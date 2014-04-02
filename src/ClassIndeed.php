@@ -19,27 +19,19 @@ require_once dirname(__FILE__) . '/../include/scooter_utils_common.php';
 
 class ClassIndeed extends ClassSiteExportBase
 {
-    private $_siteName_= 'Indeed';
-
-    function __construct($bitFlags = null, $strAltFilePath = null)
-    {
-        parent::__construct($this->_siteName_, $strAltFilePath, $bitFlags);
-    }
-
-    function getOutputFileFullPath() { return parent::getOutputFileName($this->_siteName_ , 'jobs', 'csv'); }
-
+    protected $siteName = 'Indeed';
 
 
     function getJobs($strAlternateLocalHTMLFile = null)
     {
-
-
         $strSearch = 'http://www.indeed.com/jobs?q=title%3A%28%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22%29&l=Seattle%2C+WA&sort=date&limit=50&fromage=1&start=';
 
         $arrJobs = $this->__getJobsFromSearch__($strSearch, 'Exec Keywords in Seattle, WA', $strAlternateLocalHTMLFile);
 
+        $strOutFile = $this->getOutputFileFullPath();
+        $this->writeJobsToCSV($strOutFile , $arrJobs );
 
-        parent::writeJobsToCSV($this->getOutputFileFullPath(), $arrJobs );
+        return $strOutFile ;
 
 
     }
@@ -50,8 +42,7 @@ class ClassIndeed extends ClassSiteExportBase
         $arrAllJobs = array();
         $nItemCount = 1;
 
-        $objSimpleHTML = parent::getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $strBaseURL);
-        if(!$objSimpleHTML) throw new ErrorException('Error:  unable to get SimpleHTML object from file('.$strAlternateLocalHTMLFile.') or '.$strBaseURL);
+        $objSimpleHTML = $this->getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $strBaseURL);
 
         $nItemChunkSize = 50;
 
@@ -68,16 +59,15 @@ class ClassIndeed extends ClassSiteExportBase
         {
             $objSimpleHTML = null;
             $strURL = $strBaseURL.$nItemCount;
-            __debug__printLine("Querying ' . $this->_siteName_ .' jobs: ".$strURL, C__DISPLAY_ITEM_START__);
+            __debug__printLine("Querying " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
 
             if(!$objSimpleHTML) $objSimpleHTML = parent::getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $strURL);
             if(!$objSimpleHTML) throw new ErrorException('Error:  unable to get SimpleHTML object from file('.$strAlternateLocalHTMLFile.') or '.$strURL);
 
             $arrNewJobs = $this->_scrapeItemsFromHTML_($objSimpleHTML, $category);
 
-
-
             $arrAllJobs = array_merge($arrAllJobs, $arrNewJobs);
+            __debug__printLine("Querying " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
 
             $nItemCount += $nItemChunkSize;
 
@@ -86,6 +76,7 @@ class ClassIndeed extends ClassSiteExportBase
             unset($objSimpleHTML);
 
         }
+        $this->arr = array_copy($arrAllJobs);
 
         return $arrAllJobs;
     }
@@ -122,7 +113,7 @@ class ClassIndeed extends ClassSiteExportBase
             $item[ 'script_search_key'] = $category;
 
             // calculate the original source
-            $item['job_site'] = $this->_siteName_;
+            $item['job_site'] = $this->siteName;
             $origSiteNode = $node->find("span[class='sdn']");
             if($origSiteNode && $origSiteNode[0])
             {

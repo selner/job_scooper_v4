@@ -21,31 +21,26 @@ require_once dirname(__FILE__) . '/../include/scooter_utils_common.php';
 
 class ClassSimplyHired extends ClassSiteExportBase
 {
-    private $_siteName_= 'SimplyHired';
+    protected $siteName = 'SimplyHired';
 
-    function __construct($bitFlags = null, $strAltFilePath = null)
-    {
-        parent::__construct($this->_siteName_, $strAltFilePath, $bitFlags);
-    }
-
-    function getOutputFileFullPath() { return parent::getOutputFileName($this->_siteName_ , 'jobs', 'csv'); }
 
     function getJobs($strAlternateLocalHTMLFile = null)
     {
 
 
-//        Keywords: title:("vice president" or VP or director or CTO or CPO or director or "chief product officer" or "product management" or "general manager" or "Chief Technology Officer")
-//  Location: Seattle Washington (25 miles)
-//  Filters: Last 24 hours, Full time
+        //        Keywords: title:("vice president" or VP or director or CTO or CPO or director or "chief product officer" or "product management" or "general manager" or "Chief Technology Officer")
+        //  Location: Seattle Washington (25 miles)
+        //  Filters: Last 24 hours, Full time
 
 
         $strSearch = 'http://www.simplyhired.com/search?t=%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22product+management%22+or+%22general+manager%22+or+%22Chief+Technology+Officer%22&lc=Seattle&ls=WA&fdb=1&ws=50&sb=dd&pn=';
 
         $arrJobs = $this->__getJobsFromSearch__($strSearch, 'Exec Keywords near Seattle, WA 98102', $strAlternateLocalHTMLFile );
 
+        $strOutFile = $this->getOutputFileFullPath();
+        $this->writeJobsToCSV($strOutFile , $arrJobs );
 
-        parent::writeJobsToCSV($this->getOutputFileFullPath(), $arrJobs );
-
+        return $strOutFile ;
 
     }
 
@@ -73,7 +68,7 @@ class ClassSimplyHired extends ClassSiteExportBase
         {
             $objSimpleHTML = null;
             $strURL = $strBaseURL.$nItemCount;
-            __debug__printLine("Querying ' . $this->_siteName_ .' jobs: ".$strURL, C__DISPLAY_ITEM_START__);
+            __debug__printLine("Querying " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
 
             if(!$objSimpleHTML) $objSimpleHTML = parent::getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $strURL);
             if(!$objSimpleHTML) throw new ErrorException('Error:  unable to get SimpleHTML object from file('.$strAlternateLocalHTMLFile.') or '.$strURL);
@@ -90,6 +85,7 @@ class ClassSimplyHired extends ClassSiteExportBase
             unset($objSimpleHTML);
 
         }
+        $this->arr = array_copy($arrAllJobs);
 
         return $arrAllJobs;
     }
@@ -129,7 +125,7 @@ class ClassSimplyHired extends ClassSiteExportBase
 
 
             // calculate the original source
-            $item['job_site'] = $this->_siteName_;
+            $item['job_site'] = $this->siteName;
             $origSiteNode = $node->find("div[class='source']");
             if($origSiteNode && $origSiteNode[0])
             {

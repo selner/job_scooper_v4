@@ -15,7 +15,7 @@
  * under the License.
  */
 require_once dirname(__FILE__) . '/include/scooter_utils_common.php';
-require_once dirname(__FILE__) . '/src/ClassAmazonJobs.php';
+require_once dirname(__FILE__) . '/include/Functions-RunJobs.php';
 
 
 /****************************************************************************************************************/
@@ -24,8 +24,11 @@ require_once dirname(__FILE__) . '/src/ClassAmazonJobs.php';
 /****                                                                                                        ****/
 /****************************************************************************************************************/
 
-// $classAmazon = new ClassAmazonJobs(C_NORMAL);
-// $strOutFile = $classAmazon->getJobs_NewSite();
-// print $strOutFile;
+
+// Run Amazon Only
+// __runAllJobs__(1, 0, 0, 0);
+
+// Run All but CL
+__runAllJobs__(1, 0, 1, 1, C_STR_DATAFOLDER . '/bryans_current_jobs_list.csv');
 
 ?>

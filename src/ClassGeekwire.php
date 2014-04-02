@@ -33,12 +33,13 @@ $test = new ClassGeekwire();
 //$results = $test->getSeattlePMJobsList("http://www.amazon.com/gp/jobs/ref=j_sr_pag_2_next?ie=UTF8&category=*&jobSearchKeywords=director%20product%20management&location=US%2C%20WA%2C%20Seattle&page=3");
 
 
-class ClassGeekwire {
+class ClassGeekwire
+{
+    protected $siteName = 'Geekwire';
     function outputGeekwireList()
     {
         $classFileOut = new SimpleScooterCSVFileClass("Geekwire200.csv", "w");
         $classFileOut->writeArrayToCSVFile($this->_getGeekwireStartupIndex());
-
     }
 
     private function _getGeekwireStartupIndex()

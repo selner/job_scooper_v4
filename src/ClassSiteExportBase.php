@@ -16,10 +16,93 @@
  */
 require_once dirname(__FILE__) . '/../include/scooter_utils_common.php';
 
-
-
-class ClassSiteExportBase
+function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strExt = '')
 {
+    $strFilename = '';
+    if(strlen($strFilePrefix) > 0) $strFilename .= $strFilePrefix . "_";
+    $strFilename .= date("Ymd");
+    if(strlen($strBase) > 0) $strFilename .= "_" . $strBase . "_";
+    if(strlen($strExt) > 0) $strFilename .= "." . $strExt;
+
+    return $strFilename;
+}
+
+
+abstract class ClassSiteExportBase
+{
+
+//    function call_child_method(){
+//        if(method_exists($this, 'child_method')){
+//            $this->child_method();
+//        }
+//    }
+
+
+    abstract function getJobs($strAlternateLocalHTMLFile = null);
+
+
+    protected $siteName = 'NAME-NOT-SET';
+    private $_strAlternateLocalFile = '';
+    private $_bitFlags = null;
+    protected $strOutputFolder = "";
+    protected $arrLatestJobs = "";
+
+    function setOutputFolder($strPath)
+    {
+        $this->strOutputFolder = $strPath;
+    }
+
+    function __construct($strAltFilePath = null, $bitFlags = null)
+    {
+        $this->_strAlternateLocalFile = $strAltFilePath;
+        $this->_bitFlags = $bitFlags;
+    }
+
+    function __destruct()
+    {
+        __debug__printLine("Done with ".$this->siteName." processing.", C__DISPLAY_ITEM_START__);
+    }
+
+
+    function downloadAllUpdatedJobs($strSourceFilePath = null)
+    {
+        $retFilePath = '';
+
+        // Now go download and output the latest jobs from this site
+        __debug__printLine("Downloading new ". $this->siteName ." jobs...", C__DISPLAY_ITEM_START__);
+        $strJobsDownloadPath = $this->getJobs();
+        $retFilePath = $strJobsDownloadPath;
+
+        __debug__printLine("Downloaded ". count($this->arrLatestJobs) ." new ". $this->siteName ." jobs to " . $strJobsDownloadPath , C__DISPLAY_ITEM_START__);
+
+
+        // If we had a source file, then we need to merge it
+        if($strSourceFilePath != null && strlen($strSourceFilePath) > 0)
+        {
+            __debug__printLine("Including source data from " .$strSourceFilePath, C__DISPLAY_ITEM_START__);
+
+            $arrFilesToCombine = array($strSourceFilePath, $strJobsDownloadPath);
+            $strOutFilePath = $this->getOutputFileFullPath('FinalCombined');
+
+            __debug__printLine("Merging input & downloaded jobs data and writing to " . $strOutFilePath , C__DISPLAY_ITEM_START__);
+
+            $classCombined = new SimpleScooterCSVFileClass($strOutFilePath , "w");
+            $arrRetJobs = $classCombined->combineMultipleCSVs($arrFilesToCombine);
+            $retFilePath = $strOutFilePath;
+            __debug__printLine("Combined file has ". count($arrRetJobs) . " jobs." . $strOutFilePath , C__DISPLAY_ITEM_START__);
+        }
+
+
+        //
+        // return the output file path to the caller so they know where to find them
+        //
+        return $retFilePath;
+
+    }
+
+
+
+
     function getEmptyItemsArray()
     {
         return array(
@@ -42,27 +125,8 @@ class ClassSiteExportBase
         );
     }
 
-    private $_extendClassSiteName_ = '';
-    private $_strExtendsAlternateLocalFile = '';
-    private $_bitFlags = null;
-
-
-    function __construct($name, $strAltFilePath = null, $bitFlags = null)
-    {
-        $this->_strExtendsAlternateLocalFile = $strAltFilePath;
-        $this->_extendClassSiteName_ = $name;
-        $this->_bitFlags = $bitFlags;
-        __debug__printLine("Starting ".$name." processing...", C__DISPLAY_ITEM_START__);
-    }
-
-    function __destruct()
-    {
-        __debug__printLine("Done with ".$this->_extendClassSiteName_." processing.", C__DISPLAY_ITEM_START__);
-    }
-
     function getSimpleObjFromPathOrURL($filePath = "", $strURL = "")
     {
-
         __debug__printLine("getSimpleObjFromPathOrURL(".$filePath.', '.$strURL.")", C__DISPLAY_ITEM_START__);
         $objSimpleHTML = null;
 
@@ -84,6 +148,10 @@ class ClassSiteExportBase
             $objSimpleHTML = file_get_html($strURL);
         }
 
+        if(!$objSimpleHTML)
+        {
+            throw new ErrorException('Error:  unable to get SimpleHTML object from file('.$filePath.') or '.$strURL);
+        }
 
         return $objSimpleHTML;
     }
@@ -138,15 +206,26 @@ class ClassSiteExportBase
         return false;
     }
 
-    function getOutputFileName($strFilePrefix = '', $strBase = '', $strExt = '')
+    private function _getOutputFileName_($strFilePrefix = '', $strBase = '', $strExt = '')
     {
-        $strFilename = '';
+        $strFilename = $this->siteName;
         if(strlen($strFilePrefix) > 0) $strFilename .= $strFilePrefix . "_";
         $strFilename .= date("Ymd-Hms");
         if(strlen($strBase) > 0) $strFilename .= "_" . $strBase . "_";
         if(strlen($strExt) > 0) $strFilename .= "." . $strExt;
 
         return $strFilename;
+    }
+
+    function getOutputFileFullPath($strFilePrefix = "", $strBase = 'jobs', $strExtension = 'csv')
+    {
+        $strFullPath =  getDefaultJobsOutputFileName($this->siteName . "_".$strFilePrefix, $strBase , $strExtension);
+
+        if(strlen($this->strOutputFolder) > 0)
+        {
+            $strFullPath = $this->strOutputFolder . "/" . $strFullPath;
+        }
+        return $strFullPath;
     }
 
     function getSimpleHTMLObjForFileContents($strInputFileFullPath)

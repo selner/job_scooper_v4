@@ -21,45 +21,42 @@ require_once dirname(__FILE__) . '/ClassSiteExportBase.php';
 
 class ClassCraigslist extends ClassSiteExportBase
 {
-    private $_siteName_= 'Craigslist';
+    protected $siteName = 'Craigslist';
 
-    function getJobs()
+    function getJobs($strAlternateLocalHTMLFile = null)
     {
-
 
         $strSearch = 'http://seattle.craigslist.org/search/jjj?catAbb=jjj&query=%22Vice%20President%22%20%7C%20%22Chief%20Technology%20Office%22%20%7C%20%22Chief%20Products%20Officer%22%20%7C%20%22CTO%22%20%7C%20%22CPO%22%20%7C%20%22VP%22%20%7C%20%22V.P.%22%20%7C%20%22Director%22%20%7C%20%20%22product%20management%22%20%7C%20%22general%20manager%22%20&srchType=T&s=';
 
-        $arrJobs = $this->__getJobsFromSearch__($strSearch, 'Exec Titles');
+        $arrJobs = $this->__getJobsFromSearch__($strSearch, 'Exec Titles', $strAlternateLocalHTMLFile);
+        $this->arr = $arrJobs;
 
-        $strOutFileName = parent::getOutputFileName($this->_siteName_, 'jobs', 'csv');
+        $strOutFile = $this->getOutputFileFullPath();
+        $this->writeJobsToCSV($strOutFile , $arrJobs );
 
-        parent::writeJobsToCSV($strOutFileName, $arrJobs );
-
-
+        return $strOutFile ;
     }
 
 
 
-    private function __getJobsFromSearch__($strBaseURL, $category)
+    private function __getJobsFromSearch__($strBaseURL, $searchName = "", $strAlternateLocalHTMLFile = null)
     {
         $arrAllJobs = array();
         $nItemCount = 1;
 
 
-        $classAPIWrap = new APICallWrapperClass();
-        // create HTML DOM
-        $html = file_get_html($strBaseURL."1");
+        $objSimpleHTML = $this->getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $strBaseURL);
 
         // # of items to parse
-        $pageDiv= $html->find('span[class="button pagenum"]');
+        $pageDiv= $objSimpleHTML->find('span[class="button pagenum"]');
         $pageDiv = $pageDiv[0];
         $pageText = $pageDiv->plaintext;
         $arrItemItems = explode(" ", trim($pageText));
         $maxItem = $arrItemItems[4];
 
 
-        $html->clear();
-        unset($html);
+        $objSimpleHTML->clear();
+        unset($objSimpleHTML);
 
 
         $nItemChunkSize = 100;
@@ -69,9 +66,12 @@ class ClassCraigslist extends ClassSiteExportBase
             $strURL = $strBaseURL.$nItemCount;
             __debug__printLine("Querying Craigslist jobs from ".$strURL, C__DISPLAY_ITEM_START__);
 
-            $objSimpleHTML = file_get_html($strURL);
+            if(!$objSimpleHTML)
+            {
+                $objSimpleHTML = $this->getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $strBaseURL);
+            }
 
-            $arrNewJobs = $this->_scrapeItemsFromHTML_($objSimpleHTML, $category);
+            $arrNewJobs = $this->_scrapeItemsFromHTML_($objSimpleHTML, $searchName);
 
             $arrAllJobs = array_merge($arrAllJobs, $arrNewJobs);
 
@@ -86,13 +86,9 @@ class ClassCraigslist extends ClassSiteExportBase
         return $arrAllJobs;
     }
 
-    private function _scrapeItemsFromHTML_($objSimpleHTML, $category)
+    private function _scrapeItemsFromHTML_($objSimpleHTML, $searchName)
     {
-//        $dom = new simple_html_dom(null, $lowercase, $forceTagsClosed, $target_charset, $stripRN, $defaultBRText, $defaultSpanText);
-//        $html= $dom->load($strHTML, $lowercase, $stripRN);
 
-        // find the results section
-        //
         $resultsSection= $objSimpleHTML->find('div[class="content"]');
         $resultsSection= $resultsSection[0];
 
@@ -111,7 +107,7 @@ class ClassCraigslist extends ClassSiteExportBase
             $item['date_posted'] = $node->find("span[class='date']")[0]->plaintext;
             $item['location'] = $node->find("span[class='pnr']")[0]->plaintext;
             $item['job_site_category'] = $node->find("a[class='gc']")[0]->plaintext;
-            $item['original_source'] = $this->_siteName_;
+            $item['original_source'] = $this->siteName;
 
 
             $ret[] = $item;

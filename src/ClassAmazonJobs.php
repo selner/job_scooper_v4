@@ -28,14 +28,7 @@ require_once dirname(__FILE__) . '/../include/scooter_utils_common.php';
 
 class ClassAmazonJobs extends ClassSiteExportBase
 {
-    private $_siteName_= 'Amazon';
-
-    private $strAlternateLocalFile = '';
-
-    function __construct($bitFlags)
-    {
-        parent::__construct($this->_siteName_, "", $bitFlags);
-    }
+    protected $siteName = 'Amazon';
 
     private $arrSearches = array(
         'keyword-dir'=> array("name" => 'keyword-dir', 'output_file' => "OutputAMZNJobs-Keyword-Dir.csv", "baseURL" => "http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=director&category=*&location=US%2C+WA%2C+Seattle&x=0&y=0&page="),
@@ -45,13 +38,18 @@ class ClassAmazonJobs extends ClassSiteExportBase
         'pm-newsite' => array("name" => 'pm-newsite', 'output_file' => "OutputAMZNJobs-PM-NewSite.csv", "baseURL" => "'http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=director&category=*&location=US%2C+WA%2C+Seattle&x=0&y=0&page="),
     );
 
+    function downloadAllUpdatedJobs($strSourceFileToInclude = null)
+    {
+        return $this->getJobs($strSourceFileToInclude);
+    }
 
-    function getJobs()
+    function getJobs($strSourceFileToInclude  = null)
     {
         $this->getJobs_OldSite_Keywords();
         $this->getJobs_NewSite();
         $this->getJobs_OldSite_PMCategory();
-        $strCombinedFileName = $this->getOutputFileName("Combined_AllJobs", "jobs", "csv");
+
+        $strCombinedFileName = $this->getOutputFileFullPath("AllJobs");
         $classCombined = new SimpleScooterCSVFileClass($strCombinedFileName, "w");
         $classCombined->combineMultipleCSVs(array(
             $this->arrSearches['keyword-dir']['output_file'],
@@ -65,10 +63,13 @@ class ClassAmazonJobs extends ClassSiteExportBase
 
     function getJobs_OldSite_Keywords()
     {
+        __debug__printLine("Adding Amazon jobs for " . $this->arrSearches['keyword-dir']['name']."...", C__DISPLAY_ITEM_START__);
         $this->__writeDataToCSV_Amazon_OldJobs_($this->arrSearches['keyword-dir']);
+
+        __debug__printLine("Adding Amazon jobs for " . $this->arrSearches['keyword-gm']['name']."...", C__DISPLAY_ITEM_START__);
         $this->__writeDataToCSV_Amazon_OldJobs_($this->arrSearches['keyword-gm']);
 
-        $strCombinedFileName = $this->getOutputFileName("Combined_OldSite_Keywords", "jobs", "csv");
+        $strCombinedFileName = $this->getOutputFileFullPath("Combined_OldSite_Keywords");
         $classCombined = new SimpleScooterCSVFileClass($strCombinedFileName, "w");
         $classCombined->combineMultipleCSVs(array($this->arrSearches['keyword-dir']['output_file'], $this->arrSearches['keyword-gm']['output_file'] ));
         return $strCombinedFileName;
@@ -76,18 +77,23 @@ class ClassAmazonJobs extends ClassSiteExportBase
 
     function getJobs_NewSite()
     {
+        __debug__printLine("Adding Amazon jobs for " . $this->arrSearches['pm-newsite']['name']."...", C__DISPLAY_ITEM_START__);
+        $strOut = $this->getOutputFileFullPath($this->arrSearches['pm-newsite']['name']);
+        $arrRet  = $this->__processHTMLFiles_Amazon_NewJobs__($strOut);
+        $this->arr = array_merge($this->arrLatestJobs, $arrRet );
 
-        $this->__processHTMLFiles_Amazon_NewJobs__();
-        $this->arrSearches['pm-newsite']['output_file'] ;
+        return $strOut;
     }
 
     function getJobs_OldSite_PMCategory()
     {
+        __debug__printLine("Adding Amazon jobs for " . $this->arrSearches['pm-nontech']['name']."...", C__DISPLAY_ITEM_START__);
+         $this->__writeDataToCSV_Amazon_OldJobs_($this->arrSearches['pm-nontech']);
 
-        $this->__writeDataToCSV_Amazon_OldJobs_($this->arrSearches['pm-nontech']);
-        $this->__writeDataToCSV_Amazon_OldJobs_($this->arrSearches['pm-tech']);
+        __debug__printLine("Adding Amazon jobs for " . $this->arrSearches['pm-tech']['name']."...", C__DISPLAY_ITEM_START__);
+         $this->__writeDataToCSV_Amazon_OldJobs_($this->arrSearches['pm-tech']);
 
-        $strCombinedFileName = $this->getOutputFileName("Combined_OldSite_PMCategory", "jobs", "csv");
+        $strCombinedFileName = $this->getOutputFileFullPath("Combined_OldSite_PMCategory");
         $classCombined = new SimpleScooterCSVFileClass($strCombinedFileName, "w");
         $classCombined->combineMultipleCSVs(array($this->arrSearches['pm-nontech']['output_file'], $this->arrSearches['pm-tech']['output_file'] ));
         return $strCombinedFileName;
@@ -95,7 +101,7 @@ class ClassAmazonJobs extends ClassSiteExportBase
     }
 
 // http://www.amazon.jobs/results?sjid=68,sjid=83&checklid=@'US, WA, Seattle'&cname='US, WA, Seattle'
-    private function __processHTMLFiles_Amazon_NewJobs__()
+    private function __processHTMLFiles_Amazon_NewJobs__($strOutfilePath )
     {
 
         $classFileOut = new SimpleScooterCSVFileClass($this->arrSearches['pm-newsite']['output_file'], "a");
@@ -157,7 +163,7 @@ class ClassAmazonJobs extends ClassSiteExportBase
 
 
                 $item['original_source'] = 'Amazon';
-                $item['job_id'] = explode("/", $item['link'])[4];
+                $item['job_id'] = trim(explode("/", $item['link'])[4]);
                 $item['job_site_category'] = $nodesTD[$nTDIndex]->plaintext;
                 $nTDIndex++;
                 $item['location'] = $nodesTD[$nTDIndex]->plaintext;
@@ -167,7 +173,6 @@ class ClassAmazonJobs extends ClassSiteExportBase
                 $item['brief_description'] = $arrBrief[1];
 
                   $ret[] = $item;
-//                $ret[ $item['job_site']."-".$item['job_id']] = $item;
 
             }
             $nTDIndex = $nTDIndex + 3;
@@ -184,8 +189,16 @@ class ClassAmazonJobs extends ClassSiteExportBase
     private function __writeDataToCSV_Amazon_OldJobs_($arrSearchSettings, $strAlternateLocalHTMLFile = "")
     {
 
-        // Technical PM jobs in SEA
         $arrRet = $this->__getJobsFromSearch__($arrSearchSettings['baseURL'], $arrSearchSettings, $strAlternateLocalHTMLFile );
+        if(is_array($this->arrLatestJobs))
+        {
+            $this->arrLatestJobs = array_merge($this->arrLatestJobs, $arrRet);
+
+        }
+        else
+        {
+            $this->arr = array_copy( $arrRet );
+        }
 
         $classFileOut = new SimpleScooterCSVFileClass($arrSearchSettings['output_file'], "w");
         $classFileOut->writeArrayToCSVFile($arrRet);
@@ -244,6 +257,7 @@ class ClassAmazonJobs extends ClassSiteExportBase
         $nodesTR = $resultsDiv->find('tr');
         foreach($nodesTR as $firstPart)
         {
+            $item = $this->getEmptyItemsArray();
             $item['job_title'] = $firstPart->find('a[class="title"]')[0]->plaintext;
             if($item['job_title'] == '') continue;
             $item['script_search_key'] = $arrSettings['name'];
@@ -253,7 +267,7 @@ class ClassAmazonJobs extends ClassSiteExportBase
             $item['job_source_url'] = $item['job_post_url'];
             $item['location'] = trim($firstPart->find('span[class="details"]')[0]->plaintext);
             $id = trim($firstPart->find('span[class="id"]')[0]->plaintext);
-            $item['job_id'] = str_replace("&nbsp;", " ", trim($id));
+            $item['job_id'] = trim(str_replace(array("&nbsp;", "(", ")", "ID"), " ", $id));
             $item['job_site_category'] = $arrSettings['name'];
 
 
