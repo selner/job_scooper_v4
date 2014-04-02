@@ -121,7 +121,7 @@ class ClassGeekwire {
                 $ret[] = $item;
             }
 
-            if(is_array($ret))            $classFileOut->writeArrayToCSVFile($ret, array('company_name', 'url', 'geekwire_category'));
+            if(is_array($ret))            $classFileOut->writeArrayToCSVFilew
 
             // clean up memory
             $html->clear();
@@ -132,3 +132,6 @@ class ClassGeekwire {
         return $ret;
     }
 } 
+
+
+?>
