@@ -62,7 +62,7 @@ function __runAllJobs__($arrSitesSettings = null, $strOutputFile = null, $arrSou
     {
         __debug__printLine("Adding Indeed jobs....", C__DISPLAY_ITEM_START__);
         $class  = new ClassIndeed(null, C_NORMAL);
-        $class ->setOutputFolder(C_STR_DATAFOLDER  .  $arrSitesSettings['Indeed']['working_subfolder']);
+        $class ->setOutputFolder(C_STR_DATAFOLDER  .  "/" . $arrSitesSettings['Indeed']['working_subfolder']);
         $arrOutputFilesToIncludeInResults[] = $class->downloadAllUpdatedJobs($nDays, $arrSourceFiles, $fIncludeFilteredJobsInResults );
     }
 
@@ -70,7 +70,7 @@ function __runAllJobs__($arrSitesSettings = null, $strOutputFile = null, $arrSou
     {
         __debug__printLine("Adding SimplyHired jobs....", C__DISPLAY_ITEM_START__);
         $class = new ClassSimplyHired(null, C_NORMAL);
-        $class ->setOutputFolder(C_STR_DATAFOLDER  . $arrSitesSettings['SimplyHired']['working_subfolder']);
+        $class ->setOutputFolder(C_STR_DATAFOLDER  . "/" . $arrSitesSettings['SimplyHired']['working_subfolder']);
         $arrOutputFilesToIncludeInResults[] = $class->downloadAllUpdatedJobs($nDays, $arrSourceFiles, $fIncludeFilteredJobsInResults );
     }
 
@@ -79,7 +79,7 @@ function __runAllJobs__($arrSitesSettings = null, $strOutputFile = null, $arrSou
     {
         __debug__printLine("Adding Craigslist jobs....", C__DISPLAY_ITEM_START__);
         $class = new ClassCraigslist(null, C_NORMAL);
-        $class ->setOutputFolder(C_STR_DATAFOLDER  . $arrSitesSettings['Craigslist']['working_subfolder']);
+        $class ->setOutputFolder(C_STR_DATAFOLDER  . "/" . $arrSitesSettings['Craigslist']['working_subfolder']);
         $arrOutputFilesToIncludeInResults[] = $class->downloadAllUpdatedJobs($nDays, $arrSourceFiles, $fIncludeFilteredJobsInResults );
     }
 
@@ -87,7 +87,7 @@ function __runAllJobs__($arrSitesSettings = null, $strOutputFile = null, $arrSou
     {
         __debug__printLine("Adding Amazon jobs....", C__DISPLAY_ITEM_START__);
         $class = new ClassAmazonJobs(null, C_NORMAL);
-        $class ->setOutputFolder(C_STR_DATAFOLDER  . $arrSitesSettings['Amazon']['working_subfolder']);
+        $class ->setOutputFolder(C_STR_DATAFOLDER  . "/" . $arrSitesSettings['Amazon']['working_subfolder']);
         $arrOutputFilesToIncludeInResults[] = $class->downloadAllUpdatedJobs($nDays, $arrSourceFiles, $fIncludeFilteredJobsInResults );
     }
 

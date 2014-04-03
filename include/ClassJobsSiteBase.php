@@ -102,7 +102,7 @@ abstract class ClassJobsSiteBase extends ClassJobsSiteExport
         $val = $this->_bitFlags & C_EXCLUDE_BRIEF;
         $notVal = !($this->_bitFlags & C_EXCLUDE_BRIEF);
         // __debug__printLine('ExcludeBrief/not = ' . $val .', '. $notVal, C__DISPLAY_ITEM_START__);
-        return true;
+        return false;
     }
 
     function is_IncludeActualURL()

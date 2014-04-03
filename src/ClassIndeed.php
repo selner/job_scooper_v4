@@ -136,7 +136,7 @@ class ClassIndeed extends ClassJobsSiteBase
             $item['date_pulled'] = $this->_getCurrentDateAsString_();
             $item['job_site_date'] = $node->find("span[class='date']")[0]->plaintext;
 
-            if($this->is_IncludeBrief())
+            if($this->is_IncludeBrief() == true)
             {
                 $item['brief_description'] = $node->find("span[class='summary']")[0]->plaintext;
             }

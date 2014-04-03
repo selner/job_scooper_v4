@@ -31,11 +31,11 @@ class ClassAmazonJobs extends ClassJobsSiteBase
     protected $siteName = 'Amazon';
 
     private $arrSearches = array(
-        'keyword-dir'=> array("name" => 'keyword-dir', 'output_file' => "OutputAMZNJobs-Keyword-Dir.csv", "baseURL" => "http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=director&category=*&location=US%2C+WA%2C+Seattle&x=0&y=0&page="),
-        'keyword-gm'=> array("name" => 'keyword-gm', 'output_file' => "OutputAMZNJobs-Keyword-GM.csv", "baseURL" => "http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=general+manager&category=*&location=US%2C+WA%2C+Seattle&x=25&y=10&page="),
-        'pm-nontech' => array("name" => 'pm-nontech', 'output_file' => "OutputAMZNJobs-PM-NonTech.csv", "baseURL" => "http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=&category=Project%2FProgram%2FProduct+Management--NON-TECH&location=US%2C+WA%2C+Seattle&x=40&y=11&page="),
-        'pm-tech' => array("name" => 'pm-tech', 'output_file' => "OutputAMZNJobs-PM-Tech.csv", "baseURL" => "http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=&category=Project%2FProgram%2FProduct+Management--TECHNICAL&location=US%2C+WA%2C+Seattle&x=22&y=9&page="),
-        'pm-newsite' => array("name" => 'pm-newsite', 'output_file' => "OutputAMZNJobs-PM-NewSite.csv", "baseURL" => "'http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=director&category=*&location=US%2C+WA%2C+Seattle&x=0&y=0&page="),
+        'keyword-dir'=> array("name" => 'keyword-dir',  "baseURL" => "http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=director&category=*&location=US%2C+WA%2C+Seattle&x=0&y=0&page="),
+        'keyword-gm'=> array("name" => 'keyword-gm',  "baseURL" => "http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=general+manager&category=*&location=US%2C+WA%2C+Seattle&x=25&y=10&page="),
+        'pm-nontech' => array("name" => 'pm-nontech',  "baseURL" => "http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=&category=Project%2FProgram%2FProduct+Management--NON-TECH&location=US%2C+WA%2C+Seattle&x=40&y=11&page="),
+        'pm-tech' => array("name" => 'pm-tech',  "baseURL" => "http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=&category=Project%2FProgram%2FProduct+Management--TECHNICAL&location=US%2C+WA%2C+Seattle&x=22&y=9&page="),
+        'pm-newsite' => array("name" => 'pm-newsite', "baseURL" => "'http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=director&category=*&location=US%2C+WA%2C+Seattle&x=0&y=0&page="),
     );
 
 /*    function downloadAllUpdatedJobs($nDays = -1)
@@ -51,96 +51,96 @@ class ClassAmazonJobs extends ClassJobsSiteBase
             return "";
         }
 
-        $this->getJobs_OldSite_Keywords();
-        $this->getJobs_NewSite();
-        $this->getJobs_OldSite_PMCategory();
+        $arrOutFiles[] = $this->getJobs_OldSite_Keywords();
+        $arrOutFiles[] = $this->getJobs_NewSite();
+        $arrOutFiles[] = $this->getJobs_OldSite_PMCategory();
 
         $strCombinedFileName = $this->getOutputFileFullPath("AllJobs");
-        $this->combineMultipleJobsCSVs($strCombinedFileName, array(
-            $this->arrSearches['keyword-dir']['output_file'],
-            $this->arrSearches['keyword-gm']['output_file'],
-            $this->arrSearches['pm-nontech']['output_file'],
-            $this->arrSearches['pm-tech']['output_file'],
-            $this->arrSearches['pm-newsite']['output_file'],
-        ));
+        $this->combineMultipleJobsCSVs($strCombinedFileName, $arrOutFiles);
         return $strCombinedFileName;
     }
 
     function getJobs_OldSite_Keywords()
     {
+
+        $arrFilesOut = array();
+
+
         __debug__printLine("Adding Amazon jobs for " . $this->arrSearches['keyword-dir']['name']."...", C__DISPLAY_ITEM_START__);
-        $this->__writeDataToCSV_Amazon_OldJobs_($this->arrSearches['keyword-dir']);
+        $arrFilesOut[] = $this->__writeDataToCSV_Amazon_OldJobs_($this->arrSearches['keyword-dir']);
 
         __debug__printLine("Adding Amazon jobs for " . $this->arrSearches['keyword-gm']['name']."...", C__DISPLAY_ITEM_START__);
-        $this->__writeDataToCSV_Amazon_OldJobs_($this->arrSearches['keyword-gm']);
+        $arrFilesOut[] = $this->__writeDataToCSV_Amazon_OldJobs_($this->arrSearches['keyword-gm']);
 
         $strCombinedFileName = $this->getOutputFileFullPath("Combined_OldSite_Keywords");
         $classCombined = new SimpleScooterCSVFileClass($strCombinedFileName, "w");
-        $classCombined->combineMultipleCSVs(array($this->arrSearches['keyword-dir']['output_file'], $this->arrSearches['keyword-gm']['output_file'] ));
+        $classCombined->combineMultipleCSVs($arrFilesOut);
+
         return $strCombinedFileName;
     }
 
     function getJobs_NewSite()
     {
         __debug__printLine("Adding Amazon jobs for " . $this->arrSearches['pm-newsite']['name']."...", C__DISPLAY_ITEM_START__);
-        $strOut = $this->getOutputFileFullPath($this->arrSearches['pm-newsite']['name']);
-        $arrRet  = $this->__processHTMLFiles_Amazon_NewJobs__($strOut);
-        $this->arr = array_merge($this->arrLatestJobs, $arrRet );
+        $strOutFileName = $this->getOutputFileFullPath($this->arrSearches['pm-newsite']['name']);
 
-        return $strOut;
+        $strOut = $this->getOutputFileFullPath($strOutFileName);
+        $this->__processHTMLFiles_Amazon_NewJobs__($strOut);
+
+        return $strOutFileName;
     }
 
     function getJobs_OldSite_PMCategory()
     {
+        $arrFilesOut = array();
+
         __debug__printLine("Adding Amazon jobs for " . $this->arrSearches['pm-nontech']['name']."...", C__DISPLAY_ITEM_START__);
-         $this->__writeDataToCSV_Amazon_OldJobs_($this->arrSearches['pm-nontech']);
+        $arrFilesOut[] = $this->__writeDataToCSV_Amazon_OldJobs_($this->arrSearches['pm-nontech']);
 
         __debug__printLine("Adding Amazon jobs for " . $this->arrSearches['pm-tech']['name']."...", C__DISPLAY_ITEM_START__);
-         $this->__writeDataToCSV_Amazon_OldJobs_($this->arrSearches['pm-tech']);
+        $arrFilesOut[] = $this->__writeDataToCSV_Amazon_OldJobs_($this->arrSearches['pm-tech']);
 
         $strCombinedFileName = $this->getOutputFileFullPath("Combined_OldSite_PMCategory");
         $classCombined = new SimpleScooterCSVFileClass($strCombinedFileName, "w");
-        $classCombined->combineMultipleCSVs(array($this->arrSearches['pm-nontech']['output_file'], $this->arrSearches['pm-tech']['output_file'] ));
-        return $strCombinedFileName;
+        $classCombined->combineMultipleCSVs($arrFilesOut);
 
     }
 
 // http://www.amazon.jobs/results?sjid=68,sjid=83&checklid=@'US, WA, Seattle'&cname='US, WA, Seattle'
-    private function __processHTMLFiles_Amazon_NewJobs__($strOutfilePath )
+    private function __processHTMLFiles_Amazon_NewJobs__($strOutFile )
     {
 
-        $classFileOut = new SimpleScooterCSVFileClass($this->arrSearches['pm-newsite']['output_file'], "a");
+        $classFileOut = new SimpleScooterCSVFileClass($strOutFile, "a");
 
-        $arrAllJobs = $this->getEmptyItemsArray();
         $nItemCount = 1;
 
-        $strFileName = '/Users/bryan/Code/data/amzn_jobs/page-'.$nItemCount.'.html';
+        $strFileName = C_STR_DATAFOLDER . "/amazon_jobs/page-".$nItemCount.".html";
 
 
         while (file_exists($strFileName) && is_file($strFileName))
         {
-            $fpGeek = fopen($strFileName , 'r');
-            if(!$fpGeek) break;
-            $strHTML = fread($fpGeek,4000000);
+            $objSimpleHTML = $this->getSimpleHTMLObjForFileContents($strFileName);
+            $arrNewJobs = $this->_getParseJobsData_Amazon_NewJobs_($objSimpleHTML, $this->arrSearches['pm-newsite']);
 
-            $arrNewJobs = $this->_getParseJobsData_Amazon_NewJobs_($strHTML, $this->arrSearches['pm-newsite']);
-            $classFileOut->writeArrayToCSVFile($arrNewJobs);
+            $objSimpleHTML->clear();
+            unset($objSimpleHTML);
+
+
+            $this->addJobsToList($arrNewJobs);
+
+            $classFileOut->writeArrayToCSVFile($this->arrLatestJobs);
 
             $nItemCount++;
-            $strFileName = '/Users/bryan/Code/data/amzn_jobs/page-'.$nItemCount.'.html';
+            $strFileName = C_STR_DATAFOLDER . "/amazon_jobs/page-".$nItemCount.".html";
 
         }
 
-        return $arrAllJobs;
+
     }
 
 
-    private function _getParseJobsData_Amazon_NewJobs_($strHTML, $arrSettings)
+    private function _getParseJobsData_Amazon_NewJobs_($objSimpleHTML, $arrSettings)
     {
-
-        $dom = new simple_html_dom(null, $lowercase, $forceTagsClosed, $target_charset, $stripRN, $defaultBRText, $defaultSpanText);
-        $objSimpleHTML= $dom->load($strHTML, $lowercase, $stripRN);
-        if(!$objSimpleHTML) throw new ErrorException('Error:  unable to get SimpleHTML object from string HTML');
 
 
         // # of pages to parse
@@ -159,7 +159,7 @@ class ClassAmazonJobs extends ClassJobsSiteBase
 
                 $item['notes'] = '';
                 $item['interested'] = '';
-                $item['job_post_url'] = "http://www.amazon.jobs" . $nodesTD[$nTDIndex]->previousSibling()->first_child()->href;
+                $item['job_post_url'] = $nodesTD[$nTDIndex]->previousSibling()->first_child()->href;
                 $item['job_source_url'] = $item['job_post_url'];
                 $item['company'] = 'Amazon';
 
@@ -173,11 +173,15 @@ class ClassAmazonJobs extends ClassJobsSiteBase
                 $nTDIndex++;
                 $item['location'] = $nodesTD[$nTDIndex]->plaintext;
                 $nTDIndex++;
-                $brief  = trim($nodesTD[$nTDIndex]->plaintext);
-                $arrBrief = explode("Short Description", $brief);
-                $item['brief_description'] = $arrBrief[1];
 
-                  $ret[] = $item;
+                if($this->is_IncludeBrief() == true)
+                {
+                    $brief  = trim($nodesTD[$nTDIndex]->plaintext);
+                    $arrBrief = explode("Short Description", $brief);
+                    $item['brief_description'] = $arrBrief[1];
+                }
+
+                $ret[] = $item;
 
             }
             $nTDIndex = $nTDIndex + 3;
@@ -185,29 +189,23 @@ class ClassAmazonJobs extends ClassJobsSiteBase
 
         }
 
-        $objSimpleHTML->clear();
-        unset($objSimpleHTML);
-
         return $ret;
     }
 
     private function __writeDataToCSV_Amazon_OldJobs_($arrSearchSettings, $strAlternateLocalHTMLFile = "")
     {
+        $strOutFileName = $this->getOutputFileFullPath($this->arrSearches['pm-newsite']['name']);
 
         $arrRet = $this->__getJobsFromSearch__($arrSearchSettings['baseURL'], $arrSearchSettings, $strAlternateLocalHTMLFile );
-        if(is_array($this->arrLatestJobs))
-        {
-            $this->arrLatestJobs = array_merge($this->arrLatestJobs, $arrRet);
 
-        }
-        else
-        {
-            $this->arr = array_copy( $arrRet );
-        }
 
-        $classFileOut = new SimpleScooterCSVFileClass($arrSearchSettings['output_file'], "w");
-        $classFileOut->writeArrayToCSVFile($arrRet);
+        $this->addJobsToList($arrRet);
+
+        $classFileOut = new SimpleScooterCSVFileClass($strOutFileName, "w");
+        $classFileOut->writeArrayToCSVFile($this->arrLatestJobs);
         $classFileOut = null;
+
+        return $strOutFileName;
 
     }
 
@@ -284,15 +282,17 @@ class ClassAmazonJobs extends ClassJobsSiteBase
             $item['date_pulled'] = $this->_getCurrentDateAsString_();
 
 
-
-            $secPart = $firstPart->nextSibling();
-
-            if($secPart)
+            if($this->is_IncludeBrief() == true)
             {
-                $nodeDesc = $secPart->find('div[class="shortDescription"] div')[0];
-                if($nodeDesc)
+                $secPart = $firstPart->nextSibling();
+
+                if($secPart)
                 {
-                    $item['brief_description'] = trim($nodeDesc->plaintext);
+                    $nodeDesc = $secPart->find('div[class="shortDescription"] div')[0];
+                    if($nodeDesc)
+                    {
+                        $item['brief_description'] = trim($nodeDesc->plaintext);
+                    }
                 }
             }
             $ret[] = $item;

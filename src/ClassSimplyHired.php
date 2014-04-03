@@ -142,7 +142,7 @@ class ClassSimplyHired extends ClassJobsSiteBase
             $item['date_pulled'] = $this->_getCurrentDateAsString_();
             $item['job_site_date'] = $node->find("span[class='ago']")[0]->plaintext;
 
-            if($this->is_IncludeBrief())
+            if($this->is_IncludeBrief() == true)
             {
                 $item['brief_description'] = $node->find("p[class='description']")[0]->plaintext;
             }

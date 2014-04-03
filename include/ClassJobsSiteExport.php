@@ -48,6 +48,26 @@ class ClassJobsSiteExport
     protected $arrLatestJobs = "";
     protected $arrTitlesToFilter = null;
 
+
+    function addJobsToList($arrAdd)
+    {
+        if(!is_array($arrAdd) || count($arrAdd) == 0)
+        {
+            // skip. no jobs to add
+            return;
+        }
+
+        if(is_array($this->arrLatestJobs))
+        {
+            $this->arrLatestJobs = array_merge($this->arrLatestJobs, $arrAdd );
+        }
+        else
+        {
+            $this->arrLatestJobs = array_copy( $arrAdd );
+
+        }
+    }
+
     function setOutputFolder($strPath)
     {
         $this->strOutputFolder = $strPath;
@@ -166,6 +186,7 @@ class ClassJobsSiteExport
                 else if($arrCurJobInterest['exclude'] == false)
                 {
                     $retArrayFilteredJobs[] = $job;
+                    $nJobsNotExcluded++;
                 }
                 else
                 {
