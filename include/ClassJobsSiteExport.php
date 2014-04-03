@@ -236,7 +236,7 @@ class ClassJobsSiteExport
         if($fIncludeFilteredJobsInResults == false)
         {
             __debug__printLine("Filtering final results data...", C__DISPLAY_ITEM_DETAIL__);
-            $arrRetJobs = $classCombined->readMultipleCSVsAndCombine($arrFilesToCombine);
+            $arrRetJobs = $classCombined->readMultipleCSVsAndCombine($arrFilesToCombine, $arrKeysForDeduping);
             $arrRetJobs = $this->filterNotInterestedJobs($arrRetJobs, $fIncludeFilteredJobsInResults);
             if(is_array($arrRetJobs) && count($arrRetJobs) > 0)
             {
