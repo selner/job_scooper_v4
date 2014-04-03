@@ -85,7 +85,7 @@ class ClassAmazonJobs extends ClassJobsSiteBase
         $strOutFileName = $this->getOutputFileFullPath($this->arrSearches['pm-newsite']['name']);
 
         $strOut = $this->getOutputFileFullPath($strOutFileName);
-        $this->__processHTMLFiles_Amazon_NewJobs__($strOut);
+        $this->__processHTMLFiles_Amazon_NewJobs__($strOutFileName);
 
         return $strOutFileName;
     }
