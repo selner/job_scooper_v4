@@ -22,9 +22,21 @@ class ClassIndeed extends ClassSiteExportBase
     protected $siteName = 'Indeed';
 
 
-    function getJobs($strAlternateLocalHTMLFile = null)
+    function getJobs($nDays = -1)
     {
-        $strSearch = 'http://www.indeed.com/jobs?q=title%3A%28%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22%29&l=Seattle%2C+WA&sort=date&limit=50&fromage=1&start=';
+        switch($nDays)
+        {
+            case 7:
+                $strSearch = "http://www.indeed.com/jobs?q=title%3A%28%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22%29&l=Seattle%2C+WA&sort=date&limit=50&fromage=1&start=";
+                __debug__printLine("Getting " . $nDays . " worth of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
+                break;
+
+            default:  // assume last 24 hours
+                $strDays = $nDays < 1 ? "24 hours" : $nDays;
+                $strSearch = "http://www.indeed.com/jobs?q=title%3A%28%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22%29&l=Seattle%2C+WA&sort=date&limit=50&fromage=1&start=";
+                __debug__printLine("Getting " . $strDays . " worth of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
+                break;
+        }
 
         $arrJobs = $this->__getJobsFromSearch__($strSearch, 'Exec Keywords in Seattle, WA', $strAlternateLocalHTMLFile);
 
@@ -52,8 +64,13 @@ class ClassIndeed extends ClassSiteExportBase
         $pageDiv = $pageDiv[0];
         $pageText = $pageDiv->plaintext;
         $arrItemItems = explode(" ", trim($pageText));
-        $maxItem = $arrItemItems[5] / $nItemChunkSize;
+        $totalItems = $arrItemItems[5];
+        $totalItems  = intval(str_replace(",", "", $totalItems));
+        $maxItem = intval($totalItems / $nItemChunkSize);
+
         if($maxItem < 1)  $maxItem = 1;
+
+        __debug__printLine("Downloading " . $maxItem . " pages of ".$totalItems  . " jobs from " . $this->siteName , C__DISPLAY_ITEM_START__);
 
         while ($nItemCount <= $maxItem)
         {

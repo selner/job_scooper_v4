@@ -38,13 +38,19 @@ class ClassAmazonJobs extends ClassSiteExportBase
         'pm-newsite' => array("name" => 'pm-newsite', 'output_file' => "OutputAMZNJobs-PM-NewSite.csv", "baseURL" => "'http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=director&category=*&location=US%2C+WA%2C+Seattle&x=0&y=0&page="),
     );
 
-    function downloadAllUpdatedJobs($strSourceFileToInclude = null)
+    function downloadAllUpdatedJobs($nDays = -1)
     {
-        return $this->getJobs($strSourceFileToInclude);
+        return $this->getJobs($nDays );
     }
 
-    function getJobs($strSourceFileToInclude  = null)
+    function getJobs($nDays = -1)
     {
+        if($nDays > 1)
+        {
+            __debug__printLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Skipping.", C__DISPLAY_MOMENTARY_INTERUPPT__);
+            return "";
+        }
+
         $this->getJobs_OldSite_Keywords();
         $this->getJobs_NewSite();
         $this->getJobs_OldSite_PMCategory();

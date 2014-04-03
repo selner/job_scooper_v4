@@ -20,7 +20,9 @@ function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strEx
 {
     $strFilename = '';
     if(strlen($strFilePrefix) > 0) $strFilename .= $strFilePrefix . "_";
-    $strFilename .= date("Ymd");
+    $date=date_create(null);
+    $strFilename .= date_format($date,"Y-m-d_Hi");
+//    $strFilename .= date("Y-m-d_h-m");
     if(strlen($strBase) > 0) $strFilename .= "_" . $strBase . "_";
     if(strlen($strExt) > 0) $strFilename .= "." . $strExt;
 
@@ -64,13 +66,13 @@ abstract class ClassSiteExportBase
     }
 
 
-    function downloadAllUpdatedJobs($strSourceFilePath = null)
+    function downloadAllUpdatedJobs($nDays = -1 )
     {
         $retFilePath = '';
 
         // Now go download and output the latest jobs from this site
         __debug__printLine("Downloading new ". $this->siteName ." jobs...", C__DISPLAY_ITEM_START__);
-        $strJobsDownloadPath = $this->getJobs();
+        $strJobsDownloadPath = $this->getJobs($nDays);
         $retFilePath = $strJobsDownloadPath;
 
         __debug__printLine("Downloaded ". count($this->arrLatestJobs) ." new ". $this->siteName ." jobs to " . $strJobsDownloadPath , C__DISPLAY_ITEM_START__);
@@ -108,15 +110,15 @@ abstract class ClassSiteExportBase
         return array(
             'job_site' => '',
             'job_id' => '',
-            'job_title' => '',
             'company' => '',
-            'notes' => '',
+            'job_title' => '',
             'interested' => '',
-            'location' => '',
-            'job_post_url' => '',
+            'notes' => '',
             'date_pulled' => '',
+            'job_post_url' => '',
             'brief_description' => '',
-            'full_description' => '',
+            // 'full_description' => '',
+            'location' => '',
             'job_site_category' => '',
             'job_site_date' =>'',
             'original_source' => '',
@@ -192,18 +194,18 @@ abstract class ClassSiteExportBase
     function is_IncludeBrief()
     {
         $val = $this->_bitFlags & C_EXCLUDE_BRIEF;
-        $notVal = $this->_bitFlags & C_EXCLUDE_BRIEF;
+        $notVal = !($this->_bitFlags & C_EXCLUDE_BRIEF);
         // __debug__printLine('ExcludeBrief/not = ' . $val .', '. $notVal, C__DISPLAY_ITEM_START__);
-        return false;
+        return true;
     }
 
     function is_IncludeActualURL()
     {
         $val = $this->_bitFlags & C_EXCLUDE_GETTING_ACTUAL_URL;
-        $notVal = $this->_bitFlags & C_EXCLUDE_GETTING_ACTUAL_URL;
+        $notVal = !($this->_bitFlags & C_EXCLUDE_GETTING_ACTUAL_URL);
         // __debug__printLine('ExcludeActualURL/not = ' . $val .', '. $notVal, C__DISPLAY_ITEM_START__);
 
-        return false;
+        return !$notVal;
     }
 
     private function _getOutputFileName_($strFilePrefix = '', $strBase = '', $strExt = '')

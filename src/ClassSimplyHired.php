@@ -24,7 +24,7 @@ class ClassSimplyHired extends ClassSiteExportBase
     protected $siteName = 'SimplyHired';
 
 
-    function getJobs($strAlternateLocalHTMLFile = null)
+    function getJobs($nDays = -1)
     {
 
 
@@ -33,7 +33,16 @@ class ClassSimplyHired extends ClassSiteExportBase
         //  Filters: Last 24 hours, Full time
 
 
-        $strSearch = 'http://www.simplyhired.com/search?t=%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22product+management%22+or+%22general+manager%22+or+%22Chief+Technology+Officer%22&lc=Seattle&ls=WA&fdb=1&ws=50&sb=dd&pn=';
+        if($nDays > 1)
+        {
+                $strSearch = "http://www.simplyhired.com/search?t=%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22product+management%22+or+%22general+manager%22+or+%22Chief+Technology+Officer%22&lc=Seattle&ls=WA&fdb=".$nDays."&ws=50&sb=dd&pn=";
+                // __debug__printLine("Getting " . $nDays . " days of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
+        }
+        else
+        {
+            $strDays = $nDays < 1 ? "24 hours" : $nDays;
+            $strSearch = 'http://www.simplyhired.com/search?t=%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22product+management%22+or+%22general+manager%22+or+%22Chief+Technology+Officer%22&lc=Seattle&ls=WA&fdb=1&ws=50&sb=dd&pn=';
+        }
 
         $arrJobs = $this->__getJobsFromSearch__($strSearch, 'Exec Keywords near Seattle, WA 98102', $strAlternateLocalHTMLFile );
 
@@ -60,14 +69,20 @@ class ClassSimplyHired extends ClassSiteExportBase
         $pageDiv = $pageDiv[0];
         $pageText = $pageDiv->plaintext;
         $arrItemItems = explode(" ", trim($pageText));
-        $maxItem = $arrItemItems[4] / $nItemChunkSize;
+        $totalItems = $arrItemItems[4];
+        $totalItems  = intval(str_replace(",", "", $totalItems));
+        $maxItem = intval($totalItems / $nItemChunkSize);
         if($maxItem < 1)  $maxItem = 1;
 
 
-        while ($nItemCount <= $maxItem)
+
+        __debug__printLine("Downloading " . $maxItem . " pages of ".$totalItems  . " jobs from " . $this->siteName , C__DISPLAY_ITEM_START__);
+
+
+        while ($nPageCount <= $maxItem)
         {
             $objSimpleHTML = null;
-            $strURL = $strBaseURL.$nItemCount;
+            $strURL = $strBaseURL.$nPageCount;
             __debug__printLine("Querying " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
 
             if(!$objSimpleHTML) $objSimpleHTML = parent::getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $strURL);
@@ -76,13 +91,24 @@ class ClassSimplyHired extends ClassSiteExportBase
 
             $arrNewJobs = $this->_scrapeItemsFromHTML_($objSimpleHTML, $category);
 
-            $arrAllJobs = array_merge($arrAllJobs, $arrNewJobs);
+            if(!is_array($arrNewJobs))
+            {
+                // we likely hit a page where jobs started to be hidden.
+                // Go ahead and bail on the loop here
+                __debug__printLine("Not getting results back from SimplyHired startging on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", C__DISPLAY_ITEM_START__);
+                $nPageCount = $maxItem;
+            }
+            else
+            {
+                $arrAllJobs = array_merge($arrAllJobs, $arrNewJobs);
 
-            $nItemCount += $nItemChunkSize;
+                $nItemCount += $nItemChunkSize;
+            }
 
             // clean up memory
             $objSimpleHTML->clear();
             unset($objSimpleHTML);
+            $nPageCount++;
 
         }
         $this->arr = array_copy($arrAllJobs);

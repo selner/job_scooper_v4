@@ -23,8 +23,13 @@ class ClassCraigslist extends ClassSiteExportBase
 {
     protected $siteName = 'Craigslist';
 
-    function getJobs($strAlternateLocalHTMLFile = null)
+    function getJobs($nDays = -1)
     {
+        if($nDays > 1)
+        {
+            __debug__printLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Skipping.", C__DISPLAY_MOMENTARY_INTERUPPT__);
+            return "";
+        }
 
         $strSearch = 'http://seattle.craigslist.org/search/jjj?catAbb=jjj&query=%22Vice%20President%22%20%7C%20%22Chief%20Technology%20Office%22%20%7C%20%22Chief%20Products%20Officer%22%20%7C%20%22CTO%22%20%7C%20%22CPO%22%20%7C%20%22VP%22%20%7C%20%22V.P.%22%20%7C%20%22Director%22%20%7C%20%20%22product%20management%22%20%7C%20%22general%20manager%22%20&srchType=T&s=';
 

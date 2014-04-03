@@ -22,6 +22,7 @@ require_once dirname(__FILE__) . '/../src/ClassSimplyHired.php';
 
 
 const C_STR_DATAFOLDER = '/Users/bryan/Code/data/';
+const C_STR_FOLDER_JOBSEARCH= '/Users/bryan/Dropbox/Job Search 2013/';
 
 
 
@@ -36,10 +37,10 @@ const C_STR_DATAFOLDER = '/Users/bryan/Code/data/';
 
 
 
-function __runAllJobs__($incAmazon= 1, $inclCraigslist = 0, $incSimplyHired = 1, $incIndeed = 1, $strSource = null )
+function __runAllJobs__($incAmazon= 1, $inclCraigslist = 0, $incSimplyHired = 1, $incIndeed = 1, $arrSourceFiles = null, $nDays = -1)
 {
 
-    $G_FINALOUTPUT_FILE_NAME = C_STR_DATAFOLDER . getDefaultJobsOutputFileName("ALL-", "jobs", "csv");
+    $G_FINALOUTPUT_FILE_NAME = C_STR_FOLDER_JOBSEARCH . getDefaultJobsOutputFileName("ALL-", "jobs", "csv");
 
 
 
@@ -52,7 +53,7 @@ function __runAllJobs__($incAmazon= 1, $inclCraigslist = 0, $incSimplyHired = 1,
         __debug__printLine("Adding Indeed jobs....", C__DISPLAY_ITEM_START__);
         $classIndeed = new ClassIndeed(null, C_NORMAL);
         $classIndeed->setOutputFolder(C_STR_DATAFOLDER   . 'indeed_jobs');
-        $arrDownloadedJobsFiles[] = $classIndeed->downloadAllUpdatedJobs();
+        $arrDownloadedJobsFiles[] = $classIndeed->downloadAllUpdatedJobs($nDays );
     }
 
     if($incSimplyHired)
@@ -60,7 +61,7 @@ function __runAllJobs__($incAmazon= 1, $inclCraigslist = 0, $incSimplyHired = 1,
         __debug__printLine("Adding SimplyHired jobs....", C__DISPLAY_ITEM_START__);
         $classSimply= new ClassSimplyHired(null, C_NORMAL);
         $classSimply->setOutputFolder(C_STR_DATAFOLDER  . 'simply_jobs');
-        $arrDownloadedJobsFiles[] = $classSimply->downloadAllUpdatedJobs();
+        $arrDownloadedJobsFiles[] = $classSimply->downloadAllUpdatedJobs($nDays);
     }
 
 
@@ -69,7 +70,7 @@ function __runAllJobs__($incAmazon= 1, $inclCraigslist = 0, $incSimplyHired = 1,
         __debug__printLine("Adding Craigslist jobs....", C__DISPLAY_ITEM_START__);
         $classCraig= new ClassCraigslist(null, C_NORMAL);
         $classCraig->setOutputFolder(C_STR_DATAFOLDER  . 'craigslist_jobs');
-        $arrDownloadedJobsFiles[] = $classCraig->downloadAllUpdatedJobs();
+        $arrDownloadedJobsFiles[] = $classCraig->downloadAllUpdatedJobs($nDays);
     }
 
     if($incAmazon)
@@ -77,15 +78,18 @@ function __runAllJobs__($incAmazon= 1, $inclCraigslist = 0, $incSimplyHired = 1,
         __debug__printLine("Adding Amazon jobs....", C__DISPLAY_ITEM_START__);
         $classAmazon= new ClassAmazonJobs(null, C_NORMAL);
         $classAmazon->setOutputFolder(C_STR_DATAFOLDER  . 'amzn_jobs');
-        $arrDownloadedJobsFiles[] = $classAmazon->downloadAllUpdatedJobs();
+        $arrDownloadedJobsFiles[] = $classAmazon->downloadAllUpdatedJobs($nDays);
     }
 
 
 
-    if($strSource  && strlen($strSource ) > 0)
+    if($arrSourceFiles  && is_array($arrSourceFiles))
     {
-        __debug__printLine("Adding source file jobs from " . $strSource , C__DISPLAY_ITEM_START__);
-        $arrDownloadedJobsFiles[] = $strSource;
+        foreach($arrSourceFiles as $source)
+        {
+            __debug__printLine("Adding source file jobs from " . $source, C__DISPLAY_ITEM_START__);
+            $arrDownloadedJobsFiles[] = $source;
+        }
     }
 
 

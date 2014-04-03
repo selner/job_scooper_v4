@@ -24,11 +24,46 @@ require_once dirname(__FILE__) . '/include/Functions-RunJobs.php';
 /****                                                                                                        ****/
 /****************************************************************************************************************/
 
+// function __runAllJobs__($incAmazon= 1, $inclCraigslist = 0, $incSimplyHired = 1, $incIndeed = 1, $arrSourceFiles = null, $nDays = -1)
 
-// Run Amazon Only
-// __runAllJobs__(1, 0, 0, 0);
+
+$arrBryanTrackingFiles = array(
+    '/Users/bryan/Dropbox/Job Search 2013/bryans_list_active.csv',
+    '/Users/bryan/Dropbox/Job Search 2013/bryans_list_inactive.csv'
+);
+
+// Run AMZN
+// __runAllJobs__(1, 0, 0, 0, $arrBryanTrackingFiles);
 
 // Run All but CL
-__runAllJobs__(1, 0, 1, 1, C_STR_DATAFOLDER . '/bryans_current_jobs_list.csv');
+//__runAllJobs__(1, 0, 1, 1, $arrBryanTrackingFiles);
 
+
+// Get the last 7 days worth from Indeed & SimplyHired
+__runAllJobs__(0, 0, 1, 1, $arrBryanTrackingFiles, 7);
+__runAllJobs__(1, 0, 0, 0, $arrBryanTrackingFiles, 1);
+
+
+
+
+
+
+
+/*
+$class = new ClassSimplyHired();
+
+$arrBlank = $class->getEmptyItemsArray();
+
+$classCombined = new SimpleScooterCSVFileClass("test-inputcombined.csv", "w");
+// $classCombined->combineMultipleCSVs(array("/Users/bryan/Code/data/bryans_current_jobs_list.csv") );
+$classCombined->combineMultipleCSVs(array("/Users/bryan/Code/data/ALL-_2014-04-02_1454_jobs_.csv", "/Users/bryan/Code/data/bryans_current_jobs_list.csv"));
+
+__debug__printLine("merge complete", C__DISPLAY_ITEM_START__);
+
+*/
+/*__debug__printLine("Adding Amazon jobs....", C__DISPLAY_ITEM_START__);
+$classAmazon= new ClassAmazonJobs(null, C_NORMAL);
+$classAmazon->setOutputFolder(C_STR_DATAFOLDER  . 'amzn_jobs');
+$arrDownloadedJobsFiles[] = $classAmazon->getJobs_NewSite();
+*/
 ?>
