@@ -16,10 +16,10 @@
  */
 
 
-require_once dirname(__FILE__) . '/../include/scooter_utils_common.php';
+require_once dirname(__FILE__) . '/../include/ClassJobsSiteBase.php';
 
 
-class ClassSimplyHired extends ClassSiteExportBase
+class ClassSimplyHired extends ClassJobsSiteBase
 {
     protected $siteName = 'SimplyHired';
 
@@ -139,7 +139,7 @@ class ClassSimplyHired extends ClassSiteExportBase
             $item['job_post_url'] = 'http://www.simplyhired.com' . $node->find("a[class='title']")[0]->href;
             $item['company']= trim($node->find("h4[class='company']")[0]->plaintext);
             $item['location'] =trim( $node->find("span[class='location']")[0]->plaintext);
-            $item['date_pulled'] = parent::getPostDateString();
+            $item['date_pulled'] = $this->_getCurrentDateAsString_();
             $item['job_site_date'] = $node->find("span[class='ago']")[0]->plaintext;
 
             if($this->is_IncludeBrief())

@@ -48,6 +48,8 @@ $arrBryanTrackingFiles = array(
 
 $arrSitesSettings = $g_arrJobSitesList;
 $arrSitesSettings['Indeed']['include_in_run'] = true;
+$arrSitesSettings['Amazon']['include_in_run'] = true;
+$arrSitesSettings['SimplyHired']['include_in_run'] = true;
 
 
-__runAllJobs__($arrSitesSettings, null, $arrBryanTrackingFiles, 1);
+__runAllJobs__($arrSitesSettings, null, $arrBryanTrackingFiles, 1, false);

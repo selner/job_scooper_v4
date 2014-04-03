@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/../include/scooter_utils_common.php';
+require_once dirname(__FILE__) . '/../include/ClassJobsSiteBase.php';
 
 /****************************************************************************************************************/
 /****                                                                                                        ****/
@@ -26,7 +26,7 @@ require_once dirname(__FILE__) . '/../include/scooter_utils_common.php';
 
 
 
-class ClassAmazonJobs extends ClassSiteExportBase
+class ClassAmazonJobs extends ClassJobsSiteBase
 {
     protected $siteName = 'Amazon';
 
@@ -38,11 +38,11 @@ class ClassAmazonJobs extends ClassSiteExportBase
         'pm-newsite' => array("name" => 'pm-newsite', 'output_file' => "OutputAMZNJobs-PM-NewSite.csv", "baseURL" => "'http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=director&category=*&location=US%2C+WA%2C+Seattle&x=0&y=0&page="),
     );
 
-    function downloadAllUpdatedJobs($nDays = -1)
+/*    function downloadAllUpdatedJobs($nDays = -1)
     {
         return $this->getJobs($nDays );
     }
-
+*/
     function getJobs($nDays = -1)
     {
         if($nDays > 1)
@@ -56,8 +56,7 @@ class ClassAmazonJobs extends ClassSiteExportBase
         $this->getJobs_OldSite_PMCategory();
 
         $strCombinedFileName = $this->getOutputFileFullPath("AllJobs");
-        $classCombined = new SimpleScooterCSVFileClass($strCombinedFileName, "w");
-        $classCombined->combineMultipleCSVs(array(
+        $this->combineMultipleJobsCSVs($strCombinedFileName, array(
             $this->arrSearches['keyword-dir']['output_file'],
             $this->arrSearches['keyword-gm']['output_file'],
             $this->arrSearches['pm-nontech']['output_file'],
@@ -165,7 +164,7 @@ class ClassAmazonJobs extends ClassSiteExportBase
                 $item['company'] = 'Amazon';
 
                 $item['job_site'] = 'Amazon';
-                $item['date_pulled'] = parent::getPostDateString();
+                $item['date_pulled'] = $this->_getCurrentDateAsString_();
 
 
                 $item['original_source'] = 'Amazon';
@@ -282,7 +281,7 @@ class ClassAmazonJobs extends ClassSiteExportBase
             $item['company'] = 'Amazon';
             $item['original_source'] = 'Amazon';
             $item['job_site'] = 'Amazon';
-            $item['date_pulled'] = parent::getPostDateString();
+            $item['date_pulled'] = $this->_getCurrentDateAsString_();
 
 
 

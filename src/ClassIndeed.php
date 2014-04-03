@@ -14,10 +14,10 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/../include/scooter_utils_common.php';
+require_once dirname(__FILE__) . '/../include/ClassJobsSiteBase.php';
 
 
-class ClassIndeed extends ClassSiteExportBase
+class ClassIndeed extends ClassJobsSiteBase
 {
     protected $siteName = 'Indeed';
 
@@ -133,7 +133,7 @@ class ClassIndeed extends ClassSiteExportBase
             $item['job_post_url'] = 'http://www.indeed.com' . $jobInfoNode->href;
             $item['company'] = trim($node->find("span[class='company'] span")[0]->plaintext);
             $item['location'] =trim( $node->find("span[class='location'] span")[0]->plaintext);
-            $item['date_pulled'] = parent::getPostDateString();
+            $item['date_pulled'] = $this->_getCurrentDateAsString_();
             $item['job_site_date'] = $node->find("span[class='date']")[0]->plaintext;
 
             if($this->is_IncludeBrief())

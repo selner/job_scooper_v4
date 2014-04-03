@@ -41,20 +41,21 @@ $g_arrJobSitesList = array(
 
 
 
-function __runAllJobs__($arrSitesSettings = null, $strOutputFile = null, $arrSourceFiles = null, $nDays = -1)
+function __runAllJobs__($arrSitesSettings = null, $strOutputFile = null, $arrSourceFiles = null, $nDays = -1, $fIncludeFilteredJobsInResults = true)
 {
     if(!$arrSitesSettings || !is_array($arrSitesSettings))
     {
         $arrSitesSettings = $g_arrJobSitesList;
     }
 
-    if(!$strOutputFile)
+
+    $arrOutputFilesToIncludeInResults = array();
+
+    if($arrSourceFiles  && is_array($arrSourceFiles))
     {
-        $G_FINALOUTPUT_FILE_NAME = C_STR_FOLDER_JOBSEARCH . getDefaultJobsOutputFileName("ALL-", "jobs", "csv");
+        $arrOutputFilesToIncludeInResults = array_copy($arrSourceFiles);
+        __debug__printLine("Adding source file jobs from " . var_export($arrSourceFiles, true), C__DISPLAY_ITEM_START__);
     }
-
-    $arrDownloadedJobsFiles = array();
-
 
 
     if($arrSitesSettings['Indeed']['include_in_run'] == true)
@@ -62,7 +63,7 @@ function __runAllJobs__($arrSitesSettings = null, $strOutputFile = null, $arrSou
         __debug__printLine("Adding Indeed jobs....", C__DISPLAY_ITEM_START__);
         $class  = new ClassIndeed(null, C_NORMAL);
         $class ->setOutputFolder(C_STR_DATAFOLDER  .  $arrSitesSettings['Indeed']['working_subfolder']);
-        $arrDownloadedJobsFiles[] = $class ->downloadAllUpdatedJobs($nDays);
+        $arrOutputFilesToIncludeInResults[] = $class->downloadAllUpdatedJobs($nDays, $arrSourceFiles, $fIncludeFilteredJobsInResults );
     }
 
     if($arrSitesSettings['SimplyHired']['include_in_run'] == true)
@@ -70,7 +71,7 @@ function __runAllJobs__($arrSitesSettings = null, $strOutputFile = null, $arrSou
         __debug__printLine("Adding SimplyHired jobs....", C__DISPLAY_ITEM_START__);
         $class = new ClassSimplyHired(null, C_NORMAL);
         $class ->setOutputFolder(C_STR_DATAFOLDER  . $arrSitesSettings['SimplyHired']['working_subfolder']);
-        $arrDownloadedJobsFiles[] = $class ->downloadAllUpdatedJobs($nDays);
+        $arrOutputFilesToIncludeInResults[] = $class->downloadAllUpdatedJobs($nDays, $arrSourceFiles, $fIncludeFilteredJobsInResults );
     }
 
 
@@ -79,7 +80,7 @@ function __runAllJobs__($arrSitesSettings = null, $strOutputFile = null, $arrSou
         __debug__printLine("Adding Craigslist jobs....", C__DISPLAY_ITEM_START__);
         $class = new ClassCraigslist(null, C_NORMAL);
         $class ->setOutputFolder(C_STR_DATAFOLDER  . $arrSitesSettings['Craigslist']['working_subfolder']);
-        $arrDownloadedJobsFiles[] = $class ->downloadAllUpdatedJobs($nDays);
+        $arrOutputFilesToIncludeInResults[] = $class->downloadAllUpdatedJobs($nDays, $arrSourceFiles, $fIncludeFilteredJobsInResults );
     }
 
     if($arrSitesSettings['Amazon']['include_in_run'] == true)
@@ -87,27 +88,27 @@ function __runAllJobs__($arrSitesSettings = null, $strOutputFile = null, $arrSou
         __debug__printLine("Adding Amazon jobs....", C__DISPLAY_ITEM_START__);
         $class = new ClassAmazonJobs(null, C_NORMAL);
         $class ->setOutputFolder(C_STR_DATAFOLDER  . $arrSitesSettings['Amazon']['working_subfolder']);
-        $arrDownloadedJobsFiles[] = $class ->downloadAllUpdatedJobs($nDays);
+        $arrOutputFilesToIncludeInResults[] = $class->downloadAllUpdatedJobs($nDays, $arrSourceFiles, $fIncludeFilteredJobsInResults );
     }
 
+    $class = null;
 
+    __debug__printLine("Combining records from these files: " .var_export($arrOutputFilesToIncludeInResults, true), C__DISPLAY_ITEM_START__);
+    $classJobExportHelper = new ClassJobsSiteExport();
+    $classJobExportHelper->setOutputFolder(C_STR_DATAFOLDER);
 
-    if($arrSourceFiles  && is_array($arrSourceFiles))
+    if(!$strOutputFile )
     {
-        foreach($arrSourceFiles as $source)
-        {
-            __debug__printLine("Adding source file jobs from " . $source, C__DISPLAY_ITEM_START__);
-            $arrDownloadedJobsFiles[] = $source;
-        }
+        $strOutputFile = $classJobExportHelper->getOutputFileFullPath("ALL-", "jobs", "csv");
     }
 
+    $retFile = $classJobExportHelper->combineMultipleJobsCSVs($strOutputFile, $arrOutputFilesToIncludeInResults, $fIncludeFilteredJobsInResults);
+    if($retFile)
+    {
+        __debug__printLine("Combined results written to " . $strOutputFile , C__DISPLAY_ITEM_START__);
+    }
 
-    __debug__printLine("Combining records from these files: " .var_export($arrDownloadedJobsFiles, true), C__DISPLAY_ITEM_START__);
-
-    $classCombined = new SimpleScooterCSVFileClass($G_FINALOUTPUT_FILE_NAME, "w");
-    $classCombined->combineMultipleCSVs($arrDownloadedJobsFiles);
-
-    __debug__printLine("Download complete to " . $G_FINALOUTPUT_FILE_NAME , C__DISPLAY_ITEM_START__);
+    __debug__printLine("Run completed.", C__DISPLAY_ITEM_START__);
 
 }
 

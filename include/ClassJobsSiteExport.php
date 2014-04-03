@@ -22,30 +22,26 @@ function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strEx
     if(strlen($strFilePrefix) > 0) $strFilename .= $strFilePrefix . "_";
     $date=date_create(null);
     $strFilename .= date_format($date,"Y-m-d_Hi");
-//    $strFilename .= date("Y-m-d_h-m");
+
     if(strlen($strBase) > 0) $strFilename .= "_" . $strBase . "_";
     if(strlen($strExt) > 0) $strFilename .= "." . $strExt;
 
     return $strFilename;
 }
 
-
-
-abstract class ClassSiteExportBase
+class ClassJobsSiteExport
 {
-
-//    function call_child_method(){
-//        if(method_exists($this, 'child_method')){
-//            $this->child_method();
-//        }
-//    }
 
     private $_strFilePathInput_ExcludedTitles = null;
 
-    abstract function getJobs($strAlternateLocalHTMLFile = null);
+    private $arrInterestLevelsToExclude = array(
+        'No' => array('interested' => 'No', 'exclude' => true),
+        'Yes' => array('interested' => 'Yes', 'exclude' => false),
+        'Maybe' => array('interested' => 'Maybe', 'exclude' => false),
+        'No (Auto Excluded)' => array('interested' => 'No (Auto Excluded)', 'exclude' => true),
+    );
 
 
-    protected $siteName = 'NAME-NOT-SET';
     private $_strAlternateLocalFile = '';
     private $_bitFlags = null;
     protected $strOutputFolder = "";
@@ -64,10 +60,12 @@ abstract class ClassSiteExportBase
         $this->_strFilePathInput_ExcludedTitles = C_STR_DATAFOLDER  . "bryans_list_exclude_titles.csv";
     }
 
-    function __destruct()
+    function _getCurrentDateAsString_()
     {
-        __debug__printLine("Done with ".$this->siteName." processing.", C__DISPLAY_ITEM_START__);
+        return date("Y-m-d");
     }
+
+
 
     function _loadTitlesToFilter_()
     {
@@ -95,7 +93,7 @@ abstract class ClassSiteExportBase
         }
     }
 
-    function filterExcludedTitles($arrJobsToFilter)
+    function setExcludedTitles($arrJobsToFilter)
     {
         $this->_loadTitlesToFilter_();
         if(!is_array($this->arrTitlesToFilter))
@@ -112,7 +110,7 @@ abstract class ClassSiteExportBase
         {
             $varValMatch = $this->arrTitlesToFilter[$job['job_title']];
 
- //           __debug__printLine("Matching listing job title '".$job['job_title'] ."' and found " . (!$varValMatch  ? "nothing" : $varValMatch ) . " for " . $this->arrTitlesToFilter[$job['job_title']], C__DISPLAY_ITEM_DETAIL__);
+            //           __debug__printLine("Matching listing job title '".$job['job_title'] ."' and found " . (!$varValMatch  ? "nothing" : $varValMatch ) . " for " . $this->arrTitlesToFilter[$job['job_title']], C__DISPLAY_ITEM_DETAIL__);
             if(!is_array($varValMatch))  // we're ignoring the Excluded column fact for the time being. If it's in the list, it's excluded
             {
                 $nJobsNotExcluded++;
@@ -127,87 +125,120 @@ abstract class ClassSiteExportBase
         }
 
 
-        __debug__printLine("Filtering complete:  '".$nJobsExcluded ."' were automatically filtered and ". $nJobsNotExcluded . " jobs were not." , C__DISPLAY_ITEM_RESULT__);
-
+        __debug__printLine("Completed marking auto-excluded titles:  '".$nJobsExcluded ."' were marked as auto excluded and ". $nJobsNotExcluded . " jobs were not." , C__DISPLAY_ITEM_RESULT__);
 
 
         return $arrJobsToFilter;
     }
 
 
-    function downloadAllUpdatedJobs($nDays = -1, $varPathToInputFilesToMergeWithResults = null )
+    function filterNotInterestedJobs($arrJobsToFilter, $fIncludeFilteredJobsInResults = true)
     {
-        $retFilePath = '';
-
-        // Now go download and output the latest jobs from this site
-        __debug__printLine("Downloading new ". $this->siteName ." jobs...", C__DISPLAY_ITEM_START__);
-
-        //
-        // Call the child classes getJobs function to update the object's array of job listings
-        // and output the results to a single CSV
-        //
-        $retCSVFilePathJobsWrittenTo = $this->getJobs($nDays);
-
-        //
-        // Now, filter those jobs and mark any rows that are titles we want to automatically
-        // exclude
-        //
-        $this->arrLatestJobs = $this->filterExcludedTitles($this->arrLatestJobs);
-
-        //
-        // Write the resulting array of the latest job postings from this site to
-        // a CSV file for the user
-        //
-        $this->writeJobsToCSV($retCSVFilePathJobsWrittenTo, $this->arrLatestJobs);
-
-        __debug__printLine("Downloaded ". count($this->arrLatestJobs) ." new ". $this->siteName ." jobs to " . $retCSVFilePathJobsWrittenTo, C__DISPLAY_ITEM_DETAIL__);
-
-        //
-        // Lastly, if had we input files of job listings from the user,
-        // we need to merge them with the latest jobs.
-        //
-        if($varPathToInputFilesToMergeWithResults != null)
+        if($fIncludeFilteredJobsInResults == true)
         {
-            $arrFilePathsToCombine = array($retCSVFilePathJobsWrittenTo);
+            __debug__printLine("Including filtered jobs in results." , C__DISPLAY_MOMENTARY_INTERUPPT__);
+            return $arrJobsToFilter;
+        }
 
-            if(is_string($varPathToInputFilesToMergeWithResults) && strlen($varPathToInputFilesToMergeWithResults) > 0)
+        $nJobsNotExcluded = 0;
+        $nJobsExcluded = 0;
+        $retArrayFilteredJobs = array();
+
+        foreach($arrJobsToFilter as $job)
+        {
+            if(strlen($job['interested']) <= 0)
             {
-                $arrFilePathsToCombine[] = $varPathToInputFilesToMergeWithResults;
+                // Interested value not set; always include in the results
+                $retArrayFilteredJobs[] = $job;
+
             }
-            else if(is_array($varPathToInputFilesToMergeWithResults))
+            else
             {
-                foreach($varPathToInputFilesToMergeWithResults as $inputfile)
+                $arrCurJobInterest = $this->arrInterestLevelsToExclude[$job['interested']];
+
+
+                if(!is_array($arrCurJobInterest ))  // we're ignoring the Excluded column fact for the time being. If it's in the list, it's excluded
                 {
-                    $arrFilePathsToCombine[] = $inputfile;
+                    $retArrayFilteredJobs[] = $job;
+                    $nJobsNotExcluded++;
+                    __debug__printLine("Job interest level of '".$job['interested'] ."' was not found in the exclusion list.  Keeping for review." , C__DISPLAY_ITEM_DETAIL__);
                 }
-            }
-
-            //
-            // Make sure we didn't have bad input file names and only ended up with our results file
-            // from this class as the only file to combine
-            //
-            if(count($arrFilePathsToCombine) > 1)
-            {
-                $strOutFilePath = $this->getOutputFileFullPath('Final_CombinedWithUserInput');
-                __debug__printLine("Merging input & downloaded jobs data and writing to " . $strOutFilePath , C__DISPLAY_ITEM_START__);
-                __debug__printLine("Including source data from " .var_export($arrFilePathsToCombine, true), C__DISPLAY_ITEM_DETAIL__);
-
-                $classCombined = new SimpleScooterCSVFileClass($strOutFilePath , "w");
-                $arrRetJobs = $classCombined->combineMultipleCSVs($arrFilePathsToCombine);
-                $retCSVFilePathJobsWrittenTo = $strOutFilePath;
-                __debug__printLine("Combined file has ". count($arrRetJobs) . " jobs." . $strOutFilePath , C__DISPLAY_ITEM_START__);
+                else if($arrCurJobInterest['exclude'] == false)
+                {
+                    $retArrayFilteredJobs[] = $job;
+                }
+                else
+                {
+                    $nJobsExcluded++;
+                }
             }
         }
 
+        __debug__printLine("Filtering complete:  '".$nJobsExcluded ."' were automatically filtered and ". $nJobsNotExcluded . " jobs were not." , C__DISPLAY_ITEM_RESULT__);
 
-        //
-        // return the output file path to the caller so they know where to find them
-        //
-        return $retCSVFilePathJobsWrittenTo;
-
+        return $retArrayFilteredJobs;
     }
 
 
+
+    function combineMultipleJobsCSVs($strOutFilePath, $arrFilesToCombine, $fIncludeFilteredJobsInResults = true)
+    {
+        if(!$strOutFilePath || strlen($strOutFilePath) <= 0)
+        {
+            $strOutFilePath = $this->getOutputFileFullPath('CombineMultipleJobsCSVs_');
+        }
+
+        if(!$arrFilesToCombine)
+        {
+            if(!is_array($arrFilesToCombine) && is_string($arrFilesToCombine))
+            {
+                $arrFilesToCombine = array($arrFilesToCombine);
+            }
+            else
+            {
+                throw new ErrorException("Cannot combine files into a single CSF because there were no filenames set to combine.");
+            }
+
+        }
+
+        $retOutFilePathWritten = $strOutFilePath;
+        $arrKeysForDeduping = array('job_site', 'job_id');
+        $arrRetJobs = null;
+
+        $classCombined = new SimpleScooterCSVFileClass($strOutFilePath , "w");
+
+
+        __debug__printLine("Merging input & downloaded jobs data and writing to " . $strOutFilePath , C__DISPLAY_ITEM_START__);
+        __debug__printLine("Including source data from " .var_export($arrFilesToCombine, true), C__DISPLAY_ITEM_DETAIL__);
+
+
+        if($fIncludeFilteredJobsInResults == false)
+        {
+            __debug__printLine("Filtering final results data...", C__DISPLAY_ITEM_DETAIL__);
+            $arrRetJobs = $classCombined->readMultipleCSVsAndCombine($arrFilesToCombine);
+            $arrRetJobs = $this->filterNotInterestedJobs($arrRetJobs, $fIncludeFilteredJobsInResults);
+            if(is_array($arrRetJobs) && count($arrRetJobs) > 0)
+            {
+                $classCombined->writeArrayToCSVFile($arrRetJobs);
+                __debug__printLine("Combined file has ". count($arrRetJobs) . " jobs and was written to " . $strOutFilePath , C__DISPLAY_ITEM_START__);
+            }
+            else
+            {
+                __debug__printLine("All records were filtered, so not writing output to file " . $strOutFilePath, C__DISPLAY_ITEM_DETAIL__);
+                $retOutFilePathWritten = null;
+            }
+
+        }
+        else
+        {
+            $arrRetJobs = $classCombined->combineMultipleCSVs($arrFilesToCombine, null, $arrKeysForDeduping);
+            __debug__printLine("Combined file has ". count($arrRetJobs) . " jobs and was written to " . $strOutFilePath , C__DISPLAY_ITEM_START__);
+        }
+
+
+        return $retOutFilePathWritten;
+
+    }
 
 
     function getEmptyItemsArray()
@@ -243,10 +274,10 @@ abstract class ClassSiteExportBase
             $objSimpleHTML =  $this->getSimpleHTMLObjForFileContents($filePath);
         }
 
-        if(!$objSimpleHTML && $this->_strExtendsAlternateLocalFile && strlen($this->_strExtendsAlternateLocalFile) > 0)
+        if(!$objSimpleHTML && $this->_strAlternateLocalFile  && strlen($this->_strAlternateLocalFile ) > 0)
         {
-            __debug__printLine("Loading ALTERNATE results from ".$this->_strExtendsAlternateLocalFile, C__DISPLAY_ITEM_START__);
-            $objSimpleHTML =  $this->getSimpleHTMLObjForFileContents($this->_strExtendsAlternateLocalFile);
+            __debug__printLine("Loading ALTERNATE results from ".$this->_strAlternateLocalFile , C__DISPLAY_ITEM_START__);
+            $objSimpleHTML =  $this->getSimpleHTMLObjForFileContents($this->_strAlternateLocalFile );
         }
 
         if(!$objSimpleHTML && $strURL && strlen($strURL) > 0)
@@ -270,67 +301,13 @@ abstract class ClassSiteExportBase
         $classFileOut->writeArrayToCSVFile($arrJobsToOutput);
     }
 
-    function getActualPostURL($strSrcURL)
-    {
-        $retURL = null;
-
-        $classAPI = new APICallWrapperClass();
-        __debug__printLine("Getting source URL for ".$strSrcURL, C__DISPLAY_ITEM_START__);
-        try
-        {
-            $curlObj = $classAPI->cURL($strSrcURL);
-            if($curlObj && !$curl_object['error_number'] && $curl_object['error_number'] == 0 )
-            {
-                $retURL  =  $curlObj['actual_site_url'];
-            }
-        }
-        catch(ErrorException $err)
-        {
-                // do nothing
-        }
-        return $retURL;
-    }
-
-    function getPostDateString()
-    {
-        return date("Y-m-d");
-    }
-
-    function is_IncludeBrief()
-    {
-        $val = $this->_bitFlags & C_EXCLUDE_BRIEF;
-        $notVal = !($this->_bitFlags & C_EXCLUDE_BRIEF);
-        // __debug__printLine('ExcludeBrief/not = ' . $val .', '. $notVal, C__DISPLAY_ITEM_START__);
-        return true;
-    }
-
-    function is_IncludeActualURL()
-    {
-        $val = $this->_bitFlags & C_EXCLUDE_GETTING_ACTUAL_URL;
-        $notVal = !($this->_bitFlags & C_EXCLUDE_GETTING_ACTUAL_URL);
-        // __debug__printLine('ExcludeActualURL/not = ' . $val .', '. $notVal, C__DISPLAY_ITEM_START__);
-
-        return !$notVal;
-    }
-
-    private function _getOutputFileName_($strFilePrefix = '', $strBase = '', $strExt = '')
-    {
-        $strFilename = $this->siteName;
-        if(strlen($strFilePrefix) > 0) $strFilename .= $strFilePrefix . "_";
-        $strFilename .= date("Ymd-Hms");
-        if(strlen($strBase) > 0) $strFilename .= "_" . $strBase . "_";
-        if(strlen($strExt) > 0) $strFilename .= "." . $strExt;
-
-        return $strFilename;
-    }
-
     function getOutputFileFullPath($strFilePrefix = "", $strBase = 'jobs', $strExtension = 'csv')
     {
-        $strFullPath =  getDefaultJobsOutputFileName($this->siteName . "_".$strFilePrefix, $strBase , $strExtension);
+        $strFullPath = getDefaultJobsOutputFileName($strFilePrefix, $strBase , $strExtension);
 
         if(strlen($this->strOutputFolder) > 0)
         {
-            $strFullPath = $this->strOutputFolder . "/" . $strFullPath;
+            $strFullPath = $this->strOutputFolder . $strFullPath;
         }
         return $strFullPath;
     }
@@ -354,4 +331,5 @@ abstract class ClassSiteExportBase
 
 
 
-} 
+}
+
