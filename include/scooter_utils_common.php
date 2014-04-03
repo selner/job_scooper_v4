@@ -25,3 +25,7 @@ date_default_timezone_set("America/Los_Angeles");
 const C_NORMAL = 0;
 const C_EXCLUDE_BRIEF = 1;
 const C_EXCLUDE_GETTING_ACTUAL_URL = 3;
+
+const C_STR_DATAFOLDER = '/Users/bryan/Code/data/jobs/';
+const C_STR_FOLDER_JOBSEARCH= '/Users/bryan/Dropbox/Job Search 2013/';
+

@@ -160,7 +160,7 @@ class ClassAmazonJobs extends ClassSiteExportBase
 
                 $item['notes'] = '';
                 $item['interested'] = '';
-                $item['job_post_url'] = $nodesTD[$nTDIndex]->previousSibling()->first_child()->href;
+                $item['job_post_url'] = "http://www.amazon.jobs" . $nodesTD[$nTDIndex]->previousSibling()->first_child()->href;
                 $item['job_source_url'] = $item['job_post_url'];
                 $item['company'] = 'Amazon';
 
@@ -269,7 +269,7 @@ class ClassAmazonJobs extends ClassSiteExportBase
             $item['script_search_key'] = $arrSettings['name'];
 
             $item['notes'] = '';
-            $item['job_post_url'] = $firstPart->find('a[class="title"]')[0]->href;
+            $item['job_post_url'] = "http://www.amazon.com" . $firstPart->find('a[class="title"]')[0]->href;
             $item['job_source_url'] = $item['job_post_url'];
             $item['location'] = trim($firstPart->find('span[class="details"]')[0]->plaintext);
             $id = trim($firstPart->find('span[class="id"]')[0]->plaintext);

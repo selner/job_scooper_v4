@@ -44,10 +44,10 @@ class ClassSimplyHired extends ClassSiteExportBase
             $strSearch = 'http://www.simplyhired.com/search?t=%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22product+management%22+or+%22general+manager%22+or+%22Chief+Technology+Officer%22&lc=Seattle&ls=WA&fdb=1&ws=50&sb=dd&pn=';
         }
 
-        $arrJobs = $this->__getJobsFromSearch__($strSearch, 'Exec Keywords near Seattle, WA 98102', $strAlternateLocalHTMLFile );
+        $this->arrLatestJobs= $this->__getJobsFromSearch__($strSearch, 'Exec Keywords in Seattle, WA', $strAlternateLocalHTMLFile);
 
         $strOutFile = $this->getOutputFileFullPath();
-        $this->writeJobsToCSV($strOutFile , $arrJobs );
+        $this->writeJobsToCSV($strOutFile , $this->arrLatestJobs);
 
         return $strOutFile ;
 
@@ -95,7 +95,7 @@ class ClassSimplyHired extends ClassSiteExportBase
             {
                 // we likely hit a page where jobs started to be hidden.
                 // Go ahead and bail on the loop here
-                __debug__printLine("Not getting results back from SimplyHired startging on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", C__DISPLAY_ITEM_START__);
+                __debug__printLine("Not getting results back from SimplyHired starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", C__DISPLAY_ITEM_START__);
                 $nPageCount = $maxItem;
             }
             else

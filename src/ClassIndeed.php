@@ -38,10 +38,10 @@ class ClassIndeed extends ClassSiteExportBase
                 break;
         }
 
-        $arrJobs = $this->__getJobsFromSearch__($strSearch, 'Exec Keywords in Seattle, WA', $strAlternateLocalHTMLFile);
+        $this->arrLatestJobs= $this->__getJobsFromSearch__($strSearch, 'Exec Keywords in Seattle, WA', $strAlternateLocalHTMLFile);
 
         $strOutFile = $this->getOutputFileFullPath();
-        $this->writeJobsToCSV($strOutFile , $arrJobs );
+        $this->writeJobsToCSV($strOutFile , $this->arrLatestJobs);
 
         return $strOutFile ;
 
@@ -82,8 +82,21 @@ class ClassIndeed extends ClassSiteExportBase
             if(!$objSimpleHTML) throw new ErrorException('Error:  unable to get SimpleHTML object from file('.$strAlternateLocalHTMLFile.') or '.$strURL);
 
             $arrNewJobs = $this->_scrapeItemsFromHTML_($objSimpleHTML, $category);
+            if(!is_array($arrNewJobs))
+            {
+                // we likely hit a page where jobs started to be hidden.
+                // Go ahead and bail on the loop here
+                __debug__printLine("Not getting results back from SimplyHired starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", C__DISPLAY_ITEM_START__);
+                $nPageCount = $maxItem;
+            }
+            else
+            {
+                $arrAllJobs = array_merge($arrAllJobs, $arrNewJobs);
 
-            $arrAllJobs = array_merge($arrAllJobs, $arrNewJobs);
+                $nItemCount += $nItemChunkSize;
+            }
+
+
             __debug__printLine("Querying " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
 
             $nItemCount += $nItemChunkSize;

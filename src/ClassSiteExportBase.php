@@ -30,6 +30,7 @@ function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strEx
 }
 
 
+
 abstract class ClassSiteExportBase
 {
 
@@ -39,6 +40,7 @@ abstract class ClassSiteExportBase
 //        }
 //    }
 
+    private $_strFilePathInput_ExcludedTitles = null;
 
     abstract function getJobs($strAlternateLocalHTMLFile = null);
 
@@ -48,6 +50,7 @@ abstract class ClassSiteExportBase
     private $_bitFlags = null;
     protected $strOutputFolder = "";
     protected $arrLatestJobs = "";
+    protected $arrTitlesToFilter = null;
 
     function setOutputFolder($strPath)
     {
@@ -58,6 +61,7 @@ abstract class ClassSiteExportBase
     {
         $this->_strAlternateLocalFile = $strAltFilePath;
         $this->_bitFlags = $bitFlags;
+        $this->_strFilePathInput_ExcludedTitles = C_STR_DATAFOLDER  . "bryans_list_exclude_titles.csv";
     }
 
     function __destruct()
@@ -65,40 +69,141 @@ abstract class ClassSiteExportBase
         __debug__printLine("Done with ".$this->siteName." processing.", C__DISPLAY_ITEM_START__);
     }
 
+    function _loadTitlesToFilter_()
+    {
+        if(!is_array($this->arrTitlesToFilter) && $this->_strFilePathInput_ExcludedTitles && file_exists($this->_strFilePathInput_ExcludedTitles) && is_file($this->_strFilePathInput_ExcludedTitles))
+        {
+            __debug__printLine("Loading job titles to filter from ".$this->_strFilePathInput_ExcludedTitles."." , C__DISPLAY_ITEM_DETAIL__);
+            $classCSVFile = new SimpleScooterCSVFileClass($this->_strFilePathInput_ExcludedTitles, 'r');
+            $arrTitlesTemp = $classCSVFile->readAllRecords(true);
+            __debug__printLine(count($arrTitlesTemp) . " titles found in the source file that will be automatically filtered from job listings." , C__DISPLAY_ITEM_DETAIL__);
 
-    function downloadAllUpdatedJobs($nDays = -1 )
+            //
+            // Add each title we found in the file to our list in this class, setting the key for
+            // each record to be equal to the job title so we can do a fast lookup later
+            //
+            $this->arrTitlesToFilter = array();
+            foreach($arrTitlesTemp as $titleRecord)
+            {
+                $this->arrTitlesToFilter[$titleRecord['job_title']] = $titleRecord;
+            }
+
+        }
+        else
+        {
+            __debug__printLine("Could not load the list of titles to exclude from '" . $this->_strFilePathInput_ExcludedTitles . "'.  Final list will not be filtered." , C__DISPLAY_MOMENTARY_INTERUPPT__);
+        }
+    }
+
+    function filterExcludedTitles($arrJobsToFilter)
+    {
+        $this->_loadTitlesToFilter_();
+        if(!is_array($this->arrTitlesToFilter))
+        {
+            __debug__printLine("No titles found to exclude. Skipping results filtering." , C__DISPLAY_MOMENTARY_INTERUPPT__);
+            return $arrJobsToFilter;
+        }
+
+        $nJobsNotExcluded = 0;
+        $nJobsExcluded = 0;
+
+        $nIndex = 0;
+        foreach($arrJobsToFilter as $job)
+        {
+            $varValMatch = $this->arrTitlesToFilter[$job['job_title']];
+
+ //           __debug__printLine("Matching listing job title '".$job['job_title'] ."' and found " . (!$varValMatch  ? "nothing" : $varValMatch ) . " for " . $this->arrTitlesToFilter[$job['job_title']], C__DISPLAY_ITEM_DETAIL__);
+            if(!is_array($varValMatch))  // we're ignoring the Excluded column fact for the time being. If it's in the list, it's excluded
+            {
+                $nJobsNotExcluded++;
+                __debug__printLine("Job title '".$job['job_title'] ."' was not found in the exclusion list.  Keeping for review." , C__DISPLAY_ITEM_DETAIL__);
+            }
+            else
+            {
+                $arrJobsToFilter[$nIndex]['interested'] = "No (Auto Excluded)";
+                $nJobsExcluded++;
+            }
+            $nIndex++;
+        }
+
+
+        __debug__printLine("Filtering complete:  '".$nJobsExcluded ."' were automatically filtered and ". $nJobsNotExcluded . " jobs were not." , C__DISPLAY_ITEM_RESULT__);
+
+
+
+        return $arrJobsToFilter;
+    }
+
+
+    function downloadAllUpdatedJobs($nDays = -1, $varPathToInputFilesToMergeWithResults = null )
     {
         $retFilePath = '';
 
         // Now go download and output the latest jobs from this site
         __debug__printLine("Downloading new ". $this->siteName ." jobs...", C__DISPLAY_ITEM_START__);
-        $strJobsDownloadPath = $this->getJobs($nDays);
-        $retFilePath = $strJobsDownloadPath;
 
-        __debug__printLine("Downloaded ". count($this->arrLatestJobs) ." new ". $this->siteName ." jobs to " . $strJobsDownloadPath , C__DISPLAY_ITEM_START__);
+        //
+        // Call the child classes getJobs function to update the object's array of job listings
+        // and output the results to a single CSV
+        //
+        $retCSVFilePathJobsWrittenTo = $this->getJobs($nDays);
 
+        //
+        // Now, filter those jobs and mark any rows that are titles we want to automatically
+        // exclude
+        //
+        $this->arrLatestJobs = $this->filterExcludedTitles($this->arrLatestJobs);
 
-        // If we had a source file, then we need to merge it
-        if($strSourceFilePath != null && strlen($strSourceFilePath) > 0)
+        //
+        // Write the resulting array of the latest job postings from this site to
+        // a CSV file for the user
+        //
+        $this->writeJobsToCSV($retCSVFilePathJobsWrittenTo, $this->arrLatestJobs);
+
+        __debug__printLine("Downloaded ". count($this->arrLatestJobs) ." new ". $this->siteName ." jobs to " . $retCSVFilePathJobsWrittenTo, C__DISPLAY_ITEM_DETAIL__);
+
+        //
+        // Lastly, if had we input files of job listings from the user,
+        // we need to merge them with the latest jobs.
+        //
+        if($varPathToInputFilesToMergeWithResults != null)
         {
-            __debug__printLine("Including source data from " .$strSourceFilePath, C__DISPLAY_ITEM_START__);
+            $arrFilePathsToCombine = array($retCSVFilePathJobsWrittenTo);
 
-            $arrFilesToCombine = array($strSourceFilePath, $strJobsDownloadPath);
-            $strOutFilePath = $this->getOutputFileFullPath('FinalCombined');
+            if(is_string($varPathToInputFilesToMergeWithResults) && strlen($varPathToInputFilesToMergeWithResults) > 0)
+            {
+                $arrFilePathsToCombine[] = $varPathToInputFilesToMergeWithResults;
+            }
+            else if(is_array($varPathToInputFilesToMergeWithResults))
+            {
+                foreach($varPathToInputFilesToMergeWithResults as $inputfile)
+                {
+                    $arrFilePathsToCombine[] = $inputfile;
+                }
+            }
 
-            __debug__printLine("Merging input & downloaded jobs data and writing to " . $strOutFilePath , C__DISPLAY_ITEM_START__);
+            //
+            // Make sure we didn't have bad input file names and only ended up with our results file
+            // from this class as the only file to combine
+            //
+            if(count($arrFilePathsToCombine) > 1)
+            {
+                $strOutFilePath = $this->getOutputFileFullPath('Final_CombinedWithUserInput');
+                __debug__printLine("Merging input & downloaded jobs data and writing to " . $strOutFilePath , C__DISPLAY_ITEM_START__);
+                __debug__printLine("Including source data from " .var_export($arrFilePathsToCombine, true), C__DISPLAY_ITEM_DETAIL__);
 
-            $classCombined = new SimpleScooterCSVFileClass($strOutFilePath , "w");
-            $arrRetJobs = $classCombined->combineMultipleCSVs($arrFilesToCombine);
-            $retFilePath = $strOutFilePath;
-            __debug__printLine("Combined file has ". count($arrRetJobs) . " jobs." . $strOutFilePath , C__DISPLAY_ITEM_START__);
+                $classCombined = new SimpleScooterCSVFileClass($strOutFilePath , "w");
+                $arrRetJobs = $classCombined->combineMultipleCSVs($arrFilePathsToCombine);
+                $retCSVFilePathJobsWrittenTo = $strOutFilePath;
+                __debug__printLine("Combined file has ". count($arrRetJobs) . " jobs." . $strOutFilePath , C__DISPLAY_ITEM_START__);
+            }
         }
 
 
         //
         // return the output file path to the caller so they know where to find them
         //
-        return $retFilePath;
+        return $retCSVFilePathJobsWrittenTo;
 
     }
 

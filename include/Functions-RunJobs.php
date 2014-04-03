@@ -21,11 +21,15 @@ require_once dirname(__FILE__) . '/../src/ClassIndeed.php';
 require_once dirname(__FILE__) . '/../src/ClassSimplyHired.php';
 
 
-const C_STR_DATAFOLDER = '/Users/bryan/Code/data/';
-const C_STR_FOLDER_JOBSEARCH= '/Users/bryan/Dropbox/Job Search 2013/';
-
-
-
+//
+// Default settings for the job sites
+//
+$g_arrJobSitesList = array(
+    'Amazon' => array('site_name' => 'Amazon', 'include_in_run' => false, 'working_subfolder' => 'amazon_jobs'),
+    'Craigslist' => array('site_name' => 'Craigslist', 'include_in_run' => false, 'working_subfolder' => 'craigslist_jobs'),
+    'Indeed' => array('site_name' => 'Indeed', 'include_in_run' => false, 'working_subfolder' => 'indeed_jobs'),
+    'SimplyHired' => array('site_name' => 'SimplyHired', 'include_in_run' => false, 'working_subfolder' => 'simply_jobs'),
+);
 
 
 
@@ -37,48 +41,53 @@ const C_STR_FOLDER_JOBSEARCH= '/Users/bryan/Dropbox/Job Search 2013/';
 
 
 
-function __runAllJobs__($incAmazon= 1, $inclCraigslist = 0, $incSimplyHired = 1, $incIndeed = 1, $arrSourceFiles = null, $nDays = -1)
+function __runAllJobs__($arrSitesSettings = null, $strOutputFile = null, $arrSourceFiles = null, $nDays = -1)
 {
+    if(!$arrSitesSettings || !is_array($arrSitesSettings))
+    {
+        $arrSitesSettings = $g_arrJobSitesList;
+    }
 
-    $G_FINALOUTPUT_FILE_NAME = C_STR_FOLDER_JOBSEARCH . getDefaultJobsOutputFileName("ALL-", "jobs", "csv");
-
-
+    if(!$strOutputFile)
+    {
+        $G_FINALOUTPUT_FILE_NAME = C_STR_FOLDER_JOBSEARCH . getDefaultJobsOutputFileName("ALL-", "jobs", "csv");
+    }
 
     $arrDownloadedJobsFiles = array();
 
 
 
-    if($incIndeed)
+    if($arrSitesSettings['Indeed']['include_in_run'] == true)
     {
         __debug__printLine("Adding Indeed jobs....", C__DISPLAY_ITEM_START__);
-        $classIndeed = new ClassIndeed(null, C_NORMAL);
-        $classIndeed->setOutputFolder(C_STR_DATAFOLDER   . 'indeed_jobs');
-        $arrDownloadedJobsFiles[] = $classIndeed->downloadAllUpdatedJobs($nDays );
+        $class  = new ClassIndeed(null, C_NORMAL);
+        $class ->setOutputFolder(C_STR_DATAFOLDER  .  $arrSitesSettings['Indeed']['working_subfolder']);
+        $arrDownloadedJobsFiles[] = $class ->downloadAllUpdatedJobs($nDays);
     }
 
-    if($incSimplyHired)
+    if($arrSitesSettings['SimplyHired']['include_in_run'] == true)
     {
         __debug__printLine("Adding SimplyHired jobs....", C__DISPLAY_ITEM_START__);
-        $classSimply= new ClassSimplyHired(null, C_NORMAL);
-        $classSimply->setOutputFolder(C_STR_DATAFOLDER  . 'simply_jobs');
-        $arrDownloadedJobsFiles[] = $classSimply->downloadAllUpdatedJobs($nDays);
+        $class = new ClassSimplyHired(null, C_NORMAL);
+        $class ->setOutputFolder(C_STR_DATAFOLDER  . $arrSitesSettings['SimplyHired']['working_subfolder']);
+        $arrDownloadedJobsFiles[] = $class ->downloadAllUpdatedJobs($nDays);
     }
 
 
-    if($inclCraigslist)
+    if($arrSitesSettings['Craigslist']['include_in_run'] == true)
     {
         __debug__printLine("Adding Craigslist jobs....", C__DISPLAY_ITEM_START__);
-        $classCraig= new ClassCraigslist(null, C_NORMAL);
-        $classCraig->setOutputFolder(C_STR_DATAFOLDER  . 'craigslist_jobs');
-        $arrDownloadedJobsFiles[] = $classCraig->downloadAllUpdatedJobs($nDays);
+        $class = new ClassCraigslist(null, C_NORMAL);
+        $class ->setOutputFolder(C_STR_DATAFOLDER  . $arrSitesSettings['Craigslist']['working_subfolder']);
+        $arrDownloadedJobsFiles[] = $class ->downloadAllUpdatedJobs($nDays);
     }
 
-    if($incAmazon)
+    if($arrSitesSettings['Amazon']['include_in_run'] == true)
     {
         __debug__printLine("Adding Amazon jobs....", C__DISPLAY_ITEM_START__);
-        $classAmazon= new ClassAmazonJobs(null, C_NORMAL);
-        $classAmazon->setOutputFolder(C_STR_DATAFOLDER  . 'amzn_jobs');
-        $arrDownloadedJobsFiles[] = $classAmazon->downloadAllUpdatedJobs($nDays);
+        $class = new ClassAmazonJobs(null, C_NORMAL);
+        $class ->setOutputFolder(C_STR_DATAFOLDER  . $arrSitesSettings['Amazon']['working_subfolder']);
+        $arrDownloadedJobsFiles[] = $class ->downloadAllUpdatedJobs($nDays);
     }
 
 
