@@ -170,6 +170,7 @@ class ClassJobsSiteExport
             {
                 // Interested value not set; always include in the results
                 $retArrayFilteredJobs[] = $job;
+                $nJobsNotExcluded++;
 
             }
             else
