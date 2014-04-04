@@ -27,10 +27,6 @@ require_once dirname(__FILE__) . '/include/Functions-RunJobs.php';
 // function __runAllJobs__($incAmazon= 1, $inclCraigslist = 0, $incSimplyHired = 1, $incIndeed = 1, $arrSourceFiles = null, $nDays = -1)
 
 
-$arrBryanTrackingFiles = array(
-    C_STR_DATAFOLDER . 'bryans_list_active.csv',
-    C_STR_DATAFOLDER . 'bryans_list_inactive.csv'
-);
 
 // Run AMZN
 // __runAllJobs__(1, 0, 0, 0, $arrBryanTrackingFiles);
@@ -47,9 +43,17 @@ $arrBryanTrackingFiles = array(
 
 
 $arrSitesSettings = $g_arrJobSitesList;
-// $arrSitesSettings['Indeed']['include_in_run'] = true;
+$arrSitesSettings['Indeed']['include_in_run'] = false;
 $arrSitesSettings['Amazon']['include_in_run'] = true;
-// $arrSitesSettings['SimplyHired']['include_in_run'] = true;
+$arrSitesSettings['SimplyHired']['include_in_run'] = false;
 
+/*
+ *
+ $arrBryanTrackingFiles = array(
+    C_STR_DATAFOLDER . 'bryans_list_active.csv',
+    C_STR_DATAFOLDER . 'bryans_list_inactive.csv',
+    C_STR_DATAFOLDER . 'ALL-_2014-04-03_1923_jobs_.csv',
+);
+*/
 
 __runAllJobs__($arrSitesSettings, null, $arrBryanTrackingFiles, 1, false);

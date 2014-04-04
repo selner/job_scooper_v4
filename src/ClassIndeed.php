@@ -22,37 +22,32 @@ class ClassIndeed extends ClassJobsSiteBase
     protected $siteName = 'Indeed';
 
 
-    function getJobs($nDays = -1)
+    function getMyJobs($nDays = -1, $fIncludeFilteredJobsInResults = true)
     {
         switch($nDays)
         {
             case 7:
-                $strSearch = "http://www.indeed.com/jobs?q=title%3A%28%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22%29&l=Seattle%2C+WA&sort=date&limit=50&fromage=1&start=";
-                __debug__printLine("Getting " . $nDays . " worth of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
+                $strSearch = "http://www.indeed.com/jobs?q=title%3A%28%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22%29&l=Seattle%2C+WA&sort=date&limit=50&fromage=7&start=";
+                __debug__printLine("Getting " . $nDays . " days worth of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
                 break;
 
-            default:  // assume last 24 hours
+            default:  // Yesterday was giving me headaches, so switched "24 hours" to really mean last 3 days for Indeed
                 $strDays = $nDays < 1 ? "24 hours" : $nDays;
-                $strSearch = "http://www.indeed.com/jobs?q=title%3A%28%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22%29&l=Seattle%2C+WA&sort=date&limit=50&fromage=1&start=";
-                __debug__printLine("Getting " . $strDays . " worth of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
+                $strSearch = "http://www.indeed.com/jobs?q=title%3A%28%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22%29&l=Seattle%2C+WA&sort=date&limit=50&fromage=3&start=";
+                __debug__printLine("Getting " . $strDays . " days worth of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
                 break;
         }
 
-        $this->arrLatestJobs= $this->__getJobsFromSearch__($strSearch, 'Exec Keywords in Seattle, WA', $strAlternateLocalHTMLFile);
-
-        $strOutFile = $this->getOutputFileFullPath();
-        $this->writeJobsToCSV($strOutFile , $this->arrLatestJobs);
-
-        return $strOutFile ;
+        $this->__getMyJobsFromSearch__($strSearch, 'Exec Keywords in Seattle, WA', $strAlternateLocalHTMLFile);
 
 
     }
 
 
-    private function __getJobsFromSearch__($strBaseURL, $category,  $strAlternateLocalHTMLFile = null)
+    private function __getMyJobsFromSearch__($strBaseURL, $category,  $strAlternateLocalHTMLFile = null)
     {
         $arrAllJobs = array();
-        $nItemCount = 1;
+        $nItemCount = 0;
 
         $objSimpleHTML = $this->getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $strBaseURL);
 
@@ -66,17 +61,21 @@ class ClassIndeed extends ClassJobsSiteBase
         $arrItemItems = explode(" ", trim($pageText));
         $totalItems = $arrItemItems[5];
         $totalItems  = intval(str_replace(",", "", $totalItems));
+
+
         $maxItem = intval($totalItems / $nItemChunkSize);
+
+        $nURLItemCount = 1;
 
         if($maxItem < 1)  $maxItem = 1;
 
         __debug__printLine("Downloading " . $maxItem . " pages of ".$totalItems  . " jobs from " . $this->siteName , C__DISPLAY_ITEM_START__);
 
-        while ($nItemCount <= $maxItem)
+        while ($nURLItemCount <= $totalItems)
         {
             $objSimpleHTML = null;
-            $strURL = $strBaseURL.$nItemCount;
-            __debug__printLine("Querying " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
+            $strURL = $strBaseURL.$nURLItemCount;
+            __debug__printLine("Querying for jobs  " . $nItemCount . " - " . ($nItemCount + $nItemChunkSize - 1) . " from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
 
             if(!$objSimpleHTML) $objSimpleHTML = parent::getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $strURL);
             if(!$objSimpleHTML) throw new ErrorException('Error:  unable to get SimpleHTML object from file('.$strAlternateLocalHTMLFile.') or '.$strURL);
@@ -86,19 +85,16 @@ class ClassIndeed extends ClassJobsSiteBase
             {
                 // we likely hit a page where jobs started to be hidden.
                 // Go ahead and bail on the loop here
-                __debug__printLine("Not getting results back from SimplyHired starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", C__DISPLAY_ITEM_START__);
-                $nPageCount = $maxItem;
+                __debug__printLine("Not getting results back from Indeed starting on page " . intval($nItemCount/$nItemChunkSize).".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", C__DISPLAY_ITEM_START__);
+                $nItemCount = $maxItem;
             }
             else
             {
                 $arrAllJobs = array_merge($arrAllJobs, $arrNewJobs);
 
-                $nItemCount += $nItemChunkSize;
+                $nItemCount = count($arrAllJobs);
             }
-
-
-            __debug__printLine("Querying " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
-
+            $nURLItemCount = $nURLItemCount + $nItemChunkSize + ($nURLItemCount == 1 ? -1 : 0);
             $nItemCount += $nItemChunkSize;
 
             // clean up memory
@@ -106,7 +102,7 @@ class ClassIndeed extends ClassJobsSiteBase
             unset($objSimpleHTML);
 
         }
-        $this->arr = array_copy($arrAllJobs);
+        $this->arrLatestJobs = array_copy($arrAllJobs);
 
         return $arrAllJobs;
     }
@@ -156,7 +152,6 @@ class ClassIndeed extends ClassJobsSiteBase
 
             $ret[] = $item;
 //            $ret[ $item['job_site']."-".$item['job_id']] = $item;
-
 
         }
 

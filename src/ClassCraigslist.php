@@ -23,7 +23,7 @@ class ClassCraigslist extends ClassJobsSiteBase
 {
     protected $siteName = 'Craigslist';
 
-    function getJobs($nDays = -1)
+    function getMyJobs($nDays = -1, $fIncludeFilteredJobsInResults = true)
     {
         if($nDays > 1)
         {
@@ -33,18 +33,13 @@ class ClassCraigslist extends ClassJobsSiteBase
 
         $strSearch = 'http://seattle.craigslist.org/search/jjj?catAbb=jjj&query=%22Vice%20President%22%20%7C%20%22Chief%20Technology%20Office%22%20%7C%20%22Chief%20Products%20Officer%22%20%7C%20%22CTO%22%20%7C%20%22CPO%22%20%7C%20%22VP%22%20%7C%20%22V.P.%22%20%7C%20%22Director%22%20%7C%20%20%22product%20management%22%20%7C%20%22general%20manager%22%20&srchType=T&s=';
 
-        $arrJobs = $this->__getJobsFromSearch__($strSearch, 'Exec Titles', $strAlternateLocalHTMLFile);
-        $this->arr = $arrJobs;
+        $this->__getMyJobsFromSearch__($strSearch, 'Exec Titles', $strAlternateLocalHTMLFile);
 
-        $strOutFile = $this->getOutputFileFullPath();
-        $this->writeJobsToCSV($strOutFile , $arrJobs );
-
-        return $strOutFile ;
     }
 
 
 
-    private function __getJobsFromSearch__($strBaseURL, $searchName = "", $strAlternateLocalHTMLFile = null)
+    private function __getMyJobsFromSearch__($strBaseURL, $searchName = "", $strAlternateLocalHTMLFile = null)
     {
         $arrAllJobs = array();
         $nItemCount = 1;
@@ -88,7 +83,8 @@ class ClassCraigslist extends ClassJobsSiteBase
 
         }
 
-        return $arrAllJobs;
+        $this->arrLatestJobs = array_copy($arrAllJobs);
+
     }
 
     private function _scrapeItemsFromHTML_($objSimpleHTML, $searchName)

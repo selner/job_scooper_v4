@@ -20,7 +20,10 @@ require_once dirname(__FILE__) . '/ClassJobsSiteExport.php';
 abstract class ClassJobsSiteBase extends ClassJobsSiteExport
 {
     protected $siteName = 'NAME-NOT-SET';
-    abstract function getJobs($strAlternateLocalHTMLFile = null);
+    public $arrLatestJobs = null;
+
+    abstract function getMyJobs($strAlternateLocalHTMLFile = null, $fIncludeFilteredJobsInResults = true);
+
 
     function __destruct()
     {
@@ -28,7 +31,40 @@ abstract class ClassJobsSiteBase extends ClassJobsSiteExport
     }
 
 
-    function downloadAllUpdatedJobs($nDays = -1, $varPathToInputFilesToMergeWithResults = null, $fIncludeFilteredJobsInResults = true )
+
+    function returnMyCurrentJobsList() { return $this->arrLatestJobs; }
+
+    function addJobsToList($arrAdd)
+    {
+
+//        var_dump('arrLatest = ', count($this->arrLatestJobs), $this->arrLatestJobs);
+//        var_dump('arrAdd = ', count($arrAdd), $arrAdd);
+
+        if(!is_array($arrAdd) || count($arrAdd) == 0)
+        {
+            // skip. no jobs to add
+            return;
+        }
+
+        if(is_array($this->arrLatestJobs))
+        {
+            $this->arrLatestJobs = my_merge_add_new_keys($this->arrLatestJobs, $arrAdd );
+        }
+        else
+        {
+            $this->arrLatestJobs = array_copy( $arrAdd );
+
+        }
+
+
+    }
+
+    function writeMyJobsListToFile($strOutFilePath, $fIncludeFilteredJobsInResults = true)
+    {
+        return $this->writeJobsListToFile($strOutFilePath, $this->arrLatestJobs, $fIncludeFilteredJobsInResults);
+    }
+
+    function downloadAllUpdatedJobs($nDays = -1, $arrInputFilesToMergeWithResults = null, $fIncludeFilteredJobsInResults = true )
     {
         $retFilePath = '';
 
@@ -39,39 +75,91 @@ abstract class ClassJobsSiteBase extends ClassJobsSiteExport
         // Call the child classes getJobs function to update the object's array of job listings
         // and output the results to a single CSV
         //
-        $retCSVFilePathJobsWrittenTo = $this->getJobs($nDays);
+        $this->getMyJobs($nDays, $fIncludeFilteredJobsInResults);
 
         //
         // Now, filter those jobs and mark any rows that are titles we want to automatically
         // exclude
         //
-        $this->arrLatestJobs = $this->setExcludedTitles($this->arrLatestJobs);
+        $this->markMyJobsListForAnyAutoExcludedTitles();
+
 
         //
         // Write the resulting array of the latest job postings from this site to
         // a CSV file for the user
         //
-        $this->writeJobsToCSV($retCSVFilePathJobsWrittenTo, $this->arrLatestJobs);
+        $strOutFilePath = $this->getOutputFileFullPath();
+        $this->writeMyJobsListToFile($strOutFilePath , $fIncludeFilteredJobsInResults);
 
-        __debug__printLine("Downloaded ". count($this->arrLatestJobs) ." new ". $this->siteName ." jobs to " . $retCSVFilePathJobsWrittenTo, C__DISPLAY_ITEM_DETAIL__);
-
-        $arrFilesToCombine = array();
-        $arrFilesToCombine[] = $retCSVFilePathJobsWrittenTo;
-        if(is_array($varPathToInputFilesToMergeWithResults))
+        if(count($arrInputFilesToMergeWithResults ) >= 1)
         {
-            $arrFilePathsToCombine = array_merge($arrFilesToCombine, $varPathToInputFilesToMergeWithResults);
-        }
-        else if(is_string($varPathToInputFilesToMergeWithResults))
-        {
-            $arrFilesToCombine[] = $varPathToInputFilesToMergeWithResults;
+            $retFilePath = $this->combineMultipleJobsCSVs($strOutFilePath, $arrInputFilesToMergeWithResults, $this->arrLatestJobs, $fIncludeFilteredJobsInResults);
         }
 
 
-        $strOutFilePath = $this->getOutputFileFullPath("Final_CombinedWithUserInput");
-        $retFilePath = $this->combineMultipleJobsCSVs($strOutFilePath, $arrFilesToCombine, $fIncludeFilteredJobsInResults);
+        return $strOutFilePath;
+    }
+
+    function markMyJobsListForAnyAutoExcludedTitles()
+    {
+        $this->_loadTitlesToFilter_();
+        if(!is_array($this->arrTitlesToFilter))
+        {
+            __debug__printLine("No titles found to exclude. Skipping results filtering." , C__DISPLAY_MOMENTARY_INTERUPPT__);
+            return $arrJobsToFilter;
+        }
+        else
+        {
+            __debug__printLine("Applying " .count($this->arrTitlesToFilter) . " to " .count($this->arrLatestJobs) . " job records.", C__DISPLAY_MOMENTARY_INTERUPPT__);
+
+        }
+
+        $nJobsSkipped = 0;
+        $nJobsNotMarked = 0;
+        $nJobsMarkedAutoExcluded = 0;
+
+        $nIndex = 0;
+        foreach($this->arrLatestJobs as $job)
+        {
+            // First, make sure we don't already have a value in the interested column.
+            // if we do, skip it and move to the next one
+            if(strlen($this->arrLatestJobs[$nIndex]['interested']) > 0)
+            {
+                $nJobsSkipped++;
+                continue;
+            }
+
+            // Look for a matching title in our list of excluded titles
+            $varValMatch = $this->arrTitlesToFilter[$job['job_title']];
+            //           __debug__printLine("Matching listing job title '".$job['job_title'] ."' and found " . (!$varValMatch  ? "nothing" : $varValMatch ) . " for " . $this->arrTitlesToFilter[$job['job_title']], C__DISPLAY_ITEM_DETAIL__);
+
+            // if we got a match, we'll get an array back with that title and some other data
+            // such as the reason it's excluded
+            //
+
+            if(is_array($varValMatch))
+            {
+                if(strlen($varValMatch['exclude_reason']) > 0)
+                {
+                    $this->arrLatestJobs[$nIndex]['interested'] = $varValMatch['exclude_reason'] . "[auto-filtered]";
+                }
+                else
+                {
+                    $this->arrLatestJobs[$nIndex]['interested'] = 'UNKNOWN - FOUND MATCH BUT NO REASON (Auto)';
+                    __debug__printLine("Excluded title " . $job['job_title'] . " did not have an exclude reason.  Cannot mark.", C__DISPLAY_ERROR__);
+                }
+                $nJobsMarkedAutoExcluded++;
+            }
+            else              // we're ignoring the Excluded column fact for the time being. If it's in the list, it's excluded
+            {
+                $nJobsNotMarked++;
+                __debug__printLine("Job title '".$job['job_title'] ."' was not found in the exclusion list.  Keeping for review." , C__DISPLAY_ITEM_DETAIL__);
+            }
+            $nIndex++;
+        }
 
 
-        return $retFilePath;
+        __debug__printLine("Completed marking auto-excluded titles:  '".$nJobsMarkedAutoExcluded ."' were marked as auto excluded, " . $nJobsSkipped . " skipped and ". $nJobsNotMarked . " jobs were not." , C__DISPLAY_ITEM_RESULT__);
     }
 
 
@@ -114,7 +202,7 @@ abstract class ClassJobsSiteBase extends ClassJobsSiteExport
         return !$notVal;
     }
 
-    function getOutputFileFullPath($strFilePrefix = "", $strBase = "", $strExtension = "")
+    function getOutputFileFullPath($strFilePrefix = "", $strBase = "jobs", $strExtension = "csv")
     {
         return parent::getOutputFileFullPath($this->siteName . "_" . $strFilePrefix, $strBase, $strExtension);
     }

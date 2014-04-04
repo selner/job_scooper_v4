@@ -24,7 +24,7 @@ class ClassSimplyHired extends ClassJobsSiteBase
     protected $siteName = 'SimplyHired';
 
 
-    function getJobs($nDays = -1)
+    function getMyJobs($nDays = -1, $fIncludeFilteredJobsInResults = true)
     {
 
 
@@ -44,24 +44,19 @@ class ClassSimplyHired extends ClassJobsSiteBase
             $strSearch = 'http://www.simplyhired.com/search?t=%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22product+management%22+or+%22general+manager%22+or+%22Chief+Technology+Officer%22&lc=Seattle&ls=WA&fdb=1&ws=50&sb=dd&pn=';
         }
 
-        $this->arrLatestJobs= $this->__getJobsFromSearch__($strSearch, 'Exec Keywords in Seattle, WA', $strAlternateLocalHTMLFile);
-
-        $strOutFile = $this->getOutputFileFullPath();
-        $this->writeJobsToCSV($strOutFile , $this->arrLatestJobs);
-
-        return $strOutFile ;
+        $this->__getMyJobsFromSearch__($strSearch, 'Exec Keywords in Seattle, WA', $strAlternateLocalHTMLFile);
 
     }
 
 
 
-    private function __getJobsFromSearch__($strBaseURL, $category, $strAlternateLocalHTMLFile = null)
+    private function __getMyJobsFromSearch__($strBaseURL, $category, $strAlternateLocalHTMLFile = null)
     {
         $arrAllJobs = array();
         $nPageCount = 1;
         $nItemChunkSize = 50;
 
-        $objSimpleHTML = parent::getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $strBaseURL);
+        $objSimpleHTML = $this->getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $strBaseURL);
         if(!$objSimpleHTML) throw new ErrorException('Error:  unable to get SimpleHTML object from file('.$strAlternateLocalHTMLFile.') or '.$strBaseURL);
 
         // # of items to parse
@@ -111,9 +106,8 @@ class ClassSimplyHired extends ClassJobsSiteBase
             $nPageCount++;
 
         }
-        $this->arr = array_copy($arrAllJobs);
 
-        return $arrAllJobs;
+        $this->arrLatestJobs = array_copy($arrAllJobs);
     }
 
     private function _scrapeItemsFromHTML_($objSimpleHTML, $category)
