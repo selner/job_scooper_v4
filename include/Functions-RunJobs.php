@@ -24,13 +24,6 @@ require_once dirname(__FILE__) . '/../src/ClassSimplyHired.php';
 //
 // Default settings for the job sites
 //
-$g_arrJobSitesList = array(
-    'Amazon' => array('site_name' => 'Amazon', 'include_in_run' => false, 'working_subfolder' => 'amazon_jobs'),
-    'Craigslist' => array('site_name' => 'Craigslist', 'include_in_run' => false, 'working_subfolder' => 'craigslist_jobs'),
-    'Indeed' => array('site_name' => 'Indeed', 'include_in_run' => false, 'working_subfolder' => 'indeed_jobs'),
-    'SimplyHired' => array('site_name' => 'SimplyHired', 'include_in_run' => false, 'working_subfolder' => 'simply_jobs'),
-);
-
 
 
 /****************************************************************************************************************/
@@ -39,7 +32,45 @@ $g_arrJobSitesList = array(
 /****                                                                                                        ****/
 /****************************************************************************************************************/
 
+function __runCommandLine()
+{
+    __get_ScooperUtil_args__();
 
+    $arrJobSitesList = array(
+        'Amazon' => array('site_name' => 'Amazon', 'include_in_run' => false, 'working_subfolder' => 'amazon_jobs'),
+//        'Craigslist' => array('site_name' => 'Craigslist', 'include_in_run' => false, 'working_subfolder' => 'craigslist_jobs'),
+        'Indeed' => array('site_name' => 'Indeed', 'include_in_run' => false, 'working_subfolder' => 'indeed_jobs'),
+        'SimplyHired' => array('site_name' => 'SimplyHired', 'include_in_run' => false, 'working_subfolder' => 'simply_jobs'),
+    );
+
+
+    foreach($arrJobSitesList as $site)
+    {
+        $arrJobSitesList[$site['site_name']]['include_in_run'] = is_IncludeSite($site['site_name']);
+    }
+
+
+
+    $arrBryanTrackingFiles = array(
+        C_STR_DATAFOLDER . 'bryans_list_active.csv',
+        C_STR_DATAFOLDER . 'bryans_list_inactive.csv'
+    );
+
+    $nDays = get_PharseOptionValue('number_days');
+    if($nDays == false) { $nDays = 1; }
+    $fIncludeFilteredListings = true;
+    if($GLOBALS['OPTS']['filter_notinterested_given'])
+    {
+        $fIncludeFilteredListings = false;
+    }
+
+    $strOutputDir =  get_PharseOptionValue("output_folder");
+    if($strOutputDir == false)  { $strOutputDir  = null; }
+
+
+    __runAllJobs__($arrJobSitesList, $strOutputDir, $arrBryanTrackingFiles, $nDays, $fIncludeFilteredListings  );
+
+}
 
 function __runAllJobs__($arrSitesSettings = null, $strOutputFile = null, $arrSourceFiles = null, $nDays = -1, $fIncludeFilteredJobsInResults = true)
 {

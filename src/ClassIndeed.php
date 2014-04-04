@@ -31,6 +31,11 @@ class ClassIndeed extends ClassJobsSiteBase
                 __debug__printLine("Getting " . $nDays . " days worth of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
                 break;
 
+            case 3:
+                $strSearch = "http://www.indeed.com/jobs?q=title%3A%28%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22%29&l=Seattle%2C+WA&sort=date&limit=50&fromage=3&start=";
+                __debug__printLine("Getting " . $nDays . " days worth of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
+                break;
+
             default:  // Yesterday was giving me headaches, so switched "24 hours" to really mean last 3 days for Indeed
                 $strDays = $nDays < 1 ? "24 hours" : $nDays;
                 $strSearch = "http://www.indeed.com/jobs?q=title%3A%28%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22%29&l=Seattle%2C+WA&sort=date&limit=50&fromage=3&start=";

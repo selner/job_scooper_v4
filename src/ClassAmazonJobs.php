@@ -42,8 +42,8 @@ class ClassAmazonJobs extends ClassJobsSiteBase
     {
         if($nDays > 1)
         {
-            __debug__printLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Skipping.", C__DISPLAY_MOMENTARY_INTERUPPT__);
-            return "";
+            __debug__printLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Ignoring number of days value and just pulling current listings.", C__DISPLAY_MOMENTARY_INTERUPPT__);
+
         }
 
         __debug__printLine("Adding Amazon jobs for " . $this->arrSearches['pm-nontech']['name']."...", C__DISPLAY_ITEM_START__);

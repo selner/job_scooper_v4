@@ -24,36 +24,21 @@ require_once dirname(__FILE__) . '/include/Functions-RunJobs.php';
 /****                                                                                                        ****/
 /****************************************************************************************************************/
 
-// function __runAllJobs__($incAmazon= 1, $inclCraigslist = 0, $incSimplyHired = 1, $incIndeed = 1, $arrSourceFiles = null, $nDays = -1)
 
+__runCommandLine();
 
-
-// Run AMZN
-// __runAllJobs__(1, 0, 0, 0, $arrBryanTrackingFiles);
-
-// Run All but CL
-//__runAllJobs__(1, 0, 1, 1, $arrBryanTrackingFiles);
-
-
-// Get the last 7 days worth from Indeed & SimplyHired
-// __runAllJobs__(0, 0, 1, 1, $arrBryanTrackingFiles, 7);
-// __runAllJobs__(1, 0, 0, 0, $arrBryanTrackingFiles, 1);
-
-
-
-
-$arrSitesSettings = $g_arrJobSitesList;
-$arrSitesSettings['Indeed']['include_in_run'] = false;
+/*
+ $arrSitesSettings = $g_arrJobSitesList;
+$arrSitesSettings['Indeed']['include_in_run'] = true;
 $arrSitesSettings['Amazon']['include_in_run'] = true;
-$arrSitesSettings['SimplyHired']['include_in_run'] = false;
+$arrSitesSettings['SimplyHired']['include_in_run'] = true;
 
 /*
  *
  $arrBryanTrackingFiles = array(
     C_STR_DATAFOLDER . 'bryans_list_active.csv',
-    C_STR_DATAFOLDER . 'bryans_list_inactive.csv',
-    C_STR_DATAFOLDER . 'ALL-_2014-04-03_1923_jobs_.csv',
-);
-*/
+    C_STR_DATAFOLDER . 'bryans_list_inactive.csv');
+
 
 __runAllJobs__($arrSitesSettings, null, $arrBryanTrackingFiles, 1, false);
+*/

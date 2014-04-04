@@ -128,7 +128,21 @@ class ClassJobsSiteExport
             }
             else
             {
-                $arrCurJobInterest = $arrInterestLevelsToExclude[$job['interested']];
+                $strIntFirstPart = substr($job['interested'], 0, 2);
+
+                if(strcasecmp($strIntFirstPart, 'No') == 0)
+                {
+                        $nJobsExcluded++;
+                }
+                else
+                {
+                    $retArrayFilteredJobs[] = $job;
+                    $nJobsNotExcluded++;
+                }
+
+/*
+ *
+                 $arrCurJobInterest = $arrInterestLevelsToExclude[$job['interested']];
 
 
                 if(!is_array($arrCurJobInterest))
@@ -142,6 +156,8 @@ class ClassJobsSiteExport
 //                    __debug__printLine("Filtering job '".$job['job_title'] ."' because interested = '".$job['interested'] ."'." , C__DISPLAY_ITEM_DETAIL__);
                     $nJobsExcluded++;
                 }
+
+*/
             }
         }
 
