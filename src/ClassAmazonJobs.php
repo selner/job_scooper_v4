@@ -59,8 +59,9 @@ class ClassAmazonJobs extends ClassJobsSiteBase
         $this->_getMyJobsFromOldSiteSearchURL_($this->arrSearches['keyword-gm']);
 
         __debug__printLine("Skipping new Amazon jobs site ", C__DISPLAY_ITEM_START__);
-//        $this->getJobs_NewSite($fIncludeFilteredJobsInResults );
-//        $this->__getMyJobsFrom_Amazon_NewJobs_HTMLFiles__($fIncludeFilteredJobsInResults);
+
+        __debug__printLine("Adding Amazon jobs from new Amazon site...", C__DISPLAY_ITEM_START__);
+        $this->__getMyJobsFrom_Amazon_NewJobs_HTMLFiles__($this->arrSearches['pm-newsite'], $fIncludeFilteredJobsInResults);
 
         $strCombinedFileName = $this->getOutputFileFullPath("AllJobs");
         $this->writeMyJobsListToFile($strCombinedFileName, $fIncludeFilteredJobsInResults );
@@ -83,18 +84,19 @@ class ClassAmazonJobs extends ClassJobsSiteBase
 
 
 // http://www.amazon.jobs/results?sjid=68,sjid=83&checklid=@'US, WA, Seattle'&cname='US, WA, Seattle'
-    private function __getMyJobsFrom_Amazon_NewJobs_HTMLFiles__($strOutFile )
+    private function __getMyJobsFrom_Amazon_NewJobs_HTMLFiles__($arrSettings, $fIncludeFilteredJobsInResults)
     {
 
 
         $nItemCount = 1;
 
-        $strFileName = $this->strOutputFolder . "page-".$nItemCount.".html";
+        $strFileName = $this->strOutputFolder . "amazon-newjobs-page-".$nItemCount.".html";
 
 
         while (file_exists($strFileName) && is_file($strFileName))
         {
             $objSimpleHTML = $this->getSimpleHTMLObjForFileContents($strFileName);
+
             $arrNewJobs = $this->_getParseJobsData_Amazon_NewJobs_($objSimpleHTML, $this->arrSearches['pm-newsite']);
 
             $objSimpleHTML->clear();
@@ -103,6 +105,10 @@ class ClassAmazonJobs extends ClassJobsSiteBase
             $this->addJobsToList($arrNewJobs);
 
             $nItemCount++;
+            $strOutputJobsFile = $this->getOutputFileFullPath($arrSettings['name']);
+            $this->writeMyJobsListToFile($strOutputJobsFile, $fIncludeFilteredJobsInResults );
+
+            return $strOutputJobsFile;
 
         }
 
@@ -114,20 +120,21 @@ class ClassAmazonJobs extends ClassJobsSiteBase
     {
 
 
-        // # of pages to parse
-        $tableResults= $objSimpleHTML->find('table[id="teamjobs"]');
         $ret = array();
-        $tableResults = $tableResults[0];
-        $nodesTD= $tableResults->find('tr td');
-        $nTDIndex =2;
+        $nodesTD= $objSimpleHTML->find('tr td[class="expand footable-first-column"]');
+
+        $nTDIndex = 0;
         while($nTDIndex < count($nodesTD))
         {
             if($nodesTD[$nTDIndex])
             {
                 $item = $this->getEmptyItemsArray();
-                $item['job_title'] = $nodesTD[$nTDIndex]->previousSibling()->first_child()->plaintext;
 
-                $item['job_post_url'] = $nodesTD[$nTDIndex]->previousSibling()->first_child()->href;
+                $titleObj = $nodesTD[$nTDIndex]->nextSibling();
+
+                $item['job_title'] = $titleObj->firstChild()->plaintext;
+
+                $item['job_post_url'] =$titleObj->firstChild()->href;
                 $item['company'] = 'Amazon';
 
                 $item['job_site'] = 'Amazon';
@@ -137,15 +144,20 @@ class ClassAmazonJobs extends ClassJobsSiteBase
 //                $item['job_source_url'] = $item['job_post_url'];
 //                 $item['original_source'] = 'Amazon';
 
-                $item['job_id'] = trim(explode("/", $item['link'])[4]);
-                $item['job_site_category'] = $nodesTD[$nTDIndex]->plaintext;
-                $nTDIndex++;
-                $item['location'] = $nodesTD[$nTDIndex]->plaintext;
-                $nTDIndex++;
+                $item['job_id'] = trim(explode("/", $item['job_post_url'])[4]);
 
-                if($this->is_IncludeBrief() == true)
+                $catObj = $titleObj->nextSibling();
+                $item['job_site_category'] = $catObj->plaintext;
+
+                $locObj = $catObj ->nextSibling();
+                $item['location'] = $locObj->plaintext;
+
+                $briefObj = $locObj ->nextSibling();
+
+                if(true)
+//                if($this->is_IncludeBrief() == true)
                 {
-                    $brief  = trim($nodesTD[$nTDIndex]->plaintext);
+                    $brief  = trim($briefObj->plaintext);
                     $arrBrief = explode("Short Description", $brief);
                     $item['brief_description'] = $arrBrief[1];
                 }
@@ -153,11 +165,10 @@ class ClassAmazonJobs extends ClassJobsSiteBase
                 $ret[] = $item;
 
             }
-            $nTDIndex = $nTDIndex + 3;
+            $nTDIndex = $nTDIndex + 5;
 
 
         }
-
         return $ret;
     }
 
