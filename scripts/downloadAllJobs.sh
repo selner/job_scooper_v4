@@ -11,7 +11,9 @@ file=$path$filename
 log=$path$now$endlogname
 destpath="/Users/bryan/Code/data/"
 destname=$destpath$enddestname
-
+endjobspath="jobs/"
+endamznpath="amazon_jobs/"
+amzndir=$destpath$endjobspath$endamznpath
 
 echo 'Output file will be ' $file 2>&1 1>>"$log"
 echo 'Latest file will be also written to '  $destname 2>&1 1>>"$log"
@@ -19,11 +21,11 @@ echo 'Log file is ' $log  2>&1 1>>"$log"
 
 when="unknown"
 
-case "$(date +%a)" in Mon|Wed|Fri) 
+case "$(date +%a)" in Mon|Wed|Fri|Sat) 
   when="noteveryday"
   script_flags=" -all " 
   echo 'Downloading HTML for jobs from Amazon.com new jobs site... ' 2>&1 1>>"$log"
-  bash "./updateAmazonNewSiteHTMLFiles.sh" 2>&1 1>>"$log"
+  bash ./updateAmazonNewSiteHTMLFiles.sh "$amzndir" 2>&1 1>>"$log"
   echo 'New jobs site download complete.' $log  2>&1 1>>"$log"
 esac
 
@@ -51,7 +53,7 @@ echo 'Downloading new jobs... ' 2>&1 1>>"$log"
 # site.  
 # php ../../scooper_utils/runJobs.php  -fni $1 $2 -o "$file" 2>&1 1>>"$log"
 echo 'Running "php ../../scooper_utils/runJobs.php $script_flags -o "$file" ' 2>&1 1>>"$log"
-#php ../runJobs.php $script_flags -o "$file" 2>&1 1>>"$log"
+php ../runJobs.php $script_flags -o "$file" 2>&1 1>>"$log"
 
 echo 'Download complete. ' 2>&1 1>>"$log"
 
