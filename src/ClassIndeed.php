@@ -141,7 +141,9 @@ class ClassIndeed extends ClassJobsSiteBase
             {
                 $item['brief_description'] = $node->find("span[class='summary']")[0]->plaintext;
             }
-            $item[ 'script_search_key'] = $category;
+
+
+/*            $item[ 'script_search_key'] = $category;
 
             // calculate the original source
             $item['job_site'] = $this->siteName;
@@ -154,9 +156,8 @@ class ClassIndeed extends ClassJobsSiteBase
             {
                 $item['job_source_url'] = parent::getActualPostURL($item['job_post_url']);
             }
-
+*/
             $ret[] = $item;
-//            $ret[ $item['job_site']."-".$item['job_id']] = $item;
 
         }
 

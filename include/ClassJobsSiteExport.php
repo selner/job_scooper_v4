@@ -41,6 +41,28 @@ class ClassJobsSiteExport
     protected $strOutputFolder = "";
     protected $arrTitlesToFilter = null;
 
+    function getEmptyItemsArray()
+    {
+        return array(
+            'job_site' => '',
+            'job_id' => '',
+            'company' => '',
+            'job_title' => '',
+            'interested' => '',
+            'notes' => '',
+            'status' => '',
+            'last_status_update' => '',
+            'date_pulled' => '',
+            'job_post_url' => '',
+            'brief_description' => '',
+            'location' => '',
+            'job_site_category' => '',
+            'job_site_date' =>'',
+//            'original_source' => '',
+//            'job_source_url' => '',
+//            'script_search_key' => '',
+        );
+    }
 
     function setOutputFolder($strPath)
     {
@@ -238,26 +260,6 @@ class ClassJobsSiteExport
     }
 
 
-    function getEmptyItemsArray()
-    {
-        return array(
-            'job_site' => '',
-            'job_id' => '',
-            'company' => '',
-            'job_title' => '',
-            'interested' => '',
-            'notes' => '',
-            'date_pulled' => '',
-            'job_post_url' => '',
-            'brief_description' => '',
-            'location' => '',
-            'job_site_category' => '',
-            'job_site_date' =>'',
-            'original_source' => '',
-            'job_source_url' => '',
-            'script_search_key' => '',
-        );
-    }
 
     function getSimpleObjFromPathOrURL($filePath = "", $strURL = "")
     {

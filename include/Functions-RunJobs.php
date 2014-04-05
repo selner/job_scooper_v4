@@ -136,7 +136,13 @@ function __runAllJobs__($arrSitesSettings = null, $strOutputFile = null, $arrSou
     {
         foreach($arrSourceFiles as $source)
         {
-            $arrOutputFilesToIncludeInResults[] = $source;
+            //
+            // Push the source files to the front of the array so that they
+            // get into the final jobs list first.  That way the others are
+            // de-duped against them, not the other way around.  Helps prevent
+            // input data loss.
+            //
+            array_push($arrOutputFilesToIncludeInResults, $source);
             // __debug__printLine("Adding input source file: " . $source, C__DISPLAY_ITEM_START__);
         }
     }

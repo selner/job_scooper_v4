@@ -1,0 +1,280 @@
+
+Option Explicit
+
+Sub ExportXLSToCSVs()
+
+ 
+
+' yyExportTabToCSV "Active", "active", "A:P"
+' yyExportTabToCSV "TitlesToExclude", "exclude_titles", "A:C"
+' yyExportTabToCSV "Inactive", "inactive", "A:P"
+ 
+ copySheetRangeToNewCSV "Active", "active", "A:Q"
+ copySheetRangeToNewCSV "TitlesToExclude", "exclude_titles", "A:C"
+ copySheetRangeToNewCSV "Inactive", "inactive", "A:Q"
+
+
+End Sub
+
+Sub yyExportTabToCSV(strTabName, strFilePrefix)
+   Dim strCodeDataJobsPath As String
+   strCodeDataJobsPath = "\\psf\Home\Code\data\jobs\"
+    Application.WindowState = xlNormal
+    
+    ' Turn off the SaveAs Overwrite complaint dialog
+   Application.DisplayAlerts = False
+   Sheets(strTabName).Select
+   Sheets(strTabName).Copy
+   ActiveWorkbook.SaveAs Filename:= _
+         strCodeDataJobsPath & "bryans_list_" & strFilePrefix & ".csv", FileFormat:= _
+        xlCSV, CreateBackup:=False
+    Range("I2:I10000").ClearContents
+    Selection.Clear
+    ActiveWorkbook.Save
+    ActiveWorkbook.Saved = True
+    
+    ActiveWindow.Close
+    
+    
+   ' Turn alerts back on for everything
+    Application.DisplayAlerts = True
+End Sub
+
+Sub copySheetRangeToNewCSV(strTabName, strFilePrefix, strRangeToCopy)
+    Dim strCodeDataJobsPath As String
+    
+    strCodeDataJobsPath = "\\psf\Home\Code\data\jobs\"
+    Application.WindowState = xlNormal
+
+    
+    ' Turn off the SaveAs Overwrite complaint dialog
+   Application.DisplayAlerts = False
+   
+   Dim wbI As Workbook, wbO As Workbook
+    Dim wsI As Worksheet, wsO As Worksheet
+
+    Set wbI = ActiveWorkbook
+    
+    '~~> Set the relevant sheet from where you want to copy
+    Set wsI = wbI.Sheets(strTabName)
+    
+    
+    '~~> Destination/Output Workbook
+    Set wbO = Workbooks.Add
+
+    With wbO
+        '~~> Set the relevant sheet to where you want to paste
+        Set wsO = wbO.Sheets("Sheet1")
+        
+        '~~>. Save the file
+        .SaveAs Filename:= _
+         strCodeDataJobsPath & "bryans_list_" & strFilePrefix & ".csv", FileFormat:= _
+        xlCSV, CreateBackup:=False
+
+        '~~> Copy the range
+        wsI.Range(strRangeToCopy).Copy
+
+        '~~> Paste it in say Cell A1. Change as applicable
+        wsO.Range("A1").PasteSpecial Paste:=xlPasteValues
+    End With
+
+    wbO.Save
+    wbO.Saved = True
+    
+    ActiveWindow.Close
+    
+   ' Turn alerts back on for everything
+    Application.DisplayAlerts = True
+End Sub
+
+Sub zzCleanupCSVList()
+'
+' CleanupCSVList Macro
+'
+
+'
+    Application.WindowState = xlNormal
+    Range(Selection, Selection.End(xlDown)).Select
+    Range("A1:A46").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Range(Selection, Selection.End(xlToLeft)).Select
+    ActiveSheet.ListObjects.Add(xlSrcRange, Range("$A$1:$CB$46"), , xlYes).Name = _
+        "Table1"
+    Range("Table1[#All]").Select
+    ActiveSheet.ListObjects("Table1").TableStyle = "TableStyleMedium7"
+    
+    With Selection
+        .HorizontalAlignment = xlGeneral
+        .VerticalAlignment = xlBottom
+        .WrapText = True
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+    End With
+    
+    With Selection.Font
+        .Name = "Calibri"
+        .Size = 10
+        .Strikethrough = False
+        .Superscript = False
+        .Subscript = False
+        .OutlineFont = False
+        .Shadow = False
+        .Underline = xlUnderlineStyleNone
+        .ThemeColor = xlThemeColorLight1
+        .TintAndShade = 0
+        .ThemeFont = xlThemeFontMinor
+    End With
+    
+    With Selection
+        .HorizontalAlignment = xlGeneral
+        .VerticalAlignment = xlTop
+        .WrapText = True
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+    End With
+    
+    Cells.Replace What:="<not set>", Replacement:="", LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+    
+    Columns("G:G").Select
+    Selection.Cut
+    
+    Columns("F:F").Select
+    Selection.Insert Shift:=xlToRight
+    
+    
+    Columns("C:C").Select
+    Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+    Range("Table1[Column1]").Select
+    ActiveCell.FormulaR1C1 = ""
+    Range("Table1[[#Headers],[Column1]]").Select
+    ActiveCell.FormulaR1C1 = "company_name_linked"
+    Range("C2").Select
+    ActiveCell.FormulaR1C1 = "=HYPERLINK([@[actual_site_url]], [@[company_name]])"
+    
+    Columns("D:D").Select
+    Selection.EntireColumn.Hidden = True
+    
+    Columns("A:A").Select
+    Selection.EntireColumn.Hidden = True
+    
+    Cells.Select
+    Selection.Rows.AutoFit
+    Selection.RowHeight = 80
+    
+    Columns("I:I").Select
+    Selection.Insert Shift:=xlToRight
+    
+    
+    Columns("K:K").Select
+    With Selection
+        .HorizontalAlignment = xlCenter
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+    End With
+    
+    Columns("L:L").ColumnWidth = 10.14
+    Columns("M:M").ColumnWidth = 7.57
+    Columns("I:I").ColumnWidth = 25.29
+    Columns("F:F").ColumnWidth = 36.57
+    Columns("E:E").ColumnWidth = 30
+    Columns("C:C").ColumnWidth = 28.14
+
+End Sub
+
+
+'
+' MoveCSVNotesColumns Macro
+'
+Sub zzMoveCSVNotesColumns()
+'
+    
+'    Cells.Find(What:="Contact Info", After:=ActiveCell, LookIn:=xlFormulas, _
+        LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, _
+        MatchCase:=False, SearchFormat:=False).Activate
+'    Columns("BW:CA").Select
+ '   Selection.Cut
+
+    Columns("I:I").Select
+    Selection.Insert Shift:=xlToRight
+    Range("I1").Select
+    ActiveCell = "Open Roles"
+    Columns("I:I").Select
+    Selection.Insert Shift:=xlToRight
+    Range("I1").Select
+    ActiveCell = "Last Status Update"
+    Columns("I:I").Select
+    Selection.Insert Shift:=xlToRight
+    Range("I1").Select
+    ActiveCell = "Status"
+    Columns("I:I").Select
+    Selection.Insert Shift:=xlToRight
+    Range("I1").Select
+    ActiveCell = "Notes"
+        Columns("I:I").Select
+    Selection.Insert Shift:=xlToRight
+    Range("I1").Select
+    ActiveCell = "Contact Info"
+        Columns("I:I").Select
+    Selection.Insert Shift:=xlToRight
+    Range("I1").Select
+    ActiveCell = "Company Description"
+        Columns("I:I").Select
+    Selection.Insert Shift:=xlToRight
+    Range("I1").Select
+    ActiveCell = "Where Did Company Get Added to the List From?"
+    
+    Columns("I:I").Select
+    Selection.Insert Shift:=xlToRight
+    Range("I1").Select
+    
+    ActiveCell = "KInd"
+    Columns("I:I").Select
+    Selection.Insert Shift:=xlToRight
+  
+    Range("I1").Select
+    ActiveCell = "Specialization"
+    Columns("I:I").Select
+    Selection.Insert Shift:=xlToRight
+ Range("I1").Select
+    ActiveCell = "Specialization"
+    
+    Columns("CB:CB").Select
+    Selection.Cut
+
+    Columns("I:I").Select
+    Selection.Insert Shift:=xlToRight
+
+    Columns("H:H").Select
+    Selection.Cut
+    Columns("F:F").Select
+    Selection.Insert Shift:=xlToRight
+
+    Columns("B:B").Select
+    Selection.EntireColumn.Hidden = True
+    Columns("J:J").ColumnWidth = 36
+    Columns("K:K").ColumnWidth = 14.5
+ Columns("K:K").Select
+    With Selection
+        .HorizontalAlignment = xlCenter
+        
+    End With
+    Columns("L:L").ColumnWidth = 14.5
+    Columns("M:M").ColumnWidth = 14.5
+
+End Sub

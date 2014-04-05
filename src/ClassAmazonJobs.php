@@ -126,17 +126,17 @@ class ClassAmazonJobs extends ClassJobsSiteBase
             {
                 $item = $this->getEmptyItemsArray();
                 $item['job_title'] = $nodesTD[$nTDIndex]->previousSibling()->first_child()->plaintext;
-                $item['script_search_key'] = $arrSettings['name'];
 
                 $item['job_post_url'] = $nodesTD[$nTDIndex]->previousSibling()->first_child()->href;
-                $item['job_source_url'] = $item['job_post_url'];
                 $item['company'] = 'Amazon';
 
                 $item['job_site'] = 'Amazon';
                 $item['date_pulled'] = $this->_getCurrentDateAsString_();
 
+//                $item['script_search_key'] = $arrSettings['name'];
+//                $item['job_source_url'] = $item['job_post_url'];
+//                 $item['original_source'] = 'Amazon';
 
-                $item['original_source'] = 'Amazon';
                 $item['job_id'] = trim(explode("/", $item['link'])[4]);
                 $item['job_site_category'] = $nodesTD[$nTDIndex]->plaintext;
                 $nTDIndex++;
@@ -215,16 +215,16 @@ class ClassAmazonJobs extends ClassJobsSiteBase
             $item = $this->getEmptyItemsArray();
             $item['job_title'] = $firstPart->find('a[class="title"]')[0]->plaintext;
             if($item['job_title'] == '') continue;
-            $item['script_search_key'] = $arrSettings['name'];
+//            $item['script_search_key'] = $arrSettings['name'];
 
             $item['job_post_url'] = "http://www.amazon.com" . $firstPart->find('a[class="title"]')[0]->href;
-            $item['job_source_url'] = $item['job_post_url'];
+//            $item['job_source_url'] = $item['job_post_url'];
             $item['location'] = trim($firstPart->find('span[class="details"]')[0]->plaintext);
             $id = trim($firstPart->find('span[class="id"]')[0]->plaintext);
             $item['job_id'] = trim(str_replace(array("&nbsp;", "(", ")", "ID"), " ", $id));
 
             $item['company'] = 'Amazon';
-            $item['original_source'] = 'Amazon';
+//             $item['original_source'] = 'Amazon';
             $item['job_site'] = 'Amazon';
             $item['date_pulled'] = $this->_getCurrentDateAsString_();
 

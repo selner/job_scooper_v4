@@ -18,11 +18,22 @@
 
 require_once dirname(__FILE__) . '/../include/ClassJobsSiteBase.php';
 
-
-class ClassSimplyHired extends ClassJobsSiteBase
+/*  TODO -- IN PROGRESS
+class ClassJobsSiteGeneric extends ClassJobsSiteBase
 {
-    protected $siteName = 'SimplyHired';
+    protected $siteName = 'Generic';
 
+    private $arrSitesSupported = array(
+      'Porch' => array('site_name' => "Porch", "base_url" => "http://about.porch.com/careers/", 'get_pagecount_callback' => '_getNumPorchPages', 'scrape_jobs_list_callback' => '_getJobsFromPorchPage'),
+
+    );
+
+    private $_siteThisInstance_ = null;
+
+    function setSite($strName)
+    {
+        $this->_siteThisInstance_ = $this->arrSitesSupported[$strName];
+    }
 
     function getMyJobs($nDays = -1, $fIncludeFilteredJobsInResults = true)
     {
@@ -35,8 +46,8 @@ class ClassSimplyHired extends ClassJobsSiteBase
 
         if($nDays > 1)
         {
-                $strSearch = "http://www.simplyhired.com/search?t=%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22product+management%22+or+%22general+manager%22+or+%22Chief+Technology+Officer%22&lc=Seattle&ls=WA&fdb=".$nDays."&ws=50&sb=dd&pn=";
-                // __debug__printLine("Getting " . $nDays . " days of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
+            $strSearch = "http://www.simplyhired.com/search?t=%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22product+management%22+or+%22general+manager%22+or+%22Chief+Technology+Officer%22&lc=Seattle&ls=WA&fdb=".$nDays."&ws=50&sb=dd&pn=";
+            // __debug__printLine("Getting " . $nDays . " days of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
         }
         else
         {
@@ -49,27 +60,32 @@ class ClassSimplyHired extends ClassJobsSiteBase
     }
 
 
+    private function __handleCallback__($callback, &$val)
+    {
+
+        if ($callback && is_callable($callback))
+        {
+            call_user_func_array($callback, array(&$val));
+        }
+    }
+
 
     private function __getMyJobsFromSearch__($strBaseURL, $category, $strAlternateLocalHTMLFile = null)
     {
         $arrAllJobs = array();
+
+        $arrRetPageCounts = $this->__handleCallback__($this->_siteThisInstance_['get_pagecount_callback'], $this->_siteThisInstance_);
+
         $nPageCount = 1;
-        $nItemChunkSize = 50;
+        $maxPages = $arrRetPageCounts['number_pages'];
+        $nItemChunkSize = $arrRetPageCounts['item_chunksize'];
+        $totalItems = $arrRetPageCounts['total_items'];
 
         $objSimpleHTML = $this->getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $strBaseURL);
         if(!$objSimpleHTML) throw new ErrorException('Error:  unable to get SimpleHTML object from file('.$strAlternateLocalHTMLFile.') or '.$strBaseURL);
 
-        // # of items to parse
-        $pageDiv= $objSimpleHTML->find('span[class="search_title"]');
-        $pageDiv = $pageDiv[0];
-        $pageText = $pageDiv->plaintext;
-        $arrItemItems = explode(" ", trim($pageText));
-        $totalItems = $arrItemItems[4];
-        $totalItems  = intval(str_replace(",", "", $totalItems));
         $maxItem = intval($totalItems / $nItemChunkSize);
         if($maxItem < 1)  $maxItem = 1;
-
-
 
         __debug__printLine("Downloading " . $maxItem . " pages of ".$totalItems  . " jobs from " . $this->siteName , C__DISPLAY_ITEM_START__);
 
@@ -83,8 +99,7 @@ class ClassSimplyHired extends ClassJobsSiteBase
             if(!$objSimpleHTML) $objSimpleHTML = parent::getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $strURL);
             if(!$objSimpleHTML) throw new ErrorException('Error:  unable to get SimpleHTML object from file('.$strAlternateLocalHTMLFile.') or '.$strURL);
 
-
-            $arrNewJobs = $this->_scrapeItemsFromHTML_($objSimpleHTML, $category);
+            $arrNewJobs = $this->__handleCallback__($this->_siteThisInstance_['scrape_jobs_list_callback'], $objSimpleHTML);
 
             if(!is_array($arrNewJobs))
             {
@@ -110,15 +125,15 @@ class ClassSimplyHired extends ClassJobsSiteBase
         $this->arrLatestJobs = array_copy($arrAllJobs);
     }
 
-    private function _scrapeItemsFromHTML_($objSimpleHTML, $category)
+    static function _getJobsFromPorchPage($objSimpleHTML)
     {
         $ret = null;
 
 
-        $resultsSection= $objSimpleHTML->find('div[class="results"]');
+        $resultsSection= $objSimpleHTML->find('div[id="job-listings"]');
         $resultsSection= $resultsSection[0];
 
-        $nodesJobs = $resultsSection->find('ul[id="jobs"] li[class="result"]');
+        $nodesJobs = $resultsSection->find('div[class="cell"]');
 
 //        var_dump('found ' . count($nodesJobs) . ' nodes');
 
@@ -127,44 +142,44 @@ class ClassSimplyHired extends ClassJobsSiteBase
             $item = parent::getEmptyItemsArray();
             $item['job_id'] = $node->attr['id'];
 
-            $item['job_title'] = $node->find("a[class='title']")[0]->plaintext;
+            $item['job_title'] = $node->find("h4")[0]->plaintext;
             if($item['job_title'] == '') continue;
 
-            $item['job_post_url'] = 'http://www.simplyhired.com' . $node->find("a[class='title']")[0]->href;
-            $item['company']= trim($node->find("h4[class='company']")[0]->plaintext);
+            $item['job_post_url'] = 'http://about.porch.com/careers/' . $node->find("a")[0]->href;
+            $item['job_source_url'] = $item['job_post_url'];
+            $item['company']= 'Porch'
             $item['location'] =trim( $node->find("span[class='location']")[0]->plaintext);
             $item['date_pulled'] = $this->_getCurrentDateAsString_();
-            $item['job_site_date'] = $node->find("span[class='ago']")[0]->plaintext;
 
-            if($this->is_IncludeBrief() == true)
-            {
-                $item['brief_description'] = $node->find("p[class='description']")[0]->plaintext;
-            }
-            $item['job_site'] = $this->siteName;
-
-
-/*
-            $item[ 'script_search_key'] = $category;
-
-
-            $origSiteNode = $node->find("div[class='source']");
-            if($origSiteNode && $origSiteNode[0])
-            {
-                $strSource = $origSiteNode[0]->plaintext;
-                $strSource = str_replace($item['job_site_date'], "", $strSource);
-
-                $item['original_source'] .= ' - '. trim($strSource);
-            }
-
-            if($this->is_IncludeActualURL())
-            {
-                $item['job_source_url'] = parent::getActualPostURL($item['job_post_url']);
-            }
-*/
             $ret[] = $item;
         }
 
         return $ret;
     }
 
+    static function _getNumPorchPages($objSimpleHTML)
+    {
+        $arrAllJobs = array();
+        $nPageCount = 1;
+        $nItemChunkSize = 50;
+
+        $objSimpleHTML = $this->getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $strBaseURL);
+        if(!$objSimpleHTML) throw new ErrorException('Error:  unable to get SimpleHTML object from file('.$strAlternateLocalHTMLFile.') or '.$strBaseURL);
+
+        // # of items to parse
+        $pageDiv= $objSimpleHTML->find('span[class="search_title"]');
+        $pageDiv = $pageDiv[0];
+        $pageText = $pageDiv->plaintext;
+        $arrItemItems = explode(" ", trim($pageText));
+        $totalItems = $arrItemItems[4];
+        $totalItems  = intval(str_replace(",", "", $totalItems));
+        $maxItem = intval($totalItems / $nItemChunkSize);
+        if($maxItem < 1)  $maxItem = 1;
+
+
+        return array("total_items"=>-1, "number_pages"=>1, "max_pages"=>1,  "item_chunksize"=>1);
+    }
+
 }
+
+*/

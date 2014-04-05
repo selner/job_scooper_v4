@@ -108,7 +108,7 @@ class ClassCraigslist extends ClassJobsSiteBase
             $item['date_posted'] = $node->find("span[class='date']")[0]->plaintext;
             $item['location'] = $node->find("span[class='pnr']")[0]->plaintext;
             $item['job_site_category'] = $node->find("a[class='gc']")[0]->plaintext;
-            $item['original_source'] = $this->siteName;
+//             $item['original_source'] = $this->siteName;
 
 
             $ret[] = $item;
