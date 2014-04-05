@@ -38,10 +38,10 @@ echo 'Running script case $when using the following flags:  '$script_flags 2>&1 
 #
 # create the jobs directory for output if needed
 #
-mkdir -p jobs/amazon_jobs 2>&1 1>>"$log"
-mkdir -p jobs/indeed_jobs 2>&1 1>>"$log"
-mkdir -p jobs/simply_jobs 2>&1 1>>"$log"
-mkdir -p jobs/craigslist_jobs 2>&1 1>>"$log"
+mkdir -p $destpath/jobs/amazon_jobs 2>&1 1>>"$log"
+mkdir -p $destpath/jobs/indeed_jobs 2>&1 1>>"$log"
+mkdir -p $destpath/jobs/simply_jobs 2>&1 1>>"$log"
+mkdir -p $destpath/jobs/craigslist_jobs 2>&1 1>>"$log"
 
 echo 'Downloading new jobs... ' 2>&1 1>>"$log"
 
@@ -51,7 +51,7 @@ echo 'Downloading new jobs... ' 2>&1 1>>"$log"
 # site.  
 # php ../../scooper_utils/runJobs.php  -fni $1 $2 -o "$file" 2>&1 1>>"$log"
 echo 'Running "php ../../scooper_utils/runJobs.php $script_flags -o "$file" ' 2>&1 1>>"$log"
-php ../runJobs.php $script_flags -o "$file" 2>&1 1>>"$log"
+#php ../runJobs.php $script_flags -o "$file" 2>&1 1>>"$log"
 
 echo 'Download complete. ' 2>&1 1>>"$log"
 
