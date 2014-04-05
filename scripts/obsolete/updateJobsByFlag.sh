@@ -21,7 +21,10 @@ when="unknown"
 
 case "$(date +%a)" in Mon|Wed|Fri) 
   when="noteveryday"
-  script_flags=" -all "
+  script_flags=" -all " 
+  echo 'Downloading HTML for jobs from Amazon\'s new jobs site... ' $log  2>&1 1> "$log"
+  bash ./updateAmazonNewSiteHTMLFiles.sh 2>&1 1> "$log"
+  echo 'New jobs site download complete.' $log  2>&1 1> "$log"
 esac
 
 case "$(date +%a)" in  Tue|Thu|Sat|Sun) 
@@ -39,51 +42,6 @@ mkdir -p jobs/amazon_jobs 2>&1 1> "$log"
 mkdir -p jobs/indeed_jobs 2>&1 1> "$log"
 mkdir -p jobs/simply_jobs 2>&1 1> "$log"
 mkdir -p jobs/craigslist_jobs 2>&1 1> "$log"
-
-#
-# BUGBUG THIS VERSION DOESN'T WORK 
-#
-# if [ ! -d 'jobs' ]
-# then
-#	mkdir jobs;
-# fi
-
-#
-# First clear out any old CSVs
-#
-
-# echo 'Removing CSVs older than 2 days... ' 2>&1 1> "$log"
-# _arrJ=(
-# 	amazon
-# 	indeed
-# 	simply
-# 	craigslist
-# 	)
-#
-# create the site specific output folders
-#
-# for _i in $_arrJ
-# do
-#    if [ ! -d "jobs/$_i_jobs" ] 
-#    then 
-#    	mkdir "jobs/$_i_jobs";
-#    fi;
-# done
-
-# for _i in $_arrJ
-# do
-#     find jobs/$_i_jobs -iname $_i*_jobs_.csv -mtime +2 -exec rm {} \;
-# done
-# sleep 500
-
-
-# cd indeed_jobs
-# find Indeed*_jobs_.csv -mtime +2 -exec rm {} \;
-# cd ..
-
-# cd simply_jobs
-# find Simply*_jobs_.csv -mtime +2 -exec rm {} \;
-# cd ..
 
 echo 'Downloading new jobs... ' 2>&1 1> "$log"
 
