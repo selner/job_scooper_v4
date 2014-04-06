@@ -17,7 +17,7 @@
 require_once dirname(__FILE__) . '/../../scooper/src/include/plugin-base.php';
 require_once dirname(__FILE__) . '/../../scooper/src/include/common.php';
 require_once dirname(__FILE__) . '/../lib/simple_html_dom.php';
-require_once dirname(__FILE__) . '/ClassJobsSiteBase.php';
+require_once dirname(__FILE__) . '/ClassJobsSite.php';
 require_once dirname(__FILE__) . '/../../scooper/src/lib/pharse.php';
 
 date_default_timezone_set("America/Los_Angeles");

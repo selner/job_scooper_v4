@@ -14,10 +14,10 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/../include/ClassJobsSiteBase.php';
+require_once dirname(__FILE__) . '/../include/ClassJobsSite.php';
 
 
-class ClassIndeed extends ClassJobsSiteBase
+class ClassIndeed extends ClassJobsSite
 {
     protected $siteName = 'Indeed';
 

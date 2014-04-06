@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/../include/ClassJobsSiteBase.php';
+require_once dirname(__FILE__) . '/../include/ClassJobsSite.php';
 
 /****************************************************************************************************************/
 /****                                                                                                        ****/
@@ -26,7 +26,7 @@ require_once dirname(__FILE__) . '/../include/ClassJobsSiteBase.php';
 
 
 
-class ClassAmazonJobs extends ClassJobsSiteBase
+class ClassAmazonJobs extends ClassJobsSite
 {
     protected $siteName = 'Amazon';
 

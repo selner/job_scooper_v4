@@ -17,7 +17,7 @@
 require_once dirname(__FILE__) . '/scooter_utils_common.php';
 require_once dirname(__FILE__) . '/ClassJobsSiteExport.php';
 
-abstract class ClassJobsSiteBase extends ClassJobsSiteExport
+abstract class ClassJobsSite extends ClassJobsSiteExport
 {
     protected $siteName = 'NAME-NOT-SET';
     public $arrLatestJobs = null;

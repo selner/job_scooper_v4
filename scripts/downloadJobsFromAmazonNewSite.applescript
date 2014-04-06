@@ -1,4 +1,4 @@
-
+ï»¿
 on textToList(theText, theDelimiter)
 	set saveDelim to AppleScript's text item delimiters
 	try
@@ -73,7 +73,7 @@ on doJobsDownload(strOutputFolder, strURL)
 		
 		set nNextPage to (strNextPage as number)
 		
-		repeat while (nNextPage ² nMaxPages and boolClickedNext = true)
+		repeat while (nNextPage â‰¤ nMaxPages and boolClickedNext = true)
 			
 			set strNextPage to do JavaScript "function getNextPageValue() {return document.getElementById('nextpage').value;} getNextPageValue();" in document 1
 			if (strNextPage as number) < nNextPage then
@@ -95,7 +95,7 @@ on doJobsDownload(strOutputFolder, strURL)
 			set theFile to theFullFilePath
 			try
 				set fRef to open for access file theFile with write permission
-				write theSource to fRef as Çclass utf8È
+				write theSource to fRef as Â«class utf8Â»
 				close access fRef
 			on error
 				try

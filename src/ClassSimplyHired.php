@@ -16,10 +16,10 @@
  */
 
 
-require_once dirname(__FILE__) . '/../include/ClassJobsSiteBase.php';
+require_once dirname(__FILE__) . '/../include/ClassJobsSite.php';
 
 
-class ClassSimplyHired extends ClassJobsSiteBase
+class ClassSimplyHired extends ClassJobsSite
 {
     protected $siteName = 'SimplyHired';
 
