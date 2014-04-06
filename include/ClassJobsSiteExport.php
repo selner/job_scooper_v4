@@ -217,17 +217,17 @@ class ClassJobsSiteExport
 
     }
 
-    function combineMultipleJobsCSVs($strOutFilePath, $arrFilesToCombine, $arrMyRecordsToInclude = null, $fIncludeFilteredJobsInResults = true)
+    function writeMergedJobsCSVFile($strOutFilePath, $arrFilesToCombine, $arrMyRecordsToInclude = null, $fIncludeFilteredJobsInResults = true)
     {
         $arrRetJobs = array();
         if(!$strOutFilePath || strlen($strOutFilePath) <= 0)
         {
-            $strOutFilePath = $this->getOutputFileFullPath('CombineMultipleJobsCSVs_');
+            $strOutFilePath = $this->getOutputFileFullPath('writeMergedJobsCSVFile_');
         }
 
         if(!is_array($arrFilesToCombine) || strlen($arrFilesToCombine[0]) <= 0)
         {
-            throw new ErrorException("Error: combineMultipleJobsCSVs called with an empty array of filenames to combine. ");
+            throw new ErrorException("Error: writeMergedJobsCSVFile called with an empty array of filenames to combine. ");
         }
 
         __debug__printLine("Combining jobs into " . $strOutFilePath . " from " . count($arrMyRecordsToInclude) ." records and " . count($arrFilesToCombine) . " CSV input files: " . var_export($arrFilesToCombine, true), C__DISPLAY_ITEM_DETAIL__);

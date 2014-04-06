@@ -153,7 +153,7 @@ function __runAllJobs__($arrSitesSettings = null, $strOutputFile = null, $arrSou
     }
 
 
-    $retFile = $classJobExportHelper->combineMultipleJobsCSVs($strOutputFile, $arrOutputFilesToIncludeInResults, null, $fIncludeFilteredJobsInResults);
+    $retFile = $classJobExportHelper->writeMergedJobsCSVFile($strOutputFile, $arrOutputFilesToIncludeInResults, null, $fIncludeFilteredJobsInResults);
     if(!$retFile)
     {
         throw new ErrorException("Failed to combine new job lists with source files.");

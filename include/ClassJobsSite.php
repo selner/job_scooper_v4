@@ -93,7 +93,7 @@ abstract class ClassJobsSite extends ClassJobsSiteExport
 
         if(count($arrInputFilesToMergeWithResults ) >= 1)
         {
-            $retFilePath = $this->combineMultipleJobsCSVs($strOutFilePath, $arrInputFilesToMergeWithResults, $this->arrLatestJobs, $fIncludeFilteredJobsInResults);
+            $retFilePath = $this->writeMergedJobsCSVFile($strOutFilePath, $arrInputFilesToMergeWithResults, $this->arrLatestJobs, $fIncludeFilteredJobsInResults);
         }
 
 
