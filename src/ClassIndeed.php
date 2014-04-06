@@ -124,6 +124,7 @@ class ClassIndeed extends ClassJobsSiteBase
         {
             $item = parent::getEmptyItemsArray();
             $item['job_id'] = $node->attr['id'];
+            $item['job_site'] = $this->siteName;
 
 
 
