@@ -41,6 +41,29 @@ class ClassJobsSiteExport
     protected $strOutputFolder = "";
     protected $arrTitlesToFilter = null;
 
+    /**
+     * TODO:  DOC
+     *
+     *
+     * @param  string TODO DOC
+     * @param  string TODO DOC
+     * @return string TODO DOC
+     */
+    function __construct($strAltFilePath = null, $bitFlags = null)
+    {
+        $this->_strAlternateLocalFile = $strAltFilePath;
+        $this->_bitFlags = $bitFlags;
+        $this->_strFilePathInput_ExcludedTitles = C_STR_DATAFOLDER  . "bryans_list_exclude_titles.csv";
+    }
+
+    /**
+     * TODO:  DOC
+     *
+     *
+     * @param  string TODO DOC
+     * @param  string TODO DOC
+     * @return string TODO DOC
+     */
     function getEmptyItemsArray()
     {
         return array(
@@ -58,32 +81,39 @@ class ClassJobsSiteExport
             'location' => '',
             'job_site_category' => '',
             'job_site_date' =>'',
-//            'original_source' => '',
-//            'job_source_url' => '',
-//            'script_search_key' => '',
         );
     }
 
+
+    /**
+     * TODO:  DOC
+     *
+     *
+     * @param  string TODO DOC
+     * @param  string TODO DOC
+     * @return string TODO DOC
+     */
     function setOutputFolder($strPath)
     {
         $this->strOutputFolder = $strPath;
     }
 
-    function __construct($strAltFilePath = null, $bitFlags = null)
-    {
-        $this->_strAlternateLocalFile = $strAltFilePath;
-        $this->_bitFlags = $bitFlags;
-        $this->_strFilePathInput_ExcludedTitles = C_STR_DATAFOLDER  . "bryans_list_exclude_titles.csv";
-    }
 
-    function _getCurrentDateAsString_()
+     function getTodayAsString()
     {
         return date("Y-m-d");
     }
 
 
-
-    function _loadTitlesToFilter_()
+    /**
+     * TODO:  DOC
+     *
+     *
+     * @param  string TODO DOC
+     * @param  string TODO DOC
+     * @return string TODO DOC
+     */
+     function _loadTitlesToFilter_()
     {
         if(!is_array($this->arrTitlesToFilter) && $this->_strFilePathInput_ExcludedTitles && file_exists($this->_strFilePathInput_ExcludedTitles) && is_file($this->_strFilePathInput_ExcludedTitles))
         {
@@ -110,7 +140,14 @@ class ClassJobsSiteExport
     }
 
 
-
+    /**
+     * TODO:  DOC
+     *
+     *
+     * @param  string TODO DOC
+     * @param  string TODO DOC
+     * @return string TODO DOC
+     */
     function filterNotInterestedJobs($arrJobsToFilter, $fIncludeFilteredJobsInResults = true)
     {
         if($fIncludeFilteredJobsInResults == true)
@@ -125,12 +162,12 @@ class ClassJobsSiteExport
         }
 
         $arrInterestLevelsToExclude = array(
-        'No' => array('interested' => 'No', 'exclude' => true),
-        'No (Bad Title & Role)]' => array('interested' => 'No (Bad Title & Role)', 'exclude' => true),
-        'No (Bad Role, not Title)' => array('interested' => 'No (Bad Role, not Title)', 'exclude' => true),
-        'No (Bad Title & Role)[auto-filtered]' => array('interested' => 'No (Bad Title & Role)[auto-filtered]', 'exclude' => true),
-        'No (Bad Role, not Title)' => array('interested' => 'No (Bad Role, not Title)[auto-filtered]', 'exclude' => true),
-    );
+            'No' => array('interested' => 'No', 'exclude' => true),
+            'No (Bad Title & Role)]' => array('interested' => 'No (Bad Title & Role)', 'exclude' => true),
+            'No (Bad Role, not Title)' => array('interested' => 'No (Bad Role, not Title)', 'exclude' => true),
+            'No (Bad Title & Role)[auto-filtered]' => array('interested' => 'No (Bad Title & Role)[auto-filtered]', 'exclude' => true),
+            'No (Duplicate Job Post)' => array('interested' => 'No (Bad Role, not Title)[auto-filtered]', 'exclude' => true),
+        );
 
 
         $nJobsNotExcluded = 0;
@@ -189,6 +226,14 @@ class ClassJobsSiteExport
     }
 
 
+    /**
+     * TODO:  DOC
+     *
+     *
+     * @param  string TODO DOC
+     * @param  string TODO DOC
+     * @return string TODO DOC
+     */
     function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true)
     {
         if(!$strOutFilePath || strlen($strOutFilePath) <= 0)
@@ -217,6 +262,17 @@ class ClassJobsSiteExport
 
     }
 
+
+    /**
+     * Merge multiple lists of jobs from memory and from file into a new single CSV file of jobs
+     *
+     *
+     * @param  string $strOutFilePath The file to output the jobs list to
+     * @param  Array $arrFilesToCombine An array of optional jobs CSV files to combine into the file output CSV
+     * @param  Array $arrMyRecordsToInclude An array of optional job records to combine into the file output CSV
+     * @param  integer $fIncludeFilteredJobsInResults False if you do not want jobs marked as interested = "No *" excluded from the results
+     * @return string $strOutFilePath The file the jobs was written to or null if failed.
+     */
     function writeMergedJobsCSVFile($strOutFilePath, $arrFilesToCombine, $arrMyRecordsToInclude = null, $fIncludeFilteredJobsInResults = true)
     {
         $arrRetJobs = array();
@@ -260,7 +316,14 @@ class ClassJobsSiteExport
     }
 
 
-
+    /**
+     * TODO:  DOC
+     *
+     *
+     * @param  string TODO DOC
+     * @param  string TODO DOC
+     * @return string TODO DOC
+     */
     function getSimpleObjFromPathOrURL($filePath = "", $strURL = "")
     {
 //         __debug__printLine("getSimpleObjFromPathOrURL(".$filePath.', '.$strURL.")", C__DISPLAY_ITEM_DETAIL__);
@@ -292,7 +355,14 @@ class ClassJobsSiteExport
         return $objSimpleHTML;
     }
 
-
+    /**
+     * TODO:  DOC
+     *
+     *
+     * @param  string TODO DOC
+     * @param  string TODO DOC
+     * @return string TODO DOC
+     */
     function getOutputFileFullPath($strFilePrefix = "", $strBase = 'jobs', $strExtension = 'csv')
     {
         $strFullPath = getDefaultJobsOutputFileName($strFilePrefix, $strBase , $strExtension);
@@ -304,6 +374,14 @@ class ClassJobsSiteExport
         return $strFullPath;
     }
 
+    /**
+     * TODO:  DOC
+     *
+     *
+     * @param  string TODO DOC
+     * @param  string TODO DOC
+     * @return string TODO DOC
+     */
     function getSimpleHTMLObjForFileContents($strInputFileFullPath)
     {
         $objSimpleHTML = null;

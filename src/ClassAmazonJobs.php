@@ -102,7 +102,7 @@ class ClassAmazonJobs extends ClassJobsSite
             $objSimpleHTML->clear();
             unset($objSimpleHTML);
 
-            $this->addJobsToList($arrNewJobs);
+            $this->_addJobsToList_($arrNewJobs);
 
             $nItemCount++;
             $strOutputJobsFile = $this->getOutputFileFullPath($arrSettings['name']);
@@ -138,7 +138,7 @@ class ClassAmazonJobs extends ClassJobsSite
                 $item['company'] = 'Amazon';
 
                 $item['job_site'] = 'Amazon';
-                $item['date_pulled'] = $this->_getCurrentDateAsString_();
+                $item['date_pulled'] = $this->getTodayAsString();
 
 //                $item['script_search_key'] = $arrSettings['name'];
 //                $item['job_source_url'] = $item['job_post_url'];
@@ -206,7 +206,7 @@ class ClassAmazonJobs extends ClassJobsSite
             $nItemCount++;
         }
 
-        $this->addJobsToList($arrAllJobs);
+        $this->_addJobsToList_($arrAllJobs);
     }
 
     private function _scrapeJobsFromHTML($url, $arrSettings, $strAlternateLocalHTMLFile = null)
@@ -237,7 +237,7 @@ class ClassAmazonJobs extends ClassJobsSite
             $item['company'] = 'Amazon';
 //             $item['original_source'] = 'Amazon';
             $item['job_site'] = 'Amazon';
-            $item['date_pulled'] = $this->_getCurrentDateAsString_();
+            $item['date_pulled'] = $this->getTodayAsString();
 
 
             if($this->is_IncludeBrief() == true)

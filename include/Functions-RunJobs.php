@@ -72,7 +72,7 @@ function __runCommandLine()
 
 }
 
-function __runAllJobs__($arrSitesSettings = null, $strOutputFile = null, $arrSourceFiles = null, $nDays = -1, $fIncludeFilteredJobsInResults = true)
+function __runAllJobs__($arrSitesSettings = null, $strOutputFile_Filtered = null, $arrSourceFiles = null, $nDays = -1, $fIncludeFilteredJobsInResults = null)
 {
     if(!$arrSitesSettings || !is_array($arrSitesSettings))
     {
@@ -86,7 +86,7 @@ function __runAllJobs__($arrSitesSettings = null, $strOutputFile = null, $arrSou
     $class = new ClassAmazonJobs(null, C_NORMAL);
     $class ->setOutputFolder(C_STR_DATAFOLDER  .  $arrSitesSettings['Amazon']['working_subfolder'] . "/");
     $retPath = $class->getJobs_NewSite(false);
-    $arrRet = $class->returnMyCurrentJobsList();
+    $arrRet = $class->getMyJobsList();
     // var_dump('$arrRet = ', $arrRet);
     // var_dump('$retPath = ', $retPath);
 
@@ -147,19 +147,35 @@ function __runAllJobs__($arrSitesSettings = null, $strOutputFile = null, $arrSou
         }
     }
 
-    if(!$strOutputFile )
+    if(!$strOutputFile_Filtered )
     {
-        $strOutputFile = $classJobExportHelper->getOutputFileFullPath("ALL-", "jobs", "csv");
+        $strOutputFile_Filtered = $classJobExportHelper->getOutputFileFullPath("ALL-", "jobs", "csv");
+
     }
 
 
-    $retFile = $classJobExportHelper->writeMergedJobsCSVFile($strOutputFile, $arrOutputFilesToIncludeInResults, null, $fIncludeFilteredJobsInResults);
+    $strOutputFile_Unfiltered = str_ireplace("_filtered", "_unfiltered", $strOutputFile_Filtered);
+    if(strcasecmp($strOutputFile_Unfiltered, $strOutputFile_Filtered) == 0)
+        $strOutputFile_Unfiltered = "unfiltered_" . $strOutputFile_Filtered;
+
+
+    $retFile = $classJobExportHelper->writeMergedJobsCSVFile($strOutputFile_Filtered, $arrOutputFilesToIncludeInResults, null, $fIncludeFilteredJobsInResults);
     if(!$retFile)
     {
         throw new ErrorException("Failed to combine new job lists with source files.");
     }
 
-    __debug__printLine("Complete. Results written to " . $strOutputFile , C__DISPLAY_RESULT__);
+    if($fIncludeFilteredJobsInResults == null)
+    {
+
+        $retFile = $classJobExportHelper->writeMergedJobsCSVFile($strOutputFile_Unfiltered, $arrOutputFilesToIncludeInResults, null, false);
+        if(!$retFile)
+        {
+            throw new ErrorException("Failed to combine new job lists with source files.");
+        }
+    }
+
+    __debug__printLine("Complete. Results written to " . $strOutputFile_Filtered , C__DISPLAY_RESULT__);
 
 
 }

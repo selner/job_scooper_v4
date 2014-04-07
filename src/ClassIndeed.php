@@ -135,7 +135,7 @@ class ClassIndeed extends ClassJobsSite
             $item['job_post_url'] = 'http://www.indeed.com' . $jobInfoNode->href;
             $item['company'] = trim($node->find("span[class='company'] span")[0]->plaintext);
             $item['location'] =trim( $node->find("span[class='location'] span")[0]->plaintext);
-            $item['date_pulled'] = $this->_getCurrentDateAsString_();
+            $item['date_pulled'] = $this->getTodayAsString();
             $item['job_site_date'] = $node->find("span[class='date']")[0]->plaintext;
 
             if($this->is_IncludeBrief() == true)

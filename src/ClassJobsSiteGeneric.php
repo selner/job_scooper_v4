@@ -149,7 +149,7 @@ class ClassJobsSiteGeneric extends ClassJobsSite
             $item['job_source_url'] = $item['job_post_url'];
             $item['company']= 'Porch'
             $item['location'] =trim( $node->find("span[class='location']")[0]->plaintext);
-            $item['date_pulled'] = $this->_getCurrentDateAsString_();
+            $item['date_pulled'] = $this->getTodayAsString();
 
             $ret[] = $item;
         }
