@@ -14,41 +14,60 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/../include/ClassJobsSite.php';
+require_once dirname(__FILE__) . '/../include/ClassJobsSiteGeneric.php';
 
 
-class ClassIndeed extends ClassJobsSite
+class ClassIndeed extends ClassJobsSiteGeneric
 {
     protected $siteName = 'Indeed';
+    protected $nJobListingsPerPage = 50;
+    protected $siteBaseURL = 'http://www.Indeed.com';
 
 
-    function getMyJobs($nDays = -1, $fIncludeFilteredJobsInResults = true)
+
+    function getItemURLValue($nItem)
     {
+        if($nItem == null || $nItem == 1) { return 0; }
+
+        return $nItem;
+    }
+
+    function getDaysURLValue($nDays)
+    {
+        $ret = 1;
         switch($nDays)
         {
-            case 7:
-                $strSearch = "http://www.indeed.com/jobs?q=title%3A%28%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22%29&l=Seattle%2C+WA&sort=date&limit=50&fromage=7&start=";
-                __debug__printLine("Getting " . $nDays . " days worth of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
+            case $nDays > 3 && $nDays <= 7:
+                $ret = 7;
                 break;
 
-            case 3:
-                $strSearch = "http://www.indeed.com/jobs?q=title%3A%28%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22%29&l=Seattle%2C+WA&sort=date&limit=50&fromage=3&start=";
-                __debug__printLine("Getting " . $nDays . " days worth of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
+            case $nDays > 1 && $nDays <= 3:
+                $ret = 3;
                 break;
 
-            default:  // Yesterday was giving me headaches, so switched "24 hours" to really mean last 3 days for Indeed
-                $strDays = $nDays < 1 ? "24 hours" : $nDays;
-                $strSearch = "http://www.indeed.com/jobs?q=title%3A%28%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22%29&l=Seattle%2C+WA&sort=date&limit=50&fromage=3&start=";
-                __debug__printLine("Getting " . $strDays . " days worth of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
+            default:
+                // BUGBUG: Yesterday was giving me headaches, so switched "24 hours" to really mean last 3 days for Indeed
+                $ret = 3;
                 break;
         }
-
-        $this->__getMyJobsFromSearch__($strSearch, 'Exec Keywords in Seattle, WA', $strAlternateLocalHTMLFile);
-
+       return $ret;
 
     }
 
+    function parseJobsListForPage($objSimpHTML)
+    { return $this->_scrapeItemsFromHTML_($objSimpHTML); }
 
+
+    function parseTotalResultsCount($objSimpHTML)
+    {
+        // # of items to parse
+        $pageDiv= $objSimpHTML->find('div[id="searchCount"]');
+        $pageDiv = $pageDiv[0];
+        $pageText = $pageDiv->plaintext;
+        $arrItemItems = explode(" ", trim($pageText));
+        return $arrItemItems[5];
+    }
+/*
     private function __getMyJobsFromSearch__($strBaseURL, $category,  $strAlternateLocalHTMLFile = null)
     {
         $arrAllJobs = array();
@@ -112,7 +131,32 @@ class ClassIndeed extends ClassJobsSite
         return $arrAllJobs;
     }
 
-    private function _scrapeItemsFromHTML_($objSimpleHTML, $category)
+    function getMyJobs($nDays = -1, $fIncludeFilteredJobsInResults = true)
+    {
+        switch($nDays)
+        {
+            case 7:
+                $strSearch = "http://www.indeed.com/jobs?q=title%3A%28%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22%29&l=Seattle%2C+WA&sort=date&limit=50&fromage=7&start=";
+                __debug__printLine("Getting " . $nDays . " days worth of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
+                break;
+
+            case 3:
+                $strSearch = "http://www.indeed.com/jobs?q=title%3A%28%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22%29&l=Seattle%2C+WA&sort=date&limit=50&fromage=3&start=";
+                __debug__printLine("Getting " . $nDays . " days worth of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
+                break;
+
+            default:  // Yesterday was giving me headaches, so switched "24 hours" to really mean last 3 days for Indeed
+                $strDays = $nDays < 1 ? "24 hours" : $nDays;
+                $strSearch = "http://www.indeed.com/jobs?q=title%3A%28%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22%29&l=Seattle%2C+WA&sort=date&limit=50&fromage=3&start=";
+                __debug__printLine("Getting " . $strDays . " days worth of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
+                break;
+        }
+
+        $this->__getMyJobsFromSearch__($strSearch, 'Exec Keywords in Seattle, WA', $strAlternateLocalHTMLFile);
+    }
+*/
+
+    private function _scrapeItemsFromHTML_($objSimpleHTML)
     {
         $ret = null;
 
@@ -143,21 +187,6 @@ class ClassIndeed extends ClassJobsSite
                 $item['brief_description'] = $node->find("span[class='summary']")[0]->plaintext;
             }
 
-
-/*            $item[ 'script_search_key'] = $category;
-
-            // calculate the original source
-            $item['job_site'] = $this->siteName;
-            $origSiteNode = $node->find("span[class='sdn']");
-            if($origSiteNode && $origSiteNode[0])
-            {
-                $item['original_source'] = trim($origSiteNode[0]->plaintext);
-            }
-            if($this->is_IncludeActualURL())
-            {
-                $item['job_source_url'] = parent::getActualPostURL($item['job_post_url']);
-            }
-*/
             $ret[] = $item;
 
         }

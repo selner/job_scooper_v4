@@ -30,17 +30,39 @@ const C_STR_DATAFOLDER = '/Users/bryan/Code/data/jobs/';
 const C_STR_FOLDER_JOBSEARCH= '/Users/bryan/Dropbox/Job Search 2013/';
 
 
-function __get_ScooperUtil_args__()
+function __initializeArgs__()
 {
+    $GLOBALS['SITES_SUPPORTED'] = array();
 
     # specify some options
     $options = array(
         'include_all' => array(
             'description'   => 'Include all job sites.',
-            'default'       => 0,
+            'default'       => 1,
             'type'          => Pharse::PHARSE_INTEGER,
             'required'      => false,
             'short'      => 'all',
+        ),
+        'number_days' => array(
+            'description'   => 'Number of days ago to pull job listings for..',
+            'default'       => 0,
+            'type'          => Pharse::PHARSE_INTEGER,
+            'required'      => false,
+            'short'      => 'days',
+        ),
+        'output_folder' => array(
+            'description'   => 'Output file path to use.',
+            'default'       => null,
+            'type'          => Pharse::PHARSE_STRING,
+            'required'      => false,
+            'short'      => 'o',
+        ),
+        'filter_notinterested' => array(
+            'description'   => 'Exclude listings that are marked as "not interested".',
+            'default'       => 0,
+            'type'          => Pharse::PHARSE_INTEGER,
+            'required'      => false,
+            'short'      => 'fni',
         ),
         'include_amazon' => array(
             'description'   => 'Include Amazon.',
@@ -70,36 +92,41 @@ function __get_ScooperUtil_args__()
             'required'      => false,
             'short'      => 'indeed',
         ),
-        'number_days' => array(
-            'description'   => 'Number of days ago to pull job listings for..',
-            'default'       => 0,
-            'type'          => Pharse::PHARSE_INTEGER,
-            'required'      => false,
-            'short'      => 'days',
-        ),
-        'filter_notinterested' => array(
-            'description'   => 'Exclude listings that are marked as "not interested".',
-            'default'       => 0,
-            'type'          => Pharse::PHARSE_INTEGER,
-            'required'      => false,
-            'short'      => 'fni',
-        ),
-        'output_folder' => array(
-            'description'   => 'Output file path to use.',
-            'default'       => null,
-            'type'          => Pharse::PHARSE_STRING,
-            'required'      => false,
-            'short'      => 'o',
-        ),
-
     );
 
 //    # You may specify a program banner thusly:
 //    $banner = "Find and export basic website, Moz.com, Crunchbase and Quantcast data for any company name or URL.";
 //    Pharse::setBanner($banner);
 
+    $GLOBALS['OPTS_SETTINGS'] = $options;
+}
+
+function __getPassedArgs__()
+{
     # After you've configured Pharse, run it like so:
-    $GLOBALS['OPTS'] = Pharse::options($options);
+   $GLOBALS['OPTS'] = Pharse::options($GLOBALS['OPTS_SETTINGS']);
+
+    foreach($GLOBALS['SITES_SUPPORTED']  as $site)
+    {
+        $GLOBALS['SITES_SUPPORTED'] [$site['site_name']]['include_in_run'] = is_IncludeSite($site['site_name']);
+    }
+
+    $nDays = get_PharseOptionValue('number_days');
+    if($nDays == false) { $GLOBALS['OPTS']['number_days'] = 1; }
+
+
+    if($GLOBALS['OPTS']['filter_notinterested_given'])
+    {
+        $GLOBALS['OPTS']['filter_notinterested'] = false;
+    }
+    else
+    {
+        $GLOBALS['OPTS']['filter_notinterested'] = true;
+    }
+
+    $strOutputDir =  get_PharseOptionValue("output_folder");
+    if($strOutputDir == false)  { $strOutputDir  = null; }
+
 
     return $GLOBALS['OPTS'];
 }
@@ -124,4 +151,15 @@ function get_PharseOptionValue($strOptName)
     }
 
     return false;
+}
+
+
+function intceil($number)
+{
+    if(is_string($number)) $number = floatval($number);
+
+    $ret = ( is_numeric($number) ) ? ceil($number) : false;
+    if ($ret != false) $ret = intval($ret);
+
+    return $ret;
 }

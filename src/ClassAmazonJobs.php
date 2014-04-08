@@ -154,8 +154,7 @@ class ClassAmazonJobs extends ClassJobsSite
 
                 $briefObj = $locObj ->nextSibling();
 
-                if(true)
-//                if($this->is_IncludeBrief() == true)
+                if($this->is_IncludeBrief() == true)
                 {
                     $brief  = trim($briefObj->plaintext);
                     $arrBrief = explode("Short Description", $brief);

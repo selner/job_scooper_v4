@@ -56,6 +56,8 @@ class ClassJobsSiteExport
         $this->_strFilePathInput_ExcludedTitles = C_STR_DATAFOLDER  . "bryans_list_exclude_titles.csv";
     }
 
+     function getMyBitFlags() { return $this->_bitFlags; }
+
     /**
      * TODO:  DOC
      *
@@ -398,8 +400,6 @@ class ClassJobsSiteExport
 
         return $objSimpleHTML;
     }
-
-
 
 }
 

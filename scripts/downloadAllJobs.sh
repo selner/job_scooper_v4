@@ -2,26 +2,26 @@
 
 # get an output file name
 now=$(date +"%Y_%m_%d")
-path="/Users/bryan/Dropbox/Job Search 2013/"
+dest="/Users/bryan/Code/data/jobs/"
 endfilename="_newjobs_filtered.csv"
 endlogname="_newjobs_run.log"
 enddestname="latest_newjobs_filtered.csv"
 filename=$now$endfilename
 file=$path$filename
 log=$path$now$endlogname
-destpath="/Users/bryan/Code/data/"
-destname=$destpath$enddestname
-endjobspath="jobs/"
 endamznpath="amazon_jobs/"
-amzndir=$destpath$endjobspath$endamznpath
+amzndir=$path$endamznpath
+finalpath="/Users/bryan/Dropbox/Job Search - Bryan Tracking/"
 
-echo 'Output file will be ' $file 2>&1 1>>"$log"
-echo 'Latest file will be also written to '  $destname 2>&1 1>>"$log"
+echo 'Output file will be ' $file 2>&1 1>"$log"
 echo 'Log file is ' $log  2>&1 1>>"$log"
 
 when="unknown"
 
-case "$(date +%a)" in Mon|Wed|Fri|Sat) 
+# BUGBUG
+# case "$(date +%a)" in Mon|Wed|Fri|Sat)
+case "$(date +%a)" in  Mon|Wed|Fri|Tue|Thu|Sat|Sun)
+
   when="noteveryday"
   script_flags=" -all " 
   echo 'Downloading HTML for jobs from Amazon.com new jobs site... ' 2>&1 1>>"$log"
@@ -29,10 +29,10 @@ case "$(date +%a)" in Mon|Wed|Fri|Sat)
   echo 'New jobs site download complete.' $log  2>&1 1>>"$log"
 esac
 
-case "$(date +%a)" in  Tue|Thu|Sat|Sun) 
-  when="everyday"
-  script_flags=" -indeed -simplyhired "
-esac
+#case "$(date +%a)" in  Tue|Thu|Sat|Sun)
+#  when="everyday"
+#  script_flags=" -indeed -simplyhired "
+#esac
 echo 'Running script case $when using the following flags:  '$script_flags 2>&1 1>>"$log"
 
 
@@ -40,10 +40,10 @@ echo 'Running script case $when using the following flags:  '$script_flags 2>&1 
 #
 # create the jobs directory for output if needed
 #
-mkdir -p $destpath/jobs/amazon_jobs 2>&1 1>>"$log"
-mkdir -p $destpath/jobs/indeed_jobs 2>&1 1>>"$log"
-mkdir -p $destpath/jobs/simply_jobs 2>&1 1>>"$log"
-mkdir -p $destpath/jobs/craigslist_jobs 2>&1 1>>"$log"
+mkdir -p $path/jobs/amazon_jobs 2>&1 1>>"$log"
+mkdir -p $path/jobs/indeed_jobs 2>&1 1>>"$log"
+mkdir -p $path/jobs/simply_jobs 2>&1 1>>"$log"
+mkdir -p $path/jobs/craigslist_jobs 2>&1 1>>"$log"
 
 echo 'Downloading new jobs... ' 2>&1 1>>"$log"
 
@@ -52,8 +52,9 @@ echo 'Downloading new jobs... ' 2>&1 1>>"$log"
 # Now process that data and pull down the jobs from the old
 # site.  
 # php ../../scooper_utils/runJobs.php  -fni $1 $2 -o "$file" 2>&1 1>>"$log"
-echo 'Running "php ../../scooper_utils/runJobs.php $script_flags -o "$file" ' 2>&1 1>>"$log"
+echo "Running php ../../scooper_utils/runJobs.php $script_flags -o '$file'"  2>&1 1>>"$log"
 php ../runJobs.php $script_flags -o "$file" 2>&1 1>>"$log"
+cp "$file" "$finalpath"   2>&1 1>>"$log"
 
 echo 'Download complete. ' 2>&1 1>>"$log"
 

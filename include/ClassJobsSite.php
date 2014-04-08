@@ -20,9 +20,9 @@ require_once dirname(__FILE__) . '/ClassJobsSiteExport.php';
 abstract class ClassJobsSite extends ClassJobsSiteExport
 {
     protected $siteName = 'NAME-NOT-SET';
-    public $arrLatestJobs = null;
+    protected $arrLatestJobs = null;
 
-    abstract function getMyJobs($strAlternateLocalHTMLFile = null, $fIncludeFilteredJobsInResults = true);
+    abstract function getMyJobs($nDays = null, $fIncludeFilteredJobsInResults = true);
 
 
     function __destruct()
@@ -101,6 +101,14 @@ abstract class ClassJobsSite extends ClassJobsSiteExport
         $nJobsNotMarked = 0;
         $nJobsMarkedAutoExcluded = 0;
 
+
+        // * * * * * * *
+        //
+        //  TODO
+        //
+        // * * * * * * *
+/*
+
         $nIndex = 0;
         foreach($this->arrLatestJobs as $job)
         {
@@ -143,6 +151,8 @@ abstract class ClassJobsSite extends ClassJobsSiteExport
 
 
         __debug__printLine("Completed marking auto-excluded titles:  '".$nJobsMarkedAutoExcluded ."' were marked as auto excluded, " . $nJobsSkipped . " skipped and ". $nJobsNotMarked . " jobs were not." , C__DISPLAY_ITEM_RESULT__);
+*/
+
     }
 
     /**
@@ -163,7 +173,7 @@ abstract class ClassJobsSite extends ClassJobsSiteExport
         }
         else
         {
-            __debug__printLine("Applying " .count($this->arrTitlesToFilter) . " to " .count($this->arrLatestJobs) . " job records.", C__DISPLAY_MOMENTARY_INTERUPPT__);
+            __debug__printLine("Applying " .count($this->arrTitlesToFilter) . " title exclusion rules to " .count($this->arrLatestJobs) . " job records.", C__DISPLAY_MOMENTARY_INTERUPPT__);
 
         }
 
@@ -308,11 +318,8 @@ abstract class ClassJobsSite extends ClassJobsSiteExport
      * @param  string TODO DOC
      * @return string TODO DOC
      */
-    private function _addJobsToList_($arrAdd)
+    function _addJobsToList_($arrAdd)
     {
-
-//        var_dump('arrLatest = ', count($this->arrLatestJobs), $this->arrLatestJobs);
-//        var_dump('arrAdd = ', count($arrAdd), $arrAdd);
 
         if(!is_array($arrAdd) || count($arrAdd) == 0)
         {
@@ -320,15 +327,22 @@ abstract class ClassJobsSite extends ClassJobsSiteExport
             return;
         }
 
-        if(is_array($this->arrLatestJobs))
+
+        if($this->arrLatestJobs == null || !is_array($this->arrLatestJobs ))
         {
-            $this->arrLatestJobs = my_merge_add_new_keys($this->arrLatestJobs, $arrAdd );
+            $this->arrLatestJobs = array();
+            $this->arrLatestJobs = array_copy( $arrAdd );
         }
         else
         {
-            $this->arrLatestJobs = array_copy( $arrAdd );
+            foreach($arrAdd as $jobRecord)
+            {
+                   $this->arrLatestJobs[] = $jobRecord;
+            }
 
         }
+
+        return;
 
 
     }
