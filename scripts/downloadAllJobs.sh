@@ -21,8 +21,8 @@ echo 'Log file is ' $log  2>&1 1>>"$log"
 when="unknown"
 
 # BUGBUG
-# case "$(date +%a)" in Mon|Wed|Fri|Sat)
-case "$(date +%a)" in  Mon|Wed|Fri|Tue|Thu|Sat|Sun)
+#case "$(date +%a)" in  Mon|Wed|Fri|Tue|Thu|Sat|Sun)
+case "$(date +%a)" in Mon|Wed|Fri|Sat)
 
   when="noteveryday"
   script_flags=" -all " 
@@ -31,10 +31,10 @@ case "$(date +%a)" in  Mon|Wed|Fri|Tue|Thu|Sat|Sun)
   echo 'New jobs site download complete.' $log  2>&1 1>>"$log"
 esac
 
-#case "$(date +%a)" in  Tue|Thu|Sat|Sun)
-#  when="everyday"
-#  script_flags=" -indeed -simplyhired "
-#esac
+case "$(date +%a)" in  Tue|Thu|Sat|Sun)
+  when="everyday"
+  script_flags=" -indeed -simplyhired "
+esac
 echo 'Running script case $when using the following flags:  '$script_flags 2>&1 1>>"$log"
 
 

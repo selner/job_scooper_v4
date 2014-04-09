@@ -91,7 +91,7 @@ function __initializeArgs__()
         ),
         'include_amazon' => array(
             'description'   => 'Include Amazon.',
-            'default'       => 1,
+            'default'       => -1,
             'type'          => Pharse::PHARSE_INTEGER,
             'required'      => false,
             'short'      => 'amazon',
@@ -149,7 +149,7 @@ function is_IncludeSite($strName)
 
     if($GLOBALS['OPTS'][$strFullOptName . "_given"] == true)
     {
-        if($GLOBALS['OPTS'][$strFullOptName] == "0")
+        if($GLOBALS['OPTS'][$strFullOptName] != null && $GLOBALS['OPTS'][$strFullOptName] == 0 )
         {
             $GLOBALS['OPTS'][$strFullOptName . "_given"] = false;
             return false;

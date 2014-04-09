@@ -283,7 +283,6 @@ class ClassJobsSiteExport
             $strOutFilePath = $this->getOutputFileFullPath('writeMergedJobsCSVFile_');
         }
 
-        var_dump('$arrFilesToCombine', $arrFilesToCombine);
 
         if(!is_array($arrFilesToCombine) || count($arrFilesToCombine) == 0)
         {

@@ -98,12 +98,14 @@ function __runAllJobs__($arrSearches, $arrSourceFiles = null, $nDays = -1, $fInc
 
 
     $arrOutDetails_Main = $GLOBALS['output_file_details'];
+/*    var_dump($arrOutDetails_Main);
     if(strlen($arrOutDetails_Main['full_file_path'] == 0))
     {
         $strTemp = $classJobExportHelper_Main->getOutputFileFullPath("ALL-", "jobs", "csv");
         $arrOutDetails_Main = parseFilePath($strTemp, false);
     }
-
+   var_dump($arrOutDetails_Main);
+*/
 
     $strTemp = $arrOutDetails_Main['directory'] . "/" . $arrOutDetails_Main['file_name_base']  ."_filtered".".".$arrOutDetails_Main['file_extension'];
     $arrOutDetails_Filtered = parseFilePath($strTemp );
@@ -117,6 +119,7 @@ function __runAllJobs__($arrSearches, $arrSourceFiles = null, $nDays = -1, $fInc
         throw new ErrorException("Failed to combine new job lists with source files.");
     }
 
+    var_dump($arrOutDetails_Main);
     $retFile = $classJobExportHelper_Main->writeMergedJobsCSVFile($arrOutDetails_Main['full_file_path'], $arrOutputFilesToIncludeInResults, null, false);
     if(!$retFile)
     {

@@ -82,8 +82,20 @@ abstract class ClassJobsSiteGeneric extends ClassJobsSite
     function getJobsForAllSearches($nDays = -1, $fIncludeFilteredJobsInResults = true)
     {
 
+
         foreach($this->arrSearchesToReturn as $search)
         {
+            $strIncludeKey = 'include_'.strtolower($search['site_name']);
+
+            var_dump($strIncludeKey);
+            var_dump($GLOBALS['OPTS'][$search['site_name']]);
+            if($GLOBALS['OPTS'][$strIncludeKey] == null || $GLOBALS['OPTS'][$strIncludeKey] == 0)
+            {
+                __debug__printLine("Search " . $search['search_name'] . " on site ". $search['site_name'] . " has been excluded because the site was excluded.", C__DISPLAY_ITEM_DETAIL__);
+
+                continue;
+            }
+
             $class = null;
             $nLastCount = count($this->arrLatestJobs);
             __debug__printLine("Running search " . $search['search_name'] . " against site ". $search['site_name'], C__DISPLAY_ITEM_DETAIL__);
@@ -171,7 +183,7 @@ abstract class ClassJobsSiteGeneric extends ClassJobsSite
 
         $GLOBALS['OPTS_SETTINGS'][$strIncludeKey ] = array(
                 'description'   => 'Include ' .strtolower($this->siteName) . ' in the results list.' ,
-                'default'       => 0,
+                'default'       => -1,
                 'type'          => Pharse::PHARSE_INTEGER,
                 'required'      => false,
                 'short'      => strtolower($this->siteName)
