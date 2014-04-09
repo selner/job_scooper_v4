@@ -14,11 +14,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/../include/ClassJobsSiteGeneric.php';
+require_once dirname(__FILE__) . '/../include/ClassJobsSite.php';
 
 
 
-class ClassGlassdoor extends ClassJobsSiteGeneric
+class ClassGlassdoor extends ClassJobsSite
 {
     protected $siteName = 'Glassdoor';
     protected $siteBaseURL = 'http://www.glassdoor.com';
@@ -102,7 +102,7 @@ class ClassGlassdoor extends ClassJobsSiteGeneric
                 $item['brief'] =trim( $node->find("p[class='desc']")[0]->plaintext);
             }
 
-            $ret[] = $item;
+            $ret[] = $this->normalizeItem($item);
         }
 
         return $ret;

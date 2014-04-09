@@ -16,12 +16,26 @@
  */
 
 
-require_once dirname(__FILE__) . '/../include/ClassJobsSiteGeneric.php';
+require_once dirname(__FILE__) . '/../include/ClassJobsSite.php';
 
+class ClassJobsSiteNoActualSite extends ClassJobsSite
+{
+    protected $siteName = 'ClassNoJobsSite';
 
-class ClassMultiSiteSearch extends ClassJobsSiteGeneric
+    function parseJobsListForPage($objSimpHTML)
+    {
+        throw new ErrorException("parseJobsListForPage not supported for class ClassNoJobsSite");
+    }
+    function parseTotalResultsCount($objSimpHTML)
+    {
+        throw new ErrorException("parseTotalResultsCount not supported for class ClassNoJobsSite");
+    }
+}
+
+class ClassMultiSiteSearch extends ClassJobsSite
 {
     protected $siteName = 'Multisite';
+    protected $flagAutoMarkListings = false; // All the called classes do it for us already
 
     function parseJobsListForPage($objSimpHTML)
     {
@@ -29,17 +43,17 @@ class ClassMultiSiteSearch extends ClassJobsSiteGeneric
     }
     function parseTotalResultsCount($objSimpHTML) { throw new ErrorException("parseJobsListForPage not supported for class ClassMultiSiteSearch"); }
 
-    function __construct($arrSearches = null)
+    function __construct($bitFlags = null, $strOutputDirectory = null, $arrSearches = null)
     {
+        parent::__construct($bitFlags, $strOutputDirectory);
         if($arrSearches != null)
         {
-
            foreach($arrSearches as $search)
            {
                 $class = null;
                 $strSite = strtolower($search['site_name']);
                 $strSiteClass = $this->arrSiteClasses[$strSite];
-                $class = new $strSiteClass(null, $GLOBALS["bit_flags"]);
+                $class = new $strSiteClass($bitFlags, $strOutputDirectory);
            }
 
         }

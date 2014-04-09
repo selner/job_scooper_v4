@@ -15,22 +15,111 @@
  * under the License.
  */
 require_once dirname(__FILE__) . '/scooter_utils_common.php';
-require_once dirname(__FILE__) . '/ClassJobsSiteExport.php';
+require_once dirname(__FILE__) . '/ClassJobsSiteCommon.php';
 
-abstract class ClassJobsSite extends ClassJobsSiteExport
+const C__JOB_PAGECOUNT_NOTAPPLICABLE__ = -1;
+const C__JOB_ITEMCOUNT_UNKNOWN__ = 11111;
+
+//
+// Jobs List Filter Functions
+//
+function isMarked_AutoDupe($var)
+{
+    if(substr_count($var['interested'], "Likely Dup") > 0) return true;
+
+    return false;
+}
+
+function isMarked_Auto($var)
+{
+    $GLOBALS['CNT'][$var['interested']] +=1;
+    if(substr_count($var['interested'], C__STR_TAG_AUTOMARKEDJOB__) > 0)
+    {
+        return true;
+    };
+
+    return false;
+}
+
+function isMarked_NotInterested($var)
+{
+    if(substr_count($var['interested'], "No ") > 0) return true;
+    return false;
+}
+
+function isMarked_InterestedOrBlank($var)
+{
+    if((substr_count($var['interested'], "No ") > 0) || isMarked_AutoDupe($var) == true) return false;
+    return true;
+}
+
+function isJobFilterable($var)
+{
+    $filterYes = false;
+
+    if(isMarked_Auto($var) == true) $filterYes = true;
+    if(isMarked_NotInterested($var) == true) $filterYes = true;
+
+    return $filterYes;
+}
+
+function includeJobInFilteredList($var)
+{
+    return !(isJobFilterable($var));
+}
+
+
+
+abstract class ClassJobsSite extends ClassJobsSiteCommon
 {
     protected $siteName = 'NAME-NOT-SET';
     protected $arrLatestJobs = null;
+    protected $arrSearchesToReturn = null;
+    protected $nJobListingsPerPage = 20;
+    protected $flagAutoMarkListings = true; // All the called classes do it for us already
 
-    abstract function getMyJobs($nDays = null, $fIncludeFilteredJobsInResults = true);
-
+    function __construct($bitFlags = null, $strOutputDirectory = null)
+    {
+        $this->_bitFlags = $bitFlags;
+        $this->setOutputFolder($strOutputDirectory);
+        $this->addUserOptionFlag();
+        $this->addToSitesList();
+    }
 
     function __destruct()
     {
-        __debug__printLine("Done with ".$this->siteName." processing.", C__DISPLAY_ITEM_START__);
+        __debug__printLine("Closing ".$this->siteName." class instance.", C__DISPLAY_ITEM_START__);
+
+        //
+        // Write out the interim data to file if we're debugging
+        //
+        if($GLOBALS['DEBUG'] == true)
+        {
+
+            if($this->arrLatestJobs != null)
+            {
+                $strDebugFileName = $this->getMyOutputFileFullPath("debug");
+                __debug__printLine("Writing ". $this->siteName." " .count($this->arrLatestJobs) ." job records to " . $strDebugFileName . " for debugging (if needed).", C__DISPLAY_ITEM_START__);
+                $this->writeMyJobsListToFile($strDebugFileName, false);
+
+            }
+
+
+        }
+
     }
 
 
+    abstract function parseJobsListForPage($objSimpHTML); // returns an array of jobs
+    abstract function parseTotalResultsCount($objSimpHTML); // returns a settings array
+
+    protected $arrSiteClasses = array(
+        'glassdoor' => 'ClassGlassdoor',
+        'indeed' => 'ClassIndeed',
+        'simplyhired' => 'ClassSimplyHired',
+        'porch' => 'ClassPorchJobs',
+        'craigslist' => 'ClassCraigslist',
+    );
 
     /**
      * TODO:  DOC
@@ -41,6 +130,10 @@ abstract class ClassJobsSite extends ClassJobsSiteExport
      * @return string TODO DOC
      */
     function getMyJobsList() { return $this->arrLatestJobs; }
+    function loadMyJobsListFromCSVs($arrFilesToLoad)
+    {
+        $this->arrLatestJobs = $this->loadJobsListFromCSVs($arrFilesToLoad);
+    }
 
 
     /**
@@ -52,7 +145,7 @@ abstract class ClassJobsSite extends ClassJobsSiteExport
      * @param  integer $fIncludeFilteredJobsInResults If true, filters out jobs flagged with "not interested" values from the results.
      * @return string If successful, the final output CSV file with the full jobs list
      */
-    function downloadAllUpdatedJobs($nDays = -1, $arrInputFilesToMergeWithResults = null, $fIncludeFilteredJobsInResults = true )
+    function downloadAllUpdatedJobs($nDays = -1)
     {
         $retFilePath = '';
 
@@ -63,164 +156,15 @@ abstract class ClassJobsSite extends ClassJobsSiteExport
         // Call the child classes getJobs function to update the object's array of job listings
         // and output the results to a single CSV
         //
-        $this->getMyJobs($nDays, $fIncludeFilteredJobsInResults);
+        $this->getJobsForAllSearches($nDays);
 
-        //
-        // Now, filter those jobs and mark any rows that are titles we want to automatically
-        // exclude
-        //
-        $this->markMyJobsList_SetAutoExcludedTitles();
-
-        //
-        // Now, mark jobs that look like duplicates by company name & title.
-        //
-        $this->markMyJobsList_SetLikelyDuplicatePosts();
-
-        //
-        // Write the resulting array of the latest job postings from this site to
-        // a CSV file for the user
-        //
-        $strOutFilePath = $this->getOutputFileFullPath();
-        $this->writeMyJobsListToFile($strOutFilePath , $fIncludeFilteredJobsInResults);
-
-        if(count($arrInputFilesToMergeWithResults ) >= 1)
+        if($this->flagAutoMarkListings == true)
         {
-            $retFilePath = $this->writeMergedJobsCSVFile($strOutFilePath, $arrInputFilesToMergeWithResults, $this->arrLatestJobs, $fIncludeFilteredJobsInResults);
+            $this->markMyJobsListWithAutoItems();
         }
-
-
-        return $strOutFilePath;
     }
 
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
-    function markMyJobsList_SetLikelyDuplicatePosts()
-    {
-        $nJobsSMatched = 0;
-        $nUniqueRoles = 0;
-        $nProblemRolesSkipped= 0;
 
-
-        $arrCompanyRoleNamePairsFound = $GLOBALS['company_role_pairs'];
-        if($arrCompanyRoleNamePairsFound == null) { $arrCompanyRoleNamePairsFound = array(); }
-
-        __debug__printLine("Checking " . count($this->arrLatestJobs) . " jobs for duplicates by company/role pairing. ".count($arrCompanyRoleNamePairsFound)." previous roles are being used to seed the process." , C__DISPLAY_ITEM_START__);
-
-        $nIndex = 0;
-        foreach($this->arrLatestJobs as $job)
-        {
-
-            if(strlen($job['company']) == 0 || strlen($job['job_title']) == 0)
-            {
-                // we're missing one part of the key we need, so cannot dedupe
-                // it successfully.  Skip it and move on.
-                $nProblemRolesSkipped++;
-                __debug__printLine("Skipping " . $job['job_title'] . "/". $job['company'] . " due to insufficient information to detect duplicates with." , C__DISPLAY_ITEM_DETAIL__);
-            }
-            else
-            {
-
-                $strRoleKey = $job['company'] . '-'. $job['job_title'];
-
-                // is it the first time we've seen this pairing?
-                if($arrCompanyRoleNamePairsFound[$strRoleKey] == null)
-                {
-                    // add it to the list
-                    $arrCompanyRoleNamePairsFound[$strRoleKey] = $job;
-                    $nUniqueRoles++;
-                }
-                else
-                {
-
-//                    $datePulled = strtotime($this->arrLatestJobs['date_pulled'], TODO);
-//                   $now = new DateTime();
-
-//                    if($now->diff($datePulled)->days > 60) // if it's been over 60 days, then
-
-                    //
-                    // Not the first time we've seen this before so
-                    // mark it as a likely dupe and note who it's a dupe of
-                    //
-                    $this->arrLatestJobs[$nIndex]['interested'] = 'Maybe (Likely Duplicate Job Post)[auto-marked]';
-                    $this->arrLatestJobs[$nIndex]['notes'] =  $this->arrLatestJobs[$nIndex]['notes'] . " *** Likely a duplicate post of ". $arrCompanyRoleNamePairsFound[$strRoleKey]['job_site'] . " ID#" . $arrCompanyRoleNamePairsFound[$strRoleKey]['job_id'];
-                    $nJobsSMatched++;
-                }
-            }
-            $nIndex++;
-        }
-
-        // set it back to the global so we lookup better each search
-        $GLOBALS['company_role_pairs'] = array_copy($arrCompanyRoleNamePairsFound);
-
-
-        __debug__printLine("Completed marking posts that are likely duplicates by company/title:  ".$nJobsSMatched ." roles marked duplicate,  " . $nProblemRolesSkipped . " skipped,  ". $nUniqueRoles . " unique jobs.." ,    C__DISPLAY_ITEM_DETAIL__);
-        __debug__printLine(count($GLOBALS['company_role_pairs']) ." company/role pairs have been stored to check the next jobs list.",C__DISPLAY_ITEM_DETAIL__);
-    }
-
-    /**
-     *
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
-    function markMyJobsList_SetAutoExcludedTitles()
-    {
-
-        $nJobsSkipped = 0;
-        $nJobsNotMarked = 0;
-        $nJobsMarkedAutoExcluded = 0;
-
-        $nIndex = 0;
-        foreach($this->arrLatestJobs as $job)
-        {
-            // First, make sure we don't already have a value in the interested column.
-            // if we do, skip it and move to the next one
-            if(strlen($this->arrLatestJobs[$nIndex]['interested']) > 0)
-            {
-                $nJobsSkipped++;
-                continue;
-            }
-
-            // Look for a matching title in our list of excluded titles
-            $varValMatch = $this->arrTitlesToFilter[$job['job_title']];
-            //           __debug__printLine("Matching listing job title '".$job['job_title'] ."' and found " . (!$varValMatch  ? "nothing" : $varValMatch ) . " for " . $this->arrTitlesToFilter[$job['job_title']], C__DISPLAY_ITEM_DETAIL__);
-
-            // if we got a match, we'll get an array back with that title and some other data
-            // such as the reason it's excluded
-            //
-
-            if(is_array($varValMatch))
-            {
-                if(strlen($varValMatch['exclude_reason']) > 0)
-                {
-                    $this->arrLatestJobs[$nIndex]['interested'] = $varValMatch['exclude_reason'] . "[auto-filtered]";
-                }
-                else
-                {
-                    $this->arrLatestJobs[$nIndex]['interested'] = 'UNKNOWN - FOUND MATCH BUT NO REASON (Auto)';
-                    __debug__printLine("Excluded title " . $job['job_title'] . " did not have an exclude reason.  Cannot mark.", C__DISPLAY_ERROR__);
-                }
-                $nJobsMarkedAutoExcluded++;
-            }
-            else              // we're ignoring the Excluded column fact for the time being. If it's in the list, it's excluded
-            {
-                $nJobsNotMarked++;
-                __debug__printLine("Job title '".$job['job_title'] ."' was not found in the exclusion list.  Keeping for review." , C__DISPLAY_ITEM_DETAIL__);
-            }
-            $nIndex++;
-        }
-
-
-        __debug__printLine("Completed marking auto-excluded titles:  '".$nJobsMarkedAutoExcluded ."' were marked as auto excluded, " . $nJobsSkipped . " skipped and ". $nJobsNotMarked . " jobs were not." , C__DISPLAY_ITEM_RESULT__);
-    }
 
     /**
      * TODO:  DOC
@@ -286,24 +230,34 @@ abstract class ClassJobsSite extends ClassJobsSiteExport
         return !$notVal;
     }
 
-    function getOutputFileFullPath($strFilePrefix = "", $strBase = "jobs", $strExtension = "csv")
+/*    function getOutputFileFullPath($strFilePrefix = "", $strBase = "jobs", $strExtension = "csv")
     {
         return parent::getOutputFileFullPath($this->siteName . "_" . $strFilePrefix, $strBase, $strExtension);
+    }
+*/
+    function getMyOutputFileFullPath($strFilePrefix = "")
+    {
+        return parent::getOutputFileFullPath($this->siteName . "_" . $strFilePrefix, "jobs", "csv");
+    }
+
+    function markMyJobsList_withAutoItems()
+    {
+        $this->markJobsList_withAutoItems($this->arrLatestJobs, $this->siteName);
     }
 
 
     /**
-     * Write this class instance's list of jobs to an output CSV file
+     * Write this class instance's list of jobs to an output CSV file.  Always rights
+     * the full unfiltered list.
      *
      *
      * @param  string $strOutFilePath The file to output the jobs list to
      * @param  Array $arrMyRecordsToInclude An array of optional job records to combine into the file output CSV
-     * @param  integer $fIncludeFilteredJobsInResults False if you do not want jobs marked as interested = "No *" excluded from the results
      * @return string $strOutFilePath The file the jobs was written to or null if failed.
      */
-    function writeMyJobsListToFile($strOutFilePath = null, $fIncludeFilteredJobsInResults = true)
+    function writeMyJobsListToFile($strOutFilePath = null)
     {
-        return $this->writeJobsListToFile($strOutFilePath, $this->arrLatestJobs, $fIncludeFilteredJobsInResults);
+        return $this->writeJobsListToFile($strOutFilePath, $this->arrLatestJobs, true, false, $this->siteName);
     }
 
 
@@ -315,35 +269,167 @@ abstract class ClassJobsSite extends ClassJobsSiteExport
      * @param  string TODO DOC
      * @return string TODO DOC
      */
-    function _addJobsToList_($arrAdd)
+    function _addJobsToMyJobsList_($arrAdd)
     {
-
-        if(!is_array($arrAdd) || count($arrAdd) == 0)
-        {
-            // skip. no jobs to add
-            return;
-        }
-
-
-        if($this->arrLatestJobs == null || !is_array($this->arrLatestJobs ))
-        {
-            $this->arrLatestJobs = array();
-            $this->arrLatestJobs = array_copy( $arrAdd );
-        }
-        else
-        {
-            foreach($arrAdd as $jobRecord)
-            {
-                   $this->arrLatestJobs[] = $jobRecord;
-            }
-
-        }
-
-        return;
-
+        addJobsToJobsList($this->arrLatestJobs, $arrAdd);
 
     }
 
+    function getJobsForAllSearches($nDays = -1, $fIncludeFilteredJobsInResults = true)
+    {
 
+
+        foreach($this->arrSearchesToReturn as $search)
+        {
+            $strIncludeKey = 'include_'.strtolower($search['site_name']);
+
+            if($GLOBALS['OPTS'][$strIncludeKey] == null || $GLOBALS['OPTS'][$strIncludeKey] == 0)
+            {
+                __debug__printLine($search['site_name'] . " excluded, so skipping its '" . $search['search_name'] . "' search.", C__DISPLAY_WARNING__);
+
+                continue;
+            }
+
+            $class = null;
+            $nLastCount = count($this->arrLatestJobs);
+            __debug__printLine("Running ". $search['site_name'] . " search '" . $search['search_name'], C__DISPLAY_ITEM_START__);
+
+            $strSite = strtolower($search['site_name']);
+            $strSiteClass = $this->arrSiteClasses[$strSite];
+            $class = new $strSiteClass;
+
+
+            $class->getMyJobsForSearch($search, $nDays, $fIncludeFilteredJobsInResults);
+            $this->_addJobsToMyJobsList_($class->getMyJobsList());
+            // var_dump($this->siteName . " count loop end -- adding ".count($class->getMyJobsList()) . " to the previous " . $nLastCount ." so allJobs now = " . count($this->arrLatestJobs));
+        }
+
+    }
+    function getMyJobsForSearch($search, $nDays = -1, $fIncludeFilteredJobsInResults = true)
+    {
+        $nItemCount = 1;
+        $nPageCount = 1;
+
+        $strURL = $this->_getURLfromBase_($search, $nDays, $nPageCount, $nItemCount);
+        __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$search['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
+        $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL );
+        if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
+
+        $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML);
+        if($strTotalResults == C__JOB_PAGECOUNT_NOTAPPLICABLE__)
+        {
+            $totalPagesCount = 1;
+            $nTotalListings = C__JOB_ITEMCOUNT_UNKNOWN__ ; // placeholder because we don't know how many are on the page
+        }
+        else
+        {
+            $strTotalResults  = intval(str_replace(",", "", $strTotalResults));
+            $nTotalListings = intval($strTotalResults);
+            $totalPagesCount = intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
+            if($totalPagesCount < 1)  $totalPagesCount = 1;
+        }
+
+        if($nTotalListings <= 0)
+        {
+            __debug__printLine("No new job listings were found on " . $this->siteName . " for search '" . $search['search_name']."'.", C__DISPLAY_ITEM_START__);
+            return;
+        }
+
+        __debug__printLine("Downloading " . $totalPagesCount . " pages with ". ($nTotalListings == C__JOB_ITEMCOUNT_UNKNOWN__  ? "a not yet know number of" : $nTotalListings). " total jobs  " . $this->siteName . " for search '" . $search['search_name']."'.", C__DISPLAY_ITEM_START__);
+
+        while ($nPageCount <= $totalPagesCount )
+        {
+            $arrPageJobsList = null;
+
+            $objSimpleHTML = null;
+            $strURL = $this->_getURLfromBase_($search, $nDays, $nPageCount, $nItemCount);
+            __debug__printLine("Querying " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
+
+            if(!$objSimpleHTML) $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL);
+            if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
+
+            $arrPageJobsList = $this->parseJobsListForPage($objSimpleHTML);
+
+
+            if(!is_array($arrPageJobsList))
+            {
+                // we likely hit a page where jobs started to be hidden.
+                // Go ahead and bail on the loop here
+                __debug__printLine("Not getting results back from ". $this->siteName . " starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", C__DISPLAY_ITEM_START__);
+                $nPageCount = $totalPagesCount ;
+            }
+            else
+            {
+                $this->_addJobsToMyJobsList_($arrPageJobsList);
+                $nItemCount += $this->nJobListingsPerPage;
+            }
+
+            // clean up memory
+            $objSimpleHTML->clear();
+            unset($objSimpleHTML);
+            $nPageCount++;
+
+        }
+
+        __debug__printLine("Total of " . $nItemCount . " jobs were downloaded for " . $this->siteName . " search " . $search['search_name'] . " over " . $totalPagesCount . " pages.", C__DISPLAY_ITEM_START__);
+
+    }
+
+    function getDaysURLValue($days) { return ($days == null || $days == "") ? 1 : $days; } // default is to return the raw number
+    function getItemURLValue($nItem) { return ($nItem == null || $nItem == "") ? 0 : $nItem; } // default is to return the raw number
+    function getPageURLValue($nPage) { return ($nPage == null || $nPage == "") ? 0 : $nPage; } // default is to return the raw number
+
+    function addSearchURL($site, $name, $fmtURL)
+    {
+        $this->addSearches(array('site_name' => $site, 'search_name' => $name, 'base_url_format' =>$fmtURL));
+
+    }
+
+    function addSearches($arrSearches)
+    {
+        foreach($arrSearches as $search)
+        {
+            $this->arrSearchesToReturn[] = $search;
+        }
+    }
+
+
+    private function _getURLfromBase_($search, $nDays, $nPage, $nItem = null)
+    {
+        $strURL = $search['base_url_format'];
+        $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($nDays), $strURL );
+        $strURL = str_ireplace("***PAGE_NUMBER***", $nPage, $strURL );
+        $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
+        return $strURL;
+    }
+
+
+
+
+
+    protected function addUserOptionFlag()
+    {
+
+        $strIncludeKey = 'include_'.strtolower($this->siteName);
+
+        $GLOBALS['OPTS_SETTINGS'][$strIncludeKey ] = array(
+            'description'   => 'Include ' .strtolower($this->siteName) . ' in the results list.' ,
+            'default'       => -1,
+            'type'          => Pharse::PHARSE_INTEGER,
+            'required'      => false,
+            'short'      => strtolower($this->siteName)
+        );
+
+    }
+
+    protected  function addToSitesList()
+    {
+        $arrSupportedSites = $GLOBALS['sites_supported'];
+
+        $arrSupportedSites[$this->siteName] = array('site_name' => $this->siteName, 'include_in_run' => -1);
+
+        $GLOBALS['sites_supported'] = $arrSupportedSites;
+
+    }
 
 }

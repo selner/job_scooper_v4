@@ -3,7 +3,7 @@
 
 # delete any jobs lists HTML files older than a day
 # so we know to go get them again 
-find $1 -name amazon-newjobs-page-*.html -mtime +1 -exec rm {} \;
+find $1 -type f -name 'amazon-newjobs-page-*.html' -mtime +1 -exec rm {} \;
 
 
 if [ -f '$1/amazon-newjobs-page-1.html' ];

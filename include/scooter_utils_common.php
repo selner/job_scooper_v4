@@ -48,8 +48,9 @@ const C_STR_FOLDER_JOBSEARCH= '/Users/bryan/Dropbox/Job Search 2013/';
 function __initializeArgs__()
 {
 
-    $GLOBALS['VERBOSE'] = true;
 
+    $GLOBALS['DEBUG'] = false;
+    if($GLOBALS['DEBUG'] == true ) { $GLOBALS['VERBOSE'] = true; }
 
     $GLOBALS['sites_supported'] = array();
 
@@ -142,6 +143,7 @@ function __getPassedArgs__()
     $GLOBALS['OPTS']['filter_notinterested'] = get_PharseOptionValue('filter_notinterested');
 
     $GLOBALS['excluded_titles_file_details'] = get_PharseOption_FileDetails("excluded_titles_file", true);
+
     $GLOBALS['output_file_details'] = get_PharseOption_FileDetails("output_file", false);
 
     $GLOBALS['titles_to_filter'] = null;
@@ -150,6 +152,24 @@ function __getPassedArgs__()
     if($GLOBALS['VERBOSE'] == true) { __log__ ('Options set: '.var_export($GLOBALS['OPTS'], true), C__LOGLEVEL_INFO__); }
 
     return $GLOBALS['OPTS'];
+}
+function strTrimAndLower($str)
+{
+    if($str != null && is_string($str)) { return strtolower(trim($str)); }
+
+    return $str;
+}
+
+function strScrub($str)
+{
+    $ret = strTrimAndLower($str);
+    if($ret != null)
+    {
+        $ret  = str_replace(array(".", ",", "–", "/", "-", ":", ";"), " ", $ret);
+        $ret  = str_replace("  ", " ", $ret);
+        $ret  = str_replace("  ", " ", $ret); // do it twice to catch the multiples
+    }
+    return $ret;
 }
 
 function is_IncludeSite($strName)

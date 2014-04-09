@@ -14,10 +14,10 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/../include/ClassJobsSiteGeneric.php';
+require_once dirname(__FILE__) . '/../include/ClassJobsSite.php';
 
 
-class ClassIndeed extends ClassJobsSiteGeneric
+class ClassIndeed extends ClassJobsSite
 {
     protected $siteName = 'Indeed';
     protected $nJobListingsPerPage = 50;
@@ -100,7 +100,7 @@ class ClassIndeed extends ClassJobsSiteGeneric
                 $item['brief_description'] = $node->find("span[class='summary']")[0]->plaintext;
             }
 
-            $ret[] = $item;
+            $ret[] = $this->normalizeItem($item);
 
         }
 

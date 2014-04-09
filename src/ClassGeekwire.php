@@ -19,9 +19,9 @@ require_once 'common.php';
 require_once dirname(__FILE__) . './include/scooter_utils_common.php';
 
 /****************************************************************************************************************/
-/****                                                                                                        ****/
-/****         Helper Class:  Pulling the StartupLists from Geekwire                                          ****/
-/****                                                                                                        ****/
+/**************                                                                                                         ****/
+/**************          Helper Class:  Pulling the StartupLists from Geekwire                                          ****/
+/**************                                                                                                         ****/
 /****************************************************************************************************************/
 
 $test = new ClassGeekwire();
@@ -70,7 +70,7 @@ class ClassGeekwire
             $nodesTDValues= $node->find('td[class="value"] span');
             $item['employees_on_linkedin'] = $nodesTDValues[2]->plaintext;
 
-            $ret[] = $item;
+            $ret[] = $this->normalizeItem($item);
         }
 
         // clean up memory
@@ -119,7 +119,7 @@ class ClassGeekwire
                 $item['geekwire_category'] = str_replace("&nbsp;", " ", trim($category));
 
 
-                $ret[] = $item;
+                $ret[] = $this->normalizeItem($item);
             }
 
             if(is_array($ret))            $classFileOut->writeArrayToCSVFilew

@@ -23,9 +23,9 @@ require_once dirname(__FILE__) . '/JobSiteClasses.php';
 
 
 /****************************************************************************************************************/
-/****                                                                                                        ****/
-/****         Helper Function:  Pulling the Active Jobs                                                         ****/
-/****                                                                                                        ****/
+/**************                                                                                                         ****/
+/**************          Helper Function:  Pulling the Active Jobs                                                         ****/
+/**************                                                                                                         ****/
 /****************************************************************************************************************/
 
 function __runCommandLine($arrSearches = null, $arrInputFiles = null)
@@ -33,7 +33,7 @@ function __runCommandLine($arrSearches = null, $arrInputFiles = null)
     $GLOBALS["bit_flags"] = C_NORMAL;
     __initializeArgs__();
 
-    $classInit = new ClassMultiSiteSearch($arrSearches);
+    $classInit = new ClassMultiSiteSearch($GLOBALS["bit_flags"], null /* no dir needed */, $arrSearches);
 
 
     __getPassedArgs__();
@@ -49,90 +49,77 @@ function __runAllJobs__($arrSearches, $arrSourceFiles = null, $nDays = -1, $fInc
 {
     $arrSitesSettings =  $GLOBALS['sites_supported'];
     $strOutputFolder = $GLOBALS['output_file_details']['directory'];
+    $strOutName = $GLOBALS['output_file_details']['full_file_path'];
+
+    $arrListAllJobsFromSearches = null;
 
     $strOutputFile_Filtered = null;
 
-    $arrOutputFilesToIncludeInResults = array();
+    __debug__printLine(PHP_EOL."**************  Start  **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
+
+    $classJobExportHelper_Main = new ClassJobsSiteNoActualSite(C_NORMAL, $strOutputFolder);
+
+    if($GLOBALS['output_file_details']['file_name'] == null || $GLOBALS['output_file_details']['full_file_path'] == "")
+    {
+        $strOutName = $classJobExportHelper_Main->getOutputFileFullPath("_runjobs_notnamed_");
+    }
+
+    if($arrSourceFiles != null)
+    {
+        __debug__printLine(PHP_EOL."**************  Loading jobs from ". count($arrSourceFiles) ." user input source files **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
+        $classJobExportHelper_Main->loadMyJobsListFromCSVs($arrSourceFiles);
+        addJobsToJobsList($arrListAllJobsFromSearches, $classJobExportHelper_Main->getMyJobsList());
+    }
 
 
-    __debug__printLine("Adding listings for ". count($arrSearches) ." job searches....", C__DISPLAY_ITEM_START__);
-    $classMulti = new ClassMultiSiteSearch();
-    $classMulti->setOutputFolder($strOutputFolder);
+    __debug__printLine(PHP_EOL."**************  Adding jobs from " . count($arrSearches) . " searches ***************".PHP_EOL, C__DISPLAY_NORMAL__);
+
+    $classMulti = new ClassMultiSiteSearch($GLOBALS["bit_flags"], $strOutputFolder);
     $classMulti->addSearches($arrSearches);
-    $classMulti->downloadAllUpdatedJobs( $GLOBALS['OPTS']['number_days'], null, $fIncludeFilteredJobsInResults );
-    $arrOutputFilesToIncludeInResults[] = $classMulti->writeMyJobsListToFile();
+    $classMulti->downloadAllUpdatedJobs( $GLOBALS['OPTS']['number_days']);
+    addJobsToJobsList($arrListAllJobsFromSearches, $classMulti->getMyJobsList());
 
 
     if($arrSitesSettings['Amazon']['include_in_run'] == true)
     {
         __debug__printLine("Adding Amazon jobs....", C__DISPLAY_ITEM_START__);
-        $class = new ClassAmazonJobs(null, $GLOBALS["bit_flags"]);
-        $class ->setOutputFolder($strOutputFolder);
-        $class->downloadAllUpdatedJobs( $GLOBALS['OPTS']['number_days'], null, $fIncludeFilteredJobsInResults );
+        $class = new ClassAmazonJobs($GLOBALS["bit_flags"], $strOutputFolder);
+        $class->downloadAllUpdatedJobs( $GLOBALS['OPTS']['number_days']);
+        addJobsToJobsList($arrListAllJobsFromSearches, $class->getMyJobsList());
         $arrOutputFilesToIncludeInResults[] = $class->writeMyJobsListToFile();
     }
 
+    __debug__printLine(PHP_EOL."**************  " . count($arrListAllJobsFromSearches) . " job listings from all sources have been loaded.  **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
+
+    __debug__printLine(PHP_EOL."**************  Updating jobs list for known filters ***************".PHP_EOL, C__DISPLAY_NORMAL__);
+    $classJobExportHelper_Main->markJobsList_withAutoItems($arrListAllJobsFromSearches, "RUNNER");
+
+    __debug__printLine(PHP_EOL."**************  Writing final list of " . count($arrListAllJobsFromSearches) . " to filtered and all results files.  ***************  ".PHP_EOL, C__DISPLAY_NORMAL__);
     $class = null;
 
-    $classJobExportHelper_Main = new ClassJobsSiteExport();
-    $classJobExportHelper_Filtered = new ClassJobsSiteExport();
-    $classJobExportHelper_Unfiltered = new ClassJobsSiteExport();
-    $classJobExportHelper_Main->setOutputFolder($strOutputFolder);
-    $classJobExportHelper_Filtered->setOutputFolder($strOutputFolder);
-    $classJobExportHelper_Unfiltered->setOutputFolder($strOutputFolder);
+    // Write to the main output file name that the user passed in
+    $classJobExportHelper_Main->writeJobsListToFile($strOutName, $arrListAllJobsFromSearches, $fIncludeFilteredJobsInResults);
 
-    if($arrSourceFiles  && is_array($arrSourceFiles))
-    {
-        foreach($arrSourceFiles as $source)
-        {
-            //
-            // Push the source files to the front of the array so that they
-            // get into the final jobs list first.  That way the others are
-            // de-duped against them, not the other way around.  Helps prevent
-            // input data loss.
-            //
-            array_push($arrOutputFilesToIncludeInResults, $source);
-            // __debug__printLine("Adding input source file: " . $source, C__DISPLAY_ITEM_START__);
-        }
-    }
+    $strOutDetailsFilteredName = getFullPathFromFileDetails(parseFilePath($strOutName), "", "_filtered");
+    $classJobExportHelper_Main->writeJobsListToFile($strOutDetailsFilteredName, $arrListAllJobsFromSearches, false);
+
+    $strOutDetailsAllResultsName = getFullPathFromFileDetails(parseFilePath($strOutName), "", "_alljobs");
+    $classJobExportHelper_Main->writeJobsListToFile($strOutDetailsAllResultsName , $arrListAllJobsFromSearches, true);
 
 
-    $arrOutDetails_Main = $GLOBALS['output_file_details'];
-    if(strlen($arrOutDetails_Main['file_name_base'] == 0))
-    {
-        $classJobExportHelper_Main->setOutputFolder($arrOutDetails_Main['directory']);
-        $strTemp = $classJobExportHelper_Main->getOutputFileFullPath("ALL-", "jobs", "csv");
-        $arrOutDetails_Main = parseFilePath($strTemp, false);
-    }
+    __debug__printLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
 
-    $strTemp = $arrOutDetails_Main['directory']  . $arrOutDetails_Main['file_name_base']  ."_filtered".".".$arrOutDetails_Main['file_extension'];
-    $arrOutDetails_Filtered = parseFilePath($strTemp );
-
-    $strTemp = $arrOutDetails_Main['directory'] . $arrOutDetails_Main['file_name_base']  ."_unfiltered" .".".$arrOutDetails_Main['file_extension'];
-    $arrOutDetails_Unfiltered = parseFilePath($strTemp );
-
-    $retFile = $classJobExportHelper_Unfiltered->writeMergedJobsCSVFile($arrOutDetails_Unfiltered['full_file_path'], $arrOutputFilesToIncludeInResults, null, true);
-    if(!$retFile)
-    {
-        throw new ErrorException("Failed to combine new job lists with source files.");
-    }
-
-    $retFile = $classJobExportHelper_Main->writeMergedJobsCSVFile($arrOutDetails_Main['full_file_path'], $arrOutputFilesToIncludeInResults, null, false);
-    if(!$retFile)
-    {
-        throw new ErrorException("Failed to combine new job lists with source files.");
-    }
+    $arrRunAutoMark = $arrListAllJobsFromSearches;
+    $classJobExportHelper_Main->markJobsList_SetAutoExcludedTitles($arrRunAutoMark, "run_jobs");
+    $arrAutoDupes = array_filter($arrRunAutoMark, "isMarked_AutoDupe");
+    $arrAllAutoMarked = array_filter($arrRunAutoMark, "isMarked_Auto");
+    $arrNotInterested = array_filter($arrRunAutoMark, "isMarked_NotInterested");
+    $arrInteresting = array_filter($arrRunAutoMark, "isMarked_InterestedOrBlank");
 
 
-    $retFile = $classJobExportHelper_Filtered->writeMergedJobsCSVFile($arrOutDetails_Filtered['full_file_path'], $arrOutputFilesToIncludeInResults, null, true);
-    if(!$retFile)
-    {
-        throw new ErrorException("Failed to combine new job lists with source files.");
-    }
+    __debug__printLine("Total jobs:  ".count($arrListAllJobsFromSearches). PHP_EOL."Interesting: ". count($arrInteresting) . " / ". count($arrNotInterested) . PHP_EOL. "Auto-Marked: ".count($arrAllAutoMarked). " / Dupes: ".count($arrAutoDupes) , C__DISPLAY_SUMMARY__);
 
-
-    __debug__printLine("Complete run." , C__DISPLAY_RESULT__);
-
+    var_dump($GLOBALS['CNT']);
 }
 
 ?>

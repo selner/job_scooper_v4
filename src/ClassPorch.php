@@ -14,9 +14,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/../include/ClassJobsSiteGeneric.php';
+require_once dirname(__FILE__) . '/../include/ClassJobsSite.php';
 
-class ClassPorchJobs extends ClassJobsSiteGeneric
+class ClassPorchJobs extends ClassJobsSite
 {
     protected $siteName = 'Porch';
     protected $siteBaseURL = 'http://www.porch.com';
@@ -30,7 +30,7 @@ class ClassPorchJobs extends ClassJobsSiteGeneric
 
     function parseTotalResultsCount($objSimpHTML)
     {
-        return 1; // only one page ever
+        return C__JOB_PAGECOUNT_NOTAPPLICABLE__; // only one page ever
     }
 
      function parseJobsListForPage($objSimpleHTML)
@@ -55,10 +55,10 @@ class ClassPorchJobs extends ClassJobsSiteGeneric
             $item['job_id'] = $item['job_title'];
 
             $item['job_post_url'] = 'http://about.porch.com/careers/' . $node->find("a")[0]->href;
-            $item['location'] =trim( $node->find("span[class='location']")[0]->plaintext);
+            $item['location'] = $node->find("span[class='location']")[0]->plaintext;
             $item['date_pulled'] = $this->getTodayAsString();
 
-            $ret[] = $item;
+            $ret[] = $this->normalizeItem($item);
 
         }
 

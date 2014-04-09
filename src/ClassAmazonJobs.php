@@ -17,9 +17,9 @@
 require_once dirname(__FILE__) . '/../include/ClassJobsSite.php';
 
 /****************************************************************************************************************/
-/****                                                                                                        ****/
-/****         Helper Class:  Pulling the Active Jobs from Amazon's site                                      ****/
-/****                                                                                                        ****/
+/**************                                                                                                         ****/
+/**************          Helper Class:  Pulling the Active Jobs from Amazon's site                                      ****/
+/**************                                                                                                         ****/
 /****************************************************************************************************************/
 // $test = new ClassAmazonJobs();
 // $test->getJobsFromNewSiteFiles();
@@ -30,6 +30,10 @@ class ClassAmazonJobs extends ClassJobsSite
 {
     protected $siteName = 'Amazon';
 
+
+    function parseJobsListForPage($objSimpHTML) { throw new ErrorException ("Error ClassAmazonJobs does not implement the parseJobsListForPage function.");}
+    function parseTotalResultsCount($objSimpHTML) { throw new ErrorException ("Error ClassAmazonJobs does not implement the parseTotalResultsCount function.");}
+
     public $arrSearches = array(
         'keyword-dir'=> array("name" => 'keyword-dir',  "base_url" => "http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=director&category=*&location=US%2C+WA%2C+Seattle&x=0&y=0&page="),
         'keyword-gm'=> array("name" => 'keyword-gm',  "base_url" => "http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=general+manager&category=*&location=US%2C+WA%2C+Seattle&x=25&y=10&page="),
@@ -38,11 +42,11 @@ class ClassAmazonJobs extends ClassJobsSite
         'pm-newsite' => array("name" => 'pm-newsite', "base_url" => "http://www.amazon.jobs/results?sjid=68,83&checklid=@'US, WA, Seattle'&cname='US, WA, Seattle'"),
     );
 
-    function getMyJobs($nDays = -1, $fIncludeFilteredJobsInResults = true)
+    function getJobsForAllSearches($nDays)
     {
         if($nDays > 1)
         {
-            __debug__printLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Ignoring number of days value and just pulling current listings.", C__DISPLAY_MOMENTARY_INTERUPPT__);
+            __debug__printLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Ignoring number of days value and just pulling current listings.", C__DISPLAY_WARNING__);
 
         }
 
@@ -58,13 +62,12 @@ class ClassAmazonJobs extends ClassJobsSite
         __debug__printLine("Adding Amazon jobs for " . $this->arrSearches['keyword-gm']['name']."...", C__DISPLAY_ITEM_START__);
         $this->_getMyJobsFromOldSiteSearchURL_($this->arrSearches['keyword-gm']);
 
-        __debug__printLine("Skipping new Amazon jobs site ", C__DISPLAY_ITEM_START__);
 
         __debug__printLine("Adding Amazon jobs from new Amazon site...", C__DISPLAY_ITEM_START__);
-        $this->__getMyJobsFrom_Amazon_NewJobs_HTMLFiles__($this->arrSearches['pm-newsite'], $fIncludeFilteredJobsInResults);
+        $this->__getMyJobsFrom_Amazon_NewJobs_HTMLFiles__($this->arrSearches['pm-newsite']);
 
-        $strCombinedFileName = $this->getOutputFileFullPath("AllJobs");
-        $this->writeMyJobsListToFile($strCombinedFileName, $fIncludeFilteredJobsInResults );
+        $strCombinedFileName = $this->getMyOutputFileFullPath("all_amzn_searches");
+        $this->writeMyJobsListToFile($strCombinedFileName );
 
         return $strCombinedFileName;
     }
@@ -76,7 +79,7 @@ class ClassAmazonJobs extends ClassJobsSite
         $this->_getMyJobsFromOldSiteSearchURL_($arrSearchSettings);
 
 
-        $strTestFile = $this->getOutputFileFullPath($arrSearchSettings['name']."SingleSearchTestingOnly");
+        $strTestFile = $this->getMyOutputFileFullPath($arrSearchSettings['name']."SingleSearchTestingOnly");
         $this->writeMyJobsListToFile($strTestFile, $fIncludeFilteredJobsInResults );
 
         return $strTestFile;
@@ -84,33 +87,43 @@ class ClassAmazonJobs extends ClassJobsSite
 
 
 // http://www.amazon.jobs/results?sjid=68,sjid=83&checklid=@'US, WA, Seattle'&cname='US, WA, Seattle'
-    private function __getMyJobsFrom_Amazon_NewJobs_HTMLFiles__($arrSettings, $fIncludeFilteredJobsInResults)
+    private function __getMyJobsFrom_Amazon_NewJobs_HTMLFiles__($arrSettings)
     {
 
 
         $nItemCount = 1;
+        $dataFolder = $this->strOutputFolder ;
 
-        $strFileName = $this->strOutputFolder . "amazon-newjobs-page-".$nItemCount.".html";
-
+        $strFileName = $dataFolder . "amazon-newjobs-page-".$nItemCount.".html";
+        if(!is_file($strFileName)) // try the current folder instead
+        {
+            $dataFolder = "./";
+            $strFileName = $dataFolder . "amazon-newjobs-page-".$nItemCount.".html";
+        }
+        if(!is_file($strFileName)) // last try the debugging data folder
+        {
+            $dataFolder = C_STR_DATAFOLDER;
+            $strFileName = $dataFolder . "amazon-newjobs-page-".$nItemCount.".html";
+        }
 
         while (file_exists($strFileName) && is_file($strFileName))
         {
             $objSimpleHTML = $this->getSimpleHTMLObjForFileContents($strFileName);
 
-            $arrNewJobs = $this->_getParseJobsData_Amazon_NewJobs_($objSimpleHTML, $this->arrSearches['pm-newsite']);
+            $arrNewJobs = $this->_getParseJobsData_Amazon_NewJobs_($objSimpleHTML, $arrSettings['pm-newsite']);
 
             $objSimpleHTML->clear();
             unset($objSimpleHTML);
 
-            $this->_addJobsToList_($arrNewJobs);
+            $this->_addJobsToMyJobsList_($arrNewJobs);
 
             $nItemCount++;
-            $strOutputJobsFile = $this->getOutputFileFullPath($arrSettings['name']);
-            $this->writeMyJobsListToFile($strOutputJobsFile, $fIncludeFilteredJobsInResults );
 
-            return $strOutputJobsFile;
+            $strFileName = $dataFolder . "amazon-newjobs-page-".$nItemCount.".html";
 
         }
+
+
 
 
     }
@@ -161,7 +174,7 @@ class ClassAmazonJobs extends ClassJobsSite
                     $item['brief_description'] = $arrBrief[1];
                 }
 
-                $ret[] = $item;
+                $ret[] = $this->normalizeItem($item);
 
             }
             $nTDIndex = $nTDIndex + 5;
@@ -172,11 +185,11 @@ class ClassAmazonJobs extends ClassJobsSite
     }
 
 
-    private function _getMyJobsFromOldSiteSearchURL_($arrSettings, $strAlternateLocalHTMLFile = "")
+    private function _getMyJobsFromOldSiteSearchURL_($arrSettings)
     {
 
-        $objSimpleHTML = $this->getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $arrSettings['base_url']);
-        if(!$objSimpleHTML) throw new ErrorException('Error:  unable to get SimpleHTML object from file('.$strAlternateLocalHTMLFile.') or '.$arrSettings['base_url']);
+        $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $arrSettings['base_url']);
+        if(!$objSimpleHTML) throw new ErrorException('Error:  unable to get SimpleHTML object from '.$arrSettings['base_url']);
 
 
         // # of pages to parse
@@ -189,7 +202,7 @@ class ClassAmazonJobs extends ClassJobsSite
         $objSimpleHTML->clear();
         unset($objSimpleHTML);
 
-        $arrAllJobs = array();
+        $arrNewJobs = array();
 
 
 
@@ -198,22 +211,20 @@ class ClassAmazonJobs extends ClassJobsSite
         {
             $strURL = $arrSettings['base_url'].$nItemCount;
             __debug__printLine("Querying jobs page #".$nItemCount." from ".$strURL, C__DISPLAY_ITEM_START__);
-            $arrNewJobs = $this->_scrapeJobsFromHTML($strURL, $arrSettings, $strAlternateLocalHTMLFile);
+            $arrNewJobs = $this->_scrapeJobsFromHTML($strURL, $arrSettings);
 
-            $arrAllJobs = array_merge($arrAllJobs, $arrNewJobs);
+            $this->_addJobsToMyJobsList_($arrNewJobs);
 
             $nItemCount++;
         }
-
-        $this->_addJobsToList_($arrAllJobs);
     }
 
-    private function _scrapeJobsFromHTML($url, $arrSettings, $strAlternateLocalHTMLFile = null)
+    private function _scrapeJobsFromHTML($url, $arrSettings)
     {
 
 
-        $objSimpleHTML = parent::getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $url);
-        if(!$objSimpleHTML) throw new ErrorException('Error:  unable to get SimpleHTML object from file('.$strAlternateLocalHTMLFile.') or '.$url);
+        $objSimpleHTML = parent::getSimpleObjFromPathOrURL(null, $url);
+        if(!$objSimpleHTML) throw new ErrorException('Error:  unable to get SimpleHTML object from '.$url);
 
         $ret=null;
         $resultsDiv= $objSimpleHTML->find('div[class="searchResultsWrapper"]');
@@ -252,7 +263,7 @@ class ClassAmazonJobs extends ClassJobsSite
                     }
                 }
             }
-            $ret[] = $item;
+            $ret[] = $this->normalizeItem($item);
         }
 
         // clean up memory

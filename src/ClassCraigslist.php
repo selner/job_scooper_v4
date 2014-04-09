@@ -19,7 +19,7 @@ require_once dirname(__FILE__) . '/../include/ClassJobsSite.php';
 
 
 
-class ClassCraigslist  extends ClassJobsSiteGeneric
+class ClassCraigslist  extends ClassJobsSite
 {
     protected $siteName = 'Craigslist';
     protected $nJobListingsPerPage = 50;
@@ -38,7 +38,7 @@ class ClassCraigslist  extends ClassJobsSiteGeneric
     {
         if($nDays > 1)
         {
-            __debug__printLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Ignoring number of days value and just pulling current listings.", C__DISPLAY_MOMENTARY_INTERUPPT__);
+            __debug__printLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Ignoring number of days value and just pulling current listings.", C__DISPLAY_WARNING__);
 
         }
         return 1;
@@ -76,12 +76,12 @@ class ClassCraigslist  extends ClassJobsSiteGeneric
 
             $item['job_site'] = "Craigslist";
             $item['job_id'] = $node->attr['data-pid'];
-            $item['job_site_date'] = trim($node->find("span[class='date']")[0]->plaintext);
-            $item['location'] = trim(str_replace("pic", "", $node->find("span[class='pnr']")[0]->plaintext));
-            $item['job_site_category'] = trim($node->find("a[class='gc']")[0]->plaintext);
+            $item['job_site_date'] = $node->find("span[class='date']")[0]->plaintext;
+            $item['location'] = str_replace("pic", "", $node->find("span[class='pnr']")[0]->plaintext);
+            $item['job_site_category'] = $node->find("a[class='gc']")[0]->plaintext;
 
 
-            $ret[] = $item;
+            $ret[] = $this->normalizeItem($item);
         }
         return $ret;
     }

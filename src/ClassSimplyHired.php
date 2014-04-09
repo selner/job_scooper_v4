@@ -17,10 +17,10 @@
 */
 
 
-require_once dirname(__FILE__) . '/../include/ClassJobsSiteGeneric.php';
+require_once dirname(__FILE__) . '/../include/ClassJobsSite.php';
 
 
-class ClassSimplyHired extends ClassJobsSiteGeneric
+class ClassSimplyHired extends ClassJobsSite
 {
     protected $siteBaseURL = 'http://www.simplyhired.com';
     protected $siteName = 'SimplyHired';
@@ -59,93 +59,7 @@ class ClassSimplyHired extends ClassJobsSiteGeneric
 
         return $arrItemItems[4];
     }
-/*
-    function getMyJobs($nDays = -1, $fIncludeFilteredJobsInResults = true)
-    {
 
-
-        //        Keywords: title:("vice president" or VP or director or CTO or CPO or director or "chief product officer" or "product management" or "general manager" or "Chief Technology Officer")
-        //  Location: Seattle Washington (25 miles)
-        //  Filters: Last 24 hours, Full time
-
-
-        if($nDays > 1)
-        {
-                $strSearch = "http://www.simplyhired.com/search?t=%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22product+management%22+or+%22general+manager%22+or+%22Chief+Technology+Officer%22&lc=Seattle&ls=WA&fdb=".$nDays."&ws=50&sb=dd&pn=";
-                // __debug__printLine("Getting " . $nDays . " days of postings from " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
-        }
-        else
-        {
-            $strDays = $nDays < 1 ? "24 hours" : $nDays;
-            $strSearch = 'http://www.simplyhired.com/search?t=%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22product+management%22+or+%22general+manager%22+or+%22Chief+Technology+Officer%22&lc=Seattle&ls=WA&fdb=1&ws=50&sb=dd&pn=';
-        }
-
-        $this->__getMyJobsFromSearch__($strSearch, 'Exec Keywords in Seattle, WA', $strAlternateLocalHTMLFile);
-
-    }
-
-
-
-    private function __getMyJobsFromSearch__($strBaseURL, $category, $strAlternateLocalHTMLFile = null)
-    {
-        $arrAllJobs = array();
-        $nPageCount = 1;
-        $nItemChunkSize = 50;
-
-        $objSimpleHTML = $this->getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $strBaseURL);
-        if(!$objSimpleHTML) throw new ErrorException('Error:  unable to get SimpleHTML object from file('.$strAlternateLocalHTMLFile.') or '.$strBaseURL);
-
-        // # of items to parse
-        $pageDiv= $objSimpleHTML->find('span[class="search_title"]');
-        $pageDiv = $pageDiv[0];
-        $pageText = $pageDiv->plaintext;
-        $arrItemItems = explode(" ", trim($pageText));
-        $totalItems = $arrItemItems[4];
-        $totalItems  = intval(str_replace(",", "", $totalItems));
-        $maxItem = intval($totalItems / $nItemChunkSize);
-        if($maxItem < 1)  $maxItem = 1;
-
-
-
-        __debug__printLine("Downloading " . $maxItem . " pages of ".$totalItems  . " jobs from " . $this->siteName , C__DISPLAY_ITEM_START__);
-
-
-        while ($nPageCount <= $maxItem)
-        {
-            $objSimpleHTML = null;
-            $strURL = $strBaseURL.$nPageCount;
-            __debug__printLine("Querying " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
-
-            if(!$objSimpleHTML) $objSimpleHTML = parent::getSimpleObjFromPathOrURL($strAlternateLocalHTMLFile, $strURL);
-            if(!$objSimpleHTML) throw new ErrorException('Error:  unable to get SimpleHTML object from file('.$strAlternateLocalHTMLFile.') or '.$strURL);
-
-
-            $arrNewJobs = $this->_scrapeItemsFromHTML_($objSimpleHTML, $category);
-
-            if(!is_array($arrNewJobs))
-            {
-                // we likely hit a page where jobs started to be hidden.
-                // Go ahead and bail on the loop here
-                __debug__printLine("Not getting results back from SimplyHired starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", C__DISPLAY_ITEM_START__);
-                $nPageCount = $maxItem;
-            }
-            else
-            {
-                $arrAllJobs = array_merge($arrAllJobs, $arrNewJobs);
-
-                $nItemCount += $nItemChunkSize;
-            }
-
-            // clean up memory
-            $objSimpleHTML->clear();
-            unset($objSimpleHTML);
-            $nPageCount++;
-
-        }
-
-        $this->arrLatestJobs = array_copy($arrAllJobs);
-    }
-*/
 
     private function _scrapeItemsFromHTML_($objSimpleHTML)
     {
@@ -178,7 +92,7 @@ class ClassSimplyHired extends ClassJobsSiteGeneric
             }
             $item['job_site'] = $this->siteName;
 
-            $ret[] = $item;
+            $ret[] = $this->normalizeItem($item);
         }
 
         return $ret;
