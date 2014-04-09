@@ -43,7 +43,6 @@ class ClassPorchJobs extends ClassJobsSiteGeneric
 
         $nodesJobs = $resultsSection->find('div[class="cell"]');
 
-        var_dump('found ' . count($nodesJobs) . ' nodes');
 
         foreach($nodesJobs as $node)
         {

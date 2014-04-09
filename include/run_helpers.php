@@ -68,7 +68,7 @@ function __runAllJobs__($arrSearches, $arrSourceFiles = null, $nDays = -1, $fInc
         __debug__printLine("Adding Amazon jobs....", C__DISPLAY_ITEM_START__);
         $class = new ClassAmazonJobs(null, $GLOBALS["bit_flags"]);
         $class ->setOutputFolder($strOutputFolder);
-        $arrOutputFilesToIncludeInResults[] = $class->downloadAllUpdatedJobs( $GLOBALS['OPTS']['number_days'], null, $fIncludeFilteredJobsInResults );
+        $class->downloadAllUpdatedJobs( $GLOBALS['OPTS']['number_days'], null, $fIncludeFilteredJobsInResults );
         $arrOutputFilesToIncludeInResults[] = $class->writeMyJobsListToFile();
     }
 
@@ -98,19 +98,17 @@ function __runAllJobs__($arrSearches, $arrSourceFiles = null, $nDays = -1, $fInc
 
 
     $arrOutDetails_Main = $GLOBALS['output_file_details'];
-/*    var_dump($arrOutDetails_Main);
-    if(strlen($arrOutDetails_Main['full_file_path'] == 0))
+    if(strlen($arrOutDetails_Main['file_name_base'] == 0))
     {
+        $classJobExportHelper_Main->setOutputFolder($arrOutDetails_Main['directory']);
         $strTemp = $classJobExportHelper_Main->getOutputFileFullPath("ALL-", "jobs", "csv");
         $arrOutDetails_Main = parseFilePath($strTemp, false);
     }
-   var_dump($arrOutDetails_Main);
-*/
 
-    $strTemp = $arrOutDetails_Main['directory'] . "/" . $arrOutDetails_Main['file_name_base']  ."_filtered".".".$arrOutDetails_Main['file_extension'];
+    $strTemp = $arrOutDetails_Main['directory']  . $arrOutDetails_Main['file_name_base']  ."_filtered".".".$arrOutDetails_Main['file_extension'];
     $arrOutDetails_Filtered = parseFilePath($strTemp );
 
-    $strTemp = $arrOutDetails_Main['directory'] . "/" . $arrOutDetails_Main['file_name_base']  ."_unfiltered" .".".$arrOutDetails_Main['file_extension'];
+    $strTemp = $arrOutDetails_Main['directory'] . $arrOutDetails_Main['file_name_base']  ."_unfiltered" .".".$arrOutDetails_Main['file_extension'];
     $arrOutDetails_Unfiltered = parseFilePath($strTemp );
 
     $retFile = $classJobExportHelper_Unfiltered->writeMergedJobsCSVFile($arrOutDetails_Unfiltered['full_file_path'], $arrOutputFilesToIncludeInResults, null, true);
@@ -119,7 +117,6 @@ function __runAllJobs__($arrSearches, $arrSourceFiles = null, $nDays = -1, $fInc
         throw new ErrorException("Failed to combine new job lists with source files.");
     }
 
-    var_dump($arrOutDetails_Main);
     $retFile = $classJobExportHelper_Main->writeMergedJobsCSVFile($arrOutDetails_Main['full_file_path'], $arrOutputFilesToIncludeInResults, null, false);
     if(!$retFile)
     {

@@ -103,6 +103,7 @@ class ClassJobsSiteExport
     }
 
 
+
     /**
      * Initializes the global list of titles we will automatically mark
      * as "not interested" in the final results set.
@@ -172,7 +173,10 @@ class ClassJobsSiteExport
         $nJobsNotExcluded = 0;
         $nJobsExcluded = 0;
         $retArrayFilteredJobs = array();
+        $ncount = 0;
 
+        // try
+        //  {
         foreach($arrJobsToFilter as $job)
         {
 //            __debug__printLine("Checking filter for '".$job['job_title'] ."' interest level of '".$job['interested'] ."'." , C__DISPLAY_ITEM_DETAIL__);
@@ -198,26 +202,12 @@ class ClassJobsSiteExport
                     $nJobsNotExcluded++;
                 }
 
-/*
- *
-                 $arrCurJobInterest = $arrInterestLevelsToExclude[$job['interested']];
-
-
-                if(!is_array($arrCurJobInterest))
-                {
-                    $retArrayFilteredJobs[] = $job;
-                    $nJobsNotExcluded++;
-                    // __debug__printLine("Job interest level of '".$job['interested'] ."' was not found in the exclusion list.  Keeping for review." , C__DISPLAY_ITEM_DETAIL__);
-                }
-                else
-                {
-//                    __debug__printLine("Filtering job '".$job['job_title'] ."' because interested = '".$job['interested'] ."'." , C__DISPLAY_ITEM_DETAIL__);
-                    $nJobsExcluded++;
-                }
-
-*/
             }
+            $ncount++;
         }
+    // } catch(Exception $err) {
+        //     __debug__var_dump_exit__($retArrayFilteredJobs[$ncount]);
+        // }
 
         __debug__printLine("Filtering complete:  ".$nJobsExcluded ." filtered; ". $nJobsNotExcluded . " not filtered; " . count($arrJobsToFilter) . " total records." , C__DISPLAY_ITEM_RESULT__);
 
@@ -388,7 +378,7 @@ class ClassJobsSiteExport
             $strFullPath = $this->strOutputFolder . "/" . $strFullPath;
         }
 
-        $arrReturnPathDetails = parseFilePath($strFullPath, true);
+        $arrReturnPathDetails = parseFilePath($strFullPath, false);
         return $arrReturnPathDetails ['full_file_path'];
     }
 

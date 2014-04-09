@@ -1,4 +1,4 @@
-﻿
+
 on run(argv)
 	
 	
@@ -28,10 +28,10 @@ on sendMail(strFileToSend)
 	
 	set ret to -1
 	
-	set theAttachmentFileFullPath to strFileToSend as string
-	-- 	set theAttachmentFileFullPath to switchToPosixPathQuickHack(strFileToSend)
+	set theAttachmentFileFullPath to "" as string
+	 	set theAttachmentFileFullPath to switchToPosixPathQuickHack(strFileToSend)
 	
-	set theAttachmentFileName to getFileNameFromPath(theAttachmentFileFullPath, "/")
+	set theAttachmentFileName to getFileNameFromPath(theAttachmentFileFullPath, ":")
 	
 	
 	set myAttachmentFileAlias to ""

@@ -107,7 +107,7 @@ function __initializeArgs__()
     if($GLOBALS['VERBOSE'] == true) { __log__ ('Options set: '.var_export($GLOBALS['OPTS'], true), C__LOGLEVEL_INFO__); }
 
 
-    $GLOBALS['sites_supported']['Amazon'] =  array('site_name' => 'Amazon', 'include_in_run' => false, 'working_subfolder' => 'amazon_jobs');
+    $GLOBALS['sites_supported']['Amazon'] =  array('site_name' => 'Amazon', 'include_in_run' => -1);
 
     $GLOBALS['OPTS_SETTINGS'] = $options;
 
@@ -116,17 +116,25 @@ function __initializeArgs__()
 
 function __getPassedArgs__()
 {
+    // Add each of the sites to the supported list so that they show up as keys in the potential
+    // option choices
+    //
     foreach($GLOBALS['sites_supported']  as $site)
     {
         $GLOBALS['sites_supported'][$site['site_name']]['include_in_run'] = is_IncludeSite($site['site_name']);
     }
 
-    __log__ ('Options set: '.var_export($GLOBALS['OPTS'], true), C__LOGLEVEL_INFO__);
+    __log__ ('Possible options: '.var_export($GLOBALS['OPTS_SETTINGS'], true), C__LOGLEVEL_INFO__);
 
     # After you've configured Pharse, run it like so:
     $GLOBALS['OPTS'] = Pharse::options($GLOBALS['OPTS_SETTINGS']);
 
-
+    // Now go see what we got back for each of the sites
+    //
+    foreach($GLOBALS['sites_supported']  as $site)
+    {
+        $GLOBALS['sites_supported'][$site['site_name']]['include_in_run'] = is_IncludeSite($site['site_name']);
+    }
     $nDays = get_PharseOptionValue('number_days');
     if($nDays == false) { $GLOBALS['OPTS']['number_days'] = 1; }
 
@@ -137,6 +145,7 @@ function __getPassedArgs__()
     $GLOBALS['output_file_details'] = get_PharseOption_FileDetails("output_file", false);
 
     $GLOBALS['titles_to_filter'] = null;
+    $GLOBALS['company_role_pairs'] = null;
 
     if($GLOBALS['VERBOSE'] == true) { __log__ ('Options set: '.var_export($GLOBALS['OPTS'], true), C__LOGLEVEL_INFO__); }
 
@@ -145,19 +154,35 @@ function __getPassedArgs__()
 
 function is_IncludeSite($strName)
 {
-    $strFullOptName = "include_" . strtolower($strName);
+    $strIncludeSiteKey = "include_" . strtolower($strName);
+    $strGivenKey = $strIncludeSiteKey."_given";
 
-    if($GLOBALS['OPTS'][$strFullOptName . "_given"] == true)
+
+
+    if($GLOBALS['OPTS'][$strGivenKey] == true)
     {
-        if($GLOBALS['OPTS'][$strFullOptName] != null && $GLOBALS['OPTS'][$strFullOptName] == 0 )
-        {
-            $GLOBALS['OPTS'][$strFullOptName . "_given"] = false;
-            return false;
-        }
-   }
-    if($GLOBALS['OPTS']['include_all_given']) return true;
+       switch($GLOBALS['OPTS'][$strIncludeSiteKey])
+       {
+           case 0:
+               $GLOBALS['OPTS'][$strGivenKey] = 0;
+                break;
 
-    return false;
+           case -1:
+           case 1:
+           default:
+           $GLOBALS['OPTS'][$strGivenKey] = 1;
+           break;
+
+       }
+    }
+    else if($GLOBALS['OPTS']['include_all_given'] == true)
+    {
+        $GLOBALS['OPTS'][$strGivenKey] = true;
+        $GLOBALS['OPTS'][$strIncludeSiteKey] = true;
+    }
+
+
+    return $GLOBALS['OPTS'][$strIncludeSiteKey];
 }
 
 function get_PharseOptionValue($strOptName)

@@ -71,6 +71,10 @@ abstract class ClassJobsSite extends ClassJobsSiteExport
         //
         $this->markMyJobsList_SetAutoExcludedTitles();
 
+        //
+        // Now, mark jobs that look like duplicates by company name & title.
+        //
+        $this->markMyJobsList_SetLikelyDuplicatePosts();
 
         //
         // Write the resulting array of the latest job postings from this site to
@@ -98,62 +102,65 @@ abstract class ClassJobsSite extends ClassJobsSiteExport
      */
     function markMyJobsList_SetLikelyDuplicatePosts()
     {
-        $nJobsSkipped = 0;
-        $nJobsNotMarked = 0;
-        $nJobsMarkedAutoExcluded = 0;
+        $nJobsSMatched = 0;
+        $nUniqueRoles = 0;
+        $nProblemRolesSkipped= 0;
 
 
-        // * * * * * * *
-        //
-        //  TODO
-        //
-        // * * * * * * *
-/*
+        $arrCompanyRoleNamePairsFound = $GLOBALS['company_role_pairs'];
+        if($arrCompanyRoleNamePairsFound == null) { $arrCompanyRoleNamePairsFound = array(); }
+
+        __debug__printLine("Checking " . count($this->arrLatestJobs) . " jobs for duplicates by company/role pairing. ".count($arrCompanyRoleNamePairsFound)." previous roles are being used to seed the process." , C__DISPLAY_ITEM_START__);
 
         $nIndex = 0;
         foreach($this->arrLatestJobs as $job)
         {
-            // First, make sure we don't already have a value in the interested column.
-            // if we do, skip it and move to the next one
-            if(strlen($this->arrLatestJobs[$nIndex]['interested']) > 0)
+
+            if(strlen($job['company']) == 0 || strlen($job['job_title']) == 0)
             {
-                $nJobsSkipped++;
-                continue;
+                // we're missing one part of the key we need, so cannot dedupe
+                // it successfully.  Skip it and move on.
+                $nProblemRolesSkipped++;
+                __debug__printLine("Skipping " . $job['job_title'] . "/". $job['company'] . " due to insufficient information to detect duplicates with." , C__DISPLAY_ITEM_DETAIL__);
             }
-
-            // Look for a matching title in our list of excluded titles
-            $varValMatch = $this->arrTitlesToFilter[$job['job_title']];
-            //           __debug__printLine("Matching listing job title '".$job['job_title'] ."' and found " . (!$varValMatch  ? "nothing" : $varValMatch ) . " for " . $this->arrTitlesToFilter[$job['job_title']], C__DISPLAY_ITEM_DETAIL__);
-
-            // if we got a match, we'll get an array back with that title and some other data
-            // such as the reason it's excluded
-            //
-
-            if(is_array($varValMatch))
+            else
             {
-                if(strlen($varValMatch['exclude_reason']) > 0)
+
+                $strRoleKey = $job['company'] . '-'. $job['job_title'];
+
+                // is it the first time we've seen this pairing?
+                if($arrCompanyRoleNamePairsFound[$strRoleKey] == null)
                 {
-                    $this->arrLatestJobs[$nIndex]['interested'] = $varValMatch['exclude_reason'] . "[auto-filtered]";
+                    // add it to the list
+                    $arrCompanyRoleNamePairsFound[$strRoleKey] = $job;
+                    $nUniqueRoles++;
                 }
                 else
                 {
-                    $this->arrLatestJobs[$nIndex]['interested'] = 'UNKNOWN - FOUND MATCH BUT NO REASON (Auto)';
-                    __debug__printLine("Excluded title " . $job['job_title'] . " did not have an exclude reason.  Cannot mark.", C__DISPLAY_ERROR__);
+
+//                    $datePulled = strtotime($this->arrLatestJobs['date_pulled'], TODO);
+//                   $now = new DateTime();
+
+//                    if($now->diff($datePulled)->days > 60) // if it's been over 60 days, then
+
+                    //
+                    // Not the first time we've seen this before so
+                    // mark it as a likely dupe and note who it's a dupe of
+                    //
+                    $this->arrLatestJobs[$nIndex]['interested'] = 'Maybe (Likely Duplicate Job Post)[auto-marked]';
+                    $this->arrLatestJobs[$nIndex]['notes'] =  $this->arrLatestJobs[$nIndex]['notes'] . " *** Likely a duplicate post of ". $arrCompanyRoleNamePairsFound[$strRoleKey]['job_site'] . " ID#" . $arrCompanyRoleNamePairsFound[$strRoleKey]['job_id'];
+                    $nJobsSMatched++;
                 }
-                $nJobsMarkedAutoExcluded++;
-            }
-            else              // we're ignoring the Excluded column fact for the time being. If it's in the list, it's excluded
-            {
-                $nJobsNotMarked++;
-                __debug__printLine("Job title '".$job['job_title'] ."' was not found in the exclusion list.  Keeping for review." , C__DISPLAY_ITEM_DETAIL__);
             }
             $nIndex++;
         }
 
+        // set it back to the global so we lookup better each search
+        $GLOBALS['company_role_pairs'] = array_copy($arrCompanyRoleNamePairsFound);
 
-        __debug__printLine("Completed marking auto-excluded titles:  '".$nJobsMarkedAutoExcluded ."' were marked as auto excluded, " . $nJobsSkipped . " skipped and ". $nJobsNotMarked . " jobs were not." , C__DISPLAY_ITEM_RESULT__);
-*/
 
+        __debug__printLine("Completed marking posts that are likely duplicates by company/title:  ".$nJobsSMatched ." roles marked duplicate,  " . $nProblemRolesSkipped . " skipped,  ". $nUniqueRoles . " unique jobs.." ,    C__DISPLAY_ITEM_DETAIL__);
+        __debug__printLine(count($GLOBALS['company_role_pairs']) ." company/role pairs have been stored to check the next jobs list.",C__DISPLAY_ITEM_DETAIL__);
     }
 
     /**

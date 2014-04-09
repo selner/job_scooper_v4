@@ -87,8 +87,6 @@ abstract class ClassJobsSiteGeneric extends ClassJobsSite
         {
             $strIncludeKey = 'include_'.strtolower($search['site_name']);
 
-            var_dump($strIncludeKey);
-            var_dump($GLOBALS['OPTS'][$search['site_name']]);
             if($GLOBALS['OPTS'][$strIncludeKey] == null || $GLOBALS['OPTS'][$strIncludeKey] == 0)
             {
                 __debug__printLine("Search " . $search['search_name'] . " on site ". $search['site_name'] . " has been excluded because the site was excluded.", C__DISPLAY_ITEM_DETAIL__);
@@ -182,12 +180,12 @@ abstract class ClassJobsSiteGeneric extends ClassJobsSite
         $strIncludeKey = 'include_'.strtolower($this->siteName);
 
         $GLOBALS['OPTS_SETTINGS'][$strIncludeKey ] = array(
-                'description'   => 'Include ' .strtolower($this->siteName) . ' in the results list.' ,
-                'default'       => -1,
-                'type'          => Pharse::PHARSE_INTEGER,
-                'required'      => false,
-                'short'      => strtolower($this->siteName)
-            );
+            'description'   => 'Include ' .strtolower($this->siteName) . ' in the results list.' ,
+            'default'       => -1,
+            'type'          => Pharse::PHARSE_INTEGER,
+            'required'      => false,
+            'short'      => strtolower($this->siteName)
+        );
 
     }
 
@@ -195,7 +193,7 @@ abstract class ClassJobsSiteGeneric extends ClassJobsSite
    {
        $arrSupportedSites = $GLOBALS['sites_supported'];
 
-       $arrSupportedSites[$this->siteName] = array('site_name' => $this->siteName, 'include_in_run' => false, 'working_subfolder' => 'working_folder');
+       $arrSupportedSites[$this->siteName] = array('site_name' => $this->siteName, 'include_in_run' => -1);
 
        $GLOBALS['sites_supported'] = $arrSupportedSites;
 
