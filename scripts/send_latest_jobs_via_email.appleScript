@@ -1,24 +1,25 @@
-on run (argv)
+﻿
+on run(argv)
 	
-
- 	if (count of argv) = 0 then
- 		log "Error: No file specified for sending."
- 		return -1
- 	else
- 		set strFileToSend to first item of argv
- 		if (characters 1 thru 1 of strFileToSend as string) = "\"" then
- 			set strFileToSend to (characters 2 thru ((length of strFileToSend) - 1)) of strFileToSend as string
- 		end if
- 		log "Starting email send for CSV file = " & strFileToSend & "."
- 	end if
- 	
- 	set ret to sendMail(strFileToSend)
+	
+	if (count of argv) = 0 then
+		log "Error: No file specified for sending."
+		return -1
+	else
+		set strFileToSend to first item of argv
+		if (characters 1 thru 1 of strFileToSend as string) = "\"" then
+			set strFileToSend to (characters 2 thru ((length of strFileToSend) - 1)) of strFileToSend as string
+		end if
+		log "Starting email send for CSV file = " & strFileToSend & "."
+	end if
+	
+	set ret to sendMail(strFileToSend)
 	if (ret < 0) then
 		log "An error occured sending the file."
 	end if
 	
 	return ret
-end run
+end go
 
 on sendMail(strFileToSend)
 	
@@ -27,10 +28,10 @@ on sendMail(strFileToSend)
 	
 	set ret to -1
 	
-	set theAttachmentFileFullPath to "" as string
-	set theAttachmentFileFullPath to switchToPosixPathQuickHack(strFileToSend)
+	set theAttachmentFileFullPath to strFileToSend as string
+	-- 	set theAttachmentFileFullPath to switchToPosixPathQuickHack(strFileToSend)
 	
-	set theAttachmentFileName to getFileNameFromPath(theAttachmentFileFullPath)
+	set theAttachmentFileName to getFileNameFromPath(theAttachmentFileFullPath, "/")
 	
 	
 	set myAttachmentFileAlias to ""
@@ -95,6 +96,23 @@ on sendMail(strFileToSend)
 	
 	return ret
 end sendMail
+
+on writeToFile(TotalString, strFilePath)
+	set theFileReference to open for access file strFilePath with write permission
+	write TotalString to theFileReference
+	close access theFileReference
+end writeToFile
+
+
+to joinList(aList, delimiter)
+	set retVal to ""
+	set prevDelimiter to AppleScript's text item delimiters
+	set AppleScript's text item delimiters to delimiter
+	set retVal to aList as string
+	set AppleScript's text item delimiters to prevDelimiter
+	return retVal
+end joinList
+
 on getParent(anAlias)
 	try
 		return POSIX file ((POSIX path of anAlias) & "/..") as alias
@@ -103,8 +121,8 @@ on getParent(anAlias)
 	end try
 end getParent
 
-on getFileNameFromPath(strFilePath)
-	set strFileName to last item of my textToList(strFilePath, ":")
+on getFileNameFromPath(strFilePath, strDelim)
+	set strFileName to last item of my textToList(strFilePath, strDelim)
 	return strFileName
 	
 end getFileNameFromPath

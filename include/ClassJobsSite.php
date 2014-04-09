@@ -44,12 +44,13 @@ abstract class ClassJobsSite extends ClassJobsSiteExport
 
 
     /**
-     * TODO:  DOC
+     * Main worker function for all jobs sites.
      *
      *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
+     * @param  integer $nDays Number of days of job listings to pull
+     * @param  Array $arrInputFilesToMergeWithResults Optional list of jobs list CSV files to include in the results
+     * @param  integer $fIncludeFilteredJobsInResults If true, filters out jobs flagged with "not interested" values from the results.
+     * @return string If successful, the final output CSV file with the full jobs list
      */
     function downloadAllUpdatedJobs($nDays = -1, $arrInputFilesToMergeWithResults = null, $fIncludeFilteredJobsInResults = true )
     {
@@ -156,7 +157,7 @@ abstract class ClassJobsSite extends ClassJobsSiteExport
     }
 
     /**
-     * TODO:  DOC
+     *
      *
      *
      * @param  string TODO DOC
@@ -165,17 +166,6 @@ abstract class ClassJobsSite extends ClassJobsSiteExport
      */
     function markMyJobsList_SetAutoExcludedTitles()
     {
-        $this->_loadTitlesToFilter_();
-        if(!is_array($this->arrTitlesToFilter))
-        {
-            __debug__printLine("No titles found to exclude. Skipping results filtering." , C__DISPLAY_MOMENTARY_INTERUPPT__);
-            return $arrJobsToFilter;
-        }
-        else
-        {
-            __debug__printLine("Applying " .count($this->arrTitlesToFilter) . " title exclusion rules to " .count($this->arrLatestJobs) . " job records.", C__DISPLAY_MOMENTARY_INTERUPPT__);
-
-        }
 
         $nJobsSkipped = 0;
         $nJobsNotMarked = 0;
@@ -304,7 +294,7 @@ abstract class ClassJobsSite extends ClassJobsSiteExport
      * @param  integer $fIncludeFilteredJobsInResults False if you do not want jobs marked as interested = "No *" excluded from the results
      * @return string $strOutFilePath The file the jobs was written to or null if failed.
      */
-    function writeMyJobsListToFile($strOutFilePath, $fIncludeFilteredJobsInResults = true)
+    function writeMyJobsListToFile($strOutFilePath = null, $fIncludeFilteredJobsInResults = true)
     {
         return $this->writeJobsListToFile($strOutFilePath, $this->arrLatestJobs, $fIncludeFilteredJobsInResults);
     }

@@ -73,8 +73,16 @@ class ClassGlassdoor extends ClassJobsSiteGeneric
             $item = parent::getEmptyItemsArray();
 
             $jobLink = $node->find("a[class='jobLink']")[1];
+            $titleTextNode = $jobLink->firstChild();
+            if($titleTextNode->hasChildNodes())
+            {
+                $item['job_title'] = $titleTextNode->firstChild()->plaintext;
+            }
+            else
+            {
+                $item['job_title'] = $titleTextNode->plaintext;
+            }
 
-            $item['job_title'] = $jobLink->firstChild()->firstChild()->plaintext;
             $item['job_post_url'] = $this->siteBaseURL . $jobLink->href;
 
             // <a href="/partner/jobListing.htm?pos=115&amp;ao=29933&amp;s=58&amp;guid=000001453fb833deb3e300823643def8&amp;src=GD_JOB_AD&amp;t=SR&amp;extid=1&amp;exst=OL&amp;ist=&amp;ast=OL&amp;vt=w&amp;cb=1396933407969&amp;jobListingId=1008408496" rel="nofollow" class="jobLink" data-ja-clk="1" data-gd-view="1" data-ev-a="B-S"><tt class="notranslate"><strong>Director, Product</strong> Management</tt></a>

@@ -23,7 +23,7 @@ function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strEx
     $date=date_create(null);
     $strFilename .= date_format($date,"Y-m-d_Hi");
 
-    if(strlen($strBase) > 0) $strFilename .= "_" . $strBase . "_";
+    if(strlen($strBase) > 0) $strFilename .= "_" . $strBase;
     if(strlen($strExt) > 0) $strFilename .= "." . $strExt;
 
     return $strFilename;
@@ -32,14 +32,11 @@ function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strEx
 class ClassJobsSiteExport
 {
 
-    private $_strFilePathInput_ExcludedTitles = null;
-
     private $arrKeysForDeduping = array('job_site', 'job_id');
 
     private $_strAlternateLocalFile = '';
     private $_bitFlags = null;
     protected $strOutputFolder = "";
-    protected $arrTitlesToFilter = null;
 
     /**
      * TODO:  DOC
@@ -53,7 +50,6 @@ class ClassJobsSiteExport
     {
         $this->_strAlternateLocalFile = $strAltFilePath;
         $this->_bitFlags = $bitFlags;
-        $this->_strFilePathInput_ExcludedTitles = C_STR_DATAFOLDER  . "bryans_list_exclude_titles.csv";
     }
 
      function getMyBitFlags() { return $this->_bitFlags; }
@@ -108,19 +104,20 @@ class ClassJobsSiteExport
 
 
     /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
+     * Initializes the global list of titles we will automatically mark
+     * as "not interested" in the final results set.
      */
      function _loadTitlesToFilter_()
     {
-        if(!is_array($this->arrTitlesToFilter) && $this->_strFilePathInput_ExcludedTitles && file_exists($this->_strFilePathInput_ExcludedTitles) && is_file($this->_strFilePathInput_ExcludedTitles))
+        if(count($GLOBALS['titles_to_filter']) > 0)
         {
-            __debug__printLine("Loading job titles to filter from ".$this->_strFilePathInput_ExcludedTitles."." , C__DISPLAY_ITEM_DETAIL__);
-            $classCSVFile = new SimpleScooterCSVFileClass($this->_strFilePathInput_ExcludedTitles, 'r');
+            // We've already loaded the titles; go ahead and return right away
+            return;
+        }
+        elseif($GLOBALS['OPTS']['titles_to_filter_input_file'] && file_exists($GLOBALS['OPTS']['titles_to_filter_input_file']) && is_file($GLOBALS['OPTS']['titles_to_filter_input_file']))
+        {
+            __debug__printLine("Loading job titles to filter from ".$GLOBALS['OPTS']['titles_to_filter_input_file']."." , C__DISPLAY_ITEM_DETAIL__);
+            $classCSVFile = new SimpleScooterCSVFileClass($GLOBALS['OPTS']['titles_to_filter_input_file'], 'r');
             $arrTitlesTemp = $classCSVFile->readAllRecords(true);
             __debug__printLine(count($arrTitlesTemp) . " titles found in the source file that will be automatically filtered from job listings." , C__DISPLAY_ITEM_DETAIL__);
 
@@ -128,16 +125,16 @@ class ClassJobsSiteExport
             // Add each title we found in the file to our list in this class, setting the key for
             // each record to be equal to the job title so we can do a fast lookup later
             //
-            $this->arrTitlesToFilter = array();
+            $GLOBALS['titles_to_filter'] = array();
             foreach($arrTitlesTemp as $titleRecord)
             {
-                $this->arrTitlesToFilter[$titleRecord['job_title']] = $titleRecord;
+                $GLOBALS['titles_to_filter'][$titleRecord['job_title']] = $titleRecord;
             }
 
         }
         else
         {
-            __debug__printLine("Could not load the list of titles to exclude from '" . $this->_strFilePathInput_ExcludedTitles . "'.  Final list will not be filtered." , C__DISPLAY_MOMENTARY_INTERUPPT__);
+            __debug__printLine("Could not load the list of titles to exclude from '" . $GLOBALS['OPTS']['titles_to_filter_input_file'] . "'.  Final list will not be filtered." , C__DISPLAY_MOMENTARY_INTERUPPT__);
         }
     }
 
@@ -240,7 +237,10 @@ class ClassJobsSiteExport
     {
         if(!$strOutFilePath || strlen($strOutFilePath) <= 0)
         {
-            throw new ErrorException("Error: writeJobsListToFile called without an output file path to use.");
+            $strOutFilePath = $this->getOutputFileFullPath();
+            __debug__printLine("Warning: writeJobsListToFile was called without an output file name.  Using default value: " . $strOutFilePath, C__DISPLAY_ITEM_DETAIL__);
+
+//            throw new ErrorException("Error: writeJobsListToFile called without an output file path to use.");
         }
         if(count($arrJobsRecordsToUse) == 0)
         {
@@ -283,36 +283,51 @@ class ClassJobsSiteExport
             $strOutFilePath = $this->getOutputFileFullPath('writeMergedJobsCSVFile_');
         }
 
-        if(!is_array($arrFilesToCombine) || strlen($arrFilesToCombine[0]) <= 0)
+        var_dump('$arrFilesToCombine', $arrFilesToCombine);
+
+        if(!is_array($arrFilesToCombine) || count($arrFilesToCombine) == 0)
         {
-            throw new ErrorException("Error: writeMergedJobsCSVFile called with an empty array of filenames to combine. ");
+            if(count($arrMyRecordsToInclude) > 0)
+            {
+                $this->writeJobsListToFile($strOutFilePath, $arrRetJobs, $fIncludeFilteredJobsInResults);
+            }
+            else
+            {
+                throw new ErrorException("Error: writeMergedJobsCSVFile called with an empty array of filenames to combine. ");
+
+            }
+
         }
-
-        __debug__printLine("Combining jobs into " . $strOutFilePath . " from " . count($arrMyRecordsToInclude) ." records and " . count($arrFilesToCombine) . " CSV input files: " . var_export($arrFilesToCombine, true), C__DISPLAY_ITEM_DETAIL__);
-
-
-
-        if(count($arrFilesToCombine) > 1)
+        else
         {
-            $classCombined = new SimpleScooterCSVFileClass($strOutFilePath , "w");
-            $arrRetJobs = $classCombined->readMultipleCSVsAndCombine($arrFilesToCombine, array_keys($this->getEmptyItemsArray()), $this->arrKeysForDeduping);
+
+
+            __debug__printLine("Combining jobs into " . $strOutFilePath . " from " . count($arrMyRecordsToInclude) ." records and " . count($arrFilesToCombine) . " CSV input files: " . var_export($arrFilesToCombine, true), C__DISPLAY_ITEM_DETAIL__);
+
+
+
+            if(count($arrFilesToCombine) > 1)
+            {
+                $classCombined = new SimpleScooterCSVFileClass($strOutFilePath , "w");
+                $arrRetJobs = $classCombined->readMultipleCSVsAndCombine($arrFilesToCombine, array_keys($this->getEmptyItemsArray()), $this->arrKeysForDeduping);
+
+            }
+            else if(count($arrFilesToCombine) == 1)
+            {
+                $classCombinedRead = new SimpleScooterCSVFileClass($arrFilesToCombine[0], "r");
+                $arrRetJobs = $classCombinedRead->readAllRecords(true, array_keys($this->getEmptyItemsArray()));
+            }
+
+
+            if(count($arrMyRecordsToInclude) > 1)
+            {
+                $arrRetJobs = my_merge_add_new_keys($arrMyRecordsToInclude, $arrRetJobs);
+            }
+
+            $this->writeJobsListToFile($strOutFilePath, $arrRetJobs, $fIncludeFilteredJobsInResults);
+            __debug__printLine("Combined file has ". count($arrRetJobs) . " jobs and was written to " . $strOutFilePath , C__DISPLAY_ITEM_START__);
 
         }
-        else if(count($arrFilesToCombine) == 1)
-        {
-            $classCombined = new SimpleScooterCSVFileClass($arrFilesToCombine[0], "r");
-            $arrRetJobs = $classCombined->readAllRecords(true, array_keys($this->getEmptyItemsArray()));
-        }
-
-
-        if(count($arrMyRecordsToInclude) > 1)
-        {
-            $arrRetJobs = my_merge_add_new_keys($arrMyRecordsToInclude, $arrRetJobs);
-        }
-
-        $this->writeJobsListToFile($strOutFilePath, $arrRetJobs, $fIncludeFilteredJobsInResults);
-        __debug__printLine("Combined file has ". count($arrRetJobs) . " jobs and was written to " . $strOutFilePath , C__DISPLAY_ITEM_START__);
-
         return $strOutFilePath;
 
     }
@@ -371,9 +386,11 @@ class ClassJobsSiteExport
 
         if(strlen($this->strOutputFolder) > 0)
         {
-            $strFullPath = $this->strOutputFolder . $strFullPath;
+            $strFullPath = $this->strOutputFolder . "/" . $strFullPath;
         }
-        return $strFullPath;
+
+        $arrReturnPathDetails = parseFilePath($strFullPath, true);
+        return $arrReturnPathDetails ['full_file_path'];
     }
 
     /**

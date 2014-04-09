@@ -29,12 +29,19 @@ abstract class ClassJobsSiteGeneric extends ClassJobsSite
     abstract function parseJobsListForPage($objSimpHTML); // returns an array of jobs
     abstract function parseTotalResultsCount($objSimpHTML); // returns a settings array
 
+    protected $arrSiteClasses = array(
+        'glassdoor' => 'ClassGlassdoor',
+          'indeed' => 'ClassIndeed',
+          'simplyhired' => 'ClassSimplyHired',
+          'porch' => 'ClassPorchJobs',
+          'craigslist' => 'ClassCraigslist',
+);
 
     function __construct()
     {
         parent::__construct(null, $this->getMyBitFlags());
         $this->_addUserOptionFlag_();
-        $this->_addToSitesList_();
+        $this->addToSitesList();
     }
 
     function getDaysURLValue($days) { return ($days == null || $days == "") ? 1 : $days; } // default is to return the raw number
@@ -81,34 +88,10 @@ abstract class ClassJobsSiteGeneric extends ClassJobsSite
             $nLastCount = count($this->arrLatestJobs);
             __debug__printLine("Running search " . $search['search_name'] . " against site ". $search['site_name'], C__DISPLAY_ITEM_DETAIL__);
 
-            switch(strtolower($search['site_name']))
-            {
-                case 'glassdoor':
-                    $class = new ClassGlassdoor();
-                    break;
+            $strSite = strtolower($search['site_name']);
+            $strSiteClass = $this->arrSiteClasses[$strSite];
+            $class = new $strSiteClass;
 
-                case 'indeed':
-                    $class = new ClassIndeed();
-                    break;
-
-                case 'simplyhired':
-                    $class = new ClassSimplyHired();
-                    break;
-
-                case 'porch':
-                    $class = new ClassPorchJobs();
-                    break;
-
-
-                case 'craigslist':
-                    $class = new ClassCraigslist();
-                    break;
-
-                default:
-                    throw new ErrorException("ERROR: Search '" . $search['search_name'] . " listed an unknown job site value.  Cannot continue.  Exiting.");
-                    break;
-
-            }
 
             $class->getMyJobsForSearch($search, $nDays, $fIncludeFilteredJobsInResults);
             $this->_addJobsToList_($class->getMyJobsList());
@@ -184,9 +167,9 @@ abstract class ClassJobsSiteGeneric extends ClassJobsSite
     private function _addUserOptionFlag_()
     {
 
-        $arrUserOptions = $GLOBALS['OPTS_SETTINGS'];
+        $strIncludeKey = 'include_'.strtolower($this->siteName);
 
-        $arrUserOptions['include_'.strtolower($this->siteName)] = array(
+        $GLOBALS['OPTS_SETTINGS'][$strIncludeKey ] = array(
                 'description'   => 'Include ' .strtolower($this->siteName) . ' in the results list.' ,
                 'default'       => 0,
                 'type'          => Pharse::PHARSE_INTEGER,
@@ -194,16 +177,15 @@ abstract class ClassJobsSiteGeneric extends ClassJobsSite
                 'short'      => strtolower($this->siteName)
             );
 
-        $GLOBALS['OPTS_SETTINGS'] = $arrUserOptions;
     }
 
-   private function _addToSitesList_()
+   protected  function addToSitesList()
    {
-       $arrSupportedSites = $GLOBALS['SITES_SUPPORTED'];
+       $arrSupportedSites = $GLOBALS['sites_supported'];
 
        $arrSupportedSites[$this->siteName] = array('site_name' => $this->siteName, 'include_in_run' => false, 'working_subfolder' => 'working_folder');
 
-       $GLOBALS['SITES_SUPPORTED'] = $arrSupportedSites;
+       $GLOBALS['sites_supported'] = $arrSupportedSites;
 
    }
 

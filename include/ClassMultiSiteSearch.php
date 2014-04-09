@@ -28,4 +28,21 @@ class ClassMultiSiteSearch extends ClassJobsSiteGeneric
         throw new ErrorException("parseJobsListForPage not supported for class ClassMultiSiteSearch");
     }
     function parseTotalResultsCount($objSimpHTML) { throw new ErrorException("parseJobsListForPage not supported for class ClassMultiSiteSearch"); }
+
+    function __construct($arrSearches = null)
+    {
+        if($arrSearches != null)
+        {
+
+           foreach($arrSearches as $search)
+           {
+                $class = null;
+                $strSite = strtolower($search['site_name']);
+                $strSiteClass = $this->arrSiteClasses[$strSite];
+                $class = new $strSiteClass(null, $GLOBALS["bit_flags"]);
+           }
+
+        }
+    }
+
 }

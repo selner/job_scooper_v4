@@ -56,7 +56,6 @@ class ClassPorchJobs extends ClassJobsSiteGeneric
             $item['job_id'] = $item['job_title'];
 
             $item['job_post_url'] = 'http://about.porch.com/careers/' . $node->find("a")[0]->href;
-            $item['job_source_url'] = $item['job_post_url'];
             $item['location'] =trim( $node->find("span[class='location']")[0]->plaintext);
             $item['date_pulled'] = $this->getTodayAsString();
 

@@ -14,11 +14,26 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+//
+// If installed as part of the package, uses Klogger v0.1 version (http://codefury.net/projects/klogger/)
+//
+require_once dirname(__FILE__) . '/../lib/pharse.php';
+
+if ( file_exists ( dirname(__FILE__) . '/../lib/KLogger.php') )
+{
+    define(C_USE_KLOGGER, 1);
+    require_once dirname(__FILE__) . '/../lib/KLogger.php';
+
+}
+else
+{
+    print "Could not find KLogger file: ". dirname(__FILE__) . '/../lib/KLogger.php'.PHP_EOL;
+    define(C_USE_KLOGGER, 0);
+}
 require_once dirname(__FILE__) . '/../../scooper/src/include/plugin-base.php';
 require_once dirname(__FILE__) . '/../../scooper/src/include/common.php';
 require_once dirname(__FILE__) . '/../lib/simple_html_dom.php';
 require_once dirname(__FILE__) . '/ClassJobsSite.php';
-require_once dirname(__FILE__) . '/../../scooper/src/lib/pharse.php';
 
 date_default_timezone_set("America/Los_Angeles");
 
@@ -32,9 +47,12 @@ const C_STR_FOLDER_JOBSEARCH= '/Users/bryan/Dropbox/Job Search 2013/';
 
 function __initializeArgs__()
 {
-    $GLOBALS['SITES_SUPPORTED'] = array();
 
-    # specify some options
+    $GLOBALS['VERBOSE'] = true;
+
+
+    $GLOBALS['sites_supported'] = array();
+
     $options = array(
         'include_all' => array(
             'description'   => 'Include all job sites.',
@@ -50,12 +68,19 @@ function __initializeArgs__()
             'required'      => false,
             'short'      => 'days',
         ),
-        'output_folder' => array(
-            'description'   => 'Output file path to use.',
+        'output_file' => array(
+            'description'   => 'Full file path and name for the final results CSV file.',
             'default'       => null,
             'type'          => Pharse::PHARSE_STRING,
             'required'      => false,
             'short'      => 'o',
+        ),
+        'excluded_titles_file' => array(
+            'description'   => 'CSV file of titles to flag automatically as "not interested"',
+            'default'       => null,
+            'type'          => Pharse::PHARSE_STRING,
+            'required'      => false,
+            'short'      => 't',
         ),
         'filter_notinterested' => array(
             'description'   => 'Exclude listings that are marked as "not interested".',
@@ -66,91 +91,103 @@ function __initializeArgs__()
         ),
         'include_amazon' => array(
             'description'   => 'Include Amazon.',
-            'default'       => 0,
+            'default'       => 1,
             'type'          => Pharse::PHARSE_INTEGER,
             'required'      => false,
             'short'      => 'amazon',
         ),
-        'include_craigslist' => array(
-            'description'   => 'Include Craigslist.',
-            'default'       => 0,
-            'type'          => Pharse::PHARSE_INTEGER,
-            'required'      => false,
-            'short'      => 'craigslist',
-        ),
-        'include_simplyhired' => array(
-            'description'   => 'Include SimplyHired.',
-            'default'       => 0,
-            'type'          => Pharse::PHARSE_INTEGER,
-            'required'      => false,
-            'short'      => 'simplyhired',
-        ),
-        'include_indeed' => array(
-            'description'   => 'Include Indeed.',
-            'default'       => 0,
-            'type'          => Pharse::PHARSE_INTEGER,
-            'required'      => false,
-            'short'      => 'indeed',
-        ),
     );
+
+
+
 
 //    # You may specify a program banner thusly:
 //    $banner = "Find and export basic website, Moz.com, Crunchbase and Quantcast data for any company name or URL.";
 //    Pharse::setBanner($banner);
+    if($GLOBALS['VERBOSE'] == true) { __log__ ('Options set: '.var_export($GLOBALS['OPTS'], true), C__LOGLEVEL_INFO__); }
+
+
+    $GLOBALS['sites_supported']['Amazon'] =  array('site_name' => 'Amazon', 'include_in_run' => false, 'working_subfolder' => 'amazon_jobs');
 
     $GLOBALS['OPTS_SETTINGS'] = $options;
+
+
 }
 
 function __getPassedArgs__()
 {
-    # After you've configured Pharse, run it like so:
-   $GLOBALS['OPTS'] = Pharse::options($GLOBALS['OPTS_SETTINGS']);
-
-    foreach($GLOBALS['SITES_SUPPORTED']  as $site)
+    foreach($GLOBALS['sites_supported']  as $site)
     {
-        $GLOBALS['SITES_SUPPORTED'] [$site['site_name']]['include_in_run'] = is_IncludeSite($site['site_name']);
+        $GLOBALS['sites_supported'][$site['site_name']]['include_in_run'] = is_IncludeSite($site['site_name']);
     }
+
+    __log__ ('Options set: '.var_export($GLOBALS['OPTS'], true), C__LOGLEVEL_INFO__);
+
+    # After you've configured Pharse, run it like so:
+    $GLOBALS['OPTS'] = Pharse::options($GLOBALS['OPTS_SETTINGS']);
+
 
     $nDays = get_PharseOptionValue('number_days');
     if($nDays == false) { $GLOBALS['OPTS']['number_days'] = 1; }
 
 
-    if($GLOBALS['OPTS']['filter_notinterested_given'])
-    {
-        $GLOBALS['OPTS']['filter_notinterested'] = false;
-    }
-    else
-    {
-        $GLOBALS['OPTS']['filter_notinterested'] = true;
-    }
+    $GLOBALS['OPTS']['filter_notinterested'] = get_PharseOptionValue('filter_notinterested');
 
-    $strOutputDir =  get_PharseOptionValue("output_folder");
-    if($strOutputDir == false)  { $strOutputDir  = null; }
+    $GLOBALS['excluded_titles_file_details'] = get_PharseOption_FileDetails("excluded_titles_file", true);
+    $GLOBALS['output_file_details'] = get_PharseOption_FileDetails("output_file", false);
 
+    $GLOBALS['titles_to_filter'] = null;
+
+    if($GLOBALS['VERBOSE'] == true) { __log__ ('Options set: '.var_export($GLOBALS['OPTS'], true), C__LOGLEVEL_INFO__); }
 
     return $GLOBALS['OPTS'];
 }
 
 function is_IncludeSite($strName)
 {
-    if($GLOBALS['OPTS']['include_all_given']) return true;
-
     $strFullOptName = "include_" . strtolower($strName);
 
-    if($GLOBALS['OPTS'][$strFullOptName . "_given"] == true) return true;
+    if($GLOBALS['OPTS'][$strFullOptName . "_given"] == true)
+    {
+        if($GLOBALS['OPTS'][$strFullOptName] == "0")
+        {
+            $GLOBALS['OPTS'][$strFullOptName . "_given"] = false;
+            return false;
+        }
+   }
+    if($GLOBALS['OPTS']['include_all_given']) return true;
 
     return false;
 }
 
 function get_PharseOptionValue($strOptName)
 {
-
-    if($GLOBALS['OPTS'][$strOptName. "_given"] == true)
+    $retvalue = null;
+    $strOptGiven = $strOptName."_given";
+    if($GLOBALS['OPTS'][$strOptGiven] == true)
     {
-        return $GLOBALS['OPTS'][$strOptName];
+        __debug__printLine("'".$strOptName ."'"."=[".$GLOBALS['OPTS'][$strOptName] ."]", C__DISPLAY_ITEM_DETAIL__);
+        $retvalue = $GLOBALS['OPTS'][$strOptName];
     }
 
-    return false;
+    return $retvalue;
+}
+
+function get_PharseOption_FileDetails($strOptName, $fFileRequired)  // todo: add "is file requried?" functionality
+{
+    $retFileDetails = null;
+    $valOpt = get_PharseOptionValue($strOptName);
+    if($valOpt = false)
+    {
+        $GLOBALS['OPTS'][$strOptName] = null;
+    }
+    else
+    {
+        $retFileDetails = parseFilePath($GLOBALS['OPTS'][$strOptName], $fFileRequired);
+        __debug__printLine("". $strOptName ."details= [" . var_export($retFileDetails , true) . "]", C__DISPLAY_ITEM_DETAIL__);
+    }
+
+    return $retFileDetails;
 }
 
 

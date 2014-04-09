@@ -35,6 +35,8 @@ $arrSearches = array(
     array('site_name' => 'Glassdoor', 'search_name' => "chief product officer", 'base_url_format' => "http://www.glassdoor.com/Job/seattle-chief-product-officer-job-openings-SRCH_IL.0,7_IC1150505_KO8,29_IP***PAGE_NUMBER***.htm?fromAge=***NUMBER_DAYS***"),
 );
 
+$GLOBALS['OPTS']['titles_to_filter_input_file'] = C_STR_DATAFOLDER  . "bryans_list_exclude_titles.csv";
+
 $arrBryanTrackingFiles = array(
     C_STR_DATAFOLDER . 'bryans_list_active.csv',
     C_STR_DATAFOLDER . 'bryans_list_inactive.csv'
