@@ -16,10 +16,10 @@
  */
 require_once dirname(__FILE__) . '/../include/ClassJobsSitePlugin.php';
 
-class PluginPorchJobs extends ClassJobsSitePlugin
+class PluginPorch extends ClassJobsSitePlugin
 {
     protected $siteName = 'Porch';
-    protected $siteBaseURL = 'http://www.porch.com';
+    protected $siteBaseURL = 'http://about.porch.com/careers';
 
 
     function getDaysURLValue($days)
@@ -54,7 +54,7 @@ class PluginPorchJobs extends ClassJobsSitePlugin
             if($item['job_title'] == '') continue;
             $item['job_id'] = $item['job_title'];
 
-            $item['job_post_url'] = 'http://about.porch.com/careers/' . $node->find("a")[0]->href;
+            $item['job_post_url'] = $this->siteBaseURL . $node->find("a")[0]->href;
             $item['location'] = $node->find("span[class='location']")[0]->plaintext;
             $item['date_pulled'] = $this->getTodayAsString();
 

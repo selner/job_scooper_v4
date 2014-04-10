@@ -38,6 +38,9 @@ const C_EXCLUDE_BRIEF = 1;
 const C_EXCLUDE_GETTING_ACTUAL_URL = 3;
 
 
+$GLOBALS['DEBUG'] = false;
+
+
 
 //
 // Default settings for the job sites

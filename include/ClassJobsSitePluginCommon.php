@@ -136,6 +136,7 @@ class ClassJobsSitePluginCommon
         $retArrNormalized ['job_site_date'] = strTrimAndLower($retArrNormalized['job_site_date']);
         $retArrNormalized ['job_post_url'] = strTrimAndLower($retArrNormalized['job_post_url']);
         $retArrNormalized ['location'] = strScrub($retArrNormalized['location']);
+        $retArrNormalized ['brief'] = strScrub($retArrNormalized['brief']);
 
         return $retArrNormalized;
     }

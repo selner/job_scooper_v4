@@ -24,7 +24,6 @@ function __initializeArgs__()
 {
 
 
-    $GLOBALS['DEBUG'] = false;
     if($GLOBALS['DEBUG'] == true ) { $GLOBALS['VERBOSE'] = true; }
 
     $GLOBALS['OPTS_SETTINGS']  = array(
