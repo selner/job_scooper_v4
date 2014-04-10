@@ -10,8 +10,6 @@ enddestname="latest_newjobs_filtered.csv"
 filename=$now$endfilename
 file=$path$filename
 log=$path$now$endlogname
-endamznpath="amazon_jobs/"
-finalpath="/Users/bryan/Dropbox/Job Search - Bryan Tracking/"
 
 echo 'Output file will be ' $file 2>&1 1>"$log"
 echo 'Final destination will be ' $dest 2>&1 1>"$log"
@@ -27,8 +25,9 @@ case "$(date +%a)" in  Mon|Wed|Fri|Tue|Thu|Sat|Sun)
   script_flags=" -all " 
   echo 'Downloading HTML for jobs from Amazon.com new jobs site... ' 2>&1 1>>"$log"
 # BUGBUG
- bash ./updateAmazonNewSiteHTMLFiles.sh "$path" 2>&1 1>>"$log"
-  echo 'New jobs site download complete.' $log  2>&1 1>>"$log"
+# bash ./updateAmazonNewSiteHTMLFiles.sh "$path" 2>&1 1>>"$log"
+echo 'Skipping Amazon HTML download'  2>&1 1>>"$log"
+echo 'New jobs site download complete.' $log  2>&1 1>>"$log"
 esac
 
 case "$(date +%a)" in  Tue|Thu|Sat|Sun)
@@ -46,7 +45,7 @@ echo 'Downloading new jobs... ' 2>&1 1>>"$log"
 # site.  
 # php ../../scooper_utils/runJobs.php  -fni $1 $2 -o "$file" 2>&1 1>>"$log"
 echo "Running php ../../scooper_utils/runJobs.php $script_flags -o '$file'"  2>&1 1>>"$log"
-php ../runJobs.php $script_flags -days 3 -o "$file" 2>&1 1>>"$log"
+php ../runJobs.php $script_flags -days 7 -o "$file" 2>&1 1>>"$log"
 
 # cp "$file" "$dest"   2>&1 1>>"$log"
 

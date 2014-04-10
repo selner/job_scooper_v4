@@ -160,7 +160,7 @@ abstract class ClassJobsSite extends ClassJobsSiteCommon
 
         if($this->flagAutoMarkListings == true)
         {
-            $this->markMyJobsListWithAutoItems();
+            $this->markMyJobsList_withAutoItems();
         }
     }
 
