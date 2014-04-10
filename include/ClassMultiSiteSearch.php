@@ -74,9 +74,6 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
             $strSiteClass = $GLOBALS['site_plugins'][$strSite]['class_name'];
             try
             {
-                var_dump($GLOBALS['site_plugins']);
-                var_dump($strSite);
-                var_dump($strSiteClass);
 
                 $class = new $strSiteClass;
                 $class->getMyJobsForSearch($search, $nDays);

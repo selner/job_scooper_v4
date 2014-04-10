@@ -32,7 +32,7 @@ $GLOBALS['site_plugins'] = array(
     'amazon' => array('name' => 'amazon', 'class_name' => 'PluginAmazon', 'include_in_run' => false),
     'craigslist' => array('name' => 'craigslist', 'class_name' => 'PluginCraigslist', 'include_in_run' => false),
     'porch' => array('name' => 'porch', 'class_name' => 'PluginPorch', 'include_in_run' => false),
-    'expedia' => array('name' => 'expedia', 'class_name' => 'PluginCraigslist', 'include_in_run' => false),
+    'expedia' => array('name' => 'expedia', 'class_name' => 'PluginExpedia', 'include_in_run' => false),
     'indeed' => array('name' => 'indeed', 'class_name' => 'PluginIndeed', 'include_in_run' => false),
     'glassdoor' => array('name' => 'glassdoor', 'class_name' => 'PluginGlassdoor', 'include_in_run' => false),
     'simplyhired' => array('name' => 'simplyhired', 'class_name' => 'PluginSimplyHired', 'include_in_run' => false),
