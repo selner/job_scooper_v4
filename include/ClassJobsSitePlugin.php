@@ -14,8 +14,8 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/scooter_utils_common.php';
-require_once dirname(__FILE__) . '/ClassJobsSiteCommon.php';
+require_once dirname(__FILE__) . '/Options.php';
+require_once dirname(__FILE__) . '/ClassJobsSitePluginCommon.php';
 
 const C__JOB_PAGECOUNT_NOTAPPLICABLE__ = -1;
 const C__JOB_ITEMCOUNT_UNKNOWN__ = 11111;
@@ -70,7 +70,7 @@ function includeJobInFilteredList($var)
 
 
 
-abstract class ClassJobsSite extends ClassJobsSiteCommon
+abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 {
     protected $siteName = 'NAME-NOT-SET';
     protected $arrLatestJobs = null;
@@ -82,8 +82,6 @@ abstract class ClassJobsSite extends ClassJobsSiteCommon
     {
         $this->_bitFlags = $bitFlags;
         $this->setOutputFolder($strOutputDirectory);
-        $this->addUserOptionFlag();
-        $this->addToSitesList();
     }
 
     function __destruct()
@@ -101,25 +99,14 @@ abstract class ClassJobsSite extends ClassJobsSiteCommon
                 $strDebugFileName = $this->getMyOutputFileFullPath("debug");
                 __debug__printLine("Writing ". $this->siteName." " .count($this->arrLatestJobs) ." job records to " . $strDebugFileName . " for debugging (if needed).", C__DISPLAY_ITEM_START__);
                 $this->writeMyJobsListToFile($strDebugFileName, false);
-
             }
-
-
         }
-
     }
 
 
     abstract function parseJobsListForPage($objSimpHTML); // returns an array of jobs
     abstract function parseTotalResultsCount($objSimpHTML); // returns a settings array
 
-    protected $arrSiteClasses = array(
-        'glassdoor' => 'ClassGlassdoor',
-        'indeed' => 'ClassIndeed',
-        'simplyhired' => 'ClassSimplyHired',
-        'porch' => 'ClassPorchJobs',
-        'craigslist' => 'ClassCraigslist',
-    );
 
     /**
      * TODO:  DOC
@@ -130,6 +117,16 @@ abstract class ClassJobsSite extends ClassJobsSiteCommon
      * @return string TODO DOC
      */
     function getMyJobsList() { return $this->arrLatestJobs; }
+
+
+    /**
+     * TODO:  DOC
+     *
+     *
+     * @param  string TODO DOC
+     * @param  string TODO DOC
+     * @return string TODO DOC
+     */
     function loadMyJobsListFromCSVs($arrFilesToLoad)
     {
         $this->arrLatestJobs = $this->loadJobsListFromCSVs($arrFilesToLoad);
@@ -275,10 +272,16 @@ abstract class ClassJobsSite extends ClassJobsSiteCommon
 
     }
 
-    function getJobsForAllSearches($nDays = -1, $fIncludeFilteredJobsInResults = true)
+    /**
+     * TODO:  DOC
+     *
+     *
+     * @param  string TODO DOC
+     * @param  string TODO DOC
+     * @return string TODO DOC
+     */
+    function getJobsForAllSearches($nDays = -1)
     {
-
-
         foreach($this->arrSearchesToReturn as $search)
         {
             $strIncludeKey = 'include_'.strtolower($search['site_name']);
@@ -295,17 +298,13 @@ abstract class ClassJobsSite extends ClassJobsSiteCommon
             __debug__printLine("Running ". $search['site_name'] . " search '" . $search['search_name'], C__DISPLAY_ITEM_START__);
 
             $strSite = strtolower($search['site_name']);
-            $strSiteClass = $this->arrSiteClasses[$strSite];
-            $class = new $strSiteClass;
-
-
-            $class->getMyJobsForSearch($search, $nDays, $fIncludeFilteredJobsInResults);
-            $this->_addJobsToMyJobsList_($class->getMyJobsList());
-            // var_dump($this->siteName . " count loop end -- adding ".count($class->getMyJobsList()) . " to the previous " . $nLastCount ." so allJobs now = " . count($this->arrLatestJobs));
+            if(strcasecmp($strSite, $this->siteName) == 0)
+            {
+                $this->getMyJobsForSearch($search, $nDays);
+            }
         }
-
     }
-    function getMyJobsForSearch($search, $nDays = -1, $fIncludeFilteredJobsInResults = true)
+    function getMyJobsForSearch($search, $nDays = -1)
     {
         $nItemCount = 1;
         $nPageCount = 1;
@@ -407,29 +406,5 @@ abstract class ClassJobsSite extends ClassJobsSiteCommon
 
 
 
-    protected function addUserOptionFlag()
-    {
-
-        $strIncludeKey = 'include_'.strtolower($this->siteName);
-
-        $GLOBALS['OPTS_SETTINGS'][$strIncludeKey ] = array(
-            'description'   => 'Include ' .strtolower($this->siteName) . ' in the results list.' ,
-            'default'       => -1,
-            'type'          => Pharse::PHARSE_INTEGER,
-            'required'      => false,
-            'short'      => strtolower($this->siteName)
-        );
-
-    }
-
-    protected  function addToSitesList()
-    {
-        $arrSupportedSites = $GLOBALS['sites_supported'];
-
-        $arrSupportedSites[$this->siteName] = array('site_name' => $this->siteName, 'include_in_run' => -1);
-
-        $GLOBALS['sites_supported'] = $arrSupportedSites;
-
-    }
 
 }

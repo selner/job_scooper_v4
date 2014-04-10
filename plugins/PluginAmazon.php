@@ -14,25 +14,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/../include/ClassJobsSite.php';
+require_once dirname(__FILE__) . '/../include/ClassJobsSitePlugin.php';
 
 /****************************************************************************************************************/
 /**************                                                                                                         ****/
 /**************          Helper Class:  Pulling the Active Jobs from Amazon's site                                      ****/
 /**************                                                                                                         ****/
 /****************************************************************************************************************/
-// $test = new ClassAmazonJobs();
+// $test = new PluginAmazon();
 // $test->getJobsFromNewSiteFiles();
 
 
 
-class ClassAmazonJobs extends ClassJobsSite
+class PluginAmazon extends ClassJobsSitePlugin
 {
     protected $siteName = 'Amazon';
 
 
-    function parseJobsListForPage($objSimpHTML) { throw new ErrorException ("Error ClassAmazonJobs does not implement the parseJobsListForPage function.");}
-    function parseTotalResultsCount($objSimpHTML) { throw new ErrorException ("Error ClassAmazonJobs does not implement the parseTotalResultsCount function.");}
+    function parseJobsListForPage($objSimpHTML) { throw new ErrorException ("Error PluginAmazon does not implement the parseJobsListForPage function.");}
+    function parseTotalResultsCount($objSimpHTML) { throw new ErrorException ("Error PluginAmazon does not implement the parseTotalResultsCount function.");}
 
     public $arrSearches = array(
         'keyword-dir'=> array("name" => 'keyword-dir',  "base_url" => "http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=director&category=*&location=US%2C+WA%2C+Seattle&x=0&y=0&page="),

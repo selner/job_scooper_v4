@@ -17,33 +17,8 @@
 //
 // If installed as part of the package, uses Klogger v0.1 version (http://codefury.net/projects/klogger/)
 //
-require_once dirname(__FILE__) . '/../lib/pharse.php';
 
-if ( file_exists ( dirname(__FILE__) . '/../lib/KLogger.php') )
-{
-    define(C_USE_KLOGGER, 1);
-    require_once dirname(__FILE__) . '/../lib/KLogger.php';
-
-}
-else
-{
-    print "Could not find KLogger file: ". dirname(__FILE__) . '/../lib/KLogger.php'.PHP_EOL;
-    define(C_USE_KLOGGER, 0);
-}
-require_once dirname(__FILE__) . '/../../scooper/src/include/plugin-base.php';
-require_once dirname(__FILE__) . '/../../scooper/src/include/common.php';
-require_once dirname(__FILE__) . '/../lib/simple_html_dom.php';
-require_once dirname(__FILE__) . '/ClassJobsSite.php';
-
-date_default_timezone_set("America/Los_Angeles");
-
-const C_NORMAL = 0;
-const C_EXCLUDE_BRIEF = 1;
-const C_EXCLUDE_GETTING_ACTUAL_URL = 3;
-
-const C_STR_DATAFOLDER = '/Users/bryan/Code/data/jobs/';
-const C_STR_FOLDER_JOBSEARCH= '/Users/bryan/Dropbox/Job Search 2013/';
-
+require_once dirname(__FILE__) . '/RunHelpers.php';
 
 function __initializeArgs__()
 {
@@ -52,9 +27,7 @@ function __initializeArgs__()
     $GLOBALS['DEBUG'] = false;
     if($GLOBALS['DEBUG'] == true ) { $GLOBALS['VERBOSE'] = true; }
 
-    $GLOBALS['sites_supported'] = array();
-
-    $options = array(
+    $GLOBALS['OPTS_SETTINGS']  = array(
         'include_all' => array(
             'description'   => 'Include all job sites.',
             'default'       => 1,
@@ -100,7 +73,7 @@ function __initializeArgs__()
     );
 
 
-
+    addUserOptionForSitePlugins();
 
 //    # You may specify a program banner thusly:
 //    $banner = "Find and export basic website, Moz.com, Crunchbase and Quantcast data for any company name or URL.";
@@ -108,34 +81,25 @@ function __initializeArgs__()
     if($GLOBALS['VERBOSE'] == true) { __log__ ('Options set: '.var_export($GLOBALS['OPTS'], true), C__LOGLEVEL_INFO__); }
 
 
-    $GLOBALS['sites_supported']['Amazon'] =  array('site_name' => 'Amazon', 'include_in_run' => -1);
-
-    $GLOBALS['OPTS_SETTINGS'] = $options;
-
 
 }
 
 function __getPassedArgs__()
 {
-    // Add each of the sites to the supported list so that they show up as keys in the potential
-    // option choices
-    //
-    foreach($GLOBALS['sites_supported']  as $site)
-    {
-        $GLOBALS['sites_supported'][$site['site_name']]['include_in_run'] = is_IncludeSite($site['site_name']);
-    }
 
-    __log__ ('Possible options: '.var_export($GLOBALS['OPTS_SETTINGS'], true), C__LOGLEVEL_INFO__);
+    __debug__printLine('Possible options: '.var_export($GLOBALS['OPTS_SETTINGS'], true), C__DISPLAY_NORMAL__);
 
     # After you've configured Pharse, run it like so:
     $GLOBALS['OPTS'] = Pharse::options($GLOBALS['OPTS_SETTINGS']);
 
     // Now go see what we got back for each of the sites
     //
-    foreach($GLOBALS['sites_supported']  as $site)
+    foreach($GLOBALS['site_plugins']  as $site)
     {
-        $GLOBALS['sites_supported'][$site['site_name']]['include_in_run'] = is_IncludeSite($site['site_name']);
+        $fIsIncludedInRun = is_IncludeSite($site['name']);
+        $GLOBALS['site_plugins'][$site['name']]['include_in_run'] = $fIsIncludedInRun;
     }
+
     $nDays = get_PharseOptionValue('number_days');
     if($nDays == false) { $GLOBALS['OPTS']['number_days'] = 1; }
 
@@ -153,23 +117,22 @@ function __getPassedArgs__()
 
     return $GLOBALS['OPTS'];
 }
-function strTrimAndLower($str)
-{
-    if($str != null && is_string($str)) { return strtolower(trim($str)); }
 
-    return $str;
-}
 
-function strScrub($str)
+function addUserOptionForSitePlugins()
 {
-    $ret = strTrimAndLower($str);
-    if($ret != null)
+    foreach($GLOBALS['site_plugins'] as $site)
     {
-        $ret  = str_replace(array(".", ",", "–", "/", "-", ":", ";"), " ", $ret);
-        $ret  = str_replace("  ", " ", $ret);
-        $ret  = str_replace("  ", " ", $ret); // do it twice to catch the multiples
+        $strIncludeKey = 'include_'.strtolower($site['name']);
+
+        $GLOBALS['OPTS_SETTINGS'][$strIncludeKey ] = array(
+            'description'   => 'Include ' .strtolower($site['name']) . ' in the results list.' ,
+            'default'       => -1,
+            'type'          => Pharse::PHARSE_INTEGER,
+            'required'      => false,
+            'short'      => strtolower($site['name'])
+        );
     }
-    return $ret;
 }
 
 function is_IncludeSite($strName)
@@ -233,15 +196,4 @@ function get_PharseOption_FileDetails($strOptName, $fFileRequired)  // todo: add
     }
 
     return $retFileDetails;
-}
-
-
-function intceil($number)
-{
-    if(is_string($number)) $number = floatval($number);
-
-    $ret = ( is_numeric($number) ) ? ceil($number) : false;
-    if ($ret != false) $ret = intval($ret);
-
-    return $ret;
 }

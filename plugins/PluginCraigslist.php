@@ -14,12 +14,12 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/../include/ClassJobsSite.php';
+require_once dirname(__FILE__) . '/../include/ClassJobsSitePlugin.php';
 
 
 
 
-class ClassCraigslist  extends ClassJobsSite
+class PluginCraigslist  extends ClassJobsSitePlugin
 {
     protected $siteName = 'Craigslist';
     protected $nJobListingsPerPage = 50;

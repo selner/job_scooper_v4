@@ -14,11 +14,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/../include/ClassJobsSite.php';
+require_once dirname(__FILE__) . '/../include/ClassJobsSitePlugin.php';
 
 
 
-class ClassGlassdoor extends ClassJobsSite
+class PluginGlassdoor extends ClassJobsSitePlugin
 {
     protected $siteName = 'Glassdoor';
     protected $siteBaseURL = 'http://www.glassdoor.com';

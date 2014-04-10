@@ -16,9 +16,9 @@
  */
 
 
-require_once dirname(__FILE__) . '/../include/ClassJobsSite.php';
+require_once dirname(__FILE__) . '/../include/ClassJobsSitePlugin.php';
 
-class ClassJobsSiteNoActualSite extends ClassJobsSite
+class ClassJobsSitePluginNoActualSite extends ClassJobsSitePlugin
 {
     protected $siteName = 'ClassNoJobsSite';
 
@@ -32,7 +32,7 @@ class ClassJobsSiteNoActualSite extends ClassJobsSite
     }
 }
 
-class ClassMultiSiteSearch extends ClassJobsSite
+class ClassMultiSiteSearch extends ClassJobsSitePlugin
 {
     protected $siteName = 'Multisite';
     protected $flagAutoMarkListings = false; // All the called classes do it for us already
@@ -43,18 +43,49 @@ class ClassMultiSiteSearch extends ClassJobsSite
     }
     function parseTotalResultsCount($objSimpHTML) { throw new ErrorException("parseJobsListForPage not supported for class ClassMultiSiteSearch"); }
 
-    function __construct($bitFlags = null, $strOutputDirectory = null, $arrSearches = null)
+
+    /**
+     * TODO:  DOC
+     *
+     *
+     * @param  string TODO DOC
+     * @param  string TODO DOC
+     * @return string TODO DOC
+     */
+    function getJobsForAllSearches($nDays = -1)
     {
-        parent::__construct($bitFlags, $strOutputDirectory);
-        if($arrSearches != null)
+        foreach($this->arrSearchesToReturn as $search)
         {
-           foreach($arrSearches as $search)
-           {
-                $class = null;
-                $strSite = strtolower($search['site_name']);
-                $strSiteClass = $this->arrSiteClasses[$strSite];
-                $class = new $strSiteClass($bitFlags, $strOutputDirectory);
-           }
+            $strIncludeKey = 'include_'.strtolower($search['site_name']);
+
+            if($GLOBALS['OPTS'][$strIncludeKey] == null || $GLOBALS['OPTS'][$strIncludeKey] == 0)
+            {
+                __debug__printLine($search['site_name'] . " excluded, so skipping its '" . $search['search_name'] . "' search.", C__DISPLAY_WARNING__);
+
+                continue;
+            }
+
+            $class = null;
+            $nLastCount = count($this->arrLatestJobs);
+            __debug__printLine("Running ". $search['site_name'] . " search '" . $search['search_name'], C__DISPLAY_ITEM_START__);
+
+            $strSite = strtolower($search['site_name']);
+
+            $strSiteClass = $GLOBALS['site_plugins'][$strSite]['class_name'];
+            try
+            {
+                var_dump($GLOBALS['site_plugins']);
+                var_dump($strSite);
+                var_dump($strSiteClass);
+
+                $class = new $strSiteClass;
+                $class->getMyJobsForSearch($search, $nDays);
+                $this->_addJobsToMyJobsList_($class->getMyJobsList());
+            }
+            catch (ErrorException $classError)
+            {
+                throw new ErrorException("Error: Plugin for site [" .$search['site_name'] . "] could not be found. [" .$classError['message']."]");
+            }
 
         }
     }

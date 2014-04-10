@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/../include/scooter_utils_common.php';
+require_once dirname(__FILE__) . '/../include/Options.php';
 
 const C__STR_TAG_AUTOMARKEDJOB__ = "[auto-marked]";
 /**
@@ -57,7 +57,7 @@ function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strEx
     return $strFilename;
 }
 
-class ClassJobsSiteCommon
+class ClassJobsSitePluginCommon
 {
 
     private $arrKeysForDeduping = array('job_site', 'job_id');

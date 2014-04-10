@@ -14,7 +14,29 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/JobSiteClasses.php';
+require_once dirname(__FILE__) . '/SitePlugins.php';
+require_once dirname(__FILE__) . '/../lib/pharse.php';
+
+if ( file_exists ( dirname(__FILE__) . '/../lib/KLogger.php') )
+{
+    define(C_USE_KLOGGER, 1);
+    require_once dirname(__FILE__) . '/../lib/KLogger.php';
+
+}
+else
+{
+    print "Could not find KLogger file: ". dirname(__FILE__) . '/../lib/KLogger.php'.PHP_EOL;
+    define(C_USE_KLOGGER, 0);
+}
+require_once dirname(__FILE__) . '/../../scooper_common/include/common.php';
+require_once dirname(__FILE__) . '/../lib/simple_html_dom.php';
+
+date_default_timezone_set("America/Los_Angeles");
+
+const C_NORMAL = 0;
+const C_EXCLUDE_BRIEF = 1;
+const C_EXCLUDE_GETTING_ACTUAL_URL = 3;
+
 
 
 //
@@ -47,7 +69,6 @@ function __runCommandLine($arrSearches = null, $arrInputFiles = null)
 
 function __runAllJobs__($arrSearches, $arrSourceFiles = null, $nDays = -1, $fIncludeFilteredJobsInResults = null)
 {
-    $arrSitesSettings =  $GLOBALS['sites_supported'];
     $strOutputFolder = $GLOBALS['output_file_details']['directory'];
     $strOutName = $GLOBALS['output_file_details']['full_file_path'];
 
@@ -57,7 +78,7 @@ function __runAllJobs__($arrSearches, $arrSourceFiles = null, $nDays = -1, $fInc
 
     __debug__printLine(PHP_EOL."**************  Start  **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
 
-    $classJobExportHelper_Main = new ClassJobsSiteNoActualSite(C_NORMAL, $strOutputFolder);
+    $classJobExportHelper_Main = new ClassJobsSitePluginNoActualSite(C_NORMAL, $strOutputFolder);
 
     if($GLOBALS['output_file_details']['file_name'] == null || $GLOBALS['output_file_details']['full_file_path'] == "")
     {
@@ -80,10 +101,10 @@ function __runAllJobs__($arrSearches, $arrSourceFiles = null, $nDays = -1, $fInc
     addJobsToJobsList($arrListAllJobsFromSearches, $classMulti->getMyJobsList());
 
 
-    if($arrSitesSettings['Amazon']['include_in_run'] == true)
+    if($GLOBALS['site_plugins']['Amazon']['include_in_run'] == true)
     {
         __debug__printLine("Adding Amazon jobs....", C__DISPLAY_ITEM_START__);
-        $class = new ClassAmazonJobs($GLOBALS["bit_flags"], $strOutputFolder);
+        $class = new PluginAmazon($GLOBALS["bit_flags"], $strOutputFolder);
         $class->downloadAllUpdatedJobs( $GLOBALS['OPTS']['number_days']);
         addJobsToJobsList($arrListAllJobsFromSearches, $class->getMyJobsList());
         $arrOutputFilesToIncludeInResults[] = $class->writeMyJobsListToFile();
