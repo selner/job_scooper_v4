@@ -25,7 +25,7 @@ const C__JOB_ITEMCOUNT_UNKNOWN__ = 11111;
 //
 function isMarked_AutoDupe($var)
 {
-    if(substr_count($var['interested'], "Likely Dup") > 0) return true;
+    if(substr_count($var['interested'], "No (Likely Duplicate") > 0) return true;
 
     return false;
 }

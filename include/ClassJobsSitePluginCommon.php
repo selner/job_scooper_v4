@@ -241,6 +241,10 @@ class ClassJobsSitePluginCommon
     {
         $ret = array('lookup_value' => null, 'found_in_array' => false );
 
+        // remove spacess from any of the input strings
+        $param1= str_replace( ' ', '', $param1);
+        $param2= str_replace( ' ', '', $param2);
+
         if(strlen($param1) >= 0 && strlen($param1) >= 0)
         {
             $ret['lookup_value'] = strtolower(trim($param1)) . '-'. strtolower(trim($param2));
@@ -259,6 +263,7 @@ class ClassJobsSitePluginCommon
         {
             $ret['found_in_array'] = true;
         }
+
 
         return $ret;
     }
@@ -280,7 +285,14 @@ class ClassJobsSitePluginCommon
         $nIndex = 0;
         foreach($arrToMark as $job)
         {
-            $arrPrevMatchJob = $this->_getJobFromArrayByKeyPair_($arrToMark, $job['company'], $job['job_title']);
+            $strCompanyKey = $job['company'];
+            if($job['company'] == null || $job['company'] == "")
+            {
+                $strCompanyKey = $job['job_site'];
+            }
+
+            $arrPrevMatchJob = $this->_getJobFromArrayByKeyPair_($arrCompanyRoleNamePairsFound, $strCompanyKey, $job['job_title']);
+//            var_dump("job",$job,'company key', $strCompanyKey, "arrMatch",$arrPrevMatchJob);
             if($arrPrevMatchJob['found_in_array'] == true)
             {
                 //
@@ -294,7 +306,7 @@ class ClassJobsSitePluginCommon
             else
             {
                 // add it to the list
-                $arrCompanyRoleNamePairsFound[$strRoleKey] = $job;
+                $arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ] = $job;
                 $nUniqueRoles++;
             }
             $nIndex++;
@@ -391,6 +403,15 @@ class ClassJobsSitePluginCommon
 
         }
 
+        $arrNotInterested = array_filter($arrJobsToFilter, "isMarked_NotInterested");
+        $arrInteresting = array_filter($arrJobsToFilter, "isMarked_InterestedOrBlank");
+
+
+        __debug__printLine("Filtering complete:  ". count($arrNotInterested)." filtered; ". count($arrInteresting). " not filtered " . count($arrJobsToFilter) . " total records." , C__DISPLAY_ITEM_RESULT__);
+
+        return $arrInteresting;
+
+       /*
         $nJobsNotExcluded = 0;
         $nJobsExcluded = 0;
         $retArrayIncludedJobs = array();
@@ -435,6 +456,7 @@ class ClassJobsSitePluginCommon
         __debug__printLine("Filtering complete:  ".$nJobsExcluded ." filtered; ". $nJobsNotExcluded . " not filtered; " . count($arrJobsToFilter) . " total records." , C__DISPLAY_ITEM_RESULT__);
 
         return $retArrayIncludedJobs;
+*/
     }
 
 

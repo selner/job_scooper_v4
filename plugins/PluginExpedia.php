@@ -85,10 +85,10 @@ class PluginExpedia extends ClassJobsSitePlugin
             $item['job_post_url'] = $this->siteBaseURL . $node->find("a")[0]->href;
             $item['date_pulled'] = $this->getTodayAsString();
             $item['location'] = preg_replace("/(\s{2,})/", " ", $node->find("p[class='search-result-item-company-name']")[0]->plaintext, -1);
-            $item['brief'] = $node->find("p[class='search-result-item-description']")[0]->plaintext;
-            $item['brief'] = str_ireplace(array("Position Description ", "position overview", "PositionSummary"), "", $item['brief']);
+//            $item['brief'] = $node->find("p[class='search-result-item-description']")[0]->plaintext;
+//           $item['brief'] = str_ireplace(array("Position Description ", "position overview", "PositionSummary"), "", $item['brief']);
 
-            $item['job_site_date'] = $node->find("span[class='search-result-item-post-date']")[0]->plaintext;
+            $item['job_site_date'] = str_replace("date posted: ","", $node->find("span[class='search-result-item-post-date']")[0]->plaintext);
             $ret[] = $this->normalizeItem($item);
 
         }
