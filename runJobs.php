@@ -50,7 +50,7 @@ $GLOBALS['OPTS']['titles_to_filter_input_file'] = C_STR_DATAFOLDER  . "bryans_li
 
 $arrBryanTrackingFiles = array(
     C_STR_DATAFOLDER . 'bryans_list_active.csv',
-    C_STR_DATAFOLDER . 'bryans_list_inactive.csv'
+    C_STR_DATAFOLDER . 'bryans_list_inactive.csv',
 );
 
 

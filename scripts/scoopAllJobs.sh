@@ -18,15 +18,15 @@ echo 'Log file is ' $log  2>&1 1>>"$log"
 when="unknown"
 
 # BUGBUG
-case "$(date +%a)" in  Mon|Wed|Fri|Tue|Thu|Sat|Sun)
-#case "$(date +%a)" in Mon|Wed|Fri|Sat)
+#case "$(date +%a)" in  Mon|Wed|Fri|Tue|Thu|Sat|Sun)
+case "$(date +%a)" in Mon|Wed|Fri|Sat)
 
   when="noteveryday"
   script_flags=" -all " 
   echo 'Downloading HTML for jobs from Amazon.com new jobs site... ' 2>&1 1>>"$log"
 # BUGBUG
-#echo 'Skipping Amazon HTML download'  2>&1 1>>"$log"
-bash ./updateAmazonNewSiteHTMLFiles.sh "$path" 2>&1 1>>"$log"
+echo 'Skipping Amazon HTML download'  2>&1 1>>"$log"
+#bash ./updateAmazonNewSiteHTMLFiles.sh "$path" 2>&1 1>>"$log"
 echo 'New jobs site download complete.' $log  2>&1 1>>"$log"
 esac
 

@@ -28,7 +28,7 @@ else
     print "Could not find KLogger file: ". dirname(__FILE__) . '/../lib/KLogger.php'.PHP_EOL;
     define(C_USE_KLOGGER, 0);
 }
-require_once dirname(__FILE__) . '/../../scooper_common/include/common.php';
+require_once dirname(__FILE__) . '/../scooper_common/common.php';
 require_once dirname(__FILE__) . '/../lib/simple_html_dom.php';
 
 date_default_timezone_set("America/Los_Angeles");
