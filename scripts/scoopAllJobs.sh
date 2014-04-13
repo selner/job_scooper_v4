@@ -1,8 +1,9 @@
 #!/bin/bash
+override=$1
 
 # get an output file name
 now=$(date +"%Y_%m_%d_%H%M")
-path="/Users/bryan/OneDrive/JobSearch/"
+path="/Users/bryan/OneDrive/OneDrive-JobSearch/"
 dest=$path
 endfilename="_newjobs.csv"
 endlogname="_newjobs_run.log"
@@ -18,8 +19,7 @@ echo 'Log file is ' $log  2>&1 1>>"$log"
 when="unknown"
 
 # BUGBUG
-#case "$(date +%a)" in  Mon|Wed|Fri|Tue|Thu|Sat|Sun)
-case "$(date +%a)" in Mon|Wed|Fri|Sat)
+case "$(date +%a)" in (Mon|Wed|Fri|Sat)
 
   when="noteveryday"
   script_flags=" -all " 
@@ -36,6 +36,12 @@ case "$(date +%a)" in  Tue|Thu|Sat|Sun)
 esac
 echo 'Running script case $when using the following flags:  '$script_flags 2>&1 1>>"$log"
 
+if [ "$override" == "all" ]; then     ## GOOD
+
+  when="noteveryday"
+  script_flags=" -all " 
+
+fi
 
 echo 'Downloading new jobs... ' 2>&1 1>>"$log"
 

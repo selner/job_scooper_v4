@@ -83,7 +83,9 @@ class PluginLinkUp extends ClassJobsSitePlugin
             $item['job_post_url'] = $titleLink->href;
             if($item['job_title'] == '') continue;
 
-            $item['company'] = $node->find("span[class='listing-company']")[0]->text;
+            $item['company'] = $node->find("span[class='listing-company']")[0]->plaintext;
+
+
             $item['job_id'] = $node->attr['data-hash'];
             $item['location'] = trim($node->find("span[class='listing-location'] span")[0]->plaintext) . "-" .
                     trim($node->find("span[class='listing-location'] span")[1]->plaintext);
