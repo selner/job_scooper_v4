@@ -2,7 +2,7 @@
 
 # get an output file name
 now=$(date +"%Y_%m_%d_%H%M")
-path="/Users/bryan/Code/data/jobs/"
+path="/Users/bryan/OneDrive/JobSearch/"
 dest=$path
 endfilename="_newjobs.csv"
 endlogname="_newjobs_run.log"
@@ -26,7 +26,7 @@ case "$(date +%a)" in Mon|Wed|Fri|Sat)
   echo 'Downloading HTML for jobs from Amazon.com new jobs site... ' 2>&1 1>>"$log"
 # BUGBUG
 echo 'Skipping Amazon HTML download'  2>&1 1>>"$log"
-#bash ./updateAmazonNewSiteHTMLFiles.sh "$path" 2>&1 1>>"$log"
+bash ./updateAmazonNewSiteHTMLFiles.sh "$path" 2>&1 1>>"$log"
 echo 'New jobs site download complete.' $log  2>&1 1>>"$log"
 esac
 

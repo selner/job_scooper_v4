@@ -35,7 +35,7 @@ function __initializeArgs__()
             'short'      => 'all',
         ),
         'number_days' => array(
-            'description'   => 'Number of days ago to pull job listings for..',
+            'description'   => 'Number of days ago to pull job listings for.',
             'default'       => 0,
             'type'          => Pharse::PHARSE_INTEGER,
             'required'      => false,
@@ -99,6 +99,10 @@ function __getPassedArgs__()
         $GLOBALS['site_plugins'][$site['name']]['include_in_run'] = $fIsIncludedInRun;
     }
 
+    var_dump('$fIsIncludedInRun', $fIsIncludedInRun);
+    var_dump('plugins', $GLOBALS['site_plugins']);
+    var_dump('plugins', $GLOBALS['OPTS']);
+
     $nDays = get_PharseOptionValue('number_days');
     if($nDays == false) { $GLOBALS['OPTS']['number_days'] = 1; }
 
@@ -140,19 +144,18 @@ function is_IncludeSite($strName)
     $strGivenKey = $strIncludeSiteKey."_given";
 
 
-
     if($GLOBALS['OPTS'][$strGivenKey] == true)
     {
        switch($GLOBALS['OPTS'][$strIncludeSiteKey])
        {
            case 0:
-               $GLOBALS['OPTS'][$strGivenKey] = 0;
+               $GLOBALS['OPTS'][$strIncludeSiteKey] = 0;
                 break;
 
            case -1:
            case 1:
            default:
-           $GLOBALS['OPTS'][$strGivenKey] = 1;
+           $GLOBALS['OPTS'][$strIncludeSiteKey] = 1;
            break;
 
        }
@@ -162,6 +165,7 @@ function is_IncludeSite($strName)
         $GLOBALS['OPTS'][$strGivenKey] = true;
         $GLOBALS['OPTS'][$strIncludeSiteKey] = true;
     }
+
 
 
     return $GLOBALS['OPTS'][$strIncludeSiteKey];

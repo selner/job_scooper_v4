@@ -26,6 +26,7 @@ require_once dirname(__FILE__) . '/../plugins/PluginSimplyHired.php';
 require_once dirname(__FILE__) . '/../plugins/PluginGlassdoor.php';
 require_once dirname(__FILE__) . '/../plugins/PluginPorch.php';
 require_once dirname(__FILE__) . '/../plugins/PluginExpedia.php';
+require_once dirname(__FILE__) . '/../plugins/PluginLinkUp.php';
 
 
 $GLOBALS['site_plugins'] = array(
@@ -36,6 +37,7 @@ $GLOBALS['site_plugins'] = array(
     'indeed' => array('name' => 'indeed', 'class_name' => 'PluginIndeed', 'include_in_run' => false),
     'glassdoor' => array('name' => 'glassdoor', 'class_name' => 'PluginGlassdoor', 'include_in_run' => false),
     'simplyhired' => array('name' => 'simplyhired', 'class_name' => 'PluginSimplyHired', 'include_in_run' => false),
+    'linkup' => array('name' => 'linkup', 'class_name' => 'PluginLinkUp', 'include_in_run' => false),
 );
 
 

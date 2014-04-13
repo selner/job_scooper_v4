@@ -64,7 +64,6 @@ function __runCommandLine($arrSearches = null, $arrInputFiles = null)
     __getPassedArgs__();
 
 
-
     __runAllJobs__($arrSearches, $arrInputFiles , $nDays, $fIncludeFilteredListings  );
 
 }

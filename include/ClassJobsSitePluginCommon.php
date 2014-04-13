@@ -633,16 +633,13 @@ class ClassJobsSitePluginCommon
             $objSimpleHTML =  $this->getSimpleHTMLObjForFileContents($filePath);
         }
 
-        if(!$objSimpleHTML && $this->_strAlternateLocalFile  && strlen($this->_strAlternateLocalFile ) > 0)
-        {
-            __debug__printLine("Loading ALTERNATE results from ".$this->_strAlternateLocalFile , C__DISPLAY_ITEM_DETAIL__);
-            $objSimpleHTML =  $this->getSimpleHTMLObjForFileContents($this->_strAlternateLocalFile );
-        }
 
         if(!$objSimpleHTML && $strURL && strlen($strURL) > 0)
         {
 //             __debug__printLine("Loading results from ".$strURL, C__DISPLAY_ITEM_DETAIL__);
-            $objSimpleHTML = file_get_html($strURL);
+            $options  = array('http' => array( 'timeout' => 10,                 'user_agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36'));
+            $context  = stream_context_create($options);
+            $objSimpleHTML = file_get_html($strURL, false, $context);
         }
 
         if(!$objSimpleHTML)
