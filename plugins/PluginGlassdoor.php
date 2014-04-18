@@ -17,6 +17,23 @@
 require_once dirname(__FILE__) . '/../include/ClassJobsSitePlugin.php';
 
 
+function combineTextAllChildren($node, $fRecursed = false)
+{
+
+    $retStr = "";
+    if($node->hasChildNodes())
+    {
+        $retStr = combineTextAllChildren($node->firstChild(), true);
+    }
+
+    if($node->plaintext != null && $fRecursed == false)
+    {
+       $retStr = strScrub($node->plaintext . " " . $retStr, DEFAULT_SCRUB );
+    }
+    return $retStr;
+
+
+}
 
 class PluginGlassdoor extends ClassJobsSitePlugin
 {
@@ -47,6 +64,21 @@ class PluginGlassdoor extends ClassJobsSitePlugin
      return $ret;
 
     }
+    protected function _getURLfromBase_($search, $nDays, $nPage, $nItem = null)
+    {
+        $strURL = $search['base_url_format'];
+        $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($nDays), $strURL );
+        if($nPage == null || $nPage <= 1)
+        {
+            $strURL = str_ireplace("***PAGE_NUMBER***", "", $strURL );
+        }
+        else
+        {
+            $strURL = str_ireplace("***PAGE_NUMBER***", "_IP".$nPage, $strURL );
+        }
+        $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
+        return $strURL;
+    }
 
 
     function parseTotalResultsCount($objSimpHTML)
@@ -73,15 +105,9 @@ class PluginGlassdoor extends ClassJobsSitePlugin
             $item = parent::getEmptyItemsArray();
 
             $jobLink = $node->find("a[class='jobLink']")[1];
-            $titleTextNode = $jobLink->firstChild();
-            if($titleTextNode->hasChildNodes())
-            {
-                $item['job_title'] = $titleTextNode->firstChild()->plaintext;
-            }
-            else
-            {
-                $item['job_title'] = $titleTextNode->plaintext;
-            }
+            $item['job_title'] = combineTextAllChildren($jobLink);
+
+
 
             $item['job_post_url'] = $this->siteBaseURL . $jobLink->href;
 
@@ -90,7 +116,7 @@ class PluginGlassdoor extends ClassJobsSitePlugin
             if($fIDMatch) { $item['job_id'] = str_replace("jobListingId=", "", $arrIDMatches[0]); }
 
             $item['date_pulled'] = $this->getTodayAsString();
-            $item['job_site'] = $this->siteName . "(" . trim($node->find("span[class='displaySource']")[0]->plaintext) .")";
+            $item['job_site'] = $this->siteName;
             $item['company']= trim($node->find("span[class='employerName']")[0]->plaintext);
             $item['location'] =trim( $node->find("span[class='location'] span span span")[0]->plaintext);
 
