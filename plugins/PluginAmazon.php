@@ -238,7 +238,11 @@ class PluginAmazon extends ClassJobsSitePlugin
             if($item['job_title'] == '') continue;
 //            $item['script_search_key'] = $arrSettings['name'];
 
-            $item['job_post_url'] = "http://www.amazon.com" . $firstPart->find('a[class="title"]')[0]->href;
+
+            // sr+manager+product+management+amazon+local&category=*&location=*&x=0&y=0
+            $item['job_post_url'] = "http://www.amazon.com/gp/jobs/ref=j_sq_btn?jobSearchKeywords=%22" .  strScrub($item['job_title'], DEFAULT_SCRUB | URL_ENCODE ) . "%22";
+
+//            $item['job_post_url'] = "http://www.amazon.com" . $firstPart->find('a[class="title"]')[0]->href;
 //            $item['job_source_url'] = $item['job_post_url'];
             $item['location'] = trim($firstPart->find('span[class="details"]')[0]->plaintext);
             $id = trim($firstPart->find('span[class="id"]')[0]->plaintext);

@@ -70,6 +70,7 @@ class PluginGlassdoor extends ClassJobsSitePlugin
 
         foreach($nodesJobs as $node)
         {
+
             $item = parent::getEmptyItemsArray();
 
             $jobLink = $node->find("a[class='jobLink']")[1];
@@ -85,12 +86,16 @@ class PluginGlassdoor extends ClassJobsSitePlugin
 
             $item['job_post_url'] = $this->siteBaseURL . $jobLink->href;
 
+            $item['date_pulled'] = $this->getTodayAsString();
+            $strPartnerSiteName = trim($node->find("span[class='displaySource']")[0]->plaintext);
+
+
             // <a href="/partner/jobListing.htm?pos=115&amp;ao=29933&amp;s=58&amp;guid=000001453fb833deb3e300823643def8&amp;src=GD_JOB_AD&amp;t=SR&amp;extid=1&amp;exst=OL&amp;ist=&amp;ast=OL&amp;vt=w&amp;cb=1396933407969&amp;jobListingId=1008408496" rel="nofollow" class="jobLink" data-ja-clk="1" data-gd-view="1" data-ev-a="B-S"><tt class="notranslate"><strong>Director, Product</strong> Management</tt></a>
             $fIDMatch = preg_match("/jobListingId=([0-9]+)/", $jobLink->href, $arrIDMatches);
-            if($fIDMatch) { $item['job_id'] = str_replace("jobListingId=", "", $arrIDMatches[0]); }
+            if($fIDMatch) { $item['job_id'] = $strPartnerSiteName . '-'. str_replace("jobListingId=", "", $arrIDMatches[0]); }
 
-            $item['date_pulled'] = $this->getTodayAsString();
-            $item['job_site'] = $this->siteName . "(" . trim($node->find("span[class='displaySource']")[0]->plaintext) .")";
+
+            $item['job_site'] = $this->siteName;
             $item['company']= trim($node->find("span[class='employerName']")[0]->plaintext);
             $item['location'] =trim( $node->find("span[class='location'] span span span")[0]->plaintext);
 
@@ -103,6 +108,7 @@ class PluginGlassdoor extends ClassJobsSitePlugin
             }
 
             $ret[] = $this->normalizeItem($item);
+
         }
 
         return $ret;

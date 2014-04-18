@@ -101,10 +101,10 @@ class ClassJobsSitePluginCommon
             'last_status_update' => '',
             'date_pulled' => '',
             'job_post_url' => '',
-            'brief_description' => '',
             'location' => '',
             'job_site_category' => '',
             'job_site_date' =>'',
+            'brief_description' => '',
         );
     }
 
