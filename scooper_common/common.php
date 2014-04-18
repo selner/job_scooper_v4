@@ -537,19 +537,27 @@ define('LOWERCASE', 0x2);
 define('HTML_DECODE', 0x4);
 define('REPLACES_SPACES_WITH_HYPHENS', 0x8);
 define('URL_ENCODE', 0x8);
-define('DEFAULT_SCRUB', REMOVE_PUNCT | HTML_DECODE | LOWERCASE );
+define('REMOVE_EXTRA_WHITESPACE', 0x10);
+define('DEFAULT_SCRUB', REMOVE_PUNCT | HTML_DECODE | LOWERCASE | REMOVE_EXTRA_WHITESPACE );
 
 //And so on, 0x8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800 etc..
 
 
 function strScrub($str, $flags = null)
 {
-    $ret = strTrimAndLower($str);
-    if($ret != null)
+    if($flags == null)  $flags = REMOVE_EXTRA_WHITESPACE;
+    $ret = $str;
+
+    if ($flags & REMOVE_EXTRA_WHITESPACE)
     {
-        $ret  = str_replace(array(".", ",", "–", "/", "-", ":", ";"), " ", $ret);
-        $ret  = str_replace("  ", " ", $ret);
-        $ret  = str_replace("  ", " ", $ret); // do it twice to catch the multiples
+        $ret = trim($ret);
+        if($ret != null)
+        {
+            $ret  = str_replace(array(".", ",", "–", "/", "-", ":", ";"), " ", $ret);
+            $ret  = str_replace("  ", " ", $ret);
+            $ret  = str_replace("  ", " ", $ret); // do it twice to catch the multiples
+        }
+        $ret = trim($ret);
     }
 
     if ($flags & REMOVE_PUNCT)
