@@ -393,7 +393,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     }
 
 
-    private function _getURLfromBase_($search, $nDays, $nPage, $nItem = null)
+    protected function _getURLfromBase_($search, $nDays, $nPage, $nItem = null)
     {
         $strURL = $search['base_url_format'];
         $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($nDays), $strURL );
