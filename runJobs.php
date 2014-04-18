@@ -24,7 +24,7 @@ require_once dirname(__FILE__) . '/include/SitePlugins.php';
 /****************************************************************************************************************/
 
 const C_STR_DATAFOLDER = '/Users/bryan/Code/data/jobs/';
-const C_STR_FOLDER_JOBSEARCH= '/Users/bryan/Dropbox/Job Search 2013/';
+const C_STR_FOLDER_JOBSEARCH= '/Users/bryan/OneDrive/OneDrive-JobSearch/';
 
 $GLOBALS['DEBUG'] = true;
 
@@ -67,6 +67,7 @@ $GLOBALS['OPTS']['titles_to_filter_input_file'] = C_STR_DATAFOLDER  . "bryans_li
 $arrBryanTrackingFiles = array(
     C_STR_DATAFOLDER . 'bryans_list_active.csv',
     C_STR_DATAFOLDER . 'bryans_list_inactive.csv',
+    '/Users/bryan/OneDrive/OneDrive-JobSearch/bryans_list_source_to_use/bryans_list_inactives_pre_2014_04_18.csv'
 );
 
 
