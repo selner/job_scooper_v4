@@ -96,13 +96,12 @@ class PluginMonster extends ClassJobsSitePlugin
             if($item['job_title'] == '') continue;
 
             $item['company'] = $node->find("a[class='fnt4']")[0]->plaintext;
+            $item['location'] = strScrub(str_replace("Location:", "", $node->find("div[class='jobLocationSingleLine']")[0]->plaintext));
 
-            $strScrubTitle = strScrub($item['job_title'], DEFAULT_SCRUB );
-            $item['location'] = strScrub(str_replace("Location:", "", $node->find("div[class='jobLocationSingleLine']")[0]->plaintext), DEFAULT_SCRUB );
+            $strScrubTitle = strip_punctuation(html_entity_decode($item['job_title']));
+            $strLoc= strip_punctuation(html_entity_decode($item['location']));
 
-            $item['job_post_url'] = $this->siteBaseURL . "/" . strScrub($strScrubTitle, DEFAULT_SCRUB | REPLACES_SPACES_WITH_HYPHENS )."-".strScrub($strScrubTitle, DEFAULT_SCRUB | REPLACES_SPACES_WITH_HYPHENS )."-".$item['job_id'].".aspx";
-
-            $item['job_post_url'] = $this->siteBaseURL . "/search/" . strScrub($strScrubTitle, DEFAULT_SCRUB | URL_ENCODE | REPLACES_SPACES_WITH_HYPHENS )."_5";
+            $item['job_post_url'] = $this->siteBaseURL . "/" . str_replace(" ", "-", $strScrubTitle )."-".str_replace(" ", "-",$strLoc)."-".$item['job_id'].".aspx";
 
 //            $item['location'] = trim($node->find("span[class='listing-location'] span")[0]->plaintext) . "-" .
  //               trim($node->find("span[class='listing-location'] span")[1]->plaintext);

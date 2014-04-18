@@ -1,4 +1,18 @@
 
+on textToList(theText, theDelimiter)
+	set saveDelim to AppleScript's text item delimiters
+	try
+		set AppleScript's text item delimiters to {theDelimiter}
+		set theList to every text item of theText
+	on error errStr number errNum
+		set AppleScript's text item delimiters to saveDelim
+		error errStr number errNum
+	end try
+	set AppleScript's text item delimiters to saveDelim
+	return (theList)
+end textToList
+
+
 
 on run (argv)
 	startRun(argv)
@@ -174,17 +188,4 @@ to joinList(aList, delimiter)
 	set AppleScript's text item delimiters to prevDelimiter
 	return retVal
 end joinList
-
-on textToList(theText, theDelimiter)
-	set saveDelim to AppleScript's text item delimiters
-	try
-		set AppleScript's text item delimiters to {theDelimiter}
-		set theList to every text item of theText
-	on error errStr number errNum
-		set AppleScript's text item delimiters to saveDelim
-		error errStr number errNum
-	end try
-	set AppleScript's text item delimiters to saveDelim
-	return (theList)
-end textToList
 
