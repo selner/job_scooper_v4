@@ -41,7 +41,7 @@ $GLOBALS['site_plugins'] = array(
     'simplyhired' => array('name' => 'simplyhired', 'class_name' => 'PluginSimplyHired', 'include_in_run' => false),
     'linkup' => array('name' => 'linkup', 'class_name' => 'PluginLinkUp', 'include_in_run' => false),
     'monster' => array('name' => 'monster', 'class_name' => 'PluginMonster', 'include_in_run' => false),
-    // 'careerbuilder' => array('name' => 'careerbuilder', 'class_name' => 'PluginCareerBuilder', 'include_in_run' => false),
+    'careerbuilder' => array('name' => 'careerbuilder', 'class_name' => 'PluginCareerBuilder', 'include_in_run' => false),
 );
 
 

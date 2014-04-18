@@ -39,17 +39,24 @@ $arrBryanSearches = array(
     array('site_name' => 'Glassdoor', 'search_name' => "chief product officer", 'base_url_format' => "http://www.glassdoor.com/Job/seattle-chief-product-officer-job-openings-SRCH_IL.0,7_IC1150505_KO8,29_IP***PAGE_NUMBER***.htm?fromAge=***NUMBER_DAYS***"),
     array('site_name' => 'LinkUp', 'search_name' => "exec titles", 'base_url_format' => "http://www.linkup.com/results.php?q=title%3A%28%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22%29&l=seattle%2C+washington&sort=d&tm==***NUMBER_DAYS***d&page=***PAGE_NUMBER***"),
     array('site_name' => 'Monster', 'search_name' => "exec titles", 'base_url_format' => "http://jobsearch.monster.com/search/CPO+CTO+Chief-Product-Officer+Chief-Technology-Officer+Director+General-Manager+VP+Vice-President_55555555?where=seattle__2C-wa&tm=***NUMBER_DAYS***&pg=***PAGE_NUMBER***"),
+    array('site_name' => 'CareerBuilder', 'search_name' => "director", 'base_url_format' => "http://www.careerbuilder.com/jobseeker/jobs/jobresults.aspx?qb=1&SB%3Asbkw=director&SB%3As_freeloc=SEATTLE%2C+WA&SB%3Asbfr=***NUMBER_DAYS***&sbsbmt=Find+Jobs&IPath=ILKGV&excrit=freeLoc%3DSEATTLE%2C+WA%3Bst%3DA%3Buse%3DALL%3BrawWords%3Ddirector%3BTID%3D0%3BCTY%3DSeattle%3BSID%3DWA%3BCID%3DUS%3BLOCCID%3DUS%3BENR%3DNO%3BDTP%3DDRNS%3BYDI%3DYES%3BIND%3DALL%3BPDQ%3DAll%3BPDQ%3DAll%3BPAYL%3D0%3BPAYH%3DGT120%3BPOY%3DNO%3BETD%3DJTFT%3BRE%3DALL%3BMGT%3DDC%3BSUP%3DDC%3BFRE%3D3%3BCHL%3DAL%3BQS%3DADVSEARCHFRM%3BSS%3DNO%3BTITL%3D0%3BOB%3D-relv%3BRAD%3D30%3BJQT%3DRAD%3BJDV%3DFalse%3BSITEENT%3DUSJOB%3BMaxLowExp%3D-1%3BRecsPerPage%3D25&cid=US&pg=***PAGE_NUMBER***&IPath=ILKGV"),
+    array('site_name' => 'CareerBuilder', 'search_name' => "vice president", 'base_url_format' => "http://www.careerbuilder.com/jobseeker/jobs/jobresults.aspx?as%3AMXJobSrchCriteria_JobQueryType=RAD&as%3Ach=al&as%3AMXJobSrchCriteria_QuerySrc=AdvSearchFrm&as%3AIPath=QA&qb=1&as%3As_rawwords=vice+president&as%3As_use=ALL&as%3As_freeloc=SEATTLE%2C+WA&as%3As_freeloc=&as%3As_freeloc=&as%3As_radius=30&as%3As_freshness=***NUMBER_DAYS****&as%3AMXJOBSRCHCRITERIA_Industries=&as%3As_jobtypes=ALL&as%3As_jobtypes=ALL&as%3As_jobtypes=ALL&as%3As_education=DRNS&as%3As_includelowereducationvalues=YES&s_includelowereducationvalues_hidden=&as%3As_emptype=JTFT&as%3As_paylow=0&as%3As_payhigh=gt120&as%3Aexkw=&as%3Aexjl=&as%3Aexcn=&pg=***PAGE_NUMBER***&SearchBtn=Find+Jobs"),
 
 
-//    array('site_name' => 'CareerBuilder', 'search_name' => "director product", 'base_url_format' => "http://www.careerbuilder.com/jobseeker/jobs/jobresults.aspx?sd=2&excrit=freeLoc%3dSEATTLE%2c+WA%3bst%3dA%3buse%3dALL%3brawWords%3dproduct+director%3bTID%3d0%3bCTY%3dSeattle%3bSID%3dWA%3bCID%3dUS%3bLOCCID%3dUS%3bENR%3dNO%3bDTP%3dDRNS%3bYDI%3dYES%3bIND%3dALL%3bPDQ%3dAll%3bPDQ%3dAll%3bPAYL%3dGT120%3bPAYH%3dGT120%3bPOY%3dNO%3bETD%3dJTFT%3bRE%3dALL%3bMGT%3dDC%3bSUP%3dDC%3bFRE%3d30%3bCHL%3dAL%3bQS%3dADVSEARCHFRM%3bSS%3dNO%3bTITL%3d0%3bOB%3d-modifiedint%3bRAD%3d30%3bJQT%3dRAD%3bJDV%3dFalse%3bSITEENT%3dUSJOB%3bMaxLowExp%3d-1%3bRecsPerPage%3d25&sc=3&pg=***PAGE_NUMBER***&IPath=QAKVGM"),
+
 );
 
- $arrRudySearches= array(
+$arrRudySearches= array(
     array('site_name' => 'Craigslist', 'search_name' => "real estate agent", 'base_url_format' => "http://seattle.craigslist.org/search/jjj?catAbb=jjj&query=%22real%20estate%20agent%22&s=***ITEM_NUMBER***"),
     array('site_name' => 'SimplyHired', 'search_name' => "real estate agent", 'base_url_format' => "http://www.simplyhired.com/search?q=real+estate+agent&l=seattle%2C+wa&pn=2fdb=***NUMBER_DAYS***&&ws=50&sb=dd&pn=start=***PAGE_NUMBER***"),
     array('site_name' => 'Indeed', 'search_name' => "real estate agent", 'base_url_format' => "http://www.indeed.com/jobs?as_and=&as_phr=%22real+estate+agent%22&as_any=&as_not=&as_ttl=&as_cmp=&jt=all&st=&salary=&radius=25&l=Seattle%2C+WA&fromage=any&limit=50&sort=date&psf=advsrch&start=***ITEM_NUMBER***"),
-     array('site_name' => 'Glassdoor', 'search_name' => "real estate agent", 'base_url_format' => "http://www.glassdoor.com/Job/seattle-real-estate-agent-job-listings-SRCH_IL.0,7_IC1150505_KO8,25_IP***PAGE_NUMBER***.htm?fromAge=***NUMBER_DAYS***"),
+    array('site_name' => 'Glassdoor', 'search_name' => "real estate agent", 'base_url_format' => "http://www.glassdoor.com/Job/seattle-real-estate-agent-job-listings-SRCH_IL.0,7_IC1150505_KO8,25_IP***PAGE_NUMBER***.htm?fromAge=***NUMBER_DAYS***"),
 );
+
+$arrTestSearches = array(
+    array('site_name' => 'CareerBuilder', 'search_name' => "director product", 'base_url_format' => "http://www.careerbuilder.com/jobseeker/jobs/jobresults.aspx?as%3AMXJobSrchCriteria_JobQueryType=RAD&as%3Ach=al&as%3AMXJobSrchCriteria_QuerySrc=AdvSearchFrm&as%3AIPath=QA&qb=1&as%3As_rawwords=product+director&as%3As_use=ALL&as%3As_freeloc=SEATTLE%2C+WA&as%3As_freeloc=&as%3As_freeloc=&as%3As_radius=30&as%3As_freshness=***NUMBER_DAYS***&pg=***PAGE_NUMBER***&as%3AMXJOBSRCHCRITERIA_Industries=&as%3As_jobtypes=ALL&as%3As_jobtypes=ALL&as%3As_jobtypes=ALL&as%3As_education=DRNS&as%3As_includelowereducationvalues=YES&s_includelowereducationvalues_hidden=&as%3As_emptype=JTFT&as%3A&as%3Aexkw=&as%3Aexjl=&as%3Aexcn=&SearchBtn=Find+Jobs"),
+);
+
 
 
 $GLOBALS['OPTS']['titles_to_filter_input_file'] = C_STR_DATAFOLDER  . "bryans_list_exclude_titles.csv";
@@ -60,6 +67,6 @@ $arrBryanTrackingFiles = array(
 );
 
 
-__runCommandLine($arrBryanSearches, $arrBryanTrackingFiles);
+__runCommandLine($arrTestSearches, $arrBryanTrackingFiles);
 
 ?>
