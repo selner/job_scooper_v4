@@ -155,8 +155,10 @@ class ClassJobsSitePluginCommon
 
             case "Walt Disney Parks &amp Resorts Online":
             case "The Walt Disney Studios":
+            case "The Walt Disney Company":
             case "Disney Parks &amp Resorts":
-                $retArrNormalized ['company'] = "market leader";
+            case "Disney":
+                $retArrNormalized ['company'] = "disney";
                 break;
 
         }
