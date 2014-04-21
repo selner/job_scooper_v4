@@ -244,7 +244,7 @@ class SimpleScooterCSVFileClass {
 
         if(!$arrFieldsToUseInKey || !is_array($arrFieldsToUseInKey))
         {
-            __debug__printLine("Field keys to use for deduping were not set.  Skipping dedupe.", C__DISPLAY_MOMENTARY_INTERUPPT__);
+//            __debug__printLine("Not deduping output data; primary keys to use were not set.", C__DISPLAY_MOMENTARY_INTERUPPT__);
             return $arrCSVRows;
         }
 //        print 'input array rows = ' . count($arrCSVRows).PHP_EOL;

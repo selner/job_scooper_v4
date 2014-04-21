@@ -55,7 +55,10 @@ function getObjectsFromAPICall( $baseURL, $objName = "", $fReturnType = C__API_R
         {
             if($objName == "")
             {
-                $this->__handleCallback__($callback, $srcdata, $fReturnType);
+                if($callback != null)
+                {
+                    $this->__handleCallback__($callback, $srcdata, $fReturnType);
+                }
                 $retData = $srcdata;
             }
             else
