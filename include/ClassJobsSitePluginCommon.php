@@ -272,19 +272,27 @@ class ClassJobsSitePluginCommon
 
     function markJobsList_SetLikelyDuplicatePosts(&$arrToMark, $strCallerDescriptor = null)
     {
+/*      BUGBUG[bryan]:  DISABLED FOR NOW.  FOUND AT LEAST ONE JOB IT MARKED INCORRECTLY.
+**                      NEED TO TEST AND VERIFY
+ *
+ */
         $nJobsSMatched = 0;
         $nUniqueRoles = 0;
         $nProblemRolesSkipped= 0;
 
-
         $arrCompanyRoleNamePairsFound = $GLOBALS['company_role_pairs'];
+        $arrSiteJobIDPairs = $GLOBALS['site_jobid_pairs'];
         if($arrCompanyRoleNamePairsFound == null) { $arrCompanyRoleNamePairsFound = array(); }
+        if($arrSiteJobIDPairs == null) { $arrSiteJobIDPairs = array(); }
 
         __debug__printLine("Checking " . count($arrToMark) . " jobs for duplicates by company/role pairing. ".count($arrCompanyRoleNamePairsFound)." previous roles are being used to seed the process." , C__DISPLAY_ITEM_START__);
 
         $nIndex = 0;
         foreach($arrToMark as $job)
         {
+
+            // Second, look for it by company / title
+            //
             $strCompanyKey = $job['company'];
             if($job['company'] == null || $job['company'] == "")
             {
@@ -292,16 +300,16 @@ class ClassJobsSitePluginCommon
             }
 
             $arrPrevMatchJob = $this->_getJobFromArrayByKeyPair_($arrCompanyRoleNamePairsFound, $strCompanyKey, $job['job_title']);
-//            var_dump("job",$job,'company key', $strCompanyKey, "arrMatch",$arrPrevMatchJob);
-            if($arrPrevMatchJob['found_in_array'] == true)
+            if($arrPrevMatchJob['found_in_array'] == true && isMarked_InterestedBlankOnly($arrToMark[$nIndex]))
             {
                 //
                 // Not the first time we've seen this before so
                 // mark it as a likely dupe and note who it's a dupe of
                 //
-                $arrToMark[$nIndex]['interested'] = 'No (Likely Duplicate Job Post)'.C__STR_TAG_AUTOMARKEDJOB__;
-                $arrToMark[$nIndex]['notes'] =  $arrToMark[$nIndex]['notes'] . " *** Likely a duplicate post of ". $arrCompanyRoleNamePairsFound[$strRoleKey]['job_site'] . " ID#" . $arrCompanyRoleNamePairsFound[$strRoleKey]['job_id'];
-                $nJobsSMatched++;
+                $arrToMark[$nIndex]['interested'] = 'Duplicate Job Post? '.C__STR_TAG_AUTOMARKEDJOB__;
+                $arrToMark[$nIndex]['notes'] =  $arrToMark[$nIndex]['notes'] . " *** Likely a duplicate post of ". $arrPrevMatchJob['lookup_value'];
+
+                if($fMarked != true) $nJobsSMatched++;
             }
             else
             {
@@ -314,6 +322,7 @@ class ClassJobsSitePluginCommon
 
         // set it back to the global so we lookup better each search
         $GLOBALS['company_role_pairs'] = array_copy($arrCompanyRoleNamePairsFound);
+        $GLOBALS['site_jobid_pairs'] = array_copy($arrSiteJobIDPairs);
 
         $strTotalRowsText = "/".count($arrToMark);
         __debug__printLine("Marked  ".$nJobsSMatched .$strTotalRowsText ." roles as likely duplicates based on company/role " . ($strCallerDescriptor != null ? "from " . $strCallerDescriptor : "") . " as 'No/Not Interested'. (Skipped: " . $nProblemRolesSkipped . $strTotalRowsText ."; Unique jobs: ". $nUniqueRoles . $strTotalRowsText .")" , C__DISPLAY_ITEM_RESULT__);
@@ -372,7 +381,7 @@ class ClassJobsSitePluginCommon
             else              // we're ignoring the Excluded column fact for the time being. If it's in the list, it's excluded
             {
                 $nJobsNotMarked++;
-                __debug__printLine("Job title '".$job['job_title'] ."' was not found in the exclusion list.  Keeping for review." , C__DISPLAY_ITEM_DETAIL__);
+//                __debug__printLine("Job title '".$job['job_title'] ."' was not found in the exclusion list.  Keeping for review." , C__DISPLAY_ITEM_DETAIL__);
             }
 
 
@@ -411,52 +420,6 @@ class ClassJobsSitePluginCommon
 
         return $arrInteresting;
 
-       /*
-        $nJobsNotExcluded = 0;
-        $nJobsExcluded = 0;
-        $retArrayIncludedJobs = array();
-        $retArrayExcludedJobs = array();
-        $ncount = 0;
-
-        // try
-        //  {
-        foreach($arrJobsToFilter as $job)
-        {
-//            __debug__printLine("Checking filter for '".$job['job_title'] ."' interest level of '".$job['interested'] ."'." , C__DISPLAY_ITEM_DETAIL__);
-
-            if(strlen($job['interested']) <= 0)
-            {
-                // Interested value not set; always include in the results
-                $retArrayIncludedJobs[] = $job;
-                $nJobsNotExcluded++;
-
-            }
-            else
-            {
-                $strIntFirstPart = substr($job['interested'], 0, 2);
-
-                if(strcasecmp($strIntFirstPart, 'No') == 0)
-                {
-                    $retArrayExcludedJobs[] = $job;
-                    $nJobsExcluded++;
-                }
-                else
-                {
-                    $retArrayIncludedJobs[] = $job;
-                    $nJobsNotExcluded++;
-                }
-
-            }
-            $ncount++;
-        }
-    // } catch(Exception $err) {
-        //     __debug__var_dump_exit__($retArrayIncludedJobs[$ncount]);
-        // }
-
-        __debug__printLine("Filtering complete:  ".$nJobsExcluded ." filtered; ". $nJobsNotExcluded . " not filtered; " . count($arrJobsToFilter) . " total records." , C__DISPLAY_ITEM_RESULT__);
-
-        return $retArrayIncludedJobs;
-*/
     }
 
 

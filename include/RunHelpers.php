@@ -132,11 +132,15 @@ function __runAllJobs__($arrSearches, $arrSourceFiles = null, $nDays = -1, $fInc
     __debug__printLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
 
     $arrRunAutoMark = $arrListAllJobsFromSearches;
+    $arrNotMarkedInterestedYet = array_filter($arrRunAutoMark, "isMarked_InterestedBlankOnly");
     $classJobExportHelper_Main->markJobsList_SetAutoExcludedTitles($arrRunAutoMark, "run_jobs");
     $arrAutoDupes = array_filter($arrRunAutoMark, "isMarked_AutoDupe");
     $arrAllAutoMarked = array_filter($arrRunAutoMark, "isMarked_Auto");
     $arrNotInterested = array_filter($arrRunAutoMark, "isMarked_NotInterested");
     $arrInteresting = array_filter($arrRunAutoMark, "isMarked_InterestedOrBlank");
+
+    $strOutDetailsAllResultsName = getFullPathFromFileDetails(parseFilePath($strOutName), "", "_newjobsonly");
+    $classJobExportHelper_Main->writeJobsListToFile($strOutDetailsAllResultsName , $arrNotMarkedInterestedYet , true);
 
 
     __debug__printLine("Total jobs:  ".count($arrListAllJobsFromSearches). PHP_EOL."Interesting: ". count($arrInteresting) . " / ". count($arrNotInterested) . PHP_EOL. "Auto-Marked: ".count($arrAllAutoMarked). " / Dupes: ".count($arrAutoDupes) , C__DISPLAY_SUMMARY__);

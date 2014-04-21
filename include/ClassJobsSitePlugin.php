@@ -47,6 +47,15 @@ function isMarked_NotInterested($var)
     return false;
 }
 
+
+
+function isMarked_InterestedBlankOnly($var)
+{
+    if($var['interested'] == null || trim($var['interested']) =="") return true;
+    return false;
+}
+
+
 function isMarked_InterestedOrBlank($var)
 {
     if((substr_count($var['interested'], "No ") > 0) || isMarked_AutoDupe($var) == true) return false;
