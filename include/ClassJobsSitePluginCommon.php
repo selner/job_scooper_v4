@@ -134,9 +134,32 @@ class ClassJobsSitePluginCommon
 
         $retArrNormalized ['job_site_category'] = strScrub($retArrNormalized['job_site_category']);
         $retArrNormalized ['job_site_date'] = strTrimAndLower($retArrNormalized['job_site_date']);
-        $retArrNormalized ['job_post_url'] = strTrimAndLower($retArrNormalized['job_post_url']);
+        $retArrNormalized ['job_post_url'] = trim($retArrNormalized['job_post_url']); // DO NOT LOWER, BREAKS URLS
         $retArrNormalized ['location'] = strScrub($retArrNormalized['location']);
         $retArrNormalized ['brief'] = strScrub($retArrNormalized['brief']);
+
+
+        switch($retArrNormalized ['company'])
+        {
+            case "Amazon":
+            case "Amazon com":
+            case "a2z":
+                $retArrNormalized ['company'] = "amazon";
+                break;
+
+            case "Market Leader":
+            case "Market Leader Inc":
+            case "Market Leader LLC":
+                $retArrNormalized ['company'] = "market leader";
+                break;
+
+            case "Walt Disney Parks &amp Resorts Online":
+            case "The Walt Disney Studios":
+            case "Disney Parks &amp Resorts":
+                $retArrNormalized ['company'] = "market leader";
+                break;
+
+        }
 
         return $retArrNormalized;
     }
@@ -268,14 +291,22 @@ class ClassJobsSitePluginCommon
         return $ret;
     }
 
+    function getIndexOfJob($arrList, $site, $id)
+    {
+        $nCount = 0;
+        foreach ($arrList as $item ) {
+            if(strcasecmp($item['job_site'], $site) == 0 &&  strcasecmp($item['job_id'], $id) == 0)
+                return $nCount;
+            $nCount++;
+
+        }
+
+        return false;
+    }
 
 
     function markJobsList_SetLikelyDuplicatePosts(&$arrToMark, $strCallerDescriptor = null)
     {
-/*      BUGBUG[bryan]:  DISABLED FOR NOW.  FOUND AT LEAST ONE JOB IT MARKED INCORRECTLY.
-**                      NEED TO TEST AND VERIFY
- *
- */
         $nJobsSMatched = 0;
         $nUniqueRoles = 0;
         $nProblemRolesSkipped= 0;
@@ -300,16 +331,40 @@ class ClassJobsSitePluginCommon
             }
 
             $arrPrevMatchJob = $this->_getJobFromArrayByKeyPair_($arrCompanyRoleNamePairsFound, $strCompanyKey, $job['job_title']);
-            if($arrPrevMatchJob['found_in_array'] == true && isMarked_InterestedBlankOnly($arrToMark[$nIndex]))
+            if($arrPrevMatchJob['found_in_array'] == true)
             {
+                // Go get the current job we have stored for this lookup pair
+                $prevJobMatchIndex = $this->getIndexOfJob($arrToMark, $arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ]['job_site'], $arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ]['job_id']);
+                // Now, compare that previously stored job against this new one.  Whichever has a value for
+                // "interested" wins and becomes the stored job for this lookup.  The other gets marked as
+                // duplicate (if it's not been set with a status yet.)
                 //
-                // Not the first time we've seen this before so
-                // mark it as a likely dupe and note who it's a dupe of
-                //
-                $arrToMark[$nIndex]['interested'] = 'Duplicate Job Post? '.C__STR_TAG_AUTOMARKEDJOB__;
-                $arrToMark[$nIndex]['notes'] =  $arrToMark[$nIndex]['notes'] . " *** Likely a duplicate post of ". $arrPrevMatchJob['lookup_value'];
+                /*                if(!isMarked_InterestedBlankOnly($arrToMark[$nIndex]) && isMarked_InterestedBlankOnly($arrToMark[$prevJobMatchIndex ]))
+                                {
 
-                if($fMarked != true) $nJobsSMatched++;
+                                    var_dump('Lookup Key', $arrPrevMatchJob['lookup_value']);
+                                    var_dump('new job trumping old', $arrToMark[$nIndex]);
+                                    var_dump('keys ', $arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ]['job_site'], $arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ]['job_id']);
+
+                                    var_dump('old job (nIndex)', $arrToMark[$prevJobMatchIndex]);
+                                    var_dump('old job (lookup key)', $arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ]);
+                                    var_dump('$prevJobMatchIndex', $prevJobMatchIndex);
+                                   $arrToMark[$match]['interested'] = 'Duplicate Job Post? '.C__STR_TAG_AUTOMARKEDJOB__;
+                    $arrToMark[$match]['notes'] =  $arrToMark[$nIndex]['notes'] . " *** Likely a duplicate post of ". $arrPrevMatchJob['lookup_value'];
+                    $arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ] = $job;
+                }
+                else
+                {
+
+*/                    //
+                    // Not the first time we've seen this before so
+                    // mark it as a likely dupe and note who it's a dupe of
+                    //
+                    $arrToMark[$nIndex]['interested'] = 'Duplicate Job Post? '.C__STR_TAG_AUTOMARKEDJOB__;
+                    $arrToMark[$nIndex]['notes'] =  $arrToMark[$nIndex]['notes'] . " *** Likely a duplicate post of ". $arrPrevMatchJob['lookup_value'];
+ //               }
+
+                $nJobsSMatched++;
             }
             else
             {
