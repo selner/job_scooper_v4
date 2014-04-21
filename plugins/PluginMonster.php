@@ -36,7 +36,7 @@ class PluginMonster extends ClassJobsSitePlugin
                     $ret = "Last-7-Days";
                     break;
 
-                case ($days<=3 && $days<7):
+                case ($days>=3 && $days<7):
                     $ret = "Last-3-Days";
                     break;
 

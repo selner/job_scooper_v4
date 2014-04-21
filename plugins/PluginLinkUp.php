@@ -36,7 +36,7 @@ class PluginLinkUp extends ClassJobsSitePlugin
                     $ret = "7d";
                     break;
 
-                case ($days<=3 && $days<7):
+                case ($days>=3 && $days<7):
                     $ret = "3d";
                     break;
 
