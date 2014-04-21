@@ -40,7 +40,7 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
                     $ret = "7";
                     break;
 
-                case ($days<=3 && $days<7):
+                case ($days>=3 && $days<7):
                     $ret = "3";
                     break;
 
