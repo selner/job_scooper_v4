@@ -48,6 +48,7 @@ class PluginCraigslist  extends ClassJobsSitePlugin
 
     function parseTotalResultsCount($objSimpHTML)
     {
+        return 100;
         $pageDiv= $objSimpHTML->find('span[class="button pagenum"]');
         $pageDiv = $pageDiv[0];
         $pageText = $pageDiv->plaintext;

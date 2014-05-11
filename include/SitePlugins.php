@@ -27,9 +27,11 @@ require_once dirname(__FILE__) . '/../plugins/PluginGlassdoor.php';
 require_once dirname(__FILE__) . '/../plugins/PluginPorch.php';
 require_once dirname(__FILE__) . '/../plugins/PluginExpedia.php';
 require_once dirname(__FILE__) . '/../plugins/PluginLinkUp.php';
+require_once dirname(__FILE__) . '/../plugins/PluginEmploymentGuide.php';
 require_once dirname(__FILE__) . '/../plugins/PluginMonster.php';
 require_once dirname(__FILE__) . '/../plugins/PluginCareerBuilder.php';
 require_once dirname(__FILE__) . '/../plugins/PluginMashable.php';
+require_once dirname(__FILE__) . '/../plugins/PluginDisney.php';
 
 
 $GLOBALS['site_plugins'] = array(
@@ -41,10 +43,11 @@ $GLOBALS['site_plugins'] = array(
     'glassdoor' => array('name' => 'glassdoor', 'class_name' => 'PluginGlassdoor', 'include_in_run' => false),
     'simplyhired' => array('name' => 'simplyhired', 'class_name' => 'PluginSimplyHired', 'include_in_run' => false),
     'linkup' => array('name' => 'linkup', 'class_name' => 'PluginLinkUp', 'include_in_run' => false),
+    'employmentguide' => array('name' => 'employmentguide', 'class_name' => 'PluginEmploymentGuide', 'include_in_run' => false),
     'monster' => array('name' => 'monster', 'class_name' => 'PluginMonster', 'include_in_run' => false),
     'careerbuilder' => array('name' => 'careerbuilder', 'class_name' => 'PluginCareerBuilder', 'include_in_run' => false),
     'mashable' => array('name' => 'mashable', 'class_name' => 'PluginMashable', 'include_in_run' => false),
+    'disney' => array('name' => 'disney', 'class_name' => 'PluginDisney', 'include_in_run' => false),
 );
-
 
 ?>

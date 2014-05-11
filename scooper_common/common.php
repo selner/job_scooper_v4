@@ -463,11 +463,6 @@ function strScrub($str, $flags = null)
         $ret = trim($ret);
     }
 
-    if ($flags & REMOVE_PUNCT)
-    {
-        $ret = strip_punctuation($ret);
-    }
-
     if ($flags & HTML_DECODE)
     {
         $ret = html_entity_decode($ret);
@@ -482,9 +477,16 @@ function strScrub($str, $flags = null)
     {
         $ret  = str_replace(" ", "-", $ret); // do it twice to catch the multiples
     }
+
+    if ($flags & REMOVE_PUNCT)  // has to come after HTML_DECODE
+    {
+        $ret = strip_punctuation($ret);
+    }
+
+
     if ($flags & URL_ENCODE)
     {
-        $ret  = urlencode($ret); // do it twice to catch the multiples
+        $ret  = urlencode($ret);
     }
 
     return $ret;

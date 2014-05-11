@@ -20,12 +20,14 @@ require_once dirname(__FILE__) . '/ClassJobsSitePluginCommon.php';
 const C__JOB_PAGECOUNT_NOTAPPLICABLE__ = -1;
 const C__JOB_ITEMCOUNT_UNKNOWN__ = 11111;
 
+
+
 //
 // Jobs List Filter Functions
 //
 function isMarked_AutoDupe($var)
 {
-    if(substr_count($var['interested'], "No (Likely Duplicate") > 0) return true;
+    if(substr_count($var['interested'], C__STR_TAG_DULICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__) > 0) return true;
 
     return false;
 }
@@ -49,7 +51,7 @@ function isMarked_NotInterested($var)
 
 
 
-function isMarked_InterestedBlankOnly($var)
+function isMarked_InterestedEqualBlank($var)
 {
     if($var['interested'] == null || trim($var['interested']) =="") return true;
     return false;
@@ -320,6 +322,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         $strURL = $this->_getURLfromBase_($search, $nDays, $nPageCount, $nItemCount);
         __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$search['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
+        var_dump( $strURL);
         $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL );
         if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
 

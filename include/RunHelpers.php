@@ -132,7 +132,7 @@ function __runAllJobs__($arrSearches, $arrSourceFiles = null, $nDays = -1, $fInc
     __debug__printLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
 
     $arrRunAutoMark = $arrListAllJobsFromSearches;
-    $arrNotMarkedInterestedYet = array_filter($arrRunAutoMark, "isMarked_InterestedBlankOnly");
+    $arrNotMarkedInterestedYet = array_filter($arrRunAutoMark, "isMarked_InterestedEqualBlank");
     $classJobExportHelper_Main->markJobsList_SetAutoExcludedTitles($arrRunAutoMark, "run_jobs");
     $arrAutoDupes = array_filter($arrRunAutoMark, "isMarked_AutoDupe");
     $arrAllAutoMarked = array_filter($arrRunAutoMark, "isMarked_Auto");

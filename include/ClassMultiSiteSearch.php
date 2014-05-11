@@ -66,11 +66,9 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
             }
 
             $class = null;
-            $nLastCount = count($this->arrLatestJobs);
             __debug__printLine("Running ". $search['site_name'] . " search '" . $search['search_name'], C__DISPLAY_ITEM_START__);
 
             $strSite = strtolower($search['site_name']);
-
             $strSiteClass = $GLOBALS['site_plugins'][$strSite]['class_name'];
             try
             {

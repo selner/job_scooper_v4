@@ -17,6 +17,7 @@
 require_once dirname(__FILE__) . '/../include/Options.php';
 
 const C__STR_TAG_AUTOMARKEDJOB__ = "[auto-marked]";
+const C__STR_TAG_DULICATE_POST__ = "No (Duplicate Job Post?)";
 /**
  * TODO:  DOC
  *
@@ -25,9 +26,35 @@ const C__STR_TAG_AUTOMARKEDJOB__ = "[auto-marked]";
  * @param  string TODO DOC
  * @return string TODO DOC
  */
+
+function getArrayKeyValueForJob($job)
+{
+
+    $strKey = strScrub($job['job_site'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACES_SPACES_WITH_HYPHENS);
+
+    // For craigslist, they change IDs on every post, so deduping that way doesn't help
+    // much.  Instead, let's dedupe for Craigslist by using the role title and the jobsite
+    // (Company doesn't usually get filled out either with them.)
+    if(strcasecmp($strKey, "craigslist") == 0)
+    {
+        $strKey = $strKey . "-" . strScrub($job['job_title'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACES_SPACES_WITH_HYPHENS );
+    }
+    if($job['job_id'] != null && $job['job_id'] != "")
+    {
+        $strKey = $strKey . "-" . strScrub($job['job_id'], REPLACES_SPACES_WITH_HYPHENS | REMOVE_PUNCT | HTML_DECODE | LOWERCASE);
+    }
+    else
+    {
+        $strKey = $strKey . "-" . strScrub($job['company'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACES_SPACES_WITH_HYPHENS );
+        $strKey = $strKey . "-" . strScrub($job['job_title'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACES_SPACES_WITH_HYPHENS );
+    }
+
+    return $strKey;
+}
+
 function addJobsToJobsList(&$arrJobsListToUpdate, $arrAddJobs)
 {
-   $nstartcount = count($arrJobsListToUpdate);
+    $nstartcount = count($arrJobsListToUpdate);
     if($arrAddJobs == null) return;
 
     if(!is_array($arrAddJobs) || count($arrAddJobs) == 0)
@@ -39,9 +66,18 @@ function addJobsToJobsList(&$arrJobsListToUpdate, $arrAddJobs)
 
     foreach($arrAddJobs as $jobRecord)
     {
-        $arrJobsListToUpdate[] = $jobRecord;
+        addJobToJobsList($arrJobsListToUpdate, $jobRecord);
     }
 
+}
+
+
+function addJobToJobsList(&$arrJobsListToUpdate, $job)
+{
+    if($arrJobsListToUpdate == null) $arrJobsListToUpdate = array();
+
+    $strKey = getArrayKeyValueForJob($job);
+    $arrJobsListToUpdate[$strKey] = $job;
 }
 
 function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strExt = '')
@@ -117,7 +153,7 @@ class ClassJobsSitePluginCommon
         foreach($arrJobList as $job)
         {
             $jobNorm = $this->normalizeItem($job);
-            $arrRetList[] = $jobNorm;
+            addJobToJobsList($arrRetList, $jobNorm);
         }
         return $arrRetList;
     }
@@ -127,37 +163,55 @@ class ClassJobsSitePluginCommon
         $retArrNormalized = $arrItem;
 
 
-        $retArrNormalized ['job_site'] = strScrub($retArrNormalized['job_site']);
+        $retArrNormalized ['job_site'] = strScrub($retArrNormalized['job_site'], DEFAULT_SCRUB);
         $retArrNormalized ['job_id'] = strScrub($retArrNormalized['job_id']);
-        $retArrNormalized ['company'] = strScrub($retArrNormalized['company']);
-        $retArrNormalized ['job_title'] = strScrub($retArrNormalized['job_title']);
+        $retArrNormalized ['job_title'] = strScrub($retArrNormalized['job_title'], DEFAULT_SCRUB);
 
-        $retArrNormalized ['job_site_category'] = strScrub($retArrNormalized['job_site_category']);
-        $retArrNormalized ['job_site_date'] = strTrimAndLower($retArrNormalized['job_site_date']);
+        $retArrNormalized ['job_site_category'] = strScrub($retArrNormalized['job_site_category'], REMOVE_EXTRA_WHITESPACE | HTML_DECODE | LOWERCASE);
+        $retArrNormalized ['job_site_date'] = strScrub($retArrNormalized['job_site_date'], REMOVE_EXTRA_WHITESPACE | LOWERCASE | HTML_DECODE );
         $retArrNormalized ['job_post_url'] = trim($retArrNormalized['job_post_url']); // DO NOT LOWER, BREAKS URLS
-        $retArrNormalized ['location'] = strScrub($retArrNormalized['location']);
-        $retArrNormalized ['brief'] = strScrub($retArrNormalized['brief']);
+        $retArrNormalized ['location'] = strScrub($retArrNormalized['location'], REMOVE_EXTRA_WHITESPACE | HTML_DECODE | LOWERCASE);
+        $retArrNormalized ['brief'] = strScrub($retArrNormalized['brief'], REMOVE_EXTRA_WHITESPACE | HTML_DECODE | LOWERCASE);
 
+        $retArrNormalized ['company'] = strScrub($retArrNormalized['company'], DEFAULT_SCRUB );
+
+        // Remove common company name extenisons like "Corporation" or "Inc." so we have
+        // a higher match likelihood
+        $retArrNormalized ['company'] = str_replace(array(" corporation", " corp", " inc", " llc"), "", $retArrNormalized['company']);
 
         switch($retArrNormalized ['company'])
         {
-            case "Amazon":
-            case "Amazon com":
+            case "amazon":
+            case "amazon com":
             case "a2z":
+            case "amazon corporate llc":
+            case "amazon Web Services":
+            case "amazon fulfillment services":
+            case "amazonwebservices":
+            case "amazon (seattle)":
                 $retArrNormalized ['company'] = "amazon";
                 break;
 
-            case "Market Leader":
-            case "Market Leader Inc":
-            case "Market Leader LLC":
+            case "market leader":
+            case "market leader inc":
+            case "market leader llc":
                 $retArrNormalized ['company'] = "market leader";
                 break;
 
-            case "Walt Disney Parks &amp Resorts Online":
-            case "The Walt Disney Studios":
-            case "The Walt Disney Company":
-            case "Disney Parks &amp Resorts":
-            case "Disney":
+
+            case "walt disney parks &amp resorts online":
+            case "walt disney parks resorts online":
+            case "the walt disney studios":
+            case "walt disney studios":
+            case "the walt disney company corporate":
+            case "the walt disney company":
+            case "disney parks &amp resorts":
+            case "disney parks resorts":
+            case "walt disney parks resorts":
+            case "walt disney parks &amp resorts":
+            case "walt disney parks resorts careers":
+            case "walt disney parks &amp resorts careers":
+            case "disney":
                 $retArrNormalized ['company'] = "disney";
                 break;
 
@@ -266,7 +320,7 @@ class ClassJobsSitePluginCommon
     {
         $ret = array('lookup_value' => null, 'found_in_array' => false );
 
-        // remove spacess from any of the input strings
+        // remove spaces from any of the input strings
         $param1= str_replace( ' ', '', $param1);
         $param2= str_replace( ' ', '', $param2);
 
@@ -293,19 +347,6 @@ class ClassJobsSitePluginCommon
         return $ret;
     }
 
-    function getIndexOfJob($arrList, $site, $id)
-    {
-        $nCount = 0;
-        foreach ($arrList as $item ) {
-            if(strcasecmp($item['job_site'], $site) == 0 &&  strcasecmp($item['job_id'], $id) == 0)
-                return $nCount;
-            $nCount++;
-
-        }
-
-        return false;
-    }
-
 
     function markJobsList_SetLikelyDuplicatePosts(&$arrToMark, $strCallerDescriptor = null)
     {
@@ -320,11 +361,12 @@ class ClassJobsSitePluginCommon
 
         __debug__printLine("Checking " . count($arrToMark) . " jobs for duplicates by company/role pairing. ".count($arrCompanyRoleNamePairsFound)." previous roles are being used to seed the process." , C__DISPLAY_ITEM_START__);
 
-        $nIndex = 0;
         foreach($arrToMark as $job)
         {
+            $match = false;
+            $strThisJobKey = getArrayKeyValueForJob($job);
 
-            // Second, look for it by company / title
+            // look for it by company / title
             //
             $strCompanyKey = $job['company'];
             if($job['company'] == null || $job['company'] == "")
@@ -333,38 +375,54 @@ class ClassJobsSitePluginCommon
             }
 
             $arrPrevMatchJob = $this->_getJobFromArrayByKeyPair_($arrCompanyRoleNamePairsFound, $strCompanyKey, $job['job_title']);
+
             if($arrPrevMatchJob['found_in_array'] == true)
             {
                 // Go get the current job we have stored for this lookup pair
-                $prevJobMatchIndex = $this->getIndexOfJob($arrToMark, $arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ]['job_site'], $arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ]['job_id']);
                 // Now, compare that previously stored job against this new one.  Whichever has a value for
                 // "interested" wins and becomes the stored job for this lookup.  The other gets marked as
                 // duplicate (if it's not been set with a status yet.)
                 //
-                /*                if(!isMarked_InterestedBlankOnly($arrToMark[$nIndex]) && isMarked_InterestedBlankOnly($arrToMark[$prevJobMatchIndex ]))
-                                {
+                $arrMatchedEarlierJob = $arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ];
+                $strEarlierMatchJobKey = getArrayKeyValueForJob($arrMatchedEarlierJob);
+/*                var_dump('earlier saved job record', $arrToMark[$strEarlierMatchJobIndex]);
+                var_dump('newly saved job record', $arrToMark[$strJobIndex]);
+                var_dump('$strJobIndex', $strJobIndex);
+                var_dump('$strEarlierMatchJobIndex', $strEarlierMatchJobIndex);
+                var_dump('earlier saved job record[interested]', $arrToMark[$strJobIndex]['interested']);
+                var_dump('newly saved job record[interested]', $arrToMark[$strJobIndex]['interested']);
+                $match = true;
+                var_dump('Lookup Key', $arrPrevMatchJob['lookup_value']);
+*/
+                if(!isMarked_InterestedEqualBlank($arrToMark[$strThisJobKey ]))
+                {
 
-                                    var_dump('Lookup Key', $arrPrevMatchJob['lookup_value']);
-                                    var_dump('new job trumping old', $arrToMark[$nIndex]);
-                                    var_dump('keys ', $arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ]['job_site'], $arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ]['job_id']);
+                    $arrToMark[$strEarlierMatchJobKey]['interested'] =  C__STR_TAG_DULICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__;
+                    $arrToMark[$strEarlierMatchJobKey]['notes'] =  $arrToMark[$strEarlierMatchJobIndex]['notes'] . " *** Likely a duplicate post of ". $strThisJobKey;
 
-                                    var_dump('old job (nIndex)', $arrToMark[$prevJobMatchIndex]);
-                                    var_dump('old job (lookup key)', $arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ]);
-                                    var_dump('$prevJobMatchIndex', $prevJobMatchIndex);
-                                   $arrToMark[$match]['interested'] = 'Duplicate Job Post? '.C__STR_TAG_AUTOMARKEDJOB__;
-                    $arrToMark[$match]['notes'] =  $arrToMark[$nIndex]['notes'] . " *** Likely a duplicate post of ". $arrPrevMatchJob['lookup_value'];
-                    $arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ] = $job;
+                    // If we haven't added a note saying it matches this other specific job, add it now.
+                    if(substr_count($arrToMark[$strThisJobKey]['notes'], $strEarlierMatchJobKey) <= 0)
+                    {
+                        $arrToMark[$strThisJobKey]['notes'] =  $arrToMark[$strThisJobKey]['notes'] . "  (Also listed as ". $strEarlierMatchJobKey .") ";
+                    }
+                    $arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ] = $arrToMark[$strThisJobKey];
                 }
                 else
                 {
 
-*/                    //
+                    //
                     // Not the first time we've seen this before so
                     // mark it as a likely dupe and note who it's a dupe of
                     //
-                    $arrToMark[$nIndex]['interested'] = 'Duplicate Job Post? '.C__STR_TAG_AUTOMARKEDJOB__;
-                    $arrToMark[$nIndex]['notes'] =  $arrToMark[$nIndex]['notes'] . " *** Likely a duplicate post of ". $arrPrevMatchJob['lookup_value'];
- //               }
+                    $arrToMark[$strThisJobKey ]['interested'] =  C__STR_TAG_DULICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__;
+                    $arrToMark[$strThisJobKey ]['notes'] =  $arrToMark[$strThisJobKey ]['notes'] . " *** Likely a duplicate post of ". $strEarlierMatchJobKey;
+
+                    // If we haven't added a note saying it matches this other specific job, add it now.
+                    if(substr_count($arrToMark[$strEarlierMatchJobKey]['notes'], $strThisJobKey) <= 0)
+                    {
+                        $arrToMark[$strEarlierMatchJobKey]['notes'] =  $arrToMark[$strEarlierMatchJobKey]['notes'] . "  (Also listed as ". $strThisJobKey .") ";
+                    }
+                }
 
                 $nJobsSMatched++;
             }
@@ -374,9 +432,21 @@ class ClassJobsSitePluginCommon
                 $arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ] = $job;
                 $nUniqueRoles++;
             }
-            $nIndex++;
-        }
 
+/*            if(strcasecmp($job['job_title'], "director of product management enterprise smartsheet com") == 0)
+            {
+                $strEarlierMatchJobIndex = getArrayKeyValueForJob($arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ]);
+                var_dump('earlier saved job record', $arrToMark[$strEarlierMatchJobIndex]);
+                var_dump('newly saved job record', $arrToMark[$strJobIndex]);
+                var_dump('$strJobIndex', $strJobIndex);
+                var_dump('$strEarlierMatchJobIndex', $strEarlierMatchJobIndex);
+                var_dump('earlier saved job record[interested]', $arrToMark[$strJobIndex]['interested']);
+                var_dump('newly saved job record[interested]', $arrToMark[$strJobIndex]['interested']);
+                var_dump('Lookup Key', $arrPrevMatchJob['lookup_value']);
+
+            }
+*/
+        }
         // set it back to the global so we lookup better each search
         $GLOBALS['company_role_pairs'] = array_copy($arrCompanyRoleNamePairsFound);
         $GLOBALS['site_jobid_pairs'] = array_copy($arrSiteJobIDPairs);
@@ -388,19 +458,18 @@ class ClassJobsSitePluginCommon
 
     function markJobsList_SetAutoExcludedTitles(&$arrToMark, $strCallerDescriptor = null)
     {
-
         $this->_loadTitlesToFilter_();
 
         $nJobsSkipped = 0;
         $nJobsNotMarked = 0;
         $nJobsMarkedAutoExcluded = 0;
 
-        $nIndex = 0;
 
         __debug__printLine("Checking ".count($arrToMark) ." roles against ". count($GLOBALS['titles_to_filter']) ." excluded titles.", C__DISPLAY_ITEM_START__);
 
         foreach($arrToMark as $job)
         {
+            $strJobIndex = getArrayKeyValueForJob($job);
             // First, make sure we don't already have a value in the interested column.
             // if we do, skip it and move to the next one
             if($job['interested'] == null || strlen($job['interested']) <= 0)
@@ -409,7 +478,7 @@ class ClassJobsSitePluginCommon
                 continue;
             }
 
-            $strJobKeyToMatch = strScrub($job['job_title']);
+            $strJobKeyToMatch = strScrub($job['job_title'], REPLACES_SPACES_WITH_HYPHENS | DEFAULT_SCRUB );
 
             // Look for a matching title in our list of excluded titles
             $varValMatch =  $GLOBALS['titles_to_filter'][$strJobKeyToMatch];
@@ -426,11 +495,11 @@ class ClassJobsSitePluginCommon
             {
                 if(strlen($varValMatch['exclude_reason']) > 0)
                 {
-                    $arrToMark[$nIndex]['interested'] = $varValMatch['exclude_reason'] . C__STR_TAG_AUTOMARKEDJOB__;
+                    $arrToMark[$strJobIndex]['interested'] = $varValMatch['exclude_reason'] . C__STR_TAG_AUTOMARKEDJOB__;
                 }
                 else
                 {
-                    $arrToMark[$nIndex]['interested'] = 'No (EXCLUDED TITLE BUT UNKNOWN REASON VALUE)';
+                    $arrToMark[$strJobIndex]['interested'] = 'No (EXCLUDED TITLE BUT UNKNOWN REASON VALUE)';
                     __debug__printLine("Excluded title " . $job['job_title'] . " did not have an exclude reason.  Cannot mark.", C__DISPLAY_ERROR__);
                 }
                 $nJobsMarkedAutoExcluded++;
@@ -442,7 +511,6 @@ class ClassJobsSitePluginCommon
             }
 
 
-            $nIndex++;
         }
 
         $strTotalRowsText = "/".count($arrToMark);
@@ -556,6 +624,7 @@ class ClassJobsSitePluginCommon
             $arrCurFileJobs = $classCombinedRead->readAllRecords(true, array_keys($this->getEmptyItemsArray()));
             $classCombinedRead = null;
             $arrCurNormalizedJobs =  $this->normalizeJobList($arrCurFileJobs);
+
             addJobsToJobsList($arrRetJobsList, $arrCurNormalizedJobs);
         }
 
