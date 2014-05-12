@@ -99,3 +99,6 @@ class PluginSimplyHired extends ClassJobsSitePlugin
     }
 
 }
+
+
+?>

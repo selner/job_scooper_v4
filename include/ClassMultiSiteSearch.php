@@ -79,10 +79,12 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
             }
             catch (ErrorException $classError)
             {
-                throw new ErrorException("Error: Plugin for site [" .$search['site_name'] . "] could not be found. [" .$classError['message']."]");
+                throw new ErrorException('Unable to load the search for ' .$search['site_name'] . '. Reason:  '. $classError->getMessage());
             }
 
         }
     }
 
 }
+
+?>

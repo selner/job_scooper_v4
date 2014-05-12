@@ -32,6 +32,7 @@ require_once dirname(__FILE__) . '/../plugins/PluginMonster.php';
 require_once dirname(__FILE__) . '/../plugins/PluginCareerBuilder.php';
 require_once dirname(__FILE__) . '/../plugins/PluginMashable.php';
 require_once dirname(__FILE__) . '/../plugins/PluginDisney.php';
+require_once dirname(__FILE__) . '/../plugins/PluginOuterwall.php';
 
 
 $GLOBALS['site_plugins'] = array(
@@ -48,6 +49,7 @@ $GLOBALS['site_plugins'] = array(
     'careerbuilder' => array('name' => 'careerbuilder', 'class_name' => 'PluginCareerBuilder', 'include_in_run' => false),
     'mashable' => array('name' => 'mashable', 'class_name' => 'PluginMashable', 'include_in_run' => false),
     'disney' => array('name' => 'disney', 'class_name' => 'PluginDisney', 'include_in_run' => false),
+    'outerwall' => array('name' => 'outerwall', 'class_name' => 'PluginOuterwall', 'include_in_run' => false),
 );
 
 ?>
