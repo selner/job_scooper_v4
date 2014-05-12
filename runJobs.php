@@ -30,9 +30,10 @@ $GLOBALS['DEBUG'] = false;
 
 
 $arrBryanSearches = array(
-    array('site_name' => 'EmploymentGuide', 'search_name' => "director", 'base_url_format' => "http://seattle.employmentguide.com/searchresults.php?page=***PAGE_NUMBER***&q=director&l=seattle%2C+wa&radius=20&sort=date&posted_after=***NUMBER_DAYS***"),
-    array('site_name' => 'EmploymentGuide', 'search_name' => "senior manager", 'base_url_format' => "http://seattle.employmentguide.com/searchresults.php?page=***PAGE_NUMBER***&q=senior+manager&l=seattle%2C+wa&radius=20&sort=date&posted_after=***NUMBER_DAYS***"),
-//    array('site_name' => 'Disney', 'search_name' => "all digital/online in WA", 'base_url_format' => "http://disneycareers.com/en/search-jobs/jobsearch-results/?jqs=%5B%7B%22c%22%3A%22US%257CCA%22%2C%22s%22%3A%22WA%22%2C%22g%22%3A%22Seattle%22%2C%22co%22%3A%22%22%2C%22in%22%3A%22Corporate%252COnline%252CDigital%2520%252F%2520Interactive%22%2C%22p%22%3A%22%22%2C%22jc%22%3A%22%22%2C%22e%22%3A%22%22%2C%22q%22%3A%22%22%2C%22r%22%3A%22%22%7D%5D"),
+//    array('site_name' => 'EmploymentGuide', 'search_name' => "director", 'base_url_format' => "http://seattle.employmentguide.com/searchresults.php?page=***PAGE_NUMBER***&q=director&l=seattle%2C+wa&radius=20&sort=date&posted_after=***NUMBER_DAYS***"),
+//    array('site_name' => 'EmploymentGuide', 'search_name' => "senior manager", 'base_url_format' => "http://seattle.employmentguide.com/searchresults.php?page=***PAGE_NUMBER***&q=senior+manager&l=seattle%2C+wa&radius=20&sort=date&posted_after=***NUMBER_DAYS***"),
+    array('site_name' => 'Outerwall', 'search_name' => "all jobs in WA", 'base_url_format' => "http://outerwall.jobs/washington/usa/jobs/"),
+    array('site_name' => 'Disney', 'search_name' => "all digital/online in WA", 'base_url_format' => "http://disneycareers.com/en/search-jobs/jobsearch-results/?jqs=%5B%7B%22c%22%3A%22US%257CCA%22%2C%22s%22%3A%22WA%22%2C%22g%22%3A%22Seattle%22%2C%22co%22%3A%22%22%2C%22in%22%3A%22Corporate%252COnline%252CDigital%2520%252F%2520Interactive%22%2C%22p%22%3A%22%22%2C%22jc%22%3A%22%22%2C%22e%22%3A%22%22%2C%22q%22%3A%22%22%2C%22r%22%3A%22%22%7D%5D"),
     array('site_name' => 'Glassdoor', 'search_name' => "director product management", 'base_url_format' => "http://www.glassdoor.com/Job/seattle-director-product-management-job-listings-SRCH_IL.0,7_IC1150505_KO8,35***PAGE_NUMBER***.htm?fromAge=***NUMBER_DAYS***"),
     array('site_name' => 'Expedia', 'search_name' => "all jobs", 'base_url_format' => "http://expediajobs.findly.com/candidate/job_search/advanced/results/***PAGE_NUMBER***?job_type=5517&state=2336&country=5492&sort=date"),
     array('site_name' => 'Porch', 'search_name' => "all jobs", 'base_url_format' => "http://about.porch.com/careers/"),
