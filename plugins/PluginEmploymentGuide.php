@@ -22,7 +22,7 @@ require_once dirname(__FILE__) . '/../include/ClassJobsSitePlugin.php';
 class PluginEmploymentGuide extends ClassJobsSitePlugin
 {
     protected $siteName = 'EmploymentGuide';
-    protected $siteBaseURL = 'http://seattle.employmentguide.com//';
+    protected $siteBaseURL = 'http://seattle.employmentguide.com/';
 
 
 
@@ -96,14 +96,14 @@ class PluginEmploymentGuide extends ClassJobsSitePlugin
 
             $item['job_site_date'] = $node->find("div[class='datePosted']")[0]->plaintext . '-'.$node->find("div[class='datePosted'] span[class='dateNum']")[0]->plaintext;;
 
-            var_dump($item);
 
             $ret[] = $this->normalizeItem($item);
         }
-
-//        var_dump($node->getAllAttributes());
 
         return $ret;
     }
 
 }
+
+
+?>
