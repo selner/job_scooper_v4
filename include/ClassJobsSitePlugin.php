@@ -320,12 +320,19 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $nItemCount = 1;
         $nPageCount = 1;
 
-        $strURL = $this->_getURLfromBase_($search, $nDays, $nPageCount, $nItemCount);
-        __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$search['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
-        var_dump( $strURL);
-        $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL );
-        if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
-
+        try
+        {
+            $strURL = $this->_getURLfromBase_($search, $nDays, $nPageCount, $nItemCount);
+            __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$search['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
+            var_dump( $strURL);
+            $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL );
+            if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
+        }
+        catch (ErrorException $ex)
+        {
+            throw new ErrorException("Error:  unable to getMyJobsForSearch from ".$strURL. " Reason:".$ex->getMessage());
+            return;
+        }
         $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML);
         if($strTotalResults == C__JOB_PAGECOUNT_NOTAPPLICABLE__)
         {
@@ -420,3 +427,5 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
 
 }
+
+?>
