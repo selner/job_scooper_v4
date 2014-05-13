@@ -67,7 +67,7 @@ class PluginFacebook extends ClassJobsSitePlugin
             $item['location'] = "Seattle, WA";
             $item['date_pulled'] = $this->getTodayAsString();
 
-            var_dump($item);
+//            var_dump($item);
             $ret[] = $this->normalizeItem($item);
         }
 
