@@ -83,7 +83,7 @@ class PluginTableau extends ClassJobsSitePlugin
             $item['job_post_url'] = $node->find("td a")[0]->href;
             $item['job_title'] = $node->find("td a")[0]->plaintext;
             $item['job_id'] = explode("rid=", $item['job_post_url'])[1];
-            // if($item['job_title'] == '') continue;
+            if($item['job_title'] == '') continue;
 
             $item['job_site_category'] = $node->find("td")[1]->plaintext;
             $item['location'] = $node->find("td")[2]->plaintext;
