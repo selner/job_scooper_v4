@@ -60,7 +60,7 @@ class PluginFacebook extends ClassJobsSitePlugin
             $item['job_title'] = $node->find("li span a")[0]->plaintext;
             $item['job_post_url'] = $node->find("li span a")[0]->href;
             $item['job_id'] = explode("req=", $item['job_post_url'])[1];
-            // if($item['job_title'] == '') continue;
+            if($item['job_title'] == '') continue;
 
             $item['job_site_category'] = $node->parent()->find("h3")[0]->plaintext;
 
