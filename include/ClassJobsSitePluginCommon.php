@@ -524,6 +524,7 @@ class ClassJobsSitePluginCommon
      */
     function filterOutUninterestedJobs($arrJobsToFilter, $fIncludeFilteredJobsInResults = true)
     {
+
         if($fIncludeFilteredJobsInResults == true)
         {
             __debug__printLine("Not filtering results." , C__DISPLAY_WARNING__);
