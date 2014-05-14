@@ -187,6 +187,7 @@ class SimpleScooterCSVFileClass {
                     }
 */
                     $arrDataLoaded['data_rows'][] = array_combine($arrDataLoaded['header_keys'], $data);
+
                 }
 
             }

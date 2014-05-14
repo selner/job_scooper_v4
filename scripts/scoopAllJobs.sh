@@ -1,6 +1,6 @@
 #!/bin/bash
 override=$1
-skipamazon=$2
+skipHTMLDownload=$2
 
 # get an output file name
 now=$(date +"%Y_%m_%d_%H%M")
@@ -20,9 +20,21 @@ echo 'Log file is ' $log  2>&1 1>>"$log"
 when="unknown"
 
 # BUGBUG
-if [ "$skipamazon" != "skip" ]; then     ## GOOD
-	echo 'Downloading HTML from new Amazon site'  2>&1 1>>"$log"
-	bash ./updateAmazonNewSiteHTMLFiles.sh "$path" 2>&1 1>>"$log"
+if [ "$skipHTMLDownload" != "skip" ]; then     ## GOOD
+	echo 'Downloading HTML from jobs sites'  2>&1 1>>"$log"
+	if [ -f '$1/amazon-newjobs-page-1.html' ];
+	then
+		echo 'New jobs files were pulled within the last 24 hours. Skipping re-download.'
+	else
+
+		# Run the applescript workflow to pull the latest jobs
+		# from the jobs sites that we can't automate via PHP
+		osascript downloadJobsSitesHTML.applescript "$path" 2>&1 1>>"$log"
+
+		# Wait for the workflow to finish
+		sleep 2m
+	fi
+
 	echo 'New jobs site download complete.' $log  2>&1 1>>"$log"
 fi
 
@@ -30,7 +42,6 @@ case "$(date +%a)" in (Mon|Wed|Fri|Sat)
 
   when="noteveryday"
   script_flags=" -all " 
-  echo 'Downloading HTML for jobs from Amazon.com new jobs site... ' 2>&1 1>>"$log"
 
 esac
 
@@ -48,8 +59,6 @@ if [ "$override" == "all" ]; then     ## GOOD
 fi
 
 echo 'Downloading new jobs... ' 2>&1 1>>"$log"
-
-
 
 # Now process that data and pull down the jobs from the old
 # site.  

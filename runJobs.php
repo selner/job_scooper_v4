@@ -24,15 +24,13 @@ require_once dirname(__FILE__) . '/include/SitePlugins.php';
 /****************************************************************************************************************/
 
 const C_STR_DATAFOLDER = '/Users/bryan/Code/data/jobs/';
-const C_STR_FOLDER_JOBSEARCH= '/Users/bryan/OneDrive/OneDrive-JobSearch/';
+const C_STR_FOLDER_JOBSEARCH = '/Users/bryan/OneDrive/OneDrive-JobSearch/';
 
-$GLOBALS['DEBUG'] = false;
 
 
 $arrBryanSearches = array(
-//    array('site_name' => 'EmploymentGuide', 'search_name' => "director", 'base_url_format' => "http://seattle.employmentguide.com/searchresults.php?page=***PAGE_NUMBER***&q=director&l=seattle%2C+wa&radius=20&sort=date&posted_after=***NUMBER_DAYS***"),
-//    array('site_name' => 'EmploymentGuide', 'search_name' => "senior manager", 'base_url_format' => "http://seattle.employmentguide.com/searchresults.php?page=***PAGE_NUMBER***&q=senior+manager&l=seattle%2C+wa&radius=20&sort=date&posted_after=***NUMBER_DAYS***"),
-
+    array('site_name' => 'EmploymentGuide', 'search_name' => "director", 'base_url_format' => "http://seattle.employmentguide.com/searchresults.php?page=***PAGE_NUMBER***&q=director&l=seattle%2C+wa&radius=20&sort=date&posted_after=***NUMBER_DAYS***"),
+    array('site_name' => 'EmploymentGuide', 'search_name' => "senior manager", 'base_url_format' => "http://seattle.employmentguide.com/searchresults.php?page=***PAGE_NUMBER***&q=senior+manager&l=seattle%2C+wa&radius=20&sort=date&posted_after=***NUMBER_DAYS***"),
     array('site_name' => 'Facebook', 'search_name' => "all SEA jobs", 'base_url_format' => "https://www.facebook.com/careers/locations/seattle"),
     array('site_name' => 'Tableau', 'search_name' => "all jobs", 'base_url_format' => "https://ch.tbe.taleo.net/CH11/ats/careers/searchResults.jsp?org=TABLEAU&cws=1&act=next&rowFrom=***ITEM_NUMBER***"),
     array('site_name' => 'Outerwall', 'search_name' => "all jobs in WA", 'base_url_format' => "http://outerwall.jobs/washington/usa/jobs/"),
@@ -57,7 +55,7 @@ $arrBryanSearches = array(
     array('site_name' => 'Mashable', 'search_name' => "senior-manager", 'base_url_format' => "http://jobs.mashable.com/jobs/results/keyword/senior-manager?kwsJobTitleOnly=true&location=Seattle%2C+Washington%2C+United+States&radius=25&view=List_Detail&page=***PAGE_NUMBER***&sort=PostType+asc%2C+PostDate+desc%2C+IsFeatured+desc&rows=50&modifiedDate=***NUMBER_DAYS***&SearchNetworks=US&networkView=national"),
     array('site_name' => 'Craigslist', 'search_name' => "exec titles", 'base_url_format' => "http://seattle.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=%22Vice%20President%22%20%7C%20%22Chief%20Technology%20Office%22%20%7C%20%22Chief%20Products%20Officer%22%20%7C%20%22CTO%22%20%7C%20%22CPO%22%20%7C%20%22VP%22%20%7C%20%22V.P.%22%20%7C%20%22Director%22%20%7C%20%20%22product%20management%22%20%7C%20%22general%20manager%22%20&srchType=T"),
     array('site_name' => 'Craigslist', 'search_name' => "exec titles", 'base_url_format' => "http://seattle.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=%22Vice%20President%22%20%7C%20%22Chief%20Technology%20Office%22%20%7C%20%22Chief%20Products%20Officer%22%20%7C%20%22CTO%22%20%7C%20%22CPO%22%20%7C%20%22VP%22%20%7C%20%22V.P.%22%20%7C%20%22Director%22%20%7C%20%20%22product%20management%22%20%7C%20%22general%20manager%22%20&srchType=T"),
-//    array('site_name' => 'Google', 'search_name' => "all Seattle/Kirkland jobs", 'base_url_format' => "https://www.google.com/about/careers/search/#t=sq&q=j&***ITEM_NUMBER***&jl=47.6062095%253A-122.3320708%253ASeattle%252C+WA%252C+USA%253Anull%253Aundefined%253A9.903894146066163%253ALOCALITY&jl=47.6814875%253A-122.2087353%253AKirkland%252C+WA%252C+USA%253Anull%253Aundefined%253A5.173281946960293%253ALOCALITY&"),
+    array('site_name' => 'Google', 'search_name' => "all Seattle/Kirkland jobs", 'base_url_format' => "https://www.google.com/about/careers/search/#t=sq&q=j&***ITEM_NUMBER***&jl=47.6062095%253A-122.3320708%253ASeattle%252C+WA%252C+USA%253Anull%253Aundefined%253A9.903894146066163%253ALOCALITY&jl=47.6814875%253A-122.2087353%253AKirkland%252C+WA%252C+USA%253Anull%253Aundefined%253A5.173281946960293%253ALOCALITY&"),
 
 
 );
@@ -86,14 +84,13 @@ $arrTest = array (
 
 
 
-$GLOBALS['OPTS']['titles_to_filter_input_file'] = C_STR_DATAFOLDER  . "bryans_list_exclude_titles.csv";
+$GLOBALS['OPTS']['titles_to_filter_input_file'] = C_STR_FOLDER_JOBSEARCH  . "bryans_list_source_to_use/bryans_list_exclude_titles.csv";
 
 $arrBryanTrackingFiles = array(
-    C_STR_DATAFOLDER . 'bryans_list_active.csv',
-    C_STR_DATAFOLDER . 'bryans_list_inactive.csv',
-    '/Users/bryan/OneDrive/OneDrive-JobSearch/bryans_list_source_to_use/bryans_list_inactives_pre_2014_04_18.csv',
-    '/Users/bryan/OneDrive/OneDrive-JobSearch/bryans_list_source_to_use/bryans_list_inactives_pre_2014_05_12.csv',
-
+    C_STR_FOLDER_JOBSEARCH . 'bryans_list_source_to_use/bryans_list_active.csv',
+    C_STR_FOLDER_JOBSEARCH . 'bryans_list_source_to_use/bryans_list_inactive.csv',
+    C_STR_FOLDER_JOBSEARCH . 'bryans_list_source_to_use/bryans_list_inactives_pre_2014_04_18.csv',
+    C_STR_FOLDER_JOBSEARCH . 'bryans_list_source_to_use/bryans_list_inactives_pre_2014_05_12.csv',
 );
 
 

@@ -34,7 +34,7 @@ require_once dirname(__FILE__) . '/../plugins/PluginMashable.php';
 require_once dirname(__FILE__) . '/../plugins/PluginDisney.php';
 require_once dirname(__FILE__) . '/../plugins/PluginOuterwall.php';
 require_once dirname(__FILE__) . '/../plugins/PluginTableau.php';
-//require_once dirname(__FILE__) . '/../plugins/PluginGoogle.php';
+require_once dirname(__FILE__) . '/../plugins/PluginGoogle.php';
 require_once dirname(__FILE__) . '/../plugins/PluginFacebook.php';
 
 
@@ -54,7 +54,7 @@ $GLOBALS['site_plugins'] = array(
     'disney' => array('name' => 'disney', 'class_name' => 'PluginDisney', 'include_in_run' => false),
     'outerwall' => array('name' => 'outerwall', 'class_name' => 'PluginOuterwall', 'include_in_run' => false),
     'tableau' => array('name' => 'tableau', 'class_name' => 'PluginTableau', 'include_in_run' => false),
-//    'google' => array('name' => 'google', 'class_name' => 'PluginGoogle', 'include_in_run' => false),
+    'google' => array('name' => 'google', 'class_name' => 'PluginGoogle', 'include_in_run' => false),
     'facebook' => array('name' => 'facebook', 'class_name' => 'PluginFacebook', 'include_in_run' => false),
 );
 

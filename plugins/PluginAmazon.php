@@ -94,16 +94,16 @@ class PluginAmazon extends ClassJobsSitePlugin
         $nItemCount = 1;
         $dataFolder = $this->strOutputFolder ;
 
-        $strFileName = $dataFolder . "amazon-newjobs-page-".$nItemCount.".html";
+        $strFileName = $dataFolder . "amazon-jobs-page-".$nItemCount.".html";
         if(!is_file($strFileName)) // try the current folder instead
         {
             $dataFolder = "./";
-            $strFileName = $dataFolder . "amazon-newjobs-page-".$nItemCount.".html";
+            $strFileName = $dataFolder . "Amazon-jobs-page-".$nItemCount.".html";
         }
         if(!is_file($strFileName)) // last try the debugging data folder
         {
             $dataFolder = C_STR_DATAFOLDER;
-            $strFileName = $dataFolder . "amazon-newjobs-page-".$nItemCount.".html";
+            $strFileName = $dataFolder . "Amazon-jobs-page-".$nItemCount.".html";
         }
 
         while (file_exists($strFileName) && is_file($strFileName))
@@ -119,20 +119,14 @@ class PluginAmazon extends ClassJobsSitePlugin
 
             $nItemCount++;
 
-            $strFileName = $dataFolder . "amazon-newjobs-page-".$nItemCount.".html";
+            $strFileName = $dataFolder . "Amazon-jobs-page-".$nItemCount.".html";
 
         }
-
-
-
-
     }
 
 
     private function _getParseJobsData_Amazon_NewJobs_($objSimpleHTML, $arrSettings)
     {
-
-
         $ret = array();
         $nodesTD= $objSimpleHTML->find('tr td[class="expand footable-first-column"]');
 

@@ -22,7 +22,7 @@ require_once dirname(__FILE__) . '/../include/ClassJobsSitePlugin.php';
 class PluginGoogle extends ClassJobsSitePlugin
 {
     protected $siteName = 'Google';
-    protected $siteBaseURL = 'https://www.google.com/about/careers';
+    protected $siteBaseURL = 'https://www.google.com/about/careers/search/';
     protected $nJobListingsPerPage = 10;
 
 
@@ -44,20 +44,25 @@ class PluginGoogle extends ClassJobsSitePlugin
         return "li=".$nItem."&st=".($nItem+10);
     }
 
+    function getMyJobsForSearch($search, $nDays = -1)
+    {
+        return $this->getMyJobsFromHTMLFiles($this->siteName);
+    }
 
     function parseTotalResultsCount($objSimpHTML)
     {
-        dump_html_tree($objSimpHTML);
-        $resultsSection= $objSimpHTML->find("iframe div[class='kd-count']");
-        var_dump($resultsSection);
+/*        $resultsSection= $objSimpHTML->find("iframe div[class='kd-count']");
         $resultsSection = $resultsSection->find("span");
-        dump_html_tree($resultsSection);
         $totalItemsText = $resultsSection[1]->plaintext;
         $arrItemItems = explode(" ", trim($totalItemsText));
         $strTotalItemsCount = trim($arrItemItems[3]);
         $strTotalItemsCount = str_replace(",", "", $strTotalItemsCount);
 
         return (intceil($strTotalItemsCount) * $nJobListingsPerPage);
+*/
+    // not necessary for an HTML file loaded plugin
+        return -1;
+
     }
 
     function parseJobsListForPage($objSimpHTML)
@@ -65,33 +70,26 @@ class PluginGoogle extends ClassJobsSitePlugin
         $ret = null;
 
 
-        $nodesJobs= $objSimpHTML->find('div[class="sr sr-a"]');
+        $nodesJobs= $objSimpHTML->find('div[class="sr-content"]');
         $counter = 0;
 
         foreach($nodesJobs as $node)
         {
-            dump_html_tree($node);
-            if($counter == 0)
-            {
-                $counter++;
-                continue;
-            } // skip the header row
-            $counter++;
-
             $item = parent::getEmptyItemsArray();
             $item['job_site'] = $this->siteName;
             $item['company'] = $this->siteName;
-            $item['job_id'] = $node->attr['id'];
-            $item['job_title'] = $jobLink->find("span")[0]->plaintext;
-            $jobLink = $node->find("a[class='title heading sr-title']");
-            $item['job_post_url'] = $jobLink[0]->href;
-            // if($item['job_title'] == '') continue;
+            $item['job_title'] = $node->find("a[class='title heading sr-title'] span")[0]->plaintext;
+            if($item['job_title'] == '') continue;
+            $item['job_post_url'] = $this->siteBaseURL . $node->find("a[class='title heading sr-title']")[0]->attr['href'];
+            $item['job_id'] = explode("jid=", $item['job_post_url'])[1];
+            $item['job_id'] = str_replace("&amp;", "", $item['job_id']);
+            $item['job_post_url'] = str_replace("&amp;", "&", $item['job_post_url']);
 
             $item['job_site_category'] = $node->find("a[class='greytext']")[0]->plaintext;
-            $item['location'] = $node->find("a[class='source']")[0]->plaintext;
+            $item['location'] = 'Seattle or Kirkland';
+
             $item['date_pulled'] = $this->getTodayAsString();
 
-            var_dump($item);
             $ret[] = $this->normalizeItem($item);
         }
 
