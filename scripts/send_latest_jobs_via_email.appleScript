@@ -1,16 +1,16 @@
 
-on run(argv)
+on run (argv)
 	
 	
-	if (count of argv) = 0 then
-		log "Error: No file specified for sending."
-		return -1
-	else
+		if (count of argv) = 0 then
+			log "Error: No file specified for sending."
+			return -1
+		else
 		set strFileToSend to first item of argv
-		if (characters 1 thru 1 of strFileToSend as string) = "\"" then
-			set strFileToSend to (characters 2 thru ((length of strFileToSend) - 1)) of strFileToSend as string
-		end if
-		log "Starting email send for CSV file = " & strFileToSend & "."
+	if (characters 1 thru 1 of strFileToSend as string) = "\"" then
+		set strFileToSend to (characters 2 thru ((length of strFileToSend) - 1)) of strFileToSend as string
+	end if
+	log "Starting email send for CSV file = " & strFileToSend & "."
 	end if
 	
 	set ret to sendMail(strFileToSend)
@@ -19,9 +19,12 @@ on run(argv)
 	end if
 	
 	return ret
-end go
+end run
 
 on sendMail(strFileToSend)
+	
+	
+	
 	
 	set recipName to "Bryan Selner"
 	set recipAddress to "selner@gmail.com"
@@ -29,9 +32,11 @@ on sendMail(strFileToSend)
 	set ret to -1
 	
 	set theAttachmentFileFullPath to "" as string
-	 	set theAttachmentFileFullPath to switchToPosixPathQuickHack(strFileToSend)
-	
+	set strBashGrepForError to " egrep -e \"ERROR\" " & strFileToSend
+	set theAttachmentFileFullPath to switchToPosixPathQuickHack(strFileToSend)
 	set theAttachmentFileName to getFileNameFromPath(theAttachmentFileFullPath, ":")
+	set strLoggedErrors to ""
+	set strLoggedErrors to do shell script strBashGrepForError as string
 	
 	
 	set myAttachmentFileAlias to ""
@@ -49,8 +54,13 @@ on sendMail(strFileToSend)
 	
 	
 	if fileExists = "true" then
-		set theSubject to "New Job Postings Found:  " & theAttachmentFileName -- the subject
-		set theContent to "New job postings found and are attached.  File: " & theAttachmentFileName & return & return -- the content
+		if (strLoggedErrors is not "") then
+			set theSubject to "New Job Postings[w/ERRORS!]:  " & theAttachmentFileName
+			set theContent to "New job postings found and are attached.  " & return & "ERRORS:  " & return & strLoggedErrors & return & return & "File: " & theAttachmentFileName & return & return -- the content
+		else
+			set theSubject to "New Job Postings:  " & theAttachmentFileName
+			set theContent to "New job postings found and are attached.  File: " & theAttachmentFileName & return & return -- the content
+		end if
 		log "Specified " & strFileToSend & " CSV file exists."
 		
 	else
