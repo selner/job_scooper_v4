@@ -24,7 +24,6 @@ function __initializeArgs__()
 {
 
 
-    if($GLOBALS['DEBUG'] == true ) { $GLOBALS['VERBOSE'] = true; }
 
     $GLOBALS['OPTS_SETTINGS']  = array(
         'include_all' => array(
@@ -68,6 +67,13 @@ function __initializeArgs__()
             'type'          => Pharse::PHARSE_INTEGER,
             'required'      => false,
             'short'      => 'amazon',
+        ),
+        'use_debug' => array(
+            'description'   => 'Output debug files and logging',
+            'default'       => 0,
+            'type'          => Pharse::PHARSE_INTEGER,
+            'required'      => false,
+            'short'      => 'debug',
         ),
     );
 
@@ -115,6 +121,12 @@ function __getPassedArgs__()
 
     $GLOBALS['titles_to_filter'] = null;
     $GLOBALS['company_role_pairs'] = null;
+
+
+    $GLOBALS['OPTS']['DEBUG'] = false;
+    $GLOBALS['OPTS']['DEBUG'] = get_PharseOptionValue('use_debug');
+    if($GLOBALS['OPTS']['DEBUG'] == true ) { $GLOBALS['VERBOSE'] = true; }
+
 
     if($GLOBALS['VERBOSE'] == true) { __log__ ('Options set: '.var_export($GLOBALS['OPTS'], true), C__LOGLEVEL_INFO__); }
 

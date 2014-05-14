@@ -69,7 +69,6 @@ class PluginTableau extends ClassJobsSitePlugin
 
         foreach($nodesJobs as $node)
         {
-            dump_html_tree($node);
             if($counter == 0)
             {
                 $counter++;

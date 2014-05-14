@@ -102,7 +102,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         //
         // Write out the interim data to file if we're debugging
         //
-        if($GLOBALS['DEBUG'] == true)
+        if($GLOBALS['OPTS']['DEBUG'] == true)
         {
 
             if($this->arrLatestJobs != null)
@@ -393,6 +393,46 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     }
 
+    protected function getMyJobsFromHTMLFiles($strCompanyName)
+    {
+
+        $nItemCount = 1;
+        $dataFolder = $this->strOutputFolder ;
+
+        $strFileName = $dataFolder . $strCompanyName. "-jobs-page-".$nItemCount.".html";
+        if(!is_file($strFileName)) // try the current folder instead
+        {
+            $dataFolder = "./";
+            $strFileName = $dataFolder . $strCompanyName. "-jobs-page-".$nItemCount.".html";
+        }
+        if(!is_file($strFileName)) // last try the debugging data folder
+        {
+            $dataFolder = C_STR_DATAFOLDER;
+            $strFileName = $dataFolder . $strCompanyName. "-jobs-page-".$nItemCount.".html";
+        }
+
+        while (file_exists($strFileName) && is_file($strFileName))
+        {
+            $objSimpleHTML = $this->getSimpleHTMLObjForFileContents($strFileName);
+            if(!$objSimpleHTML)
+            {
+                throw new ErrorException('Error:  unable to get SimpleHTML object from file('.$filePath.') or '.$strURL);
+            }
+
+            $arrNewJobs = $this->parseJobsListForPage($objSimpleHTML);
+
+            $objSimpleHTML->clear();
+            unset($objSimpleHTML);
+
+            $this->_addJobsToMyJobsList_($arrNewJobs);
+
+            $nItemCount++;
+
+            $strFileName = $dataFolder . $strCompanyName . "-jobs-page-".$nItemCount.".html";
+
+        }
+    }
+
     function getDaysURLValue($days) { return ($days == null || $days == "") ? 1 : $days; } // default is to return the raw number
     function getItemURLValue($nItem) { return ($nItem == null || $nItem == "") ? 0 : $nItem; } // default is to return the raw number
     function getPageURLValue($nPage) { return ($nPage == null || $nPage == "") ? 0 : $nPage; } // default is to return the raw number
@@ -402,6 +442,8 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $this->addSearches(array('site_name' => $site, 'search_name' => $name, 'base_url_format' =>$fmtURL));
 
     }
+
+
 
     function addSearches($arrSearches)
     {
