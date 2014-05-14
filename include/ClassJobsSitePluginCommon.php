@@ -139,9 +139,7 @@ class ClassJobsSitePluginCommon
             'job_post_url' => '',
             'location' => '',
             'job_site_category' => '',
-            'job_site_date' =>'',
-            'brief_description' => '',
-        );
+            'job_site_date' =>''        );
     }
 
     function normalizeJobList($arrJobList)
