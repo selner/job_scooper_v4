@@ -70,16 +70,15 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
 
             $strSite = strtolower($search['site_name']);
             $strSiteClass = $GLOBALS['site_plugins'][$strSite]['class_name'];
+            $class = new $strSiteClass;
             try
             {
-
-                $class = new $strSiteClass;
                 $class->getMyJobsForSearch($search, $nDays);
                 $this->_addJobsToMyJobsList_($class->getMyJobsList());
             }
             catch (ErrorException $classError)
             {
-                throw new ErrorException('Unable to load the search for ' .$search['site_name'] . '. Reason:  '. $classError->getMessage());
+                __debug__printLine('ERROR:  Unable to load the search for ' .$search['site_name'] . '. Reason:  '. $classError->getMessage() ."  Skipping ". $search['site_name']." searches and continuing with any others.", C__DISPLAY_ERROR__);
             }
 
         }
