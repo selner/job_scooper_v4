@@ -248,7 +248,7 @@ class ClassJobsSitePluginCommon
      function _loadTitlesToFilter_()
     {
         $fTitlesLoaded = false;
-        $arrTitleFileDetails = $GLOBALS['excluded_titles_file_details'];
+        $arrTitleFileDetails = $GLOBALS['titles_file_details'];
         $strFileName = "";
 
         if($GLOBALS['titles_to_filter'] != null && count($GLOBALS['titles_to_filter']) > 0)

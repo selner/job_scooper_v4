@@ -115,7 +115,7 @@ function __getPassedArgs__()
 
     $GLOBALS['OPTS']['filter_notinterested'] = get_PharseOptionValue('filter_notinterested');
 
-    $GLOBALS['excluded_titles_file_details'] = get_PharseOption_FileDetails("excluded_titles_file", true);
+    $GLOBALS['titles_file_details'] = get_PharseOption_FileDetails("excluded_titles_file", true);
 
     $GLOBALS['output_file_details'] = get_PharseOption_FileDetails("output_file", false);
 

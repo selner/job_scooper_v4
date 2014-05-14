@@ -5,10 +5,13 @@ skipHTMLDownload=$2
 # get an output file name
 now=$(date +"%Y_%m_%d_%H%M")
 path="/Users/bryan/OneDrive/OneDrive-JobSearch/"
+pathsrcfiles=$path"bryans_list_source_to_use/"
 dest=$path
 endfilename="_newjobs.csv"
 endlogname="_newjobs_run.log"
 enddestname="latest_newjobs_filtered.csv"
+endtitlesname="bryans_list_exclude_titles.csv"
+titlesfilename=$pathsrcfiles$endtitlesname
 filename=$now$endfilename
 file=$path$filename
 log=$path$now$endlogname
@@ -24,15 +27,17 @@ if [ "$skipHTMLDownload" != "skip" ]; then     ## GOOD
 	echo 'Downloading HTML from jobs sites'  2>&1 1>>"$log"
 	if [ -f '$1/amazon-newjobs-page-1.html' ];
 	then
-		echo 'New jobs files were pulled within the last 24 hours. Skipping re-download.'
+		echo 'New jobs files were pulled within the last 24 hours. Skipping re-download.' 2>&1 1>>"$log"
 	else
 
 		# Run the applescript workflow to pull the latest jobs
 		# from the jobs sites that we can't automate via PHP
-		osascript downloadJobsSitesHTML.applescript "$path" 2>&1 1>>"$log"
+
+		echo 'Starting download of HTML from jobs sites.' &>"$log"
+		osascript downloadJobsSitesHTML.applescript "$path" &>"$log"
 
 		# Wait for the workflow to finish
-		sleep 2m
+		sleep 2m &>"$log"
 	fi
 
 	echo 'New jobs site download complete.' $log  2>&1 1>>"$log"
@@ -60,11 +65,9 @@ fi
 
 echo 'Downloading new jobs... ' 2>&1 1>>"$log"
 
-# Now process that data and pull down the jobs from the old
-# site.  
-# php ../../scooper_utils/runJobs.php  -fni $1 $2 -o "$file" 2>&1 1>>"$log"
-echo "Running php ../../scooper_utils/runJobs.php $script_flags -o '$file'"  2>&1 1>>"$log"
-php ../runJobs.php $script_flags -days 7 -o "$file" 2>&1 1>>"$log"
+# Now process that data and export CSVs with the listings
+echo "Running php ../../scooper_utils/runJobs.php $script_flags -o '$file' -t '$titlesfilename'"  2>&1 1>>"$log"
+php ../runJobs.php $script_flags -days 7 -o "$file" -t "$titlesfilename" 2>&1 1>>"$log"
 
 # cp "$file" "$dest"   2>&1 1>>"$log"
 

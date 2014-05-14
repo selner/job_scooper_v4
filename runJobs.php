@@ -74,17 +74,6 @@ $arrMichaelSearches= array(
     array('site_name' => 'Glassdoor', 'search_name' => "real estate agent", 'base_url_format' => "http://www.glassdoor.com/Job/seattle-analytics-manager-job-openings-SRCH_IL.0,7_IC1150505_KO8,25_IP***PAGE_NUMBER***.htm?fromAge=***NUMBER_DAYS***"),
 );
 
-$arrTest = array (
-
-
-
-
-);
-
-
-
-
-$GLOBALS['OPTS']['titles_to_filter_input_file'] = C_STR_FOLDER_JOBSEARCH  . "bryans_list_source_to_use/bryans_list_exclude_titles.csv";
 
 $arrBryanTrackingFiles = array(
     C_STR_FOLDER_JOBSEARCH . 'bryans_list_source_to_use/bryans_list_active.csv',
