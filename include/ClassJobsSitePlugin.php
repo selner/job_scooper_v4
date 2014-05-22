@@ -389,7 +389,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         }
 
-        __debug__printLine("Total of " . $nItemCount . " jobs were downloaded for " . $this->siteName . " search " . $search['search_name'] . " over " . $totalPagesCount . " pages.", C__DISPLAY_ITEM_START__);
+        __debug__printLine(PHP_EOL.$this->siteName .":" . $nItemCount . " jobs downloaded for " . $search['search_name'].PHP_EOL, C__DISPLAY_ITEM_RESULT__);
 
     }
 
