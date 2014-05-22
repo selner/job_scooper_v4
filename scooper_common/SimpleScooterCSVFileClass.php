@@ -228,13 +228,16 @@ class SimpleScooterCSVFileClass {
 
         $arrRecordsToOutput = $this->getSortedDeDupedCSVArray($records, $arrKeysToUseToDedupe);
 
-        foreach ($arrRecordsToOutput as $record)
+        if(count($arrRecordsToOutput) > 0)
         {
-            if(!fputcsv($this->_fp_, $record))
+            foreach ($arrRecordsToOutput as $record)
             {
-                $err = error_get_last();
+                if(!fputcsv($this->_fp_, $record))
+                {
+                    $err = error_get_last();
 
-                throw new Exception("Error: writeArrayToCSVFile failed because ".$err['message'] ." for file ".$err['file']. " writing " . count(@$records) . " records with keys=" . var_export($keys, true));
+                    throw new Exception("Error: writeArrayToCSVFile failed because ".$err['message'] ." for file ".$err['file']. " writing " . count(@$records) . " records with keys=" . var_export($keys, true));
+                }
             }
         }
     }
