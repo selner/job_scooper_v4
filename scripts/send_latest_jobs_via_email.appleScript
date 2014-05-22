@@ -2,15 +2,15 @@
 on run (argv)
 	
 	
-		if (count of argv) = 0 then
-			log "Error: No file specified for sending."
-			return -1
-		else
+	if (count of argv) = 0 then
+		log "Error: No file specified for sending."
+		return -1
+	else
 		set strFileToSend to first item of argv
-	if (characters 1 thru 1 of strFileToSend as string) = "\"" then
-		set strFileToSend to (characters 2 thru ((length of strFileToSend) - 1)) of strFileToSend as string
-	end if
-	log "Starting email send for CSV file = " & strFileToSend & "."
+		if (characters 1 thru 1 of strFileToSend as string) = "\"" then
+			set strFileToSend to (characters 2 thru ((length of strFileToSend) - 1)) of strFileToSend as string
+		end if
+		log "Starting email send for CSV file = " & strFileToSend & "."
 	end if
 	
 	set ret to sendMail(strFileToSend)
@@ -19,7 +19,7 @@ on run (argv)
 	end if
 	
 	return ret
-end run
+end go
 
 on sendMail(strFileToSend)
 	
@@ -32,12 +32,16 @@ on sendMail(strFileToSend)
 	set ret to -1
 	
 	set theAttachmentFileFullPath to "" as string
-	set strBashGrepForError to " egrep -e \"ERROR\" " & strFileToSend
+	set strBashGrepForError to "egrep -e \"ERROR\" " & strFileToSend
 	set theAttachmentFileFullPath to switchToPosixPathQuickHack(strFileToSend)
 	set theAttachmentFileName to getFileNameFromPath(theAttachmentFileFullPath, ":")
 	set strLoggedErrors to ""
-	set strLoggedErrors to do shell script strBashGrepForError as string
 	
+	try
+		set strLoggedErrors to do shell script strBashGrepForError as string
+	on error errM number errN
+		set strLoggedErrors to ""
+	end try
 	
 	set myAttachmentFileAlias to ""
 	
@@ -101,7 +105,7 @@ on sendMail(strFileToSend)
 		end tell
 		
 		send curmsg
-		set ret to 1
+		set ret to 0
 	end tell
 	
 	return ret
