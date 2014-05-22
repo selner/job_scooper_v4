@@ -389,7 +389,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         }
 
-        __debug__printLine(PHP_EOL.$this->siteName .":" . $nItemCount . " jobs downloaded for " . $search['search_name'].PHP_EOL, C__DISPLAY_ITEM_RESULT__);
+        __debug__printLine(PHP_EOL.$this->siteName . "[".$search['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, C__DISPLAY_ITEM_RESULT__);
 
     }
 
