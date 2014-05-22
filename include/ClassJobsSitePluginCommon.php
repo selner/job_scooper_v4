@@ -245,7 +245,7 @@ class ClassJobsSitePluginCommon
      * Initializes the global list of titles we will automatically mark
      * as "not interested" in the final results set.
      */
-     function _loadTitlesToFilter_()
+    function _loadTitlesToFilter_()
     {
         $fTitlesLoaded = false;
         $arrTitleFileDetails = $GLOBALS['titles_file_details'];
@@ -295,9 +295,63 @@ class ClassJobsSitePluginCommon
         }
     }
 
+    /**
+     * Initializes the global list of titles we will automatically mark
+     * as "not interested" in the final results set.
+     */
+    function _loadTitlesRegexesToFilter_()
+    {
+        $fTitlesLoaded = false;
+        $arrTitleFileDetails = $GLOBALS['titles_regex_file_details'];
+        $strFileName = "";
+
+        if($GLOBALS['titles_regex_to_filter'] != null && count($GLOBALS['titles_regex_to_filter']) > 0)
+        {
+            // We've already loaded the titles; go ahead and return right away
+            $fTitlesLoaded = true;
+            __debug__printLine("Using previously loaded " . count($GLOBALS['titles_regex_to_filter']) . " regexed title strings to exclude." , C__DISPLAY_ITEM_DETAIL__);
+            return;
+        }
+        else if($arrTitleFileDetails != null)
+        {
+            $strFileName = $arrTitleFileDetails ['full_file_path'];
+            if(file_exists($strFileName ) && is_file($strFileName ))
+            {
+                __debug__printLine("Loading job title regexes to filter from ".$strFileName."." , C__DISPLAY_ITEM_DETAIL__);
+                $classCSVFile = new SimpleScooterCSVFileClass($strFileName , 'r');
+                $arrTitlesTemp = $classCSVFile->readAllRecords(true);
+                __debug__printLine(count($arrTitlesTemp) . " titles found in the source file that will be automatically filtered from job listings." , C__DISPLAY_ITEM_DETAIL__);
+
+                //
+                // Add each title we found in the file to our list in this class, setting the key for
+                // each record to be equal to the job title so we can do a fast lookup later
+                //
+                $GLOBALS['titles_regex_to_filter'] = array();
+                foreach($arrTitlesTemp as $titleRecord)
+                {
+
+                    $GLOBALS['titles_regex_to_filter'][] = $titleRecord['title_match_regex'];
+                }
+                $fTitlesLoaded = true;
+            }
+        }
+
+        if($fTitlesLoaded == false)
+        {
+            __debug__printLine("Could not load regex list for titles to exclude from '" . $strFileName . "'.  Final list will not be filtered." , C__DISPLAY_WARNING__);
+        }
+        else
+        {
+            var_dump('$GLOBALS[titles_regex_to_filter]', $GLOBALS['titles_regex_to_filter']);
+            __debug__printLine("Loaded regexes to use for filtering titles from '" . $strFileName . "'." , C__DISPLAY_WARNING__);
+
+        }
+    }
+
 
     function markJobsList_withAutoItems(&$arrJobs, $strCallerDescriptor = "")
     {
+        $this->markJobsList_SetAutoExcludedTitlesFromRegex($arrJobs, $strCallerDescriptor);
         $this->markJobsList_SetAutoExcludedTitles($arrJobs, $strCallerDescriptor);
         $this->markJobsList_SetLikelyDuplicatePosts($arrJobs, $strCallerDescriptor);
     }
@@ -456,6 +510,7 @@ class ClassJobsSitePluginCommon
 
     function markJobsList_SetAutoExcludedTitles(&$arrToMark, $strCallerDescriptor = null)
     {
+        __debug__printLine("Excluding Jobs by Exact Title Matches", C__DISPLAY_ITEM_START__);
         $this->_loadTitlesToFilter_();
 
         $nJobsSkipped = 0;
@@ -463,7 +518,7 @@ class ClassJobsSitePluginCommon
         $nJobsMarkedAutoExcluded = 0;
 
 
-        __debug__printLine("Checking ".count($arrToMark) ." roles against ". count($GLOBALS['titles_to_filter']) ." excluded titles.", C__DISPLAY_ITEM_START__);
+        __debug__printLine("Checking ".count($arrToMark) ." roles against ". count($GLOBALS['titles_to_filter']) ." excluded titles.", C__DISPLAY_ITEM_DETAIL__);
 
         foreach($arrToMark as $job)
         {
@@ -513,6 +568,59 @@ class ClassJobsSitePluginCommon
 
         $strTotalRowsText = "/".count($arrToMark);
         __debug__printLine("Automatically marked ".$nJobsMarkedAutoExcluded .$strTotalRowsText ." roles " . ($strCallerDescriptor != null ? "from " . $strCallerDescriptor : "") . " as 'No/Not Interested' because the job title was in the exclusion list. (Skipped: " . $nJobsSkipped . $strTotalRowsText ."; Untouched: ". $nJobsNotMarked . $strTotalRowsText .")" , C__DISPLAY_ITEM_RESULT__);
+    }
+
+    function markJobsList_SetAutoExcludedTitlesFromRegex(&$arrToMark, $strCallerDescriptor = null)
+    {
+        $this->_loadTitlesRegexesToFilter_();
+
+        $nJobsNotMarked = 0;
+        $nJobsMarkedAutoExcluded = 0;
+
+        __debug__printLine("Excluding Jobs by Title Regex Matches", C__DISPLAY_ITEM_START__);
+        __debug__printLine("Checking ".count($arrToMark) ." roles against ". count($GLOBALS['titles_regex_to_filter']) ." excluded titles.", C__DISPLAY_ITEM_DETAIL__);
+        $arrJobs_BlankInterested = array_filter($arrToMark, "isMarked_InterestedEqualBlank");
+        $nJobsSkipped = count($arrToMark) - count($arrJobs_BlankInterested);
+
+        if(count($arrJobs_BlankInterested) > 0)
+        {
+            foreach($arrJobs_BlankInterested as $job)
+            {
+                $fMatched = false;
+                // get all the job records that do not yet have an interested value
+
+                foreach($GLOBALS['titles_regex_to_filter'] as $rxInput )
+                {
+                    $arrRXInput = explode("|", strtolower($rxInput));
+                    if(count($arrRXInput) == 0)
+                    {
+                        $arrRXInput = array($rxInput);
+                    }
+
+                    foreach($arrRXInput as $rxItem)
+                    {
+                        $rx = '/'.$rxItem.'/';
+                        if(preg_match($rx, strtolower($job['job_title'])))
+                        {
+                            $strJobIndex = getArrayKeyValueForJob($job);
+                            $arrToMark[$strJobIndex]['interested'] = 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__;
+                            $nJobsMarkedAutoExcluded++;
+                            $fMatched = true;
+                            break;
+                        }
+                        else              // we're ignoring the Excluded column fact for the time being. If it's in the list, it's excluded
+                        {
+                            $nJobsNotMarked++;
+        //                __debug__printLine("Job title '".$job['job_title'] ."' was not found in the exclusion list.  Keeping for review." , C__DISPLAY_ITEM_DETAIL__);
+                        }
+                    }
+                    if($fMatched == true) break;
+                }
+
+            }
+        }
+        $strTotalRowsText = "/".count($arrToMark);
+        __debug__printLine("Marked not interested via regex(".$nJobsMarkedAutoExcluded . $strTotalRowsText .") , skipped: " . $nJobsSkipped . $strTotalRowsText .", untouched: ". $nJobsNotMarked . $strTotalRowsText .")" , C__DISPLAY_ITEM_RESULT__);
     }
     /**
      * TODO:  DOC
@@ -568,9 +676,7 @@ class ClassJobsSitePluginCommon
         {
             __debug__printLine("Warning: writeJobsListToFile had no records to write to  " . $strOutFilePath, C__DISPLAY_ITEM_DETAIL__);
 
-
         }
-
 
         if($fFirstAutoMarkJobs == true)
         {

@@ -54,6 +54,13 @@ function __initializeArgs__()
             'required'      => false,
             'short'      => 't',
         ),
+        'excluded_titles_regexes_file' => array(
+            'description'   => 'CSV file of titles to flag automatically as "not interested"',
+            'default'       => null,
+            'type'          => Pharse::PHARSE_STRING,
+            'required'      => false,
+            'short'      => 'tr',
+        ),
         'filter_notinterested' => array(
             'description'   => 'Exclude listings that are marked as "not interested".',
             'default'       => 0,
@@ -116,10 +123,13 @@ function __getPassedArgs__()
     $GLOBALS['OPTS']['filter_notinterested'] = get_PharseOptionValue('filter_notinterested');
 
     $GLOBALS['titles_file_details'] = get_PharseOption_FileDetails("excluded_titles_file", true);
+    $GLOBALS['titles_regex_file_details'] = get_PharseOption_FileDetails("excluded_titles_regexes_file", true);
 
     $GLOBALS['output_file_details'] = get_PharseOption_FileDetails("output_file", false);
 
     $GLOBALS['titles_to_filter'] = null;
+    $GLOBALS['titles_regex_to_filter'] = null;
+
     $GLOBALS['company_role_pairs'] = null;
 
 
@@ -206,7 +216,9 @@ function get_PharseOption_FileDetails($strOptName, $fFileRequired)  // todo: add
     }
     else
     {
+//        var_dump('$strOptName', $strOptName);
         $retFileDetails = parseFilePath($GLOBALS['OPTS'][$strOptName], $fFileRequired);
+//        var_dump('$retFileDetails ', $retFileDetails);
         __debug__printLine("". $strOptName ."details= [" . var_export($retFileDetails , true) . "]", C__DISPLAY_ITEM_DETAIL__);
     }
 
