@@ -57,7 +57,7 @@ class PluginOuterwall extends ClassJobsSitePlugin
         {
             $item = parent::getEmptyItemsArray();
             $item['job_site'] = $this->siteName;
-            $item['job_post_url'] = $node->find("h4 a")[0]->href;
+            $item['job_post_url'] = $siteBaseURL . $node->find("h4 a")[0]->href;
             $item['job_title'] = $node->find("h4 a span")[0]->plaintext;
             $item['job_id'] = explode("/", $item['job_post_url'])[3];
             if($item['job_title'] == '') continue;
