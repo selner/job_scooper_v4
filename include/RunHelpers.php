@@ -114,7 +114,7 @@ function __runAllJobs__($arrSearches, $arrSourceFiles = null, $nDays = -1, $fInc
     __debug__printLine(PHP_EOL."**************  " . count($arrListAllJobsFromSearches) . " job listings from all sources have been loaded.  **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
 
     __debug__printLine(PHP_EOL."**************  Updating jobs list for known filters ***************".PHP_EOL, C__DISPLAY_NORMAL__);
-    $classJobExportHelper_Main->markJobsList_withAutoItems($arrListAllJobsFromSearches, "RUNNER");
+    $classJobExportHelper_Main->markJobsList_withAutoItems($arrListAllJobsFromSearches, "");
 
     __debug__printLine(PHP_EOL."**************  Writing final list of " . count($arrListAllJobsFromSearches) . " to filtered and all results files.  ***************  ".PHP_EOL, C__DISPLAY_NORMAL__);
     $class = null;
@@ -122,25 +122,49 @@ function __runAllJobs__($arrSearches, $arrSourceFiles = null, $nDays = -1, $fInc
     // Write to the main output file name that the user passed in
     $classJobExportHelper_Main->writeJobsListToFile($strOutName, $arrListAllJobsFromSearches, $fIncludeFilteredJobsInResults);
 
-    $strOutDetailsFilteredName = getFullPathFromFileDetails(parseFilePath($strOutName), "", "_filtered");
-    $classJobExportHelper_Main->writeJobsListToFile($strOutDetailsFilteredName, $arrListAllJobsFromSearches, false);
+//    $strOutDetailsFilteredName = getFullPathFromFileDetails(parseFilePath($strOutName), "", "_filtered");
+//    $classJobExportHelper_Main->writeJobsListToFile($strOutDetailsFilteredName, $arrListAllJobsFromSearches, false);
 
+
+    //
+    // Output all job records and their values
+    //
     $strOutDetailsAllResultsName = getFullPathFromFileDetails(parseFilePath($strOutName), "", "_alljobs");
     $classJobExportHelper_Main->writeJobsListToFile($strOutDetailsAllResultsName , $arrListAllJobsFromSearches, true);
 
-
-    __debug__printLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
-
+    //
+    // Now, output the various subsets of the total jobs list
+    //
     $arrRunAutoMark = $arrListAllJobsFromSearches;
-    $arrNotMarkedInterestedYet = array_filter($arrRunAutoMark, "isMarked_InterestedEqualBlank");
-    $classJobExportHelper_Main->markJobsList_SetAutoExcludedTitles($arrRunAutoMark, "run_jobs");
-    $arrAutoDupes = array_filter($arrRunAutoMark, "isMarked_AutoDupe");
-    $arrAllAutoMarked = array_filter($arrRunAutoMark, "isMarked_Auto");
-    $arrNotInterested = array_filter($arrRunAutoMark, "isMarked_NotInterested");
-    $arrInteresting = array_filter($arrRunAutoMark, "isMarked_InterestedOrBlank");
+    $classJobExportHelper_Main->markJobsList_SetAutoExcludedTitles($arrRunAutoMark, "");
 
+    // Output only records that are new or not marked as excluded (aka "Yes" or "Maybe")
+    $arrInteresting = array_filter($arrRunAutoMark, "isMarked_InterestedOrBlank");
+    $strOutDetailsActiveJobsName = getFullPathFromFileDetails(parseFilePath($strOutName), "", "_active_jobs");
+    $classJobExportHelper_Main->writeJobsListToFile($strOutDetailsActiveJobsName, $arrInteresting , true);
+
+    // Output only new records that haven't been looked at yet
+    $arrNotMarkedInterestedYet = array_filter($arrRunAutoMark, "isMarked_InterestedEqualBlank");
     $strOutDetailsAllResultsName = getFullPathFromFileDetails(parseFilePath($strOutName), "", "_newjobsonly");
     $classJobExportHelper_Main->writeJobsListToFile($strOutDetailsAllResultsName , $arrNotMarkedInterestedYet , true);
+
+    // Output only records that were auto-marked as duplicates
+    $arrNotMarkedAutoDupe = array_filter($arrRunAutoMark, "isMarked_AutoDupe");
+    $strOutDetailsAutoDupe = getFullPathFromFileDetails(parseFilePath($strOutName), "", "_auto_duped");
+    $classJobExportHelper_Main->writeJobsListToFile($strOutDetailsAutoDupe , $arrNotMarkedAutoDupe , true);
+
+    // Output all records that were automatically excluded
+    $arrAllAutoMarked = array_filter($arrRunAutoMark, "isMarked_Auto");
+    $strOutDetailsAutoMarked= getFullPathFromFileDetails(parseFilePath($strOutName), "", "_auto_excluded");
+    $classJobExportHelper_Main->writeJobsListToFile($strOutDetailsAutoMarked , $arrAllAutoMarked , true);
+
+    // Output all records that were previously marked excluded manually by the user
+    $arrAllManualMarked = array_filter($arrRunAutoMark, "isMarked_ManuallyNotInterested");
+    $strOutDetailsManualMarked= getFullPathFromFileDetails(parseFilePath($strOutName), "", "_manually_excluded");
+    $classJobExportHelper_Main->writeJobsListToFile($strOutDetailsManualMarked , $arrAllManualMarked , true);
+
+
+    __debug__printLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
 
 
     __debug__printLine("Total jobs:  ".count($arrListAllJobsFromSearches). PHP_EOL."Interesting: ". count($arrInteresting) . " / ". count($arrNotInterested) . PHP_EOL. "Auto-Marked: ".count($arrAllAutoMarked). " / Dupes: ".count($arrAutoDupes) , C__DISPLAY_SUMMARY__);

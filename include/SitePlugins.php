@@ -36,6 +36,7 @@ require_once dirname(__FILE__) . '/../plugins/PluginOuterwall.php';
 require_once dirname(__FILE__) . '/../plugins/PluginTableau.php';
 require_once dirname(__FILE__) . '/../plugins/PluginGoogle.php';
 require_once dirname(__FILE__) . '/../plugins/PluginFacebook.php';
+require_once dirname(__FILE__) . '/../plugins/PluginEbay.php';
 
 
 $GLOBALS['site_plugins'] = array(
@@ -56,6 +57,7 @@ $GLOBALS['site_plugins'] = array(
     'tableau' => array('name' => 'tableau', 'class_name' => 'PluginTableau', 'include_in_run' => false),
     'google' => array('name' => 'google', 'class_name' => 'PluginGoogle', 'include_in_run' => false),
     'facebook' => array('name' => 'facebook', 'class_name' => 'PluginFacebook', 'include_in_run' => false),
+    'ebay' => array('name' => 'ebay', 'class_name' => 'PluginEbay', 'include_in_run' => false),
 );
 
 ?>
