@@ -22,7 +22,7 @@ require_once dirname(__FILE__) . '/../include/ClassJobsSitePlugin.php';
 class PluginMashable extends ClassJobsSitePlugin
 {
     protected $siteName = 'Mashable';
-    protected $siteBaseURL = 'http://http://jobs.mashable.com/';
+    protected $siteBaseURL = 'http://jobs.mashable.com';
     protected $nJobListingsPerPage = 50;
 
 
@@ -79,7 +79,7 @@ class PluginMashable extends ClassJobsSitePlugin
             $titleLink = $node->find("div[class='aiResultTitle'] h3 a")[0];
 
             $item['job_title'] = $titleLink->plaintext;
-            $item['job_post_url'] = $titleLink->href;
+            $item['job_post_url'] = $siteBaseURL . $titleLink->href;
             if($item['job_title'] == '') continue;
 
             $item['company'] = $node->find("li[class='aiResultsCompanyName']")[0]->plaintext;
