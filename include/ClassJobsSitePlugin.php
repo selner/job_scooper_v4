@@ -60,8 +60,21 @@ function isMarked_InterestedEqualBlank($var)
 
 function isMarked_InterestedOrBlank($var)
 {
-    if((substr_count($var['interested'], "No ") > 0) || isMarked_AutoDupe($var) == true) return false;
+    if(substr_count($var['interested'], "No ") > 0 || (substr_count($var['interested'], "New") == 1)) return false;
     return true;
+}
+
+function isMarked_ManuallyNotInterested($var)
+{
+    if((substr_count($var['interested'], "No ") > 0) && isMarked_Auto($var) == false) return true;
+    return false;
+}
+
+function isJobAutoUpdatable($var)
+{
+    if(isMarked_InterestedEqualBlank($var) == true || (substr_count($var['interested'], "New") == 1) ) return true;
+
+    return false;
 }
 
 function isJobFilterable($var)

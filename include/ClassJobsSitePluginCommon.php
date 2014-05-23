@@ -329,8 +329,14 @@ class ClassJobsSitePluginCommon
                 $GLOBALS['titles_regex_to_filter'] = array();
                 foreach($arrTitlesTemp as $titleRecord)
                 {
+                    $arrRXInput = explode("|", strtolower($titleRecord['title_match_regex']));
 
-                    $GLOBALS['titles_regex_to_filter'][] = $titleRecord['title_match_regex'];
+                    foreach($arrRXInput as $rxItem)
+                    {
+                        $rx = '/'.$rxItem.'/';
+
+                        $GLOBALS['titles_regex_to_filter'][] = $rx;
+                    }
                 }
                 $fTitlesLoaded = true;
             }
@@ -342,7 +348,7 @@ class ClassJobsSitePluginCommon
         }
         else
         {
-            var_dump('$GLOBALS[titles_regex_to_filter]', $GLOBALS['titles_regex_to_filter']);
+//            var_dump('$GLOBALS[titles_regex_to_filter]', $GLOBALS['titles_regex_to_filter']);
             __debug__printLine("Loaded regexes to use for filtering titles from '" . $strFileName . "'." , C__DISPLAY_WARNING__);
 
         }
@@ -399,7 +405,26 @@ class ClassJobsSitePluginCommon
         return $ret;
     }
 
+    private function _addDupeIDToNotes_($strNote, $strNewDupe)
+    {
+        $strDupeMarker = "Also: ";
+        if($strNote == "" || $strNote == null)
+        {
+            return $strDupeMarker . $strNewDupe;
+        }
 
+        $arrNote = explode($strDupeMarker, $strNote);
+        if(count($arrNote) == 1)
+        {
+            return $arrNote[0] . "; ". $strDupeMarker . $strNewDupe;
+        }
+        else
+        {
+            return $arrNote[0] . "; ". $strDupeMarker . $arrNote[0] . ", " . $strNewDupe;
+
+        }
+
+    }
     function markJobsList_SetLikelyDuplicatePosts(&$arrToMark, $strCallerDescriptor = null)
     {
         $nJobsSMatched = 0;
@@ -426,6 +451,7 @@ class ClassJobsSitePluginCommon
                 $strCompanyKey = $job['job_site'];
             }
 
+
             $arrPrevMatchJob = $this->_getJobFromArrayByKeyPair_($arrCompanyRoleNamePairsFound, $strCompanyKey, $job['job_title']);
 
             if($arrPrevMatchJob['found_in_array'] == true)
@@ -450,12 +476,13 @@ class ClassJobsSitePluginCommon
                 {
 
                     $arrToMark[$strEarlierMatchJobKey]['interested'] =  C__STR_TAG_DULICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__;
-                    $arrToMark[$strEarlierMatchJobKey]['notes'] =  $arrToMark[$strEarlierMatchJobIndex]['notes'] . " *** Likely a duplicate post of ". $strThisJobKey;
+                    $arrToMark[$strEarlierMatchJobKey]['notes'] =  $arrToMark[$strEarlierMatchJobKey]['notes'] . " *** Likely a duplicate post of ". $strThisJobKey;
 
                     // If we haven't added a note saying it matches this other specific job, add it now.
                     if(substr_count($arrToMark[$strThisJobKey]['notes'], $strEarlierMatchJobKey) <= 0)
                     {
-                        $arrToMark[$strThisJobKey]['notes'] =  $arrToMark[$strThisJobKey]['notes'] . "  (Also listed as ". $strEarlierMatchJobKey .") ";
+//                        $arrToMark[$strThisJobKey]['notes'] =  $arrToMark[$strThisJobKey]['notes'] . " Also:". $strEarlierMatchJobKey ."]";
+                        $arrToMark[$strThisJobKey]['notes'] = $this->_addDupeIDToNotes_($arrToMark[$strThisJobKey]['notes'], $strEarlierMatchJobKey );
                     }
                     $arrCompanyRoleNamePairsFound[$arrPrevMatchJob['lookup_value'] ] = $arrToMark[$strThisJobKey];
                 }
@@ -472,7 +499,8 @@ class ClassJobsSitePluginCommon
                     // If we haven't added a note saying it matches this other specific job, add it now.
                     if(substr_count($arrToMark[$strEarlierMatchJobKey]['notes'], $strThisJobKey) <= 0)
                     {
-                        $arrToMark[$strEarlierMatchJobKey]['notes'] =  $arrToMark[$strEarlierMatchJobKey]['notes'] . "  (Also listed as ". $strThisJobKey .") ";
+//                        $arrToMark[$strEarlierMatchJobKey]['notes'] =  $arrToMark[$strEarlierMatchJobKey]['notes'] . "  (Also listed as ". $strThisJobKey .") ";
+                        $arrToMark[$strEarlierMatchJobKey]['notes'] = $this->_addDupeIDToNotes_($arrToMark[$strEarlierMatchJobKey]['notes'], $strThisJobKey );
                     }
                 }
 
@@ -525,7 +553,8 @@ class ClassJobsSitePluginCommon
             $strJobIndex = getArrayKeyValueForJob($job);
             // First, make sure we don't already have a value in the interested column.
             // if we do, skip it and move to the next one
-            if($job['interested'] == null || strlen($job['interested']) <= 0)
+//            if($job['interested'] == null || strlen($job['interested']) <= 0)
+            if(!isJobAutoUpdatable($job))
             {
                 $nJobsSkipped++;
                 continue;
@@ -579,43 +608,35 @@ class ClassJobsSitePluginCommon
 
         __debug__printLine("Excluding Jobs by Title Regex Matches", C__DISPLAY_ITEM_START__);
         __debug__printLine("Checking ".count($arrToMark) ." roles against ". count($GLOBALS['titles_regex_to_filter']) ." excluded titles.", C__DISPLAY_ITEM_DETAIL__);
-        $arrJobs_BlankInterested = array_filter($arrToMark, "isMarked_InterestedEqualBlank");
-        $nJobsSkipped = count($arrToMark) - count($arrJobs_BlankInterested);
+        $arrJobs_AutoUpdatable= array_filter($arrToMark, "isJobAutoUpdatable");
+        $nJobsSkipped = count($arrToMark) - count($arrJobs_AutoUpdatable);
 
-        if(count($arrJobs_BlankInterested) > 0)
+        if(count($arrJobs_AutoUpdatable) > 0)
         {
-            foreach($arrJobs_BlankInterested as $job)
+            foreach($arrJobs_AutoUpdatable as $job)
             {
                 $fMatched = false;
                 // get all the job records that do not yet have an interested value
 
                 foreach($GLOBALS['titles_regex_to_filter'] as $rxInput )
                 {
-                    $arrRXInput = explode("|", strtolower($rxInput));
-                    if(count($arrRXInput) == 0)
+                    if(preg_match($rxInput, strtolower($job['job_title'])))
                     {
-                        $arrRXInput = array($rxInput);
+                        $strJobIndex = getArrayKeyValueForJob($job);
+                        $arrToMark[$strJobIndex]['interested'] = 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__;
+                        $nJobsMarkedAutoExcluded++;
+                        $fMatched = true;
+                        break;
                     }
-
-                    foreach($arrRXInput as $rxItem)
+                    else              // we're ignoring the Excluded column fact for the time being. If it's in the list, it's excluded
                     {
-                        $rx = '/'.$rxItem.'/';
-                        if(preg_match($rx, strtolower($job['job_title'])))
-                        {
-                            $strJobIndex = getArrayKeyValueForJob($job);
-                            $arrToMark[$strJobIndex]['interested'] = 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__;
-                            $nJobsMarkedAutoExcluded++;
-                            $fMatched = true;
-                            break;
-                        }
-                        else              // we're ignoring the Excluded column fact for the time being. If it's in the list, it's excluded
-                        {
-                            $nJobsNotMarked++;
-        //                __debug__printLine("Job title '".$job['job_title'] ."' was not found in the exclusion list.  Keeping for review." , C__DISPLAY_ITEM_DETAIL__);
-                        }
+                        $nJobsNotMarked++;
                     }
                     if($fMatched == true) break;
                 }
+
+                if($fMatched == false)
+                    __debug__printLine("Job title '".$job['job_title'] ."' was not found in the title exclusion regex list.  Keeping for review." , C__DISPLAY_ITEM_DETAIL__);
 
             }
         }
@@ -693,7 +714,7 @@ class ClassJobsSitePluginCommon
 
         $classCombined = new SimpleScooterCSVFileClass($strOutFilePath , "w");
         $classCombined->writeArrayToCSVFile($arrJobsRecordsToUse, array_keys($this->getEmptyItemsArray()), $this->arrKeysForDeduping);
-        __debug__printLine($strCallerDescriptor . ($strCallerDescriptor  != "" ? " jobs" : "Jobs ") ."list had  ". count($arrJobsRecordsToUse) . " jobs and was written to " . $strOutFilePath , C__DISPLAY_ITEM_START__);
+        __debug__printLine($strCallerDescriptor . ($strCallerDescriptor  != "" ? " jobs" : "Jobs ") ." list had  ". count($arrJobsRecordsToUse) . " jobs and was written to " . $strOutFilePath , C__DISPLAY_ITEM_START__);
 
         return $strOutFilePath;
 
