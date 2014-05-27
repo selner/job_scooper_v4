@@ -29,6 +29,7 @@ const C_STR_FOLDER_JOBSEARCH = '/Users/bryan/OneDrive/OneDrive-JobSearch/';
 
 
 $arrBryanSearches = array(
+    array('site_name' => 'Groupon', 'search_name' => "all seattle jobs", 'base_url_format' => "https://jobs.groupon.com/careers/seattle-wa-united-states"),
     array('site_name' => 'EmploymentGuide', 'search_name' => "director", 'base_url_format' => "http://seattle.employmentguide.com/searchresults.php?page=***PAGE_NUMBER***&q=director&l=seattle%2C+wa&radius=20&sort=date&posted_after=***NUMBER_DAYS***"),
     array('site_name' => 'EmploymentGuide', 'search_name' => "senior manager", 'base_url_format' => "http://seattle.employmentguide.com/searchresults.php?page=***PAGE_NUMBER***&q=senior+manager&l=seattle%2C+wa&radius=20&sort=date&posted_after=***NUMBER_DAYS***"),
     array('site_name' => 'Facebook', 'search_name' => "all SEA jobs", 'base_url_format' => "https://www.facebook.com/careers/locations/seattle"),

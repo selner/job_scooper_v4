@@ -37,6 +37,7 @@ require_once dirname(__FILE__) . '/../plugins/PluginTableau.php';
 require_once dirname(__FILE__) . '/../plugins/PluginGoogle.php';
 require_once dirname(__FILE__) . '/../plugins/PluginFacebook.php';
 require_once dirname(__FILE__) . '/../plugins/PluginEbay.php';
+require_once dirname(__FILE__) . '/../plugins/PluginGroupon.php';
 
 
 $GLOBALS['site_plugins'] = array(
@@ -58,6 +59,7 @@ $GLOBALS['site_plugins'] = array(
     'google' => array('name' => 'google', 'class_name' => 'PluginGoogle', 'include_in_run' => false),
     'facebook' => array('name' => 'facebook', 'class_name' => 'PluginFacebook', 'include_in_run' => false),
     'ebay' => array('name' => 'ebay', 'class_name' => 'PluginEbay', 'include_in_run' => false),
+    'groupon' => array('name' => 'groupon', 'class_name' => 'PluginGroupon', 'include_in_run' => false),
 );
 
 ?>
