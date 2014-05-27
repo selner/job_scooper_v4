@@ -27,7 +27,7 @@ class PluginEbay extends ClassJobsSitePlugin
 
     function getDaysURLValue($days)
     {
-        __debug__printLine("EBay Day Parsing Not Yet Implemented!", C__DISPLAY_WARNING__);
+        // __debug__printLine("EBay Day Parsing Not Yet Implemented!", C__DISPLAY_WARNING__);
         return "";
     }
 
