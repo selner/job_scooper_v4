@@ -312,7 +312,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
             if($GLOBALS['OPTS'][$strIncludeKey] == null || $GLOBALS['OPTS'][$strIncludeKey] == 0)
             {
-                __debug__printLine($search['site_name'] . " excluded, so skipping its '" . $search['search_name'] . "' search.", C__DISPLAY_WARNING__);
+                __debug__printLine($search['site_name'] . " excluded, so skipping its '" . $search['search_name'] . "' search.", C__DISPLAY_ITEM_START__);
 
                 continue;
             }
@@ -366,7 +366,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             return;
         }
 
-        __debug__printLine("Downloading " . $totalPagesCount . " pages with ". ($nTotalListings == C__JOB_ITEMCOUNT_UNKNOWN__  ? "a not yet know number of" : $nTotalListings). " total jobs  " . $this->siteName . " for search '" . $search['search_name']."'.", C__DISPLAY_ITEM_START__);
+        __debug__printLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__JOB_ITEMCOUNT_UNKNOWN__  ? "a not yet know number of" : $nTotalListings) . " jobs:  ".$strURL, C__DISPLAY_ITEM_START__);
 
         while ($nPageCount <= $totalPagesCount )
         {
@@ -374,7 +374,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
             $objSimpleHTML = null;
             $strURL = $this->_getURLfromBase_($search, $nDays, $nPageCount, $nItemCount);
-            __debug__printLine("Querying " . $this->siteName ." jobs: ".$strURL, C__DISPLAY_ITEM_START__);
 
             if(!$objSimpleHTML) $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL);
             if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
