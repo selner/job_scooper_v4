@@ -80,9 +80,10 @@ class PluginIndeed extends ClassJobsSitePlugin
         foreach($nodesJobs as $node)
         {
             $item = parent::getEmptyItemsArray();
-            $item['job_id'] = $node->attr['id'];
             $item['job_site'] = $this->siteName;
 
+            var_dump('HTML node for next job:');
+            dump_html_tree($node);
 
 
             $jobInfoNode = $node->firstChild()->firstChild();
@@ -90,6 +91,11 @@ class PluginIndeed extends ClassJobsSitePlugin
             if($item['job_title'] == '') continue;
 
             $item['job_post_url'] = 'http://www.indeed.com' . $jobInfoNode->href;
+
+            $arrURLParts = explode("jk=",  $item['job_post_url']);
+            $item['job_id'] = strScrub($arrURLParts[1]);
+
+
             $item['company'] = trim($node->find("span[class='company'] span")[0]->plaintext);
             $item['location'] =trim( $node->find("span[class='location'] span")[0]->plaintext);
             $item['date_pulled'] = $this->getTodayAsString();
