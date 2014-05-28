@@ -137,6 +137,75 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     abstract function parseTotalResultsCount($objSimpHTML); // returns a settings array
 
 
+    /**  NOT YET TESTED AND INTEGRATED
+    //
+    // Parses a relative date string such as "5 hrs ago" or "22 days ago"
+    // and returns a date string representing the actual date (i.e. "2014-05-15")
+    // the relative string represents.
+    function getDateFromRelativeDateString($strDaysPast, $fReturnNullForFailure = false)
+    {
+        $nRetNumber = null;
+        $strRetUnit = null;
+        $nRetDays = null;
+
+        //
+        // First, let's break the string into it's words
+        //
+        $arrDateStringWords = explode(" ", $strDaysPast);
+
+        if(count($arrDateStringWords) <= 1) return null; // we don't know enough to parse the value
+
+        // Let's see if the first item is numeric
+        if(is_string($arrDateStringWords[0]) && is_numeric($arrDateStringWords[0]))
+        {
+            $nRetNumber = floatval($arrDateStringWords[0]);
+
+            switch ($arrDateStringWords[1])
+            {
+                case "hrs":
+                case "hr":
+                case "hours":
+                case "hour":
+                $strRetUnit = "hours";
+                    $nRetDays = intceil($nRetNumber / 24);  // divide to get number of days and then round up
+                    break;
+
+                case "d":
+                case "days":
+                case "day":
+                $strRetUnit = "hours";
+                    $nRetDays = intceil($nRetNumber);  // divide to get number of days
+                    break;
+
+                default:
+                    return null;  // we don't know what this is so return null
+                    break;
+            }
+        }
+
+        if($strRetUnit != null && $strRetUnit != "")
+        {
+            $now = new DateTime();
+            $retDate = $now->sub(new DateInterval('P'.$nRetDays.'D')); // P1D means a period of 1 day
+            return $retDate->format('Y-m-d');
+        }
+
+        //
+        // If we were told to return null on failure, return null.
+        //
+        if($fReturnNullForFailure == true)
+        {
+            return null;
+        }
+
+        //
+        // Return the input string if we weren't told to return null on failure
+        //
+        return $strDaysPast;
+
+    }
+**/
+
     /**
      * TODO:  DOC
      *

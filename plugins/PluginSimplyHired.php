@@ -74,7 +74,6 @@ class PluginSimplyHired extends ClassJobsSitePlugin
 
         foreach($nodesJobs as $node)
         {
-            dump_html_tree($node);
             $item = parent::getEmptyItemsArray();
             $item['job_id'] = $node->attr['id'];
 
@@ -83,11 +82,17 @@ class PluginSimplyHired extends ClassJobsSitePlugin
 
             $item['job_post_url'] = 'http://www.simplyhired.com' . $node->find("a[class='title']")[0]->href;
 
+            $strURLAfterJobKey = str_replace("http://www.simplyhired.com/a/job-details/view/jobkey-", "", $item['job_post_url']);
+            $arrURLRemainingParts = explode("/",  $strURLAfterJobKey);
+            $item['job_id'] = str_replace(".", "", $arrURLRemainingParts[0]);
+
             // TODO[BUGBUG] the h4 for company name can sometimes be missing.  the value is incorrectly set if so.
             $item['company']= trim($node->find("h4[class='company']")[0]->plaintext);
             $item['location'] =trim($node->find("span[class='location']")[0]->plaintext);
             $item['date_pulled'] = $this->getTodayAsString();
             $item['job_site_date'] = $node->find("span[class='ago']")[0]->plaintext;
+//            $item['job_site_date'] = $this->getDateFromRelativeDateString(strScrub($node->find("span[class='ago']")[0]->plaintext));
+
 
             if($this->is_IncludeBrief() == true)
             {
@@ -95,8 +100,6 @@ class PluginSimplyHired extends ClassJobsSitePlugin
             }
             $item['job_site'] = $this->siteName;
 
-//            dump_html_tree($node);
-//            __debug__var_dump_exit__($item);
             $ret[] = $this->normalizeItem($item);
         }
 
