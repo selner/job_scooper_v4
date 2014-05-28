@@ -4,7 +4,7 @@ skipHTMLDownload=$2
 
 # get an output file name
 now=$(date +"%Y_%m_%d_%H%M")
-path="/Users/bryan/OneDrive/OneDrive-JobSearch/"
+path="/Users/bryan/Dropbox/JobSearch-and-Consulting/JobPosts-Tracking/"
 pathsrcfiles=$path"bryans_list_source_to_use/"
 dest=$path
 endfilename="_jobs.csv"
@@ -17,12 +17,18 @@ regextitlesfilename=$pathsrcfiles$endregextitlesname
 filename=$now$endfilename
 file=$path$filename
 log=$path$now$endlogname
+when="unknown"
+
+
+echo 'Starting run log:' $log 2>&1 1>"$log"
+open "$log"
+
 
 echo 'Output file will be ' $file 2>&1 1>"$log"
 echo 'Final destination will be ' $dest 2>&1 1>"$log"
 echo 'Log file is ' $log  2>&1 1>>"$log"
 
-when="unknown"
+
 
 # BUGBUG
 if [ "$skipHTMLDownload" != "skip" ]; then     ## GOOD
@@ -45,17 +51,17 @@ if [ "$skipHTMLDownload" != "skip" ]; then     ## GOOD
 	echo 'New jobs site download complete.' $log  2>&1 1>>"$log"
 fi
 
-case "$(date +%a)" in (Mon|Wed|Fri|Sat)
-
+case "$(date +%a)" in 
+Mon|Wed|Fri|Sat)
   when="noteveryday"
   script_flags=" -all " 
-
-esac
-
-case "$(date +%a)" in  Tue|Thu|Sat|Sun)
+;;
+Tue|Thu|Sat|Sun)
   when="everyday"
   script_flags=" -indeed -simplyhired "
+;;
 esac
+
 echo 'Running script case $when using the following flags:  '$script_flags 2>&1 1>>"$log"
 
 if [ "$override" == "all" ]; then     ## GOOD

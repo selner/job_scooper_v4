@@ -24,7 +24,7 @@ require_once dirname(__FILE__) . '/include/SitePlugins.php';
 /****************************************************************************************************************/
 
 const C_STR_DATAFOLDER = '/Users/bryan/Code/data/jobs/';
-const C_STR_FOLDER_JOBSEARCH = '/Users/bryan/OneDrive/OneDrive-JobSearch/';
+const C_STR_FOLDER_JOBSEARCH = '/Users/bryan/Dropbox/JobSearch-and-Consulting/JobPosts-Tracking/';
 
 
 
