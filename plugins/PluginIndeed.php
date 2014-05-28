@@ -82,8 +82,6 @@ class PluginIndeed extends ClassJobsSitePlugin
             $item = parent::getEmptyItemsArray();
             $item['job_site'] = $this->siteName;
 
-            var_dump('HTML node for next job:');
-            dump_html_tree($node);
 
 
             $jobInfoNode = $node->firstChild()->firstChild();
