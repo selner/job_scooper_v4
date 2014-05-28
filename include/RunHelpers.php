@@ -67,7 +67,6 @@ function __runCommandLine($arrSearches = null, $arrInputFiles = null)
 
 }
 
-
 function __runAllJobs__($arrSearches, $arrSourceFiles = null, $nDays = -1, $fIncludeFilteredJobsInResults = null)
 {
     $strOutputFolder = $GLOBALS['output_file_details']['directory'];
@@ -86,6 +85,15 @@ function __runAllJobs__($arrSearches, $arrSourceFiles = null, $nDays = -1, $fInc
         $strOutName = $classJobExportHelper_Main->getOutputFileFullPath("_runjobs_notnamed_");
     }
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Process the input CSVs of job listings that the user specified.
+    // The inactives get added to the full jobs list as the starting jobs
+    // The actives will get added at the end so they overwrite any jobs that
+    // were found again
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if($arrSourceFiles != null)
     {
         __debug__printLine(PHP_EOL."**************  Loading jobs from ". count($arrSourceFiles) ." user input source files **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
@@ -93,6 +101,11 @@ function __runAllJobs__($arrSearches, $arrSourceFiles = null, $nDays = -1, $fInc
         addJobsToJobsList($arrListAllJobsFromSearches, $classJobExportHelper_Main->getMyJobsList());
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Download all the job listings for all the users searches
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     __debug__printLine(PHP_EOL."**************  Adding jobs from " . count($arrSearches) . " searches ***************".PHP_EOL, C__DISPLAY_NORMAL__);
 
@@ -113,17 +126,37 @@ function __runAllJobs__($arrSearches, $arrSourceFiles = null, $nDays = -1, $fInc
 
     __debug__printLine(PHP_EOL."**************  " . count($arrListAllJobsFromSearches) . " job listings from all sources have been loaded.  **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Now we can update the full jobs list with the active jobs we loaded from the CSV at the start
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    if( $GLOBALS['active_jobs_from_input_source_files'] != null)
+    {
+        addJobsToJobsList($arrListAllJobsFromSearches, $GLOBALS['active_jobs_from_input_source_files']);
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Filter the full jobs list looking for duplicates, etc.
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     __debug__printLine(PHP_EOL."**************  Updating jobs list for known filters ***************".PHP_EOL, C__DISPLAY_NORMAL__);
     $classJobExportHelper_Main->markJobsList_withAutoItems($arrListAllJobsFromSearches, "");
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Output the full jobs list into a file and into files for different cuts at the jobs list data
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     __debug__printLine(PHP_EOL."**************  Writing final list of " . count($arrListAllJobsFromSearches) . " to filtered and all results files.  ***************  ".PHP_EOL, C__DISPLAY_NORMAL__);
     $class = null;
 
     // Write to the main output file name that the user passed in
     $classJobExportHelper_Main->writeJobsListToFile($strOutName, $arrListAllJobsFromSearches, $fIncludeFilteredJobsInResults);
-
-//    $strOutDetailsFilteredName = getFullPathFromFileDetails(parseFilePath($strOutName), "", "_filtered");
-//    $classJobExportHelper_Main->writeJobsListToFile($strOutDetailsFilteredName, $arrListAllJobsFromSearches, false);
 
 
     //

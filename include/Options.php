@@ -133,6 +133,15 @@ function __getPassedArgs__()
     $GLOBALS['company_role_pairs'] = null;
 
 
+    // These will be used at the beginning and end of
+    // job processing to filter out jobs we'd previous seen
+    // and to make sure our notes get updated on active jobs
+    // that we'd seen previously
+    //
+    $GLOBALS['active_jobs_from_input_source_files'] = null;
+    $GLOBALS['inactive_jobs_from_input_source_files'] = null;
+
+
     $GLOBALS['OPTS']['DEBUG'] = false;
     $GLOBALS['OPTS']['DEBUG'] = get_PharseOptionValue('use_debug');
     if($GLOBALS['OPTS']['DEBUG'] == true ) { $GLOBALS['VERBOSE'] = true; }

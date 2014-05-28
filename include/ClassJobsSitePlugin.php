@@ -64,6 +64,11 @@ function isMarked_InterestedOrBlank($var)
     return true;
 }
 
+function isMarked_NotInterestedAndNotBlank($var)
+{
+    return !(isMarked_InterestedEqualBlank($var));
+}
+
 function isMarked_ManuallyNotInterested($var)
 {
     if((substr_count($var['interested'], "No ") > 0) && isMarked_Auto($var) == false) return true;
@@ -153,7 +158,28 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
      */
     function loadMyJobsListFromCSVs($arrFilesToLoad)
     {
-        $this->arrLatestJobs = $this->loadJobsListFromCSVs($arrFilesToLoad);
+        $arrAllJobsLoadedFromSrc = $this->loadJobsListFromCSVs($arrFilesToLoad);
+
+
+        // These will be used at the beginning and end of
+        // job processing to filter out jobs we'd previous seen
+        // and to make sure our notes get updated on active jobs
+        // that we'd seen previously
+        //
+        //
+        // Set a global var with an array of all input cSV jobs marked new or not marked as excluded (aka "Yes" or "Maybe")
+        //
+        $GLOBALS['active_jobs_from_input_source_files'] = array_filter($arrAllJobsLoadedFromSrc, "isMarked_InterestedOrBlank");
+
+        //
+        // Set a global var with an array of all input CSV jobs that are not in the first set (aka marked Not Interested & Not Blank)
+        //
+        $GLOBALS['inactive_jobs_from_input_source_files'] = array_filter($arrAllJobsLoadedFromSrc, "isMarked_NotInterestedAndNotBlank");
+
+        //
+        // Initialize the run's jobs list with all the jobs we'd previously set as inactive.
+        //
+        $this->arrLatestJobs =  $GLOBALS['inactive_jobs_from_input_source_files'];
     }
 
 
