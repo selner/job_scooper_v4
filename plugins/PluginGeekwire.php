@@ -14,10 +14,81 @@
 * License for the specific language governing permissions and limitations
 * under the License.
  */
-require_once 'plugin-base.php';
-require_once 'common.php';
-require_once dirname(__FILE__) . './include/Options.php';
+require_once dirname(__FILE__) . '/../include/ClassJobsSitePlugin.php';
 
+
+
+
+
+class PluginGeekwire extends ClassJobsSitePlugin
+{
+    protected $siteName = 'Geekwire';
+    protected $siteBaseURL = 'http://www.geekwork.com//';
+
+
+    function getDaysURLValue($days)
+    {
+        // __debug__printLine($this->site_name . " Day Parsing Not Yet Implemented!", C__DISPLAY_WARNING__);
+        return "";
+    }
+
+
+    function parseTotalResultsCount($objSimpHTML)
+    {
+/*        $resultsSection= $objSimpHTML->find("us[class='job_listings']");
+        $strTotalItemsCount  = $resultsSection[0]->plaintext;
+        $strTotalItemsCount = strScrub($strTotalItemsCount);
+        return str_replace(",", "", $strTotalItemsCount);
+*/
+        return -1;
+    }
+
+    function parseJobsListForPage($objSimpHTML)
+    {
+        $ret = null;
+
+        dump_html_tree($objSimpHTML);
+        $nodesJobs = $objSimpHTML->find("ul[class='job_listings'] li");
+
+        $nCounter = -1;
+
+        foreach($nodesJobs as $node)
+        {
+            $nCounter += 1;
+            if($nCounter < 2)
+            {
+                continue;
+            }
+
+            $item = parent::getEmptyItemsArray();
+            $item['job_site'] = $this->siteName;
+
+            $item['job_title'] = $node->find("a h3")[0]->plaintext;
+            $item['job_post_url'] = $node->find("a")[0]->href;
+            if($item['job_title'] == '') continue;
+
+            $item['location'] = strScrub($node->find("div[class='location']")[0]->plaintext);
+
+            $item['company'] = strScrub($node->find("div[class='company'] span")[0]->plaintext);
+            $item['date_pulled'] = getTodayAsString();
+            $item['job_site_date'] = strScrub($node->find("li[class='date']")[0]->plaintext);
+            $item['job_site_category'] = strScrub($node->find("ul[class='meta'] li")[0]->plaintext);
+
+
+            $arrLIParts = explode(" ", $node->attr['class']);
+            $item['job_id'] = str_replace("post-", "", $arrLIParts[0]);
+
+            var_dump($item);
+            dump_html_tree($node);
+
+            $ret[] = $this->normalizeItem($item);
+
+        }
+exit();
+        return $ret;
+    }
+
+}
 /****************************************************************************************************************/
 /**************                                                                                                         ****/
 /**************          Helper Class:  Pulling the StartupLists from Geekwire                                          ****/
@@ -32,6 +103,7 @@ $test = new ClassGeekwire();
 
 //$results = $test->getSeattlePMJobsList("http://www.amazon.com/gp/jobs/ref=j_sr_pag_2_next?ie=UTF8&category=*&jobSearchKeywords=director%20product%20management&location=US%2C%20WA%2C%20Seattle&page=3");
 
+// http://www.geekwork.com/jobs/?type=full-time&search_location=Seattle&search_keywords=director
 
 class ClassGeekwire
 {
@@ -122,8 +194,9 @@ class ClassGeekwire
                 $ret[] = $this->normalizeItem($item);
             }
 
-            if(is_array($ret))            $classFileOut->writeArrayToCSVFilew
-
+/*            if(is_array($ret))
+                $classFileOut->writeArrayToCSVFilew
+*/
             // clean up memory
             $html->clear();
             unset($html);
