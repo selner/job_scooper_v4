@@ -90,7 +90,7 @@ class PluginLinkUp extends ClassJobsSitePlugin
             $item['location'] = trim($node->find("span[class='listing-location'] span")[0]->plaintext) . "-" .
                     trim($node->find("span[class='listing-location'] span")[1]->plaintext);
 
-            $item['date_pulled'] = $this->getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             if($this->is_IncludeBrief() == true)
             {

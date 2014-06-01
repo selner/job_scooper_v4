@@ -145,7 +145,7 @@ class PluginAmazon extends ClassJobsSitePlugin
                 $item['company'] = 'Amazon';
 
                 $item['job_site'] = 'Amazon';
-                $item['date_pulled'] = $this->getTodayAsString();
+                $item['date_pulled'] = getTodayAsString();
 
 //                $item['script_search_key'] = $arrSettings['name'];
 //                $item['job_source_url'] = $item['job_post_url'];
@@ -241,7 +241,7 @@ class PluginAmazon extends ClassJobsSitePlugin
             $item['company'] = 'Amazon';
 //             $item['original_source'] = 'Amazon';
             $item['job_site'] = 'Amazon';
-            $item['date_pulled'] = $this->getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
 
             if($this->is_IncludeBrief() == true)

@@ -25,14 +25,14 @@ const C__JOB_ITEMCOUNT_UNKNOWN__ = 11111;
 //
 // Jobs List Filter Functions
 //
-function isMarked_AutoDupe($var)
+function wasMarkedDuplicateAutomatically($var)
 {
     if(substr_count($var['interested'], C__STR_TAG_DULICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__) > 0) return true;
 
     return false;
 }
 
-function isMarked_Auto($var)
+function wasInterestedMarkedAutomatically($var)
 {
     $GLOBALS['CNT'][$var['interested']] +=1;
     if(substr_count($var['interested'], C__STR_TAG_AUTOMARKEDJOB__) > 0)
@@ -43,17 +43,23 @@ function isMarked_Auto($var)
     return false;
 }
 
-function isMarked_NotInterested($var)
+function isNewJobAddedToday($var)
 {
-    if(substr_count($var['interested'], "No ") > 0) return true;
-    return false;
+    return isMarkedInterested_IsBlank($var) && isJobPulledToday($var);
+}
+
+function isJobPulledToday($var)
+{
+    return (strcasecmp($var['date_pulled'], getTodayAsString()) == 0);
 }
 
 
-
-function isMarked_InterestedEqualBlank($var)
+function isMarkedInterested_IsBlank($var)
 {
-    if($var['interested'] == null || trim($var['interested']) =="") return true;
+    if($var['interested'] == null || trim($var['interested']) =="" || strlen(trim($var['interested']))==0)
+    {
+        return true;
+    }
     return false;
 }
 
@@ -64,37 +70,40 @@ function isMarked_InterestedOrBlank($var)
     return true;
 }
 
+// TODO: Test that isMarked_NotInterested() == isMarked_InterestedOrBlank().  They should match, no?
+function isMarked_NotInterested($var)
+{
+    if(substr_count($var['interested'], "No ") <= 0) return false;
+    return true;
+}
+
+
 function isMarked_NotInterestedAndNotBlank($var)
 {
-    return !(isMarked_InterestedEqualBlank($var));
+    return !(isMarkedInterested_IsBlank($var));
 }
 
 function isMarked_ManuallyNotInterested($var)
 {
-    if((substr_count($var['interested'], "No ") > 0) && isMarked_Auto($var) == false) return true;
+    if((substr_count($var['interested'], "No ") > 0) && wasInterestedMarkedAutomatically($var) == false) return true;
     return false;
 }
 
 function isJobAutoUpdatable($var)
 {
-    if(isMarked_InterestedEqualBlank($var) == true || (substr_count($var['interested'], "New") == 1) ) return true;
+    if(isMarkedInterested_IsBlank($var) == true || (substr_count($var['interested'], "New") == 1) ) return true;
 
     return false;
 }
 
-function isJobFilterable($var)
+function includeJobInFilteredList($var)
 {
     $filterYes = false;
 
-    if(isMarked_Auto($var) == true) $filterYes = true;
+    if(wasInterestedMarkedAutomatically($var) == true) $filterYes = true;
     if(isMarked_NotInterested($var) == true) $filterYes = true;
 
-    return $filterYes;
-}
-
-function includeJobInFilteredList($var)
-{
-    return !(isJobFilterable($var));
+    return !$filterYes;
 }
 
 
@@ -110,6 +119,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     function __construct($bitFlags = null, $strOutputDirectory = null)
     {
         $this->_bitFlags = $bitFlags;
+        if($strOutputDirectory == null)
+        {
+            $strOutputDirectory = $GLOBALS['output_file_details']['directory'];
+        }
         $this->setOutputFolder($strOutputDirectory);
     }
 
@@ -125,7 +138,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
             if($this->arrLatestJobs != null)
             {
-                $strDebugFileName = $this->getMyOutputFileFullPath("debug");
+                $strDebugFileName = $this->getMyOutputFileFullPath("DEBUG");
                 __debug__printLine("Writing ". $this->siteName." " .count($this->arrLatestJobs) ." job records to " . $strDebugFileName . " for debugging (if needed).", C__DISPLAY_ITEM_START__);
                 $this->writeMyJobsListToFile($strDebugFileName, false);
             }
@@ -414,7 +427,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
             $class = null;
             $nLastCount = count($this->arrLatestJobs);
-            __debug__printLine("Running ". $search['site_name'] . " search '" . $search['search_name'] ."'...", C__DISPLAY_ITEM_START__);
+            __debug__printLine("Running ". $search['site_name'] . " search '" . $search['search_name'] ."'...", C__DISPLAY_SECTION_START__);
 
             $strSite = strtolower($search['site_name']);
             if(strcasecmp($strSite, $this->siteName) == 0)

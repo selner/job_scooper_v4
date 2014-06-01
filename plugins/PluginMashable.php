@@ -85,7 +85,7 @@ class PluginMashable extends ClassJobsSitePlugin
             $item['company'] = $node->find("li[class='aiResultsCompanyName']")[0]->plaintext;
             $item['location'] = trim($node->find("span[class='aiResultsLocationSpan']")[0]->plaintext);
             $item['job_site_category'] = $node->find("div[class='aiDescriptionPod'] ul li[class='searchResultsCategoryDisplay']")[0]->plaintext;
-            $item['date_pulled'] = $this->getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
 
             $idClass = $node->find("div[class='aiResultsMainDiv']")[0];

@@ -88,7 +88,7 @@ class PluginGoogle extends ClassJobsSitePlugin
             $item['job_site_category'] = $node->find("a[class='greytext']")[0]->plaintext;
             $item['location'] = 'Seattle or Kirkland';
 
-            $item['date_pulled'] = $this->getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             $ret[] = $this->normalizeItem($item);
         }

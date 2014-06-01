@@ -112,7 +112,7 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
             $item['company'] = $node->find("a[class='prefCompany']")[0]->plaintext;
             $item['location'] = strScrub($node->find("div[class='jl_col4_div']")[0]->plaintext);
 
-            $item['date_pulled'] = $this->getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             if($this->is_IncludeBrief() == true)
             {

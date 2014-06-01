@@ -22,7 +22,7 @@ require_once dirname(__FILE__) . '/../include/ClassJobsSitePlugin.php';
 class PluginEbay extends ClassJobsSitePlugin
 {
     protected $siteName = 'eBay';
-    protected $siteBaseURL = 'http://http://jobs.ebaycareers.com/';
+    protected $siteBaseURL = 'http://jobs.ebaycareers.com/';
 
 
     function getDaysURLValue($days)
@@ -73,7 +73,7 @@ class PluginEbay extends ClassJobsSitePlugin
             $item['job_site_date'] = $dateNode[0]->plaintext;
 
             $item['company'] = $this->siteName;
-            $item['date_pulled'] = $this->getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
 
             $arrURLParts = explode("/",  $item['job_post_url']);

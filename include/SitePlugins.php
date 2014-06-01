@@ -17,8 +17,8 @@
 
 
 require_once dirname(__FILE__) . '/Options.php';
-require_once dirname(__FILE__) . '/RunHelpers.php';
 require_once dirname(__FILE__) . '/ClassMultiSiteSearch.php';
+require_once dirname(__FILE__) . '/ClassJobsRunWrapper.php';
 require_once dirname(__FILE__) . '/../plugins/PluginAmazon.php';
 require_once dirname(__FILE__) . '/../plugins/PluginCraigslist.php';
 require_once dirname(__FILE__) . '/../plugins/PluginIndeed.php';
@@ -38,6 +38,7 @@ require_once dirname(__FILE__) . '/../plugins/PluginGoogle.php';
 require_once dirname(__FILE__) . '/../plugins/PluginFacebook.php';
 require_once dirname(__FILE__) . '/../plugins/PluginEbay.php';
 require_once dirname(__FILE__) . '/../plugins/PluginGroupon.php';
+require_once dirname(__FILE__) . '/../plugins/PluginGeekwire.php';
 
 
 $GLOBALS['site_plugins'] = array(
@@ -60,6 +61,7 @@ $GLOBALS['site_plugins'] = array(
     'facebook' => array('name' => 'facebook', 'class_name' => 'PluginFacebook', 'include_in_run' => false),
     'ebay' => array('name' => 'ebay', 'class_name' => 'PluginEbay', 'include_in_run' => false),
     'groupon' => array('name' => 'groupon', 'class_name' => 'PluginGroupon', 'include_in_run' => false),
+    // 'geekwire' => array('name' => 'geekwire', 'class_name' => 'PluginGeekwire', 'include_in_run' => false),
 );
 
 ?>

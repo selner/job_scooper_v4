@@ -74,7 +74,7 @@ fi
 echo 'Downloading new jobs... ' 2>&1 1>>"$log"
 
 # Now process that data and export CSVs with the listings
-echo "Running php ../../scooper_utils/runJobs.php $script_flags -o '$file' -t '$titlesfilename' -tr '$regextitlesfilename'"  2>&1 1>>"$log"
+echo "Running php ../../scooper_utils/runJobs.php $script_flags -days 7 -o '$file' -t '$titlesfilename' -tr '$regextitlesfilename'"  2>&1 1>>"$log"
 php ../runJobs.php $script_flags -days 7 -o "$file" -t "$titlesfilename" -tr "$regextitlesfilename" 2>&1 1>>"$log"
 
 # cp "$file" "$dest"   2>&1 1>>"$log"

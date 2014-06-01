@@ -78,7 +78,7 @@ class PluginGroupon extends ClassJobsSitePlugin
 
 
             $item['company'] = $this->siteName;
-            $item['date_pulled'] = $this->getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
 
             $arrURLParts = explode("/",  $item['job_post_url']);

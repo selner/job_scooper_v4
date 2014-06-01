@@ -86,7 +86,7 @@ class PluginDisney extends ClassJobsSitePlugin
             $item['job_site_category'] = strScrub($node->find("td[class='column2'] div")[0]->plaintext);
             $item['location'] = strScrub($node->find("td[class='column3'] div span[class='bold-text']")[0]->plaintext);
 
-            $item['date_pulled'] = $this->getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             $item['job_site_date'] = $node->find("td[class='column4']")[0]->plaintext;
 

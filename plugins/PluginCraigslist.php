@@ -73,7 +73,7 @@ class PluginCraigslist  extends ClassJobsSitePlugin
             if($item['job_title'] == '') continue;
 
             $item['job_post_url'] = 'http://seattle.craigslist.org'.$jobTitleLink[0]->href;
-            $item['date_pulled'] = $this->getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             $item['job_site'] = "Craigslist";
             $item['job_id'] = $node->attr['data-pid'];

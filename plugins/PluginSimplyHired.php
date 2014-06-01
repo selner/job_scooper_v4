@@ -89,7 +89,7 @@ class PluginSimplyHired extends ClassJobsSitePlugin
             // TODO[BUGBUG] the h4 for company name can sometimes be missing.  the value is incorrectly set if so.
             $item['company']= trim($node->find("h4[class='company']")[0]->plaintext);
             $item['location'] =trim($node->find("span[class='location']")[0]->plaintext);
-            $item['date_pulled'] = $this->getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
             $item['job_site_date'] = $node->find("span[class='ago']")[0]->plaintext;
 //            $item['job_site_date'] = $this->getDateFromRelativeDateString(strScrub($node->find("span[class='ago']")[0]->plaintext));
 

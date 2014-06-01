@@ -26,7 +26,31 @@ require_once dirname(__FILE__) . '/include/SitePlugins.php';
 const C_STR_DATAFOLDER = '/Users/bryan/Code/data/jobs/';
 const C_STR_FOLDER_JOBSEARCH = '/Users/bryan/Dropbox/JobSearch-and-Consulting/JobPosts-Tracking/';
 
+function debug_GetStaticSiteSearchesOnly($arrSearches)
+{
+    $arrRet = array();
 
+    foreach($arrSearches as $search )
+    {
+        switch($search['site_name'])
+        {
+            case "Groupon":
+            case "Outerwall":
+            case "Porch":
+            case "Expedia":
+            case "eBay":
+                $arrRet[] = $search;
+                break;
+
+            default:
+                break;
+        }
+
+    }
+
+    return $arrRet;
+
+}
 
 $arrBryanSearches = array(
     array('site_name' => 'Groupon', 'search_name' => "all seattle jobs", 'base_url_format' => "https://jobs.groupon.com/careers/seattle-wa-united-states"),
@@ -51,13 +75,18 @@ $arrBryanSearches = array(
     array('site_name' => 'CareerBuilder', 'search_name' => "director", 'base_url_format' => "http://www.careerbuilder.com/jobseeker/jobs/jobresults.aspx?qb=1&SB%3Asbkw=director&SB%3As_freeloc=SEATTLE%2C+WA&SB%3Asbfr=***NUMBER_DAYS***&sbsbmt=Find+Jobs&IPath=ILKGV&excrit=freeLoc%3DSEATTLE%2C+WA%3Bst%3DA%3Buse%3DALL%3BrawWords%3Ddirector%3BTID%3D0%3BCTY%3DSeattle%3BSID%3DWA%3BCID%3DUS%3BLOCCID%3DUS%3BENR%3DNO%3BDTP%3DDRNS%3BYDI%3DYES%3BIND%3DALL%3BPDQ%3DAll%3BPDQ%3DAll%3BPAYL%3D0%3BPAYH%3DGT120%3BPOY%3DNO%3BETD%3DJTFT%3BRE%3DALL%3BMGT%3DDC%3BSUP%3DDC%3BFRE%3D3%3BCHL%3DAL%3BQS%3DADVSEARCHFRM%3BSS%3DNO%3BTITL%3D0%3BOB%3D-relv%3BRAD%3D30%3BJQT%3DRAD%3BJDV%3DFalse%3BSITEENT%3DUSJOB%3BMaxLowExp%3D-1%3BRecsPerPage%3D25&cid=US&pg=***PAGE_NUMBER***&IPath=ILKGV"),
     array('site_name' => 'CareerBuilder', 'search_name' => "vice president", 'base_url_format' => "http://www.careerbuilder.com/jobseeker/jobs/jobresults.aspx?as%3AMXJobSrchCriteria_JobQueryType=RAD&as%3Ach=al&as%3AMXJobSrchCriteria_QuerySrc=AdvSearchFrm&as%3AIPath=QA&qb=1&as%3As_rawwords=vice+president&as%3As_use=ALL&as%3As_freeloc=SEATTLE%2C+WA&as%3As_freeloc=&as%3As_freeloc=&as%3As_radius=30&as%3As_freshness=***NUMBER_DAYS****&as%3AMXJOBSRCHCRITERIA_Industries=&as%3As_jobtypes=ALL&as%3As_jobtypes=ALL&as%3As_jobtypes=ALL&as%3As_education=DRNS&as%3As_includelowereducationvalues=YES&s_includelowereducationvalues_hidden=&as%3As_emptype=JTFT&as%3As_paylow=0&as%3As_payhigh=gt120&as%3Aexkw=&as%3Aexjl=&as%3Aexcn=&pg=***PAGE_NUMBER***&SearchBtn=Find+Jobs"),
     array('site_name' => 'CareerBuilder', 'search_name' => "director product", 'base_url_format' => "http://www.careerbuilder.com/jobseeker/jobs/jobresults.aspx?qb=1&SB%3Asbkw=director+product&SB%3As_freeloc=seattle%2C+wa&SB%3Asbfr=***NUMBER_DAYS***&sbsbmt=Find+Jobs&IPath=QAKVGV&excrit=freeLoc%3Dseattle%2C+wa%3Bst%3DA%3Buse%3DALL%3BrawWords%3Ddirector+product%3BTID%3D0%3BCTY%3DSeattle%3BSID%3DWA%3BCID%3DUS%3BLOCCID%3DUS%3BENR%3DYES%3BDTP%3DDRNS%3BYDI%3DYES%3BIND%3DALL%3BPDQ%3DAll%3BPDQ%3DAll%3BPAYL%3D0%3BPAYH%3DGT120%3BPOY%3DNO%3BETD%3DJTFT%3BETD%3DJTCT%3BRE%3DALL%3BMGT%3DDC%3BSUP%3DDC%3BFRE%3D7%3BCHL%3DAL%3BQS%3DADVSEARCHFRM%3BSS%3DNO%3BTITL%3D0%3BOB%3D-relv%3BRAD%3D20%3BJQT%3DRAD%3BJDV%3DFalse%3BSITEENT%3DUSJOB%3BMaxLowExp%3D-1%3BRecsPerPage%3D25&cid=US&pg=***PAGE_NUMBER***&findjob=sb"),
-    array('site_name' => 'Mashable', 'search_name' => "director", 'base_url_format' => "http://jobs.mashable.com/jobs/results/keyword/director?kwsJobTitleOnly=true&location=Seattle%2C+Washington%2C+United+States&radius=25&view=List_Detail&page=***PAGE_NUMBER***&sort=PostType+asc%2C+PostDate+desc%2C+IsFeatured+desc&rows=50&modifiedDate=***NUMBER_DAYS***&SearchNetworks=US&networkView=national"),
-    array('site_name' => 'Mashable', 'search_name' => "vice president", 'base_url_format' => "http://jobs.mashable.com/jobs/results/keyword/vice-president?kwsJobTitleOnly=true&location=Seattle%2C+Washington%2C+United+States&radius=25&view=List_Detail&page=***PAGE_NUMBER***&sort=PostType+asc%2C+PostDate+desc%2C+IsFeatured+desc&rows=50&modifiedDate=***NUMBER_DAYS***&SearchNetworks=US&networkView=national"),
-    array('site_name' => 'Mashable', 'search_name' => "senior-manager", 'base_url_format' => "http://jobs.mashable.com/jobs/results/keyword/senior-manager?kwsJobTitleOnly=true&location=Seattle%2C+Washington%2C+United+States&radius=25&view=List_Detail&page=***PAGE_NUMBER***&sort=PostType+asc%2C+PostDate+desc%2C+IsFeatured+desc&rows=50&modifiedDate=***NUMBER_DAYS***&SearchNetworks=US&networkView=national"),
+    array('site_name' => 'Mashable', 'search_name' => "senior manager", 'base_url_format' => "http://jobs.mashable.com/jobs/results/keyword/senior-manager?kwsJobTitleOnly=true&location=Seattle%2C+Washington%2C+United+States&radius=25&view=List_Detail&page=***PAGE_NUMBER***&sort=PostType+asc%2C+PostDate+desc%2C+IsFeatured+desc&rows=50&modifiedDate=***NUMBER_DAYS***"),
+    array('site_name' => 'Mashable', 'search_name' => "vice president", 'base_url_format' => "http://jobs.mashable.com/jobs/results/keyword/vice-president?kwsJobTitleOnly=true&location=Seattle%2C+Washington%2C+United+States&radius=25&view=List_Detail&page=***PAGE_NUMBER***&sort=PostType+asc%2C+PostDate+desc%2C+IsFeatured+desc&rows=50&modifiedDate=***NUMBER_DAYS***"),
+    array('site_name' => 'Mashable', 'search_name' => "director", 'base_url_format' => "http://jobs.mashable.com/jobs/results/keyword/director?kwsJobTitleOnly=true&location=Seattle%2C+Washington%2C+United+States&radius=25&view=List_Detail&page=***PAGE_NUMBER***&sort=PostType+asc%2C+PostDate+desc%2C+IsFeatured+desc&rows=50&modifiedDate=***NUMBER_DAYS***"),
+    array('site_name' => 'Mashable', 'search_name' => "product", 'base_url_format' => "http://jobs.mashable.com/jobs/results/keyword/product?kwsJobTitleOnly=true&location=Seattle%2C+Washington%2C+United+States&radius=25&view=List_Detail&page=***PAGE_NUMBER***&sort=PostType+asc%2C+PostDate+desc%2C+IsFeatured+desc&rows=50&modifiedDate=***NUMBER_DAYS***"),
     array('site_name' => 'Craigslist', 'search_name' => "exec titles", 'base_url_format' => "http://seattle.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=%22Vice%20President%22%20%7C%20%22Chief%20Technology%20Office%22%20%7C%20%22Chief%20Products%20Officer%22%20%7C%20%22CTO%22%20%7C%20%22CPO%22%20%7C%20%22VP%22%20%7C%20%22V.P.%22%20%7C%20%22Director%22%20%7C%20%20%22product%20management%22%20%7C%20%22general%20manager%22%20&srchType=T"),
     array('site_name' => 'Craigslist', 'search_name' => "exec titles", 'base_url_format' => "http://seattle.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=%22Vice%20President%22%20%7C%20%22Chief%20Technology%20Office%22%20%7C%20%22Chief%20Products%20Officer%22%20%7C%20%22CTO%22%20%7C%20%22CPO%22%20%7C%20%22VP%22%20%7C%20%22V.P.%22%20%7C%20%22Director%22%20%7C%20%20%22product%20management%22%20%7C%20%22general%20manager%22%20&srchType=T"),
     array('site_name' => 'Google', 'search_name' => "all Seattle/Kirkland jobs", 'base_url_format' => "https://www.google.com/about/careers/search/#t=sq&q=j&***ITEM_NUMBER***&jl=47.6062095%253A-122.3320708%253ASeattle%252C+WA%252C+USA%253Anull%253Aundefined%253A9.903894146066163%253ALOCALITY&jl=47.6814875%253A-122.2087353%253AKirkland%252C+WA%252C+USA%253Anull%253Aundefined%253A5.173281946960293%253ALOCALITY&"),
     array('site_name' => 'eBay', 'search_name' => "all WA jobs", 'base_url_format' => "http://jobs.ebaycareers.com/search/advanced-search/ASCategory/-1/ASPostedDate/-1/ASCountry/-1/ASState/Washington/ASCity/-1/ASLocation/-1/ASCompanyName/-1/ASCustom1/-1/ASCustom2/-1/ASCustom3/-1/ASCustom4/-1/ASCustom5/-1/ASIsRadius/false/ASCityStateZipcode/-1/ASDistance/-1/ASLatitude/-1/ASLongitude/-1/ASDistanceType/-1"),
+//    array('site_name' => 'Geekwire', 'search_name' => "director in WA", 'base_url_format' => "http://www.geekwork.com/jobs/?type=full-time&search_location=WA&search_keywords=director"),
+
+
+//
 
 
 //    array('site_name' => 'Verizon', 'search_name' => "all WA jobs", 'base_url_format' => "http://www.verizon.com/jobs/verizon/search-jobs/Washington-jobs-2?refineSearchViewAll=Y"),
@@ -88,6 +117,11 @@ $arrBryanTrackingFiles = array(
 );
 
 
-__runCommandLine($arrBryanSearches, $arrBryanTrackingFiles);
+
+$classRunJobs = new ClassJobsRunWrapper($arrBryanSearches, $arrBryanTrackingFiles, $GLOBALS['OPTS']['number_days']);
+$classRunJobs->RunAll();
+
+//__runCommandLine($arrBryanSearches, $arrBryanTrackingFiles);
+//   __runAllJobs__($arrSearches, $arrInputFiles , $nDays, $fIncludeFilteredListings  );
 
 ?>

@@ -96,7 +96,7 @@ class PluginIndeed extends ClassJobsSitePlugin
 
             $item['company'] = trim($node->find("span[class='company'] span")[0]->plaintext);
             $item['location'] =trim( $node->find("span[class='location'] span")[0]->plaintext);
-            $item['date_pulled'] = $this->getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
             $item['job_site_date'] = $node->find("span[class='date']")[0]->plaintext;
 
             if($this->is_IncludeBrief() == true)

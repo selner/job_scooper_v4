@@ -18,7 +18,30 @@
 // If installed as part of the package, uses Klogger v0.1 version (http://codefury.net/projects/klogger/)
 //
 
-require_once dirname(__FILE__) . '/RunHelpers.php';
+require_once dirname(__FILE__) . '/../lib/pharse.php';
+
+if ( file_exists ( dirname(__FILE__) . '/../lib/KLogger.php') )
+{
+    define(C_USE_KLOGGER, 1);
+    require_once dirname(__FILE__) . '/../lib/KLogger.php';
+
+}
+else
+{
+    print "Could not find KLogger file: ". dirname(__FILE__) . '/../lib/KLogger.php'.PHP_EOL;
+    define(C_USE_KLOGGER, 0);
+}
+require_once dirname(__FILE__) . '/../scooper_common/common.php';
+require_once dirname(__FILE__) . '/../lib/simple_html_dom.php';
+
+date_default_timezone_set("America/Los_Angeles");
+
+const C_NORMAL = 0;
+const C_EXCLUDE_BRIEF = 1;
+const C_EXCLUDE_GETTING_ACTUAL_URL = 3;
+
+const C__STR_TAG_AUTOMARKEDJOB__ = "[auto-marked]";
+const C__STR_TAG_DULICATE_POST__ = "No (Duplicate Job Post?)";
 
 function __initializeArgs__()
 {
@@ -112,7 +135,6 @@ function __getPassedArgs__()
         $GLOBALS['site_plugins'][$site['name']]['include_in_run'] = $fIsIncludedInRun;
     }
 
-    var_dump('$fIsIncludedInRun', $fIsIncludedInRun);
     var_dump('plugins', $GLOBALS['site_plugins']);
     var_dump('plugins', $GLOBALS['OPTS']);
 

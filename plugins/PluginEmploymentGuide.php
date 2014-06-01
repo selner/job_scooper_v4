@@ -92,7 +92,7 @@ class PluginEmploymentGuide extends ClassJobsSitePlugin
 
             $item['job_site_category'] = strScrub($node->find("td[class='column2'] div")[0]->plaintext);
 
-            $item['date_pulled'] = $this->getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             $item['job_site_date'] = $node->find("div[class='datePosted']")[0]->plaintext . '-'.$node->find("div[class='datePosted'] span[class='dateNum']")[0]->plaintext;;
 

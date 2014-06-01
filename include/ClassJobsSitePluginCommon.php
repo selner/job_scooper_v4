@@ -16,8 +16,6 @@
  */
 require_once dirname(__FILE__) . '/../include/Options.php';
 
-const C__STR_TAG_AUTOMARKEDJOB__ = "[auto-marked]";
-const C__STR_TAG_DULICATE_POST__ = "No (Duplicate Job Post?)";
 /**
  * TODO:  DOC
  *
@@ -114,7 +112,8 @@ class ClassJobsSitePluginCommon
         $this->_bitFlags = $bitFlags;
     }
 
-     function getMyBitFlags() { return $this->_bitFlags; }
+    function getMyBitFlags() { return $this->_bitFlags; }
+    function setMyBitFlags($bitFlags) { $this->_bitFlags = $bitFlags; }
 
     /**
      * TODO:  DOC
@@ -234,10 +233,6 @@ class ClassJobsSitePluginCommon
     }
 
 
-     function getTodayAsString()
-    {
-        return date("Y-m-d");
-    }
 
 
 
@@ -472,7 +467,7 @@ class ClassJobsSitePluginCommon
                 $match = true;
                 var_dump('Lookup Key', $arrPrevMatchJob['lookup_value']);
 */
-                if(!isMarked_InterestedEqualBlank($arrToMark[$strThisJobKey ]))
+                if(!isMarkedInterested_IsBlank($arrToMark[$strThisJobKey ]))
                 {
 
                     $arrToMark[$strEarlierMatchJobKey]['interested'] =  C__STR_TAG_DULICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__;
@@ -714,7 +709,7 @@ class ClassJobsSitePluginCommon
 
         $classCombined = new SimpleScooterCSVFileClass($strOutFilePath , "w");
         $classCombined->writeArrayToCSVFile($arrJobsRecordsToUse, array_keys($this->getEmptyItemsArray()), $this->arrKeysForDeduping);
-        __debug__printLine($strCallerDescriptor . ($strCallerDescriptor  != "" ? " jobs" : "Jobs ") ." list had  ". count($arrJobsRecordsToUse) . " jobs and was written to " . $strOutFilePath , C__DISPLAY_ITEM_START__);
+        __debug__printLine($strCallerDescriptor . ($strCallerDescriptor  != "" ? " jobs" : "Jobs") ." list had  ". count($arrJobsRecordsToUse) . " jobs and was written to " . $strOutFilePath , C__DISPLAY_ITEM_START__);
 
         return $strOutFilePath;
 

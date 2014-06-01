@@ -77,7 +77,10 @@ const C__API_RETURN_TYPE_OBJECT__ = 33;
 const C__API_RETURN_TYPE_ARRAY__ = 44;
 
 
-
+function getTodayAsString()
+{
+    return date("Y-m-d");
+}
 
 
 /****************************************************************************************************************/
@@ -231,7 +234,8 @@ function parseFilePath($strFilePath, $fFileMustExist = false)
 
     // Make sure the directory part ends with a slash always
     $strDir = $arrReturnFileDetails['directory'];
-    if((strlen($strDir) > 1) && $strDir[strlen($strDir)-1] != "/")
+
+    if((strlen($strDir) >= 1) && $strDir[strlen($strDir)-1] != "/")
     {
         $arrReturnFileDetails['directory'] = $arrReturnFileDetails['directory'] . "/";
     }

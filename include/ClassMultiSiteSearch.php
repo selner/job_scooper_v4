@@ -66,7 +66,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
             }
 
             $class = null;
-            __debug__printLine("Running ". $search['site_name'] . " search '" . $search['search_name'], C__DISPLAY_ITEM_START__);
+            __debug__printLine("Running ". $search['site_name'] . " search: '" . $search['search_name']."'", C__DISPLAY_SECTION_START__);
 
             $strSite = strtolower($search['site_name']);
             $strSiteClass = $GLOBALS['site_plugins'][$strSite]['class_name'];
