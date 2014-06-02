@@ -112,8 +112,7 @@ $arrMichaelSearches= array(
 $arrBryanTrackingFiles = array(
     C_STR_FOLDER_JOBSEARCH . 'bryans_list_source_to_use/bryans_list_active.csv',
     C_STR_FOLDER_JOBSEARCH . 'bryans_list_source_to_use/bryans_list_inactive.csv',
-    C_STR_FOLDER_JOBSEARCH . 'bryans_list_source_to_use/bryans_list_inactives_pre_2014_04_18.csv',
-    C_STR_FOLDER_JOBSEARCH . 'bryans_list_source_to_use/bryans_list_inactives_pre_2014_05_12.csv',
+    //C_STR_FOLDER_JOBSEARCH . 'bryans_list_source_to_use/bryans_list_inactives_before_jun_1_2014.csv',
 );
 
 
