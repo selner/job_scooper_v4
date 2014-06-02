@@ -67,7 +67,12 @@ class ClassJobsRunWrapper extends ClassJobsSitePluginNoActualSite
     private function loadUserInputJobsFromCSV()
     {
         $arrAllJobsLoadedFromSrc = $this->loadJobsListFromCSVs($this->arrSourceFiles);
-
+        $this->normalizeJobList($arrAllJobsLoadedFromSrc);
+        if($GLOBALS['OPTS']['DEBUG'] == true)
+        {
+            $strCSVInputJobsPath = getFullPathFromFileDetails($this->detailsOutputFile, "", "_Jobs_From_UserInput");
+            $this->writeJobsListToFile($strCSVInputJobsPath, $arrAllJobsLoadedFromSrc, true, false, "ClassJobRunner-LoadCSVs");
+        }
 
         // These will be used at the beginning and end of
         // job processing to filter out jobs we'd previous seen
@@ -246,7 +251,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePluginNoActualSite
         //
         // Output all job records and their values
         //
-        $strOutDetailsAllResultsName = getFullPathFromFileDetails($this->detailsOutputFile, "", "_alljobs");
+        $strOutDetailsAllResultsName = getFullPathFromFileDetails($this->detailsOutputFile, "", "_AllJobs");
         $this->writeJobsListToFile($strOutDetailsAllResultsName, $this->arrLatestJobs, "ClassJobsRunWrapper-AllJobs");
 
         //
@@ -256,25 +261,25 @@ class ClassJobsRunWrapper extends ClassJobsSitePluginNoActualSite
 
 
         // Output only records that are new or not marked as excluded (aka "Yes" or "Maybe")
-        $arrJobs_Active = $this->outputFilteredJobsListToCSV("isMarked_InterestedOrBlank", "_AllActiveJobs");
+        $arrJobs_Active = $this->outputFilteredJobsListToCSV("isMarked_InterestedOrBlank", "_ActiveJobs");
+        $arrJobs_Active = $this->outputFilteredJobsListToCSV("isJobUpdatedToday", "_UpdatedJobs");
 
         // Output only new records that haven't been looked at yet
-//        $arrJobs_NewOnly = $this->outputFilteredJobsListToCSV("isMarkedInterested_IsBlank", "_NewAndUnreviewedJobs");
-        $arrJobs_NewOnly = $this->outputFilteredJobsListToCSV("isNewJobAddedToday", "_NewJobsOnly");
-
-        // Output only records that were auto-marked as duplicates
-        $arrJobs_AutoDupe = $this->outputFilteredJobsListToCSV("wasMarkedDuplicateAutomatically", "_AutoDupedJobs");
+        $arrJobs_NewOnly = $this->outputFilteredJobsListToCSV("isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview");
 
         // Output all records that were automatically excluded
-        $arrJobs_AutoExcluded = $this->outputFilteredJobsListToCSV("wasInterestedMarkedAutomatically", "_AutoExcludedJobs");
+        $arrJobs_AutoExcluded = $this->outputFilteredJobsListToCSV("isMarked_NotInterested", "_ExcludedJobs");
 
+        // Output only records that were auto-marked as duplicates
+        // $arrJobs_AutoDupe = $this->outputFilteredJobsListToCSV("isInterested_MarkedDuplicateAutomatically", "_AutoDuped");
+        // $arrJobs_NewButFiltered = $this->outputFilteredJobsListToCSV("isNewJobToday_Interested_IsNo", "_NewJobs_AutoExcluded");
         // Output all records that were previously marked excluded manually by the user
-        $arrJobs_ManualExcl = $this->outputFilteredJobsListToCSV("isMarked_ManuallyNotInterested", "_ManuallyExcludedJobs");
+        // $arrJobs_ManualExcl = $this->outputFilteredJobsListToCSV("isMarked_ManuallyNotInterested", "_ManuallyExcludedJobs");
 
         __debug__printLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
 
 
-        __debug__printLine("Total jobs downloaded:  ".count($this->arrLatestJobs_UnfilteredByUserInput). PHP_EOL. "Total jobs:  ".count($this->arrLatestJobs). PHP_EOL."New: ". count($arrJobs_NewOnly).PHP_EOL."Active: ". count($arrJobs_Active)  . PHP_EOL. "Auto-Filtered: ".count($arrJobs_AutoExcluded). PHP_EOL."Dupes: ".count($arrJobs_AutoDupe) , C__DISPLAY_SUMMARY__);
+        __debug__printLine("Total jobs downloaded:  ".count($this->arrLatestJobs_UnfilteredByUserInput). PHP_EOL. "Total jobs:  ".count($this->arrLatestJobs). PHP_EOL."New: ". count($arrJobs_NewOnly) . " jobs for review. " .count($arrJobs_NewButFiltered). " jobs were auto-filtered.".PHP_EOL."Active: ". count($arrJobs_Active)  . PHP_EOL. "Auto-Filtered: ".count($arrJobs_AutoExcluded). PHP_EOL."Dupes: ".count($arrJobs_AutoDupe) , C__DISPLAY_SUMMARY__);
 
     }
 } 
