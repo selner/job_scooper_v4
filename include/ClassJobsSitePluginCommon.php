@@ -551,7 +551,7 @@ class ClassJobsSitePluginCommon
 
                 foreach($GLOBALS['titles_regex_to_filter'] as $rxInput )
                 {
-                    if(preg_match($rxInput, strtolower($job['job_title'])))
+                    if(preg_match($rxInput, strScrub($job['job_title'], DEFAULT_SCRUB)))
                     {
                         $strJobIndex = getArrayKeyValueForJob($job);
                         $arrToMark[$strJobIndex]['interested'] = 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__;
