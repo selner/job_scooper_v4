@@ -68,7 +68,7 @@ class PluginDisney extends ClassJobsSitePlugin
                 continue;
             }
 */
-            $item = parent::getEmptyItemsArray();
+            $item = parent::getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
             $item['company'] = $this->siteName;
 
@@ -83,8 +83,8 @@ class PluginDisney extends ClassJobsSitePlugin
             $item['job_id'] = explode("jobid=", $item['job_post_url'])[1];
 
 
-            $item['job_site_category'] = strScrub($node->find("td[class='column2'] div")[0]->plaintext);
-            $item['location'] = strScrub($node->find("td[class='column3'] div span[class='bold-text']")[0]->plaintext);
+            $item['job_site_category'] = $node->find("td[class='column2'] div")[0]->plaintext;
+            $item['location'] = $node->find("td[class='column3'] div span[class='bold-text']")[0]->plaintext;
 
             $item['date_pulled'] = getTodayAsString();
 

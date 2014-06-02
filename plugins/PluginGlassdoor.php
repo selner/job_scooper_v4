@@ -102,7 +102,7 @@ class PluginGlassdoor extends ClassJobsSitePlugin
 
         foreach($nodesJobs as $node)
         {
-            $item = parent::getEmptyItemsArray();
+            $item = parent::getEmptyJobListingRecord();
 
             $jobLink = $node->find("a[class='jobLink']")[1];
             $item['job_title'] = combineTextAllChildren($jobLink);

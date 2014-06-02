@@ -54,7 +54,7 @@ class PluginFacebook extends ClassJobsSitePlugin
         foreach($nodesJobs as $node)
         {
 
-            $item = parent::getEmptyItemsArray();
+            $item = parent::getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
             $item['company'] = $this->siteName;
             $item['job_title'] = $node->find("li span a")[0]->plaintext;

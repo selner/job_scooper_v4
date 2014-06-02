@@ -62,7 +62,7 @@ class PluginGroupon extends ClassJobsSitePlugin
                 continue;
             }
 
-            $item = parent::getEmptyItemsArray();
+            $item = parent::getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
 
             $titleNode = $node->firstChild();

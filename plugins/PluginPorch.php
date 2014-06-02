@@ -46,7 +46,7 @@ class PluginPorch extends ClassJobsSitePlugin
 
         foreach($nodesJobs as $node)
         {
-            $item = parent::getEmptyItemsArray();
+            $item = parent::getEmptyJobListingRecord();
             $item['company'] = 'Porch';
             $item['job_site'] = $item['company'];
 

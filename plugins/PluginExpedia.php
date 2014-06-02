@@ -71,7 +71,7 @@ class PluginExpedia extends ClassJobsSitePlugin
 
         foreach($nodesJobs as $node)
         {
-            $item = parent::getEmptyItemsArray();
+            $item = parent::getEmptyJobListingRecord();
             $item['company'] = 'Expedia';
             $item['job_site'] = $item['company'];
 

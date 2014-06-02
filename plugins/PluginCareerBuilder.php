@@ -87,7 +87,7 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
                 continue;
             }
 
-            $item = parent::getEmptyItemsArray();
+            $item = parent::getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
 
             $titleLink = $node->find("a[class='jt']");

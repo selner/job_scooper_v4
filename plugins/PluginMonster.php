@@ -79,7 +79,7 @@ class PluginMonster extends ClassJobsSitePlugin
             {
                     continue;
             }
-            $item = parent::getEmptyItemsArray();
+            $item = parent::getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
 
             $titleLink = $node->find("div div a")[0];

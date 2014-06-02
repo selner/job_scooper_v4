@@ -77,7 +77,7 @@ class PluginEmploymentGuide extends ClassJobsSitePlugin
                             continue;
                         }
             */
-            $item = parent::getEmptyItemsArray();
+            $item = parent::getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
             $item['job_post_url']  = $node->href;
             $item['job_id'] = explode("JobID=", $item['job_post_url'])[1];
@@ -86,11 +86,11 @@ class PluginEmploymentGuide extends ClassJobsSitePlugin
             //          if($item['job_title'] == '') continue;
 
 
-            $item['company'] = strScrub($node->find("div[class='jobInfo'] span[class='companyName']")[0]->plaintext, DEFAULT_SCRUB | REMOVE_EXTRA_WHITESPACE);
-            $item['location'] = strScrub($node->find("div[class='jobInfo'] span[class='location'] span")[0]->plaintext, DEFAULT_SCRUB | REMOVE_EXTRA_WHITESPACE);
+            $item['company'] = $node->find("div[class='jobInfo'] span[class='companyName']")[0]->plaintext;
+            $item['location'] = $node->find("div[class='jobInfo'] span[class='location'] span")[0]->plaintext;
 
 
-            $item['job_site_category'] = strScrub($node->find("td[class='column2'] div")[0]->plaintext);
+            $item['job_site_category'] = $node->find("td[class='column2'] div")[0]->plaintext;
 
             $item['date_pulled'] = getTodayAsString();
 

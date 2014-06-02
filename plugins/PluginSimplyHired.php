@@ -74,7 +74,7 @@ class PluginSimplyHired extends ClassJobsSitePlugin
 
         foreach($nodesJobs as $node)
         {
-            $item = parent::getEmptyItemsArray();
+            $item = parent::getEmptyJobListingRecord();
             $item['job_id'] = $node->attr['id'];
 
             $item['job_title'] = $node->find("a[class='title']")[0]->plaintext;
@@ -85,6 +85,7 @@ class PluginSimplyHired extends ClassJobsSitePlugin
             $strURLAfterJobKey = str_replace("http://www.simplyhired.com/a/job-details/view/jobkey-", "", $item['job_post_url']);
             $arrURLRemainingParts = explode("/",  $strURLAfterJobKey);
             $item['job_id'] = str_replace(".", "", $arrURLRemainingParts[0]);
+            $item['job_id'] = strScrub($item['job_id'], REPLACE_SPACES_WITH_HYPHENS);
 
             // TODO[BUGBUG] the h4 for company name can sometimes be missing.  the value is incorrectly set if so.
             $item['company']= trim($node->find("h4[class='company']")[0]->plaintext);

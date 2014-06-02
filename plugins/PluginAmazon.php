@@ -135,7 +135,7 @@ class PluginAmazon extends ClassJobsSitePlugin
         {
             if($nodesTD[$nTDIndex])
             {
-                $item = $this->getEmptyItemsArray();
+                $item = $this->getEmptyJobListingRecord();
 
                 $titleObj = $nodesTD[$nTDIndex]->nextSibling();
 
@@ -227,7 +227,7 @@ class PluginAmazon extends ClassJobsSitePlugin
         $nodesTR = $resultsDiv->find('tr');
         foreach($nodesTR as $firstPart)
         {
-            $item = $this->getEmptyItemsArray();
+            $item = $this->getEmptyJobListingRecord();
             $item['job_title'] = $firstPart->find('a[class="title"]')[0]->plaintext;
             if($item['job_title'] == '') continue;
 //            $item['script_search_key'] = $arrSettings['name'];

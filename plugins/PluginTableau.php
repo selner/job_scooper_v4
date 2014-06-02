@@ -76,7 +76,7 @@ class PluginTableau extends ClassJobsSitePlugin
             } // skip the header row
             $counter++;
 
-            $item = parent::getEmptyItemsArray();
+            $item = parent::getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
             $item['company'] = $this->siteName;
             $item['job_post_url'] = $node->find("td a")[0]->href;

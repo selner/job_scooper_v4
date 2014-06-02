@@ -60,19 +60,19 @@ class PluginGeekwire extends ClassJobsSitePlugin
                 continue;
             }
 
-            $item = parent::getEmptyItemsArray();
+            $item = parent::getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
 
             $item['job_title'] = $node->find("a h3")[0]->plaintext;
             $item['job_post_url'] = $node->find("a")[0]->href;
             if($item['job_title'] == '') continue;
 
-            $item['location'] = strScrub($node->find("div[class='location']")[0]->plaintext);
+            $item['location'] = $node->find("div[class='location']")[0]->plaintext;
 
-            $item['company'] = strScrub($node->find("div[class='company'] span")[0]->plaintext);
+            $item['company'] = $node->find("div[class='company'] span")[0]->plaintext;
             $item['date_pulled'] = getTodayAsString();
-            $item['job_site_date'] = strScrub($node->find("li[class='date']")[0]->plaintext);
-            $item['job_site_category'] = strScrub($node->find("ul[class='meta'] li")[0]->plaintext);
+            $item['job_site_date'] = $node->find("li[class='date']")[0]->plaintext;
+            $item['job_site_category'] = $node->find("ul[class='meta'] li")[0]->plaintext;
 
 
             $arrLIParts = explode(" ", $node->attr['class']);
