@@ -49,9 +49,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
             if($this->arrLatestJobs != null)
             {
-                $strDebugFileName = $this->getMyOutputFileFullPath("DEBUG");
-                __debug__printLine("Writing ". $this->siteName." " .count($this->arrLatestJobs) ." job records to " . $strDebugFileName . " for debugging (if needed).", C__DISPLAY_ITEM_START__);
-                $this->writeMyJobsListToFile($strDebugFileName, false);
+                $strOutPathWithName = $this->getOutputFileFullPath($this->siteName . "_");
+                __debug__printLine("Writing ". $this->siteName." " .count($this->arrLatestJobs) ." job records to " . $strOutPathWithName . " for debugging (if needed).", C__DISPLAY_ITEM_START__);
+                $this->writeMyJobsListToFile($strOutPathWithName, false);
             }
         }
     }
