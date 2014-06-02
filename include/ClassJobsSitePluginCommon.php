@@ -15,81 +15,8 @@
  * under the License.
  */
 require_once dirname(__FILE__) . '/../include/Options.php';
+require_once dirname(__FILE__) . '/../include/JobListHelpers.php';
 
-/**
- * TODO:  DOC
- *
- *
- * @param  string TODO DOC
- * @param  string TODO DOC
- * @return string TODO DOC
- */
-
-function getArrayKeyValueForJob($job)
-{
-
-    $strKey = strScrub($job['job_site'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACES_SPACES_WITH_HYPHENS);
-
-    // For craigslist, they change IDs on every post, so deduping that way doesn't help
-    // much.  Instead, let's dedupe for Craigslist by using the role title and the jobsite
-    // (Company doesn't usually get filled out either with them.)
-    if(strcasecmp($strKey, "craigslist") == 0)
-    {
-        $strKey = $strKey . "-" . strScrub($job['job_title'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACES_SPACES_WITH_HYPHENS );
-    }
-    if($job['job_id'] != null && $job['job_id'] != "")
-    {
-        $strKey = $strKey . "-" . strScrub($job['job_id'], REPLACES_SPACES_WITH_HYPHENS | REMOVE_PUNCT | HTML_DECODE | LOWERCASE);
-    }
-    else
-    {
-        $strKey = $strKey . "-" . strScrub($job['company'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACES_SPACES_WITH_HYPHENS );
-        $strKey = $strKey . "-" . strScrub($job['job_title'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACES_SPACES_WITH_HYPHENS );
-    }
-
-    return $strKey;
-}
-
-function addJobsToJobsList(&$arrJobsListToUpdate, $arrAddJobs)
-{
-    $nstartcount = count($arrJobsListToUpdate);
-    if($arrAddJobs == null) return;
-
-    if(!is_array($arrAddJobs) || count($arrAddJobs) == 0)
-    {
-        // skip. no jobs to add
-        return;
-    }
-    if($arrJobsListToUpdate == null) $arrJobsListToUpdate = array();
-
-    foreach($arrAddJobs as $jobRecord)
-    {
-        addJobToJobsList($arrJobsListToUpdate, $jobRecord);
-    }
-
-}
-
-
-function addJobToJobsList(&$arrJobsListToUpdate, $job)
-{
-    if($arrJobsListToUpdate == null) $arrJobsListToUpdate = array();
-
-    $strKey = getArrayKeyValueForJob($job);
-    $arrJobsListToUpdate[$strKey] = $job;
-}
-
-function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strExt = '')
-{
-    $strFilename = '';
-    if(strlen($strFilePrefix) > 0) $strFilename .= $strFilePrefix . "_";
-    $date=date_create(null);
-    $strFilename .= date_format($date,"Y-m-d_Hi");
-
-    if(strlen($strBase) > 0) $strFilename .= "_" . $strBase;
-    if(strlen($strExt) > 0) $strFilename .= "." . $strExt;
-
-    return $strFilename;
-}
 
 class ClassJobsSitePluginCommon
 {
