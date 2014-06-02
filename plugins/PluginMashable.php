@@ -79,7 +79,7 @@ class PluginMashable extends ClassJobsSitePlugin
             $titleLink = $node->find("div[class='aiResultTitle'] h3 a")[0];
 
             $item['job_title'] = $titleLink->plaintext;
-            $item['job_post_url'] = $siteBaseURL . $titleLink->href;
+            $item['job_post_url'] = $this->siteBaseURL . $titleLink->href;
             if($item['job_title'] == '') continue;
 
             $item['company'] = $node->find("li[class='aiResultsCompanyName']")[0]->plaintext;
