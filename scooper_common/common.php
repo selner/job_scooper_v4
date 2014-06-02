@@ -439,12 +439,24 @@ function strTrimAndLower($str)
     return strScrub($str, LOWERCASE | REMOVE_EXTRA_WHITESPACE );
 }
 
-define('REMOVE_PUNCT', 0x1);
-define('LOWERCASE', 0x2);
-define('HTML_DECODE', 0x4);
-define('REPLACES_SPACES_WITH_HYPHENS', 0x8);
-define('URL_ENCODE', 0x8);
-define('REMOVE_EXTRA_WHITESPACE', 0x10);
+/*
+0x20 : 00100000
+0x10 : 00010000
+0x08 : 00001000
+0x04 : 00000100
+0x02 : 00000010
+0x01 : 00000001
+*/
+
+define('REMOVE_PUNCT', 0x001);
+define('LOWERCASE', 0x002);
+define('HTML_DECODE', 0x004);
+define('URL_ENCODE', 0x008);
+define('REPLACE_SPACES_WITH_HYPHENS', 0x010);
+define('REMOVE_EXTRA_WHITESPACE', 0x020);
+define('REMOVE_ALL_SPACES', 0x040);
+define('SIMPLE_TEXT_CLEANUP', HTML_DECODE | REMOVE_EXTRA_WHITESPACE );
+define('FOR_LOOKUP_VALUE_MATCHING', REMOVE_PUNCT | LOWERCASE | HTML_DECODE | LOWERCASE | REMOVE_EXTRA_WHITESPACE | REMOVE_ALL_SPACES );
 define('DEFAULT_SCRUB', REMOVE_PUNCT | HTML_DECODE | LOWERCASE | REMOVE_EXTRA_WHITESPACE );
 
 //And so on, 0x8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800 etc..
@@ -455,31 +467,10 @@ function strScrub($str, $flags = null)
     if($flags == null)  $flags = REMOVE_EXTRA_WHITESPACE;
     $ret = $str;
 
-    if ($flags & REMOVE_EXTRA_WHITESPACE)
-    {
-        $ret = trim($ret);
-        if($ret != null)
-        {
-            $ret  = str_replace(array(".", ",", "–", "/", "-", ":", ";"), " ", $ret);
-            $ret  = str_replace("  ", " ", $ret);
-            $ret  = str_replace("  ", " ", $ret); // do it twice to catch the multiples
-        }
-        $ret = trim($ret);
-    }
 
     if ($flags & HTML_DECODE)
     {
         $ret = html_entity_decode($ret);
-    }
-
-    if ($flags & LOWERCASE)
-    {
-        $ret = strtolower($ret);
-    }
-
-    if ($flags & REPLACES_SPACES_WITH_HYPHENS)
-    {
-        $ret  = str_replace(" ", "-", $ret); // do it twice to catch the multiples
     }
 
     if ($flags & REMOVE_PUNCT)  // has to come after HTML_DECODE
@@ -487,6 +478,37 @@ function strScrub($str, $flags = null)
         $ret = strip_punctuation($ret);
     }
 
+    if ($flags & REMOVE_ALL_SPACES)
+    {
+        $ret = trim($ret);
+        if($ret != null)
+        {
+            $ret  = str_replace(" ", "", $ret);
+        }
+    }
+
+    if ($flags & REMOVE_EXTRA_WHITESPACE)
+    {
+        $ret = trim($ret);
+        if($ret != null)
+        {
+            $ret  = str_replace(array("   ", "  ", "    "), " ", $ret);
+            $ret  = str_replace(array("   ", "  ", "    "), " ", $ret);
+        }
+        $ret = trim($ret);
+    }
+
+
+    if ($flags & REPLACE_SPACES_WITH_HYPHENS) // has to come after REMOVE_EXTRA_WHITESPACE
+    {
+        $ret  = str_replace(" ", "-", $ret); // do it twice to catch the multiples
+    }
+
+
+    if ($flags & LOWERCASE)
+    {
+        $ret = strtolower($ret);
+    }
 
     if ($flags & URL_ENCODE)
     {
