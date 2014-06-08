@@ -22,7 +22,7 @@ require_once dirname(__FILE__) . '/../include/ClassJobsSitePlugin.php';
 class PluginOuterwall extends ClassJobsSitePlugin
 {
     protected $siteName = 'Outerwall';
-    protected $siteBaseURL = 'http://outerwall.jobs/';
+    protected $siteBaseURL = 'http://outerwall.jobs';
 
 
 
