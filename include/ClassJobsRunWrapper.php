@@ -93,13 +93,13 @@ class ClassJobsRunWrapper extends ClassJobsSitePluginNoActualSite
 
     }
 
-    private function writeRunsJobsToFile($strFileOut, $arrJobsToOutput, $strLogDescriptor)
+    private function writeRunsJobsToFile($strFileOut, $arrJobsToOutput, $strLogDescriptor, $strExt = "CSV")
     {
-        $this->writeJobsListToFile($strFileOut, $arrJobsToOutput, true, false, "ClassJobRunner-".$strLogDescriptor);
+        $this->writeJobsListToFile($strFileOut, $arrJobsToOutput, true, false, "ClassJobRunner-".$strLogDescriptor, $strExt);
 
     }
 
-    private function outputFilteredJobsListToCSV($strFilterToApply, $strFileNameExtension, $strFilterDescription = null)
+    private function outputFilteredJobsListToFile($strFilterToApply, $strFileNameAppend, $strExt = "CSV", $strFilterDescription = null)
     {
         $arrToOutput = null;
 
@@ -108,16 +108,17 @@ class ClassJobsRunWrapper extends ClassJobsSitePluginNoActualSite
             throw new ErrorException("Required array filter callback was not specified.  Cannot output filtered jobs list.");
         }
 
-        if($strFileNameExtension == null || $strFileNameExtension == "")
+        if($strFileNameAppend == null || $strFileNameAppend == "")
         {
             throw new ErrorException("Required array filter callback was not specified.  Cannot output " . $strFilterToApply . " filtered jobs list.");
         }
 
         $arrToOutput = array_filter($this->arrLatestJobs, $strFilterToApply);
-        $strFilteredCSVOutputPath = getFullPathFromFileDetails($this->detailsOutputFile, "", $strFileNameExtension);
-//        $this->writeJobsListToFile($strFilteredCSVOutputPath, $arrToOutput , true, false, "ClassJobsRunWrapper-".$strFilterToApply);
-        $this->writeRunsJobsToFile($strFilteredCSVOutputPath, $arrToOutput, $strFilterToApply);
-        __debug__printLine(($strFilterDescription != null ? $strFilterDescription : $strFileNameExtension) . " " . count($arrToOutput). " job listings output to  " . $strFilteredCSVOutputPath, C__DISPLAY_SUMMARY__);
+        $details = $this->detailsOutputFile;
+        $details['file_extension'] = $strExt;
+        $strFilteredCSVOutputPath = getFullPathFromFileDetails($details, "", $strFileNameAppend);
+        $this->writeRunsJobsToFile($strFilteredCSVOutputPath, $arrToOutput, $strFilterToApply, $strExt);
+        __debug__printLine(($strFilterDescription != null ? $strFilterDescription : $strFileNameAppend) . " " . count($arrToOutput). " job listings output to  " . $strFilteredCSVOutputPath, C__DISPLAY_SUMMARY__);
 
         return $arrToOutput;
     }
@@ -261,20 +262,23 @@ class ClassJobsRunWrapper extends ClassJobsSitePluginNoActualSite
 
 
         // Output only records that are new or not marked as excluded (aka "Yes" or "Maybe")
-        $arrJobs_Active = $this->outputFilteredJobsListToCSV("isMarked_InterestedOrBlank", "_ActiveJobs");
-        $arrJobs_Active = $this->outputFilteredJobsListToCSV("isJobUpdatedToday", "_UpdatedJobs");
+        $arrJobs_Active = $this->outputFilteredJobsListToFile("isMarked_InterestedOrBlank", "_ActiveJobs", "CSV");
+        $arrJobs_Active = $this->outputFilteredJobsListToFile("isMarked_InterestedOrBlank", "_ActiveJobs", "HTML");
+
+        $arrJobs_Active = $this->outputFilteredJobsListToFile("isJobUpdatedToday", "_UpdatedJobs");
 
         // Output only new records that haven't been looked at yet
-        $arrJobs_NewOnly = $this->outputFilteredJobsListToCSV("isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview");
+        $arrJobs_NewOnly = $this->outputFilteredJobsListToFile("isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "CSV");
+        $arrJobs_NewOnly = $this->outputFilteredJobsListToFile("isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "HTML");
 
         // Output all records that were automatically excluded
-        $arrJobs_AutoExcluded = $this->outputFilteredJobsListToCSV("isMarked_NotInterested", "_ExcludedJobs");
+        $arrJobs_AutoExcluded = $this->outputFilteredJobsListToFile("isMarked_NotInterested", "_ExcludedJobs");
 
         // Output only records that were auto-marked as duplicates
-        // $arrJobs_AutoDupe = $this->outputFilteredJobsListToCSV("isInterested_MarkedDuplicateAutomatically", "_AutoDuped");
-        // $arrJobs_NewButFiltered = $this->outputFilteredJobsListToCSV("isNewJobToday_Interested_IsNo", "_NewJobs_AutoExcluded");
+        // $arrJobs_AutoDupe = $this->outputFilteredJobsListToFile("isInterested_MarkedDuplicateAutomatically", "_AutoDuped");
+        // $arrJobs_NewButFiltered = $this->outputFilteredJobsListToFile("isNewJobToday_Interested_IsNo", "_NewJobs_AutoExcluded");
         // Output all records that were previously marked excluded manually by the user
-        // $arrJobs_ManualExcl = $this->outputFilteredJobsListToCSV("isMarked_ManuallyNotInterested", "_ManuallyExcludedJobs");
+        // $arrJobs_ManualExcl = $this->outputFilteredJobsListToFile("isMarked_ManuallyNotInterested", "_ManuallyExcludedJobs");
 
         __debug__printLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
 

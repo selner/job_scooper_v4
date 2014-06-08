@@ -73,6 +73,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
             $class = new $strSiteClass;
             try
             {
+                $class->addSearch($search);
                 $class->getMyJobsForSearch($search, $nDays);
                 $this->_addJobsToMyJobsList_($class->getMyJobsList());
             }

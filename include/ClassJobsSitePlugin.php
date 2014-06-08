@@ -16,8 +16,12 @@
  */
 require_once dirname(__FILE__) . '/Options.php';
 require_once dirname(__FILE__) . '/ClassJobsSitePluginCommon.php';
+require_once dirname(__FILE__) . '/../scooper_common/APICallWrapperClass.php';
 
 
+const C__SEARCH_RESULTS_TYPE_HTML__ = 1;
+const C__SEARCH_RESULTS_TYPE_XML__ = 4;
+const C__SEARCH_RESULTS_TYPE_HTML_FILE__= 10;
 
 abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 {
@@ -29,12 +33,15 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     function __construct($bitFlags = null, $strOutputDirectory = null)
     {
+
         $this->_bitFlags = $bitFlags;
         if($strOutputDirectory == null)
         {
             $strOutputDirectory = $GLOBALS['output_file_details']['directory'];
         }
         $this->setOutputFolder($strOutputDirectory);
+
+
     }
 
     function __destruct()
@@ -347,7 +354,110 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             }
         }
     }
-    function getMyJobsForSearch($search, $nDays = -1)
+
+    public function getMyJobsForSearch($searchDetails, $nDays = -1)
+    {
+
+        if($GLOBALS['site_plugins'][strtolower($searchDetails['site_name'])]['results_type'] == C__SEARCH_RESULTS_TYPE_XML__)
+        {
+            $this->getMyJobsForSearchFromXML($search, $nDays);
+        }
+        if($GLOBALS['site_plugins'][strtolower($searchDetails['site_name'])]['results_type'] == C__SEARCH_RESULTS_TYPE_HTML_FILE__)
+        {
+            $this->getMyJobsForSearchFromFile($searchDetails, $nDays);
+
+        }
+        else
+        {
+            $this->getMyJobsForSearchFromWebpage($searchDetails, $nDays);
+        }
+    }
+
+    function getMyJobsForSearchFromXML($search, $nDays = -1)
+    {
+        ini_set("user_agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.114 Safari/537.36");
+        ini_set("max_execution_time", 0);
+        ini_set("memory_limit", "10000M");
+
+        $nItemCount = 1;
+        $nPageCount = 1;
+
+        try
+        {
+            $strURL = $this->_getURLfromBase_($search, $nDays, $nPageCount, $nItemCount);
+            __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$search['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
+
+            $class = new APICallWrapperClass();
+            $ret = $class->cURL($strURL, null, 'GET', 'text/xml; charset=UTF-8');
+            $xmlResult = simplexml_load_string($ret['output']);
+
+            if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
+            //$xmlResult->registerXPathNamespace("def", "http://www.w3.org/2005/Atom");
+
+        }
+        catch (ErrorException $ex)
+        {
+            throw new ErrorException("Error:  unable to getMyJobsForSearchFromXML from ".$strURL. " Reason:".$ex->getMessage());
+            return;
+        }
+        $strTotalResults = $this->parseTotalResultsCount($xmlResult);
+        if($strTotalResults == C__JOB_PAGECOUNT_NOTAPPLICABLE__)
+        {
+            $totalPagesCount = 1;
+            $nTotalListings = C__JOB_ITEMCOUNT_UNKNOWN__ ; // placeholder because we don't know how many are on the page
+        }
+        else
+        {
+            $strTotalResults  = intval(str_replace(",", "", $strTotalResults));
+            $nTotalListings = intval($strTotalResults);
+            $totalPagesCount = intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
+            if($totalPagesCount < 1)  $totalPagesCount = 1;
+        }
+
+        if($nTotalListings <= 0)
+        {
+            __debug__printLine("No new job listings were found on " . $this->siteName . " for search '" . $search['search_name']."'.", C__DISPLAY_ITEM_START__);
+            return;
+        }
+
+        __debug__printLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__JOB_ITEMCOUNT_UNKNOWN__  ? "a not yet know number of" : $nTotalListings) . " jobs:  ".$strURL, C__DISPLAY_ITEM_START__);
+
+        while ($nPageCount <= $totalPagesCount )
+        {
+            $arrPageJobsList = null;
+
+            $objSimpleHTML = null;
+            $strURL = $this->_getURLfromBase_($search, $nDays, $nPageCount, $nItemCount);
+            $class = new APICallWrapperClass();
+            $ret = $class->cURL($strURL, 'search_keywords%3Dproduct%26search_location%3DWA%26search_categories%3D0%26filter_job_type%255B%255D%3Dfreelance%26filter_job_type%255B%255D%3Dfull-time%26filter_job_type%255B%255D%3Dinternship%26filter_job_type%255B%255D%3Dpart-time%26filter_job_type%255B%255D%3Dtemporary', 'POST');
+
+            $xmlResult = simplexml_load_string($ret['output']);
+            if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
+
+            $arrPageJobsList = $this->parseJobsListForPage($xmlResult);
+
+
+            if(!is_array($arrPageJobsList))
+            {
+                // we likely hit a page where jobs started to be hidden.
+                // Go ahead and bail on the loop here
+                __debug__printLine("Not getting results back from ". $this->siteName . " starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", C__DISPLAY_ITEM_START__);
+                $nPageCount = $totalPagesCount ;
+            }
+            else
+            {
+                $this->_addJobsToMyJobsList_($arrPageJobsList);
+                $nItemCount += $this->nJobListingsPerPage;
+            }
+            $nPageCount++;
+
+        }
+
+        __debug__printLine(PHP_EOL.$this->siteName . "[".$search['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, C__DISPLAY_ITEM_RESULT__);
+
+    }
+
+    function getMyJobsForSearchFromWebpage($search, $nDays = -1)
     {
         $nItemCount = 1;
         $nPageCount = 1;
@@ -356,7 +466,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         {
             $strURL = $this->_getURLfromBase_($search, $nDays, $nPageCount, $nItemCount);
             __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$search['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
-            var_dump( $strURL);
+
             $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL );
             if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
         }
@@ -424,22 +534,32 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     }
 
-    protected function getMyJobsFromHTMLFiles($strCompanyName)
+    protected function getMyJobsFromHTMLFiles($strCompanyName, $searchDetails = null)
     {
 
         $nItemCount = 1;
         $dataFolder = $this->strOutputFolder ;
 
-        $strFileName = $dataFolder . $strCompanyName. "-jobs-page-".$nItemCount.".html";
+        if($searchDetails)
+        {
+            $strFileBase = strtolower($strCompanyName).'-'.$searchDetails['search_name'] . "-jobs-page-";
+        }
+        else
+        {
+            $strFileBase = strtolower($strCompanyName). "-jobs-page-";
+        }
+
+        $strFileName = $dataFolder . $strFileBase.$nItemCount.".html";
         if(!is_file($strFileName)) // try the current folder instead
         {
             $dataFolder = "./";
-            $strFileName = $dataFolder . $strCompanyName. "-jobs-page-".$nItemCount.".html";
+            $strFileName = $dataFolder . $strFileBase.$nItemCount.".html";
         }
+
         if(!is_file($strFileName)) // last try the debugging data folder
         {
             $dataFolder = C_STR_DATAFOLDER;
-            $strFileName = $dataFolder . $strCompanyName. "-jobs-page-".$nItemCount.".html";
+            $strFileName = $dataFolder . $strFileBase.$nItemCount.".html";
         }
 
         while (file_exists($strFileName) && is_file($strFileName))
@@ -459,7 +579,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
             $nItemCount++;
 
-            $strFileName = $dataFolder . $strCompanyName . "-jobs-page-".$nItemCount.".html";
+            $strFileName = $dataFolder . $strFileBase.$nItemCount.".html";
 
         }
     }
@@ -474,14 +594,23 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     }
 
-
+    function getMySearches()
+    {
+        return $this->arrSearchesToReturn;
+    }
 
     function addSearches($arrSearches)
     {
-        foreach($arrSearches as $search)
+        if(!is_array($arrSearches[0])) { $arrSearches[] = $arrSearches; }
+        foreach($arrSearches as $searchDetails)
         {
-            $this->arrSearchesToReturn[] = $search;
+            $this->addSearch($searchDetails);
         }
+    }
+
+    function addSearch($arrSearch)
+    {
+            $this->arrSearchesToReturn[] = $arrSearch;
     }
 
 

@@ -16,17 +16,28 @@ on run (argv)
 	startRun(argv)
 end run
 
-
+on doJobsDownloads_Geek(strOutputFolder)
+	
+	doJobsDownload_Geekwire(strOutputFolder, "http://www.geekwork.com/jobs/?search_keywords=product&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time", "product-wa")
+	doJobsDownload_Geekwire(strOutputFolder, "http://www.geekwork.com/jobs/?search_keywords=vice+president&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time", "vp-wa")
+	doJobsDownload_Geekwire(strOutputFolder, "http://www.geekwork.com/jobs/?search_keywords=chief&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time", "chief-wa")
+	doJobsDownload_Geekwire(strOutputFolder, "http://www.geekwork.com/jobs/?search_keywords=director&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time", "director-wa")
+	
+end doJobsDownloads_Geek
 
 on startRun(argv)
 	if (count of argv) = 0 then
 		log "Output directory was not set.  Defaulting to script directory."
 		
-		set strOutputDir to "/Users/bryan/Code/data/jobs"
+		set strOutputDir to "/Users/bryan/Code/data"
 	else
 		set strOutputDir to first item of argv
 	end if
 	
+	set ret to doJobsDownloads_Geek(strOutputDir)
+	if (ret < 0) then
+		return ret
+	end if
 	
 	set ret to doJobsDownload_AMZN(strOutputDir)
 	if (ret < 0) then
@@ -40,6 +51,21 @@ on startRun(argv)
 	
 	return ret
 end startRun
+
+on doJobsDownload_Geekwire(strOutputFolder, strStartURL, strSearchKey)
+	set strJSGetMaxPageValue_GEEK to ""
+	
+	set strGetNextPageValue_GEEK to ""
+	
+	set strJSClickNext_GEEK_First to ""
+	
+	set strJSClickNext_GEEK_Others to ""
+	set strJSGetTheSource_GEEK to "function getHTML() { return document.getElementById('content').innerHTML; } getHTML();"
+	
+	set ret to doJobsDownload_Base(strOutputFolder, strStartURL, "geekwire-" & strSearchKey, strJSGetMaxPageValue_GEEK, strGetNextPageValue_GEEK, strJSClickNext_GEEK_First, strJSClickNext_GEEK_Others, strJSGetTheSource_GEEK, 1)
+	return ret
+	
+end doJobsDownload_Geekwire
 
 on doJobsDownload_AMZN(strOutputFolder)
 	set strURL_AMZN to "http://www.amazon.jobs/results?slid=226&sjid=68,83"
@@ -106,14 +132,23 @@ on doJobsDownload_Base(strOutputFolder, strURL, strCompanyName, strJSGetMaxPageV
 		
 		delay 5
 		
-		set strMaxPages to do JavaScript strJSGetMaxPageValue in document 1
-		set nMaxPages to (do JavaScript strJSGetMaxPageValue in document 1) as integer
+		if (strJSGetMaxPageValue is not "") then
+			set strMaxPages to do JavaScript strJSGetMaxPageValue in document 1
+			set nMaxPages to (do JavaScript strJSGetMaxPageValue in document 1) as integer
+		else
+			set strMaxPages to 1
+			set nMaxPages to 1
+			
+		end if
 		-- set nMaxPages to (characters 5 thru (count of strMaxPages) of strMaxPages) as string
 		
 		log "Search returned " & nMaxPages & " of jobs."
 		
-		set strNextPage to (do JavaScript strGetNextPageValue in document 1) as integer
-		
+		if (strGetNextPageValue is not "") then
+			set strNextPage to (do JavaScript strGetNextPageValue in document 1) as integer
+		else
+			set strNextPage to 1
+		end if
 		
 		
 		set boolClickedNext to true
@@ -122,11 +157,15 @@ on doJobsDownload_Base(strOutputFolder, strURL, strCompanyName, strJSGetMaxPageV
 		
 		repeat while (nNextPage ² nMaxPages and boolClickedNext = true)
 			
-			set strNextPage to (do JavaScript strGetNextPageValue in document 1) as integer
-			if (strNextPage as number) < nNextPage then
-				nNextPage = nMaxPages
+			if (strGetNextPageValue is not "") then
+				set strNextPage to (do JavaScript strGetNextPageValue in document 1) as integer
+				if (strNextPage as number) < nNextPage then
+					nNextPage = nMaxPages
+				else
+					set nNextPage to (strNextPage as integer)
+				end if
 			else
-				set nNextPage to (strNextPage as integer)
+				nNextPage = nMaxPages
 			end if
 			
 			set theSource to do JavaScript strJSGetTheSource in document 1
@@ -155,9 +194,12 @@ on doJobsDownload_Base(strOutputFolder, strURL, strCompanyName, strJSGetMaxPageV
 			log "Clicking Next button to move to the next results page...."
 			
 			
-			set boolClickedNext to do JavaScript strJSClickNext in document 1
-			set strJSClickNext to strJSClickNext_Others
-			
+			if (strJSClickNext is not "") then
+				set boolClickedNext to do JavaScript strJSClickNext in document 1
+				set strJSClickNext to strJSClickNext_Others
+			else
+				set boolClickedNext to false
+			end if
 			
 			delay 5
 			

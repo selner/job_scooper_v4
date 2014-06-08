@@ -618,8 +618,9 @@ class ClassJobsSitePluginCommon
      * @param  string TODO DOC
      * @return string TODO DOC
      */
-    function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true, $fFirstAutoMarkJobs = false, $strCallerDescriptor = "")
+    function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true, $fFirstAutoMarkJobs = false, $strCallerDescriptor = "", $ext = "CSV")
     {
+
         if(!$strOutFilePath || strlen($strOutFilePath) <= 0)
         {
             $strOutFilePath = $this->getOutputFileFullPath();
@@ -647,7 +648,16 @@ class ClassJobsSitePluginCommon
 
 
         $classCombined = new SimpleScooterCSVFileClass($strOutFilePath , "w");
-        $classCombined->writeArrayToCSVFile($arrJobsRecordsToUse, array_keys($this->getEmptyJobListingRecord()), $this->arrKeysForDeduping);
+
+        if($ext == 'HTML')
+        {
+            $classCombined->writeArrayToHTMLFile($arrJobsRecordsToUse, array_keys($this->getEmptyJobListingRecord()), $this->arrKeysForDeduping);
+
+        }
+        else
+        {
+            $classCombined->writeArrayToCSVFile($arrJobsRecordsToUse, array_keys($this->getEmptyJobListingRecord()), $this->arrKeysForDeduping);
+        }
         __debug__printLine($strCallerDescriptor . ($strCallerDescriptor  != "" ? " jobs" : "Jobs") ." list had  ". count($arrJobsRecordsToUse) . " jobs and was written to " . $strOutFilePath , C__DISPLAY_ITEM_START__);
 
         return $strOutFilePath;

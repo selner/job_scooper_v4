@@ -197,13 +197,28 @@ class SimpleScooterCSVFileClass {
         return $arrDataLoaded['data_rows'];
     }
 
-    function writeArrayToCSVFile($records, $keys=null, $arrKeysToUseToDedupe = null)
+    function writeArrayToHTMLFile($records, $keys=null, $arrKeysToUseToDedupe = null)
     {
-
         if($this->_strAccessMode_[0] == 'w' || $this->_strAccessMode_[0] == 'w')
         {
             $this->_resetFile();
         }
+
+        $htmlOut = $this->getHTMLTableForCSV($records, $keys);
+
+        if(!fputs($this->_fp_, $htmlOut))
+        {
+            throw new Exception("Unable to write file.");
+        }
+    }
+
+    function writeArrayToCSVFile($records, $keys=null, $arrKeysToUseToDedupe = null)
+        {
+
+            if($this->_strAccessMode_[0] == 'w' || $this->_strAccessMode_[0] == 'w')
+            {
+                $this->_resetFile();
+            }
 
 
         // check if inputs are really arrays
@@ -240,6 +255,31 @@ class SimpleScooterCSVFileClass {
                 }
             }
         }
+    }
+
+
+    function getHTMLTableForCSV($arrCSVRows, $arrFieldsToUseInKey)
+    {
+
+        $strHTMLReturn = "";
+
+        $strHTMLReturn .= "<div class='CSV_outer' width='100%>";
+        foreach($arrCSVRows as $rec)
+        {
+            $strHTMLReturn .= "<div class='CSV_row'>";
+            foreach($arrFieldsToUseInKey as $fieldName)
+            {
+                $strHTMLReturn .= "<div class='CSV_column $fieldName'>";
+                $strHTMLReturn .= linkify($rec[$fieldName]);
+                $strHTMLReturn .= "</td>";
+            }
+            $strHTMLReturn .= "</div>";
+        }
+        $strHTMLReturn .= "</div><br/>";
+
+
+        return $strHTMLReturn;
+
     }
 
 

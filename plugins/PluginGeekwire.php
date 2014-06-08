@@ -23,7 +23,7 @@ require_once dirname(__FILE__) . '/../include/ClassJobsSitePlugin.php';
 class PluginGeekwire extends ClassJobsSitePlugin
 {
     protected $siteName = 'Geekwire';
-    protected $siteBaseURL = 'http://www.geekwork.com//';
+    protected $siteBaseURL = 'http://www.geekwork.com/';
 
 
     function getDaysURLValue($days)
@@ -33,39 +33,96 @@ class PluginGeekwire extends ClassJobsSitePlugin
     }
 
 
-    function parseTotalResultsCount($objSimpHTML)
+
+    function parseTotalResultsCount($nDays)  { return -1; }
+
+
+/*
+
+    function parseJobsListForPage($xmlResult)
     {
-/*        $resultsSection= $objSimpHTML->find("us[class='job_listings']");
-        $strTotalItemsCount  = $resultsSection[0]->plaintext;
-        $strTotalItemsCount = strScrub($strTotalItemsCount);
-        return str_replace(",", "", $strTotalItemsCount);
-*/
-        return -1;
+        $ret = null;
+        $elem = $xmlResult;
+
+        foreach ($xmlResult->channel->item as $job)
+        {
+
+            var_dump($xmlResult->channel->item[0]->asXML())
+            $md = new MicrodataPhp();
+            $data = $md->obj();
+            var_dump($data);
+            exit();
+
+
+            $dc = $item->children("http://purl.org/dc/elements/1.1/");
+            echo $dc->creator;
+            foreach ($job->description->children() as $child)
+            {
+                var_dump('Child=', $child->getName());
+            }
+
+            $desc = $job->description;
+            var_dump($desc);
+            var_dump($job->{"job_listing:location"}[0]);
+
+                $item = parent::getEmptyJobListingRecord();
+            $item['job_site'] = $this->siteName;
+            $item['job_post_url'] = (string)$job->link;
+            $arrURLParts = explode("/", (string)$job->link);
+            var_dump($arrURLParts );
+            $item['company'] = explode("-", $arrURLParts[4])[0];
+            $item['job_title'] =  (string)$job->title;
+//            $item['location'] =  $job->job_listing:location);
+            $item['location'] = (string)$job->{'job_listing:location'};
+
+            $item['job_id'] = (string)explode("/", (string)$job->guid)[3];
+//            if($item['job_title'] == '') continue;
+
+            $item['job_site_date'] = (string)$job->pubDate;
+//            $item['company'] = $this->siteName;
+            $item['date_pulled'] = getTodayAsString();
+
+            var_dump($job);
+            var_dump($job->description);
+            var_dump($item);
+            $ret[] = $this->normalizeItem($item);
+        }
+exit();
+        return $ret;
+    }*/
+    function getMyJobsForSearch($url, $nDays = -1)
+    {
+        $srcList = $this->getMySearches();
+        foreach($srcList as $search)
+        {
+            $this->getMyJobsFromHTMLFiles($this->siteName, $search);
+        }
     }
+
 
     function parseJobsListForPage($objSimpHTML)
     {
+
         $ret = null;
 
-        dump_html_tree($objSimpHTML);
-        $nodesJobs = $objSimpHTML->find("ul[class='job_listings'] li");
+        $nodesJobs = $objSimpHTML->find("ul[class='job_listings'] li[class='type-job_listing']");
 
         $nCounter = -1;
 
         foreach($nodesJobs as $node)
         {
-            $nCounter += 1;
+   /*         $nCounter += 1;
             if($nCounter < 2)
             {
                 continue;
             }
-
+*/
             $item = parent::getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
 
-            $item['job_title'] = $node->find("a h3")[0]->plaintext;
+            $item['job_title'] = $node->find("h3")[0]->plaintext;
             $item['job_post_url'] = $node->find("a")[0]->href;
-            if($item['job_title'] == '') continue;
+            //if($item['job_title'] == '') continue;
 
             $item['location'] = $node->find("div[class='location']")[0]->plaintext;
 
@@ -78,13 +135,11 @@ class PluginGeekwire extends ClassJobsSitePlugin
             $arrLIParts = explode(" ", $node->attr['class']);
             $item['job_id'] = str_replace("post-", "", $arrLIParts[0]);
 
-            var_dump($item);
-            dump_html_tree($node);
 
             $ret[] = $this->normalizeItem($item);
 
         }
-exit();
+
         return $ret;
     }
 

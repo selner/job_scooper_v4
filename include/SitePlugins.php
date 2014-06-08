@@ -16,6 +16,7 @@
  */
 
 
+require_once dirname(__FILE__) . '/Linkify.php';
 require_once dirname(__FILE__) . '/Options.php';
 require_once dirname(__FILE__) . '/ClassMultiSiteSearch.php';
 require_once dirname(__FILE__) . '/ClassJobsRunWrapper.php';
@@ -39,29 +40,31 @@ require_once dirname(__FILE__) . '/../plugins/PluginFacebook.php';
 require_once dirname(__FILE__) . '/../plugins/PluginEbay.php';
 require_once dirname(__FILE__) . '/../plugins/PluginGroupon.php';
 require_once dirname(__FILE__) . '/../plugins/PluginGeekwire.php';
+require_once dirname(__FILE__) . '/../plugins/PluginDotJobs.php';
 
 
 $GLOBALS['site_plugins'] = array(
-    'amazon' => array('name' => 'amazon', 'class_name' => 'PluginAmazon', 'include_in_run' => false),
-    'craigslist' => array('name' => 'craigslist', 'class_name' => 'PluginCraigslist', 'include_in_run' => false),
-    'porch' => array('name' => 'porch', 'class_name' => 'PluginPorch', 'include_in_run' => false),
-    'expedia' => array('name' => 'expedia', 'class_name' => 'PluginExpedia', 'include_in_run' => false),
-    'indeed' => array('name' => 'indeed', 'class_name' => 'PluginIndeed', 'include_in_run' => false),
-    'glassdoor' => array('name' => 'glassdoor', 'class_name' => 'PluginGlassdoor', 'include_in_run' => false),
-    'simplyhired' => array('name' => 'simplyhired', 'class_name' => 'PluginSimplyHired', 'include_in_run' => false),
-    'linkup' => array('name' => 'linkup', 'class_name' => 'PluginLinkUp', 'include_in_run' => false),
-    'employmentguide' => array('name' => 'employmentguide', 'class_name' => 'PluginEmploymentGuide', 'include_in_run' => false),
-    'monster' => array('name' => 'monster', 'class_name' => 'PluginMonster', 'include_in_run' => false),
-    'careerbuilder' => array('name' => 'careerbuilder', 'class_name' => 'PluginCareerBuilder', 'include_in_run' => false),
-    'mashable' => array('name' => 'mashable', 'class_name' => 'PluginMashable', 'include_in_run' => false),
-    'disney' => array('name' => 'disney', 'class_name' => 'PluginDisney', 'include_in_run' => false),
-    'outerwall' => array('name' => 'outerwall', 'class_name' => 'PluginOuterwall', 'include_in_run' => false),
-    'tableau' => array('name' => 'tableau', 'class_name' => 'PluginTableau', 'include_in_run' => false),
-    'google' => array('name' => 'google', 'class_name' => 'PluginGoogle', 'include_in_run' => false),
-    'facebook' => array('name' => 'facebook', 'class_name' => 'PluginFacebook', 'include_in_run' => false),
-    'ebay' => array('name' => 'ebay', 'class_name' => 'PluginEbay', 'include_in_run' => false),
-    'groupon' => array('name' => 'groupon', 'class_name' => 'PluginGroupon', 'include_in_run' => false),
-    // 'geekwire' => array('name' => 'geekwire', 'class_name' => 'PluginGeekwire', 'include_in_run' => false),
+    'amazon' => array('name' => 'amazon', 'class_name' => 'PluginAmazon',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
+    'craigslist' => array('name' => 'craigslist', 'class_name' => 'PluginCraigslist',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
+    'porch' => array('name' => 'porch', 'class_name' => 'PluginPorch',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
+    'expedia' => array('name' => 'expedia', 'class_name' => 'PluginExpedia',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
+    'indeed' => array('name' => 'indeed', 'class_name' => 'PluginIndeed',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
+    'glassdoor' => array('name' => 'glassdoor', 'class_name' => 'PluginGlassdoor',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
+    'simplyhired' => array('name' => 'simplyhired', 'class_name' => 'PluginSimplyHired',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
+    'linkup' => array('name' => 'linkup', 'class_name' => 'PluginLinkUp',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
+    'employmentguide' => array('name' => 'employmentguide', 'class_name' => 'PluginEmploymentGuide',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
+    'monster' => array('name' => 'monster', 'class_name' => 'PluginMonster',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
+    'careerbuilder' => array('name' => 'careerbuilder', 'class_name' => 'PluginCareerBuilder',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
+    'mashable' => array('name' => 'mashable', 'class_name' => 'PluginMashable',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
+    'disney' => array('name' => 'disney', 'class_name' => 'PluginDisney',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
+    'outerwall' => array('name' => 'outerwall', 'class_name' => 'PluginOuterwall',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
+    'tableau' => array('name' => 'tableau', 'class_name' => 'PluginTableau',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
+    'google' => array('name' => 'google', 'class_name' => 'PluginGoogle',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML_FILE__, 'include_in_run' => false),
+    'facebook' => array('name' => 'facebook', 'class_name' => 'PluginFacebook',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
+    'ebay' => array('name' => 'ebay', 'class_name' => 'PluginEbay',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false),
+    'groupon' => array('name' => 'groupon', 'class_name' => 'PluginGroupon',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false),
+    'dotjobs' => array('name' => 'dotjobs', 'class_name' => 'PluginDotJobs',  'results_type' => C__SEARCH_RESULTS_TYPE_XML__, 'include_in_run' => false),
+    'geekwire' => array('name' => 'geekwire', 'class_name' => 'PluginGeekwire',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML_FILE__, 'include_in_run' => false),
 );
 
 ?>
