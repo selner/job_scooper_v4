@@ -128,7 +128,7 @@ class ClassJobsSitePluginCommon
         // a higher match likelihood
         $retArrNormalized ['company'] = str_replace(array(" corporation", " corp", " inc", " llc"), "", $retArrNormalized['company']);
 
-        switch(strTrimAndLower($retArrNormalized ['company']))
+        switch(strScrub($retArrNormalized ['company']))
         {
             case "amazon":
             case "amazon com":
@@ -281,6 +281,64 @@ class ClassJobsSitePluginCommon
      * Initializes the global list of titles we will automatically mark
      * as "not interested" in the final results set.
      */
+    function _loadCompaniesRegexesToFilter_()
+    {
+        $classCSVFile=null;
+        $fCompaniesLoaded = false;
+        $arrCompanyFileDetails = $GLOBALS['companies_regex_file_details'];
+        $strFileName = "";
+
+        if($GLOBALS['companies_regex_to_filter'] != null && count($GLOBALS['companies_regex_to_filter']) > 0)
+        {
+            // We've already loaded the companies; go ahead and return right away
+            $fCompaniesLoaded = true;
+            __debug__printLine("Using previously loaded " . count($GLOBALS['companies_regex_to_filter']) . " regexed company strings to exclude." , C__DISPLAY_ITEM_DETAIL__);
+            return;
+        }
+        else if($arrCompanyFileDetails != null)
+        {
+            $strFileName = $arrCompanyFileDetails ['full_file_path'];
+            if(file_exists($strFileName ) && is_file($strFileName ))
+            {
+                __debug__printLine("Loading job Company regexes to filter from ".$strFileName."." , C__DISPLAY_ITEM_DETAIL__);
+                $classCSVFile = new SimpleScooterCSVFileClass($strFileName , 'r');
+                $arrCompaniesTemp = $classCSVFile->readAllRecords(true);
+                __debug__printLine(count($arrCompaniesTemp) . " companies found in the source file that will be automatically filtered from job listings." , C__DISPLAY_ITEM_DETAIL__);
+
+                //
+                // Add each Company we found in the file to our list in this class, setting the key for
+                // each record to be equal to the job Company so we can do a fast lookup later
+                //
+                $GLOBALS['companies_regex_to_filter'] = array();
+                foreach($arrCompaniesTemp as $CompanyRecord)
+                {
+                    $arrRXInput = explode("|", strtolower($CompanyRecord['match_regex']));
+
+                    foreach($arrRXInput as $rxItem)
+                    {
+                        $rx = '/'.$rxItem.'/';
+
+                        $GLOBALS['companies_regex_to_filter'][] = $rx;
+                    }
+                }
+                $fCompaniesLoaded = true;
+            }
+        }
+
+        if($fCompaniesLoaded == false)
+        {
+            __debug__printLine("Could not load regex list for companies to exclude from '" . $strFileName . "'.  Final list will not be filtered." , C__DISPLAY_WARNING__);
+        }
+        else
+        {
+//            var_dump('$GLOBALS[companies_regex_to_filter]', $GLOBALS['companies_regex_to_filter']);
+            __debug__printLine("Loaded " . count($GLOBALS['companies_regex_to_filter']). " regexes to use for filtering companies from '" . $strFileName . "'." , C__DISPLAY_WARNING__);
+
+        }
+    }
+
+
+
     function _loadTitlesRegexesToFilter_()
     {
         $fTitlesLoaded = false;
@@ -311,7 +369,7 @@ class ClassJobsSitePluginCommon
                 $GLOBALS['titles_regex_to_filter'] = array();
                 foreach($arrTitlesTemp as $titleRecord)
                 {
-                    $arrRXInput = explode("|", strtolower($titleRecord['title_match_regex']));
+                    $arrRXInput = explode("|", strtolower($titleRecord['match_regex']));
 
                     foreach($arrRXInput as $rxItem)
                     {
@@ -341,6 +399,7 @@ class ClassJobsSitePluginCommon
     {
         $this->markJobsList_SetAutoExcludedTitlesFromRegex($arrJobs, $strCallerDescriptor);
         $this->markJobsList_SetAutoExcludedTitles($arrJobs, $strCallerDescriptor);
+        $this->markJobsList_SetAutoExcludedCompaniesFromRegex($arrJobs, $strCallerDescriptor);
         $this->markJobsList_SetLikelyDuplicatePosts($arrJobs, $strCallerDescriptor);
     }
 
@@ -419,7 +478,7 @@ class ClassJobsSitePluginCommon
 
     function markJobsList_SetLikelyDuplicatePosts(&$arrToMark, $strCallerDescriptor = null)
     {
-        $nJobsSMatched = 0;
+        $nJobsMatched = 0;
         $nUniqueRoles = 0;
         $nProblemRolesSkipped= 0;
 
@@ -528,6 +587,53 @@ class ClassJobsSitePluginCommon
 
         $strTotalRowsText = "/".count($arrToMark);
         __debug__printLine("Automatically marked ".$nJobsMarkedAutoExcluded .$strTotalRowsText ." roles " . ($strCallerDescriptor != null ? "from " . $strCallerDescriptor : "") . " as 'No/Not Interested' because the job title was in the exclusion list. (Skipped: " . $nJobsSkipped . $strTotalRowsText ."; Untouched: ". $nJobsNotMarked . $strTotalRowsText .")" , C__DISPLAY_ITEM_RESULT__);
+    }
+    function markJobsList_SetAutoExcludedCompaniesFromRegex(&$arrToMark, $strCallerDescriptor = null)
+    {
+        $this->_loadCompaniesRegexesToFilter_();
+
+        $nJobsNotMarked = 0;
+        $nJobsMarkedAutoExcluded = 0;
+
+        __debug__printLine("Excluding Jobs by Companies Regex Matches", C__DISPLAY_ITEM_START__);
+        __debug__printLine("Checking ".count($arrToMark) ." roles against ". count($GLOBALS['companies_regex_to_filter']) ." excluded companies.", C__DISPLAY_ITEM_DETAIL__);
+        $arrJobs_AutoUpdatable= array_filter($arrToMark, "isJobAutoUpdatable");
+        $nJobsSkipped = count($arrToMark) - count($arrJobs_AutoUpdatable);
+
+        if(count($arrJobs_AutoUpdatable) > 0)
+        {
+            foreach($arrJobs_AutoUpdatable as $job)
+            {
+                $fMatched = false;
+                // get all the job records that do not yet have an interested value
+
+                foreach($GLOBALS['companies_regex_to_filter'] as $rxInput )
+                {
+                    if(preg_match($rxInput, strScrub($job['company'], DEFAULT_SCRUB)))
+                    {
+                        $strJobIndex = getArrayKeyValueForJob($job);
+                        $arrToMark[$strJobIndex]['interested'] = 'No (Wrong Company)' . C__STR_TAG_AUTOMARKEDJOB__;
+                        if(strlen($arrToMark[$strJobIndex]['notes']) > 0) { $arrToMark[$strJobIndex]['notes'] = $arrToMark[$strJobIndex]['notes'] . " "; }
+                        $arrToMark[$strJobIndex]['notes'] = "Matched regex[". $rxInput ."]". C__STR_TAG_AUTOMARKEDJOB__;
+                        $arrToMark[$strJobIndex]['date_last_updated'] = getTodayAsString();
+                        $nJobsMarkedAutoExcluded++;
+                        $fMatched = true;
+                        break;
+                    }
+                    else              // we're ignoring the Excluded column fact for the time being. If it's in the list, it's excluded
+                    {
+                        $nJobsNotMarked++;
+                    }
+                    if($fMatched == true) break;
+                }
+
+//                if($fMatched == false)
+//                  __debug__printLine("Company '".$job['company'] ."' was not found in the companies exclusion regex list.  Keeping for review." , C__DISPLAY_ITEM_DETAIL__);
+
+            }
+        }
+        $strTotalRowsText = "/".count($arrToMark);
+        __debug__printLine("Jobs marked not interested via companies regex(".$nJobsMarkedAutoExcluded . $strTotalRowsText .") , skipped: " . $nJobsSkipped . $strTotalRowsText .", untouched: ". $nJobsNotMarked . $strTotalRowsText .")" , C__DISPLAY_ITEM_RESULT__);
     }
 
     function markJobsList_SetAutoExcludedTitlesFromRegex(&$arrToMark, $strCallerDescriptor = null)
@@ -796,7 +902,7 @@ class ClassJobsSitePluginCommon
         if(!$objSimpleHTML && $strURL && strlen($strURL) > 0)
         {
 //             __debug__printLine("Loading results from ".$strURL, C__DISPLAY_ITEM_DETAIL__);
-            $options  = array('http' => array( 'timeout' => 10,                 'user_agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.131 Safari/537.36'));
+            $options  = array('http' => array( 'timeout' => 10, 'user_agent' => C__STR_USER_AGENT__));
             $context  = stream_context_create($options);
             $objSimpleHTML = file_get_html($strURL, false, $context);
         }

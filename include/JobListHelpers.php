@@ -249,7 +249,10 @@ function updateJobRecord($prevJobRecord, $jobRecordChanges)
 
 function getMergedJobRecord($prevJobRecord, $newerJobRecord)
 {
-    if($prevJobRecord['key_jobsite_siteid'] == $newerJobRecord['key_jobsite_siteid']) return $prevJobRecord; // don't update yourself.
+    if($prevJobRecord['key_jobsite_siteid'] == $newerJobRecord['key_jobsite_siteid'])
+    {
+        return $prevJobRecord; // don't update yourself.
+    }
 
     // Since we already had a job record for this particular listing,
     // we'll merge the new info into the old one.  For most fields,

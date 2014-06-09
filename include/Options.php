@@ -84,6 +84,13 @@ function __initializeArgs__()
             'required'      => false,
             'short'      => 'tr',
         ),
+        'excluded_companies_regexes_file' => array(
+            'description'   => 'CSV file of company names to flag automatically as "not interested"',
+            'default'       => null,
+            'type'          => Pharse::PHARSE_STRING,
+            'required'      => false,
+            'short'      => 'cr',
+        ),
         'filter_notinterested' => array(
             'description'   => 'Exclude listings that are marked as "not interested".',
             'default'       => 0,
@@ -146,11 +153,13 @@ function __getPassedArgs__()
 
     $GLOBALS['titles_file_details'] = get_PharseOption_FileDetails("excluded_titles_file", true);
     $GLOBALS['titles_regex_file_details'] = get_PharseOption_FileDetails("excluded_titles_regexes_file", true);
+    $GLOBALS['companies_regex_file_details'] = get_PharseOption_FileDetails("excluded_companies_regexes_file", true);
 
     $GLOBALS['output_file_details'] = get_PharseOption_FileDetails("output_file", false);
 
     $GLOBALS['titles_to_filter'] = null;
     $GLOBALS['titles_regex_to_filter'] = null;
+    $GLOBALS['companies_regex_to_filter'] = null;
 
     $GLOBALS['company_role_pairs'] = null;
 
