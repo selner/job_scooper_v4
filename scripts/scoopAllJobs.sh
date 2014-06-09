@@ -12,8 +12,10 @@ endlogname="_jobs.log"
 enddestname="latest_jobs.csv"
 endtitlesname="bryans_list_exclude_titles.csv"
 endregextitlesname="bryans_list_exclude_titles_regex.csv"
+endregexcompaniesname="bryans_list_exclude_companies_regex.csv"
 titlesfilename=$pathsrcfiles$endtitlesname
 regextitlesfilename=$pathsrcfiles$endregextitlesname
+regexcompaniesfilename=$pathsrcfiles$endregexcompaniesname
 filename=$now$endfilename
 file=$path$filename
 log=$path$now$endlogname
@@ -69,8 +71,8 @@ fi
 echo 'Starting download of jobs... ' 2>&1 1>>"$log"
 
 # Now process that data and export CSVs with the listings
-echo "Running php ../../scooper_utils/runJobs.php $flags_script_defaults -days 7 -o '$file' -t '$titlesfilename' -tr '$regextitlesfilename'"  2>&1 1>>"$log"
-php ../runJobs.php $flags -days 7 -o "$file" -t "$titlesfilename" -tr "$regextitlesfilename" 2>&1 1>>"$log"
+echo "Running php ../../scooper_utils/runJobs.php $flags_script_defaults -days 7 -o '$file' -t '$titlesfilename' -tr '$regextitlesfilename'  -cr '$regexcompaniesfilename' "  2>&1 1>>"$log"
+php ../runJobs.php $flags -days 7 -o "$file" -t "$titlesfilename" -tr "$regextitlesfilename" -cr "$regexcompaniesfilename" 2>&1 1>>"$log"
 
 echo 'Download complete. ' 2>&1 1>>"$log"
 
