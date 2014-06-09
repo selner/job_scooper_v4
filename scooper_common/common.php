@@ -31,6 +31,7 @@ $GLOBALS['VERBOSE'] = false;
 const C__RECORD_CHUNK_SIZE__ = 5;
 const C__FSHOWVERBOSE_APICALL__ = 0;
 
+
 function getDefaultFileName($strFilePrefix, $strBase, $strExt)
 {
     return sprintf(C__APPNAME__."_". date("Ymd-Hms")."%s_%s.%s", ($strFilePrefix != null ? "_".$strFilePrefix : ""), ($strBase != null  ? "_".$strBase : ""), $strExt);
