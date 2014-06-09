@@ -1,6 +1,6 @@
 #!/bin/bash
-override=$1
-skipHTMLDownload=$2
+flags=$2
+skipHTMLDownload=$1
 
 # get an output file name
 now=$(date +"%Y_%m_%d_%H%M")
@@ -28,6 +28,16 @@ echo 'Output file will be ' $file 2>&1 1>"$log"
 echo 'Final destination will be ' $dest 2>&1 1>"$log"
 echo 'Log file is ' $log  2>&1 1>>"$log"
 
+case "$(date +%a)" in 
+Mon|Wed|Fri|Sat)
+  when="noteveryday"
+  flags_script_defaults=" -all " 
+;;
+Tue|Thu|Sat|Sun)
+  when="everyday"
+  flags_script_defaults=" -indeed -simplyhired "
+;;
+esac
 
 
 # BUGBUG
@@ -51,33 +61,16 @@ if [ "$skipHTMLDownload" != "skip" ]; then     ## GOOD
 	echo 'New jobs site download complete.' $log  2>&1 1>>"$log"
 fi
 
-case "$(date +%a)" in 
-Mon|Wed|Fri|Sat)
-  when="noteveryday"
-  script_flags=" -all " 
-;;
-Tue|Thu|Sat|Sun)
-  when="everyday"
-  script_flags=" -indeed -simplyhired "
-;;
-esac
-
-echo 'Running script case $when using the following flags:  '$script_flags 2>&1 1>>"$log"
-
-if [ "$override" == "all" ]; then     ## GOOD
-
-  when="noteveryday"
-  script_flags=" -all " 
-
+if [ "$flags" == "" ]; then     ## No flags so go with the defaults
+	$flags=$flags_script_defaults
 fi
 
-echo 'Downloading new jobs... ' 2>&1 1>>"$log"
+
+echo 'Starting download of jobs... ' 2>&1 1>>"$log"
 
 # Now process that data and export CSVs with the listings
-echo "Running php ../../scooper_utils/runJobs.php $script_flags -days 7 -o '$file' -t '$titlesfilename' -tr '$regextitlesfilename'"  2>&1 1>>"$log"
-php ../runJobs.php $script_flags -days 7 -o "$file" -t "$titlesfilename" -tr "$regextitlesfilename" 2>&1 1>>"$log"
-
-# cp "$file" "$dest"   2>&1 1>>"$log"
+echo "Running php ../../scooper_utils/runJobs.php $flags_script_defaults -days 7 -o '$file' -t '$titlesfilename' -tr '$regextitlesfilename'"  2>&1 1>>"$log"
+php ../runJobs.php $flags -days 7 -o "$file" -t "$titlesfilename" -tr "$regextitlesfilename" 2>&1 1>>"$log"
 
 echo 'Download complete. ' 2>&1 1>>"$log"
 
