@@ -357,18 +357,17 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     public function getMyJobsForSearch($searchDetails, $nDays = -1)
     {
-
-        if($GLOBALS['site_plugins'][strtolower($searchDetails['site_name'])]['results_type'] == C__SEARCH_RESULTS_TYPE_XML__)
+        switch($GLOBALS['site_plugins'][strtolower($searchDetails['site_name'])]['results_type'])
         {
+            case C__SEARCH_RESULTS_TYPE_XML__:
             $this->getMyJobsForSearchFromXML($searchDetails, $nDays);
-        }
-        if($GLOBALS['site_plugins'][strtolower($searchDetails['site_name'])]['results_type'] == C__SEARCH_RESULTS_TYPE_HTML_FILE__)
-        {
-            $this->getMyJobsForSearchFromFile($searchDetails, $nDays);
+            break;
 
-        }
-        else
-        {
+            case C__SEARCH_RESULTS_TYPE_HTML_FILE__:
+            $this->getMyJobsFromHTMLFiles($searchDetails, $nDays);
+            break;
+
+            default:
             $this->getMyJobsForSearchFromWebpage($searchDetails, $nDays);
         }
     }
@@ -392,8 +391,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             $xmlResult = simplexml_load_string($ret['output']);
 
             if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
-            //$xmlResult->registerXPathNamespace("def", "http://www.w3.org/2005/Atom");
-
+            $xmlResult->registerXPathNamespace("def", "http://www.w3.org/2005/Atom");
         }
         catch (ErrorException $ex)
         {
@@ -419,40 +417,42 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             __debug__printLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['search_name']."'.", C__DISPLAY_ITEM_START__);
             return;
         }
-
-        __debug__printLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__JOB_ITEMCOUNT_UNKNOWN__  ? "a not yet know number of" : $nTotalListings) . " jobs:  ".$strURL, C__DISPLAY_ITEM_START__);
-
-        while ($nPageCount <= $totalPagesCount )
+        else
         {
-            $arrPageJobsList = null;
 
-            $objSimpleHTML = null;
-            $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
-            $class = new APICallWrapperClass();
-            $ret = $class->cURL($strURL,'' , 'GET', 'application/rss+xml');
+            __debug__printLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__JOB_ITEMCOUNT_UNKNOWN__  ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strURL, C__DISPLAY_ITEM_START__);
 
-            $xmlResult = simplexml_load_string($ret['output']);
-            if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
-
-            $arrPageJobsList = $this->parseJobsListForPage($xmlResult);
-
-
-            if(!is_array($arrPageJobsList))
+            while ($nPageCount <= $totalPagesCount )
             {
-                // we likely hit a page where jobs started to be hidden.
-                // Go ahead and bail on the loop here
-                __debug__printLine("Not getting results back from ". $this->siteName . " starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", C__DISPLAY_ITEM_START__);
-                $nPageCount = $totalPagesCount ;
+                $arrPageJobsList = null;
+
+                $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
+                $class = new APICallWrapperClass();
+                $ret = $class->cURL($strURL,'' , 'GET', 'application/rss+xml');
+
+                $xmlResult = simplexml_load_string($ret['output']);
+                if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
+
+                $arrPageJobsList = $this->parseJobsListForPage($xmlResult);
+
+
+                if(!is_array($arrPageJobsList))
+                {
+                    // we likely hit a page where jobs started to be hidden.
+                    // Go ahead and bail on the loop here
+                    __debug__printLine("Not getting results back from ". $this->siteName . " starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", C__DISPLAY_ITEM_START__);
+                    $nPageCount = $totalPagesCount ;
+                }
+                else
+                {
+                    $this->_addJobsToMyJobsList_($arrPageJobsList);
+                    $nItemCount += $this->nJobListingsPerPage;
+                }
+                $nPageCount++;
+
             }
-            else
-            {
-                $this->_addJobsToMyJobsList_($arrPageJobsList);
-                $nItemCount += $this->nJobListingsPerPage;
-            }
-            $nPageCount++;
 
         }
-
         __debug__printLine(PHP_EOL.$this->siteName . "[".$searchDetails['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, C__DISPLAY_ITEM_RESULT__);
 
     }
@@ -494,40 +494,43 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             __debug__printLine("No new job listings were found on " . $this->siteName . " for search '" . $search['search_name']."'.", C__DISPLAY_ITEM_START__);
             return;
         }
-
-        __debug__printLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__JOB_ITEMCOUNT_UNKNOWN__  ? "a not yet know number of" : $nTotalListings) . " jobs:  ".$strURL, C__DISPLAY_ITEM_START__);
-
-        while ($nPageCount <= $totalPagesCount )
+        else
         {
-            $arrPageJobsList = null;
 
-            $objSimpleHTML = null;
-            $strURL = $this->_getURLfromBase_($search, $nDays, $nPageCount, $nItemCount);
+            __debug__printLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__JOB_ITEMCOUNT_UNKNOWN__  ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strURL, C__DISPLAY_ITEM_START__);
 
-            if(!$objSimpleHTML) $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL);
-            if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
-
-            $arrPageJobsList = $this->parseJobsListForPage($objSimpleHTML);
-
-
-            if(!is_array($arrPageJobsList))
+            while ($nPageCount <= $totalPagesCount )
             {
-                // we likely hit a page where jobs started to be hidden.
-                // Go ahead and bail on the loop here
-                __debug__printLine("Not getting results back from ". $this->siteName . " starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", C__DISPLAY_ITEM_START__);
-                $nPageCount = $totalPagesCount ;
-            }
-            else
-            {
-                $this->_addJobsToMyJobsList_($arrPageJobsList);
-                $nItemCount += $this->nJobListingsPerPage;
-            }
+                $arrPageJobsList = null;
 
-            // clean up memory
-            $objSimpleHTML->clear();
-            unset($objSimpleHTML);
-            $nPageCount++;
+                $objSimpleHTML = null;
+                $strURL = $this->_getURLfromBase_($search, $nDays, $nPageCount, $nItemCount);
 
+                if(!$objSimpleHTML) $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL);
+                if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
+
+                $arrPageJobsList = $this->parseJobsListForPage($objSimpleHTML);
+
+
+                if(!is_array($arrPageJobsList))
+                {
+                    // we likely hit a page where jobs started to be hidden.
+                    // Go ahead and bail on the loop here
+                    __debug__printLine("Not getting results back from ". $this->siteName . " starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", C__DISPLAY_ITEM_START__);
+                    $nPageCount = $totalPagesCount ;
+                }
+                else
+                {
+                    $this->_addJobsToMyJobsList_($arrPageJobsList);
+                    $nItemCount += $this->nJobListingsPerPage;
+                }
+
+                // clean up memory
+                $objSimpleHTML->clear();
+                unset($objSimpleHTML);
+                $nPageCount++;
+
+            }
         }
 
         __debug__printLine(PHP_EOL.$this->siteName . "[".$search['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, C__DISPLAY_ITEM_RESULT__);

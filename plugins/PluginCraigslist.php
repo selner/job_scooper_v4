@@ -22,8 +22,8 @@ require_once dirname(__FILE__) . '/../include/ClassJobsSitePlugin.php';
 class PluginCraigslist  extends ClassJobsSitePlugin
 {
     protected $siteName = 'Craigslist';
-    protected $nJobListingsPerPage = 50;
-    protected $siteBaseURL = 'http://www.Indeed.com';
+    protected $nJobListingsPerPage = 100;
+    protected $siteBaseURL = 'http://seattle.craigslist.org/';
 
 
 
@@ -48,8 +48,7 @@ class PluginCraigslist  extends ClassJobsSitePlugin
 
     function parseTotalResultsCount($objSimpHTML)
     {
-        return 100;
-        $pageDiv= $objSimpHTML->find('span[class="button pagenum"]');
+        $pageDiv= $objSimpHTML->find('span[class="pagenum"]');
         $pageDiv = $pageDiv[0];
         $pageText = $pageDiv->plaintext;
         $arrItemItems = explode(" ", trim($pageText));
@@ -72,7 +71,7 @@ class PluginCraigslist  extends ClassJobsSitePlugin
             $item['job_title'] = $jobTitleLink[0]->plaintext;
             if($item['job_title'] == '') continue;
 
-            $item['job_post_url'] = 'http://seattle.craigslist.org'.$jobTitleLink[0]->href;
+            $item['job_post_url'] = $this->siteName.$jobTitleLink[0]->href;
             $item['date_pulled'] = getTodayAsString();
 
             $item['job_site'] = "Craigslist";
@@ -84,6 +83,7 @@ class PluginCraigslist  extends ClassJobsSitePlugin
 
             $ret[] = $this->normalizeItem($item);
         }
+
         return $ret;
     }
 

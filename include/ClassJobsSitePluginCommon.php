@@ -169,7 +169,7 @@ class ClassJobsSitePluginCommon
 
         if(is_null($retArrNormalized['company']) || strlen($retArrNormalized['company']) <= 0)
         {
-            $retArrNormalized['company'] = $retArrNormalized['job_site'] . "-" . "COMPANY-UNKNOWN";
+            $retArrNormalized['company'] = "company-unknown";
         }
 
 //        $retArrNormalized ['brief'] = strScrub($retArrNormalized['brief'], REMOVE_EXTRA_WHITESPACE | HTML_DECODE | LOWERCASE);
@@ -187,7 +187,7 @@ class ClassJobsSitePluginCommon
             // Instead for Craiglist listings, we'll dedupe using the role title and the jobsite name
             if(strcasecmp($retArrNormalized['job_site'], "craigslist") == 0)
             {
-                $retArrNormalized['key_jobsite_siteid'] = strScrub($retArrNormalized['job_site'], FOR_LOOKUP_VALUE_MATCHING) . strScrub($retArrNormalized['job_title'], FOR_LOOKUP_VALUE_MATCHING);
+                $retArrNormalized['key_jobsite_siteid'] = strScrub($retArrNormalized['job_site'], FOR_LOOKUP_VALUE_MATCHING) .strScrub($retArrNormalized['job_title'], FOR_LOOKUP_VALUE_MATCHING) . strScrub($retArrNormalized['job_site_date'], FOR_LOOKUP_VALUE_MATCHING);
             }
             else
             {
@@ -295,7 +295,7 @@ class ClassJobsSitePluginCommon
             __debug__printLine("Using previously loaded " . count($GLOBALS['companies_regex_to_filter']) . " regexed company strings to exclude." , C__DISPLAY_ITEM_DETAIL__);
             return;
         }
-        else if($arrCompanyFileDetails != null)
+        else if($arrCompanyFileDetails != null && $arrCompanyFileDetails ['full_file_path'] != '')
         {
             $strFileName = $arrCompanyFileDetails ['full_file_path'];
             if(file_exists($strFileName ) && is_file($strFileName ))
@@ -327,12 +327,15 @@ class ClassJobsSitePluginCommon
 
         if($fCompaniesLoaded == false)
         {
-            __debug__printLine("Could not load regex list for companies to exclude from '" . $strFileName . "'.  Final list will not be filtered." , C__DISPLAY_WARNING__);
+            if($arrCompanyFileDetails['full_file_path'] == '')
+                __debug__printLine("No file specified for companies regexes to exclude from '" . $strFileName . "'.  Final list will not be filtered." , C__DISPLAY_WARNING__);
+            else
+                __debug__printLine("Could not load regex list for companies to exclude from '" . $strFileName . "'.  Final list will not be filtered." , C__DISPLAY_WARNING__);
         }
         else
         {
 //            var_dump('$GLOBALS[companies_regex_to_filter]', $GLOBALS['companies_regex_to_filter']);
-            __debug__printLine("Loaded " . count($GLOBALS['companies_regex_to_filter']). " regexes to use for filtering companies from '" . $strFileName . "'." , C__DISPLAY_WARNING__);
+            __debug__printLine("Loaded " . count($GLOBALS['companies_regex_to_filter']). " regexes to use for filtering companies." , C__DISPLAY_WARNING__);
 
         }
     }
@@ -352,7 +355,7 @@ class ClassJobsSitePluginCommon
             __debug__printLine("Using previously loaded " . count($GLOBALS['titles_regex_to_filter']) . " regexed title strings to exclude." , C__DISPLAY_ITEM_DETAIL__);
             return;
         }
-        else if($arrTitleFileDetails != null)
+        else if($arrTitleFileDetails != null && $arrTitleFileDetails ['full_file_path'] != '')
         {
             $strFileName = $arrTitleFileDetails ['full_file_path'];
             if(file_exists($strFileName ) && is_file($strFileName ))
@@ -384,7 +387,10 @@ class ClassJobsSitePluginCommon
 
         if($fTitlesLoaded == false)
         {
-            __debug__printLine("Could not load regex list for titles to exclude from '" . $strFileName . "'.  Final list will not be filtered." , C__DISPLAY_WARNING__);
+            if($arrTitleFileDetails['full_file_path'] == '')
+                __debug__printLine("No file specified for title regexes to exclude from '" . $strFileName . "'.  Final list will not be filtered." , C__DISPLAY_WARNING__);
+            else
+                __debug__printLine("Could not load regex list for titles to exclude from '" . $strFileName . "'.  Final list will not be filtered." , C__DISPLAY_WARNING__);
         }
         else
         {
@@ -451,8 +457,8 @@ class ClassJobsSitePluginCommon
         $retNote = "";
         $strDupeNotes = null;
 
-        $strDupeMarker_Start = "<duplicate jobs>";
-        $strDupeMarker_End = "</duplicate_jobs>";
+        $strDupeMarker_Start = "<dupe>";
+        $strDupeMarker_End = "</dupe>";
 
         if(substr_count($strNote, $strDupeMarker_Start)>0)
         {
@@ -470,9 +476,7 @@ class ClassJobsSitePluginCommon
             }
         }
 
-
-
-        return $strUserNotePart . " " . PHP_EOL . $strDupeMarker_Start . $strDupeNotes . $strNewDupe . $strDupeMarker_End;
+        return (strlen($strUserNotePart) > 0 ? $strUserNotePart . " " . PHP_EOL : "") . $strDupeMarker_Start . $strDupeNotes . $strNewDupe . $strDupeMarker_End;
 
     }
 
@@ -591,6 +595,7 @@ class ClassJobsSitePluginCommon
     function markJobsList_SetAutoExcludedCompaniesFromRegex(&$arrToMark, $strCallerDescriptor = null)
     {
         $this->_loadCompaniesRegexesToFilter_();
+        $fMatched = false;
 
         $nJobsNotMarked = 0;
         $nJobsMarkedAutoExcluded = 0;
@@ -600,7 +605,7 @@ class ClassJobsSitePluginCommon
         $arrJobs_AutoUpdatable= array_filter($arrToMark, "isJobAutoUpdatable");
         $nJobsSkipped = count($arrToMark) - count($arrJobs_AutoUpdatable);
 
-        if(count($arrJobs_AutoUpdatable) > 0)
+        if(count($arrJobs_AutoUpdatable) > 0 && count($GLOBALS['companies_regex_to_filter']) > 0)
         {
             foreach($arrJobs_AutoUpdatable as $job)
             {
@@ -675,8 +680,8 @@ class ClassJobsSitePluginCommon
                     if($fMatched == true) break;
                 }
 
-                if($fMatched == false)
-                    __debug__printLine("Job title '".$job['job_title'] ."' was not found in the title exclusion regex list.  Keeping for review." , C__DISPLAY_ITEM_DETAIL__);
+//                if($fMatched == false)
+//                    __debug__printLine("Job title '".$job['job_title'] ."' was not found in the title exclusion regex list.  Keeping for review." , C__DISPLAY_ITEM_DETAIL__);
 
             }
         }
@@ -902,9 +907,18 @@ class ClassJobsSitePluginCommon
         if(!$objSimpleHTML && $strURL && strlen($strURL) > 0)
         {
 //             __debug__printLine("Loading results from ".$strURL, C__DISPLAY_ITEM_DETAIL__);
-            $options  = array('http' => array( 'timeout' => 10, 'user_agent' => C__STR_USER_AGENT__));
-            $context  = stream_context_create($options);
-            $objSimpleHTML = file_get_html($strURL, false, $context);
+            $class = new APICallWrapperClass();
+            $retHTML = $class->curl($strURL, null, 'GET');
+            if(count(strlen($retHTML['output']) > 0))
+            {
+                $objSimpleHTML = str_get_html($retHTML['output']);
+            }
+            else
+            {
+                $options  = array('http' => array( 'timeout' => 30, 'user_agent' => C__STR_USER_AGENT__));
+                $context  = stream_context_create($options);
+                $objSimpleHTML = file_get_html($strURL, false, $context);
+            }
         }
 
         if(!$objSimpleHTML)
