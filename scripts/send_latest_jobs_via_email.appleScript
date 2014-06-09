@@ -1,6 +1,7 @@
 
 on run (argv)
 	
+	sendMail("/Users/bryan/Dropbox/JobSearch-and-Consulting/JobPosts-Tracking/2014_06_09_0804_jobs.csv")
 	
 	if (count of argv) = 0 then
 		log "Error: No file specified for sending."
@@ -19,7 +20,7 @@ on run (argv)
 	end if
 	
 	return ret
-end go
+end run
 
 on sendMail(strFileToSend)
 	
@@ -32,10 +33,11 @@ on sendMail(strFileToSend)
 	set ret to -1
 	
 	set theAttachmentFileFullPath to "" as string
-	set strBashGrepForError to "egrep -e \"ERROR\" " & strFileToSend
 	set theAttachmentFileFullPath to switchToPosixPathQuickHack(strFileToSend)
+	set theLogFileFullPath to replaceString(strFileToSend, ".csv", ".log")
 	set theAttachmentFileName to getFileNameFromPath(theAttachmentFileFullPath, ":")
 	set strLoggedErrors to ""
+	set strBashGrepForError to "egrep -e \"ERROR\" " & theLogFileFullPath
 	
 	try
 		set strLoggedErrors to do shell script strBashGrepForError as string
