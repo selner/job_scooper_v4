@@ -360,7 +360,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         if($GLOBALS['site_plugins'][strtolower($searchDetails['site_name'])]['results_type'] == C__SEARCH_RESULTS_TYPE_XML__)
         {
-            $this->getMyJobsForSearchFromXML($search, $nDays);
+            $this->getMyJobsForSearchFromXML($searchDetails, $nDays);
         }
         if($GLOBALS['site_plugins'][strtolower($searchDetails['site_name'])]['results_type'] == C__SEARCH_RESULTS_TYPE_HTML_FILE__)
         {
@@ -373,9 +373,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
     }
 
-    function getMyJobsForSearchFromXML($search, $nDays = -1)
+    function getMyJobsForSearchFromXML($searchDetails, $nDays = -1)
     {
-        ini_set("user_agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.114 Safari/537.36");
+        ini_set("user_agent",C__STR_USER_AGENT__);
         ini_set("max_execution_time", 0);
         ini_set("memory_limit", "10000M");
 
@@ -384,8 +384,8 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         try
         {
-            $strURL = $this->_getURLfromBase_($search, $nDays, $nPageCount, $nItemCount);
-            __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$search['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
+            $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
+            __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
 
             $class = new APICallWrapperClass();
             $ret = $class->cURL($strURL, null, 'GET', 'text/xml; charset=UTF-8');
@@ -416,7 +416,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         if($nTotalListings <= 0)
         {
-            __debug__printLine("No new job listings were found on " . $this->siteName . " for search '" . $search['search_name']."'.", C__DISPLAY_ITEM_START__);
+            __debug__printLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['search_name']."'.", C__DISPLAY_ITEM_START__);
             return;
         }
 
@@ -427,9 +427,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             $arrPageJobsList = null;
 
             $objSimpleHTML = null;
-            $strURL = $this->_getURLfromBase_($search, $nDays, $nPageCount, $nItemCount);
+            $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
             $class = new APICallWrapperClass();
-            $ret = $class->cURL($strURL, 'search_keywords%3Dproduct%26search_location%3DWA%26search_categories%3D0%26filter_job_type%255B%255D%3Dfreelance%26filter_job_type%255B%255D%3Dfull-time%26filter_job_type%255B%255D%3Dinternship%26filter_job_type%255B%255D%3Dpart-time%26filter_job_type%255B%255D%3Dtemporary', 'POST');
+            $ret = $class->cURL($strURL,'' , 'GET', 'application/rss+xml');
 
             $xmlResult = simplexml_load_string($ret['output']);
             if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
@@ -453,7 +453,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         }
 
-        __debug__printLine(PHP_EOL.$this->siteName . "[".$search['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, C__DISPLAY_ITEM_RESULT__);
+        __debug__printLine(PHP_EOL.$this->siteName . "[".$searchDetails['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, C__DISPLAY_ITEM_RESULT__);
 
     }
 

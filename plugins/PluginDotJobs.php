@@ -25,7 +25,7 @@ class PluginDotJobs extends ClassJobsSitePlugin
     protected $siteBaseURL = '';
 
     function getDaysURLValue($nDays) { return -1; }
-    function parseTotalResultsCount($nDays)  { return -1; }
+    function parseTotalResultsCount($nDays)  { return C__JOB_PAGECOUNT_NOTAPPLICABLE__; }
 
 
 
@@ -36,8 +36,6 @@ class PluginDotJobs extends ClassJobsSitePlugin
 
         foreach ($xmlResult->channel->item as $job)
         {
-
-
 
             $item = parent::getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
