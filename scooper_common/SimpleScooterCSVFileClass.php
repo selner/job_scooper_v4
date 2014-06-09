@@ -263,20 +263,23 @@ class SimpleScooterCSVFileClass {
 
         $strHTMLReturn = "";
 
-        $strHTMLReturn .= "<div class='CSV_outer' width='100%>";
+        $strHTMLReturn .= "<div class='CSV_outer' style='width:2000;'>";
         foreach($arrCSVRows as $rec)
         {
-            $strHTMLReturn .= "<div class='CSV_row'>";
+            $strHTMLReturn .= "<div class='CSV_row'style='display: inline-block;
+padding-bottom: 20px;'>";
             foreach($arrFieldsToUseInKey as $fieldName)
             {
-                $strHTMLReturn .= "<div class='CSV_column $fieldName'>";
+                $strHTMLReturn .= "<div class='CSV_column $fieldName'  style='display: inline; padding-right:10px;'>";
                 $strHTMLReturn .= linkify($rec[$fieldName]);
-                $strHTMLReturn .= "</td>";
+                $strHTMLReturn .= "</div>";
             }
             $strHTMLReturn .= "</div>";
         }
-        $strHTMLReturn .= "</div><br/>";
+        $strHTMLReturn .= "</div><p></p>";
 
+
+        $strHTMLReturn = preg_replace("/^(.*)/", "<br/><br/>$1", $strHTMLReturn );
 
         return $strHTMLReturn;
 
