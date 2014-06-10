@@ -197,14 +197,14 @@ class SimpleScooterCSVFileClass {
         return $arrDataLoaded['data_rows'];
     }
 
-    function writeArrayToHTMLFile($records, $keys=null, $arrKeysToUseToDedupe = null)
+    function writeArrayToHTMLFile($records, $keys=null, $arrKeysToUseToDedupe = null, $strCSSToInclude = null)
     {
         if($this->_strAccessMode_[0] == 'w' || $this->_strAccessMode_[0] == 'w')
         {
             $this->_resetFile();
         }
 
-        $htmlOut = $this->getHTMLTableForCSV($records, $keys);
+        $htmlOut = $this->getHTMLTableForCSV($records, $keys, $strCSSToInclude);
 
         if(!fputs($this->_fp_, $htmlOut))
         {
@@ -258,28 +258,58 @@ class SimpleScooterCSVFileClass {
     }
 
 
-    function getHTMLTableForCSV($arrCSVRows, $arrFieldsToUseInKey)
+    function getHTMLTableForCSV($arrCSVRows, $arrFieldsToUseInKey, $strCSSToInclude = null)
     {
 
         $strHTMLReturn = "";
 
-        $strHTMLReturn .= "<div class='CSV_outer' style='width:2000;'>";
+        if($strCSSToInclude != null)
+        {
+            $strHTMLReturn = PHP_EOL . PHP_EOL . "<style>" . $strCSSToInclude . "</style>". PHP_EOL . PHP_EOL;
+        }
+
+        $strHTMLReturn .= "<table class='CSVTable'>";
+
+        $strHTMLReturn .= "<tr>";
+        foreach($arrFieldsToUseInKey as $fieldName)
+        {
+            $strHTMLReturn .= "<td>";
+            $strHTMLReturn .= $fieldName;
+            $strHTMLReturn .= "</td>";
+        }
+        $strHTMLReturn .= "</tr>";
+
+
         foreach($arrCSVRows as $rec)
         {
-            $strHTMLReturn .= "<div class='CSV_row'style='display: inline-block;
-padding-bottom: 20px;'>";
+            $strHTMLReturn .= "<tr>";
             foreach($arrFieldsToUseInKey as $fieldName)
             {
-                $strHTMLReturn .= "<div class='CSV_column $fieldName'  style='display: inline; padding-right:10px;'>";
-                $strHTMLReturn .= linkify($rec[$fieldName]);
-                $strHTMLReturn .= "</div>";
+                $strHTMLReturn .= "<td>";
+                $linkCount = substr_count($rec[$fieldName], "http");
+                switch ($linkCount)
+                {
+                    case 0:
+                         $strHTMLReturn .= $rec[$fieldName];
+                        break;
+
+                    case 1:
+                        $strLink = substr($rec[$fieldName], 0, 50);
+                        $strHTMLReturn .= "<a href='" . $rec[$fieldName] . "'>" . $strLink . "</a>";
+                        break;
+
+                    default:
+                        $strHTMLReturn .= linkify($rec[$fieldName]);
+                        break;
+                }
+                $strHTMLReturn .= "</td>";
             }
-            $strHTMLReturn .= "</div>";
+            $strHTMLReturn .= "</tr>";
         }
-        $strHTMLReturn .= "</div><p></p>";
+        $strHTMLReturn .= "</table>";
 
 
-        $strHTMLReturn = preg_replace("/^(.*)/", "<br/><br/>$1", $strHTMLReturn );
+//        $strHTMLReturn = preg_replace("/^(.*)/", "<br/><br/>$1", $strHTMLReturn );
 
         return $strHTMLReturn;
 
