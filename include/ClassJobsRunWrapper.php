@@ -14,18 +14,19 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/SitePlugins.php';
 
+define('__ROOT__', dirname(dirname(__FILE__)));
+require_once(__ROOT__.'/include/SitePlugins.php');
+require_once(__ROOT__.'/include/ClassMultiSiteSearch.php');
 
-
-class ClassJobsRunWrapper extends ClassJobsSitePluginNoActualSite
+class ClassJobsRunWrapper extends ClassJobsSitePlugin
 {
     protected $arrJobSearches = null;
     protected $arrUserInputJobs_Active = null;
     protected $arrUserInputJobs_Inactive = null;
     protected $arrJobCSVUserInputFiles = null;
     protected $nNumDaysToSearch = -1;
-
+    protected $detailsOutputSubfolder = null;
 
     function ClassJobsRunWrapper($arrSearches = null, $arrJobCSVUserInputFiles = null, $nDays = -1)
     {
@@ -38,20 +39,75 @@ class ClassJobsRunWrapper extends ClassJobsSitePluginNoActualSite
 
         $this->getCommandLine($arrSearches);
         $this->detailsOutputFile =  $GLOBALS['output_file_details'];
-        $this->setOutputFolder($this->detailsOutputFile['directory']);
         $this->setMyBitFlags(C_NORMAL);
 
         if($this->detailsOutputFile['directory'] == null || $this->detailsOutputFile['directory']== "")
         {
             throw new ErrorException("Required value for the output folder was not specified. Exiting.");
         }
+
         if($this->detailsOutputFile['file_name'] == null || $this->detailsOutputFile['full_file_path'] == "")
         {
-            $strOutPathWithName = $this->getOutputFileFullPath("_runjobs_notnamed_");
-            $this->detailsOutputFile = parseFilePath($strOutPathWithName);
+            $fileName = getDefaultJobsOutputFileName("", "jobs", "csv");
+            $this->detailsOutputFile = parseFilePath($this->detailsOutputFile['directory'] . $fileName);
         }
 
+        $this->detailsOutputSubfolder = $this->createOutputSubFolder($this->detailsOutputFile);
+        $this->flagValidClassConstruction = true;
+
     }
+
+
+    function parseJobsListForPage($objSimpHTML)
+    {
+        throw new ErrorException("parseJobsListForPage not supported for class" . get_class($this));
+    }
+    function parseTotalResultsCount($objSimpHTML)
+    {
+        throw new ErrorException("parseTotalResultsCount not supported for class " . get_class($this));
+    }
+
+    function __destruct()
+    {
+        __debug__printLine("Closing ".$this->siteName." instance of class " . get_class($this), C__DISPLAY_ITEM_START__);
+    }
+
+    function getMyOutputFileFullPath($strFilePrefix = "")
+    {
+        $this->checkIsValid();
+        return parent::getOutputFileFullPath($this->siteName . "_" . $strFilePrefix, "jobs", "csv");
+    }
+
+
+    private function createOutputSubFolder($fileDetails)
+    {
+
+
+        // Append the file name base to the directory as a new subdirectory for output
+        $fullNewDirectory = $fileDetails['directory'] . $fileDetails['file_name_base'];
+        __debug__printLine("Attempting to create output directory: " . $fullNewDirectory , C__DISPLAY_SUMMARY__);
+        if(is_dir($fullNewDirectory))
+        {
+
+        }
+        else
+        {
+            if (!mkdir($fullNewDirectory, 0777, true))
+            {
+                throw new ErrorException('Failed to create the output folder: '.$fullNewDirectory);
+            }
+         }
+        $fullNewFilePath = $fullNewDirectory . '/' . getFileNameFromFileDetails($fileDetails);
+        __debug__printLine("Create folder for results output: " . $fullNewFilePath , C__DISPLAY_SUMMARY__);
+
+        // return the new file & path details
+        $this->setOutputFolder($fullNewDirectory);
+
+        return parseFilePath($fullNewFilePath);
+    }
+
+
+
 
     private function getCommandLine($arrSearches=null)
     {
@@ -70,7 +126,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePluginNoActualSite
         $this->normalizeJobList($arrAllJobsLoadedFromSrc);
         if($GLOBALS['OPTS']['DEBUG'] == true)
         {
-            $strCSVInputJobsPath = getFullPathFromFileDetails($this->detailsOutputFile, "", "_Jobs_From_UserInput");
+            $strCSVInputJobsPath = getFullPathFromFileDetails($this->detailsOutputSubfolder, "", "_Jobs_From_UserInput");
             $this->writeJobsListToFile($strCSVInputJobsPath, $arrAllJobsLoadedFromSrc, true, false, "ClassJobRunner-LoadCSVs");
         }
 
@@ -93,19 +149,23 @@ class ClassJobsRunWrapper extends ClassJobsSitePluginNoActualSite
 
     }
 
-    private function writeRunsJobsToFile($strFileOut, $arrJobsToOutput, $strLogDescriptor, $strExt = "CSV")
+    private function writeRunsJobsToFile($strFileOut, $arrJobsToOutput, $strLogDescriptor, $strExt = "CSV", $keysToOutput = null)
     {
-        $this->writeJobsListToFile($strFileOut, $arrJobsToOutput, true, false, "ClassJobRunner-".$strLogDescriptor, $strExt);
+        $this->writeJobsListToFile($strFileOut, $arrJobsToOutput, true, false, "ClassJobRunner-".$strLogDescriptor, $strExt, $keysToOutput);
 
     }
 
-    private function outputFilteredJobsListToFile($strFilterToApply, $strFileNameAppend, $strExt = "CSV", $strFilterDescription = null)
+    private function outputFilteredJobsListToFile($strFilterToApply, $strFileNameAppend, $strExt = "CSV", $strFilterDescription = null, $keysToOutput = null)
     {
         $arrToOutput = null;
 
         if($strFilterToApply == null || $strFilterToApply == "")
         {
-            throw new ErrorException("Required array filter callback was not specified.  Cannot output filtered jobs list.");
+            $arrToOutput = $this->arrLatestJobs;
+        }
+        else
+        {
+            $arrToOutput = array_filter($this->arrLatestJobs, $strFilterToApply);
         }
 
         if($strFileNameAppend == null || $strFileNameAppend == "")
@@ -113,11 +173,10 @@ class ClassJobsRunWrapper extends ClassJobsSitePluginNoActualSite
             throw new ErrorException("Required array filter callback was not specified.  Cannot output " . $strFilterToApply . " filtered jobs list.");
         }
 
-        $arrToOutput = array_filter($this->arrLatestJobs, $strFilterToApply);
-        $details = $this->detailsOutputFile;
+        $details = $this->detailsOutputSubfolder;
         $details['file_extension'] = $strExt;
         $strFilteredCSVOutputPath = getFullPathFromFileDetails($details, "", $strFileNameAppend);
-        $this->writeRunsJobsToFile($strFilteredCSVOutputPath, $arrToOutput, $strFilterToApply, $strExt);
+        $this->writeRunsJobsToFile($strFilteredCSVOutputPath, $arrToOutput, $strFilterToApply, $strExt,$keysToOutput );
         __debug__printLine(($strFilterDescription != null ? $strFilterDescription : $strFileNameAppend) . " " . count($arrToOutput). " job listings output to  " . $strFilteredCSVOutputPath, C__DISPLAY_SUMMARY__);
 
         return $arrToOutput;
@@ -142,7 +201,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePluginNoActualSite
         // the searches in the list and returning us the combined set of new jobs
         // (with the exception of Amazon for historical reasons)
         //
-        $classMulti = new ClassMultiSiteSearch($GLOBALS["bit_flags"], $this->detailsOutputFile['full_file_path']);
+        $classMulti = new ClassMultiSiteSearch($GLOBALS["bit_flags"], $this->detailsOutputSubfolder['full_file_path']);
         $classMulti->addSearches($this->arrJobSearches);
         $classMulti->downloadAllUpdatedJobs( $this->nNumDaysToSearch);
         $this->_addJobsToMyJobsList_($classMulti->getMyJobsList());
@@ -153,7 +212,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePluginNoActualSite
         if($GLOBALS['site_plugins']['Amazon']['include_in_run'] == true)
         {
             __debug__printLine("Adding Amazon jobs....", C__DISPLAY_ITEM_START__);
-            $class = new PluginAmazon($GLOBALS["bit_flags"], $this->detailsOutputFile['full_file_path']);
+            $class = new PluginAmazon($GLOBALS["bit_flags"], $this->detailsOutputSubfolder['full_file_path']);
             $class->downloadAllUpdatedJobs( $this->nNumDaysToSearch);
             $this->_addJobsToMyJobsList_($class->getMyJobsList());
         }
@@ -165,7 +224,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePluginNoActualSite
 
         addJobsToJobsList($this->arrLatestJobs_UnfilteredByUserInput, $this->arrLatestJobs);
 
-        $strRawJobsListOutput = getFullPathFromFileDetails($this->detailsOutputFile, "", "_rawjobslist_preuser_filtering");
+        $strRawJobsListOutput = getFullPathFromFileDetails($this->detailsOutputSubfolder, "", "_rawjobslist_preuser_filtering");
 //        $this->writeJobsListToFile($strRawJobsListOutput, $this->arrLatestJobs_UnfilteredByUserInput , true, false, "ClassJobsRunWrapper-_rawjobslist_preuser_filtering");
         $this->writeRunsJobsToFile($strRawJobsListOutput, $this->arrLatestJobs_UnfilteredByUserInput, "RawJobsList_PreUserDataFiltering");
 
@@ -252,8 +311,9 @@ class ClassJobsRunWrapper extends ClassJobsSitePluginNoActualSite
         //
         // Output all job records and their values
         //
-        $strOutDetailsAllResultsName = getFullPathFromFileDetails($this->detailsOutputFile, "", "_AllJobs");
-        $this->writeJobsListToFile($strOutDetailsAllResultsName, $this->arrLatestJobs, "ClassJobsRunWrapper-AllJobs");
+        $arrJobs_Active = $this->outputFilteredJobsListToFile(null, "_AllJobs", "CSV");
+//        $strOutDetailsAllResultsName = getFullPathFromFileDetails($this->detailsOutputFile, "", "_AllJobs");
+//        $this->writeJobsListToFile($strOutDetailsAllResultsName, $this->arrLatestJobs, "ClassJobsRunWrapper-AllJobs");
 
         //
         // Now, output the various subsets of the total jobs list
@@ -263,13 +323,13 @@ class ClassJobsRunWrapper extends ClassJobsSitePluginNoActualSite
 
         // Output only records that are new or not marked as excluded (aka "Yes" or "Maybe")
         $arrJobs_Active = $this->outputFilteredJobsListToFile("isMarked_InterestedOrBlank", "_ActiveJobs", "CSV");
-        $arrJobs_Active = $this->outputFilteredJobsListToFile("isMarked_InterestedOrBlank", "_ActiveJobs", "HTML");
+        $arrJobs_Active = $this->outputFilteredJobsListToFile("isMarked_InterestedOrBlank", "_ActiveJobs", "HTML", null, $this->getKeysForHTMLOutput());
 
         $arrJobs_Active = $this->outputFilteredJobsListToFile("isJobUpdatedToday", "_UpdatedJobs");
 
         // Output only new records that haven't been looked at yet
         $arrJobs_NewOnly = $this->outputFilteredJobsListToFile("isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "CSV");
-        $arrJobs_NewOnly = $this->outputFilteredJobsListToFile("isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "HTML");
+        $arrJobs_NewOnly = $this->outputFilteredJobsListToFile("isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "HTML", null, $this->getKeysForHTMLOutput());
 
         // Output all records that were automatically excluded
         $arrJobs_AutoExcluded = $this->outputFilteredJobsListToFile("isMarked_NotInterested", "_ExcludedJobs");
@@ -286,4 +346,27 @@ class ClassJobsRunWrapper extends ClassJobsSitePluginNoActualSite
         __debug__printLine("Total jobs downloaded:  ".count($this->arrLatestJobs_UnfilteredByUserInput). PHP_EOL. "Total jobs:  ".count($this->arrLatestJobs). PHP_EOL."New: ". count($arrJobs_NewOnly) . " jobs for review. " .count($arrJobs_NewButFiltered). " jobs were auto-filtered.".PHP_EOL."Active: ". count($arrJobs_Active)  . PHP_EOL. "Auto-Filtered: ".count($arrJobs_AutoExcluded). PHP_EOL."Dupes: ".count($arrJobs_AutoDupe) , C__DISPLAY_SUMMARY__);
 
     }
+
+    private function getKeysForHTMLOutput()
+    {
+        return array(
+            'company',
+            'job_title',
+            'job_post_url',
+            'location',
+            'job_site_category',
+//            'job_site_date' =>'',
+            'interested',
+            'notes',
+//            'status',
+//            'last_status_update',
+            'date_pulled',
+            'job_site',
+            'job_id',
+//            'key_jobsite_siteid',
+//            'key_company_role',
+//            'date_last_updated',
+        );
+    }
+
 } 

@@ -1,7 +1,15 @@
-
 on run (argv)
+	run_with_args(argv)
+	--	test()
+end run
+
+on test()
 	
-	sendMail("/Users/bryan/Dropbox/JobSearch-and-Consulting/JobPosts-Tracking/2014_06_09_0804_jobs.csv")
+	sendMail("/Users/bryan/Dropbox/JobSearch-and-Consulting/JobPosts-Tracking/2014_06_10_0951_jobs/2014_06_10_0951_jobs.csv")
+	
+end test
+
+on run_with_args(argv)
 	
 	if (count of argv) = 0 then
 		log "Error: No file specified for sending."
@@ -20,7 +28,7 @@ on run (argv)
 	end if
 	
 	return ret
-end run
+end run_with_args
 
 on sendMail(strFileToSend)
 	

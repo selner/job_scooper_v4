@@ -14,7 +14,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/../include/ClassJobsSitePlugin.php';
+define('__ROOT__', dirname(dirname(__FILE__)));
+require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
+
 
 
 function combineTextAllChildren($node, $fRecursed = false)

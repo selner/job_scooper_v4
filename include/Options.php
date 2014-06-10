@@ -17,22 +17,24 @@
 //
 // If installed as part of the package, uses Klogger v0.1 version (http://codefury.net/projects/klogger/)
 //
+define('__ROOT__', dirname(dirname(__FILE__)));
+require_once(__ROOT__.'/lib/pharse.php');
+require_once(__ROOT__.'/lib/Linkify.php');
+require_once(__ROOT__.'/lib/simple_html_dom.php');
+require_once(__ROOT__.'/scooper_common/common.php');
 
-require_once dirname(__FILE__) . '/../lib/pharse.php';
 
-if ( file_exists ( dirname(__FILE__) . '/../lib/KLogger.php') )
+if ( file_exists ( __ROOT__.'/lib/KLogger.php' ) )
 {
     define(C_USE_KLOGGER, 1);
-    require_once dirname(__FILE__) . '/../lib/KLogger.php';
+    require_once(__ROOT__.'/lib/KLogger.php');
 
 }
 else
 {
-    print "Could not find KLogger file: ". dirname(__FILE__) . '/../lib/KLogger.php'.PHP_EOL;
+    print "Could not find KLogger file: ". __ROOT__.'/lib/KLogger.php' .PHP_EOL;
     define(C_USE_KLOGGER, 0);
 }
-require_once dirname(__FILE__) . '/../scooper_common/common.php';
-require_once dirname(__FILE__) . '/../lib/simple_html_dom.php';
 
 date_default_timezone_set("America/Los_Angeles");
 
@@ -42,12 +44,10 @@ const C_EXCLUDE_GETTING_ACTUAL_URL = 3;
 
 const C__STR_TAG_AUTOMARKEDJOB__ = "[auto-marked]";
 const C__STR_TAG_DULICATE_POST__ = "No (Duplicate Job Post?)";
+const C__STR_TAG_BAD_TITLE_POST__ = "No (Bad Title & Role)";
 
 function __initializeArgs__()
 {
-
-
-
     $GLOBALS['OPTS_SETTINGS']  = array(
         'include_all' => array(
             'description'   => 'Include all job sites.',
@@ -121,8 +121,6 @@ function __initializeArgs__()
 //    $banner = "Find and export basic website, Moz.com, Crunchbase and Quantcast data for any company name or URL.";
 //    Pharse::setBanner($banner);
     if($GLOBALS['VERBOSE'] == true) { __log__ ('Options set: '.var_export($GLOBALS['OPTS'], true), C__LOGLEVEL_INFO__); }
-
-
 
 }
 

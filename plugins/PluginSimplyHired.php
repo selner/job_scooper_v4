@@ -17,7 +17,9 @@
 */
 
 
-require_once dirname(__FILE__) . '/../include/ClassJobsSitePlugin.php';
+define('__ROOT__', dirname(dirname(__FILE__)));
+require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
+
 
 
 class PluginSimplyHired extends ClassJobsSitePlugin

@@ -14,8 +14,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/Options.php';
-require_once dirname(__FILE__) . '/ClassJobsSitePluginCommon.php';
+define('__ROOT__', dirname(dirname(__FILE__)));
+require_once(__ROOT__.'/include/Options.php');
+require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
+
+
 
 const C__JOB_PAGECOUNT_NOTAPPLICABLE__ = -1;
 const C__JOB_ITEMCOUNT_UNKNOWN__ = 11111;
@@ -45,6 +48,16 @@ function isInterested_MarkedAutomatically($var)
 function isNewJobToday_Interested_IsBlank($var)
 {
     return isMarkedInterested_IsBlank($var) && wasJobPulledToday($var);
+}
+
+function onlyBadTitlesAndRoles($var)
+{
+    if(substr_count($var['interested'], C__STR_TAG_BAD_TITLE_POST__) > 0)
+    {
+        return true;
+    };
+
+    return false;
 }
 
 function isNewJobToday_Interested_IsNo($var)

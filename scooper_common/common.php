@@ -20,10 +20,10 @@
 /****         Common Includes                                                                                ****/
 /****                                                                                                        ****/
 /****************************************************************************************************************/
+define('__ROOT__', dirname(dirname(__FILE__)));
+require_once(__ROOT__.'/scooper_common/debug_functions.php');
+require_once(__ROOT__.'/scooper_common/SimpleScooterCSVFileClass.php');
 
-
-require_once dirname(__FILE__) .'/SimpleScooterCSVFileClass.php';
-require_once dirname(__FILE__) . '/debug_functions.php';
 
 ini_set('auto_detect_line_endings', true);
 
@@ -33,7 +33,9 @@ const C__FSHOWVERBOSE_APICALL__ = 0;
 
 function getDefaultFileName($strFilePrefix, $strBase, $strExt)
 {
-    return sprintf(C__APPNAME__."_". date("Ymd-Hms")."%s_%s.%s", ($strFilePrefix != null ? "_".$strFilePrefix : ""), ($strBase != null  ? "_".$strBase : ""), $strExt);
+    $strApp = "";
+    if(C__APPNAME__) { $strApp = C__APPNAME__ . "_"; }
+    return sprintf($strApp . date("Ymd-Hms")."%s_%s.%s", ($strFilePrefix != null ? "_".$strFilePrefix : ""), ($strBase != null  ? "_".$strBase : ""), $strExt);
 }
 
 /****************************************************************************************************************/
@@ -163,8 +165,13 @@ function addToErrs(&$strErr, $strNew)
 
 function getFullPathFromFileDetails($arrFileDetails, $strPrependToFileBase = "", $strAppendToFileBase = "")
 {
-    return $arrFileDetails['directory'] . $strPrependToFileBase . $arrFileDetails['file_name_base'] . $strAppendToFileBase . "." . $arrFileDetails['file_extension'];
+    return $arrFileDetails['directory'] . getFileNameFromFileDetails($arrFileDetails, $strPrependToFileBase, $strAppendToFileBase);
 
+}
+
+function getFileNameFromFileDetails($arrFileDetails, $strPrependToFileBase = "", $strAppendToFileBase = "")
+{
+    return $strPrependToFileBase . $arrFileDetails['file_name_base'] . $strAppendToFileBase . "." . $arrFileDetails['file_extension'];
 }
 
 function parseFilePath($strFilePath, $fFileMustExist = false)
@@ -456,6 +463,7 @@ define('REPLACE_SPACES_WITH_HYPHENS', 0x010);
 define('REMOVE_EXTRA_WHITESPACE', 0x020);
 define('REMOVE_ALL_SPACES', 0x040);
 define('SIMPLE_TEXT_CLEANUP', HTML_DECODE | REMOVE_EXTRA_WHITESPACE );
+define('ADVANCED_TEXT_CLEANUP', HTML_DECODE | REMOVE_EXTRA_WHITESPACE | REMOVE_PUNCT | REMOVE_EXTRA_WHITESPACE | HTML_DECODE );
 define('FOR_LOOKUP_VALUE_MATCHING', REMOVE_PUNCT | LOWERCASE | HTML_DECODE | LOWERCASE | REMOVE_EXTRA_WHITESPACE | REMOVE_ALL_SPACES );
 define('DEFAULT_SCRUB', REMOVE_PUNCT | HTML_DECODE | LOWERCASE | REMOVE_EXTRA_WHITESPACE );
 
@@ -581,6 +589,10 @@ function strip_punctuation( $text )
         ' ',
         $text );
 }
+
+
+
+
 
 
 ?>

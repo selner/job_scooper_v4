@@ -14,9 +14,10 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/Options.php';
-require_once dirname(__FILE__) . '/ClassJobsSitePluginCommon.php';
-require_once dirname(__FILE__) . '/../scooper_common/APICallWrapperClass.php';
+define('__ROOT__', dirname(dirname(__FILE__)));
+require_once(__ROOT__.'/include/Options.php');
+require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
+require_once(__ROOT__.'/scooper_common/APICallWrapperClass.php');
 
 
 const C__SEARCH_RESULTS_TYPE_HTML__ = 1;
@@ -25,6 +26,7 @@ const C__SEARCH_RESULTS_TYPE_HTML_FILE__= 10;
 
 abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 {
+    protected $flagValidClassConstruction = false;
     protected $siteName = 'NAME-NOT-SET';
     protected $arrLatestJobs = null;
     protected $arrSearchesToReturn = null;
@@ -33,27 +35,27 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     function __construct($bitFlags = null, $strOutputDirectory = null)
     {
-
-        $this->_bitFlags = $bitFlags;
-        if($strOutputDirectory == null)
+        if($bitFlags == null && $strOutputDirectory == null)
         {
-            $strOutputDirectory = $GLOBALS['output_file_details']['directory'];
+            $this->flagValidClassConstruction = false;
         }
-        $this->setOutputFolder($strOutputDirectory);
-
-
+        else
+        {
+            $this->_bitFlags = $bitFlags;
+            $this->setOutputFolder($strOutputDirectory);
+           $this->flagValidClassConstruction = true;
+        }
     }
 
     function __destruct()
     {
-        __debug__printLine("Closing ".$this->siteName." class instance.", C__DISPLAY_ITEM_START__);
+        __debug__printLine("Closing ".$this->siteName." instance of class " . get_class($this), C__DISPLAY_ITEM_START__);
 
         //
         // Write out the interim data to file if we're debugging
         //
         if($GLOBALS['OPTS']['DEBUG'] == true)
         {
-
             if($this->arrLatestJobs != null)
             {
                 $strOutPathWithName = $this->getOutputFileFullPath($this->siteName . "_");
@@ -63,101 +65,25 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
     }
 
+    function checkIsValid()
+    {
+        if(!$this->flagValidClassConstruction)
+            throw new ErrorException(get_class($this) . " was not constructed with valid parameters to be executed.  Aborting.");
+    }
 
     abstract function parseJobsListForPage($objSimpHTML); // returns an array of jobs
     abstract function parseTotalResultsCount($objSimpHTML); // returns a settings array
 
 
-    /**  NOT YET TESTED AND INTEGRATED
-    //
-    // Parses a relative date string such as "5 hrs ago" or "22 days ago"
-    // and returns a date string representing the actual date (i.e. "2014-05-15")
-    // the relative string represents.
-    function getDateFromRelativeDateString($strDaysPast, $fReturnNullForFailure = false)
-    {
-        $nRetNumber = null;
-        $strRetUnit = null;
-        $nRetDays = null;
-
-        //
-        // First, let's break the string into it's words
-        //
-        $arrDateStringWords = explode(" ", $strDaysPast);
-
-        if(count($arrDateStringWords) <= 1) return null; // we don't know enough to parse the value
-
-        // Let's see if the first item is numeric
-        if(is_string($arrDateStringWords[0]) && is_numeric($arrDateStringWords[0]))
-        {
-            $nRetNumber = floatval($arrDateStringWords[0]);
-
-            switch ($arrDateStringWords[1])
-            {
-                case "hrs":
-                case "hr":
-                case "hours":
-                case "hour":
-                $strRetUnit = "hours";
-                    $nRetDays = intceil($nRetNumber / 24);  // divide to get number of days and then round up
-                    break;
-
-                case "d":
-                case "days":
-                case "day":
-                $strRetUnit = "hours";
-                    $nRetDays = intceil($nRetNumber);  // divide to get number of days
-                    break;
-
-                default:
-                    return null;  // we don't know what this is so return null
-                    break;
-            }
-        }
-
-        if($strRetUnit != null && $strRetUnit != "")
-        {
-            $now = new DateTime();
-            $retDate = $now->sub(new DateInterval('P'.$nRetDays.'D')); // P1D means a period of 1 day
-            return $retDate->format('Y-m-d');
-        }
-
-        //
-        // If we were told to return null on failure, return null.
-        //
-        if($fReturnNullForFailure == true)
-        {
-            return null;
-        }
-
-        //
-        // Return the input string if we weren't told to return null on failure
-        //
-        return $strDaysPast;
-
-    }
-**/
-
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
-    function getMyJobsList() { return $this->arrLatestJobs; }
 
 
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
+    function getMyJobsList() { $this->checkIsValid(); return $this->arrLatestJobs; }
+
+
+
     function loadMyJobsListFromCSVs($arrFilesToLoad)
     {
+        $this->checkIsValid();
         $arrAllJobsLoadedFromSrc = $this->loadJobsListFromCSVs($arrFilesToLoad);
 
 
@@ -194,6 +120,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
      */
     function downloadAllUpdatedJobs($nDays = -1)
     {
+        $this->checkIsValid();
         $retFilePath = '';
 
         // Now go download and output the latest jobs from this site
@@ -212,18 +139,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     }
 
 
-
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
-
     function getActualPostURL($strSrcURL)
     {
+        $this->checkIsValid();
+
         $retURL = null;
 
         $classAPI = new APICallWrapperClass();
@@ -244,32 +163,22 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         return $retURL;
     }
 
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
+
     function is_IncludeBrief()
     {
+        $this->checkIsValid();
+
         $val = $this->_bitFlags & C_EXCLUDE_BRIEF;
         $notVal = !($this->_bitFlags & C_EXCLUDE_BRIEF);
         // __debug__printLine('ExcludeBrief/not = ' . $val .', '. $notVal, C__DISPLAY_ITEM_START__);
         return false;
     }
 
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
+
     function is_IncludeActualURL()
     {
+        $this->checkIsValid();
+
         $val = $this->_bitFlags & C_EXCLUDE_GETTING_ACTUAL_URL;
         $notVal = !($this->_bitFlags & C_EXCLUDE_GETTING_ACTUAL_URL);
         // __debug__printLine('ExcludeActualURL/not = ' . $val .', '. $notVal, C__DISPLAY_ITEM_START__);
@@ -277,18 +186,16 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         return !$notVal;
     }
 
-/*    function getOutputFileFullPath($strFilePrefix = "", $strBase = "jobs", $strExtension = "csv")
-    {
-        return parent::getOutputFileFullPath($this->siteName . "_" . $strFilePrefix, $strBase, $strExtension);
-    }
-*/
+
     function getMyOutputFileFullPath($strFilePrefix = "")
     {
+        $this->checkIsValid();
         return parent::getOutputFileFullPath($this->siteName . "_" . $strFilePrefix, "jobs", "csv");
     }
 
     function markMyJobsList_withAutoItems()
     {
+        $this->checkIsValid();
         $this->markJobsList_withAutoItems($this->arrLatestJobs, $this->siteName);
     }
 
@@ -304,34 +211,24 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
      */
     function writeMyJobsListToFile($strOutFilePath = null)
     {
+        $this->checkIsValid();
         return $this->writeJobsListToFile($strOutFilePath, $this->arrLatestJobs, true, false, $this->siteName);
     }
 
 
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
+
     function _addJobsToMyJobsList_($arrAdd)
     {
+        $this->checkIsValid();
         addJobsToJobsList($this->arrLatestJobs, $arrAdd);
 
     }
 
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
+
     function getJobsForAllSearches($nDays = -1)
     {
+        $this->checkIsValid();
+
         foreach($this->arrSearchesToReturn as $search)
         {
             $strIncludeKey = 'include_'.strtolower($search['site_name']);
@@ -357,6 +254,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     public function getMyJobsForSearch($searchDetails, $nDays = -1)
     {
+        $this->checkIsValid();
         switch($GLOBALS['site_plugins'][strtolower($searchDetails['site_name'])]['results_type'])
         {
             case C__SEARCH_RESULTS_TYPE_XML__:
@@ -374,6 +272,8 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     function getMyJobsForSearchFromXML($searchDetails, $nDays = -1)
     {
+        $this->checkIsValid();
+
         ini_set("user_agent",C__STR_USER_AGENT__);
         ini_set("max_execution_time", 0);
         ini_set("memory_limit", "10000M");
@@ -459,6 +359,8 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     function getMyJobsForSearchFromWebpage($search, $nDays = -1)
     {
+        $this->checkIsValid();
+
         $nItemCount = 1;
         $nPageCount = 1;
 
@@ -539,6 +441,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     protected function getMyJobsFromHTMLFiles($strCompanyName, $searchDetails = null)
     {
+        $this->checkIsValid();
 
         $nItemCount = 1;
         $dataFolder = $this->strOutputFolder ;
@@ -585,7 +488,77 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             $strFileName = $dataFolder . $strFileBase.$nItemCount.".html";
 
         }
+
+
     }
+    /**  NOT YET TESTED AND INTEGRATED
+    //
+    // Parses a relative date string such as "5 hrs ago" or "22 days ago"
+    // and returns a date string representing the actual date (i.e. "2014-05-15")
+    // the relative string represents.
+    function getDateFromRelativeDateString($strDaysPast, $fReturnNullForFailure = false)
+    {
+    $nRetNumber = null;
+    $strRetUnit = null;
+    $nRetDays = null;
+
+    //
+    // First, let's break the string into it's words
+    //
+    $arrDateStringWords = explode(" ", $strDaysPast);
+
+    if(count($arrDateStringWords) <= 1) return null; // we don't know enough to parse the value
+
+    // Let's see if the first item is numeric
+    if(is_string($arrDateStringWords[0]) && is_numeric($arrDateStringWords[0]))
+    {
+    $nRetNumber = floatval($arrDateStringWords[0]);
+
+    switch ($arrDateStringWords[1])
+    {
+    case "hrs":
+    case "hr":
+    case "hours":
+    case "hour":
+    $strRetUnit = "hours";
+    $nRetDays = intceil($nRetNumber / 24);  // divide to get number of days and then round up
+    break;
+
+    case "d":
+    case "days":
+    case "day":
+    $strRetUnit = "hours";
+    $nRetDays = intceil($nRetNumber);  // divide to get number of days
+    break;
+
+    default:
+    return null;  // we don't know what this is so return null
+    break;
+    }
+    }
+
+    if($strRetUnit != null && $strRetUnit != "")
+    {
+    $now = new DateTime();
+    $retDate = $now->sub(new DateInterval('P'.$nRetDays.'D')); // P1D means a period of 1 day
+    return $retDate->format('Y-m-d');
+    }
+
+    //
+    // If we were told to return null on failure, return null.
+    //
+    if($fReturnNullForFailure == true)
+    {
+    return null;
+    }
+
+    //
+    // Return the input string if we weren't told to return null on failure
+    //
+    return $strDaysPast;
+
+    }
+     **/
 
     function getDaysURLValue($days) { return ($days == null || $days == "") ? 1 : $days; } // default is to return the raw number
     function getItemURLValue($nItem) { return ($nItem == null || $nItem == "") ? 0 : $nItem; } // default is to return the raw number

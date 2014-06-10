@@ -16,21 +16,10 @@
  */
 
 
-require_once dirname(__FILE__) . '/../include/ClassJobsSitePlugin.php';
+define('__ROOT__', dirname(dirname(__FILE__)));
+require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
-class ClassJobsSitePluginNoActualSite extends ClassJobsSitePlugin
-{
-    protected $siteName = 'ClassNoJobsSite';
 
-    function parseJobsListForPage($objSimpHTML)
-    {
-        throw new ErrorException("parseJobsListForPage not supported for class ClassNoJobsSite");
-    }
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        throw new ErrorException("parseTotalResultsCount not supported for class ClassNoJobsSite");
-    }
-}
 
 class ClassMultiSiteSearch extends ClassJobsSitePlugin
 {
@@ -44,14 +33,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
     function parseTotalResultsCount($objSimpHTML) { throw new ErrorException("parseJobsListForPage not supported for class ClassMultiSiteSearch"); }
 
 
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
+
     function getJobsForAllSearches($nDays = -1)
     {
         foreach($this->arrSearchesToReturn as $search)
@@ -68,9 +50,8 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
             $class = null;
             __debug__printLine("Running ". $search['site_name'] . " search: '" . $search['search_name']."'", C__DISPLAY_SECTION_START__);
 
-            $strSite = strtolower($search['site_name']);
-            $strSiteClass = $GLOBALS['site_plugins'][$strSite]['class_name'];
-            $class = new $strSiteClass;
+            $strSiteClass = $GLOBALS['site_plugins'][strtolower($search['site_name'])]['class_name'];
+            $class = new $strSiteClass($this->getMyBitFlags(), $this->strOutputFolder);
             try
             {
                 $class->addSearch($search);

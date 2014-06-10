@@ -15,32 +15,35 @@
  * under the License.
  */
 
+define('__ROOT__', dirname(dirname(__FILE__)));
+require_once(__ROOT__.'/include/Options.php');
+require_once(__ROOT__.'/lib/Linkify.php');
+require_once(__ROOT__.'/include/ClassJobsSitePlugin.php');
+require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
+require_once(__ROOT__.'/include/ClassJobsRunWrapper.php');
 
-require_once dirname(__FILE__) . '/Linkify.php';
-require_once dirname(__FILE__) . '/Options.php';
-require_once dirname(__FILE__) . '/ClassMultiSiteSearch.php';
-require_once dirname(__FILE__) . '/ClassJobsRunWrapper.php';
-require_once dirname(__FILE__) . '/../plugins/PluginAmazon.php';
-require_once dirname(__FILE__) . '/../plugins/PluginCraigslist.php';
-require_once dirname(__FILE__) . '/../plugins/PluginIndeed.php';
-require_once dirname(__FILE__) . '/../plugins/PluginSimplyHired.php';
-require_once dirname(__FILE__) . '/../plugins/PluginGlassdoor.php';
-require_once dirname(__FILE__) . '/../plugins/PluginPorch.php';
-require_once dirname(__FILE__) . '/../plugins/PluginExpedia.php';
-require_once dirname(__FILE__) . '/../plugins/PluginLinkUp.php';
-require_once dirname(__FILE__) . '/../plugins/PluginEmploymentGuide.php';
-require_once dirname(__FILE__) . '/../plugins/PluginMonster.php';
-require_once dirname(__FILE__) . '/../plugins/PluginCareerBuilder.php';
-require_once dirname(__FILE__) . '/../plugins/PluginMashable.php';
-require_once dirname(__FILE__) . '/../plugins/PluginDisney.php';
-require_once dirname(__FILE__) . '/../plugins/PluginOuterwall.php';
-require_once dirname(__FILE__) . '/../plugins/PluginTableau.php';
-require_once dirname(__FILE__) . '/../plugins/PluginGoogle.php';
-require_once dirname(__FILE__) . '/../plugins/PluginFacebook.php';
-require_once dirname(__FILE__) . '/../plugins/PluginEbay.php';
-require_once dirname(__FILE__) . '/../plugins/PluginGroupon.php';
-require_once dirname(__FILE__) . '/../plugins/PluginGeekwire.php';
-require_once dirname(__FILE__) . '/../plugins/PluginDotJobs.php';
+require_once(__ROOT__.'/include/ClassMultiSiteSearch.php');
+require_once (__ROOT__.'/plugins/PluginAmazon.php');
+require_once (__ROOT__.'/plugins/PluginCraigslist.php');
+require_once (__ROOT__.'/plugins/PluginIndeed.php');
+require_once (__ROOT__.'/plugins/PluginSimplyHired.php');
+require_once (__ROOT__.'/plugins/PluginGlassdoor.php');
+require_once (__ROOT__.'/plugins/PluginPorch.php');
+require_once (__ROOT__.'/plugins/PluginExpedia.php');
+require_once (__ROOT__.'/plugins/PluginLinkUp.php');
+require_once (__ROOT__.'/plugins/PluginEmploymentGuide.php');
+require_once (__ROOT__.'/plugins/PluginMonster.php');
+require_once (__ROOT__.'/plugins/PluginCareerBuilder.php');
+require_once (__ROOT__.'/plugins/PluginMashable.php');
+require_once (__ROOT__.'/plugins/PluginDisney.php');
+require_once (__ROOT__.'/plugins/PluginOuterwall.php');
+require_once (__ROOT__.'/plugins/PluginTableau.php');
+require_once (__ROOT__.'/plugins/PluginGoogle.php');
+require_once (__ROOT__.'/plugins/PluginFacebook.php');
+require_once (__ROOT__.'/plugins/PluginEbay.php');
+require_once (__ROOT__.'/plugins/PluginGroupon.php');
+require_once (__ROOT__.'/plugins/PluginGeekwire.php');
+require_once (__ROOT__.'/plugins/PluginDotJobs.php');
 
 
 $GLOBALS['site_plugins'] = array(

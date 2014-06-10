@@ -28,14 +28,7 @@ class ClassJobsSitePluginCommon
     private $_bitFlags = null;
     protected $strOutputFolder = "";
 
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
+
     function __construct($bitFlags = null)
     {
         $this->_bitFlags = $bitFlags;
@@ -44,14 +37,7 @@ class ClassJobsSitePluginCommon
     function getMyBitFlags() { return $this->_bitFlags; }
     function setMyBitFlags($bitFlags) { $this->_bitFlags = $bitFlags; }
 
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
+
     function getEmptyJobListingRecord()
     {
         return array(
@@ -122,7 +108,7 @@ class ClassJobsSitePluginCommon
         $retArrNormalized ['job_post_url'] = trim($retArrNormalized['job_post_url']); // DO NOT LOWER, BREAKS URLS
         $retArrNormalized ['location'] = strScrub($retArrNormalized['location'], SIMPLE_TEXT_CLEANUP);
 
-        $retArrNormalized ['company'] = strScrub($retArrNormalized['company'], SIMPLE_TEXT_CLEANUP );
+        $retArrNormalized ['company'] = strScrub($retArrNormalized['company'], ADVANCED_TEXT_CLEANUP );
 
         // Remove common company name extensions like "Corporation" or "Inc." so we have
         // a higher match likelihood
@@ -167,13 +153,12 @@ class ClassJobsSitePluginCommon
         }
 
 
-        if(is_null($retArrNormalized['company']) || strlen($retArrNormalized['company']) <= 0)
+
+        if(is_null($retArrNormalized['company']) || strlen($retArrNormalized['company']) <= 0 ||
+                substr_count(strtolower($retArrNormalized['company']), "company-unknown") >= 1) // substr check is to clean up records pre 6/9/14.
         {
-            $retArrNormalized['company'] = "company-unknown";
+            $retArrNormalized['company'] = "unknown";
         }
-
-//        $retArrNormalized ['brief'] = strScrub($retArrNormalized['brief'], REMOVE_EXTRA_WHITESPACE | HTML_DECODE | LOWERCASE);
-
 
         if(strlen($retArrNormalized['key_company_role']) <= 0)
         {
@@ -204,14 +189,7 @@ class ClassJobsSitePluginCommon
         return $retArrNormalized;
     }
 
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
+
     function setOutputFolder($strPath)
     {
         if($strPath == "") $strPath = null;
@@ -220,7 +198,29 @@ class ClassJobsSitePluginCommon
     }
 
 
+    private function _addTitlesToFilterList_($arrTitlesToAdd)
+    {
+        foreach($arrTitlesToAdd as $titleRecord)
+        {
+            $strTitleKey = strScrub($titleRecord['job_title']);
+            $titleRecord['job_title'] = strScrub($titleRecord['job_title']);
 
+            $GLOBALS['titles_to_filter'][$strTitleKey] = $titleRecord;
+        }
+
+    }
+
+    private function _addBadTitlesFromJobsList_()
+    {
+        __debug__printLine(PHP_EOL.PHP_EOL."--TODO-- FINISH JOB TITLES LIST FILTER FROM LOADED JOBS".PHP_EOL.PHP_EOL, C__DISPLAY_ERROR__);
+/*
+        $arrJobsBadTitles = array_filter($arrJobsList, "onlyBadTitlesAndRoles");
+
+        $arrBadTitlesToAdd = array_column($arrJobsBadTitles, "job_title");
+
+        $this->_addTitlesToFilterList_($arrBadTitlesToAdd);
+ */
+    }
 
 
     /**
@@ -229,18 +229,17 @@ class ClassJobsSitePluginCommon
      */
     function _loadTitlesToFilter_()
     {
-        $fTitlesLoaded = false;
         $arrTitleFileDetails = $GLOBALS['titles_file_details'];
         $strFileName = "";
 
         if($GLOBALS['titles_to_filter'] != null && count($GLOBALS['titles_to_filter']) > 0)
         {
             // We've already loaded the titles; go ahead and return right away
-            $fTitlesLoaded = true;
             __debug__printLine("Using previously loaded " . count($GLOBALS['titles_to_filter']) . " titles to exclude." , C__DISPLAY_ITEM_DETAIL__);
             return;
         }
-        else if($arrTitleFileDetails != null)
+
+        if($arrTitleFileDetails != null)
         {
             $strFileName = $arrTitleFileDetails ['full_file_path'];
             if(file_exists($strFileName ) && is_file($strFileName ))
@@ -255,18 +254,13 @@ class ClassJobsSitePluginCommon
                 // each record to be equal to the job title so we can do a fast lookup later
                 //
                 $GLOBALS['titles_to_filter'] = array();
-                foreach($arrTitlesTemp as $titleRecord)
-                {
-                    $strTitleKey = strScrub($titleRecord['job_title']);
-                    $titleRecord['job_title'] = strScrub($titleRecord['job_title']);
-
-                    $GLOBALS['titles_to_filter'][$strTitleKey] = $titleRecord;
-                }
-                $fTitlesLoaded = true;
+                $this->_addTitlesToFilterList_($arrTitlesTemp);
             }
         }
 
-        if($fTitlesLoaded == false)
+        $this->_addBadTitlesFromJobsList_();
+
+        if(count($GLOBALS['titles_to_filter']) <= 0)
         {
             __debug__printLine("Could not load the list of titles to exclude from '" . $strFileName . "'.  Final list will not be filtered." , C__DISPLAY_WARNING__);
         }
@@ -409,14 +403,7 @@ class ClassJobsSitePluginCommon
         $this->markJobsList_SetLikelyDuplicatePosts($arrJobs, $strCallerDescriptor);
     }
 
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
+
 
 
     // returns an array with the lookup value and true/false for whether found
@@ -688,48 +675,10 @@ class ClassJobsSitePluginCommon
         $strTotalRowsText = "/".count($arrToMark);
         __debug__printLine("Marked not interested via regex(".$nJobsMarkedAutoExcluded . $strTotalRowsText .") , skipped: " . $nJobsSkipped . $strTotalRowsText .", untouched: ". $nJobsNotMarked . $strTotalRowsText .")" , C__DISPLAY_ITEM_RESULT__);
     }
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
-/*    function filterOutUninterestedJobs($arrJobsToFilter, $fIncludeFilteredJobsInResults = true)
-    {
-
-        if($fIncludeFilteredJobsInResults == true)
-        {
-            __debug__printLine("Not filtering results." , C__DISPLAY_WARNING__);
-            return $arrJobsToFilter;
-        }
-        else
-        {
-            __debug__printLine("Applying filters to " . count($arrJobsToFilter). " jobs.", C__DISPLAY_ITEM_DETAIL__);
-
-        }
-
-        $arrNotInterested = array_filter($arrJobsToFilter, "isMarked_NotInterested");
-        $arrInteresting = array_filter($arrJobsToFilter, "isMarked_InterestedOrBlank");
 
 
-        __debug__printLine("Filtering complete:  ". count($arrNotInterested)." filtered; ". count($arrInteresting). " not filtered " . count($arrJobsToFilter) . " total records." , C__DISPLAY_ITEM_RESULT__);
 
-        return $arrInteresting;
-
-    }*/
-
-
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
-    function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true, $fFirstAutoMarkJobs = false, $strCallerDescriptor = "", $ext = "CSV")
+    function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true, $fFirstAutoMarkJobs = false, $strCallerDescriptor = "", $ext = "CSV", $keysToOutput=null)
     {
 
         if(!$strOutFilePath || strlen($strOutFilePath) <= 0)
@@ -760,14 +709,17 @@ class ClassJobsSitePluginCommon
 
         $classCombined = new SimpleScooterCSVFileClass($strOutFilePath , "w");
 
+        if ($keysToOutput == null) { $keysToOutput = array_keys($this->getEmptyJobListingRecord()); }
+
         if($ext == 'HTML')
         {
-            $classCombined->writeArrayToHTMLFile($arrJobsRecordsToUse, array_keys($this->getEmptyJobListingRecord()), $this->arrKeysForDeduping);
+            $strCSS = file_get_contents(dirname(__FILE__) . '/../include/CSVTableStyle.css');
+            $classCombined->writeArrayToHTMLFile($arrJobsRecordsToUse, $keysToOutput, $this->arrKeysForDeduping, $strCSS);
 
         }
         else
         {
-            $classCombined->writeArrayToCSVFile($arrJobsRecordsToUse, array_keys($this->getEmptyJobListingRecord()), $this->arrKeysForDeduping);
+            $classCombined->writeArrayToCSVFile($arrJobsRecordsToUse, $keysToOutput, $this->arrKeysForDeduping);
         }
         __debug__printLine($strCallerDescriptor . ($strCallerDescriptor  != "" ? " jobs" : "Jobs") ." list had  ". count($arrJobsRecordsToUse) . " jobs and was written to " . $strOutFilePath , C__DISPLAY_ITEM_START__);
 
@@ -884,14 +836,7 @@ class ClassJobsSitePluginCommon
     }
 
 
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
+
     function getSimpleObjFromPathOrURL($filePath = "", $strURL = "")
     {
 //         __debug__printLine("getSimpleObjFromPathOrURL(".$filePath.', '.$strURL.")", C__DISPLAY_ITEM_DETAIL__);
@@ -929,14 +874,7 @@ class ClassJobsSitePluginCommon
         return $objSimpleHTML;
     }
 
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
+
     function getOutputFileFullPath($strFilePrefix = "", $strBase = 'jobs', $strExtension = 'csv')
     {
         $strFullPath = getDefaultJobsOutputFileName($strFilePrefix, $strBase , $strExtension);
@@ -951,14 +889,7 @@ class ClassJobsSitePluginCommon
         return $arrReturnPathDetails ['full_file_path'];
     }
 
-    /**
-     * TODO:  DOC
-     *
-     *
-     * @param  string TODO DOC
-     * @param  string TODO DOC
-     * @return string TODO DOC
-     */
+
     function getSimpleHTMLObjForFileContents($strInputFileFullPath)
     {
         $objSimpleHTML = null;
