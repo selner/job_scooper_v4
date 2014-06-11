@@ -57,10 +57,3 @@ echo "Running php ../main/runJobs.php $flags_script_defaults -days 7 -o '$file' 
 php ../main/runJobs.php $flags -days 7 -o "$file" -t "$titlesfilename" -tr "$regextitlesfilename" -cr "$regexcompaniesfilename" 2>&1 1>>"$log"
 
 echo 'Download complete.' 2>&1 1>>"$log"
-echo 'Sending email with the latest results file =' $endfilebase/$file 2>&1 1>>"$log"
-echo 'Running osascript send_latest_jobs_via_email.appleScript' '$endfilebase/$file' 2>&1 1>>"$log"
-
-osascript "send_latest_jobs_via_email.appleScript" "$endfilebase/$file" 2>&1 1>>"$log"
-
-echo 'Done.' 2>&1 1>>"$log"
-
