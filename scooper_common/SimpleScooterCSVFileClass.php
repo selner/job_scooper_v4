@@ -213,18 +213,15 @@ class SimpleScooterCSVFileClass {
     }
 
     function writeArrayToCSVFile($records, $keys=null, $arrKeysToUseToDedupe = null)
-        {
+    {
 
-            if($this->_strAccessMode_[0] == 'w' || $this->_strAccessMode_[0] == 'w')
+        if($this->_strAccessMode_[0] == 'w' || $this->_strAccessMode_[0] == 'w')
             {
                 $this->_resetFile();
             }
 
 
-        // check if inputs are really arrays
-        if(!is_array($records) && !is_array($records[0])) {
-            throw new Exception("$records variable passed was not a 2-D array.");
-        }
+
 
 
         if(!$keys)
@@ -241,10 +238,11 @@ class SimpleScooterCSVFileClass {
             throw new Exception("$keys variable passed was not a valid array.");
         }
 
+        if(count($records) > 0)
+        {
+
         $arrRecordsToOutput = $this->getSortedDeDupedCSVArray($records, $arrKeysToUseToDedupe);
 
-        if(count($arrRecordsToOutput) > 0)
-        {
             foreach ($arrRecordsToOutput as $record)
             {
                 if(!fputcsv($this->_fp_, $record))
