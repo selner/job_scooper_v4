@@ -22,7 +22,6 @@ require_once(__ROOT__.'/include/ClassMultiSiteSearch.php');
 class ClassJobsRunWrapper extends ClassJobsSitePlugin
 {
     protected $configSettings = null;
-    protected $arrJobSearches = null;
     protected $arrUserInputJobs_Active = null;
     protected $arrUserInputJobs_Inactive = null;
     protected $arrJobCSVUserInputFiles = null;
@@ -33,7 +32,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     function ClassJobsRunWrapper($arrSearches = null, $arrPassedFiles = null, $nDays = -1)
     {
-        $this->arrJobSearches = $arrSearches;
 
         $this->siteName = "JobsRunner";
         $this->arrLatestJobs_FilteredByUserInput = null;
@@ -93,7 +91,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             set_FileDetails_fromPharseSetting("filepath_excluded_titles_regexes", 'titles_regex_file_details', true);
             set_FileDetails_fromPharseSetting("filepath_excluded_companies_regexes", 'companies_regex_file_details', true);
 
-            $this->arrJobSearches = $arrSearches;
+            $this->arrSearchesToReturn = $arrSearches;
             $this->arrJobCSVUserInputFiles = $arrPassedFiles;
             $this->__setupOutputFolders__();
         }
@@ -176,10 +174,41 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
             }
         }
+
+        $this->__getSearchesFromConfig__($config);
+
         __debug__printLine("Completed loading configuration from INI file:  ".var_export($GLOBALS['OPTS'], true), C__DISPLAY_SUMMARY__);
 
     }
 
+    private function __getSearchesFromConfig__($config)
+    {
+        __debug__printLine("Loading searches from config file.", C__DISPLAY_ITEM_START__);
+        if(!$config) throw new ErrorException("Invalid configuration.  Cannot load user's searches.");
+
+        if($config->search)
+        {
+            foreach($config->search as $iniSearch)
+            {
+                $tempSearch =  array('site_name' => null, 'search_name' => null, 'base_url_format' => null);
+                $tempSearch['search_key'] = $iniSearch['key'];
+                $tempSearch['site_name'] = $iniSearch['jobsite'];
+                $tempSearch['search_name'] = $iniSearch['name'];
+                $tempSearch['base_url_format'] = $iniSearch['url_format'];
+
+                if($tempSearch['search_key'] == "")
+                {
+                    $tempSearch['search_key'] = strScrub($tempSearch['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . strScrub($tempSearch['search_name'], FOR_LOOKUP_VALUE_MATCHING);
+                }
+                __debug__printLine("Search added [search_name=" . $tempSearch['search_name'] . "; site_name=" . $tempSearch['site_name'] . "; search_key=" . $tempSearch['search_key'] . "]; base_url_format='" . $tempSearch['base_url_format'] . "']", C__DISPLAY_ITEM_DETAIL__);
+                $this->arrSearchesToReturn[] = $tempSearch;
+
+            }
+        }
+
+        __debug__printLine("Loaded " . count($this->arrSearchesToReturn) . " searches. ", C__DISPLAY_ITEM_RESULT__);
+
+    }
     private function createOutputSubFolder($fileDetails)
     {
 
@@ -291,7 +320,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // (with the exception of Amazon for historical reasons)
         //
         $classMulti = new ClassMultiSiteSearch($this->getMyBitFlags(), $this->detailsOutputSubfolder['full_file_path']);
-        $classMulti->addSearches($this->arrJobSearches);
+        $classMulti->addSearches($this->arrSearchesToReturn);
         $classMulti->downloadAllUpdatedJobs( $this->nNumDaysToSearch);
         $this->_addJobsToMyJobsList_($classMulti->getMyJobsList());
 
@@ -345,10 +374,15 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // completely unfiltered.  Let's save that off now before we update it with the values that user passed in via CSVs.
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        if($this->arrJobSearches != null)
+        if($this->arrSearchesToReturn != null)
         {
             __debug__printLine(PHP_EOL."************** Get the latest jobs for all searches ****************".PHP_EOL, C__DISPLAY_NORMAL__);
             $this->getLatestRawJobsFromAllSearches();
+        }
+        else
+        {
+            throw new ErrorException("No searches have been set to be run.");
+
         }
 
 

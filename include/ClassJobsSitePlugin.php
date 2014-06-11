@@ -358,7 +358,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     }
 
-    function getMyJobsForSearchFromWebpage($search, $nDays = -1)
+    function getMyJobsForSearchFromWebpage($searchDetails, $nDays = -1)
     {
         $this->checkIsValid();
 
@@ -367,15 +367,15 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         try
         {
-            $strURL = $this->_getURLfromBase_($search, $nDays, $nPageCount, $nItemCount);
-            __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$search['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
+            $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
+            __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
 
             $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL );
             if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
         }
         catch (ErrorException $ex)
         {
-            throw new ErrorException("Error:  unable to getMyJobsForSearch from ".$strURL. " Reason:".$ex->getMessage());
+            throw new ErrorException("Error: Unable to getMyJobsForSearchFromWebpage from ".$strURL. " Reason:".$ex->getMessage());
             return;
         }
         $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML);
@@ -394,7 +394,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         if($nTotalListings <= 0)
         {
-            __debug__printLine("No new job listings were found on " . $this->siteName . " for search '" . $search['search_name']."'.", C__DISPLAY_ITEM_START__);
+            __debug__printLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['search_name']."'.", C__DISPLAY_ITEM_START__);
             return;
         }
         else
@@ -406,9 +406,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             {
                 $arrPageJobsList = null;
 
-                $objSimpleHTML = null;
-                $strURL = $this->_getURLfromBase_($search, $nDays, $nPageCount, $nItemCount);
-
+                if($objSimpleHTML == null)
+                {
+                    $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
+                }
                 if(!$objSimpleHTML) $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL);
                 if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
 
@@ -431,6 +432,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 // clean up memory
                 $objSimpleHTML->clear();
                 unset($objSimpleHTML);
+                $objSimpleHTML = null;
                 $nPageCount++;
 
             }
@@ -451,7 +453,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
 
 
-            $strCmdToRun = "osascript " . __ROOT__ . "/scripts/downloadJobsSitesHTML.applescript '" . escapeshellarg($this->detailsMyFileOut['directory'])  . "' '".escapeshellarg($searchDetails['site_name'])."' '" . escapeshellarg($searchDetails['search_name'])   . "' '"  . $strURL . "'";
+            $strCmdToRun = "osascript " . __ROOT__ . "/scripts/downloadJobsSitesHTML.applescript '" . escapeshellarg($this->detailsMyFileOut['directory'])  . "' '".escapeshellarg($searchDetails['site_name'])."' '" . escapeshellarg($searchDetails['search_key'])   . "' '"  . $strURL . "'";
             var_dump('Command = ', $strCmdToRun);
             exec($strCmdToRun);
             $this->fFilesDownloaded = true;
@@ -459,7 +461,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         $nItemCount = 1;
 
-        $strFileBase = strtolower($strCompanyName).'-'.$searchDetails['search_name'] . "-jobs-page-";
+        $strFileBase = strtolower($strCompanyName).'-'.$searchDetails['search_key'] . "-jobs-page-";
 
         $strDirectory = $this->detailsMyFileOut['directory'];
         $strFileName = $strDirectory . $strFileBase.$nItemCount.".html";
@@ -591,9 +593,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     }
 
 
-    protected function _getURLfromBase_($search, $nDays, $nPage = null, $nItem = null)
+    protected function _getURLfromBase_($searchDetails, $nDays, $nPage = null, $nItem = null)
     {
-        $strURL = $search['base_url_format'];
+        $strURL = $searchDetails['base_url_format'];
         $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($nDays), $strURL );
         $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL );
         $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
