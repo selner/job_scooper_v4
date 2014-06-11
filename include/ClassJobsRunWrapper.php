@@ -29,6 +29,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     protected $detailsOutputSubfolder = null;
     protected $detailsIniFile = null;
     protected $detailsOutputFile = null;
+    protected $arrEmailAddresses = null;
 
     function ClassJobsRunWrapper($arrSearches = null, $arrPassedFiles = null, $nDays = -1)
     {
@@ -129,15 +130,32 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $this->detailsOutputFile = parseFilePath($this->detailsOutputFile['directory'] . $fileName);
         }
         $this->detailsOutputSubfolder = $this->createOutputSubFolder($this->detailsOutputFile);
-
     }
+
     private function _setupRunFromConfig_($config)
     {
         __debug__printLine("Reading configuration options from ".$GLOBALS['OPTS']['config_file_details']['file_full_path']."...", C__DISPLAY_ITEM_START__);
-        if($config->output && $config->output->folder)
+        if($config->output)
         {
-            $this->detailsOutputFile = parseFilePath($config->output->folder);
-            $this->__setupOutputFolders__();
+             if($config->output->folder)
+            {
+                $this->detailsOutputFile = parseFilePath($config->output->folder);
+                $this->__setupOutputFolders__();
+            }
+
+        }
+
+        var_dump($config->emails );
+        if($config->emails )
+        {
+            foreach($config->emails as $emailItem)
+            {
+                $tempEmail = $this->__getEmptyEmailRecord__();
+                $tempEmail['name'] = $emailItem['name'];
+                $tempEmail['address'] = $emailItem['address'];
+                $tempEmail['type'] = $emailItem['type'];
+                $this->arrEmailAddresses[] = $tempEmail;
+            }
         }
 
         $pathInput = "";
@@ -271,6 +289,15 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     }
 
+    private function __getAlternateOutputFileDetails__($ext, $strNamePrepend = "", $strNameAppend = "")
+    {
+        $detailsRet = $this->detailsOutputSubfolder;
+        $detailsRet['file_extension'] = $ext;
+        $strTempPath = getFullPathFromFileDetails($detailsRet, $strNamePrepend , $strNameAppend);
+        $detailsRet= parseFilePath($strTempPath, true);
+        return $detailsRet;
+    }
+
     private function outputFilteredJobsListToFile($strFilterToApply, $strFileNameAppend, $strExt = "CSV", $strFilterDescription = null, $keysToOutput = null)
     {
         if(count($this->arrLatestJobs) == 0) return null;
@@ -291,9 +318,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             throw new ErrorException("Required array filter callback was not specified.  Cannot output " . $strFilterToApply . " filtered jobs list.");
         }
 
-        $details = $this->detailsOutputSubfolder;
-        $details['file_extension'] = $strExt;
-        $strFilteredCSVOutputPath = getFullPathFromFileDetails($details, "", $strFileNameAppend);
+        $details = $this->__getAlternateOutputFileDetails__($strExt, "", $strFileNameAppend);
+        $strFilteredCSVOutputPath = $details['full_file_path'];
         $this->writeRunsJobsToFile($strFilteredCSVOutputPath, $arrToOutput, $strFilterToApply, $strExt,$keysToOutput );
         __debug__printLine(($strFilterDescription != null ? $strFilterDescription : $strFileNameAppend) . " " . count($arrToOutput). " job listings output to  " . $strFilteredCSVOutputPath, C__DISPLAY_SUMMARY__);
 
@@ -346,7 +372,10 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 //        $this->writeJobsListToFile($strRawJobsListOutput, $this->arrLatestJobs_UnfilteredByUserInput , true, false, "ClassJobsRunWrapper-_rawjobslist_preuser_filtering");
         $this->writeRunsJobsToFile($strRawJobsListOutput, $this->arrLatestJobs_UnfilteredByUserInput, "RawJobsList_PreUserDataFiltering");
 
+        $detailsBodyContentFile = null;
+
        __debug__printLine(count($this->arrLatestJobs_UnfilteredByUserInput). " raw, latest job listings from " . count($this->arrJobSearches) . " searches downloaded to " . $strRawJobsListOutput, C__DISPLAY_SUMMARY__);
+
 
     }
 
@@ -429,7 +458,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         // Write to the main output file name that the user passed in
         $this->writeRunsJobsToFile($this->detailsOutputFile['full_file_path'], $this->arrLatestJobs, "ClassJobsRunWrapper-UserOutputFile");
-
+        $detailsCSVFile = $this->detailsOutputFile;
 
         //
         // Output all job records and their values
@@ -447,8 +476,10 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // Output only records that are new or not marked as excluded (aka "Yes" or "Maybe")
         $arrJobs_Active = $this->outputFilteredJobsListToFile("isMarked_InterestedOrBlank", "_ActiveJobs", "CSV");
         $arrJobs_Active = $this->outputFilteredJobsListToFile("isMarked_InterestedOrBlank", "_ActiveJobs", "HTML", null, $this->getKeysForHTMLOutput());
+        $detailsHTMLFile = $this->__getAlternateOutputFileDetails__("HTML", "", "_ActiveJobs");
 
-        $arrJobs_Active = $this->outputFilteredJobsListToFile("isJobUpdatedToday", "_UpdatedJobs");
+        $arrJobs_Updated = $this->outputFilteredJobsListToFile("isJobUpdatedToday", "_UpdatedJobs");
+
 
         // Output only new records that haven't been looked at yet
         $arrJobs_NewOnly = $this->outputFilteredJobsListToFile("isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "CSV");
@@ -463,13 +494,112 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // Output all records that were previously marked excluded manually by the user
         // $arrJobs_ManualExcl = $this->outputFilteredJobsListToFile("isMarked_ManuallyNotInterested", "_ManuallyExcludedJobs");
 
+        $strOutputResult = "Result:  ". PHP_EOL. "All:  ". count($arrJobs_Active) . " Active, " .count($arrJobs_AutoExcluded). " Auto-Filtered, ". count($arrJobs_AutoDupe). " Dupes, " . count($this->arrLatestJobs).  " Jobs Total." .PHP_EOL. "New:  ". count($arrJobs_NewOnly) . " jobs for review. " .count($arrJobs_NewButFiltered). " jobs were auto-filtered, ". count($arrJobs_Updated) . " updated; " . count($this->arrLatestJobs_UnfilteredByUserInput) . " Jobs Downloaded." .PHP_EOL;
+        __debug__printLine($strOutputResult, C__DISPLAY_SUMMARY__);
+
+        //
+        // Send the email notification out for the completed job
+        //
+        $this->__sendJobCompletedEmail__($strOutputResult, $detailsCSVFile, $detailsHTMLFile);
+
         __debug__printLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
-
-
-        __debug__printLine("Result:  ". PHP_EOL. "All:  ". count($arrJobs_Active) . " Active, " .count($arrJobs_AutoExcluded). " Auto-Filtered, ". count($arrJobs_AutoDupe). " Dupes, " . count($this->arrLatestJobs).  " Jobs Total." .PHP_EOL. "New:  ". count($arrJobs_NewOnly) . " jobs for review. " .count($arrJobs_NewButFiltered). " jobs were auto-filtered, ". count($this->arrLatestJobs_UnfilteredByUserInput) . " Jobs Downloaded." .PHP_EOL, C__DISPLAY_SUMMARY__);
-
     }
 
+
+    private function __sendJobCompletedEmail__($strBodyText = null, $detailsFileCSV = null, $detailsFileHTML = null)
+    {
+        //        set strEmailBodyContentFile to first item of argv
+        //		set strFileToAttachCSV to second item of argv
+        //		set strFileToAttachHTML to third item of argv
+        //		set strToAddr to fourthitem of argv
+        //		set strToName to fifth item of argv
+        //		set strBCCAddr to sixth item of argv
+
+        __debug__printLine("Sending email notifcations for complted run. ", C__DISPLAY_ITEM_START__);
+
+        $strHTMLFilePath = "";
+        $strBodyFilePath = "";
+        $strCSVFilePath = "";
+
+        if($strBodyText != null)
+        {
+            $detailsFileBody = $this->__getAlternateOutputFileDetails__("TXT", "", "_Results");
+            $fp = fopen($detailsFileBody['full_file_path'],'w');
+            if($fp)
+                $this->_fp_ = $fp;
+            else
+                throw new ErrorException("Unable to open file '". $detailsFileBody['full_file_path'] . "' with access mode of 'w'.".PHP_EOL .error_get_last()['message']) ;
+
+            if(!fputs($fp, $strBodyText))
+            {
+                throw new Exception("Unable to write file: " .$detailsFileBody['full_file_path'] );
+            }
+
+            $strBodyFilePath = $detailsFileBody['full_file_path'];
+        }
+
+
+        // Get Active Jobs HTML file name again
+        if($detailsFileHTML != null)
+        {
+            $strHTMLFilePath = $detailsFileHTML['full_file_path'];
+        }
+
+        if($detailsFileCSV != null)
+        {
+            $strCSVFilePath = $detailsFileCSV['full_file_path'];
+
+        }
+
+        $toEmail = $this->__getEmptyEmailRecord__();;
+        $bccEmail = $this->__getEmptyEmailRecord__();;
+
+        foreach($this->arrEmailAddresses as $email)
+        {
+            switch($email['type'])
+            {
+                case "to":
+                    $toEmail = $email;
+                    break;
+
+                case "bcc":
+                    $bccEmail = $email;
+                    break;
+
+                default:
+                    break;
+            }
+
+        }
+
+        $result = "";
+/*        $strCmdToRun = 'osascript ' . __ROOT__ . '/scripts/email_job_run_results.appleScript "' . escapeshellarg($strBodyFilePath)  . '" "' . escapeshellarg($strCSVFilePath)  . '" "'.escapeshellarg($strHTMLFilePath).'" "' . escapeshellarg($toEmail['address']) . '" "' . escapeshellarg($toEmail['name']) . '" "' . escapeshellarg($bccEmail['address']) . '"';
+        $strCmdToRun = 'osascript ' . __ROOT__ . '/scripts/email_job_run_results.appleScript ' . escapeshellarg($strBodyFilePath)  . ' ' . escapeshellarg($strCSVFilePath)  . ' '.escapeshellarg($strHTMLFilePath).' ' . escapeshellarg($toEmail['address']) . ' ' . escapeshellarg($toEmail['name']) . ' ' . escapeshellarg($bccEmail['address']) . '';
+        $strCmdToRun = 'osascript ' . __ROOT__ . '/scripts/email_job_run_results.appleScript ' . $strBodyFilePath  . ' ' . $strCSVFilePath  . ' '.$strHTMLFilePath.' ' . $toEmail['address'] . ' ' . $toEmail['name'] . ' ' . $bccEmail['address'];
+        $strCmdToRun = 'osascript ' . __ROOT__ . '/scripts/email_job_run_results.appleScript "' . $strBodyFilePath  . '" "' . $strCSVFilePath  . '" "'.$strHTMLFilePath.'" "' . $toEmail['address'] . '" "' . $toEmail['name'] . '" "' . $bccEmail['address'] . '"';
+        $strCmdToRun = escapeshellcmd($strCmdToRun);
+        __debug__printLine("Exec Command = " . $strCmdToRun, C__DISPLAY_ITEM_DETAIL__);
+        $result = exec($strCmdToRun);
+        __debug__printLine("Result=".var_export($result, true), C__DISPLAY_ITEM_DETAIL__);
+*/
+
+        $strCmdToRun = 'osascript ' . __ROOT__ . '/scripts/email_job_run_results.appleScript "' . $strBodyFilePath  . '" "' . $strCSVFilePath  . '" "'.$strHTMLFilePath.'" "' . $toEmail['address'] . '" "' . $toEmail['name'] . '" "' . $bccEmail['address'] . '"';
+        $strCmdToRun = escapeshellcmd($strCmdToRun);
+        __debug__printLine("My Command = " . $strCmdToRun, C__DISPLAY_ITEM_DETAIL__);
+        $result = my_exec($strCmdToRun);
+        if($result['stderr'])
+        {
+            __debug__printLine("Failed to send notification email with error = ".$result['stderr'], C__DISPLAY_ERROR__);
+        }
+        else
+        {
+            __debug__printLine($result['stdout'], C__DISPLAY_ITEM_DETAIL__);
+
+        }
+
+        __debug__printLine("Email notification send done.", C__DISPLAY_ITEM_RESULT__);
+exit();
+    }
 
     function parseJobsListForPage($objSimpHTML)
     {
@@ -478,6 +608,11 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     function parseTotalResultsCount($objSimpHTML)
     {
         throw new ErrorException("parseTotalResultsCount not supported for class " . get_class($this));
+    }
+
+    private function __getEmptyEmailRecord__()
+    {
+        return array('type'=> null, 'name'=>null, 'address' => null);
     }
 
     private function getKeysForHTMLOutput()

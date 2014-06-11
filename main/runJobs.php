@@ -57,9 +57,9 @@ function debug_GetStaticSiteSearchesOnly($arrSearches)
 $arrBryanSearches = array(
 
     array('site_name' => 'Geekwire', 'search_name' => "product-wa", 'base_url_format' => "http://www.geekwork.com/jobs/?search_keywords=product&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time"),
-//    array('site_name' => 'Geekwire', 'search_name' => "chief-wa", 'base_url_format' => "http://www.geekwork.com/jobs/?search_keywords=chief&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time"),
-//    array('site_name' => 'Geekwire', 'search_name' => "director-wa", 'base_url_format' => "http://www.geekwork.com/jobs/?search_keywords=director&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time"),
-//    array('site_name' => 'Geekwire', 'search_name' => "vp-wa", 'base_url_format' => "http://www.geekwork.com/jobs/?search_keywords=vice+president&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time"),
+    array('site_name' => 'Geekwire', 'search_name' => "chief-wa", 'base_url_format' => "http://www.geekwork.com/jobs/?search_keywords=chief&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time"),
+    array('site_name' => 'Geekwire', 'search_name' => "director-wa", 'base_url_format' => "http://www.geekwork.com/jobs/?search_keywords=director&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time"),
+    array('site_name' => 'Geekwire', 'search_name' => "vp-wa", 'base_url_format' => "http://www.geekwork.com/jobs/?search_keywords=vice+president&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time"),
 
     array('site_name' => 'DotJobs', 'search_name' => "Product director jobs - Bellevue", 'base_url_format' => "http://washington.jobs/jobs/feed/rss?location=Bellevue%2C+WA&q=director+product"),
     array('site_name' => 'DotJobs', 'search_name' => "Product director jobs - Seattle", 'base_url_format' => "http://washington.jobs/jobs/feed/rss?location=Seattle%2C+WA&q=director+product"),
