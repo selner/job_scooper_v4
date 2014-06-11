@@ -50,13 +50,14 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
             $class = null;
             __debug__printLine("Running ". $search['site_name'] . " search: '" . $search['search_name']."'", C__DISPLAY_SECTION_START__);
 
-            $strSiteClass = $GLOBALS['site_plugins'][strtolower($search['site_name'])]['class_name'];
-            $class = new $strSiteClass($this->getMyBitFlags(), $this->strOutputFolder);
+            $strSiteClass = $GLOBALS['DATA']['site_plugins'][strtolower($search['site_name'])]['class_name'];
+            $class = new $strSiteClass($this->getMyBitFlags(), $this->detailsMyFileOut['full_file_path']);
             try
             {
                 $class->addSearch($search);
                 $class->getMyJobsForSearch($search, $nDays);
                 $this->_addJobsToMyJobsList_($class->getMyJobsList());
+                $class = null;
             }
             catch (ErrorException $classError)
             {

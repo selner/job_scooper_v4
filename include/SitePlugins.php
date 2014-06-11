@@ -46,7 +46,7 @@ require_once (__ROOT__.'/plugins/PluginGeekwire.php');
 require_once (__ROOT__.'/plugins/PluginDotJobs.php');
 
 
-$GLOBALS['site_plugins'] = array(
+$GLOBALS['DATA']['site_plugins'] = array(
     'amazon' => array('name' => 'amazon', 'class_name' => 'PluginAmazon',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
     'craigslist' => array('name' => 'craigslist', 'class_name' => 'PluginCraigslist',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 
     'porch' => array('name' => 'porch', 'class_name' => 'PluginPorch',  'results_type' => C__SEARCH_RESULTS_TYPE_HTML__, 'include_in_run' => false), 

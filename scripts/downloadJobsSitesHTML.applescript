@@ -1,20 +1,14 @@
 
-on textToList(theText, theDelimiter)
-	set saveDelim to AppleScript's text item delimiters
-	try
-		set AppleScript's text item delimiters to {theDelimiter}
-		set theList to every text item of theText
-	on error errStr number errNum
-		set AppleScript's text item delimiters to saveDelim
-		error errStr number errNum
-	end try
-	set AppleScript's text item delimiters to saveDelim
-	return (theList)
-end textToList
 
 on run (argv)
 	startRun(argv)
+	-- test()
 end run
+
+on test()
+	set params to ["/Users/bryan/Code/data/jobs_debug/2014-06-10_1949_jobs/", "Geekwire", "http://www.geekwork.com/jobs/?search_keywords=product&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time", "search-key-name"]
+	startRun(params)
+end test
 
 on doJobsDownloads_Geek(strOutputFolder)
 	
@@ -26,6 +20,32 @@ on doJobsDownloads_Geek(strOutputFolder)
 end doJobsDownloads_Geek
 
 on startRun(argv)
+	
+	set ret to -1
+	if (count of argv) < 1 then
+		log "Output directory was not set and is required."
+		log "No site was specified to download from."
+	else
+		set strOutputDir to first item of argv as string
+		set strSiteName to second item of argv as string
+		set strKey to third item of argv as string
+		set strURL to fourth item of argv as string
+		
+		if (strSiteName is "Geekwire") then
+			set ret to doJobsDownload_Geekwire(strOutputDir, strURL, strKey)
+		else if (strSiteName is "Amazon") then
+			set ret to doJobsDownload_AMZN(strOutputDir, strURL, strKey)
+		else if (strSiteName is "Google") then
+			set ret to doJobsDownload_GOOG(strOutputDir, strURL, strKey)
+		else
+			log "Unknown site '" & strSiteName & "' was specified to download from."
+		end if
+	end if
+	
+	return ret
+end startRun
+
+on startRunOrig(strFolder)
 	if (count of argv) = 0 then
 		log "Output directory was not set.  Defaulting to script directory."
 		
@@ -50,7 +70,7 @@ on startRun(argv)
 	end if
 	
 	return ret
-end startRun
+end startRunOrig
 
 on doJobsDownload_Geekwire(strOutputFolder, strStartURL, strSearchKey)
 	set strJSGetMaxPageValue_GEEK to ""
@@ -223,9 +243,13 @@ on getOrCreateOutputFolder(strOutputFolder)
 	
 	
 	log "Setting up output folder: '" & pathOutputFolder & "'"
-	tell application "Finder"
-		set fldrExists to exists of folder pathOutputFolder
-	end tell
+	
+	set fldrExists to false
+	try
+		tell application "Finder"
+			set fldrExists to exists of folder pathOutputFolder
+		end tell
+	end try
 	
 	if not fldrExists then
 		set nameOutputFolder to last item of my textToList(pathOutputFolder, ":")
@@ -366,3 +390,16 @@ on doJobsDownload_orig_Amazon(strOutputFolder, strURL)
 	
 end doJobsDownload_orig_Amazon
 
+
+on textToList(theText, theDelimiter)
+	set saveDelim to AppleScript's text item delimiters
+	try
+		set AppleScript's text item delimiters to {theDelimiter}
+		set theList to every text item of theText
+	on error errStr number errNum
+		set AppleScript's text item delimiters to saveDelim
+		error errStr number errNum
+	end try
+	set AppleScript's text item delimiters to saveDelim
+	return (theList)
+end textToList

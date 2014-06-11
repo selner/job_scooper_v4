@@ -21,51 +21,91 @@ require_once(__ROOT__.'/include/ClassMultiSiteSearch.php');
 
 class ClassJobsRunWrapper extends ClassJobsSitePlugin
 {
+    protected $configSettings = null;
     protected $arrJobSearches = null;
     protected $arrUserInputJobs_Active = null;
     protected $arrUserInputJobs_Inactive = null;
     protected $arrJobCSVUserInputFiles = null;
     protected $nNumDaysToSearch = -1;
     protected $detailsOutputSubfolder = null;
+    protected $detailsIniFile = null;
+    protected $detailsOutputFile = null;
 
-    function ClassJobsRunWrapper($arrSearches = null, $arrJobCSVUserInputFiles = null, $nDays = -1)
+    function ClassJobsRunWrapper($arrSearches = null, $arrPassedFiles = null, $nDays = -1)
     {
         $this->arrJobSearches = $arrSearches;
-        $this->arrSourceFiles = $arrJobCSVUserInputFiles;
-        $this->nNumDaysToSearch = $nDays;
-        $this->arrLatestJobs = null;
+
+        $this->siteName = "JobsRunner";
         $this->arrLatestJobs_FilteredByUserInput = null;
         $this->arrLatestJobs_UnfilteredByUserInput = null;
-
-        $this->getCommandLine($arrSearches);
-        $this->detailsOutputFile =  $GLOBALS['output_file_details'];
         $this->setMyBitFlags(C_NORMAL);
+        __initializeArgs__();
 
-        if($this->detailsOutputFile['directory'] == null || $this->detailsOutputFile['directory']== "")
+        $this->__setupRunFromArgs__($arrSearches, $arrPassedFiles, $nDays);
+    }
+
+    private function __setupRunFromArgs__($arrSearches, $arrPassedFiles, $nDays)
+    {
+        # After you've configured Pharse, run it like so:
+        $GLOBALS['OPTS'] = Pharse::options($GLOBALS['OPTS_SETTINGS']);
+
+
+        $GLOBALS['DATA']['titles_to_filter'] = null;
+        $GLOBALS['DATA']['titles_regex_to_filter'] = null;
+        $GLOBALS['DATA']['companies_regex_to_filter'] = null;
+
+        // These will be used at the beginning and end of
+        // job processing to filter out jobs we'd previous seen
+        // and to make sure our notes get updated on active jobs
+        // that we'd seen previously
+        //
+//    $GLOBALS['DATA']['active_jobs_from_input_source_files'] = null;
+//    $GLOBALS['DATA']['inactive_jobs_from_input_source_files'] = null;
+
+        // Now go see what we got back for each of the sites
+        //
+        foreach($GLOBALS['DATA']['site_plugins']  as $site)
         {
-            throw new ErrorException("Required value for the output folder was not specified. Exiting.");
+            $fIsIncludedInRun = is_IncludeSite($site['name']);
+            $GLOBALS['DATA']['site_plugins'][$site['name']]['include_in_run'] = $fIsIncludedInRun;
         }
 
-        if($this->detailsOutputFile['file_name'] == null || $this->detailsOutputFile['full_file_path'] == "")
+        $GLOBALS['OPTS']['DEBUG'] = get_PharseOptionValue('use_debug');
+        $GLOBALS['OPTS']['VERBOSE'] = $GLOBALS['OPTS']['DEBUG'];
+
+        if($GLOBALS['OPTS']['use_config_ini_given'])
         {
-            $fileName = getDefaultJobsOutputFileName("", "jobs", "csv");
-            $this->detailsOutputFile = parseFilePath($this->detailsOutputFile['directory'] . $fileName);
+//            throw new ErrorException("Config ini files not yet supported!");
+            $this->detailsIniFile = set_FileDetails_fromPharseSetting("use_config_ini", 'config_file_details', true);
+
+            __debug__printLine("Parsing ini file ".$this->detailsIniFile['full_file_path']."...", C__DISPLAY_ITEM_START__);
+
+            $iniParser = new IniParser($this->detailsIniFile['full_file_path']);
+            $confTemp = $iniParser->parse();
+            $this->_setupRunFromConfig_($confTemp);
+        }
+        else
+        {
+
+            __dumpGlobalArray__('OPTS');
+            $this->detailsOutputFile = get_FileDetails_fromPharseOption("output_file", false);
+            set_FileDetails_fromPharseSetting("filepath_excluded_titles_file", 'titles_file_details', true);
+            set_FileDetails_fromPharseSetting("filepath_excluded_titles_regexes", 'titles_regex_file_details', true);
+            set_FileDetails_fromPharseSetting("filepath_excluded_companies_regexes", 'companies_regex_file_details', true);
+
+            $this->arrJobSearches = $arrSearches;
+            $this->arrJobCSVUserInputFiles = $arrPassedFiles;
+            $this->__setupOutputFolders__();
         }
 
-        $this->detailsOutputSubfolder = $this->createOutputSubFolder($this->detailsOutputFile);
+        $this->nNumDaysToSearch = $nDays;
+        $nDays = get_PharseOptionValue('number_days');
+        if($nDays == false) { $GLOBALS['OPTS']['number_days'] = 1; }
+
+
         $this->flagValidClassConstruction = true;
-
     }
 
-
-    function parseJobsListForPage($objSimpHTML)
-    {
-        throw new ErrorException("parseJobsListForPage not supported for class" . get_class($this));
-    }
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        throw new ErrorException("parseTotalResultsCount not supported for class " . get_class($this));
-    }
 
     function __destruct()
     {
@@ -78,6 +118,67 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         return parent::getOutputFileFullPath($this->siteName . "_" . $strFilePrefix, "jobs", "csv");
     }
 
+    private function __setupOutputFolders__()
+    {
+        if($this->detailsOutputFile['directory'] == null || $this->detailsOutputFile['directory']== "")
+        {
+            throw new ErrorException("Required value for the output folder was not specified. Exiting.");
+        }
+
+        if($this->detailsOutputFile['file_name'] == null || $this->detailsOutputFile['full_file_path'] == "")
+        {
+            $fileName = getDefaultJobsOutputFileName("", "jobs", "csv");
+            $this->detailsOutputFile = parseFilePath($this->detailsOutputFile['directory'] . $fileName);
+        }
+        $this->detailsOutputSubfolder = $this->createOutputSubFolder($this->detailsOutputFile);
+
+    }
+    private function _setupRunFromConfig_($config)
+    {
+        __debug__printLine("Reading configuration options from ".$GLOBALS['OPTS']['config_file_details']['file_full_path']."...", C__DISPLAY_ITEM_START__);
+        if($config->output && $config->output->folder)
+        {
+            $this->detailsOutputFile = parseFilePath($config->output->folder);
+            $this->__setupOutputFolders__();
+        }
+
+        $pathInput = "";
+        if($config->input && $config->input->folder)
+        {
+            $pathInput = parseFilePath($config->input->folder);
+        }
+
+        if($config->inputfiles)
+        {
+            foreach($config->inputfiles as $iniInputFile)
+            {
+                __debug__printLine("Processing input file '" . $pathInput['directory'].$iniInputFile['name'] . "' with type of '". $iniInputFile['type'] . "'...", C__DISPLAY_NORMAL__);
+                switch($iniInputFile['type'])
+                {
+                    case "jobs":
+                        $this->arrJobCSVUserInputFiles[] = $pathInput['directory'] . $iniInputFile['name'];
+                        break;
+
+                    case "titles_filter":
+                        setGlobalFileDetails('titles_file_details', true, $pathInput['directory']. $iniInputFile['name']);
+                        break;
+
+                    case "regex_filter_titles":
+                        setGlobalFileDetails('titles_regex_file_details', true, $pathInput['directory']. $iniInputFile['name']);
+                        break;
+
+                    case "regex_filter_companies":
+                        setGlobalFileDetails('companies_regex_file_details', true, $pathInput['directory']. $iniInputFile['name']);
+                        break;
+
+
+                }
+
+            }
+        }
+        __debug__printLine("Completed loading configuration from INI file:  ".var_export($GLOBALS['OPTS'], true), C__DISPLAY_SUMMARY__);
+
+    }
 
     private function createOutputSubFolder($fileDetails)
     {
@@ -85,7 +186,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         // Append the file name base to the directory as a new subdirectory for output
         $fullNewDirectory = $fileDetails['directory'] . $fileDetails['file_name_base'];
-        __debug__printLine("Attempting to create output directory: " . $fullNewDirectory , C__DISPLAY_SUMMARY__);
+        __debug__printLine("Attempting to create output directory: " . $fullNewDirectory , C__DISPLAY_ITEM_START__);
         if(is_dir($fullNewDirectory))
         {
 
@@ -101,28 +202,14 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         __debug__printLine("Create folder for results output: " . $fullNewFilePath , C__DISPLAY_SUMMARY__);
 
         // return the new file & path details
-        $this->setOutputFolder($fullNewDirectory);
-
-        return parseFilePath($fullNewFilePath);
+        return parseFilePath($fullNewFilePath, false);
     }
 
-
-
-
-    private function getCommandLine($arrSearches=null)
-    {
-            $GLOBALS["bit_flags"] = C_NORMAL;
-            __initializeArgs__();
-
-            $classInit = new ClassMultiSiteSearch($GLOBALS["bit_flags"], null /* no dir needed */, $arrSearches);
-            __getPassedArgs__();
-
-    }
 
 
     private function loadUserInputJobsFromCSV()
     {
-        $arrAllJobsLoadedFromSrc = $this->loadJobsListFromCSVs($this->arrSourceFiles);
+        $arrAllJobsLoadedFromSrc = $this->loadJobsListFromCSVs($this->arrJobCSVUserInputFiles);
         $this->normalizeJobList($arrAllJobsLoadedFromSrc);
         if($GLOBALS['OPTS']['DEBUG'] == true)
         {
@@ -157,6 +244,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     private function outputFilteredJobsListToFile($strFilterToApply, $strFileNameAppend, $strExt = "CSV", $strFilterDescription = null, $keysToOutput = null)
     {
+        if(count($this->arrLatestJobs) == 0) return null;
+
         $arrToOutput = null;
 
         if($strFilterToApply == null || $strFilterToApply == "")
@@ -201,7 +290,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // the searches in the list and returning us the combined set of new jobs
         // (with the exception of Amazon for historical reasons)
         //
-        $classMulti = new ClassMultiSiteSearch($GLOBALS["bit_flags"], $this->detailsOutputSubfolder['full_file_path']);
+        $classMulti = new ClassMultiSiteSearch($this->getMyBitFlags(), $this->detailsOutputSubfolder['full_file_path']);
         $classMulti->addSearches($this->arrJobSearches);
         $classMulti->downloadAllUpdatedJobs( $this->nNumDaysToSearch);
         $this->_addJobsToMyJobsList_($classMulti->getMyJobsList());
@@ -209,7 +298,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         //
         // Let's go get Amazon too if the user asked for Amazon's jobs
         //
-        if($GLOBALS['site_plugins']['Amazon']['include_in_run'] == true)
+        if($GLOBALS['DATA']['site_plugins']['Amazon']['include_in_run'] == true)
         {
             __debug__printLine("Adding Amazon jobs....", C__DISPLAY_ITEM_START__);
             $class = new PluginAmazon($GLOBALS["bit_flags"], $this->detailsOutputSubfolder['full_file_path']);
@@ -243,9 +332,9 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // were found again
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        if($this->arrSourceFiles != null)
+        if($this->arrJobCSVUserInputFiles != null)
         {
-            __debug__printLine(PHP_EOL."**************  Loading user-specified jobs list information from ". count($this->arrSourceFiles) ." CSV files **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
+            __debug__printLine(PHP_EOL."**************  Loading user-specified jobs list information from ". count($this->arrJobCSVUserInputFiles) ." CSV files **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
             $this->loadUserInputJobsFromCSV();
         }
 
@@ -343,8 +432,18 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         __debug__printLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, C__DISPLAY_NORMAL__);
 
 
-        __debug__printLine("Total jobs downloaded:  ".count($this->arrLatestJobs_UnfilteredByUserInput). PHP_EOL. "Total jobs:  ".count($this->arrLatestJobs). PHP_EOL."New: ". count($arrJobs_NewOnly) . " jobs for review. " .count($arrJobs_NewButFiltered). " jobs were auto-filtered.".PHP_EOL."Active: ". count($arrJobs_Active)  . PHP_EOL. "Auto-Filtered: ".count($arrJobs_AutoExcluded). PHP_EOL."Dupes: ".count($arrJobs_AutoDupe) , C__DISPLAY_SUMMARY__);
+        __debug__printLine("Result:  ". PHP_EOL. "All:  ". count($arrJobs_Active) . " Active, " .count($arrJobs_AutoExcluded). " Auto-Filtered, ". count($arrJobs_AutoDupe). " Dupes, " . count($this->arrLatestJobs).  " Jobs Total." .PHP_EOL. "New:  ". count($arrJobs_NewOnly) . " jobs for review. " .count($arrJobs_NewButFiltered). " jobs were auto-filtered, ". count($this->arrLatestJobs_UnfilteredByUserInput) . " Jobs Downloaded." .PHP_EOL, C__DISPLAY_SUMMARY__);
 
+    }
+
+
+    function parseJobsListForPage($objSimpHTML)
+    {
+        throw new ErrorException("parseJobsListForPage not supported for class" . get_class($this));
+    }
+    function parseTotalResultsCount($objSimpHTML)
+    {
+        throw new ErrorException("parseTotalResultsCount not supported for class " . get_class($this));
     }
 
     private function getKeysForHTMLOutput()

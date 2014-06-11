@@ -1,0 +1,16 @@
+{
+    "name": "selner/jobs_scooper",
+    "description": "jobs_scooper app",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bryan Selner",
+            "email": "bry.int@bryanselner.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "austinhyde/iniparser": "dev-master"
+    }
+}

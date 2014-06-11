@@ -32,6 +32,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     protected $arrSearchesToReturn = null;
     protected $nJobListingsPerPage = 20;
     protected $flagAutoMarkListings = true; // All the called classes do it for us already
+    protected $fFilesDownloaded = false;
 
     function __construct($bitFlags = null, $strOutputDirectory = null)
     {
@@ -42,7 +43,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         else
         {
             $this->_bitFlags = $bitFlags;
-            $this->setOutputFolder($strOutputDirectory);
+            $this->detailsMyFileOut = parseFilePath($strOutputDirectory, false);
            $this->flagValidClassConstruction = true;
         }
     }
@@ -81,7 +82,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
 
 
-    function loadMyJobsListFromCSVs($arrFilesToLoad)
+/*    function loadMyJobsListFromCSVs($arrFilesToLoad)
     {
         $this->checkIsValid();
         $arrAllJobsLoadedFromSrc = $this->loadJobsListFromCSVs($arrFilesToLoad);
@@ -95,18 +96,18 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         //
         // Set a global var with an array of all input cSV jobs marked new or not marked as excluded (aka "Yes" or "Maybe")
         //
-        $GLOBALS['active_jobs_from_input_source_files'] = array_filter($arrAllJobsLoadedFromSrc, "isMarked_InterestedOrBlank");
+        $GLOBALS['DATA']['active_jobs_from_input_source_files'] = array_filter($arrAllJobsLoadedFromSrc, "isMarked_InterestedOrBlank");
 
         //
         // Set a global var with an array of all input CSV jobs that are not in the first set (aka marked Not Interested & Not Blank)
         //
-        $GLOBALS['inactive_jobs_from_input_source_files'] = array_filter($arrAllJobsLoadedFromSrc, "isMarked_NotInterestedAndNotBlank");
+        $GLOBALS['DATA']['inactive_jobs_from_input_source_files'] = array_filter($arrAllJobsLoadedFromSrc, "isMarked_NotInterestedAndNotBlank");
 
         //
         // Initialize the run's jobs list with all the jobs we'd previously set as inactive.
         //
-        $this->arrLatestJobs =  $GLOBALS['inactive_jobs_from_input_source_files'];
-    }
+        $this->arrLatestJobs =  $GLOBALS['DATA']['inactive_jobs_from_input_source_files'];
+    }*/
 
 
     /**
@@ -255,7 +256,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     public function getMyJobsForSearch($searchDetails, $nDays = -1)
     {
         $this->checkIsValid();
-        switch($GLOBALS['site_plugins'][strtolower($searchDetails['site_name'])]['results_type'])
+        switch($GLOBALS['DATA']['site_plugins'][strtolower($searchDetails['site_name'])]['results_type'])
         {
             case C__SEARCH_RESULTS_TYPE_XML__:
             $this->getMyJobsForSearchFromXML($searchDetails, $nDays);
@@ -443,29 +444,29 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     {
         $this->checkIsValid();
 
+
+        if(!$this->fFilesDownloaded)
+        {
+            $strURL = $this->_getURLfromBase_($searchDetails, $nDays);
+            __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
+
+
+            $strCmdToRun = "osascript " . __ROOT__ . "/scripts/downloadJobsSitesHTML.applescript '" . escapeshellarg($this->detailsMyFileOut['directory'])  . "' '".escapeshellarg($searchDetails['site_name'])."' '" . escapeshellarg($searchDetails['search_name'])   . "' '"  . $strURL . "'";
+            var_dump('Command = ', $strCmdToRun);
+            exec($strCmdToRun);
+            $this->fFilesDownloaded = true;
+        }
+
         $nItemCount = 1;
-        $dataFolder = $this->strOutputFolder ;
 
-        if($searchDetails)
-        {
-            $strFileBase = strtolower($strCompanyName).'-'.$searchDetails['search_name'] . "-jobs-page-";
-        }
-        else
-        {
-            $strFileBase = strtolower($strCompanyName). "-jobs-page-";
-        }
+        $strFileBase = strtolower($strCompanyName).'-'.$searchDetails['search_name'] . "-jobs-page-";
 
-        $strFileName = $dataFolder . $strFileBase.$nItemCount.".html";
+        $strDirectory = $this->detailsMyFileOut['directory'];
+        $strFileName = $strDirectory . $strFileBase.$nItemCount.".html";
         if(!is_file($strFileName)) // try the current folder instead
         {
-            $dataFolder = "./";
-            $strFileName = $dataFolder . $strFileBase.$nItemCount.".html";
-        }
-
-        if(!is_file($strFileName)) // last try the debugging data folder
-        {
-            $dataFolder = C_STR_DATAFOLDER;
-            $strFileName = $dataFolder . $strFileBase.$nItemCount.".html";
+            $strDirectory = "./";
+            $strFileName = $strDirectory  . $strFileBase.$nItemCount.".html";
         }
 
         while (file_exists($strFileName) && is_file($strFileName))
@@ -485,7 +486,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
             $nItemCount++;
 
-            $strFileName = $dataFolder . $strFileBase.$nItemCount.".html";
+            $strFileName = $strDirectory  . $strFileBase.$nItemCount.".html";
 
         }
 
@@ -562,7 +563,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     function getDaysURLValue($days) { return ($days == null || $days == "") ? 1 : $days; } // default is to return the raw number
     function getItemURLValue($nItem) { return ($nItem == null || $nItem == "") ? 0 : $nItem; } // default is to return the raw number
-    function getPageURLValue($nPage) { return ($nPage == null || $nPage == "") ? 0 : $nPage; } // default is to return the raw number
+    function getPageURLValue($nPage) { return ($nPage == null || $nPage == "") ? "" : $nPage; } // default is to return the raw number
 
     function addSearchURL($site, $name, $fmtURL)
     {
@@ -590,11 +591,11 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     }
 
 
-    protected function _getURLfromBase_($search, $nDays, $nPage, $nItem = null)
+    protected function _getURLfromBase_($search, $nDays, $nPage = null, $nItem = null)
     {
         $strURL = $search['base_url_format'];
         $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($nDays), $strURL );
-        $strURL = str_ireplace("***PAGE_NUMBER***", $nPage, $strURL );
+        $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL );
         $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
         return $strURL;
     }

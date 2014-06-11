@@ -17,7 +17,7 @@
 define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__ . '/include/SitePlugins.php');
 
-$GLOBALS['VERBOSE'] = false;
+$GLOBALS['OPTS']['VERBOSE'] = false;
 
 /****************************************************************************************************************/
 /**************                                                                                                         ****/
@@ -57,9 +57,9 @@ function debug_GetStaticSiteSearchesOnly($arrSearches)
 $arrBryanSearches = array(
 
     array('site_name' => 'Geekwire', 'search_name' => "product-wa", 'base_url_format' => "http://www.geekwork.com/jobs/?search_keywords=product&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time"),
-    array('site_name' => 'Geekwire', 'search_name' => "chief-wa", 'base_url_format' => "http://www.geekwork.com/jobs/?search_keywords=chief&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time"),
-    array('site_name' => 'Geekwire', 'search_name' => "director-wa", 'base_url_format' => "http://www.geekwork.com/jobs/?search_keywords=director&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time"),
-    array('site_name' => 'Geekwire', 'search_name' => "vp-wa", 'base_url_format' => "http://www.geekwork.com/jobs/?search_keywords=vice+president&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time"),
+//    array('site_name' => 'Geekwire', 'search_name' => "chief-wa", 'base_url_format' => "http://www.geekwork.com/jobs/?search_keywords=chief&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time"),
+//    array('site_name' => 'Geekwire', 'search_name' => "director-wa", 'base_url_format' => "http://www.geekwork.com/jobs/?search_keywords=director&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time"),
+//    array('site_name' => 'Geekwire', 'search_name' => "vp-wa", 'base_url_format' => "http://www.geekwork.com/jobs/?search_keywords=vice+president&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time"),
 
     array('site_name' => 'DotJobs', 'search_name' => "Product director jobs - Bellevue", 'base_url_format' => "http://washington.jobs/jobs/feed/rss?location=Bellevue%2C+WA&q=director+product"),
     array('site_name' => 'DotJobs', 'search_name' => "Product director jobs - Seattle", 'base_url_format' => "http://washington.jobs/jobs/feed/rss?location=Seattle%2C+WA&q=director+product"),
@@ -102,7 +102,7 @@ $arrBryanSearches = array(
     array('site_name' => 'Craigslist', 'search_name' => "exec titles", 'base_url_format' => "http://seattle.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=%22Vice%20President%22%20%7C%20%22Chief%20Technology%20Office%22%20%7C%20%22Chief%20Products%20Officer%22%20%7C%20%22CTO%22%20%7C%20%22CPO%22%20%7C%20%22VP%22%20%7C%20%22V.P.%22%20%7C%20%22Director%22%20%7C%20%20%22product%20management%22%20%7C%20%22general%20manager%22%20&srchType=T"),
     array('site_name' => 'Craigslist', 'search_name' => "exec titles", 'base_url_format' => "http://seattle.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=%22Vice%20President%22%20%7C%20%22Chief%20Technology%20Office%22%20%7C%20%22Chief%20Products%20Officer%22%20%7C%20%22CTO%22%20%7C%20%22CPO%22%20%7C%20%22VP%22%20%7C%20%22V.P.%22%20%7C%20%22Director%22%20%7C%20%20%22product%20management%22%20%7C%20%22general%20manager%22%20&srchType=T"),
 
-    array('site_name' => 'Google', 'search_name' => "all Seattle/Kirkland jobs", 'base_url_format' => "https://www.google.com/about/careers/search/#t=sq&q=j&***ITEM_NUMBER***&jl=47.6062095%253A-122.3320708%253ASeattle%252C+WA%252C+USA%253Anull%253Aundefined%253A9.903894146066163%253ALOCALITY&jl=47.6814875%253A-122.2087353%253AKirkland%252C+WA%252C+USA%253Anull%253Aundefined%253A5.173281946960293%253ALOCALITY&"),
+    array('site_name' => 'Google', 'search_name' => "all-Seattle-Kirkland-jobs", 'base_url_format' => "https://www.google.com/about/careers/search/#t=sq&q=j&***ITEM_NUMBER***&jl=47.6062095%253A-122.3320708%253ASeattle%252C+WA%252C+USA%253Anull%253Aundefined%253A9.903894146066163%253ALOCALITY&jl=47.6814875%253A-122.2087353%253AKirkland%252C+WA%252C+USA%253Anull%253Aundefined%253A5.173281946960293%253ALOCALITY&"),
     array('site_name' => 'eBay', 'search_name' => "all WA jobs", 'base_url_format' => "http://jobs.ebaycareers.com/search/advanced-search/ASCategory/-1/ASPostedDate/-1/ASCountry/-1/ASState/Washington/ASCity/-1/ASLocation/-1/ASCompanyName/-1/ASCustom1/-1/ASCustom2/-1/ASCustom3/-1/ASCustom4/-1/ASCustom5/-1/ASIsRadius/false/ASCityStateZipcode/-1/ASDistance/-1/ASLatitude/-1/ASLongitude/-1/ASDistanceType/-1"),
 
 
@@ -137,7 +137,7 @@ $arrBryanTrackingFiles = array(
 
 
 
-$classRunJobs = new ClassJobsRunWrapper($arrBryanSearches, $arrBryanTrackingFiles, $GLOBALS['OPTS']['number_days']);
+$classRunJobs = new ClassJobsRunWrapper($arrBryanSearches, $arrBryanTrackingFiles);
 $classRunJobs->RunAll();
 
 //__runCommandLine($arrBryanSearches, $arrBryanTrackingFiles);

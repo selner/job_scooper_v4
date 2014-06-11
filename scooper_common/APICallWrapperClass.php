@@ -76,7 +76,7 @@ function getObjectsFromAPICall( $baseURL, $objName = "", $fReturnType = C__API_R
                 //
                 if($srcdata->next_page)
                 {
-                    if($GLOBALS['VERBOSE'] == true) { __debug__printLine('Multipage results detected. Getting results for ' . $srcdata->next_page . '...' . PHP_EOL, C__DISPLAY_ITEM_DETAIL__); }
+                    if($GLOBALS['OPTS']['VERBOSE'] == true) { __debug__printLine('Multipage results detected. Getting results for ' . $srcdata->next_page . '...' . PHP_EOL, C__DISPLAY_ITEM_DETAIL__); }
 
                     // $patternPage = "/.*page=([0-9]{1,})/";
                     $patternPagePrefix = "/.*page=/";
