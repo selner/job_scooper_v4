@@ -5,7 +5,6 @@ end run
 
 on test()
 	
-	--	sendMail("", "/Users/bryan/Code/data/jobs_debug/2014-06-10_2200_jobs.csv", "/Users/bryan/Code/data/jobs_debug/2014-06-10_2200_jobs/2014-06-10_2200_jobs_ActiveJobs.HTML", "selner@gmail.com", "Bryan Selner", "bselner@icloud.com")
 	run_with_args({"", "/Users/bryan/Code/data/jobs_debug/2014-06-10_2349_jobs.csv", "/Users/bryan/Code/data/jobs_debug/2014-06-10_2349_jobs/2014-06-10_2349_jobs_ActiveJobs.HTML", "selner@gmail.com", "Bryan Selner", "bselner@icloud.com"})
 end test
 
@@ -119,7 +118,7 @@ on sendMail(strEmailBodyContentFile, strAttachFileCSV, strAttachFileHTML, recipA
 	else
 		if (strLoggedErrors is not "") then
 			set theSubject to "New Job Postings[w/ERRORS!]:  " & theAttachmentCSVFileName
-			set theContent to "New job postings found and are attached.  " & return & "ERRORS:  " & return & strLoggedErrors & return & return & "File: " & theAttachmentFileName & return & return -- the content
+			set theContent to "New job postings found and are attached.  " & return & "ERRORS:  " & return & strLoggedErrors & return & return & "File: " & theAttachmentCSVFileName & return & return -- the content
 		else
 			set theSubject to "New Job Postings  "
 			set theContent to "New job postings found and are attached.  File: " & theAttachmentCSVFileName & return & return -- the content
