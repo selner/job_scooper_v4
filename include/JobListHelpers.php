@@ -30,7 +30,7 @@ const C__JOB_ITEMCOUNT_UNKNOWN__ = 11111;
 //
 function isInterested_MarkedDuplicateAutomatically($var)
 {
-    if(substr_count($var['interested'], C__STR_TAG_DULICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__) > 0) return true;
+    if(substr_count($var['interested'], C__STR_TAG_DUPLICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__) > 0) return true;
 
     return false;
 }
