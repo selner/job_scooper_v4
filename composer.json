@@ -1,16 +1,20 @@
 {
-    "name": "selner/jobs_scooper",
+    "name": "scooper/jobs_scooper",
     "description": "jobs_scooper app",
-    "type": "library",
-    "license": "MIT",
+    "homepage": "http://github.com/selner/scooper_common",
+    "license": "GNUV2",
     "authors": [
         {
             "name": "Bryan Selner",
-            "email": "bry.int@bryanselner.com"
+            "email": "dev@recoilvelocity.com",
+            "role": "Developer"
         }
     ],
     "minimum-stability": "dev",
     "require": {
-        "austinhyde/iniparser": "dev-master"
+        "php": ">=5.3.0",
+        "austinhyde/iniparser": "dev-master",
+        "phpoffice/phpexcel": "1.8.0",
+        "katzgrau/klogger": "1.0.0"
     }
 }
