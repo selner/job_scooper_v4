@@ -117,10 +117,10 @@ on sendMail(strEmailBodyContentFile, strAttachFileCSV, strAttachFileHTML, recipA
 		set ret to -1
 	else
 		if (strLoggedErrors is not "") then
-			set theSubject to "New Job Postings[w/ERRORS!]:  " & theAttachmentCSVFileName
-			set theContent to "New job postings found and are attached.  " & return & "ERRORS:  " & return & strLoggedErrors & return & return & "File: " & theAttachmentCSVFileName & return & return -- the content
+			set theSubject to "New Job Postings[w/ERRORS!]: " & theAttachmentCSVFileName
+			set theContent to "New job postings found and are attached. " & return & "ERRORS:  " & return & strLoggedErrors & return & return & "File: " & theAttachmentCSVFileName & return & return -- the content
 		else
-			set theSubject to "New Job Postings  "
+			set theSubject to "New Job Postings "
 			set theContent to "New job postings found and are attached.  File: " & theAttachmentCSVFileName & return & return -- the content
 		end if
 	end if
