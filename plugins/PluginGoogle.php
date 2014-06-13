@@ -36,8 +36,13 @@ class PluginGoogle extends ClassJobsSitePlugin
             __debug__printLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Ignoring number of days value and just pulling current listings.", C__DISPLAY_WARNING__);
 
         }
-        return 1;
+        return C__JOB_PAGECOUNT_NOTAPPLICABLE__;
 
+    }
+
+    function parseTotalResultsCount($objSimpHTML)
+    {
+        return C__JOB_ITEMCOUNT_UNKNOWN__;
     }
 
     function getItemURLValue($nItem)
@@ -46,26 +51,7 @@ class PluginGoogle extends ClassJobsSitePlugin
         return "li=".$nItem."&st=".($nItem+10);
     }
 
-    function getMyJobsForSearch($search, $nDays = -1)
-    {
-        return $this->getMyJobsFromHTMLFiles($this->siteName);
-    }
 
-    function parseTotalResultsCount($objSimpHTML)
-    {
-/*        $resultsSection= $objSimpHTML->find("iframe div[class='kd-count']");
-        $resultsSection = $resultsSection->find("span");
-        $totalItemsText = $resultsSection[1]->plaintext;
-        $arrItemItems = explode(" ", trim($totalItemsText));
-        $strTotalItemsCount = trim($arrItemItems[3]);
-        $strTotalItemsCount = str_replace(",", "", $strTotalItemsCount);
-
-        return (intceil($strTotalItemsCount) * $nJobListingsPerPage);
-*/
-    // not necessary for an HTML file loaded plugin
-        return -1;
-
-    }
 
     function parseJobsListForPage($objSimpHTML)
     {

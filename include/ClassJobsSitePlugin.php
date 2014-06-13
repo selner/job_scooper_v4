@@ -20,7 +20,7 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 require_once(__ROOT__.'/scooper_common/APICallWrapperClass.php');
 
 
-const C__SEARCH_RESULTS_TYPE_HTML__ = 1;
+const C__SEARCH_RESULTS_TYPE_WEBPAGE__ = 1;
 const C__SEARCH_RESULTS_TYPE_XML__ = 4;
 const C__SEARCH_RESULTS_TYPE_HTML_FILE__= 10;
 
@@ -66,25 +66,18 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
     }
 
-    function checkIsValid()
-    {
-        if(!$this->flagValidClassConstruction)
-            throw new ErrorException(get_class($this) . " was not constructed with valid parameters to be executed.  Aborting.");
-    }
-
     abstract function parseJobsListForPage($objSimpHTML); // returns an array of jobs
     abstract function parseTotalResultsCount($objSimpHTML); // returns a settings array
 
 
 
 
-    function getMyJobsList() { $this->checkIsValid(); return $this->arrLatestJobs; }
+    function getMyJobsList() { return $this->arrLatestJobs; }
 
 
 
 /*    function loadMyJobsListFromCSVs($arrFilesToLoad)
     {
-        $this->checkIsValid();
         $arrAllJobsLoadedFromSrc = $this->loadJobsListFromCSVs($arrFilesToLoad);
 
 
@@ -121,7 +114,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
      */
     function downloadAllUpdatedJobs($nDays = -1)
     {
-        $this->checkIsValid();
         $retFilePath = '';
 
         // Now go download and output the latest jobs from this site
@@ -142,7 +134,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     function getActualPostURL($strSrcURL)
     {
-        $this->checkIsValid();
 
         $retURL = null;
 
@@ -152,7 +143,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         try
         {
             $curlObj = $classAPI->cURL($strSrcURL);
-            if($curlObj && !$curl_object['error_number'] && $curl_object['error_number'] == 0 )
+            if($curlObj && !$curlObj['error_number'] && $curlObj['error_number'] == 0 )
             {
                 $retURL  =  $curlObj['actual_site_url'];
             }
@@ -167,7 +158,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     function is_IncludeBrief()
     {
-        $this->checkIsValid();
 
         $val = $this->_bitFlags & C_EXCLUDE_BRIEF;
         $notVal = !($this->_bitFlags & C_EXCLUDE_BRIEF);
@@ -176,27 +166,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     }
 
 
-    function is_IncludeActualURL()
-    {
-        $this->checkIsValid();
-
-        $val = $this->_bitFlags & C_EXCLUDE_GETTING_ACTUAL_URL;
-        $notVal = !($this->_bitFlags & C_EXCLUDE_GETTING_ACTUAL_URL);
-        // __debug__printLine('ExcludeActualURL/not = ' . $val .', '. $notVal, C__DISPLAY_ITEM_START__);
-
-        return !$notVal;
-    }
-
 
     function getMyOutputFileFullPath($strFilePrefix = "")
     {
-        $this->checkIsValid();
         return parent::getOutputFileFullPath($this->siteName . "_" . $strFilePrefix, "jobs", "csv");
     }
 
     function markMyJobsList_withAutoItems()
     {
-        $this->checkIsValid();
         $this->markJobsList_withAutoItems($this->arrLatestJobs, $this->siteName);
     }
 
@@ -212,7 +189,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
      */
     function writeMyJobsListToFile($strOutFilePath = null)
     {
-        $this->checkIsValid();
         return $this->writeJobsListToFile($strOutFilePath, $this->arrLatestJobs, true, false, $this->siteName);
     }
 
@@ -220,7 +196,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     function _addJobsToMyJobsList_($arrAdd)
     {
-        $this->checkIsValid();
         addJobsToJobsList($this->arrLatestJobs, $arrAdd);
 
     }
@@ -228,7 +203,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     function getJobsForAllSearches($nDays = -1)
     {
-        $this->checkIsValid();
 
         foreach($this->arrSearchesToReturn as $search)
         {
@@ -255,7 +229,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     public function getMyJobsForSearch($searchDetails, $nDays = -1)
     {
-        $this->checkIsValid();
         switch($GLOBALS['DATA']['site_plugins'][strtolower($searchDetails['site_name'])]['results_type'])
         {
             case C__SEARCH_RESULTS_TYPE_XML__:
@@ -273,7 +246,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     function getMyJobsForSearchFromXML($searchDetails, $nDays = -1)
     {
-        $this->checkIsValid();
 
         ini_set("user_agent",C__STR_USER_AGENT__);
         ini_set("max_execution_time", 0);
@@ -282,9 +254,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $nItemCount = 1;
         $nPageCount = 1;
 
+        $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
+
         try
         {
-            $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
             __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
 
             $class = new APICallWrapperClass();
@@ -360,7 +333,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     function getMyJobsForSearchFromWebpage($searchDetails, $nDays = -1)
     {
-        $this->checkIsValid();
 
         $nItemCount = 1;
         $nPageCount = 1;
@@ -438,14 +410,29 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             }
         }
 
-        __debug__printLine(PHP_EOL.$this->siteName . "[".$search['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, C__DISPLAY_ITEM_RESULT__);
+        __debug__printLine(PHP_EOL.$this->siteName . "[".$searchDetails['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, C__DISPLAY_ITEM_RESULT__);
 
     }
 
-    protected function getMyJobsFromHTMLFiles($strCompanyName, $searchDetails = null)
+    protected function getMyJobsFromHTMLFiles($searchDetails, $nDays = -1)
     {
-        $this->checkIsValid();
+        $nPageCount = 1;
+        $this->fFilesDownloaded = false;
 
+        $strFileKey = strtolower($searchDetails['name'].'-'.$searchDetails['search_key']);
+        $strFileBase = $this->detailsMyFileOut['directory'].$strFileKey. "-jobs-page-";
+        $strFileName = $strFileBase.$nPageCount.".html";
+
+        if(file_exists($strFileName) && is_file($strFileName))
+        {
+            $cache_life = '120'; //caching time, in seconds
+
+            $filemtime = @filemtime($cache_file);  // returns FALSE if file does not exist
+            if ($filemtime && (time() - $filemtime <= $cache_life))
+            {
+                $this->fFilesDownloaded = true;
+            }
+        }
 
         if(!$this->fFilesDownloaded)
         {
@@ -453,43 +440,35 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
 
 
-            $strCmdToRun = "osascript " . __ROOT__ . "/scripts/downloadJobsSitesHTML.applescript '" . escapeshellarg($this->detailsMyFileOut['directory'])  . "' '".escapeshellarg($searchDetails['site_name'])."' '" . escapeshellarg($searchDetails['search_key'])   . "' '"  . $strURL . "'";
-            var_dump('Command = ', $strCmdToRun);
+            $strCmdToRun = "osascript " . __ROOT__ . '/scripts/downloadJobsSitesHTML.applescript \'' . escapeshellarg($this->detailsMyFileOut['directory'])  . "' '".escapeshellarg($searchDetails['site_name'])."' '" . escapeshellarg($strFileKey)   . "' '"  . $strURL . "'";
+            __debug__printLine("Command = " . $strCmdToRun, C__DISPLAY_ITEM_DETAIL__);
             exec($strCmdToRun);
             $this->fFilesDownloaded = true;
         }
 
-        $nItemCount = 1;
 
-        $strFileBase = strtolower($strCompanyName).'-'.$searchDetails['search_key'] . "-jobs-page-";
-
-        $strDirectory = $this->detailsMyFileOut['directory'];
-        $strFileName = $strDirectory . $strFileBase.$nItemCount.".html";
-        if(!is_file($strFileName)) // try the current folder instead
-        {
-            $strDirectory = "./";
-            $strFileName = $strDirectory  . $strFileBase.$nItemCount.".html";
-        }
-
+        $strFileName = $strFileBase.$nPageCount.".html";
+        __debug__printLine("Parsing downloaded HTML files: '" . $strFileBase."*.html'", C__DISPLAY_ITEM_DETAIL__);
         while (file_exists($strFileName) && is_file($strFileName))
         {
+            __debug__printLine("Parsing results HTML from '" . $strFileName ."'", C__DISPLAY_ITEM_DETAIL__);
             $objSimpleHTML = $this->getSimpleHTMLObjForFileContents($strFileName);
             if(!$objSimpleHTML)
             {
-                throw new ErrorException('Error:  unable to get SimpleHTML object from file('.$filePath.') or '.$strURL);
+                throw new ErrorException('Error:  unable to get SimpleHTMLDom object from file('.$strFileName.').');
             }
 
             $arrNewJobs = $this->parseJobsListForPage($objSimpleHTML);
 
             $objSimpleHTML->clear();
             unset($objSimpleHTML);
+            $objSimpleHTML = null;
 
             $this->_addJobsToMyJobsList_($arrNewJobs);
 
-            $nItemCount++;
+            $nPageCount++;
 
-            $strFileName = $strDirectory  . $strFileBase.$nItemCount.".html";
-
+            $strFileName = $strFileBase.$nPageCount.".html";
         }
 
 
@@ -602,11 +581,17 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         return $strURL;
     }
 
+    function isJobListingMine($var)
+    {
+        if(substr_count($var['job_site'], strtolower($this->siteName)) > 0)
+        {
+            return true;
+        }
 
-
-
-
-
+        return false;
+    }
 }
+
+
 
 ?>

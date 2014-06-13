@@ -19,6 +19,7 @@ require_once dirname(__FILE__) . '/../include/JobListHelpers.php';
 require_once dirname(__FILE__) . '/../lib/array_column.php';
 
 
+
 class ClassJobsSitePluginCommon
 {
 
@@ -239,7 +240,7 @@ class ClassJobsSitePluginCommon
             if(file_exists($strFileName ) && is_file($strFileName ))
             {
                 __debug__printLine("Loading job titles to filter from ".$strFileName."." , C__DISPLAY_ITEM_DETAIL__);
-                $classCSVFile = new SimpleScooterCSVFileClass($strFileName , 'r');
+                $classCSVFile = new SimpleScooperCSVClass($strFileName , 'r');
                 $arrTitlesTemp = $classCSVFile->readAllRecords(true);
                 __debug__printLine(count($arrTitlesTemp) . " titles found in the source file that will be automatically filtered from job listings." , C__DISPLAY_ITEM_DETAIL__);
 
@@ -289,7 +290,7 @@ class ClassJobsSitePluginCommon
             if(file_exists($strFileName ) && is_file($strFileName ))
             {
                 __debug__printLine("Loading job Company regexes to filter from ".$strFileName."." , C__DISPLAY_ITEM_DETAIL__);
-                $classCSVFile = new SimpleScooterCSVFileClass($strFileName , 'r');
+                $classCSVFile = new SimpleScooperCSVClass($strFileName , 'r');
                 $arrCompaniesTemp = $classCSVFile->readAllRecords(true);
                 __debug__printLine(count($arrCompaniesTemp) . " companies found in the source file that will be automatically filtered from job listings." , C__DISPLAY_ITEM_DETAIL__);
 
@@ -349,7 +350,7 @@ class ClassJobsSitePluginCommon
             if(file_exists($strFileName ) && is_file($strFileName ))
             {
                 __debug__printLine("Loading job title regexes to filter from ".$strFileName."." , C__DISPLAY_ITEM_DETAIL__);
-                $classCSVFile = new SimpleScooterCSVFileClass($strFileName , 'r');
+                $classCSVFile = new SimpleScooperCSVClass($strFileName , 'r');
                 $arrTitlesTemp = $classCSVFile->readAllRecords(true);
                 __debug__printLine(count($arrTitlesTemp) . " titles found in the source file that will be automatically filtered from job listings." , C__DISPLAY_ITEM_DETAIL__);
 
@@ -498,7 +499,7 @@ class ClassJobsSitePluginCommon
                 $arrToMark[$indexPrevListingForCompanyRole] ['date_last_updated'] = getTodayAsString();
 
                 $arrToMark[$job['key_jobsite_siteid']]['notes'] = $this->getNotesWithDupeIDAdded($arrToMark[$job['key_jobsite_siteid']]['notes'], $indexPrevListingForCompanyRole );
-                $arrToMark[$job['key_jobsite_siteid']]['interested'] =  C__STR_TAG_DULICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__;
+                $arrToMark[$job['key_jobsite_siteid']]['interested'] =  C__STR_TAG_DUPLICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__;
                 $arrToMark[$job['key_jobsite_siteid']]['date_last_updated'] = getTodayAsString();
 
                 $nJobsMatched++;
@@ -709,7 +710,7 @@ class ClassJobsSitePluginCommon
         }
 
 
-        $classCombined = new SimpleScooterCSVFileClass($strOutFilePath , "w");
+        $classCombined = new SimpleScooperCSVClass($strOutFilePath , "w");
 
         if ($keysToOutput == null) { $keysToOutput = array_keys($this->getEmptyJobListingRecord()); }
 
@@ -742,7 +743,7 @@ class ClassJobsSitePluginCommon
      */
     function loadJobsListFromCSVs($arrFilesToLoad)
     {
-        $arrRetJobsList = array();
+        $arrRetJobsList = null;
 
         if(!is_array($arrFilesToLoad) || count($arrFilesToLoad) == 0)
         {
@@ -755,12 +756,16 @@ class ClassJobsSitePluginCommon
 
         foreach($arrFilesToLoad as $fileInput)
         {
-            $classCombinedRead = new SimpleScooterCSVFileClass($fileInput, "r");
+            $strFilePath = $fileInput['details']['full_file_path'];
+            $classCombinedRead = new SimpleScooperCSVClass($strFilePath , "r");
             $arrCurFileJobs = $classCombinedRead->readAllRecords(true, array_keys($this->getEmptyJobListingRecord()));
             $classCombinedRead = null;
-            $arrCurNormalizedJobs =  $this->normalizeJobList($arrCurFileJobs);
+            if($arrCurFileJobs != null)
+            {
+                $arrCurNormalizedJobs =  $this->normalizeJobList($arrCurFileJobs);
 
-            addJobsToJobsList($arrRetJobsList, $arrCurNormalizedJobs);
+                addJobsToJobsList($arrRetJobsList, $arrCurNormalizedJobs);
+            }
         }
 
 
@@ -813,13 +818,13 @@ class ClassJobsSitePluginCommon
 
             if(count($arrFilesToCombine) > 1)
             {
-                $classCombined = new SimpleScooterCSVFileClass($strOutFilePath , "w");
+                $classCombined = new SimpleScooperCSVClass($strOutFilePath , "w");
                 $arrRetJobs = $classCombined->readMultipleCSVsAndCombine($arrFilesToCombine, array_keys($this->getEmptyJobListingRecord()), $this->arrKeysForDeduping);
 
             }
             else if(count($arrFilesToCombine) == 1)
             {
-                $classCombinedRead = new SimpleScooterCSVFileClass($arrFilesToCombine[0], "r");
+                $classCombinedRead = new SimpleScooperCSVClass($arrFilesToCombine[0], "r");
                 $arrRetJobs = $classCombinedRead->readAllRecords(true, array_keys($this->getEmptyJobListingRecord()));
             }
 

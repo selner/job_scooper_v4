@@ -3,29 +3,16 @@ flags=$1
 
 # get an output file name
 now=$(date +"%Y_%m_%d_%H%M")
-inpath="/Users/bryan/Dropbox/JobSearch-and-Consulting/JobPosts-Tracking/"
-inpathsrcfiles=$inpath"bryans_list_source_to_use/"
+workingfolder="/Users/bryan/Dropbox/JobSearch-and-Consulting/JobPosts-Tracking/"
+inifilepath=$workingfolder"bryans_list_source_to_use/bryans_jobs_scooper_config.ini"
 endfilebase=$now"_jobs"
-outpath=$inpath"recent_data/"
+outpath=$workingfolder"recent_data/"
 endfilename=$endfilebase".csv"
 endlogname=$endfilebase".log"
 enddestname="latest_jobs.csv"
-endtitlesname="bryans_list_exclude_titles.csv"
-endregextitlesname="bryans_list_exclude_titles_regex.csv"
-endregexcompaniesname="bryans_list_exclude_companies_regex.csv"
-titlesfilename=$inpathsrcfiles$endtitlesname
-regextitlesfilename=$inpathsrcfiles$endregextitlesname
-regexcompaniesfilename=$inpathsrcfiles$endregexcompaniesname
 file=$outpath$endfilename
 log=$outpath$endlogname
 when="unknown"
-
-echo "now: '$now'"
-echo "inpathsrcfiles: '$inpathsrcfiles'"
-echo "inpath: '$inpath'"
-echo "outpath: '$outpath'"
-echo "endfilebase: '$endfilebase'"
-echo "file: '$file'"
 
 echo "Creating output directory: '$outpath'"
 mkdir "$outpath"
@@ -53,7 +40,7 @@ fi
 echo 'Starting download of jobs... ' 2>&1 1>>"$log"
 
 # Now process that data and export CSVs with the listings
-echo "Running php ../main/runJobs.php $flags_script_defaults -days 7 -o '$file' -t '$titlesfilename' -tr '$regextitlesfilename'  -cr '$regexcompaniesfilename' "  2>&1 1>>"$log"
-php ../main/runJobs.php $flags -days 7 -o "$file" -t "$titlesfilename" -tr "$regextitlesfilename" -cr "$regexcompaniesfilename" 2>&1 1>>"$log"
+echo "Running php ../main/runJobs.php $flags_script_defaults -days 7 -o '$file' -ini '$inifilepath'"  2>&1 1>>"$log"
+php ../main/runJobs.php $flags -days 7 -o "$file" -ini "$inifilepath" 2>&1 1>>"$log"
 
 echo 'Download complete.' 2>&1 1>>"$log"

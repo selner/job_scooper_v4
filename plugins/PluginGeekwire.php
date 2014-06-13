@@ -92,14 +92,6 @@ class PluginGeekwire extends ClassJobsSitePlugin
 exit();
         return $ret;
     }*/
-    function getMyJobsForSearch($url, $nDays = -1)
-    {
-        $srcList = $this->getMySearches();
-        foreach($srcList as $search)
-        {
-            $this->getMyJobsFromHTMLFiles($this->siteName, $search);
-        }
-    }
 
 
     function parseJobsListForPage($objSimpHTML)
@@ -167,7 +159,7 @@ class ClassGeekwire
     protected $siteName = 'Geekwire';
     function outputGeekwireList()
     {
-        $classFileOut = new SimpleScooterCSVFileClass("Geekwire200.csv", "w");
+        $classFileOut = new SimpleScooperCSVClass("Geekwire200.csv", "w");
         $classFileOut->writeArrayToCSVFile($this->_getGeekwireStartupIndex());
     }
 
@@ -215,7 +207,7 @@ class ClassGeekwire
     {
         // $html = file_get_html('http://www.geekwire.com/geekwire-200/');
         $fpGeek = fopen('/Users/bryan/Code/scooper/GeekwireStartupList.html', 'r');
-        $classFileOut = new SimpleScooterCSVFileClass("GeekwireStartupList.csv", "w");
+        $classFileOut = new SimpleScooperCSVClass("GeekwireStartupList.csv", "w");
 
         $ret = array();
 

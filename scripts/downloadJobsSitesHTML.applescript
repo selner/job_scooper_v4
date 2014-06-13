@@ -72,7 +72,7 @@ on startRunOrig(strFolder)
 	return ret
 end startRunOrig
 
-on doJobsDownload_Geekwire(strOutputFolder, strStartURL, strSearchKey)
+on doJobsDownload_Geekwire(strOutputFolder, strStartURL, strFileKey)
 	set strJSGetMaxPageValue_GEEK to ""
 	
 	set strGetNextPageValue_GEEK to ""
@@ -82,12 +82,12 @@ on doJobsDownload_Geekwire(strOutputFolder, strStartURL, strSearchKey)
 	set strJSClickNext_GEEK_Others to ""
 	set strJSGetTheSource_GEEK to "function getHTML() { return document.getElementById('content').innerHTML; } getHTML();"
 	
-	set ret to doJobsDownload_Base(strOutputFolder, strStartURL, "geekwire-" & strSearchKey, strJSGetMaxPageValue_GEEK, strGetNextPageValue_GEEK, strJSClickNext_GEEK_First, strJSClickNext_GEEK_Others, strJSGetTheSource_GEEK, 1)
+	set ret to doJobsDownload_Base(strOutputFolder, strStartURL, strFileKey, strJSGetMaxPageValue_GEEK, strGetNextPageValue_GEEK, strJSClickNext_GEEK_First, strJSClickNext_GEEK_Others, strJSGetTheSource_GEEK, 1)
 	return ret
 	
 end doJobsDownload_Geekwire
 
-on doJobsDownload_AMZN(strOutputFolder)
+on doJobsDownload_AMZN(strOutputFolder, strStartURL, strFileKey)
 	set strURL_AMZN to "http://www.amazon.jobs/results?slid=226&sjid=68,83"
 	set strJSGetMaxPageValue_AMZN to "function getMaxPageValue() { var strItem =  document.getElementById('searchProfiles').firstChild.nextSibling.nextSibling.nextSibling.firstChild.nextSibling.textContent; return strItem.split(' ')[2];  }  getMaxPageValue();"
 	
@@ -102,14 +102,15 @@ on doJobsDownload_AMZN(strOutputFolder)
 		            false, false, false, false, 
 		            0, null); 
 		        document.getElementsByClassName('page gradient')[1].dispatchEvent(event); return true; } doGetJobsClick();"
+	
 	set strJSGetTheSource_AMZN to "function getHTML() { return document.getElementById('teamjobs').innerHTML; } getHTML();"
 	
-	set ret to doJobsDownload_Base(strOutputFolder, strURL_AMZN, "Amazon", strJSGetMaxPageValue_AMZN, strGetNextPageValue_AMZN, strJSClickNext_AMZN_First, strJSClickNext_AMZN_Others, strJSGetTheSource_AMZN, 1)
+	set ret to doJobsDownload_Base(strOutputFolder, strURL_AMZN, strFileKey, strJSGetMaxPageValue_AMZN, strGetNextPageValue_AMZN, strJSClickNext_AMZN_First, strJSClickNext_AMZN_Others, strJSGetTheSource_AMZN, 1)
 	return ret
 	
 end doJobsDownload_AMZN
 
-on doJobsDownload_GOOG(strOutputFolder)
+on doJobsDownload_GOOG(strOutputFolder, strStartURL, strFileKey)
 	set strURL_GOOG to "https://www.google.com/about/careers/search/#t=sq&q=j&jl=Kirkland,WA&jl=Seattle,WA"
 	
 	set strJSGetMaxPageValue_GOOG to "function getMaxPageValue() { return parseInt(document.getElementsByClassName('count')[0].textContent); }  getMaxPageValue();"
@@ -125,21 +126,20 @@ on doJobsDownload_GOOG(strOutputFolder)
 	set strJSGetTheSource_GOOG to "function getHTML() {  var text = ''; var arrItems = document.getElementsByClassName('sr sr-a'); for (var i = 0; i <  arrItems.length; i++) { 
    text = text + arrItems[i].innerHTML; }  return text; } getHTML();"
 	
-	set ret to doJobsDownload_Base(strOutputFolder, strURL_GOOG, "Google", strJSGetMaxPageValue_GOOG, strGetNextPageValue_GOOG, strJSClickNext_GOOG, strJSClickNext_GOOG, strJSGetTheSource_GOOG, 0)
+	set ret to doJobsDownload_Base(strOutputFolder, strURL_GOOG, strFileKey, strJSGetMaxPageValue_GOOG, strGetNextPageValue_GOOG, strJSClickNext_GOOG, strJSClickNext_GOOG, strJSGetTheSource_GOOG, 0)
 	
 	return ret
 	
 end doJobsDownload_GOOG
 
 
-on doJobsDownload_Base(strOutputFolder, strURL, strCompanyName, strJSGetMaxPageValue, strGetNextPageValue, strJSClickNext_First, strJSClickNext_Others, strJSGetTheSource, nIndexMaxForClick)
+on doJobsDownload_Base(strOutputFolder, strURL, strFileKey, strJSGetMaxPageValue, strGetNextPageValue, strJSClickNext_First, strJSClickNext_Others, strJSGetTheSource, nIndexMaxForClick)
 	
-	log "Starting HTML download for " & strCompanyName & " jobs."
-	log "Starting download of the HTML for " & strCompanyName & " jobs site search: " & strURL
+	log "Starting download of the HTML for " & strFileKey & " search: " & strURL
 	log "Output will be written to " & strOutputFolder
 	set outFolder to getOrCreateOutputFolder(strOutputFolder)
 	
-	set theFileBase to strCompanyName & "-jobs-page-"
+	set theFileBase to strFileKey & "-jobs-page-"
 	
 	tell application "Safari" to quit
 	delay 2
@@ -175,7 +175,7 @@ on doJobsDownload_Base(strOutputFolder, strURL, strCompanyName, strJSGetMaxPageV
 		set strJSClickNext to strJSClickNext_First
 		set nNextPage to (strNextPage as integer)
 		
-		repeat while (nNextPage ² nMaxPages and boolClickedNext = true)
+		repeat while (nNextPage < nMaxPages and boolClickedNext = true)
 			
 			if (strGetNextPageValue is not "") then
 				set strNextPage to (do JavaScript strGetNextPageValue in document 1) as integer
@@ -201,13 +201,13 @@ on doJobsDownload_Base(strOutputFolder, strURL, strCompanyName, strJSGetMaxPageV
 			set theFile to theFullFilePath
 			try
 				set fRef to open for access file theFile with write permission
-				write theSource to fRef as Çclass utf8È
+				write theSource to fRef as class utf8
 				close access fRef
 			on error
 				try
 					close access file theFile
 				end try
-				log "An error occured.   " & strCompanyName & " jobs download did not complete."
+				log "An error occured.   " & strFileKey & " jobs download did not complete."
 				return -1
 			end try
 			
@@ -231,7 +231,7 @@ on doJobsDownload_Base(strOutputFolder, strURL, strCompanyName, strJSGetMaxPageV
 	end tell
 	
 	
-	log "Completed downloading HTML for  " & strCompanyName & "  jobs."
+	log "Completed downloading HTML for  " & strFileKey & "  jobs."
 	return 1 -- success 
 	
 end doJobsDownload_Base
@@ -340,7 +340,7 @@ on doJobsDownload_orig_Amazon(strOutputFolder, strURL)
 		
 		set nNextPage to (strNextPage as number)
 		
-		repeat while (nNextPage ² nMaxPages and boolClickedNext = true)
+		repeat while (nNextPage < nMaxPages and boolClickedNext = true)
 			set strNextPage to do JavaScript "function getNextPageValue() {return document.getElementById('nextpage').value;} getNextPageValue();" in document 1
 			if (strNextPage as number) < nNextPage then
 				nNextPage = nMaxPages
@@ -361,7 +361,7 @@ on doJobsDownload_orig_Amazon(strOutputFolder, strURL)
 			set theFile to theFullFilePath
 			try
 				set fRef to open for access file theFile with write permission
-				write theSource to fRef as Çclass utf8È
+				write theSource to fRef as class utf8
 				close access fRef
 			on error
 				try

@@ -21,8 +21,16 @@
 /****                                                                                                        ****/
 /****************************************************************************************************************/
 define('__ROOT__', dirname(dirname(__FILE__)));
+if ( file_exists ( __ROOT__.'/scooper_common/SimpleScooterCSVFileClass.php' ) )
+{
+    require_once(__ROOT__.'/scooper_common/SimpleScooterCSVFileClass.php');
+}
+else
+{
+    require_once(__ROOT__.'/scooper_common/SimpleScooperCSVClass.php');
+
+}
 require_once(__ROOT__.'/scooper_common/debug_functions.php');
-require_once(__ROOT__.'/scooper_common/SimpleScooterCSVFileClass.php');
 
 
 ini_set('auto_detect_line_endings', true);
@@ -38,118 +46,6 @@ function getDefaultFileName($strFilePrefix, $strBase, $strExt)
     return sprintf($strApp . date("Ymd-Hms")."%s_%s.%s", ($strFilePrefix != null ? "_".$strFilePrefix : ""), ($strBase != null  ? "_".$strBase : ""), $strExt);
 }
 
-/****************************************************************************************************************/
-/****                                                                                                        ****/
-/****         Logging                                                                                        ****/
-/****                                                                                                        ****/
-/****************************************************************************************************************/
-
-const C__LOGLEVEL_DEBUG__	= 1;	// Most Verbose
-const C__LOGLEVEL_INFO__	= 2;	// ...
-const C__LOGLEVEL_WARN__	= 3;	// ...
-const C__LOGLEVEL_ERROR__	= 4;	// ...
-const C__LOGLEVEL_FATAL__	= 5;	// Least Verbose
-const C__LOGLEVEL_OFF__		= 6;	// Nothing at all.
-
-//
-// If installed as part of the package, uses Klogger v0.1 version (http://codefury.net/projects/klogger/)
-//
-if ( file_exists ( dirname(__FILE__) . '/../lib/KLogger.php') )
-{
-    define(C_USE_KLOGGER, 1);
-    require_once dirname(__FILE__) . '/../lib/KLogger.php';
-
-}
-else
-{
-    print "Could not find KLogger file: ". dirname(__FILE__) . '/../lib/KLogger.php'.PHP_EOL;
-    define(C_USE_KLOGGER, 0);
-}
-
-
-
-/****************************************************************************************************************/
-/****                                                                                                        ****/
-/****         Common Declarations                                                                            ****/
-/****                                                                                                        ****/
-/****************************************************************************************************************/
-
-
-const C__API_RETURN_TYPE_OBJECT__ = 33;
-const C__API_RETURN_TYPE_ARRAY__ = 44;
-
-
-function getTodayAsString()
-{
-    return date("Y-m-d");
-}
-
-
-/****************************************************************************************************************/
-/****                                                                                                        ****/
-/****         Helper Functions:  Information and Error Logging                                               ****/
-/****                                                                                                        ****/
-/****************************************************************************************************************/
-
-function __initLogger__($strBaseFileName = null, $strOutputDirPath = null)
-{
-    $fileLogFullPath = getDefaultFileName(null,$strBaseFileName,"log");
-
-    $GLOBALS['logger'] = null;
-
-    if(C_USE_KLOGGER == 1)
-    {
-
-        $log = new KLogger ( $fileLogFullPath , KLogger::DEBUG );
-
-        $GLOBALS['logger'] = $log;
-
-        __log__("Initialized output log:  ".$fileLogFullPath, C__LOGLEVEL_INFO__);
-
-    }
-    else
-    {
-        __debug__printLine("Output log will not be enabled.  KLogger is not installed. ".$fileLogFullPath, C__DISPLAY_NORMAL__);
-    }
-}
-
-
-function __log__($strToLog, $LOG_LEVEL)
-{
-    $arrLevelNames = array( 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL', 'OFF' );
-
-    $strLogLine =  $strToLog;
-
-
-
-    if($GLOBALS['logger'] != null)
-    {
-        switch ($LOG_LEVEL)
-        {
-            case C__LOGLEVEL_DEBUG__:
-                $GLOBALS['logger']->LogDebug($strLogLine);
-                break;
-
-            case C__LOGLEVEL_WARN__:
-                $GLOBALS['logger']->LogWarn($strLogLine);
-                break;
-
-            case C__LOGLEVEL_ERROR__:
-                $GLOBALS['logger']->LogError($strLogLine);
-                break;
-
-            case C__LOGLEVEL_FATAL__:
-                $GLOBALS['logger']->LogFatal($strLogLine);
-                break;
-
-            default:
-            case C__LOGLEVEL_INFO__:
-            $GLOBALS['logger']->LogInfo($strLogLine);
-                break;
-        }
-    }
-    print '['.$arrLevelNames[$LOG_LEVEL-1]."] ".$strLogLine .PHP_EOL;
-}
 
 /****************************************************************************************************************/
 /****                                                                                                        ****/
@@ -255,6 +151,52 @@ function getEmptyUserInputRecord()
 {
     return array('header_keys'=>null, 'data_type' => null, 'data_rows'=>array());
 }
+function get_PharseOptionValue($strOptName)
+{
+    $retvalue = null;
+    $strOptGiven = $strOptName."_given";
+    if($GLOBALS['OPTS'][$strOptGiven] == true)
+    {
+        __debug__printLine("'".$strOptName ."'"."=[".$GLOBALS['OPTS'][$strOptName] ."]", C__DISPLAY_ITEM_DETAIL__);
+        $retvalue = $GLOBALS['OPTS'][$strOptName];
+    }
+    else
+    {
+        $retvalue = null;
+    }
+
+    return $retvalue;
+}
+
+function setGlobalFileDetails($key, $fRequireFile = false, $fullpath = null)
+{
+    $ret = null;
+    $ret = parseFilePath($fullpath, $fRequireFile);
+
+    __debug__printLine("". $key ." set to [" . var_export($ret, true) . "]", C__DISPLAY_ITEM_DETAIL__);
+
+    $GLOBALS['OPTS'][$key] = $ret;
+
+    return $ret;
+}
+
+function set_FileDetails_fromPharseSetting($optUserKeyName, $optDetailsKeyName, $fFileRequired)
+{
+    $valOpt = get_PharseOptionValue($optUserKeyName);
+    return setGlobalFileDetails($optDetailsKeyName, $fFileRequired, $valOpt);
+}
+
+
+function get_FileDetails_fromPharseOption($optUserKeyName, $fFileRequired)
+{
+    $ret = null;
+    $valOpt = get_PharseOptionValue($optUserKeyName);
+    if($valOpt) $ret = parseFilePath($valOpt, $fFileRequired);
+
+    return $ret;
+
+}
+
 
 
 /****************************************************************************************************************/
@@ -280,6 +222,42 @@ function addPrefixToArrayKeys( $arr, $strPrefix = "", $strSep = "" )
     return $arrNewKeyValues;
 }
 
+function array_to_object($d) {
+    if (is_array($d)) {
+        /*
+        * Return array converted to object
+        * Using __FUNCTION__ (Magic constant)
+        * for recursive call
+        */
+        return (object) array_map(__FUNCTION__, $d);
+    }
+    else {
+        // Return object
+        return $d;
+    }
+}
+	function object_to_array($d) {
+    if (is_object($d)) {
+        // Gets the properties of the given object
+        // with get_object_vars function
+        $d = get_object_vars($d);
+    }
+
+    if (is_array($d)) {
+        /*
+        * Return array converted to object
+        * Using __FUNCTION__ (Magic constant)
+        * for recursive call
+        */
+        return array_map(__FUNCTION__, $d);
+    }
+    else {
+        // Return array
+        return $d;
+    }
+}
+
+
 function merge_into_array_and_add_new_keys( &$arr1, $arr2 )
 {
 
@@ -292,7 +270,6 @@ function my_merge_add_new_keys( $arr1, $arr2 )
 {
     // check if inputs are really arrays
     if (!is_array($arr1) || !is_array($arr2)) {
-        throw new Exception("Input is not an Array");
     }
     $strFunc = "my_merge_add_new_keys(arr1(size=".count($arr1)."),arr2(size=".count($arr2)."))";
     __debug__printLine($strFunc, C__DISPLAY_FUNCTION__, true);
@@ -369,7 +346,19 @@ function array_copy ($aSource) {
 
     return $aRetAr;
 }
+function addSeqKey($m)
+{
+    return(array($m => $m));
+}
 
+
+
+
+function array_addseq_key($arr)
+{
+    $arrStringKeys = array_map(function($n) { return sprintf('key%03d', $n); }, range(1, count($arr)) );
+    return array_combine(array_values($arrStringKeys), array_values($arr));
+}
 /*
  * Flattening a multi-dimensional array into a
  * single-dimensional one. The resulting keys are a
@@ -421,7 +410,7 @@ function array_flatten_n($array, $n) {
             if (is_array($value)) {
                 $new_prefix = array_values($prefix);
                 array_push($new_prefix, $key);
-                if (count($new_prefix) >= n)
+                if (count($new_prefix) >= $n)
                     array_shift($new_prefix);
 
                 array_push($stack, array($new_prefix, $value));
@@ -538,8 +527,72 @@ function intceil($number)
     return $ret;
 }
 
+function readarray($from_array, $addr = array()) {
+//    var_dump('readarray start:' .var_export($from_array, true));
+    global $output;
+        foreach ($from_array as $key => $value)
+        {
+            if (is_Array($value) && count($value) > 0) {
+                $addr[] = $key;
+                $output[] = readarray($value, $addr);
+            } else {
+                $output[] = implode('||', $addr) . $value;
+            }
+        }
+    return $output;
+}
 
+const C_ARRFLAT_SUBITEM_NONE__ = 0;
+const C_ARRFLAT_SUBITEM_SEPARATOR__ = 1;
+const C_ARRFLAT_SUBITEM_LINEBREAK__ = 2;
 
+function substr_count_array( $haystack, $needle ) {
+    $count = 0;
+    foreach ($needle as $substring) {
+        $count += substr_count( $haystack, $substring);
+    }
+    return $count;
+}
+
+function is_array_multidimensional($a)
+{
+    if(!is_array($a)) return false;
+    foreach($a as $v) if(is_array($v)) return TRUE;
+    return FALSE;
+}
+
+function array_flatten($arr, $strDelim = '|', $flagsSubItems=C_ARRFLAT_SUBITEM_NONE__)
+{
+    $fSkipLevel = false;
+    $keys = array_keys($arr);
+    $values= array_values($arr);
+    $output = array();
+    foreach ($keys as $key => $item)
+    {
+       $newVal = $values[$key];
+        if(is_array($newVal))
+        {
+            if(is_array_multidimensional($newVal))
+            {
+               $outputVal = array_flatten($newVal, $strDelim, $flagsSubItems );
+            }
+            else
+            {
+               $outputVal = implode($strDelim, $newVal);
+           }
+        }
+        else
+       {
+            $outputVal = $newVal;
+       }
+        $fIncludeLineBreaks = (substr_count($outputVal, "|") > 1 && ($flagsSubItems & C_ARRFLAT_SUBITEM_LINEBREAK__));
+        $fIncludeSeparators = (substr_count($outputVal, "|") > 1 && ($flagsSubItems & C_ARRFLAT_SUBITEM_SEPARATOR__));
+        $output[$key] = ($fIncludeLineBreaks ? "\n" : "") . ($fIncludeSeparators ? "(" : "") . $outputVal . ($fIncludeSeparators ? ")" : "");
+    }
+    $ret = implode($strDelim, $output);
+
+    return $ret;
+}
 
 /**
  * Strip punctuation from text.
@@ -611,4 +664,4 @@ function my_exec($cmd, $input='') {
 
 
 
-?>
+
