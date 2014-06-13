@@ -207,14 +207,15 @@ class ClassJobsSitePluginCommon
 
     private function _addBadTitlesFromJobsList_()
     {
-        __debug__printLine(PHP_EOL.PHP_EOL."--TODO-- FINISH JOB TITLES LIST FILTER FROM LOADED JOBS".PHP_EOL.PHP_EOL, C__DISPLAY_ERROR__);
-/*
-        $arrJobsBadTitles = array_filter($arrJobsList, "onlyBadTitlesAndRoles");
+        /*
+                __debug__printLine(PHP_EOL.PHP_EOL."--TODO-- FINISH JOB TITLES LIST FILTER FROM LOADED JOBS".PHP_EOL.PHP_EOL, C__DISPLAY_ERROR__);
 
-        $arrBadTitlesToAdd = array_column($arrJobsBadTitles, "job_title");
+                $arrJobsBadTitles = array_filter($arrJobsList, "onlyBadTitlesAndRoles");
 
-        $this->_addTitlesToFilterList_($arrBadTitlesToAdd);
- */
+                $arrBadTitlesToAdd = array_column($arrJobsBadTitles, "job_title");
+
+                $this->_addTitlesToFilterList_($arrBadTitlesToAdd);
+         */
     }
 
 
