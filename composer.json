@@ -16,7 +16,7 @@
         "austinhyde/iniparser": "dev-master",
         "katzgrau/klogger": "1.0.*",
         "mgargano/simplehtmldom": "1.5",
-        "selner/scooper_common": "dev-master"
+        "selner/scooper_common": "@dev"
    },
     "repositories": [
         {
