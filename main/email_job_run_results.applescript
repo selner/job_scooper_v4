@@ -284,4 +284,3 @@ on escape_string(input_string)
 	return output_string as text
 	
 end escape_string
-
