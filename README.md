@@ -2,10 +2,10 @@
 Download the latest jobs from any websites into one comma-separated value (CSV) for Excel.  Configuration is easy.  You just need to specify the URL of the search and a name for it in your configuartion INI file.  Jobs Scooper does the rest.
 
 Example INI settings for a Facebook jobs site search:
-``[search.Facebook-all-SEA-jobs]``
-``jobsite="Facebook"``
-``name="all SEA jobs"``
-``url_format="https://www.facebook.com/careers/locations/seattle"``
+``[search.Facebook-all-SEA-jobs]
+jobsite="Facebook"
+name="all SEA jobs"
+url_format="https://www.facebook.com/careers/locations/seattle"``
 
 That's it!
 
