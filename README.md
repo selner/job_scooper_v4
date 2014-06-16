@@ -14,7 +14,15 @@ To run:
 Jobs Scooper supports over 20 different job sites out of the box:  
 Amazon, CareerBuilder, Craigslist, Disney, DotJobs, Ebay, EmploymentGuide, Expedia, Facebook, Geekwire, Glassdoor, Google, Groupon, Indeed, LinkUp, Mashable, Monster, Outerwall, Porch, SimplyHired, Tableau. 
 
-If your site isn't supported, it's super easy to add a new site plugin.  Basic instructions on how to create your own are in examples/PluginTemplate.php.  Please add your new plugin to the list in Github so that everyone can benefit from your efforts!
+If your site isn't supported, it's super easy to add a new site plugin for almost any site that lists jobs.  Basic instructions on how to create your own are in examples/PluginTemplate.php.  There are currently
+three kinds of plugins that can be written:
+* server-side HTML download
+* XML download and parse (e.g. for an RSS feed of jobs) and
+* client-side HTML download
+
+The client-side HTML download uses Applescript to drive Safari and download the HTML to files for parsing.
+
+Please add your new plugin to the list in Github so that everyone can benefit from your efforts!
 
 ###Other Stuff
 * Version:  v1.0.1
