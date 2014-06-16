@@ -34,6 +34,13 @@ class PluginExample extends ClassJobsSitePlugin
     protected $siteName = 'ExampleSiteName';
     protected $siteBaseURL = 'http://www.examplesite.com';
 
+	// if this is a client-side HTML download plugin, you will need to add a script
+	// for driving Safari to download the files and set that script name here.
+	//
+	// This value is unused for XML or server-side webpage download plugins.
+    protected $strFilePath_HTMLFileDownloadScript = "PluginTemplate_downloadjobs.applescript";
+
+
     /**
      * If the site does not have a URL parameter for number of days
      * then set the plugin flag to C__JOB_DAYS_VALUE_NOTAPPLICABLE__
