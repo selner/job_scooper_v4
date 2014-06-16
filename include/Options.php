@@ -68,13 +68,6 @@ function __initializeArgs__()
             'required'      => false,
             'short'      => 'o',
         ),
-        'include_amazon' => array(
-            'description'   => 'Include Amazon.',
-            'default'       => -1,
-            'type'          => Pharse::PHARSE_INTEGER,
-            'required'      => false,
-            'short'      => 'amazon',
-        ),
         'use_debug' => array(
             'description'   => 'Output debug files and logging',
             'default'       => 0,
