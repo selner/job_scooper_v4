@@ -1,6 +1,14 @@
 #Jobs Scooper 
 Download the latest jobs from any websites into one comma-separated value (CSV) for Excel.  Configuration is easy.  You just need to specify the URL of the search and a name for it in your configuartion INI file.  Jobs Scooper does the rest.
 
+Example INI settings for a Facebook jobs site search:
+``[search.Facebook-all-SEA-jobs]``
+``jobsite="Facebook"``
+``name="all SEA jobs"``
+``url_format="https://www.facebook.com/careers/locations/seattle"``
+
+That's it!
+
 To run:
 ``/usr/bin/php "main/runJobs.php" -all -days 3 -ini myconfig.ini``
 
@@ -27,5 +35,6 @@ Please add your new plugin to the list in Github so that everyone can benefit fr
 ###Other Stuff
 * Version:  v1.0.1
 * Author:  Bryan Selner (dev at recoilvelocity dot com)
-* Platforms:  I've only really tested it on Mac OS/X 10.9.2 with PHP 5.4.24.  Your mileage could definitely vary on any other platform or version.  
+* Platforms:  I've only really tested it on Mac OS/X 10.9.3 with PHP 5.4.24.  Your mileage could definitely vary on any other platform or version.  Obviously, the applescripts will fail
+on any platform that isn't Mac OSX, so you'll have to workaround that.
 * Issues/Bugs:  See [https://github.com/selner/jobs_scooper/issues](https://github.com/selner/jobs_scooper/issues)
