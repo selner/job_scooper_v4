@@ -19,24 +19,6 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 
 
-function combineTextAllChildren($node, $fRecursed = false)
-{
-
-    $retStr = "";
-    if($node->hasChildNodes())
-    {
-        $retStr = combineTextAllChildren($node->firstChild(), true);
-    }
-
-    if($node->plaintext != null && $fRecursed == false)
-    {
-       $retStr = strScrub($node->plaintext . " " . $retStr, DEFAULT_SCRUB );
-    }
-    return $retStr;
-
-
-}
-
 class PluginGlassdoor extends ClassJobsSitePlugin
 {
     protected $siteName = 'Glassdoor';
@@ -66,6 +48,7 @@ class PluginGlassdoor extends ClassJobsSitePlugin
      return $ret;
 
     }
+
     protected function _getURLfromBase_($search, $nDays, $nPage, $nItem = null)
     {
         $strURL = $search['base_url_format'];
@@ -125,10 +108,6 @@ class PluginGlassdoor extends ClassJobsSitePlugin
             $item['job_site_date'] =trim( $node->find("div[class='minor nowrap']")[0]->plaintext);
             if(strlen($item['job_site_date']) == 0)  { $item['job_site_date'] = "N/A (likely sponsored result)";}
 
-            if($this->is_IncludeBrief() == true)
-            {
-                $item['brief'] =trim( $node->find("p[class='desc']")[0]->plaintext);
-            }
 
             $ret[] = $this->normalizeItem($item);
         }

@@ -94,10 +94,6 @@ class PluginLinkUp extends ClassJobsSitePlugin
 
             $item['date_pulled'] = getTodayAsString();
 
-            if($this->is_IncludeBrief() == true)
-            {
-                $item['brief_description'] = $node->find("div[class='listing-description']")[0]->plaintext;
-            }
 
             $item['job_site_category'] = $node->find("span[class='listing-tag']")[0]->plaintext;
             $item['job_site_date'] = $node->find("span[class='listing-date']")[0]->plaintext;

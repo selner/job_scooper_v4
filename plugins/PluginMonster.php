@@ -104,23 +104,11 @@ class PluginMonster extends ClassJobsSitePlugin
             $strLoc= strip_punctuation(html_entity_decode($item['location']));
 
             $item['job_post_url'] = $this->siteBaseURL . "/" . str_replace(" ", "-", $strScrubTitle )."-".str_replace(" ", "-",$strLoc)."-".$item['job_id'].".aspx";
-
-//            $item['location'] = trim($node->find("span[class='listing-location'] span")[0]->plaintext) . "-" .
- //               trim($node->find("span[class='listing-location'] span")[1]->plaintext);
-
             $item['date_pulled'] = getTodayAsString();
 
-/*            if($this->is_IncludeBrief() == true)
-            {
-                $item['brief_description'] = $node->find("div[class='listing-description']")[0]->plaintext;
-            }
-*/
-//            $item['job_site_category'] = $node->find("span[class='listing-tag']")[0]->plaintext;
             $item['job_site_date'] = $node->find("span[class='accessibilityOnly']")[0]->plaintext;
             $ret[] = $this->normalizeItem($item);
         }
-
-//        var_dump($node->getAllAttributes());
 
         return $ret;
     }

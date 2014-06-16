@@ -96,11 +96,6 @@ class PluginMashable extends ClassJobsSitePlugin
             $item['job_id'] = str_replace("aiResultsMainDiv", "", $idText);
 
 
-            if($this->is_IncludeBrief() == true)
-            {
-                $item['brief_description'] = $node->find("div[class='aiResultsDescriptionNoAdvert']")[0]->plaintext;
-            }
-
             $item['job_site_date'] = $node->find("div[class='aiDescriptionPod'] ul li")[2]->plaintext;
 
             $ret[] = $this->normalizeItem($item);

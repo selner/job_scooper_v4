@@ -30,24 +30,6 @@ class PluginAmazon extends ClassJobsSitePlugin
     protected $siteName = 'Amazon';
 
 
-    function getDaysURLValue($nDays)
-    {
-        if($nDays > 1)
-        {
-            __debug__printLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Ignoring number of days value and just pulling current listings.", C__DISPLAY_WARNING__);
-
-        }
-        return C__JOB_PAGECOUNT_NOTAPPLICABLE__;
-
-    }
-
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        return C__JOB_ITEMCOUNT_UNKNOWN__;
-    }
-
-
-
     function parseJobsListForPage($objSimpHTML)
 
     {
@@ -81,12 +63,6 @@ class PluginAmazon extends ClassJobsSitePlugin
 
                 $briefObj = $locObj ->nextSibling();
 
-                if($this->is_IncludeBrief() == true)
-                {
-                    $brief  = trim($briefObj->plaintext);
-                    $arrBrief = explode("Short Description", $brief);
-                    $item['brief_description'] = $arrBrief[1];
-                }
 
                 $ret[] = $this->normalizeItem($item);
 

@@ -28,23 +28,6 @@ class PluginGoogle extends ClassJobsSitePlugin
     protected $nJobListingsPerPage = 10;
 
 
-
-    function getDaysURLValue($nDays)
-    {
-        if($nDays > 1)
-        {
-            __debug__printLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Ignoring number of days value and just pulling current listings.", C__DISPLAY_WARNING__);
-
-        }
-        return C__JOB_PAGECOUNT_NOTAPPLICABLE__;
-
-    }
-
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        return C__JOB_ITEMCOUNT_UNKNOWN__;
-    }
-
     function getItemURLValue($nItem)
     {
         if($nItem == null || $nItem <= 10 ) { return "li=0"; }

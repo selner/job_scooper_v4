@@ -14,29 +14,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(__FILE__) . '/../include/Options.php';
-require_once dirname(__FILE__) . '/../include/JobListHelpers.php';
-require_once dirname(__FILE__) . '/../lib/array_column.php';
+define('__ROOT__', dirname(dirname(__FILE__)));
+require_once(__ROOT__.'/include/Options.php');
+require_once(__ROOT__.'/lib/array_column.php');
+require_once(__ROOT__.'/include/JobListHelpers.php');
+
+
 
 
 
 class ClassJobsSitePluginCommon
 {
 
-//    private $arrKeysForDeduping = array('job_site', 'job_id');
     private $arrKeysForDeduping = array('key_jobsite_siteid');
 
-    private $_bitFlags = null;
     protected $detailsMyFileOut= "";
 
-
-    function __construct($bitFlags = null)
-    {
-        $this->_bitFlags = $bitFlags;
-    }
-
-    function getMyBitFlags() { return $this->_bitFlags; }
-    function setMyBitFlags($bitFlags) { $this->_bitFlags = $bitFlags; }
 
 
     function getEmptyJobListingRecord()
@@ -241,7 +234,7 @@ class ClassJobsSitePluginCommon
             if(file_exists($strFileName ) && is_file($strFileName ))
             {
                 __debug__printLine("Loading job titles to filter from ".$strFileName."." , C__DISPLAY_ITEM_DETAIL__);
-                $classCSVFile = new SimpleScooperCSVClass($strFileName , 'r');
+                $classCSVFile = new ClassScooperSimpleCSVFile($strFileName , 'r');
                 $arrTitlesTemp = $classCSVFile->readAllRecords(true);
                 __debug__printLine(count($arrTitlesTemp) . " titles found in the source file that will be automatically filtered from job listings." , C__DISPLAY_ITEM_DETAIL__);
 
@@ -291,7 +284,7 @@ class ClassJobsSitePluginCommon
             if(file_exists($strFileName ) && is_file($strFileName ))
             {
                 __debug__printLine("Loading job Company regexes to filter from ".$strFileName."." , C__DISPLAY_ITEM_DETAIL__);
-                $classCSVFile = new SimpleScooperCSVClass($strFileName , 'r');
+                $classCSVFile = new ClassScooperSimpleCSVFile($strFileName , 'r');
                 $arrCompaniesTemp = $classCSVFile->readAllRecords(true);
                 __debug__printLine(count($arrCompaniesTemp) . " companies found in the source file that will be automatically filtered from job listings." , C__DISPLAY_ITEM_DETAIL__);
 
@@ -324,7 +317,6 @@ class ClassJobsSitePluginCommon
         }
         else
         {
-//            var_dump('$GLOBALS[companies_regex_to_filter]', $GLOBALS['DATA']['companies_regex_to_filter']);
             __debug__printLine("Loaded " . count($GLOBALS['DATA']['companies_regex_to_filter']). " regexes to use for filtering companies." , C__DISPLAY_WARNING__);
 
         }
@@ -351,7 +343,7 @@ class ClassJobsSitePluginCommon
             if(file_exists($strFileName ) && is_file($strFileName ))
             {
                 __debug__printLine("Loading job title regexes to filter from ".$strFileName."." , C__DISPLAY_ITEM_DETAIL__);
-                $classCSVFile = new SimpleScooperCSVClass($strFileName , 'r');
+                $classCSVFile = new ClassScooperSimpleCSVFile($strFileName , 'r');
                 $arrTitlesTemp = $classCSVFile->readAllRecords(true);
                 __debug__printLine(count($arrTitlesTemp) . " titles found in the source file that will be automatically filtered from job listings." , C__DISPLAY_ITEM_DETAIL__);
 
@@ -384,7 +376,6 @@ class ClassJobsSitePluginCommon
         }
         else
         {
-//            var_dump('$GLOBALS[titles_regex_to_filter]', $GLOBALS['DATA']['titles_regex_to_filter']);
             __debug__printLine("Loaded regexes to use for filtering titles from '" . $strFileName . "'." , C__DISPLAY_WARNING__);
 
         }
@@ -532,7 +523,6 @@ class ClassJobsSitePluginCommon
             $strJobIndex = getArrayKeyValueForJob($job);
             // First, make sure we don't already have a value in the interested column.
             // if we do, skip it and move to the next one
-//            if($job['interested'] == null || strlen($job['interested']) <= 0)
             if(!isJobAutoUpdatable($job))
             {
                 $nJobsSkipped++;
@@ -544,14 +534,9 @@ class ClassJobsSitePluginCommon
             // Look for a matching title in our list of excluded titles
             $varValMatch =  $GLOBALS['DATA']['titles_to_filter'][$strJobKeyToMatch];
 
-            // Look for a matching title in our list of excluded titles
-//            __debug__printLine("Matching listing job title '".$job['job_title'] ."' and found " . (!$varValMatch  ? "nothing" : var_export($varValMatch, true)) . " for " . $this->arrTitlesToFilter[$job['job_title']], C__DISPLAY_ITEM_DETAIL__);
-
             // if we got a match, we'll get an array back with that title and some other data
             // such as the reason it's excluded
             //
-
-
             if($varValMatch != null && $varValMatch['exclude_reason'] != null)
             {
                 if(strlen($varValMatch['exclude_reason']) > 0)
@@ -578,6 +563,9 @@ class ClassJobsSitePluginCommon
         $strTotalRowsText = "/".count($arrToMark);
         __debug__printLine("Automatically marked ".$nJobsMarkedAutoExcluded .$strTotalRowsText ." roles " . ($strCallerDescriptor != null ? "from " . $strCallerDescriptor : "") . " as 'No/Not Interested' because the job title was in the exclusion list. (Skipped: " . $nJobsSkipped . $strTotalRowsText ."; Untouched: ". $nJobsNotMarked . $strTotalRowsText .")" , C__DISPLAY_ITEM_RESULT__);
     }
+
+
+
     function markJobsList_SetAutoExcludedCompaniesFromRegex(&$arrToMark, $strCallerDescriptor = null)
     {
         if(count($arrToMark) == 0) return;
@@ -627,6 +615,8 @@ class ClassJobsSitePluginCommon
         $strTotalRowsText = "/".count($arrToMark);
         __debug__printLine("Jobs marked not interested via companies regex(".$nJobsMarkedAutoExcluded . $strTotalRowsText .") , skipped: " . $nJobsSkipped . $strTotalRowsText .", untouched: ". $nJobsNotMarked . $strTotalRowsText .")" , C__DISPLAY_ITEM_RESULT__);
     }
+
+
 
     function markJobsList_SetAutoExcludedTitlesFromRegex(&$arrToMark, $strCallerDescriptor = null)
     {
@@ -711,7 +701,7 @@ class ClassJobsSitePluginCommon
         }
 
 
-        $classCombined = new SimpleScooperCSVClass($strOutFilePath , "w");
+        $classCombined = new ClassScooperSimpleCSVFile($strOutFilePath , "w");
 
         if ($keysToOutput == null) { $keysToOutput = array_keys($this->getEmptyJobListingRecord()); }
 
@@ -758,7 +748,7 @@ class ClassJobsSitePluginCommon
         foreach($arrFilesToLoad as $fileInput)
         {
             $strFilePath = $fileInput['details']['full_file_path'];
-            $classCombinedRead = new SimpleScooperCSVClass($strFilePath , "r");
+            $classCombinedRead = new ClassScooperSimpleCSVFile($strFilePath , "r");
             $arrCurFileJobs = $classCombinedRead->readAllRecords(true, array_keys($this->getEmptyJobListingRecord()));
             $classCombinedRead = null;
             if($arrCurFileJobs != null)
@@ -819,13 +809,13 @@ class ClassJobsSitePluginCommon
 
             if(count($arrFilesToCombine) > 1)
             {
-                $classCombined = new SimpleScooperCSVClass($strOutFilePath , "w");
+                $classCombined = new ClassScooperSimpleCSVFile($strOutFilePath , "w");
                 $arrRetJobs = $classCombined->readMultipleCSVsAndCombine($arrFilesToCombine, array_keys($this->getEmptyJobListingRecord()), $this->arrKeysForDeduping);
 
             }
             else if(count($arrFilesToCombine) == 1)
             {
-                $classCombinedRead = new SimpleScooperCSVClass($arrFilesToCombine[0], "r");
+                $classCombinedRead = new ClassScooperSimpleCSVFile($arrFilesToCombine[0], "r");
                 $arrRetJobs = $classCombinedRead->readAllRecords(true, array_keys($this->getEmptyJobListingRecord()));
             }
 
@@ -847,7 +837,6 @@ class ClassJobsSitePluginCommon
 
     function getSimpleObjFromPathOrURL($filePath = "", $strURL = "")
     {
-//         __debug__printLine("getSimpleObjFromPathOrURL(".$filePath.', '.$strURL.")", C__DISPLAY_ITEM_DETAIL__);
         $objSimpleHTML = null;
 
         if(!$objSimpleHTML && ($filePath && strlen($filePath) > 0))
@@ -859,24 +848,23 @@ class ClassJobsSitePluginCommon
 
         if(!$objSimpleHTML && $strURL && strlen($strURL) > 0)
         {
-//             __debug__printLine("Loading results from ".$strURL, C__DISPLAY_ITEM_DETAIL__);
-            $class = new APICallWrapperClass();
+            $class = new ClassScooperAPIWrapper();
             $retHTML = $class->curl($strURL, null, 'GET');
             if(count(strlen($retHTML['output']) > 0))
             {
-                $objSimpleHTML = str_get_html($retHTML['output']);
+                $objSimpleHTML = SimpleHtmlDom\str_get_html($retHTML['output']);
             }
             else
             {
                 $options  = array('http' => array( 'timeout' => 30, 'user_agent' => C__STR_USER_AGENT__));
                 $context  = stream_context_create($options);
-                $objSimpleHTML = file_get_html($strURL, false, $context);
+                $objSimpleHTML = SimpleHtmlDom\file_get_html($strURL, false, $context);
             }
         }
 
         if(!$objSimpleHTML)
         {
-            throw new ErrorException('Error:  unable to get SimpleHTML object from file('.$filePath.') or '.$strURL);
+            throw new ErrorException('Error:  unable to get SimpleHtmlDom\SimpleHTMLDom object from file('.$filePath.') or '.$strURL);
         }
 
         return $objSimpleHTML;
@@ -903,7 +891,7 @@ class ClassJobsSitePluginCommon
         if(!$fp ) return $objSimpleHTML;
 
         $strHTML = fread($fp, MAX_FILE_SIZE);
-        $dom = new simple_html_dom(null, $lowercase, $forceTagsClosed, $target_charset, $stripRN, $defaultBRText, $defaultSpanText);
+        $dom = new SimpleHtmlDom\simple_html_dom(null, $lowercase, $forceTagsClosed, $target_charset, $stripRN, $defaultBRText, $defaultSpanText);
         $objSimpleHTML = $dom->load($strHTML, $lowercase, $stripRN);
         fclose($fp);
 
@@ -911,6 +899,7 @@ class ClassJobsSitePluginCommon
     }
 
 }
+
 
 
 ?>

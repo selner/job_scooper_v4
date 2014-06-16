@@ -27,26 +27,6 @@ class PluginOuterwall extends ClassJobsSitePlugin
     protected $siteBaseURL = 'http://outerwall.jobs';
 
 
-
-    function getDaysURLValue($nDays)
-    {
-        if($nDays > 1)
-        {
-            __debug__printLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Ignoring number of days value and just pulling current listings.", C__DISPLAY_WARNING__);
-
-        }
-        return 1;
-
-    }
-
-
-
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        __debug__printLine($this->siteName ." does now show how many jobs are available as a count.  Processing everything we can.", C__DISPLAY_WARNING__);
-        return 1;
-    }
-
     function parseJobsListForPage($objSimpHTML)
     {
         $ret = null;

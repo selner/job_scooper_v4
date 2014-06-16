@@ -17,35 +17,26 @@
 define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__.'/include/Options.php');
 require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
-require_once(__ROOT__.'/scooper_common/APICallWrapperClass.php');
 
-
-const C__SEARCH_RESULTS_TYPE_WEBPAGE__ = 1;
-const C__SEARCH_RESULTS_TYPE_XML__ = 4;
-const C__SEARCH_RESULTS_TYPE_HTML_FILE__= 10;
 
 abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 {
-    protected $flagValidClassConstruction = false;
     protected $siteName = 'NAME-NOT-SET';
     protected $arrLatestJobs = null;
     protected $arrSearchesToReturn = null;
     protected $nJobListingsPerPage = 20;
-    protected $flagAutoMarkListings = true; // All the called classes do it for us already
-    protected $fFilesDownloaded = false;
+    private $flagSettings = null;
 
-    function __construct($bitFlags = null, $strOutputDirectory = null)
+
+    function __construct($strOutputDirectory = null)
     {
-        if($bitFlags == null && $strOutputDirectory == null)
+        if($strOutputDirectory != null)
         {
-            $this->flagValidClassConstruction = false;
-        }
-        else
-        {
-            $this->_bitFlags = $bitFlags;
             $this->detailsMyFileOut = parseFilePath($strOutputDirectory, false);
-           $this->flagValidClassConstruction = true;
         }
+
+        $this->flagSettings = $GLOBALS['DATA']['site_plugins'][strtolower($this->siteName)]['flags'];
+
     }
 
     function __destruct()
@@ -66,41 +57,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
     }
 
-    abstract function parseJobsListForPage($objSimpHTML); // returns an array of jobs
-    abstract function parseTotalResultsCount($objSimpHTML); // returns a settings array
-
+    function parseJobsListForPage($objSimpHTML) { return null; } // returns an array of jobs
+    function parseTotalResultsCount($objSimpHTML) { return null; } // returns an array of jobs
 
 
 
     function getMyJobsList() { return $this->arrLatestJobs; }
 
 
-
-/*    function loadMyJobsListFromCSVs($arrFilesToLoad)
-    {
-        $arrAllJobsLoadedFromSrc = $this->loadJobsListFromCSVs($arrFilesToLoad);
-
-
-        // These will be used at the beginning and end of
-        // job processing to filter out jobs we'd previous seen
-        // and to make sure our notes get updated on active jobs
-        // that we'd seen previously
-        //
-        //
-        // Set a global var with an array of all input cSV jobs marked new or not marked as excluded (aka "Yes" or "Maybe")
-        //
-        $GLOBALS['DATA']['active_jobs_from_input_source_files'] = array_filter($arrAllJobsLoadedFromSrc, "isMarked_InterestedOrBlank");
-
-        //
-        // Set a global var with an array of all input CSV jobs that are not in the first set (aka marked Not Interested & Not Blank)
-        //
-        $GLOBALS['DATA']['inactive_jobs_from_input_source_files'] = array_filter($arrAllJobsLoadedFromSrc, "isMarked_NotInterestedAndNotBlank");
-
-        //
-        // Initialize the run's jobs list with all the jobs we'd previously set as inactive.
-        //
-        $this->arrLatestJobs =  $GLOBALS['DATA']['inactive_jobs_from_input_source_files'];
-    }*/
 
 
     /**
@@ -125,10 +89,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         //
         $this->getJobsForAllSearches($nDays);
 
-        if($this->flagAutoMarkListings == true)
-        {
-            $this->markMyJobsList_withAutoItems();
-        }
+        $this->markMyJobsList_withAutoItems();
     }
 
 
@@ -137,7 +98,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         $retURL = null;
 
-        $classAPI = new APICallWrapperClass();
+        $classAPI = new ClassScooperAPIWrapper();
         __debug__printLine("Getting source URL for ". $strSrcURL , C__DISPLAY_ITEM_START__);
 
         try
@@ -156,14 +117,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     }
 
 
-    function is_IncludeBrief()
-    {
-
-        $val = $this->_bitFlags & C_EXCLUDE_BRIEF;
-        $notVal = !($this->_bitFlags & C_EXCLUDE_BRIEF);
-        // __debug__printLine('ExcludeBrief/not = ' . $val .', '. $notVal, C__DISPLAY_ITEM_START__);
-        return false;
-    }
 
 
 
@@ -229,18 +182,21 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     public function getMyJobsForSearch($searchDetails, $nDays = -1)
     {
-        switch($GLOBALS['DATA']['site_plugins'][strtolower($searchDetails['site_name'])]['results_type'])
+        if($this->flagSettings & C__SEARCH_RESULTS_TYPE_XML__)
         {
-            case C__SEARCH_RESULTS_TYPE_XML__:
             $this->getMyJobsForSearchFromXML($searchDetails, $nDays);
-            break;
-
-            case C__SEARCH_RESULTS_TYPE_HTML_FILE__:
+        }
+        elseif($this->flagSettings & C__SEARCH_RESULTS_TYPE_HTML_FILE__)
+        {
             $this->getMyJobsFromHTMLFiles($searchDetails, $nDays);
-            break;
-
-            default:
+        }
+        elseif($this->flagSettings & C__SEARCH_RESULTS_TYPE_WEBPAGE__)
+        {
             $this->getMyJobsForSearchFromWebpage($searchDetails, $nDays);
+        }
+        else
+        {
+            throw new ErrorException("Class ". get_class($this) . " does not have a valid setting for parser.  Cannot continue.");
         }
     }
 
@@ -260,7 +216,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         {
             __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
 
-            $class = new APICallWrapperClass();
+            $class = new ClassScooperAPIWrapper();
             $ret = $class->cURL($strURL, null, 'GET', 'text/xml; charset=UTF-8');
             $xmlResult = simplexml_load_string($ret['output']);
 
@@ -272,14 +228,15 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             throw new ErrorException("Error:  unable to getMyJobsForSearchFromXML from ".$strURL. " Reason:".$ex->getMessage());
             return;
         }
-        $strTotalResults = $this->parseTotalResultsCount($xmlResult);
-        if($strTotalResults == C__JOB_PAGECOUNT_NOTAPPLICABLE__)
+
+        if($this->flagSettings & C__JOB_PAGECOUNT_NOTAPPLICABLE__)
         {
             $totalPagesCount = 1;
-            $nTotalListings = C__JOB_ITEMCOUNT_UNKNOWN__ ; // placeholder because we don't know how many are on the page
+            $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
         }
         else
         {
+            $strTotalResults = $this->parseTotalResultsCount($xmlResult);
             $strTotalResults  = intval(str_replace(",", "", $strTotalResults));
             $nTotalListings = intval($strTotalResults);
             $totalPagesCount = intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
@@ -294,14 +251,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         else
         {
 
-            __debug__printLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__JOB_ITEMCOUNT_UNKNOWN__  ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strURL, C__DISPLAY_ITEM_START__);
+            __debug__printLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strURL, C__DISPLAY_ITEM_START__);
 
             while ($nPageCount <= $totalPagesCount )
             {
                 $arrPageJobsList = null;
 
                 $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
-                $class = new APICallWrapperClass();
+                $class = new ClassScooperAPIWrapper();
                 $ret = $class->cURL($strURL,'' , 'GET', 'application/rss+xml');
 
                 $xmlResult = simplexml_load_string($ret['output']);
@@ -350,14 +307,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             throw new ErrorException("Error: Unable to getMyJobsForSearchFromWebpage from ".$strURL. " Reason:".$ex->getMessage());
             return;
         }
-        $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML);
-        if($strTotalResults == C__JOB_PAGECOUNT_NOTAPPLICABLE__)
+        if($this->flagSettings & C__JOB_PAGECOUNT_NOTAPPLICABLE__)
         {
             $totalPagesCount = 1;
-            $nTotalListings = C__JOB_ITEMCOUNT_UNKNOWN__ ; // placeholder because we don't know how many are on the page
+            $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
         }
         else
         {
+            $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML);
             $strTotalResults  = intval(str_replace(",", "", $strTotalResults));
             $nTotalListings = intval($strTotalResults);
             $totalPagesCount = intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
@@ -372,7 +329,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         else
         {
 
-            __debug__printLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__JOB_ITEMCOUNT_UNKNOWN__  ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strURL, C__DISPLAY_ITEM_START__);
+            __debug__printLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strURL, C__DISPLAY_ITEM_START__);
 
             while ($nPageCount <= $totalPagesCount )
             {
@@ -434,17 +391,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             }
         }
 
-        if(!$this->fFilesDownloaded)
-        {
-            $strURL = $this->_getURLfromBase_($searchDetails, $nDays);
-            __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
+        $strURL = $this->_getURLfromBase_($searchDetails, $nDays);
+        __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
 
 
-            $strCmdToRun = "osascript " . __ROOT__ . '/scripts/downloadJobsSitesHTML.applescript \'' . escapeshellarg($this->detailsMyFileOut['directory'])  . "' '".escapeshellarg($searchDetails['site_name'])."' '" . escapeshellarg($strFileKey)   . "' '"  . $strURL . "'";
-            __debug__printLine("Command = " . $strCmdToRun, C__DISPLAY_ITEM_DETAIL__);
-            exec($strCmdToRun);
-            $this->fFilesDownloaded = true;
-        }
+        $strCmdToRun = "osascript " . __ROOT__ . '/scripts/downloadJobsSitesHTML.applescript \'' . escapeshellarg($this->detailsMyFileOut['directory'])  . "' '".escapeshellarg($searchDetails['site_name'])."' '" . escapeshellarg($strFileKey)   . "' '"  . $strURL . "'";
+        __debug__printLine("Command = " . $strCmdToRun, C__DISPLAY_ITEM_DETAIL__);
+        exec($strCmdToRun);
+        $this->fFilesDownloaded = true;
 
 
         $strFileName = $strFileBase.$nPageCount.".html";
@@ -473,74 +427,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
 
     }
-    /**  NOT YET TESTED AND INTEGRATED
-    //
-    // Parses a relative date string such as "5 hrs ago" or "22 days ago"
-    // and returns a date string representing the actual date (i.e. "2014-05-15")
-    // the relative string represents.
-    function getDateFromRelativeDateString($strDaysPast, $fReturnNullForFailure = false)
-    {
-    $nRetNumber = null;
-    $strRetUnit = null;
-    $nRetDays = null;
-
-    //
-    // First, let's break the string into it's words
-    //
-    $arrDateStringWords = explode(" ", $strDaysPast);
-
-    if(count($arrDateStringWords) <= 1) return null; // we don't know enough to parse the value
-
-    // Let's see if the first item is numeric
-    if(is_string($arrDateStringWords[0]) && is_numeric($arrDateStringWords[0]))
-    {
-    $nRetNumber = floatval($arrDateStringWords[0]);
-
-    switch ($arrDateStringWords[1])
-    {
-    case "hrs":
-    case "hr":
-    case "hours":
-    case "hour":
-    $strRetUnit = "hours";
-    $nRetDays = intceil($nRetNumber / 24);  // divide to get number of days and then round up
-    break;
-
-    case "d":
-    case "days":
-    case "day":
-    $strRetUnit = "hours";
-    $nRetDays = intceil($nRetNumber);  // divide to get number of days
-    break;
-
-    default:
-    return null;  // we don't know what this is so return null
-    break;
-    }
-    }
-
-    if($strRetUnit != null && $strRetUnit != "")
-    {
-    $now = new DateTime();
-    $retDate = $now->sub(new DateInterval('P'.$nRetDays.'D')); // P1D means a period of 1 day
-    return $retDate->format('Y-m-d');
-    }
-
-    //
-    // If we were told to return null on failure, return null.
-    //
-    if($fReturnNullForFailure == true)
-    {
-    return null;
-    }
-
-    //
-    // Return the input string if we weren't told to return null on failure
-    //
-    return $strDaysPast;
-
-    }
-     **/
 
     function getDaysURLValue($days) { return ($days == null || $days == "") ? 1 : $days; } // default is to return the raw number
     function getItemURLValue($nItem) { return ($nItem == null || $nItem == "") ? 0 : $nItem; } // default is to return the raw number

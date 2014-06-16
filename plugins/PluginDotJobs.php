@@ -26,9 +26,6 @@ class PluginDotJobs extends ClassJobsSitePlugin
     protected $siteName = 'dotjobs';
     protected $siteBaseURL = '';
 
-    function getDaysURLValue($nDays) { return -1; }
-    function parseTotalResultsCount($nDays)  { return C__JOB_PAGECOUNT_NOTAPPLICABLE__; }
-
 
 
 

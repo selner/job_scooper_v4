@@ -1,8 +1,9 @@
 {
     "name": "scooper/jobs_scooper",
     "description": "jobs_scooper app",
-    "homepage": "http://github.com/selner/scooper_common",
-    "license": "GNUV2",
+    "homepage": "https://github.com/selner/jobs_scooper",
+    "license": "GPL-2.0",
+    "minimum-stability": "dev",
     "authors": [
         {
             "name": "Bryan Selner",
@@ -10,11 +11,17 @@
             "role": "Developer"
         }
     ],
-    "minimum-stability": "dev",
     "require": {
         "php": ">=5.3.0",
         "austinhyde/iniparser": "dev-master",
-        "phpoffice/phpexcel": "1.8.0",
-        "katzgrau/klogger": "1.0.0"
-    }
+        "katzgrau/klogger": "1.0.*",
+        "mgargano/simplehtmldom": "1.5",
+        "selner/scooper_common": "dev-master"
+   },
+    "repositories": [
+        {
+        "type": "git",
+        "url": "https://github.com/selner/scooper_common"
+        }
+    ]
 }

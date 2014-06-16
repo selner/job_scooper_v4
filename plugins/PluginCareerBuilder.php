@@ -116,12 +116,6 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
 
             $item['date_pulled'] = getTodayAsString();
 
-            if($this->is_IncludeBrief() == true)
-            {
-                $item['brief_description'] = $node->find("td[class='jl_col2'] div")[0]->plaintext;
-            }
-            //            $item['job_site_category'] = $node->find("span[class='listing-tag']")[0]->plaintext;
-
             $item['job_site_date'] = strScrub($node->find("TD[class='jl_rslt_posted_cell'] span")[0]->plaintext,DEFAULT_SCRUB );
             $ret[] = $this->normalizeItem($item);
         }

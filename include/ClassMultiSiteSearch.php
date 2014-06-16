@@ -24,7 +24,6 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 class ClassMultiSiteSearch extends ClassJobsSitePlugin
 {
     protected $siteName = 'Multisite';
-    protected $flagAutoMarkListings = false; // All the called classes do it for us already
 
     function parseJobsListForPage($objSimpHTML)
     {
@@ -51,7 +50,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
             __debug__printLine("Running ". $search['site_name'] . " search: '" . $search['search_name']."'", C__DISPLAY_SECTION_START__);
 
             $strSiteClass = $GLOBALS['DATA']['site_plugins'][strtolower($search['site_name'])]['class_name'];
-            $class = new $strSiteClass($this->getMyBitFlags(), $this->detailsMyFileOut['full_file_path']);
+            $class = new $strSiteClass($this->detailsMyFileOut['full_file_path']);
             try
             {
                 $class->addSearch($search);

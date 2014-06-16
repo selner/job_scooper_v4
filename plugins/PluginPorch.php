@@ -24,17 +24,6 @@ class PluginPorch extends ClassJobsSitePlugin
     protected $siteBaseURL = 'http://about.porch.com/careers';
 
 
-    function getDaysURLValue($days)
-    {
-       return "";
-    }
-
-
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        return C__JOB_PAGECOUNT_NOTAPPLICABLE__; // only one page ever
-    }
-
      function parseJobsListForPage($objSimpleHTML)
     {
         $ret = null;

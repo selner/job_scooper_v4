@@ -27,12 +27,6 @@ class PluginEbay extends ClassJobsSitePlugin
     protected $siteBaseURL = 'http://jobs.ebaycareers.com/';
 
 
-    function getDaysURLValue($days)
-    {
-        // __debug__printLine("EBay Day Parsing Not Yet Implemented!", C__DISPLAY_WARNING__);
-        return "";
-    }
-
 
     function parseTotalResultsCount($objSimpHTML)
     {

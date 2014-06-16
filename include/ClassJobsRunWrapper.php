@@ -39,7 +39,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $this->siteName = "JobsRunner";
         $this->arrLatestJobs_FilteredByUserInput = null;
         $this->arrLatestJobs_UnfilteredByUserInput = null;
-        $this->setMyBitFlags(C_NORMAL);
         __initializeArgs__();
 
         $this->__setupRunFromArgs__();
@@ -98,7 +97,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         }
 
 
-        $this->flagValidClassConstruction = true;
     }
 
 
@@ -361,7 +359,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // the searches in the list and returning us the combined set of new jobs
         // (with the exception of Amazon for historical reasons)
         //
-        $classMulti = new ClassMultiSiteSearch($this->getMyBitFlags(), $this->detailsOutputSubfolder['full_file_path']);
+        $classMulti = new ClassMultiSiteSearch($this->detailsOutputSubfolder['full_file_path']);
         $classMulti->addSearches($this->arrSearchesToReturn);
         $classMulti->downloadAllUpdatedJobs( $this->nNumDaysToSearch);
         $this->_addJobsToMyJobsList_($classMulti->getMyJobsList());
@@ -369,14 +367,14 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         //
         // Let's go get Amazon too if the user asked for Amazon's jobs
         //
-        if($GLOBALS['DATA']['site_plugins']['Amazon']['include_in_run'] == true)
+/*        if($GLOBALS['DATA']['site_plugins']['Amazon']['include_in_run'] == true)
         {
             __debug__printLine("Adding Amazon jobs....", C__DISPLAY_ITEM_START__);
-            $class = new PluginAmazon($GLOBALS["bit_flags"], $this->detailsOutputSubfolder['full_file_path']);
+            $class = new PluginAmazon($this->detailsOutputSubfolder['full_file_path']);
             $class->downloadAllUpdatedJobs( $this->nNumDaysToSearch);
             $this->_addJobsToMyJobsList_($class->getMyJobsList());
         }
-
+*/
         //
         // Let's save off the unfiltered jobs list in case we need it later.  The $this->arrLatestJobs
         // will shortly have the user's input jobs applied to it

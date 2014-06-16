@@ -27,11 +27,6 @@ class PluginGroupon extends ClassJobsSitePlugin
     protected $siteBaseURL = 'https://jobs.groupon.com';
 
 
-    function getDaysURLValue($days)
-    {
-//        __debug__printLine($this->siteName . " Day Parsing Not Yet Implemented!", C__DISPLAY_WARNING__);
-        return "";
-    }
 
 
     function parseTotalResultsCount($objSimpHTML)

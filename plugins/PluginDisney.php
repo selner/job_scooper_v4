@@ -28,18 +28,6 @@ class PluginDisney extends ClassJobsSitePlugin
 
 
 
-    function getDaysURLValue($nDays)
-    {
-        if($nDays > 1)
-        {
-            __debug__printLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Ignoring number of days value and just pulling current listings.", C__DISPLAY_WARNING__);
-
-        }
-        return 1;
-
-    }
-
-
 
     function parseTotalResultsCount($objSimpHTML)
     {

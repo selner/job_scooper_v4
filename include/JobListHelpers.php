@@ -20,11 +20,6 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 
 
-const C__JOB_PAGECOUNT_NOTAPPLICABLE__ = -1;
-const C__JOB_ITEMCOUNT_UNKNOWN__ = 11111;
-
-
-
 //
 // Jobs List Filter Functions
 //
@@ -128,19 +123,26 @@ function includeJobInFilteredList($var)
     return !$filterYes;
 
 }
-/*
-function isJob_InWashingtonState_or_UnknownLocation($var)
+
+
+
+function combineTextAllChildren($node, $fRecursed = false)
 {
-    $arrCities = array("seattle", "redmond", "bothell", )
 
-    $tempLocation = strTrimAndLower($var['location']);
-    if((substr_count($tempLocation, "wa ") > 0) || (substr_count($tempLocation, "washington") > 0)) { $fRet = true; }
+    $retStr = "";
+    if($node->hasChildNodes())
+    {
+        $retStr = combineTextAllChildren($node->firstChild(), true);
+    }
 
-    if((substr_count($tempLocation, "wa ") > 0) || (substr_count($tempLocation, "washington") > 0)) { $fRet = true; }
+    if($node->plaintext != null && $fRecursed == false)
+    {
+        $retStr = strScrub($node->plaintext . " " . $retStr, DEFAULT_SCRUB );
+    }
+    return $retStr;
 
 
-    return false;
-}*/
+}
 
 
 

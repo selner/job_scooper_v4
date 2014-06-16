@@ -94,13 +94,6 @@ class PluginSimplyHired extends ClassJobsSitePlugin
             $item['location'] =trim($node->find("span[class='location']")[0]->plaintext);
             $item['date_pulled'] = getTodayAsString();
             $item['job_site_date'] = $node->find("span[class='ago']")[0]->plaintext;
-//            $item['job_site_date'] = $this->getDateFromRelativeDateString(strScrub($node->find("span[class='ago']")[0]->plaintext));
-
-
-            if($this->is_IncludeBrief() == true)
-            {
-                $item['brief_description'] = $node->find("p[class='description']")[0]->plaintext;
-            }
             $item['job_site'] = $this->siteName;
 
             $ret[] = $this->normalizeItem($item);

@@ -101,10 +101,6 @@ class PluginIndeed extends ClassJobsSitePlugin
             $item['date_pulled'] = getTodayAsString();
             $item['job_site_date'] = $node->find("span[class='date']")[0]->plaintext;
 
-            if($this->is_IncludeBrief() == true)
-            {
-                $item['brief_description'] = $node->find("span[class='summary']")[0]->plaintext;
-            }
 
             $ret[] = $this->normalizeItem($item);
 

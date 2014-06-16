@@ -20,8 +20,6 @@
 define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__.'/lib/pharse.php');
 require_once(__ROOT__.'/lib/Linkify.php');
-require_once(__ROOT__.'/lib/simple_html_dom.php');
-require_once(__ROOT__.'/scooper_common/common.php');
 
 define('BASE_DIR', dirname(__DIR__));
 if (file_exists(BASE_DIR . '/vendor/autoload.php')) {
@@ -30,23 +28,10 @@ if (file_exists(BASE_DIR . '/vendor/autoload.php')) {
     trigger_error("Composer required to run this app.");
 }
 
-if ( file_exists ( __ROOT__.'/lib/KLogger.php' ) )
-{
-    define(C_USE_KLOGGER, 1);
-    require_once(__ROOT__.'/lib/KLogger.php');
-
-}
-else
-{
-    print "Could not find KLogger file: ". __ROOT__.'/lib/KLogger.php' .PHP_EOL;
-    define(C_USE_KLOGGER, 0);
-}
 $GLOBALS['OPTS']['VERBOSE'] = false;
 
 date_default_timezone_set("America/Los_Angeles");
 
-const C_NORMAL = 0;
-const C_EXCLUDE_BRIEF = 1;
 
 const C__STR_TAG_AUTOMARKEDJOB__ = "[auto-marked]";
 const C__STR_TAG_DUPLICATE_POST__ = "No (Duplicate Job Post?)";
