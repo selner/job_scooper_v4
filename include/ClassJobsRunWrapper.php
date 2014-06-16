@@ -592,7 +592,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             //
             // Shell out to Applescript to send the email notifications
             //
-            $strCmdToRun = 'osascript ' . __ROOT__ . '/scripts/email_job_run_results.appleScript "' . $strBodyFilePath  . '" "' . $strCSVFilePath  . '" "'.$strHTMLFilePath.'" "' . $toEmail['address'] . '" "' . $toEmail['name'] . '" "' . $bccEmail['address'] . '"';
+            $strCmdToRun = 'osascript ' . __ROOT__ . '/main/email_job_run_results.appleScript "' . $strBodyFilePath  . '" "' . $strCSVFilePath  . '" "'.$strHTMLFilePath.'" "' . $toEmail['address'] . '" "' . $toEmail['name'] . '" "' . $bccEmail['address'] . '"';
             $strCmdToRun = escapeshellcmd($strCmdToRun);
             __debug__printLine("Starting email notifications: " . $strCmdToRun, C__DISPLAY_ITEM_DETAIL__);
             $result = my_exec($strCmdToRun);

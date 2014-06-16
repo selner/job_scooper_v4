@@ -382,7 +382,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
 
 
-        $strCmdToRun = "osascript " . __ROOT__ . '/scripts/downloadJobsSitesHTML.applescript \'' . escapeshellarg($this->detailsMyFileOut['directory'])  . "' '".escapeshellarg($searchDetails['site_name'])."' '" . escapeshellarg($strFileKey)   . "' '"  . $strURL . "'";
+        $strCmdToRun = "osascript " . __ROOT__ . '/plugins/downloadJobsSitesHTML.applescript \'' . escapeshellarg($this->detailsMyFileOut['directory'])  . "' '".escapeshellarg($searchDetails['site_name'])."' '" . escapeshellarg($strFileKey)   . "' '"  . $strURL . "'";
         __debug__printLine("Command = " . $strCmdToRun, C__DISPLAY_ITEM_DETAIL__);
         exec($strCmdToRun);
 
