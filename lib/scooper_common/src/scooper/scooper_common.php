@@ -21,23 +21,24 @@
  * @subpackage scooper_common
  */
 
-namespace Selner\Scooper;
 
 
-
-    /****************************************************************************************************************/
+/****************************************************************************************************************/
 /****                                                                                                        ****/
 /****         Main Library Include for all Components                                                        ****/
 /****                                                                                                        ****/
 /****************************************************************************************************************/
 define('__SCROOT__', dirname(__FILE__));
 
-define('__BASE_DIR__', dirname(dirname(dirname(__FILE__))));
+/*
+ *
+ define('__BASE_DIR__', dirname(dirname(dirname(__FILE__))));
 if (file_exists(__BASE_DIR__. '/vendor/autoload.php')) {
     require_once(__BASE_DIR__. '/vendor/autoload.php');
 } else {
     trigger_error("Composer required for this library.");
 }
+*/
 
 require_once(__SCROOT__ . '/include/common.php');
 require_once(__SCROOT__ . '/include/ClassScooperSimpleCSVFile.php');

@@ -47,10 +47,6 @@ require_once (__ROOT__.'/plugins/PluginGroupon.php');
 require_once (__ROOT__.'/plugins/PluginGeekwire.php');
 require_once (__ROOT__.'/plugins/PluginDotJobs.php');
 
-// const C__SEARCH_RESULTS_TYPE_NONE__ = 0;
-// const C__SEARCH_RESULTS_TYPE_WEBPAGE__ = 1;
-// const C__SEARCH_RESULTS_TYPE_XML__ = 2;
-// const C__SEARCH_RESULTS_TYPE_HTML_FILE__ = 4;
 define( "C__SEARCH_RESULTS_TYPE_NONE__", 0x0 );
 define( "C__SEARCH_RESULTS_TYPE_WEBPAGE__", 0x1 );
 define( "C__SEARCH_RESULTS_TYPE_XML__", 0x2 );

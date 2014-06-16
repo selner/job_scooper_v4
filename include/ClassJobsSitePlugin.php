@@ -26,6 +26,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     protected $arrSearchesToReturn = null;
     protected $nJobListingsPerPage = 20;
     private $flagSettings = null;
+    protected $strFilePath_HTMLFileDownloadScript = null;
 
 
     function __construct($strOutputDirectory = null)
@@ -182,23 +183,31 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     public function getMyJobsForSearch($searchDetails, $nDays = -1)
     {
-        if($this->flagSettings & C__SEARCH_RESULTS_TYPE_XML__)
+        try
         {
-            $this->getMyJobsForSearchFromXML($searchDetails, $nDays);
+            if($this->flagSettings & C__SEARCH_RESULTS_TYPE_XML__)
+            {
+                $this->getMyJobsForSearchFromXML($searchDetails, $nDays);
+            }
+            elseif($this->flagSettings & C__SEARCH_RESULTS_TYPE_HTML_FILE__)
+            {
+                $this->getMyJobsFromHTMLFiles($searchDetails, $nDays);
+            }
+            elseif($this->flagSettings & C__SEARCH_RESULTS_TYPE_WEBPAGE__)
+            {
+                $this->getMyJobsForSearchFromWebpage($searchDetails, $nDays);
+            }
+            else
+            {
+                throw new ErrorException("Class ". get_class($this) . " does not have a valid setting for parser.  Cannot continue.");
+            }
+
+        } catch (ErrorException $ex) {
+            $strError = "Failed to download jobs from " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "[URL=".$searchDetails['base_url_format']. "].   Reason:  ".$ex->getMessage();
+            __debug__printLine($strError, C__DISPLAY_ERROR__);
+            throw new ErrorException($strError);
         }
-        elseif($this->flagSettings & C__SEARCH_RESULTS_TYPE_HTML_FILE__)
-        {
-            $this->getMyJobsFromHTMLFiles($searchDetails, $nDays);
-        }
-        elseif($this->flagSettings & C__SEARCH_RESULTS_TYPE_WEBPAGE__)
-        {
-            $this->getMyJobsForSearchFromWebpage($searchDetails, $nDays);
-        }
-        else
-        {
-            throw new ErrorException("Class ". get_class($this) . " does not have a valid setting for parser.  Cannot continue.");
-        }
-    }
+     }
 
     function getMyJobsForSearchFromXML($searchDetails, $nDays = -1)
     {
@@ -212,8 +221,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
 
-        try
-        {
             __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
 
             $class = new ClassScooperAPIWrapper();
@@ -222,71 +229,66 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
             if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
             $xmlResult->registerXPathNamespace("def", "http://www.w3.org/2005/Atom");
-        }
-        catch (ErrorException $ex)
-        {
-            throw new ErrorException("Error:  unable to getMyJobsForSearchFromXML from ".$strURL. " Reason:".$ex->getMessage());
-            return;
-        }
 
-        if($this->flagSettings & C__JOB_PAGECOUNT_NOTAPPLICABLE__)
-        {
-            $totalPagesCount = 1;
-            $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
-        }
-        else
-        {
-            $strTotalResults = $this->parseTotalResultsCount($xmlResult);
-            $strTotalResults  = intval(str_replace(",", "", $strTotalResults));
-            $nTotalListings = intval($strTotalResults);
-            $totalPagesCount = intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
-            if($totalPagesCount < 1)  $totalPagesCount = 1;
-        }
-
-        if($nTotalListings <= 0)
-        {
-            __debug__printLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['search_name']."'.", C__DISPLAY_ITEM_START__);
-            return;
-        }
-        else
-        {
-
-            __debug__printLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strURL, C__DISPLAY_ITEM_START__);
-
-            while ($nPageCount <= $totalPagesCount )
+            if($this->flagSettings & C__JOB_PAGECOUNT_NOTAPPLICABLE__)
             {
-                $arrPageJobsList = null;
+                $totalPagesCount = 1;
+                $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
+            }
+            else
+            {
+                $strTotalResults = $this->parseTotalResultsCount($xmlResult);
+                $strTotalResults  = intval(str_replace(",", "", $strTotalResults));
+                $nTotalListings = intval($strTotalResults);
+                $totalPagesCount = intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
+                if($totalPagesCount < 1)  $totalPagesCount = 1;
+            }
 
-                $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
-                $class = new ClassScooperAPIWrapper();
-                $ret = $class->cURL($strURL,'' , 'GET', 'application/rss+xml');
+            if($nTotalListings <= 0)
+            {
+                __debug__printLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['search_name']."'.", C__DISPLAY_ITEM_START__);
+                return;
+            }
+            else
+            {
 
-                $xmlResult = simplexml_load_string($ret['output']);
-                if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
+                __debug__printLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strURL, C__DISPLAY_ITEM_START__);
 
-                $arrPageJobsList = $this->parseJobsListForPage($xmlResult);
-
-
-                if(!is_array($arrPageJobsList))
+                while ($nPageCount <= $totalPagesCount )
                 {
-                    // we likely hit a page where jobs started to be hidden.
-                    // Go ahead and bail on the loop here
-                    __debug__printLine("Not getting results back from ". $this->siteName . " starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", C__DISPLAY_ITEM_START__);
-                    $nPageCount = $totalPagesCount ;
-                }
-                else
-                {
-                    $this->_addJobsToMyJobsList_($arrPageJobsList);
-                    $nItemCount += $this->nJobListingsPerPage;
-                }
+                    $arrPageJobsList = null;
+
+                    $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
+                    $class = new ClassScooperAPIWrapper();
+                    $ret = $class->cURL($strURL,'' , 'GET', 'application/rss+xml');
+
+                    $xmlResult = simplexml_load_string($ret['output']);
+                    if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
+
+                    $arrPageJobsList = $this->parseJobsListForPage($xmlResult);
+
+
+                    if(!is_array($arrPageJobsList))
+                    {
+                        // we likely hit a page where jobs started to be hidden.
+                        // Go ahead and bail on the loop here
+                        __debug__printLine("Not getting results back from ". $this->siteName . " starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", C__DISPLAY_ITEM_START__);
+                        $nPageCount = $totalPagesCount ;
+                    }
+                    else
+                    {
+                        $this->_addJobsToMyJobsList_($arrPageJobsList);
+                        $nItemCount += $this->nJobListingsPerPage;
+                    }
                 $nPageCount++;
 
             }
 
         }
         __debug__printLine(PHP_EOL.$this->siteName . "[".$searchDetails['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, C__DISPLAY_ITEM_RESULT__);
-
     }
+
+
 
     function getMyJobsForSearchFromWebpage($searchDetails, $nDays = -1)
     {
@@ -294,19 +296,13 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $nItemCount = 1;
         $nPageCount = 1;
 
-        try
-        {
-            $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
-            __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
 
-            $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL );
-            if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
-        }
-        catch (ErrorException $ex)
-        {
-            throw new ErrorException("Error: Unable to getMyJobsForSearchFromWebpage from ".$strURL. " Reason:".$ex->getMessage());
-            return;
-        }
+        $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
+        __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
+
+        $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL );
+        if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL); }
+
         if($this->flagSettings & C__JOB_PAGECOUNT_NOTAPPLICABLE__)
         {
             $totalPagesCount = 1;
@@ -373,6 +369,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     protected function getMyJobsFromHTMLFiles($searchDetails, $nDays = -1)
     {
+
+        if($this->strFilePath_HTMLFileDownloadScript == null || strlen($this->strFilePath_HTMLFileDownloadScript) == 0)
+        {
+            throw new ErrorException("Cannot download client-side jobs HTML for " . $this->siteName . " because the " . get_class($this) . " plugin does not have an Applescript configured to call.");
+
+        }
+
+
         $nPageCount = 1;
 
         $strFileKey = strtolower($this->siteName.'-'.$searchDetails['search_key']);
@@ -382,12 +386,18 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
 
 
-        $strCmdToRun = "osascript " . __ROOT__ . '/plugins/downloadJobsSitesHTML.applescript \'' . escapeshellarg($this->detailsMyFileOut['directory'])  . "' '".escapeshellarg($searchDetails['site_name'])."' '" . escapeshellarg($strFileKey)   . "' '"  . $strURL . "'";
+        $strCmdToRun = "osascript " . __ROOT__ . "/plugins/".$this->strFilePath_HTMLFileDownloadScript . " " . escapeshellarg($this->detailsMyFileOut["directory"])  . " ".escapeshellarg($searchDetails["site_name"])." " . escapeshellarg($strFileKey)   . " '"  . $strURL . "'";
         __debug__printLine("Command = " . $strCmdToRun, C__DISPLAY_ITEM_DETAIL__);
-        exec($strCmdToRun);
+        $result = my_exec($strCmdToRun);
+        if($result['stdout'] == -1)
+        {
+            $strError = "AppleScript did not successfully download the jobs.  Log = ".$result['stderr'];
+            __debug__printLine($strError, C__DISPLAY_ERROR__);
+            throw new ErrorException($strError);
+        }
 
 
-        $strFileName = $strFileBase.$nPageCount.".html";
+        $strFileName = $strFileBase.".html";
         __debug__printLine("Parsing downloaded HTML files: '" . $strFileBase."*.html'", C__DISPLAY_ITEM_DETAIL__);
         while (file_exists($strFileName) && is_file($strFileName))
         {

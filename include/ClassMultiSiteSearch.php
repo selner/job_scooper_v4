@@ -62,6 +62,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
             {
                 __debug__printLine('ERROR:  Unable to load the search for ' .$search['site_name'] . '. Skipping '. $search['search_name'] .' search and continuing with any others.', C__DISPLAY_ERROR__);
                 __debug__printLine('ERROR:  Search failure reason:  '.$classError->getMessage(), C__DISPLAY_ERROR__);
+                if($GLOBALS['OPTS']['DEBUG']) { throw $classError; }
             }
 
         }

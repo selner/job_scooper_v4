@@ -26,6 +26,7 @@ class PluginGeekwire extends ClassJobsSitePlugin
 {
     protected $siteName = 'Geekwire';
     protected $siteBaseURL = 'http://www.geekwork.com/';
+    protected $strFilePath_HTMLFileDownloadScript = "PluginGeekwire_downloadjobs.applescript";
 
 
 
