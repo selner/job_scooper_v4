@@ -1,7 +1,5 @@
 .idea/*
 
-*.csv
-
 *.lock
 
 vendor/*
