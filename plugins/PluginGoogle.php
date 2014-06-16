@@ -46,7 +46,7 @@ class PluginGoogle extends ClassJobsSitePlugin
 
         foreach($nodesJobs as $node)
         {
-            $item = parent::getEmptyJobListingRecord();
+            $item = $this->getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
             $item['company'] = $this->siteName;
             $item['job_title'] = $node->find("a[class='title heading sr-title'] span")[0]->plaintext;

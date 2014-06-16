@@ -81,7 +81,7 @@ class PluginIndeed extends ClassJobsSitePlugin
 
         foreach($nodesJobs as $node)
         {
-            $item = parent::getEmptyJobListingRecord();
+            $item = $this->getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
 
 

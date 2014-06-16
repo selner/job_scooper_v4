@@ -38,7 +38,7 @@ class PluginGeekwire extends ClassJobsSitePlugin
 
         foreach($nodesJobs as $node)
         {
-            $item = parent::getEmptyJobListingRecord();
+            $item = $this->getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
 
             $item['job_title'] = $node->find("h3")[0]->plaintext;

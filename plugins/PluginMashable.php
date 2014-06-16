@@ -75,7 +75,7 @@ class PluginMashable extends ClassJobsSitePlugin
 
         foreach($nodesJobs as $node)
         {
-            $item = parent::getEmptyJobListingRecord();
+            $item = $this->getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
 
             $titleLink = $node->find("div[class='aiResultTitle'] h3 a")[0];

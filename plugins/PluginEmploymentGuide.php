@@ -79,7 +79,7 @@ class PluginEmploymentGuide extends ClassJobsSitePlugin
                             continue;
                         }
             */
-            $item = parent::getEmptyJobListingRecord();
+            $item = $this->getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
             $item['job_post_url']  = $node->href;
             $item['job_id'] = explode("JobID=", $item['job_post_url'])[1];

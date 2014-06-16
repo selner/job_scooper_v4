@@ -76,7 +76,7 @@ class PluginSimplyHired extends ClassJobsSitePlugin
 
         foreach($nodesJobs as $node)
         {
-            $item = parent::getEmptyJobListingRecord();
+            $item = $this->getEmptyJobListingRecord();
             $item['job_id'] = $node->attr['id'];
 
             $item['job_title'] = $node->find("a[class='title']")[0]->plaintext;

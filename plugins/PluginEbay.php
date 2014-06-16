@@ -53,7 +53,7 @@ class PluginEbay extends ClassJobsSitePlugin
                 continue;
             }
 
-            $item = parent::getEmptyJobListingRecord();
+            $item = $this->getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
 
             $titleNode = $node->find("td[class='td1'] a");

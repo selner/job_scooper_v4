@@ -374,22 +374,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     protected function getMyJobsFromHTMLFiles($searchDetails, $nDays = -1)
     {
         $nPageCount = 1;
-        $this->fFilesDownloaded = false;
 
-        $strFileKey = strtolower($searchDetails['name'].'-'.$searchDetails['search_key']);
+        $strFileKey = strtolower($this->siteName.'-'.$searchDetails['search_key']);
         $strFileBase = $this->detailsMyFileOut['directory'].$strFileKey. "-jobs-page-";
-        $strFileName = $strFileBase.$nPageCount.".html";
-
-        if(file_exists($strFileName) && is_file($strFileName))
-        {
-            $cache_life = '120'; //caching time, in seconds
-
-            $filemtime = @filemtime($cache_file);  // returns FALSE if file does not exist
-            if ($filemtime && (time() - $filemtime <= $cache_life))
-            {
-                $this->fFilesDownloaded = true;
-            }
-        }
 
         $strURL = $this->_getURLfromBase_($searchDetails, $nDays);
         __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
@@ -398,7 +385,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $strCmdToRun = "osascript " . __ROOT__ . '/scripts/downloadJobsSitesHTML.applescript \'' . escapeshellarg($this->detailsMyFileOut['directory'])  . "' '".escapeshellarg($searchDetails['site_name'])."' '" . escapeshellarg($strFileKey)   . "' '"  . $strURL . "'";
         __debug__printLine("Command = " . $strCmdToRun, C__DISPLAY_ITEM_DETAIL__);
         exec($strCmdToRun);
-        $this->fFilesDownloaded = true;
 
 
         $strFileName = $strFileBase.$nPageCount.".html";

@@ -36,7 +36,7 @@ class PluginDotJobs extends ClassJobsSitePlugin
         foreach ($xmlResult->channel->item as $job)
         {
 
-            $item = parent::getEmptyJobListingRecord();
+            $item = $this->getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
             $item['job_post_url'] = (string)$job->link;
             $item['job_title'] =  (string)explode(")", (string)$job->title)[1];

@@ -67,7 +67,7 @@ class PluginCraigslist  extends ClassJobsSitePlugin
         $nodesJobs = $resultsSection->find('p[class="row"]');
         foreach($nodesJobs as $node)
         {
-            $item = parent::getEmptyJobListingRecord();
+            $item = $this->getEmptyJobListingRecord();
 
             $jobTitleLink = $node->find("span[class='pl'] a");
             $item['job_title'] = $jobTitleLink[0]->plaintext;

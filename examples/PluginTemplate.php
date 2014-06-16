@@ -16,17 +16,36 @@
      * under the License.
      */
 define('__ROOT__', dirname(dirname(__FILE__)));
-require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
+require_once(__ROOT__ . '/include/ClassJobsSitePluginCommon.php');
 
 
+/**
+ * Class PluginExample
+ *
+ * Add the code to implement the necessary functions and then
+ * add a record to SitePlugins.php for that new plugin.  Any search
+ * specified with the site name you added will call this new plugin to
+ * process the results.
+ *
 
-
-class PluginLinkUp extends ClassJobsSitePlugin
+ */
+class PluginExample extends ClassJobsSitePlugin
 {
-    protected $siteName = 'LinkUp';
-    protected $siteBaseURL = 'http://www.linkup.com';
+    protected $siteName = 'ExampleSiteName';
+    protected $siteBaseURL = 'http://www.examplesite.com';
 
-
+    /**
+     * If the site does not have a URL parameter for number of days
+     * then set the plugin flag to C__JOB_DAYS_VALUE_NOTAPPLICABLE__
+     * in the SitePlugins.php file and just comment out this function.
+     *
+     * getDaysURLValue returns the value that is used to replace
+     * the ***DAYS*** token in the search URL for the number of
+     * days requested.
+     *
+     * @param $days
+     * @return int|string
+     */
     function getDaysURLValue($days) {
         $ret = "1d";
 
@@ -55,17 +74,51 @@ class PluginLinkUp extends ClassJobsSitePlugin
 
     }
 
-
+    /**
+     * parseTotalResultsCount
+     *
+     * If the site does not show the total number of results
+     * then set the plugin flag to C__JOB_PAGECOUNT_NOTAPPLICABLE__
+     * in the SitePlugins.php file and just comment out this function.
+     *
+     * parseTotalResultsCount returns the total number of listings that
+     * the search returned by parsing the value from the returned HTML
+     * *
+     * @param $objSimpHTML
+     * @return string|null
+     */
     function parseTotalResultsCount($objSimpHTML)
     {
+        //
+        // Find the HTML node that holds the result count
+        //
         $resultsSection= $objSimpHTML->find("div[id='search-showing']");
+
+        // get the text value of that node
         $totalItemsText = $resultsSection[0]->plaintext;
+
+        // If the node text is something like "44 of 104 results"
+        // then split the string by the ' ' character and return
+        // the right array item for that number.
+        //
         $arrItemItems = explode(" ", trim($totalItemsText));
         $strTotalItemsCount = $arrItemItems[4];
 
+        // parse out any commas so that the string returned is purely digits
+        //
         return str_replace(",", "", $strTotalItemsCount);
     }
 
+    /**
+    /**
+     * parseJobsListForPage
+     *
+     * This does the heavy lifting of parsing each job record from the
+     * page's HTML it was passed.
+     * *
+     * @param $objSimpHTML
+     * @return array|null
+     */
     function parseJobsListForPage($objSimpHTML)
     {
         $ret = null;
@@ -76,27 +129,36 @@ class PluginLinkUp extends ClassJobsSitePlugin
 
         foreach($nodesJobs as $node)
         {
+            //
+            // get a new record with all columns set to null
+            //
             $item = $this->getEmptyJobListingRecord();
+
+
             $item['job_site'] = $this->siteName;
+            $item['date_pulled'] = getTodayAsString();
 
             $titleLink = $node->find("a[class='listing-title']")[0];
-
             $item['job_title'] = $titleLink->firstChild()->plaintext;
-            $item['job_post_url'] = $titleLink->href;
+
+            // If we couldn't parse the job title, it's not really a job
+            // listing so just continue to the next one
+            //
             if($item['job_title'] == '') continue;
 
+            $item['job_post_url'] = $titleLink->href;
             $item['company'] = $node->find("span[class='listing-company']")[0]->plaintext;
-
-
             $item['job_id'] = $node->attr['data-hash'];
             $item['location'] = trim($node->find("span[class='listing-location'] span")[0]->plaintext) . "-" .
                     trim($node->find("span[class='listing-location'] span")[1]->plaintext);
 
-            $item['date_pulled'] = getTodayAsString();
-
-
             $item['job_site_category'] = $node->find("span[class='listing-tag']")[0]->plaintext;
             $item['job_site_date'] = $node->find("span[class='listing-date']")[0]->plaintext;
+
+
+            //
+            // Call normalizeItem to standardize the resulting listing result
+            //
             $ret[] = $this->normalizeItem($item);
 
         }
