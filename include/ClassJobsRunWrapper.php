@@ -189,15 +189,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             }
         }
 
-        $arrFiles = $this->__getInputFilesByType__("titles_filter");
-        if(count($arrFiles)>0)  setGlobalFileDetails('titles_file_details', true, $arrFiles[0]['full_file_path']);
-
-        $arrFiles = $this->__getInputFilesByType__("regex_filter_titles");
-        if(count($arrFiles)>0)  setGlobalFileDetails('titles_regex_file_details', true, $arrFiles[0]['full_file_path']);
-
-        $arrFiles = $this->__getInputFilesByType__("regex_filter_companies");
-        if(count($arrFiles)>0)  setGlobalFileDetails('companies_regex_file_details', false, $arrFiles[0]['full_file_path']);
-
 
         $this->__getSearchesFromConfig__($config);
 
