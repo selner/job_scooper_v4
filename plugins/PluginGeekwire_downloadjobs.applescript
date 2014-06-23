@@ -46,9 +46,7 @@ on loadScript(scriptFileToLoad)
 	try
 		set scriptObject to load script alias scriptFileToLoad
 	on error number -1752 -- text format script 
-		set scriptObject to run script ("script s" & return & Â
-			(read alias scriptFileToLoad as Çclass utf8È) & Â
-			return & "end script " & return & "return s")
+		set scriptObject to run script ("script s" & return & (read alias scriptFileToLoad as Çclass utf8È) & return & "end script " & return & "return s")
 	end try
 	return scriptObject
 end loadScript

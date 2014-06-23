@@ -1,9 +1,8 @@
-test()
 on test()
 	doRun({"/Users/bryan/Code/data/jobs_debug/2014-06-16_1523_jobs/", "Amazon", "amazon-amazon-amazon-seattle-pm", "http://www.amazon.jobs/results?sjid=68,83&checklid=@%27US,%20WA,%20Seattle%27&cname=%27US,%20WA,%20Seattle%27"})
 end test
 
-on doRun(argv)
+on run (argv)
 	set libDownload to init_library()
 	
 	set strOutputDir of libDownload to first item of argv as string
@@ -31,7 +30,7 @@ on doRun(argv)
 		set ret to doJobsDownload()
 	end tell
 	return ret
-end doRun
+end run
 
 
 --*******************************************************************************************
