@@ -521,7 +521,16 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         //		set strToName to fifth item of argv
         //		set strBCCAddr to sixth item of argv
 
+
+        if($GLOBALS['OPTS']['DEBUG'] == true)
+        {
+            __debug__printLine("DEBUG mode:  skipping email notifications.", C__DISPLAY_ITEM_START__);
+            return;
+        }
+
         __debug__printLine("Sending email notifications for completed run. ", C__DISPLAY_ITEM_START__);
+
+
 
         $strHTMLFilePath = "";
         $strBodyFilePath = "";
@@ -657,16 +666,24 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $arrPluginJobs = array_filter($this->getMyJobsList(), array($classPlug, "isJobListingMine"));
             $arrCounts[$strName]['name'] = $strName;
             $arrCounts[$strName]['total_listings'] = count($arrPluginJobs);
-            $arrCounts[$strName]['downloaded_today'] = count(array_filter($arrPluginJobs, "wasJobPulledToday"));
+            $arrCounts[$strName]['new_today'] = count(array_filter($arrPluginJobs, "wasJobPulledToday"));
             $arrCounts[$strName]['updated_today'] = count(array_filter($arrPluginJobs, "isJobUpdatedToday"));
             $arrCounts[$strName]['total_not_interested'] = count(array_filter($arrPluginJobs, "isMarked_NotInterested"));
             $arrCounts[$strName]['total_active'] = count(array_filter($arrPluginJobs, "isMarked_InterestedOrBlank"));
         }
 
-        $strOut = "	  Downloaded	Total 	Updated	Not Interested	/	Active" .PHP_EOL;
+
+        $nPlacesToFirstColumn = 20;
+
+        $strHeaderFmt = "%".($nPlacesToFirstColumn-6)."sToday	Updated	Total 	    Not Interested	/	Active" .PHP_EOL;
+        $strOut = sprintf($strHeaderFmt, " ");
         foreach($arrCounts as $site)
         {
-            $strOut = $strOut . $site['name'].":    ".$site['downloaded_today']."			".$site['total_listings']."			".$site['updated_today']."		".$site['total_not_interested']."					".$site['total_active'].PHP_EOL;
+            $fmtSeparatorString = "%".($nPlacesToFirstColumn-strlen($site['name'])+1)."s";
+            $strSpacerName = sprintf($fmtSeparatorString, ' ');
+
+            $strOut = $strOut . $site['name'].":".$strSpacerName;
+            $strOut = $strOut . $site['downloaded_today']."     ".$site['updated_today']."			".$site['total_listings']."		".$site['total_not_interested']."					".$site['total_active'].PHP_EOL;
         }
 
 //        __debug__printLine($strOut, C__DISPLAY_ITEM_DETAIL__);
