@@ -673,20 +673,23 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         }
 
 
-        $nPlacesToFirstColumn = 20;
+        $strOut = "            ";
+        $arrHeaders = array("Today", "Updated", "Total", "Active", "Inactive");
+        foreach($arrHeaders as $value)
+        {
+            $strOut = $strOut . sprintf("%-17s", $value);
+        }
+        $strOut = $strOut . PHP_EOL;
 
-        $strHeaderFmt = "%".($nPlacesToFirstColumn-6)."sToday	Updated	Total 	    Not Interested	/	Active" .PHP_EOL;
-        $strOut = sprintf($strHeaderFmt, " ");
         foreach($arrCounts as $site)
         {
-            $fmtSeparatorString = "%".($nPlacesToFirstColumn-strlen($site['name'])+1)."s";
-            $strSpacerName = sprintf($fmtSeparatorString, ' ');
+            foreach($site as $value)
+            {
+                $strOut = $strOut . sprintf("%-18s", $value);
+            }
+            $strOut = $strOut . PHP_EOL;
 
-            $strOut = $strOut . $site['name'].":".$strSpacerName;
-            $strOut = $strOut . $site['downloaded_today']."     ".$site['updated_today']."			".$site['total_listings']."		".$site['total_not_interested']."					".$site['total_active'].PHP_EOL;
         }
-
-//        __debug__printLine($strOut, C__DISPLAY_ITEM_DETAIL__);
 
         return array('text' => $strOut, 'data' => $arrCounts);
     }

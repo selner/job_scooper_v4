@@ -236,6 +236,7 @@ class ClassJobsSitePluginCommon
                 __debug__printLine("Loading job titles to filter from ".$strFileName."." , C__DISPLAY_ITEM_DETAIL__);
                 $classCSVFile = new ClassScooperSimpleCSVFile($strFileName , 'r');
                 $arrTitlesTemp = $classCSVFile->readAllRecords(true);
+                $arrTitlesTemp = $arrTitlesTemp['data_rows'];
                 __debug__printLine(count($arrTitlesTemp) . " titles found in the source file that will be automatically filtered from job listings." , C__DISPLAY_ITEM_DETAIL__);
 
                 //
