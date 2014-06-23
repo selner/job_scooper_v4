@@ -1,4 +1,14 @@
-on run (argv)
+on run(argv)
+	doRun(argv)
+end run
+
+
+on test()
+	doRun({"/Users/bryan/Code", "Google", "google-test", "https://www.google.com/about/careers/search/#t=sq&q=j&jl=Kirkland,WA&jl=Seattle,WA'"})
+end test
+
+
+on doRun(argv)
 	set libDownload to init_library()
 	
 	set strOutputDir of libDownload to first item of argv as string
@@ -11,11 +21,11 @@ on run (argv)
 	
 	set strGetNextPageValue of libDownload to "function getNextPageValue() { return parseInt(document.getElementsByClassName('page')[0].textContent); }  getNextPageValue();"
 	
-	set strJSClickNext_GOOG to "function doGetJobsClick($nIndex) { if(document.getElementsByClassName('kd-button small selected')[1].nextSibling.className == 'kd-button small disabled') return false; var event = document.createEvent('MouseEvents');       event.initMouseEvent('click', true, true, window,        0, 0, 0, 0, 0,  
+	set strJSClickNext_First of libDownload to "function doGetJobsClick($nIndex) { if(document.getElementsByClassName('kd-button small selected')[1].nextSibling.className == 'kd-button small disabled') return false; var event = document.createEvent('MouseEvents');       event.initMouseEvent('click', true, true, window,        0, 0, 0, 0, 0,  
 		            false, false, false, false, 
 		            0, null); 
 		        document.getElementsByClassName('kd-button small selected')[1].nextSibling.dispatchEvent(event); return true; } doGetJobsClick();"
-	
+	set strJSClickNext_Others of libDownload to strJSClickNext_First of libDownload
 	
 	set strJSGetTheSource of libDownload to "function getHTML() {  var text = ''; var arrItems = document.getElementsByClassName('sr sr-a'); for (var i = 0; i <  arrItems.length; i++) {    text = text + arrItems[i].innerHTML; }  return text; } getHTML();"
 	
@@ -24,7 +34,7 @@ on run (argv)
 		set ret to doJobsDownload()
 	end tell
 	return ret
-end run
+end doRun
 
 
 --*******************************************************************************************
@@ -50,7 +60,7 @@ on loadScript(scriptFileToLoad)
 	try
 		set scriptObject to load script alias scriptFileToLoad
 	on error number -1752 -- text format script 
-		set scriptObject to run script ("script s" & return & (read alias scriptFileToLoad as Â«class utf8Â») & return & "end script " & return & "return s")
+		set scriptObject to run script ("script s" & return & (read alias scriptFileToLoad as Çclass utf8È) & return & "end script " & return & "return s")
 	end try
 	return scriptObject
 end loadScript

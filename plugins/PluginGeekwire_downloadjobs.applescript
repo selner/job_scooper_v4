@@ -1,26 +1,35 @@
-on run (argv)
+-- on run (argv)
+-- 	test()
+-- 	doRun(argv)
+-- end run
+-- on test()
+-- 	doRun({"/Users/bryan/Code/data", "Geekwire", "geekwire-test", "http://www.geekwork.com/jobs/?search_keywords=product&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time'"})
+-- end test
+
+on Run(argv)
 	set libDownload to init_library()
-	
 	set strOutputDir of libDownload to first item of argv as string
 	set strSiteName of libDownload to second item of argv as string
 	set strFileKey of libDownload to third item of argv as string
 	set strURL of libDownload to fourth item of argv as string
+	set nIndexMaxForClick of libDownload to 1
 	
-	set strJSGetMaxPageValue_GEEK to ""
 	
-	set strGetNextPageValue_GEEK to ""
+	set strJSGetMaxPageValue of libDownload to ""
+	set strGetNextPageValue of libDownload to ""
 	
-	set strJSClickNext_GEEK_First to ""
 	
-	set strJSClickNext_GEEK_Others to ""
-	set strJSGetTheSource_GEEK to "function getHTML() { return document.getElementById('content').innerHTML; } getHTML();"
+	set strJSClickNext_First of libDownload to ""
+	
+	set strJSClickNext_Others of libDownload to ""
+	set strJSGetTheSource of libDownload to "function getHTML() { return document.getElementById('content').innerHTML; } getHTML();"
 	
 	
 	tell libDownload
 		set ret to doJobsDownload()
 	end tell
 	return ret
-end run
+end doRun
 
 
 --*******************************************************************************************
