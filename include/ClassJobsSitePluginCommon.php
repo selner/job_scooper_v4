@@ -286,6 +286,7 @@ class ClassJobsSitePluginCommon
                 __debug__printLine("Loading job Company regexes to filter from ".$strFileName."." , C__DISPLAY_ITEM_DETAIL__);
                 $classCSVFile = new ClassScooperSimpleCSVFile($strFileName , 'r');
                 $arrCompaniesTemp = $classCSVFile->readAllRecords(true);
+                $arrCompaniesTemp = $arrCompaniesTemp['data_rows'];
                 __debug__printLine(count($arrCompaniesTemp) . " companies found in the source file that will be automatically filtered from job listings." , C__DISPLAY_ITEM_DETAIL__);
 
                 //
@@ -345,6 +346,7 @@ class ClassJobsSitePluginCommon
                 __debug__printLine("Loading job title regexes to filter from ".$strFileName."." , C__DISPLAY_ITEM_DETAIL__);
                 $classCSVFile = new ClassScooperSimpleCSVFile($strFileName , 'r');
                 $arrTitlesTemp = $classCSVFile->readAllRecords(true);
+                $arrTitlesTemp = $arrTitlesTemp['data_rows'];
                 __debug__printLine(count($arrTitlesTemp) . " titles found in the source file that will be automatically filtered from job listings." , C__DISPLAY_ITEM_DETAIL__);
 
                 //
@@ -750,6 +752,7 @@ class ClassJobsSitePluginCommon
             $strFilePath = $fileInput['details']['full_file_path'];
             $classCombinedRead = new ClassScooperSimpleCSVFile($strFilePath , "r");
             $arrCurFileJobs = $classCombinedRead->readAllRecords(true, array_keys($this->getEmptyJobListingRecord()));
+            $arrCurFileJobs = $arrCurFileJobs['data_rows'];
             $classCombinedRead = null;
             if($arrCurFileJobs != null)
             {
@@ -817,6 +820,7 @@ class ClassJobsSitePluginCommon
             {
                 $classCombinedRead = new ClassScooperSimpleCSVFile($arrFilesToCombine[0], "r");
                 $arrRetJobs = $classCombinedRead->readAllRecords(true, array_keys($this->getEmptyJobListingRecord()));
+                $arrRetJobs = $arrRetJobs['data_rows'];
             }
 
 

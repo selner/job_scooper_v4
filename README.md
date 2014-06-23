@@ -48,7 +48,8 @@ If you're looking at job listings across many sites, Job Scooper has some built-
 
 
 ###Other Stuff
-* Version:  v1.0.1
+* You will need to also download the scooper_common library from selner/scooper_common and place it in a parallel folder to jobs_scooper.  For example:  /users/bryan/code/scooper_common and   /users/bryan/code/job_scooper.
+* Version:  v1.1-dev
 * Author:  Bryan Selner (dev at recoilvelocity dot com)
 * Platforms:  I've only really tested it on Mac OS/X 10.9.3 with PHP 5.4.24.  Your mileage could definitely vary on any other platform or version.  Obviously, the applescripts will fail
 on any platform that isn't Mac OSX, so you'll have to workaround that.

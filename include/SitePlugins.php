@@ -16,7 +16,8 @@
  */
 
 define('__ROOT__', dirname(dirname(__FILE__)));
-require_once(__ROOT__ . '/lib/scooper_common/src/scooper/scooper_common.php');
+define('__PARENTDIR__', dirname(dirname(dirname(__FILE__))));
+require_once(__PARENTDIR__ . '/scooper_common/scooper_common.php');
 require_once(__ROOT__.'/include/Options.php');
 require_once(__ROOT__.'/lib/Linkify.php');
 require_once(__ROOT__.'/include/ClassJobsSitePlugin.php');

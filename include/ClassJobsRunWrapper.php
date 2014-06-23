@@ -224,10 +224,10 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         __debug__printLine("Loaded " . count($this->arrSearchesToReturn) . " searches. ", C__DISPLAY_ITEM_RESULT__);
 
     }
+
+
     private function createOutputSubFolder($fileDetails)
     {
-
-
         // Append the file name base to the directory as a new subdirectory for output
         $fullNewDirectory = $fileDetails['directory'] . $fileDetails['file_name_base'];
         __debug__printLine("Attempting to create output directory: " . $fullNewDirectory , C__DISPLAY_ITEM_START__);
