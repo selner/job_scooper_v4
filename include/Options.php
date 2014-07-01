@@ -39,6 +39,8 @@ const C__STR_TAG_BAD_TITLE_POST__ = "No (Bad Title & Role)";
 
 function __initializeArgs__()
 {
+    $GLOBALS['logger'] = new \Scooper\ScooperLogger();
+
     $GLOBALS['OPTS_SETTINGS']  = array(
         'use_config_ini' => array(
             'description'   => 'Use only the settings from this INI config file ',
@@ -89,7 +91,7 @@ function __initializeArgs__()
 
 function __dumpGlobalArray__($strKey)
 {
-    __debug__printLine('-------- $GLOBALS['.$strKey.']: '.var_export($GLOBALS[$strKey], false) . "--------", C__DISPLAY_NORMAL__);
+    $GLOBALS['logger']->logLine('-------- $GLOBALS['.$strKey.']: '.var_export($GLOBALS[$strKey], false) . "--------", \Scooper\C__DISPLAY_NORMAL__);
 
     var_dump('$GLOBALS['.$strKey.']', $GLOBALS[$strKey]);
 }

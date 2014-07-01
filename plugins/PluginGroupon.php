@@ -35,7 +35,7 @@ class PluginGroupon extends ClassJobsSitePlugin
 
         $resultsSection= $objSimpHTML->find("div[class='jobvite-search-results'] p");
         $strTotalItemsCount  = $resultsSection[0]->plaintext;
-        $strTotalItemsCount = strScrub($strTotalItemsCount);
+        $strTotalItemsCount = \Scooper\strScrub($strTotalItemsCount);
 
         $arrItemItems = explode(" ", trim($strTotalItemsCount));
         return $arrItemItems[4];
@@ -75,7 +75,7 @@ class PluginGroupon extends ClassJobsSitePlugin
 
 
             $item['company'] = $this->siteName;
-            $item['date_pulled'] = getTodayAsString();
+            $item['date_pulled'] = \Scooper\getTodayAsString();
 
 
             $arrURLParts = explode("/",  $item['job_post_url']);

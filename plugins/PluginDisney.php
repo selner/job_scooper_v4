@@ -37,7 +37,7 @@ class PluginDisney extends ClassJobsSitePlugin
         $strTotalItemsCount = trim($arrItemItems[3]);
         $strTotalItemsCount = str_replace(",", "", $strTotalItemsCount);
 
-        __debug__printLine($this->siteName ." only pulling the last 10 jobs posted out of " . $strTotalItemsCount, C__DISPLAY_WARNING__);
+        $GLOBALS['logger']->logLine($this->siteName ." only pulling the last 10 jobs posted out of " . $strTotalItemsCount, \Scooper\C__DISPLAY_WARNING__);
 
         return $strTotalItemsCount;
     }
@@ -76,7 +76,7 @@ class PluginDisney extends ClassJobsSitePlugin
             $item['job_site_category'] = $node->find("td[class='column2'] div")[0]->plaintext;
             $item['location'] = $node->find("td[class='column3'] div span[class='bold-text']")[0]->plaintext;
 
-            $item['date_pulled'] = getTodayAsString();
+            $item['date_pulled'] = \Scooper\getTodayAsString();
 
             $item['job_site_date'] = $node->find("td[class='column4']")[0]->plaintext;
 

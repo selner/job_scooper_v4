@@ -51,7 +51,7 @@ class PluginAmazon extends ClassJobsSitePlugin
                 $item['company'] = 'Amazon';
 
                 $item['job_site'] = 'Amazon';
-                $item['date_pulled'] = getTodayAsString();
+                $item['date_pulled'] = \Scooper\getTodayAsString();
 
                 $item['job_id'] = trim(explode("/", $item['job_post_url'])[4]);
 

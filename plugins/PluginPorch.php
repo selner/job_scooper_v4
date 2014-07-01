@@ -47,7 +47,7 @@ class PluginPorch extends ClassJobsSitePlugin
 
             $item['job_post_url'] = $this->siteBaseURL . $node->find("a")[0]->href;
             $item['location'] = $node->find("span[class='location']")[0]->plaintext;
-            $item['date_pulled'] = getTodayAsString();
+            $item['date_pulled'] = \Scooper\getTodayAsString();
 
             $ret[] = $this->normalizeItem($item);
 

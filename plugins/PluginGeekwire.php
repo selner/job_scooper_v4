@@ -48,7 +48,7 @@ class PluginGeekwire extends ClassJobsSitePlugin
             $item['location'] = $node->find("div[class='location']")[0]->plaintext;
 
             $item['company'] = $node->find("div[class='company'] span")[0]->plaintext;
-            $item['date_pulled'] = getTodayAsString();
+            $item['date_pulled'] = \Scooper\getTodayAsString();
             $item['job_site_date'] = $node->find("li[class='date']")[0]->plaintext;
             $item['job_site_category'] = $node->find("ul[class='meta'] li")[0]->plaintext;
 

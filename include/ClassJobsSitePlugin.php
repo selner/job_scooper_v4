@@ -33,7 +33,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     {
         if($strOutputDirectory != null)
         {
-            $this->detailsMyFileOut = parseFilePath($strOutputDirectory, false);
+            $this->detailsMyFileOut = \Scooper\parseFilePath($strOutputDirectory, false);
         }
 
         $this->flagSettings = $GLOBALS['DATA']['site_plugins'][strtolower($this->siteName)]['flags'];
@@ -42,7 +42,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     function __destruct()
     {
-        __debug__printLine("Closing ".$this->siteName." instance of class " . get_class($this), C__DISPLAY_ITEM_START__);
+        $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__);
 
         //
         // Write out the interim data to file if we're debugging
@@ -52,7 +52,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             if($this->arrLatestJobs != null)
             {
                 $strOutPathWithName = $this->getOutputFileFullPath($this->siteName . "_");
-                __debug__printLine("Writing ". $this->siteName." " .count($this->arrLatestJobs) ." job records to " . $strOutPathWithName . " for debugging (if needed).", C__DISPLAY_ITEM_START__);
+                $GLOBALS['logger']->logLine("Writing ". $this->siteName." " .count($this->arrLatestJobs) ." job records to " . $strOutPathWithName . " for debugging (if needed).", \Scooper\C__DISPLAY_ITEM_START__);
                 $this->writeMyJobsListToFile($strOutPathWithName, false);
             }
         }
@@ -82,7 +82,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $retFilePath = '';
 
         // Now go download and output the latest jobs from this site
-        __debug__printLine("Downloading new ". $this->siteName ." jobs...", C__DISPLAY_ITEM_START__);
+        $GLOBALS['logger']->logLine("Downloading new ". $this->siteName ." jobs...", \Scooper\C__DISPLAY_ITEM_START__);
 
         //
         // Call the child classes getJobs function to update the object's array of job listings
@@ -99,8 +99,8 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         $retURL = null;
 
-        $classAPI = new ClassScooperAPIWrapper();
-        __debug__printLine("Getting source URL for ". $strSrcURL , C__DISPLAY_ITEM_START__);
+        $classAPI = new \Scooper\ScooperDataAPIWrapper();
+        $GLOBALS['logger']->logLine("Getting source URL for ". $strSrcURL , \Scooper\C__DISPLAY_ITEM_START__);
 
         try
         {
@@ -164,14 +164,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
             if($GLOBALS['OPTS'][$strIncludeKey] == null || $GLOBALS['OPTS'][$strIncludeKey] == 0)
             {
-                __debug__printLine($search['site_name'] . " excluded, so skipping its '" . $search['search_name'] . "' search.", C__DISPLAY_ITEM_START__);
+                $GLOBALS['logger']->logLine($search['site_name'] . " excluded, so skipping its '" . $search['search_name'] . "' search.", \Scooper\C__DISPLAY_ITEM_START__);
 
                 continue;
             }
 
             $class = null;
             $nLastCount = count($this->arrLatestJobs);
-            __debug__printLine("Running ". $search['site_name'] . " search '" . $search['search_name'] ."'...", C__DISPLAY_SECTION_START__);
+            $GLOBALS['logger']->logLine("Running ". $search['site_name'] . " search '" . $search['search_name'] ."'...", \Scooper\C__DISPLAY_SECTION_START__);
 
             $strSite = strtolower($search['site_name']);
             if(strcasecmp($strSite, $this->siteName) == 0)
@@ -204,7 +204,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         } catch (ErrorException $ex) {
             $strError = "Failed to download jobs from " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "[URL=".$searchDetails['base_url_format']. "].   Reason:  ".$ex->getMessage();
-            __debug__printLine($strError, C__DISPLAY_ERROR__);
+            $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
             throw new ErrorException($strError);
         }
      }
@@ -221,9 +221,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
 
-            __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
+            $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-            $class = new ClassScooperAPIWrapper();
+            $class = new \Scooper\ScooperDataAPIWrapper();
             $ret = $class->cURL($strURL, null, 'GET', 'text/xml; charset=UTF-8');
             $xmlResult = simplexml_load_string($ret['output']);
 
@@ -240,26 +240,26 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 $strTotalResults = $this->parseTotalResultsCount($xmlResult);
                 $strTotalResults  = intval(str_replace(",", "", $strTotalResults));
                 $nTotalListings = intval($strTotalResults);
-                $totalPagesCount = intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
+                $totalPagesCount = \Scooper\intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
                 if($totalPagesCount < 1)  $totalPagesCount = 1;
             }
 
             if($nTotalListings <= 0)
             {
-                __debug__printLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['search_name']."'.", C__DISPLAY_ITEM_START__);
+                $GLOBALS['logger']->logLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['search_name']."'.", \Scooper\C__DISPLAY_ITEM_START__);
                 return;
             }
             else
             {
 
-                __debug__printLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strURL, C__DISPLAY_ITEM_START__);
+                $GLOBALS['logger']->logLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strURL, \Scooper\C__DISPLAY_ITEM_START__);
 
                 while ($nPageCount <= $totalPagesCount )
                 {
                     $arrPageJobsList = null;
 
                     $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
-                    $class = new ClassScooperAPIWrapper();
+                    $class = new \Scooper\ScooperDataAPIWrapper();
                     $ret = $class->cURL($strURL,'' , 'GET', 'application/rss+xml');
 
                     $xmlResult = simplexml_load_string($ret['output']);
@@ -272,7 +272,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                     {
                         // we likely hit a page where jobs started to be hidden.
                         // Go ahead and bail on the loop here
-                        __debug__printLine("Not getting results back from ". $this->siteName . " starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", C__DISPLAY_ITEM_START__);
+                        $GLOBALS['logger']->logLine("Not getting results back from ". $this->siteName . " starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", \Scooper\C__DISPLAY_ITEM_START__);
                         $nPageCount = $totalPagesCount ;
                     }
                     else
@@ -285,7 +285,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             }
 
         }
-        __debug__printLine(PHP_EOL.$this->siteName . "[".$searchDetails['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, C__DISPLAY_ITEM_RESULT__);
+        $GLOBALS['logger']->logLine(PHP_EOL.$this->siteName . "[".$searchDetails['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
     }
 
 
@@ -298,7 +298,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
 
         $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
-        __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL );
         if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL); }
@@ -313,19 +313,19 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML);
             $strTotalResults  = intval(str_replace(",", "", $strTotalResults));
             $nTotalListings = intval($strTotalResults);
-            $totalPagesCount = intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
+            $totalPagesCount = \Scooper\intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
             if($totalPagesCount < 1)  $totalPagesCount = 1;
         }
 
         if($nTotalListings <= 0)
         {
-            __debug__printLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['search_name']."'.", C__DISPLAY_ITEM_START__);
+            $GLOBALS['logger']->logLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['search_name']."'.", \Scooper\C__DISPLAY_ITEM_START__);
             return;
         }
         else
         {
 
-            __debug__printLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strURL, C__DISPLAY_ITEM_START__);
+            $GLOBALS['logger']->logLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strURL, \Scooper\C__DISPLAY_ITEM_START__);
 
             while ($nPageCount <= $totalPagesCount )
             {
@@ -345,7 +345,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 {
                     // we likely hit a page where jobs started to be hidden.
                     // Go ahead and bail on the loop here
-                    __debug__printLine("Not getting results back from ". $this->siteName . " starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", C__DISPLAY_ITEM_START__);
+                    $GLOBALS['logger']->logLine("Not getting results back from ". $this->siteName . " starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", \Scooper\C__DISPLAY_ITEM_START__);
                     $nPageCount = $totalPagesCount ;
                 }
                 else
@@ -363,7 +363,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             }
         }
 
-        __debug__printLine(PHP_EOL.$this->siteName . "[".$searchDetails['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, C__DISPLAY_ITEM_RESULT__);
+        $GLOBALS['logger']->logLine(PHP_EOL.$this->siteName . "[".$searchDetails['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
 
     }
 
@@ -383,25 +383,25 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $strFileBase = $this->detailsMyFileOut['directory'].$strFileKey. "-jobs-page-";
 
         $strURL = $this->_getURLfromBase_($searchDetails, $nDays);
-        __debug__printLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
 
         $strCmdToRun = "osascript " . __ROOT__ . "/plugins/".$this->strFilePath_HTMLFileDownloadScript . " " . escapeshellarg($this->detailsMyFileOut["directory"])  . " ".escapeshellarg($searchDetails["site_name"])." " . escapeshellarg($strFileKey)   . " '"  . $strURL . "'";
-        __debug__printLine("Command = " . $strCmdToRun, C__DISPLAY_ITEM_DETAIL__);
-        $result = my_exec($strCmdToRun);
+        $GLOBALS['logger']->logLine("Command = " . $strCmdToRun, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $result = \Scooper\my_exec($strCmdToRun);
         if($result['stdout'] == -1)
         {
             $strError = "AppleScript did not successfully download the jobs.  Log = ".$result['stderr'];
-            __debug__printLine($strError, C__DISPLAY_ERROR__);
+            $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
             throw new ErrorException($strError);
         }
 
 
         $strFileName = $strFileBase.".html";
-        __debug__printLine("Parsing downloaded HTML files: '" . $strFileBase."*.html'", C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Parsing downloaded HTML files: '" . $strFileBase."*.html'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
         while (file_exists($strFileName) && is_file($strFileName))
         {
-            __debug__printLine("Parsing results HTML from '" . $strFileName ."'", C__DISPLAY_ITEM_DETAIL__);
+            $GLOBALS['logger']->logLine("Parsing results HTML from '" . $strFileName ."'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
             $objSimpleHTML = $this->getSimpleHTMLObjForFileContents($strFileName);
             if(!$objSimpleHTML)
             {
