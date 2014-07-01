@@ -203,21 +203,17 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         if($config->search)
         {
-            foreach($config->search as $iniSearch)
+            if(is_object($config->search))
             {
-                $tempSearch =  array('site_name' => null, 'search_name' => null, 'base_url_format' => null);
-                $tempSearch['search_key'] = $iniSearch['key'];
-                $tempSearch['site_name'] = $iniSearch['jobsite'];
-                $tempSearch['search_name'] = $iniSearch['name'];
-                $tempSearch['base_url_format'] = $iniSearch['url_format'];
 
-                if($tempSearch['search_key'] == "")
+                foreach($config->search as $iniSearch)
                 {
-                    $tempSearch['search_key'] = strScrub($tempSearch['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . strScrub($tempSearch['search_name'], FOR_LOOKUP_VALUE_MATCHING);
+                    $this->arrSearchesToReturn[] = $this->_parseSearchFromINI_($iniSearch);
                 }
-                __debug__printLine("Search added [search_name=" . $tempSearch['search_name'] . "; site_name=" . $tempSearch['site_name'] . "; search_key=" . $tempSearch['search_key'] . "]; base_url_format='" . $tempSearch['base_url_format'] . "']", C__DISPLAY_ITEM_DETAIL__);
-                $this->arrSearchesToReturn[] = $tempSearch;
-
+            }
+            else
+            {
+                $this->arrSearchesToReturn[] = $this->_parseSearchFromINI_($config->search);
             }
         }
 
@@ -225,6 +221,23 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     }
 
+    private function _parseSearchFromINI_($iniSearch)
+    {
+        $tempSearch =  array('site_name' => null, 'search_name' => null, 'base_url_format' => null);
+        $tempSearch['search_key'] = $iniSearch['key'];
+        $tempSearch['site_name'] = $iniSearch['jobsite'];
+        $tempSearch['search_name'] = $iniSearch['name'];
+        $tempSearch['base_url_format'] = $iniSearch['url_format'];
+
+        if($tempSearch['search_key'] == "")
+        {
+            $tempSearch['search_key'] = strScrub($tempSearch['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . strScrub($tempSearch['search_name'], FOR_LOOKUP_VALUE_MATCHING);
+        }
+        __debug__printLine("Search added [search_name=" . $tempSearch['search_name'] . "; site_name=" . $tempSearch['site_name'] . "; search_key=" . $tempSearch['search_key'] . "]; base_url_format='" . $tempSearch['base_url_format'] . "']", C__DISPLAY_ITEM_DETAIL__);
+
+        return $tempSearch;
+
+    }
 
     private function createOutputSubFolder($fileDetails)
     {
