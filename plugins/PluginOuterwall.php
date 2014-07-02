@@ -25,7 +25,7 @@ class PluginOuterwall extends ClassJobsSitePlugin
 {
     protected $siteName = 'Outerwall';
     protected $siteBaseURL = 'http://outerwall.jobs';
-
+    protected $strBaseURLFormat = "http://outerwall.jobs/***LOCATION***/usa/jobs/";
 
     function parseJobsListForPage($objSimpHTML)
     {
@@ -47,7 +47,7 @@ class PluginOuterwall extends ClassJobsSitePlugin
 
             $item['location'] =  explode("/", $item['job_post_url'])[1];
             $item['company'] = $this->siteName;
-            $item['date_pulled'] = getTodayAsString();
+            $item['date_pulled'] = \Scooper\getTodayAsString();
 
 //            var_dump($item);
             $ret[] = $this->normalizeItem($item);

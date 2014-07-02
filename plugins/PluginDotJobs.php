@@ -26,6 +26,7 @@ class PluginDotJobs extends ClassJobsSitePlugin
     protected $siteName = 'dotjobs';
     protected $siteBaseURL = '';
 
+    protected $strBaseURLFormat = "http://washington.jobs/jobs/feed/rss?location=***LOCATION***%2C+WA&q=***KEYWORDS***";
 
 
 
@@ -46,7 +47,7 @@ class PluginDotJobs extends ClassJobsSitePlugin
 
             $item['job_site_date'] = (string)$job->pubDate;
 //            $item['company'] = $this->siteName;
-            $item['date_pulled'] = getTodayAsString();
+            $item['date_pulled'] = \Scooper\getTodayAsString();
 
 //            __debug__var_dump_exit__($item);
             $ret[] = $this->normalizeItem($item);

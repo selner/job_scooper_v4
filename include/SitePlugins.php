@@ -16,8 +16,8 @@
  */
 
 define('__ROOT__', dirname(dirname(__FILE__)));
-define('__PARENTDIR__', dirname(dirname(dirname(__FILE__))));
-require_once(__PARENTDIR__ . '/scooper_common/src/scooper_common/scooper_common.php');
+// define('__PARENTDIR__', dirname(dirname(dirname(__FILE__))));
+// require_once(__PARENTDIR__ . '/scooper_common/src/scooper_common/scooper_common.php');
 require_once(__ROOT__.'/include/Options.php');
 require_once(__ROOT__.'/lib/Linkify.php');
 require_once(__ROOT__.'/include/ClassJobsSitePlugin.php');
@@ -47,6 +47,7 @@ require_once (__ROOT__.'/plugins/PluginEbay.php');
 require_once (__ROOT__.'/plugins/PluginGroupon.php');
 require_once (__ROOT__.'/plugins/PluginGeekwire.php');
 require_once (__ROOT__.'/plugins/PluginDotJobs.php');
+require_once (__ROOT__.'/plugins/PluginZipRecruiter.php');
 
 define( "C__SEARCH_RESULTS_TYPE_NONE__", 0x0 );
 define( "C__SEARCH_RESULTS_TYPE_WEBPAGE__", 0x1 );
@@ -62,7 +63,7 @@ const C__JOB_ITEMCOUNT_NOTAPPLICABLE__ = 0x800;
 const C__TOTAL_ITEMS_UNKNOWN__ = 11111;
 
 $GLOBALS['DATA']['site_plugins'] = array(
-    'amazon' => array('name' => 'amazon', 'class_name' => 'PluginAmazon',  'flags' => C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ , 'include_in_run' => false),
+    'ziprecruiter' => array('name' => 'ziprecruiter', 'class_name' => 'PluginZipRecruiter',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__  , 'include_in_run' => false),
     'craigslist' => array('name' => 'craigslist', 'class_name' => 'PluginCraigslist',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
     'porch' => array('name' => 'porch', 'class_name' => 'PluginPorch',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
     'expedia' => array('name' => 'expedia', 'class_name' => 'PluginExpedia',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
@@ -77,12 +78,13 @@ $GLOBALS['DATA']['site_plugins'] = array(
     'disney' => array('name' => 'disney', 'class_name' => 'PluginDisney',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
     'outerwall' => array('name' => 'outerwall', 'class_name' => 'PluginOuterwall',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__|C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
     'tableau' => array('name' => 'tableau', 'class_name' => 'PluginTableau',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'google' => array('name' => 'google', 'class_name' => 'PluginGoogle',  'flags' => C__SEARCH_RESULTS_TYPE_HTML_FILE__|C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
     'facebook' => array('name' => 'facebook', 'class_name' => 'PluginFacebook',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__| C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__|C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
     'ebay' => array('name' => 'ebay', 'class_name' => 'PluginEbay',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
     'groupon' => array('name' => 'groupon', 'class_name' => 'PluginGroupon',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__|C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'dotjobs' => array('name' => 'dotjobs', 'class_name' => 'PluginDotJobs',  'flags' => C__SEARCH_RESULTS_TYPE_XML__| C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ , 'include_in_run' => false),
     'geekwire' => array('name' => 'geekwire', 'class_name' => 'PluginGeekwire',  'flags' => C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__ , 'include_in_run' => false),
+    'google' => array('name' => 'google', 'class_name' => 'PluginGoogle',  'flags' => C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
+    'amazon' => array('name' => 'amazon', 'class_name' => 'PluginAmazon',  'flags' => C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ , 'include_in_run' => false),
+    'dotjobs' => array('name' => 'dotjobs', 'class_name' => 'PluginDotJobs',  'flags' => C__SEARCH_RESULTS_TYPE_XML__| C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ , 'include_in_run' => false),
 );
 
 ?>

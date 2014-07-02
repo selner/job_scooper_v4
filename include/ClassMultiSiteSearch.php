@@ -41,13 +41,13 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
 
             if($GLOBALS['OPTS'][$strIncludeKey] == null || $GLOBALS['OPTS'][$strIncludeKey] == 0)
             {
-                __debug__printLine($search['site_name'] . " excluded, so skipping its '" . $search['search_name'] . "' search.", C__DISPLAY_ITEM_START__);
+                $GLOBALS['logger']->logLine($search['site_name'] . " excluded, so skipping its '" . $search['search_name'] . "' search.", \Scooper\C__DISPLAY_ITEM_START__);
 
                 continue;
             }
 
             $class = null;
-            __debug__printLine("Running ". $search['site_name'] . " search: '" . $search['search_name']."'", C__DISPLAY_SECTION_START__);
+            $GLOBALS['logger']->logLine("Running ". $search['site_name'] . " search: '" . $search['search_name']."'", \Scooper\C__DISPLAY_SECTION_START__);
 
             $strSiteClass = $GLOBALS['DATA']['site_plugins'][strtolower($search['site_name'])]['class_name'];
             $class = new $strSiteClass($this->detailsMyFileOut['full_file_path']);
@@ -60,8 +60,8 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
             }
             catch (ErrorException $classError)
             {
-                __debug__printLine('ERROR:  Unable to load the search for ' .$search['site_name'] . '. Skipping '. $search['search_name'] .' search and continuing with any others.', C__DISPLAY_ERROR__);
-                __debug__printLine('ERROR:  Search failure reason:  '.$classError->getMessage(), C__DISPLAY_ERROR__);
+                $GLOBALS['logger']->logLine('ERROR:  Unable to load the search for ' .$search['site_name'] . '. Skipping '. $search['search_name'] .' search and continuing with any others.', \Scooper\C__DISPLAY_ERROR__);
+                $GLOBALS['logger']->logLine('ERROR:  Search failure reason:  '.$classError->getMessage(), \Scooper\C__DISPLAY_ERROR__);
                 if($GLOBALS['OPTS']['DEBUG']) { throw $classError; }
             }
 

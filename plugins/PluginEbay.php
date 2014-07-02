@@ -32,7 +32,7 @@ class PluginEbay extends ClassJobsSitePlugin
     {
         $resultsSection= $objSimpHTML->find("span[id='searchResultCount']");
         $strTotalItemsCount  = $resultsSection[0]->plaintext;
-        $strTotalItemsCount = strScrub($strTotalItemsCount);
+        $strTotalItemsCount = \Scooper\strScrub($strTotalItemsCount);
         return str_replace(",", "", $strTotalItemsCount);
     }
 
@@ -69,7 +69,7 @@ class PluginEbay extends ClassJobsSitePlugin
             $item['job_site_date'] = $dateNode[0]->plaintext;
 
             $item['company'] = $this->siteName;
-            $item['date_pulled'] = getTodayAsString();
+            $item['date_pulled'] = \Scooper\getTodayAsString();
 
 
             $arrURLParts = explode("/",  $item['job_post_url']);

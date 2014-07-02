@@ -39,6 +39,7 @@ const C__STR_TAG_BAD_TITLE_POST__ = "No (Bad Title & Role)";
 
 function __initializeArgs__()
 {
+
     $GLOBALS['OPTS_SETTINGS']  = array(
         'use_config_ini' => array(
             'description'   => 'Use only the settings from this INI config file ',
@@ -86,15 +87,6 @@ function __initializeArgs__()
     if($GLOBALS['OPTS']['VERBOSE'] == true) { __log__ ('Options set: '.var_export($GLOBALS['OPTS'], true), C__LOGLEVEL_INFO__); }
 
 }
-
-function __dumpGlobalArray__($strKey)
-{
-    __debug__printLine('-------- $GLOBALS['.$strKey.']: '.var_export($GLOBALS[$strKey], false) . "--------", C__DISPLAY_NORMAL__);
-
-    var_dump('$GLOBALS['.$strKey.']', $GLOBALS[$strKey]);
-}
-
-
 
 function addUserOptionForSitePlugins()
 {

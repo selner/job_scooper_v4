@@ -1,10 +1,11 @@
-on run(argv)
+on run (argv)
 	doRun(argv)
 end run
 
 
 on test()
 	doRun({"/Users/bryan/Code", "Google", "google-test", "https://www.google.com/about/careers/search/#t=sq&q=j&jl=Kirkland,WA&jl=Seattle,WA'"})
+	-- doRun({"/Users/bryan/Dropbox/JobSearch-and-Consulting/JobPosts-Tracking/2014-07-01_1255_jobs/", "Google", "google-google-all-seattle-kirkland-jobs", "https://www.google.com/about/careers/search/#t=sq&q=j&jl=Kirkland,WA&jl=Seattle,WA"})
 end test
 
 
@@ -15,9 +16,8 @@ on doRun(argv)
 	set strSiteName of libDownload to second item of argv as string
 	set strFileKey of libDownload to third item of argv as string
 	set strURL of libDownload to fourth item of argv as string
-	set nIndexMaxForClick of libDownload to 0
 	
-	set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() { return parseInt(document.getElementsByClassName('count')[0].textContent); }  getMaxPageValue();"
+	set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() { try { return parseInt(document.getElementsByClassName('count')[0].textContent); } catch(err) { return 99999; } }  getMaxPageValue();" -- returns just a string "of many" sometimes, so we set an arbitrary high limit until we know.
 	
 	set strGetNextPageValue of libDownload to "function getNextPageValue() { return parseInt(document.getElementsByClassName('page')[0].textContent); }  getNextPageValue();"
 	

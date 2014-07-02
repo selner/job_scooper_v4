@@ -24,6 +24,7 @@ class PluginIndeed extends ClassJobsSitePlugin
     protected $siteName = 'Indeed';
     protected $nJobListingsPerPage = 50;
     protected $siteBaseURL = 'http://www.Indeed.com';
+    protected $strBaseURLFormat = "http://www.indeed.com/jobs?q=title%3A%28***KEYWORDS***%29&l=***LOCATION***&sort=date&limit=50&fromage=***NUMBER_DAYS***&start=***ITEM_NUMBER***";
 
 
 
@@ -93,12 +94,12 @@ class PluginIndeed extends ClassJobsSitePlugin
             $item['job_post_url'] = 'http://www.indeed.com' . $jobInfoNode->href;
 
             $arrURLParts = explode("jk=",  $item['job_post_url']);
-            $item['job_id'] = strScrub($arrURLParts[1]);
+            $item['job_id'] = \Scooper\strScrub($arrURLParts[1]);
 
 
             $item['company'] = trim($node->find("span[class='company'] span")[0]->plaintext);
             $item['location'] =trim( $node->find("span[class='location'] span")[0]->plaintext);
-            $item['date_pulled'] = getTodayAsString();
+            $item['date_pulled'] = \Scooper\getTodayAsString();
             $item['job_site_date'] = $node->find("span[class='date']")[0]->plaintext;
 
 

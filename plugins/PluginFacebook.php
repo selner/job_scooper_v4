@@ -26,6 +26,7 @@ class PluginFacebook extends ClassJobsSitePlugin
     protected $siteName = 'Facebook';
     protected $siteBaseURL = 'https://www.facebook.com/careers/';
     protected $nJobListingsPerPage = 10;
+    protected $strBaseURLFormat = "https://www.facebook.com/careers/locations/***LOCATION***";
 
 
 
@@ -50,7 +51,7 @@ class PluginFacebook extends ClassJobsSitePlugin
             $item['job_site_category'] = $node->parent()->find("h3")[0]->plaintext;
 
             $item['location'] = "Seattle, WA";
-            $item['date_pulled'] = getTodayAsString();
+            $item['date_pulled'] = \Scooper\getTodayAsString();
 
 //            var_dump($item);
             $ret[] = $this->normalizeItem($item);

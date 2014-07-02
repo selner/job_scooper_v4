@@ -29,16 +29,20 @@ require_once(__ROOT__ . '/include/ClassJobsSitePluginCommon.php');
  *
 
  */
-class PluginExample extends ClassJobsSitePlugin
+class PluginZipRecruiter extends ClassJobsSitePlugin
 {
-    protected $siteName = 'ExampleSiteName';
-    protected $siteBaseURL = 'http://www.examplesite.com';
+    protected $siteName = 'ZipRecruiter';
+    protected $siteBaseURL = 'https://jobs.ziprecruiter.com';
+    protected $nJobListingsPerPage = 20;
+    protected $fQuoteKeywords = true;
+    protected $strBaseURLFormat = "https://jobs.ziprecruiter.com/candidate/search?search=***KEYWORDS***&location=***LOCATION***&radius=25&page=***PAGE_NUMBER***&days=***NUMBER_DAYS***";
 
-	// if this is a client-side HTML download plugin, you will need to add a script
-	// for driving Safari to download the files and set that script name here.
-	//
-	// This value is unused for XML or server-side webpage download plugins.
-    protected $strFilePath_HTMLFileDownloadScript = "PluginTemplate_downloadjobs.applescript";
+
+    // if this is a client-side HTML download plugin, you will need to add a script
+    // for driving Safari to download the files and set that script name here.
+    //
+    // This value is unused for XML or server-side webpage download plugins.
+    protected $strFilePath_HTMLFileDownloadScript = null;
 
 
     /**
@@ -53,33 +57,35 @@ class PluginExample extends ClassJobsSitePlugin
      * @param $days
      * @return int|string
      */
-    function getDaysURLValue($days) {
-        $ret = "1d";
+    function getDaysURLValue($days)
+    {
+        $ret = "1";
 
         if($days != null)
         {
             switch($days)
             {
-                case ($days>3 && $days<=7):
-                    $ret = "7d";
+                case ($days>5 && $days<=10):
+                    $ret = "10";
                     break;
 
-                case ($days>=3 && $days<7):
-                    $ret = "3d";
+                case ($days>1 && $days<=5):
+                    $ret = "5";
                     break;
 
 
                 case $days<=1:
                 default:
-                    $ret = "1d";
+                    $ret = "1";
                     break;
 
             }
         }
 
         return $ret;
-
     }
+
+
 
     /**
      * parseTotalResultsCount
@@ -99,21 +105,12 @@ class PluginExample extends ClassJobsSitePlugin
         //
         // Find the HTML node that holds the result count
         //
-        $resultsSection= $objSimpHTML->find("div[id='search-showing']");
+        $resultsSection = $objSimpHTML->find("strong[id='default_total_entries']");
 
         // get the text value of that node
         $totalItemsText = $resultsSection[0]->plaintext;
 
-        // If the node text is something like "44 of 104 results"
-        // then split the string by the ' ' character and return
-        // the right array item for that number.
-        //
-        $arrItemItems = explode(" ", trim($totalItemsText));
-        $strTotalItemsCount = $arrItemItems[4];
-
-        // parse out any commas so that the string returned is purely digits
-        //
-        return str_replace(",", "", $strTotalItemsCount);
+        return $totalItemsText;
     }
 
     /**
@@ -131,7 +128,7 @@ class PluginExample extends ClassJobsSitePlugin
         $ret = null;
 
 
-        $nodesJobs= $objSimpHTML->find('div[class="listing"]');
+        $nodesJobs= $objSimpHTML->find('li[class="job_row_ai"]');
 
 
         foreach($nodesJobs as $node)
@@ -145,23 +142,50 @@ class PluginExample extends ClassJobsSitePlugin
             $item['job_site'] = $this->siteName;
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
-            $titleLink = $node->find("a[class='listing-title']")[0];
-            $item['job_title'] = $titleLink->firstChild()->plaintext;
+
+            $titleNode = $node->find("h4[class='font14 fBold mb2 font13Phone']");
+            $item['job_title'] = $titleNode[0]->plaintext;
+
+
+            $titleLink = $node->find("a[class='clickable_target']")[0];
+            $item['job_post_url'] = $titleLink->href;
+
 
             // If we couldn't parse the job title, it's not really a job
             // listing so just continue to the next one
             //
             if($item['job_title'] == '') continue;
 
-            $item['job_post_url'] = $titleLink->href;
-            $item['company'] = $node->find("span[class='listing-company']")[0]->plaintext;
-            $item['job_id'] = $node->attr['data-hash'];
-            $item['location'] = trim($node->find("span[class='listing-location'] span")[0]->plaintext) . "-" .
-                    trim($node->find("span[class='listing-location'] span")[1]->plaintext);
+            $idLink = $node->find("a[class='toggle_job_save btn btn-small']");
+            $jobID = $idLink[0]->attr['data-external_job_id'];
+            $item['job_id'] = $jobID;
 
-            $item['job_site_category'] = $node->find("span[class='listing-tag']")[0]->plaintext;
-            $item['job_site_date'] = $node->find("span[class='listing-date']")[0]->plaintext;
+            $companyNode = $node->find("p[class='font12Phone clearLeft']");
+            $arrCompanyParts = explode(" - ", $companyNode[0]->plaintext);
+            $item['company'] = $arrCompanyParts [0];
+            $item['location'] = $arrCompanyParts[1];
 
+
+            $jobDetailsNode = $node->find("p[class='greenText font12 font11Phone'] span");
+            $strJobDetails = \Scooper\strScrub($jobDetailsNode[0]->plaintext, SIMPLE_TEXT_CLEANUP);
+            $arrJobDetailsParts = explode(" ", $strJobDetails);
+
+            $item['job_site_category'] = $arrJobDetailsParts[5];
+            if(is_numeric($arrJobDetailsParts[1]) )
+            {
+                $daysToSubtract = $arrJobDetailsParts[1];
+            }
+            elseif(strcasecmp($arrJobDetailsParts[1], "yesterday") == 0)
+            {
+                $daysToSubtract = 1;
+            }
+            else
+            {
+                $daysToSubtract = 0;
+            }
+            $date = new DateTime();
+            $date->modify("-".$daysToSubtract." days");
+            $item['job_site_date'] = $date->format('Y-m-d');
 
             //
             // Call normalizeItem to standardize the resulting listing result

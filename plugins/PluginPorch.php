@@ -22,6 +22,7 @@ class PluginPorch extends ClassJobsSitePlugin
 {
     protected $siteName = 'Porch';
     protected $siteBaseURL = 'http://about.porch.com/careers';
+    protected $strBaseURLFormat = "http://about.porch.com/careers/";
 
 
      function parseJobsListForPage($objSimpleHTML)
@@ -47,7 +48,7 @@ class PluginPorch extends ClassJobsSitePlugin
 
             $item['job_post_url'] = $this->siteBaseURL . $node->find("a")[0]->href;
             $item['location'] = $node->find("span[class='location']")[0]->plaintext;
-            $item['date_pulled'] = getTodayAsString();
+            $item['date_pulled'] = \Scooper\getTodayAsString();
 
             $ret[] = $this->normalizeItem($item);
 

@@ -112,11 +112,11 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
 
 
             $item['company'] = $node->find("a[class='prefCompany']")[0]->plaintext;
-            $item['location'] = strScrub($node->find("div[class='jl_col4_div']")[0]->plaintext);
+            $item['location'] = \Scooper\strScrub($node->find("div[class='jl_col4_div']")[0]->plaintext);
 
-            $item['date_pulled'] = getTodayAsString();
+            $item['date_pulled'] = \Scooper\getTodayAsString();
 
-            $item['job_site_date'] = strScrub($node->find("TD[class='jl_rslt_posted_cell'] span")[0]->plaintext,DEFAULT_SCRUB );
+            $item['job_site_date'] = \Scooper\strScrub($node->find("TD[class='jl_rslt_posted_cell'] span")[0]->plaintext,DEFAULT_SCRUB );
             $ret[] = $this->normalizeItem($item);
         }
 

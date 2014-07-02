@@ -62,13 +62,19 @@ function isNewJobToday_Interested_IsNo($var)
 
 function wasJobPulledToday($var)
 {
-    return (strcasecmp($var['date_pulled'], getTodayAsString()) == 0);
+    return (strcasecmp($var['date_pulled'], \Scooper\getTodayAsString()) == 0);
 }
 
 
 function isJobUpdatedToday($var)
 {
-    return (strcasecmp($var['date_last_updated'], getTodayAsString()) == 0);
+    return (strcasecmp($var['date_last_updated'], \Scooper\getTodayAsString()) == 0);
+}
+
+
+function isJobUpdatedTodayOrIsInterested($var)
+{
+    return ((strcasecmp($var['date_last_updated'], \Scooper\getTodayAsString()) == 0) || isMarked_InterestedOrBlank($var));
 }
 
 
@@ -137,7 +143,7 @@ function combineTextAllChildren($node, $fRecursed = false)
 
     if($node->plaintext != null && $fRecursed == false)
     {
-        $retStr = strScrub($node->plaintext . " " . $retStr, DEFAULT_SCRUB );
+        $retStr = \Scooper\strScrub($node->plaintext . " " . $retStr, DEFAULT_SCRUB );
     }
     return $retStr;
 
@@ -161,23 +167,23 @@ function getArrayKeyValueForJob($job)
     return $job['key_jobsite_siteid'];
 
 /*
-    $strKey = strScrub($job['job_site'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACE_SPACES_WITH_HYPHENS);
+    $strKey = \Scooper\strScrub($job['job_site'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACE_SPACES_WITH_HYPHENS);
 
     // For craigslist, they change IDs on every post, so deduping that way doesn't help
     // much.  Instead, let's dedupe for Craigslist by using the role title and the jobsite
     // (Company doesn't usually get filled out either with them.)
     if(strcasecmp($strKey, "craigslist") == 0)
     {
-        $strKey = $strKey . "-" . strScrub($job['job_title'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACE_SPACES_WITH_HYPHENS );
+        $strKey = $strKey . "-" . \Scooper\strScrub($job['job_title'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACE_SPACES_WITH_HYPHENS );
     }
     if($job['job_id'] != null && $job['job_id'] != "")
     {
-        $strKey = $strKey . "-" . strScrub($job['job_id'], REPLACE_SPACES_WITH_HYPHENS | REMOVE_PUNCT | HTML_DECODE | LOWERCASE);
+        $strKey = $strKey . "-" . \Scooper\strScrub($job['job_id'], REPLACE_SPACES_WITH_HYPHENS | REMOVE_PUNCT | HTML_DECODE | LOWERCASE);
     }
     else
     {
-        $strKey = $strKey . "-" . strScrub($job['company'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACE_SPACES_WITH_HYPHENS );
-        $strKey = $strKey . "-" . strScrub($job['job_title'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACE_SPACES_WITH_HYPHENS );
+        $strKey = $strKey . "-" . \Scooper\strScrub($job['company'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACE_SPACES_WITH_HYPHENS );
+        $strKey = $strKey . "-" . \Scooper\strScrub($job['job_title'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACE_SPACES_WITH_HYPHENS );
     }
     return $strKey;
 */
@@ -208,7 +214,7 @@ function addJobToJobsList(&$arrJobsListToUpdate, $job)
 {
     if($arrJobsListToUpdate == null) $arrJobsListToUpdate = array();
 
-    $jobToAdd = array_copy($job);
+    $jobToAdd = \Scooper\array_copy($job);
 
 
 
@@ -231,7 +237,7 @@ function addJobToJobsList(&$arrJobsListToUpdate, $job)
 
 function updateJobColumn(&$job, $newJob, $strColumn, $fAllowEmptyValueOverwrite = false)
 {
-    $prevJob = array_copy($job);
+    $prevJob = \Scooper\array_copy($job);
 
     if(strlen($job[$strColumn]) == 0)
     {
@@ -247,7 +253,7 @@ function updateJobColumn(&$job, $newJob, $strColumn, $fAllowEmptyValueOverwrite 
     }
     else
     {
-        if(strcasecmp(strScrub($job[$strColumn]), strScrub($newJob[$strColumn])) != 0)
+        if(strcasecmp(\Scooper\strScrub($job[$strColumn]), \Scooper\strScrub($newJob[$strColumn])) != 0)
         {
             $job[$strColumn] = $newJob[$strColumn];
             $job['notes'] .= PHP_EOL.$strColumn . ": old[" . $prevJob[$strColumn]."], new[" .$job[$strColumn]."]".PHP_EOL;
@@ -292,7 +298,7 @@ function getMergedJobRecord($prevJobRecord, $newerJobRecord)
 
 
     $mergedJob['notes'] = $newerJobRecord['notes'] . ' ' . $mergedJob['notes'];
-    $mergedJob['date_last_updated'] = getTodayAsString();
+    $mergedJob['date_last_updated'] = \Scooper\getTodayAsString();
 
     return $mergedJob;
 

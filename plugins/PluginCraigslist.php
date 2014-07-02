@@ -26,6 +26,7 @@ class PluginCraigslist  extends ClassJobsSitePlugin
     protected $siteName = 'Craigslist';
     protected $nJobListingsPerPage = 100;
     protected $siteBaseURL = 'http://seattle.craigslist.org/';
+    protected $strBaseURLFormat = "http://***LOCATION***.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=***KEYWORDS***&srchType=T";
 
 
 
@@ -40,7 +41,7 @@ class PluginCraigslist  extends ClassJobsSitePlugin
     {
         if($nDays > 1)
         {
-            __debug__printLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Ignoring number of days value and just pulling current listings.", C__DISPLAY_WARNING__);
+            $GLOBALS['logger']->logLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Ignoring number of days value and just pulling current listings.", \Scooper\C__DISPLAY_WARNING__);
 
         }
         return 1;
@@ -74,7 +75,7 @@ class PluginCraigslist  extends ClassJobsSitePlugin
             if($item['job_title'] == '') continue;
 
             $item['job_post_url'] = $this->siteBaseURL.$jobTitleLink[0]->href;
-            $item['date_pulled'] = getTodayAsString();
+            $item['date_pulled'] = \Scooper\getTodayAsString();
 
             $item['job_site'] = "Craigslist";
             $item['job_id'] = $node->attr['data-pid'];
