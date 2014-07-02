@@ -162,8 +162,9 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
 
             $companyNode = $node->find("p[class='font12Phone clearLeft']");
             $arrCompanyParts = explode(" - ", $companyNode[0]->plaintext);
-            $item['company'] = $arrCompanyParts [0];
-            $item['location'] = $arrCompanyParts[1];
+            $company = str_ireplace("at ", "", $arrCompanyParts[0]);
+            $item['company'] = $company;
+            $item['location'] = $arrCompanyParts [1];;
 
 
             $jobDetailsNode = $node->find("p[class='greenText font12 font11Phone'] span");
