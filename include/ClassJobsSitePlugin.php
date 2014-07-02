@@ -27,7 +27,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     protected $nJobListingsPerPage = 20;
     private $flagSettings = null;
     protected $strFilePath_HTMLFileDownloadScript = null;
-
+    protected $strBaseURLFormat = null;
 
     function __construct($strOutputDirectory = null)
     {
@@ -335,6 +335,8 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 {
                     $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
                 }
+                $GLOBALS['logger']->logLine("Getting jobs from ". $strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
                 if(!$objSimpleHTML) $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL);
                 if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
 
@@ -427,12 +429,40 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     function getDaysURLValue($days) { return ($days == null || $days == "") ? 1 : $days; } // default is to return the raw number
     function getItemURLValue($nItem) { return ($nItem == null || $nItem == "") ? 0 : $nItem; } // default is to return the raw number
     function getPageURLValue($nPage) { return ($nPage == null || $nPage == "") ? "" : $nPage; } // default is to return the raw number
-
-    function addSearchURL($site, $name, $fmtURL)
+    function getLocationURLValue($strLocation)
     {
-        $this->addSearches(array('site_name' => $site, 'search_name' => $name, 'base_url_format' =>$fmtURL));
+        $strReturnLocation = $strLocation;
+
+        if(!$this->_isValueURLEncoded_($strReturnLocation)) { $strReturnLocation = urlencode($strReturnLocation); }
+
+        return ($strReturnLocation == null || $strReturnLocation == "") ? "" : $strReturnLocation;
+    } // default is to return the string as URL encoded
+
+
+    private function _isValueURLEncoded_($str)
+    {
+        return (\Scooper\substr_count_array($str, array("%22", "&", "=", "+", "-", "%7C", "%3C" )) >0 );
 
     }
+
+    function getKeywordURLValue($strKeywords)
+    {
+        $arrKeywords = explode(",", $strKeywords);
+        if(count($arrKeywords) > 1)
+        {
+            throw new ErrorException($this->siteName . " can only support a single keyword per search.  Skipping all searches for " . $this->siteName . " until that has been fixed.");
+        }
+        $strReturnKeywords = $arrKeywords[0];
+        if(!$this->_isValueURLEncoded_($strReturnKeywords)) { $strReturnKeywords = urlencode($strReturnKeywords); }
+
+        return ($strReturnKeywords[0] == null || $strReturnKeywords[0] == "") ? "" : $strReturnKeywords;
+    }
+
+//    function addSearchURL($site, $name, $fmtURL)
+//    {
+//        $this->addSearches(array('site_name' => $site, 'search_name' => $name, 'base_url_format' =>$fmtURL));
+//
+//    }
 
     function getMySearches()
     {
@@ -454,12 +484,28 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     }
 
 
-    protected function _getURLfromBase_($searchDetails, $nDays, $nPage = null, $nItem = null)
+    protected function _getURLfromBase_($searchDetails, $nDays, $nPage = null, $nItem = null, $strKeywords=null)
     {
-        $strURL = $searchDetails['base_url_format'];
+        if(isset($searchDetails['base_url_format']))
+        {
+            $strURL = $searchDetails['base_url_format'];
+
+        }
+        elseif(isset($this->strBaseURLFormat))
+        {
+            $strURL = $this->strBaseURLFormat;
+        }
+        else
+        {
+            throw new ErrorException("Could not find base URL format for " . $this->siteName . ".  Aborting all searches for ". $this->siteName, \Scooper\C__DISPLAY_ERROR__);
+        }
+
         $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($nDays), $strURL );
         $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL );
         $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
+        $strURL = str_ireplace("***KEYWORDS***", $this->getKeywordURLValue($searchDetails['keywords']), $strURL );
+        $strURL = str_ireplace("***LOCATION***", $this->getLocationURLValue($searchDetails['location_keyword']), $strURL );
+
         return $strURL;
     }
 

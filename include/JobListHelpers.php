@@ -72,6 +72,12 @@ function isJobUpdatedToday($var)
 }
 
 
+function isJobUpdatedTodayOrIsInterested($var)
+{
+    return ((strcasecmp($var['date_last_updated'], \Scooper\getTodayAsString()) == 0) || isMarked_InterestedOrBlank($var));
+}
+
+
 function isMarkedInterested_IsBlank($var)
 {
     if($var['interested'] == null || trim($var['interested']) =="" || strlen(trim($var['interested']))==0)
@@ -247,7 +253,7 @@ function updateJobColumn(&$job, $newJob, $strColumn, $fAllowEmptyValueOverwrite 
     }
     else
     {
-        if(strcasecmp(strScrub($job[$strColumn]), \Scooper\strScrub($newJob[$strColumn])) != 0)
+        if(strcasecmp(\Scooper\strScrub($job[$strColumn]), \Scooper\strScrub($newJob[$strColumn])) != 0)
         {
             $job[$strColumn] = $newJob[$strColumn];
             $job['notes'] .= PHP_EOL.$strColumn . ": old[" . $prevJob[$strColumn]."], new[" .$job[$strColumn]."]".PHP_EOL;

@@ -76,21 +76,23 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         {
 //            throw new ErrorException("Config ini files not yet supported!");
             $this->detailsIniFile = \Scooper\set_FileDetails_fromPharseSetting("use_config_ini", 'config_file_details', true);
+            if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($this->detailsIniFile['directory'] );
 
-            $GLOBALS['logger']->logLine("Parsing ini file ".$this->detailsIniFile['full_file_path']."...", \Scooper\C__DISPLAY_ITEM_START__);
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Parsing ini file ".$this->detailsIniFile['full_file_path']."...", \Scooper\C__DISPLAY_ITEM_START__);
 
             $iniParser = new IniParser($this->detailsIniFile['full_file_path']);
             $confTemp = $iniParser->parse();
             $this->_setupRunFromConfig_($confTemp);
         }
 
-        $nDays = \Scooper\get_PharseOptionValue('number_days');
-        if($nDays == false) { $GLOBALS['OPTS']['number_days'] = 1; }
+        $this->nNumDaysToSearch = \Scooper\get_PharseOptionValue('number_days');
+        if($this->nNumDaysToSearch == false) { $GLOBALS['OPTS']['number_days'] = 1; $this->nNumDaysToSearch = 1; }
 
 
         // Override any INI file setting with the command line output file path & name
         // the user specificed (if they did)
         $userOutfileDetails = \Scooper\get_FileDetails_fromPharseOption("output_file", true);
+        if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($userOutfileDetails['directory'] );
         if($userOutfileDetails['full_file_path'] != '')
         {
             $this->detailsOutputFile = $userOutfileDetails;
@@ -127,7 +129,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     private function _setupRunFromConfig_($config)
     {
-        $GLOBALS['logger']->logLine("Reading configuration options from ".$GLOBALS['OPTS']['config_file_details']['file_full_path']."...", \Scooper\C__DISPLAY_ITEM_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Reading configuration options from ".$GLOBALS['OPTS']['config_file_details']['file_full_path']."...", \Scooper\C__DISPLAY_ITEM_START__);
         if($config->output)
         {
              if($config->output->folder)
@@ -162,7 +164,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             {
                 $tempFileDetails = \Scooper\parseFilePath($pathInput['directory'].$iniInputFile['name'], true);
 
-                $GLOBALS['logger']->logLine("Processing input file '" . $pathInput['directory'].$iniInputFile['name'] . "' with type of '". $iniInputFile['type'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Processing input file '" . $pathInput['directory'].$iniInputFile['name'] . "' with type of '". $iniInputFile['type'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
                 $this->__addInputFile__($tempFileDetails, $iniInputFile['type'], $iniInputFile['sheet']);
 
                 switch($iniInputFile['type'])
@@ -192,13 +194,13 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         $this->__getSearchesFromConfig__($config);
 
-        $GLOBALS['logger']->logLine("Completed loading configuration from INI file:  ".var_export($GLOBALS['OPTS'], true), \Scooper\C__DISPLAY_SUMMARY__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Completed loading configuration from INI file:  ".var_export($GLOBALS['OPTS'], true), \Scooper\C__DISPLAY_SUMMARY__);
 
     }
 
     private function __getSearchesFromConfig__($config)
     {
-        $GLOBALS['logger']->logLine("Loading searches from config file.", \Scooper\C__DISPLAY_ITEM_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading searches from config file.", \Scooper\C__DISPLAY_ITEM_START__);
         if(!$config) throw new ErrorException("Invalid configuration.  Cannot load user's searches.");
 
         if($config->search)
@@ -217,23 +219,26 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             }
         }
 
-        $GLOBALS['logger']->logLine("Loaded " . count($this->arrSearchesToReturn) . " searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->arrSearchesToReturn) . " searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
 
     }
 
     private function _parseSearchFromINI_($iniSearch)
     {
-        $tempSearch =  array('site_name' => null, 'search_name' => null, 'base_url_format' => null);
-        $tempSearch['search_key'] = $iniSearch['key'];
-        $tempSearch['site_name'] = $iniSearch['jobsite'];
-        $tempSearch['search_name'] = $iniSearch['name'];
-        $tempSearch['base_url_format'] = $iniSearch['url_format'];
+        $tempSearch =  array(
+            'search_key' => $iniSearch['key'],
+            'site_name' => $iniSearch['jobsite'],
+            'search_name' => $iniSearch['name'],
+            'base_url_format' => $iniSearch['url_format'],
+            'keywords' => $iniSearch['keywords'],
+            'location_keyword' => $iniSearch['location'],
+        );
 
         if($tempSearch['search_key'] == "")
         {
             $tempSearch['search_key'] = \Scooper\strScrub($tempSearch['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($tempSearch['search_name'], FOR_LOOKUP_VALUE_MATCHING);
         }
-        $GLOBALS['logger']->logLine("Search added [search_name=" . $tempSearch['search_name'] . "; site_name=" . $tempSearch['site_name'] . "; search_key=" . $tempSearch['search_key'] . "]; base_url_format='" . $tempSearch['base_url_format'] . "']", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added Search_Name=" . $tempSearch['search_name'] . "; site_name=" . $tempSearch['site_name'] . "; search_key=" . $tempSearch['search_key'] . "]; base_url_format='" . $tempSearch['base_url_format'] . "; keywords=" . $tempSearch['keywords'] . "; location_keyword=" . $tempSearch['location_keyword'] ."']", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         return $tempSearch;
 
@@ -243,7 +248,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     {
         // Append the file name base to the directory as a new subdirectory for output
         $fullNewDirectory = $fileDetails['directory'] . $fileDetails['file_name_base'];
-        $GLOBALS['logger']->logLine("Attempting to create output directory: " . $fullNewDirectory , \Scooper\C__DISPLAY_ITEM_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Attempting to create output directory: " . $fullNewDirectory , \Scooper\C__DISPLAY_ITEM_START__);
         if(is_dir($fullNewDirectory))
         {
 
@@ -256,7 +261,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             }
          }
         $fullNewFilePath = $fullNewDirectory . '/' . \Scooper\getFileNameFromFileDetails($fileDetails);
-        $GLOBALS['logger']->logLine("Create folder for results output: " . $fullNewFilePath , \Scooper\C__DISPLAY_SUMMARY__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Create folder for results output: " . $fullNewFilePath , \Scooper\C__DISPLAY_SUMMARY__);
 
         // return the new file & path details
         return \Scooper\parseFilePath($fullNewFilePath, false);
@@ -474,7 +479,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $class = null;
 
         // Write to the main output file name that the user passed in
-        $this->writeRunsJobsToFile($this->detailsOutputFile['full_file_path'], $this->arrLatestJobs, "ClassJobsRunWrapper-UserOutputFile");
+        $arrJobs_UpdatedOrInterested = array_filter($this->arrLatestJobs, "isJobUpdatedTodayOrIsInterested");
+        $this->writeRunsJobsToFile($this->detailsOutputFile['full_file_path'], $arrJobs_UpdatedOrInterested, "ClassJobsRunWrapper-UserOutputFile");
         $detailsCSVFile = $this->detailsOutputFile;
 
         //
@@ -514,6 +520,13 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $strOutputResult = "Result:  ". PHP_EOL. "All:  ". count($arrJobs_Active) . " Active, " .count($arrJobs_AutoExcluded). " Auto-Filtered, ". count($arrJobs_AutoDupe). " Dupes, " . count($this->arrLatestJobs).  " Jobs Total." .PHP_EOL. "New:  ". count($arrJobs_NewOnly) . " jobs for review. " .count($arrJobs_NewButFiltered). " jobs were auto-filtered, ". count($arrJobs_Updated) . " updated; " . count($this->arrLatestJobs_UnfilteredByUserInput) . " Jobs Downloaded." .PHP_EOL;
         $arrUnfilteredCounts = $this->getListingCountsByPlugin();
         $strOutputResult = $arrUnfilteredCounts . $arrUnfilteredCounts['text'];
+
+        $strErrs = $GLOBALS['logger']->getCumulativeErrorsAsString();
+        if($strErrs != "" && $strErrs != null)
+        {
+            $strOutputResult = PHP_EOL . "ERRORS!" . PHP_EOL . $strErrs .PHP_EOL;
+        }
+
         $GLOBALS['logger']->logLine($strOutputResult, \Scooper\C__DISPLAY_SUMMARY__);
 
         //
@@ -679,15 +692,15 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $arrPluginJobs = array_filter($this->getMyJobsList(), array($classPlug, "isJobListingMine"));
             $arrCounts[$strName]['name'] = $strName;
             $arrCounts[$strName]['total_listings'] = count($arrPluginJobs);
-            $arrCounts[$strName]['new_today'] = count(array_filter($arrPluginJobs, "wasJobPulledToday"));
             $arrCounts[$strName]['updated_today'] = count(array_filter($arrPluginJobs, "isJobUpdatedToday"));
+            $arrCounts[$strName]['new_today'] = count(array_filter($arrPluginJobs, "isNewJobToday_Interested_IsBlank"));
             $arrCounts[$strName]['total_not_interested'] = count(array_filter($arrPluginJobs, "isMarked_NotInterested"));
             $arrCounts[$strName]['total_active'] = count(array_filter($arrPluginJobs, "isMarked_InterestedOrBlank"));
         }
 
 
         $strOut = "            ";
-        $arrHeaders = array("Today", "Updated", "Total", "Active", "Inactive");
+        $arrHeaders = array("Updated", "New", "Total", "Active", "Inactive");
         foreach($arrHeaders as $value)
         {
             $strOut = $strOut . sprintf("%-17s", $value);

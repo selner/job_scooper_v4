@@ -167,7 +167,7 @@ class ClassJobsSitePluginCommon
             // Instead for Craiglist listings, we'll dedupe using the role title and the jobsite name
             if(strcasecmp($retArrNormalized['job_site'], "craigslist") == 0)
             {
-                $retArrNormalized['key_jobsite_siteid'] = \Scooper\strScrub($retArrNormalized['job_site'], FOR_LOOKUP_VALUE_MATCHING) .strScrub($retArrNormalized['job_title'], FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($retArrNormalized['job_site_date'], FOR_LOOKUP_VALUE_MATCHING);
+                $retArrNormalized['key_jobsite_siteid'] = \Scooper\strScrub($retArrNormalized['job_site'], FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($retArrNormalized['job_title'], FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($retArrNormalized['job_site_date'], FOR_LOOKUP_VALUE_MATCHING);
             }
             else
             {

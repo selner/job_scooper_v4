@@ -23,6 +23,8 @@ class PluginGlassdoor extends ClassJobsSitePlugin
 {
     protected $siteName = 'Glassdoor';
     protected $siteBaseURL = 'http://www.glassdoor.com';
+    protected $strBaseURLFormat = "http://www.glassdoor.com/Job/***LOCATION***-***KEYWORDS***-job-opportunities-SRCH_IL.0,7_IC1150505_KO8,22***PAGE_NUMBER***.htm?fromAge=***NUMBER_DAYS***";
+    // protected $strBaseURLFormat = "http://www.glassdoor.com/Job/***LOCATION***-***KEYWORDS***-job-openings-SRCH_IL.0,7_IC1150505_KO8,22***PAGE_NUMBER***.htm?fromAge=***NUMBER_DAYS***";
 
 
     function getDaysURLValue($days) {
@@ -49,10 +51,8 @@ class PluginGlassdoor extends ClassJobsSitePlugin
 
     }
 
-    protected function _getURLfromBase_($search, $nDays, $nPage, $nItem = null)
+    public function getPageURLValue($nPage)
     {
-        $strURL = $search['base_url_format'];
-        $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($nDays), $strURL );
         if($nPage == null || $nPage <= 1)
         {
             $strURL = str_ireplace("***PAGE_NUMBER***", "", $strURL );
@@ -61,7 +61,6 @@ class PluginGlassdoor extends ClassJobsSitePlugin
         {
             $strURL = str_ireplace("***PAGE_NUMBER***", "_IP".$nPage, $strURL );
         }
-        $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
         return $strURL;
     }
 

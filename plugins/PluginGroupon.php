@@ -25,6 +25,7 @@ class PluginGroupon extends ClassJobsSitePlugin
 {
     protected $siteName = 'Groupon';
     protected $siteBaseURL = 'https://jobs.groupon.com';
+    protected $strBaseURLFormat = "https://jobs.groupon.com/careers/***LOCATION***";
 
 
 

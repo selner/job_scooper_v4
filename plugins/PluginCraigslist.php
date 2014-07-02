@@ -26,6 +26,7 @@ class PluginCraigslist  extends ClassJobsSitePlugin
     protected $siteName = 'Craigslist';
     protected $nJobListingsPerPage = 100;
     protected $siteBaseURL = 'http://seattle.craigslist.org/';
+    protected $strBaseURLFormat = "http://***LOCATION***.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=***KEYWORDS***&srchType=T";
 
 
 

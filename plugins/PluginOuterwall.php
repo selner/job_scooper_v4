@@ -25,7 +25,7 @@ class PluginOuterwall extends ClassJobsSitePlugin
 {
     protected $siteName = 'Outerwall';
     protected $siteBaseURL = 'http://outerwall.jobs';
-
+    protected $strBaseURLFormat = "http://outerwall.jobs/***LOCATION***/usa/jobs/";
 
     function parseJobsListForPage($objSimpHTML)
     {
