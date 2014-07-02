@@ -519,7 +519,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $detailsHTMLFile = $this->__getAlternateOutputFileDetails__("HTML", "", "_ActiveJobs");
 
         $arrJobs_Updated = $this->outputFilteredJobsListToFile("isJobUpdatedToday", "_UpdatedJobs");
-
+        $arrJobs_UpdatedButFiltered  = $this->outputFilteredJobsListToFile("isJobUpdatedTodayNotInterested", "_UpdatedExcludedJobs");
 
         // Output only new records that haven't been looked at yet
         $arrJobs_NewOnly = $this->outputFilteredJobsListToFile("isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "CSV");
@@ -534,14 +534,14 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // Output all records that were previously marked excluded manually by the user
         // $arrJobs_ManualExcl = $this->outputFilteredJobsListToFile("isMarked_ManuallyNotInterested", "_ManuallyExcludedJobs");
 
-        $strOutputResult = "Result:  ". PHP_EOL. "All:  ". count($arrJobs_Active) . " Active, " .count($arrJobs_AutoExcluded). " Auto-Filtered, ". count($arrJobs_AutoDupe). " Dupes, " . count($this->arrLatestJobs).  " Jobs Total." .PHP_EOL. "New:  ". count($arrJobs_NewOnly) . " jobs for review. " .count($arrJobs_NewButFiltered). " jobs were auto-filtered, ". count($arrJobs_Updated) . " updated; " . count($this->arrLatestJobs_UnfilteredByUserInput) . " Jobs Downloaded." .PHP_EOL;
-        $arrUnfilteredCounts = $this->getListingCountsByPlugin();
-        $strOutputResult = $arrUnfilteredCounts . $arrUnfilteredCounts['text'];
+        $strOutputResult = "Result:  ". PHP_EOL. "All:  ". count($arrJobs_Active) . " Active, " .count($arrJobs_AutoExcluded). " Auto-Filtered, " . count($this->arrLatestJobs).  " Jobs Total." .PHP_EOL. "New:  ". count($arrJobs_NewOnly) . " jobs for review. " .count($arrJobs_UpdatedButFiltered). " jobs were auto-filtered, ". count($arrJobs_Updated) . " updated; " . count($this->arrLatestJobs_UnfilteredByUserInput) . " Jobs Downloaded." .PHP_EOL;
+        $strResultCounts = $this->getListingCountsByPlugin();
+        $strOutputResult = $strOutputResult . PHP_EOL . $strResultCounts;
 
         $strErrs = $GLOBALS['logger']->getCumulativeErrorsAsString();
         if($strErrs != "" && $strErrs != null)
         {
-            $strOutputResult = PHP_EOL . "ERRORS!" . PHP_EOL . $strErrs .PHP_EOL;
+            $strOutputResult = $strOutputResult . PHP_EOL . "ERRORS!" . PHP_EOL . $strErrs .PHP_EOL;
         }
 
         $GLOBALS['logger']->logLine($strOutputResult, \Scooper\C__DISPLAY_SUMMARY__);
@@ -706,10 +706,10 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         foreach( $GLOBALS['DATA']['site_plugins'] as $plugin_setup)
         {
             $strName = $plugin_setup['name'];
-            if($plugin_setup['include_in_run'] == true)
+            $classPlug = new $plugin_setup['class_name'](null, null);
+            $arrPluginJobs = array_filter($this->getMyJobsList(), array($classPlug, "isJobListingMine"));
+            if($plugin_setup['include_in_run'] == true || count($arrPluginJobs) > 0)
             {
-                $classPlug = new $plugin_setup['class_name'](null, null);
-                $arrPluginJobs = array_filter($this->getMyJobsList(), array($classPlug, "isJobListingMine"));
                 $arrCounts[$strName]['name'] = $strName;
                 $arrCounts[$strName]['total_listings'] = count($arrPluginJobs);
                 $arrCounts[$strName]['updated_today'] = count(array_filter($arrPluginJobs, "isJobUpdatedToday"));
@@ -724,11 +724,11 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         }
 
 
-        $strOut = "            ";
+        $strOut = "                ";
         $arrHeaders = array("Updated", "New", "Total", "Active", "Inactive");
         foreach($arrHeaders as $value)
         {
-            $strOut = $strOut . sprintf("%-17s", $value);
+            $strOut = $strOut . sprintf("%-18s", $value);
         }
         $strOut = $strOut . PHP_EOL;
 
@@ -743,17 +743,17 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         if($arrExcluded != null && count($arrExcluded) > 0)
         {
-            $strOut = $strOut . PHP_EOL .  "Not included in this run:" . PHP_EOL;
+            $strOut = $strOut . PHP_EOL .  "No jobs found or site was excluded for this run:" . PHP_EOL;
 
             foreach($arrExcluded as $site)
             {
-                $strOut = $strOut . "- ". $site .PHP_EOL;
+                $strOut = $strOut . "     - ". $site .PHP_EOL;
             }
             $strOut = $strOut . PHP_EOL;
         }
 
 
-        return array('text' => $strOut, 'data' => $arrCounts);
+        return $strOut;
     }
 
 

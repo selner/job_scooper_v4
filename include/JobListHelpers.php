@@ -91,6 +91,11 @@ function isJobUpdatedTodayOrIsInterested($var)
     return ((strcasecmp($var['date_last_updated'], \Scooper\getTodayAsString()) == 0) || isMarked_InterestedOrBlank($var));
 }
 
+function isJobUpdatedTodayNotInterested($var)
+{
+    return ((strcasecmp($var['date_last_updated'], \Scooper\getTodayAsString()) == 0) || !isMarked_InterestedOrBlank($var));
+}
+
 
 function isMarkedInterested_IsBlank($var)
 {
