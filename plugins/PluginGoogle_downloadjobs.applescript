@@ -15,9 +15,8 @@ on doRun(argv)
 	set strSiteName of libDownload to second item of argv as string
 	set strFileKey of libDownload to third item of argv as string
 	set strURL of libDownload to fourth item of argv as string
-	set nIndexMaxForClick of libDownload to 0
 	
-	set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() { return parseInt(document.getElementsByClassName('count')[0].textContent); }  getMaxPageValue();"
+	set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() { try { return parseInt(document.getElementsByClassName('count')[0].textContent); } catch(err) { return 99999; } }  getMaxPageValue();" -- returns just a string "of many" sometimes, so we set an arbitrary high limit until we know.
 	
 	set strGetNextPageValue of libDownload to "function getNextPageValue() { return parseInt(document.getElementsByClassName('page')[0].textContent); }  getNextPageValue();"
 	

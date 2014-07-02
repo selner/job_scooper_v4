@@ -25,7 +25,7 @@ class PluginMonster extends ClassJobsSitePlugin
 {
     protected $siteName = 'Monster';
     protected $siteBaseURL = 'http://jobsearch.monster.com';
-
+    protected $strBaseURLFormat = "http://jobsearch.monster.com/search/***KEYWORDS***+Full-Time_588?tm=Today&where=***LOCATION***&tm=***NUMBER_DAYS***&pg=***PAGE_NUMBER***";
 
     function getDaysURLValue($days) {
         $ret = "yesterday";
@@ -98,13 +98,13 @@ class PluginMonster extends ClassJobsSitePlugin
             if($item['job_title'] == '') continue;
 
             $item['company'] = $node->find("a[class='fnt4']")[0]->plaintext;
-            $item['location'] = strScrub(str_replace("Location:", "", $node->find("div[class='jobLocationSingleLine']")[0]->plaintext));
+            $item['location'] = \Scooper\strScrub(str_replace("Location:", "", $node->find("div[class='jobLocationSingleLine']")[0]->plaintext));
 
-            $strScrubTitle = strip_punctuation(html_entity_decode($item['job_title']));
-            $strLoc= strip_punctuation(html_entity_decode($item['location']));
+            $strScrubTitle = \Scooper\strip_punctuation(html_entity_decode($item['job_title']));
+            $strLoc= \Scooper\strip_punctuation(html_entity_decode($item['location']));
 
             $item['job_post_url'] = $this->siteBaseURL . "/" . str_replace(" ", "-", $strScrubTitle )."-".str_replace(" ", "-",$strLoc)."-".$item['job_id'].".aspx";
-            $item['date_pulled'] = getTodayAsString();
+            $item['date_pulled'] = \Scooper\getTodayAsString();
 
             $item['job_site_date'] = $node->find("span[class='accessibilityOnly']")[0]->plaintext;
             $ret[] = $this->normalizeItem($item);

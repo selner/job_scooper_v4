@@ -26,6 +26,8 @@ class PluginMashable extends ClassJobsSitePlugin
     protected $siteName = 'Mashable';
     protected $siteBaseURL = 'http://jobs.mashable.com';
     protected $nJobListingsPerPage = 50;
+    protected $strBaseURLFormat = "http://jobs.mashable.com/jobs/results/keyword/***KEYWORDS***?kwsJobTitleOnly=true&location=***LOCATION***&radius=25&view=List_Detail&page=***PAGE_NUMBER***&sort=PostType+asc%2C+PostDate+desc%2C+IsFeatured+desc&rows=50&modifiedDate=***NUMBER_DAYS***";
+
 
 
     function getDaysURLValue($days) {
@@ -87,7 +89,7 @@ class PluginMashable extends ClassJobsSitePlugin
             $item['company'] = $node->find("li[class='aiResultsCompanyName']")[0]->plaintext;
             $item['location'] = trim($node->find("span[class='aiResultsLocationSpan']")[0]->plaintext);
             $item['job_site_category'] = $node->find("div[class='aiDescriptionPod'] ul li[class='searchResultsCategoryDisplay']")[0]->plaintext;
-            $item['date_pulled'] = getTodayAsString();
+            $item['date_pulled'] = \Scooper\getTodayAsString();
 
 
             $idClass = $node->find("div[class='aiResultsMainDiv']")[0];

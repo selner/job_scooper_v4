@@ -87,12 +87,12 @@ class PluginSimplyHired extends ClassJobsSitePlugin
             $strURLAfterJobKey = str_replace("http://www.simplyhired.com/a/job-details/view/jobkey-", "", $item['job_post_url']);
             $arrURLRemainingParts = explode("/",  $strURLAfterJobKey);
             $item['job_id'] = str_replace(".", "", $arrURLRemainingParts[0]);
-            $item['job_id'] = strScrub($item['job_id'], REPLACE_SPACES_WITH_HYPHENS);
+            $item['job_id'] = \Scooper\strScrub($item['job_id'], REPLACE_SPACES_WITH_HYPHENS);
 
             // TODO[BUGBUG] the h4 for company name can sometimes be missing.  the value is incorrectly set if so.
             $item['company']= trim($node->find("h4[class='company']")[0]->plaintext);
             $item['location'] =trim($node->find("span[class='location']")[0]->plaintext);
-            $item['date_pulled'] = getTodayAsString();
+            $item['date_pulled'] = \Scooper\getTodayAsString();
             $item['job_site_date'] = $node->find("span[class='ago']")[0]->plaintext;
             $item['job_site'] = $this->siteName;
 

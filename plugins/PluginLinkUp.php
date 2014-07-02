@@ -25,7 +25,7 @@ class PluginLinkUp extends ClassJobsSitePlugin
 {
     protected $siteName = 'LinkUp';
     protected $siteBaseURL = 'http://www.linkup.com';
-
+    protected $strBaseURLFormat = "http://www.linkup.com/results.php?q=title%3A%28***KEYWORDS***%29&l=***LOCATION***&sort=d&tm==***NUMBER_DAYS***d&page=***PAGE_NUMBER***";
 
     function getDaysURLValue($days) {
         $ret = "1d";
@@ -92,7 +92,7 @@ class PluginLinkUp extends ClassJobsSitePlugin
             $item['location'] = trim($node->find("span[class='listing-location'] span")[0]->plaintext) . "-" .
                     trim($node->find("span[class='listing-location'] span")[1]->plaintext);
 
-            $item['date_pulled'] = getTodayAsString();
+            $item['date_pulled'] = \Scooper\getTodayAsString();
 
 
             $item['job_site_category'] = $node->find("span[class='listing-tag']")[0]->plaintext;

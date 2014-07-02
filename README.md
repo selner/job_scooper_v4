@@ -1,15 +1,43 @@
 #Jobs Scooper 
 Download the latest jobs from any websites into one comma-separated value (CSV) for Excel.  Configuration is easy.  You just need to specify the URL of the search and a name for it in your configuartion INI file.  Jobs Scooper does the rest.
 
-Here's an example of the INI settings needed for a Facebook jobs site search:
-* ``[search.Facebook-all-jobs]``
-* ``jobsite="Facebook"``
-* ``name="all SEA jobs"``
-* ``url_format="https://www.facebook.com/careers/locations/seattle"``
+The majority of plugins support letting you just set a keyword and location to use for the search.  The plugin then maps that to the correct URL format for that site and runs the search.
 
-That's it!
+Here's an example for a ZipRecruiter search: 
+``
+	[ZipRecruiter-all-jobs]        
+	jobsite="ZipRecruiter"        
+	name="all SEA jobs"        
+	keywords="vice president"        
+	location="Seattle, WA"        
+``
+If the job site supports advanced keyword queries, such as "this or that", set the keywords value to be the url encoded value from the search page's address.  Example:
+``
+	[Indeed-all-SEA-jobs]        
+	jobsite="Indeed"        
+	name="all SEA jobs"        
+	location="Seattle, WA"        
+	keywords="%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22"        
+``
+You can always override the URL used for a search by including a single url_format value and omitting the keywords and location values.  This is supported by every plugin.
+Here's an example 
+``
+	[Amazon-PM-jobs]        
+	jobsite="Amazon"        
+	name="all PM jobs"        
+	url_format="http://www.amazon.jobs/results?sjid=68,83&checklid=@%27US,%20WA,%20Seattle%27&cname=%27US,%20WA,%20Seattle%27"        
+``
+Some plugins only support the url_format option however and do not support keywords or location options:
+* Amazon
+* CareerBuilder
+* eBay
+* Disney
+* EmploymentGuide
+* Expedia
+* Google
+* SimplyHired
 
-To run:
+###To Run Jobs_Scooper:
 ``/usr/bin/php "main/runJobs.php" -all -days 3 -ini myconfig.ini``
 
 ###Parameters:
@@ -20,7 +48,7 @@ To run:
 
 ###Supported Job Sites
 Jobs Scooper supports nearly 20 different job sites out of the box:  
-CareerBuilder, Craigslist, Disney, DotJobs, Ebay, EmploymentGuide, Expedia, Facebook,  Glassdoor, Groupon, Indeed, LinkUp, Mashable, Monster, Outerwall, Porch, SimplyHired, and Tableau. 
+CareerBuilder, Craigslist, Disney, DotJobs, Ebay, EmploymentGuide, Expedia, Facebook,  Glassdoor, Groupon, Indeed, LinkUp, Mashable, Monster, Outerwall, Porch, SimplyHired, Tableau and ZipRecruiter.
 
 If your site isn't supported, it's super easy to add a new site plugin for almost any site that lists jobs.  Basic instructions on how to create your own are in examples/PluginTemplate.php.  There are currently
 three kinds of plugins that can be written:
@@ -48,8 +76,13 @@ If you're looking at job listings across many sites, Job Scooper has some built-
 
 
 ###Other Stuff
-* Version:  v1.0.1
+* You will need to also download the scooper_common library from selner/scooper_common and place it in a parallel folder to jobs_scooper.  For example:  /users/bryan/code/scooper_common and   /users/bryan/code/job_scooper.
+* Version:  v1.1-dev
 * Author:  Bryan Selner (dev at recoilvelocity dot com)
-* Platforms:  I've only really tested it on Mac OS/X 10.9.3 with PHP 5.4.24.  Your mileage could definitely vary on any other platform or version.  Obviously, the applescripts will fail
+* Platforms:  
+	*  Mac OS X 10.9.3 with PHP 5.4.24.  
+	*	Ubuntu Linux 14.04 with PHP 5.5.9-1ubuntu4.2 (with E_NOTICE error reporting disabled.)
+		* The applescripts will fail on any platform other than Mac OS X.  This means that some plugins (Amazon, Google, Geekwire, DotJobs) will fail.  Also, email notifications will not be sent. 
+	*  Your mileage could definitely vary on any other platform or version. 
 on any platform that isn't Mac OSX, so you'll have to workaround that.
 * Issues/Bugs:  See [https://github.com/selner/jobs_scooper/issues](https://github.com/selner/jobs_scooper/issues)
