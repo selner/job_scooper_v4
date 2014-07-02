@@ -61,8 +61,6 @@ class PluginAmazon extends ClassJobsSitePlugin
                 $locObj = $catObj ->nextSibling();
                 $item['location'] = $locObj->plaintext;
 
-                $briefObj = $locObj ->nextSibling();
-
 
                 $ret[] = $this->normalizeItem($item);
 
