@@ -42,7 +42,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     function __destruct()
     {
-        $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__);
 
         //
         // Write out the interim data to file if we're debugging
@@ -56,6 +55,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 $this->writeMyJobsListToFile($strOutPathWithName, false);
             }
         }
+        $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__);
     }
 
     function parseJobsListForPage($objSimpHTML) { return null; } // returns an array of jobs
