@@ -33,10 +33,6 @@ $GLOBALS['OPTS']['VERBOSE'] = false;
 date_default_timezone_set("America/Los_Angeles");
 
 
-const C__STR_TAG_AUTOMARKEDJOB__ = "[auto-marked]";
-const C__STR_TAG_DUPLICATE_POST__ = "No (Duplicate Job Post?)";
-const C__STR_TAG_BAD_TITLE_POST__ = "No (Bad Title & Role)";
-
 function __initializeArgs__()
 {
 

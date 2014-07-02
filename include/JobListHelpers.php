@@ -18,7 +18,11 @@ define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__.'/include/Options.php');
 require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
+const C__STR_TAG_AUTOMARKEDJOB__ = "[auto-marked]";
+const C__STR_TAG_DUPLICATE_POST__ = "No (Duplicate Job Post?)";
+const C__STR_TAG_BAD_TITLE_POST__ = "No (Bad Title & Role)";
 
+const C__STR_TAG_EXCLUDED_TITLE_REGEX = 'No (Title Excluded Via RegEx)';
 
 //
 // Jobs List Filter Functions
@@ -33,6 +37,16 @@ function isInterested_MarkedDuplicateAutomatically($var)
 function isInterested_MarkedAutomatically($var)
 {
     if(substr_count($var['interested'], C__STR_TAG_AUTOMARKEDJOB__) > 0)
+    {
+        return true;
+    };
+
+    return false;
+}
+
+function isInterested_TitleExcludedViaRegex($var)
+{
+    if(substr_count($var['interested'], C__STR_TAG_EXCLUDED_TITLE_REGEX) > 0)
     {
         return true;
     };

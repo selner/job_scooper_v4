@@ -107,7 +107,7 @@ class ClassJobsSitePluginCommon
         // Remove common company name extensions like "Corporation" or "Inc." so we have
         // a higher match likelihood
 //        $retArrNormalized ['company'] = str_replace(array(" corporation", " corp", " inc", " llc"), "", $retArrNormalized['company']);
-        $retArrNormalized ['company'] = preg_replace(array("/\s[Cc]orporation/", "/\s[Cc]orp\W{0,1}/", "/.com/", "/\W{0,}\s[iI]nc/", "/\W{0,}\s[lL][lL][cC]/"), "", $retArrNormalized['company']);
+        $retArrNormalized ['company'] = preg_replace(array("/\s[Cc]orporation/", "/\s[Cc]orp\W{0,1}/", "/.com/", "/\W{0,}\s[iI]nc/", "/\W{0,}\s[lL][lL][cC]/","/\W{0,}\s[lL][tT][dD]/"), "", $retArrNormalized['company']);
 
         switch(\Scooper\strScrub($retArrNormalized ['company']))
         {
@@ -362,7 +362,7 @@ class ClassJobsSitePluginCommon
 
                     foreach($arrRXInput as $rxItem)
                     {
-                        $rx = '/'.$rxItem.'/';
+                        $rx = '/'.$rxItem.'/i';
 
                         $GLOBALS['DATA']['titles_regex_to_filter'][] = $rx;
                     }
@@ -628,7 +628,6 @@ class ClassJobsSitePluginCommon
 
         $this->_loadTitlesRegexesToFilter_();
 
-        $nJobsNotMarked = 0;
         $nJobsMarkedAutoExcluded = 0;
 
         $GLOBALS['logger']->logLine("Excluding Jobs by Title Regex Matches", \Scooper\C__DISPLAY_ITEM_START__);
@@ -647,6 +646,7 @@ class ClassJobsSitePluginCommon
 
                 foreach($GLOBALS['DATA']['titles_regex_to_filter'] as $rxInput )
                 {
+                  try {
                     if(preg_match($rxInput, \Scooper\strScrub($job['job_title'], DEFAULT_SCRUB)))
                     {
                         $strJobIndex = getArrayKeyValueForJob($job);
@@ -655,23 +655,20 @@ class ClassJobsSitePluginCommon
                         $arrToMark[$strJobIndex]['notes'] = "Matched regex[". $rxInput ."]". C__STR_TAG_AUTOMARKEDJOB__;
                         $arrToMark[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
                         $nJobsMarkedAutoExcluded++;
-                        $fMatched = true;
                         break;
                     }
-                    else              // we're ignoring the Excluded column fact for the time being. If it's in the list, it's excluded
-                    {
-                        $nJobsNotMarked++;
-                    }
-                    if($fMatched == true) break;
+                   } catch (ErrorException $classError) {
+                      $GLOBALS['logger']->logLine('ERROR:  Unable to match regex for ' .$rxInput . '. Error: ' . $classError->getMessage(), \Scooper\C__DISPLAY_ERROR__);
+                  }
+
+
                 }
-
-//                if($fMatched == false)
-//                    $GLOBALS['logger']->logLine("Job title '".$job['job_title'] ."' was not found in the title exclusion regex list.  Keeping for review." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
             }
         }
         $strTotalRowsText = "/".count($arrToMark);
-        $GLOBALS['logger']->logLine("Marked not interested via regex(".$nJobsMarkedAutoExcluded . $strTotalRowsText .") , skipped: " . $nJobsSkipped . $strTotalRowsText .", untouched: ". $nJobsNotMarked . $strTotalRowsText .")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
+        $nAutoExcludedTitleRegex = count(array_filter($arrToMark, "isInterested_TitleExcludedViaRegex"));
+
+        $GLOBALS['logger']->logLine("Marked not interested via regex(".$nAutoExcludedTitleRegex . $strTotalRowsText .") , skipped: " . $nJobsSkipped . $strTotalRowsText .", untouched: ". (count($arrToMark) - $nJobsSkipped - $nAutoExcludedTitleRegex) . $strTotalRowsText .")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
     }
 
 
