@@ -325,15 +325,15 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     {
         if(count($this->arrLatestJobs) == 0) return null;
 
-        $arrToOutput = null;
+        $arrJobs = null;
 
         if($strFilterToApply == null || $strFilterToApply == "")
         {
-            $arrToOutput = $this->arrLatestJobs;
+            $arrJobs = $this->arrLatestJobs;
         }
         else
         {
-            $arrToOutput = array_filter($this->arrLatestJobs, $strFilterToApply);
+            $arrJobs = array_filter($this->arrLatestJobs, $strFilterToApply);
         }
 
         if($strFileNameAppend == null || $strFileNameAppend == "")
@@ -341,12 +341,29 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             throw new ErrorException("Required array filter callback was not specified.  Cannot output " . $strFilterToApply . " filtered jobs list.");
         }
 
-        $details = $this->__getAlternateOutputFileDetails__($strExt, "", $strFileNameAppend);
-        $strFilteredCSVOutputPath = $details['full_file_path'];
-        $this->writeRunsJobsToFile($strFilteredCSVOutputPath, $arrToOutput, $strFilterToApply, $strExt,$keysToOutput );
-        $GLOBALS['logger']->logLine(($strFilterDescription != null ? $strFilterDescription : $strFileNameAppend) . " " . count($arrToOutput). " job listings output to  " . $strFilteredCSVOutputPath, \Scooper\C__DISPLAY_SUMMARY__);
+        $arrJobsOutput = array();
 
-        return $arrToOutput;
+        if(strcasecmp($strExt, "HTML") == 0)
+        {
+            foreach($arrJobs as $job)
+            {
+                $job['job_title_linked'] = '<a href="'.$job['job_post_url'].'" target="new">'.$job['job_title'].'</a>';
+                $arrJobsOutput[] = $job;
+            }
+        }
+        else
+        {
+            $arrJobsOutput = \Scooper\array_copy($arrJobs);
+        }
+
+        $details = $this->__getAlternateOutputFileDetails__($strExt, "", $strFileNameAppend);
+
+        $strFilteredCSVOutputPath = $details['full_file_path'];
+        $this->writeRunsJobsToFile($strFilteredCSVOutputPath, $arrJobsOutput, $strFilterToApply, $strExt, $keysToOutput);
+
+        $GLOBALS['logger']->logLine(($strFilterDescription != null ? $strFilterDescription : $strFileNameAppend) . " " . count($arrJobsOutput). " job listings output to  " . $strFilteredCSVOutputPath, \Scooper\C__DISPLAY_SUMMARY__);
+
+        return $arrJobs;
     }
 
     //
@@ -725,8 +742,9 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     {
         return array(
             'company',
-            'job_title',
-            'job_post_url',
+//            'job_title',
+            'job_title_linked',
+//            'job_post_url',
             'location',
             'job_site_category',
 //            'job_site_date' =>'',
