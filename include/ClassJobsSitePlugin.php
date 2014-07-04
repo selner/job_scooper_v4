@@ -385,17 +385,22 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $strFileBase = $this->detailsMyFileOut['directory'].$strFileKey. "-jobs-page-";
 
         $strURL = $this->_getURLfromBase_($searchDetails, $nDays);
-        $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Exporting HTML from " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "' to be parsed: ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
 
         $strCmdToRun = "osascript " . __ROOT__ . "/plugins/".$this->strFilePath_HTMLFileDownloadScript . " " . escapeshellarg($this->detailsMyFileOut["directory"])  . " ".escapeshellarg($searchDetails["site_name"])." " . escapeshellarg($strFileKey)   . " '"  . $strURL . "'";
         $GLOBALS['logger']->logLine("Command = " . $strCmdToRun, \Scooper\C__DISPLAY_ITEM_DETAIL__);
         $result = \Scooper\my_exec($strCmdToRun);
-        if($result['stdout'] == -1)
+        if(\Scooper\intceil($result['stdout']) == -1)
         {
             $strError = "AppleScript did not successfully download the jobs.  Log = ".$result['stderr'];
             $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
             throw new ErrorException($strError);
+        }
+        else
+        {
+            // log the resulting output from the script to the job_scooper log
+            $GLOBALS['logger']->logLine($result['stderr'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
         }
 
 
