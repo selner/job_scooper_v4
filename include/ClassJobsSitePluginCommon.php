@@ -20,7 +20,7 @@ require_once(__ROOT__.'/lib/array_column.php');
 require_once(__ROOT__.'/include/JobListHelpers.php');
 
 
-
+define('JOBS_SCOOPER_MAX_FILE_SIZE', 1024000);
 
 
 class ClassJobsSitePluginCommon
@@ -893,7 +893,7 @@ class ClassJobsSitePluginCommon
         $fp = fopen($strInputFileFullPath , 'r');
         if(!$fp ) return $objSimpleHTML;
 
-        $strHTML = fread($fp, MAX_FILE_SIZE);
+        $strHTML = fread($fp, JOBS_SCOOPER_MAX_FILE_SIZE);
         $dom = new SimpleHtmlDom\simple_html_dom(null, $lowercase, $forceTagsClosed, $target_charset, $stripRN, $defaultBRText, $defaultSpanText);
         $objSimpleHTML = $dom->load($strHTML, $lowercase, $stripRN);
         fclose($fp);
