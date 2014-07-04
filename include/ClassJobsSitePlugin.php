@@ -379,14 +379,13 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
 
 
-        $nPageCount = 1;
+        $nPageCount = 0;
 
         $strFileKey = strtolower($this->siteName.'-'.$searchDetails['search_key']);
         $strFileBase = $this->detailsMyFileOut['directory'].$strFileKey. "-jobs-page-";
 
         $strURL = $this->_getURLfromBase_($searchDetails, $nDays);
         $GLOBALS['logger']->logLine("Exporting HTML from " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "' to be parsed: ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
 
         $strCmdToRun = "osascript " . __ROOT__ . "/plugins/".$this->strFilePath_HTMLFileDownloadScript . " " . escapeshellarg($this->detailsMyFileOut["directory"])  . " ".escapeshellarg($searchDetails["site_name"])." " . escapeshellarg($strFileKey)   . " '"  . $strURL . "'";
         $GLOBALS['logger']->logLine("Command = " . $strCmdToRun, \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -402,7 +401,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             // log the resulting output from the script to the job_scooper log
             $GLOBALS['logger']->logLine($result['stderr'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
         }
-
 
         $strFileName = $strFileBase.".html";
         $GLOBALS['logger']->logLine("Parsing downloaded HTML files: '" . $strFileBase."*.html'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -429,7 +427,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
 
 
+
     }
+
 
     function getDaysURLValue($days) { return ($days == null || $days == "") ? 1 : $days; } // default is to return the raw number
     function getItemURLValue($nItem) { return ($nItem == null || $nItem == "") ? 0 : $nItem; } // default is to return the raw number
@@ -523,6 +523,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         return false;
     }
+
 }
 
 
