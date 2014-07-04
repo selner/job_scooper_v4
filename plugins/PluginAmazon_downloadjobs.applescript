@@ -1,13 +1,13 @@
---on test()
---	doRun({"/Users/bryan/Code/data", "Amazon", "amazon-test", "http://www.amazon.jobs/results?sjid=68,83&checklid=@%27US,%20WA,%20Seattle%27&cname=%27US,%20WA,%20Seattle%27"})
---end test
+on test()
+	doRun({"/Users/bryan/Code/data", "Amazon", "amazon-test", "http://www.amazon.jobs/results?sjid=68,83&checklid=@%27US,%20WA,%20Seattle%27&cname=%27US,%20WA,%20Seattle%27"})
+end test
 
---on run (argv)
---	test()
---end run
+on doRun(argv)
+	test()
+end doRun
 
---on doRun(argv)
 on run (argv)
+	-- on run (argv)
 	set libDownload to init_library()
 	
 	set strOutputDir of libDownload to first item of argv as string
@@ -16,9 +16,9 @@ on run (argv)
 	set strURL of libDownload to fourth item of argv as string
 	
 	set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() { var strItem =  document.getElementById('searchProfiles').firstChild.nextSibling.nextSibling.nextSibling.firstChild.nextSibling.textContent; return strItem.split(' ')[2];  }  getMaxPageValue();"
-
--- TEST CODE
---	set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() { var strItem =  document.getElementById('searchProfiles').firstChild.nextSibling.nextSibling.nextSibling.firstChild.nextSibling.textContent; return 2;  }  getMaxPageValue();"
+	
+	-- TEST CODE
+	-- set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() { var strItem =  document.getElementById('searchProfiles').firstChild.nextSibling.nextSibling.nextSibling.firstChild.nextSibling.textContent; return 2;  }  getMaxPageValue();"
 	
 	set strGetNextPageValue of libDownload to "function getNextPageValue() {return document.getElementById('nextpage').value;} getNextPageValue();"
 	
@@ -32,7 +32,7 @@ on run (argv)
 		            0, null); 
 		        document.getElementsByClassName('page gradient')[1].dispatchEvent(event); return true; } doGetJobsClick();"
 	
-	set strJSGetTheSource of libDownload to "function getHTML() { return '<table>' + document.getElementById('teamjobs').innerHTML + '</table>'} getHTML();"
+	set strJSGetTheSource of libDownload to "function getHTML() { return " & quote & "<table class='scooper_jobs_page_result'>" & quote & " + document.getElementById('teamjobs').innerHTML + " & quote & "</table>" & quote & "} getHTML();"
 	
 	tell libDownload
 		set ret to doJobsDownload()
