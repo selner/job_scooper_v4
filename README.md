@@ -77,7 +77,7 @@ If you're looking at job listings across many sites, Job Scooper has some built-
 
 ###Other Stuff
 * You will need to also download the scooper_common library from selner/scooper_common and place it in a parallel folder to jobs_scooper.  For example:  /users/bryan/code/scooper_common and   /users/bryan/code/job_scooper.
-* Version:  v1.1.0
+* Version:  v1.2
 * Author:  Bryan Selner (dev at recoilvelocity dot com)
 * Platforms:  
 	*  Mac OS X 10.9.3 with PHP 5.4.24.  
