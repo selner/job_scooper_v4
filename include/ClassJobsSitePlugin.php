@@ -205,7 +205,8 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         } catch (ErrorException $ex) {
             $strError = "Failed to download jobs from " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "[URL=".$searchDetails['base_url_format']. "].   Reason:  ".$ex->getMessage();
             $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-            throw new ErrorException($strError);
+            if($GLOBALS['OPTS']['DEBUG'] == true) { throw new ErrorException( $strError); }
+
         }
      }
 
