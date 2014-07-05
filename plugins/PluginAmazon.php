@@ -38,6 +38,11 @@ class PluginAmazon extends ClassJobsSitePlugin
         $nTRIndex = 0;
         while($nTRIndex < count($nodesTR))
         {
+            $strTeamDetailsRemain = "";
+            $teamDetails = "";
+            $strTeamName = "";
+            $strTeamCat = "";
+
             $item = $this->getEmptyJobListingRecord();
 
             $tds = $nodesTR[$nTRIndex]->find('td');
@@ -56,16 +61,49 @@ class PluginAmazon extends ClassJobsSitePlugin
 
                 $item['job_id'] = trim(explode("/", $item['job_post_url'])[4]);
 
-/*
-BUGBUG:  strip_punctuation in strScrub returns null for some reason.
 
                 $teamDetails = combineTextAllChildren($tds[4]);
-                $strTeamCat = preg_replace("/\bTeam:\s{2,}(.*)\s{2,}Team Category:\s{2,}(.*)\s{2,}Short Description:\s{2,}(.*)/", "$1; $2", $teamDetails );
-                $strTeamCat = \Scooper\strScrub($strTeamCat, ADVANCED_TEXT_CLEANUP);
+                $arrTeamDetails = explode("\n", $teamDetails);
+                $nCount = 0;
+                while($nCount < count($arrTeamDetails))
+                {
+                    switch(trim($arrTeamDetails[$nCount]))
+                    {
+                        case "Team:":
+                            $strTeamName = $arrTeamDetails[$nCount + 1];
+                            $nCount = $nCount + 2;
+                            break;
 
-                $item['job_site_category'] =  $strTeamCat . "; ". $tds[2]->plaintext ;
- */
-                $item['job_site_category'] =  $tds[2]->plaintext ;
+                        case "Team Category:":
+                            $strTeamCat = $arrTeamDetails[$nCount + 1];
+                            $nCount = $nCount + 2;
+                            break;
+
+                        default:
+                            $nCount = $nCount + 1;
+                            break;
+                    }
+
+                }
+//                $teamDetails= trim(preg_replace("/Location:\W{1,}(.*)\W{1,}/", "", $teamDetails));
+//                $teamDetails = trim(preg_replace("/Short Description:\W{1,}.*/", "", $teamDetails));
+//                $strTeamName = trim(preg_replace("/Team:\W{1,}(.*)\W{2,}[\w\W]{1,}/", "$1", $teamDetails));
+//                if(strlen($strTeamName) > 0)
+//                {
+//                    $arrStringItems = explode($strTeamName, $teamDetails);
+//                    $strTeamDetailsRemain = trim($arrStringItems[1]);
+//                }
+//                else
+//                {
+//                    $strTeamDetailsRemain = trim($teamDetails);
+//                }
+//
+//                $strTeamCat = preg_replace("/Team Category:\W{1,}(.*){1,}\W{1,}/", "$1", $strTeamDetailsRemain );
+
+                $strTeamCat = \Scooper\strScrub($strTeamCat, SIMPLE_TEXT_CLEANUP);
+                $strTeamName = \Scooper\strScrub($strTeamName, SIMPLE_TEXT_CLEANUP);
+
+                $item['job_site_category'] =  (strlen($strTeamName) > 0 ? $strTeamName . "; " : "") . (strlen($strTeamCat ) > 0 ? $strTeamCat . "; " : "") . $tds[2]->plaintext ;
 
                 $item['location'] = $tds[3]->plaintext ;
 
@@ -75,51 +113,6 @@ BUGBUG:  strip_punctuation in strScrub returns null for some reason.
             }
 
             $nTRIndex = $nTRIndex + 1;
-
-        }
-        return $ret;
-    }
-    function parseJobsListForPageOrig($objSimpHTML)
-    {
-        $ret = array();
-        $nodesTD= $objSimpHTML->find('tr td[class="expand footable-first-column"]');
-
-        $nTDIndex = 0;
-        while($nTDIndex < count($nodesTD))
-        {
-            if($nodesTD[$nTDIndex])
-            {
-                $item = $this->getEmptyJobListingRecord();
-
-                \SimpleHtmlDom\dump_html_tree($nodesTD[$nTDIndex]);
-
-                $titleObj = $nodesTD[$nTDIndex]->nextSibling();
-
-                $item['job_title'] = $titleObj->firstChild()->plaintext;
-
-                $item['job_post_url'] =$titleObj->firstChild()->href;
-                $item['company'] = 'Amazon';
-
-                $item['job_site'] = 'Amazon';
-                $item['date_pulled'] = \Scooper\getTodayAsString();
-
-                $item['job_id'] = trim(explode("/", $item['job_post_url'])[4]);
-
-                $GLOBALS['logger']->logLine("AZID=".$item['job_id'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-
-                $catObj = $titleObj->nextSibling();
-                $item['job_site_category'] = $catObj->plaintext;
-
-                $locObj = $catObj ->nextSibling();
-                $item['location'] = $locObj->plaintext;
-
-
-                $ret[] = $this->normalizeItem($item);
-
-            }
-            $nTDIndex = $nTDIndex + 5;
-
 
         }
         return $ret;
