@@ -1,18 +1,21 @@
--- on run (argv)
--- 	test()
--- 	doRun(argv)
--- end run
--- on test()
--- 	doRun({"/Users/bryan/Code/data", "Geekwire", "geekwire-test", "http://www.geekwork.com/jobs/?search_keywords=product&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time'"})
--- end test
+(*
+on run (argv)
+	test()
+	--	doRun(argv)
+end run
+on test()
+	doRun({"/Users/bryan/Code/data/", "Geekwire", "geekwire-test", "http://www.geekwork.com/jobs/?search_keywords=product&search_location=WA&search_categories=0&filter_job_type%5B%5D=full-time'"})
+end test
 
-on Run(argv)
+on doRun(argv)
+*)
+
+on run (argv)
 	set libDownload to init_library()
 	set strOutputDir of libDownload to first item of argv as string
 	set strSiteName of libDownload to second item of argv as string
 	set strFileKey of libDownload to third item of argv as string
 	set strURL of libDownload to fourth item of argv as string
-	set nIndexMaxForClick of libDownload to 1
 	
 	
 	set strJSGetMaxPageValue of libDownload to ""
@@ -29,7 +32,7 @@ on Run(argv)
 		set ret to doJobsDownload()
 	end tell
 	return ret
-end doRun
+end run
 
 
 --*******************************************************************************************
