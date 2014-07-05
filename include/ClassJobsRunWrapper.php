@@ -496,7 +496,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $class = null;
 
         // Write to the main output file name that the user passed in
-        $arrJobs_UpdatedOrInterested = array_filter($this->arrLatestJobs, "isJobUpdatedTodayOrIsInterested");
+        $arrJobs_UpdatedOrInterested = array_filter($this->arrLatestJobs, "isJobUpdatedTodayOrIsInterestedOrBlank");
         $this->writeRunsJobsToFile($this->detailsOutputFile['full_file_path'], $arrJobs_UpdatedOrInterested, "ClassJobsRunWrapper-UserOutputFile");
         $detailsCSVFile = $this->detailsOutputFile;
 
@@ -703,27 +703,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $arrCounts = null;
         $arrExcluded = null;
 
-        foreach( $GLOBALS['DATA']['site_plugins'] as $plugin_setup)
-        {
-            $strName = $plugin_setup['name'];
-            $classPlug = new $plugin_setup['class_name'](null, null);
-            $arrPluginJobs = array_filter($this->getMyJobsList(), array($classPlug, "isJobListingMine"));
-            if($plugin_setup['include_in_run'] == true || count($arrPluginJobs) > 0)
-            {
-                $arrCounts[$strName]['name'] = $strName;
-                $arrCounts[$strName]['total_listings'] = count($arrPluginJobs);
-                $arrCounts[$strName]['updated_today'] = count(array_filter($arrPluginJobs, "isJobUpdatedToday"));
-                $arrCounts[$strName]['new_today'] = count(array_filter($arrPluginJobs, "isNewJobToday_Interested_IsBlank"));
-                $arrCounts[$strName]['total_not_interested'] = count(array_filter($arrPluginJobs, "isMarked_NotInterested"));
-                $arrCounts[$strName]['total_active'] = count(array_filter($arrPluginJobs, "isMarked_InterestedOrBlank"));
-            }
-            else
-            {
-                $arrExcluded[$strName] = $strName;
-            }
-        }
-
-
         $strOut = "                ";
         $arrHeaders = array("Updated", "New", "Total", "Active", "Inactive");
         foreach($arrHeaders as $value)
@@ -732,18 +711,37 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         }
         $strOut = $strOut . PHP_EOL;
 
-        foreach($arrCounts as $site)
+        foreach( $GLOBALS['DATA']['site_plugins'] as $plugin_setup)
         {
-            foreach($site as $value)
+            $strName = $plugin_setup['name'];
+            $classPlug = new $plugin_setup['class_name'](null, null);
+            $arrPluginJobs = array_filter($this->getMyJobsList(), array($classPlug, "isJobListingMine"));
+            $arrCounts[$strName]['name'] = $strName;
+            $arrCounts[$strName]['updated_today'] = count(array_filter($arrPluginJobs, "isJobUpdatedToday"));
+            if($plugin_setup['include_in_run'] == true && $arrCounts[$strName]['updated_today'] > 0)
             {
-                $strOut = $strOut . sprintf("%-18s", $value);
+                $arrCounts[$strName]['new_today'] = count(array_filter($arrPluginJobs, "isNewJobToday_Interested_IsBlank"));
+                $arrCounts[$strName]['total_listings'] = count($arrPluginJobs);
+                $arrCounts[$strName]['total_not_interested'] = count(array_filter($arrPluginJobs, "isMarked_NotInterested"));
+                $arrCounts[$strName]['total_active'] = count(array_filter($arrPluginJobs, "isMarked_InterestedOrBlank"));
+
+                foreach($arrCounts[$strName] as $value)
+                {
+                    $strOut = $strOut . sprintf("%-18s", $value);
+                }
+                $strOut = $strOut . PHP_EOL;
+
             }
-            $strOut = $strOut . PHP_EOL;
+            else
+            {
+                $arrExcluded[$strName] = $strName;
+            }
         }
+
 
         if($arrExcluded != null && count($arrExcluded) > 0)
         {
-            $strOut = $strOut . PHP_EOL .  "No jobs found or site was excluded for this run:" . PHP_EOL;
+            $strOut = $strOut . PHP_EOL .  "Sites that either were excluded or had no updated jobs found:" . PHP_EOL;
 
             foreach($arrExcluded as $site)
             {
