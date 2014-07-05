@@ -541,7 +541,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $strErrs = $GLOBALS['logger']->getCumulativeErrorsAsString();
         if($strErrs != "" && $strErrs != null)
         {
-            $strOutputResult = $strOutputResult . PHP_EOL . "ERRORS!" . PHP_EOL . $strErrs .PHP_EOL;
+            $strOutputResult = $strOutputResult . PHP_EOL . "------------ ERRORS FOUND ------------" . PHP_EOL . $strErrs .PHP_EOL .PHP_EOL. "----------------------------------------" .PHP_EOL .PHP_EOL;
         }
 
         $GLOBALS['logger']->logLine($strOutputResult, \Scooper\C__DISPLAY_SUMMARY__);
