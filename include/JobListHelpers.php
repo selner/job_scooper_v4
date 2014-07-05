@@ -162,7 +162,7 @@ function combineTextAllChildren($node, $fRecursed = false)
 
     if($node->plaintext != null && $fRecursed == false)
     {
-        $retStr = \Scooper\strScrub($node->plaintext . " " . $retStr, DEFAULT_SCRUB );
+        $retStr = \Scooper\strScrub($node->plaintext . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE  );
     }
     return $retStr;
 
