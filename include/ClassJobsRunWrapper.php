@@ -736,7 +736,12 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $arrCounts[$strName]['updated_today'] = $plugin['updated_today'];
 
 
-            if($plugin_setup['include_in_run'] == true && $arrCounts[$strName]['updated_today'] > 0)
+            if($plugin_setup['include_in_run'] == false)
+            {
+                $arrExcluded[$strName] = $strName;
+
+            }
+            elseif($arrCounts[$strName]['updated_today'] > 0)
             {
                 $arrCounts[$strName]['new_today'] = count(array_filter($arrPluginJobs, "isNewJobToday_Interested_IsBlank"));
                 $arrCounts[$strName]['total_listings'] = count($arrPluginJobs);
@@ -752,20 +757,32 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             }
             else
             {
-                $arrExcluded[$strName] = $strName;
+                $arrNoJobUpdates[$strName] = $strName;
+
             }
         }
 
+        $strOut = $strOut . PHP_EOL;
+
+        if($arrNoJobUpdates != null && count($arrNoJobUpdates) > 0)
+        {
+            $strOut = $strOut . PHP_EOL .  "No updated jobs for " . \Scooper\getTodayAsString() . " on these sites: " . PHP_EOL;
+
+            foreach($arrNoJobUpdates as $site)
+            {
+                $strOut = $strOut . "     - ". $site .PHP_EOL;
+            }
+
+        }
 
         if($arrExcluded != null && count($arrExcluded) > 0)
         {
-            $strOut = $strOut . PHP_EOL .  "Sites that either were excluded or had no updated jobs found:" . PHP_EOL;
+            $strOut = $strOut . PHP_EOL .  "Excluded sites for this run:" . PHP_EOL;
 
             foreach($arrExcluded as $site)
             {
                 $strOut = $strOut . "     - ". $site .PHP_EOL;
             }
-            $strOut = $strOut . PHP_EOL;
         }
 
 
