@@ -30,12 +30,13 @@ Here's an example
 Some plugins only support the url_format option however and do not support keywords or location options:
 * Amazon
 * CareerBuilder
-* eBay
 * Disney
+* eBay
 * EmploymentGuide
 * Expedia
 * Google
 * SimplyHired
+* StartupHire
 
 ###To Run Jobs_Scooper:
 ``/usr/bin/php "main/runJobs.php" -all -days 3 -ini myconfig.ini``
