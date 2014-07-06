@@ -47,6 +47,7 @@ require_once (__ROOT__.'/plugins/PluginGeekwire.php');
 require_once (__ROOT__.'/plugins/PluginDotJobs.php');
 require_once (__ROOT__.'/plugins/PluginZipRecruiter.php');
 require_once (__ROOT__.'/plugins/PluginStartupHire.php');
+require_once (__ROOT__.'/plugins/PluginAdicioCareerCast.php');
 
 define( "C__SEARCH_RESULTS_TYPE_NONE__", 0x0 );
 define( "C__SEARCH_RESULTS_TYPE_WEBPAGE__", 0x1 );
@@ -62,6 +63,9 @@ const C__JOB_ITEMCOUNT_NOTAPPLICABLE__ = 0x800;
 const C__TOTAL_ITEMS_UNKNOWN__ = 11111;
 
 $GLOBALS['DATA']['site_plugins'] = array(
+    'careercast' => array('name' => 'careercast', 'class_name' => 'PluginAdicioCareerCast',  'flags' =>  C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__, 'include_in_run' => false),
+    'seattletimes' => array('name' => 'seattletimes', 'class_name' => 'PluginSeattleTimes',  'flags' =>  C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__, 'include_in_run' => false),
+    'albuquerquejournal' => array('name' => 'albuquerquejournal', 'class_name' => 'PluginAlbuquerqueJournal',  'flags' =>  C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__, 'include_in_run' => false),
     'startuphire' => array('name' => 'startuphire', 'class_name' => 'PluginStartupHire',  'flags' => C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__  , 'include_in_run' => false),
     'ziprecruiter' => array('name' => 'ziprecruiter', 'class_name' => 'PluginZipRecruiter',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__  , 'include_in_run' => false),
     'craigslist' => array('name' => 'craigslist', 'class_name' => 'PluginCraigslist',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
@@ -86,5 +90,19 @@ $GLOBALS['DATA']['site_plugins'] = array(
     'amazon' => array('name' => 'amazon', 'class_name' => 'PluginAmazon',  'flags' => C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ , 'include_in_run' => false),
     'dotjobs' => array('name' => 'dotjobs', 'class_name' => 'PluginDotJobs',  'flags' => C__SEARCH_RESULTS_TYPE_XML__| C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ , 'include_in_run' => false),
 );
+
+//function setupPlugins()
+//{
+//
+//    $classList = get_declared_classes();
+//    foreach($classList as $class)
+//    {
+//        if(preg_match('/^Plugin', $class) > 0)
+//        {
+//            $classinst = new $class(null, null);
+//            $GLOBALS['DATA']['site_plugins'][$classinst->getName()] = array('name'=>$classinst->getName(), 'class_name' => $class, 'flags' => $classinst->getFlags(), 'include_in_run' => false );
+//        }
+//    }
+//}
 
 ?>
