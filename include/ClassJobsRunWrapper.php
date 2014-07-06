@@ -697,6 +697,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         return $ret;
     }
 
+
     private function getListingCountsByPlugin()
     {
 
@@ -711,13 +712,30 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         }
         $strOut = $strOut . PHP_EOL;
 
+//        $arrCounts[$strName]['updated_today'] = count(array_filter($arrPluginJobs, "isJobUpdatedToday"));
+
+
         foreach( $GLOBALS['DATA']['site_plugins'] as $plugin_setup)
         {
             $strName = $plugin_setup['name'];
             $classPlug = new $plugin_setup['class_name'](null, null);
             $arrPluginJobs = array_filter($this->getMyJobsList(), array($classPlug, "isJobListingMine"));
+            $arrSorted[$strName] = array('name' => $strName, 'updated_today' => count(array_filter($arrPluginJobs, "isJobUpdatedToday")));
+        }
+        $retVal = usort($arrSorted, "sortByCountDesc");
+
+
+
+        foreach( $arrSorted as $plugin)
+        {
+            $plugin_setup = $GLOBALS['DATA']['site_plugins'][$plugin['name']];
+            $classPlug = new $plugin_setup['class_name'](null, null);
+            $arrPluginJobs = array_filter($this->getMyJobsList(), array($classPlug, "isJobListingMine"));
+            $strName=$plugin['name'];
             $arrCounts[$strName]['name'] = $strName;
-            $arrCounts[$strName]['updated_today'] = count(array_filter($arrPluginJobs, "isJobUpdatedToday"));
+            $arrCounts[$strName]['updated_today'] = $plugin['updated_today'];
+
+
             if($plugin_setup['include_in_run'] == true && $arrCounts[$strName]['updated_today'] > 0)
             {
                 $arrCounts[$strName]['new_today'] = count(array_filter($arrPluginJobs, "isNewJobToday_Interested_IsBlank"));

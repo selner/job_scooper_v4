@@ -169,6 +169,15 @@ function combineTextAllChildren($node, $fRecursed = false)
 
 }
 
+function sortByCountDesc($a, $b)
+{
+    $al = $a["updated_today"];
+    $bl = $b["updated_today"];
+    if ($al == $bl) {
+        return 0;
+    }
+    return ($al < $bl) ? +1 : -1;
+}
 
 
 /**
