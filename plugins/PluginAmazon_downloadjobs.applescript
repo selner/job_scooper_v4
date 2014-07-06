@@ -19,10 +19,10 @@ on run (argv)
 	set strFileKey of libDownload to third item of argv as string
 	set strURL of libDownload to fourth item of argv as string
 	
-	set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() { if(!document.getElementsByClassName('page gradient') == false) { return 1; };  var strItem =  document.getElementById('searchProfiles').firstChild.nextSibling.nextSibling.nextSibling.firstChild.nextSibling.textContent; return strItem.split(' ')[2];  }  getMaxPageValue();"
+	set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() { if(!document.getElementsByClassName('searchProfiles') == false) { return 1; };  var strItem =  document.getElementById('searchProfiles').firstChild.nextSibling.nextSibling.nextSibling.firstChild.nextSibling.textContent; return strItem.split(' ')[2];  }  getMaxPageValue();"
 	
 	-- TEST CODE
-	-- set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() { if(!document.getElementsByClassName('page gradient') == false) { return 1; };  var strItem =  document.getElementById('searchProfiles').firstChild.nextSibling.nextSibling.nextSibling.firstChild.nextSibling.textContent; return 3;  }  getMaxPageValue();"
+	-- set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() { if(!document.getElementsByClassName('searchProfiles') == false) { return 1; };  var strItem =  document.getElementById('searchProfiles').firstChild.nextSibling.nextSibling.nextSibling.firstChild.nextSibling.textContent; return 3;  }  getMaxPageValue();"
 	
 	set strGetNextPageValue of libDownload to "function getNextPageValue() {if(document.getElementById('nextpage') == null) { return 1;} return document.getElementById('nextpage').value;} getNextPageValue();"
 	
