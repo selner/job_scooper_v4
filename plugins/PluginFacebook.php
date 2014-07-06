@@ -27,6 +27,7 @@ class PluginFacebook extends ClassJobsSitePlugin
     protected $siteBaseURL = 'https://www.facebook.com/careers/';
     protected $nJobListingsPerPage = 10;
     protected $strBaseURLFormat = "https://www.facebook.com/careers/locations/***LOCATION***";
+    protected $flagSettings = JOBSITE_BASE_WEBPAGE_FLAGS;
 
 
 

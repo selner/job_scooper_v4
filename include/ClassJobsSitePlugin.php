@@ -25,7 +25,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     protected $arrLatestJobs = null;
     protected $arrSearchesToReturn = null;
     protected $nJobListingsPerPage = 20;
-    private $flagSettings = null;
+    protected $flagSettings = null;
     protected $strFilePath_HTMLFileDownloadScript = null;
     protected $strBaseURLFormat = null;
 
@@ -36,7 +36,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             $this->detailsMyFileOut = \Scooper\parseFilePath($strOutputDirectory, false);
         }
 
-        $this->flagSettings = $GLOBALS['DATA']['site_plugins'][strtolower($this->siteName)]['flags'];
+//        if($GLOBALS['DATA']['site_plugins'][strtolower($this->siteName)]['flags'] > 0)
+//        {
+//            $this->flagSettings = $GLOBALS['DATA']['site_plugins'][strtolower($this->siteName)]['flags'];
+//        }
+//        else
+//        {
+//            print('class ' . get_class($this) . ' pre-set the flags'.PHP_EOL);
+//        }
 
     }
 
@@ -55,12 +62,13 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 $this->writeMyJobsListToFile($strOutPathWithName, false);
             }
         }
-        $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__);
+        if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
     }
 
     function parseJobsListForPage($objSimpHTML) { return null; } // returns an array of jobs
     function parseTotalResultsCount($objSimpHTML) { return null; } // returns an array of jobs
 
+    function getName() { return $this->siteName; }
 
 
     function getMyJobsList() { return $this->arrLatestJobs; }
@@ -213,7 +221,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     function getMyJobsForSearchFromXML($searchDetails, $nDays = -1)
     {
 
-        ini_set("user_agent",C__STR_USER_AGENT__);
+        ini_set("user_agent",\Scooper\C__STR_USER_AGENT__);
         ini_set("max_execution_time", 0);
         ini_set("memory_limit", "10000M");
 

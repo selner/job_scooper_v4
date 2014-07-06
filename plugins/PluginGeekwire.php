@@ -21,13 +21,13 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 
 
-
 class PluginGeekwire extends ClassJobsSitePlugin
 {
     protected $siteName = 'Geekwire';
     protected $siteBaseURL = 'http://www.geekwork.com/';
     protected $strFilePath_HTMLFileDownloadScript = "PluginGeekwire_downloadjobs.applescript";
     protected $strBaseURLFormat = "http://www.geekwork.com/jobs/?search_keywords=***KEYWORDS***&search_location=***LOCATION***&search_categories=0&filter_job_type%5B%5D=full-time";
+    protected $flagSettings = JOBSITE_BASE_HTML_DOWNLOAD_FLAGS;
 
 
     function parseJobsListForPage($objSimpHTML)

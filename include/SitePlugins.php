@@ -62,47 +62,30 @@ const C__JOB_ITEMCOUNT_NOTAPPLICABLE__ = 0x800;
 
 const C__TOTAL_ITEMS_UNKNOWN__ = 11111;
 
-$GLOBALS['DATA']['site_plugins'] = array(
-    'careercast' => array('name' => 'careercast', 'class_name' => 'PluginAdicioCareerCast',  'flags' =>  C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__, 'include_in_run' => false),
-    'seattletimes' => array('name' => 'seattletimes', 'class_name' => 'PluginSeattleTimes',  'flags' =>  C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__, 'include_in_run' => false),
-    'albuquerquejournal' => array('name' => 'albuquerquejournal', 'class_name' => 'PluginAlbuquerqueJournal',  'flags' =>  C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__, 'include_in_run' => false),
-    'startuphire' => array('name' => 'startuphire', 'class_name' => 'PluginStartupHire',  'flags' => C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__  , 'include_in_run' => false),
-    'ziprecruiter' => array('name' => 'ziprecruiter', 'class_name' => 'PluginZipRecruiter',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__  , 'include_in_run' => false),
-    'craigslist' => array('name' => 'craigslist', 'class_name' => 'PluginCraigslist',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'porch' => array('name' => 'porch', 'class_name' => 'PluginPorch',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'expedia' => array('name' => 'expedia', 'class_name' => 'PluginExpedia',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'indeed' => array('name' => 'indeed', 'class_name' => 'PluginIndeed',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'glassdoor' => array('name' => 'glassdoor', 'class_name' => 'PluginGlassdoor',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'simplyhired' => array('name' => 'simplyhired', 'class_name' => 'PluginSimplyHired',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'linkup' => array('name' => 'linkup', 'class_name' => 'PluginLinkUp',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'employmentguide' => array('name' => 'employmentguide', 'class_name' => 'PluginEmploymentGuide',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'monster' => array('name' => 'monster', 'class_name' => 'PluginMonster',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'careerbuilder' => array('name' => 'careerbuilder', 'class_name' => 'PluginCareerBuilder',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'mashable' => array('name' => 'mashable', 'class_name' => 'PluginMashable',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'disney' => array('name' => 'disney', 'class_name' => 'PluginDisney',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'outerwall' => array('name' => 'outerwall', 'class_name' => 'PluginOuterwall',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__|C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'tableau' => array('name' => 'tableau', 'class_name' => 'PluginTableau',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'facebook' => array('name' => 'facebook', 'class_name' => 'PluginFacebook',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__| C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__|C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'ebay' => array('name' => 'ebay', 'class_name' => 'PluginEbay',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'groupon' => array('name' => 'groupon', 'class_name' => 'PluginGroupon',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__|C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'geekwire' => array('name' => 'geekwire', 'class_name' => 'PluginGeekwire',  'flags' => C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__ , 'include_in_run' => false),
-    'google' => array('name' => 'google', 'class_name' => 'PluginGoogle',  'flags' => C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'amazon' => array('name' => 'amazon', 'class_name' => 'PluginAmazon',  'flags' => C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ , 'include_in_run' => false),
-    'dotjobs' => array('name' => 'dotjobs', 'class_name' => 'PluginDotJobs',  'flags' => C__SEARCH_RESULTS_TYPE_XML__| C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ , 'include_in_run' => false),
-);
 
-//function setupPlugins()
-//{
-//
-//    $classList = get_declared_classes();
-//    foreach($classList as $class)
-//    {
-//        if(preg_match('/^Plugin', $class) > 0)
-//        {
-//            $classinst = new $class(null, null);
-//            $GLOBALS['DATA']['site_plugins'][$classinst->getName()] = array('name'=>$classinst->getName(), 'class_name' => $class, 'flags' => $classinst->getFlags(), 'include_in_run' => false );
-//        }
-//    }
-//}
+define('JOBSITE_BASE_WEBPAGE_FLAGS', C__SEARCH_RESULTS_TYPE_WEBPAGE__);
+define('JOBSITE_BASE_HTML_DOWNLOAD_FLAGS', C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__);
+define('JOBSITE_BASE_XMLRSS_FLAGS', C__SEARCH_RESULTS_TYPE_XML__| C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__);
+
+
+setupPlugins();
+
+function setupPlugins()
+{
+
+    $classList = get_declared_classes();
+    print('Getting job site plugin list...'. PHP_EOL);
+    foreach($classList as $class)
+    {
+        if(preg_match('/^Plugin/', $class) > 0)
+        {
+
+            $classinst = new $class(null, null);
+            $GLOBALS['DATA']['site_plugins'][strtolower($classinst->getName())] = array('name'=>strtolower($classinst->getName()), 'class_name' => $class, 'include_in_run' => false );
+            print('Added job site plugin for '. $classinst->getName() . '.' . PHP_EOL);
+            $classinst=null;
+        }
+    }
+}
 
 ?>

@@ -19,14 +19,13 @@ define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 
-
-
 class PluginGoogle extends ClassJobsSitePlugin
 {
     protected $siteName = 'Google';
     protected $siteBaseURL = 'https://www.google.com/about/careers/search/';
     protected $nJobListingsPerPage = 10;
     protected $strFilePath_HTMLFileDownloadScript = "PluginGoogle_downloadjobs.applescript";
+    protected $flagSettings = JOBSITE_BASE_HTML_DOWNLOAD_FLAGS;
 
     function getItemURLValue($nItem)
     {

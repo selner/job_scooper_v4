@@ -25,6 +25,7 @@ class PluginGlassdoor extends ClassJobsSitePlugin
     protected $siteBaseURL = 'http://www.glassdoor.com';
     protected $strBaseURLFormat = "http://www.glassdoor.com/Job/***LOCATION***-***KEYWORDS***-job-opportunities-SRCH_IL.0,7_IC1150505_KO8,22***PAGE_NUMBER***.htm?fromAge=***NUMBER_DAYS***";
     // protected $strBaseURLFormat = "http://www.glassdoor.com/Job/***LOCATION***-***KEYWORDS***-job-openings-SRCH_IL.0,7_IC1150505_KO8,22***PAGE_NUMBER***.htm?fromAge=***NUMBER_DAYS***";
+    protected $flagSettings = JOBSITE_BASE_WEBPAGE_FLAGS;
 
 
     function getDaysURLValue($days) {

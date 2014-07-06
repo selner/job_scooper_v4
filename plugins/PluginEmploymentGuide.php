@@ -25,7 +25,7 @@ class PluginEmploymentGuide extends ClassJobsSitePlugin
 {
     protected $siteName = 'EmploymentGuide';
     protected $siteBaseURL = 'http://seattle.employmentguide.com/';
-
+    protected $flagSettings = JOBSITE_BASE_WEBPAGE_FLAGS;
 
 
     function getDaysURLValue($nDays)

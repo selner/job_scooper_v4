@@ -25,7 +25,7 @@ class PluginDotJobs extends ClassJobsSitePlugin
 {
     protected $siteName = 'dotjobs';
     protected $siteBaseURL = '';
-
+    protected $flagSettings = JOBSITE_BASE_XMLRSS_FLAGS;
     protected $strBaseURLFormat = "http://washington.jobs/jobs/feed/rss?location=***LOCATION***%2C+WA&q=***KEYWORDS***";
 
 

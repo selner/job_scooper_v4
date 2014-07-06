@@ -27,6 +27,7 @@ class PluginMashable extends ClassJobsSitePlugin
     protected $siteBaseURL = 'http://jobs.mashable.com';
     protected $nJobListingsPerPage = 50;
     protected $strBaseURLFormat = "http://jobs.mashable.com/jobs/results/keyword/***KEYWORDS***?kwsJobTitleOnly=true&location=***LOCATION***&radius=25&view=List_Detail&page=***PAGE_NUMBER***&sort=PostType+asc%2C+PostDate+desc%2C+IsFeatured+desc&rows=50&modifiedDate=***NUMBER_DAYS***";
+    protected $flagSettings = JOBSITE_BASE_WEBPAGE_FLAGS;
 
 
 

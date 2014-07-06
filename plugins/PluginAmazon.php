@@ -25,10 +25,13 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 
 
+
+
 class PluginAmazon extends ClassJobsSitePlugin
 {
     protected $siteName = 'Amazon';
     protected $strFilePath_HTMLFileDownloadScript = "PluginAmazon_downloadjobs.applescript";
+    protected $flagSettings = JOBSITE_BASE_HTML_DOWNLOAD_FLAGS;
 
     function parseJobsListForPage($objSimpHTML)
     {

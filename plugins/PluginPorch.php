@@ -23,7 +23,7 @@ class PluginPorch extends ClassJobsSitePlugin
     protected $siteName = 'Porch';
     protected $siteBaseURL = 'http://about.porch.com/careers';
     protected $strBaseURLFormat = "http://about.porch.com/careers/";
-
+    protected $flagSettings = JOBSITE_BASE_WEBPAGE_FLAGS;
 
      function parseJobsListForPage($objSimpleHTML)
     {
