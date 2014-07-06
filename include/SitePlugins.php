@@ -46,6 +46,7 @@ require_once (__ROOT__.'/plugins/PluginGroupon.php');
 require_once (__ROOT__.'/plugins/PluginGeekwire.php');
 require_once (__ROOT__.'/plugins/PluginDotJobs.php');
 require_once (__ROOT__.'/plugins/PluginZipRecruiter.php');
+require_once (__ROOT__.'/plugins/PluginStartupHire.php');
 
 define( "C__SEARCH_RESULTS_TYPE_NONE__", 0x0 );
 define( "C__SEARCH_RESULTS_TYPE_WEBPAGE__", 0x1 );
@@ -61,6 +62,7 @@ const C__JOB_ITEMCOUNT_NOTAPPLICABLE__ = 0x800;
 const C__TOTAL_ITEMS_UNKNOWN__ = 11111;
 
 $GLOBALS['DATA']['site_plugins'] = array(
+    'startuphire' => array('name' => 'startuphire', 'class_name' => 'PluginStartupHire',  'flags' => C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__  , 'include_in_run' => false),
     'ziprecruiter' => array('name' => 'ziprecruiter', 'class_name' => 'PluginZipRecruiter',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__  , 'include_in_run' => false),
     'craigslist' => array('name' => 'craigslist', 'class_name' => 'PluginCraigslist',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
     'porch' => array('name' => 'porch', 'class_name' => 'PluginPorch',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
