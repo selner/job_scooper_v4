@@ -27,6 +27,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     protected $arrUserInputJobs_Inactive = null;
     protected $arrLatestJobs_UnfilteredByUserInput = null;
     protected $arrJobCSVUserInputFiles = null;
+    protected $arrSearchKeywordSet = null;
     protected $nNumDaysToSearch = -1;
     protected $detailsOutputSubfolder = null;
     protected $detailsIniFile = null;
@@ -225,7 +226,9 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                 $this->arrAllSearchesFromConfig[] = $this->_parseSearchFromINI_($config->search);
             }
         }
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->arrSearchesToReturn) . " searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->arrAllSearchesFromConfig) . " searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
+
+        $this->_parseKeywordSettingsFromINI_($config);
 
         if($config->search_location_setting_set)
         {
@@ -239,7 +242,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                     if(count($iniSettings) > 1)
                     {
                         $strSettingsName = $iniSettings['name'];
-                        $this->arrSearchLocationSetsToRun[$strSettingsName] = $this->_parseSearchSettingsFromINI_($iniSettings);
+                        $this->arrSearchLocationSetsToRun[$strSettingsName] = $this->_parseLocationSettingsFromINI_($iniSettings);
                         $this->arrSearchLocationSetsToRun[$strSettingsName]['name'] = $strSettingsName;
                         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added set of search settings named " . $this->arrSearchLocationSetsToRun[$strSettingsName]['name'] . " with values = " . var_export($this->arrSearchLocationSetsToRun[$strSettingsName], true), \Scooper\C__DISPLAY_ITEM_DETAIL__);
                     }
@@ -248,7 +251,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             else
             {
                 $strSettingsName = $config->search_location_setting_set['name'];
-                $this->arrSearchLocationSetsToRun[$strSettingsName] = $this->_parseSearchSettingsFromINI_($config->search_location_setting_set);
+                $this->arrSearchLocationSetsToRun[$strSettingsName] = $this->_parseLocationSettingsFromINI_($config->search_location_setting_set);
                 $this->arrSearchLocationSetsToRun[$strSettingsName]['name'] = $strSettingsName;
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added set of search settings named " . $this->arrSearchLocationSetsToRun[$strSettingsName]['name'] . " with values = " . var_export($this->arrSearchLocationSetsToRun[$strSettingsName], true), \Scooper\C__DISPLAY_ITEM_DETAIL__);
             }
@@ -274,13 +277,25 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         {
             $tempSearch['search_key'] = \Scooper\strScrub($tempSearch['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($tempSearch['search_name'], FOR_LOOKUP_VALUE_MATCHING);
         }
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added Search_Name=" . $tempSearch['search_name'] . "; site_name=" . $tempSearch['site_name'] . "; search_key=" . $tempSearch['search_key'] . "]; base_url_format='" . $tempSearch['base_url_format'] . "; keywords=" . $tempSearch['keywords'] . "; location_keyword=" . $tempSearch['location_keyword'] ."']", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added: " . $this->_getStringForSearchItem_('search_name', $tempSearch) . $this->_getStringForSearchItem_('site_name', $tempSearch) . $this->_getStringForSearchItem_('search_key', $tempSearch).  $this->_getStringForSearchItem_('base_url_format', $tempSearch) . $this->_getStringForSearchItem_('keywords', $tempSearch) . $this->_getStringForSearchItem_('location_keyword', $tempSearch), \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         return $tempSearch;
 
     }
 
-    private function _parseSearchSettingsFromINI_($iniSearchSetting)
+    private function _getStringForSearchItem_($strItem, $searchDetails)
+    {
+        $ret = "; " . $strItem ."=[";
+        if(strlen($searchDetails[$strItem]) > 0)
+        {
+            $ret = $ret . $searchDetails[$strItem];
+        }
+        $ret = $ret . "]";
+        return $ret;
+    }
+
+
+    private function _parseLocationSettingsFromINI_($iniSearchSetting)
     {
         $tempSettings = null;
 
@@ -295,6 +310,26 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
 
         return $tempSettings;
+    }
+
+    private function _parseKeywordSettingsFromINI_($config)
+    {
+        if($config->search_keyword_set)
+        {
+            if(is_object($config->search_keyword_set))
+            {
+                foreach($config->search_keyword_set as $keyword)
+                {
+                    $this->arrSearchKeywordSet[] = $keyword;
+                }
+            }
+            else
+            {
+                $this->arrSearchKeywordSet[] = $config->search_keyword_set;
+            }
+
+        }
+
     }
 
 
@@ -333,6 +368,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         if($arrAllJobsLoadedFromSrc )
         {
             $this->normalizeJobList($arrAllJobsLoadedFromSrc);
+            $this->arrUserInputJobs = $arrAllJobsLoadedFromSrc;
         }
 
         if($GLOBALS['OPTS']['DEBUG'] == true)
@@ -349,7 +385,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         //
         // Set a global var with an array of all input cSV jobs marked new or not marked as excluded (aka "Yes" or "Maybe")
         //
-        $this->arrUserInputJobs = $arrAllJobsLoadedFromSrc;
 
         $this->arrUserInputJobs_Active = array_filter($arrAllJobsLoadedFromSrc, "isMarked_InterestedOrBlank");
         $GLOBALS['logger']->logLine(count($this->arrUserInputJobs_Active). " active job listings loaded from user input CSVs.", \Scooper\C__DISPLAY_SUMMARY__);
@@ -442,8 +477,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // (with the exception of Amazon for historical reasons)
         //
         $classMulti = new ClassMultiSiteSearch($this->detailsOutputSubfolder['full_file_path']);
-        $classMulti->addSearches($this->arrSearchesToReturn, $this->arrSearchLocationSetsToRun);
-        $classMulti->downloadAllUpdatedJobs( $this->nNumDaysToSearch);
+        $classMulti->addMultipleSearches($this->arrSearchesToReturn, $this->arrSearchLocationSetsToRun);
+        $classMulti->getJobsForMyMultipleSearches( $this->nNumDaysToSearch, $this->arrSearchKeywordSet);
         $this->_addJobsToMyJobsList_($classMulti->getMyJobsList());
 
         //
@@ -469,7 +504,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         $detailsBodyContentFile = null;
 
-       $GLOBALS['logger']->logLine(count($this->arrLatestJobs_UnfilteredByUserInput). " raw, latest job listings from " . count($this->arrSearchesToReturn) . " searches downloaded to " . $strRawJobsListOutput, \Scooper\C__DISPLAY_SUMMARY__);
+       $GLOBALS['logger']->logLine(count($this->arrLatestJobs_UnfilteredByUserInput). " raw, latest job listings from " . count($this->arrSearchesToReturn) . " search(es) downloaded to " . $strRawJobsListOutput, \Scooper\C__DISPLAY_SUMMARY__);
 
 
     }
@@ -590,13 +625,13 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // Output all records that were previously marked excluded manually by the user
         // $arrJobs_ManualExcl = $this->outputFilteredJobsListToFile("isMarked_ManuallyNotInterested", "_ManuallyExcludedJobs");
 
-        $strOutputResult = "Result:  ". PHP_EOL. "All:       ". count($arrJobs_Active) . " Active, " .count($arrJobs_AutoExcluded). " Auto-Filtered, " . count($this->arrLatestJobs).  " Total Jobs." .PHP_EOL;
+        $strOutputResult = "Result:  ". PHP_EOL. "All:\t\t". count($arrJobs_Active) . " Active, " .count($arrJobs_AutoExcluded). " Auto-Filtered, " . count($this->arrLatestJobs).  " Total Jobs." .PHP_EOL;
         if($this->arrUserInputJobs != null && count($this->arrUserInputJobs) > 0)
         {
-            $strOutputResult = $strOutputResult . "User Inputted:       ". count(array_filter($this->arrUserInputJobs, 'isMarkedInterested_IsBlank')) . " Active, " .count($this->arrUserInputJobs). " Total Jobs." .PHP_EOL;
+            $strOutputResult = $strOutputResult . "User Input:\t\t". count(array_filter($this->arrUserInputJobs, 'isMarkedInterested_IsBlank')) . " Active, " .count($this->arrUserInputJobs). " Total Jobs." .PHP_EOL;
         }
 
-        $strOutputResult = $strOutputResult . "New:       ". count($arrJobs_NewOnly) . " jobs for review. " .count($arrJobs_UpdatedButFiltered). " jobs were auto-filtered, ". count($arrJobs_Updated) . " updated; " . count($arrJobs_Updated). " Jobs Downloaded Today." .PHP_EOL;
+        $strOutputResult = $strOutputResult . "New:\t\t". count($arrJobs_NewOnly) . " jobs for review. " .count($arrJobs_UpdatedButFiltered). " jobs were auto-filtered, ". count($arrJobs_Updated) . " updated; " . count($arrJobs_Updated). " Jobs Downloaded Today." .PHP_EOL;
 
         $strResultCounts = $this->getListingCountsByPlugin();
         $strOutputResult = $strOutputResult . PHP_EOL . $strResultCounts;
@@ -820,30 +855,30 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                 $arrExcluded[$strName] = $strName;
             }
         }
-        usort($arrCounts, "sortByCountDesc");
-        sort($arrNoJobUpdates);
-        sort($arrExcluded);
 
-        foreach($arrHeaders as $value)
+
+        if($arrCounts != null && count($arrCounts) > 0)
         {
-            $strOut = $strOut . sprintf("%-18s", $value);
-        }
-        $strOut = $strOut . PHP_EOL;
-
-
-        foreach($arrCounts as $site)
-        {
-            foreach($site as $value)
+          foreach($arrHeaders as $value)
             {
                 $strOut = $strOut . sprintf("%-18s", $value);
             }
             $strOut = $strOut . PHP_EOL;
+            usort($arrCounts, "sortByCountDesc");
+            foreach($arrCounts as $site)
+            {
+                foreach($site as $value)
+                {
+                    $strOut = $strOut . sprintf("%-18s", $value);
+                }
+                $strOut = $strOut . PHP_EOL;
+            }
+            $strOut = $strOut . PHP_EOL;
         }
-
-        $strOut = $strOut . PHP_EOL;
 
         if($arrNoJobUpdates != null && count($arrNoJobUpdates) > 0)
         {
+            sort($arrNoJobUpdates);
             $strOut = $strOut . PHP_EOL .  "No updated jobs for " . \Scooper\getTodayAsString() . " on these sites: " . PHP_EOL;
 
             foreach($arrNoJobUpdates as $site)
@@ -855,6 +890,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         if($arrExcluded != null && count($arrExcluded) > 0)
         {
+            sort($arrExcluded);
             $strOut = $strOut . PHP_EOL .  "Excluded sites for this run:" . PHP_EOL;
 
             foreach($arrExcluded as $site)

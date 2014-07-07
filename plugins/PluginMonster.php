@@ -19,7 +19,7 @@ define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 
-
+define('MONSTER_FLAGS', C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES);
 
 class PluginMonster extends ClassJobsSitePlugin
 {

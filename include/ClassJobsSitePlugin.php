@@ -25,13 +25,13 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     protected $arrLatestJobs = null;
     protected $arrSearchesToReturn = null;
     protected $arrSearchLocationSetsToRun = null;
-    protected $arrSearchKeywordSetsToRun = null;
     protected $nJobListingsPerPage = 20;
     protected $flagSettings = null;
     protected $strFilePath_HTMLFileDownloadScript = null;
     protected $strBaseURLFormat = null;
     protected $typeLocationSearchNeeded = null;
     protected $locationValue = null;
+    protected $strKeywordDelimiter = null;
 
     function __construct($strOutputDirectory = null)
     {
@@ -183,12 +183,27 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             $nLastCount = count($this->arrLatestJobs);
 
             $strSite = strtolower($search['site_name']);
-            if(strcasecmp($strSite, $this->siteName) == 0)
+            if(strcasecmp($strSite, strtolower($this->siteName)) == 0)
             {
                 $this->getMyJobsForSearch($search, $nDays);
             }
         }
     }
+
+    protected function getMyJobsForSearch($searchDetails, $nDays = -1)
+    {
+        /*
+        $keywordsSettings = $this->arrSearchKeywordSetsToRun;
+        if($keywordsSettings == null || count($keywordsSettings) == 0 || $this->_isBitFlagSet_(C__JOB_KEYWORD_PARAMETER_NOT_SUPPORTED))
+        {
+            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' with no keyword settings...", \Scooper\C__DISPLAY_SECTION_START__);
+            $this->_runLocationSetForKeywordsSet_($searchDetails, $nDays, null);
+        }
+        elseif($searchDetails['keywords'] != null && strlen($searchDetails['keywords']) == 0)
+        */
+        $this->_runSearchesForEachLocationSetting($searchDetails, $nDays);
+    }
+
 
     protected function getJobsForSearchByType($searchDetails, $nDays, $locSingleSettingSet = null)
     {
@@ -222,7 +237,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     {
         if($this->_isBitFlagSet_(C__JOB_LOCATION_PARAMETER_NOT_SUPPORTED))
         {
-            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' with no location settings...", \Scooper\C__DISPLAY_SECTION_START__);
+            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' with no location settings..." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_START__);
             $this->getJobsForSearchByType($searchDetails, $nDays, null);
         }
         else
@@ -241,34 +256,12 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             {
                 foreach($this->arrSearchLocationSetsToRun as $locSingleSettingSet)
                 {
-                    $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' for location settings set '" . $locSingleSettingSet['name'] . "'...", \Scooper\C__DISPLAY_SECTION_START__);
+                    $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' for location settings set '" . $locSingleSettingSet['name'] . "'...", \Scooper\C__DISPLAY_ITEM_START__);
 
                     $this->getJobsForSearchByType($searchDetails, $nDays, $locSingleSettingSet);
+                    $GLOBALS['logger']->logLine("Completed ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' for location settings set '" . $locSingleSettingSet['name'] . "'...", \Scooper\C__DISPLAY_ITEM_RESULT__);
                 }
             }
-        }
-    }
-
-    public function getMyJobsForSearch($searchDetails, $nDays = -1)
-    {
-        /*
-        $keywordsSettings = $this->arrSearchKeywordSetsToRun;
-        if($keywordsSettings == null || count($keywordsSettings) == 0 || $this->_isBitFlagSet_(C__JOB_KEYWORD_PARAMETER_NOT_SUPPORTED))
-        {
-            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' with no keyword settings...", \Scooper\C__DISPLAY_SECTION_START__);
-            $this->_runLocationSetForKeywordsSet_($searchDetails, $nDays, null);
-        }
-        elseif($searchDetails['keywords'] != null && strlen($searchDetails['keywords']) == 0)
-        */
-        if($searchDetails['keywords'] != null && strlen($searchDetails['keywords']) == 0)
-        {
-            $keywordsSettings = array('keywords' => $searchDetails['keywords']);
-            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' with ". ($keywordsSettings == null ? "" : ("and keywords = ". var_export($keywordsSettings, true))) ." settings...", \Scooper\C__DISPLAY_SECTION_START__);
-            $this->_runSearchesForEachLocationSetting($searchDetails, $nDays);
-        }
-        else
-        {
-            $this->_runSearchesForEachLocationSetting($searchDetails, $nDays);
         }
     }
 
@@ -279,7 +272,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         // if($strURL == -1) $GLOBALS['logger']->logLine("Skipping " . $this->siteName ." search '".$details['search_name']. "' because a valid URL could not be set.");
     }
 
-    function getMyJobsForSearchFromXML($searchDetails, $nDays = -1, $locSingleSettingSet=null)
+    protected function getMyJobsForSearchFromXML($searchDetails, $nDays = -1, $locSingleSettingSet=null)
     {
 
         ini_set("user_agent",C__STR_USER_AGENT__);
@@ -363,7 +356,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
 
 
-    function getMyJobsForSearchFromWebpage($searchDetails, $nDays = -1, $locSingleSettingSet=null)
+    protected function getMyJobsForSearchFromWebpage($searchDetails, $nDays = -1, $locSingleSettingSet=null)
     {
 
         $nItemCount = 1;
@@ -514,6 +507,15 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     function getDaysURLValue($days) { return ($days == null || $days == "") ? 1 : $days; } // default is to return the raw number
     function getItemURLValue($nItem) { return ($nItem == null || $nItem == "") ? 0 : $nItem; } // default is to return the raw number
     function getPageURLValue($nPage) { return ($nPage == null || $nPage == "") ? "" : $nPage; } // default is to return the raw number
+    function getKeywordURLValue($strKeywords)
+    {
+        if($this->_isBitFlagSet_(C__JOB_LOCATION_PARAMETER_NOT_SUPPORTED))
+        {
+            return -1;
+        }
+        return $strKeywords;
+    }
+
 
     function getLocationURLValue($searchDetails, $locSettingSets = null)
     {
@@ -560,76 +562,56 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         return $strReturnLocation;
     }
 
-
-    protected function _getLocationValueFromSettings_($settingsSet, $fLowerCase = false)
+    function isJobListingMine($var)
     {
-        $strReturnLocation = -1;
-
-        if($settingsSet['search_location_override'] != null && strlen($settingsSet['search_location_override']) > 0)
+        if(substr_count($var['job_site'], strtolower($this->siteName)) > 0)
         {
-            $strReturnLocation = $settingsSet['search_location_override'];
-        }
-        else
-        {
-
-            $locTypeNeeded = $this->getLocationSettingType();
-            if($settingsSet != null && count($settingsSet) > 0 && $settingsSet[$locTypeNeeded] != null)
-            {
-                $strReturnLocation = $settingsSet[$locTypeNeeded];
-            }
+            return true;
         }
 
-        if($fLowerCase == true)
-        {
-            $strReturnLocation = strtolower($strReturnLocation);
-        }
-        return $strReturnLocation;
+        return false;
     }
-
-    private function _isValueURLEncoded_($str)
-    {
-        if(strlen($str) <= 0) return 0;
-        return (\Scooper\substr_count_array($str, array("%22", "&", "=", "+", "-", "%7C", "%3C" )) >0 );
-
-    }
-
-    function getKeywordURLValue($strKeywords)
-    {
-        // TODO: Keywords in settings set not yet supported
-
-        $arrKeywords = explode(",", $strKeywords);
-        if(count($arrKeywords) > 1)
-        {
-            throw new ErrorException($this->siteName . " can only support a single keyword per search.  Skipping all searches for " . $this->siteName . " until that has been fixed.");
-        }
-        $strReturnKeywords = $arrKeywords[0];
-        if(!$this->_isValueURLEncoded_($strReturnKeywords)) { $strReturnKeywords = urlencode($strReturnKeywords); }
-
-        return ($strReturnKeywords[0] == null || $strReturnKeywords[0] == "") ? "" : $strReturnKeywords;
-    }
-
-//    function addSearchURL($site, $name, $fmtURL)
-//    {
-//        $this->addSearches(array('site_name' => $site, 'search_name' => $name, 'base_url_format' =>$fmtURL));
-//
-//    }
 
     function getMySearches()
     {
         return $this->arrSearchesToReturn;
     }
 
-    function addSearches($arrSearches, $locSettingSets = null)
+    function addSearches($arrSearches, $locSettingSets = null, $keywordSet = null)
     {
 
         if(!is_array($arrSearches[0])) { $arrSearches[] = $arrSearches; }
-        foreach($arrSearches as $searchDetails)
+
+        if($this->_isBitFlagSet_(C__JOB_KEYWORD_PARAMETER_NOT_SUPPORTED))
         {
-            $this->addSearch($searchDetails, $locSettingSets);
+            $this->addSearch($arrSearches[0], $locSettingSets);
+        }
+        else
+        {
+
+            $strCombinedKeywords = $this->getCombinedKeywordValueForSearches($keywordSet);
+            foreach($arrSearches as $searchDetails)
+            {
+                if($searchDetails['keywords'] != null && strlen($searchDetails['keywords'])>0)
+                {
+                    $this->addSearch($searchDetails, $locSettingSets);
+                }
+                elseif($strCombinedKeywords == -1)
+                {
+                    $this->addSearch($searchDetails, $locSettingSets);
+                }
+                else
+                {
+                    $newCombinedSearch = $searchDetails;
+                    $newCombinedSearch['keywords'] = $strCombinedKeywords;
+                    $this->addSearch($newCombinedSearch, $locSettingSets);
+                }
+            }
         }
     }
 
-    function addSearch($searchDetails, $locSettingSets = null)
+
+    protected function addSearch($searchDetails, $locSettingSets = null)
     {
         //
         // Add the search to the list of ones to run
@@ -640,7 +622,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     }
 
-    function addSearchLocations($searchDetails, $locSettingSets = null)
+    protected function addSearchLocations($searchDetails, $locSettingSets = null)
     {
         //
         // Add the search locations to the list of ones to run
@@ -669,6 +651,87 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
     }
 
+
+    protected function _getLocationValueFromSettings_($settingsSet, $fLowerCase = false)
+    {
+        $strReturnLocation = -1;
+
+        if($settingsSet['search_location_override'] != null && strlen($settingsSet['search_location_override']) > 0)
+        {
+            $strReturnLocation = $settingsSet['search_location_override'];
+        }
+        else
+        {
+
+            $locTypeNeeded = $this->getLocationSettingType();
+            if($settingsSet != null && count($settingsSet) > 0 && $settingsSet[$locTypeNeeded] != null)
+            {
+                $strReturnLocation = $settingsSet[$locTypeNeeded];
+            }
+        }
+        if(!$this->_isValueURLEncoded_($strReturnLocation)) { $strReturnLocation = urlencode($strReturnLocation); }
+
+        if($fLowerCase == true)
+        {
+            $strReturnLocation = strtolower($strReturnLocation);
+        }
+        return $strReturnLocation;
+    }
+
+    private function _isValueURLEncoded_($str)
+    {
+        if(strlen($str) <= 0) return 0;
+        return (\Scooper\substr_count_array($str, array("%22", "&", "=", "+", "-", "%7C", "%3C" )) >0 );
+
+    }
+
+    protected function getCombinedKeywordValueForSearches($arrSearchKeywords)
+    {
+        $arrKeywords = array();
+
+        if(count($arrSearchKeywords) == 1)
+        {
+            $arrKeywords[] = $arrSearchKeywords[0];
+        }
+        else
+        {
+            $arrKeywords = array_combine($arrKeywords, $arrSearchKeywords);
+        }
+
+        $strReturnKeywords = -1;
+
+        if(!($this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_ALLOWED)) && count($arrKeywords) > 1)
+        {
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($this->siteName . " can only support a single keyword per search.  Skipping search with multiple keywords =" . var_export($arrKeywords, true), \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+        }
+        else
+        {
+            if(count($arrKeywords) == 1)
+            {
+                $strReturnKeywords = $arrKeywords[0];
+            }
+            else
+            {
+                if($this->strKeywordDelimiter == null)
+                {
+                    throw new ErrorException($this->siteName . " supports multiple keyword terms, but has not set the \$strKeywordDelimiter value in " .get_class($this). " Aborting search beacyse cannot create the URL.");
+                }
+
+                foreach($arrKeywords as $kywd)
+                {
+                    $strReturnKeywords = (strlen($strReturnKeywords) > 0 ? ' '. $this->strKeywordDelimiter .' ' : '') . '"' . $strReturnKeywords . '"';
+                }
+            }
+            if(!$this->_isValueURLEncoded_($strReturnKeywords)) { $strReturnKeywords = urlencode($strReturnKeywords); }
+            if($this->_isBitFlagSet_(C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES))
+            {
+                $strReturnKeywords = str_replace("%22", "-", $strReturnKeywords);
+            }
+        }
+        return $strReturnKeywords;
+    }
+
     protected function _getURLfromBase_($searchDetails, $nDays, $nPage = null, $nItem = null, $locSingleSettingSet=null)
     {
         $strURL = null;
@@ -692,7 +755,16 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
         if(!$this->_isBitFlagSet_(C__JOB_KEYWORD_PARAMETER_NOT_SUPPORTED))
         {
-            $strURL = str_ireplace("***KEYWORDS***", $this->getKeywordURLValue($searchDetails['keywords']) , $strURL );
+            $keywordValue = $this->getKeywordURLValue($searchDetails['keywords']);
+            if($keywordValue == null)
+            {
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search '" . $searchDetails['search_name'] ."' did not include a required keyword string value.  Skipping search...", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                $strURL = -1;
+            }
+            else
+            {
+                $strURL = str_ireplace("***KEYWORDS***", $keywordValue, $strURL );
+            }
         }
 
         if(!$this->_isBitFlagSet_(C__JOB_LOCATION_PARAMETER_NOT_SUPPORTED))
@@ -714,16 +786,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     private function _isBitFlagSet_($flagToCheck)
     {
         $ret = ($this->flagSettings & $flagToCheck);
-        if($ret > 0) { return true; }
-        return false;
-    }
-    function isJobListingMine($var)
-    {
-        if(substr_count($var['job_site'], strtolower($this->siteName)) > 0)
-        {
-            return true;
-        }
-
+        if($ret == $flagToCheck) { return true; }
         return false;
     }
 
