@@ -57,12 +57,15 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
                     continue;
                 }
 
-                $class = null;
-
                 $strSiteClass = $GLOBALS['DATA']['site_plugins'][strtolower($search['site_name'])]['class_name'];
-                $arrPluginClassesToRun[$strSiteClass] = array('class_name'=>$strSiteClass, 'site_name'=>$search['site_name'], 'searches' =>null);
+                if($arrPluginClassesToRun[$strSiteClass] == null)
+                {
+                    $arrPluginClassesToRun[$strSiteClass] = array('class_name'=>$strSiteClass, 'site_name'=>$search['site_name'], 'searches' =>null);
+                }
                 $arrPluginClassesToRun[$strSiteClass]['searches'][] = $search;
             }
+
+            $class = null;
 
             foreach($arrPluginClassesToRun as $classSearches)
             {
@@ -75,7 +78,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
                     $this->_addJobsToMyJobsList_($class->getMyJobsList());
                     $class = null;
                 }
-                catch (ErrorException $classError)
+                catch (Exception $classError)
                 {
                     $GLOBALS['logger']->logLine('ERROR:  Unable to load the class for ' .$classSearches['site_name'] . '. Skipping '. $search['search_name'] .' search and continuing with any others.', \Scooper\C__DISPLAY_ERROR__);
                     $GLOBALS['logger']->logLine('ERROR:  Search failure reason:  '.$classError->getMessage(), \Scooper\C__DISPLAY_ERROR__);
