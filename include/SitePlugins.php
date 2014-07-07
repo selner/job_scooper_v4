@@ -75,7 +75,6 @@ define('C__JOB_BASETYPE_NONE_NO_LOCATION_OR_KEYWORDS', C__JOB_SEARCH_RESULTS_TYP
 
 $GLOBALS['DATA']['location_types'] = array('location-city', 'location-city-comma-statecode', 'location-city-comma-statecode-underscores-and-dashes', 'location-city-comma-state', 'location-city-comma-state-country', 'location-statecode', 'location-state', 'location-city-comma-state-country-no-commas');
 
-setupPlugins();
 
 function setupPlugins()
 {

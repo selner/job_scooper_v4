@@ -34,9 +34,9 @@ const C__STR_USER_AGENT__ = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) Appl
 
 date_default_timezone_set("America/Los_Angeles");
 
-
 function __initializeArgs__()
 {
+    setupPlugins();
 
     $GLOBALS['OPTS_SETTINGS']  = array(
         'use_config_ini' => array(
@@ -106,31 +106,33 @@ function is_IncludeSite($strName)
 {
     $strIncludeSiteKey = "include_" . strtolower($strName);
     $strGivenKey = $strIncludeSiteKey."_given";
-
+    $ret = false;
 
     if($GLOBALS['OPTS'][$strGivenKey] == true)
     {
        switch($GLOBALS['OPTS'][$strIncludeSiteKey])
        {
            case 0:
-               $GLOBALS['OPTS'][$strIncludeSiteKey] = 0;
+               $GLOBALS['OPTS'][$strIncludeSiteKey] = false;
                 break;
 
            case -1:
            case 1:
            default:
-           $GLOBALS['OPTS'][$strIncludeSiteKey] = 1;
+           $GLOBALS['OPTS'][$strIncludeSiteKey] = true;
            break;
 
        }
+       $ret = $GLOBALS['OPTS'][$strIncludeSiteKey];
     }
     else if($GLOBALS['OPTS']['include_all_given'] == true)
     {
         $GLOBALS['OPTS'][$strGivenKey] = true;
         $GLOBALS['OPTS'][$strIncludeSiteKey] = true;
+        $ret = $GLOBALS['OPTS'][$strIncludeSiteKey];
     }
 
 
 
-    return $GLOBALS['OPTS'][$strIncludeSiteKey];
+    return $ret;
 }
