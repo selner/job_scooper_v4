@@ -25,6 +25,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     protected $arrUserInputJobs = null;
     protected $arrUserInputJobs_Active = null;
     protected $arrUserInputJobs_Inactive = null;
+    protected $arrLatestJobs_UnfilteredByUserInput = null;
     protected $arrJobCSVUserInputFiles = null;
     protected $nNumDaysToSearch = -1;
     protected $detailsOutputSubfolder = null;
@@ -223,7 +224,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             //
             // Check if this is a single search setting or if it's a set of search settings
             //
-            if (is_object($config->search_location_setting_set) && (count($config->search_location_setting_set) > 1))
+            if (is_object($config->search_location_setting_set))
             {
                 foreach($config->search_location_setting_set as $iniSettings)
                 {
