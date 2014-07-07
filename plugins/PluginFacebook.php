@@ -30,8 +30,11 @@ class PluginFacebook extends ClassJobsSitePlugin
     protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
     protected $typeLocationSearchNeeded = 'location-city';
 
-    function setLocationValue($locVal) { $this->locationValue = strtolower($locVal); }
 
+    protected function _getLocationValueFromSettings_($settingsSet)
+    {
+        return parent::_getLocationValueFromSettings_($settingsSet, true);
+    }
 
     function parseJobsListForPage($objSimpHTML)
     {

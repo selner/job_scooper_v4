@@ -30,6 +30,10 @@ class PluginCraigslist  extends ClassJobsSitePlugin
     protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
     protected $typeLocationSearchNeeded = 'location-city';
 
+    protected function _getLocationValueFromSettings_($settingsSet)
+    {
+        return parent::_getLocationValueFromSettings_($settingsSet, true);
+    }
 
 
     function getItemURLValue($nItem)
