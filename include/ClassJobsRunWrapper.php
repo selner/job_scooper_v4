@@ -463,6 +463,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     //
     protected function getLatestRawJobsFromAllSearches()
     {
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //
         // Download all the job listings for all the users searches
@@ -647,13 +648,210 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         //
         // Send the email notification out for the completed job
         //
-        $this->__sendJobCompletedEmail__($strOutputResult, $detailsCSVFile, $detailsHTMLFile);
+        $this->__sendJobCompletedEmail__($strOutputResult, null /* HTML body */, $detailsCSVFile, $detailsHTMLFile);
 
         $GLOBALS['logger']->logLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
     }
 
 
     private function __sendJobCompletedEmail__($strBodyText = null, $detailsFileCSV = null, $detailsFileHTML = null)
+    {
+            $ret = $this->__sendJobCompletedEmail_PHP__($strBodyText, $detailsFileCSV, $detailsFileHTML);
+            // $ret = $this->__sendJobCompletedEmail_Applescript__($strBodyText, $strBodyHTML, $detailsFileCSV, $detailsFileHTML);
+            if($ret != true)
+            {
+                $GLOBALS['logger']->logLine("Failed to send notification email with error = ".$result['stderr'], \Scooper\C__DISPLAY_ERROR__);
+            }
+            else
+            {
+                $GLOBALS['logger']->logLine("Email notification sent.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            }
+
+    }
+
+
+    private function __sendJobCompletedEmail_PHP__($strBodyText = null, $detailsFileCSV = null, $detailsFileHTML = null)
+    {
+
+        $subject = "";
+        $messageHtml = "";
+        $messageText = "";
+
+        //
+        // Setup the plaintext content
+        //
+        if($strBodyText != null && strlen($strBodyText) > 0)
+        {
+            //
+            // Add the message section content
+            //
+            $strUpdateNote = "New job postings found for " . \Scooper\getTodayAsString() .". ";
+            if($detailsFileCSV != null && $detailsFileCSV['file_name'] != null)
+            {
+                $strCSVFile = $detailsFileCSV['file_name'];
+                $strUpdateNote .= "Results attached: " . $strCSVFile . PHP_EOL;
+            }
+
+
+            //
+            // Setup the plaintext message text value
+            //
+            $messageText = $strBodyText;
+            $messageText .= PHP_EOL . $strUpdateNote;
+
+            //
+            // Setup the value for the html version of the message
+            //
+            $messageHtml  .= '<H3>Job Scooper Results</H3>'.PHP_EOL. PHP_EOL;
+            $messageHtml  .= $messageText . PHP_EOL. PHP_EOL;
+            $content = $this->_getFullFileContents_($detailsFileHTML);
+            $messageHtml  .= $content . PHP_EOL. PHP_EOL. "</body></html>";
+
+        }
+        //
+        // Add initial email address header values
+        //
+        if(!$this->_getEmailAddressByType_($toEmail, "to"))
+        {
+            $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
+            return false;
+        }
+
+        if(!$this->_getEmailAddressByType_($bccEmail, "bcc"))
+        {
+            $bccEmail = null;
+        }
+
+        if(!$this->_getEmailAddressByType_($fromEmail, "from"))
+        {
+            $fromEmail['address'] = "From: dev@recoilvelocity.com";
+        }
+
+        $mail = new PHPMailer();
+
+//        $mail->isSMTP();                                      // Set mailer to use SMTP
+
+        $mail->From = $fromEmail['address'];
+        if(strlen($fromEmail['address']) > 0)
+        {
+            $mail->FromName = $fromEmail['name'];
+
+        }
+        $mail->addAddress($toEmail['address'], $toEmail['name']);     // Add a recipient
+//        $mail->addAddress('ellen@example.com');               // Name is optional
+//        $mail->addReplyTo('info@example.com', 'Information');
+//        $mail->addCC('cc@example.com');
+        if($bccEmail != null)
+        {
+            $mail->addBCC($bccEmail['address']);
+        }
+
+        $mail->WordWrap = 50;                                 // Set word wrap to 50 characters
+        $mail->addAttachment($detailsFileCSV['full_file_path']);         // Add attachments
+        $mail->addAttachment($detailsFileHTML['full_file_path']);         // Add attachments
+        $mail->isHTML(true);                                  // Set email format to HTML
+
+        $mail->Subject = $subject;
+        $mail->Body    = $messageHtml;
+        $mail->AltBody = $messageText;
+
+
+        $ret = $mail->send();
+        if($ret != true)
+        {
+            $GLOBALS['logger']->logLine("Failed to send notification email with error = ".$mail->ErrorInfo, \Scooper\C__DISPLAY_ERROR__);
+        }
+        else
+        {
+            $GLOBALS['logger']->logLine("Email notification sent.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        }
+        return $ret;
+
+
+    }
+
+
+    private function _getHeadersForAttachment_($detailsFile, $strBoundaryNum, $strContentType)
+    {
+        $retHeaders = "";
+
+        if($detailsFile != null && $detailsFile['full_file_path'] != null)
+        {
+            $fileName = $detailsFile['file_name'];
+            $attachmentContent = $this->_getFullFileContents_($detailsFile);
+
+            if(strlen($attachmentContent) > 0)
+            {
+                $retHeaders .= "Content-Type:  ".$strContentType . " name=\"$fileName\"".ASCII_LINEEND;
+                $retHeaders .= "Content-Transfer-Encoding:base64".ASCII_LINEEND;
+                $retHeaders .= "Content-Disposition:attachment; filename=\"$fileName\"".ASCII_LINEEND.chr(10);
+                # encode the data for safe transit
+                # and insert \r\n after every 76 chars.
+                $encoded_content = chunk_split( base64_encode($attachmentContent));
+                $retHeaders .= "$encoded_content".ASCII_LINEEND;
+                $retHeaders .= "--$strBoundaryNum";
+                return $retHeaders;
+            }
+        }
+
+        return null;
+
+    }
+private function _getFullFileContents_($detailsFile)
+    {
+        $content = null;
+        $filePath = $detailsFile['full_file_path'];
+
+        if(strlen($filePath) < 0)
+        {
+            $GLOBALS['logger']->logLine("Unable to get contents from '". var_export($detailsFile, true) ."' to include in email.  Failing notification.", \Scooper\C__DISPLAY_ERROR__);
+            return null;
+        }
+
+        # Open a file
+        $file = fopen( $filePath, "r" );
+        if( $file == false )
+        {
+            $GLOBALS['logger']->logLine("Unable to open file '". $filePath ."' for to get contents for notification mail.  Failing notification.", \Scooper\C__DISPLAY_ERROR__);
+            return null;
+        }
+
+        # Read the file into a variable
+        $size = filesize($filePath);
+        $content = fread( $file, $size);
+
+        return $content;
+    }
+
+
+    private function _getPHPMailHeadersForAttachment_($detailsFile)
+    {
+
+        $content = $this->_getFullFileContents_($detailsFile);
+
+        # encode the data for safe transit
+        # and insert \r\n after every 76 chars.
+        $encoded_content = chunk_split( base64_encode($content));
+
+        # Get a random 32 bit number using time() as seed.
+        $boundaryTag = md5( time() );
+
+//        $headers  .= "boundary=$boundaryTag".ASCII_LINEEND;
+//        $headers  .= "--$boundaryTag".ASCII_LINEEND;
+
+
+        # Define the attachment section
+        $headers .= "Content-Type:  multipart/mixed; ";
+        $headers .= "name=\"test.txt\"".ASCII_LINEEND;
+        $headers .= "Content-Transfer-Encoding:base64".ASCII_LINEEND;
+        $headers .= "Content-Disposition:attachment; ";
+        $headers .= "filename=\"test.txt\"".ASCII_LINEEND.chr(10);
+        $headers .= "$encoded_content".ASCII_LINEEND;
+        $headers .= "--$boundaryTag--";
+
+    }
+
+    private function __sendJobCompletedEmail_Applescript__($strBodyText = null, $detailsFileCSV = null, $detailsFileHTML = null)
     {
         //      set strEmailBodyContentFile to first item of argv
         //		set strFileToAttachCSV to second item of argv
@@ -705,54 +903,48 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         }
 
-        $toEmail = $this->__getEmptyEmailRecord__();;
-        $bccEmail = $this->__getEmptyEmailRecord__();;
+        if(!$this->_getEmailAddressByType_($toEmail, "to"))
+        {
+            $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
+            return;
+        }
+        if(!$this->_getEmailAddressByType_($bccEmail, "bcc"))
+        {
+            $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
+            return;
+        }
+        $result = "";
 
+        //
+        // Shell out to Applescript to send the email notifications
+        //
+        $strCmdToRun = 'osascript ' . __ROOT__ . '/main/email_job_run_results.appleScript "' . $strBodyFilePath  . '" "' . $strCSVFilePath  . '" "'.$strHTMLFilePath.'" "' . $toEmail['address'] . '" "' . $toEmail['name'] . '" "' . $bccEmail['address'] . '"';
+        $strCmdToRun = escapeshellcmd($strCmdToRun);
+        $GLOBALS['logger']->logLine("Starting email notifications: " . $strCmdToRun, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $result = \Scooper\my_exec($strCmdToRun);
+        $GLOBALS['logger']->logLine($result['stderr'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        return $result['stdout'];
+
+
+    }
+
+    private function _getEmailAddressByType_(&$emailRecord, $strType)
+    {
+        $fFound = false;
         if($this->arrEmailAddresses)
         {
             foreach($this->arrEmailAddresses as $email)
             {
-                switch($email['type'])
+                if(strcasecmp($email['type'], $strType) == 0)
                 {
-                    case "to":
-                        $toEmail = $email;
-                        break;
-
-                    case "bcc":
-                        $bccEmail = $email;
-                        break;
-
-                    default:
-                        break;
+                    $emailRecord = $email;
+                    $fFound = true;
                 }
 
             }
-
-            $result = "";
-
-            //
-            // Shell out to Applescript to send the email notifications
-            //
-            $strCmdToRun = 'osascript ' . __ROOT__ . '/main/email_job_run_results.appleScript "' . $strBodyFilePath  . '" "' . $strCSVFilePath  . '" "'.$strHTMLFilePath.'" "' . $toEmail['address'] . '" "' . $toEmail['name'] . '" "' . $bccEmail['address'] . '"';
-            $strCmdToRun = escapeshellcmd($strCmdToRun);
-            $GLOBALS['logger']->logLine("Starting email notifications: " . $strCmdToRun, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            $result = \Scooper\my_exec($strCmdToRun);
-            if($result['return'] != 0)
-            {
-                $GLOBALS['logger']->logLine("Failed to send notification email with error = ".$result['stderr'], \Scooper\C__DISPLAY_ERROR__);
-            }
-            else
-            {
-                $GLOBALS['logger']->logLine($result['stdout'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-            }
-
-            $GLOBALS['logger']->logLine("Email notification send done.", \Scooper\C__DISPLAY_ITEM_RESULT__);
         }
-        else
-        {
-            $GLOBALS['logger']->logLine("No email addresses were set; cannot send email notifications.", \Scooper\C__DISPLAY_ERROR__);
-        }
+
+        return $fFound;
 
     }
 
