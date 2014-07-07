@@ -35,8 +35,8 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
 
     function addSearches($arrSearches, $locSettingSets = null)
     {
-        $this->arrSearchesToReturn = $arrSearches;
         $this->arrSearchLocationSetsToRun = $locSettingSets;
+        $this->arrSearchesToReturn = $arrSearches;
     }
 
 

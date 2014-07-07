@@ -358,7 +358,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             }
 
         }
-        $GLOBALS['logger']->logLine(PHP_EOL.$this->siteName . "[".$searchDetails['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+        $GLOBALS['logger']->logLine($this->siteName . "[".$searchDetails['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
     }
 
 
@@ -443,7 +443,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             }
         }
 
-        $GLOBALS['logger']->logLine(PHP_EOL.$this->siteName . "[".$searchDetails['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+        $GLOBALS['logger']->logLine($this->siteName . "[".$searchDetails['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
 
     }
 
@@ -560,14 +560,28 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         return $strReturnLocation;
     }
 
-    private function _getLocationValueFromSettings_($settingsSet)
+
+    protected function _getLocationValueFromSettings_($settingsSet, $fLowerCase = false)
     {
         $strReturnLocation = -1;
 
-        $locTypeNeeded = $this->getLocationSettingType();
-        if($settingsSet != null && count($settingsSet) > 0 && $settingsSet[$locTypeNeeded] != null)
+        if($settingsSet['search_location_override'] != null && strlen($settingsSet['search_location_override']) > 0)
         {
-            $strReturnLocation = $settingsSet[$locTypeNeeded];
+            $strReturnLocation = $settingsSet['search_location_override'];
+        }
+        else
+        {
+
+            $locTypeNeeded = $this->getLocationSettingType();
+            if($settingsSet != null && count($settingsSet) > 0 && $settingsSet[$locTypeNeeded] != null)
+            {
+                $strReturnLocation = $settingsSet[$locTypeNeeded];
+            }
+        }
+
+        if($fLowerCase == true)
+        {
+            $strReturnLocation = strtolower($strReturnLocation);
         }
         return $strReturnLocation;
     }
@@ -615,18 +629,41 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
     }
 
-    function addSearch($arrSearch, $locSettingSets = null)
+    function addSearch($searchDetails, $locSettingSets = null)
     {
-        $this->arrSearchesToReturn[] = $arrSearch;
+        //
+        // Add the search to the list of ones to run
+        //
+        $this->arrSearchesToReturn[] = $searchDetails;
 
-        $locTypeSupported = $this->getLocationSettingType();
-        if($locTypeSupported != null && strlen($locTypeSupported) > 0 && $locSettingSets != null)
+        $this->addSearchLocations($searchDetails, $locSettingSets);
+
+    }
+
+    function addSearchLocations($searchDetails, $locSettingSets = null)
+    {
+        //
+        // Add the search locations to the list of ones to run
+        //
+        // If the search had location keywords, it overrides the locSettingSets
+        //
+        if($searchDetails['location_keyword'] != null && strlen($searchDetails['location_keyword']) > 0)
         {
-            foreach($locSettingSets as $set)
+            $locSingleSettingSet = array('name' => 'search_location_override', 'search_location_value_override' => $searchDetails['location_keyword']);
+            $this->arrSearchLocationSetsToRun['search_location_override'] = $locSingleSettingSet;
+        }
+        else
+        {
+            $locTypeSupported = $this->getLocationSettingType();
+            if($locTypeSupported != null && strlen($locTypeSupported) > 0 && $locSettingSets != null)
             {
-                if($set[$locTypeSupported] != null)
+                foreach($locSettingSets as $set)
                 {
-                    $this->arrSearchLocationSetsToRun[$set['name']][$locTypeSupported] = $set[$locTypeSupported];
+                    if($set[$locTypeSupported] != null)
+                    {
+                        $this->arrSearchLocationSetsToRun[$set['name']]['name'] = $set['name'];
+                        $this->arrSearchLocationSetsToRun[$set['name']][$locTypeSupported] = $set[$locTypeSupported];
+                    }
                 }
             }
         }
@@ -660,27 +697,16 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         if(!$this->_isBitFlagSet_(C__JOB_LOCATION_PARAMETER_NOT_SUPPORTED))
         {
-            $strLocationFromSettings = $this->_getLocationValueFromSettings_($locSingleSettingSet);
-            if($strLocationFromSettings == null)
+            $strLocationValue = $this->_getLocationValueFromSettings_($locSingleSettingSet);
+            if($strLocationValue == null)
             {
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search settings '" . $locSingleSettingSet['name'] ."' did not have the required location type of " . $this->getLocationSettingType() ." set.  Skipping search '". $searchDetails['search_name'] . "' with settings '" . $locSingleSettingSet['name'] ."'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 $strURL = -1;
             }
-            else
-            {
-                if($searchDetails['location_keyword'] != null && $searchDetails['location_keyword'] != "")
-                {
-                    $strLocationValue = $searchDetails['location_keyword'];
-                }
-                else
-                {
-                    $strLocationValue = $this->getLocationURLValue($searchDetails, $locSingleSettingSet);
-
-                    if($strLocationValue == null) { throw new ErrorException("Location value is required for " . $this->siteName . ", but was not set for the search '" . $searchDetails['name'] ."'.". " Aborting all searches for ". $this->siteName, \Scooper\C__DISPLAY_ERROR__); }
-                }
-                $strURL = str_ireplace("***LOCATION***", $strLocationValue, $strURL);
-            }
+            $strURL = str_ireplace("***LOCATION***", $strLocationValue, $strURL);
         }
+
+        if($strURL == null) { throw new ErrorException("Location value is required for " . $this->siteName . ", but was not set for the search '" . $searchDetails['name'] ."'.". " Aborting all searches for ". $this->siteName, \Scooper\C__DISPLAY_ERROR__); }
 
         return $strURL;
     }
