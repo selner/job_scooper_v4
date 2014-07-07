@@ -19,6 +19,11 @@ define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__ . '/include/ClassJobsSitePluginCommon.php');
 
 
+class PluginMashable extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = 'Mashable';
+    protected $siteBaseURL = 'http://jobs.mashable.com';
+}
 class PluginMilwaukeeWAJournalSentinal extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'MilwaukeeJournalSentinal';
@@ -172,7 +177,9 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
     protected $siteName = '';
     protected $siteBaseURL = '';
     protected $nJobListingsPerPage = 25;
-    protected $strBaseURLFormatSuffix = "/jobs/results/keyword/***KEYWORDS***?location=***LOCATION***&kwsJobTitleOnly=true&view=List_Detail&workType%5B0%5D=employee&radius=15&sort=Priority%20desc,%20PostDate%20desc&page=***PAGE_NUMBER***&modifiedDate=***NUMBER_DAYS***";
+    protected $strBaseURLFormatSuffix = "/jobs/results/keyword/***KEYWORDS***?location=***LOCATION***&kwsJobTitleOnly=true&view=List_Detail&networkView=national&radius=15&sort=Priority+desc,+PostDate+desc&page=***PAGE_NUMBER***&postDate=***NUMBER_DAYS***";
+//    protected $strBaseURLFormatSuffix = "/jobs/results/keyword/senior-manager/Seattle%2C+Washington%2C+United+States?view=List_Detail&radius=15&kwsJobTitleOnly=true&SearchNetworks=US&networkView=national&postDate=%5BNOW-7DAYS+TO+NOW%5D&sort=PostType%20asc,%20PostDate%20desc,%20IsFeatured%20desc";
+
     protected $strBaseURLFormat = null;
     protected $flagSettings = C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS;
 

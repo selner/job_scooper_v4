@@ -35,7 +35,7 @@ require_once (__ROOT__.'/plugins/PluginLinkUp.php');
 require_once (__ROOT__.'/plugins/PluginEmploymentGuide.php');
 require_once (__ROOT__.'/plugins/PluginMonster.php');
 require_once (__ROOT__.'/plugins/PluginCareerBuilder.php');
-require_once (__ROOT__.'/plugins/PluginMashable.php');
+// require_once (__ROOT__.'/plugins/PluginMashable.php');
 require_once (__ROOT__.'/plugins/PluginDisney.php');
 require_once (__ROOT__.'/plugins/PluginOuterwall.php');
 require_once (__ROOT__.'/plugins/PluginTableau.php');
