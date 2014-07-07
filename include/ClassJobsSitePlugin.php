@@ -120,7 +120,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 $retURL  =  $curlObj['actual_site_url'];
             }
         }
-        catch(ErrorException $err)
+        catch(Exception $err)
         {
             // do nothing
         }
@@ -225,7 +225,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 throw new ErrorException("Class ". get_class($this) . " does not have a valid setting for parser.  Cannot continue.");
             }
 
-        } catch (ErrorException $ex) {
+        } catch (Exception $ex) {
             $strError = "Failed to download jobs from " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "[URL=".$searchDetails['base_url_format']. "].  ".$ex->getMessage();
             $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
             if($GLOBALS['OPTS']['DEBUG'] == true) { throw new ErrorException( $strError); }
@@ -509,10 +509,16 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     function getPageURLValue($nPage) { return ($nPage == null || $nPage == "") ? "" : $nPage; } // default is to return the raw number
     function getKeywordURLValue($strKeywords)
     {
-        if($this->_isBitFlagSet_(C__JOB_LOCATION_PARAMETER_NOT_SUPPORTED))
+        if($this->_isBitFlagSet_(C__JOB_KEYWORD_PARAMETER_NOT_SUPPORTED))
         {
             return -1;
         }
+
+        if(!$this->_isValueURLEncoded_($strKeywords))
+        {
+            $strKeywords = urlencode($strKeywords);
+        }
+
         return $strKeywords;
     }
 
