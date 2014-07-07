@@ -33,7 +33,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     protected $detailsOutputFile = null;
     protected $arrEmailAddresses = null;
     protected $arrUserInputFiles = null;
-
+    protected $arrAllSearchesFromConfig = null;
 
     function ClassJobsRunWrapper()
     {
@@ -98,6 +98,14 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $this->detailsOutputFile = $userOutfileDetails;
         }
 
+        foreach($this->arrAllSearchesFromConfig as $search)
+        {
+            $plugin = $GLOBALS['DATA']['site_plugins'][strtolower($search['site_name'])];
+            if($plugin['include_in_run'] == true)
+            {
+                $this->arrSearchesToReturn[] = $search;
+            }
+        }
 
     }
 
@@ -209,12 +217,12 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             {
                 foreach($config->search as $iniSearch)
                 {
-                    $this->arrSearchesToReturn[] = $this->_parseSearchFromINI_($iniSearch);
+                    $this->arrAllSearchesFromConfig[] = $this->_parseSearchFromINI_($iniSearch);
                 }
             }
             else
             {
-                $this->arrSearchesToReturn[] = $this->_parseSearchFromINI_($config->search);
+                $this->arrAllSearchesFromConfig[] = $this->_parseSearchFromINI_($config->search);
             }
         }
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->arrSearchesToReturn) . " searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
@@ -762,60 +770,74 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         $strOut = "                ";
         $arrHeaders = array("Updated", "New", "Total", "Active", "Inactive");
+
+        $arrSitesSearched = null;
+        //
+        // First, build an array of all the possible job sites
+        // and set them to "false", meaning they weren't searched
+        //
+        foreach( $GLOBALS['DATA']['site_plugins'] as $plugin_setup)
+        {
+            $arrSitesSearched[$plugin_setup['name']] = false;
+
+        }
+
+        //
+        // Now go through the list of searches that were run and
+        // set the value to "true" for any job sites that were run
+        //
+        foreach($this->arrSearchesToReturn as $searchDetails)
+        {
+            $arrSitesSearched[strtolower($searchDetails['site_name'])] = true;
+        }
+
+
+        foreach( $GLOBALS['DATA']['site_plugins'] as $plugin_setup)
+        {
+            $strName = $plugin_setup['name'];
+            $fWasSearched = $arrSitesSearched[$plugin_setup['name']];
+            if($fWasSearched)
+            {
+                $classPlug = new $plugin_setup['class_name'](null, null);
+                $arrPluginJobs = array_filter($this->getMyJobsList(), array($classPlug, "isJobListingMine"));
+                $countUpdated = count(array_filter($arrPluginJobs, "isJobUpdatedToday"));
+                if($countUpdated == 0)
+                {
+                    $arrNoJobUpdates[$strName] = $strName;
+                }
+                else
+                {
+                    $arrCounts[$strName]['name'] = $strName;
+                    $arrCounts[$strName]['updated_today'] = $countUpdated;
+                    $arrCounts[$strName]['new_today'] = count(array_filter($arrPluginJobs, "isNewJobToday_Interested_IsBlank"));
+                    $arrCounts[$strName]['total_listings'] = count($arrPluginJobs);
+                    $arrCounts[$strName]['total_not_interested'] = count(array_filter($arrPluginJobs, "isMarked_NotInterested"));
+                    $arrCounts[$strName]['total_active'] = count(array_filter($arrPluginJobs, "isMarked_InterestedOrBlank"));
+                }
+            }
+            else
+            {
+                $arrExcluded[$strName] = $strName;
+            }
+        }
+        usort($arrCounts, "sortByCountDesc");
+        sort($arrNoJobUpdates);
+        sort($arrExcluded);
+
         foreach($arrHeaders as $value)
         {
             $strOut = $strOut . sprintf("%-18s", $value);
         }
         $strOut = $strOut . PHP_EOL;
 
-//        $arrCounts[$strName]['updated_today'] = count(array_filter($arrPluginJobs, "isJobUpdatedToday"));
 
-
-        foreach( $GLOBALS['DATA']['site_plugins'] as $plugin_setup)
+        foreach($arrCounts as $site)
         {
-            $strName = $plugin_setup['name'];
-            $classPlug = new $plugin_setup['class_name'](null, null);
-            $arrPluginJobs = array_filter($this->getMyJobsList(), array($classPlug, "isJobListingMine"));
-            $arrSorted[$strName] = array('name' => $strName, 'updated_today' => count(array_filter($arrPluginJobs, "isJobUpdatedToday")));
-        }
-        usort($arrSorted, "sortByCountDesc");
-
-
-
-        foreach( $arrSorted as $plugin)
-        {
-            $plugin_setup = $GLOBALS['DATA']['site_plugins'][$plugin['name']];
-            $classPlug = new $plugin_setup['class_name'](null, null);
-            $arrPluginJobs = array_filter($this->getMyJobsList(), array($classPlug, "isJobListingMine"));
-            $strName=$plugin['name'];
-            $arrCounts[$strName]['name'] = $strName;
-            $arrCounts[$strName]['updated_today'] = $plugin['updated_today'];
-
-
-            if($plugin_setup['include_in_run'] == false)
+            foreach($site as $value)
             {
-                $arrExcluded[$strName] = $strName;
-
+                $strOut = $strOut . sprintf("%-18s", $value);
             }
-            elseif($arrCounts[$strName]['updated_today'] > 0)
-            {
-                $arrCounts[$strName]['new_today'] = count(array_filter($arrPluginJobs, "isNewJobToday_Interested_IsBlank"));
-                $arrCounts[$strName]['total_listings'] = count($arrPluginJobs);
-                $arrCounts[$strName]['total_not_interested'] = count(array_filter($arrPluginJobs, "isMarked_NotInterested"));
-                $arrCounts[$strName]['total_active'] = count(array_filter($arrPluginJobs, "isMarked_InterestedOrBlank"));
-
-                foreach($arrCounts[$strName] as $value)
-                {
-                    $strOut = $strOut . sprintf("%-18s", $value);
-                }
-                $strOut = $strOut . PHP_EOL;
-
-            }
-            else
-            {
-                $arrNoJobUpdates[$strName] = $strName;
-
-            }
+            $strOut = $strOut . PHP_EOL;
         }
 
         $strOut = $strOut . PHP_EOL;
