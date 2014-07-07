@@ -26,7 +26,7 @@ class PluginExpedia extends ClassJobsSitePlugin
 {
     protected $siteName = 'Expedia';
     protected $siteBaseURL = 'http://expediajobs.findly.com';
-    protected $flagSettings = JOBSITE_BASE_WEBPAGE_FLAGS;
+    protected $flagSettings = C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS_NO_LOCATION_OR_KEYWORDS;
 
 
     function getDaysURLValue($days) {

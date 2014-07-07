@@ -29,6 +29,8 @@ if (file_exists(BASE_DIR . '/vendor/autoload.php')) {
 }
 
 $GLOBALS['OPTS']['VERBOSE'] = false;
+$GLOBALS['OPTS']['VERBOSE_API_CALLS'] = false;
+const C__STR_USER_AGENT__ = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36";
 
 date_default_timezone_set("America/Los_Angeles");
 

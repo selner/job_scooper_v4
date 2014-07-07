@@ -27,8 +27,10 @@ class PluginFacebook extends ClassJobsSitePlugin
     protected $siteBaseURL = 'https://www.facebook.com/careers/';
     protected $nJobListingsPerPage = 10;
     protected $strBaseURLFormat = "https://www.facebook.com/careers/locations/***LOCATION***";
-    protected $flagSettings = JOBSITE_BASE_WEBPAGE_FLAGS;
+    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
+    protected $typeLocationSearchNeeded = 'location-city';
 
+    function setLocationValue($locVal) { $this->locationValue = strtolower($locVal); }
 
 
     function parseJobsListForPage($objSimpHTML)
@@ -51,7 +53,7 @@ class PluginFacebook extends ClassJobsSitePlugin
 
             $item['job_site_category'] = $node->parent()->find("h3")[0]->plaintext;
 
-            $item['location'] = "Seattle, WA";
+            $item['location'] = $this->getLocationValue();
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
 //            var_dump($item);

@@ -35,7 +35,8 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
     protected $siteBaseURL = 'https://jobs.ziprecruiter.com';
     protected $nJobListingsPerPage = 20;
     protected $strBaseURLFormat = "https://jobs.ziprecruiter.com/candidate/search?search=***KEYWORDS***&location=***LOCATION***&radius=25&page=***PAGE_NUMBER***&days=***NUMBER_DAYS***";
-    protected $flagSettings = JOBSITE_BASE_WEBPAGE_FLAGS;
+    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
+    protected $typeLocationSearchNeeded = 'location-statecode';
 
 
     // if this is a client-side HTML download plugin, you will need to add a script

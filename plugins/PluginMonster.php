@@ -26,7 +26,8 @@ class PluginMonster extends ClassJobsSitePlugin
     protected $siteName = 'Monster';
     protected $siteBaseURL = 'http://jobsearch.monster.com';
     protected $strBaseURLFormat = "http://jobsearch.monster.com/search/***KEYWORDS***+Full-Time_588?tm=Today&where=***LOCATION***&tm=***NUMBER_DAYS***&pg=***PAGE_NUMBER***";
-    protected $flagSettings = JOBSITE_BASE_WEBPAGE_FLAGS;
+    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
+    protected $typeLocationSearchNeeded = 'location-city-comma-statecode-underscores-and-dashes';
 
     function getDaysURLValue($days) {
         $ret = "yesterday";

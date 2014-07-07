@@ -27,7 +27,8 @@ class PluginSimplyHired extends ClassJobsSitePlugin
     protected $siteBaseURL = 'http://www.simplyhired.com';
     protected $siteName = 'SimplyHired';
     protected $nJobListingsPerPage = 50;
-    protected $flagSettings = JOBSITE_BASE_WEBPAGE_FLAGS;
+    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
+    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
 
 
     function getItemURLValue($nItem)

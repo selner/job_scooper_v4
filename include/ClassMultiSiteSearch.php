@@ -24,6 +24,8 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 class ClassMultiSiteSearch extends ClassJobsSitePlugin
 {
     protected $siteName = 'Multisite';
+    protected $flagSettings = C__JOB_BASETYPE_NONE_NO_LOCATION_OR_KEYWORDS;
+
 
     function parseJobsListForPage($objSimpHTML)
     {
@@ -31,6 +33,11 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
     }
     function parseTotalResultsCount($objSimpHTML) { throw new ErrorException("parseJobsListForPage not supported for class ClassMultiSiteSearch"); }
 
+    function addSearches($arrSearches, $locSettingSets = null)
+    {
+        $this->arrSearchesToReturn = $arrSearches;
+        $this->arrSearchLocationSetsToRun = $locSettingSets;
+    }
 
 
     function getJobsForAllSearches($nDays = -1)
@@ -53,7 +60,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
             $class = new $strSiteClass($this->detailsMyFileOut['full_file_path']);
             try
             {
-                $class->addSearch($search);
+                $class->addSearch($search, $this->arrSearchLocationSetsToRun);
                 $class->getMyJobsForSearch($search, $nDays);
                 $this->_addJobsToMyJobsList_($class->getMyJobsList());
                 $class = null;

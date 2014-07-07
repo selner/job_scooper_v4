@@ -25,7 +25,7 @@ class PluginGoogle extends ClassJobsSitePlugin
     protected $siteBaseURL = 'https://www.google.com/about/careers/search/';
     protected $nJobListingsPerPage = 10;
     protected $strFilePath_HTMLFileDownloadScript = "PluginGoogle_downloadjobs.applescript";
-    protected $flagSettings = JOBSITE_BASE_HTML_DOWNLOAD_FLAGS;
+    protected $flagSettings = C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS;
 
     function getItemURLValue($nItem)
     {

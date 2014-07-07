@@ -26,7 +26,7 @@ class PluginTableau extends ClassJobsSitePlugin
     protected $siteName = 'Tableau';
     protected $siteBaseURL = 'https://ch.tbe.taleo.net/CH11/ats/careers/requisition.jsp?org=TABLEAU&cws=1&rid=';
     protected $nJobListingsPerPage = 100;
-    protected $flagSettings = JOBSITE_BASE_WEBPAGE_FLAGS;
+    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_NO_LOCATION_OR_KEYWORDS;
 
 
 

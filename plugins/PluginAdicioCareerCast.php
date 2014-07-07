@@ -174,12 +174,19 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
     protected $nJobListingsPerPage = 25;
     protected $strBaseURLFormatSuffix = "/jobs/results/keyword/***KEYWORDS***?location=***LOCATION***&kwsJobTitleOnly=true&view=List_Detail&workType%5B0%5D=employee&radius=15&sort=Priority%20desc,%20PostDate%20desc&page=***PAGE_NUMBER***&modifiedDate=***NUMBER_DAYS***";
     protected $strBaseURLFormat = null;
-    protected $flagSettings = JOBSITE_BASE_HTML_DOWNLOAD_FLAGS;
+    protected $flagSettings = C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS;
 
-    protected function _getURLfromBase_($searchDetails, $nDays, $nPage = null, $nItem = null, $strKeywords=null)
+
+    function __construct($strOutputDirectory = null)
+    {
+        $this->typeLocationSearchNeeded = 'location-city-comma-state-country';
+        return parent::__construct($strOutputDirectory);
+    }
+
+    protected function _getURLfromBase_($searchDetails, $nDays, $nPage = null, $nItem = null, $locSettingSets=null)
     {
         $this->strBaseURLFormat = $this->siteBaseURL . $this->strBaseURLFormatSuffix;
-        return parent::_getURLfromBase_($searchDetails, $nDays, $nPage, $nItem, $strKeywords);
+        return parent::_getURLfromBase_($searchDetails, $nDays, $nPage, $nItem, $locSettingSets);
     }
 
     // if this is a client-side HTML download plugin, you will need to add a script

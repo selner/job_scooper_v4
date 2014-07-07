@@ -22,6 +22,7 @@ require_once(__ROOT__.'/include/ClassMultiSiteSearch.php');
 class ClassJobsRunWrapper extends ClassJobsSitePlugin
 {
     protected $configSettings = null;
+    protected $arrUserInputJobs = null;
     protected $arrUserInputJobs_Active = null;
     protected $arrUserInputJobs_Inactive = null;
     protected $arrJobCSVUserInputFiles = null;
@@ -37,8 +38,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     {
 
         $this->siteName = "JobsRunner";
-        $this->arrLatestJobs_FilteredByUserInput = null;
-        $this->arrLatestJobs_UnfilteredByUserInput = null;
         __initializeArgs__();
 
         $this->__setupRunFromArgs__();
@@ -207,7 +206,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         {
             if(is_object($config->search))
             {
-
                 foreach($config->search as $iniSearch)
                 {
                     $this->arrSearchesToReturn[] = $this->_parseSearchFromINI_($iniSearch);
@@ -218,8 +216,37 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                 $this->arrSearchesToReturn[] = $this->_parseSearchFromINI_($config->search);
             }
         }
-
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->arrSearchesToReturn) . " searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
+
+        if($config->search_location_setting_set)
+        {
+            //
+            // Check if this is a single search setting or if it's a set of search settings
+            //
+            if (is_object($config->search_location_setting_set) && (count($config->search_location_setting_set) > 1))
+            {
+                foreach($config->search_location_setting_set as $iniSettings)
+                {
+                    if(count($iniSettings) > 1)
+                    {
+                        $strSettingsName = $iniSettings['name'];
+                        $this->arrSearchLocationSetsToRun[$strSettingsName] = $this->_parseSearchSettingsFromINI_($iniSettings);
+                        $this->arrSearchLocationSetsToRun[$strSettingsName]['name'] = $strSettingsName;
+                        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added set of search settings named " . $this->arrSearchLocationSetsToRun[$strSettingsName]['name'] . " with values = " . var_export($this->arrSearchLocationSetsToRun[$strSettingsName], true), \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    }
+                }
+            }
+            else
+            {
+                $strSettingsName = $config->search_location_setting_set['name'];
+                $this->arrSearchLocationSetsToRun[$strSettingsName] = $this->_parseSearchSettingsFromINI_($config->search_location_setting_set);
+                $this->arrSearchLocationSetsToRun[$strSettingsName]['name'] = $strSettingsName;
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added set of search settings named " . $this->arrSearchLocationSetsToRun[$strSettingsName]['name'] . " with values = " . var_export($this->arrSearchLocationSetsToRun[$strSettingsName], true), \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            }
+        }
+
+
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->arrSearchLocationSetsToRun) . " search setting groups. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
 
     }
 
@@ -243,6 +270,24 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         return $tempSearch;
 
     }
+
+    private function _parseSearchSettingsFromINI_($iniSearchSetting)
+    {
+        $tempSettings = null;
+
+        foreach($GLOBALS['DATA']['location_types'] as $loctype)
+        {
+            if($iniSearchSetting[$loctype] != null && $iniSearchSetting[$loctype] != "")
+            {
+                $tempSettings[$loctype] = \Scooper\strScrub($iniSearchSetting[$loctype], REMOVE_EXTRA_WHITESPACE);
+                $tempSettings[$loctype] = $iniSearchSetting[$loctype];
+            }
+        }
+
+
+        return $tempSettings;
+    }
+
 
     private function createOutputSubFolder($fileDetails)
     {
@@ -295,6 +340,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         //
         // Set a global var with an array of all input cSV jobs marked new or not marked as excluded (aka "Yes" or "Maybe")
         //
+        $this->arrUserInputJobs = $arrAllJobsLoadedFromSrc;
+
         $this->arrUserInputJobs_Active = array_filter($arrAllJobsLoadedFromSrc, "isMarked_InterestedOrBlank");
         $GLOBALS['logger']->logLine(count($this->arrUserInputJobs_Active). " active job listings loaded from user input CSVs.", \Scooper\C__DISPLAY_SUMMARY__);
 
@@ -386,7 +433,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // (with the exception of Amazon for historical reasons)
         //
         $classMulti = new ClassMultiSiteSearch($this->detailsOutputSubfolder['full_file_path']);
-        $classMulti->addSearches($this->arrSearchesToReturn);
+        $classMulti->addSearches($this->arrSearchesToReturn, $this->arrSearchLocationSetsToRun);
         $classMulti->downloadAllUpdatedJobs( $this->nNumDaysToSearch);
         $this->_addJobsToMyJobsList_($classMulti->getMyJobsList());
 
@@ -534,7 +581,14 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // Output all records that were previously marked excluded manually by the user
         // $arrJobs_ManualExcl = $this->outputFilteredJobsListToFile("isMarked_ManuallyNotInterested", "_ManuallyExcludedJobs");
 
-        $strOutputResult = "Result:  ". PHP_EOL. "All:  ". count($arrJobs_Active) . " Active, " .count($arrJobs_AutoExcluded). " Auto-Filtered, " . count($this->arrLatestJobs).  " Jobs Total." .PHP_EOL. "New:  ". count($arrJobs_NewOnly) . " jobs for review. " .count($arrJobs_UpdatedButFiltered). " jobs were auto-filtered, ". count($arrJobs_Updated) . " updated; " . count($this->arrLatestJobs_UnfilteredByUserInput) . " Jobs Downloaded." .PHP_EOL;
+        $strOutputResult = "Result:  ". PHP_EOL. "All:       ". count($arrJobs_Active) . " Active, " .count($arrJobs_AutoExcluded). " Auto-Filtered, " . count($this->arrLatestJobs).  " Total Jobs." .PHP_EOL;
+        if($this->arrUserInputJobs != null && count($this->arrUserInputJobs) > 0)
+        {
+            $strOutputResult = $strOutputResult . "User Inputted:       ". count(array_filter($this->arrUserInputJobs, 'isMarkedInterested_IsBlank')) . " Active, " .count($this->arrUserInputJobs). " Total Jobs." .PHP_EOL;
+        }
+
+        $strOutputResult = $strOutputResult . "New:       ". count($arrJobs_NewOnly) . " jobs for review. " .count($arrJobs_UpdatedButFiltered). " jobs were auto-filtered, ". count($arrJobs_Updated) . " updated; " . count($arrJobs_Updated). " Jobs Downloaded Today." .PHP_EOL;
+
         $strResultCounts = $this->getListingCountsByPlugin();
         $strOutputResult = $strOutputResult . PHP_EOL . $strResultCounts;
 
@@ -703,6 +757,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         $arrCounts = null;
         $arrExcluded = null;
+        $arrNoJobUpdates = null;
 
         $strOut = "                ";
         $arrHeaders = array("Updated", "New", "Total", "Active", "Inactive");
@@ -722,7 +777,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $arrPluginJobs = array_filter($this->getMyJobsList(), array($classPlug, "isJobListingMine"));
             $arrSorted[$strName] = array('name' => $strName, 'updated_today' => count(array_filter($arrPluginJobs, "isJobUpdatedToday")));
         }
-        $retVal = usort($arrSorted, "sortByCountDesc");
+        usort($arrSorted, "sortByCountDesc");
 
 
 
