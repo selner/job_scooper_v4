@@ -355,16 +355,28 @@ class ClassJobsSitePluginCommon
                 // each record to be equal to the job title so we can do a fast lookup later
                 //
                 $GLOBALS['DATA']['titles_regex_to_filter'] = array();
+                $nDebugCounter = 0;
                 foreach($arrTitlesTemp as $titleRecord)
                 {
                     $arrRXInput = explode("|", strtolower($titleRecord['match_regex']));
-
                     foreach($arrRXInput as $rxItem)
                     {
                         $rx = '/'.$rxItem.'/i';
+//                        $GLOBALS['logger']->logLine("Testing regex record " .$nDebugCounter . " with value of " . $rx , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                        try
+                        {
+                            $testMatch = preg_match($rx, "empty");
 
+                        }
+                        catch (Exception $ex)
+                        {
+                            $strError = "Regex test failed on # " . $nDebugCounter . ", value " . $rxItem .".  Skipping.  Error: '".$ex->getMessage();
+                            $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
+                            if($GLOBALS['OPTS']['DEBUG'] == true) { throw new ErrorException( $strError); }
+                        }
                         $GLOBALS['DATA']['titles_regex_to_filter'][] = $rx;
                     }
+                    $nDebugCounter = $nDebugCounter + 1;
                 }
                 $fTitlesLoaded = true;
             }
@@ -643,10 +655,22 @@ class ClassJobsSitePluginCommon
 
                 if($GLOBALS['DATA']['titles_regex_to_filter'] == null) break;
 
+                $nDebugIndexCounter = 0;
+
                 foreach($GLOBALS['DATA']['titles_regex_to_filter'] as $rxInput )
                 {
+                    $strScrubbedJobTitle = "<not yet set>";
                   try {
-                    if(preg_match($rxInput, \Scooper\strScrub($job['job_title'], DEFAULT_SCRUB)))
+                      $strScrubbedJobTitle = \Scooper\strScrub($job['job_title'], DEFAULT_SCRUB);
+                      $fMatched = preg_match($rxInput, $strScrubbedJobTitle);
+                  }
+                  catch (Exception $classError)
+                  {
+                      $strErr = 'ERROR:  Regex match failed on index ' . $nDebugIndexCounter . ', job title=' . $strScrubbedJobTitle .' with regex = ' .$rxInput . '. Error: ' . $classError->getMessage();
+                      $GLOBALS['logger']->logLine($strErr, \Scooper\C__DISPLAY_ERROR__);
+                      if($GLOBALS['OPTS']['use_debug'] == false) { throw new ErrorException($strErr); }
+                  }
+                    if($fMatched == true)
                     {
                         $strJobIndex = getArrayKeyValueForJob($job);
                         $arrToMark[$strJobIndex]['interested'] = 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__;
@@ -656,11 +680,7 @@ class ClassJobsSitePluginCommon
                         $nJobsMarkedAutoExcluded++;
                         break;
                     }
-                   } catch (ErrorException $classError) {
-                      $GLOBALS['logger']->logLine('ERROR:  Unable to match regex for ' .$rxInput . '. Error: ' . $classError->getMessage(), \Scooper\C__DISPLAY_ERROR__);
-                  }
-
-
+                    $nDebugIndexCounter = $nDebugIndexCounter+1;
                 }
             }
         }
