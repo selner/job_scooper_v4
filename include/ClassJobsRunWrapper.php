@@ -682,6 +682,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $messageHtml = "";
         $messageText = "";
 
+        $subject = "New Job Postings Found For " . \Scooper\getTodayAsString() ."";
+
         //
         // Setup the plaintext content
         //
