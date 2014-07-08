@@ -205,7 +205,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     }
 
 
-    protected function getJobsForSearchByType($searchDetails, $nDays, $locSingleSettingSet = null)
+    protected function getJobsForSearchByType($searchDetails, $nDays, $locSingleSettingSet = null, $nAttemptNumber = 0)
     {
         try {
             if($this->_isBitFlagSet_(C__JOB_SEARCH_RESULTS_TYPE_XML__))
@@ -228,7 +228,24 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         } catch (Exception $ex) {
             $strError = "Failed to download jobs from " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "[URL=".$searchDetails['base_url_format']. "].  ".$ex->getMessage();
             $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-            if($GLOBALS['OPTS']['DEBUG'] == true) { throw new ErrorException( $strError); }
+
+            //
+            // Sometimes the site just returns a timeout on the request.  if this is the first attempt,
+            // delay a bit then try it once more before failing.
+            //
+            if($nAttemptNumber < 1)
+            {
+                // delay for 15 seconds
+                sleep(15);
+
+                // retry the request
+                $this->getJobsForSearchByType($searchDetails, $nDays, $locSingleSettingSet, ($nAttemptNumber+1));
+            }
+            else
+            {
+                if($GLOBALS['OPTS']['DEBUG'] == true) { throw new ErrorException( $strError); }
+            }
+
         }
     }
 
