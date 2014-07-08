@@ -626,38 +626,45 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // Output all records that were previously marked excluded manually by the user
         // $arrJobs_ManualExcl = $this->outputFilteredJobsListToFile("isMarked_ManuallyNotInterested", "_ManuallyExcludedJobs");
 
-        $strOutputResult = "Result:  ". PHP_EOL. "All:\t\t". count($arrJobs_Active) . " Active, " .count($arrJobs_AutoExcluded). " Auto-Filtered, " . count($this->arrLatestJobs).  " Total Jobs." .PHP_EOL;
+        $strResultSummary = "Result:  ". PHP_EOL. "All:\t\t". count($arrJobs_Active) . " Active, " .count($arrJobs_AutoExcluded). " Auto-Filtered, " . count($this->arrLatestJobs).  " Total Jobs." .PHP_EOL;
         if($this->arrUserInputJobs != null && count($this->arrUserInputJobs) > 0)
         {
-            $strOutputResult = $strOutputResult . "User Input:\t\t". count(array_filter($this->arrUserInputJobs, 'isMarkedInterested_IsBlank')) . " Active, " .count($this->arrUserInputJobs). " Total Jobs." .PHP_EOL;
+            $strResultSummary .= "User Input:\t". count(array_filter($this->arrUserInputJobs, 'isMarkedInterested_IsBlank')) . " Active, " .count($this->arrUserInputJobs). " Total Jobs." .PHP_EOL;
         }
 
-        $strOutputResult = $strOutputResult . "New:\t\t". count($arrJobs_NewOnly) . " jobs for review. " .count($arrJobs_UpdatedButFiltered). " jobs were auto-filtered, ". count($arrJobs_Updated) . " updated; " . count($arrJobs_Updated). " Jobs Downloaded Today." .PHP_EOL;
+        $strResultSummary .= "New:\t\t". count($arrJobs_NewOnly) . " jobs for review. " .count($arrJobs_UpdatedButFiltered). " jobs were auto-filtered, ". count($arrJobs_Updated) . " updated; " . count($arrJobs_Updated). " Jobs Downloaded Today." .PHP_EOL;
 
-        $strResultCounts = $this->getListingCountsByPlugin();
-        $strOutputResult = $strOutputResult . PHP_EOL . $strResultCounts;
+        $strResultCountsText = $this->getListingCountsByPlugin("text");
+
+
 
         $strErrs = $GLOBALS['logger']->getCumulativeErrorsAsString();
+        $strErrsResult = "";
         if($strErrs != "" && $strErrs != null)
         {
-            $strOutputResult = $strOutputResult . PHP_EOL . "------------ ERRORS FOUND ------------" . PHP_EOL . $strErrs .PHP_EOL .PHP_EOL. "----------------------------------------" .PHP_EOL .PHP_EOL;
+            $strErrsResult = $strErrsResult . PHP_EOL . "------------ ERRORS FOUND ------------" . PHP_EOL . $strErrs .PHP_EOL .PHP_EOL. "----------------------------------------" .PHP_EOL .PHP_EOL;
         }
 
-        $GLOBALS['logger']->logLine($strOutputResult, \Scooper\C__DISPLAY_SUMMARY__);
+        $strResultText = $strResultSummary . PHP_EOL . $strResultCountsText . PHP_EOL . $strErrsResult;
+
+        $GLOBALS['logger']->logLine($strResultText, \Scooper\C__DISPLAY_SUMMARY__);
+
+        $strResultCountsHTML = $this->getListingCountsByPlugin("html");
+        $strResultHTML = "<pre>" . $strResultSummary . "</pre>" . PHP_EOL . $strResultCountsHTML . PHP_EOL . "<pre>" . $strErrsResult . "</pre>".PHP_EOL;
 
         //
         // Send the email notification out for the completed job
         //
-        $this->__sendJobCompletedEmail__($strOutputResult, null /* HTML body */, $detailsCSVFile, $detailsHTMLFile);
+        $this->__sendJobCompletedEmail__($strResultText, $strResultHTML, $detailsCSVFile, $detailsHTMLFile);
 
         $GLOBALS['logger']->logLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
     }
 
 
-    private function __sendJobCompletedEmail__($strBodyText = null, $detailsFileCSV = null, $detailsFileHTML = null)
+    private function __sendJobCompletedEmail__($strBodyText = null, $strBodyHTML = null, $detailsFileCSV = null, $detailsFileHTML = null)
     {
-        $ret = $this->__sendJobCompletedEmail_PHP__($strBodyText, $detailsFileCSV, $detailsFileHTML);
-        // $ret = $this->__sendJobCompletedEmail_Applescript__($strBodyText, $strBodyHTML, $detailsFileCSV, $detailsFileHTML);
+        $ret = $this->__sendJobCompletedEmail_PHP__($strBodyText, $strBodyHTML, $detailsFileCSV, $detailsFileHTML);
+        // $ret = $this->__sendJobCompletedEmail_Applescript__($strBodyText, $detailsFileCSV, $detailsFileHTML);
         if($ret != true)
         {
             $GLOBALS['logger']->logLine("Failed to send notification email.", \Scooper\C__DISPLAY_ERROR__);
@@ -668,7 +675,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     }
 
 
-    private function __sendJobCompletedEmail_PHP__($strBodyText = null, $detailsFileCSV = null, $detailsFileHTML = null)
+    private function __sendJobCompletedEmail_PHP__($strBodyText, $strBodyHTML = null, $detailsFileCSV = null, $detailsFileHTML = null)
     {
 
         $subject = "";
@@ -701,7 +708,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             // Setup the value for the html version of the message
             //
             $messageHtml  .= '<H3>Job Scooper Results</H3>'.PHP_EOL. PHP_EOL;
-            $messageHtml  .= $messageText . PHP_EOL. PHP_EOL;
+            $messageHtml  .= $strBodyHTML . PHP_EOL. PHP_EOL;
             $content = $this->_getFullFileContents_($detailsFileHTML);
             $messageHtml  .= $content . PHP_EOL. PHP_EOL. "</body></html>";
 
@@ -744,20 +751,17 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $mail->addBCC($bccEmail['address']);
         }
 
-        $mail->WordWrap = 50;                                 // Set word wrap to 50 characters
+        $mail->WordWrap = 120;                                 // Set word wrap to 120 characters
         $mail->addAttachment($detailsFileCSV['full_file_path']);         // Add attachments
-         $mail->addAttachment($detailsFileHTML['full_file_path']);         // Add attachments
+        $mail->addAttachment($detailsFileHTML['full_file_path']);         // Add attachments
 
-        $mail->isHTML(true);                                  // Set email format to HTML
+       $mail->isHTML(true);                                  // Set email format to HTML
 
-        $mail->Subject = $subject;
-/*
- *      TODO:  Re-enable HTML mail once it's been formatted well for email inclusion.
- *
-        $mail->Body    = $messageHtml;
-        $mail->AltBody = $messageText;
- */
-        $mail->Body    = $messageText;
+       $mail->Subject = $subject;
+
+       $mail->Body    = $messageHtml;
+       $mail->AltBody = $messageText;
+
 
 
         $ret = $mail->send();
@@ -802,32 +806,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     }
 
 
-    private function _getPHPMailHeadersForAttachment_($detailsFile)
-    {
 
-        $content = $this->_getFullFileContents_($detailsFile);
-
-        # encode the data for safe transit
-        # and insert \r\n after every 76 chars.
-        $encoded_content = chunk_split( base64_encode($content));
-
-        # Get a random 32 bit number using time() as seed.
-        $boundaryTag = md5( time() );
-
-//        $headers  .= "boundary=$boundaryTag".ASCII_LINEEND;
-//        $headers  .= "--$boundaryTag".ASCII_LINEEND;
-
-
-        # Define the attachment section
-        $headers .= "Content-Type:  multipart/mixed; ";
-        $headers .= "name=\"test.txt\"".ASCII_LINEEND;
-        $headers .= "Content-Transfer-Encoding:base64".ASCII_LINEEND;
-        $headers .= "Content-Disposition:attachment; ";
-        $headers .= "filename=\"test.txt\"".ASCII_LINEEND.chr(10);
-        $headers .= "$encoded_content".ASCII_LINEEND;
-        $headers .= "--$boundaryTag--";
-
-    }
 
     private function __sendJobCompletedEmail_Applescript__($strBodyText = null, $detailsFileCSV = null, $detailsFileHTML = null)
     {
@@ -966,7 +945,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     }
 
 
-    private function getListingCountsByPlugin()
+    private function getListingCountsByPlugin($fLayoutType)
     {
 
         $arrCounts = null;
@@ -984,7 +963,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         foreach( $GLOBALS['DATA']['site_plugins'] as $plugin_setup)
         {
             $arrSitesSearched[$plugin_setup['name']] = false;
-
         }
 
         //
@@ -1026,10 +1004,30 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             }
         }
 
+        switch ($fLayoutType)
+        {
+            case "html":
+                $content = $this->_getResultsTextHTML_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrExcluded);
+                break;
+
+            default:
+            case "text":
+                $content = $this->_getResultsTextPlain_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrExcluded);
+                break;
+
+        }
+
+        return $content;
+    }
+
+    private function _getResultsTextPlain_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrExcluded)
+    {
+        $strOut = "";
 
         if($arrCounts != null && count($arrCounts) > 0)
         {
-          foreach($arrHeaders as $value)
+            $strOut = $strOut . sprintf("%-18s", "Job Site");
+            foreach($arrHeaders as $value)
             {
                 $strOut = $strOut . sprintf("%-18s", $value);
             }
@@ -1069,6 +1067,75 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             }
         }
 
+        return $strOut;
+    }
+
+    private function _getResultsTextHTML_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrExcluded)
+    {
+        $strOut = "";
+        $strOut = "<div class='job_scooper outer'>";
+
+        if($arrCounts != null && count($arrCounts) > 0)
+        {
+            $strOut .= "<table id='resultscount' class='job_scooper'>" . PHP_EOL . "<thead>". PHP_EOL;
+            $strOut .= "<th class='job_scooper' width='20%' align='left'>Job Site</td>" . PHP_EOL;
+
+            foreach($arrHeaders as $value)
+            {
+                $strOut .= "<th class='job_scooper' width='10%' align='center'>" . $value . "</th>" . PHP_EOL;
+            }
+            $strOut .=  PHP_EOL . "</thead>". PHP_EOL;
+
+            usort($arrCounts, "sortByCountDesc");
+            foreach($arrCounts as $site)
+            {
+                $strOut .=  PHP_EOL . "<tr class='job_scooper'>". PHP_EOL;
+                $strOut .= "<td class='job_scooper' width='20%' align='left'>" . $site['name'] . "</td>" . PHP_EOL;
+                $fFirstCol = true;
+                foreach($site as $value)
+                {
+                    if($fFirstCol == true)
+                    {
+                        $fFirstCol = false;
+                        continue;
+                    }
+                    $strOut .= "<td class='job_scooper' width='10%' align='center'>" . $value . "</td>" . PHP_EOL;
+                }
+                $strOut .=  PHP_EOL . "</tr>". PHP_EOL;
+            }
+            $strOut .=  PHP_EOL . "</table><br><br>". PHP_EOL. PHP_EOL;
+        }
+
+        if($arrNoJobUpdates != null && count($arrNoJobUpdates) > 0)
+        {
+            sort($arrNoJobUpdates);
+            $strOut .=  PHP_EOL . "<div class='job_scooper section'>". PHP_EOL;
+            $strOut .=  PHP_EOL .  "No updated jobs for " . \Scooper\getTodayAsString() . " on these sites: " . PHP_EOL;
+            $strOut .=  PHP_EOL . "<ul class='job_scooper'>". PHP_EOL;
+
+            foreach($arrNoJobUpdates as $site)
+            {
+                $strOut .=  "<li>". $site . "</li>". PHP_EOL;
+            }
+
+            $strOut .=  PHP_EOL . "</ul></div><br><br>". PHP_EOL;
+        }
+
+        if($arrExcluded != null && count($arrExcluded) > 0)
+        {
+            sort($arrExcluded);
+            $strOut .=  PHP_EOL . "<div class='job_scooper section'>". PHP_EOL;
+            $strOut .=  PHP_EOL .  "Excluded sites for this run: " . PHP_EOL;
+            $strOut .=  PHP_EOL . "<ul class='job_scooper'>". PHP_EOL;
+
+            foreach($arrExcluded as $site)
+            {
+                $strOut .=  "<li>". $site . "</li>". PHP_EOL;
+            }
+
+            $strOut .=  PHP_EOL . "</ul></div><br><br>". PHP_EOL;
+        }
+        $strOut .= "</div";
 
         return $strOut;
     }
