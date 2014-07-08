@@ -656,16 +656,14 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     private function __sendJobCompletedEmail__($strBodyText = null, $detailsFileCSV = null, $detailsFileHTML = null)
     {
-            $ret = $this->__sendJobCompletedEmail_PHP__($strBodyText, $detailsFileCSV, $detailsFileHTML);
-            // $ret = $this->__sendJobCompletedEmail_Applescript__($strBodyText, $strBodyHTML, $detailsFileCSV, $detailsFileHTML);
-            if($ret != true)
-            {
-                $GLOBALS['logger']->logLine("Failed to send notification email with error = ".$result['stderr'], \Scooper\C__DISPLAY_ERROR__);
-            }
-            else
-            {
-                $GLOBALS['logger']->logLine("Email notification sent.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            }
+        $ret = $this->__sendJobCompletedEmail_PHP__($strBodyText, $detailsFileCSV, $detailsFileHTML);
+        // $ret = $this->__sendJobCompletedEmail_Applescript__($strBodyText, $strBodyHTML, $detailsFileCSV, $detailsFileHTML);
+        if($ret != true)
+        {
+            $GLOBALS['logger']->logLine("Failed to send notification email.", \Scooper\C__DISPLAY_ERROR__);
+
+        }
+        return $ret;
 
     }
 
@@ -748,12 +746,18 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         $mail->WordWrap = 50;                                 // Set word wrap to 50 characters
         $mail->addAttachment($detailsFileCSV['full_file_path']);         // Add attachments
-        $mail->addAttachment($detailsFileHTML['full_file_path']);         // Add attachments
+         $mail->addAttachment($detailsFileHTML['full_file_path']);         // Add attachments
+
         $mail->isHTML(true);                                  // Set email format to HTML
 
         $mail->Subject = $subject;
+/*
+ *      TODO:  Re-enable HTML mail once it's been formatted well for email inclusion.
+ *
         $mail->Body    = $messageHtml;
         $mail->AltBody = $messageText;
+ */
+        $mail->Body    = $messageText;
 
 
         $ret = $mail->send();
@@ -771,33 +775,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     }
 
 
-    private function _getHeadersForAttachment_($detailsFile, $strBoundaryNum, $strContentType)
-    {
-        $retHeaders = "";
-
-        if($detailsFile != null && $detailsFile['full_file_path'] != null)
-        {
-            $fileName = $detailsFile['file_name'];
-            $attachmentContent = $this->_getFullFileContents_($detailsFile);
-
-            if(strlen($attachmentContent) > 0)
-            {
-                $retHeaders .= "Content-Type:  ".$strContentType . " name=\"$fileName\"".ASCII_LINEEND;
-                $retHeaders .= "Content-Transfer-Encoding:base64".ASCII_LINEEND;
-                $retHeaders .= "Content-Disposition:attachment; filename=\"$fileName\"".ASCII_LINEEND.chr(10);
-                # encode the data for safe transit
-                # and insert \r\n after every 76 chars.
-                $encoded_content = chunk_split( base64_encode($attachmentContent));
-                $retHeaders .= "$encoded_content".ASCII_LINEEND;
-                $retHeaders .= "--$strBoundaryNum";
-                return $retHeaders;
-            }
-        }
-
-        return null;
-
-    }
-private function _getFullFileContents_($detailsFile)
+    private function _getFullFileContents_($detailsFile)
     {
         $content = null;
         $filePath = $detailsFile['full_file_path'];
