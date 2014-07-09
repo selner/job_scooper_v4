@@ -28,6 +28,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     protected $arrLatestJobs_UnfilteredByUserInput = null;
     protected $arrJobCSVUserInputFiles = null;
     protected $arrSearchKeywordSet = null;
+    protected $arrSearchKeywordSetsToRun = null;
     protected $nNumDaysToSearch = -1;
     protected $detailsOutputSubfolder = null;
     protected $detailsIniFile = null;
@@ -47,6 +48,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     private function __setupRunFromArgs__()
     {
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting up application... ", \Scooper\C__DISPLAY_SECTION_START__);
         # After you've configured Pharse, run it like so:
         $GLOBALS['OPTS'] = Pharse::options($GLOBALS['OPTS_SETTINGS']);
 
@@ -78,16 +80,19 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 //            throw new ErrorException("Config ini files not yet supported!");
             $this->detailsIniFile = \Scooper\set_FileDetails_fromPharseSetting("use_config_ini", 'config_file_details', true);
             if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($this->detailsIniFile['directory'] );
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting output log folder to " . $this->detailsIniFile['directory'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Parsing ini file ".$this->detailsIniFile['full_file_path']."...", \Scooper\C__DISPLAY_ITEM_START__);
-
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration file details from " . $this->detailsIniFile['full_file_path'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
             $iniParser = new IniParser($this->detailsIniFile['full_file_path']);
             $confTemp = $iniParser->parse();
             $this->_setupRunFromConfig_($confTemp);
         }
 
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Configuring specific settings for this run... ", \Scooper\C__DISPLAY_SECTION_START__);
+
         $this->nNumDaysToSearch = \Scooper\get_PharseOptionValue('number_days');
         if($this->nNumDaysToSearch == false) { $GLOBALS['OPTS']['number_days'] = 1; $this->nNumDaysToSearch = 1; }
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($GLOBALS['OPTS']['number_days'] . " days configured for run. ", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
 
         // Override any INI file setting with the command line output file path & name
@@ -99,14 +104,23 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $this->detailsOutputFile = $userOutfileDetails;
         }
 
+        $strOutfileArrString = getArrayValuesAsString($this->detailsOutputFile);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output file configured: " . $strOutfileArrString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting searches for this run...", \Scooper\C__DISPLAY_ITEM_START__);
         foreach($this->arrAllSearchesFromConfig as $search)
         {
             $plugin = $GLOBALS['DATA']['site_plugins'][strtolower($search['site_name'])];
             if($plugin['include_in_run'] == true)
             {
                 $this->arrSearchesToReturn[] = $search;
+                $strSearchAsString = getArrayValuesAsString($search);
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added search to this run:  " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             }
         }
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added " . count($this->arrSearchesToReturn) . " total searches to this run.", \Scooper\C__DISPLAY_ITEM_RESULT__);
+
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Run configuration completed.", \Scooper\C__DISPLAY_RESULT__);
 
     }
 
@@ -138,7 +152,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     private function _setupRunFromConfig_($config)
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Reading configuration options from ".$GLOBALS['OPTS']['config_file_details']['file_full_path']."...", \Scooper\C__DISPLAY_ITEM_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Reading configuration options from ".$this->detailsIniFile['full_file_path']."...", \Scooper\C__DISPLAY_ITEM_START__);
         if($config->output)
         {
              if($config->output->folder)
@@ -202,14 +216,13 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
 
         $this->__getSearchesFromConfig__($config);
-
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Completed loading configuration from INI file:  ".var_export($GLOBALS['OPTS'], true), \Scooper\C__DISPLAY_SUMMARY__);
 
     }
 
     private function __getSearchesFromConfig__($config)
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading searches from config file.", \Scooper\C__DISPLAY_ITEM_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading searches from config file...", \Scooper\C__DISPLAY_ITEM_START__);
         if(!$config) throw new ErrorException("Invalid configuration.  Cannot load user's searches.");
 
         if($config->search)
@@ -228,10 +241,28 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         }
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->arrAllSearchesFromConfig) . " searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
 
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading keyword set from config file...", \Scooper\C__DISPLAY_ITEM_START__);
         $this->_parseKeywordSettingsFromINI_($config);
+
+        //
+        // TODO:  Add true support for multiple keyword sets someday
+        //
+        // For now, we only support one keyword set, so if we have any at
+        // all, pick the first one and use that.
+        //
+        if(count($this->arrSearchKeywordSetsToRun) > 0)
+        {
+            foreach($this->arrSearchKeywordSetsToRun as $keywordSet)
+            {
+                $this->arrSearchKeywordSet = $keywordSet;
+                break;
+            }
+        }
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->arrSearchKeywordSetsToRun) . " keyword sets to use for searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
 
         if($config->search_location_setting_set)
         {
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading search locations from config file...", \Scooper\C__DISPLAY_ITEM_START__);
             //
             // Check if this is a single search setting or if it's a set of search settings
             //
@@ -244,7 +275,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                         $strSettingsName = $iniSettings['name'];
                         $this->arrSearchLocationSetsToRun[$strSettingsName] = $this->_parseLocationSettingsFromINI_($iniSettings);
                         $this->arrSearchLocationSetsToRun[$strSettingsName]['name'] = $strSettingsName;
-                        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added set of search settings named " . $this->arrSearchLocationSetsToRun[$strSettingsName]['name'] . " with values = " . var_export($this->arrSearchLocationSetsToRun[$strSettingsName], true), \Scooper\C__DISPLAY_ITEM_DETAIL__);
                     }
                 }
             }
@@ -253,8 +283,9 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                 $strSettingsName = $config->search_location_setting_set['name'];
                 $this->arrSearchLocationSetsToRun[$strSettingsName] = $this->_parseLocationSettingsFromINI_($config->search_location_setting_set);
                 $this->arrSearchLocationSetsToRun[$strSettingsName]['name'] = $strSettingsName;
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added set of search settings named " . $this->arrSearchLocationSetsToRun[$strSettingsName]['name'] . " with values = " . var_export($this->arrSearchLocationSetsToRun[$strSettingsName], true), \Scooper\C__DISPLAY_ITEM_DETAIL__);
             }
+            $strSettingStrings = getArrayValuesAsString($this->arrSearchLocationSetsToRun[$strSettingsName]);
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added location search settings: " . $strSettingStrings, \Scooper\C__DISPLAY_ITEM_DETAIL__);
         }
 
 
@@ -262,36 +293,52 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     }
 
+    private function _getKeywordMatchFlagFromString_($strMatchType)
+    {
+        $retFlag = null;
+
+        if($strMatchType)
+        {
+            switch($strMatchType)
+            {
+                case "title-only":
+                    $retFlag = C__USER_KEYWORD_MUST_BE_IN_TITLE;
+                    break;
+
+                case "exact-only":
+                    $retFlag = C__USER_KEYWORD_MUST_EQUAL_TITLE;
+                    break;
+
+                case "any":
+                    $retFlag = C__USER_KEYWORD_ANYWHERE;
+                    break;
+            }
+        }
+
+        return $retFlag;
+    }
+
     private function _parseSearchFromINI_($iniSearch)
     {
-        $tempSearch =  array(
-            'search_key' => $iniSearch['key'],
-            'site_name' => $iniSearch['jobsite'],
-            'search_name' => $iniSearch['name'],
-            'base_url_format' => $iniSearch['url_format'],
-            'keywords' => $iniSearch['keywords'],
-            'location_keyword' => $iniSearch['location'],
-        );
+        $tempSearch = $this->getEmptySearchDetailsRecord();
+
+        $tempSearch['search_key']  = $iniSearch['key'];
+        $tempSearch['site_name']  = $iniSearch['jobsite'];
+        $tempSearch['search_name']  = $iniSearch['name'];
+        $tempSearch['base_url_format']  = $iniSearch['url_format'];
+        $tempSearch['keyword_search_override']  = $iniSearch['keywords'];
+        $tempSearch['location_search_override']  = $iniSearch['location'];
+
 
         if($tempSearch['search_key'] == "")
         {
             $tempSearch['search_key'] = \Scooper\strScrub($tempSearch['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($tempSearch['search_name'], FOR_LOOKUP_VALUE_MATCHING);
         }
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added: " . $this->_getStringForSearchItem_('search_name', $tempSearch) . $this->_getStringForSearchItem_('site_name', $tempSearch) . $this->_getStringForSearchItem_('search_key', $tempSearch).  $this->_getStringForSearchItem_('base_url_format', $tempSearch) . $this->_getStringForSearchItem_('keywords', $tempSearch) . $this->_getStringForSearchItem_('location_keyword', $tempSearch), \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+        $strSearchAsString = getArrayValuesAsString($tempSearch);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search loaded from config INI: " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         return $tempSearch;
-
-    }
-
-    private function _getStringForSearchItem_($strItem, $searchDetails)
-    {
-        $ret = "; " . $strItem ."=[";
-        if(strlen($searchDetails[$strItem]) > 0)
-        {
-            $ret = $ret . $searchDetails[$strItem];
-        }
-        $ret = $ret . "]";
-        return $ret;
     }
 
 
@@ -314,18 +361,40 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     private function _parseKeywordSettingsFromINI_($config)
     {
-        if($config->search_keyword_set)
+        if($config->search_keyword_set && is_object($config->search_keyword_set))
         {
-            if(is_object($config->search_keyword_set))
+            foreach($config->search_keyword_set as $ini_keyword_set)
             {
-                foreach($config->search_keyword_set as $keyword)
+                $strSetName = 'KeywordSet' . (count($this->arrSearchKeywordSetsToRun) + 1);
+                if($ini_keyword_set['name'] != null && strlen($ini_keyword_set['name']) > 0)
                 {
-                    $this->arrSearchKeywordSet[] = $keyword;
+                    $strSetName = $ini_keyword_set['name'];
                 }
-            }
-            else
-            {
-                $this->arrSearchKeywordSet[] = $config->search_keyword_set;
+
+                $this->arrSearchKeywordSetsToRun[$strSetName] = array('name' => $strSetName, 'keywords_array' => null, 'match-type' => C__USER_KEYWORD_MATCH_DEFAULT);
+
+
+                foreach($ini_keyword_set['keywords'] as $keywordItem)
+                {
+                    $this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array'][] = $keywordItem;
+                }
+
+                if($ini_keyword_set['keyword_match_type'] != null && strlen($ini_keyword_set['keyword_match_type'] ) > 0)
+                {
+                    $strMatchType = $ini_keyword_set['keyword_match_type'];
+                    $flagType = $this->_getKeywordMatchFlagFromString_($ini_keyword_set['keyword_match_type'] );
+                    if($flagType != null)
+                    {
+                        $this->arrSearchKeywordSetsToRun[$strSetName]['match-type'] = $flagType;
+                    }
+                }
+
+
+                if($this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array'] != null && count($this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array']) > 0)
+                {
+                    $strKeywords= getArrayValuesAsString($this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array']);
+                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added keyword set '" . $strSetName . "' with keywords = " . $strKeywords . (($strMatchType != null && strlen($strMatchType ) > 0) ? " matching " . $strMatchType : ""), \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                }
             }
 
         }
@@ -452,7 +521,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $strFilteredCSVOutputPath = $details['full_file_path'];
         $this->writeRunsJobsToFile($strFilteredCSVOutputPath, $arrJobsOutput, $strFilterToApply, $strExt, $keysToOutput);
 
-        $GLOBALS['logger']->logLine(($strFilterDescription != null ? $strFilterDescription : $strFileNameAppend) . " " . count($arrJobsOutput). " job listings output to  " . $strFilteredCSVOutputPath, \Scooper\C__DISPLAY_SUMMARY__);
+        $GLOBALS['logger']->logLine(($strFilterDescription != null ? $strFilterDescription : $strFileNameAppend) . " " . count($arrJobsOutput). " job listings output to  " . $strFilteredCSVOutputPath, \Scooper\C__DISPLAY_ITEM_RESULT__);
 
         return $arrJobs;
     }
@@ -480,19 +549,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $classMulti = new ClassMultiSiteSearch($this->detailsOutputSubfolder['full_file_path']);
         $classMulti->addMultipleSearches($this->arrSearchesToReturn, $this->arrSearchLocationSetsToRun);
         $classMulti->getJobsForMyMultipleSearches( $this->nNumDaysToSearch, $this->arrSearchKeywordSet);
-        $this->_addJobsToMyJobsList_($classMulti->getMyJobsList());
-
-        //
-        // Let's go get Amazon too if the user asked for Amazon's jobs
-        //
-/*        if($GLOBALS['DATA']['site_plugins']['Amazon']['include_in_run'] == true)
-        {
-            $GLOBALS['logger']->logLine("Adding Amazon jobs....", \Scooper\C__DISPLAY_ITEM_START__);
-            $class = new PluginAmazon($this->detailsOutputSubfolder['full_file_path']);
-            $class->downloadAllUpdatedJobs( $this->nNumDaysToSearch);
-            $this->_addJobsToMyJobsList_($class->getMyJobsList());
-        }
-*/
+        addJobsToJobsList($this->arrLatestJobs, $classMulti->getMyJobsList());
         //
         // Let's save off the unfiltered jobs list in case we need it later.  The $this->arrLatestJobs
         // will shortly have the user's input jobs applied to it
@@ -663,6 +720,12 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     private function __sendJobCompletedEmail__($strBodyText = null, $strBodyHTML = null, $detailsFileCSV = null, $detailsFileHTML = null)
     {
+        if($GLOBALS['OPTS']['use_debug'] == true)
+        {
+            $GLOBALS['logger']->logLine(PHP_EOL."Debug mode = true, so skipping email notifications.".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+            return;
+        }
+
         $ret = $this->__sendJobCompletedEmail_PHP__($strBodyText, $strBodyHTML, $detailsFileCSV, $detailsFileHTML);
         // $ret = $this->__sendJobCompletedEmail_Applescript__($strBodyText, $detailsFileCSV, $detailsFileHTML);
         if($ret != true)
@@ -670,7 +733,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $GLOBALS['logger']->logLine("Failed to send notification email.", \Scooper\C__DISPLAY_ERROR__);
 
         }
-        return $ret;
+        return;
 
     }
 
@@ -1141,6 +1204,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         return $strOut;
     }
+
 
 
     private function getKeysForHTMLOutput()

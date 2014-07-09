@@ -18,7 +18,7 @@ define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 
-
+DEFINE('CRAIGSLIST_FLAGS', C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS | C__JOB_PAGECOUNT_NOTAPPLICABLE__);
 
 
 class PluginCraigslist  extends ClassJobsSitePlugin

@@ -21,6 +21,8 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 const C__STR_TAG_AUTOMARKEDJOB__ = "[auto-marked]";
 const C__STR_TAG_DUPLICATE_POST__ = "No (Duplicate Job Post?)";
 const C__STR_TAG_BAD_TITLE_POST__ = "No (Bad Title & Role)";
+const C__STR_TAG_NOT_STRICT_TITLE_MATCH__ = "No (Not a Strict Title Match)";
+const C__STR_TAG_NOT_EXACT_TITLE_MATCH__ = "No (Not an Exact Title Match)";
 
 const C__STR_TAG_EXCLUDED_TITLE_REGEX = 'No (Title Excluded Via RegEx)';
 
@@ -179,6 +181,12 @@ function sortByCountDesc($a, $b)
     return ($al < $bl) ? +1 : -1;
 }
 
+function isBitFlagSet($flagSettings, $flagToCheck)
+{
+    $ret = ($flagSettings & $flagToCheck);
+    if($ret == $flagToCheck) { return true; }
+    return false;
+}
 
 /**
  * TODO:  DOC
@@ -288,6 +296,41 @@ function updateJobColumn(&$job, $newJob, $strColumn, $fAllowEmptyValueOverwrite 
         }
     }
 
+}
+
+function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strDelimiter = "", $strIntro = "")
+{
+    $strReturn = "";
+
+    if($arrItem[$key] != null && strlen($arrItem[$key]) > 0)
+    {
+        if($fIsFirstItem == true)
+        {
+            $strReturn .= $strIntro;
+        }
+        else
+        {
+            $strReturn .= $strDelimiter;
+        }
+        $strReturn .= $key . '=['.$arrItem[$key].']';
+    }
+
+    return $strReturn;
+}
+
+function getArrayValuesAsString($arrDetails, $strDelimiter = ", ", $strIntro = "")
+{
+    $strReturn = "";
+
+    if($arrDetails != null)
+    {
+        foreach(array_keys($arrDetails) as $key)
+        {
+            $strReturn .= getArrayItemDetailsAsString($arrDetails, $key, (strlen($strReturn) <= 0), $strDelimiter, $strIntro);
+        }
+    }
+
+    return $strReturn;
 }
 
 function updateJobRecord($prevJobRecord, $jobRecordChanges)

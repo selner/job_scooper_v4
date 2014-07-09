@@ -18,14 +18,13 @@ define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 
+DEFINE('GLASSDOOR_FLAGS', C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_BASE_URL_FORMAT_REQUIRED);
 
 class PluginGlassdoor extends ClassJobsSitePlugin
 {
     protected $siteName = 'Glassdoor';
     protected $siteBaseURL = 'http://www.glassdoor.com';
-    protected $strBaseURLFormat = "http://www.glassdoor.com/Job/***LOCATION***-***KEYWORDS***-job-opportunities-SRCH_IL.0,7_IC1150505_KO8,22***PAGE_NUMBER***.htm?fromAge=***NUMBER_DAYS***";
-    // protected $strBaseURLFormat = "http://www.glassdoor.com/Job/***LOCATION***-***KEYWORDS***-job-openings-SRCH_IL.0,7_IC1150505_KO8,22***PAGE_NUMBER***.htm?fromAge=***NUMBER_DAYS***";
-    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
+    protected $flagSettings = GLASSDOOR_FLAGS;
     protected $typeLocationSearchNeeded = 'location-city';
 
 

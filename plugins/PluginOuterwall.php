@@ -19,14 +19,12 @@ define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 
-
-
 class PluginOuterwall extends ClassJobsSitePlugin
 {
     protected $siteName = 'Outerwall';
     protected $siteBaseURL = 'http://outerwall.jobs';
     protected $strBaseURLFormat = "http://outerwall.jobs/***LOCATION***/usa/jobs/";
-    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_NO_KEYWORDS;
+    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE;
     protected $typeLocationSearchNeeded = 'location-state';
 
     function parseJobsListForPage($objSimpHTML)

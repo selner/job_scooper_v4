@@ -29,7 +29,20 @@ class ClassJobsSitePluginCommon
 
     protected $detailsMyFileOut= "";
 
-
+    function getEmptySearchDetailsRecord()
+    {
+        return array(
+            'search_key' => null,
+            'site_name' => null,
+            'search_name' => null,
+            'base_url_format' => null,
+            'location_search_override' => null,
+            'keyword_search_override' => null,
+            'keywords_string_for_url' => null,
+            'keyword_set' => null,
+            'user_setting_flags' => C__USER_KEYWORD_MATCH_DEFAULT,
+        );
+    }
 
     function getEmptyJobListingRecord()
     {

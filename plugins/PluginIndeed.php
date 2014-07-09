@@ -26,7 +26,8 @@ class PluginIndeed extends ClassJobsSitePlugin
     protected $strBaseURLFormat = "http://www.indeed.com/jobs?q=title%3A%28***KEYWORDS***%29&l=***LOCATION***&sort=date&limit=50&fromage=***NUMBER_DAYS***&start=***ITEM_NUMBER***";
     protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
-    protected $strKeywordDelimiter = "|";
+    protected $strKeywordDelimiter = "OR";
+    protected $strTitleOnlySearchKeywordFormat = "title:(%s)";
 
 
     function getItemURLValue($nItem)
