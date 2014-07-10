@@ -23,7 +23,8 @@ class PluginMonster extends ClassJobsSitePlugin
 {
     protected $siteName = 'Monster';
     protected $siteBaseURL = 'http://jobsearch.monster.com';
-    protected $strBaseURLFormat = "http://jobsearch.monster.com/search/***KEYWORDS***+Full-Time_588?tm=Today&where=***LOCATION***&tm=***NUMBER_DAYS***&pg=***PAGE_NUMBER***";
+    protected $strBaseURLFormat = "http://jobsearch.monster.com/search/***KEYWORDS***_5?where=***LOCATION***&tm=***NUMBER_DAYS***&pg=***PAGE_NUMBER***";
+    protected $nJobListingsPerPage = 25;
     protected $flagSettings = null;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode-underscores-and-dashes';
 
