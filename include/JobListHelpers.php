@@ -229,13 +229,18 @@ function getArrayKeyValueForJob($job)
 
 function countAssociativeArrayValues($arrToCount)
 {
+    if($arrToCount == null || !is_array($arrToCount))
+    {
+        return 0;
+    }
+
     $arrValues = array_values($arrToCount);
     $nValues = count($arrValues);
+    return $nValues;
+//    $arrKeys = array_keys($arrToCount);
+//    $nKeys = count($arrKeys);
 
-    $arrKeys = array_keys($arrToCount);
-    $nKeys = count($arrKeys);
-
-    return max($nKeys, $nValues);
+//    return max($nKeys, $nValues);
 }
 
 function countJobRecords($arrJobs)
