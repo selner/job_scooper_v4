@@ -37,7 +37,7 @@ class PluginCraigslist  extends ClassJobsSitePlugin
 
     function __construct($strBaseDir = null)
     {
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS | C__JOB_PAGECOUNT_NOTAPPLICABLE__;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS;
         parent::__construct($strBaseDir);
     }
 
@@ -52,10 +52,9 @@ class PluginCraigslist  extends ClassJobsSitePlugin
     {
         if($nDays > 1)
         {
-            $GLOBALS['logger']->logLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Ignoring number of days value and just pulling current listings.", \Scooper\C__DISPLAY_WARNING__);
-
+            $GLOBALS['logger']->logLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Ignoring number of days value and just pulling current listings.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
         }
-        return 1;
+        return VALUE_NOT_SUPPORTED;
 
     }
 
