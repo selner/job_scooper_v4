@@ -18,7 +18,6 @@ define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 
-DEFINE('CRAIGSLIST_FLAGS', C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS | C__JOB_PAGECOUNT_NOTAPPLICABLE__);
 
 
 class PluginCraigslist  extends ClassJobsSitePlugin
@@ -27,7 +26,7 @@ class PluginCraigslist  extends ClassJobsSitePlugin
     protected $nJobListingsPerPage = 100;
     protected $siteBaseURL = 'http://seattle.craigslist.org/';
     protected $strBaseURLFormat = "http://***LOCATION***.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=***KEYWORDS***&srchType=T";
-    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS;
+    protected $flagSettings = null;
     protected $typeLocationSearchNeeded = 'location-city';
     protected $strKeywordDelimiter = "|";
 
@@ -36,6 +35,11 @@ class PluginCraigslist  extends ClassJobsSitePlugin
         return parent::_getLocationValueFromSettings_($settingsSet, true);
     }
 
+    function __construct($strBaseDir = null)
+    {
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS | C__JOB_PAGECOUNT_NOTAPPLICABLE__;
+        parent::__construct($strBaseDir);
+    }
 
     function getItemURLValue($nItem)
     {

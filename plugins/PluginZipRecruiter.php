@@ -29,13 +29,14 @@ require_once(__ROOT__ . '/include/ClassJobsSitePluginCommon.php');
  *
 
  */
+
 class PluginZipRecruiter extends ClassJobsSitePlugin
 {
     protected $siteName = 'ZipRecruiter';
     protected $siteBaseURL = 'https://jobs.ziprecruiter.com';
     protected $nJobListingsPerPage = 20;
     protected $strBaseURLFormat = "https://jobs.ziprecruiter.com/candidate/search?search=***KEYWORDS***&location=***LOCATION***&radius=25&page=***PAGE_NUMBER***&days=***NUMBER_DAYS***";
-    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
+    protected $flagSettings = null;
     protected $typeLocationSearchNeeded = 'location-statecode';
 
 
@@ -45,6 +46,11 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
     // This value is unused for XML or server-side webpage download plugins.
     protected $strFilePath_HTMLFileDownloadScript = null;
 
+    function __construct($strBaseDir = null)
+    {
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_SUPPORTS_PLUS_PREFIX | C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS;
+        parent::__construct($strBaseDir);
+    }
 
     /**
      * If the site does not have a URL parameter for number of days

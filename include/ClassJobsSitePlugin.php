@@ -243,7 +243,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         // If the plugin does not support multiple terms or if we don't have a valid delimiter to collapse
         // the terms with, we can't collapse, so just leave the searches as they were and return
-        if(!$this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_ALLOWED) || $this->strKeywordDelimiter == null || strlen($this->strKeywordDelimiter) <= 0)
+        if(!$this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) || $this->strKeywordDelimiter == null || strlen($this->strKeywordDelimiter) <= 0)
         {
             $GLOBALS['logger']->logLine($this->siteName . " does not support collapsing terms into a single search.  Continuing with " . count($this->arrSearchesToReturn) . " search(es).", \Scooper\C__DISPLAY_WARNING__);
             return;
@@ -681,21 +681,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     function getDaysURLValue($days) { return ($days == null || $days == "") ? 1 : $days; } // default is to return the raw number
     function getItemURLValue($nItem) { return ($nItem == null || $nItem == "") ? 0 : $nItem; } // default is to return the raw number
     function getPageURLValue($nPage) { return ($nPage == null || $nPage == "") ? "" : $nPage; } // default is to return the raw number
-//    function getKeywordURLValue($strKeywords)
-//    {
-//        if($this->_isBitFlagSet_(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
-//        {
-//            return VALUE_NOT_SUPPORTED;
-//        }
-//
-//        if(!$this->_isValueURLEncoded_($strKeywords))
-//        {
-//            $strKeywords = urlencode($strKeywords);
-//        }
-//
-//        return $strKeywords;
-//    }
-
 
     function getLocationURLValue($searchDetails, $locSettingSets = null)
     {
@@ -766,15 +751,54 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             if($configKeywordSettingsSet != null)
             {
                 $searchDetails['keyword_set'] = $configKeywordSettingsSet['keywords_array'];
-                $searchDetails['user_setting_flags'] = $searchDetails['user_setting_flags'] | $keywordSet['match-type'];
+                $searchDetails['user_setting_flags'] = $searchDetails['user_setting_flags'] | $configKeywordSettingsSet['match-type'];
             }
-            $this->_setKeywordStringsForSearch_($searchDetails);
-            $this->addSearch($searchDetails, $locSettingSets);
+
+            //
+            // If the search has multiple keywords on it, either because there was an overall keyword set for
+            // all searches or because this one search was not configured well, and the site does not support
+            // searches with multiple keywords at once, then we need to break this one search up into one
+            // search for each keyword in it's keyword set.
+            //
+            if(!$this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && !$this->_isBitFlagSet_(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) &&
+                count($searchDetails['keyword_set']) > 1)
+            {
+                //
+                // Create clones of the current search, one for each separate keyword item in the array
+                //
+                $newSearchBase = $this->cloneSearchDetailsRecordExceptFor($searchDetails, array('keyword_set', 'keywords_string_for_url'));
+                foreach($searchDetails['keyword_set'] as $splitKeyword)
+                {
+                    $newSearchBase = $newSearchBase;
+                    $newSearch = $this->cloneSearchDetailsRecordExceptFor($searchDetails, array('keyword_set', 'keywords_string_for_url'));
+                    $newSearch['keyword_set'] = array($splitKeyword);
+                    $newSearch['search_key'] .= "-split-" .$splitKeyword;
+                    $newSearch['search_name'] .= "-split-" .$splitKeyword;
+                    $this->addSearch($newSearch, $locSettingSets);
+                }
+
+                //
+                // Now, we need to go find and remove the original search, that
+                // was just split up, from the list of searches to run
+                //
+                for($i = 0; $i < count($this->arrSearchesToReturn); $i++)
+                {
+                    if(strcasecmp($this->arrSearchesToReturn[$i]['search_name'], $searchDetails['search_name']) == 0)
+                    {
+                        unset($this->arrSearchesToReturn[$i]);
+                    }
+                }
+            }
+            else
+            {
+
+                $this->addSearch($searchDetails, $locSettingSets);
+            }
 
         }
     }
 
-    private function _setKeywordStringsForSearch_(&$searchDetails)
+    protected function _setKeywordStringsForSearch_(&$searchDetails)
     {
 
 //        'keyword_search_override' => null,
@@ -896,11 +920,12 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     }
 
+
     protected function getCombinedKeywordStringForURL($arrKeywordSet)
     {
         $arrKeywords = array();
 
-        if(count($arrKeywordSet) == 1)
+        if(!is_array($arrKeywordSet))
         {
             $arrKeywords[] =$arrKeywordSet[0];
         }
@@ -911,42 +936,60 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         $strRetCombinedKeywords = VALUE_NOT_SUPPORTED;
 
-        if(($this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_ALLOWED)) && count($arrKeywords) >= 1)
+        if(($this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED)) && count($arrKeywords) > 1)
         {
-            if(count($arrKeywords) == 1)
+            if($this->strKeywordDelimiter == null)
             {
-                $strRetCombinedKeywords = $arrKeywords[0];
+                throw new ErrorException($this->siteName . " supports multiple keyword terms, but has not set the \$strKeywordDelimiter value in " .get_class($this). " Aborting search beacyse cannot create the URL.");
+            }
+
+            foreach($arrKeywords as $kywd)
+            {
+                $newKywd = $kywd;
+                if($this->_isBitFlagSet_(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS))
+                {
+                    $newKywd = '"' . $newKywd .'"';
+                }
+
+                if($strRetCombinedKeywords == VALUE_NOT_SUPPORTED)
+                {
+                    $strRetCombinedKeywords = $newKywd;
+                }
+                else
+                {
+                    $strRetCombinedKeywords .= " " . $this->strKeywordDelimiter . $newKywd;
+                }
+            }
+            if($this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && strlen($this->strTitleOnlySearchKeywordFormat) > 0)
+            {
+                $strRetCombinedKeywords = sprintf($this->strTitleOnlySearchKeywordFormat, $strRetCombinedKeywords);
+            }
+
+        }
+        elseif(count($arrKeywords) == 1)
+        {
+            if($this->_isBitFlagSet_(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS))
+            {
+                $strRetCombinedKeywords = '"' . $arrKeywords[0] .'"';
             }
             else
             {
-                if($this->strKeywordDelimiter == null)
-                {
-                    throw new ErrorException($this->siteName . " supports multiple keyword terms, but has not set the \$strKeywordDelimiter value in " .get_class($this). " Aborting search beacyse cannot create the URL.");
-                }
-
-                foreach($arrKeywords as $kywd)
-                {
-                    if($strRetCombinedKeywords == VALUE_NOT_SUPPORTED)
-                    {
-                        $strRetCombinedKeywords = "\"$kywd\"";
-                    }
-                    else
-                    {
-                        $strRetCombinedKeywords .= " " . $this->strKeywordDelimiter . " \"$kywd\"";
-                    }
-                }
-                if($this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_ALLOWED) && strlen($this->strTitleOnlySearchKeywordFormat) > 0)
-                {
-                    $strRetCombinedKeywords = sprintf($this->strTitleOnlySearchKeywordFormat, $strRetCombinedKeywords);
-                }
-
-            }
-            if(!$this->_isValueURLEncoded_($strRetCombinedKeywords)) { $strRetCombinedKeywords = urlencode($strRetCombinedKeywords); }
-            if($this->_isBitFlagSet_(C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES))
-            {
-                $strRetCombinedKeywords = str_replace("%22", "-", $strRetCombinedKeywords);
+                $strRetCombinedKeywords = $arrKeywords[0];
             }
         }
+
+
+        if($this->_isBitFlagSet_(C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES))
+        {
+            $strRetCombinedKeywords = str_replace("%22", "-", $strRetCombinedKeywords);
+        }
+
+        if(!$this->_isValueURLEncoded_($strRetCombinedKeywords)) { $strRetCombinedKeywords = urlencode($strRetCombinedKeywords); }
+        if($this->_isBitFlagSet_(C__JOB_KEYWORD_SUPPORTS_PLUS_PREFIX))
+        {
+            $strRetCombinedKeywords = "+" . $strRetCombinedKeywords;
+        }
+
         return $strRetCombinedKeywords;
     }
 

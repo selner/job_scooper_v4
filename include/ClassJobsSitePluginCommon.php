@@ -44,6 +44,19 @@ class ClassJobsSitePluginCommon
         );
     }
 
+    function cloneSearchDetailsRecordExceptFor($srcDetails, $arrDontCopyTheseKeys)
+    {
+        $retDetails = $this->getEmptySearchDetailsRecord();
+        $retDetails = array_merge($retDetails, $srcDetails);
+        foreach($arrDontCopyTheseKeys as $key)
+        {
+            $retDetails[$key] = null;
+        }
+
+        return $retDetails;
+
+    }
+
     function getEmptyJobListingRecord()
     {
         return array(
