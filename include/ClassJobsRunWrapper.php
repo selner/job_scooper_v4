@@ -1047,8 +1047,17 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             if($fWasSearched)
             {
                 $classPlug = new $plugin_setup['class_name'](null, null);
-                $arrPluginJobs = array_filter($this->getMyJobsList(), array($classPlug, "isJobListingMine"));
-                $countUpdated = count(array_filter($arrPluginJobs, "isJobUpdatedToday"));
+                $arrPluginJobsUnfiltered = $this->getMyJobsList();
+                if($arrPluginJobsUnfiltered == null || !is_array($arrPluginJobsUnfiltered) || countJobRecords($arrPluginJobsUnfiltered) == 0)
+                {
+                    $countUpdated = 0;
+                }
+                else
+                {
+                    $arrPluginJobs = array_filter($arrPluginJobsUnfiltered, array($classPlug, "isJobListingMine"));
+                    $countUpdated = count(array_filter($arrPluginJobs, "isJobUpdatedToday"));
+                }
+
                 if($countUpdated == 0)
                 {
                     $arrNoJobUpdates[$strName] = $strName;
