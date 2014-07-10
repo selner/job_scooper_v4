@@ -366,13 +366,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             }
         }
 
+        if(!$this->_isValueURLEncoded_($strRetCombinedKeywords)) { $strRetCombinedKeywords = urlencode($strRetCombinedKeywords); }
 
         if($this->_isBitFlagSet_(C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES))
         {
             $strRetCombinedKeywords = str_replace("%22", "-", $strRetCombinedKeywords);
+            $strRetCombinedKeywords = str_replace("+", "-", $strRetCombinedKeywords);
         }
 
-        if(!$this->_isValueURLEncoded_($strRetCombinedKeywords)) { $strRetCombinedKeywords = urlencode($strRetCombinedKeywords); }
         if($this->_isBitFlagSet_(C__JOB_KEYWORD_SUPPORTS_PLUS_PREFIX))
         {
             $strRetCombinedKeywords = "+" . $strRetCombinedKeywords;
@@ -677,7 +678,11 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 {
                     // we likely hit a page where jobs started to be hidden.
                     // Go ahead and bail on the loop here
-                    $GLOBALS['logger']->logLine("Not getting results back from ". $this->siteName . " starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", \Scooper\C__DISPLAY_ITEM_START__);
+                    $strWarnHiddenListings = "Could not get all job results back from ". $this->siteName . " for this search starting on page " . $nPageCount.".";
+                    if($nPageCount < $totalPagesCount)
+                        $strWarnHiddenListings .= "  They likely have hidden the remaining " . ($totalPagesCount - $nPageCount) . " pages worth. ";
+
+                    $GLOBALS['logger']->logLine($strWarnHiddenListings, \Scooper\C__DISPLAY_ITEM_START__);
                     $nPageCount = $totalPagesCount ;
                 }
                 else
@@ -759,7 +764,11 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 {
                     // we likely hit a page where jobs started to be hidden.
                     // Go ahead and bail on the loop here
-                    $GLOBALS['logger']->logLine("Not getting results back from ". $this->siteName . " starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", \Scooper\C__DISPLAY_ITEM_START__);
+                    $strWarnHiddenListings = "Could not get all job results back from ". $this->siteName . " for this search starting on page " . $nPageCount.".";
+                    if($nPageCount < $totalPagesCount)
+                        $strWarnHiddenListings .= "  They likely have hidden the remaining " . ($totalPagesCount - $nPageCount) . " pages worth. ";
+
+                    $GLOBALS['logger']->logLine($strWarnHiddenListings, \Scooper\C__DISPLAY_ITEM_START__);
                     $nPageCount = $totalPagesCount;
                 }
                 else
@@ -883,7 +892,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 // We're going to check keywords for strict matches,
                 // but we should skip it if we're exact matching and we have multiple keywords, since
                 // that's not a possible match case.
-                if(!(isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE)) && count($searchDetails['keyword_set']) > 1)
+                if(!(isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE)) && count($searchDetails['keyword_set']) >= 1)
                 {
                     //
                     // check array of jobs against keywords; mark any needed
