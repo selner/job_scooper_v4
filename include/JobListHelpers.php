@@ -227,6 +227,23 @@ function getArrayKeyValueForJob($job)
 
 }
 
+function countAssociativeArrayValues($arrToCount)
+{
+    $arrValues = array_values($arrToCount);
+    $nValues = count($arrValues);
+
+    $arrKeys = array_keys($arrToCount);
+    $nKeys = count($arrKeys);
+
+    return max($nKeys, $nValues);
+}
+
+function countJobRecords($arrJobs)
+{
+    return countAssociativeArrayValues($arrJobs);
+}
+
+
 function addJobsToJobsList(&$arrJobsListToUpdate, $arrAddJobs)
 {
     if($arrAddJobs == null) return;
@@ -306,7 +323,7 @@ function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strD
     {
         if($fIsFirstItem == true)
         {
-            $strReturn .= $strIntro;
+            $strReturn = $strIntro . $arrItem[$key];
         }
         else
         {
