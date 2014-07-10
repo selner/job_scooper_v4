@@ -19,7 +19,8 @@ require_once(__ROOT__.'/include/Options.php');
 require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 const VALUE_NOT_SUPPORTED = -1;
-
+const BASE_URL_TAG_LOCATION = "***LOCATION***";
+const BASE_URL_TAG_KEYWORDS = "***KEYWORDS***";
 
 abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 {
@@ -29,6 +30,12 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     protected $arrSearchLocationSetsToRun = null;
     protected $nJobListingsPerPage = 20;
     protected $flagSettings = null;
+
+//   TODO:  break the single flag setup into multiples
+//    protected $flagsKeywordSettings = null;
+//    protected $flagsLocationSettings = null;
+//    protected $flagsPluginSetup = null;
+
     protected $strFilePath_HTMLFileDownloadScript = null;
     protected $strBaseURLFormat = null;
     protected $typeLocationSearchNeeded = null;
@@ -86,6 +93,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         foreach($arrSearches as $searchDetails)
         {
+            $strURLBase = $this->_getBaseURLFormat_($searchDetails);
 
             if($configKeywordSettingsSet == null)
             {
@@ -102,45 +110,52 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 {
                     $searchDetails['keyword_set'] = $configKeywordSettingsSet['keywords_array'];
 
-
-                    //
-                    // If the search has multiple keywords on it, either because there was an overall keyword set for
-                    // all searches or because this one search was not configured well, and the site does not support
-                    // searches with multiple keywords at once, then we need to break this one search up into one
-                    // search for each keyword in it's keyword set.
-                    //
-                    if(!$this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && !$this->_isBitFlagSet_(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) &&
-                        count($searchDetails['keyword_set']) > 1)
+                    if(substr_count($strURLBase, BASE_URL_TAG_KEYWORDS) < 1)
                     {
-                        //
-                        // Create clones of the current search, one for each separate keyword item in the array
-                        //
-                        $newSearchBase = $this->cloneSearchDetailsRecordExceptFor($searchDetails, array('keyword_set', 'keywords_string_for_url'));
-                        foreach($searchDetails['keyword_set'] as $splitKeyword)
-                        {
-                            $newSearch = $newSearchBase;
-                            $newSearch = $this->cloneSearchDetailsRecordExceptFor($searchDetails, array('keyword_set', 'keywords_string_for_url'));
-                            $newSearch['keyword_set'] = array($splitKeyword);
-                            $newSearch['search_key'] .= "-split-" .$splitKeyword;
-                            $newSearch['search_name'] .= "-split-" .$splitKeyword;
-                            $this->addSearch($newSearch, $locSettingSets);
-                        }
-
-                        //
-                        // Now, we need to go find and remove the original search, that
-                        // was just split up, from the list of searches to run
-                        //
-                        for($i = 0; $i < count($this->arrSearchesToReturn); $i++)
-                        {
-                            if(strcasecmp($this->arrSearchesToReturn[$i]['search_name'], $searchDetails['search_name']) == 0)
-                            {
-                                unset($this->arrSearchesToReturn[$i]);
-                            }
-                        }
+                        $GLOBALS['logger']->logLine("Not setting keywords for search ". $searchDetails['search_name'] . " because it does not have a keyword marker in it's base_url_format = " . $strURLBase . "...", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                        $this->addSearch($searchDetails, $locSettingSets);
                     }
                     else
                     {
-                        $this->addSearch($searchDetails, $locSettingSets);
+                        //
+                        // If the search has multiple keywords on it, either because there was an overall keyword set for
+                        // all searches or because this one search was not configured well, and the site does not support
+                        // searches with multiple keywords at once, then we need to break this one search up into one
+                        // search for each keyword in it's keyword set.
+                        //
+
+                        if(!$this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && !$this->_isBitFlagSet_(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) &&
+                            count($searchDetails['keyword_set']) > 1)
+                        {
+                            //
+                            // Create clones of the current search, one for each separate keyword item in the array
+                            //
+                            $newSearchBase = $this->cloneSearchDetailsRecordExceptFor($searchDetails, array('keyword_set', 'keywords_string_for_url'));
+                            foreach($searchDetails['keyword_set'] as $splitKeyword)
+                            {
+                                $newSearch = $newSearchBase;
+                                $newSearch['keyword_set'] = array($splitKeyword);
+                                $newSearch['search_key'] .= $newSearchBase['search_key'] . "-split-" .$splitKeyword;
+                                $newSearch['search_name'] = $newSearchBase['search_name'] . "-split-" .$splitKeyword;
+                                $this->addSearch($newSearch, $locSettingSets);
+                            }
+
+                            //
+                            // Now, we need to go find and remove the original search, that
+                            // was just split up, from the list of searches to run
+                            //
+                            for($i = 0; $i < count($this->arrSearchesToReturn); $i++)
+                            {
+                                if(strcasecmp($this->arrSearchesToReturn[$i]['search_name'], $searchDetails['search_name']) == 0)
+                                {
+                                    unset($this->arrSearchesToReturn[$i]);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            $this->addSearch($searchDetails, $locSettingSets);
+                        }
                     }
                 }
             }
@@ -456,9 +471,16 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     protected function _getMyJobsForEachLocationAndSearch_($searchDetails, $nDays)
     {
+        $strURLBase = $this->_getBaseURLFormat_($searchDetails);
+
         if($this->_isBitFlagSet_(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
         {
-            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' with no location settings..." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_START__);
+            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' with no location settings and and base_url_format = " . $strURLBase . "..." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_START__);
+            $this->getJobsForSearchByType($searchDetails, $nDays, null);
+        }
+        elseif(substr_count($strURLBase, BASE_URL_TAG_LOCATION) < 1)
+        {
+            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' with base_url_format = " . $strURLBase . "..." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_START__);
             $this->getJobsForSearchByType($searchDetails, $nDays, null);
         }
         else
@@ -1012,38 +1034,45 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         return $strReturnLocation;
     }
 
-    protected function _getURLfromBase_($searchDetails, $nDays, $nPage = null, $nItem = null, $locSingleSettingSet=null)
+    private function _getBaseURLFormat_($searchDetails = null)
     {
-        $strURL = null;
+        $strBaseURL = VALUE_NOT_SUPPORTED;
 
-        if(isset($searchDetails['base_url_format']))
+        if($searchDetails != null && isset($searchDetails['base_url_format']))
         {
-            $strURL = $searchDetails['base_url_format'];
+            $strBaseURL = $searchDetails['base_url_format'];
 
         }
         elseif(isset($this->strBaseURLFormat))
         {
-            $strURL = $this->strBaseURLFormat;
+            $strBaseURL = $this->strBaseURLFormat;
         }
         else
         {
             throw new ErrorException("Could not find base URL format for " . $this->siteName . ".  Aborting all searches for ". $this->siteName, \Scooper\C__DISPLAY_ERROR__);
         }
+        return $strBaseURL;
+    }
+
+    protected function _getURLfromBase_($searchDetails, $nDays, $nPage = null, $nItem = null, $locSingleSettingSet=null)
+    {
+        $strURL = $this->_getBaseURLFormat_($searchDetails);
+
 
         $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($nDays), $strURL );
         $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL );
         $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
         if(!$this->_isBitFlagSet_(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
         {
-            if($searchDetails['keywords_string_for_url'] == null || $searchDetails['keywords_string_for_url'] == VALUE_NOT_SUPPORTED)
-            {
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search '" . $searchDetails['search_name'] ."' did not include a required keyword string value.  Skipping search...", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                $strURL = VALUE_NOT_SUPPORTED;
-            }
-            else
-            {
-                $strURL = str_ireplace("***KEYWORDS***", $searchDetails['keywords_string_for_url'], $strURL );
-            }
+//            if($searchDetails['keywords_string_for_url'] == null || $searchDetails['keywords_string_for_url'] == VALUE_NOT_SUPPORTED)
+//            {
+//                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search '" . $searchDetails['search_name'] ."' did not include a required keyword string value.  Skipping search...", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+//                $strURL = VALUE_NOT_SUPPORTED;
+//            }
+//            else
+//            {
+                $strURL = str_ireplace(BASE_URL_TAG_KEYWORDS, $searchDetails['keywords_string_for_url'], $strURL );
+//            }
         }
 
         if(!$this->_isBitFlagSet_(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
@@ -1054,7 +1083,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search settings '" . $locSingleSettingSet['name'] ."' did not have the required location type of " . $this->getLocationSettingType() ." set.  Skipping search '". $searchDetails['search_name'] . "' with settings '" . $locSingleSettingSet['name'] ."'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 $strURL = VALUE_NOT_SUPPORTED;
             }
-            $strURL = str_ireplace("***LOCATION***", $strLocationValue, $strURL);
+            $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $strLocationValue, $strURL);
         }
 
         if($strURL == null) { throw new ErrorException("Location value is required for " . $this->siteName . ", but was not set for the search '" . $searchDetails['name'] ."'.". " Aborting all searches for ". $this->siteName, \Scooper\C__DISPLAY_ERROR__); }
