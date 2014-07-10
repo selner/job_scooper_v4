@@ -324,7 +324,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         $tempSearch['search_key']  = $iniSearch['key'];
         $tempSearch['site_name']  = $iniSearch['jobsite'];
-        $tempSearch['search_name']  = $iniSearch['name'];
+        $tempSearch['search_name']  = ($iniSearch['jobsite'] != null ? $iniSearch['jobsite'] . ': ' : "") . $iniSearch['name'];
         $tempSearch['base_url_format']  = $iniSearch['url_format'];
         $tempSearch['keyword_search_override']  = $iniSearch['keywords'];
         $tempSearch['location_search_override']  = $iniSearch['location'];
