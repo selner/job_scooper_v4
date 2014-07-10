@@ -645,7 +645,13 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $class = null;
 
         // Write to the main output file name that the user passed in
-        $arrJobs_UpdatedOrInterested = array_filter($this->arrLatestJobs, "isJobUpdatedTodayOrIsInterestedOrBlank");
+        $arrJobsTemp = $this->arrLatestJobs;
+        if($arrJobsTemp == null || !is_array($arrJobsTemp))
+        {
+            $arrJobsTemp = array();
+        }
+
+        $arrJobs_UpdatedOrInterested = array_filter($arrJobsTemp, "isJobUpdatedTodayOrIsInterestedOrBlank");
         $this->writeRunsJobsToFile($this->detailsOutputFile['full_file_path'], $arrJobs_UpdatedOrInterested, "ClassJobsRunWrapper-UserOutputFile");
         $detailsCSVFile = $this->detailsOutputFile;
 
