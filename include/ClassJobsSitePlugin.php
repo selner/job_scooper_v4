@@ -65,174 +65,102 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     function parseJobsListForPage($objSimpHTML) { return VALUE_NOT_SUPPORTED; } // returns an array of jobs
     function parseTotalResultsCount($objSimpHTML) { return VALUE_NOT_SUPPORTED; } // returns an array of jobs
 
-    function getName() { return $this->siteName; }
-    function getMyJobsList() { return $this->arrLatestJobs; }
-    function getLocationSettingType() { return $this->typeLocationSearchNeeded; }
-    function setLocationValue($locVal) { $this->locationValue = $locVal; }
-    function getLocationValue() { return $this->locationValue; }
 
-    /**
-     * Main worker function for all jobs sites.
-     *
-     *
-     * @param  integer $nDays Number of days of job listings to pull
-     * @param  Array $arrInputFilesToMergeWithResults Optional list of jobs list CSV files to include in the results
-     * @param  integer $fIncludeFilteredJobsInResults If true, filters out jobs flagged with "not interested" values from the results.
-     * @return string If successful, the final output CSV file with the full jobs list
-     */
-    function downloadAllUpdatedJobs($nDays = VALUE_NOT_SUPPORTED)
+
+
+
+    //************************************************************************
+    //
+    //
+    //
+    //  Functions for Adding Searches to Plugin Instance 
+    //
+    //
+    //
+    //************************************************************************
+
+
+    function addSearches($arrSearches, $locSettingSets = null, $configKeywordSettingsSet = null)
     {
-        $retFilePath = '';
+        if(!is_array($arrSearches[0])) { $arrSearches[] = $arrSearches; }
 
-        // Now go download and output the latest jobs from this site
-        $GLOBALS['logger']->logLine("Downloading new ". $this->siteName ." jobs...", \Scooper\C__DISPLAY_ITEM_START__);
-
-        //
-        // Call the child classes getJobs function to update the object's array of job listings
-        // and output the results to a single CSV
-        //
-        $this->getJobsForAllSearches($nDays);
-
-        $this->markMyJobsList_withAutoItems();
-    }
-
-
-    function getMyOutputFileFullPath($strFilePrefix = "")
-    {
-        return parent::getOutputFileFullPath($this->siteName . "_" . $strFilePrefix, "jobs", "csv");
-    }
-
-    function markMyJobsList_withAutoItems()
-    {
-        $this->markJobsList_withAutoItems($this->arrLatestJobs, $this->siteName);
-    }
-
-
-    /**
-     * Write this class instance's list of jobs to an output CSV file.  Always rights
-     * the full unfiltered list.
-     *
-     *
-     * @param  string $strOutFilePath The file to output the jobs list to
-     * @param  Array $arrMyRecordsToInclude An array of optional job records to combine into the file output CSV
-     * @return string $strOutFilePath The file the jobs was written to or null if failed.
-     */
-    function writeMyJobsListToFile($strOutFilePath = null)
-    {
-        return $this->writeJobsListToFile($strOutFilePath, $this->arrLatestJobs, true, false, $this->siteName);
-    }
-
-
-    /*
-     * _addSearchJobsToMyJobsList_
-     *
-     * Is passed the jobs returned for any given search, marks them for
-     * search-specific settings, such as strict title matching, and adds them
-     * to the plug-in's internal jobs list.
-     *
-     * @param array $arrAdd list of jobs to add to this plugins internal tracking list
-     * @param array $searchDetails details for the search that the jobs belong to
-     *
-     */
-    function _addSearchJobsToMyJobsList_($arrAdd, $searchDetails)
-    {
-        $arrAddJobsForSearch = $arrAdd;
-
-        if(!is_array($arrAddJobsForSearch)) return;
-
-
-        //
-        // check the search flag to see if this is needed
-        //
-        if(isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_BE_IN_TITLE) || isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE))
+        foreach($arrSearches as $searchDetails)
         {
-            //
-            // verify we didn't get here when the keyword can be anywhere in the search
-            //
-            assert(!isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_ANYWHERE));
 
-            // get an array of the search keywords
-            //
-            if(!$searchDetails['keyword_set'] == null && is_array($searchDetails['keyword_set']))
+            if($configKeywordSettingsSet == null)
             {
-                // We're going to check keywords for strict matches,
-                // but we should skip it if we're exact matching and we have multiple keywords, since
-                // that's not a possible match case.
-                if(!(isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE)) && count($searchDetails['keyword_set']) > 1)
-                {
-                    //
-                    // check array of jobs against keywords; mark any needed
-                    //
-                    foreach($arrAddJobsForSearch as $job)
-                    {
-                        $strTitleMatchScrubbed = \Scooper\strScrub($job['job_title'], FOR_LOOKUP_VALUE_MATCHING);
-
-                        if(isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE))
-                        {
-                            if(count($searchDetails['keyword_set']) != 1)
-                            {
-                                // TODO log error.
-                                print("TODO log error" . PHP_EOL);
-                            }
-                            elseif(strcasecmp($strTitleMatchScrubbed, $searchDetails['keyword_set'][0]) != 0)
-                            {
-                                 $arrAddJobsForSearch[$job['key_jobsite_siteid']]['interested'] = C__STR_TAG_NOT_EXACT_TITLE_MATCH__ . C__STR_TAG_AUTOMARKEDJOB__;
-                            }
-                        }
-                        else
-                        {
-                            // Check the different keywords against the job title.  If we got a
-                            // match, leave that job record alone and move on.
-                            //
-                            $arrScrubbedKeywords = $this->_getScrubbedKeywordSet_($searchDetails['keyword_set']);
-                            $nCount = \Scooper\substr_count_array($strTitleMatchScrubbed, $arrScrubbedKeywords);
-                            if($nCount <= 0)
-                            {
-                                //
-                                // At this point, we assume we're not going to have a match for any of the keywords
-                                // but there is one more case to check.  Set a var to the default answer and then
-                                // check the multiple terms per keyword case to be sure.
-
-                                $strInterestedValue = C__STR_TAG_NOT_STRICT_TITLE_MATCH__ . C__STR_TAG_AUTOMARKEDJOB__;
-                                //
-                                // If we had no matches against all the terms, break up any of the keywords
-                                // that are multiple words to see if all of the words are present in the title
-                                // (just not in the same order.)  If they are not, then mark it as not a match.
-                                //
-                                foreach($searchDetails['keyword_set'] as $keywordTerm)
-                                {
-                                    $arrKeywordSubterms = explode(" ", $keywordTerm);
-                                    if(count($arrKeywordSubterms) > 1)
-                                    {
-                                        $arrScrubbedSubterms = $this->_getScrubbedKeywordSet_($arrKeywordSubterms);
-                                        $nSubtermMatches = \Scooper\substr_count_array($strTitleMatchScrubbed, $arrScrubbedSubterms);
-
-                                        // If we found a match for every subterm in the list, then
-                                        // this was a true match and we should leave it as interested = blank
-                                        if($nSubtermMatches == count($arrScrubbedSubterms))
-                                        {
-                                            $strInterestedValue = "";
-                                        }
-                                    }
-                                }
-                                $arrAddJobsForSearch[$job['key_jobsite_siteid']]['interested'] = $strInterestedValue;
-                            }
-                        }
-                    }
-                }
+                $this->addSearch($searchDetails, $locSettingSets);
             }
             else
             {
-                $GLOBALS['logger']->logLine($searchDetails['search_key'] . " incorrectly set a keyword match type, but has no possible keywords.  Ignoring match-type request and returning all jobs.", \Scooper\C__DISPLAY_ERROR__);
+                $searchDetails['user_setting_flags'] = $searchDetails['user_setting_flags'] | $configKeywordSettingsSet['match-type'];
+                if($searchDetails['keyword_search_override'] != null && strlen($searchDetails['keyword_search_override']) > 0)
+                {
+                    $this->addSearch($searchDetails, $locSettingSets);
+                }
+                else
+                {
+                    $searchDetails['keyword_set'] = $configKeywordSettingsSet['keywords_array'];
+
+
+                    //
+                    // If the search has multiple keywords on it, either because there was an overall keyword set for
+                    // all searches or because this one search was not configured well, and the site does not support
+                    // searches with multiple keywords at once, then we need to break this one search up into one
+                    // search for each keyword in it's keyword set.
+                    //
+                    if(!$this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && !$this->_isBitFlagSet_(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) &&
+                        count($searchDetails['keyword_set']) > 1)
+                    {
+                        //
+                        // Create clones of the current search, one for each separate keyword item in the array
+                        //
+                        $newSearchBase = $this->cloneSearchDetailsRecordExceptFor($searchDetails, array('keyword_set', 'keywords_string_for_url'));
+                        foreach($searchDetails['keyword_set'] as $splitKeyword)
+                        {
+                            $newSearch = $newSearchBase;
+                            $newSearch = $this->cloneSearchDetailsRecordExceptFor($searchDetails, array('keyword_set', 'keywords_string_for_url'));
+                            $newSearch['keyword_set'] = array($splitKeyword);
+                            $newSearch['search_key'] .= "-split-" .$splitKeyword;
+                            $newSearch['search_name'] .= "-split-" .$splitKeyword;
+                            $this->addSearch($newSearch, $locSettingSets);
+                        }
+
+                        //
+                        // Now, we need to go find and remove the original search, that
+                        // was just split up, from the list of searches to run
+                        //
+                        for($i = 0; $i < count($this->arrSearchesToReturn); $i++)
+                        {
+                            if(strcasecmp($this->arrSearchesToReturn[$i]['search_name'], $searchDetails['search_name']) == 0)
+                            {
+                                unset($this->arrSearchesToReturn[$i]);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        $this->addSearch($searchDetails, $locSettingSets);
+                    }
+                }
             }
         }
+    }
+
+    protected function addSearch($searchDetails, $locSettingSets = null)
+    {
+
+        $this->_setKeywordStringsForSearch_($searchDetails);
 
         //
-        // add the jobs to my list, now marked if necessary
+        // Add the search to the list of ones to run
         //
-        addJobsToJobsList($this->arrLatestJobs, $arrAddJobsForSearch);
+        $this->arrSearchesToReturn[] = $searchDetails;
+
+        $this->addSearchLocations($searchDetails, $locSettingSets);
 
     }
+
 
     private function collapseSearchesIfPossible()
     {
@@ -310,6 +238,281 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     }
 
 
+
+    //************************************************************************
+    //
+    //
+    //
+    //  Keyword Search Related Functions
+    //
+    //
+    //
+    //************************************************************************
+    protected function _setKeywordStringsForSearch_(&$searchDetails)
+    {
+
+//        'keyword_search_override' => null,
+//            'keywords_string_for_url' => null,
+//            'keyword_set' => null,
+//            'user_setting_flags' => null,
+
+
+        // Does this search have a set of keywords specific to it that override
+        // all the general settings?
+        if($searchDetails['keyword_search_override'] != null && strlen($searchDetails['keyword_search_override']) > 0)
+        {
+            // keyword_search_override should only ever be a string value for any given search
+            assert(!is_array($searchDetails['keyword_search_override']));
+
+            // null out any generalized keyword set values we previously had
+            $searchDetails['keyword_set'] = null;
+            $searchDetails['keywords_string_for_url'] = null;
+
+            //
+            // Now take the override value and setup the keyword_set
+            // and URL value for that particular string
+            //
+            $searchDetails['keyword_set'] = array($searchDetails['keyword_search_override']);
+        }
+
+        if($searchDetails['keyword_set'] != null)
+        {
+            assert(is_array($searchDetails['keyword_set']));
+
+            $searchDetails['keywords_string_for_url'] = $this->getCombinedKeywordStringForURL($searchDetails['keyword_set']);
+        }
+
+        // Lastly, check if we support keywords in the URL at all for this
+        // plugin.  If not, remove any keywords_string_for_url value we'd set
+        // and set it to "not supported"
+        if($this->_isBitFlagSet_(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
+        {
+            $searchDetails['keywords_string_for_url'] = VALUE_NOT_SUPPORTED;
+        }
+    }
+
+
+
+
+    protected function getCombinedKeywordStringForURL($arrKeywordSet)
+    {
+        $arrKeywords = array();
+
+        if(!is_array($arrKeywordSet))
+        {
+            $arrKeywords[] =$arrKeywordSet[0];
+        }
+        else
+        {
+            $arrKeywords = $arrKeywordSet;
+        }
+
+        $strRetCombinedKeywords = VALUE_NOT_SUPPORTED;
+
+        if(($this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED)) && count($arrKeywords) > 1)
+        {
+            if($this->strKeywordDelimiter == null)
+            {
+                throw new ErrorException($this->siteName . " supports multiple keyword terms, but has not set the \$strKeywordDelimiter value in " .get_class($this). " Aborting search beacyse cannot create the URL.");
+            }
+
+            foreach($arrKeywords as $kywd)
+            {
+                $newKywd = $kywd;
+                if($this->_isBitFlagSet_(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS))
+                {
+                    $newKywd = '"' . $newKywd .'"';
+                }
+
+                if($strRetCombinedKeywords == VALUE_NOT_SUPPORTED)
+                {
+                    $strRetCombinedKeywords = $newKywd;
+                }
+                else
+                {
+                    $strRetCombinedKeywords .= " " . $this->strKeywordDelimiter . $newKywd;
+                }
+            }
+            if($this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && strlen($this->strTitleOnlySearchKeywordFormat) > 0)
+            {
+                $strRetCombinedKeywords = sprintf($this->strTitleOnlySearchKeywordFormat, $strRetCombinedKeywords);
+            }
+
+        }
+        elseif(count($arrKeywords) == 1)
+        {
+            if($this->_isBitFlagSet_(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS))
+            {
+                $strRetCombinedKeywords = '"' . $arrKeywords[0] .'"';
+            }
+            else
+            {
+                $strRetCombinedKeywords = $arrKeywords[0];
+            }
+        }
+
+
+        if($this->_isBitFlagSet_(C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES))
+        {
+            $strRetCombinedKeywords = str_replace("%22", "-", $strRetCombinedKeywords);
+        }
+
+        if(!$this->_isValueURLEncoded_($strRetCombinedKeywords)) { $strRetCombinedKeywords = urlencode($strRetCombinedKeywords); }
+        if($this->_isBitFlagSet_(C__JOB_KEYWORD_SUPPORTS_PLUS_PREFIX))
+        {
+            $strRetCombinedKeywords = "+" . $strRetCombinedKeywords;
+        }
+
+        return $strRetCombinedKeywords;
+    }
+
+
+
+    private function _getScrubbedKeywordSet_($arrKeywordSet)
+    {
+        $arrReturnKeywords = array();
+
+        foreach($arrKeywordSet as $term)
+        {
+            $strAddTerm = \Scooper\strScrub($term, FOR_LOOKUP_VALUE_MATCHING);
+
+            if(strlen($strAddTerm) > 0) $arrReturnKeywords[] = $strAddTerm;
+        }
+
+        return $arrReturnKeywords;
+    }
+
+
+
+
+
+
+    //************************************************************************
+    //
+    //
+    //
+    //  Location Search Related Functions
+    //
+    //
+    //
+    //************************************************************************
+
+    protected function addSearchLocations($searchDetails, $locSettingSets = null)
+    {
+        //
+        // Add the search locations to the list of ones to run
+        //
+        // If the search had location keywords, it overrides the locSettingSets
+        //
+        if($searchDetails['location_search_override'] != null && strlen($searchDetails['location_search_override']) > 0)
+        {
+            $locSingleSettingSet = array('name' => 'search_location_override', 'search_location_value_override' => $searchDetails['location_search_override']);
+            $this->arrSearchLocationSetsToRun['search_location_override'] = $locSingleSettingSet;
+        }
+        else
+        {
+            $locTypeSupported = $this->getLocationSettingType();
+            if($locTypeSupported != null && strlen($locTypeSupported) > 0 && $locSettingSets != null)
+            {
+                foreach($locSettingSets as $set)
+                {
+                    if($set[$locTypeSupported] != null)
+                    {
+                        $this->arrSearchLocationSetsToRun[$set['name']]['name'] = $set['name'];
+                        $this->arrSearchLocationSetsToRun[$set['name']][$locTypeSupported] = $set[$locTypeSupported];
+                    }
+                }
+            }
+        }
+    }
+
+
+    protected function _getLocationValueFromSettings_($settingsSet, $fLowerCase = false)
+    {
+        $strReturnLocation = VALUE_NOT_SUPPORTED;
+
+        if($settingsSet['search_location_override'] != null && strlen($settingsSet['search_location_override']) > 0)
+        {
+            $strReturnLocation = $settingsSet['search_location_override'];
+        }
+        else
+        {
+
+            $locTypeNeeded = $this->getLocationSettingType();
+            if($settingsSet != null && count($settingsSet) > 0 && $settingsSet[$locTypeNeeded] != null)
+            {
+                $strReturnLocation = $settingsSet[$locTypeNeeded];
+            }
+        }
+        if(!$this->_isValueURLEncoded_($strReturnLocation)) { $strReturnLocation = urlencode($strReturnLocation); }
+
+        if($fLowerCase == true)
+        {
+            $strReturnLocation = strtolower($strReturnLocation);
+        }
+        return $strReturnLocation;
+    }
+
+
+    protected function _getMyJobsForEachLocationAndSearch_($searchDetails, $nDays)
+    {
+        if($this->_isBitFlagSet_(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
+        {
+            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' with no location settings..." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_START__);
+            $this->getJobsForSearchByType($searchDetails, $nDays, null);
+        }
+        else
+        {
+            // Did the user specify an override at the search level in the INI?
+            if($searchDetails != null && $searchDetails['location_search_override'] != null && strlen($searchDetails['location_search_override']) > 0)
+            {
+                $locSingleSettingSet = array('name' => 'location_search_override', 'search_location_override' => $searchDetails['location_search_override']);
+                $this->getJobsForSearchByType($searchDetails, $nDays, $locSingleSettingSet);
+            }
+            elseif(($this->arrSearchLocationSetsToRun == null || count($this->arrSearchLocationSetsToRun) == 0) == true)
+            {
+                $GLOBALS['logger']->logLine("Skipping ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' because there was no location set...", \Scooper\C__DISPLAY_ITEM_RESULT__);
+            }
+            else
+            {
+                foreach($this->arrSearchLocationSetsToRun as $locSingleSettingSet)
+                {
+                    $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' for location settings set '" . $locSingleSettingSet['name'] . "'...", \Scooper\C__DISPLAY_ITEM_START__);
+
+                    $this->getJobsForSearchByType($searchDetails, $nDays, $locSingleSettingSet);
+                    $GLOBALS['logger']->logLine("Completed ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' for location settings set '" . $locSingleSettingSet['name'] . "'...", \Scooper\C__DISPLAY_ITEM_RESULT__);
+                }
+            }
+        }
+    }
+
+
+    //************************************************************************
+    //
+    //
+    //
+    //  Job Download Functions
+    //
+    //
+    //
+    //************************************************************************
+
+    function downloadAllUpdatedJobs($nDays = VALUE_NOT_SUPPORTED)
+    {
+        $retFilePath = '';
+
+        // Now go download and output the latest jobs from this site
+        $GLOBALS['logger']->logLine("Downloading new ". $this->siteName ." jobs...", \Scooper\C__DISPLAY_ITEM_START__);
+
+        //
+        // Call the child classes getJobs function to update the object's array of job listings
+        // and output the results to a single CSV
+        //
+        $this->getJobsForAllSearches($nDays);
+
+        $this->markMyJobsList_withAutoItems();
+    }
+
     function getJobsForAllSearches($nDays = VALUE_NOT_SUPPORTED)
     {
 
@@ -333,21 +536,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 $this->_getMyJobsForEachLocationAndSearch_($search, $nDays);
             }
         }
-    }
-
-
-    private function _getScrubbedKeywordSet_($arrKeywordSet)
-    {
-        $arrReturnKeywords = array();
-
-        foreach($arrKeywordSet as $term)
-        {
-             $strAddTerm = \Scooper\strScrub($term, FOR_LOOKUP_VALUE_MATCHING);
-
-             if(strlen($strAddTerm) > 0) $arrReturnKeywords[] = $strAddTerm;
-        }
-
-        return $arrReturnKeywords;
     }
 
 
@@ -399,44 +587,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     }
 
 
-    protected function _getMyJobsForEachLocationAndSearch_($searchDetails, $nDays)
-    {
-        if($this->_isBitFlagSet_(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
-        {
-            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' with no location settings..." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_START__);
-            $this->getJobsForSearchByType($searchDetails, $nDays, null);
-        }
-        else
-        {
-            // Did the user specify an override at the search level in the INI?
-            if($searchDetails != null && $searchDetails['location_search_override'] != null && strlen($searchDetails['location_search_override']) > 0)
-            {
-                $locSingleSettingSet = array('name' => 'location_search_override', 'search_location_override' => $searchDetails['location_search_override']);
-                $this->getJobsForSearchByType($searchDetails, $nDays, $locSingleSettingSet);
-            }
-            elseif(($this->arrSearchLocationSetsToRun == null || count($this->arrSearchLocationSetsToRun) == 0) == true)
-            {
-                $GLOBALS['logger']->logLine("Skipping ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' because there was no location set...", \Scooper\C__DISPLAY_ITEM_RESULT__);
-            }
-            else
-            {
-                foreach($this->arrSearchLocationSetsToRun as $locSingleSettingSet)
-                {
-                    $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' for location settings set '" . $locSingleSettingSet['name'] . "'...", \Scooper\C__DISPLAY_ITEM_START__);
-
-                    $this->getJobsForSearchByType($searchDetails, $nDays, $locSingleSettingSet);
-                    $GLOBALS['logger']->logLine("Completed ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' for location settings set '" . $locSingleSettingSet['name'] . "'...", \Scooper\C__DISPLAY_ITEM_RESULT__);
-                }
-            }
-        }
-    }
-
-    private function _checkInvalidURL_($details, $strURL)
-    {
-        if($strURL == null) throw new ErrorException("Skipping " . $this->siteName ." search '".$details['search_name']. "' because a valid URL could not be set.");
-        return $strURL;
-        // if($strURL == VALUE_NOT_SUPPORTED) $GLOBALS['logger']->logLine("Skipping " . $this->siteName ." search '".$details['search_name']. "' because a valid URL could not be set.");
-    }
 
     protected function getMyJobsForSearchFromXML($searchDetails, $nDays = VALUE_NOT_SUPPORTED, $locSingleSettingSet=null)
     {
@@ -449,70 +599,70 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $nItemCount = 1;
         $nPageCount = 1;
 
-            $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount, $locSingleSettingSet);
-            if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
+        $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount, $locSingleSettingSet);
+        if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
 
-            $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-            $class = new \Scooper\ScooperDataAPIWrapper();
-            $ret = $class->cURL($strURL, null, 'GET', 'text/xml; charset=UTF-8');
-            $xmlResult = simplexml_load_string($ret['output']);
+        $class = new \Scooper\ScooperDataAPIWrapper();
+        $ret = $class->cURL($strURL, null, 'GET', 'text/xml; charset=UTF-8');
+        $xmlResult = simplexml_load_string($ret['output']);
 
-            if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
-            $xmlResult->registerXPathNamespace("def", "http://www.w3.org/2005/Atom");
+        if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
+        $xmlResult->registerXPathNamespace("def", "http://www.w3.org/2005/Atom");
 
-            if($this->_isBitFlagSet_(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
+        if($this->_isBitFlagSet_(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
+        {
+            $totalPagesCount = 1;
+            $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
+        }
+        else
+        {
+            $strTotalResults = $this->parseTotalResultsCount($xmlResult);
+            $strTotalResults  = intval(str_replace(",", "", $strTotalResults));
+            $nTotalListings = intval($strTotalResults);
+            $totalPagesCount = \Scooper\intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
+            if($totalPagesCount < 1)  $totalPagesCount = 1;
+        }
+
+        if($nTotalListings <= 0)
+        {
+            $GLOBALS['logger']->logLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['search_name']."'.", \Scooper\C__DISPLAY_ITEM_START__);
+            return;
+        }
+        else
+        {
+
+            $GLOBALS['logger']->logLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strURL, \Scooper\C__DISPLAY_ITEM_START__);
+
+            while ($nPageCount <= $totalPagesCount )
             {
-                $totalPagesCount = 1;
-                $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
-            }
-            else
-            {
-                $strTotalResults = $this->parseTotalResultsCount($xmlResult);
-                $strTotalResults  = intval(str_replace(",", "", $strTotalResults));
-                $nTotalListings = intval($strTotalResults);
-                $totalPagesCount = \Scooper\intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
-                if($totalPagesCount < 1)  $totalPagesCount = 1;
-            }
+                $arrPageJobsList = null;
 
-            if($nTotalListings <= 0)
-            {
-                $GLOBALS['logger']->logLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['search_name']."'.", \Scooper\C__DISPLAY_ITEM_START__);
-                return;
-            }
-            else
-            {
+                $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount, $locSingleSettingSet);
+                if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
 
-                $GLOBALS['logger']->logLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strURL, \Scooper\C__DISPLAY_ITEM_START__);
+                $class = new \Scooper\ScooperDataAPIWrapper();
+                $ret = $class->cURL($strURL,'' , 'GET', 'application/rss+xml');
 
-                while ($nPageCount <= $totalPagesCount )
+                $xmlResult = simplexml_load_string($ret['output']);
+                if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
+
+                $arrPageJobsList = $this->parseJobsListForPage($xmlResult);
+
+
+                if(!is_array($arrPageJobsList))
                 {
-                    $arrPageJobsList = null;
-
-                    $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount, $locSingleSettingSet);
-                    if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
-
-                    $class = new \Scooper\ScooperDataAPIWrapper();
-                    $ret = $class->cURL($strURL,'' , 'GET', 'application/rss+xml');
-
-                    $xmlResult = simplexml_load_string($ret['output']);
-                    if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
-
-                    $arrPageJobsList = $this->parseJobsListForPage($xmlResult);
-
-
-                    if(!is_array($arrPageJobsList))
-                    {
-                        // we likely hit a page where jobs started to be hidden.
-                        // Go ahead and bail on the loop here
-                        $GLOBALS['logger']->logLine("Not getting results back from ". $this->siteName . " starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", \Scooper\C__DISPLAY_ITEM_START__);
-                        $nPageCount = $totalPagesCount ;
-                    }
-                    else
-                    {
-                        addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
-                        $nItemCount += $this->nJobListingsPerPage;
-                    }
+                    // we likely hit a page where jobs started to be hidden.
+                    // Go ahead and bail on the loop here
+                    $GLOBALS['logger']->logLine("Not getting results back from ". $this->siteName . " starting on page " . $nPageCount.".  They likely have hidden the remaining " . $maxItem - $nPageCount. " pages worth. ", \Scooper\C__DISPLAY_ITEM_START__);
+                    $nPageCount = $totalPagesCount ;
+                }
+                else
+                {
+                    addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
+                    $nItemCount += $this->nJobListingsPerPage;
+                }
                 $nPageCount++;
 
             }
@@ -620,6 +770,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         }
 
+        $GLOBALS['logger']->logLine("Starting search " . $searchDetails['search_name'] . " jobs download through AppleScript.", \Scooper\C__DISPLAY_ITEM_START__);
 
         $nPageCount = 0;
 
@@ -664,17 +815,151 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             $objSimpleHTML = null;
 
             addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
+            $GLOBALS['logger']->logLine("Downloaded " . countJobRecords($arrSearchReturnedJobs) ." jobs from " . $strFileName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
             $nPageCount++;
 
             $strFileName = $strFileBase.$nPageCount.".html";
         }
 
+        $GLOBALS['logger']->logLine("Downloaded " . countJobRecords($arrSearchReturnedJobs) ." total jobs for search '" . $searchDetails['search_name'] . "'.", \Scooper\C__DISPLAY_ITEM_RESULT__);
         $this->_addSearchJobsToMyJobsList_($arrSearchReturnedJobs, $searchDetails);
+    }
 
+    /*
+     * _addSearchJobsToMyJobsList_
+     *
+     * Is passed the jobs returned for any given search, marks them for
+     * search-specific settings, such as strict title matching, and adds them
+     * to the plug-in's internal jobs list.
+     *
+     * @param array $arrAdd list of jobs to add to this plugins internal tracking list
+     * @param array $searchDetails details for the search that the jobs belong to
+     *
+     */
+    function _addSearchJobsToMyJobsList_($arrAdd, $searchDetails)
+    {
+        $arrAddJobsForSearch = $arrAdd;
+
+        if(!is_array($arrAddJobsForSearch)) return;
+
+
+        //
+        // check the search flag to see if this is needed
+        //
+        if(isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_BE_IN_TITLE) || isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE))
+        {
+            //
+            // verify we didn't get here when the keyword can be anywhere in the search
+            //
+            assert(!isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_ANYWHERE));
+
+            // get an array of the search keywords
+            //
+            if(!$searchDetails['keyword_set'] == null && is_array($searchDetails['keyword_set']))
+            {
+                // We're going to check keywords for strict matches,
+                // but we should skip it if we're exact matching and we have multiple keywords, since
+                // that's not a possible match case.
+                if(!(isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE)) && count($searchDetails['keyword_set']) > 1)
+                {
+                    //
+                    // check array of jobs against keywords; mark any needed
+                    //
+                    foreach($arrAddJobsForSearch as $job)
+                    {
+                        $strTitleMatchScrubbed = \Scooper\strScrub($job['job_title'], FOR_LOOKUP_VALUE_MATCHING);
+
+                        if(isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE))
+                        {
+                            if(count($searchDetails['keyword_set']) != 1)
+                            {
+                                // TODO log error.
+                                print("TODO log error" . PHP_EOL);
+                            }
+                            elseif(strcasecmp($strTitleMatchScrubbed, $searchDetails['keyword_set'][0]) != 0)
+                            {
+                                $arrAddJobsForSearch[$job['key_jobsite_siteid']]['interested'] = C__STR_TAG_NOT_EXACT_TITLE_MATCH__ . C__STR_TAG_AUTOMARKEDJOB__;
+                            }
+                        }
+                        else
+                        {
+                            // Check the different keywords against the job title.  If we got a
+                            // match, leave that job record alone and move on.
+                            //
+                            $arrScrubbedKeywords = $this->_getScrubbedKeywordSet_($searchDetails['keyword_set']);
+                            $nCount = \Scooper\substr_count_array($strTitleMatchScrubbed, $arrScrubbedKeywords);
+                            if($nCount <= 0)
+                            {
+                                //
+                                // At this point, we assume we're not going to have a match for any of the keywords
+                                // but there is one more case to check.  Set a var to the default answer and then
+                                // check the multiple terms per keyword case to be sure.
+
+                                $strInterestedValue = C__STR_TAG_NOT_STRICT_TITLE_MATCH__ . C__STR_TAG_AUTOMARKEDJOB__;
+                                //
+                                // If we had no matches against all the terms, break up any of the keywords
+                                // that are multiple words to see if all of the words are present in the title
+                                // (just not in the same order.)  If they are not, then mark it as not a match.
+                                //
+                                foreach($searchDetails['keyword_set'] as $keywordTerm)
+                                {
+                                    $arrKeywordSubterms = explode(" ", $keywordTerm);
+                                    if(count($arrKeywordSubterms) > 1)
+                                    {
+                                        $arrScrubbedSubterms = $this->_getScrubbedKeywordSet_($arrKeywordSubterms);
+                                        $nSubtermMatches = \Scooper\substr_count_array($strTitleMatchScrubbed, $arrScrubbedSubterms);
+
+                                        // If we found a match for every subterm in the list, then
+                                        // this was a true match and we should leave it as interested = blank
+                                        if($nSubtermMatches == count($arrScrubbedSubterms))
+                                        {
+                                            $strInterestedValue = "";
+                                        }
+                                    }
+                                }
+                                $arrAddJobsForSearch[$job['key_jobsite_siteid']]['interested'] = $strInterestedValue;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                $GLOBALS['logger']->logLine($searchDetails['search_key'] . " incorrectly set a keyword match type, but has no possible keywords.  Ignoring match-type request and returning all jobs.", \Scooper\C__DISPLAY_ERROR__);
+            }
+        }
+
+        //
+        // add the jobs to my list, now marked if necessary
+        //
+        addJobsToJobsList($this->arrLatestJobs, $arrAddJobsForSearch);
 
     }
 
+    //************************************************************************
+    //
+    //
+    //
+    //  Search URL Functions
+    //
+    //
+    //
+    //************************************************************************
+
+    private function _isValueURLEncoded_($str)
+    {
+        if(strlen($str) <= 0) return 0;
+        return (\Scooper\substr_count_array($str, array("%22", "&", "=", "+", "-", "%7C", "%3C" )) >0 );
+
+    }
+
+    private function _checkInvalidURL_($details, $strURL)
+    {
+        if($strURL == null) throw new ErrorException("Skipping " . $this->siteName ." search '".$details['search_name']. "' because a valid URL could not be set.");
+        return $strURL;
+        // if($strURL == VALUE_NOT_SUPPORTED) $GLOBALS['logger']->logLine("Skipping " . $this->siteName ." search '".$details['search_name']. "' because a valid URL could not be set.");
+    }
 
 
 
@@ -727,272 +1012,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         return $strReturnLocation;
     }
 
-    function isJobListingMine($var)
-    {
-        if(substr_count($var['job_site'], strtolower($this->siteName)) > 0)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    function getMySearches()
-    {
-        return $this->arrSearchesToReturn;
-    }
-
-    function addSearches($arrSearches, $locSettingSets = null, $configKeywordSettingsSet = null)
-    {
-        if(!is_array($arrSearches[0])) { $arrSearches[] = $arrSearches; }
-
-        foreach($arrSearches as $searchDetails)
-        {
-            if($configKeywordSettingsSet != null)
-            {
-                $searchDetails['keyword_set'] = $configKeywordSettingsSet['keywords_array'];
-                $searchDetails['user_setting_flags'] = $searchDetails['user_setting_flags'] | $configKeywordSettingsSet['match-type'];
-            }
-
-            //
-            // If the search has multiple keywords on it, either because there was an overall keyword set for
-            // all searches or because this one search was not configured well, and the site does not support
-            // searches with multiple keywords at once, then we need to break this one search up into one
-            // search for each keyword in it's keyword set.
-            //
-            if(!$this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && !$this->_isBitFlagSet_(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) &&
-                count($searchDetails['keyword_set']) > 1)
-            {
-                //
-                // Create clones of the current search, one for each separate keyword item in the array
-                //
-                $newSearchBase = $this->cloneSearchDetailsRecordExceptFor($searchDetails, array('keyword_set', 'keywords_string_for_url'));
-                foreach($searchDetails['keyword_set'] as $splitKeyword)
-                {
-                    $newSearchBase = $newSearchBase;
-                    $newSearch = $this->cloneSearchDetailsRecordExceptFor($searchDetails, array('keyword_set', 'keywords_string_for_url'));
-                    $newSearch['keyword_set'] = array($splitKeyword);
-                    $newSearch['search_key'] .= "-split-" .$splitKeyword;
-                    $newSearch['search_name'] .= "-split-" .$splitKeyword;
-                    $this->addSearch($newSearch, $locSettingSets);
-                }
-
-                //
-                // Now, we need to go find and remove the original search, that
-                // was just split up, from the list of searches to run
-                //
-                for($i = 0; $i < count($this->arrSearchesToReturn); $i++)
-                {
-                    if(strcasecmp($this->arrSearchesToReturn[$i]['search_name'], $searchDetails['search_name']) == 0)
-                    {
-                        unset($this->arrSearchesToReturn[$i]);
-                    }
-                }
-            }
-            else
-            {
-
-                $this->addSearch($searchDetails, $locSettingSets);
-            }
-
-        }
-    }
-
-    protected function _setKeywordStringsForSearch_(&$searchDetails)
-    {
-
-//        'keyword_search_override' => null,
-//            'keywords_string_for_url' => null,
-//            'keyword_set' => null,
-//            'user_setting_flags' => null,
-
-
-        // Does this search have a set of keywords specific to it that override
-        // all the general settings?
-        if($searchDetails['keyword_search_override'] != null && strlen($searchDetails['keyword_search_override']) > 0)
-        {
-            // keyword_search_override should only ever be a string value for any given search
-            assert(!is_array($searchDetails['keyword_search_override']));
-
-           // null out any generalized keyword set values we previously had
-           $searchDetails['keyword_set'] = null;
-           $searchDetails['keywords_string_for_url'] = null;
-
-            //
-            // Now take the override value and setup the keyword_set
-            // and URL value for that particular string
-            //
-            $searchDetails['keyword_set'] = array($searchDetails['keyword_search_override']);
-        }
-
-        if($searchDetails['keyword_set'] != null)
-        {
-            assert(is_array($searchDetails['keyword_set']));
-
-            $searchDetails['keywords_string_for_url'] = $this->getCombinedKeywordStringForURL($searchDetails['keyword_set']);
-        }
-
-        // Lastly, check if we support keywords in the URL at all for this
-        // plugin.  If not, remove any keywords_string_for_url value we'd set
-        // and set it to "not supported"
-        if($this->_isBitFlagSet_(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
-        {
-            $searchDetails['keywords_string_for_url'] = VALUE_NOT_SUPPORTED;
-        }
-    }
-
-
-
-    protected function addSearch($searchDetails, $locSettingSets = null)
-    {
-
-        $this->_setKeywordStringsForSearch_($searchDetails);
-
-        //
-        // Add the search to the list of ones to run
-        //
-        $this->arrSearchesToReturn[] = $searchDetails;
-
-        $this->addSearchLocations($searchDetails, $locSettingSets);
-
-    }
-
-    protected function addSearchLocations($searchDetails, $locSettingSets = null)
-    {
-        //
-        // Add the search locations to the list of ones to run
-        //
-        // If the search had location keywords, it overrides the locSettingSets
-        //
-        if($searchDetails['location_search_override'] != null && strlen($searchDetails['location_search_override']) > 0)
-        {
-            $locSingleSettingSet = array('name' => 'search_location_override', 'search_location_value_override' => $searchDetails['location_search_override']);
-            $this->arrSearchLocationSetsToRun['search_location_override'] = $locSingleSettingSet;
-        }
-        else
-        {
-            $locTypeSupported = $this->getLocationSettingType();
-            if($locTypeSupported != null && strlen($locTypeSupported) > 0 && $locSettingSets != null)
-            {
-                foreach($locSettingSets as $set)
-                {
-                    if($set[$locTypeSupported] != null)
-                    {
-                        $this->arrSearchLocationSetsToRun[$set['name']]['name'] = $set['name'];
-                        $this->arrSearchLocationSetsToRun[$set['name']][$locTypeSupported] = $set[$locTypeSupported];
-                    }
-                }
-            }
-        }
-    }
-
-
-    protected function _getLocationValueFromSettings_($settingsSet, $fLowerCase = false)
-    {
-        $strReturnLocation = VALUE_NOT_SUPPORTED;
-
-        if($settingsSet['search_location_override'] != null && strlen($settingsSet['search_location_override']) > 0)
-        {
-            $strReturnLocation = $settingsSet['search_location_override'];
-        }
-        else
-        {
-
-            $locTypeNeeded = $this->getLocationSettingType();
-            if($settingsSet != null && count($settingsSet) > 0 && $settingsSet[$locTypeNeeded] != null)
-            {
-                $strReturnLocation = $settingsSet[$locTypeNeeded];
-            }
-        }
-        if(!$this->_isValueURLEncoded_($strReturnLocation)) { $strReturnLocation = urlencode($strReturnLocation); }
-
-        if($fLowerCase == true)
-        {
-            $strReturnLocation = strtolower($strReturnLocation);
-        }
-        return $strReturnLocation;
-    }
-
-    private function _isValueURLEncoded_($str)
-    {
-        if(strlen($str) <= 0) return 0;
-        return (\Scooper\substr_count_array($str, array("%22", "&", "=", "+", "-", "%7C", "%3C" )) >0 );
-
-    }
-
-
-    protected function getCombinedKeywordStringForURL($arrKeywordSet)
-    {
-        $arrKeywords = array();
-
-        if(!is_array($arrKeywordSet))
-        {
-            $arrKeywords[] =$arrKeywordSet[0];
-        }
-        else
-        {
-            $arrKeywords = $arrKeywordSet;
-        }
-
-        $strRetCombinedKeywords = VALUE_NOT_SUPPORTED;
-
-        if(($this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED)) && count($arrKeywords) > 1)
-        {
-            if($this->strKeywordDelimiter == null)
-            {
-                throw new ErrorException($this->siteName . " supports multiple keyword terms, but has not set the \$strKeywordDelimiter value in " .get_class($this). " Aborting search beacyse cannot create the URL.");
-            }
-
-            foreach($arrKeywords as $kywd)
-            {
-                $newKywd = $kywd;
-                if($this->_isBitFlagSet_(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS))
-                {
-                    $newKywd = '"' . $newKywd .'"';
-                }
-
-                if($strRetCombinedKeywords == VALUE_NOT_SUPPORTED)
-                {
-                    $strRetCombinedKeywords = $newKywd;
-                }
-                else
-                {
-                    $strRetCombinedKeywords .= " " . $this->strKeywordDelimiter . $newKywd;
-                }
-            }
-            if($this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && strlen($this->strTitleOnlySearchKeywordFormat) > 0)
-            {
-                $strRetCombinedKeywords = sprintf($this->strTitleOnlySearchKeywordFormat, $strRetCombinedKeywords);
-            }
-
-        }
-        elseif(count($arrKeywords) == 1)
-        {
-            if($this->_isBitFlagSet_(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS))
-            {
-                $strRetCombinedKeywords = '"' . $arrKeywords[0] .'"';
-            }
-            else
-            {
-                $strRetCombinedKeywords = $arrKeywords[0];
-            }
-        }
-
-
-        if($this->_isBitFlagSet_(C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES))
-        {
-            $strRetCombinedKeywords = str_replace("%22", "-", $strRetCombinedKeywords);
-        }
-
-        if(!$this->_isValueURLEncoded_($strRetCombinedKeywords)) { $strRetCombinedKeywords = urlencode($strRetCombinedKeywords); }
-        if($this->_isBitFlagSet_(C__JOB_KEYWORD_SUPPORTS_PLUS_PREFIX))
-        {
-            $strRetCombinedKeywords = "+" . $strRetCombinedKeywords;
-        }
-
-        return $strRetCombinedKeywords;
-    }
-
     protected function _getURLfromBase_($searchDetails, $nDays, $nPage = null, $nItem = null, $locSingleSettingSet=null)
     {
         $strURL = null;
@@ -1043,10 +1062,79 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         return $strURL;
     }
 
+    //************************************************************************
+    //
+    //
+    //
+    //  Utility Functions
+    //
+    //
+    //
+    //************************************************************************
+    function getName() { return $this->siteName; }
+    function getMyJobsList() { return $this->arrLatestJobs; }
+    function getLocationSettingType() { return $this->typeLocationSearchNeeded; }
+    function setLocationValue($locVal) { $this->locationValue = $locVal; }
+    function getLocationValue() { return $this->locationValue; }
+
+    /**
+     * Main worker function for all jobs sites.
+     *
+     *
+     * @param  integer $nDays Number of days of job listings to pull
+     * @param  Array $arrInputFilesToMergeWithResults Optional list of jobs list CSV files to include in the results
+     * @param  integer $fIncludeFilteredJobsInResults If true, filters out jobs flagged with "not interested" values from the results.
+     * @return string If successful, the final output CSV file with the full jobs list
+     */
+
+    function getMyOutputFileFullPath($strFilePrefix = "")
+    {
+        return parent::getOutputFileFullPath($this->siteName . "_" . $strFilePrefix, "jobs", "csv");
+    }
+
+    function markMyJobsList_withAutoItems()
+    {
+        $this->markJobsList_withAutoItems($this->arrLatestJobs, $this->siteName);
+    }
+
+
+    /**
+     * Write this class instance's list of jobs to an output CSV file.  Always rights
+     * the full unfiltered list.
+     *
+     *
+     * @param  string $strOutFilePath The file to output the jobs list to
+     * @param  Array $arrMyRecordsToInclude An array of optional job records to combine into the file output CSV
+     * @return string $strOutFilePath The file the jobs was written to or null if failed.
+     */
+    function writeMyJobsListToFile($strOutFilePath = null)
+    {
+        return $this->writeJobsListToFile($strOutFilePath, $this->arrLatestJobs, true, false, $this->siteName);
+    }
+
+
+
     private function _isBitFlagSet_($flagToCheck)
     {
         $ret = isBitFlagSet($this->flagSettings, $flagToCheck);
         if($ret == $flagToCheck) { return true; }
+        return false;
+    }
+
+
+
+    function getMySearches()
+    {
+        return $this->arrSearchesToReturn;
+    }
+
+    function isJobListingMine($var)
+    {
+        if(substr_count($var['job_site'], strtolower($this->siteName)) > 0)
+        {
+            return true;
+        }
+
         return false;
     }
 
