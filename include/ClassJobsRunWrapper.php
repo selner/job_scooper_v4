@@ -88,6 +88,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $this->_setupRunFromConfig_($confTemp);
         }
 
+
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Configuring specific settings for this run... ", \Scooper\C__DISPLAY_SECTION_START__);
 
         $this->nNumDaysToSearch = \Scooper\get_PharseOptionValue('number_days');
@@ -97,12 +98,15 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         // Override any INI file setting with the command line output file path & name
         // the user specificed (if they did)
-        $userOutfileDetails = \Scooper\get_FileDetails_fromPharseOption("output_file", true);
+        $userOutfileDetails = \Scooper\get_FileDetails_fromPharseOption("output_file", false);
         if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($userOutfileDetails['directory'] );
-        if($userOutfileDetails['full_file_path'] != '')
+        if(strlen($userOutfileDetails['full_file_path']) > 0 || strlen($userOutfileDetails['directory']) > 0)
         {
             $this->detailsOutputFile = $userOutfileDetails;
         }
+
+        // Now setup all the output folders
+        $this->__setupOutputFolders__();
 
         $strOutfileArrString = getArrayValuesAsString($this->detailsOutputFile);
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output file configured: " . $strOutfileArrString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -142,7 +146,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             throw new ErrorException("Required value for the output folder was not specified. Exiting.");
         }
 
-        if($this->detailsOutputFile['file_name'] == null || $this->detailsOutputFile['full_file_path'] == "")
+        if($this->detailsOutputFile['file_name'] == null || strlen($this->detailsOutputFile['file_name']) == 0 || strlen($this->detailsOutputFile['full_file_path']) == 0)
         {
             $fileName = getDefaultJobsOutputFileName("", "jobs", "csv");
             $this->detailsOutputFile = \Scooper\parseFilePath($this->detailsOutputFile['directory'] . $fileName);
@@ -155,12 +159,15 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Reading configuration options from ".$this->detailsIniFile['full_file_path']."...", \Scooper\C__DISPLAY_ITEM_START__);
         if($config->output)
         {
-             if($config->output->folder)
+            if($config->output->folder)
             {
                 $this->detailsOutputFile = \Scooper\parseFilePath($config->output->folder);
-                $this->__setupOutputFolders__();
             }
 
+            if($config->output->file)
+            {
+                $this->detailsOutputFile = \Scooper\parseFilePath($this->detailsOutputFile . $config->output->file);
+            }
         }
 
         if($config->emails )
