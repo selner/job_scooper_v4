@@ -1,4 +1,5 @@
 (*
+
 on test()
 	doRun({"/Users/bryan/Code/data", "Amazon", "amazon-test", "http://www.amazon.jobs/results?sjid=68,83&checklid=@%27US,%20WA,%20Seattle%27&cname=%27US,%20WA,%20Seattle%27"})
 end test
@@ -9,8 +10,8 @@ end run
 
 on doRun(argv)
 *)
+
 on run (argv)
-	
 	-- on run (argv)
 	set libDownload to init_library()
 	
@@ -26,15 +27,9 @@ on run (argv)
 	
 	set strGetNextPageValue of libDownload to "function getNextPageValue() {if(document.getElementById('nextpage') == null) { return 1;} return document.getElementById('nextpage').value;} getNextPageValue();"
 	
-	set strJSClickNext_First of libDownload to "function doGetJobsClick($nIndex) { if(!document.getElementsByClassName('page gradient') == false) { return false; };  var event = document.createEvent('MouseEvents');       event.initMouseEvent('click', true, true, window,        0, 0, 0, 0, 0,  
-		            false, false, false, false, 
-		            0, null); 
-		        document.getElementsByClassName('page gradient')[0].dispatchEvent(event); return true; }  doGetJobsClick();"
+	set strJSClickNext_First of libDownload to "function doGetJobsClick() {  if(document.getElementsByClassName('page gradient') == null ||Object.getOwnPropertyNames(document.getElementsByClassName('page gradient')).length == 2) { return false; } var event = document.createEvent('MouseEvents');       event.initMouseEvent('click', true, true, window,        0, 0, 0, 0, 0,  false, false, false, false,  0, null);   document.getElementsByClassName('page gradient')[0].dispatchEvent(event); return true; } doGetJobsClick();"
 	
-	set strJSClickNext_Others of libDownload to "function doGetJobsClick() { if(!document.getElementsByClassName('page gradient') == false || document.getElementsByClassName('page gradient')[1] == null) return false; var event = document.createEvent('MouseEvents');       event.initMouseEvent('click', true, true, window,        0, 0, 0, 0, 0,  
-		            false, false, false, false, 
-		            0, null); 
-		        document.getElementsByClassName('page gradient')[1].dispatchEvent(event); return true; } doGetJobsClick();"
+	set strJSClickNext_Others of libDownload to "function doGetJobsClick() {  if(document.getElementsByClassName('page gradient') == null ||Object.getOwnPropertyNames(document.getElementsByClassName('page gradient')).length == 2) { return false; } var event = document.createEvent('MouseEvents');       event.initMouseEvent('click', true, true, window,        0, 0, 0, 0, 0,  false, false, false, false,  0, null);   document.getElementsByClassName('page gradient')[1].dispatchEvent(event); return true; } doGetJobsClick();"
 	
 	set strJSGetTheSource of libDownload to "function getHTML() { return " & quote & "<table class='scooper_jobs_page_result'>" & quote & " + document.getElementById('teamjobs').innerHTML + " & quote & "</table>" & quote & "} getHTML();"
 	
