@@ -180,13 +180,15 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
     protected $siteName = '';
     protected $siteBaseURL = '';
     protected $childSiteURLBase = '';
-    protected $nJobListingsPerPage = 25;
-    protected $strBaseURLPathSection = "/jobs/results/keyword/***KEYWORDS***?location=***LOCATION***&kwsJobTitleOnly=true&view=List_Detail&networkView=national&radius=15&sort=Priority+desc,+PostDate+desc&page=***PAGE_NUMBER***&postDate=***NUMBER_DAYS***";
-//    protected $strBaseURLPathSection = "/jobs/results/keyword/senior-manager/Seattle%2C+Washington%2C+United+States?view=List_Detail&radius=15&kwsJobTitleOnly=true&SearchNetworks=US&networkView=national&postDate=%5BNOW-7DAYS+TO+NOW%5D&sort=PostType%20asc,%20PostDate%20desc,%20IsFeatured%20desc";
+    protected $nJobListingsPerPage = 50;
     protected $strBaseURLPathSuffix = "";
-
     protected $strBaseURLFormat = null;
     protected $flagSettings = C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS;
+
+    // postDate param below could also be modifiedDate=***NUMBER_DAYS***.  Unclear which is more correct when...
+    protected $strBaseURLPathSection = "/jobs/results/keyword/***KEYWORDS***?location=***LOCATION***&kwsJobTitleOnly=true&view=List_Detail&networkView=national&radius=15&&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***&postDate=***NUMBER_DAYS***";
+
+
 
 
     function __construct($strOutputDirectory = null)
