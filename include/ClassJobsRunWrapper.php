@@ -293,31 +293,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     }
 
-    private function _getKeywordMatchFlagFromString_($strMatchType)
-    {
-        $retFlag = null;
-
-        if($strMatchType)
-        {
-            switch($strMatchType)
-            {
-                case "title-only":
-                    $retFlag = C__USER_KEYWORD_MUST_BE_IN_TITLE;
-                    break;
-
-                case "exact-only":
-                    $retFlag = C__USER_KEYWORD_MUST_EQUAL_TITLE;
-                    break;
-
-                case "any":
-                    $retFlag = C__USER_KEYWORD_ANYWHERE;
-                    break;
-            }
-        }
-
-        return $retFlag;
-    }
-
     private function _parseSearchFromINI_($iniSearch)
     {
         $tempSearch = $this->getEmptySearchDetailsRecord();

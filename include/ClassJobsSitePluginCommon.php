@@ -79,6 +79,56 @@ class ClassJobsSitePluginCommon
          );
     }
 
+    protected  function _getKeywordMatchFlagFromString_($strMatchType)
+    {
+        $retFlag = null;
+
+        if($strMatchType)
+        {
+            switch($strMatchType)
+            {
+                case C__USER_KEYWORD_MUST_BE_IN_TITLE_AS_STRING:
+                    $retFlag = C__USER_KEYWORD_MUST_BE_IN_TITLE;
+                    break;
+
+                case C__USER_KEYWORD_MUST_EQUAL_TITLE_AS_STRING:
+                    $retFlag = C__USER_KEYWORD_MUST_EQUAL_TITLE;
+                    break;
+
+                case C__USER_KEYWORD_ANYWHERE_AS_STRING:
+                    $retFlag = C__USER_KEYWORD_ANYWHERE;
+                    break;
+            }
+        }
+
+        return $retFlag;
+    }
+
+    protected function _getKeywordMatchStringFromFlag_($flag)
+    {
+        $retString = null;
+
+        if($flag)
+        {
+            switch($strMatchType)
+            {
+                case C__USER_KEYWORD_MUST_BE_IN_TITLE:
+                    $retString = C__USER_KEYWORD_MUST_BE_IN_TITLE_AS_STRING;
+                    break;
+
+                case C__USER_KEYWORD_MUST_EQUAL_TITLE:
+                    $retString = C__USER_KEYWORD_MUST_EQUAL_TITLE_AS_STRING;
+                    break;
+
+                case C__USER_KEYWORD_ANYWHERE:
+                    $retString = C__USER_KEYWORD_ANYWHERE_AS_STRING;
+                    break;
+            }
+        }
+
+        return $retString;
+    }
+
     function normalizeJobList($arrJobList)
     {
         $arrRetList = null;
