@@ -384,7 +384,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         if($this->_isBitFlagSet_(C__JOB_KEYWORD_SUPPORTS_PLUS_PREFIX))
         {
-            $strRetCombinedKeywords = "+" . $strRetCombinedKeywords;
+            $strRetCombinedKeywords = "%2B" . $strRetCombinedKeywords;
         }
 
         return $strRetCombinedKeywords;
@@ -592,28 +592,49 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         } catch (Exception $ex) {
 
-            $strError = "Failed to download jobs from " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "[URL=".$searchDetails['base_url_format']. "].  ".$ex->getMessage();
             //
-            // Sometimes the site just returns a timeout on the request.  if this is the first attempt,
-            // delay a bit then try it once more before failing.
+            // BUGBUG:  This is a workaround to prevent errors from showing up
+            // when no results are returned for a particular search for EmploymentGuide plugin only
+            // See https://github.com/selner/jobs_scooper/issues/23 for more details on
+            // this particular underlying problem
             //
-            if($nAttemptNumber < 1)
+            $strErr = $ex->getMessage();
+            if((strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['employmentguide']['name']) == 0) &&
+                (substr_count($strErr, "HTTP error #404") > 0))
             {
-                $strError .= " Retrying search...";
-                $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_WARNING__);
-                // delay for 15 seconds
-                sleep(15);
-
-                // retry the request
-                $this->getJobsForSearchByType($searchDetails, $nDays, $locSingleSettingSet, ($nAttemptNumber+1));
+                $strError = $this->siteName . " plugin returned a 404 page for the search.  This is not an error; it means zero results found." ;
+                $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             }
             else
             {
-                $strError .= " Search failed twice.  Skipping search.";
-                $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-                if($GLOBALS['OPTS']['DEBUG'] == true) { throw new ErrorException( $strError); }
-            }
+                //
+                // Not the known issue case, so log the error and re-throw the exception
+                // if we should have thrown one
+                //
 
+
+                $strError = "Failed to download jobs from " . $this->siteName ." jobs for search '".$searchDetails['search_name']. "[URL=".$searchDetails['base_url_format']. "].  ".$ex->getMessage();
+                //
+                // Sometimes the site just returns a timeout on the request.  if this is the first attempt,
+                // delay a bit then try it once more before failing.
+                //
+                if($nAttemptNumber < 1)
+                {
+                    $strError .= " Retrying search...";
+                    $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_WARNING__);
+                    // delay for 15 seconds
+                    sleep(15);
+
+                    // retry the request
+                    $this->getJobsForSearchByType($searchDetails, $nDays, $locSingleSettingSet, ($nAttemptNumber+1));
+                }
+                else
+                {
+                    $strError .= " Search failed twice.  Skipping search.";
+                    $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
+                    if($GLOBALS['OPTS']['DEBUG'] == true) { throw new ErrorException( $strError); }
+                }
+            }
         }
     }
 
