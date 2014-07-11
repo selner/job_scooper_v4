@@ -1,4 +1,4 @@
-(*
+	(*
 on run (argv)
 	test()
 	--	doRun(argv)
@@ -9,7 +9,7 @@ end test
 
 on doRun(argv)
 *)
-
+	
 on run (argv)
 	set libDownload to init_library()
 	set strOutputDir of libDownload to first item of argv as string
@@ -17,14 +17,48 @@ on run (argv)
 	set strFileKey of libDownload to third item of argv as string
 	set strURL of libDownload to fourth item of argv as string
 	
-	
-	set strJSGetMaxPageValue of libDownload to ""
+	set strJSGetMaxPageValue of libDownload to "1000"
 	set strGetNextPageValue of libDownload to ""
 	
+	set clickJS to "function doClickMoreJobsClick() 
+		{ 
+		   var elem = document.getElementsByClassName('load_more_jobs')[0]; 
+		   var event = document.createEvent('MouseEvents');    
+		   event.initMouseEvent('click', true, true, window,  0, 0, 0, 0, 0,  false, false, false, false,  0, null); elem.dispatchEvent(event); 
+		};
+		
+		function isMoreJobsToLoad() 
+		{ 
+		   return (document.getElementsByClassName('load_more_jobs')[0] != null && document.getElementsByClassName('load_more_jobs')[0].style.display != 'none'); 
+		};
+
+		function doMoreJobs()
+		{
+				if(isMoreJobsToLoad()) 
+				{ 
+				  window.hasMoreJobs = true;
+				   console.log('job_scooper: loading more jobs...'); 
+				   doClickMoreJobsClick(); 
+				   return true; } 
+				else { 
+				  window.hasMoreJobs = false;
+				   console.log('job_scooper: No more jobs to load.'); 
+				   clearInterval(window.myInterval); return false; }
+		};
+
+
+		function loadMoreJobs()
+		{
+		  doMoreJobs();
+		  window.myInterval = setInterval(function(){ doMoreJobs(); }, 1000);
+		  return window.hasMoreJobs; 
+		} 
+		loadMoreJobs();"
 	
-	set strJSClickNext_First of libDownload to ""
+	set strJSClickNext_First of libDownload to clickJS
 	
-	set strJSClickNext_Others of libDownload to ""
+	
+	set strJSClickNext_Others of libDownload to clickJS
 	set strJSGetTheSource of libDownload to "function getHTML() { return document.getElementById('content').innerHTML; } getHTML();"
 	
 	
@@ -32,7 +66,7 @@ on run (argv)
 		set ret to doJobsDownload()
 	end tell
 	return ret
-end run
+end doRun
 
 
 --*******************************************************************************************
