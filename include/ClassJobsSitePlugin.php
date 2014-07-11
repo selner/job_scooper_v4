@@ -101,7 +101,15 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             }
             else
             {
-                $searchDetails['user_setting_flags'] = $searchDetails['user_setting_flags'] | $configKeywordSettingsSet['match-type'];
+                //
+                // If this search already has any flags set on it, then do not overwrite that value for this search
+                // Otherwise, set it to be the value that any keyword set we're adding has
+                //
+                if($searchDetails['user_setting_flags'] == null || $searchDetails['user_setting_flags'] == 0)
+                {
+                    $searchDetails['user_setting_flags'] = $configKeywordSettingsSet['match-type'];
+                }
+
                 if($searchDetails['keyword_search_override'] != null && strlen($searchDetails['keyword_search_override']) > 0)
                 {
                     $this->addSearch($searchDetails, $locSettingSets);
@@ -774,7 +782,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 else
                 {
                     addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
-                    $nItemCount += $this->nJobListingsPerPage;
+                    $nJobsFound = countJobRecords($arrSearchReturnedJobs);
+                    if($nItemCount == 1) { $nItemCount = 0; }
+                    $nItemCount += ($nJobsFound < $this->nJobListingsPerPage) ? $nJobsFound : $this->nJobListingsPerPage;
+
                 }
 
                 // clean up memory
