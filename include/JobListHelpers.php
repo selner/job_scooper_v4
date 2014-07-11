@@ -234,9 +234,15 @@ function countAssociativeArrayValues($arrToCount)
         return 0;
     }
 
+    $count = 0;
+    foreach($arrToCount as $item)
+    {
+        $count = $count + 1;
+    }
+
     $arrValues = array_values($arrToCount);
     $nValues = count($arrValues);
-    return $nValues;
+    return max($nValues, $count);
 //    $arrKeys = array_keys($arrToCount);
 //    $nKeys = count($arrKeys);
 
