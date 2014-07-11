@@ -69,10 +69,10 @@ class PluginStartupHire extends ClassJobsSitePlugin
             $item['job_title'] = $titleLink->plaintext;
             if($item['job_title'] == '') continue;
 
-            $item['job_post_url'] = $titleLink->href;
+            $item['job_post_url'] = $this->siteBaseURL . $titleLink->href;
             $arrURLParts = explode("-", $item['job_post_url']);
 
-            $item['job_id'] = $this->siteBaseURL . $arrURLParts[count($arrURLParts)-1];
+            $item['job_id'] = $arrURLParts[count($arrURLParts)-1];
 
             // If we couldn't parse the job title, it's not really a job
             // listing so just continue to the next one
