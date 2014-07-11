@@ -898,8 +898,26 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
             // get an array of the search keywords
             //
-            if(!$searchDetails['keyword_set'] == null && is_array($searchDetails['keyword_set']))
+            if(!$searchDetails['keyword_set'] == null && is_array($searchDetails['keyword_set']) && count($searchDetails['keyword_set']) > 0)
             {
+
+                // Keywords entered on a per search basis as an override
+                // are allowed to be set to the exact URL encoded value
+                // the site expects in the search URL.  However, if this type
+                // of value is used as the keyword_search_override, no
+                // title-matching methods other than "match-type=any" are supported.
+                //
+                // Since we only get to this point if a non-"any" match-type was set
+                // log the fact that we cannot apply the match type for the search
+                // and return the unchanged jobs list
+                //
+                if($this->_isValueURLEncoded_($searchDetails['keyword_set'][0]))
+                {
+                    $strMatchTypeName = $this->_getKeywordMatchStringFromFlag_($searchDetails['user_setting_flags']);
+                    $GLOBALS['logger']->logLine("Cannot apply match-type=" . $strMatchTypeName . " when keywords are set to exact URL-encoded strings.  Using match-type='any' for search '" .  $searchDetails['search_name'] ."' instead.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    addJobsToJobsList($this->arrLatestJobs, $arrAdd);
+                }
+
                 // We're going to check keywords for strict matches,
                 // but we should skip it if we're exact matching and we have multiple keywords, since
                 // that's not a possible match case.
