@@ -1,4 +1,4 @@
-	(*
+(*
 
 on test()
 	--	doRun({"/Users/bryan/Code/data", "careercast", "careercast-test", "http://www.careercast.com/jobs/results/keyword/director?location=Seattle%2C+Washington%2C+United+States?kwsJobTitleOnly=true&view=List_Detail&workType%5B0%5D=employee&radius=15&sort=Priority%20desc,%20PostDate%20desc&page=&modifiedDate=%5BNOW-1DAYS+TO+NOW%5D"})
@@ -14,8 +14,9 @@ on run (argv)
 end run
 on doRun(argv)
 	*)
+	
 on run (argv)
-
+	
 	
 	-- on run (argv)
 	set libDownload to init_library()
@@ -29,14 +30,10 @@ on run (argv)
 	
 	set strGetNextPageValue of libDownload to "function getNextPageValue() { if(document.getElementsByClassName('pageNumber') == null ||Object.getOwnPropertyNames(document.getElementsByClassName('pageNumber')).length == 2) { return 1; }; var strItem =  document.getElementsByClassName('pageNumber')[0].textContent; return parseInt(strItem);  } getNextPageValue();"
 	
-	set strJSClickNext_First of libDownload to "function doGetJobsClick() { if( document.getElementById('nextLinkTop') == null || document.getElementById('nextLinkTop').textContent == '') return false; var event = document.createEvent('MouseEvents');       event.initMouseEvent('click', true, true, window,        0, 0, 0, 0, 0,  
-		            false, false, false, false, 
-		            0, null); 
+	set strJSClickNext_First of libDownload to "function doGetJobsClick() { if( document.getElementById('nextLinkTop') == null || document.getElementById('nextLinkTop').textContent == '') return false; var event = document.createEvent('MouseEvents');       event.initMouseEvent('click', true, true, window,        0, 0, 0, 0, 0,  false, false, false, false, 0, null); 
 		        document.getElementById('nextLinkTop').dispatchEvent(event); return true; } doGetJobsClick();"
 	
-	set strJSClickNext_Others of libDownload to "function doGetJobsClick() { if( document.getElementById('nextLinkTop') == null || document.getElementById('nextLinkTop').textContent == '') return false; var event = document.createEvent('MouseEvents');       event.initMouseEvent('click', true, true, window,        0, 0, 0, 0, 0,  
-		            false, false, false, false, 
-		            0, null); 
+	set strJSClickNext_Others of libDownload to "function doGetJobsClick() { if( document.getElementById('nextLinkTop') == null || document.getElementById('nextLinkTop').textContent == '') return false; var event = document.createEvent('MouseEvents');       event.initMouseEvent('click', true, true, window,  0, 0, 0, 0, 0, false, false, false, false, 0, null); 
 		        document.getElementById('nextLinkTop').dispatchEvent(event); return true; } doGetJobsClick();"
 	
 	set strJSGetTheSource of libDownload to "function getHTML() { if(document.getElementById('docHolder') == null) { return ''; } else { return " & quote & "<table class='scooper_jobs_page_result'><tr><td>" & quote & " + document.getElementById('docHolder').innerHTML + " & quote & "</td></tr></table>" & quote & "}} getHTML();"
@@ -46,7 +43,7 @@ on run (argv)
 	end tell
 	
 	return ret
-end doRun
+end run
 
 
 --*******************************************************************************************
