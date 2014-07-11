@@ -1,4 +1,4 @@
-	(*
+(*
 on run (argv)
 	test()
 	--	doRun(argv)
@@ -9,7 +9,7 @@ end test
 
 on doRun(argv)
 *)
-	
+
 on run (argv)
 	set libDownload to init_library()
 	set strOutputDir of libDownload to first item of argv as string
@@ -17,6 +17,7 @@ on run (argv)
 	set strFileKey of libDownload to third item of argv as string
 	set strURL of libDownload to fourth item of argv as string
 	
+	set nSecondsDelayForPageLoad of libDownload to 3
 	set strJSGetMaxPageValue of libDownload to "1000"
 	set strGetNextPageValue of libDownload to ""
 	
@@ -66,7 +67,7 @@ on run (argv)
 		set ret to doJobsDownload()
 	end tell
 	return ret
-end doRun
+end run
 
 
 --*******************************************************************************************

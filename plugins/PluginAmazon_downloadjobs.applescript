@@ -19,6 +19,8 @@ on run (argv)
 	set strFileKey of libDownload to third item of argv as string
 	set strURL of libDownload to fourth item of argv as string
 	
+	set nSecondsDelayForPageLoad of libDownload to 1.5
+	
 	set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() {  if(document.getElementsByClassName('searchProfiles') == null ||Object.getOwnPropertyNames(document.getElementsByClassName('searchProfiles')).length == 2) { return 1; };  var strItem =  document.getElementById('searchProfiles').firstChild.nextSibling.nextSibling.nextSibling.firstChild.nextSibling.textContent; return strItem.split(' ')[2];  }  getMaxPageValue();"
 	
 	set strGetNextPageValue of libDownload to "function getNextPageValue() { if(document.getElementsByClassName('nextpage') == null ||Object.getOwnPropertyNames(document.getElementsByClassName('nextpage')).length == 2) { return 1;} return document.getElementById('nextpage').value;} getNextPageValue();"

@@ -22,6 +22,7 @@ on run (argv)
 	set strFileKey of libDownload to third item of argv as string
 	set strURL of libDownload to fourth item of argv as string
 	
+	set nSecondsDelayForPageLoad of libDownload to 2
 	set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() { if(Object.getOwnPropertyNames(document.getElementsByClassName('pages')).length == 2) { return 1; }   var strItem =  document.getElementsByClassName('pages')[document.getElementsByClassName('pages').length-1].textContent; return parseInt(strItem);  }  getMaxPageValue();"
 	
 	set strGetNextPageValue of libDownload to "function getNextPageValue() {if(Object.getOwnPropertyNames(document.getElementsByClassName('currentPage')).length == 2) { return 1;} return parseInt(document.getElementsByClassName('currentPage')[0].textContent)+1;}  getNextPageValue();"
@@ -31,7 +32,7 @@ on run (argv)
 	
 	set strJSClickNext_Others of libDownload to "function doGetJobsClick() {     if(Object.getOwnPropertyNames(document.getElementsByClassName('currentPage')).length == 2) { return 1;}   var matchVal = parseInt(document.getElementsByClassName('currentPage')[0].textContent)+1;  var objClick = null;  for(var index = 0; index < document.getElementsByClassName('pages').length; ++index) {        console.log('first=' + document.getElementsByClassName('pages')[index]. textContent + '; second = ' + matchVal); if(document.getElementsByClassName('pages')[index].textContent == matchVal) { objClick = document.getElementsByClassName('pages')[index]; } }  var event = document.createEvent('MouseEvents');    event.initMouseEvent('click', true, true, window,  0, 0, 0, 0, 0,  false, false, false, false,  0, null); objClick.dispatchEvent(event); return true; } doGetJobsClick();"
 	
-		
+	
 	set strJSGetTheSource of libDownload to "function getHTML() { return " & quote & "<table class='scooper_jobs_page_result'><tr><td>" & quote & " + document.getElementById('pageCenterColumn').innerHTML + " & quote & "</td></tr></table>" & quote & "} getHTML();"
 	
 	tell libDownload

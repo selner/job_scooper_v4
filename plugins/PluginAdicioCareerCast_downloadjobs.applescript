@@ -26,6 +26,9 @@ on run (argv)
 	set strFileKey of libDownload to third item of argv as string
 	set strURL of libDownload to fourth item of argv as string
 	
+	
+	set nSecondsDelayForPageLoad of libDownload to 5
+
 	set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() { if(document.getElementsByClassName('aiPageTotalTop') == null ||Object.getOwnPropertyNames(document.getElementsByClassName('aiPageTotalTop')).length == 2) { return 1; }; var strItem =  document.getElementsByClassName('aiPageTotalTop')[0].textContent; return parseInt(strItem);  }  getMaxPageValue();"
 	
 	set strGetNextPageValue of libDownload to "function getNextPageValue() { if(document.getElementsByClassName('pageNumber') == null ||Object.getOwnPropertyNames(document.getElementsByClassName('pageNumber')).length == 2) { return 1; }; var strItem =  document.getElementsByClassName('pageNumber')[0].textContent; return parseInt(strItem);  } getNextPageValue();"
