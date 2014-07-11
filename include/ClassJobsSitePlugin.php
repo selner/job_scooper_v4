@@ -878,13 +878,23 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             unset($objSimpleHTML);
             $objSimpleHTML = null;
 
+/*            $idsPage = array_column($arrPageJobsList, 'job_id');
+            $key_jobsite_siteidsPage = array_column($arrPageJobsList, 'key_jobsite_siteid');
+            print('$idsPage=' . var_export($idsPage, true).PHP_EOL);
+            print('$key_jobsite_siteidsPage=' . var_export($key_jobsite_siteidsPage, true).PHP_EOL);*/
+
+            $GLOBALS['logger']->logLine("Downloaded " . countJobRecords($arrPageJobsList) ." jobs from " . $strFileName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
-            $GLOBALS['logger']->logLine("Downloaded " . countJobRecords($arrSearchReturnedJobs) ." jobs from " . $strFileName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
 
             $nPageCount++;
 
             $strFileName = $strFileBase.$nPageCount.".html";
         }
+/*        $idsSearch = array_column($arrSearchReturnedJobs, 'job_id');
+        $key_jobsite_siteidsSearch = array_column($arrSearchReturnedJobs, 'key_jobsite_siteid');
+//        print('$idsSearch=' . var_export($idsSearch, true).PHP_EOL);
+//        print('$key_jobsite_siteidsSearch=' . var_export($key_jobsite_siteidsSearch, true).PHP_EOL);*/
 
         $GLOBALS['logger']->logLine("Downloaded " . countJobRecords($arrSearchReturnedJobs) ." total jobs for search '" . $searchDetails['search_name'] . "'.", \Scooper\C__DISPLAY_ITEM_RESULT__);
         $this->_addSearchJobsToMyJobsList_($arrSearchReturnedJobs, $searchDetails);
