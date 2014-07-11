@@ -41,8 +41,6 @@ class PluginAmazon extends ClassJobsSitePlugin
         $nTRIndex = 0;
         while($nTRIndex < count($nodesTR))
         {
-            $strTeamDetailsRemain = "";
-            $teamDetails = "";
             $strTeamName = "";
             $strTeamCat = "";
 
@@ -116,7 +114,6 @@ class PluginAmazon extends ClassJobsSitePlugin
             }
 
             $nTRIndex = $nTRIndex + 1;
-
         }
         return $ret;
     }
