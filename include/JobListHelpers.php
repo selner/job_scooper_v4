@@ -330,18 +330,29 @@ function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strD
 {
     $strReturn = "";
 
-    if($arrItem[$key] != null && strlen($arrItem[$key]) > 0)
+    if($arrItem[$key] != null)
     {
+        $val = $arrItem[$key];
+        if(is_string($val) && strlen($val) > 0)
+        {
+            $strVal = $val;
+        }
+        else
+        {
+            $strVal = var_export($val, true);
+        }
+
         if($fIsFirstItem == true)
         {
-            $strReturn = $strIntro . $arrItem[$key];
+            $strReturn = $strIntro . $strVal;
         }
         else
         {
             $strReturn .= $strDelimiter;
         }
-        $strReturn .= $key . '=['.$arrItem[$key].']';
+        $strReturn .= $key . '=['.$strVal.']';
     }
+
 
     return $strReturn;
 }
