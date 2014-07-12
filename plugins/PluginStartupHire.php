@@ -34,7 +34,13 @@ class PluginStartupHire extends ClassJobsSitePlugin
     protected $siteName = 'StartupHire';
     protected $siteBaseURL = 'http://www.startuphire.com';
     protected $strFilePath_HTMLFileDownloadScript = "PluginStartupHire_downloadjobs.applescript";
-    protected $flagSettings = C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS;
+    protected $flagSettings = null;
+
+    function __construct($strBaseDir = null)
+    {
+        $this->flagSettings = C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS | C__JOB_BASE_URL_FORMAT_REQUIRED;
+        parent::__construct($strBaseDir);
+    }
 
     /**
     /**

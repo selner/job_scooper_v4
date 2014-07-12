@@ -132,7 +132,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                         // search for each keyword in it's keyword set.
                         //
 
-                        if(!$this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && !$this->_isBitFlagSet_(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) &&
+                        if(!$this->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && !$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) &&
                             count($searchDetails['keyword_set']) > 1)
                         {
                             //
@@ -194,7 +194,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         // If the plugin does not support multiple terms or if we don't have a valid delimiter to collapse
         // the terms with, we can't collapse, so just leave the searches as they were and return
-        if(!$this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) || $this->strKeywordDelimiter == null || strlen($this->strKeywordDelimiter) <= 0)
+        if(!$this->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) || $this->strKeywordDelimiter == null || strlen($this->strKeywordDelimiter) <= 0)
         {
             $GLOBALS['logger']->logLine($this->siteName . " does not support collapsing terms into a single search.  Continuing with " . count($this->arrSearchesToReturn) . " search(es).", \Scooper\C__DISPLAY_WARNING__);
             return;
@@ -229,6 +229,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                     $searchCollapsedDetails['base_url_format'] = $search['base_url_format'];
                     $searchCollapsedDetails['keyword_set'] = $search['keyword_set'];
                     $searchCollapsedDetails['user_setting_flags'] = $search['user_setting_flags'];
+                    $this->_setKeywordStringsForSearch_($searchCollapsedDetails);
                 }
                 else
                 {
@@ -238,7 +239,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                     if(isBitFlagSet($searchCollapsedDetails['user_setting_flags'], $search['user_setting_flags']))
                     {
                         $searchCollapsedDetails['search_name'] .= " and " . $search['search_name'];
-                        $searchCollapsedDetails['keyword_set'] = array_merge($searchCollapsedDetails['keyword_set'], $search['keyword_set']);
+                        $searchCollapsedDetails['keyword_set'] = \Scooper\my_merge_add_new_keys(array_values($searchCollapsedDetails['keyword_set']), array_values($search['keyword_set']));
+
+                        $this->_setKeywordStringsForSearch_($searchCollapsedDetails);
                     }
                     else // not the same, so can't combine them.  Just add this search as separate then
                     {
@@ -308,7 +311,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         // Lastly, check if we support keywords in the URL at all for this
         // plugin.  If not, remove any keywords_string_for_url value we'd set
         // and set it to "not supported"
-        if($this->_isBitFlagSet_(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
+        if($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
         {
             $searchDetails['keywords_string_for_url'] = VALUE_NOT_SUPPORTED;
         }
@@ -332,7 +335,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         $strRetCombinedKeywords = VALUE_NOT_SUPPORTED;
 
-        if(($this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED)) && count($arrKeywords) > 1)
+        if(($this->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED)) && count($arrKeywords) > 1)
         {
             if($this->strKeywordDelimiter == null)
             {
@@ -342,7 +345,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             foreach($arrKeywords as $kywd)
             {
                 $newKywd = $kywd;
-                if($this->_isBitFlagSet_(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS))
+                if($this->isBitFlagSet(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS))
                 {
                     $newKywd = '"' . $newKywd .'"';
                 }
@@ -356,7 +359,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                     $strRetCombinedKeywords .= " " . $this->strKeywordDelimiter . $newKywd;
                 }
             }
-            if($this->_isBitFlagSet_(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && strlen($this->strTitleOnlySearchKeywordFormat) > 0)
+            if($this->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && strlen($this->strTitleOnlySearchKeywordFormat) > 0)
             {
                 $strRetCombinedKeywords = sprintf($this->strTitleOnlySearchKeywordFormat, $strRetCombinedKeywords);
             }
@@ -364,7 +367,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
         elseif(count($arrKeywords) == 1)
         {
-            if($this->_isBitFlagSet_(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS))
+            if($this->isBitFlagSet(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS))
             {
                 $strRetCombinedKeywords = '"' . $arrKeywords[0] .'"';
             }
@@ -376,13 +379,13 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         if(!$this->_isValueURLEncoded_($strRetCombinedKeywords)) { $strRetCombinedKeywords = urlencode($strRetCombinedKeywords); }
 
-        if($this->_isBitFlagSet_(C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES))
+        if($this->isBitFlagSet(C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES))
         {
             $strRetCombinedKeywords = str_replace("%22", "-", $strRetCombinedKeywords);
             $strRetCombinedKeywords = str_replace("+", "-", $strRetCombinedKeywords);
         }
 
-        if($this->_isBitFlagSet_(C__JOB_KEYWORD_SUPPORTS_PLUS_PREFIX))
+        if($this->isBitFlagSet(C__JOB_KEYWORD_SUPPORTS_PLUS_PREFIX))
         {
             $strRetCombinedKeywords = "%2B" . $strRetCombinedKeywords;
         }
@@ -482,7 +485,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     {
         $strURLBase = $this->_getBaseURLFormat_($searchDetails);
 
-        if($this->_isBitFlagSet_(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
+        if($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
         {
             $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' with no location settings and and base_url_format = " . $strURLBase . "..." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_START__);
             $this->getJobsForSearchByType($searchDetails, $nDays, null);
@@ -573,15 +576,15 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     protected function getJobsForSearchByType($searchDetails, $nDays, $locSingleSettingSet = null, $nAttemptNumber = 0)
     {
         try {
-            if($this->_isBitFlagSet_(C__JOB_SEARCH_RESULTS_TYPE_XML__))
+            if($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_XML__))
             {
                 $this->getMyJobsForSearchFromXML($searchDetails, $nDays, $locSingleSettingSet);
             }
-            elseif($this->_isBitFlagSet_(C__JOB_SEARCH_RESULTS_TYPE_HTML_FILE__))
+            elseif($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_HTML_FILE__))
             {
                 $this->getMyJobsFromHTMLFiles($searchDetails, $nDays, $locSingleSettingSet);
             }
-            elseif($this->_isBitFlagSet_(C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__))
+            elseif($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__))
             {
                 $this->getMyJobsForSearchFromWebpage($searchDetails, $nDays, $locSingleSettingSet);
             }
@@ -600,6 +603,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             //
             $strErr = $ex->getMessage();
             if(((strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['employmentguide']['name']) == 0)||
+                 (strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['careerbuilder']['name']) == 0) ||
                 (strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['ziprecruiter']['name']) == 0)) &&
                 (substr_count($strErr, "HTTP error #404") > 0))
             {
@@ -664,7 +668,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
         $xmlResult->registerXPathNamespace("def", "http://www.w3.org/2005/Atom");
 
-        if($this->_isBitFlagSet_(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
+        if($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
         {
             $totalPagesCount = 1;
             $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
@@ -747,7 +751,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL );
         if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL); }
 
-        if($this->_isBitFlagSet_(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
+        if($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
         {
             $totalPagesCount = 1;
             $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
@@ -1063,7 +1067,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     {
         $strReturnLocation = VALUE_NOT_SUPPORTED;
 
-        if($this->_isBitFlagSet_(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
+        if($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
         {
             throw new ErrorException($this->siteName . " does not support the ***LOCATION*** replacement value in a base URL.  Please review and change your base URL format to remove the location value.  Aborting all searches for ". $this->siteName, \Scooper\C__DISPLAY_ERROR__);
         }
@@ -1132,7 +1136,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($nDays), $strURL );
         $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL );
         $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
-        if(!$this->_isBitFlagSet_(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
+        if(!$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
         {
 //            if($searchDetails['keywords_string_for_url'] == null || $searchDetails['keywords_string_for_url'] == VALUE_NOT_SUPPORTED)
 //            {
@@ -1145,7 +1149,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 //            }
         }
 
-        if(!$this->_isBitFlagSet_(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
+        if(!$this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
         {
             $strLocationValue = $this->_getLocationValueFromSettings_($locSingleSettingSet);
             if($strLocationValue == null)
@@ -1153,7 +1157,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search settings '" . $locSingleSettingSet['name'] ."' did not have the required location type of " . $this->getLocationSettingType() ." set.  Skipping search '". $searchDetails['search_name'] . "' with settings '" . $locSingleSettingSet['name'] ."'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 $strURL = VALUE_NOT_SUPPORTED;
             }
-            $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $strLocationValue, $strURL);
+            else
+            {
+                $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $strLocationValue, $strURL);
+            }
         }
 
         if($strURL == null) { throw new ErrorException("Location value is required for " . $this->siteName . ", but was not set for the search '" . $searchDetails['name'] ."'.". " Aborting all searches for ". $this->siteName, \Scooper\C__DISPLAY_ERROR__); }
@@ -1213,7 +1220,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
 
 
-    private function _isBitFlagSet_($flagToCheck)
+    function isBitFlagSet($flagToCheck)
     {
         $ret = isBitFlagSet($this->flagSettings, $flagToCheck);
         if($ret == $flagToCheck) { return true; }

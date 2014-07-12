@@ -232,22 +232,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading searches from config file...", \Scooper\C__DISPLAY_ITEM_START__);
         if(!$config) throw new ErrorException("Invalid configuration.  Cannot load user's searches.");
 
-        if($config->search)
-        {
-            if(is_object($config->search))
-            {
-                foreach($config->search as $iniSearch)
-                {
-                    $this->arrAllSearchesFromConfig[] = $this->_parseSearchFromINI_($iniSearch);
-                }
-            }
-            else
-            {
-                $this->arrAllSearchesFromConfig[] = $this->_parseSearchFromINI_($config->search);
-            }
-        }
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->arrAllSearchesFromConfig) . " searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
-
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading keyword set from config file...", \Scooper\C__DISPLAY_ITEM_START__);
         $this->_parseKeywordSettingsFromINI_($config);
 
@@ -265,7 +249,24 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                 break;
             }
         }
+
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->arrSearchKeywordSetsToRun) . " keyword sets to use for searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
+        if($config->search)
+        {
+            if(is_object($config->search))
+            {
+                foreach($config->search as $iniSearch)
+                {
+                    $this->arrAllSearchesFromConfig[] = $this->_parseSearchFromINI_($iniSearch);
+                }
+            }
+            else
+            {
+                $this->arrAllSearchesFromConfig[] = $this->_parseSearchFromINI_($config->search);
+            }
+        }
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->arrAllSearchesFromConfig) . " searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
+
 
         if($config->search_location_setting_set)
         {
@@ -347,18 +348,50 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         {
             foreach($config->search_keyword_set as $ini_keyword_set)
             {
+
                 $strSetName = 'KeywordSet' . (count($this->arrSearchKeywordSetsToRun) + 1);
                 if($ini_keyword_set['name'] != null && strlen($ini_keyword_set['name']) > 0)
                 {
                     $strSetName = $ini_keyword_set['name'];
                 }
-
-                $this->arrSearchKeywordSetsToRun[$strSetName] = array('name' => $strSetName, 'keywords_array' => null, 'match-type' => C__USER_KEYWORD_MATCH_DEFAULT);
-
-
-                foreach($ini_keyword_set['keywords'] as $keywordItem)
+                elseif($ini_keyword_set['set_key'] != null && strlen($ini_keyword_set['set_key']) > 0)
                 {
-                    $this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array'][] = $keywordItem;
+                    $strSetName = $ini_keyword_set['set_key'];
+
+                }
+
+
+                $this->arrSearchKeywordSetsToRun[$strSetName] = $this->_getEmptyKeywordSettingsSet_();
+                $this->arrSearchKeywordSetsToRun[$strSetName]['set_name'] = $strSetName;
+
+                if($ini_keyword_set['settings_scope'] != null && strlen($ini_keyword_set['settings_scope'] ) > 0)
+                {
+                    $this->arrSearchKeywordSetsToRun[$strSetName]['settings_scope'] = $ini_keyword_set['settings_scope'];
+
+                    if(strcasecmp($this->arrSearchKeywordSetsToRun[$strSetName]['settings_scope'], "all-sites") == 0)
+                    {
+                        // Copy all the job sites into the list of sites included to be run
+                        $this->arrSearchKeywordSetsToRun[$strSetName]['included_jobsites_array'] = array_column($GLOBALS['DATA']['site_plugins'], 'name', 'name');
+                    }
+                }
+
+                if($ini_keyword_set['excluded_jobsites'] != null && count($ini_keyword_set['excluded_jobsites']) > 0)
+                {
+                    foreach($ini_keyword_set['excluded_jobsites'] as $excludedSite)
+                    {
+                        $excludedSite = strtolower($excludedSite);
+                        $this->arrSearchKeywordSetsToRun[$strSetName]['excluded_jobsites_array'][] = $excludedSite;
+                        unset($this->arrSearchKeywordSetsToRun[$strSetName]['included_jobsites_array'][$excludedSite]);
+                    }
+                }
+
+
+                if($ini_keyword_set['keywords'] != null && count($ini_keyword_set['keywords']) > 0)
+                {
+                    foreach($ini_keyword_set['keywords'] as $keywordItem)
+                    {
+                        $this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array'][] = $keywordItem;
+                    }
                 }
 
                 if($ini_keyword_set['keyword_match_type'] != null && strlen($ini_keyword_set['keyword_match_type'] ) > 0)
@@ -377,10 +410,57 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                     $strKeywords= getArrayValuesAsString($this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array']);
                     if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added keyword set '" . $strSetName . "' with keywords = " . $strKeywords . (($strMatchType != null && strlen($strMatchType ) > 0) ? " matching " . $strMatchType : ""), \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 }
+
+
+
+                // If the keyword settings scope is all sites, then create a search for every possible site
+                // so that it runs with the keywords settings if it was included_<site> = true
+                //
+                if($this->arrSearchKeywordSetsToRun[$strSetName]['included_jobsites_array'] != null && count($this->arrSearchKeywordSetsToRun[$strSetName]['included_jobsites_array']) > 0)
+                {
+                    foreach($this->arrSearchKeywordSetsToRun[$strSetName]['included_jobsites_array'] as $siteToSearch)
+                    {
+                        $classPlug = new $GLOBALS['DATA']['site_plugins'][$siteToSearch]['class_name'](null, null);
+
+                        // if this plugin supports keyword parameters, then add a search for it.
+                        if(!$classPlug->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$classPlug->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
+                        {
+
+                            $tempSearch = $this->getEmptySearchDetailsRecord();
+                            $tempSearch['search_key'] = \Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . '-for-keyword-set-' . \Scooper\strScrub($strSetName, FOR_LOOKUP_VALUE_MATCHING);
+                            $tempSearch['search_name']  = $tempSearch['search_key'];
+                            $tempSearch['site_name']  = $siteToSearch;
+                            $tempSearch['keywords']  = $this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array'];
+                            $tempSearch['user_setting_flags'] = $this->arrSearchKeywordSetsToRun[$strSetName]['match-type'];
+
+                            $this->arrAllSearchesFromConfig[] = $tempSearch;
+                            $strSearchAsString = getArrayValuesAsString($tempSearch);
+                            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search loaded for keyword settings: " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                        }
+                        else
+                        {
+                            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Skipping " . $siteToSearch . " for keyword settings '" . $siteToSearch. "' because it does not support keyword searches. " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+                        }
+                    }
+                }
             }
+
 
         }
 
+    }
+
+    private function _getEmptyKeywordSettingsSet_()
+    {
+        return array(
+            'set_key' => null,
+            'set_name' => null,
+            'keywords_array' => null,
+            'keyword_match_type' => null,
+            'excluded_sites_array' => null,
+            'settings_scope' => "all-searches",
+        );
     }
 
 
