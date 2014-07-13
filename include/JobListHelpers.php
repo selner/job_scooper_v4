@@ -181,13 +181,6 @@ function sortByCountDesc($a, $b)
     return ($al < $bl) ? +1 : -1;
 }
 
-function isBitFlagSet($flagSettings, $flagToCheck)
-{
-    $ret = ($flagSettings & $flagToCheck);
-    if($ret == $flagToCheck) { return true; }
-    return false;
-}
-
 /**
  * TODO:  DOC
  *

@@ -80,7 +80,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 //            throw new ErrorException("Config ini files not yet supported!");
             $this->detailsIniFile = \Scooper\set_FileDetails_fromPharseSetting("use_config_ini", 'config_file_details', true);
             if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($this->detailsIniFile['directory'] );
-            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting output log folder to " . $this->detailsIniFile['directory'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Log file for run being written to: " . $this->detailsIniFile['directory'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration file details from " . $this->detailsIniFile['full_file_path'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
             $iniParser = new IniParser($this->detailsIniFile['full_file_path']);
@@ -100,7 +100,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // the user specificed (if they did)
         $userOutfileDetails = \Scooper\get_FileDetails_fromPharseOption("output_file", false);
         if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($userOutfileDetails['directory'] );
-        if(strlen($userOutfileDetails['full_file_path']) > 0 || strlen($userOutfileDetails['directory']) > 0)
+        if($userOutfileDetails['has_directory'])
         {
             $this->detailsOutputFile = $userOutfileDetails;
         }
@@ -141,15 +141,16 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     private function __setupOutputFolders__()
     {
-        if($this->detailsOutputFile['directory'] == null || $this->detailsOutputFile['directory']== "")
+        if(!$this->detailsOutputFile['has_directory'])
         {
             throw new ErrorException("Required value for the output folder was not specified. Exiting.");
         }
 
-        if($this->detailsOutputFile['file_name'] == null || strlen($this->detailsOutputFile['file_name']) == 0 || strlen($this->detailsOutputFile['full_file_path']) == 0)
+        if(!$this->detailsOutputFile['has_file'])
         {
-            $fileName = getDefaultJobsOutputFileName("", "jobs", "csv");
-            $this->detailsOutputFile = \Scooper\parseFilePath($this->detailsOutputFile['directory'] . $fileName);
+           $strDefaultFileName = getDefaultJobsOutputFileName("", "jobs", "csv");
+
+           $this->detailsOutputFile = \Scooper\parseFilePath($this->detailsOutputFile['directory'] .  $strDefaultFileName);
         }
         $this->detailsOutputSubfolder = $this->createOutputSubFolder($this->detailsOutputFile);
     }
@@ -468,23 +469,12 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     {
         // Append the file name base to the directory as a new subdirectory for output
         $fullNewDirectory = $fileDetails['directory'] . $fileDetails['file_name_base'];
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Attempting to create output directory: " . $fullNewDirectory , \Scooper\C__DISPLAY_ITEM_START__);
-        if(is_dir($fullNewDirectory))
-        {
+        $detailsSubdir = \Scooper\getFilePathDetailsFromString($fullNewDirectory, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
 
-        }
-        else
-        {
-            if (!mkdir($fullNewDirectory, 0777, true))
-            {
-                throw new ErrorException('Failed to create the output folder: '.$fullNewDirectory);
-            }
-         }
-        $fullNewFilePath = $fullNewDirectory . '/' . \Scooper\getFileNameFromFileDetails($fileDetails);
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Create folder for results output: " . $fullNewFilePath , \Scooper\C__DISPLAY_SUMMARY__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Created folder for results output: " . $detailsSubdir['directory'], \Scooper\C__DISPLAY_SUMMARY__);
 
         // return the new file & path details
-        return \Scooper\parseFilePath($fullNewFilePath, false);
+        return $detailsSubdir;
     }
 
 
@@ -504,8 +494,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         if($GLOBALS['OPTS']['DEBUG'] == true)
         {
-            $strCSVInputJobsPath = \Scooper\getFullPathFromFileDetails($this->detailsOutputSubfolder, "", "_Jobs_From_UserInput");
-            $this->writeJobsListToFile($strCSVInputJobsPath, $arrAllJobsLoadedFromSrc, true, false, "ClassJobRunner-LoadCSVs");
+            $strDebugInputCSV = $this->detailsOutputSubfolder['directory'] . \Scooper\getDefaultFileName("", "_Jobs_From_UserInput", "csv");
+            $this->writeJobsListToFile($strDebugInputCSV, $arrAllJobsLoadedFromSrc, true, false, "ClassJobRunner-LoadCSVs");
         }
 
         // These will be used at the beginning and end of
@@ -608,7 +598,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // the searches in the list and returning us the combined set of new jobs
         // (with the exception of Amazon for historical reasons)
         //
-        $classMulti = new ClassMultiSiteSearch($this->detailsOutputSubfolder['full_file_path']);
+        $classMulti = new ClassMultiSiteSearch($this->detailsOutputSubfolder['directory']);
         $classMulti->addMultipleSearches($this->arrSearchesToReturn, $this->arrSearchLocationSetsToRun);
         $classMulti->getJobsForMyMultipleSearches( $this->nNumDaysToSearch, $this->arrSearchKeywordSet);
         addJobsToJobsList($this->arrLatestJobs, $classMulti->getMyJobsList());
@@ -696,6 +686,9 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         $GLOBALS['logger']->logLine(PHP_EOL."**************  Updating jobs list for known filters ***************".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
         $this->markMyJobsList_withAutoItems();
+
+        // Sort the jobs by site/ID using the key of the jobs array
+        ksort ( $this->arrLatestJobs );
 
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

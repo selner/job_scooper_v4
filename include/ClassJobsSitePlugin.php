@@ -236,7 +236,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                     // Verify the user settings for keyword match type are the same.  If they are,
                     // we can combine this search into the collapsed one.
                     //
-                    if(isBitFlagSet($searchCollapsedDetails['user_setting_flags'], $search['user_setting_flags']))
+                    if(\Scooper\isBitFlagSet($searchCollapsedDetails['user_setting_flags'], $search['user_setting_flags']))
                     {
                         $searchCollapsedDetails['search_name'] .= " and " . $search['search_name'];
                         $searchCollapsedDetails['keyword_set'] = \Scooper\my_merge_add_new_keys(array_values($searchCollapsedDetails['keyword_set']), array_values($search['keyword_set']));
@@ -925,12 +925,12 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         //
         // check the search flag to see if this is needed
         //
-        if(isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_BE_IN_TITLE) || isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE))
+        if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_BE_IN_TITLE) || \Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE))
         {
             //
             // verify we didn't get here when the keyword can be anywhere in the search
             //
-            assert(!isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_ANYWHERE));
+            assert(!\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_ANYWHERE));
 
             // get an array of the search keywords
             //
@@ -957,7 +957,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 // We're going to check keywords for strict matches,
                 // but we should skip it if we're exact matching and we have multiple keywords, since
                 // that's not a possible match case.
-                if(!(isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE)) && count($searchDetails['keyword_set']) >= 1)
+                if(!(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE)) && count($searchDetails['keyword_set']) >= 1)
                 {
                     //
                     // check array of jobs against keywords; mark any needed
@@ -966,7 +966,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                     {
                         $strTitleMatchScrubbed = \Scooper\strScrub($job['job_title'], FOR_LOOKUP_VALUE_MATCHING);
 
-                        if(isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE))
+                        if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE))
                         {
                             if(count($searchDetails['keyword_set']) != 1)
                             {
@@ -1222,7 +1222,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     function isBitFlagSet($flagToCheck)
     {
-        $ret = isBitFlagSet($this->flagSettings, $flagToCheck);
+        $ret = \Scooper\isBitFlagSet($this->flagSettings, $flagToCheck);
         if($ret == $flagToCheck) { return true; }
         return false;
     }

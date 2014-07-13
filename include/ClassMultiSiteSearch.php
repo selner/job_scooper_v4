@@ -69,7 +69,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
 
             foreach($arrPluginClassesToRun as $classSearches)
             {
-                $class = new $classSearches['class_name']($this->detailsMyFileOut['full_file_path']);
+                $class = new $classSearches['class_name']($this->detailsMyFileOut['directory']);
                 try
                 {
                     $GLOBALS['logger']->logLine("Setting up " . count($classSearches['searches']) . " search(es) for ". $classSearches['site_name'] . "...", \Scooper\C__DISPLAY_SECTION_START__);
