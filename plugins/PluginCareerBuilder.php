@@ -26,9 +26,15 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
 {
     protected $siteName = 'CareerBuilder';
     protected $siteBaseURL = 'http://www.careerbuilder.com/';
-    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
+    protected $flagSettings = null;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
 
+
+    function __construct($strDir = null)
+    {
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_BASE_URL_FORMAT_REQUIRED;
+        parent::__construct($strDir);
+    }
 
     function getDaysURLValue($days) {
         $ret = "yesterday";
