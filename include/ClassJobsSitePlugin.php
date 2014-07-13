@@ -41,7 +41,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     protected $typeLocationSearchNeeded = null;
     protected $locationValue = null;
     protected $strKeywordDelimiter = null;
-    protected $strTitleOnlySearchKeywordFormat = "null";
+    protected $strTitleOnlySearchKeywordFormat = null;
 
     function __construct($strOutputDirectory = null)
     {
@@ -356,10 +356,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 }
                 else
                 {
-                    $strRetCombinedKeywords .= " " . $this->strKeywordDelimiter . $newKywd;
+                    $strRetCombinedKeywords .= " " . $this->strKeywordDelimiter . " " . $newKywd;
                 }
             }
-            if($this->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && strlen($this->strTitleOnlySearchKeywordFormat) > 0)
+            if($this->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && $this->strTitleOnlySearchKeywordFormat != null && strlen($this->strTitleOnlySearchKeywordFormat) > 0)
             {
                 $strRetCombinedKeywords = sprintf($this->strTitleOnlySearchKeywordFormat, $strRetCombinedKeywords);
             }
