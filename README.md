@@ -31,12 +31,11 @@ url_format="http://www.amazon.jobs/results?sjid=68,83&checklid=@%27US,%20WA,%20S
 ###To Run Jobs_Scooper:
 ``/usr/bin/php "main/runJobs.php" -all -days 3 -ini myconfig.ini``
 
-###Parameters:
+###Required Parameters:
 ```man
 -ini : Path to your configuration ini file (see examples/example_config.ini) 
 -days X:  number of days before today to download listings for. 
 -all:  run all the searches found in the .ini file.  Alternatively, you can specify the name of a single job site to run only that site's searches.  e.g. ``-amazon``
--o: the full filename and path to use for the resulting CSV data
 ```
 
 ###Supported Job Sites
