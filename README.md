@@ -4,39 +4,28 @@ Download the latest jobs from any websites into one comma-separated value (CSV) 
 The majority of plugins support letting you just set a keyword and location to use for the search.  The plugin then maps that to the correct URL format for that site and runs the search.
 
 Here's an example for a ZipRecruiter search: 
-``
-	[ZipRecruiter-all-jobs]        
-	jobsite="ZipRecruiter"        
-	name="all SEA jobs"        
-	keywords="vice president"        
-	location="Seattle, WA"        
-``
-If the job site supports advanced keyword queries, such as "this or that", set the keywords value to be the url encoded value from the search page's address.  Example:
-``
-	[Indeed-all-SEA-jobs]        
-	jobsite="Indeed"        
-	name="all SEA jobs"        
-	location="Seattle, WA"        
-	keywords="%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director+or+%22chief+product+officer%22+or+%22Chief+Technology+Officer%22"        
-``
+```INI
+jobsite="ZipRecruiter"        
+name="all SEA jobs"        
+keywords="vice president"        
+location="Seattle, WA"        
+```
+If the job site supports advanced keyword queries, such as "this or that", set the keywords value to be the url encoded value from the search page's address:
+```INI
+[Indeed-all-SEA-jobs]        
+jobsite="Indeed"        
+name="all SEA jobs"        
+location="Seattle, WA"
+keywords="%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director%22"        
+```
 You can always override the URL used for a search by including a single url_format value and omitting the keywords and location values.  This is supported by every plugin.
-Here's an example 
-``
-	[Amazon-PM-jobs]        
-	jobsite="Amazon"        
-	name="all PM jobs"        
-	url_format="http://www.amazon.jobs/results?sjid=68,83&checklid=@%27US,%20WA,%20Seattle%27&cname=%27US,%20WA,%20Seattle%27"        
-``
-Some plugins only support the url_format option however and do not support keywords or location options:
-* Amazon
-* CareerBuilder
-* Disney
-* eBay
-* EmploymentGuide
-* Expedia
-* Google
-* SimplyHired
-* StartupHire
+Here's an example:
+```INI
+[Amazon-PM-jobs]        
+jobsite="Amazon"        
+name="all PM jobs"        
+url_format="http://www.amazon.jobs/results?sjid=68,83&checklid=@%27US,%20WA,%20Seattle%27&cname=%27US,%20WA,%20Seattle%27"
+```
 
 ###To Run Jobs_Scooper:
 ``/usr/bin/php "main/runJobs.php" -all -days 3 -ini myconfig.ini``
