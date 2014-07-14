@@ -39,14 +39,14 @@ url_format="http://www.amazon.jobs/results?sjid=68,83&checklid=@%27US,%20WA,%20S
 ```
 
 ###Supported Job Sites
-Jobs Scooper supports [https://github.com/selner/jobs_scooper/wiki/Jobs-Scooper:--Sites-Supported](at least 60 different sites already), such as CareerBuilder, Craigslist, DotJobs, Ebay, EmploymentGuide, Expedia, Glassdoor, Groupon, Indeed, LinkUp, Mashable, Monster,  SimplyHired, Tableau and ZipRecruiter.  
+Jobs Scooper supports (https://github.com/selner/jobs_scooper/wiki/Jobs-Scooper:--Sites-Supported)[at least 60 different sites already], such as CareerBuilder, Craigslist, DotJobs, Ebay, EmploymentGuide, Expedia, Glassdoor, Groupon, Indeed, LinkUp, Mashable, Monster,  SimplyHired, Tableau and ZipRecruiter.  
 
 If your site isn't supported, it's super easy to add a new site plugin for almost any site that lists jobs.  Basic instructions on how to create your own are in examples/PluginTemplate.php.  There are currently three kinds of plugins that can be written:
 * server-side HTML download
 * XML download and parse (e.g. for an RSS feed of jobs), and
 * client-side HTML download for dynamic/AJAX-powered sites
 
-On average, it has been taking me less than 2 hours to add a new site plugin. (It's bascailly just setting some parameters and writng two straightofrward methods.)  If there's a site missing you want, just go ahead and add it!  [mailto:dev@recoilvelocity.com)[Let me know if you need help] doing it.
+On average, it has been taking me less than 2 hours to add a new site plugin. (It's bascailly just setting some parameters and writng two straightofrward methods.)  If there's a site missing you want, just go ahead and add it!  (mailto:dev@recoilvelocity.com)[Let me know if you need help] doing it.
 
 
 ###Tune Up Your Results! 
