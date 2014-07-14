@@ -131,7 +131,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     function __destruct()
     {
-        if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
+        if($GLOBALS['OPTS']['DEBUG'] == true)
+             if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
     }
 
     function getMyOutputFileFullPath($strFilePrefix = "")
@@ -177,6 +178,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             {
                 $tempEmail = $this->__getEmptyEmailRecord__();
                 if (isset($emailItem['name'])) {
+
                     $tempEmail['name'] = $emailItem['name'];
                 }
                 if (isset($emailItem['address'])) {
@@ -185,6 +187,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                 if (isset($emailItem['type'])) {
                     $tempEmail['type'] = $emailItem['type'];
                 }
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added email from config.ini: '" . getArrayValuesAsString($tempEmail), \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 $this->arrEmailAddresses[] = $tempEmail;
             }
         }
@@ -431,16 +434,21 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                     {
                         $classPlug = new $GLOBALS['DATA']['site_plugins'][$siteToSearch]['class_name'](null, null);
 
-                        // if this plugin supports keyword parameters, then add a search for it.
-                        if(!$classPlug->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$classPlug->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
+                        if(!$classPlug->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
                         {
-
                             $tempSearch = $this->getEmptySearchDetailsRecord();
                             $tempSearch['search_key'] = \Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . '-for-keyword-set-' . \Scooper\strScrub($strSetName, FOR_LOOKUP_VALUE_MATCHING);
                             $tempSearch['search_name']  = $tempSearch['search_key'];
                             $tempSearch['site_name']  = $siteToSearch;
-                            $tempSearch['keywords']  = $this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array'];
+                            $tempSearch['keyword_set']  = $this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array'];
                             $tempSearch['user_setting_flags'] = $this->arrSearchKeywordSetsToRun[$strSetName]['match-type'];
+                            $tempSearch['keywords_string_for_url'] = VALUE_NOT_SUPPORTED;
+                            // if this plugin supports keyword parameters, then add a search for it.
+                            if(!$classPlug->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
+                            {
+
+                                $tempSearch['keywords_string_for_url'] = $classPlug->getCombinedKeywordStringForURL($tempSearch['keyword_set']);
+                            }
 
                             $this->arrAllSearchesFromConfig[] = $tempSearch;
                             $strSearchAsString = getArrayValuesAsString($tempSearch);
@@ -448,7 +456,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                         }
                         else
                         {
-                            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Skipping " . $siteToSearch . " for keyword settings '" . $siteToSearch. "' because it does not support keyword searches. " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($siteToSearch . " requires url_format to be specfied in the INI file; cannot set searches for keyword settings: " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
                         }
                     }
@@ -915,7 +923,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         }
         else
         {
-            $GLOBALS['logger']->logLine("Email notification sent.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            $GLOBALS['logger']->logLine("Email notification sent to " . $toEmail['address'] . " from " . $mail->From, \Scooper\C__DISPLAY_ITEM_RESULT__);
         }
         return $ret;
 
@@ -1295,7 +1303,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
 
 
-    private function getKeysForHTMLOutput($target)
+    private function getKeysForHTMLOutput()
     {
         return array(
             'company',
