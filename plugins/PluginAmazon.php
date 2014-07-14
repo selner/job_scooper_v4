@@ -31,7 +31,7 @@ class PluginAmazon extends ClassJobsSitePlugin
 {
     protected $siteName = 'Amazon';
     protected $strFilePath_HTMLFileDownloadScript = "PluginAmazon_downloadjobs.applescript";
-    protected $flagSettings = C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS_NO_LOCATION_OR_KEYWORDS;
+    protected $flagSettings = C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS_URL_FORMAT_REQUIRED;
 
     function parseJobsListForPage($objSimpHTML)
     {

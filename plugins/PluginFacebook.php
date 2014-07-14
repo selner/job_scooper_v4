@@ -27,13 +27,13 @@ class PluginFacebook extends ClassJobsSitePlugin
     protected $siteBaseURL = 'https://www.facebook.com/careers/';
     protected $nJobListingsPerPage = 10;
     protected $strBaseURLFormat = "https://www.facebook.com/careers/locations/***LOCATION***";
-    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE;
+    protected $flagSettings = null;
     protected $typeLocationSearchNeeded = 'location-city';
 
 
     function __construct($strBaseDir = null)
     {
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE | C__JOB_LOCATION_REQUIRES_LOWERCASE;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS | C__JOB_LOCATION_REQUIRES_LOWERCASE | C__JOB_PAGECOUNT_NOTAPPLICABLE__;
         parent::__construct($strBaseDir);
     }
 

@@ -24,10 +24,9 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 class PluginTableau extends ClassJobsSitePlugin
 {
     protected $siteName = 'Tableau';
-    protected $siteBaseURL = 'https://ch.tbe.taleo.net/CH11/ats/careers/requisition.jsp?org=TABLEAU&cws=1&rid=';
+    protected $strBaseURLFormat = 'https://ch.tbe.taleo.net/CH11/ats/careers/searchResults.jsp?org=TABLEAU&cws=1&act=next&rowFrom=***ITEM_NUMBER***';
     protected $nJobListingsPerPage = 100;
-    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_NO_LOCATION_OR_KEYWORDS;
-
+    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_NO_LOCATION;
 
 
     function getItemURLValue($nItem)
