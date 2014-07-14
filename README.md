@@ -39,7 +39,7 @@ url_format="http://www.amazon.jobs/results?sjid=68,83&checklid=@%27US,%20WA,%20S
 ```
 
 ###Supported Job Sites
-Jobs Scooper supports [at least 60 different sites already](https://github.com/selner/jobs_scooper/wiki/Jobs-Scooper:--Sites-Supported), such as CareerBuilder, Craigslist, DotJobs, Ebay, EmploymentGuide, Expedia, Glassdoor, Groupon, Indeed, LinkUp, Mashable, Monster,  SimplyHired, Tableau and ZipRecruiter.  [https://github.com/selner/jobs_scooper/wiki/Jobs-Scooper:--Sites-Supported](Head over to the wiki) to see the full list.
+Jobs Scooper supports [at least 60 different sites already](https://github.com/selner/jobs_scooper/wiki/Jobs-Scooper:--Sites-Supported), such as CareerBuilder, Craigslist, DotJobs, Ebay, EmploymentGuide, Expedia, Glassdoor, Groupon, Indeed, LinkUp, Mashable, Monster,  SimplyHired, Tableau and ZipRecruiter.  [Head over to the wiki](https://github.com/selner/jobs_scooper/wiki/Jobs-Scooper:--Sites-Supported) to see the full list.
 
 If your site isn't supported, it's super easy to add a new site plugin for almost any site that lists jobs.  Basic instructions on how to create your own are in examples/PluginTemplate.php.  There are currently three kinds of plugins that can be written:
 * server-side HTML download
