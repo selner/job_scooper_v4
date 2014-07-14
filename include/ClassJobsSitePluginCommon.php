@@ -182,14 +182,13 @@ class ClassJobsSitePluginCommon
         // Remove common company name extensions like "Corporation" or "Inc." so we have
         // a higher match likelihood
 //        $retArrNormalized ['company'] = str_replace(array(" corporation", " corp", " inc", " llc"), "", $retArrNormalized['company']);
-        $retArrNormalized ['company'] = preg_replace(array("/\s[Cc]orporation/", "/\s[Cc]orp\W{0,1}/", "/.com/", "/\W{0,}\s[iI]nc/", "/\W{0,}\s[lL][lL][cC]/","/\W{0,}\s[lL][tT][dD]/"), "", $retArrNormalized['company']);
+        $retArrNormalized ['company'] = preg_replace(array("/\s[Cc]orporat[e|ion]/", "/\s[Cc]orp\W{0,1}/", "/.com/", "/\W{0,}\s[iI]nc/", "/\W{0,}\s[lL][lL][cC]/","/\W{0,}\s[lL][tT][dD]/"), "", $retArrNormalized['company']);
 
         switch(\Scooper\strScrub($retArrNormalized ['company']))
         {
             case "amazon":
             case "amazon com":
             case "a2z":
-            case "amazon corporate llc":
             case "amazon Web Services":
             case "amazon fulfillment services":
             case "amazonwebservices":
