@@ -5,6 +5,7 @@ The majority of plugins support letting you just set a keyword and location to u
 
 Here's an example for a ZipRecruiter search: 
 ```INI
+[search.Zip-SEA]    
 jobsite="ZipRecruiter"        
 name="all SEA jobs"        
 keywords="vice president"        
@@ -12,7 +13,7 @@ location="Seattle, WA"
 ```
 If the job site supports advanced keyword queries, such as "this or that", set the keywords value to be the url encoded value from the search page's address:
 ```INI
-[Indeed-all-SEA-jobs]        
+[search.Indeed-all-SEA-jobs]        
 jobsite="Indeed"        
 name="all SEA jobs"        
 location="Seattle, WA"
@@ -21,7 +22,7 @@ keywords="%22vice+president%22+or+VP+or+director+or+CTO+or+CPO+or+director%22"
 You can always override the URL used for a search by including a single url_format value and omitting the keywords and location values.  This is supported by every plugin.
 Here's an example:
 ```INI
-[Amazon-PM-jobs]        
+[search.Amazon-PM-jobs]        
 jobsite="Amazon"        
 name="all PM jobs"        
 url_format="http://www.amazon.jobs/results?sjid=68,83&checklid=@%27US,%20WA,%20Seattle%27&cname=%27US,%20WA,%20Seattle%27"
@@ -31,10 +32,12 @@ url_format="http://www.amazon.jobs/results?sjid=68,83&checklid=@%27US,%20WA,%20S
 ``/usr/bin/php "main/runJobs.php" -all -days 3 -ini myconfig.ini``
 
 ###Parameters:
-* ``-ini`` : Path to your configuration ini file (see examples/example_config.ini) 
-* ``-days X``:  number of days before today to download listings for. 
-* ``-all``:  run all the searches found in the .ini file.  Alternatively, you can specify the name of a single job site to run only that site's searches.  e.g. ``-amazon``
-* ``-o``: the full filename and path to use for the resulting CSV data
+```man
+-ini : Path to your configuration ini file (see examples/example_config.ini) 
+-days X:  number of days before today to download listings for. 
+-all:  run all the searches found in the .ini file.  Alternatively, you can specify the name of a single job site to run only that site's searches.  e.g. ``-amazon``
+-o: the full filename and path to use for the resulting CSV data
+```
 
 ###Supported Job Sites
 Jobs Scooper supports nearly 20 different job sites out of the box:  
