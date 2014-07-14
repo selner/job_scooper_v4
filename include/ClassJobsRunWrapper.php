@@ -1152,11 +1152,11 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                 else
                 {
                     $arrCounts[$strName]['name'] = $strName;
-                    $arrCounts[$strName]['updated_today'] = $countUpdated;
                     $arrCounts[$strName]['new_today'] = count(array_filter($arrPluginJobs, "isNewJobToday_Interested_IsBlank"));
-                    $arrCounts[$strName]['total_listings'] = count($arrPluginJobs);
+                    $arrCounts[$strName]['updated_today'] = $countUpdated;
                     $arrCounts[$strName]['total_not_interested'] = count(array_filter($arrPluginJobs, "isMarked_NotInterested"));
                     $arrCounts[$strName]['total_active'] = count(array_filter($arrPluginJobs, "isMarked_InterestedOrBlank"));
+                    $arrCounts[$strName]['total_listings'] = count($arrPluginJobs);
                 }
             }
             else
