@@ -44,6 +44,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         __initializeArgs__();
 
         $this->__setupRunFromArgs__();
+
     }
 
     private function __setupRunFromArgs__()
@@ -488,6 +489,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $detailsSubdir = \Scooper\getFilePathDetailsFromString($fullNewDirectory, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
 
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Created folder for results output: " . $detailsSubdir['directory'], \Scooper\C__DISPLAY_SUMMARY__);
+        $detailsSubdir['file_name_base'] =  $fileDetails['file_name_base'];
+        $detailsSubdir['file_extension'] =  $fileDetails['file_extension'];
 
         // return the new file & path details
         return $detailsSubdir;
@@ -536,7 +539,12 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     private function writeRunsJobsToFile($strFileOut, $arrJobsToOutput, $strLogDescriptor, $strExt = "CSV", $keysToOutput = null)
     {
+
+
         $this->writeJobsListToFile($strFileOut, $arrJobsToOutput, true, false, "ClassJobRunner-".$strLogDescriptor, $strExt, $keysToOutput);
+
+        if($strExt == "HTML")
+            $this->_addCSSStyleToHTMLFile_($strFileOut);
 
     }
 
@@ -590,6 +598,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         $strFilteredCSVOutputPath = $details['full_file_path'];
         $this->writeRunsJobsToFile($strFilteredCSVOutputPath, $arrJobsOutput, $strFilterToApply, $strExt, $keysToOutput);
+
 
         $GLOBALS['logger']->logLine(($strFilterDescription != null ? $strFilterDescription : $strFileNameAppend) . " " . count($arrJobsOutput). " job listings output to  " . $strFilteredCSVOutputPath, \Scooper\C__DISPLAY_ITEM_RESULT__);
 
@@ -710,9 +719,12 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // Create a copy of the jobs list that is sorted by that value.
         //
         $arrFinalJobs_SortedByCompanyRole = array();
-        foreach($this->arrLatestJobs as $job)
+        if(countJobRecords($this->arrLatestJobs) > 0)
         {
-            $arrFinalJobs_SortedByCompanyRole [$job['key_company_role']] = $job;
+            foreach($this->arrLatestJobs as $job)
+            {
+                $arrFinalJobs_SortedByCompanyRole [$job['key_company_role']] = $job;
+            }
         }
         ksort($arrFinalJobs_SortedByCompanyRole );
 
@@ -794,7 +806,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $GLOBALS['logger']->logLine($strResultText, \Scooper\C__DISPLAY_SUMMARY__);
 
         $strResultCountsHTML = $this->getListingCountsByPlugin("html");
-        $strResultHTML = "<pre>" . $strResultSummary . "</pre>" . PHP_EOL . $strResultCountsHTML . PHP_EOL . "<pre>" . $strErrsResult . "</pre>".PHP_EOL;
+        $strErrHTML = preg_replace("/\n/", ("<br>" . chr(10) . chr(13)), $strErrsResult);
+        $strResultHTML = "<pre>" . $strResultSummary . "</pre>" . PHP_EOL . $strResultCountsHTML . PHP_EOL . "<pre>" . $strErrHTML . "</pre>".PHP_EOL;
 
         //
         // Send the email notification out for the completed job
@@ -864,7 +877,10 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $content = $this->_getFullFileContents_($detailsFileHTML);
             $messageHtml  .= $content . PHP_EOL. PHP_EOL. "</body></html>";
 
+            $this->_wrapCSSStyleOnHTML_($messageHtml);
         }
+
+
         //
         // Add initial email address header values
         //
@@ -1105,7 +1121,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $arrNoJobUpdates = null;
 
         $strOut = "                ";
-        $arrHeaders = array("Updated", "New", "Total", "Active", "Inactive");
+        $arrHeaders = array("New", "Updated", "Total", "Active", "Inactive");
 
         $arrSitesSearched = null;
         //
@@ -1138,6 +1154,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                 if($arrPluginJobsUnfiltered == null || !is_array($arrPluginJobsUnfiltered) || countJobRecords($arrPluginJobsUnfiltered) == 0)
                 {
                     $countUpdated = 0;
+                    $arrPluginJobs = array();
                 }
                 else
                 {
@@ -1222,9 +1239,23 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             sort($arrExcluded);
             $strOut = $strOut . PHP_EOL .  "Excluded sites for this run:" . PHP_EOL;
 
+            $nItemPerLineCount = 0;
             foreach($arrExcluded as $site)
             {
-                $strOut = $strOut . "     - ". $site .PHP_EOL;
+                if($nItemPerLineCount == 0)
+                {
+                    $strOut = $strOut . "     - ". $site;
+                    $nItemPerLineCount += 1;
+                }
+                elseif($nItemPerLineCount < 5) {
+                    $strOut = $strOut . ", ". $site;
+                    $nItemPerLineCount += 1;
+                }
+                else
+                {
+                    $strOut = $strOut . ", ". $site . PHP_EOL;
+                    $nItemPerLineCount = 0;
+                }
             }
         }
 
@@ -1233,7 +1264,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     private function _getResultsTextHTML_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrExcluded)
     {
-        $strOut = "";
         $strOut = "<div class='job_scooper outer'>";
 
         if($arrCounts != null && count($arrCounts) > 0)
@@ -1286,12 +1316,28 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         {
             sort($arrExcluded);
             $strOut .=  PHP_EOL . "<div class='job_scooper section'>". PHP_EOL;
-            $strOut .=  PHP_EOL .  "Excluded sites for this run: " . PHP_EOL;
-            $strOut .=  PHP_EOL . "<ul class='job_scooper'>". PHP_EOL;
 
+            $strOut .=  PHP_EOL .  "<span style=\"font-size: xx-small;color: #8e959c;\">Excluded sites for this run: </span>" . PHP_EOL;
+            $strOut .=  PHP_EOL . "<ul class='job_scooper' style=\"font-size:xx-small; color:#8e959c\">". PHP_EOL;
+
+            $nItemPerLineCount = 0;
             foreach($arrExcluded as $site)
             {
-                $strOut .=  "<li>". $site . "</li>". PHP_EOL;
+                if($nItemPerLineCount == 0)
+                {
+                    $strOut = $strOut . "<li>" . $site;
+                    $nItemPerLineCount += 1;
+                }
+                elseif($nItemPerLineCount < 5)
+                {
+                    $strOut = $strOut . ", ". $site;
+                    $nItemPerLineCount += 1;
+                }
+                else
+                {
+                    $strOut = $strOut . ", ". $site . "</li>". PHP_EOL;
+                    $nItemPerLineCount = 0;
+                }
             }
 
             $strOut .=  PHP_EOL . "</ul></div><br><br>". PHP_EOL;
@@ -1301,6 +1347,21 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         return $strOut;
     }
 
+    private function _addCSSStyleToHTMLFile_($strFilePath)
+    {
+        $strHTMLContent = file_get_contents($strFilePath);
+        $retWrapped = $this->_wrapCSSStyleOnHTML_($strHTMLContent);
+        file_put_contents($strFilePath, $retWrapped);
+    }
+
+    private function _wrapCSSStyleOnHTML_($strHTML)
+    {
+        $cssToInlineStyles = new \TijsVerkoyen\CssToInlineStyles\CssToInlineStyles();
+        $css = file_get_contents(dirname(dirname(__FILE__)) . '/include/CSVTableStyle.css');
+        $cssToInlineStyles->setHTML($strHTML);
+        $cssToInlineStyles->setCSS($css);
+        return $cssToInlineStyles->convert();
+    }
 
 
     private function getKeysForHTMLOutput()

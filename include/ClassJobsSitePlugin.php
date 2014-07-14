@@ -1232,7 +1232,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
      */
     function writeMyJobsListToFile($strOutFilePath = null)
     {
-        return $this->writeJobsListToFile($strOutFilePath, $this->arrLatestJobs, true, false, $this->siteName);
+        return $this->writeJobsListToFile($strOutFilePath, $this->arrLatestJobs, true, false, $this->siteName, "CSV");
     }
 
 

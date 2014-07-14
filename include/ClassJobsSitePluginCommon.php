@@ -767,7 +767,7 @@ class ClassJobsSitePluginCommon
 
 
 
-    function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true, $fFirstAutoMarkJobs = false, $strCallerDescriptor = "", $ext = "CSV", $keysToOutput=null)
+    function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true, $fFirstAutoMarkJobs = false, $strCallerDescriptor = "", $ext = "CSV", $keysToOutput=null, $detailsCSSToInclude = null)
     {
 
         if(!$strOutFilePath || strlen($strOutFilePath) <= 0)
@@ -802,7 +802,12 @@ class ClassJobsSitePluginCommon
 
         if($ext == 'HTML')
         {
-            $strCSS = file_get_contents(dirname(__FILE__) . '/../include/CSVTableStyle.css');
+            $strCSS = null;
+            if($detailsCSSToInclude['has_file'])
+            {
+                // $strCSS = file_get_contents(dirname(__FILE__) . '/../include/CSVTableStyle.css');
+                $strCSS = file_get_contents($detailsCSSToInclude['full_file_path']);
+            }
             $classCombined->writeArrayToHTMLFile($arrJobsRecordsToUse, $keysToOutput, $this->arrKeysForDeduping, $strCSS);
 
         }
