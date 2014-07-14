@@ -205,8 +205,25 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             $GLOBALS['logger']->logLine($this->siteName . " does not have more than one search to collapse.  Continuing with single '" . $this->arrSearchesToReturn[0]['search_name'] . "' search.", \Scooper\C__DISPLAY_WARNING__);
             return;
         }
-
         $searchCollapsedDetails = null;
+
+        $arrSearchesLeftToCollapse = $this->arrSearchesToReturn;
+
+        while(count($arrSearchesLeftToCollapse) > 1)
+        {
+            $curSearch = array_pop($arrSearchesLeftToCollapse);
+
+            // if this search has any of the search-level overrides on it
+            // then we don't bother trying to collapse it
+            //
+            if(strlen($curSearch['url_format']) > 0 || strlen($curSearch['keyword_search_override']) > 0 || strlen($curSearch['location_user_specified_override']) > 0)
+            {
+                $arrCollapsedSearches[] = $curSearch;
+            }
+        }
+
+        $arrCollapsedSearches[] = array_pop($arrSearchesLeftToCollapse);
+
         foreach($this->arrSearchesToReturn as $search)
         {
             //
@@ -454,26 +471,26 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     }
 
 
-    protected function _getLocationValueFromSettings_($settingsSet, $fLowerCase = false)
+    function getSearchLocationValue($searchDetails, $settingsSet = null)
     {
         $strReturnLocation = VALUE_NOT_SUPPORTED;
 
-        if($settingsSet['search_location_override'] != null && strlen($settingsSet['search_location_override']) > 0)
+        if($searchDetails['search_location_override'] != null && strlen($searchDetails['search_location_override']) > 0)
         {
-            $strReturnLocation = $settingsSet['search_location_override'];
+            $strReturnLocation = $searchDetails['search_location_override'];
         }
-        else
+        elseif($settingsSet != null)
         {
-
             $locTypeNeeded = $this->getLocationSettingType();
             if($settingsSet != null && count($settingsSet) > 0 && $settingsSet[$locTypeNeeded] != null)
             {
                 $strReturnLocation = $settingsSet[$locTypeNeeded];
             }
         }
+
         if(!$this->_isValueURLEncoded_($strReturnLocation)) { $strReturnLocation = urlencode($strReturnLocation); }
 
-        if($fLowerCase == true)
+        if($this->isBitFlagSet(C__JOB_LOCATION_REQUIRES_LOWERCASE))
         {
             $strReturnLocation = strtolower($strReturnLocation);
         }
@@ -1151,10 +1168,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         if(!$this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
         {
-            $strLocationValue = $this->_getLocationValueFromSettings_($locSingleSettingSet);
-            if($strLocationValue == null)
+            $strLocationValue = $this->getSearchLocationValue($searchDetails, $locSingleSettingSet);
+            if($strLocationValue == VALUE_NOT_SUPPORTED)
             {
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search settings '" . $locSingleSettingSet['name'] ."' did not have the required location type of " . $this->getLocationSettingType() ." set.  Skipping search '". $searchDetails['search_name'] . "' with settings '" . $locSingleSettingSet['name'] ."'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Location settings set '" . $locSingleSettingSet['name'] ."' did not have the required location type of " . $this->getLocationSettingType() ." set.  Skipping search '". $searchDetails['search_name'] . "' with settings '" . $locSingleSettingSet['name'] ."'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 $strURL = VALUE_NOT_SUPPORTED;
             }
             else

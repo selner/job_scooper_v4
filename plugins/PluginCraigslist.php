@@ -30,14 +30,9 @@ class PluginCraigslist  extends ClassJobsSitePlugin
     protected $typeLocationSearchNeeded = 'location-city';
     protected $strKeywordDelimiter = "|";
 
-    protected function _getLocationValueFromSettings_($settingsSet)
-    {
-        return parent::_getLocationValueFromSettings_($settingsSet, true);
-    }
-
     function __construct($strBaseDir = null)
     {
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS | C__JOB_LOCATION_REQUIRES_LOWERCASE;
         parent::__construct($strBaseDir);
     }
 
