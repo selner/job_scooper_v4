@@ -176,9 +176,15 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             foreach($config->emails as $emailItem)
             {
                 $tempEmail = $this->__getEmptyEmailRecord__();
-                $tempEmail['name'] = $emailItem['name'];
-                $tempEmail['address'] = $emailItem['address'];
-                $tempEmail['type'] = $emailItem['type'];
+                if (isset($emailItem['name'])) {
+                    $tempEmail['name'] = $emailItem['name'];
+                }
+                if (isset($emailItem['address'])) {
+                    $tempEmail['address'] = $emailItem['address'];
+                }
+                if (isset($emailItem['type'])) {
+                    $tempEmail['type'] = $emailItem['type'];
+                }
                 $this->arrEmailAddresses[] = $tempEmail;
             }
         }
@@ -193,32 +199,34 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         {
             foreach($config->inputfiles as $iniInputFile)
             {
-                $tempFileDetails = \Scooper\parseFilePath($pathInput['directory'].$iniInputFile['name'], true);
+                if (isset($iniInputFile['name'])) {
 
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Processing input file '" . $pathInput['directory'].$iniInputFile['name'] . "' with type of '". $iniInputFile['type'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
-                $this->__addInputFile__($tempFileDetails, $iniInputFile['type'], $iniInputFile['sheet']);
+                    $tempFileDetails = \Scooper\parseFilePath($pathInput['directory'].$iniInputFile['name'], true);
 
-                switch($iniInputFile['type'])
-                {
-                    case "jobs":
-                        $this->arrJobCSVUserInputFiles[] = $pathInput['directory'] . $iniInputFile['name'];
-                        break;
+                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Processing input file '" . $pathInput['directory'].$iniInputFile['name'] . "' with type of '". $iniInputFile['type'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
+                    $this->__addInputFile__($tempFileDetails, $iniInputFile['type'], $iniInputFile['sheet']);
 
-                    case "titles_filter":
-                        \Scooper\setGlobalFileDetails('titles_file_details', true, $pathInput['directory']. $iniInputFile['name']);
-                        break;
+                    switch($iniInputFile['type'])
+                    {
+                        case "jobs":
+                            $this->arrJobCSVUserInputFiles[] = $pathInput['directory'] . $iniInputFile['name'];
+                            break;
 
-                    case "regex_filter_titles":
-                        \Scooper\setGlobalFileDetails('titles_regex_file_details', true, $pathInput['directory']. $iniInputFile['name']);
-                        break;
+                        case "titles_filter":
+                            \Scooper\setGlobalFileDetails('titles_file_details', true, $pathInput['directory']. $iniInputFile['name']);
+                            break;
 
-                    case "regex_filter_companies":
-                        \Scooper\setGlobalFileDetails('companies_regex_file_details', true, $pathInput['directory']. $iniInputFile['name']);
-                        break;
+                        case "regex_filter_titles":
+                            \Scooper\setGlobalFileDetails('titles_regex_file_details', true, $pathInput['directory']. $iniInputFile['name']);
+                            break;
+
+                        case "regex_filter_companies":
+                            \Scooper\setGlobalFileDetails('companies_regex_file_details', true, $pathInput['directory']. $iniInputFile['name']);
+                            break;
 
 
+                    }
                 }
-
             }
         }
 
