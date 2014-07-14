@@ -330,6 +330,10 @@ function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strD
         {
             $strVal = $val;
         }
+        elseif(is_array($val))
+        {
+            $strVal = join(" | ", $val);
+        }
         else
         {
             $strVal = var_export($val, true);
