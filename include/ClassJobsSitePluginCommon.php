@@ -523,21 +523,25 @@ class ClassJobsSitePluginCommon
 
         $strDupeMarker_Start = "<dupe>";
         $strDupeMarker_End = "</dupe>";
+        $strUserNotePart = "";
 
         if(substr_count($strNote, $strDupeMarker_Start)>0)
         {
             $arrNote = explode($strDupeMarker_Start, $strNote);
             $strUserNotePart = $arrNote[0];
             $strDupeNotes = $arrNote[1];
+            $arrDupesListed = explode(";", $strDupeNotes);
+            if(count($arrDupesListed) > 3)
+            {
+                $strDupeNotes = $arrDupesListed[0] . "; " . $arrDupesListed[1] . "; " . $arrDupesListed[2] . "; " . $arrDupesListed[3] . "; and more";
+            }
+
             $strDupeNotes = str_replace($strDupeMarker_End, "", $strDupeNotes);
             $strDupeNotes .= $strDupeNotes ."; ";
         }
-        else
+        elseif(strlen($strNote) > 0)
         {
-            if(strlen($strNote) > 0)
-            {
-                $strUserNotePart = $strNote;
-            }
+            $strUserNotePart = $strNote;
         }
 
         return (strlen($strUserNotePart) > 0 ? $strUserNotePart . " " . PHP_EOL : "") . $strDupeMarker_Start . $strDupeNotes . $strNewDupe . $strDupeMarker_End;
