@@ -403,7 +403,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
                 if($this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array'] != null && count($this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array']) > 0)
                 {
-                    $strKeywords= getArrayValuesAsString($this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array']);
+                    $strKeywords= getArrayValuesAsString($this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array'], null, "", false);
                     if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added keyword set '" . $strSetName . "' with keywords = " . $strKeywords . (($strMatchType != null && strlen($strMatchType ) > 0) ? " matching " . $strMatchType : ""), \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 }
 
