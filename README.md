@@ -31,7 +31,8 @@ location-city-comma-state-country-no-commas="seattle washington united states"
 
 That's all you need to do.  Just [run Jobs Scooper](https://github.com/selner/jobs_scooper/wiki/Running-Jobs-Scooper) and let it do the work for you.
 
-####To Run Jobs_Scooper:
+####Running Jobs_Scooper
+Type:
 ``/usr/bin/php "main/runJobs.php" -all -days 3 -ini myconfig.ini``
 
 Required Parameters:
