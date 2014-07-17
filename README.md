@@ -47,6 +47,7 @@ If you're looking at job listings across many sites, Job Scooper has some built-
 * **Filter out jobs you've already reviewed** 
 * **Exclude specific companies automatically**
 * **Exclude particular job titles automatically**
+* 
 That's just the start of [what Jobs Scooper can do](https://github.com/selner/jobs_scooper/wiki).
 
 ##Other Stuff
