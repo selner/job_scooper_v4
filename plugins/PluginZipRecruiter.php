@@ -29,13 +29,15 @@ require_once(__ROOT__ . '/include/ClassJobsSitePluginCommon.php');
  *
 
  */
+
 class PluginZipRecruiter extends ClassJobsSitePlugin
 {
     protected $siteName = 'ZipRecruiter';
     protected $siteBaseURL = 'https://jobs.ziprecruiter.com';
     protected $nJobListingsPerPage = 20;
-    protected $fQuoteKeywords = true;
     protected $strBaseURLFormat = "https://jobs.ziprecruiter.com/candidate/search?search=***KEYWORDS***&location=***LOCATION***&radius=25&page=***PAGE_NUMBER***&days=***NUMBER_DAYS***";
+    protected $flagSettings = null;
+    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
 
 
     // if this is a client-side HTML download plugin, you will need to add a script
@@ -44,6 +46,11 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
     // This value is unused for XML or server-side webpage download plugins.
     protected $strFilePath_HTMLFileDownloadScript = null;
 
+    function __construct($strBaseDir = null)
+    {
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_SUPPORTS_PLUS_PREFIX | C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS;
+        parent::__construct($strBaseDir);
+    }
 
     /**
      * If the site does not have a URL parameter for number of days
@@ -143,8 +150,14 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
 
+
             $titleNode = $node->find("h4[class='font14 fBold mb2 font13Phone']");
             $item['job_title'] = $titleNode[0]->plaintext;
+
+            // Removes " NEW!" from the job title.  ZipRecruiter tends to occasionally
+            // have that appended which then fails de-duplication. (Fixes issue #45)
+            $item['job_title'] = str_ireplace(" NEW!", "", $item['job_title']);
+
 
 
             $titleLink = $node->find("a[class='clickable_target']")[0];
@@ -156,9 +169,19 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
             //
             if($item['job_title'] == '') continue;
 
-            $idLink = $node->find("a[class='toggle_job_save btn btn-small']");
-            $jobID = $idLink[0]->attr['data-external_job_id'];
-            $item['job_id'] = $jobID;
+            // get the id and parse it down to <name>-<identifier>
+            $strExternalJobID = $node->attr['id'];
+            $fMatch = preg_match('/quiz-card-(\w{1,}-\w{1,})/i', $strExternalJobID, $arrExternalIDParts );
+            assert($fMatch == true);
+            $strExternalJobID = $arrExternalIDParts[1];
+
+            // remove "remaining15" or similar if it exists
+            $strExternalJobID = preg_replace('/remaining\d{1,3}/i', "", $strExternalJobID);
+
+            // remove "_cpc" from the ID if it still exists
+            $strExternalJobID = preg_replace('/_cpc/i', "", $strExternalJobID );
+
+            $item['job_id'] = $strExternalJobID;
 
             $companyNode = $node->find("p[class='font12Phone clearLeft']");
             $arrCompanyParts = explode(" - ", $companyNode[0]->plaintext);

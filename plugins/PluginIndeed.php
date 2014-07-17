@@ -18,15 +18,23 @@ define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 
-
 class PluginIndeed extends ClassJobsSitePlugin
 {
     protected $siteName = 'Indeed';
     protected $nJobListingsPerPage = 50;
     protected $siteBaseURL = 'http://www.Indeed.com';
-    protected $strBaseURLFormat = "http://www.indeed.com/jobs?q=title%3A%28***KEYWORDS***%29&l=***LOCATION***&sort=date&limit=50&fromage=***NUMBER_DAYS***&start=***ITEM_NUMBER***";
+    protected $strBaseURLFormat = "http://www.indeed.com/jobs?q=***KEYWORDS***&l=***LOCATION***&sort=date&limit=50&fromage=***NUMBER_DAYS***&start=***ITEM_NUMBER***";
+    protected $flagSettings = null;
+    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
+    protected $strKeywordDelimiter = "OR";
+    protected $strTitleOnlySearchKeywordFormat = "title:(%s)";
 
 
+    function __construct($strBaseDir = null)
+    {
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS | C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS;
+        parent::__construct($strBaseDir);
+    }
 
     function getItemURLValue($nItem)
     {

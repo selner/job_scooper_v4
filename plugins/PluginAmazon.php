@@ -25,10 +25,13 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 
 
+
+
 class PluginAmazon extends ClassJobsSitePlugin
 {
     protected $siteName = 'Amazon';
     protected $strFilePath_HTMLFileDownloadScript = "PluginAmazon_downloadjobs.applescript";
+    protected $flagSettings = C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS_URL_FORMAT_REQUIRED;
 
     function parseJobsListForPage($objSimpHTML)
     {
@@ -38,8 +41,6 @@ class PluginAmazon extends ClassJobsSitePlugin
         $nTRIndex = 0;
         while($nTRIndex < count($nodesTR))
         {
-            $strTeamDetailsRemain = "";
-            $teamDetails = "";
             $strTeamName = "";
             $strTeamCat = "";
 
@@ -113,7 +114,6 @@ class PluginAmazon extends ClassJobsSitePlugin
             }
 
             $nTRIndex = $nTRIndex + 1;
-
         }
         return $ret;
     }

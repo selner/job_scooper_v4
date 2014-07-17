@@ -25,7 +25,10 @@ class PluginLinkUp extends ClassJobsSitePlugin
 {
     protected $siteName = 'LinkUp';
     protected $siteBaseURL = 'http://www.linkup.com';
-    protected $strBaseURLFormat = "http://www.linkup.com/results.php?q=title%3A%28***KEYWORDS***%29&l=***LOCATION***&sort=d&tm==***NUMBER_DAYS***d&page=***PAGE_NUMBER***";
+    protected $strBaseURLFormat = "http://www.linkup.com/results.php?ttl=***KEYWORDS***&l=***LOCATION***&sort=d&tm=***NUMBER_DAYS***&page=***PAGE_NUMBER***&p=50";
+    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS;
+    protected $typeLocationSearchNeeded = 'location-city-comma-state';
+    protected $strKeywordDelimiter = "or";
 
     function getDaysURLValue($days) {
         $ret = "1d";

@@ -25,6 +25,7 @@ class PluginDisney extends ClassJobsSitePlugin
 {
     protected $siteName = 'Disney';
     protected $siteBaseURL = 'http://disneycareers.com/';
+    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_URL_FORMAT_REQUIRED;
 
 
 

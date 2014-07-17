@@ -22,7 +22,6 @@ require_once(__ROOT__.'/include/JobListHelpers.php');
 
 define('JOBS_SCOOPER_MAX_FILE_SIZE', 1024000);
 
-
 class ClassJobsSitePluginCommon
 {
 
@@ -30,7 +29,33 @@ class ClassJobsSitePluginCommon
 
     protected $detailsMyFileOut= "";
 
+    function getEmptySearchDetailsRecord()
+    {
+        return array(
+            'search_key' => null,
+            'site_name' => null,
+            'search_name' => null,
+            'base_url_format' => null,
+            'location_search_override' => null,
+            'keyword_search_override' => null,
+            'keywords_string_for_url' => null,
+            'keyword_set' => null,
+            'user_setting_flags' => C__USER_KEYWORD_MATCH_DEFAULT,
+        );
+    }
 
+    function cloneSearchDetailsRecordExceptFor($srcDetails, $arrDontCopyTheseKeys)
+    {
+        $retDetails = $this->getEmptySearchDetailsRecord();
+        $retDetails = array_merge($retDetails, $srcDetails);
+        foreach($arrDontCopyTheseKeys as $key)
+        {
+            $retDetails[$key] = null;
+        }
+
+        return $retDetails;
+
+    }
 
     function getEmptyJobListingRecord()
     {
@@ -52,6 +77,56 @@ class ClassJobsSitePluginCommon
             'key_company_role' => '',
             'date_last_updated' => '',
          );
+    }
+
+    protected  function _getKeywordMatchFlagFromString_($strMatchType)
+    {
+        $retFlag = null;
+
+        if($strMatchType)
+        {
+            switch($strMatchType)
+            {
+                case C__USER_KEYWORD_MUST_BE_IN_TITLE_AS_STRING:
+                    $retFlag = C__USER_KEYWORD_MUST_BE_IN_TITLE;
+                    break;
+
+                case C__USER_KEYWORD_MUST_EQUAL_TITLE_AS_STRING:
+                    $retFlag = C__USER_KEYWORD_MUST_EQUAL_TITLE;
+                    break;
+
+                case C__USER_KEYWORD_ANYWHERE_AS_STRING:
+                    $retFlag = C__USER_KEYWORD_ANYWHERE;
+                    break;
+            }
+        }
+
+        return $retFlag;
+    }
+
+    protected function _getKeywordMatchStringFromFlag_($flag)
+    {
+        $retString = null;
+
+        if($flag)
+        {
+            switch($strMatchType)
+            {
+                case C__USER_KEYWORD_MUST_BE_IN_TITLE:
+                    $retString = C__USER_KEYWORD_MUST_BE_IN_TITLE_AS_STRING;
+                    break;
+
+                case C__USER_KEYWORD_MUST_EQUAL_TITLE:
+                    $retString = C__USER_KEYWORD_MUST_EQUAL_TITLE_AS_STRING;
+                    break;
+
+                case C__USER_KEYWORD_ANYWHERE:
+                    $retString = C__USER_KEYWORD_ANYWHERE_AS_STRING;
+                    break;
+            }
+        }
+
+        return $retString;
     }
 
     function normalizeJobList($arrJobList)
@@ -107,14 +182,14 @@ class ClassJobsSitePluginCommon
         // Remove common company name extensions like "Corporation" or "Inc." so we have
         // a higher match likelihood
 //        $retArrNormalized ['company'] = str_replace(array(" corporation", " corp", " inc", " llc"), "", $retArrNormalized['company']);
-        $retArrNormalized ['company'] = preg_replace(array("/\s[Cc]orporation/", "/\s[Cc]orp\W{0,1}/", "/.com/", "/\W{0,}\s[iI]nc/", "/\W{0,}\s[lL][lL][cC]/","/\W{0,}\s[lL][tT][dD]/"), "", $retArrNormalized['company']);
+        $retArrNormalized ['company'] = preg_replace(array("/\s[Cc]orporat[e|ion]/", "/\s[Cc]orp\W{0,1}/", "/.com/", "/\W{0,}\s[iI]nc/", "/\W{0,}\s[lL][lL][cC]/","/\W{0,}\s[lL][tT][dD]/"), "", $retArrNormalized['company']);
 
         switch(\Scooper\strScrub($retArrNormalized ['company']))
         {
             case "amazon":
             case "amazon com":
             case "a2z":
-            case "amazon corporate llc":
+            case "lab 126":
             case "amazon Web Services":
             case "amazon fulfillment services":
             case "amazonwebservices":
@@ -356,16 +431,28 @@ class ClassJobsSitePluginCommon
                 // each record to be equal to the job title so we can do a fast lookup later
                 //
                 $GLOBALS['DATA']['titles_regex_to_filter'] = array();
+                $nDebugCounter = 0;
                 foreach($arrTitlesTemp as $titleRecord)
                 {
                     $arrRXInput = explode("|", strtolower($titleRecord['match_regex']));
-
                     foreach($arrRXInput as $rxItem)
                     {
                         $rx = '/'.$rxItem.'/i';
+//                        $GLOBALS['logger']->logLine("Testing regex record " .$nDebugCounter . " with value of " . $rx , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                        try
+                        {
+                            $testMatch = preg_match($rx, "empty");
 
+                        }
+                        catch (Exception $ex)
+                        {
+                            $strError = "Regex test failed on # " . $nDebugCounter . ", value " . $rxItem .".  Skipping.  Error: '".$ex->getMessage();
+                            $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
+                            if($GLOBALS['OPTS']['DEBUG'] == true) { throw new ErrorException( $strError); }
+                        }
                         $GLOBALS['DATA']['titles_regex_to_filter'][] = $rx;
                     }
+                    $nDebugCounter = $nDebugCounter + 1;
                 }
                 $fTitlesLoaded = true;
             }
@@ -437,21 +524,25 @@ class ClassJobsSitePluginCommon
 
         $strDupeMarker_Start = "<dupe>";
         $strDupeMarker_End = "</dupe>";
+        $strUserNotePart = "";
 
         if(substr_count($strNote, $strDupeMarker_Start)>0)
         {
             $arrNote = explode($strDupeMarker_Start, $strNote);
             $strUserNotePart = $arrNote[0];
             $strDupeNotes = $arrNote[1];
+            $arrDupesListed = explode(";", $strDupeNotes);
+            if(count($arrDupesListed) > 3)
+            {
+                $strDupeNotes = $arrDupesListed[0] . "; " . $arrDupesListed[1] . "; " . $arrDupesListed[2] . "; " . $arrDupesListed[3] . "; and more";
+            }
+
             $strDupeNotes = str_replace($strDupeMarker_End, "", $strDupeNotes);
             $strDupeNotes .= $strDupeNotes ."; ";
         }
-        else
+        elseif(strlen($strNote) > 0)
         {
-            if(strlen($strNote) > 0)
-            {
-                $strUserNotePart = $strNote;
-            }
+            $strUserNotePart = $strNote;
         }
 
         return (strlen($strUserNotePart) > 0 ? $strUserNotePart . " " . PHP_EOL : "") . $strDupeMarker_Start . $strDupeNotes . $strNewDupe . $strDupeMarker_End;
@@ -644,10 +735,22 @@ class ClassJobsSitePluginCommon
 
                 if($GLOBALS['DATA']['titles_regex_to_filter'] == null) break;
 
+                $nDebugIndexCounter = 0;
+
                 foreach($GLOBALS['DATA']['titles_regex_to_filter'] as $rxInput )
                 {
+                    $strScrubbedJobTitle = "<not yet set>";
                   try {
-                    if(preg_match($rxInput, \Scooper\strScrub($job['job_title'], DEFAULT_SCRUB)))
+                      $strScrubbedJobTitle = \Scooper\strScrub($job['job_title'], DEFAULT_SCRUB);
+                      $fMatched = preg_match($rxInput, $strScrubbedJobTitle);
+                  }
+                  catch (Exception $classError)
+                  {
+                      $strErr = 'ERROR:  Regex match failed on index ' . $nDebugIndexCounter . ', job title=' . $strScrubbedJobTitle .' with regex = ' .$rxInput . '. Error: ' . $classError->getMessage();
+                      $GLOBALS['logger']->logLine($strErr, \Scooper\C__DISPLAY_ERROR__);
+                      if($GLOBALS['OPTS']['use_debug'] == false) { throw new ErrorException($strErr); }
+                  }
+                    if($fMatched == true)
                     {
                         $strJobIndex = getArrayKeyValueForJob($job);
                         $arrToMark[$strJobIndex]['interested'] = 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__;
@@ -657,11 +760,7 @@ class ClassJobsSitePluginCommon
                         $nJobsMarkedAutoExcluded++;
                         break;
                     }
-                   } catch (ErrorException $classError) {
-                      $GLOBALS['logger']->logLine('ERROR:  Unable to match regex for ' .$rxInput . '. Error: ' . $classError->getMessage(), \Scooper\C__DISPLAY_ERROR__);
-                  }
-
-
+                    $nDebugIndexCounter = $nDebugIndexCounter+1;
                 }
             }
         }
@@ -673,7 +772,7 @@ class ClassJobsSitePluginCommon
 
 
 
-    function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true, $fFirstAutoMarkJobs = false, $strCallerDescriptor = "", $ext = "CSV", $keysToOutput=null)
+    function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true, $fFirstAutoMarkJobs = false, $strCallerDescriptor = "", $ext = "CSV", $keysToOutput=null, $detailsCSSToInclude = null)
     {
 
         if(!$strOutFilePath || strlen($strOutFilePath) <= 0)
@@ -708,7 +807,12 @@ class ClassJobsSitePluginCommon
 
         if($ext == 'HTML')
         {
-            $strCSS = file_get_contents(dirname(__FILE__) . '/../include/CSVTableStyle.css');
+            $strCSS = null;
+            if($detailsCSSToInclude['has_file'])
+            {
+                // $strCSS = file_get_contents(dirname(__FILE__) . '/../include/CSVTableStyle.css');
+                $strCSS = file_get_contents($detailsCSSToInclude['full_file_path']);
+            }
             $classCombined->writeArrayToHTMLFile($arrJobsRecordsToUse, $keysToOutput, $this->arrKeysForDeduping, $strCSS);
 
         }

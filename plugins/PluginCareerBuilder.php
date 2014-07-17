@@ -19,13 +19,22 @@ define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 
-
+// TODO:  Make abstract class to power sites like http://www.careerbuilder.com/jobs/greenbay,wisconsin/category/engineering/?channel=en&siteid=gagbp037&sc_cmp1=JS_Sub_Loc_EN&lr=cbga_gbp
+// just have to add the following terms per site &siteid=gagbp037&lr=cbga_gbp
 
 class PluginCareerBuilder extends ClassJobsSitePlugin
 {
     protected $siteName = 'CareerBuilder';
     protected $siteBaseURL = 'http://www.careerbuilder.com/';
+    protected $flagSettings = null;
+    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
 
+
+    function __construct($strDir = null)
+    {
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_BASE_URL_FORMAT_REQUIRED;
+        parent::__construct($strDir);
+    }
 
     function getDaysURLValue($days) {
         $ret = "yesterday";

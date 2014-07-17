@@ -35,7 +35,6 @@ require_once (__ROOT__.'/plugins/PluginLinkUp.php');
 require_once (__ROOT__.'/plugins/PluginEmploymentGuide.php');
 require_once (__ROOT__.'/plugins/PluginMonster.php');
 require_once (__ROOT__.'/plugins/PluginCareerBuilder.php');
-require_once (__ROOT__.'/plugins/PluginMashable.php');
 require_once (__ROOT__.'/plugins/PluginDisney.php');
 require_once (__ROOT__.'/plugins/PluginOuterwall.php');
 require_once (__ROOT__.'/plugins/PluginTableau.php');
@@ -49,60 +48,78 @@ require_once (__ROOT__.'/plugins/PluginZipRecruiter.php');
 require_once (__ROOT__.'/plugins/PluginStartupHire.php');
 require_once (__ROOT__.'/plugins/PluginAdicioCareerCast.php');
 
-define( "C__SEARCH_RESULTS_TYPE_NONE__", 0x0 );
-define( "C__SEARCH_RESULTS_TYPE_WEBPAGE__", 0x1 );
-define( "C__SEARCH_RESULTS_TYPE_XML__", 0x2 );
-define( "C__SEARCH_RESULTS_TYPE_HTML_FILE__", 0x4 );
 //And so on, 0x8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800 etc..
 
-const C__JOB_NONE = 0x100;
-const C__JOB_PAGECOUNT_NOTAPPLICABLE__= 0x200;
-const C__JOB_DAYS_VALUE_NOTAPPLICABLE__ = 0x400;
-const C__JOB_ITEMCOUNT_NOTAPPLICABLE__ = 0x800;
+const C__JOB_SEARCH_RESULTS_TYPE_NONE__ = 0x1;
+const C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__ = 0x2;
+const C__JOB_SEARCH_RESULTS_TYPE_XML__= 0x4;
+const C__JOB_SEARCH_RESULTS_TYPE_HTML_FILE__ = 0x8;
+const C__JOB_NONE = 0x10;
 
+const C__JOB_PAGECOUNT_NOTAPPLICABLE__= 0x100;
+const C__JOB_DAYS_VALUE_NOTAPPLICABLE__ = 0x200;
+const C__JOB_ITEMCOUNT_NOTAPPLICABLE__ = 0x400;
+
+const C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED = 0x1000;
+const C__JOB_LOCATION_REQUIRES_LOWERCASE = 0x2000;
+
+const C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED = 0x4000;
+const C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES = 0x8000;
+const C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED = 0x10000;
+const C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS = 0x20000;
+const C__JOB_KEYWORD_SUPPORTS_PLUS_PREFIX = 0x40000;
+const C__JOB_BASE_URL_FORMAT_REQUIRED = 0x80000;
+
+const C__USER_KEYWORD_ANYWHERE = 0x1;
+const C__USER_KEYWORD_ANYWHERE_AS_STRING = "any";
+const C__USER_KEYWORD_MUST_EQUAL_TITLE = 0x2;
+const C__USER_KEYWORD_MUST_EQUAL_TITLE_AS_STRING = "exact-title";
+const C__USER_KEYWORD_MUST_BE_IN_TITLE = 0x4;
+const C__USER_KEYWORD_MUST_BE_IN_TITLE_AS_STRING = "in-title";
+const C__USER_KEYWORD_MATCH_DEFAULT = C__USER_KEYWORD_MUST_BE_IN_TITLE;
+
+define('C__JOB_BASETYPE_WEBPAGE_FLAGS', C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__);
+define('C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS', C__JOB_SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__);
+define('C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS_NO_LOCATION_OR_KEYWORDS', C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS  | C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED);
+define('C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS_URL_FORMAT_REQUIRED', C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS | C__JOB_BASE_URL_FORMAT_REQUIRED  | C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED);
+define('C__JOB_BASETYPE_XMLRSS_FLAGS', C__JOB_SEARCH_RESULTS_TYPE_XML__| C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__);
+define('C__JOB_BASETYPE_NONE_NO_LOCATION_OR_KEYWORDS', C__JOB_SEARCH_RESULTS_TYPE_NONE__ | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED | C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED);
+define('C__JOB_BASETYPE_WEBPAGE_FLAGS_NO_LOCATION', C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED);
+define('C__JOB_BASETYPE_WEBPAGE_FLAGS_NO_KEYWORDS', C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED);
+define('C__JOB_BASETYPE_WEBPAGE_FLAGS_NO_LOCATION_OR_KEYWORDS', C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED);
+define('C__JOB_BASETYPE_WEBPAGE_FLAGS_URL_FORMAT_REQUIRED', C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_BASE_URL_FORMAT_REQUIRED | C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED);
+define('C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS', C__JOB_BASETYPE_WEBPAGE_FLAGS_NO_KEYWORDS | C__JOB_DAYS_VALUE_NOTAPPLICABLE__);
+define('C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_NO_LOCATION', C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED);
+define('C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE_NO_LOCATION', C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_NO_LOCATION | C__JOB_PAGECOUNT_NOTAPPLICABLE__);
+define('C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS', C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED);
+
+$GLOBALS['DATA']['location_types'] = array('location-city', 'location-city-comma-statecode', 'location-city-comma-statecode-underscores-and-dashes', 'location-city-comma-state', 'location-city-comma-state-country', 'location-statecode', 'location-state', 'location-city-comma-state-country-no-commas');
 const C__TOTAL_ITEMS_UNKNOWN__ = 11111;
 
-$GLOBALS['DATA']['site_plugins'] = array(
-    'careercast' => array('name' => 'careercast', 'class_name' => 'PluginAdicioCareerCast',  'flags' =>  C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__, 'include_in_run' => false),
-    'seattletimes' => array('name' => 'seattletimes', 'class_name' => 'PluginSeattleTimes',  'flags' =>  C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__, 'include_in_run' => false),
-    'albuquerquejournal' => array('name' => 'albuquerquejournal', 'class_name' => 'PluginAlbuquerqueJournal',  'flags' =>  C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__, 'include_in_run' => false),
-    'startuphire' => array('name' => 'startuphire', 'class_name' => 'PluginStartupHire',  'flags' => C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__  , 'include_in_run' => false),
-    'ziprecruiter' => array('name' => 'ziprecruiter', 'class_name' => 'PluginZipRecruiter',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__  , 'include_in_run' => false),
-    'craigslist' => array('name' => 'craigslist', 'class_name' => 'PluginCraigslist',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'porch' => array('name' => 'porch', 'class_name' => 'PluginPorch',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'expedia' => array('name' => 'expedia', 'class_name' => 'PluginExpedia',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'indeed' => array('name' => 'indeed', 'class_name' => 'PluginIndeed',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'glassdoor' => array('name' => 'glassdoor', 'class_name' => 'PluginGlassdoor',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'simplyhired' => array('name' => 'simplyhired', 'class_name' => 'PluginSimplyHired',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'linkup' => array('name' => 'linkup', 'class_name' => 'PluginLinkUp',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'employmentguide' => array('name' => 'employmentguide', 'class_name' => 'PluginEmploymentGuide',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'monster' => array('name' => 'monster', 'class_name' => 'PluginMonster',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'careerbuilder' => array('name' => 'careerbuilder', 'class_name' => 'PluginCareerBuilder',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'mashable' => array('name' => 'mashable', 'class_name' => 'PluginMashable',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__, 'include_in_run' => false),
-    'disney' => array('name' => 'disney', 'class_name' => 'PluginDisney',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'outerwall' => array('name' => 'outerwall', 'class_name' => 'PluginOuterwall',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__|C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'tableau' => array('name' => 'tableau', 'class_name' => 'PluginTableau',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'facebook' => array('name' => 'facebook', 'class_name' => 'PluginFacebook',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__| C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__|C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'ebay' => array('name' => 'ebay', 'class_name' => 'PluginEbay',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'groupon' => array('name' => 'groupon', 'class_name' => 'PluginGroupon',  'flags' => C__SEARCH_RESULTS_TYPE_WEBPAGE__|C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'geekwire' => array('name' => 'geekwire', 'class_name' => 'PluginGeekwire',  'flags' => C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__ , 'include_in_run' => false),
-    'google' => array('name' => 'google', 'class_name' => 'PluginGoogle',  'flags' => C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_DAYS_VALUE_NOTAPPLICABLE__, 'include_in_run' => false),
-    'amazon' => array('name' => 'amazon', 'class_name' => 'PluginAmazon',  'flags' => C__SEARCH_RESULTS_TYPE_HTML_FILE__ | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ , 'include_in_run' => false),
-    'dotjobs' => array('name' => 'dotjobs', 'class_name' => 'PluginDotJobs',  'flags' => C__SEARCH_RESULTS_TYPE_XML__| C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ , 'include_in_run' => false),
-);
 
-//function setupPlugins()
-//{
-//
-//    $classList = get_declared_classes();
-//    foreach($classList as $class)
-//    {
-//        if(preg_match('/^Plugin', $class) > 0)
-//        {
-//            $classinst = new $class(null, null);
-//            $GLOBALS['DATA']['site_plugins'][$classinst->getName()] = array('name'=>$classinst->getName(), 'class_name' => $class, 'flags' => $classinst->getFlags(), 'include_in_run' => false );
-//        }
-//    }
-//}
+function setupPlugins()
+{
+    $arrAddedPlugins = null;
+    $classList = get_declared_classes();
+    print('Getting job site plugin list...'. PHP_EOL);
+    foreach($classList as $class)
+    {
+        if(preg_match('/^Plugin/', $class) > 0)
+        {
+
+            $classinst = new $class(null, null);
+            $GLOBALS['DATA']['site_plugins'][strtolower($classinst->getName())] = array('name'=>strtolower($classinst->getName()), 'class_name' => $class, 'include_in_run' => false );
+            $arrAddedPlugins[] = $classinst->getName();
+            // print('      Added job site plugin for '. $classinst->getName() . '.' . PHP_EOL);
+            $classinst=null;
+        }
+    }
+    $strLog = "Added " . count($arrAddedPlugins) ." plugins: " . getArrayValuesAsString($arrAddedPlugins, ", ", null, false). ".";
+    if(isset($GLOBALS['logger']))
+        $GLOBALS['logger']->logLine($strLog , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+    else
+         print($strLog . PHP_EOL);
+
+}
 
 ?>

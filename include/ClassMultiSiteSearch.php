@@ -24,6 +24,8 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 class ClassMultiSiteSearch extends ClassJobsSitePlugin
 {
     protected $siteName = 'Multisite';
+    protected $flagSettings = C__JOB_BASETYPE_NONE_NO_LOCATION_OR_KEYWORDS;
+
 
     function parseJobsListForPage($objSimpHTML)
     {
@@ -31,40 +33,58 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
     }
     function parseTotalResultsCount($objSimpHTML) { throw new ErrorException("parseJobsListForPage not supported for class ClassMultiSiteSearch"); }
 
-
-
-    function getJobsForAllSearches($nDays = -1)
+    function addMultipleSearches($arrSearches, $locSettingSets = null)
     {
-        foreach($this->arrSearchesToReturn as $search)
+        $this->arrSearchLocationSetsToRun = $locSettingSets;
+        $this->arrSearchesToReturn = $arrSearches;
+    }
+
+
+    function getJobsForMyMultipleSearches($nDays = -1, $keywordSet = null)
+    {
+        $arrPluginClassesToRun = null;
+
+        if(count($this->arrSearchesToReturn) >= 0)
         {
-            $strIncludeKey = 'include_'.strtolower($search['site_name']);
-
-            if($GLOBALS['OPTS'][$strIncludeKey] == null || $GLOBALS['OPTS'][$strIncludeKey] == 0)
+            foreach($this->arrSearchesToReturn as $search)
             {
-                $GLOBALS['logger']->logLine($search['site_name'] . " excluded, so skipping its '" . $search['search_name'] . "' search.", \Scooper\C__DISPLAY_ITEM_START__);
+                $strIncludeKey = 'include_'.strtolower($search['site_name']);
 
-                continue;
+                if($GLOBALS['OPTS'][$strIncludeKey] == null || $GLOBALS['OPTS'][$strIncludeKey] == false)
+                {
+                    $GLOBALS['logger']->logLine($search['site_name'] . " excluded, so skipping its '" . $search['search_name'] . "' search.", \Scooper\C__DISPLAY_ITEM_START__);
+
+                    continue;
+                }
+
+                $strSiteClass = $GLOBALS['DATA']['site_plugins'][strtolower($search['site_name'])]['class_name'];
+                if($arrPluginClassesToRun[$strSiteClass] == null)
+                {
+                    $arrPluginClassesToRun[$strSiteClass] = array('class_name'=>$strSiteClass, 'site_name'=>$search['site_name'], 'searches' =>null);
+                }
+                $arrPluginClassesToRun[$strSiteClass]['searches'][] = $search;
             }
 
             $class = null;
-            $GLOBALS['logger']->logLine("Running ". $search['site_name'] . " search: '" . $search['search_name']."'", \Scooper\C__DISPLAY_SECTION_START__);
 
-            $strSiteClass = $GLOBALS['DATA']['site_plugins'][strtolower($search['site_name'])]['class_name'];
-            $class = new $strSiteClass($this->detailsMyFileOut['full_file_path']);
-            try
+            foreach($arrPluginClassesToRun as $classSearches)
             {
-                $class->addSearch($search);
-                $class->getMyJobsForSearch($search, $nDays);
-                $this->_addJobsToMyJobsList_($class->getMyJobsList());
-                $class = null;
+                $class = new $classSearches['class_name']($this->detailsMyFileOut['directory']);
+                try
+                {
+                    $GLOBALS['logger']->logLine("Setting up " . count($classSearches['searches']) . " search(es) for ". $classSearches['site_name'] . "...", \Scooper\C__DISPLAY_SECTION_START__);
+                    $class->addSearches($classSearches['searches'], $this->arrSearchLocationSetsToRun, $keywordSet);
+                    $class->getJobsForAllSearches($nDays);
+                    addJobsToJobsList($this->arrLatestJobs, $class->getMyJobsList());
+                    $class = null;
+                }
+                catch (Exception $classError)
+                {
+                    $GLOBALS['logger']->logLine('ERROR:  Unable to load the class for ' .$classSearches['site_name'] . '. Skipping it\'s searches and continuing with any others.', \Scooper\C__DISPLAY_ERROR__);
+                    $GLOBALS['logger']->logLine('ERROR:  Search failure reason:  '.$classError->getMessage(), \Scooper\C__DISPLAY_ERROR__);
+                    if($GLOBALS['OPTS']['DEBUG']) { throw $classError; }
+                }
             }
-            catch (ErrorException $classError)
-            {
-                $GLOBALS['logger']->logLine('ERROR:  Unable to load the search for ' .$search['site_name'] . '. Skipping '. $search['search_name'] .' search and continuing with any others.', \Scooper\C__DISPLAY_ERROR__);
-                $GLOBALS['logger']->logLine('ERROR:  Search failure reason:  '.$classError->getMessage(), \Scooper\C__DISPLAY_ERROR__);
-                if($GLOBALS['OPTS']['DEBUG']) { throw $classError; }
-            }
-
         }
     }
 

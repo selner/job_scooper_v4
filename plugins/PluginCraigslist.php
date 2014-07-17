@@ -20,15 +20,21 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 
 
-
 class PluginCraigslist  extends ClassJobsSitePlugin
 {
     protected $siteName = 'Craigslist';
     protected $nJobListingsPerPage = 100;
     protected $siteBaseURL = 'http://seattle.craigslist.org/';
     protected $strBaseURLFormat = "http://***LOCATION***.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=***KEYWORDS***&srchType=T";
+    protected $flagSettings = null;
+    protected $typeLocationSearchNeeded = 'location-city';
+    protected $strKeywordDelimiter = "|";
 
-
+    function __construct($strBaseDir = null)
+    {
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS | C__JOB_LOCATION_REQUIRES_LOWERCASE | C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS;
+        parent::__construct($strBaseDir);
+    }
 
     function getItemURLValue($nItem)
     {
@@ -41,10 +47,9 @@ class PluginCraigslist  extends ClassJobsSitePlugin
     {
         if($nDays > 1)
         {
-            $GLOBALS['logger']->logLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Ignoring number of days value and just pulling current listings.", \Scooper\C__DISPLAY_WARNING__);
-
+            $GLOBALS['logger']->logLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Ignoring number of days value and just pulling current listings.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
         }
-        return 1;
+        return VALUE_NOT_SUPPORTED;
 
     }
 

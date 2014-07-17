@@ -21,6 +21,8 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 const C__STR_TAG_AUTOMARKEDJOB__ = "[auto-marked]";
 const C__STR_TAG_DUPLICATE_POST__ = "No (Duplicate Job Post?)";
 const C__STR_TAG_BAD_TITLE_POST__ = "No (Bad Title & Role)";
+const C__STR_TAG_NOT_STRICT_TITLE_MATCH__ = "No (Not a Strict Title Match)";
+const C__STR_TAG_NOT_EXACT_TITLE_MATCH__ = "No (Not an Exact Title Match)";
 
 const C__STR_TAG_EXCLUDED_TITLE_REGEX = 'No (Title Excluded Via RegEx)';
 
@@ -179,7 +181,6 @@ function sortByCountDesc($a, $b)
     return ($al < $bl) ? +1 : -1;
 }
 
-
 /**
  * TODO:  DOC
  *
@@ -218,6 +219,34 @@ function getArrayKeyValueForJob($job)
 
 
 }
+
+function countAssociativeArrayValues($arrToCount)
+{
+    if($arrToCount == null || !is_array($arrToCount))
+    {
+        return 0;
+    }
+
+    $count = 0;
+    foreach($arrToCount as $item)
+    {
+        $count = $count + 1;
+    }
+
+    $arrValues = array_values($arrToCount);
+    $nValues = count($arrValues);
+    return max($nValues, $count);
+//    $arrKeys = array_keys($arrToCount);
+//    $nKeys = count($arrKeys);
+
+//    return max($nKeys, $nValues);
+}
+
+function countJobRecords($arrJobs)
+{
+    return countAssociativeArrayValues($arrJobs);
+}
+
 
 function addJobsToJobsList(&$arrJobsListToUpdate, $arrAddJobs)
 {
@@ -288,6 +317,61 @@ function updateJobColumn(&$job, $newJob, $strColumn, $fAllowEmptyValueOverwrite 
         }
     }
 
+}
+
+function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strDelimiter = "", $strIntro = "", $fIncludeKey = true)
+{
+    $strReturn = "";
+
+    if($arrItem[$key] != null)
+    {
+        $val = $arrItem[$key];
+        if(is_string($val) && strlen($val) > 0)
+        {
+            $strVal = $val;
+        }
+        elseif(is_array($val))
+        {
+            $strVal = join(" | ", $val);
+        }
+        else
+        {
+            $strVal = var_export($val, true);
+        }
+
+        if($fIsFirstItem == true)
+        {
+            $strReturn = $strIntro;
+        }
+        else
+        {
+            $strReturn .= $strDelimiter;
+        }
+        if($fIncludeKey == true) {
+            $strReturn .= $key . '=['.$strVal.']';
+        } else {
+            $strReturn .= $strVal;
+        }
+
+    }
+
+
+    return $strReturn;
+}
+
+function getArrayValuesAsString($arrDetails, $strDelimiter = ", ", $strIntro = "", $fIncludeKey = true)
+{
+    $strReturn = "";
+
+    if($arrDetails != null)
+    {
+        foreach(array_keys($arrDetails) as $key)
+        {
+            $strReturn .= getArrayItemDetailsAsString($arrDetails, $key, (strlen($strReturn) <= 0), $strDelimiter, $strIntro, $fIncludeKey);
+        }
+    }
+
+    return $strReturn;
 }
 
 function updateJobRecord($prevJobRecord, $jobRecordChanges)

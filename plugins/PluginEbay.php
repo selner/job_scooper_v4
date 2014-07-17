@@ -25,6 +25,7 @@ class PluginEbay extends ClassJobsSitePlugin
 {
     protected $siteName = 'eBay';
     protected $siteBaseURL = 'http://jobs.ebaycareers.com/';
+    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_URL_FORMAT_REQUIRED;
 
 
 

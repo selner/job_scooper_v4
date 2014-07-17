@@ -19,13 +19,20 @@ define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 
-
-
 class PluginMonster extends ClassJobsSitePlugin
 {
     protected $siteName = 'Monster';
     protected $siteBaseURL = 'http://jobsearch.monster.com';
-    protected $strBaseURLFormat = "http://jobsearch.monster.com/search/***KEYWORDS***+Full-Time_588?tm=Today&where=***LOCATION***&tm=***NUMBER_DAYS***&pg=***PAGE_NUMBER***";
+    protected $strBaseURLFormat = "http://jobsearch.monster.com/search/***KEYWORDS***_5?where=***LOCATION***&tm=***NUMBER_DAYS***&pg=***PAGE_NUMBER***";
+    protected $nJobListingsPerPage = 25;
+    protected $flagSettings = null;
+    protected $typeLocationSearchNeeded = 'location-city-comma-statecode-underscores-and-dashes';
+
+    function __construct($strBaseDir = null)
+    {
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES;
+        parent::__construct($strBaseDir);
+    }
 
     function getDaysURLValue($days) {
         $ret = "yesterday";

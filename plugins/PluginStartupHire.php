@@ -34,6 +34,13 @@ class PluginStartupHire extends ClassJobsSitePlugin
     protected $siteName = 'StartupHire';
     protected $siteBaseURL = 'http://www.startuphire.com';
     protected $strFilePath_HTMLFileDownloadScript = "PluginStartupHire_downloadjobs.applescript";
+    protected $flagSettings = null;
+
+    function __construct($strBaseDir = null)
+    {
+        $this->flagSettings = C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS | C__JOB_BASE_URL_FORMAT_REQUIRED;
+        parent::__construct($strBaseDir);
+    }
 
     /**
     /**
@@ -68,10 +75,10 @@ class PluginStartupHire extends ClassJobsSitePlugin
             $item['job_title'] = $titleLink->plaintext;
             if($item['job_title'] == '') continue;
 
-            $item['job_post_url'] = $titleLink->href;
+            $item['job_post_url'] = $this->siteBaseURL . $titleLink->href;
             $arrURLParts = explode("-", $item['job_post_url']);
 
-            $item['job_id'] = $this->siteBaseURL . $arrURLParts[count($arrURLParts)-1];
+            $item['job_id'] = $arrURLParts[count($arrURLParts)-1];
 
             // If we couldn't parse the job title, it's not really a job
             // listing so just continue to the next one

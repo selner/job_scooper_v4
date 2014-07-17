@@ -19,33 +19,41 @@ define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__.'/include/SitePlugins.php');
 require_once(__ROOT__.'/include/ClassMultiSiteSearch.php');
 
+const C__RESULTS_INDEX_ALL = '***TOTAL_ALL***';
+const C__RESULTS_INDEX_USER = '***TOTAL_USER***';
+
 class ClassJobsRunWrapper extends ClassJobsSitePlugin
 {
     protected $configSettings = null;
+    protected $arrUserInputJobs = null;
     protected $arrUserInputJobs_Active = null;
     protected $arrUserInputJobs_Inactive = null;
+    protected $arrLatestJobs_UnfilteredByUserInput = null;
     protected $arrJobCSVUserInputFiles = null;
+    protected $arrSearchKeywordSet = null;
+    protected $arrSearchKeywordSetsToRun = null;
     protected $nNumDaysToSearch = -1;
     protected $detailsOutputSubfolder = null;
     protected $detailsIniFile = null;
     protected $detailsOutputFile = null;
     protected $arrEmailAddresses = null;
     protected $arrUserInputFiles = null;
-
+    protected $arrAllSearchesFromConfig = null;
+    protected $arrEmail_PHPMailer_SMTPSetup = null;
 
     function ClassJobsRunWrapper()
     {
 
         $this->siteName = "JobsRunner";
-        $this->arrLatestJobs_FilteredByUserInput = null;
-        $this->arrLatestJobs_UnfilteredByUserInput = null;
         __initializeArgs__();
 
         $this->__setupRunFromArgs__();
+
     }
 
     private function __setupRunFromArgs__()
     {
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting up application... ", \Scooper\C__DISPLAY_SECTION_START__);
         # After you've configured Pharse, run it like so:
         $GLOBALS['OPTS'] = Pharse::options($GLOBALS['OPTS_SETTINGS']);
 
@@ -77,34 +85,59 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 //            throw new ErrorException("Config ini files not yet supported!");
             $this->detailsIniFile = \Scooper\set_FileDetails_fromPharseSetting("use_config_ini", 'config_file_details', true);
             if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($this->detailsIniFile['directory'] );
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Log file for run being written to: " . $this->detailsIniFile['directory'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Parsing ini file ".$this->detailsIniFile['full_file_path']."...", \Scooper\C__DISPLAY_ITEM_START__);
-
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration file details from " . $this->detailsIniFile['full_file_path'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
             $iniParser = new IniParser($this->detailsIniFile['full_file_path']);
             $confTemp = $iniParser->parse();
             $this->_setupRunFromConfig_($confTemp);
         }
 
+
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Configuring specific settings for this run... ", \Scooper\C__DISPLAY_SECTION_START__);
+
         $this->nNumDaysToSearch = \Scooper\get_PharseOptionValue('number_days');
         if($this->nNumDaysToSearch == false) { $GLOBALS['OPTS']['number_days'] = 1; $this->nNumDaysToSearch = 1; }
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($GLOBALS['OPTS']['number_days'] . " days configured for run. ", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
 
         // Override any INI file setting with the command line output file path & name
         // the user specificed (if they did)
-        $userOutfileDetails = \Scooper\get_FileDetails_fromPharseOption("output_file", true);
+        $userOutfileDetails = \Scooper\get_FileDetails_fromPharseOption("output_file", false);
         if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($userOutfileDetails['directory'] );
-        if($userOutfileDetails['full_file_path'] != '')
+        if($userOutfileDetails['has_directory'])
         {
             $this->detailsOutputFile = $userOutfileDetails;
         }
 
+        // Now setup all the output folders
+        $this->__setupOutputFolders__();
+
+        $strOutfileArrString = getArrayValuesAsString($this->detailsOutputFile);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output file configured: " . $strOutfileArrString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting searches for this run...", \Scooper\C__DISPLAY_ITEM_START__);
+        foreach($this->arrAllSearchesFromConfig as $search)
+        {
+            $plugin = $GLOBALS['DATA']['site_plugins'][strtolower($search['site_name'])];
+            if($plugin['include_in_run'] == true)
+            {
+                $this->arrSearchesToReturn[] = $search;
+                $strSearchAsString = getArrayValuesAsString($search);
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added search to this run:  " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            }
+        }
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added " . count($this->arrSearchesToReturn) . " total searches to this run.", \Scooper\C__DISPLAY_ITEM_RESULT__);
+
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Run configuration completed.", \Scooper\C__DISPLAY_RESULT__);
 
     }
 
 
     function __destruct()
     {
-        if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
+//        if($GLOBALS['OPTS']['DEBUG'] == true)
+//             if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
     }
 
     function getMyOutputFileFullPath($strFilePrefix = "")
@@ -114,43 +147,36 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     private function __setupOutputFolders__()
     {
-        if($this->detailsOutputFile['directory'] == null || $this->detailsOutputFile['directory']== "")
+        if(!$this->detailsOutputFile['has_directory'])
         {
             throw new ErrorException("Required value for the output folder was not specified. Exiting.");
         }
 
-        if($this->detailsOutputFile['file_name'] == null || $this->detailsOutputFile['full_file_path'] == "")
+        if(!$this->detailsOutputFile['has_file'])
         {
-            $fileName = getDefaultJobsOutputFileName("", "jobs", "csv");
-            $this->detailsOutputFile = \Scooper\parseFilePath($this->detailsOutputFile['directory'] . $fileName);
+           $strDefaultFileName = getDefaultJobsOutputFileName("", "jobs", "csv");
+
+           $this->detailsOutputFile = \Scooper\parseFilePath($this->detailsOutputFile['directory'] .  $strDefaultFileName);
         }
         $this->detailsOutputSubfolder = $this->createOutputSubFolder($this->detailsOutputFile);
     }
 
     private function _setupRunFromConfig_($config)
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Reading configuration options from ".$GLOBALS['OPTS']['config_file_details']['file_full_path']."...", \Scooper\C__DISPLAY_ITEM_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Reading configuration options from ".$this->detailsIniFile['full_file_path']."...", \Scooper\C__DISPLAY_ITEM_START__);
         if($config->output)
         {
-             if($config->output->folder)
+            if($config->output->folder)
             {
                 $this->detailsOutputFile = \Scooper\parseFilePath($config->output->folder);
-                $this->__setupOutputFolders__();
             }
 
-        }
-
-        if($config->emails )
-        {
-            foreach($config->emails as $emailItem)
+            if($config->output->file)
             {
-                $tempEmail = $this->__getEmptyEmailRecord__();
-                $tempEmail['name'] = $emailItem['name'];
-                $tempEmail['address'] = $emailItem['address'];
-                $tempEmail['type'] = $emailItem['type'];
-                $this->arrEmailAddresses[] = $tempEmail;
+                $this->detailsOutputFile = \Scooper\parseFilePath($this->detailsOutputFile . $config->output->file);
             }
         }
+
 
         $pathInput = "";
         if($config->input && $config->input->folder)
@@ -162,109 +188,334 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         {
             foreach($config->inputfiles as $iniInputFile)
             {
-                $tempFileDetails = \Scooper\parseFilePath($pathInput['directory'].$iniInputFile['name'], true);
+                if (isset($iniInputFile['name'])) {
 
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Processing input file '" . $pathInput['directory'].$iniInputFile['name'] . "' with type of '". $iniInputFile['type'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
-                $this->__addInputFile__($tempFileDetails, $iniInputFile['type'], $iniInputFile['sheet']);
+                    $tempFileDetails = \Scooper\parseFilePath($pathInput['directory'].$iniInputFile['name'], true);
 
-                switch($iniInputFile['type'])
-                {
-                    case "jobs":
-                        $this->arrJobCSVUserInputFiles[] = $pathInput['directory'] . $iniInputFile['name'];
-                        break;
+                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Processing input file '" . $pathInput['directory'].$iniInputFile['name'] . "' with type of '". $iniInputFile['type'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
+                    $this->__addInputFile__($tempFileDetails, $iniInputFile['type'], $iniInputFile['sheet']);
 
-                    case "titles_filter":
-                        \Scooper\setGlobalFileDetails('titles_file_details', true, $pathInput['directory']. $iniInputFile['name']);
-                        break;
+                    switch($iniInputFile['type'])
+                    {
+                        case "jobs":
+                            $this->arrJobCSVUserInputFiles[] = $pathInput['directory'] . $iniInputFile['name'];
+                            break;
 
-                    case "regex_filter_titles":
-                        \Scooper\setGlobalFileDetails('titles_regex_file_details', true, $pathInput['directory']. $iniInputFile['name']);
-                        break;
+                        case "titles_filter":
+                            \Scooper\setGlobalFileDetails('titles_file_details', true, $pathInput['directory']. $iniInputFile['name']);
+                            break;
 
-                    case "regex_filter_companies":
-                        \Scooper\setGlobalFileDetails('companies_regex_file_details', true, $pathInput['directory']. $iniInputFile['name']);
-                        break;
+                        case "regex_filter_titles":
+                            \Scooper\setGlobalFileDetails('titles_regex_file_details', true, $pathInput['directory']. $iniInputFile['name']);
+                            break;
+
+                        case "regex_filter_companies":
+                            \Scooper\setGlobalFileDetails('companies_regex_file_details', true, $pathInput['directory']. $iniInputFile['name']);
+                            break;
 
 
+                    }
                 }
-
             }
         }
 
+        $this->_parseEmailSetupFromINI_($config);
 
         $this->__getSearchesFromConfig__($config);
-
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Completed loading configuration from INI file:  ".var_export($GLOBALS['OPTS'], true), \Scooper\C__DISPLAY_SUMMARY__);
 
     }
 
     private function __getSearchesFromConfig__($config)
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading searches from config file.", \Scooper\C__DISPLAY_ITEM_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading searches from config file...", \Scooper\C__DISPLAY_ITEM_START__);
         if(!$config) throw new ErrorException("Invalid configuration.  Cannot load user's searches.");
 
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading keyword set from config file...", \Scooper\C__DISPLAY_ITEM_START__);
+        $this->_parseKeywordSettingsFromINI_($config);
+
+        //
+        // TODO:  Add true support for multiple keyword sets someday
+        //
+        // For now, we only support one keyword set, so if we have any at
+        // all, pick the first one and use that.
+        //
+        if(count($this->arrSearchKeywordSetsToRun) > 0)
+        {
+            foreach($this->arrSearchKeywordSetsToRun as $keywordSet)
+            {
+                $this->arrSearchKeywordSet = $keywordSet;
+                break;
+            }
+        }
+
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->arrSearchKeywordSetsToRun) . " keyword sets to use for searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
         if($config->search)
         {
             if(is_object($config->search))
             {
-
                 foreach($config->search as $iniSearch)
                 {
-                    $this->arrSearchesToReturn[] = $this->_parseSearchFromINI_($iniSearch);
+                    $this->arrAllSearchesFromConfig[] = $this->_parseSearchFromINI_($iniSearch);
                 }
             }
             else
             {
-                $this->arrSearchesToReturn[] = $this->_parseSearchFromINI_($config->search);
+                $this->arrAllSearchesFromConfig[] = $this->_parseSearchFromINI_($config->search);
             }
         }
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->arrAllSearchesFromConfig) . " searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
 
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->arrSearchesToReturn) . " searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
+
+        if($config->search_location_setting_set)
+        {
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading search locations from config file...", \Scooper\C__DISPLAY_ITEM_START__);
+            //
+            // Check if this is a single search setting or if it's a set of search settings
+            //
+            if (is_object($config->search_location_setting_set))
+            {
+                foreach($config->search_location_setting_set as $iniSettings)
+                {
+                    if(count($iniSettings) > 1)
+                    {
+                        $strSettingsName = $iniSettings['name'];
+                        $this->arrSearchLocationSetsToRun[$strSettingsName] = $this->_parseLocationSettingsFromINI_($iniSettings);
+                        $this->arrSearchLocationSetsToRun[$strSettingsName]['name'] = $strSettingsName;
+                    }
+                }
+            }
+            else
+            {
+                $strSettingsName = $config->search_location_setting_set['name'];
+                $this->arrSearchLocationSetsToRun[$strSettingsName] = $this->_parseLocationSettingsFromINI_($config->search_location_setting_set);
+                $this->arrSearchLocationSetsToRun[$strSettingsName]['name'] = $strSettingsName;
+            }
+            $strSettingStrings = getArrayValuesAsString($this->arrSearchLocationSetsToRun[$strSettingsName]);
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added location search settings: " . $strSettingStrings, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        }
+
+
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->arrSearchLocationSetsToRun) . " search setting groups. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
 
     }
 
     private function _parseSearchFromINI_($iniSearch)
     {
-        $tempSearch =  array(
-            'search_key' => $iniSearch['key'],
-            'site_name' => $iniSearch['jobsite'],
-            'search_name' => $iniSearch['name'],
-            'base_url_format' => $iniSearch['url_format'],
-            'keywords' => $iniSearch['keywords'],
-            'location_keyword' => $iniSearch['location'],
-        );
+        $tempSearch = $this->getEmptySearchDetailsRecord();
+
+        $tempSearch['search_key']  = $iniSearch['key'];
+        $tempSearch['site_name']  = $iniSearch['jobsite'];
+        $tempSearch['search_name']  = ($iniSearch['jobsite'] != null ? $iniSearch['jobsite'] . ': ' : "") . $iniSearch['name'];
+        $tempSearch['base_url_format']  = $iniSearch['url_format'];
+        $tempSearch['keyword_search_override']  = $iniSearch['keywords'];
+        $tempSearch['location_search_override']  = $iniSearch['location'];
+
 
         if($tempSearch['search_key'] == "")
         {
             $tempSearch['search_key'] = \Scooper\strScrub($tempSearch['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($tempSearch['search_name'], FOR_LOOKUP_VALUE_MATCHING);
         }
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added Search_Name=" . $tempSearch['search_name'] . "; site_name=" . $tempSearch['site_name'] . "; search_key=" . $tempSearch['search_key'] . "]; base_url_format='" . $tempSearch['base_url_format'] . "; keywords=" . $tempSearch['keywords'] . "; location_keyword=" . $tempSearch['location_keyword'] ."']", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+        $strSearchAsString = getArrayValuesAsString($tempSearch);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search loaded from config INI: " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         return $tempSearch;
+    }
+
+
+    private function _parseLocationSettingsFromINI_($iniSearchSetting)
+    {
+        $tempSettings = null;
+
+        foreach($GLOBALS['DATA']['location_types'] as $loctype)
+        {
+            if($iniSearchSetting[$loctype] != null && $iniSearchSetting[$loctype] != "")
+            {
+                $tempSettings[$loctype] = \Scooper\strScrub($iniSearchSetting[$loctype], REMOVE_EXTRA_WHITESPACE);
+                $tempSettings[$loctype] = $iniSearchSetting[$loctype];
+            }
+        }
+
+
+        return $tempSettings;
+    }
+
+    private function _parseKeywordSettingsFromINI_($config)
+    {
+        if($config->search_keyword_set && is_object($config->search_keyword_set))
+        {
+            foreach($config->search_keyword_set as $ini_keyword_set)
+            {
+
+                $strSetName = 'KeywordSet' . (count($this->arrSearchKeywordSetsToRun) + 1);
+                if($ini_keyword_set['name'] != null && strlen($ini_keyword_set['name']) > 0)
+                {
+                    $strSetName = $ini_keyword_set['name'];
+                }
+                elseif($ini_keyword_set['set_key'] != null && strlen($ini_keyword_set['set_key']) > 0)
+                {
+                    $strSetName = $ini_keyword_set['set_key'];
+
+                }
+
+
+                $this->arrSearchKeywordSetsToRun[$strSetName] = $this->_getEmptyKeywordSettingsSet_();
+                $this->arrSearchKeywordSetsToRun[$strSetName]['set_name'] = $strSetName;
+
+                if($ini_keyword_set['settings_scope'] != null && strlen($ini_keyword_set['settings_scope'] ) > 0)
+                {
+                    $this->arrSearchKeywordSetsToRun[$strSetName]['settings_scope'] = $ini_keyword_set['settings_scope'];
+
+                    if(strcasecmp($this->arrSearchKeywordSetsToRun[$strSetName]['settings_scope'], "all-sites") == 0)
+                    {
+                        // Copy all the job sites into the list of sites included to be run
+                        $this->arrSearchKeywordSetsToRun[$strSetName]['included_jobsites_array'] = array_column($GLOBALS['DATA']['site_plugins'], 'name', 'name');
+                    }
+                }
+
+                if($ini_keyword_set['excluded_jobsites'] != null && count($ini_keyword_set['excluded_jobsites']) > 0)
+                {
+                    foreach($ini_keyword_set['excluded_jobsites'] as $excludedSite)
+                    {
+                        $excludedSite = strtolower($excludedSite);
+                        $this->arrSearchKeywordSetsToRun[$strSetName]['excluded_jobsites_array'][] = $excludedSite;
+                        unset($this->arrSearchKeywordSetsToRun[$strSetName]['included_jobsites_array'][$excludedSite]);
+                    }
+                }
+
+
+                if($ini_keyword_set['keywords'] != null && count($ini_keyword_set['keywords']) > 0)
+                {
+                    foreach($ini_keyword_set['keywords'] as $keywordItem)
+                    {
+                        $this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array'][] = $keywordItem;
+                    }
+                }
+
+                if($ini_keyword_set['keyword_match_type'] != null && strlen($ini_keyword_set['keyword_match_type'] ) > 0)
+                {
+                    $strMatchType = $ini_keyword_set['keyword_match_type'];
+                    $flagType = $this->_getKeywordMatchFlagFromString_($ini_keyword_set['keyword_match_type'] );
+                    if($flagType != null)
+                    {
+                        $this->arrSearchKeywordSetsToRun[$strSetName]['match-type'] = $flagType;
+                    }
+                }
+
+
+                if($this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array'] != null && count($this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array']) > 0)
+                {
+                    $strKeywords= getArrayValuesAsString($this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array'], null, "", false);
+                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added keyword set '" . $strSetName . "' with keywords = " . $strKeywords . (($strMatchType != null && strlen($strMatchType ) > 0) ? " matching " . $strMatchType : ""), \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                }
+
+
+
+                // If the keyword settings scope is all sites, then create a search for every possible site
+                // so that it runs with the keywords settings if it was included_<site> = true
+                //
+                if($this->arrSearchKeywordSetsToRun[$strSetName]['included_jobsites_array'] != null && count($this->arrSearchKeywordSetsToRun[$strSetName]['included_jobsites_array']) > 0)
+                {
+                    $arrSkippedPlugins = "";
+
+                    foreach($this->arrSearchKeywordSetsToRun[$strSetName]['included_jobsites_array'] as $siteToSearch)
+                    {
+                        $classPlug = new $GLOBALS['DATA']['site_plugins'][$siteToSearch]['class_name'](null, null);
+
+                        if(!$classPlug->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
+                        {
+                            $tempSearch = $this->getEmptySearchDetailsRecord();
+                            $tempSearch['search_key'] = \Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . '-for-keyword-set-' . \Scooper\strScrub($strSetName, FOR_LOOKUP_VALUE_MATCHING);
+                            $tempSearch['search_name']  = $tempSearch['search_key'];
+                            $tempSearch['site_name']  = $siteToSearch;
+                            $tempSearch['keyword_set']  = $this->arrSearchKeywordSetsToRun[$strSetName]['keywords_array'];
+                            $tempSearch['user_setting_flags'] = $this->arrSearchKeywordSetsToRun[$strSetName]['match-type'];
+                            $tempSearch['keywords_string_for_url'] = VALUE_NOT_SUPPORTED;
+                            // if this plugin supports keyword parameters, then add a search for it.
+                            if(!$classPlug->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
+                            {
+
+                                $tempSearch['keywords_string_for_url'] = $classPlug->getCombinedKeywordStringForURL($tempSearch['keyword_set']);
+                            }
+
+                            $this->arrAllSearchesFromConfig[] = $tempSearch;
+                            $strSearchAsString = getArrayValuesAsString($tempSearch);
+                            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search loaded for keyword settings: " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                        }
+                        else
+                        {
+                            $arrSkippedPlugins[] = $siteToSearch;
+                        }
+                    }
+                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Skipped " . count($arrSkippedPlugins) ." plugins because they do not support keyword search: " . getArrayValuesAsString($arrSkippedPlugins, ", ", null, false). "." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                }
+            }
+
+
+        }
 
     }
+
+    private function _parseEmailSetupFromINI_($config)
+    {
+        if($config->email )
+        {
+            if($config->email->smtp)
+            {
+                $this->arrEmail_PHPMailer_SMTPSetup = $config->email->smtp;
+            }
+        }
+
+        if($config->emails )
+        {
+            var_dump($config->emails);
+            foreach($config->emails as $emailItem)
+            {
+                $tempEmail = $this->__getEmptyEmailRecord__();
+                if (isset($emailItem['name'])) {
+
+                    $tempEmail['name'] = $emailItem['name'];
+                }
+                if (isset($emailItem['address'])) {
+                    $tempEmail['address'] = $emailItem['address'];
+                }
+                if (isset($emailItem['type'])) {
+                    $tempEmail['type'] = $emailItem['type'];
+                }
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added email from config.ini: '" . getArrayValuesAsString($tempEmail), \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                $this->arrEmailAddresses[] = $tempEmail;
+            }
+        }
+
+
+    }
+
+    private function _getEmptyKeywordSettingsSet_()
+    {
+        return array(
+            'set_key' => null,
+            'set_name' => null,
+            'keywords_array' => null,
+            'keyword_match_type' => null,
+            'excluded_sites_array' => null,
+            'settings_scope' => "all-searches",
+        );
+    }
+
 
     private function createOutputSubFolder($fileDetails)
     {
         // Append the file name base to the directory as a new subdirectory for output
         $fullNewDirectory = $fileDetails['directory'] . $fileDetails['file_name_base'];
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Attempting to create output directory: " . $fullNewDirectory , \Scooper\C__DISPLAY_ITEM_START__);
-        if(is_dir($fullNewDirectory))
-        {
+        $detailsSubdir = \Scooper\getFilePathDetailsFromString($fullNewDirectory, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
 
-        }
-        else
-        {
-            if (!mkdir($fullNewDirectory, 0777, true))
-            {
-                throw new ErrorException('Failed to create the output folder: '.$fullNewDirectory);
-            }
-         }
-        $fullNewFilePath = $fullNewDirectory . '/' . \Scooper\getFileNameFromFileDetails($fileDetails);
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Create folder for results output: " . $fullNewFilePath , \Scooper\C__DISPLAY_SUMMARY__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Created folder for results output: " . $detailsSubdir['directory'], \Scooper\C__DISPLAY_SUMMARY__);
+        $detailsSubdir['file_name_base'] =  $fileDetails['file_name_base'];
+        $detailsSubdir['file_extension'] =  $fileDetails['file_extension'];
 
         // return the new file & path details
-        return \Scooper\parseFilePath($fullNewFilePath, false);
+        return $detailsSubdir;
     }
 
 
@@ -279,12 +530,13 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         if($arrAllJobsLoadedFromSrc )
         {
             $this->normalizeJobList($arrAllJobsLoadedFromSrc);
+            $this->arrUserInputJobs = $arrAllJobsLoadedFromSrc;
         }
 
         if($GLOBALS['OPTS']['DEBUG'] == true)
         {
-            $strCSVInputJobsPath = \Scooper\getFullPathFromFileDetails($this->detailsOutputSubfolder, "", "_Jobs_From_UserInput");
-            $this->writeJobsListToFile($strCSVInputJobsPath, $arrAllJobsLoadedFromSrc, true, false, "ClassJobRunner-LoadCSVs");
+            $strDebugInputCSV = $this->detailsOutputSubfolder['directory'] . \Scooper\getDefaultFileName("", "_Jobs_From_UserInput", "csv");
+            $this->writeJobsListToFile($strDebugInputCSV, $arrAllJobsLoadedFromSrc, true, false, "ClassJobRunner-LoadCSVs");
         }
 
         // These will be used at the beginning and end of
@@ -295,6 +547,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         //
         // Set a global var with an array of all input cSV jobs marked new or not marked as excluded (aka "Yes" or "Maybe")
         //
+
         $this->arrUserInputJobs_Active = array_filter($arrAllJobsLoadedFromSrc, "isMarked_InterestedOrBlank");
         $GLOBALS['logger']->logLine(count($this->arrUserInputJobs_Active). " active job listings loaded from user input CSVs.", \Scooper\C__DISPLAY_SUMMARY__);
 
@@ -308,7 +561,12 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     private function writeRunsJobsToFile($strFileOut, $arrJobsToOutput, $strLogDescriptor, $strExt = "CSV", $keysToOutput = null)
     {
+
+
         $this->writeJobsListToFile($strFileOut, $arrJobsToOutput, true, false, "ClassJobRunner-".$strLogDescriptor, $strExt, $keysToOutput);
+
+        if($strExt == "HTML")
+            $this->_addCSSStyleToHTMLFile_($strFileOut);
 
     }
 
@@ -321,19 +579,21 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         return $detailsRet;
     }
 
-    private function outputFilteredJobsListToFile($strFilterToApply, $strFileNameAppend, $strExt = "CSV", $strFilterDescription = null, $keysToOutput = null)
+    private function outputFilteredJobsListToFile($arrJobsList, $strFilterToApply, $strFileNameAppend, $strExt = "CSV", $strFilterDescription = null, $keysToOutput = null)
     {
-        if(count($this->arrLatestJobs) == 0) return null;
+        if($arrJobsList == null) { $arrJobsList = $this->arrLatestJobs; }
+
+        if(countJobRecords($arrJobsList) == 0) return null;
 
         $arrJobs = null;
 
         if($strFilterToApply == null || $strFilterToApply == "")
         {
-            $arrJobs = $this->arrLatestJobs;
+            $arrJobs = $arrJobsList;
         }
         else
         {
-            $arrJobs = array_filter($this->arrLatestJobs, $strFilterToApply);
+            $arrJobs = array_filter($arrJobsList, $strFilterToApply);
         }
 
         if($strFileNameAppend == null || $strFileNameAppend == "")
@@ -361,7 +621,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $strFilteredCSVOutputPath = $details['full_file_path'];
         $this->writeRunsJobsToFile($strFilteredCSVOutputPath, $arrJobsOutput, $strFilterToApply, $strExt, $keysToOutput);
 
-        $GLOBALS['logger']->logLine(($strFilterDescription != null ? $strFilterDescription : $strFileNameAppend) . " " . count($arrJobsOutput). " job listings output to  " . $strFilteredCSVOutputPath, \Scooper\C__DISPLAY_SUMMARY__);
+
+        $GLOBALS['logger']->logLine(($strFilterDescription != null ? $strFilterDescription : $strFileNameAppend) . " " . count($arrJobsOutput). " job listings output to  " . $strFilteredCSVOutputPath, \Scooper\C__DISPLAY_ITEM_RESULT__);
 
         return $arrJobs;
     }
@@ -372,6 +633,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     //
     protected function getLatestRawJobsFromAllSearches()
     {
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //
         // Download all the job listings for all the users searches
@@ -385,22 +647,10 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // the searches in the list and returning us the combined set of new jobs
         // (with the exception of Amazon for historical reasons)
         //
-        $classMulti = new ClassMultiSiteSearch($this->detailsOutputSubfolder['full_file_path']);
-        $classMulti->addSearches($this->arrSearchesToReturn);
-        $classMulti->downloadAllUpdatedJobs( $this->nNumDaysToSearch);
-        $this->_addJobsToMyJobsList_($classMulti->getMyJobsList());
-
-        //
-        // Let's go get Amazon too if the user asked for Amazon's jobs
-        //
-/*        if($GLOBALS['DATA']['site_plugins']['Amazon']['include_in_run'] == true)
-        {
-            $GLOBALS['logger']->logLine("Adding Amazon jobs....", \Scooper\C__DISPLAY_ITEM_START__);
-            $class = new PluginAmazon($this->detailsOutputSubfolder['full_file_path']);
-            $class->downloadAllUpdatedJobs( $this->nNumDaysToSearch);
-            $this->_addJobsToMyJobsList_($class->getMyJobsList());
-        }
-*/
+        $classMulti = new ClassMultiSiteSearch($this->detailsOutputSubfolder['directory']);
+        $classMulti->addMultipleSearches($this->arrSearchesToReturn, $this->arrSearchLocationSetsToRun);
+        $classMulti->getJobsForMyMultipleSearches( $this->nNumDaysToSearch, $this->arrSearchKeywordSet);
+        addJobsToJobsList($this->arrLatestJobs, $classMulti->getMyJobsList());
         //
         // Let's save off the unfiltered jobs list in case we need it later.  The $this->arrLatestJobs
         // will shortly have the user's input jobs applied to it
@@ -413,7 +663,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         $detailsBodyContentFile = null;
 
-       $GLOBALS['logger']->logLine(count($this->arrLatestJobs_UnfilteredByUserInput). " raw, latest job listings from " . count($this->arrSearchesToReturn) . " searches downloaded to " . $strRawJobsListOutput, \Scooper\C__DISPLAY_SUMMARY__);
+       $GLOBALS['logger']->logLine(count($this->arrLatestJobs_UnfilteredByUserInput). " raw, latest job listings from " . count($this->arrSearchesToReturn) . " search(es) downloaded to " . $strRawJobsListOutput, \Scooper\C__DISPLAY_SUMMARY__);
 
 
     }
@@ -486,24 +736,44 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $GLOBALS['logger']->logLine(PHP_EOL."**************  Updating jobs list for known filters ***************".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
         $this->markMyJobsList_withAutoItems();
 
+        //
+        // For our final output, we want the jobs to be sorted by company and then role name.
+        // Create a copy of the jobs list that is sorted by that value.
+        //
+        $arrFinalJobs_SortedByCompanyRole = array();
+        if(countJobRecords($this->arrLatestJobs) > 0)
+        {
+            foreach($this->arrLatestJobs as $job)
+            {
+                $arrFinalJobs_SortedByCompanyRole [$job['key_company_role']] = $job;
+            }
+        }
+        ksort($arrFinalJobs_SortedByCompanyRole );
+
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //
         // Output the full jobs list into a file and into files for different cuts at the jobs list data
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        $GLOBALS['logger']->logLine(PHP_EOL."**************  Writing final list of " . count($this->arrLatestJobs) . " jobs to output files.  ***************  ".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine(PHP_EOL."**************  Writing final list of " . count($arrFinalJobs_SortedByCompanyRole ) . " jobs to output files.  ***************  ".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
         $class = null;
 
-        // Write to the main output file name that the user passed in
-        $arrJobs_UpdatedOrInterested = array_filter($this->arrLatestJobs, "isJobUpdatedTodayOrIsInterestedOrBlank");
+//        // Write to the main output file name that the user passed in
+//        $arrJobsTemp = $arrFinalJobs_SortedByCompanyRole ;
+//        if($arrJobsTemp == null || !is_array($arrJobsTemp))
+//        {
+//            $arrJobsTemp = array();
+//        }
+
+        $arrJobs_UpdatedOrInterested = array_filter($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayOrIsInterestedOrBlank");
         $this->writeRunsJobsToFile($this->detailsOutputFile['full_file_path'], $arrJobs_UpdatedOrInterested, "ClassJobsRunWrapper-UserOutputFile");
         $detailsCSVFile = $this->detailsOutputFile;
 
         //
         // Output all job records and their values
         //
-        $arrJobs_Active = $this->outputFilteredJobsListToFile(null, "_AllJobs", "CSV");
+        $arrJobs_Active = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, null, "_AllJobs", "CSV");
 //        $strOutDetailsAllResultsName = getFullPathFromFileDetails($this->detailsOutputFile, "", "_AllJobs");
 //        $this->writeJobsListToFile($strOutDetailsAllResultsName, $this->arrLatestJobs, "ClassJobsRunWrapper-AllJobs");
 
@@ -514,48 +784,217 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
 
         // Output only records that are new or not marked as excluded (aka "Yes" or "Maybe")
-        $arrJobs_Active = $this->outputFilteredJobsListToFile("isMarked_InterestedOrBlank", "_ActiveJobs", "CSV");
-        $arrJobs_Active = $this->outputFilteredJobsListToFile("isMarked_InterestedOrBlank", "_ActiveJobs", "HTML", null, $this->getKeysForHTMLOutput());
+        $arrJobs_Active = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_ActiveJobs", "CSV");
+        $arrJobs_Active = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_ActiveJobs", "HTML", null, $this->getKeysForHTMLOutput());
         $detailsHTMLFile = $this->__getAlternateOutputFileDetails__("HTML", "", "_ActiveJobs");
 
-        $arrJobs_Updated = $this->outputFilteredJobsListToFile("isJobUpdatedToday", "_UpdatedJobs");
-        $arrJobs_UpdatedButFiltered  = $this->outputFilteredJobsListToFile("isJobUpdatedTodayNotInterested", "_UpdatedExcludedJobs");
+        $arrJobs_Updated = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedToday", "_UpdatedJobs");
+        $arrJobs_UpdatedButFiltered  = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayNotInterested", "_UpdatedExcludedJobs");
 
         // Output only new records that haven't been looked at yet
-        $arrJobs_NewOnly = $this->outputFilteredJobsListToFile("isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "CSV");
-        $arrJobs_NewOnly = $this->outputFilteredJobsListToFile("isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "HTML", null, $this->getKeysForHTMLOutput());
+        $arrJobs_NewOnly = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "CSV");
+        $arrJobs_NewOnly = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "HTML", null, $this->getKeysForHTMLOutput());
 
         // Output all records that were automatically excluded
-        $arrJobs_AutoExcluded = $this->outputFilteredJobsListToFile("isMarked_NotInterested", "_ExcludedJobs");
+        $arrJobs_AutoExcluded = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", "_ExcludedJobs");
 
         // Output only records that were auto-marked as duplicates
-        // $arrJobs_AutoDupe = $this->outputFilteredJobsListToFile("isInterested_MarkedDuplicateAutomatically", "_AutoDuped");
-        // $arrJobs_NewButFiltered = $this->outputFilteredJobsListToFile("isNewJobToday_Interested_IsNo", "_NewJobs_AutoExcluded");
+        // $arrJobs_AutoDupe = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isInterested_MarkedDuplicateAutomatically", "_AutoDuped");
+        // $arrJobs_NewButFiltered = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsNo", "_NewJobs_AutoExcluded");
         // Output all records that were previously marked excluded manually by the user
-        // $arrJobs_ManualExcl = $this->outputFilteredJobsListToFile("isMarked_ManuallyNotInterested", "_ManuallyExcludedJobs");
+        // $arrJobs_ManualExcl = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isMarked_ManuallyNotInterested", "_ManuallyExcludedJobs");
 
-        $strOutputResult = "Result:  ". PHP_EOL. "All:  ". count($arrJobs_Active) . " Active, " .count($arrJobs_AutoExcluded). " Auto-Filtered, " . count($this->arrLatestJobs).  " Jobs Total." .PHP_EOL. "New:  ". count($arrJobs_NewOnly) . " jobs for review. " .count($arrJobs_UpdatedButFiltered). " jobs were auto-filtered, ". count($arrJobs_Updated) . " updated; " . count($this->arrLatestJobs_UnfilteredByUserInput) . " Jobs Downloaded." .PHP_EOL;
-        $strResultCounts = $this->getListingCountsByPlugin();
-        $strOutputResult = $strOutputResult . PHP_EOL . $strResultCounts;
+        $strResultCountsText = $this->getListingCountsByPlugin("text");
+
+
 
         $strErrs = $GLOBALS['logger']->getCumulativeErrorsAsString();
+        $strErrsResult = "";
         if($strErrs != "" && $strErrs != null)
         {
-            $strOutputResult = $strOutputResult . PHP_EOL . "------------ ERRORS FOUND ------------" . PHP_EOL . $strErrs .PHP_EOL .PHP_EOL. "----------------------------------------" .PHP_EOL .PHP_EOL;
+            $strErrsResult = $strErrsResult . PHP_EOL . "------------ ERRORS FOUND ------------" . PHP_EOL . $strErrs .PHP_EOL .PHP_EOL. "----------------------------------------" .PHP_EOL .PHP_EOL;
         }
 
-        $GLOBALS['logger']->logLine($strOutputResult, \Scooper\C__DISPLAY_SUMMARY__);
+        $strResultText =  "Job Scooper Results for " . date("D, M d") . PHP_EOL . $strResultCountsText . PHP_EOL . $strErrsResult;
+
+        $GLOBALS['logger']->logLine($strResultText, \Scooper\C__DISPLAY_SUMMARY__);
+
+        $strResultCountsHTML = $this->getListingCountsByPlugin("html");
+        $strErrHTML = preg_replace("/\n/", ("<br>" . chr(10) . chr(13)), $strErrsResult);
+        $strResultHTML = $strResultCountsHTML . PHP_EOL . "<pre>" . $strErrHTML . "</pre>".PHP_EOL;
 
         //
         // Send the email notification out for the completed job
         //
-        $this->__sendJobCompletedEmail__($strOutputResult, $detailsCSVFile, $detailsHTMLFile);
+        $this->__sendJobCompletedEmail__($strResultText, $strResultHTML, $detailsCSVFile, $detailsHTMLFile);
 
         $GLOBALS['logger']->logLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
     }
 
 
-    private function __sendJobCompletedEmail__($strBodyText = null, $detailsFileCSV = null, $detailsFileHTML = null)
+    private function __sendJobCompletedEmail__($strBodyText = null, $strBodyHTML = null, $detailsFileCSV = null, $detailsFileHTML = null)
+    {
+        if($GLOBALS['OPTS']['use_debug'] == true)
+        {
+            $GLOBALS['logger']->logLine(PHP_EOL."Debug mode = true, so skipping email notifications.".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+            return;
+        }
+
+        $ret = $this->__sendJobCompletedEmail_PHP__($strBodyText, $strBodyHTML, $detailsFileCSV, $detailsFileHTML);
+        // $ret = $this->__sendJobCompletedEmail_Applescript__($strBodyText, $detailsFileCSV, $detailsFileHTML);
+        if($ret != true)
+        {
+            $GLOBALS['logger']->logLine("Failed to send notification email.", \Scooper\C__DISPLAY_ERROR__);
+
+        }
+        return;
+
+    }
+
+
+    private function __sendJobCompletedEmail_PHP__($strBodyText, $strBodyHTML = null, $detailsFileCSV = null, $detailsFileHTML = null)
+    {
+
+        $subject = "";
+        $messageHtml = "";
+        $messageText = "";
+
+        $subject = "New Job Postings Found For " . \Scooper\getTodayAsString() ."";
+
+        //
+        // Setup the plaintext content
+        //
+        if($strBodyText != null && strlen($strBodyText) > 0)
+        {
+
+            //
+            // Setup the plaintext message text value
+            //
+            $messageText = $strBodyText;
+//            $messageText .= PHP_EOL ;
+//            $messageText .= $strUpdateNote;
+            $messageText .= PHP_EOL ;
+            //
+            // Setup the value for the html version of the message
+            //
+            $messageHtml  .= $strBodyHTML . "<br>" .PHP_EOL.  "<br>" .PHP_EOL;
+            $messageHtml  .= '<H2>New Job Matches</H2>'.PHP_EOL. PHP_EOL;
+            $content = $this->_getFullFileContents_($detailsFileHTML);
+            $messageHtml  .= $content . PHP_EOL. PHP_EOL. "</body></html>";
+
+            $this->_wrapCSSStyleOnHTML_($messageHtml);
+        }
+
+
+        //
+        // Add initial email address header values
+        //
+        if(!$this->_getEmailAddressByType_($toEmail, "to") || strlen($toEmail['address']) <= 0)
+        {
+            $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
+            return false;
+        }
+
+        $this->_getEmailAddressByType_($bccEmail, "bcc");
+        if(!$this->_getEmailAddressByType_($fromEmail, "from") || strlen($toEmail['address']) <= 0)
+        {
+            $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
+            return false;
+        }
+
+
+        $mail = new PHPMailer();
+
+        if($this->arrEmail_PHPMailer_SMTPSetup != null && is_array($this->arrEmail_PHPMailer_SMTPSetup))
+        {
+            $mail->isSMTP();
+            $properties = array_keys($this->arrEmail_PHPMailer_SMTPSetup);
+            foreach($properties as $property)
+            {
+                $mail->$property = $this->arrEmail_PHPMailer_SMTPSetup[$property];
+            }
+
+        }
+        else
+        {
+            $mail->isSendmail();
+        }
+
+
+
+        if($this->_getEmailAddressByType_($bccEmail, "bcc") && strlen($bccEmail['address']) > 0)
+        {
+            $ret = $mail->addBCC($bccEmail['address'], $bccEmail['name']);     // Add a recipient
+        }
+        $mail->addAddress($toEmail['address'], $toEmail['name']);
+        $mail->addReplyTo("dev@recoilvelocity.com");
+
+        if(strlen($fromEmail['address']) > 0)
+        {
+            $mail->setFrom($fromEmail['address'], $fromEmail['name']);
+        }
+        else
+        {
+            throw new ErrorException("No from: email address set in config.ini.  Cannot send email notifications.");
+        }
+
+
+        $mail->WordWrap = 120;                                 // Set word wrap to 120 characters
+        $mail->addAttachment($detailsFileCSV['full_file_path']);         // Add attachments
+        $mail->addAttachment($detailsFileHTML['full_file_path']);         // Add attachments
+
+        $mail->isHTML(true);                                  // Set email format to HTML
+        $mail->Subject = $subject;
+        $mail->Body    = $messageHtml;
+        $mail->AltBody = $messageText;
+
+
+
+        $ret = $mail->send();
+        if($ret != true)
+        {
+            $GLOBALS['logger']->logLine("Failed to send notification email with error = ".$mail->ErrorInfo, \Scooper\C__DISPLAY_ERROR__);
+        }
+        else
+        {
+            $GLOBALS['logger']->logLine("Email notification sent to " . $toEmail['address'] . " from " . $mail->From, \Scooper\C__DISPLAY_ITEM_RESULT__);
+        }
+        return $ret;
+
+
+    }
+
+
+    private function _getFullFileContents_($detailsFile)
+    {
+        $content = null;
+        $filePath = $detailsFile['full_file_path'];
+
+        if(strlen($filePath) < 0)
+        {
+            $GLOBALS['logger']->logLine("Unable to get contents from '". var_export($detailsFile, true) ."' to include in email.  Failing notification.", \Scooper\C__DISPLAY_ERROR__);
+            return null;
+        }
+
+        # Open a file
+        $file = fopen( $filePath, "r" );
+        if( $file == false )
+        {
+            $GLOBALS['logger']->logLine("Unable to open file '". $filePath ."' for to get contents for notification mail.  Failing notification.", \Scooper\C__DISPLAY_ERROR__);
+            return null;
+        }
+
+        # Read the file into a variable
+        $size = filesize($filePath);
+        $content = fread( $file, $size);
+
+        return $content;
+    }
+
+
+
+
+    private function __sendJobCompletedEmail_Applescript__($strBodyText = null, $detailsFileCSV = null, $detailsFileHTML = null)
     {
         //      set strEmailBodyContentFile to first item of argv
         //		set strFileToAttachCSV to second item of argv
@@ -607,54 +1046,48 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         }
 
-        $toEmail = $this->__getEmptyEmailRecord__();;
-        $bccEmail = $this->__getEmptyEmailRecord__();;
+        if(!$this->_getEmailAddressByType_($toEmail, "to"))
+        {
+            $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
+            return;
+        }
+        if(!$this->_getEmailAddressByType_($bccEmail, "bcc"))
+        {
+            $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
+            return;
+        }
+        $result = "";
 
+        //
+        // Shell out to Applescript to send the email notifications
+        //
+        $strCmdToRun = 'osascript ' . __ROOT__ . '/main/email_job_run_results.appleScript "' . $strBodyFilePath  . '" "' . $strCSVFilePath  . '" "'.$strHTMLFilePath.'" "' . $toEmail['address'] . '" "' . $toEmail['name'] . '" "' . $bccEmail['address'] . '"';
+        $strCmdToRun = escapeshellcmd($strCmdToRun);
+        $GLOBALS['logger']->logLine("Starting email notifications: " . $strCmdToRun, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $result = \Scooper\my_exec($strCmdToRun);
+        $GLOBALS['logger']->logLine($result['stderr'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        return $result['stdout'];
+
+
+    }
+
+    private function _getEmailAddressByType_(&$emailRecord, $strType)
+    {
+        $fFound = false;
         if($this->arrEmailAddresses)
         {
             foreach($this->arrEmailAddresses as $email)
             {
-                switch($email['type'])
+                if(strcasecmp($email['type'], $strType) == 0)
                 {
-                    case "to":
-                        $toEmail = $email;
-                        break;
-
-                    case "bcc":
-                        $bccEmail = $email;
-                        break;
-
-                    default:
-                        break;
+                    $emailRecord = $email;
+                    $fFound = true;
                 }
 
             }
-
-            $result = "";
-
-            //
-            // Shell out to Applescript to send the email notifications
-            //
-            $strCmdToRun = 'osascript ' . __ROOT__ . '/main/email_job_run_results.appleScript "' . $strBodyFilePath  . '" "' . $strCSVFilePath  . '" "'.$strHTMLFilePath.'" "' . $toEmail['address'] . '" "' . $toEmail['name'] . '" "' . $bccEmail['address'] . '"';
-            $strCmdToRun = escapeshellcmd($strCmdToRun);
-            $GLOBALS['logger']->logLine("Starting email notifications: " . $strCmdToRun, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            $result = \Scooper\my_exec($strCmdToRun);
-            if($result['return'] != 0)
-            {
-                $GLOBALS['logger']->logLine("Failed to send notification email with error = ".$result['stderr'], \Scooper\C__DISPLAY_ERROR__);
-            }
-            else
-            {
-                $GLOBALS['logger']->logLine($result['stdout'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-            }
-
-            $GLOBALS['logger']->logLine("Email notification send done.", \Scooper\C__DISPLAY_ITEM_RESULT__);
         }
-        else
-        {
-            $GLOBALS['logger']->logLine("No email addresses were set; cannot send email notifications.", \Scooper\C__DISPLAY_ERROR__);
-        }
+
+        return $fFound;
 
     }
 
@@ -698,57 +1131,68 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     }
 
 
-    private function getListingCountsByPlugin()
+    private function getListingCountsByPlugin($fLayoutType)
     {
 
         $arrCounts = null;
         $arrExcluded = null;
+        $arrNoJobUpdates = null;
 
         $strOut = "                ";
-        $arrHeaders = array("Updated", "New", "Total", "Active", "Inactive");
-        foreach($arrHeaders as $value)
+        $arrHeaders = array("New", "Updated", "Total", "Active", "Inactive");
+
+        $arrSitesSearched = null;
+        //
+        // First, build an array of all the possible job sites
+        // and set them to "false", meaning they weren't searched
+        //
+        foreach( $GLOBALS['DATA']['site_plugins'] as $plugin_setup)
         {
-            $strOut = $strOut . sprintf("%-18s", $value);
+            $arrSitesSearched[$plugin_setup['name']] = false;
         }
-        $strOut = $strOut . PHP_EOL;
 
-//        $arrCounts[$strName]['updated_today'] = count(array_filter($arrPluginJobs, "isJobUpdatedToday"));
+        //
+        // Now go through the list of searches that were run and
+        // set the value to "true" for any job sites that were run
+        //
+        foreach($this->arrSearchesToReturn as $searchDetails)
+        {
+            $arrSitesSearched[strtolower($searchDetails['site_name'])] = true;
+        }
 
+        $arrPluginJobsUnfiltered = $this->getMyJobsList();
 
         foreach( $GLOBALS['DATA']['site_plugins'] as $plugin_setup)
         {
             $strName = $plugin_setup['name'];
-            $classPlug = new $plugin_setup['class_name'](null, null);
-            $arrPluginJobs = array_filter($this->getMyJobsList(), array($classPlug, "isJobListingMine"));
-            $arrSorted[$strName] = array('name' => $strName, 'updated_today' => count(array_filter($arrPluginJobs, "isJobUpdatedToday")));
-        }
-        $retVal = usort($arrSorted, "sortByCountDesc");
-
-
-
-        foreach( $arrSorted as $plugin)
-        {
-            $plugin_setup = $GLOBALS['DATA']['site_plugins'][$plugin['name']];
-            $classPlug = new $plugin_setup['class_name'](null, null);
-            $arrPluginJobs = array_filter($this->getMyJobsList(), array($classPlug, "isJobListingMine"));
-            $strName=$plugin['name'];
-            $arrCounts[$strName]['name'] = $strName;
-            $arrCounts[$strName]['updated_today'] = $plugin['updated_today'];
-
-
-            if($plugin_setup['include_in_run'] == true && $arrCounts[$strName]['updated_today'] > 0)
+            $fWasSearched = $arrSitesSearched[$plugin_setup['name']];
+            if($fWasSearched)
             {
-                $arrCounts[$strName]['new_today'] = count(array_filter($arrPluginJobs, "isNewJobToday_Interested_IsBlank"));
-                $arrCounts[$strName]['total_listings'] = count($arrPluginJobs);
-                $arrCounts[$strName]['total_not_interested'] = count(array_filter($arrPluginJobs, "isMarked_NotInterested"));
-                $arrCounts[$strName]['total_active'] = count(array_filter($arrPluginJobs, "isMarked_InterestedOrBlank"));
-
-                foreach($arrCounts[$strName] as $value)
+                $classPlug = new $plugin_setup['class_name'](null, null);
+                if($arrPluginJobsUnfiltered == null || !is_array($arrPluginJobsUnfiltered) || countJobRecords($arrPluginJobsUnfiltered) == 0)
                 {
-                    $strOut = $strOut . sprintf("%-18s", $value);
+                    $countUpdated = 0;
+                    $arrPluginJobs = array();
                 }
-                $strOut = $strOut . PHP_EOL;
+                else
+                {
+                    $arrPluginJobs = array_filter($arrPluginJobsUnfiltered, array($classPlug, "isJobListingMine"));
+                    $countUpdated = count(array_filter($arrPluginJobs, "isJobUpdatedToday"));
+                }
 
+                if($countUpdated == 0)
+                {
+                    $arrNoJobUpdates[$strName] = $strName;
+                }
+                else
+                {
+                    $arrCounts[$strName]['name'] = $strName;
+                    $arrCounts[$strName]['new_today'] = count(array_filter($arrPluginJobs, "isNewJobToday_Interested_IsBlank"));
+                    $arrCounts[$strName]['updated_today'] = $countUpdated;
+                    $arrCounts[$strName]['total_not_interested'] = count(array_filter($arrPluginJobs, "isMarked_NotInterested"));
+                    $arrCounts[$strName]['total_active'] = count(array_filter($arrPluginJobs, "isMarked_InterestedOrBlank"));
+                    $arrCounts[$strName]['total_listings'] = count($arrPluginJobs);
+                }
             }
             else
             {
@@ -757,19 +1201,244 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         }
 
 
-        if($arrExcluded != null && count($arrExcluded) > 0)
+        if($this->arrUserInputJobs != null && count($this->arrUserInputJobs) > 0)
         {
-            $strOut = $strOut . PHP_EOL .  "Sites that either were excluded or had no updated jobs found:" . PHP_EOL;
+            $strName = C__RESULTS_INDEX_USER;
+            $arrCounts[$strName]['name'] = $strName;
+            $arrCounts[$strName]['new_today'] = count(array_filter($this->arrUserInputJobs, "isNewJobToday_Interested_IsBlank"));
+            $arrCounts[$strName]['updated_today'] = count(array_filter($this->arrUserInputJobs, "isJobUpdatedToday"));
+            $arrCounts[$strName]['total_not_interested'] = count(array_filter($this->arrUserInputJobs, "isMarked_NotInterested"));
+            $arrCounts[$strName]['total_active'] = count(array_filter($this->arrUserInputJobs, "isMarked_InterestedOrBlank"));
+            $arrCounts[$strName]['total_listings'] = count($this->arrUserInputJobs);
+        }
 
-            foreach($arrExcluded as $site)
+        if($arrPluginJobsUnfiltered != null && count($arrPluginJobsUnfiltered) > 0)
+        {
+            $strName = C__RESULTS_INDEX_ALL;
+            $arrCounts[$strName]['name'] = $strName;
+            $arrCounts[$strName]['new_today'] = count(array_filter($arrPluginJobsUnfiltered, "isNewJobToday_Interested_IsBlank"));
+            $arrCounts[$strName]['updated_today'] = count(array_filter($arrPluginJobsUnfiltered, "isJobUpdatedToday"));
+            $arrCounts[$strName]['total_not_interested'] = count(array_filter($arrPluginJobsUnfiltered, "isMarked_NotInterested"));
+            $arrCounts[$strName]['total_active'] = count(array_filter($arrPluginJobsUnfiltered, "isMarked_InterestedOrBlank"));
+            $arrCounts[$strName]['total_listings'] = count($arrPluginJobsUnfiltered);
+        }
+
+
+        switch ($fLayoutType)
+        {
+            case "html":
+                $content = $this->_getResultsTextHTML_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrExcluded);
+                break;
+
+            default:
+            case "text":
+                $content = $this->_getResultsTextPlain_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrExcluded);
+                break;
+
+        }
+
+        return $content;
+    }
+
+    private function _printResultsLine_($arrRow, $strType="TEXT")
+    {
+        if($arrRow == null || !isset($arrRow) || !is_array($arrRow)) return "";
+
+        $strOut = "";
+        $fFirstCol = true;
+
+        // Fixup the names for our special case values
+        switch($arrRow['name'])
+        {
+            case C__RESULTS_INDEX_ALL:
+                $arrRow['name'] = "Total";
+                break;
+            case C__RESULTS_INDEX_USER:
+                $arrRow['name'] = "User Input";
+                break;
+        }
+
+        if($strType == "HTML")
+        {
+            $strOut .=  PHP_EOL . "<tr class='job_scooper'>". PHP_EOL;
+        }
+
+        foreach($arrRow as $value)
+        {
+            switch ($strType)
+            {
+                case "HTML":
+                    if($fFirstCol == true)
+                    {
+                        $strOut .= "<td class='job_scooper' width='20%' align='left'>" . $value . "</td>" . PHP_EOL;
+                        $fFirstCol = false;
+                    }
+                    else
+                        $strOut .= "<td class='job_scooper' width='10%' align='center'>" . $value . "</td>" . PHP_EOL;
+                    break;
+
+                case "TEXT":
+                default:
+                    $strOut = $strOut . sprintf("%-18s", $value);
+                    break;
+            }
+        }
+        if($strType == "HTML")
+        {
+            $strOut .=  PHP_EOL . "</tr>". PHP_EOL;
+        }
+
+        $strOut .=  PHP_EOL;
+        return $strOut;
+    }
+
+    private function _getResultsTextPlain_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrExcluded)
+    {
+        $strOut = "";
+        $arrCounts_TotalAll = null;
+        $arrCounts_TotalUser = null;
+
+        if($arrCounts != null && count($arrCounts) > 0)
+        {
+            $strOut = $strOut . sprintf("%-18s", "Site");
+            foreach($arrHeaders as $value)
+            {
+                $strOut = $strOut . sprintf("%-18s", $value);
+            }
+            $strOut .=  PHP_EOL . sprintf("%'-100s","") . PHP_EOL;
+
+            usort($arrCounts, "sortByCountDesc");
+            foreach($arrCounts as $site)
+            {
+                if($site['name'] == C__RESULTS_INDEX_ALL) {
+                    $arrCounts_TotalAll = $site;
+                } elseif($site['name'] == C__RESULTS_INDEX_USER) {
+                    $arrCounts_TotalUser = $site;
+                }
+                else
+                {
+                    $strOut .= $this->_printResultsLine_($site, "TEXT");
+                }
+            }
+
+
+            $strOut .= sprintf("%'=100s","") . PHP_EOL;
+            $strOut .= $this->_printResultsLine_($arrCounts_TotalUser);
+            $strOut .= $this->_printResultsLine_($arrCounts_TotalAll);
+            $strOut .= PHP_EOL;
+        }
+
+        if($arrNoJobUpdates != null && count($arrNoJobUpdates) > 0)
+        {
+            sort($arrNoJobUpdates);
+            $strOut = $strOut . PHP_EOL .  "No updated jobs for " . \Scooper\getTodayAsString() . " on these sites: " . PHP_EOL;
+
+            foreach($arrNoJobUpdates as $site)
             {
                 $strOut = $strOut . "     - ". $site .PHP_EOL;
             }
-            $strOut = $strOut . PHP_EOL;
+
+        }
+
+        if($arrExcluded != null && count($arrExcluded) > 0)
+        {
+            sort($arrExcluded);
+            $strExcluded = getArrayValuesAsString($arrExcluded, ", ", "Sites excluded by user or settings: ", false);
+            $strOut .= $strExcluded;
         }
 
 
         return $strOut;
+    }
+
+    private function _getResultsTextHTML_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrExcluded)
+    {
+        $arrCounts_TotalAll = null;
+        $arrCounts_TotalUser = null;
+        $strOut = "<div class='job_scooper outer'>";
+        $strOut  .= "<H2>Job Scooper Results for " . date("D, M d") . "</H2>".PHP_EOL. PHP_EOL;
+
+        if($arrCounts != null && count($arrCounts) > 0)
+        {
+            $strOut .= "<table id='resultscount' class='job_scooper'>" . PHP_EOL . "<thead>". PHP_EOL;
+            $strOut .= "<th class='job_scooper' width='20%' align='left'>Job Site</td>" . PHP_EOL;
+
+            foreach($arrHeaders as $value)
+            {
+                $strOut .= "<th class='job_scooper' width='10%' align='center'>" . $value . "</th>" . PHP_EOL;
+            }
+            $strOut .=  PHP_EOL . "</thead>". PHP_EOL;
+
+            usort($arrCounts, "sortByCountDesc");
+            foreach($arrCounts as $site)
+            {
+                if($site['name'] == C__RESULTS_INDEX_ALL) {
+                    $arrCounts_TotalAll = $site;
+                } elseif($site['name'] == C__RESULTS_INDEX_USER) {
+                    $arrCounts_TotalUser = $site;
+                }
+                else
+                {
+                    $strOut .= $this->_printResultsLine_($site, "HTML");
+                }
+            }
+
+            $strOut .=  PHP_EOL . "<tr class='job_scooper totaluser'>". PHP_EOL;
+            $strOut .= $this->_printResultsLine_($arrCounts_TotalUser, "HTML");
+            $strOut .=  PHP_EOL . "</tr><tr class='job_scooper totalall'>". PHP_EOL;
+            $strOut .= $this->_printResultsLine_($arrCounts_TotalAll, "HTML");
+            $strOut .=  PHP_EOL . "</tr>". PHP_EOL;
+
+            $strOut .=  PHP_EOL . "</table><br><br>". PHP_EOL. PHP_EOL;
+        }
+
+        if($arrNoJobUpdates != null && count($arrNoJobUpdates) > 0)
+        {
+            sort($arrNoJobUpdates);
+            $strOut .=  PHP_EOL . "<div class='job_scooper section'>". PHP_EOL;
+            $strOut .=  PHP_EOL .  "No updated jobs for " . \Scooper\getTodayAsString() . " on these sites: " . PHP_EOL;
+            $strOut .=  PHP_EOL . "<ul class='job_scooper'>". PHP_EOL;
+
+            foreach($arrNoJobUpdates as $site)
+            {
+                $strOut .=  "<li>". $site . "</li>". PHP_EOL;
+            }
+
+            $strOut .=  PHP_EOL . "</ul></div><br><br>". PHP_EOL;
+        }
+
+        if($arrExcluded != null && count($arrExcluded) > 0)
+        {
+            sort($arrExcluded);
+
+            $strOut .=  PHP_EOL . "<div class='job_scooper section'>". PHP_EOL;
+            $strExcluded = getArrayValuesAsString($arrExcluded, ", ", "", false);
+
+            $strOut .=  PHP_EOL .  "<span style=\"font-size: xx-small;color: #8e959c;\">Excluded sites for this run:" . PHP_EOL;
+            $strOut .= $strExcluded;
+            $strOut .= "</span>" . PHP_EOL;
+
+
+        }
+        $strOut .= "</div";
+
+        return $strOut;
+    }
+
+    private function _addCSSStyleToHTMLFile_($strFilePath)
+    {
+        $strHTMLContent = file_get_contents($strFilePath);
+        $retWrapped = $this->_wrapCSSStyleOnHTML_($strHTMLContent);
+        file_put_contents($strFilePath, $retWrapped);
+    }
+
+    private function _wrapCSSStyleOnHTML_($strHTML)
+    {
+        $cssToInlineStyles = new \TijsVerkoyen\CssToInlineStyles\CssToInlineStyles();
+        $css = file_get_contents(dirname(dirname(__FILE__)) . '/include/CSVTableStyle.css');
+        $cssToInlineStyles->setHTML($strHTML);
+        $cssToInlineStyles->setCSS($css);
+        return $cssToInlineStyles->convert();
     }
 
 
@@ -780,16 +1449,15 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 //            'job_title',
             'job_title_linked',
 //            'job_post_url',
-            'location',
-            'job_site_category',
 //            'job_site_date' =>'',
-            'interested',
-            'notes',
+//            'interested',
+//            'notes',
 //            'status',
 //            'last_status_update',
-            'date_pulled',
-            'job_site',
-            'job_id',
+            'location',
+//            'job_site_category',
+//            'job_site',
+//            'job_id',
 //            'key_jobsite_siteid',
 //            'key_company_role',
 //            'date_last_updated',
