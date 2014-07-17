@@ -36,6 +36,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     protected $arrEmailAddresses = null;
     protected $arrUserInputFiles = null;
     protected $arrAllSearchesFromConfig = null;
+    protected $arrEmail_PHPMailer_SMTPSetup = null;
 
     function ClassJobsRunWrapper()
     {
@@ -173,25 +174,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             }
         }
 
-        if($config->emails )
-        {
-            foreach($config->emails as $emailItem)
-            {
-                $tempEmail = $this->__getEmptyEmailRecord__();
-                if (isset($emailItem['name'])) {
-
-                    $tempEmail['name'] = $emailItem['name'];
-                }
-                if (isset($emailItem['address'])) {
-                    $tempEmail['address'] = $emailItem['address'];
-                }
-                if (isset($emailItem['type'])) {
-                    $tempEmail['type'] = $emailItem['type'];
-                }
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added email from config.ini: '" . getArrayValuesAsString($tempEmail), \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                $this->arrEmailAddresses[] = $tempEmail;
-            }
-        }
 
         $pathInput = "";
         if($config->input && $config->input->folder)
@@ -234,6 +216,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             }
         }
 
+        $this->_parseEmailSetupFromINI_($config);
 
         $this->__getSearchesFromConfig__($config);
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Completed loading configuration from INI file:  ".var_export($GLOBALS['OPTS'], true), \Scooper\C__DISPLAY_SUMMARY__);
@@ -466,6 +449,40 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
 
         }
+
+    }
+
+    private function _parseEmailSetupFromINI_($config)
+    {
+        if($config->email )
+        {
+            if($config->email->smtp)
+            {
+                $this->arrEmail_PHPMailer_SMTPSetup = $config->email->smtp;
+            }
+        }
+
+        if($config->emails )
+        {
+            var_dump($config->emails);
+            foreach($config->emails as $emailItem)
+            {
+                $tempEmail = $this->__getEmptyEmailRecord__();
+                if (isset($emailItem['name'])) {
+
+                    $tempEmail['name'] = $emailItem['name'];
+                }
+                if (isset($emailItem['address'])) {
+                    $tempEmail['address'] = $emailItem['address'];
+                }
+                if (isset($emailItem['type'])) {
+                    $tempEmail['type'] = $emailItem['type'];
+                }
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added email from config.ini: '" . getArrayValuesAsString($tempEmail), \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                $this->arrEmailAddresses[] = $tempEmail;
+            }
+        }
+
 
     }
 
@@ -884,51 +901,64 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         //
         // Add initial email address header values
         //
-        if(!$this->_getEmailAddressByType_($toEmail, "to"))
+        if(!$this->_getEmailAddressByType_($toEmail, "to") || strlen($toEmail['address']) <= 0)
         {
             $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
             return false;
         }
 
-        if(!$this->_getEmailAddressByType_($bccEmail, "bcc"))
+        $this->_getEmailAddressByType_($bccEmail, "bcc");
+        if(!$this->_getEmailAddressByType_($fromEmail, "from") || strlen($toEmail['address']) <= 0)
         {
-            $bccEmail = null;
+            $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
+            return false;
         }
 
-        if(!$this->_getEmailAddressByType_($fromEmail, "from"))
-        {
-            $fromEmail['address'] = "From: dev@recoilvelocity.com";
-        }
 
         $mail = new PHPMailer();
 
-//        $mail->isSMTP();                                      // Set mailer to use SMTP
+        if($this->arrEmail_PHPMailer_SMTPSetup != null && is_array($this->arrEmail_PHPMailer_SMTPSetup))
+        {
+            $mail->isSMTP();
+            $properties = array_keys($this->arrEmail_PHPMailer_SMTPSetup);
+            foreach($properties as $property)
+            {
+                $mail->$property = $this->arrEmail_PHPMailer_SMTPSetup[$property];
+            }
 
-        $mail->From = $fromEmail['address'];
+        }
+        else
+        {
+            $mail->isSendmail();
+        }
+
+
+
+        if($this->_getEmailAddressByType_($bccEmail, "bcc") && strlen($bccEmail['address']) > 0)
+        {
+            $ret = $mail->addBCC($bccEmail['address'], $bccEmail['name']);     // Add a recipient
+        }
+        $mail->addAddress($toEmail['address'], $toEmail['name']);
+        $mail->addReplyTo("dev@recoilvelocity.com");
+
         if(strlen($fromEmail['address']) > 0)
         {
-            $mail->FromName = $fromEmail['name'];
-
+            $mail->setFrom($fromEmail['address'], $fromEmail['name']);
         }
-        $mail->addAddress($toEmail['address'], $toEmail['name']);     // Add a recipient
-//        $mail->addAddress('ellen@example.com');               // Name is optional
-//        $mail->addReplyTo('info@example.com', 'Information');
-//        $mail->addCC('cc@example.com');
-        if($bccEmail != null)
+        else
         {
-            $mail->addBCC($bccEmail['address']);
+            throw new ErrorException("No from: email address set in config.ini.  Cannot send email notifications.");
         }
+
 
         $mail->WordWrap = 120;                                 // Set word wrap to 120 characters
         $mail->addAttachment($detailsFileCSV['full_file_path']);         // Add attachments
         $mail->addAttachment($detailsFileHTML['full_file_path']);         // Add attachments
 
-       $mail->isHTML(true);                                  // Set email format to HTML
-
-       $mail->Subject = $subject;
-
-       $mail->Body    = $messageHtml;
-       $mail->AltBody = $messageText;
+        $mail->isHTML(true);                                  // Set email format to HTML
+        $mail->Subject = $subject;
+        $mail->Body    = $messageHtml;
+        $mail->AltBody = $messageText;
 
 
 
