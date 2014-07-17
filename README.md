@@ -1,5 +1,6 @@
 #Jobs Scooper
 Get email alerts with links to latest jobs matching your favorite search terms from any job site or company's careers website and a .CSV file of the full set of matches.
+![Example: Job Scooper Email Notification on Mobile](http://www.bryanselner.com/www-root-wpblog/wp-content/uploads/2014/07/JobScooperResultEmailMobile-250pxw.png "Example: Job Scooper Email Notification on Mobile")
 
 Jobs Scooper currently supports [over 60 different sites](../../wiki/Job-Sites-Supported-by-Jobs-Scooper), including CareerBuilder, Craigslist, DotJobs, EmploymentGuide, Expedia, Glassdoor, Groupon, Indeed, LinkUp, Mashable, Monster,  SimplyHired, StartupHire, Tableau and ZipRecruiter.  [view all supported sites](../../wiki/Job-Sites-Supported-by-Jobs-Scooper) to see the full list.
 
