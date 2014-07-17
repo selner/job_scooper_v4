@@ -99,7 +99,7 @@ const C__TOTAL_ITEMS_UNKNOWN__ = 11111;
 
 function setupPlugins()
 {
-
+    $arrAddedPlugins = null;
     $classList = get_declared_classes();
     print('Getting job site plugin list...'. PHP_EOL);
     foreach($classList as $class)
@@ -109,10 +109,17 @@ function setupPlugins()
 
             $classinst = new $class(null, null);
             $GLOBALS['DATA']['site_plugins'][strtolower($classinst->getName())] = array('name'=>strtolower($classinst->getName()), 'class_name' => $class, 'include_in_run' => false );
-            print('      Added job site plugin for '. $classinst->getName() . '.' . PHP_EOL);
+            $arrAddedPlugins[] = $classinst->getName();
+            // print('      Added job site plugin for '. $classinst->getName() . '.' . PHP_EOL);
             $classinst=null;
         }
     }
+    $strLog = "Added " . count($arrAddedPlugins) ." plugins: " . getArrayValuesAsString($arrAddedPlugins, ", ", null, false). ".";
+    if(isset($GLOBALS['logger']))
+        $GLOBALS['logger']->logLine($strLog , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+    else
+         print($strLog . PHP_EOL);
+
 }
 
 ?>
