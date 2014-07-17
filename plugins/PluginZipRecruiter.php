@@ -150,6 +150,7 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
 
+
             $titleNode = $node->find("h4[class='font14 fBold mb2 font13Phone']");
             $item['job_title'] = $titleNode[0]->plaintext;
 
@@ -163,9 +164,19 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
             //
             if($item['job_title'] == '') continue;
 
-            $idLink = $node->find("a[class='toggle_job_save btn btn-small']");
-            $jobID = $idLink[0]->attr['data-external_job_id'];
-            $item['job_id'] = $jobID;
+            // get the id and parse it down to <name>-<identifier>
+            $strExternalJobID = $node->attr['id'];
+            $fMatch = preg_match('/quiz-card-(\w{1,}-\w{1,})/i', $strExternalJobID, $arrExternalIDParts );
+            assert($fMatch == true);
+            $strExternalJobID = $arrExternalIDParts[1];
+
+            // remove "remaining15" or similar if it exists
+            $strExternalJobID = preg_replace('/remaining\d{1,3}/i', "", $strExternalJobID);
+
+            // remove "_cpc" from the ID if it still exists
+            $strExternalJobID = preg_replace('/_cpc/i', "", $strExternalJobID );
+
+            $item['job_id'] = $strExternalJobID;
 
             $companyNode = $node->find("p[class='font12Phone clearLeft']");
             $arrCompanyParts = explode(" - ", $companyNode[0]->plaintext);
