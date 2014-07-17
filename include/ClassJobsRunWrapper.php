@@ -19,6 +19,9 @@ define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__.'/include/SitePlugins.php');
 require_once(__ROOT__.'/include/ClassMultiSiteSearch.php');
 
+const C__RESULTS_INDEX_ALL = '***TOTAL_ALL***';
+const C__RESULTS_INDEX_USER = '***TOTAL_USER***';
+
 class ClassJobsRunWrapper extends ClassJobsSitePlugin
 {
     protected $configSettings = null;
@@ -801,14 +804,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // Output all records that were previously marked excluded manually by the user
         // $arrJobs_ManualExcl = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isMarked_ManuallyNotInterested", "_ManuallyExcludedJobs");
 
-        $strResultSummary = "Result:  ". PHP_EOL. "All:\t\t". count($arrJobs_Active) . " Active, " .count($arrJobs_AutoExcluded). " Auto-Filtered, " . count($arrFinalJobs_SortedByCompanyRole ).  " Total Jobs." .PHP_EOL;
-        if($this->arrUserInputJobs != null && count($this->arrUserInputJobs) > 0)
-        {
-            $strResultSummary .= "User Input:\t". count(array_filter($this->arrUserInputJobs, 'isMarkedInterested_IsBlank')) . " Active, " .count($this->arrUserInputJobs). " Total Jobs." .PHP_EOL;
-        }
-
-        $strResultSummary .= "New:\t\t". count($arrJobs_NewOnly) . " jobs for review. " .count($arrJobs_UpdatedButFiltered). " jobs were auto-filtered, ". count($arrJobs_Updated) . " updated; " . count($arrJobs_Updated). " Jobs Downloaded Today." .PHP_EOL;
-
         $strResultCountsText = $this->getListingCountsByPlugin("text");
 
 
@@ -820,13 +815,13 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $strErrsResult = $strErrsResult . PHP_EOL . "------------ ERRORS FOUND ------------" . PHP_EOL . $strErrs .PHP_EOL .PHP_EOL. "----------------------------------------" .PHP_EOL .PHP_EOL;
         }
 
-        $strResultText = $strResultSummary . PHP_EOL . $strResultCountsText . PHP_EOL . $strErrsResult;
+        $strResultText =  "Job Scooper Results for " . date("D, M d") . PHP_EOL . $strResultCountsText . PHP_EOL . $strErrsResult;
 
         $GLOBALS['logger']->logLine($strResultText, \Scooper\C__DISPLAY_SUMMARY__);
 
         $strResultCountsHTML = $this->getListingCountsByPlugin("html");
         $strErrHTML = preg_replace("/\n/", ("<br>" . chr(10) . chr(13)), $strErrsResult);
-        $strResultHTML = "<pre>" . $strResultSummary . "</pre>" . PHP_EOL . $strResultCountsHTML . PHP_EOL . "<pre>" . $strErrHTML . "</pre>".PHP_EOL;
+        $strResultHTML = $strResultCountsHTML . PHP_EOL . "<pre>" . $strErrHTML . "</pre>".PHP_EOL;
 
         //
         // Send the email notification out for the completed job
@@ -871,28 +866,19 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         //
         if($strBodyText != null && strlen($strBodyText) > 0)
         {
-            //
-            // Add the message section content
-            //
-            $strUpdateNote = "New job postings found for " . \Scooper\getTodayAsString() .". ";
-            if($detailsFileCSV != null && $detailsFileCSV['file_name'] != null)
-            {
-                $strCSVFile = $detailsFileCSV['file_name'];
-                $strUpdateNote .= "Results attached: " . $strCSVFile . PHP_EOL;
-            }
-
 
             //
             // Setup the plaintext message text value
             //
             $messageText = $strBodyText;
-            $messageText .= PHP_EOL . $strUpdateNote;
-
+//            $messageText .= PHP_EOL ;
+//            $messageText .= $strUpdateNote;
+            $messageText .= PHP_EOL ;
             //
             // Setup the value for the html version of the message
             //
-            $messageHtml  .= '<H3>Job Scooper Results</H3>'.PHP_EOL. PHP_EOL;
-            $messageHtml  .= $strBodyHTML . PHP_EOL. PHP_EOL;
+            $messageHtml  .= $strBodyHTML . "<br>" .PHP_EOL.  "<br>" .PHP_EOL;
+            $messageHtml  .= '<H2>New Job Matches</H2>'.PHP_EOL. PHP_EOL;
             $content = $this->_getFullFileContents_($detailsFileHTML);
             $messageHtml  .= $content . PHP_EOL. PHP_EOL. "</body></html>";
 
@@ -1174,6 +1160,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $arrSitesSearched[strtolower($searchDetails['site_name'])] = true;
         }
 
+        $arrPluginJobsUnfiltered = $this->getMyJobsList();
 
         foreach( $GLOBALS['DATA']['site_plugins'] as $plugin_setup)
         {
@@ -1182,7 +1169,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             if($fWasSearched)
             {
                 $classPlug = new $plugin_setup['class_name'](null, null);
-                $arrPluginJobsUnfiltered = $this->getMyJobsList();
                 if($arrPluginJobsUnfiltered == null || !is_array($arrPluginJobsUnfiltered) || countJobRecords($arrPluginJobsUnfiltered) == 0)
                 {
                     $countUpdated = 0;
@@ -1214,6 +1200,30 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             }
         }
 
+
+        if($this->arrUserInputJobs != null && count($this->arrUserInputJobs) > 0)
+        {
+            $strName = C__RESULTS_INDEX_USER;
+            $arrCounts[$strName]['name'] = $strName;
+            $arrCounts[$strName]['new_today'] = count(array_filter($this->arrUserInputJobs, "isNewJobToday_Interested_IsBlank"));
+            $arrCounts[$strName]['updated_today'] = count(array_filter($this->arrUserInputJobs, "isJobUpdatedToday"));
+            $arrCounts[$strName]['total_not_interested'] = count(array_filter($this->arrUserInputJobs, "isMarked_NotInterested"));
+            $arrCounts[$strName]['total_active'] = count(array_filter($this->arrUserInputJobs, "isMarked_InterestedOrBlank"));
+            $arrCounts[$strName]['total_listings'] = count($this->arrUserInputJobs);
+        }
+
+        if($arrPluginJobsUnfiltered != null && count($arrPluginJobsUnfiltered) > 0)
+        {
+            $strName = C__RESULTS_INDEX_ALL;
+            $arrCounts[$strName]['name'] = $strName;
+            $arrCounts[$strName]['new_today'] = count(array_filter($arrPluginJobsUnfiltered, "isNewJobToday_Interested_IsBlank"));
+            $arrCounts[$strName]['updated_today'] = count(array_filter($arrPluginJobsUnfiltered, "isJobUpdatedToday"));
+            $arrCounts[$strName]['total_not_interested'] = count(array_filter($arrPluginJobsUnfiltered, "isMarked_NotInterested"));
+            $arrCounts[$strName]['total_active'] = count(array_filter($arrPluginJobsUnfiltered, "isMarked_InterestedOrBlank"));
+            $arrCounts[$strName]['total_listings'] = count($arrPluginJobsUnfiltered);
+        }
+
+
         switch ($fLayoutType)
         {
             case "html":
@@ -1230,28 +1240,92 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         return $content;
     }
 
+    private function _printResultsLine_($arrRow, $strType="TEXT")
+    {
+        if($arrRow == null || !isset($arrRow) || !is_array($arrRow)) return "";
+
+        $strOut = "";
+        $fFirstCol = true;
+
+        // Fixup the names for our special case values
+        switch($arrRow['name'])
+        {
+            case C__RESULTS_INDEX_ALL:
+                $arrRow['name'] = "Total";
+                break;
+            case C__RESULTS_INDEX_USER:
+                $arrRow['name'] = "User Input";
+                break;
+        }
+
+        if($strType == "HTML")
+        {
+            $strOut .=  PHP_EOL . "<tr class='job_scooper'>". PHP_EOL;
+        }
+
+        foreach($arrRow as $value)
+        {
+            switch ($strType)
+            {
+                case "HTML":
+                    if($fFirstCol == true)
+                    {
+                        $strOut .= "<td class='job_scooper' width='20%' align='left'>" . $value . "</td>" . PHP_EOL;
+                        $fFirstCol = false;
+                    }
+                    else
+                        $strOut .= "<td class='job_scooper' width='10%' align='center'>" . $value . "</td>" . PHP_EOL;
+                    break;
+
+                case "TEXT":
+                default:
+                    $strOut = $strOut . sprintf("%-18s", $value);
+                    break;
+            }
+        }
+        if($strType == "HTML")
+        {
+            $strOut .=  PHP_EOL . "</tr>". PHP_EOL;
+        }
+
+        $strOut .=  PHP_EOL;
+        return $strOut;
+    }
+
     private function _getResultsTextPlain_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrExcluded)
     {
         $strOut = "";
+        $arrCounts_TotalAll = null;
+        $arrCounts_TotalUser = null;
 
         if($arrCounts != null && count($arrCounts) > 0)
         {
-            $strOut = $strOut . sprintf("%-18s", "Job Site");
+            $strOut = $strOut . sprintf("%-18s", "Site");
             foreach($arrHeaders as $value)
             {
                 $strOut = $strOut . sprintf("%-18s", $value);
             }
-            $strOut = $strOut . PHP_EOL;
+            $strOut .=  PHP_EOL . sprintf("%'-100s","") . PHP_EOL;
+
             usort($arrCounts, "sortByCountDesc");
             foreach($arrCounts as $site)
             {
-                foreach($site as $value)
-                {
-                    $strOut = $strOut . sprintf("%-18s", $value);
+                if($site['name'] == C__RESULTS_INDEX_ALL) {
+                    $arrCounts_TotalAll = $site;
+                } elseif($site['name'] == C__RESULTS_INDEX_USER) {
+                    $arrCounts_TotalUser = $site;
                 }
-                $strOut = $strOut . PHP_EOL;
+                else
+                {
+                    $strOut .= $this->_printResultsLine_($site, "TEXT");
+                }
             }
-            $strOut = $strOut . PHP_EOL;
+
+
+            $strOut .= sprintf("%'=100s","") . PHP_EOL;
+            $strOut .= $this->_printResultsLine_($arrCounts_TotalUser);
+            $strOut .= $this->_printResultsLine_($arrCounts_TotalAll);
+            $strOut .= PHP_EOL;
         }
 
         if($arrNoJobUpdates != null && count($arrNoJobUpdates) > 0)
@@ -1269,34 +1343,20 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         if($arrExcluded != null && count($arrExcluded) > 0)
         {
             sort($arrExcluded);
-            $strOut = $strOut . PHP_EOL .  "Excluded sites for this run:" . PHP_EOL;
-
-            $nItemPerLineCount = 0;
-            foreach($arrExcluded as $site)
-            {
-                if($nItemPerLineCount == 0)
-                {
-                    $strOut = $strOut . "     - ". $site;
-                    $nItemPerLineCount += 1;
-                }
-                elseif($nItemPerLineCount < 5) {
-                    $strOut = $strOut . ", ". $site;
-                    $nItemPerLineCount += 1;
-                }
-                else
-                {
-                    $strOut = $strOut . ", ". $site . PHP_EOL;
-                    $nItemPerLineCount = 0;
-                }
-            }
+            $strExcluded = getArrayValuesAsString($arrExcluded, ", ", "Sites excluded by user or settings: ", false);
+            $strOut .= $strExcluded;
         }
+
 
         return $strOut;
     }
 
     private function _getResultsTextHTML_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrExcluded)
     {
+        $arrCounts_TotalAll = null;
+        $arrCounts_TotalUser = null;
         $strOut = "<div class='job_scooper outer'>";
+        $strOut  .= "<H2>Job Scooper Results for " . date("D, M d") . "</H2>".PHP_EOL. PHP_EOL;
 
         if($arrCounts != null && count($arrCounts) > 0)
         {
@@ -1312,20 +1372,23 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             usort($arrCounts, "sortByCountDesc");
             foreach($arrCounts as $site)
             {
-                $strOut .=  PHP_EOL . "<tr class='job_scooper'>". PHP_EOL;
-                $strOut .= "<td class='job_scooper' width='20%' align='left'>" . $site['name'] . "</td>" . PHP_EOL;
-                $fFirstCol = true;
-                foreach($site as $value)
-                {
-                    if($fFirstCol == true)
-                    {
-                        $fFirstCol = false;
-                        continue;
-                    }
-                    $strOut .= "<td class='job_scooper' width='10%' align='center'>" . $value . "</td>" . PHP_EOL;
+                if($site['name'] == C__RESULTS_INDEX_ALL) {
+                    $arrCounts_TotalAll = $site;
+                } elseif($site['name'] == C__RESULTS_INDEX_USER) {
+                    $arrCounts_TotalUser = $site;
                 }
-                $strOut .=  PHP_EOL . "</tr>". PHP_EOL;
+                else
+                {
+                    $strOut .= $this->_printResultsLine_($site, "HTML");
+                }
             }
+
+            $strOut .=  PHP_EOL . "<tr class='job_scooper totaluser'>". PHP_EOL;
+            $strOut .= $this->_printResultsLine_($arrCounts_TotalUser, "HTML");
+            $strOut .=  PHP_EOL . "</tr><tr class='job_scooper totalall'>". PHP_EOL;
+            $strOut .= $this->_printResultsLine_($arrCounts_TotalAll, "HTML");
+            $strOut .=  PHP_EOL . "</tr>". PHP_EOL;
+
             $strOut .=  PHP_EOL . "</table><br><br>". PHP_EOL. PHP_EOL;
         }
 
@@ -1347,32 +1410,15 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         if($arrExcluded != null && count($arrExcluded) > 0)
         {
             sort($arrExcluded);
+
             $strOut .=  PHP_EOL . "<div class='job_scooper section'>". PHP_EOL;
+            $strExcluded = getArrayValuesAsString($arrExcluded, ", ", "", false);
 
-            $strOut .=  PHP_EOL .  "<span style=\"font-size: xx-small;color: #8e959c;\">Excluded sites for this run: </span>" . PHP_EOL;
-            $strOut .=  PHP_EOL . "<ul class='job_scooper' style=\"font-size:xx-small; color:#8e959c\">". PHP_EOL;
+            $strOut .=  PHP_EOL .  "<span style=\"font-size: xx-small;color: #8e959c;\">Excluded sites for this run:" . PHP_EOL;
+            $strOut .= $strExcluded;
+            $strOut .= "</span>" . PHP_EOL;
 
-            $nItemPerLineCount = 0;
-            foreach($arrExcluded as $site)
-            {
-                if($nItemPerLineCount == 0)
-                {
-                    $strOut = $strOut . "<li>" . $site;
-                    $nItemPerLineCount += 1;
-                }
-                elseif($nItemPerLineCount < 5)
-                {
-                    $strOut = $strOut . ", ". $site;
-                    $nItemPerLineCount += 1;
-                }
-                else
-                {
-                    $strOut = $strOut . ", ". $site . "</li>". PHP_EOL;
-                    $nItemPerLineCount = 0;
-                }
-            }
 
-            $strOut .=  PHP_EOL . "</ul></div><br><br>". PHP_EOL;
         }
         $strOut .= "</div";
 
