@@ -189,6 +189,7 @@ class ClassJobsSitePluginCommon
             case "amazon":
             case "amazon com":
             case "a2z":
+            case "lab 126":
             case "amazon Web Services":
             case "amazon fulfillment services":
             case "amazonwebservices":
