@@ -32,7 +32,7 @@ class PluginCraigslist  extends ClassJobsSitePlugin
 
     function __construct($strBaseDir = null)
     {
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS | C__JOB_LOCATION_REQUIRES_LOWERCASE;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS | C__JOB_LOCATION_REQUIRES_LOWERCASE | C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS;
         parent::__construct($strBaseDir);
     }
 
