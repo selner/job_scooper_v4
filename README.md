@@ -29,21 +29,7 @@ location-city-comma-state-country-no-commas="seattle washington united states"
 
 * Set the notification email address and output folder path in your config.ini file.  
 
-* Run Job Scooper.   
-
-That's it!  
-
-###To Run Jobs_Scooper:###
-``/usr/bin/php "main/runJobs.php" -all -days 3 -ini myconfig.ini``
-
-####Required Parameters:####
-```man
--ini : Path to your configuration ini file (see examples/example_config.ini) 
--days X:  number of days before today to download listings for. 
--all:  run all the searches found in the .ini file.  Alternatively, you can specify the name of a single job site to run only that site's searches.  e.g. ``-amazon``
-```
-
-
+That's all you need to do.  Just [run Jobs Scooper](https://github.com/selner/jobs_scooper/wiki/Running-Jobs-Scooper) and let it do the work for you.
 
 ####To Run Jobs_Scooper:
 ``/usr/bin/php "main/runJobs.php" -all -days 3 -ini myconfig.ini``
@@ -56,21 +42,16 @@ Required Parameters:
 ```
 
 
-###Tune Up Your Results! 
+##Power Up Your Results! 
 If you're looking at job listings across many sites, Job Scooper has some built-in features to make that work much easier:
-
 * **Automatic duplication detection:**  if the same job is posted on multiple sites, job scooper automatically marks all but the first one as duplicates so you don't waste time reviewing the same job again. 
-
 * **Filter to title-only matches for the keywords:**  The majority of sites do not support filtering your search to match only the job title.  One of the best features of Job Scooper is that it let's you filter to title-only matches for any site, regardless of whether the site supports it or not!
-
 * **Filter out jobs you've already reviewed** 
 * **Exclude specific companies automatically**
 * **Exclude particular job titles automatically**
-
 That's just the start of [what Jobs Scooper can do](https://github.com/selner/jobs_scooper/wiki).
 
-
-###Other Stuff
+##Other Stuff
 * Version:  v2.0
 * Author:  Bryan Selner (dev at recoilvelocity dot com)
 * Platforms:  
