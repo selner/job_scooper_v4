@@ -4,7 +4,7 @@ Get email alerts with links to latest jobs matching your favorite search terms f
 Jobs Scooper currently supports [over 60 different sites](https://github.com/selner/jobs_scooper/wiki/Jobs-Scooper:--Sites-Supported), including CareerBuilder, Craigslist, DotJobs, EmploymentGuide, Expedia, Glassdoor, Groupon, Indeed, LinkUp, Mashable, Monster,  SimplyHired, StartupHire, Tableau and ZipRecruiter.  [view all supported sites](https://github.com/selner/jobs_scooper/wiki/Jobs-Scooper:--Sites-Supported) to see the full list.
 
 ###Configuration is easy.###
-* Make a copy of the [example_config.ini](https://github.com/selner/jobs_scooper/blob/master/examples/example_config.ini) and edit it's settings to match the search keywords and locations that you want:
+First, make a copy of the [example_config.ini](https://github.com/selner/jobs_scooper/blob/master/examples/example_config.ini) and edit it's settings to match the search keywords and locations that you want:
 ```INI
 [search_keyword_set]
 [search_keyword_set.analytics]
@@ -27,12 +27,9 @@ location-city-comma-state-country="seattle, washington, united states"
 location-city-comma-state-country-no-commas="seattle washington united states"
 ```
 
-* Set the notification email address and output folder path in your config.ini file.  
+Then update config.ini values for your notification email address and output folder path.  That's it!  [Run Jobs Scooper](https://github.com/selner/jobs_scooper/wiki/Running-Jobs-Scooper) and let it do the work for you.
 
-That's all you need to do.  Just [run Jobs Scooper](https://github.com/selner/jobs_scooper/wiki/Running-Jobs-Scooper) and let it do the work for you.
-
-####Running Jobs_Scooper
-Type:
+To run Jobs Scooper, type:
 ``/usr/bin/php "main/runJobs.php" -all -days 3 -ini myconfig.ini``
 
 Required Parameters:
