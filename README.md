@@ -1,7 +1,58 @@
 #Jobs Scooper 
-Download the latest jobs from any websites into one comma-separated value (CSV) for Excel.  Configuration is easy.  You just need to specify the URL of the search and a name for it in your configuartion INI file.  Jobs Scooper does the rest.
+Get email alerts with links to latest jobs matching your favorite search terms from any job site or company's careers website and a .CSV file of the full set of matches.  
 
-The majority of plugins support letting you just set a keyword and location to use for the search.  The plugin then maps that to the correct URL format for that site and runs the search.
+###Supported Job Sites
+Jobs Scooper supports [at least 60 different sites already](https://github.com/selner/jobs_scooper/wiki/Jobs-Scooper:--Sites-Supported), such as CareerBuilder, Craigslist, DotJobs, Ebay, EmploymentGuide, Expedia, Glassdoor, Groupon, Indeed, LinkUp, Mashable, Monster,  SimplyHired, Tableau and ZipRecruiter.  [Head over to the wiki](https://github.com/selner/jobs_scooper/wiki/Jobs-Scooper:--Sites-Supported) to see the full list.
+
+###Configuration is easy.###
+* Make a copy of the [example_config.ini](https://github.com/selner/jobs_scooper/blob/master/examples/example_config.ini) and edit it's settings to match the search keywords and locations that you want:
+```INI
+[search_keyword_set]
+[search_keyword_set.analytics]
+keywords[]="analytics manager"   ;# will pick up analytics manager and senior/sr analytics manager
+keywords[]="Digital market"
+keywords[]="director"
+keyword_match_type="in-title"
+settings_scope="all-sites"
+excluded_jobsites[]="AcandiaAdvocate"
+
+[search_location_setting_set]
+
+[search_location_setting_set.Seattle]
+name="Seattle"
+location-city="Seattle"
+location-city-comma-statecode="seattle, wa"
+location-city-comma-statecode-underscores-and-dashes="seattle__2c-wa"
+location-city-comma-state="seattle, washington"
+location-city-comma-state-country="seattle, washington, united states"
+location-city-comma-state-country-no-commas="seattle washington united states"
+```
+
+* Set the notification email address and output folder path in your config.ini file.  
+
+* Run Job Scooper.   
+
+That's it!  
+
+###To Run Jobs_Scooper:###
+``/usr/bin/php "main/runJobs.php" -all -days 3 -ini myconfig.ini``
+
+####Required Parameters:####
+```man
+-ini : Path to your configuration ini file (see examples/example_config.ini) 
+-days X:  number of days before today to download listings for. 
+-all:  run all the searches found in the .ini file.  Alternatively, you can specify the name of a single job site to run only that site's searches.  e.g. ``-amazon``
+```
+
+###Configuration is easy.###
+
+
+The majority of plugins support letting you just set a keyword and location to use for a search.  You can also specify a specific search URL for any search.  Jobs Scooper does the rest.  
+
+
+
+
+
 
 Here's an example for a ZipRecruiter search: 
 ```INI
