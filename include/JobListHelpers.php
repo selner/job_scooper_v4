@@ -341,7 +341,7 @@ function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strD
 
         if($fIsFirstItem == true)
         {
-            $strReturn = $strIntro . $strVal;
+            $strReturn = $strIntro;
         }
         else
         {
