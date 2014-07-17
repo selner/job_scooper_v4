@@ -154,6 +154,11 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
             $titleNode = $node->find("h4[class='font14 fBold mb2 font13Phone']");
             $item['job_title'] = $titleNode[0]->plaintext;
 
+            // Removes " NEW!" from the job title.  ZipRecruiter tends to occasionally
+            // have that appended which then fails de-duplication. (Fixes issue #45)
+            $item['job_title'] = str_ireplace(" NEW!", "", $item['job_title']);
+
+
 
             $titleLink = $node->find("a[class='clickable_target']")[0];
             $item['job_post_url'] = $titleLink->href;
