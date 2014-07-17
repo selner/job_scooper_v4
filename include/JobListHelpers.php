@@ -319,7 +319,7 @@ function updateJobColumn(&$job, $newJob, $strColumn, $fAllowEmptyValueOverwrite 
 
 }
 
-function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strDelimiter = "", $strIntro = "")
+function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strDelimiter = "", $strIntro = "", $fIncludeKey = true)
 {
     $strReturn = "";
 
@@ -347,14 +347,19 @@ function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strD
         {
             $strReturn .= $strDelimiter;
         }
-        $strReturn .= $key . '=['.$strVal.']';
+        if($fIncludeKey == true) {
+            $strReturn .= $key . '=['.$strVal.']';
+        } else {
+            $strReturn .= $strVal;
+        }
+
     }
 
 
     return $strReturn;
 }
 
-function getArrayValuesAsString($arrDetails, $strDelimiter = ", ", $strIntro = "")
+function getArrayValuesAsString($arrDetails, $strDelimiter = ", ", $strIntro = "", $fIncludeKey = true)
 {
     $strReturn = "";
 
@@ -362,7 +367,7 @@ function getArrayValuesAsString($arrDetails, $strDelimiter = ", ", $strIntro = "
     {
         foreach(array_keys($arrDetails) as $key)
         {
-            $strReturn .= getArrayItemDetailsAsString($arrDetails, $key, (strlen($strReturn) <= 0), $strDelimiter, $strIntro);
+            $strReturn .= getArrayItemDetailsAsString($arrDetails, $key, (strlen($strReturn) <= 0), $strDelimiter, $strIntro, $fIncludeKey);
         }
     }
 
