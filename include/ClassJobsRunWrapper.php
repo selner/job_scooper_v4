@@ -133,8 +133,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     function __destruct()
     {
-        if($GLOBALS['OPTS']['DEBUG'] == true)
-             if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
+//        if($GLOBALS['OPTS']['DEBUG'] == true)
+//             if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
     }
 
     function getMyOutputFileFullPath($strFilePrefix = "")
@@ -414,6 +414,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                 //
                 if($this->arrSearchKeywordSetsToRun[$strSetName]['included_jobsites_array'] != null && count($this->arrSearchKeywordSetsToRun[$strSetName]['included_jobsites_array']) > 0)
                 {
+                    $arrSkippedPlugins = "";
+
                     foreach($this->arrSearchKeywordSetsToRun[$strSetName]['included_jobsites_array'] as $siteToSearch)
                     {
                         $classPlug = new $GLOBALS['DATA']['site_plugins'][$siteToSearch]['class_name'](null, null);
@@ -440,10 +442,10 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                         }
                         else
                         {
-                            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($siteToSearch . " requires url_format to be specfied in the INI file; cannot set searches for keyword settings: " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
+                            $arrSkippedPlugins[] = $siteToSearch;
                         }
                     }
+                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Skipped " . count($arrSkippedPlugins) ." plugins because they do not support keyword search: " . getArrayValuesAsString($arrSkippedPlugins, ", ", null, false). "." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 }
             }
 
