@@ -74,6 +74,13 @@ function __initializeArgs__()
             'required'      => false,
             'short'      => 'debug',
         ),
+        'skip_notifications' => array(
+            'description'   => 'Send email notifications of the completed run.',
+            'default'       => 1,
+            'type'          => Pharse::PHARSE_INTEGER,
+            'required'      => false,
+            'short'      => 'nonotify',
+        ),
     );
 
 

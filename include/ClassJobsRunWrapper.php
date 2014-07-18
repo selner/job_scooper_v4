@@ -786,7 +786,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // Output only records that are new or not marked as excluded (aka "Yes" or "Maybe")
         $arrJobs_Active = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_ActiveJobs", "CSV");
         $arrJobs_Active = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_ActiveJobs", "HTML", null, $this->getKeysForHTMLOutput());
-        $detailsHTMLFile = $this->__getAlternateOutputFileDetails__("HTML", "", "_ActiveJobs");
 
         $arrJobs_Updated = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedToday", "_UpdatedJobs");
         $arrJobs_UpdatedButFiltered  = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayNotInterested", "_UpdatedExcludedJobs");
@@ -794,6 +793,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // Output only new records that haven't been looked at yet
         $arrJobs_NewOnly = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "CSV");
         $arrJobs_NewOnly = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "HTML", null, $this->getKeysForHTMLOutput());
+        $detailsHTMLFile = $this->__getAlternateOutputFileDetails__("HTML", "", "_NewJobs_ForReview");
 
         // Output all records that were automatically excluded
         $arrJobs_AutoExcluded = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", "_ExcludedJobs");
@@ -804,7 +804,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // Output all records that were previously marked excluded manually by the user
         // $arrJobs_ManualExcl = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isMarked_ManuallyNotInterested", "_ManuallyExcludedJobs");
 
-        $strResultCountsText = $this->getListingCountsByPlugin("text");
+        $strResultCountsText = $this->getListingCountsByPlugin("text", $arrFinalJobs_SortedByCompanyRole );
 
 
 
@@ -834,20 +834,19 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     private function __sendJobCompletedEmail__($strBodyText = null, $strBodyHTML = null, $detailsFileCSV = null, $detailsFileHTML = null)
     {
-        if($GLOBALS['OPTS']['use_debug'] == true)
+        if($GLOBALS['OPTS']['skip_notifications'] != 1)
         {
-            $GLOBALS['logger']->logLine(PHP_EOL."Debug mode = true, so skipping email notifications.".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
-            return;
-        }
+            $ret = $this->__sendJobCompletedEmail_PHP__($strBodyText, $strBodyHTML, $detailsFileCSV, $detailsFileHTML);
+            // $ret = $this->__sendJobCompletedEmail_Applescript__($strBodyText, $detailsFileCSV, $detailsFileHTML);
+            if($ret != true)
+            {
+                $GLOBALS['logger']->logLine("Failed to send notification email.", \Scooper\C__DISPLAY_ERROR__);
 
-        $ret = $this->__sendJobCompletedEmail_PHP__($strBodyText, $strBodyHTML, $detailsFileCSV, $detailsFileHTML);
-        // $ret = $this->__sendJobCompletedEmail_Applescript__($strBodyText, $detailsFileCSV, $detailsFileHTML);
-        if($ret != true)
-        {
-            $GLOBALS['logger']->logLine("Failed to send notification email.", \Scooper\C__DISPLAY_ERROR__);
-
+            }
         }
-        return;
+        else
+
+            $GLOBALS['logger']->logLine(PHP_EOL."Skipping email notifications (-send_notifications = 0)".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
 
     }
 
@@ -1131,7 +1130,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     }
 
 
-    private function getListingCountsByPlugin($fLayoutType)
+    private function getListingCountsByPlugin($fLayoutType, $arrPluginJobsUnfiltered = null)
     {
 
         $arrCounts = null;
@@ -1160,7 +1159,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $arrSitesSearched[strtolower($searchDetails['site_name'])] = true;
         }
 
-        $arrPluginJobsUnfiltered = $this->getMyJobsList();
+        if($arrPluginJobsUnfiltered == null || !isset($arrPluginJobsUnfiltered) || !is_array($arrPluginJobsUnfiltered))
+            $arrPluginJobsUnfiltered = $this->getMyJobsList();
 
         foreach( $GLOBALS['DATA']['site_plugins'] as $plugin_setup)
         {
