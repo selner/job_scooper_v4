@@ -804,7 +804,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // Output all records that were previously marked excluded manually by the user
         // $arrJobs_ManualExcl = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isMarked_ManuallyNotInterested", "_ManuallyExcludedJobs");
 
-        $strResultCountsText = $this->getListingCountsByPlugin("text");
+        $strResultCountsText = $this->getListingCountsByPlugin("text", $arrFinalJobs_SortedByCompanyRole );
 
 
 
@@ -834,13 +834,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     private function __sendJobCompletedEmail__($strBodyText = null, $strBodyHTML = null, $detailsFileCSV = null, $detailsFileHTML = null)
     {
-        if($GLOBALS['OPTS']['send_notifications'] != true)
+        if($GLOBALS['OPTS']['skip_notifications'] != 1)
         {
-            $GLOBALS['logger']->logLine(PHP_EOL."Debug mode = true, so skipping email notifications.".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
-        }
-        else
-        {
-
             $ret = $this->__sendJobCompletedEmail_PHP__($strBodyText, $strBodyHTML, $detailsFileCSV, $detailsFileHTML);
             // $ret = $this->__sendJobCompletedEmail_Applescript__($strBodyText, $detailsFileCSV, $detailsFileHTML);
             if($ret != true)
@@ -849,6 +844,9 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
             }
         }
+        else
+
+            $GLOBALS['logger']->logLine(PHP_EOL."Skipping email notifications (-send_notifications = 0)".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
 
     }
 
@@ -1132,7 +1130,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     }
 
 
-    private function getListingCountsByPlugin($fLayoutType)
+    private function getListingCountsByPlugin($fLayoutType, $arrPluginJobsUnfiltered = null)
     {
 
         $arrCounts = null;
@@ -1161,7 +1159,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $arrSitesSearched[strtolower($searchDetails['site_name'])] = true;
         }
 
-        $arrPluginJobsUnfiltered = $this->getMyJobsList();
+        if($arrPluginJobsUnfiltered == null || !isset($arrPluginJobsUnfiltered) || !is_array($arrPluginJobsUnfiltered))
+            $arrPluginJobsUnfiltered = $this->getMyJobsList();
 
         foreach( $GLOBALS['DATA']['site_plugins'] as $plugin_setup)
         {
