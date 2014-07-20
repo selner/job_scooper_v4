@@ -33,14 +33,16 @@ class ClassJobsSitePluginCommon
     {
         return array(
             'search_key' => null,
-            'site_name' => null,
             'search_name' => null,
-            'base_url_format' => null,
-            'location_search_override' => null,
-            'keyword_search_override' => null,
+            'site_name' => null,
             'keywords_string_for_url' => null,
-            'keyword_set' => null,
+            'location_search_value' => null,
+            'base_url_format' => null,
             'user_setting_flags' => C__USER_KEYWORD_MATCH_DEFAULT,
+            'location_user_specified_override' => null,
+            'location_set' => null,
+            'keyword_search_override' => null,
+            'keyword_set' => null,
         );
     }
 
@@ -110,7 +112,7 @@ class ClassJobsSitePluginCommon
 
         if($flag)
         {
-            switch($strMatchType)
+            switch($flag)
             {
                 case C__USER_KEYWORD_MUST_BE_IN_TITLE:
                     $retString = C__USER_KEYWORD_MUST_BE_IN_TITLE_AS_STRING;
@@ -977,7 +979,6 @@ class ClassJobsSitePluginCommon
         return $objSimpleHTML;
     }
 
-
     function getOutputFileFullPath($strFilePrefix = "", $strBase = 'jobs', $strExtension = 'csv')
     {
         $strNewFileName = getDefaultJobsOutputFileName($strFilePrefix, $strBase , $strExtension);
@@ -986,6 +987,8 @@ class ClassJobsSitePluginCommon
 
         return $detailsNewFile['full_file_path'];
     }
+
+
 
 
     function getSimpleHTMLObjForFileContents($strInputFileFullPath)

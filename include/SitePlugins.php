@@ -20,6 +20,7 @@ require_once(__ROOT__.'/include/Options.php');
 require_once(__ROOT__.'/lib/Linkify.php');
 require_once(__ROOT__.'/include/ClassJobsSitePlugin.php');
 require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
+require_once(__ROOT__.'/include/ClassConfig.php');
 require_once(__ROOT__.'/include/ClassJobsRunWrapper.php');
 
 
