@@ -27,7 +27,7 @@ class PluginIndeed extends ClassJobsSitePlugin
     protected $flagSettings = null;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $strKeywordDelimiter = "OR";
-    protected $strTitleOnlySearchKeywordFormat = "title:(%s)";
+    protected $strTitleOnlySearchKeywordFormat = "title:%s";
 
 
     function __construct($strBaseDir = null)
