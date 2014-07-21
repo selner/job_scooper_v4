@@ -22,7 +22,7 @@ require_once(__ROOT__.'/include/SitePlugins.php');
 class ClassConfig extends ClassJobsSitePlugin
 {
     protected $nNumDaysToSearch = -1;
-    protected $arrFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null, 'user_input_files' => array('data_type' => null, 'file_details' => null));
+    protected $arrFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null, 'user_input_files' => null);
     protected $arrEmailAddresses = null;
     protected $configSettings = array('searches' => null, 'keyword_sets' => null, 'location_sets' => null, 'number_days'=>VALUE_NOT_SUPPORTED);
     protected $arrEmail_PHPMailer_SMTPSetup = null;
@@ -197,24 +197,24 @@ class ClassConfig extends ClassJobsSitePlugin
                     $tempFileDetails = \Scooper\parseFilePath($this->arrFileDetails['input_folder']['directory'].$iniInputFile['name'], true);
 
                     if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Processing input file '" . $this->arrFileDetails['input_folder']['directory'].$iniInputFile['name'] . "' with type of '". $iniInputFile['type'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
-                    $this->__addInputFile__($tempFileDetails, $iniInputFile['type'], $iniInputFile['sheet']);
+                    $this->__addInputFile__($iniInputFile);
 
                     switch($iniInputFile['type'])
                     {
                         case "jobs":
-                            $this->arrFileDetails['input_jobs_csv_files'][] = $this->arrFileDetails['input_folder']['directory'] . $iniInputFile['name'];
+                            $this->__addInputFile__($this->arrFileDetails['input_folder']['directory'] . $iniInputFile['name'], "jobs");
                             break;
 
                         case "titles_filter":
-                            \Scooper\setGlobalFileDetails('titles_file_details', true, $this->arrFileDetails['input_folder']['directory'] . $iniInputFile['name']);
+                            \Scooper\setGlobalFileDetails('titles_file_details', true, $tempFileDetails['full_file_path']);
                             break;
 
                         case "regex_filter_titles":
-                            \Scooper\setGlobalFileDetails('titles_regex_file_details', true, $this->arrFileDetails['input_folder']['directory'] . $iniInputFile['name']);
+                            \Scooper\setGlobalFileDetails('titles_regex_file_details', true, $tempFileDetails['full_file_path']);
                             break;
 
                         case "regex_filter_companies":
-                            \Scooper\setGlobalFileDetails('companies_regex_file_details', true, $this->arrFileDetails['input_folder']['directory'] . $iniInputFile['name']);
+                            \Scooper\setGlobalFileDetails('companies_regex_file_details', true, $tempFileDetails['full_file_path']);
                             break;
 
 
@@ -225,31 +225,75 @@ class ClassConfig extends ClassJobsSitePlugin
 
         $this->_parseEmailSetupFromINI_($config);
 
-        $this->__getSearchesFromConfig__($config);
+        $this->__readSearchesFromConfig__($config);
+
+        $this->__readKeywordSetsFromConfig__($config);
+
+        $this->__readLocationSetsFromConfig__($config);
+
+        $this->_loadTitlesRegexesToFilter_();
+
+        $this->_loadCompanyRegexesToFilter_();
+
+
+
+
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Completed loading configuration from INI file:  ".var_export($GLOBALS['OPTS'], true), \Scooper\C__DISPLAY_SUMMARY__);
 
     }
-
-    private function __getSearchesFromConfig__($config)
+    private function __getEmptyEmailRecord__()
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading searches from config file...", \Scooper\C__DISPLAY_ITEM_START__);
-        if(!$config) throw new ErrorException("Invalid configuration.  Cannot load user's searches.");
-
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading keyword set from config file...", \Scooper\C__DISPLAY_ITEM_START__);
-
-
-        $this->__readSearchesFromConfig__($config);
-        $this->__readKeywordSetsFromConfig__($config);
-        $this->__readLocationSetsFromConfig__($config);
-
-
+        return array('type'=> null, 'name'=>null, 'address' => null);
     }
+    private function __addInputFile__($iniInputFileItem)
+    {
+        $tempFileDetails = null;
+        if(isset($iniInputFileItem['path']))
+        {
+            $tempFileDetails = \Scooper\parseFilePath($iniInputFileItem['path'], true);
+
+        }
+        elseif(isset($iniInputFileItem['name']))
+        {
+            $tempFileDetails = \Scooper\parseFilePath($this->arrFileDetails['input_folder']['directory'].$iniInputFileItem['name'], true);
+        }
+
+        if(isset($tempFileDetails))
+        {
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Processing input file '" . $this->arrFileDetails['input_folder']['directory'].$iniInputFileItem['name'] . "' with type of '". $iniInputFile['type'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
+
+            $this->arrFileDetails['user_input_files'][]= array('details'=> $tempFileDetails, 'data_type' => $iniInputFileItem['type']);
+        }
+    }
+
+    private function __getInputFilesByType__($strType)
+    {
+        $ret = $this->__getInputFilesByValue__('data_type', $strType);
+
+        return $ret;
+    }
+
+    private function __getInputFilesByValue__($valKey, $val)
+    {
+        $ret = null;
+        foreach($this->arrFileDetails['user_input_files'] as $fileItem)
+        {
+            if(strcasecmp($fileItem[$valKey], $val) == 0)
+            {
+                $ret[] = $fileItem;
+            }
+        }
+
+        return $ret;
+    }
+
 
 
     private function __readSearchesFromConfig__($config)
     {
+        if(!$config) throw new ErrorException("Invalid configuration.  Cannot load user's searches.");
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading searches from config file...", \Scooper\C__DISPLAY_ITEM_START__);
 
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->configSettings['keyword_sets']) . " keyword sets to use for searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
         if($config->search)
         {
             if(is_object($config->search))
@@ -365,6 +409,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
     private function __readKeywordSetsFromConfig__($config)
     {
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading keyword set from config file...", \Scooper\C__DISPLAY_ITEM_START__);
         if($config->search_keyword_set && is_object($config->search_keyword_set))
         {
             foreach($config->search_keyword_set as $ini_keyword_set)
@@ -574,6 +619,231 @@ class ClassConfig extends ClassJobsSitePlugin
 
     }
 
+    private function _addTitlesToFilterList_($arrTitlesToAdd)
+    {
+        foreach($arrTitlesToAdd as $titleRecord)
+        {
+            $strTitleKey = \Scooper\strScrub($titleRecord['job_title']);
+            $titleRecord['job_title'] = \Scooper\strScrub($titleRecord['job_title']);
+
+            $GLOBALS['DATA']['titles_to_filter'][$strTitleKey] = $titleRecord;
+        }
+
+    }
+
+
+
+    /**
+     * Initializes the global list of titles we will automatically mark
+     * as "not interested" in the final results set.
+     */
+    function _loadTitlesToFilter_()
+    {
+        $arrFileInput = $this->getInputFilesByType("regex_filter_titles");
+        $fTitlesLoaded = false;
+
+        $GLOBALS['DATA']['titles_regex_to_filter'] = array();
+        $nDebugCounter = 0;
+
+        if($GLOBALS['DATA']['titles_regex_to_filter'] != null && count($GLOBALS['DATA']['titles_regex_to_filter']) > 0)
+        {
+            // We've already loaded the titles; go ahead and return right away
+            $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['DATA']['titles_regex_to_filter']) . " regexed title strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            return;
+        }
+
+        foreach($arrFileInput as $fileItem)
+        {
+            $fileDetail = $fileItem['details'];
+
+
+            if($fileDetail != null)
+            {
+                if(file_exists($fileDetail ['full_file_path']) && is_file($fileDetail ['full_file_path']))
+                {
+                    $GLOBALS['logger']->logLine("Loading job titles to filter from ".$fileDetail ['full_file_path']."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    $classCSVFile = new \Scooper\ScooperSimpleCSV($fileDetail ['full_file_path'], 'r');
+                    $arrTitlesTemp = $classCSVFile->readAllRecords(true);
+                    $arrTitlesTemp = $arrTitlesTemp['data_rows'];
+                    $GLOBALS['logger']->logLine(count($arrTitlesTemp) . " titles found in the source file that will be automatically filtered from job listings." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+                    //
+                    // Add each title we found in the file to our list in this class, setting the key for
+                    // each record to be equal to the job title so we can do a fast lookup later
+                    //
+                    $GLOBALS['DATA']['titles_to_filter'] = array();
+                    $this->_addTitlesToFilterList_($arrTitlesTemp);
+                }
+            }
+
+        }
+
+
+        if(count($GLOBALS['DATA']['titles_to_filter']) <= 0)
+        {
+            $GLOBALS['logger']->logLine("Could not load the list of titles to exclude from '" . getArrayValuesAsString($arrFileInput) . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
+        }
+        else
+        {
+            $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['DATA']['titles_to_filter']) . " titles to exclude from '" . getArrayValuesAsString($arrFileInput). "'." , \Scooper\C__DISPLAY_WARNING__);
+
+        }
+    }
+
+
+    private function _loadTitlesRegexesToFilter_()
+    {
+        $arrFileInput = $this->getInputFilesByType("regex_filter_titles");
+        $fTitlesLoaded = false;
+
+        $GLOBALS['DATA']['titles_regex_to_filter'] = array();
+        $nDebugCounter = 0;
+
+        if($GLOBALS['DATA']['titles_regex_to_filter'] != null && count($GLOBALS['DATA']['titles_regex_to_filter']) > 0)
+        {
+            // We've already loaded the titles; go ahead and return right away
+            $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['DATA']['titles_regex_to_filter']) . " regexed title strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            return;
+        }
+
+        foreach($arrFileInput as $fileItem)
+        {
+            $fileDetail = $fileItem['details'];
+
+            if($fileDetail != null && $fileDetail ['full_file_path'] != '')
+            {
+                if(file_exists($fileDetail ['full_file_path'] ) && is_file($fileDetail ['full_file_path'] ))
+                {
+                    $GLOBALS['logger']->logLine("Loading job title regexes to filter from ".$fileDetail ['full_file_path']."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    $classCSVFile = new \Scooper\ScooperSimpleCSV($fileDetail ['full_file_path'] , 'r');
+                    $arrTitlesTemp = $classCSVFile->readAllRecords(true);
+                    $arrTitlesTemp = $arrTitlesTemp['data_rows'];
+                    $GLOBALS['logger']->logLine(count($arrTitlesTemp) . " titles found in the source file " . $fileDetail['file_name'] . " that will be automatically filtered from job listings." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+                    //
+                    // Add each title we found in the file to our list in this class, setting the key for
+                    // each record to be equal to the job title so we can do a fast lookup later
+                    //
+                    foreach($arrTitlesTemp as $titleRecord)
+                    {
+                        $arrRXInput = explode("|", strtolower($titleRecord['match_regex']));
+                        foreach($arrRXInput as $rxItem)
+                        {
+                            $rx = '/'.$rxItem.'/i';
+                            //                        $GLOBALS['logger']->logLine("Testing regex record " .$nDebugCounter . " with value of " . $rx , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                            try
+                            {
+                                $testMatch = preg_match($rx, "empty");
+
+                            }
+                            catch (Exception $ex)
+                            {
+                                $strError = "Regex test failed on # " . $nDebugCounter . ", value " . $rxItem .".  Skipping.  Error: '".$ex->getMessage();
+                                $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
+                                if($GLOBALS['OPTS']['DEBUG'] == true) { throw new ErrorException( $strError); }
+                            }
+                            $GLOBALS['DATA']['titles_regex_to_filter'][] = $rx;
+                        }
+                        $nDebugCounter = $nDebugCounter + 1;
+                    }
+                    $fTitlesLoaded = true;
+                }
+
+            }
+        }
+
+        if($fTitlesLoaded == false)
+        {
+            if(count($arrFileInput) ==0)
+                $GLOBALS['logger']->logLine("No file specified for title regexes to exclude.'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
+            else
+                $GLOBALS['logger']->logLine("Could not load regex list for titles to exclude from '" . getArrayValuesAsString($arrFileInput) . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
+        }
+        else
+        {
+            $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($GLOBALS['DATA']['titles_regex_to_filter']) . " regexes to use for filtering titles from '" . getArrayValuesAsString($arrFileInput) . "'." , \Scooper\C__DISPLAY_WARNING__);
+
+        }
+
+    }
+
+
+
+    /**
+     * Initializes the global list of titles we will automatically mark
+     * as "not interested" in the final results set.
+     */
+    function _loadCompanyRegexesToFilter_()
+    {
+        if($GLOBALS['DATA']['companies_regex_to_filter'] != null && count($GLOBALS['DATA']['companies_regex_to_filter']) > 0)
+        {
+            // We've already loaded the companies; go ahead and return right away
+            $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['DATA']['companies_regex_to_filter']) . " regexed company strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            return;
+        }
+        $arrFileInput = $this->getInputFilesByType("companies_regex_to_filter");
+
+        $GLOBALS['DATA']['companies_regex_to_filter'] = array();
+
+        if($GLOBALS['DATA']['companies_regex_to_filter'] != null && count($GLOBALS['DATA']['companies_regex_to_filter']) > 0)
+        {
+            // We've already loaded the titles; go ahead and return right away
+            $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['DATA']['companies_regex_to_filter']) . " regexed title strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            return;
+        }
+        $fCompaniesLoaded = false;
+
+        foreach($arrFileInput as $fileItem)
+        {
+            $fileDetail = $fileItem['details'];
+
+
+        if($fileDetail != null && $fileDetail ['full_file_path'] != '')
+        {
+            $strFileName = $fileDetail ['full_file_path'];
+            if(file_exists($fileDetail ['full_file_path'] ) && is_file($fileDetail ['full_file_path'] ))
+            {
+                $GLOBALS['logger']->logLine("Loading job Company regexes to filter from ".$fileDetail ['full_file_path']."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                $classCSVFile = new \Scooper\ScooperSimpleCSV($fileDetail ['full_file_path'] , 'r');
+                $arrCompaniesTemp = $classCSVFile->readAllRecords(true);
+                $arrCompaniesTemp = $arrCompaniesTemp['data_rows'];
+                $GLOBALS['logger']->logLine(count($arrCompaniesTemp) . " companies found in the source file that will be automatically filtered from job listings." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+                //
+                // Add each Company we found in the file to our list in this class, setting the key for
+                // each record to be equal to the job Company so we can do a fast lookup later
+                //
+                $GLOBALS['DATA']['companies_regex_to_filter'] = array();
+                foreach($arrCompaniesTemp as $CompanyRecord)
+                {
+                    $arrRXInput = explode("|", strtolower($CompanyRecord['match_regex']));
+
+                    foreach($arrRXInput as $rxItem)
+                    {
+                        $rx = '/'.$rxItem.'/';
+
+                        $GLOBALS['DATA']['companies_regex_to_filter'][] = $rx;
+                    }
+                }
+                $fCompaniesLoaded = true;
+            }
+        }
+
+        if($fCompaniesLoaded == false)
+        {
+            if(count($arrFileInput) == 0)
+                $GLOBALS['logger']->logLine("No file specified for companies regexes to exclude from '" . getArrayValuesAsString($arrFileInput) . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
+            else
+                $GLOBALS['logger']->logLine("Could not load regex list for companies to exclude from '" . getArrayValuesAsString($arrFileInput) . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
+        }
+        else
+        {
+            $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['DATA']['companies_regex_to_filter']). " regexes to use for filtering companies from " . getArrayValuesAsString($arrFileInput)  , \Scooper\C__DISPLAY_WARNING__);
+
+        }
+      }
+    }
+
     function parseJobsListForPage($objSimpHTML)
     {
         throw new ErrorException("parseJobsListForPage not supported for class" . get_class($this));
@@ -583,34 +853,5 @@ class ClassConfig extends ClassJobsSitePlugin
         throw new ErrorException("parseTotalResultsCount not supported for class " . get_class($this));
     }
 
-    private function __getEmptyEmailRecord__()
-    {
-        return array('type'=> null, 'name'=>null, 'address' => null);
-    }
-    private function __addInputFile__($fileDetails, $file_use, $excel_sheet_name)
-    {
-        $this->arrFileDetails['user_input_files'][] = array('details'=> $fileDetails, 'file_use_type' => $file_use, 'worksheet_name'=>$excel_sheet_name);
-    }
-
-    private function __getInputFilesByType__($strType)
-    {
-        $ret = $this->__getInputFilesByValue__('file_use_type', $strType);
-
-        return $ret;
-    }
-
-    private function __getInputFilesByValue__($valKey, $val)
-    {
-        $ret = null;
-        foreach($this->arrFileDetails['user_input_files'] as $fileItem)
-        {
-            if(strcasecmp($fileItem[$valKey], $val) == 0)
-            {
-                $ret[] = $fileItem;
-            }
-        }
-
-        return $ret;
-    }
 
 } 

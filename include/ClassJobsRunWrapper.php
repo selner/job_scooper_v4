@@ -291,7 +291,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                         $newSearch = $arrPossibleSearches_Start[$l];
                         $newSearch['search_key'] = $arrPossibleSearches_Start[$l]['search_key'] . "-for-location-set-" . strtolower($locSet['name']);
                         $newSearch['search_name'] = $arrPossibleSearches_Start[$l]['search_name'] . "-for-location-set-" . strtolower($locSet['name']);
-                        $newSearch['location_set'] = $strSearchLocation;
+                        $newSearch['location_set'] = $locSet;
                         $newSearch['location_search_value'] = $strSearchLocation;
                         $this->_finalizeSearch_($tempSearch);
 
@@ -354,7 +354,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     {
         $arrAllJobsLoadedFromSrc = null;
 
-        $arrFiles = $this->__getInputFilesByType__("jobs");
+        $arrFiles = $this->classConfig->getInputFilesByType("jobs");
 //        $arrAllJobsLoadedFromSrc = $this->loadJobsListFromCSVs($this->arrJobCSVUserInputFiles);
         $arrAllJobsLoadedFromSrc = $this->loadJobsListFromCSVs($arrFiles);
         if($arrAllJobsLoadedFromSrc )
@@ -768,36 +768,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     function parseTotalResultsCount($objSimpHTML)
     {
         throw new ErrorException("parseTotalResultsCount not supported for class " . get_class($this));
-    }
-
-    private function __getEmptyEmailRecord__()
-    {
-        return array('type'=> null, 'name'=>null, 'address' => null);
-    }
-    private function __addInputFile__($fileDetails, $file_use, $excel_sheet_name)
-    {
-        $this->arrUserInputFiles[] = array('details'=> $fileDetails, 'file_use_type' => $file_use, 'worksheet_name'=>$excel_sheet_name);
-    }
-
-    private function __getInputFilesByType__($strType)
-    {
-        $ret = $this->__getInputFilesByValue__('file_use_type', $strType);
-
-        return $ret;
-    }
-
-    private function __getInputFilesByValue__($valKey, $val)
-    {
-        $ret = null;
-        foreach($this->arrUserInputFiles as $fileItem)
-        {
-            if(strcasecmp($fileItem[$valKey], $val) == 0)
-            {
-                $ret[] = $fileItem;
-            }
-        }
-
-        return $ret;
     }
 
 
