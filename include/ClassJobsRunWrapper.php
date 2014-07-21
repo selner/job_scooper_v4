@@ -463,16 +463,18 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         //
         // Add initial email address header values
         //
-        if(!$this->_getEmailAddressByType_($toEmail, "to") || strlen($toEmail['address']) <= 0)
+        $toEmail =$this->classConfig->getEmailByType("to");
+        if(!isset($toEmail) || strlen($toEmail['address']) <= 0)
         {
             $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
             return false;
         }
 
-        $this->_getEmailAddressByType_($bccEmail, "bcc");
-        if(!$this->_getEmailAddressByType_($fromEmail, "from") || strlen($toEmail['address']) <= 0)
+        $bccEmail =$this->classConfig->getEmailByType("bcc");
+        $fromEmail =$this->classConfig->getEmailByType("from");
+        if(!isset($fromEmail) || strlen($fromEmail['address']) <= 0)
         {
-            $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
+            $GLOBALS['logger']->logLine("Could not find 'from:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
             return false;
         }
 
@@ -496,21 +498,13 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
 
 
-        if($this->_getEmailAddressByType_($bccEmail, "bcc") && strlen($bccEmail['address']) > 0)
+        if(isset($bccEmail) && strlen($bccEmail['address']) > 0)
         {
             $ret = $mail->addBCC($bccEmail['address'], $bccEmail['name']);     // Add a recipient
         }
         $mail->addAddress($toEmail['address'], $toEmail['name']);
         $mail->addReplyTo("dev@recoilvelocity.com");
-
-        if(strlen($fromEmail['address']) > 0)
-        {
-            $mail->setFrom($fromEmail['address'], $fromEmail['name']);
-        }
-        else
-        {
-            throw new ErrorException("No from: email address set in config.ini.  Cannot send email notifications.");
-        }
+        $mail->setFrom($fromEmail['address'], $fromEmail['name']);
 
 
         $mail->WordWrap = 120;                                 // Set word wrap to 120 characters
@@ -620,12 +614,12 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         }
 
-        if(!$this->_getEmailAddressByType_($toEmail, "to"))
+        if(!$this->classConfig->getEmailByType($toEmail, "to"))
         {
             $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
             return;
         }
-        if(!$this->_getEmailAddressByType_($bccEmail, "bcc"))
+        if(!$this->classConfig->getEmailByType($bccEmail, "bcc"))
         {
             $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
             return;
@@ -642,26 +636,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $GLOBALS['logger']->logLine($result['stderr'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
         return $result['stdout'];
 
-
-    }
-
-    private function _getEmailAddressByType_(&$emailRecord, $strType)
-    {
-        $fFound = false;
-        if($this->arrEmailAddresses)
-        {
-            foreach($this->arrEmailAddresses as $email)
-            {
-                if(strcasecmp($email['type'], $strType) == 0)
-                {
-                    $emailRecord = $email;
-                    $fFound = true;
-                }
-
-            }
-        }
-
-        return $fFound;
 
     }
 
