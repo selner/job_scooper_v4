@@ -220,7 +220,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             // if this search has any of the search-level overrides on it
             // then we don't bother trying to collapse it
             //
-            if(strlen($curSearch['url_format']) > 0 || strlen($curSearch['keyword_search_override']) > 0 || strlen($curSearch['location_user_specified_override']) > 0)
+            if(strlen($curSearch['base_url_format']) > 0 || strlen($curSearch['keyword_search_override']) > 0 || strlen($curSearch['location_user_specified_override']) > 0)
             {
                 $arrCollapsedSearches[] = $curSearch;
             }

@@ -327,7 +327,6 @@ class ClassJobsSitePluginCommon
 
     private function getNotesWithDupeIDAdded($strNote, $strNewDupe)
     {
-        $retNote = "";
         $strDupeNotes = null;
 
         $strDupeMarker_Start = "<dupe>";
@@ -362,8 +361,6 @@ class ClassJobsSitePluginCommon
         if(count($arrToMark) == 0) return;
 
         $nJobsMatched = 0;
-        $nUniqueRoles = 0;
-        $nProblemRolesSkipped= 0;
 
         $arrKeys_CompanyAndRole = array_column ( $arrToMark, 'key_company_role');
         $arrKeys_JobSiteAndJobID = array_column ( $arrToMark, 'key_jobsite_siteid');
