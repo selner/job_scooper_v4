@@ -45,7 +45,7 @@ class PluginIndeed extends ClassJobsSitePlugin
 
     function getDaysURLValue($nDays)
     {
-        $ret = 1;
+
         switch($nDays)
         {
             case $nDays > 3 && $nDays <= 7:
