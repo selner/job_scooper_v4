@@ -392,7 +392,7 @@ function getMergedJobRecord($prevJobRecord, $newerJobRecord)
     // the latter (aka the passed in $job) values will win.  For some
     // fields such as Notes, the values will be combined.
     //
-    $mergedJob = array_copy($prevJobRecord);
+    $mergedJob = \Scooper\array_copy($prevJobRecord);
 
     updateJobColumn($mergedJob, $newerJobRecord, 'company', false);
     updateJobColumn($mergedJob, $newerJobRecord, 'job_title', false);
