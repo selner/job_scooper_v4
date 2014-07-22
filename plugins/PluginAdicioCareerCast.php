@@ -269,7 +269,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
 
     function getPageURLValue($page)
     {
-        if($page == 1) { return 0; } else {return $oage; }
+        if($page == 1) { return 0; } else {return $page; }
     }
     /**
      * If the site does not have a URL parameter for number of days
