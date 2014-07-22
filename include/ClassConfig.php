@@ -192,7 +192,7 @@ class ClassConfig extends ClassJobsSitePlugin
         {
             foreach($config->inputfiles as $iniInputFile)
             {
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Processing input file '" . $this->arrFileDetails['input_folder']['directory'].$iniInputFile['name'] . "' with type of '". $iniInputFile['type'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Processing input file '" . $this->arrFileDetails['input_folder']['directory'].$iniInputFile['filename'] . "' with type of '". $iniInputFile['type'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
                 $this->__addInputFile__($iniInputFile);
             }
         }
@@ -463,6 +463,8 @@ class ClassConfig extends ClassJobsSitePlugin
     }
     private function _expandKeywordsAndLocationsIntoSearches_()
     {
+        $arrSkippedPlugins = null;
+
         //
         // explode any keyword sets we loaded into separate searches
         //
@@ -561,7 +563,7 @@ class ClassConfig extends ClassJobsSitePlugin
                     continue;
                 }
 
-                foreach($setsLocationSettings as $locSet)
+                foreach($this->configSettings['location_sets'] as $locSet)
                 {
                     $strSearchLocation = $classPlug->getLocationValueForLocationSetting($arrPossibleSearches_Start[$l], $locSet);
                     if($strSearchLocation != VALUE_NOT_SUPPORTED)
@@ -666,77 +668,6 @@ class ClassConfig extends ClassJobsSitePlugin
 
 
 
-    private function _addTitlesToFilterList_($arrTitlesToAdd)
-    {
-        foreach($arrTitlesToAdd as $titleRecord)
-        {
-            $strTitleKey = \Scooper\strScrub($titleRecord['job_title']);
-            $titleRecord['job_title'] = \Scooper\strScrub($titleRecord['job_title']);
-
-            $GLOBALS['DATA']['titles_to_filter'][$strTitleKey] = $titleRecord;
-        }
-
-    }
-
-
-
-    /**
-     * Initializes the global list of titles we will automatically mark
-     * as "not interested" in the final results set.
-     */
-    function _loadTitlesToFilter_()
-    {
-        $arrFileInput = $this->getInputFilesByType("regex_filter_titles");
-        $fTitlesLoaded = false;
-
-        $GLOBALS['DATA']['titles_regex_to_filter'] = array();
-        $nDebugCounter = 0;
-
-        if($GLOBALS['DATA']['titles_regex_to_filter'] != null && count($GLOBALS['DATA']['titles_regex_to_filter']) > 0)
-        {
-            // We've already loaded the titles; go ahead and return right away
-            $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['DATA']['titles_regex_to_filter']) . " regexed title strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            return;
-        }
-
-        foreach($arrFileInput as $fileItem)
-        {
-            $fileDetail = $fileItem['details'];
-
-
-            if($fileDetail != null)
-            {
-                if(file_exists($fileDetail ['full_file_path']) && is_file($fileDetail ['full_file_path']))
-                {
-                    $GLOBALS['logger']->logLine("Loading job titles to filter from ".$fileDetail ['full_file_path']."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                    $classCSVFile = new \Scooper\ScooperSimpleCSV($fileDetail ['full_file_path'], 'r');
-                    $arrTitlesTemp = $classCSVFile->readAllRecords(true);
-                    $arrTitlesTemp = $arrTitlesTemp['data_rows'];
-                    $GLOBALS['logger']->logLine(count($arrTitlesTemp) . " titles found in the source file that will be automatically filtered from job listings." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-                    //
-                    // Add each title we found in the file to our list in this class, setting the key for
-                    // each record to be equal to the job title so we can do a fast lookup later
-                    //
-                    $GLOBALS['DATA']['titles_to_filter'] = array();
-                    $this->_addTitlesToFilterList_($arrTitlesTemp);
-                }
-            }
-
-        }
-
-
-        if(count($GLOBALS['DATA']['titles_to_filter']) <= 0)
-        {
-            $GLOBALS['logger']->logLine("Could not load the list of titles to exclude from '" . getArrayValuesAsString($arrFileInput) . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
-        }
-        else
-        {
-            $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['DATA']['titles_to_filter']) . " titles to exclude from '" . getArrayValuesAsString($arrFileInput). "'." , \Scooper\C__DISPLAY_WARNING__);
-
-        }
-    }
-
 
     private function _loadTitlesRegexesToFilter_()
     {
@@ -766,7 +697,7 @@ class ClassConfig extends ClassJobsSitePlugin
                     $arrTitlesTemp = $classCSVFile->readAllRecords(true);
                     $arrTitlesTemp = $arrTitlesTemp['data_rows'];
                     $GLOBALS['logger']->logLine(count($arrTitlesTemp) . " titles found in the source file " . $fileDetail['file_name'] . " that will be automatically filtered from job listings." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
+                    if(count($arrTitlesTemp) <= 0)  continue;
                     //
                     // Add each title we found in the file to our list in this class, setting the key for
                     // each record to be equal to the job title so we can do a fast lookup later
@@ -808,7 +739,7 @@ class ClassConfig extends ClassJobsSitePlugin
         }
         else
         {
-            $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($GLOBALS['DATA']['titles_regex_to_filter']) . " regexes to use for filtering titles from '" . getArrayValuesAsString($arrFileInput) . "'." , \Scooper\C__DISPLAY_WARNING__);
+            $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($GLOBALS['DATA']['titles_regex_to_filter']) . " regexes to use for filtering titles from '" . getArrayValuesAsString($this->getInputFilesByType("regex_filter_titles")) . "'." , \Scooper\C__DISPLAY_WARNING__);
 
         }
 
@@ -859,7 +790,6 @@ class ClassConfig extends ClassJobsSitePlugin
                     // Add each Company we found in the file to our list in this class, setting the key for
                     // each record to be equal to the job Company so we can do a fast lookup later
                     //
-                    $GLOBALS['DATA']['companies_regex_to_filter'] = array();
                     foreach($arrCompaniesTemp as $CompanyRecord)
                     {
                         $arrRXInput = explode("|", strtolower($CompanyRecord['match_regex']));

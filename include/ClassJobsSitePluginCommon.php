@@ -284,7 +284,6 @@ class ClassJobsSitePluginCommon
     function markJobsList_withAutoItems(&$arrJobs, $strCallerDescriptor = "")
     {
         $this->markJobsList_SetAutoExcludedTitlesFromRegex($arrJobs, $strCallerDescriptor);
-        $this->markJobsList_SetAutoExcludedTitles($arrJobs, $strCallerDescriptor);
         $this->markJobsList_SetAutoExcludedCompaniesFromRegex($arrJobs, $strCallerDescriptor);
         $this->markJobsList_SetLikelyDuplicatePosts($arrJobs, $strCallerDescriptor);
     }
@@ -729,7 +728,7 @@ class ClassJobsSitePluginCommon
 
             if(count($arrMyRecordsToInclude) > 1)
             {
-                $arrRetJobs = my_merge_add_new_keys($arrMyRecordsToInclude, $arrRetJobs);
+                $arrRetJobs = \Scooper\my_merge_add_new_keys($arrMyRecordsToInclude, $arrRetJobs);
             }
 
             $this->writeJobsListToFile($strOutFilePath, $arrRetJobs, $fIncludeFilteredJobsInResults);
@@ -799,7 +798,7 @@ class ClassJobsSitePluginCommon
         if(!$fp ) return $objSimpleHTML;
 
         $strHTML = fread($fp, JOBS_SCOOPER_MAX_FILE_SIZE);
-        $dom = new SimpleHtmlDom\simple_html_dom(null, $lowercase, $forceTagsClosed, $target_charset, $stripRN, $defaultBRText, $defaultSpanText);
+        $dom = new SimpleHtmlDom\simple_html_dom(null, null, true, null, null, null, null);
         $objSimpleHTML = $dom->load($strHTML, $lowercase, $stripRN);
         fclose($fp);
 
