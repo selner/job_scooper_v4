@@ -613,6 +613,9 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $strCSVFilePath = $detailsFileCSV['full_file_path'];
 
         }
+        $toEmail = null;
+        $fromEmail = null;
+        $bccEmail = null;
 
         if(!$this->classConfig->getEmailByType($toEmail, "to"))
         {
