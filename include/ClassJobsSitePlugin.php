@@ -548,6 +548,11 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' with base_url_format = " . $strURLBase . "..." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_START__);
             $this->getJobsForSearchByType($searchDetails, $nDays, null);
         }
+        elseif($this->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
+        {
+            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' with base_url_format = " . $strURLBase . "..." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_START__);
+            $this->getJobsForSearchByType($searchDetails, $nDays, null);
+        }
         else
         {
             // Did the user specify an override at the search level in the INI?
