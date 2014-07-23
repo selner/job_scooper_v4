@@ -24,6 +24,7 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 class PluginLinkUp extends ClassJobsSitePlugin
 {
     protected $siteName = 'LinkUp';
+    protected $nJobListingsPerPage = 50;
     protected $siteBaseURL = 'http://www.linkup.com';
     protected $strBaseURLFormat = "http://www.linkup.com/results.php?ttl=***KEYWORDS***&l=***LOCATION***&sort=d&tm=***NUMBER_DAYS***&page=***PAGE_NUMBER***&p=50";
     protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS;
