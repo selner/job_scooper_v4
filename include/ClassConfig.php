@@ -704,10 +704,11 @@ class ClassConfig extends ClassJobsSitePlugin
                     //
                     foreach($arrTitlesTemp as $titleRecord)
                     {
+                        print("Adding term " . $titleRecord['match_regex'] . PHP_EOL);
                         $arrRXInput = explode("|", strtolower($titleRecord['match_regex']));
                         foreach($arrRXInput as $rxItem)
                         {
-                            $rx = '/'.$rxItem.'/i';
+                            $rx = '/'.preg_quote($rxItem).'/i';
                             //                        $GLOBALS['logger']->logLine("Testing regex record " .$nDebugCounter . " with value of " . $rx , \Scooper\C__DISPLAY_ITEM_DETAIL__);
                             try
                             {
