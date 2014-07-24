@@ -2,7 +2,6 @@ Attribute VB_Name = "Job_Scooper_Load_CSV"
 Option Explicit
 Sub LoadCSVAndMergeWithActive()
     Dim strPathToOpen  As String
-    strPathToOpen = "\\.psf\Home\Dropbox\JobPosts-Tracking\BryanSelner\search_results\"
     strPathToOpen = Job_Scooper_XLS_Helpers.getUserCSVSavePath()
     strPathToOpen = strPathToOpen & "search_results"
 
@@ -10,8 +9,7 @@ Sub LoadCSVAndMergeWithActive()
     Dim sheetName As String
     
     retFile = SelectFiles(strPathToOpen)
-    sheetName = Replace(ImportCSVFile(retFile), ".csv", "")
-    
+    sheetName = ImportCSVFile(retFile)
     ProcessNewCSVRows sheetName
 
 
@@ -59,7 +57,17 @@ Attribute ImportCSVFile.VB_ProcData.VB_Invoke_Func = " \n14"
     mainWB.Sheets("LookupValsInterested").Range("r2:y2").Copy
     sheetNew.Range(rngDataAddr).PasteSpecial xlPasteAll
     
-    ImportCSVFile = fileName
+    Dim sheetName As String
+    sheetName = fileName
+    sheetName = LCase(sheetName)
+    sheetName = Replace(sheetName, ".CSV", "")
+    sheetName = Replace(sheetName, ".csv", "")
+    sheetName = Replace(sheetName, "_jobs_", "")
+    sheetName = Replace(sheetName, "jobs", "")
+    
+    mainWB.Sheets(mainWB.Sheets.Count).Name = sheetName
+    
+    ImportCSVFile = sheetName
 
 End Function
 
@@ -86,10 +94,14 @@ Sub ProcessNewCSVRows(strSheetName)
         
         rowInactive = curRow.Range("W1").Text
         rowActive = curRow.Range("R1").Text
-        If (rowInactive <> "#N/A" And rowInactive <> "") Then
-            valInactive = ActiveWorkbook.Sheets("Inactive").Range("E" & rowInactive).Text
+        If (curRow.Range("E1").Text <> "") Then
+            valInactive = curRow.Range("E1").Text
         Else
-            valInactive = "#N/A"
+            If (rowInactive <> "#N/A" And rowInactive <> "") Then
+                valInactive = ActiveWorkbook.Sheets("Inactive").Range("E" & rowInactive).Text
+            Else
+                valInactive = "#N/A"
+            End If
         End If
         
         If (rowInactive <> "#N/A") Then
@@ -99,18 +111,20 @@ Sub ProcessNewCSVRows(strSheetName)
         End If
             
             
-         
-         If (rowInactive <> "#N/A" And rowActive <> "#N/A" And valActive = "") Then       ' matched Active with a blank interested value but was in the Inactive with a value
+        
+        If (valInactive <> "#N/A" And rowActive <> "#N/A" And valActive = "") Then       ' matched Active with a blank interested value but was in the Inactive with a value
             ActiveWorkbook.Sheets("Active").Range("E" & rowActive).Value = valInactive
             curRow.Range("q1").Value = "Marked active row # " & rowActive & " as " & valInactive
-        ElseIf (rowInactive <> "#N/A" And rowActive <> "#N/A" And valActive <> "") Then
+        ElseIf (valInactive <> "#N/A" And rowActive <> "#N/A" And valActive <> "") Then
                 ActiveWorkbook.Sheets("Active").Range("F" & rowActive).Value = valInactive & "; " & ActiveWorkbook.Sheets("Active").Range("F" & rowActive).Text
                 curRow.Range("q1").Value = "Updated Active Row" & rowActive & " as " & valInactive
-         ElseIf (rowActive = "#N/A") Then
+         ElseIf (valInactive = "#N/A" And rowActive = "#N/A") Then
                curRow.Range("A1:P1").Copy
                ActiveWorkbook.Sheets("Active").Range("A" & nNextActiveDataRow & ":Y" & nNextActiveDataRow).PasteSpecial xlPasteAll
                curRow.Range("q1").Value = "Added (active row #)" & nNextActiveDataRow
                nNextActiveDataRow = nNextActiveDataRow + 1
+         Else
+               curRow.Range("q1").Value = "Skipped"
          End If
          
         curRow.Font.Strikethrough = True
