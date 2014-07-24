@@ -3,7 +3,7 @@ Get email alerts with links to latest jobs matching your favorite search terms f
 
 ![Example: Job Scooper Email Notification on Mobile](http://www.bryanselner.com/www-root-wpblog/wp-content/uploads/2014/07/JobScooperResultEmailMobile-250pxw.png "Example: Job Scooper Email Notification on Mobile")
 
-Jobs Scooper currently supports [over 60 different sites](../../wiki/Job-Sites-Supported-by-Jobs-Scooper), including CareerBuilder, Craigslist, DotJobs, EmploymentGuide, Expedia, Glassdoor, Groupon, Indeed, LinkUp, Mashable, Monster,  SimplyHired, StartupHire, Tableau and ZipRecruiter.  [view all supported sites](../../wiki/Job-Sites-Supported-by-Jobs-Scooper) to see the full list.
+Jobs Scooper currently **supports [over 70 different sites](../../wiki/Job-Sites-Supported-by-Jobs-Scooper)**, including CareerBuilder, Craigslist, DotJobs, EmploymentGuide, Expedia, Glassdoor, Groupon, Indeed, LinkUp, Mashable, Monster,  SimplyHired, StartupHire, Tableau and ZipRecruiter.  [view all supported sites](../../wiki/Job-Sites-Supported-by-Jobs-Scooper) to see the full list.
 
 ###Configuration is easy.###
 First, make a copy of the [example_config.ini](examples/example_config.ini) and edit it's settings to match the search keywords and locations that you want:
