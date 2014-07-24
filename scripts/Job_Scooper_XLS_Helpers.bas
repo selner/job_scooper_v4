@@ -55,7 +55,7 @@ End Sub
 Private Sub copySheetRangeToNewCSV(strTabName, strFilePrefix, strRangeToCopy)
     Dim strCodeDataJobsPath As String
     strCodeDataJobsPath = getUserCSVSavePath
-    strCodeDataJobsPath = strCodeDataJobsPath & "list_source_to_use"
+    strCodeDataJobsPath = strCodeDataJobsPath & "list_source_to_use/"
     If (strCodeDataJobsPath = "") Then
          Exit Sub
     End If
@@ -271,29 +271,30 @@ Private Sub moveNotInterestedToInactiveSheet()
     wsActive.Range("A:P").AutoFilter Field:=5, Criteria1:=inactiveFilterCriteria
     With wsActive.AutoFilter.Range
  
-    On Error Resume Next
-       If (wsActive.AutoFilter.Range.SpecialCells(xlCellTypeLastCell).Row() > 1) Then
-           Set copyRng = .Offset(1, 0).Resize(.Rows.Count - 1, 16) _
-               .SpecialCells(xlCellTypeVisible)
-        
-        If Not (copyRng Is Nothing) Then
-           Set rng = wsActive.AutoFilter.Range
-           rng.Offset(1, 0).Resize(rng.Rows.Count - 1, 16).Copy _
-             Destination:=wsInactive.Range("A" & lastrowInactive)
-          rng.Offset(1, 0).Resize(rng.Rows.Count - 1, 16).Select
-      ' Turn alerts back on for everything
-          Application.DisplayAlerts = False
-         rng.Offset(1, 0).Resize(rng.Rows.Count - 1, 16).Delete
+        On Error Resume Next
+           nNonFilteredRows = wsActive.AutoFilter.Range.SpecialCells(xlCellTypeLastCell).Row()
+           
+           If (nNonFilteredRows > 1) Then
+               Set copyRng = .Offset(1, 0).Resize(.Rows.Count - 1, 16) _
+                   .SpecialCells(xlCellTypeVisible)
+            
+            If Not (copyRng = Empty) Then
+               Set rng = wsActive.AutoFilter.Range
+               rng.Offset(1, 0).Resize(rng.Rows.Count - 1, 16).Copy _
+                 Destination:=wsInactive.Range("A" & lastrowInactive)
+              rng.Offset(1, 0).Resize(rng.Rows.Count - 1, 16).Select
           ' Turn alerts back on for everything
-          Application.DisplayAlerts = True
-        End If
-      On Error GoTo 0
-     End If
-     
-     wsActive.AutoFilter.ShowAllData
-       End With
-       sortJobsSheetByCompany ("Active")
-        Application.ScreenUpdating = True
+              Application.DisplayAlerts = False
+             rng.Offset(1, 0).Resize(rng.Rows.Count - 1, 16).Delete
+              ' Turn alerts back on for everything
+              Application.DisplayAlerts = True
+            End If
+          On Error GoTo 0
+         End If
+    End With
+    wsActive.AutoFilter.ShowAllData
+    sortJobsSheetByCompany ("Active")
+    Application.ScreenUpdating = True
  
 
 End Sub
