@@ -403,67 +403,6 @@ class ClassJobsSitePluginCommon
 
     }
 
-
-    function markJobsList_SetAutoExcludedTitles(&$arrToMark, $strCallerDescriptor = null)
-    {
-        if(count($arrToMark) == 0) return;
-        $GLOBALS['logger']->logLine("Excluding Jobs by Exact Title Matches", \Scooper\C__DISPLAY_ITEM_START__);
-
-        $nJobsSkipped = 0;
-        $nJobsNotMarked = 0;
-        $nJobsMarkedAutoExcluded = 0;
-
-
-        $GLOBALS['logger']->logLine("Checking ".count($arrToMark) ." roles against ". count($GLOBALS['DATA']['titles_to_filter']) ." excluded titles.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-        foreach($arrToMark as $job)
-        {
-            $strJobIndex = getArrayKeyValueForJob($job);
-            // First, make sure we don't already have a value in the interested column.
-            // if we do, skip it and move to the next one
-            if(!isJobAutoUpdatable($job))
-            {
-                $nJobsSkipped++;
-                continue;
-            }
-
-            $strJobKeyToMatch = \Scooper\strScrub($job['job_title'], REPLACE_SPACES_WITH_HYPHENS | DEFAULT_SCRUB );
-
-            // Look for a matching title in our list of excluded titles
-            $varValMatch =  $GLOBALS['DATA']['titles_to_filter'][$strJobKeyToMatch];
-
-            // if we got a match, we'll get an array back with that title and some other data
-            // such as the reason it's excluded
-            //
-            if($varValMatch != null && $varValMatch['exclude_reason'] != null)
-            {
-                if(strlen($varValMatch['exclude_reason']) > 0)
-                {
-                    $arrToMark[$strJobIndex]['interested'] = $varValMatch['exclude_reason'] . C__STR_TAG_AUTOMARKEDJOB__;
-                }
-                else
-                {
-                    $arrToMark[$strJobIndex]['interested'] = 'No (EXCLUDED TITLE BUT UNKNOWN REASON VALUE)';
-                    $arrToMark[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
-                    $GLOBALS['logger']->logLine("Excluded title " . $job['job_title'] . " did not have an exclude reason.  Cannot mark.", \Scooper\C__DISPLAY_ERROR__);
-                }
-                $nJobsMarkedAutoExcluded++;
-            }
-            else              // we're ignoring the Excluded column fact for the time being. If it's in the list, it's excluded
-            {
-                $nJobsNotMarked++;
-//                $GLOBALS['logger']->logLine("Job title '".$job['job_title'] ."' was not found in the exclusion list.  Keeping for review." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            }
-
-
-        }
-
-        $strTotalRowsText = "/".count($arrToMark);
-        $GLOBALS['logger']->logLine("Automatically marked ".$nJobsMarkedAutoExcluded .$strTotalRowsText ." roles " . ($strCallerDescriptor != null ? "from " . $strCallerDescriptor : "") . " as 'No/Not Interested' because the job title was in the exclusion list. (Skipped: " . $nJobsSkipped . $strTotalRowsText ."; Untouched: ". $nJobsNotMarked . $strTotalRowsText .")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
-    }
-
-
-
     function markJobsList_SetAutoExcludedCompaniesFromRegex(&$arrToMark, $strCallerDescriptor = null)
     {
         if(count($arrToMark) == 0) return;
@@ -529,52 +468,35 @@ class ClassJobsSitePluginCommon
         {
             foreach($arrJobs_AutoUpdatable as $job)
             {
-                $fMatched = false;
-                // get all the job records that do not yet have an interested value
-
                 if($GLOBALS['DATA']['titles_regex_to_filter'] == null) break;
                 $strScrubbedJobTitle = \Scooper\strScrub($job['job_title'], DEFAULT_SCRUB);
 
-                $nDebugIndexCounter = 0;
                 $arrMatches = null;
                 $arrMatchErrors = null;
 
-                $fMatched = preg_match_multiple($GLOBALS['DATA']['titles_regex_to_filter'], $strScrubbedJobTitle, $arrMatches , null, $arrMatchErrors );
+                preg_match_multiple($GLOBALS['DATA']['titles_regex_to_filter'], $strScrubbedJobTitle, $arrMatches , null, $arrMatchErrors );
 
                 if(count($arrMatchErrors) > 0)
                 {
                     $GLOBALS['logger']->logLine("Errors with regexes: ". getArrayValuesAsString($arrMatchErrors), \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 }
 
-//                foreach($GLOBALS['DATA']['titles_regex_to_filter'] as $rxInput )
-//                {
-//                    $strScrubbedJobTitle = "<not yet set>";
-//                  try {
-//                      $fMatched = preg_match($rxInput, $strScrubbedJobTitle);
-//                  }
-//                  catch (Exception $classError)
-//                  {
-//                      $strErr = 'ERROR:  Regex match failed on index ' . $nDebugIndexCounter . ', job title=' . $strScrubbedJobTitle .' with regex = ' .$rxInput . '. Error: ' . $classError->getMessage();
-//                      $GLOBALS['logger']->logLine($strErr, \Scooper\C__DISPLAY_ERROR__);
-//                      if($GLOBALS['OPTS']['use_debug'] == false) { throw new ErrorException($strErr); }
-//                  }
-                    if($fMatched == true)
+                $arrMatchCol0 = array_column($arrMatches, "0");
+                $arrCol0Count = count($arrMatchCol0);
+
+                if($arrCol0Count > 0)
+                {
+                    foreach($arrMatches as $match)
                     {
-                        foreach($arrMatches as $match)
-                        {
-                            if(is_array($match) && count($match) > 0)
-                                $strMatches = "#" . key($match) . "-" .$match[0][0];
-                        }
-                        $strJobIndex = getArrayKeyValueForJob($job);
-                        $arrToMark[$strJobIndex]['interested'] = 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__;
-                        if(strlen($arrToMark[$strJobIndex]['notes']) > 0) { $arrToMark[$strJobIndex]['notes'] = $arrToMark[$strJobIndex]['notes'] . " "; }
-                        $arrToMark[$strJobIndex]['notes'] = "Matched regex[". $strMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__;
-                        $arrToMark[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
-                        $nJobsMarkedAutoExcluded++;
-                        break;
+                        if(is_array($match) && count($match) > 0)
+                            $strMatches = "#" . key($match) . "-" .$match[0][0];
                     }
-                    $nDebugIndexCounter = $nDebugIndexCounter+1;
-//                }
+                    $strJobIndex = getArrayKeyValueForJob($job);
+                    $arrToMark[$strJobIndex]['interested'] = 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__;
+                    if(strlen($arrToMark[$strJobIndex]['notes']) > 0) { $arrToMark[$strJobIndex]['notes'] = $arrToMark[$strJobIndex]['notes'] . " "; }
+                    $arrToMark[$strJobIndex]['notes'] = "Matched regex[". $strMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__;
+                    $arrToMark[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
+                }
             }
         }
         $strTotalRowsText = "/".count($arrToMark);
