@@ -54,10 +54,8 @@ End Sub
 
 Private Sub copySheetRangeToNewCSV(strTabName, strFilePrefix, strRangeToCopy)
     Dim strCodeDataJobsPath As String
-    getUserCSVSavePath
-    
     strCodeDataJobsPath = getUserCSVSavePath
-    
+    strCodeDataJobsPath = strCodeDataJobsPath & "list_source_to_use"
     If (strCodeDataJobsPath = "") Then
          Exit Sub
     End If
@@ -104,7 +102,7 @@ Private Sub copySheetRangeToNewCSV(strTabName, strFilePrefix, strRangeToCopy)
    ' Turn alerts back on for everything
     Application.DisplayAlerts = True
 End Sub
-Private Function getUserCSVSavePath()
+ Function getUserCSVSavePath()
      
  
  Dim strRangePath As String

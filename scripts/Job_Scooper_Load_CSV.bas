@@ -1,14 +1,17 @@
 Attribute VB_Name = "Job_Scooper_Load_CSV"
 Option Explicit
 Sub LoadCSVAndMergeWithActive()
-      Dim strPathToOpen  As String
-      strPathToOpen = "\\.psf\Home\Dropbox\JobPosts-Tracking\BryanSelner\search_results\"
+    Dim strPathToOpen  As String
+    strPathToOpen = "\\.psf\Home\Dropbox\JobPosts-Tracking\BryanSelner\search_results\"
+    strPathToOpen = Job_Scooper_XLS_Helpers.getUserCSVSavePath()
+    strPathToOpen = strPathToOpen & "search_results"
 
     Dim retFile As String
     Dim sheetName As String
     
     retFile = SelectFiles(strPathToOpen)
-    sheetName = ImportCSVFile(retFile)
+    sheetName = Replace(ImportCSVFile(retFile), ".csv", "")
+    
     ProcessNewCSVRows sheetName
 
 
@@ -61,12 +64,8 @@ Attribute ImportCSVFile.VB_ProcData.VB_Invoke_Func = " \n14"
 End Function
 
 
-Sub Test()
-    ProcessNewCSVRows ("test")
-End Sub
 Sub ProcessNewCSVRows(strSheetName)
     
-    strSheetName = "test"
     Dim sheetNew As Worksheet
     Set sheetNew = ActiveWorkbook.Sheets(strSheetName)
     
@@ -74,9 +73,9 @@ Sub ProcessNewCSVRows(strSheetName)
     Dim nLastDataRow, nNextActiveDataRow As Long
     Dim curRow As Range
     
-            Dim val As String
-            Dim valInactive As String
-            Dim valActive As String
+    Dim val As String
+    Dim valInactive As String
+    Dim valActive As String
     Dim rowActive As String
     
     nLastDataRow = sheetNew.Range("A" & Rows.Count).End(xlUp).Row
@@ -86,13 +85,13 @@ Sub ProcessNewCSVRows(strSheetName)
     For Each curRow In sheetNew.Range("A2:Y" & nLastDataRow).Rows
         
         rowInactive = curRow.Range("W1").Text
-        If (rowInactive <> "#N/A") Then
+        rowActive = curRow.Range("R1").Text
+        If (rowInactive <> "#N/A" And rowInactive <> "") Then
             valInactive = ActiveWorkbook.Sheets("Inactive").Range("E" & rowInactive).Text
         Else
             valInactive = "#N/A"
         End If
         
-        rowActive = curRow.Range("R1").Text
         If (rowInactive <> "#N/A") Then
             valActive = ActiveWorkbook.Sheets("Active").Range("E" & rowInactive).Text
         Else
@@ -101,18 +100,16 @@ Sub ProcessNewCSVRows(strSheetName)
             
             
          
-         If (valInactive <> "#N/A" And rowActive <> "#N/A") Then       ' matched Active with a blank interested value but was in the Inactive with a value
-                If (valActive = "") Then
-                     ActiveWorkbook.Sheets("Active").Range("E" & rowActive).Value = valInactive
-                    curRow.Range("q1").Value = "Marked active row # " & rowActive & " as " & valInactive
-                Else
-                     ActiveWorkbook.Sheets("Active").Range("F" & rowActive).Value = valInactive & "; " & ActiveWorkbook.Sheets("Active").Range("F" & rowActive).Text
-                     curRow.Range("q1").Value = "Updated Notes for active row # " & rowActive & " as " & valInactive
-                End If
-         ElseIf (rowActive <> "#N/A") Then
+         If (rowInactive <> "#N/A" And rowActive <> "#N/A" And valActive = "") Then       ' matched Active with a blank interested value but was in the Inactive with a value
+            ActiveWorkbook.Sheets("Active").Range("E" & rowActive).Value = valInactive
+            curRow.Range("q1").Value = "Marked active row # " & rowActive & " as " & valInactive
+        ElseIf (rowInactive <> "#N/A" And rowActive <> "#N/A" And valActive <> "") Then
+                ActiveWorkbook.Sheets("Active").Range("F" & rowActive).Value = valInactive & "; " & ActiveWorkbook.Sheets("Active").Range("F" & rowActive).Text
+                curRow.Range("q1").Value = "Updated Active Row" & rowActive & " as " & valInactive
+         ElseIf (rowActive = "#N/A") Then
                curRow.Range("A1:P1").Copy
                ActiveWorkbook.Sheets("Active").Range("A" & nNextActiveDataRow & ":Y" & nNextActiveDataRow).PasteSpecial xlPasteAll
-               curRow.Range("q1").Value = "Copied to active row #" & nNextActiveDataRow
+               curRow.Range("q1").Value = "Added (active row #)" & nNextActiveDataRow
                nNextActiveDataRow = nNextActiveDataRow + 1
          End If
          
