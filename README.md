@@ -1,5 +1,5 @@
 #Jobs Scooper
-Get email alerts with links to latest jobs matching your favorite search terms from any job site or company's careers website and a .CSV file of the full set of matches.
+**Get automatic email alerts or a CSV download for all new job listings from over 70 career websites and job search aggregators  to latest jobs for your personal search terms.**
 
 ![Example: Job Scooper Email Notification on Mobile](http://www.bryanselner.com/www-root-wpblog/wp-content/uploads/2014/07/JobScooperResultEmailMobile-250pxw.png "Example: Job Scooper Email Notification on Mobile")
 
@@ -53,7 +53,7 @@ If you're looking at job listings across many sites, Job Scooper has some built-
 That's just the start of [what Jobs Scooper can do](../../wiki).
 
 ##Other Stuff
-* Version:  v2.0.0 [release notes](../releases/tag/v2.0.0)
+* Version:  v2.1.0 [release notes](../releases/tag/v2.0.0)
 * Author:  Bryan Selner (dev at recoilvelocity dot com)
 * Platforms:
 	* Mac OS X 10.9.3 with PHP 5.4.24.
