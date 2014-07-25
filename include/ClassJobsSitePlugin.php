@@ -65,7 +65,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Writing ". $this->siteName." " .count($this->arrLatestJobs) ." job records to " . $strOutPathWithName . " for debugging (if needed).", \Scooper\C__DISPLAY_ITEM_START__); }
                 $this->writeMyJobsListToFile($strOutPathWithName, false);
             }
-//            if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
         }
     }
 
@@ -107,7 +106,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 //
                 if($searchDetails['user_setting_flags'] == null || $searchDetails['user_setting_flags'] == 0)
                 {
-                    $searchDetails['user_setting_flags'] = $configKeywordSettingsSet['match-type'];
+                    $searchDetails['user_setting_flags'] = $configKeywordSettingsSet['keyword_match_type_flag'];
                 }
 
                 if($searchDetails['keyword_search_override'] != null && strlen($searchDetails['keyword_search_override']) > 0)
@@ -116,7 +115,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 }
                 else
                 {
-                    $searchDetails['keyword_set'] = $configKeywordSettingsSet['keywords_array'];
+                    $searchDetails['keyword_set'] = \Scooper\array_copy($configKeywordSettingsSet['keywords_array']);
 
                     if(substr_count($strURLBase, BASE_URL_TAG_KEYWORDS) < 1)
                     {
@@ -187,6 +186,11 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     private function collapseSearchesIfPossible()
     {
+        if(count($this->arrSearchesToReturn) == 1)
+        {
+            // $GLOBALS['logger']->logLine($this->siteName . " does not have more than one search to collapse.  Continuing with single '" . $this->arrSearchesToReturn[0]['search_name'] . "' search.", \Scooper\C__DISPLAY_WARNING__);
+            return;
+        }
 
         $arrCollapsedSearches = array();
 
@@ -216,7 +220,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             // if this search has any of the search-level overrides on it
             // then we don't bother trying to collapse it
             //
-            if(strlen($curSearch['url_format']) > 0 || strlen($curSearch['keyword_search_override']) > 0 || strlen($curSearch['location_user_specified_override']) > 0)
+            if(strlen($curSearch['base_url_format']) > 0 || strlen($curSearch['keyword_search_override']) > 0 || strlen($curSearch['location_user_specified_override']) > 0)
             {
                 $arrCollapsedSearches[] = $curSearch;
             }
@@ -229,7 +233,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             //
             // if this search has an override value for keyword or location, don't bother to collapse it
             //
-            if(strlen($search['keyword_search_override']) > 0 || strlen($search['location_search_override']) > 0)
+            if(strlen($search['keyword_search_override']) > 0 || strlen($search['location_user_specified_override']) > 0)
             {
                 $arrCollapsedSearches[] = $search;
             }
@@ -247,6 +251,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                     $searchCollapsedDetails['keyword_set'] = $search['keyword_set'];
                     $searchCollapsedDetails['user_setting_flags'] = $search['user_setting_flags'];
                     $this->_setKeywordStringsForSearch_($searchCollapsedDetails);
+                    $this->_finalizeSearch_($tempSearch);
                 }
                 else
                 {
@@ -255,7 +260,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                     //
                     if(\Scooper\isBitFlagSet($searchCollapsedDetails['user_setting_flags'], $search['user_setting_flags']))
                     {
-                        $searchCollapsedDetails['search_name'] .= " and " . $search['search_name'];
+                            $searchCollapsedDetails['search_name'] .= " and " . $search['search_name'];
                         $searchCollapsedDetails['keyword_set'] = \Scooper\my_merge_add_new_keys(array_values($searchCollapsedDetails['keyword_set']), array_values($search['keyword_set']));
 
                         $this->_setKeywordStringsForSearch_($searchCollapsedDetails);
@@ -376,11 +381,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                     $strRetCombinedKeywords .= " " . $this->strKeywordDelimiter . " " . $newKywd;
                 }
             }
-            if($this->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && $this->strTitleOnlySearchKeywordFormat != null && strlen($this->strTitleOnlySearchKeywordFormat) > 0)
-            {
-                $strRetCombinedKeywords = sprintf($this->strTitleOnlySearchKeywordFormat, $strRetCombinedKeywords);
-            }
-
         }
         elseif(count($arrKeywords) == 1)
         {
@@ -392,6 +392,11 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             {
                 $strRetCombinedKeywords = $arrKeywords[0];
             }
+        }
+
+        if($this->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && $this->strTitleOnlySearchKeywordFormat != null && strlen($this->strTitleOnlySearchKeywordFormat) > 0)
+        {
+            $strRetCombinedKeywords = sprintf($this->strTitleOnlySearchKeywordFormat, $strRetCombinedKeywords);
         }
 
         if(!$this->_isValueURLEncoded_($strRetCombinedKeywords)) { $strRetCombinedKeywords = urlencode($strRetCombinedKeywords); }
@@ -441,6 +446,38 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     //
     //************************************************************************
 
+    protected function _setLocationValueForSearch_(&$searchDetails)
+    {
+        $searchDetails['location_search_value'] = VALUE_NOT_SUPPORTED;
+
+        if ($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || $this->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
+        {
+            $searchDetails['location_search_value'] = VALUE_NOT_SUPPORTED;
+        }
+        elseif($searchDetails['location_user_specified_override'] != null && strlen($searchDetails['location_user_specified_override']) > 0)
+        {
+            $searchDetails['location_search_value'] = $searchDetails['location_user_specified_override'];
+        }
+        elseif(isset($searchDetails['location_set']) && is_array($searchDetails['location_set']) )
+        {
+            $locTypeNeeded = $this->getLocationSettingType();
+            if($searchDetails['location_set'] != null && count($searchDetails['location_set']) > 0 && $searchDetails['location_set'][$locTypeNeeded] != null)
+            {
+                $searchDetails['location_search_value'] = $searchDetails['location_set'][$locTypeNeeded];
+            }
+        }
+
+        if(!$this->_isValueURLEncoded_($searchDetails['location_search_value'])) { $searchDetails['location_search_value'] = urlencode($searchDetails['location_search_value']); }
+
+        if($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
+        {
+            $searchDetails['location_search_value']= strtolower($searchDetails['location_search_value']);
+        }
+    }
+
+
+
+
     protected function addSearchLocations($searchDetails, $locSettingSets = null)
     {
         //
@@ -448,9 +485,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         //
         // If the search had location keywords, it overrides the locSettingSets
         //
-        if($searchDetails['location_search_override'] != null && strlen($searchDetails['location_search_override']) > 0)
+        if($searchDetails['location_user_specified_override'] != null && strlen($searchDetails['location_user_specified_override']) > 0)
         {
-            $locSingleSettingSet = array('name' => 'search_location_override', 'search_location_value_override' => $searchDetails['location_search_override']);
+            $locSingleSettingSet = array('name' => 'search_location_override', 'search_location_value_override' => $searchDetails['location_user_specified_override']);
             $this->arrSearchLocationSetsToRun['search_location_override'] = $locSingleSettingSet;
         }
         else
@@ -470,24 +507,22 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
     }
 
-
-    function getSearchLocationValue($searchDetails, $settingsSet = null)
+    function getLocationValueForLocationSetting($searchDetails, $settingsLocation = null)
     {
         $strReturnLocation = VALUE_NOT_SUPPORTED;
 
-        if($searchDetails['search_location_override'] != null && strlen($searchDetails['search_location_override']) > 0)
+        if($searchDetails['location_user_specified_override'] != null && strlen($searchDetails['location_user_specified_override']) > 0)
         {
-            $strReturnLocation = $searchDetails['search_location_override'];
+            $strReturnLocation = $searchDetails['location_user_specified_override'];
         }
-        elseif($settingsSet != null)
+        else
         {
             $locTypeNeeded = $this->getLocationSettingType();
-            if($settingsSet != null && count($settingsSet) > 0 && $settingsSet[$locTypeNeeded] != null)
+            if($settingsLocation != null && count($settingsLocation) > 0 && $settingsLocation[$locTypeNeeded] != null)
             {
-                $strReturnLocation = $settingsSet[$locTypeNeeded];
+                $strReturnLocation = $settingsLocation[$locTypeNeeded];
             }
         }
-
         if(!$this->_isValueURLEncoded_($strReturnLocation)) { $strReturnLocation = urlencode($strReturnLocation); }
 
         if($this->isBitFlagSet(C__JOB_LOCATION_REQUIRES_LOWERCASE))
@@ -496,6 +531,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
         return $strReturnLocation;
     }
+
 
 
     protected function _getMyJobsForEachLocationAndSearch_($searchDetails, $nDays)
@@ -512,12 +548,17 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' with base_url_format = " . $strURLBase . "..." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_START__);
             $this->getJobsForSearchByType($searchDetails, $nDays, null);
         }
+        elseif($this->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
+        {
+            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['search_name'] ."' with base_url_format = " . $strURLBase . "..." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_START__);
+            $this->getJobsForSearchByType($searchDetails, $nDays, null);
+        }
         else
         {
             // Did the user specify an override at the search level in the INI?
-            if($searchDetails != null && $searchDetails['location_search_override'] != null && strlen($searchDetails['location_search_override']) > 0)
+            if($searchDetails != null && $searchDetails['location_user_specified_override'] != null && strlen($searchDetails['location_user_specified_override']) > 0)
             {
-                $locSingleSettingSet = array('name' => 'location_search_override', 'search_location_override' => $searchDetails['location_search_override']);
+                $locSingleSettingSet = array('name' => 'location_user_specified_override', 'search_location_override' => $searchDetails['location_user_specified_override']);
                 $this->getJobsForSearchByType($searchDetails, $nDays, $locSingleSettingSet);
             }
             elseif(($this->arrSearchLocationSetsToRun == null || count($this->arrSearchLocationSetsToRun) == 0) == true)
@@ -547,6 +588,30 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     //
     //
     //************************************************************************
+
+
+    //************************************************************************
+    //
+    //
+    //
+    //  Keyword Search Related Functions
+    //
+    //
+    //
+    //************************************************************************
+    protected function _finalizeSearch_(&$searchDetails)
+    {
+
+        if ($searchDetails['search_key'] == "") {
+            $searchDetails['search_key'] = \Scooper\strScrub($searchDetails['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($searchDetails['search_name'], FOR_LOOKUP_VALUE_MATCHING);
+        }
+
+        $this->_setKeywordStringsForSearch_($searchDetails);
+        $this->_setLocationValueForSearch_($searchDetails);
+
+
+
+    }
 
     function downloadAllUpdatedJobs($nDays = VALUE_NOT_SUPPORTED)
     {
@@ -967,7 +1032,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 if($this->_isValueURLEncoded_($searchDetails['keyword_set'][0]))
                 {
                     $strMatchTypeName = $this->_getKeywordMatchStringFromFlag_($searchDetails['user_setting_flags']);
-                    $GLOBALS['logger']->logLine("Cannot apply match-type=" . $strMatchTypeName . " when keywords are set to exact URL-encoded strings.  Using match-type='any' for search '" .  $searchDetails['search_name'] ."' instead.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    $GLOBALS['logger']->logLine("Cannot apply keyword_match_type=" . $strMatchTypeName . " when keywords are set to exact URL-encoded strings.  Using match-type='any' for search '" .  $searchDetails['search_name'] ."' instead.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                     addJobsToJobsList($this->arrLatestJobs, $arrAdd);
                 }
 
@@ -1039,7 +1104,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             }
             else
             {
-                $GLOBALS['logger']->logLine($searchDetails['search_key'] . " incorrectly set a keyword match type, but has no possible keywords.  Ignoring match-type request and returning all jobs.", \Scooper\C__DISPLAY_ERROR__);
+                $GLOBALS['logger']->logLine($searchDetails['search_key'] . " incorrectly set a keyword match type, but has no possible keywords.  Ignoring keyword_match_type request and returning all jobs.", \Scooper\C__DISPLAY_ERROR__);
             }
         }
 
@@ -1090,9 +1155,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
 
         // Did the user specify an override at the search level in the INI?
-        if($searchDetails != null && $searchDetails['location_search_override'] != null && strlen($searchDetails['location_search_override']) > 0)
+        if($searchDetails != null && $searchDetails['location_user_specified_override'] != null && strlen($searchDetails['location_user_specified_override']) > 0)
         {
-            $strReturnLocation = $searchDetails['location_search_override'];
+            $strReturnLocation = $searchDetails['location_user_specified_override'];
         }
         else
         {
@@ -1168,7 +1233,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         if(!$this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
         {
-            $strLocationValue = $this->getSearchLocationValue($searchDetails, $locSingleSettingSet);
+            $strLocationValue = $this->getLocationValueForLocationSetting($searchDetails, $locSingleSettingSet);
             if($strLocationValue == VALUE_NOT_SUPPORTED)
             {
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Location settings set '" . $locSingleSettingSet['name'] ."' did not have the required location type of " . $this->getLocationSettingType() ." set.  Skipping search '". $searchDetails['search_name'] . "' with settings '" . $locSingleSettingSet['name'] ."'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);

@@ -60,13 +60,12 @@ class PluginGlassdoor extends ClassJobsSitePlugin
     {
         if($nPage == null || $nPage <= 1)
         {
-            $strURL = str_ireplace("***PAGE_NUMBER***", "", $strURL );
+            return "";
         }
         else
         {
-            $strURL = str_ireplace("***PAGE_NUMBER***", "_IP".$nPage, $strURL );
+            return "_IP".$nPage;
         }
-        return $strURL;
     }
 
 

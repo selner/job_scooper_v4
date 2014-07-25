@@ -19,7 +19,9 @@ define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__.'/include/Options.php');
 require_once(__ROOT__.'/lib/Linkify.php');
 require_once(__ROOT__.'/include/ClassJobsSitePlugin.php');
+require_once(__ROOT__.'/include/ClassBaseSimplePlugin.php');
 require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
+require_once(__ROOT__.'/include/ClassConfig.php');
 require_once(__ROOT__.'/include/ClassJobsRunWrapper.php');
 
 
@@ -47,6 +49,7 @@ require_once (__ROOT__.'/plugins/PluginDotJobs.php');
 require_once (__ROOT__.'/plugins/PluginZipRecruiter.php');
 require_once (__ROOT__.'/plugins/PluginStartupHire.php');
 require_once (__ROOT__.'/plugins/PluginAdicioCareerCast.php');
+require_once (__ROOT__.'/plugins/PluginResumator.php');
 
 //And so on, 0x8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800 etc..
 

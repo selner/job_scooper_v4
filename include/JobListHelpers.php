@@ -392,7 +392,7 @@ function getMergedJobRecord($prevJobRecord, $newerJobRecord)
     // the latter (aka the passed in $job) values will win.  For some
     // fields such as Notes, the values will be combined.
     //
-    $mergedJob = array_copy($prevJobRecord);
+    $mergedJob = \Scooper\array_copy($prevJobRecord);
 
     updateJobColumn($mergedJob, $newerJobRecord, 'company', false);
     updateJobColumn($mergedJob, $newerJobRecord, 'job_title', false);
@@ -416,6 +416,44 @@ function getMergedJobRecord($prevJobRecord, $newerJobRecord)
 
 }
 
+/**
+ * Allows multiple expressions to be tested on one string.
+ * This will return a boolean, however you may want to alter this.
+ *
+ * @author William Jaspers, IV <wjaspers4@gmail.com>
+ * @created 2009-02-27 17:00:00 +6:00:00 GMT
+ * @access public
+ *
+ * @param array $patterns An array of expressions to be tested.
+ * @param String $subject The data to test.
+ * @param array $findings Optional argument to store our results.
+ * @param mixed $flags Pass-thru argument to allow normal flags to apply to all tested expressions.
+ * @param array $errors A storage bin for errors
+ *
+ * @returns bool Whether or not errors occurred.
+ */
+function preg_match_multiple(
+    array $patterns=array(),
+    $subject=null,
+    &$findings=array(),
+    $flags=false,
+    &$errors=array()
+) {
+    foreach( $patterns as $name => $pattern )
+    {
+        if( 1 <= preg_match_all( $pattern, $subject, $found, $flags ) )
+        {
+            $findings[$name] = $found;
+        } else
+        {
+            if( PREG_NO_ERROR !== ( $code = preg_last_error() ))
+            {
+                $errors[$name] = $code;
+            } else $findings[$name] = array();
+        }
+    }
+    return (0===sizeof($errors));
+}
 
 function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strExt = '')
 {

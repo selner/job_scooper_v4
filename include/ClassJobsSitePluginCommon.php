@@ -33,14 +33,16 @@ class ClassJobsSitePluginCommon
     {
         return array(
             'search_key' => null,
-            'site_name' => null,
             'search_name' => null,
-            'base_url_format' => null,
-            'location_search_override' => null,
-            'keyword_search_override' => null,
+            'site_name' => null,
             'keywords_string_for_url' => null,
-            'keyword_set' => null,
+            'location_search_value' => null,
+            'base_url_format' => null,
             'user_setting_flags' => C__USER_KEYWORD_MATCH_DEFAULT,
+            'location_user_specified_override' => null,
+            'location_set' => null,
+            'keyword_search_override' => null,
+            'keyword_set' => null,
         );
     }
 
@@ -110,7 +112,7 @@ class ClassJobsSitePluginCommon
 
         if($flag)
         {
-            switch($strMatchType)
+            switch($flag)
             {
                 case C__USER_KEYWORD_MUST_BE_IN_TITLE:
                     $retString = C__USER_KEYWORD_MUST_BE_IN_TITLE_AS_STRING;
@@ -262,18 +264,6 @@ class ClassJobsSitePluginCommon
 
 
 
-    private function _addTitlesToFilterList_($arrTitlesToAdd)
-    {
-        foreach($arrTitlesToAdd as $titleRecord)
-        {
-            $strTitleKey = \Scooper\strScrub($titleRecord['job_title']);
-            $titleRecord['job_title'] = \Scooper\strScrub($titleRecord['job_title']);
-
-            $GLOBALS['DATA']['titles_to_filter'][$strTitleKey] = $titleRecord;
-        }
-
-    }
-
     private function _addBadTitlesFromJobsList_()
     {
         /*
@@ -288,195 +278,12 @@ class ClassJobsSitePluginCommon
     }
 
 
-    /**
-     * Initializes the global list of titles we will automatically mark
-     * as "not interested" in the final results set.
-     */
-    function _loadTitlesToFilter_()
-    {
-        $arrTitleFileDetails = $GLOBALS['OPTS']['titles_file_details'];
-        $strFileName = "";
 
-        if($GLOBALS['DATA']['titles_to_filter'] != null && count($GLOBALS['DATA']['titles_to_filter']) > 0)
-        {
-            // We've already loaded the titles; go ahead and return right away
-            $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['DATA']['titles_to_filter']) . " titles to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            return;
-        }
-
-        if($arrTitleFileDetails != null)
-        {
-            $strFileName = $arrTitleFileDetails ['full_file_path'];
-            if(file_exists($strFileName ) && is_file($strFileName ))
-            {
-                $GLOBALS['logger']->logLine("Loading job titles to filter from ".$strFileName."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                $classCSVFile = new \Scooper\ScooperSimpleCSV($strFileName , 'r');
-                $arrTitlesTemp = $classCSVFile->readAllRecords(true);
-                $arrTitlesTemp = $arrTitlesTemp['data_rows'];
-                $GLOBALS['logger']->logLine(count($arrTitlesTemp) . " titles found in the source file that will be automatically filtered from job listings." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-                //
-                // Add each title we found in the file to our list in this class, setting the key for
-                // each record to be equal to the job title so we can do a fast lookup later
-                //
-                $GLOBALS['DATA']['titles_to_filter'] = array();
-                $this->_addTitlesToFilterList_($arrTitlesTemp);
-            }
-        }
-
-        $this->_addBadTitlesFromJobsList_();
-
-        if(count($GLOBALS['DATA']['titles_to_filter']) <= 0)
-        {
-            $GLOBALS['logger']->logLine("Could not load the list of titles to exclude from '" . $strFileName . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
-        }
-        else
-        {
-            $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['DATA']['titles_to_filter']) . " titles to exclude from '" . $strFileName . "'." , \Scooper\C__DISPLAY_WARNING__);
-
-        }
-    }
-
-    /**
-     * Initializes the global list of titles we will automatically mark
-     * as "not interested" in the final results set.
-     */
-    function _loadCompaniesRegexesToFilter_()
-    {
-        $classCSVFile=null;
-        $fCompaniesLoaded = false;
-        $arrCompanyFileDetails = $GLOBALS['OPTS']['companies_regex_file_details'];
-        $strFileName = "";
-
-        if($GLOBALS['DATA']['companies_regex_to_filter'] != null && count($GLOBALS['DATA']['companies_regex_to_filter']) > 0)
-        {
-            // We've already loaded the companies; go ahead and return right away
-            $fCompaniesLoaded = true;
-            $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['DATA']['companies_regex_to_filter']) . " regexed company strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            return;
-        }
-        else if($arrCompanyFileDetails != null && $arrCompanyFileDetails ['full_file_path'] != '')
-        {
-            $strFileName = $arrCompanyFileDetails ['full_file_path'];
-            if(file_exists($strFileName ) && is_file($strFileName ))
-            {
-                $GLOBALS['logger']->logLine("Loading job Company regexes to filter from ".$strFileName."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                $classCSVFile = new \Scooper\ScooperSimpleCSV($strFileName , 'r');
-                $arrCompaniesTemp = $classCSVFile->readAllRecords(true);
-                $arrCompaniesTemp = $arrCompaniesTemp['data_rows'];
-                $GLOBALS['logger']->logLine(count($arrCompaniesTemp) . " companies found in the source file that will be automatically filtered from job listings." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-                //
-                // Add each Company we found in the file to our list in this class, setting the key for
-                // each record to be equal to the job Company so we can do a fast lookup later
-                //
-                $GLOBALS['DATA']['companies_regex_to_filter'] = array();
-                foreach($arrCompaniesTemp as $CompanyRecord)
-                {
-                    $arrRXInput = explode("|", strtolower($CompanyRecord['match_regex']));
-
-                    foreach($arrRXInput as $rxItem)
-                    {
-                        $rx = '/'.$rxItem.'/';
-
-                        $GLOBALS['DATA']['companies_regex_to_filter'][] = $rx;
-                    }
-                }
-                $fCompaniesLoaded = true;
-            }
-        }
-
-        if($fCompaniesLoaded == false)
-        {
-            if($arrCompanyFileDetails['full_file_path'] == '')
-                $GLOBALS['logger']->logLine("No file specified for companies regexes to exclude from '" . $strFileName . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
-            else
-                $GLOBALS['logger']->logLine("Could not load regex list for companies to exclude from '" . $strFileName . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
-        }
-        else
-        {
-            $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['DATA']['companies_regex_to_filter']). " regexes to use for filtering companies." , \Scooper\C__DISPLAY_WARNING__);
-
-        }
-    }
-
-
-
-    function _loadTitlesRegexesToFilter_()
-    {
-        $fTitlesLoaded = false;
-        $arrTitleFileDetails = $GLOBALS['OPTS']['titles_regex_file_details'];
-        $strFileName = "";
-
-        if($GLOBALS['DATA']['titles_regex_to_filter'] != null && count($GLOBALS['DATA']['titles_regex_to_filter']) > 0)
-        {
-            // We've already loaded the titles; go ahead and return right away
-            $fTitlesLoaded = true;
-            $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['DATA']['titles_regex_to_filter']) . " regexed title strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            return;
-        }
-        else if($arrTitleFileDetails != null && $arrTitleFileDetails ['full_file_path'] != '')
-        {
-            $strFileName = $arrTitleFileDetails ['full_file_path'];
-            if(file_exists($strFileName ) && is_file($strFileName ))
-            {
-                $GLOBALS['logger']->logLine("Loading job title regexes to filter from ".$strFileName."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                $classCSVFile = new \Scooper\ScooperSimpleCSV($strFileName , 'r');
-                $arrTitlesTemp = $classCSVFile->readAllRecords(true);
-                $arrTitlesTemp = $arrTitlesTemp['data_rows'];
-                $GLOBALS['logger']->logLine(count($arrTitlesTemp) . " titles found in the source file that will be automatically filtered from job listings." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-                //
-                // Add each title we found in the file to our list in this class, setting the key for
-                // each record to be equal to the job title so we can do a fast lookup later
-                //
-                $GLOBALS['DATA']['titles_regex_to_filter'] = array();
-                $nDebugCounter = 0;
-                foreach($arrTitlesTemp as $titleRecord)
-                {
-                    $arrRXInput = explode("|", strtolower($titleRecord['match_regex']));
-                    foreach($arrRXInput as $rxItem)
-                    {
-                        $rx = '/'.$rxItem.'/i';
-//                        $GLOBALS['logger']->logLine("Testing regex record " .$nDebugCounter . " with value of " . $rx , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                        try
-                        {
-                            $testMatch = preg_match($rx, "empty");
-
-                        }
-                        catch (Exception $ex)
-                        {
-                            $strError = "Regex test failed on # " . $nDebugCounter . ", value " . $rxItem .".  Skipping.  Error: '".$ex->getMessage();
-                            $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-                            if($GLOBALS['OPTS']['DEBUG'] == true) { throw new ErrorException( $strError); }
-                        }
-                        $GLOBALS['DATA']['titles_regex_to_filter'][] = $rx;
-                    }
-                    $nDebugCounter = $nDebugCounter + 1;
-                }
-                $fTitlesLoaded = true;
-            }
-        }
-
-        if($fTitlesLoaded == false)
-        {
-            if($arrTitleFileDetails['full_file_path'] == '')
-                $GLOBALS['logger']->logLine("No file specified for title regexes to exclude from '" . $strFileName . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
-            else
-                $GLOBALS['logger']->logLine("Could not load regex list for titles to exclude from '" . $strFileName . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
-        }
-        else
-        {
-            $GLOBALS['logger']->logLine("Loaded regexes to use for filtering titles from '" . $strFileName . "'." , \Scooper\C__DISPLAY_WARNING__);
-
-        }
-    }
 
 
     function markJobsList_withAutoItems(&$arrJobs, $strCallerDescriptor = "")
     {
         $this->markJobsList_SetAutoExcludedTitlesFromRegex($arrJobs, $strCallerDescriptor);
-        $this->markJobsList_SetAutoExcludedTitles($arrJobs, $strCallerDescriptor);
         $this->markJobsList_SetAutoExcludedCompaniesFromRegex($arrJobs, $strCallerDescriptor);
         $this->markJobsList_SetLikelyDuplicatePosts($arrJobs, $strCallerDescriptor);
     }
@@ -519,7 +326,6 @@ class ClassJobsSitePluginCommon
 
     private function getNotesWithDupeIDAdded($strNote, $strNewDupe)
     {
-        $retNote = "";
         $strDupeNotes = null;
 
         $strDupeMarker_Start = "<dupe>";
@@ -554,8 +360,6 @@ class ClassJobsSitePluginCommon
         if(count($arrToMark) == 0) return;
 
         $nJobsMatched = 0;
-        $nUniqueRoles = 0;
-        $nProblemRolesSkipped= 0;
 
         $arrKeys_CompanyAndRole = array_column ( $arrToMark, 'key_company_role');
         $arrKeys_JobSiteAndJobID = array_column ( $arrToMark, 'key_jobsite_siteid');
@@ -599,73 +403,9 @@ class ClassJobsSitePluginCommon
 
     }
 
-
-    function markJobsList_SetAutoExcludedTitles(&$arrToMark, $strCallerDescriptor = null)
-    {
-        if(count($arrToMark) == 0) return;
-        $GLOBALS['logger']->logLine("Excluding Jobs by Exact Title Matches", \Scooper\C__DISPLAY_ITEM_START__);
-        $this->_loadTitlesToFilter_();
-
-        $nJobsSkipped = 0;
-        $nJobsNotMarked = 0;
-        $nJobsMarkedAutoExcluded = 0;
-
-
-        $GLOBALS['logger']->logLine("Checking ".count($arrToMark) ." roles against ". count($GLOBALS['DATA']['titles_to_filter']) ." excluded titles.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-        foreach($arrToMark as $job)
-        {
-            $strJobIndex = getArrayKeyValueForJob($job);
-            // First, make sure we don't already have a value in the interested column.
-            // if we do, skip it and move to the next one
-            if(!isJobAutoUpdatable($job))
-            {
-                $nJobsSkipped++;
-                continue;
-            }
-
-            $strJobKeyToMatch = \Scooper\strScrub($job['job_title'], REPLACE_SPACES_WITH_HYPHENS | DEFAULT_SCRUB );
-
-            // Look for a matching title in our list of excluded titles
-            $varValMatch =  $GLOBALS['DATA']['titles_to_filter'][$strJobKeyToMatch];
-
-            // if we got a match, we'll get an array back with that title and some other data
-            // such as the reason it's excluded
-            //
-            if($varValMatch != null && $varValMatch['exclude_reason'] != null)
-            {
-                if(strlen($varValMatch['exclude_reason']) > 0)
-                {
-                    $arrToMark[$strJobIndex]['interested'] = $varValMatch['exclude_reason'] . C__STR_TAG_AUTOMARKEDJOB__;
-                }
-                else
-                {
-                    $arrToMark[$strJobIndex]['interested'] = 'No (EXCLUDED TITLE BUT UNKNOWN REASON VALUE)';
-                    $arrToMark[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
-                    $GLOBALS['logger']->logLine("Excluded title " . $job['job_title'] . " did not have an exclude reason.  Cannot mark.", \Scooper\C__DISPLAY_ERROR__);
-                }
-                $nJobsMarkedAutoExcluded++;
-            }
-            else              // we're ignoring the Excluded column fact for the time being. If it's in the list, it's excluded
-            {
-                $nJobsNotMarked++;
-//                $GLOBALS['logger']->logLine("Job title '".$job['job_title'] ."' was not found in the exclusion list.  Keeping for review." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            }
-
-
-        }
-
-        $strTotalRowsText = "/".count($arrToMark);
-        $GLOBALS['logger']->logLine("Automatically marked ".$nJobsMarkedAutoExcluded .$strTotalRowsText ." roles " . ($strCallerDescriptor != null ? "from " . $strCallerDescriptor : "") . " as 'No/Not Interested' because the job title was in the exclusion list. (Skipped: " . $nJobsSkipped . $strTotalRowsText ."; Untouched: ". $nJobsNotMarked . $strTotalRowsText .")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
-    }
-
-
-
     function markJobsList_SetAutoExcludedCompaniesFromRegex(&$arrToMark, $strCallerDescriptor = null)
     {
         if(count($arrToMark) == 0) return;
-        $this->_loadCompaniesRegexesToFilter_();
-        $fMatched = false;
 
         $nJobsNotMarked = 0;
         $nJobsMarkedAutoExcluded = 0;
@@ -717,8 +457,6 @@ class ClassJobsSitePluginCommon
     {
         if(count($arrToMark) == 0) return;
 
-        $this->_loadTitlesRegexesToFilter_();
-
         $nJobsMarkedAutoExcluded = 0;
 
         $GLOBALS['logger']->logLine("Excluding Jobs by Title Regex Matches", \Scooper\C__DISPLAY_ITEM_START__);
@@ -730,37 +468,34 @@ class ClassJobsSitePluginCommon
         {
             foreach($arrJobs_AutoUpdatable as $job)
             {
-                $fMatched = false;
-                // get all the job records that do not yet have an interested value
-
                 if($GLOBALS['DATA']['titles_regex_to_filter'] == null) break;
+                $strScrubbedJobTitle = \Scooper\strScrub($job['job_title'], DEFAULT_SCRUB);
 
-                $nDebugIndexCounter = 0;
+                $arrMatches = null;
+                $arrMatchErrors = null;
 
-                foreach($GLOBALS['DATA']['titles_regex_to_filter'] as $rxInput )
+                preg_match_multiple($GLOBALS['DATA']['titles_regex_to_filter'], $strScrubbedJobTitle, $arrMatches , null, $arrMatchErrors );
+
+                if(count($arrMatchErrors) > 0)
                 {
-                    $strScrubbedJobTitle = "<not yet set>";
-                  try {
-                      $strScrubbedJobTitle = \Scooper\strScrub($job['job_title'], DEFAULT_SCRUB);
-                      $fMatched = preg_match($rxInput, $strScrubbedJobTitle);
-                  }
-                  catch (Exception $classError)
-                  {
-                      $strErr = 'ERROR:  Regex match failed on index ' . $nDebugIndexCounter . ', job title=' . $strScrubbedJobTitle .' with regex = ' .$rxInput . '. Error: ' . $classError->getMessage();
-                      $GLOBALS['logger']->logLine($strErr, \Scooper\C__DISPLAY_ERROR__);
-                      if($GLOBALS['OPTS']['use_debug'] == false) { throw new ErrorException($strErr); }
-                  }
-                    if($fMatched == true)
+                    $GLOBALS['logger']->logLine("Errors with regexes: ". getArrayValuesAsString($arrMatchErrors), \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                }
+
+                $arrMatchCol0 = array_column($arrMatches, "0");
+                $arrCol0Count = count($arrMatchCol0);
+
+                if($arrCol0Count > 0)
+                {
+                    foreach($arrMatches as $match)
                     {
-                        $strJobIndex = getArrayKeyValueForJob($job);
-                        $arrToMark[$strJobIndex]['interested'] = 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__;
-                        if(strlen($arrToMark[$strJobIndex]['notes']) > 0) { $arrToMark[$strJobIndex]['notes'] = $arrToMark[$strJobIndex]['notes'] . " "; }
-                        $arrToMark[$strJobIndex]['notes'] = "Matched regex[". $rxInput ."]". C__STR_TAG_AUTOMARKEDJOB__;
-                        $arrToMark[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
-                        $nJobsMarkedAutoExcluded++;
-                        break;
+                        if(is_array($match) && count($match) > 0)
+                            $strMatches = "#" . key($match) . "-" .$match[0][0];
                     }
-                    $nDebugIndexCounter = $nDebugIndexCounter+1;
+                    $strJobIndex = getArrayKeyValueForJob($job);
+                    $arrToMark[$strJobIndex]['interested'] = 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__;
+                    if(strlen($arrToMark[$strJobIndex]['notes']) > 0) { $arrToMark[$strJobIndex]['notes'] = $arrToMark[$strJobIndex]['notes'] . " "; }
+                    $arrToMark[$strJobIndex]['notes'] = "Matched regex[". $strMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__;
+                    $arrToMark[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
                 }
             }
         }
@@ -929,7 +664,7 @@ class ClassJobsSitePluginCommon
 
             if(count($arrMyRecordsToInclude) > 1)
             {
-                $arrRetJobs = my_merge_add_new_keys($arrMyRecordsToInclude, $arrRetJobs);
+                $arrRetJobs = \Scooper\my_merge_add_new_keys($arrMyRecordsToInclude, $arrRetJobs);
             }
 
             $this->writeJobsListToFile($strOutFilePath, $arrRetJobs, $fIncludeFilteredJobsInResults);
@@ -977,7 +712,6 @@ class ClassJobsSitePluginCommon
         return $objSimpleHTML;
     }
 
-
     function getOutputFileFullPath($strFilePrefix = "", $strBase = 'jobs', $strExtension = 'csv')
     {
         $strNewFileName = getDefaultJobsOutputFileName($strFilePrefix, $strBase , $strExtension);
@@ -986,6 +720,8 @@ class ClassJobsSitePluginCommon
 
         return $detailsNewFile['full_file_path'];
     }
+
+
 
 
     function getSimpleHTMLObjForFileContents($strInputFileFullPath)
@@ -998,7 +734,7 @@ class ClassJobsSitePluginCommon
         if(!$fp ) return $objSimpleHTML;
 
         $strHTML = fread($fp, JOBS_SCOOPER_MAX_FILE_SIZE);
-        $dom = new SimpleHtmlDom\simple_html_dom(null, $lowercase, $forceTagsClosed, $target_charset, $stripRN, $defaultBRText, $defaultSpanText);
+        $dom = new SimpleHtmlDom\simple_html_dom(null, null, true, null, null, null, null);
         $objSimpleHTML = $dom->load($strHTML, $lowercase, $stripRN);
         fclose($fp);
 
