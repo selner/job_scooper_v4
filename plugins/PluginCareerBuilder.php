@@ -76,7 +76,7 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
         $resultsSection= $objSimpHTML->find("div[id='pnlJobResultsCount']");
         $totalItemsText = $resultsSection[0]->plaintext;
         $arrItemItems = explode(" ", trim($totalItemsText));
-        $strTotalItemsCount = $arrItemItems[4];
+        $strTotalItemsCount = $arrItemItems[0];
 
         return str_replace(",", "", $strTotalItemsCount);
     }
@@ -101,7 +101,7 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
             $item = $this->getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
 
-            $titleLink = $node->find("a[class='jt']");
+            $titleLink = $node->find("a[class='jt prefTitle']");
 
 
             $item['job_title'] = $titleLink[0]->plaintext;
