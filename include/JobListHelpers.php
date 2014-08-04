@@ -280,12 +280,6 @@ function addJobToJobsList(&$arrJobsListToUpdate, $job)
         $jobToAdd = getMergedJobRecord($arrJobsListToUpdate[$job['key_jobsite_siteid']], $job);
     }
 
-    if($arrJobsListToUpdate[$job['key_jobsite_siteid']] && $arrJobsListToUpdate[$job['key_jobsite_siteid']]['company'] == "groupon")
-    {
-        var_dump('$prevJobRecord', $arrJobsListToUpdate[$job['key_jobsite_siteid']]);
-        var_dump('$newerJobRecord', $job);
-        var_dump('$jobToAdd', $jobToAdd);
-    }
 
     $arrJobsListToUpdate[$job['key_jobsite_siteid']] = $jobToAdd;
 }
