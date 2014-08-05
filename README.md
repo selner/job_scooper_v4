@@ -53,7 +53,7 @@ If you're looking at job listings across many sites, Job Scooper has some built-
 That's just the start of [what Jobs Scooper can do](../../wiki).
 
 ##Other Stuff
-* Version:  v2.1.0 [release notes](../releases/tag/v2.0.0)
+* Version:  v2.1.0 [release notes](https://github.com/selner/jobs_scooper/releases)
 * Author:  Bryan Selner (dev at recoilvelocity dot com)
 * Platforms:
 	* Mac OS X 10.9.3 with PHP 5.4.24.
