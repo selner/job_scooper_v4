@@ -699,12 +699,13 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                 else
                 {
                     $arrPluginJobs = array_filter($arrPluginJobsUnfiltered, array($classPlug, "isJobListingMine"));
-                    $countUpdated = count(array_filter($arrPluginJobs, "isJobUpdatedToday"));
+                    $countPluginJobs = countJobRecords($arrPluginJobs);
+                    $countUpdated = countJobRecords(array_filter($arrPluginJobs, "isJobUpdatedToday"));
                 }
 
                 if($countUpdated == 0)
                 {
-                    $arrNoJobUpdates[$strName] = $strName;
+                    $arrNoJobUpdates[$strName] = $strName . "(" . $countPluginJobs . " total jobs)";
                 }
                 else
                 {
@@ -853,7 +854,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         if($arrNoJobUpdates != null && count($arrNoJobUpdates) > 0)
         {
             sort($arrNoJobUpdates);
-            $strOut = $strOut . PHP_EOL .  "No updated jobs for " . \Scooper\getTodayAsString() . " on these sites: " . PHP_EOL;
+            $strOut = $strOut . PHP_EOL .  "No jobs were updated for" . \Scooper\getTodayAsString() . " on these sites: " . PHP_EOL;
 
             foreach($arrNoJobUpdates as $site)
             {
