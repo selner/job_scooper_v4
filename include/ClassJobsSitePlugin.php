@@ -68,8 +68,16 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
     }
 
-    function parseJobsListForPage($objSimpHTML) { return VALUE_NOT_SUPPORTED; } // returns an array of jobs
+    function parseJobsListForPageBase($objSimpHTML) {
+         $retJobs = $this->parseJobsListForPage($objSimpHTML);
+        $retJobs = $this->normalizeJobList($retJobs);
+
+        return $retJobs;
+
+    } // returns an array of jobs
+
     function parseTotalResultsCount($objSimpHTML) { return VALUE_NOT_SUPPORTED; } // returns an array of jobs
+    function parseJobsListForPage($objSimpHTML) { return VALUE_NOT_SUPPORTED; } // returns an array of jobs
 
 
 
@@ -873,7 +881,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 if(!$objSimpleHTML) $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL);
                 if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
 
-                $arrPageJobsList = $this->parseJobsListForPage($objSimpleHTML);
+                $arrPageJobsList = $this->parseJobsListForPageBase($objSimpleHTML);
 
 
                 if(!is_array($arrPageJobsList))
@@ -906,7 +914,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
 
         $this->_addSearchJobsToMyJobsList_($arrSearchReturnedJobs, $searchDetails);
-        $GLOBALS['logger']->logLine($this->siteName . "[".$searchDetails['search_name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+        $GLOBALS['logger']->logLine($this->siteName . "[".$searchDetails['search_name']."]" .": " . $nJobsFound . " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
 
     }
 
@@ -1231,7 +1239,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 //            }
         }
 
-        if(!$this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
+
+        $nSubtermMatches = substr_count($strURL, BASE_URL_TAG_LOCATION);
+
+        if(!$this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) && $nSubtermMatches > 0)
         {
             $strLocationValue = $this->getLocationValueForLocationSetting($searchDetails, $locSingleSettingSet);
             if($strLocationValue == VALUE_NOT_SUPPORTED)
