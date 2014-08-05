@@ -31,6 +31,17 @@ location-city-comma-state-country-no-commas="seattle washington united states"
 
 Then update config.ini values for your notification email address and output folder path.  That's it!  [Run Jobs Scooper](../wiki/Running-Jobs-Scooper) and let it do the work for you.
 
+##Power Up Your Results!
+If you're looking at job listings across many sites, Job Scooper has some built-in features to make that work much easier:
+* **Automatic duplication detection:**  if the same job is posted on multiple sites, job scooper automatically marks all but the first one as duplicates so you don't waste time reviewing the same job again.
+* **Filter to title-only matches for the keywords:**  The majority of sites do not support filtering your search to match only the job title.  One of the best features of Job Scooper is that it let's you filter to title-only matches for any site, regardless of whether the site supports it or not!
+* **Filter out jobs you've already reviewed**
+* **Exclude specific companies automatically**
+* **Exclude particular job title matches automatically**
+
+That's just the start of [what Jobs Scooper can do...](../../wiki).
+
+## Running Jobs_Scooper
 To run Jobs Scooper, type:
 ``/usr/bin/php "main/runJobs.php" -all -days 3 -ini myconfig.ini``
 
@@ -41,16 +52,6 @@ Required Parameters:
 -all:  run all the searches found in the .ini file.  Alternatively, you can specify the name of a single job site to run only that site's searches.  e.g. ``-amazon``
 ```
 
-
-##Power Up Your Results!
-If you're looking at job listings across many sites, Job Scooper has some built-in features to make that work much easier:
-* **Automatic duplication detection:**  if the same job is posted on multiple sites, job scooper automatically marks all but the first one as duplicates so you don't waste time reviewing the same job again.
-* **Filter to title-only matches for the keywords:**  The majority of sites do not support filtering your search to match only the job title.  One of the best features of Job Scooper is that it let's you filter to title-only matches for any site, regardless of whether the site supports it or not!
-* **Filter out jobs you've already reviewed**
-* **Exclude specific companies automatically**
-* **Exclude particular job title matches automatically**
-
-That's just the start of [what Jobs Scooper can do...](../../wiki).
 
 ##Other Stuff
 * Version:  v2.1.0 [release notes](https://github.com/selner/jobs_scooper/releases)
