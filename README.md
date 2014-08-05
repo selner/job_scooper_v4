@@ -48,9 +48,9 @@ If you're looking at job listings across many sites, Job Scooper has some built-
 * **Filter to title-only matches for the keywords:**  The majority of sites do not support filtering your search to match only the job title.  One of the best features of Job Scooper is that it let's you filter to title-only matches for any site, regardless of whether the site supports it or not!
 * **Filter out jobs you've already reviewed**
 * **Exclude specific companies automatically**
-* **Exclude particular job titles automatically**
-*
-That's just the start of [what Jobs Scooper can do](../../wiki).
+* **Exclude particular job title matches automatically**
+
+That's just the start of [what Jobs Scooper can do...](../../wiki).
 
 ##Other Stuff
 * Version:  v2.1.0 [release notes](https://github.com/selner/jobs_scooper/releases)
