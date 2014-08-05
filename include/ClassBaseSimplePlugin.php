@@ -137,8 +137,6 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
                 //
                 $item = $this->getEmptyJobListingRecord();
 
-                \SimpleHtmlDom\dump_html_tree($node);
-
                 $item['job_site'] = $this->siteName;
                 $item['date_pulled'] = \Scooper\getTodayAsString();
 
