@@ -601,7 +601,7 @@ class ClassConfig extends ClassJobsSitePlugin
                     // use a single search with the full set.
                     $nameKywdSet = $keywordSet['key'];
                     $arrKywdSetsForUniqSearches = array();
-                    if($classPlug->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED))
+                    if($classPlug->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) || $classPlug->isBitFlagSet(C__JOB_ALWAYS_ADD_FULL_KEYWORDS_SET))
                     {
                         $arrKywdSetsForUniqSearches[$keywordSet['key']] = array('key' => $keywordSet['key'], 'keywords_array' => $keywordSet['keywords_array']);
                     }
@@ -741,7 +741,7 @@ class ClassConfig extends ClassJobsSitePlugin
                 }
             }
 
-            $this->configSettings['searches'] = \Scooper\my_merge_add_new_keys($this->configSettings['searches'], $arrNewSearches);
+            if($arrNewSearches != null && is_array($arrNewSearches)) $this->configSettings['searches'] = \Scooper\my_merge_add_new_keys($this->configSettings['searches'], $arrNewSearches);
 
         }
 
