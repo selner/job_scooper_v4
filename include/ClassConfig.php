@@ -508,38 +508,6 @@ class ClassConfig extends ClassJobsSitePlugin
             }
         }
 
-        // If the keyword settings scope is all sites, then create a search for every possible site
-        // so that it runs with the keywords settings if it was included_<site> = true
-        //
-//        $setsKeywordSettings = $this->classConfig->getSearchConfiguration('keyword_sets');
-//        if(isset($setsKeywordSettings))
-//        {
-//            foreach($setsKeywordSettings as $kywdSetting)
-//            {
-//                if ($kywdSetting['included_jobsites_array'] != null && count($kywdSetting['included_jobsites_array']) > 0) {
-//                    foreach ($kywdSetting['included_jobsites_array'] as $siteToSearch) {
-//                        $classPlug = new $GLOBALS['DATA']['site_plugins'][$siteToSearch]['class_name'](null, null);
-//
-//                        // if this plugin supports keyword parameters, then add a search for it.
-//                        if (!$classPlug->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$classPlug->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED)) {
-//
-//                            $tempSearch = $this->getEmptySearchDetailsRecord();
-//                            $tempSearch['search_key'] = \Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . '-for-keyword-set-' . \Scooper\strScrub($kywdSetting['set_name'], FOR_LOOKUP_VALUE_MATCHING);
-//                            $tempSearch['search_name'] = $tempSearch['search_key'];
-//                            $tempSearch['site_name'] = $siteToSearch;
-//                            $tempSearch['keyword_set'] = $kywdSetting['keywords_array'];
-//                            $tempSearch['user_setting_flags'] = $kywdSetting['keyword_match_type_flag'];
-//                            $this->_finalizeSearch_($tempSearch);
-//
-//                            $arrPossibleSearchesForRun[] = $tempSearch;
-//                            $strSearchAsString = getArrayValuesAsString($tempSearch);
-//                            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search added for run: " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
 
 
         if(isset($this->configSettings['location_sets']))
@@ -704,9 +672,6 @@ class ClassConfig extends ClassJobsSitePlugin
                     //
                     foreach($arrTitlesTemp as $titleRecord)
                     {
-                        if($GLOBALS['OPTS']['DEBUG'] == true) {
-                            $GLOBALS['logger']->logLine("Adding title regex term: " . $titleRecord, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                        }
                         $arrRXInput = explode("|", strtolower($titleRecord['match_regex']));
                         foreach($arrRXInput as $rxItem)
                         {
