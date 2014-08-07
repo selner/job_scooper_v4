@@ -384,10 +384,13 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         //
 
         $classMulti = new ClassMultiSiteSearch($this->classConfig->getFileDetails('output_subfolder')['directory']);
-        $classMulti->addMultipleSearches($this->arrSearchesToReturn, $this->classConfig->getSearchConfiguration('location_sets'));
+//        $classMulti->addMultipleSearches($this->arrSearchesToReturn, $this->classConfig->getSearchConfiguration('location_sets'));
+        $classMulti->addMultipleSearches($this->arrSearchesToReturn, null);
+//        $classMulti->addMultipleSearches($this->arrSearchesToReturn, $this->classConfig->getSearchConfiguration('location_sets'));
 
-        $tempKeywordSet = current($this->classConfig->getSearchConfiguration('keyword_sets'));
-        $classMulti->getJobsForMyMultipleSearches( $this->classConfig->getSearchConfiguration('number_days'), $tempKeywordSet);
+//         $tempKeywordSet = current($this->classConfig->getSearchConfiguration('keyword_sets'));
+//        $classMulti->getJobsForMyMultipleSearches( $this->classConfig->getSearchConfiguration('number_days'), $tempKeywordSet);
+        $classMulti->getJobsForMyMultipleSearches( $this->classConfig->getSearchConfiguration('number_days'), null);
         addJobsToJobsList($this->arrLatestJobs, $classMulti->getMyJobsList());
         //
         // Let's save off the unfiltered jobs list in case we need it later.  The $this->arrLatestJobs
@@ -560,88 +563,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     }
 
 
-
-
-    private function __sendJobCompletedEmail_Applescript__($strBodyText = null, $detailsFileCSV = null, $detailsFileHTML = null)
-    {
-        //      set strEmailBodyContentFile to first item of argv
-        //		set strFileToAttachCSV to second item of argv
-        //		set strFileToAttachHTML to third item of argv
-        //		set strToAddr to fourthitem of argv
-        //		set strToName to fifth item of argv
-        //		set strBCCAddr to sixth item of argv
-
-
-        if($GLOBALS['OPTS']['DEBUG'] == true)
-        {
-            $GLOBALS['logger']->logLine("DEBUG mode:  skipping email notifications.", \Scooper\C__DISPLAY_ITEM_START__);
-            return;
-        }
-
-        $GLOBALS['logger']->logLine("Sending email notifications for completed run. ", \Scooper\C__DISPLAY_ITEM_START__);
-
-
-
-        $strHTMLFilePath = "";
-        $strBodyFilePath = "";
-        $strCSVFilePath = "";
-
-        if($strBodyText != null)
-        {
-            $detailsFileBody = $this->__getAlternateOutputFileDetails__("TXT", "", "_Results");
-            $fp = fopen($detailsFileBody['full_file_path'],'w+');
-            if(!$fp)
-                throw new ErrorException("Unable to open file '". $detailsFileBody['full_file_path'] . "' with access mode of 'w'.".PHP_EOL .error_get_last()['message']) ;
-
-            if(!fputs($fp, $strBodyText))
-            {
-                throw new Exception("Unable to write file: " .$detailsFileBody['full_file_path'] );
-            }
-
-            $strBodyFilePath = $detailsFileBody['full_file_path'];
-        }
-
-
-        // Get Active Jobs HTML file name again
-        if($detailsFileHTML != null)
-        {
-            $strHTMLFilePath = $detailsFileHTML['full_file_path'];
-        }
-
-        if($detailsFileCSV != null)
-        {
-            $strCSVFilePath = $detailsFileCSV['full_file_path'];
-
-        }
-        $toEmail = null;
-        $fromEmail = null;
-        $bccEmail = null;
-
-        if(!$this->classConfig->getEmailByType($toEmail, "to"))
-        {
-            $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
-            return;
-        }
-        if(!$this->classConfig->getEmailByType($bccEmail, "bcc"))
-        {
-            $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
-            return;
-        }
-        $result = "";
-
-        //
-        // Shell out to Applescript to send the email notifications
-        //
-        $strCmdToRun = 'osascript ' . __ROOT__ . '/main/email_job_run_results.appleScript "' . $strBodyFilePath  . '" "' . $strCSVFilePath  . '" "'.$strHTMLFilePath.'" "' . $toEmail['address'] . '" "' . $toEmail['name'] . '" "' . $bccEmail['address'] . '"';
-        $strCmdToRun = escapeshellcmd($strCmdToRun);
-        $GLOBALS['logger']->logLine("Starting email notifications: " . $strCmdToRun, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        $result = \Scooper\my_exec($strCmdToRun);
-        $GLOBALS['logger']->logLine($result['stderr'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        return $result['stdout'];
-
-
-    }
-
     function parseJobsListForPage($objSimpHTML)
     {
         throw new ErrorException("parseJobsListForPage not supported for class" . get_class($this));
@@ -705,7 +626,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
                 if($countUpdated == 0)
                 {
-                    $arrNoJobUpdates[$strName] = $strName . "(" . $countPluginJobs . " total jobs)";
+                    $arrNoJobUpdates[$strName] = $strName . " (" . $countPluginJobs . " total jobs)";
                 }
                 else
                 {
@@ -854,7 +775,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         if($arrNoJobUpdates != null && count($arrNoJobUpdates) > 0)
         {
             sort($arrNoJobUpdates);
-            $strOut = $strOut . PHP_EOL .  "No jobs were updated for" . \Scooper\getTodayAsString() . " on these sites: " . PHP_EOL;
+            $strOut = $strOut . PHP_EOL .  "No jobs were updated for " . \Scooper\getTodayAsString() . " on these sites: " . PHP_EOL;
 
             foreach($arrNoJobUpdates as $site)
             {
