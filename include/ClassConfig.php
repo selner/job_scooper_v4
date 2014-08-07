@@ -556,6 +556,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
     private function _updateSearchesWithKeywordSet_($keywordSet)
     {
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Updating user-specified searches with keyword set details", \Scooper\C__DISPLAY_ITEM_START__);
         for($c = 0; $c < count($this->configSettings['searches']); $c++)
         {
             $this->configSettings['searches'][$c]['keyword_set']  = $keywordSet['keywords_array'];
@@ -572,6 +573,8 @@ class ClassConfig extends ClassJobsSitePlugin
 
     private function _addSearchesForKeywordSets_()
     {
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Adding new searches for user's keyword sets ", \Scooper\C__DISPLAY_ITEM_START__);
+
         $arrSkippedPlugins = null;
 
         //
@@ -686,6 +689,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
     private function _addSearchesForAdditionalLocationSets_()
     {
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Creating searches for additional location sets after the primary by cloning and updating all searches", \Scooper\C__DISPLAY_ITEM_START__);
         $arrSkippedPlugins = null;
 
         //
