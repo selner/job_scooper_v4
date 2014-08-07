@@ -286,7 +286,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     protected $siteName = 'NAME-NOT-SET';
     protected $arrLatestJobs = null;
     protected $arrSearchesToReturn = null;
-    protected $arrSearchLocationSetsToRun = null;
     protected $nJobListingsPerPage = 20;
     protected $flagSettings = null;
 
