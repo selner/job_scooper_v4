@@ -332,7 +332,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
         // Find the HTML node that holds the result count
         //
         $resultsSection = $objSimpHTML->find("span[id='retCountNumber']");
-        \SimpleHtmlDom\dump_html_tree($objSimpHTML);
+
         // get the text value of that node
         $totalItemsText = $resultsSection[0]->plaintext;
 

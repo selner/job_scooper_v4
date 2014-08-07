@@ -86,7 +86,6 @@ class PluginGlassdoor extends ClassJobsSitePlugin
 
         $nodesJobs = $objSimpHTML->find('div[class="jobScopeWrapper"]');
 
-//        var_dump('found ' . count($nodesJobs) . ' nodes');
 
         foreach($nodesJobs as $node)
         {

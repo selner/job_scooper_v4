@@ -79,7 +79,6 @@ class PluginTableau extends ClassJobsSitePlugin
             $item['location'] = $node->find("td")[2]->plaintext;
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
-//            var_dump($item);
             $ret[] = $this->normalizeItem($item);
         }
 
