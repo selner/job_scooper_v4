@@ -35,7 +35,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     protected $arrAllSearchesFromConfig = null;
     protected $arrEmail_PHPMailer_SMTPSetup = null;
 
-    function ClassJobsRunWrapper()
+    function __construct()
     {
 
         $this->siteName = "JobsRunner";
