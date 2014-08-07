@@ -24,7 +24,7 @@ class ClassConfig extends ClassJobsSitePlugin
     protected $nNumDaysToSearch = -1;
     protected $arrFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null, 'user_input_files' => null);
     protected $arrEmailAddresses = null;
-    protected $configSettings = array('searches' => null, 'keyword_sets' => null, 'location_sets' => null, 'number_days'=>VALUE_NOT_SUPPORTED);
+    protected $configSettings = array('searches' => null, 'keyword_sets' => null, 'location_sets' => null, 'number_days'=>VALUE_NOT_SUPPORTED, 'included_sites' => array(), 'excluded_sites' => array());
     protected $arrEmail_PHPMailer_SMTPSetup = null;
 
 
@@ -92,6 +92,17 @@ class ClassConfig extends ClassJobsSitePlugin
         {
             $fIsIncludedInRun = is_IncludeSite($site['name']);
             $GLOBALS['DATA']['site_plugins'][$site['name']]['include_in_run'] = $fIsIncludedInRun;
+
+            // Initialize the config settings for the site list using the options set by the user
+            // on the command line
+            if($fIsIncludedInRun)
+            {
+                $this->configSettings['included_sites'][$site['name']] = $site['name'];
+            }
+            else
+            {
+                $this->configSettings['excluded_sites'][$site['name']] = $site['name'];
+            }
         }
 
         $GLOBALS['OPTS']['DEBUG'] = \Scooper\get_PharseOptionValue('use_debug');
@@ -210,11 +221,12 @@ class ClassConfig extends ClassJobsSitePlugin
         // and configure all searches
         //
 
-//        $this->__readGlobalSearchParamtersFromConfig_($config);
+//        $this->_readGlobalSearchParamtersFromConfig_($config);
 
-        $this->__readKeywordSetsFromConfig__($config);
 
-        $this->__readLocationSetsFromConfig__($config);
+        $this->_readKeywordSetsFromConfig_($config);
+
+        $this->_readLocationSetsFromConfig_($config);
 
         //
         // Load any specific searches specified by the user in the config
@@ -321,12 +333,14 @@ class ClassConfig extends ClassJobsSitePlugin
             {
                 foreach($config->search as $iniSearch)
                 {
-                    $this->configSettings['searches'][] = $this->_parseSearchFromINI_($iniSearch);
+                    $retSearch = $this->_parseSearchFromINI_($iniSearch);
+                    if($retSearch != null) $this->configSettings['searches'][] = $retSearch;
                 }
             }
             else
             {
-                $this->configSettings['searches'][] = $this->_parseSearchFromINI_($config->search);
+                $retSearch = $this->_parseSearchFromINI_($config->search);
+                if($retSearch != null) $this->configSettings['searches'][] = $retSearch;
             }
         }
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->configSettings['searches']) . " searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
@@ -338,6 +352,13 @@ class ClassConfig extends ClassJobsSitePlugin
 
         $tempSearch['key'] = \Scooper\strScrub($iniSearch['key'], REMOVE_EXTRA_WHITESPACE | LOWERCASE );
         $tempSearch['site_name'] = \Scooper\strScrub($iniSearch['jobsite'], REMOVE_EXTRA_WHITESPACE | LOWERCASE );
+        $strJobSiteKey = \Scooper\strScrub($iniSearch['jobsite'], FOR_LOOKUP_VALUE_MATCHING | LOWERCASE );
+        if(!isset($this->configSettings['included_sites'][$strJobSiteKey]))
+        {
+            assert(isset($this->configSettings['excluded_sites'][$strJobSiteKey]));
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($iniSearch['jobsite'] . "search " .$iniSearch['name'] . " was not added; " . $iniSearch['jobsite'] . " is excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            return null;
+        }
         $tempSearch['name'] = ($iniSearch['jobsite'] != null ? $iniSearch['jobsite'] . ': ' : "") . $iniSearch['name'];
         $tempSearch['base_url_format']  = $iniSearch['url_format'];
         $tempSearch['keyword_search_override']  = $iniSearch['keywords'];
@@ -366,7 +387,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
 // TODO:  Add excluded_sites global support
 //
-//    private function __readGlobalSearchParamtersFromConfig_($config)
+//    private function _readGlobalSearchParamtersFromConfig_($config)
 //    {
 //        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading global search settings from config file...", \Scooper\C__DISPLAY_ITEM_START__);
 //        if($config->search_keyword_set && is_object($config->search_keyword_set))
@@ -385,7 +406,7 @@ class ClassConfig extends ClassJobsSitePlugin
 //        }
 //    }
 
-    private function __readLocationSetsFromConfig__($config)
+    private function _readLocationSetsFromConfig_($config)
     {
         if (!$config) throw new ErrorException("Invalid configuration.  Cannot load user's searches.");
 
@@ -445,7 +466,7 @@ class ClassConfig extends ClassJobsSitePlugin
         return $tempSettings;
     }
 
-    private function __readKeywordSetsFromConfig__($config)
+    private function _readKeywordSetsFromConfig_($config)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading keyword set from config file...", \Scooper\C__DISPLAY_ITEM_START__);
         if($config->search_keyword_set && is_object($config->search_keyword_set))
@@ -485,7 +506,7 @@ class ClassConfig extends ClassJobsSitePlugin
                 if($fScopeAllSites == true)
                 {
                     // Copy all the job sites into the list of sites included to be run
-                    $this->configSettings['keyword_sets'][$strSetName]['included_jobsites_array'] = array_column($GLOBALS['DATA']['site_plugins'], 'name', 'name');
+                    $this->configSettings['keyword_sets'][$strSetName]['included_jobsites_array'] = $this->configSettings['included_sites'];
                 }
 
                 if($ini_keyword_set['excluded_jobsites'] != null && count($ini_keyword_set['excluded_jobsites']) > 0)
@@ -493,11 +514,12 @@ class ClassConfig extends ClassJobsSitePlugin
                     foreach($ini_keyword_set['excluded_jobsites'] as $excludedSite)
                     {
                         $excludedSite = strtolower($excludedSite);
-                        $this->configSettings['keyword_sets'][$strSetName]['excluded_jobsites_array'][] = $excludedSite;
+                        $this->configSettings['keyword_sets'][$strSetName]['excluded_jobsites_array'][$excludedSite] = $excludedSite;
                         unset($this->configSettings['keyword_sets'][$strSetName]['included_jobsites_array'][$excludedSite]);
                         $excludedSite = '';
                     }
                 }
+                $this->configSettings['keyword_sets'][$strSetName]['excluded_jobsites_array'] = \Scooper\my_merge_add_new_keys($this->configSettings['keyword_sets'][$strSetName]['excluded_jobsites_array'], $this->configSettings['excluded_sites']);
 
 
                 if($ini_keyword_set['keywords'] != null && count($ini_keyword_set['keywords']) > 0)
@@ -566,23 +588,45 @@ class ClassConfig extends ClassJobsSitePlugin
                 {
                     $classPlug = new $GLOBALS['DATA']['site_plugins'][$siteToSearch]['class_name'](null, null);
 
-                    if(!$classPlug->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
+                    if($classPlug->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
+                    {
+                        $arrSkippedPlugins[] = $siteToSearch;
+                        continue;
+                    }
+
+                    // If the class supports multiple keywords per search, then we can
+                    // use a single search with the full set.
+                    $nameKywdSet = $keywordSet['key'];
+                    $arrKywdSetsForUniqSearches = array();
+                    if($classPlug->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED))
+                    {
+                        $arrKywdSetsForUniqSearches[$keywordSet['key']] = array('key' => $keywordSet['key'], 'keywords_array' => $keywordSet['keywords_array']);
+                    }
+                    else // if not, we need to add search for each keyword using that word as a single value in a keyword set
+                    {
+                        $arrSetForEachTerm = array_chunk ( $keywordSet['keywords_array'], 1);
+                        foreach($arrSetForEachTerm as $set)
+                        {
+                            $nameSet = $nameKywdSet."-".\Scooper\strScrub($set[0], FOR_LOOKUP_VALUE_MATCHING);
+                            $arrKywdSetsForUniqSearches[$nameSet] = array('key' => $nameSet, 'keywords_array' => array($set[0]));
+                        }
+
+                    }
+
+                    foreach($arrKywdSetsForUniqSearches as $searchKywdSet)
                     {
                         $tempSearch = $this->getEmptySearchDetailsRecord();
-                        $tempSearch['key'] = \Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . '-' . \Scooper\strScrub($keywordSet['key'], FOR_LOOKUP_VALUE_MATCHING);
+                        $tempSearch['key'] = \Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . '-' . \Scooper\strScrub($searchKywdSet['key'], FOR_LOOKUP_VALUE_MATCHING);
                         $tempSearch['name']  = $tempSearch['key'];
                         $tempSearch['site_name']  = $siteToSearch;
-                        $tempSearch['keyword_set']  = $keywordSet['keywords_array'];
+                        $tempSearch['keyword_set']  = $searchKywdSet['keywords_array'];
                         $tempSearch['user_setting_flags'] = $keywordSet['keyword_match_type_flag'];
 
                         $this->configSettings['searches'][] = $tempSearch;
                         $strSearchAsString = getArrayValuesAsString($tempSearch);
                         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search added: " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
                     }
-                    else
-                    {
-                        $arrSkippedPlugins[] = $siteToSearch;
-                    }
+
                 }
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Keyword set " . $keywordSet['name'] . " did not generate searches for " . count($arrSkippedPlugins) ." plugins because they do not support keyword search: " . getArrayValuesAsString($arrSkippedPlugins, ", ", null, false). "." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
             }
