@@ -256,9 +256,9 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
         return parent::__construct($strOutputDirectory);
     }
 
-    protected function _getURLfromBase_($searchDetails, $nDays, $nPage = null, $nItem = null, $locSettingSets=null)
+    protected function _getURLfromBase_($searchDetails, $nDays, $nPage = null, $nItem = null)
     {
-        return parent::_getURLfromBase_($searchDetails, $nDays, $nPage, $nItem, $locSettingSets);
+        return parent::_getURLfromBase_($searchDetails, $nDays, $nPage, $nItem);
     }
 
     // if this is a client-side HTML download plugin, you will need to add a script

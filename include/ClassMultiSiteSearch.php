@@ -73,7 +73,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
                 try
                 {
                     $GLOBALS['logger']->logLine("Setting up " . count($classSearches['searches']) . " search(es) for ". $classSearches['site_name'] . "...", \Scooper\C__DISPLAY_SECTION_START__);
-                    $class->addSearches($classSearches['searches'], $this->arrSearchLocationSetsToRun, $keywordSet);
+                    $class->addSearches($classSearches['searches']);
                     $class->getJobsForAllSearches($nDays);
                     addJobsToJobsList($this->arrLatestJobs, $class->getMyJobsList());
                     $class = null;
