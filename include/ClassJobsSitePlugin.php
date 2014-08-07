@@ -62,7 +62,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     function parseJobsListForPage($objSimpHTML) { return VALUE_NOT_SUPPORTED; } // returns an array of jobs
 
 
-    function addSearches($arrSearches, $locSettingSets = null, $configKeywordSettingsSet = null)
+    function addSearches($arrSearches)
     {
         if(!is_array($arrSearches[0])) { $arrSearches[] = $arrSearches; }
 
@@ -70,80 +70,8 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         {
             $this->_finalizeSearch_($searchDetails);
 
-            $strURLBase = $this->_getBaseURLFormat_($searchDetails);
+            $this->_addSearch_($searchDetails);
 
-            if($configKeywordSettingsSet == null)
-            {
-                $this->_addSearch_($searchDetails, $locSettingSets);
-            }
-            else
-            {
-                //
-                // If this search already has any flags set on it, then do not overwrite that value for this search
-                // Otherwise, set it to be the value that any keyword set we're adding has
-                //
-                if($searchDetails['user_setting_flags'] == null || $searchDetails['user_setting_flags'] == 0)
-                {
-                    $searchDetails['user_setting_flags'] = $configKeywordSettingsSet['keyword_match_type_flag'];
-                }
-
-                if($searchDetails['keyword_search_override'] != null && strlen($searchDetails['keyword_search_override']) > 0)
-                {
-                    $this->_addSearch_($searchDetails, $locSettingSets);
-                }
-                else
-                {
-                    $searchDetails['keyword_set'] = \Scooper\array_copy($configKeywordSettingsSet['keywords_array']);
-
-                    if(substr_count($strURLBase, BASE_URL_TAG_KEYWORDS) < 1)
-                    {
-                        $GLOBALS['logger']->logLine("Not setting keywords for search ". $searchDetails['name'] . " because it does not have a keyword marker in it's base_url_format = " . $strURLBase . "...", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                        $this->_addSearch_($searchDetails, $locSettingSets);
-                    }
-                    else
-                    {
-                        //
-                        // If the search has multiple keywords on it, either because there was an overall keyword set for
-                        // all searches or because this one search was not configured well, and the site does not support
-                        // searches with multiple keywords at once, then we need to break this one search up into one
-                        // search for each keyword in it's keyword set.
-                        //
-
-                        if(!$this->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && !$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) &&
-                            count($searchDetails['keyword_set']) > 1)
-                        {
-                            //
-                            // Create clones of the current search, one for each separate keyword item in the array
-                            //
-                            $newSearchBase = $this->cloneSearchDetailsRecordExceptFor($searchDetails, array('keyword_set', 'keywords_string_for_url'));
-                            foreach($searchDetails['keyword_set'] as $splitKeyword)
-                            {
-                                $newSearch = $newSearchBase;
-                                $newSearch['keyword_set'] = array($splitKeyword);
-                                $newSearch['key'] .= $newSearchBase['key'] . "-split-" .$splitKeyword;
-                                $newSearch['name'] = $newSearchBase['name'] . "-split-" .$splitKeyword;
-                                $this->_addSearch_($newSearch, $locSettingSets);
-                            }
-
-                            //
-                            // Now, we need to go find and remove the original search, that
-                            // was just split up, from the list of searches to run
-                            //
-                            for($i = 0; $i < count($this->arrSearchesToReturn); $i++)
-                            {
-                                if(strcasecmp($this->arrSearchesToReturn[$i]['name'], $searchDetails['name']) == 0)
-                                {
-                                    unset($this->arrSearchesToReturn[$i]);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            $this->_addSearch_($searchDetails, $locSettingSets);
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -790,7 +718,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
 
 
-    private function _getMyJobsForSearchFromXML_($searchDetails, $nDays = VALUE_NOT_SUPPORTED, $locSingleSettingSet=null)
+    private function _getMyJobsForSearchFromXML_($searchDetails, $nDays = VALUE_NOT_SUPPORTED)
     {
 
         ini_set("user_agent",C__STR_USER_AGENT__);
@@ -801,7 +729,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $nItemCount = 1;
         $nPageCount = 1;
 
-        $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount, $locSingleSettingSet);
+        $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
         if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
 
         $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['name']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -841,7 +769,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             {
                 $arrPageJobsList = null;
 
-                $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount, $locSingleSettingSet);
+                $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
                 if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
 
                 $class = new \Scooper\ScooperDataAPIWrapper();
@@ -927,7 +855,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
                 if($objSimpleHTML == null)
                 {
-                    $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount, $locSingleSettingSet);
+                    $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
                     if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
 
 
@@ -974,7 +902,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     }
 
-    private function _getMyJobsFromHTMLFiles_($searchDetails, $nDays = VALUE_NOT_SUPPORTED, $locSingleSettingSet=null)
+    private function _getMyJobsFromHTMLFiles_($searchDetails, $nDays = VALUE_NOT_SUPPORTED)
     {
         $arrSearchReturnedJobs = null;
 
@@ -991,7 +919,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $strFileKey = strtolower($this->siteName.'-'.$searchDetails['key']);
         $strFileBase = $this->detailsMyFileOut['directory'].$strFileKey. "-jobs-page-";
 
-        $strURL = $this->_getURLfromBase_($searchDetails, $nDays, null, null, $locSingleSettingSet);
+        $strURL = $this->_getURLfromBase_($searchDetails, $nDays, null, null);
         if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
 
         $GLOBALS['logger']->logLine("Exporting HTML from " . $this->siteName ." jobs for search '".$searchDetails['name']. "' to be parsed: ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -1284,15 +1212,8 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
         if(!$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
         {
-//            if($searchDetails['keywords_string_for_url'] == null || $searchDetails['keywords_string_for_url'] == VALUE_NOT_SUPPORTED)
-//            {
-//                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search '" . $searchDetails['name'] ."' did not include a required keyword string value.  Skipping search...", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-//                $strURL = VALUE_NOT_SUPPORTED;
-//            }
-//            else
-//            {
-                $strURL = str_ireplace(BASE_URL_TAG_KEYWORDS, $searchDetails['keywords_string_for_url'], $strURL );
-//            }
+            assert($searchDetails['keywords_string_for_url'] != VALUE_NOT_SUPPORTED);
+            $strURL = str_ireplace(BASE_URL_TAG_KEYWORDS, $searchDetails['keywords_string_for_url'], $strURL );
         }
 
 
