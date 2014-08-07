@@ -434,7 +434,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         {
             if($this->strKeywordDelimiter == null)
             {
-                throw new ErrorException($this->siteName . " supports multiple keyword terms, but has not set the \$strKeywordDelimiter value in " .get_class($this). " Aborting search beacyse cannot create the URL.");
+                throw new ErrorException($this->siteName . " supports multiple keyword terms, but has not set the \$strKeywordDelimiter value in " .get_class($this). ". Aborting search because cannot create the URL.");
             }
 
             foreach($arrKeywords as $kywd)
