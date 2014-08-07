@@ -32,8 +32,8 @@ class ClassJobsSitePluginCommon
     function getEmptySearchDetailsRecord()
     {
         return array(
-            'search_key' => null,
-            'search_name' => null,
+            'key' => null,
+            'name' => null,
             'site_name' => null,
             'keywords_string_for_url' => null,
             'location_search_value' => null,

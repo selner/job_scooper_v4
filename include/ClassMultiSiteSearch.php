@@ -52,7 +52,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
 
                 if($GLOBALS['OPTS'][$strIncludeKey] == null || $GLOBALS['OPTS'][$strIncludeKey] == false)
                 {
-                    $GLOBALS['logger']->logLine($search['site_name'] . " excluded, so skipping its '" . $search['search_name'] . "' search.", \Scooper\C__DISPLAY_ITEM_START__);
+                    $GLOBALS['logger']->logLine($search['site_name'] . " excluded, so skipping its '" . $search['name'] . "' search.", \Scooper\C__DISPLAY_ITEM_START__);
 
                     continue;
                 }

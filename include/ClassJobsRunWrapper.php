@@ -235,7 +235,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             {
                 $GLOBALS['logger']->logLine($curSearch['site_name'] . " excluded, so dropping its searches from the run.", \Scooper\C__DISPLAY_ITEM_START__);
 
-                $arrPossibleSearchesForRun[$z]['search_key'] = 'EXCLUDED_FOR_RUN__' . $arrPossibleSearchesForRun[$z]['search_key'];
+                $arrPossibleSearchesForRun[$z]['key'] = 'EXCLUDED_FOR_RUN__' . $arrPossibleSearchesForRun[$z]['key'];
             }
             else
             {
