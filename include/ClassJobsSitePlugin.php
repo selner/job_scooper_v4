@@ -282,6 +282,8 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             $GLOBALS['logger']->logLine($this->siteName . " does not have more than one search to collapse.  Continuing with single '" . $this->arrSearchesToReturn[0]['name'] . "' search.", \Scooper\C__DISPLAY_WARNING__);
             return;
         }
+
+
         $searchCollapsedDetails = null;
 
         $arrSearchesLeftToCollapse = $this->arrSearchesToReturn;
@@ -294,6 +296,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             // then we don't bother trying to collapse it
             //
             if(strlen($curSearch['base_url_format']) > 0 || strlen($curSearch['keyword_search_override']) > 0 || strlen($curSearch['location_user_specified_override']) > 0)
+            {
+                $arrCollapsedSearches[] = $curSearch;
+            }
+            elseif($curSearch['location_set'] != $arrSearchesLeftToCollapse[0]['location_set'])
             {
                 $arrCollapsedSearches[] = $curSearch;
             }
@@ -310,13 +316,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             {
                 $arrCollapsedSearches[] = $search;
             }
+
             else
             {
                 // Otherwise, if we haven't gotten details together yet for any collapsed searches,
                 // let's start a unified one now
                 if($searchCollapsedDetails == null)
                 {
-                    $searchCollapsedDetails = $this->getEmptySearchDetailsRecord();
+                    $searchCollapsedDetails = $this->cloneSearchDetailsRecordExceptFor($search, array());
                     $searchCollapsedDetails['key'] = $this->siteName . "-collapsed-search";
                     $searchCollapsedDetails['name'] = "Collapsed " . $search['name'];
                     $searchCollapsedDetails['site_name'] = $this->siteName;
@@ -1224,7 +1231,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             $strLocationValue = $this->getLocationValueForLocationSetting($searchDetails);
             if($strLocationValue == VALUE_NOT_SUPPORTED)
             {
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Location settings set '" . $locSingleSettingSet['name'] ."' did not have the required location type of " . $this->getLocationSettingType() ." set.  Skipping search '". $searchDetails['name'] . "' with settings '" . $locSingleSettingSet['name'] ."'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() ." set.  Skipping search '". $searchDetails['name'] . "' with settings '" . $locSingleSettingSet['name'] ."'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 $strURL = VALUE_NOT_SUPPORTED;
             }
             else

@@ -72,7 +72,7 @@ const C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED = 0x10000;
 const C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS = 0x20000;
 const C__JOB_KEYWORD_SUPPORTS_PLUS_PREFIX = 0x40000;
 const C__JOB_BASE_URL_FORMAT_REQUIRED = 0x80000;
-const C__JOB_ALWAYS_ADD_FULL_KEYWORDS_SET = 0x100000;  // Used to override the default behavior of creating multiple searches when a search returns all jobs.    
+const C__JOB_ALWAYS_ADD_FULL_KEYWORDS_SET = 0x100000;  // Used to override the default behavior of creating multiple searches when a search returns all jobs.
 
 const C__USER_KEYWORD_ANYWHERE = 0x1;
 const C__USER_KEYWORD_ANYWHERE_AS_STRING = "any";

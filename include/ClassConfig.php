@@ -678,8 +678,8 @@ class ClassConfig extends ClassJobsSitePlugin
                 $strSearchLocation = $classPlug->getLocationValueForLocationSetting($this->configSettings['searches'][$l]);
                 if($strSearchLocation != VALUE_NOT_SUPPORTED)
                 {
-                    $this->configSettings['searches'][$l]['key'] = $this->configSettings['searches'][$l]['key'] . "-" . strtolower($primaryLocationSet['name']);
-                    $this->configSettings['searches'][$l]['name'] = $this->configSettings['searches'][$l]['name'] . "-" . strtolower($primaryLocationSet['name']);
+                    $this->configSettings['searches'][$l]['key'] = $this->configSettings['searches'][$l]['key'] . "-loc-" . strtolower($primaryLocationSet['name']);
+                    $this->configSettings['searches'][$l]['name'] = $this->configSettings['searches'][$l]['name'] . "-loc-" . strtolower($primaryLocationSet['name']);
                     $this->configSettings['searches'][$l]['location_search_value'] = $strSearchLocation;
                 }
             }
@@ -727,17 +727,21 @@ class ClassConfig extends ClassJobsSitePlugin
                         continue;
                     }
 
+                    $newSearch = $this->cloneSearchDetailsRecordExceptFor($arrPossibleSearches_Start[$l], array('location_search_value', 'location_set'));
                     $newSearch['location_set'] = $locSet;
-                    $strSearchLocation = $classPlug->getLocationValueForLocationSetting($arrPossibleSearches_Start[$l]);
+                    $strSearchLocation = $classPlug->getLocationValueForLocationSetting($newSearch);
                     if($strSearchLocation != VALUE_NOT_SUPPORTED)
                     {
-                        $newSearch = $arrPossibleSearches_Start[$l];
-                        $newSearch['key'] = $arrPossibleSearches_Start[$l]['key'] . "-" . strtolower($locSet['name']);
-                        $newSearch['name'] = $arrPossibleSearches_Start[$l]['name'] . "-" . strtolower($locSet['name']);
+                        $strOldSearchKey = $newSearch['key'] . "-" . strtolower($locSet['name']);
+                        if(substr_count($strOldSearchKey, "-loc-") > 0) { $strOldSearchKey = explode("-loc-", $strOldSearchKey)[0]; }
+                        $newSearch['key'] = $strOldSearchKey . "-loc-" . strtolower($locSet['name']);
+                        $newSearch['name'] = $strOldSearchKey . "-loc-" . strtolower($locSet['name']);
                         $newSearch['location_search_value'] = $strSearchLocation;
 
-                        $arrNewSearches[] = $newSearch;
+                        $this->configSettings['searches'][] = $newSearch;
+
                     }
+                    $newSearch = null;
                 }
             }
 
