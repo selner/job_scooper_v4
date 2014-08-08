@@ -46,6 +46,18 @@ class ClassJobsSitePluginCommon
         );
     }
 
+    function is_OutputInterimFiles()
+    {
+        $valInterimFiles = \Scooper\get_PharseOptionValue('output_interim_files');
+
+        if(isset($valInterimFiles) && $valInterimFiles == true)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     function cloneSearchDetailsRecordExceptFor($srcDetails, $arrDontCopyTheseKeys)
     {
         $retDetails = $this->getEmptySearchDetailsRecord();

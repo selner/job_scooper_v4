@@ -39,8 +39,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         //
         // Write out the interim data to file if we're debugging
         //
-        if($GLOBALS['OPTS']['DEBUG'] == true)
-        {
+        if($this->is_OutputInterimFiles() == true) {
             if($this->arrLatestJobs != null)
             {
                 $strOutPathWithName = $this->getOutputFileFullPath($this->siteName . "_");

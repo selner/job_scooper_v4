@@ -262,7 +262,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $this->arrUserInputJobs = $arrAllJobsLoadedFromSrc;
         }
 
-        if($GLOBALS['OPTS']['DEBUG'] == true)
+        if($this->is_OutputInterimFiles() == true)
         {
             $strDebugInputCSV = $this->classConfig->getFileDetails('output_subfolder')['directory'] . \Scooper\getDefaultFileName("", "_Jobs_From_UserInput", "csv");
             $this->writeJobsListToFile($strDebugInputCSV, $arrAllJobsLoadedFromSrc, true, false, "ClassJobRunner-LoadCSVs");
@@ -291,7 +291,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     private function writeRunsJobsToFile($strFileOut, $arrJobsToOutput, $strLogDescriptor, $strExt = "CSV", $keysToOutput = null)
     {
 
-
         $this->writeJobsListToFile($strFileOut, $arrJobsToOutput, true, false, "ClassJobRunner-".$strLogDescriptor, $strExt, $keysToOutput);
 
         if($strExt == "HTML")
@@ -310,6 +309,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     private function outputFilteredJobsListToFile($arrJobsList, $strFilterToApply, $strFileNameAppend, $strExt = "CSV", $strFilterDescription = null, $keysToOutput = null)
     {
+
         if($arrJobsList == null) { $arrJobsList = $this->arrLatestJobs; }
 
         if(countJobRecords($arrJobsList) == 0) return null;
@@ -324,6 +324,14 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         {
             $arrJobs = array_filter($arrJobsList, $strFilterToApply);
         }
+
+
+        //
+        // If the user hasn't asked for interim files to be written,
+        // just return the filtered jobs.  Don't write the file.
+        //
+        if($this->is_OutputInterimFiles() != true)  return $arrJobs;
+
 
         if($strFileNameAppend == null || $strFileNameAppend == "")
         {
@@ -384,23 +392,21 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         //
 
         $classMulti = new ClassMultiSiteSearch($this->classConfig->getFileDetails('output_subfolder')['directory']);
-//        $classMulti->addMultipleSearches($this->arrSearchesToReturn, $this->classConfig->getSearchConfiguration('location_sets'));
         $classMulti->addMultipleSearches($this->arrSearchesToReturn, null);
-//        $classMulti->addMultipleSearches($this->arrSearchesToReturn, $this->classConfig->getSearchConfiguration('location_sets'));
-
-//         $tempKeywordSet = current($this->classConfig->getSearchConfiguration('keyword_sets'));
-//        $classMulti->getJobsForMyMultipleSearches( $this->classConfig->getSearchConfiguration('number_days'), $tempKeywordSet);
         $classMulti->getJobsForMyMultipleSearches( $this->classConfig->getSearchConfiguration('number_days'), null);
         addJobsToJobsList($this->arrLatestJobs, $classMulti->getMyJobsList());
-        //
-        // Let's save off the unfiltered jobs list in case we need it later.  The $this->arrLatestJobs
-        // will shortly have the user's input jobs applied to it
-        //
+
         addJobsToJobsList($this->arrLatestJobs_UnfilteredByUserInput, $this->arrLatestJobs);
 
-        $strRawJobsListOutput = \Scooper\getFullPathFromFileDetails($this->classConfig->getFileDetails('output_subfolder'), "", "_rawjobslist_preuser_filtering");
-//        $this->writeJobsListToFile($strRawJobsListOutput, $this->arrLatestJobs_UnfilteredByUserInput , true, false, "ClassJobsRunWrapper-_rawjobslist_preuser_filtering");
-        $this->writeRunsJobsToFile($strRawJobsListOutput, $this->arrLatestJobs_UnfilteredByUserInput, "RawJobsList_PreUserDataFiltering");
+
+        if($this->is_OutputInterimFiles() == true) {
+            //
+            // Let's save off the unfiltered jobs list in case we need it later.  The $this->arrLatestJobs
+            // will shortly have the user's input jobs applied to it
+            //
+            $strRawJobsListOutput = \Scooper\getFullPathFromFileDetails($this->classConfig->getFileDetails('output_subfolder'), "", "_rawjobslist_preuser_filtering");
+            $this->writeRunsJobsToFile($strRawJobsListOutput, $this->arrLatestJobs_UnfilteredByUserInput, "RawJobsList_PreUserDataFiltering");
+        }
 
         $detailsBodyContentFile = null;
 
@@ -415,7 +421,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         if($GLOBALS['OPTS']['skip_notifications'] != 1)
         {
             $ret = $this->__sendJobCompletedEmail_PHP__($strBodyText, $strBodyHTML, $detailsFileCSV, $detailsFileHTML);
-            // $ret = $this->__sendJobCompletedEmail_Applescript__($strBodyText, $detailsFileCSV, $detailsFileHTML);
             if($ret != true)
             {
                 $GLOBALS['logger']->logLine("Failed to send notification email.", \Scooper\C__DISPLAY_ERROR__);
@@ -448,9 +453,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             // Setup the plaintext message text value
             //
             $messageText = $strBodyText;
-//            $messageText .= PHP_EOL ;
-//            $messageText .= $strUpdateNote;
             $messageText .= PHP_EOL ;
+
             //
             // Setup the value for the html version of the message
             //

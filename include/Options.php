@@ -81,6 +81,13 @@ function __initializeArgs__()
             'required'      => false,
             'short'      => 'nonotify',
         ),
+        'output_interim_files' => array(
+            'description'   => 'In addition to the main results, output CSV files for the interim processing of job sites',
+            'default'       => 0,
+            'type'          => Pharse::PHARSE_INTEGER,
+            'required'      => false,
+            'short'      => 'debug_files',
+        ),
     );
 
 
