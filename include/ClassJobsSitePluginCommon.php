@@ -447,11 +447,11 @@ class ClassJobsSitePluginCommon
                         $fMatched = true;
                         break;
                     }
-                    else              // we're ignoring the Excluded column fact for the time being. If it's in the list, it's excluded
-                    {
-                        $nJobsNotMarked++;
-                    }
                     if($fMatched == true) break;
+                }
+                if($fMatched == false)
+                {
+                    $nJobsNotMarked++;
                 }
 
 //                if($fMatched == false)
