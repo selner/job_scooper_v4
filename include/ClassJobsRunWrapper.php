@@ -174,17 +174,11 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         // Output only new records that haven't been looked at yet
         $arrJobs_NewOnly = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "CSV");
-        $arrJobs_NewOnly = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "HTML", null, $this->getKeysForHTMLOutput());
+        $arrJobs_NewOnly = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "HTML", null, $this->getKeysForHTMLOutput(), true);
         $detailsHTMLFile = $this->__getAlternateOutputFileDetails__("HTML", "", "_NewJobs_ForReview");
 
         // Output all records that were automatically excluded
         $arrJobs_AutoExcluded = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", "_ExcludedJobs");
-
-        // Output only records that were auto-marked as duplicates
-        // $arrJobs_AutoDupe = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isInterested_MarkedDuplicateAutomatically", "_AutoDuped");
-        // $arrJobs_NewButFiltered = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsNo", "_NewJobs_AutoExcluded");
-        // Output all records that were previously marked excluded manually by the user
-        // $arrJobs_ManualExcl = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isMarked_ManuallyNotInterested", "_ManuallyExcludedJobs");
 
         $strResultCountsText = $this->getListingCountsByPlugin("text", $arrFinalJobs_SortedByCompanyRole );
 
@@ -307,7 +301,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         return $detailsRet;
     }
 
-    private function outputFilteredJobsListToFile($arrJobsList, $strFilterToApply, $strFileNameAppend, $strExt = "CSV", $strFilterDescription = null, $keysToOutput = null)
+    private function outputFilteredJobsListToFile($arrJobsList, $strFilterToApply, $strFileNameAppend, $strExt = "CSV", $strFilterDescription = null, $keysToOutput = null, $fOverrideInterimFileOption = false)
     {
 
         if($arrJobsList == null) { $arrJobsList = $this->arrLatestJobs; }
@@ -330,7 +324,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // If the user hasn't asked for interim files to be written,
         // just return the filtered jobs.  Don't write the file.
         //
-        if($this->is_OutputInterimFiles() != true)  return $arrJobs;
+        if($fOverrideInterimFileOption == false && $this->is_OutputInterimFiles() != true)  return $arrJobs;
 
 
         if($strFileNameAppend == null || $strFileNameAppend == "")

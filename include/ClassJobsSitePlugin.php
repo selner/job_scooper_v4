@@ -915,7 +915,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         if($this->strFilePath_HTMLFileDownloadScript == null || strlen($this->strFilePath_HTMLFileDownloadScript) == 0)
         {
             throw new ErrorException("Cannot download client-side jobs HTML for " . $this->siteName . " because the " . get_class($this) . " plugin does not have an Applescript configured to call.");
-
         }
 
         $GLOBALS['logger']->logLine("Starting search " . $searchDetails['name'] . " jobs download through AppleScript.", \Scooper\C__DISPLAY_ITEM_START__);
@@ -962,23 +961,22 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             unset($objSimpleHTML);
             $objSimpleHTML = null;
 
-/*            $idsPage = array_column($arrPageJobsList, 'job_id');
-            $key_jobsite_siteidsPage = array_column($arrPageJobsList, 'key_jobsite_siteid');
-            print('$idsPage=' . var_export($idsPage, true).PHP_EOL);
-            print('$key_jobsite_siteidsPage=' . var_export($key_jobsite_siteidsPage, true).PHP_EOL);*/
+            //
+            // If the user has not asked us to keep interim files around
+            // after we're done processing, then delete the interim HTML file
+            //
+            if($this->is_OutputInterimFiles() != true) {
+                unlink($strFileName);
+
+            }
 
             $GLOBALS['logger']->logLine("Downloaded " . countJobRecords($arrPageJobsList) ." jobs from " . $strFileName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
-
 
             $nPageCount++;
 
             $strFileName = $strFileBase.$nPageCount.".html";
         }
-/*        $idsSearch = array_column($arrSearchReturnedJobs, 'job_id');
-        $key_jobsite_siteidsSearch = array_column($arrSearchReturnedJobs, 'key_jobsite_siteid');
-//        print('$idsSearch=' . var_export($idsSearch, true).PHP_EOL);
-//        print('$key_jobsite_siteidsSearch=' . var_export($key_jobsite_siteidsSearch, true).PHP_EOL);*/
 
         $GLOBALS['logger']->logLine("Downloaded " . countJobRecords($arrSearchReturnedJobs) ." total jobs for search '" . $searchDetails['name'] . "'.", \Scooper\C__DISPLAY_ITEM_RESULT__);
         $this->_addSearchJobsToMyJobsList_($arrSearchReturnedJobs, $searchDetails);
