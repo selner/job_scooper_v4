@@ -353,8 +353,7 @@ class ClassConfig extends ClassJobsSitePlugin
         $strJobSiteKey = \Scooper\strScrub($iniSearch['jobsite'], FOR_LOOKUP_VALUE_MATCHING | LOWERCASE );
         if(!isset($this->configSettings['included_sites'][$strJobSiteKey]))
         {
-            assert(isset($this->configSettings['excluded_sites'][$strJobSiteKey]));
-            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($iniSearch['jobsite'] . "search " .$iniSearch['name'] . " was not added; " . $iniSearch['jobsite'] . " is excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($iniSearch['jobsite'] . "search " .$iniSearch['name'] . " was not added; " . $strJobSiteKey . " is excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
             return null;
         }
         $tempSearch['name'] = ($iniSearch['jobsite'] != null ? $iniSearch['jobsite'] . ': ' : "") . $iniSearch['name'];
@@ -386,9 +385,9 @@ class ClassConfig extends ClassJobsSitePlugin
     private function _readGlobalSearchParamtersFromConfig_($config)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading global search settings from config file...", \Scooper\C__DISPLAY_ITEM_START__);
-        if($config->search && is_object($config->search) && is_object($config->search->excluded_jobsites))
+        if($config->global_search_options && is_object($config->global_search_options))
         {
-            foreach($config->search['excluded_jobsites'] as $excludedSite)
+            foreach($config->global_search_options['excluded_jobsites'] as $excludedSite)
             {
                 $excludedSite = strtolower($excludedSite);
                 $this->configSettings['excluded_sites'][$excludedSite] = $excludedSite;
@@ -527,8 +526,8 @@ class ClassConfig extends ClassJobsSitePlugin
                         unset($this->configSettings['keyword_sets'][$strSetName]['included_jobsites_array'][$excludedSite]);
                         $excludedSite = '';
                     }
+                    $this->configSettings['keyword_sets'][$strSetName]['excluded_jobsites_array'] = \Scooper\my_merge_add_new_keys($this->configSettings['keyword_sets'][$strSetName]['excluded_jobsites_array'], $this->configSettings['excluded_sites']);
                 }
-                $this->configSettings['keyword_sets'][$strSetName]['excluded_jobsites_array'] = \Scooper\my_merge_add_new_keys($this->configSettings['keyword_sets'][$strSetName]['excluded_jobsites_array'], $this->configSettings['excluded_sites']);
 
 
                 if($ini_keyword_set['keywords'] != null && count($ini_keyword_set['keywords']) > 0)
@@ -817,7 +816,7 @@ class ClassConfig extends ClassJobsSitePlugin
             'keywords_array' => null,
             'keyword_match_type_string' => null,
             'keyword_match_type_flag' => null,
-            'excluded_jobsites_array' => null,
+            'excluded_jobsites_array' => array(),
             'settings_scope' => "all-searches",
         );
     }
@@ -827,7 +826,7 @@ class ClassConfig extends ClassJobsSitePlugin
         return array(
             'key' => null,
             'name' => null,
-            'excluded_jobsites_array' => null,
+            'excluded_jobsites_array' => array(),
         );
     }
 
