@@ -94,7 +94,23 @@ class PluginSimplyHired extends ClassJobsSitePlugin
             $item['job_id'] = \Scooper\strScrub($item['job_id'], REPLACE_SPACES_WITH_HYPHENS);
 
             // TODO[BUGBUG] the h4 for company name can sometimes be missing.  the value is incorrectly set if so.
-            $item['company']= trim($node->find("h4[class='company']")[0]->plaintext);
+            $tempCompany = $node->find("h4[class='company']")[0]->plaintext;
+            if(isset($tempCompany) && strlen($tempCompany) > 0)
+            {
+                $item['company']= trim($tempCompany);
+            }
+            else
+            {
+                $tempCompany = $node->find("div[class='source']")[0]->plaintext;
+                if(isset($tempCompany) && strlen($tempCompany) > 0)
+                {
+                    $arrTempCompany = explode(" from ", $tempCompany);
+                    if(count($arrTempCompany) > 1)
+                    {
+                        $item['company']= trim($arrTempCompany[1]);
+                    }
+                }
+            }
             $item['location'] =trim($node->find("span[class='location']")[0]->plaintext);
             $item['date_pulled'] = \Scooper\getTodayAsString();
             $item['job_site_date'] = $node->find("span[class='ago']")[0]->plaintext;
