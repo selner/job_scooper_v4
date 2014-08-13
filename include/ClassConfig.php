@@ -33,8 +33,10 @@ class ClassConfig extends ClassJobsSitePlugin
         if($strSubkey != null)
             return $this->configSettings[$strSubkey];
         else
-            $this->configSettings;
+            return $this->configSettings;
     }
+
+    function getSMTPSettings() { return $this->arrEmail_PHPMailer_SMTPSetup; }
 
     function getInputFilesByType($strInputDataType)
     {
