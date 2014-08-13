@@ -481,14 +481,16 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
 
         $mail = new PHPMailer();
-
-        if($this->arrEmail_PHPMailer_SMTPSetup != null && is_array($this->arrEmail_PHPMailer_SMTPSetup))
+        
+        $smtpSettings = $this->classConfig->getSMTPSettings();
+        
+        if($smtpSettings != null && is_array($smtpSettings))
         {
             $mail->isSMTP();
-            $properties = array_keys($this->arrEmail_PHPMailer_SMTPSetup);
+            $properties = array_keys($smtpSettings);
             foreach($properties as $property)
             {
-                $mail->$property = $this->arrEmail_PHPMailer_SMTPSetup[$property];
+                $mail->$property = $smtpSettings[$property];
             }
 
         }
