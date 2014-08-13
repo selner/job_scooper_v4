@@ -36,6 +36,8 @@ class ClassConfig extends ClassJobsSitePlugin
             $this->configSettings;
     }
 
+    function getSMTPSettings() { return $this->arrEmail_PHPMailer_SMTPSetup; }
+
     function getInputFilesByType($strInputDataType)
     {
         $ret = $this->__getInputFilesByValue__('data_type', $strInputDataType);
@@ -307,14 +309,16 @@ class ClassConfig extends ClassJobsSitePlugin
     private function __getInputFilesByValue__($valKey, $val)
     {
         $ret = null;
-        foreach($this->arrFileDetails['user_input_files'] as $fileItem)
+        if(isset($this->arrFileDetails['user_input_files']) && is_object($this->arrFileDetails['user_input_files']))
         {
-            if(strcasecmp($fileItem[$valKey], $val) == 0)
+            foreach($this->arrFileDetails['user_input_files'] as $fileItem)
             {
-                $ret[] = $fileItem;
+                if(strcasecmp($fileItem[$valKey], $val) == 0)
+                {
+                    $ret[] = $fileItem;
+                }
             }
         }
-
         return $ret;
     }
 
@@ -950,6 +954,9 @@ class ClassConfig extends ClassJobsSitePlugin
             return;
         }
         $fCompaniesLoaded = false;
+
+        if(!isset($arrFileInput) ||  !is_array($arrFileInput)) { return; }
+
 
         foreach($arrFileInput as $fileItem)
         {
