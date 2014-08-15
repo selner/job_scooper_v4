@@ -309,7 +309,7 @@ class ClassConfig extends ClassJobsSitePlugin
     private function __getInputFilesByValue__($valKey, $val)
     {
         $ret = null;
-        if(isset($this->arrFileDetails['user_input_files']) && is_object($this->arrFileDetails['user_input_files']))
+        if(isset($this->arrFileDetails['user_input_files']) && (is_array($this->arrFileDetails['user_input_files'])  || is_object($this->arrFileDetails['user_input_files'])))
         {
             foreach($this->arrFileDetails['user_input_files'] as $fileItem)
             {
@@ -868,6 +868,13 @@ class ClassConfig extends ClassJobsSitePlugin
             return;
         }
 
+        if(!is_array($arrFileInput))
+        {
+            // No files were found, so bail
+            $GLOBALS['logger']->logLine("No input files were found with regex title strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            return;
+        }
+
         foreach($arrFileInput as $fileItem)
         {
             $fileDetail = $fileItem['details'];
@@ -977,18 +984,21 @@ class ClassConfig extends ClassJobsSitePlugin
                     // Add each Company we found in the file to our list in this class, setting the key for
                     // each record to be equal to the job Company so we can do a fast lookup later
                     //
-                    foreach($arrCompaniesTemp as $CompanyRecord)
+                    if(count($arrCompaniesTemp) > 0)
                     {
-                        $arrRXInput = explode("|", strtolower($CompanyRecord['match_regex']));
-
-                        foreach($arrRXInput as $rxItem)
+                        foreach($arrCompaniesTemp as $CompanyRecord)
                         {
-                            $rx = '/'.$rxItem.'/';
+                            $arrRXInput = explode("|", strtolower($CompanyRecord['match_regex']));
 
-                            $GLOBALS['DATA']['companies_regex_to_filter'][] = $rx;
+                            foreach($arrRXInput as $rxItem)
+                            {
+                                $rx = '/'.$rxItem.'/';
+
+                                $GLOBALS['DATA']['companies_regex_to_filter'][] = $rx;
+                            }
                         }
+                        $fCompaniesLoaded = true;
                     }
-                    $fCompaniesLoaded = true;
                 }
             }
         }
