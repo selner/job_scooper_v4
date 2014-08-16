@@ -36,7 +36,7 @@ class PluginTraderJoes extends BaseTaleoPlugin
     protected $siteName = 'TraderJoes';
     protected $siteBaseURL = 'http://www.traderjoes.com/careers/index.asp';
     protected $strBaseURLFormat = "http://ch.tbe.taleo.net/CH14/ats/careers/searchResults.jsp?org=TRADERJOES&cws=1***ITEM_NUMBER***";
-    protected $nJobListingsPerPage = 100;
+    protected $nJobListingsPerPage = 50;
 
     function parseTotalResultsCount($objSimpHTML)
     {
@@ -100,16 +100,14 @@ abstract class BaseTaleoPlugin extends ClassJobsSitePlugin
     protected $strBaseURLFormat = null;
     protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_NO_LOCATION;
 
-
     function getItemURLValue($nItem)
     {
-        $strFirst = "&act=first&rowFrom=100";
+        $strFirst = "&act=first&rowFrom=" . $this->nJobListingsPerPage;
         $strNext = "&act=next&rowFrom=";
-        $strNextBaseCount = 100;
 
         if($nItem == null || $nItem == 1) { return $strFirst; }
 
-        $ret = $nItem - 100;
+        $ret = $nItem - $this->nJobListingsPerPage;
         if($ret < 0) return $strFirst;
 
         return $strNext . $ret;
