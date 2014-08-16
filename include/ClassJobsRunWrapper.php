@@ -127,7 +127,9 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         {
             foreach($this->arrLatestJobs as $job)
             {
-                $arrFinalJobs_SortedByCompanyRole [$job['key_company_role']] = $job;
+                // Need to add uniq key of job site id to the end or it will collapse duplicate job titles that
+                // are actually multiple open posts
+                $arrFinalJobs_SortedByCompanyRole [$job['key_company_role']."-".$job['key_jobsite_siteid']] = $job;
             }
         }
         ksort($arrFinalJobs_SortedByCompanyRole );
