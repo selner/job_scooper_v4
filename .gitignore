@@ -11,3 +11,5 @@ ScoopJobs.app*
 build*
 
 *IGNORE*
+
+lib/pharse.php
