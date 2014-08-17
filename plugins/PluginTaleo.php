@@ -18,85 +18,103 @@
 define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
+class PluginEntercom extends BaseTaleoPlugin
+{
+    protected $taleoOrgID = "ENTERCOM";
+    protected $nJobListingsPerPage = 100;
+    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleo_container', 'index'=>1);
+}
+
+class PluginHTC extends BaseTaleoPlugin
+{
+    protected $taleoOrgID = "HTC";
+    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleocontent', 'index'=>1);
+}
+
+class PluginTesla extends BaseTaleoPlugin
+{
+    protected $taleoOrgID = "TESLA";
+    protected $nJobListingsPerPage = 100;
+    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleocontent', 'index'=>4);
+}
+
+class PluginPacMed extends BaseTaleoPlugin
+{
+    protected $taleoOrgID = "PACMED";
+    protected $siteBaseURL = 'http://pacificmedicalcenters.org/index.php/work-with-us/';
+    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleoContent', 'index'=>1);
+}
+
+class PluginSeattleGenetics extends BaseTaleoPlugin
+{
+    protected $siteBaseURL = 'http://www.seattlegenetics.com/careers';
+    protected $taleoOrgID = "SEAGEN";
+    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleocontent', 'index'=>1);
+}
+
 class PluginInternetBrands extends BaseTaleoPlugin
 {
-    protected $siteName = 'InternetBrands';
     protected $siteBaseURL = 'http://www.internetbrands.com/work-with-us/';
-    protected $strBaseURLFormat = "http://ch.tbe.taleo.net/CH05/ats/careers/searchResults.jsp?org=CARSDIRECT&cws=2***ITEM_NUMBER***";
-    protected $nJobListingsPerPage = 100;
-
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        return $this->parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, "class", "avada-row", 1);
-    }
+    protected $taleoOrgID = "CARSDIRECT";
+    protected $arrResultsCountTag = array('type' =>'class', 'value'=>'avada-row', 'index'=>1);
 }
 
 class PluginTraderJoes extends BaseTaleoPlugin
 {
-    protected $siteName = 'TraderJoes';
     protected $siteBaseURL = 'http://www.traderjoes.com/careers/index.asp';
-    protected $strBaseURLFormat = "http://ch.tbe.taleo.net/CH14/ats/careers/searchResults.jsp?org=TRADERJOES&cws=1***ITEM_NUMBER***";
-    protected $nJobListingsPerPage = 50;
-
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        return $this->parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, "id", "taleoContent", 1);
-    }
+    protected $taleoOrgID = "TRADERJOES";
+    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleoContent', 'index'=>1);
 }
-
-
-
 class PluginViacom extends BaseTaleoPlugin
 {
-    protected $siteName = 'Viacom';
     protected $siteBaseURL = 'http://tbe.taleo.net/CH05/ats/careers/jobSearch.jsp?org=MTVNETWORKS&cws=1';
-    protected $strBaseURLFormat = "http://ch.tbe.taleo.net/CH05/ats/careers/searchResults.jsp?org=MTVNETWORKS&cws=1***ITEM_NUMBER***";
-    protected $nJobListingsPerPage = 100;
-
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        return $this->parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, "id", "content", 2);
-    }
-
+    protected $taleoOrgID = "MTVNETWORKS";
+    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'content', 'index'=>2);
 }
-
-
-
 class PluginPorch extends BaseTaleoPlugin
 {
-    protected $siteName = 'Porch';
     protected $siteBaseURL = 'http://about.porch.com/careers';
-    protected $strBaseURLFormat = "http://ch.tbe.taleo.net/CH10/ats/careers/searchResults.jsp?org=PORCH&cws=1***ITEM_NUMBER***";
-    protected $nJobListingsPerPage = 100;
-
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        return $this->parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, "id", "summary", 1);
-    }
-
+    protected $taleoOrgID = "PORCH";
+    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'summary', 'index'=>1);
 }
-
-
-
 class PluginTableau extends BaseTaleoPlugin
 {
-    protected $siteName = 'Tableau';
-    protected $strBaseURLFormat = 'https://ch.tbe.taleo.net/CH11/ats/careers/searchResults.jsp?org=TABLEAU&cws=1***ITEM_NUMBER***';
-    protected $nJobListingsPerPage = 100;
-
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        return $this->parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, "id", "taleoContent", 3);
-    }
-
+    protected $taleoOrgID = "TABLEAU";
+    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleoContent', 'index'=>3);
 }
-
-
 
 
 abstract class BaseTaleoPlugin extends ClassJobsSitePlugin
 {
+    protected $taleoOrgID = null;
+    protected $nJobListingsPerPage = 50;
+    protected $arrResultsCountTag = array('type' =>null, 'value'=>null, 'index'=>null);
     protected $siteName = null;
+
+    function __construct($strOutputDirectory = null)
+    {
+        if(isset($this->taleoOrgID) and strlen($this->taleoOrgID) > 0)
+        {
+            $this->strBaseURLFormat = 'https://ch.tbe.taleo.net/CH11/ats/careers/searchResults.jsp?org=' . $this->taleoOrgID . '&cws=1***ITEM_NUMBER***';
+        }
+
+        if(!isset($this->siteName) && strlen($this->siteName) <= 0)
+        {
+            $strPluginSite = get_class($this);
+            $strPluginSite = str_replace("Plugin", "", $strPluginSite);
+            $this->siteName = $strPluginSite;
+        }
+
+        return parent::__construct($strOutputDirectory);
+    }
+
+    function parseTotalResultsCount($objSimpHTML)
+    {
+        return $this->parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, $this->arrResultsCountTag['type'], $this->arrResultsCountTag['value'], $this->arrResultsCountTag['index']);
+    }
+
+
+
     protected $strBaseURLFormat = null;
     protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_NO_LOCATION;
 
@@ -113,11 +131,6 @@ abstract class BaseTaleoPlugin extends ClassJobsSitePlugin
         return $strNext . $ret;
     }
 
-
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        return -1;
-    }
 
     function parseJobsListForPage($objSimpHTML)
     {
@@ -157,7 +170,7 @@ abstract class BaseTaleoPlugin extends ClassJobsSitePlugin
 
     function parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, $divTagType, $divTagValue, $trIndex)
     {
-        $resultsSection= $objSimpHTML->find("div[". $divTagType . "='".$divTagValue."'] table tr");  // "1 - 10 of 10 Job Results"
+        $resultsSection= $objSimpHTML->find("div[". $divTagType . "='".$divTagValue."'] table tbody tr");  // "1 - 10 of 10 Job Results"
         $trSecond = $resultsSection[$trIndex];
         $tdNode = $trSecond->find("td");
         $totalItemsText = $tdNode[0]->plaintext;
