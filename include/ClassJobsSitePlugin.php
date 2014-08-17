@@ -339,7 +339,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                     //
                     if(\Scooper\isBitFlagSet($searchCollapsedDetails['user_setting_flags'], $search['user_setting_flags']))
                     {
-                            $searchCollapsedDetails['name'] .= " and " . $search['name'];
+                        $searchCollapsedDetails['name'] .= " and " . $search['name'];
                         $searchCollapsedDetails['keyword_set'] = \Scooper\my_merge_add_new_keys(array_values($searchCollapsedDetails['keyword_set']), array_values($search['keyword_set']));
 
                         $this->_setKeywordStringsForSearch_($searchCollapsedDetails);
@@ -555,51 +555,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     }
 
 
-
-//
-//    private function _getMyJobsForEachLocationAndSearch_($searchDetails, $nDays)
-//    {
-//        $strURLBase = $this->_getBaseURLFormat_($searchDetails);
-//
-//        if($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
-//        {
-//            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['name'] ."' with no location settings and and base_url_format = " . $strURLBase . "..." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_START__);
-//            $this->_getJobsForSearchByType_($searchDetails, $nDays, null);
-//        }
-//        elseif(substr_count($strURLBase, BASE_URL_TAG_LOCATION) < 1)
-//        {
-//            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['name'] ."' with base_url_format = " . $strURLBase . "..." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_START__);
-//            $this->_getJobsForSearchByType_($searchDetails, $nDays, null);
-//        }
-//        elseif($this->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
-//        {
-//            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['name'] ."' with base_url_format = " . $strURLBase . "..." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_START__);
-//            $this->_getJobsForSearchByType_($searchDetails, $nDays, null);
-//        }
-//        else
-//        {
-//            // Did the user specify an override at the search level in the INI?
-//            if($searchDetails != null && $searchDetails['location_user_specified_override'] != null && strlen($searchDetails['location_user_specified_override']) > 0)
-//            {
-//                $locSingleSettingSet = array('name' => 'location_user_specified_override', 'search_location_override' => $searchDetails['location_user_specified_override']);
-//                $this->_getJobsForSearchByType_($searchDetails, $nDays, $locSingleSettingSet);
-//            }
-//            elseif(($this->arrSearchLocationSetsToRun == null || count($this->arrSearchLocationSetsToRun) == 0) == true)
-//            {
-//                $GLOBALS['logger']->logLine("Skipping ". $searchDetails['site_name'] . " search '" . $searchDetails['name'] ."' because there was no location set...", \Scooper\C__DISPLAY_ITEM_RESULT__);
-//            }
-//            else
-//            {
-//                foreach($this->arrSearchLocationSetsToRun as $locSingleSettingSet)
-//                {
-//                    $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['name'] ."' for location settings set '" . $locSingleSettingSet['name'] . "'...", \Scooper\C__DISPLAY_ITEM_START__);
-//
-//                    $this->_getJobsForSearchByType_($searchDetails, $nDays, $locSingleSettingSet);
-//                    $GLOBALS['logger']->logLine("Completed ". $searchDetails['site_name'] . " search '" . $searchDetails['name'] ."' for location settings set '" . $locSingleSettingSet['name'] . "'...", \Scooper\C__DISPLAY_ITEM_RESULT__);
-//                }
-//            }
-//        }
-//    }
 
 
     //************************************************************************
