@@ -25,12 +25,6 @@ class PluginEntercom extends BaseTaleoPlugin
     protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleo_container', 'index'=>1);
 }
 
-class PluginHTC extends BaseTaleoPlugin
-{
-    protected $taleoOrgID = "HTC";
-    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleocontent', 'index'=>1);
-}
-
 class PluginTesla extends BaseTaleoPlugin
 {
     protected $taleoOrgID = "TESLA";
