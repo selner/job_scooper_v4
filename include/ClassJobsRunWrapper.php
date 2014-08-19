@@ -35,7 +35,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     protected $arrAllSearchesFromConfig = null;
     protected $arrEmail_PHPMailer_SMTPSetup = null;
 
-    function ClassJobsRunWrapper()
+    function __construct()
     {
 
         $this->siteName = "JobsRunner";
@@ -127,7 +127,9 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         {
             foreach($this->arrLatestJobs as $job)
             {
-                $arrFinalJobs_SortedByCompanyRole [$job['key_company_role']] = $job;
+                // Need to add uniq key of job site id to the end or it will collapse duplicate job titles that
+                // are actually multiple open posts
+                $arrFinalJobs_SortedByCompanyRole [$job['key_company_role']."-".$job['key_jobsite_siteid']] = $job;
             }
         }
         ksort($arrFinalJobs_SortedByCompanyRole );
@@ -174,17 +176,11 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         // Output only new records that haven't been looked at yet
         $arrJobs_NewOnly = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "CSV");
-        $arrJobs_NewOnly = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "HTML", null, $this->getKeysForHTMLOutput());
+        $arrJobs_NewOnly = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "HTML", null, $this->getKeysForHTMLOutput(), true);
         $detailsHTMLFile = $this->__getAlternateOutputFileDetails__("HTML", "", "_NewJobs_ForReview");
 
         // Output all records that were automatically excluded
         $arrJobs_AutoExcluded = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", "_ExcludedJobs");
-
-        // Output only records that were auto-marked as duplicates
-        // $arrJobs_AutoDupe = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isInterested_MarkedDuplicateAutomatically", "_AutoDuped");
-        // $arrJobs_NewButFiltered = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsNo", "_NewJobs_AutoExcluded");
-        // Output all records that were previously marked excluded manually by the user
-        // $arrJobs_ManualExcl = $this->outputFilteredJobsListToFile($arrFinalJobs_SortedByCompanyRole, "isMarked_ManuallyNotInterested", "_ManuallyExcludedJobs");
 
         $strResultCountsText = $this->getListingCountsByPlugin("text", $arrFinalJobs_SortedByCompanyRole );
 
@@ -235,7 +231,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             {
                 $GLOBALS['logger']->logLine($curSearch['site_name'] . " excluded, so dropping its searches from the run.", \Scooper\C__DISPLAY_ITEM_START__);
 
-                $arrPossibleSearchesForRun[$z]['search_key'] = 'EXCLUDED_FOR_RUN__' . $arrPossibleSearchesForRun[$z]['search_key'];
+                $arrPossibleSearchesForRun[$z]['key'] = 'EXCLUDED_FOR_RUN__' . $arrPossibleSearchesForRun[$z]['key'];
             }
             else
             {
@@ -262,7 +258,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $this->arrUserInputJobs = $arrAllJobsLoadedFromSrc;
         }
 
-        if($GLOBALS['OPTS']['DEBUG'] == true)
+        if($this->is_OutputInterimFiles() == true)
         {
             $strDebugInputCSV = $this->classConfig->getFileDetails('output_subfolder')['directory'] . \Scooper\getDefaultFileName("", "_Jobs_From_UserInput", "csv");
             $this->writeJobsListToFile($strDebugInputCSV, $arrAllJobsLoadedFromSrc, true, false, "ClassJobRunner-LoadCSVs");
@@ -291,7 +287,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     private function writeRunsJobsToFile($strFileOut, $arrJobsToOutput, $strLogDescriptor, $strExt = "CSV", $keysToOutput = null)
     {
 
-
         $this->writeJobsListToFile($strFileOut, $arrJobsToOutput, true, false, "ClassJobRunner-".$strLogDescriptor, $strExt, $keysToOutput);
 
         if($strExt == "HTML")
@@ -308,8 +303,9 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         return $detailsRet;
     }
 
-    private function outputFilteredJobsListToFile($arrJobsList, $strFilterToApply, $strFileNameAppend, $strExt = "CSV", $strFilterDescription = null, $keysToOutput = null)
+    private function outputFilteredJobsListToFile($arrJobsList, $strFilterToApply, $strFileNameAppend, $strExt = "CSV", $strFilterDescription = null, $keysToOutput = null, $fOverrideInterimFileOption = false)
     {
+
         if($arrJobsList == null) { $arrJobsList = $this->arrLatestJobs; }
 
         if(countJobRecords($arrJobsList) == 0) return null;
@@ -324,6 +320,14 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         {
             $arrJobs = array_filter($arrJobsList, $strFilterToApply);
         }
+
+
+        //
+        // If the user hasn't asked for interim files to be written,
+        // just return the filtered jobs.  Don't write the file.
+        //
+        if($fOverrideInterimFileOption == false && $this->is_OutputInterimFiles() != true)  return $arrJobs;
+
 
         if($strFileNameAppend == null || $strFileNameAppend == "")
         {
@@ -384,20 +388,21 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         //
 
         $classMulti = new ClassMultiSiteSearch($this->classConfig->getFileDetails('output_subfolder')['directory']);
-        $classMulti->addMultipleSearches($this->arrSearchesToReturn, $this->classConfig->getSearchConfiguration('location_sets'));
-
-        $tempKeywordSet = current($this->classConfig->getSearchConfiguration('keyword_sets'));
-        $classMulti->getJobsForMyMultipleSearches( $this->classConfig->getSearchConfiguration('number_days'), $tempKeywordSet);
+        $classMulti->addMultipleSearches($this->arrSearchesToReturn, null);
+        $classMulti->getJobsForMyMultipleSearches( $this->classConfig->getSearchConfiguration('number_days'), null);
         addJobsToJobsList($this->arrLatestJobs, $classMulti->getMyJobsList());
-        //
-        // Let's save off the unfiltered jobs list in case we need it later.  The $this->arrLatestJobs
-        // will shortly have the user's input jobs applied to it
-        //
+
         addJobsToJobsList($this->arrLatestJobs_UnfilteredByUserInput, $this->arrLatestJobs);
 
-        $strRawJobsListOutput = \Scooper\getFullPathFromFileDetails($this->classConfig->getFileDetails('output_subfolder'), "", "_rawjobslist_preuser_filtering");
-//        $this->writeJobsListToFile($strRawJobsListOutput, $this->arrLatestJobs_UnfilteredByUserInput , true, false, "ClassJobsRunWrapper-_rawjobslist_preuser_filtering");
-        $this->writeRunsJobsToFile($strRawJobsListOutput, $this->arrLatestJobs_UnfilteredByUserInput, "RawJobsList_PreUserDataFiltering");
+
+        if($this->is_OutputInterimFiles() == true) {
+            //
+            // Let's save off the unfiltered jobs list in case we need it later.  The $this->arrLatestJobs
+            // will shortly have the user's input jobs applied to it
+            //
+            $strRawJobsListOutput = \Scooper\getFullPathFromFileDetails($this->classConfig->getFileDetails('output_subfolder'), "", "_rawjobslist_preuser_filtering");
+            $this->writeRunsJobsToFile($strRawJobsListOutput, $this->arrLatestJobs_UnfilteredByUserInput, "RawJobsList_PreUserDataFiltering");
+        }
 
         $detailsBodyContentFile = null;
 
@@ -412,7 +417,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         if($GLOBALS['OPTS']['skip_notifications'] != 1)
         {
             $ret = $this->__sendJobCompletedEmail_PHP__($strBodyText, $strBodyHTML, $detailsFileCSV, $detailsFileHTML);
-            // $ret = $this->__sendJobCompletedEmail_Applescript__($strBodyText, $detailsFileCSV, $detailsFileHTML);
             if($ret != true)
             {
                 $GLOBALS['logger']->logLine("Failed to send notification email.", \Scooper\C__DISPLAY_ERROR__);
@@ -445,9 +449,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             // Setup the plaintext message text value
             //
             $messageText = $strBodyText;
-//            $messageText .= PHP_EOL ;
-//            $messageText .= $strUpdateNote;
             $messageText .= PHP_EOL ;
+
             //
             // Setup the value for the html version of the message
             //
@@ -480,8 +483,9 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
 
         $mail = new PHPMailer();
+        
         $smtpSettings = $this->classConfig->getSMTPSettings();
-
+        
         if($smtpSettings != null && is_array($smtpSettings))
         {
             $mail->isSMTP();
@@ -561,88 +565,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     }
 
 
-
-
-    private function __sendJobCompletedEmail_Applescript__($strBodyText = null, $detailsFileCSV = null, $detailsFileHTML = null)
-    {
-        //      set strEmailBodyContentFile to first item of argv
-        //		set strFileToAttachCSV to second item of argv
-        //		set strFileToAttachHTML to third item of argv
-        //		set strToAddr to fourthitem of argv
-        //		set strToName to fifth item of argv
-        //		set strBCCAddr to sixth item of argv
-
-
-        if($GLOBALS['OPTS']['DEBUG'] == true)
-        {
-            $GLOBALS['logger']->logLine("DEBUG mode:  skipping email notifications.", \Scooper\C__DISPLAY_ITEM_START__);
-            return;
-        }
-
-        $GLOBALS['logger']->logLine("Sending email notifications for completed run. ", \Scooper\C__DISPLAY_ITEM_START__);
-
-
-
-        $strHTMLFilePath = "";
-        $strBodyFilePath = "";
-        $strCSVFilePath = "";
-
-        if($strBodyText != null)
-        {
-            $detailsFileBody = $this->__getAlternateOutputFileDetails__("TXT", "", "_Results");
-            $fp = fopen($detailsFileBody['full_file_path'],'w+');
-            if(!$fp)
-                throw new ErrorException("Unable to open file '". $detailsFileBody['full_file_path'] . "' with access mode of 'w'.".PHP_EOL .error_get_last()['message']) ;
-
-            if(!fputs($fp, $strBodyText))
-            {
-                throw new Exception("Unable to write file: " .$detailsFileBody['full_file_path'] );
-            }
-
-            $strBodyFilePath = $detailsFileBody['full_file_path'];
-        }
-
-
-        // Get Active Jobs HTML file name again
-        if($detailsFileHTML != null)
-        {
-            $strHTMLFilePath = $detailsFileHTML['full_file_path'];
-        }
-
-        if($detailsFileCSV != null)
-        {
-            $strCSVFilePath = $detailsFileCSV['full_file_path'];
-
-        }
-        $toEmail = null;
-        $fromEmail = null;
-        $bccEmail = null;
-
-        if(!$this->classConfig->getEmailByType($toEmail, "to"))
-        {
-            $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
-            return;
-        }
-        if(!$this->classConfig->getEmailByType($bccEmail, "bcc"))
-        {
-            $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
-            return;
-        }
-        $result = "";
-
-        //
-        // Shell out to Applescript to send the email notifications
-        //
-        $strCmdToRun = 'osascript ' . __ROOT__ . '/main/email_job_run_results.appleScript "' . $strBodyFilePath  . '" "' . $strCSVFilePath  . '" "'.$strHTMLFilePath.'" "' . $toEmail['address'] . '" "' . $toEmail['name'] . '" "' . $bccEmail['address'] . '"';
-        $strCmdToRun = escapeshellcmd($strCmdToRun);
-        $GLOBALS['logger']->logLine("Starting email notifications: " . $strCmdToRun, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        $result = \Scooper\my_exec($strCmdToRun);
-        $GLOBALS['logger']->logLine($result['stderr'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        return $result['stdout'];
-
-
-    }
-
     function parseJobsListForPage($objSimpHTML)
     {
         throw new ErrorException("parseJobsListForPage not supported for class" . get_class($this));
@@ -706,7 +628,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
                 if($countUpdated == 0)
                 {
-                    $arrNoJobUpdates[$strName] = $strName . "(" . $countPluginJobs . " total jobs)";
+                    $arrNoJobUpdates[$strName] = $strName . " (" . $countPluginJobs . " total jobs)";
                 }
                 else
                 {
@@ -855,7 +777,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         if($arrNoJobUpdates != null && count($arrNoJobUpdates) > 0)
         {
             sort($arrNoJobUpdates);
-            $strOut = $strOut . PHP_EOL .  "No jobs were updated for" . \Scooper\getTodayAsString() . " on these sites: " . PHP_EOL;
+            $strOut = $strOut . PHP_EOL .  "No jobs were updated for " . \Scooper\getTodayAsString() . " on these sites: " . PHP_EOL;
 
             foreach($arrNoJobUpdates as $site)
             {
