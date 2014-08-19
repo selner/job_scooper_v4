@@ -24,7 +24,7 @@ class ClassConfig extends ClassJobsSitePlugin
     protected $nNumDaysToSearch = -1;
     protected $arrFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null, 'user_input_files' => null);
     protected $arrEmailAddresses = null;
-    protected $configSettings = array('searches' => null, 'keyword_sets' => null, 'location_sets' => null, 'number_days'=>VALUE_NOT_SUPPORTED);
+    protected $configSettings = array('searches' => null, 'keyword_sets' => null, 'location_sets' => null, 'number_days'=>VALUE_NOT_SUPPORTED, 'included_sites' => array(), 'excluded_sites' => array());
     protected $arrEmail_PHPMailer_SMTPSetup = null;
 
 
@@ -94,6 +94,17 @@ class ClassConfig extends ClassJobsSitePlugin
         {
             $fIsIncludedInRun = is_IncludeSite($site['name']);
             $GLOBALS['DATA']['site_plugins'][$site['name']]['include_in_run'] = $fIsIncludedInRun;
+
+            // Initialize the config settings for the site list using the options set by the user
+            // on the command line
+            if($fIsIncludedInRun)
+            {
+                $this->configSettings['included_sites'][$site['name']] = $site['name'];
+            }
+            else
+            {
+                $this->configSettings['excluded_sites'][$site['name']] = $site['name'];
+            }
         }
 
         $GLOBALS['OPTS']['DEBUG'] = \Scooper\get_PharseOptionValue('use_debug');
@@ -201,14 +212,66 @@ class ClassConfig extends ClassJobsSitePlugin
 
         $this->_parseEmailSetupFromINI_($config);
 
+        //
+        //
+        //
+
+
+
+        //
+        // Load the global search data that will be used to create
+        // and configure all searches
+        //
+
+        $this->_readGlobalSearchParamtersFromConfig_($config);
+
+
+        $this->_readKeywordSetsFromConfig_($config);
+
+        $this->_readLocationSetsFromConfig_($config);
+
+        //
+        // Load any specific searches specified by the user in the config
+        //
         $this->__readSearchesFromConfig__($config);
 
-        $this->__readKeywordSetsFromConfig__($config);
+        // Update the searches with the keyword values
+        if(isset($this->configSettings['keyword_sets']) && is_array($this->configSettings['keyword_sets']) && count($this->configSettings['keyword_sets']) >= 1)
+        {
+            reset($this->configSettings['keyword_sets']);
+            $primarySet = current($this->configSettings['keyword_sets']);
 
-        $this->__readLocationSetsFromConfig__($config);
+            $this->_updateSearchesWithKeywordSet_($primarySet);
+        }
 
-        $this->_expandKeywordsAndLocationsIntoSearches_();
+        //
+        // Create searches needed to run all the keyword sets
+        //
+        $this->_addSearchesForKeywordSets_();
 
+
+        //
+        // Full set of searches loaded (location-agnostic).  We've now
+        // got the full set of searches, so update the set with the
+        // primary location data we have in the config.
+        //
+        if(isset($this->configSettings['location_sets']) && is_array($this->configSettings['location_sets']) && count($this->configSettings['location_sets']) >= 1)
+        {
+
+            $this->_addLocationSetToInitialSetOfSearches_();
+        }
+
+        //
+        // Clone all searches if there were 2 or more location sets
+        // Add update those clones with those location values
+        //
+        $this->_addSearchesForAdditionalLocationSets_();
+
+
+
+        //
+        // Load the exclusion filter and other user data from files
+        //
         $this->_loadTitlesRegexesToFilter_();
 
         $this->_loadCompanyRegexesToFilter_();
@@ -246,14 +309,16 @@ class ClassConfig extends ClassJobsSitePlugin
     private function __getInputFilesByValue__($valKey, $val)
     {
         $ret = null;
-        foreach($this->arrFileDetails['user_input_files'] as $fileItem)
+        if(isset($this->arrFileDetails['user_input_files']) && (is_array($this->arrFileDetails['user_input_files'])  || is_object($this->arrFileDetails['user_input_files'])))
         {
-            if(strcasecmp($fileItem[$valKey], $val) == 0)
+            foreach($this->arrFileDetails['user_input_files'] as $fileItem)
             {
-                $ret[] = $fileItem;
+                if(strcasecmp($fileItem[$valKey], $val) == 0)
+                {
+                    $ret[] = $fileItem;
+                }
             }
         }
-
         return $ret;
     }
 
@@ -270,12 +335,14 @@ class ClassConfig extends ClassJobsSitePlugin
             {
                 foreach($config->search as $iniSearch)
                 {
-                    $this->configSettings['searches'][] = $this->_parseSearchFromINI_($iniSearch);
+                    $retSearch = $this->_parseSearchFromINI_($iniSearch);
+                    if($retSearch != null) $this->configSettings['searches'][] = $retSearch;
                 }
             }
             else
             {
-                $this->configSettings['searches'][] = $this->_parseSearchFromINI_($config->search);
+                $retSearch = $this->_parseSearchFromINI_($config->search);
+                if($retSearch != null) $this->configSettings['searches'][] = $retSearch;
             }
         }
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->configSettings['searches']) . " searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
@@ -285,9 +352,15 @@ class ClassConfig extends ClassJobsSitePlugin
     {
         $tempSearch = $this->getEmptySearchDetailsRecord();
 
-        $tempSearch['search_key'] = \Scooper\strScrub($iniSearch['key'], REMOVE_EXTRA_WHITESPACE | LOWERCASE );
+        $tempSearch['key'] = \Scooper\strScrub($iniSearch['key'], REMOVE_EXTRA_WHITESPACE | LOWERCASE );
         $tempSearch['site_name'] = \Scooper\strScrub($iniSearch['jobsite'], REMOVE_EXTRA_WHITESPACE | LOWERCASE );
-        $tempSearch['search_name'] = ($iniSearch['jobsite'] != null ? $iniSearch['jobsite'] . ': ' : "") . $iniSearch['name'];
+        $strJobSiteKey = \Scooper\strScrub($iniSearch['jobsite'], FOR_LOOKUP_VALUE_MATCHING | LOWERCASE );
+        if(!isset($this->configSettings['included_sites'][$strJobSiteKey]))
+        {
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($iniSearch['jobsite'] . "search " .$iniSearch['name'] . " was not added; " . $strJobSiteKey . " is excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            return null;
+        }
+        $tempSearch['name'] = ($iniSearch['jobsite'] != null ? $iniSearch['jobsite'] . ': ' : "") . $iniSearch['name'];
         $tempSearch['base_url_format']  = $iniSearch['url_format'];
         $tempSearch['keyword_search_override']  = $iniSearch['keywords'];
         $tempSearch['location_user_specified_override']  = $iniSearch['location'];
@@ -301,14 +374,9 @@ class ClassConfig extends ClassJobsSitePlugin
             }
         }
 
-// BUGBUG:  Can't call FinalizeSearch from $this here because we aren't the plugin that will process it.
-//        Can only call it from a job site plugin, so we'd need to instantiate the class if we're going to do it.
-//        $this->_finalizeSearch_($tempSearch);
-
-
-        if($tempSearch['search_key'] == "")
+        if($tempSearch['key'] == "")
         {
-            $tempSearch['search_key'] = \Scooper\strScrub($tempSearch['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($tempSearch['search_name'], FOR_LOOKUP_VALUE_MATCHING);
+            $tempSearch['key'] = \Scooper\strScrub($tempSearch['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($tempSearch['name'], FOR_LOOKUP_VALUE_MATCHING);
         }
 
         $strSearchAsString = getArrayValuesAsString($tempSearch);
@@ -317,25 +385,24 @@ class ClassConfig extends ClassJobsSitePlugin
         return $tempSearch;
     }
 
-    private function _parseLocationSettingsFromINI_($iniSearchSetting)
+
+    private function _readGlobalSearchParamtersFromConfig_($config)
     {
-        $tempSettings = null;
-
-        foreach($GLOBALS['DATA']['location_types'] as $loctype)
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading global search settings from config file...", \Scooper\C__DISPLAY_ITEM_START__);
+        if($config->global_search_options && is_object($config->global_search_options))
         {
-            if($iniSearchSetting[$loctype] != null && $iniSearchSetting[$loctype] != "")
+            foreach($config->global_search_options['excluded_jobsites'] as $excludedSite)
             {
-                $tempSettings[$loctype] = \Scooper\strScrub($iniSearchSetting[$loctype], REMOVE_EXTRA_WHITESPACE);
-                $tempSettings[$loctype] = $iniSearchSetting[$loctype];
+                $excludedSite = strtolower($excludedSite);
+                $this->configSettings['excluded_sites'][$excludedSite] = $excludedSite;
+                if(isset($this->configSettings['included_sites'][$excludedSite])) unset($this->configSettings['included_sites'][$excludedSite]);
+                $excludedSite = '';
             }
+
         }
-
-
-        return $tempSettings;
     }
 
-
-    private function __readLocationSetsFromConfig__($config)
+    private function _readLocationSetsFromConfig_($config)
     {
         if (!$config) throw new ErrorException("Invalid configuration.  Cannot load user's searches.");
 
@@ -348,38 +415,70 @@ class ClassConfig extends ClassJobsSitePlugin
             // Check if this is a single search setting or if it's a set of search settings
             //
             $strSettingsName = null;
-            if (is_object($config->search_location_setting_set))
+            if($config->search_location_setting_set && is_object($config->search_location_setting_set))
             {
                 foreach($config->search_location_setting_set as $iniSettings)
                 {
                     if(count($iniSettings) > 1)
                     {
-                        $strSettingsName = $iniSettings['name'];
-                        $this->configSettings['location_sets'][$strSettingsName] = $this->_parseLocationSettingsFromINI_($iniSettings);
-                        $this->configSettings['location_sets'][$strSettingsName]['name'] = $strSettingsName;
+                        $arrNewLocationSet = $this->_getEmptyLocationSettingsSet_();
+                        $strSetName = 'LocationSet' . (count($this->configSettings['location_sets']) + 1);
+                        if($iniSettings['name'] != null && strlen($iniSettings['name']) > 0)
+                        {
+                            $strSetName = $iniSettings['name'];
+                        }
+                        elseif($iniSettings['key'] != null && strlen($iniSettings['key']) > 0)
+                        {
+                            $strSetName = $iniSettings['key'];
+                        }
+                        $strSetName = \Scooper\strScrub($strSetName, FOR_LOOKUP_VALUE_MATCHING);
+
+                        $arrNewLocationSet['key'] = $strSetName;
+                        $arrNewLocationSet['name'] = $strSetName ;
+                        $arrNewLocationSet = $this->_parseAndAddLocationSet_($arrNewLocationSet, $iniSettings);
+
+                        if($iniSettings['excluded_jobsites'] != null && count($iniSettings['excluded_jobsites']) > 0)
+                        {
+                            foreach($iniSettings['excluded_jobsites'] as $excludedSite)
+                            {
+                                $excludedSite = strtolower($excludedSite);
+                                $arrNewLocationSet['excluded_jobsites_array'][$excludedSite] = $excludedSite;
+                                $excludedSite = '';
+                            }
+                        }
+                        if(is_array($arrNewLocationSet['excluded_jobsites_array']))
+                        {
+                            $arrNewLocationSet['excluded_jobsites_array'] = \Scooper\my_merge_add_new_keys($arrNewLocationSet['excluded_jobsites_array'], $this->configSettings['excluded_sites']);
+                        }
+
+                        $strSettingStrings = getArrayValuesAsString($arrNewLocationSet);
+                        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added location search settings '" . $strSetName . ": " . $strSettingStrings, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+                        $this->configSettings['location_sets'][$strSetName] = $arrNewLocationSet;
+
                     }
                 }
             }
-            else
+
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->configSettings['location_sets']) . " location sets. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
+        }
+    }
+
+    private function _parseAndAddLocationSet_($arrLocSet, $iniSearchSetting)
+    {
+        foreach($GLOBALS['DATA']['location_types'] as $loctype)
+        {
+            if($iniSearchSetting[$loctype] != null && $iniSearchSetting[$loctype] != "")
             {
-                $strSettingsName = $config->search_location_setting_set['name'];
-                $this->configSettings['location_sets'][$strSettingsName] = $this->_parseLocationSettingsFromINI_($config->search_location_setting_set);
-                $this->configSettings['location_sets'][$strSettingsName]['name'] = $strSettingsName;
-            }
-            if($strSettingsName != null)
-            {
-                $strSettingStrings = getArrayValuesAsString($this->configSettings['location_sets'][$strSettingsName]);
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added location search settings: " . $strSettingStrings, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                $arrLocSet[$loctype] = \Scooper\strScrub($iniSearchSetting[$loctype], REMOVE_EXTRA_WHITESPACE);
+                $arrLocSet[$loctype] = $iniSearchSetting[$loctype];
             }
         }
 
-
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->configSettings['location_sets']) . " search setting groups. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
-
+        return $arrLocSet;
     }
 
-
-    private function __readKeywordSetsFromConfig__($config)
+    private function _readKeywordSetsFromConfig_($config)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading keyword set from config file...", \Scooper\C__DISPLAY_ITEM_START__);
         if($config->search_keyword_set && is_object($config->search_keyword_set))
@@ -392,17 +491,17 @@ class ClassConfig extends ClassJobsSitePlugin
                 {
                     $strSetName = $ini_keyword_set['name'];
                 }
-                elseif($ini_keyword_set['set_key'] != null && strlen($ini_keyword_set['set_key']) > 0)
+                elseif($ini_keyword_set['key'] != null && strlen($ini_keyword_set['key']) > 0)
                 {
-                    $strSetName = $ini_keyword_set['set_key'];
+                    $strSetName = $ini_keyword_set['key'];
 
                 }
 
 
                 $this->configSettings['keyword_sets'][$strSetName] = $this->_getEmptyKeywordSettingsSet_();
-                $this->configSettings['keyword_sets'][$strSetName]['set_name'] = $strSetName;
-                if(!isset($ini_keyword_set['set_key'])) {
-                    $this->configSettings['keyword_sets'][$strSetName]['set_key'] = strtolower($strSetName);
+                $this->configSettings['keyword_sets'][$strSetName]['name'] = $strSetName;
+                if(!isset($ini_keyword_set['key'])) {
+                    $this->configSettings['keyword_sets'][$strSetName]['key'] = strtolower($strSetName);
                 }
 
                 $fScopeAllSites = true;
@@ -419,7 +518,7 @@ class ClassConfig extends ClassJobsSitePlugin
                 if($fScopeAllSites == true)
                 {
                     // Copy all the job sites into the list of sites included to be run
-                    $this->configSettings['keyword_sets'][$strSetName]['included_jobsites_array'] = array_column($GLOBALS['DATA']['site_plugins'], 'name', 'name');
+                    $this->configSettings['keyword_sets'][$strSetName]['included_jobsites_array'] = $this->configSettings['included_sites'];
                 }
 
                 if($ini_keyword_set['excluded_jobsites'] != null && count($ini_keyword_set['excluded_jobsites']) > 0)
@@ -427,10 +526,11 @@ class ClassConfig extends ClassJobsSitePlugin
                     foreach($ini_keyword_set['excluded_jobsites'] as $excludedSite)
                     {
                         $excludedSite = strtolower($excludedSite);
-                        $this->configSettings['keyword_sets'][$strSetName]['excluded_jobsites_array'][] = $excludedSite;
+                        $this->configSettings['keyword_sets'][$strSetName]['excluded_jobsites_array'][$excludedSite] = $excludedSite;
                         unset($this->configSettings['keyword_sets'][$strSetName]['included_jobsites_array'][$excludedSite]);
                         $excludedSite = '';
                     }
+                    $this->configSettings['keyword_sets'][$strSetName]['excluded_jobsites_array'] = \Scooper\my_merge_add_new_keys($this->configSettings['keyword_sets'][$strSetName]['excluded_jobsites_array'], $this->configSettings['excluded_sites']);
                 }
 
 
@@ -463,8 +563,30 @@ class ClassConfig extends ClassJobsSitePlugin
 
         }
     }
-    private function _expandKeywordsAndLocationsIntoSearches_()
+
+
+
+    private function _updateSearchesWithKeywordSet_($keywordSet)
     {
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Updating user-specified searches with keyword set details", \Scooper\C__DISPLAY_ITEM_START__);
+        for($c = 0; $c < count($this->configSettings['searches']); $c++)
+        {
+            $this->configSettings['searches'][$c]['keyword_set']  = $keywordSet['keywords_array'];
+            //
+            // If this search already has any flags set on it, then do not overwrite that value for this search
+            // Otherwise, set it to be the value that any keyword set we're adding has
+            //
+            if($this->configSettings['searches'][$c]['user_setting_flags'] == null || $this->configSettings['searches'][$c]['user_setting_flags'] == 0)
+            {
+                $this->configSettings['searches'][$c]['user_setting_flags'] = $keywordSet['keyword_match_type_flag'];
+            }
+        }
+    }
+
+    private function _addSearchesForKeywordSets_()
+    {
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Adding new searches for user's keyword sets ", \Scooper\C__DISPLAY_ITEM_START__);
+
         $arrSkippedPlugins = null;
 
         //
@@ -481,73 +603,127 @@ class ClassConfig extends ClassJobsSitePlugin
                 {
                     $classPlug = new $GLOBALS['DATA']['site_plugins'][$siteToSearch]['class_name'](null, null);
 
-                    if(!$classPlug->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
+                    if($classPlug->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
+                    {
+                        $arrSkippedPlugins[] = $siteToSearch;
+                        continue;
+                    }
+
+                    // If the class supports multiple keywords per search, then we can
+                    // use a single search with the full set.
+                    $nameKywdSet = $keywordSet['key'];
+                    $arrKywdSetsForUniqSearches = array();
+                    if($classPlug->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) || $classPlug->isBitFlagSet(C__JOB_ALWAYS_ADD_FULL_KEYWORDS_SET))
+                    {
+                        $arrKywdSetsForUniqSearches[$keywordSet['key']] = array('key' => $keywordSet['key'], 'keywords_array' => $keywordSet['keywords_array']);
+                    }
+                    else // if not, we need to add search for each keyword using that word as a single value in a keyword set
+                    {
+                        $arrSetForEachTerm = array_chunk ( $keywordSet['keywords_array'], 1);
+                        foreach($arrSetForEachTerm as $set)
+                        {
+                            $nameSet = $nameKywdSet."-".\Scooper\strScrub($set[0], FOR_LOOKUP_VALUE_MATCHING);
+                            $arrKywdSetsForUniqSearches[$nameSet] = array('key' => $nameSet, 'keywords_array' => array($set[0]));
+                        }
+
+                    }
+
+                    foreach($arrKywdSetsForUniqSearches as $searchKywdSet)
                     {
                         $tempSearch = $this->getEmptySearchDetailsRecord();
-                        $tempSearch['search_key'] = \Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . '-for-keyword-set-' . \Scooper\strScrub($keywordSet['set_key'], FOR_LOOKUP_VALUE_MATCHING);
-                        $tempSearch['search_name']  = $tempSearch['search_key'];
+                        $tempSearch['key'] = \Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . '-' . \Scooper\strScrub($searchKywdSet['key'], FOR_LOOKUP_VALUE_MATCHING);
+                        $tempSearch['name']  = $tempSearch['key'];
                         $tempSearch['site_name']  = $siteToSearch;
-                        $tempSearch['keyword_set']  = $keywordSet['keywords_array'];
+                        $tempSearch['keyword_set']  = $searchKywdSet['keywords_array'];
                         $tempSearch['user_setting_flags'] = $keywordSet['keyword_match_type_flag'];
-                        $tempSearch['keywords_string_for_url'] = VALUE_NOT_SUPPORTED;
-                        // if this plugin supports keyword parameters, then add a search for it.
-                        if(!$classPlug->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
-                        {
-                            $tempSearch['keywords_string_for_url'] = $classPlug->getCombinedKeywordStringForURL($tempSearch['keyword_set']);
-                        }
-                        $classPlug->_finalizeSearch_($tempSearch);
 
                         $this->configSettings['searches'][] = $tempSearch;
                         $strSearchAsString = getArrayValuesAsString($tempSearch);
-                        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search loaded for keyword settings: " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search added: " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
                     }
-                    else
-                    {
-                        $arrSkippedPlugins[] = $siteToSearch;
-                    }
+
                 }
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Skipped " . count($arrSkippedPlugins) ." plugins because they do not support keyword search: " . getArrayValuesAsString($arrSkippedPlugins, ", ", null, false). "." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                if(count($arrSkippedPlugins) > 0)
+                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Keyword set " . $keywordSet['name'] . " did not generate searches for " . count($arrSkippedPlugins) ." plugins because they do not support keyword search: " . getArrayValuesAsString($arrSkippedPlugins, ", ", null, false). "." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            }
+        }
+    }
+
+
+    private function _addLocationSetToInitialSetOfSearches_()
+    {
+        $arrSkippedPlugins = null;
+
+        reset($this->configSettings['location_sets']);
+        $primaryLocationSet = current($this->configSettings['location_sets']);
+
+        assert($primaryLocationSet!=null);
+
+        if(!isset($primaryLocationSet))
+        {
+            return;
+        }
+
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Updating all searches with primary location set '" . $primaryLocationSet['name'] . "...", \Scooper\C__DISPLAY_NORMAL__);
+
+        //
+        // The first location set will be added to all searches always.
+        // This function adds a copy of all searches if there was 2 or more
+        // location sets specified
+        //
+        //
+        if(isset($primaryLocationSet))
+        {
+            for($l = 0; $l < count($this->configSettings['searches']) ; $l++)
+            {
+
+                if(isset($this->configSettings['searches'][$l]['location_user_specified_override']) && strlen($this->configSettings['searches'][$l]['location_user_specified_override'])>0)
+                {
+                    // this search already has a location from the user, so we don't need to update it with the location set
+                    continue;
+                }
+
+                $curSiteName = \Scooper\strScrub($this->configSettings['searches'][$l]['site_name'], FOR_LOOKUP_VALUE_MATCHING);
+
+                if(isset($primaryLocationSet['excluded_jobsites_array'][$curSiteName]) && strlen($primaryLocationSet['excluded_jobsites_array'][$curSiteName]) > 0)
+                {
+                    // this site was excluded for this location set, so continue.
+                    // TODO[Future] Try to use a secondary location set for the search instead
+
+                    // TODO[future] Update the search in such a way that it doesn't try to process later without a location.  Maybe a "is_valid = T/F" flag?
+                    continue;
+                }
+
+
+                $classPlug = new $GLOBALS['DATA']['site_plugins'][$this->configSettings['searches'][$l]['site_name']]['class_name'](null, null);
+                $this->configSettings['searches'][$l]['location_set'] = $primaryLocationSet;
+                $strSearchLocation = $classPlug->getLocationValueForLocationSetting($this->configSettings['searches'][$l]);
+                if($strSearchLocation != VALUE_NOT_SUPPORTED)
+                {
+                    $this->configSettings['searches'][$l]['key'] = $this->configSettings['searches'][$l]['key'] . "-loc-" . strtolower($primaryLocationSet['name']);
+                    $this->configSettings['searches'][$l]['name'] = $this->configSettings['searches'][$l]['name'] . "-loc-" . strtolower($primaryLocationSet['name']);
+                    $this->configSettings['searches'][$l]['location_search_value'] = $strSearchLocation;
+                }
             }
         }
 
-        // If the keyword settings scope is all sites, then create a search for every possible site
-        // so that it runs with the keywords settings if it was included_<site> = true
+    }
+
+    private function _addSearchesForAdditionalLocationSets_()
+    {
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Creating searches for additional location sets after the primary by cloning and updating all searches", \Scooper\C__DISPLAY_ITEM_START__);
+        $arrSkippedPlugins = null;
+
         //
-//        $setsKeywordSettings = $this->classConfig->getSearchConfiguration('keyword_sets');
-//        if(isset($setsKeywordSettings))
-//        {
-//            foreach($setsKeywordSettings as $kywdSetting)
-//            {
-//                if ($kywdSetting['included_jobsites_array'] != null && count($kywdSetting['included_jobsites_array']) > 0) {
-//                    foreach ($kywdSetting['included_jobsites_array'] as $siteToSearch) {
-//                        $classPlug = new $GLOBALS['DATA']['site_plugins'][$siteToSearch]['class_name'](null, null);
-//
-//                        // if this plugin supports keyword parameters, then add a search for it.
-//                        if (!$classPlug->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$classPlug->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED)) {
-//
-//                            $tempSearch = $this->getEmptySearchDetailsRecord();
-//                            $tempSearch['search_key'] = \Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . '-for-keyword-set-' . \Scooper\strScrub($kywdSetting['set_name'], FOR_LOOKUP_VALUE_MATCHING);
-//                            $tempSearch['search_name'] = $tempSearch['search_key'];
-//                            $tempSearch['site_name'] = $siteToSearch;
-//                            $tempSearch['keyword_set'] = $kywdSetting['keywords_array'];
-//                            $tempSearch['user_setting_flags'] = $kywdSetting['keyword_match_type_flag'];
-//                            $this->_finalizeSearch_($tempSearch);
-//
-//                            $arrPossibleSearchesForRun[] = $tempSearch;
-//                            $strSearchAsString = getArrayValuesAsString($tempSearch);
-//                            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search added for run: " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
-
-
-        if(isset($this->configSettings['location_sets']))
+        // The first location set will be added to all searches always.
+        // This function adds a copy of all searches if there was 2 or more
+        // location sets specified
+        //
+        //
+        if(isset($this->configSettings['location_sets']) && is_array($this->configSettings['location_sets']) && count($this->configSettings['location_sets']) > 1)
         {
             $arrPossibleSearches_Start = $this->configSettings['searches'];
-            $arrPossibleSearches_End = null;
+            $arrNewSearches = null;
 
             for($l = 0; $l < count($arrPossibleSearches_Start) ; $l++)
             {
@@ -555,56 +731,54 @@ class ClassConfig extends ClassJobsSitePlugin
                 if(isset($arrPossibleSearches_Start[$l]['location_user_specified_override']) && strlen($arrPossibleSearches_Start[$l]['location_user_specified_override'])>0)
                 {
                     // this search already has a location from the user, so we shouldn't clone it with the location set
-                    $arrPossibleSearches_End[] = $arrPossibleSearches_Start[$l];
                     continue;
                 }
+
 
                 $classPlug = new $GLOBALS['DATA']['site_plugins'][$arrPossibleSearches_Start[$l]['site_name']]['class_name'](null, null);
                 if ($classPlug->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || $classPlug->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED)) {
-                    $arrPossibleSearches_End[] = $arrPossibleSearches_Start[$l];
+                    // this search doesn't support specifying locations so we shouldn't clone it for a second location set
                     continue;
                 }
 
+
+                $fSkippedPrimary = false;
                 foreach($this->configSettings['location_sets'] as $locSet)
                 {
-                    $strSearchLocation = $classPlug->getLocationValueForLocationSetting($arrPossibleSearches_Start[$l], $locSet);
+                    if(!$fSkippedPrimary) // Starts at index 1 because the primary location (index 0) was already set for all searches
+                    {
+                        $fSkippedPrimary = true;
+                        continue;
+                    }
+
+                    $curSiteName = \Scooper\strScrub($this->configSettings['searches'][$l]['site_name'], FOR_LOOKUP_VALUE_MATCHING);
+                    if(isset($locSet['excluded_jobsites_array'][$curSiteName]) && strlen($locSet['excluded_jobsites_array'][$curSiteName]) > 0)
+                    {
+                        // this site was excluded for this location set, so continue.
+                        continue;
+                    }
+
+                    $newSearch = $this->cloneSearchDetailsRecordExceptFor($arrPossibleSearches_Start[$l], array('location_search_value', 'location_set'));
+                    $newSearch['location_set'] = $locSet;
+                    $strSearchLocation = $classPlug->getLocationValueForLocationSetting($newSearch);
                     if($strSearchLocation != VALUE_NOT_SUPPORTED)
                     {
-                        $newSearch = $arrPossibleSearches_Start[$l];
-                        $newSearch['search_key'] = $arrPossibleSearches_Start[$l]['search_key'] . "-for-location-set-" . strtolower($locSet['name']);
-                        $newSearch['search_name'] = $arrPossibleSearches_Start[$l]['search_name'] . "-for-location-set-" . strtolower($locSet['name']);
-                        $newSearch['location_set'] = $locSet;
+                        $strOldSearchKey = $newSearch['key'] . "-" . strtolower($locSet['name']);
+                        if(substr_count($strOldSearchKey, "-loc-") > 0) { $strOldSearchKey = explode("-loc-", $strOldSearchKey)[0]; }
+                        $newSearch['key'] = $strOldSearchKey . "-loc-" . strtolower($locSet['name']);
+                        $newSearch['name'] = $strOldSearchKey . "-loc-" . strtolower($locSet['name']);
                         $newSearch['location_search_value'] = $strSearchLocation;
-                        $this->_finalizeSearch_($tempSearch);
 
-                        $arrPossibleSearches_End[] = $newSearch;
+                        $this->configSettings['searches'][] = $newSearch;
+
                     }
+                    $newSearch = null;
                 }
             }
-            $arrPossibleSearchesForRun = $arrPossibleSearches_End;
         }
-        //
-        // Add the search locations to the list of ones to run
-        //
-        // If the search had location keywords, it overrides the locSettingSets
-        //
-//        if ($searchDetails['location_user_specified_override'] != null && strlen($searchDetails['location_user_specified_override']) > 0) {
-//            $locSingleSettingSet = array('name' => 'location_user_specified_override', 'search_location_value_override' => $searchDetails['location_user_specified_override']);
-//            $this->configSettings['location_sets']['location_user_specified_override'] = $locSingleSettingSet;
-//        } else {
-//            $locTypeSupported = $this->getLocationSettingType();
-//            if ($locTypeSupported != null && strlen($locTypeSupported) > 0 && $locSettingSets != null) {
-//                foreach ($locSettingSets as $set) {
-//                    if ($set[$locTypeSupported] != null) {
-//                        $this->configSettings['location_sets'][$set['name']]['name'] = $set['name'];
-//                        $this->configSettings['location_sets'][$set['name']][$locTypeSupported] = $set[$locTypeSupported];
-//                    }
-//                }
-//            }
-//        }
-//   }
 
     }
+
     private function _parseEmailSetupFromINI_($config)
     {
         if($config->email )
@@ -642,13 +816,22 @@ class ClassConfig extends ClassJobsSitePlugin
     private function _getEmptyKeywordSettingsSet_()
     {
         return array(
-            'set_key' => null,
-            'set_name' => null,
+            'key' => null,
+            'name' => null,
             'keywords_array' => null,
             'keyword_match_type_string' => null,
             'keyword_match_type_flag' => null,
-            'excluded_sites_array' => null,
+            'excluded_jobsites_array' => array(),
             'settings_scope' => "all-searches",
+        );
+    }
+
+    private function _getEmptyLocationSettingsSet_()
+    {
+        return array(
+            'key' => null,
+            'name' => null,
+            'excluded_jobsites_array' => array(),
         );
     }
 
@@ -686,6 +869,13 @@ class ClassConfig extends ClassJobsSitePlugin
             return;
         }
 
+        if(!is_array($arrFileInput))
+        {
+            // No files were found, so bail
+            $GLOBALS['logger']->logLine("No input files were found with regex title strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            return;
+        }
+
         foreach($arrFileInput as $fileItem)
         {
             $fileDetail = $fileItem['details'];
@@ -706,9 +896,6 @@ class ClassConfig extends ClassJobsSitePlugin
                     //
                     foreach($arrTitlesTemp as $titleRecord)
                     {
-                        if($GLOBALS['OPTS']['DEBUG'] == true) {
-                            $GLOBALS['logger']->logLine("Adding title regex term: " . $titleRecord, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                        }
                         $arrRXInput = explode("|", strtolower($titleRecord['match_regex']));
                         foreach($arrRXInput as $rxItem)
                         {
@@ -776,6 +963,9 @@ class ClassConfig extends ClassJobsSitePlugin
         }
         $fCompaniesLoaded = false;
 
+        if(!isset($arrFileInput) ||  !is_array($arrFileInput)) { return; }
+
+
         foreach($arrFileInput as $fileItem)
         {
             $fileDetail = $fileItem['details'];
@@ -795,18 +985,21 @@ class ClassConfig extends ClassJobsSitePlugin
                     // Add each Company we found in the file to our list in this class, setting the key for
                     // each record to be equal to the job Company so we can do a fast lookup later
                     //
-                    foreach($arrCompaniesTemp as $CompanyRecord)
+                    if(count($arrCompaniesTemp) > 0)
                     {
-                        $arrRXInput = explode("|", strtolower($CompanyRecord['match_regex']));
-
-                        foreach($arrRXInput as $rxItem)
+                        foreach($arrCompaniesTemp as $CompanyRecord)
                         {
-                            $rx = '/'.$rxItem.'/';
+                            $arrRXInput = explode("|", strtolower($CompanyRecord['match_regex']));
 
-                            $GLOBALS['DATA']['companies_regex_to_filter'][] = $rx;
+                            foreach($arrRXInput as $rxItem)
+                            {
+                                $rx = '/'.$rxItem.'/';
+
+                                $GLOBALS['DATA']['companies_regex_to_filter'][] = $rx;
+                            }
                         }
+                        $fCompaniesLoaded = true;
                     }
-                    $fCompaniesLoaded = true;
                 }
             }
         }

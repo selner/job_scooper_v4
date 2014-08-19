@@ -27,7 +27,7 @@ fi
 regex_titles_final=$inifolder"list_exclude_titles_regex.csv"
 regex_titles_me=$inifolder"list_exclude_titles_regex-meonly.csv"
 regex_titles_common=/Users/bryan/Code/jobs_scooper/build/common_exclude_titles_regex.csv
-codepath="/Users/bryan/Code/jobs_scooper/main/runJobs.php"
+codepath="/Users/bryan/Dropbox/Code/jobs_scooper/main/runJobs.php"
 now=$(date +"%Y_%m_%d_%H%M")
 endfilebase=$now"_jobs"
 tempfoldername="job_scooper_"$now

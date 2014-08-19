@@ -52,7 +52,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
 
                 if($GLOBALS['OPTS'][$strIncludeKey] == null || $GLOBALS['OPTS'][$strIncludeKey] == false)
                 {
-                    $GLOBALS['logger']->logLine($search['site_name'] . " excluded, so skipping its '" . $search['search_name'] . "' search.", \Scooper\C__DISPLAY_ITEM_START__);
+                    $GLOBALS['logger']->logLine($search['site_name'] . " excluded, so skipping its '" . $search['name'] . "' search.", \Scooper\C__DISPLAY_ITEM_START__);
 
                     continue;
                 }
@@ -73,7 +73,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
                 try
                 {
                     $GLOBALS['logger']->logLine("Setting up " . count($classSearches['searches']) . " search(es) for ". $classSearches['site_name'] . "...", \Scooper\C__DISPLAY_SECTION_START__);
-                    $class->addSearches($classSearches['searches'], $this->arrSearchLocationSetsToRun, $keywordSet);
+                    $class->addSearches($classSearches['searches']);
                     $class->getJobsForAllSearches($nDays);
                     addJobsToJobsList($this->arrLatestJobs, $class->getMyJobsList());
                     $class = null;

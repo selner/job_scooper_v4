@@ -256,9 +256,9 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
         return parent::__construct($strOutputDirectory);
     }
 
-    protected function _getURLfromBase_($searchDetails, $nDays, $nPage = null, $nItem = null, $locSettingSets=null)
+    protected function _getURLfromBase_($searchDetails, $nDays, $nPage = null, $nItem = null)
     {
-        return parent::_getURLfromBase_($searchDetails, $nDays, $nPage, $nItem, $locSettingSets);
+        return parent::_getURLfromBase_($searchDetails, $nDays, $nPage, $nItem);
     }
 
     // if this is a client-side HTML download plugin, you will need to add a script
@@ -332,7 +332,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
         // Find the HTML node that holds the result count
         //
         $resultsSection = $objSimpHTML->find("span[id='retCountNumber']");
-        \SimpleHtmlDom\dump_html_tree($objSimpHTML);
+
         // get the text value of that node
         $totalItemsText = $resultsSection[0]->plaintext;
 

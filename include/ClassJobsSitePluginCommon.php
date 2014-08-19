@@ -32,8 +32,8 @@ class ClassJobsSitePluginCommon
     function getEmptySearchDetailsRecord()
     {
         return array(
-            'search_key' => null,
-            'search_name' => null,
+            'key' => null,
+            'name' => null,
             'site_name' => null,
             'keywords_string_for_url' => null,
             'location_search_value' => null,
@@ -44,6 +44,18 @@ class ClassJobsSitePluginCommon
             'keyword_search_override' => null,
             'keyword_set' => null,
         );
+    }
+
+    function is_OutputInterimFiles()
+    {
+        $valInterimFiles = \Scooper\get_PharseOptionValue('output_interim_files');
+
+        if(isset($valInterimFiles) && $valInterimFiles == true)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     function cloneSearchDetailsRecordExceptFor($srcDetails, $arrDontCopyTheseKeys)
@@ -435,11 +447,11 @@ class ClassJobsSitePluginCommon
                         $fMatched = true;
                         break;
                     }
-                    else              // we're ignoring the Excluded column fact for the time being. If it's in the list, it's excluded
-                    {
-                        $nJobsNotMarked++;
-                    }
                     if($fMatched == true) break;
+                }
+                if($fMatched == false)
+                {
+                    $nJobsNotMarked++;
                 }
 
 //                if($fMatched == false)

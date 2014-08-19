@@ -24,8 +24,14 @@ class PluginOuterwall extends ClassJobsSitePlugin
     protected $siteName = 'Outerwall';
     protected $siteBaseURL = 'http://outerwall.jobs';
     protected $strBaseURLFormat = "http://outerwall.jobs/***LOCATION***/usa/jobs/";
-    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS;
     protected $typeLocationSearchNeeded = 'location-state';
+
+    function __construct($strBaseDir = null)
+    {
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS | C__JOB_PAGECOUNT_NOTAPPLICABLE__;
+        parent::__construct($strBaseDir);
+    }
+
 
     function parseJobsListForPage($objSimpHTML)
     {
@@ -41,7 +47,7 @@ class PluginOuterwall extends ClassJobsSitePlugin
             $item['job_site'] = $this->siteName;
             $item['job_post_url'] = $this->siteBaseURL . $node->find("h4 a")[0]->href;
             $item['job_title'] = $node->find("h4 a span")[0]->plaintext;
-            $item['job_id'] = explode("/", $item['job_post_url'])[3];
+            $item['job_id'] = explode("/", $item['job_post_url'])[4];
             if($item['job_title'] == '') continue;
 
 

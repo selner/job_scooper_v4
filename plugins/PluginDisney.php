@@ -84,7 +84,6 @@ class PluginDisney extends ClassJobsSitePlugin
             $ret[] = $this->normalizeItem($item);
         }
 
-//        var_dump($node->getAllAttributes());
 
         return $ret;
     }

@@ -60,7 +60,6 @@ class PluginFacebook extends ClassJobsSitePlugin
             $item['location'] = $this->getLocationValue();
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
-//            var_dump($item);
             $ret[] = $this->normalizeItem($item);
         }
 

@@ -26,12 +26,15 @@ require_once(__ROOT__.'/include/ClassJobsRunWrapper.php');
 
 
 require_once (__ROOT__.'/include/ClassMultiSiteSearch.php');
+require_once (__ROOT__.'/plugins/PluginTaleo.php');
+require_once (__ROOT__.'/plugins/PluginAdicioCareerCast.php');
+require_once (__ROOT__.'/plugins/PluginResumator.php');
+
 require_once (__ROOT__.'/plugins/PluginAmazon.php');
 require_once (__ROOT__.'/plugins/PluginCraigslist.php');
 require_once (__ROOT__.'/plugins/PluginIndeed.php');
 require_once (__ROOT__.'/plugins/PluginSimplyHired.php');
 require_once (__ROOT__.'/plugins/PluginGlassdoor.php');
-require_once (__ROOT__.'/plugins/PluginPorch.php');
 require_once (__ROOT__.'/plugins/PluginExpedia.php');
 require_once (__ROOT__.'/plugins/PluginLinkUp.php');
 require_once (__ROOT__.'/plugins/PluginEmploymentGuide.php');
@@ -39,7 +42,6 @@ require_once (__ROOT__.'/plugins/PluginMonster.php');
 require_once (__ROOT__.'/plugins/PluginCareerBuilder.php');
 require_once (__ROOT__.'/plugins/PluginDisney.php');
 require_once (__ROOT__.'/plugins/PluginOuterwall.php');
-require_once (__ROOT__.'/plugins/PluginTableau.php');
 require_once (__ROOT__.'/plugins/PluginGoogle.php');
 require_once (__ROOT__.'/plugins/PluginFacebook.php');
 require_once (__ROOT__.'/plugins/PluginEbay.php');
@@ -48,8 +50,6 @@ require_once (__ROOT__.'/plugins/PluginGeekwire.php');
 require_once (__ROOT__.'/plugins/PluginDotJobs.php');
 require_once (__ROOT__.'/plugins/PluginZipRecruiter.php');
 require_once (__ROOT__.'/plugins/PluginStartupHire.php');
-require_once (__ROOT__.'/plugins/PluginAdicioCareerCast.php');
-require_once (__ROOT__.'/plugins/PluginResumator.php');
 
 //And so on, 0x8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800 etc..
 
@@ -72,6 +72,7 @@ const C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED = 0x10000;
 const C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS = 0x20000;
 const C__JOB_KEYWORD_SUPPORTS_PLUS_PREFIX = 0x40000;
 const C__JOB_BASE_URL_FORMAT_REQUIRED = 0x80000;
+const C__JOB_ALWAYS_ADD_FULL_KEYWORDS_SET = 0x100000;  // Used to override the default behavior of creating multiple searches when a search returns all jobs.
 
 const C__USER_KEYWORD_ANYWHERE = 0x1;
 const C__USER_KEYWORD_ANYWHERE_AS_STRING = "any";
@@ -91,7 +92,7 @@ define('C__JOB_BASETYPE_WEBPAGE_FLAGS_NO_LOCATION', C__JOB_BASETYPE_WEBPAGE_FLAG
 define('C__JOB_BASETYPE_WEBPAGE_FLAGS_NO_KEYWORDS', C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED);
 define('C__JOB_BASETYPE_WEBPAGE_FLAGS_NO_LOCATION_OR_KEYWORDS', C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED);
 define('C__JOB_BASETYPE_WEBPAGE_FLAGS_URL_FORMAT_REQUIRED', C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_BASE_URL_FORMAT_REQUIRED | C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED);
-define('C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS', C__JOB_BASETYPE_WEBPAGE_FLAGS_NO_KEYWORDS | C__JOB_DAYS_VALUE_NOTAPPLICABLE__);
+define('C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS', C__JOB_BASETYPE_WEBPAGE_FLAGS_NO_KEYWORDS | C__JOB_DAYS_VALUE_NOTAPPLICABLE__ | C__JOB_ALWAYS_ADD_FULL_KEYWORDS_SET);
 define('C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_NO_LOCATION', C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED);
 define('C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE_NO_LOCATION', C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_NO_LOCATION | C__JOB_PAGECOUNT_NOTAPPLICABLE__);
 define('C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS', C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED);
