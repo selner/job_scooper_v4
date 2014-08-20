@@ -1,5 +1,5 @@
 #Jobs Scooper
-**Get automatic email alerts or a CSV download for all new job listings from over 70 career websites and job search aggregators  to latest jobs for your personal search terms.**
+**Get automatic email alerts or a CSV download for all new job listings from over 75 career websites and job search aggregators  to latest jobs for your personal search terms.**
 
 ![Example: Job Scooper Email Notification on Mobile](http://www.bryanselner.com/www-root-wpblog/wp-content/uploads/2014/07/JobScooperResultEmailMobile-250pxw.png "Example: Job Scooper Email Notification on Mobile")
 
