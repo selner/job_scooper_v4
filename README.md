@@ -55,7 +55,7 @@ Required Parameters:
 
 ##Other Stuff
 * Version:  v2.2.0 [release notes](https://github.com/selner/jobs_scooper/releases)
-* Author:  Bryan Selner (dev at recoilvelocity dot com)
+* Author:  Bryan Selner (bryan at bryanselner dot com)
 * Platforms:
 	* Mac OS X 10.9.4 with PHP 5.4.24.
 	* Ubuntu Linux 14.04 with PHP 5.5.9-1ubuntu4.2 (with E_NOTICE error reporting disabled.)
