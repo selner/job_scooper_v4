@@ -18,7 +18,24 @@
 define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__ . '/include/ClassJobsSitePluginCommon.php');
 
-
+//class PluginJuneau extends ClassBaseSimplePlugin
+//{
+//    protected $siteName = 'Juneau';
+//    protected $childSiteURLBase = 'http://junotherapeutics.com/';
+//    protected $childSiteListingPage = 'http://junotherapeutics.com/';
+//
+//    protected $arrListingTagSetup = array(
+//        'tag_listings_section' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'container'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'post')),
+//        'tag_title' => array('tag' => 'a', 'attribute' => '', 'attribute_value' =>''),
+//        'tag_link' => array('tag' => 'a', 'attribute' => '', 'attribute_value' =>''),
+//        'tag_department' => array('tag' => 'td', 'attribute' => '', 'attribute_value'=>''),
+//        'tag_location' => array('tag' => '', 'attribute' => '', 'attribute_value' =>''),
+//        'regex_link_job_id' => '/.com\/uploads\/(\S*)\//i',
+//    );
+//
+//}
+//
+//
 abstract class ClassBaseResumatorTablesPlugin extends ClassBaseSimplePlugin
 {
     protected $arrListingTagSetup = array(
