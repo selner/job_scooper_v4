@@ -461,15 +461,12 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 }
             }
         }
-        elseif(count($arrKeywords) == 1)
+        else
         {
+            $strRetCombinedKeywords = $arrKeywords[0];
             if($this->isBitFlagSet(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS))
             {
-                $strRetCombinedKeywords = '"' . $arrKeywords[0] .'"';
-            }
-            else
-            {
-                $strRetCombinedKeywords = $arrKeywords[0];
+                $strRetCombinedKeywords = '"' . $strRetCombinedKeywords .'"';
             }
         }
 
