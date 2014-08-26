@@ -121,7 +121,6 @@ class ClassConfig extends ClassJobsSitePlugin
             $iniParser = new IniParser($this->arrFileDetails['config_ini']['full_file_path']);
             $confTemp = $iniParser->parse();
             $this->setupRunFromAllConfigsRecursive($confTemp);
-            $this->_setupRunFromConfig_($confTemp);
         }
 
 
@@ -186,15 +185,11 @@ class ClassConfig extends ClassJobsSitePlugin
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading all configurations from ".$this->arrFileDetails['config_ini']['file_name']." and it's included INI file references...", \Scooper\C__DISPLAY_ITEM_START__);
 
-        var_dump($config->settings_files);
-
-        var_dump($config);
         if($config->settings_files && is_object($config->settings_files))
         {
             foreach($config->settings_files['ini_path'] as $nextConfigFile)
             {
-
-                var_dump($nextConfigFile);
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configurations from ".$nextConfigFile." and it's included INI file references...", \Scooper\C__DISPLAY_ITEM_START__);
                 $iniParser = new IniParser($nextConfigFile);
                 $nextConfig = $iniParser->parse();
                 $this->setupRunFromAllConfigsRecursive($nextConfig);
@@ -230,7 +225,10 @@ class ClassConfig extends ClassJobsSitePlugin
         {
             foreach($config->inputfiles as $iniInputFile)
             {
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Processing input file '" . $this->arrFileDetails['input_folder']['directory'].$iniInputFile['filename'] . "' with type of '". $iniInputFile['type'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
+                $strFileName = $iniInputFile['path'];
+                if(strlen($strFileName) <= 0) $strFileName = $iniInputFile['filename'];
+
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Processing input file '" . $strFileName. "' with type of '". $iniInputFile['type'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
                 $this->__addInputFile__($iniInputFile);
             }
         }
@@ -320,9 +318,9 @@ class ClassConfig extends ClassJobsSitePlugin
             $tempFileDetails = \Scooper\parseFilePath($iniInputFileItem['path'], true);
 
         }
-        elseif(isset($iniInputFileItem['filename']))
+        elseif(isset($iniInputFileItem['file_name']))
         {
-            $tempFileDetails = \Scooper\parseFilePath($this->arrFileDetails['input_folder']['directory'].$iniInputFileItem['filename'], true);
+            $tempFileDetails = \Scooper\parseFilePath($this->arrFileDetails['input_folder']['directory'].$iniInputFileItem['file_name'], true);
         }
 
         if(isset($tempFileDetails))
@@ -610,20 +608,19 @@ class ClassConfig extends ClassJobsSitePlugin
 
     private function _addSearchesForKeywordSets_()
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Adding new searches for user's keyword sets ", \Scooper\C__DISPLAY_ITEM_START__);
-
-        $arrSkippedPlugins = null;
-
         //
         // explode any keyword sets we loaded into separate searches
         //
         // If the keyword settings scope is all sites, then create a search for every possible site
         // so that it runs with the keywords settings if it was included_<site> = true
         //
-        if(isset($this->configSettings['keyword_sets']))
+        if(isset($this->configSettings['keyword_sets']) && count($this->configSettings['keyword_sets']) > 0)
         {
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Adding new searches for user's keyword sets ", \Scooper\C__DISPLAY_ITEM_START__);
+
             foreach($this->configSettings['keyword_sets'] as $keywordSet)
             {
+                $arrSkippedPlugins = null;
                 foreach($keywordSet['included_jobsites_array'] as $siteToSearch)
                 {
                     $classPlug = new $GLOBALS['DATA']['site_plugins'][$siteToSearch]['class_name'](null, null);
@@ -816,7 +813,6 @@ class ClassConfig extends ClassJobsSitePlugin
 
         if($config->emails )
         {
-            var_dump($config->emails);
             foreach($config->emails as $emailItem)
             {
                 $tempEmail = $this->__getEmptyEmailRecord__();
@@ -911,7 +907,7 @@ class ClassConfig extends ClassJobsSitePlugin
                 {
                     $GLOBALS['logger']->logLine("Loading job title regexes to filter from ".$fileDetail ['full_file_path']."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
                     $classCSVFile = new \Scooper\ScooperSimpleCSV($fileDetail ['full_file_path'] , 'r');
-                    $arrTitlesTemp = $classCSVFile->readAllRecords(true);
+                    $arrTitlesTemp = $classCSVFile->readAllRecords(true, array("match_regex"));
                     $arrTitlesTemp = $arrTitlesTemp['data_rows'];
                     $GLOBALS['logger']->logLine(count($arrTitlesTemp) . " titles found in the source file " . $fileDetail['file_name'] . " that will be automatically filtered from job listings." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
                     if(count($arrTitlesTemp) <= 0)  continue;
@@ -1002,7 +998,7 @@ class ClassConfig extends ClassJobsSitePlugin
                 {
                     $GLOBALS['logger']->logLine("Loading job Company regexes to filter from ".$fileDetail ['full_file_path']."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
                     $classCSVFile = new \Scooper\ScooperSimpleCSV($fileDetail ['full_file_path'] , 'r');
-                    $arrCompaniesTemp = $classCSVFile->readAllRecords(true);
+                    $arrCompaniesTemp = $classCSVFile->readAllRecords(true,array('match_regex'));
                     $arrCompaniesTemp = $arrCompaniesTemp['data_rows'];
                     $GLOBALS['logger']->logLine(count($arrCompaniesTemp) . " companies found in the source file that will be automatically filtered from job listings." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
