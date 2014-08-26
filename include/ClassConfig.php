@@ -624,50 +624,51 @@ class ClassConfig extends ClassJobsSitePlugin
             foreach($this->configSettings['keyword_sets'] as $keywordSet)
             {
                 $arrSkippedPlugins = null;
-                foreach($keywordSet['included_jobsites_array'] as $siteToSearch)
-                {
-                    $classPlug = new $GLOBALS['DATA']['site_plugins'][$siteToSearch]['class_name'](null, null);
+                if(isset($keywordSet['included_jobsites_array']))
+                    foreach($keywordSet['included_jobsites_array'] as $siteToSearch)
+                    {
+                        $classPlug = new $GLOBALS['DATA']['site_plugins'][$siteToSearch]['class_name'](null, null);
 
-                    if($classPlug->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
-                    {
-                        $arrSkippedPlugins[] = $siteToSearch;
-                        continue;
-                    }
-
-                    // If the class supports multiple keywords per search, then we can
-                    // use a single search with the full set.
-                    $nameKywdSet = $keywordSet['key'];
-                    $arrKywdSetsForUniqSearches = array();
-                    if($classPlug->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) || $classPlug->isBitFlagSet(C__JOB_ALWAYS_ADD_FULL_KEYWORDS_SET))
-                    {
-                        $arrKywdSetsForUniqSearches[$keywordSet['key']] = array('key' => $keywordSet['key'], 'keywords_array' => $keywordSet['keywords_array']);
-                    }
-                    else // if not, we need to add search for each keyword using that word as a single value in a keyword set
-                    {
-                        $arrSetForEachTerm = array_chunk ( $keywordSet['keywords_array'], 1);
-                        foreach($arrSetForEachTerm as $set)
+                        if($classPlug->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
                         {
-                            $nameSet = $nameKywdSet."-".\Scooper\strScrub($set[0], FOR_LOOKUP_VALUE_MATCHING);
-                            $arrKywdSetsForUniqSearches[$nameSet] = array('key' => $nameSet, 'keywords_array' => array($set[0]));
+                            $arrSkippedPlugins[] = $siteToSearch;
+                            continue;
+                        }
+
+                        // If the class supports multiple keywords per search, then we can
+                        // use a single search with the full set.
+                        $nameKywdSet = $keywordSet['key'];
+                        $arrKywdSetsForUniqSearches = array();
+                        if($classPlug->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) || $classPlug->isBitFlagSet(C__JOB_ALWAYS_ADD_FULL_KEYWORDS_SET))
+                        {
+                            $arrKywdSetsForUniqSearches[$keywordSet['key']] = array('key' => $keywordSet['key'], 'keywords_array' => $keywordSet['keywords_array']);
+                        }
+                        else // if not, we need to add search for each keyword using that word as a single value in a keyword set
+                        {
+                            $arrSetForEachTerm = array_chunk ( $keywordSet['keywords_array'], 1);
+                            foreach($arrSetForEachTerm as $set)
+                            {
+                                $nameSet = $nameKywdSet."-".\Scooper\strScrub($set[0], FOR_LOOKUP_VALUE_MATCHING);
+                                $arrKywdSetsForUniqSearches[$nameSet] = array('key' => $nameSet, 'keywords_array' => array($set[0]));
+                            }
+
+                        }
+
+                        foreach($arrKywdSetsForUniqSearches as $searchKywdSet)
+                        {
+                            $tempSearch = $this->getEmptySearchDetailsRecord();
+                            $tempSearch['key'] = \Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . '-' . \Scooper\strScrub($searchKywdSet['key'], FOR_LOOKUP_VALUE_MATCHING);
+                            $tempSearch['name']  = $tempSearch['key'];
+                            $tempSearch['site_name']  = $siteToSearch;
+                            $tempSearch['keyword_set']  = $searchKywdSet['keywords_array'];
+                            $tempSearch['user_setting_flags'] = $keywordSet['keyword_match_type_flag'];
+
+                            $this->configSettings['searches'][] = $tempSearch;
+                            $strSearchAsString = getArrayValuesAsString($tempSearch);
+                            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search added: " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
                         }
 
                     }
-
-                    foreach($arrKywdSetsForUniqSearches as $searchKywdSet)
-                    {
-                        $tempSearch = $this->getEmptySearchDetailsRecord();
-                        $tempSearch['key'] = \Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . '-' . \Scooper\strScrub($searchKywdSet['key'], FOR_LOOKUP_VALUE_MATCHING);
-                        $tempSearch['name']  = $tempSearch['key'];
-                        $tempSearch['site_name']  = $siteToSearch;
-                        $tempSearch['keyword_set']  = $searchKywdSet['keywords_array'];
-                        $tempSearch['user_setting_flags'] = $keywordSet['keyword_match_type_flag'];
-
-                        $this->configSettings['searches'][] = $tempSearch;
-                        $strSearchAsString = getArrayValuesAsString($tempSearch);
-                        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search added: " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                    }
-
-                }
                 if(count($arrSkippedPlugins) > 0)
                     if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Keyword set " . $keywordSet['name'] . " did not generate searches for " . count($arrSkippedPlugins) ." plugins because they do not support keyword search: " . getArrayValuesAsString($arrSkippedPlugins, ", ", null, false). "." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
             }
