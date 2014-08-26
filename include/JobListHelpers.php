@@ -325,7 +325,7 @@ function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strD
         {
             $strVal = $val;
         }
-        elseif(is_array($val))
+        elseif(is_array($val) && !(\Scooper\is_array_multidimensional($val)))
         {
             $strVal = join(" | ", $val);
         }
