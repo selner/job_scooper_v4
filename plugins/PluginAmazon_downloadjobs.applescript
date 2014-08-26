@@ -1,4 +1,4 @@
-(*
+
 on test()
 	doRun({"/Users/bryan/Code/data", "Amazon", "amazon-test", "http://www.amazon.jobs/results?jobCategoryIds[]=83&jobCategoryIds[]=68&locationIds[]=226"})
 end test
@@ -8,10 +8,11 @@ on run (argv)
 end run
 
 on doRun(argv)
-
-*)
+	
+	(*
 on run (argv)
-
+*)
+	
 	set libDownload to init_library()
 	
 	set strOutputDir of libDownload to first item of argv as string
@@ -27,10 +28,13 @@ on run (argv)
 	set strJSClickNext_First of libDownload to libDownload's getJS_ClickLink()
 	set strJSClickNext_Others of libDownload to strJSClickNext_First of libDownload
 	
-	set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() {  if(document.getElementsByClassName('pagination') == null ||Object.getOwnPropertyNames(document.getElementsByClassName('pagination')[0]).length == 2) { return 1; };  var strItem =  document.getElementsByClassName('pagination')[0].firstChild.nextSibling.nextSibling.nextSibling.textContent; return strItem; }  getMaxPageValue();"
+	--	set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() {  if(document.getElementsByClassName('pagination') == null ||Object.getOwnPropertyNames(document.getElementsByClassName('pagination')[0]).length == 2) { return 1; };  var strItem =  document.getElementsByClassName('pagination')[0].firstChild.nextSibling.nextSibling.nextSibling.textContent; return strItem; }  getMaxPageValue();"
 	
-	set strGetNextPageValue of libDownload to "function getNextPageValue() { if(document.getElementsByClassName('nextpage') == null ||Object.getOwnPropertyNames(document.getElementsByClassName('nextpage')).length == 2) { return 1;} return document.getElementById('nextpage').value;} getNextPageValue();"
+	set param1 of libDownload to "document.getElementsByClassName('pagination')[0].firstChild.nextSibling.firstChild"
+	set strGetNextPageValue of libDownload to libDownload's getJS_GetNodeValue()
 	
+	set param1 of libDownload to "document.getElementsByClassName('pagination')[0].firstChild.nextSibling.nextSibling.nextSibling"
+	set strJSGetMaxPageValue of libDownload to libDownload's getJS_GetNodeText()
 	
 	set strJSGetTheSource of libDownload to "function getHTML() { return " & quote & "<table class='scooper_jobs_page_result'>" & quote & " + document.getElementsByClassName('footable footable-loaded tablet breakpoint')[0].innerHTML + " & quote & "</table>" & quote & "; } getHTML();"
 	
