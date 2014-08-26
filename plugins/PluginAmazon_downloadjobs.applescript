@@ -1,6 +1,6 @@
 (*
 on test()
-	doRun({"/Users/bryan/Code/data", "Amazon", "amazon-test", "http://www.amazon.jobs/results?sjid=68,83&checklid=@%27US,%20WA,%20Seattle%27&cname=%27US,%20WA,%20Seattle%27"})
+	doRun({"/Users/bryan/Code/data", "Amazon", "amazon-test", "http://www.amazon.jobs/results?jobCategoryIds[]=83&jobCategoryIds[]=68&locationIds[]=226"})
 end test
 
 on run (argv)
@@ -8,10 +8,10 @@ on run (argv)
 end run
 
 on doRun(argv)
-*)
 
+*)
 on run (argv)
-	
+
 	set libDownload to init_library()
 	
 	set strOutputDir of libDownload to first item of argv as string
@@ -19,24 +19,27 @@ on run (argv)
 	set strFileKey of libDownload to third item of argv as string
 	set strURL of libDownload to fourth item of argv as string
 	
-	set nSecondsDelayForPageLoad of libDownload to 2
+	set nSecondsDelayForPageLoad of libDownload to 4
 	
-	set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() {  if(document.getElementsByClassName('searchProfiles') == null ||Object.getOwnPropertyNames(document.getElementsByClassName('searchProfiles')).length == 2) { return 1; };  var strItem =  document.getElementById('searchProfiles').firstChild.nextSibling.nextSibling.nextSibling.firstChild.nextSibling.textContent; return strItem.split(' ')[2];  }  getMaxPageValue();"
+	set strJS_ClickNext to ""
+	
+	set param1 of libDownload to "document.getElementsByClassName('pagination')[0].firstChild.nextSibling.nextSibling.nextSibling.nextSibling;"
+	set strJSClickNext_First of libDownload to libDownload's getJS_ClickLink()
+	set strJSClickNext_Others of libDownload to strJSClickNext_First of libDownload
+	
+	set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() {  if(document.getElementsByClassName('pagination') == null ||Object.getOwnPropertyNames(document.getElementsByClassName('pagination')[0]).length == 2) { return 1; };  var strItem =  document.getElementsByClassName('pagination')[0].firstChild.nextSibling.nextSibling.nextSibling.textContent; return strItem; }  getMaxPageValue();"
 	
 	set strGetNextPageValue of libDownload to "function getNextPageValue() { if(document.getElementsByClassName('nextpage') == null ||Object.getOwnPropertyNames(document.getElementsByClassName('nextpage')).length == 2) { return 1;} return document.getElementById('nextpage').value;} getNextPageValue();"
 	
-	set strJSClickNext_First of libDownload to "function doGetJobsClick() {  if(document.getElementsByClassName('page gradient') == null ||Object.getOwnPropertyNames(document.getElementsByClassName('page gradient')).length == 2) { return false; } var event = document.createEvent('MouseEvents');       event.initMouseEvent('click', true, true, window,        0, 0, 0, 0, 0,  false, false, false, false,  0, null);   document.getElementsByClassName('page gradient')[0].dispatchEvent(event); return true; } doGetJobsClick();"
 	
-	set strJSClickNext_Others of libDownload to "function doGetJobsClick() {  if(document.getElementsByClassName('page gradient') == null ||Object.getOwnPropertyNames(document.getElementsByClassName('page gradient')).length == 2) { return false; } var event = document.createEvent('MouseEvents');       event.initMouseEvent('click', true, true, window,        0, 0, 0, 0, 0,  false, false, false, false,  0, null);   document.getElementsByClassName('page gradient')[1].dispatchEvent(event); return true; } doGetJobsClick();"
-	
-	set strJSGetTheSource of libDownload to "function getHTML() { return " & quote & "<table class='scooper_jobs_page_result'>" & quote & " + document.getElementById('teamjobs').innerHTML + " & quote & "</table>" & quote & "} getHTML();"
+	set strJSGetTheSource of libDownload to "function getHTML() { return " & quote & "<table class='scooper_jobs_page_result'>" & quote & " + document.getElementsByClassName('footable footable-loaded tablet breakpoint')[0].innerHTML + " & quote & "</table>" & quote & "; } getHTML();"
 	
 	tell libDownload
 		set ret to doJobsDownload()
 	end tell
 	
 	return ret
-end run
+end doRun
 
 
 --*******************************************************************************************

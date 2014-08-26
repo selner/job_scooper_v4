@@ -25,6 +25,14 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 
 
+/*****
+ *
+ * To get the right URL for Amazon Jobs search, fill out the parameters on
+ * http://www.amazon.jobs/advancedjobsearch and then submit the form.  The URL of the
+ * resulting page (e.g. "http://www.amazon.jobs/results?jobCategoryIds[]=83&jobCategoryIds[]=68&locationIds[]=226")
+ * is the value you should set in the INI file to get the right filtered results.
+ *
+ */
 
 
 class PluginAmazon extends ClassJobsSitePlugin
