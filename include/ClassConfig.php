@@ -120,6 +120,7 @@ class ClassConfig extends ClassJobsSitePlugin
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration file details from " . $this->arrFileDetails['config_ini']['full_file_path'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
             $iniParser = new IniParser($this->arrFileDetails['config_ini']['full_file_path']);
             $confTemp = $iniParser->parse();
+            $this->setupRunFromAllConfigsRecursive($confTemp);
             $this->_setupRunFromConfig_($confTemp);
         }
 
@@ -177,6 +178,30 @@ class ClassConfig extends ClassJobsSitePlugin
              $this->arrFileDetails['output'] = \Scooper\parseFilePath( $this->arrFileDetails['output']['directory'] .  $strDefaultFileName);
         }
         $this->arrFileDetails['output_subfolder'] = $this->createOutputSubFolder( $this->arrFileDetails['output']);
+    }
+
+
+
+    private function setupRunFromAllConfigsRecursive($config)
+    {
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading all configurations from ".$this->arrFileDetails['config_ini']['file_name']." and it's included INI file references...", \Scooper\C__DISPLAY_ITEM_START__);
+
+        var_dump($config->settings_files);
+
+        var_dump($config);
+        if($config->settings_files && is_object($config->settings_files))
+        {
+            foreach($config->settings_files['ini_path'] as $nextConfigFile)
+            {
+
+                var_dump($nextConfigFile);
+                $iniParser = new IniParser($nextConfigFile);
+                $nextConfig = $iniParser->parse();
+                $this->setupRunFromAllConfigsRecursive($nextConfig);
+            }
+        }
+
+        $this->_setupRunFromConfig_($config);
     }
 
     private function _setupRunFromConfig_($config)
