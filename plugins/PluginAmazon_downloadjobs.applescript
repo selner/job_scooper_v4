@@ -1,6 +1,6 @@
-(*
+ (*
 on test()
-	doRun({"/Users/bryan/Code/data", "Amazon", "amazon-test", "http://www.amazon.jobs/results?jobCategoryIds[]=83&jobCategoryIds[]=68&locationIds[]=226"})
+	doRun({"/Users/bryan/Desktop/2014-08-26_1319_jobs/", "amazon", "amazon-amazon-amazonseattle-pm", " http://www.amazon.jobs/results?jobCategoryIds[]=83&jobCategoryIds[]=68&locationIds[]=226"})
 end test
 
 on run (argv)
@@ -19,15 +19,13 @@ on run (argv)
 	set strFileKey of libDownload to third item of argv as string
 	set strURL of libDownload to fourth item of argv as string
 	
-	set nSecondsDelayForPageLoad of libDownload to 4
+	set nSecondsDelayForPageLoad of libDownload to 5
 	
 	set strJS_ClickNext to ""
 	
 	set param1 of libDownload to "document.getElementsByClassName('pagination')[0].firstChild.nextSibling.nextSibling.nextSibling.nextSibling;"
 	set strJSClickNext_First of libDownload to libDownload's getJS_ClickLink()
 	set strJSClickNext_Others of libDownload to strJSClickNext_First of libDownload
-	
-	--	set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() {  if(document.getElementsByClassName('pagination') == null ||Object.getOwnPropertyNames(document.getElementsByClassName('pagination')[0]).length == 2) { return 1; };  var strItem =  document.getElementsByClassName('pagination')[0].firstChild.nextSibling.nextSibling.nextSibling.textContent; return strItem; }  getMaxPageValue();"
 	
 	set param1 of libDownload to "document.getElementsByClassName('pagination')[0].firstChild.nextSibling.firstChild"
 	set strGetNextPageValue of libDownload to libDownload's getJS_GetNodeValue()
