@@ -40,6 +40,7 @@ class PluginAmazon extends ClassJobsSitePlugin
     protected $siteName = 'Amazon';
     protected $strFilePath_HTMLFileDownloadScript = "PluginAmazon_downloadjobs.applescript";
     protected $flagSettings = C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS_URL_FORMAT_REQUIRED;
+    protected $siteBaseURL = 'http://www.amazon.jobs';
 
     function parseJobsListForPage($objSimpHTML)
     {
@@ -62,7 +63,7 @@ class PluginAmazon extends ClassJobsSitePlugin
                 $titleLink = $tds[1]->find("a");
 
                 $item['job_title'] = $titleLink[0]->plaintext;
-                $item['job_post_url'] = $titleLink[0]->href;
+                $item['job_post_url'] = $this->siteBaseURL . $titleLink[0]->href;
                 $item['company'] = 'Amazon';
 
                 $item['job_site'] = 'Amazon';
