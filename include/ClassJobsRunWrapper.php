@@ -204,10 +204,12 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         //
         // Send the email notification out for the completed job
         //
-        $this->__sendJobCompletedEmail__($strResultText, $strResultHTML, $detailsCSVFile, $detailsHTMLFile);
+        $this->sendJobCompletedEmail($strResultText, $strResultHTML, $detailsCSVFile, $detailsHTMLFile);
 
         $GLOBALS['logger']->logLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
     }
+
+    function getConfig() { return $this->classConfig; }
 
 
     private function _setSearchesForRun_()
@@ -412,7 +414,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     }
 
 
-    private function __sendJobCompletedEmail__($strBodyText = null, $strBodyHTML = null, $detailsFileCSV = null, $detailsFileHTML = null)
+    function sendJobCompletedEmail($strBodyText = null, $strBodyHTML = null, $detailsFileCSV = null, $detailsFileHTML = null)
     {
         if($GLOBALS['OPTS']['skip_notifications'] != 1)
         {
