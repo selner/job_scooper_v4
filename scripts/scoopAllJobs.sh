@@ -15,7 +15,7 @@ if [ "$days_to_run" == "" ]; then     ## No days so go with the defaults
 fi
 
 if [ "$inifile" == "" ]; then     ## No ini file so use Selner's 
-	workingfolder="/Users/bryan/Dropbox/JobSearch-and-Consulting/JobPosts-Tracking/"
+	workingfolder="/Volumes/Dropbox/JobPosts-Tracking/BryanSelner"
 	inifolder=$workingfolder"list_source_to_use"
 	inifilepath=$inifolder"jobs_scooper_config.ini"
 else
@@ -26,8 +26,7 @@ fi
 
 regex_titles_final=$inifolder"list_exclude_titles_regex.csv"
 regex_titles_me=$inifolder"list_exclude_titles_regex-meonly.csv"
-regex_titles_common=/Users/bryan/Code/jobs_scooper/build/common_exclude_titles_regex.csv
-codepath="/Users/bryan/Dropbox/Code/jobs_scooper/main/runJobs.php"
+codepath="/Volumes/Dropbox/code/jobs_scooper/main/runJobs.php"
 now=$(date +"%Y_%m_%d_%H%M")
 endfilebase=$now"_jobs"
 tempfoldername="job_scooper_"$now
@@ -57,11 +56,6 @@ case $OSTYPE in
  #   ;;
 esac
 
-#cat "$regex_titles_me" > "$regex_titles_final" 2>&1 1>"$log"
-#cat "$regex_titles_common" >> "$regex_titles_final" 2>&1 1>"$log"
-#echo $regex_titles_final
-#echo $regex_titles_me
-#echo $regex_titles_common
 
 echo 'Final destination will be ' $filedir 2>&1 1>"$log"
 echo 'Output file will be ' $file 2>&1 1>"$log"
