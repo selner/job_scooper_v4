@@ -19,17 +19,6 @@ define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__ . '/include/ClassJobsSitePluginCommon.php');
 
 
-/**
- * Class PluginExample
- *
- * Add the code to implement the necessary functions and then
- * add a record to SitePlugins.php for that new plugin.  Any search
- * specified with the site name you added will call this new plugin to
- * process the results.
- *
-
- */
-
 class PluginZipRecruiter extends ClassJobsSitePlugin
 {
     protected $siteName = 'ZipRecruiter';
@@ -48,6 +37,7 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
 
     function __construct($strBaseDir = null)
     {
+
         $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_SUPPORTS_PLUS_PREFIX | C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS;
         parent::__construct($strBaseDir);
     }
@@ -171,7 +161,7 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
 
             // get the id and parse it down to <name>-<identifier>
             $strExternalJobID = $node->attr['id'];
-            $fMatch = preg_match('/quiz-card-(\w{1,}-\w{1,})/i', $strExternalJobID, $arrExternalIDParts );
+            $fMatch = preg_match('/quiz-card-(\w{1,}-?\w{0,}-?\w{0,})/i', $strExternalJobID, $arrExternalIDParts );
             assert($fMatch == true);
             $strExternalJobID = $arrExternalIDParts[1];
 
