@@ -1,4 +1,4 @@
-
+(*
 on test()
 	doRun({"/Users/bryan/Code/data", "Amazon", "amazon-test", "http://www.amazon.jobs/results?jobCategoryIds[]=83&jobCategoryIds[]=68&locationIds[]=226"})
 end test
@@ -8,10 +8,9 @@ on run (argv)
 end run
 
 on doRun(argv)
-	
-	(*
-on run (argv)
 *)
+	
+on run (argv)
 	
 	set libDownload to init_library()
 	
