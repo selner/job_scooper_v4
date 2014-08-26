@@ -15,7 +15,7 @@
  * under the License.
  */
 
-define('__ROOT__', dirname(dirname(__FILE__)));
+if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/SitePlugins.php');
 
 
@@ -93,7 +93,8 @@ class ClassConfig extends ClassJobsSitePlugin
         foreach($GLOBALS['DATA']['site_plugins']  as $site)
         {
             $fIsIncludedInRun = is_IncludeSite($site['name']);
-            $GLOBALS['DATA']['site_plugins'][$site['name']]['include_in_run'] = $fIsIncludedInRun;
+            if(isset($GLOBALS['DATA']['site_plugins'][$site['name']]) && isset($GLOBALS['DATA']['site_plugins'][$site['name']]['include_in_run']))
+                   $GLOBALS['DATA']['site_plugins'][$site['name']]['include_in_run'] = $fIsIncludedInRun;
 
             // Initialize the config settings for the site list using the options set by the user
             // on the command line
@@ -119,7 +120,8 @@ class ClassConfig extends ClassJobsSitePlugin
 
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration file details from " . $this->arrFileDetails['config_ini']['full_file_path'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
             $iniParser = new IniParser($this->arrFileDetails['config_ini']['full_file_path']);
-            $confTemp = $iniParser->parse();
+            $confTemp = $iniParser->parse($this->arrFileDetails['config_ini']['full_file_path']);
+            $iniParser = null;
             $this->setupRunFromAllConfigsRecursive($confTemp);
         }
 
@@ -191,7 +193,8 @@ class ClassConfig extends ClassJobsSitePlugin
             {
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configurations from ".$nextConfigFile." and it's included INI file references...", \Scooper\C__DISPLAY_ITEM_START__);
                 $iniParser = new IniParser($nextConfigFile);
-                $nextConfig = $iniParser->parse();
+                $nextConfig = $iniParser->parse($nextConfigFile);
+                $iniParser = null;
                 $this->setupRunFromAllConfigsRecursive($nextConfig);
             }
         }

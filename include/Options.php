@@ -17,7 +17,7 @@
 //
 // If installed as part of the package, uses Klogger v0.1 version (http://codefury.net/projects/klogger/)
 //
-define('__ROOT__', dirname(dirname(__FILE__)));
+if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/lib/pharse.php');
 require_once(__ROOT__.'/lib/Linkify.php');
 
@@ -122,29 +122,30 @@ function is_IncludeSite($strName)
     $strGivenKey = $strIncludeSiteKey."_given";
     $ret = false;
 
-    if($GLOBALS['OPTS'][$strGivenKey] == true)
-    {
-       switch($GLOBALS['OPTS'][$strIncludeSiteKey])
-       {
-           case 0:
-               $GLOBALS['OPTS'][$strIncludeSiteKey] = false;
-                break;
+    if(isset($GLOBALS['OPTS'][$strGivenKey]))
+        if ($GLOBALS['OPTS'][$strGivenKey] == true)
+        {
+           switch($GLOBALS['OPTS'][$strIncludeSiteKey])
+           {
+               case 0:
+                   $GLOBALS['OPTS'][$strIncludeSiteKey] = false;
+                    break;
 
-           case -1:
-           case 1:
-           default:
-           $GLOBALS['OPTS'][$strIncludeSiteKey] = true;
-           break;
+               case -1:
+               case 1:
+               default:
+               $GLOBALS['OPTS'][$strIncludeSiteKey] = true;
+               break;
 
-       }
-       $ret = $GLOBALS['OPTS'][$strIncludeSiteKey];
-    }
-    elseif($GLOBALS['OPTS']['include_all_given'] == true)
-    {
-        $GLOBALS['OPTS'][$strGivenKey] = true;
-        $GLOBALS['OPTS'][$strIncludeSiteKey] = true;
-        $ret = $GLOBALS['OPTS'][$strIncludeSiteKey];
-    }
+           }
+           $ret = $GLOBALS['OPTS'][$strIncludeSiteKey];
+        }
+        elseif($GLOBALS['OPTS']['include_all_given'] == true)
+        {
+            $GLOBALS['OPTS'][$strGivenKey] = true;
+            $GLOBALS['OPTS'][$strIncludeSiteKey] = true;
+            $ret = $GLOBALS['OPTS'][$strIncludeSiteKey];
+        }
 
 
 
