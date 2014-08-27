@@ -204,7 +204,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
     private function setupRunFromAllConfigsRecursive($configFilePath, $config)
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration from ".$configFilePath." and it's included INI file references...", \Scooper\C__DISPLAY_ITEM_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration from ".$configFilePath." and it's included INI file references...", \Scooper\C__DISPLAY_SECTION_START__);
 
         if(isset($config->settings_files))
         {
@@ -216,7 +216,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
             foreach($settingFiles['ini_path'] as $nextConfigFile)
             {
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configurations from ".$nextConfigFile." and it's included INI file references...", \Scooper\C__DISPLAY_ITEM_START__);
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Child INI found: ".$nextConfigFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 $iniParser = new IniParser($nextConfigFile);
                 $nextConfig = $iniParser->parse($nextConfigFile);
                 $iniParser = null;
@@ -225,11 +225,11 @@ class ClassConfig extends ClassJobsSitePlugin
         }
 
         $this->_setupRunFromConfig_($config);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Settings loaded for: ".$configFilePath, \Scooper\C__DISPLAY_SUMMARY__);
     }
 
     private function _setupRunFromConfig_($config)
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Reading configuration options from ".$this->arrFileDetails['config_ini']['full_file_path']."...", \Scooper\C__DISPLAY_ITEM_START__);
         if(isset($config->output))
         {
             if(isset($config->output->folder))
