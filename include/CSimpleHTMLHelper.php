@@ -36,7 +36,7 @@ class CSimpleHTMLHelper
         $this->nodeObj = $nodeObject;
     }
 
-    function get($strNodePath, $retIndex, $fRequired = true)
+    function get($strNodePath, $retIndex = null, $fRequired = true)
     {
         $flags = C__SIMPLEHTML_FOUND_RETURN_NODE;
         if($fRequired == true)  $flags = $flags | C__SIMPLEHTML_THROWEXCEPTION ;
@@ -77,75 +77,89 @@ class CSimpleHTMLHelper
 
         try
         {
-            if(!isset($retIndex) || !isset($strNodePath))
+            if(isset($strNodePath) && strlen($strNodePath) > 0)
             {
-                throw new ErrorException("Failed to set required object, node path and node index.");
+                $subNode = $this->nodeObj->find($strNodePath);
+            }
+            else
+            {
+                $subNode = $this->nodeObj;
             }
 
-            $subNode = $this->nodeObj->find($strNodePath);
             if(!isset($subNode))
             {
                 throw new ErrorException("Failed to find expected node path: " & $strNodePath);
             }
 
-            if(isset($retIndex) && !isset($subNode[$retIndex]))
-            {
-                throw new ErrorException("Node path (" . $strNodePath .")[" . $retIndex . "] was not found.");
-            }
 
-            if(isVerbose())
-            {
-                print ("Node path(" . $strNodePath .")[index=".$retIndex."] => " .PHP_EOL);
-                \SimpleHtmlDom\dump_html_tree($subNode[$retIndex]);
-                print ("<= end " .PHP_EOL);
-            }
 
             if(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_NODE ))
             {
-                $ret = $subNode[$retIndex];
+                $ret = $subNode;
             }
-            elseif(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_PROPERTY ))
+            else
             {
-                if(!isset($optPropOrAttrName) || !isset($subNode[$retIndex]->$optPropOrAttrName))
+                if(isset($retIndex) && isset($subNode[$retIndex]))
                 {
-                    throw new ErrorException("Property '" . $optPropOrAttrName . "' for node (" . $strNodePath .")[" . $retIndex . "] was not found.");
+                    $subNodeElement = $subNode[$retIndex];
+                }
+                elseif(isset($retIndex) && !isset($subNode[$retIndex]))
+                {
+                    throw new ErrorException("Node element (" . $strNodePath .")[" . $retIndex . "] was not found.");
                 }
                 else
                 {
-                    $ret = $subNode[$retIndex]->$optPropOrAttrName;
+                    $subNodeElement = $subNode;
                 }
-            }
-            elseif(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_ATTRIB ))
-            {
-                if(!isset($optPropOrAttrName) || !isset($subNode[$retIndex]->attr[$optPropOrAttrName]))
+                if(isVerbose())
                 {
-                    throw new ErrorException("Attribute '" . $optPropOrAttrName . "' for node (" . $strNodePath .")[" . $retIndex . "] was not found.");
+                    print ("Node path(" . (isset($strNodePath)?$strNodePath :"null").")[index=".(isset($retIndex)?$retIndex:"null")."] => " .PHP_EOL);
+                    \SimpleHtmlDom\dump_html_tree($subNodeElement);
+                    print ("<= end " .PHP_EOL);
                 }
-                else
-                {
-                    $ret = $subNode[$retIndex]->attr[$optPropOrAttrName];
-                }
-            }
-            elseif(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_ALLCHILDREN))
-            {
-                $ret = combineTextAllChildren($subNode[$retIndex], true);
-                if(!isset($ret) && \Scooper\isBitFlagSet($flags, C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR ))
-                {
-                    $ret = "";
-                }
-            }
-            elseif(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_PLAINTEXT ))
-            {
-                if(!isset($subNode[$retIndex]->plaintext))
-                {
-                    throw new ErrorException("Plaintext value for node (" . $strNodePath .")[" . $retIndex . "] was not found.");
-                }
-                else
-                {
-                    $ret = $subNode[$retIndex]->plaintext;
-                }
-            }
 
+                if(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_PROPERTY ))
+                {
+                    if(!isset($optPropOrAttrName) || !isset($subNodeElement->$optPropOrAttrName))
+                    {
+                        throw new ErrorException("Property '" . $optPropOrAttrName . "' for node (" . $strNodePath .")[" . $retIndex . "] was not found.");
+                    }
+                    else
+                    {
+                        $ret = $subNodeElement->$optPropOrAttrName;
+                    }
+                }
+                elseif(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_ATTRIB ))
+                {
+                    if(!isset($optPropOrAttrName) || !isset($subNodeElement->attr[$optPropOrAttrName]))
+                    {
+                        throw new ErrorException("Attribute '" . $optPropOrAttrName . "' for node (" . $strNodePath .")[" . $retIndex . "] was not found.");
+                    }
+                    else
+                    {
+                        $ret = $subNodeElement->attr[$optPropOrAttrName];
+                    }
+                }
+                elseif(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_ALLCHILDREN))
+                {
+                    $ret = combineTextAllChildren($subNodeElement, true);
+                    if(!isset($ret) && \Scooper\isBitFlagSet($flags, C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR ))
+                    {
+                        $ret = "";
+                    }
+                }
+                elseif(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_PLAINTEXT ))
+                {
+                    if(!isset($subNodeElement->plaintext))
+                    {
+                        throw new ErrorException("Plaintext value for node (" . $strNodePath .")[" . $retIndex . "] was not found.");
+                    }
+                    else
+                    {
+                        $ret = $subNodeElement->plaintext;
+                    }
+                }
+            }
         } catch (Exception $ex) {
             $strErr = $ex->getMessage();
             if(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_THROWEXCEPTION ))
