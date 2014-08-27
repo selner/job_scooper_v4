@@ -46,11 +46,20 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
 
         if(count($this->arrSearchesToReturn) >= 0)
         {
-            foreach($this->arrSearchesToReturn as $search)
+
+            $arrUniq = $this->arrSearchesToReturn;
+//            // BUGBUG:  TESTING THIS OUT
+//            $arrUniq = array_unique_multidimensional($this->arrSearchesToReturn);
+//            $GLOBALS['logger']->logLine("Compacted " . (count($this->arrSearchesToReturn) - count($arrUniq)) . " searches because they were duplicates...", \Scooper\C__DISPLAY_NORMAL__);
+//
+//            foreach($this->arrSearchesToReturn as $search)
+            foreach($arrUniq as $search)
             {
                 $strIncludeKey = 'include_'.strtolower($search['site_name']);
 
-                if($GLOBALS['OPTS'][$strIncludeKey] == null || $GLOBALS['OPTS'][$strIncludeKey] == false)
+                $valInclude = \Scooper\get_PharseOptionValue($strIncludeKey);
+
+                if(!isset($valInclude) || $valInclude == 0)
                 {
                     $GLOBALS['logger']->logLine($search['site_name'] . " excluded, so skipping its '" . $search['name'] . "' search.", \Scooper\C__DISPLAY_ITEM_START__);
 
