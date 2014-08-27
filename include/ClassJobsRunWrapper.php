@@ -420,7 +420,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     function sendJobCompletedEmail($strBodyText = null, $strBodyHTML = null, $detailsFileCSV = null, $detailsFileHTML = null)
     {
-        if($GLOBALS['OPTS']['skip_notifications'] != 1)
+        if(isset($GLOBALS['OPTS']['skip_notifications']) && $GLOBALS['OPTS']['skip_notifications'] != 1)
         {
             $ret = $this->__sendJobCompletedEmail_PHP__($strBodyText, $strBodyHTML, $detailsFileCSV, $detailsFileHTML);
             if($ret != true)

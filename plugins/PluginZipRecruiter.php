@@ -142,22 +142,26 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
 
 
             $titleNode = $node->find("h4[class='font14 fBold mb2 font13Phone']");
-            $item['job_title'] = $titleNode[0]->plaintext;
+            if(isset($titleNode) && isset($titleNode[0]))
+            {
+                $item['job_title'] = $titleNode[0]->plaintext;
 
-            // Removes " NEW!" from the job title.  ZipRecruiter tends to occasionally
-            // have that appended which then fails de-duplication. (Fixes issue #45)
-            $item['job_title'] = str_ireplace(" NEW!", "", $item['job_title']);
-
-
-
-            $titleLink = $node->find("a[class='clickable_target']")[0];
-            $item['job_post_url'] = $titleLink->href;
-
+                // Removes " NEW!" from the job title.  ZipRecruiter tends to occasionally
+                // have that appended which then fails de-duplication. (Fixes issue #45)
+                $item['job_title'] = str_ireplace(" NEW!", "", $item['job_title']);
+            }
 
             // If we couldn't parse the job title, it's not really a job
             // listing so just continue to the next one
             //
             if($item['job_title'] == '') continue;
+
+            $titleLink = $node->find("a[class='clickable_target']");
+            if(isset($titleLink) && isset($titleLink[0]))
+            {
+                $item['job_post_url'] = $titleLink[0]->href;
+            }
+
 
             // get the id and parse it down to <name>-<identifier>
             $strExternalJobID = $node->attr['id'];
@@ -174,32 +178,38 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
             $item['job_id'] = $strExternalJobID;
 
             $companyNode = $node->find("p[class='font12Phone clearLeft']");
-            $arrCompanyParts = explode(" - ", $companyNode[0]->plaintext);
-            $company = str_ireplace("at ", "", $arrCompanyParts[0]);
-            $item['company'] = $company;
-            $item['location'] = $arrCompanyParts[1];;
-
+            if(isset($companyNode) && isset($companyNode[0]))
+            {
+                $arrCompanyParts = explode(" - ", $companyNode[0]->plaintext);
+                $company = str_ireplace("at ", "", $arrCompanyParts[0]);
+                $item['company'] = $company;
+                $item['location'] = $arrCompanyParts[1];
+            }
 
             $jobDetailsNode = $node->find("p[class='greenText font12 font11Phone'] span");
-            $strJobDetails = \Scooper\strScrub($jobDetailsNode[0]->plaintext, SIMPLE_TEXT_CLEANUP);
-            $arrJobDetailsParts = explode(" ", $strJobDetails);
+            if(isset($jobDetailsNode) && isset($jobDetailsNode[0]))
+            {
+                $strJobDetails = \Scooper\strScrub($jobDetailsNode[0]->plaintext, SIMPLE_TEXT_CLEANUP);
+                $arrJobDetailsParts = explode(" ", $strJobDetails);
 
-            $item['job_site_category'] = $arrJobDetailsParts[5];
-            if(is_numeric($arrJobDetailsParts[1]) )
-            {
-                $daysToSubtract = $arrJobDetailsParts[1];
+                $item['job_site_category'] = $arrJobDetailsParts[5];
+                if(is_numeric($arrJobDetailsParts[1]) )
+                {
+                    $daysToSubtract = $arrJobDetailsParts[1];
+                }
+                elseif(strcasecmp($arrJobDetailsParts[1], "yesterday") == 0)
+                {
+                    $daysToSubtract = 1;
+                }
+                else
+                {
+                    $daysToSubtract = 0;
+                }
+
+                $date = new DateTime();
+                $date->modify("-".$daysToSubtract." days");
+                $item['job_site_date'] = $date->format('Y-m-d');
             }
-            elseif(strcasecmp($arrJobDetailsParts[1], "yesterday") == 0)
-            {
-                $daysToSubtract = 1;
-            }
-            else
-            {
-                $daysToSubtract = 0;
-            }
-            $date = new DateTime();
-            $date->modify("-".$daysToSubtract." days");
-            $item['job_site_date'] = $date->format('Y-m-d');
 
             //
             // Call normalizeItem to standardize the resulting listing result

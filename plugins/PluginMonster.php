@@ -91,10 +91,8 @@ class PluginMonster extends ClassJobsSitePlugin
             $item = $this->getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
 
-            $titleLink = $node->find("")[0];
-            $subNode = $node->find(("div div a"));
-            if(isset($subNode) && isset($subNode[0])) $titleLink = $subNode[0]->plaintext;
-            $item['job_title'] = $titleLink->plaintext;
+            $subNode = $node->find("div div a");
+            if(isset($subNode) && isset($subNode[0])) $item['job_title'] = $subNode[0]->plaintext;
 
 
             $subNode = $node->find(("div[class='socialContainer']"));
@@ -102,13 +100,14 @@ class PluginMonster extends ClassJobsSitePlugin
             if(isset($objDiv) && isset($objDiv[0]) && isset($objDiv[0]->attr) && isset($objDiv[0]->attr['data-jobid']))     $item['job_id'] = $objDiv[0]->attr['data-jobid'];
 
 
-            $testLink = $objSimpHTML->find("a[id='ctl00_ctl00_ctl00_body_body_wacCenterStage_ctl03_rptResults_ctl00_linkJobTitle']")[0];
-            $testLink = $objSimpHTML->find("a[id='".$titleLink->attr['id']."']");
 
             if($item['job_title'] == '') continue;
 
-            $item['company'] = $node->find("a[class='fnt4']")[0]->plaintext;
-            $item['location'] = \Scooper\strScrub(str_replace("Location:", "", $node->find("div[class='jobLocationSingleLine']")[0]->plaintext));
+            $subNode = $node->find("a[class='fnt4']");
+            if(isset($subNode) && isset($subNode[0])) $item['company'] = $subNode[0]->plaintext;
+
+            $subNode = $node->find("div[class='jobLocationSingleLine']");
+            if(isset($subNode) && isset($subNode[0])) $item['location'] = str_replace("Location:", "", $subNode[0]->plaintext);
 
             $strScrubTitle = \Scooper\strip_punctuation(html_entity_decode($item['job_title']));
             $strLoc= \Scooper\strip_punctuation(html_entity_decode($item['location']));
@@ -116,7 +115,9 @@ class PluginMonster extends ClassJobsSitePlugin
             $item['job_post_url'] = $this->siteBaseURL . "/" . str_replace(" ", "-", $strScrubTitle )."-".str_replace(" ", "-",$strLoc)."-".$item['job_id'].".aspx";
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
-            $item['job_site_date'] = $node->find("span[class='accessibilityOnly']")[0]->plaintext;
+            $subNode = $node->find("span[class='accessibilityOnly']");
+            if(isset($subNode) && isset($subNode[0])) $item['job_site_date'] = $subNode[0]->plaintext;
+
             $ret[] = $this->normalizeItem($item);
         }
 
