@@ -84,7 +84,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
                 {
                     $GLOBALS['logger']->logLine('ERROR:  Unable to load the class for ' .$classSearches['site_name'] . '. Skipping it\'s searches and continuing with any others.', \Scooper\C__DISPLAY_ERROR__);
                     $GLOBALS['logger']->logLine('ERROR:  Search failure reason:  '.$classError->getMessage(), \Scooper\C__DISPLAY_ERROR__);
-                    if($GLOBALS['OPTS']['DEBUG']) { throw $classError; }
+                    if(isDebug()) { throw $classError; }
                 }
             }
         }
