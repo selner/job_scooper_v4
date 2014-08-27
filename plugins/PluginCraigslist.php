@@ -56,11 +56,19 @@ class PluginCraigslist  extends ClassJobsSitePlugin
 
     function parseTotalResultsCount($objSimpHTML)
     {
-        $pageDiv= $objSimpHTML->find('span[class="pagenum"]');
-        $pageDiv = $pageDiv[0];
-        $pageText = $pageDiv->plaintext;
+        $nodeHelper = new CSimpleHTMLHelper($objSimpHTML);
+
+        $pageText = $nodeHelper->getText("span[class='pagenum']", 0, false);
         $arrItemItems = explode(" ", trim($pageText));
-        return $arrItemItems[4];
+        if(!isset($arrItemItems) || !is_array($arrItemItems) || !(count($arrItemItems) >=5))
+        {
+            $GLOBALS['logger']->logLine("Unable to find count of listings for search on " . $this->siteName, \Scooper\C__DISPLAY_WARNING__);
+            return 0;
+        }
+        else
+        {
+            return $arrItemItems[4];
+        }
     }
 
 
