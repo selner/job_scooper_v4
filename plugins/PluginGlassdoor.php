@@ -71,13 +71,19 @@ class PluginGlassdoor extends ClassJobsSitePlugin
 
     function parseTotalResultsCount($objSimpHTML)
     {
-        $resultsSection= $objSimpHTML->find("div[id='MainCol'] h1[class='padTop10']");
+        $resultsSection= $objSimpHTML->find("div[class='results cell padLt'] h1[class='noMargTop']");
+        if(isset($resultsSection) && isset($resultsSection[0]))
+        {
+            $totalItemsText = $resultsSection[0]->plaintext;
+            $arrItemItems = explode(" ", trim($totalItemsText));
+            $strTotalItemsCount = $arrItemItems[0];
 
-        $totalItemsText = $resultsSection[0]->plaintext;
-        $arrItemItems = explode(" ", trim($totalItemsText));
-        $strTotalItemsCount = $arrItemItems[0];
-
-        return str_replace(",", "", $strTotalItemsCount);
+            return str_replace(",", "", $strTotalItemsCount);
+        }
+        else
+        {
+            throw new ErrorException("Unable to parse results count for " . $this->siteName);
+        }
     }
 
     function parseJobsListForPage($objSimpHTML)
@@ -91,24 +97,22 @@ class PluginGlassdoor extends ClassJobsSitePlugin
         {
             $item = $this->getEmptyJobListingRecord();
 
-            $jobLink = $node->find("a[class='jobLink']")[1];
-            $item['job_title'] = combineTextAllChildren($jobLink);
-
-
-
-            $item['job_post_url'] = $this->siteBaseURL . $jobLink->href;
+            $nodeHelper = new CSimpleHTMLHelper($node);
+            $item['job_post_url'] = $nodeHelper->getProperty("a[class='jobLink']", 0, "href", false );
+            $item['job_title'] = $nodeHelper->getText("a[class='jobLink']", 1, false );
+            if(strlen($item['job_title']) <= 0) continue;
 
             // <a href="/partner/jobListing.htm?pos=115&amp;ao=29933&amp;s=58&amp;guid=000001453fb833deb3e300823643def8&amp;src=GD_JOB_AD&amp;t=SR&amp;extid=1&amp;exst=OL&amp;ist=&amp;ast=OL&amp;vt=w&amp;cb=1396933407969&amp;jobListingId=1008408496" rel="nofollow" class="jobLink" data-ja-clk="1" data-gd-view="1" data-ev-a="B-S"><tt class="notranslate"><strong>Director, Product</strong> Management</tt></a>
-            $fIDMatch = preg_match("/jobListingId=([0-9]+)/", $jobLink->href, $arrIDMatches);
+            $fIDMatch = preg_match("/jobListingId=([0-9]+)/", $item['job_post_url'], $arrIDMatches);
             if($fIDMatch) { $item['job_id'] = str_replace("jobListingId=", "", $arrIDMatches[0]); }
 
             $item['date_pulled'] = \Scooper\getTodayAsString();
             $item['job_site'] = $this->siteName;
-            $item['company']= trim($node->find("span[class='employerName']")[0]->plaintext);
-            $item['location'] =trim( $node->find("span[class='location'] span span span")[0]->plaintext);
+            $item['company'] = $nodeHelper->getText("span[class='employerName']", 0, false );
+            $item['location'] = $nodeHelper->getText("span[class='location'] span span span", 0, false );
 
-            $item['job_site_date'] =trim( $node->find("div[class='minor nowrap']")[0]->plaintext);
-            if(strlen($item['job_site_date']) == 0)  { $item['job_site_date'] = "N/A (likely sponsored result)";}
+            $item['job_site_date'] = $nodeHelper->getText("div[class='logo floatLt'] div[class='minor']", 0, false );
+            if(strlen($item['job_site_date']) == 0)  { $item['job_site_date'] = "n/a (sponsored ad)";}
 
 
             $ret[] = $this->normalizeItem($item);
