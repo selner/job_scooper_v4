@@ -192,7 +192,7 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
                 $strJobDetails = \Scooper\strScrub($jobDetailsNode[0]->plaintext, SIMPLE_TEXT_CLEANUP);
                 $arrJobDetailsParts = explode(" ", $strJobDetails);
 
-                $item['job_site_category'] = $arrJobDetailsParts[5];
+                $item['job_site_category'] = $arrJobDetailsParts[count($arrJobDetailsParts) - 1];
                 if(is_numeric($arrJobDetailsParts[1]) )
                 {
                     $daysToSubtract = $arrJobDetailsParts[1];
@@ -201,14 +201,21 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
                 {
                     $daysToSubtract = 1;
                 }
-                else
+                elseif(strcasecmp($arrJobDetailsParts[1], "today") == 0)
                 {
                     $daysToSubtract = 0;
                 }
+                else
+                {
+                    $daysToSubtract = null;
+                }
 
-                $date = new DateTime();
-                $date->modify("-".$daysToSubtract." days");
-                $item['job_site_date'] = $date->format('Y-m-d');
+                if(isset($daysToSubtract))
+                {
+                    $date = new DateTime();
+                    $date->modify("-".$daysToSubtract." days");
+                    $item['job_site_date'] = $date->format('Y-m-d');
+                }
             }
 
             //
