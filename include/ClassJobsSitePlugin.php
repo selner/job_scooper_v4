@@ -315,7 +315,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             {
                 $arrCollapsedSearches[] = $search;
             }
-
             else
             {
                 // Otherwise, if we haven't gotten details together yet for any collapsed searches,
@@ -361,6 +360,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         // set the internal list of searches to be the newly collapsed set
         //
         $this->arrSearchesToReturn = $arrCollapsedSearches;
+        $GLOBALS['logger']->logLine($this->siteName . " has collapsed into " . count($arrCollapsedSearches). " search(es).", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
     }
 
@@ -677,6 +677,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['name']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $class = new \Scooper\ScooperDataAPIWrapper();
+        $class->setVerbose(isVerbose());
         $ret = $class->cURL($strURL, null, 'GET', 'text/xml; charset=UTF-8');
         $xmlResult = simplexml_load_string($ret['output']);
 
@@ -715,6 +716,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
 
                 $class = new \Scooper\ScooperDataAPIWrapper();
+                $class->setVerbose(isVerbose());
                 $ret = $class->cURL($strURL,'' , 'GET', 'application/rss+xml');
 
                 $xmlResult = simplexml_load_string($ret['output']);
