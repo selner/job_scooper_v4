@@ -152,23 +152,61 @@ function includeJobInFilteredList($var)
 
 }
 
+function getDateForDaysAgo($strDaysAgo)
+{
+    $retDate = null;
 
+    if(!isset($strDaysAgo) || strlen($strDaysAgo) <= 0) return $retDate;
 
+    if(is_numeric($strDaysAgo) )
+    {
+        $daysToSubtract = $strDaysAgo;
+    }
+    else
+    {
+        $strDaysAgo = \Scooper\strScrub($strDaysAgo, SIMPLE_TEXT_CLEANUP | LOWERCASE);
+        if(strcasecmp($strDaysAgo, "yesterday") == 0)
+        {
+            $daysToSubtract = 1;
+        }
+        elseif(strcasecmp($strDaysAgo, "today") == 0)
+        {
+            $daysToSubtract = 0;
+        }
+        else
+        {
+            $daysToSubtract = null;
+        }
+
+    }
+
+    if(isset($daysToSubtract))
+    {
+        $date = new DateTime();
+        $date->modify("-".$daysToSubtract." days");
+        $retDate = $date->format('Y-m-d');
+    }
+
+    return $retDate;
+}
 function combineTextAllChildren($node, $fRecursed = false)
 {
 
     $retStr = "";
     if($node->hasChildNodes())
     {
-        $retStr = combineTextAllChildren($node->firstChild(), true);
+        $retStr = \Scooper\strScrub($node->plaintext . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE  );
+        foreach($node->childNodes() as $child)
+        {
+            $retStr = $retStr . " " . combineTextAllChildren($child, true);
+        }
     }
-
-    if($node->plaintext != null && $fRecursed == false)
+    elseif(isset($node->plaintext) && $fRecursed == false)
     {
         $retStr = \Scooper\strScrub($node->plaintext . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE  );
     }
-    return $retStr;
 
+    return $retStr;
 
 }
 
