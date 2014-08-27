@@ -75,32 +75,31 @@ class PluginLinkUp extends ClassJobsSitePlugin
         $ret = null;
 
 
-        $nodesJobs= $objSimpHTML->find('div[class="listing"]');
+        $nodesJobs= $objSimpHTML->find('div[class="listing js-listing"]');
 
 
         foreach($nodesJobs as $node)
         {
             $item = $this->getEmptyJobListingRecord();
-            $item['job_site'] = $this->siteName;
+            $nodeHelper = new CSimpleHTMLHelper($node);
 
-            $titleLink = $node->find("a[class='listing-title']")[0];
-
-            $item['job_title'] = $titleLink->firstChild()->plaintext;
-            $item['job_post_url'] = $titleLink->href;
+            $item['job_title'] = $nodeHelper->getAllChildrenText("a[class='listing-title']", 0, false);
             if($item['job_title'] == '') continue;
 
-            $item['company'] = $node->find("span[class='listing-company']")[0]->plaintext;
+            $item['job_site'] = $this->siteName;
+            $item['job_post_url'] = $nodeHelper->getProperty("a[class='listing-title']", 0, "href", false );
+            $item['company'] = $nodeHelper->getText("span[class='listing-company']", 0, false );
 
 
-            $item['job_id'] = $node->attr['data-hash'];
-            $item['location'] = trim($node->find("span[class='listing-location'] span")[0]->plaintext) . "-" .
-                    trim($node->find("span[class='listing-location'] span")[1]->plaintext);
+            $item['job_id'] = $nodeHelper->getAttribute(null, null, "data-hash", false );
+            $item['location'] = $nodeHelper->getText("span[class='listing-location'] span", 0, false ) . "-" . $nodeHelper->getText("span[class='listing-location'] span", 1, false );
 
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
+            $item['job_site_category'] = $nodeHelper->getText("span[class='listing-tag']", 0, false );
+            $dateText = $nodeHelper->getText("span[class='listing-date']", 0, false );
+            $item['job_site_date'] = getDateForDaysAgo($dateText);
 
-            $item['job_site_category'] = $node->find("span[class='listing-tag']")[0]->plaintext;
-            $item['job_site_date'] = $node->find("span[class='listing-date']")[0]->plaintext;
             $ret[] = $this->normalizeItem($item);
 
         }
