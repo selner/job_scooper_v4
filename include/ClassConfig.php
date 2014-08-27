@@ -229,9 +229,9 @@ class ClassConfig extends ClassJobsSitePlugin
             foreach($config->inputfiles as $iniInputFile)
             {
                 $strFileName = "ERROR-UNKNOWN";
-                if(isset($iniInputFile['path']) && strlen($iniInputFile['path']) <= 0)
+                if(isset($iniInputFile['path']) && strlen($iniInputFile['path']) > 0)
                     { $strFileName = $iniInputFile['path']; }
-                elseif(isset($iniInputFile['filename']) && strlen($iniInputFile['filename']) <= 0)
+                elseif(isset($iniInputFile['filename']) && strlen($iniInputFile['filename']) > 0)
                      $strFileName = $iniInputFile['filename'];
 
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Processing input file '" . $strFileName. "' with type of '". $iniInputFile['type'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
