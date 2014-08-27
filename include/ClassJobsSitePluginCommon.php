@@ -747,7 +747,7 @@ class ClassJobsSitePluginCommon
 
         $strHTML = fread($fp, JOBS_SCOOPER_MAX_FILE_SIZE);
         $dom = new SimpleHtmlDom\simple_html_dom(null, null, true, null, null, null, null);
-        $objSimpleHTML = $dom->load($strHTML, $lowercase, $stripRN);
+        $objSimpleHTML = $dom->load($strHTML);
         fclose($fp);
 
         return $objSimpleHTML;
