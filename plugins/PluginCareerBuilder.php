@@ -92,7 +92,7 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
         foreach($nodesJobs as $node)
         {
 
-            if(strcasecmp($node->attr['class'], "jl_even_row prefRow") != 0 &&
+            if(isset($node->attr) && isset($node->attr['class']) && strcasecmp($node->attr['class'], "jl_even_row prefRow") != 0 &&
                 strcasecmp($node->attr['class'], "jl_odd_row prefRow") != 0)
             {
                 continue;
@@ -103,9 +103,11 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
 
             $titleLink = $node->find("a[class='jt prefTitle']");
 
-
-            $item['job_title'] = $titleLink[0]->plaintext;
-            $item['job_post_url'] = $titleLink[0]->href;
+            if(isset($titleLink) && isset($titleLink[0]))
+            {
+                $item['job_title'] = $titleLink[0]->plaintext;
+                $item['job_post_url'] = $titleLink[0]->href;
+            }
             if($item['job_title'] == '') continue;
 
             $arrURLParts = explode("&amp;", $item['job_post_url']);
@@ -120,17 +122,22 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
             }
 
 
-            $item['company'] = $node->find("a[class='prefCompany']")[0]->plaintext;
+            $subNode = $node->find("a[class='prefCompany']");
+            if(isset($subNode) && isset($subNode[0])) $item['company'] = $subNode[0]->plaintext;
             if(!isset($item['company']))
             {
-                $item['company'] = $node->find("span[class='prefCompany']")[0]->plaintext;
+                $subNode = $node->find("span[class='prefCompany']");
+                if(isset($subNode) && isset($subNode[0])) $item['company'] = $subNode[0]->plaintext;
             }
 
-            $item['location'] = \Scooper\strScrub($node->find("div[class='jl_col4_div']")[0]->plaintext);
+            $subNode = $node->find("div[class='jl_col4_div']");
+            if(isset($subNode) && isset($subNode[0])) $item['location'] = $subNode[0]->plaintext;
 
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
-            $item['job_site_date'] = \Scooper\strScrub($node->find("TD[class='jl_rslt_posted_cell'] span")[0]->plaintext,DEFAULT_SCRUB );
+            $subNode = $node->find("TD[class='jl_rslt_posted_cell'] span");
+            if(isset($subNode) && isset($subNode[0])) $item['job_site_date'] = $subNode[0]->plaintext;
+
             $ret[] = $this->normalizeItem($item);
         }
 
