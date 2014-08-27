@@ -323,11 +323,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 {
                     $searchCollapsedDetails = $this->cloneSearchDetailsRecordExceptFor($search, array());
                     $searchCollapsedDetails['key'] = $this->siteName . "-collapsed-search";
-                    $searchCollapsedDetails['name'] = "Collapsed " . $search['name'];
-                    $searchCollapsedDetails['site_name'] = $this->siteName;
-                    $searchCollapsedDetails['base_url_format'] = $search['base_url_format'];
-                    $searchCollapsedDetails['keyword_set'] = $search['keyword_set'];
-                    $searchCollapsedDetails['user_setting_flags'] = $search['user_setting_flags'];
+                    $searchCollapsedDetails['name'] = "collapsed-" . $search['name'];
                     $this->_setKeywordStringsForSearch_($searchCollapsedDetails);
                     $this->_finalizeSearch_($tempSearch);
                 }
@@ -361,6 +357,21 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         //
         $this->arrSearchesToReturn = $arrCollapsedSearches;
         $GLOBALS['logger']->logLine($this->siteName . " has collapsed into " . count($arrCollapsedSearches). " search(es).", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+
+        //
+        //BUGBUG Hack Fix for https://github.com/selner/jobs_scooper/issues/69
+        //
+        foreach($arrCollapsedSearches as $search)
+        {
+            $tempArrListofSearches[] = $this->cloneSearchDetailsRecordExceptFor($search, array('key', 'name'));
+        }
+        $arrUniqSearches = array_unique_multidimensional($tempArrListofSearches);
+        if(count($arrUniqSearches) != count($arrCollapsedSearches))
+        {
+            $this->arrSearchesToReturn = $arrUniqSearches;
+            $GLOBALS['logger']->logLine($this->siteName . " had an incorrect duplicate search, so re-collapsed into " . count($arrUniqSearches). " search(es).", \Scooper\C__DISPLAY_WARNING__);
+        }
 
     }
 
