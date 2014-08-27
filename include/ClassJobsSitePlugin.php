@@ -652,7 +652,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 {
                     $strError .= " Search failed twice.  Skipping search.";
                     $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-                    if($GLOBALS['OPTS']['DEBUG'] == true) { throw new ErrorException( $strError); }
+                    if(isDebug()) { throw new ErrorException( $strError); }
                 }
             }
         }
