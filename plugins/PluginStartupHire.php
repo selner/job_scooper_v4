@@ -66,31 +66,31 @@ class PluginStartupHire extends ClassJobsSitePlugin
             // get a new record with all columns set to null
             //
             $item = $this->getEmptyJobListingRecord();
+            $nodeHelper = new CSimpleHTMLHelper($node);
 
 
             $item['job_site'] = $this->siteName;
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
-            $titleLink = $node->find("h3[class='jobTitle'] a")[0];
-            $item['job_title'] = $titleLink->plaintext;
+            $item['job_title'] = $nodeHelper->getText("h3[class='jobTitle'] a", 0, false );
             if($item['job_title'] == '') continue;
 
-            $item['job_post_url'] = $this->siteBaseURL . $titleLink->href;
-            $arrURLParts = explode("-", $item['job_post_url']);
+            $item['job_post_url'] = $this->siteBaseURL . $nodeHelper->getProperty("h3[class='jobTitle'] a", 0, "href", false );
 
+            $arrURLParts = explode("-", $item['job_post_url']);
             $item['job_id'] = $arrURLParts[count($arrURLParts)-1];
 
             // If we couldn't parse the job title, it's not really a job
             // listing so just continue to the next one
             //
 
-            $companyNode = $node->find("h3[class='companyTitle']")[0];
-            $item['company'] = combineTextAllChildren($companyNode);
+            $item['company'] = $nodeHelper->getAllChildrenText("h3[class='companyTitle']", 0, false );
+            $item['location'] = $nodeHelper->getText("a[class='mapper']", 0, false );
 
-            $item['location'] = $node->find("a span")[0]->text;
-
-            $pNode = $node->find("p")[0];
-            $item['job_site_date'] = $pNode->nextSibling()->plaintext;
+            $pNode = $nodeHelper->get("p", null);
+            $pNode = $pNode[0]->nextSibling();
+            $nodeHelper = new CSimpleHTMLHelper($pNode);
+            $item['job_site_date'] = $nodeHelper->getText(null, null, false);
 
 
             //
