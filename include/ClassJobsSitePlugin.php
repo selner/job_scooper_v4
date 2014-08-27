@@ -1117,7 +1117,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 return $strReturnLocation;
             }
 
-            if(isset($locSettingSets) && count($locSettingSets) > 0 && isset($locSettingSets[$locTypeNeeded])
+            if(isset($locSettingSets) && count($locSettingSets) > 0 && isset($locSettingSets[$locTypeNeeded]))
             {
                 $strReturnLocation = $locSettingSets[$locTypeNeeded];
             }
