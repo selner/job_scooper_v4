@@ -34,6 +34,16 @@ const C__STR_USER_AGENT__ = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) Appl
 
 date_default_timezone_set("America/Los_Angeles");
 
+function isVerbose() {
+    if(isset($GLOBALS['OPTS']) && isset($GLOBALS['OPTS']['VERBOSE']) && $GLOBALS['OPTS']['VERBOSE'] == true) return true;
+    return false;
+}
+
+function isDebug() {
+    if(isset($GLOBALS['OPTS']) && isset($GLOBALS['OPTS']['DEBUG']) && $GLOBALS['OPTS']['DEBUG'] == true) return true;
+    return false;
+}
+
 function __initializeArgs__()
 {
     setupPlugins();
@@ -68,7 +78,7 @@ function __initializeArgs__()
             'short'      => 'o',
         ),
         'use_debug' => array(
-            'description'   => 'Output debug files and logging',
+            'description'   => 'Verbose debug logging level (0=none, 1=basic, 2=all)',
             'default'       => 0,
             'type'          => Pharse::PHARSE_INTEGER,
             'required'      => false,
@@ -82,7 +92,7 @@ function __initializeArgs__()
             'short'      => 'nonotify',
         ),
         'output_interim_files' => array(
-            'description'   => 'In addition to the main results, output CSV files for the interim processing of job sites',
+            'description'   => 'In addition to the main results, output interim debug files.',
             'default'       => 0,
             'type'          => Pharse::PHARSE_INTEGER,
             'required'      => false,
@@ -96,7 +106,7 @@ function __initializeArgs__()
 //    # You may specify a program banner thusly:
 //    $banner = "Find and export basic website, Moz.com, Crunchbase and Quantcast data for any company name or URL.";
 //    Pharse::setBanner($banner);
-    if($GLOBALS['OPTS']['VERBOSE'] == true && isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine('Options set: '.var_export($GLOBALS['OPTS'], true), \Scooper\C__DISPLAY_NORMAL__); }
+    if(isVerbose() && isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine('Options set: '.var_export($GLOBALS['OPTS'], true), \Scooper\C__DISPLAY_NORMAL__); }
 
 }
 

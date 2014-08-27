@@ -111,8 +111,24 @@ class ClassConfig extends ClassJobsSitePlugin
             }
         }
 
-        $GLOBALS['OPTS']['DEBUG'] = \Scooper\get_PharseOptionValue('use_debug');
-        $GLOBALS['OPTS']['VERBOSE'] = $GLOBALS['OPTS']['DEBUG'];
+        $tmpDebug = \Scooper\get_PharseOptionValue('use_debug');
+        switch($tmpDebug)
+        {
+            case 1:
+                $GLOBALS['OPTS']['DEBUG'] = true;
+                $GLOBALS['OPTS']['VERBOSE'] = false;
+                break;
+
+            case 2:
+                $GLOBALS['OPTS']['DEBUG'] = true;
+                $GLOBALS['OPTS']['VERBOSE'] = true;
+                break;
+
+            default:
+                $GLOBALS['OPTS']['DEBUG'] = false;
+                $GLOBALS['OPTS']['VERBOSE'] = false;
+                break;
+        }
 
         if($GLOBALS['OPTS']['use_config_ini_given'])
         {
@@ -159,7 +175,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
     function __destruct()
     {
-//        if($GLOBALS['OPTS']['DEBUG'] == true)
+//        if(isDebug())
 //             if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
     }
 
@@ -948,7 +964,7 @@ class ClassConfig extends ClassJobsSitePlugin
                             {
                                 $strError = "Regex test failed on # " . $nDebugCounter . ", value " . $rxItem .".  Skipping.  Error: '".$ex->getMessage();
                                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-                                if($GLOBALS['OPTS']['DEBUG'] == true) { throw new ErrorException( $strError); }
+                                if(isDebug()) { throw new ErrorException( $strError); }
                             }
                             $GLOBALS['DATA']['titles_regex_to_filter'][] = $rx;
                         }
