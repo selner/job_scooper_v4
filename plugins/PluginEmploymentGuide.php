@@ -87,14 +87,14 @@ class PluginEmploymentGuide extends ClassJobsSitePlugin
             $item['job_post_url']  = $node->href;
             $item['job_id'] = explode("JobID=", $item['job_post_url'])[1];
 
-            $subNode = $node->find(("div[class='jobInfo'] h2"));
+            $subNode = $node->find("div[class='jobInfo'] h2");
             if(isset($subNode) && isset($subNode[0]))  $item['job_title'] = $subNode[0]->plaintext;
             if($item['job_title'] == '') continue;
 
-            $subNode = $node->find(("div[class='jobInfo'] span[class='companyName']"));
+            $subNode = $node->find("div[class='jobInfo'] span[class='companyName']");
             if(isset($subNode) && isset($subNode[0]))  $item['company'] = $subNode[0]->plaintext;
 
-            $subNode = $node->find(("div[class='jobInfo'] span[class='location'] span"));
+            $subNode = $node->find("div[class='jobInfo'] span[class='location'] span");
             if(isset($subNode) && isset($subNode[0])) $item['location'] = $subNode[0]->plaintext;
 
             $subNode = $node->find("td[class='column2'] div");

@@ -63,23 +63,28 @@ class PluginDisney extends ClassJobsSitePlugin
             $item['job_site'] = $this->siteName;
             $item['company'] = $this->siteName;
 
-            $titleLink = $node->find("td[class='column1'] div a")[0];
-
-
-            $item['job_title'] = $titleLink->plaintext;
-            $item['job_post_url']  = $titleLink->href;
+            $titleLink = $node->find("td[class='column1'] div a");
+            if(isset($titleLink) && isset($titleLink[0]))
+            {
+                $item['job_title'] = $titleLink[0]->plaintext;
+                $item['job_post_url']  = $titleLink[0]->href;
+            }
 
           if($item['job_title'] == '') continue;
 
             $item['job_id'] = explode("jobid=", $item['job_post_url'])[1];
 
+            $subNode = $node->find("td[class='column2'] div");
+            if(isset($subNode) && isset($subNode[0])) $item['job_site_category'] = $subNode[0]->plaintext;
 
-            $item['job_site_category'] = $node->find("td[class='column2'] div")[0]->plaintext;
-            $item['location'] = $node->find("td[class='column3'] div span[class='bold-text']")[0]->plaintext;
+            $subNode = $node->find("td[class='column3'] div span[class='bold-text']");
+            if(isset($subNode) && isset($subNode[0])) $item['location'] = $subNode[0]->plaintext;
+
 
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
-            $item['job_site_date'] = $node->find("td[class='column4']")[0]->plaintext;
+            $subNode = $node->find("td[class='column4']");
+            if(isset($subNode) && isset($subNode[0])) $item['job_site_date'] = $subNode[0]->plaintext;
 
             $ret[] = $this->normalizeItem($item);
         }

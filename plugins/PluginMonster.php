@@ -91,13 +91,16 @@ class PluginMonster extends ClassJobsSitePlugin
             $item = $this->getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
 
-            $titleLink = $node->find("div div a")[0];
-
-
-            $objDiv = $node->find("div[class='socialContainer']");
-            $item['job_id'] = $objDiv[0]->attr['data-jobid'];
-
+            $titleLink = $node->find("")[0];
+            $subNode = $node->find(("div div a"));
+            if(isset($subNode) && isset($subNode[0])) $titleLink = $subNode[0]->plaintext;
             $item['job_title'] = $titleLink->plaintext;
+
+
+            $subNode = $node->find(("div[class='socialContainer']"));
+            if(isset($subNode) && isset($subNode[0])) $objDiv = $subNode[0]->plaintext;
+            if(isset($objDiv) && isset($objDiv[0]) && isset($objDiv[0]->attr) && isset($objDiv[0]->attr['data-jobid']))     $item['job_id'] = $objDiv[0]->attr['data-jobid'];
+
 
             $testLink = $objSimpHTML->find("a[id='ctl00_ctl00_ctl00_body_body_wacCenterStage_ctl03_rptResults_ctl00_linkJobTitle']")[0];
             $testLink = $objSimpHTML->find("a[id='".$titleLink->attr['id']."']");
