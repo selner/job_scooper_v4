@@ -71,12 +71,19 @@ class PluginIndeed extends ClassJobsSitePlugin
 
     function parseTotalResultsCount($objSimpHTML)
     {
-        // # of items to parse
-        $pageDiv= $objSimpHTML->find('div[id="searchCount"]');
-        $pageDiv = $pageDiv[0];
-        $pageText = $pageDiv->plaintext;
+        $nodeHelper = new CSimpleHTMLHelper($objSimpHTML);
+
+        $pageText = $nodeHelper->getText("div[id='searchCount']", 0, false);
         $arrItemItems = explode(" ", trim($pageText));
-        return $arrItemItems[5];
+        if(!isset($arrItemItems) || !is_array($arrItemItems) || !(count($arrItemItems) >=6))
+        {
+            $GLOBALS['logger']->logLine("Unable to find count of listings for search on " . $this->siteName, \Scooper\C__DISPLAY_WARNING__);
+            return 0;
+        }
+        else
+        {
+            return $arrItemItems[5];
+        }
     }
 
 
@@ -94,7 +101,6 @@ class PluginIndeed extends ClassJobsSitePlugin
             $item['job_site'] = $this->siteName;
 
 
-
             $jobInfoNode = $node->firstChild()->firstChild();
             if(isset($jobInfoNode) && isset($jobInfoNode->attr['title'])) $item['job_title'] = $jobInfoNode->attr['title'];
             if($item['job_title'] == '') continue;
@@ -102,7 +108,10 @@ class PluginIndeed extends ClassJobsSitePlugin
             $item['job_post_url'] = 'http://www.indeed.com' . $jobInfoNode->href;
 
             $arrURLParts = explode("jk=",  $item['job_post_url']);
-            $item['job_id'] = \Scooper\strScrub($arrURLParts[1]);
+            if(isset($arrURLParts) && is_array($arrURLParts) && count($arrURLParts) >=2)
+            {
+                $item['job_id'] = \Scooper\strScrub($arrURLParts[1]);
+            }
 
 
             $subNode = $node->find("span[class='company'] span");
