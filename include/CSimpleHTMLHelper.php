@@ -67,6 +67,14 @@ class CSimpleHTMLHelper
         return $this->getNodeValue($strNodePath, $retIndex, $flags, $optPropOrAttrName);
     }
 
+    function getAttribute($strNodePath, $retIndex, $optPropOrAttrName, $fRequired = false)
+    {
+        $flags = C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR | C__SIMPLEHTML_FOUND_RETURN_ATTRIB;
+        if($fRequired == true)  $flags = $flags | C__SIMPLEHTML_THROWEXCEPTION ;
+
+        return $this->getNodeValue($strNodePath, $retIndex, $flags, $optPropOrAttrName);
+    }
+
     function getNodeValue($strNodePath, $retIndex, $flags, $optPropOrAttrName = null)
     {
         $ret = null;
@@ -142,7 +150,7 @@ class CSimpleHTMLHelper
                 }
                 elseif(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_ALLCHILDREN))
                 {
-                    $ret = combineTextAllChildren($subNodeElement, true);
+                    $ret = combineTextAllChildren($subNodeElement, false);
                     if(!isset($ret) && \Scooper\isBitFlagSet($flags, C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR ))
                     {
                         $ret = "";
