@@ -145,10 +145,6 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
             if(isset($titleNode) && isset($titleNode[0]))
             {
                 $item['job_title'] = $titleNode[0]->plaintext;
-
-                // Removes " NEW!" from the job title.  ZipRecruiter tends to occasionally
-                // have that appended which then fails de-duplication. (Fixes issue #45)
-                $item['job_title'] = str_ireplace(" NEW!", "", $item['job_title']);
             }
 
             // If we couldn't parse the job title, it's not really a job

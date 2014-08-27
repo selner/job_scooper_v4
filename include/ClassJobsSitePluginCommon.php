@@ -157,6 +157,8 @@ class ClassJobsSitePluginCommon
         return $arrRetList;
     }
 
+
+
     function removeKeyColumnsFromJobList($arrJobList)
     {
         $arrRetList = null;
@@ -184,6 +186,12 @@ class ClassJobsSitePluginCommon
 
         $retArrNormalized ['job_site'] = \Scooper\strScrub($retArrNormalized['job_site'], DEFAULT_SCRUB);
         $retArrNormalized ['job_id'] = \Scooper\strScrub($retArrNormalized['job_id'], SIMPLE_TEXT_CLEANUP);
+
+        // Removes " NEW!", etc from the job title.  ZipRecruiter tends to occasionally
+        // have that appended which then fails de-duplication. (Fixes issue #45) Glassdoor has "- easy apply" as well.
+        $retArrNormalized ['job_title'] = str_ireplace(" NEW!", "", $retArrNormalized['job_title']);
+        $retArrNormalized ['job_title'] = str_ireplace("- new", "", $retArrNormalized['job_title']);
+        $retArrNormalized ['job_title'] = str_ireplace("- easy apply", "", $retArrNormalized['job_title']);
         $retArrNormalized ['job_title'] = \Scooper\strScrub($retArrNormalized['job_title'], SIMPLE_TEXT_CLEANUP);
 
         $retArrNormalized ['job_site_category'] = \Scooper\strScrub($retArrNormalized['job_site_category'], SIMPLE_TEXT_CLEANUP);
