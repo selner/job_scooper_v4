@@ -177,9 +177,12 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
             if(isset($companyNode) && isset($companyNode[0]))
             {
                 $arrCompanyParts = explode(" - ", $companyNode[0]->plaintext);
-                $company = str_ireplace("at ", "", $arrCompanyParts[0]);
-                $item['company'] = $company;
-                $item['location'] = $arrCompanyParts[1];
+                if(isset($arrCompanyParts) && count($arrCompanyParts)>=2)
+                {
+                    $company = str_ireplace("at ", "", $arrCompanyParts[0]);
+                    $item['company'] = $company;
+                    $item['location'] = $arrCompanyParts[1];
+                }
             }
 
             $jobDetailsNode = $node->find("p[class='greenText font12 font11Phone'] span");
@@ -189,29 +192,7 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
                 $arrJobDetailsParts = explode(" ", $strJobDetails);
 
                 $item['job_site_category'] = $arrJobDetailsParts[count($arrJobDetailsParts) - 1];
-                if(is_numeric($arrJobDetailsParts[1]) )
-                {
-                    $daysToSubtract = $arrJobDetailsParts[1];
-                }
-                elseif(strcasecmp($arrJobDetailsParts[1], "yesterday") == 0)
-                {
-                    $daysToSubtract = 1;
-                }
-                elseif(strcasecmp($arrJobDetailsParts[1], "today") == 0)
-                {
-                    $daysToSubtract = 0;
-                }
-                else
-                {
-                    $daysToSubtract = null;
-                }
-
-                if(isset($daysToSubtract))
-                {
-                    $date = new DateTime();
-                    $date->modify("-".$daysToSubtract." days");
-                    $item['job_site_date'] = $date->format('Y-m-d');
-                }
+                $item['job_site_date'] = getDateForDaysAgo($arrJobDetailsParts[1]);
             }
 
             //
