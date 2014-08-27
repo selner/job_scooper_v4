@@ -76,7 +76,7 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
         {
             $strMatch = $strMatch . '[' . $arrTag['attribute'] . '="' . $arrTag['attribute_value'] . '"]';
         }
-        if($GLOBALS['DEBUG']) { $GLOBALS['logger']->logLine(key($arrTag) . " match string is: " . $strMatch, \Scooper\C__DISPLAY_ITEM_DETAIL__); }
+        if(isset($GLOBALS['DEBUG']) && $GLOBALS['DEBUG'] == 1) { $GLOBALS['logger']->logLine(key($arrTag) . " match string is: " . $strMatch, \Scooper\C__DISPLAY_ITEM_DETAIL__); }
 
         return $strMatch;
     }
@@ -88,10 +88,10 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
         $strMatch = $this->_getTagMatchString_($arrString);
         if(isset($strMatch))
         {
-            $retNode = $node->find($strMatch)[0];
-            if(isset($retNode))
+            $retNode = $node->find($strMatch);
+            if(isset($retNode) && isset($retNode[0]))
             {
-                $strReturn = $retNode->$nameProperty;
+                $strReturn = $retNode[0]->$nameProperty;
             }
         }
 

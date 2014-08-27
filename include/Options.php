@@ -139,7 +139,7 @@ function is_IncludeSite($strName)
            }
            $ret = $GLOBALS['OPTS'][$strIncludeSiteKey];
         }
-        elseif($GLOBALS['OPTS']['include_all_given'] == true)
+        elseif(isset($GLOBALS['OPTS']['include_all_given']) && $GLOBALS['OPTS']['include_all_given'] == true)
         {
             $GLOBALS['OPTS'][$strGivenKey] = true;
             $GLOBALS['OPTS'][$strIncludeSiteKey] = true;

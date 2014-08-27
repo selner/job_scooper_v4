@@ -223,27 +223,28 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         if(isset($arrPossibleSearchesForRun))
         {
-            for($z = 0; $z < count($arrPossibleSearchesForRun) ; $z++)
-            {
-                $curSearch = $arrPossibleSearchesForRun[$z];
-
-                $strIncludeKey = 'include_'.$curSearch['site_name'];
-
-                $valInclude = \Scooper\get_PharseOptionValue($strIncludeKey);
-
-                if($valInclude == null || $valInclude == false)
+            if(count($arrPossibleSearchesForRun) > 0)
+                for($z = 0; $z < count($arrPossibleSearchesForRun) ; $z++)
                 {
-                    $GLOBALS['logger']->logLine($curSearch['site_name'] . " excluded, so dropping its searches from the run.", \Scooper\C__DISPLAY_ITEM_START__);
+                    $curSearch = $arrPossibleSearchesForRun[$z];
 
-                    $arrPossibleSearchesForRun[$z]['key'] = 'EXCLUDED_FOR_RUN__' . $arrPossibleSearchesForRun[$z]['key'];
-                }
-                else
-                {
-                    // keep the search
-                    $this->arrSearchesToReturn[] = $arrPossibleSearchesForRun[$z];
-                }
+                    $strIncludeKey = 'include_'.$curSearch['site_name'];
 
-            }
+                    $valInclude = \Scooper\get_PharseOptionValue($strIncludeKey);
+
+                    if(!isset($valInclude) || $valInclude == 0)
+                    {
+                        $GLOBALS['logger']->logLine($curSearch['site_name'] . " excluded, so dropping its searches from the run.", \Scooper\C__DISPLAY_ITEM_START__);
+
+                        $arrPossibleSearchesForRun[$z]['key'] = 'EXCLUDED_FOR_RUN__' . $arrPossibleSearchesForRun[$z]['key'];
+                    }
+                    else
+                    {
+                        // keep the search
+                        $this->arrSearchesToReturn[] = $arrPossibleSearchesForRun[$z];
+                    }
+
+                }
         }
 
         return;

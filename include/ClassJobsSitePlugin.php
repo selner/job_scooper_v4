@@ -386,7 +386,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         // Does this search have a set of keywords specific to it that override
         // all the general settings?
-        if($searchDetails['keyword_search_override'] != null && strlen($searchDetails['keyword_search_override']) > 0)
+        if(isset($searchDetails['keyword_search_override']) && strlen($searchDetails['keyword_search_override']) > 0)
         {
             // keyword_search_override should only ever be a string value for any given search
             assert(!is_array($searchDetails['keyword_search_override']));
@@ -402,7 +402,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             $searchDetails['keyword_set'] = array($searchDetails['keyword_search_override']);
         }
 
-        if($searchDetails['keyword_set'] != null)
+        if(isset($searchDetails['keyword_set']))
         {
             assert(is_array($searchDetails['keyword_set']));
 
