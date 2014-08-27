@@ -58,7 +58,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
                 }
 
                 $strSiteClass = $GLOBALS['DATA']['site_plugins'][strtolower($search['site_name'])]['class_name'];
-                if($arrPluginClassesToRun[$strSiteClass] == null)
+                if(!isset($arrPluginClassesToRun[$strSiteClass]))
                 {
                     $arrPluginClassesToRun[$strSiteClass] = array('class_name'=>$strSiteClass, 'site_name'=>$search['site_name'], 'searches' =>null);
                 }

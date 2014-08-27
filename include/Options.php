@@ -122,8 +122,7 @@ function is_IncludeSite($strName)
     $strGivenKey = $strIncludeSiteKey."_given";
     $ret = false;
 
-    if(isset($GLOBALS['OPTS'][$strGivenKey]))
-        if ($GLOBALS['OPTS'][$strGivenKey] == true)
+        if (isset($GLOBALS['OPTS'][$strGivenKey]) && $GLOBALS['OPTS'][$strGivenKey] == true)
         {
            switch($GLOBALS['OPTS'][$strIncludeSiteKey])
            {

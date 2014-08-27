@@ -92,10 +92,13 @@ class ClassConfig extends ClassJobsSitePlugin
         //
         foreach($GLOBALS['DATA']['site_plugins']  as $site)
         {
+            assert(isset($site['name']));
             $fIsIncludedInRun = is_IncludeSite($site['name']);
-            if(isset($GLOBALS['DATA']['site_plugins'][$site['name']]) && isset($GLOBALS['DATA']['site_plugins'][$site['name']]['include_in_run']))
+            if(isset($GLOBALS['DATA']['site_plugins'][$site['name']]))
+            {
+                if(isset($GLOBALS['DATA']['site_plugins'][$site['name']]['include_in_run']))
                    $GLOBALS['DATA']['site_plugins'][$site['name']]['include_in_run'] = $fIsIncludedInRun;
-
+            }
             // Initialize the config settings for the site list using the options set by the user
             // on the command line
             if($fIsIncludedInRun)
@@ -122,7 +125,7 @@ class ClassConfig extends ClassJobsSitePlugin
             $iniParser = new IniParser($this->arrFileDetails['config_ini']['full_file_path']);
             $confTemp = $iniParser->parse($this->arrFileDetails['config_ini']['full_file_path']);
             $iniParser = null;
-            $this->setupRunFromAllConfigsRecursive($confTemp);
+            $this->setupRunFromAllConfigsRecursive($this->arrFileDetails['config_ini']['full_file_path'], $confTemp);
         }
 
 
@@ -183,19 +186,25 @@ class ClassConfig extends ClassJobsSitePlugin
 
 
 
-    private function setupRunFromAllConfigsRecursive($config)
+    private function setupRunFromAllConfigsRecursive($configFilePath, $config)
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading all configurations from ".$this->arrFileDetails['config_ini']['file_name']." and it's included INI file references...", \Scooper\C__DISPLAY_ITEM_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration from ".$configFilePath." and it's included INI file references...", \Scooper\C__DISPLAY_ITEM_START__);
 
-        if(isset($config->settings_files) && is_object($config->settings_files))
+        if(isset($config->settings_files))
         {
-            foreach($config->settings_files['ini_path'] as $nextConfigFile)
+            $settingFiles = $config->settings_files;
+            if(!(is_array($settingFiles) || is_object($settingFiles)))
+            {
+                $settingFiles = array($config->settings_files);
+            }
+
+            foreach($settingFiles['ini_path'] as $nextConfigFile)
             {
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configurations from ".$nextConfigFile." and it's included INI file references...", \Scooper\C__DISPLAY_ITEM_START__);
                 $iniParser = new IniParser($nextConfigFile);
                 $nextConfig = $iniParser->parse($nextConfigFile);
                 $iniParser = null;
-                $this->setupRunFromAllConfigsRecursive($nextConfig);
+                $this->setupRunFromAllConfigsRecursive($nextConfigFile, $nextConfig);
             }
         }
 
@@ -382,8 +391,9 @@ class ClassConfig extends ClassJobsSitePlugin
         $tempSearch = $this->getEmptySearchDetailsRecord();
 
         if(isset($iniSearch['key'])) $tempSearch['key'] = \Scooper\strScrub($iniSearch['key'], REMOVE_EXTRA_WHITESPACE | LOWERCASE );
-        if(isset($iniSearch['site_name'])) $tempSearch['site_name'] = \Scooper\strScrub($iniSearch['jobsite'], REMOVE_EXTRA_WHITESPACE | LOWERCASE );
-        if(isset($iniSearch['jobsite'])) $strJobSiteKey = \Scooper\strScrub($iniSearch['jobsite'], FOR_LOOKUP_VALUE_MATCHING | LOWERCASE );
+        if(isset($iniSearch['jobsite'])) $tempSearch['site_name'] = \Scooper\strScrub($iniSearch['jobsite'], REMOVE_EXTRA_WHITESPACE | LOWERCASE );
+        assert(isset($iniSearch['jobsite']));
+        $strJobSiteKey = \Scooper\strScrub($iniSearch['jobsite'], FOR_LOOKUP_VALUE_MATCHING | LOWERCASE );
         if(isset($this->configSettings['included_sites']) && !isset($this->configSettings['included_sites'][$strJobSiteKey]))
         {
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($iniSearch['jobsite'] . "search " .$iniSearch['name'] . " was not added; " . $strJobSiteKey . " is excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -403,7 +413,7 @@ class ClassConfig extends ClassJobsSitePlugin
             }
         }
 
-        if(isset($tempSearch['key']) && strlen($tempSearch['key']) == 0)
+        if(!isset($tempSearch['key']) || strlen($tempSearch['key']) <= 0)
         {
             $tempSearch['key'] = \Scooper\strScrub($tempSearch['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($tempSearch['name'], FOR_LOOKUP_VALUE_MATCHING);
         }
@@ -510,7 +520,7 @@ class ClassConfig extends ClassJobsSitePlugin
     private function _readKeywordSetsFromConfig_($config)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading keyword set from config file...", \Scooper\C__DISPLAY_ITEM_START__);
-        if(isset($config->search_keyword_set) && is_object($config->search_keyword_set))
+        if(isset($config->search_keyword_set))
         {
             foreach($config->search_keyword_set as $ini_keyword_set)
             {
