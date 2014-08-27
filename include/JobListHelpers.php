@@ -276,7 +276,7 @@ function addJobToJobsList(&$arrJobsListToUpdate, $job)
 
 
 
-    if($arrJobsListToUpdate[$job['key_jobsite_siteid']] != null)
+    if(isset($arrJobsListToUpdate[$job['key_jobsite_siteid']]))
     {
         $jobToAdd = getMergedJobRecord($arrJobsListToUpdate[$job['key_jobsite_siteid']], $job);
     }
@@ -318,7 +318,7 @@ function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strD
 {
     $strReturn = "";
 
-    if($arrItem[$key] != null)
+    if(isset($arrItem[$key]))
     {
         $val = $arrItem[$key];
         if(is_string($val) && strlen($val) > 0)
@@ -358,7 +358,7 @@ function getArrayValuesAsString($arrDetails, $strDelimiter = ", ", $strIntro = "
 {
     $strReturn = "";
 
-    if($arrDetails != null)
+    if(isset($arrDetails) && is_array($arrDetails))
     {
         foreach(array_keys($arrDetails) as $key)
         {

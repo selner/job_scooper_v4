@@ -56,7 +56,7 @@ class PluginExample extends ClassJobsSitePlugin
     function getDaysURLValue($days) {
         $ret = "1d";
 
-        if($days != null)
+        if(isset($days))
         {
             switch($days)
             {

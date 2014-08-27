@@ -611,6 +611,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         foreach( $GLOBALS['DATA']['site_plugins'] as $plugin_setup)
         {
+            $countPluginJobs = 0;
             $strName = $plugin_setup['name'];
             $fWasSearched = $arrSitesSearched[$plugin_setup['name']];
             if($fWasSearched)

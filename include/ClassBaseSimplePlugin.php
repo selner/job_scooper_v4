@@ -128,7 +128,7 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
         $GLOBALS['logger']->logLine($this->siteName . " finding nodes matching: " . $strNodeMatch, \Scooper\C__DISPLAY_ITEM_DETAIL__);
         $nodesJobRows = $objSimpHTML->find($strNodeMatch);
 
-        if($nodesJobRows != null && count($nodesJobRows) > 0 )
+        if(isset($nodesJobRows) && $nodesJobRows != null && count($nodesJobRows) > 0 )
         {
             foreach($nodesJobRows as $node)
             {

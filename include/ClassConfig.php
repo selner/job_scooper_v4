@@ -30,13 +30,13 @@ class ClassConfig extends ClassJobsSitePlugin
 
     function getSearchConfiguration($strSubkey = null)
     {
-        if($strSubkey != null)
+        if(isset($strSubkey) && isset($this->configSettings[$strSubkey]))
             return $this->configSettings[$strSubkey];
         else
             return $this->configSettings;
     }
 
-    function getSMTPSettings() { return $this->arrEmail_PHPMailer_SMTPSetup; }
+    function getSMTPSettings() { if(isset($this->arrEmail_PHPMailer_SMTPSetup)) { return $this->arrEmail_PHPMailer_SMTPSetup; } else return null; }
 
     function getInputFilesByType($strInputDataType)
     {
@@ -365,13 +365,13 @@ class ClassConfig extends ClassJobsSitePlugin
                 foreach($config->search as $iniSearch)
                 {
                     $retSearch = $this->_parseSearchFromINI_($iniSearch);
-                    if($retSearch != null) $this->configSettings['searches'][] = $retSearch;
+                    if(isset($retSearch)) $this->configSettings['searches'][] = $retSearch;
                 }
             }
             else
             {
                 $retSearch = $this->_parseSearchFromINI_($config->search);
-                if($retSearch != null) $this->configSettings['searches'][] = $retSearch;
+                if(isset($retSearch)) $this->configSettings['searches'][] = $retSearch;
             }
         }
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($this->configSettings['searches']) . " searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
@@ -389,12 +389,12 @@ class ClassConfig extends ClassJobsSitePlugin
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($iniSearch['jobsite'] . "search " .$iniSearch['name'] . " was not added; " . $strJobSiteKey . " is excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
             return null;
         }
-        $tempSearch['name'] = ($iniSearch['jobsite'] != null ? $iniSearch['jobsite'] . ': ' : "") . $iniSearch['name'];
-        $tempSearch['base_url_format']  = $iniSearch['url_format'];
-        $tempSearch['keyword_search_override']  = $iniSearch['keywords'];
-        $tempSearch['location_user_specified_override']  = $iniSearch['location'];
+        $tempSearch['name'] = (isset($iniSearch['jobsite']) ? $iniSearch['jobsite'] . ': ' : "") . $iniSearch['name'];
+        if(isset($iniSearch['url_format'])) $tempSearch['base_url_format']  = $iniSearch['url_format'];
+        if(isset($iniSearch['keywords'])) $tempSearch['keyword_search_override']  = $iniSearch['keywords'];
+        if(isset($iniSearch['location'])) $tempSearch['location_user_specified_override']  = $iniSearch['location'];
 
-        if($iniSearch['keyword_match_type_string'] != null && strlen($iniSearch['keyword_match_type_string'] ) > 0)
+        if(isset($iniSearch['keyword_match_type_string']) && strlen($iniSearch['keyword_match_type_string'] ) > 0)
         {
             $flagType = $this->_getKeywordMatchFlagFromString_($iniSearch['keyword_match_type_string'] );
             if($flagType != null)
@@ -403,7 +403,7 @@ class ClassConfig extends ClassJobsSitePlugin
             }
         }
 
-        if($tempSearch['key'] == "")
+        if(isset($tempSearch['key']) && strlen($tempSearch['key']) == 0)
         {
             $tempSearch['key'] = \Scooper\strScrub($tempSearch['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($tempSearch['name'], FOR_LOOKUP_VALUE_MATCHING);
         }
@@ -452,11 +452,11 @@ class ClassConfig extends ClassJobsSitePlugin
                     {
                         $arrNewLocationSet = $this->_getEmptyLocationSettingsSet_();
                         $strSetName = 'LocationSet' . (count($this->configSettings['location_sets']) + 1);
-                        if($iniSettings['name'] != null && strlen($iniSettings['name']) > 0)
+                        if(isset($iniSettings['name']) && strlen($iniSettings['name']) > 0)
                         {
                             $strSetName = $iniSettings['name'];
                         }
-                        elseif($iniSettings['key'] != null && strlen($iniSettings['key']) > 0)
+                        elseif(isset($iniSettings['key']) && strlen($iniSettings['key']) > 0)
                         {
                             $strSetName = $iniSettings['key'];
                         }
@@ -497,7 +497,7 @@ class ClassConfig extends ClassJobsSitePlugin
     {
         foreach($GLOBALS['DATA']['location_types'] as $loctype)
         {
-            if($iniSearchSetting[$loctype] != null && $iniSearchSetting[$loctype] != "")
+            if(($iniSearchSetting[$loctype]) && $iniSearchSetting[$loctype] != "")
             {
                 $arrLocSet[$loctype] = \Scooper\strScrub($iniSearchSetting[$loctype], REMOVE_EXTRA_WHITESPACE);
                 $arrLocSet[$loctype] = $iniSearchSetting[$loctype];
@@ -520,7 +520,7 @@ class ClassConfig extends ClassJobsSitePlugin
                 {
                     $strSetName = $ini_keyword_set['name'];
                 }
-                elseif(isset($ini_keyword_set['key']) != null && strlen($ini_keyword_set['key']) > 0)
+                elseif(isset($ini_keyword_set['key']) && strlen($ini_keyword_set['key']) > 0)
                 {
                     $strSetName = $ini_keyword_set['key'];
 
@@ -582,7 +582,7 @@ class ClassConfig extends ClassJobsSitePlugin
                 }
 
 
-                if($this->configSettings['keyword_sets'][$strSetName]['keywords_array'] != null && count($this->configSettings['keyword_sets'][$strSetName]['keywords_array']) > 0)
+                if(isset($this->configSettings['keyword_sets'][$strSetName]['keywords_array']) && count($this->configSettings['keyword_sets'][$strSetName]['keywords_array']) > 0)
                 {
                     if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added keyword set '" . $strSetName . "' with keywords = " . getArrayValuesAsString($this->configSettings['keyword_sets'][$strSetName]['keywords_array']) . (($ini_keyword_set['keyword_match_type'] != null && strlen($ini_keyword_set['keyword_match_type'] ) > 0) ? " matching " . $ini_keyword_set['keyword_match_type'] : ""), \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 }
@@ -890,7 +890,7 @@ class ClassConfig extends ClassJobsSitePlugin
         $GLOBALS['DATA']['titles_regex_to_filter'] = array();
         $nDebugCounter = 0;
 
-        if($GLOBALS['DATA']['titles_regex_to_filter'] != null && count($GLOBALS['DATA']['titles_regex_to_filter']) > 0)
+        if(isset($GLOBALS['DATA']['titles_regex_to_filter']) && count($GLOBALS['DATA']['titles_regex_to_filter']) > 0)
         {
             // We've already loaded the titles; go ahead and return right away
             $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['DATA']['titles_regex_to_filter']) . " regexed title strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -908,7 +908,7 @@ class ClassConfig extends ClassJobsSitePlugin
         {
             $fileDetail = $fileItem['details'];
 
-            if($fileDetail != null && $fileDetail ['full_file_path'] != '')
+            if(isset($fileDetail) && $fileDetail ['full_file_path'] != '')
             {
                 if(file_exists($fileDetail ['full_file_path'] ) && is_file($fileDetail ['full_file_path'] ))
                 {
@@ -973,7 +973,7 @@ class ClassConfig extends ClassJobsSitePlugin
      */
     function _loadCompanyRegexesToFilter_()
     {
-        if($GLOBALS['DATA']['companies_regex_to_filter'] != null && count($GLOBALS['DATA']['companies_regex_to_filter']) > 0)
+        if(isset($GLOBALS['DATA']['companies_regex_to_filter']) && count($GLOBALS['DATA']['companies_regex_to_filter']) > 0)
         {
             // We've already loaded the companies; go ahead and return right away
             $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['DATA']['companies_regex_to_filter']) . " regexed company strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -983,7 +983,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
         $GLOBALS['DATA']['companies_regex_to_filter'] = array();
 
-        if($GLOBALS['DATA']['companies_regex_to_filter'] != null && count($GLOBALS['DATA']['companies_regex_to_filter']) > 0)
+        if(isset($GLOBALS['DATA']['companies_regex_to_filter']) && count($GLOBALS['DATA']['companies_regex_to_filter']) > 0)
         {
             // We've already loaded the titles; go ahead and return right away
             $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['DATA']['companies_regex_to_filter']) . " regexed title strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -996,37 +996,39 @@ class ClassConfig extends ClassJobsSitePlugin
 
         foreach($arrFileInput as $fileItem)
         {
-            $fileDetail = $fileItem['details'];
-
-
-            if($fileDetail != null && $fileDetail ['full_file_path'] != '')
+            if(isset($fileItem['details']))
             {
-                if(file_exists($fileDetail ['full_file_path'] ) && is_file($fileDetail ['full_file_path'] ))
+                $fileDetail = $fileItem['details'];
+
+                if(isset($fileDetail ['full_file_path'])&& $fileDetail ['full_file_path'] != '')
                 {
-                    $GLOBALS['logger']->logLine("Loading job Company regexes to filter from ".$fileDetail ['full_file_path']."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                    $classCSVFile = new \Scooper\ScooperSimpleCSV($fileDetail ['full_file_path'] , 'r');
-                    $arrCompaniesTemp = $classCSVFile->readAllRecords(true,array('match_regex'));
-                    $arrCompaniesTemp = $arrCompaniesTemp['data_rows'];
-                    $GLOBALS['logger']->logLine(count($arrCompaniesTemp) . " companies found in the source file that will be automatically filtered from job listings." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-                    //
-                    // Add each Company we found in the file to our list in this class, setting the key for
-                    // each record to be equal to the job Company so we can do a fast lookup later
-                    //
-                    if(count($arrCompaniesTemp) > 0)
+                    if(file_exists($fileDetail ['full_file_path'] ) && is_file($fileDetail ['full_file_path'] ))
                     {
-                        foreach($arrCompaniesTemp as $CompanyRecord)
+                        $GLOBALS['logger']->logLine("Loading job Company regexes to filter from ".$fileDetail ['full_file_path']."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                        $classCSVFile = new \Scooper\ScooperSimpleCSV($fileDetail ['full_file_path'] , 'r');
+                        $arrCompaniesTemp = $classCSVFile->readAllRecords(true,array('match_regex'));
+                        $arrCompaniesTemp = $arrCompaniesTemp['data_rows'];
+                        $GLOBALS['logger']->logLine(count($arrCompaniesTemp) . " companies found in the source file that will be automatically filtered from job listings." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+                        //
+                        // Add each Company we found in the file to our list in this class, setting the key for
+                        // each record to be equal to the job Company so we can do a fast lookup later
+                        //
+                        if(count($arrCompaniesTemp) > 0)
                         {
-                            $arrRXInput = explode("|", strtolower($CompanyRecord['match_regex']));
-
-                            foreach($arrRXInput as $rxItem)
+                            foreach($arrCompaniesTemp as $CompanyRecord)
                             {
-                                $rx = '/'.$rxItem.'/';
+                                $arrRXInput = explode("|", strtolower($CompanyRecord['match_regex']));
 
-                                $GLOBALS['DATA']['companies_regex_to_filter'][] = $rx;
+                                foreach($arrRXInput as $rxItem)
+                                {
+                                    $rx = '/'.$rxItem.'/';
+
+                                    $GLOBALS['DATA']['companies_regex_to_filter'][] = $rx;
+                                }
                             }
+                            $fCompaniesLoaded = true;
                         }
-                        $fCompaniesLoaded = true;
                     }
                 }
             }

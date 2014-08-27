@@ -78,14 +78,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     {
         $strReturnLocation = VALUE_NOT_SUPPORTED;
 
-        if($searchDetails['location_user_specified_override'] != null && strlen($searchDetails['location_user_specified_override']) > 0)
+        if(isset($searchDetails['location_user_specified_override']) && strlen($searchDetails['location_user_specified_override']) > 0)
         {
             $strReturnLocation = $searchDetails['location_user_specified_override'];
         }
         else
         {
             $locTypeNeeded = $this->getLocationSettingType();
-            if($searchDetails['location_set'] != null && count($searchDetails['location_set']) > 0 && $searchDetails['location_set'][$locTypeNeeded] != null)
+            if(isset($searchDetails['location_set']) && count($searchDetails['location_set']) > 0 && isset($searchDetails['location_set'][$locTypeNeeded]))
             {
                 $strReturnLocation = $searchDetails['location_set'][$locTypeNeeded];
             }
@@ -104,7 +104,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         $strIncludeKey = 'include_'.strtolower($this->siteName);
 
-        if($GLOBALS['OPTS'][$strIncludeKey] == null || $GLOBALS['OPTS'][$strIncludeKey] == 0)
+        if(isset($GLOBALS['OPTS'][$strIncludeKey]) && $GLOBALS['OPTS'][$strIncludeKey] == 0)
         {
             $GLOBALS['logger']->logLine($this->siteName . " excluded for run, so skipping '" . count($this->arrSearchesToReturn). "' search(es) set for that site.", \Scooper\C__DISPLAY_ITEM_START__);
         }
