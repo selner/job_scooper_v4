@@ -711,6 +711,7 @@ class ClassJobsSitePluginCommon
         if(!$objSimpleHTML && $strURL && strlen($strURL) > 0)
         {
             $class = new \Scooper\ScooperDataAPIWrapper();
+            if(isVerbose()) $class->setVerbose(true);
             $retHTML = $class->curl($strURL, null, 'GET');
             if(count(strlen($retHTML['output']) > 0))
             {
@@ -760,6 +761,7 @@ class ClassJobsSitePluginCommon
 
         return $objSimpleHTML;
     }
+
 
 }
 
