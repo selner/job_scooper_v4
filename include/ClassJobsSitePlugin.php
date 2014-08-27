@@ -530,14 +530,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         {
             $searchDetails['location_search_value'] = VALUE_NOT_SUPPORTED;
         }
-        elseif($searchDetails['location_user_specified_override'] != null && strlen($searchDetails['location_user_specified_override']) > 0)
+        elseif(isset($searchDetails['location_user_specified_override']) && strlen($searchDetails['location_user_specified_override']) > 0)
         {
             $searchDetails['location_search_value'] = $searchDetails['location_user_specified_override'];
         }
         elseif(isset($searchDetails['location_set']) && is_array($searchDetails['location_set']) )
         {
             $locTypeNeeded = $this->getLocationSettingType();
-            if($searchDetails['location_set'] != null && count($searchDetails['location_set']) > 0 && $searchDetails['location_set'][$locTypeNeeded] != null)
+            if(isset($searchDetails['location_set']) && count($searchDetails['location_set']) > 0 && isset($searchDetails['location_set'][$locTypeNeeded]))
             {
                 $searchDetails['location_search_value'] = $searchDetails['location_set'][$locTypeNeeded];
             }
@@ -1103,7 +1103,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
 
         // Did the user specify an override at the search level in the INI?
-        if($searchDetails != null && $searchDetails['location_user_specified_override'] != null && strlen($searchDetails['location_user_specified_override']) > 0)
+        if($searchDetails != null && isset($searchDetails['location_user_specified_override']) && strlen($searchDetails['location_user_specified_override']) > 0)
         {
             $strReturnLocation = $searchDetails['location_user_specified_override'];
         }
@@ -1117,7 +1117,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 return $strReturnLocation;
             }
 
-            if($locSettingSets != null && count($locSettingSets) > 0 && $locSettingSets[$locTypeNeeded] != null)
+            if(isset($locSettingSets) && count($locSettingSets) > 0 && isset($locSettingSets[$locTypeNeeded])
             {
                 $strReturnLocation = $locSettingSets[$locTypeNeeded];
             }

@@ -327,7 +327,7 @@ class ClassJobsSitePluginCommon
         }
 
         // Did we find a match in the array?
-        if($arr[$ret['lookup_value']] != null)
+        if(isset($ret['lookup_value']]) && isset($arr[$ret['lookup_value']]))
         {
             $ret['found_in_array'] = true;
         }
