@@ -590,22 +590,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     private function _getJobsForSearchByType_($searchDetails, $nDays, $nAttemptNumber = 0)
     {
-
-//        $strURLBase = $this->_getBaseURLFormat_($searchDetails);
-//
-//        if($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
-//        {
-//            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['name'] ."' with no location settings and and base_url_format = " . $strURLBase . "..." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_START__);
-//        }
-//        elseif(substr_count($strURLBase, BASE_URL_TAG_LOCATION) < 1)
-//        {
-//            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['name'] ."' with base_url_format = " . $strURLBase . "..." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_START__);
-//        }
-//        elseif($this->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
-//        {
-//            $GLOBALS['logger']->logLine("Running ". $searchDetails['site_name'] . " search '" . $searchDetails['name'] ."' with base_url_format = " . $strURLBase . "..." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_START__);
-//        }
-
         try {
             if($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_XML__))
             {

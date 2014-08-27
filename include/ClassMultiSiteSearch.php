@@ -46,14 +46,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
 
         if(count($this->arrSearchesToReturn) >= 0)
         {
-
-            $arrUniq = $this->arrSearchesToReturn;
-//            // BUGBUG:  TESTING THIS OUT
-//            $arrUniq = array_unique_multidimensional($this->arrSearchesToReturn);
-//            $GLOBALS['logger']->logLine("Compacted " . (count($this->arrSearchesToReturn) - count($arrUniq)) . " searches because they were duplicates...", \Scooper\C__DISPLAY_NORMAL__);
-//
-//            foreach($this->arrSearchesToReturn as $search)
-            foreach($arrUniq as $search)
+            foreach($this->arrSearchesToReturn as $search)
             {
                 $strIncludeKey = 'include_'.strtolower($search['site_name']);
 
