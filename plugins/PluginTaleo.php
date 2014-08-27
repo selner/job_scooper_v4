@@ -151,8 +151,9 @@ abstract class BaseTaleoPlugin extends ClassJobsSitePlugin
             $item['job_id'] = explode("rid=", $item['job_post_url'])[1];
             if($item['job_title'] == '') continue;
 
-            $item['job_site_category'] = $node->find("td")[1]->plaintext;
-            $item['location'] = $node->find("td")[2]->plaintext;
+            $tds = $node->find("td");
+            if(isset($tds) && isset($tds[1])) $item['job_site_category'] = $node->find("td")[1]->plaintext;
+            if(isset($tds) && isset($tds[2]))$item['location'] = $tds[2]->plaintext;
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
             $ret[] = $this->normalizeItem($item);
