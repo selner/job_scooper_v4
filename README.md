@@ -57,8 +57,8 @@ Required Parameters:
 * Version:  v2.2.0 [release notes](https://github.com/selner/jobs_scooper/releases)
 * Author:  Bryan Selner (bryan at bryanselner dot com)
 * Platforms:
-	* Mac OS X 10.9.4 with PHP 5.4.24.
-	* Ubuntu Linux 14.04 with PHP 5.5.9-1ubuntu4.2 (with E_NOTICE error reporting disabled.)
+	* PHP 5.4.32 on Mac OSX 10.7 (Lion) and Mac OSX 10.9.4 (Mavericks)
+	* v2.0 was tested on Ubuntu Linux 14.04 with PHP 5.5.9-1ubuntu4.2 (with E_NOTICE error reporting disabled.)
 	* Note:  The AppleScripts will fail on any platform other than Mac OS X.  This only affects the client-side HTML download site plugins (about 7 out of over 60).  Job Scooper should process all the others without issues.
 	* However:  your mileage might vary on any other platform or version.
 on any platform that isn't Mac OSX, so you'll have to workaround that.
