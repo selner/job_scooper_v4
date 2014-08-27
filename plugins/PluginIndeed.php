@@ -96,7 +96,7 @@ class PluginIndeed extends ClassJobsSitePlugin
 
 
             $jobInfoNode = $node->firstChild()->firstChild();
-            $item['job_title'] = $jobInfoNode->attr['title'];
+            if(isset($jobInfoNode) && isset($jobInfoNode->attr['title'])) $item['job_title'] = $jobInfoNode->attr['title'];
             if($item['job_title'] == '') continue;
 
             $item['job_post_url'] = 'http://www.indeed.com' . $jobInfoNode->href;
@@ -105,10 +105,16 @@ class PluginIndeed extends ClassJobsSitePlugin
             $item['job_id'] = \Scooper\strScrub($arrURLParts[1]);
 
 
-            $item['company'] = trim($node->find("span[class='company'] span")[0]->plaintext);
-            $item['location'] =trim( $node->find("span[class='location'] span")[0]->plaintext);
+            $subNode = $node->find("span[class='company'] span");
+            if(isset($subNode) && isset($subNode[0])) $item['company'] = $subNode[0]->plaintext;
+
+            $subNode = $node->find("span[class='location'] span");
+            if(isset($subNode) && isset($subNode[0])) $item['location'] = $subNode[0]->plaintext;
+
+            $subNode = $node->find("span[class='date']");
+            if(isset($subNode) && isset($subNode[0])) $item['job_site_date'] = $subNode[0]->plaintext;
+
             $item['date_pulled'] = \Scooper\getTodayAsString();
-            $item['job_site_date'] = $node->find("span[class='date']")[0]->plaintext;
 
 
             $ret[] = $this->normalizeItem($item);

@@ -87,19 +87,27 @@ class PluginEmploymentGuide extends ClassJobsSitePlugin
             $item['job_post_url']  = $node->href;
             $item['job_id'] = explode("JobID=", $item['job_post_url'])[1];
 
-            $item['job_title'] = $node->find("div[class='jobInfo'] h2")[0]->plaintext;
-            //          if($item['job_title'] == '') continue;
+            $subNode = $node->find(("div[class='jobInfo'] h2"));
+            if(isset($subNode) && isset($subNode[0]))  $item['job_title'] = $subNode[0]->plaintext;
+            if($item['job_title'] == '') continue;
 
+            $subNode = $node->find(("div[class='jobInfo'] span[class='companyName']"));
+            if(isset($subNode) && isset($subNode[0]))  $item['company'] = $subNode[0]->plaintext;
 
-            $item['company'] = $node->find("div[class='jobInfo'] span[class='companyName']")[0]->plaintext;
-            $item['location'] = $node->find("div[class='jobInfo'] span[class='location'] span")[0]->plaintext;
+            $subNode = $node->find(("div[class='jobInfo'] span[class='location'] span"));
+            if(isset($subNode) && isset($subNode[0])) $item['location'] = $subNode[0]->plaintext;
 
+            $subNode = $node->find("td[class='column2'] div");
+            if(isset($subNode) && isset($subNode[0])) $item['job_site_category'] = $subNode[0]->plaintext;
 
-            $item['job_site_category'] = $node->find("td[class='column2'] div")[0]->plaintext;
 
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
-            $item['job_site_date'] = $node->find("div[class='datePosted']")[0]->plaintext . '-'.$node->find("div[class='datePosted'] span[class='dateNum']")[0]->plaintext;;
+            $subNode = $node->find("div[class='datePosted']");
+            if(isset($subNode) && isset($subNode[0])) $item['job_site_date'] = $subNode[0]->plaintext;
+
+            $subNode = $node->find("div[class='datePosted'] span[class='dateNum']");
+            if(isset($subNode) && isset($subNode[0])) $item['job_site_date'] .= '-'.$subNode[0]->plaintext;;
 
 
             $ret[] = $this->normalizeItem($item);

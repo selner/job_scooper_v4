@@ -83,10 +83,11 @@ class PluginSimplyHired extends ClassJobsSitePlugin
             $item = $this->getEmptyJobListingRecord();
             $item['job_id'] = $node->attr['id'];
 
-            $item['job_title'] = $node->find("a[class='title']")[0]->plaintext;
+            $subNode = $node->find("a[class='title']");
+            if(isset($subNode) && isset($subNode[0])) $item['job_title'] = $subNode[0]->plaintext;
+            $item['job_post_url'] = 'http://www.simplyhired.com' . $subNode[0]->href;
             if($item['job_title'] == '') continue;
 
-            $item['job_post_url'] = 'http://www.simplyhired.com' . $node->find("a[class='title']")[0]->href;
 
             $strURLAfterJobKey = str_replace("http://www.simplyhired.com/a/job-details/view/jobkey-", "", $item['job_post_url']);
             $arrURLRemainingParts = explode("/",  $strURLAfterJobKey);
@@ -94,14 +95,16 @@ class PluginSimplyHired extends ClassJobsSitePlugin
             $item['job_id'] = \Scooper\strScrub($item['job_id'], REPLACE_SPACES_WITH_HYPHENS);
 
             // TODO[BUGBUG] the h4 for company name can sometimes be missing.  the value is incorrectly set if so.
-            $tempCompany = $node->find("h4[class='company']")[0]->plaintext;
+            $subNode = $node->find("h4[class='company']");
+            if(isset($subNode) && isset($subNode[0])) $tempCompany = $subNode[0]->plaintext;
             if(isset($tempCompany) && strlen($tempCompany) > 0)
             {
                 $item['company']= trim($tempCompany);
             }
             else
             {
-                $tempCompany = $node->find("div[class='source']")[0]->plaintext;
+                $subNode = $node->find("div[class='source']");
+                if(isset($subNode) && isset($subNode[0])) $tempCompany = $subNode[0]->plaintext;
                 if(isset($tempCompany) && strlen($tempCompany) > 0)
                 {
                     $arrTempCompany = explode(" from ", $tempCompany);
@@ -111,9 +114,14 @@ class PluginSimplyHired extends ClassJobsSitePlugin
                     }
                 }
             }
-            $item['location'] =trim($node->find("span[class='location']")[0]->plaintext);
+            $subNode = $node->find("span[class='location']");
+            if(isset($subNode) && isset($subNode[0])) $item['location'] = $subNode[0]->plaintext;
+
             $item['date_pulled'] = \Scooper\getTodayAsString();
-            $item['job_site_date'] = $node->find("span[class='ago']")[0]->plaintext;
+
+            $subNode = $node->find("span[class='ago']");
+            if(isset($subNode) && isset($subNode[0])) $item['job_site_date'] = $subNode[0]->plaintext;
+
             $item['job_site'] = $this->siteName;
 
             $ret[] = $this->normalizeItem($item);

@@ -804,6 +804,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
         else
         {
+            $nJobsFound = 0;
 
             $GLOBALS['logger']->logLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strURL, \Scooper\C__DISPLAY_ITEM_START__);
 

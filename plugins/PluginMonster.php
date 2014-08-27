@@ -83,7 +83,7 @@ class PluginMonster extends ClassJobsSitePlugin
 
         foreach($nodesJobs as $node)
         {
-            if(strcasecmp($node->attr['class'], "even") != 0 &&
+            if(!isset($node->attr['class']) || strcasecmp($node->attr['class'], "even") != 0 &&
                 strcasecmp($node->attr['class'], "odd") != 0)
             {
                     continue;
