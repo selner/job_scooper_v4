@@ -420,26 +420,12 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
     function sendJobCompletedEmail($strBodyText = null, $strBodyHTML = null, $detailsFileCSV = null, $detailsFileHTML = null)
     {
-        if(isset($GLOBALS['OPTS']['skip_notifications']) && $GLOBALS['OPTS']['skip_notifications'] != 1)
+        if(isset($GLOBALS['OPTS']['skip_notifications']) && $GLOBALS['OPTS']['skip_notifications'] == 1)
         {
-            $ret = $this->__sendJobCompletedEmail_PHP__($strBodyText, $strBodyHTML, $detailsFileCSV, $detailsFileHTML);
-            if($ret != true)
-            {
-                $GLOBALS['logger']->logLine("Failed to send notification email.", \Scooper\C__DISPLAY_ERROR__);
-
-            }
+            $GLOBALS['logger']->logLine(PHP_EOL."User set -send_notifications = false so skipping email notification.)".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+            return;
         }
-        else
 
-            $GLOBALS['logger']->logLine(PHP_EOL."Skipping email notifications (-send_notifications = 0)".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
-
-    }
-
-
-    private function __sendJobCompletedEmail_PHP__($strBodyText, $strBodyHTML = null, $detailsFileCSV = null, $detailsFileHTML = null)
-    {
-
-        $subject = "";
         $messageHtml = "";
         $messageText = "";
 
@@ -514,15 +500,16 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $ret = $mail->addBCC($bccEmail['address'], $bccEmail['name']);     // Add a recipient
         }
         $mail->addAddress($toEmail['address'], $toEmail['name']);
-        $mail->addReplyTo("dev@recoilvelocity.com");
+        $mail->addBCC("dev@bryanselner.com", 'Jobs for ' . $toEmail['name']);
+        $mail->addReplyTo("dev@bryanselner.com", "dev@bryanselner.com" );
         $mail->setFrom($fromEmail['address'], $fromEmail['name']);
 
 
-        $mail->WordWrap = 120;                                 // Set word wrap to 120 characters
-        $mail->addAttachment($detailsFileCSV['full_file_path']);         // Add attachments
-        $mail->addAttachment($detailsFileHTML['full_file_path']);         // Add attachments
+        $mail->WordWrap = 120;                                          // Set word wrap to 120 characters
+        $mail->addAttachment($detailsFileCSV['full_file_path']);        // Add attachments
+        $mail->addAttachment($detailsFileHTML['full_file_path']);       // Add attachments
 
-        $mail->isHTML(true);                                  // Set email format to HTML
+        $mail->isHTML(true);                                            // Set email format to HTML
         $mail->Subject = $subject;
         $mail->Body    = $messageHtml;
         $mail->AltBody = $messageText;
