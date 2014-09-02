@@ -17,7 +17,7 @@ on run (argv)
 	set strFileKey of libDownload to third item of argv as string
 	set strURL of libDownload to fourth item of argv as string
 	
-	set nSecondsDelayForPageLoad of libDownload to 4
+	set nSecondsDelayForPageLoad of libDownload to 7
 	set strJSGetMaxPageValue of libDownload to "function getMax() { return 1000; } getMax();"
 	set strGetNextPageValue of libDownload to "function getMax() { return 1000; } getMax();"
 	
