@@ -30,10 +30,12 @@ class ClassConfig extends ClassJobsSitePlugin
 
     function getSearchConfiguration($strSubkey = null)
     {
-        if(isset($strSubkey) && isset($this->configSettings[$strSubkey]))
-            return $this->configSettings[$strSubkey];
+        if(isset($strSubkey) && (isset($this->configSettings[$strSubkey]) || $this->configSettings[$strSubkey] == null))
+            $ret = $this->configSettings[$strSubkey];
         else
-            return $this->configSettings;
+            $ret = $this->configSettings;
+
+        return $ret;
     }
 
     function getSMTPSettings() { if(isset($this->arrEmail_PHPMailer_SMTPSetup)) { return $this->arrEmail_PHPMailer_SMTPSetup; } else return null; }
@@ -570,7 +572,7 @@ class ClassConfig extends ClassJobsSitePlugin
     {
         foreach($GLOBALS['DATA']['location_types'] as $loctype)
         {
-            if(($iniSearchSetting[$loctype]) && $iniSearchSetting[$loctype] != "")
+            if(isset($iniSearchSetting[$loctype]) && strlen($iniSearchSetting[$loctype]) > 0)
             {
                 $arrLocSet[$loctype] = \Scooper\strScrub($iniSearchSetting[$loctype], REMOVE_EXTRA_WHITESPACE);
                 $arrLocSet[$loctype] = $iniSearchSetting[$loctype];
