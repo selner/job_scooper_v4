@@ -1,6 +1,7 @@
 (*
+
 on test()
-	doRun({"/Users/bryan/Code", "Google", "google-test", "https://www.google.com/about/careers/search/#t=sq&q=j&jl=Kirkland,WA&jl=Seattle,WA'"})
+	dorun({"/Users/bryan/Code/data", "Google", "google-test", "https://www.google.com/about/careers/search#t=sq&q=j&li=10&jl=47.6062095%253A-122.3320708%253ASeattle%252C+WA%252C+USA%253AUS%253AUnited+States%253A9.89489183879924%253ALOCALITY&jl=47.6814875%253A-122.2087353%253AKirkland%252C+WA%252C+USA%253AUS%253AUnited+States%253A3.3027282916684966%253ALOCALITY&"})
 end test
 
 on run (argv)
@@ -8,11 +9,10 @@ on run (argv)
 end run
 
 
-on doRun(argv)
-*)
-
-on run (argv)
+on dorun(argv)
+*)	
 	
+on run (argv)
 	set libDownload to init_library()
 	
 	set strOutputDir of libDownload to first item of argv as string
@@ -20,8 +20,8 @@ on run (argv)
 	set strFileKey of libDownload to third item of argv as string
 	set strURL of libDownload to fourth item of argv as string
 	
-	set nSecondsDelayForPageLoad of libDownload to 1
-		
+	set nSecondsDelayForPageLoad of libDownload to 3
+	
 	set strJSGetMaxPageValue of libDownload to "function getMaxPageValue() { try { return parseInt(document.getElementsByClassName('count')[0].textContent); } catch(err) { return 99999; } }  getMaxPageValue();" -- returns just a string "of many" sometimes, so we set an arbitrary high limit until we know.
 	
 	set strGetNextPageValue of libDownload to "function getNextPageValue() { return parseInt(document.getElementsByClassName('page')[0].textContent); }  getNextPageValue();"
@@ -30,14 +30,14 @@ on run (argv)
 		            false, false, false, false,   0, null);        document.getElementsByClassName('kd-button small selected')[1].nextSibling.dispatchEvent(event); return true; } doGetJobsClick();"
 	set strJSClickNext_Others of libDownload to strJSClickNext_First of libDownload
 	
-	set strJSGetTheSource of libDownload to "function getHTML() {  var text = ''; var arrItems = document.getElementsByClassName('sr sr-a'); for (var i = 0; i <  arrItems.length; i++) {    text = text + arrItems[i].innerHTML; }  return text; } getHTML();"
+	set strJSGetTheSource of libDownload to "function getHTML() {  var text = ''; var arrItems = document.getElementsByClassName('garage-center-wrapper'); for (var i = 0; i <  arrItems.length; i++) {    text = text + arrItems[i].innerHTML; }  return text; } getHTML();"
 	
 	
 	tell libDownload
 		set ret to doJobsDownload()
 	end tell
 	return ret
-end run
+end dorun
 
 
 --*******************************************************************************************
