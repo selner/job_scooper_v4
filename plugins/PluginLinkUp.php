@@ -62,12 +62,15 @@ class PluginLinkUp extends ClassJobsSitePlugin
 
     function parseTotalResultsCount($objSimpHTML)
     {
-        $resultsSection= $objSimpHTML->find("div[id='search-showing']");
-        $totalItemsText = $resultsSection[0]->plaintext;
-        $arrItemItems = explode(" ", trim($totalItemsText));
-        $strTotalItemsCount = $arrItemItems[4];
+        $nodeHelper = new CSimpleHTMLHelper($objSimpHTML);
 
-        return str_replace(",", "", $strTotalItemsCount);
+        $pageText = $nodeHelper->getText("div[id='search-showing']", 0, false);
+        // # of items to parse
+        $arrItemItems = explode(" ", trim($pageText));
+        if(isset($arrItemItems) && count($arrItemItems) >= 5)
+            return $arrItemItems[4];
+        else
+            return null;
     }
 
     function parseJobsListForPage($objSimpHTML)
