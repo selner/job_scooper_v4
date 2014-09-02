@@ -57,13 +57,15 @@ class PluginSimplyHired extends ClassJobsSitePlugin
 
     function parseTotalResultsCount($objSimpHTML)
     {
-        // # of items to parse
-        $pageDiv= $objSimpHTML->find('span[class="search_title"]');
-        $pageDiv = $pageDiv[0];
-        $pageText = $pageDiv->plaintext;
-        $arrItemItems = explode(" ", trim($pageText));
+        $nodeHelper = new CSimpleHTMLHelper($objSimpHTML);
 
-        return $arrItemItems[4];
+        $pageText = $nodeHelper->getText("span[class='search_title']", 0, false);
+        // # of items to parse
+        $arrItemItems = explode(" ", trim($pageText));
+        if(isset($arrItemItems) && count($arrItemItems) >= 5)
+            return $arrItemItems[4];
+        else
+            return null;
     }
 
 
@@ -110,7 +112,7 @@ class PluginSimplyHired extends ClassJobsSitePlugin
                     $arrTempCompany = explode(" from ", $tempCompany);
                     if(count($arrTempCompany) > 1)
                     {
-                        $item['company']= trim($arrTempCompany[1]);
+                        $item['company']= trim($arrTempCompany[count($arrTempCompany)-1]);
                     }
                 }
             }
