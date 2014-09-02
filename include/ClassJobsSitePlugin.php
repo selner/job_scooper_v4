@@ -685,7 +685,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
         if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
 
-        $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['name']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['key']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $class = new \Scooper\ScooperDataAPIWrapper();
         $class->setVerbose(isVerbose());
@@ -774,7 +774,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $strURL = $this->_getURLfromBase_($searchDetails, $nDays, $nPageCount, $nItemCount);
         if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
 
-        $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['name']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['key']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL );
         if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL); }
