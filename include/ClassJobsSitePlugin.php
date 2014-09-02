@@ -217,6 +217,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     protected $arrSearchesToReturn = null;
     protected $nJobListingsPerPage = 20;
     protected $flagSettings = null;
+    protected $secsPageTimeout = null;
 
 //   TODO:  break the single flag setup into multiples
 //    protected $flagsKeywordSettings = null;
@@ -776,7 +777,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['key']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-        $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL );
+        $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout );
         if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL); }
 
         if($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
@@ -818,7 +819,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 }
                 $GLOBALS['logger']->logLine("Getting jobs from ". $strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-                if(!$objSimpleHTML) $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL);
+                if(!$objSimpleHTML) $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout);
                 if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
 
                 $arrPageJobsList = $this->parseJobsListForPageBase($objSimpleHTML);

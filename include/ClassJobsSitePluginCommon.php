@@ -697,7 +697,7 @@ class ClassJobsSitePluginCommon
 
 
 
-    function getSimpleObjFromPathOrURL($filePath = "", $strURL = "")
+    function getSimpleObjFromPathOrURL($filePath = "", $strURL = "", $optTimeout = null)
     {
         $objSimpleHTML = null;
 
@@ -712,7 +712,8 @@ class ClassJobsSitePluginCommon
         {
             $class = new \Scooper\ScooperDataAPIWrapper();
             if(isVerbose()) $class->setVerbose(true);
-            $retHTML = $class->curl($strURL, null, 'GET');
+
+            $retHTML = $class->curl($strURL, null, 'GET', null, null, null, null, $optTimeout);
             if(count(strlen($retHTML['output']) > 0))
             {
                 $objSimpleHTML = SimpleHtmlDom\str_get_html($retHTML['output']);
