@@ -167,13 +167,14 @@ abstract class BaseTaleoPlugin extends ClassJobsSitePlugin
 
     function parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, $divTagType, $divTagValue, $trIndex)
     {
-        $resultsSection= $objSimpHTML->find("div[". $divTagType . "='".$divTagValue."'] table tbody tr");  // "1 - 10 of 10 Job Results"
-        $trSecond = $resultsSection[$trIndex];
-        $tdNode = $trSecond->find("td");
-        $totalItemsText = $tdNode[0]->plaintext;
+        $nodeHelper = new CSimpleHTMLHelper($objSimpHTML);
+
+        $node = $nodeHelper->get("div[". $divTagType . "='".$divTagValue."'] table tbody tr", $trIndex, true);
+
+        $trSecond = new CSimpleHTMLHelper($node);
+        $totalItemsText = $trSecond->getText("td", 0, true);
         $arrItemsFirstSplit = explode("found ", trim($totalItemsText));
-        $arrItemsSecondSplit = explode(" matching", trim($arrItemsFirstSplit[1]));
-        $strTotalItemsCount = str_replace(",", "", trim($arrItemsSecondSplit[0]));
+        $strTotalItemsCount = explode(" matching", trim($arrItemsFirstSplit[1]));
 
         return $strTotalItemsCount;
     }
