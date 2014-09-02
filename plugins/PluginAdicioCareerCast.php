@@ -356,7 +356,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
 
         // first looked for the detail view layout and parse that
         $nodesJobRows = $objSimpHTML->find('div[class="aiResultsWrapper"]');
-        if($nodesJobRows != null && count($nodesJobRows) > 0 )
+        if(isset($nodesJobRows) && count($nodesJobRows) > 0 )
         {
             foreach($nodesJobRows as $node)
             {
@@ -405,43 +405,46 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
 
 
             $nodesJobRows= $objSimpHTML->find('table[id="aiResultsBrief"] tr[class="aiResultsRow   "]');
-            foreach($nodesJobRows as $node)
+            if(isset($nodesJobRows))
             {
-                //
-                // get a new record with all columns set to null
-                //
-                $item = $this->getEmptyJobListingRecord();
+                foreach($nodesJobRows as $node)
+                {
+                    //
+                    // get a new record with all columns set to null
+                    //
+                    $item = $this->getEmptyJobListingRecord();
 
 
-                $item['job_site'] = $this->siteName;
-                $item['date_pulled'] = \Scooper\getTodayAsString();
+                    $item['job_site'] = $this->siteName;
+                    $item['date_pulled'] = \Scooper\getTodayAsString();
 
 
-                $titleLink = $node->find("a")[0];
-                $item['job_title'] = $titleLink->plaintext;
+                    $titleLink = $node->find("a")[0];
+                    $item['job_title'] = $titleLink->plaintext;
 
 
-                $item['job_post_url'] = $titleLink->href;
-                $arrURLParts= explode("-", $item['job_post_url']);
-                $item['job_id'] = $arrURLParts[count($arrURLParts) - 2];
+                    $item['job_post_url'] = $titleLink->href;
+                    $arrURLParts= explode("-", $item['job_post_url']);
+                    $item['job_id'] = $arrURLParts[count($arrURLParts) - 2];
 
 
-                // If we couldn't parse the job title, it's not really a job
-                // listing so just continue to the next one
-                //
-                if($item['job_title'] == '') continue;
+                    // If we couldn't parse the job title, it's not really a job
+                    // listing so just continue to the next one
+                    //
+                    if($item['job_title'] == '') continue;
 
-                $locNode = $node->find("td[class='aiResultsLocation']");
-                $item['location'] = $locNode[0]->plaintext;
+                    $locNode = $node->find("td[class='aiResultsLocation']");
+                    $item['location'] = $locNode[0]->plaintext;
 
-                $companyNode = $node->find("td[class='aiResultsCompany']");
-                $item['company'] = $companyNode[0]->plaintext;
+                    $companyNode = $node->find("td[class='aiResultsCompany']");
+                    $item['company'] = $companyNode[0]->plaintext;
 
-                //
-                // Call normalizeItem to standardize the resulting listing result
-                //
-                $ret[] = $this->normalizeItem($item);
+                    //
+                    // Call normalizeItem to standardize the resulting listing result
+                    //
+                    $ret[] = $this->normalizeItem($item);
 
+                }
             }
         }
 
