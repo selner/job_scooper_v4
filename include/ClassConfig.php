@@ -203,7 +203,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
 
 
-    private function setupRunFromAllConfigsRecursive($configFilePath, $config)
+    private function setupRunFromAllConfigsRecursive($configFilePath, $config, $fRecursed = false)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration from ".$configFilePath." and it's included INI file references...", \Scooper\C__DISPLAY_SECTION_START__);
 
@@ -221,15 +221,15 @@ class ClassConfig extends ClassJobsSitePlugin
                 $iniParser = new IniParser($nextConfigFile);
                 $nextConfig = $iniParser->parse($nextConfigFile);
                 $iniParser = null;
-                $this->setupRunFromAllConfigsRecursive($nextConfigFile, $nextConfig);
+                $this->setupRunFromAllConfigsRecursive($nextConfigFile, $nextConfig, true);
             }
         }
 
-        $this->_setupRunFromConfig_($config);
+        $this->_setupRunFromConfig_($config, $fRecursed);
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Settings loaded for: ".$configFilePath, \Scooper\C__DISPLAY_SUMMARY__);
     }
 
-    private function _setupRunFromConfig_($config)
+    private function _setupRunFromConfig_($config, $fRecursed = false)
     {
         if(isset($config->output))
         {
@@ -299,39 +299,42 @@ class ClassConfig extends ClassJobsSitePlugin
             $this->_updateSearchesWithKeywordSet_($primarySet);
         }
 
-        //
-        // Create searches needed to run all the keyword sets
-        //
-        $this->_addSearchesForKeywordSets_();
-
-
-        //
-        // Full set of searches loaded (location-agnostic).  We've now
-        // got the full set of searches, so update the set with the
-        // primary location data we have in the config.
-        //
-        if(isset($this->configSettings['location_sets']) && is_array($this->configSettings['location_sets']) && count($this->configSettings['location_sets']) >= 1)
+        // Only run this section after processing the parent/last one
+        if($fRecursed == false)
         {
+            //
+            // Create searches needed to run all the keyword sets
+            //
+            $this->_addSearchesForKeywordSets_();
 
-            $this->_addLocationSetToInitialSetOfSearches_();
+
+            //
+            // Full set of searches loaded (location-agnostic).  We've now
+            // got the full set of searches, so update the set with the
+            // primary location data we have in the config.
+            //
+            if(isset($this->configSettings['location_sets']) && is_array($this->configSettings['location_sets']) && count($this->configSettings['location_sets']) >= 1)
+            {
+
+                $this->_addLocationSetToInitialSetOfSearches_();
+            }
+
+            //
+            // Clone all searches if there were 2 or more location sets
+            // Add update those clones with those location values
+            //
+            $this->_addSearchesForAdditionalLocationSets_();
+
+
+
+            //
+            // Load the exclusion filter and other user data from files
+            //
+            $this->_loadTitlesRegexesToFilter_();
+
+            $this->_loadCompanyRegexesToFilter_();
+
         }
-
-        //
-        // Clone all searches if there were 2 or more location sets
-        // Add update those clones with those location values
-        //
-        $this->_addSearchesForAdditionalLocationSets_();
-
-
-
-        //
-        // Load the exclusion filter and other user data from files
-        //
-        $this->_loadTitlesRegexesToFilter_();
-
-        $this->_loadCompanyRegexesToFilter_();
-
-
 
 
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Completed loading configuration from INI file:  ".var_export($GLOBALS['OPTS'], true), \Scooper\C__DISPLAY_SUMMARY__);
@@ -350,9 +353,9 @@ class ClassConfig extends ClassJobsSitePlugin
             $tempFileDetails = \Scooper\parseFilePath($iniInputFileItem['path'], true);
 
         }
-        elseif(isset($iniInputFileItem['file_name']))
+        elseif(isset($iniInputFileItem['filename']))
         {
-            $tempFileDetails = \Scooper\parseFilePath($this->arrFileDetails['input_folder']['directory'].$iniInputFileItem['file_name'], true);
+            $tempFileDetails = \Scooper\parseFilePath($this->arrFileDetails['input_folder']['directory'].$iniInputFileItem['filename'], true);
         }
 
         if(isset($tempFileDetails))
