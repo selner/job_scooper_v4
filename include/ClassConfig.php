@@ -985,9 +985,13 @@ class ClassConfig extends ClassJobsSitePlugin
                     $GLOBALS['logger']->logLine("Loading job title regexes to filter from ".$fileDetail ['full_file_path']."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
                     $classCSVFile = new \Scooper\ScooperSimpleCSV($fileDetail ['full_file_path'] , 'r');
                     $arrTitlesTemp = $classCSVFile->readAllRecords(true, array("match_regex"));
+                    if(!isset($arrTitlesTemp['data_rows']) || count($arrTitlesTemp) <= 0)
+                    {
+                        $GLOBALS['logger']->logLine("Warning: No titles were found in the source file " . $fileDetail['file_name'] . " that will be automatically filtered from job listings." , \Scooper\C__DISPLAY_WARNING__);
+                        continue;
+                    }
+
                     $arrTitlesTemp = $arrTitlesTemp['data_rows'];
-                    $GLOBALS['logger']->logLine(count($arrTitlesTemp) . " titles found in the source file " . $fileDetail['file_name'] . " that will be automatically filtered from job listings." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                    if(count($arrTitlesTemp) <= 0)  continue;
                     //
                     // Add each title we found in the file to our list in this class, setting the key for
                     // each record to be equal to the job title so we can do a fast lookup later
