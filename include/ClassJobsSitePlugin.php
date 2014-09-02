@@ -67,8 +67,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         foreach($arrSearches as $searchDetails)
         {
-            $this->_finalizeSearch_($searchDetails);
-
             $this->_addSearch_($searchDetails);
 
         }
@@ -106,21 +104,25 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         if(isset($GLOBALS['OPTS'][$strIncludeKey]) && $GLOBALS['OPTS'][$strIncludeKey] == 0)
         {
-            $GLOBALS['logger']->logLine($this->siteName . " excluded for run, so skipping '" . count($this->arrSearchesToReturn). "' search(es) set for that site.", \Scooper\C__DISPLAY_ITEM_START__);
+            $GLOBALS['logger']->logLine($this->siteName . ": excluded for run. Skipping '" . count($this->arrSearchesToReturn). "' site search(es).", \Scooper\C__DISPLAY_ITEM_START__);
+            return;
         }
-        else
+
+        if(count($this->arrSearchesToReturn) == 0)
         {
+            $GLOBALS['logger']->logLine($this->siteName . ": no searches set. Skipping...", \Scooper\C__DISPLAY_ITEM_START__);
+            return;
+        }
 
-            $this->_collapseSearchesIfPossible_();
+        $this->_collapseSearchesIfPossible_();
 
 
-            foreach($this->arrSearchesToReturn as $search)
-            {
-                // assert this search is actually for the job site supported by this plugin
-                assert(strcasecmp(strtolower($search['site_name']), strtolower($this->siteName)) == 0);
+        foreach($this->arrSearchesToReturn as $search)
+        {
+            // assert this search is actually for the job site supported by this plugin
+            assert(strcasecmp(strtolower($search['site_name']), strtolower($this->siteName)) == 0);
 
-                $this->_getJobsForSearchByType_($search);
-            }
+            $this->_getJobsForSearchByType_($search);
         }
     }
 
@@ -231,13 +233,22 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     private function _addSearch_($searchDetails)
     {
 
-        $this->_setKeywordStringsForSearch_($searchDetails);
+        if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_ANYWHERE) && $this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
+        {
+            $strErr = "Skipping " . $searchDetails['key'] . " search on " . $this->siteName . ".  The plugin only can return all results and therefore cannot be matched with the requested keyword string [Search requested keyword match=anywhere].  ";
+            $GLOBALS['logger']->logLine($strErr, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        }
+        else
+        {
 
-        //
-        // Add the search to the list of ones to run
-        //
-        $this->arrSearchesToReturn[] = $searchDetails;
+            $this->_finalizeSearch_($searchDetails);
 
+            //
+            // Add the search to the list of ones to run
+            //
+            $this->arrSearchesToReturn[] = $searchDetails;
+            $GLOBALS['logger']->logLine($this->siteName . ": added search (" . $searchDetails['name'] . ")", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        }
 
     }
 
@@ -258,13 +269,13 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         // the terms with, we can't collapse, so just leave the searches as they were and return
         if(!$this->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) || $this->strKeywordDelimiter == null || strlen($this->strKeywordDelimiter) <= 0)
         {
-            $GLOBALS['logger']->logLine($this->siteName . " does not support collapsing terms into a single search.  Continuing with " . count($this->arrSearchesToReturn) . " search(es).", \Scooper\C__DISPLAY_WARNING__);
+            $GLOBALS['logger']->logLine($this->siteName . " does not support collapsing terms into a single search.  Continuing with " . count($this->arrSearchesToReturn) . " search(es).", \Scooper\C__DISPLAY_ITEM_DETAIL__);
             return;
         }
 
         if(count($this->arrSearchesToReturn) == 1)
         {
-            $GLOBALS['logger']->logLine($this->siteName . " does not have more than one search to collapse.  Continuing with single '" . $this->arrSearchesToReturn[0]['name'] . "' search.", \Scooper\C__DISPLAY_WARNING__);
+            $GLOBALS['logger']->logLine($this->siteName . " does not have more than one search to collapse.  Continuing with single '" . $this->arrSearchesToReturn[0]['name'] . "' search.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
             return;
         }
 
@@ -587,6 +598,8 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     private function _getJobsForSearchByType_($searchDetails, $nAttemptNumber = 0)
     {
+        $GLOBALS['logger']->logLine($this->siteName . ": getting jobs for search(" . $searchDetails['name'] .")", \Scooper\C__DISPLAY_ITEM_START__);
+
         try {
             if($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_XML__))
             {
@@ -655,121 +668,32 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
     }
 
-    private function _getNumJobsForCachedURL_($strURL)
-    {
-        $obj = $this->_getJobsDataForCachedURL_($strURL);
-        if(isset($obj))
-        {
-            return $obj['jobs_count'];
-        }
-    }
-
     private function _getJobsDataForCachedURL_($strURL)
     {
         $ret = null;
 
         $plugin = $GLOBALS['DATA']['site_plugins'][strtolower($this->siteName)];
-        if(isset($plugin['array_data_page_objects']) && isset($plugin['array_data_page_objects'][$strURL]) &&
-            strcasecmp($strURL, $plugin['array_data_page_objects'][$strURL]['url']) == 0)
+        if(isset($plugin['cached_jobs']) && isset($plugin['cached_jobs'][$strURL]) &&
+            strcasecmp($strURL, $plugin['cached_jobs'][$strURL]['url']) == 0)
         {
-            return $plugin['array_data_page_objects'][$strURL]['object'];
+            return $plugin['cached_jobs'][$strURL]['object'];
         }
 
         return null;
     }
 
-            private function _getDataObjectForURL($searchDetails, $strURL)
+    private function _cacheJobsForURL($strURL, $dataJobs, $nJobCount = null)
     {
-        $ret = null;
+        $arrJobData = array();
+        $arrJobData['object'] = \Scooper\array_copy($dataJobs);
+        $arrJobData['url'] = $strURL;
 
-        $plugin = $GLOBALS['DATA']['site_plugins'][strtolower($this->siteName)];
-        if(isset($plugin['array_data_page_objects']) && isset($plugin['array_data_page_objects'][$strURL]) &&
-            strcasecmp($strURL, $plugin['array_data_page_objects'][$strURL]['url']) == 0)
+        if(isset($dataJobs) && isset($strURL))
         {
-                return $plugin['array_data_page_objects'][$strURL]['object'];
+            $GLOBALS['DATA']['site_plugins'][strtolower($this->siteName)]['cached_jobs'][$strURL] = $arrJobData;
         }
-        else
-        {
-
-            if($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_XML__))
-            {
-                $class = new \Scooper\ScooperDataAPIWrapper();
-                $class->setVerbose(isVerbose());
-                $ret = $class->cURL($strURL, null, 'GET', 'text/xml; charset=UTF-8');
-                $xmlResult = simplexml_load_string($ret['output']);
-
-                if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
-                $xmlResult->registerXPathNamespace("def", "http://www.w3.org/2005/Atom");
-                $ret = $xmlResult;
-            }
-            elseif($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_HTML_FILE__))
-            {
-                $strFileKey = strtolower($this->siteName.'-'.$searchDetails['key']);
-                $strFileBase = $this->detailsMyFileOut['directory'].$strFileKey. "-jobs-page-";
-
-                $strURL = $this->_getURLfromBase_($searchDetails, null, null);
-                if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
-
-                $GLOBALS['logger']->logLine("Exporting HTML from " . $this->siteName ." jobs for search '".$searchDetails['name']. "' to be parsed: ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-                $strCmdToRun = "osascript " . __ROOT__ . "/plugins/".$this->strFilePath_HTMLFileDownloadScript . " " . escapeshellarg($this->detailsMyFileOut["directory"])  . " ".escapeshellarg($searchDetails["site_name"])." " . escapeshellarg($strFileKey)   . " '"  . $strURL . "'";
-                $GLOBALS['logger']->logLine("Command = " . $strCmdToRun, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                $result = \Scooper\my_exec($strCmdToRun);
-                if(\Scooper\intceil($result['stdout']) == VALUE_NOT_SUPPORTED)
-                {
-                    $strError = "AppleScript did not successfully download the jobs.  Log = ".$result['stderr'];
-                    $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-                    throw new ErrorException($strError);
-                }
-                else
-                {
-                    // log the resulting output from the script to the job_scooper log
-                    $GLOBALS['logger']->logLine($result['stderr'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                }
-
-                $strFileName = $strFileBase.".html";
-                $GLOBALS['logger']->logLine("Parsing downloaded HTML files: '" . $strFileBase."*.html'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                if(file_exists($strFileName) && is_file($strFileName))
-                {
-                    $GLOBALS['logger']->logLine("Parsing results HTML from '" . $strFileName ."'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                    $objSimpleHTML = $this->getSimpleHTMLObjForFileContents($strFileName);
-                    if(!$objSimpleHTML)
-                    {
-                        throw new ErrorException('Error:  unable to get SimpleHTMLDom object from file('.$strFileName.').');
-                    }
-                    $ret = $objSimpleHTML;
-
-                    //
-                    // If the user has not asked us to keep interim files around
-                    // after we're done processing, then delete the interim HTML file
-                    //
-                    if($this->is_OutputInterimFiles() != true) {
-                        unlink($strFileName);
-                    }
-
-                }
-            }
-            elseif($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__))
-            {
-                $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout );
-                if(!isset($objSimpleHTML)) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL); }
-                $ret = $objSimpleHTML;
-            }
-
-            if(isset($ret))
-            {
-                $GLOBALS['DATA']['site_plugins'][strtolower($this->siteName)]['array_data_page_objects'][$strURL]['url'] = $strURL;
-                $GLOBALS['DATA']['site_plugins'][strtolower($this->siteName)]['array_data_page_objects'][$strURL]['object'] = clone $ret;
-            }
-        }
-
-        if(!isset($ret))
-        {
-            throw new ErrorException('Error: unable to get page data object for URL('.$strURL.').');
-        }
-        return $ret;
-
     }
+
 
     private function _getMyJobsForSearchFromXML_($searchDetails)
     {
@@ -786,15 +710,22 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
         $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['key']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-        $xmlResult = $this->_getDataObjectForURL($searchDetails, $strURL);
 
-//        $class = new \Scooper\ScooperDataAPIWrapper();
-//        $class->setVerbose(isVerbose());
-//        $ret = $class->cURL($strURL, null, 'GET', 'text/xml; charset=UTF-8');
-//        $xmlResult = simplexml_load_string($ret['output']);
-//
-//        if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
-//        $xmlResult->registerXPathNamespace("def", "http://www.w3.org/2005/Atom");
+        $arrPageJobsList = $this->_getJobsDataForCachedURL_($strURL);
+        if(isset($arrPageJobsList))
+        {
+            $this->_addSearchJobsToMyJobsList_($arrPageJobsList['object'], $searchDetails);
+            $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[".$searchDetails['name']."]" .": " . countJobRecords($arrPageJobsList['object']). " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+            return;
+        }
+
+        $class = new \Scooper\ScooperDataAPIWrapper();
+        $class->setVerbose(isVerbose());
+        $ret = $class->cURL($strURL, null, 'GET', 'text/xml; charset=UTF-8');
+        $xmlResult = simplexml_load_string($ret['output']);
+
+        if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
+        $xmlResult->registerXPathNamespace("def", "http://www.w3.org/2005/Atom");
 
         if($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
         {
@@ -812,13 +743,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         if($nTotalListings <= 0)
         {
-            $GLOBALS['logger']->logLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['name']."'.", \Scooper\C__DISPLAY_ITEM_START__);
+            $GLOBALS['logger']->logLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['name']."'.", \Scooper\C__DISPLAY_ITEM_RESULT__);
+            $this->_cacheJobsForURL($strURL, null, 0);
             return;
         }
         else
         {
 
-            $GLOBALS['logger']->logLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strURL, \Scooper\C__DISPLAY_ITEM_START__);
+            $GLOBALS['logger']->logLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
             while ($nPageCount <= $totalPagesCount )
             {
@@ -827,19 +759,17 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 $strURL = $this->_getURLfromBase_($searchDetails, $nPageCount, $nItemCount);
                 if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
 
-                $xmlResult = $this->_getDataObjectForURL($searchDetails, $strURL);
+                if(!($nPageCount == 1 && isset($xmlResult)))
+                {
+                    $class = new \Scooper\ScooperDataAPIWrapper();
+                    $class->setVerbose(isVerbose());
+                    $ret = $class->cURL($strURL,'' , 'GET', 'application/rss+xml');
 
-//                $class = new \Scooper\ScooperDataAPIWrapper();
-//                $class->setVerbose(isVerbose());
-//                $ret = $class->cURL($strURL,'' , 'GET', 'application/rss+xml');
-//
-//                $xmlResult = simplexml_load_string($ret['output']);
-//                if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
-
+                    $xmlResult = simplexml_load_string($ret['output']);
+                    if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
+                }
                 $arrPageJobsList = $this->parseJobsListForPage($xmlResult);
-
-
-                if(!is_array($arrPageJobsList))
+                if(!is_array($arrPageJobsList) && $nPageCount > 1)
                 {
                     // we likely hit a page where jobs started to be hidden.
                     // Go ahead and bail on the loop here
@@ -848,16 +778,16 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                         $strWarnHiddenListings .= "  They likely have hidden the remaining " . ($totalPagesCount - $nPageCount) . " pages worth. ";
 
                     $GLOBALS['logger']->logLine($strWarnHiddenListings, \Scooper\C__DISPLAY_ITEM_START__);
-                    $nPageCount = $totalPagesCount ;
+                    $nPageCount = $totalPagesCount;
+                    continue;
                 }
-                else
-                {
-                    addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
-                    $nItemCount += $this->nJobListingsPerPage;
-                }
-                $nPageCount++;
 
+                addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
+                $nItemCount += $this->nJobListingsPerPage;
+                $nPageCount++;
             }
+
+            $this->_cacheJobsForURL($strURL, $arrPageJobsList, countJobRecords($arrPageJobsList));
 
         }
         $this->_addSearchJobsToMyJobsList_($arrSearchReturnedJobs, $searchDetails);
@@ -877,12 +807,19 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $strURL = $this->_getURLfromBase_($searchDetails, $nPageCount, $nItemCount);
         if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
 
+        $arrPageJobsList = $this->_getJobsDataForCachedURL_($strURL);
+        if(isset($arrPageJobsList))
+        {
+            $this->_addSearchJobsToMyJobsList_($arrPageJobsList['object'], $searchDetails);
+            $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[".$searchDetails['name']."]" .": " . countJobRecords($arrPageJobsList['object']). " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+            return;
+        }
+
+
         $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['key']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-        $objSimpleHTML = $this->_getDataObjectForURL($searchDetails, $strURL);
-
-//        $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout );
-//        if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL); }
+        $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout );
+        if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL); }
 
         if($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
         {
@@ -914,49 +851,49 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             {
                 $arrPageJobsList = null;
 
-
-                $GLOBALS['logger']->logLine("Getting jobs from ". $strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 if(!($nPageCount == 1 && isset($objSimpleHTML)))
                 {
-
                     $strURL = $this->_getURLfromBase_($searchDetails, $nPageCount, $nItemCount);
                     if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
 
-                    $objSimpleHTML = $this->_getDataObjectForURL($searchDetails, $strURL);
-    //                if(!$objSimpleHTML) $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout);
-    //                if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
+                    $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout);
                 }
+                $GLOBALS['logger']->logLine("Getting jobs from ". $strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-                $arrPageJobsList = $this->parseJobsListForPageBase($objSimpleHTML);
-
-
-                if(!is_array($arrPageJobsList))
+                if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
+                try
                 {
-                    // we likely hit a page where jobs started to be hidden.
-                    // Go ahead and bail on the loop here
-                    $strWarnHiddenListings = "Could not get all job results back from ". $this->siteName . " for this search starting on page " . $nPageCount.".";
-                    if($nPageCount < $totalPagesCount)
-                        $strWarnHiddenListings .= "  They likely have hidden the remaining " . ($totalPagesCount - $nPageCount) . " pages worth. ";
+                    $arrPageJobsList = $this->parseJobsListForPageBase($objSimpleHTML);
+                    if(!is_array($arrPageJobsList))
+                    {
+                        // we likely hit a page where jobs started to be hidden.
+                        // Go ahead and bail on the loop here
+                        $strWarnHiddenListings = "Could not get all job results back from ". $this->siteName . " for this search starting on page " . $nPageCount.".";
+                        if($nPageCount < $totalPagesCount)
+                            $strWarnHiddenListings .= "  They likely have hidden the remaining " . ($totalPagesCount - $nPageCount) . " pages worth. ";
 
-                    $GLOBALS['logger']->logLine($strWarnHiddenListings, \Scooper\C__DISPLAY_ITEM_START__);
-                    $nPageCount = $totalPagesCount;
+                        $GLOBALS['logger']->logLine($strWarnHiddenListings, \Scooper\C__DISPLAY_ITEM_START__);
+                        $nPageCount = $totalPagesCount;
+                    }
+                    else
+                    {
+                        addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
+                        $nJobsFound = countJobRecords($arrSearchReturnedJobs);
+                        if($nItemCount == 1) { $nItemCount = 0; }
+                        $nItemCount += ($nJobsFound < $this->nJobListingsPerPage) ? $nJobsFound : $this->nJobListingsPerPage;
+                    }
+                } catch (Exception $ex) {
+                    $GLOBALS['logger']->logLine($this->siteName . " error: " . $ex, \Scooper\C__DISPLAY_ERROR__);
+
                 }
-                else
-                {
-                    addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
-                    $nJobsFound = countJobRecords($arrSearchReturnedJobs);
-                    if($nItemCount == 1) { $nItemCount = 0; }
-                    $nItemCount += ($nJobsFound < $this->nJobListingsPerPage) ? $nJobsFound : $this->nJobListingsPerPage;
 
-                }
-
-//                // clean up memory
-//                $objSimpleHTML->clear();
-//                unset($objSimpleHTML);
-//                $objSimpleHTML = null;
+                // clean up memory
+                $objSimpleHTML->clear();
+                unset($objSimpleHTML);
+                $objSimpleHTML = null;
                 $nPageCount++;
-
             }
+            $this->_cacheJobsForURL($strURL, $arrSearchReturnedJobs, countJobRecords($arrSearchReturnedJobs));
         }
 
         $this->_addSearchJobsToMyJobsList_($arrSearchReturnedJobs, $searchDetails);
@@ -983,65 +920,73 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $strURL = $this->_getURLfromBase_($searchDetails, null, null);
         if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
 
-        $objSimpleHTML = $this->_getDataObjectForURL($searchDetails, $strURL);
-//
-//        $strCmdToRun = "osascript " . __ROOT__ . "/plugins/".$this->strFilePath_HTMLFileDownloadScript . " " . escapeshellarg($this->detailsMyFileOut["directory"])  . " ".escapeshellarg($searchDetails["site_name"])." " . escapeshellarg($strFileKey)   . " '"  . $strURL . "'";
-//        $GLOBALS['logger']->logLine("Command = " . $strCmdToRun, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-//        $result = \Scooper\my_exec($strCmdToRun);
-//        if(\Scooper\intceil($result['stdout']) == VALUE_NOT_SUPPORTED)
-//        {
-//            $strError = "AppleScript did not successfully download the jobs.  Log = ".$result['stderr'];
-//            $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-//            throw new ErrorException($strError);
-//        }
-//        else
-//        {
-//            // log the resulting output from the script to the job_scooper log
-//            $GLOBALS['logger']->logLine($result['stderr'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
-//        }
-//
-//        $strFileName = $strFileBase.".html";
-//        $GLOBALS['logger']->logLine("Parsing downloaded HTML files: '" . $strFileBase."*.html'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-//        while (file_exists($strFileName) && is_file($strFileName))
-//        {
-//            $GLOBALS['logger']->logLine("Parsing results HTML from '" . $strFileName ."'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-//            $objSimpleHTML = $this->getSimpleHTMLObjForFileContents($strFileName);
-//            if(!$objSimpleHTML)
-//            {
-//                throw new ErrorException('Error:  unable to get SimpleHTMLDom object from file('.$strFileName.').');
-//            }
-//
-//            $arrPageJobsList = $this->parseJobsListForPage($objSimpleHTML);
-//
-//            $objSimpleHTML->clear();
-//            unset($objSimpleHTML);
-//            $objSimpleHTML = null;
-//
-//            //
-//            // If the user has not asked us to keep interim files around
-//            // after we're done processing, then delete the interim HTML file
-//            //
-//            if($this->is_OutputInterimFiles() != true) {
-//                unlink($strFileName);
-//            }
-//
-//            $GLOBALS['logger']->logLine("Downloaded " . countJobRecords($arrPageJobsList) ." jobs from " . $strFileName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-//            addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
-//
-//            $nPageCount++;
-//
-//            $strFileName = $strFileBase.$nPageCount.".html";
-//        }
-
-        $arrPageJobsList = $this->parseJobsListForPage($objSimpleHTML);
-
-        $GLOBALS['logger']->logLine("Downloaded " . countJobRecords($arrPageJobsList) ." jobs from " . $this->siteName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
+        $arrPageJobsList = $this->_getJobsDataForCachedURL_($strURL);
+        if(isset($arrPageJobsList))
+        {
+            $this->_addSearchJobsToMyJobsList_($arrPageJobsList['object'], $searchDetails);
+            $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[".$searchDetails['name']."]" .": " . countJobRecords($arrPageJobsList['object']). " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+            return;
+        }
 
 
+        $strCmdToRun = "osascript " . __ROOT__ . "/plugins/".$this->strFilePath_HTMLFileDownloadScript . " " . escapeshellarg($this->detailsMyFileOut["directory"])  . " ".escapeshellarg($searchDetails["site_name"])." " . escapeshellarg($strFileKey)   . " '"  . $strURL . "'";
+        $GLOBALS['logger']->logLine("Command = " . $strCmdToRun, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $result = \Scooper\my_exec($strCmdToRun);
+        if(\Scooper\intceil($result['stdout']) == VALUE_NOT_SUPPORTED)
+        {
+            $strError = "AppleScript did not successfully download the jobs.  Log = ".$result['stderr'];
+            $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
+            throw new ErrorException($strError);
+        }
+        else
+        {
+            // log the resulting output from the script to the job_scooper log
+            $GLOBALS['logger']->logLine($result['stderr'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        }
 
-        $GLOBALS['logger']->logLine("Downloaded " . countJobRecords($arrSearchReturnedJobs) ." total jobs for search '" . $searchDetails['name'] . "'.", \Scooper\C__DISPLAY_ITEM_RESULT__);
-        $this->_addSearchJobsToMyJobsList_($arrSearchReturnedJobs, $searchDetails);
+        $strFileName = $strFileBase.".html";
+        $GLOBALS['logger']->logLine("Parsing downloaded HTML files: '" . $strFileBase."*.html'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        while (file_exists($strFileName) && is_file($strFileName))
+        {
+            $GLOBALS['logger']->logLine("Parsing results HTML from '" . $strFileName ."'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            $objSimpleHTML = $this->getSimpleHTMLObjForFileContents($strFileName);
+            if(!$objSimpleHTML)
+            {
+                throw new ErrorException('Error:  unable to get SimpleHTMLDom object from file('.$strFileName.').');
+            }
+
+            $arrPageJobsList = $this->parseJobsListForPage($objSimpleHTML);
+
+            addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
+
+            $objSimpleHTML->clear();
+            unset($objSimpleHTML);
+            $objSimpleHTML = null;
+
+            //
+            // If the user has not asked us to keep interim files around
+            // after we're done processing, then delete the interim HTML file
+            //
+            if($this->is_OutputInterimFiles() != true) {
+                unlink($strFileName);
+            }
+
+            $nPageCount++;
+            $strFileName = $strFileBase.$nPageCount.".html";
+        }
+
+        if(isset($arrPageJobsList))
+        {
+            $GLOBALS['logger']->logLine("Downloaded " . countJobRecords($arrPageJobsList) ." jobs from " . $strFileName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            $this->_cacheJobsForURL($strURL, $arrPageJobsList, countJobRecords($arrPageJobsList));
+            $this->_addSearchJobsToMyJobsList_($arrSearchReturnedJobs, $searchDetails);
+        }
+        else
+        {
+            $this->_cacheJobsForURL($strURL, array(), 0);
+            $GLOBALS['logger']->logLine("0 jobs found for " . $strFileName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        }
+
     }
 
     /*

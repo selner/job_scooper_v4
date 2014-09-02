@@ -28,15 +28,6 @@ const C__STR_TAG_NOT_EXACT_TITLE_MATCH__ = "No (Not an Exact Title Match)";
 const C__STR_TAG_EXCLUDED_TITLE_REGEX = 'No (Title Excluded Via RegEx)';
 
 
-function hasPluginDataObjects($var)
-{
-    if(isset($var['array_data_page_objects']) && count($var['array_data_page_objects']) > 0)
-    {
-        return true;
-    }
-    return false;
-}
-
 //
 // Jobs List Filter Functions
 //
