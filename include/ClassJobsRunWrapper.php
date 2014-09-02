@@ -47,6 +47,26 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
     function __destruct()
     {
         if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
+
+        if($GLOBALS['DATA']['site_plugins'])
+        {
+            $plugDataObjs = array_filter($GLOBALS['DATA']['site_plugins'], 'hasPluginDataObjects');
+            if(isset($plugDataObjs))
+            {
+                foreach($plugDataObjs as $plugin)
+                {
+                    foreach($plugin['array_data_page_objects'] as $obj)
+                    {
+                        if(strcasecmp(get_class($plugin['array_data_page_objects'][$obj['url']]['object']), "SimpleHtmlDom\\simple_html_dom") == 0)
+                        {
+                            $plugin['array_data_page_objects'][$obj['url']]['object']->clear();
+                        }
+                        $plugin['array_data_page_objects'][$obj['url']]['object'] = null;
+                        $plugin['array_data_page_objects'][$obj['url']] = null;
+                    }
+                }
+            }
+        }
     }
 
     function RunAll()
@@ -395,7 +415,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         $classMulti = new ClassMultiSiteSearch($this->classConfig->getFileDetails('output_subfolder')['directory']);
         $classMulti->addMultipleSearches($this->arrSearchesToReturn, null);
-        $classMulti->getJobsForMyMultipleSearches( $this->classConfig->getSearchConfiguration('number_days'), null);
+        $classMulti->getJobsForMyMultipleSearches();
         addJobsToJobsList($this->arrLatestJobs, $classMulti->getMyJobsList());
 
         addJobsToJobsList($this->arrLatestJobs_UnfilteredByUserInput, $this->arrLatestJobs);

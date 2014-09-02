@@ -113,7 +113,7 @@ function setupPlugins()
         {
 
             $classinst = new $class(null, null);
-            $GLOBALS['DATA']['site_plugins'][strtolower($classinst->getName())] = array('name'=>strtolower($classinst->getName()), 'class_name' => $class, 'include_in_run' => false );
+            $GLOBALS['DATA']['site_plugins'][strtolower($classinst->getName())] = array('name'=>strtolower($classinst->getName()), 'class_name' => $class, 'include_in_run' => false, 'array_data_page_objects' => null );
             $arrAddedPlugins[] = $classinst->getName();
             // print('      Added job site plugin for '. $classinst->getName() . '.' . PHP_EOL);
             $classinst=null;
