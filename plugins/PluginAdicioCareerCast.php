@@ -256,9 +256,9 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
         return parent::__construct($strOutputDirectory);
     }
 
-    protected function _getURLfromBase_($searchDetails, $nDays, $nPage = null, $nItem = null)
+    protected function _getURLfromBase_($searchDetails, $nPage = null, $nItem = null)
     {
-        return parent::_getURLfromBase_($searchDetails, $nDays, $nPage, $nItem);
+        return parent::_getURLfromBase_($searchDetails, $nPage, $nItem);
     }
 
     // if this is a client-side HTML download plugin, you will need to add a script
@@ -283,7 +283,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
      * @param $days
      * @return int|string
      */
-    function getDaysURLValue($days)
+    function getDaysURLValue($days = null)
     {
         $ret = "%5BNOW-1DAYS+TO+NOW%5D";
 

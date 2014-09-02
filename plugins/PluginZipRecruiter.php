@@ -54,7 +54,7 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
      * @param $days
      * @return int|string
      */
-    function getDaysURLValue($days)
+    function getDaysURLValue($days = null)
     {
         $ret = "1";
 

@@ -40,7 +40,7 @@ class PluginSimplyHired extends ClassJobsSitePlugin
         return $nItem;
     }
 
-    function getDaysURLValue($nDays)
+    function getDaysURLValue($nDays = null)
     {
         $ret = 1;
         if($nDays > 1)

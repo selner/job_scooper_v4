@@ -40,12 +40,14 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
     }
 
 
-    function getJobsForMyMultipleSearches($nDays = -1, $keywordSet = null)
+    function getJobsForMyMultipleSearches()
     {
         $arrPluginClassesToRun = null;
 
-        if(count($this->arrSearchesToReturn) >= 0)
+        $arrSearchesToReturn = $this->arrSearchesToReturn;
+        if(count($arrSearchesToReturn) >= 0)
         {
+            shuffle($arrSearchesToReturn);
             foreach($this->arrSearchesToReturn as $search)
             {
                 $strIncludeKey = 'include_'.strtolower($search['site_name']);
@@ -76,7 +78,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
                 {
                     $GLOBALS['logger']->logLine("Setting up " . count($classSearches['searches']) . " search(es) for ". $classSearches['site_name'] . "...", \Scooper\C__DISPLAY_SECTION_START__);
                     $class->addSearches($classSearches['searches']);
-                    $class->getJobsForAllSearches($nDays);
+                    $class->getJobsForAllSearches();
                     addJobsToJobsList($this->arrLatestJobs, $class->getMyJobsList());
                     $class = null;
                 }

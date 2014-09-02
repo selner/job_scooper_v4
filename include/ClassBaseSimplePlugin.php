@@ -43,7 +43,7 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
         return parent::__construct($strOutputDirectory);
     }
 
-    protected function _getURLfromBase_($searchDetails, $nDays, $nPage = null, $nItem = null)
+    protected function _getURLfromBase_($searchDetails, $nPage = null, $nItem = null)
     {
         return $this->childSiteListingPage;
     }

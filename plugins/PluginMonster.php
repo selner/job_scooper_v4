@@ -34,7 +34,7 @@ class PluginMonster extends ClassJobsSitePlugin
         parent::__construct($strBaseDir);
     }
 
-    function getDaysURLValue($days) {
+    function getDaysURLValue($days = null) {
         $ret = "yesterday";
 
         if($days != null)

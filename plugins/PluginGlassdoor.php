@@ -32,7 +32,7 @@ class PluginGlassdoor extends ClassJobsSitePlugin
         parent::__construct($strBaseDir);
     }
 
-    function getDaysURLValue($days) {
+    function getDaysURLValue($days = null) {
         $ret = 1;
 
         if($days != null)

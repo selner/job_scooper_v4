@@ -43,7 +43,7 @@ class PluginIndeed extends ClassJobsSitePlugin
         return $nItem;
     }
 
-    function getDaysURLValue($nDays)
+    function getDaysURLValue($nDays = null)
     {
 
         switch($nDays)

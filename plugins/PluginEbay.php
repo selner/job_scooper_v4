@@ -31,18 +31,22 @@ class PluginEbay extends ClassJobsSitePlugin
 
     function parseTotalResultsCount($objSimpHTML)
     {
-        $resultsSection= $objSimpHTML->find("span[id='searchResultCount']");
-        $strTotalItemsCount  = $resultsSection[0]->plaintext;
-        $strTotalItemsCount = \Scooper\strScrub($strTotalItemsCount);
-        return str_replace(",", "", $strTotalItemsCount);
+        $nodeHelper = new CSimpleHTMLHelper($objSimpHTML);
+
+        $strTotalItemsCount = $nodeHelper->getText("span[id='searchResultCount']", 0, false);
+        return $strTotalItemsCount;
+
+//        $resultsSection= $objSimpHTML->find("");
+//        $strTotalItemsCount  = $resultsSection[0]->plaintext;
+//        $strTotalItemsCount = \Scooper\strScrub($strTotalItemsCount);
+//        return str_replace(",", "", $strTotalItemsCount);
     }
 
     function parseJobsListForPage($objSimpHTML)
     {
         $ret = null;
 
-
-        $nodesJobs= $objSimpHTML->find('table[class="tableSearchResults"] tr');
+        $nodesJobs = $objSimpHTML->find('table[class="tableSearchResults"] tr');
 
         $nCounter = -1;
 

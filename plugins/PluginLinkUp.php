@@ -31,7 +31,7 @@ class PluginLinkUp extends ClassJobsSitePlugin
     protected $typeLocationSearchNeeded = 'location-city-comma-state';
     protected $strKeywordDelimiter = "or";
 
-    function getDaysURLValue($days) {
+    function getDaysURLValue($days = null) {
         $ret = "1d";
 
         if($days != null)

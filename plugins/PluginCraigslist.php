@@ -43,14 +43,9 @@ class PluginCraigslist  extends ClassJobsSitePlugin
         return $nItem - 1;
     }
 
-    function getDaysURLValue($nDays)
+    function getDaysURLValue($days = null)
     {
-        if($nDays > 1)
-        {
-            $GLOBALS['logger']->logLine($this->siteName ." jobs can only be pulled for, at most, 1 day.  Ignoring number of days value and just pulling current listings.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        }
         return VALUE_NOT_SUPPORTED;
-
     }
 
 

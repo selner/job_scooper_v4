@@ -29,7 +29,7 @@ class PluginExpedia extends ClassJobsSitePlugin
     protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_URL_FORMAT_REQUIRED;
 
 
-    function getDaysURLValue($days) {
+    function getDaysURLValue($days = null) {
         $ret = 1;
 
         if($days != null)

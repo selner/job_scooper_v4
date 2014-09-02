@@ -31,7 +31,7 @@ class PluginEmploymentGuide extends ClassJobsSitePlugin
     protected $strBaseURLFormat = "http://***LOCATION***.employmentguide.com/searchresults.php?page=***PAGE_NUMBER***&q=***KEYWORDS***&l=***LOCATION***&radius=20&sort=date&posted_after=***NUMBER_DAYS***";
 
 
-    function getDaysURLValue($nDays)
+    function getDaysURLValue($nDays = null)
     {
         $ret = 1;
         switch($nDays)
