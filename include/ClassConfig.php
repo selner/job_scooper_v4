@@ -57,19 +57,20 @@ class ClassConfig extends ClassJobsSitePlugin
     /*
      * returns a record if it found a match; null otherwise.
      */
-    function getEmailByType($strType)
+    function getEmailsByType($strType)
     {
+        $retArr = null;
 
         if ($this->arrEmailAddresses) {
             foreach ($this->arrEmailAddresses as $email) {
                 if (strcasecmp($email['type'], $strType) == 0) {
                     $emailRecord = $email;
-                    return $emailRecord;
+                    $retArr[$email['address']] = $emailRecord;
                 }
 
             }
         }
-        return null;
+        return $retArr;
     }
 
 
@@ -454,6 +455,14 @@ class ClassConfig extends ClassJobsSitePlugin
                 $excludedSite = '';
             }
 
+            if(isset($config->global_search_options['excluded_plugin_types']))
+            {
+                foreach($config->global_search_options['excluded_plugin_types'] as $excludedPlugins)
+                {
+                    $excludedPlugins = strtolower($excludedPlugins);
+                    $this->configSettings['excluded_plugin_types'][$excludedPlugins] = $excludedPlugins;
+                }
+            }
         }
     }
 

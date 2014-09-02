@@ -458,20 +458,21 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         //
         // Add initial email address header values
         //
-        $toEmail =$this->classConfig->getEmailByType("to");
-        if(!isset($toEmail) || strlen($toEmail['address']) <= 0)
+        $toEmails =$this->classConfig->getEmailsByType("to");
+        if(!isset($toEmails) || count($toEmails) < 1 || strlen(current($toEmails)['address']) <= 0)
         {
             $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
             return false;
         }
 
-        $bccEmail =$this->classConfig->getEmailByType("bcc");
-        $fromEmail =$this->classConfig->getEmailByType("from");
-        if(!isset($fromEmail) || strlen($fromEmail['address']) <= 0)
+        $bccEmails =$this->classConfig->getEmailsByType("bcc");
+        $fromEmails =$this->classConfig->getEmailsByType("from");
+        if(!isset($fromEmails) || count($fromEmails) < 1 || strlen(current($fromEmails)['address']) <= 0)
         {
             $GLOBALS['logger']->logLine("Could not find 'from:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
             return false;
         }
+
 
 
         $mail = new PHPMailer();
@@ -495,14 +496,19 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
 
 
-        if(isset($bccEmail) && strlen($bccEmail['address']) > 0)
+        if(isset($bccEmails) && count($bccEmails) > 0)
         {
-            $ret = $mail->addBCC($bccEmail['address'], $bccEmail['name']);     // Add a recipient
+            foreach($bccEmails as $bcc)
+                $mail->addBCC($bcc['address'], $bcc['name']);     // Add a recipient
         }
-        $mail->addAddress($toEmail['address'], $toEmail['name']);
-        $mail->addBCC("dev@bryanselner.com", 'Jobs for ' . $toEmail['name']);
+        if(isset($toEmails) && count($toEmails) > 0)
+        {
+            foreach($toEmails as $to)
+                $mail->addAddress($to['address'], $to['name']);
+        }
+        $mail->addBCC("dev@bryanselner.com", 'Jobs for ' . current($toEmails)['name']);
         $mail->addReplyTo("dev@bryanselner.com", "dev@bryanselner.com" );
-        $mail->setFrom($fromEmail['address'], $fromEmail['name']);
+        $mail->setFrom(current($fromEmails)['address'], current($fromEmails)['name']);
 
 
         $mail->WordWrap = 120;                                          // Set word wrap to 120 characters
@@ -523,7 +529,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         }
         else
         {
-            $GLOBALS['logger']->logLine("Email notification sent to " . $toEmail['address'] . " from " . $mail->From, \Scooper\C__DISPLAY_ITEM_RESULT__);
+            $GLOBALS['logger']->logLine("Email notification sent to " . current($toEmails)['address'] . " from " . $mail->From, \Scooper\C__DISPLAY_ITEM_RESULT__);
         }
         return $ret;
 
