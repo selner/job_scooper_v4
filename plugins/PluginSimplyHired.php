@@ -106,7 +106,7 @@ class PluginSimplyHired extends ClassJobsSitePlugin
             else
             {
                 $subNode = $node->find("div[class='source']");
-                if(isset($subNode) && isset($subNode[0])) $tempCompany = $subNode[0]->plaintext;
+                if(isset($subNode) && isset($subNode[0])) $tempCompany = trim($subNode[0]->plaintext);
                 if(isset($tempCompany) && strlen($tempCompany) > 0)
                 {
                     $arrTempCompany = explode(" from ", $tempCompany);
