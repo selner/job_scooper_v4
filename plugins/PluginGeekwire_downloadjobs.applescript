@@ -17,9 +17,9 @@ on run (argv)
 	set strFileKey of libDownload to third item of argv as string
 	set strURL of libDownload to fourth item of argv as string
 	
-	set nSecondsDelayForPageLoad of libDownload to 3
-	set strJSGetMaxPageValue of libDownload to "1000"
-	set strGetNextPageValue of libDownload to ""
+	set nSecondsDelayForPageLoad of libDownload to 4
+	set strJSGetMaxPageValue of libDownload to "function getMax() { return 1000; } getMax();"
+	set strGetNextPageValue of libDownload to "function getMax() { return 1000; } getMax();"
 	
 	set clickJS to "function doClickMoreJobsClick() 
 		{ 
@@ -56,10 +56,15 @@ on run (argv)
 		} 
 		loadMoreJobs();"
 	
-	set strJSClickNext_First of libDownload to clickJS
+	
+	set strJSDoPageSetup of libDownload to clickJS
+	set strJSClickNext_First of libDownload to ""
+	set strJSClickNext_Others of libDownload to ""
 	
 	
-	set strJSClickNext_Others of libDownload to clickJS
+	set strJSClickNext_First of libDownload to "function getTrue() { return true; } getTrue();}"
+	set strJSClickNext_Others of libDownload to "function getTrue() { return true; } getTrue();}"
+	
 	set strJSGetTheSource of libDownload to "function getHTML() { return document.getElementById('content').innerHTML; } getHTML();"
 	
 	
