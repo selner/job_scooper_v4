@@ -643,7 +643,7 @@ class ClassConfig extends ClassJobsSitePlugin
                 {
                     foreach($ini_keyword_set['keywords'] as $keywordItem)
                     {
-                        $this->configSettings['keyword_sets'][$strSetKey]['keywords_array'][] = $keywordItem;
+                        $this->configSettings['keyword_sets'][$strSetKey]['keywords_array'][] = \Scooper\strScrub($keywordItem, ADVANCED_TEXT_CLEANUP);
                     }
                 }
 
