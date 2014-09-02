@@ -104,6 +104,10 @@ class CSimpleHTMLHelper
             if(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_NODE ))
             {
                 $ret = $subNode;
+                if(isset($retIndex) && isset($subNode[$retIndex]))
+                {
+                    $ret = $subNode[$retIndex];
+                }
             }
             else
             {
