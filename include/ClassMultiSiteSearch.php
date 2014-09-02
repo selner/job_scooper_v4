@@ -48,7 +48,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
         if(count($arrSearchesToReturn) >= 0)
         {
             shuffle($arrSearchesToReturn);
-            foreach($this->arrSearchesToReturn as $search)
+            foreach($arrSearchesToReturn as $search)
             {
                 $strIncludeKey = 'include_'.strtolower($search['site_name']);
 
