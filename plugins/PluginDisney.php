@@ -40,7 +40,7 @@ class PluginDisney extends ClassJobsSitePlugin
 
         $GLOBALS['logger']->logLine($this->siteName ." only pulling the last 10 jobs posted out of " . $strTotalItemsCount, \Scooper\C__DISPLAY_WARNING__);
 
-        return $strTotalItemsCount;
+        return "10";
     }
 
     function parseJobsListForPage($objSimpHTML)
