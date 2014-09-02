@@ -27,8 +27,10 @@ class PluginEntercom extends BaseTaleoPlugin
 
 class PluginTesla extends BaseTaleoPlugin
 {
-    protected $taleoOrgID = "TESLA";
+    protected $strBaseURLFormat = 'http://ch.tbe.taleo.net/CH07/ats/careers/searchResults.jsp?org=TESLA&cws=1***ITEM_NUMBER***';
     protected $nJobListingsPerPage = 100;
+    protected $secsPageTimeout = 20;
+
     protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleocontent', 'index'=>4);
 }
 
