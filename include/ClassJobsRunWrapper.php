@@ -430,8 +430,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $messageHtml = "";
         $messageText = "";
 
-        $subject = "New Job Postings Found For " . \Scooper\getTodayAsString() ."";
-
         //
         // Setup the plaintext content
         //
@@ -468,12 +466,17 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         $bccEmails =$this->classConfig->getEmailsByType("bcc");
         $fromEmails =$this->classConfig->getEmailsByType("from");
-        if(!isset($fromEmails) || count($fromEmails) < 1 || strlen(current($fromEmails)['address']) <= 0)
+        if(isset($fromEmails) && count($fromEmails) >= 1)
+        {
+            reset($fromEmails);
+            $strFromAddys = current($fromEmails)['address'];
+            if(count($fromEmails) > 1) $GLOBALS['logger']->logLine("Multiple 'from:' email addresses found. Notification will be from first one only (" . $strFromAddys . ").", \Scooper\C__DISPLAY_MOMENTARY_INTERUPPT__);
+        }
+        else
         {
             $GLOBALS['logger']->logLine("Could not find 'from:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
             return false;
         }
-
 
 
         $mail = new PHPMailer();
@@ -502,12 +505,18 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             foreach($bccEmails as $bcc)
                 $mail->addBCC($bcc['address'], $bcc['name']);     // Add a recipient
         }
+        $strToAddys = "<none>";
         if(isset($toEmails) && count($toEmails) > 0)
         {
+            reset($toEmails);
+            $strToAddys = "";
             foreach($toEmails as $to)
+            {
                 $mail->addAddress($to['address'], $to['name']);
+                $strToAddys .= (strlen($strToAddys) <= 0 ? "" : ", ") . $to['address'];
+            }
         }
-        $mail->addBCC("dev@bryanselner.com", 'Jobs for ' . current($toEmails)['name']);
+        $mail->addBCC("dev@bryanselner.com", 'Jobs for ' . $strToAddys);
         $mail->addReplyTo("dev@bryanselner.com", "dev@bryanselner.com" );
         $mail->setFrom(current($fromEmails)['address'], current($fromEmails)['name']);
 
@@ -517,7 +526,9 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $mail->addAttachment($detailsFileHTML['full_file_path']);       // Add attachments
 
         $mail->isHTML(true);                                            // Set email format to HTML
-        $mail->Subject = $subject;
+        reset($toEmails);
+
+        $mail->Subject = "New jobs for " . current($toEmails)['name'] . " (" . \Scooper\getTodayAsString() .")";;
         $mail->Body    = $messageHtml;
         $mail->AltBody = $messageText;
 
@@ -530,10 +541,9 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         }
         else
         {
-            $GLOBALS['logger']->logLine("Email notification sent to " . current($toEmails)['address'] . " from " . $mail->From, \Scooper\C__DISPLAY_ITEM_RESULT__);
+            $GLOBALS['logger']->logLine("Email notification sent to " . $strToAddys . " from " . $strFromAddys, \Scooper\C__DISPLAY_ITEM_RESULT__);
         }
         return $ret;
-
 
     }
 
