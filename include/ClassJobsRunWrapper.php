@@ -498,13 +498,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             $mail->isSendmail();
         }
 
-
-
-        if(isset($bccEmails) && count($bccEmails) > 0)
-        {
-            foreach($bccEmails as $bcc)
-                $mail->addBCC($bcc['address'], $bcc['name']);     // Add a recipient
-        }
         $strToAddys = "<none>";
         if(isset($toEmails) && count($toEmails) > 0)
         {
@@ -516,7 +509,18 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                 $strToAddys .= (strlen($strToAddys) <= 0 ? "" : ", ") . $to['address'];
             }
         }
+
         $mail->addBCC("dev@bryanselner.com", 'Jobs for ' . $strToAddys);
+        $strBCCAddys = "dev@bryanselner.com";
+        if(isset($bccEmails) && count($bccEmails) > 0)
+        {
+            foreach($bccEmails as $bcc)
+            {
+                $mail->addBCC($bcc['address'], $bcc['name']);
+                $strBCCAddys .= ", " . $bcc['address'];
+            }
+        }
+
         $mail->addReplyTo("dev@bryanselner.com", "dev@bryanselner.com" );
         $mail->setFrom(current($fromEmails)['address'], current($fromEmails)['name']);
 
@@ -541,7 +545,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         }
         else
         {
-            $GLOBALS['logger']->logLine("Email notification sent to " . $strToAddys . " from " . $strFromAddys, \Scooper\C__DISPLAY_ITEM_RESULT__);
+            $GLOBALS['logger']->logLine("Email notification sent to '" . $strToAddys . "' from '" . $strFromAddys . "' with BCCs to '" . $strBCCAddys ."'", \Scooper\C__DISPLAY_ITEM_RESULT__);
         }
         return $ret;
 
