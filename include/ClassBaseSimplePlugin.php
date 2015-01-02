@@ -81,17 +81,20 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
         return $strMatch;
     }
 
-    private function _getTagMatchValue_($node, $arrString, $nameProperty = 'plaintext')
+    private function _getTagMatchValue_($node, $arrTag, $nameProperty = 'plaintext')
     {
         $strReturn = '';
 
-        $strMatch = $this->_getTagMatchString_($arrString);
+        $strMatch = $this->_getTagMatchString_($arrTag);
         if(isset($strMatch))
         {
             $retNode = $node->find($strMatch);
             if(isset($retNode) && isset($retNode[0]))
             {
                 $strReturn = $retNode[0]->$nameProperty;
+                if(isset($arrTag['index']) )
+                    if(isset($retNode[$arrTag['index']]))
+                        $strReturn = $retNode[$arrTag['index']]->$nameProperty;
             }
         }
 
@@ -125,6 +128,7 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
             $strNodeMatch = $strNodeMatch . $this->_getTagMatchString_($nodeTag);
 
         }
+
         $GLOBALS['logger']->logLine($this->siteName . " finding nodes matching: " . $strNodeMatch, \Scooper\C__DISPLAY_ITEM_DETAIL__);
         $nodesJobRows = $objSimpHTML->find($strNodeMatch);
 
@@ -141,11 +145,11 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
                 $item['date_pulled'] = \Scooper\getTodayAsString();
 
                 $item['company'] = $item['job_site'];
+                $item['location'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_location'], 'plaintext');
+                $item['job_site_category'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_department'], 'plaintext');
 
                 $item['job_title'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_title'], 'plaintext');
                 $item['job_post_url'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_link'], 'href');
-                $item['location'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_location'], 'plaintext');
-                $item['job_site_category'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_department'], 'plaintext');
 
 
                 $fMatchedID = preg_match($this->arrListingTagSetup['regex_link_job_id'], $item['job_post_url'], $idMatches);

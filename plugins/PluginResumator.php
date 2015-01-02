@@ -144,6 +144,21 @@ class PluginBitly extends ClassBaseResumatorDivPlugin
     protected $siteName = 'Bitly';
     protected $childSiteURLBase = 'http://bitly.theresumator.com/';
     protected $childSiteListingPage = 'http://bitly.theresumator.com/';
+
+
+    protected $arrListingTagSetup = array(
+        'tag_listings_section' => array(array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' => 'list-group'), array('tag' => 'li', 'attribute' => 'class', 'attribute_value' => 'list-group-item')),
+//        'tag_listings_section' => array(array('tag' => 'div', 'attribute' => 'id', 'attribute_value' =>'col col-xs-7 jobs-list'), array('tag' => 'h2'), array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' => 'list-group'), array('tag' => 'li', 'attribute' => 'class', 'attribute_value' => 'list-group-item')),
+//        'tag_listings_section' => array(array('tag' => 'div', 'attribute' => 'id', 'attribute_value' =>'col col-xs-7 jobs-list'), array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' => 'list-group')),
+//        'tag_title' => array(array('tag' => 'h4', 'attribute' => 'class', 'attribute_values' => 'list-group-item-heading'), array('tag' => 'a')),
+//        'tag_link' => array(array('tag' => 'h4', 'attribute' => 'class', 'attribute_values' => 'list-group-item-heading'), array('tag' => 'a')),
+        'tag_department' => array('tag' => 'li',  'index' => "1"),
+        'tag_location' => array('tag' => 'li', 'index' => "0" ),
+        'tag_title' => array('tag' => 'a'),
+        'tag_link' => array('tag' => 'a'),
+        'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
+    );
+
 }
 
 
