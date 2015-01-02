@@ -24,7 +24,7 @@ class PluginCraigslist  extends ClassJobsSitePlugin
 {
     protected $siteName = 'Craigslist';
     protected $nJobListingsPerPage = 100;
-    protected $siteBaseURL = 'http://seattle.craigslist.org/';
+    protected $siteBaseURL = 'http://seattle.craigslist.org';
     protected $strBaseURLFormat = "http://***LOCATION***.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=***KEYWORDS***&srchType=T";
     protected $flagSettings = null;
     protected $typeLocationSearchNeeded = 'location-city';
@@ -53,16 +53,16 @@ class PluginCraigslist  extends ClassJobsSitePlugin
     {
         $nodeHelper = new CSimpleHTMLHelper($objSimpHTML);
 
-        $pageText = $nodeHelper->getText("span[class='pagenum']", 0, false);
+        $pageText = $nodeHelper->getText("span[class='range']", 0, false);
         $arrItemItems = explode(" ", trim($pageText));
-        if(!isset($arrItemItems) || !is_array($arrItemItems) || !(count($arrItemItems) >=5))
+        if(!isset($arrItemItems) || !is_array($arrItemItems) || !(count($arrItemItems) >=2))
         {
             $GLOBALS['logger']->logLine("Unable to find count of listings for search on " . $this->siteName, \Scooper\C__DISPLAY_WARNING__);
             return 0;
         }
         else
         {
-            return $arrItemItems[4];
+            return $arrItemItems[2];
         }
     }
 
@@ -73,24 +73,31 @@ class PluginCraigslist  extends ClassJobsSitePlugin
         $resultsSection= $objSimpleHTML->find('div[class="content"]');
         $resultsSection= $resultsSection[0];
 
-        $nodesJobs = $resultsSection->find('p[class="row"]');
+        $nodesJobs = $resultsSection->find('p[class="row"] span[class="txt"');
         foreach($nodesJobs as $node)
         {
             $item = $this->getEmptyJobListingRecord();
 
-            $jobTitleLink = $node->find("span[class='pl'] a");
+            $jobTitleLink = $node->find("a[class='hdrlnk']");
             $item['job_title'] = $jobTitleLink[0]->plaintext;
             if($item['job_title'] == '') continue;
 
-            $item['job_post_url'] = $this->siteBaseURL.$jobTitleLink[0]->href;
+            if(preg_match('/^http/', $jobTitleLink[0]->href) > 0)
+            {
+                $item['job_post_url'] =  $jobTitleLink[0]->href;
+
+            }
+            else
+            {
+                $item['job_post_url'] = $this->siteBaseURL . $jobTitleLink[0]->href;
+            }
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
             $item['job_site'] = "Craigslist";
             $item['job_id'] = $node->attr['data-pid'];
-            $item['job_site_date'] = $node->find("span[class='date']")[0]->plaintext;
+            $item['job_site_date'] = $node->find("time")[0]->datetime;
             $item['location'] = str_replace("pic", "", $node->find("span[class='pnr']")[0]->plaintext);
             $item['job_site_category'] = $node->find("a[class='gc']")[0]->plaintext;
-
 
             $ret[] = $this->normalizeItem($item);
         }
