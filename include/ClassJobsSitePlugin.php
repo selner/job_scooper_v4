@@ -1235,7 +1235,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             $strLocationValue = $this->getLocationValueForLocationSetting($searchDetails);
             if($strLocationValue == VALUE_NOT_SUPPORTED)
             {
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() ." set.  Skipping search '". $searchDetails['name'] . "' with settings '" . $locSingleSettingSet['name'] ."'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() ." set.  Skipping search '". $searchDetails['name'] . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 $strURL = VALUE_NOT_SUPPORTED;
             }
             else
