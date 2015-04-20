@@ -84,8 +84,15 @@ class PluginEmploymentGuide extends ClassJobsSitePlugin
             */
             $item = $this->getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
-            $item['job_post_url']  = $node->href;
-            $item['job_id'] = explode("JobID=", $item['job_post_url'])[1];
+
+            $item['job_post_url']  = $node->attr['href'];
+
+            $fMatchedID = preg_match('/jobid[=-](\w+)/i', $item['job_post_url'], $idMatches);
+            if($fMatchedID && count($idMatches) > 1)
+            {
+                $item['job_id'] = $idMatches[1];
+            }
+
 
             $subNode = $node->find("div[class='jobInfo'] h2");
             if(isset($subNode) && isset($subNode[0]))  $item['job_title'] = $subNode[0]->plaintext;
