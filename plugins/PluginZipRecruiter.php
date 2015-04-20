@@ -1,7 +1,7 @@
 <?php
 
     /**
-     * Copyright 2014 Bryan Selner
+     * Copyright 2014-15 Bryan Selner
      *
      * Licensed under the Apache License, Version 2.0 (the "License"); you may
      * not use this file except in compliance with the License. You may obtain
@@ -38,7 +38,7 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
     function __construct($strBaseDir = null)
     {
 
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_SUPPORTS_PLUS_PREFIX | C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS  | C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS;
         parent::__construct($strBaseDir);
     }
 
@@ -105,9 +105,16 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
         $resultsSection = $objSimpHTML->find("strong[id='default_total_entries']");
 
         // get the text value of that node
-        $totalItemsText = $resultsSection[0]->plaintext;
+        if($resultsSection != null)
+        {
+            $totalItemsText = $resultsSection[0]->plaintext;
+            return $totalItemsText;
+        }
+        else
+        {
+            return -1;
+        }
 
-        return $totalItemsText;
     }
 
     /**

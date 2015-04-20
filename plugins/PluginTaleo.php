@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright 2014 Bryan Selner
+ * Copyright 2014-15 Bryan Selner
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -22,7 +22,8 @@ class PluginEntercom extends BaseTaleoPlugin
 {
     protected $taleoOrgID = "ENTERCOM";
     protected $nJobListingsPerPage = 100;
-    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleo_container', 'index'=>1);
+    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'cws-search-results', 'index'=>1);
+
 }
 
 class PluginTesla extends BaseTaleoPlugin
@@ -31,7 +32,7 @@ class PluginTesla extends BaseTaleoPlugin
     protected $nJobListingsPerPage = 100;
     protected $secsPageTimeout = 60;
 
-    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleocontent', 'index'=>4);
+    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'cws-search-results', 'index'=>1);
 }
 
 class PluginPacMed extends BaseTaleoPlugin
@@ -169,7 +170,9 @@ abstract class BaseTaleoPlugin extends ClassJobsSitePlugin
     {
         $nodeHelper = new CSimpleHTMLHelper($objSimpHTML);
 
+
         $node = $nodeHelper->get("div[". $divTagType . "='".$divTagValue."'] table tbody tr", $trIndex, true);
+
 
         $trSecond = new CSimpleHTMLHelper($node);
         $totalItemsText = $trSecond->getText("td", 0, true);
