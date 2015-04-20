@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright 2014 Bryan Selner
+ * Copyright 2014-15 Bryan Selner
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -36,6 +36,25 @@ require_once(__ROOT__ . '/include/ClassJobsSitePluginCommon.php');
 //}
 //
 //
+
+
+class PluginStackSocial extends ClassBaseSimplePlugin
+{
+    protected $siteName = 'StackSocial';
+    protected $childSiteListingPage  = 'http://hire.jobvite.com/CompanyJobs/Careers.aspx?c=qqJ9VfwX&page=Jobs';
+    protected $childSiteURLBase= 'http://hire.jobvite.com/';
+
+    protected $arrListingTagSetup = array(
+        'tag_listings_section' => array(array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' =>'joblist')),
+        'tag_title' => array('tag' => 'a', 'attribute' => '', 'attribute_value' =>''),
+        'tag_link' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'resumator-job-title-link'),
+        'tag_department' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'resumator-job-info'),
+        'tag_location' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'joblocation'),
+        'regex_link_job_id' => '/,\'(\w+)\'\)\'\//i',
+    );
+}
+
+
 abstract class ClassBaseResumatorTablesPlugin extends ClassBaseSimplePlugin
 {
     protected $arrListingTagSetup = array(
@@ -88,7 +107,7 @@ class PluginMoz extends ClassBaseResumatorDivPlugin
 class PluginWePay extends ClassBaseResumatorDivPlugin
 {
     protected $siteName = 'WePay';
-    protected $childSiteURLBase = 'http://jobs.wepay.com/';
+    protected $childSiteURLBase = 'https://www.wepay.com/careers/';
     protected $childSiteListingPage = 'http://jobs.wepay.com/';
 
 }
@@ -103,12 +122,6 @@ class PluginTinder extends ClassBaseResumatorTablesPlugin
 }
 
 
-class PluginStackSocial extends ClassBaseResumatorDivPlugin
-{
-    protected $siteName = 'StackSocial';
-    protected $childSiteURLBase = 'http://jobs.stacksocial.com/';
-    protected $childSiteListingPage = 'http://jobs.stacksocial.com/';
-}
 
 class PluginAtlanticMedia extends ClassBaseResumatorDivPlugin
 {
