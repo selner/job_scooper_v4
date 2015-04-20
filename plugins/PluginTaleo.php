@@ -20,14 +20,18 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 class PluginEntercom extends BaseTaleoPlugin
 {
+    function parseJobsListForPage($objSimpHTML) {            throw new ErrorException("Unable to parse results count for " . $this->siteName); }
+
     protected $taleoOrgID = "ENTERCOM";
     protected $nJobListingsPerPage = 100;
     protected $arrResultsCountTag = array('type' =>'id', 'value'=>'cws-search-results', 'index'=>1);
+    protected $server = 'http://chk.tbe.taleo.net/chk01/ats/careers/searchResults.jsp';
 
 }
 
 class PluginTesla extends BaseTaleoPlugin
 {
+    function parseJobsListForPage($objSimpHTML) {            throw new ErrorException("Unable to parse results count for " . $this->siteName); }
     protected $strBaseURLFormat = 'http://ch.tbe.taleo.net/CH07/ats/careers/searchResults.jsp?org=TESLA&cws=1***ITEM_NUMBER***';
     protected $nJobListingsPerPage = 100;
     protected $secsPageTimeout = 60;
@@ -87,12 +91,17 @@ abstract class BaseTaleoPlugin extends ClassJobsSitePlugin
     protected $nJobListingsPerPage = 50;
     protected $arrResultsCountTag = array('type' =>null, 'value'=>null, 'index'=>null);
     protected $siteName = null;
+    protected $server = null;
 
     function __construct($strOutputDirectory = null)
     {
+        if(!isset($this->server) or strlen($this->server) <= 0) {
+            $this->server = "https://ch.tbe.taleo.net/CH11/ats/careers/searchResults.jsp";
+        }
+
         if(isset($this->taleoOrgID) and strlen($this->taleoOrgID) > 0)
         {
-            $this->strBaseURLFormat = 'https://ch.tbe.taleo.net/CH11/ats/careers/searchResults.jsp?org=' . $this->taleoOrgID . '&cws=1***ITEM_NUMBER***';
+            $this->strBaseURLFormat = $this->server.'?org=' . $this->taleoOrgID . '&cws=1***ITEM_NUMBER***';
         }
 
         if(!isset($this->siteName) && strlen($this->siteName) <= 0)
