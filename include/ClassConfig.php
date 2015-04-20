@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2014 Bryan Selner
+ * Copyright 2014-15 Bryan Selner
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -141,9 +141,24 @@ class ClassConfig extends ClassJobsSitePlugin
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Log file for run being written to: " . $this->arrFileDetails['config_ini']['directory'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration file details from " . $this->arrFileDetails['config_ini']['full_file_path'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            if($this->arrFileDetails['config_ini']['full_file_path'] )
             $iniParser = new IniParser($this->arrFileDetails['config_ini']['full_file_path']);
             $confTemp = $iniParser->parse($this->arrFileDetails['config_ini']['full_file_path']);
             $iniParser = null;
+            if (isset($this->arrFileDetails['config_ini'])) {
+                if(!is_file($this->arrFileDetails['config_ini']['full_file_path']))
+                {
+                    $altFileDetails = null;
+                    $altFileDetails = Scooper\parseFilePath($this->arrFileDetails['config_ini']['full_file_path']);
+                    if(!is_dir($altFileDetails['config_ini']['directory']))
+                    {
+                        if(is_dir(is_file($altFileDetails['config_ini']['full_file_path']))) {
+                            Scooper\parseFilePath($this->arrFileDetails['config_ini']['directoy'] . "/". $altFileDetails['config_ini']['filename']);
+                        }
+                    }
+
+                }
+            }
             $this->setupRunFromAllConfigsRecursive($this->arrFileDetails['config_ini']['full_file_path'], $confTemp);
         }
 
