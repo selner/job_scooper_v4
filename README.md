@@ -54,7 +54,7 @@ Required Parameters:
 
 
 ##Other Stuff
-* Version:  v2.2.0 [release notes](https://github.com/selner/jobs_scooper/releases)
+* Version:  v2.2.1 [release notes](https://github.com/selner/jobs_scooper/releases)
 * Author:  Bryan Selner (bryan at bryanselner dot com)
 * Platforms:
 	* PHP 5.4.32 on Mac OSX 10.7 (Lion) and Mac OSX 10.9.4 (Mavericks)
