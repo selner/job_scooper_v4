@@ -176,3 +176,16 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
     }
 
 }
+
+abstract class ClassBaseMicroDataPlugin extends ClassBaseSimplePlugin
+{
+    protected $siteBaseURL = '';
+    protected $sitename = '';
+
+    function __construct($strBaseDir = null)
+    {
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE_NO_LOCATION  | C__JOB_PREFER_MICRODATA;
+        parent::__construct($strBaseDir);
+    }
+
+}

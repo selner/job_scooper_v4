@@ -707,13 +707,17 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         {
             foreach($micro->items as $mditem)
             {
-                if (strcasecmp($mditem->type[0], "https://schema.org/JobPosting") == 0) {
+                if (isset($mditem->type) && strcasecmp($mditem->type[0], "https://schema.org/JobPosting") == 0) {
 
                     $item = $this->getEmptyJobListingRecord();
 
                     $item['job_title'] = $mditem->properties["title"][0];
-                    $item['job_post_url'] = $mditem->properties["url"][0];
-                    $item['company'] = $mditem->properties['hiringOrganization'][0]->properties['name'][0];
+                    if(isset($mditem->properties["url"]))
+                        $item['job_post_url'] = $mditem->properties["url"][0];
+                    elseif(isset($mditem->properties["mainEntityOfPage"]))
+                        $item['job_post_url'] = $mditem->properties["mainEntityOfPage"][0];
+                    if (isset($mditem->properties['hiringOrganization']))
+                        $item['company'] = $mditem->properties['hiringOrganization'][0]->properties['name'][0];
                     if (isset($mditem->properties['jobLocation']) && is_array($mditem->properties['jobLocation']))
                     {
                         if (is_array($mditem->properties['jobLocation']))
@@ -740,14 +744,13 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                         }
                     }
 
-
-                    $item['job_site_date'] = $mditem->properties['datePosted'][0];
+                    if (isset($mditem->properties['datePosted']))
+                        $item['job_site_date'] = $mditem->properties['datePosted'][0];
                     //                    $item['industry'] = $mditem->properties["industry"][0];
                     //                    $item['employmentType'] = $mditem->properties["employmentType"][0];
                     //                    $item['brief'] = $mditem->properties["description"][0];
 
                     $item['job_site'] = $this->siteName;
-                    $item['job_id'] = $item['job_post_url'];
 
                     if(isset($this->regex_link_job_id))
                     {
@@ -756,7 +759,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                     }
                     else
                     {
-                        $item['job_id'] = $item['job_site'] . "_" . preg_replace("^[:alnum:]", "", $item['job_post_url']);
+                        $item['job_id'] = $item['job_site'] . "_" . preg_replace('/[\s\W]+/', '', $item['job_post_url']);
                     }
 
 
@@ -1394,3 +1397,6 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
 
 
 }
+
+
+
