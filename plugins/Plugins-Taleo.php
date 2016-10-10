@@ -20,12 +20,7 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 class PluginEntercom extends BaseTaleoPlugin
 {
-
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        return $this->parseTotalResultsCountFrom1ToTD($objSimpHTML);
-    }
-
+    protected $use1ToTDForCount = True;
     protected $taleoOrgID = "ENTERCOM";
     protected $nJobListingsPerPage = 100;
     protected $server = 'http://chk.tbe.taleo.net/chk05/ats/careers/searchResults.jsp';
@@ -49,16 +44,14 @@ class PluginInternetBrands extends BaseTaleoPlugin
 
 class PluginTraderJoes extends BaseTaleoPlugin
 {
+    protected $use1ToTDForCount = True;
     protected $siteBaseURL = 'http://www.traderjoes.com/careers/index.asp';
     protected $taleoOrgID = "TRADERJOES";
     protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleoContent', 'index'=>1);
 }
 class PluginPorch extends BaseTaleoPlugin
 {
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        return $this->parseTotalResultsCountFrom1ToTD($objSimpHTML);
-    }
+    protected $use1ToTDForCount = True;
     protected $siteBaseURL = 'http://about.porch.com/careers';
     protected $taleoOrgID = "PORCH";
     protected $arrResultsCountTag = array('type' =>'id', 'value'=>'summary', 'index'=>1);
@@ -67,6 +60,7 @@ class PluginPorch extends BaseTaleoPlugin
 
 abstract class BaseTaleoPlugin extends ClassJobsSitePlugin
 {
+    protected $use1ToTDForCount = False;
     protected $taleoOrgID = null;
     protected $nJobListingsPerPage = 50;
     protected $arrResultsCountTag = array('type' =>null, 'value'=>null, 'index'=>null);
@@ -96,7 +90,10 @@ abstract class BaseTaleoPlugin extends ClassJobsSitePlugin
 
     function parseTotalResultsCount($objSimpHTML)
     {
-        return $this->parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, $this->arrResultsCountTag['type'], $this->arrResultsCountTag['value'], $this->arrResultsCountTag['index']);
+        if($this->use1ToTDForCount)
+            return $this->parseTotalResultsCountFrom1ToTD($objSimpHTML);
+        else
+            return $this->parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, $this->arrResultsCountTag['type'], $this->arrResultsCountTag['value'], $this->arrResultsCountTag['index']);
     }
 
 

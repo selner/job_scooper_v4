@@ -35,7 +35,7 @@ require_once (__ROOT__.'/plugins/Plugins-Resumator.php');
 
 //require_once (__ROOT__.'/plugins/PluginAmazon.php');
 //require_once (__ROOT__.'/plugins/PluginCraigslist.php');
-//require_once (__ROOT__.'/plugins/PluginIndeed.php');
+require_once (__ROOT__.'/plugins/PluginIndeed.php');
 //require_once (__ROOT__.'/plugins/PluginSimplyHired.php');
 //require_once (__ROOT__.'/plugins/PluginGlassdoor.php');
 //require_once (__ROOT__.'/plugins/PluginExpedia.php');
