@@ -20,13 +20,10 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 class PluginEntercom extends BaseTaleoPlugin
 {
-    function parseTotalResultsCount($objSimpHTML) {
-        $nodes = $objSimpHTML->find('td[class="nowrapRegular"] b');
-        if($nodes && count($nodes)>=2)
-        {
-            return $nodes[1]->plaintext;
-        }
 
+    function parseTotalResultsCount($objSimpHTML)
+    {
+        return $this->parseTotalResultsCountFrom1ToTD($objSimpHTML);
     }
 
     protected $taleoOrgID = "ENTERCOM";
@@ -58,6 +55,10 @@ class PluginTraderJoes extends BaseTaleoPlugin
 }
 class PluginPorch extends BaseTaleoPlugin
 {
+    function parseTotalResultsCount($objSimpHTML)
+    {
+        return $this->parseTotalResultsCountFrom1ToTD($objSimpHTML);
+    }
     protected $siteBaseURL = 'http://about.porch.com/careers';
     protected $taleoOrgID = "PORCH";
     protected $arrResultsCountTag = array('type' =>'id', 'value'=>'summary', 'index'=>1);
@@ -151,6 +152,15 @@ abstract class BaseTaleoPlugin extends ClassJobsSitePlugin
         }
 
         return $ret;
+    }
+
+    function parseTotalResultsCountFrom1ToTD($objSimpHTML) {
+        $nodes = $objSimpHTML->find('td[class="nowrapRegular"] b');
+        if($nodes && count($nodes)>=2)
+        {
+            return $nodes[1]->plaintext;
+        }
+
     }
 
 
