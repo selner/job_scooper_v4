@@ -701,6 +701,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $config  = array('html' => (string)$objSimpleHTML);
         $obj = new linclark\MicrodataPHP\MicrodataPhp($config);
         $micro = $obj->obj();
+        $ret = null;
 
         if($micro && $micro->items && count($micro->items) > 0)
         {

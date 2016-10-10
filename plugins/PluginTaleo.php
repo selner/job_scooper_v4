@@ -39,12 +39,6 @@ class PluginTesla extends BaseTaleoPlugin
     protected $arrResultsCountTag = array('type' =>'id', 'value'=>'cws-search-results', 'index'=>1);
 }
 
-class PluginPacMed extends BaseTaleoPlugin
-{
-    protected $taleoOrgID = "PACMED";
-    protected $siteBaseURL = 'http://pacificmedicalcenters.org/index.php/work-with-us/';
-    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleoContent', 'index'=>1);
-}
 
 class PluginSeattleGenetics extends BaseTaleoPlugin
 {
@@ -66,22 +60,11 @@ class PluginTraderJoes extends BaseTaleoPlugin
     protected $taleoOrgID = "TRADERJOES";
     protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleoContent', 'index'=>1);
 }
-class PluginViacom extends BaseTaleoPlugin
-{
-    protected $siteBaseURL = 'http://tbe.taleo.net/CH05/ats/careers/jobSearch.jsp?org=MTVNETWORKS&cws=1';
-    protected $taleoOrgID = "MTVNETWORKS";
-    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'content', 'index'=>2);
-}
 class PluginPorch extends BaseTaleoPlugin
 {
     protected $siteBaseURL = 'http://about.porch.com/careers';
     protected $taleoOrgID = "PORCH";
     protected $arrResultsCountTag = array('type' =>'id', 'value'=>'summary', 'index'=>1);
-}
-class PluginTableau extends BaseTaleoPlugin
-{
-    protected $taleoOrgID = "TABLEAU";
-    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleoContent', 'index'=>3);
 }
 
 
