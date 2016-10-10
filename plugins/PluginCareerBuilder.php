@@ -25,15 +25,16 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 class PluginCareerBuilder extends ClassJobsSitePlugin
 {
     protected $siteName = 'CareerBuilder';
-    protected $siteBaseURL = 'http://www.careerbuilder.com/';
+    protected $siteBaseURL = "http://www.careerbuilder.com/jobs--***KEYWORDS***-in-***LOCATION***?radius=30&siteid=cbnsv&pay=0&emp=JTFT&page_number=***PAGE_NUMBER***&posted=***NUMBER_DAYS***";
     protected $flagSettings = null;
-//    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
+    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
 
 
     function __construct($strDir = null)
     {
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_BASE_URL_FORMAT_REQUIRED;
         parent::__construct($strDir);
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_BASE_URL_FORMAT_REQUIRED | C__JOB_USE_SELENIUM;
+
     }
 
     function getDaysURLValue($days = null) {
@@ -73,13 +74,16 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
     {
         $this->nJobListingsPerPage = 25;
 
-        $resultsSection= $objSimpHTML->find("div[id='pnlJobResultsCount']");
+        $resultsSection= $objSimpHTML->find("div[class='count']");
         $totalItemsText = $resultsSection[0]->plaintext;
         $arrItemItems = explode(" ", trim($totalItemsText));
         $strTotalItemsCount = $arrItemItems[0];
 
-        return str_replace(",", "", $strTotalItemsCount);
-    }
+        $strTotalItemsCount = str_replace("(", "", $strTotalItemsCount);
+        $strTotalItemsCount = str_replace(")", "", $strTotalItemsCount);
+
+        return $strTotalItemsCount;
+   }
 
     function parseJobsListForPage($objSimpHTML)
     {
@@ -87,56 +91,41 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
 
 
 
-        $nodesJobs= $objSimpHTML->find('table[id="JL_D"] tr');
+        $nodesJobs= $objSimpHTML->find('div[class="job-row"]');
 
         foreach($nodesJobs as $node)
         {
-
-            if(isset($node->attr) && isset($node->attr['class']) && strcasecmp($node->attr['class'], "jl_even_row prefRow") != 0 &&
-                strcasecmp($node->attr['class'], "jl_odd_row prefRow") != 0)
-            {
-                continue;
-            }
-
+//            if(isset($node->attr) && isset($node->attr['class']) && strcasecmp($node->attr['class'], "jl_even_row prefRow") != 0 &&
+//                strcasecmp($node->attr['class'], "jl_odd_row prefRow") != 0)
+//            {
+//                continue;
+//            }
             $item = $this->getEmptyJobListingRecord();
+
+            $titleLink = $node->find("h2 a");
+            $item['job_title'] = $titleLink[0]->plaintext;
+            $item['job_post_url'] = $titleLink[0]->attr["href"];
+            $item['job_id'] = $titleLink[0]->attr["data-job-did"];
             $item['job_site'] = $this->siteName;
 
-            $titleLink = $node->find("a[class='jt prefTitle']");
-
-            if(isset($titleLink) && isset($titleLink[0]))
-            {
-                $item['job_title'] = $titleLink[0]->plaintext;
-                $item['job_post_url'] = $titleLink[0]->href;
-            }
             if($item['job_title'] == '') continue;
 
-            $arrURLParts = explode("&amp;", $item['job_post_url']);
-            foreach ($arrURLParts as $param)
-            {
-                $arrParamParts = explode("=" ,$param);
-                if($arrParamParts && count($arrParamParts) > 1 && $arrParamParts[0] == "job_did")
-                {
-                    $item['job_id'] = $arrParamParts[1];
-                    break;
-                }
-            }
+            $nodeEmploymentInfo = $node->find("div[class=row job-information]");
 
 
-            $subNode = $node->find("a[class='prefCompany']");
-            if(isset($subNode) && isset($subNode[0])) $item['company'] = $subNode[0]->plaintext;
-            if(!isset($item['company']))
-            {
-                $subNode = $node->find("span[class='prefCompany']");
-                if(isset($subNode) && isset($subNode[0])) $item['company'] = $subNode[0]->plaintext;
-            }
+            $subNode = $nodeEmploymentInfo[0]->find("div[class=columns end large-2 medium-3 small-12] h4");
+            if($subNode && count($subNode)>=1)
+                $item['location'] = trim($subNode[0]->plaintext);
 
-            $subNode = $node->find("div[class='jl_col4_div']");
-            if(isset($subNode) && isset($subNode[0])) $item['location'] = $subNode[0]->plaintext;
+            $subNode = $nodeEmploymentInfo[0]->find("div[class=columns large-2 medium-3 small-12] h4");
+            if($subNode && count($subNode)>=1)
+                $item['company'] = trim($subNode[0]->plaintext);
 
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
-            $subNode = $node->find("TD[class='jl_rslt_posted_cell'] span");
-            if(isset($subNode) && isset($subNode[0])) $item['job_site_date'] = $subNode[0]->plaintext;
+            $subNode = $node->find("div[class='show-for-medium-up'] em");
+            if(isset($subNode) && isset($subNode[0]))
+                $item['job_site_date'] = trim($subNode[0]->plaintext);
 
             $ret[] = $this->normalizeItem($item);
         }
