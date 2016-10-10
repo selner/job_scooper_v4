@@ -62,6 +62,15 @@ class PluginMashableCorporate extends ClassBaseResumatorDivPlugin
     protected $siteName = 'MashableCorporate';
     protected $childSiteURLBase = 'http://mashable.theresumator.com/';
     protected $childSiteListingPage = 'http://mashable.theresumator.com/';
+
+    protected $arrListingTagSetup = array(
+        'tag_listings_section' => array(array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' =>'list-group'), array('tag' => 'li', 'attribute' => 'class', 'attribute_value' => 'list-group-item')),
+        'tag_title' => array(array('tag' => 'h4', 'attribute' => 'class', 'attribute_value' =>'list-group-item-heading'), array('tag' => 'a')),
+        'tag_link' => array(array('tag' => 'h4', 'attribute' => 'class', 'attribute_value' =>'list-group-item-heading'), array('tag' => 'a')),
+        'tag_department' => array(array('tag' => 'ul' ), array('tag' => 'li', 'index' => 0)),
+        'tag_location' => array(array('tag' => 'ul' ), array('tag' => 'li', 'index' => 1)),
+        'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
+    );
 }
 
 
