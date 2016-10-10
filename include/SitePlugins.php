@@ -46,11 +46,11 @@ require_once (__ROOT__.'/plugins/PluginCraigslist.php');
 //require_once (__ROOT__.'/plugins/PluginLinkUp.php');
 //require_once (__ROOT__.'/plugins/PluginEmploymentGuide.php');
 //require_once (__ROOT__.'/plugins/PluginCareerBuilder.php');
-//require_once (__ROOT__.'/plugins/PluginDisney.php');
+require_once (__ROOT__.'/plugins/PluginDisney.php');
 //require_once (__ROOT__.'/plugins/PluginGoogle.php');
 //require_once (__ROOT__.'/plugins/PluginEbay.php');
 //require_once (__ROOT__.'/plugins/PluginGeekwire.php');
-//require_once (__ROOT__.'/plugins/PluginDotJobs.php');
+require_once (__ROOT__.'/plugins/PluginDotJobs.php');
 //require_once (__ROOT__.'/plugins/PluginZipRecruiter.php');
 //require_once (__ROOT__.'/plugins/PluginStartupHire.php');
 

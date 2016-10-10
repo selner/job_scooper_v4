@@ -53,12 +53,13 @@ class PluginDisney extends ClassJobsSitePlugin
 
         foreach($nodesJobs as $node)
         {
-/*            if(strcasecmp($node->attr['class'], "gradeA even") != 0 &&
-                strcasecmp($node->attr['class'], "gradeA odd") != 0)
+
+            if(strcasecmp($node->class, "gradeA even") != 0 &&
+                strcasecmp($node->class, "gradeA odd") != 0)
             {
                 continue;
             }
-*/
+
             $item = $this->getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
             $item['company'] = $this->siteName;
@@ -75,16 +76,21 @@ class PluginDisney extends ClassJobsSitePlugin
             $item['job_id'] = explode("jobid=", $item['job_post_url'])[1];
 
             $subNode = $node->find("td[class='column2'] div");
-            if(isset($subNode) && isset($subNode[0])) $item['job_site_category'] = $subNode[0]->plaintext;
-
+            if(isset($subNode) && isset($subNode[0]))
+            {
+                $item['job_site_category'] = $subNode[0]->plaintext;
+                $item['job_site_category'] = trim(str_replace("Job Category :  ", "", $item['job_site_category']));
+            }
             $subNode = $node->find("td[class='column3'] div span[class='bold-text']");
-            if(isset($subNode) && isset($subNode[0])) $item['location'] = $subNode[0]->plaintext;
+            if(isset($subNode) && isset($subNode[0]))
+                $item['location'] = $subNode[0]->plaintext;
 
 
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
             $subNode = $node->find("td[class='column4']");
-            if(isset($subNode) && isset($subNode[0])) $item['job_site_date'] = $subNode[0]->plaintext;
+            if(isset($subNode) && isset($subNode[0]))
+                $item['job_site_date'] = $subNode[0]->plaintext;
 
             $ret[] = $this->normalizeItem($item);
         }
