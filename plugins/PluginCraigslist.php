@@ -51,19 +51,18 @@ class PluginCraigslist  extends ClassJobsSitePlugin
 
     function parseTotalResultsCount($objSimpHTML)
     {
-        $nodeHelper = new CSimpleHTMLHelper($objSimpHTML);
-
-        $pageText = $nodeHelper->getText("span[class='range']", 0, false);
-        $arrItemItems = explode(" ", trim($pageText));
-        if(!isset($arrItemItems) || !is_array($arrItemItems) || !(count($arrItemItems) >=2))
+        $resultsNode = $objSimpHTML->find("span[class='totalcount']");
+        if(isset($resultsNode) && is_array($resultsNode) && count($resultsNode))
         {
-            $GLOBALS['logger']->logLine("Unable to find count of listings for search on " . $this->siteName, \Scooper\C__DISPLAY_WARNING__);
-            return 0;
+            return $resultsNode[0]->plaintext;
         }
         else
         {
-            return $arrItemItems[2];
+            $noresults = strpos((string)$objSimpHTML, "no results");
+            return 0;
         }
+
+        return -1;
     }
 
 
@@ -97,7 +96,9 @@ class PluginCraigslist  extends ClassJobsSitePlugin
             $item['job_id'] = $node->attr['data-pid'];
             $item['job_site_date'] = $node->find("time")[0]->datetime;
             $item['location'] = str_replace("pic", "", $node->find("span[class='pnr']")[0]->plaintext);
-            $item['job_site_category'] = $node->find("a[class='gc']")[0]->plaintext;
+
+//            $nodeCategory = $node->find("a[class='gc']");
+//            $item['job_site_category'] = $nodeCategory[0]->plaintext;
 
             $ret[] = $this->normalizeItem($item);
         }
