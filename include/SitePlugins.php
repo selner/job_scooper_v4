@@ -44,7 +44,7 @@ require_once (__ROOT__.'/plugins/PluginIndeed.php');
 require_once (__ROOT__.'/plugins/PluginMonster.php');
 //require_once (__ROOT__.'/plugins/PluginCareerBuilder.php');
 //require_once (__ROOT__.'/plugins/PluginDisney.php');
-//require_once (__ROOT__.'/plugins/PluginOuterwall.php');
+require_once (__ROOT__.'/plugins/PluginOuterwall.php');
 //require_once (__ROOT__.'/plugins/PluginGoogle.php');
 require_once (__ROOT__.'/plugins/PluginFacebook.php');
 //require_once (__ROOT__.'/plugins/PluginEbay.php');
