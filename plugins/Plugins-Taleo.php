@@ -20,12 +20,18 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 class PluginEntercom extends BaseTaleoPlugin
 {
-    function parseJobsListForPage($objSimpHTML) {            throw new ErrorException("Unable to parse results count for " . $this->siteName); }
+    function parseTotalResultsCount($objSimpHTML) {
+        $nodes = $objSimpHTML->find('td[class="nowrapRegular"] b');
+        if($nodes && count($nodes)>=2)
+        {
+            return $nodes[1]->plaintext;
+        }
+
+    }
 
     protected $taleoOrgID = "ENTERCOM";
     protected $nJobListingsPerPage = 100;
-    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'cws-search-results', 'index'=>1);
-    protected $server = 'http://chk.tbe.taleo.net/chk01/ats/careers/searchResults.jsp';
+    protected $server = 'http://chk.tbe.taleo.net/chk05/ats/careers/searchResults.jsp';
 
 }
 
