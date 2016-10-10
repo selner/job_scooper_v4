@@ -47,6 +47,8 @@ abstract class ClassBaseResumatorDivPlugin extends ClassBaseSimplePlugin
 
 
 
+
+
 class PluginAtlanticMedia extends ClassBaseResumatorDivPlugin
 {
     protected $siteName = 'AtlanticMedia';

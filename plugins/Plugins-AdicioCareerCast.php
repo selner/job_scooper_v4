@@ -27,33 +27,19 @@ class PluginMashable extends BaseAdicioCareerCastPlugin
 
 
 }
-class PluginMilwaukeeWAJournalSentinal extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'MilwaukeeJournalSentinal';
-    protected $childSiteURLBase = 'http://jobs.jsonline.com';
-}
 class PluginLocalworkCA extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'LocalworkCA';
     protected $childSiteURLBase = 'http://jobs.localwork.ca';
 }
 
-class PluginEverettWAHerald extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'EverettWAHerald';
-    protected $childSiteURLBase = 'http://heraldnet.careers.adicio.com';
-}
 
 class PluginPolitico extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'Politico';
     protected $childSiteURLBase = 'http://jobs.powerjobs.com';
 }
-class PluginAsheboroNCCourierTribune extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'AsheboroCourierTribune';
-    protected $childSiteURLBase = 'http://jobs.r-jobs.com';
-}
+
 class PluginIEEE extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'IEEE';
@@ -63,11 +49,6 @@ class PluginVariety extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'Variety';
     protected $childSiteURLBase = 'http://jobs.variety.com';
-}
-class PluginLasVegasReviewJournal extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'LVReviewJournal';
-    protected $childSiteURLBase = 'http://careers.reviewjournal.com';
 }
 class PluginCellCom extends BaseAdicioCareerCastPlugin
 {
@@ -100,21 +81,10 @@ class PluginKenoshaNews extends BaseAdicioCareerCastPlugin
     protected $childSiteURLBase = 'http://kenosha.careers.adicio.com/';
 }
 
-class PluginAdWeek extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'AdWeek';
-    protected $childSiteURLBase = 'http://jobs.adweek.com';
-}
-
 class PluginRetailCareersNow extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'RetailCareersNow';
     protected $childSiteURLBase = 'http://retail.careers.adicio.com';
-}
-class PluginArkansasOnline extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'ArkansasOnline';
-    protected $childSiteURLBase = 'http://jobs.arkansasonline.com';
 }
 class PluginHealthJobs extends BaseAdicioCareerCastPlugin
 {
@@ -148,19 +118,6 @@ class PluginSeacoastOnline extends BaseAdicioCareerCastPlugin
     protected $childSiteURLBase = 'http://seacoast.careers.adicio.com';
 }
 
-class PluginTulsaWorld extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'TulsaWorld';
-    protected $childSiteURLBase = 'http://tulsa.careers.adicio.com';
-
-}
-
-class PluginSeattleTimes extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'SeattleTimes';
-    protected $childSiteURLBase = 'http://nwjobs.seattletimes.com';
-}
-
 class PluginAlbuquerqueJournal extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'AlbuquerqueJournal';
@@ -186,48 +143,17 @@ class PluginAdicioCareerCast extends BaseAdicioCareerCastPlugin
     protected $childSiteURLBase = 'http://www.careercast.com';
 }
 
-class PluginBartlesvilleOKExaminerEnterprise extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'BartlesvilleOKExaminerEnterprise';
-    protected $childSiteURLBase = 'http://jobs.bvillejobs.com';
-}
-
-class PluginKFVS12MO extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'KFVS12';
-    protected $childSiteURLBase = 'http://kfvs.careers.adicio.com';
-}
 
 class PluginClevelandDotCom extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'ClevelandDotCom';
     protected $childSiteURLBase = 'http://jobs.cleveland.com';
 }
-class PluginBatonRougeAdvocate extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'BatonRougeAdvocate';
-    protected $childSiteURLBase = 'http://advocate.careers.adicio.com';
-}
 
-class PluginNewOrleansAdvocate extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'NewOrleansAdvocate';
-    protected $childSiteURLBase = 'http://advocate.careers.adicio.com';
-}
-class PluginAcandiaAdvocate extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'AcandiaAdvocate';
-    protected $childSiteURLBase = 'http://advocate.careers.adicio.com';
-}
 class PluginVictoriaTXAdvocate extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'VictoriaTXAdvocate';
     protected $childSiteURLBase = 'http://jobshome.crossroadsfinder.com';
-}
-class PluginJobsArkansas extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'JobsArkansas';
-    protected $childSiteURLBase = 'http://jobs.arkansasonline.com';
 }
 
 

@@ -25,37 +25,24 @@ class PluginGroupon extends ClassJobsSitePlugin
 {
     protected $siteName = 'Groupon';
     protected $siteBaseURL = 'https://jobs.groupon.com';
-    protected $strBaseURLFormat = "https://jobs.groupon.com/careers/";
+    protected $strBaseURLFormat = "https://jobs.groupon.com/locations/seattle";
     protected $flagSettings = null;
     protected $typeLocationSearchNeeded = '';
 
 
     function __construct($strBaseDir = null)
     {
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE_NO_LOCATION;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS  | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_USE_SELENIUM;
         parent::__construct($strBaseDir);
     }
 
-
-    function parseTotalResultsCount($objSimpHTML)
-    {
-
-
-        $resultsSection= $objSimpHTML->find("div[class='jobvite-search-results'] p");
-        $strTotalItemsCount  = $resultsSection[0]->plaintext;
-        $strTotalItemsCount = \Scooper\strScrub($strTotalItemsCount);
-
-        $arrItemItems = explode(" ", trim($strTotalItemsCount));
-        return $arrItemItems[4];
-
-    }
 
     function parseJobsListForPage($objSimpHTML)
     {
         $ret = null;
 
 
-        $nodesJobs= $objSimpHTML->find("div[class='jobvite-search-results'] table tr");
+        $nodesJobs= $objSimpHTML->find("a[class='ng-binding']");
 
         $nCounter = -1;
 
@@ -70,27 +57,15 @@ class PluginGroupon extends ClassJobsSitePlugin
             $item = $this->getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
 
-            $titleNode = $node->firstChild();
-            $locNode = $node->firstChild()->nextSibling();
 
-
-            $item['job_title'] = $titleNode->plaintext;
-            $item['job_post_url'] = $titleNode->firstChild()->href;
+            $item['job_title'] = $node->plaintext;
+            $item['job_post_url'] = $node->href;
+            $item['location'] = $this->getLocationValue();
+            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['company'] = $this->siteName;
+            $item['job_id'] = $this->getIDFromLink('/\/jobs\/([^\/]+)/i', $item['job_post_url']);
             if($item['job_title'] == '') continue;
 
-
-            $item['location'] = $locNode->plaintext;
-
-
-            $item['company'] = $this->siteName;
-            $item['date_pulled'] = \Scooper\getTodayAsString();
-
-
-            $arrURLParts = explode("/",  $item['job_post_url']);
-            $strURLJobPart = $arrURLParts[count($arrURLParts)-2];
-            $arrJobIDParts = explode("-", $strURLJobPart);
-            $nIDPart = count($arrJobIDParts)-1;
-            $item['job_id'] = $arrJobIDParts[$nIDPart];
 
             $ret[] = $this->normalizeItem($item);
 

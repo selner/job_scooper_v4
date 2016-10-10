@@ -629,9 +629,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             // this particular underlying problem
             //
             $strErr = $ex->getMessage();
-            if(((strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['employmentguide']['name']) == 0)||
-                 (strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['careerbuilder']['name']) == 0) ||
-                (strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['ziprecruiter']['name']) == 0)) &&
+            if((isset($GLOBALS['DATA']['site_plugins']['employmentguide']) && (strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['employmentguide']['name']) == 0)||
+                 (isset($GLOBALS['DATA']['site_plugins']['careerbuilder']) && strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['careerbuilder']['name']) == 0) ||
+                (isset($GLOBALS['DATA']['site_plugins']['ziprecruiter']) && strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['ziprecruiter']['name']) == 0)) &&
                 (substr_count($strErr, "HTTP error #404") > 0))
             {
                 $strError = $this->siteName . " plugin returned a 404 page for the search.  This is not an error; it means zero results found." ;
