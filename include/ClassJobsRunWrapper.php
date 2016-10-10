@@ -155,27 +155,34 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $dataAllJobs = $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, null, array("", "_AllJobs", "CSV"), "all jobs", null, false);
         $detailsAllJobs = $dataAllJobs['file_details'];
 
-        //
-        // Now, output the various subsets of the total jobs list
-        //
-
-
-        // Output only records that are new or not marked as excluded (aka "Yes" or "Maybe")
-        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_ActiveJobs", "CSV");
-        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_ActiveJobs", "HTML", null, $this->getKeysForHTMLOutput());
-        $arrJobs_AutoExcluded = $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", "");
-
-        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedToday", "_UpdatedJobs");
-        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayNotInterested", "_UpdatedExcludedJobs");
-
-        // Output only new records that haven't been looked at yet
-        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "CSV");
-        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "HTML", null, $this->getKeysForHTMLOutput(), true);
-        $detailsHTMLFile = $this->__getAlternateOutputFileDetails__("HTML", "", "_NewJobs_ForReview");
-
         // Output all records that were automatically excluded
         $dataExcludedJobs = $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", array("", "_ExcludedJobs", "CSV"), "excluded jobs", null, true);
         $detailsExcludedJobs = $dataExcludedJobs['file_details'];
+
+
+
+
+        if($this->is_OutputInterimFiles() == true) {
+
+            //
+            // Now, output the various subsets of the total jobs list
+            //
+
+
+            // Output only records that are new or not marked as excluded (aka "Yes" or "Maybe")
+            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_ActiveJobs", "CSV");
+            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_ActiveJobs", "HTML", null, $this->getKeysForHTMLOutput());
+            $arrJobs_AutoExcluded = $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", "");
+
+            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedToday", "_UpdatedJobs");
+            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayNotInterested", "_UpdatedExcludedJobs");
+
+            // Output only new records that haven't been looked at yet
+            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "CSV");
+            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "HTML", null, $this->getKeysForHTMLOutput(), true);
+            $detailsHTMLFile = $this->__getAlternateOutputFileDetails__("HTML", "", "_NewJobs_ForReview");
+
+        }
 
 
         $strResultCountsText = $this->getListingCountsByPlugin("text", $arrFinalJobs_SortedByCompanyRole);
@@ -449,11 +456,11 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             //
             $strRawJobsListOutput = \Scooper\getFullPathFromFileDetails($this->classConfig->getFileDetails('output_subfolder'), "", "_rawjobslist_preuser_filtering");
             $this->writeRunsJobsToFile($strRawJobsListOutput, $this->arrLatestJobs_UnfilteredByUserInput, "RawJobsList_PreUserDataFiltering");
+            $GLOBALS['logger']->logLine(count($this->arrLatestJobs_UnfilteredByUserInput). " raw, latest job listings from " . count($this->arrSearchesToReturn) . " search(es) downloaded to " . $strRawJobsListOutput, \Scooper\C__DISPLAY_SUMMARY__);
         }
 
         $detailsBodyContentFile = null;
 
-       $GLOBALS['logger']->logLine(count($this->arrLatestJobs_UnfilteredByUserInput). " raw, latest job listings from " . count($this->arrSearchesToReturn) . " search(es) downloaded to " . $strRawJobsListOutput, \Scooper\C__DISPLAY_SUMMARY__);
 
 
     }

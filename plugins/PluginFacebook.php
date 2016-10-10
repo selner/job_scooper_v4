@@ -26,23 +26,21 @@ class PluginFacebook extends ClassJobsSitePlugin
     protected $siteName = 'Facebook';
     protected $siteBaseURL = 'https://www.facebook.com/careers/';
     protected $nJobListingsPerPage = 10;
-    protected $strBaseURLFormat = "https://www.facebook.com/careers/locations/***LOCATION***";
+    protected $strBaseURLFormat = "https://www.facebook.com/careers/search/?q=&location=***LOCATION***";
     protected $flagSettings = null;
     protected $typeLocationSearchNeeded = 'location-city';
-
+    protected $classToCheckExists = "_3k6i";
 
     function __construct($strBaseDir = null)
     {
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS | C__JOB_LOCATION_REQUIRES_LOWERCASE | C__JOB_PAGECOUNT_NOTAPPLICABLE__;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS | C__JOB_LOCATION_REQUIRES_LOWERCASE | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_USE_SELENIUM;
         parent::__construct($strBaseDir);
     }
 
     function parseJobsListForPage($objSimpHTML)
     {
         $ret = null;
-
-
-        $nodesJobs= $objSimpHTML->find('ul[class="careersList"]');
+        $nodesJobs= $objSimpHTML->find('div[class="_3k6i"]');
 
         foreach($nodesJobs as $node)
         {
@@ -50,12 +48,12 @@ class PluginFacebook extends ClassJobsSitePlugin
             $item = $this->getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
             $item['company'] = $this->siteName;
-            $item['job_title'] = $node->find("li span a")[0]->plaintext;
-            $item['job_post_url'] = $node->find("li span a")[0]->href;
-            $item['job_id'] = explode("req=", $item['job_post_url'])[1];
+            $item['job_title'] = $node->find("a[class='_5144']")[0]->plaintext;
+            $item['job_post_url'] = $node->find("a[class='_5144']")[0]->href;
+            $item['job_id'] = $this->getIDFromLink('/\/jobs\/([^\/]+)/i', $item['job_post_url']);
             if($item['job_title'] == '') continue;
 
-            $item['job_site_category'] = $node->parent()->find("h3")[0]->plaintext;
+//            $item['job_site_category'] = $node->parent()->find("h3")[0]->plaintext;
 
             $item['location'] = $this->getLocationValue();
             $item['date_pulled'] = \Scooper\getTodayAsString();

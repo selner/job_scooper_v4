@@ -68,14 +68,6 @@ abstract class ClassBaseResumatorTablesPlugin extends ClassBaseSimplePlugin
 
 }
 
-class PluginPayscale extends ClassBaseResumatorTablesPlugin
-{
-    protected $siteName = 'Payscale';
-    protected $childSiteURLBase = 'http://jobs.payscale.com/';
-    protected $childSiteListingPage = 'http://jobs.payscale.com/';
-
-}
-
 abstract class ClassBaseResumatorDivPlugin extends ClassBaseSimplePlugin
 {
     protected $arrListingTagSetup = array(

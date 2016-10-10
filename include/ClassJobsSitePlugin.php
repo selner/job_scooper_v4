@@ -153,6 +153,8 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     }
 
 
+
+
     /**
      * Write this class instance's list of jobs to an output CSV file.  Always rights
      * the full unfiltered list.
@@ -217,7 +219,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     protected $locationValue = null;
     protected $strKeywordDelimiter = null;
     protected $strTitleOnlySearchKeywordFormat = null;
-
+    protected $classToCheckExists = null;
 
     //************************************************************************
     //
@@ -694,8 +696,94 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
     }
 
+    private function _getJobsFromMicroData_($objSimpleHTML)
+    {
+        $config  = array('html' => (string)$objSimpleHTML);
+        $obj = new linclark\MicrodataPHP\MicrodataPhp($config);
+        $micro = $obj->obj();
 
-    private function _getMyJobsForSearchFromXML_($searchDetails)
+        if($micro && $micro->items && count($micro->items) > 0)
+        {
+            foreach($micro->items as $mditem)
+            {
+                if (strcasecmp($mditem->type[0], "https://schema.org/JobPosting") == 0) {
+
+                    $item = $this->getEmptyJobListingRecord();
+
+                    $item['job_title'] = $mditem->properties["title"][0];
+                    $item['job_post_url'] = $mditem->properties["url"][0];
+                    $item['company'] = $mditem->properties['hiringOrganization'][0]->properties['name'][0];
+                    if (isset($mditem->properties['jobLocation']) && is_array($mditem->properties['jobLocation']))
+                    {
+                        if (is_array($mditem->properties['jobLocation']))
+                        {
+                            if (isset($mditem->properties['jobLocation'][0]->properties['address']) && is_array($mditem->properties['jobLocation'][0]->properties['address']))
+                            {
+                                $city = "";
+                                $region = "";
+                                $zip = "";
+
+                                if (isset($mditem->properties['jobLocation'][0]->properties['address'][0]->properties['addressLocality']))
+                                    $city = $mditem->properties['jobLocation'][0]->properties['address'][0]->properties['addressLocality'][0];
+                                if (isset($mditem->properties['jobLocation'][0]->properties['address'][0]->properties['addressRegion']))
+                                    $region = $mditem->properties['jobLocation'][0]->properties['address'][0]->properties['addressRegion'][0];
+                                if (isset($mditem->properties['jobLocation'][0]->properties['address'][0]->properties['postalCode']))
+                                    $zip = $mditem->properties['jobLocation'][0]->properties['address'][0]->properties['postalCode'][0];
+                                $item["location"] = $city . " " . $region . " " & $zip;
+                            }
+
+                        }
+                        else
+                        {
+                            $item["location"] = $mditem->properties['jobLocation'][0];
+                        }
+                    }
+
+
+                    $item['job_site_date'] = $mditem->properties['datePosted'][0];
+                    //                    $item['industry'] = $mditem->properties["industry"][0];
+                    //                    $item['employmentType'] = $mditem->properties["employmentType"][0];
+                    //                    $item['brief'] = $mditem->properties["description"][0];
+
+                    $item['job_site'] = $this->siteName;
+                    $item['job_id'] = $item['job_post_url'];
+
+                    if(isset($this->regex_link_job_id))
+                    {
+                        $item['job_id'] = $this->getIDFromLink($this->regex_link_job_id, $item['job_post_url']);
+
+                    }
+                    else
+                    {
+                        $item['job_id'] = $item['job_site'] . "_" . preg_replace("^[:alnum:]", "", $item['job_post_url']);
+                    }
+
+
+                    $ret[] = $this->normalizeItem($item);
+                }
+            }
+
+            return $ret;
+        }
+
+    }
+
+
+    function getIDFromLink($regex_link_job_id, $url)
+    {
+        if(isset($regex_link_job_id))
+        {
+            $fMatchedID = preg_match($regex_link_job_id, $url, $idMatches);
+            if($fMatchedID && count($idMatches) > 1)
+            {
+                return $idMatches[count($idMatches)-1];
+            }
+        }
+        return "";
+    }
+
+
+private function _getMyJobsForSearchFromXML_($searchDetails)
     {
 
         ini_set("user_agent",C__STR_USER_AGENT__);
@@ -795,6 +883,40 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     }
 
 
+    private function _getFullHTMLForDynamicWebpage_($url, $elementClass)
+    {
+        $strCmdToRun = "java -jar \"" . __ROOT__ . "/lib/selenium-server-standalone-2.53.1.jar\"  >/dev/null &";
+
+        $result = exec($strCmdToRun);
+
+        // start Firefox with 5 second timeout
+        $host = 'http://localhost:4444/wd/hub'; // this is the default
+        $capabilities = DesiredCapabilities::firefox();
+        $driver = RemoteWebDriver::create($host, $capabilities, 5000);
+
+        $driver->get($url);
+
+        // wait at most 10 seconds until at least one result is shown
+        if($elementClass)
+        {
+            $driver->wait(10)->until(
+                WebDriverExpectedCondition::presenceOfAllElementsLocatedBy(
+                    WebDriverBy::className($elementClass)
+                )
+            );
+        }
+        else
+        {
+            $driver->wait(10);
+        }
+
+        $pagehtml = $driver->getPageSource();
+
+        $driver->close();
+
+        return $pagehtml;
+
+    }
 
     private function _getMyJobsForSearchFromWebpage_($searchDetails)
     {
@@ -814,7 +936,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[".$searchDetails['name']."]" .": " . countJobRecords($arrPageJobsList['object']). " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
             return;
         }
-
 
         $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['key']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
@@ -849,7 +970,16 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
             while ($nPageCount <= $totalPagesCount )
             {
+
+
                 $arrPageJobsList = null;
+
+                if($this->isBitFlagSet(C__JOB_USE_SELENIUM))
+                {
+                    $html = $this->_getFullHTMLForDynamicWebpage_($strURL, $this->classToCheckExists);
+                    $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+
+                }
 
                 if(!($nPageCount == 1 && isset($objSimpleHTML)))
                 {
@@ -859,23 +989,31 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                     $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout);
                 }
                 $GLOBALS['logger']->logLine("Getting jobs from ". $strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
                 if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
                 try
                 {
-                    $arrPageJobsList = $this->parseJobsListForPageBase($objSimpleHTML);
-                    if(!is_array($arrPageJobsList))
-                    {
-                        // we likely hit a page where jobs started to be hidden.
-                        // Go ahead and bail on the loop here
-                        $strWarnHiddenListings = "Could not get all job results back from ". $this->siteName . " for this search starting on page " . $nPageCount.".";
-                        if($nPageCount < $totalPagesCount)
-                            $strWarnHiddenListings .= "  They likely have hidden the remaining " . ($totalPagesCount - $nPageCount) . " pages worth. ";
 
-                        $GLOBALS['logger']->logLine($strWarnHiddenListings, \Scooper\C__DISPLAY_ITEM_START__);
-                        $nPageCount = $totalPagesCount;
+                    if($this->isBitFlagSet(C__JOB_PREFER_MICRODATA))
+                    {
+                        $arrPageJobsList = $this->_getJobsFromMicroData_($objSimpleHTML);
                     }
-                    else
+                    if(!$arrPageJobsList)
+                    {
+                        $arrPageJobsList = $this->parseJobsListForPageBase($objSimpleHTML);
+                        if(!is_array($arrPageJobsList))
+                        {
+                            // we likely hit a page where jobs started to be hidden.
+                            // Go ahead and bail on the loop here
+                            $strWarnHiddenListings = "Could not get all job results back from ". $this->siteName . " for this search starting on page " . $nPageCount.".";
+                            if($nPageCount < $totalPagesCount)
+                                $strWarnHiddenListings .= "  They likely have hidden the remaining " . ($totalPagesCount - $nPageCount) . " pages worth. ";
+
+                            $GLOBALS['logger']->logLine($strWarnHiddenListings, \Scooper\C__DISPLAY_ITEM_START__);
+                            $nPageCount = $totalPagesCount;
+                        }
+                    }
+
+                    if(is_array($arrPageJobsList))
                     {
                         addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
                         $nJobsFound = countJobRecords($arrSearchReturnedJobs);
