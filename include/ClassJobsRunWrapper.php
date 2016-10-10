@@ -570,6 +570,13 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         $mail->addReplyTo("dev@bryanselner.com", "dev@bryanselner.com" );
         $mail->setFrom(current($fromEmails)['address'], current($fromEmails)['name']);
+        $mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            )
+        );
 
 
         $mail->WordWrap = 120;                                          // Set word wrap to 120 characters
