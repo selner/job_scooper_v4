@@ -943,7 +943,15 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
 
         $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['key']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-        $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout );
+        if($this->isBitFlagSet(C__JOB_USE_SELENIUM))
+        {
+            $html = $this->_getFullHTMLForDynamicWebpage_($strURL, $this->classToCheckExists);
+            $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+        }
+        else
+        {
+            $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout );
+        }
         if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL); }
 
         if($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
