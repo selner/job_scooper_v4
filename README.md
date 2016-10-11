@@ -54,7 +54,8 @@ Required Parameters:
 
 
 ##Setup Notes
-You will need to copy the Selenium Standalone Server version 2.53.1 from http://selenium-release.storage.googleapis.com/index.html?path=2.53/ to ./lib in order for plugins like Facebook to succeed.
+You will need to copy the Selenium Standalone Server version 3.0.0-beta4 from http://selenium-release.storage.googleapis.com/index.html?path=3.0.0-beta4/ to ./lib in order for plugins like Facebook to succeed.
+Note: The code currently uses the Safari 10 webdriver for accessing dynamic pages; you will need add support for other webdrivers to run this on another OS than macOS Sierra 10.12.
 
 ##Other Stuff
 * Version:  v3.0.0 [release notes](https://github.com/selner/jobs_scooper/releases)

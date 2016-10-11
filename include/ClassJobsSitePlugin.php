@@ -31,6 +31,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         {
             $this->detailsMyFileOut = \Scooper\parseFilePath($strOutputDirectory, false);
         }
+
     }
 
     function __destruct()
@@ -47,6 +48,29 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 $this->writeMyJobsListToFile($strOutPathWithName, false);
             }
         }
+
+        if(isset($GLOBALS['selenium_sessionid']) && $GLOBALS['selenium_sessionid'] != -1)
+        {
+            $driver = RemoteWebDriver::createBySessionID($GLOBALS['selenium_sessionid']);
+            $driver->quit();
+            $GLOBALS['selenium_sessionid'] = -1;
+
+            $sessions = RemoteWebDriver::getAllSessions();
+            foreach($sessions as $sess)
+            {
+                $driver = RemoteWebDriver::createBySessionID($sess);
+                $driver->quit();
+            }
+        }
+
+        if($this->isBitFlagSet(C__JOB_USE_SELENIUM) && isset($GLOBALS['selenium_started']) && $GLOBALS['selenium_started'] = true)
+        {
+            if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Sending server shutdown call to Selenium server...", \Scooper\C__DISPLAY_ITEM_RESULT__); }
+            $cmd = "curl \"http://localhost:4444/selenium-server/driver?cmd=shutDownSeleniumServer\" >/dev/null &";
+            exec($cmd);
+            $GLOBALS['selenium_started'] = false;
+        }
+
     }
 
     function parseJobsListForPageBase($objSimpHTML) {
@@ -220,6 +244,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     protected $strKeywordDelimiter = null;
     protected $strTitleOnlySearchKeywordFormat = null;
     protected $classToCheckExists = null;
+    protected $cookieNamesToSaveAndResend = Array();
 
     //************************************************************************
     //
@@ -696,7 +721,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
     }
 
-    private function _getJobsFromMicroData_($objSimpleHTML)
+    private function getJobsFromMicroData($objSimpleHTML)
     {
         $config  = array('html' => (string)$objSimpleHTML);
         $obj = new linclark\MicrodataPHP\MicrodataPhp($config);
@@ -887,39 +912,86 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
     }
 
 
-    private function _getFullHTMLForDynamicWebpage_($url, $elementClass)
+    private function _getFullHTMLForDynamicWebpage_($url, $elementClass, $countRetry = 0)
     {
-        $strCmdToRun = "java -jar \"" . __ROOT__ . "/lib/selenium-server-standalone-2.53.1.jar\"  >/dev/null &";
 
-        $result = exec($strCmdToRun);
-
-        // start Firefox with 5 second timeout
-        $host = 'http://localhost:4444/wd/hub'; // this is the default
-        $capabilities = DesiredCapabilities::firefox();
-        $driver = RemoteWebDriver::create($host, $capabilities, 5000);
-
-        $driver->get($url);
-
-        // wait at most 10 seconds until at least one result is shown
-        if($elementClass)
+        try
         {
-            $driver->wait(10)->until(
-                WebDriverExpectedCondition::presenceOfAllElementsLocatedBy(
-                    WebDriverBy::className($elementClass)
-                )
-            );
+
+            if(!isset($GLOBALS['selenium_started']) || $GLOBALS['selenium_started'] == false)
+            {
+                $strCmdToRun = "java -jar \"" . __ROOT__ . "/lib/selenium-server-standalone-3.0.0-beta4.jar\"  >/dev/null &";
+                $result = exec($strCmdToRun);
+                $GLOBALS['selenium_started'] = true;
+                sleep(5);
+            }
+
+            if(isset($GLOBALS['selenium_sessionid']) && $GLOBALS['selenium_sessionid'] != -1)
+            {
+                $driver = RemoteWebDriver::createBySessionID($GLOBALS['selenium_sessionid']);
+//                if(isset($GLOBALS['selenium_cookies']))
+//                {
+//                    $cookies2 = $driver->manage()->getCookies();
+//                    foreach($GLOBALS['selenium_cookies'] as $cookie)
+//                    {
+//                        $driver->get($this->$url);
+//
+//                        $driver = $driver->manage()->addCookie(array("name" => $cookie['name'], "value" => $cookie['value'], "path" =>  $cookie['path'], "domain" => $cookie['domain'], "expiry" => $cookie['expiry'], "secure" => $cookie['secure']));
+//                    }
+//                }
+            }
+            else
+            {
+                $host = 'http://localhost:4444/wd/hub'; // this is the default
+                $capabilities = DesiredCapabilities::safari();
+                $driver = RemoteWebDriver::create($host, $desired_capabilities = $capabilities, 5000);
+                $GLOBALS['selenium_sessionid'] = $driver->getSessionID();
+            }
+            $driver->get($url);
+
+            // wait at most 10 seconds until at least one result is shown
+            if($elementClass)
+            {
+                $driver->wait(10)->until(
+                    WebDriverExpectedCondition::presenceOfAllElementsLocatedBy(
+                        WebDriverBy::className($elementClass)
+                    )
+                );
+            }
+
+            else
+            {
+                $driver->wait(10);
+            }
+
+            $GLOBALS['selenium_cookies'] = $driver->manage()->getCookies();
+            $pagehtml = $driver->getPageSource();
+
+            // $driver->close();
+
+            return $pagehtml;
+        } catch (Exception $ex) {
+            $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
+
+            if($countRetry < 3)
+            {
+                $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_WARNING__);
+                return $this->_getFullHTMLForDynamicWebpage_($url, $elementClass, ($countRetry+1));
+            }
+
+            $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
+            throw new ErrorException($strMsg);
         }
-        else
+        finally
         {
-            $driver->wait(10);
+//            if($this->isBitFlagSet(C__JOB_USE_SELENIUM) && isset($GLOBALS['selenium_started']) && $GLOBALS['selenium_started'] = true)
+//            {
+//                if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Sending server shutdown call to Selenium server...", \Scooper\C__DISPLAY_ITEM_RESULT__); }
+//                $cmd = "curl \"http://localhost:4444/selenium-server/driver?cmd=shutDownSeleniumServer\" >/dev/null &";
+//                exec($cmd);
+//                $GLOBALS['selenium_started'] = false;
+//            }
         }
-
-        $pagehtml = $driver->getPageSource();
-
-        $driver->close();
-
-        return $pagehtml;
-
     }
 
     private function _getMyJobsForSearchFromWebpage_($searchDetails)
@@ -1007,7 +1079,7 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
 
                     if($this->isBitFlagSet(C__JOB_PREFER_MICRODATA))
                     {
-                        $arrPageJobsList = $this->_getJobsFromMicroData_($objSimpleHTML);
+                        $arrPageJobsList = $this->getJobsFromMicroData($objSimpleHTML);
                     }
                     if(!$arrPageJobsList)
                     {
