@@ -25,11 +25,15 @@ class PluginGeekwire extends ClassJobsSitePlugin
 {
     protected $siteName = 'Geekwire';
     protected $siteBaseURL = 'http://www.geekwork.com/';
-    protected $strFilePath_HTMLFileDownloadScript = "PluginGeekwire_downloadjobs.applescript";
-    protected $strBaseURLFormat = "http://www.geekwork.com/jobs/?search_keywords=***KEYWORDS***&search_location=***LOCATION***&search_categories=0&filter_job_type%5B%5D=full-time";
-    protected $flagSettings = C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS;
+    protected $strBaseURLFormat = "http://www.geekwork.com/jobs/?search_keywords=***KEYWORDS***&search_location=***LOCATION***";
     protected $typeLocationSearchNeeded = 'location-statecode';
+    protected $additionalLoadDelaySeconds = 20;
 
+    function __construct($strBaseDir = null)
+    {
+        parent::__construct($strBaseDir);
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_USE_SELENIUM | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PREFER_MICRODATA;
+    }
 
     function parseJobsListForPage($objSimpHTML)
     {

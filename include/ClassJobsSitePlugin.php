@@ -245,6 +245,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     protected $strTitleOnlySearchKeywordFormat = null;
     protected $classToCheckExists = null;
     protected $cookieNamesToSaveAndResend = Array();
+    protected $additionalLoadDelaySeconds = 0;
 
     //************************************************************************
     //
@@ -922,7 +923,7 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
             if(!isset($GLOBALS['selenium_started']) || $GLOBALS['selenium_started'] == false)
             {
                 $strCmdToRun = "java -jar \"" . __ROOT__ . "/lib/selenium-server-standalone-3.0.0-beta4.jar\"  >/dev/null &";
-                $result = exec($strCmdToRun);
+                exec($strCmdToRun);
                 $GLOBALS['selenium_started'] = true;
                 sleep(5);
             }
@@ -943,7 +944,7 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
             // wait at most 10 seconds until at least one result is shown
             if($elementClass)
             {
-                $driver->wait(10)->until(
+                $driver->wait(10+$this->additionalLoadDelaySeconds)->until(
                     WebDriverExpectedCondition::presenceOfAllElementsLocatedBy(
                         WebDriverBy::className($elementClass)
                     )
@@ -951,7 +952,7 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
             }
             else
             {
-                sleep(5);
+                sleep(5+$this->additionalLoadDelaySeconds);
             }
 
             $GLOBALS['selenium_cookies'] = $driver->manage()->getCookies();
@@ -1025,7 +1026,6 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
             $nTotalListings = $nTotalResults;
             if($nTotalResults == 0)
             {
-                $totalPagesCount = 0;
                 $totalPagesCount = 0;
             }
             elseif($nTotalResults != C__TOTAL_ITEMS_UNKNOWN__)
