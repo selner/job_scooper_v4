@@ -31,20 +31,13 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
     {
         throw new ErrorException("parseJobsListForPage not supported for class ClassMultiSiteSearch");
     }
-    function parseTotalResultsCount($objSimpHTML) { throw new ErrorException("parseJobsListForPage not supported for class ClassMultiSiteSearch"); }
+    function parseTotalResultsCount($objSimpHTML) { throw new ErrorException("parseTotalResultsCount not supported for class ClassMultiSiteSearch"); }
 
     function addMultipleSearches($arrSearches, $locSettingSets = null)
     {
         $this->arrSearchLocationSetsToRun = $locSettingSets;
         $this->arrSearchesToReturn = $arrSearches;
     }
-
-//    function __destruct()
-//    {
-//        $GLOBALS['logger']->logLine("Sending server shutdown call to Selenium server...", \Scooper\C__DISPLAY_ITEM_START__);
-//        $cmd = "curl \"http://localhost:4444/selenium-server/driver?cmd=shutDownSeleniumServer\" >/dev/null &";
-//        exec($cmd);
-//    }
 
     function getJobsForMyMultipleSearches()
     {
@@ -78,9 +71,6 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
             $class = null;
 
 
-//            $strCmdToRun = "java -jar \"" . __ROOT__ . "/lib/selenium-server-standalone-2.53.1.jar\"  >/dev/null &";
-//            $result = exec($strCmdToRun);
-//
             foreach($arrPluginClassesToRun as $classSearches)
             {
                 $class = new $classSearches['class_name']($this->detailsMyFileOut['directory']);
