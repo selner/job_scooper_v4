@@ -131,58 +131,71 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // Output the full jobs list into a file and into files for different cuts at the jobs list data
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        $GLOBALS['logger']->logLine(PHP_EOL . "**************  Writing final list of " . count($arrFinalJobs_SortedByCompanyRole) . " jobs to output files.  ***************  " . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logSectionHeader("Ouputing Results Files", \Scooper\C__DISPLAY_SECTION_START__, \Scooper\C__NAPPFIRSTLEVEL__);
+        $GLOBALS['logger']->logSectionHeader("Files Sent To User", \Scooper\C__DISPLAY_SECTION_START__, \Scooper\C__NAPPSECONDLEVEL__);
+        $GLOBALS['logger']->logLine(PHP_EOL . "Writing final list of " . count($arrFinalJobs_SortedByCompanyRole) . " jobs to output files." . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
         $class = null;
 
-//        // Write to the main output file name that the user passed in
-//        $arrJobsTemp = $arrFinalJobs_SortedByCompanyRole ;
-//        if($arrJobsTemp == null || !is_array($arrJobsTemp))
-//        {
-//            $arrJobsTemp = array();
-//        }
 
-        $arrJobs_UpdatedOrInterested = array_filter($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayOrIsInterestedOrBlank");
+        //
+        // Output the final files we'll send to the user
+        //
+
+        // Output all records that match the user's interest and are still active
+        if($GLOBALS['OPTS']['number_days'] > 1)
+        {
+            $filterUpdatedOrNewSinceLastRun = "isMarkedInterested_IsBlank";
+            $filterNewSinceLastRun = "isMarkedInterested_IsBlank";
+        }
+        else
+        {
+            $filterUpdatedOrNewSinceLastRun = "isJobUpdatedTodayOrIsInterestedOrBlank";
+            $filterNewSinceLastRun = "isNewJobToday_Interested_IsBlank";
+        }
+
+        $arrJobs_UpdatedOrInterested = array_filter($arrFinalJobs_SortedByCompanyRole, $filterUpdatedOrNewSinceLastRun);
         $this->writeRunsJobsToFile($this->classConfig->getFileDetails('output')['full_file_path'], $arrJobs_UpdatedOrInterested, "ClassJobsRunWrapper-UserOutputFile");
-        $detailsCSVFile = $this->classConfig->getFileDetails('output');
-
-        $dataUpdatedOrInterestedJobs = $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayOrIsInterestedOrBlank", array("", "", "CSV"), "updated today", null, false);
-        $detailsUpdatedJobs = $dataUpdatedOrInterestedJobs['file_details'];
-
-        //
-        // Output all job records and their values
-        //
-//        $arrJobs_Active = $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, null, "_AllJobs", "CSV");
-        $dataAllJobs = $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, null, array("", "_AllJobs", "CSV"), "all jobs", null, false);
-        $detailsAllJobs = $dataAllJobs['file_details'];
+        $detailsMainResultsFile = $this->classConfig->getFileDetails('output');
 
         // Output all records that were automatically excluded
         $dataExcludedJobs = $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", array("", "_ExcludedJobs", "CSV"), "excluded jobs", null, true);
-        $detailsExcludedJobs = $dataExcludedJobs['file_details'];
+
+        // Output only new records that haven't been looked at yet
+        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, $filterNewSinceLastRun, "_AllUnmarkedJobs_Today", "CSV");
+        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, $filterNewSinceLastRun, "_AllUnmarkedJobs_Today", "HTML", null, $this->getKeysForHTMLOutput(), true);
+        $detailsHTMLFile = $this->__getAlternateOutputFileDetails__("HTML", "", "_AllUnmarkedJobs_Today");
+
+        $arrFilesToAttach = array($detailsMainResultsFile, $detailsHTMLFile, $dataExcludedJobs['file_details']);
+        $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \Scooper\C__SECTION_END__, \Scooper\C__NAPPSECONDLEVEL__);
 
 
-
+        //
+        // Output debugging / interim files if asked to
+        //
 
         if($this->is_OutputInterimFiles() == true) {
+            $GLOBALS['logger']->logSectionHeader("DEBUG ONLY:  Writing out interim, developer files (user does not ever see these)..." . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
 
             //
             // Now, output the various subsets of the total jobs list
             //
 
+            $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayOrIsInterestedOrBlank", array("", "", "CSV"), "updated today", null, false);
+
+            // Output all job records and their values
+            $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, null, array("", "_AllJobs", "CSV"), "all jobs", null, false);
+
 
             // Output only records that are new or not marked as excluded (aka "Yes" or "Maybe")
-            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_ActiveJobs", "CSV");
-            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_ActiveJobs", "HTML", null, $this->getKeysForHTMLOutput());
-            $arrJobs_AutoExcluded = $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", "");
+            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_AllActiveJobs", "CSV");
+            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_AllActiveJobs", "HTML", null, $this->getKeysForHTMLOutput());
 
             $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedToday", "_UpdatedJobs");
             $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayNotInterested", "_UpdatedExcludedJobs");
 
-            // Output only new records that haven't been looked at yet
-            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "CSV");
-            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "HTML", null, $this->getKeysForHTMLOutput(), true);
-            $detailsHTMLFile = $this->__getAlternateOutputFileDetails__("HTML", "", "_NewJobs_ForReview");
-
+            $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \Scooper\C__SECTION_END__, \Scooper\C__NAPPSECONDLEVEL__);
         }
+
 
 
         $strResultCountsText = $this->getListingCountsByPlugin("text", $arrFinalJobs_SortedByCompanyRole);
@@ -200,11 +213,10 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $strErrHTML = preg_replace("/\n/", ("<br>" . chr(10) . chr(13)), $strErrsResult);
         $strResultHTML = $strResultCountsHTML . PHP_EOL . "<pre>" . $strErrHTML . "</pre>" . PHP_EOL;
 
-        $arrFilesToAttach = array($detailsCSVFile, $detailsHTMLFile,);
         //
         // Send the email notification out for the completed job
         //
-        $this->sendJobCompletedEmail($strResultText, $strResultHTML, $detailsHTMLFile, array($detailsCSVFile, $detailsHTMLFile, $detailsExcludedJobs));
+        $this->sendJobCompletedEmail($strResultText, $strResultHTML, $detailsHTMLFile, $arrFilesToAttach);
 
         //
         // If the user has not asked us to keep interim files around
@@ -218,15 +230,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                 }
             }
         }
-
-/*
- *
-         $outsubfolderDetails = $this->classConfig->getFileDetails('output_subfolder');
-        if (isset($outsubfolderDetails)) {
-            if(isset($outsubfolderDetails['directory']))
-            rmdir($outsubfolderDetails['directory']);
-        }
-*/
 
         $GLOBALS['logger']->logLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
     }
