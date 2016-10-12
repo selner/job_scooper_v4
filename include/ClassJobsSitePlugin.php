@@ -732,7 +732,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         {
             foreach($micro->items as $mditem)
             {
-                if (isset($mditem->type) && strcasecmp($mditem->type[0], "https://schema.org/JobPosting") == 0) {
+                if (isset($mditem->type) && strcasecmp(parse_url($mditem->type[0], PHP_URL_PATH), "/JobPosting") == 0) {
 
                     $item = $this->getEmptyJobListingRecord();
 
@@ -776,6 +776,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                     //                    $item['brief'] = $mditem->properties["description"][0];
 
                     $item['job_site'] = $this->siteName;
+                    $item['company'] = $this->siteName;
 
                     if(isset($this->regex_link_job_id))
                     {
@@ -803,7 +804,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         if(isset($regex_link_job_id))
         {
             $fMatchedID = preg_match($regex_link_job_id, $url, $idMatches);
-            if($fMatchedID && count($idMatches) > 1)
+            if($fMatchedID && count($idMatches) >= 1)
             {
                 return $idMatches[count($idMatches)-1];
             }
@@ -929,16 +930,6 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
             if(isset($GLOBALS['selenium_sessionid']) && $GLOBALS['selenium_sessionid'] != -1)
             {
                 $driver = RemoteWebDriver::createBySessionID($GLOBALS['selenium_sessionid']);
-//                if(isset($GLOBALS['selenium_cookies']))
-//                {
-//                    $cookies2 = $driver->manage()->getCookies();
-//                    foreach($GLOBALS['selenium_cookies'] as $cookie)
-//                    {
-//                        $driver->get($this->$url);
-//
-//                        $driver = $driver->manage()->addCookie(array("name" => $cookie['name'], "value" => $cookie['value'], "path" =>  $cookie['path'], "domain" => $cookie['domain'], "expiry" => $cookie['expiry'], "secure" => $cookie['secure']));
-//                    }
-//                }
             }
             else
             {
@@ -958,10 +949,9 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
                     )
                 );
             }
-
             else
             {
-                $driver->wait(10);
+                sleep(5);
             }
 
             $GLOBALS['selenium_cookies'] = $driver->manage()->getCookies();
@@ -1026,19 +1016,23 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
         }
         if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL); }
 
-        if($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
-        {
-            $totalPagesCount = 1;
-            $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
-        }
-        else
+        $totalPagesCount = 1;
+        $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
+        if(!$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
         {
             $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML);
-            assert($strTotalResults != VALUE_NOT_SUPPORTED);
-            $strTotalResults  = intval(str_replace(",", "", $strTotalResults));
-            $nTotalListings = intval($strTotalResults);
-            $totalPagesCount = \Scooper\intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
-            if($totalPagesCount < 1)  $totalPagesCount = 1;
+            $nTotalResults  = intval(str_replace(",", "", $strTotalResults));
+            $nTotalListings = $nTotalResults;
+            if($nTotalResults == 0)
+            {
+                $totalPagesCount = 0;
+                $totalPagesCount = 0;
+            }
+            elseif($nTotalResults != C__TOTAL_ITEMS_UNKNOWN__)
+            {
+                $totalPagesCount = \Scooper\intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
+                if($totalPagesCount < 1)  $totalPagesCount = 1;
+            }
         }
 
         if($nTotalListings <= 0)
