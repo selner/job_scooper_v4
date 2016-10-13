@@ -33,14 +33,18 @@ class PluginStartupHire extends ClassJobsSitePlugin
 {
     protected $siteName = 'StartupHire';
     protected $siteBaseURL = 'http://www.startuphire.com';
-    protected $strFilePath_HTMLFileDownloadScript = "PluginStartupHire_downloadjobs.applescript";
     protected $flagSettings = null;
+    protected $typeLocationSearchNeeded = 'location-city';
+
+    protected $strBaseURLFormat = "http://www.startuphire.com/search?keywords=product&location=Las+Vegas%2C+NV&latlon=36.175%2C-115.137&within=50&country=US";
+    protected $additionalLoadDelaySeconds = 20;
 
     function __construct($strBaseDir = null)
     {
-        $this->flagSettings = C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS | C__JOB_BASE_URL_FORMAT_REQUIRED | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED | C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
         parent::__construct($strBaseDir);
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_USE_SELENIUM | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PREFER_MICRODATA;
     }
+
 
     /**
     /**
