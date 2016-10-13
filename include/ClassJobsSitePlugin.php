@@ -995,8 +995,8 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
         $arrPageJobsList = $this->_getJobsDataForCachedURL_($strURL);
         if(isset($arrPageJobsList))
         {
-            $this->_addSearchJobsToMyJobsList_($arrPageJobsList['object'], $searchDetails);
-            $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[".$searchDetails['name']."]" .": " . countJobRecords($arrPageJobsList['object']). " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+            $this->_addSearchJobsToMyJobsList_($arrPageJobsList, $searchDetails);
+            $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[".$searchDetails['name']."]" .": " . countJobRecords($arrPageJobsList). " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
             return;
         }
 
