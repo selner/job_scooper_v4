@@ -24,7 +24,7 @@ class ClassConfig extends ClassJobsSitePlugin
     protected $nNumDaysToSearch = -1;
     protected $arrFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null, 'user_input_files' => null);
     protected $arrEmailAddresses = null;
-    protected $configSettings = array('searches' => null, 'keyword_sets' => null, 'location_sets' => null, 'number_days'=>VALUE_NOT_SUPPORTED, 'included_sites' => array(), 'excluded_sites' => array(), 'excluded_plugin_types' => array());
+    protected $configSettings = array('searches' => null, 'keyword_sets' => null, 'location_sets' => null, 'number_days'=>VALUE_NOT_SUPPORTED, 'included_sites' => array(), 'excluded_sites' => array());
     protected $arrEmail_PHPMailer_SMTPSetup = null;
 
 
@@ -467,6 +467,7 @@ class ClassConfig extends ClassJobsSitePlugin
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading global search settings from config file...", \Scooper\C__DISPLAY_ITEM_START__);
         if(isset($config['global_search_options']) && is_array($config['global_search_options']) && isset($config['global_search_options']['excluded_jobsites']))
         {
+//            if(is_string($config['global_search_options']['excluded_jobsites'])) { $config['global_search_options']['excluded_jobsites'] = explode(",", $config['global_search_options']['excluded_jobsites']); }
             if(!is_array($config['global_search_options']['excluded_jobsites'])) { $config['global_search_options']['excluded_jobsites'] = array($config['global_search_options']['excluded_jobsites']); }
             foreach($config['global_search_options']['excluded_jobsites'] as $excludedSite)
             {
@@ -476,45 +477,6 @@ class ClassConfig extends ClassJobsSitePlugin
                 $excludedSite = '';
             }
 
-            if(isset($config['global_search_options']['excluded_plugin_types']))
-            {
-                foreach($config['global_search_options']['excluded_plugin_types'] as $excludedPlugins)
-                {
-                    $excludedPlugins = strtolower($excludedPlugins);
-                    $this->configSettings['excluded_plugin_types'][$excludedPlugins] = $excludedPlugins;
-                }
-
-                if(isset($this->configSettings['excluded_plugin_types']) && count($this->configSettings['excluded_plugin_types']) > 0)
-                {
-                    foreach($this->configSettings['excluded_plugin_types'] as $type)
-                    {
-                        $flagCheck=null;
-                        foreach($GLOBALS['DATA']['site_plugins'] as $plugin)
-                        {
-                            $class = new $plugin['class_name'];
-                            switch ($type)
-                            {
-                                case "web":
-                                    $flagCheck = C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__;
-                                    break;
-
-                                case "xml":
-                                    $flagCheck = C__JOB_SEARCH_RESULTS_TYPE_XML__;
-                                    break;
-                            }
-
-                            if(isset($flagCheck) && $class->isBitFlagSet($flagCheck))
-                            {
-                                $this->configSettings['excluded_sites'][$plugin['name']] = $plugin['name'];
-                                if(isset($this->configSettings['included_sites'][$plugin['name']])) unset($this->configSettings['included_sites'][$plugin['name']]);
-
-                            }
-
-                        }
-                    }
-                }
-
-            }
         }
     }
 
