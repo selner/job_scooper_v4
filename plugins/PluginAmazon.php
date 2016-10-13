@@ -39,9 +39,9 @@ class PluginAmazon extends ClassJobsSitePlugin
     protected $siteName = 'Amazon';
     protected $nJobListingsPerPage = 100;
     protected $siteBaseURL = 'http://www.amazon.jobs';
-    protected $strBaseURLFormat = "https://www.amazon.jobs/en/search?base_query=***KEYWORDS***&loc_query=***LOCATION***&job_count=100&result_limit=100&sort=recent&cache";
+    protected $strBaseURLFormat = "https://www.amazon.jobs/en/search?base_query=***KEYWORDS***&location[]=***LOCATION***&job_count=100&result_limit=100&sort=recent&cache";
     protected $flagSettings = null;
-    protected $typeLocationSearchNeeded = 'location-city';
+    protected $typeLocationSearchNeeded = 'location-city-dash-statecode';
     protected $classToCheckExists = "job-title";
 
     function __construct($strBaseDir = null)

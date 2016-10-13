@@ -99,7 +99,7 @@ define('C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_NO_LOCATION', C__JOB_BASET
 define('C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE_NO_LOCATION', C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_NO_LOCATION | C__JOB_PAGECOUNT_NOTAPPLICABLE__);
 define('C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS', C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED);
 
-$GLOBALS['DATA']['location_types'] = array('location-city', 'location-city-comma-statecode', 'location-city-comma-statecode-underscores-and-dashes', 'location-city-comma-state', 'location-city-comma-state-country', 'location-statecode', 'location-state', 'location-city-comma-state-country-no-commas');
+$GLOBALS['DATA']['location_types'] = array('location-city', 'location-city-comma-statecode', 'location-city-dash-statecode', 'location-city-comma-statecode-underscores-and-dashes', 'location-city-comma-state', 'location-city-comma-state-country', 'location-statecode', 'location-state', 'location-city-comma-state-country-no-commas');
 const C__TOTAL_ITEMS_UNKNOWN__ = 11111;
 
 
