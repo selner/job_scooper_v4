@@ -71,6 +71,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             $GLOBALS['selenium_started'] = false;
         }
 
+
     }
 
     function parseJobsListForPageBase($objSimpHTML) {
@@ -562,7 +563,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     {
         $searchDetails['location_search_value'] = VALUE_NOT_SUPPORTED;
 
-        if ($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || $this->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
+        if ($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || $this->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED))
         {
             $searchDetails['location_search_value'] = VALUE_NOT_SUPPORTED;
         }
@@ -932,6 +933,7 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
             {
                 $host = 'http://localhost:4444/wd/hub'; // this is the default
                 $capabilities = DesiredCapabilities::safari();
+                $capabilities->setCapability("nativeEvents", true);
                 $driver = RemoteWebDriver::create($host, $desired_capabilities = $capabilities, 5000);
                 $GLOBALS['selenium_sessionid'] = $driver->getSessionID();
             }
@@ -951,12 +953,8 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
                 sleep(5+$this->additionalLoadDelaySeconds);
             }
 
-            $GLOBALS['selenium_cookies'] = $driver->manage()->getCookies();
-            $pagehtml = $driver->getPageSource();
 
-            // $driver->close();
-
-            return $pagehtml;
+            return $driver;
         } catch (Exception $ex) {
             $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
 
@@ -987,6 +985,8 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
         $nItemCount = 1;
         $nPageCount = 1;
         $arrSearchReturnedJobs = null;
+        $driver = null;
+        $objSimpleHTML = null;
 
 
         $strURL = $this->_getURLfromBase_($searchDetails, $nPageCount, $nItemCount);
@@ -1004,7 +1004,8 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
 
         if($this->isBitFlagSet(C__JOB_USE_SELENIUM))
         {
-            $html = $this->_getFullHTMLForDynamicWebpage_($strURL, $this->classToCheckExists);
+            $driver = $this->_getFullHTMLForDynamicWebpage_($strURL, $this->classToCheckExists);
+            $html = $driver->getPageSource();
             $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
         }
         else
@@ -1050,7 +1051,24 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
 
                 if($this->isBitFlagSet(C__JOB_USE_SELENIUM))
                 {
-                    $html = $this->_getFullHTMLForDynamicWebpage_($strURL, $this->classToCheckExists);
+                    if($driver == null)
+                        $driver = $this->_getFullHTMLForDynamicWebpage_($strURL, $this->classToCheckExists);
+
+                    if($this->isBitFlagSet( C__INFSCROLL_DOWNFULLPAGE))
+                    {
+                        while($nPageCount <= $totalPagesCount)
+                        {
+                            // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
+                            $driver->executeScript("window.scrollBy(500,5000);");
+
+                            sleep(5);
+                            $nPageCount = $nPageCount + 1;
+                        }
+
+                    }
+
+// BUGBUG -- Checking these two HTML values to make sure they still match
+                    $html = $driver->getPageSource();
                     $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
 
                 }

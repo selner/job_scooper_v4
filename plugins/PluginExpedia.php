@@ -25,8 +25,15 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 class PluginExpedia extends ClassJobsSitePlugin
 {
     protected $siteName = 'Expedia';
-    protected $siteBaseURL = 'http://expediajobs.findly.com';
-    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_URL_FORMAT_REQUIRED;
+    protected $siteBaseURL = 'https://expedia.wd5.myworkdayjobs.com/search/jobs/';
+    protected $strBaseURLFormat = 'https://expedia.wd5.myworkdayjobs.com/search/jobs/';
+    protected $nJobListingsPerPage = 100;
+
+    function __construct($strBaseDir = null)
+    {
+        parent::__construct($strBaseDir);
+        $this->flagSettings =  C__JOB_BASETYPE_WEBPAGE_FLAGS |C__JOB_SETTINGS_URL_VALUE_REQUIRED | C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED | C__JOB_USE_SELENIUM | C__INFSCROLL_DOWNFULLPAGE;
+    }
 
 
     function getDaysURLValue($days = null) {
@@ -56,10 +63,10 @@ class PluginExpedia extends ClassJobsSitePlugin
 
     function parseTotalResultsCount($objSimpHTML)
     {
-        $resultsSection= $objSimpHTML->find("td[class='td-result']");
+        $resultsSection= $objSimpHTML->find("span[class='GF34SVYCIUH'] span");
         $totalItemsText = $resultsSection[0]->plaintext;
         $arrItemItems = explode(" ", trim($totalItemsText));
-        $strTotalItemsCount = $arrItemItems[6];
+        $strTotalItemsCount = $arrItemItems[0];
 
         return str_replace(",", "", $strTotalItemsCount);
     }
@@ -69,9 +76,9 @@ class PluginExpedia extends ClassJobsSitePlugin
         $ret = null;
 
 
-        $nodesJobs= $objSimpHTML->find('div[class="s-res"]');
+        $parent = $objSimpHTML->find('div[class="GF34SVYCOUH.GF34SVYCAUH"]');
 
-
+        $nodesJobs= $parent[0]->find('li');
         foreach($nodesJobs as $node)
         {
             $item = $this->getEmptyJobListingRecord();

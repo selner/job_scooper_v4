@@ -229,11 +229,6 @@ class ClassConfig extends ClassJobsSitePlugin
         if(isset($config['settings_files']))
         {
             $settingFiles = $config['settings_files'];
-            if(!(is_array($settingFiles) || is_object($settingFiles)))
-            {
-                $settingFiles = array($config['settings_files']);
-            }
-
             foreach($settingFiles as $nextConfigFile)
             {
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Child INI found: ".$nextConfigFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -389,7 +384,7 @@ class ClassConfig extends ClassJobsSitePlugin
     private function __getInputFilesByValue__($valKey, $val)
     {
         $ret = null;
-        if(isset($this->arrFileDetails['user_input_files']) && (is_array($this->arrFileDetails['user_input_files'])  || is_object($this->arrFileDetails['user_input_files'])))
+        if(isset($this->arrFileDetails['user_input_files']) && (is_array($this->arrFileDetails['user_input_files'])  || is_array($this->arrFileDetails['user_input_files'])))
         {
             foreach($this->arrFileDetails['user_input_files'] as $fileItem)
             {
@@ -411,7 +406,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
         if(isset($config['search']))
         {
-            if(is_object($config['search']))
+            if(is_array($config['search']))
             {
                 foreach($config['search'] as $iniSearch)
                 {
@@ -470,7 +465,7 @@ class ClassConfig extends ClassJobsSitePlugin
     private function _readGlobalSearchParamtersFromConfig_($config)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading global search settings from config file...", \Scooper\C__DISPLAY_ITEM_START__);
-        if(isset($config['global_search_options']) && is_object($config['global_search_options']))
+        if(isset($config['global_search_options']) && is_array($config['global_search_options']) && isset($config['global_search_options']['excluded_jobsites']))
         {
             foreach($config['global_search_options']['excluded_jobsites'] as $excludedSite)
             {
@@ -732,7 +727,7 @@ class ClassConfig extends ClassJobsSitePlugin
                         {
                             $classPlug = new $GLOBALS['DATA']['site_plugins'][$siteToSearch]['class_name'](null, null);
 
-                            if($classPlug->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
+                            if($classPlug->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED))
                             {
                                 $arrSkippedPlugins[] = $siteToSearch;
                                 continue;
@@ -881,7 +876,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
 
                 $classPlug = new $GLOBALS['DATA']['site_plugins'][$arrPossibleSearches_Start[$l]['site_name']]['class_name'](null, null);
-                if ($classPlug->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || $classPlug->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED)) {
+                if ($classPlug->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || $classPlug->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED)) {
                     // this search doesn't support specifying locations so we shouldn't clone it for a second location set
                     continue;
                 }

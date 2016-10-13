@@ -33,7 +33,7 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
     function __construct($strDir = null)
     {
         parent::__construct($strDir);
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_BASE_URL_FORMAT_REQUIRED | C__JOB_USE_SELENIUM;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_SETTINGS_URL_VALUE_REQUIRED | C__JOB_USE_SELENIUM;
 
     }
 
