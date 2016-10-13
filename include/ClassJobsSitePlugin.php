@@ -917,7 +917,7 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
         try
         {
 
-            if(!isset($GLOBALS['selenium_started']) || $GLOBALS['selenium_started'] == false)
+            if(!array_key_exists('selenium_started', $GLOBALS) || $GLOBALS['selenium_started'] != true)
             {
                 $strCmdToRun = "java -jar \"" . __ROOT__ . "/lib/selenium-server-standalone-3.0.0-beta4.jar\"  >/dev/null &";
                 exec($strCmdToRun);
@@ -1004,9 +1004,17 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
 
         if($this->isBitFlagSet(C__JOB_USE_SELENIUM))
         {
-            $driver = $this->_getFullHTMLForDynamicWebpage_($strURL, $this->classToCheckExists);
-            $html = $driver->getPageSource();
-            $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+            try
+            {
+                $driver = $this->_getFullHTMLForDynamicWebpage_($strURL, $this->classToCheckExists);
+                $html = $driver->getPageSource();
+                $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+            } catch (Exception $ex) {
+                $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
+
+                $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
+                throw new ErrorException($strMsg);
+            }
         }
         else
         {
@@ -1051,26 +1059,33 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
 
                 if($this->isBitFlagSet(C__JOB_USE_SELENIUM))
                 {
-                    if($driver == null)
-                        $driver = $this->_getFullHTMLForDynamicWebpage_($strURL, $this->classToCheckExists);
-
-                    if($this->isBitFlagSet( C__INFSCROLL_DOWNFULLPAGE))
+                    try
                     {
-                        while($nPageCount <= $totalPagesCount)
-                        {
-                            // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
-                            $driver->executeScript("window.scrollBy(500,5000);");
+                        if($driver == null)
+                            $driver = $this->_getFullHTMLForDynamicWebpage_($strURL, $this->classToCheckExists);
 
-                            sleep(5);
-                            $nPageCount = $nPageCount + 1;
+                        if($this->isBitFlagSet( C__INFSCROLL_DOWNFULLPAGE))
+                        {
+                            while($nPageCount <= $totalPagesCount)
+                            {
+                                // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
+                                $driver->executeScript("window.scrollBy(500,5000);");
+
+                                sleep(5);
+                                $nPageCount = $nPageCount + 1;
+                            }
+
                         }
 
-                    }
+    // BUGBUG -- Checking these two HTML values to make sure they still match
+                        $html = $driver->getPageSource();
+                        $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+                        } catch (Exception $ex) {
+                            $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
 
-// BUGBUG -- Checking these two HTML values to make sure they still match
-                    $html = $driver->getPageSource();
-                    $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
-
+                            $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
+                            throw new ErrorException($strMsg);
+                        }
                 }
 
                 if(!($nPageCount == 1 && isset($objSimpleHTML)))
