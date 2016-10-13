@@ -141,12 +141,15 @@ class ClassConfig extends ClassJobsSitePlugin
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Log file for run being written to: " . $this->arrFileDetails['config_ini']['directory'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration file details from " . $this->arrFileDetails['config_ini']['full_file_path'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            if($this->arrFileDetails['config_ini']['full_file_path'] )
+//            if($this->arrFileDetails['config_ini']['full_file_path'] )
 
-            $iniParser = new IniParser($this->arrFileDetails['config_ini']['full_file_path']);
-            $iniParser->use_array_object = false;
-            $confTemp = $iniParser->parse();
-            $iniParser = null;
+//            $iniParser = new IniParser($this->arrFileDetails['config_ini']['full_file_path']);
+//            $iniParser->use_array_object = false;
+//            $confTemp = $iniParser->parse();
+//            $iniParser = null;
+
+            $this->_LoadAndMergeAllConfigFilesRecursive($this->arrFileDetails['config_ini']['full_file_path']);
+
             if (isset($this->arrFileDetails['config_ini'])) {
                 if(!is_file($this->arrFileDetails['config_ini']['full_file_path']))
                 {
@@ -162,7 +165,6 @@ class ClassConfig extends ClassJobsSitePlugin
                 }
             }
 
-            $this->_LoadAndMergeAllConfigFilesRecursive($this->arrFileDetails['config_ini']['full_file_path']);
             $this->_setupRunFromConfig_($this->allConfigFileSettings);
 
         }
@@ -505,13 +507,21 @@ class ClassConfig extends ClassJobsSitePlugin
                     {
                         $arrNewLocationSet = $this->_getEmptyLocationSettingsSet_();
                         $strSetName = 'LocationSet' . (count($this->configSettings['location_sets']) + 1);
-                        if(isset($iniSettings['name']) && strlen($iniSettings['name']) > 0)
+                        if(isset($iniSettings['name']))
                         {
-                            $strSetName = $iniSettings['name'];
+                            if(is_array($iniSettings['name']))
+                            {
+                                throw new Exception("Error: Invalid location set data loaded from configs.  Did you inadvertently include the same location set [" . $iniSettings['name'][0] . "] twice?");
+                            }
+                            if (strlen($iniSettings['name']) > 0)
+                            {
+                                $strSetName = $iniSettings['name'];
+                            }
                         }
                         elseif(isset($iniSettings['key']) && strlen($iniSettings['key']) > 0)
                         {
                             $strSetName = $iniSettings['key'];
+
                         }
                         $strSetName = \Scooper\strScrub($strSetName, FOR_LOOKUP_VALUE_MATCHING);
 
