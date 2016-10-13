@@ -153,7 +153,7 @@ class ClassConfig extends ClassJobsSitePlugin
                     if(!is_dir($altFileDetails['config_ini']['directory']))
                     {
                         if(is_dir(is_file($altFileDetails['config_ini']['full_file_path']))) {
-                            Scooper\parseFilePath($this->arrFileDetails['config_ini']['directoy'] . "/". $altFileDetails['config_ini']['filename']);
+                            Scooper\parseFilePath($this->arrFileDetails['config_ini']['directory'] . "/". $altFileDetails['config_ini']['filename']);
                         }
                     }
 
@@ -232,7 +232,7 @@ class ClassConfig extends ClassJobsSitePlugin
                 $settingFiles = array($config->settings_files);
             }
 
-            foreach($settingFiles['ini_path'] as $nextConfigFile)
+            foreach((Array)$settingFiles['ini_path'] as $nextConfigFile)
             {
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Child INI found: ".$nextConfigFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 $iniParser = new IniParser($nextConfigFile);
