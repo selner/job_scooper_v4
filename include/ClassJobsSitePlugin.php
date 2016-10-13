@@ -633,10 +633,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             {
                 $this->_getMyJobsForSearchFromXML_($searchDetails);
             }
-            elseif($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_HTML_FILE__))
-            {
-                $this->_getMyJobsFromHTMLFiles_($searchDetails);
-            }
             elseif($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__))
             {
                 $this->_getMyJobsForSearchFromWebpage_($searchDetails);
@@ -1117,97 +1113,6 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
 
     }
 
-    /**
-     * @param $searchDetails
-     * @throws ErrorException
-     */
-    private function _getMyJobsFromHTMLFiles_($searchDetails)
-    {
-        $arrSearchReturnedJobs = null;
-
-        if($this->strFilePath_HTMLFileDownloadScript == null || strlen($this->strFilePath_HTMLFileDownloadScript) == 0)
-        {
-            throw new ErrorException("Cannot download client-side jobs HTML for " . $this->siteName . " because the " . get_class($this) . " plugin does not have an Applescript configured to call.");
-        }
-
-        $GLOBALS['logger']->logLine("Starting search " . $searchDetails['name'] . " jobs download through AppleScript.", \Scooper\C__DISPLAY_ITEM_START__);
-
-        $nPageCount = 0;
-
-        $strFileKey = strtolower($this->siteName.'-'.$searchDetails['key']);
-        $strFileBase = $this->detailsMyFileOut['directory'].$strFileKey. "-jobs-page-";
-
-        $strURL = $this->_getURLfromBase_($searchDetails, null, null);
-        if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
-
-        $arrPageJobsList = $this->_getJobsDataForCachedURL_($strURL);
-        if(isset($arrPageJobsList))
-        {
-            $this->_addSearchJobsToMyJobsList_($arrPageJobsList['object'], $searchDetails);
-            $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[".$searchDetails['name']."]" .": " . countJobRecords($arrPageJobsList['object']). " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
-            return;
-        }
-
-
-        $strCmdToRun = "osascript " . __ROOT__ . "/plugins/".$this->strFilePath_HTMLFileDownloadScript . " " . escapeshellarg($this->detailsMyFileOut["directory"])  . " ".escapeshellarg($searchDetails["site_name"])." " . escapeshellarg($strFileKey)   . " '"  . $strURL . "'";
-        $GLOBALS['logger']->logLine("Command = " . $strCmdToRun, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        $result = \Scooper\my_exec($strCmdToRun);
-        if(\Scooper\intceil($result['stdout']) == VALUE_NOT_SUPPORTED)
-        {
-            $strError = "AppleScript did not successfully download the jobs.  Log = ".$result['stderr'];
-            $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-            throw new ErrorException($strError);
-        }
-        else
-        {
-            // log the resulting output from the script to the job_scooper log
-            $GLOBALS['logger']->logLine($result['stderr'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        }
-
-        $strFileName = $strFileBase.".html";
-        $GLOBALS['logger']->logLine("Parsing downloaded HTML files: '" . $strFileBase."*.html'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        while (file_exists($strFileName) && is_file($strFileName))
-        {
-            $GLOBALS['logger']->logLine("Parsing results HTML from '" . $strFileName ."'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            $objSimpleHTML = $this->getSimpleHTMLObjForFileContents($strFileName);
-            if(!$objSimpleHTML)
-            {
-                throw new ErrorException('Error:  unable to get SimpleHTMLDom object from file('.$strFileName.').');
-            }
-
-            $arrPageJobsList = $this->parseJobsListForPage($objSimpleHTML);
-
-            addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
-
-            $objSimpleHTML->clear();
-            unset($objSimpleHTML);
-            $objSimpleHTML = null;
-
-            //
-            // If the user has not asked us to keep interim files around
-            // after we're done processing, then delete the interim HTML file
-            //
-            if($this->is_OutputInterimFiles() != true) {
-                unlink($strFileName);
-            }
-
-            $nPageCount++;
-            $strFileName = $strFileBase.$nPageCount.".html";
-        }
-
-        if(isset($arrPageJobsList))
-        {
-            $GLOBALS['logger']->logLine("Downloaded " . countJobRecords($arrPageJobsList) ." jobs from " . $strFileName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            $this->_cacheJobsForURL($strURL, $arrPageJobsList, countJobRecords($arrPageJobsList));
-            $this->_addSearchJobsToMyJobsList_($arrSearchReturnedJobs, $searchDetails);
-        }
-        else
-        {
-            $this->_cacheJobsForURL($strURL, array(), 0);
-            $GLOBALS['logger']->logLine("0 jobs found for " . $strFileName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        }
-
-    }
 
     /*
      * _addSearchJobsToMyJobsList_

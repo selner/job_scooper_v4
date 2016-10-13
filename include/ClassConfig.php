@@ -498,10 +498,6 @@ class ClassConfig extends ClassJobsSitePlugin
                             $class = new $plugin['class_name'];
                             switch ($type)
                             {
-                                case "applescript":
-                                    $flagCheck = C__JOB_SEARCH_RESULTS_TYPE_HTML_FILE__;
-                                    break;
-
                                 case "web":
                                     $flagCheck = C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__;
                                     break;
