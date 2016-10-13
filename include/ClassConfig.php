@@ -467,6 +467,7 @@ class ClassConfig extends ClassJobsSitePlugin
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading global search settings from config file...", \Scooper\C__DISPLAY_ITEM_START__);
         if(isset($config['global_search_options']) && is_array($config['global_search_options']) && isset($config['global_search_options']['excluded_jobsites']))
         {
+            if(!is_array($config['global_search_options']['excluded_jobsites'])) { $config['global_search_options']['excluded_jobsites'] = array($config['global_search_options']['excluded_jobsites']); }
             foreach($config['global_search_options']['excluded_jobsites'] as $excludedSite)
             {
                 $excludedSite = strtolower($excludedSite);
@@ -649,7 +650,14 @@ class ClassConfig extends ClassJobsSitePlugin
                 }
 
 
-                if(isset($ini_keyword_set['keywords']) && count($ini_keyword_set['keywords']) > 0)
+                // If keywords are in a string, split them out into an array instead before continuing
+                if(isset($ini_keyword_set['keywords']) && is_string($ini_keyword_set['keywords']))
+                {
+                    $ini_keyword_set['keywords'] = explode(",", $ini_keyword_set['keywords']);
+                }
+
+
+                if(isset($ini_keyword_set['keywords']) && is_array($ini_keyword_set['keywords']) && count($ini_keyword_set['keywords']) > 0)
                 {
                     foreach($ini_keyword_set['keywords'] as $keywordItem)
                     {
