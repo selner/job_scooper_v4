@@ -142,8 +142,10 @@ class ClassConfig extends ClassJobsSitePlugin
 
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration file details from " . $this->arrFileDetails['config_ini']['full_file_path'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
             if($this->arrFileDetails['config_ini']['full_file_path'] )
+
             $iniParser = new IniParser($this->arrFileDetails['config_ini']['full_file_path']);
-            $confTemp = $iniParser->parse($this->arrFileDetails['config_ini']['full_file_path']);
+            $iniParser->use_array_object = false;
+            $confTemp = $iniParser->parse();
             $iniParser = null;
             if (isset($this->arrFileDetails['config_ini'])) {
                 if(!is_file($this->arrFileDetails['config_ini']['full_file_path']))
@@ -224,19 +226,21 @@ class ClassConfig extends ClassJobsSitePlugin
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading INI file: ".$configFilePath, \Scooper\C__DISPLAY_SECTION_START__);
 
-        if(isset($config->settings_files))
+        if(isset($config['settings_files']))
         {
-            $settingFiles = $config->settings_files;
+            $settingFiles = $config['settings_files'];
             if(!(is_array($settingFiles) || is_object($settingFiles)))
             {
-                $settingFiles = array($config->settings_files);
+                $settingFiles = array($config['settings_files']);
             }
 
-            foreach((Array)$settingFiles['ini_path'] as $nextConfigFile)
+            foreach($settingFiles as $nextConfigFile)
             {
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Child INI found: ".$nextConfigFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
                 $iniParser = new IniParser($nextConfigFile);
-                $nextConfig = $iniParser->parse($nextConfigFile);
+                $iniParser->use_array_object = false;
+                $nextConfig = $iniParser->parse();
                 $iniParser = null;
                 $this->setupRunFromAllConfigsRecursive($nextConfigFile, $nextConfig, true);
             }
@@ -247,28 +251,28 @@ class ClassConfig extends ClassJobsSitePlugin
 
     private function _setupRunFromConfig_($config, $fRecursed = false)
     {
-        if(isset($config->output))
+        if(isset($config['output']))
         {
-            if(isset($config->output->folder))
+            if(isset($config['output']['folder']))
             {
-                 $this->arrFileDetails['output'] = \Scooper\parseFilePath($config->output->folder);
+                 $this->arrFileDetails['output'] = \Scooper\parseFilePath($config['output']['folder']);
             }
 
-            if(isset($config->output->file))
+            if(isset($config['output']['file']))
             {
-                 $this->arrFileDetails['output'] = \Scooper\parseFilePath( $this->arrFileDetails['output'] . $config->output->file);
+                 $this->arrFileDetails['output'] = \Scooper\parseFilePath( $this->arrFileDetails['output'] . $config['output']['file']);
             }
         }
 
 
-        if(isset($config->input) && isset($config->input->folder))
+        if(isset($config['input']) && isset($config['input']['folder']))
         {
-            $this->arrFileDetails['input_folder']  = \Scooper\parseFilePath($config->input->folder);
+            $this->arrFileDetails['input_folder']  = \Scooper\parseFilePath($config['input']['folder']);
         }
 
-        if(isset($config->inputfiles))
+        if(isset($config['inputfiles']))
         {
-            foreach($config->inputfiles as $iniInputFile)
+            foreach($config['inputfiles'] as $iniInputFile)
             {
                 $strFileName = "ERROR-UNKNOWN";
                 if(isset($iniInputFile['path']) && strlen($iniInputFile['path']) > 0)
@@ -405,11 +409,11 @@ class ClassConfig extends ClassJobsSitePlugin
         if(!$config) throw new ErrorException("Invalid configuration.  Cannot load user's searches.");
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading searches from config file...", \Scooper\C__DISPLAY_ITEM_START__);
 
-        if(isset($config->search))
+        if(isset($config['search']))
         {
-            if(is_object($config->search))
+            if(is_object($config['search']))
             {
-                foreach($config->search as $iniSearch)
+                foreach($config['search'] as $iniSearch)
                 {
                     $retSearch = $this->_parseSearchFromINI_($iniSearch);
                     if(isset($retSearch)) $this->configSettings['searches'][] = $retSearch;
@@ -417,7 +421,7 @@ class ClassConfig extends ClassJobsSitePlugin
             }
             else
             {
-                $retSearch = $this->_parseSearchFromINI_($config->search);
+                $retSearch = $this->_parseSearchFromINI_($config['search']);
                 if(isset($retSearch)) $this->configSettings['searches'][] = $retSearch;
             }
         }
@@ -466,9 +470,9 @@ class ClassConfig extends ClassJobsSitePlugin
     private function _readGlobalSearchParamtersFromConfig_($config)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading global search settings from config file...", \Scooper\C__DISPLAY_ITEM_START__);
-        if(isset($config->global_search_options) && is_object($config->global_search_options))
+        if(isset($config['global_search_options']) && is_object($config['global_search_options']))
         {
-            foreach($config->global_search_options['excluded_jobsites'] as $excludedSite)
+            foreach($config['global_search_options']['excluded_jobsites'] as $excludedSite)
             {
                 $excludedSite = strtolower($excludedSite);
                 $this->configSettings['excluded_sites'][$excludedSite] = $excludedSite;
@@ -476,9 +480,9 @@ class ClassConfig extends ClassJobsSitePlugin
                 $excludedSite = '';
             }
 
-            if(isset($config->global_search_options['excluded_plugin_types']))
+            if(isset($config['global_search_options']['excluded_plugin_types']))
             {
-                foreach($config->global_search_options['excluded_plugin_types'] as $excludedPlugins)
+                foreach($config['global_search_options']['excluded_plugin_types'] as $excludedPlugins)
                 {
                     $excludedPlugins = strtolower($excludedPlugins);
                     $this->configSettings['excluded_plugin_types'][$excludedPlugins] = $excludedPlugins;
@@ -528,16 +532,16 @@ class ClassConfig extends ClassJobsSitePlugin
 
 
 
-        if(isset($config->search_location_setting_set))
+        if(isset($config['search_location_setting_set']))
         {
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading search locations from config file...", \Scooper\C__DISPLAY_ITEM_START__);
             //
             // Check if this is a single search setting or if it's a set of search settings
             //
             $strSettingsName = null;
-            if($config->search_location_setting_set && is_object($config->search_location_setting_set))
+            if($config['search_location_setting_set'] && is_array($config['search_location_setting_set']))
             {
-                foreach($config->search_location_setting_set as $iniSettings)
+                foreach($config['search_location_setting_set'] as $iniSettings)
                 {
                     if(count($iniSettings) > 1)
                     {
@@ -601,9 +605,9 @@ class ClassConfig extends ClassJobsSitePlugin
     private function _readKeywordSetsFromConfig_($config)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading keyword set from config file...", \Scooper\C__DISPLAY_ITEM_START__);
-        if(isset($config->search_keyword_set))
+        if(isset($config['search_keyword_set']))
         {
-            foreach($config->search_keyword_set as $ini_keyword_set)
+            foreach($config['search_keyword_set'] as $ini_keyword_set)
             {
 
                 $strSetKey = 'KeywordSet' . (count($this->configSettings['keyword_sets']) + 1);
@@ -926,17 +930,17 @@ class ClassConfig extends ClassJobsSitePlugin
 
     private function _parseEmailSetupFromINI_($config)
     {
-        if(isset($config->email ))
+        if(isset($config['email'] ))
         {
-            if($config->email->smtp)
+            if($config['email']['smtp'])
             {
-                $this->arrEmail_PHPMailer_SMTPSetup = $config->email->smtp;
+                $this->arrEmail_PHPMailer_SMTPSetup = $config['email']['smtp'];
             }
         }
 
-        if(isset($config->emails ))
+        if(isset($config['emails'] ))
         {
-            foreach($config->emails as $emailItem)
+            foreach($config['emails'] as $emailItem)
             {
                 $tempEmail = $this->__getEmptyEmailRecord__();
                 if (isset($emailItem['name'])) {
