@@ -48,30 +48,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 $this->writeMyJobsListToFile($strOutPathWithName, false);
             }
         }
-
-        if(isset($GLOBALS['selenium_sessionid']) && $GLOBALS['selenium_sessionid'] != -1)
-        {
-            $driver = RemoteWebDriver::createBySessionID($GLOBALS['selenium_sessionid']);
-            $driver->quit();
-            $GLOBALS['selenium_sessionid'] = -1;
-
-            $sessions = RemoteWebDriver::getAllSessions();
-            foreach($sessions as $sess)
-            {
-                $driver = RemoteWebDriver::createBySessionID($sess);
-                $driver->quit();
-            }
-        }
-
-        if($this->isBitFlagSet(C__JOB_USE_SELENIUM) && isset($GLOBALS['selenium_started']) && $GLOBALS['selenium_started'] = true)
-        {
-            if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Sending server shutdown call to Selenium server...", \Scooper\C__DISPLAY_ITEM_RESULT__); }
-            $cmd = "curl \"http://localhost:4444/selenium-server/driver?cmd=shutDownSeleniumServer\" >/dev/null &";
-            exec($cmd);
-            $GLOBALS['selenium_started'] = false;
-        }
-
-
     }
 
     function parseJobsListForPageBase($objSimpHTML) {
@@ -916,16 +892,7 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
 
         try
         {
-
-            if(!array_key_exists('selenium_started', $GLOBALS) || $GLOBALS['selenium_started'] != true)
-            {
-                $strCmdToRun = "java -jar \"" . __ROOT__ . "/lib/selenium-server-standalone-3.0.0-beta4.jar\"  >/dev/null &";
-                exec($strCmdToRun);
-                $GLOBALS['selenium_started'] = true;
-                sleep(5);
-            }
-
-            if(isset($GLOBALS['selenium_sessionid']) && $GLOBALS['selenium_sessionid'] != -1)
+            if(array_key_exists('selenium_sessionid', $GLOBALS) && isset($GLOBALS['selenium_sessionid']) && $GLOBALS['selenium_sessionid'] != -1)
             {
                 $driver = RemoteWebDriver::createBySessionID($GLOBALS['selenium_sessionid']);
             }
@@ -950,7 +917,7 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
             }
             else
             {
-                sleep(5+$this->additionalLoadDelaySeconds);
+                sleep(2+$this->additionalLoadDelaySeconds);
             }
 
 
