@@ -24,12 +24,11 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 class PluginEmploymentGuide extends ClassJobsSitePlugin
 {
     protected $siteName = 'EmploymentGuide';
-    protected $siteBaseURL = 'http://seattle.employmentguide.com/';
-    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
+    protected $siteBaseURL = 'http://www.employmentguide.com/';
+    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_LOCATION_REQUIRES_LOWERCASE;
     protected $typeLocationSearchNeeded = 'location-city';
 
-    protected $strBaseURLFormat = "http://***LOCATION***.employmentguide.com/searchresults.php?page=***PAGE_NUMBER***&q=***KEYWORDS***&l=***LOCATION***&radius=20&sort=date&posted_after=***NUMBER_DAYS***";
-
+    protected $strBaseURLFormat = "http://***LOCATION***.employmentguide.com/job-search.php?q=***KEYWORDS***&l=***LOCATION***&page=***PAGE_NUMBER***&radius=20&sort=date&posted_after=***NUMBER_DAYS***";
 
     function getDaysURLValue($nDays = null)
     {
