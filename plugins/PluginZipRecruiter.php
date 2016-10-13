@@ -24,10 +24,10 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
     protected $siteName = 'ZipRecruiter';
     protected $siteBaseURL = 'https://jobs.ziprecruiter.com';
     protected $nJobListingsPerPage = 20;
-    protected $strBaseURLFormat = "https://jobs.ziprecruiter.com/candidate/search?search=***KEYWORDS***&location=***LOCATION***&radius=25&page=***PAGE_NUMBER***&days=***NUMBER_DAYS***";
+    protected $strBaseURLFormat = "https://www.ziprecruiter.com/candidate/search?search=***KEYWORDS***&location=***LOCATION***&radius=25&page=***PAGE_NUMBER***&days=***NUMBER_DAYS***";
     protected $flagSettings = null;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
-
+    protected $regex_link_job_id = '/^.*\/clk\/(.*)/i';
 
     // if this is a client-side HTML download plugin, you will need to add a script
     // for driving Safari to download the files and set that script name here.
@@ -37,9 +37,9 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
 
     function __construct($strBaseDir = null)
     {
-
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS  | C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS;
         parent::__construct($strBaseDir);
+
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS  | C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS | C__JOB_PREFER_MICRODATA;
     }
 
     /**
@@ -102,13 +102,15 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
         //
         // Find the HTML node that holds the result count
         //
-        $resultsSection = $objSimpHTML->find("strong[id='default_total_entries']");
+        $resultsSection = $objSimpHTML->find("h1[class='headline']");
 
         // get the text value of that node
         if($resultsSection != null)
         {
-            $totalItemsText = $resultsSection[0]->plaintext;
-            return $totalItemsText;
+            $totalItemsText = trim($resultsSection[0]->plaintext);
+            $count = trim(substr($totalItemsText, 0, strpos($totalItemsText, ' ')));
+
+            return $count;
         }
         else
         {

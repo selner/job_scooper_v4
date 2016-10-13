@@ -51,7 +51,7 @@ require_once (__ROOT__.'/plugins/PluginGoogle.php');
 //require_once (__ROOT__.'/plugins/PluginEbay.php');
 require_once (__ROOT__.'/plugins/PluginGeekwire.php');
 require_once (__ROOT__.'/plugins/PluginDotJobs.php');
-//require_once (__ROOT__.'/plugins/PluginZipRecruiter.php');
+require_once (__ROOT__.'/plugins/PluginZipRecruiter.php');
 //require_once (__ROOT__.'/plugins/PluginStartupHire.php');
 
 //And so on, 0x8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800 etc..
