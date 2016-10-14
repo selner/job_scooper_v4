@@ -984,7 +984,7 @@ class ClassConfig extends ClassJobsSitePlugin
             $delim = '|';
         }
 
-        $rx = $delim.preg_quote($pattern, $delim).$delim.'i';
+        $rx = $delim.preg_quote(trim($pattern), $delim).$delim.'i';
         try
         {
             $testMatch = preg_match($rx, "empty");
