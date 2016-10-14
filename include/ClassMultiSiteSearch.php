@@ -40,8 +40,9 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
         if(array_key_exists('selenium_started', $GLOBALS) && isset($GLOBALS['selenium_started']) && $GLOBALS['selenium_started'] == true)
         {
             if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Sending server shutdown call to Selenium server...", \Scooper\C__DISPLAY_ITEM_RESULT__); }
-            $cmd = "curl \"http://localhost:4444/selenium-server/driver?cmd=shutDownSeleniumServer\" >/dev/null &";
+            $cmd = "curl \"http://localhost:4444/selenium-server/driver?cmd=shutDownSeleniumServer\"";
             exec($cmd);
+
             unset ($GLOBALS['selenium_started']);
         }
     }
@@ -100,7 +101,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
                     {
                         if(!array_key_exists('selenium_started', $GLOBALS) || $GLOBALS['selenium_started'] != true)
                             {
-                                $strCmdToRun = "java -jar \"" . __ROOT__ . "/lib/selenium-server-standalone-3.0.0-beta4.jar\"  >/dev/null &";
+                                $strCmdToRun = "java -jar \"" . __ROOT__ . "/lib/selenium-server-standalone-3.0.0-beta4.jar\" -role standalone  >/dev/null &";
                                 exec($strCmdToRun);
                                 $GLOBALS['selenium_started'] = true;
                                 sleep(5);
