@@ -20,31 +20,13 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
 class PluginEntercom extends BaseTaleoPlugin
 {
-    function parseJobsListForPage($objSimpHTML) {            throw new ErrorException("Unable to parse results count for " . $this->siteName); }
-
+    protected $use1ToTDForCount = True;
     protected $taleoOrgID = "ENTERCOM";
     protected $nJobListingsPerPage = 100;
-    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'cws-search-results', 'index'=>1);
-    protected $server = 'http://chk.tbe.taleo.net/chk01/ats/careers/searchResults.jsp';
+    protected $server = 'http://chk.tbe.taleo.net/chk05/ats/careers/searchResults.jsp';
 
 }
 
-class PluginTesla extends BaseTaleoPlugin
-{
-    function parseJobsListForPage($objSimpHTML) {            throw new ErrorException("Unable to parse results count for " . $this->siteName); }
-    protected $strBaseURLFormat = 'http://ch.tbe.taleo.net/CH07/ats/careers/searchResults.jsp?org=TESLA&cws=1***ITEM_NUMBER***';
-    protected $nJobListingsPerPage = 100;
-    protected $secsPageTimeout = 60;
-
-    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'cws-search-results', 'index'=>1);
-}
-
-class PluginPacMed extends BaseTaleoPlugin
-{
-    protected $taleoOrgID = "PACMED";
-    protected $siteBaseURL = 'http://pacificmedicalcenters.org/index.php/work-with-us/';
-    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleoContent', 'index'=>1);
-}
 
 class PluginSeattleGenetics extends BaseTaleoPlugin
 {
@@ -62,31 +44,23 @@ class PluginInternetBrands extends BaseTaleoPlugin
 
 class PluginTraderJoes extends BaseTaleoPlugin
 {
+    protected $use1ToTDForCount = True;
     protected $siteBaseURL = 'http://www.traderjoes.com/careers/index.asp';
     protected $taleoOrgID = "TRADERJOES";
     protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleoContent', 'index'=>1);
 }
-class PluginViacom extends BaseTaleoPlugin
-{
-    protected $siteBaseURL = 'http://tbe.taleo.net/CH05/ats/careers/jobSearch.jsp?org=MTVNETWORKS&cws=1';
-    protected $taleoOrgID = "MTVNETWORKS";
-    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'content', 'index'=>2);
-}
 class PluginPorch extends BaseTaleoPlugin
 {
+    protected $use1ToTDForCount = True;
     protected $siteBaseURL = 'http://about.porch.com/careers';
     protected $taleoOrgID = "PORCH";
     protected $arrResultsCountTag = array('type' =>'id', 'value'=>'summary', 'index'=>1);
-}
-class PluginTableau extends BaseTaleoPlugin
-{
-    protected $taleoOrgID = "TABLEAU";
-    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleoContent', 'index'=>3);
 }
 
 
 abstract class BaseTaleoPlugin extends ClassJobsSitePlugin
 {
+    protected $use1ToTDForCount = False;
     protected $taleoOrgID = null;
     protected $nJobListingsPerPage = 50;
     protected $arrResultsCountTag = array('type' =>null, 'value'=>null, 'index'=>null);
@@ -116,7 +90,10 @@ abstract class BaseTaleoPlugin extends ClassJobsSitePlugin
 
     function parseTotalResultsCount($objSimpHTML)
     {
-        return $this->parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, $this->arrResultsCountTag['type'], $this->arrResultsCountTag['value'], $this->arrResultsCountTag['index']);
+        if($this->use1ToTDForCount)
+            return $this->parseTotalResultsCountFrom1ToTD($objSimpHTML);
+        else
+            return $this->parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, $this->arrResultsCountTag['type'], $this->arrResultsCountTag['value'], $this->arrResultsCountTag['index']);
     }
 
 
@@ -172,6 +149,15 @@ abstract class BaseTaleoPlugin extends ClassJobsSitePlugin
         }
 
         return $ret;
+    }
+
+    function parseTotalResultsCountFrom1ToTD($objSimpHTML) {
+        $nodes = $objSimpHTML->find('td[class="nowrapRegular"] b');
+        if($nodes && count($nodes)>=2)
+        {
+            return $nodes[1]->plaintext;
+        }
+
     }
 
 

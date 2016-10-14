@@ -456,6 +456,7 @@ function getMergedJobRecord($prevJobRecord, $newerJobRecord)
 
 }
 
+
 /**
  * Allows multiple expressions to be tested on one string.
  * This will return a boolean, however you may want to alter this.
@@ -463,6 +464,7 @@ function getMergedJobRecord($prevJobRecord, $newerJobRecord)
  * @author William Jaspers, IV <wjaspers4@gmail.com>
  * @created 2009-02-27 17:00:00 +6:00:00 GMT
  * @access public
+ * @ref http://www.php.net/manual/en/function.preg-match.php#89252
  *
  * @param array $patterns An array of expressions to be tested.
  * @param String $subject The data to test.
@@ -470,29 +472,26 @@ function getMergedJobRecord($prevJobRecord, $newerJobRecord)
  * @param mixed $flags Pass-thru argument to allow normal flags to apply to all tested expressions.
  * @param array $errors A storage bin for errors
  *
- * @returns bool Whether or not errors occurred.
+ * @returns bool True if successful; false if errors occurred.
  */
-function preg_match_multiple(
-    array $patterns=array(),
-    $subject=null,
-    &$findings=array(),
-    $flags=false,
-    &$errors=array()
-) {
-    foreach( $patterns as $name => $pattern )
-    {
-        if( 1 <= preg_match_all( $pattern, $subject, $found, $flags ) )
-        {
+function preg_match_multiple(array $patterns = array(), $subject = null, &$findings = array(), $flags = false, &$errors = array())
+{
+    foreach ($patterns as $name => $pattern) {
+        $found = false;
+        if (1 <= preg_match_all($pattern, $subject, $found, $flags)) {
             $findings[$name] = $found;
-        } else
-        {
-            if( PREG_NO_ERROR !== ( $code = preg_last_error() ))
-            {
+        } else {
+            if (PREG_NO_ERROR !== ($code = preg_last_error() )) {
                 $errors[$name] = $code;
-            } else $findings[$name] = array();
+            }
+            else
+            {
+                // No match was found, so don't return it in the findings
+                // $findings[$name] = array();
+            }
         }
     }
-    return (0===sizeof($errors));
+    return (0 === sizeof($errors));
 }
 
 function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strExt = '')

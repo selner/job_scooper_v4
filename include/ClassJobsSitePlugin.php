@@ -31,6 +31,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         {
             $this->detailsMyFileOut = \Scooper\parseFilePath($strOutputDirectory, false);
         }
+
     }
 
     function __destruct()
@@ -153,6 +154,8 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     }
 
 
+
+
     /**
      * Write this class instance's list of jobs to an output CSV file.  Always rights
      * the full unfiltered list.
@@ -217,7 +220,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     protected $locationValue = null;
     protected $strKeywordDelimiter = null;
     protected $strTitleOnlySearchKeywordFormat = null;
-
+    protected $classToCheckExists = null;
+    protected $cookieNamesToSaveAndResend = Array();
+    protected $additionalLoadDelaySeconds = 0;
 
     //************************************************************************
     //
@@ -534,7 +539,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     {
         $searchDetails['location_search_value'] = VALUE_NOT_SUPPORTED;
 
-        if ($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || $this->isBitFlagSet(C__JOB_BASE_URL_FORMAT_REQUIRED))
+        if ($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || $this->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED))
         {
             $searchDetails['location_search_value'] = VALUE_NOT_SUPPORTED;
         }
@@ -605,10 +610,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             {
                 $this->_getMyJobsForSearchFromXML_($searchDetails);
             }
-            elseif($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_HTML_FILE__))
-            {
-                $this->_getMyJobsFromHTMLFiles_($searchDetails);
-            }
             elseif($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__))
             {
                 $this->_getMyJobsForSearchFromWebpage_($searchDetails);
@@ -627,9 +628,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             // this particular underlying problem
             //
             $strErr = $ex->getMessage();
-            if(((strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['employmentguide']['name']) == 0)||
-                 (strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['careerbuilder']['name']) == 0) ||
-                (strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['ziprecruiter']['name']) == 0)) &&
+            if((isset($GLOBALS['DATA']['site_plugins']['employmentguide']) && (strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['employmentguide']['name']) == 0)||
+                 (isset($GLOBALS['DATA']['site_plugins']['careerbuilder']) && strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['careerbuilder']['name']) == 0) ||
+                (isset($GLOBALS['DATA']['site_plugins']['ziprecruiter']) && strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['ziprecruiter']['name']) == 0)) &&
                 (substr_count($strErr, "HTTP error #404") > 0))
             {
                 $strError = $this->siteName . " plugin returned a 404 page for the search.  This is not an error; it means zero results found." ;
@@ -694,8 +695,99 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
     }
 
+    private function getJobsFromMicroData($objSimpleHTML)
+    {
+        $config  = array('html' => (string)$objSimpleHTML);
+        $obj = new linclark\MicrodataPHP\MicrodataPhp($config);
+        $micro = $obj->obj();
+        $ret = null;
 
-    private function _getMyJobsForSearchFromXML_($searchDetails)
+        if($micro && $micro->items && count($micro->items) > 0)
+        {
+            foreach($micro->items as $mditem)
+            {
+                if (isset($mditem->type) && strcasecmp(parse_url($mditem->type[0], PHP_URL_PATH), "/JobPosting") == 0) {
+
+                    $item = $this->getEmptyJobListingRecord();
+
+                    $item['job_title'] = $mditem->properties["title"][0];
+                    if(isset($mditem->properties["url"]))
+                        $item['job_post_url'] = $mditem->properties["url"][0];
+                    elseif(isset($mditem->properties["mainEntityOfPage"]))
+                        $item['job_post_url'] = $mditem->properties["mainEntityOfPage"][0];
+                    if (isset($mditem->properties['hiringOrganization']))
+                        $item['company'] = $mditem->properties['hiringOrganization'][0]->properties['name'][0];
+                    if (isset($mditem->properties['jobLocation']) && is_array($mditem->properties['jobLocation']))
+                    {
+                        if (is_array($mditem->properties['jobLocation']))
+                        {
+                            if (isset($mditem->properties['jobLocation'][0]->properties['address']) && is_array($mditem->properties['jobLocation'][0]->properties['address']))
+                            {
+                                $city = "";
+                                $region = "";
+                                $zip = "";
+
+                                if (isset($mditem->properties['jobLocation'][0]->properties['address'][0]->properties['addressLocality']))
+                                    $city = $mditem->properties['jobLocation'][0]->properties['address'][0]->properties['addressLocality'][0];
+                                if (isset($mditem->properties['jobLocation'][0]->properties['address'][0]->properties['addressRegion']))
+                                    $region = $mditem->properties['jobLocation'][0]->properties['address'][0]->properties['addressRegion'][0];
+                                if (isset($mditem->properties['jobLocation'][0]->properties['address'][0]->properties['postalCode']))
+                                    $zip = $mditem->properties['jobLocation'][0]->properties['address'][0]->properties['postalCode'][0];
+                                $item["location"] = $city . " " . $region . " " & $zip;
+                            }
+
+                        }
+                        else
+                        {
+                            $item["location"] = $mditem->properties['jobLocation'][0];
+                        }
+                    }
+
+                    if (isset($mditem->properties['datePosted']))
+                        $item['job_site_date'] = $mditem->properties['datePosted'][0];
+                    //                    $item['industry'] = $mditem->properties["industry"][0];
+                    //                    $item['employmentType'] = $mditem->properties["employmentType"][0];
+                    //                    $item['brief'] = $mditem->properties["description"][0];
+
+                    $item['job_site'] = $this->siteName;
+                    $item['company'] = $this->siteName;
+
+                    if(isset($this->regex_link_job_id))
+                    {
+                        $item['job_id'] = $this->getIDFromLink($this->regex_link_job_id, $item['job_post_url']);
+
+                    }
+                    else
+                    {
+                        $item['job_id'] = $item['job_site'] . "_" . preg_replace('/[\s\W]+/', '', $item['job_post_url']);
+                    }
+
+
+                    $ret[] = $this->normalizeItem($item);
+                }
+            }
+
+            return $ret;
+        }
+
+    }
+
+
+    function getIDFromLink($regex_link_job_id, $url)
+    {
+        if(isset($regex_link_job_id))
+        {
+            $fMatchedID = preg_match($regex_link_job_id, $url, $idMatches);
+            if($fMatchedID && count($idMatches) >= 1)
+            {
+                return $idMatches[count($idMatches)-1];
+            }
+        }
+        return "";
+    }
+
+
+private function _getMyJobsForSearchFromXML_($searchDetails)
     {
 
         ini_set("user_agent",C__STR_USER_AGENT__);
@@ -795,6 +887,64 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     }
 
 
+    private function _getFullHTMLForDynamicWebpage_($url, $elementClass, $countRetry = 0)
+    {
+
+        try
+        {
+            if(array_key_exists('selenium_sessionid', $GLOBALS) && isset($GLOBALS['selenium_sessionid']) && $GLOBALS['selenium_sessionid'] != -1)
+            {
+                $driver = RemoteWebDriver::createBySessionID($GLOBALS['selenium_sessionid']);
+            }
+            else
+            {
+                $host = 'http://localhost:4444/wd/hub'; // this is the default
+                $capabilities = DesiredCapabilities::safari();
+                $capabilities->setCapability("nativeEvents", true);
+                $driver = RemoteWebDriver::create($host, $desired_capabilities = $capabilities, 5000);
+                $GLOBALS['selenium_sessionid'] = $driver->getSessionID();
+            }
+            $driver->get($url);
+
+            // wait at most 10 seconds until at least one result is shown
+            if($elementClass)
+            {
+                $driver->wait(10+$this->additionalLoadDelaySeconds)->until(
+                    WebDriverExpectedCondition::presenceOfAllElementsLocatedBy(
+                        WebDriverBy::className($elementClass)
+                    )
+                );
+            }
+            else
+            {
+                sleep(2+$this->additionalLoadDelaySeconds);
+            }
+
+
+            return $driver;
+        } catch (Exception $ex) {
+            $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
+
+            if($countRetry < 3)
+            {
+                $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_WARNING__);
+                return $this->_getFullHTMLForDynamicWebpage_($url, $elementClass, ($countRetry+1));
+            }
+
+            $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
+            throw new ErrorException($strMsg);
+        }
+        finally
+        {
+//            if($this->isBitFlagSet(C__JOB_USE_SELENIUM) && isset($GLOBALS['selenium_started']) && $GLOBALS['selenium_started'] = true)
+//            {
+//                if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Sending server shutdown call to Selenium server...", \Scooper\C__DISPLAY_ITEM_RESULT__); }
+//                $cmd = "curl \"http://localhost:4444/selenium-server/driver?cmd=shutDownSeleniumServer\" >/dev/null &";
+//                exec($cmd);
+//                $GLOBALS['selenium_started'] = false;
+//            }
+        }
+    }
 
     private function _getMyJobsForSearchFromWebpage_($searchDetails)
     {
@@ -802,6 +952,8 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $nItemCount = 1;
         $nPageCount = 1;
         $arrSearchReturnedJobs = null;
+        $driver = null;
+        $objSimpleHTML = null;
 
 
         $strURL = $this->_getURLfromBase_($searchDetails, $nPageCount, $nItemCount);
@@ -810,30 +962,49 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $arrPageJobsList = $this->_getJobsDataForCachedURL_($strURL);
         if(isset($arrPageJobsList))
         {
-            $this->_addSearchJobsToMyJobsList_($arrPageJobsList['object'], $searchDetails);
-            $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[".$searchDetails['name']."]" .": " . countJobRecords($arrPageJobsList['object']). " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+            $this->_addSearchJobsToMyJobsList_($arrPageJobsList, $searchDetails);
+            $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[".$searchDetails['name']."]" .": " . countJobRecords($arrPageJobsList). " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
             return;
         }
 
-
         $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['key']. "': ".$strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-        $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout );
-        if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL); }
-
-        if($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
+        if($this->isBitFlagSet(C__JOB_USE_SELENIUM))
         {
-            $totalPagesCount = 1;
-            $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
+            try
+            {
+                $driver = $this->_getFullHTMLForDynamicWebpage_($strURL, $this->classToCheckExists);
+                $html = $driver->getPageSource();
+                $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+            } catch (Exception $ex) {
+                $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
+
+                $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
+                throw new ErrorException($strMsg);
+            }
         }
         else
         {
+            $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout );
+        }
+        if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL); }
+
+        $totalPagesCount = 1;
+        $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
+        if(!$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
+        {
             $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML);
-            assert($strTotalResults != VALUE_NOT_SUPPORTED);
-            $strTotalResults  = intval(str_replace(",", "", $strTotalResults));
-            $nTotalListings = intval($strTotalResults);
-            $totalPagesCount = \Scooper\intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
-            if($totalPagesCount < 1)  $totalPagesCount = 1;
+            $nTotalResults  = intval(str_replace(",", "", $strTotalResults));
+            $nTotalListings = $nTotalResults;
+            if($nTotalResults == 0)
+            {
+                $totalPagesCount = 0;
+            }
+            elseif($nTotalResults != C__TOTAL_ITEMS_UNKNOWN__)
+            {
+                $totalPagesCount = \Scooper\intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
+                if($totalPagesCount < 1)  $totalPagesCount = 1;
+            }
         }
 
         if($nTotalListings <= 0)
@@ -849,7 +1020,40 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
             while ($nPageCount <= $totalPagesCount )
             {
+
+
                 $arrPageJobsList = null;
+
+                if($this->isBitFlagSet(C__JOB_USE_SELENIUM))
+                {
+                    try
+                    {
+                        if($driver == null)
+                            $driver = $this->_getFullHTMLForDynamicWebpage_($strURL, $this->classToCheckExists);
+
+                        if($this->isBitFlagSet( C__INFSCROLL_DOWNFULLPAGE))
+                        {
+                            while($nPageCount <= $totalPagesCount)
+                            {
+                                // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
+                                $driver->executeScript("window.scrollBy(500,5000);");
+
+                                sleep(5);
+                                $nPageCount = $nPageCount + 1;
+                            }
+
+                        }
+
+    // BUGBUG -- Checking these two HTML values to make sure they still match
+                        $html = $driver->getPageSource();
+                        $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+                        } catch (Exception $ex) {
+                            $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
+
+                            $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
+                            throw new ErrorException($strMsg);
+                        }
+                }
 
                 if(!($nPageCount == 1 && isset($objSimpleHTML)))
                 {
@@ -859,23 +1063,31 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                     $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout);
                 }
                 $GLOBALS['logger']->logLine("Getting jobs from ". $strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
                 if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
                 try
                 {
-                    $arrPageJobsList = $this->parseJobsListForPageBase($objSimpleHTML);
-                    if(!is_array($arrPageJobsList))
-                    {
-                        // we likely hit a page where jobs started to be hidden.
-                        // Go ahead and bail on the loop here
-                        $strWarnHiddenListings = "Could not get all job results back from ". $this->siteName . " for this search starting on page " . $nPageCount.".";
-                        if($nPageCount < $totalPagesCount)
-                            $strWarnHiddenListings .= "  They likely have hidden the remaining " . ($totalPagesCount - $nPageCount) . " pages worth. ";
 
-                        $GLOBALS['logger']->logLine($strWarnHiddenListings, \Scooper\C__DISPLAY_ITEM_START__);
-                        $nPageCount = $totalPagesCount;
+                    if($this->isBitFlagSet(C__JOB_PREFER_MICRODATA))
+                    {
+                        $arrPageJobsList = $this->getJobsFromMicroData($objSimpleHTML);
                     }
-                    else
+                    if(!$arrPageJobsList)
+                    {
+                        $arrPageJobsList = $this->parseJobsListForPageBase($objSimpleHTML);
+                        if(!is_array($arrPageJobsList))
+                        {
+                            // we likely hit a page where jobs started to be hidden.
+                            // Go ahead and bail on the loop here
+                            $strWarnHiddenListings = "Could not get all job results back from ". $this->siteName . " for this search starting on page " . $nPageCount.".";
+                            if($nPageCount < $totalPagesCount)
+                                $strWarnHiddenListings .= "  They likely have hidden the remaining " . ($totalPagesCount - $nPageCount) . " pages worth. ";
+
+                            $GLOBALS['logger']->logLine($strWarnHiddenListings, \Scooper\C__DISPLAY_ITEM_START__);
+                            $nPageCount = $totalPagesCount;
+                        }
+                    }
+
+                    if(is_array($arrPageJobsList))
                     {
                         addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
                         $nJobsFound = countJobRecords($arrSearchReturnedJobs);
@@ -901,97 +1113,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     }
 
-    /**
-     * @param $searchDetails
-     * @throws ErrorException
-     */
-    private function _getMyJobsFromHTMLFiles_($searchDetails)
-    {
-        $arrSearchReturnedJobs = null;
-
-        if($this->strFilePath_HTMLFileDownloadScript == null || strlen($this->strFilePath_HTMLFileDownloadScript) == 0)
-        {
-            throw new ErrorException("Cannot download client-side jobs HTML for " . $this->siteName . " because the " . get_class($this) . " plugin does not have an Applescript configured to call.");
-        }
-
-        $GLOBALS['logger']->logLine("Starting search " . $searchDetails['name'] . " jobs download through AppleScript.", \Scooper\C__DISPLAY_ITEM_START__);
-
-        $nPageCount = 0;
-
-        $strFileKey = strtolower($this->siteName.'-'.$searchDetails['key']);
-        $strFileBase = $this->detailsMyFileOut['directory'].$strFileKey. "-jobs-page-";
-
-        $strURL = $this->_getURLfromBase_($searchDetails, null, null);
-        if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED) return;
-
-        $arrPageJobsList = $this->_getJobsDataForCachedURL_($strURL);
-        if(isset($arrPageJobsList))
-        {
-            $this->_addSearchJobsToMyJobsList_($arrPageJobsList['object'], $searchDetails);
-            $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[".$searchDetails['name']."]" .": " . countJobRecords($arrPageJobsList['object']). " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
-            return;
-        }
-
-
-        $strCmdToRun = "osascript " . __ROOT__ . "/plugins/".$this->strFilePath_HTMLFileDownloadScript . " " . escapeshellarg($this->detailsMyFileOut["directory"])  . " ".escapeshellarg($searchDetails["site_name"])." " . escapeshellarg($strFileKey)   . " '"  . $strURL . "'";
-        $GLOBALS['logger']->logLine("Command = " . $strCmdToRun, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        $result = \Scooper\my_exec($strCmdToRun);
-        if(\Scooper\intceil($result['stdout']) == VALUE_NOT_SUPPORTED)
-        {
-            $strError = "AppleScript did not successfully download the jobs.  Log = ".$result['stderr'];
-            $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-            throw new ErrorException($strError);
-        }
-        else
-        {
-            // log the resulting output from the script to the job_scooper log
-            $GLOBALS['logger']->logLine($result['stderr'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        }
-
-        $strFileName = $strFileBase.".html";
-        $GLOBALS['logger']->logLine("Parsing downloaded HTML files: '" . $strFileBase."*.html'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        while (file_exists($strFileName) && is_file($strFileName))
-        {
-            $GLOBALS['logger']->logLine("Parsing results HTML from '" . $strFileName ."'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            $objSimpleHTML = $this->getSimpleHTMLObjForFileContents($strFileName);
-            if(!$objSimpleHTML)
-            {
-                throw new ErrorException('Error:  unable to get SimpleHTMLDom object from file('.$strFileName.').');
-            }
-
-            $arrPageJobsList = $this->parseJobsListForPage($objSimpleHTML);
-
-            addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
-
-            $objSimpleHTML->clear();
-            unset($objSimpleHTML);
-            $objSimpleHTML = null;
-
-            //
-            // If the user has not asked us to keep interim files around
-            // after we're done processing, then delete the interim HTML file
-            //
-            if($this->is_OutputInterimFiles() != true) {
-                unlink($strFileName);
-            }
-
-            $nPageCount++;
-            $strFileName = $strFileBase.$nPageCount.".html";
-        }
-
-        if(isset($arrPageJobsList))
-        {
-            $GLOBALS['logger']->logLine("Downloaded " . countJobRecords($arrPageJobsList) ." jobs from " . $strFileName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            $this->_cacheJobsForURL($strURL, $arrPageJobsList, countJobRecords($arrPageJobsList));
-            $this->_addSearchJobsToMyJobsList_($arrSearchReturnedJobs, $searchDetails);
-        }
-        else
-        {
-            $this->_cacheJobsForURL($strURL, array(), 0);
-            $GLOBALS['logger']->logLine("0 jobs found for " . $strFileName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        }
-
-    }
 
     /*
      * _addSearchJobsToMyJobsList_
@@ -1197,7 +1318,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         return $strReturnLocation;
     }
 
-    private function _getBaseURLFormat_($searchDetails = null)
+    protected function _getBaseURLFormat_($searchDetails = null)
     {
         $strBaseURL = VALUE_NOT_SUPPORTED;
 
@@ -1222,7 +1343,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         $strURL = $this->_getBaseURLFormat_($searchDetails);
 
 
-        $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue(), $strURL );
+        $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($GLOBALS['OPTS']['number_days']), $strURL );
         $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL );
         $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
         if(!$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
@@ -1255,3 +1376,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
 
 }
+
+
+

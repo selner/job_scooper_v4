@@ -131,51 +131,91 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         // Output the full jobs list into a file and into files for different cuts at the jobs list data
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        $GLOBALS['logger']->logLine(PHP_EOL . "**************  Writing final list of " . count($arrFinalJobs_SortedByCompanyRole) . " jobs to output files.  ***************  " . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logSectionHeader("Ouputing Results Files", \Scooper\C__DISPLAY_SECTION_START__, \Scooper\C__NAPPFIRSTLEVEL__);
+        $GLOBALS['logger']->logSectionHeader("Files Sent To User", \Scooper\C__DISPLAY_SECTION_START__, \Scooper\C__NAPPSECONDLEVEL__);
+        $GLOBALS['logger']->logLine(PHP_EOL . "Writing final list of " . count($arrFinalJobs_SortedByCompanyRole) . " jobs to output files." . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
         $class = null;
 
-//        // Write to the main output file name that the user passed in
-//        $arrJobsTemp = $arrFinalJobs_SortedByCompanyRole ;
-//        if($arrJobsTemp == null || !is_array($arrJobsTemp))
-//        {
-//            $arrJobsTemp = array();
-//        }
 
-        $arrJobs_UpdatedOrInterested = array_filter($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayOrIsInterestedOrBlank");
+        //
+        // Output the final files we'll send to the user
+        //
+
+        // Output all records that match the user's interest and are still active
+        $arrJobs_UserOutput_InterestedOrUpdated = null;
+        if($GLOBALS['OPTS']['number_days'] > 1)
+        {
+            $filterUpdatedOrNewSinceLastRun = "isMarkedInterested_IsBlank";
+            $filterNewSinceLastRun = "isMarkedInterested_IsBlank";
+
+
+            //
+            // For our final output, we want the jobs to be sorted by company and then role name.
+            // Create a copy of the jobs list that is sorted by that value.
+            //
+            $arrFinalJobs_SortedByDateCompanyRole = array();
+            if (countJobRecords($this->arrLatestJobs) > 0) {
+                foreach ($this->arrLatestJobs as $job) {
+                    // Need to add uniq key of job site id to the end or it will collapse duplicate job titles that
+                    // are actually multiple open posts
+                    $arrFinalJobs_SortedByDateCompanyRole [$job['job_site_date'] . $job['key_company_role'] . "-" . $job['key_jobsite_siteid']] = $job;
+                }
+            }
+            ksort($arrFinalJobs_SortedByDateCompanyRole);
+            $arrJobs_UserOutput_InterestedOrUpdated = $arrFinalJobs_SortedByDateCompanyRole;
+
+        }
+        else
+        {
+            $filterUpdatedOrNewSinceLastRun = "isJobUpdatedTodayOrIsInterestedOrBlank";
+            $filterNewSinceLastRun = "isNewJobToday_Interested_IsBlank";
+            $arrJobs_UserOutput_InterestedOrUpdated = $arrFinalJobs_SortedByCompanyRole;
+
+        }
+
+        $arrJobs_UpdatedOrInterested = array_filter($arrJobs_UserOutput_InterestedOrUpdated, $filterUpdatedOrNewSinceLastRun);
         $this->writeRunsJobsToFile($this->classConfig->getFileDetails('output')['full_file_path'], $arrJobs_UpdatedOrInterested, "ClassJobsRunWrapper-UserOutputFile");
-        $detailsCSVFile = $this->classConfig->getFileDetails('output');
-
-        $dataUpdatedOrInterestedJobs = $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayOrIsInterestedOrBlank", array("", "", "CSV"), "updated today", null, false);
-        $detailsUpdatedJobs = $dataUpdatedOrInterestedJobs['file_details'];
-
-        //
-        // Output all job records and their values
-        //
-//        $arrJobs_Active = $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, null, "_AllJobs", "CSV");
-        $dataAllJobs = $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, null, array("", "_AllJobs", "CSV"), "all jobs", null, false);
-        $detailsAllJobs = $dataAllJobs['file_details'];
-
-        //
-        // Now, output the various subsets of the total jobs list
-        //
-
-
-        // Output only records that are new or not marked as excluded (aka "Yes" or "Maybe")
-        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_ActiveJobs", "CSV");
-        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_ActiveJobs", "HTML", null, $this->getKeysForHTMLOutput());
-        $arrJobs_AutoExcluded = $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", "");
-
-        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedToday", "_UpdatedJobs");
-        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayNotInterested", "_UpdatedExcludedJobs");
-
-        // Output only new records that haven't been looked at yet
-        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "CSV");
-        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isNewJobToday_Interested_IsBlank", "_NewJobs_ForReview", "HTML", null, $this->getKeysForHTMLOutput(), true);
-        $detailsHTMLFile = $this->__getAlternateOutputFileDetails__("HTML", "", "_NewJobs_ForReview");
+        $detailsMainResultsFile = $this->classConfig->getFileDetails('output');
 
         // Output all records that were automatically excluded
         $dataExcludedJobs = $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", array("", "_ExcludedJobs", "CSV"), "excluded jobs", null, true);
-        $detailsExcludedJobs = $dataExcludedJobs['file_details'];
+
+        // Output only new records that haven't been looked at yet
+        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, $filterNewSinceLastRun, "_AllUnmarkedJobs_Today", "CSV");
+        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, $filterNewSinceLastRun, "_AllUnmarkedJobs_Today", "HTML", null, $this->getKeysForHTMLOutput(), true);
+        $detailsHTMLFile = $this->__getAlternateOutputFileDetails__("HTML", "", "_AllUnmarkedJobs_Today");
+
+        $arrFilesToAttach = array($detailsMainResultsFile, $detailsHTMLFile, $dataExcludedJobs['file_details']);
+        $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \Scooper\C__SECTION_END__, \Scooper\C__NAPPSECONDLEVEL__);
+
+
+        //
+        // Output debugging / interim files if asked to
+        //
+
+        if($this->is_OutputInterimFiles() == true) {
+            $GLOBALS['logger']->logSectionHeader("DEBUG ONLY:  Writing out interim, developer files (user does not ever see these)..." . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
+
+            //
+            // Now, output the various subsets of the total jobs list
+            //
+
+            $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayOrIsInterestedOrBlank", array("", "", "CSV"), "updated today", null, false);
+
+            // Output all job records and their values
+            $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, null, array("", "_AllJobs", "CSV"), "all jobs", null, false);
+
+
+            // Output only records that are new or not marked as excluded (aka "Yes" or "Maybe")
+            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_AllActiveJobs", "CSV");
+            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_AllActiveJobs", "HTML", null, $this->getKeysForHTMLOutput());
+
+            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedToday", "_UpdatedJobs");
+            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayNotInterested", "_UpdatedExcludedJobs");
+
+            $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \Scooper\C__SECTION_END__, \Scooper\C__NAPPSECONDLEVEL__);
+        }
+
 
 
         $strResultCountsText = $this->getListingCountsByPlugin("text", $arrFinalJobs_SortedByCompanyRole);
@@ -193,11 +233,10 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $strErrHTML = preg_replace("/\n/", ("<br>" . chr(10) . chr(13)), $strErrsResult);
         $strResultHTML = $strResultCountsHTML . PHP_EOL . "<pre>" . $strErrHTML . "</pre>" . PHP_EOL;
 
-        $arrFilesToAttach = array($detailsCSVFile, $detailsHTMLFile,);
         //
         // Send the email notification out for the completed job
         //
-        $this->sendJobCompletedEmail($strResultText, $strResultHTML, $detailsHTMLFile, array($detailsCSVFile, $detailsHTMLFile, $detailsExcludedJobs));
+        $this->sendJobCompletedEmail($strResultText, $strResultHTML, $detailsHTMLFile, $arrFilesToAttach);
 
         //
         // If the user has not asked us to keep interim files around
@@ -211,15 +250,6 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                 }
             }
         }
-
-/*
- *
-         $outsubfolderDetails = $this->classConfig->getFileDetails('output_subfolder');
-        if (isset($outsubfolderDetails)) {
-            if(isset($outsubfolderDetails['directory']))
-            rmdir($outsubfolderDetails['directory']);
-        }
-*/
 
         $GLOBALS['logger']->logLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
     }
@@ -449,11 +479,11 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
             //
             $strRawJobsListOutput = \Scooper\getFullPathFromFileDetails($this->classConfig->getFileDetails('output_subfolder'), "", "_rawjobslist_preuser_filtering");
             $this->writeRunsJobsToFile($strRawJobsListOutput, $this->arrLatestJobs_UnfilteredByUserInput, "RawJobsList_PreUserDataFiltering");
+            $GLOBALS['logger']->logLine(count($this->arrLatestJobs_UnfilteredByUserInput). " raw, latest job listings from " . count($this->arrSearchesToReturn) . " search(es) downloaded to " . $strRawJobsListOutput, \Scooper\C__DISPLAY_SUMMARY__);
         }
 
         $detailsBodyContentFile = null;
 
-       $GLOBALS['logger']->logLine(count($this->arrLatestJobs_UnfilteredByUserInput). " raw, latest job listings from " . count($this->arrSearchesToReturn) . " search(es) downloaded to " . $strRawJobsListOutput, \Scooper\C__DISPLAY_SUMMARY__);
 
 
     }
@@ -563,6 +593,13 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         $mail->addReplyTo("dev@bryanselner.com", "dev@bryanselner.com" );
         $mail->setFrom(current($fromEmails)['address'], current($fromEmails)['name']);
+        $mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            )
+        );
 
 
         $mail->WordWrap = 120;                                          // Set word wrap to 120 characters
@@ -573,7 +610,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $mail->isHTML(true);                                            // Set email format to HTML
         reset($toEmails);
 
-        $mail->Subject = "New jobs for " . current($toEmails)['name'] . " (" . \Scooper\getTodayAsString() .")";;
+        $mail->Subject = "Newly matched jobs: " . $this->_getRunDateRange_() . " for " . current($toEmails)['name'];
+
         $mail->Body    = $messageHtml;
         $mail->AltBody = $messageText;
 
@@ -851,12 +889,24 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         return $strOut;
     }
 
+    private function _getRunDateRange_()
+    {
+        $strRangeStartDate = "";
+        $startDate = new DateTime();
+        $strMod = "-".$GLOBALS['OPTS']['number_days']." days";
+        $startDate = $startDate->modify($strMod);
+        $today = new DateTime();
+        $strDateRange = $startDate->format('D, M d') . " - " . $today->format('D, M d');
+        return $strDateRange;
+    }
+
     private function _getResultsTextHTML_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrExcluded)
     {
         $arrCounts_TotalAll = null;
         $arrCounts_TotalUser = null;
         $strOut = "<div class='job_scooper outer'>";
-        $strOut  .= "<H2>Job Scooper Results for " . date("D, M d") . "</H2>".PHP_EOL. PHP_EOL;
+
+        $strOut  .= "<H2>Job Scooper Results: " . $this->_getRunDateRange_() . "</H2>".PHP_EOL. PHP_EOL;
 
         if($arrCounts != null && count($arrCounts) > 0)
         {

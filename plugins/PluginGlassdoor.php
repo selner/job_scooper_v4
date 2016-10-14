@@ -28,7 +28,7 @@ class PluginGlassdoor extends ClassJobsSitePlugin
 
     function __construct($strBaseDir = null)
     {
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_BASE_URL_FORMAT_REQUIRED;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_SETTINGS_URL_VALUE_REQUIRED;
         parent::__construct($strBaseDir);
     }
 

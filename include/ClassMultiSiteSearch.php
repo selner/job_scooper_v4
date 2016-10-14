@@ -26,19 +26,38 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
     protected $siteName = 'Multisite';
     protected $flagSettings = C__JOB_BASETYPE_NONE_NO_LOCATION_OR_KEYWORDS;
 
+    function __destruct()
+    {
+        if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
+
+        if(array_key_exists('selenium_sessionid', $GLOBALS) && isset($GLOBALS['selenium_sessionid']) && $GLOBALS['selenium_sessionid'] != -1)
+        {
+            $driver = RemoteWebDriver::createBySessionID($GLOBALS['selenium_sessionid']);
+            $driver->quit();
+            unset ($GLOBALS['selenium_sessionid']);
+        }
+
+        if(array_key_exists('selenium_started', $GLOBALS) && isset($GLOBALS['selenium_started']) && $GLOBALS['selenium_started'] == true)
+        {
+            if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Sending server shutdown call to Selenium server...", \Scooper\C__DISPLAY_ITEM_RESULT__); }
+            $cmd = "curl \"http://localhost:4444/selenium-server/driver?cmd=shutDownSeleniumServer\"";
+            exec($cmd);
+
+            unset ($GLOBALS['selenium_started']);
+        }
+    }
 
     function parseJobsListForPage($objSimpHTML)
     {
         throw new ErrorException("parseJobsListForPage not supported for class ClassMultiSiteSearch");
     }
-    function parseTotalResultsCount($objSimpHTML) { throw new ErrorException("parseJobsListForPage not supported for class ClassMultiSiteSearch"); }
+    function parseTotalResultsCount($objSimpHTML) { throw new ErrorException("parseTotalResultsCount not supported for class ClassMultiSiteSearch"); }
 
     function addMultipleSearches($arrSearches, $locSettingSets = null)
     {
         $this->arrSearchLocationSetsToRun = $locSettingSets;
         $this->arrSearchesToReturn = $arrSearches;
     }
-
 
     function getJobsForMyMultipleSearches()
     {
@@ -71,11 +90,25 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
 
             $class = null;
 
+
             foreach($arrPluginClassesToRun as $classSearches)
             {
                 $class = new $classSearches['class_name']($this->detailsMyFileOut['directory']);
                 try
                 {
+
+                    if($class->isBitFlagSet(C__JOB_USE_SELENIUM))
+                    {
+                        if(!array_key_exists('selenium_started', $GLOBALS) || $GLOBALS['selenium_started'] != true)
+                            {
+                                $strCmdToRun = "java -jar \"" . __ROOT__ . "/lib/selenium-server-standalone-3.0.0-beta4.jar\" -role standalone  >/dev/null &";
+                                exec($strCmdToRun);
+                                $GLOBALS['selenium_started'] = true;
+                                sleep(5);
+                            }
+                    }
+
+
                     $GLOBALS['logger']->logLine("Setting up " . count($classSearches['searches']) . " search(es) for ". $classSearches['site_name'] . "...", \Scooper\C__DISPLAY_SECTION_START__);
                     $class->addSearches($classSearches['searches']);
                     $class->getJobsForAllSearches();

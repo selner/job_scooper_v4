@@ -27,33 +27,19 @@ class PluginMashable extends BaseAdicioCareerCastPlugin
 
 
 }
-class PluginMilwaukeeWAJournalSentinal extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'MilwaukeeJournalSentinal';
-    protected $childSiteURLBase = 'http://jobs.jsonline.com';
-}
 class PluginLocalworkCA extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'LocalworkCA';
     protected $childSiteURLBase = 'http://jobs.localwork.ca';
 }
 
-class PluginEverettWAHerald extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'EverettWAHerald';
-    protected $childSiteURLBase = 'http://heraldnet.careers.adicio.com';
-}
 
 class PluginPolitico extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'Politico';
     protected $childSiteURLBase = 'http://jobs.powerjobs.com';
 }
-class PluginAsheboroNCCourierTribune extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'AsheboroCourierTribune';
-    protected $childSiteURLBase = 'http://jobs.r-jobs.com';
-}
+
 class PluginIEEE extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'IEEE';
@@ -63,11 +49,6 @@ class PluginVariety extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'Variety';
     protected $childSiteURLBase = 'http://jobs.variety.com';
-}
-class PluginLasVegasReviewJournal extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'LVReviewJournal';
-    protected $childSiteURLBase = 'http://careers.reviewjournal.com';
 }
 class PluginCellCom extends BaseAdicioCareerCastPlugin
 {
@@ -79,9 +60,9 @@ class PluginCareerJet extends BaseAdicioCareerCastPlugin
     protected $siteName = 'CareerJet';
     protected $childSiteURLBase = 'http://www.careerjet.co.uk';
 }
-class PluginVirginiaPilotOnline extends BaseAdicioCareerCastPlugin
+class PluginVirginiaPilot extends BaseAdicioCareerCastPlugin
 {
-    protected $siteName = 'VirginiaPilotOnline';
+    protected $siteName = 'VirginiaPilot';
     protected $childSiteURLBase = 'http://careers.hamptonroads.com';
 }
 class PluginHamptonRoads extends BaseAdicioCareerCastPlugin
@@ -100,21 +81,10 @@ class PluginKenoshaNews extends BaseAdicioCareerCastPlugin
     protected $childSiteURLBase = 'http://kenosha.careers.adicio.com/';
 }
 
-class PluginAdWeek extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'AdWeek';
-    protected $childSiteURLBase = 'http://jobs.adweek.com';
-}
-
 class PluginRetailCareersNow extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'RetailCareersNow';
     protected $childSiteURLBase = 'http://retail.careers.adicio.com';
-}
-class PluginArkansasOnline extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'ArkansasOnline';
-    protected $childSiteURLBase = 'http://jobs.arkansasonline.com';
 }
 class PluginHealthJobs extends BaseAdicioCareerCastPlugin
 {
@@ -148,19 +118,6 @@ class PluginSeacoastOnline extends BaseAdicioCareerCastPlugin
     protected $childSiteURLBase = 'http://seacoast.careers.adicio.com';
 }
 
-class PluginTulsaWorld extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'TulsaWorld';
-    protected $childSiteURLBase = 'http://tulsa.careers.adicio.com';
-
-}
-
-class PluginSeattleTimes extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'SeattleTimes';
-    protected $childSiteURLBase = 'http://nwjobs.seattletimes.com';
-}
-
 class PluginAlbuquerqueJournal extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'AlbuquerqueJournal';
@@ -186,48 +143,17 @@ class PluginAdicioCareerCast extends BaseAdicioCareerCastPlugin
     protected $childSiteURLBase = 'http://www.careercast.com';
 }
 
-class PluginBartlesvilleOKExaminerEnterprise extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'BartlesvilleOKExaminerEnterprise';
-    protected $childSiteURLBase = 'http://jobs.bvillejobs.com';
-}
-
-class PluginKFVS12MO extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'KFVS12';
-    protected $childSiteURLBase = 'http://kfvs.careers.adicio.com';
-}
 
 class PluginClevelandDotCom extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'ClevelandDotCom';
     protected $childSiteURLBase = 'http://jobs.cleveland.com';
 }
-class PluginBatonRougeAdvocate extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'BatonRougeAdvocate';
-    protected $childSiteURLBase = 'http://advocate.careers.adicio.com';
-}
 
-class PluginNewOrleansAdvocate extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'NewOrleansAdvocate';
-    protected $childSiteURLBase = 'http://advocate.careers.adicio.com';
-}
-class PluginAcandiaAdvocate extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'AcandiaAdvocate';
-    protected $childSiteURLBase = 'http://advocate.careers.adicio.com';
-}
 class PluginVictoriaTXAdvocate extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'VictoriaTXAdvocate';
     protected $childSiteURLBase = 'http://jobshome.crossroadsfinder.com';
-}
-class PluginJobsArkansas extends BaseAdicioCareerCastPlugin
-{
-    protected $siteName = 'JobsArkansas';
-    protected $childSiteURLBase = 'http://jobs.arkansasonline.com';
 }
 
 
@@ -240,10 +166,11 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
     protected $nJobListingsPerPage = 50;
     protected $strBaseURLPathSuffix = "";
     protected $strBaseURLFormat = null;
-    protected $flagSettings = C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS;
 
     // postDate param below could also be modifiedDate=***NUMBER_DAYS***.  Unclear which is more correct when...
-    protected $strBaseURLPathSection = "/jobs/results/keyword/***KEYWORDS***?location=***LOCATION***&kwsJobTitleOnly=true&view=List_Detail&networkView=national&radius=15&&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***&postDate=***NUMBER_DAYS***";
+    protected $strBaseURLPathSection = "/jobs/results/keyword/***KEYWORDS***?location=***LOCATION***&kwsJobTitleOnly=true&view=List_Detail&networkView=national&radius=50&&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***&postDate=***NUMBER_DAYS***";
+#    protected $strBaseURLPathSection = "/jobs/search/results?kwsJobTitleOnly=true&view=List_Detail&networkView=national&radius=50&&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***&postDate=***NUMBER_DAYS***";
+    protected $additionalLoadDelaySeconds = 10;
 
 
 
@@ -253,19 +180,14 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
         $this->siteBaseURL = $this->childSiteURLBase;
         $this->typeLocationSearchNeeded = 'location-city-comma-state-country';
         $this->strBaseURLFormat = $this->childSiteURLBase . $this->strBaseURLPathSection . $this->strBaseURLPathSuffix;
-        return parent::__construct($strOutputDirectory);
+        parent::__construct($strOutputDirectory);
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_USE_SELENIUM | C__JOB_PREFER_MICRODATA;
     }
 
     protected function _getURLfromBase_($searchDetails, $nPage = null, $nItem = null)
     {
         return parent::_getURLfromBase_($searchDetails, $nPage, $nItem);
     }
-
-    // if this is a client-side HTML download plugin, you will need to add a script
-    // for driving Safari to download the files and set that script name here.
-    //
-    // This value is unused for XML or server-side webpage download plugins.
-    protected $strFilePath_HTMLFileDownloadScript = "PluginAdicioCareerCast_downloadjobs.applescript";
 
     function getPageURLValue($page)
     {
@@ -328,13 +250,19 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
      */
     function parseTotalResultsCount($objSimpHTML)
     {
+
         //
         // Find the HTML node that holds the result count
         //
         $resultsSection = $objSimpHTML->find("span[id='retCountNumber']");
 
-        // get the text value of that node
-        $totalItemsText = $resultsSection[0]->plaintext;
+        if($resultsSection && isset($resultsSection[0]))
+        {
+            // get the text value of that node
+            $totalItemsText = $resultsSection[0]->plaintext;
+        }
+        else
+            $totalItemsText = 0;
 
         return $totalItemsText;
     }

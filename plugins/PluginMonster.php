@@ -22,15 +22,15 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 class PluginMonster extends ClassJobsSitePlugin
 {
     protected $siteName = 'Monster';
-    protected $siteBaseURL = 'http://jobsearch.monster.com';
-    protected $strBaseURLFormat = "http://jobsearch.monster.com/search/***KEYWORDS***_5?where=***LOCATION***&tm=***NUMBER_DAYS***&pg=***PAGE_NUMBER***";
-    protected $nJobListingsPerPage = 25;
+    protected $siteBaseURL = 'http://www.monster.com';
+    protected $strBaseURLFormat = "http://www.monster.com/jobs/search/?***KEYWORDS***_5?where=***LOCATION***&tm=***NUMBER_DAYS***&pg=***PAGE_NUMBER***&sort=dt.rv.di";
+    protected $nJobListingsPerPage = 35;
     protected $flagSettings = null;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode-underscores-and-dashes';
-
+    protected $regex_link_job_id = '/\.com\/([^\/]+\/)?([^\.]+)/i';
     function __construct($strBaseDir = null)
     {
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES | C__JOB_PREFER_MICRODATA;
         parent::__construct($strBaseDir);
     }
 
@@ -65,7 +65,10 @@ class PluginMonster extends ClassJobsSitePlugin
 
     function parseTotalResultsCount($objSimpHTML)
     {
-        $resultsSection= $objSimpHTML->find("div[id='resultsCountHeader']");
+
+        $tags = get_meta_tags('http://www.example.com/');
+
+        $resultsSection= $objSimpHTML->find("h2[class='page-title']");
         $totalItemsText = $resultsSection[0]->plaintext;
         $arrItemItems = explode(" ", trim($totalItemsText));
         $strTotalItemsCount = $arrItemItems[0];
@@ -78,36 +81,34 @@ class PluginMonster extends ClassJobsSitePlugin
         $ret = null;
 
 
-        $nodesJobs= $objSimpHTML->find('table[class="listingsTable"] tr');
+        $nodesJobs= $objSimpHTML->find('article[class="js_result_row"]');
 
 
         foreach($nodesJobs as $node)
         {
-            if(!isset($node->attr['class']) || strcasecmp($node->attr['class'], "even") != 0 &&
-                strcasecmp($node->attr['class'], "odd") != 0)
-            {
-                    continue;
-            }
             $item = $this->getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
 
-            $subNode = $node->find("div div a");
+            $subNode = $node->find("div.JobTitle");
             if(isset($subNode) && isset($subNode[0])) $item['job_title'] = $subNode[0]->plaintext;
 
 
-            $subNode = $node->find(("div[class='socialContainer']"));
-            if(isset($subNode) && isset($subNode[0])) $objDiv = $subNode[0]->plaintext;
-            if(isset($objDiv) && isset($objDiv[0]) && isset($objDiv[0]->attr) && isset($objDiv[0]->attr['data-jobid']))     $item['job_id'] = $objDiv[0]->attr['data-jobid'];
+            $subNode = $node->find(("div.JobTitle h2 a"));
+            if(isset($subNode) && isset($subNode[0]) && isset($subNode[0]->attr) && isset($subNode[0]->attr['data-m_impr_j_postingid']))     $item['job_id'] = $subNode[0]->attr['data-m_impr_j_postingid'];
 
 
 
             if($item['job_title'] == '') continue;
 
-            $subNode = $node->find("a[class='fnt4']");
+            $subNode = $node->find("div[class='company']");
             if(isset($subNode) && isset($subNode[0])) $item['company'] = $subNode[0]->plaintext;
 
-            $subNode = $node->find("div[class='jobLocationSingleLine']");
+            $subNode = $node->find("div[class='location']");
             if(isset($subNode) && isset($subNode[0])) $item['location'] = str_replace("Location:", "", $subNode[0]->plaintext);
+
+            $subNode = $node->find("meta[itemprop='url']");
+            if(isset($subNode) && isset($subNode[0])) $item['location'] = str_replace("Location:", "", $subNode[0]->plaintext);
+            if(isset($objDiv) && isset($objDiv[0]) && isset($objDiv[0]->attr) && isset($objDiv[0]->attr['data-m_impr_j_postingid']))     $item['job_id'] = $objDiv[0]->attr['data-m_impr_j_postingid'];
 
             $strScrubTitle = \Scooper\strip_punctuation(html_entity_decode($item['job_title']));
             $strLoc= \Scooper\strip_punctuation(html_entity_decode($item['location']));

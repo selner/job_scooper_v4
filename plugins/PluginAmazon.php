@@ -34,100 +34,69 @@ require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
  *
  */
 
-
 class PluginAmazon extends ClassJobsSitePlugin
 {
     protected $siteName = 'Amazon';
-    protected $strFilePath_HTMLFileDownloadScript = "PluginAmazon_downloadjobs.applescript";
-    protected $flagSettings = C__JOB_BASETYPE_HTML_DOWNLOAD_FLAGS_URL_FORMAT_REQUIRED;
+    protected $nJobListingsPerPage = 100;
     protected $siteBaseURL = 'http://www.amazon.jobs';
+    protected $strBaseURLFormat = "https://www.amazon.jobs/en/search?base_query=***KEYWORDS***&location[]=***LOCATION***&job_count=100&result_limit=100&sort=recent&cache";
+    protected $flagSettings = null;
+    protected $typeLocationSearchNeeded = 'location-city-dash-statecode';
+    protected $classToCheckExists = "job-title";
+
+    function __construct($strBaseDir = null)
+    {
+        parent::__construct($strBaseDir);
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_USE_SELENIUM;
+    }
+
+
+    function parseTotalResultsCount($objSimpHTML)
+    {
+        $subnode = $objSimpHTML->find("div[id=search-paging] div[class=container] div[class=row] div");
+        $parts = explode(" ", $subnode[count($subnode)-1]->plaintext);
+        return $parts[2];
+
+    }
+
 
     function parseJobsListForPage($objSimpHTML)
     {
         $ret = array();
-        $nodesTR= $objSimpHTML->find('tr');
+        $nodesjobs= $objSimpHTML->find('div[class=jobs col-xs-12] a');
 
-        $nTRIndex = 0;
-        while($nTRIndex < count($nodesTR))
+        foreach($nodesjobs as $node)
         {
             $strTeamName = "";
             $strTeamCat = "";
 
             $item = $this->getEmptyJobListingRecord();
 
-            $tds = $nodesTR[$nTRIndex]->find('td');
+            $item['job_id'] = str_replace("/en/jobs/", "", $node->href);
+            $item['job_post_url'] = $this->siteBaseURL . $node->href;
 
-            if(isset($tds) && count($tds) > 0)
-            {
+            $subNode = $node->find("h2[class=job-title]");
+            $item['job_title'] = $subNode[0]->plaintext;
 
-                $titleLink = $tds[1]->find("a");
+            $item['company'] = 'Amazon';
+            $item['job_site'] = 'Amazon';
+            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $subNode = $node->find("div[class=location-and-id] span]");
+            $item['location'] = explode("|", $subNode[0]->plaintext)[0];
 
-                $item['job_title'] = $titleLink[0]->plaintext;
-                $item['job_post_url'] = $this->siteBaseURL . $titleLink[0]->href;
-                $item['company'] = 'Amazon';
+            $subNode = $node->find("h2[class=posting-date]");
+            $item['job_site_date'] = str_replace("Posted ", "", $subNode[0]->plaintext);
+            $dateVal = date_create_from_format("F d, Y", $item['job_site_date']);
+            if(isset($dateVal))
+                $item['job_site_date'] = $dateVal->format('m/d/y');
 
-                $item['job_site'] = 'Amazon';
-                $item['date_pulled'] = \Scooper\getTodayAsString();
-
-                $item['job_id'] = trim(explode("/", $item['job_post_url'])[4]);
-
-
-                $teamDetails = combineTextAllChildren($tds[4]);
-                $arrTeamDetails = explode("\n", $teamDetails);
-                $nCount = 0;
-                while($nCount < count($arrTeamDetails))
-                {
-                    switch(trim($arrTeamDetails[$nCount]))
-                    {
-                        case "Team:":
-                            $strTeamName = $arrTeamDetails[$nCount + 1];
-                            $nCount = $nCount + 2;
-                            break;
-
-                        case "Team Category:":
-                            $strTeamCat = $arrTeamDetails[$nCount + 1];
-                            $nCount = $nCount + 2;
-                            break;
-
-                        default:
-                            $nCount = $nCount + 1;
-                            break;
-                    }
-
-                }
-//                $teamDetails= trim(preg_replace("/Location:\W{1,}(.*)\W{1,}/", "", $teamDetails));
-//                $teamDetails = trim(preg_replace("/Short Description:\W{1,}.*/", "", $teamDetails));
-//                $strTeamName = trim(preg_replace("/Team:\W{1,}(.*)\W{2,}[\w\W]{1,}/", "$1", $teamDetails));
-//                if(strlen($strTeamName) > 0)
-//                {
-//                    $arrStringItems = explode($strTeamName, $teamDetails);
-//                    $strTeamDetailsRemain = trim($arrStringItems[1]);
-//                }
-//                else
-//                {
-//                    $strTeamDetailsRemain = trim($teamDetails);
-//                }
-//
-//                $strTeamCat = preg_replace("/Team Category:\W{1,}(.*){1,}\W{1,}/", "$1", $strTeamDetailsRemain );
-
-                $strTeamCat = \Scooper\strScrub($strTeamCat, SIMPLE_TEXT_CLEANUP);
-                $strTeamName = \Scooper\strScrub($strTeamName, SIMPLE_TEXT_CLEANUP);
-
-                $item['job_site_category'] =  (strlen($strTeamName) > 0 ? $strTeamName . "; " : "") . (strlen($strTeamCat ) > 0 ? $strTeamCat . "; " : "") . $tds[2]->plaintext ;
-
-                $item['location'] = $tds[3]->plaintext ;
+            $ret[] = $this->normalizeItem($item);
 
 
-                $ret[] = $this->normalizeItem($item);
-
-            }
-
-            $nTRIndex = $nTRIndex + 1;
         }
         return $ret;
     }
 
 
 }
-
 ?>

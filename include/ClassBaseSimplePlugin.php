@@ -24,7 +24,7 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
     protected $siteBaseURL = '';
     protected $childSiteURLBase = '';
     protected $childSiteListingPage = '';
-
+    protected $additionalFlags = null;
     protected $nJobListingsPerPage = 1000;
     protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE_NO_LOCATION;
 
@@ -40,6 +40,13 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
     {
         $this->siteBaseURL = $this->childSiteURLBase;
         $this->strBaseURLFormat = $this->childSiteURLBase;
+        if($this->additionalFlags)
+        {
+            foreach($this->additionalFlags as $flag)
+            {
+                $this->flagSettings = $this->flagSettings | $flag;
+            }
+        }
         return parent::__construct($strOutputDirectory);
     }
 
@@ -67,16 +74,25 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
         return -1;
     }
 
-    private function _getTagMatchString_($arrTag)
+    private function _getTagMatchString_($arrTags)
     {
-        if($arrTag == null) return null;
+        if($arrTags == null) return null;
 
-        $strMatch = $arrTag['tag'];
-        if(strlen($arrTag['attribute']) > 0)
+        if(isset($arrTags['tag']))
         {
-            $strMatch = $strMatch . '[' . $arrTag['attribute'] . '="' . $arrTag['attribute_value'] . '"]';
+            $arrTags = array($arrTags);
         }
-        if(isset($GLOBALS['DEBUG']) && $GLOBALS['DEBUG'] == 1) { $GLOBALS['logger']->logLine(key($arrTag) . " match string is: " . $strMatch, \Scooper\C__DISPLAY_ITEM_DETAIL__); }
+        $strMatch = "";
+
+        foreach($arrTags as $arrTag)
+        {
+            if(strlen($strMatch) > 0) $strMatch = $strMatch . ' ';
+            $strMatch = $strMatch . $arrTag['tag'];
+            if(isset($arrTag['attribute']) && strlen($arrTag['attribute']) > 0)
+            {
+                $strMatch = $strMatch .'[' . $arrTag['attribute'] . '="' . $arrTag['attribute_value'] . '"]';
+            }
+        }
 
         return $strMatch;
     }
@@ -88,6 +104,7 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
         $strMatch = $this->_getTagMatchString_($arrTag);
         if(isset($strMatch))
         {
+            $GLOBALS['logger']->logLine(" Looking for nodes matching: " . $strMatch, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             $retNode = $node->find($strMatch);
             if(isset($retNode) && isset($retNode[0]))
             {
@@ -116,18 +133,7 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
         $item = null;
 
         // first looked for the detail view layout and parse that
-        $arrTags = $this->arrListingTagSetup['tag_listings_section'];
-        if(!is_array($arrTags) && !is_array($arrTags[0]))
-        {
-            $arrTags = array($arrTags);
-        }
-        $strNodeMatch = "";
-        foreach($arrTags as $nodeTag)
-        {
-            if(strlen($strNodeMatch) > 0) $strNodeMatch = $strNodeMatch . ' ';
-            $strNodeMatch = $strNodeMatch . $this->_getTagMatchString_($nodeTag);
-
-        }
+        $strNodeMatch = $this->_getTagMatchString_($this->arrListingTagSetup['tag_listings_section']);
 
         $GLOBALS['logger']->logLine($this->siteName . " finding nodes matching: " . $strNodeMatch, \Scooper\C__DISPLAY_ITEM_DETAIL__);
         $nodesJobRows = $objSimpHTML->find($strNodeMatch);
@@ -143,13 +149,13 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
 
                 $item['job_site'] = $this->siteName;
                 $item['date_pulled'] = \Scooper\getTodayAsString();
+                $item['job_title'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_title'], 'plaintext');
+                $item['job_post_url'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_link'], 'href');
+
 
                 $item['company'] = $item['job_site'];
                 $item['location'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_location'], 'plaintext');
                 $item['job_site_category'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_department'], 'plaintext');
-
-                $item['job_title'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_title'], 'plaintext');
-                $item['job_post_url'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_link'], 'href');
 
 
                 $fMatchedID = preg_match($this->arrListingTagSetup['regex_link_job_id'], $item['job_post_url'], $idMatches);
@@ -167,6 +173,19 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
         }
 
         return $ret;
+    }
+
+}
+
+abstract class ClassBaseMicroDataPlugin extends ClassBaseSimplePlugin
+{
+    protected $siteBaseURL = '';
+    protected $sitename = '';
+
+    function __construct($strBaseDir = null)
+    {
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE_NO_LOCATION  | C__JOB_PREFER_MICRODATA;
+        parent::__construct($strBaseDir);
     }
 
 }

@@ -13,3 +13,8 @@ build*
 *IGNORE*
 
 2014-08-28_macpro_crontab.txt
+
+configs/*
+
+
+*.jar

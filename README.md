@@ -3,7 +3,7 @@
 
 ![Example: Job Scooper Email Notification on Mobile](http://www.bryanselner.com/www-root-wpblog/wp-content/uploads/2014/07/JobScooperResultEmailMobile-250pxw.png "Example: Job Scooper Email Notification on Mobile")
 
-Jobs Scooper currently **supports [over 70 different sites](../../wiki/Job-Sites-Supported-by-Jobs-Scooper)**, including CareerBuilder, Craigslist, DotJobs, EmploymentGuide, Expedia, Glassdoor, Groupon, Indeed, LinkUp, Mashable, Monster,  SimplyHired, StartupHire, Tableau and ZipRecruiter.  [view all supported sites](../../wiki/Job-Sites-Supported-by-Jobs-Scooper) to see the full list.
+Jobs Scooper currently **supports [over 30 different sites](../../wiki/Job-Sites-Supported-by-Jobs-Scooper)**, including Monster, Indeed, and ZipRecruiter.  [view all supported sites](../../wiki/Job-Sites-Supported-by-Jobs-Scooper) to see the full list.
 
 ###Configuration is easy.###
 First, make a copy of the [example_config.ini](examples/example_config.ini) and edit it's settings to match the search keywords and locations that you want:
@@ -53,11 +53,16 @@ Required Parameters:
 ```
 
 
+##Setup Notes
+You will need to copy the Selenium Standalone Server version 3.0.0-beta4 from http://selenium-release.storage.googleapis.com/index.html?path=3.0.0-beta4/ to ./lib in order for plugins like Facebook to succeed.
+Note: The code currently uses the Safari 10 webdriver for accessing dynamic pages; you will need add support for other webdrivers to run this on another OS than macOS Sierra 10.12.
+Check out https://webkit.org/blog/6900/webdriver-support-in-safari-10/ to learn how to configure Safari for WebDriver automation.
+
 ##Other Stuff
-* Version:  v2.2.1 [release notes](https://github.com/selner/jobs_scooper/releases)
+* Version:  v3.0.0 [release notes](https://github.com/selner/jobs_scooper/releases)
 * Author:  Bryan Selner (bryan at bryanselner dot com)
 * Platforms:
-	* PHP 5.4.32 on Mac OSX 10.7 (Lion) and Mac OSX 10.9.4 (Mavericks)
+	* PHP 5.6.24 on macOS 10.12 (Sierra)
 	* v2.0 was tested on Ubuntu Linux 14.04 with PHP 5.5.9-1ubuntu4.2 (with E_NOTICE error reporting disabled.)
 	* Note:  The AppleScripts will fail on any platform other than Mac OS X.  This only affects the client-side HTML download site plugins (about 7 out of over 60).  Job Scooper should process all the others without issues.
 	* However:  your mileage might vary on any other platform or version.
