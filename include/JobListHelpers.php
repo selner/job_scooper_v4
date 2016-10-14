@@ -121,6 +121,11 @@ function isJobUpdatedToday($var)
 
 function isJobUpdatedTodayOrIsInterestedOrBlank($var)
 {
+    return (isJobUpdatedToday($var) && isMarkedInterested_IsBlank($var));
+}
+
+function isJobUpdatedTodayAndBlank($var)
+{
     return (isJobUpdatedToday($var) && isMarked_InterestedOrBlank($var));
 }
 

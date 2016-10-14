@@ -143,11 +143,11 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         //
 
         // Output all records that match the user's interest and are still active
-        $arrJobs_UserOutput_InterestedOrUpdated = null;
+        $arrJobs_UserOutput_InterestedOrBlank = null;
         if($GLOBALS['OPTS']['number_days'] > 1)
         {
-            $filterUpdatedOrNewSinceLastRun = "isMarkedInterested_IsBlank";
-            $filterNewSinceLastRun = "isMarkedInterested_IsBlank";
+            $filterUpdatedOrNewSinceLastRun = "isJobUpdatedTodayOrIsInterestedOrBlank";
+            $filterNewSinceLastRun = "isJobUpdatedTodayOrIsInterestedOrBlank";
 
 
             //
@@ -163,18 +163,18 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
                 }
             }
             ksort($arrFinalJobs_SortedByDateCompanyRole);
-            $arrJobs_UserOutput_InterestedOrUpdated = $arrFinalJobs_SortedByDateCompanyRole;
+            $arrJobs_UserOutput_InterestedOrBlank = $arrFinalJobs_SortedByDateCompanyRole;
 
         }
         else
         {
             $filterUpdatedOrNewSinceLastRun = "isJobUpdatedTodayOrIsInterestedOrBlank";
             $filterNewSinceLastRun = "isNewJobToday_Interested_IsBlank";
-            $arrJobs_UserOutput_InterestedOrUpdated = $arrFinalJobs_SortedByCompanyRole;
+            $arrJobs_UserOutput_InterestedOrBlank = $arrFinalJobs_SortedByCompanyRole;
 
         }
 
-        $arrJobs_UpdatedOrInterested = array_filter($arrJobs_UserOutput_InterestedOrUpdated, $filterUpdatedOrNewSinceLastRun);
+        $arrJobs_UpdatedOrInterested = array_filter($arrJobs_UserOutput_InterestedOrBlank, $filterUpdatedOrNewSinceLastRun);
         $this->writeRunsJobsToFile($this->classConfig->getFileDetails('output')['full_file_path'], $arrJobs_UpdatedOrInterested, "ClassJobsRunWrapper-UserOutputFile");
         $detailsMainResultsFile = $this->classConfig->getFileDetails('output');
 
