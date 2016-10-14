@@ -180,7 +180,7 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
 abstract class ClassBaseMicroDataPlugin extends ClassBaseSimplePlugin
 {
     protected $siteBaseURL = '';
-    protected $sitename = '';
+    protected $siteName = '';
 
     function __construct($strBaseDir = null)
     {
