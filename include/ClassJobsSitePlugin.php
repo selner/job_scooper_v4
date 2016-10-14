@@ -1318,7 +1318,7 @@ private function _getMyJobsForSearchFromXML_($searchDetails)
         return $strReturnLocation;
     }
 
-    private function _getBaseURLFormat_($searchDetails = null)
+    protected function _getBaseURLFormat_($searchDetails = null)
     {
         $strBaseURL = VALUE_NOT_SUPPORTED;
 

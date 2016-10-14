@@ -40,7 +40,7 @@ require_once (__ROOT__.'/plugins/PluginFacebook.php');
 require_once (__ROOT__.'/plugins/PluginGroupon.php');
 require_once (__ROOT__.'/plugins/PluginAmazon.php');
 require_once (__ROOT__.'/plugins/PluginCraigslist.php');
-//require_once (__ROOT__.'/plugins/PluginSimplyHired.php');
+require_once (__ROOT__.'/plugins/PluginSimplyHired.php');
 //require_once (__ROOT__.'/plugins/PluginGlassdoor.php');
 require_once (__ROOT__.'/plugins/PluginExpedia.php');
 require_once (__ROOT__.'/plugins/PluginLinkUp.php');

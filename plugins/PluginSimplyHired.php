@@ -27,10 +27,10 @@ class PluginSimplyHired extends ClassJobsSitePlugin
     protected $siteBaseURL = 'http://www.simplyhired.com';
     protected $siteName = 'SimplyHired';
     protected $nJobListingsPerPage = 50;
-    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS;
+    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $strKeywordDelimiter = "or";
-    protected $strBaseURLFormat = "http://www.simplyhired.com/search?q=***KEYWORDS***&l=***LOCATION***&fdb=***NUMBER_DAYS***&&ws=50&sb=dd&pn=***PAGE_NUMBER***";
+    protected $strBaseURLFormat = "http://www.simplyhired.com/search?q=***KEYWORDS***&l=***LOCATION***&fdb=***NUMBER_DAYS***&&ws=50&mi=50&sb=dd&pn=***PAGE_NUMBER***";
     protected $strTitleOnlySearchKeywordFormat = "title:(%s)";
 
     function getItemURLValue($nItem)
@@ -40,97 +40,163 @@ class PluginSimplyHired extends ClassJobsSitePlugin
         return $nItem;
     }
 
-    function getDaysURLValue($nDays = null)
+
+    /**
+     * If the site does not have a URL parameter for number of days
+     * then set the plugin flag to C__JOB_DAYS_VALUE_NOTAPPLICABLE__
+     * in the SitePlugins.php file and just comment out this function.
+     *
+     * getDaysURLValue returns the value that is used to replace
+     * the ***DAYS*** token in the search URL for the number of
+     * days requested.
+     *
+     * @param $days
+     * @return int|string
+     */
+    function getDaysURLValue($days = null)
     {
-        $ret = 1;
-        if($nDays > 1)
+        $ret = "%5BNOW-1DAYS+TO+NOW%5D";
+
+        if($days != null)
         {
-            $ret = $nDays;
+            switch($days)
+            {
+                case ($days==1):
+                    $ret = "1";
+                    break;
+
+                case ($days>1 && $days<8):
+                    $ret = "7";
+                    break;
+
+                case ($days>14 && $days < 30):
+                    $ret = "14";
+                    break;
+
+                case ($days>=30):
+                    $ret = "30";
+                    break;
+
+
+                default:
+                    $ret = "";
+                    break;
+
+            }
         }
 
         return $ret;
-   }
+    }
 
-    function parseJobsListForPage($objSimpHTML)
-    { return $this->_scrapeItemsFromHTML_($objSimpHTML); }
+
+    protected function _getURLfromBase_($searchDetails, $nPage = null, $nItem = null)
+    {
+        $strURL = $this->_getBaseURLFormat_($searchDetails);
+
+
+        $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($GLOBALS['OPTS']['number_days']), $strURL );
+        $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL );
+        $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
+        if(!$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
+        {
+            assert($searchDetails['keywords_string_for_url'] != VALUE_NOT_SUPPORTED);
+            $strURL = str_ireplace(BASE_URL_TAG_KEYWORDS, $searchDetails['keywords_string_for_url'], $strURL );
+        }
+
+
+        if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_BE_IN_TITLE) || \Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE))
+        {
+            $strBaseURLFormat = $this->strBaseURLFormat . "&fft=***KEYWORDS***";
+        }
+        $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
+
+        $nSubtermMatches = substr_count($strURL, BASE_URL_TAG_LOCATION);
+
+        if(!$this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) && $nSubtermMatches > 0)
+        {
+            $strLocationValue = $this->getLocationValueForLocationSetting($searchDetails);
+            if($strLocationValue == VALUE_NOT_SUPPORTED)
+            {
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() ." set.  Skipping search '". $searchDetails['name'] . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                $strURL = VALUE_NOT_SUPPORTED;
+            }
+            else
+            {
+                $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $strLocationValue, $strURL);
+            }
+        }
+
+        if($strURL == null) { throw new ErrorException("Location value is required for " . $this->siteName . ", but was not set for the search '" . $searchDetails['name'] ."'.". " Aborting all searches for ". $this->siteName, \Scooper\C__DISPLAY_ERROR__); }
+
+        return $strURL;
+    }
 
 
     function parseTotalResultsCount($objSimpHTML)
     {
-        $nodeHelper = new CSimpleHTMLHelper($objSimpHTML);
+        $node = $objSimpHTML->find("div[class='result-headline'] div[class='hidden-sm-down'] div");
+        if($node && isset($node) && is_array($node))
+        {
+            $arrParts = explode(" ", $node[0]->plaintext);
+            return $arrParts[3];
+        }
 
-        $pageText = $nodeHelper->getText("span[class='search_title']", 0, false);
-        // # of items to parse
-        $arrItemItems = explode(" ", trim($pageText));
-        if(isset($arrItemItems) && count($arrItemItems) >= 5)
-            return $arrItemItems[4];
-        else
-            return null;
+        return null;
     }
 
 
-    private function _scrapeItemsFromHTML_($objSimpleHTML)
+    function parseJobsListForPage($objSimpHTML)
     {
+
         $ret = null;
-
-
-        $resultsSection= $objSimpleHTML->find('div[class="results"]');
-        $resultsSection= $resultsSection[0];
-
-        $nodesJobs = $resultsSection->find('ul[id="jobs"] li[class="result"]');
-
+        $nodesJobs= $objSimpHTML->find('div[class="card js-job"]');
 
         foreach($nodesJobs as $node)
         {
-            $item = $this->getEmptyJobListingRecord();
-            $item['job_id'] = $node->attr['id'];
 
-            $subNode = $node->find("a[class='title']");
-            if(isset($subNode) && isset($subNode[0])) $item['job_title'] = $subNode[0]->plaintext;
-            $item['job_post_url'] = 'http://www.simplyhired.com' . $subNode[0]->href;
+            $item = $this->getEmptyJobListingRecord();
+
+            $titlelink = $node->find('a[class="card-link js-job-link"]');
+            $item['job_site'] = $this->siteName;
+            $item['job_title'] = combineTextAllChildren($titlelink[0]);;
+            $item['job_post_url'] = $titlelink[0]->href;
+
             if($item['job_title'] == '') continue;
 
-
-            $strURLAfterJobKey = str_replace("http://www.simplyhired.com/a/job-details/view/jobkey-", "", $item['job_post_url']);
-            $arrURLRemainingParts = explode("/",  $strURLAfterJobKey);
-            $item['job_id'] = str_replace(".", "", $arrURLRemainingParts[0]);
-            $item['job_id'] = \Scooper\strScrub($item['job_id'], REPLACE_SPACES_WITH_HYPHENS);
-
-            // TODO[BUGBUG] the h4 for company name can sometimes be missing.  the value is incorrectly set if so.
-            $subNode = $node->find("h4[class='company']");
-            if(isset($subNode) && isset($subNode[0])) $tempCompany = $subNode[0]->plaintext;
-            if(isset($tempCompany) && strlen($tempCompany) > 0)
+            $datenode = $node->find('span[class="serp-timestamp"]');
+            if(isset($datenode) && is_array($datenode))
             {
-                $item['company']= trim($tempCompany);
+                $item['job_site_date'] = $datenode[0]->plaintext;
             }
-            else
+
+            $companynode = $node->find('span[class="serp-company"]');
+            if(isset($companynode ) && is_array($companynode ))
             {
-                $subNode = $node->find("div[class='source']");
-                if(isset($subNode) && isset($subNode[0])) $tempCompany = trim($subNode[0]->plaintext);
-                if(isset($tempCompany) && strlen($tempCompany) > 0)
-                {
-                    $arrTempCompany = explode(" from ", $tempCompany);
-                    if(count($arrTempCompany) > 1)
-                    {
-                        $item['company']= trim($arrTempCompany[count($arrTempCompany)-1]);
-                    }
-                }
+                $item['company'] = combineTextAllChildren($companynode [0]);
             }
-            $subNode = $node->find("span[class='location']");
-            if(isset($subNode) && isset($subNode[0])) $item['location'] = $subNode[0]->plaintext;
+
+            $locnode = $node->find('span[class="serp-location"]');
+            if(isset($locnode) && is_array($locnode))
+            {
+                $item['job_site_date'] = combineTextAllChildren($locnode[0]);
+            }
+
+            $item['job_id'] = $this->getIDFromLink('/\/a\/job-details\/\?a=([^\/]+)/i', $item['job_post_url']);
 
             $item['date_pulled'] = \Scooper\getTodayAsString();
-
-            $subNode = $node->find("span[class='ago']");
-            if(isset($subNode) && isset($subNode[0])) $item['job_site_date'] = $subNode[0]->plaintext;
-
-            $item['job_site'] = $this->siteName;
 
             $ret[] = $this->normalizeItem($item);
         }
 
         return $ret;
     }
+
+
+
+
+
+
+
 
 }
 
