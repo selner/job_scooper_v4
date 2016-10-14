@@ -24,6 +24,7 @@ const C__RESULTS_INDEX_USER = '***TOTAL_USER***';
 
 class ClassJobsRunWrapper extends ClassJobsSitePlugin
 {
+    protected $siteName = "JobRunWrapper";
     protected $classConfig = null;
     protected $arrUserInputJobs = null;
     protected $arrUserInputJobs_Active = null;
