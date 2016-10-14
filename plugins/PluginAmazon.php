@@ -72,8 +72,8 @@ class PluginAmazon extends ClassJobsSitePlugin
 
             $item = $this->getEmptyJobListingRecord();
 
-            $item['job_post_url'] = $node->href;
-            $item['job_id'] = str_replace("/en/jobs/", "", $item['job_post_url']);
+            $item['job_id'] = str_replace("/en/jobs/", "", $node->href);
+            $item['job_post_url'] = $this->siteBaseURL . $node->href;
 
             $subNode = $node->find("h2[class=job-title]");
             $item['job_title'] = $subNode[0]->plaintext;
@@ -85,8 +85,10 @@ class PluginAmazon extends ClassJobsSitePlugin
             $item['location'] = explode("|", $subNode[0]->plaintext)[0];
 
             $subNode = $node->find("h2[class=posting-date]");
-            $item['job_site_date'] = $subNode[0]->plaintext;
-
+            $item['job_site_date'] = str_replace("Posted ", "", $subNode[0]->plaintext);
+            $dateVal = date_create_from_format("F d, Y", $item['job_site_date']);
+            if(isset($dateVal))
+                $item['job_site_date'] = $dateVal->format('m/d/y');
 
             $ret[] = $this->normalizeItem($item);
 
