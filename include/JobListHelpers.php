@@ -28,6 +28,35 @@ const C__STR_TAG_NOT_EXACT_TITLE_MATCH__ = "No (Not an Exact Title Match)";
 const C__STR_TAG_EXCLUDED_TITLE_REGEX = 'No (Title Excluded Via RegEx)';
 
 
+/*
+	For explanation and usage, see:
+
+    Based on orignal JG_Cache
+    @source https://github.com/diogeneshamilton/JG_Cache
+	For explanation and usage of JG_Cache, see:
+	http://www.jongales.com/blog/2009/02/18/simple-file-based-php-cache-class/
+
+    @source https://github.com/diogeneshamilton/JG_Cache
+    JG_Cache2 added the ability to have a human-readable cache subdirectory for cached files
+*/
+
+class JG_Cache2 extends JG_Cache {
+    function __construct($dir, $subdir = "")
+    {
+        if (isset($subdir) && count($subdir) > 0)
+            $dir = $dir . strtolower($subdir);
+
+        if ( !file_exists($dir))
+        {
+            mkdir($dir, $mode = 0777, $recursive = true);
+        }
+
+        parent::__construct($dir);
+    }
+
+};
+
+
 //
 // Jobs List Filter Functions
 //

@@ -695,15 +695,20 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         }
     }
 
-    private function _getCacheKey($searchSettings, $strURLFirstPage)
+    private function _getCacheKey($strURLFirstPage)
     {
-        return \Scooper\getTodayAsString() . $searchSettings['name'] . $strURLFirstPage;
+        return \Scooper\getTodayAsString() . $strURLFirstPage;
+    }
+
+    private function _getCache()
+    {
+        return new JG_Cache2($dir = $GLOBALS['OPTS']['cache_path'], $subdir = $this->siteName);
     }
 
     private function _getJobsDataForCachedURL_($searchSettings, $strURLFirstPage)
     {
-        $cache = new JG_Cache($GLOBALS['OPTS']['cache_path']);
-        $key = $this->_getCacheKey($searchSettings, $strURLFirstPage);
+        $cache = $this->_getCache();
+        $key = $this->_getCacheKey($strURLFirstPage);
 
         $data = $cache->get($key);
         if ($data === FALSE)
@@ -720,9 +725,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     private function _cacheJobsForURL($searchSettings, $strURLFirstPage, $dataJobs, $nJobCount = null)
     {
-        $key = $this->_getCacheKey($searchSettings, $strURLFirstPage);
+        $key = $this->_getCacheKey( $strURLFirstPage);
 
-        $cache = new JG_Cache($GLOBALS['OPTS']['cache_path']);
+        $cache = $this->_getCache();
         $data = $cache->set($key, $dataJobs);
         if ($data === FALSE)
         {
