@@ -142,18 +142,38 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         //
 
         // Output all records that match the user's interest and are still active
+        $arrJobs_UserOutput_InterestedOrUpdated = null;
         if($GLOBALS['OPTS']['number_days'] > 1)
         {
             $filterUpdatedOrNewSinceLastRun = "isMarkedInterested_IsBlank";
             $filterNewSinceLastRun = "isMarkedInterested_IsBlank";
+
+
+            //
+            // For our final output, we want the jobs to be sorted by company and then role name.
+            // Create a copy of the jobs list that is sorted by that value.
+            //
+            $arrFinalJobs_SortedByDateCompanyRole = array();
+            if (countJobRecords($this->arrLatestJobs) > 0) {
+                foreach ($this->arrLatestJobs as $job) {
+                    // Need to add uniq key of job site id to the end or it will collapse duplicate job titles that
+                    // are actually multiple open posts
+                    $arrFinalJobs_SortedByDateCompanyRole [$job['job_site_date'] . $job['key_company_role'] . "-" . $job['key_jobsite_siteid']] = $job;
+                }
+            }
+            ksort($arrFinalJobs_SortedByDateCompanyRole);
+            $arrJobs_UserOutput_InterestedOrUpdated = $arrFinalJobs_SortedByDateCompanyRole;
+
         }
         else
         {
             $filterUpdatedOrNewSinceLastRun = "isJobUpdatedTodayOrIsInterestedOrBlank";
             $filterNewSinceLastRun = "isNewJobToday_Interested_IsBlank";
+            $arrJobs_UserOutput_InterestedOrUpdated = $arrFinalJobs_SortedByCompanyRole;
+
         }
 
-        $arrJobs_UpdatedOrInterested = array_filter($arrFinalJobs_SortedByCompanyRole, $filterUpdatedOrNewSinceLastRun);
+        $arrJobs_UpdatedOrInterested = array_filter($arrJobs_UserOutput_InterestedOrUpdated, $filterUpdatedOrNewSinceLastRun);
         $this->writeRunsJobsToFile($this->classConfig->getFileDetails('output')['full_file_path'], $arrJobs_UpdatedOrInterested, "ClassJobsRunWrapper-UserOutputFile");
         $detailsMainResultsFile = $this->classConfig->getFileDetails('output');
 
@@ -590,7 +610,8 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         $mail->isHTML(true);                                            // Set email format to HTML
         reset($toEmails);
 
-        $mail->Subject = "New jobs for " . current($toEmails)['name'] . " (" . \Scooper\getTodayAsString() .")";;
+        $mail->Subject = "Newly matched jobs: " . $this->_getRunDateRange_() . " for " . current($toEmails)['name'];
+
         $mail->Body    = $messageHtml;
         $mail->AltBody = $messageText;
 
@@ -868,12 +889,24 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         return $strOut;
     }
 
+    private function _getRunDateRange_()
+    {
+        $strRangeStartDate = "";
+        $startDate = new DateTime();
+        $strMod = "-".$GLOBALS['OPTS']['number_days']." days";
+        $startDate = $startDate->modify($strMod);
+        $today = new DateTime();
+        $strDateRange = $startDate->format('D, M d') . " - " . $today->format('D, M d');
+        return $strDateRange;
+    }
+
     private function _getResultsTextHTML_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrExcluded)
     {
         $arrCounts_TotalAll = null;
         $arrCounts_TotalUser = null;
         $strOut = "<div class='job_scooper outer'>";
-        $strOut  .= "<H2>Job Scooper Results for " . date("D, M d") . "</H2>".PHP_EOL. PHP_EOL;
+
+        $strOut  .= "<H2>Job Scooper Results: " . $this->_getRunDateRange_() . "</H2>".PHP_EOL. PHP_EOL;
 
         if($arrCounts != null && count($arrCounts) > 0)
         {
