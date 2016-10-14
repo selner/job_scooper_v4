@@ -181,7 +181,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
         $this->typeLocationSearchNeeded = 'location-city-comma-state-country';
         $this->strBaseURLFormat = $this->childSiteURLBase . $this->strBaseURLPathSection . $this->strBaseURLPathSuffix;
         parent::__construct($strOutputDirectory);
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_USE_SELENIUM | C__JOB_PREFER_MICRODATA;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES | C__JOB_USE_SELENIUM | C__JOB_PREFER_MICRODATA;
     }
 
     protected function _getURLfromBase_($searchDetails, $nPage = null, $nItem = null)
@@ -193,6 +193,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
     {
         if($page == 1) { return 0; } else {return $page; }
     }
+
     /**
      * If the site does not have a URL parameter for number of days
      * then set the plugin flag to C__JOB_DAYS_VALUE_NOTAPPLICABLE__

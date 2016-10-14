@@ -17,6 +17,7 @@
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/Options.php');
 require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
+header('Content-Type: text/html');
 
 const VALUE_NOT_SUPPORTED = -1;
 const BASE_URL_TAG_LOCATION = "***LOCATION***";
@@ -489,7 +490,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             $strRetCombinedKeywords = sprintf($this->strTitleOnlySearchKeywordFormat, $strRetCombinedKeywords);
         }
 
-        if(!$this->_isValueURLEncoded_($strRetCombinedKeywords)) { $strRetCombinedKeywords = urlencode($strRetCombinedKeywords); }
+        if(!$this->_isValueURLEncoded_($strRetCombinedKeywords))
+        {
+            $strRetCombinedKeywords = urlencode($strRetCombinedKeywords);
+        }
 
         if($this->isBitFlagSet(C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES))
         {
@@ -1041,7 +1045,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                         if($driver == null)
                             $driver = $this->_getFullHTMLForDynamicWebpage_($strStartURL, $this->classToCheckExists);
 
-                        if($this->isBitFlagSet( C__INFSCROLL_DOWNFULLPAGE))
+                        if($this->isBitFlagSet( C__JOB_INFSCROLL_DOWNFULLPAGE))
                         {
                             while($nPageCount <= $totalPagesCount)
                             {
