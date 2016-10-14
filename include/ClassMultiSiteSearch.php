@@ -25,6 +25,7 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
 {
     protected $siteName = 'Multisite';
     protected $flagSettings = C__JOB_BASETYPE_NONE_NO_LOCATION_OR_KEYWORDS;
+    protected $arrSearchLocationSetsToRun = null;
 
     function __destruct()
     {

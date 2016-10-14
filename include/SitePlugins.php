@@ -18,6 +18,7 @@
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/Options.php');
 require_once(__ROOT__.'/lib/Linkify.php');
+require_once(__ROOT__.'/lib/jg_cache.php');
 require_once(__ROOT__.'/include/CSimpleHTMLHelper.php');
 require_once(__ROOT__.'/include/ClassJobsSitePlugin.php');
 require_once(__ROOT__.'/include/ClassBaseSimplePlugin.php');

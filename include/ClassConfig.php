@@ -27,6 +27,7 @@ class ClassConfig extends ClassJobsSitePlugin
     protected $configSettings = array('searches' => null, 'keyword_sets' => null, 'location_sets' => null, 'number_days'=>VALUE_NOT_SUPPORTED, 'included_sites' => array(), 'excluded_sites' => array());
     protected $arrEmail_PHPMailer_SMTPSetup = null;
     protected $allConfigFileSettings = null;
+    private $arrCacheFolder = null;
 
     function getSearchConfiguration($strSubkey = null)
     {
@@ -223,6 +224,12 @@ class ClassConfig extends ClassJobsSitePlugin
              $this->arrFileDetails['output'] = \Scooper\parseFilePath( $this->arrFileDetails['output']['directory'] .  $strDefaultFileName);
         }
         $this->arrFileDetails['output_subfolder'] = $this->createOutputSubFolder( $this->arrFileDetails['output']);
+        $this->arrCacheFolder = \Scooper\array_copy($this->arrFileDetails['output']);
+        $this->arrCacheFolder['file_name_base'] = 'data_cache';
+        $tempCachePath = $this->createOutputSubFolder( $this->arrCacheFolder);
+        $GLOBALS['OPTS']['cache_path'] = $tempCachePath['directory'];
+
+
     }
 
 
@@ -988,14 +995,13 @@ class ClassConfig extends ClassJobsSitePlugin
         try
         {
             $testMatch = preg_match($rx, "empty");
-            return $rx;
         }
         catch (Exception $ex)
         {
             $GLOBALS['logger']->logLine($ex->getMessage(), \Scooper\C__DISPLAY_ERROR__);
             if(isDebug()) { throw $ex; }
         }
-
+        return $rx;
     }
 
 
