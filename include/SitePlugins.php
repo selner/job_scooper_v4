@@ -41,17 +41,21 @@ require_once (__ROOT__.'/plugins/PluginGroupon.php');
 require_once (__ROOT__.'/plugins/PluginAmazon.php');
 require_once (__ROOT__.'/plugins/PluginCraigslist.php');
 require_once (__ROOT__.'/plugins/PluginSimplyHired.php');
-//require_once (__ROOT__.'/plugins/PluginGlassdoor.php');
-require_once (__ROOT__.'/plugins/PluginExpedia.php');
+require_once (__ROOT__ . '/plugins/PluginExpedia.php');
 require_once (__ROOT__.'/plugins/PluginLinkUp.php');
-//require_once (__ROOT__.'/plugins/PluginEmploymentGuide.php');
 require_once (__ROOT__.'/plugins/PluginCareerBuilder.php');
 require_once (__ROOT__.'/plugins/PluginDisney.php');
 require_once (__ROOT__.'/plugins/PluginGoogle.php');
-//require_once (__ROOT__.'/plugins/PluginEbay.php');
 require_once (__ROOT__.'/plugins/PluginGeekwire.php');
 require_once (__ROOT__.'/plugins/PluginDotJobs.php');
 require_once (__ROOT__.'/plugins/PluginZipRecruiter.php');
+
+//
+//BUGBUG:  Current defunct and need to be updated before re-adding
+//
+//require_once (__ROOT__.'/plugins/PluginEbay.php');
+//require_once (__ROOT__.'/plugins/PluginGlassdoor.php');
+//require_once (__ROOT__.'/plugins/PluginEmploymentGuide.php');
 //require_once (__ROOT__.'/plugins/PluginStartupHire.php');
 
 //And so on, 0x8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800 etc..
