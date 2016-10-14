@@ -976,7 +976,27 @@ class ClassConfig extends ClassJobsSitePlugin
     }
 
 
+    private function _scrubRegexSearchString($pattern)
+    {
+        $delim = '~';
+        if(strpos($pattern, $delim) != false)
+        {
+            $delim = '|';
+        }
 
+        $rx = $delim.preg_quote($pattern, $delim).$delim.'i';
+        try
+        {
+            $testMatch = preg_match($rx, "empty");
+            return $rx;
+        }
+        catch (Exception $ex)
+        {
+            $GLOBALS['logger']->logLine($ex->getMessage(), \Scooper\C__DISPLAY_ERROR__);
+            if(isDebug()) { throw $ex; }
+        }
+
+    }
 
 
     private function _loadTitlesRegexesToFilter_()
@@ -1028,11 +1048,10 @@ class ClassConfig extends ClassJobsSitePlugin
                         $arrRXInput = explode("|", strtolower($titleRecord['match_regex']));
                         foreach($arrRXInput as $rxItem)
                         {
-                            $rx = '/'.preg_quote($rxItem).'/i';
-                            //                        $GLOBALS['logger']->logLine("Testing regex record " .$nDebugCounter . " with value of " . $rx , \Scooper\C__DISPLAY_ITEM_DETAIL__);
                             try
                             {
-                                $testMatch = preg_match($rx, "empty");
+                                $rx = $this->_scrubRegexSearchString($rxItem);
+                                $GLOBALS['DATA']['titles_regex_to_filter'][$rxItem] = $rx;
 
                             }
                             catch (Exception $ex)
@@ -1041,7 +1060,6 @@ class ClassConfig extends ClassJobsSitePlugin
                                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
                                 if(isDebug()) { throw new ErrorException( $strError); }
                             }
-                            $GLOBALS['DATA']['titles_regex_to_filter'][] = $rx;
                         }
                         $nDebugCounter = $nDebugCounter + 1;
                     }
@@ -1123,9 +1141,18 @@ class ClassConfig extends ClassJobsSitePlugin
 
                                 foreach($arrRXInput as $rxItem)
                                 {
-                                    $rx = '/'.$rxItem.'/';
+                                    try
+                                    {
+                                        $rx = $this->_scrubRegexSearchString($rxItem);
+                                        $GLOBALS['DATA']['companies_regex_to_filter'][] = $rx;
 
-                                    $GLOBALS['DATA']['companies_regex_to_filter'][] = $rx;
+                                    }
+                                    catch (Exception $ex)
+                                    {
+                                        $strError = "Regex test failed on company regex pattern " . $rxItem .".  Skipping.  Error: '".$ex->getMessage();
+                                        $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
+                                        if(isDebug()) { throw new ErrorException( $strError); }
+                                    }
                                 }
                             }
                             $fCompaniesLoaded = true;
