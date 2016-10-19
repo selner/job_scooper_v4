@@ -43,15 +43,21 @@ const C__STR_TAG_EXCLUDED_TITLE_REGEX = 'No (Title Excluded Via RegEx)';
 class JG_Cache2 extends JG_Cache {
     function __construct($dir, $subdir = "")
     {
-        if (isset($subdir) && count($subdir) > 0)
-            $dir = $dir . strtolower($subdir);
 
-        if ( !file_exists($dir))
+        $cachedir = join(DIRECTORY_SEPARATOR, array($dir, strtolower(\Scooper\getTodayAsString()), strtolower($subdir)));
+
+//        if (isset($subdir) && count($subdir) > 0)
+//            $dir = $dir . strtolower($subdir);
+//
+//        $dir = $dir . strtolower(\Scooper\getTodayAsString());
+//
+
+        if ( !file_exists($cachedir))
         {
-            mkdir($dir, $mode = 0777, $recursive = true);
+            mkdir($cachedir, $mode = 0777, $recursive = true);
         }
 
-        parent::__construct($dir);
+        parent::__construct($cachedir);
     }
 
 };
