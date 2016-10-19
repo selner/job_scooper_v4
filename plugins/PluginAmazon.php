@@ -54,8 +54,12 @@ class PluginAmazon extends ClassJobsSitePlugin
     function parseTotalResultsCount($objSimpHTML)
     {
         $subnode = $objSimpHTML->find("div[id=search-paging] div[class=container] div[class=row] div");
-        $parts = explode(" ", $subnode[count($subnode)-1]->plaintext);
-        return $parts[2];
+        if(isset($subnode) && is_array($subnode) && count($subnode) >= 1)
+        {
+            $parts = explode(" ", $subnode[count($subnode)-1]->plaintext);
+            return $parts[2];
+        }
+        return 0;
 
     }
 
