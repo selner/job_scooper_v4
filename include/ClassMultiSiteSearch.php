@@ -19,7 +19,7 @@
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
 
-
+const SELENIUM_STANDALONE_SERVER_JAR = "selenium-server-standalone-3.0.1.jar";
 
 class ClassMultiSiteSearch extends ClassJobsSitePlugin
 {
@@ -102,7 +102,8 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
                     {
                         if(!array_key_exists('selenium_started', $GLOBALS) || $GLOBALS['selenium_started'] != true)
                             {
-                                $strCmdToRun = "java -jar \"" . __ROOT__ . "/lib/selenium-server-standalone-3.0.0-beta4.jar\" -role standalone  >/dev/null &";
+                                $strCmdToRun = "java -jar \"" . __ROOT__ . "/lib/" . SELENIUM_STANDALONE_SERVER_JAR . "\" -role standalone  >/dev/null &";
+			                    $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \Scooper\C__DISPLAY_ITEM_RESULT__);
                                 exec($strCmdToRun);
                                 $GLOBALS['selenium_started'] = true;
                                 sleep(5);
