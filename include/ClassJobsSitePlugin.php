@@ -963,19 +963,20 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             }
             $driver->get($url);
 
-            // wait at most 10 seconds until at least one result is shown
-            if($elementClass)
-            {
-                $driver->wait(10+$this->additionalLoadDelaySeconds)->until(
-                    WebDriverExpectedCondition::presenceOfAllElementsLocatedBy(
-                        WebDriverBy::className($elementClass)
-                    )
-                );
-            }
-            else
-            {
-                sleep(2+$this->additionalLoadDelaySeconds);
-            }
+//            // wait at most 10 seconds until at least one result is shown
+//            if($elementClass)
+//            {
+//                $driver->wait(10+$this->additionalLoadDelaySeconds)->until(
+//                    WebDriverExpectedCondition::presenceOfAllElementsLocatedBy(
+//                        WebDriverBy::className($elementClass)
+//                    )
+//                );
+//            }
+//            else
+//            {
+//                sleep(2+$this->additionalLoadDelaySeconds);
+//            }
+            sleep(2+$this->additionalLoadDelaySeconds);
 
         } catch (Exception $ex) {
             $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
