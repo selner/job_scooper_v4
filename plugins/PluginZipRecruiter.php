@@ -16,7 +16,7 @@
      * under the License.
      */
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
-require_once(__ROOT__ . '/include/ClassJobsSitePluginCommon.php');
+require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 
 class PluginZipRecruiter extends ClassJobsSitePlugin
@@ -28,12 +28,6 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
     protected $flagSettings = null;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $regex_link_job_id = '/^.*\/clk\/(.*)/i';
-
-    // if this is a client-side HTML download plugin, you will need to add a script
-    // for driving Safari to download the files and set that script name here.
-    //
-    // This value is unused for XML or server-side webpage download plugins.
-    protected $strFilePath_HTMLFileDownloadScript = null;
 
     function __construct($strBaseDir = null)
     {

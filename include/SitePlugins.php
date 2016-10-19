@@ -22,7 +22,7 @@ require_once(__ROOT__.'/lib/jg_cache.php');
 require_once(__ROOT__.'/include/CSimpleHTMLHelper.php');
 require_once(__ROOT__.'/include/ClassJobsSitePlugin.php');
 require_once(__ROOT__.'/include/ClassBaseSimplePlugin.php');
-require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
+require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 require_once(__ROOT__.'/include/ClassConfig.php');
 require_once(__ROOT__.'/include/ClassJobsRunWrapper.php');
 

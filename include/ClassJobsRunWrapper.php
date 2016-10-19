@@ -22,14 +22,15 @@ require_once(__ROOT__.'/include/ClassMultiSiteSearch.php');
 const C__RESULTS_INDEX_ALL = '***TOTAL_ALL***';
 const C__RESULTS_INDEX_USER = '***TOTAL_USER***';
 
-class ClassJobsRunWrapper extends ClassJobsSitePlugin
+class ClassJobsRunWrapper extends ClassJobsSiteCommon
 {
     protected $siteName = "JobRunWrapper";
     protected $classConfig = null;
     protected $arrUserInputJobs = null;
     protected $arrUserInputJobs_Active = null;
     protected $arrUserInputJobs_Inactive = null;
-    protected $arrLatestJobs_UnfilteredByUserInput = null;
+    protected $arrLatestJobs_UnfilteredByUserInput = array();
+    protected $arrLatestJobs = array();
 
     protected $arrEmailAddresses = null;
 
@@ -50,6 +51,13 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
 
     }
+
+    function markMyJobsList_withAutoItems()
+    {
+        $this->markJobsList_withAutoItems($this->arrLatestJobs, $this->siteName);
+    }
+
+
 
     function RunAll()
     {
@@ -467,10 +475,9 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
 
         $classMulti = new ClassMultiSiteSearch($this->classConfig->getFileDetails('output_subfolder')['directory']);
         $classMulti->addMultipleSearches($this->arrSearchesToReturn, null);
-        $classMulti->getJobsForMyMultipleSearches();
-        addJobsToJobsList($this->arrLatestJobs, $classMulti->getMyJobsList());
-
-        addJobsToJobsList($this->arrLatestJobs_UnfilteredByUserInput, $this->arrLatestJobs);
+        $arrUpdatedJobs = $classMulti->updateJobsForAllPlugins();
+        addJobsToJobsList($this->arrLatestJobs_UnfilteredByUserInput, $arrUpdatedJobs);
+        addJobsToJobsList($this->arrLatestJobs, $arrUpdatedJobs);
 
 
         if($this->is_OutputInterimFiles() == true) {
@@ -697,7 +704,7 @@ class ClassJobsRunWrapper extends ClassJobsSitePlugin
         }
 
         if($arrPluginJobsUnfiltered == null || !isset($arrPluginJobsUnfiltered) || !is_array($arrPluginJobsUnfiltered))
-            $arrPluginJobsUnfiltered = $this->getMyJobsList();
+            $arrPluginJobsUnfiltered = $this->arrLatestJobs_UnfilteredByUserInput;
 
         foreach( $GLOBALS['DATA']['site_plugins'] as $plugin_setup)
         {

@@ -22,7 +22,7 @@ require_once(__ROOT__.'/include/JobListHelpers.php');
 
 define('JOBS_SCOOPER_MAX_FILE_SIZE', 1024000);
 
-class ClassJobsSitePluginCommon
+class ClassJobsSiteCommon
 {
 
     private $arrKeysForDeduping = array('key_jobsite_siteid');

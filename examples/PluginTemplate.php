@@ -16,7 +16,7 @@
      * under the License.
      */
 define('__ROOT__', dirname(dirname(__FILE__)));
-require_once(__ROOT__ . '/include/ClassJobsSitePluginCommon.php');
+require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 
 /**

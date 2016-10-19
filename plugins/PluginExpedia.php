@@ -16,7 +16,7 @@
      * under the License.
      */
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
-require_once(__ROOT__ . '/include/ClassJobsSitePluginCommon.php');
+require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 
 //.// http://expediajobs.findly.com/candidate/job_search/advanced/results?job_type=5517&state=2336&country=5492&sort=date

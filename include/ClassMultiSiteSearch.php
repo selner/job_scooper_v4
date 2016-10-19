@@ -17,16 +17,16 @@
 
 
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
-require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
+require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 
 const SELENIUM_STANDALONE_SERVER_JAR = "selenium-server-standalone-3.0.1.jar";
 
-class ClassMultiSiteSearch extends ClassJobsSitePlugin
+class ClassMultiSiteSearch extends ClassJobsSiteCommon
 {
     protected $siteName = 'Multisite';
     protected $flagSettings = C__JOB_BASETYPE_NONE_NO_LOCATION_OR_KEYWORDS;
     protected $arrSearchLocationSetsToRun = null;
-
+    private $arrPluginClassesToRun = array();
     function __destruct()
     {
         if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
@@ -48,83 +48,87 @@ class ClassMultiSiteSearch extends ClassJobsSitePlugin
         }
     }
 
-    function parseJobsListForPage($objSimpHTML)
-    {
-        throw new ErrorException("parseJobsListForPage not supported for class ClassMultiSiteSearch");
-    }
-    function parseTotalResultsCount($objSimpHTML) { throw new ErrorException("parseTotalResultsCount not supported for class ClassMultiSiteSearch"); }
-
     function addMultipleSearches($arrSearches, $locSettingSets = null)
     {
         $this->arrSearchLocationSetsToRun = $locSettingSets;
         $this->arrSearchesToReturn = $arrSearches;
     }
 
-    function getJobsForMyMultipleSearches()
-    {
-        $arrPluginClassesToRun = null;
 
-        $arrSearchesToReturn = $this->arrSearchesToReturn;
-        if(count($arrSearchesToReturn) >= 0)
+    private function _setPluginClassDataForAllSearches_()
+    {
+        $this->arrPluginClassesToRun = array();
+
+        $arrSearchSites = array_column($this->arrSearchesToReturn, "site_name");
+        foreach(array_unique($arrSearchSites) as $sitename)
         {
-            shuffle($arrSearchesToReturn);
-            foreach($arrSearchesToReturn as $search)
+            $this->arrPluginClassesToRun[$sitename] = array('class_name'=>$GLOBALS['DATA']['site_plugins'][strtolower($sitename)]['class_name'], 'site_name'=>$sitename, 'searches' =>array());
+        }
+
+        if(count($arrSearchSites) >= 0)
+        {
+            foreach($this->arrSearchesToReturn as $searchDetails)
             {
-                $strIncludeKey = 'include_'.strtolower($search['site_name']);
+                $strIncludeKey = 'include_'.strtolower($searchDetails['site_name']);
 
                 $valInclude = \Scooper\get_PharseOptionValue($strIncludeKey);
 
                 if(!isset($valInclude) || $valInclude == 0)
                 {
-                    $GLOBALS['logger']->logLine($search['site_name'] . " excluded, so skipping its '" . $search['name'] . "' search.", \Scooper\C__DISPLAY_ITEM_START__);
-
+                    $GLOBALS['logger']->logLine($searchDetails['site_name'] . " excluded, so skipping its searches.", \Scooper\C__DISPLAY_ITEM_START__);
+                    if(array_key_exists($this->arrPluginClassesToRun, $searchDetails['site_name']))
+                        unset($this->arrPluginClassesToRun[$searchDetails['site_name']]);
                     continue;
                 }
 
-                $strSiteClass = $GLOBALS['DATA']['site_plugins'][strtolower($search['site_name'])]['class_name'];
-                if(!isset($arrPluginClassesToRun[$strSiteClass]))
-                {
-                    $arrPluginClassesToRun[$strSiteClass] = array('class_name'=>$strSiteClass, 'site_name'=>$search['site_name'], 'searches' =>null);
-                }
-                $arrPluginClassesToRun[$strSiteClass]['searches'][] = $search;
-            }
-
-            $class = null;
-
-
-            foreach($arrPluginClassesToRun as $classSearches)
-            {
-                $class = new $classSearches['class_name']($this->detailsMyFileOut['directory']);
-                try
-                {
-
-                    if($class->isBitFlagSet(C__JOB_USE_SELENIUM))
-                    {
-                        if(!array_key_exists('selenium_started', $GLOBALS) || $GLOBALS['selenium_started'] != true)
-                            {
-                                $strCmdToRun = "java -jar \"" . __ROOT__ . "/lib/" . SELENIUM_STANDALONE_SERVER_JAR . "\" -role standalone  >/dev/null &";
-			                    $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \Scooper\C__DISPLAY_ITEM_RESULT__);
-                                exec($strCmdToRun);
-                                $GLOBALS['selenium_started'] = true;
-                                sleep(5);
-                            }
-                    }
-
-
-                    $GLOBALS['logger']->logLine("Setting up " . count($classSearches['searches']) . " search(es) for ". $classSearches['site_name'] . "...", \Scooper\C__DISPLAY_SECTION_START__);
-                    $class->addSearches($classSearches['searches']);
-                    $class->getJobsForAllSearches();
-                    addJobsToJobsList($this->arrLatestJobs, $class->getMyJobsList());
-                    $class = null;
-                }
-                catch (Exception $classError)
-                {
-                    $GLOBALS['logger']->logLine('ERROR:  Unable to load the class for ' .$classSearches['site_name'] . '. Skipping it\'s searches and continuing with any others.', \Scooper\C__DISPLAY_ERROR__);
-                    $GLOBALS['logger']->logLine('ERROR:  Search failure reason:  '.$classError->getMessage(), \Scooper\C__DISPLAY_ERROR__);
-                    if(isDebug()) { throw $classError; }
-                }
+                $this->arrPluginClassesToRun[$searchDetails['site_name']]['searches'][] = $searchDetails;
             }
         }
+    }
+
+    function updateJobsForAllPlugins()
+    {
+        $this->_setPluginClassDataForAllSearches_();
+
+
+        $class = null;
+
+        $retJobList = array();
+
+        foreach($this->arrPluginClassesToRun as $classPluginForSearch)
+        {
+            $class = new $classPluginForSearch['class_name']($this->detailsMyFileOut['directory']);
+            try
+            {
+
+                if($class->isBitFlagSet(C__JOB_USE_SELENIUM))
+                {
+                    if(!array_key_exists('selenium_started', $GLOBALS) || $GLOBALS['selenium_started'] != true)
+                        {
+                            $strCmdToRun = "java -jar \"" . __ROOT__ . "/lib/" . SELENIUM_STANDALONE_SERVER_JAR . "\" -role standalone  >/dev/null &";
+                            $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \Scooper\C__DISPLAY_ITEM_RESULT__);
+                            exec($strCmdToRun);
+                            $GLOBALS['selenium_started'] = true;
+                            sleep(5);
+                        }
+                }
+
+
+                $GLOBALS['logger']->logLine("Setting up " . count($classPluginForSearch['searches']) . " search(es) for ". $classPluginForSearch['site_name'] . "...", \Scooper\C__DISPLAY_SECTION_START__);
+                $class->addSearches($classPluginForSearch['searches']);
+                $arrResults = $class->getUpdatedJobsForAllSearches();
+                addJobsToJobsList($retJobList, $arrResults);
+                $class = null;
+            }
+            catch (Exception $classError)
+            {
+                $GLOBALS['logger']->logLine('ERROR:  Unable to load the class for ' .$classPluginForSearch['site_name'] . '. Skipping it\'s searches and continuing with any others.', \Scooper\C__DISPLAY_ERROR__);
+                $GLOBALS['logger']->logLine('ERROR:  Search failure reason:  '.$classError->getMessage(), \Scooper\C__DISPLAY_ERROR__);
+                if(isDebug()) { throw $classError; }
+            }
+        }
+
+        return $retJobList;
     }
 
 }

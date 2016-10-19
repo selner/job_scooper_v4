@@ -16,48 +16,42 @@
  */
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/Options.php');
-require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
+require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 header('Content-Type: text/html');
 
 const VALUE_NOT_SUPPORTED = -1;
 const BASE_URL_TAG_LOCATION = "***LOCATION***";
 const BASE_URL_TAG_KEYWORDS = "***KEYWORDS***";
 
-abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
+abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 {
+    //************************************************************************
+    //
+    //
+    //
+    //  Protected and Private Class Members
+    //
+    //
+    //
+    //************************************************************************
 
-    function __construct($strOutputDirectory = null)
-    {
-        if($strOutputDirectory != null)
-        {
-            $this->detailsMyFileOut = \Scooper\parseFilePath($strOutputDirectory, false);
-        }
 
-    }
+    protected $siteName = 'NAME-NOT-SET';
+    protected $nJobListingsPerPage = 20;
+    protected $flagSettings = null;
+    protected $secsPageTimeout = null;
 
-    function __destruct()
-    {
+    protected $strBaseURLFormat = null;
+    protected $typeLocationSearchNeeded = null;
+    protected $locationValue = null;
+    protected $strKeywordDelimiter = null;
+    protected $strTitleOnlySearchKeywordFormat = null;
+    protected $classToCheckExists = null;
+    protected $cookieNamesToSaveAndResend = Array();
+    protected $additionalLoadDelaySeconds = 0;
 
-        //
-        // Write out the interim data to file if we're debugging
-        //
-        if($this->is_OutputInterimFiles() == true) {
-            if($this->arrLatestJobs != null)
-            {
-                $strOutPathWithName = $this->getOutputFileFullPath($this->siteName . "_");
-                if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Writing ". $this->siteName." " .count($this->arrLatestJobs) ." job records to " . $strOutPathWithName . " for debugging (if needed).", \Scooper\C__DISPLAY_ITEM_START__); }
-                $this->writeMyJobsListToFile($strOutPathWithName, false);
-            }
-        }
-    }
 
-    function parseJobsListForPageBase($objSimpHTML) {
-         $retJobs = $this->parseJobsListForPage($objSimpHTML);
-        $retJobs = $this->normalizeJobList($retJobs);
 
-        return $retJobs;
-
-    } // returns an array of jobs
 
     function parseTotalResultsCount($objSimpHTML) { return VALUE_NOT_SUPPORTED; } // returns an array of jobs
     function parseJobsListForPage($objSimpHTML) { return VALUE_NOT_SUPPORTED; } // returns an array of jobs
@@ -73,6 +67,47 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         }
     }
+
+    private function _getResultsForSearch_($searchDetails)
+    {
+        $tmpSearchJobs = $this->_getCachedJobsForSearch_($searchDetails);
+        if(isset($tmpSearchJobs) && is_array($tmpSearchJobs))
+            return $tmpSearchJobs;
+        else
+            return array();
+    }
+
+    public function getMyJobsList()
+    {
+        $retAllSearchResults = array();
+        if(isset($this->arrSearchesToReturn) && is_array($this->arrSearchesToReturn))
+        {
+            foreach($this->arrSearchesToReturn as $searchDetails)
+            {
+
+                $tmpSearchJobs = $this->_getResultsForSearch_($searchDetails);
+                addJobsToJobsList($retAllSearchResults, $tmpSearchJobs);
+            }
+        }
+        return $retAllSearchResults;
+    }
+
+    function __destruct()
+    {
+
+        //
+        // Write out the interim data to file if we're debugging
+        //
+        if($this->is_OutputInterimFiles() == true && isset($this->detailsMyFileOut) && is_array($this->detailsMyFileOut))
+        {
+            $arrAllSearchResults = $this->getMyJobsList();
+            $strOutPathWithName = $this->getOutputFileFullPath($this->siteName . "_");
+            if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Writing ". $this->siteName." " .count($arrAllSearchResults) ." job records to " . $strOutPathWithName . " for debugging (if needed).", \Scooper\C__DISPLAY_ITEM_START__); }
+            $this->writeJobsListToFile($strOutPathWithName, $arrAllSearchResults, true, false, $this->siteName, "CSV");
+        }
+    }
+
+
 
     function getLocationValueForLocationSetting($searchDetails)
     {
@@ -99,21 +134,20 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         return $strReturnLocation;
     }
 
-    function getJobsForAllSearches()
+    function getUpdatedJobsForAllSearches()
     {
-
         $strIncludeKey = 'include_'.strtolower($this->siteName);
 
         if(isset($GLOBALS['OPTS'][$strIncludeKey]) && $GLOBALS['OPTS'][$strIncludeKey] == 0)
         {
             $GLOBALS['logger']->logLine($this->siteName . ": excluded for run. Skipping '" . count($this->arrSearchesToReturn). "' site search(es).", \Scooper\C__DISPLAY_ITEM_START__);
-            return;
+            return array();
         }
 
         if(count($this->arrSearchesToReturn) == 0)
         {
             $GLOBALS['logger']->logLine($this->siteName . ": no searches set. Skipping...", \Scooper\C__DISPLAY_ITEM_START__);
-            return;
+            return array();
         }
 
         $this->_collapseSearchesIfPossible_();
@@ -126,7 +160,18 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
             $this->_getJobsForSearchByType_($search);
         }
+
+        return $this->getMyJobsList();
     }
+
+
+    private function _parseJobsListForPageBase_($objSimpHTML) {
+        $retJobs = $this->parseJobsListForPage($objSimpHTML);
+        $retJobs = $this->normalizeJobList($retJobs);
+
+        return $retJobs;
+
+    } // returns an array of jobs
 
 
     //************************************************************************
@@ -139,21 +184,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     //
     //************************************************************************
     function getName() { return $this->siteName; }
-    function getMyJobsList() { return $this->arrLatestJobs; }
     function getLocationSettingType() { return $this->typeLocationSearchNeeded; }
-    function setLocationValue($locVal) { $this->locationValue = $locVal; }
+    private function _setLocationValue_($locVal) { $this->locationValue = $locVal; }
     function getLocationValue() { return $this->locationValue; }
-
-    function getMyOutputFileFullPath($strFilePrefix = "")
-    {
-        return parent::getOutputFileFullPath($this->siteName . "_" . $strFilePrefix, "jobs", "csv");
-    }
-
-    function markMyJobsList_withAutoItems()
-    {
-        $this->markJobsList_withAutoItems($this->arrLatestJobs, $this->siteName);
-    }
-
 
 
 
@@ -168,7 +201,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
      */
     function writeMyJobsListToFile($strOutFilePath = null)
     {
-        return $this->writeJobsListToFile($strOutFilePath, $this->arrLatestJobs, true, false, $this->siteName, "CSV");
+        return $this->writeJobsListToFile($strOutFilePath, $this->getMyJobsList(), true, false, $this->siteName, "CSV");
     }
 
 
@@ -196,34 +229,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         return false;
     }
-
-    //************************************************************************
-    //
-    //
-    //
-    //  Protected and Private Class Members
-    //
-    //
-    //
-    //************************************************************************
-
-
-    protected $siteName = 'NAME-NOT-SET';
-    protected $arrLatestJobs = null;
-    protected $arrSearchesToReturn = null;
-    protected $nJobListingsPerPage = 20;
-    protected $flagSettings = null;
-    protected $secsPageTimeout = null;
-
-    protected $strFilePath_HTMLFileDownloadScript = null;
-    protected $strBaseURLFormat = null;
-    protected $typeLocationSearchNeeded = null;
-    protected $locationValue = null;
-    protected $strKeywordDelimiter = null;
-    protected $strTitleOnlySearchKeywordFormat = null;
-    protected $classToCheckExists = null;
-    protected $cookieNamesToSaveAndResend = Array();
-    protected $additionalLoadDelaySeconds = 0;
 
     //************************************************************************
     //
@@ -328,7 +333,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                     $searchCollapsedDetails['key'] = $this->siteName . "-collapsed-search";
                     $searchCollapsedDetails['name'] = "collapsed-" . $search['name'];
                     $this->_setKeywordStringsForSearch_($searchCollapsedDetails);
-                    $this->_finalizeSearch_($tempSearch);
+                    $this->_finalizeSearch_($searchCollapsedDetails);
                 }
                 else
                 {
@@ -570,6 +575,15 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     }
 
 
+    function _setStartingUrlForSearch_(&$searchDetails)
+    {
+
+        $searchStartURL = $this->_getURLfromBase_($searchDetails, 1, 1);
+        $searchDetails['search_start_url'] = $searchStartURL;
+        $GLOBALS['logger']->logLine("Setting start URL to " . $searchDetails['search_start_url'] . " for " . $this->siteName . "[". $searchDetails['name'] ."].", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+    }
+
 
 
     //************************************************************************
@@ -601,6 +615,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
         $this->_setKeywordStringsForSearch_($searchDetails);
         $this->_setLocationValueForSearch_($searchDetails);
+        $this->_setStartingUrlForSearch_($searchDetails);
 
     }
 
@@ -609,7 +624,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
     private function _getJobsForSearchByType_($searchDetails, $nAttemptNumber = 0)
     {
         $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[". $searchDetails['name']), \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPTOPLEVEL__);
-        $strStartingURL = $this->_getURLfromBase_($searchDetails, 1, 1);
+        $strStartingURL = $searchDetails['search_start_url'];
 
         try {
 
@@ -617,7 +632,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
             if($this->_checkInvalidURL_($searchDetails, $strStartingURL) == VALUE_NOT_SUPPORTED) return;
 
             // get all the results for all pages if we have them cached already
-            $arrPageJobsList = $this->_getJobsDataForCachedURL_($searchDetails, $strStartingURL);
+            $arrPageJobsList = $this->_getCachedJobsForSearch_($searchDetails);
             if(isset($arrPageJobsList))
             {
                 $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[".$searchDetails['name']."]" .": " . countJobRecords($arrPageJobsList). " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
@@ -638,9 +653,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 {
                     throw new ErrorException("Class ". get_class($this) . " does not have a valid setting for parser.  Cannot continue.");
                 }
-                $this->_cacheJobsForURL($searchDetails, $strStartingURL, $arrPageJobsList, countJobRecords($arrPageJobsList));
+                $this->_setCachedJobsForSearch_($searchDetails, $arrPageJobsList);
             }
-            $this->_addSearchJobsToMyJobsList_($arrPageJobsList, $searchDetails);
+            $this->_autoMarkUpdatedSearchJobs_($arrPageJobsList, $searchDetails);
         } catch (Exception $ex) {
 
             //
@@ -705,10 +720,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         return new JG_Cache2($dir = $GLOBALS['OPTS']['cache_path'], $subdir = $this->siteName);
     }
 
-    private function _getJobsDataForCachedURL_($searchSettings, $strURLFirstPage)
+    private function _getCachedJobsForSearch_($searchSettings)
     {
         $cache = $this->_getCache();
-        $key = $this->_getCacheKey($strURLFirstPage);
+        $key = $this->_getCacheKey($searchSettings['search_start_url']);
 
         $data = $cache->get($key);
         if ($data === FALSE)
@@ -723,22 +738,32 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
     }
 
-    private function _cacheJobsForURL($searchSettings, $strURLFirstPage, $dataJobs, $nJobCount = null)
+    private function _setCachedJobsForSearch_($searchSettings, $dataJobs)
     {
-        $key = $this->_getCacheKey( $strURLFirstPage);
+        $key = $this->_getCacheKey( $searchSettings['search_start_url']);
 
         $cache = $this->_getCache();
         $data = $cache->set($key, $dataJobs);
         if ($data === FALSE)
         {
-            $GLOBALS['logger']->logLine("File caching of job search results failed for URL: " . $strURLFirstPage, \Scooper\C__DISPLAY_ERROR__);
+            $GLOBALS['logger']->logLine("Failed to cache results for search " . $searchSettings['name'] . " and key [" . $key . ".]", \Scooper\C__DISPLAY_ERROR__);
             return FALSE;
         }
         else
         {
-            $GLOBALS['logger']->logLine("Search result listings cached to disk with key [" . $key . " for URL: " . $strURLFirstPage, \Scooper\C__DISPLAY_NORMAL__);
+            $GLOBALS['logger']->logLine("Search " . $searchSettings['name'] . " listings cached to disk with key [" . $key . ".]", \Scooper\C__DISPLAY_NORMAL__);
             return $dataJobs;
         }
+    }
+
+    protected function getCachedJobResultsForSearch($searchDetails)
+    {
+        $dataCached = $this->_getCachedJobsForSearch_($searchDetails);
+        if($dataCached != null && is_array($dataCached))
+            return $dataCached;
+        else
+            return array();
+
     }
 
     private function getJobsFromMicroData($objSimpleHTML)
@@ -1093,7 +1118,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                     }
                     if(!$arrPageJobsList)
                     {
-                        $arrPageJobsList = $this->parseJobsListForPageBase($objSimpleHTML);
+                        $arrPageJobsList = $this->_parseJobsListForPageBase_($objSimpleHTML);
                         if(!is_array($arrPageJobsList))
                         {
                             // we likely hit a page where jobs started to be hidden.
@@ -1134,7 +1159,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
 
 
     /*
-     * _addSearchJobsToMyJobsList_
+     * _autoMarkUpdatedSearchJobs_
      *
      * Is passed the jobs returned for any given search, marks them for
      * search-specific settings, such as strict title matching, and adds them
@@ -1144,11 +1169,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
      * @param array $searchDetails details for the search that the jobs belong to
      *
      */
-    private function _addSearchJobsToMyJobsList_($arrAdd, $searchDetails)
+    private function _autoMarkUpdatedSearchJobs_(&$arrJobsFound, $searchDetails)
     {
-        $arrAddJobsForSearch = $arrAdd;
-
-        if(!is_array($arrAddJobsForSearch)) return;
+        if(!is_array($arrJobsFound)) return;
 
 
         //
@@ -1180,7 +1203,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 {
                     $strMatchTypeName = $this->_getKeywordMatchStringFromFlag_($searchDetails['user_setting_flags']);
                     $GLOBALS['logger']->logLine("Cannot apply keyword_match_type=" . $strMatchTypeName . " when keywords are set to exact URL-encoded strings.  Using match-type='any' for search '" .  $searchDetails['name'] ."' instead.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                    addJobsToJobsList($this->arrLatestJobs, $arrAdd);
+                    return;
                 }
 
                 // We're going to check keywords for strict matches,
@@ -1191,7 +1214,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                     //
                     // check array of jobs against keywords; mark any needed
                     //
-                    foreach($arrAddJobsForSearch as $job)
+                    foreach($arrJobsFound as $job)
                     {
                         $strTitleMatchScrubbed = \Scooper\strScrub($job['job_title'], FOR_LOOKUP_VALUE_MATCHING);
 
@@ -1200,7 +1223,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                             if(count($searchDetails['keyword_set']) != 1)
                             {
                                 // TODO log error.
-                                print("TODO log error" . PHP_EOL);
+                                $err = "ERROR:  No keywords found for" . $searchDetails['name'].  "Cannot continue.";
+                                $GLOBALS['logger']->logLine($err, \Scooper\C__DISPLAY_ERROR__);
+                                throw new Exception($err);
                             }
                             elseif(strcasecmp($strTitleMatchScrubbed, $searchDetails['keyword_set'][0]) != 0)
                             {
@@ -1243,7 +1268,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                                         }
                                     }
                                 }
-                                $arrAddJobsForSearch[$job['key_jobsite_siteid']]['interested'] = $strInterestedValue;
+                                $arrJobsFound[$job['key_jobsite_siteid']]['interested'] = $strInterestedValue;
                             }
                         }
                     }
@@ -1254,12 +1279,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
                 $GLOBALS['logger']->logLine($searchDetails['key'] . " incorrectly set a keyword match type, but has no possible keywords.  Ignoring keyword_match_type request and returning all jobs.", \Scooper\C__DISPLAY_ERROR__);
             }
         }
-
-        //
-        // add the jobs to my list, now marked if necessary
-        //
-        addJobsToJobsList($this->arrLatestJobs, $arrAddJobsForSearch);
-
     }
 
     //************************************************************************
@@ -1332,7 +1351,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSitePluginCommon
         {
             $strReturnLocation = urlencode($strReturnLocation);
         }
-        $this->setLocationValue($strReturnLocation);
+        $this->_setLocationValue_($strReturnLocation);
         $strReturnLocation = $this->getLocationValue();
         return $strReturnLocation;
     }

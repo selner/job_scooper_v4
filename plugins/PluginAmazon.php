@@ -15,7 +15,7 @@
  * under the License.
  */
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
-require_once(__ROOT__.'/include/ClassJobsSitePluginCommon.php');
+require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 
 /****************************************************************************************************************/
 /***                                                                                                         ****/
@@ -67,9 +67,6 @@ class PluginAmazon extends ClassJobsSitePlugin
 
         foreach($nodesjobs as $node)
         {
-            $strTeamName = "";
-            $strTeamCat = "";
-
             $item = $this->getEmptyJobListingRecord();
 
             $item['job_id'] = str_replace("/en/jobs/", "", $node->href);
