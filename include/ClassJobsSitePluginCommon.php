@@ -28,6 +28,16 @@ class ClassJobsSitePluginCommon
     private $arrKeysForDeduping = array('key_jobsite_siteid');
 
     protected $detailsMyFileOut= "";
+    protected $arrSearchesToReturn = null;
+
+    function __construct($strOutputDirectory = null)
+    {
+        if($strOutputDirectory != null)
+        {
+            $this->detailsMyFileOut = \Scooper\parseFilePath($strOutputDirectory, false);
+        }
+
+    }
 
     function getEmptySearchDetailsRecord()
     {
@@ -35,6 +45,7 @@ class ClassJobsSitePluginCommon
             'key' => null,
             'name' => null,
             'site_name' => null,
+            'search_start_url' => null,
             'keywords_string_for_url' => null,
             'location_search_value' => null,
             'base_url_format' => null,
@@ -58,7 +69,7 @@ class ClassJobsSitePluginCommon
         return false;
     }
 
-    function cloneSearchDetailsRecordExceptFor($srcDetails, $arrDontCopyTheseKeys)
+    function cloneSearchDetailsRecordExceptFor($srcDetails, $arrDontCopyTheseKeys = array())
     {
         $retDetails = $this->getEmptySearchDetailsRecord();
         $retDetails = array_merge($retDetails, $srcDetails);
