@@ -104,7 +104,7 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
         $strMatch = $this->_getTagMatchString_($arrTag);
         if(isset($strMatch))
         {
-            $GLOBALS['logger']->logLine(" Looking for nodes matching: " . $strMatch, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+//            $GLOBALS['logger']->logLine(" Looking for nodes matching: " . $strMatch, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             $retNode = $node->find($strMatch);
             if(isset($retNode) && isset($retNode[0]))
             {
