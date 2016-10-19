@@ -87,6 +87,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
                 $tmpSearchJobs = $this->_getResultsForSearch_($searchDetails);
                 addJobsToJobsList($retAllSearchResults, $tmpSearchJobs);
+                $this->_autoMarkUpdatedSearchJobs_($retAllSearchResults, $searchDetails);
             }
         }
         return $retAllSearchResults;
@@ -655,7 +656,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                 }
                 $this->_setCachedJobsForSearch_($searchDetails, $arrPageJobsList);
             }
-            $this->_autoMarkUpdatedSearchJobs_($arrPageJobsList, $searchDetails);
         } catch (Exception $ex) {
 
             //
@@ -1207,72 +1207,63 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                     return;
                 }
 
-                // We're going to check keywords for strict matches,
-                // but we should skip it if we're exact matching and we have multiple keywords, since
-                // that's not a possible match case.
-                if(!(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE)) && count($searchDetails['keyword_set']) >= 1)
+                //
+                // check array of jobs against keywords; mark any needed
+                //
+                foreach($arrJobsFound as $job)
                 {
-                    //
-                    // check array of jobs against keywords; mark any needed
-                    //
-                    foreach($arrJobsFound as $job)
+                    $strTitleMatchScrubbed = \Scooper\strScrub($job['job_title'], FOR_LOOKUP_VALUE_MATCHING);
+                    $strInterestedValue = "";
+
+                    // We're going to check keywords for strict matches,
+                    // but we should skip it if we're exact matching and we have multiple keywords, since
+                    // that's not a possible match case.
+                    if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE) && count($searchDetails['keyword_set']) >= 1)
                     {
-                        $strTitleMatchScrubbed = \Scooper\strScrub($job['job_title'], FOR_LOOKUP_VALUE_MATCHING);
 
-                        if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE))
+                        if(strcasecmp($strTitleMatchScrubbed, $searchDetails['keyword_set'][0]) != 0)
                         {
-                            if(count($searchDetails['keyword_set']) != 1)
-                            {
-                                // TODO log error.
-                                $err = "ERROR:  No keywords found for" . $searchDetails['name'].  "Cannot continue.";
-                                $GLOBALS['logger']->logLine($err, \Scooper\C__DISPLAY_ERROR__);
-                                throw new Exception($err);
-                            }
-                            elseif(strcasecmp($strTitleMatchScrubbed, $searchDetails['keyword_set'][0]) != 0)
-                            {
-                                $arrAddJobsForSearch[$job['key_jobsite_siteid']]['interested'] = C__STR_TAG_NOT_EXACT_TITLE_MATCH__ . C__STR_TAG_AUTOMARKEDJOB__;
-                            }
+                            $strInterestedValue = C__STR_TAG_NOT_EXACT_TITLE_MATCH__ . C__STR_TAG_AUTOMARKEDJOB__;
                         }
-                        else
+                    }
+                    else if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_BE_IN_TITLE) && count($searchDetails['keyword_set']) >= 1)
+                    {
+
+                        // Check the different keywords against the job title.  If we got a
+                        // match, leave that job record alone and move on.
+                        //
+                        $arrScrubbedKeywords = $this->_getScrubbedKeywordSet_($searchDetails['keyword_set']);
+                        $nCount = \Scooper\substr_count_array($strTitleMatchScrubbed, $arrScrubbedKeywords);
+                        if($nCount <= 0)
                         {
-                            // Check the different keywords against the job title.  If we got a
-                            // match, leave that job record alone and move on.
+                            $strInterestedValue = null;
+
                             //
-                            $arrScrubbedKeywords = $this->_getScrubbedKeywordSet_($searchDetails['keyword_set']);
-                            $nCount = \Scooper\substr_count_array($strTitleMatchScrubbed, $arrScrubbedKeywords);
-                            if($nCount <= 0)
+                            // If we had no matches against all the terms, break up any of the keywords
+                            // that are multiple words to see if all of the words are present in the title
+                            // (just not in the same order.)  If they are not, then mark it as not a match.
+                            //
+                            foreach($searchDetails['keyword_set'] as $keywordTerm)
                             {
-                                //
-                                // At this point, we assume we're not going to have a match for any of the keywords
-                                // but there is one more case to check.  Set a var to the default answer and then
-                                // check the multiple terms per keyword case to be sure.
-
-                                $strInterestedValue = C__STR_TAG_NOT_STRICT_TITLE_MATCH__ . C__STR_TAG_AUTOMARKEDJOB__;
-                                //
-                                // If we had no matches against all the terms, break up any of the keywords
-                                // that are multiple words to see if all of the words are present in the title
-                                // (just not in the same order.)  If they are not, then mark it as not a match.
-                                //
-                                foreach($searchDetails['keyword_set'] as $keywordTerm)
+                                $arrKeywordSubterms = explode(" ", $keywordTerm);
+                                if(count($arrKeywordSubterms) > 1)
                                 {
-                                    $arrKeywordSubterms = explode(" ", $keywordTerm);
-                                    if(count($arrKeywordSubterms) > 1)
-                                    {
-                                        $arrScrubbedSubterms = $this->_getScrubbedKeywordSet_($arrKeywordSubterms);
-                                        $nSubtermMatches = \Scooper\substr_count_array($strTitleMatchScrubbed, $arrScrubbedSubterms);
+                                    $arrScrubbedSubterms = $this->_getScrubbedKeywordSet_($arrKeywordSubterms);
+                                    $nSubtermMatches = \Scooper\substr_count_array($strTitleMatchScrubbed, $arrScrubbedSubterms);
 
-                                        // If we found a match for every subterm in the list, then
-                                        // this was a true match and we should leave it as interested = blank
-                                        if($nSubtermMatches == count($arrScrubbedSubterms))
-                                        {
-                                            $strInterestedValue = "";
-                                        }
-                                    }
+                                    // If we found a match for every subterm in the list, then
+                                    // this was a true match and we should leave it as interested = blank
+                                    if($nSubtermMatches == count($arrScrubbedSubterms))
+                                        $strInterestedValue = null;
+                                    else
+                                        $strInterestedValue =  C__STR_TAG_NOT_A_KEYWORD_TITLE_MATCH__. C__STR_TAG_AUTOMARKEDJOB__;
+
                                 }
-                                $arrJobsFound[$job['key_jobsite_siteid']]['interested'] = $strInterestedValue;
                             }
                         }
                     }
+                    if(isset($strInterestedValue))
+                        $arrJobsFound[$job['key_jobsite_siteid']]['interested'] = $strInterestedValue;
                 }
             }
             else

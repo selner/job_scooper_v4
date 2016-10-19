@@ -22,7 +22,7 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 const C__STR_TAG_AUTOMARKEDJOB__ = "[auto-marked]";
 const C__STR_TAG_DUPLICATE_POST__ = "No (Duplicate Job Post?)";
 const C__STR_TAG_BAD_TITLE_POST__ = "No (Bad Title & Role)";
-const C__STR_TAG_NOT_STRICT_TITLE_MATCH__ = "No (Not a Strict Title Match)";
+const C__STR_TAG_NOT_A_KEYWORD_TITLE_MATCH__ = "No (Not a Keyword Title Match)";
 const C__STR_TAG_NOT_EXACT_TITLE_MATCH__ = "No (Not an Exact Title Match)";
 
 const C__STR_TAG_EXCLUDED_TITLE_REGEX = 'No (Title Excluded Via RegEx)';
