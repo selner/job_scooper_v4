@@ -514,7 +514,7 @@ class ClassJobsSiteCommon
                     }
                     if(count($arrMatches) > 0)
                     {
-                        $strTitleREMatches = getArrayValuesAsString($arrMatchErrors, "|", "", false );
+                        $strTitleREMatches = getArrayValuesAsString(array_keys($arrMatches), "|", "", false );
                         $strJobIndex = getArrayKeyValueForJob($job);
 
                         $arrToMark[$strJobIndex]['interested'] = 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__;
