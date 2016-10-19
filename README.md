@@ -54,7 +54,8 @@ Required Parameters:
 
 
 ##Setup Notes
-You will need to copy the Selenium Standalone Server version 3.0.1 from http://selenium-release.storage.googleapis.com/index.html?path=3.0.0-beta4/ to ./lib in order for plugins like Facebook to succeed.
+You will need to set up Selenium Standalone Server in order for plugins like Facebook to succeed.
+* Download v3.0.1's jar file (selenium-server-standalone-3.0.1.jar) from http://selenium-release.storage.googleapis.com/index.html?path=3.0.1.
 * Install Java SE Development Kit from Oracle from http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html.  Selenium Standalone Server requires Java 8 on macOS 10.12.
 * Copy the .jar for Selenium into ./lib/
 
