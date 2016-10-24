@@ -39,4 +39,23 @@ class PluginTesla extends ClassBaseSimplePlugin
 }
 
 
+
+class PluginSmashingMagazine extends ClassBaseSimplePlugin
+{
+    protected $siteName = 'SmashingMagazine';
+    protected $childSiteURLBase = 'http://jobs.smashingmagazine.com/';
+    protected $childSiteListingPage = 'http://jobs.smashingmagazine.com/fulltime';
+    protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__,  C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE_NO_LOCATION ];
+
+    protected $arrListingTagSetup = array(
+        'tag_listings_section' => array(array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' =>'entry-list compact'), array('tag' => 'li')),
+        'tag_title' => array('tag' => 'h2'),
+        'tag_link' =>  array('tag' => 'a'),
+        'tag_company' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'entry-company'),
+        'regex_link_job_id' => '/j\/.*?\/([^\/]+)/i'
+    );
+
+}
+
+
 ?>
