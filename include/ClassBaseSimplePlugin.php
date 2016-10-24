@@ -34,6 +34,7 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
         'tag_link' => null,
         'tag_department' => null,
         'tag_location' => null,
+        'tag_company' => null,
         'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
     );
     function __construct($strOutputDirectory = null)
@@ -153,9 +154,21 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
                 $item['job_post_url'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_link'], 'href');
 
 
-                $item['company'] = $item['job_site'];
-                $item['location'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_location'], 'plaintext');
-                $item['job_site_category'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_department'], 'plaintext');
+                if(array_key_exists('tag_company', $this->arrListingTagSetup))
+                {
+                    $item['company'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_company'], 'plaintext');
+                }
+                else
+                {
+                    $item['company'] = $item['job_site'];
+                }
+
+                if(array_key_exists('tag_department', $this->arrListingTagSetup))
+                    $item['job_site_category'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_department'], 'plaintext');
+
+                if(array_key_exists('tag_location', $this->arrListingTagSetup))
+                    $item['location'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_location'], 'plaintext');
+
 
 
                 $fMatchedID = preg_match($this->arrListingTagSetup['regex_link_job_id'], $item['job_post_url'], $idMatches);
