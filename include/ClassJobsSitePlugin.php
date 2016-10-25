@@ -581,7 +581,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
         $searchStartURL = $this->_getURLfromBase_($searchDetails, 1, 1);
         $searchDetails['search_start_url'] = $searchStartURL;
-        $GLOBALS['logger']->logLine("Setting start URL to " . $searchDetails['search_start_url'] . " for " . $this->siteName . "[". $searchDetails['name'] ."].", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Setting start URL for " . $this->siteName . "[". $searchDetails['name'] . " to: " . PHP_EOL. $searchDetails['search_start_url'] , \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
     }
 
