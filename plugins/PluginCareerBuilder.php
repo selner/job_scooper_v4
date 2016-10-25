@@ -59,7 +59,7 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
 
                 case $days<=1:
                 default:
-                    $ret = "";
+                    $ret = "1";
                     break;
 
             }
