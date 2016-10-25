@@ -23,17 +23,31 @@ class PluginIndeed extends ClassJobsSitePlugin
     protected $siteName = 'Indeed';
     protected $nJobListingsPerPage = 50;
     protected $siteBaseURL = 'http://www.Indeed.com';
-    protected $strBaseURLFormat = "http://www.indeed.com/jobs?q=***KEYWORDS***&l=***LOCATION***&sort=date&limit=50&fromage=***NUMBER_DAYS***&start=***ITEM_NUMBER***";
+    protected $strBaseURLFormat = "http://www.indeed.com/jobs?as_cmp=&jt=all&st=&salary=&radius=50&&fromage=***NUMBER_DAYS***&limit=50&sort=date&psf=advsrch&start=50&pp=***ITEM_NUMBER***";
     protected $flagSettings = null;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $strKeywordDelimiter = "OR";
-    protected $strTitleOnlySearchKeywordFormat = "title:%s";
 
 
     function __construct($strBaseDir = null)
     {
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS | C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS | C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED;
         parent::__construct($strBaseDir);
+    }
+
+    protected function _getBaseURLFormat_($searchDetails = null)
+    {
+        $strURL = parent::_getBaseURLFormat_($searchDetails);
+        if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_BE_IN_TITLE) || \Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE))
+        {
+            $strURL = $strURL . "&as_ttl=***KEYWORDS***&l=***LOCATION***";
+        }
+        else
+        {
+            $strURL = $strURL . "&q=***KEYWORDS***&l=***LOCATION***";
+        }
+
+        return $strURL;
     }
 
     function getItemURLValue($nItem)
@@ -56,8 +70,11 @@ class PluginIndeed extends ClassJobsSitePlugin
                 $ret = 3;
                 break;
 
+            case $nDays = 1:
+                $ret = 1;
+                break;
+
             default:
-                // BUGBUG: Yesterday was giving me headaches, so switched "24 hours" to really mean last 3 days for Indeed
                 $ret = 3;
                 break;
         }
@@ -77,7 +94,7 @@ class PluginIndeed extends ClassJobsSitePlugin
         $arrItemItems = explode(" ", trim($pageText));
         if(!isset($arrItemItems) || !is_array($arrItemItems) || !(count($arrItemItems) >=6))
         {
-            $GLOBALS['logger']->logLine("Unable to find count of listings for search on " . $this->siteName, \Scooper\C__DISPLAY_WARNING__);
+            $GLOBALS['logger']->logLine("Unable to find count of listrings for search on " . $this->siteName, \Scooper\C__DISPLAY_WARNING__);
             return 0;
         }
         else
