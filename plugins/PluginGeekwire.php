@@ -60,7 +60,7 @@ class PluginGeekwire extends ClassJobsSitePlugin
 
 
             $arrLIParts = explode(" ", $node->attr['class']);
-            $item['job_id'] = str_replace("post-", "", $arrLIParts[0]);
+            $item['job_id'] = str_ireplace("post-", "", $arrLIParts[0]);
 
 
             $ret[] = $this->normalizeItem($item);

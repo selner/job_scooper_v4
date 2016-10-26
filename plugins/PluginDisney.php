@@ -79,7 +79,7 @@ class PluginDisney extends ClassJobsSitePlugin
             if(isset($subNode) && isset($subNode[0]))
             {
                 $item['job_site_category'] = $subNode[0]->plaintext;
-                $item['job_site_category'] = trim(str_replace("Job Category :  ", "", $item['job_site_category']));
+                $item['job_site_category'] = trim(str_ireplace("Job Category :  ", "", $item['job_site_category']));
             }
             $subNode = $node->find("td[class='column3'] div span[class='bold-text']");
             if(isset($subNode) && isset($subNode[0]))

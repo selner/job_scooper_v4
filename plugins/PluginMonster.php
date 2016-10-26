@@ -104,16 +104,16 @@ class PluginMonster extends ClassJobsSitePlugin
             if(isset($subNode) && isset($subNode[0])) $item['company'] = $subNode[0]->plaintext;
 
             $subNode = $node->find("div[class='location']");
-            if(isset($subNode) && isset($subNode[0])) $item['location'] = str_replace("Location:", "", $subNode[0]->plaintext);
+            if(isset($subNode) && isset($subNode[0])) $item['location'] = str_ireplace("Location:", "", $subNode[0]->plaintext);
 
             $subNode = $node->find("meta[itemprop='url']");
-            if(isset($subNode) && isset($subNode[0])) $item['location'] = str_replace("Location:", "", $subNode[0]->plaintext);
+            if(isset($subNode) && isset($subNode[0])) $item['location'] = str_ireplace("Location:", "", $subNode[0]->plaintext);
             if(isset($objDiv) && isset($objDiv[0]) && isset($objDiv[0]->attr) && isset($objDiv[0]->attr['data-m_impr_j_postingid']))     $item['job_id'] = $objDiv[0]->attr['data-m_impr_j_postingid'];
 
             $strScrubTitle = \Scooper\strip_punctuation(html_entity_decode($item['job_title']));
             $strLoc= \Scooper\strip_punctuation(html_entity_decode($item['location']));
 
-            $item['job_post_url'] = $this->siteBaseURL . "/" . str_replace(" ", "-", $strScrubTitle )."-".str_replace(" ", "-",$strLoc)."-".$item['job_id'].".aspx";
+            $item['job_post_url'] = $this->siteBaseURL . "/" . str_ireplace(" ", "-", $strScrubTitle )."-".str_ireplace(" ", "-",$strLoc)."-".$item['job_id'].".aspx";
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
             $subNode = $node->find("span[class='accessibilityOnly']");
