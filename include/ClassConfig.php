@@ -82,6 +82,7 @@ class ClassConfig extends ClassJobsSitePlugin
     {
         # increase memory consumed to fit larger job searches
         ini_set('memory_limit','500M');
+        ini_set("auto_detect_line_endings", true);
 
         __initializeArgs__();
 
