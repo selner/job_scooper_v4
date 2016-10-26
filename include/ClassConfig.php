@@ -80,6 +80,9 @@ class ClassConfig extends ClassJobsSitePlugin
 
     function initialize()
     {
+        # increase memory consumed to fit larger job searches
+        ini_set('memory_limit','500M');
+
         __initializeArgs__();
 
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting up application... ", \Scooper\C__DISPLAY_SECTION_START__);
