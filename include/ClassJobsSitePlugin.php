@@ -626,6 +626,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     {
         $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[". $searchDetails['name']), \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPTOPLEVEL__);
         $strStartingURL = $searchDetails['search_start_url'];
+        $this->_logMemoryUsage_();
 
         try {
 
@@ -706,6 +707,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         }
         finally
         {
+            $this->_logMemoryUsage_();
             $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->siteName . "[". $searchDetails['name']), \Scooper\C__SECTION_END__, \Scooper\C__NAPPTOPLEVEL__);
         }
     }
@@ -943,6 +945,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         return $arrSearchReturnedJobs;
     }
 
+    protected function getNextInfiniteScrollSet($driver)
+    {
+        // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
+        $driver->executeScript("window.scrollBy(500,5000);");
+
+        sleep(5);
+
+    }
 
     private function _getFullHTMLForDynamicWebpage_($url, $elementClass, $countRetry = 0)
     {
@@ -1002,6 +1012,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         }
         return $driver;
     }
+
 
     private function _getMyJobsForSearchFromWebpage_($searchDetails, $strStartURL)
     {
@@ -1080,27 +1091,36 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                         {
                             while($nPageCount <= $totalPagesCount)
                             {
-                                // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
-                                $driver->executeScript("window.scrollBy(500,5000);");
+                                $this->getNextInfiniteScrollSet($driver);
+                                $this->_logMemoryUsage_();
 
-                                sleep(5);
-                                $nPageCount = $nPageCount + 1;
+                                if($nPageCount <= $totalPagesCount)
+                                    $nPageCount = $nPageCount + 1;
                             }
 
                         }
+                    } catch (Exception $ex) {
+                        $strMsg = "Failed to scroll down through full set of results due to error: ".$ex->getMessage();
 
-    // BUGBUG -- Checking these two HTML values to make sure they still match
+                        $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
+                        throw new ErrorException($strMsg);
+                    }
+
+                    try
+                    {
+
+                        // BUGBUG -- Checking these two HTML values to make sure they still match
                         $html = $driver->getPageSource();
                         $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
-                        } catch (Exception $ex) {
-                            $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
+                    } catch (Exception $ex) {
+                        $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
 
-                            $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
-                            throw new ErrorException($strMsg);
-                        }
+                        $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
+                        throw new ErrorException($strMsg);
+                    }
                 }
                 $strURL = $strStartURL;
-                if(!($nPageCount == 1 && isset($objSimpleHTML)))
+                if(!isset($objSimpleHTML))
                 {
                     $strURL = $this->_getURLfromBase_($searchDetails, $nPageCount, $nItemCount);
                     if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
@@ -1108,8 +1128,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
                     $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout);
                 }
-                $GLOBALS['logger']->logLine("Getting jobs from ". $strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
+
+                $GLOBALS['logger']->logLine("Getting jobs from ". $strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 try
                 {
 
@@ -1157,6 +1178,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         return $arrSearchReturnedJobs;
 
     }
+
 
 
     /*

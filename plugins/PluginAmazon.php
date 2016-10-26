@@ -39,15 +39,14 @@ class PluginAmazon extends ClassJobsSitePlugin
     protected $siteName = 'Amazon';
     protected $nJobListingsPerPage = 100;
     protected $siteBaseURL = 'http://www.amazon.jobs';
-    protected $strBaseURLFormat = "https://www.amazon.jobs/en/search?base_query=***KEYWORDS***&location[]=***LOCATION***&job_count=100&result_limit=100&sort=recent&cache";
+    protected $strBaseURLFormat = "https://www.amazon.jobs/en/search?base_query=***KEYWORDS***&location%5B%5D=***LOCATION***&result_limit=100&sort=recent&cache";
     protected $flagSettings = null;
     protected $typeLocationSearchNeeded = 'location-city-dash-statecode';
-    protected $classToCheckExists = "job-title";
 
     function __construct($strBaseDir = null)
     {
         parent::__construct($strBaseDir);
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_USE_SELENIUM;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_USE_SELENIUM | C__JOB_INFSCROLL_DOWNFULLPAGE;
     }
 
 
@@ -57,11 +56,20 @@ class PluginAmazon extends ClassJobsSitePlugin
         if(isset($subnode) && is_array($subnode) && count($subnode) >= 1)
         {
             $parts = explode(" ", $subnode[count($subnode)-1]->plaintext);
-            return $parts[2];
+            return $parts[(count($parts)-2)];
         }
         return 0;
 
     }
+
+    protected function getNextInfiniteScrollSet($driver)
+    {
+        // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
+        $driver->executeScript("window.scrollBy(500,5000);  var btn = document.getElementsByClassName(\"load-more btn\"); if(btn && Object.keys(btn).length >= 1) { btn[0].click(); }");
+
+        sleep(1);
+    }
+
 
 
     function parseJobsListForPage($objSimpHTML)
@@ -87,6 +95,7 @@ class PluginAmazon extends ClassJobsSitePlugin
 
             $subNode = $node->find("h2[class=posting-date]");
             $item['job_site_date'] = str_replace("Posted ", "", $subNode[0]->plaintext);
+            $item['job_site_date'] = trim(str_replace("on", "", $item['job_site_date']));
             $dateVal = date_create_from_format("F d, Y", $item['job_site_date']);
             if(isset($dateVal))
                 $item['job_site_date'] = $dateVal->format('m/d/y');
@@ -97,7 +106,6 @@ class PluginAmazon extends ClassJobsSitePlugin
         }
         return $ret;
     }
-
 
 }
 ?>
