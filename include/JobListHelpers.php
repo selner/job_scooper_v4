@@ -547,4 +547,15 @@ function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strEx
     return $strFilename;
 }
 
+
+function getPhpMemoryUsage()
+{
+    $size = memory_get_usage(true);
+
+    $unit=array(' bytes','KB','MB','GB','TB','PN');
+
+    return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
+}
+
+
 ?>

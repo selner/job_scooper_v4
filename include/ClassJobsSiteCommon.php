@@ -189,6 +189,16 @@ class ClassJobsSiteCommon
 
     }
 
+    protected function _logMemoryUsage_()
+    {
+        if(isDebug()) {
+
+            $usage = getPhpMemoryUsage();
+
+            if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("~~~~ PHP memory usage is ".$usage." ~~~~", \Scooper\C__DISPLAY_NORMAL__); }
+        }
+    }
+
     function normalizeItem($arrItem)
     {
         $retArrNormalized = $arrItem;
