@@ -220,6 +220,12 @@ class ClassConfig extends ClassJobsSitePlugin
         {
             throw new ErrorException("Required value for the output folder was not specified. Exiting.");
         }
+        $this->arrCacheFolder = \Scooper\array_copy($this->arrFileDetails['output']);
+        $this->arrCacheFolder['file_name_base'] = 'data_cache';
+        $tempCachePath = $this->createOutputSubFolder( $this->arrCacheFolder);
+        $GLOBALS['OPTS']['cache_path'] = $tempCachePath['directory'];
+
+        $this->arrFileDetails['output'] = \Scooper\parseFilePath( $this->arrFileDetails['output']['directory'] .  "search-results");
 
         if(! $this->arrFileDetails['output']['has_file'])
         {
@@ -227,11 +233,8 @@ class ClassConfig extends ClassJobsSitePlugin
 
              $this->arrFileDetails['output'] = \Scooper\parseFilePath( $this->arrFileDetails['output']['directory'] .  $strDefaultFileName);
         }
+
         $this->arrFileDetails['output_subfolder'] = $this->createOutputSubFolder( $this->arrFileDetails['output']);
-        $this->arrCacheFolder = \Scooper\array_copy($this->arrFileDetails['output']);
-        $this->arrCacheFolder['file_name_base'] = 'data_cache';
-        $tempCachePath = $this->createOutputSubFolder( $this->arrCacheFolder);
-        $GLOBALS['OPTS']['cache_path'] = $tempCachePath['directory'];
 
 
     }
