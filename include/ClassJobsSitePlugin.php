@@ -86,8 +86,8 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             {
 
                 $tmpSearchJobs = $this->_getResultsForSearch_($searchDetails);
+                $this->_autoMarkUpdatedSearchJobs_($tmpSearchJobs, $searchDetails);
                 addJobsToJobsList($retAllSearchResults, $tmpSearchJobs);
-                $this->_autoMarkUpdatedSearchJobs_($retAllSearchResults, $searchDetails);
             }
         }
         return $retAllSearchResults;
@@ -1000,16 +1000,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
             throw new ErrorException($strMsg);
         }
-        finally
-        {
-//            if($this->isBitFlagSet(C__JOB_USE_SELENIUM) && isset($GLOBALS['selenium_started']) && $GLOBALS['selenium_started'] = true)
-//            {
-//                if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Sending server shutdown call to Selenium server...", \Scooper\C__DISPLAY_ITEM_RESULT__); }
-//                $cmd = "curl \"http://localhost:4444/selenium-server/driver?cmd=shutDownSeleniumServer\" >/dev/null &";
-//                exec($cmd);
-//                $GLOBALS['selenium_started'] = false;
-//            }
-        }
         return $driver;
     }
 
@@ -1091,6 +1081,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                         {
                             while($nPageCount <= $totalPagesCount)
                             {
+                                if(isDebug() && isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("... getting infinite results page #".$nPageCount." of " .$totalPagesCount, \Scooper\C__DISPLAY_NORMAL__); }
                                 $this->getNextInfiniteScrollSet($driver);
                                 $this->_logMemoryUsage_();
 
@@ -1254,35 +1245,26 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                         // Check the different keywords against the job title.  If we got a
                         // match, leave that job record alone and move on.
                         //
-                        $arrScrubbedKeywords = $this->_getScrubbedKeywordSet_($searchDetails['keyword_set']);
-                        $nCount = \Scooper\substr_count_array($strTitleMatchScrubbed, $arrScrubbedKeywords);
-                        if($nCount <= 0)
+//                        $arrScrubbedKeywords = $this->_getScrubbedKeywordSet_($searchDetails['keyword_set']);
+                        $arrScrubbedSubterms = array();
+                        foreach($searchDetails['keyword_set'] as $keywordTerm)
                         {
+                            $arrKeywordSubterms = explode(" ", $keywordTerm);
+                            $newSubTerms = $this->_getScrubbedKeywordSet_($arrKeywordSubterms);
+                            foreach($newSubTerms as $newTerm)
+                                $arrScrubbedSubterms[] = $newTerm;
+                        }
+                        $arrScrubbedSubterms = array_unique($arrScrubbedSubterms);
+
+                        $nSubtermMatches = \Scooper\substr_count_array($strTitleMatchScrubbed, $arrScrubbedSubterms);
+
+                        // If we found a match for any subterm in the list, then
+                        // this was a true match and we should leave it as interested = blank
+                        if($nSubtermMatches <= 0 )
+                            $strInterestedValue =  C__STR_TAG_NOT_A_KEYWORD_TITLE_MATCH__. C__STR_TAG_AUTOMARKEDJOB__;
+                        else
                             $strInterestedValue = null;
 
-                            //
-                            // If we had no matches against all the terms, break up any of the keywords
-                            // that are multiple words to see if all of the words are present in the title
-                            // (just not in the same order.)  If they are not, then mark it as not a match.
-                            //
-                            foreach($searchDetails['keyword_set'] as $keywordTerm)
-                            {
-                                $arrKeywordSubterms = explode(" ", $keywordTerm);
-                                if(count($arrKeywordSubterms) > 1)
-                                {
-                                    $arrScrubbedSubterms = $this->_getScrubbedKeywordSet_($arrKeywordSubterms);
-                                    $nSubtermMatches = \Scooper\substr_count_array($strTitleMatchScrubbed, $arrScrubbedSubterms);
-
-                                    // If we found a match for every subterm in the list, then
-                                    // this was a true match and we should leave it as interested = blank
-                                    if($nSubtermMatches == count($arrScrubbedSubterms))
-                                        $strInterestedValue = null;
-                                    else
-                                        $strInterestedValue =  C__STR_TAG_NOT_A_KEYWORD_TITLE_MATCH__. C__STR_TAG_AUTOMARKEDJOB__;
-
-                                }
-                            }
-                        }
                     }
                     if(isset($strInterestedValue))
                         $arrJobsFound[$job['key_jobsite_siteid']]['interested'] = $strInterestedValue;
