@@ -238,7 +238,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
 
         $GLOBALS['logger']->logLine($strResultText, \Scooper\C__DISPLAY_SUMMARY__);
 
-        $strResultCountsHTML = $this->getListingCountsByPlugin("html");
+        $strResultCountsHTML = $this->getListingCountsByPlugin("html", $arrFinalJobs_SortedByCompanyRole);
         $strErrHTML = preg_replace("/\n/", ("<br>" . chr(10) . chr(13)), $strErrsResult);
         $strResultHTML = $strResultCountsHTML . PHP_EOL . "<pre>" . $strErrHTML . "</pre>" . PHP_EOL;
 
