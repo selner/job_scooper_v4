@@ -18,15 +18,47 @@
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
-abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
+abstract class ClassSimpleFullPageJobSitePlugin extends ClassBaseSimpleJobSitePlugin
+{
+    protected $childSiteURLBase = '';
+    protected $childSiteListingPage = '';
+
+    function __construct($strOutputDirectory = null)
+    {
+        $this->siteBaseURL = $this->childSiteURLBase;
+        $this->strBaseURLFormat = $this->childSiteURLBase;
+        return parent::__construct($strOutputDirectory);
+    }
+
+
+    protected function _getURLfromBase_($searchDetails, $nPage = null, $nItem = null)
+    {
+        return $this->childSiteListingPage;
+    }
+}
+
+
+abstract class ClassBaseMicroDataPlugin extends ClassBaseSimpleJobSitePlugin
+{
+    protected $siteBaseURL = '';
+    protected $siteName = '';
+
+    function __construct($strBaseDir = null)
+    {
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE_NO_LOCATION  | C__JOB_PREFER_MICRODATA;
+        parent::__construct($strBaseDir);
+    }
+
+}
+
+
+abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
 {
     protected $siteName = '';
     protected $siteBaseURL = '';
-    protected $childSiteURLBase = '';
-    protected $childSiteListingPage = '';
     protected $additionalFlags = null;
-    protected $nJobListingsPerPage = 1000;
-    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE_NO_LOCATION;
+    protected $nJobListingsPerPage = 20;
+    protected $flagSettings = C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__;
 
     protected $arrListingTagSetup = array(
         'tag_listings_section' => null,
@@ -35,12 +67,12 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
         'tag_department' => null,
         'tag_location' => null,
         'tag_company' => null,
+        'tag_job_posting_date' => null,
         'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
     );
+
     function __construct($strOutputDirectory = null)
     {
-        $this->siteBaseURL = $this->childSiteURLBase;
-        $this->strBaseURLFormat = $this->childSiteURLBase;
         if($this->additionalFlags)
         {
             foreach($this->additionalFlags as $flag)
@@ -49,11 +81,6 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
             }
         }
         return parent::__construct($strOutputDirectory);
-    }
-
-    protected function _getURLfromBase_($searchDetails, $nPage = null, $nItem = null)
-    {
-        return $this->childSiteListingPage;
     }
 
 
@@ -72,7 +99,9 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
      */
     function parseTotalResultsCount($objSimpHTML)
     {
-        return -1;
+        assert($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__), "$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__)");
+
+        return C__TOTAL_ITEMS_UNKNOWN__;
     }
 
     private function _getTagMatchString_($arrTags)
@@ -186,19 +215,6 @@ abstract class ClassBaseSimplePlugin extends ClassJobsSitePlugin
         }
 
         return $ret;
-    }
-
-}
-
-abstract class ClassBaseMicroDataPlugin extends ClassBaseSimplePlugin
-{
-    protected $siteBaseURL = '';
-    protected $siteName = '';
-
-    function __construct($strBaseDir = null)
-    {
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE_NO_LOCATION  | C__JOB_PREFER_MICRODATA;
-        parent::__construct($strBaseDir);
     }
 
 }

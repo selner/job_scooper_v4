@@ -20,7 +20,7 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 
 
-class PluginTesla extends ClassBaseSimplePlugin
+class PluginTesla extends ClassBaseSimpleJobSitePlugin
 {
     protected $siteName = 'Tesla';
     protected $childSiteURLBase = 'https://www.tesla.com';
@@ -40,7 +40,7 @@ class PluginTesla extends ClassBaseSimplePlugin
 
 
 
-class PluginSmashingMagazine extends ClassBaseSimplePlugin
+class PluginSmashingMagazine extends ClassSimpleFullPageJobSitePlugin
 {
     protected $siteName = 'SmashingMagazine';
     protected $childSiteURLBase = 'http://jobs.smashingmagazine.com/';
@@ -56,6 +56,67 @@ class PluginSmashingMagazine extends ClassBaseSimplePlugin
     );
 
 }
+
+
+
+
+class PluginBetalist extends ClassBaseSimpleJobSitePlugin
+{
+    protected $siteName = 'Betalist';
+    protected $siteBaseURL = "https://betalist.com";
+    protected $nJobListingsPerPage = 500;
+    protected $strBaseURLFormat = "https://betalist.com/jobs?q=***KEYWORDS***&hPP=500&p=***PAGE_NUMBER***&dFR%5Bcommitment%5D%5B0%5D=Full-Time&dFR%5Bcommitment%5D%5B1%5D=Part-Time&dFR%5Bcommitment%5D%5B2%5D=Contractor&dFR%5Bcommitment%5D%5B3%5D=Internship&is_v=1";
+    protected $additionalFlags = [ C__JOB_USE_SELENIUM, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED ];  // TODO:  Add Lat/Long support for BetaList location search
+    protected $additionalLoadDelaySeconds = 6;
+
+    function parseTotalResultsCount($objSimpHTML)
+    {
+        $nTotalResults = C__TOTAL_ITEMS_UNKNOWN__;
+        $TEXT_NOJOBS = "No jobs found";
+
+        $spanNoCount = $objSimpHTML->find("span[class='ais-hits ais-hits__empty']");
+        if($spanNoCount != null && is_array($spanNoCount) && isset($spanNoCount[0]))
+        {
+            if(substr($spanNoCount[0]->plaintext, 0, strlen($TEXT_NOJOBS)) == $TEXT_NOJOBS)
+            {
+                return 0;
+            }
+
+        }
+
+        //
+        // Find the HTML node that holds the result count
+        $spanCounts = $objSimpHTML->find("span[class='ais-refinement-list--count']");
+        if($spanCounts != null && is_array($spanCounts) && isset($spanCounts[0]))
+        {
+            foreach($spanCounts as $spanCount)
+            {
+                $strVal = $spanCount->plaintext;
+                $nVal = intval(str_replace(",", "", $strVal));
+                if($nTotalResults == C__TOTAL_ITEMS_UNKNOWN__)
+                    $nTotalResults = $nVal;
+                else
+                    $nTotalResults += $nVal;
+            }
+        }
+
+
+        return $nTotalResults;
+
+    }
+
+
+    protected $arrListingTagSetup = array(
+        'tag_listings_section' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'jobCard'),
+        'tag_title' =>  array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'jobCard__details__title'),
+        'tag_link' =>  array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'jobCard__details__title'),
+        'tag_company' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'jobCard__details__company'), array('tag' => 'a')),
+        'tag_location' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'jobCard__details__location'),
+        'regex_link_job_id' => '/jobs\/([^\/]+)/i'
+    );
+
+}
+
 
 
 ?>

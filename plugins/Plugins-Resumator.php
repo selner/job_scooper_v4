@@ -20,7 +20,7 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 
 
-abstract class ClassBaseResumatorTablesPlugin extends ClassBaseSimplePlugin
+abstract class ClassBaseResumatorTablesPlugin extends ClassSimpleFullPageJobSitePlugin
 {
     protected $arrListingTagSetup = array(
         'tag_listings_section' => array(array('tag' => 'table', 'attribute' => 'class', 'attribute_value' =>'resumator-job-listings'), array('tag' => 'tr', 'attribute' => '', 'attribute_value' =>'')),
@@ -33,7 +33,7 @@ abstract class ClassBaseResumatorTablesPlugin extends ClassBaseSimplePlugin
 
 }
 
-abstract class ClassBaseResumatorDivPlugin extends ClassBaseSimplePlugin
+abstract class ClassBaseResumatorDivPlugin extends ClassSimpleFullPageJobSitePlugin
 {
     protected $arrListingTagSetup = array(
         'tag_listings_section' => array(array('tag' => 'div', 'attribute' => 'id', 'attribute_value' =>'resumator-content-left-wrapper'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'resumator-job')),
