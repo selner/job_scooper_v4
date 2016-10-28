@@ -30,8 +30,7 @@ class PluginSimplyHired extends ClassJobsSitePlugin
     protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $strKeywordDelimiter = "or";
-    protected $strBaseURLFormat = "http://www.simplyhired.com/search?l=***LOCATION***&fdb=***NUMBER_DAYS***&&ws=50&mi=50&sb=dd&pn=***PAGE_NUMBER***&";
-    protected $strTitleOnlySearchKeywordFormat = "title:(%s)";
+    protected $strBaseURLFormat = "http://www.simplyhired.com/search?q=***KEYWORDS***&l=***LOCATION***&fdb=***NUMBER_DAYS***&&ws=50&mi=50&sb=dd&pn=***PAGE_NUMBER***&";
 
     function getItemURLValue($nItem)
     {
@@ -91,16 +90,6 @@ class PluginSimplyHired extends ClassJobsSitePlugin
     protected function _getURLfromBase_($searchDetails, $nPage = null, $nItem = null)
     {
         $strURL = $this->_getBaseURLFormat_($searchDetails);
-
-        if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_BE_IN_TITLE) || \Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE))
-        {
-            $strURL = $strURL . "&fft=***KEYWORDS***";
-        }
-        else
-        {
-            $strURL = $strURL . "&q=***KEYWORDS***";
-
-        }
 
         $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($GLOBALS['OPTS']['number_days']), $strURL );
         $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL );
