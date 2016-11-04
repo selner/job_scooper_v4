@@ -152,7 +152,7 @@ class PluginSimplyHired extends ClassJobsSitePlugin
             $titlelink = $node->find('a[class="card-link js-job-link"]');
             $item['job_site'] = $this->siteName;
             $item['job_title'] = combineTextAllChildren($titlelink[0]);;
-            $item['job_post_url'] = $titlelink[0]->href;
+            $item['job_post_url'] = $this->siteBaseURL . $titlelink[0]->href;
 
             if($item['job_title'] == '') continue;
 
