@@ -57,6 +57,99 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
         $this->markJobsList_withAutoItems($this->arrLatestJobs, $this->siteName);
     }
 
+    private function _combineCSVsToExcel($outfileDetails, $arrCSVFiles)
+    {
+        $spreadsheet = new PHPExcel();
+        $objWriter = PHPExcel_IOFactory::createWriter($spreadsheet, "Excel2007");
+        $GLOBALS['logger']->logLine("Creating output XLS file '" . $outfileDetails['full_file_path'] . "'." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+        $style_all = array(
+            'alignment' => array(
+                'vertical' => PHPExcel_Style_Alignment::VERTICAL_TOP,
+                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
+                'wrap' => true
+            ),
+            'font' => array(
+                'size' => 10.0,
+            )
+        );
+
+        $style_header = array_replace_recursive($style_all, array(
+            'alignment' => array(
+                'vertical' => PHPExcel_Style_Alignment::VERTICAL_BOTTOM,
+                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            ),
+            'fill' => array(
+                'type' => PHPExcel_Style_Fill::FILL_SOLID,
+                'color' => array('rgb'=>'E1E0F7'),
+            ),
+            'font' => array(
+                'bold' => true,
+            )
+        ));
+        $spreadsheet->getDefaultStyle()->applyFromArray($style_all);
+
+        foreach($arrCSVFiles as $csvFile)
+        {
+            if(strcasecmp($csvFile['file_extension'], "csv") == 0)
+            {
+                $objPHPExcelFromCSV = PHPExcel_IOFactory::createReaderForFile($csvFile['full_file_path']);
+                $srcFile = $objPHPExcelFromCSV->load($csvFile['full_file_path']);
+                $colCount = count($this->getEmptyJobListingRecord());
+                $lastCol = ord("A") + $colCount - 1;
+                $lastColLetter = chr($lastCol);
+                $headerRange = "A" . 1 . ":" . $lastColLetter . "1";
+
+                $sheet = $srcFile->getSheet(0);
+                $sheet->getDefaultColumnDimension()->setWidth(50);
+                foreach($sheet->getColumnIterator("a", $lastColLetter) as $col)
+                {
+                    $sheet->getColumnDimension($col->getColumnIndex())->setWidth(40);
+                }
+
+                $nameParts = explode("-", $csvFile['file_name_base']);
+                $name = "unknown";
+                foreach($nameParts as $part) {
+                    $int = intval($part);
+//                    print $name . " | " . $part . " | " . $int . " | " . (is_integer($int) && $int != 0) . PHP_EOL;
+                    if(!(is_integer($int) && $int != 0))
+                    {
+                        if($name == "unknown")
+                            $name = $part;
+                        else
+                            $name = $name . "-" . $part;
+                    }
+                }
+                $name = substr($name, max([strlen($name)-31, 0]), 31);
+
+//                $name = $nameParts[count($nameParts)-1];
+                $n = 1;
+                while($spreadsheet->getSheetByName($name) != null)
+                {
+                    $n++;
+                    $name = $name . $n;
+                }
+                $sheet->setTitle($name);
+                $sheet->getStyle($headerRange)->applyFromArray( $style_header );
+
+                $newSheet = $spreadsheet->addExternalSheet($sheet);
+                if($spreadsheet->getSheetCount() > 3)
+                {
+                    $newSheet->setSheetState(PHPExcel_Worksheet::SHEETSTATE_HIDDEN);
+                }
+
+
+                $GLOBALS['logger']->logLine("Added data from CSV '" . $csvFile['full_file_path'] . "' to output XLS file." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+            }
+        }
+
+        $spreadsheet->removeSheetByIndex(0);
+        $objWriter->save($outfileDetails['full_file_path']);
+
+
+        return $outfileDetails;
+
+    }
+
 
 
     function RunAll()
@@ -187,14 +280,21 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
         $detailsMainResultsFile = $this->classConfig->getFileDetails('output');
 
         // Output all records that were automatically excluded
-        $dataExcludedJobs = $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", array("", "_ExcludedJobs", "CSV"), "excluded jobs", null, true);
+        $dataExcludedJobs = $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", array("", "ExcludedJobs", "CSV"), "excluded jobs", null, true);
 
         // Output only new records that haven't been looked at yet
-        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, $filterNewSinceLastRun, "_AllUnmarkedJobs_Today", "CSV");
-        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, $filterNewSinceLastRun, "_AllUnmarkedJobs_Today", "HTML", null, $this->getKeysForHTMLOutput(), true);
-        $detailsHTMLFile = $this->__getAlternateOutputFileDetails__("HTML", "", "_AllUnmarkedJobs_Today");
+        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, $filterNewSinceLastRun, "-AllUnmarkedJobs_Today", "CSV");
+        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, $filterNewSinceLastRun, "-AllUnmarkedJobs_Today", "HTML", null, $this->getKeysForHTMLOutput(), true);
+        $detailsHTMLFile = $this->__getAlternateOutputFileDetails__("HTML", "", "-AllUnmarkedJobs_Today");
 
-        $arrFilesToAttach = array($detailsMainResultsFile, $detailsHTMLFile, $dataExcludedJobs['file_details']);
+        $arrResultFilesToCombine = array($detailsMainResultsFile, $dataExcludedJobs['file_details']);
+        $arrFilesToAttach = array($detailsHTMLFile);
+
+        foreach($this->classConfig->arrFileDetails['user_input_files'] as $inputfile)
+        {
+            array_push($arrResultFilesToCombine, $inputfile['details']);
+
+        }
         $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \Scooper\C__SECTION_END__, \Scooper\C__NAPPSECONDLEVEL__);
 
 
@@ -212,15 +312,15 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
             $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayOrIsInterestedOrBlank", array("", "", "CSV"), "updated today", null, false);
 
             // Output all job records and their values
-            $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, null, array("", "_AllJobs", "CSV"), "all jobs", null, false);
+            $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, null, array("", "-AllJobs", "CSV"), "all jobs", null, false);
 
 
             // Output only records that are new or not marked as excluded (aka "Yes" or "Maybe")
-            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_AllActiveJobs", "CSV");
-            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "_AllActiveJobs", "HTML", null, $this->getKeysForHTMLOutput());
+            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "-AllActiveJobs", "CSV");
+            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "-AllActiveJobs", "HTML", null, $this->getKeysForHTMLOutput());
 
-            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedToday", "_UpdatedJobs");
-            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayNotInterested", "_UpdatedExcludedJobs");
+            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedToday", "-UpdatedJobs");
+            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayNotInterested", "-UpdatedExcludedJobs");
 
             $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \Scooper\C__SECTION_END__, \Scooper\C__NAPPSECONDLEVEL__);
         }
@@ -241,6 +341,10 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
         $strResultCountsHTML = $this->getListingCountsByPlugin("html", $arrFinalJobs_SortedByCompanyRole);
         $strErrHTML = preg_replace("/\n/", ("<br>" . chr(10) . chr(13)), $strErrsResult);
         $strResultHTML = $strResultCountsHTML . PHP_EOL . "<pre>" . $strErrHTML . "</pre>" . PHP_EOL;
+
+        $xlsDetails = $this->__getAlternateOutputFileDetails__("xls", "", "AllResults");
+        $xlsOutputFile = $this->_combineCSVsToExcel($xlsDetails, $arrResultFilesToCombine);
+        array_push($arrFilesToAttach, $xlsOutputFile);
 
         //
         // Send the email notification out for the completed job

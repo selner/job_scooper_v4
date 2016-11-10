@@ -324,6 +324,9 @@ class ClassJobsSiteCommon
 
     function markJobsList_withAutoItems(&$arrJobs, $strCallerDescriptor = "")
     {
+
+        $this->markJobsList_SetAutoExcludedTitles($arrJobs, $strCallerDescriptor);
+        $this->markJobsList_SetAutoIncludeTitles($arrJobs);
         $this->markJobsList_SetAutoExcludedTitlesFromRegex($arrJobs, $strCallerDescriptor);
         $this->markJobsList_SetAutoExcludedCompaniesFromRegex($arrJobs, $strCallerDescriptor);
         $this->markJobsList_SetLikelyDuplicatePosts($arrJobs, $strCallerDescriptor);
@@ -547,6 +550,107 @@ class ClassJobsSiteCommon
     }
 
 
+    const RESULT = 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__;
+    function markJobsList_SetAutoTitleMatches(&$arrToMark, $keywordsToMatch, $boolMatchesMarkedNotInterested=false, $matchResult = RESULT)
+    {
+        if(count($arrToMark) == 0) return;
+
+        $GLOBALS['logger']->logLine("Including/Excluding Jobs by Title Matches", \Scooper\C__DISPLAY_ITEM_START__);
+        $GLOBALS['logger']->logLine("Checking ".count($arrToMark) ." roles against ". count($keywordsToMatch) ." keywords in titles.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $arrJobs_AutoUpdatable= array_filter($arrToMark, "isJobAutoUpdatable");
+        $nJobsSkipped = count($arrToMark) - count($arrJobs_AutoUpdatable);
+
+        if(count($arrJobs_AutoUpdatable) > 0)
+        {
+            try
+            {
+                $arrTitles = \Scooper\array_copy($arrJobs_AutoUpdatable);
+//                $titles = array_column($arrJobs_AutoUpdatable, "job_title", "job_title");
+//                foreach($titles as $k_rec => $v_rec)
+//                    $arrTitles[] = array('job_title' => $v_rec);
+//
+                //                foreach($titles as $k_rec => $v_rec)
+//                    $arrTitles[] = array('job_title' => $v_rec);
+                $tokenOutputFile = __DIR__. "/tempJobTitleTokens.csv";
+//                $classCSVFile = new \Scooper\ScooperSimpleCSV($tokenOutputFile , 'w');
+//                $classCSVFile->writeArrayToCSVFile($arrTitles, array('job_title'), array("job_title"));
+//                $classCSVFile = null;
+
+
+                $classCSVFile = new \Scooper\ScooperSimpleCSV($tokenOutputFile, 'w');
+                $classCSVFile->writeArrayToCSVFile($arrTitles, array_keys(array_shift($arrTitles)), "key_jobsite_siteid");
+                $arrTitlesTokened = callTokenizer($tokenOutputFile, null, "job_title");
+
+                foreach($arrTitlesTokened as $job)
+                {
+                    $arrMatches = array();
+                    $arrMatchErrors = array();
+                    $tokenizedTitle = join(" ", explode("|", $job['tokenized']));
+
+//                    $success = preg_match_multiple($GLOBALS['DATA']['title_tokens_to_filter'], $tokenizedTitle, $arrMatches , null, $arrMatchErrors );
+
+//                    $success = \Scooper\substr_count_array($tokenizedTitle, array$GLOBALS['DATA']['title_tokens_to_filter']);
+//
+                    $matched = substr_count_multi($tokenizedTitle, $keywordsToMatch, $arrMatches );
+                    $strTitleREMatches = getArrayValuesAsString(array_values($arrMatches), "|", "", false );
+                    $strJobIndex = getArrayKeyValueForJob($job);
+                    $arrToMark[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
+                    if(strlen($arrToMark[$strJobIndex]['notes']) > 0) { $arrToMark[$strJobIndex]['notes'] = $arrToMark[$strJobIndex]['notes'] . " "; }
+
+                    if(count($arrMatches) > 0 && $boolMatchesMarkedNotInterested == true)
+                    {
+                        $arrToMark[$strJobIndex]['interested'] = $matchResult;
+                        $arrToMark[$strJobIndex]['notes'] = "Title matched keyword[". $strTitleREMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__;
+                    }
+                    else if($boolMatchesMarkedNotInterested == false)
+                    {
+                        if (count($arrMatches) >= 0)
+                        {
+                            $arrToMark[$strJobIndex]['interested'] = $matchResult;
+                            if(strlen($arrToMark[$strJobIndex]['notes']) > 0) { $arrToMark[$strJobIndex]['notes'] = $arrToMark[$strJobIndex]['notes'] . " "; }
+                            $arrToMark[$strJobIndex]['notes'] = "Title matched term [". $strTitleREMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__;
+    
+                        }
+                        else
+                        {
+                            $arrToMark[$strJobIndex]['interested'] = null;
+                            if(strlen($arrToMark[$strJobIndex]['notes']) > 0) { $arrToMark[$strJobIndex]['notes'] = $arrToMark[$strJobIndex]['notes'] . " "; }
+                            $arrToMark[$strJobIndex]['notes'] = "Title did not match keywords[". $strTitleREMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__;
+                        }
+                    }
+                }
+            }
+            catch (Exception $ex)
+            {
+                $GLOBALS['logger']->logLine('ERROR:  Failed to verify titles against regex strings due to error: '. $ex->getMessage(), \Scooper\C__DISPLAY_ERROR__);
+                if(isDebug()) { throw $ex; }
+            }
+        }
+        $strTotalRowsText = "/".count($arrToMark);
+        $nAutoExcludedTitleRegex = count(array_filter($arrToMark, "isInterested_TitleExcludedViaRegex"));
+
+        $GLOBALS['logger']->logLine("Marked not interested via regex(".$nAutoExcludedTitleRegex . $strTotalRowsText .") , skipped: " . $nJobsSkipped . $strTotalRowsText .", untouched: ". (count($arrToMark) - $nJobsSkipped - $nAutoExcludedTitleRegex) . $strTotalRowsText .")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
+    }
+
+    function markJobsList_SetAutoExcludedTitles(&$arrToMark, $boolMatchesMarkedNotInterested=false)
+    {
+        $this->markJobsList_SetAutoTitleMatches($arrToMark, $GLOBALS['DATA']['title_tokens_to_filter'], $boolMatchesMarkedNotInterested=true, $matchResult = 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__);
+    }
+
+    function markJobsList_SetAutoIncludeTitles(&$arrToMark)
+    {
+        $searchAnswer = array();
+
+        foreach($this->arrSearchesToReturn as $search)
+        {
+            $searchAnswer = \Scooper\my_merge_add_new_keys($searchAnswer, $search['keyword_set']);
+        }
+
+        $this->markJobsList_SetAutoTitleMatches($arrToMark, $searchAnswer, $boolMatchesMarkedNotInterested=false, $matchResult = 'No (Title Did Not Contain Keywords)' . C__STR_TAG_AUTOMARKEDJOB__);
+
+    }
+
+
 
     function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true, $fFirstAutoMarkJobs = false, $strCallerDescriptor = "", $ext = "CSV", $keysToOutput=null, $detailsCSSToInclude = null)
     {
@@ -594,7 +698,17 @@ class ClassJobsSiteCommon
         }
         else
         {
-            $classCombined->writeArrayToCSVFile($arrJobsRecordsToUse, $keysToOutput, $this->arrKeysForDeduping);
+            $arrRecordsToOutput = $classCombined->getSortedDeDupedCSVArray($arrJobsRecordsToUse, $this->arrKeysForDeduping);
+            if (!is_array($arrRecordsToOutput)) $arrRecordsToOutput = array();
+            array_unshift($arrRecordsToOutput, $keysToOutput);
+            $objPHPExcel = new PHPExcel();
+            $objPHPExcel->getActiveSheet()->fromArray($arrRecordsToOutput, null, 'A1');
+            $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, "CSV");
+
+//            $spreadsheet->removeSheetByIndex(0);
+            $objWriter->save($strOutFilePath);
+
+//            $classCombined->writeArrayToCSVFile($arrJobsRecordsToUse, $keysToOutput, $this->arrKeysForDeduping);
         }
         $GLOBALS['logger']->logLine($strCallerDescriptor . ($strCallerDescriptor  != "" ? " jobs" : "Jobs") ." list had  ". count($arrJobsRecordsToUse) . " jobs and was written to " . $strOutFilePath , \Scooper\C__DISPLAY_ITEM_START__);
 

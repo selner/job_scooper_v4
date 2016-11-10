@@ -22,7 +22,7 @@ require_once(__ROOT__.'/include/SitePlugins.php');
 class ClassConfig extends ClassJobsSitePlugin
 {
     protected $nNumDaysToSearch = -1;
-    protected $arrFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null, 'user_input_files' => null);
+    public $arrFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null, 'user_input_files' => null);
     protected $arrEmailAddresses = null;
     protected $configSettings = array('searches' => null, 'keyword_sets' => null, 'location_sets' => null, 'number_days'=>VALUE_NOT_SUPPORTED, 'included_sites' => array(), 'excluded_sites' => array());
     protected $arrEmail_PHPMailer_SMTPSetup = null;
@@ -211,7 +211,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
     function getMyOutputFileFullPath($strFilePrefix = "")
     {
-        return parent::getOutputFileFullPath($this->siteName . "_" . $strFilePrefix, "jobs", "csv");
+        return parent::getOutputFileFullPath($this->siteName . "-" . $strFilePrefix, "Results", "csv");
     }
 
     private function __setupOutputFolders__()
@@ -229,7 +229,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
         if(! $this->arrFileDetails['output']['has_file'])
         {
-            $strDefaultFileName = getDefaultJobsOutputFileName("", "jobs", "csv");
+            $strDefaultFileName = getDefaultJobsOutputFileName("", "Results", "csv");
 
              $this->arrFileDetails['output'] = \Scooper\parseFilePath( $this->arrFileDetails['output']['directory'] .  $strDefaultFileName);
         }
@@ -287,7 +287,9 @@ class ClassConfig extends ClassJobsSitePlugin
             {
                  $this->arrFileDetails['output'] = \Scooper\parseFilePath( $this->arrFileDetails['output'] . $config['output']['file']);
             }
+
         }
+        $GLOBALS['OPTS']['output_folder'] = $this->arrFileDetails['output']['directory'];
 
 
         if(isset($config['input']) && isset($config['input']['folder']))
@@ -369,16 +371,16 @@ class ClassConfig extends ClassJobsSitePlugin
         // Load the exclusion filter and other user data from files
         //
         $this->_loadTitlesRegexesToFilter_();
+        $this->_loadTitlesTokensToFilter_();
 
         $this->_loadCompanyRegexesToFilter_();
-
-
-
     }
+
     private function __getEmptyEmailRecord__()
     {
         return array('type'=> null, 'name'=>null, 'address' => null);
     }
+
     private function __addInputFile__($iniInputFileItem)
     {
 
@@ -456,7 +458,10 @@ class ClassConfig extends ClassJobsSitePlugin
         }
         $tempSearch['name'] = (isset($iniSearch['jobsite']) ? $iniSearch['jobsite'] . ': ' : "") . $iniSearch['name'];
         if(isset($iniSearch['url_format'])) $tempSearch['base_url_format']  = $iniSearch['url_format'];
-        if(isset($iniSearch['keywords'])) $tempSearch['keyword_search_override']  = $iniSearch['keywords'];
+        if(isset($iniSearch['keywords'])) {
+            $tempSearch['original_keyword_search_override']  = $iniSearch['keywords'];
+            $tempSearch['keyword_search_override']  = $this->tokenizeKeywords($iniSearch['keywords']);
+        }
         if(isset($iniSearch['location'])) $tempSearch['location_user_specified_override']  = $iniSearch['location'];
 
         if(isset($iniSearch['keyword_match_type_string']) && strlen($iniSearch['keyword_match_type_string'] ) > 0)
@@ -584,6 +589,135 @@ class ClassConfig extends ClassJobsSitePlugin
         return $arrLocSet;
     }
 
+    private function tokenizeKeywords($keywords)
+    {
+        if (is_string($keywords))
+        {
+            $keywords = explode(",", $keywords);
+        }
+
+        if (!is_array($keywords))
+        {
+            throw new Exception("Invalid keywords object type.");
+        }
+
+        $keywordtempset = $GLOBALS['OPTS']['output_folder']. "/" .  "tempKeywordTokens-" . substr(join("", str_replace(" ", "", $keywords)), 0, 6);
+        $tokenInputFile = $keywordtempset . "-input.csv";
+        $tokenOutputFile = $keywordtempset . "-output.csv";
+        $classCSVFile = new \Scooper\ScooperSimpleCSV($tokenInputFile, 'w', true);
+        $kwds = array();
+        foreach($keywords as $k_rec => $v_rec)
+            $kwds[] = array('keyword' => $v_rec);
+
+
+        $classCSVFile->writeArrayToCSVFile($kwds, array("keyword"), array("keyword"));
+        $arrKeywordTokens = callTokenizer($tokenInputFile, $tokenOutputFile, "keyword");
+        unlink($tokenOutputFile);
+        $keywordset = array_column($arrKeywordTokens, "tokenized");
+        $retKeywords = array();
+        foreach (array_keys($keywordset) as $setKey)
+        {
+            $retKeywords[$setKey] = str_replace("|", " ", $keywordset[$setKey]);
+        }
+        return $retKeywords;
+    }
+
+//    private function _readTokenizedKeywordSetsFromConfig_($config)
+//    {
+//        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading keyword set from config file...", \Scooper\C__DISPLAY_ITEM_START__);
+//        if(isset($config['search_keyword_set']))
+//        {
+//            foreach($config['search_keyword_set'] as $ini_keyword_set)
+//            {
+//
+//
+//                $strSetKey = 'KeywordSet' . (count($this->configSettings['keyword_sets']) + 1);
+//                if(isset($ini_keyword_set['name']) && strlen($ini_keyword_set['name']) > 0)
+//                {
+//                    $strSetKey = $ini_keyword_set['name'];
+//                }
+//                elseif(isset($ini_keyword_set['key']) && strlen($ini_keyword_set['key']) > 0)
+//                {
+//                    $strSetKey = $ini_keyword_set['key'];
+//                }
+//
+//
+//                $this->configSettings['keyword_sets'][$strSetKey] = $this->_getEmptyKeywordSettingsSet_();
+//                $this->configSettings['keyword_sets'][$strSetKey]['name'] = $strSetKey;
+//                if(!isset($ini_keyword_set['key'])) {
+//                    $this->configSettings['keyword_sets'][$strSetKey]['key'] = strtolower($strSetKey);
+//                }
+//
+//                $fScopeAllSites = true;
+//                if(isset($ini_keyword_set['settings_scope']) && strlen($ini_keyword_set['settings_scope'] ) > 0)
+//                {
+//                    $this->configSettings['keyword_sets'][$strSetKey]['settings_scope'] = $ini_keyword_set['settings_scope'];
+//
+//                    if(strcasecmp($this->configSettings['keyword_sets'][$strSetKey]['settings_scope'], "all-sites") != 0)
+//                    {
+//                        $fScopeAllSites = false;
+//                    }
+//                }
+//
+//                if($fScopeAllSites == true)
+//                {
+//                    // Copy all the job sites into the list of sites included to be run
+//                    $this->configSettings['keyword_sets'][$strSetKey]['included_jobsites_array'] = $this->configSettings['included_sites'];
+//                }
+//
+//                if(isset($ini_keyword_set['excluded_jobsites']) && count($ini_keyword_set['excluded_jobsites']) > 0)
+//                {
+//                    foreach($ini_keyword_set['excluded_jobsites'] as $excludedSite)
+//                    {
+//                        $excludedSite = strtolower($excludedSite);
+//                        $this->configSettings['keyword_sets'][$strSetKey]['excluded_jobsites_array'][$excludedSite] = $excludedSite;
+//                        unset($this->configSettings['keyword_sets'][$strSetKey]['included_jobsites_array'][$excludedSite]);
+//                        $excludedSite = '';
+//                    }
+//                    $this->configSettings['keyword_sets'][$strSetKey]['excluded_jobsites_array'] = \Scooper\my_merge_add_new_keys($this->configSettings['keyword_sets'][$strSetKey]['excluded_jobsites_array'], $this->configSettings['excluded_sites']);
+//                }
+//
+//
+//                // If keywords are in a string, split them out into an array instead before continuing
+//                if(isset($ini_keyword_set['keywords']))
+//                {
+//                    if(!is_string($ini_keyword_set['keywords']))
+//                        $ini_keyword_set['keywords'] = join(",", $ini_keyword_set['keywords']);
+//                    $ini_keyword_set['original_keywords'] = $ini_keyword_set['keywords'];
+//                    $ini_keyword_set['tokenized_keywords'] = $this->tokenizeKeywords($ini_keyword_set['keywords']);
+//
+//                    $this->configSettings['keyword_sets'][$strSetKey]['keywords_array'][] = explode(",", $ini_keyword_set['keywords']);
+//                    $this->configSettings['keyword_sets'][$strSetKey]['tokenized_keywords'][] = $ini_keyword_set['tokenized_keywords'];
+//                }
+//
+//                if(isset($ini_keyword_set['keyword_match_type']) && strlen($ini_keyword_set['keyword_match_type'] ) > 0)
+//                {
+//                    $flagType = $this->_getKeywordMatchFlagFromString_($ini_keyword_set['keyword_match_type'] );
+//                    if($flagType != null)
+//                    {
+//                        $this->configSettings['keyword_sets'][$strSetKey]['keyword_match_type_string'] = $ini_keyword_set['keyword_match_type'] ;
+//                        $this->configSettings['keyword_sets'][$strSetKey]['keyword_match_type_flag'] = $flagType;
+//                    }
+//                }
+//
+//
+//                if(isset($this->configSettings['keyword_sets'][$strSetKey]['keywords_array']) && count($this->configSettings['keyword_sets'][$strSetKey]['keywords_array']) > 0)
+//                {
+//                    if(strcasecmp('Keyword',$strSetKey) <= 0)
+//                    {
+//                        $this->configSettings['keyword_sets'][$strSetKey]['name'] = "KeywordSet-" . $strSetKey; // \Scooper\strScrub($this->configSettings['keyword_sets'][$strSetKey]['keywords_array'][0], FOR_LOOKUP_VALUE_MATCHING);
+//                    }
+//
+//                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added keyword set '" . $this->configSettings['keyword_sets'][$strSetKey]['name'] . "' with keywords = " . getArrayValuesAsString($this->configSettings['keyword_sets'][$strSetKey]['keywords_array']) . (($ini_keyword_set['keyword_match_type'] != null && strlen($ini_keyword_set['keyword_match_type'] ) > 0) ? " matching " . $ini_keyword_set['keyword_match_type'] : ""), \Scooper\C__DISPLAY_ITEM_DETAIL__);
+//                }
+//
+//
+//            }
+//
+//        }
+//    }
+
+
     private function _readKeywordSetsFromConfig_($config)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading keyword set from config file...", \Scooper\C__DISPLAY_ITEM_START__);
@@ -681,7 +815,6 @@ class ClassConfig extends ClassJobsSitePlugin
 
         }
     }
-
 
 
     private function _updateSearchesWithKeywordSet_($keywordSet)
@@ -1058,6 +1191,12 @@ class ClassConfig extends ClassJobsSitePlugin
                     //
                     foreach($arrTitlesTemp as $titleRecord)
                     {
+//                        if($titleRecord[0] == "#")
+//                        {
+//                            if(isset($GLOBALS['logger']) && isDebug()) { $GLOBALS['logger']->logLine("# skipping comment line in CSV ", \Scooper\C__DISPLAY_NORMAL__); }
+//
+//                            continue;
+//                        }
                         $arrRXInput = explode("|", strtolower($titleRecord['match_regex']));
                         foreach($arrRXInput as $rxItem)
                         {
@@ -1092,6 +1231,100 @@ class ClassConfig extends ClassJobsSitePlugin
         else
         {
             $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($GLOBALS['DATA']['titles_regex_to_filter']) . " regexes to use for filtering titles from '" . getArrayValuesAsString($this->getInputFilesByType("regex_filter_titles")) . "'." , \Scooper\C__DISPLAY_WARNING__);
+
+        }
+
+    }
+
+    private function _loadTitlesTokensToFilter_()
+    {
+        $arrFileInput = $this->getInputFilesByType("regex_filter_titles");
+        $fTitlesLoaded = false;
+
+        $GLOBALS['DATA']['title_tokens_to_filter'] = array();
+        $nDebugCounter = 0;
+
+        if(isset($GLOBALS['DATA']['title_tokens_to_filter']) && count($GLOBALS['DATA']['title_tokens_to_filter']) > 0)
+        {
+            // We've already loaded the titles; go ahead and return right away
+            $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['DATA']['title_tokens_to_filter']) . " tokenized title strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            return;
+        }
+
+        if(!is_array($arrFileInput))
+        {
+            // No files were found, so bail
+            $GLOBALS['logger']->logLine("No input files were found with title token strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            return;
+        }
+
+        foreach($arrFileInput as $fileItem)
+        {
+            $fileDetail = $fileItem['details'];
+
+            if(isset($fileDetail) && $fileDetail ['full_file_path'] != '')
+            {
+                if(file_exists($fileDetail ['full_file_path'] ) && is_file($fileDetail['full_file_path'] ))
+                {
+                    $arrTitlesTemp = callTokenizer($fileDetail ['full_file_path'], null, 'match_regex');
+
+//                    $GLOBALS['logger']->logLine("Loading job title regexes to filter from ".$fileDetail ['full_file_path']."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+//                    $classCSVFile = new \Scooper\ScooperSimpleCSV($fileDetail ['full_file_path'] , 'r');
+//                    $arrTitlesTemp = $classCSVFile->readAllRecords(true, array("match_regex"));
+                    if(count($arrTitlesTemp) <= 0)
+                    {
+                        $GLOBALS['logger']->logLine("Warning: No titles were found in the source file " . $fileDetail['file_name'] . " that will be automatically filtered from job listings." , \Scooper\C__DISPLAY_WARNING__);
+                        continue;
+                    }
+
+                    //
+                    // Add each title we found in the file to our list in this class, setting the key for
+                    // each record to be equal to the job title so we can do a fast lookup later
+                    //
+                    foreach($arrTitlesTemp as $titleRecord)
+                    {
+                        $tokens = explode("|", $titleRecord['tokenized']);
+                        $GLOBALS['DATA']['title_tokens_to_filter'][] = $tokens;
+//                        if($titleRecord[0] == "#")
+//                        {
+//                            if(isset($GLOBALS['logger']) && isDebug()) { $GLOBALS['logger']->logLine("# skipping comment line in CSV ", \Scooper\C__DISPLAY_NORMAL__); }
+//
+//                            continue;
+//                        }
+//                        $arrRXInput = explode("|", strtolower($titleRecord['tokenized']));
+//                        foreach($arrRXInput as $rxItem)
+//                        {
+//                            try
+//                            {
+//                                $rx = $this->_scrubRegexSearchString($rxItem);
+//                                $GLOBALS['DATA']['titles_regex_to_filter'][$rxItem] = $rx;
+//
+//                            }
+//                            catch (Exception $ex)
+//                            {
+//                                $strError = "Regex test failed on # " . $nDebugCounter . ", value " . $rxItem .".  Skipping.  Error: '".$ex->getMessage();
+//                                $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
+//                                if(isDebug()) { throw new ErrorException( $strError); }
+//                            }
+//                        }
+//                        $nDebugCounter = $nDebugCounter + 1;
+                    }
+                    $fTitlesLoaded = true;
+                }
+
+            }
+        }
+
+        if($fTitlesLoaded == false)
+        {
+            if(count($arrFileInput) ==0)
+                $GLOBALS['logger']->logLine("No file specified for title regexes to exclude.'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
+            else
+                $GLOBALS['logger']->logLine("Could not load regex list for titles to exclude from '" . getArrayValuesAsString($arrFileInput) . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
+        }
+        else
+        {
+            $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($GLOBALS['DATA']['titles_to_filter']) . " regexes to use for filtering titles from '" . getArrayValuesAsString($this->getInputFilesByType("regex_filter_titles")) . "'." , \Scooper\C__DISPLAY_WARNING__);
 
         }
 

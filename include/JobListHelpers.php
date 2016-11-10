@@ -497,6 +497,23 @@ function getMergedJobRecord($prevJobRecord, $newerJobRecord)
 }
 
 
+function callTokenizer($inputfile, $outputFile, $keyname)
+{
+    $GLOBALS['logger']->logLine("Tokenizing title exclusion matches from ".$inputfile."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+    if(!$outputFile)
+        $outputFile = __DIR__. "/tempCallTokenizer.csv";
+    $cmd = "python /Users/bryan/Code/pyJobNormalizer/normalizeStrings.py -i " . $inputfile . " -o " . $outputFile . " -k " . $keyname;
+    $GLOBALS['logger']->logLine("Running command: " . $cmd   , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+    exec($cmd);
+
+    $GLOBALS['logger']->logLine("Loading tokens for ".$inputfile."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+    $classCSVFile = new \Scooper\ScooperSimpleCSV($outputFile, 'r');
+    $arrTokenizedList = $classCSVFile->readAllRecords(true);
+
+    return $arrTokenizedList['data_rows'];
+
+}
 /**
  * Allows multiple expressions to be tested on one string.
  * This will return a boolean, however you may want to alter this.
@@ -534,14 +551,52 @@ function preg_match_multiple(array $patterns = array(), $subject = null, &$findi
     return (0 === sizeof($errors));
 }
 
+/**
+ * Allows multiple expressions to be tested on one string.
+ * This will return a boolean, however you may want to alter this.
+ *
+ * @author William Jaspers, IV <wjaspers4@gmail.com>
+ * @created 2009-02-27 17:00:00 +6:00:00 GMT
+ * @access public
+ * @ref http://www.php.net/manual/en/function.preg-match.php#89252
+ *
+ * @param array $patterns An array of expressions to be tested.
+ * @param String $subject The data to test.
+ * @param array $findings Optional argument to store our results.
+ * @param mixed $flags Pass-thru argument to allow normal flags to apply to all tested expressions.
+ * @param array $errors A storage bin for errors
+ *
+ * @returns bool True if successful; false if errors occurred.
+ */
+function substr_count_multi($subject = "", array $patterns = array(), &$findings = array())
+{
+    foreach ($patterns as $name => $pattern) {
+        $found = false;
+        $count = \Scooper\substr_count_array($subject, $pattern);
+        if (0 < $count) {
+            $findings[$name] = $pattern;
+        } else {
+//            if (PREG_NO_ERROR !== ($code = preg_last_error() )) {
+//                $errors[$name] = $code;
+//            }
+//            else
+//            {
+                // No match was found, so don't return it in the findings
+                // $findings[$name] = array();
+//            }
+        }
+    }
+    return !(0 === sizeof($findings));
+}
+
 function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strExt = '')
 {
     $strFilename = '';
-    if(strlen($strFilePrefix) > 0) $strFilename .= $strFilePrefix . "_";
+    if(strlen($strFilePrefix) > 0) $strFilename .= $strFilePrefix . "-";
     $date=date_create(null);
-    $strFilename .= date_format($date,"Y-m-d_Hi");
+    $strFilename .= date_format($date,"Y-m-d-Hi");
 
-    if(strlen($strBase) > 0) $strFilename .= "_" . $strBase;
+    if(strlen($strBase) > 0) $strFilename .= "-" . $strBase;
     if(strlen($strExt) > 0) $strFilename .= "." . $strExt;
 
     return $strFilename;
@@ -556,6 +611,5 @@ function getPhpMemoryUsage()
 
     return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
 }
-
 
 ?>
