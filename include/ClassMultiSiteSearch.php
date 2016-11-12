@@ -84,6 +84,10 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
                 $this->arrPluginClassesToRun[$searchDetails['site_name']]['searches'][] = $searchDetails;
             }
         }
+
+
+        $GLOBALS['logger']->logLine("Searches loaded and configured for run: " . getArrayValuesAsString($this->arrPluginClassesToRun) . PHP_EOL . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+
     }
 
     function updateJobsForAllPlugins()
