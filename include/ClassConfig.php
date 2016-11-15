@@ -1232,14 +1232,14 @@ class ClassConfig extends ClassJobsSitePlugin
             {
                 if(file_exists($fileDetail ['full_file_path'] ) && is_file($fileDetail['full_file_path'] ))
                 {
-                    $arrTitlesTemp = callTokenizer($fileDetail ['full_file_path'], null, 'negative_keywords');
+                    $arrTitlesTemp = callTokenizer($fileDetail ['full_file_path'], null, 'negative_keywords', 'negative_keywords');
 
 //                    $GLOBALS['logger']->logLine("Loading job title regexes to filter from ".$fileDetail ['full_file_path']."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
 //                    $classCSVFile = new \Scooper\ScooperSimpleCSV($fileDetail ['full_file_path'] , 'r');
 //                    $arrTitlesTemp = $classCSVFile->readAllRecords(true, array("match_regex"));
                     if(count($arrTitlesTemp) <= 0)
                     {
-                        $GLOBALS['logger']->logLine("Warning: No titles were found in the source file " . $fileDetail['file_name'] . " that will be automatically filtered from job listings." , \Scooper\C__DISPLAY_WARNING__);
+                        $GLOBALS['logger']->logLine("Warning: No title negative keywords were found in the source file " . $fileDetail['file_name'] . " to be filtered from job listings." , \Scooper\C__DISPLAY_WARNING__);
                         continue;
                     }
 
@@ -1251,29 +1251,6 @@ class ClassConfig extends ClassJobsSitePlugin
                     {
                         $tokens = explode("|", $titleRecord['tokenized']);
                         $GLOBALS['DATA']['title_tokens_to_filter'][] = $tokens;
-//                        if($titleRecord[0] == "#")
-//                        {
-//                            if(isset($GLOBALS['logger']) && isDebug()) { $GLOBALS['logger']->logLine("# skipping comment line in CSV ", \Scooper\C__DISPLAY_NORMAL__); }
-//
-//                            continue;
-//                        }
-//                        $arrRXInput = explode("|", strtolower($titleRecord['tokenized']));
-//                        foreach($arrRXInput as $rxItem)
-//                        {
-//                            try
-//                            {
-//                                $rx = $this->_scrubRegexSearchString($rxItem);
-//                                $GLOBALS['DATA']['titles_regex_to_filter'][$rxItem] = $rx;
-//
-//                            }
-//                            catch (Exception $ex)
-//                            {
-//                                $strError = "Regex test failed on # " . $nDebugCounter . ", value " . $rxItem .".  Skipping.  Error: '".$ex->getMessage();
-//                                $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-//                                if(isDebug()) { throw new ErrorException( $strError); }
-//                            }
-//                        }
-//                        $nDebugCounter = $nDebugCounter + 1;
                     }
                     $fTitlesLoaded = true;
                 }
