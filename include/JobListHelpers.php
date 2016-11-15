@@ -574,8 +574,8 @@ function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName, $ind
 
 function tokenizeMultiDimensionArray($arrData, $keynameIndex, $keynameTokenize, $tempFileKey, $indexKeyName = null)
 {
-    $inputFile = $GLOBALS['OPTS']['output_folder'] . "/tmp-".$tempFileKey."-token-input.csv";
-    $outputFile = $GLOBALS['OPTS']['output_folder'] . "/tmp-".$tempFileKey."-token-output.csv";
+    $inputFile = $GLOBALS['OPTS']['output_folder'] . "tmp-".$tempFileKey."-token-input.csv";
+    $outputFile = $GLOBALS['OPTS']['output_folder'] . "tmp-".$tempFileKey."-token-output.csv";
 
 //    $classCSVFile = new \Scooper\ScooperSimpleCSV($tokenOutputFile, 'w');
 //    $classCSVFile->writeArrayToCSVFile($arrTitles, array_keys(array_shift($arrTitles)), "key_jobsite_siteid");
