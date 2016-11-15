@@ -92,12 +92,12 @@ class ClassJobsSiteCommon
             'company' => '',
             'job_title' => '',
             'interested' => '',
-            'notes' => '',
+            'job_post_url' => '',
+            'match_details' => '',
+            'match_notes' => '',
             'status' => '',
             'last_status_update' => '',
-            'match_details' => '',
             'date_pulled' => '',
-            'job_post_url' => '',
             'location' => '',
             'job_site_category' => '',
             'job_site_date' =>'',
@@ -330,7 +330,6 @@ class ClassJobsSiteCommon
     {
 
         $this->markJobsList_SetAutoIncludeTitles($arrJobs);
-        $this->markJobsList_SetAutoExcludedTitlesFromRegex($arrJobs);
         $this->markJobsList_SetAutoExcludedTitles($arrJobs);
         $this->markJobsList_SetAutoExcludedCompaniesFromRegex($arrJobs);
         $this->markJobsList_SetLikelyDuplicatePosts($arrJobs);
@@ -401,10 +400,10 @@ class ClassJobsSiteCommon
                 // Add a note to the previous listing that it had a new duplicate
                 //
 
-                $arrToMark[$indexPrevListingForCompanyRole]['notes'] = $this->getNotesWithDupeIDAdded($arrToMark[$indexPrevListingForCompanyRole]['notes'], $job['key_jobsite_siteid'] );
+                $arrToMark[$indexPrevListingForCompanyRole]['match_notes'] = $this->getNotesWithDupeIDAdded($arrToMark[$indexPrevListingForCompanyRole]['match_notes'], $job['key_jobsite_siteid'] );
                 $arrToMark[$indexPrevListingForCompanyRole] ['date_last_updated'] = \Scooper\getTodayAsString();
 
-                $arrToMark[$job['key_jobsite_siteid']]['notes'] = $this->getNotesWithDupeIDAdded($arrToMark[$job['key_jobsite_siteid']]['notes'], $indexPrevListingForCompanyRole );
+                $arrToMark[$job['key_jobsite_siteid']]['match_notes'] = $this->getNotesWithDupeIDAdded($arrToMark[$job['key_jobsite_siteid']]['match_notes'], $indexPrevListingForCompanyRole );
                 $arrToMark[$job['key_jobsite_siteid']]['interested'] =  C__STR_TAG_DUPLICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__;
                 $arrToMark[$job['key_jobsite_siteid']]['date_last_updated'] = \Scooper\getTodayAsString();
 
@@ -426,25 +425,25 @@ class ClassJobsSiteCommon
         $nJobsMarkedAutoExcluded = 0;
 
         $GLOBALS['logger']->logLine("Excluding Jobs by Companies Regex Matches", \Scooper\C__DISPLAY_ITEM_START__);
-        $GLOBALS['logger']->logLine("Checking ".count($arrToMark) ." roles against ". count($GLOBALS['DATA']['companies_regex_to_filter']) ." excluded companies.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Checking ".count($arrToMark) ." roles against ". count($GLOBALS['USERDATA']['companies_regex_to_filter']) ." excluded companies.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
         $arrJobs_AutoUpdatable= array_filter($arrToMark, "isJobAutoUpdatable");
         $nJobsSkipped = count($arrToMark) - count($arrJobs_AutoUpdatable);
 
-        if(count($arrJobs_AutoUpdatable) > 0 && count($GLOBALS['DATA']['companies_regex_to_filter']) > 0)
+        if(count($arrJobs_AutoUpdatable) > 0 && count($GLOBALS['USERDATA']['companies_regex_to_filter']) > 0)
         {
             foreach($arrJobs_AutoUpdatable as $job)
             {
                 $fMatched = false;
                 // get all the job records that do not yet have an interested value
 
-                foreach($GLOBALS['DATA']['companies_regex_to_filter'] as $rxInput )
+                foreach($GLOBALS['USERDATA']['companies_regex_to_filter'] as $rxInput )
                 {
                     if(preg_match($rxInput, \Scooper\strScrub($job['company'], DEFAULT_SCRUB)))
                     {
                         $strJobIndex = getArrayKeyValueForJob($job);
                         $arrToMark[$strJobIndex]['interested'] = 'No (Wrong Company)' . C__STR_TAG_AUTOMARKEDJOB__;
-                        if(strlen($arrToMark[$strJobIndex]['notes']) > 0) { $arrToMark[$strJobIndex]['notes'] = $arrToMark[$strJobIndex]['notes'] . " "; }
-                        $arrToMark[$strJobIndex]['notes'] = "Matched regex[". $rxInput ."]". C__STR_TAG_AUTOMARKEDJOB__;
+                        if(strlen($arrToMark[$strJobIndex]['match_notes']) > 0) { $arrToMark[$strJobIndex]['match_notes'] = $arrToMark[$strJobIndex]['match_notes'] . " "; }
+                        $arrToMark[$strJobIndex]['match_notes'] = "Matched regex[". $rxInput ."]". C__STR_TAG_AUTOMARKEDJOB__;
                         $arrToMark[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
                         $nJobsMarkedAutoExcluded++;
                         $fMatched = true;
@@ -464,61 +463,6 @@ class ClassJobsSiteCommon
         }
         $strTotalRowsText = "/".count($arrToMark);
         $GLOBALS['logger']->logLine("Jobs marked not interested via companies regex(".$nJobsMarkedAutoExcluded . $strTotalRowsText .") , skipped: " . $nJobsSkipped . $strTotalRowsText .", untouched: ". $nJobsNotMarked . $strTotalRowsText .")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
-    }
-
-
-
-    function markJobsList_SetAutoExcludedTitlesFromRegex(&$arrToMark)
-    {
-        if(count($arrToMark) == 0) return;
-
-        $nJobsMarkedAutoExcluded = 0;
-
-        $GLOBALS['logger']->logLine("Excluding Jobs by Title Regex Matches", \Scooper\C__DISPLAY_ITEM_START__);
-        $GLOBALS['logger']->logLine("Checking ".count($arrToMark) ." roles against ". count($GLOBALS['DATA']['titles_regex_to_filter']) ." excluded titles.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        $arrJobs_AutoUpdatable= array_filter($arrToMark, "isJobAutoUpdatable");
-        $nJobsSkipped = count($arrToMark) - count($arrJobs_AutoUpdatable);
-
-        if(count($arrJobs_AutoUpdatable) > 0)
-        {
-            try
-            {
-                foreach($arrJobs_AutoUpdatable as $job)
-                {
-                    if($GLOBALS['DATA']['titles_regex_to_filter'] == null) break;
-                    $strScrubbedJobTitle = \Scooper\strScrub($job['job_title'], DEFAULT_SCRUB);
-
-                    $arrMatches = array();
-                    $arrMatchErrors = array();
-                    $success = preg_match_multiple($GLOBALS['DATA']['titles_regex_to_filter'], $strScrubbedJobTitle, $arrMatches , null, $arrMatchErrors );
-
-                    if($success == false)
-                    {
-                        $GLOBALS['logger']->logLine("Errors with title exclusion regexes: ". getArrayValuesAsString($arrMatchErrors), \Scooper\C__DISPLAY_WARNING__);
-                    }
-                    if(count($arrMatches) > 0)
-                    {
-                        $strTitleREMatches = getArrayValuesAsString(array_keys($arrMatches), "|", "", false );
-                        $strJobIndex = getArrayKeyValueForJob($job);
-
-                        $arrToMark[$strJobIndex]['interested'] = 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__;
-                        if(strlen($arrToMark[$strJobIndex]['notes']) > 0) { $arrToMark[$strJobIndex]['notes'] = $arrToMark[$strJobIndex]['notes'] . " "; }
-                        $arrToMark[$strJobIndex]['notes'] = "Title matched exclusion regex [". $strTitleREMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__;
-                        $arrToMark[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
-                        appendJobColumnData($arrToMark[$strJobIndex], 'match_details',"|", "title_regex_exclude");
-                    }
-                }
-            }
-            catch (Exception $ex)
-            {
-                $GLOBALS['logger']->logLine('ERROR:  Failed to verify titles against regex strings due to error: '. $ex->getMessage(), \Scooper\C__DISPLAY_ERROR__);
-                if(isDebug()) { throw $ex; }
-            }
-        }
-        $strTotalRowsText = "/".count($arrToMark);
-        $nAutoExcludedTitleRegex = count(array_filter($arrToMark, "isInterested_TitleExcludedViaRegex"));
-
-        $GLOBALS['logger']->logLine("Marked not interested via regex(".$nAutoExcludedTitleRegex . $strTotalRowsText .") , skipped: " . $nJobsSkipped . $strTotalRowsText .", untouched: ". (count($arrToMark) - $nJobsSkipped - $nAutoExcludedTitleRegex) . $strTotalRowsText .")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
     }
 
 
@@ -544,9 +488,9 @@ class ClassJobsSiteCommon
                     $job['job_title_tokenized'] = join(" ", explode("|", $job['tokenized']));
                     $arrToMark[$strJobIndex]['job_title_tokenized'] = $job['job_title_tokenized'];
 
-//                    $success = preg_match_multiple($GLOBALS['DATA']['title_tokens_to_filter'], $tokenizedTitle, $arrMatches , null, $arrMatchErrors );
+//                    $success = preg_match_multiple($GLOBALS['USERDATA']['title_negative_keyword_tokens'], $tokenizedTitle, $arrMatches , null, $arrMatchErrors );
 
-//                    $success = \Scooper\substr_count_array($tokenizedTitle, array$GLOBALS['DATA']['title_tokens_to_filter']);
+//                    $success = \Scooper\substr_count_array($tokenizedTitle, array$GLOBALS['USERDATA']['title_negative_keyword_tokens']);
 //
                     foreach($keywordsToMatch as $kywdtoken)
                     {
@@ -564,14 +508,14 @@ class ClassJobsSiteCommon
                                 if($boolMatchesMarkedNotInterested == true)
                                 {
                                     $arrToMark[$strJobIndex]['interested'] = $matchResult;
-                                    appendJobColumnData($arrToMark[$strJobIndex], 'notes',"|", "title_keyword_exclusion_hit on term [". $strTitleTokenMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__);
+                                    appendJobColumnData($arrToMark[$strJobIndex], 'match_notes',"|", "title_keyword_exclusion_hit on term [". $strTitleTokenMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__);
                                     appendJobColumnData($arrToMark[$strJobIndex], 'match_details',"|", "title_keyword_exclusion_hit");
                                     $didNotMatch = false;
                                 }
                                 elseif($boolMatchesMarkedNotInterested == false && count($arrMatches) > 0)
                                 {
             //                          $arrToMark[$strJobIndex]['interested'] = null;
-                                        appendJobColumnData($arrToMark[$strJobIndex], 'notes',"|", "title_keyword_search_match_hit on term [". $strTitleTokenMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__);
+                                        appendJobColumnData($arrToMark[$strJobIndex], 'match_notes',"|", "title_keyword_search_match_hit on term [". $strTitleTokenMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__);
                                         appendJobColumnData($arrToMark[$strJobIndex], 'match_details',"|", "title_keyword_search_match_hit");
                                     $didNotMatch = false;
                                 }
@@ -586,7 +530,7 @@ class ClassJobsSiteCommon
                     {
                         $arrToMark[$strJobIndex]['interested'] = NO_TITLE_MATCHES;
                         $strTitleTokenKwds = getArrayValuesAsString(array_values($keywordsToMatch), "|", "", false );
-                        appendJobColumnData($arrToMark[$strJobIndex], 'notes',"|", "title_keyword_search_miss on terms [". $strTitleTokenKwds  ."]". C__STR_TAG_AUTOMARKEDJOB__);
+                        appendJobColumnData($arrToMark[$strJobIndex], 'match_notes',"|", "title_keyword_search_miss on terms [". $strTitleTokenKwds  ."]". C__STR_TAG_AUTOMARKEDJOB__);
                         appendJobColumnData($arrToMark[$strJobIndex], 'match_details',"|", "did_not_match_title_keywords");
                     }
                 }
@@ -603,7 +547,7 @@ class ClassJobsSiteCommon
 
     function markJobsList_SetAutoExcludedTitles(&$arrToMark)
     {
-        $this->markJobsList_SetAutoTitleMatches($arrToMark, $GLOBALS['DATA']['title_tokens_to_filter'], true, 'No (Title Excluded By Negative Keyword)' . C__STR_TAG_AUTOMARKEDJOB__);
+        $this->markJobsList_SetAutoTitleMatches($arrToMark, $GLOBALS['USERDATA']['title_negative_keyword_tokens'], true, 'No (Title Excluded By Negative Keyword)' . C__STR_TAG_AUTOMARKEDJOB__);
     }
 
     function markJobsList_SetAutoIncludeTitles(&$arrToMark)

@@ -62,7 +62,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
         $arrSearchSites = array_column($this->arrSearchesToReturn, "site_name");
         foreach(array_unique($arrSearchSites) as $sitename)
         {
-            $this->arrPluginClassesToRun[$sitename] = array('class_name'=>$GLOBALS['DATA']['site_plugins'][strtolower($sitename)]['class_name'], 'site_name'=>$sitename, 'searches' =>array());
+            $this->arrPluginClassesToRun[$sitename] = array('class_name'=>$GLOBALS['JOBSITE_PLUGINS'][strtolower($sitename)]['class_name'], 'site_name'=>$sitename, 'searches' =>array());
         }
 
         if(count($arrSearchSites) >= 0)

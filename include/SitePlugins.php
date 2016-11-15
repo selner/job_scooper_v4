@@ -120,13 +120,12 @@ function setupPlugins()
         {
 
             $classinst = new $class(null, null);
-            $GLOBALS['DATA']['site_plugins'][strtolower($classinst->getName())] = array('name'=>strtolower($classinst->getName()), 'class_name' => $class, 'include_in_run' => false, 'cached_jobs' => null );
-            $arrAddedPlugins[] = $classinst->getName();
-            // print('      Added job site plugin for '. $classinst->getName() . '.' . PHP_EOL);
+            $name = strtolower($classinst->getName());
+            $GLOBALS['JOBSITE_PLUGINS'][$name] = array('name'=> $name, 'class_name' => $class, 'include_in_run' => false, 'cached_jobs' => null );
             $classinst=null;
         }
     }
-    $strLog = "Added " . count($arrAddedPlugins) ." plugins: " . getArrayValuesAsString($arrAddedPlugins, ", ", null, false). ".";
+    $strLog = "Added " . count($GLOBALS['JOBSITE_PLUGINS']) ." plugins: " . getArrayValuesAsString(array_column($GLOBALS['JOBSITE_PLUGINS'], "name"), ", ", null, false). ".";
     if(isset($GLOBALS['logger']))
         $GLOBALS['logger']->logLine($strLog , \Scooper\C__DISPLAY_ITEM_DETAIL__);
     else

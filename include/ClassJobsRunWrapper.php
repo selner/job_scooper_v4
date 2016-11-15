@@ -295,6 +295,11 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
             array_push($arrResultFilesToCombine, $inputfile['details']);
 
         }
+
+        $xlsDetails = $this->__getAlternateOutputFileDetails__("xls", "", "AllResults");
+        $xlsOutputFile = $this->_combineCSVsToExcel($xlsDetails, $arrResultFilesToCombine);
+        array_push($arrFilesToAttach, $xlsOutputFile);
+
         $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \Scooper\C__SECTION_END__, \Scooper\C__NAPPSECONDLEVEL__);
 
 
@@ -314,18 +319,19 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
             // Output all job records and their values
             $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, null, array("", "-AllJobs", "CSV"), "all jobs", null, false);
 
-
+/*
             // Output only records that are new or not marked as excluded (aka "Yes" or "Maybe")
             $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "-AllActiveJobs", "CSV");
             $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "-AllActiveJobs", "HTML", null, $this->getKeysForHTMLOutput());
 
             $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedToday", "-UpdatedJobs");
             $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayNotInterested", "-UpdatedExcludedJobs");
-
+*/
             $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \Scooper\C__SECTION_END__, \Scooper\C__NAPPSECONDLEVEL__);
         }
 
 
+        $GLOBALS['logger']->logSectionHeader("Generating email content for user" . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
 
         $strResultCountsText = $this->getListingCountsByPlugin("text", $arrFinalJobs_SortedByCompanyRole);
         $strErrs = $GLOBALS['logger']->getCumulativeErrorsAsString();
@@ -342,9 +348,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
         $strErrHTML = preg_replace("/\n/", ("<br>" . chr(10) . chr(13)), $strErrsResult);
         $strResultHTML = $strResultCountsHTML . PHP_EOL . "<pre>" . $strErrHTML . "</pre>" . PHP_EOL;
 
-        $xlsDetails = $this->__getAlternateOutputFileDetails__("xls", "", "AllResults");
-        $xlsOutputFile = $this->_combineCSVsToExcel($xlsDetails, $arrResultFilesToCombine);
-        array_push($arrFilesToAttach, $xlsOutputFile);
+        $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \Scooper\C__SECTION_END__, \Scooper\C__NAPPSECONDLEVEL__);
 
         //
         // Send the email notification out for the completed job
@@ -425,7 +429,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
         if($this->is_OutputInterimFiles() == true)
         {
             $strDebugInputCSV = $this->classConfig->getFileDetails('output_subfolder')['directory'] . \Scooper\getDefaultFileName("", "_Jobs_From_UserInput", "csv");
-            $this->writeJobsListToFile($strDebugInputCSV, $arrAllJobsLoadedFromSrc, true, false, "ClassJobRunner-LoadCSVs");
+            $this->writeJobsListToFile($strDebugInputCSV, $arrAllJobsLoadedFromSrc, true, false, "ClassJobRunner-loadUserInputJobsFromCSV");
         }
 
         // These will be used at the beginning and end of
@@ -793,7 +797,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
         // First, build an array of all the possible job sites
         // and set them to "false", meaning they weren't searched
         //
-        foreach( $GLOBALS['DATA']['site_plugins'] as $plugin_setup)
+        foreach( $GLOBALS['JOBSITE_PLUGINS'] as $plugin_setup)
         {
             $arrSitesSearched[$plugin_setup['name']] = false;
         }
@@ -810,7 +814,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
         if($arrPluginJobsUnfiltered == null || !isset($arrPluginJobsUnfiltered) || !is_array($arrPluginJobsUnfiltered))
             $arrPluginJobsUnfiltered = $this->arrLatestJobs_UnfilteredByUserInput;
 
-        foreach( $GLOBALS['DATA']['site_plugins'] as $plugin_setup)
+        foreach( $GLOBALS['JOBSITE_PLUGINS'] as $plugin_setup)
         {
             $countPluginJobs = 0;
             $strName = $plugin_setup['name'];
@@ -1113,7 +1117,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
 //            'job_post_url',
 //            'job_site_date' =>'',
 //            'interested',
-//            'notes',
+//            'match_notes',
 //            'status',
 //            'last_status_update',
             'location',

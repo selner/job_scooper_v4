@@ -185,7 +185,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     //
     //
     //************************************************************************
-    function getName() { return $this->siteName; }
+    function getName() {
+        $name = strtolower($this->siteName);
+        if(is_null($name) || strlen($name) == 0)
+        {
+            $name = str_replace("plugin", "", get_class($this));
+        }
+        return $name;
+    }
     function getLocationSettingType() { return $this->typeLocationSearchNeeded; }
     private function _setLocationValue_($locVal) { $this->locationValue = $locVal; }
     function getLocationValue() { return $this->locationValue; }
@@ -666,9 +673,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             // this particular underlying problem
             //
             $strErr = $ex->getMessage();
-            if((isset($GLOBALS['DATA']['site_plugins']['employmentguide']) && (strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['employmentguide']['name']) == 0)||
-                 (isset($GLOBALS['DATA']['site_plugins']['careerbuilder']) && strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['careerbuilder']['name']) == 0) ||
-                (isset($GLOBALS['DATA']['site_plugins']['ziprecruiter']) && strcasecmp($this->siteName, $GLOBALS['DATA']['site_plugins']['ziprecruiter']['name']) == 0)) &&
+            if((isset($GLOBALS['JOBSITE_PLUGINS']['employmentguide']) && (strcasecmp($this->siteName, $GLOBALS['JOBSITE_PLUGINS']['employmentguide']['name']) == 0)||
+                 (isset($GLOBALS['JOBSITE_PLUGINS']['careerbuilder']) && strcasecmp($this->siteName, $GLOBALS['JOBSITE_PLUGINS']['careerbuilder']['name']) == 0) ||
+                (isset($GLOBALS['JOBSITE_PLUGINS']['ziprecruiter']) && strcasecmp($this->siteName, $GLOBALS['JOBSITE_PLUGINS']['ziprecruiter']['name']) == 0)) &&
                 (substr_count($strErr, "HTTP error #404") > 0))
             {
                 $strError = $this->siteName . " plugin returned a 404 page for the search.  This is not an error; it means zero results found." ;
@@ -712,9 +719,12 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         }
     }
 
-    private function _getCacheKey($strURLFirstPage)
+    private function _getCacheKeyForSearch($strURLFirstPage)
     {
-        return urlencode(\Scooper\getTodayAsString() . $strURLFirstPage);
+        $key = urlencode(\Scooper\getTodayAsString() . "days" . $this->getDaysURLValue() .$strURLFirstPage );
+        $GLOBALS['logger']->logLine("Cache key [" . $key . "] (md5=" .md5($key) .")", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+        return $key;
     }
 
     private function _getCache()
@@ -725,12 +735,13 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     private function _getCachedJobsForSearch_($searchSettings)
     {
         $cache = $this->_getCache();
-        $key = $this->_getCacheKey($searchSettings['search_start_url']);
+        $key = $this->_getCacheKeyForSearch($searchSettings['search_start_url']);
 
         $data = $cache->get($key);
         if ($data === FALSE)
         {
             // No cached data file found; return null;
+            $GLOBALS['logger']->logLine("Cache miss for key [" . $key . "] (md5=" .md5($key) .") in " . $cache->dir, \Scooper\C__DISPLAY_ERROR__);
             return null;
         }
         else
@@ -742,18 +753,18 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
     private function _setCachedJobsForSearch_($searchSettings, $dataJobs)
     {
-        $key = $this->_getCacheKey( $searchSettings['search_start_url']);
+        $key = $this->_getCacheKeyForSearch( $searchSettings['search_start_url']);
 
         $cache = $this->_getCache();
         $data = $cache->set($key, $dataJobs);
         if ($data === FALSE)
         {
-            $GLOBALS['logger']->logLine("Failed to cache results for search " . $searchSettings['name'] . " and key [" . $key . ".]", \Scooper\C__DISPLAY_ERROR__);
+            $GLOBALS['logger']->logLine("Failed to cache results for search " . $searchSettings['name'] . " and key [" . $key . "] (md5=" .md5($key) .") in " . $cache->dir, \Scooper\C__DISPLAY_ERROR__);
             return FALSE;
         }
         else
         {
-            $GLOBALS['logger']->logLine("Search " . $searchSettings['name'] . " listings cached to disk with key [" . $key . ".]", \Scooper\C__DISPLAY_NORMAL__);
+            $GLOBALS['logger']->logLine("Search " . $searchSettings['name'] . " listings cached to disk with key [" . $key . "] (md5=" .md5($key) .") in " . $cache->dir, \Scooper\C__DISPLAY_NORMAL__);
             return $dataJobs;
         }
     }
@@ -1171,264 +1182,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     }
 
 
-
-//    function markJobsList_NonTitleMatches(&$arrToMark, $searchDetails)
-//    {
-//        if(count($arrToMark) == 0) return;
-//
-//        $GLOBALS['logger']->logLine("Excluding Jobs that are not Title Matches for search " . $searchDetails['name'], \Scooper\C__DISPLAY_ITEM_START__);
-//
-//        //
-//        // check the search flag to see if this is needed
-//        //
-//        if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_BE_IN_TITLE) || \Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE))
-//        {
-//            //
-//            // verify we didn't get here when the keyword can be anywhere in the search
-//            //
-//            assert(!\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_ANYWHERE));
-//
-//            // get an array of the search keywords
-//            //
-//            if(!$searchDetails['keyword_set'] == null && is_array($searchDetails['keyword_set']) && count($searchDetails['keyword_set']) > 0)
-//            {
-//
-//                $kwdTokens = tokenizeKeywords($searchDetails['keyword_set']);
-//
-//                // Keywords entered on a per search basis as an override
-//                // are allowed to be set to the exact URL encoded value
-//                // the site expects in the search URL.  However, if this type
-//                // of value is used as the keyword_search_override, no
-//                // title-matching methods other than "match-type=any" are supported.
-//                //
-//                // Since we only get to this point if a non-"any" match-type was set
-//                // log the fact that we cannot apply the match type for the search
-//                // and return the unchanged jobs list
-//                //
-//                if($this->_isValueURLEncoded_($searchDetails['keyword_set'][0]))
-//                {
-//                    $strMatchTypeName = $this->_getKeywordMatchStringFromFlag_($searchDetails['user_setting_flags']);
-//                    $GLOBALS['logger']->logLine("Cannot apply keyword_match_type=" . $strMatchTypeName . " when keywords are set to exact URL-encoded strings.  Using match-type='any' for search '" .  $searchDetails['name'] ."' instead.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-//                    return;
-//                }
-//
-//                //
-//                // check array of jobs against keywords; mark any needed
-//                //
-//                foreach($arrToMark as $job)
-//                {
-//                    $strTitleMatchScrubbed = \Scooper\strScrub($job['job_title'], FOR_LOOKUP_VALUE_MATCHING);
-//                    $strInterestedValue = "";
-//
-//                    // We're going to check keywords for strict matches,
-//                    // but we should skip it if we're exact matching and we have multiple keywords, since
-//                    // that's not a possible match case.
-//                    if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE) && count($searchDetails['keyword_set']) >= 1)
-//                    {
-//
-//                        if(strcasecmp($strTitleMatchScrubbed, $searchDetails['keyword_set'][0]) != 0)
-//                        {
-//                            $strInterestedValue = C__STR_TAG_NOT_EXACT_TITLE_MATCH__ . C__STR_TAG_AUTOMARKEDJOB__;
-//                        }
-//                    }
-//                    else if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_BE_IN_TITLE) && count($searchDetails['keyword_set']) >= 1)
-//                    {
-//
-//                        // Check the different keywords against the job title.  If we got a
-//                        // match, leave that job record alone and move on.
-//                        //
-////                        $arrScrubbedKeywords = $this->_getScrubbedKeywordSet_($searchDetails['keyword_set']);
-//                        $arrScrubbedSubterms = array();
-//                        foreach($searchDetails['keyword_set'] as $keywordTerm)
-//                        {
-//                            $arrKeywordSubterms = explode(" ", $keywordTerm);
-//                            $newSubTerms = $this->_getScrubbedKeywordSet_($arrKeywordSubterms);
-//                            foreach($newSubTerms as $newTerm)
-//                                $arrScrubbedSubterms[] = $newTerm;
-//                        }
-//                        $arrScrubbedSubterms = array_unique($arrScrubbedSubterms);
-//
-//                        $nSubtermMatches = \Scooper\substr_count_array($strTitleMatchScrubbed, $arrScrubbedSubterms);
-//
-//                        // If we found a match for any subterm in the list, then
-//                        // this was a true match and we should leave it as interested = blank
-//                        if($nSubtermMatches <= 0 && $nSubtermMatches != count($arrScrubbedSubterms))
-//                            $strInterestedValue =  C__STR_TAG_NOT_A_KEYWORD_TITLE_MATCH__. C__STR_TAG_AUTOMARKEDJOB__;
-//                        else
-//                            $strInterestedValue = null;
-//
-//                    }
-//                    if(isset($strInterestedValue))
-//                        $arrJobsFound[$job['key_jobsite_siteid']]['interested'] = $strInterestedValue;
-//                }
-//            }
-//            else
-//            {
-//                $GLOBALS['logger']->logLine($searchDetails['key'] . " incorrectly set a keyword match type, but has no possible keywords.  Ignoring keyword_match_type request and returning all jobs.", \Scooper\C__DISPLAY_ERROR__);
-//            }
-//        }
-////        if(count($arrJobs_AutoUpdatable) > 0)
-////        {
-////            try
-////            {
-////                $arrTitles = \Scooper\array_copy($arrJobs_AutoUpdatable);
-//////                $titles = array_column($arrJobs_AutoUpdatable, "job_title", "job_title");
-//////                foreach($titles as $k_rec => $v_rec)
-//////                    $arrTitles[] = array('job_title' => $v_rec);
-//////
-////                //                foreach($titles as $k_rec => $v_rec)
-//////                    $arrTitles[] = array('job_title' => $v_rec);
-////                $tokenOutputFile = __DIR__. "/tempJobTitleTokens.csv";
-//////                $classCSVFile = new \Scooper\ScooperSimpleCSV($tokenOutputFile , 'w');
-//////                $classCSVFile->writeArrayToCSVFile($arrTitles, array('job_title'), array("job_title"));
-//////                $classCSVFile = null;
-////
-////
-////                $classCSVFile = new \Scooper\ScooperSimpleCSV($tokenOutputFile, 'w');
-////                $classCSVFile->writeArrayToCSVFile($arrTitles, array_keys(array_shift($arrTitles)), "key_jobsite_siteid");
-////                $arrTitlesTokened = callTokenizer($tokenOutputFile, null, "job_title");
-////
-////                foreach($arrTitlesTokened as $job)
-////                {
-////                    $arrMatches = array();
-////                    $arrMatchErrors = array();
-////                    $tokenizedTitle = join(" ", explode("|", $job['tokenized']));
-////
-//////                    $success = preg_match_multiple($GLOBALS['DATA']['title_tokens_to_filter'], $tokenizedTitle, $arrMatches , null, $arrMatchErrors );
-////
-//////                    $success = \Scooper\substr_count_array($tokenizedTitle, array$GLOBALS['DATA']['title_tokens_to_filter']);
-//////
-////                    $matched = substr_count_multi($tokenizedTitle, $GLOBALS['DATA']['title_tokens_to_filter'], $arrMatches );
-////
-////                    if(count($arrMatches) > 0)
-////                    {
-////                        $strTitleREMatches = getArrayValuesAsString(array_values($arrMatches), "|", "", false );
-////                        $strJobIndex = getArrayKeyValueForJob($job);
-////
-////                        $arrToMark[$strJobIndex]['interested'] = 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__;
-////                        if(strlen($arrToMark[$strJobIndex]['notes']) > 0) { $arrToMark[$strJobIndex]['notes'] = $arrToMark[$strJobIndex]['notes'] . " "; }
-////                        $arrToMark[$strJobIndex]['notes'] = "Title matched exclusion regex [". $strTitleREMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__;
-////                        $arrToMark[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
-////                    }
-////
-////                }
-////            }
-////            catch (Exception $ex)
-////            {
-////                $GLOBALS['logger']->logLine('ERROR:  Failed to verify titles against regex strings due to error: '. $ex->getMessage(), \Scooper\C__DISPLAY_ERROR__);
-////                if(isDebug()) { throw $ex; }
-////            }
-////        }
-//        $strTotalRowsText = "/".count($arrToMark);
-////        $nAutoExcludedTitleRegex = count(array_filter($arrToMark, "isInterested_TitleExcludedViaRegex"));
-//
-////        $GLOBALS['logger']->logLine("Marked titles regex(".$nAutoExcludedTitleRegex . $strTotalRowsText .") , skipped: " . $nJobsSkipped . $strTotalRowsText .", untouched: ". (count($arrToMark) - $nJobsSkipped - $nAutoExcludedTitleRegex) . $strTotalRowsText .")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
-//    }
-
-    /*
-     * _autoMarkUpdatedSearchJobs_
-     *
-     * Is passed the jobs returned for any given search, marks them for
-     * search-specific settings, such as strict title matching, and adds them
-     * to the plug-in's internal jobs list.
-     *
-     * @param array $arrAdd list of jobs to add to this plugins internal tracking list
-     * @param array $searchDetails details for the search that the jobs belong to
-     *
-     */
-    private function _autoMarkUpdatedSearchJobs_(&$arrJobsFound, $searchDetails)
-    {
-        if(!is_array($arrJobsFound)) return;
-
-
-        //
-        // check the search flag to see if this is needed
-        //
-        if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_BE_IN_TITLE) || \Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE))
-        {
-            //
-            // verify we didn't get here when the keyword can be anywhere in the search
-            //
-            assert(!\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_ANYWHERE));
-
-            // get an array of the search keywords
-            //
-            if(!$searchDetails['keyword_set'] == null && is_array($searchDetails['keyword_set']) && count($searchDetails['keyword_set']) > 0)
-            {
-
-                // Keywords entered on a per search basis as an override
-                // are allowed to be set to the exact URL encoded value
-                // the site expects in the search URL.  However, if this type
-                // of value is used as the keyword_search_override, no
-                // title-matching methods other than "match-type=any" are supported.
-                //
-                // Since we only get to this point if a non-"any" match-type was set
-                // log the fact that we cannot apply the match type for the search
-                // and return the unchanged jobs list
-                //
-                if($this->_isValueURLEncoded_($searchDetails['keyword_set'][0]))
-                {
-                    $strMatchTypeName = $this->_getKeywordMatchStringFromFlag_($searchDetails['user_setting_flags']);
-                    $GLOBALS['logger']->logLine("Cannot apply keyword_match_type=" . $strMatchTypeName . " when keywords are set to exact URL-encoded strings.  Using match-type='any' for search '" .  $searchDetails['name'] ."' instead.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                    return;
-                }
-
-                //
-                // check array of jobs against keywords; mark any needed
-                //
-                foreach($arrJobsFound as $job)
-                {
-                    $strTitleMatchScrubbed = \Scooper\strScrub($job['job_title'], FOR_LOOKUP_VALUE_MATCHING);
-                    $strInterestedValue = "";
-
-                    // We're going to check keywords for strict matches,
-                    // but we should skip it if we're exact matching and we have multiple keywords, since
-                    // that's not a possible match case.
-                    if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE) && count($searchDetails['keyword_set']) >= 1)
-                    {
-
-                        if(strcasecmp($strTitleMatchScrubbed, $searchDetails['keyword_set'][0]) != 0)
-                        {
-                            $strInterestedValue = C__STR_TAG_NOT_EXACT_TITLE_MATCH__ . C__STR_TAG_AUTOMARKEDJOB__;
-                        }
-                    }
-                    else if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_BE_IN_TITLE) && count($searchDetails['keyword_set']) >= 1)
-                    {
-
-                        // Check the different keywords against the job title.  If we got a
-                        // match, leave that job record alone and move on.
-                        //
-//                        $arrScrubbedKeywords = $this->_getScrubbedKeywordSet_($searchDetails['keyword_set']);
-                        $arrScrubbedSubterms = array();
-                        foreach($searchDetails['keyword_set'] as $keywordTerm)
-                        {
-                            $arrKeywordSubterms = explode(" ", $keywordTerm);
-                            $newSubTerms = $this->_getScrubbedKeywordSet_($arrKeywordSubterms);
-                            foreach($newSubTerms as $newTerm)
-                                $arrScrubbedSubterms[] = $newTerm;
-                        }
-                        $arrScrubbedSubterms = array_unique($arrScrubbedSubterms);
-
-                        $nSubtermMatches = \Scooper\substr_count_array($strTitleMatchScrubbed, $arrScrubbedSubterms);
-
-                        // If we found a match for any subterm in the list, then
-                        // this was a true match and we should leave it as interested = blank
-                        if($nSubtermMatches <= 0 && $nSubtermMatches != count($arrScrubbedSubterms))
-                            $strInterestedValue =  C__STR_TAG_NOT_A_KEYWORD_TITLE_MATCH__. C__STR_TAG_AUTOMARKEDJOB__;
-                        else
-                            $strInterestedValue = null;
-
-                    }
-                    if(isset($strInterestedValue))
-                        $arrJobsFound[$job['key_jobsite_siteid']]['interested'] = $strInterestedValue;
-                }
-            }
-            else
-            {
-                $GLOBALS['logger']->logLine($searchDetails['key'] . " incorrectly set a keyword match type, but has no possible keywords.  Ignoring keyword_match_type request and returning all jobs.", \Scooper\C__DISPLAY_ERROR__);
-            }
-        }
-    }
 
     //************************************************************************
     //

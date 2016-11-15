@@ -25,8 +25,6 @@ const C__STR_TAG_BAD_TITLE_POST__ = "No (Bad Title & Role)";
 const C__STR_TAG_NOT_A_KEYWORD_TITLE_MATCH__ = "No (Not a Keyword Title Match)";
 const C__STR_TAG_NOT_EXACT_TITLE_MATCH__ = "No (Not an Exact Title Match)";
 
-const C__STR_TAG_EXCLUDED_TITLE_REGEX = 'No (Title Excluded Via RegEx)';
-
 
 /*
 	For explanation and usage, see:
@@ -45,6 +43,7 @@ class JG_Cache2 extends JG_Cache {
     {
 
         $cachedir = join(DIRECTORY_SEPARATOR, array($dir, strtolower(\Scooper\getTodayAsString()), strtolower($subdir)));
+        $cachedir = str_replace(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $cachedir);
 
 //        if (isset($subdir) && count($subdir) > 0)
 //            $dir = $dir . strtolower($subdir);
@@ -59,10 +58,6 @@ class JG_Cache2 extends JG_Cache {
 
         parent::__construct($cachedir);
     }
-
-
-
-
 };
 
 
@@ -79,16 +74,6 @@ function isInterested_MarkedDuplicateAutomatically($var)
 function isInterested_MarkedAutomatically($var)
 {
     if(substr_count($var['interested'], C__STR_TAG_AUTOMARKEDJOB__) > 0)
-    {
-        return true;
-    };
-
-    return false;
-}
-
-function isInterested_TitleExcludedViaRegex($var)
-{
-    if(substr_count($var['interested'], C__STR_TAG_EXCLUDED_TITLE_REGEX) > 0)
     {
         return true;
     };
@@ -382,7 +367,7 @@ function updateJobColumn(&$job, $newJob, $strColumn, $fAllowEmptyValueOverwrite 
         if($fAllowEmptyValueOverwrite == true)
         {
             $job[$strColumn] = $newJob[$strColumn];
-            $job['notes'] .= $strColumn . " value '" . $prevJob[$strColumn]."' removed.'".PHP_EOL;
+            $job['match_notes'] .= $strColumn . " value '" . $prevJob[$strColumn]."' removed.'".PHP_EOL;
         }
     }
     else
@@ -390,7 +375,7 @@ function updateJobColumn(&$job, $newJob, $strColumn, $fAllowEmptyValueOverwrite 
         if(strcasecmp(\Scooper\strScrub($job[$strColumn]), \Scooper\strScrub($newJob[$strColumn])) != 0)
         {
             $job[$strColumn] = $newJob[$strColumn];
-            $job['notes'] .= PHP_EOL.$strColumn . ": old[" . $prevJob[$strColumn]."], new[" .$job[$strColumn]."]".PHP_EOL;
+            $job['match_notes'] .= PHP_EOL.$strColumn . ": old[" . $prevJob[$strColumn]."], new[" .$job[$strColumn]."]".PHP_EOL;
         }
     }
 
@@ -502,7 +487,7 @@ function getMergedJobRecord($prevJobRecord, $newerJobRecord)
     }
 
 
-    $mergedJob['notes'] = $newerJobRecord['notes'] . ' ' . $mergedJob['notes'];
+    $mergedJob['match_notes'] = $newerJobRecord['match_notes'] . ' ' . $mergedJob['match_notes'];
     $mergedJob['date_last_updated'] = \Scooper\getTodayAsString();
 
     return $mergedJob;
@@ -540,17 +525,22 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 
 }
 
-function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName, $indexKeyName = null)
+function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "keywords", $indexKeyName = null)
 {
     $inputFile = $GLOBALS['OPTS']['output_folder'] . "tmp-".$tempFileKey."-token-input.csv";
     $outputFile = $GLOBALS['OPTS']['output_folder']. "tmp-".$tempFileKey."-token-output.csv";
 
+    $headers = array($dataKeyName);
+    if(array_key_exists($dataKeyName, $arrData)) $headers = array_keys($arrData);
+
     $file = fopen($inputFile,"w");
-    fputcsv($file, explode(',', "keywords"));
+    fputcsv($file, $headers);
 
     foreach ($arrData as $line)
     {
-        fputcsv($file, explode(',', $line));
+        if(is_string($line))
+            $line = explode(',', $line);
+        fputcsv($file, $line);
     }
 
     fclose($file);

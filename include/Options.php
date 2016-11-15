@@ -112,16 +112,17 @@ function __initializeArgs__()
 
 function addUserOptionForSitePlugins()
 {
-    foreach($GLOBALS['DATA']['site_plugins'] as $site)
+    foreach($GLOBALS['JOBSITE_PLUGINS'] as $site)
     {
-        $strIncludeKey = 'include_'.strtolower($site['name']);
+        $sitename = strtolower($site['name']);
+        $strIncludeKey = 'include_'.$sitename;
 
         $GLOBALS['OPTS_SETTINGS'][$strIncludeKey ] = array(
-            'description'   => 'Include ' .strtolower($site['name']) . ' in the results list.' ,
+            'description'   => 'Include ' .$sitename . ' in the results list.' ,
             'default'       => -1,
             'type'          => Pharse::PHARSE_INTEGER,
             'required'      => false,
-            'short'      => strtolower($site['name'])
+            'short'         => $sitename
         );
     }
 }
