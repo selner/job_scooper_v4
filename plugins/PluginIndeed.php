@@ -124,12 +124,13 @@ class PluginIndeed extends ClassJobsSitePlugin
 
             $item['job_post_url'] = 'http://www.indeed.com' . $jobInfoNode->href;
 
+
+            // BUGBUG:  does not get ID from this valid URL  http://www.indeed.com/cmp/IEH-Laboratories/jobs/PT-Accounting-Intern-79cb387002268752?r=1&fccid=e6c6c781cbff7bd3
             $arrURLParts = explode("jk=",  $item['job_post_url']);
             if(isset($arrURLParts) && is_array($arrURLParts) && count($arrURLParts) >=2)
             {
                 $item['job_id'] = \Scooper\strScrub($arrURLParts[1]);
             }
-
 
             $subNode = $node->find("span[class='company'] span");
             if(isset($subNode) && isset($subNode[0])) $item['company'] = $subNode[0]->plaintext;
