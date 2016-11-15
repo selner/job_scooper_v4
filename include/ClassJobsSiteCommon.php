@@ -20,6 +20,7 @@ require_once(__ROOT__.'/lib/array_column.php');
 require_once(__ROOT__.'/include/JobListHelpers.php');
 
 define('RESULT', 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__);
+define('NO_TITLE_MATCHES', 'No (Title Did Not Match Search Keywords))' . C__STR_TAG_AUTOMARKEDJOB__);
 
 define('JOBS_SCOOPER_MAX_FILE_SIZE', 1024000);
 
@@ -100,9 +101,10 @@ class ClassJobsSiteCommon
             'location' => '',
             'job_site_category' => '',
             'job_site_date' =>'',
+            'date_last_updated' => '',
             'key_jobsite_siteid' => '',
             'key_company_role' => '',
-            'date_last_updated' => '',
+            'job_title_tokenized' => '',
          );
     }
 
@@ -543,8 +545,10 @@ class ClassJobsSiteCommon
 
                 foreach($arrTitlesTokened as $job)
                 {
-                    $arrMatches = array();
-                    $job['tokenized_string'] = join(" ", explode("|", $job['tokenized']));
+                    $didNotMatch = null;
+                    $strJobIndex = getArrayKeyValueForJob($job);
+                    $job['job_title_tokenized'] = join(" ", explode("|", $job['tokenized']));
+                    $arrToMark[$strJobIndex]['job_title_tokenized'] = $job['job_title_tokenized'];
 
 //                    $success = preg_match_multiple($GLOBALS['DATA']['title_tokens_to_filter'], $tokenizedTitle, $arrMatches , null, $arrMatchErrors );
 
@@ -552,29 +556,44 @@ class ClassJobsSiteCommon
 //
                     foreach($keywordsToMatch as $kywdtoken)
                     {
-                        $matched = substr_count_multi($job['tokenized_string'], $kywdtoken, $arrMatches, $boolMatchesMarkedNotInterested);
-                        $strTitleTokenMatches = getArrayValuesAsString(array_values($arrMatches), "|", "", false );
-                        $strJobIndex = getArrayKeyValueForJob($job);
-                        $arrToMark[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
-                        if(strlen($arrToMark[$strJobIndex]['notes']) > 0) { $arrToMark[$strJobIndex]['notes'] = $arrToMark[$strJobIndex]['notes'] . " "; }
+                        $arrMatches = array();
 
-                        if(count($arrMatches) > 0 && $boolMatchesMarkedNotInterested == true)
+                        $matched = substr_count_multi($job['job_title_tokenized'], $kywdtoken, $arrMatches, $boolMatchesMarkedNotInterested);
+                        if(count($arrMatches) > 0)
                         {
-                            $arrToMark[$strJobIndex]['interested'] = $matchResult;
-                            $arrToMark[$strJobIndex]['notes'] = "Title matched keyword[". $strTitleTokenMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__;
-                            appendJobColumnData($arrToMark[$strJobIndex], 'notes',"|", "title_keyword_exclusion_hit on term [". $strTitleTokenMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__);
-                            appendJobColumnData($arrToMark[$strJobIndex], 'match_details',"|", "title_keyword_exclusion_hit");
+                            $strTitleTokenMatches = getArrayValuesAsString(array_values($arrMatches), "|", "", false );
+                            $arrToMark[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
+
+                            if(count($arrMatches) === count($kywdtoken))
+                            {
+
+                                if($boolMatchesMarkedNotInterested == true)
+                                {
+                                    $arrToMark[$strJobIndex]['interested'] = $matchResult;
+                                    appendJobColumnData($arrToMark[$strJobIndex], 'notes',"|", "title_keyword_exclusion_hit on term [". $strTitleTokenMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__);
+                                    appendJobColumnData($arrToMark[$strJobIndex], 'match_details',"|", "title_keyword_exclusion_hit");
+                                    $didNotMatch = false;
+                                }
+                                elseif($boolMatchesMarkedNotInterested == false && count($arrMatches) > 0)
+                                {
+            //                          $arrToMark[$strJobIndex]['interested'] = null;
+                                        appendJobColumnData($arrToMark[$strJobIndex], 'notes',"|", "title_keyword_search_match_hit on term [". $strTitleTokenMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__);
+                                        appendJobColumnData($arrToMark[$strJobIndex], 'match_details',"|", "title_keyword_search_match_hit");
+                                    $didNotMatch = false;
+                                }
+                            }
+                            else
+                            {
+                                // do nothing
+                            }
                         }
-                        elseif($boolMatchesMarkedNotInterested == false && count($arrMatches) >= 0)
-                        {
-    //                            $arrToMark[$strJobIndex]['interested'] = null;
-                                appendJobColumnData($arrToMark[$strJobIndex], 'notes',"|", "title_keyword_search_match_hit on term [". $strTitleTokenMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__);
-                                appendJobColumnData($arrToMark[$strJobIndex], 'match_details',"|", "title_keyword_search_match_hit");
-                        }
-                        else
-                        {
-                            // Do nothing
-                        }
+                    }
+                    if($boolMatchesMarkedNotInterested == false && ($didNotMatch === null))
+                    {
+                        $arrToMark[$strJobIndex]['interested'] = NO_TITLE_MATCHES;
+                        $strTitleTokenKwds = getArrayValuesAsString(array_values($keywordsToMatch), "|", "", false );
+                        appendJobColumnData($arrToMark[$strJobIndex], 'notes',"|", "title_keyword_search_miss on terms [". $strTitleTokenKwds  ."]". C__STR_TAG_AUTOMARKEDJOB__);
+                        appendJobColumnData($arrToMark[$strJobIndex], 'match_details',"|", "did_not_match_title_keywords");
                     }
                 }
             }
@@ -584,15 +603,13 @@ class ClassJobsSiteCommon
                 if(isDebug()) { throw $ex; }
             }
         }
-        $strTotalRowsText = "/".count($arrToMark);
-        $nAutoExcludedTitleRegex = count(array_filter($arrToMark, "isInterested_TitleExcludedViaRegex"));
 
 //        $GLOBALS['logger']->logLine("Marked not interested via regex(".$nAutoExcludedTitleRegex . $strTotalRowsText ."):" . $strTotalRowsText .", updated: ". (count($arrToMark) - $nJobsSkipped - $nAutoExcludedTitleRegex) . $strTotalRowsText .")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
     }
 
     function markJobsList_SetAutoExcludedTitles(&$arrToMark)
     {
-        $this->markJobsList_SetAutoTitleMatches($arrToMark, $GLOBALS['DATA']['title_tokens_to_filter'], true, 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__);
+        $this->markJobsList_SetAutoTitleMatches($arrToMark, $GLOBALS['DATA']['title_tokens_to_filter'], true, 'No (Title Excluded By Negative Keyword)' . C__STR_TAG_AUTOMARKEDJOB__);
     }
 
     function markJobsList_SetAutoIncludeTitles(&$arrToMark)
