@@ -326,14 +326,14 @@ class ClassJobsSiteCommon
 
 
 
-    function markJobsList_withAutoItems(&$arrJobs, $strCallerDescriptor = "")
+    function markJobsList_withAutoItems(&$arrJobs)
     {
 
         $this->markJobsList_SetAutoIncludeTitles($arrJobs);
-        $this->markJobsList_SetAutoExcludedTitlesFromRegex($arrJobs, $strCallerDescriptor);
+        $this->markJobsList_SetAutoExcludedTitlesFromRegex($arrJobs);
         $this->markJobsList_SetAutoExcludedTitles($arrJobs);
-        $this->markJobsList_SetAutoExcludedCompaniesFromRegex($arrJobs, $strCallerDescriptor);
-        $this->markJobsList_SetLikelyDuplicatePosts($arrJobs, $strCallerDescriptor);
+        $this->markJobsList_SetAutoExcludedCompaniesFromRegex($arrJobs);
+        $this->markJobsList_SetLikelyDuplicatePosts($arrJobs);
     }
 
 
@@ -370,7 +370,7 @@ class ClassJobsSiteCommon
 
     }
 
-    function markJobsList_SetLikelyDuplicatePosts(&$arrToMark, $strCallerDescriptor = null)
+    function markJobsList_SetLikelyDuplicatePosts(&$arrToMark)
     {
         if(count($arrToMark) == 0) return;
 
@@ -418,7 +418,7 @@ class ClassJobsSiteCommon
 
     }
 
-    function markJobsList_SetAutoExcludedCompaniesFromRegex(&$arrToMark, $strCallerDescriptor = null)
+    function markJobsList_SetAutoExcludedCompaniesFromRegex(&$arrToMark)
     {
         if(count($arrToMark) == 0) return;
 
@@ -468,7 +468,7 @@ class ClassJobsSiteCommon
 
 
 
-    function markJobsList_SetAutoExcludedTitlesFromRegex(&$arrToMark, $strCallerDescriptor = null)
+    function markJobsList_SetAutoExcludedTitlesFromRegex(&$arrToMark)
     {
         if(count($arrToMark) == 0) return;
 
@@ -536,12 +536,6 @@ class ClassJobsSiteCommon
                 $arrTitles = \Scooper\array_copy($arrToMark);
 
                 $arrTitlesTokened = tokenizeMultiDimensionArray($arrTitles, "key_jobsite_siteid", "job_title", "jobList", "key_jobsite_siteid");
-//
-//                $tokenOutputFile = __DIR__. "/tempJobTitleTokens.csv";
-//
-//                $classCSVFile = new \Scooper\ScooperSimpleCSV($tokenOutputFile, 'w');
-//                $classCSVFile->writeArrayToCSVFile($arrTitles, array_keys(array_shift($arrTitles)), "key_jobsite_siteid");
-//                $arrTitlesTokened = callTokenizer($tokenOutputFile, null, "job_title");
 
                 foreach($arrTitlesTokened as $job)
                 {
@@ -599,7 +593,7 @@ class ClassJobsSiteCommon
             }
             catch (Exception $ex)
             {
-                $GLOBALS['logger']->logLine('ERROR:  Failed to verify titles against regex strings due to error: '. $ex->getMessage(), \Scooper\C__DISPLAY_ERROR__);
+                $GLOBALS['logger']->logLine('ERROR:  Failed to verify titles against negative keywords due to error: '. $ex->getMessage(), \Scooper\C__DISPLAY_ERROR__);
                 if(isDebug()) { throw $ex; }
             }
         }
@@ -631,7 +625,7 @@ class ClassJobsSiteCommon
 
 
 
-    function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true, $fFirstAutoMarkJobs = false, $strCallerDescriptor = "", $ext = "CSV", $keysToOutput=null, $detailsCSSToInclude = null)
+    function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true, $fFirstAutoMarkJobs = false, $loggedFileType = null, $ext = "CSV", $keysToOutput=null, $detailsCSSToInclude = null)
     {
 
         if(!$strOutFilePath || strlen($strOutFilePath) <= 0)
@@ -689,7 +683,7 @@ class ClassJobsSiteCommon
 
 //            $classCombined->writeArrayToCSVFile($arrJobsRecordsToUse, $keysToOutput, $this->arrKeysForDeduping);
         }
-        $GLOBALS['logger']->logLine($strCallerDescriptor . ($strCallerDescriptor  != "" ? " jobs" : "Jobs") ." list had  ". count($arrJobsRecordsToUse) . " jobs and was written to " . $strOutFilePath , \Scooper\C__DISPLAY_ITEM_START__);
+        $GLOBALS['logger']->logLine($loggedFileType . ($loggedFileType  != "" ? " jobs" : "Jobs") ." list had  ". count($arrJobsRecordsToUse) . " jobs and was written to " . $strOutFilePath , \Scooper\C__DISPLAY_ITEM_START__);
 
         return $strOutFilePath;
 
@@ -765,7 +759,7 @@ class ClassJobsSiteCommon
         {
             if(count($arrMyRecordsToInclude) > 0)
             {
-                $this->writeJobsListToFile($strOutFilePath, $arrRetJobs, $fIncludeFilteredJobsInResults);
+                $this->writeJobsListToFile($strOutFilePath, $arrRetJobs, $fIncludeFilteredJobsInResults, false, "writeMergedJobsCSVFile");
             }
             else
             {
@@ -801,7 +795,7 @@ class ClassJobsSiteCommon
                 $arrRetJobs = \Scooper\my_merge_add_new_keys($arrMyRecordsToInclude, $arrRetJobs);
             }
 
-            $this->writeJobsListToFile($strOutFilePath, $arrRetJobs, $fIncludeFilteredJobsInResults);
+            $this->writeJobsListToFile($strOutFilePath, $arrRetJobs, $fIncludeFilteredJobsInResults, false, "writeMergedJobsCSVFile2");
             $GLOBALS['logger']->logLine("Combined file has ". count($arrRetJobs) . " jobs and was written to " . $strOutFilePath , \Scooper\C__DISPLAY_ITEM_START__);
 
         }

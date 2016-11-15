@@ -54,7 +54,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
 
     function markMyJobsList_withAutoItems()
     {
-        $this->markJobsList_withAutoItems($this->arrLatestJobs, $this->siteName);
+        $this->markJobsList_withAutoItems($this->arrLatestJobs);
     }
 
     private function _combineCSVsToExcel($outfileDetails, $arrCSVFiles)
