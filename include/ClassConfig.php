@@ -458,10 +458,6 @@ class ClassConfig extends ClassJobsSitePlugin
         }
         $tempSearch['name'] = (isset($iniSearch['jobsite']) ? $iniSearch['jobsite'] . ': ' : "") . $iniSearch['name'];
         if(isset($iniSearch['url_format'])) $tempSearch['base_url_format']  = $iniSearch['url_format'];
-        if(isset($iniSearch['keywords'])) {
-            $tempSearch['original_keyword_search_override']  = $iniSearch['keywords'];
-            $tempSearch['keyword_search_override']  = $this->tokenizeKeywords($iniSearch['keywords']);
-        }
         if(isset($iniSearch['location'])) $tempSearch['location_user_specified_override']  = $iniSearch['location'];
 
         if(isset($iniSearch['keyword_match_type_string']) && strlen($iniSearch['keyword_match_type_string'] ) > 0)
@@ -589,39 +585,6 @@ class ClassConfig extends ClassJobsSitePlugin
         return $arrLocSet;
     }
 
-    private function tokenizeKeywords($keywords)
-    {
-        if (is_string($keywords))
-        {
-            $keywords = explode(",", $keywords);
-        }
-
-        if (!is_array($keywords))
-        {
-            throw new Exception("Invalid keywords object type.");
-        }
-
-        $keywordtempset = $GLOBALS['OPTS']['output_folder']. "/" .  "tempKeywordTokens-" . substr(join("", str_replace(" ", "", $keywords)), 0, 6);
-        $tokenInputFile = $keywordtempset . "-input.csv";
-        $tokenOutputFile = $keywordtempset . "-output.csv";
-        $classCSVFile = new \Scooper\ScooperSimpleCSV($tokenInputFile, 'w', true);
-        $kwds = array();
-        foreach($keywords as $k_rec => $v_rec)
-            $kwds[] = array('keyword' => $v_rec);
-
-
-        $classCSVFile->writeArrayToCSVFile($kwds, array("keyword"), array("keyword"));
-        $arrKeywordTokens = callTokenizer($tokenInputFile, $tokenOutputFile, "keyword");
-        unlink($tokenOutputFile);
-        $keywordset = array_column($arrKeywordTokens, "tokenized");
-        $retKeywords = array();
-        foreach (array_keys($keywordset) as $setKey)
-        {
-            $retKeywords[$setKey] = str_replace("|", " ", $keywordset[$setKey]);
-        }
-        return $retKeywords;
-    }
-
 //    private function _readTokenizedKeywordSetsFromConfig_($config)
 //    {
 //        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading keyword set from config file...", \Scooper\C__DISPLAY_ITEM_START__);
@@ -684,7 +647,7 @@ class ClassConfig extends ClassJobsSitePlugin
 //                    if(!is_string($ini_keyword_set['keywords']))
 //                        $ini_keyword_set['keywords'] = join(",", $ini_keyword_set['keywords']);
 //                    $ini_keyword_set['original_keywords'] = $ini_keyword_set['keywords'];
-//                    $ini_keyword_set['tokenized_keywords'] = $this->tokenizeKeywords($ini_keyword_set['keywords']);
+//                    $ini_keyword_set['tokenized_keywords'] = tokenizeKeywords($ini_keyword_set['keywords']);
 //
 //                    $this->configSettings['keyword_sets'][$strSetKey]['keywords_array'][] = explode(",", $ini_keyword_set['keywords']);
 //                    $this->configSettings['keyword_sets'][$strSetKey]['tokenized_keywords'][] = $ini_keyword_set['tokenized_keywords'];
@@ -734,7 +697,6 @@ class ClassConfig extends ClassJobsSitePlugin
                 elseif(isset($ini_keyword_set['key']) && strlen($ini_keyword_set['key']) > 0)
                 {
                     $strSetKey = $ini_keyword_set['key'];
-
                 }
 
 
@@ -780,9 +742,9 @@ class ClassConfig extends ClassJobsSitePlugin
                     $ini_keyword_set['keywords'] = explode(",", $ini_keyword_set['keywords']);
                 }
 
-
                 if(isset($ini_keyword_set['keywords']) && is_array($ini_keyword_set['keywords']) && count($ini_keyword_set['keywords']) > 0)
                 {
+                    $this->configSettings['keyword_sets'][$strSetKey]['tokenized_keywords']  = tokenizeKeywords($ini_keyword_set['keywords']);
                     foreach($ini_keyword_set['keywords'] as $keywordItem)
                     {
                         $this->configSettings['keyword_sets'][$strSetKey]['keywords_array'][] = \Scooper\strScrub($keywordItem, ADVANCED_TEXT_CLEANUP);
@@ -870,15 +832,18 @@ class ClassConfig extends ClassJobsSitePlugin
                             $arrKywdSetsForUniqSearches = array();
                             if($classPlug->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) || $classPlug->isBitFlagSet(C__JOB_ALWAYS_ADD_FULL_KEYWORDS_SET))
                             {
-                                $arrKywdSetsForUniqSearches[$keywordSet['key']] = array('key' => $keywordSet['key'], 'keywords_array' => $keywordSet['keywords_array']);
+                                $arrKywdSetsForUniqSearches[$keywordSet['key']] = array('key' => $keywordSet['key'], 'keywords_array' => $keywordSet['keywords_array'], 'tokenized_keywords' => $keywordSet['tokenized_keywords']);
                             }
                             else // if not, we need to add search for each keyword using that word as a single value in a keyword set
                             {
                                 $arrSetForEachTerm = array_chunk ( $keywordSet['keywords_array'], 1);
-                                foreach($arrSetForEachTerm as $set)
+                                $arrTokenSetForEachTerm = array_chunk ( $keywordSet['tokenized_keywords'], 1);
+                                foreach(array_keys($arrSetForEachTerm) as $setKey)
                                 {
+                                    $set = $arrSetForEachTerm[$setKey];
+
                                     $nameSet = $nameKywdSet."-".\Scooper\strScrub($set[0], FOR_LOOKUP_VALUE_MATCHING);
-                                    $arrKywdSetsForUniqSearches[$nameSet] = array('key' => $nameSet, 'keywords_array' => array($set[0]));
+                                    $arrKywdSetsForUniqSearches[$nameSet] = array('key' => $nameSet, 'keywords_array' => array($set[0]), 'tokenized_keywords' => $arrTokenSetForEachTerm[$setKey]);
                                 }
 
                             }
@@ -890,6 +855,7 @@ class ClassConfig extends ClassJobsSitePlugin
                                 $tempSearch['name'] =  $tempSearch['key'] . '-' . \Scooper\strScrub($keywordSet['name'], FOR_LOOKUP_VALUE_MATCHING);
                                 $tempSearch['site_name']  = $siteToSearch;
                                 $tempSearch['keyword_set']  = $searchKywdSet['keywords_array'];
+                                $tempSearch['tokenized_keywords'] = $searchKywdSet['tokenized_keywords'];
                                 $tempSearch['user_setting_flags'] = $keywordSet['keyword_match_type_flag'];
 
                                 $this->configSettings['searches'][] = $tempSearch;
@@ -1238,7 +1204,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
     private function _loadTitlesTokensToFilter_()
     {
-        $arrFileInput = $this->getInputFilesByType("regex_filter_titles");
+        $arrFileInput = $this->getInputFilesByType("negative_title_keywords");
         $fTitlesLoaded = false;
 
         $GLOBALS['DATA']['title_tokens_to_filter'] = array();
@@ -1266,7 +1232,7 @@ class ClassConfig extends ClassJobsSitePlugin
             {
                 if(file_exists($fileDetail ['full_file_path'] ) && is_file($fileDetail['full_file_path'] ))
                 {
-                    $arrTitlesTemp = callTokenizer($fileDetail ['full_file_path'], null, 'match_regex');
+                    $arrTitlesTemp = callTokenizer($fileDetail ['full_file_path'], null, 'negative_keywords');
 
 //                    $GLOBALS['logger']->logLine("Loading job title regexes to filter from ".$fileDetail ['full_file_path']."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
 //                    $classCSVFile = new \Scooper\ScooperSimpleCSV($fileDetail ['full_file_path'] , 'r');
@@ -1318,13 +1284,13 @@ class ClassConfig extends ClassJobsSitePlugin
         if($fTitlesLoaded == false)
         {
             if(count($arrFileInput) ==0)
-                $GLOBALS['logger']->logLine("No file specified for title regexes to exclude.'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
+                $GLOBALS['logger']->logLine("No file specified for title keywords to exclude.'. " , \Scooper\C__DISPLAY_WARNING__);
             else
-                $GLOBALS['logger']->logLine("Could not load regex list for titles to exclude from '" . getArrayValuesAsString($arrFileInput) . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
+                $GLOBALS['logger']->logLine("Could not load list of title keywords to exclude from '" . getArrayValuesAsString($arrFileInput) . "'.  Final list may not be filtered." , \Scooper\C__DISPLAY_WARNING__);
         }
         else
         {
-            $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($GLOBALS['DATA']['titles_to_filter']) . " regexes to use for filtering titles from '" . getArrayValuesAsString($this->getInputFilesByType("regex_filter_titles")) . "'." , \Scooper\C__DISPLAY_WARNING__);
+            $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($GLOBALS['DATA']['title_tokens_to_filter']) . " tokens to use for filtering titles from '" . getArrayValuesAsString($this->getInputFilesByType("negative_title_keywords")) . "'." , \Scooper\C__DISPLAY_WARNING__);
 
         }
 

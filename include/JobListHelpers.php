@@ -60,6 +60,9 @@ class JG_Cache2 extends JG_Cache {
         parent::__construct($cachedir);
     }
 
+
+
+
 };
 
 
@@ -393,6 +396,16 @@ function updateJobColumn(&$job, $newJob, $strColumn, $fAllowEmptyValueOverwrite 
 
 }
 
+function appendJobColumnData(&$job, $strColumn, $delim, $newData)
+{
+    if(is_string($job[$strColumn]) && strlen($job[$strColumn]) > 0)
+    {
+        $job[$strColumn] .= $delim . " ";
+    }
+    $job[$strColumn] .= $newData;
+
+}
+
 function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strDelimiter = "", $strIntro = "", $fIncludeKey = true)
 {
     $strReturn = "";
@@ -497,23 +510,130 @@ function getMergedJobRecord($prevJobRecord, $newerJobRecord)
 }
 
 
-function callTokenizer($inputfile, $outputFile, $keyname)
+function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 {
     $GLOBALS['logger']->logLine("Tokenizing title exclusion matches from ".$inputfile."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
     if(!$outputFile)
-        $outputFile = __DIR__. "/tempCallTokenizer.csv";
+        $outputFile = $GLOBALS['OPTS']['output_folder'] . "/tempCallTokenizer.csv";
     $cmd = "python /Users/bryan/Code/pyJobNormalizer/normalizeStrings.py -i " . $inputfile . " -o " . $outputFile . " -k " . $keyname;
+    if ($indexKeyName != null)
+        $cmd .= " --index " . $indexKeyName;
     $GLOBALS['logger']->logLine("Running command: " . $cmd   , \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
     exec($cmd);
 
     $GLOBALS['logger']->logLine("Loading tokens for ".$inputfile."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-    $classCSVFile = new \Scooper\ScooperSimpleCSV($outputFile, 'r');
-    $arrTokenizedList = $classCSVFile->readAllRecords(true);
+    $file = fopen($outputFile,"r");
+    $headers = fgetcsv($file);
+    $arrTokenizedList = array();
+    while (($rowData = fgetcsv($file, null, ",", "\"")) !== false) {
+        $arrRec = array_combine($headers, $rowData);
+        if($indexKeyName != null)
+            $arrTokenizedList[$arrRec[$indexKeyName]] = $arrRec;
+        else
+            $arrTokenizedList[] = $arrRec;
+    }
 
-    return $arrTokenizedList['data_rows'];
+    fclose($file);
+
+    return $arrTokenizedList;
 
 }
+
+function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName, $indexKeyName = null)
+{
+    $inputFile = $GLOBALS['OPTS']['output_folder'] . "tmp-".$tempFileKey."-token-input.csv";
+    $outputFile = $GLOBALS['OPTS']['output_folder']. "tmp-".$tempFileKey."-token-output.csv";
+
+    $file = fopen($inputFile,"w");
+    fputcsv($file, explode(',', "keywords"));
+
+    foreach ($arrData as $line)
+    {
+        fputcsv($file, explode(',', $line));
+    }
+
+    fclose($file);
+
+//    $objPHPExcel = new PHPExcel();
+//    $rowNumber = 1;
+//    $objPHPExcel->getActiveSheet()->fromArray($arrData, NULL,'A1');
+//    $objWriter = new PHPExcel_Writer_CSV($objPHPExcel);
+//    $objWriter->save($inputFile);
+
+//
+//    $classCSVFile = new \Scooper\ScooperSimpleCSV($outputFile, 'w');
+//    $classCSVFile->writeArrayToCSVFile($arrData, , $keyname);
+    $ret = callTokenizer($inputFile, $outputFile, $dataKeyName, $indexKeyName);
+    unlink($inputFile);
+    unlink($outputFile);
+
+    return $ret;
+}
+
+
+function tokenizeMultiDimensionArray($arrData, $keynameIndex, $keynameTokenize, $tempFileKey, $indexKeyName = null)
+{
+    $inputFile = __DIR__. "/tmp-".$tempFileKey."-token-input.csv";
+    $outputFile = __DIR__. "/tmp-".$tempFileKey."-token-output.csv";
+
+//    $classCSVFile = new \Scooper\ScooperSimpleCSV($tokenOutputFile, 'w');
+//    $classCSVFile->writeArrayToCSVFile($arrTitles, array_keys(array_shift($arrTitles)), "key_jobsite_siteid");
+//    $arrTitlesTokened = callTokenizer($tokenOutputFile, null, "job_title");
+
+
+    $file = fopen($inputFile,"w");
+    fputcsv($file, array_keys(array_shift($arrData)));
+
+    foreach ($arrData as $rec)
+    {
+        fputcsv($file, $rec);
+    }
+
+    fclose($file);
+
+//    $objPHPExcel = new PHPExcel();
+//    $rowNumber = 1;
+//    $objPHPExcel->getActiveSheet()->fromArray($arrData, NULL,'A1');
+//    $objWriter = new PHPExcel_Writer_CSV($objPHPExcel);
+//    $objWriter->save($inputFile);
+
+//
+//    $classCSVFile = new \Scooper\ScooperSimpleCSV($outputFile, 'w');
+//    $classCSVFile->writeArrayToCSVFile($arrData, , $keyname);
+    $ret = callTokenizer($inputFile, $outputFile, $keynameTokenize, $indexKeyName);
+    unlink($inputFile);
+    unlink($outputFile);
+
+    return $ret;
+}
+
+
+
+function tokenizeKeywords($arrKeywords)
+{
+    if (!is_array($arrKeywords))
+    {
+        throw new Exception("Invalid keywords object type.");
+    }
+
+//    $arrKeywordsForTokenize = array("keywords" => $arrKeywords);
+//    $arrKeywordsForTokenize = array("keywords" => "keywords");
+//    foreach(array_keys($arrKeywords) as $key)
+//    {
+//        $arrKeywordsForTokenize[] = array("keywords" => $arrKeywords[$key]);
+//    }
+    $arrKeywordTokens = tokenizeSingleDimensionArray($arrKeywords, "srchkwd", "keywords", "keywords");
+    $keywordset = array_column($arrKeywordTokens, "tokenized");
+    $retKeywords = array();
+    foreach (array_keys($keywordset) as $setKey)
+    {
+        $retKeywords[$setKey] = str_replace("|", " ", $keywordset[$setKey]);
+    }
+    return $retKeywords;
+}
+
+
 /**
  * Allows multiple expressions to be tested on one string.
  * This will return a boolean, however you may want to alter this.
@@ -568,7 +688,7 @@ function preg_match_multiple(array $patterns = array(), $subject = null, &$findi
  *
  * @returns bool True if successful; false if errors occurred.
  */
-function substr_count_multi($subject = "", array $patterns = array(), &$findings = array())
+function substr_count_multi($subject = "", array $patterns = array(), &$findings = array(), $boolMustMatchAllKeywords = false)
 {
     foreach ($patterns as $name => $pattern) {
         $found = false;
@@ -576,6 +696,10 @@ function substr_count_multi($subject = "", array $patterns = array(), &$findings
         if (0 < $count) {
             $findings[$name] = $pattern;
         } else {
+
+            if($boolMustMatchAllKeywords == true)
+                return (sizeof($findings) === sizeof($patterns));
+
 //            if (PREG_NO_ERROR !== ($code = preg_last_error() )) {
 //                $errors[$name] = $code;
 //            }

@@ -197,7 +197,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
      *
      *
      * @param  string $strOutFilePath The file to output the jobs list to
-     * @param  Array $arrMyRecordsToInclude An array of optional job records to combine into the file output CSV
      * @return string $strOutFilePath The file the jobs was written to or null if failed.
      */
     function writeMyJobsListToFile($strOutFilePath = null)
@@ -714,7 +713,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
     private function _getCacheKey($strURLFirstPage)
     {
-        return \Scooper\getTodayAsString() . $strURLFirstPage;
+        return urlencode(\Scooper\getTodayAsString() . $strURLFirstPage);
     }
 
     private function _getCache()
@@ -1215,7 +1214,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                 //
                 // check array of jobs against keywords; mark any needed
                 //
-                foreach($arrJobsFound as $job)
+                foreach($arrToMark as $job)
                 {
                     $strTitleMatchScrubbed = \Scooper\strScrub($job['job_title'], FOR_LOOKUP_VALUE_MATCHING);
                     $strInterestedValue = "";
@@ -1267,62 +1266,62 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                 $GLOBALS['logger']->logLine($searchDetails['key'] . " incorrectly set a keyword match type, but has no possible keywords.  Ignoring keyword_match_type request and returning all jobs.", \Scooper\C__DISPLAY_ERROR__);
             }
         }
-        if(count($arrJobs_AutoUpdatable) > 0)
-        {
-            try
-            {
-                $arrTitles = \Scooper\array_copy($arrJobs_AutoUpdatable);
-//                $titles = array_column($arrJobs_AutoUpdatable, "job_title", "job_title");
-//                foreach($titles as $k_rec => $v_rec)
-//                    $arrTitles[] = array('job_title' => $v_rec);
+//        if(count($arrJobs_AutoUpdatable) > 0)
+//        {
+//            try
+//            {
+//                $arrTitles = \Scooper\array_copy($arrJobs_AutoUpdatable);
+////                $titles = array_column($arrJobs_AutoUpdatable, "job_title", "job_title");
+////                foreach($titles as $k_rec => $v_rec)
+////                    $arrTitles[] = array('job_title' => $v_rec);
+////
+//                //                foreach($titles as $k_rec => $v_rec)
+////                    $arrTitles[] = array('job_title' => $v_rec);
+//                $tokenOutputFile = __DIR__. "/tempJobTitleTokens.csv";
+////                $classCSVFile = new \Scooper\ScooperSimpleCSV($tokenOutputFile , 'w');
+////                $classCSVFile->writeArrayToCSVFile($arrTitles, array('job_title'), array("job_title"));
+////                $classCSVFile = null;
 //
-                //                foreach($titles as $k_rec => $v_rec)
-//                    $arrTitles[] = array('job_title' => $v_rec);
-                $tokenOutputFile = __DIR__. "/tempJobTitleTokens.csv";
-//                $classCSVFile = new \Scooper\ScooperSimpleCSV($tokenOutputFile , 'w');
-//                $classCSVFile->writeArrayToCSVFile($arrTitles, array('job_title'), array("job_title"));
-//                $classCSVFile = null;
-
-
-                $classCSVFile = new \Scooper\ScooperSimpleCSV($tokenOutputFile, 'w');
-                $classCSVFile->writeArrayToCSVFile($arrTitles, array_keys(array_shift($arrTitles)), "key_jobsite_siteid");
-                $arrTitlesTokened = callTokenizer($tokenOutputFile, null, "job_title");
-
-                foreach($arrTitlesTokened as $job)
-                {
-                    $arrMatches = array();
-                    $arrMatchErrors = array();
-                    $tokenizedTitle = join(" ", explode("|", $job['tokenized']));
-
-//                    $success = preg_match_multiple($GLOBALS['DATA']['title_tokens_to_filter'], $tokenizedTitle, $arrMatches , null, $arrMatchErrors );
-
-//                    $success = \Scooper\substr_count_array($tokenizedTitle, array$GLOBALS['DATA']['title_tokens_to_filter']);
 //
-                    $matched = substr_count_multi($tokenizedTitle, $GLOBALS['DATA']['title_tokens_to_filter'], $arrMatches );
-
-                    if(count($arrMatches) > 0)
-                    {
-                        $strTitleREMatches = getArrayValuesAsString(array_values($arrMatches), "|", "", false );
-                        $strJobIndex = getArrayKeyValueForJob($job);
-
-                        $arrToMark[$strJobIndex]['interested'] = 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__;
-                        if(strlen($arrToMark[$strJobIndex]['notes']) > 0) { $arrToMark[$strJobIndex]['notes'] = $arrToMark[$strJobIndex]['notes'] . " "; }
-                        $arrToMark[$strJobIndex]['notes'] = "Title matched exclusion regex [". $strTitleREMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__;
-                        $arrToMark[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
-                    }
-
-                }
-            }
-            catch (Exception $ex)
-            {
-                $GLOBALS['logger']->logLine('ERROR:  Failed to verify titles against regex strings due to error: '. $ex->getMessage(), \Scooper\C__DISPLAY_ERROR__);
-                if(isDebug()) { throw $ex; }
-            }
-        }
+//                $classCSVFile = new \Scooper\ScooperSimpleCSV($tokenOutputFile, 'w');
+//                $classCSVFile->writeArrayToCSVFile($arrTitles, array_keys(array_shift($arrTitles)), "key_jobsite_siteid");
+//                $arrTitlesTokened = callTokenizer($tokenOutputFile, null, "job_title");
+//
+//                foreach($arrTitlesTokened as $job)
+//                {
+//                    $arrMatches = array();
+//                    $arrMatchErrors = array();
+//                    $tokenizedTitle = join(" ", explode("|", $job['tokenized']));
+//
+////                    $success = preg_match_multiple($GLOBALS['DATA']['title_tokens_to_filter'], $tokenizedTitle, $arrMatches , null, $arrMatchErrors );
+//
+////                    $success = \Scooper\substr_count_array($tokenizedTitle, array$GLOBALS['DATA']['title_tokens_to_filter']);
+////
+//                    $matched = substr_count_multi($tokenizedTitle, $GLOBALS['DATA']['title_tokens_to_filter'], $arrMatches );
+//
+//                    if(count($arrMatches) > 0)
+//                    {
+//                        $strTitleREMatches = getArrayValuesAsString(array_values($arrMatches), "|", "", false );
+//                        $strJobIndex = getArrayKeyValueForJob($job);
+//
+//                        $arrToMark[$strJobIndex]['interested'] = 'No (Title Excluded Via RegEx)' . C__STR_TAG_AUTOMARKEDJOB__;
+//                        if(strlen($arrToMark[$strJobIndex]['notes']) > 0) { $arrToMark[$strJobIndex]['notes'] = $arrToMark[$strJobIndex]['notes'] . " "; }
+//                        $arrToMark[$strJobIndex]['notes'] = "Title matched exclusion regex [". $strTitleREMatches  ."]". C__STR_TAG_AUTOMARKEDJOB__;
+//                        $arrToMark[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
+//                    }
+//
+//                }
+//            }
+//            catch (Exception $ex)
+//            {
+//                $GLOBALS['logger']->logLine('ERROR:  Failed to verify titles against regex strings due to error: '. $ex->getMessage(), \Scooper\C__DISPLAY_ERROR__);
+//                if(isDebug()) { throw $ex; }
+//            }
+//        }
         $strTotalRowsText = "/".count($arrToMark);
-        $nAutoExcludedTitleRegex = count(array_filter($arrToMark, "isInterested_TitleExcludedViaRegex"));
+//        $nAutoExcludedTitleRegex = count(array_filter($arrToMark, "isInterested_TitleExcludedViaRegex"));
 
-        $GLOBALS['logger']->logLine("Marked not interested via regex(".$nAutoExcludedTitleRegex . $strTotalRowsText .") , skipped: " . $nJobsSkipped . $strTotalRowsText .", untouched: ". (count($arrToMark) - $nJobsSkipped - $nAutoExcludedTitleRegex) . $strTotalRowsText .")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
+//        $GLOBALS['logger']->logLine("Marked titles regex(".$nAutoExcludedTitleRegex . $strTotalRowsText .") , skipped: " . $nJobsSkipped . $strTotalRowsText .", untouched: ". (count($arrToMark) - $nJobsSkipped - $nAutoExcludedTitleRegex) . $strTotalRowsText .")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
     }
 
     /*
