@@ -514,7 +514,7 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 {
     $GLOBALS['logger']->logLine("Tokenizing title exclusion matches from ".$inputfile."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
     if(!$outputFile)
-        $outputFile = $GLOBALS['OPTS']['output_folder'] . "/tempCallTokenizer.csv";
+        $outputFile = $GLOBALS['OPTS']['output_folder'] . "tempCallTokenizer.csv";
     $cmd = "python /Users/bryan/Code/pyJobNormalizer/normalizeStrings.py -i " . $inputfile . " -o " . $outputFile . " -k " . $keyname;
     if ($indexKeyName != null)
         $cmd .= " --index " . $indexKeyName;
@@ -574,8 +574,8 @@ function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName, $ind
 
 function tokenizeMultiDimensionArray($arrData, $keynameIndex, $keynameTokenize, $tempFileKey, $indexKeyName = null)
 {
-    $inputFile = __DIR__. "/tmp-".$tempFileKey."-token-input.csv";
-    $outputFile = __DIR__. "/tmp-".$tempFileKey."-token-output.csv";
+    $inputFile = $GLOBALS['OPTS']['output_folder'] . "/tmp-".$tempFileKey."-token-input.csv";
+    $outputFile = $GLOBALS['OPTS']['output_folder'] . "/tmp-".$tempFileKey."-token-output.csv";
 
 //    $classCSVFile = new \Scooper\ScooperSimpleCSV($tokenOutputFile, 'w');
 //    $classCSVFile->writeArrayToCSVFile($arrTitles, array_keys(array_shift($arrTitles)), "key_jobsite_siteid");
