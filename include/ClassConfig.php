@@ -1022,7 +1022,7 @@ class ClassConfig extends ClassJobsSitePlugin
         if(isset($GLOBALS['USERDATA']['title_negative_keyword_tokens']) && count($GLOBALS['USERDATA']['title_negative_keyword_tokens']) > 0)
         {
             // We've already loaded the titles; go ahead and return right away
-            $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokenized title strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            $GLOBALS['logger']->logLine("Using previously loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokenized title strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
             return;
         }
 
@@ -1078,12 +1078,6 @@ class ClassConfig extends ClassJobsSitePlugin
             $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokens to use for filtering titles from '" . getArrayValuesAsString($this->getInputFilesByType("negative_title_keywords")) . "'." , \Scooper\C__DISPLAY_WARNING__);
 
         }
-
-
-        if(count($arrFileInput) ==0)
-            $GLOBALS['logger']->logLine("No file specified for title keywords to exclude.'. " , \Scooper\C__DISPLAY_WARNING__);
-        else
-            $GLOBALS['logger']->logLine("Could not load list of title keywords to exclude from '" . getArrayValuesAsString($arrFileInput) . "'.  Final list may not be filtered." , \Scooper\C__DISPLAY_WARNING__);
 
 
     }
