@@ -97,11 +97,12 @@ def loadCSV(csvFileName, rowKeyName = None):
     csv_reader = None
     try:
         with csv_fp:
-            csv_reader = unicodecsv.DictReader(csv_fp, delimiter=",", quoting=unicodecsv.QUOTE_MINIMAL, errors='strict')
+            csv_reader = unicodecsv.DictReader(csv_fp, delimiter=",", quoting=unicodecsv.QUOTE_ALL, errors='strict')
             fields = csv_reader.fieldnames
             for row in csv_reader:
                 if rowKeyName is None:
                     rowKeyName = fields[0]
+
                 dictRecords[row[rowKeyName]] = row
     except Exception as err:
         print err
@@ -122,6 +123,10 @@ def tokenizeStrings(listStrings):
     for k in listStrings.keys():
         v = listStrings[k]
         retData[k] = { "original" : v, "tokenized" : []}
+        if len(k) == 0:
+            print "String value for key was empty.  Skipping..."
+            continue;
+
         tokens = getScrubbedStringTokens(v)
         retData[k]["tokenized"] = "|".join(tokens)
 
@@ -154,6 +159,7 @@ def combine_dicts(a, b):
     return z
 
 def getExpandedWords(strWords):
+    assert(len(strWords) > 0)
     s = ''.join(ch for ch in strWords if ch not in exclude)
 
     retWords = []

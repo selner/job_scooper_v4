@@ -131,13 +131,17 @@ function isJobUpdatedTodayNotInterested($var)
 
 function isMarkedInterested_IsBlank($var)
 {
-    if($var['interested'] == null || trim($var['interested']) =="" || strlen(trim($var['interested']))==0)
+    if(is_null($var['interested']) || strlen(trim($var['interested']))==0)
     {
         return true;
     }
     return false;
 }
 
+function isMarkedInterested_NotBlank($var)
+{
+    return !(isMarkedInterested_IsBlank($var));
+}
 
 function isMarked_InterestedOrBlank($var)
 {
@@ -494,13 +498,44 @@ function getMergedJobRecord($prevJobRecord, $newerJobRecord)
 
 }
 
+function loadCSV($filename, $indexKeyName = null)
+{
+    if(!is_file($filename))
+    {
+        throw new \Symfony\Component\Filesystem\Exception\FileNotFoundException($filename);
+    }
 
+    $file = fopen($filename,"r");
+    $headers = fgetcsv($file);
+    $arrLoadedList = array();
+    while (!feof($file) ) {
+        $rowData = fgetcsv($file);
+        if($rowData === false)
+        {
+            break;
+        }
+        else
+        {
+            $arrRec = array_combine($headers, $rowData);
+            if($indexKeyName != null)
+                $arrLoadedList[$arrRec[$indexKeyName]] = $arrRec;
+            else
+                $arrLoadedList[] = $arrRec;
+        }
+    }
+
+    fclose($file);
+
+    return $arrLoadedList;
+
+}
 function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 {
     $GLOBALS['logger']->logLine("Tokenizing title exclusion matches from ".$inputfile."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
     if(!$outputFile)
         $outputFile = $GLOBALS['OPTS']['output_folder'] . "tempCallTokenizer.csv";
-    $cmd = "python /Users/bryan/Code/pyJobNormalizer/normalizeStrings.py -i " . $inputfile . " -o " . $outputFile . " -k " . $keyname;
+    $PYTHONPATH = realpath(__DIR__ ."/../python/pyJobNormalizer/");
+    $cmd = "python " . $PYTHONPATH . "/normalizeStrings.py -i " . $inputfile . " -o " . $outputFile . " -k " . $keyname;
     if ($indexKeyName != null)
         $cmd .= " --index " . $indexKeyName;
     $GLOBALS['logger']->logLine("Running command: " . $cmd   , \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -511,12 +546,20 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
     $file = fopen($outputFile,"r");
     $headers = fgetcsv($file);
     $arrTokenizedList = array();
-    while (($rowData = fgetcsv($file, null, ",", "\"")) !== false) {
-        $arrRec = array_combine($headers, $rowData);
-        if($indexKeyName != null)
-            $arrTokenizedList[$arrRec[$indexKeyName]] = $arrRec;
+    while (!feof($file) ) {
+        $rowData = fgetcsv($file);
+        if($rowData === false)
+        {
+            break;
+        }
         else
-            $arrTokenizedList[] = $arrRec;
+        {
+            $arrRec = array_combine($headers, $rowData);
+            if($indexKeyName != null)
+                $arrTokenizedList[$arrRec[$indexKeyName]] = $arrRec;
+            else
+                $arrTokenizedList[] = $arrRec;
+        }
     }
 
     fclose($file);
@@ -555,14 +598,20 @@ function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "ke
 //    $classCSVFile = new \Scooper\ScooperSimpleCSV($outputFile, 'w');
 //    $classCSVFile->writeArrayToCSVFile($arrData, , $keyname);
     $ret = callTokenizer($inputFile, $outputFile, $dataKeyName, $indexKeyName);
-    unlink($inputFile);
-    unlink($outputFile);
+    $valInterimFiles = \Scooper\get_PharseOptionValue('output_interim_files');
+
+    if(isset($valInterimFiles) && $valInterimFiles != true)
+    {
+        unlink($inputFile);
+        unlink($outputFile);
+    }
+
 
     return $ret;
 }
 
 
-function tokenizeMultiDimensionArray($arrData, $keynameIndex, $keynameTokenize, $tempFileKey, $indexKeyName = null)
+function tokenizeMultiDimensionArray($arrData, $tempFileKey, $dataKeyName, $indexKeyName = null)
 {
     $inputFile = $GLOBALS['OPTS']['output_folder'] . "tmp-".$tempFileKey."-token-input.csv";
     $outputFile = $GLOBALS['OPTS']['output_folder'] . "tmp-".$tempFileKey."-token-output.csv";
@@ -573,11 +622,17 @@ function tokenizeMultiDimensionArray($arrData, $keynameIndex, $keynameTokenize, 
 
 
     $file = fopen($inputFile,"w");
-    fputcsv($file, array_keys(array_shift($arrData)));
+//    fputs($file, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
+
+    fputcsv($file, array_keys(array_shift(\Scooper\array_copy($arrData))));
 
     foreach ($arrData as $rec)
     {
-        fputcsv($file, $rec);
+        $line = join('`', $rec);
+
+        $outline = preg_replace("/\\x00/", "", utf8_encode($line));
+        $outRec = explode('`', $outline);
+        fputcsv($file, $outRec, ',', '"');
     }
 
     fclose($file);
@@ -591,9 +646,12 @@ function tokenizeMultiDimensionArray($arrData, $keynameIndex, $keynameTokenize, 
 //
 //    $classCSVFile = new \Scooper\ScooperSimpleCSV($outputFile, 'w');
 //    $classCSVFile->writeArrayToCSVFile($arrData, , $keyname);
-    $ret = callTokenizer($inputFile, $outputFile, $keynameTokenize, $indexKeyName);
-    unlink($inputFile);
-    unlink($outputFile);
+    $ret = callTokenizer($inputFile, $outputFile, $dataKeyName, $indexKeyName);
+    if(isset($valInterimFiles) && $valInterimFiles != true)
+    {
+        unlink($inputFile);
+        unlink($outputFile);
+    }
 
     return $ret;
 }
