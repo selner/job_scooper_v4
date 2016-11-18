@@ -502,10 +502,15 @@ function loadCSV($filename, $indexKeyName = null)
 {
     if(!is_file($filename))
     {
-        throw new \Symfony\Component\Filesystem\Exception\FileNotFoundException($filename);
+        throw new Exception("Specified input file '" . $filename . "' was not found.  Aborting.");
     }
 
     $file = fopen($filename,"r");
+    if(is_bool($file))
+    {
+        throw new Exception("Specified input file '" . $filename . "' could not be opened.  Aborting.");
+    }
+
     $headers = fgetcsv($file);
     $arrLoadedList = array();
     while (!feof($file) ) {
@@ -540,10 +545,19 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
         $cmd .= " --index " . $indexKeyName;
     $GLOBALS['logger']->logLine("Running command: " . $cmd   , \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-    exec($cmd);
+    $cmdOutput = array();
+    $cmdRet = "";
+    exec($cmd, $cmdOutput, $cmdRet);
+    foreach($cmdOutput as $resultLine)
+        $GLOBALS['logger']->logLine($resultLine, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
     $GLOBALS['logger']->logLine("Loading tokens for ".$inputfile."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
     $file = fopen($outputFile,"r");
+    if(is_bool($file))
+    {
+        throw new Exception("Specified input file '" . $outputFile . "' could not be opened.  Aborting.");
+    }
+
     $headers = fgetcsv($file);
     $arrTokenizedList = array();
     while (!feof($file) ) {

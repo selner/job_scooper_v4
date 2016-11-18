@@ -396,7 +396,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
         if(!is_file($tempFileDetails['full_file_path']))
         {
-            throw new Exception("Specified input file '" . $filename . "' was not found.  Aborting.");
+            throw new Exception("Specified input file '" . $tempFileDetails['full_file_path'] . "' was not found.  Aborting.");
         }
 
 
