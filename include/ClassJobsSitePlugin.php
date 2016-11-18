@@ -734,8 +734,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
     private function _getCacheKeyForSearch($searchSettings)
     {
-        $strURLPath = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $searchSettings['search_start_url']);
-        $key = urlencode($this->getDaysURLValue()."-".$strURLPath);
+        $key = $this->getDaysURLValue().$searchSettings['name'];
+//        $strURLPath = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $searchSettings['search_start_url']);
+//        $key = urlencode($this->getDaysURLValue()."-".$strURLPath);
         if(isDebug()) {  $GLOBALS['logger']->logLine("Cache key md5=(" .md5($key) .") key=[" . $key . "] ", \Scooper\C__DISPLAY_ITEM_DETAIL__); }
 
         return $key;
@@ -971,7 +972,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         sleep(5);
 
     }
-
     private function _getFullHTMLForDynamicWebpage_($url, $elementClass, $countRetry = 0)
     {
         $driver = null;
@@ -984,8 +984,15 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             else
             {
                 $host = 'http://localhost:4444/wd/hub'; // this is the default
-                $capabilities = DesiredCapabilities::safari();
+
+                $capabilities = DesiredCapabilities::phantomjs();
+                if(PHP_OS == "Darwin")
+                    $capabilities = DesiredCapabilities::safari();
+
                 $capabilities->setCapability("nativeEvents", true);
+                $capabilities->setCapability("setThrowExceptionOnScriptError", false);
+
+
                 $driver = RemoteWebDriver::create($host, $desired_capabilities = $capabilities, 5000);
                 $GLOBALS['selenium_sessionid'] = $driver->getSessionID();
             }

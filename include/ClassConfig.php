@@ -598,7 +598,7 @@ class ClassConfig extends ClassJobsSitePlugin
             foreach($config['search_keyword_set'] as $ini_keyword_set)
             {
 
-                $strSetKey = 'KeywordSet' . (count($this->configSettings['keyword_sets']) + 1);
+                $strSetKey = 'ks' . (count($this->configSettings['keyword_sets']) + 1);
                 if(isset($ini_keyword_set['name']) && strlen($ini_keyword_set['name']) > 0)
                 {
                     $strSetKey = $ini_keyword_set['name'];
@@ -759,8 +759,8 @@ class ClassConfig extends ClassJobsSitePlugin
                             foreach($arrKywdSetsForUniqSearches as $searchKywdSet)
                             {
                                 $tempSearch = $this->getEmptySearchDetailsRecord();
-                                $tempSearch['key'] = \Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . '-' . \Scooper\strScrub($searchKywdSet['key'], FOR_LOOKUP_VALUE_MATCHING);
-                                $tempSearch['name'] =  $tempSearch['key'] . '-' . \Scooper\strScrub($keywordSet['name'], FOR_LOOKUP_VALUE_MATCHING);
+                                $tempSearch['name'] =  \Scooper\strScrub($searchKywdSet['key'], FOR_LOOKUP_VALUE_MATCHING);
+                                $tempSearch['key'] = \Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($searchKywdSet['key'], FOR_LOOKUP_VALUE_MATCHING);
                                 $tempSearch['site_name']  = $siteToSearch;
                                 $tempSearch['keyword_set']  = $searchKywdSet['keywords_array'];
                                 $tempSearch['tokenized_keywords'] = $searchKywdSet['tokenized_keywords'];
