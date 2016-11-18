@@ -33,18 +33,30 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
 
         if(array_key_exists('selenium_sessionid', $GLOBALS) && isset($GLOBALS['selenium_sessionid']) && $GLOBALS['selenium_sessionid'] != -1)
         {
-            $driver = RemoteWebDriver::createBySessionID($GLOBALS['selenium_sessionid']);
-            $driver->quit();
-            unset ($GLOBALS['selenium_sessionid']);
+            try
+            {
+                $driver = RemoteWebDriver::createBySessionID($GLOBALS['selenium_sessionid']);
+                $driver->quit();
+                unset ($GLOBALS['selenium_sessionid']);
+            }
+            catch (Exception $ex) {
+                if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Failed to terminate Selenium webdriver session.  You will need to manually shut it down.", \Scooper\C__DISPLAY_ERROR__); }
+            }
         }
 
         if(array_key_exists('selenium_started', $GLOBALS) && isset($GLOBALS['selenium_started']) && $GLOBALS['selenium_started'] == true)
         {
-            if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Sending server shutdown call to Selenium server...", \Scooper\C__DISPLAY_ITEM_RESULT__); }
-            $cmd = "curl \"http://localhost:4444/selenium-server/driver?cmd=shutDownSeleniumServer\"";
-            exec($cmd);
+            try
+            {
+                if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Sending server shutdown call to Selenium server...", \Scooper\C__DISPLAY_ITEM_RESULT__); }
+                $cmd = "curl \"http://localhost:4444/selenium-server/driver?cmd=shutDownSeleniumServer\"";
+                exec($cmd);
 
-            unset ($GLOBALS['selenium_started']);
+                unset ($GLOBALS['selenium_started']);
+            }
+            catch (Exception $ex) {
+                if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Failed to send shutdown to Selenium server.  You will need to manually shut it down.", \Scooper\C__DISPLAY_ERROR__); }
+            }
         }
     }
 
