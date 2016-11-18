@@ -754,6 +754,7 @@ function substr_count_multi($subject = "", array $patterns = array(), &$findings
 {
     foreach ($patterns as $name => $pattern) {
         $found = false;
+        if (!is_array($pattern)) $pattern = array($pattern);
         $count = \Scooper\substr_count_array($subject, $pattern);
         if (0 < $count) {
             $findings[$name] = $pattern;
