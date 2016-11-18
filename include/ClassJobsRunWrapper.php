@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2014-15 Bryan Selner
+ * Copyright 2014-16 Bryan Selner
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain

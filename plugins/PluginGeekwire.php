@@ -1,6 +1,6 @@
 <?php
 /**
-* Copyright 2014-15 Bryan Selner
+* Copyright 2014-16 Bryan Selner
 *
 * Licensed under the Apache License, Version 2.0 (the "License"); you may
 * not use this file except in compliance with the License. You may obtain
@@ -24,8 +24,8 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 class PluginGeekwire extends ClassJobsSitePlugin
 {
     protected $siteName = 'Geekwire';
-    protected $siteBaseURL = 'http://www.geekwork.com/';
-    protected $strBaseURLFormat = "http://www.geekwork.com/jobs";
+    protected $siteBaseURL = 'http://www.geekwire.com/jobs/';
+    protected $strBaseURLFormat = "http://www.geekwire.com/jobs/";
 //    protected $strBaseURLFormat = "http://www.geekwork.com/jobs/?search_keywords=***KEYWORDS***&search_location=***LOCATION***";
     protected $typeLocationSearchNeeded = 'location-statecode';
     protected $additionalLoadDelaySeconds = 20;
