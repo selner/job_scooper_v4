@@ -126,10 +126,17 @@ class PluginIndeed extends ClassJobsSitePlugin
 
 
             // BUGBUG:  does not get ID from this valid URL  http://www.indeed.com/cmp/IEH-Laboratories/jobs/PT-Accounting-Intern-79cb387002268752?r=1&fccid=e6c6c781cbff7bd3
-            $arrURLParts = explode("jk=",  $item['job_post_url']);
+            $item['job_id'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $item['job_post_url']);
+            $arrURLParts = explode("jk=",  $item['job_id']);
             if(isset($arrURLParts) && is_array($arrURLParts) && count($arrURLParts) >=2)
             {
                 $item['job_id'] = \Scooper\strScrub($arrURLParts[1]);
+            }
+            else
+            {
+                $item['job_id'] = preg_replace('/\/(company|cmp)\//', "", $item['job_id']);
+                $item['job_id'] = preg_replace('/\?.*$/', "", $item['job_id']);
+                $item['job_id'] = \Scooper\strScrub(str_replace("/jobs/", "", $item['job_id']));
             }
 
             $subNode = $node->find("span[class='company'] span");
