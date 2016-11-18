@@ -284,6 +284,10 @@ class ClassJobsSiteCommon
             $retArrNormalized['job_post_url'] = "unknown";
         }
 
+        if(is_null($retArrNormalized['job_id']) || strlen($retArrNormalized['job_id']) == 0)
+        {
+            $retArrNormalized['job_id'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $retArrNormalized['job_post_url']);
+        }
 
 
         if(is_null($retArrNormalized['company']) || strlen($retArrNormalized['company']) <= 0 ||
