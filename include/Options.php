@@ -98,6 +98,18 @@ function __initializeArgs__()
             'required'      => false,
             'short'      => 'debug_files',
         ),
+        's3_bucket' => array(
+            'description'   => 'Name of the S3 bucket to publish to',
+            'default'       => "",
+            'type'          => Pharse::PHARSE_STRING,
+            'required'      => false
+        ),
+        's3_region' => array(
+            'description'   => 'Name of the AWS region to use for the S3 bucket',
+            'default'       => "",
+            'type'          => Pharse::PHARSE_STRING,
+            'required'      => false
+        ),
     );
 
 

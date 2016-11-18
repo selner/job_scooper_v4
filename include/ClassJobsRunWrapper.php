@@ -18,6 +18,7 @@
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/SitePlugins.php');
 require_once(__ROOT__.'/include/ClassMultiSiteSearch.php');
+require_once(__ROOT__.'/include/S3Publisher.php');
 
 const C__RESULTS_INDEX_ALL = '***TOTAL_ALL***';
 const C__RESULTS_INDEX_USER = '***TOTAL_USER***';
@@ -354,6 +355,14 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
         //
         $this->sendJobCompletedEmail($strResultText, $strResultHTML, $detailsHTMLFile, $arrFilesToAttach);
 
+        $s3 = array("bucket" => \Scooper\get_PharseOptionValue("s3_bucket"), "region" => \Scooper\get_PharseOptionValue("s3_region") );
+
+        if(!is_null($s3['bucket']) && !is_null($s3['region']))
+        {
+            $s3 = new S3Publisher($s3['bucket'], $s3['region']);
+            $s3->publishOutputFiles($GLOBALS['OPTS']['output_subfolder']['directory']);
+        }
+
         //
         // If the user has not asked us to keep interim files around
         // after we're done processing, then delete the interim HTML file
@@ -610,6 +619,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
 
 
         if($this->is_OutputInterimFiles() == true) {
+
             //
             // Let's save off the unfiltered jobs list in case we need it later.  The $this->arrLatestJobs
             // will shortly have the user's input jobs applied to it
