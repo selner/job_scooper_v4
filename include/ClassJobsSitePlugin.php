@@ -634,6 +634,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[". $searchDetails['name']), \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPTOPLEVEL__);
         $strStartingURL = $searchDetails['search_start_url'];
         $this->_logMemoryUsage_();
+        $arrPageJobsList = null;
 
         try {
 
@@ -662,7 +663,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                 {
                     throw new ErrorException("Class ". get_class($this) . " does not have a valid setting for parser.  Cannot continue.");
                 }
-                $this->_setCachedJobsForSearch_($searchDetails, $arrPageJobsList);
             }
         } catch (Exception $ex) {
 
@@ -714,15 +714,29 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         }
         finally
         {
-            $this->_logMemoryUsage_();
+            $key = $this->_getCacheKeyForSearch($searchDetails);
+            if (!is_null($arrPageJobsList))
+            {
+                $GLOBALS['logger']->logLine("Setting retrieved jobs to local disk cache as md5=(" .md5($key) .") key=[" . $key . "] in " . $this->_getCache()->dir . " for " . $searchDetails['name'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                $this->_setCachedJobsForSearch_($searchDetails, $arrPageJobsList);
+            }
+            else
+            {
+                $GLOBALS['logger']->logLine("No jobs were able to be cached as md5=(" .md5($key) .") key=[" . $key . "] in " . $this->_getCache()->dir . " for " . $searchDetails['name'], \Scooper\C__DISPLAY_WARNING__);
+
+            }
+            if(isDebug()) {  $this->_logMemoryUsage_(); }
+
+
             $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->siteName . "[". $searchDetails['name']), \Scooper\C__SECTION_END__, \Scooper\C__NAPPTOPLEVEL__);
         }
     }
 
-    private function _getCacheKeyForSearch($strURLFirstPage)
+    private function _getCacheKeyForSearch($searchSettings)
     {
-        $key = urlencode(\Scooper\getTodayAsString() . "days" . $this->getDaysURLValue() .$strURLFirstPage );
-        $GLOBALS['logger']->logLine("Cache key [" . $key . "] (md5=" .md5($key) .")", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $strURLPath = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $searchSettings['search_start_url']);
+        $key = urlencode($this->getDaysURLValue()."-".$strURLPath);
+        if(isDebug()) {  $GLOBALS['logger']->logLine("Cache key md5=(" .md5($key) .") key=[" . $key . "] ", \Scooper\C__DISPLAY_ITEM_DETAIL__); }
 
         return $key;
     }
@@ -735,17 +749,18 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     private function _getCachedJobsForSearch_($searchSettings)
     {
         $cache = $this->_getCache();
-        $key = $this->_getCacheKeyForSearch($searchSettings['search_start_url']);
+        $key = $this->_getCacheKeyForSearch($searchSettings);
 
         $data = $cache->get($key);
         if ($data === FALSE)
         {
             // No cached data file found; return null;
-            $GLOBALS['logger']->logLine("Cache miss for key [" . $key . "] (md5=" .md5($key) .") in " . $cache->dir, \Scooper\C__DISPLAY_ERROR__);
+            $GLOBALS['logger']->logLine("Cache miss for  md5=(" .md5($key) .") key=[" . $key . "] in " . $cache->dir, \Scooper\C__DISPLAY_ERROR__);
             return null;
         }
         else
         {
+            $GLOBALS['logger']->logLine("Using cached data from md5=(" .md5($key) .") key=[" . $key . "] in " . $cache->dir, \Scooper\C__DISPLAY_NORMAL__);
             return $data;
         }
 
@@ -753,30 +768,22 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
     private function _setCachedJobsForSearch_($searchSettings, $dataJobs)
     {
-        $key = $this->_getCacheKeyForSearch( $searchSettings['search_start_url']);
+        $key = $this->_getCacheKeyForSearch( $searchSettings);
+        if(is_null($dataJobs))
+            $dataJobs = array($this->getEmptyJobListingRecord());
 
         $cache = $this->_getCache();
         $data = $cache->set($key, $dataJobs);
         if ($data === FALSE)
         {
-            $GLOBALS['logger']->logLine("Failed to cache results for search " . $searchSettings['name'] . " and key [" . $key . "] (md5=" .md5($key) .") in " . $cache->dir, \Scooper\C__DISPLAY_ERROR__);
+            $GLOBALS['logger']->logLine("Failed to cache results for search " . $searchSettings['name'] . " and key md5=(" .md5($key) .") key=[" . $key . "]  in " . $cache->dir, \Scooper\C__DISPLAY_ERROR__);
             return FALSE;
         }
         else
         {
-            $GLOBALS['logger']->logLine("Search " . $searchSettings['name'] . " listings cached to disk with key [" . $key . "] (md5=" .md5($key) .") in " . $cache->dir, \Scooper\C__DISPLAY_NORMAL__);
+            $GLOBALS['logger']->logLine("Search " . $searchSettings['name'] . " listings cached to disk with key md5=(" .md5($key) .") key=[" . $key . "]  in " . $cache->dir, \Scooper\C__DISPLAY_NORMAL__);
             return $dataJobs;
         }
-    }
-
-    protected function getCachedJobResultsForSearch($searchDetails)
-    {
-        $dataCached = $this->_getCachedJobsForSearch_($searchDetails);
-        if($dataCached != null && is_array($dataCached))
-            return $dataCached;
-        else
-            return array();
-
     }
 
     private function getJobsFromMicroData($objSimpleHTML)
