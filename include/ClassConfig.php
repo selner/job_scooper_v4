@@ -288,7 +288,8 @@ class ClassConfig extends ClassJobsSitePlugin
             }
 
         }
-        $GLOBALS['OPTS']['output_folder'] = $this->arrFileDetails['output']['directory'];
+        $detailsOutDir = \Scooper\getFilePathDetailsFromString($this->arrFileDetails['output']['directory'], \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+        $GLOBALS['OPTS']['output_folder'] = $detailsOutDir['directory'];
 
 
         if(isset($config['input']) && isset($config['input']['folder']))
@@ -393,8 +394,15 @@ class ClassConfig extends ClassJobsSitePlugin
             $tempFileDetails = \Scooper\parseFilePath($this->arrFileDetails['input_folder']['directory'].$iniInputFileItem['filename'], true);
         }
 
+        if(!is_file($tempFileDetails['full_file_path']))
+        {
+            throw new Exception("Specified input file '" . $filename . "' was not found.  Aborting.");
+        }
+
+
         if(isset($tempFileDetails))
         {
+
             $this->arrFileDetails['user_input_files'][]= array('details'=> $tempFileDetails, 'data_type' => $iniInputFileItem['type']);
         }
     }
