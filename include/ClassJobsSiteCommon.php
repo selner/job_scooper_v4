@@ -211,6 +211,7 @@ class ClassJobsSiteCommon
         $retArrNormalized = $arrItem;
 
         // For reference, DEFAULT_SCRUB =  REMOVE_PUNCT | HTML_DECODE | LOWERCASE | REMOVE_EXTRA_WHITESPACE
+        $retArrNormalized['date_pulled'] = \Scooper\getTodayAsString();
 
         $retArrNormalized ['job_site'] = \Scooper\strScrub($retArrNormalized['job_site'], DEFAULT_SCRUB);
         $retArrNormalized ['job_id'] = \Scooper\strScrub($retArrNormalized['job_id'], SIMPLE_TEXT_CLEANUP);
