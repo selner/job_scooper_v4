@@ -1,4 +1,4 @@
-.idea/*
+.idea*
 
 *.lock
 
@@ -18,3 +18,4 @@ configs/*
 
 
 *.jar
+output
