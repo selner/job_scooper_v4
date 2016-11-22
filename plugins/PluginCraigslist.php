@@ -37,7 +37,7 @@ class PluginCraigslist extends ClassBaseSimpleJobSitePlugin
         'tag_location' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'result-hood'),
         'tag_postdate' => array('tag' => 'time', 'attribute' => 'class', 'attribute_value' =>'result-date'),
 
-        'regex_link_job_id' => '.*?/\w{3}\/\w{3}\/([^\/\.]+)/i'
+        'regex_link_job_id' => '/.*?\/\w{3}\/\w{3}\/([^\/\.]+)/'
     );
 
     function getItemURLValue($nItem)
