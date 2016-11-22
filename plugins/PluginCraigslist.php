@@ -19,22 +19,26 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 
 
 
-
-class PluginCraigslist  extends ClassJobsSitePlugin
+class PluginCraigslist extends ClassBaseSimpleJobSitePlugin
 {
     protected $siteName = 'Craigslist';
     protected $nJobListingsPerPage = 100;
     protected $siteBaseURL = 'http://seattle.craigslist.org';
     protected $strBaseURLFormat = "http://***LOCATION***.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=***KEYWORDS***&srchType=T";
-    protected $flagSettings = null;
+    protected $additionalFlags = [C__JOB_BASETYPE_WEBPAGE_FLAGS, C__JOB_LOCATION_REQUIRES_LOWERCASE, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
     protected $typeLocationSearchNeeded = 'location-city';
     protected $strKeywordDelimiter = "|";
 
-    function __construct($strBaseDir = null)
-    {
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS | C__JOB_LOCATION_REQUIRES_LOWERCASE | C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS;
-        parent::__construct($strBaseDir);
-    }
+    protected $arrListingTagSetup = array(
+        'tag_listings_section' => array('tag' => 'li', 'attribute' => 'class', 'attribute_value' =>'result-row'),
+        'tag_title' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'result-title hdrlnk'),
+        'tag_link' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'result-title hdrlnk'),
+        'tag_department' => array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'listing-department'),
+        'tag_location' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'result-hood'),
+        'tag_postdate' => array('tag' => 'time', 'attribute' => 'class', 'attribute_value' =>'result-date'),
+
+        'regex_link_job_id' => '.*?/\w{3}\/\w{3}\/([^\/\.]+)/i'
+    );
 
     function getItemURLValue($nItem)
     {
@@ -43,67 +47,5 @@ class PluginCraigslist  extends ClassJobsSitePlugin
         return $nItem - 1;
     }
 
-    function getDaysURLValue($days = null)
-    {
-        return VALUE_NOT_SUPPORTED;
-    }
+}
 
-
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        $resultsNode = $objSimpHTML->find("span[class='totalcount']");
-        if(isset($resultsNode) && is_array($resultsNode) && count($resultsNode))
-        {
-            return $resultsNode[0]->plaintext;
-        }
-        else
-        {
-            $noresults = strpos((string)$objSimpHTML, "no results");
-            return 0;
-        }
-
-        return -1;
-    }
-
-
-     function parseJobsListForPage($objSimpleHTML)
-    {
-        $ret = null;
-        $resultsSection= $objSimpleHTML->find('div[class="content"]');
-        $resultsSection= $resultsSection[0];
-
-        $nodesJobs = $resultsSection->find('p[class="row"] span[class="txt"');
-        foreach($nodesJobs as $node)
-        {
-            $item = $this->getEmptyJobListingRecord();
-
-            $jobTitleLink = $node->find("a[class='hdrlnk']");
-            $item['job_title'] = $jobTitleLink[0]->plaintext;
-            if($item['job_title'] == '') continue;
-
-            if(preg_match('/^http/', $jobTitleLink[0]->href) > 0)
-            {
-                $item['job_post_url'] =  $jobTitleLink[0]->href;
-
-            }
-            else
-            {
-                $item['job_post_url'] = $this->siteBaseURL . $jobTitleLink[0]->href;
-            }
-            $item['date_pulled'] = \Scooper\getTodayAsString();
-
-            $item['job_site'] = "Craigslist";
-            $item['job_id'] = $node->attr['data-pid'];
-            $item['job_site_date'] = $node->find("time")[0]->datetime;
-            $item['location'] = str_replace("pic", "", $node->find("span[class='pnr']")[0]->plaintext);
-
-//            $nodeCategory = $node->find("a[class='gc']");
-//            $item['job_site_category'] = $nodeCategory[0]->plaintext;
-
-            $ret[] = $this->normalizeItem($item);
-        }
-
-        return $ret;
-    }
-
-} 
