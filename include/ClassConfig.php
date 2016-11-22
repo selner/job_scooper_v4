@@ -738,7 +738,7 @@ class ClassConfig extends ClassJobsSitePlugin
                             // use a single search with the full set.
                             $nameKywdSet = $keywordSet['key'];
                             $arrKywdSetsForUniqSearches = array();
-                            if($classPlug->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) || $classPlug->isBitFlagSet(C__JOB_ALWAYS_ADD_FULL_KEYWORDS_SET))
+                            if($classPlug->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED))
                             {
                                 $arrKywdSetsForUniqSearches[$keywordSet['key']] = array('key' => $keywordSet['key'], 'keywords_array' => $keywordSet['keywords_array'], 'tokenized_keywords' => $keywordSet['tokenized_keywords']);
                             }
