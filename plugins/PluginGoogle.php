@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright 2014-15 Bryan Selner
+ * Copyright 2014-16 Bryan Selner
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -21,18 +21,16 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 
 class PluginGoogle extends ClassJobsSitePlugin
 {
-
-    // BUGBUG: currently uses microdata only which is missing location, date posted.  Need to switch to HTML parsed later to pick those facts up as well
-
     // BUGBUG: currently does not handle pagination of job listings
 
 
     protected $siteName = 'Google';
-    protected $siteBaseURL = 'https://www.google.com';
-    protected $strBaseURLFormat = 'https://www.google.com/about/careers/jobs#t=sq&q=j&li=20&l=false&jlo=en-US&j=***KEYWORDS***';
-    protected $classToCheckExists = null;
-    protected $regex_link_job_id = '/.*?([0-9]+)[\?\/&]*$/i';
+    protected $siteBaseURL = 'https://www.google.com/about/careers/jobs';
 
+    // BUGBUG:  Hard coded to use Seattle, Sea-Tac and Mountain View locations for the time being
+    protected $strBaseURLFormat = 'https://www.google.com/about/careers/jobs#t=sq&q=j&li=20&l=false&jlo=en-US&jcoid=7c8c6665-81cf-4e11-8fc9-ec1d6a69120c&jcoid=e43afd0d-d215-45db-a154-5386c9036525&jl=47.6062095%3A-122.3320708%3ASeattle%2C+WA%2C+USA%3AUS%3AUS%3A9.901219492788272%3ALOCALITY%3A%3A%3A%3A%3A%3A&jl=47.7881528%3A-122.3087405%3AMountlake+Terrace%2C+WA%2C+USA%3AUS%3AUS%3A1.8843888568290035%3ALOCALITY%3A%3A%3A%3A%3A%3A&jl=47.4435903%3A-122.2960726%3ASeaTac%2C+WA%2C+USA%3AUS%3AUS%3A3.5844312389483015%3ALOCALITY%3A%3A%3A%3A%3A%3A&jl=37.3860517%3A-122.0838511%3AMountain+View%2C+CA%2C+USA%3AUS%3AUnited+States%3A9.901223692706639%3ALOCALITY%3A%3A%3A%3ACA%3ASanta+Clara+County%3AMountain+View&jld=100&j=***KEYWORDS***';
+
+    protected $classToCheckExists = null;
 
     function getItemURLValue($nItem)
     {
@@ -42,8 +40,9 @@ class PluginGoogle extends ClassJobsSitePlugin
 
     function __construct($strBaseDir = null)
     {
+        $this->regex_link_job_id = '/' . REXPR_PARTIAL_MATCH_URL_DOMAIN . '/.*?jid=([^&]*)/i';
         parent::__construct($strBaseDir);
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_USE_SELENIUM | C__JOB_PREFER_MICRODATA;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_USE_SELENIUM ;
     }
 
     /**
@@ -103,30 +102,53 @@ class PluginGoogle extends ClassJobsSitePlugin
 
     }
 
+    protected function getNextInfiniteScrollSet($driver)
+    {
+        // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
+        $driver->executeScript("var elem = document.getElementById('gjsrpn').click();  if (elem != null) { console.log('attempting next button click on element ID gjsrpn'); elem.click();");
+        sleep(2);
+
+    }
+
 
 
     function parseJobsListForPage($objSimpHTML)
     {
         $ret = null;
 
-        $nodesJobs= $objSimpHTML->find('div[class="sr-title-container subhead2"]');
+        $nodesJobs= $objSimpHTML->find('div[role="listitem"]');
 
         if(!$nodesJobs) return null;
 
         foreach($nodesJobs as $node)
         {
             $item = $this->getEmptyJobListingRecord();
-            $item['job_post_url'] = $this->siteBaseURL . $node->children(0)->attr['href'];
-            $item['job_title'] = $node->children(0)->attr['title'];;
+
+            $item['job_id'] = $node->attr['id'];;
+
+            $subNode = $node->find("h2 a");
+            if(isset($subNode))
+            {
+                $item['job_post_url'] = $this->siteBaseURL . $subNode[0]->attr['href'];
+                $item['job_title'] = $subNode[0]->children[1]->plaintext;
+            }
+
             $item['job_site'] = $this->siteName;
-            $item['company'] = $this->siteName;
-            if($item['job_title'] == '') continue;
 
-            $summaryNode = $node->next_sibling();
-            $item['location'] = $summaryNode->children(2)->attr['title'];
+            if($item['job_id'] == '') continue;
 
-            $descrNode = $summaryNode->next_sibling();
-            $item['job_site_date'] = $descrNode->children(0)->plaintext;
+            $subNode = $node->find("span[class='location secondary-text']");
+            if(isset($subNode))
+                $item['location'] = $subNode[0]->plaintext;
+
+            $subNode = $node->find("span[class='secondary-text']");
+            if(isset($subNode))
+                $item['company'] = $subNode[0]->plaintext;
+            else
+                $item['company'] = $this->siteName;
+
+
+            $item['job_site_date'] = null;
             $item['date_pulled'] = \Scooper\getTodayAsString();
 
             $ret[] = $this->normalizeItem($item);
