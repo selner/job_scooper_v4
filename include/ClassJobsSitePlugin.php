@@ -653,11 +653,11 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
                 if($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_XML__))
                 {
-                    $arrPageJobsList = $this->_getMyJobsForSearchFromXML_($searchDetails, $strStartingURL);
+                    $arrPageJobsList = $this->_getMyJobsForSearchFromXML_($searchDetails);
                 }
                 elseif($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__))
                 {
-                    $arrPageJobsList = $this->_getMyJobsForSearchFromWebpage_($searchDetails, $strStartingURL);
+                    $arrPageJobsList = $this->_getMyJobsForSearchFromWebpage_($searchDetails);
                 }
                 else
                 {
@@ -879,7 +879,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     }
 
 
-    private function _getMyJobsForSearchFromXML_($searchDetails, $strStartingURL)
+    private function _getMyJobsForSearchFromXML_($searchDetails)
     {
 
         ini_set("user_agent",C__STR_USER_AGENT__);
@@ -890,14 +890,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         $nItemCount = 1;
         $nPageCount = 1;
 
-        $GLOBALS['logger']->logLine("Downloading count of " . $this->siteName ." jobs for search '".$searchDetails['key']. "': ".$strStartingURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Downloading count of " . $this->siteName ." jobs for search '".$searchDetails['key']. "': ".$searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $class = new \Scooper\ScooperDataAPIWrapper();
         $class->setVerbose(isVerbose());
-        $ret = $class->cURL($strStartingURL, null, 'GET', 'text/xml; charset=UTF-8');
+        $ret = $class->cURL($searchDetails['search_start_url'], null, 'GET', 'text/xml; charset=UTF-8');
         $xmlResult = simplexml_load_string($ret['output']);
 
-        if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strStartingURL);
+        if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$searchDetails['search_start_url']);
         $xmlResult->registerXPathNamespace("def", "http://www.w3.org/2005/Atom");
 
         if($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
@@ -922,7 +922,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         else
         {
 
-            $GLOBALS['logger']->logLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strStartingURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            $GLOBALS['logger']->logLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
             while ($nPageCount <= $totalPagesCount )
             {
@@ -1029,7 +1029,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     }
 
 
-    private function _getMyJobsForSearchFromWebpage_($searchDetails, $strStartURL)
+    private function _getMyJobsForSearchFromWebpage_($searchDetails)
     {
 
         $nItemCount = 1;
@@ -1038,13 +1038,13 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         $driver = null;
         $objSimpleHTML = null;
 
-        $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['key']. "': ".$strStartURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['key']. "': ".$searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         if($this->isBitFlagSet(C__JOB_USE_SELENIUM))
         {
             try
             {
-                $driver = $this->_getFullHTMLForDynamicWebpage_($strStartURL, $this->classToCheckExists);
+                $driver = $this->_getFullHTMLForDynamicWebpage_($searchDetails['search_start_url'], $this->classToCheckExists);
                 $html = $driver->getPageSource();
                 $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
             } catch (Exception $ex) {
@@ -1056,7 +1056,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         }
         else
         {
-            $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strStartURL, $this->secsPageTimeout );
+            $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $searchDetails['search_start_url'], $this->secsPageTimeout );
         }
         if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strStartURL); }
 
@@ -1087,7 +1087,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         {
             $nJobsFound = 0;
 
-            $GLOBALS['logger']->logLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$strStartURL, \Scooper\C__DISPLAY_ITEM_START__);
+            $GLOBALS['logger']->logLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_START__);
 
             while ($nPageCount <= $totalPagesCount )
             {
@@ -1135,7 +1135,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                         throw new ErrorException($strMsg);
                     }
                 }
-                $strURL = $strStartURL;
+                $strURL = $searchDetails['search_start_url'];
                 if(!isset($objSimpleHTML))
                 {
                     $strURL = $this->_getURLfromBase_($searchDetails, $nPageCount, $nItemCount);
