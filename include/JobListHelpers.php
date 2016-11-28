@@ -590,6 +590,11 @@ function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "ke
     $headers = array($dataKeyName);
     if(array_key_exists($dataKeyName, $arrData)) $headers = array_keys($arrData);
 
+    if(is_file($inputFile))
+    {
+        unlink($inputFile);
+    }
+
     $file = fopen($inputFile,"w");
     fputcsv($file, $headers);
 
@@ -634,6 +639,10 @@ function tokenizeMultiDimensionArray($arrData, $tempFileKey, $dataKeyName, $inde
 //    $classCSVFile->writeArrayToCSVFile($arrTitles, array_keys(array_shift($arrTitles)), "key_jobsite_siteid");
 //    $arrTitlesTokened = callTokenizer($tokenOutputFile, null, "job_title");
 
+    if(is_file($inputFile))
+    {
+        unlink($inputFile);
+    }
 
     $file = fopen($inputFile,"w");
 //    fputs($file, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
