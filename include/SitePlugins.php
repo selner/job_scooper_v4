@@ -33,7 +33,7 @@ require_once (__ROOT__.'/plugins/Plugins-Taleo.php');
 require_once (__ROOT__.'/plugins/Plugins-AdicioCareerCast.php');
 require_once (__ROOT__.'/plugins/Plugins-Resumator.php');
 require_once (__ROOT__.'/plugins/Plugins-Microdata.php');
-require_once (__ROOT__.'/plugins/PluginsJobsAPI.php');
+require_once (__ROOT__.'/plugins/Plugins-JobsAPI.php');
 
 require_once (__ROOT__.'/plugins/PluginIndeed.php');
 require_once (__ROOT__.'/plugins/PluginMonster.php');
