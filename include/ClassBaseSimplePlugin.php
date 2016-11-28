@@ -39,9 +39,9 @@ abstract class ClassBaseJobsAPIPlugin extends ClassBaseSimpleJobSitePlugin
 
         $pageNumber = 1;
         $noMoreJobs = false;
-        $arrPageJobsList = [];
         while($noMoreJobs != true)
         {
+            $arrPageJobsList = [];
             $apiJobs = $this->getSearchJobsFromAPI($searchDetails, $pageNumber);
 
             foreach($apiJobs as $job)
@@ -68,11 +68,14 @@ abstract class ClassBaseJobsAPIPlugin extends ClassBaseSimpleJobSitePlugin
                 $arrPageJobsList[$strCurrentJobIndex] = $item;
                 $nItemCount += 1;
             }
-            addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
-            if(count($arrSearchReturnedJobs) <= $this->nJobListingsPerPage)
+            if(count($arrPageJobsList) < $this->nJobListingsPerPage)
             {
+                addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
                 $noMoreJobs = true;
-                break;
+            }
+            else
+            {
+                addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
             }
             $pageNumber++;
         }

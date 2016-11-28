@@ -25,37 +25,37 @@ use JobApis\Jobs\Client\Queries\UsajobsQuery;
 use JobApis\Jobs\Client\Providers\GovtProvider;
 use JobApis\Jobs\Client\Providers\UsajobsProvider;
 use JobApis\Jobs\Client\Providers\DiceProvider;
-
-
-class PluginGovtJobs extends ClassBaseJobsAPIPlugin
-{
-    protected $siteBaseURL = 'http://search.digitalgov.gov/developer/jobs.html';
-    protected $strBaseURLFormat = 'http://search.digitalgov.gov/developer/jobs.html';
-    protected $siteName = 'GovtJobs';
-    protected $nJobListingsPerPage = 20;
-
-
-    function getSearchJobsFromAPI($searchDetails)
-    {
-        $strKeywords = $this->getCombinedKeywordString($searchDetails['keyword_set']);
-
-        // Add parameters to the query via the constructor
-        $options = [
-            'query' => $strKeywords
-        ];
-        $query = new GovtQuery($options);
-        $query->set('size', '1000');
-
-        $client = new GovtProvider($query);
-        $GLOBALS['logger']->logLine("Getting jobs from " . $query->getUrl() . "[". $searchDetails['name'] , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-        // Get a Collection of Jobs
-        $apiJobs = $client->getJobs();
-        return $apiJobs->all();
-
-    }
-
-}
+//
+//
+//class PluginGovtJobs extends ClassBaseJobsAPIPlugin
+//{
+//    protected $siteBaseURL = 'http://search.digitalgov.gov/developer/jobs.html';
+//    protected $strBaseURLFormat = 'http://search.digitalgov.gov/developer/jobs.html';
+//    protected $siteName = 'GovtJobs';
+//    protected $nJobListingsPerPage = 100;
+//
+//
+//    function getSearchJobsFromAPI($searchDetails)
+//    {
+//        $strKeywords = $this->getCombinedKeywordString($searchDetails['keyword_set']);
+//
+//        // Add parameters to the query via the constructor
+//        $options = [
+//            'query' => $strKeywords,
+//            'size' => 100,
+//        ];
+//        $query = new GovtQuery($options);
+//
+//        $client = new GovtProvider($query);
+//        $GLOBALS['logger']->logLine("Getting jobs from " . $query->getUrl() . "[". $searchDetails['name'] , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+//
+//        // Get a Collection of Jobs
+//        $apiJobs = $client->getJobs();
+//        return $apiJobs->all();
+//
+//    }
+//
+//}
 
 
 class PluginUSAJobs extends ClassBaseJobsAPIPlugin
@@ -97,7 +97,8 @@ class PluginDice extends ClassBaseJobsAPIPlugin
     protected $siteName = 'Dice';
 //    protected $nJobListingsPerPage = 1000;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
-    protected $regex_link_job_id = '/^.*\/job\/result\/([^\/]+)\/.*/i';
+    protected $regex_link_job_id = '/^.*\/job\/result\/([^\?]+).*/i';
+    protected $nJobListingsPerPage = 50;
 
 
 
@@ -108,9 +109,10 @@ class PluginDice extends ClassBaseJobsAPIPlugin
         // Add parameters to the query via the constructor
         $options = [
             'text' => $strKeywords,
-//            'page' => $pageNumber,
-//            'pgcnt' => 1000
-//            'city' => $searchDetails['location']
+            'page' => $pageNumber,
+            'pgcnt' => $this->nJobListingsPerPage,
+            'city' => $searchDetails['location_set']['location-city'],
+            'state' => $searchDetails['location_set']['location-state']
         ];
         $query = new DiceQuery($options);
         $client = new DiceProvider($query);
@@ -121,17 +123,15 @@ class PluginDice extends ClassBaseJobsAPIPlugin
         $apiJobs = $client->getJobs();
         $retJobs = [];
         $jobsForPage = $apiJobs->all();
-        while($jobsForPage != null)
+        if($jobsForPage != null)
         {
             foreach($jobsForPage as $job)
             {
                 $id = $this->getIDFromLink($this->regex_link_job_id, $job->url);
                 $job->setSourceId( $id );
-                $strCurrentJobIndex = getArrayKeyValueForJob($job);
-                $retJobs[$strCurrentJobIndex] = $job;
             }
         }
-        return $retJobs;
+        return $jobsForPage;
     }
 
 }
