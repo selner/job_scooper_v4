@@ -33,6 +33,7 @@ require_once (__ROOT__.'/plugins/Plugins-Taleo.php');
 require_once (__ROOT__.'/plugins/Plugins-AdicioCareerCast.php');
 require_once (__ROOT__.'/plugins/Plugins-Resumator.php');
 require_once (__ROOT__.'/plugins/Plugins-Microdata.php');
+require_once (__ROOT__.'/plugins/PluginsJobsAPI.php');
 
 require_once (__ROOT__.'/plugins/PluginIndeed.php');
 require_once (__ROOT__.'/plugins/PluginMonster.php');
@@ -49,6 +50,7 @@ require_once (__ROOT__.'/plugins/PluginDisney.php');
 require_once (__ROOT__.'/plugins/PluginGoogle.php');
 require_once (__ROOT__.'/plugins/PluginGeekwire.php');
 require_once (__ROOT__.'/plugins/PluginDotJobs.php');
+
 require_once (__ROOT__.'/plugins/PluginZipRecruiter.php');
 
 //
@@ -61,10 +63,11 @@ require_once (__ROOT__.'/plugins/PluginZipRecruiter.php');
 
 //And so on, 0x8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800 etc..
 
+const C__JOB_NONE = 0x0;
 const C__JOB_SEARCH_RESULTS_TYPE_NONE__ = 0x1;
 const C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__ = 0x2;
 const C__JOB_SEARCH_RESULTS_TYPE_XML__= 0x4;
-const C__JOB_NONE = 0x8;
+const C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__ = 0x8;
 
 const C__JOB_PAGECOUNT_NOTAPPLICABLE__= 0x10;
 const C__JOB_DAYS_VALUE_NOTAPPLICABLE__ = 0x20;
@@ -121,7 +124,7 @@ function setupPlugins()
 
             $classinst = new $class(null, null);
             $name = strtolower($classinst->getName());
-            $GLOBALS['JOBSITE_PLUGINS'][$name] = array('name'=> $name, 'class_name' => $class, 'include_in_run' => false, 'cached_jobs' => null );
+            $GLOBALS['JOBSITE_PLUGINS'][$name] = array('name'=> $name, 'class_name' => $class, 'include_in_run' => false, 'cached_jobs' => null, 'other_settings' => [] );
             $classinst=null;
         }
     }

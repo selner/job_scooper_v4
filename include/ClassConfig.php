@@ -318,8 +318,12 @@ class ClassConfig extends ClassJobsSitePlugin
         // Load the global search data that will be used to create
         // and configure all searches
         //
-
         $this->_readGlobalSearchParamtersFromConfig_($config);
+
+        //
+        // Load Plugin Specific settings from the config
+        //
+        $this->_readPluginSettingsFromConfig_($config);
 
 
         $this->_readKeywordSetsFromConfig_($config);
@@ -486,6 +490,23 @@ class ClassConfig extends ClassJobsSitePlugin
         return $tempSearch;
     }
 
+
+    private function _readPluginSettingsFromConfig_($config)
+    {
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading plugin setup information from config file...", \Scooper\C__DISPLAY_ITEM_START__);
+
+        foreach($GLOBALS['JOBSITE_PLUGINS'] as $classPlugin)
+        {
+            $name = strtolower($classPlugin['class_name']) . "_settings";
+            if(isset($config[$name]) && is_array($config[$name]))
+            {
+                $GLOBALS['JOBSITE_PLUGINS'][$classPlugin['name']]['other_settings'] = $config[$name];
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Found settings for " . $name, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+            }
+        }
+
+    }
 
     private function _readGlobalSearchParamtersFromConfig_($config)
     {

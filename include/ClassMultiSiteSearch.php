@@ -74,7 +74,8 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
         $arrSearchSites = array_column($this->arrSearchesToReturn, "site_name");
         foreach(array_unique($arrSearchSites) as $sitename)
         {
-            $this->arrPluginClassesToRun[$sitename] = array('class_name'=>$GLOBALS['JOBSITE_PLUGINS'][strtolower($sitename)]['class_name'], 'site_name'=>$sitename, 'searches' =>array());
+            $this->arrPluginClassesToRun[$sitename] = array_merge_recursive($GLOBALS['JOBSITE_PLUGINS'][strtolower($sitename)], array('searches' =>array()));
+//            $this->new[$sitename] = array_merge_recursive($GLOBALS['JOBSITE_PLUGINS'][strtolower($sitename)], array('class_name'=>$GLOBALS['JOBSITE_PLUGINS'][strtolower($sitename)]['class_name'], 'site_name'=>$sitename, 'searches' =>array());
         }
 
         if(count($arrSearchSites) >= 0)
@@ -113,7 +114,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
 
         foreach($this->arrPluginClassesToRun as $classPluginForSearch)
         {
-            $class = new $classPluginForSearch['class_name']($this->detailsMyFileOut['directory']);
+            $class = new $classPluginForSearch['class_name']($this->detailsMyFileOut['directory'], $classPluginForSearch);
             try
             {
 
@@ -130,7 +131,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
                 }
 
 
-                $GLOBALS['logger']->logLine("Setting up " . count($classPluginForSearch['searches']) . " search(es) for ". $classPluginForSearch['site_name'] . "...", \Scooper\C__DISPLAY_SECTION_START__);
+                $GLOBALS['logger']->logLine("Setting up " . count($classPluginForSearch['searches']) . " search(es) for ". $classPluginForSearch['name'] . "...", \Scooper\C__DISPLAY_SECTION_START__);
                 $class->addSearches($classPluginForSearch['searches']);
                 $arrResults = $class->getUpdatedJobsForAllSearches();
                 addJobsToJobsList($retJobList, $arrResults);
@@ -138,7 +139,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
             }
             catch (Exception $classError)
             {
-                $GLOBALS['logger']->logLine('ERROR:  Unable to load the class for ' .$classPluginForSearch['site_name'] . '. Skipping it\'s searches and continuing with any others.', \Scooper\C__DISPLAY_ERROR__);
+                $GLOBALS['logger']->logLine('ERROR:  Unable to load the class for ' .$classPluginForSearch['name'] . '. Skipping it\'s searches and continuing with any others.', \Scooper\C__DISPLAY_ERROR__);
                 $GLOBALS['logger']->logLine('ERROR:  Search failure reason:  '.$classError->getMessage(), \Scooper\C__DISPLAY_ERROR__);
                 if(isDebug()) { throw $classError; }
             }

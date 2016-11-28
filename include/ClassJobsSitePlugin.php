@@ -39,6 +39,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     protected $siteName = 'NAME-NOT-SET';
     protected $nJobListingsPerPage = 20;
     protected $flagSettings = null;
+    protected $additionalFlags = [];
     protected $secsPageTimeout = null;
 
     protected $strBaseURLFormat = null;
@@ -49,6 +50,31 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     protected $classToCheckExists = null;
     protected $cookieNamesToSaveAndResend = Array();
     protected $additionalLoadDelaySeconds = 0;
+
+
+    function __construct($strOutputDirectory = null, $attributes = null)
+    {
+        if(array_key_exists("JOBSITE_PLUGINS", $GLOBALS) && (array_key_exists(strtolower($this->siteName), $GLOBALS['JOBSITE_PLUGINS'])))
+        {
+        $plugin = $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->siteName)];
+            if(array_key_exists("other_settings", $plugin))
+            {
+                $keys = array_keys($plugin['other_settings']);
+                foreach($keys as $attrib_name)
+                {
+                    $this->$attrib_name = $plugin['other_settings'][$attrib_name];
+                }
+            }
+        }
+        if($this->additionalFlags)
+        {
+            foreach($this->additionalFlags as $flag)
+            {
+                $this->flagSettings = $this->flagSettings | $flag;
+            }
+        }
+        return parent::__construct($strOutputDirectory);
+    }
 
 
 
@@ -449,7 +475,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
 
 
-    protected function getCombinedKeywordStringForURL($arrKeywordSet)
+    protected function getCombinedKeywordString($arrKeywordSet)
     {
         $arrKeywords = array();
 
@@ -502,6 +528,24 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         {
             $strRetCombinedKeywords = sprintf($this->strTitleOnlySearchKeywordFormat, $strRetCombinedKeywords);
         }
+
+        return $strRetCombinedKeywords;
+    }
+
+    protected function getCombinedKeywordStringForURL($arrKeywordSet)
+    {
+        $arrKeywords = array();
+
+        if(!is_array($arrKeywordSet))
+        {
+            $arrKeywords[] =$arrKeywordSet[0];
+        }
+        else
+        {
+            $arrKeywords = $arrKeywordSet;
+        }
+
+        $strRetCombinedKeywords = $this->getCombinedKeywordString($arrKeywords);
 
         if(!$this->_isValueURLEncoded_($strRetCombinedKeywords))
         {
@@ -574,6 +618,8 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             }
         }
 
+        $searchDetails['location'] =  $searchDetails['location_search_value'];
+
         if(!$this->_isValueURLEncoded_($searchDetails['location_search_value'])) { $searchDetails['location_search_value'] = urlencode($searchDetails['location_search_value']); }
 
         if($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
@@ -632,14 +678,13 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     private function _getJobsForSearchByType_($searchDetails, $nAttemptNumber = 0)
     {
         $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[". $searchDetails['name']), \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPTOPLEVEL__);
-        $strStartingURL = $searchDetails['search_start_url'];
         $this->_logMemoryUsage_();
         $arrPageJobsList = null;
 
         try {
 
             // get the url for the first page/items in the results
-            if($this->_checkInvalidURL_($searchDetails, $strStartingURL) == VALUE_NOT_SUPPORTED) return;
+            if($this->_checkInvalidURL_($searchDetails, $searchDetails['search_start_url']) == VALUE_NOT_SUPPORTED) return;
 
             // get all the results for all pages if we have them cached already
             $arrPageJobsList = $this->_getCachedJobsForSearch_($searchDetails);
@@ -654,6 +699,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                 if($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_XML__))
                 {
                     $arrPageJobsList = $this->_getMyJobsForSearchFromXML_($searchDetails);
+                }
+                elseif($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__))
+                {
+                    $arrPageJobsList = $this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
                 }
                 elseif($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__))
                 {
@@ -689,7 +738,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                 //
 
 
-                $strError = "Failed to download jobs from " . $this->siteName ." jobs for search '".$searchDetails['name']. "[URL=".$strStartingURL. "].  ".$ex->getMessage();
+                $strError = "Failed to download jobs from " . $this->siteName ." jobs for search '".$searchDetails['name']. "[URL=".$searchDetails['search_start_url'] . "].  ".$ex->getMessage();
                 //
                 // Sometimes the site just returns a timeout on the request.  if this is the first attempt,
                 // delay a bit then try it once more before failing.
@@ -1058,7 +1107,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         {
             $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $searchDetails['search_start_url'], $this->secsPageTimeout );
         }
-        if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strStartURL); }
+        if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$searchDetails['search_start_url']); }
 
         $totalPagesCount = 1;
         $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
@@ -1100,7 +1149,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                     try
                     {
                         if($driver == null)
-                            $driver = $this->_getFullHTMLForDynamicWebpage_($strStartURL, $this->classToCheckExists);
+                            $driver = $this->_getFullHTMLForDynamicWebpage_($searchDetails['search_start_url'], $this->classToCheckExists);
 
                         if($this->isBitFlagSet( C__JOB_INFSCROLL_DOWNFULLPAGE))
                         {

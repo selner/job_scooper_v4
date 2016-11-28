@@ -18,6 +18,71 @@
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
+abstract class ClassBaseJobsAPIPlugin extends ClassBaseSimpleJobSitePlugin
+{
+    protected $siteBaseURL = '';
+    protected $siteName = '';
+
+    function __construct($strBaseDir = null)
+    {
+        $this->additionalFlags = [C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
+        parent::__construct($strBaseDir);
+    }
+    function getSearchJobsFromAPI($searchDetails) { return VALUE_NOT_SUPPORTED; }
+
+    protected function _getMyJobsForSearchFromJobsAPI_($searchDetails)
+    {
+        $nItemCount = 0;
+
+        $arrSearchReturnedJobs = [];
+        $GLOBALS['logger']->logLine("Downloading count of " . $this->siteName ." jobs for search '".$searchDetails['key']. "'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+        $pageNumber = 1;
+        $noMoreJobs = false;
+        $arrPageJobsList = [];
+        while($noMoreJobs != true)
+        {
+            $apiJobs = $this->getSearchJobsFromAPI($searchDetails, $pageNumber);
+
+            foreach($apiJobs as $job)
+            {
+                $item = $this->getEmptyJobListingRecord();
+                $item['job_site'] = $this->siteName;
+                $item['job_title'] = $job->name;
+                $item['job_id'] = $job->sourceId;
+                if($item['job_id'] == null)
+                    $item['job_id'] = $job->url;
+
+                if(strlen(trim($item['job_title'])) == 0 || strlen(trim($item['job_id'])) == 0)
+                {
+                    continue;
+                }
+                $item['location'] = $job->location;
+                $item['company'] = $job->company;
+                if($job->datePosted != null)
+                    $item['job_site_date'] = $job->datePosted->format('D, M d');
+                $item['job_post_url'] = $job->url;
+
+                $item = $this->normalizeItem($item);
+                $strCurrentJobIndex = getArrayKeyValueForJob($item);
+                $arrPageJobsList[$strCurrentJobIndex] = $item;
+                $nItemCount += 1;
+            }
+            addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
+            if(count($arrSearchReturnedJobs) <= $this->nJobListingsPerPage)
+            {
+                $noMoreJobs = true;
+                break;
+            }
+            $pageNumber++;
+        }
+
+        $GLOBALS['logger']->logLine($this->siteName . "[".$searchDetails['name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+        return $arrSearchReturnedJobs;
+    }
+}
+
+
 abstract class ClassSimpleFullPageJobSitePlugin extends ClassBaseSimpleJobSitePlugin
 {
     protected $childSiteURLBase = '';
@@ -71,19 +136,6 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
         'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
     );
 
-    function __construct($strOutputDirectory = null)
-    {
-        if($this->additionalFlags)
-        {
-            foreach($this->additionalFlags as $flag)
-            {
-                $this->flagSettings = $this->flagSettings | $flag;
-            }
-        }
-        return parent::__construct($strOutputDirectory);
-    }
-
-
     /**
      * parseTotalResultsCount
      *
@@ -99,7 +151,7 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
      */
     function parseTotalResultsCount($objSimpHTML)
     {
-        assert($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__), "$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__)");
+        assert($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__));
 
         return C__TOTAL_ITEMS_UNKNOWN__;
     }
@@ -147,6 +199,7 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
 
         return $strReturn;
     }
+
     /**
     /**
      * parseJobsListForPage
