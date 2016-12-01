@@ -35,7 +35,6 @@ Then update config.ini values for your notification email address and output fol
 If you're looking at job listings across many sites, Job Scooper has some built-in features to make that work much easier:
 * **Automatic duplication detection:**  if the same job is posted on multiple sites, job scooper automatically marks all but the first one as duplicates so you don't waste time reviewing the same job again.
 * **Filter to title-only matches for the keywords:**  The majority of sites do not support filtering your search to match only the job title.  One of the best features of Job Scooper is that it let's you filter to title-only matches for any site, regardless of whether the site supports it or not!
-* **Filter out jobs you've already reviewed**
 * **Exclude specific companies automatically**
 * **Exclude particular job title matches automatically**
 
