@@ -59,15 +59,14 @@ You will need to set up Selenium Standalone Server in order for plugins like Fac
 * Install Java SE Development Kit from Oracle from http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html.  Selenium Standalone Server requires Java 8 on macOS 10.12.
 * Copy the .jar for Selenium into ./lib/
 
-Note: The code currently uses the Safari 10 webdriver for accessing dynamic pages; you will need add support for other webdrivers to run this on another OS than macOS Sierra 10.12.  Check out https://webkit.org/blog/6900/webdriver-support-in-safari-10/ to learn how to configure Safari for WebDriver automation.
+Note: The code currently uses the Safari 10 webdriver on macOS and uses phantomJS on other OSs for accessing dynamic pages  You will need add support for other webdrivers to run this on another OS than macOS Sierra 10.12.  Check out https://webkit.org/blog/6900/webdriver-support-in-safari-10/ to learn how to configure Safari for WebDriver automation.
+
+You will also need Python 2.7 and pip.  To install the necessary modules for Python, run "pip install -r /python/pyJobNormalizer/requirements.txt".  You will also need the NTLK data available at http://www.nltk.org/data.html.
 
 ##Other Stuff
-* Version:  v3.0.0 [release notes](https://github.com/selner/jobs_scooper/releases)
+* Version:  v3.5.0 [release notes](https://github.com/selner/jobs_scooper/releases)
 * Author:  Bryan Selner (bryan at bryanselner dot com)
 * Platforms:
 	* PHP 5.6.24 on macOS 10.12 (Sierra)
-	* v2.0 was tested on Ubuntu Linux 14.04 with PHP 5.5.9-1ubuntu4.2 (with E_NOTICE error reporting disabled.)
-	* Note:  The AppleScripts will fail on any platform other than Mac OS X.  This only affects the client-side HTML download site plugins (about 7 out of over 60).  Job Scooper should process all the others without issues.
-	* However:  your mileage might vary on any other platform or version.
-on any platform that isn't Mac OSX, so you'll have to workaround that.
+	* Your mileage might vary on any other platform or version.
 * Issues/Bugs:  [Please report them!](../../issues)
