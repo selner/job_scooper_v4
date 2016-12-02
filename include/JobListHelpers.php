@@ -42,13 +42,13 @@ class JG_Cache2 extends JG_Cache {
     function __construct($dir, $subdir = "")
     {
 
-        $cachedir = join(DIRECTORY_SEPARATOR, array($dir, strtolower(\Scooper\getTodayAsString()), strtolower($subdir)));
+        $cachedir = join(DIRECTORY_SEPARATOR, array($dir, strtolower(getTodayAsString()), strtolower($subdir)));
         $cachedir = str_replace(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $cachedir);
 
 //        if (isset($subdir) && count($subdir) > 0)
 //            $dir = $dir . strtolower($subdir);
 //
-//        $dir = $dir . strtolower(\Scooper\getTodayAsString());
+//        $dir = $dir . strtolower(getTodayAsString());
 //
 
         if ( !file_exists($cachedir))
@@ -103,13 +103,13 @@ function isNewJobToday_Interested_IsNo($var)
 
 function wasJobPulledToday($var)
 {
-    return (strcasecmp($var['date_pulled'], \Scooper\getTodayAsString()) == 0);
+    return (strcasecmp($var['date_pulled'], getTodayAsString()) == 0);
 }
 
 
 function isJobUpdatedToday($var)
 {
-    return (strcasecmp($var['date_last_updated'], \Scooper\getTodayAsString()) == 0);
+    return (strcasecmp($var['date_last_updated'], getTodayAsString()) == 0);
 }
 
 
@@ -492,7 +492,7 @@ function getMergedJobRecord($prevJobRecord, $newerJobRecord)
 
 
     $mergedJob['match_notes'] = $newerJobRecord['match_notes'] . ' ' . $mergedJob['match_notes'];
-    $mergedJob['date_last_updated'] = \Scooper\getTodayAsString();
+    $mergedJob['date_last_updated'] = getTodayAsString();
 
     return $mergedJob;
 
@@ -538,7 +538,7 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 {
     $GLOBALS['logger']->logLine("Tokenizing title exclusion matches from ".$inputfile."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
     if(!$outputFile)
-        $outputFile = $GLOBALS['OPTS']['output_folder'] . "tempCallTokenizer.csv";
+        $outputFile = $GLOBALS['USERDATA']['directories']['staging'] . "tempCallTokenizer.csv";
     $PYTHONPATH = realpath(__DIR__ ."/../python/pyJobNormalizer/");
     $cmd = "python " . $PYTHONPATH . "/normalizeStrings.py -i " . $inputfile . " -o " . $outputFile . " -k " . $keyname;
     if ($indexKeyName != null)
@@ -584,8 +584,8 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 
 function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "keywords", $indexKeyName = null)
 {
-    $inputFile = $GLOBALS['OPTS']['output_folder'] . "tmp-".$tempFileKey."-token-input.csv";
-    $outputFile = $GLOBALS['OPTS']['output_folder']. "tmp-".$tempFileKey."-token-output.csv";
+    $inputFile = $GLOBALS['USERDATA']['directories']['staging'] . "tmp-".$tempFileKey."-token-input.csv";
+    $outputFile = $GLOBALS['USERDATA']['directories']['staging']. "tmp-".$tempFileKey."-token-output.csv";
 
     $headers = array($dataKeyName);
     if(array_key_exists($dataKeyName, $arrData)) $headers = array_keys($arrData);
@@ -632,8 +632,8 @@ function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "ke
 
 function tokenizeMultiDimensionArray($arrData, $tempFileKey, $dataKeyName, $indexKeyName = null)
 {
-    $inputFile = $GLOBALS['OPTS']['output_folder'] . "tmp-".$tempFileKey."-token-input.csv";
-    $outputFile = $GLOBALS['OPTS']['output_folder'] . "tmp-".$tempFileKey."-token-output.csv";
+    $inputFile = $GLOBALS['USERDATA']['directories']['staging'] . "tmp-".$tempFileKey."-token-input.csv";
+    $outputFile = $GLOBALS['USERDATA']['directories']['staging'] . "tmp-".$tempFileKey."-token-output.csv";
 
 //    $classCSVFile = new \Scooper\ScooperSimpleCSV($tokenOutputFile, 'w');
 //    $classCSVFile->writeArrayToCSVFile($arrTitles, array_keys(array_shift($arrTitles)), "key_jobsite_siteid");
@@ -784,12 +784,21 @@ function substr_count_multi($subject = "", array $patterns = array(), &$findings
     return !(0 === sizeof($findings));
 }
 
-function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strExt = '')
+function getTodayAsString($delim="-")
+{
+    $fmt = "Y" . $delim ."m" . $delim . "d";
+    return date($fmt);
+}
+
+
+function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strExt = '', $delim="")
 {
     $strFilename = '';
     if(strlen($strFilePrefix) > 0) $strFilename .= $strFilePrefix . "-";
     $date=date_create(null);
-    $strFilename .= date_format($date,"Y-m-d-Hi");
+    $fmt = "Y" . $delim ."m" . $delim . "d" . "Hi";
+
+    $strFilename .= date_format($date, $fmt);
 
     if(strlen($strBase) > 0) $strFilename .= "-" . $strBase;
     if(strlen($strExt) > 0) $strFilename .= "." . $strExt;

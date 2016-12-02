@@ -137,20 +137,41 @@ class ClassConfig extends ClassJobsSitePlugin
                 break;
         }
 
+
+        // Override any INI file setting with the command line output file path & name
+        // the user specificed (if they did)
+        $userOutfileDetails = \Scooper\get_FileDetails_fromPharseOption("output", false);
+        if(!$userOutfileDetails['has_directory'])
+        {
+            throw new ErrorException("Required value for the output folder was not specified. Exiting.");
+        }
+
         if($GLOBALS['OPTS']['use_config_ini_given'])
         {
-//            throw new ErrorException("Config ini files not yet supported!");
             $this->arrFileDetails['config_ini'] = \Scooper\set_FileDetails_fromPharseSetting("use_config_ini", 'config_file_details', true);
+            $name = str_replace(DIRECTORY_SEPARATOR, "", $this->arrFileDetails['config_ini']['directory']);
+            $name = substr($name, max([strlen($name)-31, 0]), 31);
+            $GLOBALS['USERDATA']['user_unique_key'] = md5($name);
+        }
+        else
+        {
+            $GLOBALS['USERDATA']['user_unique_key'] = uniqid("unknown");
+        }
+
+        // Now setup all the output folders
+        $this->__setupOutputFolders__($userOutfileDetails['directory'], $GLOBALS['USERDATA']['user_unique_key']);
+
+        if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['debug'] );
+
+        $strOutfileArrString = getArrayValuesAsString( $GLOBALS['USERDATA']['directories']);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output folders configured: " . $strOutfileArrString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+        if($GLOBALS['OPTS']['use_config_ini_given'])
+        {
             if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($this->arrFileDetails['config_ini']['directory'] );
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Log file for run being written to: " . $this->arrFileDetails['config_ini']['directory'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration file details from " . $this->arrFileDetails['config_ini']['full_file_path'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
-//            if($this->arrFileDetails['config_ini']['full_file_path'] )
-
-//            $iniParser = new IniParser($this->arrFileDetails['config_ini']['full_file_path']);
-//            $iniParser->use_array_object = false;
-//            $confTemp = $iniParser->parse();
-//            $iniParser = null;
 
             $this->_LoadAndMergeAllConfigFilesRecursive($this->arrFileDetails['config_ini']['full_file_path']);
 
@@ -181,22 +202,6 @@ class ClassConfig extends ClassJobsSitePlugin
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($GLOBALS['OPTS']['number_days'] . " days configured for run. ", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
 
-        // Override any INI file setting with the command line output file path & name
-        // the user specificed (if they did)
-        $userOutfileDetails = \Scooper\get_FileDetails_fromPharseOption("output_file", false);
-        if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($userOutfileDetails['directory'] );
-        if($userOutfileDetails['has_directory'])
-        {
-             $this->arrFileDetails['output'] = $userOutfileDetails;
-        }
-
-        // Now setup all the output folders
-        $this->__setupOutputFolders__();
-
-        $strOutfileArrString = getArrayValuesAsString( $this->arrFileDetails['output']);
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output file configured: " . $strOutfileArrString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Completed configuration load.", \Scooper\C__DISPLAY_SUMMARY__);
 
     }
@@ -208,33 +213,28 @@ class ClassConfig extends ClassJobsSitePlugin
 //             if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
     }
 
-    function getMyOutputFileFullPath($strFilePrefix = "")
+    private function __setupOutputFolders__($outputDirectory, $userKey)
     {
-        return parent::getOutputFileFullPath($this->siteName . "-" . $strFilePrefix, "Results", "csv");
-    }
-
-    private function __setupOutputFolders__()
-    {
-        if(! $this->arrFileDetails['output']['has_directory'])
+        if(! $outputDirectory)
         {
             throw new ErrorException("Required value for the output folder was not specified. Exiting.");
         }
-        $this->arrCacheFolder = \Scooper\array_copy($this->arrFileDetails['output']);
-        $this->arrCacheFolder['file_name_base'] = 'data_cache';
-        $tempCachePath = $this->createOutputSubFolder( $this->arrCacheFolder);
-        $GLOBALS['OPTS']['cache_path'] = $tempCachePath['directory'];
 
-        $this->arrFileDetails['output'] = \Scooper\parseFilePath( $this->arrFileDetails['output']['directory'] .  "search-results");
+        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey, "debug"));
+        $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+        $GLOBALS['USERDATA']['directories']['debug'] = realpath($details['directory']);
 
-        if(! $this->arrFileDetails['output']['has_file'])
-        {
-            $strDefaultFileName = getDefaultJobsOutputFileName("", "Results", "csv");
+        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey, "staged"));
+        $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+        $GLOBALS['USERDATA']['directories']['staging'] = realpath($details['directory']);
 
-             $this->arrFileDetails['output'] = \Scooper\parseFilePath( $this->arrFileDetails['output']['directory'] .  $strDefaultFileName);
-        }
+        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey, "results"));
+        $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+        $GLOBALS['USERDATA']['directories']['results'] = realpath($details['directory']);
 
-        $this->arrFileDetails['output_subfolder'] = $this->createOutputSubFolder( $this->arrFileDetails['output']);
-        $GLOBALS['OPTS']['output_subfolder'] = $this->arrFileDetails['output_subfolder'];
+        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey, "data-cache"));
+        $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+        $GLOBALS['USERDATA']['directories']['cache'] = realpath($details['directory']);
 
     }
 
@@ -275,23 +275,6 @@ class ClassConfig extends ClassJobsSitePlugin
 
     private function _setupRunFromConfig_($config)
     {
-        if(isset($config['output']))
-        {
-            if(isset($config['output']['folder']))
-            {
-                 $this->arrFileDetails['output'] = \Scooper\parseFilePath($config['output']['folder']);
-            }
-
-            if(isset($config['output']['file']))
-            {
-                 $this->arrFileDetails['output'] = \Scooper\parseFilePath( $this->arrFileDetails['output'] . $config['output']['file']);
-            }
-
-        }
-        $detailsOutDir = \Scooper\getFilePathDetailsFromString($this->arrFileDetails['output']['directory'], \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-        $GLOBALS['OPTS']['output_folder'] = $detailsOutDir['directory'];
-
-
         if(isset($config['input']) && isset($config['input']['folder']))
         {
             $this->arrFileDetails['input_folder']  = \Scooper\parseFilePath($config['input']['folder']);

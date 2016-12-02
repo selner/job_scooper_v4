@@ -149,7 +149,7 @@ class PluginGoogle extends ClassJobsSitePlugin
 
 
             $item['job_site_date'] = null;
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             $ret[] = $this->normalizeItem($item);
         }

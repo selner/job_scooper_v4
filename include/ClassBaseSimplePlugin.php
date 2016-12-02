@@ -234,7 +234,7 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
                 $item = $this->getEmptyJobListingRecord();
 
                 $item['job_site'] = $this->siteName;
-                $item['date_pulled'] = \Scooper\getTodayAsString();
+                $item['date_pulled'] = getTodayAsString();
                 $item['job_title'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_title'], 'plaintext');
                 $item['job_post_url'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_link'], 'href');
 

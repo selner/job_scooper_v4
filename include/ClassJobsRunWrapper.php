@@ -271,8 +271,12 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
         }
 
         $arrJobs_UpdatedOrInterested = array_filter($arrJobs_UserOutput_InterestedOrBlank, "isMarked_InterestedOrBlank");
-        $this->writeRunsJobsToFile($this->classConfig->getFileDetails('output')['full_file_path'], $arrJobs_UpdatedOrInterested, "ClassJobsRunWrapper-UserOutputFile");
-        $detailsMainResultsFile = $this->classConfig->getFileDetails('output');
+        $detailsMainResultsCSVFile = \Scooper\getFilePathDetailsFromString(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], getDefaultJobsOutputFileName("results", "", "csv"))), \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+        $detailsMainResultsXLSFile = \Scooper\array_copy($detailsMainResultsCSVFile);
+        $detailsMainResultsXLSFile['file_extension'] = "xls";
+        $detailsMainResultsXLSFile = \Scooper\parseFilePath(\Scooper\getFullPathFromFileDetails($detailsMainResultsXLSFile));
+
+        $this->writeRunsJobsToFile($detailsMainResultsCSVFile['full_file_path'], $arrJobs_UpdatedOrInterested, "ClassJobsRunWrapper-UserOutputFile");
 
         // Output all records that were automatically excluded
         $dataExcludedJobs = $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", array("", "ExcludedJobs", "CSV"), "excluded jobs", null, true);
@@ -282,7 +286,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
         $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "-AllUnmarkedJobs", "HTML", null, $this->getKeysForHTMLOutput(), true);
         $detailsHTMLFile = $this->__getAlternateOutputFileDetails__("HTML", "", "-AllUnmarkedJobs");
 
-        $arrResultFilesToCombine = array($detailsMainResultsFile, $dataExcludedJobs['file_details']);
+        $arrResultFilesToCombine = array($detailsMainResultsCSVFile, $dataExcludedJobs['file_details']);
         $arrFilesToAttach = array($detailsHTMLFile);
 
         foreach($this->classConfig->arrFileDetails['user_input_files'] as $inputfile)
@@ -290,14 +294,8 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
             array_push($arrResultFilesToCombine, $inputfile['details']);
 
         }
-//        foreach(array_keys($GLOBALS['USERDATA']) as $key)
-//        {
-//            $tmpfile = $this->_outputSearchTokensList_($GLOBALS['USERDATA'][$key], $key, $key);
-//            array_push($arrResultFilesToCombine, $tmpfile);
-//        }
-//
-        $xlsDetails = $this->__getAlternateOutputFileDetails__("xls", "", "AllResults");
-        $xlsOutputFile = $this->_combineCSVsToExcel($xlsDetails, $arrResultFilesToCombine);
+
+        $xlsOutputFile = $this->_combineCSVsToExcel($detailsMainResultsXLSFile, $arrResultFilesToCombine);
         array_push($arrFilesToAttach, $xlsOutputFile);
 
         $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \Scooper\C__SECTION_END__, \Scooper\C__NAPPSECONDLEVEL__);
@@ -319,14 +317,6 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
             // Output all job records and their values
             $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, null, array("", "-AllJobs", "CSV"), "all jobs", null, false);
 
-/*
-            // Output only records that are new or not marked as excluded (aka "Yes" or "Maybe")
-            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "-AllActiveJobs", "CSV");
-            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "-AllActiveJobs", "HTML", null, $this->getKeysForHTMLOutput());
-
-            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedToday", "-UpdatedJobs");
-            $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedTodayNotInterested", "-UpdatedExcludedJobs");
-*/
             $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \Scooper\C__SECTION_END__, \Scooper\C__NAPPSECONDLEVEL__);
         }
 
@@ -360,7 +350,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
         if(!is_null($s3['bucket']) && !is_null($s3['region']))
         {
             $s3 = new S3Publisher($s3['bucket'], $s3['region']);
-            $s3->publishOutputFiles($GLOBALS['OPTS']['output_subfolder']['directory']);
+            $s3->publishOutputFiles($GLOBALS['USERDATA']['directories']['results']);
         }
 
         //
@@ -436,7 +426,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
 
         if($this->is_OutputInterimFiles() == true)
         {
-            $strDebugInputCSV = $this->classConfig->getFileDetails('output_subfolder')['directory'] . \Scooper\getDefaultFileName("", "_Jobs_From_UserInput", "csv");
+            $strDebugInputCSV = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'],  \Scooper\getDefaultFileName("", "_Jobs_From_UserInput", "csv")));
             $this->writeJobsListToFile($strDebugInputCSV, $arrAllJobsLoadedFromSrc, true, false, "ClassJobRunner-loadUserInputJobsFromCSV");
         }
 
@@ -472,10 +462,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
 
     private function __getAlternateOutputFileDetails__($ext, $strNamePrepend = "", $strNameAppend = "")
     {
-        $detailsRet = $this->classConfig->getFileDetails('output_subfolder');
-        $detailsRet['file_extension'] = $ext;
-        $strTempPath = \Scooper\getFullPathFromFileDetails($detailsRet, $strNamePrepend , $strNameAppend);
-        $detailsRet= \Scooper\parseFilePath($strTempPath, false);
+        $detailsRet = \Scooper\parseFilePath(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['debug'], getDefaultJobsOutputFileName($strNamePrepend, $strNameAppend, $ext, ""))), false);
         return $detailsRet;
     }
 
@@ -638,7 +625,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
 
     function sendJobCompletedEmail($strBodyText = null, $strBodyHTML = null, $detailsHTMLBodyInclude = null, $arrDetailsAttachFiles = array())
     {
-        if(isset($GLOBALS['OPTS']['skip_notifications']) && $GLOBALS['OPTS']['skip_notifications'] == 1)
+        if(!isset($GLOBALS['OPTS']['send_notifications']) || $GLOBALS['OPTS']['send_notifications'] != 1)
         {
             $GLOBALS['logger']->logLine(PHP_EOL."User set -send_notifications = false so skipping email notification.)".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
             return null;
@@ -1016,7 +1003,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
         if($arrNoJobUpdates != null && count($arrNoJobUpdates) > 0)
         {
             sort($arrNoJobUpdates);
-            $strOut = $strOut . PHP_EOL .  "No jobs were updated for " . \Scooper\getTodayAsString() . " on these sites: " . PHP_EOL;
+            $strOut = $strOut . PHP_EOL .  "No jobs were updated for " . getTodayAsString() . " on these sites: " . PHP_EOL;
 
             foreach($arrNoJobUpdates as $site)
             {
@@ -1093,7 +1080,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
         {
             sort($arrNoJobUpdates);
             $strOut .=  PHP_EOL . "<div class='job_scooper section'>". PHP_EOL;
-            $strOut .=  PHP_EOL .  "No updated jobs for " . \Scooper\getTodayAsString() . " on these sites: " . PHP_EOL;
+            $strOut .=  PHP_EOL .  "No updated jobs for " . getTodayAsString() . " on these sites: " . PHP_EOL;
             $strOut .=  PHP_EOL . "<ul class='job_scooper'>". PHP_EOL;
 
             foreach($arrNoJobUpdates as $site)
@@ -1210,11 +1197,11 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
                 // Add a note to the previous listing that it had a new duplicate
                 //
                 appendJobColumnData($this->arrLatestJobs[$indexPrevListingForCompanyRole], 'match_notes', "|", $this->getNotesWithDupeIDAdded($this->arrLatestJobs[$indexPrevListingForCompanyRole]['match_notes'], $job['key_jobsite_siteid'] ));
-                $this->arrLatestJobs[$indexPrevListingForCompanyRole] ['date_last_updated'] = \Scooper\getTodayAsString();
+                $this->arrLatestJobs[$indexPrevListingForCompanyRole] ['date_last_updated'] = getTodayAsString();
 
                 $this->arrLatestJobs[$strCurrentJobIndex]['interested'] =  C__STR_TAG_DUPLICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__;
                 appendJobColumnData($this->arrLatestJobs[$strCurrentJobIndex], 'match_notes', "|", $this->getNotesWithDupeIDAdded($this->arrLatestJobs[$strCurrentJobIndex]['match_notes'], $indexPrevListingForCompanyRole ));
-                $this->arrLatestJobs[$strCurrentJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
+                $this->arrLatestJobs[$strCurrentJobIndex]['date_last_updated'] = getTodayAsString();
 
                 $nJobsMatched++;
             }
@@ -1253,7 +1240,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
                         $this->arrLatestJobs[$strJobIndex]['interested'] = 'No (Wrong Company)' . C__STR_TAG_AUTOMARKEDJOB__;
                         appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_notes', "|", "Matched regex[". $rxInput ."]");
                         appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_details',"|", "excluded_company");
-                        $this->arrLatestJobs[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
+                        $this->arrLatestJobs[$strJobIndex]['date_last_updated'] = getTodayAsString();
                         $nJobsMarkedAutoExcluded++;
                         $fMatched = true;
                         break;
@@ -1388,7 +1375,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
         {
             $strJobIndex = getArrayKeyValueForJob($job);
             $this->arrLatestJobs[$strJobIndex]['interested'] = NO_TITLE_MATCHES;
-            $this->arrLatestJobs[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
+            $this->arrLatestJobs[$strJobIndex]['date_last_updated'] = getTodayAsString();
             appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_notes', "|", "title keywords not matched to terms [". getArrayValuesAsString($arrKwdSet, "|", "", false)  ."]");
             appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_details',"|", NO_TITLE_MATCHES);
         }
@@ -1408,7 +1395,7 @@ class ClassJobsRunWrapper extends ClassJobsSiteCommon
         {
             $strJobIndex = getArrayKeyValueForJob($job);
             $this->arrLatestJobs[$strJobIndex]['interested'] = TITLE_NEG_KWD_MATCH;
-            $this->arrLatestJobs[$strJobIndex]['date_last_updated'] = \Scooper\getTodayAsString();
+            $this->arrLatestJobs[$strJobIndex]['date_last_updated'] = getTodayAsString();
             appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_notes', "|", "matched negative keyword title[". getArrayValuesAsString($job['keywords_matched'], "|", "", false)  ."]");
             appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_details',"|", TITLE_NEG_KWD_MATCH);
         }

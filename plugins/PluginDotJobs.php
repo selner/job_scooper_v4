@@ -46,7 +46,7 @@ class PluginDotJobs extends ClassJobsSitePlugin
 
             $item['job_site_date'] = (string)$job->pubDate;
 //            $item['company'] = $this->siteName;
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             $ret[] = $this->normalizeItem($item);
         }

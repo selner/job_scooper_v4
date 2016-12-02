@@ -107,7 +107,7 @@ class PluginEmploymentGuide extends ClassJobsSitePlugin
             if(isset($subNode) && isset($subNode[0])) $item['job_site_category'] = $subNode[0]->plaintext;
 
 
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             $subNode = $node->find("div[class='datePosted']");
             if(isset($subNode) && isset($subNode[0])) $item['job_site_date'] = $subNode[0]->plaintext;

@@ -148,7 +148,7 @@ class PluginIndeed extends ClassJobsSitePlugin
             $subNode = $node->find("span[class='date']");
             if(isset($subNode) && isset($subNode[0])) $item['job_site_date'] = $subNode[0]->plaintext;
 
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
 
             $ret[] = $this->normalizeItem($item);

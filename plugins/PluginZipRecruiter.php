@@ -140,7 +140,7 @@ class PluginZipRecruiter extends ClassJobsSitePlugin
 
 
             $item['job_site'] = $this->siteName;
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
 
 

@@ -61,7 +61,7 @@ class PluginGroupon extends ClassJobsSitePlugin
             $item['job_title'] = $node->plaintext;
             $item['job_post_url'] = $node->href;
             $item['location'] = $this->getLocationValue();
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
             $item['company'] = $this->siteName;
             $item['job_id'] = $this->getIDFromLink('/\/jobs\/([^\/]+)/i', $item['job_post_url']);
             if($item['job_title'] == '') continue;

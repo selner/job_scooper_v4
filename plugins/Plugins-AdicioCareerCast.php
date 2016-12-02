@@ -296,7 +296,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
 
 
                 $item['job_site'] = $this->siteName;
-                $item['date_pulled'] = \Scooper\getTodayAsString();
+                $item['date_pulled'] = getTodayAsString();
 
 
                 $titleLink = $node->find("a")[0];
@@ -345,7 +345,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
 
 
                     $item['job_site'] = $this->siteName;
-                    $item['date_pulled'] = \Scooper\getTodayAsString();
+                    $item['date_pulled'] = getTodayAsString();
 
 
                     $titleLink = $node->find("a")[0];

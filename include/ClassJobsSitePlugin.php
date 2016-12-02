@@ -96,7 +96,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
     private function _getResultsForSearch_($searchDetails)
     {
-        $tmpSearchJobs = $this->_getCachedJobsForSearch_($searchDetails);
+        $tmpSearchJobs = $this->_getStoredJobsForSearch_($searchDetails);
         if(isset($tmpSearchJobs) && is_array($tmpSearchJobs))
             return $tmpSearchJobs;
         else
@@ -687,7 +687,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             if($this->_checkInvalidURL_($searchDetails, $searchDetails['search_start_url']) == VALUE_NOT_SUPPORTED) return;
 
             // get all the results for all pages if we have them cached already
-            $arrPageJobsList = $this->_getCachedJobsForSearch_($searchDetails);
+            $arrPageJobsList = $this->_getStoredJobsForSearch_($searchDetails);
             if(isset($arrPageJobsList))
             {
                 $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[".$searchDetails['name']."]" .": " . countJobRecords($arrPageJobsList). " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
@@ -763,16 +763,15 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         }
         finally
         {
-            $key = $this->_getCacheKeyForSearch($searchDetails);
+            $this->_setJobsToFileStoreForSearch_($searchDetails, $arrPageJobsList);
             if (!is_null($arrPageJobsList))
             {
-                $GLOBALS['logger']->logLine("Setting retrieved jobs to local disk cache as md5=(" .md5($key) .") key=[" . $key . "] in " . $this->_getCache()->dir . " for " . $searchDetails['name'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 $this->_setCachedJobsForSearch_($searchDetails, $arrPageJobsList);
             }
             else
             {
+                $key = $this->_getFileStoreKeyForSearch($searchDetails);
                 $GLOBALS['logger']->logLine("No jobs were able to be cached as md5=(" .md5($key) .") key=[" . $key . "] in " . $this->_getCache()->dir . " for " . $searchDetails['name'], \Scooper\C__DISPLAY_WARNING__);
-
             }
             if(isDebug()) {  $this->_logMemoryUsage_(); }
 
@@ -781,7 +780,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         }
     }
 
-    private function _getCacheKeyForSearch($searchSettings)
+    private function _getFileStoreKeyForSearch($searchSettings)
     {
         $key = $this->getDaysURLValue().$searchSettings['name'];
 //        $strURLPath = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $searchSettings['search_start_url']);
@@ -793,13 +792,13 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
     private function _getCache()
     {
-        return new JG_Cache2($dir = $GLOBALS['OPTS']['cache_path'], $subdir = $this->siteName);
+        return new JG_Cache2($dir = $GLOBALS['USERDATA']['directories']['cache'], $subdir = $this->siteName);
     }
 
-    private function _getCachedJobsForSearch_($searchSettings)
+    private function _getStoredJobsForSearch_($searchSettings)
     {
         $cache = $this->_getCache();
-        $key = $this->_getCacheKeyForSearch($searchSettings);
+        $key = $this->_getFileStoreKeyForSearch($searchSettings);
 
         $data = $cache->get($key);
         if ($data === FALSE)
@@ -818,7 +817,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
     private function _setCachedJobsForSearch_($searchSettings, $dataJobs)
     {
-        $key = $this->_getCacheKeyForSearch( $searchSettings);
+        $key = $this->_getFileStoreKeyForSearch( $searchSettings);
         if(is_null($dataJobs))
             $dataJobs = array($this->getEmptyJobListingRecord());
 
@@ -834,6 +833,23 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             $GLOBALS['logger']->logLine("Search " . $searchSettings['name'] . " listings cached to disk with key md5=(" .md5($key) .") key=[" . $key . "]  in " . $cache->dir, \Scooper\C__DISPLAY_NORMAL__);
             return $dataJobs;
         }
+    }
+
+    private function _setJobsToFileStoreForSearch_($searchSettings, $dataJobs)
+    {
+        $key = $this->_getFileStoreKeyForSearch( $searchSettings);
+        if(is_null($dataJobs))
+            $dataJobs = array($this->getEmptyJobListingRecord());
+
+
+        $jobsJson = json_encode($dataJobs, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+        $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['staging'], ($key . "-" . strtolower(getTodayAsString("")) . ".json")));
+
+        $GLOBALS['logger']->logLine("Writing final job data pull results to json file " . $resultsFile, \Scooper\C__DISPLAY_ERROR__);
+        file_put_contents($resultsFile, $jobsJson, FILE_TEXT);
+
+        return $resultsFile;
+
     }
 
     private function getJobsFromMicroData($objSimpleHTML)

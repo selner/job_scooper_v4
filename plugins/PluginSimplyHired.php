@@ -176,7 +176,7 @@ class PluginSimplyHired extends ClassJobsSitePlugin
 
             $item['job_id'] = $this->getIDFromLink('/\/a\/job-details\/\?a=([^\/]+)/i', $item['job_post_url']);
 
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             $ret[] = $this->normalizeItem($item);
         }

@@ -22,14 +22,20 @@ class S3Publisher {
         ]);
     }
 
-    public function publishOutputFiles($outputDirectory)
+    public function publishFilesToBucket($outputDirectory, $bucketName=null, $bucketKeyPrefix="")
     {
+        if ($bucketName == null)
+        {
+            $bucketName = $this->bucket;
+        }
+        if ($bucketKeyPrefix == null)
+        {
+            $bucketKeyPrefix = $this->keyPrefix;
+        }
 
         $source = $outputDirectory;
 
-        $dirParts = explode(DIRECTORY_SEPARATOR, $outputDirectory);
-        $keypath = $this->keyPrefix . join("/", array_slice($dirParts, count($dirParts) - 4, 2)) . "/latest";
-        $dest = 's3://'.$this->bucket . "/" . $keypath;
+        $dest = 's3://'.$bucketName . "/" . $bucketKeyPrefix;
 
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Publishing result files from " . $source . " to " . $dest, \Scooper\C__DISPLAY_NORMAL__);
         $manager = new \Aws\S3\Transfer($this->s3Client, $source, $dest,[
@@ -40,5 +46,14 @@ class S3Publisher {
         ]);
         $manager->transfer();
     }
-    
+
+    public function publishOutputFiles($outputDirectory)
+    {
+        $dirParts = explode(DIRECTORY_SEPARATOR, $outputDirectory);
+        $keypath = $this->keyPrefix . join("/", array_slice($dirParts, count($dirParts) - 4, 2)) . "/latest";
+
+        $this->publishFilesToBucket($outputDirectory, $this->bucket, $keypath);
+    }
+
+
 }

@@ -121,7 +121,7 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
             if($subNode && count($subNode)>=1)
                 $item['company'] = trim($subNode[0]->plaintext);
 
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             $subNode = $node->find("div[class='show-for-medium-up'] em");
             if(isset($subNode) && isset($subNode[0]))

@@ -74,7 +74,7 @@ class PluginEbay extends ClassJobsSitePlugin
             $item['job_site_date'] = $dateNode[0]->plaintext;
 
             $item['company'] = $this->siteName;
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
 
             $arrURLParts = explode("/",  $item['job_post_url']);

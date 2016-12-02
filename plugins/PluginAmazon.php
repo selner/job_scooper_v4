@@ -91,7 +91,7 @@ class PluginAmazon extends ClassJobsSitePlugin
 
             $item['company'] = 'Amazon';
             $item['job_site'] = 'Amazon';
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
             $subNode = $node->find("div[class=location-and-id] span]");
             $item['location'] = explode("|", $subNode[0]->plaintext)[0];
 

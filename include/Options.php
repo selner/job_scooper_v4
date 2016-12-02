@@ -70,11 +70,11 @@ function __initializeArgs__()
             'required'      => false,
             'short'      => 'days',
         ),
-        'output_file' => array(
-            'description'   => 'Full file path and name for the final results CSV file.',
+        'output' => array(
+            'description'   => 'Full file path to use for results output.',
             'default'       => null,
             'type'          => Pharse::PHARSE_STRING,
-            'required'      => false,
+            'required'      => true,
             'short'      => 'o',
         ),
         'use_debug' => array(
@@ -84,12 +84,12 @@ function __initializeArgs__()
             'required'      => false,
             'short'      => 'debug',
         ),
-        'skip_notifications' => array(
+        'send_notifications' => array(
             'description'   => 'Send email notifications of the completed run.',
-            'default'       => 1,
+            'default'       => 0,
             'type'          => Pharse::PHARSE_INTEGER,
             'required'      => false,
-            'short'      => 'nonotify',
+            'short'      => 'notify',
         ),
         'output_interim_files' => array(
             'description'   => 'In addition to the main results, output interim debug files.',
@@ -118,7 +118,11 @@ function __initializeArgs__()
 //    # You may specify a program banner thusly:
 //    $banner = "Find and export basic website, Moz.com, Crunchbase and Quantcast data for any company name or URL.";
 //    Pharse::setBanner($banner);
-    if(isVerbose() && isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine('Options set: '.var_export($GLOBALS['OPTS'], true), \Scooper\C__DISPLAY_NORMAL__); }
+    if(isset($GLOBALS['logger']))
+    {
+        $GLOBALS['logger']->logLine('Options set: '.var_export($GLOBALS['OPTS'], true), \Scooper\C__DISPLAY_NORMAL__);
+    }
+    else { 'Options set: '.var_export($GLOBALS['OPTS'], true); }
 
 }
 

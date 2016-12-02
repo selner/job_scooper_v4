@@ -74,7 +74,7 @@ class PluginStartupHire extends ClassJobsSitePlugin
 
 
             $item['job_site'] = $this->siteName;
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             $item['job_title'] = $nodeHelper->getText("h3[class='jobTitle'] a", 0, false );
             if($item['job_title'] == '') continue;

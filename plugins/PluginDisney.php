@@ -86,7 +86,7 @@ class PluginDisney extends ClassJobsSitePlugin
                 $item['location'] = $subNode[0]->plaintext;
 
 
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             $subNode = $node->find("td[class='column4']");
             if(isset($subNode) && isset($subNode[0]))

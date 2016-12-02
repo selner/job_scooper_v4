@@ -114,7 +114,7 @@ class PluginMonster extends ClassJobsSitePlugin
             $strLoc= \Scooper\strip_punctuation(html_entity_decode($item['location']));
 
             $item['job_post_url'] = $this->siteBaseURL . "/" . str_ireplace(" ", "-", $strScrubTitle )."-".str_ireplace(" ", "-",$strLoc)."-".$item['job_id'].".aspx";
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             $subNode = $node->find("span[class='accessibilityOnly']");
             if(isset($subNode) && isset($subNode[0])) $item['job_site_date'] = $subNode[0]->plaintext;

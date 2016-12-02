@@ -53,7 +53,7 @@ class PluginOuterwall extends ClassJobsSitePlugin
 
             $item['location'] =  explode("/", $item['job_post_url'])[1];
             $item['company'] = $this->siteName;
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
 //            var_dump($item);
             $ret[] = $this->normalizeItem($item);

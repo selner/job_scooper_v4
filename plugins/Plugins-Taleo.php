@@ -143,7 +143,7 @@ abstract class BaseTaleoPlugin extends ClassJobsSitePlugin
             $tds = $node->find("td");
             if(isset($tds) && isset($tds[1])) $item['location'] = $node->find("td")[1]->plaintext;
             if(isset($tds) && isset($tds[2]))$item['job_site_category'] = $tds[2]->plaintext;
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             $ret[] = $this->normalizeItem($item);
         }

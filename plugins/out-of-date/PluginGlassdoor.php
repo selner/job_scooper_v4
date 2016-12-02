@@ -106,7 +106,7 @@ class PluginGlassdoor extends ClassJobsSitePlugin
             $fIDMatch = preg_match("/jobListingId=([0-9]+)/", $item['job_post_url'], $arrIDMatches);
             if($fIDMatch) { $item['job_id'] = str_replace("jobListingId=", "", $arrIDMatches[0]); }
 
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
             $item['job_site'] = $this->siteName;
             $item['company'] = $nodeHelper->getText("span[class='employerName']", 0, false );
             $item['location'] = $nodeHelper->getText("span[class='location'] span span span", 0, false );

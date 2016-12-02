@@ -56,7 +56,7 @@ class PluginFacebook extends ClassJobsSitePlugin
 //            $item['job_site_category'] = $node->parent()->find("h3")[0]->plaintext;
 
             $item['location'] = $this->getLocationValue();
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             $ret[] = $this->normalizeItem($item);
         }

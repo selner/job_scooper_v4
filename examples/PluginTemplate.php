@@ -136,7 +136,7 @@ class PluginExample extends ClassJobsSitePlugin
 
 
             $item['job_site'] = $this->siteName;
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             $titleLink = $node->find("a[class='listing-title']")[0];
             $item['job_title'] = $titleLink->firstChild()->plaintext;

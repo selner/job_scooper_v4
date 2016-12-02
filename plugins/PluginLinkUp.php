@@ -97,7 +97,7 @@ class PluginLinkUp extends ClassJobsSitePlugin
             $item['job_id'] = $nodeHelper->getAttribute(null, null, "data-hash", false );
             $item['location'] = $nodeHelper->getText("span[class='listing-location'] span", 0, false ) . "-" . $nodeHelper->getText("span[class='listing-location'] span", 1, false );
 
-            $item['date_pulled'] = \Scooper\getTodayAsString();
+            $item['date_pulled'] = getTodayAsString();
 
             $item['job_site_category'] = $nodeHelper->getText("span[class='listing-tag']", 0, false );
             $dateText = $nodeHelper->getText("span[class='listing-date']", 0, false );
