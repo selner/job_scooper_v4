@@ -150,7 +150,7 @@ class ClassConfig extends ClassJobsSitePlugin
         {
             $this->arrFileDetails['config_ini'] = \Scooper\set_FileDetails_fromPharseSetting("use_config_ini", 'config_file_details', true);
             $name = str_replace(DIRECTORY_SEPARATOR, "", $this->arrFileDetails['config_ini']['directory']);
-            $name = substr($name, max([strlen($name)-31, 0]), 31);
+            $name = substr($name, max([strlen($name)-31-strlen(".ini"), 0]), 31);
             $GLOBALS['USERDATA']['user_unique_key'] = md5($name);
         }
         else

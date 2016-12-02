@@ -782,9 +782,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
     private function _getFileStoreKeyForSearch($searchSettings)
     {
-        $key = $this->getDaysURLValue().$searchSettings['name'];
-//        $strURLPath = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $searchSettings['search_start_url']);
-//        $key = urlencode($this->getDaysURLValue()."-".$strURLPath);
+        $key = \Scooper\strip_punctuation($this->getDaysURLValue().$searchSettings['name']);
         if(isDebug()) {  $GLOBALS['logger']->logLine("Cache key md5=(" .md5($key) .") key=[" . $key . "] ", \Scooper\C__DISPLAY_ITEM_DETAIL__); }
 
         return $key;

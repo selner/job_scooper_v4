@@ -635,10 +635,6 @@ function tokenizeMultiDimensionArray($arrData, $tempFileKey, $dataKeyName, $inde
     $inputFile = $GLOBALS['USERDATA']['directories']['staging'] . "tmp-".$tempFileKey."-token-input.csv";
     $outputFile = $GLOBALS['USERDATA']['directories']['staging'] . "tmp-".$tempFileKey."-token-output.csv";
 
-//    $classCSVFile = new \Scooper\ScooperSimpleCSV($tokenOutputFile, 'w');
-//    $classCSVFile->writeArrayToCSVFile($arrTitles, array_keys(array_shift($arrTitles)), "key_jobsite_siteid");
-//    $arrTitlesTokened = callTokenizer($tokenOutputFile, null, "job_title");
-
     if(is_file($inputFile))
     {
         unlink($inputFile);
@@ -660,15 +656,6 @@ function tokenizeMultiDimensionArray($arrData, $tempFileKey, $dataKeyName, $inde
 
     fclose($file);
 
-//    $objPHPExcel = new PHPExcel();
-//    $rowNumber = 1;
-//    $objPHPExcel->getActiveSheet()->fromArray($arrData, NULL,'A1');
-//    $objWriter = new PHPExcel_Writer_CSV($objPHPExcel);
-//    $objWriter->save($inputFile);
-
-//
-//    $classCSVFile = new \Scooper\ScooperSimpleCSV($outputFile, 'w');
-//    $classCSVFile->writeArrayToCSVFile($arrData, , $keyname);
     $ret = callTokenizer($inputFile, $outputFile, $dataKeyName, $indexKeyName);
     if(isset($valInterimFiles) && $valInterimFiles != true)
     {
@@ -688,12 +675,6 @@ function tokenizeKeywords($arrKeywords)
         throw new Exception("Invalid keywords object type.");
     }
 
-//    $arrKeywordsForTokenize = array("keywords" => $arrKeywords);
-//    $arrKeywordsForTokenize = array("keywords" => "keywords");
-//    foreach(array_keys($arrKeywords) as $key)
-//    {
-//        $arrKeywordsForTokenize[] = array("keywords" => $arrKeywords[$key]);
-//    }
     $arrKeywordTokens = tokenizeSingleDimensionArray($arrKeywords, "srchkwd", "keywords", "keywords");
     $keywordset = array_column($arrKeywordTokens, "tokenized");
     $retKeywords = array();
