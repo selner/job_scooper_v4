@@ -22,7 +22,7 @@ require_once(__ROOT__.'/include/SitePlugins.php');
 class ClassConfig extends ClassJobsSitePlugin
 {
     protected $nNumDaysToSearch = -1;
-    public $arrFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null, 'user_input_files' => null);
+    public $arrFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null, 'user_input_files_details' => null);
     protected $arrEmailAddresses = null;
     protected $configSettings = array('searches' => null, 'keyword_sets' => null, 'location_sets' => null, 'number_days'=>VALUE_NOT_SUPPORTED, 'included_sites' => array(), 'excluded_sites' => array());
     protected $arrEmail_PHPMailer_SMTPSetup = null;
@@ -50,7 +50,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
     function getFileDetails($file_key_name, $strSubDataType = null)
     {
-        if ($file_key_name == 'user_input_files') {
+        if ($file_key_name == 'user_input_files_details') {
             return $this->getInputFilesByType($strSubDataType);
         } else {
             return $this->arrFileDetails[$file_key_name];
@@ -165,6 +165,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
         $strOutfileArrString = getArrayValuesAsString( $GLOBALS['USERDATA']['directories']);
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output folders configured: " . $strOutfileArrString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['USERDATA']['AWS'] = array("S3" => array("bucket" => \Scooper\get_PharseOptionValue("s3_bucket"), "region" => \Scooper\get_PharseOptionValue("s3_region") ));
 
         if($GLOBALS['OPTS']['use_config_ini_given'])
         {
@@ -220,19 +221,27 @@ class ClassConfig extends ClassJobsSitePlugin
             throw new ErrorException("Required value for the output folder was not specified. Exiting.");
         }
 
-        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey, "debug"));
+        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey, "debug/"));
         $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
         $GLOBALS['USERDATA']['directories']['debug'] = realpath($details['directory']);
 
-        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey, "staged"));
+        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey, "staged/"));
         $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
         $GLOBALS['USERDATA']['directories']['staging'] = realpath($details['directory']);
 
-        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey, "results"));
+        $path = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['staging'], STAGE1_PATHKEY));
+        $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+        $GLOBALS['USERDATA']['directories']['stage1'] = realpath($details['directory']);
+
+        $path = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['staging'], STAGE2_PATHKEY));
+        $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+        $GLOBALS['USERDATA']['directories']['stage2'] = realpath($details['directory']);
+
+        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey, "results/"));
         $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
         $GLOBALS['USERDATA']['directories']['results'] = realpath($details['directory']);
 
-        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey, "data-cache"));
+        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey, "data-cache/"));
         $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
         $GLOBALS['USERDATA']['directories']['cache'] = realpath($details['directory']);
 
@@ -390,16 +399,16 @@ class ClassConfig extends ClassJobsSitePlugin
         if(isset($tempFileDetails))
         {
 
-            $this->arrFileDetails['user_input_files'][]= array('details'=> $tempFileDetails, 'data_type' => $iniInputFileItem['type']);
+            $GLOBALS['USERDATA']['user_input_files_details'][]= array('details'=> $tempFileDetails, 'data_type' => $iniInputFileItem['type']);
         }
     }
 
     private function __getInputFilesByValue__($valKey, $val)
     {
         $ret = null;
-        if(isset($this->arrFileDetails['user_input_files']) && (is_array($this->arrFileDetails['user_input_files'])  || is_array($this->arrFileDetails['user_input_files'])))
+        if(isset($GLOBALS['USERDATA']['user_input_files_details']) && (is_array($GLOBALS['USERDATA']['user_input_files_details'])  || is_array($GLOBALS['USERDATA']['user_input_files_details'])))
         {
-            foreach($this->arrFileDetails['user_input_files'] as $fileItem)
+            foreach($GLOBALS['USERDATA']['user_input_files_details'] as $fileItem)
             {
                 if(strcasecmp($fileItem[$valKey], $val) == 0)
                 {

@@ -24,7 +24,7 @@ require_once(__ROOT__.'/include/ClassJobsSitePlugin.php');
 require_once(__ROOT__.'/include/ClassBaseSimplePlugin.php');
 require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 require_once(__ROOT__.'/include/ClassConfig.php');
-require_once(__ROOT__.'/include/ClassJobsRunWrapper.php');
+require_once(__ROOT__.'/include/StageManager.php');
 
 
 require_once (__ROOT__.'/include/ClassMultiSiteSearch.php');
@@ -52,6 +52,10 @@ require_once (__ROOT__.'/plugins/PluginGeekwire.php');
 require_once (__ROOT__.'/plugins/PluginDotJobs.php');
 
 require_once (__ROOT__.'/plugins/PluginZipRecruiter.php');
+
+const STAGE1_PATHKEY = "stage1-rawlistings";
+const STAGE2_PATHKEY = "stage2-rawlistings";
+
 
 //
 //BUGBUG:  Current defunct and need to be updated before re-adding

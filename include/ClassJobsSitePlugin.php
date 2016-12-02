@@ -51,7 +51,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     protected $cookieNamesToSaveAndResend = Array();
     protected $additionalLoadDelaySeconds = 0;
 
-
     function __construct($strOutputDirectory = null, $attributes = null)
     {
         if(array_key_exists("JOBSITE_PLUGINS", $GLOBALS) && (array_key_exists(strtolower($this->siteName), $GLOBALS['JOBSITE_PLUGINS'])))
@@ -73,6 +72,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                 $this->flagSettings = $this->flagSettings | $flag;
             }
         }
+
         return parent::__construct($strOutputDirectory);
     }
 
@@ -85,6 +85,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
     function addSearches($arrSearches)
     {
+
         if(!is_array($arrSearches[0])) { $arrSearches[] = $arrSearches; }
 
         foreach($arrSearches as $searchDetails)
@@ -130,7 +131,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             $arrAllSearchResults = $this->getMyJobsList();
             $strOutPathWithName = $this->getOutputFileFullPath($this->siteName . "-");
             if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Writing ". $this->siteName." " .count($arrAllSearchResults) ." job records to " . $strOutPathWithName . " for debugging (if needed).", \Scooper\C__DISPLAY_ITEM_START__); }
-            $this->writeJobsListToFile($strOutPathWithName, $arrAllSearchResults, true, false, $this->siteName, "CSV");
+            $this->writeJobsListToFile($strOutPathWithName, $arrAllSearchResults, true, $this->siteName, "CSV");
         }
     }
 
@@ -235,7 +236,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
      */
     function writeMyJobsListToFile($strOutFilePath = null)
     {
-        return $this->writeJobsListToFile($strOutFilePath, $this->getMyJobsList(), true, false, $this->siteName, "CSV");
+        return $this->writeJobsListToFile($strOutFilePath, $this->getMyJobsList(), true, $this->siteName, "CSV");
     }
 
 
@@ -780,9 +781,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         }
     }
 
-    private function _getFileStoreKeyForSearch($searchSettings)
+    private function _getFileStoreKeyForSearch($searchSettings, $prefix="")
     {
-        $key = \Scooper\strip_punctuation($this->getDaysURLValue().$searchSettings['name']);
+        $key = $prefix . \Scooper\strip_punctuation($this->getDaysURLValue().$searchSettings['name']);
+
         if(isDebug()) {  $GLOBALS['logger']->logLine("Cache key md5=(" .md5($key) .") key=[" . $key . "] ", \Scooper\C__DISPLAY_ITEM_DETAIL__); }
 
         return $key;
@@ -835,13 +837,15 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
     private function _setJobsToFileStoreForSearch_($searchSettings, $dataJobs)
     {
-        $key = $this->_getFileStoreKeyForSearch( $searchSettings);
+        $userkey = $GLOBALS['USERDATA']['user_unique_key'] ."-";
+
+        $key = $this->_getFileStoreKeyForSearch( $searchSettings, $userkey );
         if(is_null($dataJobs))
             $dataJobs = array($this->getEmptyJobListingRecord());
 
 
         $jobsJson = json_encode($dataJobs, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
-        $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['staging'], ($key . "-" . strtolower(getTodayAsString("")) . ".json")));
+        $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['stage1'], ($key . "-" . strtolower(getTodayAsString("")) . ".json")));
 
         $GLOBALS['logger']->logLine("Writing final job data pull results to json file " . $resultsFile, \Scooper\C__DISPLAY_ERROR__);
         file_put_contents($resultsFile, $jobsJson, FILE_TEXT);

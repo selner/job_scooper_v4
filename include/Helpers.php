@@ -61,129 +61,6 @@ class JG_Cache2 extends JG_Cache {
 };
 
 
-//
-// Jobs List Filter Functions
-//
-function isInterested_MarkedDuplicateAutomatically($var)
-{
-    if(substr_count($var['interested'], C__STR_TAG_DUPLICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__) > 0) return true;
-
-    return false;
-}
-
-function isInterested_MarkedAutomatically($var)
-{
-    if(substr_count($var['interested'], C__STR_TAG_AUTOMARKEDJOB__) > 0)
-    {
-        return true;
-    };
-
-    return false;
-}
-
-function isNewJobToday_Interested_IsBlank($var)
-{
-    return isMarkedInterested_IsBlank($var) && wasJobPulledToday($var);
-}
-
-function onlyBadTitlesAndRoles($var)
-{
-    if(substr_count($var['interested'], C__STR_TAG_BAD_TITLE_POST__) > 0)
-    {
-        return true;
-    };
-
-    return false;
-}
-
-function isNewJobToday_Interested_IsNo($var)
-{
-    return isMarked_NotInterested($var) && wasJobPulledToday($var);
-}
-
-function wasJobPulledToday($var)
-{
-    return (strcasecmp($var['date_pulled'], getTodayAsString()) == 0);
-}
-
-
-function isJobUpdatedToday($var)
-{
-    return (strcasecmp($var['date_last_updated'], getTodayAsString()) == 0);
-}
-
-
-function isJobUpdatedTodayOrIsInterestedOrBlank($var)
-{
-    return (isJobUpdatedToday($var) && isMarkedInterested_IsBlank($var));
-}
-
-function isJobUpdatedTodayAndBlank($var)
-{
-    return (isJobUpdatedToday($var) && isMarked_InterestedOrBlank($var));
-}
-
-function isJobUpdatedTodayNotInterested($var)
-{
-    return (isJobUpdatedToday($var) && !isMarked_InterestedOrBlank($var));
-}
-
-
-function isMarkedInterested_IsBlank($var)
-{
-    if(is_null($var['interested']) || strlen(trim($var['interested']))==0)
-    {
-        return true;
-    }
-    return false;
-}
-
-function isMarkedInterested_NotBlank($var)
-{
-    return !(isMarkedInterested_IsBlank($var));
-}
-
-function isMarked_InterestedOrBlank($var)
-{
-   return (!isMarked_NotInterested($var) || isMarkedInterested_IsBlank($var));
-}
-
-// TODO: Test that isMarked_NotInterested() == isMarked_InterestedOrBlank().  They should match, no?
-function isMarked_NotInterested($var)
-{
-    if(substr_count($var['interested'], "No ") <= 0) return false;
-    return true;
-}
-
-
-function isMarked_NotInterestedAndNotBlank($var)
-{
-    return !(isMarkedInterested_IsBlank($var));
-}
-
-function isMarked_ManuallyNotInterested($var)
-{
-    if((substr_count($var['interested'], "No ") > 0) && isInterested_MarkedAutomatically($var) == false) return true;
-    return false;
-}
-
-function isJobAutoUpdatable($var)
-{
-    if(isMarkedInterested_IsBlank($var) == true || (substr_count($var['interested'], "New") == 1) ) return true;
-
-    return false;
-}
-
-function includeJobInFilteredList($var)
-{
-    $filterYes = false;
-
-    if(isInterested_MarkedAutomatically($var) == true) $filterYes = true;
-    if(isMarked_NotInterested($var) == true) $filterYes = true;
-
-    return !$filterYes;
-
-}
 
 function getDateForDaysAgo($strDaysAgo)
 {
@@ -222,6 +99,7 @@ function getDateForDaysAgo($strDaysAgo)
 
     return $retDate;
 }
+
 function combineTextAllChildren($node, $fRecursed = false)
 {
 
@@ -607,15 +485,6 @@ function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "ke
 
     fclose($file);
 
-//    $objPHPExcel = new PHPExcel();
-//    $rowNumber = 1;
-//    $objPHPExcel->getActiveSheet()->fromArray($arrData, NULL,'A1');
-//    $objWriter = new PHPExcel_Writer_CSV($objPHPExcel);
-//    $objWriter->save($inputFile);
-
-//
-//    $classCSVFile = new \Scooper\ScooperSimpleCSV($outputFile, 'w');
-//    $classCSVFile->writeArrayToCSVFile($arrData, , $keyname);
     $ret = callTokenizer($inputFile, $outputFile, $dataKeyName, $indexKeyName);
     $valInterimFiles = \Scooper\get_PharseOptionValue('output_interim_files');
 

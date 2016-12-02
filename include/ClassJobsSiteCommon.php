@@ -17,7 +17,7 @@
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/Options.php');
 require_once(__ROOT__.'/lib/array_column.php');
-require_once(__ROOT__.'/include/JobListHelpers.php');
+require_once(__ROOT__ . '/include/Helpers.php');
 
 define('TITLE_NEG_KWD_MATCH', 'No (Title Excluded Via Negative Keyword)');
 define('NO_TITLE_MATCHES', 'No (Title Did Not Match Search Keywords))');
@@ -96,14 +96,14 @@ class ClassJobsSiteCommon
             'job_title' => '',
             'interested' => '',
             'job_post_url' => '',
-            'match_details' => '',
-            'match_notes' => '',
-            'status' => '',
-            'last_status_update' => '',
-            'date_pulled' => '',
             'location' => '',
+            'status' => '',
             'job_site_category' => '',
             'job_site_date' =>'',
+            'match_details' => '',
+            'match_notes' => '',
+            'last_status_update' => '',
+            'date_pulled' => '',
             'date_last_updated' => '',
             'key_jobsite_siteid' => '',
             'key_company_role' => '',
@@ -214,7 +214,7 @@ class ClassJobsSiteCommon
         $retArrNormalized['date_pulled'] = getTodayAsString();
 
         $retArrNormalized ['job_site'] = \Scooper\strScrub($retArrNormalized['job_site'], DEFAULT_SCRUB);
-        $retArrNormalized ['job_id'] = \Scooper\strScrub($retArrNormalized['job_id'], SIMPLE_TEXT_CLEANUP);
+        $retArrNormalized ['job_id'] = \Scooper\strScrub($retArrNormalized['job_id'], FOR_LOOKUP_VALUE_MATCHING);
 
         // Removes " NEW!", etc from the job title.  ZipRecruiter tends to occasionally
         // have that appended which then fails de-duplication. (Fixes issue #45) Glassdoor has "- easy apply" as well.
@@ -299,7 +299,7 @@ class ClassJobsSiteCommon
 
         if(strlen($retArrNormalized['key_company_role']) <= 0)
         {
-            $retArrNormalized['key_company_role'] = \Scooper\strScrub($retArrNormalized['company'], FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($retArrNormalized['job_title'], FOR_LOOKUP_VALUE_MATCHING);
+            $retArrNormalized['key_company_role'] = \Scooper\strScrub($retArrNormalized['company'], FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($retArrNormalized['job_title'], FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($retArrNormalized['job_id'], FOR_LOOKUP_VALUE_MATCHING);
         }
 
         if(strlen($retArrNormalized['key_jobsite_siteid']) <= 0)
@@ -334,16 +334,14 @@ class ClassJobsSiteCommon
 
 
 
-    function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true, $fFirstAutoMarkJobs = false, $loggedFileType = null, $ext = "CSV", $keysToOutput=null, $detailsCSSToInclude = null)
+    function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true, $loggedFileType = null, $ext = "CSV", $keysToOutput=null, $detailsCSSToInclude = null)
     {
 
         if(!$strOutFilePath || strlen($strOutFilePath) <= 0)
         {
-            $strOutFilePath = $this->getOutputFileFullPath();
-            $GLOBALS['logger']->logLine("Warning: writeJobsListToFile was called without an output file name.  Using default value: " . $strOutFilePath, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-//            throw new ErrorException("Error: writeJobsListToFile called without an output file path to use.");
+            throw new ErrorException("Error: writeJobsListToFile called without an output file path to use.");
         }
+
         if(count($arrJobsRecordsToUse) == 0)
         {
             $GLOBALS['logger']->logLine("Warning: writeJobsListToFile had no records to write to  " . $strOutFilePath, \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -360,7 +358,43 @@ class ClassJobsSiteCommon
 
         $classCombined = new \Scooper\ScooperSimpleCSV($strOutFilePath , "w");
 
-        if ($keysToOutput == null) { $keysToOutput = array_keys($this->getEmptyJobListingRecord()); }
+        $arrRecordsToOutput = array_unique_multidimensional($arrJobsRecordsToUse);
+        sort($arrRecordsToOutput);
+        if (!is_array($arrRecordsToOutput))
+        {
+            $arrRecordsToOutput = array();
+        }
+        if ($keysToOutput == null && count($arrRecordsToOutput) > 0)
+        {
+            $exampleRec = $arrRecordsToOutput[array_keys($arrRecordsToOutput)[0]];
+
+            $arrKeys = array_keys($exampleRec);
+            $arrKeysInOrder = array();
+            $tmpKeyOrderWithDupes = array_merge($keysToOutput, $arrKeys);
+            foreach($tmpKeyOrderWithDupes as $key)
+            {
+                if(!in_array($key, $arrKeysInOrder))
+                    $arrKeysInOrder[] = $key;
+            }
+            $keysToOutput = $arrKeysInOrder;
+        }
+        elseif($keysToOutput == null)
+        {
+            $keysToOutput = $this->getEmptyJobListingRecord();
+        }
+
+        if($arrRecordsToOutput != null && count($arrRecordsToOutput) > 0)
+        {
+            foreach($arrRecordsToOutput as $reckey => $rec)
+            {
+                $out = array();
+                foreach($keysToOutput as $k)
+                {
+                    $out[$k] = $rec[$k];
+                }
+                $arrRecordsToOutput[$reckey] = \Scooper\array_copy($out);
+            }
+        }
 
         if($ext == 'HTML')
         {
@@ -370,14 +404,11 @@ class ClassJobsSiteCommon
                 // $strCSS = file_get_contents(dirname(__FILE__) . '/../include/CSVTableStyle.css');
                 $strCSS = file_get_contents($detailsCSSToInclude['full_file_path']);
             }
-            $classCombined->writeArrayToHTMLFile($arrJobsRecordsToUse, $keysToOutput, $this->arrKeysForDeduping, $strCSS);
+            $classCombined->writeArrayToHTMLFile($arrRecordsToOutput, $keysToOutput, $this->arrKeysForDeduping, $strCSS);
 
         }
         else
         {
-            $arrRecordsToOutput = array_unique_multidimensional($arrJobsRecordsToUse);
-            sort($arrRecordsToOutput);
-            if (!is_array($arrRecordsToOutput)) $arrRecordsToOutput = array();
             array_unshift($arrRecordsToOutput, $keysToOutput);
             $objPHPExcel = new PHPExcel();
             $objPHPExcel->getActiveSheet()->fromArray($arrRecordsToOutput, null, 'A1');
@@ -465,7 +496,7 @@ class ClassJobsSiteCommon
         {
             if(count($arrMyRecordsToInclude) > 0)
             {
-                $this->writeJobsListToFile($strOutFilePath, $arrRetJobs, $fIncludeFilteredJobsInResults, false, "writeMergedJobsCSVFile");
+                $this->writeJobsListToFile($strOutFilePath, $arrRetJobs, $fIncludeFilteredJobsInResults, "writeMergedJobsCSVFile");
             }
             else
             {
@@ -501,7 +532,7 @@ class ClassJobsSiteCommon
                 $arrRetJobs = \Scooper\my_merge_add_new_keys($arrMyRecordsToInclude, $arrRetJobs);
             }
 
-            $this->writeJobsListToFile($strOutFilePath, $arrRetJobs, $fIncludeFilteredJobsInResults, false, "writeMergedJobsCSVFile2");
+            $this->writeJobsListToFile($strOutFilePath, $arrRetJobs, $fIncludeFilteredJobsInResults, "writeMergedJobsCSVFile2");
             $GLOBALS['logger']->logLine("Combined file has ". count($arrRetJobs) . " jobs and was written to " . $strOutFilePath , \Scooper\C__DISPLAY_ITEM_START__);
 
         }

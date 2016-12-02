@@ -1,11 +1,8 @@
-import nltk
 from nltk.corpus import stopwords
 import unicodecsv
-import re
 from nltk.stem.snowball import SnowballStemmer
 snowstemmer = SnowballStemmer("english")
 stopwrds = stopwords.words('english')
-
 
 
 
@@ -118,7 +115,7 @@ filepath = os.path.dirname(os.path.abspath(__file__)) # /a/b/c/d/e
 abbrevfile = os.path.join(filepath, "static", "job-title-abbreviations.csv")
 expandWords = loadCSV(abbrevfile, "abbreviation")['dict']
 
-def tokenizeStrings(listStrings):
+def tokenizeStrings(listStrings, fieldTokenized = "tokenized"):
     retData = {}
     for k in listStrings.keys():
         v = listStrings[k]
@@ -128,7 +125,7 @@ def tokenizeStrings(listStrings):
             continue;
 
         tokens = getScrubbedStringTokens(v)
-        retData[k]["tokenized"] = "|".join(tokens)
+        retData[k][fieldTokenized] = "|".join(tokens)
 
     return retData
 
@@ -182,6 +179,31 @@ def getScrubbedStringTokens(inputstring):
     return lStemmedTokens
 
 
+
+def tokenizeJSONFile(inputFile, outputFile, dataKey=None, indexKey=None):
+    if indexKey is None:
+        indexKey = 0
+    if dataKey is None:
+        dataKey = 0
+
+    import json
+    inf = open(inputFile, "r")
+    inputData = json.load(inf)
+
+    if inputData:
+        dictStrings = {}
+        for k, v in inputData.items():
+            dictStrings[k] = v[dataKey]
+
+        outData = tokenizeStrings(dictStrings, "job_title_tokenized")
+        combined = combine_dicts(inputData, outData)
+        outf = open(outputFile, "w")
+        json.dump(combined, outf, indent=4, encoding='utf-8')
+        outf.close()
+        return outputFile
+
+    return None
+
 def tokenizeFile(inputFile, outputFile, dataKey=None, indexKey=None):
     if indexKey is None:
         indexKey = 0
@@ -198,9 +220,9 @@ def tokenizeFile(inputFile, outputFile, dataKey=None, indexKey=None):
         # print v[dataKey], "\n", "\n"
 #    listStrings = [k, v[dataKey] for k, v in dictData.items()]
 
-    outData = tokenizeStrings(dictStrings)
+    outData = tokenizeStrings(dictStrings, "tokenized")
     results = combine_dicts(dictData, outData)
-    fields.append(u"tokenized")
+    fields.append("tokenized")
     writedicttocsv(outputFile, results, fields)
 
     return results

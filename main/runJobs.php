@@ -19,10 +19,10 @@ const C__APPNAME__ = "jobs_scooper";
 define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__ . '/include/SitePlugins.php');
 
-
-
-$classRunJobs = new ClassJobsRunWrapper();
+$classRunJobs = new StageManager();
 $classRunJobs->RunAll();
+//$classRunJobs->doStage1();
+//$classRunJobs->doStage4();
 
 
 ?>
