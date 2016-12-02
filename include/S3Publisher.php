@@ -6,8 +6,6 @@ require_once(__ROOT__.'/include/Options.php');
 
 class S3Publisher {
     private $s3Client = null;
-    private $key = "AKIAID46ZVSLZOCQI6AA";
-    private $secret = "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";
     private $bucket = "www.rvelocity.net";
     private $keyPrefix = "jobs_output/";
 
