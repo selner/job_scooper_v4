@@ -98,14 +98,20 @@ function __initializeArgs__()
             'required'      => false,
             'short'      => 'debug_files',
         ),
-        's3_bucket' => array(
+        's3bucket' => array(
             'description'   => 'Name of the S3 bucket to publish to',
             'default'       => "",
             'type'          => Pharse::PHARSE_STRING,
-            'required'      => false
+            'required'      => true
         ),
-        's3_region' => array(
+        's3region' => array(
             'description'   => 'Name of the AWS region to use for the S3 bucket',
+            'default'       => "",
+            'type'          => Pharse::PHARSE_STRING,
+            'required'      => True
+        ),
+        'stages' => array(
+            'description'   => 'Comma-separated list of stage numbers to execute.  All stages are run if not present.',
             'default'       => "",
             'type'          => Pharse::PHARSE_STRING,
             'required'      => false
@@ -122,7 +128,7 @@ function __initializeArgs__()
     {
         $GLOBALS['logger']->logLine('Options set: '.var_export($GLOBALS['OPTS'], true), \Scooper\C__DISPLAY_NORMAL__);
     }
-    else { 'Options set: '.var_export($GLOBALS['OPTS'], true); }
+    else { print('Options set: '.var_export($GLOBALS['OPTS'], true)); }
 
 }
 

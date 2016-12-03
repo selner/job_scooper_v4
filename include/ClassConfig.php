@@ -27,7 +27,6 @@ class ClassConfig extends ClassJobsSitePlugin
     protected $configSettings = array('searches' => null, 'keyword_sets' => null, 'location_sets' => null, 'number_days'=>VALUE_NOT_SUPPORTED, 'included_sites' => array(), 'excluded_sites' => array());
     protected $arrEmail_PHPMailer_SMTPSetup = null;
     protected $allConfigFileSettings = null;
-    private $arrCacheFolder = null;
 
     function getSearchConfiguration($strSubkey = null)
     {
@@ -165,7 +164,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
         $strOutfileArrString = getArrayValuesAsString( $GLOBALS['USERDATA']['directories']);
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output folders configured: " . $strOutfileArrString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        $GLOBALS['USERDATA']['AWS'] = array("S3" => array("bucket" => \Scooper\get_PharseOptionValue("s3_bucket"), "region" => \Scooper\get_PharseOptionValue("s3_region") ));
+        $GLOBALS['USERDATA']['AWS'] = array("S3" => array("bucket" => \Scooper\get_PharseOptionValue("s3bucket"), "region" => \Scooper\get_PharseOptionValue("s3region") ));
 
         if($GLOBALS['OPTS']['use_config_ini_given'])
         {
@@ -207,6 +206,10 @@ class ClassConfig extends ClassJobsSitePlugin
 
     }
 
+    function getLogger()
+    {
+        return $GLOBALS['logger'];
+    }
 
     function __destruct()
     {

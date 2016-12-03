@@ -189,19 +189,21 @@ def tokenizeJSONFile(inputFile, outputFile, dataKey=None, indexKey=None):
     import json
     inf = open(inputFile, "r")
     inputData = json.load(inf)
-
     if inputData:
+        print "Processing file " + inputFile
         dictStrings = {}
-        for k, v in inputData.items():
-            dictStrings[k] = v[dataKey]
-
-        outData = tokenizeStrings(dictStrings, "job_title_tokenized")
-        combined = combine_dicts(inputData, outData)
-        outf = open(outputFile, "w")
-        json.dump(combined, outf, indent=4, encoding='utf-8')
-        outf.close()
-        return outputFile
-
+        if(isinstance(inputData, dict)):
+            for k, v in inputData.items():
+                dictStrings[k] = v[dataKey]
+            outData = tokenizeStrings(dictStrings, "job_title_tokenized")
+            combined = combine_dicts(inputData, outData)
+            outf = open(outputFile, "w")
+            json.dump(combined, outf, indent=4, encoding='utf-8')
+            outf.close()
+            print "Tokenized results written to " + outputFile
+            return outputFile
+    else:
+            print "Error:  No job listings found in " + inputFile
     return None
 
 def tokenizeFile(inputFile, outputFile, dataKey=None, indexKey=None):

@@ -144,12 +144,6 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
         }
 
 
-        if(isset($GLOBALS['USERDATA']['AWS']['S3']) && !is_null($GLOBALS['USERDATA']['AWS']['S3']['bucket']) && !is_null($GLOBALS['USERDATA']['AWS']['S3']['region']))
-        {
-            $s3 = new S3Manager($GLOBALS['USERDATA']['AWS']['S3']['bucket'], $GLOBALS['USERDATA']['AWS']['S3']['region']);
-            $s3->publishFolderToBucket($GLOBALS['USERDATA']['directories']['stage1'], "staging/stage1-rawlistings");
-        }
-
         return $retJobList;
     }
 
