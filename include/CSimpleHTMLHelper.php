@@ -96,7 +96,7 @@ class CSimpleHTMLHelper
 
             if(!isset($subNode))
             {
-                throw new ErrorException("Failed to find expected node path: " & $strNodePath);
+                throw new ErrorException("Failed to find expected node path: " . $strNodePath);
             }
 
 
