@@ -839,19 +839,13 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     {
         $userkey = $GLOBALS['USERDATA']['user_unique_key'] ."-";
 
-        $key = $this->_getFileStoreKeyForSearch( $searchSettings, $userkey );
-        if(is_null($dataJobs))
-            $dataJobs = array($this->getEmptyJobListingRecord());
+        if(stripos($searchSettings['name'], $this->siteName) === false)
+        {
+            $userkey = $userkey .$this->siteName;
+        }
 
-
-        $jobsJson = json_encode($dataJobs, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
-        $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['stage1'], ($key . "-" . strtolower(getTodayAsString("")) . ".json")));
-
-        $GLOBALS['logger']->logLine("Writing final job data pull results to json file " . $resultsFile, \Scooper\C__DISPLAY_ERROR__);
-        file_put_contents($resultsFile, $jobsJson, FILE_TEXT);
-
-        return $resultsFile;
-
+        $key = $this->_getFileStoreKeyForSearch( $searchSettings, $userkey);
+        return writeJobsListToLocalJSONFile($key, $dataJobs);
     }
 
     private function getJobsFromMicroData($objSimpleHTML)

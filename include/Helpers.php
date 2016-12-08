@@ -657,6 +657,80 @@ function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strEx
 }
 
 
+const STAGE1_PATHKEY = "stage1-rawlistings/";
+const STAGE2_PATHKEY = "stage2-rawlistings/";
+const STAGE3_PATHKEY = "stage3-aggregatelistings/";
+const STAGE4_PATHKEY = "stage4-automarkedlistings/";
+const STAGE_FLAG_STAGEONLY = 0x0;
+const STAGE_FLAG_INCLUDEUSER = 0x1;
+const STAGE_FLAG_INCLUDEDATE = 0x2;
+const STAGE_FLAG_EXCLUDEPARENTPATH = 0x4;
+
+function addDelimIfNeeded($currString, $delim, $strToAdd)
+{
+    $result = $currString;
+    if(strlen($currString) > 0)
+        $result = $result . $delim;
+
+    $result = $result . $strToAdd;
+    return $result;
+}
+function getStageKeyPrefix($stageNumber, $fileFlags = STAGE_FLAG_STAGEONLY, $delim="")
+{
+    $prefix = $GLOBALS['USERDATA']['user_unique_key'] . "/";
+
+    if(($fileFlags& STAGE_FLAG_INCLUDEUSER) == true)
+        $prefix = addDelimIfNeeded($prefix , $delim, $GLOBALS['USERDATA']['user_unique_key']);
+
+    if(($fileFlags & STAGE_FLAG_INCLUDEDATE) == true)
+        $prefix = addDelimIfNeeded($prefix , $delim, \Scooper\getTodayAsString(""));
+
+    if(($fileFlags & STAGE_FLAG_EXCLUDEPARENTPATH) == false)
+        $prefix = "jobscooper/staging/" . $prefix;
+
+    switch($stageNumber)
+    {
+        case 1:
+            $prefix = STAGE1_PATHKEY . $prefix;
+            break;
+        case 2:
+            $prefix = STAGE2_PATHKEY . $prefix;
+            break;
+        case 3:
+            $prefix = STAGE3_PATHKEY . $prefix;
+            break;
+        case 4:
+            $prefix = STAGE4_PATHKEY . $prefix;
+            break;
+        default:
+            throw new Exception("Error: invalid stage number passed '" . $stageNumber. "'" );
+            break;
+    }
+
+    return $prefix;
+}
+
+function writeJobsListToLocalJSONFile($fileKey, $dataJobs, $stageNumber = null)
+{
+    if(is_null($dataJobs))
+        $dataJobs = array();
+    if(is_null($stageNumber))
+        $stageNumber = 1;
+
+    $stageName = "stage" . $stageNumber;
+    $fileKey = str_replace(" ", "", $fileKey);
+
+    $jobsJson = json_encode($dataJobs, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], ($fileKey . "-" . strtolower(getTodayAsString("")) . ".json")));
+
+    $GLOBALS['logger']->logLine("Writing final job data pull results to json file " . $resultsFile, \Scooper\C__DISPLAY_ERROR__);
+    file_put_contents($resultsFile, $jobsJson, FILE_TEXT);
+
+    return $resultsFile;
+
+}
+
+
 function getPhpMemoryUsage()
 {
     $size = memory_get_usage(true);

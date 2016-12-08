@@ -24,54 +24,8 @@ require_once(__ROOT__.'/include/JobsAutoMarker.php');
 
 const JOBLIST_TYPE_UNFILTERED = "unfiltered";
 const JOBLIST_TYPE_MARKED = "marked";
-const STAGE1_PATHKEY = "jobscooper/staging/stage1-rawlistings/";
-const STAGE2_PATHKEY = "jobscooper/staging/stage2-rawlistings/";
-const STAGE3_PATHKEY = "jobscooper/staging/stage3-aggregatelistings/";
-const STAGE4_PATHKEY = "jobscooper/staging/stage4-automarkedlistings/";
-const STAGE_FLAG_STAGEONLY = 0x0;
-const STAGE_FLAG_INCLUDEUSER = 0x1;
-const STAGE_FLAG_INCLUDEDATE = 0x2;
+const JSON_FILENAME = "-alljobsites.json";
 
-function addDelimIfNeeded($currString, $delim, $strToAdd)
-{
-    $result = $currString;
-    if(strlen($currString) > 0)
-        $result = $result . $delim;
-
-    $result = $result . $strToAdd;
-    return $result;
-}
-function getStageKeyPrefix($stageNumber, $fileFlags = STAGE_FLAG_STAGEONLY, $delim="")
-{
-    $prefix = $GLOBALS['USERDATA']['user_unique_key'] . "/";
-
-    if(($fileFlags& STAGE_FLAG_INCLUDEUSER) == true)
-        $prefix = addDelimIfNeeded($prefix , $delim, $GLOBALS['USERDATA']['user_unique_key']);
-
-    if(($fileFlags & STAGE_FLAG_INCLUDEDATE) == true)
-        $prefix = addDelimIfNeeded($prefix , $delim, \Scooper\getTodayAsString(""));
-
-    switch($stageNumber)
-    {
-        case 1:
-            $prefix = STAGE1_PATHKEY . $prefix;
-            break;
-        case 2:
-            $prefix = STAGE2_PATHKEY . $prefix;
-            break;
-        case 3:
-            $prefix = STAGE3_PATHKEY . $prefix;
-            break;
-        case 4:
-            $prefix = STAGE4_PATHKEY . $prefix;
-            break;
-        default:
-            throw new Exception("Error: invalid stage number passed '" . $stageNumber. "'" );
-            break;
-    }
-
-    return $prefix;
-}
 
 class S3JobListManager extends ClassJobsSiteCommon
 {
@@ -98,6 +52,12 @@ class S3JobListManager extends ClassJobsSiteCommon
         try {
             $data = $this->_getJobsListDataForS3_($stageNumber, $listType);
             $this->s3Manager->uploadObject($data['key'], $data['joblistings']);
+            $keyparts = explode("/", $data['key']);
+            if($GLOBALS['OPTS']['DEBUG'] == true)
+            {
+                writeJobsListToLocalJSONFile($keyparts[count($keyparts)-1], $data['joblistings'], $stageNumber);
+            }
+
             return $data['key'];
 
         } catch (Exception $e) {
@@ -175,6 +135,7 @@ class S3JobListManager extends ClassJobsSiteCommon
             return $result['key'];
         return null;
     }
+
     private function _getJobsListDataForS3_($stageNumber, $listType)
     {
         $jobList = null;
@@ -183,11 +144,11 @@ class S3JobListManager extends ClassJobsSiteCommon
         {
             case JOBLIST_TYPE_UNFILTERED:
                 $jobList = $this->arrLatestJobs_UnfilteredByUserInput;
-                $keyEnding = JOBLIST_TYPE_UNFILTERED . ".json";
+                $keyEnding = JOBLIST_TYPE_UNFILTERED . JSON_FILENAME;
                 break;
             case JOBLIST_TYPE_MARKED:
                 $jobList = $this->arrMarkedJobs;
-                $keyEnding = JOBLIST_TYPE_MARKED . ".json";
+                $keyEnding = JOBLIST_TYPE_MARKED . JSON_FILENAME;
                 break;
 
             default:

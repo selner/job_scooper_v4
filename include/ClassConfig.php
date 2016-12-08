@@ -232,14 +232,17 @@ class ClassConfig extends ClassJobsSitePlugin
         $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
         $GLOBALS['USERDATA']['directories']['staging'] = realpath($details['directory']);
 
-        $path = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['staging'], STAGE1_PATHKEY));
-        $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-        $GLOBALS['USERDATA']['directories']['stage1'] = realpath($details['directory']);
+        for($n=1; $n <= 4; $n++)
+        {
+            $path = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['staging'], getStageKeyPrefix($n, STAGE_FLAG_EXCLUDEPARENTPATH)));
+            $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+            $GLOBALS['USERDATA']['directories']["stage".$n] = realpath($details['directory']);
+        }
 
-        $path = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['staging'], STAGE2_PATHKEY));
-        $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-        $GLOBALS['USERDATA']['directories']['stage2'] = realpath($details['directory']);
-
+//        $path = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['staging'], STAGE2_PATHKEY));
+//        $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+//        $GLOBALS['USERDATA']['directories']['stage2'] = realpath($details['directory']);
+//
         $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey, "results/"));
         $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
         $GLOBALS['USERDATA']['directories']['results'] = realpath($details['directory']);
