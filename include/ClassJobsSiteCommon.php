@@ -226,6 +226,7 @@ class ClassJobsSiteCommon
         $retArrNormalized ['job_site_category'] = \Scooper\strScrub($retArrNormalized['job_site_category'], SIMPLE_TEXT_CLEANUP);
         $retArrNormalized ['job_site_date'] = \Scooper\strScrub($retArrNormalized['job_site_date'], REMOVE_EXTRA_WHITESPACE | LOWERCASE | HTML_DECODE );
         $retArrNormalized ['job_post_url'] = trim($retArrNormalized['job_post_url']); // DO NOT LOWER, BREAKS URLS
+        $retArrNormalized ['location'] = preg_replace('#(^\s*\(+|\)+\s*$)#', "", $retArrNormalized['location']); // strip leading & ending () chars
         $retArrNormalized ['location'] = \Scooper\strScrub($retArrNormalized['location'], SIMPLE_TEXT_CLEANUP);
 
         $retArrNormalized ['company'] = \Scooper\strScrub($retArrNormalized['company'], ADVANCED_TEXT_CLEANUP );
