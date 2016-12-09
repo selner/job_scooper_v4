@@ -30,7 +30,7 @@ class PluginMonster extends ClassJobsSitePlugin
     protected $regex_link_job_id = '/\.com\/([^\/]+\/)?([^\.]+)/i';
     function __construct($strBaseDir = null)
     {
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES | C__JOB_PREFER_MICRODATA;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES ;
         parent::__construct($strBaseDir);
     }
 
@@ -89,40 +89,58 @@ class PluginMonster extends ClassJobsSitePlugin
             $item = $this->getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
 
-            $subNode = $node->find("div.JobTitle");
-            if(isset($subNode) && isset($subNode[0])) $item['job_title'] = $subNode[0]->plaintext;
-
-
-            $subNode = $node->find(("div.JobTitle h2 a"));
-            if(isset($subNode) && isset($subNode[0]) && isset($subNode[0]->attr) && isset($subNode[0]->attr['data-m_impr_j_postingid']))     $item['job_id'] = $subNode[0]->attr['data-m_impr_j_postingid'];
-
-
-
-            if($item['job_title'] == '') continue;
-
-            $subNode = $node->find("div[class='company']");
-            if(isset($subNode) && isset($subNode[0])) $item['company'] = $subNode[0]->plaintext;
-
-            $subNode = $node->find("div[class='location']");
-            if(isset($subNode) && isset($subNode[0])) $item['location'] = str_ireplace("Location:", "", $subNode[0]->plaintext);
-
-            $subNode = $node->find("meta[itemprop='url']");
-            if(isset($subNode) && isset($subNode[0])) $item['location'] = str_ireplace("Location:", "", $subNode[0]->plaintext);
-            if(isset($objDiv) && isset($objDiv[0]) && isset($objDiv[0]->attr) && isset($objDiv[0]->attr['data-m_impr_j_postingid']))     $item['job_id'] = $objDiv[0]->attr['data-m_impr_j_postingid'];
-
-            $strScrubTitle = \Scooper\strip_punctuation(html_entity_decode($item['job_title']));
-            $strLoc= \Scooper\strip_punctuation(html_entity_decode($item['location']));
-
-            $item['job_post_url'] = $this->siteBaseURL . "/" . str_ireplace(" ", "-", $strScrubTitle )."-".str_ireplace(" ", "-",$strLoc)."-".$item['job_id'].".aspx";
-            $item['date_pulled'] = getTodayAsString();
-
-            $subNode = $node->find("span[class='accessibilityOnly']");
+            $subNode = $node->find("div[class='jobTitle'] h2 a");
             if(isset($subNode) && isset($subNode[0]))
             {
-                $item['job_site_date'] = $subNode[0]->plaintext;
-                $dateVal = date_create_from_format("c", $item['job_site_date']);
-                if(isset($dateVal))
-                    $item['job_site_date'] = $dateVal->format('m/d/y');
+                $item['job_title'] = $subNode[0]->attr['title'];
+                $item['job_id'] = $subNode[0]->attr['data-m_impr_j_postingid'];
+                $item['job_post_url'] = $subNode[0]->attr['href'];
+
+
+                $mousedownval = html_entity_decode($subNode[0]->attr['onmousedown'], ENT_QUOTES | ENT_XML1, 'UTF-8');
+
+                $parts = explode("clickJobTitleSiteCat('{", $mousedownval);
+                $vars = array();
+                if(count($parts) >= 2)
+                {
+
+                    foreach(explode(",", $parts[1]) as $v)
+                    {
+                        $keyval = explode(":", $v);
+                        if(count($keyval) >= 2)
+                        {
+                            $key = str_replace("\"", "", $keyval[0]);
+                            $val = str_replace("\"", "", $keyval[1]);
+                            $vars[$key] = $val;
+                        }
+                    }
+
+                    if(array_key_exists("eVar31", $vars) === true)
+                        $item['location'] = str_replace("_", " ", $vars['eVar31']);
+
+                    if(array_key_exists("prop24", $vars) === true)
+                    {
+                        $item['job_site_date'] = str_replace("_", "", $vars["prop24"]);
+                        $dateVal = strtotime($item['job_site_date']);
+                        if(!($dateVal === false))
+                            $item['job_site_date'] = $dateVal->format('Y-m-d');
+                    }
+                }
+            }
+
+            if($item['job_title'] == '' || $item['job_id'] == '')
+                continue;
+
+            $subNode = $node->find("div[class='company'] a span");
+            if(isset($subNode) && isset($subNode[0]))
+                $item['company'] = $subNode[0]->plaintext;
+
+            $subNode = $node->find("span[itemprop='address'] span[itemprop='addressLocality']");
+            if(isset($subNode) && isset($subNode[0]))
+            {
+                $item['location'] = $subNode[0]->plaintext;
+                $stateNode = $subNode[0]->nextSibling();
+                $item['location'] = $item['location'] . ", " . $stateNode->plaintext;
             }
 
             $ret[] = $this->normalizeItem($item);
