@@ -41,7 +41,7 @@ class S3JobListManager extends ClassJobsSiteCommon
         elseif($GLOBALS['logger'])
             $this->logger = $GLOBALS['logger'];
         else
-            $this->logger = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['debug'] );
+            $this->logger = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['stage1'] );
 
         $this->s3Manager = new S3Manager($GLOBALS['USERDATA']['AWS']['S3']['bucket'], $GLOBALS['USERDATA']['AWS']['S3']['region']);
     }

@@ -189,7 +189,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         ksort($arrFinalJobs_SortedByCompanyRole);
         $GLOBALS['logger']->logLine(PHP_EOL . "Writing final list of " . count($arrFinalJobs_SortedByCompanyRole) . " jobs to output files." . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
 
-        $detailsMainResultsCSVFile = \Scooper\getFilePathDetailsFromString(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], getDefaultJobsOutputFileName("results", "", "csv"))), \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+        $detailsMainResultsCSVFile = \Scooper\getFilePathDetailsFromString(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['stage4'], getDefaultJobsOutputFileName("results", "", "csv"))), \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
         $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", $detailsMainResultsCSVFile);
         
         $detailsMainResultsXLSFile = \Scooper\array_copy($detailsMainResultsCSVFile);
@@ -266,7 +266,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         if(isset($GLOBALS['USERDATA']['AWS']['S3']) && !is_null($GLOBALS['USERDATA']['AWS']['S3']['bucket']) && !is_null($GLOBALS['USERDATA']['AWS']['S3']['region']))
         {
             $s3 = new S3Manager($GLOBALS['USERDATA']['AWS']['S3']['bucket'], $GLOBALS['USERDATA']['AWS']['S3']['region']);
-            $s3->publishOutputFiles($GLOBALS['USERDATA']['directories']['results']);
+            $s3->publishOutputFiles($GLOBALS['USERDATA']['directories']['stage4']);
         }
 
         //
@@ -346,7 +346,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
     private function __getAlternateOutputFileDetails__($strNamePrepend = "results", $strNameAppend = "", $ext = "")
     {
         $fileName = getDefaultJobsOutputFileName($strNamePrepend, $strNameAppend, $ext, "");
-        $detailsRet = \Scooper\parseFilePath(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['debug'], $fileName)), false);
+        $detailsRet = \Scooper\parseFilePath(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['stage4'], $fileName)), false);
         return $detailsRet;
     }
 

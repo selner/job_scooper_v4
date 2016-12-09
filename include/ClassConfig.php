@@ -155,7 +155,7 @@ class ClassConfig extends ClassJobsSitePlugin
         // Now setup all the output folders
         $this->__setupOutputFolders__($userOutfileDetails['directory'], $GLOBALS['USERDATA']['user_unique_key']);
 
-        if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['debug'] );
+        if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['stage1'] );
 
         $strOutfileArrString = getArrayValuesAsString( $GLOBALS['USERDATA']['directories']);
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output folders configured: " . $strOutfileArrString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -214,24 +214,16 @@ class ClassConfig extends ClassJobsSitePlugin
             throw new ErrorException("Required value for the output folder was not specified. Exiting.");
         }
 
-        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey, "debug/"));
+        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey));
         $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-        $GLOBALS['USERDATA']['directories']['debug'] = realpath($details['directory']);
-
-        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey, "staged/"));
-        $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-        $GLOBALS['USERDATA']['directories']['staging'] = realpath($details['directory']);
+        $stageDirectory = realpath($details['directory']);
 
         for($n=1; $n <= 4; $n++)
         {
-            $path = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['staging'], getStageKeyPrefix($n, STAGE_FLAG_EXCLUDEPARENTPATH)));
+            $path = join(DIRECTORY_SEPARATOR, array($stageDirectory, getStageKeyPrefix($n, STAGE_FLAG_EXCLUDEPARENTPATH)));
             $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
             $GLOBALS['USERDATA']['directories']["stage".$n] = realpath($details['directory']);
         }
-
-        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey, "results/"));
-        $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-        $GLOBALS['USERDATA']['directories']['results'] = realpath($details['directory']);
 
     }
 
@@ -685,7 +677,7 @@ class ClassConfig extends ClassJobsSitePlugin
 //                            $baseSearch ['keyword_set']  = $searchKywdSet['keywords_array'];
 //                            $baseSearch ['keywords_array_tokenized'] = $searchKywdSet['keywords_array_tokenized'];
 
-                            if($classPlug->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED))
+                            if($classPlug->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) || $classPlug->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
                             {
                                 $thisSearch['keywords_array'] = $keywordSet['keywords_array'];
                                 $thisSearch['keywords_array_tokenized'] = $keywordSet['keywords_array_tokenized'];

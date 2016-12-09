@@ -28,7 +28,7 @@ class S3Manager {
         elseif($GLOBALS['logger'])
             $this->logger = $GLOBALS['logger'];
         else
-            $this->logger = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['debug'] );
+            $this->logger = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['stage1'] );
 
     }
 

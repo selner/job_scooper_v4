@@ -389,7 +389,7 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 {
     $GLOBALS['logger']->logLine("Tokenizing title exclusion matches from ".$inputfile."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
     if(!$outputFile)
-        $outputFile = $GLOBALS['USERDATA']['directories']['staging'] . "tempCallTokenizer.csv";
+        $outputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tempCallTokenizer.csv";
     $PYTHONPATH = realpath(__DIR__ ."/../python/pyJobNormalizer/");
     $cmd = "python " . $PYTHONPATH . "/normalizeStrings.py -i " . $inputfile . " -o " . $outputFile . " -k " . $keyname;
     if ($indexKeyName != null)
@@ -435,8 +435,8 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 
 function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "keywords", $indexKeyName = null)
 {
-    $inputFile = $GLOBALS['USERDATA']['directories']['staging'] . "tmp-".$tempFileKey."-token-input.csv";
-    $outputFile = $GLOBALS['USERDATA']['directories']['staging']. "tmp-".$tempFileKey."-token-output.csv";
+    $inputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-".$tempFileKey."-token-input.csv";
+    $outputFile = $GLOBALS['USERDATA']['directories']['stage2']. "/tmp-".$tempFileKey."-token-output.csv";
 
     $headers = array($dataKeyName);
     if(array_key_exists($dataKeyName, $arrData)) $headers = array_keys($arrData);
@@ -479,8 +479,8 @@ function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "ke
 
 function tokenizeMultiDimensionArray($arrData, $tempFileKey, $dataKeyName, $indexKeyName = null)
 {
-    $inputFile = $GLOBALS['USERDATA']['directories']['staging'] . "tmp-".$tempFileKey."-token-input.csv";
-    $outputFile = $GLOBALS['USERDATA']['directories']['staging'] . "tmp-".$tempFileKey."-token-output.csv";
+    $inputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-".$tempFileKey."-token-input.csv";
+    $outputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-".$tempFileKey."-token-output.csv";
 
     if(is_file($inputFile))
     {
@@ -661,7 +661,8 @@ function addDelimIfNeeded($currString, $delim, $strToAdd)
 }
 function getStageKeyPrefix($stageNumber, $fileFlags = STAGE_FLAG_STAGEONLY, $delim="")
 {
-    $prefix = $GLOBALS['USERDATA']['user_unique_key'] . "/";
+    $prefix =  "/";
+#    $prefix = $GLOBALS['USERDATA']['user_unique_key'] . "/";
 
     if(($fileFlags& STAGE_FLAG_INCLUDEUSER) == true)
         $prefix = addDelimIfNeeded($prefix , $delim, $GLOBALS['USERDATA']['user_unique_key']);
