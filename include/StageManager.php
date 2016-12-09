@@ -92,18 +92,25 @@ class S3JobListManager extends ClassJobsSiteCommon
         $prevStageNumber = \Scooper\intceil($thisStageNumber)-1;
         $arrRetJobs = array();
         $result = $this->getS3JobsList($thisStageNumber, $listType);
-        $arrJobsCurrStage = $result['BodyDecoded'];
-        if(countJobRecords($arrJobsCurrStage) > 0)
+        if (!is_null($result) && is_array($result) && array_key_exists('BodyDecoded', $result))
         {
-            addJobsToJobsList($arrRetJobs, $arrJobsCurrStage);
+            $arrJobsCurrStage = $result['BodyDecoded'];
+            if(countJobRecords($arrJobsCurrStage) > 0)
+            {
+                addJobsToJobsList($arrRetJobs, $arrJobsCurrStage);
+            }
         }
+
         if($prevStageNumber > 0)
         {
             $result = $this->getS3JobsList($prevStageNumber, $listType);
-            $arrJobsPrevStage = $result['BodyDecoded'];
-            if(countJobRecords($arrJobsPrevStage) > 0)
+            if (!is_null($result) && is_array($result) && array_key_exists('BodyDecoded', $result))
             {
-                addJobsToJobsList($arrRetJobs, $arrJobsPrevStage);
+                $arrJobsPrevStage = $result['BodyDecoded'];
+                if(countJobRecords($arrJobsPrevStage) > 0)
+                {
+                    addJobsToJobsList($arrRetJobs, $arrJobsPrevStage);
+                }
             }
         }
         switch($listType)
