@@ -168,7 +168,7 @@ class PluginSimplyHired extends ClassJobsSitePlugin
                 $item['company'] = combineTextAllChildren($companynode [0]);
             }
 
-            $locnode = $node->find('span[class="serp-location"]');
+            $locnode = $node->find('span[class="serp-location"] span span[class="serp-location"]');
             if(isset($locnode) && is_array($locnode))
             {
                 $item['location'] = combineTextAllChildren($locnode[0]);
