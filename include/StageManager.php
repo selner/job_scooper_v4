@@ -232,7 +232,6 @@ class StageManager extends S3JobListManager
             $this->doStage2();
             $this->doStage3();
             $this->doStage4();
-            $this->doStage5();
         }
     }
 
@@ -359,46 +358,6 @@ class StageManager extends S3JobListManager
         foreach($cmdOutput as $resultLine)
             $this->logger->logLine($resultLine, \Scooper\C__DISPLAY_ITEM_DETAIL__);
     }
-//
-//    public function doStage3()
-//    {
-//        if(isset($GLOBALS['logger'])) $this->logger->logLine("Stage 3:  Tokenizing Jobs ", \Scooper\C__DISPLAY_SECTION_START__);
-//        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//        //
-//        // Load the jobs list we need to process in this stage
-//        //
-//        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//        $this->migrateAndLoadS3JobListForStage(3, JOBLIST_TYPE_UNFILTERED);
-//
-//        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//        //
-//        // Download the stage 2 job listings from S3 to a local files, aggregate them and re-load them to S3
-//        //
-//        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//        $this->arrLatestJobs_UnfilteredByUserInput = null;
-//
-//        $details = \Scooper\getFilePathDetailsFromString($GLOBALS['USERDATA']['directories']['stage2'], \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-//        $prefix = getStageKeyPrefix(2, STAGE_FLAG_INCLUDEDATE);
-//        $this->s3Manager->downloadObjectsToFile($prefix, $details['directory']);
-//
-//        $filesToLoad = array_filter(scandir($details['directory']), function($file) { return (strcasecmp(substr($file, strlen($file)-5, 5), ".json") == 0); });
-//        foreach($filesToLoad as $file)
-//        {
-//            $fileFullPath = $details['directory'] . DIRECTORY_SEPARATOR . $file;
-//            $jsonText = file_get_contents($fileFullPath, FILE_TEXT);
-//            $arrJobs = json_decode($jsonText, true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
-//            addJobsToJobsList($this->arrLatestJobs_UnfilteredByUserInput, $arrJobs);
-//        }
-//        $this->publishS3JobsList(2, JOBLIST_TYPE_UNFILTERED);
-//
-//        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//        //
-//        // Publish the aggregated job list file back to S3 so its there for the next stage.
-//        // Remove the previous stage's processed file.
-//        //
-//        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-//    }
 
     public function doStage3()
     {
