@@ -191,7 +191,10 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
         $detailsMainResultsCSVFile = \Scooper\getFilePathDetailsFromString(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['stage4'], getDefaultJobsOutputFileName("results", "", "csv"))), \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
         $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", $detailsMainResultsCSVFile);
-        
+
+        // Output only new records that haven't been looked at yet
+        $allupdatedjobsfile = $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedToday", "-allchangedjobs", "CSV");
+
         $detailsMainResultsXLSFile = \Scooper\array_copy($detailsMainResultsCSVFile);
         $detailsMainResultsXLSFile['file_extension'] = "xls";
         $detailsMainResultsXLSFile = \Scooper\parseFilePath(\Scooper\getFullPathFromFileDetails($detailsMainResultsXLSFile));
@@ -205,7 +208,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         $detailsHTMLFile = \Scooper\parseFilePath($this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "-AllUnmarkedJobs", "HTML"));
 
         $arrResultFilesToCombine = array($detailsMainResultsCSVFile, \Scooper\parseFilePath($dataExcludedJobs));
-        $arrFilesToAttach = array($detailsHTMLFile);
+        $arrFilesToAttach = array($detailsMainResultsXLSFile, $detailsHTMLFile, $detailsMainResultsCSVFile, \Scooper\parseFilePath($allupdatedjobsfile));
 
         foreach($GLOBALS['USERDATA']['user_input_files_details'] as $inputfile)
         {
@@ -263,11 +266,11 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         //
         $this->sendJobCompletedEmail($strResultText, $strResultHTML, $detailsHTMLFile, $arrFilesToAttach);
 
-        if(isset($GLOBALS['USERDATA']['AWS']['S3']) && !is_null($GLOBALS['USERDATA']['AWS']['S3']['bucket']) && !is_null($GLOBALS['USERDATA']['AWS']['S3']['region']))
-        {
-            $s3 = new S3Manager($GLOBALS['USERDATA']['AWS']['S3']['bucket'], $GLOBALS['USERDATA']['AWS']['S3']['region']);
-            $s3->publishOutputFiles($GLOBALS['USERDATA']['directories']['stage4']);
-        }
+//        if(isset($GLOBALS['USERDATA']['AWS']['S3']) && !is_null($GLOBALS['USERDATA']['AWS']['S3']['bucket']) && !is_null($GLOBALS['USERDATA']['AWS']['S3']['region']))
+//        {
+//            $s3 = new S3Manager($GLOBALS['USERDATA']['AWS']['S3']['bucket'], $GLOBALS['USERDATA']['AWS']['S3']['region']);
+//            $s3->publishOutputFiles($GLOBALS['USERDATA']['directories']['stage4']);
+//        }
 
         //
         // If the user has not asked us to keep interim files around
