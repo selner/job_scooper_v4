@@ -454,15 +454,18 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         //
         // Add initial email address header values
         //
-        $toEmails =$this->classConfig->getEmailsByType("to");
-        if(!isset($toEmails) || count($toEmails) < 1 || strlen(current($toEmails)['address']) <= 0)
+        $settings = $GLOBALS['USERDATA']['configurationSettings']['email'];
+
+        if(!isset($settings['email_addresses']["to"]) || count($settings['email_addresses']["to"]) < 1 || strlen(current($settings['email_addresses']["to"])['address']) <= 0)
         {
             $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
             return false;
         }
+        if(array_key_exists("bcc", $settings['email_addresses']))
+            $bccEmails =$settings['email_addresses']["bcc"];
+        if(array_key_exists("from", $settings['email_addresses']))
+            $fromEmails =$settings['email_addresses']["from"];
 
-        $bccEmails =$this->classConfig->getEmailsByType("bcc");
-        $fromEmails =$this->classConfig->getEmailsByType("from");
         if(isset($fromEmails) && count($fromEmails) >= 1)
         {
             reset($fromEmails);
@@ -478,7 +481,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
         $mail = new PHPMailer();
         
-        $smtpSettings = $this->classConfig->getSMTPSettings();
+        $smtpSettings = $settings['PHPMailer_SMTPSetup'];
         
         if($smtpSettings != null && is_array($smtpSettings))
         {
@@ -496,11 +499,10 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         }
 
         $strToAddys = "<none>";
-        if(isset($toEmails) && count($toEmails) > 0)
+        if(isset($settings['email_addresses']["to"]) && count($settings['email_addresses']["to"]) > 0)
         {
-            reset($toEmails);
             $strToAddys = "";
-            foreach($toEmails as $to)
+            foreach($settings['email_addresses']["to"] as $to)
             {
                 $mail->addAddress($to['address'], $to['name']);
                 $strToAddys .= (strlen($strToAddys) <= 0 ? "" : ", ") . $to['address'];
@@ -535,9 +537,8 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
                 $mail->addAttachment($detailsAttach['full_file_path']);        // Add attachments
 
         $mail->isHTML(true);                                            // Set email format to HTML
-        reset($toEmails);
 
-        $mail->Subject = "Newly matched jobs: " . $this->_getRunDateRange_() . " for " . current($toEmails)['name'];
+        $mail->Subject = "Newly matched jobs: " . $this->_getRunDateRange_() . " for " . current($settings['email_addresses']["to"])['name'];
 
         $mail->Body    = $messageHtml;
         $mail->AltBody = $messageText;

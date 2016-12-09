@@ -860,11 +860,13 @@ class ClassConfig extends ClassJobsSitePlugin
 
     private function _parseEmailSetupFromINI_($config)
     {
+        $settingsEmail = array();
+
         if(isset($config['email'] ))
         {
             if($config['email']['smtp'])
             {
-                $this->arrEmail_PHPMailer_SMTPSetup = $config['email']['smtp'];
+                $settingsEmail['PHPMailer_SMTPSetup'] = $config['email']['smtp'];
             }
         }
 
@@ -884,9 +886,11 @@ class ClassConfig extends ClassJobsSitePlugin
                     $tempEmail['type'] = $emailItem['type'];
                 }
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added email from config.ini: '" . getArrayValuesAsString($tempEmail), \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                $this->arrEmailAddresses[] = $tempEmail;
+                $settingsEmail['email_addresses'][$tempEmail['type']][] = $tempEmail;
             }
         }
+
+        $GLOBALS['USERDATA']['configurationSettings']['email'] = \Scooper\array_copy($settingsEmail);
 
 
     }
