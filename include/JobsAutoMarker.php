@@ -140,7 +140,7 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         $arrLookup_JobListing_ByCompanyRole = array_flip($arrOneJobListingPerCompanyAndRole);
 
         $GLOBALS['logger']->logLine("Marking Duplicate Job Roles" , \Scooper\C__DISPLAY_SECTION_START__);
-        $GLOBALS['logger']->logLine("Auto-marking" . $nUniqJobs . " duplicated froms from " . countAssociativeArrayValues($this->arrLatestJobs) . " total jobs based on company/role pairing. " , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Auto-marking " . $nUniqJobs . " duplicated jobs from " . countAssociativeArrayValues($this->arrLatestJobs) . " total jobs based on company/role pairing. " , \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         foreach($this->arrLatestJobs as $job)
         {
