@@ -102,13 +102,13 @@ function __initializeArgs__()
             'description'   => 'Name of the S3 bucket to publish to',
             'default'       => "",
             'type'          => Pharse::PHARSE_STRING,
-            'required'      => true
+            'required'      => false
         ),
         's3region' => array(
             'description'   => 'Name of the AWS region to use for the S3 bucket',
             'default'       => "",
             'type'          => Pharse::PHARSE_STRING,
-            'required'      => True
+            'required'      => false
         ),
         'stages' => array(
             'description'   => 'Comma-separated list of stage numbers to execute.  All stages are run if not present.',

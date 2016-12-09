@@ -705,7 +705,9 @@ function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stage
     $data = array('key' => $fileKey, 'stage' => $stageNumber, 'listtype' => $listType, 'jobslist' => $dataJobs);
 
     $jobsJson = json_encode($data, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
-    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], ($fileKey . "-" . strtolower(getTodayAsString("")) . ".json")));
+    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], $fileKey ));
+    if(stripos($fileKey, ".json") === false)
+        $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
 
     $GLOBALS['logger']->logLine("Writing final job data pull results to json file " . $resultsFile);
     file_put_contents($resultsFile, $jobsJson, FILE_TEXT);
@@ -721,8 +723,10 @@ function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber)
 
     $stageName = "stage" . $stageNumber;
     $fileKey = str_replace(" ", "", $fileKey);
+    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], $fileKey ));
+    if(stripos($fileKey, ".json") === false)
+        $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
 
-    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], ($fileKey . "-" . strtolower(getTodayAsString("")) . ".json")));
     if(is_file($resultsFile))
     {
         $GLOBALS['logger']->logLine("Reading json data from file " . $resultsFile);

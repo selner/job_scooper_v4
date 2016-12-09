@@ -51,12 +51,16 @@ class S3JobListManager extends ClassJobsSiteCommon
 
         try {
             $data = $this->_getJobsListDataForS3_($stageNumber, $listType);
-            $this->s3Manager->uploadObject($data['key'], $data['joblistings']);
+            if (is_null($data)) return null;
             $keyparts = explode("/", $data['key']);
-//            if($GLOBALS['OPTS']['DEBUG'] == true)
-//            {
-                writeJobsListDataToLocalJSONFile($keyparts[count($keyparts)-1], $data['joblistings'], $listType, $stageNumber);
-//            }
+
+            $path = implode("/", array_slice($keyparts,2));
+            writeJobsListDataToLocalJSONFile($path, $data['jobslist'], $listType, $stageNumber);
+            if($this->s3Manager->isConnected() === true)
+            {
+
+                $this->s3Manager->uploadObject($data['key'], $data['jobslist']);
+            }
 
             return $data['key'];
 
@@ -72,7 +76,9 @@ class S3JobListManager extends ClassJobsSiteCommon
 
         try {
             $data = $this->_getJobsListDataForS3_($stageNumber, $listType);
+            if (is_null($data)) return null;
             return $this->s3Manager->getObject($data['key']);
+
 
         } catch (Exception $e) {
             $msg = "Warning:  could not find object for " . $listType . " joblist in S3:  " . $e->getMessage();
@@ -92,13 +98,21 @@ class S3JobListManager extends ClassJobsSiteCommon
         $prevStageNumber = \Scooper\intceil($thisStageNumber)-1;
         $arrRetJobs = array();
         $result = $this->getS3JobsList($thisStageNumber, $listType);
+
         if (!is_null($result) && is_array($result) && array_key_exists('BodyDecoded', $result))
         {
             $arrJobsCurrStage = $result['BodyDecoded'];
-            if(countJobRecords($arrJobsCurrStage) > 0)
-            {
-                addJobsToJobsList($arrRetJobs, $arrJobsCurrStage);
-            }
+        }
+        else
+        {
+            $data = $this->_getJobsListDataForS3_($thisStageNumber, $listType);
+            $keyparts = explode("/", $data['key']);
+            $path = implode("/", array_slice($keyparts,2));
+            $arrJobsCurrStage = readJobsListFromLocalJsonFile($path, $thisStageNumber);
+        }
+        if(countJobRecords($arrJobsCurrStage) > 0)
+        {
+            addJobsToJobsList($arrRetJobs, $arrJobsCurrStage);
         }
 
         if($prevStageNumber > 0)
@@ -107,12 +121,20 @@ class S3JobListManager extends ClassJobsSiteCommon
             if (!is_null($result) && is_array($result) && array_key_exists('BodyDecoded', $result))
             {
                 $arrJobsPrevStage = $result['BodyDecoded'];
-                if(countJobRecords($arrJobsPrevStage) > 0)
-                {
-                    addJobsToJobsList($arrRetJobs, $arrJobsPrevStage);
-                }
+            }
+            else
+            {
+                $data = $this->_getJobsListDataForS3_($prevStageNumber, $listType);
+                $keyparts = explode("/", $data['key']);
+                $path = implode("/", array_slice($keyparts,2));
+                $arrJobsPrevStage = readJobsListFromLocalJsonFile($path, $prevStageNumber);
+            }
+            if(countJobRecords($arrJobsPrevStage) > 0)
+            {
+                addJobsToJobsList($arrRetJobs, $arrJobsPrevStage);
             }
         }
+
         switch($listType)
         {
             case JOBLIST_TYPE_UNFILTERED:
@@ -126,9 +148,12 @@ class S3JobListManager extends ClassJobsSiteCommon
                 throw new Exception("Invalid job list type specified: " . $listType);
         }
 
-        writeJobsListDataToLocalJSONFile($fileKey="migratedFromPrevStageTo". $thisStageNumber, $dataJobs=$arrRetJobs, $listType, $stageNumber=3);
-        $this->publishS3JobsList($thisStageNumber, $listType);
-        $this->deleteS3JobsList($prevStageNumber, $listType);
+        writeJobsListDataToLocalJSONFile(("migrated-to-stage".$thisStageNumber), $dataJobs=$arrRetJobs, $listType, $stageNumber=$thisStageNumber);
+        if($this->s3Manager->isConnected() === true)
+        {
+            $this->publishS3JobsList($thisStageNumber, $listType);
+            $this->deleteS3JobsList($prevStageNumber, $listType);
+        }
     }
 
     public function deleteS3JobsList($stageNumber, $listType)
@@ -136,6 +161,8 @@ class S3JobListManager extends ClassJobsSiteCommon
         $key = "unknown";
         try {
             $data = $this->_getJobsListDataForS3_($stageNumber, $listType);
+            if (is_null($data)) return null;
+
             $key = $data['key'];
             $this->s3Manager->deleteObjects($key);
 
@@ -178,7 +205,7 @@ class S3JobListManager extends ClassJobsSiteCommon
         $data = array(
             'key' => $key,
             'type' => $listType,
-            'joblistings' =>  $jobList
+            'jobslist' =>  $jobList
         );
 
         return $data;
@@ -349,7 +376,19 @@ class StageManager extends S3JobListManager
         $stage2Key = $this->getS3KeyForStage(2, JOBLIST_TYPE_UNFILTERED);
 
         $PYTHONPATH = realpath(__DIR__ ."/../python/pyJobNormalizer/normalizeS3JobListings.py");
-        $cmd = "python " . $PYTHONPATH . " -b " . $GLOBALS['USERDATA']['AWS']['S3']['bucket'] . " --inkey " . escapeshellarg($stage1Key) . " --outkey " . escapeshellarg($stage2Key) . " --column job_title --index key_jobsite_siteid";
+        $sourceparam = "";
+        $bucketparam = "";
+
+        if(array_key_exists('AWS', $GLOBALS['USERDATA']) && array_key_exists('S3', $GLOBALS['USERDATA']['AWS']) && array_key_exists('bucket', $GLOBALS['USERDATA']['AWS']['S3']) && strlen($GLOBALS['USERDATA']['AWS']['S3']['bucket'])>0)
+        {
+            $sourceparam = "--source s3";
+            $bucketparam = "-b " . $GLOBALS['USERDATA']['AWS']['S3']['bucket'];
+        }
+        else
+        {
+            $sourceparam = "--source " . escapeshellarg($GLOBALS['OPTS']['output']);
+        }
+        $cmd = "python " . $PYTHONPATH . " ". $bucketparam . " " . $sourceparam . " --inkey " . escapeshellarg($stage1Key) . " --outkey " . escapeshellarg($stage2Key) . " --column job_title --index key_jobsite_siteid";
         $this->logger->logLine("Running command: " . $cmd   , \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $cmdOutput = array();
@@ -357,6 +396,14 @@ class StageManager extends S3JobListManager
         exec($cmd, $cmdOutput, $cmdRet);
         foreach($cmdOutput as $resultLine)
             $this->logger->logLine($resultLine, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+//        $this->logger->logLine("Loading results and saving for next stage...", \Scooper\C__DISPLAY_SECTION_START__);
+//        $keyparts = explode("/", $stage2Key);
+//        $path = implode("/", array_slice($keyparts,2));
+//
+//        $this->arrLatestJobs_UnfilteredByUserInput = readJobsListFromLocalJsonFile($path, 2);
+//        $this->publishS3JobsList(2, JOBLIST_TYPE_UNFILTERED);
+
     }
 
     public function doStage3()

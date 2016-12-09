@@ -117,8 +117,11 @@ expandWords = loadCSV(abbrevfile, "abbreviation")['dict']
 
 def tokenizeStrings(listStrings, fieldTokenized = "tokenized"):
     retData = {}
-    for k in listStrings.keys():
-        v = listStrings[k]
+    keys = listStrings.keys()
+    while len(keys) > 0:
+        k = keys.pop()
+        v = listStrings.pop(k)
+
         retData[k] = { "original" : v, fieldTokenized : []}
         if len(k) == 0:
             print "String value for key was empty.  Skipping..."
@@ -193,12 +196,13 @@ def tokenizeJSONFile(inputFile, outputFile, dataKey=None, indexKey=None):
         print "Processing file " + inputFile
         dictStrings = {}
         if(isinstance(inputData, dict)):
-            for k, v in inputData.items():
+            for k, v in inputData['jobslist'].items():
                 dictStrings[k] = v[dataKey]
             outData = tokenizeStrings(dictStrings, "job_title_tokenized")
-            combined = combine_dicts(inputData, outData)
+            combined = combine_dicts(inputData['jobslist'], outData)
+            inputData[u'jobslist'] = combined
             outf = open(outputFile, "w")
-            json.dump(combined, outf, indent=4, encoding='utf-8')
+            json.dump(inputData, outf, indent=4, encoding='utf-8')
             outf.close()
             print "Tokenized results written to " + outputFile
             return outputFile

@@ -13,16 +13,21 @@ class S3Manager {
     private $bucket = "www.rvelocity.net";
     private $logger = null;
 
+    public function isConnected() { return !is_null($this->s3Client); }
+
     public function __construct($bucket, $region, $logger=null)
     {
-        $this->bucket = $bucket;
+        if(strlen($bucket) > 0 && strlen($region) > 0)
+        {
+            $this->bucket = $bucket;
 
-        $this->s3Client  = new Aws\S3\S3Client([
-            'version' => 'latest',
-            'region'  => $region,
-            'credentials' => CredentialProvider::defaultProvider()
+            $this->s3Client  = new Aws\S3\S3Client([
+                'version' => 'latest',
+                'region'  => $region,
+                'credentials' => CredentialProvider::defaultProvider()
+            ]);
+        }
 
-        ]);
         if ($logger)
             $this->logger = $logger;
         elseif($GLOBALS['logger'])
@@ -34,6 +39,12 @@ class S3Manager {
 
     public function publishFolderToBucket($sourceDirectory, $bucketKeyPrefix="")
     {
+        if($this->isConnected() === false)
+        {
+            $this->logger->logLine("S3 not connected so ignoring....");
+            return;
+        }
+
         $dest = 's3://'.$this->bucket."/". $bucketKeyPrefix;
         $this->logger->logLine("Publishing folder '" . $sourceDirectory . "' to " . $dest);
 
@@ -53,15 +64,14 @@ class S3Manager {
 
     }
 
-    public function publishOutputFiles($outputDirectory)
-    {
-        $keypath = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['user_unique_key'] . "latest"));
-
-        $this->publishFolderToBucket($outputDirectory, $keypath);
-    }
-
     public function downloadObjectsToFile($bucketKeyPrefix, $downloadDirectory)
     {
+        if($this->isConnected() === false)
+        {
+            $this->logger->logLine("S3 not connected so ignoring....");
+            return;
+        }
+
         $srcPath = 's3://'.$this->bucket.  $bucketKeyPrefix;
 
         $this->logger->logLine("Downloading objects from '" . $srcPath . "' to " . $downloadDirectory);
@@ -100,6 +110,12 @@ class S3Manager {
 
     public function getObject($bucketKey)
     {
+        if($this->isConnected() === false)
+        {
+            $this->logger->logLine("S3 not connected so ignoring....");
+            return null;
+        }
+
         try
         {
             $this->logger->logLine("Deleting objects from S3 with the following key:  " . $bucketKey );
@@ -125,6 +141,12 @@ class S3Manager {
 
     public function deleteObjects($bucketKeyPrefix)
     {
+        if($this->isConnected() === false)
+        {
+            $this->logger->logLine("S3 not connected so ignoring....");
+            return;
+        }
+
         try
         {
             $this->logger->logLine("Deleting objects from S3 with the following key prefix:  " . $bucketKeyPrefix );
@@ -140,6 +162,12 @@ class S3Manager {
 
     public function getObjectKeyMatches($bucketKeyPrefix)
     {
+        if($this->isConnected() === false)
+        {
+            $this->logger->logLine("S3 not connected so ignoring....");
+            return null;
+        }
+
         try {
             $objects = $this->s3Client->getIterator('ListObjects', array('Bucket' => $this->bucket));
             $arrMatches = array();
@@ -159,6 +187,12 @@ class S3Manager {
 
     public function uploadObject($key, $data)
     {
+        if($this->isConnected() === false)
+        {
+            $this->logger->logLine("S3 not connected so ignoring....");
+            return null;
+        }
+
         try {
             $this->logger->logLine("Uploading object to S3 bucket '".$this->bucket."' with key '".$key);
             // Upload data.
