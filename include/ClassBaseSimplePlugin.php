@@ -130,9 +130,13 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
 
     function __construct($strBaseDir = null)
     {
-        $this->siteBaseURL = $this->childSiteURLBase;
-        $this->strBaseURLFormat = $this->childSiteURLBase;
+        if(strlen($this->siteBaseURL) == 0)
+            $this->siteBaseURL = $this->childSiteURLBase;
+        if(strlen($this->strBaseURLFormat) == 0)
+            $this->strBaseURLFormat = $this->childSiteURLBase;
+
         parent::__construct($strBaseDir);
+
     }
 
 
