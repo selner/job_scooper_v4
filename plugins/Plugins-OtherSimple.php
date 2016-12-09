@@ -29,8 +29,8 @@ class PluginTesla extends ClassSimpleFullPageJobSitePlugin
 
     protected $arrListingTagSetup = array(
         'tag_listings_section' => array('tag' => 'tr', 'attribute' => 'class', 'attribute_value' =>'table-row'),
-        'tag_title' => array(array('tag' => 'th', 'attribute' => 'class', 'attribute_value' => 'listing-title'), array('tag' => 'a')),
-        'tag_link' => array(array('tag' => 'th', 'attribute' => 'class', 'attribute_value' => 'listing-title'), array('tag' => 'a')),
+        'tag_title' => array(array('tag' => 'th', 'attribute' => 'class', 'attribute_value' => 'listing-title'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+        'tag_link' => array(array('tag' => 'th', 'attribute' => 'class', 'attribute_value' => 'listing-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
         'tag_department' => array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'listing-department'),
         'tag_location' => array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'listing-location'),
         'regex_link_job_id' => '/job\/([^\/]+)/i'
@@ -50,7 +50,7 @@ class PluginSmashingMagazine extends ClassSimpleFullPageJobSitePlugin
     protected $arrListingTagSetup = array(
         'tag_listings_section' => array(array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' =>'entry-list compact'), array('tag' => 'li')),
         'tag_title' => array('tag' => 'h2'),
-        'tag_link' =>  array('tag' => 'a'),
+        'tag_link' =>  array(array('tag' => 'a'), 'return_attribute' => 'href'),
         'tag_company' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'entry-company'),
         'regex_link_job_id' => '/j\/.*?\/([^\/]+)/i'
     );

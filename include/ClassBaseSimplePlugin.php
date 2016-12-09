@@ -179,6 +179,9 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
 
         foreach($arrTags as $arrTag)
         {
+            if (!is_array($arrTag))
+                continue;
+
             if(strlen($strMatch) > 0) $strMatch = $strMatch . ' ';
             $strMatch = $strMatch . $arrTag['tag'];
             if(isset($arrTag['attribute']) && strlen($arrTag['attribute']) > 0)
@@ -193,7 +196,10 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
     private function _getTagMatchValue_($node, $arrTag, $nameProperty = 'plaintext')
     {
         $strReturn = '';
-
+        if(array_key_exists("return_attribute", $arrTag))
+        {
+            $nameProperty = $arrTag['return_attribute'];
+        }
         $strMatch = $this->_getTagMatchString_($arrTag);
         if(isset($strMatch))
         {
@@ -246,6 +252,8 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
                 $item['job_title'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_title'], 'plaintext');
                 $item['job_post_url'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_link'], 'href');
 
+                if(strlen($item['job_title']) == 0)
+                    continue;
 
                 if(array_key_exists('tag_company', $this->arrListingTagSetup))
                 {
