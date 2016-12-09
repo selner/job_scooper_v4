@@ -230,7 +230,7 @@ class ClassJobsSiteCommon
         $dateVal = strtotime($retArrNormalized ['job_site_date'], $now = time());
         if(!($dateVal === false))
         {
-            $retArrNormalized['job_site_date'] = date('m/d/y', $dateVal);
+            $retArrNormalized['job_site_date'] = date('Y-m-d', $dateVal);
         }
 
         $retArrNormalized ['job_post_url'] = trim($retArrNormalized['job_post_url']); // DO NOT LOWER, BREAKS URLS
