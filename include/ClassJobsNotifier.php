@@ -32,11 +32,6 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
     protected $arrLatestJobs_UnfilteredByUserInput = array();
     protected $arrLatestJobs = array();
 
-    protected $arrEmailAddresses = null;
-
-    protected $arrAllSearchesFromConfig = null;
-    protected $arrEmail_PHPMailer_SMTPSetup = null;
-
     function __construct($arrJobs_Unfiltered, $arrJobs_AutoMarked)
     {
         $this->arrLatestJobs_UnfilteredByUserInput = \Scooper\array_copy($arrJobs_Unfiltered);
@@ -48,9 +43,6 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
 
     }
-
-
-
 
     private function _combineCSVsToExcel($outfileDetails, $arrCSVFiles)
     {
@@ -208,7 +200,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         $detailsHTMLFile = \Scooper\parseFilePath($this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "-AllUnmarkedJobs", "HTML"));
 
         $arrResultFilesToCombine = array($detailsMainResultsCSVFile, \Scooper\parseFilePath($dataExcludedJobs));
-        $arrFilesToAttach = array($detailsMainResultsXLSFile, $detailsHTMLFile, $detailsMainResultsCSVFile, \Scooper\parseFilePath($allupdatedjobsfile));
+        $arrFilesToAttach = array($detailsMainResultsXLSFile, $detailsHTMLFile, $detailsMainResultsCSVFile);
 
         foreach($GLOBALS['USERDATA']['user_input_files_details'] as $inputfile)
         {
@@ -286,48 +278,6 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         }
 
         $GLOBALS['logger']->logLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
-    }
-
-    function getConfig() { return $this->classConfig; }
-
-
-    private function _setSearchesForRun_()
-    {
-        $GLOBALS['logger']->logLine(PHP_EOL."Setting up searches for this specific run.".PHP_EOL, \Scooper\C__DISPLAY_SECTION_START__);
-
-        //
-        // let's start with the searches specified with the details in the the config.ini
-        //
-        $arrPossibleSearchesForRun = $this->classConfig->getSearchConfiguration('searches');
-
-        if(isset($arrPossibleSearchesForRun))
-        {
-            if(count($arrPossibleSearchesForRun) > 0)
-                for($z = 0; $z < count($arrPossibleSearchesForRun) ; $z++)
-                {
-                    $curSearch = $arrPossibleSearchesForRun[$z];
-
-                    $strIncludeKey = 'include_'.$curSearch['site_name'];
-
-                    $valInclude = \Scooper\get_PharseOptionValue($strIncludeKey);
-
-                    if(!isset($valInclude) || $valInclude == 0)
-                    {
-                        $GLOBALS['logger']->logLine($curSearch['site_name'] . " excluded, so dropping its searches from the run.", \Scooper\C__DISPLAY_ITEM_START__);
-
-                        $arrPossibleSearchesForRun[$z]['key'] = 'EXCLUDED_FOR_RUN__' . $arrPossibleSearchesForRun[$z]['key'];
-                    }
-                    else
-                    {
-                        // keep the search
-                        $this->arrSearchesToReturn[] = $arrPossibleSearchesForRun[$z];
-                    }
-
-                }
-        }
-
-        return;
-
     }
 
 
@@ -541,7 +491,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
         $mail->isHTML(true);                                            // Set email format to HTML
 
-        $mail->Subject = "Newly matched jobs: " . $this->_getRunDateRange_() . " for " . current($settings['email_addresses']["to"])['name'];
+        $mail->Subject = "New Job Postings: " . $this->_getRunDateRange_();
 
         $mail->Body    = $messageHtml;
         $mail->AltBody = $messageText;
@@ -621,7 +571,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         // Now go through the list of searches that were run and
         // set the value to "true" for any job sites that were run
         //
-        foreach($GLOBALS['USERDATA']['searches_for_run'] as $searchDetails)
+        foreach($GLOBALS['USERDATA']['configuration_settings']['searches'] as $searchDetails)
         {
             $arrSitesSearched[strtolower($searchDetails['site_name'])] = true;
         }
@@ -837,7 +787,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         $arrCounts_TotalUser = null;
         $strOut = "<div class='job_scooper outer'>";
 
-        $strOut  .= "<H2>Job Scooper Results: " . $this->_getRunDateRange_() . "</H2>".PHP_EOL. PHP_EOL;
+        $strOut  .= "<H2>New Job Postings for " . $this->_getRunDateRange_() . "</H2>".PHP_EOL. PHP_EOL;
 
         if($arrCounts != null && count($arrCounts) > 0)
         {
@@ -888,20 +838,24 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             $strOut .=  PHP_EOL . "</ul></div><br><br>". PHP_EOL;
         }
 
+        $strOut .=  PHP_EOL . "<div class='job_scooper section'>". PHP_EOL;
+
         if($arrExcluded != null && count($arrExcluded) > 0)
         {
             sort($arrExcluded);
 
-            $strOut .=  PHP_EOL . "<div class='job_scooper section'>". PHP_EOL;
             $strExcluded = getArrayValuesAsString($arrExcluded, ", ", "", false);
 
             $strOut .=  PHP_EOL .  "<span style=\"font-size: xx-small;color: #8e959c;\">Excluded sites for this run:" . PHP_EOL;
             $strOut .= $strExcluded;
             $strOut .= "</span>" . PHP_EOL;
-
-
         }
-        $strOut .= "</div";
+
+        $strOut .=  PHP_EOL . "<div class='job_scooper section'>". PHP_EOL;
+        $strOut .=  PHP_EOL .  "<span style=\"font-size: xx-small;color: lightblue;\">Generated by " . __APP_VERSION__. " on " . \Scooper\getTodayAsString() . "." . PHP_EOL;
+        $strOut .= "</span>" . PHP_EOL;
+
+        $strOut .= "</div>";
 
         return $strOut;
     }
