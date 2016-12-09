@@ -20,12 +20,12 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 
 
-class PluginTesla extends ClassBaseSimpleJobSitePlugin
+class PluginTesla extends ClassSimpleFullPageJobSitePlugin
 {
     protected $siteName = 'Tesla';
-    protected $childSiteURLBase = 'https://www.tesla.com';
+    protected $childSiteURLBase = 'https://www.tesla.com/careers/search#';
     protected $childSiteListingPage = 'https://www.tesla.com/careers/search#';
-    protected $additionalFlags = [C__JOB_USE_SELENIUM];
+    protected $additionalFlags = [C__JOB_USE_SELENIUM, C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE_NO_LOCATION];
 
     protected $arrListingTagSetup = array(
         'tag_listings_section' => array('tag' => 'tr', 'attribute' => 'class', 'attribute_value' =>'table-row'),
