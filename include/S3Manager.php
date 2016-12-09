@@ -34,7 +34,7 @@ class S3Manager {
 
     public function publishFolderToBucket($sourceDirectory, $bucketKeyPrefix="")
     {
-        $dest = 's3://'.$this->bucket. $bucketKeyPrefix;
+        $dest = 's3://'.$this->bucket."/". $bucketKeyPrefix;
         $this->logger->logLine("Publishing folder '" . $sourceDirectory . "' to " . $dest);
 
         try {
