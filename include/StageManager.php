@@ -348,9 +348,6 @@ class StageManager extends S3JobListManager
             } else {
                 throw new ErrorException("No searches have been set to be run.");
             }
-
-            // TODO:  Remove this local copy when we refactor the output section later
-            $GLOBALS['USERDATA']['searches_for_run'] = \Scooper\array_copy($arrSearchesToRun);
         }
     }
 
