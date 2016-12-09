@@ -117,7 +117,13 @@ class PluginMonster extends ClassJobsSitePlugin
             $item['date_pulled'] = getTodayAsString();
 
             $subNode = $node->find("span[class='accessibilityOnly']");
-            if(isset($subNode) && isset($subNode[0])) $item['job_site_date'] = $subNode[0]->plaintext;
+            if(isset($subNode) && isset($subNode[0]))
+            {
+                $item['job_site_date'] = $subNode[0]->plaintext;
+                $dateVal = date_create_from_format("c", $item['job_site_date']);
+                if(isset($dateVal))
+                    $item['job_site_date'] = $dateVal->format('m/d/y');
+            }
 
             $ret[] = $this->normalizeItem($item);
         }
