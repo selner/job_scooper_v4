@@ -53,10 +53,10 @@ class S3JobListManager extends ClassJobsSiteCommon
             $data = $this->_getJobsListDataForS3_($stageNumber, $listType);
             $this->s3Manager->uploadObject($data['key'], $data['joblistings']);
             $keyparts = explode("/", $data['key']);
-            if($GLOBALS['OPTS']['DEBUG'] == true)
-            {
-                writeJobsListToLocalJSONFile($keyparts[count($keyparts)-1], $data['joblistings'], $stageNumber);
-            }
+//            if($GLOBALS['OPTS']['DEBUG'] == true)
+//            {
+                writeJobsListDataToLocalJSONFile($keyparts[count($keyparts)-1], $data['joblistings'], $listType, $stageNumber);
+//            }
 
             return $data['key'];
 
@@ -81,6 +81,12 @@ class S3JobListManager extends ClassJobsSiteCommon
         }
     }
 
+    public function migrateAndLoadS3JobListsIntoStage($thisStageNumber)
+    {
+        $this->migrateAndLoadS3JobListForStage($thisStageNumber, JOBLIST_TYPE_UNFILTERED);
+        $this->migrateAndLoadS3JobListForStage($thisStageNumber, JOBLIST_TYPE_MARKED);
+    }
+
     public function migrateAndLoadS3JobListForStage($thisStageNumber, $listType)
     {
         $prevStageNumber = \Scooper\intceil($thisStageNumber)-1;
@@ -91,11 +97,14 @@ class S3JobListManager extends ClassJobsSiteCommon
         {
             addJobsToJobsList($arrRetJobs, $arrJobsCurrStage);
         }
-        $result = $this->getS3JobsList($prevStageNumber, $listType);
-        $arrJobsPrevStage = $result['BodyDecoded'];
-        if(countJobRecords($arrJobsPrevStage) > 0)
+        if($prevStageNumber > 0)
         {
-            addJobsToJobsList($arrRetJobs, $arrJobsPrevStage);
+            $result = $this->getS3JobsList($prevStageNumber, $listType);
+            $arrJobsPrevStage = $result['BodyDecoded'];
+            if(countJobRecords($arrJobsPrevStage) > 0)
+            {
+                addJobsToJobsList($arrRetJobs, $arrJobsPrevStage);
+            }
         }
         switch($listType)
         {
@@ -110,6 +119,7 @@ class S3JobListManager extends ClassJobsSiteCommon
                 throw new Exception("Invalid job list type specified: " . $listType);
         }
 
+        writeJobsListDataToLocalJSONFile($fileKey="migratedFromPrevStageTo". $thisStageNumber, $dataJobs=$arrRetJobs, $listType, $stageNumber=3);
         $this->publishS3JobsList($thisStageNumber, $listType);
         $this->deleteS3JobsList($prevStageNumber, $listType);
     }
@@ -128,6 +138,8 @@ class S3JobListManager extends ClassJobsSiteCommon
         }
 
     }
+
+
     public function getS3KeyForStage($stageNumber, $listType)
     {
         $result = $this->_getJobsListDataForS3_($stageNumber, $listType);
@@ -224,6 +236,13 @@ class StageManager extends S3JobListManager
         if(isset($GLOBALS['logger'])) $this->logger->logLine("Stage 1: Downloading Latest Matching Jobs ", \Scooper\C__DISPLAY_SECTION_START__);
 
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //
+        // Load the jobs list we need to process in this stage
+        //
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        $this->migrateAndLoadS3JobListsIntoStage(1);
+
         //
         // let's start with the searches specified with the details in the the config.ini
         //
@@ -237,7 +256,8 @@ class StageManager extends S3JobListManager
                 //
                 // Remove any sites that were excluded in this run from the searches list
                 //
-                for($z = 0; $z < count($arrSearchesToRun) ; $z++)
+//                for($z = 0; $z < count($arrSearchesToRun) ; $z++)
+                    foreach(array_keys($arrSearchesToRun) as $z)
                 {
                     $curSearch = $arrSearchesToRun[$z];
 
@@ -305,6 +325,13 @@ class StageManager extends S3JobListManager
     {
 
         if(isset($GLOBALS['logger'])) $this->logger->logLine("Stage 2:  Tokenizing Jobs ", \Scooper\C__DISPLAY_SECTION_START__);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //
+        // Load the jobs list we need to process in this stage
+        //
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        $this->migrateAndLoadS3JobListsIntoStage(2);
 
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -377,7 +404,7 @@ class StageManager extends S3JobListManager
         // Load the jobs list we need to process in this stage
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        $this->migrateAndLoadS3JobListForStage(3, JOBLIST_TYPE_UNFILTERED);
+        $this->migrateAndLoadS3JobListsIntoStage(3);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //
@@ -403,9 +430,9 @@ class StageManager extends S3JobListManager
         $this->publishS3JobsList(3, JOBLIST_TYPE_MARKED);
     }
 
-    public function doStage5()
+    public function doStage4()
     {
-        $this->migrateAndLoadS3JobListForStage(4, JOBLIST_TYPE_UNFILTERED);
+        $this->migrateAndLoadS3JobListsIntoStage(4);
         $this->logger->logLine("Stage 4: Notifying User", \Scooper\C__DISPLAY_SECTION_START__);
         $notifier = new ClassJobsNotifier($this->arrLatestJobs_UnfilteredByUserInput, $this->arrMarkedJobs);
         $notifier->processNotifications();

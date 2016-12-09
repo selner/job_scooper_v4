@@ -97,7 +97,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
     private function _getResultsForSearch_($searchDetails)
     {
-        $tmpSearchJobs = $this->_getStoredJobsForSearch_($searchDetails);
+        $tmpSearchJobs = $this->_getJobsfromFileStoreForSearch_($searchDetails);
         if(isset($tmpSearchJobs) && is_array($tmpSearchJobs))
             return $tmpSearchJobs;
         else
@@ -293,7 +293,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             // Add the search to the list of ones to run
             //
             $this->arrSearchesToReturn[] = $searchDetails;
-            $GLOBALS['logger']->logLine($this->siteName . ": added search (" . $searchDetails['name'] . ")", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            $GLOBALS['logger']->logLine($this->siteName . ": added search (" . $searchDetails['key'] . ")", \Scooper\C__DISPLAY_ITEM_DETAIL__);
         }
 
     }
@@ -457,11 +457,11 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             $searchDetails['keyword_set'] = array($searchDetails['keyword_search_override']);
         }
 
-        if(isset($searchDetails['keyword_set']))
+        if(isset($searchDetails['keywords_array']))
         {
-            assert(is_array($searchDetails['keyword_set']));
+            assert(is_array($searchDetails['keywords_array']));
 
-            $searchDetails['keywords_string_for_url'] = $this->getCombinedKeywordStringForURL($searchDetails['keyword_set']);
+            $searchDetails['keywords_string_for_url'] = $this->getCombinedKeywordStringForURL($searchDetails['keywords_array']);
         }
 
         // Lastly, check if we support keywords in the URL at all for this
@@ -490,6 +490,11 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         }
 
         $strRetCombinedKeywords = VALUE_NOT_SUPPORTED;
+        if($this->isBitFlagSet(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS))
+        {
+            $arrKeywords = array_mapk(function ($k, $v) { return "\"{$v}\""; }, $arrKeywords);
+        }
+
 
         if(($this->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED)) && count($arrKeywords) > 1)
         {
@@ -498,31 +503,12 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                 throw new ErrorException($this->siteName . " supports multiple keyword terms, but has not set the \$strKeywordDelimiter value in " .get_class($this). ". Aborting search because cannot create the URL.");
             }
 
-            foreach($arrKeywords as $kywd)
-            {
-                $newKywd = $kywd;
-                if($this->isBitFlagSet(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS))
-                {
-                    $newKywd = '"' . $newKywd .'"';
-                }
+            $strRetCombinedKeywords = implode((" " . $this->strKeywordDelimiter . " "), $arrKeywords);
 
-                if($strRetCombinedKeywords == VALUE_NOT_SUPPORTED)
-                {
-                    $strRetCombinedKeywords = $newKywd;
-                }
-                else
-                {
-                    $strRetCombinedKeywords .= " " . $this->strKeywordDelimiter . " " . $newKywd;
-                }
-            }
         }
         else
         {
-            $strRetCombinedKeywords = $arrKeywords[0];
-            if($this->isBitFlagSet(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS))
-            {
-                $strRetCombinedKeywords = '"' . $strRetCombinedKeywords .'"';
-            }
+            $strRetCombinedKeywords = array_shift($arrKeywords);
         }
 
         if($this->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) && $this->strTitleOnlySearchKeywordFormat != null && strlen($this->strTitleOnlySearchKeywordFormat) > 0)
@@ -565,22 +551,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         }
 
         return $strRetCombinedKeywords;
-    }
-
-
-
-    private function _getScrubbedKeywordSet_($arrKeywordSet)
-    {
-        $arrReturnKeywords = array();
-
-        foreach($arrKeywordSet as $term)
-        {
-            $strAddTerm = \Scooper\strScrub($term, FOR_LOOKUP_VALUE_MATCHING);
-
-            if(strlen($strAddTerm) > 0) $arrReturnKeywords[] = $strAddTerm;
-        }
-
-        return $arrReturnKeywords;
     }
 
 
@@ -688,14 +658,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             if($this->_checkInvalidURL_($searchDetails, $searchDetails['search_start_url']) == VALUE_NOT_SUPPORTED) return;
 
             // get all the results for all pages if we have them cached already
-            $arrPageJobsList = $this->_getStoredJobsForSearch_($searchDetails);
+            $arrPageJobsList = $this->_getJobsfromFileStoreForSearch_($searchDetails);
             if(isset($arrPageJobsList))
             {
                 $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[".$searchDetails['name']."]" .": " . countJobRecords($arrPageJobsList). " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
             }
             else
             {
-                $GLOBALS['logger']->logLine(("No cached results found.  Starting data pull for " . $this->siteName . "[". $searchDetails['name']), \Scooper\C__DISPLAY_ITEM_RESULT__);
+                $GLOBALS['logger']->logLine(("No previously retrieved & cached results found.  Starting data pull for " . $this->siteName . "[". $searchDetails['name']), \Scooper\C__DISPLAY_ITEM_RESULT__);
 
                 if($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_XML__))
                 {
@@ -765,88 +735,37 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         finally
         {
             $this->_setJobsToFileStoreForSearch_($searchDetails, $arrPageJobsList);
-            if (!is_null($arrPageJobsList))
-            {
-                $this->_setCachedJobsForSearch_($searchDetails, $arrPageJobsList);
-            }
-            else
-            {
-                $key = $this->_getFileStoreKeyForSearch($searchDetails);
-                $GLOBALS['logger']->logLine("No jobs were able to be cached as md5=(" .md5($key) .") key=[" . $key . "] in " . $this->_getCache()->dir . " for " . $searchDetails['name'], \Scooper\C__DISPLAY_WARNING__);
-            }
-            if(isDebug()) {  $this->_logMemoryUsage_(); }
-
-
             $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->siteName . "[". $searchDetails['name']), \Scooper\C__SECTION_END__, \Scooper\C__NAPPTOPLEVEL__);
         }
     }
 
     private function _getFileStoreKeyForSearch($searchSettings, $prefix="")
     {
-        $key = $prefix . \Scooper\strip_punctuation($this->getDaysURLValue().$searchSettings['name']);
+        if(stripos($searchSettings['key'], $this->siteName) === false)
+        {
+            $prefix = $prefix .$this->siteName;
+        }
 
-        if(isDebug()) {  $GLOBALS['logger']->logLine("Cache key md5=(" .md5($key) .") key=[" . $key . "] ", \Scooper\C__DISPLAY_ITEM_DETAIL__); }
+        $key = $prefix . \Scooper\strip_punctuation($this->getDaysURLValue().$searchSettings['key']);
 
         return $key;
     }
 
-    private function _getCache()
-    {
-        return new JG_Cache2($dir = $GLOBALS['USERDATA']['directories']['cache'], $subdir = $this->siteName);
-    }
-
-    private function _getStoredJobsForSearch_($searchSettings)
-    {
-        $cache = $this->_getCache();
-        $key = $this->_getFileStoreKeyForSearch($searchSettings);
-
-        $data = $cache->get($key);
-        if ($data === FALSE)
-        {
-            // No cached data file found; return null;
-            $GLOBALS['logger']->logLine("Cache miss for  md5=(" .md5($key) .") key=[" . $key . "] in " . $cache->dir, \Scooper\C__DISPLAY_ERROR__);
-            return null;
-        }
-        else
-        {
-            $GLOBALS['logger']->logLine("Using cached data from md5=(" .md5($key) .") key=[" . $key . "] in " . $cache->dir, \Scooper\C__DISPLAY_NORMAL__);
-            return $data;
-        }
-
-    }
-
-    private function _setCachedJobsForSearch_($searchSettings, $dataJobs)
-    {
-        $key = $this->_getFileStoreKeyForSearch( $searchSettings);
-        if(is_null($dataJobs))
-            $dataJobs = array($this->getEmptyJobListingRecord());
-
-        $cache = $this->_getCache();
-        $data = $cache->set($key, $dataJobs);
-        if ($data === FALSE)
-        {
-            $GLOBALS['logger']->logLine("Failed to cache results for search " . $searchSettings['name'] . " and key md5=(" .md5($key) .") key=[" . $key . "]  in " . $cache->dir, \Scooper\C__DISPLAY_ERROR__);
-            return FALSE;
-        }
-        else
-        {
-            $GLOBALS['logger']->logLine("Search " . $searchSettings['name'] . " listings cached to disk with key md5=(" .md5($key) .") key=[" . $key . "]  in " . $cache->dir, \Scooper\C__DISPLAY_NORMAL__);
-            return $dataJobs;
-        }
-    }
-
     private function _setJobsToFileStoreForSearch_($searchSettings, $dataJobs)
     {
-        $userkey = $GLOBALS['USERDATA']['user_unique_key'] ."-";
-
-        if(stripos($searchSettings['name'], $this->siteName) === false)
-        {
-            $userkey = $userkey .$this->siteName;
-        }
-
-        $key = $this->_getFileStoreKeyForSearch( $searchSettings, $userkey);
-        return writeJobsListToLocalJSONFile($key, $dataJobs);
+        $key = $this->_getFileStoreKeyForSearch( $searchSettings, "");
+        return writeJobsListDataToLocalJSONFile($key, $dataJobs, JOBLIST_TYPE_UNFILTERED);
     }
+
+
+    private function _getJobsfromFileStoreForSearch_($searchSettings)
+    {
+        $key = $this->_getFileStoreKeyForSearch( $searchSettings, "");
+        return readJobsListFromLocalJsonFile($key);
+
+    }
+
+
 
     private function getJobsFromMicroData($objSimpleHTML)
     {

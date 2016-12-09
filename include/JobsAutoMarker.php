@@ -59,6 +59,7 @@ class JobsAutoMarker extends ClassJobsSiteCommon
     private function _markJobsList_withAutoItems_()
     {
         $this->arrLatestJobs = \Scooper\array_copy($this->arrLatestJobs_UnfilteredByUserInput);
+//        $this->_markJobsList_WithPreviouslyReviewedPostNotes_();
         $this->_markJobsList_SetLikelyDuplicatePosts_();
         $this->_markJobsList_SearchKeywordsNotFound_();
         $this->_markJobsList_SetAutoExcludedTitles_();
@@ -66,6 +67,61 @@ class JobsAutoMarker extends ClassJobsSiteCommon
     }
 
 
+
+
+//    private function _markJobsList_WithPreviouslyReviewedPostNotes_()
+//    {
+//        if(count($this->arrLatestJobs) == 0) return;
+//
+//        $nJobsMatched = 0;
+//
+//        $arrKeys_CompanyAndRole = array_column ( $this->arrLatestJobs, 'key_company_role');
+//        $arrKeys_JobSiteAndJobID = array_column ( $this->arrLatestJobs, 'key_jobsite_siteid');
+//
+//
+//        $arrUniqIds = array_unique($arrKeys_CompanyAndRole);
+//        $nUniqJobs = countAssociativeArrayValues($arrUniqIds);
+//        $arrOneJobListingPerCompanyAndRole = array_unique_multidimensional(array_combine($arrKeys_JobSiteAndJobID, $arrKeys_CompanyAndRole));
+//        $arrLookup_JobListing_ByCompanyRole = array_flip($arrOneJobListingPerCompanyAndRole);
+//
+//        $GLOBALS['logger']->logLine("Updating Jobs with Previously Made Notes..." , \Scooper\C__DISPLAY_SECTION_START__);
+//
+//
+//
+//
+//        foreach($this->arrLatestJobs as $job)
+//        {
+//            $strCurrentJobIndex = getArrayKeyValueForJob($job);
+//            if(!isMarkedBlank($job))
+//            {
+//                continue;  // only mark dupes that haven't yet been marked with anything
+//            }
+//
+//            $indexPrevListingForCompanyRole = $arrLookup_JobListing_ByCompanyRole[$job['key_company_role']];
+//            // Another listing already exists with that title at that company
+//            // (and we're not going to be updating the record we're checking)
+//            if($indexPrevListingForCompanyRole != null && strcasecmp($indexPrevListingForCompanyRole, $job['key_jobsite_siteid'])!=0)
+//            {
+//
+//                //
+//                // Add a note to the previous listing that it had a new duplicate
+//                //
+//                appendJobColumnData($this->arrLatestJobs[$indexPrevListingForCompanyRole], 'match_notes', "|", $this->getNotesWithDupeIDAdded($this->arrLatestJobs[$indexPrevListingForCompanyRole]['match_notes'], $job['key_jobsite_siteid'] ));
+//                $this->arrLatestJobs[$indexPrevListingForCompanyRole] ['date_last_updated'] = getTodayAsString();
+//
+//                $this->arrLatestJobs[$strCurrentJobIndex]['interested'] =  C__STR_TAG_DUPLICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__;
+//                appendJobColumnData($this->arrLatestJobs[$strCurrentJobIndex], 'match_notes', "|", $this->getNotesWithDupeIDAdded($this->arrLatestJobs[$strCurrentJobIndex]['match_notes'], $indexPrevListingForCompanyRole ));
+//                $this->arrLatestJobs[$strCurrentJobIndex]['date_last_updated'] = getTodayAsString();
+//
+//                $nJobsMatched++;
+//            }
+//
+//        }
+//
+//        $strTotalRowsText = "/".count($this->arrLatestJobs);
+//        $GLOBALS['logger']->logLine("Marked  ".$nJobsMatched .$strTotalRowsText ." roles as likely duplicates based on company/role. " , \Scooper\C__DISPLAY_ITEM_RESULT__);
+//
+//    }
 
 
     private function _markJobsList_SetLikelyDuplicatePosts_()
@@ -267,11 +323,14 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         $nStartingBlankCount = countAssociativeArrayValues($arrJobsStillActive);
         foreach($GLOBALS['USERDATA']['searches_for_run'] as $search)
         {
-            foreach($search['tokenized_keywords'] as $kwdset)
+            if(array_key_exists('keywords_array_tokenized', $search))
             {
-                $arrKwdSet[$kwdset] = explode(" ", $kwdset);
+                foreach($search['keywords_array_tokenized'] as $kwdset)
+                {
+                    $arrKwdSet[$kwdset] = explode(" ", $kwdset);
+                }
+                $arrKwdSet = \Scooper\my_merge_add_new_keys($arrKwdSet, $arrKwdSet);
             }
-            $arrKwdSet = \Scooper\my_merge_add_new_keys($arrKwdSet, $arrKwdSet);
         }
 
         $ret = $this->_getJobsList_MatchingJobTitleKeywords_($arrJobsStillActive, $arrKwdSet, "TitleKeywordSearchMatch");

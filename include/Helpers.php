@@ -26,42 +26,6 @@ const C__STR_TAG_NOT_A_KEYWORD_TITLE_MATCH__ = "No (Not a Keyword Title Match)";
 const C__STR_TAG_NOT_EXACT_TITLE_MATCH__ = "No (Not an Exact Title Match)";
 
 
-/*
-	For explanation and usage, see:
-
-    Based on orignal JG_Cache
-    @source https://github.com/diogeneshamilton/JG_Cache
-	For explanation and usage of JG_Cache, see:
-	http://www.jongales.com/blog/2009/02/18/simple-file-based-php-cache-class/
-
-    @source https://github.com/diogeneshamilton/JG_Cache
-    JG_Cache2 added the ability to have a human-readable cache subdirectory for cached files
-*/
-
-class JG_Cache2 extends JG_Cache {
-    function __construct($dir, $subdir = "")
-    {
-
-        $cachedir = join(DIRECTORY_SEPARATOR, array($dir, strtolower(getTodayAsString()), strtolower($subdir)));
-        $cachedir = str_replace(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $cachedir);
-
-//        if (isset($subdir) && count($subdir) > 0)
-//            $dir = $dir . strtolower($subdir);
-//
-//        $dir = $dir . strtolower(getTodayAsString());
-//
-
-        if ( !file_exists($cachedir))
-        {
-            mkdir($cachedir, $mode = 0777, $recursive = true);
-        }
-
-        parent::__construct($cachedir);
-    }
-};
-
-
-
 function getDateForDaysAgo($strDaysAgo)
 {
     $retDate = null;
@@ -312,6 +276,15 @@ function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strD
 
     return $strReturn;
 }
+
+function array_mapk($callback, $array) {
+    $newArray = array();
+    foreach ($array as $k => $v) {
+        $newArray[$k] = call_user_func($callback, $k, $v);
+    }
+    return $newArray;
+}
+
 function array_unique_multidimensional($input)
 {
     $serialized = array_map('serialize', $input);
@@ -337,7 +310,7 @@ function getArrayValuesAsString($arrDetails, $strDelimiter = ", ", $strIntro = "
 function updateJobRecord($prevJobRecord, $jobRecordChanges)
 {
 
-    $ret = getMergedJobRecord($prevJobRecord, $jobRecordChanges);
+    return getMergedJobRecord($prevJobRecord, $jobRecordChanges);
 }
 
 function getMergedJobRecord($prevJobRecord, $newerJobRecord)
@@ -473,6 +446,11 @@ function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "ke
         unlink($inputFile);
     }
 
+    if(is_file($outputFile))
+    {
+        unlink($outputFile);
+    }
+
     $file = fopen($inputFile,"w");
     fputcsv($file, $headers);
 
@@ -485,7 +463,7 @@ function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "ke
 
     fclose($file);
 
-    $ret = callTokenizer($inputFile, $outputFile, $dataKeyName, $indexKeyName);
+    $tmpTokenizedWords = callTokenizer($inputFile, $outputFile, $dataKeyName, $indexKeyName);
     $valInterimFiles = \Scooper\get_PharseOptionValue('output_interim_files');
 
     if(isset($valInterimFiles) && $valInterimFiles != true)
@@ -495,7 +473,7 @@ function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "ke
     }
 
 
-    return $ret;
+    return $tmpTokenizedWords;
 }
 
 
@@ -545,13 +523,19 @@ function tokenizeKeywords($arrKeywords)
     }
 
     $arrKeywordTokens = tokenizeSingleDimensionArray($arrKeywords, "srchkwd", "keywords", "keywords");
-    $keywordset = array_column($arrKeywordTokens, "tokenized");
-    $retKeywords = array();
-    foreach (array_keys($keywordset) as $setKey)
+    $arrReturnKeywordTokens = array_fill_keys(array_keys($arrKeywordTokens), null);
+    foreach(array_keys($arrReturnKeywordTokens) as $key)
     {
-        $retKeywords[$setKey] = str_replace("|", " ", $keywordset[$setKey]);
+        $arrReturnKeywordTokens[$key] = str_replace("|", " ", $arrKeywordTokens[$key]['tokenized']);
     }
-    return $retKeywords;
+    return $arrReturnKeywordTokens;
+//    $keywordset = array_column($arrKeywordTokens, "tokenized");
+//    $retKeywords = array();
+//    foreach (array_keys($keywordset) as $setKey)
+//    {
+//        $retKeywords[$setKey] = str_replace("|", " ", $keywordset[$setKey]);
+//    }
+//    return $retKeywords;
 }
 
 
@@ -659,8 +643,8 @@ function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strEx
 
 const STAGE1_PATHKEY = "stage1-rawlistings/";
 const STAGE2_PATHKEY = "stage2-rawlistings/";
-const STAGE3_PATHKEY = "stage3-aggregatelistings/";
-const STAGE4_PATHKEY = "stage4-automarkedlistings/";
+const STAGE3_PATHKEY = "stage3-automarkedlistings/";
+const STAGE4_PATHKEY = "stage4-notifyuser/";
 const STAGE_FLAG_STAGEONLY = 0x0;
 const STAGE_FLAG_INCLUDEUSER = 0x1;
 const STAGE_FLAG_INCLUDEDATE = 0x2;
@@ -710,24 +694,58 @@ function getStageKeyPrefix($stageNumber, $fileFlags = STAGE_FLAG_STAGEONLY, $del
     return $prefix;
 }
 
-function writeJobsListToLocalJSONFile($fileKey, $dataJobs, $stageNumber = null)
+function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stageNumber = null)
 {
     if(is_null($dataJobs))
         $dataJobs = array();
+
     if(is_null($stageNumber))
         $stageNumber = 1;
 
     $stageName = "stage" . $stageNumber;
     $fileKey = str_replace(" ", "", $fileKey);
 
-    $jobsJson = json_encode($dataJobs, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+    $data = array('key' => $fileKey, 'stage' => $stageNumber, 'listtype' => $listType, 'jobslist' => $dataJobs);
+
+    $jobsJson = json_encode($data, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
     $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], ($fileKey . "-" . strtolower(getTodayAsString("")) . ".json")));
 
-    $GLOBALS['logger']->logLine("Writing final job data pull results to json file " . $resultsFile, \Scooper\C__DISPLAY_ERROR__);
+    $GLOBALS['logger']->logLine("Writing final job data pull results to json file " . $resultsFile);
     file_put_contents($resultsFile, $jobsJson, FILE_TEXT);
 
     return $resultsFile;
+}
 
+function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber)
+{
+    if(is_null($stageNumber))
+        $stageNumber = 1;
+
+
+    $stageName = "stage" . $stageNumber;
+    $fileKey = str_replace(" ", "", $fileKey);
+
+    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], ($fileKey . "-" . strtolower(getTodayAsString("")) . ".json")));
+    if(is_file($resultsFile))
+    {
+        $GLOBALS['logger']->logLine("Reading json data from file " . $resultsFile);
+        $jsonText = file_get_contents($resultsFile, FILE_TEXT);
+
+        $data = json_decode($jsonText, $assoc=true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+
+        return $data;
+    }
+
+    return array();
+}
+
+function readJobsListFromLocalJsonFile($fileKey, $stageNumber=1)
+{
+    $data = readJobsListDataFromLocalJsonFile($fileKey, $stageNumber);
+    if(array_key_exists("jobslist", $data))
+        return $data['jobslist'];
+
+    return null;
 }
 
 
