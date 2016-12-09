@@ -171,7 +171,7 @@ class PluginSimplyHired extends ClassJobsSitePlugin
             $locnode = $node->find('span[class="serp-location"]');
             if(isset($locnode) && is_array($locnode))
             {
-                $item['job_site_date'] = combineTextAllChildren($locnode[0]);
+                $item['location'] = combineTextAllChildren($locnode[0]);
             }
 
             $item['job_id'] = $this->getIDFromLink('/\/a\/job-details\/\?a=([^\/]+)/i', $item['job_post_url']);
