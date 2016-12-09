@@ -119,7 +119,7 @@ def tokenizeStrings(listStrings, fieldTokenized = "tokenized"):
     retData = {}
     for k in listStrings.keys():
         v = listStrings[k]
-        retData[k] = { "original" : v, "tokenized" : []}
+        retData[k] = { "original" : v, fieldTokenized : []}
         if len(k) == 0:
             print "String value for key was empty.  Skipping..."
             continue;
