@@ -30,10 +30,10 @@ class ClassConfig extends ClassJobsSitePlugin
 
     function getSearchConfiguration($strSubkey = null)
     {
-        if(isset($strSubkey) && (isset($GLOBALS['USERDATA']['configurationSettings'][$strSubkey]) || $GLOBALS['USERDATA']['configurationSettings'][$strSubkey] == null))
-            $ret = $GLOBALS['USERDATA']['configurationSettings'][$strSubkey];
+        if(isset($strSubkey) && (isset($GLOBALS['USERDATA']['configuration_settings'][$strSubkey]) || $GLOBALS['USERDATA']['configuration_settings'][$strSubkey] == null))
+            $ret = $GLOBALS['USERDATA']['configuration_settings'][$strSubkey];
         else
-            $ret = $GLOBALS['USERDATA']['configurationSettings'];
+            $ret = $GLOBALS['USERDATA']['configuration_settings'];
 
         return $ret;
     }
@@ -91,7 +91,7 @@ class ClassConfig extends ClassJobsSitePlugin
         $GLOBALS['OPTS'] = Pharse::options($GLOBALS['OPTS_SETTINGS']);
 
         $GLOBALS['USERDATA']['companies_regex_to_filter'] = null;
-        $GLOBALS['USERDATA']['configurationSettings'] = array();
+        $GLOBALS['USERDATA']['configuration_settings'] = array();
 
         // and to make sure our notes get updated on active jobs
         // that we'd seen previously
@@ -108,9 +108,9 @@ class ClassConfig extends ClassJobsSitePlugin
         $excludedsites = array_filter($GLOBALS['JOBSITE_PLUGINS'], function($k) {
             return !($k['include_in_run']);
         });
-        $GLOBALS['USERDATA']['configurationSettings']['included_sites'] = array_combine(array_keys($includedsites), array_column($includedsites, 'name'));
-        $GLOBALS['USERDATA']['configurationSettings']['excluded_sites'] = array_combine(array_keys($excludedsites), array_column($excludedsites, 'name'));
-        $GLOBALS['USERDATA']['configurationSettings']['searches'] = array();
+        $GLOBALS['USERDATA']['configuration_settings']['included_sites'] = array_combine(array_keys($includedsites), array_column($includedsites, 'name'));
+        $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] = array_combine(array_keys($excludedsites), array_column($excludedsites, 'name'));
+        $GLOBALS['USERDATA']['configuration_settings']['searches'] = array();
 
         $tmpDebug = \Scooper\get_PharseOptionValue('use_debug');
         switch($tmpDebug)
@@ -192,8 +192,8 @@ class ClassConfig extends ClassJobsSitePlugin
 
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Configuring specific settings for this run... ", \Scooper\C__DISPLAY_SECTION_START__);
 
-        $GLOBALS['USERDATA']['configurationSettings']['number_days']= \Scooper\get_PharseOptionValue('number_days');
-        if($GLOBALS['USERDATA']['configurationSettings']['number_days']== false) { $GLOBALS['OPTS']['number_days'] = 1; $GLOBALS['USERDATA']['configurationSettings']['number_days'] = 1; }
+        $GLOBALS['USERDATA']['configuration_settings']['number_days']= \Scooper\get_PharseOptionValue('number_days');
+        if($GLOBALS['USERDATA']['configuration_settings']['number_days']== false) { $GLOBALS['OPTS']['number_days'] = 1; $GLOBALS['USERDATA']['configuration_settings']['number_days'] = 1; }
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($GLOBALS['OPTS']['number_days'] . " days configured for run. ", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $this->_setPreviouslyReviewedJobsInputFiles_();
@@ -207,20 +207,16 @@ class ClassConfig extends ClassJobsSitePlugin
         return $GLOBALS['logger'];
     }
 
-    private function __setupOutputFolders__($outputDirectory, $userKey)
+    private function __setupOutputFolders__($outputDirectory)
     {
         if(! $outputDirectory)
         {
             throw new ErrorException("Required value for the output folder was not specified. Exiting.");
         }
 
-        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, $userKey));
-        $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-        $stageDirectory = realpath($details['directory']);
-
         for($n=1; $n <= 4; $n++)
         {
-            $path = join(DIRECTORY_SEPARATOR, array($stageDirectory, getStageKeyPrefix($n, STAGE_FLAG_EXCLUDEPARENTPATH)));
+            $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getStageKeyPrefix($n, STAGE_FLAG_STAGEONLY)));
             $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
             $GLOBALS['USERDATA']['directories']["stage".$n] = realpath($details['directory']);
         }
@@ -308,10 +304,10 @@ class ClassConfig extends ClassJobsSitePlugin
         $this->__readSearchesFromConfig__($config);
 
         // Update the searches with the keyword values
-        if(isset($GLOBALS['USERDATA']['configurationSettings']['keyword_sets']) && is_array($GLOBALS['USERDATA']['configurationSettings']['keyword_sets']) && count($GLOBALS['USERDATA']['configurationSettings']['keyword_sets']) >= 1)
+        if(isset($GLOBALS['USERDATA']['configuration_settings']['keyword_sets']) && is_array($GLOBALS['USERDATA']['configuration_settings']['keyword_sets']) && count($GLOBALS['USERDATA']['configuration_settings']['keyword_sets']) >= 1)
         {
-            reset($GLOBALS['USERDATA']['configurationSettings']['keyword_sets']);
-            $primarySet = current($GLOBALS['USERDATA']['configurationSettings']['keyword_sets']);
+            reset($GLOBALS['USERDATA']['configuration_settings']['keyword_sets']);
+            $primarySet = current($GLOBALS['USERDATA']['configuration_settings']['keyword_sets']);
 
             $this->_updateSearchesWithKeywordSet_($primarySet);
         }
@@ -329,7 +325,7 @@ class ClassConfig extends ClassJobsSitePlugin
         // got the full set of searches, so update the set with the
         // primary location data we have in the config.
         //
-        if(isset($GLOBALS['USERDATA']['configurationSettings']['location_sets']) && is_array($GLOBALS['USERDATA']['configurationSettings']['location_sets']) && count($GLOBALS['USERDATA']['configurationSettings']['location_sets']) >= 1)
+        if(isset($GLOBALS['USERDATA']['configuration_settings']['location_sets']) && is_array($GLOBALS['USERDATA']['configuration_settings']['location_sets']) && count($GLOBALS['USERDATA']['configuration_settings']['location_sets']) >= 1)
         {
 
             $this->_addLocationSetToInitialSetOfSearches_();
@@ -413,16 +409,16 @@ class ClassConfig extends ClassJobsSitePlugin
                 foreach($config['search'] as $iniSearch)
                 {
                     $retSearch = $this->_parseSearchFromINI_($iniSearch);
-                    if(isset($retSearch)) $GLOBALS['USERDATA']['configurationSettings']['searches'][$retSearch['key']] = $retSearch;
+                    if(isset($retSearch)) $GLOBALS['USERDATA']['configuration_settings']['searches'][$retSearch['key']] = $retSearch;
                 }
             }
             else
             {
                 $retSearch = $this->_parseSearchFromINI_($config['search']);
-                if(isset($retSearch)) $GLOBALS['USERDATA']['configurationSettings']['searches'][$retSearch['key']] = $retSearch;
+                if(isset($retSearch)) $GLOBALS['USERDATA']['configuration_settings']['searches'][$retSearch['key']] = $retSearch;
             }
         }
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['configurationSettings']['searches']) . " searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['configuration_settings']['searches']) . " searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
     }
 
     private function _parseSearchFromINI_($iniSearch)
@@ -433,7 +429,7 @@ class ClassConfig extends ClassJobsSitePlugin
         if(isset($iniSearch['jobsite'])) $tempSearch['site_name'] = \Scooper\strScrub($iniSearch['jobsite'], REMOVE_EXTRA_WHITESPACE | LOWERCASE );
         assert(isset($iniSearch['jobsite']));
         $strJobSiteKey = \Scooper\strScrub($iniSearch['jobsite'], FOR_LOOKUP_VALUE_MATCHING | LOWERCASE );
-        if(isset($GLOBALS['USERDATA']['configurationSettings']['included_sites']) && !isset($GLOBALS['USERDATA']['configurationSettings']['included_sites'][$strJobSiteKey]))
+        if(isset($GLOBALS['USERDATA']['configuration_settings']['included_sites']) && !isset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$strJobSiteKey]))
         {
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($iniSearch['jobsite'] . "search " .$iniSearch['name'] . " was not added; " . $strJobSiteKey . " is excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
             return null;
@@ -490,8 +486,8 @@ class ClassConfig extends ClassJobsSitePlugin
             foreach($config['global_search_options']['excluded_jobsites'] as $excludedSite)
             {
                 $excludedSite = strtolower(trim($excludedSite));
-                $GLOBALS['USERDATA']['configurationSettings']['excluded_sites'][$excludedSite] = $excludedSite;
-                if(isset($GLOBALS['USERDATA']['configurationSettings']['included_sites'][$excludedSite])) unset($GLOBALS['USERDATA']['configurationSettings']['included_sites'][$excludedSite]);
+                $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$excludedSite] = $excludedSite;
+                if(isset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite])) unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite]);
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting " . $excludedSite . " as excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
             }
@@ -503,8 +499,8 @@ class ClassConfig extends ClassJobsSitePlugin
     {
         if (!$config) throw new ErrorException("Invalid configuration.  Cannot load user's searches.");
 
-        if(!array_key_exists('location_sets', $GLOBALS['USERDATA']['configurationSettings']))
-            $GLOBALS['USERDATA']['configurationSettings']['location_sets'] = array();
+        if(!array_key_exists('location_sets', $GLOBALS['USERDATA']['configuration_settings']))
+            $GLOBALS['USERDATA']['configuration_settings']['location_sets'] = array();
 
         if(isset($config['search_location_setting_set']))
         {
@@ -520,7 +516,7 @@ class ClassConfig extends ClassJobsSitePlugin
                     if(count($iniSettings) > 1)
                     {
                         $arrNewLocationSet = $this->_getEmptyLocationSettingsSet_();
-                        $strSetName = 'LocationSet' . (count($GLOBALS['USERDATA']['configurationSettings']['location_sets']) + 1);
+                        $strSetName = 'LocationSet' . (count($GLOBALS['USERDATA']['configuration_settings']['location_sets']) + 1);
                         if(isset($iniSettings['name']))
                         {
                             if(is_array($iniSettings['name']))
@@ -553,19 +549,19 @@ class ClassConfig extends ClassJobsSitePlugin
                         }
                         if(is_array($arrNewLocationSet['excluded_jobsites']))
                         {
-                            $arrNewLocationSet['excluded_jobsites'] = \Scooper\my_merge_add_new_keys($arrNewLocationSet['excluded_jobsites'], $GLOBALS['USERDATA']['configurationSettings']['excluded_sites']);
+                            $arrNewLocationSet['excluded_jobsites'] = \Scooper\my_merge_add_new_keys($arrNewLocationSet['excluded_jobsites'], $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']);
                         }
 
                         $strSettingStrings = getArrayValuesAsString($arrNewLocationSet);
                         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added location search settings '" . $strSetName . ": " . $strSettingStrings, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-                        $GLOBALS['USERDATA']['configurationSettings']['location_sets'][$strSetName] = $arrNewLocationSet;
+                        $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$strSetName] = $arrNewLocationSet;
 
                     }
                 }
             }
 
-            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['configurationSettings']['location_sets']) . " location sets. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['configuration_settings']['location_sets']) . " location sets. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
         }
     }
 
@@ -587,9 +583,9 @@ class ClassConfig extends ClassJobsSitePlugin
     private function _readKeywordSetsFromConfig_($config)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading keyword set from config file...", \Scooper\C__DISPLAY_ITEM_START__);
-        if(!array_key_exists('keyword_sets', $GLOBALS['USERDATA']['configurationSettings']))
+        if(!array_key_exists('keyword_sets', $GLOBALS['USERDATA']['configuration_settings']))
         {
-            $GLOBALS['USERDATA']['configurationSettings']['keyword_sets'] = array();
+            $GLOBALS['USERDATA']['configuration_settings']['keyword_sets'] = array();
         }
         if(isset($config['search_keyword_set']))
         {
@@ -598,7 +594,7 @@ class ClassConfig extends ClassJobsSitePlugin
                 $ini_keyword_set = $config['search_keyword_set'][$key];
                 $ini_keyword_set['key'] = $key;
 
-                $strSetKey = 'ks' . (count($GLOBALS['USERDATA']['configurationSettings']['keyword_sets']) + 1);
+                $strSetKey = 'ks' . (count($GLOBALS['USERDATA']['configuration_settings']['keyword_sets']) + 1);
                 if(isset($ini_keyword_set['name']) && strlen($ini_keyword_set['name']) > 0)
                 {
                     $strSetKey = $ini_keyword_set['name'];
@@ -608,9 +604,9 @@ class ClassConfig extends ClassJobsSitePlugin
                     $strSetKey = $ini_keyword_set['key'];
                 }
 
-                $GLOBALS['USERDATA']['configurationSettings']['keyword_sets'][$strSetKey] = $this->_getNewKeywordSettingsSet_(strtolower($strSetKey), $ini_keyword_set);
+                $GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey] = $this->_getNewKeywordSettingsSet_(strtolower($strSetKey), $ini_keyword_set);
 
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added keyword set '" . $GLOBALS['USERDATA']['configurationSettings']['keyword_sets'][$strSetKey]['name'] . "' with keywords = " . getArrayValuesAsString($GLOBALS['USERDATA']['configurationSettings']['keyword_sets'][$strSetKey]['keywords_array']) . (($ini_keyword_set['keyword_match_type'] != null && strlen($ini_keyword_set['keyword_match_type'] ) > 0) ? " matching " . $ini_keyword_set['keyword_match_type'] : ""), \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added keyword set '" . $GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey]['name'] . "' with keywords = " . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey]['keywords_array']) . (($ini_keyword_set['keyword_match_type'] != null && strlen($ini_keyword_set['keyword_match_type'] ) > 0) ? " matching " . $ini_keyword_set['keyword_match_type'] : ""), \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
             }
 
@@ -621,19 +617,19 @@ class ClassConfig extends ClassJobsSitePlugin
     private function _updateSearchesWithKeywordSet_($keywordSet)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Updating user-specified searches with keyword set details", \Scooper\C__DISPLAY_ITEM_START__);
-        //for($c = 0; $c < count($GLOBALS['USERDATA']['configurationSettings']['searches']); $c++)
-        foreach(array_keys($GLOBALS['USERDATA']['configurationSettings']['searches']) as $c)
+        //for($c = 0; $c < count($GLOBALS['USERDATA']['configuration_settings']['searches']); $c++)
+        foreach(array_keys($GLOBALS['USERDATA']['configuration_settings']['searches']) as $c)
         {
-            $GLOBALS['USERDATA']['configurationSettings']['searches'][$c]['keywords_array'] = $keywordSet['keywords_array'];
-            $GLOBALS['USERDATA']['configurationSettings']['searches'][$c]['keywords_array_tokenized'] = $keywordSet['keywords_array_tokenized'];
+            $GLOBALS['USERDATA']['configuration_settings']['searches'][$c]['keywords_array'] = $keywordSet['keywords_array'];
+            $GLOBALS['USERDATA']['configuration_settings']['searches'][$c]['keywords_array_tokenized'] = $keywordSet['keywords_array_tokenized'];
 
             //
             // If this search already has any flags set on it, then do not overwrite that value for this search
             // Otherwise, set it to be the value that any keyword set we're adding has
             //
-            if(!array_key_exists('user_setting_flags', $GLOBALS['USERDATA']['configurationSettings']['searches'][$c]) || $GLOBALS['USERDATA']['configurationSettings']['searches'][$c]['user_setting_flags'] == null || $GLOBALS['USERDATA']['configurationSettings']['searches'][$c]['user_setting_flags'] == 0)
+            if(!array_key_exists('user_setting_flags', $GLOBALS['USERDATA']['configuration_settings']['searches'][$c]) || $GLOBALS['USERDATA']['configuration_settings']['searches'][$c]['user_setting_flags'] == null || $GLOBALS['USERDATA']['configuration_settings']['searches'][$c]['user_setting_flags'] == 0)
             {
-                $GLOBALS['USERDATA']['configurationSettings']['searches'][$c]['user_setting_flags'] = $keywordSet['keyword_match_type_flag'];
+                $GLOBALS['USERDATA']['configuration_settings']['searches'][$c]['user_setting_flags'] = $keywordSet['keyword_match_type_flag'];
             }
         }
     }
@@ -646,11 +642,11 @@ class ClassConfig extends ClassJobsSitePlugin
         // If the keyword settings scope is all sites, then create a search for every possible site
         // so that it runs with the keywords settings if it was included_<site> = true
         //
-        if(isset($GLOBALS['USERDATA']['configurationSettings']['keyword_sets']) && count($GLOBALS['USERDATA']['configurationSettings']['keyword_sets']) > 0)
+        if(isset($GLOBALS['USERDATA']['configuration_settings']['keyword_sets']) && count($GLOBALS['USERDATA']['configuration_settings']['keyword_sets']) > 0)
         {
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Adding new searches for user's keyword sets ", \Scooper\C__DISPLAY_ITEM_START__);
 
-            foreach($GLOBALS['USERDATA']['configurationSettings']['keyword_sets'] as $keywordSet)
+            foreach($GLOBALS['USERDATA']['configuration_settings']['keyword_sets'] as $keywordSet)
             {
                 $arrSkippedPlugins = null;
                 if(isset($keywordSet['included_jobsites']))
@@ -682,7 +678,7 @@ class ClassConfig extends ClassJobsSitePlugin
                                 $thisSearch['keywords_array'] = $keywordSet['keywords_array'];
                                 $thisSearch['keywords_array_tokenized'] = $keywordSet['keywords_array_tokenized'];
 
-                                $GLOBALS['USERDATA']['configurationSettings']['searches'][$thisSearch['key']] = $thisSearch;
+                                $GLOBALS['USERDATA']['configuration_settings']['searches'][$thisSearch['key']] = $thisSearch;
                             }
                             else // if not, we need to add search for each keyword using that word as a single value in a keyword set
                             {
@@ -695,7 +691,7 @@ class ClassConfig extends ClassJobsSitePlugin
                                     $newSearch['keywords_array'] = array($keywordSet['keywords_array'][$key]);
                                     $newSearch['keywords_array_tokenized'] = array($keywordSet['keywords_array_tokenized'][$key]);
 
-                                    $GLOBALS['USERDATA']['configurationSettings']['searches'][$newSearch['key']] = $newSearch;
+                                    $GLOBALS['USERDATA']['configuration_settings']['searches'][$newSearch['key']] = $newSearch;
                                 }
                             }
                         }
@@ -715,13 +711,13 @@ class ClassConfig extends ClassJobsSitePlugin
     private function _addLocationSetToInitialSetOfSearches_()
     {
         $arrSkippedPlugins = null;
-        if(count($GLOBALS['USERDATA']['configurationSettings']['searches']) <= 0)
+        if(count($GLOBALS['USERDATA']['configuration_settings']['searches']) <= 0)
         {
             return;
         }
 
-        reset($GLOBALS['USERDATA']['configurationSettings']['location_sets']);
-        $primaryLocationSet = current($GLOBALS['USERDATA']['configurationSettings']['location_sets']);
+        reset($GLOBALS['USERDATA']['configuration_settings']['location_sets']);
+        $primaryLocationSet = current($GLOBALS['USERDATA']['configuration_settings']['location_sets']);
 
         assert($primaryLocationSet!=null);
 
@@ -740,15 +736,15 @@ class ClassConfig extends ClassJobsSitePlugin
         //
         if(isset($primaryLocationSet))
         {
-            foreach(array_keys($GLOBALS['USERDATA']['configurationSettings']['searches']) as $searchKey)
+            foreach(array_keys($GLOBALS['USERDATA']['configuration_settings']['searches']) as $searchKey)
             {
-                if(isset($GLOBALS['USERDATA']['configurationSettings']['searches'][$searchKey]['location_user_specified_override']) && strlen($GLOBALS['USERDATA']['configurationSettings']['searches'][$searchKey]['location_user_specified_override'])>0)
+                if(isset($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_user_specified_override']) && strlen($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_user_specified_override'])>0)
                 {
                     // this search already has a location from the user, so we don't need to update it with the location set
                     continue;
                 }
 
-                $curSiteName = \Scooper\strScrub($GLOBALS['USERDATA']['configurationSettings']['searches'][$searchKey]['site_name'], FOR_LOOKUP_VALUE_MATCHING);
+                $curSiteName = \Scooper\strScrub($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['site_name'], FOR_LOOKUP_VALUE_MATCHING);
 
                 if(isset($primaryLocationSet['excluded_jobsites'][$curSiteName]) && strlen($primaryLocationSet['excluded_jobsites'][$curSiteName]) > 0)
                 {
@@ -760,14 +756,14 @@ class ClassConfig extends ClassJobsSitePlugin
                 }
 
 
-                $classPlug = new $GLOBALS['JOBSITE_PLUGINS'][$GLOBALS['USERDATA']['configurationSettings']['searches'][$searchKey]['site_name']]['class_name'](null, null);
-                $GLOBALS['USERDATA']['configurationSettings']['searches'][$searchKey]['location_set'] = $primaryLocationSet;
-                $strSearchLocation = $classPlug->getLocationValueForLocationSetting($GLOBALS['USERDATA']['configurationSettings']['searches'][$searchKey]);
+                $classPlug = new $GLOBALS['JOBSITE_PLUGINS'][$GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['site_name']]['class_name'](null, null);
+                $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_set'] = $primaryLocationSet;
+                $strSearchLocation = $classPlug->getLocationValueForLocationSetting($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]);
                 if($strSearchLocation != VALUE_NOT_SUPPORTED)
                 {
-                    $GLOBALS['USERDATA']['configurationSettings']['searches'][$searchKey]['key'] = $GLOBALS['USERDATA']['configurationSettings']['searches'][$searchKey]['key'] . "-loc-" . strtolower($primaryLocationSet['name']);
-                    $GLOBALS['USERDATA']['configurationSettings']['searches'][$searchKey]['name'] = $GLOBALS['USERDATA']['configurationSettings']['searches'][$searchKey]['name'] . "-loc-" . strtolower($primaryLocationSet['name']);
-                    $GLOBALS['USERDATA']['configurationSettings']['searches'][$searchKey]['location_search_value'] = $strSearchLocation;
+                    $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['key'] = $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['key'] . "-loc-" . strtolower($primaryLocationSet['name']);
+                    $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['name'] = $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['name'] . "-loc-" . strtolower($primaryLocationSet['name']);
+                    $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value'] = $strSearchLocation;
                 }
             }
         }
@@ -776,7 +772,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
     private function _addSearchesForAdditionalLocationSets_()
     {
-        if(count($GLOBALS['USERDATA']['configurationSettings']['searches']) <= 0)
+        if(count($GLOBALS['USERDATA']['configuration_settings']['searches']) <= 0)
         {
             return;
         }
@@ -791,9 +787,9 @@ class ClassConfig extends ClassJobsSitePlugin
         // location sets specified
         //
         //
-        if(isset($GLOBALS['USERDATA']['configurationSettings']['location_sets']) && is_array($GLOBALS['USERDATA']['configurationSettings']['location_sets']) && count($GLOBALS['USERDATA']['configurationSettings']['location_sets']) > 1)
+        if(isset($GLOBALS['USERDATA']['configuration_settings']['location_sets']) && is_array($GLOBALS['USERDATA']['configuration_settings']['location_sets']) && count($GLOBALS['USERDATA']['configuration_settings']['location_sets']) > 1)
         {
-            $arrPossibleSearches_Start = $GLOBALS['USERDATA']['configurationSettings']['searches'];
+            $arrPossibleSearches_Start = $GLOBALS['USERDATA']['configuration_settings']['searches'];
             $arrNewSearches = null;
 
             for($l = 0; $l < count($arrPossibleSearches_Start) ; $l++)
@@ -814,7 +810,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
 
                 $fSkippedPrimary = false;
-                foreach($GLOBALS['USERDATA']['configurationSettings']['location_sets'] as $locSet)
+                foreach($GLOBALS['USERDATA']['configuration_settings']['location_sets'] as $locSet)
                 {
                     if(!$fSkippedPrimary) // Starts at index 1 because the primary location (index 0) was already set for all searches
                     {
@@ -822,7 +818,7 @@ class ClassConfig extends ClassJobsSitePlugin
                         continue;
                     }
 
-                    $curSiteName = \Scooper\strScrub($GLOBALS['USERDATA']['configurationSettings']['searches'][$l]['site_name'], FOR_LOOKUP_VALUE_MATCHING);
+                    $curSiteName = \Scooper\strScrub($GLOBALS['USERDATA']['configuration_settings']['searches'][$l]['site_name'], FOR_LOOKUP_VALUE_MATCHING);
                     if(isset($locSet['excluded_jobsites'][$curSiteName]) && strlen($locSet['excluded_jobsites'][$curSiteName]) > 0)
                     {
                         // this site was excluded for this location set, so continue.
@@ -840,7 +836,7 @@ class ClassConfig extends ClassJobsSitePlugin
                         $newSearch['name'] = $strOldSearchKey . "-loc-" . strtolower($locSet['name']);
                         $newSearch['location_search_value'] = $strSearchLocation;
 
-                        $GLOBALS['USERDATA']['configurationSettings']['searches'][] = $newSearch;
+                        $GLOBALS['USERDATA']['configuration_settings']['searches'][] = $newSearch;
 
                     }
                     $newSearch = null;
@@ -882,7 +878,7 @@ class ClassConfig extends ClassJobsSitePlugin
             }
         }
 
-        $GLOBALS['USERDATA']['configurationSettings']['email'] = \Scooper\array_copy($settingsEmail);
+        $GLOBALS['USERDATA']['configuration_settings']['email'] = \Scooper\array_copy($settingsEmail);
 
 
     }
@@ -905,8 +901,8 @@ class ClassConfig extends ClassJobsSitePlugin
             'keywords_array' => null,
             'keyword_match_type_string' => $iniKeywordSetup['keyword_match_type'],
             'keyword_match_type_flag' => $flagType,
-            'excluded_jobsites' => $GLOBALS['USERDATA']['configurationSettings']['excluded_sites'],
-            'included_jobsites' => $GLOBALS['USERDATA']['configurationSettings']['included_sites'],
+            'excluded_jobsites' => $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'],
+            'included_jobsites' => $GLOBALS['USERDATA']['configuration_settings']['included_sites'],
             'settings_scope' => $iniKeywordSetup['settings_scope']
         );
 

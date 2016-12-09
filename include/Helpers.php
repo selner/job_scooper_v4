@@ -648,7 +648,6 @@ const STAGE4_PATHKEY = "stage4-notifyuser/";
 const STAGE_FLAG_STAGEONLY = 0x0;
 const STAGE_FLAG_INCLUDEUSER = 0x1;
 const STAGE_FLAG_INCLUDEDATE = 0x2;
-const STAGE_FLAG_EXCLUDEPARENTPATH = 0x4;
 
 function addDelimIfNeeded($currString, $delim, $strToAdd)
 {
@@ -661,8 +660,7 @@ function addDelimIfNeeded($currString, $delim, $strToAdd)
 }
 function getStageKeyPrefix($stageNumber, $fileFlags = STAGE_FLAG_STAGEONLY, $delim="")
 {
-    $prefix =  "/";
-#    $prefix = $GLOBALS['USERDATA']['user_unique_key'] . "/";
+    $prefix =  "";
 
     if(($fileFlags& STAGE_FLAG_INCLUDEUSER) == true)
         $prefix = addDelimIfNeeded($prefix , $delim, $GLOBALS['USERDATA']['user_unique_key']);
@@ -670,9 +668,7 @@ function getStageKeyPrefix($stageNumber, $fileFlags = STAGE_FLAG_STAGEONLY, $del
     if(($fileFlags & STAGE_FLAG_INCLUDEDATE) == true)
         $prefix = addDelimIfNeeded($prefix , $delim, \Scooper\getTodayAsString(""));
 
-    if(($fileFlags & STAGE_FLAG_EXCLUDEPARENTPATH) == false)
-        $prefix = "jobscooper/staging/" . $prefix;
-
+    $rootPrefix = $GLOBALS['USERDATA']['user_unique_key'] . "/";
     switch($stageNumber)
     {
         case 1:
@@ -692,7 +688,7 @@ function getStageKeyPrefix($stageNumber, $fileFlags = STAGE_FLAG_STAGEONLY, $del
             break;
     }
 
-    return $prefix;
+    return ($rootPrefix . $prefix);
 }
 
 function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stageNumber = null)

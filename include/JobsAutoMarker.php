@@ -321,7 +321,7 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         $arrKwdSet = array();
         $arrJobsStillActive = array_filter($this->arrLatestJobs, "isMarkedBlank");
         $nStartingBlankCount = countAssociativeArrayValues($arrJobsStillActive);
-        foreach($GLOBALS['USERDATA']['searches_for_run'] as $search)
+        foreach($GLOBALS['USERDATA']['configuration_settings']['searches'] as $search)
         {
             if(array_key_exists('keywords_array_tokenized', $search))
             {

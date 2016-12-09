@@ -454,7 +454,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         //
         // Add initial email address header values
         //
-        $settings = $GLOBALS['USERDATA']['configurationSettings']['email'];
+        $settings = $GLOBALS['USERDATA']['configuration_settings']['email'];
 
         if(!isset($settings['email_addresses']["to"]) || count($settings['email_addresses']["to"]) < 1 || strlen(current($settings['email_addresses']["to"])['address']) <= 0)
         {
