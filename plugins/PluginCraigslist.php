@@ -24,7 +24,7 @@ class PluginCraigslist extends ClassBaseSimpleJobSitePlugin
     protected $siteName = 'Craigslist';
     protected $nJobListingsPerPage = 100;
     protected $siteBaseURL = 'http://seattle.craigslist.org';
-    protected $strBaseURLFormat = "http://***LOCATION***.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=***KEYWORDS***&srchType=T";
+    protected $strBaseURLFormat = "http://***LOCATION***.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=***KEYWORDS***&srchType=T&bundleDuplicates=1";
     protected $additionalFlags = [C__JOB_BASETYPE_WEBPAGE_FLAGS, C__JOB_LOCATION_REQUIRES_LOWERCASE, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
     protected $typeLocationSearchNeeded = 'location-city';
     protected $strKeywordDelimiter = "|";
