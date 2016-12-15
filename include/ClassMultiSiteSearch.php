@@ -117,7 +117,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
 
                 if($class->isBitFlagSet(C__JOB_USE_SELENIUM))
                 {
-                    if($GLOBALS['USERDATA']['selenium']['autostart'] == 1 && !(array_key_exists('selenium_started', $GLOBALS) || $GLOBALS['selenium_started'] != true))
+                    if($GLOBALS['USERDATA']['selenium']['autostart'] == 1 && (array_key_exists('selenium_started', $GLOBALS) === false || $GLOBALS['selenium_started'] !== true))
                         {
                             $strCmdToRun = "java -jar \"" . $GLOBALS['USERDATA']['selenium']['jar'] . "\" -port " . $GLOBALS['USERDATA']['selenium']['port'] . " ". $GLOBALS['USERDATA']['selenium']['switches'] ." >/dev/null &";
                             $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \Scooper\C__DISPLAY_ITEM_RESULT__);
