@@ -648,7 +648,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
     private function _getJobsForSearchByType_($searchDetails, $nAttemptNumber = 0)
     {
-        $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[". $searchDetails['name']), \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPTOPLEVEL__);
+        $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[". $searchDetails['name']) ."]", \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPTOPLEVEL__);
         $this->_logMemoryUsage_();
         $arrPageJobsList = null;
 
@@ -737,6 +737,59 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             $this->_setJobsToFileStoreForSearch_($searchDetails, $arrPageJobsList);
             $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->siteName . "[". $searchDetails['name']), \Scooper\C__SECTION_END__, \Scooper\C__NAPPTOPLEVEL__);
         }
+    }
+    protected function _getMyJobsForSearchFromJobsAPI_($searchDetails)
+    {
+        $nItemCount = 0;
+
+        $arrSearchReturnedJobs = [];
+        $GLOBALS['logger']->logLine("Downloading count of " . $this->siteName ." jobs for search '".$searchDetails['key']. "'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+        $pageNumber = 1;
+        $noMoreJobs = false;
+        while($noMoreJobs != true)
+        {
+            $arrPageJobsList = [];
+            $apiJobs = $this->getSearchJobsFromAPI($searchDetails, $pageNumber);
+
+            foreach($apiJobs as $job)
+            {
+                $item = $this->getEmptyJobListingRecord();
+                $item['job_site'] = $this->siteName;
+                $item['job_title'] = $job->name;
+                $item['job_id'] = $job->sourceId;
+                if($item['job_id'] == null)
+                    $item['job_id'] = $job->url;
+
+                if(strlen(trim($item['job_title'])) == 0 || strlen(trim($item['job_id'])) == 0)
+                {
+                    continue;
+                }
+                $item['location'] = $job->location;
+                $item['company'] = $job->company;
+                if($job->datePosted != null)
+                    $item['job_site_date'] = $job->datePosted->format('D, M d');
+                $item['job_post_url'] = $job->url;
+
+                $item = $this->normalizeItem($item);
+                $strCurrentJobIndex = getArrayKeyValueForJob($item);
+                $arrPageJobsList[$strCurrentJobIndex] = $item;
+                $nItemCount += 1;
+            }
+            if(count($arrPageJobsList) < $this->nJobListingsPerPage)
+            {
+                addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
+                $noMoreJobs = true;
+            }
+            else
+            {
+                addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
+            }
+            $pageNumber++;
+        }
+
+        $GLOBALS['logger']->logLine($this->siteName . "[".$searchDetails['name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+        return $arrSearchReturnedJobs;
     }
 
     private function _getFileStoreKeyForSearch($searchSettings, $prefix="")
@@ -963,7 +1016,28 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             }
             else
             {
-                $host = 'http://localhost:4444/wd/hub'; // this is the default
+
+
+//                use \Facebook\WebDriver\Remote\WebDriverCapabilityType;
+//                use \Facebook\WebDriver\Remote\RemoteWebDriver;
+//                use \Facebook\WebDriver\WebDriverDimension;
+//
+//                $host = '127.0.0.1:8910';
+//                $capabilities = array(
+//                    WebDriverCapabilityType::BROWSER_NAME => 'phantomjs',
+//                    'phantomjs.page.settings.userAgent' => 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0',
+//                );
+//                $driver = RemoteWebDriver::create($host, $capabilities, 5000);
+//
+//                $window = new WebDriverDimension(1024, 768);
+//                $driver->manage()->window()->setSize($window);
+//
+//                $driver->get('https://www.google.ru/');
+//
+//                $driver->takeScreenshot('/tmp/screen.png');
+//                $driver->quit();
+
+                $host = 'http://localhost:' . $GLOBALS['USERDATA']['selenium']['port'] . '/wd/hub';
 
                 $capabilities = DesiredCapabilities::phantomjs();
                 if(PHP_OS == "Darwin")

@@ -19,8 +19,6 @@
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 
-const SELENIUM_STANDALONE_SERVER_JAR = "selenium-server-standalone-3.0.1.jar";
-
 class ClassMultiSiteSearch extends ClassJobsSiteCommon
 {
     protected $siteName = 'Multisite';
@@ -49,7 +47,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
             try
             {
                 if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Sending server shutdown call to Selenium server...", \Scooper\C__DISPLAY_ITEM_RESULT__); }
-                $cmd = "curl \"http://localhost:4444/selenium-server/driver?cmd=shutDownSeleniumServer\"";
+                $cmd = "curl \"http://localhost:" . $GLOBALS['USERDATA']['selenium']['port'] . "/selenium-server/driver?cmd=shutDownSeleniumServer\"";
                 exec($cmd);
 
                 unset ($GLOBALS['selenium_started']);
@@ -119,9 +117,9 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
 
                 if($class->isBitFlagSet(C__JOB_USE_SELENIUM))
                 {
-                    if(!array_key_exists('selenium_started', $GLOBALS) || $GLOBALS['selenium_started'] != true)
+                    if($GLOBALS['USERDATA']['selenium']['autostart'] == 1 && !(array_key_exists('selenium_started', $GLOBALS) || $GLOBALS['selenium_started'] != true))
                         {
-                            $strCmdToRun = "java -jar \"" . __ROOT__ . "/lib/" . SELENIUM_STANDALONE_SERVER_JAR . "\" -role standalone  >/dev/null &";
+                            $strCmdToRun = "java -jar \"" . $GLOBALS['USERDATA']['selenium']['jar'] . "\" -port " . $GLOBALS['USERDATA']['selenium']['port'] . " ". $GLOBALS['USERDATA']['selenium']['switches'] ." >/dev/null &";
                             $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \Scooper\C__DISPLAY_ITEM_RESULT__);
                             exec($strCmdToRun);
                             $GLOBALS['selenium_started'] = true;

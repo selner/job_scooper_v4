@@ -287,6 +287,7 @@ class ClassConfig extends ClassJobsSitePlugin
         // and configure all searches
         //
         $this->_readGlobalSearchParamtersFromConfig_($config);
+        $this->_readSeleniumParamtersFromConfig_($config);
 
         //
         // Load Plugin Specific settings from the config
@@ -489,10 +490,26 @@ class ClassConfig extends ClassJobsSitePlugin
                 $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$excludedSite] = $excludedSite;
                 if(isset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite])) unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite]);
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting " . $excludedSite . " as excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
             }
 
         }
+    }
+    private function _readSeleniumParamtersFromConfig_($config)
+    {
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading Selenium settings from config file...", \Scooper\C__DISPLAY_ITEM_START__);
+        if(isset($config['selenium']) && is_array($config['selenium']))
+        {
+            foreach(array_keys($config['selenium']) as $k)
+                $GLOBALS['USERDATA']['selenium'][$k] = $config['selenium'][$k];
+        }
+
+        if (!(array_key_exists('autostart', $GLOBALS['USERDATA']['selenium']) === true && array_key_exists('port', $GLOBALS['USERDATA']['selenium']) === true ))
+            throw new Exception("Required parameters for Selenium are missing; app cannot start.  You must set both 'autostart' and 'port' in your configuration files.");
+
+        $GLOBALS['USERDATA']['selenium']['autostart'] = \Scooper\intceil($GLOBALS['USERDATA']['selenium']['autostart']);
+
+        if ($GLOBALS['USERDATA']['selenium']['autostart'] == 1 && !(array_key_exists('jar', $GLOBALS['USERDATA']['selenium']) === true && array_key_exists('switches', $GLOBALS['USERDATA']['selenium']) === true ))
+            throw new Exception("Required parameters to autostart Selenium are missing; you must set both 'jar' and 'switches' in your configuration files.");
     }
 
     private function _readLocationSetsFromConfig_($config)
