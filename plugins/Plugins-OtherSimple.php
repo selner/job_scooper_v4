@@ -58,6 +58,49 @@ class PluginSmashingMagazine extends ClassSimpleFullPageJobSitePlugin
 }
 
 
+class PluginRobertHalf extends ClassBaseSimpleJobSitePlugin
+{
+    protected $siteName = 'RobertHalf';
+    protected $strBaseURLFormat = 'https://www.roberthalf.com/technology/jobs/***KEYWORDS***/***LOCATION***?pageSize=1500';
+    protected $additionalFlags = [C__JOB_USE_SELENIUM, C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES ];
+    protected $typeLocationSearchNeeded = 'location-city';
+    protected $nJobListingsPerPage = 1500;
+
+
+    protected $arrListingTagSetup = array(
+        'tag_listings_section' => array('tag' => 'tr', 'attribute' => 'class', 'attribute_value' =>'job-search-page'),
+        'tag_title' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+        'tag_link' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'a'), 'return_attribute' => 'href'),
+        'tag_location' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'city')),
+        'tag_job_posting_date' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'postDate')),
+        'regex_link_job_id' => '/\/technology\/job\/([^?]+)/i'
+    );
+
+
+    function parseTotalResultsCount($objSimpHTML)
+    {
+        $nTotalResults = C__TOTAL_ITEMS_UNKNOWN__;
+
+        //
+        // Find the HTML node that holds the result count
+        $spanCounts = $objSimpHTML->find("div[class='job-search-result-counter pg-1 first']");
+        if($spanCounts != null && is_array($spanCounts) && isset($spanCounts[0]))
+        {
+            $counts = explode(" of ", $spanCounts[0]->plaintext);
+            $nTotalResults = \Scooper\intceil($counts[1]);
+        }
+
+
+        return $nTotalResults;
+
+    }
+
+
+
+
+}
+
+
 
 
 class PluginBetalist extends ClassBaseSimpleJobSitePlugin
