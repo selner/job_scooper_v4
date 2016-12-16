@@ -31,7 +31,9 @@ class PluginIndeed extends ClassJobsSitePlugin
 
     function __construct($strBaseDir = null)
     {
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS | C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED;
+        // Note:  C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS intentioanlly not set although Indeed supports it.  However, their support is too explicit of a search a will weed out
+        //        too many potentia hits to be worth it.
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
         parent::__construct($strBaseDir);
     }
 
@@ -62,6 +64,14 @@ class PluginIndeed extends ClassJobsSitePlugin
 
         switch($nDays)
         {
+            case $nDays > 15:
+                $ret = "any";
+                break;
+
+            case $nDays > 7 && $nDays <= 15:
+                $ret = 15;
+                break;
+
             case $nDays > 3 && $nDays <= 7:
                 $ret = 7;
                 break;
