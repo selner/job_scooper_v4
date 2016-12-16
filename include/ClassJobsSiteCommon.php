@@ -58,7 +58,7 @@ class ClassJobsSiteCommon
             'location_user_specified_override' => null,
             'location_set' => null,
             'keyword_search_override' => null,
-            'keyword_set' => null,
+            'keywords_array' => null,
         );
     }
 

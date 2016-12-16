@@ -376,10 +376,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                     // Verify the user settings for keyword match type are the same.  If they are,
                     // we can combine this search into the collapsed one.
                     //
-                    if(\Scooper\isBitFlagSet($searchCollapsedDetails['user_setting_flags'], $search['user_setting_flags']))
+                    if(\Scooper\isBitFlagSet($searchCollapsedDetails['user_setting_flags'], $search['user_setting_flags']) === true)
                     {
                         $searchCollapsedDetails['name'] .= " and " . $search['name'];
-                        $searchCollapsedDetails['keyword_set'] = \Scooper\my_merge_add_new_keys(array_values($searchCollapsedDetails['keyword_set']), array_values($search['keyword_set']));
+                        $searchCollapsedDetails['keywords_array'] = \Scooper\my_merge_add_new_keys(array_values($searchCollapsedDetails['keywords_array']), array_values($search['keywords_array']));
 
                         $this->_setKeywordStringsForSearch_($searchCollapsedDetails);
                     }
@@ -448,14 +448,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             assert(!is_array($searchDetails['keyword_search_override']));
 
             // null out any generalized keyword set values we previously had
-            $searchDetails['keyword_set'] = null;
+            $searchDetails['keywords_array'] = null;
             $searchDetails['keywords_string_for_url'] = null;
 
             //
-            // Now take the override value and setup the keyword_set
+            // Now take the override value and setup the keywords_array
             // and URL value for that particular string
             //
-            $searchDetails['keyword_set'] = array($searchDetails['keyword_search_override']);
+            $searchDetails['keywords_array'] = array($searchDetails['keyword_search_override']);
         }
 
         if(isset($searchDetails['keywords_array']))
@@ -537,7 +537,11 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
         if(!$this->_isValueURLEncoded_($strRetCombinedKeywords))
         {
-            $strRetCombinedKeywords = urlencode($strRetCombinedKeywords);
+            if($this->isBitFlagSet(C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE))
+                $strRetCombinedKeywords = rawurlencode($strRetCombinedKeywords);
+            else
+                $strRetCombinedKeywords = urlencode($strRetCombinedKeywords);
+
         }
 
         if($this->isBitFlagSet(C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES))
@@ -1146,7 +1150,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             while ($nPageCount <= $totalPagesCount )
             {
 
-
                 $arrPageJobsList = null;
 
                 if($this->isBitFlagSet(C__JOB_USE_SELENIUM))
@@ -1182,8 +1185,11 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                     try
                     {
                         if($nPageCount <= $totalPagesCount && $nPageCount != 1)
-                            $driver = $this->getNextPage($driver, $nPageCount + 1);
-
+                        {
+                            $retDriver = $this->getNextPage($driver, $nPageCount + 1);
+                            if(!is_null($retDriver))
+                                $driver = $retDriver;
+                        }
 
                         // BUGBUG -- Checking these two HTML values to make sure they still match
                         $html = $driver->getPageSource();
@@ -1357,7 +1363,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         $strURL = $this->_getBaseURLFormat_($searchDetails);
 
 
-        $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($GLOBALS['OPTS']['number_days']), $strURL );
+        $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($GLOBALS['USERDATA']['configuration_settings']['number_days']), $strURL );
         $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL );
         $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
         if(!$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
