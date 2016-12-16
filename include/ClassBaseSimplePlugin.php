@@ -37,12 +37,12 @@ abstract class ClassSimpleFullPageJobSitePlugin extends ClassBaseSimpleJobSitePl
 {
     protected $childSiteURLBase = '';
     protected $childSiteListingPage = '';
+    protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__];
 
     function __construct($strOutputDirectory = null)
     {
         return parent::__construct($strOutputDirectory);
     }
-
 
     protected function _getURLfromBase_($searchDetails, $nPage = null, $nItem = null)
     {
@@ -69,7 +69,7 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
 {
     protected $siteName = '';
     protected $siteBaseURL = '';
-    protected $additionalFlags = [C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
+    protected $additionalFlags = [];
     protected $nJobListingsPerPage = 20;
     protected $flagSettings = C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__;
     protected $childSiteURLBase = '';
