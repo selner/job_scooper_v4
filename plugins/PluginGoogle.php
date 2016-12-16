@@ -102,12 +102,11 @@ class PluginGoogle extends ClassJobsSitePlugin
 
     }
 
-    protected function getNextInfiniteScrollSet($driver)
+    function getNextPage($driver)
     {
-        // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
-        $driver->executeScript("var elem = document.getElementById('gjsrpn').click();  if (elem != null) { console.log('attempting next button click on element ID gjsrpn'); elem.click();");
+        $driver->executeScript("var elem = document.getElementById('gjsrpn');  if (elem != null) { console.log('attempting next button click on element ID gjsrpn'); elem.click(); };");
         sleep(2);
-
+        return $driver;
     }
 
 
