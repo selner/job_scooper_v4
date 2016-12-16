@@ -35,7 +35,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     //
     //************************************************************************
 
-
     protected $siteName = 'NAME-NOT-SET';
     protected $nJobListingsPerPage = 20;
     protected $flagSettings = null;
@@ -79,9 +78,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
 
 
-    function parseTotalResultsCount($objSimpHTML) { return VALUE_NOT_SUPPORTED; }
-    function parseJobsListForPage($objSimpHTML) { return VALUE_NOT_SUPPORTED; }
-    function getNextPage($driver, $nextPageNum) { return null; }
+    function parseTotalResultsCount($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); }
+    function parseJobsListForPage($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); }
+    function getNextPage($driver, $nextPageNum) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); }
 
 
     function addSearches($arrSearches)
@@ -136,32 +135,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         }
     }
 
-
-
-    function getLocationValueForLocationSetting($searchDetails)
-    {
-        $strReturnLocation = VALUE_NOT_SUPPORTED;
-
-        if(isset($searchDetails['location_user_specified_override']) && strlen($searchDetails['location_user_specified_override']) > 0)
-        {
-            $strReturnLocation = $searchDetails['location_user_specified_override'];
-        }
-        else
-        {
-            $locTypeNeeded = $this->getLocationSettingType();
-            if(isset($searchDetails['location_set']) && count($searchDetails['location_set']) > 0 && isset($searchDetails['location_set'][$locTypeNeeded]))
-            {
-                $strReturnLocation = $searchDetails['location_set'][$locTypeNeeded];
-            }
-        }
-        if(!$this->_isValueURLEncoded_($strReturnLocation)) { $strReturnLocation = urlencode($strReturnLocation); }
-
-        if($this->isBitFlagSet(C__JOB_LOCATION_REQUIRES_LOWERCASE))
-        {
-            $strReturnLocation = strtolower($strReturnLocation);
-        }
-        return $strReturnLocation;
-    }
 
     function getUpdatedJobsForAllSearches()
     {
@@ -338,11 +311,11 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             // if this search has any of the search-level overrides on it
             // then we don't bother trying to collapse it
             //
-            if(strlen($curSearch['base_url_format']) > 0 || strlen($curSearch['keyword_search_override']) > 0 || strlen($curSearch['location_user_specified_override']) > 0)
+            if(strlen($curSearch['base_url_format']) > 0 || strlen($curSearch['keyword_search_override']) > 0 || strlen($curSearch['location_search_value']) > 0)
             {
                 $arrCollapsedSearches[] = $curSearch;
             }
-            elseif($curSearch['location_set'] != $arrSearchesLeftToCollapse[0]['location_set'])
+            elseif($curSearch['location_search_value'] != $arrSearchesLeftToCollapse[0]['location_search_value'])
             {
                 $arrCollapsedSearches[] = $curSearch;
             }
@@ -355,7 +328,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             //
             // if this search has an override value for keyword or location, don't bother to collapse it
             //
-            if(strlen($search['keyword_search_override']) > 0 || strlen($search['location_user_specified_override']) > 0)
+            if(strlen($search['keyword_search_override']) > 0 || strlen($search['location_search_value']) > 0)
             {
                 $arrCollapsedSearches[] = $search;
             }
@@ -433,13 +406,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     //************************************************************************
     private function _setKeywordStringsForSearch_(&$searchDetails)
     {
-
-//        'keyword_search_override' => null,
-//            'keywords_string_for_url' => null,
-//            'keyword_set' => null,
-//            'user_setting_flags' => null,
-
-
         // Does this search have a set of keywords specific to it that override
         // all the general settings?
         if(isset($searchDetails['keyword_search_override']) && strlen($searchDetails['keyword_search_override']) > 0)
@@ -535,7 +501,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
         $strRetCombinedKeywords = $this->getCombinedKeywordString($arrKeywords);
 
-        if(!$this->_isValueURLEncoded_($strRetCombinedKeywords))
+        if(!isValueURLEncoded($strRetCombinedKeywords))
         {
             if($this->isBitFlagSet(C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE))
                 $strRetCombinedKeywords = rawurlencode($strRetCombinedKeywords);
@@ -558,51 +524,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         return $strRetCombinedKeywords;
     }
 
-
-
-
-
-
-    //************************************************************************
-    //
-    //
-    //
-    //  Location Search Related Functions
-    //
-    //
-    //
-    //************************************************************************
-
-    private function _setLocationValueForSearch_(&$searchDetails)
-    {
-        $searchDetails['location_search_value'] = VALUE_NOT_SUPPORTED;
-
-        if ($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || $this->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED))
-        {
-            $searchDetails['location_search_value'] = VALUE_NOT_SUPPORTED;
-        }
-        elseif(isset($searchDetails['location_user_specified_override']) && strlen($searchDetails['location_user_specified_override']) > 0)
-        {
-            $searchDetails['location_search_value'] = $searchDetails['location_user_specified_override'];
-        }
-        elseif(isset($searchDetails['location_set']) && is_array($searchDetails['location_set']) )
-        {
-            $locTypeNeeded = $this->getLocationSettingType();
-            if(isset($searchDetails['location_set']) && count($searchDetails['location_set']) > 0 && isset($searchDetails['location_set'][$locTypeNeeded]))
-            {
-                $searchDetails['location_search_value'] = $searchDetails['location_set'][$locTypeNeeded];
-            }
-        }
-
-        $searchDetails['location'] =  $searchDetails['location_search_value'];
-
-        if(!$this->_isValueURLEncoded_($searchDetails['location_search_value'])) { $searchDetails['location_search_value'] = urlencode($searchDetails['location_search_value']); }
-
-        if($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
-        {
-            $searchDetails['location_search_value']= strtolower($searchDetails['location_search_value']);
-        }
-    }
 
 
     function _setStartingUrlForSearch_(&$searchDetails)
@@ -643,8 +564,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             $searchDetails['key'] = \Scooper\strScrub($searchDetails['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($searchDetails['name'], FOR_LOOKUP_VALUE_MATCHING);
         }
 
+        assert($searchDetails['location_search_value'] !== VALUE_NOT_SUPPORTED && strlen($searchDetails['location_search_value']) > 0);
+
         $this->_setKeywordStringsForSearch_($searchDetails);
-        $this->_setLocationValueForSearch_($searchDetails);
         $this->_setStartingUrlForSearch_($searchDetails);
 
     }
@@ -812,7 +734,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     private function _setJobsToFileStoreForSearch_($searchSettings, $dataJobs)
     {
         $key = $this->_getFileStoreKeyForSearch( $searchSettings, "");
-        return writeJobsListDataToLocalJSONFile($key, $dataJobs, JOBLIST_TYPE_UNFILTERED);
+        return writeJobsListDataToLocalJSONFile($key, $dataJobs, JOBLIST_TYPE_UNFILTERED, $stageNumber=null, $searchDetails=$searchSettings);
     }
 
 
@@ -1273,12 +1195,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     //
     //************************************************************************
 
-    private function _isValueURLEncoded_($str)
-    {
-        if(strlen($str) <= 0) return 0;
-        return (\Scooper\substr_count_array($str, array("%22", "&", "=", "+", "-", "%7C", "%3C" )) >0 );
-
-    }
 
     private function _checkInvalidURL_($details, $strURL)
     {
@@ -1329,7 +1245,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             }
         }
 
-        if(!$this->_isValueURLEncoded_($strReturnLocation))
+        if(!isValueURLEncoded($strReturnLocation))
         {
             $strReturnLocation = urlencode($strReturnLocation);
         }
@@ -1377,7 +1293,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
         if(!$this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) && $nSubtermMatches > 0)
         {
-            $strLocationValue = $this->getLocationValueForLocationSetting($searchDetails);
+            $strLocationValue = $searchDetails['location_search_value'];
             if($strLocationValue == VALUE_NOT_SUPPORTED)
             {
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() ." set.  Skipping search '". $searchDetails['name'] . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);

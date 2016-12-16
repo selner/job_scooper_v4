@@ -52,11 +52,10 @@ class ClassJobsSiteCommon
             'site_name' => null,
             'search_start_url' => null,
             'keywords_string_for_url' => null,
-            'location_search_value' => null,
             'base_url_format' => null,
             'user_setting_flags' => C__USER_KEYWORD_MATCH_DEFAULT,
             'location_user_specified_override' => null,
-            'location_set' => null,
+            'location_search_value' => VALUE_NOT_SUPPORTED,
             'keyword_search_override' => null,
             'keywords_array' => null,
         );

@@ -646,12 +646,12 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         switch ($fLayoutType)
         {
             case "html":
-                $content = $this->_getResultsTextHTML_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrExcluded);
+                $content = $this->_getResultsTextHTML_($arrHeaders, $arrCounts, $arrNoJobUpdates);
                 break;
 
             default:
             case "text":
-                $content = $this->_getResultsTextPlain_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrExcluded);
+                $content = $this->_getResultsTextPlain_($arrHeaders, $arrCounts, $arrNoJobUpdates);
                 break;
 
         }
@@ -711,7 +711,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         return $strOut;
     }
 
-    private function _getResultsTextPlain_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrExcluded)
+    private function _getResultsTextPlain_($arrHeaders, $arrCounts, $arrNoJobUpdates)
     {
         $strOut = "";
         $arrCounts_TotalAll = null;
@@ -759,10 +759,10 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
         }
 
-        if($arrExcluded != null && count($arrExcluded) > 0)
+        if($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] != null && count($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']) > 0)
         {
-            sort($arrExcluded);
-            $strExcluded = getArrayValuesAsString($arrExcluded, ", ", "Sites excluded by user or settings: ", false);
+            sort($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']);
+            $strExcluded = getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'], ", ", "Sites excluded by user or settings: ", false);
             $strOut .= $strExcluded;
         }
 
@@ -780,7 +780,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         return $strDateRange;
     }
 
-    private function _getResultsTextHTML_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrExcluded)
+    private function _getResultsTextHTML_($arrHeaders, $arrCounts, $arrNoJobUpdates)
     {
         $arrCounts_TotalAll = null;
         $arrCounts_TotalUser = null;
@@ -839,11 +839,11 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
         $strOut .=  PHP_EOL . "<div class=\"job_scooper section\">". PHP_EOL;
 
-        if($arrExcluded != null && count($arrExcluded) > 0)
+        if($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] != null && count($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']) > 0)
         {
-            sort($arrExcluded);
+            sort($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']);
 
-            $strExcluded = getArrayValuesAsString($arrExcluded, ", ", "", false);
+            $strExcluded = getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'], ", ", "", false);
 
             $strOut .=  PHP_EOL .  "<span style=\"font-size: xx-small; color: #8e959c;\">Excluded sites for this run:" . PHP_EOL;
             $strOut .= $strExcluded;

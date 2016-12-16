@@ -68,14 +68,13 @@ class PluginUSAJobs extends ClassBaseJobsAPIPlugin
 
     function getSearchJobsFromAPI($searchDetails, $pageNumber = 1)
     {
-        $strKeywords = $this->getCombinedKeywordString($searchDetails['keyword_set']);
-
+        $strKeywords = $this->getCombinedKeywordString($searchDetails['keywords_array']);
 
         // Add parameters to the query via the constructor
         $options = [
             'AuthorizationKey' => $this->authorization_key,
             'Keyword' => $strKeywords,
-            'LocationName' => $searchDetails['location_set'][$this->typeLocationSearchNeeded],
+            'LocationName' => $searchDetails['location_search_value'],
             'Page' => $pageNumber
         ];
         $query = new UsajobsQuery($options);
@@ -104,15 +103,15 @@ class PluginDice extends ClassBaseJobsAPIPlugin
 
     function getSearchJobsFromAPI($searchDetails, $pageNumber = 1)
     {
-        $strKeywords = $this->getCombinedKeywordString($searchDetails['keyword_set']);
+        $strKeywords = $this->getCombinedKeywordString($searchDetails['keywords_array']);
 
         // Add parameters to the query via the constructor
         $options = [
             'text' => $strKeywords,
             'page' => $pageNumber,
             'pgcnt' => $this->nJobListingsPerPage,
-            'city' => $searchDetails['location_set']['location-city'],
-            'state' => $searchDetails['location_set']['location-state']
+            'city' => $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-city'],
+            'state' => $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-state']
         ];
         $query = new DiceQuery($options);
         $client = new DiceProvider($query);
@@ -121,7 +120,6 @@ class PluginDice extends ClassBaseJobsAPIPlugin
 
         // Get a Collection of Jobs
         $apiJobs = $client->getJobs();
-        $retJobs = [];
         $jobsForPage = $apiJobs->all();
         if($jobsForPage != null)
         {

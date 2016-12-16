@@ -55,7 +55,7 @@ class S3JobListManager extends ClassJobsSiteCommon
             $keyparts = explode("/", $data['key']);
 
             $path = implode("/", array_slice($keyparts,2));
-            writeJobsListDataToLocalJSONFile($path, $data['jobslist'], $listType, $stageNumber);
+            writeJobsListDataToLocalJSONFile($path, $data['jobslist'], $listType, $stageNumber, $searchDetails=null);
             if($this->s3Manager->isConnected() === true)
             {
 
@@ -148,7 +148,7 @@ class S3JobListManager extends ClassJobsSiteCommon
                 throw new Exception("Invalid job list type specified: " . $listType);
         }
 
-        writeJobsListDataToLocalJSONFile(("migrated-to-stage".$thisStageNumber), $dataJobs=$arrRetJobs, $listType, $stageNumber=$thisStageNumber);
+        writeJobsListDataToLocalJSONFile(("migrated-to-stage".$thisStageNumber), $dataJobs=$arrRetJobs, $listType, $stageNumber=$thisStageNumber, $searchDetails=null);
         if($this->s3Manager->isConnected() === true)
         {
             $this->publishS3JobsList($thisStageNumber, $listType);
@@ -289,8 +289,7 @@ class StageManager extends S3JobListManager
                 //
                 // Remove any sites that were excluded in this run from the searches list
                 //
-//                for($z = 0; $z < count($arrSearchesToRun) ; $z++)
-                    foreach(array_keys($arrSearchesToRun) as $z)
+                foreach(array_keys($arrSearchesToRun) as $z)
                 {
                     $curSearch = $arrSearchesToRun[$z];
 

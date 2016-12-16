@@ -640,6 +640,13 @@ function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strEx
     return $strFilename;
 }
 
+function isValueURLEncoded($str)
+{
+    if(strlen($str) <= 0) return 0;
+    return (\Scooper\substr_count_array($str, array("%22", "&", "=", "+", "-", "%7C", "%3C" )) >0 );
+}
+
+
 
 const STAGE1_PATHKEY = "stage1-rawlistings/";
 const STAGE2_PATHKEY = "stage2-rawlistings/";
@@ -691,7 +698,7 @@ function getStageKeyPrefix($stageNumber, $fileFlags = STAGE_FLAG_STAGEONLY, $del
     return ($rootPrefix . $prefix);
 }
 
-function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stageNumber = null)
+function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stageNumber = null, $searchDetails = null)
 {
     if(is_null($dataJobs))
         $dataJobs = array();
@@ -702,10 +709,10 @@ function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stage
     $stageName = "stage" . $stageNumber;
     $fileKey = str_replace(" ", "", $fileKey);
 
-    $data = array('key' => $fileKey, 'stage' => $stageNumber, 'listtype' => $listType, 'jobslist' => $dataJobs);
+    $data = array('key' => $fileKey, 'stage' => $stageNumber, 'listtype' => $listType, 'jobslist' => $dataJobs, 'search' => $searchDetails);
 
     $jobsJson = json_encode($data, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
-    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], $fileKey ));
+    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], strtolower($fileKey) ));
     if(stripos($fileKey, ".json") === false)
         $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
 
@@ -723,7 +730,7 @@ function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber)
 
     $stageName = "stage" . $stageNumber;
     $fileKey = str_replace(" ", "", $fileKey);
-    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], $fileKey ));
+    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName],  strtolower($fileKey) ));
     if(stripos($fileKey, ".json") === false)
         $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
 
