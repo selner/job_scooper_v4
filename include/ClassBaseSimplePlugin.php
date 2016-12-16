@@ -113,9 +113,10 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
      */
     function parseTotalResultsCount($objSimpHTML)
     {
-        assert($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__));
-
-        return C__TOTAL_ITEMS_UNKNOWN__;
+        if($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
+            return C__TOTAL_ITEMS_UNKNOWN__;
+        else
+            throw new Exception("Error: plugin is missing either C__JOB_PAGECOUNT_NOTAPPLICABLE__ flag or an implementation of parseTotalResultsCount for that job site. Cannot complete search.");
     }
 
     private function _getTagMatchString_($arrTags)
