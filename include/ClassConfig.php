@@ -193,8 +193,10 @@ class ClassConfig extends ClassJobsSitePlugin
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Configuring specific settings for this run... ", \Scooper\C__DISPLAY_SECTION_START__);
 
         $GLOBALS['USERDATA']['configuration_settings']['number_days']= \Scooper\get_PharseOptionValue('number_days');
-        if($GLOBALS['USERDATA']['configuration_settings']['number_days']== false) { $GLOBALS['OPTS']['number_days'] = 1; $GLOBALS['USERDATA']['configuration_settings']['number_days'] = 1; }
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($GLOBALS['OPTS']['number_days'] . " days configured for run. ", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        if($GLOBALS['USERDATA']['configuration_settings']['number_days'] === false) {
+            $GLOBALS['USERDATA']['configuration_settings']['number_days'] = 1;
+        }
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($GLOBALS['USERDATA']['configuration_settings']['number_days'] . " days configured for run. ", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $this->_setPreviouslyReviewedJobsInputFiles_();
 
@@ -567,10 +569,10 @@ class ClassConfig extends ClassJobsSitePlugin
                                 $arrNewLocationSet['excluded_jobsites'][$excludedSite] = $excludedSite;
                             }
                         }
-                        if(is_array($arrNewLocationSet['excluded_jobsites']))
-                        {
+                        if(array_key_exists('excluded_jobsites', $arrNewLocationSet) && is_array($arrNewLocationSet['excluded_jobsites']) && count($arrNewLocationSet['excluded_jobsites']) > 0)
                             $arrNewLocationSet['excluded_jobsites'] = \Scooper\my_merge_add_new_keys($arrNewLocationSet['excluded_jobsites'], $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']);
-                        }
+                        else
+                            $arrNewLocationSet['excluded_jobsites'] = \Scooper\array_copy($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']);
 
                         $strSettingStrings = getArrayValuesAsString($arrNewLocationSet);
                         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added location search settings '" . $strSetName . ": " . $strSettingStrings, \Scooper\C__DISPLAY_ITEM_DETAIL__);
