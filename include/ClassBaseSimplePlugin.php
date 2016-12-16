@@ -221,7 +221,8 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
                 if(array_key_exists('tag_location', $this->arrListingTagSetup))
                     $item['location'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_location'], 'plaintext');
 
-
+                if(array_key_exists('tag_job_posting_date', $this->arrListingTagSetup))
+                    $item['job_site_date'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_job_posting_date'], 'plaintext');
 
                 $fMatchedID = preg_match($this->arrListingTagSetup['regex_link_job_id'], $item['job_post_url'], $idMatches);
                 if($fMatchedID && count($idMatches) > 1)
