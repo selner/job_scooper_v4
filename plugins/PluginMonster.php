@@ -35,24 +35,37 @@ class PluginMonster extends ClassJobsSitePlugin
     }
 
     function getDaysURLValue($days = null) {
-        $ret = "yesterday";
+        $ret = "1";
 
         if($days != null)
         {
             switch($days)
             {
-                case ($days>3 && $days<=7):
-                    $ret = "Last-7-Days";
+
+                case ($days>=31):
+                    $ret = "";
+                    break;
+
+                case ($days>=15 && $days<31):
+                    $ret = "30";
+                    break;
+
+                case ($days>=7 && $days<15):
+                    $ret = "14";
                     break;
 
                 case ($days>=3 && $days<7):
-                    $ret = "Last-3-Days";
+                    $ret = "7";
+                    break;
+
+                case ($days>=1 && $days<3):
+                    $ret = "3";
                     break;
 
 
                 case $days<=1:
                 default:
-                    $ret = "yesterday";
+                    $ret = 1;
                     break;
 
             }
