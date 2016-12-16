@@ -33,7 +33,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
         {
             try
             {
-                $driver = RemoteWebDriver::createBySessionID($GLOBALS['selenium_sessionid']);
+                $driver = RemoteWebDriver::createBySessionID($GLOBALS['selenium_sessionid'], $GLOBALS['USERDATA']['selenium']['host_location'] . "/wd/hub");
                 $driver->quit();
                 unset ($GLOBALS['selenium_sessionid']);
             }
@@ -47,7 +47,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
             try
             {
                 if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Sending server shutdown call to Selenium server...", \Scooper\C__DISPLAY_ITEM_RESULT__); }
-                $cmd = "curl \"http://localhost:" . $GLOBALS['USERDATA']['selenium']['port'] . "/selenium-server/driver?cmd=shutDownSeleniumServer\"";
+                $cmd = "curl \"" . $GLOBALS['USERDATA']['selenium']['host_location'] . "/selenium-server/driver?cmd=shutDownSeleniumServer\"";
                 exec($cmd);
 
                 unset ($GLOBALS['selenium_started']);

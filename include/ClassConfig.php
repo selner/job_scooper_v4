@@ -510,6 +510,9 @@ class ClassConfig extends ClassJobsSitePlugin
 
         if ($GLOBALS['USERDATA']['selenium']['autostart'] == 1 && !(array_key_exists('jar', $GLOBALS['USERDATA']['selenium']) === true && array_key_exists('switches', $GLOBALS['USERDATA']['selenium']) === true ))
             throw new Exception("Required parameters to autostart Selenium are missing; you must set both 'jar' and 'switches' in your configuration files.");
+
+        $GLOBALS['USERDATA']['selenium']['host_location'] = 'http://localhost:' . $GLOBALS['USERDATA']['selenium']['port'];
+
     }
 
     private function _readLocationSetsFromConfig_($config)

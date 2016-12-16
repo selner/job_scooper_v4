@@ -79,8 +79,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
 
 
-    function parseTotalResultsCount($objSimpHTML) { return VALUE_NOT_SUPPORTED; } // returns an array of jobs
-    function parseJobsListForPage($objSimpHTML) { return VALUE_NOT_SUPPORTED; } // returns an array of jobs
+    function parseTotalResultsCount($objSimpHTML) { return VALUE_NOT_SUPPORTED; }
+    function parseJobsListForPage($objSimpHTML) { return VALUE_NOT_SUPPORTED; }
+    function getNextPage($driver, $nextPageNum) { return null; }
 
 
     function addSearches($arrSearches)
@@ -1012,7 +1013,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         {
             if(array_key_exists('selenium_sessionid', $GLOBALS) && isset($GLOBALS['selenium_sessionid']) && $GLOBALS['selenium_sessionid'] != -1)
             {
-                $driver = RemoteWebDriver::createBySessionID($GLOBALS['selenium_sessionid']);
+                $driver = RemoteWebDriver::createBySessionID($GLOBALS['selenium_sessionid'], $GLOBALS['USERDATA']['selenium']['host_location'] . "/wd/hub");
             }
             else
             {
@@ -1037,7 +1038,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 //                $driver->takeScreenshot('/tmp/screen.png');
 //                $driver->quit();
 
-                $host = 'http://localhost:' . $GLOBALS['USERDATA']['selenium']['port'] . '/wd/hub';
 
                 $capabilities = DesiredCapabilities::phantomjs();
                 if(PHP_OS == "Darwin")
@@ -1046,7 +1046,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                 $capabilities->setCapability("nativeEvents", true);
                 $capabilities->setCapability("setThrowExceptionOnScriptError", false);
 
-
+                $host = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
                 $driver = RemoteWebDriver::create($host, $desired_capabilities = $capabilities, 5000);
                 $GLOBALS['selenium_sessionid'] = $driver->getSessionID();
             }
@@ -1176,8 +1176,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                         throw new ErrorException($strMsg);
                     }
 
+
+
+
                     try
                     {
+                        if($nPageCount <= $totalPagesCount && $nPageCount != 0)
+                            $driver = $this->getNextPage($driver, $nPageCount + 1);
+
 
                         // BUGBUG -- Checking these two HTML values to make sure they still match
                         $html = $driver->getPageSource();
@@ -1200,7 +1206,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                 }
                 if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
 
-                $GLOBALS['logger']->logLine("Getting jobs from ". $strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                $GLOBALS['logger']->logLine("Getting page # ". ($nPageCount + 1) . " of jobs from ". $strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 try
                 {
 
