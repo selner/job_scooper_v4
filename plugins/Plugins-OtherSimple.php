@@ -61,6 +61,7 @@ class PluginSmashingMagazine extends ClassSimpleFullPageJobSitePlugin
 class PluginRobertHalf extends ClassBaseSimpleJobSitePlugin
 {
     protected $siteName = 'RobertHalf';
+    protected $siteBaseURL = "https://www.roberthalf.com";
     protected $strBaseURLFormat = 'https://www.roberthalf.com/technology/jobs/***KEYWORDS***/***LOCATION***?pageSize=1500';
     protected $additionalFlags = [C__JOB_USE_SELENIUM, C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES ];
     protected $typeLocationSearchNeeded = 'location-city';
