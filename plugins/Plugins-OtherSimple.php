@@ -119,4 +119,70 @@ class PluginBetalist extends ClassBaseSimpleJobSitePlugin
 
 
 
+
+
+class PluginAltasource extends BaseForceComClass
+{
+    protected $siteName = 'Altasource';
+    protected $siteBaseURL = "http://altasourcegroup.force.com/";
+    protected $nJobListingsPerPage = 30;
+    protected $strBaseURLFormat = "http://altasourcegroup.force.com/careers";
+}
+
+class PluginSalesforce extends BaseForceComClass
+{
+    protected $siteName = 'Salesforce';
+    protected $siteBaseURL = "https://careers.secure.force.com/";
+    protected $strBaseURLFormat = "https://careers.secure.force.com/jobs";
+
+    // Alternate job site that could be used instead:   http://salesforce.careermount.com/candidate/job_search/quick/results?location=seattle&keyword=developer&sort_dir=desc&sort_field=post_date&relevance=false
+}
+
+class BaseForceComClass extends ClassBaseSimpleJobSitePlugin
+{
+    protected $additionalFlags = [ C__JOB_USE_SELENIUM, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED ];
+    protected $additionalLoadDelaySeconds = 3;
+    protected $nJobListingsPerPage = 50;
+    protected $nextPageScript = "A4J.AJAX.Submit('j_id0:j_id1:atsForm',event,{'similarityGroupingId':'j_id0:j_id1:atsForm:j_id123','containerId':'j_id0:j_id1:atsForm:j_id77','parameters':{'j_id0:j_id1:atsForm:j_id123':'j_id0:j_id1:atsForm:j_id123'} ,'status':'j_id0:j_id1:atsForm:ats_pagination_status'} );return false;";
+
+
+    function parseTotalResultsCount($objSimpHTML)
+    {
+        $nTotalResults = C__TOTAL_ITEMS_UNKNOWN__;
+
+        //
+        // Find the HTML node that holds the result count
+        $spanCounts = $objSimpHTML->find("div[id='atsSearchResultsText']");
+        if($spanCounts != null && is_array($spanCounts) && isset($spanCounts[0]))
+        {
+            $counts = explode("&nbsp", $spanCounts[0]->plaintext);
+            $nTotalResults = \Scooper\intceil($counts[0]);
+        }
+
+
+        return $nTotalResults;
+
+    }
+
+    protected $arrListingTagSetup = array(
+        'tag_listings_section' => array(array('tag' => 'table', 'attribute' => 'id', 'attribute_value' => "j_id0:j_id1:atsForm:atsSearchResultsTable"), array('tag' => 'tbody'),array('tag' => 'tr')),
+        'tag_title' =>  array(array('tag' => 'td', 'index' => 0), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+        'tag_link' =>  array(array('tag' => 'td', 'index' => 0), array('tag' => 'a'), 'return_attribute' => 'href'),
+        'tag_location' =>  array(array('tag' => 'td', 'index' => 2), array('tag' => 'span')),
+#        'tag_company' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'jobCard__details__company'), array('tag' => 'a')),
+        'regex_link_job_id' => '/.*?jobId=([^&]+)/i'
+    );
+
+    public function getNextPage($driver, $nextPageNum)
+    {
+        $driver->executeScript("function callNextPage() { " . $this->nextPageScript ." } ; callNextPage();");
+        sleep(2);
+        return $driver;
+
+    }
+
+}
+
+
+
 ?>
