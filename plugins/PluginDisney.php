@@ -21,82 +21,44 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 
 
 
-class PluginDisney extends ClassJobsSitePlugin
+class PluginDisney extends ClassBaseSimpleJobSitePlugin
 {
     protected $siteName = 'Disney';
-    protected $siteBaseURL = 'http://disneycareers.com/';
-    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_URL_FORMAT_REQUIRED;
+    protected $siteBaseURL = 'https://jobs.disneycareers.com/';
+    protected $strBaseURLFormat = "https://jobs.disneycareers.com/search-jobs/***KEYWORDS***/***LOCATION***?orgIds=391-5733-5732&kt=1";
+    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
+    protected $additionalFlags = [ C__JOB_USE_SELENIUM, C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE ];
+    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
 
+    protected $nJobListingsPerPage = 50;
 
-
+    protected $arrListingTagSetup = array(
+        'tag_listings_section' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => "search-results-list"), array('tag' => 'ul'),array('tag' => 'li')),
+        'tag_title' =>  array(array('tag' => 'a'), array('tag' => 'h2')),
+        'tag_link' =>  array(array('tag' => 'a'), 'return_attribute' => 'href'),
+        'tag_location' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'job-location'),
+        'tag_job_posting_date' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'job-date-posted'),
+        'regex_link_job_id' => '/.*?\/(.*?\/[^\/]]+)/i'
+    );
 
     function parseTotalResultsCount($objSimpHTML)
     {
-        $resultsSection= $objSimpHTML->find("div[id='searchResultMessage'] h1");  // "Your Search returned 30  results"
-        $totalItemsText = $resultsSection[0]->plaintext;
-        $arrItemItems = explode(" ", trim($totalItemsText));
-        $strTotalItemsCount = trim($arrItemItems[3]);
-        $strTotalItemsCount = str_replace(",", "", $strTotalItemsCount);
-
-        $GLOBALS['logger']->logLine($this->siteName ." only pulling the last 10 jobs posted out of " . $strTotalItemsCount, \Scooper\C__DISPLAY_WARNING__);
-
-        return "10";
-    }
-
-    function parseJobsListForPage($objSimpHTML)
-    {
-        $ret = null;
-
-
-        $nodesJobs= $objSimpHTML->find('table[id="searchResultsBlock"] tr');
-
-
-        foreach($nodesJobs as $node)
+        $nTotalResults = C__TOTAL_ITEMS_UNKNOWN__;
+        $resultsSection = $objSimpHTML->find("section[id='search-results']");  // "Your Search returned 30  results"
+        if(isset($resultsSection) && isset($resultsSection[0]))
         {
-
-            if(strcasecmp($node->class, "gradeA even") != 0 &&
-                strcasecmp($node->class, "gradeA odd") != 0)
-            {
-                continue;
-            }
-
-            $item = $this->getEmptyJobListingRecord();
-            $item['job_site'] = $this->siteName;
-            $item['company'] = $this->siteName;
-
-            $titleLink = $node->find("td[class='column1'] div a");
-            if(isset($titleLink) && isset($titleLink[0]))
-            {
-                $item['job_title'] = $titleLink[0]->plaintext;
-                $item['job_post_url']  = $titleLink[0]->href;
-            }
-
-          if($item['job_title'] == '') continue;
-
-            $item['job_id'] = explode("jobid=", $item['job_post_url'])[1];
-
-            $subNode = $node->find("td[class='column2'] div");
-            if(isset($subNode) && isset($subNode[0]))
-            {
-                $item['job_site_category'] = $subNode[0]->plaintext;
-                $item['job_site_category'] = trim(str_ireplace("Job Category :  ", "", $item['job_site_category']));
-            }
-            $subNode = $node->find("td[class='column3'] div span[class='bold-text']");
-            if(isset($subNode) && isset($subNode[0]))
-                $item['location'] = $subNode[0]->plaintext;
-
-
-            $item['date_pulled'] = getTodayAsString();
-
-            $subNode = $node->find("td[class='column4']");
-            if(isset($subNode) && isset($subNode[0]))
-                $item['job_site_date'] = $subNode[0]->plaintext;
-
-            $ret[] = $this->normalizeItem($item);
+            $nTotalResults = \Scooper\intceil($resultsSection[0]->attr['data-total-results']);
         }
 
-
-        return $ret;
+        return $nTotalResults;
     }
+
+    public function getNextPage($driver, $nextPageNum)
+    {
+        $driver->executeScript("function callNextPage() { var elem = document.querySelector(\"#pagination-bottom > div.pagination-paging > a.next\");  if (elem != null) { console.log('attempting next button click on element a.next'); elem.click(); }; } ; callNextPage();");
+        sleep(2);
+        return $driver;
+    }
+
 
 }
