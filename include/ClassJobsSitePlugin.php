@@ -1181,7 +1181,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
                     try
                     {
-                        if($nPageCount <= $totalPagesCount && $nPageCount != 0)
+                        if($nPageCount <= $totalPagesCount && $nPageCount != 1)
                             $driver = $this->getNextPage($driver, $nPageCount + 1);
 
 
