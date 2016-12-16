@@ -167,7 +167,7 @@ class PluginBetalist extends ClassBaseSimpleJobSitePlugin
 class PluginAltasource extends BaseForceComClass
 {
     protected $siteName = 'Altasource';
-    protected $siteBaseURL = "http://altasourcegroup.force.com/";
+    protected $siteBaseURL = "http://altasourcegroup.force.com";
     protected $nJobListingsPerPage = 30;
     protected $strBaseURLFormat = "http://altasourcegroup.force.com/careers";
 }
@@ -175,7 +175,7 @@ class PluginAltasource extends BaseForceComClass
 class PluginSalesforce extends BaseForceComClass
 {
     protected $siteName = 'Salesforce';
-    protected $siteBaseURL = "https://careers.secure.force.com/";
+    protected $siteBaseURL = "https://careers.secure.force.com";
     protected $strBaseURLFormat = "https://careers.secure.force.com/jobs";
 
     // Alternate job site that could be used instead:   http://salesforce.careermount.com/candidate/job_search/quick/results?location=seattle&keyword=developer&sort_dir=desc&sort_field=post_date&relevance=false
