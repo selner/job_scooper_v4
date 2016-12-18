@@ -887,7 +887,6 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 //            'interested',
 //            'match_notes',
 //            'status',
-//            'last_status_update',
             'location',
 //            'job_site_category',
 //            'job_site',
