@@ -691,7 +691,7 @@ function getStageKeyPrefix($stageNumber, $fileFlags = STAGE_FLAG_STAGEONLY, $del
             $prefix = STAGE4_PATHKEY . $prefix;
             break;
         default:
-            throw new Exception("Error: invalid stage number passed '" . $stageNumber. "'" );
+            throw new IndexOutOfBoundsException("Error: invalid stage number passed '" . $stageNumber. "'" );
             break;
     }
 
