@@ -152,7 +152,8 @@ class S3JobListManager extends ClassJobsSiteCommon
         if($this->s3Manager->isConnected() === true)
         {
             $this->publishS3JobsList($thisStageNumber, $listType);
-            $this->deleteS3JobsList($prevStageNumber, $listType);
+            if($prevStageNumber > 0)
+                $this->deleteS3JobsList($prevStageNumber, $listType);
         }
     }
 
