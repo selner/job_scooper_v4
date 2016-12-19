@@ -32,7 +32,7 @@ class PluginGroupon extends ClassJobsSitePlugin
 
     function __construct($strBaseDir = null)
     {
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS  | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_USE_SELENIUM;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS  | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_USE_SELENIUM | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
         parent::__construct($strBaseDir);
     }
 
@@ -60,7 +60,7 @@ class PluginGroupon extends ClassJobsSitePlugin
 
             $item['job_title'] = $node->plaintext;
             $item['job_post_url'] = $node->href;
-            $item['location'] = $this->getLocationValue();
+//            $item['location'] = $this->getLocationValue();
             $item['date_pulled'] = getTodayAsString();
             $item['company'] = $this->siteName;
             $item['job_id'] = $this->getIDFromLink('/\/jobs\/([^\/]+)/i', $item['job_post_url']);
