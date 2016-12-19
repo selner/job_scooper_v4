@@ -108,8 +108,16 @@ class ClassConfig extends ClassJobsSitePlugin
         $excludedsites = array_filter($GLOBALS['JOBSITE_PLUGINS'], function($k) {
             return !($k['include_in_run']);
         });
-        $GLOBALS['USERDATA']['configuration_settings']['included_sites'] = array_combine(array_keys($includedsites), array_column($includedsites, 'name'));
-        $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] = array_combine(array_keys($excludedsites), array_column($excludedsites, 'name'));
+        $keys = array();
+        foreach(array_keys($includedsites) as $k)
+            $keys[] = strtolower($k);
+
+        $GLOBALS['USERDATA']['configuration_settings']['included_sites'] = array_combine($keys, array_column($includedsites, 'name'));
+        $keys = array();
+        foreach(array_keys($excludedsites) as $k)
+            $keys[] = strtolower($k);
+
+        $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] = array_combine($keys, array_column($excludedsites, 'name'));
         $GLOBALS['USERDATA']['configuration_settings']['searches'] = array();
 
         $tmpDebug = \Scooper\get_PharseOptionValue('use_debug');
