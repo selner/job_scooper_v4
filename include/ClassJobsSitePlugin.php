@@ -970,159 +970,164 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
         $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['key']. "': ".$searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-        if($this->isBitFlagSet(C__JOB_USE_SELENIUM))
+        try
         {
-            try
+            if($this->isBitFlagSet(C__JOB_USE_SELENIUM))
             {
-                $driver = $this->_getFullHTMLForDynamicWebpage_($searchDetails['search_start_url'], $this->classToCheckExists);
-                $html = $driver->getPageSource();
-                $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
-            } catch (Exception $ex) {
-                $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
-
-                $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
-                throw new ErrorException($strMsg);
-            }
-        }
-        else
-        {
-            $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $searchDetails['search_start_url'], $this->secsPageTimeout );
-        }
-        if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$searchDetails['search_start_url']); }
-
-        $totalPagesCount = 1;
-        $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
-        if(!$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
-        {
-            $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML->root);
-            $nTotalResults  = intval(str_replace(",", "", $strTotalResults));
-            $nTotalListings = $nTotalResults;
-            if($nTotalResults == 0)
-            {
-                $totalPagesCount = 0;
-            }
-            elseif($nTotalResults != C__TOTAL_ITEMS_UNKNOWN__)
-            {
-                $totalPagesCount = \Scooper\intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
-                if($totalPagesCount < 1)  $totalPagesCount = 1;
-            }
-        }
-
-        if($nTotalListings <= 0)
-        {
-            $GLOBALS['logger']->logLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['name']."'.", \Scooper\C__DISPLAY_ITEM_START__);
-            return array();
-        }
-        else
-        {
-            $nJobsFound = 0;
-
-            $GLOBALS['logger']->logLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_START__);
-
-            $strURL = $searchDetails['search_start_url'];
-            while ($nPageCount <= $totalPagesCount )
-            {
-
-                $arrPageJobsList = null;
-
-                if($this->isBitFlagSet(C__JOB_USE_SELENIUM))
-                {
-                    try
-                    {
-                        if($driver == null)
-                        {
-                            $driver = $this->_getFullHTMLForDynamicWebpage_($strURL, $this->classToCheckExists);
-                        }
-                        if($this->isBitFlagSet( C__JOB_INFSCROLL_DOWNFULLPAGE))
-                        {
-                            while($nPageCount <= $totalPagesCount)
-                            {
-                                if(isDebug() && isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("... getting infinite results page #".$nPageCount." of " .$totalPagesCount, \Scooper\C__DISPLAY_NORMAL__); }
-                                $this->getNextInfiniteScrollSet($driver);
-                                $strURL = $driver->getCurrentURL();
-                                $nPageCount = $nPageCount + 1;
-                            }
-                            $html = $driver->getPageSource();
-                            $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
-                        }
-                        else if(!$this->isBitFlagSet( C__JOB_INFSCROLL_DOWNFULLPAGE))
-                        {
-                            if($nPageCount <= $totalPagesCount && $nPageCount > 1)
-                            {
-                                $retDriver = $this->getNextPage($driver, $nPageCount);
-                                if(!is_null($retDriver))
-                                    $driver = $retDriver;
-                            }
-
-                            // BUGBUG -- Checking these two HTML values to make sure they still match
-                            $strURL = $driver->getCurrentURL();
-                            $html = $driver->getPageSource();
-                            $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
-                        }
-                } catch (Exception $ex) {
-                        $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
-
-                        $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
-                        throw new ErrorException($strMsg);
-                    }
-                }
-                else
-                {
-                    $strURL = $this->_getURLfromBase_($searchDetails, $nPageCount, $nItemCount);
-                    if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
-                        return null;
-
-                    $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout);
-                }
-                if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
-
-                $GLOBALS['logger']->logLine("Getting page # ". ($nPageCount + 1) . " of jobs from ". $strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 try
                 {
+                    $driver = $this->_getFullHTMLForDynamicWebpage_($searchDetails['search_start_url'], $this->classToCheckExists);
+                    $html = $driver->getPageSource();
+                    $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+                } catch (Exception $ex) {
+                    $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
 
-                    if($this->isBitFlagSet(C__JOB_PREFER_MICRODATA))
+                    $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
+                    throw new ErrorException($strMsg);
+                }
+            }
+            else
+            {
+                $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $searchDetails['search_start_url'], $this->secsPageTimeout );
+            }
+            if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$searchDetails['search_start_url']); }
+
+            $totalPagesCount = 1;
+            $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
+            if(!$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
+            {
+                $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML->root);
+                $nTotalResults  = intval(str_replace(",", "", $strTotalResults));
+                $nTotalListings = $nTotalResults;
+                if($nTotalResults == 0)
+                {
+                    $totalPagesCount = 0;
+                }
+                elseif($nTotalResults != C__TOTAL_ITEMS_UNKNOWN__)
+                {
+                    $totalPagesCount = \Scooper\intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
+                    if($totalPagesCount < 1)  $totalPagesCount = 1;
+                }
+            }
+
+            if($nTotalListings <= 0)
+            {
+                $GLOBALS['logger']->logLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['name']."'.", \Scooper\C__DISPLAY_ITEM_START__);
+                return array();
+            }
+            else
+            {
+                $nJobsFound = 0;
+
+                $GLOBALS['logger']->logLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_START__);
+
+                $strURL = $searchDetails['search_start_url'];
+                while ($nPageCount <= $totalPagesCount )
+                {
+
+                    $arrPageJobsList = null;
+
+                    if($this->isBitFlagSet(C__JOB_USE_SELENIUM))
                     {
-                        $arrPageJobsList = $this->getJobsFromMicroData($objSimpleHTML);
-                    }
-                    if(!$arrPageJobsList)
-                    {
-                        $arrPageJobsList = $this->_parseJobsListForPageBase_($objSimpleHTML);
-                        if(!is_array($arrPageJobsList))
+                        try
                         {
-                            // we likely hit a page where jobs started to be hidden.
-                            // Go ahead and bail on the loop here
-                            $strWarnHiddenListings = "Could not get all job results back from ". $this->siteName . " for this search starting on page " . $nPageCount.".";
-                            if($nPageCount < $totalPagesCount)
-                                $strWarnHiddenListings .= "  They likely have hidden the remaining " . ($totalPagesCount - $nPageCount) . " pages worth. ";
+                            if($driver == null)
+                            {
+                                $driver = $this->_getFullHTMLForDynamicWebpage_($strURL, $this->classToCheckExists);
+                            }
+                            if($this->isBitFlagSet( C__JOB_INFSCROLL_DOWNFULLPAGE))
+                            {
+                                while($nPageCount <= $totalPagesCount)
+                                {
+                                    if(isDebug() && isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("... getting infinite results page #".$nPageCount." of " .$totalPagesCount, \Scooper\C__DISPLAY_NORMAL__); }
+                                    $this->getNextInfiniteScrollSet($driver);
+                                    $strURL = $driver->getCurrentURL();
+                                    $nPageCount = $nPageCount + 1;
+                                }
+                                $html = $driver->getPageSource();
+                                $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+                            }
+                            else if(!$this->isBitFlagSet( C__JOB_INFSCROLL_DOWNFULLPAGE))
+                            {
+                                if($nPageCount <= $totalPagesCount && $nPageCount > 1)
+                                {
+                                    $retDriver = $this->getNextPage($driver, $nPageCount);
+                                    if(!is_null($retDriver))
+                                        $driver = $retDriver;
+                                }
 
-                            $GLOBALS['logger']->logLine($strWarnHiddenListings, \Scooper\C__DISPLAY_ITEM_START__);
-                            $nPageCount = $totalPagesCount;
+                                // BUGBUG -- Checking these two HTML values to make sure they still match
+                                $strURL = $driver->getCurrentURL();
+                                $html = $driver->getPageSource();
+                                $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+                            }
+                    } catch (Exception $ex) {
+                            $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
+
+                            $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
+                            throw new ErrorException($strMsg);
                         }
                     }
-
-                    if(is_array($arrPageJobsList))
+                    else
                     {
-                        addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
-                        $nJobsFound = countJobRecords($arrSearchReturnedJobs);
-                        if($nItemCount == 1) { $nItemCount = 0; }
-                        $nItemCount += ($nJobsFound < $this->nJobListingsPerPage) ? $nJobsFound : $this->nJobListingsPerPage;
+                        $strURL = $this->_getURLfromBase_($searchDetails, $nPageCount, $nItemCount);
+                        if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
+                            return null;
+
+                        $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout);
                     }
-                } catch (Exception $ex) {
-                    $GLOBALS['logger']->logLine($this->siteName . " error: " . $ex, \Scooper\C__DISPLAY_ERROR__);
+                    if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
 
+                    $GLOBALS['logger']->logLine("Getting page # ". ($nPageCount + 1) . " of jobs from ". $strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    try
+                    {
+
+                        if($this->isBitFlagSet(C__JOB_PREFER_MICRODATA))
+                        {
+                            $arrPageJobsList = $this->getJobsFromMicroData($objSimpleHTML);
+                        }
+                        if(!$arrPageJobsList)
+                        {
+                            $arrPageJobsList = $this->_parseJobsListForPageBase_($objSimpleHTML);
+                            if(!is_array($arrPageJobsList))
+                            {
+                                // we likely hit a page where jobs started to be hidden.
+                                // Go ahead and bail on the loop here
+                                $strWarnHiddenListings = "Could not get all job results back from ". $this->siteName . " for this search starting on page " . $nPageCount.".";
+                                if($nPageCount < $totalPagesCount)
+                                    $strWarnHiddenListings .= "  They likely have hidden the remaining " . ($totalPagesCount - $nPageCount) . " pages worth. ";
+
+                                $GLOBALS['logger']->logLine($strWarnHiddenListings, \Scooper\C__DISPLAY_ITEM_START__);
+                                $nPageCount = $totalPagesCount;
+                            }
+                        }
+
+                        if(is_array($arrPageJobsList))
+                        {
+                            addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
+                            $nJobsFound = countJobRecords($arrSearchReturnedJobs);
+                            if($nItemCount == 1) { $nItemCount = 0; }
+                            $nItemCount += ($nJobsFound < $this->nJobListingsPerPage) ? $nJobsFound : $this->nJobListingsPerPage;
+                        }
+                    } catch (Exception $ex) {
+                        $GLOBALS['logger']->logLine($this->siteName . " error: " . $ex, \Scooper\C__DISPLAY_ERROR__);
+                        throw $ex;
+                    }
+
+                    // clean up memory
+                    $objSimpleHTML->clear();
+                    unset($objSimpleHTML);
+                    $objSimpleHTML = null;
+                    $nPageCount++;
                 }
-
-                // clean up memory
-                $objSimpleHTML->clear();
-                unset($objSimpleHTML);
-                $objSimpleHTML = null;
-                $nPageCount++;
             }
+            $GLOBALS['logger']->logLine($this->siteName . "[".$searchDetails['name']."]" .": " . $nJobsFound . " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+            return $arrSearchReturnedJobs;
+
+        } catch (Exception $ex) {
+            $GLOBALS['logger']->logLine($this->siteName . " error: " . $ex, \Scooper\C__DISPLAY_ERROR__);
+            throw $ex;
         }
-
-        $GLOBALS['logger']->logLine($this->siteName . "[".$searchDetails['name']."]" .": " . $nJobsFound . " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
-        return $arrSearchReturnedJobs;
-
     }
 
 
