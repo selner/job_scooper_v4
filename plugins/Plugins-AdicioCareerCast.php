@@ -23,14 +23,28 @@ class PluginMashable extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'Mashable';
     protected $childSiteURLBase = 'http://jobs.mashable.com';
-    protected $strBaseURLSuffix = "&SearchNetworks=US&networkView=national";
+    protected $strBaseURLPathSection = "/jobs/results/keyword/***KEYWORDS***?location=***LOCATION***&kwsMustContain=***KEYWORDS***&radius=50&view=List_Detail&sort=PostType+asc%2C+PostDate+desc%2C+IsFeatured+desc&rows=50&modifiedDate=***NUMBER_DAYS***%page=***PAGE_NUMBER***&PostDate=***NUMBER_DAYS***";
 
+    protected $typeLocationSearchNeeded = 'location-city-comma-state';
 
 }
+
 class PluginLocalworkCA extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'LocalworkCA';
     protected $childSiteURLBase = 'http://jobs.localwork.ca';
+}
+
+class PluginASME extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = 'ASME';
+    protected $childSiteURLBase = 'http://jobsearch.asme.org';
+}
+
+class PluginJacksonville extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = 'Jacksonville';
+    protected $childSiteURLBase = 'http://http://jobs.jacksonville.com';
 }
 
 
@@ -53,7 +67,7 @@ class PluginVariety extends BaseAdicioCareerCastPlugin
 class PluginCellCom extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'CellCom';
-    protected $childSiteURLBase = 'http://jobs.cell.com/';
+    protected $childSiteURLBase = 'http://jobs.cell.com';
 }
 class PluginCareerJet extends BaseAdicioCareerCastPlugin
 {
@@ -75,10 +89,17 @@ class PluginAnalyticTalent extends BaseAdicioCareerCastPlugin
     protected $siteName = 'AnalyticTalent';
     protected $childSiteURLBase = 'http://careers.analytictalent.com';
 }
+
 class PluginKenoshaNews extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'KenoshaNews';
-    protected $childSiteURLBase = 'http://kenosha.careers.adicio.com/';
+    protected $childSiteURLBase = 'http://kenosha.careers.adicio.com';
+}
+
+class PluginTopekaCapitalJournal extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = 'TopekaCapitalJournal';
+    protected $childSiteURLBase = 'http://jobs.cjonline.com';
 }
 
 class PluginRetailCareersNow extends BaseAdicioCareerCastPlugin
@@ -136,11 +157,40 @@ class PluginDeadline extends BaseAdicioCareerCastPlugin
     protected $childSiteURLBase = 'http://jobsearch.deadline.com';
 }
 
+class PluginLogCabinDemocrat extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = 'LogCabinDemocrat';
+    protected $childSiteURLBase = 'jobs.thecabin.net';
+}
+
+class PluginPennEnergy extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = 'PennEnergy';
+    protected $childSiteURLBase = 'http://careers.pennenergyjobs.com';
+}
+
+class PluginBig4Firms extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = 'Big4Firms';
+    protected $childSiteURLBase = 'http://careers.big4.com';
+}
+
+class PluginVindy extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = 'Vindy';
+    protected $childSiteURLBase = 'http://careers.vindy.com';
+}
 
 class PluginAdicioCareerCast extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'CareerCast';
     protected $childSiteURLBase = 'http://www.careercast.com';
+}
+
+class PluginTheLancet extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = 'TheLancet';
+    protected $childSiteURLBase = 'http://careers.thelancet.com';
 }
 
 
@@ -156,6 +206,119 @@ class PluginVictoriaTXAdvocate extends BaseAdicioCareerCastPlugin
     protected $childSiteURLBase = 'http://jobshome.crossroadsfinder.com';
 }
 
+class PluginTVB extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = 'TVB';
+    protected $childSiteURLBase = 'http://postjobs.tvb.org';
+}
+
+class PluginOregonLive extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = 'OregonLive';
+    protected $childSiteURLBase = 'http://jobs.oregonlive.com';
+}
+
+class PluginSHRM extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = 'SHRM';
+    protected $childSiteURLBase = 'http://hrjobs.shrm.org';
+}
+
+class PluginCareerCastIT extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = "CareerCastIT";
+    protected $childSiteURLBase = "http://it.careercast.com";
+}
+
+class PluginCareerCastHealthcare extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = "CareerCastHealthcare";
+    protected $childSiteURLBase = "http://healthcare.careercast.com";
+}
+
+class PluginCareerCastNursing extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = "CareerCastNursing";
+    protected $childSiteURLBase = "http://nursing.careercast.com";
+}
+
+class PluginCareerCastTempJobs extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = "CareerCastTempJobs";
+    protected $childSiteURLBase = "http://tempjobs.careercast.com";
+}
+
+class PluginCareerCastMarketing extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = "CareerCastMarketing";
+    protected $childSiteURLBase = "http://marketing.careercast.com";
+}
+
+class PluginCareerCastRetail extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = "CareerCastRetail";
+    protected $childSiteURLBase = "http://retail.careercast.com";
+}
+
+class PluginCareerCastGreenNetwork extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = "CareerCastGreenNetwork";
+    protected $childSiteURLBase = "http://green.careercast.com";
+}
+
+class PluginCareerCastDiversity extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = "CareerCastDiversity";
+    protected $childSiteURLBase = "http://diversity.careercast.com";
+}
+
+class PluginCareerCastConstruction extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = "CareerCastConstruction";
+    protected $childSiteURLBase = "http://construction.careercast.com";
+}
+
+class PluginCareerCastEnergy extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = "CareerCastEnergy";
+    protected $childSiteURLBase = "http://energy.careercast.com";
+}
+
+class PluginCareerCastTrucking extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = "CareerCastTrucking";
+    protected $childSiteURLBase = "http://trucking.careercast.com";
+}
+
+class PluginCareerCastDisability extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = "CareerCastDisability";
+    protected $childSiteURLBase = "http://disability.careercast.com";
+}
+
+class PluginCareerCastHR extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = "CareerCastHR";
+    protected $childSiteURLBase = "http://hr.careercast.com";
+}
+
+class PluginCareerCastVeteran extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = "CareerCastVeteran";
+    protected $childSiteURLBase = "http://veteran.careercast.com";
+}
+
+class PluginCareerCastHospitality extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = "CareerCastHospitality";
+    protected $childSiteURLBase = "http://hospitality.careercast.com";
+}
+
+class PluginCareerCastFinance extends BaseAdicioCareerCastPlugin
+{
+    protected $siteName = "CareerCastFinance";
+    protected $childSiteURLBase = "http://finance.careercast.com";
+}
 
 
 abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
@@ -167,26 +330,29 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
     protected $strBaseURLPathSuffix = "";
     protected $strBaseURLFormat = null;
 
-    // postDate param below could also be modifiedDate=***NUMBER_DAYS***.  Unclear which is more correct when...
+    // postDate param below could also be modifiedDate =***NUMBER_DAYS***.  Unclear which is more correct when...
     protected $strBaseURLPathSection = "/jobs/results/keyword/***KEYWORDS***?location=***LOCATION***&kwsJobTitleOnly=true&view=List_Detail&networkView=national&radius=50&&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***&postDate=***NUMBER_DAYS***";
 #    protected $strBaseURLPathSection = "/jobs/search/results?kwsJobTitleOnly=true&view=List_Detail&networkView=national&radius=50&&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***&postDate=***NUMBER_DAYS***";
     protected $additionalLoadDelaySeconds = 10;
-
-
+    protected $typeLocationSearchNeeded = 'location-city-comma-state-country';
+    protected $flagSettings = [C__JOB_BASETYPE_WEBPAGE_FLAGS, C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_USE_SELENIUM, C__JOB_PREFER_MICRODATA];
 
 
     function __construct($strOutputDirectory = null)
     {
         $this->siteBaseURL = $this->childSiteURLBase;
-        $this->typeLocationSearchNeeded = 'location-city-comma-state-country';
         $this->strBaseURLFormat = $this->childSiteURLBase . $this->strBaseURLPathSection . $this->strBaseURLPathSuffix;
         parent::__construct($strOutputDirectory);
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES | C__JOB_USE_SELENIUM | C__JOB_PREFER_MICRODATA;
     }
 
     protected function _getURLfromBase_($searchDetails, $nPage = null, $nItem = null)
     {
         return parent::_getURLfromBase_($searchDetails, $nPage, $nItem);
+    }
+
+    protected function getKeywordURLValue($searchDetails) {
+        $searchDetails['keywords_string_for_url'] = strtolower($searchDetails['keywords_string_for_url']);
+        return parent::getKeywordURLValue($searchDetails);
     }
 
     function getPageURLValue($page)
@@ -333,7 +499,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassJobsSitePlugin
 
 
 
-            $nodesJobRows= $objSimpHTML->find('table[id="aiResultsBrief"] tr[class="aiResultsRow   "]');
+            $nodesJobRows= $objSimpHTML->find('tr[class="aiResultsRow"]');
             if(isset($nodesJobRows))
             {
                 foreach($nodesJobRows as $node)
