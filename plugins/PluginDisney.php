@@ -29,36 +29,31 @@ class PluginDisney extends ClassBaseSimpleJobSitePlugin
     protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
     protected $additionalFlags = [ C__JOB_USE_SELENIUM, C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE ];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
+    protected $additionalLoadDelaySeconds = 5;
 
     protected $nJobListingsPerPage = 50;
 
     protected $arrListingTagSetup = array(
-        'tag_listings_section' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => "search-results-list"), array('tag' => 'ul'),array('tag' => 'li')),
+        'tag_listings_count' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results'), 'return_attribute' => 'data-total-results'),
+        'tag_listings_section' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results-list'), array('tag' => 'ul'),array('tag' => 'li')),
         'tag_title' =>  array(array('tag' => 'a'), array('tag' => 'h2')),
         'tag_link' =>  array(array('tag' => 'a'), 'return_attribute' => 'href'),
         'tag_location' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'job-location'),
         'tag_job_posting_date' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'job-date-posted'),
+        'tag_next_button' => array('selector' => '#pagination-bottom > div.pagination-paging > a.next'),
         'regex_link_job_id' => '/.*?\/(.*?\/[^\/]]+)/i'
     );
-
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        $nTotalResults = C__TOTAL_ITEMS_UNKNOWN__;
-        $resultsSection = $objSimpHTML->find("section[id='search-results']");  // "Your Search returned 30  results"
-        if(isset($resultsSection) && isset($resultsSection[0]))
-        {
-            $nTotalResults = \Scooper\intceil($resultsSection[0]->attr['data-total-results']);
-        }
-
-        return $nTotalResults;
-    }
-
-    public function getNextPage($driver, $nextPageNum)
-    {
-        $driver->executeScript("function callNextPage() { var elem = document.querySelector(\"#pagination-bottom > div.pagination-paging > a.next\");  if (elem != null) { console.log('attempting next button click on element a.next'); elem.click(); }; } ; callNextPage();");
-        sleep(2);
-        return $driver;
-    }
-
+//
+//    function parseTotalResultsCount($objSimpHTML)
+//    {
+//        $nTotalResults = C__TOTAL_ITEMS_UNKNOWN__;
+//        $resultsSection = $objSimpHTML->find("section[id='search-results']");  // "Your Search returned 30  results"
+//        if(isset($resultsSection) && isset($resultsSection[0]))
+//        {
+//            $nTotalResults = \Scooper\intceil($resultsSection[0]->attr['data-total-results']);
+//        }
+//
+//        return $nTotalResults;
+//    }
 
 }
