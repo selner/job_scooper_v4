@@ -22,30 +22,47 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 // TODO:  Make abstract class to power sites like http://www.careerbuilder.com/jobs/greenbay,wisconsin/category/engineering/?channel=en&siteid=gagbp037&sc_cmp1=JS_Sub_Loc_EN&lr=cbga_gbp
 // just have to add the following terms per site &siteid=gagbp037&lr=cbga_gbp
 
-class PluginCareerBuilder extends ClassJobsSitePlugin
+class PluginCareerBuilder extends ClassBaseSimpleJobSitePlugin
 {
     protected $siteName = 'CareerBuilder';
-    protected $siteBaseURL = "http://www.careerbuilder.com/jobs--***KEYWORDS***-in-***LOCATION***?radius=30&siteid=cbnsv&pay=0&emp=JTFT&page_number=***PAGE_NUMBER***&posted=***NUMBER_DAYS***";
-    protected $flagSettings = null;
-    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
+    protected $siteBaseURL = 'http://www.careerbuilder.com';
+    protected $strBaseURLFormat = "http://www.careerbuilder.com/jobs-***KEYWORDS***-in-***LOCATION***?keywords=***KEYWORDS***&location=***LOCATION***&radius=50&page_number=***PAGE_NUMBER***&posted=***NUMBER_DAYS***";
+    protected $additionalFlags = [C__JOB_BASETYPE_WEBPAGE_FLAGS , C__JOB_USE_SELENIUM, C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES];
+    protected $typeLocationSearchNeeded = 'location-city-dash-statecode';
+    protected $additionalLoadDelaySeconds = 5;
+    protected $nJobListingsPerPage = 25;
 
+    protected $arrListingTagSetup = array(
+        'tag_listings_count' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => "count"), 'return_attribute' => 'plaintext', 'return_value_regex' => '/[^\d]+(\d+).*?/'),
+        'tag_listings_section' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'jobs'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'job-row')),
+        'tag_title' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row', 'index' =>1), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'column small-10'), array('tag' => 'h2'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+        'tag_link' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row', 'index' =>1), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'column small-10'), array('tag' => 'h2'), array('tag' => 'a'), 'return_attribute' => 'href'),
+        'tag_job_id' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row', 'index' =>1), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'column small-10'), array('tag' => 'h2'), array('tag' => 'a'), 'return_attribute' => 'data-job-did'),
+        'tag_company' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row job-information'), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'columns large-2 medium-3 small-12'), array('tag' => 'h4', 'attribute'=>'class', 'attribute_value'=>'job-text'),  array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+        'tag_location' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row job-information'), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'columns end large-2 medium-3 small-12'), array('tag' => 'h4', 'attribute'=>'class', 'attribute_value'=>'job-text'), 'return_attribute' => 'plaintext'),
+        'tag_job_posting_date' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'column small-2 time-posted'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'show-for-medium-up'), 'return_attribute' => 'plaintext'),
+        'tag_employment_type' =>  array('selector' => 'div.job-row div.row.job-information div.columns.medium-6.large-8 h4.job-text.employment-info', 'return_attribute' => 'plaintext'),
+        'tag_next_button' =>  array('selector' => '#next-button'),
+    );
 
-    function __construct($strDir = null)
-    {
-        parent::__construct($strDir);
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_SETTINGS_URL_VALUE_REQUIRED | C__JOB_USE_SELENIUM;
-
+    protected function getKeywordURLValue($searchDetails) {
+        $searchDetails['keywords_string_for_url'] = strtolower($searchDetails['keywords_string_for_url']);
+        return parent::getKeywordURLValue($searchDetails);
     }
 
     function getDaysURLValue($days = null) {
-        $ret = "yesterday";
+        $ret = "1";
 
         if($days != null)
         {
             switch($days)
             {
-                case ($days>7):
+                case ($days>7 && $days<=30):
                     $ret = "30";
+                    break;
+
+                case ($days>30):
+                    $ret = "";
                     break;
 
                 case ($days>3 && $days<=7):
@@ -55,7 +72,6 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
                 case ($days>=3 && $days<7):
                     $ret = "3";
                     break;
-
 
                 case $days<=1:
                 default:
@@ -67,70 +83,6 @@ class PluginCareerBuilder extends ClassJobsSitePlugin
 
         return $ret;
 
-    }
-
-
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        $this->nJobListingsPerPage = 25;
-
-        $resultsSection= $objSimpHTML->find("div[class='count']");
-        $totalItemsText = $resultsSection[0]->plaintext;
-        $arrItemItems = explode(" ", trim($totalItemsText));
-        $strTotalItemsCount = $arrItemItems[0];
-
-        $strTotalItemsCount = str_replace("(", "", $strTotalItemsCount);
-        $strTotalItemsCount = str_replace(")", "", $strTotalItemsCount);
-
-        return $strTotalItemsCount;
-   }
-
-    function parseJobsListForPage($objSimpHTML)
-    {
-        $ret = null;
-
-
-
-        $nodesJobs= $objSimpHTML->find('div[class="job-row"]');
-
-        foreach($nodesJobs as $node)
-        {
-//            if(isset($node->attr) && isset($node->attr['class']) && strcasecmp($node->attr['class'], "jl_even_row prefRow") != 0 &&
-//                strcasecmp($node->attr['class'], "jl_odd_row prefRow") != 0)
-//            {
-//                continue;
-//            }
-            $item = $this->getEmptyJobListingRecord();
-
-            $titleLink = $node->find("h2 a");
-            $item['job_title'] = $titleLink[0]->plaintext;
-            $item['job_post_url'] = $titleLink[0]->attr["href"];
-            $item['job_id'] = $titleLink[0]->attr["data-job-did"];
-            $item['job_site'] = $this->siteName;
-
-            if($item['job_title'] == '') continue;
-
-            $nodeEmploymentInfo = $node->find("div[class=row job-information]");
-
-
-            $subNode = $nodeEmploymentInfo[0]->find("div[class=columns end large-2 medium-3 small-12] h4");
-            if($subNode && count($subNode)>=1)
-                $item['location'] = trim($subNode[0]->plaintext);
-
-            $subNode = $nodeEmploymentInfo[0]->find("div[class=columns large-2 medium-3 small-12] h4");
-            if($subNode && count($subNode)>=1)
-                $item['company'] = trim($subNode[0]->plaintext);
-
-            $item['date_pulled'] = getTodayAsString();
-
-            $subNode = $node->find("div[class='show-for-medium-up'] em");
-            if(isset($subNode) && isset($subNode[0]))
-                $item['job_site_date'] = trim($subNode[0]->plaintext);
-
-            $ret[] = $this->normalizeItem($item);
-        }
-
-        return $ret;
     }
 
 }
