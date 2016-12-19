@@ -42,7 +42,7 @@ class PluginGoogle extends ClassJobsSitePlugin
     {
         $this->regex_link_job_id = '/' . REXPR_PARTIAL_MATCH_URL_DOMAIN . '/.*?jid=([^&]*)/i';
         parent::__construct($strBaseDir);
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_USE_SELENIUM ;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_USE_SELENIUM | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
     }
 
     /**
