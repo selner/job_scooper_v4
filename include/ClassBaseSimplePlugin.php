@@ -290,4 +290,21 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
         }
         throw new Exception(sprintf("Error: plugin for %s is missing tag definition for the next page button to click. Cannot complete search.", $this->siteName));
     }
+
+    protected function getNextInfiniteScrollSet($driver)
+    {
+        if(array_key_exists('tag_load_more', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_load_more']))
+        {
+            $strMatch = $this->getTagSelector($this->arrListingTagSetup['tag_load_more']);
+            if(isset($strMatch))
+            {
+                $driver->executeScript(sprintf("function callLoadMore() { var elem = document.querySelector('%s');  if (elem != null) { console.log('Attempting more button click on element %s'); elem.click(); return true; } else { return false; }; } ; callLoadMore();", $strMatch, $strMatch));
+                sleep($this->additionalLoadDelaySeconds);
+                return $driver;
+            }
+        }
+        throw new Exception(sprintf("Error: plugin for %s is missing tag definition for the infinite scroll button to click. Cannot complete search.", $this->siteName));
+
+    }
+
 }
