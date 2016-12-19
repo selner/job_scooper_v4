@@ -731,7 +731,7 @@ class ClassConfig extends ClassJobsSitePlugin
             return;
         }
 
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Updating all searches with primary location set '" . $primaryLocationSet['name'] . "...", \Scooper\C__DISPLAY_NORMAL__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Updating all searches with primary location set '" . $primaryLocationSet['name'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
 
         //
         // The first location set will be added to all searches always.
@@ -743,13 +743,15 @@ class ClassConfig extends ClassJobsSitePlugin
         {
             foreach(array_keys($GLOBALS['USERDATA']['configuration_settings']['searches']) as $searchKey)
             {
-                if(isset($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_user_specified_override']) && strlen($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_user_specified_override'])>0)
+                if(array_key_exists('location_user_specified_override', $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]) &&
+                        isset($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_user_specified_override']) && strlen($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_user_specified_override'])>0)
                 {
                     // this search already has a location from the user, so we just need to set it and nothing else
                     $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value'] = $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_user_specified_override'];
                     continue;
                 }
 
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Adding primary location set to " . $searchKey . " searches...", \Scooper\C__DISPLAY_NORMAL__);
                 $curSiteName = \Scooper\strScrub($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['site_name'], FOR_LOOKUP_VALUE_MATCHING);
 
                 if(array_key_exists($curSiteName, $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']))
@@ -760,21 +762,28 @@ class ClassConfig extends ClassJobsSitePlugin
 
 
                 $classPlug = new $GLOBALS['JOBSITE_PLUGINS'][$GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['site_name']]['class_name'](null, null);
+                if($classPlug->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
+                {
+                    // This site does not support location search keywords
+                    continue;
+                }
+
                 $locTypeNeeded = $classPlug->getLocationSettingType();
                 if(array_key_exists($locTypeNeeded, $primaryLocationSet))
                     $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value'] = $primaryLocationSet[$locTypeNeeded];
                 else
-                    throw new IndexOutOfBoundsException("Requested location type setting of '%s' is not valid.", $locTypeNeeded);
+                    throw new IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' is not valid.", $locTypeNeeded));
 
                 if(!isValueURLEncoded($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value']))
                 {
                     $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value'] = urlencode($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value']);
                 }
 
-                if($this->isBitFlagSet(C__JOB_LOCATION_REQUIRES_LOWERCASE))
+                if($classPlug->isBitFlagSet(C__JOB_LOCATION_REQUIRES_LOWERCASE))
                 {
                     $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value'] = strtolower($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value']);
                 }
+
 
                 $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['key'] = $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['key'] . "-loc-" . strtolower($primaryLocationSet['name']);
                 $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['name'] = $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['name'] . "-loc-" . strtolower($primaryLocationSet['name']);
@@ -811,7 +820,7 @@ class ClassConfig extends ClassJobsSitePlugin
             for($l = 0; $l < count($arrPossibleSearches_Start) ; $l++)
             {
 
-                if(isset($arrPossibleSearches_Start[$l]['location_user_specified_override']) && strlen($arrPossibleSearches_Start[$l]['location_user_specified_override'])>0)
+                if(array_key_exists('location_user_specified_override', $arrPossibleSearches_Start[$l]) && isset($arrPossibleSearches_Start[$l]['location_user_specified_override']) && strlen($arrPossibleSearches_Start[$l]['location_user_specified_override'])>0)
                 {
                     // this search already has a location from the user, so we shouldn't clone it with the location set
                     continue;
@@ -846,7 +855,7 @@ class ClassConfig extends ClassJobsSitePlugin
                     if(array_key_exists($locTypeNeeded, $locSet))
                         $strSearchLocation = $locSet[$locTypeNeeded];
                     else
-                        throw new IndexOutOfBoundsException("Requested location type setting of '%s' is not valid.", $locTypeNeeded);
+                        throw new IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' is not valid.", $locTypeNeeded));
 
                     $strOldSearchKey = $newSearch['key'] . "-" . strtolower($locSet['name']);
                     if(substr_count($strOldSearchKey, "-loc-") > 0) { $strOldSearchKey = explode("-loc-", $strOldSearchKey)[0]; }

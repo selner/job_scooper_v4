@@ -34,6 +34,10 @@ class ClassJobsSiteCommon
     protected $detailsMyFileOut= "";
     protected $arrSearchesToReturn = null;
     protected $siteBaseURL = null;
+    protected $regex_link_job_id = null;
+    protected $strBaseURLFormat = null;
+    protected $typeLocationSearchNeeded = null;
+    protected $flagSettings = null;
 
     function __construct($strOutputDirectory = null)
     {
@@ -42,7 +46,26 @@ class ClassJobsSiteCommon
             $this->detailsMyFileOut = \Scooper\parseFilePath($strOutputDirectory, false);
         }
 
+        if(is_array($this->flagSettings))
+        {
+            $arrSettings = $this->flagSettings;
+            $this->flagSettings = null;
+            foreach($arrSettings as $flag)
+                $this->flagSettings = $this->flagSettings | $flag;
+        }
     }
+
+
+    function isBitFlagSet($flagToCheck)
+    {
+        $ret = \Scooper\isBitFlagSet($this->flagSettings, $flagToCheck);
+        if($ret == $flagToCheck) { return true; }
+        return false;
+    }
+
+    function getLocationSettingType() { return $this->typeLocationSearchNeeded; }
+
+
 
     function getEmptySearchDetailsRecord()
     {
@@ -59,18 +82,6 @@ class ClassJobsSiteCommon
             'keyword_search_override' => null,
             'keywords_array' => null,
         );
-    }
-
-    function is_OutputInterimFiles()
-    {
-        $valInterimFiles = \Scooper\get_PharseOptionValue('output_interim_files');
-
-        if(isset($valInterimFiles) && $valInterimFiles == true)
-        {
-            return true;
-        }
-
-        return false;
     }
 
     function cloneSearchDetailsRecordExceptFor($srcDetails, $arrDontCopyTheseKeys = array())
@@ -99,9 +110,9 @@ class ClassJobsSiteCommon
             'status' => '',
             'job_site_category' => '',
             'job_site_date' =>'',
+            'employment_type' => '',
             'match_details' => '',
             'match_notes' => '',
-            'last_status_update' => '',
             'date_pulled' => '',
             'date_last_updated' => '',
             'key_jobsite_siteid' => '',
@@ -176,6 +187,18 @@ class ClassJobsSiteCommon
 
 
 
+    function is_OutputInterimFiles()
+    {
+        $valInterimFiles = \Scooper\get_PharseOptionValue('output_interim_files');
+
+        if(isset($valInterimFiles) && $valInterimFiles == true)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     function removeKeyColumnsFromJobList($arrJobList)
     {
         $arrRetList = null;
@@ -205,6 +228,21 @@ class ClassJobsSiteCommon
         }
     }
 
+    function getIDFromLink($regex_link_job_id, $url)
+    {
+        if(isset($regex_link_job_id))
+        {
+            $fMatchedID = preg_match($regex_link_job_id, $url, $idMatches);
+            if($fMatchedID && count($idMatches) >= 1)
+            {
+                return $idMatches[count($idMatches)-1];
+            }
+        }
+        return "";
+    }
+
+
+
     function normalizeItem($arrItem)
     {
         $retArrNormalized = $arrItem;
@@ -213,7 +251,34 @@ class ClassJobsSiteCommon
         $retArrNormalized['date_pulled'] = getTodayAsString();
 
         $retArrNormalized ['job_site'] = \Scooper\strScrub($retArrNormalized['job_site'], DEFAULT_SCRUB);
+        $retArrNormalized ['job_post_url'] = trim($retArrNormalized['job_post_url']); // DO NOT LOWER, BREAKS URLS
+
+        if(!is_null($retArrNormalized['job_post_url']) || strlen($retArrNormalized['job_post_url']) > 0)
+        {
+            $arrMatches = array();
+            $matchedHTTP = preg_match(REXPR_MATCH_URL_DOMAIN, $retArrNormalized['job_post_url'], $arrMatches);
+            if(!$matchedHTTP)
+                $retArrNormalized['job_post_url'] = $this->siteBaseURL . $retArrNormalized['job_post_url'];
+        }
+        else
+        {
+            $retArrNormalized['job_post_url'] = "unknown";
+        }
+
         $retArrNormalized ['job_id'] = \Scooper\strScrub($retArrNormalized['job_id'], FOR_LOOKUP_VALUE_MATCHING);
+        if(is_null($retArrNormalized['job_id']) || strlen($retArrNormalized['job_id']) == 0)
+        {
+            if(isset($this->regex_link_job_id))
+            {
+                $item['job_id'] = $this->getIDFromLink($this->regex_link_job_id, $retArrNormalized['job_post_url']);
+            }
+            else
+            {
+                $retArrNormalized['job_id'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $retArrNormalized['job_post_url']);
+            }
+        }
+
+
 
         // Removes " NEW!", etc from the job title.  ZipRecruiter tends to occasionally
         // have that appended which then fails de-duplication. (Fixes issue #45) Glassdoor has "- easy apply" as well.
@@ -222,22 +287,11 @@ class ClassJobsSiteCommon
         $retArrNormalized ['job_title'] = str_ireplace("- easy apply", "", $retArrNormalized['job_title']);
         $retArrNormalized ['job_title'] = \Scooper\strScrub($retArrNormalized['job_title'], SIMPLE_TEXT_CLEANUP);
 
-        $retArrNormalized ['job_site_category'] = \Scooper\strScrub($retArrNormalized['job_site_category'], SIMPLE_TEXT_CLEANUP);
-
-
-        $retArrNormalized ['job_site_date'] = \Scooper\strScrub($retArrNormalized['job_site_date'], REMOVE_EXTRA_WHITESPACE | LOWERCASE | HTML_DECODE );
-        $dateVal = strtotime($retArrNormalized ['job_site_date'], $now = time());
-        if(!($dateVal === false))
-        {
-            $retArrNormalized['job_site_date'] = date('Y-m-d', $dateVal);
-        }
-
-        $retArrNormalized ['job_post_url'] = trim($retArrNormalized['job_post_url']); // DO NOT LOWER, BREAKS URLS
         $retArrNormalized ['location'] = preg_replace('#(^\s*\(+|\)+\s*$)#', "", $retArrNormalized['location']); // strip leading & ending () chars
         $retArrNormalized ['location'] = \Scooper\strScrub($retArrNormalized['location'], SIMPLE_TEXT_CLEANUP);
 
-        $retArrNormalized ['company'] = \Scooper\strScrub($retArrNormalized['company'], ADVANCED_TEXT_CLEANUP );
 
+        $retArrNormalized ['company'] = \Scooper\strScrub($retArrNormalized['company'], ADVANCED_TEXT_CLEANUP );
         // Remove common company name extensions like "Corporation" or "Inc." so we have
         // a higher match likelihood
 //        $retArrNormalized ['company'] = str_replace(array(" corporation", " corp", " inc", " llc"), "", $retArrNormalized['company']);
@@ -281,29 +335,23 @@ class ClassJobsSiteCommon
 
         }
 
-        if(!is_null($retArrNormalized['job_post_url']) || strlen($retArrNormalized['job_post_url']) > 0)
-        {
-            $arrMatches = array();
-            $matchedHTTP = preg_match(REXPR_MATCH_URL_DOMAIN, $retArrNormalized['job_post_url'], $arrMatches);
-            if(!$matchedHTTP)
-                $retArrNormalized['job_post_url'] = $this->siteBaseURL . $retArrNormalized['job_post_url'];
-        }
-        else
-        {
-            $retArrNormalized['job_post_url'] = "unknown";
-        }
-
-        if(is_null($retArrNormalized['job_id']) || strlen($retArrNormalized['job_id']) == 0)
-        {
-            $retArrNormalized['job_id'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $retArrNormalized['job_post_url']);
-        }
-
-
         if(is_null($retArrNormalized['company']) || strlen($retArrNormalized['company']) <= 0 ||
                 substr_count(strtolower($retArrNormalized['company']), "company-unknown") >= 1) // substr check is to clean up records pre 6/9/14.
         {
             $retArrNormalized['company'] = "unknown";
         }
+
+
+        $retArrNormalized ['job_site_category'] = \Scooper\strScrub($retArrNormalized['job_site_category'], SIMPLE_TEXT_CLEANUP);
+
+        $retArrNormalized ['job_site_date'] = \Scooper\strScrub($retArrNormalized['job_site_date'], REMOVE_EXTRA_WHITESPACE | LOWERCASE | HTML_DECODE );
+        $dateVal = strtotime($retArrNormalized ['job_site_date'], $now = time());
+        if(!($dateVal === false))
+        {
+            $retArrNormalized['job_site_date'] = date('Y-m-d', $dateVal);
+        }
+
+
 
         if(strlen($retArrNormalized['key_company_role']) <= 0)
         {

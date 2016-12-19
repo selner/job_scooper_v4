@@ -37,13 +37,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
     protected $siteName = 'NAME-NOT-SET';
     protected $nJobListingsPerPage = 20;
-    protected $flagSettings = null;
     protected $additionalFlags = [];
     protected $secsPageTimeout = null;
 
-    protected $strBaseURLFormat = null;
-    protected $typeLocationSearchNeeded = null;
-    protected $locationValue = null;
     protected $strKeywordDelimiter = null;
     protected $strTitleOnlySearchKeywordFormat = null;
     protected $classToCheckExists = null;
@@ -52,6 +48,8 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
     function __construct($strOutputDirectory = null, $attributes = null)
     {
+        parent::__construct($strOutputDirectory);
+
         if(array_key_exists("JOBSITE_PLUGINS", $GLOBALS) && (array_key_exists(strtolower($this->siteName), $GLOBALS['JOBSITE_PLUGINS'])))
         {
         $plugin = $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->siteName)];
@@ -64,6 +62,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                 }
             }
         }
+
         if($this->additionalFlags)
         {
             foreach($this->additionalFlags as $flag)
@@ -71,16 +70,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                 $this->flagSettings = $this->flagSettings | $flag;
             }
         }
-
-        return parent::__construct($strOutputDirectory);
     }
 
 
 
 
-    function parseTotalResultsCount($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); }
-    function parseJobsListForPage($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); }
-    function getNextPage($driver, $nextPageNum) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); }
+    function parseTotalResultsCount($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); return null;}
+    function parseJobsListForPage($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); return null;}
+    function getNextPage($driver, $nextPageNum) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); return null;}
 
 
     function addSearches($arrSearches)
@@ -194,9 +191,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         }
         return $name;
     }
-    function getLocationSettingType() { return $this->typeLocationSearchNeeded; }
-    private function _setLocationValue_($locVal) { $this->locationValue = $locVal; }
-    function getLocationValue() { return $this->locationValue; }
 
 
 
@@ -211,15 +205,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     function writeMyJobsListToFile($strOutFilePath = null)
     {
         return $this->writeJobsListToFile($strOutFilePath, $this->getMyJobsList(), true, $this->siteName, "CSV");
-    }
-
-
-
-    function isBitFlagSet($flagToCheck)
-    {
-        $ret = \Scooper\isBitFlagSet($this->flagSettings, $flagToCheck);
-        if($ret == $flagToCheck) { return true; }
-        return false;
     }
 
 
@@ -564,7 +549,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             $searchDetails['key'] = \Scooper\strScrub($searchDetails['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($searchDetails['name'], FOR_LOOKUP_VALUE_MATCHING);
         }
 
-        assert($searchDetails['location_search_value'] !== VALUE_NOT_SUPPORTED && strlen($searchDetails['location_search_value']) > 0);
+        assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || ($searchDetails['location_search_value'] !== VALUE_NOT_SUPPORTED && strlen($searchDetails['location_search_value']) > 0));
 
         $this->_setKeywordStringsForSearch_($searchDetails);
         $this->_setStartingUrlForSearch_($searchDetails);
@@ -573,7 +558,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
 
 
-    private function _getJobsForSearchByType_($searchDetails, $nAttemptNumber = 0)
+    private function _getJobsForSearchByType_($searchDetails)
     {
         $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[". $searchDetails['name']) ."]", \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPTOPLEVEL__);
         $this->_logMemoryUsage_();
@@ -610,7 +595,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                 {
                     throw new ErrorException("Class ". get_class($this) . " does not have a valid setting for parser.  Cannot continue.");
                 }
+
+                $this->_setJobsToFileStoreForSearch_($searchDetails, $arrPageJobsList);
             }
+            $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->siteName . "[". $searchDetails['name']), \Scooper\C__SECTION_END__, \Scooper\C__NAPPTOPLEVEL__);
         } catch (Exception $ex) {
 
             //
@@ -637,32 +625,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
 
                 $strError = "Failed to download jobs from " . $this->siteName ." jobs for search '".$searchDetails['name']. "[URL=".$searchDetails['search_start_url'] . "].  ".$ex->getMessage();
-                //
-                // Sometimes the site just returns a timeout on the request.  if this is the first attempt,
-                // delay a bit then try it once more before failing.
-                //
-                if($nAttemptNumber < 1)
-                {
-                    $strError .= " Retrying search...";
-                    $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_WARNING__);
-                    // delay for 15 seconds
-                    sleep(15);
-
-                    // retry the request
-                    $this->_getJobsForSearchByType_($searchDetails, ($nAttemptNumber+1));
-                }
-                else
-                {
-                    $strError .= " Search failed twice.  Skipping search.";
-                    $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-                    if(isDebug()) { throw new ErrorException( $strError); }
-                }
+                $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
+                throw new Exception($strError);
             }
-        }
-        finally
-        {
-            $this->_setJobsToFileStoreForSearch_($searchDetails, $arrPageJobsList);
-            $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->siteName . "[". $searchDetails['name']), \Scooper\C__SECTION_END__, \Scooper\C__NAPPTOPLEVEL__);
         }
     }
     protected function _getMyJobsForSearchFromJobsAPI_($searchDetails)
@@ -804,15 +769,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                     $item['job_site'] = $this->siteName;
                     $item['company'] = $this->siteName;
 
-                    if(isset($this->regex_link_job_id))
-                    {
-                        $item['job_id'] = $this->getIDFromLink($this->regex_link_job_id, $item['job_post_url']);
-
-                    }
-                    else
-                    {
-                        $item['job_id'] = $item['job_site'] . "_" . preg_replace('/[\s\W]+/', '', $item['job_post_url']);
-                    }
+//                    if(isset($this->regex_link_job_id))
+//                    {
+//                        $item['job_id'] = $this->getIDFromLink($this->regex_link_job_id, $item['job_post_url']);
+//                    }
+//                    else
+//                    {
+//                        $item['job_id'] = $item['job_site'] . "_" . preg_replace('/[\s\W]+/', '', $item['job_post_url']);
+//                    }
 
 
                     $ret[] = $this->normalizeItem($item);
@@ -822,20 +786,6 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
         return $ret;
 
-    }
-
-
-    function getIDFromLink($regex_link_job_id, $url)
-    {
-        if(isset($regex_link_job_id))
-        {
-            $fMatchedID = preg_match($regex_link_job_id, $url, $idMatches);
-            if($fMatchedID && count($idMatches) >= 1)
-            {
-                return $idMatches[count($idMatches)-1];
-            }
-        }
-        return "";
     }
 
 
@@ -1044,7 +994,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
         if(!$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
         {
-            $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML);
+            $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML->root);
             $nTotalResults  = intval(str_replace(",", "", $strTotalResults));
             $nTotalListings = $nTotalResults;
             if($nTotalResults == 0)
@@ -1069,6 +1019,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
             $GLOBALS['logger']->logLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_START__);
 
+            $strURL = $searchDetails['search_start_url'];
             while ($nPageCount <= $totalPagesCount )
             {
 
@@ -1079,52 +1030,43 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                     try
                     {
                         if($driver == null)
-                            $driver = $this->_getFullHTMLForDynamicWebpage_($searchDetails['search_start_url'], $this->classToCheckExists);
-
+                        {
+                            $driver = $this->_getFullHTMLForDynamicWebpage_($strURL, $this->classToCheckExists);
+                        }
                         if($this->isBitFlagSet( C__JOB_INFSCROLL_DOWNFULLPAGE))
                         {
                             while($nPageCount <= $totalPagesCount)
                             {
                                 if(isDebug() && isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("... getting infinite results page #".$nPageCount." of " .$totalPagesCount, \Scooper\C__DISPLAY_NORMAL__); }
                                 $this->getNextInfiniteScrollSet($driver);
-                                $this->_logMemoryUsage_();
-
-                                if($nPageCount <= $totalPagesCount)
-                                    $nPageCount = $nPageCount + 1;
+                                $strURL = $driver->getCurrentURL();
+                                $nPageCount = $nPageCount + 1;
+                            }
+                            $html = $driver->getPageSource();
+                            $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+                        }
+                        else if(!$this->isBitFlagSet( C__JOB_INFSCROLL_DOWNFULLPAGE))
+                        {
+                            if($nPageCount <= $totalPagesCount && $nPageCount > 1)
+                            {
+                                $retDriver = $this->getNextPage($driver, $nPageCount);
+                                if(!is_null($retDriver))
+                                    $driver = $retDriver;
                             }
 
+                            // BUGBUG -- Checking these two HTML values to make sure they still match
+                            $strURL = $driver->getCurrentURL();
+                            $html = $driver->getPageSource();
+                            $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
                         }
-                    } catch (Exception $ex) {
-                        $strMsg = "Failed to scroll down through full set of results due to error: ".$ex->getMessage();
-
-                        $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
-                        throw new ErrorException($strMsg);
-                    }
-
-
-
-
-                    try
-                    {
-                        if($nPageCount <= $totalPagesCount && $nPageCount != 1)
-                        {
-                            $retDriver = $this->getNextPage($driver, $nPageCount + 1);
-                            if(!is_null($retDriver))
-                                $driver = $retDriver;
-                        }
-
-                        // BUGBUG -- Checking these two HTML values to make sure they still match
-                        $html = $driver->getPageSource();
-                        $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
-                    } catch (Exception $ex) {
+                } catch (Exception $ex) {
                         $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
 
                         $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
                         throw new ErrorException($strMsg);
                     }
                 }
-                $strURL = $searchDetails['search_start_url'];
-                if(!isset($objSimpleHTML))
+                else
                 {
                     $strURL = $this->_getURLfromBase_($searchDetails, $nPageCount, $nItemCount);
                     if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
@@ -1208,6 +1150,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     protected function getDaysURLValue($days = null) { $days = \Scooper\get_PharseOptionValue('number_days'); return ($days == null || $days == "") ? 1 : $days; } // default is to return the raw number
     protected function getItemURLValue($nItem) { return ($nItem == null || $nItem == "") ? 0 : $nItem; } // default is to return the raw number
     protected function getPageURLValue($nPage) { return ($nPage == null || $nPage == "") ? "" : $nPage; } // default is to return the raw number
+    protected function getKeywordURLValue($searchDetails) {
+        if(!$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
+        {
+            assert($searchDetails['keywords_string_for_url'] != VALUE_NOT_SUPPORTED);
+            return $searchDetails['keywords_string_for_url'];
+        }
+        return "";
+    }
 
     protected function getLocationURLValue($searchDetails, $locSettingSets = null)
     {
@@ -1249,8 +1199,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         {
             $strReturnLocation = urlencode($strReturnLocation);
         }
-        $this->_setLocationValue_($strReturnLocation);
-        $strReturnLocation = $this->getLocationValue();
+
         return $strReturnLocation;
     }
 
@@ -1261,11 +1210,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         if($searchDetails != null && isset($searchDetails['base_url_format']))
         {
             $strBaseURL = $searchDetails['base_url_format'];
-
         }
         elseif(isset($this->strBaseURLFormat))
         {
-            $strBaseURL = $this->strBaseURLFormat;
+            $strBaseURL = $searchDetails['base_url_format'] = $this->strBaseURLFormat;
         }
         else
         {
@@ -1282,11 +1230,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($GLOBALS['USERDATA']['configuration_settings']['number_days']), $strURL );
         $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL );
         $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
-        if(!$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
-        {
-            assert($searchDetails['keywords_string_for_url'] != VALUE_NOT_SUPPORTED);
-            $strURL = str_ireplace(BASE_URL_TAG_KEYWORDS, $searchDetails['keywords_string_for_url'], $strURL );
-        }
+        $strURL = str_ireplace(BASE_URL_TAG_KEYWORDS, $this->getKeywordURLValue($searchDetails), $strURL );
 
 
         $nSubtermMatches = substr_count($strURL, BASE_URL_TAG_LOCATION);
