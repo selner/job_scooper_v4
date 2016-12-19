@@ -43,7 +43,7 @@ class PluginTesla extends ClassSimpleFullPageJobSitePlugin
 class PluginSmashingMagazine extends ClassSimpleFullPageJobSitePlugin
 {
     protected $siteName = 'SmashingMagazine';
-    protected $childSiteURLBase = 'http://jobs.smashingmagazine.com/';
+    protected $childSiteURLBase = 'http://jobs.smashingmagazine.com';
     protected $childSiteListingPage = 'http://jobs.smashingmagazine.com/fulltime';
     protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__,  C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE_NO_LOCATION ];
 
@@ -53,6 +53,29 @@ class PluginSmashingMagazine extends ClassSimpleFullPageJobSitePlugin
         'tag_link' =>  array(array('tag' => 'a'), 'return_attribute' => 'href'),
         'tag_company' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'entry-company'),
         'regex_link_job_id' => '/j\/.*?\/([^\/]+)/i'
+    );
+
+}
+
+class PluginPersonForce extends ClassBaseSimpleJobSitePlugin
+{
+    protected $siteName = 'PersonForce';
+    protected $siteBaseURL = 'http://www.personforce.com';
+    protected $strBaseURLFormat = 'https://www.personforce.com/jobs/tags/***KEYWORDS***/in/***LOCATION***';
+    protected $additionalFlags = [C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__, C__JOB_USE_SELENIUM, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
+    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
+    protected $nJobListingsPerPage = 20;
+
+    protected $arrListingTagSetup = array(
+
+        'tag_listings_section' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'content-col-content hir left'),array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'row'),array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'row')),
+        'tag_title' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'hir-job-title'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+        'tag_link' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'hir-job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
+        'tag_company' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'hir-company-title', 'return_value_regex' => '/(.*?) \- .*/'),
+        'tag_location' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'hir-company-title', 'return_value_regex' => '/.*? \- (.*)/'),
+        'tag_next_button' => array('selector' => '#content > div > div > div > div.content-col-content.hir.left > div.pagination > ul > li.active'),
+        'tag_job_id' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'hir-job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
+//        'regex_link_job_id' => '/.*?\/(\d+)|.*?;ad=-(.{1,})$/'
     );
 
 }
