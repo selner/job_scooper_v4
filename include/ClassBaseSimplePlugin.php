@@ -76,6 +76,7 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
 
     protected $arrListingTagSetup = array(
         'tag_listings_count' => null,
+        'tag_pages_count' => null,
         'tag_listings_section' => null,
         'tag_job_id' => null,
         'tag_title' => null,
@@ -112,7 +113,16 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
             if(is_null($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
                 throw new Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['tag_listings_count']));
         }
-        else
+        else if(array_key_exists('tag_pages_count', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_pages_count']))
+        {
+            $retPageCount = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_pages_count'], $propertyName='plaintext');
+            if(is_null($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
+                throw new Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['tag_pages_count']));
+
+            $retJobCount = $retPageCount * $this->nJobListingsPerPage;
+        }
+
+    else
             throw new Exception("Error: plugin is missing either C__JOB_PAGECOUNT_NOTAPPLICABLE__ flag or an implementation of parseTotalResultsCount for that job site. Cannot complete search.");
 
         return $retJobCount;
