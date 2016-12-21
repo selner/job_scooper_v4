@@ -38,7 +38,6 @@
         "austinhyde/iniparser": "dev-master",
         "linclark/microdata-php" : "*",
         "facebook/webdriver" : "*",
-        "mgargano/simplehtmldom": "1.5",
         "PHPMailer/PHPMailer": "*",
         "tijsverkoyen/css-to-inline-styles": "1.3.0",
         "phpoffice/Phpexcel": "^1.8",
@@ -46,6 +45,7 @@
         "jobapis/jobs-common": "^2.0",
         "jobapis/jobs-govt": "^1.0",
         "jobapis/jobs-usajobs": "^0.2.0",
-        "jobapis/jobs-dice": "^1.0"
+        "jobapis/jobs-dice": "^1.0",
+        "voku/simple_html_dom": "^2.0"
    }
 }
