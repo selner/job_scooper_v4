@@ -184,8 +184,8 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
 
                 if(!is_null($propertyRegEx) && strlen($strReturn) > 0)
                 {
-                    $match = "";
-                    if(preg_match($propertyRegEx, $strReturn, $match) !== false)
+                    $match = array();
+                    if(preg_match($propertyRegEx, $strReturn, $match) !== false && count($match) > 1)
                         $strReturn = $match[1];
                     else
                     {
