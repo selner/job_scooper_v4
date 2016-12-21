@@ -102,6 +102,133 @@ class PluginRobertHalf extends ClassBaseSimpleJobSitePlugin
     );
 
 }
+//
+//class PluginGovernmentJobs extends ClassBaseSimpleJobSitePlugin
+//{
+//    protected $siteName = 'GovernmentJobs';
+//    protected $siteBaseURL = "https://www.governmentjobs.com";
+//    protected $strBaseURLFormat = 'https://www.governmentjobs.com/jobs?keyword=***KEYWORDS***&location=***LOCATION***&page=***PAGE_NUMBER***&sort=date&isDescendingSort=True&distance=50';
+//    protected $additionalFlags = [C__JOB_USE_SELENIUM, C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
+//    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
+//    protected $nJobListingsPerPage = 10;
+//    protected $additionalLoadDelaySeconds = 2;
+//
+//    protected $arrListingTagSetup = array(
+////        'tag_pages_count' => array('selector' => '#iCIMS_Paginator', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?\s+(\d+)\s*$/'),
+//        'tag_listings_section' => array(array('tag' => 'ul', 'attribute'=>'class', 'attribute_value' => 'unstyled job-listing-container'), array('tag' => 'li', 'attribute' => 'class', 'attribute_value' =>'job-item')),
+//        'tag_title' =>  array(array('tag' => 'h3'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+//        'tag_link' =>  array(array('tag' => 'h3'), array('tag' => 'a'), 'return_attribute' => 'href'),
+//        'tag_job_id' =>  array(array('tag' => 'h3'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>  '/\/jobs\/(\d+).*/i'),
+//        'tag_location' =>  array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'primaryInfo job-location'),
+//        'tag_employment_type' =>  array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'primaryInfo'),
+//        'tag_job_posting_date' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'termInfo'), array('tag' => 'span')),
+//        'tag_next_button' =>  array(array('tag' => 'li', 'attribute' => 'class', 'attribute_value' =>'PagedList-skipToNext next-page-link'), array('tag' => 'a'))
+//    );
+//
+//}
+//
+//
+
+
+
+class PluginFredHutch extends BasePluginiCIMS
+{
+    protected $siteName = 'FredHutch';
+    protected $siteBaseURL = "https://hub-fhcrc.icims.com";
+
+    // Results Columns:  "Posting date", "Job ID", "Job title", "Department", "Location", "Remote base"
+    protected $arrResultsRowTDIndex = array('tag_job_posting_date' => null, 'tag_job_id' => 0, 'tag_title' => 1, 'tag_link' => 1, 'tag_department' => null, 'tag_location' => 2 );
+}
+
+class PluginRedHat extends BasePluginiCIMS
+{
+    protected $siteName = 'RedHat';
+    protected $siteBaseURL = "https://careers-redhat.icims.com";
+
+    // Results Columns:  "Posting date", "Job ID", "Job title", "Department", "Location", "Remote base"
+    protected $arrResultsRowTDIndex = array('tag_job_posting_date' => 0, 'tag_job_id' => 1, 'tag_title' => 2, 'tag_link' => 2, 'tag_department' => 3, 'tag_location' => 4 );
+}
+
+class PluginParivedaSolutions extends BasePluginiCIMS
+{
+    protected $siteName = 'ParivedaSolutions';
+    protected $siteBaseURL = "https://careers-parivedasolutions.icims.com";
+    protected $arrResultsRowTDIndex = array('tag_job_posting_date' => null, 'tag_job_id' => 0, 'tag_title' => 1, 'tag_link' => 1, 'tag_department' => null, 'tag_location' => 2 );
+}
+
+class BasePluginiCIMS extends ClassBaseSimpleJobSitePlugin
+{
+    protected $additionalFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED];
+    protected $nJobListingsPerPage = 20;
+    protected $strInitialReferer = "https://careers-parivedasolutions.icims.com/jobs/search?pr=0";
+    protected $arrResultsRowTDIndex = null;
+
+    function __construct($strBaseDir = null)
+    {
+        $this->strBaseURLFormat = $this->siteBaseURL . "/jobs/search?pr=***PAGE_NUMBER***&in_iframe=1";
+
+        if(is_null($this->arrResultsRowTDIndex))
+            throw new InvalidArgumentException("Error in iCIMS plugin:  you must map the columns in the results table to the correct indexes for HTML tag matching. Aborting.");
+
+        foreach(array_keys($this->arrResultsRowTDIndex) as $tagKey)
+        {
+            if(array_key_exists($tagKey, $this->arrResultsRowTDIndex) === true && is_null($this->arrResultsRowTDIndex[$tagKey]) !== true &&
+                array_key_exists($tagKey, $this->arrListingTagSetup))
+            {
+                if(array_key_exists(0, $this->arrListingTagSetup[$tagKey]) && is_array($this->arrListingTagSetup[$tagKey]) === true)
+                    $this->arrListingTagSetup[$tagKey][0]['index'] = $this->arrResultsRowTDIndex[$tagKey];
+                else
+                    $this->arrListingTagSetup[$tagKey]['index'] = $this->arrResultsRowTDIndex[$tagKey];
+            }
+        }
+
+        parent::__construct($strBaseDir);
+
+    }
+
+    protected $arrListingTagSetup = array(
+        'tag_pages_count' => array('selector' => '#iCIMS_Paginator', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?\s+(\d+)\s*$/'),
+        'tag_listings_section' => array(array('tag' => 'table', 'attribute'=>'class', 'attribute_value' => 'iCIMS_JobsTable iCIMS_Table'), array('tag' => 'tr')),
+        'tag_title' =>  array(array('tag' => 'td', 'index' =>null), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+        'tag_link' =>  array(array('tag' => 'td', 'index' =>null), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' => '/(.*?)\?.*/'),
+        'tag_job_id' =>  array('tag' => 'td', 'index' =>null, 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?([\d\-]+).*?$/'),
+        'tag_location' =>  array('tag' => 'td', 'index' =>null, 'return_attribute' => 'plaintext',  'return_value_regex' => '/.*?Loc[\w]+:&nbsp;\s*([\w\s[:punct:]]+)?$/')
+//        'tag_title' =>  array(array('tag' => 'td', 'index' =>1), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+//        'tag_link' =>  array(array('tag' => 'td', 'index' =>1), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' => '/(.*?)\?.*/'),
+//        'tag_job_id' =>  array('tag' => 'td', 'index' =>1), 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+\-\d+).*?/'),
+//        'tag_location' =>  array('tag' => 'td', 'index' =>2, 'return_attribute' => 'plaintext',  'return_value_regex' => '/.*?Loc[\w]+:&nbsp;\s*([\w\s\-]+)?$/')
+    );
+    protected function getPageURLValue($nPage) { return ($nPage - 1); }
+
+}
+
+
+
+class PluginCyclon extends ClassBaseSimpleJobSitePlugin
+{
+    protected $siteName = 'Cylcon';
+    protected $siteBaseURL = "http://cylcon.com";
+    protected $strBaseURLFormat = "http://cylcon.com/jobs.php?q=***KEYWORDS***&l=***LOCATION***&sort=date&radius=50&start=***ITEM_NUMBER***";
+    protected $additionalFlags = [C__JOB_DAYS_VALUE_NOTAPPLICABLE__];
+    protected $nJobListingsPerPage = 15;
+    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
+
+
+    protected $arrListingTagSetup = array(
+        'tag_listings_count' => array('selector' => '#searchCount' , 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?of\s+(\d+).*?/'),
+        'tag_listings_section' => array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'joblists clearfix'),
+        'tag_title' =>  array('tag' => 'a', 'return_attribute' => 'plaintext'),
+        'tag_link' =>  array('tag' => 'a', 'return_attribute' => 'href'),
+        'tag_job_id' =>  array(array('tag' => 'td', 'index' =>1), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' => '/.*?RedirectWEB\.php\?q=(.+)&*.*/'),
+        'tag_job_posting_date' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'date')
+    );
+    protected function getItemURLValue($nItem) { return ($nItem == null || $nItem == "" || $nItem <= 1) ? "" : ($nItem - 1); }
+
+}
+
+
+
+
 
 
 
