@@ -290,6 +290,17 @@ class ClassJobsSiteCommon
         $retArrNormalized ['location'] = preg_replace('#(^\s*\(+|\)+\s*$)#', "", $retArrNormalized['location']); // strip leading & ending () chars
         $retArrNormalized ['location'] = \Scooper\strScrub($retArrNormalized['location'], SIMPLE_TEXT_CLEANUP);
 
+        //
+        // Restructure locations like "US-VA-Richmond" to be "Richmond, VA"
+        //
+        $arrMatches = array();
+        $matched = preg_match('/.*(\w{2})\s*\-\s*.*(\w{2})\s*\-\s*([\w]+)/', $retArrNormalized ['location'], $arrMatches);
+        if ($matched !== false && count($arrMatches) == 4)
+        {
+            $retArrNormalized['location'] = $arrMatches[3] . ", " . $arrMatches[2];
+        }
+
+
 
         $retArrNormalized ['company'] = \Scooper\strScrub($retArrNormalized['company'], ADVANCED_TEXT_CLEANUP );
         // Remove common company name extensions like "Corporation" or "Inc." so we have
