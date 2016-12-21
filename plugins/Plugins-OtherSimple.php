@@ -86,7 +86,7 @@ class PluginRobertHalf extends ClassBaseSimpleJobSitePlugin
     protected $siteName = 'RobertHalf';
     protected $siteBaseURL = "https://www.roberthalf.com";
     protected $strBaseURLFormat = 'https://www.roberthalf.com/technology/jobs/***KEYWORDS***/***LOCATION***?pageSize=1500';
-    protected $additionalFlags = [C__JOB_USE_SELENIUM, C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES ];
+    protected $additionalFlags = [C__JOB_USE_SELENIUM, C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_DAYS_VALUE_NOTAPPLICABLE__  ];
     protected $typeLocationSearchNeeded = 'location-city';
     protected $nJobListingsPerPage = 1500;
 
