@@ -751,6 +751,13 @@ class ClassConfig extends ClassJobsSitePlugin
         {
             foreach(array_keys($GLOBALS['USERDATA']['configuration_settings']['searches']) as $searchKey)
             {
+                $curSiteName = \Scooper\strScrub($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['site_name'], FOR_LOOKUP_VALUE_MATCHING);
+                if(array_key_exists($curSiteName, $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']))
+                {
+                    // this site was excluded for this location set, so continue.
+                    continue;
+                }
+
                 if(array_key_exists('location_user_specified_override', $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]) &&
                         isset($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_user_specified_override']) && strlen($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_user_specified_override'])>0)
                 {
@@ -760,13 +767,6 @@ class ClassConfig extends ClassJobsSitePlugin
                 }
 
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Adding primary location set to " . $searchKey . " searches...", \Scooper\C__DISPLAY_NORMAL__);
-                $curSiteName = \Scooper\strScrub($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['site_name'], FOR_LOOKUP_VALUE_MATCHING);
-
-                if(array_key_exists($curSiteName, $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']))
-                {
-                    // this site was excluded for this location set, so continue.
-                    continue;
-                }
 
 
                 $classPlug = new $GLOBALS['JOBSITE_PLUGINS'][$GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['site_name']]['class_name'](null, null);
