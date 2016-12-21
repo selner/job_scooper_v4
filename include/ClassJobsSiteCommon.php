@@ -253,31 +253,23 @@ class ClassJobsSiteCommon
         $retArrNormalized ['job_site'] = \Scooper\strScrub($retArrNormalized['job_site'], DEFAULT_SCRUB);
         $retArrNormalized ['job_post_url'] = trim($retArrNormalized['job_post_url']); // DO NOT LOWER, BREAKS URLS
 
-        if(!is_null($retArrNormalized['job_post_url']) || strlen($retArrNormalized['job_post_url']) > 0)
-        {
+        if (!is_null($retArrNormalized['job_post_url']) || strlen($retArrNormalized['job_post_url']) > 0) {
             $arrMatches = array();
             $matchedHTTP = preg_match(REXPR_MATCH_URL_DOMAIN, $retArrNormalized['job_post_url'], $arrMatches);
             if(!$matchedHTTP)
                 $retArrNormalized['job_post_url'] = $this->siteBaseURL . $retArrNormalized['job_post_url'];
-        }
-        else
-        {
+        } else {
             $retArrNormalized['job_post_url'] = "unknown";
         }
 
         $retArrNormalized ['job_id'] = \Scooper\strScrub($retArrNormalized['job_id'], FOR_LOOKUP_VALUE_MATCHING);
-        if(is_null($retArrNormalized['job_id']) || strlen($retArrNormalized['job_id']) == 0)
-        {
-            if(isset($this->regex_link_job_id))
-            {
+        if (is_null($retArrNormalized['job_id']) || strlen($retArrNormalized['job_id']) == 0) {
+            if (isset($this->regex_link_job_id)) {
                 $item['job_id'] = $this->getIDFromLink($this->regex_link_job_id, $retArrNormalized['job_post_url']);
-            }
-            else
-            {
+            } else {
                 $retArrNormalized['job_id'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $retArrNormalized['job_post_url']);
             }
         }
-
 
 
         // Removes " NEW!", etc from the job title.  ZipRecruiter tends to occasionally
