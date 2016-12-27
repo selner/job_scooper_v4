@@ -1078,7 +1078,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                     }
                     if(!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for ".$strURL);
 
-                    $GLOBALS['logger']->logLine("Getting page # ". ($nPageCount + 1) . " of jobs from ". $strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    $GLOBALS['logger']->logLine("Getting page # ". $nPageCount . " of jobs from ". $strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
                     try
                     {
 
