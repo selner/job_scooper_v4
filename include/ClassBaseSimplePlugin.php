@@ -46,7 +46,8 @@ abstract class ClassBaseMicroDataPlugin extends ClassBaseSimpleJobSitePlugin
 {
     protected $siteBaseURL = '';
     protected $siteName = '';
-    protected $flagSettings = [C__JOB_BASETYPE_WEBPAGE_FLAGS, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PREFER_MICRODATA];
+//    protected $flagSettings = [C__JOB_BASETYPE_WEBPAGE_FLAGS, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PREFER_MICRODATA];
+    protected $flagSettings = [C__JOB_BASETYPE_WEBPAGE_FLAGS, C__JOB_PREFER_MICRODATA];
 
 }
 
