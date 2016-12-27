@@ -266,11 +266,10 @@ class ClassJobsSiteCommon
         if (is_null($retArrNormalized['job_id']) || strlen($retArrNormalized['job_id']) == 0) {
             if (isset($this->regex_link_job_id)) {
                 $item['job_id'] = $this->getIDFromLink($this->regex_link_job_id, $retArrNormalized['job_post_url']);
-            } else {
-                $retArrNormalized['job_id'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $retArrNormalized['job_post_url']);
             }
         }
 
+        $retArrNormalized['job_id'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $retArrNormalized['job_post_url']);
 
         // Removes " NEW!", etc from the job title.  ZipRecruiter tends to occasionally
         // have that appended which then fails de-duplication. (Fixes issue #45) Glassdoor has "- easy apply" as well.
