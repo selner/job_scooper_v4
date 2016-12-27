@@ -86,6 +86,7 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
         'tag_company' => null,
         'tag_job_posting_date' => null,
         'tag_employment_type' => null,
+        'tag_next_button' => null,
         'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
     );
 
