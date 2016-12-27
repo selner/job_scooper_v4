@@ -294,9 +294,19 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
             $strMatch = $this->getTagSelector($this->arrListingTagSetup['tag_next_button']);
             if(isset($strMatch))
             {
-                $driver->executeScript(sprintf("function callNextPage() { var elem = document.querySelector(\"%s\");  if (elem != null) { console.log('attempting next button click on element a.next'); elem.click(); }; } ; callNextPage();", $strMatch));
-                sleep($this->additionalLoadDelaySeconds);
-                return $driver;
+                try {
+                    $elem = $driver->findElement(WebDriverBy::cssSelector($strMatch));
+                    if (!is_null($elem)) {
+                        $driver->executeScript(sprintf("function callNextPage() { var elem = document.querySelector('%s');  if (elem != null) { console.log('attempting next button click on element a.next'); elem.click(); return true; } else return false; } ; callNextPage();", $strMatch));
+                        sleep($this->additionalLoadDelaySeconds);
+                        return $driver;
+                    }
+                }
+                catch (Exception $ex)
+                {
+                    return null;
+                }
+                return null;
             }
         }
         throw new Exception(sprintf("Error: plugin for %s is missing tag definition for the next page button to click. Cannot complete search.", $this->siteName));
