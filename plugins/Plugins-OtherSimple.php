@@ -18,6 +18,24 @@
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
+class PluginOuterwall extends ClassBaseSimpleJobSitePlugin
+{
+    protected $siteName = 'Outerwall';
+    protected $siteBaseURL = 'http://outerwall.jobs';
+    protected $strBaseURLFormat = "http://outerwall.jobs/***LOCATION***/usa/jobs/";
+    protected $typeLocationSearchNeeded = 'location-state';
+
+    protected $arrListingTagSetup = array(
+
+        'tag_listings_count' => array('tag' => 'h3', 'attribute' => 'class', 'attribute_value' =>'direct_highlightedText', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
+        'tag_listings_section' => array(array('tag' => 'ul', 'attribute'=>'class', 'attribute_value' => 'default_jobListing'), array('tag' => 'li')),
+        'tag_title' => array(array('tag' => 'h4'), array('tag' => 'a'), array('tag' => 'span'), 'return_attribute' => 'plaintext'),
+        'tag_link' =>  array(array('tag' => 'h4'), array('tag' => 'a'), 'return_attribute' => 'href'),
+        'tag_location' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'direct_joblocation'),
+        'regex_link_job_id' => '/\/[j\/]{0,2}(.*)/i'
+    );
+
+}
 
 
 class PluginTesla extends ClassSimpleFullPageJobSitePlugin

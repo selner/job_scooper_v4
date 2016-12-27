@@ -36,7 +36,6 @@ require_once (__ROOT__.'/plugins/Plugins-JobsAPI.php');
 
 require_once (__ROOT__.'/plugins/PluginIndeed.php');
 require_once (__ROOT__.'/plugins/PluginMonster.php');
-require_once (__ROOT__.'/plugins/PluginOuterwall.php');
 require_once (__ROOT__.'/plugins/PluginFacebook.php');
 require_once (__ROOT__.'/plugins/PluginGroupon.php');
 require_once (__ROOT__.'/plugins/PluginAmazon.php');
