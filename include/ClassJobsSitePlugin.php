@@ -67,7 +67,12 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
         {
             foreach($this->additionalFlags as $flag)
             {
-                $this->flagSettings = $this->flagSettings | $flag;
+                // If the flag is already set, don't try to set it again or it will
+                // actually unset that flag incorrectly
+                if(!$this->isBitFlagSet($flag))
+                {
+                    $this->flagSettings = $this->flagSettings | $flag;
+                }
             }
         }
     }
