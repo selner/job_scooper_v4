@@ -579,6 +579,11 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             if(isset($arrPageJobsList))
             {
                 $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[".$searchDetails['name']."]" .": " . countJobRecords($arrPageJobsList). " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+                $GLOBALS['USERDATA']['search_results'][$searchDetails['key']]['search_run_result'] = array(
+                    'success' => true,
+                    'details'=> 'Using cached results for ' . countAssociativeArrayValues($arrPageJobsList) . ' matching, unfiltered jobs.'
+                );
+
             }
             else
             {
@@ -602,7 +607,14 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                 }
 
                 $this->_setJobsToFileStoreForSearch_($searchDetails, $arrPageJobsList);
+
+                $GLOBALS['USERDATA']['search_results'][$searchDetails['key']]['search_run_result'] = array(
+                    'success' => true,
+                    'details'=> 'Search found ' . countAssociativeArrayValues($arrPageJobsList) . ' matching, unfiltered jobs.'
+                );
             }
+
+
             $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->siteName . "[". $searchDetails['name']), \Scooper\C__SECTION_END__, \Scooper\C__NAPPTOPLEVEL__);
         } catch (Exception $ex) {
 
@@ -620,6 +632,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             {
                 $strError = $this->siteName . " plugin returned a 404 page for the search.  This is not an error; it means zero results found." ;
                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                $GLOBALS['USERDATA']['search_results'][$searchDetails['key']]['search_run_result'] = array(
+                    'success' => true,
+                    'details'=> 'Search found no matching, unfiltered jobs.'
+                );
             }
             else
             {
@@ -627,9 +643,13 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                 // Not the known issue case, so log the error and re-throw the exception
                 // if we should have thrown one
                 //
-
-
                 $strError = "Failed to download jobs from " . $this->siteName ." jobs for search '".$searchDetails['name']. "[URL=".$searchDetails['search_start_url'] . "].  ".$ex->getMessage();
+
+                $GLOBALS['USERDATA']['search_results'][$searchDetails['key']]['search_run_result'] = array(
+                    'success' => false,
+                    'details'=> $strError
+                );
+
                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
                 throw new Exception($strError);
             }

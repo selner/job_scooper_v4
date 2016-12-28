@@ -305,7 +305,7 @@ class StageManager extends S3JobListManager
                     }
                 }
             }
-
+            $GLOBALS['USERDATA']['search_results'] = \Scooper\array_copy($arrSearchesToRun);
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             //
             // OK, now we have our list of searches & sites we are going to actually run
@@ -345,6 +345,11 @@ class StageManager extends S3JobListManager
 
                     $this->logger->logLine(count($this->arrLatestJobs_UnfilteredByUserInput). " raw, latest job listings from " . count($arrSearchesToRun) . " search(es) downloaded to " . $strRawJobsListOutput, \Scooper\C__DISPLAY_SUMMARY__);
                 }
+
+                // Process the search results and send an error alert for any that failed unexpectedly
+                $this->_alertForAnyFailedSearches();
+
+
             } else {
                 throw new ErrorException("No searches have been set to be run.");
             }
@@ -447,5 +452,20 @@ class StageManager extends S3JobListManager
         $notifier = new ClassJobsNotifier($this->arrLatestJobs_UnfilteredByUserInput, $this->arrMarkedJobs);
         $notifier->processNotifications();
     }
+
+
+    private function _alertForAnyFailedSearches()
+    {
+        $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function($k) {
+            return ($k['search_run_result']['success'] !== true);
+        });
+        $jsonFailedSearches = json_encode($arrFailedSearches, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+
+        $strErrorText = "The following site plugins returned an error or had zero listings found unexpectedly:  " . PHP_EOL . $jsonFailedSearches . PHP_EOL . PHP_EOL . "App version = " . __APP_VERSION__;
+        $notifier = new ClassJobsNotifier(null, null);
+        $notifier->sendErrorEmail($strErrorText, null);
+    }
+
+
 
 } 
