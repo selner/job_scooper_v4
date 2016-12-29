@@ -16,7 +16,6 @@
  */
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/Options.php');
-require_once(__ROOT__.'/lib/array_column.php');
 require_once(__ROOT__ . '/include/Helpers.php');
 
 define('TITLE_NEG_KWD_MATCH', 'No (Title Excluded Via Negative Keyword)');
