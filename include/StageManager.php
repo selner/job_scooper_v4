@@ -305,7 +305,7 @@ class StageManager extends S3JobListManager
                     }
                 }
             }
-            $GLOBALS['USERDATA']['search_results'] = \Scooper\array_copy($arrSearchesToRun);
+
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             //
             // OK, now we have our list of searches & sites we are going to actually run
@@ -459,11 +459,22 @@ class StageManager extends S3JobListManager
         $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function($k) {
             return ($k['search_run_result']['success'] !== true);
         });
-        $jsonFailedSearches = json_encode($arrFailedSearches, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
 
-        $strErrorText = "The following site plugins returned an error or had zero listings found unexpectedly:  " . PHP_EOL . $jsonFailedSearches . PHP_EOL . PHP_EOL . "App version = " . __APP_VERSION__;
-        $notifier = new ClassJobsNotifier(null, null);
-        $notifier->sendErrorEmail($strErrorText, null);
+        if(countAssociativeArrayValues($arrFailedSearches) > 0)
+        {
+            $jsonFailedSearches = json_encode($arrFailedSearches, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+
+            $strErrorText = "The following site plugins returned an error or had zero listings found unexpectedly:  " . PHP_EOL . $jsonFailedSearches . PHP_EOL . PHP_EOL . "App version = " . __APP_VERSION__;
+            $this->logger->logLine("Errors detected for the run searches.  attempting to send error notification email:  " . PHP_EOL . $strErrorText, \Scooper\C__DISPLAY_NORMAL__);
+            $notifier = new ClassJobsNotifier(null, null);
+            $notifier->sendErrorEmail($strErrorText, null);
+        }
+        else
+        {
+            $this->logger->logLine("No error notification necessary:  no errors detected for the run searches.", \Scooper\C__DISPLAY_NORMAL__);
+        }
+
+
     }
 
 
