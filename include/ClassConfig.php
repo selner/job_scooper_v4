@@ -206,7 +206,7 @@ class ClassConfig extends ClassJobsSitePlugin
         }
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($GLOBALS['USERDATA']['configuration_settings']['number_days'] . " days configured for run. ", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-        $this->_setPreviouslyReviewedJobsInputFiles_();
+//        $this->_setPreviouslyReviewedJobsInputFiles__setPreviouslyReviewedJobsInputFiles_();
 
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Completed configuration load.", \Scooper\C__DISPLAY_SUMMARY__);
 
@@ -974,21 +974,20 @@ class ClassConfig extends ClassJobsSitePlugin
     }
 
 
-    private function _setPreviouslyReviewedJobsInputFiles_()
-    {
-        $arrFileInput = $this->getInputFilesByType("previously_reviewed_file");
-        if(is_array($arrFileInput) && $arrFileInput != null)
-        {
-            foreach($arrFileInput as $file)
-            {
-                $details = \Scooper\getFilePathDetailsFromString($file, \Scooper\C__FILEPATH_FILE_MUST_EXIST);
-                if($details)
-                {
-                    $GLOBALS['userdata']['previous_files_details'][$details['file_name_base']] = \Scooper\array_copy($details);
-                }
-            }
-        }
-    }
+//    private function _setPreviouslyReviewedJobsInputFiles_()
+//    {
+//        $arrFileInput = $this->getInputFilesByType("previously_reviewed_file");
+//        if(is_array($arrFileInput) && $arrFileInput != null)
+//        {
+//            foreach($arrFileInput as $fileDetails)
+//            {
+//                if($fileDetails)
+//                {
+//                    $GLOBALS['userdata']['previous_files_details'][$fileDetails['file_name_base']] = \Scooper\array_copy($fileDetails);
+//                }
+//            }
+//        }
+//    }
 
 
     private function _scrubRegexSearchString($pattern)
