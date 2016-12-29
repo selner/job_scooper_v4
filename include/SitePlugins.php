@@ -33,6 +33,7 @@ require_once (__ROOT__.'/plugins/Plugins-AdicioCareerCast.php');
 require_once (__ROOT__.'/plugins/Plugins-Resumator.php');
 require_once (__ROOT__.'/plugins/Plugins-Microdata.php');
 require_once (__ROOT__.'/plugins/Plugins-JobsAPI.php');
+require_once(__ROOT__ . '/plugins/Plugins-TalentBrew.php');
 
 require_once (__ROOT__.'/plugins/PluginIndeed.php');
 require_once (__ROOT__.'/plugins/PluginMonster.php');
@@ -44,7 +45,6 @@ require_once (__ROOT__.'/plugins/PluginSimplyHired.php');
 require_once (__ROOT__ . '/plugins/PluginExpedia.php');
 require_once (__ROOT__.'/plugins/PluginLinkUp.php');
 require_once (__ROOT__.'/plugins/PluginCareerBuilder.php');
-require_once (__ROOT__.'/plugins/PluginDisney.php');
 require_once (__ROOT__.'/plugins/PluginGoogle.php');
 require_once (__ROOT__.'/plugins/PluginGeekwire.php');
 require_once (__ROOT__.'/plugins/PluginDotJobs.php');

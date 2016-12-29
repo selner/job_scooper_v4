@@ -21,17 +21,46 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 
 
 
-class PluginDisney extends ClassBaseSimpleJobSitePlugin
+class PluginBoeing extends BasePluginTalentBrew
+{
+    protected $siteName = 'Boeing';
+    protected $siteBaseURL = 'https://jobs.boeing.com';
+
+}
+
+class PluginDisney extends BasePluginTalentBrew
 {
     protected $siteName = 'Disney';
-    protected $siteBaseURL = 'https://jobs.disneycareers.com/';
-    protected $strBaseURLFormat = "https://jobs.disneycareers.com/search-jobs/***KEYWORDS***/***LOCATION***?orgIds=391-5733-5732&kt=1";
-    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
-    protected $additionalFlags = [ C__JOB_USE_SELENIUM, C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE ];
+    protected $siteBaseURL = 'https://jobs.disneycareers.com';
+//    protected $additionalFlags = [ C__JOB_INFSCROLL_DOWNFULLPAGE ];
+
+    function __construct($strBaseDir = null)
+    {
+
+        parent::__construct($strBaseDir);
+        $this->strBaseURLFormat = $this->strBaseURLFormat  . "?orgIds=391-5733-5732&kt=1";
+//        $this->arrListingTagSetup['tag_load_more'] = array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'pagination-show-all');
+    }
+
+}
+
+class BasePluginTalentBrew extends ClassBaseSimpleJobSitePlugin
+{
+    protected $strBaseURLFormat = "https://jobs.disneycareers.com/search-jobs/***KEYWORDS***/***LOCATION***";
+    protected $flagSettings = [ C__JOB_BASETYPE_WEBPAGE_FLAGS,  C__JOB_USE_SELENIUM, C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE ];
+    protected $additionalFlags = [ ];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $additionalLoadDelaySeconds = 5;
 
     protected $nJobListingsPerPage = 50;
+
+    function __construct($strBaseDir = null)
+    {
+        $this->strBaseURLFormat = $this->siteBaseURL . "/search-jobs/***KEYWORDS***/***LOCATION***?orgIds=391-5733-5732&kt=1";
+
+        parent::__construct($strBaseDir);
+
+    }
 
     protected $arrListingTagSetup = array(
         'tag_listings_count' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results'), 'return_attribute' => 'data-total-results'),
@@ -43,17 +72,5 @@ class PluginDisney extends ClassBaseSimpleJobSitePlugin
         'tag_next_button' => array('selector' => '#pagination-bottom > div.pagination-paging > a.next'),
         'regex_link_job_id' => '/.*?\/(.*?\/[^\/]]+)/i'
     );
-//
-//    function parseTotalResultsCount($objSimpHTML)
-//    {
-//        $nTotalResults = C__TOTAL_ITEMS_UNKNOWN__;
-//        $resultsSection = $objSimpHTML->find("section[id='search-results']");  // "Your Search returned 30  results"
-//        if(isset($resultsSection) && isset($resultsSection[0]))
-//        {
-//            $nTotalResults = \Scooper\intceil($resultsSection[0]->attr['data-total-results']);
-//        }
-//
-//        return $nTotalResults;
-//    }
 
 }
