@@ -82,8 +82,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
     function parseTotalResultsCount($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); return null;}
     function parseJobsListForPage($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); return null;}
-    function getNextPage($driver, $nextPageNum) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); return null;}
-
+//    function getNextPage($driver, $nextPageNum) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); return null;}
 
     function addSearches($arrSearches)
     {
@@ -1008,9 +1007,15 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             }
             if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$searchDetails['search_start_url']); }
 
-            $totalPagesCount = 1;
+            $totalPagesCount = C__TOTAL_ITEMS_UNKNOWN__;
             $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
-            if(!$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
+            if($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__) && $this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__))
+            {
+                // if we can't get a number of pages AND we can't get a number of items,
+                // we must assume there is only one page of results in total.
+                $totalPagesCount = 1;
+
+            } elseif(!$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
             {
                 $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML->root);
                 $nTotalResults  = intval(str_replace(",", "", $strTotalResults));
@@ -1065,11 +1070,17 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                             }
                             else if(!$this->isBitFlagSet( C__JOB_INFSCROLL_DOWNFULLPAGE))
                             {
-                                if($nPageCount <= $totalPagesCount && $nPageCount > 1)
+                                if(method_exists($this, 'getNextPage') && $nPageCount > 1)
                                 {
+                                    //
+                                    // if we got a driver instance back, then we got a new page
+                                    // otherwise we're out of results so end the loop here.
+                                    //
                                     $retDriver = $this->getNextPage($driver, $nPageCount);
                                     if(!is_null($retDriver))
                                         $driver = $retDriver;
+                                    else
+                                        break;
                                 }
 
                                 // BUGBUG -- Checking these two HTML values to make sure they still match
@@ -1102,10 +1113,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                         {
                             $arrPageJobsList = $this->getJobsFromMicroData($objSimpleHTML);
                         }
-                        if(!$arrPageJobsList)
+                        else
                         {
                             $arrPageJobsList = $this->_parseJobsListForPageBase_($objSimpleHTML);
-                            if(!is_array($arrPageJobsList))
+                            if(!is_array($arrPageJobsList) )
                             {
                                 // we likely hit a page where jobs started to be hidden.
                                 // Go ahead and bail on the loop here
