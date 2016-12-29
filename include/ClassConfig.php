@@ -161,7 +161,7 @@ class ClassConfig extends ClassJobsSitePlugin
         }
 
         // Now setup all the output folders
-        $this->__setupOutputFolders__($userOutfileDetails['directory'], $GLOBALS['USERDATA']['user_unique_key']);
+        $this->__setupOutputFolders__($userOutfileDetails['directory']);
 
         if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['stage1'] );
 
