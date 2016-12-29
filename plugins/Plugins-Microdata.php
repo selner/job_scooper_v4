@@ -25,7 +25,7 @@ class PluginMediaBistro extends ClassBaseMicroDataPlugin
     protected $siteName = 'MediaBistro';
     protected $childSiteURLBase = 'https://www.mediabistro.com';
     protected $childSiteListingPage = 'https://www.mediabistro.com/jobs/openings/';
-
+    protected $addtionalFlags = [C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED];
 }
 
 
