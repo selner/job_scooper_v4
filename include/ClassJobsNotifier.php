@@ -367,14 +367,59 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         return $dataRet;
     }
 
+    function _getEmailAddressesByEmailType_($emailKind=null)
+    {
 
+        $settings = $GLOBALS['USERDATA']['configuration_settings']['email'];
+
+        if(is_null($emailKind) || empty($emailKind))
+            $emailKind = 'results';
+
+        $retEmails = array (
+            'to' => array(),
+            'from' => array(),
+            'bcc' => array()
+        );
+
+        foreach($settings['email_addresses'] as $emailaddy)
+        {
+            if((!array_key_exists('emailkind', $emailaddy) && $emailKind == "results") || strcasecmp($emailaddy['emailkind'], $emailKind) == 0)
+            {
+                if(!array_key_exists('name', $emailaddy))
+                    $emailaddy['name'] = $emailaddy['address'];
+
+                $retEmails[$emailaddy['type']][] = $emailaddy;
+            }
+        }
+
+        if(!isset($retEmails["to"]) || count($retEmails["to"]) < 1 || strlen(current($retEmails["to"])['address']) <= 0)
+        {
+            $msg = "Could not find 'to:' email address in configuration file. Notification will not be sent.";
+            $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
+            throw new InvalidArgumentException($msg);
+        }
+
+        if(count($retEmails['from']) > 1)
+        {
+            $GLOBALS['logger']->logLine("Multiple 'from:' email addresses found. Notification will be from first one only (" . $retEmails['from']['address'][0] . ").", \Scooper\C__DISPLAY_WARNING__);
+        }
+        elseif(count($retEmails['from']) != 1)
+        {
+            $msg = "Could not find 'from:' email address in configuration file. Notification will not be sent.";
+            $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
+            throw new InvalidArgumentException($msg);
+        }
+        $retEmails['from'] = $retEmails['from'][0];
+
+        return $retEmails;
+
+    }
 
 
     function sendJobCompletedEmail($strBodyText = null, $strBodyHTML = null, $detailsHTMLBodyInclude = null, $arrDetailsAttachFiles = array())
     {
-        if(!isset($GLOBALS['OPTS']['send_notifications']) || $GLOBALS['OPTS']['send_notifications'] != 1)
-        {
-            $GLOBALS['logger']->logLine(PHP_EOL."User set -send_notifications = false so skipping email notification.)".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+        if (!isset($GLOBALS['OPTS']['send_notifications']) || $GLOBALS['OPTS']['send_notifications'] != 1) {
+            $GLOBALS['logger']->logLine(PHP_EOL . "User set -send_notifications = false so skipping email notification.)" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
             return null;
         }
 
@@ -384,53 +429,33 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         //
         // Setup the plaintext content
         //
-        if($strBodyText != null && strlen($strBodyText) > 0)
-        {
+        if ($strBodyText != null && strlen($strBodyText) > 0) {
 
             //
             // Setup the plaintext message text value
             //
             $messageText = $strBodyText;
-            $messageText .= PHP_EOL ;
+            $messageText .= PHP_EOL;
 
             //
             // Setup the value for the html version of the message
             //
-            $messageHtml  .= $strBodyHTML . "<br>" .PHP_EOL.  "<br>" .PHP_EOL;
-            $messageHtml  .= '<H2>New Job Matches</H2>'.PHP_EOL. PHP_EOL;
+            $messageHtml .= $strBodyHTML . "<br>" . PHP_EOL . "<br>" . PHP_EOL;
+            $messageHtml .= '<H2>New Job Matches</H2>' . PHP_EOL . PHP_EOL;
             $content = $this->_getFullFileContents_($detailsHTMLBodyInclude);
-            $messageHtml  .= $content . PHP_EOL. PHP_EOL. "</body></html>";
+            $messageHtml .= $content . PHP_EOL . PHP_EOL . "</body></html>";
 
             $this->_wrapCSSStyleOnHTML_($messageHtml);
         }
 
+        $subject = "New Job Postings: " . $this->_getRunDateRange_();
 
-        //
-        // Add initial email address header values
-        //
+        return $this->sendEmail($messageText, $messageHtml, $arrDetailsAttachFiles, $subject, "results");
+    }
+
+    function sendEmail($strBodyText = null, $strBodyHTML = null, $arrDetailsAttachFiles = array(), $subject="No subject", $emailKind='results')
+    {
         $settings = $GLOBALS['USERDATA']['configuration_settings']['email'];
-
-        if(!isset($settings['email_addresses']["to"]) || count($settings['email_addresses']["to"]) < 1 || strlen(current($settings['email_addresses']["to"])['address']) <= 0)
-        {
-            $GLOBALS['logger']->logLine("Could not find 'to:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
-            return false;
-        }
-        if(array_key_exists("bcc", $settings['email_addresses']))
-            $bccEmails =$settings['email_addresses']["bcc"];
-        if(array_key_exists("from", $settings['email_addresses']))
-            $fromEmails =$settings['email_addresses']["from"];
-
-        if(isset($fromEmails) && count($fromEmails) >= 1)
-        {
-            reset($fromEmails);
-            $strFromAddys = current($fromEmails)['address'];
-            if(count($fromEmails) > 1) $GLOBALS['logger']->logLine("Multiple 'from:' email addresses found. Notification will be from first one only (" . $strFromAddys . ").", \Scooper\C__DISPLAY_MOMENTARY_INTERUPPT__);
-        }
-        else
-        {
-            $GLOBALS['logger']->logLine("Could not find 'from:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
-            return false;
-        }
 
 
         $mail = new PHPMailer();
@@ -452,30 +477,26 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             $mail->isSendmail();
         }
 
-        $strToAddys = "<none>";
-        if(isset($settings['email_addresses']["to"]) && count($settings['email_addresses']["to"]) > 0)
-        {
-            $strToAddys = "";
-            foreach($settings['email_addresses']["to"] as $to)
-            {
-                $mail->addAddress($to['address'], $to['name']);
-                $strToAddys .= (strlen($strToAddys) <= 0 ? "" : ", ") . $to['address'];
-            }
-        }
 
-        $mail->addBCC("dev@bryanselner.com", 'Jobs for ' . $strToAddys);
-        $strBCCAddys = "dev@bryanselner.com";
-        if(isset($bccEmails) && count($bccEmails) > 0)
+        //
+        // Add initial email address header values
+        //
+        $emailAddrs = $this->_getEmailAddressesByEmailType_($emailKind);
+        $strToAddys = "";
+        $strBCCAddys = "";
+        foreach($emailAddrs["to"] as $to)
         {
-            foreach($bccEmails as $bcc)
-            {
-                $mail->addBCC($bcc['address'], $bcc['name']);
-                $strBCCAddys .= ", " . $bcc['address'];
-            }
+            $mail->addAddress($to['address'], $to['name']);
+            $strToAddys .= (strlen($strToAddys) <= 0 ? "" : ", ") . $to['address'];
         }
+        foreach($emailAddrs['bcc'] as $bcc)
+        {
+            $mail->addBCC($bcc['address'], $bcc['name']);
+            $strBCCAddys .= ", " . $bcc['address'];
+        }
+        $mail->setFrom($emailAddrs['from']['address'], $emailAddrs['from']['name']);
 
         $mail->addReplyTo("dev@bryanselner.com", "dev@bryanselner.com" );
-        $mail->setFrom(current($fromEmails)['address'], current($fromEmails)['name']);
         $mail->SMTPOptions = array(
             'ssl' => array(
                 'verify_peer' => false,
@@ -492,19 +513,22 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
         $mail->isHTML(true);                                            // Set email format to HTML
 
-        $mail->Subject = "New Job Postings: " . $this->_getRunDateRange_();
 
-        $mail->Body    = $messageHtml;
-        $mail->AltBody = $messageText;
+        $mail->Body    = $strBodyHTML;
+        $mail->AltBody = $strBodyText;
+        $mail->Subject = $subject;
 
         $ret = $mail->send();
         if($ret != true)
         {
-            $GLOBALS['logger']->logLine("Failed to send notification email with error = ".$mail->ErrorInfo, \Scooper\C__DISPLAY_ERROR__);
+            $msg = "Failed to send notification email with error = ".$mail->ErrorInfo;
+            $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
+            throw new Exception($msg);
+
         }
         else
         {
-            $GLOBALS['logger']->logLine("Email notification sent to '" . $strToAddys . "' from '" . $strFromAddys . "' with BCCs to '" . $strBCCAddys ."'", \Scooper\C__DISPLAY_ITEM_RESULT__);
+            $GLOBALS['logger']->logLine("Email notification sent to '" . $strToAddys . "' from '" . $emailAddrs['from']['address'] . "' with BCCs to '" . $strBCCAddys ."'", \Scooper\C__DISPLAY_ITEM_RESULT__);
         }
         return $ret;
 
@@ -527,110 +551,13 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             $messageText .= PHP_EOL ;
 
         }
+        $messageHtml = "<html><body><pre>". $messageText . "</pre></body>";
+
+        $subject = "JobsScooper Error(s) Notification [for Run Dated " . $this->_getRunDateRange_() . "]";
+
+        return $this->sendEmail($messageText, $messageHtml, $arrDetailsAttachFiles, $subject, "error");
 
 
-
-
-        //
-        // Add initial email address header values
-        //
-        $settings = $GLOBALS['USERDATA']['configuration_settings']['email'];
-
-        if(array_key_exists("from", $settings['email_addresses']))
-            $fromEmails =$settings['email_addresses']["from"];
-
-        if(isset($fromEmails) && count($fromEmails) >= 1)
-        {
-            reset($fromEmails);
-            $strFromAddys = current($fromEmails)['address'];
-            if(count($fromEmails) > 1) $GLOBALS['logger']->logLine("Multiple 'from:' email addresses found. Notification will be from first one only (" . $strFromAddys . ").", \Scooper\C__DISPLAY_MOMENTARY_INTERUPPT__);
-        }
-        else
-        {
-            $GLOBALS['logger']->logLine("Could not find 'from:' email address in configuration file. Notification will not be sent.", \Scooper\C__DISPLAY_ERROR__);
-            throw new InvalidArgumentException("Error:  Unable to send error notifications.  The email from address value is missing in settings.");
-        }
-
-
-        $mail = new PHPMailer();
-
-        $smtpSettings = $settings['PHPMailer_SMTPSetup'];
-
-        if($smtpSettings != null && is_array($smtpSettings))
-        {
-            $mail->isSMTP();
-            $properties = array_keys($smtpSettings);
-            foreach($properties as $property)
-            {
-                $mail->$property = $smtpSettings[$property];
-            }
-
-        }
-        else
-        {
-            $mail->isSendmail();
-        }
-
-        $strToAddys = $strFromAddys;
-        if(isset($settings['email_addresses']["to"]) && count($settings['email_addresses']["to"]) > 0)
-        {
-            $strToAddys = "";
-            foreach($settings['email_addresses']["to"] as $to)
-            {
-                $mail->addAddress($to['address'], $to['name']);
-                $strToAddys .= (strlen($strToAddys) <= 0 ? "" : ", ") . $to['address'];
-            }
-        }
-
-        $mail->addBCC("dev@bryanselner.com", __APP_VERSION__ . "Error Notification");
-        $strBCCAddys = "dev@bryanselner.com";
-        if(isset($bccEmails) && count($bccEmails) > 0)
-        {
-            foreach($bccEmails as $bcc)
-            {
-                $mail->addBCC($bcc['address'], $bcc['name']);
-                $strBCCAddys .= ", " . $bcc['address'];
-            }
-        }
-
-        $mail->addReplyTo("dev@bryanselner.com", "dev@bryanselner.com" );
-        $mail->setFrom(current($fromEmails)['address'], current($fromEmails)['name']);
-        $mail->SMTPOptions = array(
-            'ssl' => array(
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-                'allow_self_signed' => true
-            )
-        );
-
-
-        $mail->WordWrap = 120;                                          // Set word wrap to 120 characters
-        if(is_array($arrDetailsAttachFiles))     // Add attachments
-        {
-            foreach($arrDetailsAttachFiles as $detailsAttach)
-                if(isset($detailsAttach) && isset($detailsAttach['full_file_path']))
-                    $mail->addAttachment($detailsAttach['full_file_path']);
-        }
-
-        $mail->isHTML(true);                                            // Set email format to HTML
-
-        $mail->Subject = "JobsScooper Error(s)Notification for Run Dated" . $this->_getRunDateRange_();
-
-        $mail->Body    = "<html><body><pre>". $messageText . "</pre></body>";
-        $mail->AltBody = $messageText;
-
-        $ret = $mail->send();
-        if($ret != true)
-        {
-            $msg = "Failed to send notification email with error = ".$mail->ErrorInfo;
-            $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
-            throw new Exception($msg);
-        }
-        else
-        {
-            $GLOBALS['logger']->logLine("Email notification sent to '" . $strToAddys . "' from '" . $strFromAddys . "' with BCCs to '" . $strBCCAddys ."'", \Scooper\C__DISPLAY_ITEM_RESULT__);
-        }
-        return $ret;
 
     }
 

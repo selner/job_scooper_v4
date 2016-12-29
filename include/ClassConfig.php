@@ -360,7 +360,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
     private function __getEmptyEmailRecord__()
     {
-        return array('type'=> null, 'name'=>null, 'address' => null);
+        return array('emailkind'=> null, 'type'=> null, 'name'=>null, 'address' => null);
     }
 
     private function __addInputFile__($iniInputFileItem)
@@ -900,8 +900,10 @@ class ClassConfig extends ClassJobsSitePlugin
             foreach($config['emails'] as $emailItem)
             {
                 $tempEmail = $this->__getEmptyEmailRecord__();
+                if (isset($emailItem['emailkind'])) {
+                    $tempEmail['emailkind'] = $emailItem['emailkind'];
+                }
                 if (isset($emailItem['name'])) {
-
                     $tempEmail['name'] = $emailItem['name'];
                 }
                 if (isset($emailItem['address'])) {
@@ -911,7 +913,7 @@ class ClassConfig extends ClassJobsSitePlugin
                     $tempEmail['type'] = $emailItem['type'];
                 }
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added email from config.ini: '" . getArrayValuesAsString($tempEmail), \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                $settingsEmail['email_addresses'][$tempEmail['type']][] = $tempEmail;
+                $settingsEmail['email_addresses'][] = $tempEmail;
             }
         }
 
