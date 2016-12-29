@@ -32,7 +32,7 @@ class PluginGroupon extends ClassJobsSitePlugin
 
     function __construct($strBaseDir = null)
     {
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS  | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_USE_SELENIUM | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
+        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS  | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_USE_SELENIUM | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
         parent::__construct($strBaseDir);
     }
 
