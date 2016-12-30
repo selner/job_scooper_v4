@@ -114,7 +114,7 @@ function __initializeArgs__()
         ),
         'stages' => array(
             'description'   => 'Comma-separated list of stage numbers to execute.  All stages are run if not present.',
-            'default'       => "",
+            'default'       => "1,2,3,4",
             'type'          => Pharse::PHARSE_STRING,
             'required'      => false
         ),
