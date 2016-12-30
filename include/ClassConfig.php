@@ -175,8 +175,6 @@ class ClassConfig extends ClassJobsSitePlugin
                 }
             }
 
-            if(isDebug() && isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded all configuration settings:  " . var_export($this->allConfigFileSettings, true), \Scooper\C__DISPLAY_SUMMARY__);
-
             $this->_setupRunFromConfig_($this->allConfigFileSettings);
 
         }
@@ -271,30 +269,33 @@ class ClassConfig extends ClassJobsSitePlugin
                 $this->__addInputFile__($iniInputFile);
             }
         }
-
-        $this->_parseEmailSetupFromINI_($config);
-
         //
         // Load the global search data that will be used to create
         // and configure all searches
         //
-        $this->_readGlobalSearchParamtersFromConfig_($config);
-        $this->_readSeleniumParamtersFromConfig_($config);
+        $this->_parseGlobalSearchParamtersFromConfig_($config);
+
+        if(isDebug() && isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded all configuration settings:  " . var_export($this->allConfigFileSettings, true), \Scooper\C__DISPLAY_SUMMARY__);
+
+
+        $this->_parseEmailSetupFromINI_($config);
+
+        $this->_parseSeleniumParamtersFromConfig_($config);
 
         //
         // Load Plugin Specific settings from the config
         //
-        $this->_readPluginSettingsFromConfig_($config);
+        $this->_parsePluginSettingsFromConfig_($config);
 
 
-        $this->_readKeywordSetsFromConfig_($config);
+        $this->_parseKeywordSetsFromConfig_($config);
 
-        $this->_readLocationSetsFromConfig_($config);
+        $this->_parseLocationSetsFromConfig_($config);
 
         //
         // Load any specific searches specified by the user in the config
         //
-        $this->__readSearchesFromConfig__($config);
+        $this->_parseSearchesFromConfig__($config);
 
         // Update the searches with the keyword values
         if(isset($GLOBALS['USERDATA']['configuration_settings']['keyword_sets']) && is_array($GLOBALS['USERDATA']['configuration_settings']['keyword_sets']) && count($GLOBALS['USERDATA']['configuration_settings']['keyword_sets']) >= 1)
@@ -390,7 +391,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
 
 
-    private function __readSearchesFromConfig__($config)
+    private function _parseSearchesFromConfig__($config)
     {
         if(!$config) throw new ErrorException("Invalid configuration.  Cannot load user's searches.");
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading searches from config file...", \Scooper\C__DISPLAY_ITEM_START__);
@@ -452,7 +453,7 @@ class ClassConfig extends ClassJobsSitePlugin
     }
 
 
-    private function _readPluginSettingsFromConfig_($config)
+    private function _parsePluginSettingsFromConfig_($config)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading plugin setup information from config file...", \Scooper\C__DISPLAY_ITEM_START__);
 
@@ -469,7 +470,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
     }
 
-    private function _readGlobalSearchParamtersFromConfig_($config)
+    private function _parseGlobalSearchParamtersFromConfig_($config)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading global search settings from config file...", \Scooper\C__DISPLAY_ITEM_START__);
 
@@ -499,7 +500,7 @@ class ClassConfig extends ClassJobsSitePlugin
             }
         }
     }
-    private function _readSeleniumParamtersFromConfig_($config)
+    private function _parseSeleniumParamtersFromConfig_($config)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading Selenium settings from config file...", \Scooper\C__DISPLAY_ITEM_START__);
         if(isset($config['selenium']) && is_array($config['selenium']))
@@ -520,7 +521,7 @@ class ClassConfig extends ClassJobsSitePlugin
 
     }
 
-    private function _readLocationSetsFromConfig_($config)
+    private function _parseLocationSetsFromConfig_($config)
     {
         if (!$config) throw new ErrorException("Invalid configuration.  Cannot load user's searches.");
 
@@ -592,7 +593,7 @@ class ClassConfig extends ClassJobsSitePlugin
     }
 
 
-    private function _readKeywordSetsFromConfig_($config)
+    private function _parseKeywordSetsFromConfig_($config)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading keyword set from config file...", \Scooper\C__DISPLAY_ITEM_START__);
         if(!array_key_exists('keyword_sets', $GLOBALS['USERDATA']['configuration_settings']))
