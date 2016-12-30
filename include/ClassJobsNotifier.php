@@ -507,9 +507,12 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
 
         $mail->WordWrap = 120;                                          // Set word wrap to 120 characters
-        foreach($arrDetailsAttachFiles as $detailsAttach)
-            if(isset($detailsAttach) && isset($detailsAttach['full_file_path']))
-                $mail->addAttachment($detailsAttach['full_file_path']);        // Add attachments
+        if(!is_null($arrDetailsAttachFiles) && is_array($arrDetailsAttachFiles))
+        {
+            foreach($arrDetailsAttachFiles as $detailsAttach)
+                if(isset($detailsAttach) && isset($detailsAttach['full_file_path']))
+                    $mail->addAttachment($detailsAttach['full_file_path']);
+        }        // Add attachments
 
         $mail->isHTML(true);                                            // Set email format to HTML
 
