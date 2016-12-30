@@ -20,9 +20,8 @@ define('__ROOT__', dirname(dirname(__FILE__)));
 require_once(__ROOT__ . '/include/SitePlugins.php');
 
 $classRunJobs = new StageManager();
-$classRunJobs->RunAll();
+$classRunJobs->runAll();
 //$classRunJobs->doStage1();
 //$classRunJobs->doStage4();
 
 
-?>
