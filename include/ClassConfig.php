@@ -120,25 +120,7 @@ class ClassConfig extends ClassJobsSitePlugin
         $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] = array_combine($keys, array_column($excludedsites, 'name'));
         $GLOBALS['USERDATA']['configuration_settings']['searches'] = array();
 
-        $tmpDebug = \Scooper\get_PharseOptionValue('use_debug');
-        switch($tmpDebug)
-        {
-            case 1:
-                $GLOBALS['OPTS']['DEBUG'] = true;
-                $GLOBALS['OPTS']['VERBOSE'] = false;
-                break;
-
-            case 2:
-                $GLOBALS['OPTS']['DEBUG'] = true;
-                $GLOBALS['OPTS']['VERBOSE'] = true;
-                break;
-
-            default:
-                $GLOBALS['OPTS']['DEBUG'] = false;
-                $GLOBALS['OPTS']['VERBOSE'] = false;
-                break;
-        }
-
+        $GLOBALS['OPTS']['DEBUG'] =  ( \Scooper\get_PharseOptionValue('debug') == 1 ) ? true : false;
 
         // Override any INI file setting with the command line output file path & name
         // the user specificed (if they did)
@@ -192,6 +174,8 @@ class ClassConfig extends ClassJobsSitePlugin
 
                 }
             }
+
+            if(isDebug() && isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded all configuration settings:  " . var_export($this->allConfigFileSettings, true), \Scooper\C__DISPLAY_SUMMARY__);
 
             $this->_setupRunFromConfig_($this->allConfigFileSettings);
 
@@ -255,7 +239,6 @@ class ClassConfig extends ClassJobsSitePlugin
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added child settings file ".$nextConfigFile, \Scooper\C__DISPLAY_ITEM_RESULT__);
             }
         }
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded config settings file " . $fileConfigToLoad . " and any descendant children config setting files.  ".var_export($GLOBALS['OPTS'], true), \Scooper\C__DISPLAY_SUMMARY__);
 
         $allConfigfileSettings = [];
         foreach($this->_arrConfigFileSettings_ as $tempConfig)
@@ -264,7 +247,6 @@ class ClassConfig extends ClassJobsSitePlugin
         }
 
         $this->allConfigFileSettings = $allConfigfileSettings;
-
     }
 
 
@@ -490,18 +472,31 @@ class ClassConfig extends ClassJobsSitePlugin
     private function _readGlobalSearchParamtersFromConfig_($config)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading global search settings from config file...", \Scooper\C__DISPLAY_ITEM_START__);
-        if(isset($config['global_search_options']) && is_array($config['global_search_options']) && isset($config['global_search_options']['excluded_jobsites']))
-        {
-            if(is_string($config['global_search_options']['excluded_jobsites'])) { $config['global_search_options']['excluded_jobsites'] = explode(",", $config['global_search_options']['excluded_jobsites']); }
-            if(!is_array($config['global_search_options']['excluded_jobsites'])) { $config['global_search_options']['excluded_jobsites'] = array($config['global_search_options']['excluded_jobsites']); }
-            foreach($config['global_search_options']['excluded_jobsites'] as $excludedSite)
-            {
-                $excludedSite = strtolower(trim($excludedSite));
-                $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$excludedSite] = $excludedSite;
-                if(isset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite])) unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite]);
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting " . $excludedSite . " as excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            }
 
+        if (array_key_exists('global_search_options', $config))
+        {
+            foreach(array_keys($config['global_search_options']) as $gso)
+            {
+                if((strtolower($gso)== 'excluded_jobsites') && isset($config['global_search_options']['excluded_jobsites']))
+                {
+                    if(is_string($config['global_search_options']['excluded_jobsites'])) { $config['global_search_options']['excluded_jobsites'] = explode(",", $config['global_search_options']['excluded_jobsites']); }
+                    if(!is_array($config['global_search_options']['excluded_jobsites'])) { $config['global_search_options']['excluded_jobsites'] = array($config['global_search_options']['excluded_jobsites']); }
+                    foreach($config['global_search_options']['excluded_jobsites'] as $excludedSite)
+                    {
+                        $excludedSite = strtolower(trim($excludedSite));
+                        $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$excludedSite] = $excludedSite;
+                        if(isset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite])) unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite]);
+                        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting " . $excludedSite . " as excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    }
+                }
+                else
+                {
+                    $GLOBALS['USERDATA']['configuration_settings'][$gso] = $config['global_search_options'][$gso];
+                    if(strtolower($gso) == 'debug' && (!array_key_exists('DEBUG', $GLOBALS['OPTS']) || $GLOBALS['OPTS']['DEBUG'] === false)) {
+                        $GLOBALS['OPTS']['DEBUG'] =  ( \Scooper\intceil($config['global_search_options'][$gso]) == 1 ) ? true : false;
+                    }
+                }
+            }
         }
     }
     private function _readSeleniumParamtersFromConfig_($config)
@@ -1176,15 +1171,15 @@ class ClassConfig extends ClassJobsSitePlugin
 
         }
     }
-
-    function parseJobsListForPage($objSimpHTML)
-    {
-        throw new ErrorException("parseJobsListForPage not supported for class" . get_class($this));
-    }
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        throw new ErrorException("parseTotalResultsCount not supported for class " . get_class($this));
-    }
+//
+//    function parseJobsListForPage($objSimpHTML)
+//    {
+//        throw new ErrorException("parseJobsListForPage not supported for class" . get_class($this));
+//    }
+//    function parseTotalResultsCount($objSimpHTML)
+//    {
+//        throw new ErrorException("parseTotalResultsCount not supported for class " . get_class($this));
+//    }
 
 
 } 

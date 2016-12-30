@@ -42,7 +42,7 @@ function isVerbose() {
 }
 
 function isDebug() {
-    if(isset($GLOBALS['OPTS']) && isset($GLOBALS['OPTS']['DEBUG']) && $GLOBALS['OPTS']['DEBUG'] == true) return true;
+    if(isset($GLOBALS['OPTS']) && isset($GLOBALS['OPTS']['DEBUG']) && ($GLOBALS['OPTS']['DEBUG'] === true || $GLOBALS['OPTS']['DEBUG'] == 1)) return true;
     return false;
 }
 
@@ -79,8 +79,8 @@ function __initializeArgs__()
             'required'      => true,
             'short'      => 'o',
         ),
-        'use_debug' => array(
-            'description'   => 'Verbose debug logging level (0=none, 1=basic, 2=all)',
+        'debug' => array(
+            'description'   => 'Set to 1 for debug logging.',
             'default'       => 0,
             'type'          => Pharse::PHARSE_INTEGER,
             'required'      => false,
