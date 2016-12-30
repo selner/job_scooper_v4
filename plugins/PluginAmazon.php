@@ -34,21 +34,14 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
  *
  */
 
-class PluginAmazon extends ClassJobsSitePlugin
+class PluginAmazon extends ClassBaseClientSideHTMLJobSitePlugin
 {
     protected $siteName = 'Amazon';
     protected $nJobListingsPerPage = 100;
     protected $siteBaseURL = 'http://www.amazon.jobs';
     protected $strBaseURLFormat = "https://www.amazon.jobs/en/search?base_query=***KEYWORDS***&location%5B%5D=***LOCATION***&result_limit=100&sort=recent&cache";
-    protected $flagSettings = null;
+    protected $flagSettings = [C__JOB_CLIENTSIDE_INFSCROLLPAGE];
     protected $typeLocationSearchNeeded = 'location-city-dash-statecode';
-
-    function __construct($strBaseDir = null)
-    {
-        parent::__construct($strBaseDir);
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_USE_SELENIUM | C__JOB_INFSCROLL_DOWNFULLPAGE;
-    }
-
 
     function parseTotalResultsCount($objSimpHTML)
     {

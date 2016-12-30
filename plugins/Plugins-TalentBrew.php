@@ -25,6 +25,7 @@ class PluginBoeing extends BasePluginTalentBrew
 {
     protected $siteName = 'Boeing';
     protected $siteBaseURL = 'https://jobs.boeing.com';
+    protected $nJobListingsPerPage = 20;
 
 }
 
@@ -32,7 +33,8 @@ class PluginDisney extends BasePluginTalentBrew
 {
     protected $siteName = 'Disney';
     protected $siteBaseURL = 'https://jobs.disneycareers.com';
-//    protected $additionalFlags = [ C__JOB_INFSCROLL_DOWNFULLPAGE ];
+//    protected $additionalFlags = [ C__JOB_CLIENTSIDE_INFSCROLLPAGE ];
+    protected $nJobListingsPerPage = 15;
 
     function __construct($strBaseDir = null)
     {
@@ -44,23 +46,15 @@ class PluginDisney extends BasePluginTalentBrew
 
 }
 
-class BasePluginTalentBrew extends ClassBaseSimpleJobSitePlugin
+class BasePluginTalentBrew extends ClassClientHTMLJobSitePlugin
 {
     protected $strBaseURLFormat = "https://jobs.disneycareers.com/search-jobs/***KEYWORDS***/***LOCATION***";
-    protected $flagSettings = [ C__JOB_BASETYPE_WEBPAGE_FLAGS,  C__JOB_USE_SELENIUM, C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE ];
+    protected $flagSettings = [ C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE ];
     protected $additionalFlags = [ ];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $additionalLoadDelaySeconds = 5;
 
     protected $nJobListingsPerPage = 50;
-
-    function __construct($strBaseDir = null)
-    {
-        $this->strBaseURLFormat = $this->siteBaseURL . "/search-jobs/***KEYWORDS***/***LOCATION***?orgIds=391-5733-5732&kt=1";
-
-        parent::__construct($strBaseDir);
-
-    }
 
     protected $arrListingTagSetup = array(
         'tag_listings_count' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results'), 'return_attribute' => 'data-total-results'),

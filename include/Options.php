@@ -46,6 +46,10 @@ function isDebug() {
     return false;
 }
 
+function isTestRun() {
+    return (array_key_exists('test_run', $GLOBALS['USERDATA']['configuration_settings']) && ($GLOBALS['USERDATA']['configuration_settings']['test_run'] == 1));
+}
+
 function __initializeArgs__()
 {
     setupPlugins();

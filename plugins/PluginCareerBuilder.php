@@ -22,12 +22,12 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 // TODO:  Make abstract class to power sites like http://www.careerbuilder.com/jobs/greenbay,wisconsin/category/engineering/?channel=en&siteid=gagbp037&sc_cmp1=JS_Sub_Loc_EN&lr=cbga_gbp
 // just have to add the following terms per site &siteid=gagbp037&lr=cbga_gbp
 
-class PluginCareerBuilder extends ClassBaseSimpleJobSitePlugin
+class PluginCareerBuilder extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = 'CareerBuilder';
     protected $siteBaseURL = 'http://www.careerbuilder.com';
     protected $strBaseURLFormat = "http://www.careerbuilder.com/jobs-***KEYWORDS***-in-***LOCATION***?keywords=***KEYWORDS***&location=***LOCATION***&radius=50&page_number=***PAGE_NUMBER***&posted=***NUMBER_DAYS***";
-    protected $additionalFlags = [C__JOB_BASETYPE_WEBPAGE_FLAGS , C__JOB_USE_SELENIUM, C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES];
+    protected $additionalFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES];
     protected $typeLocationSearchNeeded = 'location-city-dash-statecode';
     protected $additionalLoadDelaySeconds = 5;
     protected $nJobListingsPerPage = 25;

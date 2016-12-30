@@ -22,12 +22,11 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 
 
 
-class PluginSimplyHired extends ClassJobsSitePlugin
+class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
 {
     protected $siteBaseURL = 'http://www.simplyhired.com';
     protected $siteName = 'SimplyHired';
-    protected $nJobListingsPerPage = 50;
-    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
+    protected $nJobListingsPerPage = 25;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $strKeywordDelimiter = "or";
     protected $strBaseURLFormat = "http://www.simplyhired.com/search?q=***KEYWORDS***&l=***LOCATION***&fdb=***NUMBER_DAYS***&&ws=50&mi=50&sb=dd&pn=***PAGE_NUMBER***&";

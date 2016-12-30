@@ -19,7 +19,7 @@ if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 
 
-class PluginMonster extends ClassJobsSitePlugin
+class PluginMonster extends ClassBaseServerHTMLJobSitePlugin
 {
     protected $siteName = 'Monster';
     protected $siteBaseURL = 'http://www.monster.com';
@@ -30,7 +30,7 @@ class PluginMonster extends ClassJobsSitePlugin
     protected $regex_link_job_id = '/\.com\/([^\/]+\/)?([^\.]+)/i';
     function __construct($strBaseDir = null)
     {
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES ;
+        $this->flagSettings = C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES ;
         parent::__construct($strBaseDir);
     }
 
@@ -107,6 +107,8 @@ class PluginMonster extends ClassJobsSitePlugin
             {
                 $item['job_title'] = $subNode[0]->attr['title'];
                 $item['job_id'] = $subNode[0]->attr['data-m_impr_j_postingid'];
+                if(is_null($item['job_id']) || empty($item['job_id']))
+                    $item['job_id'] = $subNode[0]->attr['data-m_impr_j_jobid'];
                 $item['job_post_url'] = $subNode[0]->attr['href'];
 
 

@@ -29,7 +29,7 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
  *
 
  */
-class PluginExample extends ClassJobsSitePlugin
+class PluginExample extends ClassBaseJobsSitePlugin
 {
     protected $siteName = 'ExampleSiteName';
     protected $siteBaseURL = 'http://www.examplesite.com';

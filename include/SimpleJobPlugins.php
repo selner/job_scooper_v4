@@ -18,22 +18,36 @@
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
-abstract class ClassBaseJobsAPIPlugin extends ClassBaseSimpleJobSitePlugin
+
+
+
+abstract class ClassClientHTMLJobSitePlugin extends ClassBaseHTMLJobSitePlugin
+{
+    protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__;
+    protected $flagSettings =[C__JOB_USE_SELENIUM];
+}
+
+
+abstract class ClassHTMLJobSitePlugin extends ClassBaseHTMLJobSitePlugin
+{
+    protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
+}
+
+
+abstract class ClassBaseMicroDataPlugin extends ClassHTMLJobSitePlugin
 {
     protected $siteBaseURL = '';
     protected $siteName = '';
-    protected $flagSettings = [C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
-
-    function getSearchJobsFromAPI($searchDetails) { return VALUE_NOT_SUPPORTED; }
+    protected $flagSettings = [C__JOB_PREFER_MICRODATA];
 
 }
 
 
-abstract class ClassSimpleFullPageJobSitePlugin extends ClassBaseSimpleJobSitePlugin
+abstract class ClassSimpleFullPageJobSitePlugin extends ClassHTMLJobSitePlugin
 {
     protected $childSiteURLBase = '';
     protected $childSiteListingPage = '';
-    protected $flagSettings = [C__JOB_BASETYPE_WEBPAGE_FLAGS, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
+    protected $flagSettings = [C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
 
     protected function _getURLfromBase_($searchDetails, $nPage = null, $nItem = null)
     {
@@ -41,23 +55,11 @@ abstract class ClassSimpleFullPageJobSitePlugin extends ClassBaseSimpleJobSitePl
     }
 }
 
-
-abstract class ClassBaseMicroDataPlugin extends ClassBaseSimpleJobSitePlugin
-{
-    protected $siteBaseURL = '';
-    protected $siteName = '';
-    protected $flagSettings = [C__JOB_BASETYPE_WEBPAGE_FLAGS, C__JOB_PREFER_MICRODATA];
-
-}
-
-
-abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
+abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
 {
     protected $siteName = '';
     protected $siteBaseURL = '';
-    protected $additionalFlags = [];
     protected $nJobListingsPerPage = 20;
-    protected $flagSettings = C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__;
     protected $childSiteURLBase = '';
     protected $childSiteListingPage = '';
     protected $additionalLoadDelaySeconds = 2;
@@ -106,7 +108,7 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
     function parseTotalResultsCount($objSimpHTML)
     {
         $retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
-        if($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
+        if($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__))
             $retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
         else if(array_key_exists('tag_listings_count', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_listings_count']))
         {
@@ -143,7 +145,7 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
         return $strMatch;
     }
 
-    private function _getTagMatchString_($arrTags)
+    protected function _getTagMatchString_($arrTags)
     {
         if($arrTags == null) return null;
 
@@ -169,7 +171,7 @@ abstract class ClassBaseSimpleJobSitePlugin extends ClassJobsSitePlugin
         return $strMatch;
     }
 
-    private function _getTagMatchValue_($node, $arrTag, $propertyName = 'plaintext', $propertyRegEx = null)
+    protected function _getTagMatchValue_($node, $arrTag, $propertyName = 'plaintext', $propertyRegEx = null)
     {
         $strReturn = '';
         if(array_key_exists("return_attribute", $arrTag))

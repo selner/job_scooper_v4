@@ -19,22 +19,15 @@ if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 
-class PluginZipRecruiter extends ClassJobsSitePlugin
+class PluginZipRecruiter extends ClassBaseServerHTMLJobSitePlugin
 {
     protected $siteName = 'ZipRecruiter';
     protected $siteBaseURL = 'https://jobs.ziprecruiter.com';
     protected $nJobListingsPerPage = 20;
     protected $strBaseURLFormat = "https://www.ziprecruiter.com/candidate/search?search=***KEYWORDS***&location=***LOCATION***&radius=25&page=***PAGE_NUMBER***&days=***NUMBER_DAYS***";
-    protected $flagSettings = null;
+    protected $flagSettings = [C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS, C__JOB_PREFER_MICRODATA];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $regex_link_job_id = '/^.*\/clk\/(.*)/i';
-
-    function __construct($strBaseDir = null)
-    {
-        parent::__construct($strBaseDir);
-
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS  | C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS | C__JOB_PREFER_MICRODATA;
-    }
 
     /**
      * If the site does not have a URL parameter for number of days

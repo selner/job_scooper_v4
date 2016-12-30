@@ -21,7 +21,7 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 
 
 
-class PluginGeekwire extends ClassJobsSitePlugin
+class PluginGeekwire extends ClassBaseClientSideHTMLJobSitePlugin
 {
     protected $siteName = 'Geekwire';
     protected $siteBaseURL = 'http://www.geekwire.com/jobs/';
@@ -29,12 +29,7 @@ class PluginGeekwire extends ClassJobsSitePlugin
 //    protected $strBaseURLFormat = "http://www.geekwork.com/jobs/?search_keywords=***KEYWORDS***&search_location=***LOCATION***";
     protected $typeLocationSearchNeeded = 'location-statecode';
     protected $additionalLoadDelaySeconds = 20;
-
-    function __construct($strBaseDir = null)
-    {
-        parent::__construct($strBaseDir);
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_USE_SELENIUM | C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__ | C__JOB_PREFER_MICRODATA | C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE_NO_LOCATION;
-    }
+    protected $flagSettings = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_PREFER_MICRODATA, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
 
     function parseJobsListForPage($objSimpHTML)
     {

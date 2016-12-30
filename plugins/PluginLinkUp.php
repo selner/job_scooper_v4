@@ -21,13 +21,13 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 
 
 
-class PluginLinkUp extends ClassJobsSitePlugin
+class PluginLinkUp extends ClassBaseServerHTMLJobSitePlugin
 {
     protected $siteName = 'LinkUp';
     protected $nJobListingsPerPage = 50;
     protected $siteBaseURL = 'http://www.linkup.com';
     protected $strBaseURLFormat = "http://www.linkup.com/results.php?ttl=***KEYWORDS***&l=***LOCATION***&sort=d&tm=***NUMBER_DAYS***&page=***PAGE_NUMBER***&p=50";
-    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS;
+    protected $flagSettings = C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED;
     protected $typeLocationSearchNeeded = 'location-city-comma-state';
     protected $strKeywordDelimiter = "or";
 

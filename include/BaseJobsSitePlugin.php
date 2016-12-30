@@ -23,7 +23,7 @@ const VALUE_NOT_SUPPORTED = -1;
 const BASE_URL_TAG_LOCATION = "***LOCATION***";
 const BASE_URL_TAG_KEYWORDS = "***KEYWORDS***";
 
-abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
+abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
 {
     //************************************************************************
     //
@@ -37,8 +37,10 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
 
     protected $siteName = 'NAME-NOT-SET';
     protected $nJobListingsPerPage = 20;
+    protected $flagSettings = [];
     protected $additionalFlags = [];
     protected $secsPageTimeout = null;
+    protected $pluginResultsType;
 
     protected $strKeywordDelimiter = null;
     protected $strTitleOnlySearchKeywordFormat = null;
@@ -588,15 +590,19 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
             {
                 $GLOBALS['logger']->logLine(("No previously retrieved & cached results found.  Starting data pull for " . $this->siteName . "[". $searchDetails['name']), \Scooper\C__DISPLAY_ITEM_RESULT__);
 
-                if($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_XML__))
+                if($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_XML__)
                 {
                     $arrPageJobsList = $this->_getMyJobsForSearchFromXML_($searchDetails);
                 }
-                elseif($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__))
+                elseif($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__)
                 {
                     $arrPageJobsList = $this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
                 }
-                elseif($this->isBitFlagSet(C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__))
+                elseif($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__)
+                {
+                    $arrPageJobsList = $this->_getMyJobsForSearchFromWebpage_($searchDetails);
+                }
+                elseif($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__)
                 {
                     $arrPageJobsList = $this->_getMyJobsForSearchFromWebpage_($searchDetails);
                 }
@@ -1015,7 +1021,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                 // we must assume there is only one page of results in total.
                 $totalPagesCount = 1;
 
-            } elseif(!$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
+            } elseif(!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__))
             {
                 $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML->root);
                 $nTotalResults  = intval(str_replace(",", "", $strTotalResults));
@@ -1024,12 +1030,29 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                 {
                     $totalPagesCount = 0;
                 }
+                elseif($this->isBitFlagSet(C__JOB_SINGLEPAGE_RESULTS))
+                {
+                    $totalPagesCount = 1;
+                }
                 elseif($nTotalResults != C__TOTAL_ITEMS_UNKNOWN__)
                 {
                     $totalPagesCount = \Scooper\intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
                     if($totalPagesCount < 1)  $totalPagesCount = 1;
                 }
             }
+
+
+            //
+            // If this is just a test run to verify everything is functioning and all plugins are returning data,
+            // then only bring back the first page and/or first 10 or so results to verify.  We don't need to bring
+            // back hundreds of results to test things are running successfully.
+            //
+            if (isTestRun())
+            {
+                $nTotalListings = (is_null($this->nJobListingsPerPage) === true) ? 10 : $this->nJobListingsPerPage;
+                $totalPagesCount = 1;
+            }
+
 
             if($nTotalListings <= 0)
             {
@@ -1056,7 +1079,7 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                             {
                                 $driver = $this->_getFullHTMLForDynamicWebpage_($strURL, $this->classToCheckExists);
                             }
-                            if($this->isBitFlagSet( C__JOB_INFSCROLL_DOWNFULLPAGE))
+                            if($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE))
                             {
                                 while($nPageCount <= $totalPagesCount)
                                 {
@@ -1068,9 +1091,9 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                                 $html = $driver->getPageSource();
                                 $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
                             }
-                            else if(!$this->isBitFlagSet( C__JOB_INFSCROLL_DOWNFULLPAGE))
+                            else if(!$this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE))
                             {
-                                if(method_exists($this, 'getNextPage') && $nPageCount > 1)
+                                if(method_exists($this, 'getNextPage') && $nPageCount > 1 && $nPageCount < $totalPagesCount)
                                 {
                                     //
                                     // if we got a driver instance back, then we got a new page
@@ -1139,6 +1162,20 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
                     } catch (Exception $ex) {
                         $GLOBALS['logger']->logLine($this->siteName . " error: " . $ex, \Scooper\C__DISPLAY_ERROR__);
                         throw $ex;
+                    }
+
+                    //
+                    // Look check for plugin errors that are not caught.  If we have looped through one page of results,
+                    // we should either have returned at least 1 listing of the total count OR if we have retrieved fewer
+                    // listings than are expected on a page, then we should our page count should be the same as the last page.
+                    //
+                    // If either is not true, then we're likely in an error condtion and about to go a bit wacky, possibly in a major loop.
+                    // Throw an error for this search instead and move on.
+                    if(($nTotalListings > 0 && $nItemCount == 0) || ($nItemCount < $this->nJobListingsPerPage && $nPageCount < $totalPagesCount))
+                    {
+                        $msg = "Error retrieving job listings for " . $this->siteName  . ".  We did not retrieve the " . $nTotalListings . " or full page of listings we expected.  Aborting search to prevent issues.";
+                        $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
+                        throw new Exception($msg);
                     }
 
                     // clean up memory
@@ -1301,6 +1338,3 @@ abstract class ClassJobsSitePlugin extends ClassJobsSiteCommon
     }
 
 }
-
-
-

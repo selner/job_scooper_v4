@@ -92,7 +92,7 @@ class PluginUSAJobs extends ClassBaseJobsAPIPlugin
 class PluginDice extends ClassBaseJobsAPIPlugin
 {
     protected $siteBaseURL = 'http://www.dice.com';
-    protected $strBaseURLFormat = 'http://service.dice.com/api/rest/jobsearch/v1/simple.json?text=java&city=New+York,+NY&pgcnt=20';
+    protected $strBaseURLFormat = 'http://service.dice.com/api/rest/jobsearch/v1/simple.json?';
     protected $siteName = 'Dice';
 //    protected $nJobListingsPerPage = 1000;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';

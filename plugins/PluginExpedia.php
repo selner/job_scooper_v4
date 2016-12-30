@@ -22,18 +22,13 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 //.// http://expediajobs.findly.com/candidate/job_search/advanced/results?job_type=5517&state=2336&country=5492&sort=date
 
 
-class PluginExpedia extends ClassJobsSitePlugin
+class PluginExpedia extends ClassBaseClientSideHTMLJobSitePlugin
 {
     protected $siteName = 'Expedia';
     protected $siteBaseURL = 'https://expedia.wd5.myworkdayjobs.com/search/jobs/';
     protected $strBaseURLFormat = 'https://expedia.wd5.myworkdayjobs.com/search/jobs/';
     protected $nJobListingsPerPage = 100;
-
-    function __construct($strBaseDir = null)
-    {
-        parent::__construct($strBaseDir);
-        $this->flagSettings =  C__JOB_BASETYPE_WEBPAGE_FLAGS |C__JOB_SETTINGS_URL_VALUE_REQUIRED | C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED | C__JOB_USE_SELENIUM | C__JOB_INFSCROLL_DOWNFULLPAGE;
-    }
+    protected $flagSettings = [C__JOB_SETTINGS_URL_VALUE_REQUIRED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_CLIENTSIDE_INFSCROLLPAGE];
 
 
     function getDaysURLValue($days = null) {

@@ -18,12 +18,12 @@ if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 
 
-class PluginIndeed extends ClassJobsSitePlugin
+class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
 {
     protected $siteName = 'Indeed';
     protected $nJobListingsPerPage = 50;
     protected $siteBaseURL = 'http://www.Indeed.com';
-    protected $strBaseURLFormat = "http://www.indeed.com/jobs?as_cmp=&jt=all&st=&salary=&radius=50&&fromage=***NUMBER_DAYS***&limit=50&sort=date&psf=advsrch&start=50&pp=***ITEM_NUMBER***";
+    protected $strBaseURLFormat = "http://www.indeed.com/jobs?as_cmp=&jt=all&st=&salary=&radius=50&&fromage=***NUMBER_DAYS***&limit=50&sort=date&psf=advsrch&start=50&pp=***ITEM_NUMBER***&filter=0";
     protected $flagSettings = null;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $strKeywordDelimiter = "OR";
@@ -33,7 +33,6 @@ class PluginIndeed extends ClassJobsSitePlugin
     {
         // Note:  C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS intentioanlly not set although Indeed supports it.  However, their support is too explicit of a search a will weed out
         //        too many potentia hits to be worth it.
-        $this->flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS;
         parent::__construct($strBaseDir);
     }
 

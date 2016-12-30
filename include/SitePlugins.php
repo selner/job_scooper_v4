@@ -20,8 +20,9 @@ require_once(__ROOT__.'/include/Options.php');
 require_once(__ROOT__.'/lib/Linkify.php');
 require_once(__ROOT__.'/include/CSimpleHTMLHelper.php');
 require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
-require_once(__ROOT__.'/include/ClassJobsSitePlugin.php');
-require_once(__ROOT__.'/include/ClassBaseSimplePlugin.php');
+require_once(__ROOT__ .'/include/BaseJobsSitePlugin.php');
+require_once(__ROOT__ .'/include/JobSitePluginsTypes.php');
+require_once(__ROOT__ . '/include/SimpleJobPlugins.php');
 require_once(__ROOT__.'/include/ClassConfig.php');
 require_once(__ROOT__.'/include/StageManager.php');
 
@@ -37,7 +38,6 @@ require_once(__ROOT__ . '/plugins/Plugins-TalentBrew.php');
 
 require_once (__ROOT__.'/plugins/PluginIndeed.php');
 require_once (__ROOT__.'/plugins/PluginMonster.php');
-require_once (__ROOT__.'/plugins/PluginFacebook.php');
 require_once (__ROOT__.'/plugins/PluginGroupon.php');
 require_once (__ROOT__.'/plugins/PluginAmazon.php');
 require_once (__ROOT__.'/plugins/PluginCraigslist.php');
@@ -62,19 +62,23 @@ require_once (__ROOT__.'/plugins/PluginZipRecruiter.php');
 
 //And so on, 0x8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800 etc..
 
-const C__JOB_NONE = 0x0;
-const C__JOB_SEARCH_RESULTS_TYPE_NONE__ = 0x1;
-const C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__ = 0x2;
-const C__JOB_SEARCH_RESULTS_TYPE_XML__= 0x4;
-const C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__ = 0x8;
+const C__JOB_SEARCH_RESULTS_TYPE_XML__ = "XML";
+const C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__  = "SERVER_HTML";
+const C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__  = "CLIENT_HTML";
+const C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__ = "JOBAPI";
+
+const C__JOB_USE_SELENIUM = 0x1;
+const C__JOB_CLIENTSIDE_INFSCROLLPAGE= 0x2;
+const C__JOB_CLIENTSIDE_NEXTBUTTON = 0x4;
+const C__JOB_SINGLEPAGE_RESULTS = 0x8;
 
 const C__JOB_PAGECOUNT_NOTAPPLICABLE__= 0x10;
 const C__JOB_DAYS_VALUE_NOTAPPLICABLE__ = 0x20;
 const C__JOB_ITEMCOUNT_NOTAPPLICABLE__ = 0x40;
 const C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED = 0x80;
 const C__JOB_LOCATION_REQUIRES_LOWERCASE = 0x100;
-const C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES = 0x200;
-const C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED = 0x400;
+const C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED = 0x200;
+const C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES = 0x400;
 const C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE = 0x800;
 
 const C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED = 0x1000;
@@ -84,8 +88,6 @@ const C__JOB_SETTINGS_URL_VALUE_REQUIRED = 0x8000;
 
 //const C__JOB_HTTP_POST = 0x10000;
 const C__JOB_PREFER_MICRODATA = 0x20000;
-const C__JOB_USE_SELENIUM = 0x40000;
-const C__JOB_INFSCROLL_DOWNFULLPAGE = 0x80000;
 
 const C__USER_KEYWORD_ANYWHERE = 0x100000;
 const C__USER_KEYWORD_ANYWHERE_AS_STRING = "any";
@@ -95,17 +97,7 @@ const C__USER_KEYWORD_MUST_BE_IN_TITLE = 0x400000;
 const C__USER_KEYWORD_MUST_BE_IN_TITLE_AS_STRING = "in-title";
 const C__USER_KEYWORD_MATCH_DEFAULT = C__USER_KEYWORD_MUST_BE_IN_TITLE;
 
-define('C__JOB_BASETYPE_WEBPAGE_FLAGS', C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__);
-define('C__JOB_BASETYPE_XMLRSS_FLAGS', C__JOB_SEARCH_RESULTS_TYPE_XML__| C__JOB_PAGECOUNT_NOTAPPLICABLE__ | C__JOB_ITEMCOUNT_NOTAPPLICABLE__);
-define('C__JOB_BASETYPE_NONE_NO_LOCATION_OR_KEYWORDS', C__JOB_SEARCH_RESULTS_TYPE_NONE__ | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED | C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED);
-define('C__JOB_BASETYPE_WEBPAGE_FLAGS_NO_LOCATION', C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED);
-define('C__JOB_BASETYPE_WEBPAGE_FLAGS_NO_KEYWORDS', C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED);
-define('C__JOB_BASETYPE_WEBPAGE_FLAGS_NO_LOCATION_OR_KEYWORDS', C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED);
-define('C__JOB_BASETYPE_WEBPAGE_FLAGS_URL_FORMAT_REQUIRED', C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_SETTINGS_URL_VALUE_REQUIRED | C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED);
-define('C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS', C__JOB_BASETYPE_WEBPAGE_FLAGS_NO_KEYWORDS | C__JOB_DAYS_VALUE_NOTAPPLICABLE__);
-define('C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_NO_LOCATION', C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS | C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED);
-define('C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE_NO_LOCATION', C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_NO_LOCATION | C__JOB_PAGECOUNT_NOTAPPLICABLE__);
-define('C__JOB_BASETYPE_WEBPAGE_FLAGS_MULTIPLE_KEYWORDS', C__JOB_BASETYPE_WEBPAGE_FLAGS | C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED);
+define('C__JOB_BASETYPE_WEBPAGE_FLAGS', 0);
 
 $GLOBALS['DATA']['location_types'] = array('location-city', 'location-city-comma-statecode', 'location-city-dash-statecode', 'location-city-comma-statecode-underscores-and-dashes', 'location-city-comma-state', 'location-city-comma-state-country', 'location-statecode', 'location-state', 'location-city-comma-state-country-no-commas');
 const C__TOTAL_ITEMS_UNKNOWN__ = 1111;

@@ -18,7 +18,7 @@
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
-class PluginOuterwall extends ClassBaseSimpleJobSitePlugin
+class PluginOuterwall extends ClassHTMLJobSitePlugin
 {
     protected $siteName = 'Outerwall';
     protected $siteBaseURL = 'http://outerwall.jobs';
@@ -43,7 +43,7 @@ class PluginTesla extends ClassSimpleFullPageJobSitePlugin
     protected $siteName = 'Tesla';
     protected $childSiteURLBase = 'https://www.tesla.com/careers/search#';
     protected $childSiteListingPage = 'https://www.tesla.com/careers/search#';
-    protected $additionalFlags = [C__JOB_USE_SELENIUM, C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_ON_SINGLE_PAGE_NO_LOCATION];
+    protected $additionalFlags = [ C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
 
     protected $arrListingTagSetup = array(
         'tag_listings_section' => array('tag' => 'tr', 'attribute' => 'class', 'attribute_value' =>'table-row'),
@@ -75,12 +75,12 @@ class PluginSmashingMagazine extends ClassSimpleFullPageJobSitePlugin
 
 }
 
-class PluginPersonForce extends ClassBaseSimpleJobSitePlugin
+class PluginPersonForce extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = 'PersonForce';
     protected $siteBaseURL = 'http://www.personforce.com';
     protected $strBaseURLFormat = 'https://www.personforce.com/jobs/tags/***KEYWORDS***/in/***LOCATION***';
-    protected $additionalFlags = [C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__, C__JOB_USE_SELENIUM, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
+    protected $additionalFlags = [ C__JOB_PAGECOUNT_NOTAPPLICABLE__];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $nJobListingsPerPage = 20;
 
@@ -99,12 +99,12 @@ class PluginPersonForce extends ClassBaseSimpleJobSitePlugin
 }
 
 
-class PluginRobertHalf extends ClassBaseSimpleJobSitePlugin
+class PluginRobertHalf extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = 'RobertHalf';
     protected $siteBaseURL = "https://www.roberthalf.com";
     protected $strBaseURLFormat = 'https://www.roberthalf.com/technology/jobs/***KEYWORDS***/***LOCATION***?pageSize=1500';
-    protected $additionalFlags = [C__JOB_USE_SELENIUM, C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_DAYS_VALUE_NOTAPPLICABLE__  ];
+    protected $additionalFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_DAYS_VALUE_NOTAPPLICABLE__  ];
     protected $typeLocationSearchNeeded = 'location-city';
     protected $nJobListingsPerPage = 1500;
 
@@ -174,7 +174,7 @@ class PluginParivedaSolutions extends BasePluginiCIMS
     protected $arrResultsRowTDIndex = array('tag_job_posting_date' => null, 'tag_job_id' => 0, 'tag_title' => 1, 'tag_link' => 1, 'tag_department' => null, 'tag_location' => 2 );
 }
 
-class BasePluginiCIMS extends ClassBaseSimpleJobSitePlugin
+class BasePluginiCIMS extends ClassHTMLJobSitePlugin
 {
     protected $additionalFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED];
     protected $nJobListingsPerPage = 20;
@@ -222,7 +222,7 @@ class BasePluginiCIMS extends ClassBaseSimpleJobSitePlugin
 
 
 
-class PluginCyclon extends ClassBaseSimpleJobSitePlugin
+class PluginCyclon extends ClassHTMLJobSitePlugin
 {
     protected $siteName = 'Cylcon';
     protected $siteBaseURL = "http://cylcon.com";
@@ -251,36 +251,30 @@ class PluginCyclon extends ClassBaseSimpleJobSitePlugin
 
 
 
-class PluginBetalist extends ClassBaseSimpleJobSitePlugin
+class PluginBetalist extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = 'Betalist';
     protected $siteBaseURL = "https://betalist.com";
     protected $nJobListingsPerPage = 500;
-    protected $strBaseURLFormat = "https://betalist.com/jobs?q=***KEYWORDS***&hPP=500&p=***PAGE_NUMBER***&dFR%5Bcommitment%5D%5B0%5D=Full-Time&dFR%5Bcommitment%5D%5B1%5D=Part-Time&dFR%5Bcommitment%5D%5B2%5D=Contractor&dFR%5Bcommitment%5D%5B3%5D=Internship&is_v=1";
-    protected $additionalFlags = [ C__JOB_USE_SELENIUM, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED ];  // TODO:  Add Lat/Long support for BetaList location search
-    protected $additionalLoadDelaySeconds = 6;
+
+    // Note:  Betalist has a short list of jobs (< 500-1000 total) so we exclude keyword search here as an optimization.  The trick we use is putting a blank space in the search text box.
+    //        The space returns all jobs whereas blank returns a special landing page.
+    protected $strBaseURLFormat = "https://betalist.com/jobs?q=%20&hPP=500&p=***PAGE_NUMBER***&dFR%5Bcommitment%5D%5B0%5D=Full-Time&dFR%5Bcommitment%5D%5B1%5D=Part-Time&dFR%5Bcommitment%5D%5B2%5D=Contractor&dFR%5Bcommitment%5D%5B3%5D=Internship&is_v=1";
+#    protected $strBaseURLFormat = "https://betalist.com/jobs?q=***KEYWORDS***&hPP=500&p=***PAGE_NUMBER***&dFR%5Bcommitment%5D%5B0%5D=Full-Time&dFR%5Bcommitment%5D%5B1%5D=Part-Time&dFR%5Bcommitment%5D%5B2%5D=Contractor&dFR%5Bcommitment%5D%5B3%5D=Internship&is_v=1";
+
+    protected $additionalFlags = [  C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED ];  // TODO:  Add Lat/Long support for BetaList location search.
+    protected $additionalLoadDelaySeconds = 10;
 
     function parseTotalResultsCount($objSimpHTML)
     {
         $nTotalResults = C__TOTAL_ITEMS_UNKNOWN__;
-        $TEXT_NOJOBS = "No jobs found";
-
-        $spanNoCount = $objSimpHTML->find("span[class='ais-hits ais-hits__empty']");
-        if($spanNoCount != null && is_array($spanNoCount) && isset($spanNoCount[0]))
-        {
-            if(substr($spanNoCount[0]->plaintext, 0, strlen($TEXT_NOJOBS)) == $TEXT_NOJOBS)
-            {
-                return 0;
-            }
-
-        }
 
         //
         // Find the HTML node that holds the result count
-        $spanCounts = $objSimpHTML->find("span[class='ais-refinement-list--count']");
-        if($spanCounts != null && is_array($spanCounts) && isset($spanCounts[0]))
+        $nodeCounts = $objSimpHTML->find("span.ais-refinement-list--count");
+        if($nodeCounts != null && is_array($nodeCounts) && isset($nodeCounts[0]))
         {
-            foreach($spanCounts as $spanCount)
+            foreach($nodeCounts as $spanCount)
             {
                 $strVal = $spanCount->plaintext;
                 $nVal = intval(str_replace(",", "", $strVal));
@@ -289,6 +283,10 @@ class PluginBetalist extends ClassBaseSimpleJobSitePlugin
                 else
                     $nTotalResults += $nVal;
             }
+        }
+        else
+        {
+            return 0;
         }
 
 
@@ -308,13 +306,32 @@ class PluginBetalist extends ClassBaseSimpleJobSitePlugin
 
 }
 
+class PluginFacebook extends ClassClientHTMLJobSitePlugin
+{
+    protected $siteName = 'Facebook';
+    protected $siteBaseURL = 'https://www.facebook.com/careers/';
+    protected $strBaseURLFormat = "https://www.facebook.com/careers/search/?q=&location=***LOCATION***";
+    protected $typeLocationSearchNeeded = 'location-city';
+    protected $additionalFlags = [C__JOB_SINGLEPAGE_RESULTS, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_REQUIRES_LOWERCASE, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
 
-class PluginAuthenticJobs extends ClassBaseSimpleJobSitePlugin
+    protected $arrListingTagSetup = array(
+        'tag_listings_count' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'_1dc4', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
+        'tag_listings_section' => array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => '_3k6i')),
+        'tag_title' => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => '_5144', 'return_attribute' => 'plaintext'),
+        'tag_link' => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => '_5144', 'return_attribute' => 'href'),
+        'tag_location' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'_3k6m'),
+        'regex_link_job_id' => '/\/[j\/]{0,2}(.*)/i'
+    );
+
+}
+
+
+class PluginAuthenticJobs extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = 'AuthenticJobs';
     protected $siteBaseURL = "https://authenticjobs.com";
     protected $strBaseURLFormat = 'https://authenticjobs.com/#location=***LOCATION***&query=***KEYWORDS***';
-    protected $flagSettings = [C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__, C__JOB_USE_SELENIUM, C__JOB_INFSCROLL_DOWNFULLPAGE, C__JOB_PAGECOUNT_NOTAPPLICABLE__ , C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
+    protected $flagSettings = [C__JOB_CLIENTSIDE_INFSCROLLPAGE, C__JOB_PAGECOUNT_NOTAPPLICABLE__ , C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $nJobListingsPerPage = 50;
 
@@ -354,9 +371,9 @@ class PluginSalesforce extends BaseForceComClass
     // Alternate job site that could be used instead:   http://salesforce.careermount.com/candidate/job_search/quick/results?location=seattle&keyword=developer&sort_dir=desc&sort_field=post_date&relevance=false
 }
 
-class BaseForceComClass extends ClassBaseSimpleJobSitePlugin
+class BaseForceComClass extends ClassClientHTMLJobSitePlugin
 {
-    protected $additionalFlags = [ C__JOB_USE_SELENIUM, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED ];
+    protected $additionalFlags = [ C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED ];
     protected $additionalLoadDelaySeconds = 3;
     protected $nJobListingsPerPage = 50;
     protected $nextPageScript = "A4J.AJAX.Submit('j_id0:j_id1:atsForm',event,{'similarityGroupingId':'j_id0:j_id1:atsForm:j_id123','containerId':'j_id0:j_id1:atsForm:j_id77','parameters':{'j_id0:j_id1:atsForm:j_id123':'j_id0:j_id1:atsForm:j_id123'} ,'status':'j_id0:j_id1:atsForm:ats_pagination_status'} );return false;";
@@ -368,10 +385,10 @@ class BaseForceComClass extends ClassBaseSimpleJobSitePlugin
 
         //
         // Find the HTML node that holds the result count
-        $spanCounts = $objSimpHTML->find("div[id='atsSearchResultsText']");
-        if($spanCounts != null && is_array($spanCounts) && isset($spanCounts[0]))
+        $nodeCounts = $objSimpHTML->find("div[id='atsSearchResultsText']");
+        if($nodeCounts != null && is_array($nodeCounts) && isset($nodeCounts[0]))
         {
-            $counts = explode("&nbsp", $spanCounts[0]->plaintext);
+            $counts = explode("&nbsp", $nodeCounts[0]->plaintext);
             $nTotalResults = \Scooper\intceil($counts[0]);
         }
 

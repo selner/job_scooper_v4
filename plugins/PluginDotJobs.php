@@ -19,11 +19,11 @@ if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 
 
-class PluginDotJobs extends ClassJobsSitePlugin
+class PluginDotJobs extends ClassBaseXMLJobSitePlugin
 {
     protected $siteName = 'dotjobs';
     protected $siteBaseURL = '';
-    protected $flagSettings = C__JOB_BASETYPE_XMLRSS_FLAGS;
+    protected $flagSettings = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
     protected $strBaseURLFormat = "http://washington.jobs/jobs/feed/rss?location=***LOCATION***&q=***KEYWORDS***";
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
 

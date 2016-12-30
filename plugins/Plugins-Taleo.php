@@ -58,7 +58,7 @@ class PluginPorch extends BaseTaleoPlugin
 }
 
 
-abstract class BaseTaleoPlugin extends ClassJobsSitePlugin
+abstract class BaseTaleoPlugin extends ClassBaseServerHTMLJobSitePlugin
 {
     protected $use1ToTDForCount = False;
     protected $taleoOrgID = null;
@@ -99,7 +99,7 @@ abstract class BaseTaleoPlugin extends ClassJobsSitePlugin
 
 
     protected $strBaseURLFormat = null;
-    protected $flagSettings = C__JOB_BASETYPE_WEBPAGE_FLAGS_RETURN_ALL_JOBS_NO_LOCATION;
+    protected $flagSettings = [C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED];
 
     function getItemURLValue($nItem)
     {
