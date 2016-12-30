@@ -36,6 +36,8 @@ class S3JobListManager extends ClassJobsSiteCommon
 
     function __construct($logger)
     {
+        parent::__construct(null);
+
         if ($logger)
             $this->logger = $logger;
         elseif($GLOBALS['logger'])
@@ -239,7 +241,7 @@ class StageManager extends S3JobListManager
     public function runAll()
     {
         $arrRunStages = explode(",", \Scooper\get_PharseOptionValue("stages"));
-        if(is_array($arrRunStages) && count($arrRunStages) >= 1)
+        if(is_array($arrRunStages) && count($arrRunStages) >= 1 && strlen($arrRunStages[0]) > 0)
         {
             foreach($arrRunStages as $stage)
             {
