@@ -79,19 +79,21 @@ class PluginPersonForce extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = 'PersonForce';
     protected $siteBaseURL = 'http://www.personforce.com';
-    protected $strBaseURLFormat = 'https://www.personforce.com/jobs/tags/***KEYWORDS***/in/***LOCATION***';
-    protected $additionalFlags = [ C__JOB_PAGECOUNT_NOTAPPLICABLE__];
+    protected $strBaseURLFormat = 'https://www.personforce.com/jobs/tags/***KEYWORDS***/in/***LOCATION***/p/***PAGE_NUMBER***';
+    protected $additionalFlags = [ ];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $nJobListingsPerPage = 20;
+    protected $additionalLoadDelaySeconds = 5;
 
     protected $arrListingTagSetup = array(
 
+        'tag_listings_count' => array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'module_jobs'), array('tag' => 'div', 'attribute_value' =>'plaintext'), 'return_value_regex' => '/.*?of total (\d+).*?/'),
         'tag_listings_section' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'content-col-content hir left'),array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'row'),array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'row')),
         'tag_title' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'hir-job-title'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
         'tag_link' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'hir-job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
         'tag_company' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'hir-company-title', 'return_value_regex' => '/(.*?) \- .*/'),
         'tag_location' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'hir-company-title', 'return_value_regex' => '/.*? \- (.*)/'),
-        'tag_next_button' => array('selector' => '#content > div > div > div > div.content-col-content.hir.left > div.pagination > ul > li.active'),
+        'tag_next_button' => array('selector' => 'div.pagination ul li.active a'),
         'tag_job_id' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'hir-job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
 //        'regex_link_job_id' => '/.*?\/(\d+)|.*?;ad=-(.{1,})$/'
     );
