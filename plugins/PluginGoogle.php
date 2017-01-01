@@ -100,7 +100,7 @@ class PluginGoogle extends ClassBaseClientSideHTMLJobSitePlugin
 
     }
 
-    function getNextPage($driver)
+    function takeNextPageAction($driver)
     {
         $driver->executeScript("var elem = document.getElementById('gjsrpn');  if (elem != null) { console.log('attempting next button click on element ID gjsrpn'); elem.click(); };");
         sleep(2);

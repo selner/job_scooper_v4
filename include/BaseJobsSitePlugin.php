@@ -84,7 +84,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
 
     function parseTotalResultsCount($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); return null;}
     function parseJobsListForPage($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); return null;}
-//    function getNextPage($driver, $nextPageNum) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); return null;}
+//    function takeNextPageAction($driver, $nextPageNum) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); return null;}
 
     function addSearches($arrSearches)
     {
@@ -1093,13 +1093,13 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                             }
                             else if(!$this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE))
                             {
-                                if(method_exists($this, 'getNextPage') && $nPageCount > 1 && $nPageCount < $totalPagesCount)
+                                if(method_exists($this, 'takeNextPageAction') && $nPageCount > 1 && $nPageCount < $totalPagesCount)
                                 {
                                     //
                                     // if we got a driver instance back, then we got a new page
                                     // otherwise we're out of results so end the loop here.
                                     //
-                                    $retDriver = $this->getNextPage($driver, $nPageCount);
+                                    $retDriver = $this->takeNextPageAction($driver, $nPageCount);
                                     if(!is_null($retDriver))
                                         $driver = $retDriver;
                                     else

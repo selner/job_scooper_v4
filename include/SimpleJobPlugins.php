@@ -289,7 +289,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
         return $ret;
     }
 
-    function getNextPage($driver, $nextPageNum)
+    function takeNextPageAction($driver)
     {
         if(array_key_exists('tag_next_button', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_next_button']))
         {

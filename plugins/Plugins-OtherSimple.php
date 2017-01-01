@@ -406,7 +406,7 @@ class BaseForceComClass extends ClassClientHTMLJobSitePlugin
         'regex_link_job_id' => '/.*?jobId=([^&]+)/i'
     );
 
-    public function getNextPage($driver, $nextPageNum)
+    public function takeNextPageAction($driver, $nextPageNum)
     {
         $driver->executeScript("function callNextPage() { " . $this->nextPageScript ." } ; callNextPage();");
         sleep(2);
