@@ -20,3 +20,5 @@ configs/*
 *.jar
 output
 scripts
+configs*
+*.pyc
