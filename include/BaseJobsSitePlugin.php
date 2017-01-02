@@ -1010,7 +1010,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                                     // if we got a driver instance back, then we got a new page
                                     // otherwise we're out of results so end the loop here.
                                     //
-                                    $retDriver = $this->takeNextPageAction($driver, $nPageCount);
+                                    $retDriver = $this->takeNextPageAction($driver);
                                     if(!is_null($retDriver))
                                         $driver = $retDriver;
                                     else
