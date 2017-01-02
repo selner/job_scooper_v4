@@ -61,7 +61,6 @@ require_once (__ROOT__.'/plugins/PluginZipRecruiter.php');
 
 //And so on, 0x8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800 etc..
 
-const C__JOB_SEARCH_RESULTS_TYPE_XML__ = "XML";
 const C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__  = "SERVER_HTML";
 const C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__  = "CLIENT_HTML";
 const C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__ = "JOBAPI";

@@ -42,8 +42,3 @@ abstract class ClassBaseClientSideHTMLJobSitePlugin extends ClassBaseJobsSitePlu
     protected $additionalFlags =[C__JOB_USE_SELENIUM];
 }
 
-
-abstract class ClassBaseXMLJobSitePlugin extends ClassBaseJobsSitePlugin
-{
-    protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
-}

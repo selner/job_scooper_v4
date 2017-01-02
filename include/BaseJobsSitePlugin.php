@@ -590,11 +590,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             {
                 $GLOBALS['logger']->logLine(("No previously retrieved & cached results found.  Starting data pull for " . $this->siteName . "[". $searchDetails['name']), \Scooper\C__DISPLAY_ITEM_RESULT__);
 
-                if($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_XML__)
-                {
-                    $arrPageJobsList = $this->_getMyJobsForSearchFromXML_($searchDetails);
-                }
-                elseif($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__)
+                if($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__)
                 {
                     $arrPageJobsList = $this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
                 }
@@ -809,91 +805,6 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
 
     }
 
-
-    private function _getMyJobsForSearchFromXML_($searchDetails)
-    {
-
-        ini_set("user_agent",C__STR_USER_AGENT__);
-        ini_set("max_execution_time", 0);
-        ini_set("memory_limit", "10000M");
-        $arrSearchReturnedJobs = null;;
-
-        $nItemCount = 1;
-        $nPageCount = 1;
-
-        $GLOBALS['logger']->logLine("Downloading count of " . $this->siteName ." jobs for search '".$searchDetails['key']. "': ".$searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-        $class = new \Scooper\ScooperDataAPIWrapper();
-        $class->setVerbose(isVerbose());
-        $ret = $class->cURL($searchDetails['search_start_url'], null, 'GET', 'text/xml; charset=UTF-8');
-        $xmlResult = simplexml_load_string($ret['output']);
-
-        if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$searchDetails['search_start_url']);
-        $xmlResult->registerXPathNamespace("def", "http://www.w3.org/2005/Atom");
-
-        if($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
-        {
-            $totalPagesCount = 1;
-            $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__  ; // placeholder because we don't know how many are on the page
-        }
-        else
-        {
-            $strTotalResults = $this->parseTotalResultsCount($xmlResult);
-            $strTotalResults  = intval(str_replace(",", "", $strTotalResults));
-            $nTotalListings = intval($strTotalResults);
-            $totalPagesCount = \Scooper\intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
-            if($totalPagesCount < 1)  $totalPagesCount = 1;
-        }
-
-        if($nTotalListings <= 0)
-        {
-            $GLOBALS['logger']->logLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['name']."'.", \Scooper\C__DISPLAY_ITEM_RESULT__);
-            return array();
-        }
-        else
-        {
-
-            $GLOBALS['logger']->logLine("Querying " . $this->siteName ." for " . $totalPagesCount . " pages with ". ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__   ? "an unknown number of" : $nTotalListings) . " jobs:  ".$searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-            while ($nPageCount <= $totalPagesCount )
-            {
-                $arrPageJobsList = null;
-
-                $strURL = $this->_getURLfromBase_($searchDetails, $nPageCount, $nItemCount);
-                if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
-                    return null;;
-
-                if(!($nPageCount == 1 && isset($xmlResult)))
-                {
-                    $class = new \Scooper\ScooperDataAPIWrapper();
-                    $class->setVerbose(isVerbose());
-                    $ret = $class->cURL($strURL,'' , 'GET', 'application/rss+xml');
-
-                    $xmlResult = simplexml_load_string($ret['output']);
-                    if(!$xmlResult) throw new ErrorException("Error:  unable to get SimpleXML object for ".$strURL);
-                }
-                $arrPageJobsList = $this->parseJobsListForPage($xmlResult);
-                if(!is_array($arrPageJobsList) && $nPageCount > 1)
-                {
-                    // we likely hit a page where jobs started to be hidden.
-                    // Go ahead and bail on the loop here
-                    $strWarnHiddenListings = "Could not get all job results back from ". $this->siteName . " for this search starting on page " . $nPageCount.".";
-                    if($nPageCount < $totalPagesCount)
-                        $strWarnHiddenListings .= "  They likely have hidden the remaining " . ($totalPagesCount - $nPageCount) . " pages worth. ";
-
-                    $GLOBALS['logger']->logLine($strWarnHiddenListings, \Scooper\C__DISPLAY_ITEM_START__);
-                    $nPageCount = $totalPagesCount;
-                    continue;
-                }
-
-                addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
-                $nItemCount += $this->nJobListingsPerPage;
-                $nPageCount++;
-            }
-        }
-        $GLOBALS['logger']->logLine($this->siteName . "[".$searchDetails['name']."]" .": " . $nItemCount . " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
-        return $arrSearchReturnedJobs;
-    }
 
     protected function getNextInfiniteScrollSet($driver)
     {
