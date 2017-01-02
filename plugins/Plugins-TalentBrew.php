@@ -51,7 +51,7 @@ class BasePluginTalentBrew extends ClassClientHTMLJobSitePlugin
     protected $strBaseURLFormat = "https://jobs.disneycareers.com/search-jobs/***KEYWORDS***/***LOCATION***";
     protected $additionalFlags = [ C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE ];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
-    protected $additionalLoadDelaySeconds = 8;
+    protected $additionalLoadDelaySeconds = 5;
 
     protected $nJobListingsPerPage = 50;
 
