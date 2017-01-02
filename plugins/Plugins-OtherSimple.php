@@ -357,9 +357,11 @@ class PluginDotJobs extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = 'dotjobs';
     protected $siteBaseURL = '';
-    protected $flagSettings = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_INFSCROLLPAGE ];
+    protected $nJobListingsPerPage = 20;
+    protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_INFSCROLLPAGE ];
     protected $strBaseURLFormat = "http://washington.jobs/jobs?location=***LOCATION***&q=***KEYWORDS***";
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
+    protected $additionalLoadDelaySeconds = 3;
 
     protected $arrListingTagSetup = array(
         'tag_listings_count' => array('tag' => 'h3', 'attribute'=>'class', 'attribute_value' => 'direct_highlightedText', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/.*?(\d+)\s*jobs/i'),
@@ -369,7 +371,7 @@ class PluginDotJobs extends ClassClientHTMLJobSitePlugin
         'tag_company' =>  array(array('tag' => 'div'), array('tag' => 'span'),array('tag' => 'b'), 'return_attribute' => 'plaintext'),
         'tag_location' =>  array(array('tag' => 'div'), array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'hiringPlace'), array('tag' => 'span'), array('tag' => 'span'), 'return_attribute' => 'plaintext'),
         'tag_job_id' =>  array(array('tag' => 'h4'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>  '/\/([\w\d]+)\/job.*/i'),
-        'tag_load_more' =>  array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'ladda-button')
+        'tag_load_more' =>  array('tag' => 'a', 'attribute' => 'id', 'attribute_value' =>'button_moreJobs')
     );
 
 

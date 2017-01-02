@@ -33,16 +33,6 @@ abstract class ClassHTMLJobSitePlugin extends ClassBaseHTMLJobSitePlugin
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
 }
 
-
-abstract class ClassBaseMicroDataPlugin extends ClassHTMLJobSitePlugin
-{
-    protected $siteBaseURL = '';
-    protected $siteName = '';
-    protected $flagSettings = [C__JOB_PREFER_MICRODATA];
-
-}
-
-
 abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
 {
     protected $siteName = '';
