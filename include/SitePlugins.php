@@ -47,7 +47,6 @@ require_once (__ROOT__.'/plugins/PluginLinkUp.php');
 require_once (__ROOT__.'/plugins/PluginCareerBuilder.php');
 require_once (__ROOT__.'/plugins/PluginGoogle.php');
 require_once (__ROOT__.'/plugins/PluginGeekwire.php');
-require_once (__ROOT__.'/plugins/PluginDotJobs.php');
 
 require_once (__ROOT__.'/plugins/PluginZipRecruiter.php');
 
