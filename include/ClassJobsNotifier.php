@@ -537,8 +537,53 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
     }
 
-    function sendErrorEmail($strBodyText = null, $arrDetailsAttachFiles = array())
+//
+//    private function _getFailedSearchesByPlugin_()
+//    {
+//        $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function($k) {
+//            return ($k['search_run_result']['success'] !== true);
+//        });
+//
+//        $arrFailedPluginsReport = array();
+//        foreach($arrFailedSearches as $search)
+//            $arrFailedPluginsReport[$search['site_name']][$search['key']] = $search;
+//
+//        return $arrFailedPluginsReport;
+//    }
+
+    private function _getFailedSearchesAlertBody_()
     {
+        $strErrorText = null;
+
+        $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function($k) {
+            return ($k['search_run_result']['success'] !== true);
+        });
+
+        $arrFailedPluginsReport = array();
+        foreach($arrFailedSearches as $search)
+            $arrFailedPluginsReport[$search['site_name']][$search['key']] = $search;
+
+        if(countAssociativeArrayValues($arrFailedPluginsReport) > 0)
+        {
+            $jsonFailedSearches = json_encode($arrFailedPluginsReport, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+
+            $strErrorText = "The following site plugins returned an error or had zero listings found unexpectedly:  " . PHP_EOL . $jsonFailedSearches . PHP_EOL . PHP_EOL . "App version = " . __APP_VERSION__;
+            if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Errors detected for the run searches.  attempting to send error notification email:  " . PHP_EOL . $strErrorText, \Scooper\C__DISPLAY_NORMAL__); }
+        }
+        else
+        {
+            if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("No error notification necessary:  no errors detected for the run searches.", \Scooper\C__DISPLAY_NORMAL__); }
+        }
+        return $strErrorText;
+
+    }
+
+    function sendErrorEmail()
+    {
+        $strBodyText = $this->_getFailedSearchesAlertBody_();
+        if(strlen($strBodyText) == 0)
+            return null;
+
         $messageText = "";
 
         //
@@ -558,7 +603,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
         $subject = "JobsScooper Error(s) Notification [for Run Dated " . $this->_getRunDateRange_() . "]";
 
-        return $this->sendEmail($messageText, $messageHtml, $arrDetailsAttachFiles, $subject, "error");
+        return $this->sendEmail($messageText, $messageHtml, null, $subject, "error");
 
 
 
