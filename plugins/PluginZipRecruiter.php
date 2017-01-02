@@ -25,7 +25,7 @@ class PluginZipRecruiter extends ClassBaseServerHTMLJobSitePlugin
     protected $siteBaseURL = 'https://jobs.ziprecruiter.com';
     protected $nJobListingsPerPage = 20;
     protected $strBaseURLFormat = "https://www.ziprecruiter.com/candidate/search?search=***KEYWORDS***&location=***LOCATION***&radius=25&page=***PAGE_NUMBER***&days=***NUMBER_DAYS***";
-    protected $flagSettings = [C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS, C__JOB_PREFER_MICRODATA];
+    protected $additionalFlags = [C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS, C__JOB_PREFER_MICRODATA];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $regex_link_job_id = '/^.*\/clk\/(.*)/i';
 

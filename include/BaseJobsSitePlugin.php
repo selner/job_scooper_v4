@@ -37,7 +37,6 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
 
     protected $siteName = 'NAME-NOT-SET';
     protected $nJobListingsPerPage = 20;
-    protected $flagSettings = [];
     protected $additionalFlags = [];
     protected $secsPageTimeout = null;
     protected $pluginResultsType;
@@ -47,6 +46,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
     protected $classToCheckExists = null;
     protected $cookieNamesToSaveAndResend = Array();
     protected $additionalLoadDelaySeconds = 0;
+    protected $_flags_ = null;
 
     function __construct($strOutputDirectory = null, $attributes = null)
     {
@@ -65,7 +65,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             }
         }
 
-        if($this->additionalFlags)
+        if(is_array($this->additionalFlags))
         {
             foreach($this->additionalFlags as $flag)
             {
@@ -73,7 +73,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                 // actually unset that flag incorrectly
                 if(!$this->isBitFlagSet($flag))
                 {
-                    $this->flagSettings = $this->flagSettings | $flag;
+                    $this->_flags_ = $this->_flags_ | $flag;
                 }
             }
         }

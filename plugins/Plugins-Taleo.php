@@ -99,7 +99,7 @@ abstract class BaseTaleoPlugin extends ClassBaseServerHTMLJobSitePlugin
 
 
     protected $strBaseURLFormat = null;
-    protected $flagSettings = [C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED];
+    protected $additionalFlags = [C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED];
 
     function getItemURLValue($nItem)
     {

@@ -40,7 +40,7 @@ class PluginAmazon extends ClassBaseClientSideHTMLJobSitePlugin
     protected $nJobListingsPerPage = 100;
     protected $siteBaseURL = 'http://www.amazon.jobs';
     protected $strBaseURLFormat = "https://www.amazon.jobs/en/search?base_query=***KEYWORDS***&location%5B%5D=***LOCATION***&result_limit=100&sort=recent&cache";
-    protected $flagSettings = [C__JOB_CLIENTSIDE_INFSCROLLPAGE];
+    protected $additionalFlags = [C__JOB_CLIENTSIDE_INFSCROLLPAGE];
     protected $typeLocationSearchNeeded = 'location-city-dash-statecode';
 
     function parseTotalResultsCount($objSimpHTML)

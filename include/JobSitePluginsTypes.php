@@ -21,9 +21,13 @@ require_once(__ROOT__ . '/include/BaseJobsSitePlugin.php');
 
 abstract class ClassBaseJobsAPIPlugin extends ClassBaseJobsSitePlugin
 {
-    protected $siteBaseURL = '';
-    protected $siteName = '';
-    protected $flagSettings = [ C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
+    function __construct($strBaseDir = null)
+    {
+        $this->additionalFlags[] = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
+        $this->additionalFlags[] = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
+        parent::__construct($strBaseDir);
+
+    }
 
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__;
 

@@ -36,7 +36,6 @@ class ClassJobsSiteCommon
     protected $regex_link_job_id = null;
     protected $strBaseURLFormat = null;
     protected $typeLocationSearchNeeded = null;
-    protected $flagSettings = null;
 
     function __construct($strOutputDirectory = null)
     {
@@ -45,19 +44,19 @@ class ClassJobsSiteCommon
             $this->detailsMyFileOut = \Scooper\parseFilePath($strOutputDirectory, false);
         }
 
-        if(is_array($this->flagSettings))
-        {
-            $arrSettings = $this->flagSettings;
-            $this->flagSettings = null;
-            foreach($arrSettings as $flag)
-                $this->flagSettings = $this->flagSettings | $flag;
-        }
+//        if(is_array($this->_flags_))
+//        {
+//            $arrSettings = $this->_flags_;
+//            $this->_flags_ = null;
+//            foreach($arrSettings as $flag)
+//                $this->_flags_ = $this->_flags_ | $flag;
+//        }
     }
 
 
     function isBitFlagSet($flagToCheck)
     {
-        $ret = \Scooper\isBitFlagSet($this->flagSettings, $flagToCheck);
+        $ret = \Scooper\isBitFlagSet($this->_flags_, $flagToCheck);
         if($ret == $flagToCheck) { return true; }
         return false;
     }

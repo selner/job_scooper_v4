@@ -24,7 +24,7 @@ class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
     protected $nJobListingsPerPage = 50;
     protected $siteBaseURL = 'http://www.Indeed.com';
     protected $strBaseURLFormat = "http://www.indeed.com/jobs?as_cmp=&jt=all&st=&salary=&radius=50&&fromage=***NUMBER_DAYS***&limit=50&sort=date&psf=advsrch&start=50&pp=***ITEM_NUMBER***&filter=0";
-    protected $flagSettings = null;
+    protected $additionalFlags = null;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $strKeywordDelimiter = "OR";
 

@@ -28,7 +28,7 @@ class PluginExpedia extends ClassBaseClientSideHTMLJobSitePlugin
     protected $siteBaseURL = 'https://expedia.wd5.myworkdayjobs.com/search/jobs/';
     protected $strBaseURLFormat = 'https://expedia.wd5.myworkdayjobs.com/search/jobs/';
     protected $nJobListingsPerPage = 100;
-    protected $flagSettings = [C__JOB_SETTINGS_URL_VALUE_REQUIRED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_CLIENTSIDE_INFSCROLLPAGE];
+    protected $additionalFlags = [C__JOB_SETTINGS_URL_VALUE_REQUIRED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_CLIENTSIDE_INFSCROLLPAGE];
 
 
     function getDaysURLValue($days = null) {

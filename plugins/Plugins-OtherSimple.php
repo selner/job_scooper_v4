@@ -58,12 +58,12 @@ class PluginTesla extends ClassClientHTMLJobSitePlugin
 
 
 
-class PluginSmashingMagazine extends ClassBaseHTMLJobSitePlugin
+class PluginSmashingMagazine extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = 'SmashingMagazine';
     protected $childSiteURLBase = 'http://jobs.smashingmagazine.com';
     protected $childSiteListingPage = 'http://jobs.smashingmagazine.com';
-    protected $flagSettings = [C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
+    protected $additionalFlags = [C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
 
     protected $arrListingTagSetup = array(
         'tag_listings_section' => array(array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' =>'entry-list compact'), array('tag' => 'li')),
@@ -335,7 +335,7 @@ class PluginAuthenticJobs extends ClassClientHTMLJobSitePlugin
     protected $siteName = 'AuthenticJobs';
     protected $siteBaseURL = "https://authenticjobs.com";
     protected $strBaseURLFormat = 'https://authenticjobs.com/#location=***LOCATION***&query=***KEYWORDS***';
-    protected $flagSettings = [C__JOB_CLIENTSIDE_INFSCROLLPAGE, C__JOB_PAGECOUNT_NOTAPPLICABLE__ , C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
+    protected $additionalFlags = [C__JOB_CLIENTSIDE_INFSCROLLPAGE, C__JOB_PAGECOUNT_NOTAPPLICABLE__ , C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $nJobListingsPerPage = 50;
 

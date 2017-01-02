@@ -22,7 +22,6 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 class ClassMultiSiteSearch extends ClassJobsSiteCommon
 {
     protected $siteName = 'Multisite';
-    protected $flagSettings = null;
     protected $arrSearchLocationSetsToRun = null;
     private $arrPluginClassesToRun = array();
     function __destruct()

@@ -24,7 +24,13 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 abstract class ClassClientHTMLJobSitePlugin extends ClassBaseHTMLJobSitePlugin
 {
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__;
-    protected $flagSettings =[C__JOB_USE_SELENIUM];
+
+    function __construct($strBaseDir = null)
+    {
+        $this->additionalFlags[] = C__JOB_USE_SELENIUM;
+        parent::__construct($strBaseDir);
+
+    }
 }
 
 
