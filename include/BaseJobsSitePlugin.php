@@ -1061,6 +1061,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                                 $GLOBALS['logger']->logLine($strWarnHiddenListings, \Scooper\C__DISPLAY_ITEM_START__);
                                 $nPageCount = $totalPagesCount;
                             }
+
                         }
 
                         if(is_array($arrPageJobsList))
@@ -1069,6 +1070,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                             $nJobsFound = countJobRecords($arrSearchReturnedJobs);
                             if($nItemCount == 1) { $nItemCount = 0; }
                             $nItemCount += ($nJobsFound < $this->nJobListingsPerPage) ? $nJobsFound : $this->nJobListingsPerPage;
+                            $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($arrSearchReturnedJobs). " of " . $nTotalListings . " job listings from " . $this->siteName, \Scooper\C__DISPLAY_NORMAL__ );
                         }
                     } catch (Exception $ex) {
                         $GLOBALS['logger']->logLine($this->siteName . " error: " . $ex, \Scooper\C__DISPLAY_ERROR__);
