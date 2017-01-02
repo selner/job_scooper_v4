@@ -233,7 +233,7 @@ class StageManager extends S3JobListManager
 
     function __destruct()
     {
-        $this->logger->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); 
+        if(isset($GLOBALS['logger'])) $this->logger->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__);
 
     }
 
