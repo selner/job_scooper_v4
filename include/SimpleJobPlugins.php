@@ -43,18 +43,6 @@ abstract class ClassBaseMicroDataPlugin extends ClassHTMLJobSitePlugin
 }
 
 
-abstract class ClassSimpleFullPageJobSitePlugin extends ClassHTMLJobSitePlugin
-{
-    protected $childSiteURLBase = '';
-    protected $childSiteListingPage = '';
-    protected $flagSettings = [C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
-
-    protected function _getURLfromBase_($searchDetails, $nPage = null, $nItem = null)
-    {
-        return $this->childSiteListingPage;
-    }
-}
-
 abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
 {
     protected $siteName = '';
@@ -108,9 +96,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
     function parseTotalResultsCount($objSimpHTML)
     {
         $retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
-        if($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__))
-            $retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
-        else if(array_key_exists('tag_listings_count', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_listings_count']))
+        if(array_key_exists('tag_listings_count', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_listings_count']))
         {
             $retJobCount = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_listings_count'], $propertyName='plaintext');
             if(is_null($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
@@ -124,8 +110,9 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
 
             $retJobCount = $retPageCount * $this->nJobListingsPerPage;
         }
-
-    else
+        elseif($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__))
+            $retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
+        else
             throw new Exception("Error: plugin is missing either C__JOB_PAGECOUNT_NOTAPPLICABLE__ flag or an implementation of parseTotalResultsCount for that job site. Cannot complete search.");
 
         return $retJobCount;

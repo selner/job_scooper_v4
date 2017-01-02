@@ -20,8 +20,9 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 
 
-abstract class ClassBaseResumatorTablesPlugin extends ClassSimpleFullPageJobSitePlugin
+abstract class ClassBaseResumatorTablesPlugin extends ClassHTMLJobSitePlugin
 {
+    protected $flagSettings = [C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
     protected $arrListingTagSetup = array(
         'tag_listings_section' => array(array('tag' => 'table', 'attribute' => 'class', 'attribute_value' =>'resumator-job-listings'), array('tag' => 'tr', 'attribute' => '', 'attribute_value' =>'')),
         'tag_title' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'resumator-job-title-link'),
@@ -33,8 +34,9 @@ abstract class ClassBaseResumatorTablesPlugin extends ClassSimpleFullPageJobSite
 
 }
 
-abstract class ClassBaseResumatorDivPlugin extends ClassSimpleFullPageJobSitePlugin
+abstract class ClassBaseResumatorDivPlugin extends ClassHTMLJobSitePlugin
 {
+    protected $flagSettings = [C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
     protected $arrListingTagSetup = array(
         'tag_listings_section' => array(array('tag' => 'div', 'attribute' => 'id', 'attribute_value' =>'resumator-content-left-wrapper'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'resumator-job')),
         'tag_title' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'resumator-job-title-link'),

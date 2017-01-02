@@ -38,32 +38,32 @@ class PluginOuterwall extends ClassHTMLJobSitePlugin
 }
 
 
-class PluginTesla extends ClassSimpleFullPageJobSitePlugin
+class PluginTesla extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = 'Tesla';
     protected $childSiteURLBase = 'https://www.tesla.com/careers/search#';
     protected $childSiteListingPage = 'https://www.tesla.com/careers/search#';
-    protected $additionalFlags = [ C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
+    protected $additionalFlags = [ C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
 
     protected $arrListingTagSetup = array(
-        'tag_listings_section' => array('tag' => 'tr', 'attribute' => 'class', 'attribute_value' =>'table-row'),
+        'tag_listings_section' => array(array('tag' => 'table', 'attribute' => 'class', 'attribute_value' =>'table'), array('tag' => 'tbody', 'attribute' => 'class', 'attribute_value' =>'table-body'), array('tag' => 'tr', 'attribute' => 'class', 'attribute_value' =>'table-row')),
         'tag_title' => array(array('tag' => 'th', 'attribute' => 'class', 'attribute_value' => 'listing-title'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
         'tag_link' => array(array('tag' => 'th', 'attribute' => 'class', 'attribute_value' => 'listing-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
+        'tag_job_id' => array(array('tag' => 'th', 'attribute' => 'class', 'attribute_value' => 'listing-title'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>  '/.*?-(\d+)/i'),
         'tag_department' => array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'listing-department'),
-        'tag_location' => array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'listing-location'),
-        'regex_link_job_id' => '/job\/([^\/]+)/i'
+        'tag_location' => array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'listing-location')
     );
 
 }
 
 
 
-class PluginSmashingMagazine extends ClassSimpleFullPageJobSitePlugin
+class PluginSmashingMagazine extends ClassBaseHTMLJobSitePlugin
 {
     protected $siteName = 'SmashingMagazine';
     protected $childSiteURLBase = 'http://jobs.smashingmagazine.com';
     protected $childSiteListingPage = 'http://jobs.smashingmagazine.com';
-    protected $additionalFlags = [];
+    protected $flagSettings = [C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
 
     protected $arrListingTagSetup = array(
         'tag_listings_section' => array(array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' =>'entry-list compact'), array('tag' => 'li')),
@@ -178,14 +178,14 @@ class PluginParivedaSolutions extends BasePluginiCIMS
 
 class BasePluginiCIMS extends ClassHTMLJobSitePlugin
 {
-    protected $additionalFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED];
+    protected $additionalFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED];
     protected $nJobListingsPerPage = 20;
     protected $strInitialReferer = "https://careers-parivedasolutions.icims.com/jobs/search?pr=0";
     protected $arrResultsRowTDIndex = null;
 
     function __construct($strBaseDir = null)
     {
-        $this->strBaseURLFormat = $this->siteBaseURL . "/jobs/search?pr=***PAGE_NUMBER***&in_iframe=1";
+        $this->strBaseURLFormat = $this->siteBaseURL . "/jobs/search?pr=***PAGE_NUMBER***&in_iframe=1&searchKeyword=***KEYWORDS***";
 
         if(is_null($this->arrResultsRowTDIndex))
             throw new InvalidArgumentException("Error in iCIMS plugin:  you must map the columns in the results table to the correct indexes for HTML tag matching. Aborting.");
