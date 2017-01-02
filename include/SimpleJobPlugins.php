@@ -275,8 +275,16 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
             {
                 try
                 {
-                    $driver->executeScript(sprintf("function callNextPage() { var elem = document.querySelector('%s');  if (elem != null) { console.log('attempting next button click on element a.next'); elem.click(); return true; } else return false; } ; callNextPage();", $strMatch));
-                    sleep($this->additionalLoadDelaySeconds);
+                    $GLOBALS['logger']->logLine("Going to next page of results via CSS object " . $strMatch, \Scooper\C__DISPLAY_NORMAL__);
+                    $arrArgs = array();
+                    $ret = $driver->executeScript(sprintf("function callNextPage() { var elem = window.document.querySelector('". $strMatch . "');  if (elem != null) { console.log('attempting next button click on element a.next'); elem.click(); return true; } else return false; } ; return callNextPage();", $arrArgs));
+                    if ($ret === false)
+                        $GLOBALS['logger']->logLine("Failed to find and click the control to go to the next page of results...", \Scooper\C__DISPLAY_ERROR__);
+                    else
+                        sleep($this->additionalLoadDelaySeconds);
+                        $GLOBALS['logger']->logLine("Next page of job listings loaded successfully.  ", \Scooper\C__DISPLAY_NORMAL__);
+
+
                     return $driver;
                 }
                 catch (Exception $ex)
@@ -297,7 +305,9 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
             $strMatch = $this->getTagSelector($this->arrListingTagSetup['tag_load_more']);
             if(isset($strMatch))
             {
-                $driver->executeScript(sprintf("function callLoadMore() { var elem = document.querySelector('%s');  if (elem != null) { console.log('Attempting more button click on element %s'); elem.click(); return true; } else { return false; }; } ; callLoadMore();", $strMatch, $strMatch));
+                $GLOBALS['logger']->logLine("Loading more results via CSS object " . $strMatch, \Scooper\C__DISPLAY_NORMAL__);
+                $arrArgs = array();
+                $driver->executeScript(sprintf("function callLoadMore() { var elem = document.querySelector('". $strMatch . "');  if (elem != null) { console.log('Attempting more button click on element %s'); elem.click(); return true; } else { return false; }; } ; return callLoadMore();", $arrArgs));
                 sleep($this->additionalLoadDelaySeconds);
                 return $driver;
             }
