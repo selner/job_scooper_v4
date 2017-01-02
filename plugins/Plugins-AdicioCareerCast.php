@@ -33,11 +33,11 @@ abstract class BaseAdicioCareerCastPlugin extends ClassBaseClientSideHTMLJobSite
 #    protected $strBaseURLPathSection = "/jobs/search/results?kwsJobTitleOnly=true&view=List_Detail&networkView=national&radius=50&&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***&postDate=***NUMBER_DAYS***";
     protected $additionalLoadDelaySeconds = 10;
     protected $typeLocationSearchNeeded = 'location-city-comma-state';
-    protected $flagSettings = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_PREFER_MICRODATA];
 
 
     function __construct($strOutputDirectory = null)
     {
+        $this->additionalFlags[] = C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES;
         $this->siteBaseURL = $this->childSiteURLBase;
         $this->strBaseURLFormat = $this->childSiteURLBase . $this->strBaseURLPathSection . $this->strBaseURLPathSuffix;
         parent::__construct($strOutputDirectory);
@@ -336,7 +336,7 @@ class PluginRetailCareersNow extends BaseAdicioCareerCastPlugin
 }
 class PluginHealthJobs extends BaseAdicioCareerCastPlugin
 {
-    protected $siteName = 'HealthProfressionalsJobsPlus';
+    protected $siteName = 'HealthJobs';
     protected $childSiteURLBase = 'http://healthjobs.careers.adicio.com';
 }
 class PluginPharmacyJobCenter extends BaseAdicioCareerCastPlugin
