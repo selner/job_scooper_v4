@@ -69,8 +69,8 @@ class PluginSmashingMagazine extends ClassClientHTMLJobSitePlugin
         'tag_listings_section' => array(array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' =>'entry-list compact'), array('tag' => 'li')),
         'tag_title' => array('tag' => 'h2'),
         'tag_link' =>  array(array('tag' => 'a'), 'return_attribute' => 'href'),
+        'tag_job_id' =>  array(array('tag' => 'article'), 'return_attribute' => 'id'),
         'tag_company' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'entry-company'),
-        'regex_link_job_id' => '/(.*)/i'
     );
 
 }
