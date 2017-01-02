@@ -237,12 +237,14 @@ class PluginCyclon extends ClassHTMLJobSitePlugin
     protected $arrListingTagSetup = array(
         'tag_listings_count' => array('selector' => '#searchCount' , 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?of\s+(\d+).*?/'),
         'tag_listings_section' => array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'joblists clearfix'),
-        'tag_title' =>  array('tag' => 'a', 'return_attribute' => 'plaintext'),
+        'tag_title' =>  array(array('tag' => 'div'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
         'tag_link' =>  array('tag' => 'a', 'return_attribute' => 'href'),
-        'tag_job_id' =>  array(array('tag' => 'td', 'index' =>1), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' => '/.*?RedirectWEB\.php\?q=(.+)&*.*/'),
+        'tag_next_button' => array('selector' => '#page-top > section > div > div.row.text-left > div.col-lg-9 > table > tbody > tr:nth-child(1) > td:nth-child(3) > a'),
+        'tag_job_id' =>  array(array('tag' => 'a'), 'return_attribute' => 'href'),  //, 'return_value_regex' => '/.*?RedirectWEB\.php\?q=(.+)&*.*/'),
+//        'tag_job_id' =>  array(array('tag' => 'button', 'attribute'=>'class', 'attribute_value' =>"btn btn-default"), 'return_attribute' => 'id'),
         'tag_job_posting_date' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'date')
     );
-    protected function getItemURLValue($nItem) { return ($nItem == null || $nItem == "" || $nItem <= 1) ? "" : ($nItem - 1); }
+//    protected function getItemURLValue($nItem) { return ($nItem == null || $nItem == "" || $nItem <= 1) ? "" : ($nItem - 1); }
 
 }
 
