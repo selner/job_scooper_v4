@@ -43,6 +43,12 @@ abstract class ClassBaseServerHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
 abstract class ClassBaseClientSideHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
 {
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__;
-    protected $additionalFlags =[C__JOB_USE_SELENIUM];
+    function __construct($strBaseDir = null)
+    {
+        $this->additionalFlags[] = C__JOB_USE_SELENIUM;
+        parent::__construct($strBaseDir);
+
+    }
+
 }
 
