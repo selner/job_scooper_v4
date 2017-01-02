@@ -49,10 +49,9 @@ class PluginDisney extends BasePluginTalentBrew
 class BasePluginTalentBrew extends ClassClientHTMLJobSitePlugin
 {
     protected $strBaseURLFormat = "https://jobs.disneycareers.com/search-jobs/***KEYWORDS***/***LOCATION***";
-    protected $flagSettings = [ C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE ];
-    protected $additionalFlags = [ ];
+    protected $additionalFlags = [ C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE ];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
-    protected $additionalLoadDelaySeconds = 5;
+    protected $additionalLoadDelaySeconds = 8;
 
     protected $nJobListingsPerPage = 50;
 
@@ -61,10 +60,10 @@ class BasePluginTalentBrew extends ClassClientHTMLJobSitePlugin
         'tag_listings_section' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results-list'), array('tag' => 'ul'),array('tag' => 'li')),
         'tag_title' =>  array(array('tag' => 'a'), array('tag' => 'h2')),
         'tag_link' =>  array(array('tag' => 'a'), 'return_attribute' => 'href'),
+        'tag_job_id' =>  array(array('tag' => 'a'), 'return_attribute' => 'data-job-id'),
         'tag_location' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'job-location'),
         'tag_job_posting_date' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'job-date-posted'),
-        'tag_next_button' => array('selector' => '#pagination-bottom > div.pagination-paging > a.next'),
-        'regex_link_job_id' => '/.*?\/(.*?\/[^\/]]+)/i'
+        'tag_next_button' => array('selector' => '#pagination-bottom > div.pagination-paging > a.next')
     );
 
 }
