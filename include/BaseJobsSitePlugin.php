@@ -1002,10 +1002,21 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                                 $html = $driver->getPageSource();
                                 $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
                             }
-                            else if(!$this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE))
+                            else if($this->isBitFlagSet( C__JOB_PAGE_VIA_URL))
                             {
-                                if(method_exists($this, 'takeNextPageAction') && $nPageCount > 1 && $nPageCount < $totalPagesCount)
-                                {
+                                $strURL = $this->_getURLfromBase_($searchDetails, $nPageCount, $nItemCount);
+                                if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
+                                    return null;
+
+                                $driver->get($strURL);
+                                // BUGBUG -- Checking these two HTML values to make sure they still match
+                                $strURL = $driver->getCurrentURL();
+                                $html = $driver->getPageSource();
+                                $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+                            }
+
+                            else if(!$this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE)) {
+                                if (method_exists($this, 'takeNextPageAction') && $nPageCount > 1 && $nPageCount < $totalPagesCount) {
                                     //
                                     // if we got a driver instance back, then we got a new page
                                     // otherwise we're out of results so end the loop here.
