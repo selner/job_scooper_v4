@@ -1021,7 +1021,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                 // we must assume there is only one page of results in total.
                 $totalPagesCount = 1;
 
-            } elseif(!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__))
+            } elseif(!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
             {
                 $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML->root);
                 $nTotalResults  = intval(str_replace(",", "", $strTotalResults));
@@ -1171,7 +1171,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                     //
                     // If either is not true, then we're likely in an error condtion and about to go a bit wacky, possibly in a major loop.
                     // Throw an error for this search instead and move on.
-                    if(($nTotalListings > 0 && $nItemCount == 0) || ($nItemCount < $this->nJobListingsPerPage && $nPageCount < $totalPagesCount))
+                    if(!$nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ && (($nTotalListings > 0 && $nItemCount == 0) || ($nItemCount < $this->nJobListingsPerPage && $nPageCount < $totalPagesCount)))
                     {
                         $msg = "Error retrieving job listings for " . $this->siteName  . ".  We did not retrieve the " . $nTotalListings . " or full page of listings we expected.  Aborting search to prevent issues.";
                         $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
