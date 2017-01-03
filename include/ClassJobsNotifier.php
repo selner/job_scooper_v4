@@ -541,9 +541,43 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
     }
 
-//
-//    private function _getFailedSearchesByPlugin_()
-//    {
+
+    private function _getFailedSearchesByPlugin_()
+    {
+        if(!array_key_exists('search_results', $GLOBALS['USERDATA']) || is_null($GLOBALS['USERDATA']['search_results']))
+            return null;
+
+
+        $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function($k) {
+            return ($k['search_run_result']['success'] !== true);
+        });
+
+        if (is_null($arrFailedSearches) || !is_array($arrFailedSearches))
+            return null;
+
+        $arrFailedPluginsReport = array();
+        foreach($arrFailedSearches as $search) {
+            if (!is_null($search['search_run_result']['success'])) {
+                $arrFailedPluginsReport[$search['site_name']][$search['key']] = cloneArray($search, array(
+                    'keywords_string_for_url',
+                    'base_url_format',
+                    'keywords_array_tokenized',
+                    'user_setting_flags',
+                    'search_start_url',
+                    'location_set_key',
+                    'location_user_specified_override',
+                    'location_search_value',
+                    'keyword_search_override',
+                    'keywords_array'));
+            }
+        }
+        return $arrFailedPluginsReport;
+    }
+
+    private function _getFailedSearchesAlertBody_()
+    {
+        $strErrorText = null;
+        $arrFailedPluginsReport = $this->_getFailedSearchesByPlugin_();
 //        $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function($k) {
 //            return ($k['search_run_result']['success'] !== true);
 //        });
@@ -551,21 +585,6 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 //        $arrFailedPluginsReport = array();
 //        foreach($arrFailedSearches as $search)
 //            $arrFailedPluginsReport[$search['site_name']][$search['key']] = $search;
-//
-//        return $arrFailedPluginsReport;
-//    }
-
-    private function _getFailedSearchesAlertBody_()
-    {
-        $strErrorText = null;
-
-        $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function($k) {
-            return ($k['search_run_result']['success'] !== true);
-        });
-
-        $arrFailedPluginsReport = array();
-        foreach($arrFailedSearches as $search)
-            $arrFailedPluginsReport[$search['site_name']][$search['key']] = $search;
 
         if(countAssociativeArrayValues($arrFailedPluginsReport) > 0)
         {

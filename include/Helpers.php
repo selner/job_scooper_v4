@@ -277,6 +277,19 @@ function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strD
     return $strReturn;
 }
 
+function cloneArray($source, $arrDontCopyTheseKeys = array())
+{
+    $retDetails = \Scooper\array_copy($source);
+
+    foreach($arrDontCopyTheseKeys as $key)
+    {
+        unset($retDetails[$key]);
+    }
+
+    return $retDetails;
+}
+
+
 function array_mapk($callback, $array) {
     $newArray = array();
     foreach ($array as $k => $v) {
