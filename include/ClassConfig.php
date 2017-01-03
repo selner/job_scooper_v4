@@ -766,9 +766,8 @@ class ClassConfig extends ClassBaseJobsSitePlugin
 
 
                 $classPlug = new $GLOBALS['JOBSITE_PLUGINS'][$GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['site_name']]['class_name'](null, null);
-                if($classPlug->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
-                {
-                    // This site does not support location search keywords
+                if ($classPlug->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || $classPlug->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED)) {
+                    // this search doesn't support specifying locations so we shouldn't clone it for a second location set
                     continue;
                 }
 
