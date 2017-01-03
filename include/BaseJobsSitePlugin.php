@@ -960,7 +960,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             //
             if (isTestRun())
             {
-                $nTotalListings = (is_null($this->nJobListingsPerPage) === true) ? 10 : $this->nJobListingsPerPage;
+                $nTotalListings = (is_null($this->nJobListingsPerPage) === true) ? 10 : ($nTotalListings < $this->nJobListingsPerPage) ? $nTotalListings : $this->nJobListingsPerPage;
                 $totalPagesCount = 1;
             }
 
