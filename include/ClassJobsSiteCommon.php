@@ -266,6 +266,9 @@ class ClassJobsSiteCommon
             $retArrNormalized['job_post_url'] = "unknown";
         }
 
+        if(is_null($retArrNormalized['job_id']) || strlen($retArrNormalized['job_id'] <= 0))
+            $retArrNormalized['job_id'] = $retArrNormalized['job_post_url'];
+
         $retArrNormalized['job_id'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $retArrNormalized['job_id']);
         $retArrNormalized ['job_id'] = \Scooper\strScrub($retArrNormalized['job_id'], FOR_LOOKUP_VALUE_MATCHING);
         if (is_null($retArrNormalized['job_id']) || strlen($retArrNormalized['job_id']) == 0) {
