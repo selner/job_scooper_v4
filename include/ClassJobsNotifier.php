@@ -930,7 +930,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         {
             sort($arrNoJobUpdates);
             $strOut .=  PHP_EOL . "<div class='job_scooper section'>". PHP_EOL;
-            $strOut .=  PHP_EOL .  "No updated jobs for " . getTodayAsString() . " on these sites: " . PHP_EOL;
+            $strOut .=  PHP_EOL .  "No jobs were successfully returned for these sites: " . PHP_EOL;
             $strOut .=  PHP_EOL . "<ul class='job_scooper'>". PHP_EOL;
 
             foreach($arrNoJobUpdates as $site)
@@ -1005,7 +1005,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
     {
         $arr = $this->getEmptyJobListingRecord();
 
-        $allKeys  = array_diff(array_keys($arr), array('job_title_tokenized', 'match_notes'));
+        $allKeys  = array_diff(array_keys($arr), array('job_title_tokenized', 'job_title_linked', 'key_jobsite_siteid', 'match_notes'));
         return $allKeys;
 
     }

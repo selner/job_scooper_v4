@@ -111,7 +111,7 @@ class ClassJobsSiteCommon
             'interested' => '',
             'job_post_url' => '',
             'location' => '',
-            'status' => '',
+//            'status' => '',
             'job_site_category' => '',
             'job_site_date' =>'',
             'employment_type' => '',

@@ -338,7 +338,7 @@ function getMergedJobRecord($prevJobRecord, $newerJobRecord)
     if(!isMarked_InterestedOrBlank($prevJobRecord))
     {
         updateJobColumn($mergedJob, $newerJobRecord, 'interested', false);
-        updateJobColumn($mergedJob, $newerJobRecord, 'status', false);
+//        updateJobColumn($mergedJob, $newerJobRecord, 'status', false);
     }
 
 
