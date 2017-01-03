@@ -763,8 +763,11 @@ function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber)
 function readJobsListFromLocalJsonFile($fileKey, $stageNumber=1)
 {
     $data = readJobsListDataFromLocalJsonFile($fileKey, $stageNumber);
-    if(array_key_exists("jobslist", $data))
-        return $data['jobslist'];
+    if(!is_null($data) && is_array($data) && array_key_exists("jobslist", $data)) {
+        $retJobs = array_filter($data['jobslist'], "isIncludedJobSite");
+
+        return $retJobs;
+    }
 
     return null;
 }

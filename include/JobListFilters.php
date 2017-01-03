@@ -144,3 +144,8 @@ function includeJobInFilteredList($var)
     return !$filterYes;
 
 }
+
+function isIncludedJobSite($var)
+{
+    return (array_search($var['job_site'], array_keys($GLOBALS['USERDATA']['configuration_settings']['included_sites'])) !== false);
+}
