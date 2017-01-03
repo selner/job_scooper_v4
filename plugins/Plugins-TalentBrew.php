@@ -41,14 +41,13 @@ class PluginDisney extends BasePluginTalentBrew
 
         parent::__construct($strBaseDir);
         $this->strBaseURLFormat = $this->strBaseURLFormat  . "?orgIds=391-5733-5732&kt=1";
-//        $this->arrListingTagSetup['tag_load_more'] = array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'pagination-show-all');
     }
 
 }
 
 class BasePluginTalentBrew extends ClassClientHTMLJobSitePlugin
 {
-    protected $strBaseURLFormat = "https://jobs.disneycareers.com/search-jobs/***KEYWORDS***/***LOCATION***";
+    protected $strBaseURLFormat = "/search-jobs/***KEYWORDS***/***LOCATION***";
     protected $additionalFlags = [ C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE ];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $additionalLoadDelaySeconds = 5;
@@ -65,5 +64,11 @@ class BasePluginTalentBrew extends ClassClientHTMLJobSitePlugin
         'tag_job_posting_date' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'job-date-posted'),
         'tag_next_button' => array('selector' => '#pagination-bottom > div.pagination-paging > a.next')
     );
+    function __construct($strBaseDir = null)
+    {
+
+        parent::__construct($strBaseDir);
+        $this->strBaseURLFormat = $this->siteBaseURL . $this->strBaseURLFormat;
+    }
 
 }

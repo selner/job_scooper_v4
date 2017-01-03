@@ -169,6 +169,7 @@ class PluginFredHutch extends BasePluginiCIMS
 class PluginRedHat extends BasePluginiCIMS
 {
     protected $siteName = 'RedHat';
+    protected $nJobListingsPerPage = 10;
     protected $siteBaseURL = "https://careers-redhat.icims.com";
 
     // Results Columns:  "Posting date", "Job ID", "Job title", "Department", "Location", "Remote base"
