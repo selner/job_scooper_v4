@@ -28,19 +28,6 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
     {
         if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
 
-        if(array_key_exists('selenium_sessionid', $GLOBALS) && isset($GLOBALS['selenium_sessionid']) && $GLOBALS['selenium_sessionid'] != -1)
-        {
-            try
-            {
-                $driver = RemoteWebDriver::createBySessionID($GLOBALS['selenium_sessionid'], $GLOBALS['USERDATA']['selenium']['host_location'] . "/wd/hub");
-                $driver->quit();
-                unset ($GLOBALS['selenium_sessionid']);
-            }
-            catch (Exception $ex) {
-                if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Failed to terminate Selenium webdriver session.  You will need to manually shut it down.", \Scooper\C__DISPLAY_ERROR__); }
-            }
-        }
-
         if(array_key_exists('selenium_started', $GLOBALS) && $GLOBALS['selenium_started'] === true)
         {
             try
@@ -57,6 +44,9 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
                 if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Failed to send shutdown to Selenium server.  You will need to manually shut it down.", \Scooper\C__DISPLAY_ERROR__); }
             }
         }
+        else
+            if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Skipping Selenium server shutdown since we did not start it.  You will need to manually shut it down.", \Scooper\C__DISPLAY_ERROR__); }
+
     }
 
     function addMultipleSearches($arrSearches, $locSettingSets = null)
@@ -116,16 +106,38 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
             try
             {
 
-                if($class->isBitFlagSet(C__JOB_USE_SELENIUM))
-                {
-                    if($GLOBALS['USERDATA']['selenium']['autostart'] == 1 && (array_key_exists('selenium_started', $GLOBALS) === false || $GLOBALS['selenium_started'] !== true))
+                if($class->isBitFlagSet(C__JOB_USE_SELENIUM)) {
+//                    $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | echo `sed \'s/.*port \([0-9]*\).*/\1/\'`';
+                    // $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | ps -p `awk \'NR!=1 {print $2}\'` -o command=';
+                    $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'] . '| ps -o command= -p `awk \'NR != 1 {print $2}\'` | sed -n 2p';
+
+                    $seleniumStarted = false;
+                    $pscmd = doExec($cmd);
+                    if (!is_null($pscmd) && is_string($pscmd) && strlen($pscmd) > 0)
                     {
-                        $strCmdToRun = "java -jar \"" . $GLOBALS['USERDATA']['selenium']['jar'] . "\" -port " . $GLOBALS['USERDATA']['selenium']['port'] . " ". $GLOBALS['USERDATA']['selenium']['switches'] ." >/dev/null &";
-                        $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \Scooper\C__DISPLAY_ITEM_RESULT__);
-                        doExec($strCmdToRun);
-                        $GLOBALS['selenium_started'] = true;
-                        sleep(5);
+                        if(preg_match('/selenium/', $pscmd) !== false)
+                        {
+                            $seleniumStarted = true;
+                            $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \Scooper\C__DISPLAY_WARNING__);
+                        }
+
                     }
+
+                    if($seleniumStarted === false)
+                    {
+                        if($GLOBALS['USERDATA']['selenium']['autostart'] == 1 && (array_key_exists('selenium_started', $GLOBALS) === false || $GLOBALS['selenium_started'] !== true))
+                        {
+                            $strCmdToRun = "java " . $GLOBALS['USERDATA']['selenium']['prefix_switches'] . " -jar \"" . $GLOBALS['USERDATA']['selenium']['jar'] . "\" -port " . $GLOBALS['USERDATA']['selenium']['port'] . " " . $GLOBALS['USERDATA']['selenium']['postfix_switches'] . " >/dev/null &";
+                            $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \Scooper\C__DISPLAY_ITEM_RESULT__);
+                            doExec($strCmdToRun);
+                            $GLOBALS['selenium_started'] = true;
+                            sleep(5);
+                        }
+                        else
+                            throw new Exception("Selenium is not running and was not set to autostart. Cannot continue without an instance of Selenium running.");
+
+                    }
+
                 }
 
                 $GLOBALS['logger']->logLine("Setting up " . count($classPluginForSearch['searches']) . " search(es) for ". $classPluginForSearch['name'] . "...", \Scooper\C__DISPLAY_SECTION_START__);

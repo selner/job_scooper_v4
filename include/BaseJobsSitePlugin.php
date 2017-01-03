@@ -819,14 +819,6 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
         $driver = null;
         try
         {
-            if(array_key_exists('selenium_sessionid', $GLOBALS) && isset($GLOBALS['selenium_sessionid']) && $GLOBALS['selenium_sessionid'] != -1)
-            {
-                $driver = RemoteWebDriver::createBySessionID($GLOBALS['selenium_sessionid'], $GLOBALS['USERDATA']['selenium']['host_location'] . "/wd/hub");
-            }
-            else
-            {
-
-
 //                use \Facebook\WebDriver\Remote\WebDriverCapabilityType;
 //                use \Facebook\WebDriver\Remote\RemoteWebDriver;
 //                use \Facebook\WebDriver\WebDriverDimension;
@@ -846,33 +838,22 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
 //                $driver->takeScreenshot('/tmp/screen.png');
 //                $driver->quit();
 
-
-                $capabilities = DesiredCapabilities::phantomjs();
-                if(PHP_OS == "Darwin")
-                    $capabilities = DesiredCapabilities::safari();
-
-                $capabilities->setCapability("nativeEvents", true);
-                $capabilities->setCapability("setThrowExceptionOnScriptError", false);
-
-                $host = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
-                $driver = RemoteWebDriver::create($host, $desired_capabilities = $capabilities, 5000);
-                $GLOBALS['selenium_sessionid'] = $driver->getSessionID();
+            $driver = (array_key_exists('webdriver', $GLOBALS['USERDATA']['selenium'])) ? $GLOBALS['USERDATA']['selenium']['webdriver'] : null;
+            if(is_null($driver)) {
+                $driver = "phantomjs";
+                if (PHP_OS == "Darwin")
+                    $driver = "safari";
             }
+            $capabilities = DesiredCapabilities::$driver();
+
+            $capabilities->setCapability("nativeEvents", true);
+            $capabilities->setCapability("setThrowExceptionOnScriptError", false);
+
+            $host = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
+            $driver = RemoteWebDriver::create($host, $desired_capabilities = $capabilities, 5000);
+
             $driver->get($url);
 
-//            // wait at most 10 seconds until at least one result is shown
-//            if($elementClass)
-//            {
-//                $driver->wait(10+$this->additionalLoadDelaySeconds)->until(
-//                    WebDriverExpectedCondition::presenceOfAllElementsLocatedBy(
-//                        WebDriverBy::className($elementClass)
-//                    )
-//                );
-//            }
-//            else
-//            {
-//                sleep(2+$this->additionalLoadDelaySeconds);
-//            }
             sleep(2+$this->additionalLoadDelaySeconds);
 
         } catch (Exception $ex) {
@@ -1126,6 +1107,17 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             $GLOBALS['logger']->logLine($this->siteName . " error: " . $ex, \Scooper\C__DISPLAY_ERROR__);
             throw $ex;
         }
+        finally {
+            if (!(is_null($driver)))
+            {
+                try {
+                    $driver->quit();
+                } catch (Exception $ex) {
+                    print $ex->getMessage();
+                }
+            }
+        }
+
     }
 
 
