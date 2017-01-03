@@ -364,7 +364,8 @@ class PluginAuthenticJobs extends ClassClientHTMLJobSitePlugin
 class PluginDotJobs extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = 'dotjobs';
-    protected $siteBaseURL = '';
+    // BUGBUG:  hard coded to be washington state
+    protected $siteBaseURL = 'http://washington.jobs';
     protected $nJobListingsPerPage = 20;
     protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_INFSCROLLPAGE ];
     protected $strBaseURLFormat = "http://washington.jobs/jobs?location=***LOCATION***&q=***KEYWORDS***";
