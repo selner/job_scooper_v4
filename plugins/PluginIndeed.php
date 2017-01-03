@@ -100,15 +100,10 @@ class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
         $nodeHelper = new CSimpleHTMLHelper($objSimpHTML);
 
         $pageText = $nodeHelper->getText("div[id='searchCount']", 0, false);
-        $arrItemItems = explode(" ", trim($pageText));
-        if(!isset($arrItemItems) || !is_array($arrItemItems) || !(count($arrItemItems) >=6))
+        $fMatchedID = preg_match('/.*?of\s*(\d+).*?/', $pageText, $idMatches);
+        if($fMatchedID && count($idMatches) >= 1)
         {
-            $GLOBALS['logger']->logLine("Unable to find count of listrings for search on " . $this->siteName, \Scooper\C__DISPLAY_WARNING__);
-            return 0;
-        }
-        else
-        {
-            return $arrItemItems[5];
+            return $idMatches[1];
         }
     }
 
