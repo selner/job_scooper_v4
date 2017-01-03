@@ -73,7 +73,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
         'tag_job_posting_date' => null,
         'tag_employment_type' => null,
         'tag_next_button' => null,
-        'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
+        'regex_link_job_id' => null,
     );
 
     /**
@@ -212,7 +212,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
         $item = null;
 
         // first looked for the detail view layout and parse that
-        $strNodeMatch = $this->_getTagMatchString_($this->arrListingTagSetup['tag_listings_section']);
+        $strNodeMatch = $this->getTagSelector($this->arrListingTagSetup['tag_listings_section']);
 
         $GLOBALS['logger']->logLine($this->siteName . " finding nodes matching: " . $strNodeMatch, \Scooper\C__DISPLAY_ITEM_DETAIL__);
         $nodesJobRows = $objSimpHTML->find($strNodeMatch);
