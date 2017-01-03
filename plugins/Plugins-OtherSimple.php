@@ -443,15 +443,16 @@ class BaseForceComClass extends ClassClientHTMLJobSitePlugin
     }
 
     protected $arrListingTagSetup = array(
-        'tag_listings_section' => array(array('tag' => 'table', 'attribute' => 'id', 'attribute_value' => "j_id0:j_id1:atsForm:atsSearchResultsTable"), array('tag' => 'tbody'),array('tag' => 'tr')),
+        'tag_listings_section' => array('selector' => "table.atsSearchResultsTable tbody tr"),
         'tag_title' =>  array(array('tag' => 'td', 'index' => 0), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
         'tag_link' =>  array(array('tag' => 'td', 'index' => 0), array('tag' => 'a'), 'return_attribute' => 'href'),
-        'tag_location' =>  array(array('tag' => 'td', 'index' => 2), array('tag' => 'span')),
+        'tag_department' =>  array(array('tag' => 'td'), array('tag' => 'span'), 'index' => 0),
+        'tag_location' =>  array(array('tag' => 'td'), array('tag' => 'span'), 'index' => 1),
 #        'tag_company' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'jobCard__details__company'), array('tag' => 'a')),
         'regex_link_job_id' => '/.*?jobId=([^&]+)/i'
     );
 
-    public function takeNextPageAction($driver, $nextPageNum)
+    public function takeNextPageAction($driver)
     {
         $driver->executeScript("function callNextPage() { " . $this->nextPageScript ." } ; callNextPage();");
         sleep(2);
