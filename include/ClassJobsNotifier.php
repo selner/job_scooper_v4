@@ -975,9 +975,10 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         }
 
         $noMatchSitesWithoutErrs = array();
-        foreach($arrNoJobUpdates as $site)
-            if(array_search($site, array_keys($arrFailedPlugins)) === false)
-                $arrNoJobUpdates[] = $site;
+        if(!is_null($arrNoJobUpdates) && is_array($arrNoJobUpdates))
+            foreach($arrNoJobUpdates as $site)
+                if(array_search($site, array_keys($arrFailedPlugins)) === false)
+                    $arrNoJobUpdates[] = $site;
 
 
         if($noMatchSitesWithoutErrs != null && count($noMatchSitesWithoutErrs) > 0)
