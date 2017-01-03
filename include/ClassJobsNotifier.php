@@ -186,7 +186,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", $detailsMainResultsCSVFile);
 
         // Output only new records that haven't been looked at yet
-        $allupdatedjobsfile = $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedToday", "-allchangedjobs", "CSV");
+//        $allupdatedjobsfile = $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedToday", "-allchangedjobs", "CSV");
 
         $detailsMainResultsXLSFile = \Scooper\array_copy($detailsMainResultsCSVFile);
         $detailsMainResultsXLSFile['file_extension'] = "xls";
@@ -203,10 +203,13 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         $arrResultFilesToCombine = array($detailsMainResultsCSVFile, \Scooper\parseFilePath($dataExcludedJobs));
         $arrFilesToAttach = array($detailsMainResultsXLSFile, $detailsHTMLFile, $detailsMainResultsCSVFile);
 
-        foreach($GLOBALS['USERDATA']['user_input_files_details'] as $inputfile)
-        {
-            array_push($arrResultFilesToCombine, $inputfile['details']);
-
+        //
+        // In a debug run, include the full details of the keywords we used for auto-matching
+        //
+        if(isDebug()) {
+            foreach ($GLOBALS['USERDATA']['user_input_files_details'] as $inputfile) {
+                array_push($arrResultFilesToCombine, $inputfile['details']);
+            }
         }
 
         $xlsOutputFile = $this->_combineCSVsToExcel($detailsMainResultsXLSFile, $arrResultFilesToCombine);
@@ -284,9 +287,10 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
     private function writeRunsJobsToFile($strFileOut, $arrJobsToOutput, $strLogDescriptor, $strExt = "CSV")
     {
-        $keys = array_keys($this->getEmptyJobListingRecord());
         if($strExt == "HTML")
             $keys = $this->getKeysForHTMLOutput();
+        else
+            $keys = $this->getKeysForUserCSVOutput();
 
         $this->writeJobsListToFile($strFileOut, $arrJobsToOutput, true, "ClassJobRunner-".$strLogDescriptor, $strExt, $keys);
 
@@ -995,6 +999,15 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 //            'key_company_role',
 //            'date_last_updated',
         );
+    }
+
+    private function getKeysForUserCSVOutput()
+    {
+        $arr = $this->getEmptyJobListingRecord();
+
+        $allKeys  = array_diff(array_keys($arr), array('job_title_tokenized', 'match_notes'));
+        return $allKeys;
+
     }
 
 
