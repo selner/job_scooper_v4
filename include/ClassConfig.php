@@ -432,7 +432,7 @@ class ClassConfig extends ClassBaseJobsSitePlugin
         if(isset($iniSearch['url_format'])) $tempSearch['base_url_format']  = $iniSearch['url_format'];
         if(isset($iniSearch['location'])) $tempSearch['location_user_specified_override']  = $iniSearch['location'];
 
-        if(isset($iniSearch['keyword_match_type_string']) && strlen($iniSearch['keyword_match_type_string'] ) > 0)
+        if(array_key_exists('keyword_match_type_string', $iniSearch) && strlen($iniSearch['keyword_match_type_string'] ) > 0)
         {
             $flagType = $this->_getKeywordMatchFlagFromString_($iniSearch['keyword_match_type_string'] );
             if($flagType != null)
@@ -619,7 +619,7 @@ class ClassConfig extends ClassBaseJobsSitePlugin
 
                 $GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey] = $this->_getNewKeywordSettingsSet_(strtolower($strSetKey), $ini_keyword_set);
 
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added keyword set '" . $GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey]['name'] . "' with keywords = " . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey]['keywords_array']) . (($ini_keyword_set['keyword_match_type'] != null && strlen($ini_keyword_set['keyword_match_type'] ) > 0) ? " matching " . $ini_keyword_set['keyword_match_type'] : ""), \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added keyword set '" . $GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey]['name'] . "' with keywords = " . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey]['keywords_array']) . ((array_key_exists('keyword_match_type', $ini_keyword_set) && strlen($ini_keyword_set['keyword_match_type'] ) > 0) ? " matching " . $ini_keyword_set['keyword_match_type'] : ""), \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
             }
 
@@ -922,7 +922,7 @@ class ClassConfig extends ClassBaseJobsSitePlugin
     private function _getNewKeywordSettingsSet_($setkey=null, $iniKeywordSetup)
     {
         $flagType = null;
-        if(isset($ini_keyword_set['keyword_match_type']) && strlen($ini_keyword_set['keyword_match_type'] ) > 0)
+        if(array_key_exists('keyword_match_type_string', $iniKeywordSetup) && strlen($iniKeywordSetup['keyword_match_type_string'] ) > 0)
         {
             $flagType = $this->_getKeywordMatchFlagFromString_($ini_keyword_set['keyword_match_type'] );
         }
@@ -933,7 +933,7 @@ class ClassConfig extends ClassBaseJobsSitePlugin
             'name' =>  $setkey,
             'source_config_file_settings' => \Scooper\array_copy($iniKeywordSetup),
             'keywords_array' => null,
-            'keyword_match_type_string' => $iniKeywordSetup['keyword_match_type'],
+            'keyword_match_type_string' => (array_key_exists('keyword_match_type', $iniKeywordSetup)) ? $iniKeywordSetup['keyword_match_type'] : null,
             'keyword_match_type_flag' => $flagType,
 //            'excluded_jobsites' => $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'],
 //            'included_jobsites' => $GLOBALS['USERDATA']['configuration_settings']['included_sites'],

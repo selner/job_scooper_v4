@@ -124,7 +124,7 @@ class ClassJobsSiteCommon
          );
     }
 
-    protected  function _getKeywordMatchFlagFromString_($strMatchType)
+    protected  function _getKeywordMatchFlagFromString_($strMatchType = null)
     {
         $retFlag = null;
 
@@ -141,6 +141,7 @@ class ClassJobsSiteCommon
                     break;
 
                 case C__USER_KEYWORD_ANYWHERE_AS_STRING:
+                default:
                     $retFlag = C__USER_KEYWORD_ANYWHERE;
                     break;
             }
