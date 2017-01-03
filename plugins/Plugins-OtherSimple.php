@@ -80,10 +80,16 @@ class PluginPersonForce extends ClassClientHTMLJobSitePlugin
     protected $siteName = 'PersonForce';
     protected $siteBaseURL = 'http://www.personforce.com';
     protected $strBaseURLFormat = 'https://www.personforce.com/jobs/tags/***KEYWORDS***/in/***LOCATION***/p/***PAGE_NUMBER***';
-    protected $additionalFlags = [ ];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $nJobListingsPerPage = 20;
     protected $additionalLoadDelaySeconds = 5;
+
+    function __construct($strOutputDirectory = null)
+    {
+        $this->additionalFlags[] = C__JOB_PAGE_VIA_URL;
+        parent::__construct($strOutputDirectory);
+    }
+
 
     protected $arrListingTagSetup = array(
 
