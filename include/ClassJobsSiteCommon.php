@@ -98,10 +98,7 @@ class ClassJobsSiteCommon
             $retDetails[$key] = null;
         }
 
-
-
         return $retDetails;
-
     }
 
     function getEmptyJobListingRecord()
@@ -118,7 +115,6 @@ class ClassJobsSiteCommon
             'job_site_category' => '',
             'job_site_date' =>'',
             'employment_type' => '',
-            'match_details' => '',
             'match_notes' => '',
             'date_pulled' => '',
             'date_last_updated' => '',
@@ -304,7 +300,7 @@ class ClassJobsSiteCommon
         // Remove common company name extensions like "Corporation" or "Inc." so we have
         // a higher match likelihood
 //        $retArrNormalized ['company'] = str_replace(array(" corporation", " corp", " inc", " llc"), "", $retArrNormalized['company']);
-        $retArrNormalized ['company'] = preg_replace(array("/\s[Cc]orporat[e|ion]/", "/\s[Cc]orp\W{0,1}/", "/.com/", "/\W{0,}\s[iI]nc/", "/\W{0,}\s[lL][lL][cC]/","/\W{0,}\s[lL][tT][dD]/"), "", $retArrNormalized['company']);
+        $retArrNormalized ['company'] = preg_replace(array("/\s[Cc]orporat[e|ion]/", "/\s[Cc]orp\W{0,1}/", "/\.com/", "/\W{0,}\s[iI]nc/", "/\W{0,}\s[lL][lL][cC]/","/\W{0,}\s[lL][tT][dD]/"), "", $retArrNormalized['company']);
 
         switch(\Scooper\strScrub($retArrNormalized ['company']))
         {
