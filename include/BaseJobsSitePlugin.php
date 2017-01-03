@@ -1081,6 +1081,16 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                             $nJobsFound = countJobRecords($arrSearchReturnedJobs);
                             if($nItemCount == 1) { $nItemCount = 0; }
                             $nItemCount += ($nJobsFound < $this->nJobListingsPerPage) ? $nJobsFound : $this->nJobListingsPerPage;
+
+                            // If we don't know the total number of listings we will get, we can guess that we've got them all
+                            // if we did not get the max number of job listings from the last page.  Basically, if we couldn't
+                            // fill up a page with our search, then they must not be that many listings avaialble.
+                            //
+                            if ($totalPagesCount > 1 && $nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ && countAssociativeArrayValues($arrPageJobsList) < $this->nJobListingsPerPage) {
+                                $totalPagesCount = $nPageCount;
+                                $nTotalListings = countAssociativeArrayValues($arrSearchReturnedJobs);
+                            }
+
                             $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($arrSearchReturnedJobs). " of " . $nTotalListings . " job listings from " . $this->siteName, \Scooper\C__DISPLAY_NORMAL__ );
                         }
                     } catch (Exception $ex) {
@@ -1095,7 +1105,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                     //
                     // If either is not true, then we're likely in an error condtion and about to go a bit wacky, possibly in a major loop.
                     // Throw an error for this search instead and move on.
-                    if(!$nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ && (($nTotalListings > 0 && $nItemCount == 0) || ($nItemCount < $this->nJobListingsPerPage && $nPageCount < $totalPagesCount)))
+                    if((($nTotalListings > 0 && $nItemCount == 0) || ($nItemCount < $this->nJobListingsPerPage && $nPageCount < $totalPagesCount)))
                     {
                         $msg = "Error retrieving job listings for " . $this->siteName  . ".  We did not retrieve the " . $nTotalListings . " or full page of listings we expected.  Aborting search to prevent issues.";
                         $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
