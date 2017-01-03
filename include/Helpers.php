@@ -134,6 +134,20 @@ function getArrayKeyValueForJob($job)
 
 }
 
+function doExec($cmd)
+{
+    $cmdOutput = array();
+    $cmdRet = "";
+
+    if(strpos($cmd, "2>&1") === false && strpos($cmd, ">/dev/null") === false)
+        $cmd = $cmd . " 2>&1";
+
+    exec($cmd, $cmdOutput, $cmdRet);
+    foreach($cmdOutput as $resultLine)
+        if(!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine($resultLine, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+    return $cmdRet;
+}
+
 function countAssociativeArrayValues($arrToCount)
 {
     if($arrToCount == null || !is_array($arrToCount))
@@ -409,11 +423,7 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
         $cmd .= " --index " . $indexKeyName;
     $GLOBALS['logger']->logLine("Running command: " . $cmd   , \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-    $cmdOutput = array();
-    $cmdRet = "";
-    exec($cmd, $cmdOutput, $cmdRet);
-    foreach($cmdOutput as $resultLine)
-        $GLOBALS['logger']->logLine($resultLine, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+    doExec($cmd);
 
     $GLOBALS['logger']->logLine("Loading tokens for ".$inputfile."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
     $file = fopen($outputFile,"r");

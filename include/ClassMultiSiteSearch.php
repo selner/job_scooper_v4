@@ -41,15 +41,17 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
             }
         }
 
-        if(array_key_exists('selenium_started', $GLOBALS) && isset($GLOBALS['selenium_started']) && $GLOBALS['selenium_started'] == true)
+        if(array_key_exists('selenium_started', $GLOBALS) && $GLOBALS['selenium_started'] === true)
         {
             try
             {
-                if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Sending server shutdown call to Selenium server...", \Scooper\C__DISPLAY_ITEM_RESULT__); }
-                $cmd = "curl \"" . $GLOBALS['USERDATA']['selenium']['host_location'] . "/selenium-server/driver?cmd=shutDownSeleniumServer\"";
-                exec($cmd);
-
-                unset ($GLOBALS['selenium_started']);
+                // The only way to shutdown standalone server in 3.0 is by killing the local process.
+                // Details: https://github.com/SeleniumHQ/selenium/issues/2852
+                //
+                $cmd='pid=`ps -eo pid,args | grep selenium-server | grep -v grep | cut -c1-6`; if [ "$pid" ]; then kill -9 $pid; echo "Killed Selenium process #"$pid; else echo "Selenium server is not running."; fi';
+                if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Killing Selenium server process with command \"" .$cmd ."\"", \Scooper\C__DISPLAY_NORMAL__); }
+                doExec($cmd);
+                $GLOBALS['selenium_started'] = false;
             }
             catch (Exception $ex) {
                 if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Failed to send shutdown to Selenium server.  You will need to manually shut it down.", \Scooper\C__DISPLAY_ERROR__); }
@@ -117,13 +119,13 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
                 if($class->isBitFlagSet(C__JOB_USE_SELENIUM))
                 {
                     if($GLOBALS['USERDATA']['selenium']['autostart'] == 1 && (array_key_exists('selenium_started', $GLOBALS) === false || $GLOBALS['selenium_started'] !== true))
-                        {
-                            $strCmdToRun = "java -jar \"" . $GLOBALS['USERDATA']['selenium']['jar'] . "\" -port " . $GLOBALS['USERDATA']['selenium']['port'] . " ". $GLOBALS['USERDATA']['selenium']['switches'] ." >/dev/null &";
-                            $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \Scooper\C__DISPLAY_ITEM_RESULT__);
-                            exec($strCmdToRun);
-                            $GLOBALS['selenium_started'] = true;
-                            sleep(5);
-                        }
+                    {
+                        $strCmdToRun = "java -jar \"" . $GLOBALS['USERDATA']['selenium']['jar'] . "\" -port " . $GLOBALS['USERDATA']['selenium']['port'] . " ". $GLOBALS['USERDATA']['selenium']['switches'] ." >/dev/null &";
+                        $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \Scooper\C__DISPLAY_ITEM_RESULT__);
+                        doExec($strCmdToRun);
+                        $GLOBALS['selenium_started'] = true;
+                        sleep(5);
+                    }
                 }
 
                 $GLOBALS['logger']->logLine("Setting up " . count($classPluginForSearch['searches']) . " search(es) for ". $classPluginForSearch['name'] . "...", \Scooper\C__DISPLAY_SECTION_START__);

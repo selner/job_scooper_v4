@@ -396,11 +396,7 @@ class StageManager extends S3JobListManager
         $cmd = "python " . $PYTHONPATH . " ". $bucketparam . " " . $sourceparam . " --inkey " . escapeshellarg($stage1Key) . " --outkey " . escapeshellarg($stage2Key) . " --column job_title --index key_jobsite_siteid";
         $this->logger->logLine("Running command: " . $cmd   , \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-        $cmdOutput = array();
-        $cmdRet = "";
-        exec($cmd, $cmdOutput, $cmdRet);
-        foreach($cmdOutput as $resultLine)
-            $this->logger->logLine($resultLine, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        doExec($cmd);
 
 //        $this->logger->logLine("Loading results and saving for next stage...", \Scooper\C__DISPLAY_SECTION_START__);
 //        $keyparts = explode("/", $stage2Key);
