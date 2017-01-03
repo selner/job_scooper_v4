@@ -202,7 +202,6 @@ class JobsAutoMarker extends ClassJobsSiteCommon
                         $strJobIndex = getArrayKeyValueForJob($job);
                         $this->arrLatestJobs[$strJobIndex]['interested'] = 'No (Wrong Company)' . C__STR_TAG_AUTOMARKEDJOB__;
                         appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_notes', "|", "Matched regex[". $rxInput ."]");
-                        appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_details',"|", "excluded_company");
                         $this->arrLatestJobs[$strJobIndex]['date_last_updated'] = getTodayAsString();
                         $nJobsMarkedAutoExcluded++;
                         $fMatched = true;
@@ -340,7 +339,6 @@ class JobsAutoMarker extends ClassJobsSiteCommon
             $this->arrLatestJobs[$strJobIndex]['interested'] = NO_TITLE_MATCHES;
             $this->arrLatestJobs[$strJobIndex]['date_last_updated'] = getTodayAsString();
             appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_notes', "|", "title keywords not matched to terms [". getArrayValuesAsString($arrKwdSet, "|", "", false)  ."]");
-            appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_details',"|", NO_TITLE_MATCHES);
         }
 
         $nEndingBlankCount = countAssociativeArrayValues(array_filter($this->arrLatestJobs, "isMarkedBlank"));
@@ -360,7 +358,6 @@ class JobsAutoMarker extends ClassJobsSiteCommon
             $this->arrLatestJobs[$strJobIndex]['interested'] = TITLE_NEG_KWD_MATCH;
             $this->arrLatestJobs[$strJobIndex]['date_last_updated'] = getTodayAsString();
             appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_notes', "|", "matched negative keyword title[". getArrayValuesAsString($job['keywords_matched'], "|", "", false)  ."]");
-            appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_details',"|", TITLE_NEG_KWD_MATCH);
         }
         $nEndingBlankCount = countAssociativeArrayValues(array_filter($this->arrLatestJobs, "isMarkedBlank"));
         $GLOBALS['logger']->logLine("Processed " . $nStartingBlankCount . "/" . countAssociativeArrayValues($this->arrLatestJobs) . " jobs marking negative keyword matches:  updated ". ($nStartingBlankCount - $nEndingBlankCount) . "/" . $nStartingBlankCount  . ", still active ". $nEndingBlankCount . "/" . $nStartingBlankCount, \Scooper\C__DISPLAY_ITEM_RESULT__);
