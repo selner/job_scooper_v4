@@ -895,15 +895,23 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
     private function _getRunDateRange_()
     {
+        $strDateRange = null;
         $startDate = new DateTime();
         $strMod = "-".$GLOBALS['USERDATA']['configuration_settings']['number_days']." days";
         $startDate = $startDate->modify($strMod);
         $today = new DateTime();
-        $strDateRange = $startDate->format('D, M d') . " - " . $today->format('D, M d');
+        if($startDate->format('Y-m-d') != $today->format('Y-m-d'))
+        {
+            $strDateRange = $startDate->format('D, M d') . " - " . $today->format('D, M d');
+        }
+        else
+        {
+            $strDateRange = $today->format('D, M d');
+        }
         return $strDateRange;
     }
 
-    private function _getResultsTextHTML_($arrHeaders, $arrCounts, $arrNoJobUpdates)
+    private function _getResultsTextHTML_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrFailedPlugins = null)
     {
         $arrCounts_TotalAll = null;
         $arrCounts_TotalUser = null;
