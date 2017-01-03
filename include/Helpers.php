@@ -139,13 +139,12 @@ function doExec($cmd)
     $cmdOutput = array();
     $cmdRet = "";
 
-    if(strpos($cmd, "2>&1") === false && strpos($cmd, ">/dev/null") === false)
-        $cmd = $cmd . " 2>&1";
-
     exec($cmd, $cmdOutput, $cmdRet);
     foreach($cmdOutput as $resultLine)
         if(!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine($resultLine, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-    return $cmdRet;
+    if(is_array($cmdOutput) && count($cmdOutput) == 1)
+        return $cmdOutput[0];
+    return $cmdOutput;
 }
 
 function countAssociativeArrayValues($arrToCount)
