@@ -120,8 +120,6 @@ class ClassConfig extends ClassBaseJobsSitePlugin
         $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] = array_combine($keys, array_column($excludedsites, 'name'));
         $GLOBALS['USERDATA']['configuration_settings']['searches'] = array();
 
-        $GLOBALS['OPTS']['DEBUG'] =  ( \Scooper\get_PharseOptionValue('debug') == 1 ) ? true : false;
-
         // Override any INI file setting with the command line output file path & name
         // the user specificed (if they did)
         $userOutfileDetails = \Scooper\get_FileDetails_fromPharseOption("output", false);
@@ -493,8 +491,8 @@ class ClassConfig extends ClassBaseJobsSitePlugin
                 else
                 {
                     $GLOBALS['USERDATA']['configuration_settings'][$gso] = $config['global_search_options'][$gso];
-                    if(strtolower($gso) == 'debug' && (!array_key_exists('DEBUG', $GLOBALS['OPTS']) || $GLOBALS['OPTS']['DEBUG'] === false)) {
-                        $GLOBALS['OPTS']['DEBUG'] =  ( \Scooper\intceil($config['global_search_options'][$gso]) == 1 ) ? true : false;
+                    if(strtolower($gso) == 'debug' && (!array_key_exists('DEBUG', $GLOBALS['OPTS']) || $GLOBALS['USERDATA']['configuration_settings']['debug'] === false)) {
+                        $GLOBALS['USERDATA']['configuration_settings']['debug'] =  ( \Scooper\intceil($config['global_search_options'][$gso]) == 1 ) ? true : false;
                     }
                 }
             }

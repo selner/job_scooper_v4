@@ -42,7 +42,7 @@ function isVerbose() {
 }
 
 function isDebug() {
-    if(isset($GLOBALS['OPTS']) && isset($GLOBALS['OPTS']['DEBUG']) && ($GLOBALS['OPTS']['DEBUG'] === true || $GLOBALS['OPTS']['DEBUG'] == 1)) return true;
+    if(isset($GLOBALS['OPTS']) && isset($GLOBALS['USERDATA']['configuration_settings']['debug']) && ($GLOBALS['USERDATA']['configuration_settings']['debug'] === true || $GLOBALS['USERDATA']['configuration_settings']['debug'] == 1)) return true;
     return false;
 }
 
@@ -83,26 +83,12 @@ function __initializeArgs__()
             'required'      => true,
             'short'      => 'o',
         ),
-        'debug' => array(
-            'description'   => 'Set to 1 for debug logging.',
-            'default'       => 0,
-            'type'          => Pharse::PHARSE_INTEGER,
-            'required'      => false,
-            'short'      => 'debug',
-        ),
         'send_notifications' => array(
             'description'   => 'Send email notifications of the completed run.',
             'default'       => 0,
             'type'          => Pharse::PHARSE_INTEGER,
             'required'      => false,
             'short'      => 'notify',
-        ),
-        'output_interim_files' => array(
-            'description'   => 'In addition to the main results, output interim debug files.',
-            'default'       => 0,
-            'type'          => Pharse::PHARSE_INTEGER,
-            'required'      => false,
-            'short'      => 'debug_files',
         ),
         's3bucket' => array(
             'description'   => 'Name of the S3 bucket to publish to',

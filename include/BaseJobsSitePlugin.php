@@ -129,7 +129,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
         //
         // Write out the interim data to file if we're debugging
         //
-        if($this->is_OutputInterimFiles() == true && isset($this->detailsMyFileOut) && is_array($this->detailsMyFileOut))
+        if(isDebug() === true && isset($this->detailsMyFileOut) && is_array($this->detailsMyFileOut))
         {
             $arrAllSearchResults = $this->getMyJobsList();
             $strOutPathWithName = $this->getOutputFileFullPath($this->siteName . "-");

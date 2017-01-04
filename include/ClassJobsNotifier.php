@@ -222,7 +222,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         // Output debugging / interim files if asked to
         //
 
-        if($this->is_OutputInterimFiles() == true) {
+        if(isDebug() === true) {
             $GLOBALS['logger']->logSectionHeader("DEBUG ONLY:  Writing out interim, developer files (user does not ever see these)..." . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
 
             //
@@ -262,17 +262,11 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         //
         $this->sendJobCompletedEmail($strResultText, $strResultHTML, $detailsHTMLFile, $arrFilesToAttach);
 
-//        if(isset($GLOBALS['USERDATA']['AWS']['S3']) && !is_null($GLOBALS['USERDATA']['AWS']['S3']['bucket']) && !is_null($GLOBALS['USERDATA']['AWS']['S3']['region']))
-//        {
-//            $s3 = new S3Manager($GLOBALS['USERDATA']['AWS']['S3']['bucket'], $GLOBALS['USERDATA']['AWS']['S3']['region']);
-//            $s3->publishOutputFiles($GLOBALS['USERDATA']['directories']['stage4']);
-//        }
-
         //
-        // If the user has not asked us to keep interim files around
-        // after we're done processing, then delete the interim HTML file
+        // We only keep interim files around in debug mode, so
+        // after we're done processing, delete the interim HTML file
         //
-        if ($this->is_OutputInterimFiles() != true) {
+        if (isDebug() !== true) {
             foreach ($arrFilesToAttach as $fileDetail) {
                 if (file_exists($fileDetail['full_file_path']) && is_file($fileDetail ['full_file_path'])) {
                     $GLOBALS['logger']->logLine("Deleting local attachment file " . $fileDetail['full_file_path'] . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
@@ -361,7 +355,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         // If the user hasn't asked for interim files to be written,
         // just return the filtered jobs.  Don't write the file.
         //
-        if($fOverrideInterimFileOption == false && $this->is_OutputInterimFiles() != true)
+        if($fOverrideInterimFileOption == false && isDebug() !== true)
         {
             unlink($details['full_file_path']);
             return $dataRet;

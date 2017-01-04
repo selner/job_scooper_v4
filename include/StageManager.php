@@ -336,7 +336,7 @@ class StageManager extends S3JobListManager
                 $this->arrLatestJobs_UnfilteredByUserInput = \Scooper\array_copy($arrUpdatedJobs);
                 $this->publishS3JobsList(1, JOBLIST_TYPE_UNFILTERED);
 
-                if($this->is_OutputInterimFiles() == true) {
+                if(isDebug() === true) {
 
                     //
                     // Let's save off the unfiltered jobs list in case we need it later.  The $this->arrLatestJobs
