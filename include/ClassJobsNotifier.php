@@ -526,9 +526,20 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         $mail->Subject = $subject;
 
         $ret = $mail->send();
-        if($ret != true)
+        if($ret !== true)
         {
-            $msg = "Failed to send notification email with error = ".$mail->ErrorInfo;
+            //
+            // If sending the email fails, try again but this time with SMTP debug
+            // enabled so we have any idea what the issue might be in the log.
+            // If we don't do this, we just get "failed" without any useful details.
+            //
+            $msg = "Failed to send notification email with error = ".$mail->ErrorInfo . PHP_EOL . "Retrying email send with debug enabled to log error details...";
+            $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
+            $mail->SMTPDebug = 1;
+            $ret = $mail->send();
+            if($ret === true) return $ret;
+
+            $msg = "Failed second attempt to send notification email.  Debug error details should be logged above.  Error: " . PHP_EOL .$mail->ErrorInfo;
             $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
             throw new Exception($msg);
 
