@@ -151,7 +151,6 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
             $item = $this->getEmptyJobListingRecord();
 
             $titlelink = $node->find('a[class="card-link js-job-link"]');
-            $item['job_site'] = $this->siteName;
             $item['job_title'] = combineTextAllChildren($titlelink[0]);;
             $item['job_post_url'] = $this->siteBaseURL . $titlelink[0]->href;
 
@@ -177,9 +176,7 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
 
             $item['job_id'] = $this->getIDFromLink('/\/a\/job-details\/\?a=([^\/]+)/i', $item['job_post_url']);
 
-            $item['date_pulled'] = getTodayAsString();
-
-            $ret[] = $this->normalizeItem($item);
+            $ret[] = $this->normalizeJobItem($item);
         }
 
         return $ret;

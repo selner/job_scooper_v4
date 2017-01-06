@@ -156,7 +156,6 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
     //
     //************************************************************************
 
-    protected $siteName = 'NAME-NOT-SET';
     protected $nJobListingsPerPage = 20;
     protected $additionalFlags = [];
     protected $secsPageTimeout = null;
@@ -767,13 +766,6 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
         );
     }
 
-    private function _parseJobsListForPageBase_($objSimpHTML) {
-        $retJobs = $this->parseJobsListForPage($objSimpHTML);
-        $retJobs = $this->normalizeJobList($retJobs);
-
-        return $retJobs;
-
-    }
     protected function _getMyJobsForSearchFromJobsAPI_($searchDetails)
     {
         $nItemCount = 0;
@@ -791,7 +783,6 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             foreach($apiJobs as $job)
             {
                 $item = $this->getEmptyJobListingRecord();
-                $item['job_site'] = $this->siteName;
                 $item['job_title'] = $job->name;
                 $item['job_id'] = $job->sourceId;
                 if($item['job_id'] == null)
@@ -807,7 +798,6 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                     $item['job_site_date'] = $job->datePosted->format('D, M d');
                 $item['job_post_url'] = $job->url;
 
-                $item = $this->normalizeItem($item);
                 $strCurrentJobIndex = getArrayKeyValueForJob($item);
                 $arrPageJobsList[$strCurrentJobIndex] = $item;
                 $nItemCount += 1;
@@ -997,7 +987,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                         }
                         else
                         {
-                            $arrPageJobsList = $this->_parseJobsListForPageBase_($objSimpleHTML);
+                            $arrPageJobsList = $this->parseJobsListForPage($objSimpleHTML);
                             if(!is_array($arrPageJobsList) )
                             {
                                 // we likely hit a page where jobs started to be hidden.
@@ -1014,6 +1004,8 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
 
                         if(is_array($arrPageJobsList))
                         {
+                            $this->normalizeJobList($arrPageJobsList);
+
                             addJobsToJobsList($arrSearchReturnedJobs, $arrPageJobsList);
                             $nJobsFound = countJobRecords($arrSearchReturnedJobs);
                             if($nItemCount == 1) { $nItemCount = 0; }
@@ -1075,8 +1067,21 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                     unset($objSimpleHTML);
                     $objSimpleHTML = null;
                     $nPageCount++;
+
+
+                }
+
+            }
+
+            if (!(is_null($driver)))
+            {
+                try {
+                    $driver->quit();
+                } catch (Exception $ex) {
+                    $GLOBALS['logger']->logLine($ex, \Scooper\C__DISPLAY_NORMAL__);
                 }
             }
+
             $GLOBALS['logger']->logLine($this->siteName . "[".$searchDetails['name']."]" .": " . $nJobsFound . " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
             return $arrSearchReturnedJobs;
 
@@ -1085,14 +1090,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             throw $ex;
         }
         finally {
-            if (!(is_null($driver)))
-            {
-                try {
-                    $driver->quit();
-                } catch (Exception $ex) {
-                    print $ex->getMessage();
-                }
-            }
+
         }
 
     }
@@ -1207,10 +1205,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                             $item["location"] = $mditem->properties['jobLocation'][0];
                         }
                     }
-                    $item['job_site'] = $this->siteName;
                     $item['company'] = $this->siteName;
-
-                    $ret[] = $this->normalizeItem($item);
                 }
             }
         }

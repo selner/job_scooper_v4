@@ -124,7 +124,6 @@ class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
             assert($node->attr['itemtype'] == "http://schema.org/JobPosting");
 
             $item = $this->getEmptyJobListingRecord();
-            $item['job_site'] = $this->siteName;
 
             $subNodes = $node->find("a");
             if(isset($subNodes) && array_key_exists('title', $subNodes[0]->attr))
@@ -163,11 +162,7 @@ class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
             }
 
             if($item['job_title'] == '') continue;
-
-            $item['date_pulled'] = getTodayAsString();
-
-
-            $ret[] = $this->normalizeItem($item);
+            $ret[] = $this->normalizeJobItem($item);
 
         }
 

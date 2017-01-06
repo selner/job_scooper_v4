@@ -62,8 +62,7 @@ class PluginGeekwire extends ClassBaseClientSideHTMLJobSitePlugin
             $arrLIParts = explode(" ", $node->attr['class']);
             $item['job_id'] = str_ireplace("http://www.geekwire.com/jobs/job/", "", $arrLIParts[0]);
 
-
-            $ret[] = $this->normalizeItem($item);
+            $ret[] = $this->normalizeJobItem($item);
 
         }
 

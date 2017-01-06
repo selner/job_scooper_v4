@@ -1066,7 +1066,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
     {
         $arr = $this->getEmptyJobListingRecord();
 
-        $allKeys  = array_diff(array_keys($arr), array('job_title_tokenized', 'job_title_linked', 'job_id', 'date_last_updated', 'key_company_role', 'match_notes'));
+        $allKeys  = array_diff(array_keys($arr), array('job_title_tokenized', 'normalized', 'job_title_linked', 'job_id', 'date_last_updated', 'key_company_role', 'match_notes'));
         return $allKeys;
 
     }

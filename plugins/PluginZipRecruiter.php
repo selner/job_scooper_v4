@@ -132,11 +132,6 @@ class PluginZipRecruiter extends ClassBaseServerHTMLJobSitePlugin
             $item = $this->getEmptyJobListingRecord();
 
 
-            $item['job_site'] = $this->siteName;
-            $item['date_pulled'] = getTodayAsString();
-
-
-
             $titleNode = $node->find("h4[class='font14 fBold mb2 font13Phone']");
             if(isset($titleNode) && isset($titleNode[0]))
             {
@@ -191,11 +186,7 @@ class PluginZipRecruiter extends ClassBaseServerHTMLJobSitePlugin
                 $item['job_site_date'] = getDateForDaysAgo($arrJobDetailsParts[1]);
             }
 
-            //
-            // Call normalizeItem to standardize the resulting listing result
-            //
-            $ret[] = $this->normalizeItem($item);
-
+            $ret[] = $this->normalizeJobItem($item);
         }
 
         return $ret;

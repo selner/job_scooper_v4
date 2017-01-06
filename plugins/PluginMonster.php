@@ -95,7 +95,6 @@ class PluginMonster extends ClassBaseServerHTMLJobSitePlugin
         foreach($nodesJobs as $node)
         {
             $item = $this->getEmptyJobListingRecord();
-            $item['job_site'] = $this->siteName;
 
             $subNode = $node->find("div[class='jobTitle'] h2 a");
             if(isset($subNode) && isset($subNode[0]))
@@ -153,7 +152,8 @@ class PluginMonster extends ClassBaseServerHTMLJobSitePlugin
                 $item['location'] = $item['location'] . ", " . $stateNode->plaintext;
             }
 
-            $ret[] = $this->normalizeItem($item);
+            $ret[] = $this->normalizeJobItem($item);
+
         }
 
         return $ret;

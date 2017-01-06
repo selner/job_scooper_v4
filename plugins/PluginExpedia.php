@@ -78,7 +78,6 @@ class PluginExpedia extends ClassBaseClientSideHTMLJobSitePlugin
         {
             $item = $this->getEmptyJobListingRecord();
             $item['company'] = 'Expedia';
-            $item['job_site'] = $item['company'];
 
             $titleLink = $node->find("h3 a")[0];
             $item['job_title'] = $titleLink->plaintext;
@@ -94,8 +93,8 @@ class PluginExpedia extends ClassBaseClientSideHTMLJobSitePlugin
 //           $item['brief'] = str_ireplace(array("Position Description ", "position overview", "PositionSummary"), "", $item['brief']);
 
             $item['job_site_date'] = str_ireplace("date posted: ","", $node->find("span[class='search-result-item-post-date']")[0]->plaintext);
-            $ret[] = $this->normalizeItem($item);
 
+            $ret[] = $this->normalizeJobItem($item);
         }
 
         return $ret;

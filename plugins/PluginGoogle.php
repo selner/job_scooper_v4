@@ -129,8 +129,6 @@ class PluginGoogle extends ClassClientHTMLJobSitePlugin
                 $item['job_title'] = $subNode[0]->children[1]->plaintext;
             }
 
-            $item['job_site'] = $this->siteName;
-
             if($item['job_id'] == '') continue;
 
             $subNode = $node->find("span[class='location secondary-text']");
@@ -143,11 +141,8 @@ class PluginGoogle extends ClassClientHTMLJobSitePlugin
             else
                 $item['company'] = $this->siteName;
 
+            $ret[] = $this->normalizeJobItem($item);
 
-            $item['job_site_date'] = null;
-            $item['date_pulled'] = getTodayAsString();
-
-            $ret[] = $this->normalizeItem($item);
         }
 
         return $ret;

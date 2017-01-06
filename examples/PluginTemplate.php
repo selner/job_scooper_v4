@@ -135,9 +135,6 @@ class PluginExample extends ClassBaseJobsSitePlugin
             $item = $this->getEmptyJobListingRecord();
 
 
-            $item['job_site'] = $this->siteName;
-            $item['date_pulled'] = getTodayAsString();
-
             $titleLink = $node->find("a[class='listing-title']")[0];
             $item['job_title'] = $titleLink->firstChild()->plaintext;
 
@@ -153,13 +150,9 @@ class PluginExample extends ClassBaseJobsSitePlugin
                     trim($node->find("span[class='listing-location'] span")[1]->plaintext);
 
             $item['job_site_category'] = $node->find("span[class='listing-tag']")[0]->plaintext;
-            $item['job_site_date'] = $node->find("span[class='listing-date']")[0]->plaintext;
+            $item['job_site_date'] = $node->find("span[class='listing-date']")[0]->plaintext;em);
 
-
-            //
-            // Call normalizeItem to standardize the resulting listing result
-            //
-            $ret[] = $this->normalizeItem($item);
+            $ret[] = $item;
 
         }
 

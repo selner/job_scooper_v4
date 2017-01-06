@@ -133,7 +133,6 @@ abstract class BaseTaleoPlugin extends ClassBaseServerHTMLJobSitePlugin
             $counter++;
 
             $item = $this->getEmptyJobListingRecord();
-            $item['job_site'] = $this->siteName;
             $item['company'] = $this->siteName;
             $item['job_post_url'] = $node->find("td a")[0]->href;
             $item['job_title'] = $node->find("td a")[0]->plaintext;
@@ -143,9 +142,8 @@ abstract class BaseTaleoPlugin extends ClassBaseServerHTMLJobSitePlugin
             $tds = $node->find("td");
             if(isset($tds) && isset($tds[1])) $item['location'] = $node->find("td")[1]->plaintext;
             if(isset($tds) && isset($tds[2]))$item['job_site_category'] = $tds[2]->plaintext;
-            $item['date_pulled'] = getTodayAsString();
 
-            $ret[] = $this->normalizeItem($item);
+            $ret[] = $this->normalizeJobItem($item);
         }
 
         return $ret;
@@ -167,7 +165,6 @@ abstract class BaseTaleoPlugin extends ClassBaseServerHTMLJobSitePlugin
 
 
         $node = $nodeHelper->get("div[". $divTagType . "='".$divTagValue."'] table tbody tr", $trIndex, true);
-
 
         $trSecond = new CSimpleHTMLHelper($node);
         $totalItemsText = $trSecond->getText("td", 0, true);

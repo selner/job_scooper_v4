@@ -83,7 +83,6 @@ class PluginAmazon extends ClassBaseClientSideHTMLJobSitePlugin
             $item['job_title'] = $subNode[0]->plaintext;
 
             $item['company'] = 'Amazon';
-            $item['job_site'] = 'Amazon';
             $item['date_pulled'] = getTodayAsString();
             $subNode = $node->find("div[class=location-and-id] span]");
             $item['location'] = explode("|", $subNode[0]->plaintext)[0];
@@ -94,9 +93,7 @@ class PluginAmazon extends ClassBaseClientSideHTMLJobSitePlugin
             if(isset($dateVal))
                 $item['job_site_date'] = $dateVal->format('m/d/y');
 
-            $ret[] = $this->normalizeItem($item);
-
-
+            $ret[] = $this->normalizeJobItem($item);
         }
         return $ret;
     }

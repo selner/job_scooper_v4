@@ -48,19 +48,14 @@ class PluginGroupon extends ClassBaseClientSideHTMLJobSitePlugin
             }
 
             $item = $this->getEmptyJobListingRecord();
-            $item['job_site'] = $this->siteName;
-
 
             $item['job_title'] = $node->plaintext;
             $item['job_post_url'] = $node->href;
-//            $item['location'] = $this->getLocationValue();
             $item['date_pulled'] = getTodayAsString();
             $item['company'] = $this->siteName;
             $item['job_id'] = $this->getIDFromLink('/\/jobs\/([^\/]+)/i', $item['job_post_url']);
             if($item['job_title'] == '') continue;
-
-
-            $ret[] = $this->normalizeItem($item);
+            $ret[] = $this->normalizeJobItem($item);
 
         }
 

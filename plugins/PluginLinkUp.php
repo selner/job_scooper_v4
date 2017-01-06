@@ -103,7 +103,7 @@ class PluginLinkUp extends ClassBaseServerHTMLJobSitePlugin
             $dateText = $nodeHelper->getText("span[class='listing-date']", 0, false );
             $item['job_site_date'] = getDateForDaysAgo($dateText);
 
-            $ret[] = $this->normalizeItem($item);
+            $ret[] = $this->normalizeJobItem($item);
 
         }
 
