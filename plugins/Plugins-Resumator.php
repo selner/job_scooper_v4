@@ -19,21 +19,6 @@ if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 
-
-abstract class ClassBaseResumatorTablesPlugin extends ClassHTMLJobSitePlugin
-{
-    protected $additionalFlags = [C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
-    protected $arrListingTagSetup = array(
-        'tag_listings_section' => array(array('tag' => 'table', 'attribute' => 'class', 'attribute_value' =>'resumator-job-listings'), array('tag' => 'tr', 'attribute' => '', 'attribute_value' =>'')),
-        'tag_title' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'resumator-job-title-link'),
-        'tag_link' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'resumator-job-title-link'),
-        'tag_department' => array('tag' => 'td', 'attribute' => 'class', 'attribute_value'=>'resumator-department-column'),
-        'tag_location' => array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'resumator-job-location-column'),
-        'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
-    );
-
-}
-
 abstract class ClassBaseResumatorDivPlugin extends ClassHTMLJobSitePlugin
 {
     protected $additionalFlags = [C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
@@ -46,8 +31,6 @@ abstract class ClassBaseResumatorDivPlugin extends ClassHTMLJobSitePlugin
         'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
     );
 }
-
-
 
 
 
