@@ -86,7 +86,7 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
         return $ret;
     }
 
-    protected function _getURLfromBase_($searchDetails, $nPage = null, $nItem = null)
+    protected function getPageURLfromBaseFmt($searchDetails, $nPage = null, $nItem = null)
     {
         $strURL = $this->_getBaseURLFormat_($searchDetails);
 
