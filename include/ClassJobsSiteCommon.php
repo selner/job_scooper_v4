@@ -189,20 +189,6 @@ class ClassJobsSiteCommon
         return $arrRetList;
     }
 
-
-
-    function is_OutputInterimFiles()
-    {
-        $valInterimFiles = \Scooper\get_PharseOptionValue('output_interim_files');
-
-        if(isset($valInterimFiles) && $valInterimFiles == true)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
     function removeKeyColumnsFromJobList($arrJobList)
     {
         $arrRetList = null;
