@@ -23,10 +23,10 @@ class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
     protected $siteName = 'Indeed';
     protected $nJobListingsPerPage = 50;
     protected $siteBaseURL = 'http://www.Indeed.com';
-    protected $strBaseURLFormat = "http://www.indeed.com/jobs?as_cmp=&jt=all&st=&salary=&radius=50&&fromage=***NUMBER_DAYS***&limit=50&sort=date&psf=advsrch&start=50&pp=***ITEM_NUMBER***&filter=0";
-    protected $additionalFlags = null;
+    protected $strBaseURLFormat = "https://www.indeed.com/jobs?q=***KEYWORDS***&l=***LOCATION***&radius=50&sort=date&limit=50&fromage=***NUMBER_DAYS***&filter=0***ITEM_NUMBER***";
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $strKeywordDelimiter = "OR";
+    protected $additionalFlags = [C__JOB_IGNORE_MISMATCHED_JOB_COUNTS];
 
 
     function __construct($strBaseDir = null)
@@ -53,9 +53,9 @@ class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
 
     function getItemURLValue($nItem)
     {
-        if($nItem == null || $nItem == 1) { return 0; }
+        if($nItem == null || $nItem == 1) { return ""; }
 
-        return $nItem;
+        return "&start=" . $nItem. "&pp=";
     }
 
     function getDaysURLValue($nDays = null)
@@ -112,45 +112,57 @@ class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
     {
         $ret = null;
 
-
-        $nodesJobs = $objSimpleHTML->find('div[class="row"]');
-
-
+        $nodesJobs = $objSimpleHTML->find('td[id=\'resultsCol\'] div[class=\'result\']');
         foreach($nodesJobs as $node)
         {
+
+            if(!array_key_exists('itemtype', $node->attr))
+            {
+                $GLOBALS['logger']->logLine("Skipping job node without itemtype attribute; likely a sponsored and therefore not an organic search result.", \Scooper\C__DISPLAY_MOMENTARY_INTERUPPT__);
+                continue;
+            }
+            assert($node->attr['itemtype'] == "http://schema.org/JobPosting");
+
             $item = $this->getEmptyJobListingRecord();
             $item['job_site'] = $this->siteName;
 
+            $subNodes = $node->find("a");
+            if(isset($subNodes) && array_key_exists('title', $subNodes[0]->attr))
+                $item['job_title'] = $subNodes[0]->attr['title'];
 
-            $jobInfoNode = $node->firstChild()->firstChild();
-            if(isset($jobInfoNode) && isset($jobInfoNode->attr['title'])) $item['job_title'] = $jobInfoNode->attr['title'];
+            if(isset($subNodes))
+                $item['job_post_url'] = $subNodes[0]->attr['href'];
+
+            if(isset($node) && isset($node->attr['data-jk']))
+                $item['job_id'] = $node->attr['data-jk'];
+//
+//            if(is_null($item['job_id']) || empty($item['job_id'])) {
+//                $id = $this->getIDFromLink('\/jobs\/.{1,}-(\w+).*', $item['job_post_url']);
+//                if($id !== false && !is_null($id))
+//                    $item['job_id'] = $id;
+//            }
+
+
+            $coNode = $node->find("span[class='company'] a");
+            if(isset($coNode) && count($coNode) >= 1)
+            {
+                $item['company'] = $coNode[0]->plaintext;
+            }
+
+            $locNode= $node->find("span[class='location']");
+            if(isset($locNode) && count($locNode) >= 1)
+            {
+                $item['location'] = $locNode[0]->plaintext;
+            }
+            $dateNode = $node->find("span[class='date']");
+            if(isset($dateNode ) && count($dateNode ) >= 1)
+            {
+                $item['job_site_date'] = $dateNode[0]->plaintext;
+                if(strcasecmp(trim($item['job_site_date']), "Just posted") == 0)
+                    $item['job_site_date'] = getTodayAsString();
+            }
+
             if($item['job_title'] == '') continue;
-
-            $item['job_post_url'] = 'http://www.indeed.com' . $jobInfoNode->href;
-
-
-            // BUGBUG:  does not get ID from this valid URL  http://www.indeed.com/cmp/IEH-Laboratories/jobs/PT-Accounting-Intern-79cb387002268752?r=1&fccid=e6c6c781cbff7bd3
-            $item['job_id'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $item['job_post_url']);
-            $arrURLParts = explode("jk=",  $item['job_id']);
-            if(isset($arrURLParts) && is_array($arrURLParts) && count($arrURLParts) >=2)
-            {
-                $item['job_id'] = \Scooper\strScrub($arrURLParts[1]);
-            }
-            else
-            {
-                $item['job_id'] = preg_replace('/\/(company|cmp)\//', "", $item['job_id']);
-                $item['job_id'] = preg_replace('/\?.*$/', "", $item['job_id']);
-                $item['job_id'] = \Scooper\strScrub(str_replace("/jobs/", "", $item['job_id']));
-            }
-
-            $subNode = $node->find("span[class='company'] span");
-            if(isset($subNode) && isset($subNode[0])) $item['company'] = $subNode[0]->plaintext;
-
-            $subNode = $node->find("span[class='location'] span");
-            if(isset($subNode) && isset($subNode[0])) $item['location'] = $subNode[0]->plaintext;
-
-            $subNode = $node->find("span[class='date']");
-            if(isset($subNode) && isset($subNode[0])) $item['job_site_date'] = $subNode[0]->plaintext;
 
             $item['date_pulled'] = getTodayAsString();
 
