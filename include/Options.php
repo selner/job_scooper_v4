@@ -47,7 +47,7 @@ function isDebug() {
 }
 
 function isTestRun() {
-    return (array_key_exists('test_run', $GLOBALS['USERDATA']['configuration_settings']) && ($GLOBALS['USERDATA']['configuration_settings']['test_run'] == 1));
+    return (array_key_exists('test_run', $GLOBALS['USERDATA']['configuration_settings']) && intval(($GLOBALS['USERDATA']['configuration_settings']['test_run']) == 1));
 }
 
 function __initializeArgs__()
