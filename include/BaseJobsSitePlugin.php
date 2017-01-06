@@ -897,7 +897,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             //
             if (isTestRun())
             {
-                $nTotalListings = (is_null($this->nJobListingsPerPage) === true) ? 10 : ($nTotalListings < $this->nJobListingsPerPage) ? $nTotalListings : $this->nJobListingsPerPage;
+                $nTotalListings = (($nTotalListings < $this->nJobListingsPerPage) === true) ? $nTotalListings : $this->nJobListingsPerPage;
                 $totalPagesCount = 1;
             }
 
@@ -1045,27 +1045,26 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                     //
                     $err = null;
                     if ($nTotalListings > 0 && $nItemCount == 0) // We got zero listings but should have found some
-                        $err = "Error: retrieved 0 of the expected " . $nTotalListings . " listings for " . $this->siteName. " (search = " . $searchDetails['key'] . ")";
+                        $err = "Retrieved 0 of the expected " . $nTotalListings . " listings for " . $this->siteName. " (search = " . $searchDetails['key'] . ")";
                     elseif ($nItemCount < $this->nJobListingsPerPage && $nPageCount < $totalPagesCount)
-                        $err = "Error: retrieved only ". $nItemCount . " of the " . $this->nJobListingsPerPage ." job listings on page " . $nPageCount . " for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
+                        $err = "Retrieved only ". $nItemCount . " of the " . $this->nJobListingsPerPage ." job listings on page " . $nPageCount . " for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
                     elseif ($nJobsFound < $nTotalListings && $nPageCount == $totalPagesCount)
-                        $err = "Error: retrieved only " . $nJobsFound . " of the " . $nTotalListings . " listings that we expected for " . $this->siteName. " (search = " . $searchDetails['key'] . ")";
+                        $err = "Retrieved only " . $nJobsFound . " of the " . $nTotalListings . " listings that we expected for " . $this->siteName. " (search = " . $searchDetails['key'] . ")";
                     elseif ($nJobsFound > $nTotalListings && $nPageCount == $totalPagesCount) {
-                        $warnMsg = "Warning: downloaded " . ($nJobsFound - $nTotalListings) . " jobs more than the " . $nTotalListings . " expected for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
+                        $warnMsg = "Warning:  Downloaded " . ($nJobsFound - $nTotalListings) . " jobs more than the " . $nTotalListings . " expected for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
                         $GLOBALS['logger']->logLine($warnMsg, \Scooper\C__DISPLAY_WARNING__);
                     }
 
                     if(!is_null($err)) {
-                        $errHTMLFile = $GLOBALS['USERDATA']['directories']['stage1'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "error", $strBase = $searchDetails['key'], $strExt = "html", $delim = "-");
-                        $objSimpleHTML->save($errHTMLFile);
-
-                        $err = $err . "  Aborting job site plugin to prevent further errors.  HTML for page that generated the error saved to " . $errHTMLFile;
-
-                        if ($this->isBitFlagSet(C__JOB_IGNORE_MISMATCHED_JOB_COUNTS))
+                        if ($this->isBitFlagSet(C__JOB_IGNORE_MISMATCHED_JOB_COUNTS) || $this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) === true)
                         {
-                            $GLOBALS['logger']->logLine($err, \Scooper\C__DISPLAY_WARNING__);
+                            $GLOBALS['logger']->logLine("Warning: " . $err, \Scooper\C__DISPLAY_WARNING__);
                         }
                         else {
+                            $errHTMLFile = $GLOBALS['USERDATA']['directories']['stage1'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "error", $strBase = $searchDetails['key'], $strExt = "html", $delim = "-");
+                            $objSimpleHTML->save($errHTMLFile);
+
+                            $err = "Error: " . $err . "  Aborting job site plugin to prevent further errors.  HTML for page that generated the error saved to " . $errHTMLFile;
                             $GLOBALS['logger']->logLine($err, \Scooper\C__DISPLAY_ERROR__);
                             throw new Exception($err);
                         }
