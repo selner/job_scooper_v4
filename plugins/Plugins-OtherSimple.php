@@ -236,7 +236,12 @@ class PluginCyclon extends ClassHTMLJobSitePlugin
     protected $siteName = 'Cylcon';
     protected $siteBaseURL = "http://cylcon.com";
     protected $strBaseURLFormat = "http://cylcon.com/jobs.php?q=***KEYWORDS***&l=***LOCATION***&sort=date&radius=50&start=***ITEM_NUMBER***";
-    protected $additionalFlags = [C__JOB_DAYS_VALUE_NOTAPPLICABLE__];
+
+    //
+    // BUGBUG: We shouldn't have to do C__JOB_IGNORE_MISMATCHED_JOB_COUNTS here, but have not yet figured out what is causing lower counts
+    //         to sporadically happen
+    //
+    protected $additionalFlags = [C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_IGNORE_MISMATCHED_JOB_COUNTS];
     protected $nJobListingsPerPage = 15;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
 
