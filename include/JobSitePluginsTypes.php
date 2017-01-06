@@ -31,8 +31,6 @@ abstract class ClassBaseJobsAPIPlugin extends ClassBaseJobsSitePlugin
 
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__;
 
-    function getSearchJobsFromAPI($searchDetails) { return VALUE_NOT_SUPPORTED; }
-
 }
 abstract class ClassBaseServerHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
 {

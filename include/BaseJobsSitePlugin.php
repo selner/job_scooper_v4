@@ -1263,4 +1263,6 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
         );
     }
 
+    protected function getSearchJobsFromAPI($searchDetails) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); }
+
 }
