@@ -208,8 +208,6 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
                 //
                 $item = $this->getEmptyJobListingRecord();
 
-                $item['job_site'] = $this->siteName;
-                $item['date_pulled'] = getTodayAsString();
                 $item['job_title'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_title'], 'plaintext');
                 $item['job_post_url'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_link'], 'href');
 
@@ -218,7 +216,6 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
 
                 if (array_key_exists('tag_company', $this->arrListingTagSetup)) {
                     $item['company'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_company'], 'plaintext');
-                    $item['company'] = $item['job_site'];
                 }
 
                 if (array_key_exists('tag_job_id', $this->arrListingTagSetup))
