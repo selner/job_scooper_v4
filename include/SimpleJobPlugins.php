@@ -263,8 +263,6 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
                         sleep($this->additionalLoadDelaySeconds);
                     $GLOBALS['logger']->logLine("Next page of job listings loaded successfully.  ", \Scooper\C__DISPLAY_NORMAL__);
 
-
-                    return $driver;
                 } catch (Exception $ex) {
                     $strError = "Exception thrown trying to click the next page link: " . $ex->getMessage();
                     $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
