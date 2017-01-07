@@ -238,29 +238,28 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         }
 
 
-        $GLOBALS['logger']->logSectionHeader("Generating email content for user" . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
+        $GLOBALS['logger']->logSectionHeader("Generating text email content for user" . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
 
         $strResultCountsText = $this->getListingCountsByPlugin("text", $arrFinalJobs_SortedByCompanyRole);
-        $strErrs = $GLOBALS['logger']->getCumulativeErrorsAsString();
-        $strErrsResult = "";
-        if ($strErrs != "" && $strErrs != null) {
-            $strErrsResult = $strErrsResult . PHP_EOL . "------------ ERRORS FOUND ------------" . PHP_EOL . $strErrs . PHP_EOL . PHP_EOL . "----------------------------------------" . PHP_EOL . PHP_EOL;
-        }
+        $strResultText = "Job Scooper Results for ". $this->_getRunDateRange_() . PHP_EOL . $strResultCountsText . PHP_EOL;
 
-        $strResultText = "Job Scooper Results for ". $this->_getRunDateRange_() . PHP_EOL . $strResultCountsText . PHP_EOL . $strErrsResult;
+        $GLOBALS['logger']->logSectionHeader("Generating text html content for user" . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
+
+
+        $messageHtml = $this->getListingCountsByPlugin("html", $arrFinalJobs_SortedByCompanyRole, $detailsHTMLFile);
+
+        $this->_wrapCSSStyleOnHTML_($messageHtml);
+        $subject = "New Job Postings: " . $this->_getRunDateRange_();
+
+        $GLOBALS['logger']->logSectionHeader("Generating text html content for user" . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
 
         $GLOBALS['logger']->logLine($strResultText, \Scooper\C__DISPLAY_SUMMARY__);
-
-        $strResultCountsHTML = $this->getListingCountsByPlugin("html", $arrFinalJobs_SortedByCompanyRole);
-        $strErrHTML = preg_replace("/\n/", ("<br>" . chr(10) . chr(13)), $strErrsResult);
-        $strResultHTML = $strResultCountsHTML . PHP_EOL . "<pre>" . $strErrHTML . "</pre>" . PHP_EOL;
-
-        $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \Scooper\C__SECTION_END__, \Scooper\C__NAPPSECONDLEVEL__);
 
         //
         // Send the email notification out for the completed job
         //
-        $this->sendJobCompletedEmail($strResultText, $strResultHTML, $detailsHTMLFile, $arrFilesToAttach);
+        $GLOBALS['logger']->logSectionHeader("Sending email to user..." . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
+        $ret = $this->sendEmail($strResultText, $messageHtml, $arrFilesToAttach, $subject, "results");
 
         //
         // We only keep interim files around in debug mode, so
@@ -274,8 +273,11 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
                 }
             }
         }
+        $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \Scooper\C__SECTION_END__, \Scooper\C__NAPPSECONDLEVEL__);
 
         $GLOBALS['logger']->logLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+
+        return $ret;
     }
 
 
@@ -414,47 +416,16 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
     }
 
 
-    function sendJobCompletedEmail($strBodyText = null, $strBodyHTML = null, $detailsHTMLBodyInclude = null, $arrDetailsAttachFiles = array())
+    function sendEmail($strBodyText = null, $strBodyHTML = null, $arrDetailsAttachFiles = array(), $subject="No subject", $emailKind='results')
     {
         if (!isset($GLOBALS['OPTS']['send_notifications']) || $GLOBALS['OPTS']['send_notifications'] != 1) {
             $GLOBALS['logger']->logLine(PHP_EOL . "User set -send_notifications = false so skipping email notification.)" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+            $GLOBALS['logger']->logLine("Mail contents would have been:" . PHP_EOL . $strBodyText, \Scooper\C__DISPLAY_NORMAL__);
             return null;
         }
 
-        $messageHtml = "";
-        $messageText = "";
 
-        //
-        // Setup the plaintext content
-        //
-        if ($strBodyText != null && strlen($strBodyText) > 0) {
-
-            //
-            // Setup the plaintext message text value
-            //
-            $messageText = $strBodyText;
-            $messageText .= PHP_EOL;
-
-            //
-            // Setup the value for the html version of the message
-            //
-            $messageHtml .= $strBodyHTML . "<br>" . PHP_EOL . "<br>" . PHP_EOL;
-            $messageHtml .= '<H2>New Job Matches</H2>' . PHP_EOL . PHP_EOL;
-            $content = $this->_getFullFileContents_($detailsHTMLBodyInclude);
-            $messageHtml .= $content . PHP_EOL . PHP_EOL . "</body></html>";
-
-            $this->_wrapCSSStyleOnHTML_($messageHtml);
-        }
-
-        $subject = "New Job Postings: " . $this->_getRunDateRange_();
-
-        return $this->sendEmail($messageText, $messageHtml, $arrDetailsAttachFiles, $subject, "results");
-    }
-
-    function sendEmail($strBodyText = null, $strBodyHTML = null, $arrDetailsAttachFiles = array(), $subject="No subject", $emailKind='results')
-    {
         $settings = $GLOBALS['USERDATA']['configuration_settings']['email'];
-
 
         $mail = new PHPMailer();
 
@@ -678,7 +649,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
     }
 
 
-    private function getListingCountsByPlugin($fLayoutType, $arrPluginJobsUnfiltered = null)
+    private function getListingCountsByPlugin($fLayoutType, $arrPluginJobsUnfiltered = null, $detailsHTMLBodyInclude = null)
     {
 
         $arrCounts = null;
@@ -686,6 +657,8 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
         $strOut = "                ";
         $arrHeaders = array("For Review", "Auto-Filtered", "Active Jobs", "Total Listings");
+
+        $arrFailedPluginsReport = $this->_getFailedSearchesByPlugin_();
 
         foreach($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $plugin) {
             if ($arrPluginJobsUnfiltered == null || !is_array($arrPluginJobsUnfiltered) || countJobRecords($arrPluginJobsUnfiltered) == 0) {
@@ -699,14 +672,22 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             $arrCounts[$plugin]['total_not_interested'] = count(array_filter($arrPluginJobs, "isMarked_NotInterested"));
             $arrCounts[$plugin]['total_active'] = count(array_filter($arrPluginJobs, "isMarked_InterestedOrBlank"));
             $arrCounts[$plugin]['total_listings'] = count($arrPluginJobs);
+
+            //
+            // if the plugin also errored, then add an asterisk to the name
+            // for refernce in the email
+            //
+            if(in_array($plugin, array_keys($arrFailedPluginsReport)) === true)
+            {
+                $arrCounts[$plugin]['name'] = $plugin . " (*)";
+            }
         }
 
-        $arrFailedPluginsReport = $this->_getFailedSearchesByPlugin_();
 
         switch ($fLayoutType)
         {
             case "html":
-                $content = $this->_getResultsTextHTML_($arrHeaders, $arrCounts, $arrFailedPluginsReport);
+                $content = $this->_getResultsTextHTML_($arrHeaders, $arrCounts, $arrFailedPluginsReport, $detailsHTMLBodyInclude);
                 break;
 
             default:
@@ -852,7 +833,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         return $strDateRange;
     }
 
-    private function _getResultsTextHTML_($arrHeaders, $arrCounts, $arrFailedPlugins = null)
+    private function _getResultsTextHTML_($arrHeaders, $arrCounts, $arrFailedPlugins = null, $detailsHTMLBodyInclude = null)
     {
         $arrCounts_TotalAll = null;
         $arrCounts_TotalUser = null;
@@ -894,11 +875,41 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             $strOut .=  PHP_EOL . "</table><br><br>". PHP_EOL. PHP_EOL;
         }
 
+
+
+        if($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] != null && count($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']) > 0)
+        {
+            $strOut .=  PHP_EOL . "<div class=\"job_scooper section\">". PHP_EOL;
+            sort($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']);
+
+            $strExcluded = getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'], ", ", "", false);
+
+            $strOut .=  PHP_EOL .  "<span style=\"font-size: xx-small; color: #8e959c;\">Excluded sites for this run:" . PHP_EOL;
+            $strOut .= $strExcluded;
+            $strOut .= "</span>" . PHP_EOL;
+            $strOut .= "</div>";
+        }
+
+
+        //
+        // Include the contents of the HTML file if passed
+        //
+        if(!is_null($detailsHTMLBodyInclude)) {
+            $strOut .= PHP_EOL . "<div class=\"job_scooper section\">" . PHP_EOL;
+            $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
+            $strOut .= '<H2>New Job Matches</H2>' . PHP_EOL . PHP_EOL;
+            $strOut .= $this->_getFullFileContents_($detailsHTMLBodyInclude);
+            $strOut .= PHP_EOL . PHP_EOL;
+            $strOut .= "</div>";
+        }
+
+
         if(!is_null($arrFailedPlugins) && is_array($arrFailedPlugins) && count($arrFailedPlugins) > 0)
         {
+            $strOut .=  PHP_EOL . "<div class=\"job_scooper section\">". PHP_EOL;
             sort($arrFailedPlugins);
             $strOut .=  PHP_EOL . "<div class='job_scooper section' style=' color: DarkRed; '>". PHP_EOL;
-            $strOut .=  PHP_EOL .  "The following job site plugins failed due to unexpected errors:" . PHP_EOL;
+            $strOut .=  PHP_EOL .  "* The following job site plugins failed due to unexpected errors:" . PHP_EOL;
             $strOut .=  PHP_EOL . "<ul class='job_scooper'>". PHP_EOL;
 
             foreach($arrFailedPlugins as $site)
@@ -908,27 +919,13 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
                 }
             }
 
-            $strOut .=  PHP_EOL . "</ul></div>". PHP_EOL;
+            $strOut .=  PHP_EOL . "</ul>". PHP_EOL;
+            $strOut .= "</div>";
         }
-
-        $strOut .=  PHP_EOL . "<div class=\"job_scooper section\">". PHP_EOL;
-
-        if($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] != null && count($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']) > 0)
-        {
-            sort($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']);
-
-            $strExcluded = getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'], ", ", "", false);
-
-            $strOut .=  PHP_EOL .  "<span style=\"font-size: xx-small; color: #8e959c;\">Excluded sites for this run:" . PHP_EOL;
-            $strOut .= $strExcluded;
-            $strOut .= "</span>" . PHP_EOL;
-        }
-        $strOut .= "</div>";
 
         $strOut .=  PHP_EOL . "<div class=\"job_scooper section\">". PHP_EOL;
         $strOut .=  PHP_EOL .  "<p style=\"min-height: 15px;\">&nbsp;</p><span style=\"font-size: xx-small; color: SlateBlue;\">Generated by " . __APP_VERSION__. " on " . \Scooper\getTodayAsString() . "." . PHP_EOL;
-        $strOut .= "</span>" . PHP_EOL;
-
+        $strOut .= "</span>";
         $strOut .= "</div>";
 
         return $strOut;
