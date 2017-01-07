@@ -65,7 +65,15 @@ class SeleniumSession extends PropertyObject
     {
         if(!is_null($this->remoteWebDriver))
         {
-            $this->remoteWebDriver->quit();
+            try {
+                $this->remoteWebDriver->close();
+            }
+            catch (Exception $ex) {  };
+
+            try {
+                $this->remoteWebDriver->quit();
+            }
+            catch (Exception $ex) {  };
             $this->remoteWebDriver= null;
         }
     }
