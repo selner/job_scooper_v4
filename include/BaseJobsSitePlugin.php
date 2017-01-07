@@ -836,7 +836,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             {
                 try
                 {
-                    $selen = new SeleniumSession();
+                    $selen = new SeleniumSession($this->additionalLoadDelaySeconds);
                     $html = $selen->getPageHTML($searchDetails['search_start_url']);
                     $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
                 } catch (Exception $ex) {
