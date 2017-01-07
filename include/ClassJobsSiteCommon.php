@@ -296,55 +296,51 @@ class ClassJobsSiteCommon
         }
 
 
+        if (is_null($arrItem['company']) || strlen($arrItem['company']) == 0) {
+            $arrItem ['company'] = '[UNKNOWN]';
+        } else {
+            $arrItem ['company'] = \Scooper\strScrub($arrItem['company'], ADVANCED_TEXT_CLEANUP);
+            // Remove common company name extensions like "Corporation" or "Inc." so we have
+            // a higher match likelihood
+            $arrItem ['company'] = preg_replace(array('/\s[Cc]orporat[e|ion]/', '/\s[Cc]orp\W{0,1}/', '/\.com/', '/\W{0,}\s[iI]nc/', '/\W{0,}\s[lL][lL][cC]/', '/\W{0,}\s[lL][tT][dD]/'), "", $arrItem['company']);
 
-        $arrItem ['company'] = \Scooper\strScrub($arrItem['company'], ADVANCED_TEXT_CLEANUP );
-        // Remove common company name extensions like "Corporation" or "Inc." so we have
-        // a higher match likelihood
-        $arrItem ['company'] = preg_replace(array('/\s[Cc]orporat[e|ion]/', '/\s[Cc]orp\W{0,1}/', '/\.com/', '/\W{0,}\s[iI]nc/', '/\W{0,}\s[lL][lL][cC]/', '/\W{0,}\s[lL][tT][dD]/'), "", $arrItem['company']);
+            switch (\Scooper\strScrub($arrItem ['company'])) {
+                case "amazon":
+                case "amazon com":
+                case "a2z":
+                case "lab 126":
+                case "amazon Web Services":
+                case "amazon fulfillment services":
+                case "amazonwebservices":
+                case "amazon (seattle)":
+                    $arrItem ['company'] = "Amazon";
+                    break;
 
-        switch(\Scooper\strScrub($arrItem ['company']))
-        {
-            case "amazon":
-            case "amazon com":
-            case "a2z":
-            case "lab 126":
-            case "amazon Web Services":
-            case "amazon fulfillment services":
-            case "amazonwebservices":
-            case "amazon (seattle)":
-                $arrItem ['company'] = "Amazon";
-                break;
-
-            case "market leader":
-            case "market leader inc":
-            case "market leader llc":
-                $arrItem ['company'] = "Market Leader";
-                break;
+                case "market leader":
+                case "market leader inc":
+                case "market leader llc":
+                    $arrItem ['company'] = "Market Leader";
+                    break;
 
 
-            case "walt disney parks &amp resorts online":
-            case "walt disney parks resorts online":
-            case "the walt disney studios":
-            case "walt disney studios":
-            case "the walt disney company corporate":
-            case "the walt disney company":
-            case "disney parks &amp resorts":
-            case "disney parks resorts":
-            case "walt disney parks resorts":
-            case "walt disney parks &amp resorts":
-            case "walt disney parks resorts careers":
-            case "walt disney parks &amp resorts careers":
-            case "disney":
-                $arrItem ['company'] = "Disney";
-                break;
+                case "walt disney parks &amp resorts online":
+                case "walt disney parks resorts online":
+                case "the walt disney studios":
+                case "walt disney studios":
+                case "the walt disney company corporate":
+                case "the walt disney company":
+                case "disney parks &amp resorts":
+                case "disney parks resorts":
+                case "walt disney parks resorts":
+                case "walt disney parks &amp resorts":
+                case "walt disney parks resorts careers":
+                case "walt disney parks &amp resorts careers":
+                case "disney":
+                    $arrItem ['company'] = "Disney";
+                    break;
 
+            }
         }
-
-        if(is_null($arrItem['company']) || strlen($arrItem['company']) <= 0) // substr check is to clean up records pre 6/9/14.
-        {
-            $arrItem['company'] = "s";
-        }
-
 
         $arrItem ['job_site_category'] = \Scooper\strScrub($arrItem['job_site_category'], SIMPLE_TEXT_CLEANUP);
 
