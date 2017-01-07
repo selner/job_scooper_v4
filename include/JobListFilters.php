@@ -147,5 +147,5 @@ function includeJobInFilteredList($var)
 
 function isIncludedJobSite($var)
 {
-    return (array_search($var['job_site'], array_keys($GLOBALS['USERDATA']['configuration_settings']['included_sites'])) !== false);
+    return (in_array(strtolower($var['job_site']), $GLOBALS['USERDATA']['configuration_settings']['included_sites']) === true);
 }
