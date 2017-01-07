@@ -144,7 +144,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
                         {
                             $strCmdToRun = "java ";
                             if(array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
-                                $strCmdToRun = $GLOBALS['USERDATA']['selenium']['prefix_switches'];
+                                $strCmdToRun .= $GLOBALS['USERDATA']['selenium']['prefix_switches'];
 
                             $strCmdToRun .= " -jar \"" . $GLOBALS['USERDATA']['selenium']['jar'] . "\" -port " . $GLOBALS['USERDATA']['selenium']['port'] . " ";
                             if(array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
