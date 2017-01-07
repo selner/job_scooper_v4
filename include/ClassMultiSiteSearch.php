@@ -172,9 +172,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
             }
             catch (Exception $classError)
             {
-                $GLOBALS['logger']->logLine('ERROR:  Unable to load the class for ' .$classPluginForSearch['name'] . '. Skipping it\'s searches and continuing with any others.', \Scooper\C__DISPLAY_ERROR__);
-                $GLOBALS['logger']->logLine('ERROR:  Search failure reason:  '.$classError->getMessage(), \Scooper\C__DISPLAY_ERROR__);
-                if(isDebug()) { throw $classError; }
+                $GLOBALS['logger']->logLine('ERROR:  Plugin ' .$classPluginForSearch['name'] . ' failed due to an error:  ' . $classError .PHP_EOL. 'Skipping it\'s remaining searches and continuing with other plugins.', \Scooper\C__DISPLAY_ERROR__);
             }
         }
 
