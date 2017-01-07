@@ -25,7 +25,7 @@ class PluginZipRecruiter extends ClassBaseServerHTMLJobSitePlugin
     protected $siteBaseURL = 'https://jobs.ziprecruiter.com';
     protected $nJobListingsPerPage = 20;
     protected $strBaseURLFormat = "https://www.ziprecruiter.com/candidate/search?search=***KEYWORDS***&location=***LOCATION***&radius=25&page=***PAGE_NUMBER***&days=***NUMBER_DAYS***";
-    protected $additionalFlags = [C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS, C__JOB_PREFER_MICRODATA];
+    protected $additionalFlags = [C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $regex_link_job_id = '/^.*\/clk\/(.*)/i';
 
@@ -90,19 +90,18 @@ class PluginZipRecruiter extends ClassBaseServerHTMLJobSitePlugin
         // Find the HTML node that holds the result count
         //
         $resultsSection = $objSimpHTML->find("h1[class='headline']");
+        $totalItemsText = C__TOTAL_ITEMS_UNKNOWN__;
 
         // get the text value of that node
         if($resultsSection != null)
         {
-            $totalItemsText = trim($resultsSection[0]->plaintext);
-            $count = trim(substr($totalItemsText, 0, strpos($totalItemsText, ' ')));
-
-            return $count;
+            $matches = array();
+            if(preg_match('/(\d+)/', $resultsSection[0]->plaintext, $matches) > 0)
+            {
+                $totalItemsText = $matches[1];
+            }
         }
-        else
-        {
-            return -1;
-        }
+        return $totalItemsText;
 
     }
 
@@ -121,7 +120,7 @@ class PluginZipRecruiter extends ClassBaseServerHTMLJobSitePlugin
         $ret = null;
 
 
-        $nodesJobs= $objSimpHTML->find('li[class="job_row_ai"]');
+        $nodesJobs= $objSimpHTML->find('div[id="job_list"] article');
 
 
         foreach($nodesJobs as $node)
@@ -131,8 +130,9 @@ class PluginZipRecruiter extends ClassBaseServerHTMLJobSitePlugin
             //
             $item = $this->getEmptyJobListingRecord();
 
+            $item['job_id'] = $node->attr['id'];
 
-            $titleNode = $node->find("h4[class='font14 fBold mb2 font13Phone']");
+            $titleNode = $node->find("span[class='just_job_title']");
             if(isset($titleNode) && isset($titleNode[0]))
             {
                 $item['job_title'] = $titleNode[0]->plaintext;
@@ -143,47 +143,42 @@ class PluginZipRecruiter extends ClassBaseServerHTMLJobSitePlugin
             //
             if($item['job_title'] == '') continue;
 
-            $titleLink = $node->find("a[class='clickable_target']");
+            $titleLink = $node->find("h2[class='job_title'] a");
             if(isset($titleLink) && isset($titleLink[0]))
             {
                 $item['job_post_url'] = $titleLink[0]->href;
             }
 
+//
+//            // remove "remaining15" or similar if it exists
+//            $strExternalJobID = preg_replace('/remaining\d{1,3}/i', "", $strExternalJobID);
+//
+//            // remove "_cpc" from the ID if it still exists
+//            $strExternalJobID = preg_replace('/_cpc/i', "", $strExternalJobID );
+//
 
-            // get the id and parse it down to <name>-<identifier>
-            $strExternalJobID = $node->attr['id'];
-            $fMatch = preg_match('/quiz-card-(\w{1,}-?\w{0,}-?\w{0,})/i', $strExternalJobID, $arrExternalIDParts );
-            assert($fMatch == true);
-            $strExternalJobID = $arrExternalIDParts[1];
-
-            // remove "remaining15" or similar if it exists
-            $strExternalJobID = preg_replace('/remaining\d{1,3}/i', "", $strExternalJobID);
-
-            // remove "_cpc" from the ID if it still exists
-            $strExternalJobID = preg_replace('/_cpc/i', "", $strExternalJobID );
-
-            $item['job_id'] = $strExternalJobID;
-
-            $companyNode = $node->find("p[class='font12Phone clearLeft']");
+            $companyNode = $node->find("a[class='t_org_link']");
             if(isset($companyNode) && isset($companyNode[0]))
             {
-                $arrCompanyParts = explode(" - ", $companyNode[0]->plaintext);
-                if(isset($arrCompanyParts) && count($arrCompanyParts)>=2)
-                {
-                    $company = str_ireplace("at ", "", $arrCompanyParts[0]);
-                    $item['company'] = $company;
-                    $item['location'] = $arrCompanyParts[1];
-                }
+                $item['company'] = $companyNode[0]->plaintext;
             }
 
-            $jobDetailsNode = $node->find("p[class='greenText font12 font11Phone'] span");
+            $locNode = $node->find("span[class='location']");
+            if(isset($locNode) && isset($locNode[0]))
+            {
+                $item['location'] = $locNode[0]->plaintext;
+            }
+
+            $empNode = $node->find("span[itemProp='employmentType']");
+            if(isset($empNode) && isset($empNode[0]))
+            {
+                $item['employment_type'] = $empNode[0]->plaintext;
+            }
+
+            $jobDetailsNode = $node->find("span[class='new']");
             if(isset($jobDetailsNode) && isset($jobDetailsNode[0]))
             {
-                $strJobDetails = \Scooper\strScrub($jobDetailsNode[0]->plaintext, SIMPLE_TEXT_CLEANUP);
-                $arrJobDetailsParts = explode(" ", $strJobDetails);
-
-                $item['job_site_category'] = $arrJobDetailsParts[count($arrJobDetailsParts) - 1];
-                $item['job_site_date'] = getDateForDaysAgo($arrJobDetailsParts[1]);
+                $item['job_site_date'] = getTodayAsString();
             }
 
             $ret[] = $this->normalizeJobItem($item);
