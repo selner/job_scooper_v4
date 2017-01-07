@@ -109,25 +109,49 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
                 if($class->isBitFlagSet(C__JOB_USE_SELENIUM)) {
 //                    $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | echo `sed \'s/.*port \([0-9]*\).*/\1/\'`';
                     // $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | ps -p `awk \'NR!=1 {print $2}\'` -o command=';
-                    $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'] . '| ps -o command= -p `awk \'NR != 1 {print $2}\'` | sed -n 2p';
+//                    $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'] . '| ps -o command= -p `awk \'NR != 1 {print $2}\'` | sed -n 2p';
+                    $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'];
 
                     $seleniumStarted = false;
                     $pscmd = doExec($cmd);
-                    if (!is_null($pscmd) && is_string($pscmd) && strlen($pscmd) > 0)
+                    if (!is_null($pscmd) && (is_array($pscmd) && count($pscmd) > 1))
                     {
-                        if(preg_match('/selenium/', $pscmd) !== false)
+                        $pidLine = preg_split('/\s+/', $pscmd[1]);
+                        if(count($pidLine) >1)
                         {
-                            $seleniumStarted = true;
-                            $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \Scooper\C__DISPLAY_WARNING__);
-                        }
+                            $pid = $pidLine[1];
+                            $cmd = 'ps -o command= -p ' . $pid;
+                            $pscmd = doExec($cmd);
 
+                            if(preg_match('/selenium/', $pscmd) !== false)
+                            {
+                                $seleniumStarted = true;
+                                $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \Scooper\C__DISPLAY_WARNING__);
+                            }
+                            else
+                            {
+                                $msg = "Error: port " . $GLOBALS['USERDATA']['selenium']['port'] . " is being used by process other than Selenium (" . var_export($pscmd, true) . ").  Aborting.";
+                                $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
+                                throw new Exception($msg);
+
+                            }
+                        }
                     }
 
                     if($seleniumStarted === false)
                     {
                         if($GLOBALS['USERDATA']['selenium']['autostart'] == 1 && (array_key_exists('selenium_started', $GLOBALS) === false || $GLOBALS['selenium_started'] !== true))
                         {
-                            $strCmdToRun = "java " . $GLOBALS['USERDATA']['selenium']['prefix_switches'] . " -jar \"" . $GLOBALS['USERDATA']['selenium']['jar'] . "\" -port " . $GLOBALS['USERDATA']['selenium']['port'] . " " . $GLOBALS['USERDATA']['selenium']['postfix_switches'] . " >/dev/null &";
+                            $strCmdToRun = "java ";
+                            if(array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
+                                $strCmdToRun = $GLOBALS['USERDATA']['selenium']['prefix_switches'];
+
+                            $strCmdToRun .= " -jar \"" . $GLOBALS['USERDATA']['selenium']['jar'] . "\" -port " . $GLOBALS['USERDATA']['selenium']['port'] . " ";
+                            if(array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
+                                $strCmdToRun .= $GLOBALS['USERDATA']['selenium']['postfix_switches'];
+
+                                $strCmdToRun .= " >/dev/null &";
+
                             $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \Scooper\C__DISPLAY_ITEM_RESULT__);
                             doExec($strCmdToRun);
                             $GLOBALS['selenium_started'] = true;
