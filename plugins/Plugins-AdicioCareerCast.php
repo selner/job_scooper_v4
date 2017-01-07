@@ -19,7 +19,24 @@ if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 
-abstract class BaseAdicioCareerCastPlugin extends ClassBaseClientSideHTMLJobSitePlugin
+
+
+abstract class AlternateAdicioCareerCastPlugin extends BaseAdicioCareerCastPlugin
+{
+    protected $nJobListingsPerPage = 20;
+}
+
+abstract class MicrodataAdicioCareerCastPlugin extends BaseAdicioCareerCastPlugin
+{
+
+    function __construct($strOutputDirectory = null)
+    {
+        $this->additionalFlags[] = C__JOB_PREFER_MICRODATA;
+        parent::__construct($strOutputDirectory);
+    }
+}
+
+abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = '';
     protected $siteBaseURL = '';
@@ -38,6 +55,8 @@ abstract class BaseAdicioCareerCastPlugin extends ClassBaseClientSideHTMLJobSite
     function __construct($strOutputDirectory = null)
     {
         $this->additionalFlags[] = C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES;
+        $this->additionalFlags[] = C__JOB_PAGE_VIA_URL;
+
         $this->siteBaseURL = $this->childSiteURLBase;
         $this->strBaseURLFormat = $this->childSiteURLBase . $this->strBaseURLPathSection . $this->strBaseURLPathSuffix;
         parent::__construct($strOutputDirectory);
@@ -159,9 +178,12 @@ abstract class BaseAdicioCareerCastPlugin extends ClassBaseClientSideHTMLJobSite
                 $item = $this->getEmptyJobListingRecord();
 
 
-                $item['job_site'] = $this->siteName;
-                $item['date_pulled'] = getTodayAsString();
-
+                $divMain = $node->find("div[class='aiResultsMainDiv']");
+                if(isset($divMain) && count($divMain) >= 1)
+                {
+                    $divID = $divMain[0]->attr['id'];
+                    $item['job_id']= preg_replace('/[^\d]*/', "", $divID);
+                }
 
                 $titleLink = $node->find("a")[0];
                 $item['job_title'] = $titleLink->plaintext;
@@ -172,10 +194,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassBaseClientSideHTMLJobSite
                 if($item['job_title'] == '') continue;
 
 
-                $item['job_post_url'] = $this->siteBaseURL . $titleLink->href;
-                $arrURLParts= explode("-", $item['job_post_url']);
-                $item['job_id'] = $arrURLParts[count($arrURLParts) - 2];
-
+                $item['job_post_url'] =  $titleLink->href;
 
 
                 $detailLIs = $node->find("ul li");
@@ -184,11 +203,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassBaseClientSideHTMLJobSite
                 $item['job_site_date'] = $detailLIs[2]->plaintext;
                 $item['job_site_category'] = $detailLIs[3]->plaintext;
 
-                //
-                // Call normalizeItem to standardize the resulting listing result
-                //
-                $ret[] = $this->normalizeItem($item);
-
+                $ret[] = $this->normalizeJobItem($item);
             }
         }
         else
@@ -206,11 +221,6 @@ abstract class BaseAdicioCareerCastPlugin extends ClassBaseClientSideHTMLJobSite
                     // get a new record with all columns set to null
                     //
                     $item = $this->getEmptyJobListingRecord();
-
-
-                    $item['job_site'] = $this->siteName;
-                    $item['date_pulled'] = getTodayAsString();
-
 
                     $titleLink = $node->find("a")[0];
                     $item['job_title'] = $titleLink->plaintext;
@@ -232,12 +242,13 @@ abstract class BaseAdicioCareerCastPlugin extends ClassBaseClientSideHTMLJobSite
                     $companyNode = $node->find("td[class='aiResultsCompany']");
                     $item['company'] = $companyNode[0]->plaintext;
 
-                    //
-                    // Call normalizeItem to standardize the resulting listing result
-                    //
-                    $ret[] = $this->normalizeItem($item);
-
+                    $ret[] = $this->normalizeJobItem($item);
                 }
+            }
+
+            else
+            {
+                return parent::parseJobsListForPage($objSimpHTML);
             }
         }
 
@@ -246,11 +257,28 @@ abstract class BaseAdicioCareerCastPlugin extends ClassBaseClientSideHTMLJobSite
 
 }
 
-class PluginMashable extends BaseAdicioCareerCastPlugin
+
+abstract class OptimizedAdicioCareerCastPlugin extends BaseAdicioCareerCastPlugin
+{
+    protected $additionalFlags = [C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED];
+
+    function __construct($strOutputDirectory = null)
+    {
+        $this->strBaseURLPathSection = str_replace("/jobs/results/keyword/***KEYWORDS***", "/jobs/search/results", $this->strBaseURLPathSection);
+        $this->strBaseURLPathSection = str_replace("&kwsMustContain=***KEYWORDS***", "", $this->strBaseURLPathSection);
+        parent::__construct($strOutputDirectory);
+    }
+
+}
+
+
+class PluginMashable extends OptimizedAdicioCareerCastPlugin
 {
     protected $siteName = 'Mashable';
     protected $childSiteURLBase = 'http://jobs.mashable.com';
-    protected $strBaseURLPathSection = "/jobs/results/keyword/***KEYWORDS***?location=***LOCATION***&kwsMustContain=***KEYWORDS***&radius=50&view=List_Detail&sort=PostType+asc%2C+PostDate+desc%2C+IsFeatured+desc&rows=50&modifiedDate=***NUMBER_DAYS***%page=***PAGE_NUMBER***&PostDate=***NUMBER_DAYS***";
+    // Note:  Mashable has a short list of jobs (< 500-1000 total) so we exclude keyword search here as an optimization.  We may download more jobs overall, but through fewer round trips to the servers
+//    protected $strBaseURLPathSection = "/jobs/results/keyword/***KEYWORDS***?location=***LOCATION***&kwsMustContain=***KEYWORDS***&radius=50&view=List_Detail&sort=PostType+asc%2C+PostDate+desc%2C+IsFeatured+desc&rows=50&modifiedDate=***NUMBER_DAYS***%page=***PAGE_NUMBER***&PostDate=***NUMBER_DAYS***";
+    protected $strBaseURLPathSection = "/jobs/search/results?location=***LOCATION***&radius=50&view=List_Detail&sort=PostType+asc%2C+PostDate+desc%2C+IsFeatured+desc&rows=50&modifiedDate=***NUMBER_DAYS***%page=***PAGE_NUMBER***&PostDate=***NUMBER_DAYS***";
 
     protected $typeLocationSearchNeeded = 'location-city-comma-state';
 
@@ -329,12 +357,12 @@ class PluginTopekaCapitalJournal extends BaseAdicioCareerCastPlugin
     protected $childSiteURLBase = 'http://jobs.cjonline.com';
 }
 
-class PluginRetailCareersNow extends BaseAdicioCareerCastPlugin
+class PluginRetailCareersNow extends AlternateAdicioCareerCastPlugin
 {
     protected $siteName = 'RetailCareersNow';
     protected $childSiteURLBase = 'http://retail.careers.adicio.com';
 }
-class PluginHealthJobs extends BaseAdicioCareerCastPlugin
+class PluginHealthJobs extends OptimizedAdicioCareerCastPlugin
 {
     protected $siteName = 'HealthJobs';
     protected $childSiteURLBase = 'http://healthjobs.careers.adicio.com';
