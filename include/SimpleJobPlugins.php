@@ -160,7 +160,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
 
     protected function _getTagMatchValue_($node, $arrTag, $propertyName = 'plaintext', $propertyRegEx = null)
     {
-        $strReturn = '';
+        $strReturn = null;
         if (array_key_exists("return_attribute", $arrTag)) {
             $propertyName = $arrTag['return_attribute'];
         }
