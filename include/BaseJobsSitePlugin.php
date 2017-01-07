@@ -671,7 +671,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             $arrPageJobsList = $this->_getJobsfromFileStoreForSearch_($searchDetails);
             if(isset($arrPageJobsList))
             {
-                $this->_setSearchResult_($searchKey = $searchDetails['key'], $success = true, $details = 'Using cached results for ' . countAssociativeArrayValues($arrPageJobsList) . ' matching, unfiltered jobs.');
+                $this->_setSearchResult_($searchDetails, $success = true, $details = 'Using cached results for ' . countAssociativeArrayValues($arrPageJobsList) . ' matching, unfiltered jobs.');
                 $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[".$searchDetails['name']."]" .": " . countJobRecords($arrPageJobsList). " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
 
             }
@@ -698,7 +698,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
 
                 $this->_setJobsToFileStoreForSearch_($searchDetails, $arrPageJobsList);
 
-                $this->_setSearchResult_($searchKey = $searchDetails['key'], $success = true, $details = 'Search found ' . countAssociativeArrayValues($arrPageJobsList) . ' matching, unfiltered jobs.');
+                $this->_setSearchResult_($searchDetails, $success = true, $details = 'Search found ' . countAssociativeArrayValues($arrPageJobsList) . ' matching, unfiltered jobs.');
 
             }
 
@@ -720,7 +720,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                 $strError = $this->siteName . " plugin returned a 404 page for the search.  This is not an error; it means zero results found." ;
                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-                $this->_setSearchResult_($searchKey = $searchDetails['key'], $success = true, $details = 'Search found no matching, unfiltered jobs.');
+                $this->_setSearchResult_($searchDetails, $success = true, $details = 'Search found no matching, unfiltered jobs.');
 
             }
             else
@@ -730,7 +730,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                 // if we should have thrown one
                 //
                 $strError = "Failed to download jobs from " . $this->siteName ." jobs for search '".$searchDetails['name']. "[URL=".$searchDetails['search_start_url'] . "].  ".$ex->getMessage();
-                $this->_setSearchResult_($searchKey = $searchDetails['key'], $success = false, $details = $strError);
+                $this->_setSearchResult_($searchDetails, $success = false, $details = $strError);
                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
                 throw new Exception($strError);
             }
@@ -744,17 +744,18 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
         // if($strURL == VALUE_NOT_SUPPORTED) $GLOBALS['logger']->logLine("Skipping " . $this->siteName ." search '".$details['name']. "' because a valid URL could not be set.");
     }
 
-    private function _setSearchResult_($searchKey, $success = null, $details = "UNKNOWN RESULT.")
+    private function _setSearchResult_(&$searchDetails, $success = null, $details = "UNKNOWN RESULT.")
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting result value for search '" . $searchKey ."' equal to " . $success ." with details '" . $details ."'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting result value for search '" . $searchDetails['key'] ."' equal to " . $success ." with details '" . $details ."'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-        if(!array_key_exists($searchKey, $GLOBALS['USERDATA']['search_results']))
-            throw new Exception("Error - Cannot Set Search Result for key " . $searchKey . ".  Key does not exist in search results array.");
+        if(!array_key_exists($searchDetails['key'], $GLOBALS['USERDATA']['search_results']))
+            throw new Exception("Error - Cannot Set Search Result for key " . $searchDetails['key'] . ".  Key does not exist in search results array.");
 
-        $GLOBALS['USERDATA']['search_results'][$searchKey]['search_run_result'] = array(
+        $searchDetails['search_run_result'] = array(
             'success' => $success,
             'details'=> $details
         );
+        $GLOBALS['USERDATA']['search_results'][$searchDetails['key']]['search_run_result'] = $searchDetails['search_run_result'];
     }
 
     protected function _getMyJobsForSearchFromJobsAPI_($searchDetails)
