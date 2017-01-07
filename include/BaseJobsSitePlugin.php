@@ -944,6 +944,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
 
                             else if(!$this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE)) {
                                 if (method_exists($this, 'takeNextPageAction') && $nPageCount > 1 && $nPageCount < $totalPagesCount) {
+                                if (method_exists($this, 'takeNextPageAction') && $nPageCount > 1 && $nPageCount <= $totalPagesCount) {
                                     //
                                     // if we got a driver instance back, then we got a new page
                                     // otherwise we're out of results so end the loop here.

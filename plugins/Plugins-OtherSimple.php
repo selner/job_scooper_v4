@@ -410,7 +410,7 @@ class PluginAltasource extends BaseForceComClass
 {
     protected $siteName = 'Altasource';
     protected $siteBaseURL = "http://altasourcegroup.force.com";
-    protected $nJobListingsPerPage = 30;
+    protected $nJobListingsPerPage = 25;
     protected $strBaseURLFormat = "http://altasourcegroup.force.com/careers";
 }
 
@@ -428,8 +428,22 @@ class BaseForceComClass extends ClassClientHTMLJobSitePlugin
     protected $additionalFlags = [ C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED ];
     protected $additionalLoadDelaySeconds = 3;
     protected $nJobListingsPerPage = 50;
-    protected $nextPageScript = "A4J.AJAX.Submit('j_id0:j_id1:atsForm',event,{'similarityGroupingId':'j_id0:j_id1:atsForm:j_id123','containerId':'j_id0:j_id1:atsForm:j_id77','parameters':{'j_id0:j_id1:atsForm:j_id123':'j_id0:j_id1:atsForm:j_id123'} ,'status':'j_id0:j_id1:atsForm:ats_pagination_status'} );return false;";
+    protected $nextPageScript = "function contains(selector, text) {
+              var elements = document.querySelectorAll(selector);
+              return Array.prototype.filter.call(elements, function(element){
+                return RegExp(text).test(element.textContent);
+              });
+            }
+            var linkNext = contains('a', 'Next');
+            if(linkNext.length >= 1)
+            {
+                console.log(linkNext[0]);
+                linkNext[0].click();
+            }
+    ";
 
+//    A4J.AJAX.Submit('j_id0:j_id1:atsForm',event,{'similarityGroupingId':'j_id0:j_id1:atsForm:j_id123','containerId':'j_id0:j_id1:atsForm:j_id77','parameters':{'j_id0:j_id1:atsForm:j_id123':'j_id0:j_id1:atsForm:j_id123'} ,'status':'j_id0:j_id1:atsForm:ats_pagination_status'} );return false;";
+//
 
     function parseTotalResultsCount($objSimpHTML)
     {
@@ -461,8 +475,9 @@ class BaseForceComClass extends ClassClientHTMLJobSitePlugin
 
     public function takeNextPageAction($driver)
     {
+        $GLOBALS['logger']->logLine("Going to next page of results via script: " . $this->nextPageScript  , \Scooper\C__DISPLAY_NORMAL__);
         $driver->executeScript("function callNextPage() { " . $this->nextPageScript ." } ; callNextPage();");
-        sleep(2);
+        sleep($this->additionalLoadDelaySeconds);
         return $driver;
 
     }
