@@ -890,7 +890,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             // then only bring back the first page and/or first 10 or so results to verify.  We don't need to bring
             // back hundreds of results to test things are running successfully.
             //
-            if (isTestRun())
+            if (isTestRun() && !$this->isBitFlagSet(C__JOB_SINGLEPAGE_RESULTS))
             {
                 $maxListings = $this->nJobListingsPerPage * 2;
                 if($nTotalListings > $maxListings)
@@ -922,7 +922,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                     {
                         try
                         {
-                            if($this->isBitFlagSet( C__JOB_PAGE_VIA_URL))
+                            if($this->isBitFlagSet( C__JOB_PAGE_VIA_URL) || $this->isBitFlagSet( C__JOB_SINGLEPAGE_RESULTS))
                             {
                                 $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
                                 if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
