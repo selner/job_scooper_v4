@@ -31,8 +31,10 @@ class PluginCraigslist extends ClassClientHTMLJobSitePlugin
     protected $strKeywordDelimiter = "|";
 
     protected $arrListingTagSetup = array(
-        'tag_listings_section' => array(array('tag' => 'li', 'attribute' => 'data-pid')),
+        'tag_listings_noresults' => array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'noresults', 'return_attribute' => 'plaintext', 'return_value_callback' => "PluginCraigslist::getNoResultsCount"),
         'tag_listings_count' => array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'totalcount'  , 'return_attribute' => 'plaintext'),
+
+        'tag_listings_section' => array(array('tag' => 'li', 'attribute' => 'data-pid')),
         'tag_title' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'return_attribute' => 'plaintext'),
         'tag_link' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'return_attribute' => 'href'),
         'tag_job_id' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'return_attribute' => 'data-id'),
@@ -41,16 +43,25 @@ class PluginCraigslist extends ClassClientHTMLJobSitePlugin
         'tag_location' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'result-hood'),
         'tag_postdate' => array('tag' => 'time', 'attribute' => 'class', 'attribute_value' =>'result-date')
     );
+//
+//    function parseTotalResultsCount($objSimpHTML)
+//    {
+//
+//        $noResultsTag = array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'button pagenum'  , 'return_attribute' => 'plaintext');
+//        $strNoRes = $this->_getTagMatchValue_($objSimpHTML, $noResultsTag, $propertyName='plaintext');
+//        if(strtolower($strNoRes) == "no results")
+//            return 0;
+//
+//        return parent::parseTotalResultsCount($objSimpHTML);
+//    }
 
-    function parseTotalResultsCount($objSimpHTML)
+    function getNoResultsCount($var)
     {
-
-        $noResultsTag = array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'button pagenum'  , 'return_attribute' => 'plaintext');
-        $strNoRes = $this->_getTagMatchValue_($objSimpHTML, $noResultsTag, $propertyName='plaintext');
-        if(strtolower($strNoRes) == "no results")
+        $nPos = strpos(strtolower($var), "nothing found");
+        if ($nPos !== false)
             return 0;
 
-        return parent::parseTotalResultsCount($objSimpHTML);
+        return null;
     }
 
     function getItemURLValue($nItem)

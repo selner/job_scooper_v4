@@ -61,6 +61,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
 
 
     protected $arrListingTagSetup = array(
+        'tag_listings_noresults' => null,
         'tag_listings_count' => null,
         'tag_pages_count' => null,
         'tag_listings_section' => null,
@@ -91,6 +92,15 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
      */
     function parseTotalResultsCount($objSimpHTML)
     {
+        if (array_key_exists('tag_listings_noresults', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_listings_noresults'])) {
+            $noResultsVal = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_listings_noresults'], $propertyName = 'plaintext');
+            if (!is_null($noResultsVal))
+            {
+                $GLOBALS['logger']->logLine("Search returned " . $noResultsVal . " and matched expected 'No results' tag for " . $this->siteName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                return $noResultsVal;
+            }
+        }
+
         $retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
         if (array_key_exists('tag_listings_count', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_listings_count'])) {
             $retJobCount = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_listings_count'], $propertyName = 'plaintext');
@@ -177,6 +187,10 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
                         $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
                         throw new Exception($strError);
                     }
+                }
+
+                if (array_key_exists("return_value_callback", $arrTag) && strlen($arrTag['return_value_callback']) > 0) {
+                    $strReturn = call_user_func($arrTag['return_value_callback'], $strReturn);
                 }
             }
         }
