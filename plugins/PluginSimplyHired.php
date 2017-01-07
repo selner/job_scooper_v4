@@ -53,7 +53,7 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
      */
     function getDaysURLValue($days = null)
     {
-        $ret = "%5BNOW-1DAYS+TO+NOW%5D";
+        $ret = "";
 
         if($days != null)
         {
