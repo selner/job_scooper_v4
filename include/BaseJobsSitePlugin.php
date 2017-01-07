@@ -634,7 +634,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             $prefix = $prefix .$this->siteName;
         }
 
-        $key = $prefix . \Scooper\strip_punctuation($this->getDaysURLValue().$searchSettings['key']);
+        $key = $prefix . \Scooper\strip_punctuation($GLOBALS['USERDATA']['configuration_settings']['number_days'].$searchSettings['key']);
 
         return $key;
     }
