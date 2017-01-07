@@ -279,8 +279,9 @@ class PluginBetalist extends ClassClientHTMLJobSitePlugin
     protected $strBaseURLFormat = "https://betalist.com/jobs?q=%20&hPP=500&p=***PAGE_NUMBER***&dFR%5Bcommitment%5D%5B0%5D=Full-Time&dFR%5Bcommitment%5D%5B1%5D=Part-Time&dFR%5Bcommitment%5D%5B2%5D=Contractor&dFR%5Bcommitment%5D%5B3%5D=Internship&is_v=1";
 #    protected $strBaseURLFormat = "https://betalist.com/jobs?q=***KEYWORDS***&hPP=500&p=***PAGE_NUMBER***&dFR%5Bcommitment%5D%5B0%5D=Full-Time&dFR%5Bcommitment%5D%5B1%5D=Part-Time&dFR%5Bcommitment%5D%5B2%5D=Contractor&dFR%5Bcommitment%5D%5B3%5D=Internship&is_v=1";
 
-    protected $additionalFlags = [  C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED ];  // TODO:  Add Lat/Long support for BetaList location search.
+    protected $additionalFlags = [  C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGE_VIA_URL ];  // TODO:  Add Lat/Long support for BetaList location search.
     protected $additionalLoadDelaySeconds = 10;
+    protected function getPageURLValue($nPage) { return ($nPage - 1); }
 
     function parseTotalResultsCount($objSimpHTML)
     {
@@ -307,13 +308,18 @@ class PluginBetalist extends ClassClientHTMLJobSitePlugin
         }
 
 
-        return $nTotalResults;
+        $this->additionalLoadDelaySeconds = $this->additionalLoadDelaySeconds + \Scooper\intceil($this->nJobListingsPerPage/100) * 2;
+
+        //
+        // Betalist maxes out at a 1000 listings.  If we're over that, reduce the count to 1000 so we don't try to download more
+        //
+        return ($nTotalResults > 1000) ? 1000 : $nTotalResults;
 
     }
 
 
     protected $arrListingTagSetup = array(
-        'tag_listings_section' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'jobCard'),
+        'tag_listings_section' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'ais-hits--item'),
         'tag_title' =>  array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'jobCard__details__title'),
         'tag_link' =>  array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'jobCard__details__title'),
         'tag_company' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'jobCard__details__company'), array('tag' => 'a')),
