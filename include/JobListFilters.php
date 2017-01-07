@@ -71,7 +71,7 @@ function isJobUpdatedToday($var)
 
 function isJobUpdatedTodayOrIsInterestedOrBlank($var)
 {
-    return (isJobUpdatedToday($var) && isMarkedBlank($var));
+    return (isJobUpdatedToday($var) && isMarked_InterestedOrBlank($var));
 }
 
 function isJobUpdatedTodayAndBlank($var)
@@ -104,7 +104,7 @@ function isMarkedNotBlank($var)
 
 function isMarked_InterestedOrBlank($var)
 {
-   $res = (isMarkedBlank($var) || !isMarked_NotInterested($var) );
+   $res = (isMarkedBlank($var) || (isMarked_NotInterested($var) === false));
    return $res;
 }
 

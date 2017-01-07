@@ -683,94 +683,22 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
         $arrCounts = null;
         $arrExcluded = null;
-        $arrNoJobUpdates = null;
 
         $strOut = "                ";
-        $arrHeaders = array("New", "Updated", "Auto-Filtered", "For Review" , "Total");
+        $arrHeaders = array("For Review", "Auto-Filtered", "Active Jobs", "Total Listings");
 
-        $arrSitesSearched = null;
-        //
-        // First, build an array of all the possible job sites
-        // and set them to "false", meaning they weren't searched
-        //
-        foreach( $GLOBALS['JOBSITE_PLUGINS'] as $plugin_setup)
-        {
-            $arrSitesSearched[$plugin_setup['name']] = false;
-        }
-
-        //
-        // Now go through the list of searches that were run and
-        // set the value to "true" for any job sites that were run
-        //
-        foreach($GLOBALS['USERDATA']['configuration_settings']['searches'] as $searchDetails)
-        {
-            $arrSitesSearched[strtolower($searchDetails['site_name'])] = true;
-        }
-
-        if($arrPluginJobsUnfiltered == null || !isset($arrPluginJobsUnfiltered) || !is_array($arrPluginJobsUnfiltered))
-            $arrPluginJobsUnfiltered = $this->arrLatestJobs_UnfilteredByUserInput;
-
-        foreach( $GLOBALS['JOBSITE_PLUGINS'] as $plugin_setup)
-        {
-            $countPluginJobs = 0;
-            $strName = $plugin_setup['name'];
-            $fWasSearched = $arrSitesSearched[$plugin_setup['name']];
-            if($fWasSearched)
-            {
-                $classPlug = new $plugin_setup['class_name'](null, null);
-                if($arrPluginJobsUnfiltered == null || !is_array($arrPluginJobsUnfiltered) || countJobRecords($arrPluginJobsUnfiltered) == 0)
-                {
-                    $countUpdated = 0;
-                    $arrPluginJobs = array();
-                }
-                else
-                {
-                    $arrPluginJobs = array_filter($arrPluginJobsUnfiltered, array($classPlug, "isJobListingMine"));
-                    $countPluginJobs = countJobRecords($arrPluginJobs);
-                    $countUpdated = countJobRecords(array_filter($arrPluginJobs, "isJobUpdatedToday"));
-                }
-
-                if($countUpdated == 0)
-                {
-                    $arrNoJobUpdates[$strName] = $strName . " (" . $countPluginJobs . " total jobs)";
-                }
-                else
-                {
-                    $arrCounts[$strName]['name'] = $strName;
-                    $arrCounts[$strName]['new_today'] = count(array_filter($arrPluginJobs, "isNewJobToday_Interested_IsBlank"));
-                    $arrCounts[$strName]['updated_today'] = $countUpdated;
-                    $arrCounts[$strName]['total_not_interested'] = count(array_filter($arrPluginJobs, "isMarked_NotInterested"));
-                    $arrCounts[$strName]['total_active'] = count(array_filter($arrPluginJobs, "isMarked_InterestedOrBlank"));
-                    $arrCounts[$strName]['total_listings'] = count($arrPluginJobs);
-                }
+        foreach($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $plugin) {
+            if ($arrPluginJobsUnfiltered == null || !is_array($arrPluginJobsUnfiltered) || countJobRecords($arrPluginJobsUnfiltered) == 0) {
+                $arrPluginJobs = array();
+            } else {
+                $arrPluginJobs = array_filter($arrPluginJobsUnfiltered, function ($var) use ($plugin) { return (strcasecmp($var['job_site'], $plugin) == 0); } );
             }
-            else
-            {
-                $arrExcluded[$strName] = $strName;
-            }
-        }
 
-
-        if($this->arrUserInputJobs != null && count($this->arrUserInputJobs) > 0)
-        {
-            $strName = C__RESULTS_INDEX_USER;
-            $arrCounts[$strName]['name'] = $strName;
-            $arrCounts[$strName]['new_today'] = count(array_filter($this->arrUserInputJobs, "isNewJobToday_Interested_IsBlank"));
-            $arrCounts[$strName]['updated_today'] = count(array_filter($this->arrUserInputJobs, "isJobUpdatedToday"));
-            $arrCounts[$strName]['total_not_interested'] = count(array_filter($this->arrUserInputJobs, "isMarked_NotInterested"));
-            $arrCounts[$strName]['total_active'] = count(array_filter($this->arrUserInputJobs, "isMarked_InterestedOrBlank"));
-            $arrCounts[$strName]['total_listings'] = count($this->arrUserInputJobs);
-        }
-
-        if($arrPluginJobsUnfiltered != null && count($arrPluginJobsUnfiltered) > 0)
-        {
-            $strName = C__RESULTS_INDEX_ALL;
-            $arrCounts[$strName]['name'] = $strName;
-            $arrCounts[$strName]['new_today'] = count(array_filter($arrPluginJobsUnfiltered, "isNewJobToday_Interested_IsBlank"));
-            $arrCounts[$strName]['updated_today'] = count(array_filter($arrPluginJobsUnfiltered, "isJobUpdatedToday"));
-            $arrCounts[$strName]['total_not_interested'] = count(array_filter($arrPluginJobsUnfiltered, "isMarked_NotInterested"));
-            $arrCounts[$strName]['total_active'] = count(array_filter($arrPluginJobsUnfiltered, "isMarked_InterestedOrBlank"));
-            $arrCounts[$strName]['total_listings'] = count($arrPluginJobsUnfiltered);
+            $arrCounts[$plugin]['name'] = $plugin;
+            $arrCounts[$plugin]['for_review'] = count(array_filter($arrPluginJobs, "isMarkedBlank"));
+            $arrCounts[$plugin]['total_not_interested'] = count(array_filter($arrPluginJobs, "isMarked_NotInterested"));
+            $arrCounts[$plugin]['total_active'] = count(array_filter($arrPluginJobs, "isMarked_InterestedOrBlank"));
+            $arrCounts[$plugin]['total_listings'] = count($arrPluginJobs);
         }
 
         $arrFailedPluginsReport = $this->_getFailedSearchesByPlugin_();
@@ -778,12 +706,12 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         switch ($fLayoutType)
         {
             case "html":
-                $content = $this->_getResultsTextHTML_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrFailedPluginsReport);
+                $content = $this->_getResultsTextHTML_($arrHeaders, $arrCounts, $arrFailedPluginsReport);
                 break;
 
             default:
             case "text":
-                $content = $this->_getResultsTextPlain_($arrHeaders, $arrCounts, $arrNoJobUpdates);
+                $content = $this->_getResultsTextPlain_($arrHeaders, $arrCounts);
                 break;
 
         }
@@ -843,7 +771,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         return $strOut;
     }
 
-    private function _getResultsTextPlain_($arrHeaders, $arrCounts, $arrNoJobUpdates)
+    private function _getResultsTextPlain_($arrHeaders, $arrCounts)
     {
         $strOut = "";
         $arrCounts_TotalAll = null;
@@ -879,18 +807,6 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             $strOut .= PHP_EOL;
         }
 
-        if($arrNoJobUpdates != null && count($arrNoJobUpdates) > 0)
-        {
-            sort($arrNoJobUpdates);
-            $strOut = $strOut . PHP_EOL .  "No jobs were updated for " . getTodayAsString() . " on these sites: " . PHP_EOL;
-
-            foreach($arrNoJobUpdates as $site)
-            {
-                $strOut = $strOut . "     - ". $site .PHP_EOL;
-            }
-
-        }
-
         if($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] != null && count($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']) > 0)
         {
             sort($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']);
@@ -920,7 +836,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         return $strDateRange;
     }
 
-    private function _getResultsTextHTML_($arrHeaders, $arrCounts, $arrNoJobUpdates, $arrFailedPlugins = null)
+    private function _getResultsTextHTML_($arrHeaders, $arrCounts, $arrFailedPlugins = null)
     {
         $arrCounts_TotalAll = null;
         $arrCounts_TotalUser = null;
@@ -980,11 +896,6 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         }
 
         $noMatchSitesWithoutErrs = array();
-        if(!is_null($arrNoJobUpdates) && is_array($arrNoJobUpdates))
-            foreach($arrNoJobUpdates as $site)
-                if(array_search($site, array_keys($arrFailedPlugins)) === false)
-                    $arrNoJobUpdates[] = $site;
-
 
         if($noMatchSitesWithoutErrs != null && count($noMatchSitesWithoutErrs) > 0)
         {

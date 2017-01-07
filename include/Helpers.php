@@ -87,8 +87,8 @@ function combineTextAllChildren($node, $fRecursed = false)
 
 function sortByCountDesc($a, $b)
 {
-    $al = $a["updated_today"];
-    $bl = $b["updated_today"];
+    $al = $a["total_listings"];
+    $bl = $b["total_listings"];
     if ($al == $bl) {
         return 0;
     }
