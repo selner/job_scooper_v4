@@ -455,7 +455,7 @@ class StageManager extends S3JobListManager
         $this->migrateAndLoadS3JobListsIntoStage(4);
         $this->logger->logLine("Stage 4: Notifying User", \Scooper\C__DISPLAY_SECTION_START__);
 
-        if (countJobRecords($this->arrLatestJobs_UnfilteredByUserInput) == 0)
+        if ((countJobRecords($this->arrMarkedJobs) + countJobRecords($this->arrLatestJobs_UnfilteredByUserInput)) == 0)
         {
             $this->logger->logLine("No jobs were loaded for notification. Skipping Stage 4." , \Scooper\C__DISPLAY_WARNING__);
             return;
