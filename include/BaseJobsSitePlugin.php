@@ -16,6 +16,7 @@
  */
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/Options.php');
+require_once(__ROOT__.'/include/SeleniumSession.php');
 require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 header('Content-Type: text/html');
 
@@ -824,7 +825,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
         $nItemCount = 1;
         $nPageCount = 1;
         $arrSearchReturnedJobs = null;
-        $driver = null;
+        $selen = null;
         $objSimpleHTML = null;
 
         $GLOBALS['logger']->logLine("Getting count of " . $this->siteName ." jobs for search '".$searchDetails['key']. "': ".$searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -835,8 +836,8 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             {
                 try
                 {
-                    $driver = $this->_getFullHTMLForDynamicWebpage_($searchDetails['search_start_url']);
-                    $html = $driver->getPageSource();
+                    $selen = new SeleniumSession();
+                    $html = $selen->getPageHTML($searchDetails['search_start_url']);
                     $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
                 } catch (Exception $ex) {
                     $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
@@ -913,54 +914,44 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                     {
                         try
                         {
-                            if($driver == null)
-                            {
-                                $driver = $this->_getFullHTMLForDynamicWebpage_($strURL);
-                            }
-                            if($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE))
-                            {
-                                while($nPageCount <= $totalPagesCount)
-                                {
-                                    if(isDebug() && isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("... getting infinite results page #".$nPageCount." of " .$totalPagesCount, \Scooper\C__DISPLAY_NORMAL__); }
-                                    $this->getNextInfiniteScrollSet($driver);
-                                    $strURL = $driver->getCurrentURL();
-                                    $nPageCount = $nPageCount + 1;
-                                }
-                                $html = $driver->getPageSource();
-                                $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
-                            }
-                            else if($this->isBitFlagSet( C__JOB_PAGE_VIA_URL))
+                            if($this->isBitFlagSet( C__JOB_PAGE_VIA_URL))
                             {
                                 $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
                                 if($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
                                     return null;
-
-                                $driver->get($strURL);
-                                // BUGBUG -- Checking these two HTML values to make sure they still match
-                                $strURL = $driver->getCurrentURL();
-                                $html = $driver->getPageSource();
-                                $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+                                $selen->loadPage($strURL);
                             }
-
-                            else if(!$this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE)) {
-                                if (method_exists($this, 'takeNextPageAction') && $nPageCount > 1 && $nPageCount < $totalPagesCount) {
+                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE))
+                            {
+                                $selen->loadPage($strURL);
+                                while($nPageCount <= $totalPagesCount)
+                                {
+                                    if(isDebug() && isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("... getting infinite results page #".$nPageCount." of " .$totalPagesCount, \Scooper\C__DISPLAY_NORMAL__); }
+                                    $this->getNextInfiniteScrollSet($selen->driver);
+                                    $nPageCount = $nPageCount + 1;
+                                }
+                            }
+                            elseif(!$this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE)) {
                                 if (method_exists($this, 'takeNextPageAction') && $nPageCount > 1 && $nPageCount <= $totalPagesCount) {
                                     //
                                     // if we got a driver instance back, then we got a new page
                                     // otherwise we're out of results so end the loop here.
                                     //
-                                    $retDriver = $this->takeNextPageAction($driver);
-                                    if(!is_null($retDriver))
-                                        $driver = $retDriver;
-                                    else
-                                        break;
-                                }
+                                    try {
+                                        $this->takeNextPageAction($selen->driver);
+                                    } catch (Exception $ex) {
+                                        $strMsg = "Failed to take nextPageAction on page " . $nPageCount . ".  Error:  ".$ex;
 
-                                // BUGBUG -- Checking these two HTML values to make sure they still match
-                                $strURL = $driver->getCurrentURL();
-                                $html = $driver->getPageSource();
-                                $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+                                        $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
+                                        throw new ErrorException($strMsg);
+                                    }
+                                }
                             }
+
+                            $strURL = $selen->driver->getCurrentURL();
+                            $html = $selen->driver->getPageSource();
+                            $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+
                     } catch (Exception $ex) {
                             $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
 
@@ -1041,7 +1032,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                         $err = "Retrieved 0 of the expected " . $nTotalListings . " listings for " . $this->siteName. " (search = " . $searchDetails['key'] . ")";
                     elseif ($nItemCount < $this->nJobListingsPerPage && $nPageCount < $totalPagesCount)
                         $err = "Retrieved only ". $nItemCount . " of the " . $this->nJobListingsPerPage ." job listings on page " . $nPageCount . " for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
-                    elseif ($nJobsFound < $nTotalListings && $nPageCount == $totalPagesCount)
+                    elseif ($nJobsFound < $nTotalListings && $nPageCount == $totalPagesCount && !$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__))
                         $err = "Retrieved only " . $nJobsFound . " of the " . $nTotalListings . " listings that we expected for " . $this->siteName. " (search = " . $searchDetails['key'] . ")";
                     elseif ($nJobsFound > $nTotalListings && $nPageCount == $totalPagesCount) {
                         $warnMsg = "Warning:  Downloaded " . ($nJobsFound - $nTotalListings) . " jobs more than the " . $nTotalListings . " expected for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
@@ -1074,15 +1065,6 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
 
             }
 
-            if (!(is_null($driver)))
-            {
-                try {
-                    $driver->quit();
-                } catch (Exception $ex) {
-                    $GLOBALS['logger']->logLine($ex, \Scooper\C__DISPLAY_NORMAL__);
-                }
-            }
-
             $GLOBALS['logger']->logLine($this->siteName . "[".$searchDetails['name']."]" .": " . $nJobsFound . " jobs found." .PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
             return $arrSearchReturnedJobs;
 
@@ -1090,67 +1072,6 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             $GLOBALS['logger']->logLine($this->siteName . " error: " . $ex, \Scooper\C__DISPLAY_ERROR__);
             throw $ex;
         }
-        finally {
-
-        }
-
-    }
-
-    private function _getFullHTMLForDynamicWebpage_($url, $countRetry = 0)
-    {
-        $driver = null;
-        try
-        {
-//                use \Facebook\WebDriver\Remote\WebDriverCapabilityType;
-//                use \Facebook\WebDriver\Remote\RemoteWebDriver;
-//                use \Facebook\WebDriver\WebDriverDimension;
-//
-//                $host = '127.0.0.1:8910';
-//                $capabilities = array(
-//                    WebDriverCapabilityType::BROWSER_NAME => 'phantomjs',
-//                    'phantomjs.page.settings.userAgent' => 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0',
-//                );
-//                $driver = RemoteWebDriver::create($host, $capabilities, 5000);
-//
-//                $window = new WebDriverDimension(1024, 768);
-//                $driver->manage()->window()->setSize($window);
-//
-//                $driver->get('https://www.google.ru/');
-//
-//                $driver->takeScreenshot('/tmp/screen.png');
-//                $driver->quit();
-
-            $driver = (array_key_exists('webdriver', $GLOBALS['USERDATA']['selenium'])) ? $GLOBALS['USERDATA']['selenium']['webdriver'] : null;
-            if(is_null($driver)) {
-                $driver = "phantomjs";
-                if (PHP_OS == "Darwin")
-                    $driver = "safari";
-            }
-            $capabilities = DesiredCapabilities::$driver();
-
-            $capabilities->setCapability("nativeEvents", true);
-            $capabilities->setCapability("setThrowExceptionOnScriptError", false);
-
-            $host = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
-            $driver = RemoteWebDriver::create($host, $desired_capabilities = $capabilities, 5000);
-
-            $driver->get($url);
-
-            sleep(2+$this->additionalLoadDelaySeconds);
-
-        } catch (Exception $ex) {
-            $strMsg = "Failed to get dynamic HTML via Selenium due to error:  ".$ex->getMessage();
-
-            if($countRetry < 3)
-            {
-                $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_WARNING__);
-                return $this->_getFullHTMLForDynamicWebpage_($url, ($countRetry+1));
-            }
-
-            $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
-            throw new ErrorException($strMsg);
-        }
-        return $driver;
     }
 
     private function _getJobsFromMicroData_($objSimpleHTML)
