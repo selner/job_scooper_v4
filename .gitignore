@@ -22,3 +22,5 @@ output
 scripts
 configs*
 *.pyc
+chromedriver
+geckodriver
