@@ -711,7 +711,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
             default:
             case "text":
-                $content = $this->_getResultsTextPlain_($arrHeaders, $arrCounts);
+                $content = $this->_getResultsTextPlain_($arrHeaders, $arrCounts, $arrFailedPluginsReport);
                 break;
 
         }
@@ -771,7 +771,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         return $strOut;
     }
 
-    private function _getResultsTextPlain_($arrHeaders, $arrCounts)
+    private function _getResultsTextPlain_($arrHeaders, $arrCounts, $arrFailedPlugins = null)
     {
         $strOut = "";
         $arrCounts_TotalAll = null;
@@ -806,6 +806,22 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             $strOut .= $this->_printResultsLine_($arrCounts_TotalAll);
             $strOut .= PHP_EOL;
         }
+
+        if(!is_null($arrFailedPlugins) && is_array($arrFailedPlugins) && count($arrFailedPlugins) > 0)
+        {
+            sort($arrFailedPlugins);
+            $strOut .=  PHP_EOL .  PHP_EOL .  "The following job site plugins failed due to unexpected errors:" . PHP_EOL;
+
+            foreach($arrFailedPlugins as $site)
+            {
+                foreach($site as $search) {
+                    $strOut .= "* " . $search['site_name'] . ": \t" . $search['search_run_result']['details'] . PHP_EOL;
+                }
+            }
+
+            $strOut .=  PHP_EOL . PHP_EOL;
+        }
+
 
         if($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] != null && count($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']) > 0)
         {
@@ -890,23 +906,6 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
                 foreach($site as $search) {
                     $strOut .= "<li>" . $search['site_name'] . ": <span style=\"color: Grey\">" . $search['search_run_result']['details'] . "</span></li>" . PHP_EOL;
                 }
-            }
-
-            $strOut .=  PHP_EOL . "</ul></div>". PHP_EOL;
-        }
-
-        $noMatchSitesWithoutErrs = array();
-
-        if($noMatchSitesWithoutErrs != null && count($noMatchSitesWithoutErrs) > 0)
-        {
-            sort($noMatchSitesWithoutErrs);
-            $strOut .=  PHP_EOL . "<div class='job_scooper section'>". PHP_EOL;
-            $strOut .=  PHP_EOL .  "No jobs were successfully returned for these sites: " . PHP_EOL;
-            $strOut .=  PHP_EOL . "<ul class='job_scooper'>". PHP_EOL;
-
-            foreach($noMatchSitesWithoutErrs as $site)
-            {
-                $strOut .=  "<li>". $site . "</li>". PHP_EOL;
             }
 
             $strOut .=  PHP_EOL . "</ul></div>". PHP_EOL;

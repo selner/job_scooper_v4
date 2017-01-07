@@ -137,16 +137,6 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
         return $name;
     }
 
-    function isJobListingMine($var)
-    {
-        if(substr_count($var['job_site'], strtolower($this->siteName)) > 0)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
     //************************************************************************
     //
     //
