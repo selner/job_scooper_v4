@@ -24,21 +24,22 @@ class PluginCraigslist extends ClassClientHTMLJobSitePlugin
     protected $siteName = 'Craigslist';
     protected $nJobListingsPerPage = 100;
     protected $siteBaseURL = 'http://seattle.craigslist.org';
-    protected $strBaseURLFormat = "http://***LOCATION***.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=***KEYWORDS***&srchType=T&bundleDuplicates=1";
+    protected $strBaseURLFormat = "http://***LOCATION***.craigslist.org/search/jjj?bundleDuplicates=1&query=%22***KEYWORDS***%22&srchType=T&searchNearby=1&s=***ITEM_NUMBER***";
+//    protected $strBaseURLFormat = "http://***LOCATION***.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=***KEYWORDS***&srchType=T&bundleDuplicates=1";
     protected $additionalFlags = [C__JOB_LOCATION_REQUIRES_LOWERCASE, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS ];
     protected $typeLocationSearchNeeded = 'location-city';
     protected $strKeywordDelimiter = "|";
 
     protected $arrListingTagSetup = array(
-        'tag_listings_section' => array('tag' => 'li', 'attribute' => 'class', 'attribute_value' =>'result-row'),
+        'tag_listings_section' => array(array('tag' => 'li', 'attribute' => 'data-pid')),
         'tag_listings_count' => array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'totalcount'  , 'return_attribute' => 'plaintext'),
-        'tag_title' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'result-title hdrlnk'),
-        'tag_link' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'result-title hdrlnk'),
+        'tag_title' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'return_attribute' => 'plaintext'),
+        'tag_link' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'return_attribute' => 'href'),
+        'tag_job_id' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'return_attribute' => 'data-id'),
+        'tag_link' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'result-title hdrlnk', 'return_attribute' => 'href'),
         'tag_department' => array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'listing-department'),
         'tag_location' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'result-hood'),
-        'tag_postdate' => array('tag' => 'time', 'attribute' => 'class', 'attribute_value' =>'result-date'),
-
-        'regex_link_job_id' => '/.*?\/\w{3}\/\w{3}\/([^\/\.]+)/'
+        'tag_postdate' => array('tag' => 'time', 'attribute' => 'class', 'attribute_value' =>'result-date')
     );
 
     function parseTotalResultsCount($objSimpHTML)
@@ -49,7 +50,7 @@ class PluginCraigslist extends ClassClientHTMLJobSitePlugin
         if(strtolower($strNoRes) == "no results")
             return 0;
 
-        parent::parseTotalResultsCount($objSimpHTML);
+        return parent::parseTotalResultsCount($objSimpHTML);
     }
 
     function getItemURLValue($nItem)

@@ -363,18 +363,7 @@ class ClassJobsSiteCommon
 
         if(strlen($arrItem['key_jobsite_siteid']) <= 0)
         {
-            // For craigslist, they change IDs on every post, so deduping that way doesn't help
-            // much.  (There's almost never a company for Craiglist listings either.)
-            // Instead for Craiglist listings, we'll dedupe using the role title and the jobsite name
-            if(strcasecmp($arrItem['job_site'], "craigslist") == 0)
-            {
-                $arrItem['key_jobsite_siteid'] = \Scooper\strScrub($arrItem['job_site'], FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($arrItem['job_title'], FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($arrItem['job_site_date'], FOR_LOOKUP_VALUE_MATCHING);
-            }
-            else
-            {
-                $arrItem['key_jobsite_siteid'] = \Scooper\strScrub($arrItem['job_site'], FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($arrItem['job_id'], FOR_LOOKUP_VALUE_MATCHING);
-            }
-
+            $arrItem['key_jobsite_siteid'] = \Scooper\strScrub($arrItem['job_site'], FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($arrItem['job_id'], FOR_LOOKUP_VALUE_MATCHING);
         }
 
         if(strlen($arrItem['date_last_updated']) <= 0)
