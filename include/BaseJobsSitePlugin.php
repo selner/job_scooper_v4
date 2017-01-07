@@ -1048,7 +1048,12 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                             $objSimpleHTML->save($errHTMLFile);
 
                             $err = "Error: " . $err . "  Aborting job site plugin to prevent further errors.  HTML for page that generated the error saved to " . $errHTMLFile;
+
+                            $this->_setSearchResult_($searchDetails, $success = false, $details = $err);
+                            $this->_setJobsToFileStoreForSearch_($searchDetails, $arrSearchReturnedJobs);
+
                             $GLOBALS['logger']->logLine($err, \Scooper\C__DISPLAY_ERROR__);
+
                             throw new Exception($err);
                         }
                     }
