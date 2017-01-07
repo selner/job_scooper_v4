@@ -269,6 +269,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
                     throw new Exception($strError);
                 }
             }
+            return;
         }
         throw new Exception(sprintf("Error: plugin for %s is missing tag definition for the next page button to click. Cannot complete search.", $this->siteName));
     }
@@ -287,7 +288,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
                     sleep($this->additionalLoadDelaySeconds);
                 $GLOBALS['logger']->logLine("Next page of job listings loaded successfully.  ", \Scooper\C__DISPLAY_NORMAL__);
                 sleep($this->additionalLoadDelaySeconds);
-                return $driver;
+                return ;
             }
         }
         throw new Exception(sprintf("Error: plugin for %s is missing tag definition for the infinite scroll button to click. Cannot complete search.", $this->siteName));
