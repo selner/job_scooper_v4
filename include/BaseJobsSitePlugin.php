@@ -687,7 +687,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             }
             else
             {
-                $GLOBALS['logger']->logLine(("No previously retrieved & cached results found.  Starting data pull for " . $this->siteName . "[". $searchDetails['name']), \Scooper\C__DISPLAY_ITEM_RESULT__);
+                $GLOBALS['logger']->logLine(("Starting data pull for " . $this->siteName . "[". $searchDetails['name'] . "] (no cache file found.)"), \Scooper\C__DISPLAY_ITEM_RESULT__);
 
                 if($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__)
                 {
@@ -875,7 +875,11 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                 }
                 elseif($nTotalListings != C__TOTAL_ITEMS_UNKNOWN__)
                 {
-                    $totalPagesCount = \Scooper\intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
+                    if($nTotalListings > C_JOB_MAX_RESULTS_PER_SEARCH ) {
+                        $GLOBALS['logger']->logLine("Search '" . $searchDetails['key'] . "' returned more results than allowed.  Only retrieving the first " . C_JOB_MAX_RESULTS_PER_SEARCH . " of  " . $nTotalListings . " job listings.", \Scooper\C__DISPLAY_WARNING__);
+                        $nTotalListings = C_JOB_MAX_RESULTS_PER_SEARCH;
+                    }
+                        $totalPagesCount = \Scooper\intceil($nTotalListings  / $this->nJobListingsPerPage); // round up always
                     if($totalPagesCount < 1)  $totalPagesCount = 1;
                 }
             }
@@ -888,8 +892,12 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             //
             if (isTestRun())
             {
-                $nTotalListings = (($nTotalListings < $this->nJobListingsPerPage) === true) ? $nTotalListings : $this->nJobListingsPerPage;
-                $totalPagesCount = 1;
+                $maxListings = $this->nJobListingsPerPage * 2;
+                if($nTotalListings > $maxListings)
+                {
+                    $nTotalListings = $maxListings;
+                    $totalPagesCount = 2;
+                }
             }
 
 
