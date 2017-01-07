@@ -136,8 +136,12 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
 
             if (strlen($strMatch) > 0) $strMatch = $strMatch . ' ';
             $strMatch = $strMatch . $arrTag['tag'];
-            if (isset($arrTag['attribute']) && strlen($arrTag['attribute']) > 0) {
-                $strMatch = $strMatch . '[' . $arrTag['attribute'] . '="' . $arrTag['attribute_value'] . '"]';
+            if (array_key_exists('attribute', $arrTag) && strlen($arrTag['attribute']) > 0) {
+                $strMatch = $strMatch . '[' . $arrTag['attribute'];
+                if (array_key_exists('attribute_value', $arrTag)  && strlen($arrTag['attribute_value']) > 0) {
+                    $strMatch = $strMatch . '="' . $arrTag['attribute_value'] . '"';
+                }
+                $strMatch = $strMatch . ']';
             }
         }
 
