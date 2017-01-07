@@ -371,6 +371,11 @@ class StageManager extends S3JobListManager
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         $this->migrateAndLoadS3JobListsIntoStage(2);
 
+        if(countAssociativeArrayValues($this->arrLatestJobs_UnfilteredByUserInput) == 0)
+        {
+            if(isset($GLOBALS['logger'])) $this->logger->logLine("No jobs found to process. Skipping Stage 2.", \Scooper\C__DISPLAY_WARNING__);
+            return;
+        }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //
@@ -420,6 +425,7 @@ class StageManager extends S3JobListManager
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         $this->migrateAndLoadS3JobListsIntoStage(3);
 
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //
         // Filter the full jobs list looking for duplicates, etc.
@@ -427,7 +433,7 @@ class StageManager extends S3JobListManager
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         if (countJobRecords($this->arrLatestJobs_UnfilteredByUserInput) == 0)
         {
-            $this->logger->logLine("No jobs were loaded to auto-mark." . PHP_EOL, \Scooper\C__DISPLAY_WARNING__);
+            $this->logger->logLine("No jobs were loaded to auto-mark.  Skipping Stage 3.", \Scooper\C__DISPLAY_WARNING__);
             return;
         }
 
@@ -448,6 +454,13 @@ class StageManager extends S3JobListManager
     {
         $this->migrateAndLoadS3JobListsIntoStage(4);
         $this->logger->logLine("Stage 4: Notifying User", \Scooper\C__DISPLAY_SECTION_START__);
+
+        if (countJobRecords($this->arrLatestJobs_UnfilteredByUserInput) == 0)
+        {
+            $this->logger->logLine("No jobs were loaded for notification. Skipping Stage 4." , \Scooper\C__DISPLAY_WARNING__);
+            return;
+        }
+
         $notifier = new ClassJobsNotifier($this->arrLatestJobs_UnfilteredByUserInput, $this->arrMarkedJobs);
         $notifier->processNotifications();
     }
