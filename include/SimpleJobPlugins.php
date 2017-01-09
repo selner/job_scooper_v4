@@ -94,8 +94,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
     {
         if (array_key_exists('tag_listings_noresults', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_listings_noresults'])) {
             $noResultsVal = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_listings_noresults'], $propertyName = 'plaintext');
-            if (!is_null($noResultsVal))
-            {
+            if (!is_null($noResultsVal)) {
                 $GLOBALS['logger']->logLine("Search returned " . $noResultsVal . " and matched expected 'No results' tag for " . $this->siteName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 return $noResultsVal;
             }
@@ -148,7 +147,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
             $strMatch = $strMatch . $arrTag['tag'];
             if (array_key_exists('attribute', $arrTag) && strlen($arrTag['attribute']) > 0) {
                 $strMatch = $strMatch . '[' . $arrTag['attribute'];
-                if (array_key_exists('attribute_value', $arrTag)  && strlen($arrTag['attribute_value']) > 0) {
+                if (array_key_exists('attribute_value', $arrTag) && strlen($arrTag['attribute_value']) > 0) {
                     $strMatch = $strMatch . '="' . $arrTag['attribute_value'] . '"';
                 }
                 $strMatch = $strMatch . ']';
@@ -158,11 +157,18 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
         return $strMatch;
     }
 
-    protected function _getTagMatchValue_($node, $arrTag, $propertyName = 'plaintext', $propertyRegEx = null)
+    protected function _getTagMatchValue_($node, $arrTag, $returnAttribute = 'plaintext', $propertyRegEx = null)
     {
-        $strReturn = null;
+        $ret = null;
+        $fReturnNodeObject = false;
+
         if (array_key_exists("return_attribute", $arrTag)) {
-            $propertyName = $arrTag['return_attribute'];
+            $returnAttribute = $arrTag['return_attribute'];
+        }
+        if($returnAttribute == 'collection' || $returnAttribute == 'node')
+        {
+            $returnAttribute = null;
+            $fReturnNodeObject = true;
         }
 
         if (array_key_exists("return_value_regex", $arrTag)) {
@@ -170,32 +176,59 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
         }
 
         $strMatch = $this->getTagSelector($arrTag);
-        if (isset($strMatch)) {
-            $retNode = $node->find($strMatch);
-            if (isset($retNode) && isset($retNode[0])) {
-                $strReturn = $retNode[0]->$propertyName;
-                if (isset($arrTag['index']))
-                    if (isset($retNode[$arrTag['index']]))
-                        $strReturn = $retNode[$arrTag['index']]->$propertyName;
+        if (!isset($strMatch)) {
+            return $ret;
+        }
 
-                if (!is_null($propertyRegEx) && strlen($strReturn) > 0) {
-                    $match = array();
-                    if (preg_match($propertyRegEx, $strReturn, $match) !== false && count($match) > 1)
-                        $strReturn = $match[1];
-                    else {
-                        $strError = sprintf("%s plugin failed to find match for regex '%s' for attribute name '%s' with value '%s' as expected.", $this->siteName, $propertyRegEx, $propertyName, $strReturn);
-                        $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-                        throw new Exception($strError);
-                    }
-                }
+        $nodeMatches = $node->find($strMatch);
+        if (!(isset($nodeMatches) && isset($nodeMatches[0]))) {
+            return $ret;
+        }
+        $ret = $nodeMatches;
 
-                if (array_key_exists("return_value_callback", $arrTag) && strlen($arrTag['return_value_callback']) > 0) {
-                    $strReturn = call_user_func($arrTag['return_value_callback'], $strReturn);
+        if ($fReturnNodeObject === true) {
+            // do nothing.  We already have the ndoe set correctly
+        } elseif (isset($arrTag['index']) && is_array($ret) && intval($arrTag['index']) < count($ret)) {
+            $index = $arrTag['index'];
+            if (count($nodeMatches) <= $index) {
+                $strError = sprintf("%s plugin failed to find index #%d in the %d nodes matching '%s'. ", $this->siteName, $index, count($nodeMatches), $strMatch);
+                $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
+                throw new Exception($strError);
+            }
+            $ret = $nodeMatches[$index];
+        } elseif (is_array($ret)) {
+            if (count($ret) > 1) {
+                $strError = sprintf("Warning:  %s plugin matched. %d nodes to selector '%s' but did not specify an index.  Assuming first node.", $this->siteName, count($ret), $strMatch);
+                $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_WARNING__);
+//                    throw new Exception($strError);
+            }
+            $ret = $ret[0];
+        }
+
+
+
+        if ($fReturnNodeObject === false) {
+            assert(!is_array($ret));
+            $ret = $ret->$returnAttribute;
+
+            if (!is_null($propertyRegEx) && is_string($ret) && strlen($ret) > 0) {
+                $match = array();
+                if (preg_match($propertyRegEx, $ret, $match) !== false && count($match) > 1)
+                    $ret = $match[1];
+                else {
+                    $strError = sprintf("%s plugin failed to find match for regex '%s' for attribute name '%s' with value '%s' as expected.", $this->siteName, $propertyRegEx, $returnAttribute, $ret);
+                    $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
+                    throw new Exception($strError);
                 }
             }
         }
 
-        return $strReturn;
+        if (array_key_exists("return_value_callback", $arrTag) && strlen($arrTag['return_value_callback']) > 0) {
+            return call_user_func($arrTag['return_value_callback'], $ret);
+        }
+
+
+        return $ret;
     }
 
     /**
@@ -205,7 +238,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
      * This does the heavy lifting of parsing each job record from the
      * page's HTML it was passed.
      * *
-     * @param $objSimpHTML
+     * @param \voku\helper\SimpleHtmlDom $objSimpHTML
      * @return array|null
      */
     function parseJobsListForPage($objSimpHTML)
@@ -218,6 +251,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
 
         $GLOBALS['logger']->logLine($this->siteName . " finding nodes matching: " . $strNodeMatch, \Scooper\C__DISPLAY_ITEM_DETAIL__);
         $nodesJobRows = $objSimpHTML->find($strNodeMatch);
+        $nodesJobRows = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_listings_section'], 'collection');
 
         if (isset($nodesJobRows) && $nodesJobRows != null && count($nodesJobRows) > 0) {
             foreach ($nodesJobRows as $node) {
@@ -288,7 +322,8 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
         throw new Exception(sprintf("Error: plugin for %s is missing tag definition for the next page button to click. Cannot complete search.", $this->siteName));
     }
 
-    protected function getNextInfiniteScrollSet($driver)
+    protected
+    function getNextInfiniteScrollSet($driver)
     {
         if (array_key_exists('tag_load_more', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_load_more'])) {
             $strMatch = $this->getTagSelector($this->arrListingTagSetup['tag_load_more']);
@@ -302,7 +337,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
                     sleep($this->additionalLoadDelaySeconds);
                 $GLOBALS['logger']->logLine("Next page of job listings loaded successfully.  ", \Scooper\C__DISPLAY_NORMAL__);
                 sleep($this->additionalLoadDelaySeconds);
-                return ;
+                return;
             }
         }
         throw new Exception(sprintf("Error: plugin for %s is missing tag definition for the infinite scroll button to click. Cannot complete search.", $this->siteName));
