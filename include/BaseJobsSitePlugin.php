@@ -1078,6 +1078,11 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
         }
     }
 
+    protected function setCompanyToSiteName($var)
+    {
+        return $this->siteName;
+    }
+
     private function _getJobsFromMicroData_($objSimpleHTML)
     {
         $config  = array('html' => (string)$objSimpleHTML);
