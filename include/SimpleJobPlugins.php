@@ -120,21 +120,12 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
 
     }
 
-    protected function getTagSelector($arrTag)
-    {
-        if (array_key_exists("selector", $arrTag)) {
-            $strMatch = $arrTag['selector'];
-        } else {
-            $strMatch = $this->_getTagMatchString_($arrTag);
-        }
-        return $strMatch;
-    }
-
-    protected function _getTagMatchString_($arrTags)
+    protected function getTagSelector($arrTags)
     {
         if ($arrTags == null) return null;
 
-        if (isset($arrTags['tag'])) {
+        $arrKeys = array_keys($arrTags);
+        if ($arrKeys[0] != "0") {
             $arrTags = array($arrTags);
         }
         $strMatch = "";
@@ -142,15 +133,18 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
         foreach ($arrTags as $arrTag) {
             if (!is_array($arrTag))
                 continue;
-
+            if (array_key_exists("selector", $arrTag)) {
+                $strMatch = $strMatch . $arrTag['selector'];
+            } else {
             if (strlen($strMatch) > 0) $strMatch = $strMatch . ' ';
-            $strMatch = $strMatch . $arrTag['tag'];
-            if (array_key_exists('attribute', $arrTag) && strlen($arrTag['attribute']) > 0) {
-                $strMatch = $strMatch . '[' . $arrTag['attribute'];
-                if (array_key_exists('attribute_value', $arrTag) && strlen($arrTag['attribute_value']) > 0) {
-                    $strMatch = $strMatch . '="' . $arrTag['attribute_value'] . '"';
+                $strMatch = $strMatch . $arrTag['tag'];
+                if (array_key_exists('attribute', $arrTag) && strlen($arrTag['attribute']) > 0) {
+                    $strMatch = $strMatch . '[' . $arrTag['attribute'];
+                    if (array_key_exists('attribute_value', $arrTag) && strlen($arrTag['attribute_value']) > 0) {
+                        $strMatch = $strMatch . '="' . $arrTag['attribute_value'] . '"';
+                    }
+                    $strMatch = $strMatch . ']';
                 }
-                $strMatch = $strMatch . ']';
             }
         }
 
@@ -254,7 +248,6 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
         $strNodeMatch = $this->getTagSelector($this->arrListingTagSetup['tag_listings_section']);
 
         $GLOBALS['logger']->logLine($this->siteName . " finding nodes matching: " . $strNodeMatch, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        $nodesJobRows = $objSimpHTML->find($strNodeMatch);
         $nodesJobRows = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_listings_section'], 'collection');
 
         if (isset($nodesJobRows) && $nodesJobRows != null && count($nodesJobRows) > 0) {
