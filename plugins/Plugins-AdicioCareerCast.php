@@ -46,11 +46,14 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
     protected $strBaseURLFormat = null;
 
     // postDate param below could also be modifiedDate =***NUMBER_DAYS***.  Unclear which is more correct when...
-    protected $strBaseURLPathSection = "/jobs/results/keyword/***KEYWORDS***?kwsJobTitleOnly=true&view=List_Detail&networkView=national&location=***LOCATION***&radius=50&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***&postDate=***NUMBER_DAYS***";
+    protected $strBaseURLPathSection = "/jobs/results/keyword/***KEYWORDS***?kwsJobTitleOnly=true&view=List_Detail&SearchNetworks=US&networkView=national&location=***LOCATION***&radius=50&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***&postDate=***NUMBER_DAYS***";
 #    protected $strBaseURLPathSection = "/jobs/search/results?kwsJobTitleOnly=true&view=List_Detail&networkView=national&radius=50&&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***&postDate=***NUMBER_DAYS***";
     protected $additionalLoadDelaySeconds = 10;
     protected $typeLocationSearchNeeded = 'location-city-comma-state';
 
+    protected $arrListingTagSetup = array(
+        'tag_listings_noresults' => array(array('tag' => 'div', 'attribute'=>'id', 'attribute_value' => 'aiAppWrapperBox'), array('tag' => 'form'), array('tag' => 'h2'), 'return_attribute' => 'plaintext'),
+    );
 
     function __construct($strOutputDirectory = null)
     {
@@ -70,11 +73,6 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
     protected function getKeywordURLValue($searchDetails) {
         $searchDetails['keywords_string_for_url'] = strtolower($searchDetails['keywords_string_for_url']);
         return parent::getKeywordURLValue($searchDetails);
-    }
-
-    function getPageURLValue($page)
-    {
-        if($page == 1) { return 0; } else {return $page; }
     }
 
     /**
@@ -458,7 +456,7 @@ class PluginClevelandDotCom extends BaseAdicioCareerCastPlugin
 class PluginVictoriaTXAdvocate extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'VictoriaTXAdvocate';
-    protected $childSiteURLBase = 'http://jobshome.crossroadsfinder.com';
+    protected $childSiteURLBase = 'http://jobs.crossroadsfinder.com';
 }
 
 class PluginTVB extends BaseAdicioCareerCastPlugin
