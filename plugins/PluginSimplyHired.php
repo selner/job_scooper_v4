@@ -29,7 +29,7 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
     protected $nJobListingsPerPage = 25;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $strKeywordDelimiter = "or";
-    protected $strBaseURLFormat = "http://www.simplyhired.com/search?q=***KEYWORDS***&l=***LOCATION***&fdb=***NUMBER_DAYS***&&ws=50&mi=50&sb=dd&pn=***PAGE_NUMBER***&";
+    protected $strBaseURLFormat = "http://www.simplyhired.com/search?q=***KEYWORDS***&l=***LOCATION***&fdb=***NUMBER_DAYS***&&ws=25&mi=50&sb=dd&pn=***PAGE_NUMBER***";
 
     function getItemURLValue($nItem)
     {
@@ -143,7 +143,7 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
     {
 
         $ret = null;
-        $nodesJobs= $objSimpHTML->find('div[class="card js-job"]');
+        $nodesJobs= $objSimpHTML->find('div[class="js-job"]');
 
         foreach($nodesJobs as $node)
         {

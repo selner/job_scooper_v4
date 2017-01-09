@@ -789,9 +789,10 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                 $item['location'] = $job->location;
                 $item['company'] = $job->company;
                 if ($job->datePosted != null)
-                    $item['job_site_date'] = $job->datePosted->format('D, M d');
+                    $item['job_site_date'] = $job->datePosted->format('Y-m-d');
                 $item['job_post_url'] = $job->url;
 
+                $item = $this->normalizeJobItem($item);
                 $strCurrentJobIndex = getArrayKeyValueForJob($item);
                 $arrPageJobsList[$strCurrentJobIndex] = $item;
                 $nItemCount += 1;
