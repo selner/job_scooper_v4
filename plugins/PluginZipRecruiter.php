@@ -19,7 +19,7 @@ if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 
-class PluginZipRecruiter extends ClassBaseServerHTMLJobSitePlugin
+class PluginZipRecruiter extends ClassHTMLJobSitePlugin
 {
     protected $siteName = 'ZipRecruiter';
     protected $siteBaseURL = 'https://jobs.ziprecruiter.com';
@@ -28,6 +28,19 @@ class PluginZipRecruiter extends ClassBaseServerHTMLJobSitePlugin
     protected $additionalFlags = [C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $regex_link_job_id = '/^.*\/clk\/(.*)/i';
+
+    protected $arrListingTagSetup = array(
+        'tag_listings_noresults' => array(array('tag' => 'section', 'attribute'=>'class', 'attribute_value' => 'no-results'), array('tag' => 'h2'), 'return_attribute' => 'plaintext', 'return_value_callback' => "PluginCraigslist::getNoResultsCount"),
+        'tag_listings_count' => array('tag' => 'h1', 'attribute'=>'class', 'attribute_value' => 'headline', 'index'=> 0, 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*(\d+).*/')
+    );
+
+    function isNoResults($var)
+    {
+        if(stristr($var, "No jobs") != "")
+            return true;
+
+        return false;
+    }
 
     /**
      * If the site does not have a URL parameter for number of days
@@ -67,42 +80,6 @@ class PluginZipRecruiter extends ClassBaseServerHTMLJobSitePlugin
         }
 
         return $ret;
-    }
-
-
-
-    /**
-     * parseTotalResultsCount
-     *
-     * If the site does not show the total number of results
-     * then set the plugin flag to C__JOB_PAGECOUNT_NOTAPPLICABLE__
-     * in the SitePlugins.php file and just comment out this function.
-     *
-     * parseTotalResultsCount returns the total number of listings that
-     * the search returned by parsing the value from the returned HTML
-     * *
-     * @param $objSimpHTML
-     * @return string|null
-     */
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        //
-        // Find the HTML node that holds the result count
-        //
-        $resultsSection = $objSimpHTML->find("h1[class='headline']");
-        $totalItemsText = C__TOTAL_ITEMS_UNKNOWN__;
-
-        // get the text value of that node
-        if($resultsSection != null)
-        {
-            $matches = array();
-            if(preg_match('/(\d+)/', $resultsSection[0]->plaintext, $matches) > 0)
-            {
-                $totalItemsText = $matches[1];
-            }
-        }
-        return $totalItemsText;
-
     }
 
     /**
