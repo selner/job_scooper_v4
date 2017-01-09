@@ -744,7 +744,7 @@ function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stage
     return $resultsFile;
 }
 
-function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber)
+function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber, $returnFailedSearches=true)
 {
     if(is_null($stageNumber))
         $stageNumber = 1;
@@ -763,17 +763,28 @@ function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber)
 
         $data = json_decode($jsonText, $assoc=true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
 
+        if ($returnFailedSearches === false || (array_key_exists('search', $data) && !is_null($data['search']) && array_key_exists('search_run_result', $data['search']) && $data['search']['search_run_result']['success'] !== true )) {
+            $GLOBALS['logger']->logLine("Ignoring incomplete search results found in file with key " . $fileKey);
+            $retJobs = null;
+        }
+
+
         return $data;
     }
 
     return array();
 }
 
-function readJobsListFromLocalJsonFile($fileKey, $stageNumber=1)
+function readJobsListFromLocalJsonFile($fileKey, $stageNumber=1, $returnFailedSearches=true)
 {
-    $data = readJobsListDataFromLocalJsonFile($fileKey, $stageNumber);
-    if(!is_null($data) && is_array($data) && array_key_exists("jobslist", $data)) {
-        $retJobs = array_filter($data['jobslist'], "isIncludedJobSite");
+    $retJobs = null;
+    $data = readJobsListDataFromLocalJsonFile($fileKey, $stageNumber, $returnFailedSearches);
+
+    if(!is_null($data) && is_array($data))
+    {
+        if (array_key_exists("jobslist", $data)) {
+            $retJobs = array_filter($data['jobslist'], "isIncludedJobSite");
+        }
 
         return $retJobs;
     }
