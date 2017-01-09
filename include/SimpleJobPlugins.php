@@ -198,7 +198,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
             $ret = $nodeMatches[$index];
         } elseif (is_array($ret)) {
             if (count($ret) > 1) {
-                $strError = sprintf("Warning:  %s plugin matched. %d nodes to selector '%s' but did not specify an index.  Assuming first node.", $this->siteName, count($ret), $strMatch);
+                $strError = sprintf("Warning:  %s plugin matched %d nodes to selector '%s' but did not specify an index.  Assuming first node.", $this->siteName, count($ret), $strMatch);
                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_WARNING__);
 //                    throw new Exception($strError);
             }
@@ -322,8 +322,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
         throw new Exception(sprintf("Error: plugin for %s is missing tag definition for the next page button to click. Cannot complete search.", $this->siteName));
     }
 
-    protected
-    function getNextInfiniteScrollSet($driver)
+    protected function getNextInfiniteScrollSet($driver)
     {
         if (array_key_exists('tag_load_more', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_load_more'])) {
             $strMatch = $this->getTagSelector($this->arrListingTagSetup['tag_load_more']);
