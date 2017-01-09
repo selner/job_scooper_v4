@@ -181,14 +181,13 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
         }
 
         $nodeMatches = $node->find($strMatch);
-        if (!(isset($nodeMatches) && isset($nodeMatches[0]))) {
-            return $ret;
+        if (isset($nodeMatches) && !is_null($nodeMatches) && count($nodeMatches) >=1) {
+            $ret = $nodeMatches;
         }
-        $ret = $nodeMatches;
 
         if ($fReturnNodeObject === true) {
             // do nothing.  We already have the ndoe set correctly
-        } elseif (isset($arrTag['index']) && is_array($ret) && intval($arrTag['index']) < count($ret)) {
+        } elseif (!is_null($ret) && isset($arrTag['index']) && is_array($ret) && intval($arrTag['index']) < count($ret)) {
             $index = $arrTag['index'];
             if (count($nodeMatches) <= $index) {
                 $strError = sprintf("%s plugin failed to find index #%d in the %d nodes matching '%s'. ", $this->siteName, $index, count($nodeMatches), $strMatch);
@@ -196,7 +195,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
                 throw new Exception($strError);
             }
             $ret = $nodeMatches[$index];
-        } elseif (is_array($ret)) {
+        } elseif (!is_null($ret) && is_array($ret)) {
             if (count($ret) > 1) {
                 $strError = sprintf("Warning:  %s plugin matched %d nodes to selector '%s' but did not specify an index.  Assuming first node.", $this->siteName, count($ret), $strMatch);
                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_WARNING__);
@@ -207,7 +206,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
 
 
 
-        if ($fReturnNodeObject === false) {
+        if ($fReturnNodeObject === false && !is_null($ret)) {
             assert(!is_array($ret));
             $ret = $ret->$returnAttribute;
 
@@ -224,7 +223,12 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
         }
 
         if (array_key_exists("return_value_callback", $arrTag) && strlen($arrTag['return_value_callback']) > 0) {
-            return call_user_func($arrTag['return_value_callback'], $ret);
+            if (!is_callable($arrTag['return_value_callback'])) {
+                $strError = sprintf("%s plugin failed could not call the tag callback method '%s' for attribute name '%s'.", $this->siteName, $arrTag['return_value_callback'], $returnAttribute);
+                $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
+                throw new Exception($strError);
+            }
+            $ret = call_user_func($arrTag['return_value_callback'], $ret);
         }
 
 

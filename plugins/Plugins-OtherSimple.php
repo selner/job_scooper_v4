@@ -30,6 +30,7 @@ class PluginOuterwall extends ClassHTMLJobSitePlugin
         'tag_listings_count' => array('tag' => 'h3', 'attribute' => 'class', 'attribute_value' =>'direct_highlightedText', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
         'tag_listings_section' => array(array('tag' => 'ul', 'attribute'=>'class', 'attribute_value' => 'default_jobListing'), array('tag' => 'li')),
         'tag_title' => array(array('tag' => 'h4'), array('tag' => 'a'), array('tag' => 'span'), 'return_attribute' => 'plaintext'),
+        'tag_company' =>  array('return_value_callback' => 'ClassBaseHTMLJobSitePlugin::setCompanyToSiteName'),
         'tag_link' =>  array(array('tag' => 'h4'), array('tag' => 'a'), 'return_attribute' => 'href'),
         'tag_location' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'direct_joblocation'),
         'regex_link_job_id' => '/\/[j\/]{0,2}(.*)/i'
@@ -49,6 +50,7 @@ class PluginTesla extends ClassClientHTMLJobSitePlugin
         'tag_listings_section' => array(array('tag' => 'table', 'attribute' => 'class', 'attribute_value' =>'table'), array('tag' => 'tbody', 'attribute' => 'class', 'attribute_value' =>'table-body'), array('tag' => 'tr', 'attribute' => 'class', 'attribute_value' =>'table-row')),
         'tag_title' => array(array('tag' => 'th', 'attribute' => 'class', 'attribute_value' => 'listing-title'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
         'tag_link' => array(array('tag' => 'th', 'attribute' => 'class', 'attribute_value' => 'listing-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
+        'tag_company' =>  array('return_value_callback' => 'ClassBaseHTMLJobSitePlugin::setCompanyToSiteName'),
         'tag_job_id' => array(array('tag' => 'th', 'attribute' => 'class', 'attribute_value' => 'listing-title'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>  '/.*?-(\d+)/i'),
         'tag_department' => array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'listing-department'),
         'tag_location' => array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'listing-location')
@@ -122,6 +124,7 @@ class PluginRobertHalf extends ClassClientHTMLJobSitePlugin
         'tag_listings_section' => array(array('tag' => 'table', 'attribute'=>'class', 'attribute_value' => 'job-search-results'), array('tag' => 'tr', 'attribute' => 'class', 'attribute_value' =>'job-search-page')),
         'tag_title' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
         'tag_link' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'a'), 'return_attribute' => 'href'),
+        'tag_company' =>  array('return_value_callback' => 'ClassBaseHTMLJobSitePlugin::setCompanyToSiteName'),
         'tag_job_id' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>  '/\/technology\/job\/([^?]+)/i'),
         'tag_location' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'city')),
         'tag_job_posting_date' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'postDate')),
@@ -219,7 +222,8 @@ class BasePluginiCIMS extends ClassHTMLJobSitePlugin
         'tag_title' =>  array(array('tag' => 'td', 'index' =>null), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
         'tag_link' =>  array(array('tag' => 'td', 'index' =>null), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' => '/(.*?)\?.*/'),
         'tag_job_id' =>  array('tag' => 'td', 'index' =>null, 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?([\d\-]+).*?$/'),
-        'tag_location' =>  array('tag' => 'td', 'index' =>null, 'return_attribute' => 'plaintext',  'return_value_regex' => '/.*?Loc[\w]+:&nbsp;\s*([\w\s[:punct:]]+)?$/')
+        'tag_location' =>  array('tag' => 'td', 'index' =>null, 'return_attribute' => 'plaintext',  'return_value_regex' => '/.*?Loc[\w]+:&nbsp;\s*([\w\s[:punct:]]+)?$/'),
+        'tag_company' =>  array('return_value_callback' => 'ClassBaseHTMLJobSitePlugin::setCompanyToSiteName'),
 //        'tag_title' =>  array(array('tag' => 'td', 'index' =>1), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
 //        'tag_link' =>  array(array('tag' => 'td', 'index' =>1), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' => '/(.*?)\?.*/'),
 //        'tag_job_id' =>  array('tag' => 'td', 'index' =>1), 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+\-\d+).*?/'),
@@ -341,6 +345,7 @@ class PluginFacebook extends ClassClientHTMLJobSitePlugin
         'tag_listings_count' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'_1dc4', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
         'tag_listings_section' => array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => '_3k6i')),
         'tag_title' => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => '_5144', 'return_attribute' => 'plaintext'),
+        'tag_company' =>  array('return_value_callback' => 'ClassBaseHTMLJobSitePlugin::setCompanyToSiteName'),
         'tag_link' => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => '_5144', 'return_attribute' => 'href'),
         'tag_job_id' => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => '_5144', 'return_attribute' => 'href', 'return_value_regex' => '/\/careers\/jobs\/([^\/]+)/'),
         'tag_location' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'_3k6m'),
@@ -475,7 +480,7 @@ class BaseForceComClass extends ClassClientHTMLJobSitePlugin
         'tag_link' =>  array(array('tag' => 'td', 'index' => 0), array('tag' => 'a'), 'return_attribute' => 'href'),
         'tag_department' =>  array(array('tag' => 'td'), array('tag' => 'span'), 'index' => 0),
         'tag_location' =>  array(array('tag' => 'td'), array('tag' => 'span'), 'index' => 1),
-#        'tag_company' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'jobCard__details__company'), array('tag' => 'a')),
+        'tag_company' =>  array('return_value_callback' => 'ClassBaseHTMLJobSitePlugin::setCompanyToSiteName'),
         'regex_link_job_id' => '/.*?jobId=([^&]+)/i'
     );
 
