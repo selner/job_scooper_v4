@@ -25,6 +25,17 @@ const C__STR_TAG_BAD_TITLE_POST__ = "No (Bad Title & Role)";
 const C__STR_TAG_NOT_A_KEYWORD_TITLE_MATCH__ = "No (Not a Keyword Title Match)";
 const C__STR_TAG_NOT_EXACT_TITLE_MATCH__ = "No (Not an Exact Title Match)";
 
+function clean_utf8($string, $control = true)
+{
+    $string = iconv('UTF-8', 'UTF-8//IGNORE', $string);
+
+    if ($control === true)
+    {
+        return preg_replace('~\p{C}+~u', '', $string);
+    }
+
+    return preg_replace(array('~\r\n?~', '~[^\P{C}\t\n]+~u'), array("\n", ''), $string);
+}
 
 function getDateForDaysAgo($strDaysAgo)
 {
@@ -730,16 +741,32 @@ function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stage
 
     $stageName = "stage" . $stageNumber;
     $fileKey = str_replace(" ", "", $fileKey);
-
-    $data = array('key' => $fileKey, 'stage' => $stageNumber, 'listtype' => $listType, 'jobslist' => $dataJobs, 'search' => $searchDetails);
-
-    $jobsJson = json_encode($data, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
     $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], strtolower($fileKey) ));
     if(stripos($fileKey, ".json") === false)
         $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
 
+
+    $data = array('key' => $fileKey, 'stage' => $stageNumber, 'listtype' => $listType, 'jobslist' => $dataJobs, 'search' => $searchDetails);
+
+    $jobsJson = json_encode($data, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+    if($jobsJson === false)
+    {
+        $err = json_last_error_msg();
+        $errMsg = "Error:  Unable to convert jobs list data to json due to error   " . $err;
+        $GLOBALS['logger']->logLine($errMsg, \Scooper\C__DISPLAY_ERROR__);
+        throw new Exception($errMsg);
+
+    }
+
     $GLOBALS['logger']->logLine("Writing final job data pull results to json file " . $resultsFile);
-    file_put_contents($resultsFile, $jobsJson, FILE_TEXT);
+    if(file_put_contents($resultsFile, $jobsJson, FILE_TEXT) === false)
+    {
+        $err = error_get_last();
+        $errMsg = "Error:  Unable to save JSON results to file " . $resultsFile . " due to error   " . $err;
+        $GLOBALS['logger']->logLine($errMsg, \Scooper\C__DISPLAY_ERROR__);
+        throw new Exception($errMsg);
+
+    }
 
     return $resultsFile;
 }
@@ -763,7 +790,7 @@ function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber, $returnFailed
 
         $data = json_decode($jsonText, $assoc=true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
 
-        if ($returnFailedSearches === false || (array_key_exists('search', $data) && !is_null($data['search']) && array_key_exists('search_run_result', $data['search']) && $data['search']['search_run_result']['success'] !== true )) {
+        if ($returnFailedSearches === false || (array_key_exists('search', $data) && !is_null($data['search']) && (is_array($data['search']) && array_key_exists('search_run_result', $data['search']) && $data['search']['search_run_result']['success'] !== true ))) {
             $GLOBALS['logger']->logLine("Ignoring incomplete search results found in file with key " . $fileKey);
             $retJobs = null;
         }

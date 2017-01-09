@@ -371,6 +371,21 @@ class ClassJobsSiteCommon
             $arrItem['date_last_updated'] = $arrItem['date_pulled'];
         }
 
+
+
+        //
+        // And finally, lets scrub the returned data to make sure it's valid UTF-8.  If we don't,
+        // we will end up with errors down the line such as when we try to save the results to file.
+        //
+        foreach(array_keys($arrItem) as $k)
+        {
+            if(is_string($arrItem[$k]))
+            {
+                $arrItem[$k] = clean_utf8($arrItem[$k]);
+            }
+        }
+
+
         $arrItem['normalized'] = true;
 
         return $arrItem;
