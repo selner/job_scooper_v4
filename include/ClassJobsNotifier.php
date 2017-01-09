@@ -82,7 +82,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             {
                 $objPHPExcelFromCSV = PHPExcel_IOFactory::createReaderForFile($csvFile['full_file_path']);
                 $srcFile = $objPHPExcelFromCSV->load($csvFile['full_file_path']);
-                $colCount = count($this->getEmptyJobListingRecord());
+                $colCount = count($this->getKeysForUserCSVOutput());
                 $lastCol = ord("A") + $colCount - 1;
                 $lastColLetter = chr($lastCol);
                 $headerRange = "A" . 1 . ":" . $lastColLetter . "1";
@@ -193,14 +193,14 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         $detailsMainResultsXLSFile = \Scooper\parseFilePath(\Scooper\getFullPathFromFileDetails($detailsMainResultsXLSFile));
 
         // Output all records that were automatically excluded
-        $dataExcludedJobs = $this->_filterAndWriteListToAlternateFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", "ExcludedJobs", "CSV", "excluded jobs", true);
-        $this->_filterAndWriteListToAlternateFile_($arrFinalJobs_SortedByCompanyRole, "isMarkedBlank", "NotMarkedJobs", "CSV", "NotMarkedJobs", true);
+        $fileExcludedJobs = $this->_filterAndWriteListToAlternateFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", "ExcludedJobs", "CSV", "excluded jobs", true);
+//        $this->_filterAndWriteListToAlternateFile_($arrFinalJobs_SortedByCompanyRole, "isMarkedBlank", "NotMarkedJobs", "CSV", "NotMarkedJobs", true);
 
         // Output only new records that haven't been looked at yet
-        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "-AllUnmarkedJobs", "CSV");
+//        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "-AllUnmarkedJobs", "CSV");
         $detailsHTMLFile = \Scooper\parseFilePath($this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "-AllUnmarkedJobs", "HTML"));
 
-        $arrResultFilesToCombine = array($detailsMainResultsCSVFile, \Scooper\parseFilePath($dataExcludedJobs));
+        $arrResultFilesToCombine = array($detailsMainResultsCSVFile, \Scooper\parseFilePath($fileExcludedJobs));
         $arrFilesToAttach = array($detailsMainResultsXLSFile, $detailsHTMLFile, $detailsMainResultsCSVFile);
 
         //
@@ -338,6 +338,8 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
         $this->writeRunsJobsToFile($fileDetails['full_file_path'], $arrJobs, $strFilterToApply, $fileDetails['file_extension']);
 
+        $GLOBALS['logger']->logLine($strFilterToApply . " " . count($arrJobs). " job listings output to  " . $fileDetails['full_file_path'], \Scooper\C__DISPLAY_ITEM_RESULT__);
+
         return $fileDetails['full_file_path'];
 
     }
@@ -363,7 +365,6 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             return $dataRet;
         }
 
-        $GLOBALS['logger']->logLine($strFilterDescription . " " . count($dataRet). " job listings output to  " . $details['full_file_path'], \Scooper\C__DISPLAY_ITEM_RESULT__);
         return $dataRet;
     }
 
