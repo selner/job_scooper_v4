@@ -671,7 +671,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
     {
         $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[" . $searchDetails['name']) . "]", \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPTOPLEVEL__);
         $this->_logMemoryUsage_();
-        $arrPageJobsList = null;
+        $arrSearchJobList = null;
 
         try {
 
@@ -679,31 +679,29 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             if ($this->_checkInvalidURL_($searchDetails, $searchDetails['search_start_url']) == VALUE_NOT_SUPPORTED) return;
 
             // get all the results for all pages if we have them cached already
-            $arrPageJobsList = $this->_getJobsfromFileStoreForSearch_($searchDetails, false);
-            if (isset($arrPageJobsList)) {
-                $this->_setSearchResult_($searchDetails, $success = true, $details = 'Using cached results for ' . countAssociativeArrayValues($arrPageJobsList) . ' matching, unfiltered jobs.');
-                $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[" . $searchDetails['name'] . "]" . ": " . countJobRecords($arrPageJobsList) . " jobs found." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+            $arrSearchJobList = $this->_getJobsfromFileStoreForSearch_($searchDetails, false);
+            if (isset($arrSearchJobList)) {
+                $this->_setSearchResult_($searchDetails, $success = true, $details = 'Using cached results for ' . countAssociativeArrayValues($arrSearchJobList) . ' matching, unfiltered jobs.');
+                $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[" . $searchDetails['name'] . "]" . ": " . countJobRecords($arrSearchJobList) . " jobs found." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
 
             } else {
                 $GLOBALS['logger']->logLine(("Starting data pull for " . $this->siteName . "[" . $searchDetails['name'] . "] (no cache file found.)"), \Scooper\C__DISPLAY_ITEM_RESULT__);
 
                 if ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__) {
-                    $arrPageJobsList = $this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
+                    $arrSearchJobList = $this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
                 } elseif ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__) {
-                    $arrPageJobsList = $this->_getMyJobsForSearchFromWebpage_($searchDetails);
+                    $arrSearchJobList = $this->_getMyJobsForSearchFromWebpage_($searchDetails);
                 } elseif ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__) {
-                    $arrPageJobsList = $this->_getMyJobsForSearchFromWebpage_($searchDetails);
+                    $arrSearchJobList = $this->_getMyJobsForSearchFromWebpage_($searchDetails);
                 } else {
                     throw new ErrorException("Class " . get_class($this) . " does not have a valid setting for parser.  Cannot continue.");
                 }
 
-                $this->_setSearchResult_($searchDetails, $success = true, $details = 'Search found ' . countAssociativeArrayValues($arrPageJobsList) . ' matching, unfiltered jobs.');
+                $this->_setSearchResult_($searchDetails, $success = true, $details = 'Search found ' . countAssociativeArrayValues($arrSearchJobList) . ' matching, unfiltered jobs.');
 
-                $this->_setJobsToFileStoreForSearch_($searchDetails, $arrPageJobsList);
-
+                $this->_setJobsToFileStoreForSearch_($searchDetails, $arrSearchJobList);
 
             }
-
 
             $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->siteName . "[" . $searchDetails['name']), \Scooper\C__SECTION_END__, \Scooper\C__NAPPTOPLEVEL__);
         } catch (Exception $ex) {
@@ -733,10 +731,25 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                 //
                 $strError = "Failed to download jobs from " . $this->siteName . " jobs for search '" . $searchDetails['name'] . "[URL=" . $searchDetails['search_start_url'] . "].  " . $ex->getMessage();
                 $this->_setSearchResult_($searchDetails, $success = false, $details = $strError);
+                $this->_setJobsToFileStoreForSearch_($searchDetails, $arrSearchJobList);
                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
                 throw new Exception($strError);
             }
         }
+
+
+
+        // Let's do another check to make sure we got any listings at all for those that weren't
+        // filtered by keyword.  If we returned zero jobs for any given city and no keyword filter
+        // then we are likely broken somehow unexpectedly.   Make sure to error so that we note
+        // it in the results & error notifications so that a developer can take a look.
+        if($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$this->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED) && countJobRecords($arrSearchJobList) == 0)
+        {
+            $strError = "The search " . $searchDetails['name'] . " on " . $this->siteName . " downloaded 0 jobs yet we did not have any keyword filter is use.  Logging as a potential error since we should have had something returned. [URL=" . $searchDetails['search_start_url'] . "].  ";
+            $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
+            throw new Exception($strError);
+        }
+
     }
 
     private function _checkInvalidURL_($details, $strURL)
