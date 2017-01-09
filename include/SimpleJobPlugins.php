@@ -135,15 +135,17 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
                 continue;
             if (array_key_exists("selector", $arrTag)) {
                 $strMatch = $strMatch . $arrTag['selector'];
-            } else {
-            if (strlen($strMatch) > 0) $strMatch = $strMatch . ' ';
-                $strMatch = $strMatch . $arrTag['tag'];
-                if (array_key_exists('attribute', $arrTag) && strlen($arrTag['attribute']) > 0) {
-                    $strMatch = $strMatch . '[' . $arrTag['attribute'];
-                    if (array_key_exists('attribute_value', $arrTag) && strlen($arrTag['attribute_value']) > 0) {
-                        $strMatch = $strMatch . '="' . $arrTag['attribute_value'] . '"';
+            } elseif(array_key_exists("tag", $arrTag)) {
+               if (strlen($strMatch) > 0) $strMatch = $strMatch . ' ';
+                {
+                    $strMatch = $strMatch . $arrTag['tag'];
+                    if (array_key_exists('attribute', $arrTag) && strlen($arrTag['attribute']) > 0) {
+                        $strMatch = $strMatch . '[' . $arrTag['attribute'];
+                        if (array_key_exists('attribute_value', $arrTag) && strlen($arrTag['attribute_value']) > 0) {
+                            $strMatch = $strMatch . '="' . $arrTag['attribute_value'] . '"';
+                        }
+                        $strMatch = $strMatch . ']';
                     }
-                    $strMatch = $strMatch . ']';
                 }
             }
         }
@@ -209,7 +211,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
                 if (preg_match($propertyRegEx, $ret, $match) !== false && count($match) > 1)
                     $ret = $match[1];
                 else {
-                    $strError = sprintf("%s plugin failed to find match for regex '%s' for attribute name '%s' with value '%s' as expected.", $this->siteName, $propertyRegEx, $returnAttribute, $ret);
+                    $strError = sprintf("%s plugin failed to find match for regex '%s' for tag '%s' with value '%s' as expected.", $this->siteName, $propertyRegEx, getArrayValuesAsString($arrTag), $ret);
                     $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
                     throw new Exception($strError);
                 }
