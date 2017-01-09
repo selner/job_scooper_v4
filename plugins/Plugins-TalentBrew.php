@@ -48,7 +48,11 @@ class PluginDisney extends BasePluginTalentBrew
 class BasePluginTalentBrew extends ClassClientHTMLJobSitePlugin
 {
     protected $strBaseURLFormat = "/search-jobs/***KEYWORDS***/***LOCATION***";
-    protected $additionalFlags = [ C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE ];
+    //
+    // BUGBUG:  Disney & Boeing are both hit or miss around returning the full set of listings correctly.
+    //          Setting to ignore_mismatched to avoid the error results that will happen when they do.
+    //
+    protected $additionalFlags = [ C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE, C__JOB_IGNORE_MISMATCHED_JOB_COUNTS ];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $additionalLoadDelaySeconds = 5;
 
