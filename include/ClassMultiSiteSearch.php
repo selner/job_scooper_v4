@@ -24,29 +24,14 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
     protected $siteName = 'Multisite';
     protected $arrSearchLocationSetsToRun = null;
     private $arrPluginClassesToRun = array();
+    private $selenium = null;
+
     function __destruct()
     {
+        if(!is_null($this->selenium))
+            $this->selenium->terminate();
+
         if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
-
-        if(array_key_exists('selenium_started', $GLOBALS) && $GLOBALS['selenium_started'] === true)
-        {
-            try
-            {
-                // The only way to shutdown standalone server in 3.0 is by killing the local process.
-                // Details: https://github.com/SeleniumHQ/selenium/issues/2852
-                //
-                $cmd='pid=`ps -eo pid,args | grep selenium-server | grep -v grep | cut -c1-6`; if [ "$pid" ]; then kill -9 $pid; echo "Killed Selenium process #"$pid; else echo "Selenium server is not running."; fi';
-                if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Killing Selenium server process with command \"" .$cmd ."\"", \Scooper\C__DISPLAY_NORMAL__); }
-                doExec($cmd);
-                $GLOBALS['selenium_started'] = false;
-            }
-            catch (Exception $ex) {
-                if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Failed to send shutdown to Selenium server.  You will need to manually shut it down.", \Scooper\C__DISPLAY_ERROR__); }
-            }
-        }
-        else
-            if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Skipping Selenium server shutdown since we did not start it.  You will need to manually shut it down.", \Scooper\C__DISPLAY_ERROR__); }
-
     }
 
     function addMultipleSearches($arrSearches, $locSettingSets = null)
@@ -107,61 +92,8 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
             {
 
                 if($class->isBitFlagSet(C__JOB_USE_SELENIUM)) {
-//                    $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | echo `sed \'s/.*port \([0-9]*\).*/\1/\'`';
-                    // $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | ps -p `awk \'NR!=1 {print $2}\'` -o command=';
-//                    $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'] . '| ps -o command= -p `awk \'NR != 1 {print $2}\'` | sed -n 2p';
-                    $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'];
-
-                    $seleniumStarted = false;
-                    $pscmd = doExec($cmd);
-                    if (!is_null($pscmd) && (is_array($pscmd) && count($pscmd) > 1))
-                    {
-                        $pidLine = preg_split('/\s+/', $pscmd[1]);
-                        if(count($pidLine) >1)
-                        {
-                            $pid = $pidLine[1];
-                            $cmd = 'ps -o command= -p ' . $pid;
-                            $pscmd = doExec($cmd);
-
-                            if(preg_match('/selenium/', $pscmd) !== false)
-                            {
-                                $seleniumStarted = true;
-                                $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \Scooper\C__DISPLAY_WARNING__);
-                            }
-                            else
-                            {
-                                $msg = "Error: port " . $GLOBALS['USERDATA']['selenium']['port'] . " is being used by process other than Selenium (" . var_export($pscmd, true) . ").  Aborting.";
-                                $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
-                                throw new Exception($msg);
-
-                            }
-                        }
-                    }
-
-                    if($seleniumStarted === false)
-                    {
-                        if($GLOBALS['USERDATA']['selenium']['autostart'] == 1 && (array_key_exists('selenium_started', $GLOBALS) === false || $GLOBALS['selenium_started'] !== true))
-                        {
-                            $strCmdToRun = "java ";
-                            if(array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
-                                $strCmdToRun .= $GLOBALS['USERDATA']['selenium']['prefix_switches'];
-
-                            $strCmdToRun .= " -jar \"" . $GLOBALS['USERDATA']['selenium']['jar'] . "\" -port " . $GLOBALS['USERDATA']['selenium']['port'] . " ";
-                            if(array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
-                                $strCmdToRun .= $GLOBALS['USERDATA']['selenium']['postfix_switches'];
-
-                                $strCmdToRun .= " >/dev/null &";
-
-                            $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \Scooper\C__DISPLAY_ITEM_RESULT__);
-                            doExec($strCmdToRun);
-                            $GLOBALS['selenium_started'] = true;
-                            sleep(5);
-                        }
-                        else
-                            throw new Exception("Selenium is not running and was not set to autostart. Cannot continue without an instance of Selenium running.");
-
-                    }
-
+                    SeleniumSession::startSeleniumServer();
+                    $this->selenium = new SeleniumSession();
                 }
 
                 $GLOBALS['logger']->logLine("Setting up " . count($classPluginForSearch['searches']) . " search(es) for ". $classPluginForSearch['name'] . "...", \Scooper\C__DISPLAY_SECTION_START__);
@@ -173,6 +105,26 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
             catch (Exception $classError)
             {
                 $GLOBALS['logger']->logLine('ERROR:  Plugin ' .$classPluginForSearch['name'] . ' failed due to an error:  ' . $classError .PHP_EOL. 'Skipping it\'s remaining searches and continuing with other plugins.', \Scooper\C__DISPLAY_ERROR__);
+
+                $arrFail = getFailedSearchesByPlugin();
+                if(countAssociativeArrayValues($arrFail) > 2) {
+                    $arrWebDriverFail = array_filter($arrFail, function ($var) {
+
+                        $arrFailureKeywords = array("curl", "WebDriverException", "WebDriverCurlException", "connection refused", "timed out");
+                        foreach ($arrFailureKeywords as $failWord) {
+                            if (stristr($var['search_run_result']['details'], $failWord) != "")
+                                return true;
+                        }
+                        return false;
+                    });
+                    if(count($arrWebDriverFail) > 2)
+                    {
+                        $this->selenium->killAllAndRestartSelenium();
+
+                        // BUGBUG:  Add a counter so we don't infinitely loop and restart forever
+                        $this->updateJobsForAllPlugins();
+                    }
+                }
             }
         }
 

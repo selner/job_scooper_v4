@@ -40,6 +40,11 @@ class SeleniumSession extends PropertyObject
         return $this->driver->getPageSource();
     }
 
+    function terminate()
+    {
+        $this->doneWithRemoteWebDriver();
+    }
+
     function loadPage($url)
     {
         try
@@ -61,6 +66,58 @@ class SeleniumSession extends PropertyObject
         $this->doneWithRemoteWebDriver();
     }
 
+    function killAllAndRestartSelenium()
+    {
+        try {
+            $this->doneWithRemoteWebDriver();
+        }
+        catch (Exception $ex)
+        {
+            $GLOBALS['logger']->logLine("Error stopping active Selenium sessions: " . $ex, \Scooper\C__DISPLAY_ERROR__);
+        }
+
+        $webdriver = $this->getWebDriverKind();
+        $pscmd = doExec("pkill -i " . $webdriver);
+
+        SeleniumSession::shutdownSelenium();
+
+        SeleniumSession::startSeleniumServer();
+
+    }
+
+    static function shutdownSelenium()
+    {
+        if(array_key_exists('selenium_started', $GLOBALS) && $GLOBALS['selenium_started'] === true) {
+            try {
+                // The only way to shutdown standalone server in 3.0 is by killing the local process.
+                // Details: https://github.com/SeleniumHQ/selenium/issues/2852
+                //
+                $cmd = 'pid=`ps -eo pid,args | grep selenium-server | grep -v grep | cut -c1-6`; if [ "$pid" ]; then kill -9 $pid; echo "Killed Selenium process #"$pid; else echo "Selenium server is not running."; fi';
+                if (isset($GLOBALS['logger'])) {
+                    $GLOBALS['logger']->logLine("Killing Selenium server process with command \"" . $cmd . "\"", \Scooper\C__DISPLAY_NORMAL__);
+                }
+                doExec($cmd);
+                $GLOBALS['selenium_started'] = false;
+            } catch (Exception $ex) {
+                $pscmd = doExec("pkill -i selenium");
+                if (isset($GLOBALS['logger'])) {
+                    $GLOBALS['logger']->logLine("Failed to send shutdown to Selenium server.  Attempted to kill process, however you may need to manually shut it down.", \Scooper\C__DISPLAY_ERROR__);
+                }
+            }
+            finally
+            {
+                $GLOBALS['selenium_started'] = false;
+            }
+        }
+        else
+        {
+            if (isset($GLOBALS['logger'])) {
+                $GLOBALS['logger']->logLine("Skipping Selenium server shutdown since we did not start it.", \Scooper\C__DISPLAY_WARNING__);
+            }
+        }
+
+    }
+
     protected function doneWithRemoteWebDriver()
     {
         if(!is_null($this->remoteWebDriver))
@@ -74,7 +131,66 @@ class SeleniumSession extends PropertyObject
                 $this->remoteWebDriver->quit();
             }
             catch (Exception $ex) {  };
-            $this->remoteWebDriver= null;
+
+        }
+
+        $this->remoteWebDriver = null;
+    }
+
+    static function startSeleniumServer()
+    {
+//                    $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | echo `sed \'s/.*port \([0-9]*\).*/\1/\'`';
+        // $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | ps -p `awk \'NR!=1 {print $2}\'` -o command=';
+//                    $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'] . '| ps -o command= -p `awk \'NR != 1 {print $2}\'` | sed -n 2p';
+        $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'];
+
+        $seleniumStarted = false;
+        $pscmd = doExec($cmd);
+        if (!is_null($pscmd) && (is_array($pscmd) && count($pscmd) > 1))
+        {
+            $pidLine = preg_split('/\s+/', $pscmd[1]);
+            if(count($pidLine) >1)
+            {
+                $pid = $pidLine[1];
+                $cmd = 'ps -o command= -p ' . $pid;
+                $pscmd = doExec($cmd);
+
+                if(preg_match('/selenium/', $pscmd) !== false)
+                {
+                    $seleniumStarted = true;
+                    $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \Scooper\C__DISPLAY_WARNING__);
+                }
+                else
+                {
+                    $msg = "Error: port " . $GLOBALS['USERDATA']['selenium']['port'] . " is being used by process other than Selenium (" . var_export($pscmd, true) . ").  Aborting.";
+                    $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
+                    throw new Exception($msg);
+
+                }
+            }
+        }
+
+        if($seleniumStarted === false)
+        {
+            if($GLOBALS['USERDATA']['selenium']['autostart'] == 1 && (array_key_exists('selenium_started', $GLOBALS) === false || $GLOBALS['selenium_started'] !== true))
+            {
+                $strCmdToRun = "java ";
+                if(array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
+                    $strCmdToRun .= $GLOBALS['USERDATA']['selenium']['prefix_switches'];
+
+                $strCmdToRun .= " -jar \"" . $GLOBALS['USERDATA']['selenium']['jar'] . "\" -port " . $GLOBALS['USERDATA']['selenium']['port'] . " ";
+                if(array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
+                    $strCmdToRun .= $GLOBALS['USERDATA']['selenium']['postfix_switches'];
+
+                $strCmdToRun .= " >/dev/null &";
+
+                $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \Scooper\C__DISPLAY_ITEM_RESULT__);
+                doExec($strCmdToRun);
+                $GLOBALS['selenium_started'] = true;
+                sleep(5);
+            }
+            else
+                throw new Exception("Selenium is not running and was not set to autostart. Cannot continue without an instance of Selenium running.");
         }
     }
 
@@ -104,9 +220,9 @@ class SeleniumSession extends PropertyObject
 
         return $this->remoteWebDriver;
     }
-        private function create_remote_webdriver()
-        {
 
+    function getWebDriverKind()
+    {
         $webdriver = (array_key_exists('webdriver', $GLOBALS['USERDATA']['selenium'])) ? $GLOBALS['USERDATA']['selenium']['webdriver'] : null;
         if(is_null($webdriver)) {
             $webdriver = "phantomjs";
@@ -114,6 +230,12 @@ class SeleniumSession extends PropertyObject
                 $webdriver = "safari";
         }
 
+        return $webdriver;
+    }
+
+    private function create_remote_webdriver()
+    {
+        $webdriver = $this->getWebDriverKind();
         //
         // First we need to make sure we don't have a conflicting session already hanging out
         // and possibly dead.  If we don't clear it, nothing will work.
