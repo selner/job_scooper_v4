@@ -697,9 +697,10 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                     throw new ErrorException("Class " . get_class($this) . " does not have a valid setting for parser.  Cannot continue.");
                 }
 
+                $this->_setSearchResult_($searchDetails, $success = true, $details = 'Search found ' . countAssociativeArrayValues($arrPageJobsList) . ' matching, unfiltered jobs.');
+
                 $this->_setJobsToFileStoreForSearch_($searchDetails, $arrPageJobsList);
 
-                $this->_setSearchResult_($searchDetails, $success = true, $details = 'Search found ' . countAssociativeArrayValues($arrPageJobsList) . ' matching, unfiltered jobs.');
 
             }
 
