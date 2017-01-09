@@ -355,10 +355,10 @@ class ClassJobsSiteCommon
 
         if(strlen($arrItem['key_company_role']) <= 0)
         {
-            $compForKey = $arrItem['company'];
+            $compForKey = $arrItem['company'] . $arrItem['job_title'];
             if(strcasecmp($compForKey, "[UNKNOWN]") == 0)
                 $compForKey = $compForKey . $arrItem['job_id'];
-            $arrItem['key_company_role'] = \Scooper\strScrub(($compForKey . $arrItem['job_title']), FOR_LOOKUP_VALUE_MATCHING);
+            $arrItem['key_company_role'] = \Scooper\strScrub(($compForKey), FOR_LOOKUP_VALUE_MATCHING);
         }
 
         if(strlen($arrItem['key_jobsite_siteid']) <= 0)
@@ -409,7 +409,7 @@ class ClassJobsSiteCommon
         $classCombined = new \Scooper\ScooperSimpleCSV($strOutFilePath , "w");
 
         $arrRecordsToOutput = array_unique_multidimensional($arrJobsRecordsToUse);
-        sort($arrRecordsToOutput);
+        ksort($arrRecordsToOutput);
         if (!is_array($arrRecordsToOutput))
         {
             $arrRecordsToOutput = array();
