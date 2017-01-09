@@ -46,7 +46,10 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
     protected $strBaseURLFormat = null;
 
     // postDate param below could also be modifiedDate =***NUMBER_DAYS***.  Unclear which is more correct when...
-    protected $strBaseURLPathSection = "/jobs/results/keyword/***KEYWORDS***?kwsJobTitleOnly=true&view=List_Detail&SearchNetworks=US&networkView=national&location=***LOCATION***&radius=50&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***&postDate=***NUMBER_DAYS***";
+    //
+    // BUGBUG: setting "search job title only" seems to not find jobs with just one word in the title.  "Pharmacy Intern" does not come back for "intern" like it should.  Therefore not setting the kwsJobTitleOnly=true flag.
+    //
+    protected $strBaseURLPathSection = "/jobs/results/keyword/***KEYWORDS***?view=List_Detail&SearchNetworks=US&networkView=national&location=***LOCATION***&radius=50&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***&postDate=***NUMBER_DAYS***";
 #    protected $strBaseURLPathSection = "/jobs/search/results?kwsJobTitleOnly=true&view=List_Detail&networkView=national&radius=50&&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***&postDate=***NUMBER_DAYS***";
     protected $additionalLoadDelaySeconds = 10;
     protected $typeLocationSearchNeeded = 'location-city-comma-state';
