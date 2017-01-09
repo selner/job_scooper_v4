@@ -656,7 +656,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         $arrExcluded = null;
 
         $strOut = "                ";
-        $arrHeaders = array("For Review", "Auto-Filtered", "Active Jobs", "Total Listings");
+        $arrHeaders = array("For Review", "Auto-Filtered", "Active Jobs", "Downloaded Listings");
 
         $arrFailedPluginsReport = $this->_getFailedSearchesByPlugin_();
 
