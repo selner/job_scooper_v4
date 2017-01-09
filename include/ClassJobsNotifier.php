@@ -519,45 +519,10 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
     }
 
 
-    private function _getFailedSearchesByPlugin_()
-    {
-        if(!array_key_exists('search_results', $GLOBALS['USERDATA']) || is_null($GLOBALS['USERDATA']['search_results']))
-            return null;
-
-
-        $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function($k) {
-            return ($k['search_run_result']['success'] !== true);
-        });
-
-        if (is_null($arrFailedSearches) || !is_array($arrFailedSearches))
-            return null;
-
-        $arrFailedPluginsReport = array();
-        foreach($arrFailedSearches as $search) {
-            if (!is_null($search['search_run_result']['success'])) {
-                if(!array_key_exists($search['site_name'], $arrFailedPluginsReport))
-                    $arrFailedPluginsReport[$search['site_name']] = array();
-
-                $arrFailedPluginsReport[$search['site_name']][$search['key']] = cloneArray($search, array(
-                    'keywords_string_for_url',
-                    'base_url_format',
-                    'keywords_array_tokenized',
-                    'user_setting_flags',
-                    'search_start_url',
-                    'location_set_key',
-                    'location_user_specified_override',
-                    'location_search_value',
-                    'keyword_search_override',
-                    'keywords_array'));
-            }
-        }
-        return $arrFailedPluginsReport;
-    }
-
     private function _getFailedSearchesAlertBody_()
     {
         $strErrorText = null;
-        $arrFailedPluginsReport = $this->_getFailedSearchesByPlugin_();
+        $arrFailedPluginsReport = getFailedSearchesByPlugin();
 //        $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function($k) {
 //            return ($k['search_run_result']['success'] !== true);
 //        });
@@ -659,7 +624,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         $strOut = "                ";
         $arrHeaders = array("For Review", "Auto-Filtered", "Active Jobs", "Downloaded Listings");
 
-        $arrFailedPluginsReport = $this->_getFailedSearchesByPlugin_();
+        $arrFailedPluginsReport = getFailedSearchesByPlugin();
 
         foreach($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $plugin) {
             if ($arrPluginJobsUnfiltered == null || !is_array($arrPluginJobsUnfiltered) || countJobRecords($arrPluginJobsUnfiltered) == 0) {
