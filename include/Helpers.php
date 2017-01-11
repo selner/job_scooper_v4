@@ -745,8 +745,7 @@ function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stage
     if(stripos($fileKey, ".json") === false)
         $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
 
-
-    $data = array('key' => $fileKey, 'stage' => $stageNumber, 'listtype' => $listType, 'jobslist' => $dataJobs, 'search' => $searchDetails);
+    $data = array('key' => $fileKey, 'stage' => $stageNumber, 'listtype' => $listType, 'jobs_count' => countJobRecords($dataJobs), 'jobslist' => $dataJobs, 'search' => $searchDetails);
 
     $jobsJson = json_encode($data, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
     if($jobsJson === false)
@@ -769,6 +768,17 @@ function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stage
     }
 
     return $resultsFile;
+}
+
+function loadJSON($file)
+{
+    $GLOBALS['logger']->logLine("Reading json data from file " . $file);
+    $jsonText = file_get_contents($file, FILE_TEXT);
+
+    $data = json_decode($jsonText, $assoc=true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+
+    return $data;
+
 }
 
 function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber, $returnFailedSearches=true)
