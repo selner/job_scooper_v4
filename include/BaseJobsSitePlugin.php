@@ -1121,8 +1121,8 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             $this->_setSearchResultError_($searchDetails, "Error: " . $ex->getMessage(), $arrSearchReturnedJobs);
             $this->_setJobsToFileStoreForSearch_($searchDetails, $arrSearchReturnedJobs);
 
-            $GLOBALS['logger']->logLine($err, \Scooper\C__DISPLAY_ERROR__);
-            throw new Exception($err);
+            $GLOBALS['logger']->logLine($ex->getMessage(), \Scooper\C__DISPLAY_ERROR__);
+            throw new Exception($ex->getMessage());
         }
     }
 
