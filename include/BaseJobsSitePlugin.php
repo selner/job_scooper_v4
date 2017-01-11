@@ -81,7 +81,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
         }
     }
 
-    public function getMyJobsList()
+    public function getMyJobsList($returnFailedSearchResults = false)
     {
         $retAllSearchResults = array();
         if(isset($this->arrSearchesToReturn) && is_array($this->arrSearchesToReturn))
@@ -89,7 +89,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             foreach($this->arrSearchesToReturn as $searchDetails)
             {
 
-                $tmpSearchJobs = $this->_getResultsForSearch_($searchDetails);
+                $tmpSearchJobs = $this->_getResultsForSearch_($searchDetails, $returnFailedSearchResults);
 //                $this->markJobsList_withAutoItems($tmpSearchJobs);
                 addJobsToJobsList($retAllSearchResults, $tmpSearchJobs);
             }
@@ -97,7 +97,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
         return $retAllSearchResults;
     }
 
-    public function getUpdatedJobsForAllSearches()
+    public function getUpdatedJobsForAllSearches($returnFailedSearchResults = true)
     {
         $strIncludeKey = 'include_' . strtolower($this->siteName);
 
@@ -125,7 +125,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
         }
 
 
-        return $this->getMyJobsList();
+        return $this->getMyJobsList($returnFailedSearchResults);
     }
 
     function getName() {
@@ -657,9 +657,9 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
     //
     //************************************************************************
 
-    private function _getResultsForSearch_($searchDetails)
+    private function _getResultsForSearch_($searchDetails, $returnFailedSearchResults = false)
     {
-        $tmpSearchJobs = $this->_getJobsfromFileStoreForSearch_($searchDetails);
+        $tmpSearchJobs = $this->_getJobsfromFileStoreForSearch_($searchDetails, $returnFailedSearchResults);
         if (isset($tmpSearchJobs) && is_array($tmpSearchJobs))
             return $tmpSearchJobs;
         else
@@ -759,21 +759,27 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
         // if($strURL == VALUE_NOT_SUPPORTED) $GLOBALS['logger']->logLine("Skipping " . $this->siteName ." search '".$details['name']. "' because a valid URL could not be set.");
     }
 
-    private function _setSearchResult_(&$searchDetails, $success = null, $details = "UNKNOWN RESULT.")
+    private function _setSearchResult_(&$searchDetails, $success = null, $details = "UNKNOWN RESULT.", $files = array())
     {
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting result value for search '" . $searchDetails['key'] . "' equal to " . $success . " with details '" . $details . "'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         if (!array_key_exists($searchDetails['key'], $GLOBALS['USERDATA']['search_results']))
             throw new Exception("Error - Cannot Set Search Result for key " . $searchDetails['key'] . ".  Key does not exist in search results array.");
-
+        $errFiles = $searchDetails['search_run_result']['error_files'];
+        if(is_null($errFiles)) $errFiles = array();
+        if(count($files) > 0) {
+            foreach($files as $f)
+                $errFiles[$f] = $f;
+        }
         $searchDetails['search_run_result'] = array(
             'success' => $success,
-            'details' => $details
+            'details' => $details,
+            'error_files' => $errFiles
         );
         $GLOBALS['USERDATA']['search_results'][$searchDetails['key']]['search_run_result'] = $searchDetails['search_run_result'];
     }
 
-    protected function _getMyJobsForSearchFromJobsAPI_($searchDetails)
+    protected function _getMyJobsForSearchFromJobsAPI_(&$searchDetails)
     {
         $nItemCount = 0;
 
@@ -826,7 +832,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
         return $arrSearchReturnedJobs;
     }
 
-    private function _getMyJobsForSearchFromWebpage_($searchDetails)
+    private function _getMyJobsForSearchFromWebpage_(&$searchDetails)
     {
 
         $nItemCount = 1;
@@ -1060,16 +1066,8 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                             $GLOBALS['logger']->logLine("Warning: " . $err, \Scooper\C__DISPLAY_WARNING__);
                         }
                         else {
-                            $errHTMLFile = $GLOBALS['USERDATA']['directories']['stage1'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "error", $strBase = $searchDetails['key'], $strExt = "html", $delim = "-");
-                            $objSimpleHTML->save($errHTMLFile);
-
-                            $err = "Error: " . $err . "  Aborting job site plugin to prevent further errors.  HTML for page that generated the error saved to " . $errHTMLFile;
-
-                            $this->_setSearchResult_($searchDetails, $success = false, $details = $err);
-                            $this->_setJobsToFileStoreForSearch_($searchDetails, $arrSearchReturnedJobs);
-
+                            $err = "Error: " . $err . "  Aborting job site plugin to prevent further errors.";
                             $GLOBALS['logger']->logLine($err, \Scooper\C__DISPLAY_ERROR__);
-
                             throw new Exception($err);
                         }
                     }
@@ -1089,8 +1087,18 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             return $arrSearchReturnedJobs;
 
         } catch (Exception $ex) {
-            $GLOBALS['logger']->logLine($this->siteName . " error: " . $ex, \Scooper\C__DISPLAY_ERROR__);
-            throw $ex;
+            $errHTMLFile = $GLOBALS['USERDATA']['directories']['stage1'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "error", $strBase = $searchDetails['key'], $strExt = "html", $delim = "-");
+            $errCSVFile = substr($errHTMLFile, 0, strlen($errHTMLFile)-4) . ".csv";
+
+            $objSimpleHTML->save($errHTMLFile);
+
+            $err = "Error: " . $ex . "  Aborting job site plugin to prevent further errors.  Files('html' = " . $errHTMLFile . ", csv = ". $errCSVFile . ").";
+            $this->writeJobsListToFile($errCSVFile, $arrSearchReturnedJobs);
+            $this->_setSearchResult_($searchDetails, $success = false, $details = $err, $files = array($errCSVFile, $errHTMLFile));
+            $this->_setJobsToFileStoreForSearch_($searchDetails, $arrSearchReturnedJobs);
+
+            $GLOBALS['logger']->logLine($err, \Scooper\C__DISPLAY_ERROR__);
+            throw new Exception($err);
         }
     }
 

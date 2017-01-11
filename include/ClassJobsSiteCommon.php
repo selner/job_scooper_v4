@@ -80,7 +80,7 @@ class ClassJobsSiteCommon
             'location_search_value' => VALUE_NOT_SUPPORTED,
             'keyword_search_override' => null,
             'keywords_array' => null,
-            'search_run_result' => array('success' => null, 'details' => 'Search result is unknown; it is likely the search was not attempted.')
+            'search_run_result' => array('success' => null, 'details' => 'Search result is unknown; it is likely the search was not attempted.', 'error_files' => array())
         );
     }
 
@@ -401,6 +401,8 @@ class ClassJobsSiteCommon
 
     function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true, $loggedFileType = null, $ext = "CSV", $keysToOutput=null, $detailsCSSToInclude = null)
     {
+        if(is_null($keysToOutput))
+            $keysToOutput = array();
 
         if(!$strOutFilePath || strlen($strOutFilePath) <= 0)
         {

@@ -323,10 +323,13 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
         if($strFilterToApply == null || function_exists($strFilterToApply) === false)
         {
-            throw new Exception("Error:  array filter function " . $strFilterToApply . " does not exist");
+            $GLOBALS['logger']->logLine("No filter function supplied; outputting all results...", \Scooper\C__DISPLAY_WARNING__);
+            $arrJobs = $arrJobsList;
         }
+        else
+            $arrJobs = array_filter($arrJobsList, $strFilterToApply);
 
-        $arrJobs = array_filter($arrJobsList, $strFilterToApply);
+
 
         if(strcasecmp($fileDetails['file_extension'], "HTML") == 0)
         {
@@ -519,9 +522,10 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
     }
 
 
-    private function _getFailedSearchesAlertBody_()
+    private function _getFailedSearchesNotification_Content()
     {
         $strErrorText = null;
+        $attachments = array();
         $arrFailedPluginsReport = getFailedSearchesByPlugin();
 //        $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function($k) {
 //            return ($k['search_run_result']['success'] !== true);
@@ -542,15 +546,33 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         {
             if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("No error notification necessary:  no errors detected for the run searches.", \Scooper\C__DISPLAY_NORMAL__); }
         }
-        return $strErrorText;
+
+        foreach(array_keys($arrFailedPluginsReport) as $plugin)
+        {
+            foreach(array_keys($arrFailedPluginsReport[$plugin]) as $reportKey)
+            {
+
+                      if(array_key_exists("search_run_result", $arrFailedPluginsReport[$plugin][$reportKey]) && array_key_exists("error_files", $arrFailedPluginsReport[$plugin][$reportKey]['search_run_result']))
+            {
+                foreach($arrFailedPluginsReport[$plugin][$reportKey]['search_run_result']['error_files'] as $file)
+                {
+                    $attachments[$file] = \Scooper\getFilePathDetailsFromString($file);
+                }
+            }
+            }
+        }
+
+        return array('body' => $strErrorText, 'attachments' => $attachments);
 
     }
 
     function sendErrorEmail()
     {
-        $strBodyText = $this->_getFailedSearchesAlertBody_();
+        $failedReports = $this->_getFailedSearchesNotification_Content();
+        $strBodyText = $failedReports['body'];
         if(strlen($strBodyText) == 0)
             return null;
+        $attachments = $failedReports['attachments'];
 
         $messageText = "";
 
@@ -563,7 +585,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             //
             // Setup the plaintext message text value
             //
-            $messageText = $strBodyText;
+            $messageText = '<pre>' . $strBodyText . "</pre>";
             $messageText .= PHP_EOL ;
 
         }
@@ -571,7 +593,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
         $subject = "JobsScooper Error(s) Notification [for Run Dated " . $this->_getRunDateRange_() . "]";
 
-        return $this->sendEmail($messageText, $messageHtml, null, $subject, "error");
+        return $this->sendEmail($messageText, $messageHtml, $attachments, $subject, "error");
 
 
 
