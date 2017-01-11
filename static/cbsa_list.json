@@ -1,19 +1,19 @@
 {
     "10180": {
-        "CSBACode": "10180",
-        "CSBAName": "Abilene,TX",
-        "CSBA City": "Abilene",
-        "CSBA State Code": "TX",
+        "CBSACode": "10180",
+        "CBSAName": "Abilene,TX",
+        "CBSA City": "Abilene",
+        "CBSA State Code": "TX",
         "Cities": "Abilene",
         "MemberCities": [
             "Abilene"
         ]
     },
     "10380": {
-        "CSBACode": "10380",
-        "CSBAName": "Aguadilla-Isabela,PR",
-        "CSBA City": "Aguadilla-Isabela",
-        "CSBA State Code": "PR",
+        "CBSACode": "10380",
+        "CBSAName": "Aguadilla-Isabela,PR",
+        "CBSA City": "Aguadilla-Isabela",
+        "CBSA State Code": "PR",
         "Cities": "Aguadilla|Isabela",
         "MemberCities": [
             "Aguadilla",
@@ -21,40 +21,40 @@
         ]
     },
     "10420": {
-        "CSBACode": "10420",
-        "CSBAName": "Akron,OH",
-        "CSBA City": "Akron",
-        "CSBA State Code": "OH",
+        "CBSACode": "10420",
+        "CBSAName": "Akron,OH",
+        "CBSA City": "Akron",
+        "CBSA State Code": "OH",
         "Cities": "Akron",
         "MemberCities": [
             "Akron"
         ]
     },
     "10500": {
-        "CSBACode": "10500",
-        "CSBAName": "Albany,GA",
-        "CSBA City": "Albany",
-        "CSBA State Code": "GA",
+        "CBSACode": "10500",
+        "CBSAName": "Albany,GA",
+        "CBSA City": "Albany",
+        "CBSA State Code": "GA",
         "Cities": "Albany",
         "MemberCities": [
             "Albany"
         ]
     },
     "10540": {
-        "CSBACode": "10540",
-        "CSBAName": "Albany,OR",
-        "CSBA City": "Albany",
-        "CSBA State Code": "OR",
+        "CBSACode": "10540",
+        "CBSAName": "Albany,OR",
+        "CBSA City": "Albany",
+        "CBSA State Code": "OR",
         "Cities": "Albany",
         "MemberCities": [
             "Albany"
         ]
     },
     "10580": {
-        "CSBACode": "10580",
-        "CSBAName": "Albany-Schenectady-Troy,NY",
-        "CSBA City": "Albany-Schenectady-Troy",
-        "CSBA State Code": "NY",
+        "CBSACode": "10580",
+        "CBSAName": "Albany-Schenectady-Troy,NY",
+        "CBSA City": "Albany-Schenectady-Troy",
+        "CBSA State Code": "NY",
         "Cities": "Albany|Schenectady|Troy",
         "MemberCities": [
             "Albany",
@@ -63,30 +63,30 @@
         ]
     },
     "10740": {
-        "CSBACode": "10740",
-        "CSBAName": "Albuquerque,NM",
-        "CSBA City": "Albuquerque",
-        "CSBA State Code": "NM",
+        "CBSACode": "10740",
+        "CBSAName": "Albuquerque,NM",
+        "CBSA City": "Albuquerque",
+        "CBSA State Code": "NM",
         "Cities": "Albuquerque",
         "MemberCities": [
             "Albuquerque"
         ]
     },
     "10780": {
-        "CSBACode": "10780",
-        "CSBAName": "Alexandria,LA",
-        "CSBA City": "Alexandria",
-        "CSBA State Code": "LA",
+        "CBSACode": "10780",
+        "CBSAName": "Alexandria,LA",
+        "CBSA City": "Alexandria",
+        "CBSA State Code": "LA",
         "Cities": "Alexandria",
         "MemberCities": [
             "Alexandria"
         ]
     },
     "10900": {
-        "CSBACode": "10900",
-        "CSBAName": "Allentown-Bethlehem-Easton,PA-NJ",
-        "CSBA City": "Allentown-Bethlehem-Easton",
-        "CSBA State Code": "PA-NJ",
+        "CBSACode": "10900",
+        "CBSAName": "Allentown-Bethlehem-Easton,PA-NJ",
+        "CBSA City": "Allentown-Bethlehem-Easton",
+        "CBSA State Code": "PA-NJ",
         "Cities": "Allentown|Bethlehem",
         "MemberCities": [
             "Allentown",
@@ -94,60 +94,60 @@
         ]
     },
     "11020": {
-        "CSBACode": "11020",
-        "CSBAName": "Altoona,PA",
-        "CSBA City": "Altoona",
-        "CSBA State Code": "PA",
+        "CBSACode": "11020",
+        "CBSAName": "Altoona,PA",
+        "CBSA City": "Altoona",
+        "CBSA State Code": "PA",
         "Cities": "Altoona",
         "MemberCities": [
             "Altoona"
         ]
     },
     "11100": {
-        "CSBACode": "11100",
-        "CSBAName": "Amarillo,TX",
-        "CSBA City": "Amarillo",
-        "CSBA State Code": "TX",
+        "CBSACode": "11100",
+        "CBSAName": "Amarillo,TX",
+        "CBSA City": "Amarillo",
+        "CBSA State Code": "TX",
         "Cities": "Amarillo",
         "MemberCities": [
             "Amarillo"
         ]
     },
     "11180": {
-        "CSBACode": "11180",
-        "CSBAName": "Ames,IA",
-        "CSBA City": "Ames",
-        "CSBA State Code": "IA",
+        "CBSACode": "11180",
+        "CBSAName": "Ames,IA",
+        "CBSA City": "Ames",
+        "CBSA State Code": "IA",
         "Cities": "Ames",
         "MemberCities": [
             "Ames"
         ]
     },
     "11260": {
-        "CSBACode": "11260",
-        "CSBAName": "Anchorage,AK",
-        "CSBA City": "Anchorage",
-        "CSBA State Code": "AK",
+        "CBSACode": "11260",
+        "CBSAName": "Anchorage,AK",
+        "CBSA City": "Anchorage",
+        "CBSA State Code": "AK",
         "Cities": "Anchorage",
         "MemberCities": [
             "Anchorage"
         ]
     },
     "11460": {
-        "CSBACode": "11460",
-        "CSBAName": "Ann Arbor,MI",
-        "CSBA City": "Ann Arbor",
-        "CSBA State Code": "MI",
+        "CBSACode": "11460",
+        "CBSAName": "Ann Arbor,MI",
+        "CBSA City": "Ann Arbor",
+        "CBSA State Code": "MI",
         "Cities": "Ann Arbor",
         "MemberCities": [
             "Ann Arbor"
         ]
     },
     "11500": {
-        "CSBACode": "11500",
-        "CSBAName": "Anniston-Oxford-Jacksonville,AL",
-        "CSBA City": "Anniston-Oxford-Jacksonville",
-        "CSBA State Code": "AL",
+        "CBSACode": "11500",
+        "CBSAName": "Anniston-Oxford-Jacksonville,AL",
+        "CBSA City": "Anniston-Oxford-Jacksonville",
+        "CBSA State Code": "AL",
         "Cities": "Anniston|Jacksonville|Oxford",
         "MemberCities": [
             "Anniston",
@@ -156,50 +156,50 @@
         ]
     },
     "11540": {
-        "CSBACode": "11540",
-        "CSBAName": "Appleton,WI",
-        "CSBA City": "Appleton",
-        "CSBA State Code": "WI",
+        "CBSACode": "11540",
+        "CBSAName": "Appleton,WI",
+        "CBSA City": "Appleton",
+        "CBSA State Code": "WI",
         "Cities": "Appleton",
         "MemberCities": [
             "Appleton"
         ]
     },
     "11640": {
-        "CSBACode": "11640",
-        "CSBAName": "Arecibo,PR",
-        "CSBA City": "Arecibo",
-        "CSBA State Code": "PR",
+        "CBSACode": "11640",
+        "CBSAName": "Arecibo,PR",
+        "CBSA City": "Arecibo",
+        "CBSA State Code": "PR",
         "Cities": "Arecibo",
         "MemberCities": [
             "Arecibo"
         ]
     },
     "11700": {
-        "CSBACode": "11700",
-        "CSBAName": "Asheville,NC",
-        "CSBA City": "Asheville",
-        "CSBA State Code": "NC",
+        "CBSACode": "11700",
+        "CBSAName": "Asheville,NC",
+        "CBSA City": "Asheville",
+        "CBSA State Code": "NC",
         "Cities": "Asheville",
         "MemberCities": [
             "Asheville"
         ]
     },
     "12020": {
-        "CSBACode": "12020",
-        "CSBAName": "Athens-Clarke County,GA",
-        "CSBA City": "Athens-Clarke County",
-        "CSBA State Code": "GA",
+        "CBSACode": "12020",
+        "CBSAName": "Athens-Clarke County,GA",
+        "CBSA City": "Athens-Clarke County",
+        "CBSA State Code": "GA",
         "Cities": "Athens-Clarke County unified government (balance)",
         "MemberCities": [
             "Athens-Clarke County unified government (balance)"
         ]
     },
     "12060": {
-        "CSBACode": "12060",
-        "CSBAName": "Atlanta-Sandy Springs-Roswell,GA",
-        "CSBA City": "Atlanta-Sandy Springs-Roswell",
-        "CSBA State Code": "GA",
+        "CBSACode": "12060",
+        "CBSAName": "Atlanta-Sandy Springs-Roswell,GA",
+        "CBSA City": "Atlanta-Sandy Springs-Roswell",
+        "CBSA State Code": "GA",
         "Cities": "Alpharetta|Atlanta|Marietta|Roswell|Sandy Springs",
         "MemberCities": [
             "Alpharetta",
@@ -210,10 +210,10 @@
         ]
     },
     "12100": {
-        "CSBACode": "12100",
-        "CSBAName": "Atlantic City-Hammonton,NJ",
-        "CSBA City": "Atlantic City-Hammonton",
-        "CSBA State Code": "NJ",
+        "CBSACode": "12100",
+        "CBSAName": "Atlantic City-Hammonton,NJ",
+        "CBSA City": "Atlantic City-Hammonton",
+        "CBSA State Code": "NJ",
         "Cities": "Atlantic City|Hammonton",
         "MemberCities": [
             "Atlantic City",
@@ -221,10 +221,10 @@
         ]
     },
     "12220": {
-        "CSBACode": "12220",
-        "CSBAName": "Auburn-Opelika,AL",
-        "CSBA City": "Auburn-Opelika",
-        "CSBA State Code": "AL",
+        "CBSACode": "12220",
+        "CBSAName": "Auburn-Opelika,AL",
+        "CBSA City": "Auburn-Opelika",
+        "CBSA State Code": "AL",
         "Cities": "Auburn|Opelika",
         "MemberCities": [
             "Auburn",
@@ -232,20 +232,20 @@
         ]
     },
     "12260": {
-        "CSBACode": "12260",
-        "CSBAName": "Augusta-Richmond County,GA-SC",
-        "CSBA City": "Augusta-Richmond County",
-        "CSBA State Code": "GA-SC",
+        "CBSACode": "12260",
+        "CBSAName": "Augusta-Richmond County,GA-SC",
+        "CBSA City": "Augusta-Richmond County",
+        "CBSA State Code": "GA-SC",
         "Cities": "Augusta-Richmond County consolidated government (balance)",
         "MemberCities": [
             "Augusta-Richmond County consolidated government (balance)"
         ]
     },
     "12420": {
-        "CSBACode": "12420",
-        "CSBAName": "Austin-Round Rock,TX",
-        "CSBA City": "Austin-Round Rock",
-        "CSBA State Code": "TX",
+        "CBSACode": "12420",
+        "CBSAName": "Austin-Round Rock,TX",
+        "CBSA City": "Austin-Round Rock",
+        "CBSA State Code": "TX",
         "Cities": "Austin|Round Rock",
         "MemberCities": [
             "Austin",
@@ -253,20 +253,20 @@
         ]
     },
     "12540": {
-        "CSBACode": "12540",
-        "CSBAName": "Bakersfield,CA",
-        "CSBA City": "Bakersfield",
-        "CSBA State Code": "CA",
+        "CBSACode": "12540",
+        "CBSAName": "Bakersfield,CA",
+        "CBSA City": "Bakersfield",
+        "CBSA State Code": "CA",
         "Cities": "Bakersfield",
         "MemberCities": [
             "Bakersfield"
         ]
     },
     "12580": {
-        "CSBACode": "12580",
-        "CSBAName": "Baltimore-Columbia-Towson,MD",
-        "CSBA City": "Baltimore-Columbia-Towson",
-        "CSBA State Code": "MD",
+        "CBSACode": "12580",
+        "CBSAName": "Baltimore-Columbia-Towson,MD",
+        "CBSA City": "Baltimore-Columbia-Towson",
+        "CBSA State Code": "MD",
         "Cities": "Baltimore|Columbia|Towson",
         "MemberCities": [
             "Baltimore",
@@ -275,60 +275,60 @@
         ]
     },
     "12620": {
-        "CSBACode": "12620",
-        "CSBAName": "Bangor,ME",
-        "CSBA City": "Bangor",
-        "CSBA State Code": "ME",
+        "CBSACode": "12620",
+        "CBSAName": "Bangor,ME",
+        "CBSA City": "Bangor",
+        "CBSA State Code": "ME",
         "Cities": "Bangor",
         "MemberCities": [
             "Bangor"
         ]
     },
     "12700": {
-        "CSBACode": "12700",
-        "CSBAName": "Barnstable Town,MA",
-        "CSBA City": "Barnstable Town",
-        "CSBA State Code": "MA",
+        "CBSACode": "12700",
+        "CBSAName": "Barnstable Town,MA",
+        "CBSA City": "Barnstable Town",
+        "CBSA State Code": "MA",
         "Cities": "Barnstable Town",
         "MemberCities": [
             "Barnstable Town"
         ]
     },
     "12940": {
-        "CSBACode": "12940",
-        "CSBAName": "Baton Rouge,LA",
-        "CSBA City": "Baton Rouge",
-        "CSBA State Code": "LA",
+        "CBSACode": "12940",
+        "CBSAName": "Baton Rouge,LA",
+        "CBSA City": "Baton Rouge",
+        "CBSA State Code": "LA",
         "Cities": "Baton Rouge",
         "MemberCities": [
             "Baton Rouge"
         ]
     },
     "12980": {
-        "CSBACode": "12980",
-        "CSBAName": "Battle Creek,MI",
-        "CSBA City": "Battle Creek",
-        "CSBA State Code": "MI",
+        "CBSACode": "12980",
+        "CBSAName": "Battle Creek,MI",
+        "CBSA City": "Battle Creek",
+        "CBSA State Code": "MI",
         "Cities": "Battle Creek",
         "MemberCities": [
             "Battle Creek"
         ]
     },
     "13020": {
-        "CSBACode": "13020",
-        "CSBAName": "Bay City,MI",
-        "CSBA City": "Bay City",
-        "CSBA State Code": "MI",
+        "CBSACode": "13020",
+        "CBSAName": "Bay City,MI",
+        "CBSA City": "Bay City",
+        "CBSA State Code": "MI",
         "Cities": "Bay City",
         "MemberCities": [
             "Bay City"
         ]
     },
     "13140": {
-        "CSBACode": "13140",
-        "CSBAName": "Beaumont-Port Arthur,TX",
-        "CSBA City": "Beaumont-Port Arthur",
-        "CSBA State Code": "TX",
+        "CBSACode": "13140",
+        "CBSAName": "Beaumont-Port Arthur,TX",
+        "CBSA City": "Beaumont-Port Arthur",
+        "CBSA State Code": "TX",
         "Cities": "Beaumont|Port Arthur",
         "MemberCities": [
             "Beaumont",
@@ -336,30 +336,30 @@
         ]
     },
     "13220": {
-        "CSBACode": "13220",
-        "CSBAName": "Beckley,WV",
-        "CSBA City": "Beckley",
-        "CSBA State Code": "WV",
+        "CBSACode": "13220",
+        "CBSAName": "Beckley,WV",
+        "CBSA City": "Beckley",
+        "CBSA State Code": "WV",
         "Cities": "Beckley",
         "MemberCities": [
             "Beckley"
         ]
     },
     "13380": {
-        "CSBACode": "13380",
-        "CSBAName": "Bellingham,WA",
-        "CSBA City": "Bellingham",
-        "CSBA State Code": "WA",
+        "CBSACode": "13380",
+        "CBSAName": "Bellingham,WA",
+        "CBSA City": "Bellingham",
+        "CBSA State Code": "WA",
         "Cities": "Bellingham",
         "MemberCities": [
             "Bellingham"
         ]
     },
     "13460": {
-        "CSBACode": "13460",
-        "CSBAName": "Bend-Redmond,OR",
-        "CSBA City": "Bend-Redmond",
-        "CSBA State Code": "OR",
+        "CBSACode": "13460",
+        "CBSAName": "Bend-Redmond,OR",
+        "CBSA City": "Bend-Redmond",
+        "CBSA State Code": "OR",
         "Cities": "Bend|Redmond",
         "MemberCities": [
             "Bend",
@@ -367,30 +367,30 @@
         ]
     },
     "13740": {
-        "CSBACode": "13740",
-        "CSBAName": "Billings,MT",
-        "CSBA City": "Billings",
-        "CSBA State Code": "MT",
+        "CBSACode": "13740",
+        "CBSAName": "Billings,MT",
+        "CBSA City": "Billings",
+        "CBSA State Code": "MT",
         "Cities": "Billings",
         "MemberCities": [
             "Billings"
         ]
     },
     "13780": {
-        "CSBACode": "13780",
-        "CSBAName": "Binghamton,NY",
-        "CSBA City": "Binghamton",
-        "CSBA State Code": "NY",
+        "CBSACode": "13780",
+        "CBSAName": "Binghamton,NY",
+        "CBSA City": "Binghamton",
+        "CBSA State Code": "NY",
         "Cities": "Binghamton",
         "MemberCities": [
             "Binghamton"
         ]
     },
     "13820": {
-        "CSBACode": "13820",
-        "CSBAName": "Birmingham-Hoover,AL",
-        "CSBA City": "Birmingham-Hoover",
-        "CSBA State Code": "AL",
+        "CBSACode": "13820",
+        "CBSAName": "Birmingham-Hoover,AL",
+        "CBSA City": "Birmingham-Hoover",
+        "CBSA State Code": "AL",
         "Cities": "Birmingham|Hoover",
         "MemberCities": [
             "Birmingham",
@@ -398,20 +398,20 @@
         ]
     },
     "13900": {
-        "CSBACode": "13900",
-        "CSBAName": "Bismarck,ND",
-        "CSBA City": "Bismarck",
-        "CSBA State Code": "ND",
+        "CBSACode": "13900",
+        "CBSAName": "Bismarck,ND",
+        "CBSA City": "Bismarck",
+        "CBSA State Code": "ND",
         "Cities": "Bismarck",
         "MemberCities": [
             "Bismarck"
         ]
     },
     "13980": {
-        "CSBACode": "13980",
-        "CSBAName": "Blacksburg-Christiansburg-Radford,VA",
-        "CSBA City": "Blacksburg-Christiansburg-Radford",
-        "CSBA State Code": "VA",
+        "CBSACode": "13980",
+        "CBSAName": "Blacksburg-Christiansburg-Radford,VA",
+        "CBSA City": "Blacksburg-Christiansburg-Radford",
+        "CBSA State Code": "VA",
         "Cities": "Blacksburg|Christiansburg|Radford",
         "MemberCities": [
             "Blacksburg",
@@ -420,30 +420,30 @@
         ]
     },
     "14010": {
-        "CSBACode": "14010",
-        "CSBAName": "Bloomington,IL",
-        "CSBA City": "Bloomington",
-        "CSBA State Code": "IL",
+        "CBSACode": "14010",
+        "CBSAName": "Bloomington,IL",
+        "CBSA City": "Bloomington",
+        "CBSA State Code": "IL",
         "Cities": "Bloomington",
         "MemberCities": [
             "Bloomington"
         ]
     },
     "14020": {
-        "CSBACode": "14020",
-        "CSBAName": "Bloomington,IN",
-        "CSBA City": "Bloomington",
-        "CSBA State Code": "IN",
+        "CBSACode": "14020",
+        "CBSAName": "Bloomington,IN",
+        "CBSA City": "Bloomington",
+        "CBSA State Code": "IN",
         "Cities": "Bloomington",
         "MemberCities": [
             "Bloomington"
         ]
     },
     "14100": {
-        "CSBACode": "14100",
-        "CSBAName": "Bloomsburg-Berwick,PA",
-        "CSBA City": "Bloomsburg-Berwick",
-        "CSBA State Code": "PA",
+        "CBSACode": "14100",
+        "CBSAName": "Bloomsburg-Berwick,PA",
+        "CBSA City": "Bloomsburg-Berwick",
+        "CBSA State Code": "PA",
         "Cities": "Berwick|Bloomsburg",
         "MemberCities": [
             "Berwick",
@@ -451,20 +451,20 @@
         ]
     },
     "14260": {
-        "CSBACode": "14260",
-        "CSBAName": "Boise City,ID",
-        "CSBA City": "Boise City",
-        "CSBA State Code": "ID",
+        "CBSACode": "14260",
+        "CBSAName": "Boise City,ID",
+        "CBSA City": "Boise City",
+        "CBSA State Code": "ID",
         "Cities": "Boise City",
         "MemberCities": [
             "Boise City"
         ]
     },
     "14460": {
-        "CSBACode": "14460",
-        "CSBAName": "Boston-Cambridge-Newton,MA-NH",
-        "CSBA City": "Boston-Cambridge-Newton",
-        "CSBA State Code": "MA-NH",
+        "CBSACode": "14460",
+        "CBSAName": "Boston-Cambridge-Newton,MA-NH",
+        "CBSA City": "Boston-Cambridge-Newton",
+        "CBSA State Code": "MA-NH",
         "Cities": "Boston|Cambridge|Framingham|Newton|Waltham",
         "MemberCities": [
             "Boston",
@@ -475,30 +475,30 @@
         ]
     },
     "14500": {
-        "CSBACode": "14500",
-        "CSBAName": "Boulder,CO",
-        "CSBA City": "Boulder",
-        "CSBA State Code": "CO",
+        "CBSACode": "14500",
+        "CBSAName": "Boulder,CO",
+        "CBSA City": "Boulder",
+        "CBSA State Code": "CO",
         "Cities": "Boulder",
         "MemberCities": [
             "Boulder"
         ]
     },
     "14540": {
-        "CSBACode": "14540",
-        "CSBAName": "Bowling Green,KY",
-        "CSBA City": "Bowling Green",
-        "CSBA State Code": "KY",
+        "CBSACode": "14540",
+        "CBSAName": "Bowling Green,KY",
+        "CBSA City": "Bowling Green",
+        "CBSA State Code": "KY",
         "Cities": "Bowling Green",
         "MemberCities": [
             "Bowling Green"
         ]
     },
     "14740": {
-        "CSBACode": "14740",
-        "CSBAName": "Bremerton-Silverdale,WA",
-        "CSBA City": "Bremerton-Silverdale",
-        "CSBA State Code": "WA",
+        "CBSACode": "14740",
+        "CBSAName": "Bremerton-Silverdale,WA",
+        "CBSA City": "Bremerton-Silverdale",
+        "CBSA State Code": "WA",
         "Cities": "Bremerton|Silverdale",
         "MemberCities": [
             "Bremerton",
@@ -506,10 +506,10 @@
         ]
     },
     "14860": {
-        "CSBACode": "14860",
-        "CSBAName": "Bridgeport-Stamford-Norwalk,CT",
-        "CSBA City": "Bridgeport-Stamford-Norwalk",
-        "CSBA State Code": "CT",
+        "CBSACode": "14860",
+        "CBSAName": "Bridgeport-Stamford-Norwalk,CT",
+        "CBSA City": "Bridgeport-Stamford-Norwalk",
+        "CBSA State Code": "CT",
         "Cities": "Bridgeport|Danbury|Norwalk|Stamford|Stratford",
         "MemberCities": [
             "Bridgeport",
@@ -520,10 +520,10 @@
         ]
     },
     "15180": {
-        "CSBACode": "15180",
-        "CSBAName": "Brownsville-Harlingen,TX",
-        "CSBA City": "Brownsville-Harlingen",
-        "CSBA State Code": "TX",
+        "CBSACode": "15180",
+        "CBSAName": "Brownsville-Harlingen,TX",
+        "CBSA City": "Brownsville-Harlingen",
+        "CBSA State Code": "TX",
         "Cities": "Brownsville|Harlingen",
         "MemberCities": [
             "Brownsville",
@@ -531,20 +531,20 @@
         ]
     },
     "15260": {
-        "CSBACode": "15260",
-        "CSBAName": "Brunswick,GA",
-        "CSBA City": "Brunswick",
-        "CSBA State Code": "GA",
+        "CBSACode": "15260",
+        "CBSAName": "Brunswick,GA",
+        "CBSA City": "Brunswick",
+        "CBSA State Code": "GA",
         "Cities": "Brunswick",
         "MemberCities": [
             "Brunswick"
         ]
     },
     "15380": {
-        "CSBACode": "15380",
-        "CSBAName": "Buffalo-Cheektowaga-Niagara Falls,NY",
-        "CSBA City": "Buffalo-Cheektowaga-Niagara Falls",
-        "CSBA State Code": "NY",
+        "CBSACode": "15380",
+        "CBSAName": "Buffalo-Cheektowaga-Niagara Falls,NY",
+        "CBSA City": "Buffalo-Cheektowaga-Niagara Falls",
+        "CBSA State Code": "NY",
         "Cities": "Buffalo|Cheektowaga|Niagara Falls",
         "MemberCities": [
             "Buffalo",
@@ -553,20 +553,20 @@
         ]
     },
     "15500": {
-        "CSBACode": "15500",
-        "CSBAName": "Burlington,NC",
-        "CSBA City": "Burlington",
-        "CSBA State Code": "NC",
+        "CBSACode": "15500",
+        "CBSAName": "Burlington,NC",
+        "CBSA City": "Burlington",
+        "CBSA State Code": "NC",
         "Cities": "Burlington",
         "MemberCities": [
             "Burlington"
         ]
     },
     "15540": {
-        "CSBACode": "15540",
-        "CSBAName": "Burlington-South Burlington,VT",
-        "CSBA City": "Burlington-South Burlington",
-        "CSBA State Code": "VT",
+        "CBSACode": "15540",
+        "CBSAName": "Burlington-South Burlington,VT",
+        "CBSA City": "Burlington-South Burlington",
+        "CBSA State Code": "VT",
         "Cities": "Burlington|South Burlington",
         "MemberCities": [
             "Burlington",
@@ -574,10 +574,10 @@
         ]
     },
     "15680": {
-        "CSBACode": "15680",
-        "CSBAName": "California-Lexington Park,MD",
-        "CSBA City": "California-Lexington Park",
-        "CSBA State Code": "MD",
+        "CBSACode": "15680",
+        "CBSAName": "California-Lexington Park,MD",
+        "CBSA City": "California-Lexington Park",
+        "CBSA State Code": "MD",
         "Cities": "California|Lexington Park",
         "MemberCities": [
             "California",
@@ -585,10 +585,10 @@
         ]
     },
     "15940": {
-        "CSBACode": "15940",
-        "CSBAName": "Canton-Massillon,OH",
-        "CSBA City": "Canton-Massillon",
-        "CSBA State Code": "OH",
+        "CBSACode": "15940",
+        "CBSAName": "Canton-Massillon,OH",
+        "CBSA City": "Canton-Massillon",
+        "CBSA State Code": "OH",
         "Cities": "Canton|Massillon",
         "MemberCities": [
             "Canton",
@@ -596,10 +596,10 @@
         ]
     },
     "15980": {
-        "CSBACode": "15980",
-        "CSBAName": "Cape Coral-Fort Myers,FL",
-        "CSBA City": "Cape Coral-Fort Myers",
-        "CSBA State Code": "FL",
+        "CBSACode": "15980",
+        "CBSAName": "Cape Coral-Fort Myers,FL",
+        "CBSA City": "Cape Coral-Fort Myers",
+        "CBSA State Code": "FL",
         "Cities": "Cape Coral|Fort Myers",
         "MemberCities": [
             "Cape Coral",
@@ -607,20 +607,20 @@
         ]
     },
     "16020": {
-        "CSBACode": "16020",
-        "CSBAName": "Cape Girardeau,MO-IL",
-        "CSBA City": "Cape Girardeau",
-        "CSBA State Code": "MO-IL",
+        "CBSACode": "16020",
+        "CBSAName": "Cape Girardeau,MO-IL",
+        "CBSA City": "Cape Girardeau",
+        "CBSA State Code": "MO-IL",
         "Cities": "Cape Girardeau",
         "MemberCities": [
             "Cape Girardeau"
         ]
     },
     "16060": {
-        "CSBACode": "16060",
-        "CSBAName": "Carbondale-Marion,IL",
-        "CSBA City": "Carbondale-Marion",
-        "CSBA State Code": "IL",
+        "CBSACode": "16060",
+        "CBSAName": "Carbondale-Marion,IL",
+        "CBSA City": "Carbondale-Marion",
+        "CBSA State Code": "IL",
         "Cities": "Carbondale|Marion",
         "MemberCities": [
             "Carbondale",
@@ -628,40 +628,40 @@
         ]
     },
     "16180": {
-        "CSBACode": "16180",
-        "CSBAName": "Carson City,NV",
-        "CSBA City": "Carson City",
-        "CSBA State Code": "NV",
+        "CBSACode": "16180",
+        "CBSAName": "Carson City,NV",
+        "CBSA City": "Carson City",
+        "CBSA State Code": "NV",
         "Cities": "Carson City",
         "MemberCities": [
             "Carson City"
         ]
     },
     "16220": {
-        "CSBACode": "16220",
-        "CSBAName": "Casper,WY",
-        "CSBA City": "Casper",
-        "CSBA State Code": "WY",
+        "CBSACode": "16220",
+        "CBSAName": "Casper,WY",
+        "CBSA City": "Casper",
+        "CBSA State Code": "WY",
         "Cities": "Casper",
         "MemberCities": [
             "Casper"
         ]
     },
     "16300": {
-        "CSBACode": "16300",
-        "CSBAName": "Cedar Rapids,IA",
-        "CSBA City": "Cedar Rapids",
-        "CSBA State Code": "IA",
+        "CBSACode": "16300",
+        "CBSAName": "Cedar Rapids,IA",
+        "CBSA City": "Cedar Rapids",
+        "CBSA State Code": "IA",
         "Cities": "Cedar Rapids",
         "MemberCities": [
             "Cedar Rapids"
         ]
     },
     "16540": {
-        "CSBACode": "16540",
-        "CSBAName": "Chambersburg-Waynesboro,PA",
-        "CSBA City": "Chambersburg-Waynesboro",
-        "CSBA State Code": "PA",
+        "CBSACode": "16540",
+        "CBSAName": "Chambersburg-Waynesboro,PA",
+        "CBSA City": "Chambersburg-Waynesboro",
+        "CBSA State Code": "PA",
         "Cities": "Chambersburg|Waynesboro",
         "MemberCities": [
             "Chambersburg",
@@ -669,10 +669,10 @@
         ]
     },
     "16580": {
-        "CSBACode": "16580",
-        "CSBAName": "Champaign-Urbana,IL",
-        "CSBA City": "Champaign-Urbana",
-        "CSBA State Code": "IL",
+        "CBSACode": "16580",
+        "CBSAName": "Champaign-Urbana,IL",
+        "CBSA City": "Champaign-Urbana",
+        "CBSA State Code": "IL",
         "Cities": "Champaign|Urbana",
         "MemberCities": [
             "Champaign",
@@ -680,20 +680,20 @@
         ]
     },
     "16620": {
-        "CSBACode": "16620",
-        "CSBAName": "Charleston,WV",
-        "CSBA City": "Charleston",
-        "CSBA State Code": "WV",
+        "CBSACode": "16620",
+        "CBSAName": "Charleston,WV",
+        "CBSA City": "Charleston",
+        "CBSA State Code": "WV",
         "Cities": "Charleston",
         "MemberCities": [
             "Charleston"
         ]
     },
     "16700": {
-        "CSBACode": "16700",
-        "CSBAName": "Charleston-North Charleston,SC",
-        "CSBA City": "Charleston-North Charleston",
-        "CSBA State Code": "SC",
+        "CBSACode": "16700",
+        "CBSAName": "Charleston-North Charleston,SC",
+        "CBSA City": "Charleston-North Charleston",
+        "CBSA State Code": "SC",
         "Cities": "Charleston|North Charleston",
         "MemberCities": [
             "Charleston",
@@ -701,10 +701,10 @@
         ]
     },
     "16740": {
-        "CSBACode": "16740",
-        "CSBAName": "Charlotte-Concord-Gastonia,NC-SC",
-        "CSBA City": "Charlotte-Concord-Gastonia",
-        "CSBA State Code": "NC-SC",
+        "CBSACode": "16740",
+        "CBSAName": "Charlotte-Concord-Gastonia,NC-SC",
+        "CBSA City": "Charlotte-Concord-Gastonia",
+        "CBSA State Code": "NC-SC",
         "Cities": "Charlotte|Concord|Gastonia|Rock Hill",
         "MemberCities": [
             "Charlotte",
@@ -714,40 +714,40 @@
         ]
     },
     "16820": {
-        "CSBACode": "16820",
-        "CSBAName": "Charlottesville,VA",
-        "CSBA City": "Charlottesville",
-        "CSBA State Code": "VA",
+        "CBSACode": "16820",
+        "CBSAName": "Charlottesville,VA",
+        "CBSA City": "Charlottesville",
+        "CBSA State Code": "VA",
         "Cities": "Charlottesville",
         "MemberCities": [
             "Charlottesville"
         ]
     },
     "16860": {
-        "CSBACode": "16860",
-        "CSBAName": "Chattanooga,TN-GA",
-        "CSBA City": "Chattanooga",
-        "CSBA State Code": "TN-GA",
+        "CBSACode": "16860",
+        "CBSAName": "Chattanooga,TN-GA",
+        "CBSA City": "Chattanooga",
+        "CBSA State Code": "TN-GA",
         "Cities": "Chattanooga",
         "MemberCities": [
             "Chattanooga"
         ]
     },
     "16940": {
-        "CSBACode": "16940",
-        "CSBAName": "Cheyenne,WY",
-        "CSBA City": "Cheyenne",
-        "CSBA State Code": "WY",
+        "CBSACode": "16940",
+        "CBSAName": "Cheyenne,WY",
+        "CBSA City": "Cheyenne",
+        "CBSA State Code": "WY",
         "Cities": "Cheyenne",
         "MemberCities": [
             "Cheyenne"
         ]
     },
     "16980": {
-        "CSBACode": "16980",
-        "CSBAName": "Chicago-Naperville-Elgin,IL-IN-WI",
-        "CSBA City": "Chicago-Naperville-Elgin",
-        "CSBA State Code": "IL-IN-WI",
+        "CBSACode": "16980",
+        "CBSAName": "Chicago-Naperville-Elgin,IL-IN-WI",
+        "CBSA City": "Chicago-Naperville-Elgin",
+        "CBSA State Code": "IL-IN-WI",
         "Cities": "Arlington Heights|Chicago|Des Plaines|Elgin|Evanston|Gary|Hoffman Estates|Naperville|Schaumburg|Skokie",
         "MemberCities": [
             "Arlington Heights",
@@ -763,50 +763,50 @@
         ]
     },
     "17020": {
-        "CSBACode": "17020",
-        "CSBAName": "Chico,CA",
-        "CSBA City": "Chico",
-        "CSBA State Code": "CA",
+        "CBSACode": "17020",
+        "CBSAName": "Chico,CA",
+        "CBSA City": "Chico",
+        "CBSA State Code": "CA",
         "Cities": "Chico",
         "MemberCities": [
             "Chico"
         ]
     },
     "17140": {
-        "CSBACode": "17140",
-        "CSBAName": "Cincinnati,OH-KY-IN",
-        "CSBA City": "Cincinnati",
-        "CSBA State Code": "OH-KY-IN",
+        "CBSACode": "17140",
+        "CBSAName": "Cincinnati,OH-KY-IN",
+        "CBSA City": "Cincinnati",
+        "CBSA State Code": "OH-KY-IN",
         "Cities": "Cincinnati",
         "MemberCities": [
             "Cincinnati"
         ]
     },
     "17300": {
-        "CSBACode": "17300",
-        "CSBAName": "Clarksville,TN-KY",
-        "CSBA City": "Clarksville",
-        "CSBA State Code": "TN-KY",
+        "CBSACode": "17300",
+        "CBSAName": "Clarksville,TN-KY",
+        "CBSA City": "Clarksville",
+        "CBSA State Code": "TN-KY",
         "Cities": "Clarksville",
         "MemberCities": [
             "Clarksville"
         ]
     },
     "17420": {
-        "CSBACode": "17420",
-        "CSBAName": "Cleveland,TN",
-        "CSBA City": "Cleveland",
-        "CSBA State Code": "TN",
+        "CBSACode": "17420",
+        "CBSAName": "Cleveland,TN",
+        "CBSA City": "Cleveland",
+        "CBSA State Code": "TN",
         "Cities": "Cleveland",
         "MemberCities": [
             "Cleveland"
         ]
     },
     "17460": {
-        "CSBACode": "17460",
-        "CSBAName": "Cleveland-Elyria,OH",
-        "CSBA City": "Cleveland-Elyria",
-        "CSBA State Code": "OH",
+        "CBSACode": "17460",
+        "CBSAName": "Cleveland-Elyria,OH",
+        "CBSA City": "Cleveland-Elyria",
+        "CBSA State Code": "OH",
         "Cities": "Cleveland|Elyria",
         "MemberCities": [
             "Cleveland",
@@ -814,20 +814,20 @@
         ]
     },
     "17660": {
-        "CSBACode": "17660",
-        "CSBAName": "Coeur d\u0027Alene,ID",
-        "CSBA City": "Coeur d\u0027Alene",
-        "CSBA State Code": "ID",
+        "CBSACode": "17660",
+        "CBSAName": "Coeur d\u0027Alene,ID",
+        "CBSA City": "Coeur d\u0027Alene",
+        "CBSA State Code": "ID",
         "Cities": "Coeur d\u0027Alene",
         "MemberCities": [
             "Coeur d\u0027Alene"
         ]
     },
     "17780": {
-        "CSBACode": "17780",
-        "CSBAName": "College Station-Bryan,TX",
-        "CSBA City": "College Station-Bryan",
-        "CSBA State Code": "TX",
+        "CBSACode": "17780",
+        "CBSAName": "College Station-Bryan,TX",
+        "CBSA City": "College Station-Bryan",
+        "CBSA State Code": "TX",
         "Cities": "Bryan|College Station",
         "MemberCities": [
             "Bryan",
@@ -835,90 +835,90 @@
         ]
     },
     "17820": {
-        "CSBACode": "17820",
-        "CSBAName": "Colorado Springs,CO",
-        "CSBA City": "Colorado Springs",
-        "CSBA State Code": "CO",
+        "CBSACode": "17820",
+        "CBSAName": "Colorado Springs,CO",
+        "CBSA City": "Colorado Springs",
+        "CBSA State Code": "CO",
         "Cities": "Colorado Springs",
         "MemberCities": [
             "Colorado Springs"
         ]
     },
     "17860": {
-        "CSBACode": "17860",
-        "CSBAName": "Columbia,MO",
-        "CSBA City": "Columbia",
-        "CSBA State Code": "MO",
+        "CBSACode": "17860",
+        "CBSAName": "Columbia,MO",
+        "CBSA City": "Columbia",
+        "CBSA State Code": "MO",
         "Cities": "Columbia",
         "MemberCities": [
             "Columbia"
         ]
     },
     "17900": {
-        "CSBACode": "17900",
-        "CSBAName": "Columbia,SC",
-        "CSBA City": "Columbia",
-        "CSBA State Code": "SC",
+        "CBSACode": "17900",
+        "CBSAName": "Columbia,SC",
+        "CBSA City": "Columbia",
+        "CBSA State Code": "SC",
         "Cities": "Columbia",
         "MemberCities": [
             "Columbia"
         ]
     },
     "17980": {
-        "CSBACode": "17980",
-        "CSBAName": "Columbus,GA-AL",
-        "CSBA City": "Columbus",
-        "CSBA State Code": "GA-AL",
+        "CBSACode": "17980",
+        "CBSAName": "Columbus,GA-AL",
+        "CBSA City": "Columbus",
+        "CBSA State Code": "GA-AL",
         "Cities": "Columbus",
         "MemberCities": [
             "Columbus"
         ]
     },
     "18020": {
-        "CSBACode": "18020",
-        "CSBAName": "Columbus,IN",
-        "CSBA City": "Columbus",
-        "CSBA State Code": "IN",
+        "CBSACode": "18020",
+        "CBSAName": "Columbus,IN",
+        "CBSA City": "Columbus",
+        "CBSA State Code": "IN",
         "Cities": "Columbus",
         "MemberCities": [
             "Columbus"
         ]
     },
     "18140": {
-        "CSBACode": "18140",
-        "CSBAName": "Columbus,OH",
-        "CSBA City": "Columbus",
-        "CSBA State Code": "OH",
+        "CBSACode": "18140",
+        "CBSAName": "Columbus,OH",
+        "CBSA City": "Columbus",
+        "CBSA State Code": "OH",
         "Cities": "Columbus",
         "MemberCities": [
             "Columbus"
         ]
     },
     "18580": {
-        "CSBACode": "18580",
-        "CSBAName": "Corpus Christi,TX",
-        "CSBA City": "Corpus Christi",
-        "CSBA State Code": "TX",
+        "CBSACode": "18580",
+        "CBSAName": "Corpus Christi,TX",
+        "CBSA City": "Corpus Christi",
+        "CBSA State Code": "TX",
         "Cities": "Corpus Christi",
         "MemberCities": [
             "Corpus Christi"
         ]
     },
     "18700": {
-        "CSBACode": "18700",
-        "CSBAName": "Corvallis,OR",
-        "CSBA City": "Corvallis",
-        "CSBA State Code": "OR",
+        "CBSACode": "18700",
+        "CBSAName": "Corvallis,OR",
+        "CBSA City": "Corvallis",
+        "CBSA State Code": "OR",
         "Cities": "Corvallis",
         "MemberCities": [
             "Corvallis"
         ]
     },
     "18880": {
-        "CSBACode": "18880",
-        "CSBAName": "Crestview-Fort Walton Beach-Destin,FL",
-        "CSBA City": "Crestview-Fort Walton Beach-Destin",
-        "CSBA State Code": "FL",
+        "CBSACode": "18880",
+        "CBSAName": "Crestview-Fort Walton Beach-Destin,FL",
+        "CBSA City": "Crestview-Fort Walton Beach-Destin",
+        "CBSA State Code": "FL",
         "Cities": "Crestview|Destin|Fort Walton Beach",
         "MemberCities": [
             "Crestview",
@@ -927,20 +927,20 @@
         ]
     },
     "19060": {
-        "CSBACode": "19060",
-        "CSBAName": "Cumberland,MD-WV",
-        "CSBA City": "Cumberland",
-        "CSBA State Code": "MD-WV",
+        "CBSACode": "19060",
+        "CBSAName": "Cumberland,MD-WV",
+        "CBSA City": "Cumberland",
+        "CBSA State Code": "MD-WV",
         "Cities": "Cumberland",
         "MemberCities": [
             "Cumberland"
         ]
     },
     "19100": {
-        "CSBACode": "19100",
-        "CSBAName": "Dallas-Fort Worth-Arlington,TX",
-        "CSBA City": "Dallas-Fort Worth-Arlington",
-        "CSBA State Code": "TX",
+        "CBSACode": "19100",
+        "CBSAName": "Dallas-Fort Worth-Arlington,TX",
+        "CBSA City": "Dallas-Fort Worth-Arlington",
+        "CBSA State Code": "TX",
         "Cities": "Arlington|Dallas|Denton|Fort Worth|Irving|Plano|Richardson",
         "MemberCities": [
             "Arlington",
@@ -953,30 +953,30 @@
         ]
     },
     "19140": {
-        "CSBACode": "19140",
-        "CSBAName": "Dalton,GA",
-        "CSBA City": "Dalton",
-        "CSBA State Code": "GA",
+        "CBSACode": "19140",
+        "CBSAName": "Dalton,GA",
+        "CBSA City": "Dalton",
+        "CBSA State Code": "GA",
         "Cities": "Dalton",
         "MemberCities": [
             "Dalton"
         ]
     },
     "19180": {
-        "CSBACode": "19180",
-        "CSBAName": "Danville,IL",
-        "CSBA City": "Danville",
-        "CSBA State Code": "IL",
+        "CBSACode": "19180",
+        "CBSAName": "Danville,IL",
+        "CBSA City": "Danville",
+        "CBSA State Code": "IL",
         "Cities": "Danville",
         "MemberCities": [
             "Danville"
         ]
     },
     "19300": {
-        "CSBACode": "19300",
-        "CSBAName": "Daphne-Fairhope-Foley,AL",
-        "CSBA City": "Daphne-Fairhope-Foley",
-        "CSBA State Code": "AL",
+        "CBSACode": "19300",
+        "CBSAName": "Daphne-Fairhope-Foley,AL",
+        "CBSA City": "Daphne-Fairhope-Foley",
+        "CBSA State Code": "AL",
         "Cities": "Daphne|Fairhope|Foley",
         "MemberCities": [
             "Daphne",
@@ -985,10 +985,10 @@
         ]
     },
     "19340": {
-        "CSBACode": "19340",
-        "CSBAName": "Davenport-Moline-Rock Island,IA-IL",
-        "CSBA City": "Davenport-Moline-Rock Island",
-        "CSBA State Code": "IA-IL",
+        "CBSACode": "19340",
+        "CBSAName": "Davenport-Moline-Rock Island,IA-IL",
+        "CBSA City": "Davenport-Moline-Rock Island",
+        "CBSA State Code": "IA-IL",
         "Cities": "Davenport|Moline|Rock Island",
         "MemberCities": [
             "Davenport",
@@ -997,40 +997,40 @@
         ]
     },
     "19380": {
-        "CSBACode": "19380",
-        "CSBAName": "Dayton,OH",
-        "CSBA City": "Dayton",
-        "CSBA State Code": "OH",
+        "CBSACode": "19380",
+        "CBSAName": "Dayton,OH",
+        "CBSA City": "Dayton",
+        "CBSA State Code": "OH",
         "Cities": "Dayton",
         "MemberCities": [
             "Dayton"
         ]
     },
     "19460": {
-        "CSBACode": "19460",
-        "CSBAName": "Decatur,AL",
-        "CSBA City": "Decatur",
-        "CSBA State Code": "AL",
+        "CBSACode": "19460",
+        "CBSAName": "Decatur,AL",
+        "CBSA City": "Decatur",
+        "CBSA State Code": "AL",
         "Cities": "Decatur",
         "MemberCities": [
             "Decatur"
         ]
     },
     "19500": {
-        "CSBACode": "19500",
-        "CSBAName": "Decatur,IL",
-        "CSBA City": "Decatur",
-        "CSBA State Code": "IL",
+        "CBSACode": "19500",
+        "CBSAName": "Decatur,IL",
+        "CBSA City": "Decatur",
+        "CBSA State Code": "IL",
         "Cities": "Decatur",
         "MemberCities": [
             "Decatur"
         ]
     },
     "19660": {
-        "CSBACode": "19660",
-        "CSBAName": "Deltona-Daytona Beach-Ormond Beach,FL",
-        "CSBA City": "Deltona-Daytona Beach-Ormond Beach",
-        "CSBA State Code": "FL",
+        "CBSACode": "19660",
+        "CBSAName": "Deltona-Daytona Beach-Ormond Beach,FL",
+        "CBSA City": "Deltona-Daytona Beach-Ormond Beach",
+        "CBSA State Code": "FL",
         "Cities": "Daytona Beach|Deltona|Ormond Beach",
         "MemberCities": [
             "Daytona Beach",
@@ -1039,10 +1039,10 @@
         ]
     },
     "19740": {
-        "CSBACode": "19740",
-        "CSBAName": "Denver-Aurora-Lakewood,CO",
-        "CSBA City": "Denver-Aurora-Lakewood",
-        "CSBA State Code": "CO",
+        "CBSACode": "19740",
+        "CBSAName": "Denver-Aurora-Lakewood,CO",
+        "CBSA City": "Denver-Aurora-Lakewood",
+        "CBSA State Code": "CO",
         "Cities": "Aurora|Broomfield|Denver|Lakewood",
         "MemberCities": [
             "Aurora",
@@ -1052,10 +1052,10 @@
         ]
     },
     "19780": {
-        "CSBACode": "19780",
-        "CSBAName": "Des Moines-West Des Moines,IA",
-        "CSBA City": "Des Moines-West Des Moines",
-        "CSBA State Code": "IA",
+        "CBSACode": "19780",
+        "CBSAName": "Des Moines-West Des Moines,IA",
+        "CBSA City": "Des Moines-West Des Moines",
+        "CBSA State Code": "IA",
         "Cities": "Des Moines|West Des Moines",
         "MemberCities": [
             "Des Moines",
@@ -1063,10 +1063,10 @@
         ]
     },
     "19820": {
-        "CSBACode": "19820",
-        "CSBAName": "Detroit-Warren-Dearborn,MI",
-        "CSBA City": "Detroit-Warren-Dearborn",
-        "CSBA State Code": "MI",
+        "CBSACode": "19820",
+        "CBSAName": "Detroit-Warren-Dearborn,MI",
+        "CBSA City": "Detroit-Warren-Dearborn",
+        "CBSA State Code": "MI",
         "Cities": "Dearborn|Detroit|Farmington Hills|Livonia|Novi|Pontiac|Southfield|Taylor|Troy|Warren",
         "MemberCities": [
             "Dearborn",
@@ -1082,50 +1082,50 @@
         ]
     },
     "20020": {
-        "CSBACode": "20020",
-        "CSBAName": "Dothan,AL",
-        "CSBA City": "Dothan",
-        "CSBA State Code": "AL",
+        "CBSACode": "20020",
+        "CBSAName": "Dothan,AL",
+        "CBSA City": "Dothan",
+        "CBSA State Code": "AL",
         "Cities": "Dothan",
         "MemberCities": [
             "Dothan"
         ]
     },
     "20100": {
-        "CSBACode": "20100",
-        "CSBAName": "Dover,DE",
-        "CSBA City": "Dover",
-        "CSBA State Code": "DE",
+        "CBSACode": "20100",
+        "CBSAName": "Dover,DE",
+        "CBSA City": "Dover",
+        "CBSA State Code": "DE",
         "Cities": "Dover",
         "MemberCities": [
             "Dover"
         ]
     },
     "20220": {
-        "CSBACode": "20220",
-        "CSBAName": "Dubuque,IA",
-        "CSBA City": "Dubuque",
-        "CSBA State Code": "IA",
+        "CBSACode": "20220",
+        "CBSAName": "Dubuque,IA",
+        "CBSA City": "Dubuque",
+        "CBSA State Code": "IA",
         "Cities": "Dubuque",
         "MemberCities": [
             "Dubuque"
         ]
     },
     "20260": {
-        "CSBACode": "20260",
-        "CSBAName": "Duluth,MN-WI",
-        "CSBA City": "Duluth",
-        "CSBA State Code": "MN-WI",
+        "CBSACode": "20260",
+        "CBSAName": "Duluth,MN-WI",
+        "CBSA City": "Duluth",
+        "CBSA State Code": "MN-WI",
         "Cities": "Duluth",
         "MemberCities": [
             "Duluth"
         ]
     },
     "20500": {
-        "CSBACode": "20500",
-        "CSBAName": "Durham-Chapel Hill,NC",
-        "CSBA City": "Durham-Chapel Hill",
-        "CSBA State Code": "NC",
+        "CBSACode": "20500",
+        "CBSAName": "Durham-Chapel Hill,NC",
+        "CBSA City": "Durham-Chapel Hill",
+        "CBSA State Code": "NC",
         "Cities": "Chapel Hill|Durham",
         "MemberCities": [
             "Chapel Hill",
@@ -1133,40 +1133,40 @@
         ]
     },
     "20700": {
-        "CSBACode": "20700",
-        "CSBAName": "East Stroudsburg,PA",
-        "CSBA City": "East Stroudsburg",
-        "CSBA State Code": "PA",
+        "CBSACode": "20700",
+        "CBSAName": "East Stroudsburg,PA",
+        "CBSA City": "East Stroudsburg",
+        "CBSA State Code": "PA",
         "Cities": "East Stroudsburg",
         "MemberCities": [
             "East Stroudsburg"
         ]
     },
     "20740": {
-        "CSBACode": "20740",
-        "CSBAName": "Eau Claire,WI",
-        "CSBA City": "Eau Claire",
-        "CSBA State Code": "WI",
+        "CBSACode": "20740",
+        "CBSAName": "Eau Claire,WI",
+        "CBSA City": "Eau Claire",
+        "CBSA State Code": "WI",
         "Cities": "Eau Claire",
         "MemberCities": [
             "Eau Claire"
         ]
     },
     "20940": {
-        "CSBACode": "20940",
-        "CSBAName": "El Centro,CA",
-        "CSBA City": "El Centro",
-        "CSBA State Code": "CA",
+        "CBSACode": "20940",
+        "CBSAName": "El Centro,CA",
+        "CBSA City": "El Centro",
+        "CBSA State Code": "CA",
         "Cities": "El Centro",
         "MemberCities": [
             "El Centro"
         ]
     },
     "21060": {
-        "CSBACode": "21060",
-        "CSBAName": "Elizabethtown-Fort Knox,KY",
-        "CSBA City": "Elizabethtown-Fort Knox",
-        "CSBA State Code": "KY",
+        "CBSACode": "21060",
+        "CBSAName": "Elizabethtown-Fort Knox,KY",
+        "CBSA City": "Elizabethtown-Fort Knox",
+        "CBSA State Code": "KY",
         "Cities": "Elizabethtown|Fort Knox",
         "MemberCities": [
             "Elizabethtown",
@@ -1174,10 +1174,10 @@
         ]
     },
     "21140": {
-        "CSBACode": "21140",
-        "CSBAName": "Elkhart-Goshen,IN",
-        "CSBA City": "Elkhart-Goshen",
-        "CSBA State Code": "IN",
+        "CBSACode": "21140",
+        "CBSAName": "Elkhart-Goshen,IN",
+        "CBSA City": "Elkhart-Goshen",
+        "CBSA State Code": "IN",
         "Cities": "Elkhart|Goshen",
         "MemberCities": [
             "Elkhart",
@@ -1185,110 +1185,110 @@
         ]
     },
     "21300": {
-        "CSBACode": "21300",
-        "CSBAName": "Elmira,NY",
-        "CSBA City": "Elmira",
-        "CSBA State Code": "NY",
+        "CBSACode": "21300",
+        "CBSAName": "Elmira,NY",
+        "CBSA City": "Elmira",
+        "CBSA State Code": "NY",
         "Cities": "Elmira",
         "MemberCities": [
             "Elmira"
         ]
     },
     "21340": {
-        "CSBACode": "21340",
-        "CSBAName": "El Paso,TX",
-        "CSBA City": "El Paso",
-        "CSBA State Code": "TX",
+        "CBSACode": "21340",
+        "CBSAName": "El Paso,TX",
+        "CBSA City": "El Paso",
+        "CBSA State Code": "TX",
         "Cities": "El Paso",
         "MemberCities": [
             "El Paso"
         ]
     },
     "21420": {
-        "CSBACode": "21420",
-        "CSBAName": "Enid,OK",
-        "CSBA City": "Enid",
-        "CSBA State Code": "OK",
+        "CBSACode": "21420",
+        "CBSAName": "Enid,OK",
+        "CBSA City": "Enid",
+        "CBSA State Code": "OK",
         "Cities": "Enid",
         "MemberCities": [
             "Enid"
         ]
     },
     "21500": {
-        "CSBACode": "21500",
-        "CSBAName": "Erie,PA",
-        "CSBA City": "Erie",
-        "CSBA State Code": "PA",
+        "CBSACode": "21500",
+        "CBSAName": "Erie,PA",
+        "CBSA City": "Erie",
+        "CBSA State Code": "PA",
         "Cities": "Erie",
         "MemberCities": [
             "Erie"
         ]
     },
     "21660": {
-        "CSBACode": "21660",
-        "CSBAName": "Eugene,OR",
-        "CSBA City": "Eugene",
-        "CSBA State Code": "OR",
+        "CBSACode": "21660",
+        "CBSAName": "Eugene,OR",
+        "CBSA City": "Eugene",
+        "CBSA State Code": "OR",
         "Cities": "Eugene",
         "MemberCities": [
             "Eugene"
         ]
     },
     "21780": {
-        "CSBACode": "21780",
-        "CSBAName": "Evansville,IN-KY",
-        "CSBA City": "Evansville",
-        "CSBA State Code": "IN-KY",
+        "CBSACode": "21780",
+        "CBSAName": "Evansville,IN-KY",
+        "CBSA City": "Evansville",
+        "CBSA State Code": "IN-KY",
         "Cities": "Evansville",
         "MemberCities": [
             "Evansville"
         ]
     },
     "21820": {
-        "CSBACode": "21820",
-        "CSBAName": "Fairbanks,AK",
-        "CSBA City": "Fairbanks",
-        "CSBA State Code": "AK",
+        "CBSACode": "21820",
+        "CBSAName": "Fairbanks,AK",
+        "CBSA City": "Fairbanks",
+        "CBSA State Code": "AK",
         "Cities": "Fairbanks",
         "MemberCities": [
             "Fairbanks"
         ]
     },
     "22020": {
-        "CSBACode": "22020",
-        "CSBAName": "Fargo,ND-MN",
-        "CSBA City": "Fargo",
-        "CSBA State Code": "ND-MN",
+        "CBSACode": "22020",
+        "CBSAName": "Fargo,ND-MN",
+        "CBSA City": "Fargo",
+        "CBSA State Code": "ND-MN",
         "Cities": "Fargo",
         "MemberCities": [
             "Fargo"
         ]
     },
     "22140": {
-        "CSBACode": "22140",
-        "CSBAName": "Farmington,NM",
-        "CSBA City": "Farmington",
-        "CSBA State Code": "NM",
+        "CBSACode": "22140",
+        "CBSAName": "Farmington,NM",
+        "CBSA City": "Farmington",
+        "CBSA State Code": "NM",
         "Cities": "Farmington",
         "MemberCities": [
             "Farmington"
         ]
     },
     "22180": {
-        "CSBACode": "22180",
-        "CSBAName": "Fayetteville,NC",
-        "CSBA City": "Fayetteville",
-        "CSBA State Code": "NC",
+        "CBSACode": "22180",
+        "CBSAName": "Fayetteville,NC",
+        "CBSA City": "Fayetteville",
+        "CBSA State Code": "NC",
         "Cities": "Fayetteville",
         "MemberCities": [
             "Fayetteville"
         ]
     },
     "22220": {
-        "CSBACode": "22220",
-        "CSBAName": "Fayetteville-Springdale-Rogers,AR-MO",
-        "CSBA City": "Fayetteville-Springdale-Rogers",
-        "CSBA State Code": "AR-MO",
+        "CBSACode": "22220",
+        "CBSAName": "Fayetteville-Springdale-Rogers,AR-MO",
+        "CBSA City": "Fayetteville-Springdale-Rogers",
+        "CBSA State Code": "AR-MO",
         "Cities": "Bentonville|Fayetteville|Rogers|Springdale",
         "MemberCities": [
             "Bentonville",
@@ -1298,40 +1298,40 @@
         ]
     },
     "22380": {
-        "CSBACode": "22380",
-        "CSBAName": "Flagstaff,AZ",
-        "CSBA City": "Flagstaff",
-        "CSBA State Code": "AZ",
+        "CBSACode": "22380",
+        "CBSAName": "Flagstaff,AZ",
+        "CBSA City": "Flagstaff",
+        "CBSA State Code": "AZ",
         "Cities": "Flagstaff",
         "MemberCities": [
             "Flagstaff"
         ]
     },
     "22420": {
-        "CSBACode": "22420",
-        "CSBAName": "Flint,MI",
-        "CSBA City": "Flint",
-        "CSBA State Code": "MI",
+        "CBSACode": "22420",
+        "CBSAName": "Flint,MI",
+        "CBSA City": "Flint",
+        "CBSA State Code": "MI",
         "Cities": "Flint",
         "MemberCities": [
             "Flint"
         ]
     },
     "22500": {
-        "CSBACode": "22500",
-        "CSBAName": "Florence,SC",
-        "CSBA City": "Florence",
-        "CSBA State Code": "SC",
+        "CBSACode": "22500",
+        "CBSAName": "Florence,SC",
+        "CBSA City": "Florence",
+        "CBSA State Code": "SC",
         "Cities": "Florence",
         "MemberCities": [
             "Florence"
         ]
     },
     "22520": {
-        "CSBACode": "22520",
-        "CSBAName": "Florence-Muscle Shoals,AL",
-        "CSBA City": "Florence-Muscle Shoals",
-        "CSBA State Code": "AL",
+        "CBSACode": "22520",
+        "CBSAName": "Florence-Muscle Shoals,AL",
+        "CBSA City": "Florence-Muscle Shoals",
+        "CBSA State Code": "AL",
         "Cities": "Florence|Muscle Shoals",
         "MemberCities": [
             "Florence",
@@ -1339,150 +1339,150 @@
         ]
     },
     "22540": {
-        "CSBACode": "22540",
-        "CSBAName": "Fond du Lac,WI",
-        "CSBA City": "Fond du Lac",
-        "CSBA State Code": "WI",
+        "CBSACode": "22540",
+        "CBSAName": "Fond du Lac,WI",
+        "CBSA City": "Fond du Lac",
+        "CBSA State Code": "WI",
         "Cities": "Fond du Lac",
         "MemberCities": [
             "Fond du Lac"
         ]
     },
     "22660": {
-        "CSBACode": "22660",
-        "CSBAName": "Fort Collins,CO",
-        "CSBA City": "Fort Collins",
-        "CSBA State Code": "CO",
+        "CBSACode": "22660",
+        "CBSAName": "Fort Collins,CO",
+        "CBSA City": "Fort Collins",
+        "CBSA State Code": "CO",
         "Cities": "Fort Collins",
         "MemberCities": [
             "Fort Collins"
         ]
     },
     "22900": {
-        "CSBACode": "22900",
-        "CSBAName": "Fort Smith,AR-OK",
-        "CSBA City": "Fort Smith",
-        "CSBA State Code": "AR-OK",
+        "CBSACode": "22900",
+        "CBSAName": "Fort Smith,AR-OK",
+        "CBSA City": "Fort Smith",
+        "CBSA State Code": "AR-OK",
         "Cities": "Fort Smith",
         "MemberCities": [
             "Fort Smith"
         ]
     },
     "23060": {
-        "CSBACode": "23060",
-        "CSBAName": "Fort Wayne,IN",
-        "CSBA City": "Fort Wayne",
-        "CSBA State Code": "IN",
+        "CBSACode": "23060",
+        "CBSAName": "Fort Wayne,IN",
+        "CBSA City": "Fort Wayne",
+        "CBSA State Code": "IN",
         "Cities": "Fort Wayne",
         "MemberCities": [
             "Fort Wayne"
         ]
     },
     "23420": {
-        "CSBACode": "23420",
-        "CSBAName": "Fresno,CA",
-        "CSBA City": "Fresno",
-        "CSBA State Code": "CA",
+        "CBSACode": "23420",
+        "CBSAName": "Fresno,CA",
+        "CBSA City": "Fresno",
+        "CBSA State Code": "CA",
         "Cities": "Fresno",
         "MemberCities": [
             "Fresno"
         ]
     },
     "23460": {
-        "CSBACode": "23460",
-        "CSBAName": "Gadsden,AL",
-        "CSBA City": "Gadsden",
-        "CSBA State Code": "AL",
+        "CBSACode": "23460",
+        "CBSAName": "Gadsden,AL",
+        "CBSA City": "Gadsden",
+        "CBSA State Code": "AL",
         "Cities": "Gadsden",
         "MemberCities": [
             "Gadsden"
         ]
     },
     "23540": {
-        "CSBACode": "23540",
-        "CSBAName": "Gainesville,FL",
-        "CSBA City": "Gainesville",
-        "CSBA State Code": "FL",
+        "CBSACode": "23540",
+        "CBSAName": "Gainesville,FL",
+        "CBSA City": "Gainesville",
+        "CBSA State Code": "FL",
         "Cities": "Gainesville",
         "MemberCities": [
             "Gainesville"
         ]
     },
     "23580": {
-        "CSBACode": "23580",
-        "CSBAName": "Gainesville,GA",
-        "CSBA City": "Gainesville",
-        "CSBA State Code": "GA",
+        "CBSACode": "23580",
+        "CBSAName": "Gainesville,GA",
+        "CBSA City": "Gainesville",
+        "CBSA State Code": "GA",
         "Cities": "Gainesville",
         "MemberCities": [
             "Gainesville"
         ]
     },
     "23900": {
-        "CSBACode": "23900",
-        "CSBAName": "Gettysburg,PA",
-        "CSBA City": "Gettysburg",
-        "CSBA State Code": "PA",
+        "CBSACode": "23900",
+        "CBSAName": "Gettysburg,PA",
+        "CBSA City": "Gettysburg",
+        "CBSA State Code": "PA",
         "Cities": "Gettysburg",
         "MemberCities": [
             "Gettysburg"
         ]
     },
     "24020": {
-        "CSBACode": "24020",
-        "CSBAName": "Glens Falls,NY",
-        "CSBA City": "Glens Falls",
-        "CSBA State Code": "NY",
+        "CBSACode": "24020",
+        "CBSAName": "Glens Falls,NY",
+        "CBSA City": "Glens Falls",
+        "CBSA State Code": "NY",
         "Cities": "Glens Falls",
         "MemberCities": [
             "Glens Falls"
         ]
     },
     "24140": {
-        "CSBACode": "24140",
-        "CSBAName": "Goldsboro,NC",
-        "CSBA City": "Goldsboro",
-        "CSBA State Code": "NC",
+        "CBSACode": "24140",
+        "CBSAName": "Goldsboro,NC",
+        "CBSA City": "Goldsboro",
+        "CBSA State Code": "NC",
         "Cities": "Goldsboro",
         "MemberCities": [
             "Goldsboro"
         ]
     },
     "24220": {
-        "CSBACode": "24220",
-        "CSBAName": "Grand Forks,ND-MN",
-        "CSBA City": "Grand Forks",
-        "CSBA State Code": "ND-MN",
+        "CBSACode": "24220",
+        "CBSAName": "Grand Forks,ND-MN",
+        "CBSA City": "Grand Forks",
+        "CBSA State Code": "ND-MN",
         "Cities": "Grand Forks",
         "MemberCities": [
             "Grand Forks"
         ]
     },
     "24260": {
-        "CSBACode": "24260",
-        "CSBAName": "Grand Island,NE",
-        "CSBA City": "Grand Island",
-        "CSBA State Code": "NE",
+        "CBSACode": "24260",
+        "CBSAName": "Grand Island,NE",
+        "CBSA City": "Grand Island",
+        "CBSA State Code": "NE",
         "Cities": "Grand Island",
         "MemberCities": [
             "Grand Island"
         ]
     },
     "24300": {
-        "CSBACode": "24300",
-        "CSBAName": "Grand Junction,CO",
-        "CSBA City": "Grand Junction",
-        "CSBA State Code": "CO",
+        "CBSACode": "24300",
+        "CBSAName": "Grand Junction,CO",
+        "CBSA City": "Grand Junction",
+        "CBSA State Code": "CO",
         "Cities": "Grand Junction",
         "MemberCities": [
             "Grand Junction"
         ]
     },
     "24340": {
-        "CSBACode": "24340",
-        "CSBAName": "Grand Rapids-Wyoming,MI",
-        "CSBA City": "Grand Rapids-Wyoming",
-        "CSBA State Code": "MI",
+        "CBSACode": "24340",
+        "CBSAName": "Grand Rapids-Wyoming,MI",
+        "CBSA City": "Grand Rapids-Wyoming",
+        "CBSA State Code": "MI",
         "Cities": "Grand Rapids|Wyoming",
         "MemberCities": [
             "Grand Rapids",
@@ -1490,50 +1490,50 @@
         ]
     },
     "24420": {
-        "CSBACode": "24420",
-        "CSBAName": "Grants Pass,OR",
-        "CSBA City": "Grants Pass",
-        "CSBA State Code": "OR",
+        "CBSACode": "24420",
+        "CBSAName": "Grants Pass,OR",
+        "CBSA City": "Grants Pass",
+        "CBSA State Code": "OR",
         "Cities": "Grants Pass",
         "MemberCities": [
             "Grants Pass"
         ]
     },
     "24500": {
-        "CSBACode": "24500",
-        "CSBAName": "Great Falls,MT",
-        "CSBA City": "Great Falls",
-        "CSBA State Code": "MT",
+        "CBSACode": "24500",
+        "CBSAName": "Great Falls,MT",
+        "CBSA City": "Great Falls",
+        "CBSA State Code": "MT",
         "Cities": "Great Falls",
         "MemberCities": [
             "Great Falls"
         ]
     },
     "24540": {
-        "CSBACode": "24540",
-        "CSBAName": "Greeley,CO",
-        "CSBA City": "Greeley",
-        "CSBA State Code": "CO",
+        "CBSACode": "24540",
+        "CBSAName": "Greeley,CO",
+        "CBSA City": "Greeley",
+        "CBSA State Code": "CO",
         "Cities": "Greeley",
         "MemberCities": [
             "Greeley"
         ]
     },
     "24580": {
-        "CSBACode": "24580",
-        "CSBAName": "Green Bay,WI",
-        "CSBA City": "Green Bay",
-        "CSBA State Code": "WI",
+        "CBSACode": "24580",
+        "CBSAName": "Green Bay,WI",
+        "CBSA City": "Green Bay",
+        "CBSA State Code": "WI",
         "Cities": "Green Bay",
         "MemberCities": [
             "Green Bay"
         ]
     },
     "24660": {
-        "CSBACode": "24660",
-        "CSBAName": "Greensboro-High Point,NC",
-        "CSBA City": "Greensboro-High Point",
-        "CSBA State Code": "NC",
+        "CBSACode": "24660",
+        "CBSAName": "Greensboro-High Point,NC",
+        "CBSA City": "Greensboro-High Point",
+        "CBSA State Code": "NC",
         "Cities": "Greensboro|High Point",
         "MemberCities": [
             "Greensboro",
@@ -1541,20 +1541,20 @@
         ]
     },
     "24780": {
-        "CSBACode": "24780",
-        "CSBAName": "Greenville,NC",
-        "CSBA City": "Greenville",
-        "CSBA State Code": "NC",
+        "CBSACode": "24780",
+        "CBSAName": "Greenville,NC",
+        "CBSA City": "Greenville",
+        "CBSA State Code": "NC",
         "Cities": "Greenville",
         "MemberCities": [
             "Greenville"
         ]
     },
     "24860": {
-        "CSBACode": "24860",
-        "CSBAName": "Greenville-Anderson-Mauldin,SC",
-        "CSBA City": "Greenville-Anderson-Mauldin",
-        "CSBA State Code": "SC",
+        "CBSACode": "24860",
+        "CBSAName": "Greenville-Anderson-Mauldin,SC",
+        "CBSA City": "Greenville-Anderson-Mauldin",
+        "CBSA State Code": "SC",
         "Cities": "Anderson|Easley|Greenville|Mauldin",
         "MemberCities": [
             "Anderson",
@@ -1564,20 +1564,20 @@
         ]
     },
     "25020": {
-        "CSBACode": "25020",
-        "CSBAName": "Guayama,PR",
-        "CSBA City": "Guayama",
-        "CSBA State Code": "PR",
+        "CBSACode": "25020",
+        "CBSAName": "Guayama,PR",
+        "CBSA City": "Guayama",
+        "CBSA State Code": "PR",
         "Cities": "Guayama",
         "MemberCities": [
             "Guayama"
         ]
     },
     "25060": {
-        "CSBACode": "25060",
-        "CSBAName": "Gulfport-Biloxi-Pascagoula,MS",
-        "CSBA City": "Gulfport-Biloxi-Pascagoula",
-        "CSBA State Code": "MS",
+        "CBSACode": "25060",
+        "CBSAName": "Gulfport-Biloxi-Pascagoula,MS",
+        "CBSA City": "Gulfport-Biloxi-Pascagoula",
+        "CBSA State Code": "MS",
         "Cities": "Biloxi|Gulfport|Pascagoula",
         "MemberCities": [
             "Biloxi",
@@ -1586,10 +1586,10 @@
         ]
     },
     "25180": {
-        "CSBACode": "25180",
-        "CSBAName": "Hagerstown-Martinsburg,MD-WV",
-        "CSBA City": "Hagerstown-Martinsburg",
-        "CSBA State Code": "MD-WV",
+        "CBSACode": "25180",
+        "CBSAName": "Hagerstown-Martinsburg,MD-WV",
+        "CBSA City": "Hagerstown-Martinsburg",
+        "CBSA State Code": "MD-WV",
         "Cities": "Hagerstown|Martinsburg",
         "MemberCities": [
             "Hagerstown",
@@ -1597,20 +1597,20 @@
         ]
     },
     "25220": {
-        "CSBACode": "25220",
-        "CSBAName": "Hammond,LA",
-        "CSBA City": "Hammond",
-        "CSBA State Code": "LA",
+        "CBSACode": "25220",
+        "CBSAName": "Hammond,LA",
+        "CBSA City": "Hammond",
+        "CBSA State Code": "LA",
         "Cities": "Hammond",
         "MemberCities": [
             "Hammond"
         ]
     },
     "25260": {
-        "CSBACode": "25260",
-        "CSBAName": "Hanford-Corcoran,CA",
-        "CSBA City": "Hanford-Corcoran",
-        "CSBA State Code": "CA",
+        "CBSACode": "25260",
+        "CBSAName": "Hanford-Corcoran,CA",
+        "CBSA City": "Hanford-Corcoran",
+        "CBSA State Code": "CA",
         "Cities": "Corcoran|Hanford",
         "MemberCities": [
             "Corcoran",
@@ -1618,10 +1618,10 @@
         ]
     },
     "25420": {
-        "CSBACode": "25420",
-        "CSBAName": "Harrisburg-Carlisle,PA",
-        "CSBA City": "Harrisburg-Carlisle",
-        "CSBA State Code": "PA",
+        "CBSACode": "25420",
+        "CBSAName": "Harrisburg-Carlisle,PA",
+        "CBSA City": "Harrisburg-Carlisle",
+        "CBSA State Code": "PA",
         "Cities": "Carlisle|Harrisburg",
         "MemberCities": [
             "Carlisle",
@@ -1629,20 +1629,20 @@
         ]
     },
     "25500": {
-        "CSBACode": "25500",
-        "CSBAName": "Harrisonburg,VA",
-        "CSBA City": "Harrisonburg",
-        "CSBA State Code": "VA",
+        "CBSACode": "25500",
+        "CBSAName": "Harrisonburg,VA",
+        "CBSA City": "Harrisonburg",
+        "CBSA State Code": "VA",
         "Cities": "Harrisonburg",
         "MemberCities": [
             "Harrisonburg"
         ]
     },
     "25540": {
-        "CSBACode": "25540",
-        "CSBAName": "Hartford-West Hartford-East Hartford,CT",
-        "CSBA City": "Hartford-West Hartford-East Hartford",
-        "CSBA State Code": "CT",
+        "CBSACode": "25540",
+        "CBSAName": "Hartford-West Hartford-East Hartford,CT",
+        "CBSA City": "Hartford-West Hartford-East Hartford",
+        "CBSA State Code": "CT",
         "Cities": "East Hartford|Hartford|Middletown|West Hartford",
         "MemberCities": [
             "East Hartford",
@@ -1652,20 +1652,20 @@
         ]
     },
     "25620": {
-        "CSBACode": "25620",
-        "CSBAName": "Hattiesburg,MS",
-        "CSBA City": "Hattiesburg",
-        "CSBA State Code": "MS",
+        "CBSACode": "25620",
+        "CBSAName": "Hattiesburg,MS",
+        "CBSA City": "Hattiesburg",
+        "CBSA State Code": "MS",
         "Cities": "Hattiesburg",
         "MemberCities": [
             "Hattiesburg"
         ]
     },
     "25860": {
-        "CSBACode": "25860",
-        "CSBAName": "Hickory-Lenoir-Morganton,NC",
-        "CSBA City": "Hickory-Lenoir-Morganton",
-        "CSBA State Code": "NC",
+        "CBSACode": "25860",
+        "CBSAName": "Hickory-Lenoir-Morganton,NC",
+        "CBSA City": "Hickory-Lenoir-Morganton",
+        "CBSA State Code": "NC",
         "Cities": "Hickory|Lenoir|Morganton",
         "MemberCities": [
             "Hickory",
@@ -1674,10 +1674,10 @@
         ]
     },
     "25940": {
-        "CSBACode": "25940",
-        "CSBAName": "Hilton Head Island-Bluffton-Beaufort,SC",
-        "CSBA City": "Hilton Head Island-Bluffton-Beaufort",
-        "CSBA State Code": "SC",
+        "CBSACode": "25940",
+        "CBSAName": "Hilton Head Island-Bluffton-Beaufort,SC",
+        "CBSA City": "Hilton Head Island-Bluffton-Beaufort",
+        "CBSA State Code": "SC",
         "Cities": "Beaufort|Bluffton|Hilton Head Island",
         "MemberCities": [
             "Beaufort",
@@ -1686,40 +1686,40 @@
         ]
     },
     "25980": {
-        "CSBACode": "25980",
-        "CSBAName": "Hinesville,GA",
-        "CSBA City": "Hinesville",
-        "CSBA State Code": "GA",
+        "CBSACode": "25980",
+        "CBSAName": "Hinesville,GA",
+        "CBSA City": "Hinesville",
+        "CBSA State Code": "GA",
         "Cities": "Hinesville",
         "MemberCities": [
             "Hinesville"
         ]
     },
     "26140": {
-        "CSBACode": "26140",
-        "CSBAName": "Homosassa Springs,FL",
-        "CSBA City": "Homosassa Springs",
-        "CSBA State Code": "FL",
+        "CBSACode": "26140",
+        "CBSAName": "Homosassa Springs,FL",
+        "CBSA City": "Homosassa Springs",
+        "CBSA State Code": "FL",
         "Cities": "Homosassa Springs",
         "MemberCities": [
             "Homosassa Springs"
         ]
     },
     "26300": {
-        "CSBACode": "26300",
-        "CSBAName": "Hot Springs,AR",
-        "CSBA City": "Hot Springs",
-        "CSBA State Code": "AR",
+        "CBSACode": "26300",
+        "CBSAName": "Hot Springs,AR",
+        "CBSA City": "Hot Springs",
+        "CBSA State Code": "AR",
         "Cities": "Hot Springs",
         "MemberCities": [
             "Hot Springs"
         ]
     },
     "26380": {
-        "CSBACode": "26380",
-        "CSBAName": "Houma-Thibodaux,LA",
-        "CSBA City": "Houma-Thibodaux",
-        "CSBA State Code": "LA",
+        "CBSACode": "26380",
+        "CBSAName": "Houma-Thibodaux,LA",
+        "CBSA City": "Houma-Thibodaux",
+        "CBSA State Code": "LA",
         "Cities": "Houma|Thibodaux",
         "MemberCities": [
             "Houma",
@@ -1727,10 +1727,10 @@
         ]
     },
     "26420": {
-        "CSBACode": "26420",
-        "CSBAName": "Houston-The Woodlands-Sugar Land,TX",
-        "CSBA City": "Houston-The Woodlands-Sugar Land",
-        "CSBA State Code": "TX",
+        "CBSACode": "26420",
+        "CBSAName": "Houston-The Woodlands-Sugar Land,TX",
+        "CBSA City": "Houston-The Woodlands-Sugar Land",
+        "CBSA State Code": "TX",
         "Cities": "Baytown|Conroe|Houston|Sugar Land|The Woodlands",
         "MemberCities": [
             "Baytown",
@@ -1741,10 +1741,10 @@
         ]
     },
     "26580": {
-        "CSBACode": "26580",
-        "CSBAName": "Huntington-Ashland,WV-KY-OH",
-        "CSBA City": "Huntington-Ashland",
-        "CSBA State Code": "WV-KY-OH",
+        "CBSACode": "26580",
+        "CBSAName": "Huntington-Ashland,WV-KY-OH",
+        "CBSA City": "Huntington-Ashland",
+        "CBSA State Code": "WV-KY-OH",
         "Cities": "Ashland|Huntington",
         "MemberCities": [
             "Ashland",
@@ -1752,30 +1752,30 @@
         ]
     },
     "26620": {
-        "CSBACode": "26620",
-        "CSBAName": "Huntsville,AL",
-        "CSBA City": "Huntsville",
-        "CSBA State Code": "AL",
+        "CBSACode": "26620",
+        "CBSAName": "Huntsville,AL",
+        "CBSA City": "Huntsville",
+        "CBSA State Code": "AL",
         "Cities": "Huntsville",
         "MemberCities": [
             "Huntsville"
         ]
     },
     "26820": {
-        "CSBACode": "26820",
-        "CSBAName": "Idaho Falls,ID",
-        "CSBA City": "Idaho Falls",
-        "CSBA State Code": "ID",
+        "CBSACode": "26820",
+        "CBSAName": "Idaho Falls,ID",
+        "CBSA City": "Idaho Falls",
+        "CBSA State Code": "ID",
         "Cities": "Idaho Falls",
         "MemberCities": [
             "Idaho Falls"
         ]
     },
     "26900": {
-        "CSBACode": "26900",
-        "CSBAName": "Indianapolis-Carmel-Anderson,IN",
-        "CSBA City": "Indianapolis-Carmel-Anderson",
-        "CSBA State Code": "IN",
+        "CBSACode": "26900",
+        "CBSAName": "Indianapolis-Carmel-Anderson,IN",
+        "CBSA City": "Indianapolis-Carmel-Anderson",
+        "CBSA State Code": "IN",
         "Cities": "Anderson|Carmel|Indianapolis city (balance)",
         "MemberCities": [
             "Anderson",
@@ -1784,80 +1784,80 @@
         ]
     },
     "26980": {
-        "CSBACode": "26980",
-        "CSBAName": "Iowa City,IA",
-        "CSBA City": "Iowa City",
-        "CSBA State Code": "IA",
+        "CBSACode": "26980",
+        "CBSAName": "Iowa City,IA",
+        "CBSA City": "Iowa City",
+        "CBSA State Code": "IA",
         "Cities": "Iowa City",
         "MemberCities": [
             "Iowa City"
         ]
     },
     "27060": {
-        "CSBACode": "27060",
-        "CSBAName": "Ithaca,NY",
-        "CSBA City": "Ithaca",
-        "CSBA State Code": "NY",
+        "CBSACode": "27060",
+        "CBSAName": "Ithaca,NY",
+        "CBSA City": "Ithaca",
+        "CBSA State Code": "NY",
         "Cities": "Ithaca",
         "MemberCities": [
             "Ithaca"
         ]
     },
     "27100": {
-        "CSBACode": "27100",
-        "CSBAName": "Jackson,MI",
-        "CSBA City": "Jackson",
-        "CSBA State Code": "MI",
+        "CBSACode": "27100",
+        "CBSAName": "Jackson,MI",
+        "CBSA City": "Jackson",
+        "CBSA State Code": "MI",
         "Cities": "Jackson",
         "MemberCities": [
             "Jackson"
         ]
     },
     "27140": {
-        "CSBACode": "27140",
-        "CSBAName": "Jackson,MS",
-        "CSBA City": "Jackson",
-        "CSBA State Code": "MS",
+        "CBSACode": "27140",
+        "CBSAName": "Jackson,MS",
+        "CBSA City": "Jackson",
+        "CBSA State Code": "MS",
         "Cities": "Jackson",
         "MemberCities": [
             "Jackson"
         ]
     },
     "27180": {
-        "CSBACode": "27180",
-        "CSBAName": "Jackson,TN",
-        "CSBA City": "Jackson",
-        "CSBA State Code": "TN",
+        "CBSACode": "27180",
+        "CBSAName": "Jackson,TN",
+        "CBSA City": "Jackson",
+        "CBSA State Code": "TN",
         "Cities": "Jackson",
         "MemberCities": [
             "Jackson"
         ]
     },
     "27260": {
-        "CSBACode": "27260",
-        "CSBAName": "Jacksonville,FL",
-        "CSBA City": "Jacksonville",
-        "CSBA State Code": "FL",
+        "CBSACode": "27260",
+        "CBSAName": "Jacksonville,FL",
+        "CBSA City": "Jacksonville",
+        "CBSA State Code": "FL",
         "Cities": "Jacksonville",
         "MemberCities": [
             "Jacksonville"
         ]
     },
     "27340": {
-        "CSBACode": "27340",
-        "CSBAName": "Jacksonville,NC",
-        "CSBA City": "Jacksonville",
-        "CSBA State Code": "NC",
+        "CBSACode": "27340",
+        "CBSAName": "Jacksonville,NC",
+        "CBSA City": "Jacksonville",
+        "CBSA State Code": "NC",
         "Cities": "Jacksonville",
         "MemberCities": [
             "Jacksonville"
         ]
     },
     "27500": {
-        "CSBACode": "27500",
-        "CSBAName": "Janesville-Beloit,WI",
-        "CSBA City": "Janesville-Beloit",
-        "CSBA State Code": "WI",
+        "CBSACode": "27500",
+        "CBSAName": "Janesville-Beloit,WI",
+        "CBSA City": "Janesville-Beloit",
+        "CBSA State Code": "WI",
         "Cities": "Beloit|Janesville",
         "MemberCities": [
             "Beloit",
@@ -1865,60 +1865,60 @@
         ]
     },
     "27620": {
-        "CSBACode": "27620",
-        "CSBAName": "Jefferson City,MO",
-        "CSBA City": "Jefferson City",
-        "CSBA State Code": "MO",
+        "CBSACode": "27620",
+        "CBSAName": "Jefferson City,MO",
+        "CBSA City": "Jefferson City",
+        "CBSA State Code": "MO",
         "Cities": "Jefferson City",
         "MemberCities": [
             "Jefferson City"
         ]
     },
     "27740": {
-        "CSBACode": "27740",
-        "CSBAName": "Johnson City,TN",
-        "CSBA City": "Johnson City",
-        "CSBA State Code": "TN",
+        "CBSACode": "27740",
+        "CBSAName": "Johnson City,TN",
+        "CBSA City": "Johnson City",
+        "CBSA State Code": "TN",
         "Cities": "Johnson City",
         "MemberCities": [
             "Johnson City"
         ]
     },
     "27780": {
-        "CSBACode": "27780",
-        "CSBAName": "Johnstown,PA",
-        "CSBA City": "Johnstown",
-        "CSBA State Code": "PA",
+        "CBSACode": "27780",
+        "CBSAName": "Johnstown,PA",
+        "CBSA City": "Johnstown",
+        "CBSA State Code": "PA",
         "Cities": "Johnstown",
         "MemberCities": [
             "Johnstown"
         ]
     },
     "27860": {
-        "CSBACode": "27860",
-        "CSBAName": "Jonesboro,AR",
-        "CSBA City": "Jonesboro",
-        "CSBA State Code": "AR",
+        "CBSACode": "27860",
+        "CBSAName": "Jonesboro,AR",
+        "CBSA City": "Jonesboro",
+        "CBSA State Code": "AR",
         "Cities": "Jonesboro",
         "MemberCities": [
             "Jonesboro"
         ]
     },
     "27900": {
-        "CSBACode": "27900",
-        "CSBAName": "Joplin,MO",
-        "CSBA City": "Joplin",
-        "CSBA State Code": "MO",
+        "CBSACode": "27900",
+        "CBSAName": "Joplin,MO",
+        "CBSA City": "Joplin",
+        "CBSA State Code": "MO",
         "Cities": "Joplin",
         "MemberCities": [
             "Joplin"
         ]
     },
     "27980": {
-        "CSBACode": "27980",
-        "CSBAName": "Kahului-Wailuku-Lahaina,HI",
-        "CSBA City": "Kahului-Wailuku-Lahaina",
-        "CSBA State Code": "HI",
+        "CBSACode": "27980",
+        "CBSAName": "Kahului-Wailuku-Lahaina,HI",
+        "CBSA City": "Kahului-Wailuku-Lahaina",
+        "CBSA State Code": "HI",
         "Cities": "Kahului|Lahaina|Wailuku",
         "MemberCities": [
             "Kahului",
@@ -1927,10 +1927,10 @@
         ]
     },
     "28020": {
-        "CSBACode": "28020",
-        "CSBAName": "Kalamazoo-Portage,MI",
-        "CSBA City": "Kalamazoo-Portage",
-        "CSBA State Code": "MI",
+        "CBSACode": "28020",
+        "CBSAName": "Kalamazoo-Portage,MI",
+        "CBSA City": "Kalamazoo-Portage",
+        "CBSA State Code": "MI",
         "Cities": "Kalamazoo|Portage",
         "MemberCities": [
             "Kalamazoo",
@@ -1938,20 +1938,20 @@
         ]
     },
     "28100": {
-        "CSBACode": "28100",
-        "CSBAName": "Kankakee,IL",
-        "CSBA City": "Kankakee",
-        "CSBA State Code": "IL",
+        "CBSACode": "28100",
+        "CBSAName": "Kankakee,IL",
+        "CBSA City": "Kankakee",
+        "CBSA State Code": "IL",
         "Cities": "Kankakee",
         "MemberCities": [
             "Kankakee"
         ]
     },
     "28140": {
-        "CSBACode": "28140",
-        "CSBAName": "Kansas City,MO-KS",
-        "CSBA City": "Kansas City",
-        "CSBA State Code": "MO-KS",
+        "CBSACode": "28140",
+        "CBSAName": "Kansas City,MO-KS",
+        "CBSA City": "Kansas City",
+        "CBSA State Code": "MO-KS",
         "Cities": "Kansas City|Overland Park",
         "MemberCities": [
             "Kansas City",
@@ -1959,10 +1959,10 @@
         ]
     },
     "28420": {
-        "CSBACode": "28420",
-        "CSBAName": "Kennewick-Richland,WA",
-        "CSBA City": "Kennewick-Richland",
-        "CSBA State Code": "WA",
+        "CBSACode": "28420",
+        "CBSAName": "Kennewick-Richland,WA",
+        "CBSA City": "Kennewick-Richland",
+        "CBSA State Code": "WA",
         "Cities": "Kennewick|Richland",
         "MemberCities": [
             "Kennewick",
@@ -1970,10 +1970,10 @@
         ]
     },
     "28660": {
-        "CSBACode": "28660",
-        "CSBAName": "Killeen-Temple,TX",
-        "CSBA City": "Killeen-Temple",
-        "CSBA State Code": "TX",
+        "CBSACode": "28660",
+        "CBSAName": "Killeen-Temple,TX",
+        "CBSA City": "Killeen-Temple",
+        "CBSA State Code": "TX",
         "Cities": "Killeen|Temple",
         "MemberCities": [
             "Killeen",
@@ -1981,10 +1981,10 @@
         ]
     },
     "28700": {
-        "CSBACode": "28700",
-        "CSBAName": "Kingsport-Bristol-Bristol,TN-VA",
-        "CSBA City": "Kingsport-Bristol-Bristol",
-        "CSBA State Code": "TN-VA",
+        "CBSACode": "28700",
+        "CBSAName": "Kingsport-Bristol-Bristol,TN-VA",
+        "CBSA City": "Kingsport-Bristol-Bristol",
+        "CBSA State Code": "TN-VA",
         "Cities": "Bristol|Kingsport",
         "MemberCities": [
             "Bristol",
@@ -1992,40 +1992,40 @@
         ]
     },
     "28740": {
-        "CSBACode": "28740",
-        "CSBAName": "Kingston,NY",
-        "CSBA City": "Kingston",
-        "CSBA State Code": "NY",
+        "CBSACode": "28740",
+        "CBSAName": "Kingston,NY",
+        "CBSA City": "Kingston",
+        "CBSA State Code": "NY",
         "Cities": "Kingston",
         "MemberCities": [
             "Kingston"
         ]
     },
     "28940": {
-        "CSBACode": "28940",
-        "CSBAName": "Knoxville,TN",
-        "CSBA City": "Knoxville",
-        "CSBA State Code": "TN",
+        "CBSACode": "28940",
+        "CBSAName": "Knoxville,TN",
+        "CBSA City": "Knoxville",
+        "CBSA State Code": "TN",
         "Cities": "Knoxville",
         "MemberCities": [
             "Knoxville"
         ]
     },
     "29020": {
-        "CSBACode": "29020",
-        "CSBAName": "Kokomo,IN",
-        "CSBA City": "Kokomo",
-        "CSBA State Code": "IN",
+        "CBSACode": "29020",
+        "CBSAName": "Kokomo,IN",
+        "CBSA City": "Kokomo",
+        "CBSA State Code": "IN",
         "Cities": "Kokomo",
         "MemberCities": [
             "Kokomo"
         ]
     },
     "29100": {
-        "CSBACode": "29100",
-        "CSBAName": "La Crosse-Onalaska,WI-MN",
-        "CSBA City": "La Crosse-Onalaska",
-        "CSBA State Code": "WI-MN",
+        "CBSACode": "29100",
+        "CBSAName": "La Crosse-Onalaska,WI-MN",
+        "CBSA City": "La Crosse-Onalaska",
+        "CBSA State Code": "WI-MN",
         "Cities": "La Crosse|Onalaska",
         "MemberCities": [
             "La Crosse",
@@ -2033,20 +2033,20 @@
         ]
     },
     "29180": {
-        "CSBACode": "29180",
-        "CSBAName": "Lafayette,LA",
-        "CSBA City": "Lafayette",
-        "CSBA State Code": "LA",
+        "CBSACode": "29180",
+        "CBSAName": "Lafayette,LA",
+        "CBSA City": "Lafayette",
+        "CBSA State Code": "LA",
         "Cities": "Lafayette",
         "MemberCities": [
             "Lafayette"
         ]
     },
     "29200": {
-        "CSBACode": "29200",
-        "CSBAName": "Lafayette-West Lafayette,IN",
-        "CSBA City": "Lafayette-West Lafayette",
-        "CSBA State Code": "IN",
+        "CBSACode": "29200",
+        "CBSAName": "Lafayette-West Lafayette,IN",
+        "CBSA City": "Lafayette-West Lafayette",
+        "CBSA State Code": "IN",
         "Cities": "Lafayette|West Lafayette",
         "MemberCities": [
             "Lafayette",
@@ -2054,20 +2054,20 @@
         ]
     },
     "29340": {
-        "CSBACode": "29340",
-        "CSBAName": "Lake Charles,LA",
-        "CSBA City": "Lake Charles",
-        "CSBA State Code": "LA",
+        "CBSACode": "29340",
+        "CBSAName": "Lake Charles,LA",
+        "CBSA City": "Lake Charles",
+        "CBSA State Code": "LA",
         "Cities": "Lake Charles",
         "MemberCities": [
             "Lake Charles"
         ]
     },
     "29420": {
-        "CSBACode": "29420",
-        "CSBAName": "Lake Havasu City-Kingman,AZ",
-        "CSBA City": "Lake Havasu City-Kingman",
-        "CSBA State Code": "AZ",
+        "CBSACode": "29420",
+        "CBSAName": "Lake Havasu City-Kingman,AZ",
+        "CBSA City": "Lake Havasu City-Kingman",
+        "CBSA State Code": "AZ",
         "Cities": "Kingman|Lake Havasu City",
         "MemberCities": [
             "Kingman",
@@ -2075,10 +2075,10 @@
         ]
     },
     "29460": {
-        "CSBACode": "29460",
-        "CSBAName": "Lakeland-Winter Haven,FL",
-        "CSBA City": "Lakeland-Winter Haven",
-        "CSBA State Code": "FL",
+        "CBSACode": "29460",
+        "CBSAName": "Lakeland-Winter Haven,FL",
+        "CBSA City": "Lakeland-Winter Haven",
+        "CBSA State Code": "FL",
         "Cities": "Lakeland|Winter Haven",
         "MemberCities": [
             "Lakeland",
@@ -2086,20 +2086,20 @@
         ]
     },
     "29540": {
-        "CSBACode": "29540",
-        "CSBAName": "Lancaster,PA",
-        "CSBA City": "Lancaster",
-        "CSBA State Code": "PA",
+        "CBSACode": "29540",
+        "CBSAName": "Lancaster,PA",
+        "CBSA City": "Lancaster",
+        "CBSA State Code": "PA",
         "Cities": "Lancaster",
         "MemberCities": [
             "Lancaster"
         ]
     },
     "29620": {
-        "CSBACode": "29620",
-        "CSBAName": "Lansing-East Lansing,MI",
-        "CSBA City": "Lansing-East Lansing",
-        "CSBA State Code": "MI",
+        "CBSACode": "29620",
+        "CBSAName": "Lansing-East Lansing,MI",
+        "CBSA City": "Lansing-East Lansing",
+        "CBSA State Code": "MI",
         "Cities": "East Lansing|Lansing",
         "MemberCities": [
             "East Lansing",
@@ -2107,30 +2107,30 @@
         ]
     },
     "29700": {
-        "CSBACode": "29700",
-        "CSBAName": "Laredo,TX",
-        "CSBA City": "Laredo",
-        "CSBA State Code": "TX",
+        "CBSACode": "29700",
+        "CBSAName": "Laredo,TX",
+        "CBSA City": "Laredo",
+        "CBSA State Code": "TX",
         "Cities": "Laredo",
         "MemberCities": [
             "Laredo"
         ]
     },
     "29740": {
-        "CSBACode": "29740",
-        "CSBAName": "Las Cruces,NM",
-        "CSBA City": "Las Cruces",
-        "CSBA State Code": "NM",
+        "CBSACode": "29740",
+        "CBSAName": "Las Cruces,NM",
+        "CBSA City": "Las Cruces",
+        "CBSA State Code": "NM",
         "Cities": "Las Cruces",
         "MemberCities": [
             "Las Cruces"
         ]
     },
     "29820": {
-        "CSBACode": "29820",
-        "CSBAName": "Las Vegas-Henderson-Paradise,NV",
-        "CSBA City": "Las Vegas-Henderson-Paradise",
-        "CSBA State Code": "NV",
+        "CBSACode": "29820",
+        "CBSAName": "Las Vegas-Henderson-Paradise,NV",
+        "CBSA City": "Las Vegas-Henderson-Paradise",
+        "CBSA State Code": "NV",
         "Cities": "Henderson|Las Vegas|Paradise",
         "MemberCities": [
             "Henderson",
@@ -2139,50 +2139,50 @@
         ]
     },
     "29940": {
-        "CSBACode": "29940",
-        "CSBAName": "Lawrence,KS",
-        "CSBA City": "Lawrence",
-        "CSBA State Code": "KS",
+        "CBSACode": "29940",
+        "CBSAName": "Lawrence,KS",
+        "CBSA City": "Lawrence",
+        "CBSA State Code": "KS",
         "Cities": "Lawrence",
         "MemberCities": [
             "Lawrence"
         ]
     },
     "30020": {
-        "CSBACode": "30020",
-        "CSBAName": "Lawton,OK",
-        "CSBA City": "Lawton",
-        "CSBA State Code": "OK",
+        "CBSACode": "30020",
+        "CBSAName": "Lawton,OK",
+        "CBSA City": "Lawton",
+        "CBSA State Code": "OK",
         "Cities": "Lawton",
         "MemberCities": [
             "Lawton"
         ]
     },
     "30140": {
-        "CSBACode": "30140",
-        "CSBAName": "Lebanon,PA",
-        "CSBA City": "Lebanon",
-        "CSBA State Code": "PA",
+        "CBSACode": "30140",
+        "CBSAName": "Lebanon,PA",
+        "CBSA City": "Lebanon",
+        "CBSA State Code": "PA",
         "Cities": "Lebanon",
         "MemberCities": [
             "Lebanon"
         ]
     },
     "30300": {
-        "CSBACode": "30300",
-        "CSBAName": "Lewiston,ID-WA",
-        "CSBA City": "Lewiston",
-        "CSBA State Code": "ID-WA",
+        "CBSACode": "30300",
+        "CBSAName": "Lewiston,ID-WA",
+        "CBSA City": "Lewiston",
+        "CBSA State Code": "ID-WA",
         "Cities": "Lewiston",
         "MemberCities": [
             "Lewiston"
         ]
     },
     "30340": {
-        "CSBACode": "30340",
-        "CSBAName": "Lewiston-Auburn,ME",
-        "CSBA City": "Lewiston-Auburn",
-        "CSBA State Code": "ME",
+        "CBSACode": "30340",
+        "CBSAName": "Lewiston-Auburn,ME",
+        "CBSA City": "Lewiston-Auburn",
+        "CBSA State Code": "ME",
         "Cities": "Auburn|Lewiston",
         "MemberCities": [
             "Auburn",
@@ -2190,40 +2190,40 @@
         ]
     },
     "30460": {
-        "CSBACode": "30460",
-        "CSBAName": "Lexington-Fayette,KY",
-        "CSBA City": "Lexington-Fayette",
-        "CSBA State Code": "KY",
+        "CBSACode": "30460",
+        "CBSAName": "Lexington-Fayette,KY",
+        "CBSA City": "Lexington-Fayette",
+        "CBSA State Code": "KY",
         "Cities": "Lexington-Fayette",
         "MemberCities": [
             "Lexington-Fayette"
         ]
     },
     "30620": {
-        "CSBACode": "30620",
-        "CSBAName": "Lima,OH",
-        "CSBA City": "Lima",
-        "CSBA State Code": "OH",
+        "CBSACode": "30620",
+        "CBSAName": "Lima,OH",
+        "CBSA City": "Lima",
+        "CBSA State Code": "OH",
         "Cities": "Lima",
         "MemberCities": [
             "Lima"
         ]
     },
     "30700": {
-        "CSBACode": "30700",
-        "CSBAName": "Lincoln,NE",
-        "CSBA City": "Lincoln",
-        "CSBA State Code": "NE",
+        "CBSACode": "30700",
+        "CBSAName": "Lincoln,NE",
+        "CBSA City": "Lincoln",
+        "CBSA State Code": "NE",
         "Cities": "Lincoln",
         "MemberCities": [
             "Lincoln"
         ]
     },
     "30780": {
-        "CSBACode": "30780",
-        "CSBAName": "Little Rock-North Little Rock-Conway,AR",
-        "CSBA City": "Little Rock-North Little Rock-Conway",
-        "CSBA State Code": "AR",
+        "CBSACode": "30780",
+        "CBSAName": "Little Rock-North Little Rock-Conway,AR",
+        "CBSA City": "Little Rock-North Little Rock-Conway",
+        "CBSA State Code": "AR",
         "Cities": "Conway|Little Rock|North Little Rock",
         "MemberCities": [
             "Conway",
@@ -2232,40 +2232,40 @@
         ]
     },
     "30860": {
-        "CSBACode": "30860",
-        "CSBAName": "Logan,UT-ID",
-        "CSBA City": "Logan",
-        "CSBA State Code": "UT-ID",
+        "CBSACode": "30860",
+        "CBSAName": "Logan,UT-ID",
+        "CBSA City": "Logan",
+        "CBSA State Code": "UT-ID",
         "Cities": "Logan",
         "MemberCities": [
             "Logan"
         ]
     },
     "30980": {
-        "CSBACode": "30980",
-        "CSBAName": "Longview,TX",
-        "CSBA City": "Longview",
-        "CSBA State Code": "TX",
+        "CBSACode": "30980",
+        "CBSAName": "Longview,TX",
+        "CBSA City": "Longview",
+        "CBSA State Code": "TX",
         "Cities": "Longview",
         "MemberCities": [
             "Longview"
         ]
     },
     "31020": {
-        "CSBACode": "31020",
-        "CSBAName": "Longview,WA",
-        "CSBA City": "Longview",
-        "CSBA State Code": "WA",
+        "CBSACode": "31020",
+        "CBSAName": "Longview,WA",
+        "CBSA City": "Longview",
+        "CBSA State Code": "WA",
         "Cities": "Longview",
         "MemberCities": [
             "Longview"
         ]
     },
     "31080": {
-        "CSBACode": "31080",
-        "CSBAName": "Los Angeles-Long Beach-Anaheim,CA",
-        "CSBA City": "Los Angeles-Long Beach-Anaheim",
-        "CSBA State Code": "CA",
+        "CBSACode": "31080",
+        "CBSAName": "Los Angeles-Long Beach-Anaheim,CA",
+        "CBSA City": "Los Angeles-Long Beach-Anaheim",
+        "CBSA State Code": "CA",
         "Cities": "Anaheim|Arcadia|Burbank|Carson|Costa Mesa|Fountain Valley|Gardena|Glendale|Irvine|Long Beach|Los Angeles|Monterey Park|Newport Beach|Orange|Pasadena|Santa Ana|Santa Monica|Torrance|Tustin",
         "MemberCities": [
             "Anaheim",
@@ -2290,70 +2290,70 @@
         ]
     },
     "31140": {
-        "CSBACode": "31140",
-        "CSBAName": "Louisville\/Jefferson County,KY-IN",
-        "CSBA City": "Louisville\/Jefferson County",
-        "CSBA State Code": "KY-IN",
+        "CBSACode": "31140",
+        "CBSAName": "Louisville\/Jefferson County,KY-IN",
+        "CBSA City": "Louisville\/Jefferson County",
+        "CBSA State Code": "KY-IN",
         "Cities": "Louisville\/Jefferson County metro government (balance)",
         "MemberCities": [
             "Louisville\/Jefferson County metro government (balance)"
         ]
     },
     "31180": {
-        "CSBACode": "31180",
-        "CSBAName": "Lubbock,TX",
-        "CSBA City": "Lubbock",
-        "CSBA State Code": "TX",
+        "CBSACode": "31180",
+        "CBSAName": "Lubbock,TX",
+        "CBSA City": "Lubbock",
+        "CBSA State Code": "TX",
         "Cities": "Lubbock",
         "MemberCities": [
             "Lubbock"
         ]
     },
     "31340": {
-        "CSBACode": "31340",
-        "CSBAName": "Lynchburg,VA",
-        "CSBA City": "Lynchburg",
-        "CSBA State Code": "VA",
+        "CBSACode": "31340",
+        "CBSAName": "Lynchburg,VA",
+        "CBSA City": "Lynchburg",
+        "CBSA State Code": "VA",
         "Cities": "Lynchburg",
         "MemberCities": [
             "Lynchburg"
         ]
     },
     "31420": {
-        "CSBACode": "31420",
-        "CSBAName": "Macon-Bibb County,GA",
-        "CSBA City": "Macon-Bibb County",
-        "CSBA State Code": "GA",
+        "CBSACode": "31420",
+        "CBSAName": "Macon-Bibb County,GA",
+        "CBSA City": "Macon-Bibb County",
+        "CBSA State Code": "GA",
         "Cities": "Macon-Bibb County",
         "MemberCities": [
             "Macon-Bibb County"
         ]
     },
     "31460": {
-        "CSBACode": "31460",
-        "CSBAName": "Madera,CA",
-        "CSBA City": "Madera",
-        "CSBA State Code": "CA",
+        "CBSACode": "31460",
+        "CBSAName": "Madera,CA",
+        "CBSA City": "Madera",
+        "CBSA State Code": "CA",
         "Cities": "Madera",
         "MemberCities": [
             "Madera"
         ]
     },
     "31540": {
-        "CSBACode": "31540",
-        "CSBAName": "Madison,WI",
-        "CSBA City": "Madison",
-        "CSBA State Code": "WI",
+        "CBSACode": "31540",
+        "CBSAName": "Madison,WI",
+        "CBSA City": "Madison",
+        "CBSA State Code": "WI",
         "Cities": "Madison",
         "MemberCities": [
             "Madison"
         ]
     },
     "31700": {
-        "CSBACode": "31700",
-        "CSBAName": "Manchester-Nashua,NH",
-        "CSBA City": "Manchester-Nashua",
-        "CSBA State Code": "NH",
+        "CBSACode": "31700",
+        "CBSAName": "Manchester-Nashua,NH",
+        "CBSA City": "Manchester-Nashua",
+        "CBSA State Code": "NH",
         "Cities": "Manchester|Nashua",
         "MemberCities": [
             "Manchester",
@@ -2361,20 +2361,20 @@
         ]
     },
     "31740": {
-        "CSBACode": "31740",
-        "CSBAName": "Manhattan,KS",
-        "CSBA City": "Manhattan",
-        "CSBA State Code": "KS",
+        "CBSACode": "31740",
+        "CBSAName": "Manhattan,KS",
+        "CBSA City": "Manhattan",
+        "CBSA State Code": "KS",
         "Cities": "Manhattan",
         "MemberCities": [
             "Manhattan"
         ]
     },
     "31860": {
-        "CSBACode": "31860",
-        "CSBAName": "Mankato-North Mankato,MN",
-        "CSBA City": "Mankato-North Mankato",
-        "CSBA State Code": "MN",
+        "CBSACode": "31860",
+        "CBSAName": "Mankato-North Mankato,MN",
+        "CBSA City": "Mankato-North Mankato",
+        "CBSA State Code": "MN",
         "Cities": "Mankato|North Mankato",
         "MemberCities": [
             "Mankato",
@@ -2382,30 +2382,30 @@
         ]
     },
     "31900": {
-        "CSBACode": "31900",
-        "CSBAName": "Mansfield,OH",
-        "CSBA City": "Mansfield",
-        "CSBA State Code": "OH",
+        "CBSACode": "31900",
+        "CBSAName": "Mansfield,OH",
+        "CBSA City": "Mansfield",
+        "CBSA State Code": "OH",
         "Cities": "Mansfield",
         "MemberCities": [
             "Mansfield"
         ]
     },
     "32420": {
-        "CSBACode": "32420",
-        "CSBAName": "Mayag_ez,PR",
-        "CSBA City": "Mayag_ez",
-        "CSBA State Code": "PR",
+        "CBSACode": "32420",
+        "CBSAName": "Mayag_ez,PR",
+        "CBSA City": "Mayag_ez",
+        "CBSA State Code": "PR",
         "Cities": "Mayag_ez",
         "MemberCities": [
             "Mayag_ez"
         ]
     },
     "32580": {
-        "CSBACode": "32580",
-        "CSBAName": "McAllen-Edinburg-Mission,TX",
-        "CSBA City": "McAllen-Edinburg-Mission",
-        "CSBA State Code": "TX",
+        "CBSACode": "32580",
+        "CBSAName": "McAllen-Edinburg-Mission,TX",
+        "CBSA City": "McAllen-Edinburg-Mission",
+        "CBSA State Code": "TX",
         "Cities": "Edinburg|McAllen|Mission",
         "MemberCities": [
             "Edinburg",
@@ -2414,40 +2414,40 @@
         ]
     },
     "32780": {
-        "CSBACode": "32780",
-        "CSBAName": "Medford,OR",
-        "CSBA City": "Medford",
-        "CSBA State Code": "OR",
+        "CBSACode": "32780",
+        "CBSAName": "Medford,OR",
+        "CBSA City": "Medford",
+        "CBSA State Code": "OR",
         "Cities": "Medford",
         "MemberCities": [
             "Medford"
         ]
     },
     "32820": {
-        "CSBACode": "32820",
-        "CSBAName": "Memphis,TN-MS-AR",
-        "CSBA City": "Memphis",
-        "CSBA State Code": "TN-MS-A",
+        "CBSACode": "32820",
+        "CBSAName": "Memphis,TN-MS-AR",
+        "CBSA City": "Memphis",
+        "CBSA State Code": "TN-MS-A",
         "Cities": "Memphis",
         "MemberCities": [
             "Memphis"
         ]
     },
     "32900": {
-        "CSBACode": "32900",
-        "CSBAName": "Merced,CA",
-        "CSBA City": "Merced",
-        "CSBA State Code": "CA",
+        "CBSACode": "32900",
+        "CBSAName": "Merced,CA",
+        "CBSA City": "Merced",
+        "CBSA State Code": "CA",
         "Cities": "Merced",
         "MemberCities": [
             "Merced"
         ]
     },
     "33100": {
-        "CSBACode": "33100",
-        "CSBAName": "Miami-Fort Lauderdale-West Palm Beach,FL",
-        "CSBA City": "Miami-Fort Lauderdale-West Palm Beach",
-        "CSBA State Code": "FL",
+        "CBSACode": "33100",
+        "CBSAName": "Miami-Fort Lauderdale-West Palm Beach,FL",
+        "CBSA City": "Miami-Fort Lauderdale-West Palm Beach",
+        "CBSA State Code": "FL",
         "Cities": "Boca Raton|Deerfield Beach|Delray Beach|Fort Lauderdale|Jupiter|Kendall|Miami|Miami Beach|Pompano Beach|West Palm Beach",
         "MemberCities": [
             "Boca Raton",
@@ -2463,10 +2463,10 @@
         ]
     },
     "33140": {
-        "CSBACode": "33140",
-        "CSBAName": "Michigan City-La Porte,IN",
-        "CSBA City": "Michigan City-La Porte",
-        "CSBA State Code": "IN",
+        "CBSACode": "33140",
+        "CBSAName": "Michigan City-La Porte,IN",
+        "CBSA City": "Michigan City-La Porte",
+        "CBSA State Code": "IN",
         "Cities": "La Porte|Michigan City",
         "MemberCities": [
             "La Porte",
@@ -2474,30 +2474,30 @@
         ]
     },
     "33220": {
-        "CSBACode": "33220",
-        "CSBAName": "Midland,MI",
-        "CSBA City": "Midland",
-        "CSBA State Code": "MI",
+        "CBSACode": "33220",
+        "CBSAName": "Midland,MI",
+        "CBSA City": "Midland",
+        "CBSA State Code": "MI",
         "Cities": "Midland",
         "MemberCities": [
             "Midland"
         ]
     },
     "33260": {
-        "CSBACode": "33260",
-        "CSBAName": "Midland,TX",
-        "CSBA City": "Midland",
-        "CSBA State Code": "TX",
+        "CBSACode": "33260",
+        "CBSAName": "Midland,TX",
+        "CBSA City": "Midland",
+        "CBSA State Code": "TX",
         "Cities": "Midland",
         "MemberCities": [
             "Midland"
         ]
     },
     "33340": {
-        "CSBACode": "33340",
-        "CSBAName": "Milwaukee-Waukesha-West Allis,WI",
-        "CSBA City": "Milwaukee-Waukesha-West Allis",
-        "CSBA State Code": "WI",
+        "CBSACode": "33340",
+        "CBSAName": "Milwaukee-Waukesha-West Allis,WI",
+        "CBSA City": "Milwaukee-Waukesha-West Allis",
+        "CBSA State Code": "WI",
         "Cities": "Milwaukee|Waukesha|West Allis",
         "MemberCities": [
             "Milwaukee",
@@ -2506,10 +2506,10 @@
         ]
     },
     "33460": {
-        "CSBACode": "33460",
-        "CSBAName": "Minneapolis-St. Paul-Bloomington,MN-WI",
-        "CSBA City": "Minneapolis-St. Paul-Bloomington",
-        "CSBA State Code": "MN-WI",
+        "CBSACode": "33460",
+        "CBSAName": "Minneapolis-St. Paul-Bloomington,MN-WI",
+        "CBSA City": "Minneapolis-St. Paul-Bloomington",
+        "CBSA State Code": "MN-WI",
         "Cities": "Bloomington|Eagan|Eden Prairie|Minneapolis|Plymouth|St. Paul",
         "MemberCities": [
             "Bloomington",
@@ -2521,90 +2521,90 @@
         ]
     },
     "33540": {
-        "CSBACode": "33540",
-        "CSBAName": "Missoula,MT",
-        "CSBA City": "Missoula",
-        "CSBA State Code": "MT",
+        "CBSACode": "33540",
+        "CBSAName": "Missoula,MT",
+        "CBSA City": "Missoula",
+        "CBSA State Code": "MT",
         "Cities": "Missoula",
         "MemberCities": [
             "Missoula"
         ]
     },
     "33660": {
-        "CSBACode": "33660",
-        "CSBAName": "Mobile,AL",
-        "CSBA City": "Mobile",
-        "CSBA State Code": "AL",
+        "CBSACode": "33660",
+        "CBSAName": "Mobile,AL",
+        "CBSA City": "Mobile",
+        "CBSA State Code": "AL",
         "Cities": "Mobile",
         "MemberCities": [
             "Mobile"
         ]
     },
     "33700": {
-        "CSBACode": "33700",
-        "CSBAName": "Modesto,CA",
-        "CSBA City": "Modesto",
-        "CSBA State Code": "CA",
+        "CBSACode": "33700",
+        "CBSAName": "Modesto,CA",
+        "CBSA City": "Modesto",
+        "CBSA State Code": "CA",
         "Cities": "Modesto",
         "MemberCities": [
             "Modesto"
         ]
     },
     "33740": {
-        "CSBACode": "33740",
-        "CSBAName": "Monroe,LA",
-        "CSBA City": "Monroe",
-        "CSBA State Code": "LA",
+        "CBSACode": "33740",
+        "CBSAName": "Monroe,LA",
+        "CBSA City": "Monroe",
+        "CBSA State Code": "LA",
         "Cities": "Monroe",
         "MemberCities": [
             "Monroe"
         ]
     },
     "33780": {
-        "CSBACode": "33780",
-        "CSBAName": "Monroe,MI",
-        "CSBA City": "Monroe",
-        "CSBA State Code": "MI",
+        "CBSACode": "33780",
+        "CBSAName": "Monroe,MI",
+        "CBSA City": "Monroe",
+        "CBSA State Code": "MI",
         "Cities": "Monroe",
         "MemberCities": [
             "Monroe"
         ]
     },
     "33860": {
-        "CSBACode": "33860",
-        "CSBAName": "Montgomery,AL",
-        "CSBA City": "Montgomery",
-        "CSBA State Code": "AL",
+        "CBSACode": "33860",
+        "CBSAName": "Montgomery,AL",
+        "CBSA City": "Montgomery",
+        "CBSA State Code": "AL",
         "Cities": "Montgomery",
         "MemberCities": [
             "Montgomery"
         ]
     },
     "34060": {
-        "CSBACode": "34060",
-        "CSBAName": "Morgantown,WV",
-        "CSBA City": "Morgantown",
-        "CSBA State Code": "WV",
+        "CBSACode": "34060",
+        "CBSAName": "Morgantown,WV",
+        "CBSA City": "Morgantown",
+        "CBSA State Code": "WV",
         "Cities": "Morgantown",
         "MemberCities": [
             "Morgantown"
         ]
     },
     "34100": {
-        "CSBACode": "34100",
-        "CSBAName": "Morristown,TN",
-        "CSBA City": "Morristown",
-        "CSBA State Code": "TN",
+        "CBSACode": "34100",
+        "CBSAName": "Morristown,TN",
+        "CBSA City": "Morristown",
+        "CBSA State Code": "TN",
         "Cities": "Morristown",
         "MemberCities": [
             "Morristown"
         ]
     },
     "34580": {
-        "CSBACode": "34580",
-        "CSBAName": "Mount Vernon-Anacortes,WA",
-        "CSBA City": "Mount Vernon-Anacortes",
-        "CSBA State Code": "WA",
+        "CBSACode": "34580",
+        "CBSAName": "Mount Vernon-Anacortes,WA",
+        "CBSA City": "Mount Vernon-Anacortes",
+        "CBSA State Code": "WA",
         "Cities": "Anacortes|Mount Vernon",
         "MemberCities": [
             "Anacortes",
@@ -2612,30 +2612,30 @@
         ]
     },
     "34620": {
-        "CSBACode": "34620",
-        "CSBAName": "Muncie,IN",
-        "CSBA City": "Muncie",
-        "CSBA State Code": "IN",
+        "CBSACode": "34620",
+        "CBSAName": "Muncie,IN",
+        "CBSA City": "Muncie",
+        "CBSA State Code": "IN",
         "Cities": "Muncie",
         "MemberCities": [
             "Muncie"
         ]
     },
     "34740": {
-        "CSBACode": "34740",
-        "CSBAName": "Muskegon,MI",
-        "CSBA City": "Muskegon",
-        "CSBA State Code": "MI",
+        "CBSACode": "34740",
+        "CBSAName": "Muskegon,MI",
+        "CBSA City": "Muskegon",
+        "CBSA State Code": "MI",
         "Cities": "Muskegon",
         "MemberCities": [
             "Muskegon"
         ]
     },
     "34820": {
-        "CSBACode": "34820",
-        "CSBAName": "Myrtle Beach-Conway-North Myrtle Beach,SC-NC",
-        "CSBA City": "Myrtle Beach-Conway-North Myrtle Beach",
-        "CSBA State Code": "SC-NC",
+        "CBSACode": "34820",
+        "CBSAName": "Myrtle Beach-Conway-North Myrtle Beach,SC-NC",
+        "CBSA City": "Myrtle Beach-Conway-North Myrtle Beach",
+        "CBSA State Code": "SC-NC",
         "Cities": "Conway|Myrtle Beach|North Myrtle Beach",
         "MemberCities": [
             "Conway",
@@ -2644,20 +2644,20 @@
         ]
     },
     "34900": {
-        "CSBACode": "34900",
-        "CSBAName": "Napa,CA",
-        "CSBA City": "Napa",
-        "CSBA State Code": "CA",
+        "CBSACode": "34900",
+        "CBSAName": "Napa,CA",
+        "CBSA City": "Napa",
+        "CBSA State Code": "CA",
         "Cities": "Napa",
         "MemberCities": [
             "Napa"
         ]
     },
     "34940": {
-        "CSBACode": "34940",
-        "CSBAName": "Naples-Immokalee-Marco Island,FL",
-        "CSBA City": "Naples-Immokalee-Marco Island",
-        "CSBA State Code": "FL",
+        "CBSACode": "34940",
+        "CBSAName": "Naples-Immokalee-Marco Island,FL",
+        "CBSA City": "Naples-Immokalee-Marco Island",
+        "CBSA State Code": "FL",
         "Cities": "Immokalee|Marco Island|Naples",
         "MemberCities": [
             "Immokalee",
@@ -2666,10 +2666,10 @@
         ]
     },
     "34980": {
-        "CSBACode": "34980",
-        "CSBAName": "Nashville-Davidson--Murfreesboro--Franklin,TN",
-        "CSBA City": "Nashville-Davidson--Murfreesboro--Franklin",
-        "CSBA State Code": "TN",
+        "CBSACode": "34980",
+        "CBSAName": "Nashville-Davidson--Murfreesboro--Franklin,TN",
+        "CBSA City": "Nashville-Davidson--Murfreesboro--Franklin",
+        "CBSA State Code": "TN",
         "Cities": "Franklin|Murfreesboro|Nashville-Davidson metropolitan government (balance)",
         "MemberCities": [
             "Franklin",
@@ -2678,20 +2678,20 @@
         ]
     },
     "35100": {
-        "CSBACode": "35100",
-        "CSBAName": "New Bern,NC",
-        "CSBA City": "New Bern",
-        "CSBA State Code": "NC",
+        "CBSACode": "35100",
+        "CBSAName": "New Bern,NC",
+        "CBSA City": "New Bern",
+        "CBSA State Code": "NC",
         "Cities": "New Bern",
         "MemberCities": [
             "New Bern"
         ]
     },
     "35300": {
-        "CSBACode": "35300",
-        "CSBAName": "New Haven-Milford,CT",
-        "CSBA City": "New Haven-Milford",
-        "CSBA State Code": "CT",
+        "CBSACode": "35300",
+        "CBSAName": "New Haven-Milford,CT",
+        "CBSA City": "New Haven-Milford",
+        "CBSA State Code": "CT",
         "Cities": "Milford city (balance)|New Haven",
         "MemberCities": [
             "Milford city (balance)",
@@ -2699,10 +2699,10 @@
         ]
     },
     "35380": {
-        "CSBACode": "35380",
-        "CSBAName": "New Orleans-Metairie,LA",
-        "CSBA City": "New Orleans-Metairie",
-        "CSBA State Code": "LA",
+        "CBSACode": "35380",
+        "CBSAName": "New Orleans-Metairie,LA",
+        "CBSA City": "New Orleans-Metairie",
+        "CBSA State Code": "LA",
         "Cities": "Metairie|New Orleans",
         "MemberCities": [
             "Metairie",
@@ -2710,10 +2710,10 @@
         ]
     },
     "35620": {
-        "CSBACode": "35620",
-        "CSBAName": "New York-Newark-Jersey City,NY-NJ-PA",
-        "CSBA City": "New York-Newark-Jersey City",
-        "CSBA State Code": "NY-NJ-PA",
+        "CBSACode": "35620",
+        "CBSAName": "New York-Newark-Jersey City,NY-NJ-PA",
+        "CBSA City": "New York-Newark-Jersey City",
+        "CBSA State Code": "NY-NJ-PA",
         "Cities": "Jersey City|Lakewood|New Brunswick|New York|Newark|White Plains",
         "MemberCities": [
             "Jersey City",
@@ -2725,10 +2725,10 @@
         ]
     },
     "35660": {
-        "CSBACode": "35660",
-        "CSBAName": "Niles-Benton Harbor,MI",
-        "CSBA City": "Niles-Benton Harbor",
-        "CSBA State Code": "MI",
+        "CBSACode": "35660",
+        "CBSAName": "Niles-Benton Harbor,MI",
+        "CBSA City": "Niles-Benton Harbor",
+        "CBSA State Code": "MI",
         "Cities": "Benton Harbor|Niles",
         "MemberCities": [
             "Benton Harbor",
@@ -2736,10 +2736,10 @@
         ]
     },
     "35840": {
-        "CSBACode": "35840",
-        "CSBAName": "North Port-Sarasota-Bradenton,FL",
-        "CSBA City": "North Port-Sarasota-Bradenton",
-        "CSBA State Code": "FL",
+        "CBSACode": "35840",
+        "CBSAName": "North Port-Sarasota-Bradenton,FL",
+        "CBSA City": "North Port-Sarasota-Bradenton",
+        "CBSA State Code": "FL",
         "Cities": "Bradenton|North Port|Sarasota|Venice",
         "MemberCities": [
             "Bradenton",
@@ -2749,10 +2749,10 @@
         ]
     },
     "35980": {
-        "CSBACode": "35980",
-        "CSBAName": "Norwich-New London,CT",
-        "CSBA City": "Norwich-New London",
-        "CSBA State Code": "CT",
+        "CBSACode": "35980",
+        "CBSAName": "Norwich-New London,CT",
+        "CBSA City": "Norwich-New London",
+        "CBSA State Code": "CT",
         "Cities": "New London|Norwich",
         "MemberCities": [
             "New London",
@@ -2760,40 +2760,40 @@
         ]
     },
     "36100": {
-        "CSBACode": "36100",
-        "CSBAName": "Ocala,FL",
-        "CSBA City": "Ocala",
-        "CSBA State Code": "FL",
+        "CBSACode": "36100",
+        "CBSAName": "Ocala,FL",
+        "CBSA City": "Ocala",
+        "CBSA State Code": "FL",
         "Cities": "Ocala",
         "MemberCities": [
             "Ocala"
         ]
     },
     "36140": {
-        "CSBACode": "36140",
-        "CSBAName": "Ocean City,NJ",
-        "CSBA City": "Ocean City",
-        "CSBA State Code": "NJ",
+        "CBSACode": "36140",
+        "CBSAName": "Ocean City,NJ",
+        "CBSA City": "Ocean City",
+        "CBSA State Code": "NJ",
         "Cities": "Ocean City",
         "MemberCities": [
             "Ocean City"
         ]
     },
     "36220": {
-        "CSBACode": "36220",
-        "CSBAName": "Odessa,TX",
-        "CSBA City": "Odessa",
-        "CSBA State Code": "TX",
+        "CBSACode": "36220",
+        "CBSAName": "Odessa,TX",
+        "CBSA City": "Odessa",
+        "CBSA State Code": "TX",
         "Cities": "Odessa",
         "MemberCities": [
             "Odessa"
         ]
     },
     "36260": {
-        "CSBACode": "36260",
-        "CSBAName": "Ogden-Clearfield,UT",
-        "CSBA City": "Ogden-Clearfield",
-        "CSBA State Code": "UT",
+        "CBSACode": "36260",
+        "CBSAName": "Ogden-Clearfield,UT",
+        "CBSA City": "Ogden-Clearfield",
+        "CBSA State Code": "UT",
         "Cities": "Clearfield|Ogden",
         "MemberCities": [
             "Clearfield",
@@ -2801,20 +2801,20 @@
         ]
     },
     "36420": {
-        "CSBACode": "36420",
-        "CSBAName": "Oklahoma City,OK",
-        "CSBA City": "Oklahoma City",
-        "CSBA State Code": "OK",
+        "CBSACode": "36420",
+        "CBSAName": "Oklahoma City,OK",
+        "CBSA City": "Oklahoma City",
+        "CBSA State Code": "OK",
         "Cities": "Oklahoma City",
         "MemberCities": [
             "Oklahoma City"
         ]
     },
     "36500": {
-        "CSBACode": "36500",
-        "CSBAName": "Olympia-Tumwater,WA",
-        "CSBA City": "Olympia-Tumwater",
-        "CSBA State Code": "WA",
+        "CBSACode": "36500",
+        "CBSAName": "Olympia-Tumwater,WA",
+        "CBSA City": "Olympia-Tumwater",
+        "CBSA State Code": "WA",
         "Cities": "Olympia|Tumwater",
         "MemberCities": [
             "Olympia",
@@ -2822,10 +2822,10 @@
         ]
     },
     "36540": {
-        "CSBACode": "36540",
-        "CSBAName": "Omaha-Council Bluffs,NE-IA",
-        "CSBA City": "Omaha-Council Bluffs",
-        "CSBA State Code": "NE-IA",
+        "CBSACode": "36540",
+        "CBSAName": "Omaha-Council Bluffs,NE-IA",
+        "CBSA City": "Omaha-Council Bluffs",
+        "CBSA State Code": "NE-IA",
         "Cities": "Council Bluffs|Omaha",
         "MemberCities": [
             "Council Bluffs",
@@ -2833,10 +2833,10 @@
         ]
     },
     "36740": {
-        "CSBACode": "36740",
-        "CSBAName": "Orlando-Kissimmee-Sanford,FL",
-        "CSBA City": "Orlando-Kissimmee-Sanford",
-        "CSBA State Code": "FL",
+        "CBSACode": "36740",
+        "CBSAName": "Orlando-Kissimmee-Sanford,FL",
+        "CBSA City": "Orlando-Kissimmee-Sanford",
+        "CBSA State Code": "FL",
         "Cities": "Kissimmee|Orlando|Sanford",
         "MemberCities": [
             "Kissimmee",
@@ -2845,10 +2845,10 @@
         ]
     },
     "36780": {
-        "CSBACode": "36780",
-        "CSBAName": "Oshkosh-Neenah,WI",
-        "CSBA City": "Oshkosh-Neenah",
-        "CSBA State Code": "WI",
+        "CBSACode": "36780",
+        "CBSAName": "Oshkosh-Neenah,WI",
+        "CBSA City": "Oshkosh-Neenah",
+        "CBSA State Code": "WI",
         "Cities": "Neenah|Oshkosh",
         "MemberCities": [
             "Neenah",
@@ -2856,20 +2856,20 @@
         ]
     },
     "36980": {
-        "CSBACode": "36980",
-        "CSBAName": "Owensboro,KY",
-        "CSBA City": "Owensboro",
-        "CSBA State Code": "KY",
+        "CBSACode": "36980",
+        "CBSAName": "Owensboro,KY",
+        "CBSA City": "Owensboro",
+        "CBSA State Code": "KY",
         "Cities": "Owensboro",
         "MemberCities": [
             "Owensboro"
         ]
     },
     "37100": {
-        "CSBACode": "37100",
-        "CSBAName": "Oxnard-Thousand Oaks-Ventura,CA",
-        "CSBA City": "Oxnard-Thousand Oaks-Ventura",
-        "CSBA State Code": "CA",
+        "CBSACode": "37100",
+        "CBSAName": "Oxnard-Thousand Oaks-Ventura,CA",
+        "CBSA City": "Oxnard-Thousand Oaks-Ventura",
+        "CBSA State Code": "CA",
         "Cities": "Camarillo|Oxnard|San Buenaventura (Ventura)|Thousand Oaks",
         "MemberCities": [
             "Camarillo",
@@ -2879,10 +2879,10 @@
         ]
     },
     "37340": {
-        "CSBACode": "37340",
-        "CSBAName": "Palm Bay-Melbourne-Titusville,FL",
-        "CSBA City": "Palm Bay-Melbourne-Titusville",
-        "CSBA State Code": "FL",
+        "CBSACode": "37340",
+        "CBSAName": "Palm Bay-Melbourne-Titusville,FL",
+        "CBSA City": "Palm Bay-Melbourne-Titusville",
+        "CBSA State Code": "FL",
         "Cities": "Melbourne|Palm Bay|Titusville",
         "MemberCities": [
             "Melbourne",
@@ -2891,20 +2891,20 @@
         ]
     },
     "37460": {
-        "CSBACode": "37460",
-        "CSBAName": "Panama City,FL",
-        "CSBA City": "Panama City",
-        "CSBA State Code": "FL",
+        "CBSACode": "37460",
+        "CBSAName": "Panama City,FL",
+        "CBSA City": "Panama City",
+        "CBSA State Code": "FL",
         "Cities": "Panama City",
         "MemberCities": [
             "Panama City"
         ]
     },
     "37620": {
-        "CSBACode": "37620",
-        "CSBAName": "Parkersburg-Vienna,WV",
-        "CSBA City": "Parkersburg-Vienna",
-        "CSBA State Code": "WV",
+        "CBSACode": "37620",
+        "CBSAName": "Parkersburg-Vienna,WV",
+        "CBSA City": "Parkersburg-Vienna",
+        "CBSA State Code": "WV",
         "Cities": "Parkersburg|Vienna",
         "MemberCities": [
             "Parkersburg",
@@ -2912,10 +2912,10 @@
         ]
     },
     "37860": {
-        "CSBACode": "37860",
-        "CSBAName": "Pensacola-Ferry Pass-Brent,FL",
-        "CSBA City": "Pensacola-Ferry Pass-Brent",
-        "CSBA State Code": "FL",
+        "CBSACode": "37860",
+        "CBSAName": "Pensacola-Ferry Pass-Brent,FL",
+        "CBSA City": "Pensacola-Ferry Pass-Brent",
+        "CBSA State Code": "FL",
         "Cities": "Brent|Ferry Pass|Pensacola",
         "MemberCities": [
             "Brent",
@@ -2924,20 +2924,20 @@
         ]
     },
     "37900": {
-        "CSBACode": "37900",
-        "CSBAName": "Peoria,IL",
-        "CSBA City": "Peoria",
-        "CSBA State Code": "IL",
+        "CBSACode": "37900",
+        "CBSAName": "Peoria,IL",
+        "CBSA City": "Peoria",
+        "CBSA State Code": "IL",
         "Cities": "Peoria",
         "MemberCities": [
             "Peoria"
         ]
     },
     "37980": {
-        "CSBACode": "37980",
-        "CSBAName": "Philadelphia-Camden-Wilmington,PA-NJ-DE-MD",
-        "CSBA City": "Philadelphia-Camden-Wilmington",
-        "CSBA State Code": "PA-NJ-DE-MD",
+        "CBSACode": "37980",
+        "CBSAName": "Philadelphia-Camden-Wilmington,PA-NJ-DE-MD",
+        "CBSA City": "Philadelphia-Camden-Wilmington",
+        "CBSA State Code": "PA-NJ-DE-MD",
         "Cities": "Camden|Philadelphia|Wilmington",
         "MemberCities": [
             "Camden",
@@ -2946,10 +2946,10 @@
         ]
     },
     "38060": {
-        "CSBACode": "38060",
-        "CSBAName": "Phoenix-Mesa-Scottsdale,AZ",
-        "CSBA City": "Phoenix-Mesa-Scottsdale",
-        "CSBA State Code": "AZ",
+        "CBSACode": "38060",
+        "CBSAName": "Phoenix-Mesa-Scottsdale,AZ",
+        "CBSA City": "Phoenix-Mesa-Scottsdale",
+        "CBSA State Code": "AZ",
         "Cities": "Mesa|Phoenix|Scottsdale|Tempe",
         "MemberCities": [
             "Mesa",
@@ -2959,60 +2959,60 @@
         ]
     },
     "38220": {
-        "CSBACode": "38220",
-        "CSBAName": "Pine Bluff,AR",
-        "CSBA City": "Pine Bluff",
-        "CSBA State Code": "AR",
+        "CBSACode": "38220",
+        "CBSAName": "Pine Bluff,AR",
+        "CBSA City": "Pine Bluff",
+        "CBSA State Code": "AR",
         "Cities": "Pine Bluff",
         "MemberCities": [
             "Pine Bluff"
         ]
     },
     "38300": {
-        "CSBACode": "38300",
-        "CSBAName": "Pittsburgh,PA",
-        "CSBA City": "Pittsburgh",
-        "CSBA State Code": "PA",
+        "CBSACode": "38300",
+        "CBSAName": "Pittsburgh,PA",
+        "CBSA City": "Pittsburgh",
+        "CBSA State Code": "PA",
         "Cities": "Pittsburgh",
         "MemberCities": [
             "Pittsburgh"
         ]
     },
     "38340": {
-        "CSBACode": "38340",
-        "CSBAName": "Pittsfield,MA",
-        "CSBA City": "Pittsfield",
-        "CSBA State Code": "MA",
+        "CBSACode": "38340",
+        "CBSAName": "Pittsfield,MA",
+        "CBSA City": "Pittsfield",
+        "CBSA State Code": "MA",
         "Cities": "Pittsfield",
         "MemberCities": [
             "Pittsfield"
         ]
     },
     "38540": {
-        "CSBACode": "38540",
-        "CSBAName": "Pocatello,ID",
-        "CSBA City": "Pocatello",
-        "CSBA State Code": "ID",
+        "CBSACode": "38540",
+        "CBSAName": "Pocatello,ID",
+        "CBSA City": "Pocatello",
+        "CBSA State Code": "ID",
         "Cities": "Pocatello",
         "MemberCities": [
             "Pocatello"
         ]
     },
     "38660": {
-        "CSBACode": "38660",
-        "CSBAName": "Ponce,PR",
-        "CSBA City": "Ponce",
-        "CSBA State Code": "PR",
+        "CBSACode": "38660",
+        "CBSAName": "Ponce,PR",
+        "CBSA City": "Ponce",
+        "CBSA State Code": "PR",
         "Cities": "Ponce",
         "MemberCities": [
             "Ponce"
         ]
     },
     "38860": {
-        "CSBACode": "38860",
-        "CSBAName": "Portland-South Portland,ME",
-        "CSBA City": "Portland-South Portland",
-        "CSBA State Code": "ME",
+        "CBSACode": "38860",
+        "CBSAName": "Portland-South Portland,ME",
+        "CBSA City": "Portland-South Portland",
+        "CBSA State Code": "ME",
         "Cities": "Portland|South Portland",
         "MemberCities": [
             "Portland",
@@ -3020,10 +3020,10 @@
         ]
     },
     "38900": {
-        "CSBACode": "38900",
-        "CSBAName": "Portland-Vancouver-Hillsboro,OR-WA",
-        "CSBA City": "Portland-Vancouver-Hillsboro",
-        "CSBA State Code": "OR-WA",
+        "CBSACode": "38900",
+        "CBSAName": "Portland-Vancouver-Hillsboro,OR-WA",
+        "CBSA City": "Portland-Vancouver-Hillsboro",
+        "CBSA State Code": "OR-WA",
         "Cities": "Beaverton|Hillsboro|Portland|Vancouver",
         "MemberCities": [
             "Beaverton",
@@ -3033,30 +3033,30 @@
         ]
     },
     "38940": {
-        "CSBACode": "38940",
-        "CSBAName": "Port St. Lucie,FL",
-        "CSBA City": "Port St. Lucie",
-        "CSBA State Code": "FL",
+        "CBSACode": "38940",
+        "CBSAName": "Port St. Lucie,FL",
+        "CBSA City": "Port St. Lucie",
+        "CBSA State Code": "FL",
         "Cities": "Port St. Lucie",
         "MemberCities": [
             "Port St. Lucie"
         ]
     },
     "39140": {
-        "CSBACode": "39140",
-        "CSBAName": "Prescott,AZ",
-        "CSBA City": "Prescott",
-        "CSBA State Code": "AZ",
+        "CBSACode": "39140",
+        "CBSAName": "Prescott,AZ",
+        "CBSA City": "Prescott",
+        "CBSA State Code": "AZ",
         "Cities": "Prescott",
         "MemberCities": [
             "Prescott"
         ]
     },
     "39300": {
-        "CSBACode": "39300",
-        "CSBAName": "Providence-Warwick,RI-MA",
-        "CSBA City": "Providence-Warwick",
-        "CSBA State Code": "RI-MA",
+        "CBSACode": "39300",
+        "CBSAName": "Providence-Warwick,RI-MA",
+        "CBSA City": "Providence-Warwick",
+        "CBSA State Code": "RI-MA",
         "Cities": "Providence|Warwick",
         "MemberCities": [
             "Providence",
@@ -3064,10 +3064,10 @@
         ]
     },
     "39340": {
-        "CSBACode": "39340",
-        "CSBAName": "Provo-Orem,UT",
-        "CSBA City": "Provo-Orem",
-        "CSBA State Code": "UT",
+        "CBSACode": "39340",
+        "CBSAName": "Provo-Orem,UT",
+        "CBSA City": "Provo-Orem",
+        "CBSA State Code": "UT",
         "Cities": "Orem|Provo",
         "MemberCities": [
             "Orem",
@@ -3075,100 +3075,100 @@
         ]
     },
     "39380": {
-        "CSBACode": "39380",
-        "CSBAName": "Pueblo,CO",
-        "CSBA City": "Pueblo",
-        "CSBA State Code": "CO",
+        "CBSACode": "39380",
+        "CBSAName": "Pueblo,CO",
+        "CBSA City": "Pueblo",
+        "CBSA State Code": "CO",
         "Cities": "Pueblo",
         "MemberCities": [
             "Pueblo"
         ]
     },
     "39460": {
-        "CSBACode": "39460",
-        "CSBAName": "Punta Gorda,FL",
-        "CSBA City": "Punta Gorda",
-        "CSBA State Code": "FL",
+        "CBSACode": "39460",
+        "CBSAName": "Punta Gorda,FL",
+        "CBSA City": "Punta Gorda",
+        "CBSA State Code": "FL",
         "Cities": "Punta Gorda",
         "MemberCities": [
             "Punta Gorda"
         ]
     },
     "39540": {
-        "CSBACode": "39540",
-        "CSBAName": "Racine,WI",
-        "CSBA City": "Racine",
-        "CSBA State Code": "WI",
+        "CBSACode": "39540",
+        "CBSAName": "Racine,WI",
+        "CBSA City": "Racine",
+        "CBSA State Code": "WI",
         "Cities": "Racine",
         "MemberCities": [
             "Racine"
         ]
     },
     "39580": {
-        "CSBACode": "39580",
-        "CSBAName": "Raleigh,NC",
-        "CSBA City": "Raleigh",
-        "CSBA State Code": "NC",
+        "CBSACode": "39580",
+        "CBSAName": "Raleigh,NC",
+        "CBSA City": "Raleigh",
+        "CBSA State Code": "NC",
         "Cities": "Raleigh",
         "MemberCities": [
             "Raleigh"
         ]
     },
     "39660": {
-        "CSBACode": "39660",
-        "CSBAName": "Rapid City,SD",
-        "CSBA City": "Rapid City",
-        "CSBA State Code": "SD",
+        "CBSACode": "39660",
+        "CBSAName": "Rapid City,SD",
+        "CBSA City": "Rapid City",
+        "CBSA State Code": "SD",
         "Cities": "Rapid City",
         "MemberCities": [
             "Rapid City"
         ]
     },
     "39740": {
-        "CSBACode": "39740",
-        "CSBAName": "Reading,PA",
-        "CSBA City": "Reading",
-        "CSBA State Code": "PA",
+        "CBSACode": "39740",
+        "CBSAName": "Reading,PA",
+        "CBSA City": "Reading",
+        "CBSA State Code": "PA",
         "Cities": "Reading",
         "MemberCities": [
             "Reading"
         ]
     },
     "39820": {
-        "CSBACode": "39820",
-        "CSBAName": "Redding,CA",
-        "CSBA City": "Redding",
-        "CSBA State Code": "CA",
+        "CBSACode": "39820",
+        "CBSAName": "Redding,CA",
+        "CBSA City": "Redding",
+        "CBSA State Code": "CA",
         "Cities": "Redding",
         "MemberCities": [
             "Redding"
         ]
     },
     "39900": {
-        "CSBACode": "39900",
-        "CSBAName": "Reno,NV",
-        "CSBA City": "Reno",
-        "CSBA State Code": "NV",
+        "CBSACode": "39900",
+        "CBSAName": "Reno,NV",
+        "CBSA City": "Reno",
+        "CBSA State Code": "NV",
         "Cities": "Reno",
         "MemberCities": [
             "Reno"
         ]
     },
     "40060": {
-        "CSBACode": "40060",
-        "CSBAName": "Richmond,VA",
-        "CSBA City": "Richmond",
-        "CSBA State Code": "VA",
+        "CBSACode": "40060",
+        "CBSAName": "Richmond,VA",
+        "CBSA City": "Richmond",
+        "CBSA State Code": "VA",
         "Cities": "Richmond",
         "MemberCities": [
             "Richmond"
         ]
     },
     "40140": {
-        "CSBACode": "40140",
-        "CSBAName": "Riverside-San Bernardino-Ontario,CA",
-        "CSBA City": "Riverside-San Bernardino-Ontario",
-        "CSBA State Code": "CA",
+        "CBSACode": "40140",
+        "CBSAName": "Riverside-San Bernardino-Ontario,CA",
+        "CBSA City": "Riverside-San Bernardino-Ontario",
+        "CBSA State Code": "CA",
         "Cities": "Chino|Corona|Ontario|Redlands|Riverside|San Bernardino|Temecula|Victorville",
         "MemberCities": [
             "Chino",
@@ -3182,70 +3182,70 @@
         ]
     },
     "40220": {
-        "CSBACode": "40220",
-        "CSBAName": "Roanoke,VA",
-        "CSBA City": "Roanoke",
-        "CSBA State Code": "VA",
+        "CBSACode": "40220",
+        "CBSAName": "Roanoke,VA",
+        "CBSA City": "Roanoke",
+        "CBSA State Code": "VA",
         "Cities": "Roanoke",
         "MemberCities": [
             "Roanoke"
         ]
     },
     "40340": {
-        "CSBACode": "40340",
-        "CSBAName": "Rochester,MN",
-        "CSBA City": "Rochester",
-        "CSBA State Code": "MN",
+        "CBSACode": "40340",
+        "CBSAName": "Rochester,MN",
+        "CBSA City": "Rochester",
+        "CBSA State Code": "MN",
         "Cities": "Rochester",
         "MemberCities": [
             "Rochester"
         ]
     },
     "40380": {
-        "CSBACode": "40380",
-        "CSBAName": "Rochester,NY",
-        "CSBA City": "Rochester",
-        "CSBA State Code": "NY",
+        "CBSACode": "40380",
+        "CBSAName": "Rochester,NY",
+        "CBSA City": "Rochester",
+        "CBSA State Code": "NY",
         "Cities": "Rochester",
         "MemberCities": [
             "Rochester"
         ]
     },
     "40420": {
-        "CSBACode": "40420",
-        "CSBAName": "Rockford,IL",
-        "CSBA City": "Rockford",
-        "CSBA State Code": "IL",
+        "CBSACode": "40420",
+        "CBSAName": "Rockford,IL",
+        "CBSA City": "Rockford",
+        "CBSA State Code": "IL",
         "Cities": "Rockford",
         "MemberCities": [
             "Rockford"
         ]
     },
     "40580": {
-        "CSBACode": "40580",
-        "CSBAName": "Rocky Mount,NC",
-        "CSBA City": "Rocky Mount",
-        "CSBA State Code": "NC",
+        "CBSACode": "40580",
+        "CBSAName": "Rocky Mount,NC",
+        "CBSA City": "Rocky Mount",
+        "CBSA State Code": "NC",
         "Cities": "Rocky Mount",
         "MemberCities": [
             "Rocky Mount"
         ]
     },
     "40660": {
-        "CSBACode": "40660",
-        "CSBAName": "Rome,GA",
-        "CSBA City": "Rome",
-        "CSBA State Code": "GA",
+        "CBSACode": "40660",
+        "CBSAName": "Rome,GA",
+        "CBSA City": "Rome",
+        "CBSA State Code": "GA",
         "Cities": "Rome",
         "MemberCities": [
             "Rome"
         ]
     },
     "40900": {
-        "CSBACode": "40900",
-        "CSBAName": "Sacramento--Roseville--Arden-Arcade,CA",
-        "CSBA City": "Sacramento--Roseville--Arden-Arcade",
-        "CSBA State Code": "CA",
+        "CBSACode": "40900",
+        "CBSAName": "Sacramento--Roseville--Arden-Arcade,CA",
+        "CBSA City": "Sacramento--Roseville--Arden-Arcade",
+        "CBSA State Code": "CA",
         "Cities": "Arden-Arcade|Folsom|Rancho Cordova|Roseville|Sacramento",
         "MemberCities": [
             "Arden-Arcade",
@@ -3256,50 +3256,50 @@
         ]
     },
     "40980": {
-        "CSBACode": "40980",
-        "CSBAName": "Saginaw,MI",
-        "CSBA City": "Saginaw",
-        "CSBA State Code": "MI",
+        "CBSACode": "40980",
+        "CBSAName": "Saginaw,MI",
+        "CBSA City": "Saginaw",
+        "CBSA State Code": "MI",
         "Cities": "Saginaw",
         "MemberCities": [
             "Saginaw"
         ]
     },
     "41060": {
-        "CSBACode": "41060",
-        "CSBAName": "St. Cloud,MN",
-        "CSBA City": "St. Cloud",
-        "CSBA State Code": "MN",
+        "CBSACode": "41060",
+        "CBSAName": "St. Cloud,MN",
+        "CBSA City": "St. Cloud",
+        "CBSA State Code": "MN",
         "Cities": "St. Cloud",
         "MemberCities": [
             "St. Cloud"
         ]
     },
     "41100": {
-        "CSBACode": "41100",
-        "CSBAName": "St. George,UT",
-        "CSBA City": "St. George",
-        "CSBA State Code": "UT",
+        "CBSACode": "41100",
+        "CBSAName": "St. George,UT",
+        "CBSA City": "St. George",
+        "CBSA State Code": "UT",
         "Cities": "St. George",
         "MemberCities": [
             "St. George"
         ]
     },
     "41140": {
-        "CSBACode": "41140",
-        "CSBAName": "St. Joseph,MO-KS",
-        "CSBA City": "St. Joseph",
-        "CSBA State Code": "MO-KS",
+        "CBSACode": "41140",
+        "CBSAName": "St. Joseph,MO-KS",
+        "CBSA City": "St. Joseph",
+        "CBSA State Code": "MO-KS",
         "Cities": "St. Joseph",
         "MemberCities": [
             "St. Joseph"
         ]
     },
     "41180": {
-        "CSBACode": "41180",
-        "CSBAName": "St. Louis,MO-IL",
-        "CSBA City": "St. Louis",
-        "CSBA State Code": "MO-IL",
+        "CBSACode": "41180",
+        "CBSAName": "St. Louis,MO-IL",
+        "CBSA City": "St. Louis",
+        "CBSA State Code": "MO-IL",
         "Cities": "St. Charles|St. Louis",
         "MemberCities": [
             "St. Charles",
@@ -3307,60 +3307,60 @@
         ]
     },
     "41420": {
-        "CSBACode": "41420",
-        "CSBAName": "Salem,OR",
-        "CSBA City": "Salem",
-        "CSBA State Code": "OR",
+        "CBSACode": "41420",
+        "CBSAName": "Salem,OR",
+        "CBSA City": "Salem",
+        "CBSA State Code": "OR",
         "Cities": "Salem",
         "MemberCities": [
             "Salem"
         ]
     },
     "41500": {
-        "CSBACode": "41500",
-        "CSBAName": "Salinas,CA",
-        "CSBA City": "Salinas",
-        "CSBA State Code": "CA",
+        "CBSACode": "41500",
+        "CBSAName": "Salinas,CA",
+        "CBSA City": "Salinas",
+        "CBSA State Code": "CA",
         "Cities": "Salinas",
         "MemberCities": [
             "Salinas"
         ]
     },
     "41540": {
-        "CSBACode": "41540",
-        "CSBAName": "Salisbury,MD-DE",
-        "CSBA City": "Salisbury",
-        "CSBA State Code": "MD-DE",
+        "CBSACode": "41540",
+        "CBSAName": "Salisbury,MD-DE",
+        "CBSA City": "Salisbury",
+        "CBSA State Code": "MD-DE",
         "Cities": "Salisbury",
         "MemberCities": [
             "Salisbury"
         ]
     },
     "41620": {
-        "CSBACode": "41620",
-        "CSBAName": "Salt Lake City,UT",
-        "CSBA City": "Salt Lake City",
-        "CSBA State Code": "UT",
+        "CBSACode": "41620",
+        "CBSAName": "Salt Lake City,UT",
+        "CBSA City": "Salt Lake City",
+        "CBSA State Code": "UT",
         "Cities": "Salt Lake City",
         "MemberCities": [
             "Salt Lake City"
         ]
     },
     "41660": {
-        "CSBACode": "41660",
-        "CSBAName": "San Angelo,TX",
-        "CSBA City": "San Angelo",
-        "CSBA State Code": "TX",
+        "CBSACode": "41660",
+        "CBSAName": "San Angelo,TX",
+        "CBSA City": "San Angelo",
+        "CBSA State Code": "TX",
         "Cities": "San Angelo",
         "MemberCities": [
             "San Angelo"
         ]
     },
     "41700": {
-        "CSBACode": "41700",
-        "CSBAName": "San Antonio-New Braunfels,TX",
-        "CSBA City": "San Antonio-New Braunfels",
-        "CSBA State Code": "TX",
+        "CBSACode": "41700",
+        "CBSAName": "San Antonio-New Braunfels,TX",
+        "CBSA City": "San Antonio-New Braunfels",
+        "CBSA State Code": "TX",
         "Cities": "New Braunfels|San Antonio",
         "MemberCities": [
             "New Braunfels",
@@ -3368,10 +3368,10 @@
         ]
     },
     "41740": {
-        "CSBACode": "41740",
-        "CSBAName": "San Diego-Carlsbad,CA",
-        "CSBA City": "San Diego-Carlsbad",
-        "CSBA State Code": "CA",
+        "CBSACode": "41740",
+        "CBSAName": "San Diego-Carlsbad,CA",
+        "CBSA City": "San Diego-Carlsbad",
+        "CBSA State Code": "CA",
         "Cities": "Carlsbad|San Diego",
         "MemberCities": [
             "Carlsbad",
@@ -3379,10 +3379,10 @@
         ]
     },
     "41860": {
-        "CSBACode": "41860",
-        "CSBAName": "San Francisco-Oakland-Hayward,CA",
-        "CSBA City": "San Francisco-Oakland-Hayward",
-        "CSBA State Code": "CA",
+        "CBSACode": "41860",
+        "CBSAName": "San Francisco-Oakland-Hayward,CA",
+        "CBSA City": "San Francisco-Oakland-Hayward",
+        "CBSA State Code": "CA",
         "Cities": "Berkeley|Hayward|Oakland|Pleasanton|Redwood City|San Francisco|San Leandro|San Rafael|San Ramon|South San Francisco|Walnut Creek",
         "MemberCities": [
             "Berkeley",
@@ -3399,20 +3399,20 @@
         ]
     },
     "41900": {
-        "CSBACode": "41900",
-        "CSBAName": "San Germn,PR",
-        "CSBA City": "San Germn",
-        "CSBA State Code": "PR",
+        "CBSACode": "41900",
+        "CBSAName": "San Germn,PR",
+        "CBSA City": "San Germn",
+        "CBSA State Code": "PR",
         "Cities": "San Germn",
         "MemberCities": [
             "San Germn"
         ]
     },
     "41940": {
-        "CSBACode": "41940",
-        "CSBAName": "San Jose-Sunnyvale-Santa Clara,CA",
-        "CSBA City": "San Jose-Sunnyvale-Santa Clara",
-        "CSBA State Code": "CA",
+        "CBSACode": "41940",
+        "CBSAName": "San Jose-Sunnyvale-Santa Clara,CA",
+        "CBSA City": "San Jose-Sunnyvale-Santa Clara",
+        "CBSA State Code": "CA",
         "Cities": "Cupertino|Milpitas|Mountain View|Palo Alto|San Jose|Santa Clara|Sunnyvale",
         "MemberCities": [
             "Cupertino",
@@ -3425,10 +3425,10 @@
         ]
     },
     "41980": {
-        "CSBACode": "41980",
-        "CSBAName": "San Juan-Carolina-Caguas,PR",
-        "CSBA City": "San Juan-Carolina-Caguas",
-        "CSBA State Code": "PR",
+        "CBSACode": "41980",
+        "CBSAName": "San Juan-Carolina-Caguas,PR",
+        "CBSA City": "San Juan-Carolina-Caguas",
+        "CBSA State Code": "PR",
         "Cities": "Caguas|Carolina|Guaynabo|San Juan",
         "MemberCities": [
             "Caguas",
@@ -3438,10 +3438,10 @@
         ]
     },
     "42020": {
-        "CSBACode": "42020",
-        "CSBAName": "San Luis Obispo-Paso Robles-Arroyo Grande,CA",
-        "CSBA City": "San Luis Obispo-Paso Robles-Arroyo Grande",
-        "CSBA State Code": "CA",
+        "CBSACode": "42020",
+        "CBSAName": "San Luis Obispo-Paso Robles-Arroyo Grande,CA",
+        "CBSA City": "San Luis Obispo-Paso Robles-Arroyo Grande",
+        "CBSA State Code": "CA",
         "Cities": "Arroyo Grande|El Paso de Robles (Paso Robles)|San Luis Obispo",
         "MemberCities": [
             "Arroyo Grande",
@@ -3450,10 +3450,10 @@
         ]
     },
     "42100": {
-        "CSBACode": "42100",
-        "CSBAName": "Santa Cruz-Watsonville,CA",
-        "CSBA City": "Santa Cruz-Watsonville",
-        "CSBA State Code": "CA",
+        "CBSACode": "42100",
+        "CBSAName": "Santa Cruz-Watsonville,CA",
+        "CBSA City": "Santa Cruz-Watsonville",
+        "CBSA State Code": "CA",
         "Cities": "Santa Cruz|Watsonville",
         "MemberCities": [
             "Santa Cruz",
@@ -3461,20 +3461,20 @@
         ]
     },
     "42140": {
-        "CSBACode": "42140",
-        "CSBAName": "Santa Fe,NM",
-        "CSBA City": "Santa Fe",
-        "CSBA State Code": "NM",
+        "CBSACode": "42140",
+        "CBSAName": "Santa Fe,NM",
+        "CBSA City": "Santa Fe",
+        "CBSA State Code": "NM",
         "Cities": "Santa Fe",
         "MemberCities": [
             "Santa Fe"
         ]
     },
     "42200": {
-        "CSBACode": "42200",
-        "CSBAName": "Santa Maria-Santa Barbara,CA",
-        "CSBA City": "Santa Maria-Santa Barbara",
-        "CSBA State Code": "CA",
+        "CBSACode": "42200",
+        "CBSAName": "Santa Maria-Santa Barbara,CA",
+        "CBSA City": "Santa Maria-Santa Barbara",
+        "CBSA State Code": "CA",
         "Cities": "Santa Barbara|Santa Maria",
         "MemberCities": [
             "Santa Barbara",
@@ -3482,30 +3482,30 @@
         ]
     },
     "42220": {
-        "CSBACode": "42220",
-        "CSBAName": "Santa Rosa,CA",
-        "CSBA City": "Santa Rosa",
-        "CSBA State Code": "CA",
+        "CBSACode": "42220",
+        "CBSAName": "Santa Rosa,CA",
+        "CBSA City": "Santa Rosa",
+        "CBSA State Code": "CA",
         "Cities": "Santa Rosa",
         "MemberCities": [
             "Santa Rosa"
         ]
     },
     "42340": {
-        "CSBACode": "42340",
-        "CSBAName": "Savannah,GA",
-        "CSBA City": "Savannah",
-        "CSBA State Code": "GA",
+        "CBSACode": "42340",
+        "CBSAName": "Savannah,GA",
+        "CBSA City": "Savannah",
+        "CBSA State Code": "GA",
         "Cities": "Savannah",
         "MemberCities": [
             "Savannah"
         ]
     },
     "42540": {
-        "CSBACode": "42540",
-        "CSBAName": "Scranton--Wilkes-Barre--Hazleton,PA",
-        "CSBA City": "Scranton--Wilkes-Barre--Hazleton",
-        "CSBA State Code": "PA",
+        "CBSACode": "42540",
+        "CBSAName": "Scranton--Wilkes-Barre--Hazleton,PA",
+        "CBSA City": "Scranton--Wilkes-Barre--Hazleton",
+        "CBSA State Code": "PA",
         "Cities": "Hazleton|Scranton|Wilkes-Barre",
         "MemberCities": [
             "Hazleton",
@@ -3514,10 +3514,10 @@
         ]
     },
     "42660": {
-        "CSBACode": "42660",
-        "CSBAName": "Seattle-Tacoma-Bellevue,WA",
-        "CSBA City": "Seattle-Tacoma-Bellevue",
-        "CSBA State Code": "WA",
+        "CBSACode": "42660",
+        "CBSAName": "Seattle-Tacoma-Bellevue,WA",
+        "CBSA City": "Seattle-Tacoma-Bellevue",
+        "CBSA State Code": "WA",
         "Cities": "Auburn|Bellevue|Everett|Kent|Lakewood|Redmond|Renton|Seattle|Tacoma",
         "MemberCities": [
             "Auburn",
@@ -3532,10 +3532,10 @@
         ]
     },
     "42680": {
-        "CSBACode": "42680",
-        "CSBAName": "Sebastian-Vero Beach,FL",
-        "CSBA City": "Sebastian-Vero Beach",
-        "CSBA State Code": "FL",
+        "CBSACode": "42680",
+        "CBSAName": "Sebastian-Vero Beach,FL",
+        "CBSA City": "Sebastian-Vero Beach",
+        "CBSA State Code": "FL",
         "Cities": "Sebastian|Vero Beach",
         "MemberCities": [
             "Sebastian",
@@ -3543,30 +3543,30 @@
         ]
     },
     "42700": {
-        "CSBACode": "42700",
-        "CSBAName": "Sebring,FL",
-        "CSBA City": "Sebring",
-        "CSBA State Code": "FL",
+        "CBSACode": "42700",
+        "CBSAName": "Sebring,FL",
+        "CBSA City": "Sebring",
+        "CBSA State Code": "FL",
         "Cities": "Sebring",
         "MemberCities": [
             "Sebring"
         ]
     },
     "43100": {
-        "CSBACode": "43100",
-        "CSBAName": "Sheboygan,WI",
-        "CSBA City": "Sheboygan",
-        "CSBA State Code": "WI",
+        "CBSACode": "43100",
+        "CBSAName": "Sheboygan,WI",
+        "CBSA City": "Sheboygan",
+        "CBSA State Code": "WI",
         "Cities": "Sheboygan",
         "MemberCities": [
             "Sheboygan"
         ]
     },
     "43300": {
-        "CSBACode": "43300",
-        "CSBAName": "Sherman-Denison,TX",
-        "CSBA City": "Sherman-Denison",
-        "CSBA State Code": "TX",
+        "CBSACode": "43300",
+        "CBSAName": "Sherman-Denison,TX",
+        "CBSA City": "Sherman-Denison",
+        "CBSA State Code": "TX",
         "Cities": "Denison|Sherman",
         "MemberCities": [
             "Denison",
@@ -3574,10 +3574,10 @@
         ]
     },
     "43340": {
-        "CSBACode": "43340",
-        "CSBAName": "Shreveport-Bossier City,LA",
-        "CSBA City": "Shreveport-Bossier City",
-        "CSBA State Code": "LA",
+        "CBSACode": "43340",
+        "CBSAName": "Shreveport-Bossier City,LA",
+        "CBSA City": "Shreveport-Bossier City",
+        "CBSA State Code": "LA",
         "Cities": "Bossier City|Shreveport",
         "MemberCities": [
             "Bossier City",
@@ -3585,10 +3585,10 @@
         ]
     },
     "43420": {
-        "CSBACode": "43420",
-        "CSBAName": "Sierra Vista-Douglas,AZ",
-        "CSBA City": "Sierra Vista-Douglas",
-        "CSBA State Code": "AZ",
+        "CBSACode": "43420",
+        "CBSAName": "Sierra Vista-Douglas,AZ",
+        "CBSA City": "Sierra Vista-Douglas",
+        "CBSA State Code": "AZ",
         "Cities": "Douglas|Sierra Vista",
         "MemberCities": [
             "Douglas",
@@ -3596,30 +3596,30 @@
         ]
     },
     "43580": {
-        "CSBACode": "43580",
-        "CSBAName": "Sioux City,IA-NE-SD",
-        "CSBA City": "Sioux City",
-        "CSBA State Code": "IA-NE-SD",
+        "CBSACode": "43580",
+        "CBSAName": "Sioux City,IA-NE-SD",
+        "CBSA City": "Sioux City",
+        "CBSA State Code": "IA-NE-SD",
         "Cities": "Sioux City",
         "MemberCities": [
             "Sioux City"
         ]
     },
     "43620": {
-        "CSBACode": "43620",
-        "CSBAName": "Sioux Falls,SD",
-        "CSBA City": "Sioux Falls",
-        "CSBA State Code": "SD",
+        "CBSACode": "43620",
+        "CBSAName": "Sioux Falls,SD",
+        "CBSA City": "Sioux Falls",
+        "CBSA State Code": "SD",
         "Cities": "Sioux Falls",
         "MemberCities": [
             "Sioux Falls"
         ]
     },
     "43780": {
-        "CSBACode": "43780",
-        "CSBAName": "South Bend-Mishawaka,IN-MI",
-        "CSBA City": "South Bend-Mishawaka",
-        "CSBA State Code": "IN-MI",
+        "CBSACode": "43780",
+        "CBSAName": "South Bend-Mishawaka,IN-MI",
+        "CBSA City": "South Bend-Mishawaka",
+        "CBSA State Code": "IN-MI",
         "Cities": "Mishawaka|South Bend",
         "MemberCities": [
             "Mishawaka",
@@ -3627,20 +3627,20 @@
         ]
     },
     "43900": {
-        "CSBACode": "43900",
-        "CSBAName": "Spartanburg,SC",
-        "CSBA City": "Spartanburg",
-        "CSBA State Code": "SC",
+        "CBSACode": "43900",
+        "CBSAName": "Spartanburg,SC",
+        "CBSA City": "Spartanburg",
+        "CBSA State Code": "SC",
         "Cities": "Spartanburg",
         "MemberCities": [
             "Spartanburg"
         ]
     },
     "44060": {
-        "CSBACode": "44060",
-        "CSBAName": "Spokane-Spokane Valley,WA",
-        "CSBA City": "Spokane-Spokane Valley",
-        "CSBA State Code": "WA",
+        "CBSACode": "44060",
+        "CBSAName": "Spokane-Spokane Valley,WA",
+        "CBSA City": "Spokane-Spokane Valley",
+        "CBSA State Code": "WA",
         "Cities": "Spokane|Spokane Valley",
         "MemberCities": [
             "Spokane",
@@ -3648,60 +3648,60 @@
         ]
     },
     "44100": {
-        "CSBACode": "44100",
-        "CSBAName": "Springfield,IL",
-        "CSBA City": "Springfield",
-        "CSBA State Code": "IL",
+        "CBSACode": "44100",
+        "CBSAName": "Springfield,IL",
+        "CBSA City": "Springfield",
+        "CBSA State Code": "IL",
         "Cities": "Springfield",
         "MemberCities": [
             "Springfield"
         ]
     },
     "44140": {
-        "CSBACode": "44140",
-        "CSBAName": "Springfield,MA",
-        "CSBA City": "Springfield",
-        "CSBA State Code": "MA",
+        "CBSACode": "44140",
+        "CBSAName": "Springfield,MA",
+        "CBSA City": "Springfield",
+        "CBSA State Code": "MA",
         "Cities": "Springfield",
         "MemberCities": [
             "Springfield"
         ]
     },
     "44180": {
-        "CSBACode": "44180",
-        "CSBAName": "Springfield,MO",
-        "CSBA City": "Springfield",
-        "CSBA State Code": "MO",
+        "CBSACode": "44180",
+        "CBSAName": "Springfield,MO",
+        "CBSA City": "Springfield",
+        "CBSA State Code": "MO",
         "Cities": "Springfield",
         "MemberCities": [
             "Springfield"
         ]
     },
     "44220": {
-        "CSBACode": "44220",
-        "CSBAName": "Springfield,OH",
-        "CSBA City": "Springfield",
-        "CSBA State Code": "OH",
+        "CBSACode": "44220",
+        "CBSAName": "Springfield,OH",
+        "CBSA City": "Springfield",
+        "CBSA State Code": "OH",
         "Cities": "Springfield",
         "MemberCities": [
             "Springfield"
         ]
     },
     "44300": {
-        "CSBACode": "44300",
-        "CSBAName": "State College,PA",
-        "CSBA City": "State College",
-        "CSBA State Code": "PA",
+        "CBSACode": "44300",
+        "CBSAName": "State College,PA",
+        "CBSA City": "State College",
+        "CBSA State Code": "PA",
         "Cities": "State College",
         "MemberCities": [
             "State College"
         ]
     },
     "44420": {
-        "CSBACode": "44420",
-        "CSBAName": "Staunton-Waynesboro,VA",
-        "CSBA City": "Staunton-Waynesboro",
-        "CSBA State Code": "VA",
+        "CBSACode": "44420",
+        "CBSAName": "Staunton-Waynesboro,VA",
+        "CBSA City": "Staunton-Waynesboro",
+        "CBSA State Code": "VA",
         "Cities": "Staunton|Waynesboro",
         "MemberCities": [
             "Staunton",
@@ -3709,10 +3709,10 @@
         ]
     },
     "44700": {
-        "CSBACode": "44700",
-        "CSBAName": "Stockton-Lodi,CA",
-        "CSBA City": "Stockton-Lodi",
-        "CSBA State Code": "CA",
+        "CBSACode": "44700",
+        "CBSAName": "Stockton-Lodi,CA",
+        "CBSA City": "Stockton-Lodi",
+        "CBSA State Code": "CA",
         "Cities": "Lodi|Stockton",
         "MemberCities": [
             "Lodi",
@@ -3720,40 +3720,40 @@
         ]
     },
     "44940": {
-        "CSBACode": "44940",
-        "CSBAName": "Sumter,SC",
-        "CSBA City": "Sumter",
-        "CSBA State Code": "SC",
+        "CBSACode": "44940",
+        "CBSAName": "Sumter,SC",
+        "CBSA City": "Sumter",
+        "CBSA State Code": "SC",
         "Cities": "Sumter",
         "MemberCities": [
             "Sumter"
         ]
     },
     "45060": {
-        "CSBACode": "45060",
-        "CSBAName": "Syracuse,NY",
-        "CSBA City": "Syracuse",
-        "CSBA State Code": "NY",
+        "CBSACode": "45060",
+        "CBSAName": "Syracuse,NY",
+        "CBSA City": "Syracuse",
+        "CBSA State Code": "NY",
         "Cities": "Syracuse",
         "MemberCities": [
             "Syracuse"
         ]
     },
     "45220": {
-        "CSBACode": "45220",
-        "CSBAName": "Tallahassee,FL",
-        "CSBA City": "Tallahassee",
-        "CSBA State Code": "FL",
+        "CBSACode": "45220",
+        "CBSAName": "Tallahassee,FL",
+        "CBSA City": "Tallahassee",
+        "CBSA State Code": "FL",
         "Cities": "Tallahassee",
         "MemberCities": [
             "Tallahassee"
         ]
     },
     "45300": {
-        "CSBACode": "45300",
-        "CSBAName": "Tampa-St. Petersburg-Clearwater,FL",
-        "CSBA City": "Tampa-St. Petersburg-Clearwater",
-        "CSBA State Code": "FL",
+        "CBSACode": "45300",
+        "CBSAName": "Tampa-St. Petersburg-Clearwater,FL",
+        "CBSA City": "Tampa-St. Petersburg-Clearwater",
+        "CBSA State Code": "FL",
         "Cities": "Clearwater|Largo|St. Petersburg|Tampa",
         "MemberCities": [
             "Clearwater",
@@ -3763,120 +3763,120 @@
         ]
     },
     "45460": {
-        "CSBACode": "45460",
-        "CSBAName": "Terre Haute,IN",
-        "CSBA City": "Terre Haute",
-        "CSBA State Code": "IN",
+        "CBSACode": "45460",
+        "CBSAName": "Terre Haute,IN",
+        "CBSA City": "Terre Haute",
+        "CBSA State Code": "IN",
         "Cities": "Terre Haute",
         "MemberCities": [
             "Terre Haute"
         ]
     },
     "45500": {
-        "CSBACode": "45500",
-        "CSBAName": "Texarkana,TX-AR",
-        "CSBA City": "Texarkana",
-        "CSBA State Code": "TX-AR",
+        "CBSACode": "45500",
+        "CBSAName": "Texarkana,TX-AR",
+        "CBSA City": "Texarkana",
+        "CBSA State Code": "TX-AR",
         "Cities": "Texarkana",
         "MemberCities": [
             "Texarkana"
         ]
     },
     "45540": {
-        "CSBACode": "45540",
-        "CSBAName": "The Villages,FL",
-        "CSBA City": "The Villages",
-        "CSBA State Code": "FL",
+        "CBSACode": "45540",
+        "CBSAName": "The Villages,FL",
+        "CBSA City": "The Villages",
+        "CBSA State Code": "FL",
         "Cities": "The Villages",
         "MemberCities": [
             "The Villages"
         ]
     },
     "45780": {
-        "CSBACode": "45780",
-        "CSBAName": "Toledo,OH",
-        "CSBA City": "Toledo",
-        "CSBA State Code": "OH",
+        "CBSACode": "45780",
+        "CBSAName": "Toledo,OH",
+        "CBSA City": "Toledo",
+        "CBSA State Code": "OH",
         "Cities": "Toledo",
         "MemberCities": [
             "Toledo"
         ]
     },
     "45820": {
-        "CSBACode": "45820",
-        "CSBAName": "Topeka,KS",
-        "CSBA City": "Topeka",
-        "CSBA State Code": "KS",
+        "CBSACode": "45820",
+        "CBSAName": "Topeka,KS",
+        "CBSA City": "Topeka",
+        "CBSA State Code": "KS",
         "Cities": "Topeka",
         "MemberCities": [
             "Topeka"
         ]
     },
     "45940": {
-        "CSBACode": "45940",
-        "CSBAName": "Trenton,NJ",
-        "CSBA City": "Trenton",
-        "CSBA State Code": "NJ",
+        "CBSACode": "45940",
+        "CBSAName": "Trenton,NJ",
+        "CBSA City": "Trenton",
+        "CBSA State Code": "NJ",
         "Cities": "Trenton",
         "MemberCities": [
             "Trenton"
         ]
     },
     "46060": {
-        "CSBACode": "46060",
-        "CSBAName": "Tucson,AZ",
-        "CSBA City": "Tucson",
-        "CSBA State Code": "AZ",
+        "CBSACode": "46060",
+        "CBSAName": "Tucson,AZ",
+        "CBSA City": "Tucson",
+        "CBSA State Code": "AZ",
         "Cities": "Tucson",
         "MemberCities": [
             "Tucson"
         ]
     },
     "46140": {
-        "CSBACode": "46140",
-        "CSBAName": "Tulsa,OK",
-        "CSBA City": "Tulsa",
-        "CSBA State Code": "OK",
+        "CBSACode": "46140",
+        "CBSAName": "Tulsa,OK",
+        "CBSA City": "Tulsa",
+        "CBSA State Code": "OK",
         "Cities": "Tulsa",
         "MemberCities": [
             "Tulsa"
         ]
     },
     "46220": {
-        "CSBACode": "46220",
-        "CSBAName": "Tuscaloosa,AL",
-        "CSBA City": "Tuscaloosa",
-        "CSBA State Code": "AL",
+        "CBSACode": "46220",
+        "CBSAName": "Tuscaloosa,AL",
+        "CBSA City": "Tuscaloosa",
+        "CBSA State Code": "AL",
         "Cities": "Tuscaloosa",
         "MemberCities": [
             "Tuscaloosa"
         ]
     },
     "46340": {
-        "CSBACode": "46340",
-        "CSBAName": "Tyler,TX",
-        "CSBA City": "Tyler",
-        "CSBA State Code": "TX",
+        "CBSACode": "46340",
+        "CBSAName": "Tyler,TX",
+        "CBSA City": "Tyler",
+        "CBSA State Code": "TX",
         "Cities": "Tyler",
         "MemberCities": [
             "Tyler"
         ]
     },
     "46520": {
-        "CSBACode": "46520",
-        "CSBAName": "Urban Honolulu,HI",
-        "CSBA City": "Urban Honolulu",
-        "CSBA State Code": "HI",
+        "CBSACode": "46520",
+        "CBSAName": "Urban Honolulu,HI",
+        "CBSA City": "Urban Honolulu",
+        "CBSA State Code": "HI",
         "Cities": "Urban Honolulu",
         "MemberCities": [
             "Urban Honolulu"
         ]
     },
     "46540": {
-        "CSBACode": "46540",
-        "CSBAName": "Utica-Rome,NY",
-        "CSBA City": "Utica-Rome",
-        "CSBA State Code": "NY",
+        "CBSACode": "46540",
+        "CBSAName": "Utica-Rome,NY",
+        "CBSA City": "Utica-Rome",
+        "CBSA State Code": "NY",
         "Cities": "Rome|Utica",
         "MemberCities": [
             "Rome",
@@ -3884,20 +3884,20 @@
         ]
     },
     "46660": {
-        "CSBACode": "46660",
-        "CSBAName": "Valdosta,GA",
-        "CSBA City": "Valdosta",
-        "CSBA State Code": "GA",
+        "CBSACode": "46660",
+        "CBSAName": "Valdosta,GA",
+        "CBSA City": "Valdosta",
+        "CBSA State Code": "GA",
         "Cities": "Valdosta",
         "MemberCities": [
             "Valdosta"
         ]
     },
     "46700": {
-        "CSBACode": "46700",
-        "CSBAName": "Vallejo-Fairfield,CA",
-        "CSBA City": "Vallejo-Fairfield",
-        "CSBA State Code": "CA",
+        "CBSACode": "46700",
+        "CBSAName": "Vallejo-Fairfield,CA",
+        "CBSA City": "Vallejo-Fairfield",
+        "CBSA State Code": "CA",
         "Cities": "Fairfield|Vallejo",
         "MemberCities": [
             "Fairfield",
@@ -3905,20 +3905,20 @@
         ]
     },
     "47020": {
-        "CSBACode": "47020",
-        "CSBAName": "Victoria,TX",
-        "CSBA City": "Victoria",
-        "CSBA State Code": "TX",
+        "CBSACode": "47020",
+        "CBSAName": "Victoria,TX",
+        "CBSA City": "Victoria",
+        "CBSA State Code": "TX",
         "Cities": "Victoria",
         "MemberCities": [
             "Victoria"
         ]
     },
     "47220": {
-        "CSBACode": "47220",
-        "CSBAName": "Vineland-Bridgeton,NJ",
-        "CSBA City": "Vineland-Bridgeton",
-        "CSBA State Code": "NJ",
+        "CBSACode": "47220",
+        "CBSAName": "Vineland-Bridgeton,NJ",
+        "CBSA City": "Vineland-Bridgeton",
+        "CBSA State Code": "NJ",
         "Cities": "Bridgeton|Vineland",
         "MemberCities": [
             "Bridgeton",
@@ -3926,10 +3926,10 @@
         ]
     },
     "47260": {
-        "CSBACode": "47260",
-        "CSBAName": "Virginia Beach-Norfolk-Newport News,VA-NC",
-        "CSBA City": "Virginia Beach-Norfolk-Newport News",
-        "CSBA State Code": "VA-NC",
+        "CBSACode": "47260",
+        "CBSAName": "Virginia Beach-Norfolk-Newport News,VA-NC",
+        "CBSA City": "Virginia Beach-Norfolk-Newport News",
+        "CBSA State Code": "VA-NC",
         "Cities": "Hampton|Newport News|Norfolk|Portsmouth|Virginia Beach",
         "MemberCities": [
             "Hampton",
@@ -3940,10 +3940,10 @@
         ]
     },
     "47300": {
-        "CSBACode": "47300",
-        "CSBAName": "Visalia-Porterville,CA",
-        "CSBA City": "Visalia-Porterville",
-        "CSBA State Code": "CA",
+        "CBSACode": "47300",
+        "CBSAName": "Visalia-Porterville,CA",
+        "CBSA City": "Visalia-Porterville",
+        "CBSA State Code": "CA",
         "Cities": "Porterville|Visalia",
         "MemberCities": [
             "Porterville",
@@ -3951,40 +3951,40 @@
         ]
     },
     "47380": {
-        "CSBACode": "47380",
-        "CSBAName": "Waco,TX",
-        "CSBA City": "Waco",
-        "CSBA State Code": "TX",
+        "CBSACode": "47380",
+        "CBSAName": "Waco,TX",
+        "CBSA City": "Waco",
+        "CBSA State Code": "TX",
         "Cities": "Waco",
         "MemberCities": [
             "Waco"
         ]
     },
     "47460": {
-        "CSBACode": "47460",
-        "CSBAName": "Walla Walla,WA",
-        "CSBA City": "Walla Walla",
-        "CSBA State Code": "WA",
+        "CBSACode": "47460",
+        "CBSAName": "Walla Walla,WA",
+        "CBSA City": "Walla Walla",
+        "CBSA State Code": "WA",
         "Cities": "Walla Walla",
         "MemberCities": [
             "Walla Walla"
         ]
     },
     "47580": {
-        "CSBACode": "47580",
-        "CSBAName": "Warner Robins,GA",
-        "CSBA City": "Warner Robins",
-        "CSBA State Code": "GA",
+        "CBSACode": "47580",
+        "CBSAName": "Warner Robins,GA",
+        "CBSA City": "Warner Robins",
+        "CBSA State Code": "GA",
         "Cities": "Warner Robins",
         "MemberCities": [
             "Warner Robins"
         ]
     },
     "47900": {
-        "CSBACode": "47900",
-        "CSBAName": "Washington-Arlington-Alexandria,DC-VA-MD-WV",
-        "CSBA City": "Washington-Arlington-Alexandria",
-        "CSBA State Code": "DC-VA-MD-WV",
+        "CBSACode": "47900",
+        "CBSAName": "Washington-Arlington-Alexandria,DC-VA-MD-WV",
+        "CBSA City": "Washington-Arlington-Alexandria",
+        "CBSA State Code": "DC-VA-MD-WV",
         "Cities": "Alexandria|Arlington|Bethesda|Frederick|Gaithersburg|Reston|Rockville|Silver Spring|Washington",
         "MemberCities": [
             "Alexandria",
@@ -3999,10 +3999,10 @@
         ]
     },
     "47940": {
-        "CSBACode": "47940",
-        "CSBAName": "Waterloo-Cedar Falls,IA",
-        "CSBA City": "Waterloo-Cedar Falls",
-        "CSBA State Code": "IA",
+        "CBSACode": "47940",
+        "CBSAName": "Waterloo-Cedar Falls,IA",
+        "CBSA City": "Waterloo-Cedar Falls",
+        "CBSA State Code": "IA",
         "Cities": "Cedar Falls|Waterloo",
         "MemberCities": [
             "Cedar Falls",
@@ -4010,10 +4010,10 @@
         ]
     },
     "48060": {
-        "CSBACode": "48060",
-        "CSBAName": "Watertown-Fort Drum,NY",
-        "CSBA City": "Watertown-Fort Drum",
-        "CSBA State Code": "NY",
+        "CBSACode": "48060",
+        "CBSAName": "Watertown-Fort Drum,NY",
+        "CBSA City": "Watertown-Fort Drum",
+        "CBSA State Code": "NY",
         "Cities": "Fort Drum|Watertown",
         "MemberCities": [
             "Fort Drum",
@@ -4021,20 +4021,20 @@
         ]
     },
     "48140": {
-        "CSBACode": "48140",
-        "CSBAName": "Wausau,WI",
-        "CSBA City": "Wausau",
-        "CSBA State Code": "WI",
+        "CBSACode": "48140",
+        "CBSAName": "Wausau,WI",
+        "CBSA City": "Wausau",
+        "CBSA State Code": "WI",
         "Cities": "Wausau",
         "MemberCities": [
             "Wausau"
         ]
     },
     "48260": {
-        "CSBACode": "48260",
-        "CSBAName": "Weirton-Steubenville,WV-OH",
-        "CSBA City": "Weirton-Steubenville",
-        "CSBA State Code": "WV-OH",
+        "CBSACode": "48260",
+        "CBSAName": "Weirton-Steubenville,WV-OH",
+        "CBSA City": "Weirton-Steubenville",
+        "CBSA State Code": "WV-OH",
         "Cities": "Steubenville|Weirton",
         "MemberCities": [
             "Steubenville",
@@ -4042,110 +4042,110 @@
         ]
     },
     "48300": {
-        "CSBACode": "48300",
-        "CSBAName": "Wenatchee,WA",
-        "CSBA City": "Wenatchee",
-        "CSBA State Code": "WA",
+        "CBSACode": "48300",
+        "CBSAName": "Wenatchee,WA",
+        "CBSA City": "Wenatchee",
+        "CBSA State Code": "WA",
         "Cities": "Wenatchee",
         "MemberCities": [
             "Wenatchee"
         ]
     },
     "48540": {
-        "CSBACode": "48540",
-        "CSBAName": "Wheeling,WV-OH",
-        "CSBA City": "Wheeling",
-        "CSBA State Code": "WV-OH",
+        "CBSACode": "48540",
+        "CBSAName": "Wheeling,WV-OH",
+        "CBSA City": "Wheeling",
+        "CBSA State Code": "WV-OH",
         "Cities": "Wheeling",
         "MemberCities": [
             "Wheeling"
         ]
     },
     "48620": {
-        "CSBACode": "48620",
-        "CSBAName": "Wichita,KS",
-        "CSBA City": "Wichita",
-        "CSBA State Code": "KS",
+        "CBSACode": "48620",
+        "CBSAName": "Wichita,KS",
+        "CBSA City": "Wichita",
+        "CBSA State Code": "KS",
         "Cities": "Wichita",
         "MemberCities": [
             "Wichita"
         ]
     },
     "48660": {
-        "CSBACode": "48660",
-        "CSBAName": "Wichita Falls,TX",
-        "CSBA City": "Wichita Falls",
-        "CSBA State Code": "TX",
+        "CBSACode": "48660",
+        "CBSAName": "Wichita Falls,TX",
+        "CBSA City": "Wichita Falls",
+        "CBSA State Code": "TX",
         "Cities": "Wichita Falls",
         "MemberCities": [
             "Wichita Falls"
         ]
     },
     "48700": {
-        "CSBACode": "48700",
-        "CSBAName": "Williamsport,PA",
-        "CSBA City": "Williamsport",
-        "CSBA State Code": "PA",
+        "CBSACode": "48700",
+        "CBSAName": "Williamsport,PA",
+        "CBSA City": "Williamsport",
+        "CBSA State Code": "PA",
         "Cities": "Williamsport",
         "MemberCities": [
             "Williamsport"
         ]
     },
     "48900": {
-        "CSBACode": "48900",
-        "CSBAName": "Wilmington,NC",
-        "CSBA City": "Wilmington",
-        "CSBA State Code": "NC",
+        "CBSACode": "48900",
+        "CBSAName": "Wilmington,NC",
+        "CBSA City": "Wilmington",
+        "CBSA State Code": "NC",
         "Cities": "Wilmington",
         "MemberCities": [
             "Wilmington"
         ]
     },
     "49020": {
-        "CSBACode": "49020",
-        "CSBAName": "Winchester,VA-WV",
-        "CSBA City": "Winchester",
-        "CSBA State Code": "VA-WV",
+        "CBSACode": "49020",
+        "CBSAName": "Winchester,VA-WV",
+        "CBSA City": "Winchester",
+        "CBSA State Code": "VA-WV",
         "Cities": "Winchester",
         "MemberCities": [
             "Winchester"
         ]
     },
     "49180": {
-        "CSBACode": "49180",
-        "CSBAName": "Winston-Salem,NC",
-        "CSBA City": "Winston-Salem",
-        "CSBA State Code": "NC",
+        "CBSACode": "49180",
+        "CBSAName": "Winston-Salem,NC",
+        "CBSA City": "Winston-Salem",
+        "CBSA State Code": "NC",
         "Cities": "Winston-Salem",
         "MemberCities": [
             "Winston-Salem"
         ]
     },
     "49340": {
-        "CSBACode": "49340",
-        "CSBAName": "Worcester,MA-CT",
-        "CSBA City": "Worcester",
-        "CSBA State Code": "MA-CT",
+        "CBSACode": "49340",
+        "CBSAName": "Worcester,MA-CT",
+        "CBSA City": "Worcester",
+        "CBSA State Code": "MA-CT",
         "Cities": "Worcester",
         "MemberCities": [
             "Worcester"
         ]
     },
     "49420": {
-        "CSBACode": "49420",
-        "CSBAName": "Yakima,WA",
-        "CSBA City": "Yakima",
-        "CSBA State Code": "WA",
+        "CBSACode": "49420",
+        "CBSAName": "Yakima,WA",
+        "CBSA City": "Yakima",
+        "CBSA State Code": "WA",
         "Cities": "Yakima",
         "MemberCities": [
             "Yakima"
         ]
     },
     "49620": {
-        "CSBACode": "49620",
-        "CSBAName": "York-Hanover,PA",
-        "CSBA City": "York-Hanover",
-        "CSBA State Code": "PA",
+        "CBSACode": "49620",
+        "CBSAName": "York-Hanover,PA",
+        "CBSA City": "York-Hanover",
+        "CBSA State Code": "PA",
         "Cities": "Hanover|York",
         "MemberCities": [
             "Hanover",
@@ -4153,10 +4153,10 @@
         ]
     },
     "49660": {
-        "CSBACode": "49660",
-        "CSBAName": "Youngstown-Warren-Boardman,OH-PA",
-        "CSBA City": "Youngstown-Warren-Boardman",
-        "CSBA State Code": "OH-PA",
+        "CBSACode": "49660",
+        "CBSAName": "Youngstown-Warren-Boardman,OH-PA",
+        "CBSA City": "Youngstown-Warren-Boardman",
+        "CBSA State Code": "OH-PA",
         "Cities": "Boardman|Warren|Youngstown",
         "MemberCities": [
             "Boardman",
@@ -4165,20 +4165,20 @@
         ]
     },
     "49700": {
-        "CSBACode": "49700",
-        "CSBAName": "Yuba City,CA",
-        "CSBA City": "Yuba City",
-        "CSBA State Code": "CA",
+        "CBSACode": "49700",
+        "CBSAName": "Yuba City,CA",
+        "CBSA City": "Yuba City",
+        "CBSA State Code": "CA",
         "Cities": "Yuba City",
         "MemberCities": [
             "Yuba City"
         ]
     },
     "49740": {
-        "CSBACode": "49740",
-        "CSBAName": "Yuma,AZ",
-        "CSBA City": "Yuma",
-        "CSBA State Code": "AZ",
+        "CBSACode": "49740",
+        "CBSAName": "Yuma,AZ",
+        "CBSA City": "Yuma",
+        "CBSA State Code": "AZ",
         "Cities": "Yuma",
         "MemberCities": [
             "Yuma"

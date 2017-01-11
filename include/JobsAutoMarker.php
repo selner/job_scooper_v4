@@ -43,9 +43,9 @@ class JobsAutoMarker extends ClassJobsSiteCommon
             if(array_key_exists('location-city', $locset) === true && array_key_exists($locset['location-city'], $this->cbsaCityMapping))
             {
                 $cbsa = $this->cbsaCityMapping[$locset['location-city']];
-                if(strcasecmp($locset['location-statecode'], $cbsa['cbsa State Code'] ) == 0)
+                if(strcasecmp($locset['location-statecode'], $cbsa['CBSA State Code'] ) == 0)
                 {
-                    $this->cbsaLocSetMapping[$locset['key']] = $cbsa['cbsaCode'];
+                    $this->cbsaLocSetMapping[$locset['key']] = $cbsa['CBSACode'];
 
                 }
             }
@@ -212,7 +212,6 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         $citycbsaKeys = array_keys($this->cbsaCityMapping);
         foreach($arrKeys_Locations as $locstr)
         {
-            print $locstr;
             $cbsaResult = null;
             if(in_array($locstr, $citycbsaKeys ))
             {
@@ -227,6 +226,8 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         $arrJobs_AutoUpdatable= array_filter($this->arrLatestJobs, "isJobAutoUpdatable");
         $nJobsSkipped = count($this->arrLatestJobs) - count($arrJobs_AutoUpdatable);
 
+        $GLOBALS['logger']->logLine("Marking Out of Area Jobs" , \Scooper\C__DISPLAY_SECTION_START__);
+
         foreach($arrJobs_AutoUpdatable as $job)
         {
             $matched = false;
@@ -239,7 +240,7 @@ class JobsAutoMarker extends ClassJobsSiteCommon
                 {
                     $cbsa = $this->cbsaCityMapping[$locStr];
 
-                    if(!in_array($cbsa['cbsaCode'], $this->cbsaLocSetMapping))
+                    if(!in_array($cbsa['CBSACode'], $this->cbsaLocSetMapping))
                     {
                         $this->arrLatestJobs[$strJobIndex]['interested'] = 'No (Out of Search Area)' . C__STR_TAG_AUTOMARKEDJOB__;
                         appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_notes', "|", "Matched " . getArrayValuesAsString($cbsa));
@@ -258,7 +259,7 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         }
 
 
-        $GLOBALS['logger']->logLine("Jobs marked not interested via companies regex: marked ".$nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobs_AutoUpdatable) .", skipped " . $nJobsSkipped . "/" . countAssociativeArrayValues($arrJobs_AutoUpdatable) .", not marked ". $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobs_AutoUpdatable).")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
+        $GLOBALS['logger']->logLine("Jobs marked as out of area: marked ".$nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobs_AutoUpdatable) .", skipped " . $nJobsSkipped . "/" . countAssociativeArrayValues($arrJobs_AutoUpdatable) .", not marked ". $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobs_AutoUpdatable).")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
         return;
     }
 
