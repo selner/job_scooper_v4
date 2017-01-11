@@ -25,14 +25,14 @@ class JobsAutoMarker extends ClassJobsSiteCommon
 {
     protected $siteName = "JobsAutoMarker";
     protected $arrLatestJobs_UnfilteredByUserInput = array();
-    protected $arrLatestJobs = array();
+    protected $arrMasterJobList = array();
     protected $cbsaList  = null;
     protected $cbsaCityMapping  = null;
     protected $cbsaLocSetMapping = null;
 
     function __construct($arrJobs_Unfiltered)
     {
-        $this->arrLatestJobs_UnfilteredByUserInput = \Scooper\array_copy($arrJobs_Unfiltered);
+        $this->arrMasterJobList = \Scooper\array_copy($arrJobs_Unfiltered);
 
         $this->cbsaList = loadJSON(__ROOT__ . '/static/cbsa_list.json');
         $this->cbsaCityMapping = loadJSON(__ROOT__ . '/static/city_to_cbsa_mapping.json');
@@ -68,24 +68,27 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         $GLOBALS['logger']->logLine(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
-        $this->_markJobsList_withAutoItems_();
+
+        $this->_markJobsList_SetLikelyDuplicatePosts_($this->arrMasterJobList);
+        $this->_markJobsList_SetOutOfArea_($this->arrMasterJobList);
+
+        $arrJobs_AutoUpdatable = array_filter($this->arrMasterJobList, "isJobAutoUpdatable");
+        $this->_markJobsList_withAutoItems_($arrJobs_AutoUpdatable);
+        $masterCopy = $this->arrMasterJobList;
+        $this->arrMasterJobList= array_replace_recursive($masterCopy, $arrJobs_AutoUpdatable);
     }
 
     public function getMarkedJobs()
     {
-        return $this->arrLatestJobs;
+        return $this->arrMasterJobList;
     }
 
 
-    private function _markJobsList_withAutoItems_()
+    private function _markJobsList_withAutoItems_(&$arrJobsList)
     {
-        $this->arrLatestJobs = \Scooper\array_copy($this->arrLatestJobs_UnfilteredByUserInput);
-//        $this->_markJobsList_WithPreviouslyReviewedPostNotes_();
-        $this->_markJobsList_SetLikelyDuplicatePosts_();
-        $this->_markJobsList_SetOutOfArea_();
-        $this->_markJobsList_SearchKeywordsNotFound_();
-        $this->_markJobsList_SetAutoExcludedTitles_();
-        $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_();
+        $this->_markJobsList_SearchKeywordsNotFound_($arrJobsList);
+        $this->_markJobsList_SetAutoExcludedTitles_($arrJobsList);
+        $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($arrJobsList);
     }
 
 
@@ -146,14 +149,14 @@ class JobsAutoMarker extends ClassJobsSiteCommon
 //    }
 
 
-    private function _markJobsList_SetLikelyDuplicatePosts_()
+    private function _markJobsList_SetLikelyDuplicatePosts_(&$arrJobsList)
     {
-        if(count($this->arrLatestJobs) == 0) return;
+        if(count($arrJobsList) == 0) return;
 
         $nJobsMatched = 0;
 
-        $arrKeys_CompanyAndRole = array_column ( $this->arrLatestJobs, 'key_company_role');
-        $arrKeys_JobSiteAndJobID = array_column ( $this->arrLatestJobs, 'key_jobsite_siteid');
+        $arrKeys_CompanyAndRole = array_column ( $arrJobsList, 'key_company_role');
+        $arrKeys_JobSiteAndJobID = array_column ( $arrJobsList, 'key_jobsite_siteid');
 
 
         $arrUniqIds = array_unique($arrKeys_CompanyAndRole);
@@ -162,9 +165,9 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         $arrLookup_JobListing_ByCompanyRole = array_flip($arrOneJobListingPerCompanyAndRole);
 
         $GLOBALS['logger']->logLine("Marking Duplicate Job Roles" , \Scooper\C__DISPLAY_SECTION_START__);
-        $GLOBALS['logger']->logLine($nUniqJobs . "/" . countAssociativeArrayValues($this->arrLatestJobs) . " jobs have immediately been marked as non-duplicate based on company/role pairing. " , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine($nUniqJobs . "/" . countAssociativeArrayValues($arrJobsList) . " jobs have immediately been marked as non-duplicate based on company/role pairing. " , \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-        foreach($this->arrLatestJobs as $job)
+        foreach($arrJobsList as $job)
         {
             $strCurrentJobIndex = getArrayKeyValueForJob($job);
             if(!isMarkedBlank($job))
@@ -181,33 +184,33 @@ class JobsAutoMarker extends ClassJobsSiteCommon
                 //
                 // Add a note to the previous listing that it had a new duplicate
                 //
-                appendJobColumnData($this->arrLatestJobs[$indexPrevListingForCompanyRole], 'match_notes', "|", $this->getNotesWithDupeIDAdded($this->arrLatestJobs[$indexPrevListingForCompanyRole]['match_notes'], $job['key_jobsite_siteid'] ));
-                $this->arrLatestJobs[$indexPrevListingForCompanyRole] ['date_last_updated'] = getTodayAsString();
+                appendJobColumnData($arrJobsList[$indexPrevListingForCompanyRole], 'match_notes', "|", $this->getNotesWithDupeIDAdded($arrJobsList[$indexPrevListingForCompanyRole]['match_notes'], $job['key_jobsite_siteid'] ));
+                $arrJobsList[$indexPrevListingForCompanyRole] ['date_last_updated'] = getTodayAsString();
 
-                $this->arrLatestJobs[$strCurrentJobIndex]['interested'] =  C__STR_TAG_DUPLICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__;
-                appendJobColumnData($this->arrLatestJobs[$strCurrentJobIndex], 'match_notes', "|", $this->getNotesWithDupeIDAdded($this->arrLatestJobs[$strCurrentJobIndex]['match_notes'], $indexPrevListingForCompanyRole ));
-                $this->arrLatestJobs[$strCurrentJobIndex]['date_last_updated'] = getTodayAsString();
+                $arrJobsList[$strCurrentJobIndex]['interested'] =  C__STR_TAG_DUPLICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__;
+                appendJobColumnData($arrJobsList[$strCurrentJobIndex], 'match_notes', "|", $this->getNotesWithDupeIDAdded($arrJobsList[$strCurrentJobIndex]['match_notes'], $indexPrevListingForCompanyRole ));
+                $arrJobsList[$strCurrentJobIndex]['date_last_updated'] = getTodayAsString();
 
                 $nJobsMatched++;
             }
 
         }
 
-        $strTotalRowsText = "/".count($this->arrLatestJobs);
+        $strTotalRowsText = "/".count($arrJobsList);
         $GLOBALS['logger']->logLine("Marked  ".$nJobsMatched .$strTotalRowsText ." roles as likely duplicates based on company/role. " , \Scooper\C__DISPLAY_ITEM_RESULT__);
 
     }
 
-    private function _markJobsList_SetOutOfArea_()
+    private function _markJobsList_SetOutOfArea_(&$arrJobsList)
     {
-        if(count($this->arrLatestJobs) == 0) return;
+        if(count($arrJobsList) == 0) return;
 
         $nJobsNotMarked = 0;
         $nJobsMarkedAutoExcluded = 0;
 
         $lookupcbsa = array();
 
-        $arrKeys_Locations = array_column ( $this->arrLatestJobs, 'location');
+        $arrKeys_Locations = array_column ( $arrJobsList, 'location');
         array_unique($arrKeys_Locations);
         $citycbsaKeys = array_keys($this->cbsaCityMapping);
         foreach($arrKeys_Locations as $locstr)
@@ -223,8 +226,8 @@ class JobsAutoMarker extends ClassJobsSiteCommon
             }
         }
 
-        $arrJobs_AutoUpdatable= array_filter($this->arrLatestJobs, "isJobAutoUpdatable");
-        $nJobsSkipped = count($this->arrLatestJobs) - count($arrJobs_AutoUpdatable);
+        $arrJobs_AutoUpdatable= array_filter($arrJobsList, "isJobAutoUpdatable");
+        $nJobsSkipped = count($arrJobsList) - count($arrJobs_AutoUpdatable);
 
         $GLOBALS['logger']->logLine("Marking Out of Area Jobs" , \Scooper\C__DISPLAY_SECTION_START__);
 
@@ -242,9 +245,9 @@ class JobsAutoMarker extends ClassJobsSiteCommon
 
                     if(!in_array($cbsa['CBSACode'], $this->cbsaLocSetMapping))
                     {
-                        $this->arrLatestJobs[$strJobIndex]['interested'] = 'No (Out of Search Area)' . C__STR_TAG_AUTOMARKEDJOB__;
-                        appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_notes', "|", "Matched " . getArrayValuesAsString($cbsa));
-                        $this->arrLatestJobs[$strJobIndex]['date_last_updated'] = getTodayAsString();
+                        $arrJobsList[$strJobIndex]['interested'] = 'No (Out of Search Area)' . C__STR_TAG_AUTOMARKEDJOB__;
+                        appendJobColumnData($arrJobsList[$strJobIndex], 'match_notes', "|", "Matched " . getArrayValuesAsString($cbsa));
+                        $arrJobsList[$strJobIndex]['date_last_updated'] = getTodayAsString();
                         $nJobsMarkedAutoExcluded++;
                         $matched = true;
                     }
@@ -263,17 +266,17 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         return;
     }
 
-    private function _markJobsList_SetAutoExcludedCompaniesFromRegex_()
+    private function _markJobsList_SetAutoExcludedCompaniesFromRegex_(&$arrJobsList)
     {
-        if(count($this->arrLatestJobs) == 0) return;
+        if(count($arrJobsList) == 0) return;
 
         $nJobsNotMarked = 0;
         $nJobsMarkedAutoExcluded = 0;
 
         $GLOBALS['logger']->logLine("Excluding Jobs by Companies Regex Matches", \Scooper\C__DISPLAY_ITEM_START__);
-        $GLOBALS['logger']->logLine("Checking ".count($this->arrLatestJobs) ." roles against ". count($GLOBALS['USERDATA']['companies_regex_to_filter']) ." excluded companies.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        $arrJobs_AutoUpdatable= array_filter($this->arrLatestJobs, "isJobAutoUpdatable");
-        $nJobsSkipped = count($this->arrLatestJobs) - count($arrJobs_AutoUpdatable);
+        $GLOBALS['logger']->logLine("Checking ".count($arrJobsList) ." roles against ". count($GLOBALS['USERDATA']['companies_regex_to_filter']) ." excluded companies.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $arrJobs_AutoUpdatable= array_filter($arrJobsList, "isJobAutoUpdatable");
+        $nJobsSkipped = count($arrJobsList) - count($arrJobs_AutoUpdatable);
 
         if(count($arrJobs_AutoUpdatable) > 0 && count($GLOBALS['USERDATA']['companies_regex_to_filter']) > 0)
         {
@@ -287,9 +290,9 @@ class JobsAutoMarker extends ClassJobsSiteCommon
                     if(preg_match($rxInput, \Scooper\strScrub($job['company'], DEFAULT_SCRUB)))
                     {
                         $strJobIndex = getArrayKeyValueForJob($job);
-                        $this->arrLatestJobs[$strJobIndex]['interested'] = 'No (Wrong Company)' . C__STR_TAG_AUTOMARKEDJOB__;
-                        appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_notes', "|", "Matched regex[". $rxInput ."]");
-                        $this->arrLatestJobs[$strJobIndex]['date_last_updated'] = getTodayAsString();
+                        $arrJobsList[$strJobIndex]['interested'] = 'No (Wrong Company)' . C__STR_TAG_AUTOMARKEDJOB__;
+                        appendJobColumnData($arrJobsList[$strJobIndex], 'match_notes', "|", "Matched regex[". $rxInput ."]");
+                        $arrJobsList[$strJobIndex]['date_last_updated'] = getTodayAsString();
                         $nJobsMarkedAutoExcluded++;
                         $fMatched = true;
                         break;
@@ -402,10 +405,10 @@ class JobsAutoMarker extends ClassJobsSiteCommon
     }
 
 
-    private function _markJobsList_SearchKeywordsNotFound_()
+    private function _markJobsList_SearchKeywordsNotFound_(&$arrJobsList)
     {
         $arrKwdSet = array();
-        $arrJobsStillActive = array_filter($this->arrLatestJobs, "isMarkedBlank");
+        $arrJobsStillActive = array_filter($arrJobsList, "isMarkedBlank");
         $nStartingBlankCount = countAssociativeArrayValues($arrJobsStillActive);
         foreach($GLOBALS['USERDATA']['configuration_settings']['searches'] as $search)
         {
@@ -423,31 +426,31 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         foreach($ret['notmatched'] as $job)
         {
             $strJobIndex = getArrayKeyValueForJob($job);
-            $this->arrLatestJobs[$strJobIndex]['interested'] = NO_TITLE_MATCHES;
-            $this->arrLatestJobs[$strJobIndex]['date_last_updated'] = getTodayAsString();
-            appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_notes', "|", "title keywords not matched to terms [". getArrayValuesAsString($arrKwdSet, "|", "", false)  ."]");
+            $arrJobsList[$strJobIndex]['interested'] = NO_TITLE_MATCHES;
+            $arrJobsList[$strJobIndex]['date_last_updated'] = getTodayAsString();
+            appendJobColumnData($arrJobsList[$strJobIndex], 'match_notes', "|", "title keywords not matched to terms [". getArrayValuesAsString($arrKwdSet, "|", "", false)  ."]");
         }
 
-        $nEndingBlankCount = countAssociativeArrayValues(array_filter($this->arrLatestJobs, "isMarkedBlank"));
-        $GLOBALS['logger']->logLine("Processed " . $nStartingBlankCount . "/" . countAssociativeArrayValues($this->arrLatestJobs) . " jobs marking if did not match title keyword search:  updated ". ($nStartingBlankCount - $nEndingBlankCount) . "/" . $nStartingBlankCount  . ", still active ". $nEndingBlankCount . "/" . $nStartingBlankCount, \Scooper\C__DISPLAY_ITEM_RESULT__);
+        $nEndingBlankCount = countAssociativeArrayValues(array_filter($arrJobsList, "isMarkedBlank"));
+        $GLOBALS['logger']->logLine("Processed " . $nStartingBlankCount . "/" . countAssociativeArrayValues($arrJobsList) . " jobs marking if did not match title keyword search:  updated ". ($nStartingBlankCount - $nEndingBlankCount) . "/" . $nStartingBlankCount  . ", still active ". $nEndingBlankCount . "/" . $nStartingBlankCount, \Scooper\C__DISPLAY_ITEM_RESULT__);
 
     }
 
-    private function _markJobsList_SetAutoExcludedTitles_()
+    private function _markJobsList_SetAutoExcludedTitles_(&$arrJobsList)
     {
-        $arrJobsStillActive = array_filter($this->arrLatestJobs, "isMarkedBlank");
+        $arrJobsStillActive = array_filter($arrJobsList, "isMarkedBlank");
         $nStartingBlankCount = countAssociativeArrayValues($arrJobsStillActive);
 
         $ret = $this->_getJobsList_MatchingJobTitleKeywords_($arrJobsStillActive, $GLOBALS['USERDATA']['title_negative_keyword_tokens'], "TitleNegativeKeywords");
         foreach($ret['matched'] as $job)
         {
             $strJobIndex = getArrayKeyValueForJob($job);
-            $this->arrLatestJobs[$strJobIndex]['interested'] = TITLE_NEG_KWD_MATCH;
-            $this->arrLatestJobs[$strJobIndex]['date_last_updated'] = getTodayAsString();
-            appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_notes', "|", "matched negative keyword title[". getArrayValuesAsString($job['keywords_matched'], "|", "", false)  ."]");
+            $arrJobsList[$strJobIndex]['interested'] = TITLE_NEG_KWD_MATCH;
+            $arrJobsList[$strJobIndex]['date_last_updated'] = getTodayAsString();
+            appendJobColumnData($arrJobsList[$strJobIndex], 'match_notes', "|", "matched negative keyword title[". getArrayValuesAsString($job['keywords_matched'], "|", "", false)  ."]");
         }
-        $nEndingBlankCount = countAssociativeArrayValues(array_filter($this->arrLatestJobs, "isMarkedBlank"));
-        $GLOBALS['logger']->logLine("Processed " . $nStartingBlankCount . "/" . countAssociativeArrayValues($this->arrLatestJobs) . " jobs marking negative keyword matches:  updated ". ($nStartingBlankCount - $nEndingBlankCount) . "/" . $nStartingBlankCount  . ", still active ". $nEndingBlankCount . "/" . $nStartingBlankCount, \Scooper\C__DISPLAY_ITEM_RESULT__);
+        $nEndingBlankCount = countAssociativeArrayValues(array_filter($arrJobsList, "isMarkedBlank"));
+        $GLOBALS['logger']->logLine("Processed " . $nStartingBlankCount . "/" . countAssociativeArrayValues($arrJobsList) . " jobs marking negative keyword matches:  updated ". ($nStartingBlankCount - $nEndingBlankCount) . "/" . $nStartingBlankCount  . ", still active ". $nEndingBlankCount . "/" . $nStartingBlankCount, \Scooper\C__DISPLAY_ITEM_RESULT__);
 
 
     }
