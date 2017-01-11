@@ -18,7 +18,7 @@
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/SitePlugins.php');
 require_once(__ROOT__.'/include/ClassMultiSiteSearch.php');
-require_once(__ROOT__.'/include/S3Manager.php');
+require_once(__ROOT__ . '/include/S3Manager.php');
 require_once(__ROOT__.'/include/ClassJobsNotifier.php');
 
 class JobsAutoMarker extends ClassJobsSiteCommon
@@ -26,10 +26,31 @@ class JobsAutoMarker extends ClassJobsSiteCommon
     protected $siteName = "JobsAutoMarker";
     protected $arrLatestJobs_UnfilteredByUserInput = array();
     protected $arrLatestJobs = array();
+    protected $cbsaList  = null;
+    protected $cbsaCityMapping  = null;
+    protected $cbsaLocSetMapping = null;
 
     function __construct($arrJobs_Unfiltered)
     {
         $this->arrLatestJobs_UnfilteredByUserInput = \Scooper\array_copy($arrJobs_Unfiltered);
+
+        $this->cbsaList = loadJSON(__ROOT__ . '/static/cbsa_list.json');
+        $this->cbsaCityMapping = loadJSON(__ROOT__ . '/static/city_to_cbsa_mapping.json');
+        $this->cbsaLocSetMapping = array();
+
+        foreach($GLOBALS['USERDATA']['configuration_settings']['location_sets'] as $locset)
+        {
+            if(array_key_exists('location-city', $locset) === true && array_key_exists($locset['location-city'], $this->cbsaCityMapping))
+            {
+                $cbsa = $this->cbsaCityMapping[$locset['location-city']];
+                if(strcasecmp($locset['location-statecode'], $cbsa['cbsa State Code'] ) == 0)
+                {
+                    $this->cbsaLocSetMapping[$locset['key']] = $cbsa['cbsaCode'];
+
+                }
+            }
+
+        }
     }
 
     function __destruct()
@@ -61,6 +82,7 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         $this->arrLatestJobs = \Scooper\array_copy($this->arrLatestJobs_UnfilteredByUserInput);
 //        $this->_markJobsList_WithPreviouslyReviewedPostNotes_();
         $this->_markJobsList_SetLikelyDuplicatePosts_();
+        $this->_markJobsList_SetOutOfArea_();
         $this->_markJobsList_SearchKeywordsNotFound_();
         $this->_markJobsList_SetAutoExcludedTitles_();
         $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_();
@@ -174,6 +196,70 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         $strTotalRowsText = "/".count($this->arrLatestJobs);
         $GLOBALS['logger']->logLine("Marked  ".$nJobsMatched .$strTotalRowsText ." roles as likely duplicates based on company/role. " , \Scooper\C__DISPLAY_ITEM_RESULT__);
 
+    }
+
+    private function _markJobsList_SetOutOfArea_()
+    {
+        if(count($this->arrLatestJobs) == 0) return;
+
+        $nJobsNotMarked = 0;
+        $nJobsMarkedAutoExcluded = 0;
+
+        $lookupcbsa = array();
+
+        $arrKeys_Locations = array_column ( $this->arrLatestJobs, 'location');
+        array_unique($arrKeys_Locations);
+        $citycbsaKeys = array_keys($this->cbsaCityMapping);
+        foreach($arrKeys_Locations as $locstr)
+        {
+            print $locstr;
+            $cbsaResult = null;
+            if(in_array($locstr, $citycbsaKeys ))
+            {
+                $cbsaResult = $this->cbsaCityMapping[$locstr];
+                if($cbsaResult !== false)
+                {
+                    $lookupcbsa[$locstr] = $cbsaResult;
+                }
+            }
+        }
+
+        $arrJobs_AutoUpdatable= array_filter($this->arrLatestJobs, "isJobAutoUpdatable");
+        $nJobsSkipped = count($this->arrLatestJobs) - count($arrJobs_AutoUpdatable);
+
+        foreach($arrJobs_AutoUpdatable as $job)
+        {
+            $matched = false;
+            $strJobIndex = getArrayKeyValueForJob($job);
+            if(array_key_exists('location', $job))
+            {
+                $locStr = trim(explode(",", $job['location'])[0]);
+
+                if(array_key_exists($locStr, $this->cbsaCityMapping))
+                {
+                    $cbsa = $this->cbsaCityMapping[$locStr];
+
+                    if(!in_array($cbsa['cbsaCode'], $this->cbsaLocSetMapping))
+                    {
+                        $this->arrLatestJobs[$strJobIndex]['interested'] = 'No (Out of Search Area)' . C__STR_TAG_AUTOMARKEDJOB__;
+                        appendJobColumnData($this->arrLatestJobs[$strJobIndex], 'match_notes', "|", "Matched " . getArrayValuesAsString($cbsa));
+                        $this->arrLatestJobs[$strJobIndex]['date_last_updated'] = getTodayAsString();
+                        $nJobsMarkedAutoExcluded++;
+                        $matched = true;
+                    }
+                }
+                if($matched === false)
+                {
+                    $nJobsNotMarked = $nJobsNotMarked + 1;
+                }
+
+            }
+
+        }
+
+
+        $GLOBALS['logger']->logLine("Jobs marked not interested via companies regex: marked ".$nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobs_AutoUpdatable) .", skipped " . $nJobsSkipped . "/" . countAssociativeArrayValues($arrJobs_AutoUpdatable) .", not marked ". $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobs_AutoUpdatable).")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
+        return;
     }
 
     private function _markJobsList_SetAutoExcludedCompaniesFromRegex_()
