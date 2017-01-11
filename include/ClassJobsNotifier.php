@@ -643,7 +643,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             // if the plugin also errored, then add an asterisk to the name
             // for refernce in the email
             //
-            if(in_array($plugin, array_keys($arrFailedPluginsReport)) === true)
+            if(!is_null($arrFailedPluginsReport) && in_array($plugin, array_keys($arrFailedPluginsReport)) === true)
             {
                 $arrCounts[$plugin]['name'] = "**" . $plugin;
             }
