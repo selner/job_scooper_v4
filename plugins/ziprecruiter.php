@@ -24,22 +24,22 @@ class PluginZipRecruiter extends ClassHTMLJobSitePlugin
     protected $siteName = 'ZipRecruiter';
     protected $siteBaseURL = 'https://jobs.ziprecruiter.com';
     protected $nJobListingsPerPage = 20;
-    protected $strBaseURLFormat = "https://www.ziprecruiter.com/candidate/search?search=***KEYWORDS***&location=***LOCATION***&radius=25&page=***PAGE_NUMBER***&days=***NUMBER_DAYS***";
+    protected $strBaseURLFormat = "https://www.ziprecruiter.com/candidate/search?search=***KEYWORDS***&include_near_duplicates=1&location=***LOCATION***&radius=25&page=***PAGE_NUMBER***&days=***NUMBER_DAYS***";
     protected $additionalFlags = [C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $regex_link_job_id = '/^.*\/clk\/(.*)/i';
 
     protected $arrListingTagSetup = array(
-        'tag_listings_noresults' => array(array('tag' => 'section', 'attribute'=>'class', 'attribute_value' => 'no-results'), array('tag' => 'h2'), 'return_attribute' => 'plaintext', 'return_value_callback' => "PluginCraigslist::getNoResultsCount"),
+        'tag_listings_noresults' => array(array('tag' => 'section', 'attribute'=>'class', 'attribute_value' => 'no-results'), array('tag' => 'h2'), 'return_attribute' => 'plaintext', 'return_value_callback' => "PluginZipRecruiter::isNoResults"),
         'tag_listings_count' => array('tag' => 'h1', 'attribute'=>'class', 'attribute_value' => 'headline', 'index'=> 0, 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*(\d+).*/')
     );
 
     function isNoResults($var)
     {
         if(stristr($var, "No jobs") != "")
-            return true;
+            return 0;
 
-        return false;
+        return null;
     }
 
     /**
@@ -134,7 +134,7 @@ class PluginZipRecruiter extends ClassHTMLJobSitePlugin
 //            $strExternalJobID = preg_replace('/_cpc/i', "", $strExternalJobID );
 //
 
-            $companyNode = $node->find("a[class='t_org_link']");
+            $companyNode = $node->find("span[class='name']");
             if(isset($companyNode) && isset($companyNode[0]))
             {
                 $item['company'] = $companyNode[0]->plaintext;
