@@ -800,9 +800,12 @@ function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber, $returnFailed
 
         $data = json_decode($jsonText, $assoc=true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
 
-        if ($returnFailedSearches === false || (array_key_exists('search', $data) && !is_null($data['search']) && (is_array($data['search']) && array_key_exists('search_run_result', $data['search']) && $data['search']['search_run_result']['success'] !== true ))) {
-            $GLOBALS['logger']->logLine("Ignoring incomplete search results found in file with key " . $fileKey);
-            $retJobs = null;
+        if ($returnFailedSearches === false)
+        {
+           if($data['search']['search_run_result']['success'] !== true ) {
+               $GLOBALS['logger']->logLine("Ignoring incomplete search results found in file with key " . $fileKey);
+               $data = null;
+           }
         }
 
 
