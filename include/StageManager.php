@@ -336,20 +336,7 @@ class StageManager extends S3JobListManager
                 $this->arrLatestJobs_UnfilteredByUserInput = \Scooper\array_copy($arrUpdatedJobs);
                 $this->publishS3JobsList(1, JOBLIST_TYPE_UNFILTERED);
 
-                if(isDebug() === true) {
-
-                    //
-                    // Let's save off the unfiltered jobs list in case we need it later.  The $this->arrLatestJobs
-                    // will shortly have the user's input jobs applied to it
-                    //
-                    $strRawJobsListOutput = \Scooper\getFullPathFromFileDetails($this->classConfig->getFileDetails('output_subfolder'), "", "_rawjobslist_preuser_filtering");
-                    $this->writeRunsJobsToFile($strRawJobsListOutput, $this->arrLatestJobs_UnfilteredByUserInput, "RawJobsList_PreUserDataFiltering");
-
-                    $this->logger->logLine(count($this->arrLatestJobs_UnfilteredByUserInput). " raw, latest job listings from " . count($arrSearchesToRun) . " search(es) downloaded to " . $strRawJobsListOutput, \Scooper\C__DISPLAY_SUMMARY__);
-                }
-
                 // Process the search results and send an error alert for any that failed unexpectedly
-
                 $notifier = new ClassJobsNotifier($this->arrLatestJobs_UnfilteredByUserInput, $this->arrMarkedJobs);
                 $notifier->sendErrorEmail();
 
