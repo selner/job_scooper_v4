@@ -25,6 +25,18 @@ const C__STR_TAG_BAD_TITLE_POST__ = "No (Bad Title & Role)";
 const C__STR_TAG_NOT_A_KEYWORD_TITLE_MATCH__ = "No (Not a Keyword Title Match)";
 const C__STR_TAG_NOT_EXACT_TITLE_MATCH__ = "No (Not an Exact Title Match)";
 
+function saveDomToFile($htmlNode, $filepath)
+{
+
+    $strHTML = strval($htmlNode);
+
+    $htmlTmp = \voku\helper\HtmlDomParser::str_get_html($strHTML);
+    $htmlTmp->save($filepath);
+
+    return $strHTML;
+
+}
+
 function clean_utf8($string, $control = true)
 {
     $string = iconv('UTF-8', 'UTF-8//IGNORE', $string);

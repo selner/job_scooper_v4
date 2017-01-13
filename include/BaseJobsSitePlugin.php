@@ -334,16 +334,6 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
     function __destruct()
     {
 
-        //
-        // Write out the interim data to file if we're debugging
-        //
-        if(isDebug() === true && isset($this->detailsMyFileOut) && is_array($this->detailsMyFileOut))
-        {
-            $arrAllSearchResults = $this->getMyJobsList();
-            $strOutPathWithName = $this->getOutputFileFullPath($this->siteName . "-");
-            if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Writing ". $this->siteName." " .count($arrAllSearchResults) ." job records to " . $strOutPathWithName . " for debugging (if needed).", \Scooper\C__DISPLAY_ITEM_START__); }
-            $this->writeJobsListToFile($strOutPathWithName, $arrAllSearchResults, true, $this->siteName, "CSV");
-        }
     }
 
 
@@ -681,7 +671,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             // get all the results for all pages if we have them cached already
             $arrSearchJobList = $this->_getJobsfromFileStoreForSearch_($searchDetails, false);
             if (isset($arrSearchJobList)) {
-                $this->_setSearchSuccessResult_($searchDetails, $success = true, $details = 'Using cached results for ' . countAssociativeArrayValues($arrSearchJobList) . ' matching, unfiltered jobs.');
+                $this->_setSearchSuccessResult_($searchDetails, $success = true, $details = 'Using cached results for ' . countAssociativeArrayValues($arrSearchJobList) . ' matching, unfiltered jobs.', $arrSearchJobList);
                 $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[" . $searchDetails['name'] . "]" . ": " . countJobRecords($arrSearchJobList) . " jobs found." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
 
             } else {
@@ -697,7 +687,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                     throw new ErrorException("Class " . get_class($this) . " does not have a valid setting for parser.  Cannot continue.");
                 }
 
-                $this->_setSearchSuccessResult_($searchDetails, $success = true, $details = 'Search found ' . countAssociativeArrayValues($arrSearchJobList) . ' matching, unfiltered jobs.');
+                $this->_setSearchSuccessResult_($searchDetails, $success = true, $details = 'Search found ' . countAssociativeArrayValues($arrSearchJobList) . ' matching, unfiltered jobs.', $arrSearchJobList);
 
                 $this->_setJobsToFileStoreForSearch_($searchDetails, $arrSearchJobList);
 
@@ -720,7 +710,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                 $strError = $this->siteName . " plugin returned a 404 page for the search.  This is not an error; it means zero results found.";
                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-                $this->_setSearchSuccessResult_($searchDetails, $success = true, $details = 'Search found no matching, unfiltered jobs.');
+                $this->_setSearchSuccessResult_($searchDetails, $success = true, $details = 'Search found no matching, unfiltered jobs.', array());
 
             }
             else
@@ -768,28 +758,47 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
         if (!array_key_exists($searchDetails['key'], $GLOBALS['USERDATA']['search_results'])){
             throw new Exception("Error - Cannot Set Search Result for key " . $searchDetails['key'] . ".  Key does not exist in search results array.");
         }
-        $errHTMLFile = $GLOBALS['USERDATA']['directories']['stage1'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "error", $strBase = $searchDetails['key'], $strExt = "html", $delim = "-");
-        $errCSVFile = substr($errHTMLFile, 0, strlen($errHTMLFile) - 4) . ".csv";
 
-        if (!is_null($objSimpleHTMLResults)) {
-            $objSimpleHTMLResults->save($errHTMLFile);
-            $arrErrorFiles[$errHTMLFile] = $errHTMLFile;
-        }
-
-        if (!is_null($arrSearchedJobs) && is_array($arrSearchedJobs) && countJobRecords($arrSearchedJobs) > 0) {
-            $this->writeJobsListToFile($errCSVFile, $arrSearchedJobs);
-            $arrErrorFiles[$errCSVFile] = $errCSVFile;
-        }
+        $this->_writeDebugFiles_($searchDetails, "ERROR", $arrSearchedJobs, $objSimpleHTMLResults);
 
         $this->_setSearchResult_($searchDetails, $success = false, $details = $err, $files = $arrErrorFiles);
     }
 
 
 
-    private function _setSearchSuccessResult_(&$searchDetails, $success = null, $details = "UNKNOWN RESULT.")
+
+    private function _writeDebugFiles_(&$searchDetails, $keyName = "UNKNOWN", $arrSearchedJobs = null, $objSimpleHTMLResults = null)
     {
+        if(isDebug())
+        {
+            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Writing debug files for plugin " . $this->siteName ."'s search". $searchDetails['key'], \Scooper\C__DISPLAY_NORMAL__);
+
+            $debugHTMLFile = $GLOBALS['USERDATA']['directories']['stage1'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "html", $delim = "-");
+            $debugCSVFile = substr($debugHTMLFile, 0, strlen($debugHTMLFile) - 4) . ".csv";
+
+            if (!is_null($objSimpleHTMLResults)) {
+                saveDomToFile($objSimpleHTMLResults, $debugHTMLFile);
+                $arrErrorFiles[$debugHTMLFile] = $debugHTMLFile;
+                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML out to " . $debugHTMLFile, \Scooper\C__DISPLAY_NORMAL__);
+            }
+
+            if (!is_null($arrSearchedJobs) && is_array($arrSearchedJobs) && countJobRecords($arrSearchedJobs) > 0) {
+                $this->writeJobsListToFile($debugCSVFile, $arrSearchedJobs);
+                $arrErrorFiles[$debugCSVFile] = $debugCSVFile;
+                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote results CSV data to " . $debugCSVFile, \Scooper\C__DISPLAY_NORMAL__);
+            }
+        }
+    }
+
+
+
+    private function _setSearchSuccessResult_(&$searchDetails, $success = null, $details = "UNKNOWN RESULT.", $arrSearchedJobs = null, $objSimpleHTMLResults = null)
+    {
+        $this->_writeDebugFiles_($searchDetails, "SUCCESS", $arrSearchedJobs, $objSimpleHTMLResults);
         $this->_setSearchResult_($searchDetails, $success, $details, $files = array());
     }
+
+
     private function _setSearchResult_(&$searchDetails, $success = null, $details = "UNKNOWN RESULT.", $files = array())
     {
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting result value for search '" . $searchDetails['key'] . "' equal to " . ($success == 1 ? "true" : "false"). " with details '" . $details . "'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -905,8 +914,17 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                 $totalPagesCount = 1;
                 $nTotalListings = $this->nJobListingsPerPage;
 
-            } elseif(!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
-            {
+            } elseif(!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__)) {
+
+                //
+                // If we are in debug mode, save the HTML we got back for the listing count page to disk so it is
+                // easy for a develooper to review it
+                //
+                if(isDebug() && !is_null($objSimpleHTML) && !is_null($objSimpleHTML->root))
+                {
+                    $this->_writeDebugFiles_($searchDetails, "parseTotalResultsCount", null, $objSimpleHTML->root);
+                }
+
                 $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML->root);
                 $nTotalListings = intval(str_replace(",", "", $strTotalResults));
                 if($nTotalListings == 0)
@@ -1003,6 +1021,15 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                             $strURL = $selen->driver->getCurrentURL();
                             $html = $selen->driver->getPageSource();
                             $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+                            //
+                            // If we are in debug mode, save the HTML we got back for the listing count page to disk so it is
+                            // easy for a develooper to review it
+                            //
+                            if(isDebug() && !is_null($objSimpleHTML) && !is_null($objSimpleHTML->root))
+                            {
+                                $this->_writeDebugFiles_($searchDetails, "page" . $nPageCount . "-loaded", null, $objSimpleHTML->root);
+                            }
+
 
                         } catch (Exception $ex) {
                             $strMsg = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
@@ -1118,7 +1145,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             return $arrSearchReturnedJobs;
 
         } catch (Exception $ex) {
-            $this->_setSearchResultError_($searchDetails, "Error: " . $ex->getMessage(), $arrSearchReturnedJobs);
+            $this->_setSearchResultError_($searchDetails, "Error: " . $ex->getMessage(), $arrSearchReturnedJobs, $objSimpleHTML);
             $this->_setJobsToFileStoreForSearch_($searchDetails, $arrSearchReturnedJobs);
 
             $GLOBALS['logger']->logLine($ex->getMessage(), \Scooper\C__DISPLAY_ERROR__);
