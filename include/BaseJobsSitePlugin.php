@@ -1130,13 +1130,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                         }
                     }
 
-                    // clean up memory
-                    $objSimpleHTML->clear();
-                    unset($objSimpleHTML);
-                    $objSimpleHTML = null;
                     $nPageCount++;
-
-
                 }
 
             }
@@ -1150,6 +1144,15 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
 
             $GLOBALS['logger']->logLine($ex->getMessage(), \Scooper\C__DISPLAY_ERROR__);
             throw new Exception($ex->getMessage());
+        }
+        finally
+        {
+            // clean up memory
+            if (!is_null($objSimpleHTML))
+            {
+                $objSimpleHTML->clear();
+                unset($objSimpleHTML);
+            }
         }
     }
 
