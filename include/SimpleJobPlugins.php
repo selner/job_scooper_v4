@@ -47,6 +47,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
     protected $childSiteURLBase = '';
     protected $childSiteListingPage = '';
     protected $additionalLoadDelaySeconds = 2;
+    protected $nextPageScript = null;
 
     function __construct($strBaseDir = null)
     {
@@ -317,6 +318,13 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
                 }
             }
             return;
+        }
+        elseif(!is_null($this->nextPageScript ))
+        {
+                $GLOBALS['logger']->logLine("Going to next page of results via script: " . $this->nextPageScript  , \Scooper\C__DISPLAY_NORMAL__);
+                $driver->executeScript("function callNextPage() { " . $this->nextPageScript ." } ; callNextPage();");
+                sleep($this->additionalLoadDelaySeconds);
+                return ;
         }
         throw new Exception(sprintf("Error: plugin for %s is missing tag definition for the next page button to click. Cannot complete search.", $this->siteName));
     }

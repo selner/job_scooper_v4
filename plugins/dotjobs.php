@@ -35,7 +35,7 @@ protected $arrListingTagSetup = array(
 'tag_title' =>  array(array('tag' => 'h4'), array('tag' => 'a'), array('tag' => 'span'), 'return_attribute' => 'plaintext'),
 'tag_link' =>  array(array('tag' => 'h4'), array('tag' => 'a'), 'return_attribute' => 'href'),
 'tag_company' =>  array(array('tag' => 'div'), array('tag' => 'span'),array('tag' => 'b'), 'return_attribute' => 'plaintext'),
-'tag_location' =>  array(array('tag' => 'div'), array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'hiringPlace'), array('tag' => 'span'), array('tag' => 'span'), 'return_attribute' => 'plaintext'),
+'tag_location' =>  array(array('tag' => 'div'), array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'hiringPlace'), array('tag' => 'span'), array('tag' => 'span'), 'index' => 0, 'return_attribute' => 'plaintext'),
 'tag_job_id' =>  array(array('tag' => 'h4'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>  '/\/([\w\d]+)\/job.*/i'),
 'tag_load_more' =>  array('tag' => 'a', 'attribute' => 'id', 'attribute_value' =>'button_moreJobs')
 );
