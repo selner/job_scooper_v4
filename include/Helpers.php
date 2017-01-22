@@ -14,16 +14,110 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
+if (!strlen(__ROOT__) > 0) {
+    define('__ROOT__', dirname(dirname(__FILE__)));
+}
 
-require_once(__ROOT__.'/include/Options.php');
-require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
+require_once(__ROOT__ . '/include/Options.php');
+require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 const C__STR_TAG_AUTOMARKEDJOB__ = "[auto-marked]";
 const C__STR_TAG_DUPLICATE_POST__ = "No (Duplicate Job Post?)";
 const C__STR_TAG_BAD_TITLE_POST__ = "No (Bad Title & Role)";
 const C__STR_TAG_NOT_A_KEYWORD_TITLE_MATCH__ = "No (Not a Keyword Title Match)";
 const C__STR_TAG_NOT_EXACT_TITLE_MATCH__ = "No (Not an Exact Title Match)";
+
+//
+//function obj2array ( &$Instance ) {
+//    $clone = (array) $Instance;
+//    $rtn = array ();
+//    $rtn['___SOURCE_KEYS_'] = $clone;
+//
+//    while ( list ($key, $value) = each ($clone) ) {
+//        $aux = explode ("\0", $key);
+//        $newkey = $aux[count($aux)-1];
+//        $rtn[$newkey] = &$rtn['___SOURCE_KEYS_'][$key];
+//    }
+//
+//    return $rtn;
+//}
+//
+
+function object_to_array($obj)
+{
+    $arr = is_object($obj) ? get_object_vars($obj) : $obj;
+    foreach ($arr as $key => $val) {
+        $val = (is_array($val) || is_object($val)) ? object_to_array($val) : $val;
+        $arr[$key] = $val;
+    }
+    return $arr;
+}
+
+function handleException($ex, $fmtLogMsg = null, $raise = true)
+{
+
+    if (!array_key_exists('ERROR_REPORTS', $GLOBALS['USERDATA']))
+        $GLOBALS['USERDATA']['ERROR_REPORTS'] = array();
+
+
+    $toThrow = $ex;
+    $msg = $ex->getMessage();
+    if (!is_null($fmtLogMsg)) {
+        $msg = sprintf($fmtLogMsg, $ex->getMessage());
+        $toThrow = new Exception($msg);
+    }
+
+    $msg .= PHP_EOL . "PHP memory usage: ". getPhpMemoryUsage() . PHP_EOL;
+
+    $msgHash = md5($msg);
+
+    //
+    // Error key = <file><line#><1st 10 Chars of Msg>
+    //
+    $excKey = \Scooper\strScrub($ex->getFile() . $ex->getLine() . $msgHash, FOR_LOOKUP_VALUE_MATCHING);
+    if (array_key_exists($excKey, $GLOBALS['USERDATA']['ERROR_REPORTS']) === true)
+    {
+        // we already stored this error so need to re-store it.  Just throw it if needed.
+        if($raise === true)
+            throw $toThrow;
+    }
+
+
+    if (isset($GLOBALS['logger'])) {
+        $GLOBALS['logger']->logLine(PHP_EOL . PHP_EOL . PHP_EOL);
+        $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
+        $GLOBALS['logger']->logLine(PHP_EOL . PHP_EOL . PHP_EOL);
+    }
+
+    $now = new DateTime('NOW');
+
+    $debugData = array(
+        "error_time" => $now ->format('Y-m-d\TH:i:s'),
+        "error_message" => $msg,
+        "exception" => \Scooper\object_to_array($ex),
+        "object_properties" => null,
+        "debug_backtrace" => var_export(debug_backtrace(), true),
+        "exception_stack_trace" => $ex->getTrace());
+
+    $filenm = exportToDebugJSON($debugData, "exception" . $excKey);
+
+    $GLOBALS['USERDATA']['ERROR_REPORTS'][$excKey] = \Scooper\getFilePathDetailsFromString($filenm);
+
+
+    if ($raise == true) {
+        throw $toThrow;
+    }
+}
+
+function exportToDebugJSON($obj, $strBaseFileName)
+{
+    $jsonSelf = json_encode($obj, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+    $debugJSONFile = $GLOBALS['USERDATA']['directories']['stage1'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_". $strBaseFileName, $strExt = "", $delim = "-") . ".json";
+    file_put_contents($debugJSONFile, $jsonSelf);
+
+    return $debugJSONFile;
+
+}
 
 function saveDomToFile($htmlNode, $filepath)
 {
@@ -41,8 +135,7 @@ function clean_utf8($string, $control = true)
 {
     $string = iconv('UTF-8', 'UTF-8//IGNORE', $string);
 
-    if ($control === true)
-    {
+    if ($control === true) {
         return preg_replace('~\p{C}+~u', '', $string);
     }
 
@@ -53,34 +146,25 @@ function getDateForDaysAgo($strDaysAgo)
 {
     $retDate = null;
 
-    if(!isset($strDaysAgo) || strlen($strDaysAgo) <= 0) return $retDate;
+    if (!isset($strDaysAgo) || strlen($strDaysAgo) <= 0) return $retDate;
 
-    if(is_numeric($strDaysAgo) )
-    {
+    if (is_numeric($strDaysAgo)) {
         $daysToSubtract = $strDaysAgo;
-    }
-    else
-    {
+    } else {
         $strDaysAgo = \Scooper\strScrub($strDaysAgo, SIMPLE_TEXT_CLEANUP | LOWERCASE);
-        if(strcasecmp($strDaysAgo, "yesterday") == 0)
-        {
+        if (strcasecmp($strDaysAgo, "yesterday") == 0) {
             $daysToSubtract = 1;
-        }
-        elseif(strcasecmp($strDaysAgo, "today") == 0)
-        {
+        } elseif (strcasecmp($strDaysAgo, "today") == 0) {
             $daysToSubtract = 0;
-        }
-        else
-        {
+        } else {
             $daysToSubtract = null;
         }
 
     }
 
-    if(isset($daysToSubtract))
-    {
+    if (isset($daysToSubtract)) {
         $date = new DateTime();
-        $date->modify("-".$daysToSubtract." days");
+        $date->modify("-" . $daysToSubtract . " days");
         $retDate = $date->format('Y-m-d');
     }
 
@@ -91,17 +175,13 @@ function combineTextAllChildren($node, $fRecursed = false)
 {
 
     $retStr = "";
-    if($node->hasChildNodes())
-    {
-        $retStr = \Scooper\strScrub($node->plaintext . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE  );
-        foreach($node->childNodes() as $child)
-        {
+    if ($node->hasChildNodes()) {
+        $retStr = \Scooper\strScrub($node->plaintext . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
+        foreach ($node->childNodes() as $child) {
             $retStr = $retStr . " " . combineTextAllChildren($child, true);
         }
-    }
-    elseif(isset($node->plaintext) && $fRecursed == false)
-    {
-        $retStr = \Scooper\strScrub($node->plaintext . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE  );
+    } elseif (isset($node->plaintext) && $fRecursed == false) {
+        $retStr = \Scooper\strScrub($node->plaintext . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
     }
 
     return $retStr;
@@ -132,27 +212,27 @@ function getArrayKeyValueForJob($job)
 
     return $job['key_jobsite_siteid'];
 
-/*
-    $strKey = \Scooper\strScrub($job['job_site'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACE_SPACES_WITH_HYPHENS);
+    /*
+        $strKey = \Scooper\strScrub($job['job_site'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACE_SPACES_WITH_HYPHENS);
 
-    // For craigslist, they change IDs on every post, so deduping that way doesn't help
-    // much.  Instead, let's dedupe for Craigslist by using the role title and the jobsite
-    // (Company doesn't usually get filled out either with them.)
-    if(strcasecmp($strKey, "craigslist") == 0)
-    {
-        $strKey = $strKey . "-" . \Scooper\strScrub($job['job_title'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACE_SPACES_WITH_HYPHENS );
-    }
-    if($job['job_id'] != null && $job['job_id'] != "")
-    {
-        $strKey = $strKey . "-" . \Scooper\strScrub($job['job_id'], REPLACE_SPACES_WITH_HYPHENS | REMOVE_PUNCT | HTML_DECODE | LOWERCASE);
-    }
-    else
-    {
-        $strKey = $strKey . "-" . \Scooper\strScrub($job['company'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACE_SPACES_WITH_HYPHENS );
-        $strKey = $strKey . "-" . \Scooper\strScrub($job['job_title'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACE_SPACES_WITH_HYPHENS );
-    }
-    return $strKey;
-*/
+        // For craigslist, they change IDs on every post, so deduping that way doesn't help
+        // much.  Instead, let's dedupe for Craigslist by using the role title and the jobsite
+        // (Company doesn't usually get filled out either with them.)
+        if(strcasecmp($strKey, "craigslist") == 0)
+        {
+            $strKey = $strKey . "-" . \Scooper\strScrub($job['job_title'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACE_SPACES_WITH_HYPHENS );
+        }
+        if($job['job_id'] != null && $job['job_id'] != "")
+        {
+            $strKey = $strKey . "-" . \Scooper\strScrub($job['job_id'], REPLACE_SPACES_WITH_HYPHENS | REMOVE_PUNCT | HTML_DECODE | LOWERCASE);
+        }
+        else
+        {
+            $strKey = $strKey . "-" . \Scooper\strScrub($job['company'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACE_SPACES_WITH_HYPHENS );
+            $strKey = $strKey . "-" . \Scooper\strScrub($job['job_title'], DEFAULT_SCRUB | REMOVE_PUNCT | REPLACE_SPACES_WITH_HYPHENS );
+        }
+        return $strKey;
+    */
 
 
 }
@@ -163,23 +243,21 @@ function doExec($cmd)
     $cmdRet = "";
 
     exec($cmd, $cmdOutput, $cmdRet);
-    foreach($cmdOutput as $resultLine)
-        if(!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine($resultLine, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-    if(is_array($cmdOutput) && count($cmdOutput) == 1)
+    foreach ($cmdOutput as $resultLine)
+        if (!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine($resultLine, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+    if (is_array($cmdOutput) && count($cmdOutput) == 1)
         return $cmdOutput[0];
     return $cmdOutput;
 }
 
 function countAssociativeArrayValues($arrToCount)
 {
-    if($arrToCount == null || !is_array($arrToCount))
-    {
+    if ($arrToCount == null || !is_array($arrToCount)) {
         return 0;
     }
 
     $count = 0;
-    foreach($arrToCount as $item)
-    {
+    foreach ($arrToCount as $item) {
         $count = $count + 1;
     }
 
@@ -200,17 +278,15 @@ function countJobRecords($arrJobs)
 
 function addJobsToJobsList(&$arrJobsListToUpdate, $arrAddJobs)
 {
-    if($arrAddJobs == null) return;
+    if ($arrAddJobs == null) return;
 
-    if(!is_array($arrAddJobs) || count($arrAddJobs) == 0)
-    {
+    if (!is_array($arrAddJobs) || count($arrAddJobs) == 0) {
         // skip. no jobs to add
         return;
     }
-    if($arrJobsListToUpdate == null) $arrJobsListToUpdate = array();
+    if ($arrJobsListToUpdate == null) $arrJobsListToUpdate = array();
 
-    foreach($arrAddJobs as $jobRecord)
-    {
+    foreach ($arrAddJobs as $jobRecord) {
         addJobToJobsList($arrJobsListToUpdate, $jobRecord);
     }
 
@@ -219,14 +295,12 @@ function addJobsToJobsList(&$arrJobsListToUpdate, $arrAddJobs)
 
 function addJobToJobsList(&$arrJobsListToUpdate, $job)
 {
-    if($arrJobsListToUpdate == null) $arrJobsListToUpdate = array();
+    if ($arrJobsListToUpdate == null) $arrJobsListToUpdate = array();
 
     $jobToAdd = \Scooper\array_copy($job);
 
 
-
-    if(isset($arrJobsListToUpdate[$job['key_jobsite_siteid']]))
-    {
+    if (isset($arrJobsListToUpdate[$job['key_jobsite_siteid']])) {
         $jobToAdd = getMergedJobRecord($arrJobsListToUpdate[$job['key_jobsite_siteid']], $job);
     }
 
@@ -235,29 +309,21 @@ function addJobToJobsList(&$arrJobsListToUpdate, $job)
 }
 
 
-
 function updateJobColumn(&$job, $newJob, $strColumn, $fAllowEmptyValueOverwrite = false)
 {
     $prevJob = \Scooper\array_copy($job);
 
-    if(strlen($job[$strColumn]) == 0)
-    {
+    if (strlen($job[$strColumn]) == 0) {
         $job[$strColumn] = $newJob[$strColumn];
-    }
-    elseif(strlen($newJob[$strColumn]) == 0)
-    {
-        if($fAllowEmptyValueOverwrite == true)
-        {
+    } elseif (strlen($newJob[$strColumn]) == 0) {
+        if ($fAllowEmptyValueOverwrite == true) {
             $job[$strColumn] = $newJob[$strColumn];
-            $job['match_notes'] .= $strColumn . " value '" . $prevJob[$strColumn]."' removed.'".PHP_EOL;
+            $job['match_notes'] .= $strColumn . " value '" . $prevJob[$strColumn] . "' removed.'" . PHP_EOL;
         }
-    }
-    else
-    {
-        if(strcasecmp(\Scooper\strScrub($job[$strColumn]), \Scooper\strScrub($newJob[$strColumn])) != 0)
-        {
+    } else {
+        if (strcasecmp(\Scooper\strScrub($job[$strColumn]), \Scooper\strScrub($newJob[$strColumn])) != 0) {
             $job[$strColumn] = $newJob[$strColumn];
-            $job['match_notes'] .= PHP_EOL.$strColumn . ": old[" . $prevJob[$strColumn]."], new[" .$job[$strColumn]."]".PHP_EOL;
+            $job['match_notes'] .= PHP_EOL . $strColumn . ": old[" . $prevJob[$strColumn] . "], new[" . $job[$strColumn] . "]" . PHP_EOL;
         }
     }
 
@@ -265,8 +331,7 @@ function updateJobColumn(&$job, $newJob, $strColumn, $fAllowEmptyValueOverwrite 
 
 function appendJobColumnData(&$job, $strColumn, $delim, $newData)
 {
-    if(is_string($job[$strColumn]) && strlen($job[$strColumn]) > 0)
-    {
+    if (is_string($job[$strColumn]) && strlen($job[$strColumn]) > 0) {
         $job[$strColumn] .= $delim . " ";
     }
     $job[$strColumn] .= $newData;
@@ -277,32 +342,23 @@ function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strD
 {
     $strReturn = "";
 
-    if(isset($arrItem[$key]))
-    {
+    if (isset($arrItem[$key])) {
         $val = $arrItem[$key];
-        if(is_string($val) && strlen($val) > 0)
-        {
+        if (is_string($val) && strlen($val) > 0) {
             $strVal = $val;
-        }
-        elseif(is_array($val) && !(\Scooper\is_array_multidimensional($val)))
-        {
+        } elseif (is_array($val) && !(\Scooper\is_array_multidimensional($val))) {
             $strVal = join(" | ", $val);
-        }
-        else
-        {
+        } else {
             $strVal = var_export($val, true);
         }
 
-        if($fIsFirstItem == true)
-        {
+        if ($fIsFirstItem == true) {
             $strReturn = $strIntro;
-        }
-        else
-        {
+        } else {
             $strReturn .= $strDelimiter;
         }
-        if($fIncludeKey == true) {
-            $strReturn .= $key . '=['.$strVal.']';
+        if ($fIncludeKey == true) {
+            $strReturn .= $key . '=[' . $strVal . ']';
         } else {
             $strReturn .= $strVal;
         }
@@ -317,8 +373,7 @@ function cloneArray($source, $arrDontCopyTheseKeys = array())
 {
     $retDetails = \Scooper\array_copy($source);
 
-    foreach($arrDontCopyTheseKeys as $key)
-    {
+    foreach ($arrDontCopyTheseKeys as $key) {
         unset($retDetails[$key]);
     }
 
@@ -326,7 +381,8 @@ function cloneArray($source, $arrDontCopyTheseKeys = array())
 }
 
 
-function array_mapk($callback, $array) {
+function array_mapk($callback, $array)
+{
     $newArray = array();
     foreach ($array as $k => $v) {
         $newArray[$k] = call_user_func($callback, $k, $v);
@@ -345,10 +401,8 @@ function getArrayValuesAsString($arrDetails, $strDelimiter = ", ", $strIntro = "
 {
     $strReturn = "";
 
-    if(isset($arrDetails) && is_array($arrDetails))
-    {
-        foreach(array_keys($arrDetails) as $key)
-        {
+    if (isset($arrDetails) && is_array($arrDetails)) {
+        foreach (array_keys($arrDetails) as $key) {
             $strReturn .= getArrayItemDetailsAsString($arrDetails, $key, (strlen($strReturn) <= 0), $strDelimiter, $strIntro, $fIncludeKey);
         }
     }
@@ -364,8 +418,7 @@ function updateJobRecord($prevJobRecord, $jobRecordChanges)
 
 function getMergedJobRecord($prevJobRecord, $newerJobRecord)
 {
-    if($prevJobRecord['key_jobsite_siteid'] == $newerJobRecord['key_jobsite_siteid'])
-    {
+    if ($prevJobRecord['key_jobsite_siteid'] == $newerJobRecord['key_jobsite_siteid']) {
         return $prevJobRecord; // don't update yourself.
     }
 
@@ -384,8 +437,7 @@ function getMergedJobRecord($prevJobRecord, $newerJobRecord)
 //    updateJobColumn($mergedJob, $newerJobRecord, 'job_post_url', false);
 //    updateJobColumn($mergedJob, $newerJobRecord, 'job_site_date', false);
 
-    if(!isMarked_InterestedOrBlank($prevJobRecord))
-    {
+    if (!isMarked_InterestedOrBlank($prevJobRecord)) {
         updateJobColumn($mergedJob, $newerJobRecord, 'interested', false);
 //        updateJobColumn($mergedJob, $newerJobRecord, 'status', false);
     }
@@ -400,29 +452,24 @@ function getMergedJobRecord($prevJobRecord, $newerJobRecord)
 
 function loadCSV($filename, $indexKeyName = null)
 {
-    if(!is_file($filename))
-    {
+    if (!is_file($filename)) {
         throw new Exception("Specified input file '" . $filename . "' was not found.  Aborting.");
     }
 
-    $file = fopen($filename,"r");
-    if(is_bool($file))
-    {
+    $file = fopen($filename, "r");
+    if (is_bool($file)) {
         throw new Exception("Specified input file '" . $filename . "' could not be opened.  Aborting.");
     }
 
     $headers = fgetcsv($file);
     $arrLoadedList = array();
-    while (!feof($file) ) {
+    while (!feof($file)) {
         $rowData = fgetcsv($file);
-        if($rowData === false)
-        {
+        if ($rowData === false) {
             break;
-        }
-        else
-        {
+        } else {
             $arrRec = array_combine($headers, $rowData);
-            if($indexKeyName != null)
+            if ($indexKeyName != null)
                 $arrLoadedList[$arrRec[$indexKeyName]] = $arrRec;
             else
                 $arrLoadedList[] = $arrRec;
@@ -434,38 +481,35 @@ function loadCSV($filename, $indexKeyName = null)
     return $arrLoadedList;
 
 }
+
 function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 {
-    $GLOBALS['logger']->logLine("Tokenizing title exclusion matches from ".$inputfile."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-    if(!$outputFile)
+    $GLOBALS['logger']->logLine("Tokenizing title exclusion matches from " . $inputfile . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+    if (!$outputFile)
         $outputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tempCallTokenizer.csv";
-    $PYTHONPATH = realpath(__DIR__ ."/../python/pyJobNormalizer/");
+    $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/");
     $cmd = "python " . $PYTHONPATH . "/normalizeStrings.py -i " . $inputfile . " -o " . $outputFile . " -k " . $keyname;
     if ($indexKeyName != null)
         $cmd .= " --index " . $indexKeyName;
-    $GLOBALS['logger']->logLine("Running command: " . $cmd   , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+    $GLOBALS['logger']->logLine("Running command: " . $cmd, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
     doExec($cmd);
 
-    $GLOBALS['logger']->logLine("Loading tokens for ".$inputfile."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-    $file = fopen($outputFile,"r");
-    if(is_bool($file))
-    {
+    $GLOBALS['logger']->logLine("Loading tokens for " . $inputfile . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+    $file = fopen($outputFile, "r");
+    if (is_bool($file)) {
         throw new Exception("Specified input file '" . $outputFile . "' could not be opened.  Aborting.");
     }
 
     $headers = fgetcsv($file);
     $arrTokenizedList = array();
-    while (!feof($file) ) {
+    while (!feof($file)) {
         $rowData = fgetcsv($file);
-        if($rowData === false)
-        {
+        if ($rowData === false) {
             break;
-        }
-        else
-        {
+        } else {
             $arrRec = array_combine($headers, $rowData);
-            if($indexKeyName != null)
+            if ($indexKeyName != null)
                 $arrTokenizedList[$arrRec[$indexKeyName]] = $arrRec;
             else
                 $arrTokenizedList[] = $arrRec;
@@ -480,28 +524,25 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 
 function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "keywords", $indexKeyName = null)
 {
-    $inputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-".$tempFileKey."-token-input.csv";
-    $outputFile = $GLOBALS['USERDATA']['directories']['stage2']. "/tmp-".$tempFileKey."-token-output.csv";
+    $inputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-" . $tempFileKey . "-token-input.csv";
+    $outputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-" . $tempFileKey . "-token-output.csv";
 
     $headers = array($dataKeyName);
-    if(array_key_exists($dataKeyName, $arrData)) $headers = array_keys($arrData);
+    if (array_key_exists($dataKeyName, $arrData)) $headers = array_keys($arrData);
 
-    if(is_file($inputFile))
-    {
+    if (is_file($inputFile)) {
         unlink($inputFile);
     }
 
-    if(is_file($outputFile))
-    {
+    if (is_file($outputFile)) {
         unlink($outputFile);
     }
 
-    $file = fopen($inputFile,"w");
+    $file = fopen($inputFile, "w");
     fputcsv($file, $headers);
 
-    foreach ($arrData as $line)
-    {
-        if(is_string($line))
+    foreach ($arrData as $line) {
+        if (is_string($line))
             $line = explode(',', $line);
         fputcsv($file, $line);
     }
@@ -511,8 +552,7 @@ function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "ke
     $tmpTokenizedWords = callTokenizer($inputFile, $outputFile, $dataKeyName, $indexKeyName);
     $valInterimFiles = \Scooper\get_PharseOptionValue('output_interim_files');
 
-    if(isset($valInterimFiles) && $valInterimFiles != true)
-    {
+    if (isset($valInterimFiles) && $valInterimFiles != true) {
         unlink($inputFile);
         unlink($outputFile);
     }
@@ -524,21 +564,19 @@ function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "ke
 
 function tokenizeMultiDimensionArray($arrData, $tempFileKey, $dataKeyName, $indexKeyName = null)
 {
-    $inputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-".$tempFileKey."-token-input.csv";
-    $outputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-".$tempFileKey."-token-output.csv";
+    $inputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-" . $tempFileKey . "-token-input.csv";
+    $outputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-" . $tempFileKey . "-token-output.csv";
 
-    if(is_file($inputFile))
-    {
+    if (is_file($inputFile)) {
         unlink($inputFile);
     }
 
-    $file = fopen($inputFile,"w");
+    $file = fopen($inputFile, "w");
 //    fputs($file, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
 
     fputcsv($file, array_keys(array_shift(\Scooper\array_copy($arrData))));
 
-    foreach ($arrData as $rec)
-    {
+    foreach ($arrData as $rec) {
         $line = join('`', $rec);
 
         $outline = preg_replace("/\\x00/", "", utf8_encode($line));
@@ -549,8 +587,7 @@ function tokenizeMultiDimensionArray($arrData, $tempFileKey, $dataKeyName, $inde
     fclose($file);
 
     $ret = callTokenizer($inputFile, $outputFile, $dataKeyName, $indexKeyName);
-    if(isset($valInterimFiles) && $valInterimFiles != true)
-    {
+    if (isset($valInterimFiles) && $valInterimFiles != true) {
         unlink($inputFile);
         unlink($outputFile);
     }
@@ -559,18 +596,15 @@ function tokenizeMultiDimensionArray($arrData, $tempFileKey, $dataKeyName, $inde
 }
 
 
-
 function tokenizeKeywords($arrKeywords)
 {
-    if (!is_array($arrKeywords))
-    {
+    if (!is_array($arrKeywords)) {
         throw new Exception("Invalid keywords object type.");
     }
 
     $arrKeywordTokens = tokenizeSingleDimensionArray($arrKeywords, "srchkwd", "keywords", "keywords");
     $arrReturnKeywordTokens = array_fill_keys(array_keys($arrKeywordTokens), null);
-    foreach(array_keys($arrReturnKeywordTokens) as $key)
-    {
+    foreach (array_keys($arrReturnKeywordTokens) as $key) {
         $arrReturnKeywordTokens[$key] = str_replace("|", " ", $arrKeywordTokens[$key]['tokenized']);
     }
     return $arrReturnKeywordTokens;
@@ -608,11 +642,9 @@ function preg_match_multiple(array $patterns = array(), $subject = null, &$findi
         if (1 <= preg_match_all($pattern, $subject, $found, $flags)) {
             $findings[$name] = $found;
         } else {
-            if (PREG_NO_ERROR !== ($code = preg_last_error() )) {
+            if (PREG_NO_ERROR !== ($code = preg_last_error())) {
                 $errors[$name] = $code;
-            }
-            else
-            {
+            } else {
                 // No match was found, so don't return it in the findings
                 // $findings[$name] = array();
             }
@@ -647,7 +679,7 @@ function substr_count_multi($subject = "", array $patterns = array(), &$findings
             $findings[$name] = $pattern;
         } else {
 
-            if($boolMustMatchAllKeywords == true)
+            if ($boolMustMatchAllKeywords == true)
                 return (sizeof($findings) === sizeof($patterns));
 
 //            if (PREG_NO_ERROR !== ($code = preg_last_error() )) {
@@ -655,42 +687,41 @@ function substr_count_multi($subject = "", array $patterns = array(), &$findings
 //            }
 //            else
 //            {
-                // No match was found, so don't return it in the findings
-                // $findings[$name] = array();
+            // No match was found, so don't return it in the findings
+            // $findings[$name] = array();
 //            }
         }
     }
     return !(0 === sizeof($findings));
 }
 
-function getTodayAsString($delim="-")
+function getTodayAsString($delim = "-")
 {
-    $fmt = "Y" . $delim ."m" . $delim . "d";
+    $fmt = "Y" . $delim . "m" . $delim . "d";
     return date($fmt);
 }
 
 
-function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strExt = '', $delim="")
+function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strExt = '', $delim = "")
 {
     $strFilename = '';
-    if(strlen($strFilePrefix) > 0) $strFilename .= $strFilePrefix . "-";
-    $date=date_create(null);
-    $fmt = "Y" . $delim ."m" . $delim . "d" . "Hi";
+    if (strlen($strFilePrefix) > 0) $strFilename .= $strFilePrefix . "-";
+    $date = date_create(null);
+    $fmt = "Y" . $delim . "m" . $delim . "d" . "Hi";
 
     $strFilename .= date_format($date, $fmt);
 
-    if(strlen($strBase) > 0) $strFilename .= "-" . $strBase;
-    if(strlen($strExt) > 0) $strFilename .= "." . $strExt;
+    if (strlen($strBase) > 0) $strFilename .= "-" . $strBase;
+    if (strlen($strExt) > 0) $strFilename .= "." . $strExt;
 
     return $strFilename;
 }
 
 function isValueURLEncoded($str)
 {
-    if(strlen($str) <= 0) return 0;
-    return (\Scooper\substr_count_array($str, array("%22", "&", "=", "+", "-", "%7C", "%3C" )) >0 );
+    if (strlen($str) <= 0) return 0;
+    return (\Scooper\substr_count_array($str, array("%22", "&", "=", "+", "-", "%7C", "%3C")) > 0);
 }
-
 
 
 const STAGE1_PATHKEY = "stage1-rawlistings/";
@@ -704,25 +735,25 @@ const STAGE_FLAG_INCLUDEDATE = 0x2;
 function addDelimIfNeeded($currString, $delim, $strToAdd)
 {
     $result = $currString;
-    if(strlen($currString) > 0)
+    if (strlen($currString) > 0)
         $result = $result . $delim;
 
     $result = $result . $strToAdd;
     return $result;
 }
-function getStageKeyPrefix($stageNumber, $fileFlags = STAGE_FLAG_STAGEONLY, $delim="")
+
+function getStageKeyPrefix($stageNumber, $fileFlags = STAGE_FLAG_STAGEONLY, $delim = "")
 {
-    $prefix =  "";
+    $prefix = "";
 
-    if(($fileFlags& STAGE_FLAG_INCLUDEUSER) == true)
-        $prefix = addDelimIfNeeded($prefix , $delim, $GLOBALS['USERDATA']['user_unique_key']);
+    if (($fileFlags & STAGE_FLAG_INCLUDEUSER) == true)
+        $prefix = addDelimIfNeeded($prefix, $delim, $GLOBALS['USERDATA']['user_unique_key']);
 
-    if(($fileFlags & STAGE_FLAG_INCLUDEDATE) == true)
-        $prefix = addDelimIfNeeded($prefix , $delim, \Scooper\getTodayAsString(""));
+    if (($fileFlags & STAGE_FLAG_INCLUDEDATE) == true)
+        $prefix = addDelimIfNeeded($prefix, $delim, \Scooper\getTodayAsString(""));
 
     $rootPrefix = $GLOBALS['USERDATA']['user_unique_key'] . "/";
-    switch($stageNumber)
-    {
+    switch ($stageNumber) {
         case 1:
             $prefix = STAGE1_PATHKEY . $prefix;
             break;
@@ -736,7 +767,7 @@ function getStageKeyPrefix($stageNumber, $fileFlags = STAGE_FLAG_STAGEONLY, $del
             $prefix = STAGE4_PATHKEY . $prefix;
             break;
         default:
-            throw new IndexOutOfBoundsException("Error: invalid stage number passed '" . $stageNumber. "'" );
+            throw new IndexOutOfBoundsException("Error: invalid stage number passed '" . $stageNumber . "'");
             break;
     }
 
@@ -745,23 +776,22 @@ function getStageKeyPrefix($stageNumber, $fileFlags = STAGE_FLAG_STAGEONLY, $del
 
 function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stageNumber = null, $searchDetails = null)
 {
-    if(is_null($dataJobs))
+    if (is_null($dataJobs))
         $dataJobs = array();
 
-    if(is_null($stageNumber))
+    if (is_null($stageNumber))
         $stageNumber = 1;
 
     $stageName = "stage" . $stageNumber;
     $fileKey = str_replace(" ", "", $fileKey);
-    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], strtolower($fileKey) ));
-    if(stripos($fileKey, ".json") === false)
+    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], strtolower($fileKey)));
+    if (stripos($fileKey, ".json") === false)
         $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
 
     $data = array('key' => $fileKey, 'stage' => $stageNumber, 'listtype' => $listType, 'jobs_count' => countJobRecords($dataJobs), 'jobslist' => $dataJobs, 'search' => $searchDetails);
 
     $jobsJson = json_encode($data, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
-    if($jobsJson === false)
-    {
+    if ($jobsJson === false) {
         $err = json_last_error_msg();
         $errMsg = "Error:  Unable to convert jobs list data to json due to error   " . $err;
         $GLOBALS['logger']->logLine($errMsg, \Scooper\C__DISPLAY_ERROR__);
@@ -770,8 +800,7 @@ function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stage
     }
 
     $GLOBALS['logger']->logLine("Writing final job data pull results to json file " . $resultsFile);
-    if(file_put_contents($resultsFile, $jobsJson, FILE_TEXT) === false)
-    {
+    if (file_put_contents($resultsFile, $jobsJson, FILE_TEXT) === false) {
         $err = error_get_last();
         $errMsg = "Error:  Unable to save JSON results to file " . $resultsFile . " due to error   " . $err;
         $GLOBALS['logger']->logLine($errMsg, \Scooper\C__DISPLAY_ERROR__);
@@ -787,37 +816,35 @@ function loadJSON($file)
     $GLOBALS['logger']->logLine("Reading json data from file " . $file);
     $jsonText = file_get_contents($file, FILE_TEXT);
 
-    $data = json_decode($jsonText, $assoc=true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+    $data = json_decode($jsonText, $assoc = true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
 
     return $data;
 
 }
 
-function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber, $returnFailedSearches=true)
+function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber, $returnFailedSearches = true)
 {
-    if(is_null($stageNumber))
+    if (is_null($stageNumber))
         $stageNumber = 1;
 
 
     $stageName = "stage" . $stageNumber;
     $fileKey = str_replace(" ", "", $fileKey);
-    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName],  strtolower($fileKey) ));
-    if(stripos($fileKey, ".json") === false)
+    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], strtolower($fileKey)));
+    if (stripos($fileKey, ".json") === false)
         $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
 
-    if(is_file($resultsFile))
-    {
+    if (is_file($resultsFile)) {
         $GLOBALS['logger']->logLine("Reading json data from file " . $resultsFile);
         $jsonText = file_get_contents($resultsFile, FILE_TEXT);
 
-        $data = json_decode($jsonText, $assoc=true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+        $data = json_decode($jsonText, $assoc = true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
 
-        if ($returnFailedSearches === false)
-        {
-           if($data['search']['search_run_result']['success'] !== true ) {
-               $GLOBALS['logger']->logLine("Ignoring incomplete search results found in file with key " . $fileKey);
-               $data = null;
-           }
+        if ($returnFailedSearches === false) {
+            if ($data['search']['search_run_result']['success'] !== true) {
+                $GLOBALS['logger']->logLine("Ignoring incomplete search results found in file with key " . $fileKey);
+                $data = null;
+            }
         }
 
 
@@ -827,13 +854,12 @@ function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber, $returnFailed
     return array();
 }
 
-function readJobsListFromLocalJsonFile($fileKey, $stageNumber=1, $returnFailedSearches=true)
+function readJobsListFromLocalJsonFile($fileKey, $stageNumber = 1, $returnFailedSearches = true)
 {
     $retJobs = null;
     $data = readJobsListDataFromLocalJsonFile($fileKey, $stageNumber, $returnFailedSearches);
 
-    if(!is_null($data) && is_array($data))
-    {
+    if (!is_null($data) && is_array($data)) {
         if (array_key_exists("jobslist", $data)) {
             $retJobs = array_filter($data['jobslist'], "isIncludedJobSite");
         }
@@ -849,17 +875,17 @@ function getPhpMemoryUsage()
 {
     $size = memory_get_usage(true);
 
-    $unit=array(' bytes','KB','MB','GB','TB','PN');
+    $unit = array(' bytes', 'KB', 'MB', 'GB', 'TB', 'PN');
 
-    return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
+    return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
 }
 
 function getFailedSearchesByPlugin()
 {
-    if(!array_key_exists('search_results', $GLOBALS['USERDATA']) || is_null($GLOBALS['USERDATA']['search_results']))
+    if (!array_key_exists('search_results', $GLOBALS['USERDATA']) || is_null($GLOBALS['USERDATA']['search_results']))
         return null;
 
-    $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function($k) {
+    $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function ($k) {
         return ($k['search_run_result']['success'] !== true);
     });
 
@@ -867,9 +893,9 @@ function getFailedSearchesByPlugin()
         return null;
 
     $arrFailedPluginsReport = array();
-    foreach($arrFailedSearches as $search) {
+    foreach ($arrFailedSearches as $search) {
         if (!is_null($search['search_run_result']['success'])) {
-            if(!array_key_exists($search['site_name'], $arrFailedPluginsReport))
+            if (!array_key_exists($search['site_name'], $arrFailedPluginsReport))
                 $arrFailedPluginsReport[$search['site_name']] = array();
 
             $arrFailedPluginsReport[$search['site_name']][$search['key']] = cloneArray($search, array(

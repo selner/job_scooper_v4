@@ -15,12 +15,15 @@
  * under the License.
  */
 
-if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
-require_once(__ROOT__.'/include/SitePlugins.php');
-require_once(__ROOT__.'/include/ClassMultiSiteSearch.php');
-require_once(__ROOT__.'/include/S3Manager.php');
-require_once(__ROOT__.'/include/ClassJobsNotifier.php');
-require_once(__ROOT__.'/include/JobsAutoMarker.php');
+if (!strlen(__ROOT__) > 0) {
+    define('__ROOT__', dirname(dirname(__FILE__)));
+}
+require_once(__ROOT__ . '/include/SitePlugins.php');
+require_once(__ROOT__ . '/include/ClassMultiSiteSearch.php');
+require_once(__ROOT__ . '/include/S3Manager.php');
+require_once(__ROOT__ . '/include/ErrorManager.php');
+require_once(__ROOT__ . '/include/ClassJobsNotifier.php');
+require_once(__ROOT__ . '/include/JobsAutoMarker.php');
 
 const JOBLIST_TYPE_UNFILTERED = "unfiltered";
 const JOBLIST_TYPE_MARKED = "marked";
@@ -40,10 +43,10 @@ class S3JobListManager extends ClassJobsSiteCommon
 
         if ($logger)
             $this->logger = $logger;
-        elseif($GLOBALS['logger'])
+        elseif ($GLOBALS['logger'])
             $this->logger = $GLOBALS['logger'];
         else
-            $this->logger = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['stage1'] );
+            $this->logger = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['stage1']);
 
         $this->s3Manager = new S3Manager($GLOBALS['USERDATA']['AWS']['S3']['bucket'], $GLOBALS['USERDATA']['AWS']['S3']['region']);
     }
@@ -56,10 +59,9 @@ class S3JobListManager extends ClassJobsSiteCommon
             if (is_null($data)) return null;
             $keyparts = explode("/", $data['key']);
 
-            $path = implode("/", array_slice($keyparts,2));
-            writeJobsListDataToLocalJSONFile($path, $data['jobslist'], $listType, $stageNumber, $searchDetails=null);
-            if($this->s3Manager->isConnected() === true)
-            {
+            $path = implode("/", array_slice($keyparts, 2));
+            writeJobsListDataToLocalJSONFile($path, $data['jobslist'], $listType, $stageNumber, $searchDetails = null);
+            if ($this->s3Manager->isConnected() === true) {
 
                 $this->s3Manager->uploadObject($data['key'], $data['jobslist']);
             }
@@ -97,48 +99,38 @@ class S3JobListManager extends ClassJobsSiteCommon
 
     public function migrateAndLoadS3JobListForStage($thisStageNumber, $listType)
     {
-        $prevStageNumber = \Scooper\intceil($thisStageNumber)-1;
+        $prevStageNumber = \Scooper\intceil($thisStageNumber) - 1;
         $arrRetJobs = array();
         $result = $this->getS3JobsList($thisStageNumber, $listType);
 
-        if (!is_null($result) && is_array($result) && array_key_exists('BodyDecoded', $result))
-        {
+        if (!is_null($result) && is_array($result) && array_key_exists('BodyDecoded', $result)) {
             $arrJobsCurrStage = $result['BodyDecoded'];
-        }
-        else
-        {
+        } else {
             $data = $this->_getJobsListDataForS3_($thisStageNumber, $listType);
             $keyparts = explode("/", $data['key']);
-            $path = implode("/", array_slice($keyparts,2));
+            $path = implode("/", array_slice($keyparts, 2));
             $arrJobsCurrStage = readJobsListFromLocalJsonFile($path, $thisStageNumber);
         }
-        if(countJobRecords($arrJobsCurrStage) > 0)
-        {
+        if (countJobRecords($arrJobsCurrStage) > 0) {
             addJobsToJobsList($arrRetJobs, $arrJobsCurrStage);
         }
 
-        if($prevStageNumber > 0)
-        {
+        if ($prevStageNumber > 0) {
             $result = $this->getS3JobsList($prevStageNumber, $listType);
-            if (!is_null($result) && is_array($result) && array_key_exists('BodyDecoded', $result))
-            {
+            if (!is_null($result) && is_array($result) && array_key_exists('BodyDecoded', $result)) {
                 $arrJobsPrevStage = $result['BodyDecoded'];
-            }
-            else
-            {
+            } else {
                 $data = $this->_getJobsListDataForS3_($prevStageNumber, $listType);
                 $keyparts = explode("/", $data['key']);
-                $path = implode("/", array_slice($keyparts,2));
+                $path = implode("/", array_slice($keyparts, 2));
                 $arrJobsPrevStage = readJobsListFromLocalJsonFile($path, $prevStageNumber);
             }
-            if(countJobRecords($arrJobsPrevStage) > 0)
-            {
+            if (countJobRecords($arrJobsPrevStage) > 0) {
                 addJobsToJobsList($arrRetJobs, $arrJobsPrevStage);
             }
         }
 
-        switch($listType)
-        {
+        switch ($listType) {
             case JOBLIST_TYPE_UNFILTERED:
                 $this->arrLatestJobs_UnfilteredByUserInput = $arrRetJobs;
                 break;
@@ -150,11 +142,10 @@ class S3JobListManager extends ClassJobsSiteCommon
                 throw new Exception("Invalid job list type specified: " . $listType);
         }
 
-        writeJobsListDataToLocalJSONFile(("migrated-to-stage".$thisStageNumber), $dataJobs=$arrRetJobs, $listType, $stageNumber=$thisStageNumber, $searchDetails=null);
-        if($this->s3Manager->isConnected() === true)
-        {
+        writeJobsListDataToLocalJSONFile(("migrated-to-stage" . $thisStageNumber), $dataJobs = $arrRetJobs, $listType, $stageNumber = $thisStageNumber, $searchDetails = null);
+        if ($this->s3Manager->isConnected() === true) {
             $this->publishS3JobsList($thisStageNumber, $listType);
-            if($prevStageNumber > 0)
+            if ($prevStageNumber > 0)
                 $this->deleteS3JobsList($prevStageNumber, $listType);
         }
     }
@@ -170,7 +161,7 @@ class S3JobListManager extends ClassJobsSiteCommon
             $this->s3Manager->deleteObjects($key);
 
         } catch (Exception $e) {
-            $msg = "Warning:  failed to delete object " . $key . " for ". $listType . " joblist in S3:  " . $e->getMessage();
+            $msg = "Warning:  failed to delete object " . $key . " for " . $listType . " joblist in S3:  " . $e->getMessage();
             $this->logger->logLine($msg, \Scooper\C__DISPLAY_WARNING__);
         }
 
@@ -189,8 +180,7 @@ class S3JobListManager extends ClassJobsSiteCommon
     {
         $jobList = null;
 
-        switch($listType)
-        {
+        switch ($listType) {
             case JOBLIST_TYPE_UNFILTERED:
                 $jobList = $this->arrLatestJobs_UnfilteredByUserInput;
                 $keyEnding = JOBLIST_TYPE_UNFILTERED . JSON_FILENAME;
@@ -204,11 +194,11 @@ class S3JobListManager extends ClassJobsSiteCommon
                 throw new Exception("Invalid job list type specified: " . $listType);
         }
 
-        $key = getStageKeyPrefix($stageNumber, STAGE_FLAG_INCLUDEDATE , "") . "-" . $keyEnding;
+        $key = getStageKeyPrefix($stageNumber, STAGE_FLAG_INCLUDEDATE, "") . "-" . $keyEnding;
         $data = array(
             'key' => $key,
             'type' => $listType,
-            'jobslist' =>  $jobList
+            'jobslist' => $jobList
         );
 
         return $data;
@@ -224,44 +214,62 @@ class StageManager extends S3JobListManager
 
     function __construct()
     {
-        $this->classConfig = new ClassConfig();
-        $this->classConfig->initialize();
-        $logger = $this->classConfig->getLogger();
+        try {
+            $this->classConfig = new ClassConfig();
+            $this->classConfig->initialize();
+            $logger = $this->classConfig->getLogger();
 
-        parent::__construct($logger);
+            parent::__construct($logger);
+
+        } catch (Exception $ex) {
+            handleException($ex, null, true);
+        }
+
     }
 
     function __destruct()
     {
-        if(isset($GLOBALS['logger'])) $this->logger->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__);
+        if (isset($GLOBALS['logger'])) $this->logger->logLine("Closing " . $this->siteName . " instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__);
+
+
+
+    }
+
+    function _cleanUpBeforeExiting()
+    {
+        $err = new ErrorManager();
+        $err->processAndAlertErrors();
+
 
     }
 
 
     public function runAll()
     {
-        $arrRunStages = explode(",", \Scooper\get_PharseOptionValue("stages"));
-        if(is_array($arrRunStages) && count($arrRunStages) >= 1 && strlen($arrRunStages[0]) > 0)
-        {
-            foreach($arrRunStages as $stage)
-            {
-                $stageFunc = "doStage" . $stage;
-                try
-                {
-                    call_user_func(array($this, $stageFunc));
+        try {
+            $arrRunStages = explode(",", \Scooper\get_PharseOptionValue("stages"));
+            if (is_array($arrRunStages) && count($arrRunStages) >= 1 && strlen($arrRunStages[0]) > 0) {
+                foreach ($arrRunStages as $stage) {
+                    $stageFunc = "doStage" . $stage;
+                    try {
+                        call_user_func(array($this, $stageFunc));
+                    } catch (Exception $ex) {
+                        throw new Exception("Error:  failed to call method \$this->" . $stageFunc . "() for " . $stage . " from option --stages " . join(",", $arrRunStages) . ".  Error: " . $ex);
+                    }
                 }
-                catch (Exception $ex)
-                {
-                    throw new Exception("Error:  failed to call method \$this->".$stageFunc."() for " . $stage . " from option --stages ". join(",", $arrRunStages) .".  Error: " . $ex);
-                }
+            } else {
+                $this->doStage1();
+                $this->doStage2();
+                $this->doStage3();
+                $this->doStage4();
             }
+        } catch (Exception $ex) {
+            handleException($ex, null, true);
         }
-        else
+        finally
         {
-            $this->doStage1();
-            $this->doStage2();
-            $this->doStage3();
-            $this->doStage4();
+            $this->_cleanUpBeforeExiting();
+
         }
     }
 
@@ -269,126 +277,121 @@ class StageManager extends S3JobListManager
     public function doStage1()
     {
 
-        if(isset($GLOBALS['logger'])) $this->logger->logLine("Stage 1: Downloading Latest Matching Jobs ", \Scooper\C__DISPLAY_SECTION_START__);
+        if (isset($GLOBALS['logger'])) $this->logger->logLine("Stage 1: Downloading Latest Matching Jobs ", \Scooper\C__DISPLAY_SECTION_START__);
+        try {
 
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //
+            // Load the jobs list we need to process in this stage
+            //
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            $this->migrateAndLoadS3JobListsIntoStage(1);
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //
-        // Load the jobs list we need to process in this stage
-        //
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        $this->migrateAndLoadS3JobListsIntoStage(1);
+            //
+            // let's start with the searches specified with the details in the the config.ini
+            //
+            $arrSearchesToRun = $this->classConfig->getSearchConfiguration('searches');
 
-        //
-        // let's start with the searches specified with the details in the the config.ini
-        //
-        $arrSearchesToRun = $this->classConfig->getSearchConfiguration('searches');
+            if (isset($arrSearchesToRun)) {
+                if (count($arrSearchesToRun) > 0) {
 
-        if(isset($arrSearchesToRun))
-        {
-            if(count($arrSearchesToRun) > 0)
-            {
+                    //
+                    // Remove any sites that were excluded in this run from the searches list
+                    //
+                    foreach (array_keys($arrSearchesToRun) as $z) {
+                        $curSearch = $arrSearchesToRun[$z];
 
-                //
-                // Remove any sites that were excluded in this run from the searches list
-                //
-                foreach(array_keys($arrSearchesToRun) as $z)
-                {
-                    $curSearch = $arrSearchesToRun[$z];
+                        $strIncludeKey = 'include_' . $curSearch['site_name'];
 
-                    $strIncludeKey = 'include_'.$curSearch['site_name'];
+                        $valInclude = \Scooper\get_PharseOptionValue($strIncludeKey);
 
-                    $valInclude = \Scooper\get_PharseOptionValue($strIncludeKey);
-
-                    if(!isset($valInclude) || $valInclude == 0)
-                    {
-                        $this->logger->logLine($curSearch['site_name'] . " excluded, so dropping its searches from the run.", \Scooper\C__DISPLAY_ITEM_START__);
-                        unset($arrSearchesToRun[$z]);
+                        if (!isset($valInclude) || $valInclude == 0) {
+                            $this->logger->logLine($curSearch['site_name'] . " excluded, so dropping its searches from the run.", \Scooper\C__DISPLAY_ITEM_START__);
+                            unset($arrSearchesToRun[$z]);
+                        }
                     }
                 }
-            }
 
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //
-            // OK, now we have our list of searches & sites we are going to actually run
-            // Let's go get the jobs for those searches
-            //
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            if ($arrSearchesToRun != null)
-            {
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //
-                // Download all the job listings for all the users searches
+                // OK, now we have our list of searches & sites we are going to actually run
+                // Let's go get the jobs for those searches
                 //
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                $this->logger->logLine(PHP_EOL."**************  Starting Run of " . count($arrSearchesToRun) . " Searches  **************  ".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+                if ($arrSearchesToRun != null) {
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    //
+                    // Download all the job listings for all the users searches
+                    //
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    $this->logger->logLine(PHP_EOL . "**************  Starting Run of " . count($arrSearchesToRun) . " Searches  **************  " . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
 
 
-                //
-                // the Multisite class handles the heavy lifting for us by executing all
-                // the searches in the list and returning us the combined set of new jobs
-                // (with the exception of Amazon for historical reasons)
-                //
+                    //
+                    // the Multisite class handles the heavy lifting for us by executing all
+                    // the searches in the list and returning us the combined set of new jobs
+                    // (with the exception of Amazon for historical reasons)
+                    //
 
-                $classMulti = new ClassMultiSiteSearch($this->classConfig->getFileDetails('output_subfolder')['directory']);
-                $classMulti->addMultipleSearches($arrSearchesToRun, null);
-                $arrUpdatedJobs = $classMulti->updateJobsForAllPlugins();
-                $this->arrLatestJobs_UnfilteredByUserInput = \Scooper\array_copy($arrUpdatedJobs);
-                $this->publishS3JobsList(1, JOBLIST_TYPE_UNFILTERED);
+                    $classMulti = new ClassMultiSiteSearch($this->classConfig->getFileDetails('output_subfolder')['directory']);
+                    $classMulti->addMultipleSearches($arrSearchesToRun, null);
+                    $arrUpdatedJobs = $classMulti->updateJobsForAllPlugins();
+                    $this->arrLatestJobs_UnfilteredByUserInput = \Scooper\array_copy($arrUpdatedJobs);
+                    $this->publishS3JobsList(1, JOBLIST_TYPE_UNFILTERED);
 
-                // Process the search results and send an error alert for any that failed unexpectedly
-                $notifier = new ClassJobsNotifier($this->arrLatestJobs_UnfilteredByUserInput, $this->arrMarkedJobs);
-                $notifier->sendErrorEmail();
+                    // Process the search results and send an error alert for any that failed unexpectedly
+                    $notifier = new ClassJobsNotifier($this->arrLatestJobs_UnfilteredByUserInput, $this->arrMarkedJobs);
+                    $notifier->sendErrorEmail();
 
-            } else {
-                throw new ErrorException("No searches have been set to be run.");
+                } else {
+                    throw new ErrorException("No searches have been set to be run.");
+                }
             }
+        } catch (Exception $ex) {
+            handleException($ex, null, true);
         }
+
     }
 
     public function doStage2()
     {
+        try {
+            if (isset($GLOBALS['logger'])) $this->logger->logLine("Stage 2:  Tokenizing Jobs ", \Scooper\C__DISPLAY_SECTION_START__);
 
-        if(isset($GLOBALS['logger'])) $this->logger->logLine("Stage 2:  Tokenizing Jobs ", \Scooper\C__DISPLAY_SECTION_START__);
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //
+            // Load the jobs list we need to process in this stage
+            //
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            $this->migrateAndLoadS3JobListsIntoStage(2);
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //
-        // Load the jobs list we need to process in this stage
-        //
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        $this->migrateAndLoadS3JobListsIntoStage(2);
+            if (countAssociativeArrayValues($this->arrLatestJobs_UnfilteredByUserInput) == 0) {
+                if (isset($GLOBALS['logger'])) $this->logger->logLine("No jobs found to process. Skipping Stage 2.", \Scooper\C__DISPLAY_WARNING__);
+                return;
+            }
 
-        if(countAssociativeArrayValues($this->arrLatestJobs_UnfilteredByUserInput) == 0)
-        {
-            if(isset($GLOBALS['logger'])) $this->logger->logLine("No jobs found to process. Skipping Stage 2.", \Scooper\C__DISPLAY_WARNING__);
-            return;
-        }
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //
+            // Tokenize the job listings found in the stage 2 prefix on S3
+            //
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            $stage1Key = $this->getS3KeyForStage(1, JOBLIST_TYPE_UNFILTERED);
+            $stage2Key = $this->getS3KeyForStage(2, JOBLIST_TYPE_UNFILTERED);
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //
-        // Tokenize the job listings found in the stage 2 prefix on S3
-        //
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        $stage1Key = $this->getS3KeyForStage(1, JOBLIST_TYPE_UNFILTERED);
-        $stage2Key = $this->getS3KeyForStage(2, JOBLIST_TYPE_UNFILTERED);
+            $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/normalizeS3JobListings.py");
+            $sourceparam = "";
+            $bucketparam = "";
 
-        $PYTHONPATH = realpath(__DIR__ ."/../python/pyJobNormalizer/normalizeS3JobListings.py");
-        $sourceparam = "";
-        $bucketparam = "";
+            if (array_key_exists('AWS', $GLOBALS['USERDATA']) && array_key_exists('S3', $GLOBALS['USERDATA']['AWS']) && array_key_exists('bucket', $GLOBALS['USERDATA']['AWS']['S3']) && strlen($GLOBALS['USERDATA']['AWS']['S3']['bucket']) > 0) {
+                $sourceparam = "--source s3";
+                $bucketparam = "-b " . $GLOBALS['USERDATA']['AWS']['S3']['bucket'];
+            } else {
+                $sourceparam = "--source " . escapeshellarg($GLOBALS['OPTS']['output']);
+            }
+            $cmd = "python " . $PYTHONPATH . " " . $bucketparam . " " . $sourceparam . " --inkey " . escapeshellarg($stage1Key) . " --outkey " . escapeshellarg($stage2Key) . " --column job_title --index key_jobsite_siteid";
+            $this->logger->logLine("Running command: " . $cmd, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-        if(array_key_exists('AWS', $GLOBALS['USERDATA']) && array_key_exists('S3', $GLOBALS['USERDATA']['AWS']) && array_key_exists('bucket', $GLOBALS['USERDATA']['AWS']['S3']) && strlen($GLOBALS['USERDATA']['AWS']['S3']['bucket'])>0)
-        {
-            $sourceparam = "--source s3";
-            $bucketparam = "-b " . $GLOBALS['USERDATA']['AWS']['S3']['bucket'];
-        }
-        else
-        {
-            $sourceparam = "--source " . escapeshellarg($GLOBALS['OPTS']['output']);
-        }
-        $cmd = "python " . $PYTHONPATH . " ". $bucketparam . " " . $sourceparam . " --inkey " . escapeshellarg($stage1Key) . " --outkey " . escapeshellarg($stage2Key) . " --column job_title --index key_jobsite_siteid";
-        $this->logger->logLine("Running command: " . $cmd   , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-        doExec($cmd);
+            doExec($cmd);
 
 //        $this->logger->logLine("Loading results and saving for next stage...", \Scooper\C__DISPLAY_SECTION_START__);
 //        $keyparts = explode("/", $stage2Key);
@@ -396,63 +399,72 @@ class StageManager extends S3JobListManager
 //
 //        $this->arrLatestJobs_UnfilteredByUserInput = readJobsListFromLocalJsonFile($path, 2);
 //        $this->publishS3JobsList(2, JOBLIST_TYPE_UNFILTERED);
+        } catch (Exception $ex) {
+            handleException($ex, null, true);
+        }
 
     }
 
     public function doStage3()
     {
 
-        $this->logger->logLine("Stage 3:  Automarking Jobs ", \Scooper\C__DISPLAY_SECTION_START__);
+        try {
+
+            $this->logger->logLine("Stage 3:  Automarking Jobs ", \Scooper\C__DISPLAY_SECTION_START__);
 
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //
-        // Load the jobs list we need to process in this stage
-        //
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        $this->migrateAndLoadS3JobListsIntoStage(3);
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //
+            // Load the jobs list we need to process in this stage
+            //
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            $this->migrateAndLoadS3JobListsIntoStage(3);
 
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //
-        // Filter the full jobs list looking for duplicates, etc.
-        //
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        if (countJobRecords($this->arrLatestJobs_UnfilteredByUserInput) == 0)
-        {
-            $this->logger->logLine("No jobs were loaded to auto-mark.  Skipping Stage 3.", \Scooper\C__DISPLAY_WARNING__);
-            return;
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //
+            // Filter the full jobs list looking for duplicates, etc.
+            //
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            if (countJobRecords($this->arrLatestJobs_UnfilteredByUserInput) == 0) {
+                $this->logger->logLine("No jobs were loaded to auto-mark.  Skipping Stage 3.", \Scooper\C__DISPLAY_WARNING__);
+                return;
+            }
+
+            $this->logger->logLine(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+            $marker = new JobsAutoMarker($this->arrLatestJobs_UnfilteredByUserInput);
+            $marker->markJobsList();
+            $this->arrMarkedJobs = $marker->getMarkedJobs();
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //
+            // Save the automarked jobs back to stage 4 on S3
+            //
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            $this->publishS3JobsList(3, JOBLIST_TYPE_MARKED);
+        } catch (Exception $ex) {
+            handleException($ex, null, true);
         }
-
-        $this->logger->logLine(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
-        $marker = new JobsAutoMarker($this->arrLatestJobs_UnfilteredByUserInput);
-        $marker->markJobsList();
-        $this->arrMarkedJobs = $marker->getMarkedJobs();
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //
-        // Save the automarked jobs back to stage 4 on S3
-        //
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        $this->publishS3JobsList(3, JOBLIST_TYPE_MARKED);
     }
 
     public function doStage4()
     {
-        $this->migrateAndLoadS3JobListsIntoStage(4);
-        $this->logger->logLine("Stage 4: Notifying User", \Scooper\C__DISPLAY_SECTION_START__);
+        try {
 
-        if ((countJobRecords($this->arrMarkedJobs) + countJobRecords($this->arrLatestJobs_UnfilteredByUserInput)) == 0)
-        {
-            $this->logger->logLine("No jobs were loaded for notification. Skipping Stage 4." , \Scooper\C__DISPLAY_WARNING__);
-            return;
+            $this->migrateAndLoadS3JobListsIntoStage(4);
+            $this->logger->logLine("Stage 4: Notifying User", \Scooper\C__DISPLAY_SECTION_START__);
+
+            if ((countJobRecords($this->arrMarkedJobs) + countJobRecords($this->arrLatestJobs_UnfilteredByUserInput)) == 0) {
+                $this->logger->logLine("No jobs were loaded for notification. Skipping Stage 4.", \Scooper\C__DISPLAY_WARNING__);
+                return;
+            }
+
+            $notifier = new ClassJobsNotifier($this->arrLatestJobs_UnfilteredByUserInput, $this->arrMarkedJobs);
+            $notifier->processNotifications();
+        } catch (Exception $ex) {
+            handleException($ex, null, true);
         }
-
-        $notifier = new ClassJobsNotifier($this->arrLatestJobs_UnfilteredByUserInput, $this->arrMarkedJobs);
-        $notifier->processNotifications();
     }
 
 
-
-
-} 
+}

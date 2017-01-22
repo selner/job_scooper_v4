@@ -158,6 +158,23 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
 
 //    function takeNextPageAction($driver, $nextPageNum) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); return null;}
 
+
+    protected function _exportObjectToJSON_()
+    {
+        //
+        // Note:  does not export the job listings attached to the plugin
+        //        instance.
+        //
+
+        if(!is_null($this->arrSearchesToReturn) && count($this->arrSearchesToReturn) > 0)
+        {
+            $filenm = exportToDebugJSON(\Scooper\object_to_array($this),($this->siteName . "-plugin-state-data"));
+            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("JSON state data for plugin '" . $this->siteName . "' written to " . $filenm .".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+            return $filenm ;
+        }
+    }
+
     protected function getCombinedKeywordString($arrKeywordSet)
     {
         $arrKeywords = array();
@@ -333,6 +350,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
 
     function __destruct()
     {
+        $this->_exportObjectToJSON_();
 
     }
 
@@ -722,8 +740,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                 $strError = "Failed to download jobs from " . $this->siteName . " jobs for search '" . $searchDetails['name'] . "[URL=" . $searchDetails['search_start_url'] . "].  " . $ex->getMessage() . PHP_EOL . "Exception Details: " . $ex;
                 $this->_setSearchResultError_($searchDetails, $strError, $arrSearchJobList);
                 $this->_setJobsToFileStoreForSearch_($searchDetails, $arrSearchJobList);
-                $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-                throw new Exception($strError);
+                handleException(new Exception($strError), null, true);
             }
         }
 
@@ -736,8 +753,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
         if($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$this->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED) && countJobRecords($arrSearchJobList) == 0)
         {
             $strError = "The search " . $searchDetails['name'] . " on " . $this->siteName . " downloaded 0 jobs yet we did not have any keyword filter is use.  Logging as a potential error since we should have had something returned. [URL=" . $searchDetails['search_start_url'] . "].  ";
-            $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-            throw new Exception($strError);
+            handleException(new Exception($strError), null, true);
         }
 
     }
@@ -893,10 +909,8 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                     $html = $selen->getPageHTML($searchDetails['search_start_url']);
                     $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
                 } catch (Exception $ex) {
-                    $strMsg = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
-
-                    $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
-                    throw new ErrorException($strMsg);
+                    $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
+                    handleException(new Exception($strError), null, true);
                 }
             }
             else
@@ -1010,10 +1024,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                                     try {
                                         $this->takeNextPageAction($selen->driver);
                                     } catch (Exception $ex) {
-                                        $strMsg = "Failed to take nextPageAction on page " . $nPageCount . ".  Error:  " . $ex;
-
-                                        $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
-                                        throw new ErrorException($strMsg);
+                                        handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
                                     }
                                 }
                             }
@@ -1032,10 +1043,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
 
 
                         } catch (Exception $ex) {
-                            $strMsg = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
-
-                            $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
-                            throw new ErrorException($strMsg);
+                            handleException($ex, "Failed to get dynamic HTML via Selenium due to error:  %s", true);
                         }
                     }
                     else
@@ -1094,8 +1102,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                             $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($arrSearchReturnedJobs) . " of " . $nTotalListings . " job listings from " . $this->siteName, \Scooper\C__DISPLAY_NORMAL__);
                         }
                     } catch (Exception $ex) {
-                        $GLOBALS['logger']->logLine($this->siteName . " error: " . $ex, \Scooper\C__DISPLAY_ERROR__);
-                        throw $ex;
+                        handleException($ex, ($this->siteName . " error: %s"), true);
                     }
 
                     //
@@ -1126,7 +1133,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                         else {
                             $err = "Error: " . $err . "  Aborting job site plugin to prevent further errors.";
                             $GLOBALS['logger']->logLine($err, \Scooper\C__DISPLAY_ERROR__);
-                            throw new Exception($err);
+                            handleException(new Exception($err), null, true);
                         }
                     }
 
@@ -1141,9 +1148,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
         } catch (Exception $ex) {
             $this->_setSearchResultError_($searchDetails, "Error: " . $ex->getMessage(), $arrSearchReturnedJobs, $objSimpleHTML);
             $this->_setJobsToFileStoreForSearch_($searchDetails, $arrSearchReturnedJobs);
-
-            $GLOBALS['logger']->logLine($ex->getMessage(), \Scooper\C__DISPLAY_ERROR__);
-            throw new Exception($ex->getMessage());
+            handleException($ex, null, true);
         }
         finally
         {

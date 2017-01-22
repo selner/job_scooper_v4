@@ -142,10 +142,6 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
     function processNotifications()
     {
-
-
-
-
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //
         // Output the full jobs list into a file and into files for different cuts at the jobs list data
@@ -483,8 +479,12 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         if(!is_null($arrDetailsAttachFiles) && is_array($arrDetailsAttachFiles))
         {
             foreach($arrDetailsAttachFiles as $detailsAttach)
+            {
                 if(isset($detailsAttach) && isset($detailsAttach['full_file_path']))
+                {
                     $mail->addAttachment($detailsAttach['full_file_path']);
+                }
+            }
         }        // Add attachments
 
         $mail->isHTML(true);                                            // Set email format to HTML
