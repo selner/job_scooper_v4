@@ -80,7 +80,9 @@ class ClassConfig extends ClassBaseJobsSitePlugin
     function initialize()
     {
         # increase memory consumed to fit larger job searches
-        ini_set('memory_limit','500M');
+        print "Starting memory is ". getPhpMemoryUsage() .PHP_EOL;
+
+        ini_set('memory_limit','1024M');
         ini_set("auto_detect_line_endings", true);
 
         $GLOBALS['USERDATA'] = array();
