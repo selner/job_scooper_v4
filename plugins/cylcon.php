@@ -37,7 +37,7 @@ protected $arrListingTagSetup = array(
 'tag_listings_count' => array('selector' => '#searchCount' , 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?of\s+(\d+).*?/'),
 'tag_listings_section' => array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'joblists clearfix'),
 'tag_title' =>  array(array('tag' => 'div'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
-'tag_link' =>  array('tag' => 'a', 'return_attribute' => 'href'),
+'tag_link' =>  array('tag' => 'a', 'index' => '0', 'return_attribute' => 'href'),
 'tag_next_button' => array('selector' => '#page-top > section > div > div.row.text-left > div.col-lg-9 > table > tbody > tr:nth-child(1) > td:nth-child(3) > a'),
 'tag_job_id' =>  array('tag' => 'a', 'return_attribute' => 'href', 'return_value_regex' => '/.*?[Rr]edirect[Ww][Ee][Bb]\.php\?q=([^&]+)&*.*/'),
 'tag_company' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'col-lg-10'), array('tag' => 'p'), array('tag' => 'strong'), 'return_attribute' => 'plaintext', 'return_value_regex' => '/(.*?)-.*/'),
