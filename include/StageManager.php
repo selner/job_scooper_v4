@@ -222,7 +222,8 @@ class StageManager extends S3JobListManager
             parent::__construct($logger);
 
         } catch (Exception $ex) {
-            handleException($ex, null, true);
+//            handleException($ex, null, true);
+            print $ex;
         }
 
     }

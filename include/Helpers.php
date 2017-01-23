@@ -74,7 +74,7 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
     //
     // Error key = <file><line#><1st 10 Chars of Msg>
     //
-    $excKey = \Scooper\strScrub($ex->getFile() . $ex->getLine() . $msgHash, FOR_LOOKUP_VALUE_MATCHING);
+    $excKey = \Scooper\strScrub($msgHash . $ex->getLine(), FOR_LOOKUP_VALUE_MATCHING);
     if (array_key_exists($excKey, $GLOBALS['USERDATA']['ERROR_REPORTS']) === true)
     {
         // we already stored this error so need to re-store it.  Just throw it if needed.
