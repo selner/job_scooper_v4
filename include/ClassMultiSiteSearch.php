@@ -105,7 +105,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
             catch (Exception $classError)
             {
                 $GLOBALS['logger']->logLine('ERROR:  Plugin ' .$classPluginForSearch['name'] . ' failed due to an error:  ' . $classError .PHP_EOL. 'Skipping it\'s remaining searches and continuing with other plugins.', \Scooper\C__DISPLAY_ERROR__);
-                handleException($classError, $raise=false);
+//                handleException($classError, $raise=false);
                 $arrFail = getFailedSearchesByPlugin();
                 if(countAssociativeArrayValues($arrFail) > 2) {
                     $arrWebDriverFail = array_filter($arrFail, function ($var) {
