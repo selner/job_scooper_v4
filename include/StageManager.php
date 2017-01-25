@@ -333,16 +333,11 @@ class StageManager extends S3JobListManager
                     // the searches in the list and returning us the combined set of new jobs
                     // (with the exception of Amazon for historical reasons)
                     //
-
                     $classMulti = new ClassMultiSiteSearch($this->classConfig->getFileDetails('output_subfolder')['directory']);
                     $classMulti->addMultipleSearches($arrSearchesToRun, null);
                     $arrUpdatedJobs = $classMulti->updateJobsForAllPlugins();
                     $this->arrLatestJobs_UnfilteredByUserInput = \Scooper\array_copy($arrUpdatedJobs);
                     $this->publishS3JobsList(1, JOBLIST_TYPE_UNFILTERED);
-
-                    // Process the search results and send an error alert for any that failed unexpectedly
-                    $notifier = new ClassJobsNotifier($this->arrLatestJobs_UnfilteredByUserInput, $this->arrMarkedJobs);
-                    $notifier->sendErrorEmail();
 
                 } else {
                     throw new ErrorException("No searches have been set to be run.");

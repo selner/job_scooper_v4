@@ -237,7 +237,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         $GLOBALS['logger']->logSectionHeader("Generating text email content for user" . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
 
         $strResultCountsText = $this->getListingCountsByPlugin("text", $arrFinalJobs_SortedByCompanyRole);
-        $strResultText = "Job Scooper Results for ". $this->_getRunDateRange_() . PHP_EOL . $strResultCountsText . PHP_EOL;
+        $strResultText = "Job Scooper Results for ". getRunDateRange() . PHP_EOL . $strResultCountsText . PHP_EOL;
 
         $GLOBALS['logger']->logSectionHeader("Generating text html content for user" . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
 
@@ -245,7 +245,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         $messageHtml = $this->getListingCountsByPlugin("html", $arrFinalJobs_SortedByCompanyRole, $detailsHTMLFile);
 
         $this->_wrapCSSStyleOnHTML_($messageHtml);
-        $subject = "New Job Postings: " . $this->_getRunDateRange_();
+        $subject = "New Job Postings: " . getRunDateRange();
 
         $GLOBALS['logger']->logSectionHeader("Generating text html content for user" . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
 
@@ -522,84 +522,6 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
     }
 
 
-    private function _getFailedSearchesNotification_Content()
-    {
-        $strErrorText = null;
-        $attachments = array();
-        $arrFailedPluginsReport = getFailedSearchesByPlugin();
-//        $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function($k) {
-//            return ($k['search_run_result']['success'] !== true);
-//        });
-//
-//        $arrFailedPluginsReport = array();
-//        foreach($arrFailedSearches as $search)
-//            $arrFailedPluginsReport[$search['site_name']][$search['key']] = $search;
-
-        if(countAssociativeArrayValues($arrFailedPluginsReport) > 0)
-        {
-            $jsonFailedSearches = json_encode($arrFailedPluginsReport, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
-
-            $strErrorText = "The following site plugins returned an error or had zero listings found unexpectedly:  " . PHP_EOL . $jsonFailedSearches . PHP_EOL . PHP_EOL . "App version = " . __APP_VERSION__;
-            if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Errors detected for the run searches.  attempting to send error notification email:  " . PHP_EOL . $strErrorText, \Scooper\C__DISPLAY_NORMAL__); }
-        }
-        else
-        {
-            if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("No error notification necessary:  no errors detected for the run searches.", \Scooper\C__DISPLAY_NORMAL__); }
-        }
-
-        foreach(array_keys($arrFailedPluginsReport) as $plugin)
-        {
-            foreach(array_keys($arrFailedPluginsReport[$plugin]) as $reportKey)
-            {
-
-                      if(array_key_exists("search_run_result", $arrFailedPluginsReport[$plugin][$reportKey]) && array_key_exists("error_files", $arrFailedPluginsReport[$plugin][$reportKey]['search_run_result']))
-            {
-                foreach($arrFailedPluginsReport[$plugin][$reportKey]['search_run_result']['error_files'] as $file)
-                {
-                    $attachments[$file] = \Scooper\getFilePathDetailsFromString($file);
-                }
-            }
-            }
-        }
-
-        return array('body' => $strErrorText, 'attachments' => $attachments);
-
-    }
-
-    function sendErrorEmail()
-    {
-        $failedReports = $this->_getFailedSearchesNotification_Content();
-        $strBodyText = $failedReports['body'];
-        if(strlen($strBodyText) == 0)
-            return null;
-        $attachments = $failedReports['attachments'];
-
-        $messageText = "";
-
-        //
-        // Setup the plaintext content
-        //
-        if($strBodyText != null && strlen($strBodyText) > 0)
-        {
-
-            //
-            // Setup the plaintext message text value
-            //
-            $messageText = '<pre>' . $strBodyText . "</pre>";
-            $messageText .= PHP_EOL ;
-
-        }
-        $messageHtml = "<html><body><pre>". $messageText . "</pre></body>";
-
-        $subject = "JobsScooper Error(s) Notification [for Run Dated " . $this->_getRunDateRange_() . "]";
-
-        return $this->sendEmail($messageText, $messageHtml, $attachments, $subject, "error");
-
-
-
-    }
-
-
     private function _getFullFileContents_($detailsFile)
     {
         $content = null;
@@ -803,23 +725,6 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         return $strOut;
     }
 
-    private function _getRunDateRange_()
-    {
-        $strDateRange = null;
-        $startDate = new DateTime();
-        $strMod = "-".$GLOBALS['USERDATA']['configuration_settings']['number_days']." days";
-        $startDate = $startDate->modify($strMod);
-        $today = new DateTime();
-        if($startDate->format('Y-m-d') != $today->format('Y-m-d'))
-        {
-            $strDateRange = $startDate->format('D, M d') . " - " . $today->format('D, M d');
-        }
-        else
-        {
-            $strDateRange = $today->format('D, M d');
-        }
-        return $strDateRange;
-    }
 
     private function _getResultsTextHTML_($arrHeaders, $arrCounts, $arrFailedPlugins = null, $detailsHTMLBodyInclude = null)
     {
@@ -827,7 +732,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         $arrCounts_TotalUser = null;
         $strOut = "<div class='job_scooper outer'>";
 
-        $strOut  .= "<H2>New Job Postings for " . $this->_getRunDateRange_() . "</H2>".PHP_EOL. PHP_EOL;
+        $strOut  .= "<H2>New Job Postings for " . getRunDateRange() . "</H2>".PHP_EOL. PHP_EOL;
 
         if($arrCounts != null && count($arrCounts) > 0)
         {

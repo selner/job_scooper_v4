@@ -43,70 +43,23 @@ class ErrorManager {
 
     function processAndAlertErrors()
     {
-//        $GLOBALS['USERDATA']['ERROR_REPORTS']
+        $subject = "JobScooper[" . gethostname() . "] Errors for " . getRunDateRange();
 
-        $this->sendErrorNotification("JobScooper Errors on " . gethostname(), $this->getErrorsEmailBody(), null);
-    }
+        $htmlBody = "<HTML><BODY>";
+        $txtBody = "";
+        $attachments = array();
 
+        $this->_appendGlobalErrorsContent_($htmlBody, $txtBody, $attachments);
+        $this->_appendSearchErrorsContent_($htmlBody, $txtBody, $attachments);
 
-
-    function sendErrorNotification($subject=null, $strBodyText=null, $attachments=null)
-    {
-        if(is_null($strBodyText) || strlen($strBodyText) == 0)
-            return null;
+        $htmlBody .= "</BODY></HTML>";
 
         $notifier = new ClassJobsNotifier(null,null);
 
-        $messageText = "";
+        return $notifier->sendEmail($txtBody, $htmlBody, $attachments, $subject, "error");
 
-        //
-        // Setup the plaintext content
-        //
-        $messageText = '<pre>' . $strBodyText . "</pre>";
-        $messageText .= PHP_EOL ;
-
-        $messageHtml = "<html><body><pre>". $messageText . "</pre></body>";
-        $attachments = array();
-        foreach($GLOBALS['USERDATA']['ERROR_REPORTS'] as $report)
-        {
-            $attachments[] = $report;
-        }
-
-        return $notifier->sendEmail($messageText, $messageHtml, $attachments, $subject, "error");
-    }
-
-    function sendErrorEmail()
-    {
-        $failedReports = $this->_getFailedSearchesNotification_Content();
-        $strBodyText = $failedReports['body'];
-        if(strlen($strBodyText) == 0)
-            return null;
-        $attachments = $failedReports['attachments'];
-
-        $messageText = "";
-
-        //
-        // Setup the plaintext content
-        //
-        if($strBodyText != null && strlen($strBodyText) > 0)
-        {
-
-            //
-            // Setup the plaintext message text value
-            //
-            $messageText = '<pre>' . $strBodyText . "</pre>";
-            $messageText .= PHP_EOL ;
-
-        }
-        $messageHtml = "<html><body><pre>". $messageText . "</pre></body>";
-
-        $subject = "JobsScooper Error(s) Notification [for Run Dated " . $this->_getRunDateRange_() . "]";
-
-        return $this->sendEmail($messageText, $messageHtml, $attachments, $subject, "error");
 
     }
-
-
 
     private function _getFailedSearchesNotification_Content()
     {
@@ -126,36 +79,88 @@ class ErrorManager {
             if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("No error notification necessary:  no errors detected for the run searches.", \Scooper\C__DISPLAY_NORMAL__); }
         }
 
-        foreach(array_keys($arrFailedPluginsReport) as $plugin)
-        {
-            foreach(array_keys($arrFailedPluginsReport[$plugin]) as $reportKey)
-            {
+        if(!is_null($arrFailedPluginsReport) && is_array($arrFailedPluginsReport)) {
+            foreach (array_keys($arrFailedPluginsReport) as $plugin) {
+                foreach (array_keys($arrFailedPluginsReport[$plugin]) as $reportKey) {
 
-                if(array_key_exists("search_run_result", $arrFailedPluginsReport[$plugin][$reportKey]) && array_key_exists("error_files", $arrFailedPluginsReport[$plugin][$reportKey]['search_run_result']))
-                {
-                    foreach($arrFailedPluginsReport[$plugin][$reportKey]['search_run_result']['error_files'] as $file)
-                    {
-                        $attachments[$file] = \Scooper\getFilePathDetailsFromString($file);
+                    if (array_key_exists("search_run_result", $arrFailedPluginsReport[$plugin][$reportKey]) && array_key_exists("error_files", $arrFailedPluginsReport[$plugin][$reportKey]['search_run_result'])) {
+                        foreach ($arrFailedPluginsReport[$plugin][$reportKey]['search_run_result']['error_files'] as $file) {
+                            $attachments[$file] = \Scooper\getFilePathDetailsFromString($file);
+                        }
                     }
                 }
             }
         }
-
         return array('body' => $strErrorText, 'attachments' => $attachments);
 
     }
 
 
-    function getErrorsEmailBody()
+    function _appendGlobalErrorsContent_(&$htmlBody, &$txtBody, &$attachments)
     {
-        if (array_key_exists('ERROR_REPORTS', $GLOBALS['USERDATA']))
-        {
-            $json = json_encode($GLOBALS['USERDATA']['ERROR_REPORTS'], JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
-            return $json;
-        }
 
-        return null;
+        if (array_key_exists('ERROR_REPORT_FILES', $GLOBALS['USERDATA']))
+        {
+            $htmlBody .= "<h2>Global Exceptions</h2>";
+            $txtBody .= " *********  GLOBAL EXCEPTIONS   *********" . PHP_EOL;
+            foreach($GLOBALS['USERDATA']['ERROR_REPORT_FILES'] as $errfile)
+            {
+                $attachments[] = $errfile;
+                $objErr = loadJSON($errfile['full_file_path']);
+                $htmlBody .=  "<h3>Error:  " . $objErr['error_message'] . "</h3>";
+                $txtBody .= PHP_EOL . "ERROR:  ". $objErr['error_message'] . PHP_EOL;
+                $jsonErr = json_encode($objErr, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+                $htmlBody .= "<pre>" . $jsonErr . "</pre><br/><br/>";
+                $txtBody .= $jsonErr . PHP_EOL;
+            }
+        }
     }
+
+
+    function getErrorsEmailContent()
+    {
+        $htmlBody = "<HTML><BODY>";
+        $txtBody = "";
+        $attachments = array();
+
+        $this->_appendGlobalErrorsContent_($htmlBody, $txtBody, $attachments);
+        $this->_appendSearchErrorsContent_($htmlBody, $txtBody, $attachments);
+
+        $htmlBody = "</BODY></HTML>";
+
+        $content = (is_null($errGlobal) ? null : $errGlobal) . (is_null($errSearches) ? null : $errSearches);
+
+        return ($content == "") ? null : $content;
+    }
+
+    function _appendSearchErrorsContent_(&$htmlBody, &$txtBody, &$attachments)
+    {
+        $failedReports = $this->_getFailedSearchesNotification_Content();
+        $strBodyText = $failedReports['body'];
+        if(strlen($strBodyText) == 0)
+            return null;
+
+        $attachments = $failedReports['attachments'];
+
+
+        //
+        // Setup the plaintext content
+        //
+        if($strBodyText != null && strlen($strBodyText) > 0)
+        {
+            $htmlBody .= "<h2>Exceptions for Specific Searches</h2>";
+            $txtBody .= PHP_EOL . PHP_EOL . " *********  Exceptions for Specific Searches *********" . PHP_EOL;
+
+            //
+            // Setup the plaintext message text value
+            //
+            $txtBody .= $strBodyText;
+            $htmlBody = '<pre>' . $strBodyText . "</pre>";
+            $htmlBody .= PHP_EOL ;
+
+        }
+    }
+
 }
 
 /*
@@ -182,7 +187,7 @@ class ErrorManager {
             title: "This is my first post!"
         }
         */
-
+/*
 //
 //
 //        $template = "Welcome {{name}} , You win \${{value}} dollars!!\n";
@@ -239,3 +244,4 @@ class ErrorManager {
 //
 //                // Output debug template with HTML comments:
 //                echo $renderer(Array('name' => 'John'), array('debug' => LightnCandy\Runtime::DEBUG_TAGS_HTML));
+*/

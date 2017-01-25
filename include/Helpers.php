@@ -55,9 +55,11 @@ function object_to_array($obj)
 
 function handleException($ex, $fmtLogMsg = null, $raise = true)
 {
+    $err = new Exception();
 
-    if (!array_key_exists('ERROR_REPORTS', $GLOBALS['USERDATA']))
-        $GLOBALS['USERDATA']['ERROR_REPORTS'] = array();
+
+    if (!array_key_exists('ERROR_REPORT_FILES', $GLOBALS['USERDATA']))
+        $GLOBALS['USERDATA']['ERROR_REPORT_FILES'] = array();
 
 
     $toThrow = $ex;
@@ -67,18 +69,17 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
         $toThrow = new Exception($msg);
     }
 
-    $msg .= PHP_EOL . "PHP memory usage: ". getPhpMemoryUsage() . PHP_EOL;
+    $msg .= PHP_EOL . "PHP memory usage: " . getPhpMemoryUsage() . PHP_EOL;
 
     $msgHash = md5($msg);
 
     //
-    // Error key = <file><line#><1st 10 Chars of Msg>
+    // Error key = <md5 msg hash><line#>
     //
     $excKey = \Scooper\strScrub($msgHash . $ex->getLine(), FOR_LOOKUP_VALUE_MATCHING);
-    if (array_key_exists($excKey, $GLOBALS['USERDATA']['ERROR_REPORTS']) === true)
-    {
+    if (array_key_exists($excKey, $GLOBALS['USERDATA']['ERROR_REPORT_FILES']) === true) {
         // we already stored this error so need to re-store it.  Just throw it if needed.
-        if($raise === true)
+        if ($raise === true)
             throw $toThrow;
     }
 
@@ -92,16 +93,19 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
     $now = new DateTime('NOW');
 
     $debugData = array(
-        "error_time" => $now ->format('Y-m-d\TH:i:s'),
+        "error_time" => $now->format('Y-m-d\TH:i:s'),
+        "exception_code" => $ex->getCode(),
         "error_message" => $msg,
+        "file" => $ex->getFile(),
+        "line_number" => $ex->getLine(),
         "exception" => \Scooper\object_to_array($ex),
         "object_properties" => null,
         "debug_backtrace" => var_export(debug_backtrace(), true),
-        "exception_stack_trace" => $ex->getTrace());
+        "exception_stack_trace" => $ex->getTraceAsString());
 
     $filenm = exportToDebugJSON($debugData, "exception" . $excKey);
 
-    $GLOBALS['USERDATA']['ERROR_REPORTS'][$excKey] = \Scooper\getFilePathDetailsFromString($filenm);
+    $GLOBALS['USERDATA']['ERROR_REPORT_FILES'][$excKey] = \Scooper\getFilePathDetailsFromString($filenm);
 
 
     if ($raise == true) {
@@ -109,10 +113,35 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
     }
 }
 
+
+function getRunDateRange()
+{
+    $strDateRange = null;
+    $startDate = new DateTime();
+    $strMod = "-".$GLOBALS['USERDATA']['configuration_settings']['number_days']." days";
+    $startDate = $startDate->modify($strMod);
+    $today = new DateTime();
+    if($startDate->format('Y-m-d') != $today->format('Y-m-d'))
+    {
+        $strDateRange = $startDate->format('D, M d') . " - " . $today->format('D, M d');
+    }
+    else
+    {
+        $strDateRange = $today->format('D, M d');
+    }
+    return $strDateRange;
+}
+
 function exportToDebugJSON($obj, $strBaseFileName)
 {
-    $jsonSelf = json_encode($obj, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
-    $debugJSONFile = $GLOBALS['USERDATA']['directories']['stage1'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_". $strBaseFileName, $strExt = "", $delim = "-") . ".json";
+    $saveArr = array();
+    $arrObj = object_to_array($obj);
+    foreach (array_keys($arrObj) as $key) {
+        $saveArr[$key] = json_encode($arrObj[$key], JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+    }
+
+    $jsonSelf = json_encode($saveArr, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+    $debugJSONFile = $GLOBALS['USERDATA']['directories']['stage1'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_" . $strBaseFileName, $strExt = "", $delim = "-") . ".json";
     file_put_contents($debugJSONFile, $jsonSelf);
 
     return $debugJSONFile;
