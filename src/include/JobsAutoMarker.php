@@ -169,9 +169,8 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         $GLOBALS['logger']->logLine("Marking Duplicate Job Roles" , \Scooper\C__DISPLAY_SECTION_START__);
         $GLOBALS['logger']->logLine($nUniqJobs . "/" . countAssociativeArrayValues($arrJobsList) . " jobs have immediately been marked as non-duplicate based on company/role pairing. " , \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-        foreach($arrJobsList as $job)
+        foreach($arrJobsList as &$job)
         {
-            $strCurrentJobIndex = getArrayKeyValueForJob($job);
             if(!isMarkedBlank($job))
             {
                 continue;  // only mark dupes that haven't yet been marked with anything
@@ -182,16 +181,15 @@ class JobsAutoMarker extends ClassJobsSiteCommon
             // (and we're not going to be updating the record we're checking)
             if($indexPrevListingForCompanyRole != null && strcasecmp($indexPrevListingForCompanyRole, $job['key_jobsite_siteid'])!=0)
             {
-
                 //
                 // Add a note to the previous listing that it had a new duplicate
                 //
                 appendJobColumnData($arrJobsList[$indexPrevListingForCompanyRole], 'match_notes', "|", $this->getNotesWithDupeIDAdded($arrJobsList[$indexPrevListingForCompanyRole]['match_notes'], $job['key_jobsite_siteid'] ));
-                $arrJobsList[$indexPrevListingForCompanyRole] ['date_last_updated'] = getTodayAsString();
+                $job['date_last_updated'] = getTodayAsString();
 
-                $arrJobsList[$strCurrentJobIndex]['interested'] =  C__STR_TAG_DUPLICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__;
-                appendJobColumnData($arrJobsList[$strCurrentJobIndex], 'match_notes', "|", $this->getNotesWithDupeIDAdded($arrJobsList[$strCurrentJobIndex]['match_notes'], $indexPrevListingForCompanyRole ));
-                $arrJobsList[$strCurrentJobIndex]['date_last_updated'] = getTodayAsString();
+                $job['interested'] =  C__STR_TAG_DUPLICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__;
+                appendJobColumnData($job, 'match_notes', "|", $this->getNotesWithDupeIDAdded($arrJobsList[$job['key_jobsite_siteid']]['match_notes'], $indexPrevListingForCompanyRole ));
+                $job['date_last_updated'] = getTodayAsString();
 
                 $nJobsMatched++;
             }
