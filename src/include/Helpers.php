@@ -50,6 +50,9 @@ function object_to_array($obj)
         $val = (is_array($val) || is_object($val)) ? object_to_array($val) : $val;
         $arr[$key] = $val;
     }
+    unset($key);
+    unset($val);
+
     return $arr;
 }
 
@@ -139,6 +142,7 @@ function exportToDebugJSON($obj, $strBaseFileName)
     foreach (array_keys($arrObj) as $key) {
         $saveArr[$key] = json_encode($arrObj[$key], JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
     }
+    unset($key);
 
     $jsonSelf = json_encode($saveArr, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
     $debugJSONFile = $GLOBALS['USERDATA']['directories']['stage1'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_" . $strBaseFileName, $strExt = "", $delim = "-") . ".json";
@@ -209,6 +213,8 @@ function combineTextAllChildren($node, $fRecursed = false)
         foreach ($node->childNodes() as $child) {
             $retStr = $retStr . " " . combineTextAllChildren($child, true);
         }
+        unset($child);
+
     } elseif (isset($node->plaintext) && $fRecursed == false) {
         $retStr = \Scooper\strScrub($node->plaintext . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
     }
@@ -274,6 +280,8 @@ function doExec($cmd)
     exec($cmd, $cmdOutput, $cmdRet);
     foreach ($cmdOutput as $resultLine)
         if (!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine($resultLine, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+    unset($resultLine);
+
     if (is_array($cmdOutput) && count($cmdOutput) == 1)
         return $cmdOutput[0];
     return $cmdOutput;
@@ -289,6 +297,8 @@ function countAssociativeArrayValues($arrToCount)
     foreach ($arrToCount as $item) {
         $count = $count + 1;
     }
+    unset($item);
+
 
     $arrValues = array_values($arrToCount);
     $nValues = count($arrValues);
@@ -318,6 +328,8 @@ function addJobsToJobsList(&$arrJobsListToUpdate, $arrAddJobs)
     foreach ($arrAddJobs as $jobRecord) {
         addJobToJobsList($arrJobsListToUpdate, $jobRecord);
     }
+    unset($jobRecord);
+
 
 }
 
@@ -416,6 +428,8 @@ function array_mapk($callback, $array)
     foreach ($array as $k => $v) {
         $newArray[$k] = call_user_func($callback, $k, $v);
     }
+    unset($k);
+
     return $newArray;
 }
 
@@ -434,6 +448,7 @@ function getArrayValuesAsString($arrDetails, $strDelimiter = ", ", $strIntro = "
         foreach (array_keys($arrDetails) as $key) {
             $strReturn .= getArrayItemDetailsAsString($arrDetails, $key, (strlen($strReturn) <= 0), $strDelimiter, $strIntro, $fIncludeKey);
         }
+        unset($key);
     }
 
     return $strReturn;
@@ -575,6 +590,7 @@ function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "ke
             $line = explode(',', $line);
         fputcsv($file, $line);
     }
+    unset($line);
 
     fclose($file);
 
@@ -612,6 +628,8 @@ function tokenizeMultiDimensionArray($arrData, $tempFileKey, $dataKeyName, $inde
         $outRec = explode('`', $outline);
         fputcsv($file, $outRec, ',', '"');
     }
+    unset($rec);
+
 
     fclose($file);
 
@@ -636,6 +654,8 @@ function tokenizeKeywords($arrKeywords)
     foreach (array_keys($arrReturnKeywordTokens) as $key) {
         $arrReturnKeywordTokens[$key] = str_replace("|", " ", $arrKeywordTokens[$key]['tokenized']);
     }
+    unset($key);
+
     return $arrReturnKeywordTokens;
 //    $keywordset = array_column($arrKeywordTokens, "tokenized");
 //    $retKeywords = array();
@@ -679,6 +699,9 @@ function preg_match_multiple(array $patterns = array(), $subject = null, &$findi
             }
         }
     }
+    unset($pattern);
+    unset($name);
+
     return (0 === sizeof($errors));
 }
 
@@ -811,11 +834,11 @@ function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stage
     if (is_null($stageNumber))
         $stageNumber = 1;
 
-    $stageName = "stage" . $stageNumber;
-    $fileKey = str_replace(" ", "", $fileKey);
-    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], strtolower($fileKey)));
-    if (stripos($fileKey, ".json") === false)
-        $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
+        $stageName = "stage" . $stageNumber;
+        $fileKey = str_replace(" ", "", $fileKey);
+        $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], strtolower($fileKey)));
+        if (stripos($fileKey, ".json") === false)
+            $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
 
     $data = array('key' => $fileKey, 'stage' => $stageNumber, 'listtype' => $listType, 'jobs_count' => countJobRecords($dataJobs), 'jobslist' => $dataJobs, 'search' => $searchDetails);
 
@@ -940,6 +963,8 @@ function getFailedSearchesByPlugin()
                 'keywords_array'));
         }
     }
+    unset($search);
+
     return $arrFailedPluginsReport;
 }
 
