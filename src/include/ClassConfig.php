@@ -506,7 +506,7 @@ class ClassConfig extends ClassBaseJobsSitePlugin
         if(isset($config['selenium']) && is_array($config['selenium']))
         {
             foreach(array_keys($config['selenium']) as $k)
-                $GLOBALS['USERDATA']['selenium'][$k] = $config['selenium'][$k];
+                $GLOBALS['USERDATA']['selenium'][$k] = trim($config['selenium'][$k]);
         }
 
         if (!(array_key_exists('autostart', $GLOBALS['USERDATA']['selenium']) === true && array_key_exists('port', $GLOBALS['USERDATA']['selenium']) === true ))
