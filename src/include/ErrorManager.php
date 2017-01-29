@@ -45,19 +45,24 @@ class ErrorManager {
     {
         $subject = "JobScooper[" . gethostname() . "] Errors for " . getRunDateRange();
 
-        $htmlBody = "<HTML><BODY>";
+        $htmlBody = "";
         $txtBody = "";
         $attachments = array();
 
         $this->_appendGlobalErrorsContent_($htmlBody, $txtBody, $attachments);
         $this->_appendSearchErrorsContent_($htmlBody, $txtBody, $attachments);
 
-        $htmlBody .= "</BODY></HTML>";
 
-        $notifier = new ClassJobsNotifier(null,null);
+        if(strlen($htmlBody) > 0) {
 
-        return $notifier->sendEmail($txtBody, $htmlBody, $attachments, $subject, "error");
+            $htmlBody = "<HTML><BODY>" . $htmlBody . "</BODY></HTML>";
 
+            $notifier = new ClassJobsNotifier(null, null);
+
+            return $notifier->sendEmail($txtBody, $htmlBody, $attachments, $subject, "error");
+        }
+
+        return null;
 
     }
 
@@ -119,18 +124,18 @@ class ErrorManager {
 
     function getErrorsEmailContent()
     {
-        $htmlBody = "<HTML><BODY>";
+        $htmlBody = "";
         $txtBody = "";
         $attachments = array();
 
-        $this->_appendGlobalErrorsContent_($htmlBody, $txtBody, $attachments);
-        $this->_appendSearchErrorsContent_($htmlBody, $txtBody, $attachments);
+        $errGlobal = "";
+        $errSearches = "";
+        $this->_appendGlobalErrorsContent_($errGlobal, $txtBody, $attachments);
+        $this->_appendSearchErrorsContent_($errSearches, $txtBody, $attachments);
 
-        $htmlBody = "</BODY></HTML>";
+        $content = (strlen($errGlobal) == 0? "" : $errGlobal) . ((strlen($errSearches) == 0) ? "" : $errSearches);
 
-        $content = (is_null($errGlobal) ? null : $errGlobal) . (is_null($errSearches) ? null : $errSearches);
-
-        return ($content == "") ? null : $content;
+        return $content;
     }
 
     function _appendSearchErrorsContent_(&$htmlBody, &$txtBody, &$attachments)

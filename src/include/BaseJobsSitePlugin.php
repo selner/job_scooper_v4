@@ -350,7 +350,9 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
 
     function __destruct()
     {
+        if(isDebug()==true) {
         $this->_exportObjectToJSON_();
+        }
 
     }
 
@@ -1229,4 +1231,20 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
 
     protected function getSearchJobsFromAPI($searchDetails) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); }
 
+    protected function normalizeJobItemWithoutJobID($arrItem)
+    {
+
+        $arrItem ['job_site_date'] = \Scooper\strScrub($arrItem['job_site_date'], REMOVE_EXTRA_WHITESPACE | LOWERCASE | HTML_DECODE );
+        $dateVal = strtotime($arrItem ['job_site_date'], $now = time());
+        if(!($dateVal === false))
+        {
+            $arrItem['job_site_date'] = date('Y-m-d', $dateVal);
+        }
+
+
+        $arrItem['job_id'] = \Scooper\strScrub($arrItem['company'], FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($arrItem['job_title'], FOR_LOOKUP_VALUE_MATCHING). \Scooper\strScrub($arrItem['job_site_date'], FOR_LOOKUP_VALUE_MATCHING);
+
+        return parent::normalizeJobItem($arrItem);
+
+    }
 }
