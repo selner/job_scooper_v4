@@ -104,8 +104,20 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
             }
             catch (Exception $classError)
             {
-                $GLOBALS['logger']->logLine('ERROR:  Plugin ' .$classPluginForSearch['name'] . ' failed due to an error:  ' . $classError .PHP_EOL. 'Skipping it\'s remaining searches and continuing with other plugins.', \Scooper\C__DISPLAY_ERROR__);
-//                handleException($classError, $raise=false);
+                $err = $classError;
+                if ($classError->getCode() == 4096)
+                {
+                    try {
+                        $this->selenium->killAllAndRestartSelenium();
+                        $arrResults = $class->getUpdatedJobsForAllSearches();
+                        addJobsToJobsList($retJobList, $arrResults);
+                    } catch (Exception $classError)
+                    {
+                        $err = $classError;
+                    }
+
+                }
+                $GLOBALS['logger']->logLine('ERROR:  Plugin ' .$classPluginForSearch['name'] . ' failed due to an error:  ' . $err .PHP_EOL. 'Skipping it\'s remaining searches and continuing with other plugins.', \Scooper\C__DISPLAY_ERROR__);
                 $arrFail = getFailedSearchesByPlugin();
                 if(countAssociativeArrayValues($arrFail) > 2) {
                     $arrWebDriverFail = array_filter($arrFail, function ($var) {
@@ -125,6 +137,11 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
                         $this->updateJobsForAllPlugins();
                     }
                 }
+            }
+            finally
+            {
+                $classPluginForSearch = null;
+                $class = null;
             }
         }
 
