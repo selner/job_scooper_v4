@@ -101,11 +101,11 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
         "error_message" => $msg,
         "file" => $ex->getFile(),
         "line_number" => $ex->getLine(),
-        "exception" => \Scooper\object_to_array($ex),
-        "object_properties" => null,
-        "debug_backtrace" => var_export(debug_backtrace(), true),
-        "exception_stack_trace" => $ex->getTraceAsString());
-
+        "exception" => \Scooper\object_to_array($ex)
+//        "object_properties" => null,
+////        "debug_backtrace" => var_export(debug_backtrace(), true),
+//        "exception_stack_trace" => $ex->getTraceAsString()
+    );
     $filenm = exportToDebugJSON($debugData, "exception" . $excKey);
 
     $GLOBALS['USERDATA']['ERROR_REPORT_FILES'][$excKey] = \Scooper\getFilePathDetailsFromString($filenm);
