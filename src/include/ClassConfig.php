@@ -517,7 +517,11 @@ class ClassConfig extends ClassBaseJobsSitePlugin
         if ($GLOBALS['USERDATA']['selenium']['autostart'] == 1 && !(array_key_exists('jar', $GLOBALS['USERDATA']['selenium']) === true && array_key_exists('postfix_switches', $GLOBALS['USERDATA']['selenium']) === true ))
             throw new Exception("Required parameters to autostart Selenium are missing; you must set both 'jar' and 'postfix_switches' in your configuration files.");
 
-        $GLOBALS['USERDATA']['selenium']['host_location'] = 'http://localhost:' . $GLOBALS['USERDATA']['selenium']['port'];
+        if (!(array_key_exists('server', $GLOBALS['USERDATA']['selenium']) === true))
+            $GLOBALS['USERDATA']['selenium']['server'] = "localhost";
+
+
+        $GLOBALS['USERDATA']['selenium']['host_location'] = 'http://' . $GLOBALS['USERDATA']['selenium']['server'] . ":" . $GLOBALS['USERDATA']['selenium']['port'];
 
     }
 
