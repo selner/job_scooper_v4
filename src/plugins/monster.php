@@ -75,7 +75,15 @@ class PluginMonster extends ClassBaseServerHTMLJobSitePlugin
     function parseTotalResultsCount($objSimpHTML)
     {
 
-        $tags = get_meta_tags('http://www.example.com/');
+        $noResults = $objSimpHTML->find("div[class='jsresultsheader'] h1");
+        if (!is_null($noResults) && is_array($noResults) && count($noResults) > 0)
+        {
+            if(strncasecmp('Sorry,', trim($noResults[0]->plaintext), 6) == 0)
+            {
+                $GLOBALS['logger']->logLine("Search returned no jobs found and matched expected 'No results' tag for " . $this->siteName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                return null;
+            }
+        }
 
         $resultsSection= $objSimpHTML->find("h2[class='page-title']");
         $totalItemsText = $resultsSection[0]->plaintext;

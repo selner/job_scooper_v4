@@ -99,6 +99,7 @@ class BasePluginiCIMS extends ClassHTMLJobSitePlugin
     }
 
     protected $arrListingTagSetup = array(
+        'tag_listings_noresults' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'iCIMS_ListingsPage', 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Job Listings\s*(Sorry)/'),
         'tag_pages_count' => array('selector' => '#iCIMS_Paginator', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?\s+(\d+)\s*$/'),
         'tag_listings_section' => array(array('tag' => 'table', 'attribute'=>'class', 'attribute_value' => 'iCIMS_JobsTable iCIMS_Table'), array('tag' => 'tr')),
         'tag_title' =>  array(array('tag' => 'td', 'index' =>null), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
