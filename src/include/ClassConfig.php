@@ -928,7 +928,7 @@ class ClassConfig extends ClassBaseJobsSitePlugin
         $flagType = null;
         if(array_key_exists('keyword_match_type_string', $iniKeywordSetup) && strlen($iniKeywordSetup['keyword_match_type_string'] ) > 0)
         {
-            $flagType = $this->_getKeywordMatchFlagFromString_($ini_keyword_set['keyword_match_type'] );
+            $flagType = $this->_getKeywordMatchFlagFromString_($iniKeywordSetup['keyword_match_type'] );
         }
 
 
