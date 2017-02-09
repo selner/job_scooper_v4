@@ -713,7 +713,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
 
             }
 
-            $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->siteName . "[" . $searchDetails['name']), \Scooper\C__SECTION_END__, \Scooper\C__NAPPTOPLEVEL__);
+            $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->siteName . "[" . $searchDetails['name'] . "]"), \Scooper\C__SECTION_END__, \Scooper\C__NAPPTOPLEVEL__);
         } catch (Exception $ex) {
 
             //
