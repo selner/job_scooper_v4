@@ -850,6 +850,11 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
         {
             $arrPageJobsList = [];
             $apiJobs = $this->getSearchJobsFromAPI($searchDetails, $pageNumber);
+            if(is_null($apiJobs))
+            {
+                $GLOBALS['logger']->logLine("Warning: " . $this->siteName . "[" . $searchDetails['name'] . "] returned zero jobs from the API." . PHP_EOL, \Scooper\C__DISPLAY_WARNING__);
+                return null;
+            }
 
             foreach($apiJobs as $job)
             {
