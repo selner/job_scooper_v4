@@ -1044,15 +1044,23 @@ class ClassConfig extends ClassBaseJobsSitePlugin
             {
                 if(file_exists($fileDetail ['full_file_path'] ) && is_file($fileDetail['full_file_path'] ))
                 {
-                    $file = fopen($fileDetail ['full_file_path'],"r");
-                    $headers = fgetcsv($file);
-                    while (($rowData = fgetcsv($file, null, ",", "\"")) !== false) {
-                        $arrRec = array_combine($headers, $rowData);
-                        $arrRec['negative_keywords'] = strtolower($arrRec['negative_keywords']);
-                        $arrNegKwds[$arrRec["negative_keywords"]] = $arrRec;
+                    $arrRecs = loadCSV($fileDetail ['full_file_path']);
+                    foreach($arrRecs as $arrRec)
+                    {
+                        if(array_key_exists('negative_keywords', $arrRec)) {
+                            $kwd = strtolower($arrRec['negative_keywords']);
+                            $arrNegKwds[$kwd] = $kwd;
                     }
-
-                    fclose($file);
+                    }
+//                    $file = fopen($fileDetail ['full_file_path'],"r");
+//                    $headers = fgetcsv($file);
+//                    while (($rowData = fgetcsv($file, null, ",", "\"")) !== false) {
+//                        $arrRec = array_combine($headers, $rowData);
+//                        $arrRec['negative_keywords'] = strtolower($arrRec['negative_keywords']);
+//                        $arrNegKwds[$arrRec["negative_keywords"]] = $arrRec;
+//                    }
+//
+//                    fclose($file);
 
                 }
             }
