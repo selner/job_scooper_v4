@@ -22,6 +22,7 @@ class SeleniumSession extends PropertyObject
 {
     private $remoteWebDriver = null;
     private $additionalLoadDelaySeconds = null;
+    private $lastCookies = array();
 
     function __construct($additionalLoadDelaySeconds = 0)
     {
@@ -36,7 +37,16 @@ class SeleniumSession extends PropertyObject
 
     function getPageHTML($url)
     {
+        foreach ($this->lastCookies as $cookie) {
+            $this->driver->manage()->addCookie(array(
+                'name' => 'cookie_name',
+                'value' => 'cookie_value',
+            ));
+        }
         $this->loadPage($url);
+
+        $this->lastCookies = $this->driver->manage()->getCookies();
+
         return $this->driver->getPageSource();
     }
 

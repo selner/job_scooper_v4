@@ -922,7 +922,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             }
             else
             {
-                $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $searchDetails['search_start_url'], $this->secsPageTimeout);
+                $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $searchDetails['search_start_url'], $this->secsPageTimeout, $referrer = $this->prevURL, $cookies = $this->prevCookies);
             }
             if(!$objSimpleHTML) { throw new ErrorException("Error:  unable to get SimpleHTML object for ".$searchDetails['search_start_url']); }
 
@@ -992,7 +992,8 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
             else
             {
                 $nJobsFound = 0;
-
+                $prevPageURL = "";
+                
                 $GLOBALS['logger']->logLine("Querying " . $this->siteName . " for " . $totalPagesCount . " pages with " . ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ ? "an unknown number of" : $nTotalListings) . " jobs:  " . $searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_START__);
 
                 $strURL = $searchDetails['search_start_url'];
@@ -1059,7 +1060,7 @@ abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
                         if ($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
                             return null;
 
-                        $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout);
+                        $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout, $referrer = $this->prevURL, $cookies = $this->prevCookies);
                     }
                     if (!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for " . $strURL);
 

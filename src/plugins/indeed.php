@@ -23,7 +23,10 @@ class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
     protected $siteName = 'Indeed';
     protected $nJobListingsPerPage = 50;
     protected $siteBaseURL = 'http://www.Indeed.com';
-    protected $strBaseURLFormat = "https://www.indeed.com/jobs?q=***KEYWORDS***&l=***LOCATION***&radius=50&sort=date&limit=50&fromage=***NUMBER_DAYS***&filter=0***ITEM_NUMBER***";
+//    protected $strBaseURLFormat = "https://www.indeed.com/jobs?q=***KEYWORDS***&l=***LOCATION***&radius=50&sort=date&limit=50&fromage=***NUMBER_DAYS***&filter=0***ITEM_NUMBER***";
+//    protected $strBaseURLFormat = "https://www.indeed.com/jobs?as_and=***KEYWORDS***&as_phr=&as_any=&as_not=&as_ttl=&as_cmp=&jt=all&st=&salary=&radius=50&l=***LOCATION***&fromage=***NUMBER_DAYS***&limit=50&sort=date&psf=advsrch&start=***ITEM_NUMBER***";
+    protected $strBaseURLFormat = "https://www.indeed.com/jobs?q=***KEYWORDS***&l=***LOCATION***&radius=50&sort=date&limit=50&fromage=***NUMBER_DAYS***&filter=0=***ITEM_NUMBER***";
+
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $strKeywordDelimiter = "OR";
     protected $additionalFlags = [C__JOB_IGNORE_MISMATCHED_JOB_COUNTS];
@@ -36,26 +39,27 @@ class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
         parent::__construct($strBaseDir);
     }
 
-    protected function _getBaseURLFormat_($searchDetails = null)
-    {
-        $strURL = parent::_getBaseURLFormat_($searchDetails);
-        if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_BE_IN_TITLE) || \Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE))
-        {
-            $strURL = $strURL . "&as_ttl=***KEYWORDS***&l=***LOCATION***";
-        }
-        else
-        {
-            $strURL = $strURL . "&q=***KEYWORDS***&l=***LOCATION***";
-        }
-
-        return $strURL;
-    }
+//    protected function _getBaseURLFormat_($searchDetails = null)
+//    {
+//        $strURL = parent::_getBaseURLFormat_($searchDetails);
+//        if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_BE_IN_TITLE) || \Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE))
+//        {
+//            $strURL = $strURL . "&as_ttl=***KEYWORDS***&l=***LOCATION***";
+//        }
+//        else
+//        {
+//            $strURL = $strURL . "&q=***KEYWORDS***&l=***LOCATION***";
+//        }
+//
+//        return $strURL;
+//    }
 
     function getItemURLValue($nItem)
     {
         if($nItem == null || $nItem == 1) { return ""; }
 
-        return "&start=" . $nItem. "&pp=";
+/*        return "&start=" . $nItem. "&pp=";*/
+        return "&start=" . $nItem;
     }
 
     function getDaysURLValue($nDays = null)
@@ -84,15 +88,15 @@ class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
                 break;
 
             default:
-                $ret = 3;
+                $ret = "any";
                 break;
         }
        return $ret;
 
     }
-
-    function parseJobsListForPage($objSimpHTML)
-    { return $this->_scrapeItemsFromHTML_($objSimpHTML); }
+//
+//    function parseJobsListForPage($objSimpHTML)
+//    { return $this->_scrapeItemsFromHTML_($objSimpHTML); }
 
 
     function parseTotalResultsCount($objSimpHTML)
@@ -108,11 +112,16 @@ class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
     }
 
 
-    private function _scrapeItemsFromHTML_($objSimpleHTML)
+    protected function parseJobsListForPage($objSimpleHTML)
     {
         $ret = null;
+        $cntNode = $objSimpleHTML->find("div[id='searchCount']");
+        if(isset($cntNode) && count($cntNode) >= 1)
+        {
+            $GLOBALS['logger']->logLine("Processing records: " . $cntNode[0]->plaintext);
+        }
 
-        $nodesJobs = $objSimpleHTML->find('td[id=\'resultsCol\'] div[class=\'result\']');
+        $nodesJobs = $objSimpleHTML->find('td[id=\'resultsCol\'] div[data-tn-component=\'organicJob\']');
         foreach($nodesJobs as $node)
         {
 
@@ -125,15 +134,14 @@ class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
 
             $item = $this->getEmptyJobListingRecord();
 
-            $subNodes = $node->find("a");
-            if(isset($subNodes) && array_key_exists('title', $subNodes[0]->attr))
-                $item['job_title'] = $subNodes[0]->attr['title'];
-
-            if(isset($subNodes))
-                $item['job_post_url'] = $subNodes[0]->attr['href'];
-
             if(isset($node) && isset($node->attr['data-jk']))
                 $item['job_id'] = $node->attr['data-jk'];
+
+            $subNodes = $node->find("a[data-tn-element='jobTitle']");
+            if(isset($subNodes) && array_key_exists('title', $subNodes[0]->attr)) {
+                $item['job_title'] = $subNodes[0]->attr['title'];
+                $item['job_post_url'] = $subNodes[0]->attr['href'];
+            }
 //
 //            if(is_null($item['job_id']) || empty($item['job_id'])) {
 //                $id = $this->getIDFromLink('\/jobs\/.{1,}-(\w+).*', $item['job_post_url']);
@@ -142,13 +150,15 @@ class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
 //            }
 
 
-            $coNode = $node->find("span[class='company'] a");
+
+
+            $coNode = $node->find("span[itemprop='hiringOrganization']");
             if(isset($coNode) && count($coNode) >= 1)
             {
-                $item['company'] = $coNode[0]->plaintext;
+                $item['company'] = combineTextAllChildren($coNode[0]);
             }
 
-            $locNode= $node->find("span[class='location']");
+            $locNode= $node->find("span[itemprop='addressLocality']");
             if(isset($locNode) && count($locNode) >= 1)
             {
                 $item['location'] = $locNode[0]->plaintext;

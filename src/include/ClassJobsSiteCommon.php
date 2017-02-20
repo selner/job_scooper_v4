@@ -37,6 +37,9 @@ class ClassJobsSiteCommon
     protected $strBaseURLFormat = null;
     protected $typeLocationSearchNeeded = null;
     protected $siteName = 'NAME-NOT-SET';
+    protected $prevCookies = "";
+    protected $prevURL = "";
+
 
     function __construct($strOutputDirectory = null)
     {
@@ -609,7 +612,7 @@ class ClassJobsSiteCommon
 
 
 
-    function getSimpleObjFromPathOrURL($filePath = "", $strURL = "", $optTimeout = null)
+    function getSimpleObjFromPathOrURL($filePath = "", $strURL = "", $optTimeout = null, $referrer = null, $cookies = null)
     {
         $objSimpleHTML = null;
 
@@ -625,10 +628,12 @@ class ClassJobsSiteCommon
             $class = new \Scooper\ScooperDataAPIWrapper();
             if(isVerbose()) $class->setVerbose(true);
 
-            $retHTML = $class->curl($strURL, null, 'GET', null, null, null, null, $optTimeout);
-            if(count(strlen($retHTML['output']) > 0))
+            $retObj = $class->cURL($strURL, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = $optTimeout, $cookies = $cookies, $referrer = $referrer);
+            if(!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0)
             {
-                $objSimpleHTML = SimpleHtmlDom\str_get_html($retHTML['output']);
+                $objSimpleHTML = SimpleHtmlDom\str_get_html($retObj['output']);
+                $this->prevCookies = $retObj['cookies'];
+                $this->prevURL = $strURL;
             }
             else
             {
