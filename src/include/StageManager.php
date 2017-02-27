@@ -251,11 +251,16 @@ class StageManager extends S3JobListManager
             $arrRunStages = explode(",", \Scooper\get_PharseOptionValue("stages"));
             if (is_array($arrRunStages) && count($arrRunStages) >= 1 && strlen($arrRunStages[0]) > 0) {
                 foreach ($arrRunStages as $stage) {
+                    if (!is_null($GLOBALS['logger'])) $this->logger->logLine("StageManager starting stage " . $stage, \Scooper\C__DISPLAY_SECTION_START__);
                     $stageFunc = "doStage" . $stage;
                     try {
                         call_user_func(array($this, $stageFunc));
                     } catch (Exception $ex) {
                         throw new Exception("Error:  failed to call method \$this->" . $stageFunc . "() for " . $stage . " from option --stages " . join(",", $arrRunStages) . ".  Error: " . $ex);
+                    }
+                    finally
+                    {
+                        if (!is_null($GLOBALS['logger'])) $this->logger->logLine("StageManager ended stage " . $stage, \Scooper\C__DISPLAY_ITEM_RESULT__);
                     }
                 }
             } else {
@@ -278,7 +283,7 @@ class StageManager extends S3JobListManager
     public function doStage1()
     {
 
-        if (isset($GLOBALS['logger'])) $this->logger->logLine("Stage 1: Downloading Latest Matching Jobs ", \Scooper\C__DISPLAY_SECTION_START__);
+        if (isset($GLOBALS['logger'])) $this->logger->logLine("Stage 1: Downloading Latest Matching Jobs ", \Scooper\C__DISPLAY_ITEM_RESULT__);
         try {
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
