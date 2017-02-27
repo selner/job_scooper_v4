@@ -786,7 +786,7 @@ class ClassConfig extends ClassBaseJobsSitePlugin
                     handleException(new IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' is not valid.", $locTypeNeeded)), $err, $raise=false);
                     $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$curSiteName] = $curSiteName;
 
-                    $arrNewSearchList = array_filter($arrSearches, function ($var) use ($curSiteName) {
+                    $arrNewSearchList = array_filter($GLOBALS['USERDATA']['configuration_settings']['searches'], function ($var) use ($curSiteName) {
                         if (strcasecmp($var['site_name'], $curSiteName) == 0)
                             return false;
                         return true;
@@ -841,7 +841,7 @@ class ClassConfig extends ClassBaseJobsSitePlugin
             $arrPossibleSearches_Start = $GLOBALS['USERDATA']['configuration_settings']['searches'];
             $arrNewSearches = null;
 
-            for($l = 0; $l < count($arrPossibleSearches_Start) ; $l++)
+            foreach(array_keys($arrPossibleSearches_Start) as $l)
             {
 
                 if(array_key_exists('location_user_specified_override', $arrPossibleSearches_Start[$l]) && isset($arrPossibleSearches_Start[$l]['location_user_specified_override']) && strlen($arrPossibleSearches_Start[$l]['location_user_specified_override'])>0)
