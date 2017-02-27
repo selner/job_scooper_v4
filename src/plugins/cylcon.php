@@ -22,7 +22,8 @@ class PluginCyclon extends ClassHTMLJobSitePlugin
 {
     protected $siteName = 'Cylcon';
     protected $siteBaseURL = "http://cylcon.com";
-    protected $strBaseURLFormat = "http://cylcon.com/jobs.php?q=***KEYWORDS***&l=***LOCATION***&sort=date&radius=50&start=***ITEM_NUMBER***";
+//    protected $strBaseURLFormat = "http://cylcon.com/jobs.php?q=***KEYWORDS***&l=***LOCATION***&sort=date&radius=50&start=***ITEM_NUMBER***";
+    protected $strBaseURLFormat = "http://www.cylcon.com/jobscylcon.php?q=***KEYWORDS***&l=***LOCATION***&sort=date&radius=50&start=***ITEM_NUMBER***";
 
     //
     // BUGBUG: We shouldn't have to do C__JOB_IGNORE_MISMATCHED_JOB_COUNTS here, but have not yet figured out what is causing lower counts
@@ -45,7 +46,7 @@ class PluginCyclon extends ClassHTMLJobSitePlugin
         'tag_next_button' => array('selector' => '#page-top > section > div > div.row.text-left > div.col-lg-9 > table > tbody > tr:nth-child(1) > td:nth-child(3) > a'),
         'tag_job_id' => array(array('tag' => 'div'), array('tag' => 'a'), 'index' => '0', 'return_attribute' => 'href', 'return_value_regex' => '/.*?[Rr]edirect[Ww][Ee][Bb]\.php\?q=([^&]+)&*.*/'),
         'tag_company' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'col-lg-10'), array('tag' => 'p'), array('tag' => 'strong'), 'return_attribute' => 'plaintext', 'return_value_regex' => '/(.*?)-.*/'),
-        'tag_locationd' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'col-lg-10'), array('tag' => 'p'), array('tag' => 'strong'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'location'), 'return_attribute' => 'plaintext', 'return_value_regex' => '/-(.*?)-.*/'),
+        'tag_location' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'col-lg-10'), array('tag' => 'p'), array('tag' => 'strong'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'location'), 'return_attribute' => 'plaintext', 'return_value_regex' => '/-(.*?)-.*/'),
         'tag_job_posting_date' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'date')
     );
 
