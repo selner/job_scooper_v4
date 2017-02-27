@@ -75,7 +75,7 @@ const C__USER_KEYWORD_MATCH_DEFAULT = C__USER_KEYWORD_MUST_BE_IN_TITLE;
 
 define('C__JOB_BASETYPE_WEBPAGE_FLAGS', 0);
 
-$GLOBALS['DATA']['location_types'] = array('location-city', 'location-city-comma-statecode', 'location-city-dash-statecode', 'location-city-comma-statecode-underscores-and-dashes', 'location-city-comma-state', 'location-city-comma-state-country', 'location-statecode', 'location-state', 'location-city-comma-state-country-no-commas');
+$GLOBALS['DATA']['location_types'] = array('location-city', 'location-city-comma-statecode', 'location-city-dash-statecode', 'location-city-comma-nospace-statecode', 'location-city-comma-statecode-underscores-and-dashes', 'location-city-comma-state', 'location-city-comma-state-country', 'location-statecode', 'location-state', 'location-city-comma-state-country-no-commas', 'location-countrycode');
 const C__TOTAL_ITEMS_UNKNOWN__ = 1111;
 
 

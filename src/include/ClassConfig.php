@@ -747,9 +747,12 @@ class ClassConfig extends ClassBaseJobsSitePlugin
         // location sets specified
         //
         //
+
+        $arrSearches = $GLOBALS['USERDATA']['configuration_settings']['searches'];
+
         if(isset($primaryLocationSet))
         {
-            foreach(array_keys($GLOBALS['USERDATA']['configuration_settings']['searches']) as $searchKey)
+            foreach(array_keys($arrSearches) as $searchKey)
             {
                 $curSiteName = \Scooper\strScrub($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['site_name'], FOR_LOOKUP_VALUE_MATCHING);
                 if(array_key_exists($curSiteName, $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']))
@@ -778,8 +781,22 @@ class ClassConfig extends ClassBaseJobsSitePlugin
                 $locTypeNeeded = $classPlug->getLocationSettingType();
                 if(array_key_exists($locTypeNeeded, $primaryLocationSet))
                     $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value'] = $primaryLocationSet[$locTypeNeeded];
-                else
-                    throw new IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' is not valid.", $locTypeNeeded));
+                else {
+                    $err = "Error:  unable to add search because the required location type '" . $locTypeNeeded ."' was not found in the location set '" . $primaryLocationSet['key'] . "'. Excluding searches for " . $curSiteName .".";
+                    handleException(new IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' is not valid.", $locTypeNeeded)), $err, $raise=false);
+                    $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$curSiteName] = $curSiteName;
+
+                    $arrNewSearchList = array_filter($arrSearches, function ($var) use ($curSiteName) {
+                        if (strcasecmp($var['site_name'], $curSiteName) == 0)
+                            return false;
+                        return true;
+                    });
+
+                    $GLOBALS['USERDATA']['configuration_settings']['searches'] = \Scooper\array_copy($arrNewSearchList);
+                    $this->_addLocationSetToInitialSetOfSearches_();
+                    return;
+
+                }
 
                 if(!isValueURLEncoded($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value']))
                 {
@@ -1050,7 +1067,7 @@ class ClassConfig extends ClassBaseJobsSitePlugin
                         if(array_key_exists('negative_keywords', $arrRec)) {
                             $kwd = strtolower($arrRec['negative_keywords']);
                             $arrNegKwds[$kwd] = $kwd;
-                    }
+                        }
                     }
 //                    $file = fopen($fileDetail ['full_file_path'],"r");
 //                    $headers = fgetcsv($file);
