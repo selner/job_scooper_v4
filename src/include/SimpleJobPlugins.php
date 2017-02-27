@@ -94,10 +94,15 @@ abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
     function parseTotalResultsCount($objSimpHTML)
     {
         if (array_key_exists('tag_listings_noresults', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_listings_noresults'])) {
-            $noResultsVal = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_listings_noresults'], $propertyName = 'plaintext');
-            if (!is_null($noResultsVal)) {
-                $GLOBALS['logger']->logLine("Search returned " . $noResultsVal . " and matched expected 'No results' tag for " . $this->siteName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                return $noResultsVal;
+            try
+            {
+                $noResultsVal = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_listings_noresults'], $propertyName = 'plaintext');
+                if (!is_null($noResultsVal)) {
+                    $GLOBALS['logger']->logLine("Search returned " . $noResultsVal . " and matched expected 'No results' tag for " . $this->siteName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    return $noResultsVal;
+                }
+            } catch (Exception $ex) {
+                $GLOBALS['logger']->logLine("Warning: Did not find matched expected 'No results' tag for " . $this->siteName . ".  %s", \Scooper\C__DISPLAY_WARNING__);
             }
         }
 
