@@ -230,7 +230,7 @@ class StageManager extends S3JobListManager
 
     function __destruct()
     {
-        if (isset($GLOBALS['logger'])) $this->logger->logLine("Closing " . $this->siteName . " instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__);
+        if (isset($this->logger)) $this->logger->logLine("Closing " . $this->siteName . " instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__);
 
 
 
@@ -251,7 +251,7 @@ class StageManager extends S3JobListManager
             $arrRunStages = explode(",", \Scooper\get_PharseOptionValue("stages"));
             if (is_array($arrRunStages) && count($arrRunStages) >= 1 && strlen($arrRunStages[0]) > 0) {
                 foreach ($arrRunStages as $stage) {
-                    if (!is_null($GLOBALS['logger'])) $this->logger->logLine("StageManager starting stage " . $stage, \Scooper\C__DISPLAY_SECTION_START__);
+                    if (isset($this->logger)) $this->logger->logLine("StageManager starting stage " . $stage, \Scooper\C__DISPLAY_SECTION_START__);
                     $stageFunc = "doStage" . $stage;
                     try {
                         call_user_func(array($this, $stageFunc));
@@ -260,7 +260,7 @@ class StageManager extends S3JobListManager
                     }
                     finally
                     {
-                        if (!is_null($GLOBALS['logger'])) $this->logger->logLine("StageManager ended stage " . $stage, \Scooper\C__DISPLAY_ITEM_RESULT__);
+                        if (isset($this->logger)) $this->logger->logLine("StageManager ended stage " . $stage, \Scooper\C__DISPLAY_ITEM_RESULT__);
                     }
                 }
             } else {
@@ -283,7 +283,7 @@ class StageManager extends S3JobListManager
     public function doStage1()
     {
 
-        if (isset($GLOBALS['logger'])) $this->logger->logLine("Stage 1: Downloading Latest Matching Jobs ", \Scooper\C__DISPLAY_ITEM_RESULT__);
+        if (isset($this->logger)) $this->logger->logLine("Stage 1: Downloading Latest Matching Jobs ", \Scooper\C__DISPLAY_ITEM_RESULT__);
         try {
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -357,7 +357,7 @@ class StageManager extends S3JobListManager
     public function doStage2()
     {
         try {
-            if (isset($GLOBALS['logger'])) $this->logger->logLine("Stage 2:  Tokenizing Jobs ", \Scooper\C__DISPLAY_SECTION_START__);
+            if (isset($this->logger)) $this->logger->logLine("Stage 2:  Tokenizing Jobs ", \Scooper\C__DISPLAY_SECTION_START__);
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             //
@@ -367,7 +367,7 @@ class StageManager extends S3JobListManager
             $this->migrateAndLoadS3JobListsIntoStage(2);
 
             if (countAssociativeArrayValues($this->arrLatestJobs_UnfilteredByUserInput) == 0) {
-                if (isset($GLOBALS['logger'])) $this->logger->logLine("No jobs found to process. Skipping Stage 2.", \Scooper\C__DISPLAY_WARNING__);
+                if (isset($this->logger)) $this->logger->logLine("No jobs found to process. Skipping Stage 2.", \Scooper\C__DISPLAY_WARNING__);
                 return;
             }
 
