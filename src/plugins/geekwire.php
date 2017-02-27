@@ -29,7 +29,7 @@ class PluginGeekwire extends ClassBaseClientSideHTMLJobSitePlugin
 //    protected $strBaseURLFormat = "http://www.geekwork.com/jobs/?search_keywords=***KEYWORDS***&search_location=***LOCATION***";
     protected $typeLocationSearchNeeded = 'location-statecode';
     protected $additionalLoadDelaySeconds = 20;
-    protected $additionalFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_PREFER_MICRODATA, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
+    protected $additionalFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
 
     function parseJobsListForPage($objSimpHTML)
     {
@@ -52,15 +52,11 @@ class PluginGeekwire extends ClassBaseClientSideHTMLJobSitePlugin
             $item['date_pulled'] = getTodayAsString();
 
             $item['job_site_date'] = $node->find("li[class='date']")[0]->plaintext;
-            $dateVal = date_create_from_format("c", $item['job_site_date']);
-            if(isset($dateVal))
-                $item['job_site_date'] = $dateVal->format('Y-m-d');
-
             $item['job_site_category'] = $node->find("ul[class='meta'] li")[0]->plaintext;
 
 
             $arrLIParts = explode(" ", $node->attr['class']);
-            $item['job_id'] = str_ireplace("http://www.geekwire.com/jobs/job/", "", $arrLIParts[0]);
+            $item['job_id'] = str_ireplace("http://www.geekwire.com/jobs/job/", "", $item['job_post_url']);
 
             $ret[] = $this->normalizeJobItem($item);
 
