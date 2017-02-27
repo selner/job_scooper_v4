@@ -26,7 +26,7 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
 {
     protected $siteBaseURL = 'http://www.simplyhired.com';
     protected $siteName = 'SimplyHired';
-    protected $nJobListingsPerPage = 25;
+    protected $nJobListingsPerPage = 10;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $strKeywordDelimiter = "or";
     protected $strBaseURLFormat = "http://www.simplyhired.com/search?q=***KEYWORDS***&l=***LOCATION***&fdb=***NUMBER_DAYS***&&ws=25&mi=50&sb=dd&pn=***PAGE_NUMBER***";
