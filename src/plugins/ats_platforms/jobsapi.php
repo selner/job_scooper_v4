@@ -98,7 +98,8 @@ class PluginDice extends ClassBaseJobsAPIPlugin
     protected $regex_link_job_id = '/^.*\/job\/result\/([^\?]+).*/i';
     protected $nJobListingsPerPage = 50;
 
-
+    // BUGBUG: API is unsupported and doesn't seem to work.  Should probably switch to website
+    // https://www.dice.com/jobs/advancedResult.html?for_one=&for_all=head+of&for_exact=&for_none=&for_jt=&for_com=&for_loc=Seattle%2C+WA&sort=relevance&radius=0&searchid=9171364965913
 
     function getSearchJobsFromAPI($searchDetails, $pageNumber = 1)
     {
@@ -109,26 +110,40 @@ class PluginDice extends ClassBaseJobsAPIPlugin
             'text' => $strKeywords,
             'page' => $pageNumber,
             'pgcnt' => $this->nJobListingsPerPage,
-            'city' => $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-city'],
-            'state' => $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-state']
+            'city' => $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-city-comma-nospace-statecode'],
+            'state' => $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-statecode'],
+            'country' => $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-countrycode'],
+            'age' => $GLOBALS['USERDATA']['configuration_settings']['number_days'],
+            'sort' => 1 // sort by date
         ];
         $query = new DiceQuery($options);
         $client = new DiceProvider($query);
 
         $GLOBALS['logger']->logLine("Getting jobs from " . $query->getUrl() . " for search ". $searchDetails['name'] , \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
+        $apiJobs = null;
         // Get a Collection of Jobs
-        $apiJobs = $client->getJobs();
-        $jobsForPage = $apiJobs->all();
-        if($jobsForPage != null)
-        {
-            foreach($jobsForPage as $job)
-            {
-                $id = $this->getIDFromLink($this->regex_link_job_id, $job->url);
-                $job->setSourceId( $id );
-            }
+        try {
+            $apiJobs = $client->getJobs();
+        } catch (Exception $ex) {
+            handleException($ex, null, false);
+            $apiJobs = null;
         }
-        return $jobsForPage;
+
+        if(!is_null($apiJobs))
+        {
+            $jobsForPage = $apiJobs->all();
+
+            if($jobsForPage != null)
+            {
+                foreach($jobsForPage as $job)
+                {
+                    $id = $this->getIDFromLink($this->regex_link_job_id, $job->url);
+                    $job->setSourceId( $id );
+                }
+            }
+            return $jobsForPage;
+        }
     }
 
 }
