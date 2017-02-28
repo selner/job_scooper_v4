@@ -16,33 +16,38 @@
  * under the License.
  */
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
-require_once(__ROOT__ . '/include/BaseJobsSitePlugin.php');
+require_once(__ROOT__ . '/include/AbstractClassBaseJobsPlugin.php');
 
 
-abstract class ClassBaseJobsAPIPlugin extends ClassBaseJobsSitePlugin
+abstract class ClassBaseJobsAPIPlugin extends AbstractClassBaseJobsPlugin
 {
     function __construct($strBaseDir = null)
     {
         $this->additionalFlags[] = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
-        $this->additionalFlags[] = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
+        $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__;
+
+        parent::__construct($strBaseDir);
+
+    }
+}
+
+abstract class ClassBaseServerHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
+{
+    function __construct($strBaseDir = null)
+    {
+        $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
+
         parent::__construct($strBaseDir);
 
     }
 
-    protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__;
-
-}
-abstract class ClassBaseServerHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
-{
-    protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
-
 }
 
-abstract class ClassBaseClientSideHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
+abstract class ClassBaseClientSideHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 {
-    protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__;
     function __construct($strBaseDir = null)
     {
+        $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__;
         $this->additionalFlags[] = C__JOB_USE_SELENIUM;
         parent::__construct($strBaseDir);
 

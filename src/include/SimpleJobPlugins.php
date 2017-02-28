@@ -39,7 +39,7 @@ abstract class ClassHTMLJobSitePlugin extends ClassBaseHTMLJobSitePlugin
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
 }
 
-abstract class ClassBaseHTMLJobSitePlugin extends ClassBaseJobsSitePlugin
+abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 {
     protected $siteName = '';
     protected $siteBaseURL = '';

@@ -20,7 +20,7 @@ require_once(__ROOT__.'/include/Options.php');
 require_once(__ROOT__.'/lib/Linkify.php');
 require_once(__ROOT__.'/include/CSimpleHTMLHelper.php');
 require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
-require_once(__ROOT__ .'/include/BaseJobsSitePlugin.php');
+require_once(__ROOT__ .'/include/AbstractClassBaseJobsPlugin.php');
 require_once(__ROOT__ .'/include/JobSitePluginsTypes.php');
 require_once(__ROOT__ . '/include/SimpleJobPlugins.php');
 require_once(__ROOT__.'/include/ClassConfig.php');
@@ -41,6 +41,7 @@ const C_JOB_MAX_RESULTS_PER_SEARCH = 1000;
 const C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__  = "SERVER_HTML";
 const C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__  = "CLIENT_HTML";
 const C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__ = "JOBAPI";
+const C__JOB_SEARCH_RESULTS_TYPE_UNKNOWN__ = "ERROR_UNKNOWN_TYPE";
 
 const C__JOB_USE_SELENIUM = 0x1;
 const C__JOB_CLIENTSIDE_INFSCROLLPAGE= 0x2;

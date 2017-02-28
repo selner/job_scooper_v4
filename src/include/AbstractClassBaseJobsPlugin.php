@@ -24,7 +24,7 @@ const VALUE_NOT_SUPPORTED = -1;
 const BASE_URL_TAG_LOCATION = "***LOCATION***";
 const BASE_URL_TAG_KEYWORDS = "***KEYWORDS***";
 
-abstract class ClassBaseJobsSitePlugin extends ClassJobsSiteCommon
+abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 {
 
     function __construct($strOutputDirectory = null, $attributes = null)

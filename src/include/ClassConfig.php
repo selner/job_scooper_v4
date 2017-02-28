@@ -19,7 +19,7 @@ if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/SitePlugins.php');
 
 
-class ClassConfig extends ClassBaseJobsSitePlugin
+class ClassConfig extends AbstractClassBaseJobsPlugin
 {
     protected $nNumDaysToSearch = -1;
     public $arrFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null, 'user_input_files_details' => null);
