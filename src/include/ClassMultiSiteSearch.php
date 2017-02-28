@@ -105,7 +105,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
             catch (Exception $classError)
             {
                 $err = $classError;
-                if ($classError->getCode() == 4096)
+                if (($classError->getCode() == 4096 || $classError->getCode() == 0) && !is_null($this->selenium))
                 {
                     try {
                         $this->selenium->killAllAndRestartSelenium();
@@ -117,6 +117,9 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
                     }
 
                 }
+                else
+                    handleException($classError, "Unable to run searches for ". $classPluginForSearch['class_name'] . ": %s", $raise = true);
+
                 $GLOBALS['logger']->logLine('ERROR:  Plugin ' .$classPluginForSearch['name'] . ' failed due to an error:  ' . $err .PHP_EOL. 'Skipping it\'s remaining searches and continuing with other plugins.', \Scooper\C__DISPLAY_ERROR__);
                 $arrFail = getFailedSearchesByPlugin();
                 if(countAssociativeArrayValues($arrFail) > 2) {
