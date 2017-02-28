@@ -72,14 +72,13 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
         $toThrow = new Exception($msg);
     }
 
-    $msg .= PHP_EOL . "PHP memory usage: " . getPhpMemoryUsage() . PHP_EOL;
+//    $msg .= PHP_EOL . "PHP memory usage: " . getPhpMemoryUsage() . PHP_EOL;
 
-    $msgHash = md5($msg);
+    $excKey = md5($msg);
 
     //
     // Error key = <md5 msg hash><line#>
     //
-    $excKey = \Scooper\strScrub($msgHash . $ex->getLine(), FOR_LOOKUP_VALUE_MATCHING);
     if (array_key_exists($excKey, $GLOBALS['USERDATA']['ERROR_REPORT_FILES']) === true) {
         // we already stored this error so need to re-store it.  Just throw it if needed.
         if ($raise === true)
