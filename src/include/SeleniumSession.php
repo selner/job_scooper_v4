@@ -53,11 +53,10 @@ class SeleniumSession extends PropertyObject
         //          Adding check for that case and a session kill/reload when it happens
         if (stristr($src, "tab has crashed") != false)
         {
-            $GLOBALS['logger']->logLine("Error in Firefox WebDriver:  tab has crashed retrieving page at " . $url .".  Killing WebDriver and trying one time...", \Scooper\C__DISPLAY_WARNING__);
+            $GLOBALS['logger']->logLine("Error in Firefox WebDriver:  tab has crashed retrieving page at " . $url .".  Killing WebDriver and trying one more time...", \Scooper\C__DISPLAY_WARNING__);
             // We found "tab has crashed" in the response, so we can't use it.
             if ($recursed != true) {
-                $this->unset_driver();
-                $this->create_remote_webdriver();
+                $this->killAllAndRestartSelenium();
                 return $this->getPageHTML($url, $recursed = true);
             }
             else
@@ -117,25 +116,37 @@ class SeleniumSession extends PropertyObject
     static function shutdownSelenium()
     {
         if(array_key_exists('selenium_started', $GLOBALS) && $GLOBALS['selenium_started'] === true) {
-            try {
-                // The only way to shutdown standalone server in 3.0 is by killing the local process.
-                // Details: https://github.com/SeleniumHQ/selenium/issues/2852
-                //
-                $cmd = 'pid=`ps -eo pid,args | grep selenium-server | grep -v grep | cut -c1-6`; if [ "$pid" ]; then kill -9 $pid; echo "Killed Selenium process #"$pid; else echo "Selenium server is not running."; fi';
-                if (isset($GLOBALS['logger'])) {
-                    $GLOBALS['logger']->logLine("Killing Selenium server process with command \"" . $cmd . "\"", \Scooper\C__DISPLAY_NORMAL__);
-                }
-                doExec($cmd);
-                $GLOBALS['selenium_started'] = false;
-            } catch (Exception $ex) {
-                $pscmd = doExec("pkill -i selenium");
-                if (isset($GLOBALS['logger'])) {
-                    $GLOBALS['logger']->logLine("Failed to send shutdown to Selenium server.  Attempted to kill process, however you may need to manually shut it down.", \Scooper\C__DISPLAY_ERROR__);
-                }
-            }
-            finally
+            
+            if(array_key_exists('stop_command', $GLOBALS['USERDATA']['selenium']) && !is_null($GLOBALS['USERDATA']['selenium']['stop_command']))
             {
+                $GLOBALS['logger']->logLine("Attempting to stop Selenium server with command \"" . $GLOBALS['USERDATA']['selenium']['stop_command'] . "\"", \Scooper\C__DISPLAY_NORMAL__);
+                $res = doExec($GLOBALS['USERDATA']['selenium']['stop_command']);
+                $GLOBALS['logger']->logLine("Stop Selenium server result: "  . $res, \Scooper\C__DISPLAY_NORMAL__);
+
                 $GLOBALS['selenium_started'] = false;
+
+            }
+            else {
+
+                try {
+                    // The only way to shutdown standalone server in 3.0 is by killing the local process.
+                    // Details: https://github.com/SeleniumHQ/selenium/issues/2852
+                    //
+                    $cmd = 'pid=`ps -eo pid,args | grep selenium-server | grep -v grep | cut -c1-6`; if [ "$pid" ]; then kill -9 $pid; echo "Killed Selenium process #"$pid; else echo "Selenium server is not running."; fi';
+                    if (isset($GLOBALS['logger'])) {
+                        $GLOBALS['logger']->logLine("Killing Selenium server process with command \"" . $cmd . "\"", \Scooper\C__DISPLAY_NORMAL__);
+                    }
+                    $res = doExec($cmd);
+                    $GLOBALS['logger']->logLine("Killing Selenium server result: "  . $res, \Scooper\C__DISPLAY_NORMAL__);
+                    $GLOBALS['selenium_started'] = false;
+                } catch (Exception $ex) {
+                    $pscmd = doExec("pkill -i selenium");
+                    if (isset($GLOBALS['logger'])) {
+                        $GLOBALS['logger']->logLine("Failed to send shutdown to Selenium server.  Attempted to kill process, however you may need to manually shut it down.", \Scooper\C__DISPLAY_ERROR__);
+                    }
+                } finally {
+                    $GLOBALS['selenium_started'] = false;
+                }
             }
         }
         else
@@ -201,25 +212,40 @@ class SeleniumSession extends PropertyObject
 
         if($seleniumStarted === false)
         {
-            if($GLOBALS['USERDATA']['selenium']['autostart'] == 1 && (array_key_exists('selenium_started', $GLOBALS) === false || $GLOBALS['selenium_started'] !== true))
+            if($GLOBALS['USERDATA']['selenium']['autostart'] == 1)
             {
-                $strCmdToRun = "java ";
-                if(array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
-                    $strCmdToRun .= $GLOBALS['USERDATA']['selenium']['prefix_switches'];
 
-                $strCmdToRun .= " -jar \"" . $GLOBALS['USERDATA']['selenium']['jar'] . "\" -port " . $GLOBALS['USERDATA']['selenium']['port'] . " ";
-                if(array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
-                    $strCmdToRun .= $GLOBALS['USERDATA']['selenium']['postfix_switches'];
+                if(array_key_exists('start_command', $GLOBALS['USERDATA']['selenium']) && !is_null($GLOBALS['USERDATA']['selenium']['start_command']))
+                {
+                    $GLOBALS['logger']->logLine("Attempting to start Selenium server with command \"" . $GLOBALS['USERDATA']['selenium']['start_command'] . "\"", \Scooper\C__DISPLAY_NORMAL__);
+                    $res = doExec($GLOBALS['USERDATA']['selenium']['start_command']);
+                    $GLOBALS['logger']->logLine("Starting Selenium server result: "  . $res, \Scooper\C__DISPLAY_NORMAL__);
 
-                $strCmdToRun .= " >/dev/null &";
+                    sleep(10);
+                    $GLOBALS['selenium_started'] = true;
+                }
+                else {
 
-                $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \Scooper\C__DISPLAY_ITEM_RESULT__);
-                doExec($strCmdToRun);
-                $GLOBALS['selenium_started'] = true;
-                sleep(5);
+                    $strCmdToRun = "java ";
+                    if (array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
+                        $strCmdToRun .= $GLOBALS['USERDATA']['selenium']['prefix_switches'];
+
+                    $strCmdToRun .= " -jar \"" . $GLOBALS['USERDATA']['selenium']['jar'] . "\" -port " . $GLOBALS['USERDATA']['selenium']['port'] . " ";
+                    if (array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
+                        $strCmdToRun .= $GLOBALS['USERDATA']['selenium']['postfix_switches'];
+
+                    $strCmdToRun .= " >/dev/null &";
+
+                    $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \Scooper\C__DISPLAY_ITEM_RESULT__);
+                    $res = doExec($strCmdToRun);
+                    sleep(10);
+                    $GLOBALS['logger']->logLine("Starting Selenium server result: "  . $res, \Scooper\C__DISPLAY_NORMAL__);
+                    $GLOBALS['selenium_started'] = true;
+                }
             }
-            else
+            else {
                 throw new Exception("Selenium is not running and was not set to autostart. Cannot continue without an instance of Selenium running.");
+            }
         }
     }
 
