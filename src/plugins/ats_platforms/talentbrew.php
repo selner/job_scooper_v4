@@ -18,7 +18,23 @@
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(dirname(__FILE__)))); }
 require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
+class PluginHP extends BasePluginTalentBrew
+{
+    protected $siteName = "HP";
+    protected $siteBaseURL = 'https://h30631.www3.hp.com';
+    protected $nJobListingsPerPage = 15;
+//    protected $additionalFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
+    protected $typeLocationSearchNeeded = 'location-state';  // HP only supports specific cities in each state so cleaner to just filter by the state now and location later
+    protected $strBaseURLFormat = "/search-jobs/***LOCATION***";  // HP's keyword search is a little squirrelly so more successful if we don't filter up front and get the mismatches removed later
 
+    function __construct($strBaseDir = null)
+    {
+
+        parent::__construct($strBaseDir);
+//        unset($this->arrListingTagSetup['tag_listings_count']);  // hp doesn't support a results count
+    }
+
+}
 
 
 class PluginBoeing extends BasePluginTalentBrew
@@ -26,7 +42,14 @@ class PluginBoeing extends BasePluginTalentBrew
     protected $siteName = 'Boeing';
     protected $siteBaseURL = 'https://jobs.boeing.com';
     protected $nJobListingsPerPage = 20;
+    protected $strBaseURLFormat = "/search-jobs/***LOCATION***";  // HP's keyword search is a little squirrelly so more successful if we don't filter up front and get the mismatches removed later
+    protected $typeLocationSearchNeeded = 'location-state';  // HP only supports specific cities in each state so cleaner to just filter by the state now and location later
 
+    function __construct($strBaseDir)
+    {
+        $this->arrListingTagSetup['tag_pages_count'] = array(array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'pagination-total-pages'), 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/of (.*)/');
+        parent::__construct($strBaseDir);
+    }
 }
 
 class PluginDisney extends BasePluginTalentBrew
@@ -59,7 +82,9 @@ class BasePluginTalentBrew extends ClassClientHTMLJobSitePlugin
     protected $nJobListingsPerPage = 50;
 
     protected $arrListingTagSetup = array(
-        'tag_listings_count' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results'), 'return_attribute' => 'data-total-results'),
+        'tag_listings_count' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results'), array('tag' => 'h1'), 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/(.*?) [Rr]esults.*/'),
+//        'tag_listings_count' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results'), 'return_attribute' => 'data-total-results'),
+
         'tag_listings_section' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results-list'), array('tag' => 'ul'),array('tag' => 'li')),
         'tag_title' =>  array(array('tag' => 'a'), array('tag' => 'h2')),
         'tag_link' =>  array(array('tag' => 'a'), 'return_attribute' => 'href'),
