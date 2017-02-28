@@ -617,6 +617,13 @@ class ClassJobsSiteCommon
     {
         $objSimpleHTML = null;
 
+        if(isDebug()==true) {
+
+            $GLOBALS['logger']->logLine("URL        = " . $strURL, \Scooper\C__DISPLAY_NORMAL__);
+            $GLOBALS['logger']->logLine("Referrer   = " . $referrer, \Scooper\C__DISPLAY_NORMAL__);
+            $GLOBALS['logger']->logLine("Cookies    = " . $cookies, \Scooper\C__DISPLAY_NORMAL__);
+        }
+
         if(!$objSimpleHTML && ($filePath && strlen($filePath) > 0))
         {
             $GLOBALS['logger']->logLine("Loading ALTERNATE results from ".$filePath, \Scooper\C__DISPLAY_ITEM_START__);
