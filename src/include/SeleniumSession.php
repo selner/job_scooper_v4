@@ -35,7 +35,7 @@ class SeleniumSession extends PropertyObject
         $this->doneWithRemoteWebDriver();
     }
 
-    function getPageHTML($url)
+    function getPageHTML($url, $recursed=false)
     {
         foreach ($this->lastCookies as $cookie) {
             $this->driver->manage()->addCookie(array(
@@ -47,7 +47,26 @@ class SeleniumSession extends PropertyObject
 
         $this->lastCookies = $this->driver->manage()->getCookies();
 
-        return $this->driver->getPageSource();
+        $src = $this->driver->getPageSource();
+
+        // BUGBUG:  Firefox has started to return "This tab has crashed" responses often as of late February 2017.
+        //          Adding check for that case and a session kill/reload when it happens
+        if (stristr($src, "tab has crashed") != false)
+        {
+            $GLOBALS['logger']->logLine("Error in Firefox WebDriver:  tab has crashed retrieving page at " . $url .".  Killing WebDriver and trying one time...", \Scooper\C__DISPLAY_WARNING__);
+            // We found "tab has crashed" in the response, so we can't use it.
+            if ($recursed != true) {
+                $this->unset_driver();
+                $this->create_remote_webdriver();
+                return $this->getPageHTML($url, $recursed = true);
+            }
+            else
+            {
+                handleException(new Exception("Error in Firefox WebDriver:  tab has crashed getting " . $url ." a second time.  Cannot load correct results so aborting..."), "%s", $raise=true);
+            }
+        }
+
+        return $src;
     }
 
     function terminate()
