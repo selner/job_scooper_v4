@@ -281,8 +281,13 @@ function doExec($cmd)
         if (!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine($resultLine, \Scooper\C__DISPLAY_ITEM_DETAIL__);
     unset($resultLine);
 
-    if (is_array($cmdOutput) && count($cmdOutput) == 1)
-        return $cmdOutput[0];
+    if (is_array($cmdOutput))
+    {
+        if (count($cmdOutput) >= 1)
+            return $cmdOutput[0];
+        else
+            return "";
+    }
     return $cmdOutput;
 }
 
