@@ -189,7 +189,7 @@ class StageManager extends ClassJobsSiteCommon
             {
                 $arrSiteJobs = $this->mergeAllJobsJsonInDir($GLOBALS['USERDATA']['directories']['listings-raw'], $site);
                 if(countAssociativeArrayValues($arrSiteJobs) > 0)
-                    writeJobsListDataToLocalJSONFile($site, $arrSiteJobs, JOBLIST_TYPE_UNFILTERED, $stageNumber = null, $dirKey = "listings-rawbysite");
+                    writeJobsListDataToLocalJSONFile($site, $arrSiteJobs, JOBLIST_TYPE_UNFILTERED, $dirKey = "listings-rawbysite");
                 $arrSiteJobs = null;
             }
             $filelist = $this->getAllIncludedFilesForDir($GLOBALS['USERDATA']['directories']['listings-rawbysite']);
