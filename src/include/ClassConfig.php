@@ -205,7 +205,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             throw new ErrorException("Required value for the output folder was not specified. Exiting.");
         }
 
-        $workingDirs = ["listings-raw", "results", "listings-userinterested", "listings-usernotinterested"];
+        $workingDirs = ["listings-raw", "results", "listings-userinterested", "listings-rawbysite", "listings-tokenized", "listings-usernotinterested"];
         foreach($workingDirs as $d) {
             $prefix = $GLOBALS['USERDATA']['user_unique_key'];
             $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), $d, $prefix));

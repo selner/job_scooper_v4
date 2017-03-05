@@ -185,7 +185,14 @@ class StageManager extends ClassJobsSiteCommon
             //
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            $filelist = array_diff(scandir($GLOBALS['USERDATA']['directories']['listings-raw']), array(".", ".."));
+            foreach($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $site)
+            {
+                $arrSiteJobs = $this->mergeAllJobsJsonInDir($GLOBALS['USERDATA']['directories']['listings-raw'], $site);
+                if(countAssociativeArrayValues($arrSiteJobs) > 0)
+                    writeJobsListDataToLocalJSONFile($site, $arrSiteJobs, JOBLIST_TYPE_UNFILTERED, $stageNumber = null, $dirKey = "listings-rawbysite");
+                $arrSiteJobs = null;
+            }
+            $filelist = $this->getAllIncludedFilesForDir($GLOBALS['USERDATA']['directories']['listings-rawbysite']);
             $jsonfiles = array_filter($filelist, function ($var) {
                 if(strtolower(pathinfo($var, PATHINFO_EXTENSION)) == "json" && substr($var, 0, strlen("tokenized_")) != "tokenized_")
                     return true;
@@ -196,8 +203,8 @@ class StageManager extends ClassJobsSiteCommon
             {
                 $this->logger->logLine(PHP_EOL . "Processing " . $jfile , \Scooper\C__DISPLAY_NORMAL__);
                 $outjfile = "tokenized_" .$jfile;
-                $jfilefullpath = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['listings-raw'], $jfile));
-                $outjfilefullpath = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['listings-raw'], $outjfile));
+                $jfilefullpath = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['listings-rawbysite'], $jfile));
+                $outjfilefullpath = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['listings-tokenized'], $outjfile));
 
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //
@@ -206,14 +213,14 @@ class StageManager extends ClassJobsSiteCommon
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                 $this->logger->logLine(PHP_EOL . "    ~~~~~~ Tokenizing job titles ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
-                $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/normalizeS3JobListings.py");
+                $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/normalizeJobListingFile.py");
 
-                $cmd = "python " . $PYTHONPATH . " --inkey " . escapeshellarg($jfile) . " --outkey " . escapeshellarg($outjfile) . " --source " . escapeshellarg($GLOBALS['USERDATA']['directories']['listings-raw']) . " --column job_title --index key_jobsite_siteid";
+                $cmd = "python " . $PYTHONPATH . " --infile " . escapeshellarg($jfilefullpath) . " --outfile " . escapeshellarg($outjfilefullpath) ." --column job_title --index key_jobsite_siteid";
                 $this->logger->logLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd ."  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
 
                 doExec($cmd);
 
-                $arrJobs = readJobsListFromLocalJsonFile(pathinfo($outjfilefullpath, PATHINFO_BASENAME), $stageNumber = null,  $returnFailedSearches = true, $dirKey = "listings-raw");
+                $arrJobs = readJobsListFromLocalJsonFile(pathinfo($outjfilefullpath, PATHINFO_BASENAME), $stageNumber = null,  $returnFailedSearches = true, $dirKey = "listings-tokenized");
                 if(countAssociativeArrayValues($arrJobs) > 0)
                 {
                     $this->logger->logLine(PHP_EOL . "    ~~~~~~ Auto-marking jobs based on user settings ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
@@ -238,9 +245,36 @@ class StageManager extends ClassJobsSiteCommon
 
     }
 
-    private function mergeAllJobsJsonInDir($directory)
+    private function getAllIncludedFilesForDir($directory, $matchFileName=null)
     {
         $filelist = array_diff(scandir($directory), array(".", ".."));
+        if(!is_null($matchFileName))
+        {
+            $filelist = array_filter($filelist, function ($var) use ($matchFileName) {
+                if(stristr($var, $matchFileName) != false)
+                    return true;
+                return false;
+            });
+        }
+
+        $includedfiles = array_filter($filelist, function ($var) {
+            $matches = array();
+            $res = substr_count_multi($var, $GLOBALS['USERDATA']['configuration_settings']['included_sites'], $matches);
+            if (count($matches) > 0)
+            {
+                return true;
+            }
+
+            return false;
+        });
+        return $includedfiles;
+    }
+
+    private function mergeAllJobsJsonInDir($directory, $matchFileName = null)
+    {
+        $filelist = $this->getAllIncludedFilesForDir($directory, $matchFileName);
+
+
         $jsMerged = array();
         foreach($filelist as $file)
         {
@@ -249,10 +283,10 @@ class StageManager extends ClassJobsSiteCommon
                 $jsobj = loadJSON($filepath);
                 if (is_array($jsobj['jobslist']) && countAssociativeArrayValues($jsobj['jobslist']) > 0)
                 {
-                    $jobsToAdd = array_diff(array_keys($jsobj['jobslist']), array_keys($jsMerged));
-                    foreach($jobsToAdd as $key)
+                    foreach(array_keys($jsobj['jobslist']) as $key)
                     {
-                        $jsMerged[$key] = $jsobj['jobslist'][$key];
+                        if(!array_key_exists($key, $jsMerged))
+                            $jsMerged[$key] = $jsobj['jobslist'][$key];
                     }
                }
             }
@@ -290,14 +324,14 @@ class StageManager extends ClassJobsSiteCommon
             $this->logger->logLine("Stage 4: Notifying User", \Scooper\C__DISPLAY_SECTION_START__);
 
             $jobData = readJobsListDataFromLocalFile(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], "all-results.json")));
-            $this->arrMarkedJobs = $jobData['jobslist'];
+            $arrMarkedJobs = $jobData['jobslist'];
 
-            if ((countJobRecords($this->arrMarkedJobs) + countJobRecords($this->arrLatestJobs_UnfilteredByUserInput)) == 0) {
+            if ((countJobRecords($arrMarkedJobs)) == 0) {
                 $this->logger->logLine("No jobs were loaded for notification. Skipping Stage 4.", \Scooper\C__DISPLAY_WARNING__);
                 return;
             }
 
-            $notifier = new ClassJobsNotifier($this->arrMarkedJobs, $GLOBALS['USERDATA']['directories']['results']);
+            $notifier = new ClassJobsNotifier($arrMarkedJobs, $GLOBALS['USERDATA']['directories']['results']);
             $notifier->processNotifications();
         } catch (Exception $ex) {
             handleException($ex, null, true);
