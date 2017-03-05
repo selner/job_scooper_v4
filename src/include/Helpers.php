@@ -144,7 +144,7 @@ function exportToDebugJSON($obj, $strBaseFileName)
     unset($key);
 
     $jsonSelf = json_encode($saveArr, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
-    $debugJSONFile = $GLOBALS['USERDATA']['directories']['stage1'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_" . $strBaseFileName, $strExt = "", $delim = "-") . ".json";
+    $debugJSONFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_" . $strBaseFileName, $strExt = "", $delim = "-") . ".json";
     file_put_contents($debugJSONFile, $jsonSelf);
 
     return $debugJSONFile;
@@ -534,7 +534,7 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 {
     $GLOBALS['logger']->logLine("Tokenizing title exclusion matches from " . $inputfile . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
     if (!$outputFile)
-        $outputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tempCallTokenizer.csv";
+        $outputFile = $GLOBALS['USERDATA']['directories']['debug'] . "/tempCallTokenizer.csv";
     $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/");
     $cmd = "python " . $PYTHONPATH . "/normalizeStrings.py -i " . $inputfile . " -o " . $outputFile . " -k " . $keyname;
     if ($indexKeyName != null)
@@ -572,8 +572,8 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 
 function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "keywords", $indexKeyName = null)
 {
-    $inputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-" . $tempFileKey . "-token-input.csv";
-    $outputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-" . $tempFileKey . "-token-output.csv";
+    $inputFile = $GLOBALS['USERDATA']['directories']['debug'] . "/tmp-" . $tempFileKey . "-token-input.csv";
+    $outputFile = $GLOBALS['USERDATA']['directories']['debug'] . "/tmp-" . $tempFileKey . "-token-output.csv";
 
     $headers = array($dataKeyName);
     if (array_key_exists($dataKeyName, $arrData)) $headers = array_keys($arrData);
@@ -613,8 +613,8 @@ function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "ke
 
 function tokenizeMultiDimensionArray($arrData, $tempFileKey, $dataKeyName, $indexKeyName = null)
 {
-    $inputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-" . $tempFileKey . "-token-input.csv";
-    $outputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-" . $tempFileKey . "-token-output.csv";
+    $inputFile = $GLOBALS['USERDATA']['directories']['debug'] . "/tmp-" . $tempFileKey . "-token-input.csv";
+    $outputFile = $GLOBALS['USERDATA']['directories']['debug'] . "/tmp-" . $tempFileKey . "-token-output.csv";
 
     if (is_file($inputFile)) {
         unlink($inputFile);
@@ -780,14 +780,6 @@ function isValueURLEncoded($str)
 }
 
 
-const STAGE1_PATHKEY = "stage1-rawlistings/";
-const STAGE2_PATHKEY = "stage2-rawlistings/";
-const STAGE3_PATHKEY = "stage3-automarkedlistings/";
-const STAGE4_PATHKEY = "stage4-notifyuser/";
-const STAGE_FLAG_STAGEONLY = 0x0;
-const STAGE_FLAG_INCLUDEUSER = 0x1;
-const STAGE_FLAG_INCLUDEDATE = 0x2;
-
 function addDelimIfNeeded($currString, $delim, $strToAdd)
 {
     $result = $currString;
@@ -798,49 +790,12 @@ function addDelimIfNeeded($currString, $delim, $strToAdd)
     return $result;
 }
 
-function getStageKeyPrefix($stageNumber, $fileFlags = STAGE_FLAG_STAGEONLY, $delim = "")
-{
-    $prefix = "";
-
-    if (($fileFlags & STAGE_FLAG_INCLUDEUSER) == true)
-        $prefix = addDelimIfNeeded($prefix, $delim, $GLOBALS['USERDATA']['user_unique_key']);
-
-    if (($fileFlags & STAGE_FLAG_INCLUDEDATE) == true)
-        $prefix = addDelimIfNeeded($prefix, $delim, \Scooper\getTodayAsString(""));
-
-    $rootPrefix = $GLOBALS['USERDATA']['user_unique_key'] . "/";
-    switch ($stageNumber) {
-        case 1:
-            $prefix = STAGE1_PATHKEY . $prefix;
-            break;
-        case 2:
-            $prefix = STAGE2_PATHKEY . $prefix;
-            break;
-        case 3:
-            $prefix = STAGE3_PATHKEY . $prefix;
-            break;
-        case 4:
-            $prefix = STAGE4_PATHKEY . $prefix;
-            break;
-        default:
-            throw new IndexOutOfBoundsException("Error: invalid stage number passed '" . $stageNumber . "'");
-            break;
-    }
-
-    return ($rootPrefix . $prefix);
-}
-
-function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stageNumber = null, $dirKey = null, $searchDetails = null)
+function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $dirKey = null, $searchDetails = null)
 {
     if (is_null($dataJobs))
         $dataJobs = array();
 
     $fileKey = str_replace(" ", "", $fileKey);
-
-    if (!is_null($stageNumber)) {
-        $stageNumber = 1;
-        $dirKey = "stage" . $stageNumber;
-    }
 
     $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$dirKey], strtolower($fileKey)));
 
@@ -848,7 +803,7 @@ function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stage
         $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
 
 
-    $data = array('key' => $fileKey, 'stage' => $stageNumber, 'listtype' => $listType, 'jobs_count' => countJobRecords($dataJobs), 'jobslist' => $dataJobs, 'search' => $searchDetails);
+    $data = array('key' => $fileKey, 'listtype' => $listType, 'jobs_count' => countJobRecords($dataJobs), 'jobslist' => $dataJobs, 'search' => $searchDetails);
     return writeJSON($data, $resultsFile);
 }
 
@@ -886,11 +841,8 @@ function loadJSON($file)
 
 }
 
-function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber = null, $returnFailedSearches = true, $dirKey = null)
+function readJobsListDataFromLocalJsonFile($fileKey, $returnFailedSearches = true, $dirKey = null)
 {
-
-    if (!is_null($stageNumber))
-        $dirKey = "stage" . $stageNumber;
 
     assert(!is_null($dirKey));
 
@@ -928,10 +880,10 @@ function readJobsListDataFromLocalFile($filepath, $returnFailedSearches = true)
     return array();
 }
 
-function readJobsListFromLocalJsonFile($fileKey, $stageNumber = null, $returnFailedSearches = true, $dirKey = null)
+function readJobsListFromLocalJsonFile($fileKey, $returnFailedSearches = true, $dirKey = null)
 {
     $retJobs = null;
-    $data = readJobsListDataFromLocalJsonFile($fileKey, $stageNumber, $returnFailedSearches, $dirKey);
+    $data = readJobsListDataFromLocalJsonFile($fileKey, $returnFailedSearches, $dirKey);
 
     if (!is_null($data) && is_array($data)) {
         if (array_key_exists("jobslist", $data)) {

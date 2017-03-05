@@ -145,7 +145,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         // Now setup all the output folders
         $this->__setupOutputFolders__($userOutfileDetails['directory']);
 
-        if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['stage1'] );
+        if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['debug'] );
 
         $strOutfileArrString = getArrayValuesAsString( $GLOBALS['USERDATA']['directories']);
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output folders configured: " . $strOutfileArrString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -205,19 +205,12 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             throw new ErrorException("Required value for the output folder was not specified. Exiting.");
         }
 
-        $workingDirs = ["listings-raw", "results", "listings-userinterested", "listings-rawbysite", "listings-tokenized", "listings-usernotinterested"];
+        $workingDirs = ["debug", "listings-raw", "results", "listings-userinterested", "listings-rawbysite", "listings-tokenized", "listings-usernotinterested"];
         foreach($workingDirs as $d) {
             $prefix = $GLOBALS['USERDATA']['user_unique_key'];
             $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), $d, $prefix));
             $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
             $GLOBALS['USERDATA']['directories'][$d] = realpath($details['directory']);
-        }
-
-        for($n=1; $n <= 4; $n++)
-        {
-            $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getStageKeyPrefix($n, STAGE_FLAG_STAGEONLY)));
-            $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-            $GLOBALS['USERDATA']['directories']["stage".$n] = realpath($details['directory']);
         }
 
     }

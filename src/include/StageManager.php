@@ -46,7 +46,7 @@ class StageManager extends ClassJobsSiteCommon
             elseif ($GLOBALS['logger'])
                 $this->logger = $GLOBALS['logger'];
             else
-                $this->logger = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['stage1']);
+                $this->logger = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['debug']);
 
             parent::__construct(null);
 
@@ -220,7 +220,7 @@ class StageManager extends ClassJobsSiteCommon
 
                 doExec($cmd);
 
-                $arrJobs = readJobsListFromLocalJsonFile(pathinfo($outjfilefullpath, PATHINFO_BASENAME), $stageNumber = null,  $returnFailedSearches = true, $dirKey = "listings-tokenized");
+                $arrJobs = readJobsListFromLocalJsonFile(pathinfo($outjfilefullpath, PATHINFO_BASENAME), $returnFailedSearches = true, $dirKey = "listings-tokenized");
                 if(countAssociativeArrayValues($arrJobs) > 0)
                 {
                     $this->logger->logLine(PHP_EOL . "    ~~~~~~ Auto-marking jobs based on user settings ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
@@ -233,10 +233,10 @@ class StageManager extends ClassJobsSiteCommon
                     $arrJobsNotInterested = array_filter($arrMarkedJobs, "isMarked_NotInterested");
 
                     if(countAssociativeArrayValues($arrJobsInterestedJobs) > 0)
-                        writeJobsListDataToLocalJSONFile($jfile, $arrJobsInterestedJobs, JOBLIST_TYPE_MARKED, $stageNumber = null, $dirKey = "listings-userinterested");
+                        writeJobsListDataToLocalJSONFile($jfile, $arrJobsInterestedJobs, JOBLIST_TYPE_MARKED,  $dirKey = "listings-userinterested");
 
                     if(countAssociativeArrayValues($arrJobsNotInterested) > 0)
-                        writeJobsListDataToLocalJSONFile($jfile, $arrJobsNotInterested, JOBLIST_TYPE_MARKED, $stageNumber = null, $dirKey = "listings-usernotinterested");
+                        writeJobsListDataToLocalJSONFile($jfile, $arrJobsNotInterested, JOBLIST_TYPE_MARKED, $dirKey = "listings-usernotinterested");
                 }
             }
         } catch (Exception $ex) {
@@ -307,7 +307,7 @@ class StageManager extends ClassJobsSiteCommon
 
             $arrMarkedJobs = array_merge_recursive($jobsnotinterested, $jobsinterested);
 
-            $data = array('key' => null, 'stage' => null, 'listtype' => JOBLIST_TYPE_MARKED, 'jobs_count' => countJobRecords($arrMarkedJobs), 'jobslist' => $arrMarkedJobs, 'search' => null);
+            $data = array('key' => null, 'listtype' => JOBLIST_TYPE_MARKED, 'jobs_count' => countJobRecords($arrMarkedJobs), 'jobslist' => $arrMarkedJobs, 'search' => null);
             writeJSON($data, $resultsJSON);
 
             $this->logger->logLine(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);

@@ -637,7 +637,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         $retJobs = null;
 
         $key = $this->_getFileStoreKeyForSearch($searchSettings, "");
-        $data = readJobsListDataFromLocalJsonFile($key, null, $returnFailedSearches, $dirKey = "listings-raw");
+        $data = readJobsListDataFromLocalJsonFile($key, $returnFailedSearches, $dirKey = "listings-raw");
         if (!is_null($data) && is_array($data)) {
             if (array_key_exists("jobslist", $data)) {
                 $retJobs = array_filter($data['jobslist'], "isIncludedJobSite");
@@ -654,7 +654,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     private function _setJobsToFileStoreForSearch_($searchSettings, $dataJobs)
     {
         $key = $this->_getFileStoreKeyForSearch($searchSettings, "");
-        return writeJobsListDataToLocalJSONFile($key, $dataJobs, JOBLIST_TYPE_UNFILTERED, $stageNumber = null, $dirKey = "listings-raw", $searchDetails = $searchSettings);
+        return writeJobsListDataToLocalJSONFile($key, $dataJobs, JOBLIST_TYPE_UNFILTERED, $dirKey = "listings-raw", $searchDetails = $searchSettings);
     }
 
     //************************************************************************
@@ -791,7 +791,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         {
             if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Writing debug files for plugin " . $this->siteName ."'s search". $searchDetails['key'], \Scooper\C__DISPLAY_NORMAL__);
 
-            $debugHTMLFile = $GLOBALS['USERDATA']['directories']['stage1'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "html", $delim = "-");
+            $debugHTMLFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "html", $delim = "-");
             $debugCSVFile = substr($debugHTMLFile, 0, strlen($debugHTMLFile) - 4) . ".csv";
 
             if (!is_null($objSimpleHTMLResults)) {
