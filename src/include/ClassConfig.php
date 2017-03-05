@@ -102,7 +102,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         foreach($GLOBALS['JOBSITE_PLUGINS']  as $site)
         {
             assert(isset($site['name']));
-            $GLOBALS['JOBSITE_PLUGINS'][$site['name']]['include_in_run'] = is_IncludeSite($site['name']);
+            $GLOBALS['JOBSITE_PLUGINS'][$site['name']]['include_in_run'] = is_OptionIncludedSite($site['name']);
         }
         $includedsites = array_filter($GLOBALS['JOBSITE_PLUGINS'], function($k) {
             return $k['include_in_run'];
@@ -486,7 +486,10 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                     {
                         $excludedSite = strtolower(trim($excludedSite));
                         $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$excludedSite] = $excludedSite;
-                        if(isset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite])) unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite]);
+                        if(array_key_exists($excludedSite, $GLOBALS['USERDATA']['configuration_settings']['included_sites'])) 
+                        {   
+                            unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite]);
+                        }
                         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting " . $excludedSite . " as excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                     }
                 }

@@ -129,7 +129,7 @@ function addUserOptionForSitePlugins()
     }
 }
 
-function is_IncludeSite($strName)
+function is_OptionIncludedSite($strName)
 {
     $strIncludeSiteKey = "include_" . strtolower($strName);
     $strGivenKey = $strIncludeSiteKey."_given";
