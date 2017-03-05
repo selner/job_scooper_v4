@@ -25,9 +25,6 @@ const C__RESULTS_INDEX_USER = '***TOTAL_USER***';
 class ClassJobsNotifier extends ClassJobsSiteCommon
 {
     protected $siteName = "ClassJobsNotifier";
-    protected $arrUserInputJobs = null;
-    protected $arrUserInputJobs_Active = null;
-    protected $arrUserInputJobs_Inactive = null;
     protected $arrLatestJobs = array();
 
     function __construct($arrJobs, $strOutputDirectory)
