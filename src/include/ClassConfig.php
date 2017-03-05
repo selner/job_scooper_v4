@@ -784,7 +784,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                 if(array_key_exists($locTypeNeeded, $primaryLocationSet))
                     $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value'] = $primaryLocationSet[$locTypeNeeded];
                 else {
-                    $err = "Error:  unable to add search because the required location type '" . $locTypeNeeded ."' was not found in the location set '" . $primaryLocationSet['key'] . "'. Excluding searches for " . $curSiteName .".";
+                    $err = "Error:  unable to add search '" . $searchKey . "' because the required location type '" . $locTypeNeeded ."' was not found in the location set '" . $primaryLocationSet['key'] . "'. Excluding searches for " . $curSiteName .".";
                     handleException(new IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' is not valid.", $locTypeNeeded)), $err, $raise=false);
                     $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$curSiteName] = $curSiteName;
 
