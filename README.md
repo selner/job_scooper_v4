@@ -58,13 +58,11 @@ You will need to set up Selenium Standalone Server in order for plugins like Fac
 * Install Java SE Development Kit from Oracle from http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html.  Selenium Standalone Server requires Java 8 on macOS 10.12.
 * Copy the .jar for Selenium into ./lib/
 
-Note: The code currently uses the Safari 10 webdriver on macOS and uses phantomJS on other OSs for accessing dynamic pages  You will need add support for other webdrivers to run this on another OS than macOS Sierra 10.12.  Check out https://webkit.org/blog/6900/webdriver-support-in-safari-10/ to learn how to configure Safari for WebDriver automation.
-
 You will also need Python 2.7 and pip.  To install the necessary modules for Python, run "pip install -r /python/pyJobNormalizer/requirements.txt".  You will also need the NTLK data available at http://www.nltk.org/data.html.
 
 ##Other Stuff
-* Version:  v3.5.0 [release notes](https://github.com/selner/jobs_scooper/releases)
-* Author:  Bryan Selner (bryan at bryanselner dot com)
+* Version:  v4.0.alpha1 [release notes](../releases)
+* Author:  Bryan Selner (dev at rvelocity dot com)
 * Platforms:
 	* PHP 5.6.24 on macOS 10.12 (Sierra)
 	* Your mileage might vary on any other platform or version.

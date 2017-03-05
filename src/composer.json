@@ -41,11 +41,10 @@
         "PHPMailer/PHPMailer": "*",
         "tijsverkoyen/css-to-inline-styles": "1.3.0",
         "phpoffice/Phpexcel": "^1.8",
-        "aws/aws-sdk-php": "^3.19",
         "jobapis/jobs-common": "^2.0",
         "jobapis/jobs-govt": "^1.0",
         "jobapis/jobs-usajobs": "^0.2.0",
         "jobapis/jobs-dice": "^1.0",
-        "voku/simple_html_dom": "^2.0"
+        "voku/simple_html_dom": "2.0.30"
    }
 }

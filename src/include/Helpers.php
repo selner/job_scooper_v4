@@ -830,24 +830,32 @@ function getStageKeyPrefix($stageNumber, $fileFlags = STAGE_FLAG_STAGEONLY, $del
     return ($rootPrefix . $prefix);
 }
 
-function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stageNumber = null, $searchDetails = null)
+function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stageNumber = null, $dirKey = null, $searchDetails = null)
 {
     if (is_null($dataJobs))
         $dataJobs = array();
 
-    if (is_null($stageNumber))
-        $stageNumber = 1;
+    $fileKey = str_replace(" ", "", $fileKey);
 
-        $stageName = "stage" . $stageNumber;
-        $fileKey = str_replace(" ", "", $fileKey);
-        $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], strtolower($fileKey)));
-        if (stripos($fileKey, ".json") === false)
-            $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
+    if (!is_null($stageNumber)) {
+        $stageNumber = 1;
+        $dirKey = "stage" . $stageNumber;
+    }
+
+    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$dirKey], strtolower($fileKey)));
+
+    if (stripos($fileKey, ".json") === false)
+        $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
+
 
     $data = array('key' => $fileKey, 'stage' => $stageNumber, 'listtype' => $listType, 'jobs_count' => countJobRecords($dataJobs), 'jobslist' => $dataJobs, 'search' => $searchDetails);
+    return writeJSON($data, $resultsFile);
+}
 
-    $jobsJson = json_encode($data, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
-    if ($jobsJson === false) {
+function writeJSON($data, $filepath)
+{
+    $jsonData = json_encode($data, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+    if ($jsonData === false) {
         $err = json_last_error_msg();
         $errMsg = "Error:  Unable to convert jobs list data to json due to error   " . $err;
         $GLOBALS['logger']->logLine($errMsg, \Scooper\C__DISPLAY_ERROR__);
@@ -855,16 +863,16 @@ function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stage
 
     }
 
-    $GLOBALS['logger']->logLine("Writing final job data pull results to json file " . $resultsFile);
-    if (file_put_contents($resultsFile, $jobsJson, FILE_TEXT) === false) {
+    $GLOBALS['logger']->logLine("Writing final job data pull results to json file " . $filepath);
+    if (file_put_contents($filepath, $jsonData, FILE_TEXT) === false) {
         $err = error_get_last();
-        $errMsg = "Error:  Unable to save JSON results to file " . $resultsFile . " due to error   " . $err;
+        $errMsg = "Error:  Unable to save JSON results to file " . $filepath . " due to error   " . $err;
         $GLOBALS['logger']->logLine($errMsg, \Scooper\C__DISPLAY_ERROR__);
         throw new Exception($errMsg);
 
     }
 
-    return $resultsFile;
+    return $filepath;
 }
 
 function loadJSON($file)
@@ -878,29 +886,39 @@ function loadJSON($file)
 
 }
 
-function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber, $returnFailedSearches = true)
+function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber = null, $returnFailedSearches = true, $dirKey = null)
 {
-    if (is_null($stageNumber))
-        $stageNumber = 1;
 
+    if (!is_null($stageNumber))
+        $dirKey = "stage" . $stageNumber;
 
-    $stageName = "stage" . $stageNumber;
+    assert(!is_null($dirKey));
+
     $fileKey = str_replace(" ", "", $fileKey);
-    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], strtolower($fileKey)));
+    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$dirKey], strtolower($fileKey)));
     if (stripos($fileKey, ".json") === false)
         $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
 
-    if (is_file($resultsFile)) {
-        $GLOBALS['logger']->logLine("Reading json data from file " . $resultsFile);
-        $jsonText = file_get_contents($resultsFile, FILE_TEXT);
+    return readJobsListDataFromLocalFile($resultsFile,$returnFailedSearches = true);
+}
 
-        $data = json_decode($jsonText, $assoc = true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+function readJobsListDataFromLocalFile($filepath, $returnFailedSearches = true)
+{
 
-        if ($returnFailedSearches === false) {
-            if ($data['search']['search_run_result']['success'] !== true) {
-                $GLOBALS['logger']->logLine("Ignoring incomplete search results found in file with key " . $fileKey);
-                $data = null;
-            }
+    if (stripos($filepath, ".json") === false)
+        $filepath = $filepath . "-" . strtolower(getTodayAsString("")) . ".json";
+
+        if (is_file($filepath)) {
+            $GLOBALS['logger']->logLine("Reading json data from file " . $filepath, \Scooper\C__DISPLAY_NORMAL__);
+            $jsonText = file_get_contents($filepath, FILE_TEXT);
+
+            $data = json_decode($jsonText, $assoc = true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+
+            if ($returnFailedSearches === false) {
+                if ($data['search']['search_run_result']['success'] !== true) {
+                    $GLOBALS['logger']->logLine("Ignoring incomplete search results found in file with key " . $filepath);
+                    $data = null;
+                }
         }
 
 
@@ -910,10 +928,10 @@ function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber, $returnFailed
     return array();
 }
 
-function readJobsListFromLocalJsonFile($fileKey, $stageNumber = 1, $returnFailedSearches = true)
+function readJobsListFromLocalJsonFile($fileKey, $stageNumber = null, $returnFailedSearches = true, $dirKey = null)
 {
     $retJobs = null;
-    $data = readJobsListDataFromLocalJsonFile($fileKey, $stageNumber, $returnFailedSearches);
+    $data = readJobsListDataFromLocalJsonFile($fileKey, $stageNumber, $returnFailedSearches, $dirKey);
 
     if (!is_null($data) && is_array($data)) {
         if (array_key_exists("jobslist", $data)) {

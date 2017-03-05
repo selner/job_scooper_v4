@@ -90,18 +90,6 @@ function __initializeArgs__()
             'required'      => false,
             'short'      => 'notify',
         ),
-        's3bucket' => array(
-            'description'   => 'Name of the S3 bucket to publish to',
-            'default'       => "",
-            'type'          => Pharse::PHARSE_STRING,
-            'required'      => false
-        ),
-        's3region' => array(
-            'description'   => 'Name of the AWS region to use for the S3 bucket',
-            'default'       => "",
-            'type'          => Pharse::PHARSE_STRING,
-            'required'      => false
-        ),
         'stages' => array(
             'description'   => 'Comma-separated list of stage numbers to execute.  All stages are run if not present.',
             'default'       => "1,2,3,4",

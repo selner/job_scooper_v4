@@ -17,7 +17,6 @@
 
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/SitePlugins.php');
-require_once(__ROOT__.'/include/S3Manager.php');
 require_once(__ROOT__.'/include/JobListFilters.php');
 
 const C__RESULTS_INDEX_ALL = '***TOTAL_ALL***';
@@ -29,15 +28,12 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
     protected $arrUserInputJobs = null;
     protected $arrUserInputJobs_Active = null;
     protected $arrUserInputJobs_Inactive = null;
-    protected $arrLatestJobs_UnfilteredByUserInput = array();
     protected $arrLatestJobs = array();
 
-    function __construct($arrJobs_Unfiltered, $arrJobs_AutoMarked)
+    function __construct($arrJobs, $strOutputDirectory)
     {
-        if(!is_null($arrJobs_Unfiltered))
-            $this->arrLatestJobs_UnfilteredByUserInput = \Scooper\array_copy($arrJobs_Unfiltered);
-        if(!is_null($arrJobs_AutoMarked))
-            $this->arrLatestJobs = \Scooper\array_copy($arrJobs_AutoMarked);
+        parent::__construct($strOutputDirectory);
+        $this->arrLatestJobs = \Scooper\array_copy($arrJobs);
     }
 
     function __destruct()

@@ -196,16 +196,17 @@ def tokenizeJSONFile(inputFile, outputFile, dataKey=None, indexKey=None):
         print "Processing file " + inputFile
         dictStrings = {}
         if(isinstance(inputData, dict)):
-            for k, v in inputData['jobslist'].items():
-                dictStrings[k] = v[dataKey]
-            outData = tokenizeStrings(dictStrings, "job_title_tokenized")
-            combined = combine_dicts(inputData['jobslist'], outData)
-            inputData[u'jobslist'] = combined
-            outf = open(outputFile, "w")
-            json.dump(inputData, outf, indent=4, encoding='utf-8')
-            outf.close()
-            print "Tokenized results written to " + outputFile
-            return outputFile
+            if('jobslist' in inputData and isinstance(inputData['jobslist'], dict) and len(inputData['jobslist']) > 0):
+                for k, v in inputData['jobslist'].items():
+                    dictStrings[k] = v[dataKey]
+                outData = tokenizeStrings(dictStrings, "job_title_tokenized")
+                combined = combine_dicts(inputData['jobslist'], outData)
+                inputData[u'jobslist'] = combined
+                outf = open(outputFile, "w")
+                json.dump(inputData, outf, indent=4, encoding='utf-8')
+                outf.close()
+                print "Tokenized results written to " + outputFile
+                return outputFile
     else:
             print "Error:  No job listings found in " + inputFile
     return None
@@ -220,8 +221,9 @@ def tokenizeFile(inputFile, outputFile, dataKey=None, indexKey=None):
     fields = data['fieldnames']
     dictData = data['dict']
     dictStrings = {}
-    for k, v in dictData.items():
-        dictStrings[k] = v[dataKey]
+    if (isinstance(dictData, dict) and len(dictData) > 0):
+        for k, v in dictData.items():
+            dictStrings[k] = v[dataKey]
         # print k, v, "\n"
         # print v[dataKey], "\n", "\n"
 #    listStrings = [k, v[dataKey] for k, v in dictData.items()]

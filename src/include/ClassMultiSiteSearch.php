@@ -87,7 +87,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
 
         foreach($this->arrPluginClassesToRun as $classPluginForSearch)
         {
-            $class = new $classPluginForSearch['class_name']($GLOBALS['USERDATA']['directories']['stage1'], $classPluginForSearch);
+            $class = new $classPluginForSearch['class_name'](\Scooper\getFullPathFromFileDetails($this->detailsMyFileOut), $classPluginForSearch);
             try
             {
 

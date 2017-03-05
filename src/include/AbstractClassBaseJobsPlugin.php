@@ -637,7 +637,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         $retJobs = null;
 
         $key = $this->_getFileStoreKeyForSearch($searchSettings, "");
-        $data = readJobsListDataFromLocalJsonFile($key, 1, $returnFailedSearches);
+        $data = readJobsListDataFromLocalJsonFile($key, null, $returnFailedSearches, $dirKey = "listings-raw");
         if (!is_null($data) && is_array($data)) {
             if (array_key_exists("jobslist", $data)) {
                 $retJobs = array_filter($data['jobslist'], "isIncludedJobSite");
@@ -654,7 +654,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     private function _setJobsToFileStoreForSearch_($searchSettings, $dataJobs)
     {
         $key = $this->_getFileStoreKeyForSearch($searchSettings, "");
-        return writeJobsListDataToLocalJSONFile($key, $dataJobs, JOBLIST_TYPE_UNFILTERED, $stageNumber = null, $searchDetails = $searchSettings);
+        return writeJobsListDataToLocalJSONFile($key, $dataJobs, JOBLIST_TYPE_UNFILTERED, $stageNumber = null, $dirKey = "listings-raw", $searchDetails = $searchSettings);
     }
 
     //************************************************************************

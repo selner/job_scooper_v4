@@ -149,7 +149,6 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
         $strOutfileArrString = getArrayValuesAsString( $GLOBALS['USERDATA']['directories']);
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output folders configured: " . $strOutfileArrString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        $GLOBALS['USERDATA']['AWS'] = array("S3" => array("bucket" => \Scooper\get_PharseOptionValue("s3bucket"), "region" => \Scooper\get_PharseOptionValue("s3region") ));
 
         if($GLOBALS['OPTS']['use_config_ini_given'])
         {
@@ -204,6 +203,14 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         if(! $outputDirectory)
         {
             throw new ErrorException("Required value for the output folder was not specified. Exiting.");
+        }
+
+        $workingDirs = ["listings-raw", "results", "listings-userinterested", "listings-usernotinterested"];
+        foreach($workingDirs as $d) {
+            $prefix = $GLOBALS['USERDATA']['user_unique_key'];
+            $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), $d, $prefix));
+            $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+            $GLOBALS['USERDATA']['directories'][$d] = realpath($details['directory']);
         }
 
         for($n=1; $n <= 4; $n++)

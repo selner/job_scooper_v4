@@ -18,7 +18,6 @@
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/SitePlugins.php');
 require_once(__ROOT__.'/include/ClassMultiSiteSearch.php');
-require_once(__ROOT__ . '/include/S3Manager.php');
 require_once(__ROOT__.'/include/ClassJobsNotifier.php');
 
 class JobsAutoMarker extends ClassJobsSiteCommon
@@ -30,8 +29,9 @@ class JobsAutoMarker extends ClassJobsSiteCommon
     protected $cbsaCityMapping  = null;
     protected $cbsaLocSetMapping = null;
 
-    function __construct($arrJobs_Unfiltered)
+    function __construct($arrJobs_Unfiltered = array(), $strOutputDirectory = null)
     {
+        parent::__construct($strOutputDirectory);
         $this->arrMasterJobList = \Scooper\array_copy($arrJobs_Unfiltered);
 
         $this->cbsaList = loadJSON(__ROOT__ . '/include/static/cbsa_list.json');
@@ -57,10 +57,15 @@ class JobsAutoMarker extends ClassJobsSiteCommon
 
     function __destruct()
     {
-        if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
+        if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_DETAIL__); }
 
     }
 
+    function setJobsList($arrJobs)
+    {
+        $this->arrMasterJobList = null;
+        $this->arrMasterJobList = \Scooper\array_copy($arrJobs);
+    }
 
     public function markJobsList()
     {
@@ -166,8 +171,8 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         $arrOneJobListingPerCompanyAndRole = array_unique_multidimensional(array_combine($arrKeys_JobSiteAndJobID, $arrKeys_CompanyAndRole));
         $arrLookup_JobListing_ByCompanyRole = array_flip($arrOneJobListingPerCompanyAndRole);
 
-        $GLOBALS['logger']->logLine("Marking Duplicate Job Roles" , \Scooper\C__DISPLAY_SECTION_START__);
-        $GLOBALS['logger']->logLine($nUniqJobs . "/" . countAssociativeArrayValues($arrJobsList) . " jobs have immediately been marked as non-duplicate based on company/role pairing. " , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Marking Duplicate Job Roles" , \Scooper\C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine($nUniqJobs . "/" . countAssociativeArrayValues($arrJobsList) . " jobs have immediately been marked as non-duplicate based on company/role pairing. " , \Scooper\C__DISPLAY_NORMAL__);
 
         foreach($arrJobsList as &$job)
         {
@@ -198,7 +203,7 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         unset($job);
 
         $strTotalRowsText = "/".count($arrJobsList);
-        $GLOBALS['logger']->logLine("Marked  ".$nJobsMatched .$strTotalRowsText ." roles as likely duplicates based on company/role. " , \Scooper\C__DISPLAY_ITEM_RESULT__);
+        $GLOBALS['logger']->logLine("Marked  ".$nJobsMatched .$strTotalRowsText ." roles as likely duplicates based on company/role. " , \Scooper\C__DISPLAY_NORMAL__);
 
     }
 
@@ -230,7 +235,7 @@ class JobsAutoMarker extends ClassJobsSiteCommon
 
         $nJobsSkipped = 0;
 
-        $GLOBALS['logger']->logLine("Marking Out of Area Jobs" , \Scooper\C__DISPLAY_SECTION_START__);
+        $GLOBALS['logger']->logLine("Marking Out of Area Jobs" , \Scooper\C__DISPLAY_NORMAL__);
 
         foreach($arrJobsList as &$job)
         {
@@ -265,7 +270,7 @@ class JobsAutoMarker extends ClassJobsSiteCommon
 
         $nJobsSkipped = count($arrJobsList) - $nJobsMarkedAutoExcluded - $nJobsNotMarked;
 
-        $GLOBALS['logger']->logLine("Jobs marked as out of area: marked ".$nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) .", skipped " . $nJobsSkipped . "/" . countAssociativeArrayValues($arrJobsList) .", not marked ". $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
+        $GLOBALS['logger']->logLine("Jobs marked as out of area: marked ".$nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) .", skipped " . $nJobsSkipped . "/" . countAssociativeArrayValues($arrJobsList) .", not marked ". $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).")" , \Scooper\C__DISPLAY_NORMAL__);
         return;
     }
 
@@ -276,8 +281,8 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         $nJobsNotMarked = 0;
         $nJobsMarkedAutoExcluded = 0;
 
-        $GLOBALS['logger']->logLine("Excluding Jobs by Companies Regex Matches", \Scooper\C__DISPLAY_ITEM_START__);
-        $GLOBALS['logger']->logLine("Checking ".count($arrJobsList) ." roles against ". count($GLOBALS['USERDATA']['companies_regex_to_filter']) ." excluded companies.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Excluding Jobs by Companies Regex Matches", \Scooper\C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine("Checking ".count($arrJobsList) ." roles against ". count($GLOBALS['USERDATA']['companies_regex_to_filter']) ." excluded companies.", \Scooper\C__DISPLAY_NORMAL__);
         $arrJobs_AutoUpdatable= array_filter($arrJobsList, "isJobAutoUpdatable");
         $nJobsSkipped = count($arrJobsList) - count($arrJobs_AutoUpdatable);
 
@@ -314,7 +319,7 @@ class JobsAutoMarker extends ClassJobsSiteCommon
             unset($job);
         }
 
-        $GLOBALS['logger']->logLine("Jobs marked not interested via companies regex: marked ".$nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobs_AutoUpdatable) .", skipped " . $nJobsSkipped . "/" . countAssociativeArrayValues($arrJobs_AutoUpdatable) .", not marked ". $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobs_AutoUpdatable).")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
+        $GLOBALS['logger']->logLine("Jobs marked not interested via companies regex: marked ".$nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobs_AutoUpdatable) .", skipped " . $nJobsSkipped . "/" . countAssociativeArrayValues($arrJobs_AutoUpdatable) .", not marked ". $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobs_AutoUpdatable).")" , \Scooper\C__DISPLAY_NORMAL__);
     }
     private function getNotesWithDupeIDAdded($strNote, $strNewDupe)
     {
@@ -353,7 +358,7 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         $ret = array("skipped" => array(), "matched" => array(), "notmatched" => array());
         if(count($arrJobs) == 0) return $ret;
 
-        $GLOBALS['logger']->logLine("Checking ".count($arrJobs) ." roles against ". count($keywordsToMatch) ." keywords in titles. [_getJobsList_MatchingJobTitleKeywords_]", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Checking ".count($arrJobs) ." roles against ". count($keywordsToMatch) ." keywords in titles. [_getJobsList_MatchingJobTitleKeywords_]", \Scooper\C__DISPLAY_NORMAL__);
         $arrMatchedTitles = array();
         $arrNotMatchedTitles = array();
         $arrTitlesWithBlanks= array_filter($arrJobs, "isMarkedBlank");
@@ -404,7 +409,7 @@ class JobsAutoMarker extends ClassJobsSiteCommon
             $GLOBALS['logger']->logLine('ERROR:  Failed to verify titles against keywords [' . $logTagString . '] due to error: '. $ex->getMessage(), \Scooper\C__DISPLAY_ERROR__);
             if(isDebug()) { throw $ex; }
         }
-        $GLOBALS['logger']->logLine("Processed " . countAssociativeArrayValues($arrJobs) . " titles for auto-marking [" . $logTagString . "]: skipped " . countAssociativeArrayValues($ret['skipped']). "/" . countAssociativeArrayValues($arrJobs) ."; matched ". countAssociativeArrayValues($ret['matched']) . "/" . countAssociativeArrayValues($arrJobs) ."; not matched " . countAssociativeArrayValues($ret['notmatched']). "/" . countAssociativeArrayValues($arrJobs)  , \Scooper\C__DISPLAY_ITEM_RESULT__);
+        $GLOBALS['logger']->logLine("Processed " . countAssociativeArrayValues($arrJobs) . " titles for auto-marking [" . $logTagString . "]: skipped " . countAssociativeArrayValues($ret['skipped']). "/" . countAssociativeArrayValues($arrJobs) ."; matched ". countAssociativeArrayValues($ret['matched']) . "/" . countAssociativeArrayValues($arrJobs) ."; not matched " . countAssociativeArrayValues($ret['notmatched']). "/" . countAssociativeArrayValues($arrJobs)  , \Scooper\C__DISPLAY_NORMAL__);
 
         return $ret;
     }
@@ -437,7 +442,7 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         }
 
         $nEndingBlankCount = countAssociativeArrayValues(array_filter($arrJobsList, "isMarkedBlank"));
-        $GLOBALS['logger']->logLine("Processed " . $nStartingBlankCount . "/" . countAssociativeArrayValues($arrJobsList) . " jobs marking if did not match title keyword search:  updated ". ($nStartingBlankCount - $nEndingBlankCount) . "/" . $nStartingBlankCount  . ", still active ". $nEndingBlankCount . "/" . $nStartingBlankCount, \Scooper\C__DISPLAY_ITEM_RESULT__);
+        $GLOBALS['logger']->logLine("Processed " . $nStartingBlankCount . "/" . countAssociativeArrayValues($arrJobsList) . " jobs marking if did not match title keyword search:  updated ". ($nStartingBlankCount - $nEndingBlankCount) . "/" . $nStartingBlankCount  . ", still active ". $nEndingBlankCount . "/" . $nStartingBlankCount, \Scooper\C__DISPLAY_NORMAL__);
 
     }
 
@@ -455,7 +460,7 @@ class JobsAutoMarker extends ClassJobsSiteCommon
             appendJobColumnData($arrJobsList[$strJobIndex], 'match_notes', "|", "matched negative keyword title[". getArrayValuesAsString($job['keywords_matched'], "|", "", false)  ."]");
         }
         $nEndingBlankCount = countAssociativeArrayValues(array_filter($arrJobsList, "isMarkedBlank"));
-        $GLOBALS['logger']->logLine("Processed " . $nStartingBlankCount . "/" . countAssociativeArrayValues($arrJobsList) . " jobs marking negative keyword matches:  updated ". ($nStartingBlankCount - $nEndingBlankCount) . "/" . $nStartingBlankCount  . ", still active ". $nEndingBlankCount . "/" . $nStartingBlankCount, \Scooper\C__DISPLAY_ITEM_RESULT__);
+        $GLOBALS['logger']->logLine("Processed " . $nStartingBlankCount . "/" . countAssociativeArrayValues($arrJobsList) . " jobs marking negative keyword matches:  updated ". ($nStartingBlankCount - $nEndingBlankCount) . "/" . $nStartingBlankCount  . ", still active ". $nEndingBlankCount . "/" . $nStartingBlankCount, \Scooper\C__DISPLAY_NORMAL__);
 
 
     }
