@@ -168,7 +168,7 @@ class StageManager extends ClassJobsSiteCommon
                 }
             }
         } catch (Exception $ex) {
-            handleException($ex, null, true);
+            handleException($ex, null, false);
         }
 
     }
