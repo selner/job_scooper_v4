@@ -105,14 +105,19 @@ class PluginDice extends ClassBaseJobsAPIPlugin
     {
         $strKeywords = $this->getCombinedKeywordString($searchDetails['keywords_array']);
 
+        $city = (array_key_exists('location-city-comma-nospace-statecode', $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']])) ? $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-city-comma-nospace-statecode'] : "";
+        $state = (array_key_exists('location-statecode', $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']])) ? $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-statecode'] : "";
+        $country = (array_key_exists('location-countrycode', $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']])) ? $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-countrycode'] : "";
+        
+
         // Add parameters to the query via the constructor
         $options = [
             'text' => $strKeywords,
             'page' => $pageNumber,
             'pgcnt' => $this->nJobListingsPerPage,
-            'city' => $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-city-comma-nospace-statecode'],
-            'state' => $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-statecode'],
-            'country' => $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-countrycode'],
+            'city' => $city,
+            'state' => $state,
+            'country' => $country,
             'age' => $GLOBALS['USERDATA']['configuration_settings']['number_days'],
             'sort' => 1 // sort by date
         ];
