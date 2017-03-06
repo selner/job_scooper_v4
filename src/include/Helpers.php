@@ -236,9 +236,9 @@ function sortByErrorThenCount($a, $b)
 {
     $rank = array($a['name'] => 0, $b['name'] => 0);
 
-    if ($a['had_error'] < $b['had_error']) {
+    if ($a['had_error'] > $b['had_error']) {
         return 1;
-    } elseif ($b['had_error'] < $a['had_error']) {
+    } elseif ($a['had_error'] < $b['had_error']) {
         return -1;
     }
 
