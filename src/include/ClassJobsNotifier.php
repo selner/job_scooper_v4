@@ -30,7 +30,9 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
     function __construct($arrJobs, $strOutputDirectory)
     {
         parent::__construct($strOutputDirectory);
-        $this->arrLatestJobs = \Scooper\array_copy($arrJobs);
+        if(!is_null($arrJobs)) {
+            $this->arrLatestJobs = \Scooper\array_copy($arrJobs);
+        }
     }
 
     function __destruct()
@@ -575,6 +577,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             $arrCounts[$plugin]['total_not_interested'] = count(array_filter($arrPluginJobs, "isMarked_NotInterested"));
             $arrCounts[$plugin]['total_active'] = count(array_filter($arrPluginJobs, "isMarked_InterestedOrBlank"));
             $arrCounts[$plugin]['total_listings'] = count($arrPluginJobs);
+            $arrCounts[$plugin]['had_error'] = false;
 
             //
             // if the plugin also errored, then add an asterisk to the name
@@ -583,8 +586,11 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             if(!is_null($arrFailedPluginsReport) && in_array($plugin, array_keys($arrFailedPluginsReport)) === true)
             {
                 $arrCounts[$plugin]['name'] = "**" . $plugin;
+                $arrCounts[$plugin]['had_error'] = true;
             }
         }
+
+        usort($arrCounts, "sortByErrorThenCount");
 
 
         switch ($fLayoutType)
@@ -670,7 +676,6 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             }
             $strOut .=  PHP_EOL . sprintf("%'-100s","") . PHP_EOL;
 
-            usort($arrCounts, "sortByCountDesc");
             foreach($arrCounts as $site)
             {
                 if($site['name'] == C__RESULTS_INDEX_ALL) {
@@ -738,7 +743,6 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             }
             $strOut .=  PHP_EOL . "</thead>". PHP_EOL;
 
-            usort($arrCounts, "sortByCountDesc");
             foreach($arrCounts as $site)
             {
                 if($site['name'] == C__RESULTS_INDEX_ALL) {
@@ -759,7 +763,6 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             $strOut .=  PHP_EOL . "</tr>". PHP_EOL;
 
             $strOut .=  PHP_EOL . "</table>". PHP_EOL. PHP_EOL;
-            $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
         }
 
 

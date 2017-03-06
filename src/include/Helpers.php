@@ -232,14 +232,22 @@ function sortByCountDesc($a, $b)
     return ($al < $bl) ? +1 : -1;
 }
 
-/**
- * TODO:  DOC
- *
- *
- * @param  string TODO DOC
- * @param  string TODO DOC
- * @return string TODO DOC
- */
+function sortByErrorThenCount($a, $b)
+{
+    $rank = array($a['name'] => 0, $b['name'] => 0);
+
+    if ($a['had_error'] < $b['had_error']) {
+        return 1;
+    } elseif ($b['had_error'] < $a['had_error']) {
+        return -1;
+    }
+
+    if ($a["total_listings"] == $b["total_listings"]) {
+        return 0;
+    }
+
+    return ($a["total_listings"] < $b["total_listings"]) ? +1 : -1;
+}
 
 function getArrayKeyValueForJob($job)
 {
