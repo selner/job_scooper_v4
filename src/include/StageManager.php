@@ -305,8 +305,8 @@ class StageManager extends ClassJobsSiteCommon
             $jobsinterested = $this->mergeAllJobsJsonInDir($GLOBALS['USERDATA']['directories']['listings-userinterested']);
             $jobsnotinterested= $this->mergeAllJobsJsonInDir($GLOBALS['USERDATA']['directories']['listings-usernotinterested']);
 
-            $arrMarkedJobs = array_merge_recursive($jobsnotinterested, $jobsinterested);
-
+            $arrMarkedJobs = $jobsnotinterested + $jobsinterested;
+            
             $data = array('key' => null, 'listtype' => JOBLIST_TYPE_MARKED, 'jobs_count' => countJobRecords($arrMarkedJobs), 'jobslist' => $arrMarkedJobs, 'search' => null);
             writeJSON($data, $resultsJSON);
 
