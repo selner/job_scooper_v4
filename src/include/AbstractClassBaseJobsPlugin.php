@@ -113,9 +113,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             return array();
         }
 
-        $this->_collapseSearchesIfPossible_();
-
-
         foreach($this->arrSearchesToReturn as $search)
         {
             // assert this search is actually for the job site supported by this plugin
@@ -490,125 +487,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     }
 
-    private function _collapseSearchesIfPossible_()
-    {
-        if(count($this->arrSearchesToReturn) == 1)
-        {
-            // $GLOBALS['logger']->logLine($this->siteName . " does not have more than one search to collapse.  Continuing with single '" . $this->arrSearchesToReturn[0]['name'] . "' search.", \Scooper\C__DISPLAY_WARNING__);
-            return;
-        }
-
-        $arrCollapsedSearches = array();
-
-        assert($this->arrSearchesToReturn != null);
-
-        // If the plugin does not support multiple terms or if we don't have a valid delimiter to collapse
-        // the terms with, we can't collapse, so just leave the searches as they were and return
-        if(!$this->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) || $this->strKeywordDelimiter == null || strlen($this->strKeywordDelimiter) <= 0)
-        {
-            $GLOBALS['logger']->logLine($this->siteName . " does not support collapsing terms into a single search.  Continuing with " . count($this->arrSearchesToReturn) . " search(es).", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            return;
-        }
-
-        if(count($this->arrSearchesToReturn) == 1)
-        {
-            $GLOBALS['logger']->logLine($this->siteName . " does not have more than one search to collapse.  Continuing with single '" . $this->arrSearchesToReturn[0]['name'] . "' search.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            return;
-        }
-
-
-        $searchCollapsedDetails = null;
-
-        $arrSearchesLeftToCollapse = $this->arrSearchesToReturn;
-
-        while(count($arrSearchesLeftToCollapse) > 1)
-        {
-            $curSearch = array_pop($arrSearchesLeftToCollapse);
-
-            // if this search has any of the search-level overrides on it
-            // then we don't bother trying to collapse it
-            //
-            if(strlen($curSearch['base_url_format']) > 0 || strlen($curSearch['keyword_search_override']) > 0 || strlen($curSearch['location_search_value']) > 0)
-            {
-                $arrCollapsedSearches[] = $curSearch;
-            }
-            elseif($curSearch['location_search_value'] != $arrSearchesLeftToCollapse[0]['location_search_value'])
-            {
-                $arrCollapsedSearches[] = $curSearch;
-            }
-        }
-
-        $arrCollapsedSearches[] = array_pop($arrSearchesLeftToCollapse);
-
-        foreach($this->arrSearchesToReturn as $search)
-        {
-            //
-            // if this search has an override value for keyword or location, don't bother to collapse it
-            //
-            if(strlen($search['keyword_search_override']) > 0 || strlen($search['location_search_value']) > 0)
-            {
-                $arrCollapsedSearches[] = $search;
-            }
-            else
-            {
-                // Otherwise, if we haven't gotten details together yet for any collapsed searches,
-                // let's start a unified one now
-                if($searchCollapsedDetails == null)
-                {
-                    $searchCollapsedDetails = $this->cloneSearchDetailsRecordExceptFor($search, array());
-                    $searchCollapsedDetails['key'] = $this->siteName . "-collapsed-search";
-                    $searchCollapsedDetails['name'] = "collapsed-" . $search['name'];
-                    $this->_setKeywordStringsForSearch_($searchCollapsedDetails);
-                    $this->_finalizeSearch_($searchCollapsedDetails);
-                }
-                else
-                {
-                    // Verify the user settings for keyword match type are the same.  If they are,
-                    // we can combine this search into the collapsed one.
-                    //
-                    if(\Scooper\isBitFlagSet($searchCollapsedDetails['user_setting_flags'], $search['user_setting_flags']) === true)
-                    {
-                        $searchCollapsedDetails['name'] .= " and " . $search['name'];
-                        $searchCollapsedDetails['keywords_array'] = \Scooper\my_merge_add_new_keys(array_values($searchCollapsedDetails['keywords_array']), array_values($search['keywords_array']));
-
-                        $this->_setKeywordStringsForSearch_($searchCollapsedDetails);
-                    }
-                    else // not the same, so can't combine them.  Just add this search as separate then
-                    {
-                        $arrCollapsedSearches[] = $search;
-                    }
-                }
-            }
-
-        }
-        if($searchCollapsedDetails != null)
-        {
-            $arrCollapsedSearches[] = $searchCollapsedDetails;
-        }
-
-        //
-        // set the internal list of searches to be the newly collapsed set
-        //
-        $this->arrSearchesToReturn = $arrCollapsedSearches;
-        $GLOBALS['logger']->logLine($this->siteName . " has collapsed into " . count($arrCollapsedSearches) . " search(es).", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-
-        //
-        //BUGBUG Hack Fix for https://github.com/selner/jobs_scooper/issues/69
-        //
-        $tempArrListofSearches = array();
-        foreach($arrCollapsedSearches as $search)
-        {
-            $tempArrListofSearches[] = $this->cloneSearchDetailsRecordExceptFor($search, array('key', 'name'));
-        }
-        $arrUniqSearches = array_unique_multidimensional($tempArrListofSearches);
-        if(count($arrUniqSearches) != count($arrCollapsedSearches))
-        {
-            $this->arrSearchesToReturn = $arrUniqSearches;
-            $GLOBALS['logger']->logLine($this->siteName . " had an incorrect duplicate search, so re-collapsed into " . count($arrUniqSearches) . " search(es).", \Scooper\C__DISPLAY_WARNING__);
-        }
-
-    }
 
     //************************************************************************
     //
