@@ -232,7 +232,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $locTypeNeeded = $this->getLocationSettingType();
             if($locTypeNeeded == null || $locTypeNeeded == "")
             {
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Plugin for '" . $searchDetails['site_name'] . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails['name'] . "' with settings '" . $locSettingSets['name'] . "'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Plugin for '" . $searchDetails['site_name'] . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails['key'] . "' with settings '" . $locSettingSets['key'] . "'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 return $strReturnLocation;
             }
 
@@ -243,7 +243,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
             if($strReturnLocation == null || $strReturnLocation == VALUE_NOT_SUPPORTED)
             {
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Plugin for '" . $searchDetails['site_name'] . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails['name'] . "' with settings '" . $locSettingSets['name'] . "'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Plugin for '" . $searchDetails['site_name'] . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails['key'] . "' with settings '" . $locSettingSets['key'] . "'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 return $strReturnLocation;
             }
         }
@@ -275,7 +275,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $strLocationValue = $searchDetails['location_search_value'];
             if($strLocationValue == VALUE_NOT_SUPPORTED)
             {
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() . " set.  Skipping search '" . $searchDetails['name'] . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() . " set.  Skipping search '" . $searchDetails['key'] . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 $strURL = VALUE_NOT_SUPPORTED;
             }
             else
@@ -284,7 +284,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             }
         }
 
-        if($strURL == null) { throw new ErrorException("Location value is required for " . $this->siteName . ", but was not set for the search '" . $searchDetails['name'] ."'.". " Aborting all searches for ". $this->siteName, \Scooper\C__DISPLAY_ERROR__); }
+        if($strURL == null) { throw new ErrorException("Location value is required for " . $this->siteName . ", but was not set for the search '" . $searchDetails['key'] ."'.". " Aborting all searches for ". $this->siteName, \Scooper\C__DISPLAY_ERROR__); }
 
         return $strURL;
     }
@@ -391,7 +391,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     {
 
         if ($searchDetails['key'] == "") {
-            $searchDetails['key'] = \Scooper\strScrub($searchDetails['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($searchDetails['name'], FOR_LOOKUP_VALUE_MATCHING);
+                $searchDetails['key'] = \Scooper\strScrub($searchDetails['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($searchDetails['key'], FOR_LOOKUP_VALUE_MATCHING);
         }
 
         assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || ($searchDetails['location_search_value'] !== VALUE_NOT_SUPPORTED && strlen($searchDetails['location_search_value']) > 0));
@@ -483,7 +483,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         $searchStartURL = $this->getPageURLfromBaseFmt($searchDetails, 1, 1);
         $searchDetails['search_start_url'] = $searchStartURL;
-        $GLOBALS['logger']->logLine("Setting start URL for " . $this->siteName . "[" . $searchDetails['name'] . " to: " . PHP_EOL . $searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Setting start URL for " . $this->siteName . "[" . $searchDetails['key'] . " to: " . PHP_EOL . $searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
     }
 
@@ -557,7 +557,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     private function _getJobsForSearchByType_($searchDetails)
     {
-        $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[" . $searchDetails['name']) . "]", \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPTOPLEVEL__);
+        $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[" . $searchDetails['key']) . "]", \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPTOPLEVEL__);
         $this->_logMemoryUsage_();
         $arrSearchJobList = null;
 
@@ -570,10 +570,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $arrSearchJobList = $this->_getJobsfromFileStoreForSearch_($searchDetails, false);
             if (isset($arrSearchJobList)) {
                 $this->_setSearchSuccessResult_($searchDetails, $success = true, $details = 'Using cached results for ' . countAssociativeArrayValues($arrSearchJobList) . ' matching, unfiltered jobs.', $arrSearchJobList);
-                $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[" . $searchDetails['name'] . "]" . ": " . countJobRecords($arrSearchJobList) . " jobs found." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+                $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[" . $searchDetails['key'] . "]" . ": " . countJobRecords($arrSearchJobList) . " jobs found." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
 
             } else {
-                $GLOBALS['logger']->logLine(("Starting data pull for " . $this->siteName . "[" . $searchDetails['name'] . "] (no cache file found.)"), \Scooper\C__DISPLAY_ITEM_RESULT__);
+                $GLOBALS['logger']->logLine(("Starting data pull for " . $this->siteName . "[" . $searchDetails['key'] . "] (no cache file found.)"), \Scooper\C__DISPLAY_ITEM_RESULT__);
 
                 if ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__) {
                     $arrSearchJobList = $this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
@@ -591,7 +591,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
             }
 
-            $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->siteName . "[" . $searchDetails['name'] . "]"), \Scooper\C__SECTION_END__, \Scooper\C__NAPPTOPLEVEL__);
+            $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->siteName . "[" . $searchDetails['key'] . "]"), \Scooper\C__SECTION_END__, \Scooper\C__NAPPTOPLEVEL__);
         } catch (Exception $ex) {
 
             //
@@ -617,7 +617,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 // Not the known issue case, so log the error and re-throw the exception
                 // if we should have thrown one
                 //
-                $strError = "Failed to download jobs from " . $this->siteName . " jobs for search '" . $searchDetails['name'] . "[URL=" . $searchDetails['search_start_url'] . "].  " . $ex->getMessage() . PHP_EOL . "Exception Details: " . $ex;
+                $strError = "Failed to download jobs from " . $this->siteName . " jobs for search '" . $searchDetails['key'] . "[URL=" . $searchDetails['search_start_url'] . "].  " . $ex->getMessage() . PHP_EOL . "Exception Details: " . $ex;
                 $this->_setSearchResultError_($searchDetails, $strError, $arrSearchJobList);
                 $this->_setJobsToFileStoreForSearch_($searchDetails, $arrSearchJobList);
                 handleException(new Exception($strError), null, true);
@@ -632,7 +632,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         // it in the results & error notifications so that a developer can take a look.
         if($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$this->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED) && countJobRecords($arrSearchJobList) == 0)
         {
-            $strError = "The search " . $searchDetails['name'] . " on " . $this->siteName . " downloaded 0 jobs yet we did not have any keyword filter is use.  Logging as a potential error since we should have had something returned. [URL=" . $searchDetails['search_start_url'] . "].  ";
+            $strError = "The search " . $searchDetails['key'] . " on " . $this->siteName . " downloaded 0 jobs yet we did not have any keyword filter is use.  Logging as a potential error since we should have had something returned. [URL=" . $searchDetails['search_start_url'] . "].  ";
             handleException(new Exception($strError), null, true);
         }
 
@@ -640,9 +640,9 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     private function _checkInvalidURL_($details, $strURL)
     {
-        if ($strURL == null) throw new ErrorException("Skipping " . $this->siteName . " search '" . $details['name'] . "' because a valid URL could not be set.");
+        if ($strURL == null) throw new ErrorException("Skipping " . $this->siteName . " search '" . $details['key'] . "' because a valid URL could not be set.");
         return $strURL;
-        // if($strURL == VALUE_NOT_SUPPORTED) $GLOBALS['logger']->logLine("Skipping " . $this->siteName ." search '".$details['name']. "' because a valid URL could not be set.");
+        // if($strURL == VALUE_NOT_SUPPORTED) $GLOBALS['logger']->logLine("Skipping " . $this->siteName ." search '".$details['key']. "' because a valid URL could not be set.");
     }
 
 
@@ -730,7 +730,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $apiJobs = $this->getSearchJobsFromAPI($searchDetails, $pageNumber);
             if(is_null($apiJobs))
             {
-                $GLOBALS['logger']->logLine("Warning: " . $this->siteName . "[" . $searchDetails['name'] . "] returned zero jobs from the API." . PHP_EOL, \Scooper\C__DISPLAY_WARNING__);
+                $GLOBALS['logger']->logLine("Warning: " . $this->siteName . "[" . $searchDetails['key'] . "] returned zero jobs from the API." . PHP_EOL, \Scooper\C__DISPLAY_WARNING__);
                 return null;
             }
 
@@ -769,7 +769,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $pageNumber++;
         }
 
-        $GLOBALS['logger']->logLine($this->siteName . "[" . $searchDetails['name'] . "]" . ": " . $nItemCount . " jobs found." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+        $GLOBALS['logger']->logLine($this->siteName . "[" . $searchDetails['key'] . "]" . ": " . $nItemCount . " jobs found." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
         return $arrSearchReturnedJobs;
     }
 
@@ -864,7 +864,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
             if($nTotalListings <= 0)
             {
-                $GLOBALS['logger']->logLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['name'] . "'.", \Scooper\C__DISPLAY_ITEM_START__);
+                $GLOBALS['logger']->logLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['key'] . "'.", \Scooper\C__DISPLAY_ITEM_START__);
                 return array();
             }
             else
@@ -1028,7 +1028,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
             }
 
-            $GLOBALS['logger']->logLine($this->siteName . "[" . $searchDetails['name'] . "]" . ": " . $nJobsFound . " jobs found." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+            $GLOBALS['logger']->logLine($this->siteName . "[" . $searchDetails['key'] . "]" . ": " . $nJobsFound . " jobs found." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
             return $arrSearchReturnedJobs;
 
         } catch (Exception $ex) {

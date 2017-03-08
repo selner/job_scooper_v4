@@ -74,7 +74,6 @@ class ClassJobsSiteCommon
     {
         return array(
             'key' => null,
-            'name' => null,
             'site_name' => null,
             'search_start_url' => null,
             'keywords_string_for_url' => null,

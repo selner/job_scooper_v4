@@ -78,7 +78,7 @@ class PluginUSAJobs extends ClassBaseJobsAPIPlugin
         ];
         $query = new UsajobsQuery($options);
         $client = new UsajobsProvider($query);
-        $GLOBALS['logger']->logLine("Getting jobs from " . $query->getUrl() . "[". $searchDetails['name'] , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Getting jobs from " . $query->getUrl() . "[". $searchDetails['key'] , \Scooper\C__DISPLAY_ITEM_DETAIL__);
         $apiJobs = $client->getJobs();
         return $apiJobs->all();
 
@@ -124,7 +124,7 @@ class PluginDice extends ClassBaseJobsAPIPlugin
         $query = new DiceQuery($options);
         $client = new DiceProvider($query);
 
-        $GLOBALS['logger']->logLine("Getting jobs from " . $query->getUrl() . " for search ". $searchDetails['name'] , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Getting jobs from " . $query->getUrl() . " for search ". $searchDetails['key'] , \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $apiJobs = null;
         // Get a Collection of Jobs
