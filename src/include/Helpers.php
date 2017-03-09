@@ -859,7 +859,7 @@ function readJobsListDataFromLocalJsonFile($fileKey, $returnFailedSearches = tru
     if (stripos($fileKey, ".json") === false)
         $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
 
-    return readJobsListDataFromLocalFile($resultsFile,$returnFailedSearches = true);
+    return readJobsListDataFromLocalFile($resultsFile, $returnFailedSearches);
 }
 
 function readJobsListDataFromLocalFile($filepath, $returnFailedSearches = true)
