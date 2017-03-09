@@ -91,13 +91,9 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
             try
             {
 
-                if($class->isBitFlagSet(C__JOB_USE_SELENIUM)) {
-                    SeleniumSession::startSeleniumServer();
-                    $this->selenium = new SeleniumSession();
-                }
-
                 $GLOBALS['logger']->logLine("Setting up " . count($classPluginForSearch['searches']) . " search(es) for ". $classPluginForSearch['name'] . "...", \Scooper\C__DISPLAY_SECTION_START__);
                 $class->addSearches($classPluginForSearch['searches']);
+
                 $arrResults = $class->getUpdatedJobsForAllSearches();
                 addJobsToJobsList($retJobList, $arrResults);
                 $class = null;

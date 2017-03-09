@@ -69,7 +69,19 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     //
     //************************************************************************
 
-    public function addSearches($arrSearches)
+    public function isBitFlagSet($flagToCheck)
+    {
+        $ret = \Scooper\isBitFlagSet($this->_flags_, $flagToCheck);
+        if($ret == $flagToCheck) { return true; }
+        return false;
+    }
+
+    public function isSearchCached($searchDetails)
+    {
+        return $searchDetails['is_cached'];
+    }
+
+    public function addSearches(&$arrSearches)
     {
 
         if(!is_array($arrSearches[0])) { $arrSearches[] = $arrSearches; }
@@ -118,7 +130,19 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             // assert this search is actually for the job site supported by this plugin
             assert(strcasecmp(strtolower($search['site_name']), strtolower($this->siteName)) == 0);
 
-            $this->_getJobsForSearchByType_($search);
+            if(!$this->isSearchCached($search)) {
+
+                if($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
+                    SeleniumSession::startSeleniumServer();
+                    $this->selenium = new SeleniumSession();
+                }
+
+                $this->_updateJobsDataForSearch_($search);
+            }
+            else
+            {
+                $GLOBALS['logger']->logLine("Jobs data for '" . $search['key'] . " has already been cached.  Skipping jobs download.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            }
         }
 
 
@@ -128,7 +152,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     function getName() {
         $name = strtolower($this->siteName);
         if(is_null($name) || strlen($name) == 0)
-    {
+        {
             $name = str_replace("plugin", "", get_class($this));
         }
         return $name;
@@ -365,7 +389,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     //************************************************************************
 
 
-    private function _addSearch_($searchDetails)
+    private function _addSearch_(&$searchDetails)
     {
 
         if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_ANYWHERE) && $this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
@@ -376,7 +400,27 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         else
         {
 
-            $this->_finalizeSearch_($searchDetails);
+            if ($searchDetails['key'] == "") {
+                $searchDetails['key'] = \Scooper\strScrub($searchDetails['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($searchDetails['key'], FOR_LOOKUP_VALUE_MATCHING);
+            }
+
+            assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || ($searchDetails['location_search_value'] !== VALUE_NOT_SUPPORTED && strlen($searchDetails['location_search_value']) > 0));
+
+            $this->_setKeywordStringsForSearch_($searchDetails);
+            $this->_setStartingUrlForSearch_($searchDetails);
+
+
+            // Check the cached data to see if we already have jobs saved for this search & timeframe.
+            // if so, mark the search as cached
+            $arrSearchJobList = $this->_getJobsfromFileStoreForSearch_($searchSettings=$searchDetails, $returnFailedSearches=false);
+            if(!(is_null($arrSearchJobList) && is_array($arrSearchJobList)))
+            {
+                // we have previously cached good search results for this search timeframe
+                $searchDetails['is_cached'] = true;
+            }
+
+            // add a global record for the search so we can report errors
+            $GLOBALS['USERDATA']['search_results'][$searchDetails['key']] = \Scooper\array_copy($searchDetails);
 
             //
             // Add the search to the list of ones to run
@@ -384,23 +428,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $this->arrSearchesToReturn[] = $searchDetails;
             $GLOBALS['logger']->logLine($this->siteName . ": added search (" . $searchDetails['key'] . ")", \Scooper\C__DISPLAY_ITEM_DETAIL__);
         }
-
-    }
-
-    private function _finalizeSearch_(&$searchDetails)
-    {
-
-        if ($searchDetails['key'] == "") {
-                $searchDetails['key'] = \Scooper\strScrub($searchDetails['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($searchDetails['key'], FOR_LOOKUP_VALUE_MATCHING);
-        }
-
-        assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || ($searchDetails['location_search_value'] !== VALUE_NOT_SUPPORTED && strlen($searchDetails['location_search_value']) > 0));
-
-        $this->_setKeywordStringsForSearch_($searchDetails);
-        $this->_setStartingUrlForSearch_($searchDetails);
-
-        // add a global record for the search so we can report errors
-        $GLOBALS['USERDATA']['search_results'][$searchDetails['key']] = \Scooper\array_copy($searchDetails);
 
     }
 
@@ -555,7 +582,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     }
 
 
-    private function _getJobsForSearchByType_($searchDetails)
+    private function _updateJobsDataForSearch_($searchDetails)
     {
         $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[" . $searchDetails['key']) . "]", \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPTOPLEVEL__);
         $this->_logMemoryUsage_();
