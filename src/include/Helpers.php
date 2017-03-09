@@ -870,9 +870,10 @@ function readJobsListDataFromLocalFile($filepath, $returnFailedSearches = true)
 
         if (is_file($filepath)) {
             $GLOBALS['logger']->logLine("Reading json data from file " . $filepath, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            $jsonText = file_get_contents($filepath, FILE_TEXT);
-
-            $data = json_decode($jsonText, $assoc = true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+            $data = loadJSON($filepath);
+//            $jsonText = file_get_contents($filepath, FILE_TEXT);
+//
+//            $data = json_decode($jsonText, $assoc = true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
 
             if ($returnFailedSearches === false) {
                 if ($data['search']['search_run_result']['success'] !== true) {

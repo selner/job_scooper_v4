@@ -57,7 +57,7 @@ class ErrorManager {
 
             $htmlBody = "<HTML><BODY>" . $htmlBody . "</BODY></HTML>";
 
-            $notifier = new ClassJobsNotifier(null, null);
+            $notifier = new ClassJobsNotifier(null, null, null);
 
             return $notifier->sendEmail($txtBody, $htmlBody, $attachments, $subject, "error");
         }

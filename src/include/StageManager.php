@@ -33,6 +33,8 @@ class StageManager extends ClassJobsSiteCommon
     protected $siteName = "StageManager";
     protected $classConfig = null;
     protected $logger = null;
+    protected $pathAllMatchedJobs = null;
+    protected $pathAllExcludedJobs = null;
 
     function __construct()
     {
@@ -49,6 +51,10 @@ class StageManager extends ClassJobsSiteCommon
                 $this->logger = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['debug']);
 
             parent::__construct(null);
+
+            $this->pathAllExcludedJobs = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], "all-excluded-jobs"));
+            $this->pathAllMatchedJobs = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], "all-job-matches"));
+
 
         } catch (Exception $ex) {
 //            handleException($ex, null, true);
@@ -299,18 +305,33 @@ class StageManager extends ClassJobsSiteCommon
     {
         
         try {
-
-            $this->logger->logLine("Stage 3:  Merging job site results into single set", \Scooper\C__DISPLAY_SECTION_START__);
-            $resultsJSON = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], "all-results.json"));
+            $this->logger->logLine("Stage 3:  Aggregating results from all jobs sites ", \Scooper\C__DISPLAY_SECTION_START__);
+            $this->logger->logLine("Merging matched job site results into single file: " . $this->pathAllMatchedJobs."[.json and .csv]", \Scooper\C__DISPLAY_NORMAL__);
             $jobsinterested = $this->mergeAllJobsJsonInDir($GLOBALS['USERDATA']['directories']['listings-userinterested']);
             $jobsnotinterested= $this->mergeAllJobsJsonInDir($GLOBALS['USERDATA']['directories']['listings-usernotinterested']);
 
-            $arrMarkedJobs = $jobsnotinterested + $jobsinterested;
-            
-            $data = array('key' => null, 'listtype' => JOBLIST_TYPE_MARKED, 'jobs_count' => countJobRecords($arrMarkedJobs), 'jobslist' => $arrMarkedJobs, 'search' => null);
-            writeJSON($data, $resultsJSON);
+            foreach(array(array($this->pathAllMatchedJobs, $jobsinterested), array($this->pathAllExcludedJobs, $jobsnotinterested)) as $jobset) {
+                $data = array('key' => null, 'listtype' => JOBLIST_TYPE_MARKED, 'jobs_count' => countJobRecords($jobset[1]), 'jobslist' => $jobset[1], 'search' => null);
+                writeJSON($data, $jobset[0].".json");
+                $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/jobsjson_to_csv.py");
+                $cmd = "python " . $PYTHONPATH . " -i " . escapeshellarg($jobset[0].".json") . " -o " . escapeshellarg($jobset[0].".csv");
+                $this->logger->logLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd . "  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+                doExec($cmd);
+            }
 
-            $this->logger->logLine(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+//            $this->logger->logLine("Merging excluded job site results into single file: " . $this->pathAllExcludedJobs, \Scooper\C__DISPLAY_NORMAL__);
+//            $data = array('key' => null, 'listtype' => JOBLIST_TYPE_MARKED, 'jobs_count' => countJobRecords($jobsnotinterested ), 'jobslist' => $jobsnotinterested , 'search' => null);
+//            writeJSON($data, $this->pathAllExcludedJobs);
+//
+//            $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/jobsjson_to_csv.py");
+//            $csvPath = join(DIRECTORY_SEPARATOR, array(dirname($this->pathAllMatchedJobs), (basename($this->pathAllMatchedJobs) . ".csv")))
+//            $cmd = "python " . $PYTHONPATH . " --infile " . escapeshellarg($this->pathAllMatchedJobs) . " --outfile " . escapeshellarg($csvPath) ." --column job_title --index key_jobsite_siteid";
+//            $this->logger->logLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd ."  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+//            doExec($cmd);
+//
+//
+            $this->logger->logLine("End of stage 3.", \Scooper\C__DISPLAY_NORMAL__);
+
 
         } catch (Exception $ex) {
             handleException($ex, null, true);
@@ -323,15 +344,12 @@ class StageManager extends ClassJobsSiteCommon
 
             $this->logger->logLine("Stage 4: Notifying User", \Scooper\C__DISPLAY_SECTION_START__);
 
-            $jobData = readJobsListDataFromLocalFile(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], "all-results.json")));
-            $arrMarkedJobs = $jobData['jobslist'];
+//            if ((countJobRecords($arrMatchedJobs)) == 0) {
+//                $this->logger->logLine("No jobs were loaded for notification. Skipping Stage 4.", \Scooper\C__DISPLAY_WARNING__);
+//                return;
+//            }
 
-            if ((countJobRecords($arrMarkedJobs)) == 0) {
-                $this->logger->logLine("No jobs were loaded for notification. Skipping Stage 4.", \Scooper\C__DISPLAY_WARNING__);
-                return;
-            }
-
-            $notifier = new ClassJobsNotifier($arrMarkedJobs, $GLOBALS['USERDATA']['directories']['results']);
+            $notifier = new ClassJobsNotifier($this->pathAllMatchedJobs, $this->pathAllExcludedJobs, $GLOBALS['USERDATA']['directories']['results']);
             $notifier->processNotifications();
         } catch (Exception $ex) {
             handleException($ex, null, true);
