@@ -78,7 +78,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     public function isSearchCached($searchDetails)
     {
-        return $searchDetails['is_cached'];
+        return ($searchDetails['is_cached'] == true);
     }
 
     public function addSearches(&$arrSearches)
@@ -130,19 +130,17 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             // assert this search is actually for the job site supported by this plugin
             assert(strcasecmp(strtolower($search['site_name']), strtolower($this->siteName)) == 0);
 
-            if(!$this->isSearchCached($search)) {
-
-                if($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
-                    SeleniumSession::startSeleniumServer();
-                    $this->selenium = new SeleniumSession();
-                }
-
-                $this->_updateJobsDataForSearch_($search);
-            }
-            else
-            {
+            if($this->isSearchCached($search) == true) {
                 $GLOBALS['logger']->logLine("Jobs data for '" . $search['key'] . " has already been cached.  Skipping jobs download.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                continue;
             }
+
+            if($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
+                SeleniumSession::startSeleniumServer();
+                $this->selenium = new SeleniumSession();
+            }
+
+            $this->_updateJobsDataForSearch_($search);
         }
 
 
@@ -413,7 +411,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             // Check the cached data to see if we already have jobs saved for this search & timeframe.
             // if so, mark the search as cached
             $arrSearchJobList = $this->_getJobsfromFileStoreForSearch_($searchSettings=$searchDetails, $returnFailedSearches=false);
-            if(!(is_null($arrSearchJobList) && is_array($arrSearchJobList)))
+            if((is_null($arrSearchJobList) || !is_array($arrSearchJobList)) == false)
             {
                 // we have previously cached good search results for this search timeframe
                 $searchDetails['is_cached'] = true;
