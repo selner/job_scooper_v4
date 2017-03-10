@@ -114,7 +114,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
 
                 }
                 else
-                    handleException($classError, "Unable to run searches for ". $classPluginForSearch['class_name'] . ": %s", $raise = true);
+                    handleException($classError, "Unable to run searches for ". $classPluginForSearch['class_name'] . ": %s", $raise = false);
 
                 $GLOBALS['logger']->logLine('ERROR:  Plugin ' .$classPluginForSearch['name'] . ' failed due to an error:  ' . $err .PHP_EOL. 'Skipping it\'s remaining searches and continuing with other plugins.', \Scooper\C__DISPLAY_ERROR__);
                 $arrFail = getFailedSearchesByPlugin();
