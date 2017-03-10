@@ -440,11 +440,6 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             }
         }
 
-        if(!isset($tempSearch['key']) || strlen($tempSearch['key']) <= 0)
-        {
-            $tempSearch['key'] = \Scooper\strScrub($tempSearch['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($tempSearch['name'], FOR_LOOKUP_VALUE_MATCHING);
-        }
-
         $strSearchAsString = getArrayValuesAsString($tempSearch);
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search loaded from config INI: " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
