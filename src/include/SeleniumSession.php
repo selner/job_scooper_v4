@@ -323,7 +323,12 @@ class SeleniumSession extends PropertyObject
         $capabilities->setCapability("setThrowExceptionOnScriptError", false);
 
 
-        $this->remoteWebDriver = RemoteWebDriver::create($host, $desired_capabilities = $capabilities, 5000);
+        $this->remoteWebDriver = RemoteWebDriver::create(
+            $host,
+            $desired_capabilities = $capabilities,
+            $connection_timeout_in_ms = 60000,
+            $request_timeout_in_ms = 60000
+        );
 
     }
 
