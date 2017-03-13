@@ -7,4 +7,7 @@
         <div style="align=block" ><strong>Exception Message:</strong> {{search_run_result.exception_message}}</div>
         <div style="align=block" ><strong>Exception Code:</strong> {{search_run_result.exception_code}}</div>
         <div style="align=block" ><strong>Exception Line:</strong> {{search_run_result.exception_line}}</div>
-        <pre style="margin:15px;">{{search_run_result.error_details}}</pre>
+        <div style="max-width:700;overflow:auto">
+            <pre style="margin:15px;">{{search_run_result.error_details}}</pre>
+        </div>
+
