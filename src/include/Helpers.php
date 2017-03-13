@@ -905,6 +905,40 @@ function readJobsListFromLocalJsonFile($fileKey, $returnFailedSearches = true, $
     return null;
 }
 
+use LightnCandy\LightnCandy;
+
+function loadTemplate($path)
+{
+    $template  = file_get_contents($path);
+
+
+    $partialDir = dirname($path) . "/partials";
+
+    $phpStr = LightnCandy::compile($template, Array(
+        'flags' => LightnCandy::FLAG_RENDER_DEBUG | LightnCandy::FLAG_ERROR_LOG| LightnCandy::FLAG_ERROR_EXCEPTION| LightnCandy::FLAG_HANDLEBARSJS_FULL,
+        'partialresolver' => function ($cx, $name) use($partialDir) {
+            $partialpath = "$partialDir/$name.tmpl";
+            if (file_exists($partialpath)) {
+                return file_get_contents($partialpath);
+            }
+            return "[partial (file:$partialpath) not found]";
+        }
+
+    ));  // set compiled PHP code into $phpStr
+
+    // Save the compiled PHP code into a php file
+    $renderFile = basename($path) .'-render.php';
+
+    file_put_contents($renderFile, '<?php ' . $phpStr . '?>');
+
+    // Get the render function from the php file
+//    $renderer = include($renderFile);
+// Get the render function
+    $renderer = LightnCandy::prepare($phpStr);
+
+
+    return $renderer;
+}
 
 function getPhpMemoryUsage()
 {
@@ -947,6 +981,28 @@ function getFailedSearchesByPlugin()
         }
     }
     unset($search);
+
+    return $arrFailedPluginsReport;
+}
+function getFailedSearches()
+{
+    if (!array_key_exists('search_results', $GLOBALS['USERDATA']) || is_null($GLOBALS['USERDATA']['search_results']))
+        return null;
+
+    $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function ($k) {
+        return ($k['search_run_result']['success'] !== true);
+    });
+
+    if (is_null($arrFailedSearches) || !is_array($arrFailedSearches))
+        return null;
+
+    $arrFailedPluginsReport = array();
+    foreach ($arrFailedSearches as $search) {
+        if (!is_null($search['search_run_result']['success'])) {
+
+            $arrFailedPluginsReport[$search['key']] = $search;
+        }
+    }
 
     return $arrFailedPluginsReport;
 }

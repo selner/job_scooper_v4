@@ -1,0 +1,15 @@
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateBody">
+            <tr>
+                <td valign="top" class="bodyContent">
+                    The following site plugins on <strong>{{server}}</strong> returned an error or had zero listings found unexpectedly running <strong>{{app_version}}</strong>:
+                    <br/>
+                    <br/>
+                        {{#plugins_with_errors}}
+                            <!-- errors index: {{@index}}, key: {{@key}} -->
+                            {{>html_email_error_item_partial}}
+                        {{/plugins_with_errors}}
+                </td>
+            </tr>
+
+        </table>
+        <!-- // END BODY -->

@@ -813,19 +813,26 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         {
             $strOut .=  PHP_EOL . "<div class=\"job_scooper section\">". PHP_EOL;
             sort($arrFailedPlugins);
-            $strOut .=  PHP_EOL . "<div class='job_scooper section' style=' color: DarkRed; '>". PHP_EOL;
-            $strOut .=  PHP_EOL .  "* The following job site plugins failed due to unexpected errors:" . PHP_EOL;
-            $strOut .=  PHP_EOL . "<ul class='job_scooper'>". PHP_EOL;
 
-            foreach($arrFailedPlugins as $site)
-            {
-                foreach($site as $search) {
-                    $strOut .= "<li>" . $search['site_name'] . ": <span style=\"color: Grey\">" . $search['search_run_result']['details'] . "</span></li>" . PHP_EOL;
-                }
-            }
+            $errMgr = new ErrorManager();
+            $errHTML = $errMgr->getFailedSearchesNotificationBody();
 
-            $strOut .=  PHP_EOL . "</ul>". PHP_EOL;
+            $strOut .=  PHP_EOL . "<!-- BEGIN ERROR MANAGER OUTPUT -->". PHP_EOL;
+            $strOut .= '<H2>Plugin Errors</H2>' . PHP_EOL . PHP_EOL;
+            $strOut .= $errHTML['body'];
+//            $strOut .=  PHP_EOL . "<ul class='job_scooper'>". PHP_EOL;
+//
+//            foreach($arrFailedPlugins as $site)
+//            {
+//                foreach($site as $search) {
+//                    $strOut .= "<li>" . $search['site_name'] . ": <span style=\"color: Grey\">" . $search['search_run_result']['details'] . "</span></li>" . PHP_EOL;
+//                }
+//            }
+//
+//            $strOut .=  PHP_EOL . "</ul>". PHP_EOL;
             $strOut .= "</div>";
+
+            $strOut .=  PHP_EOL . "<!-- END ERROR MANAGER OUTPUT -->". PHP_EOL;
             $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
         }
 

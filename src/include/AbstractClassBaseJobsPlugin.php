@@ -643,7 +643,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 // if we should have thrown one
                 //
                 $strError = "Failed to download jobs from " . $this->siteName . " jobs for search '" . $searchDetails['key'] . "[URL=" . $searchDetails['search_start_url'] . "].  " . $ex->getMessage() . PHP_EOL . "Exception Details: " . $ex;
-                $this->_setSearchResultError_($searchDetails, $strError, $arrSearchJobList);
+                $this->_setSearchResultError_($searchDetails, $strError, $ex, $arrSearchJobList, null);
                 $this->_setJobsToFileStoreForSearch_($searchDetails, $arrSearchJobList);
                 handleException(new Exception($strError), null, true);
             }
@@ -671,7 +671,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     }
 
 
-    private function _setSearchResultError_(&$searchDetails, $err = "UNKNOWN Error.", $arrSearchedJobs = array(), $objSimpleHTMLResults = null)
+    private function _setSearchResultError_(&$searchDetails, $err = "UNKNOWN Error.", $exception = null, $arrSearchedJobs = array(), $objSimpleHTMLResults = null)
     {
         $arrErrorFiles = array();
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting error for search '" . $searchDetails['key'] . "' with error '" . $err . "'.", \Scooper\C__DISPLAY_ERROR__);
@@ -682,7 +682,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         $this->_writeDebugFiles_($searchDetails, "ERROR", $arrSearchedJobs, $objSimpleHTMLResults);
 
-        $this->_setSearchResult_($searchDetails, $success = false, $details = $err, $files = $arrErrorFiles);
+        $this->_setSearchResult_($searchDetails, $success = false, $details = $err, $exception=$exception, $files = $arrErrorFiles);
     }
 
 
@@ -716,11 +716,11 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     private function _setSearchSuccessResult_(&$searchDetails, $success = null, $details = "UNKNOWN RESULT.", $arrSearchedJobs = null, $objSimpleHTMLResults = null)
     {
         $this->_writeDebugFiles_($searchDetails, "SUCCESS", $arrSearchedJobs, $objSimpleHTMLResults);
-        $this->_setSearchResult_($searchDetails, $success, $details, $files = array());
+        $this->_setSearchResult_($searchDetails, $success, $details, null, $files = array());
     }
 
 
-    private function _setSearchResult_(&$searchDetails, $success = null, $details = "UNKNOWN RESULT.", $files = array())
+    private function _setSearchResult_(&$searchDetails, $success = null, $details = "UNKNOWN RESULT.", $exception = null, $files = array())
     {
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting result value for search '" . $searchDetails['key'] . "' equal to " . ($success == 1 ? "true" : "false"). " with details '" . $details . "'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
@@ -732,9 +732,24 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             foreach($files as $f)
                 $errFiles[$f] = $f;
         }
+
+        $line= null;
+        $code = null;
+        $msg = null;
+
+        if(!is_null($exception))
+        {
+            $line = $exception->getLine();
+            $code = $exception->getCode();
+            $msg = $exception->getMessage();
+        }
         $searchDetails['search_run_result'] = array(
             'success' => $success,
-            'details' => $details,
+            'error_datetime' => new DateTime(),
+            'error_details' => $details,
+            'exception_code' => $code,
+            'exception_message' => $msg,
+            'exception_line' => $line,
             'error_files' => $errFiles
         );
         $GLOBALS['USERDATA']['search_results'][$searchDetails['key']]['search_run_result'] = $searchDetails['search_run_result'];
@@ -1057,7 +1072,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             return $arrSearchReturnedJobs;
 
         } catch (Exception $ex) {
-            $this->_setSearchResultError_($searchDetails, "Error: " . $ex->getMessage(), $arrSearchReturnedJobs, $objSimpleHTML);
+            $this->_setSearchResultError_($searchDetails, "Error: " . $ex->getMessage(), $ex, $arrSearchReturnedJobs, $objSimpleHTML);
             $this->_setJobsToFileStoreForSearch_($searchDetails, $arrSearchReturnedJobs);
             handleException($ex, null, true);
         }
