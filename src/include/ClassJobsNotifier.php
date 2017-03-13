@@ -491,6 +491,9 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
                 'allow_self_signed' => true
             )
         );
+        $GLOBALS['logger']->logLine("Email to:\t" . $strToAddys , \Scooper\C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine("Email from:\t" . $emailAddrs['from']['address'], \Scooper\C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine("Email bcc:\t" . $strBCCAddys, \Scooper\C__DISPLAY_NORMAL__);
 
 
         $mail->WordWrap = 120;                                          // Set word wrap to 120 characters
