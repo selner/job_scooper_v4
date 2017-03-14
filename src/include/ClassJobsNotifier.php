@@ -803,7 +803,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         //
         // Include the contents of the HTML file if passed
         //
-        if(!is_null($detailsHTMLBodyInclude)) {
+        if(!is_null($detailsHTMLBodyInclude) && array_key_exists('has_file', $detailsHTMLBodyInclude) && $detailsHTMLBodyInclude['has_file'] == true ) {
             $strOut .= PHP_EOL . "<div class=\"job_scooper section\">" . PHP_EOL;
             $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
             $strOut .= '<H2>New Job Matches</H2>' . PHP_EOL . PHP_EOL;
