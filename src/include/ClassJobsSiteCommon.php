@@ -232,7 +232,7 @@ class ClassJobsSiteCommon
 
         // For reference, DEFAULT_SCRUB =  REMOVE_PUNCT | HTML_DECODE | LOWERCASE | REMOVE_EXTRA_WHITESPACE
         $arrItem['date_pulled'] = getTodayAsString();
-        $arrItem['site_name'] = $this->siteName;
+        $arrItem['job_site'] = $this->siteName;
 
         if(is_null($arrItem['job_site']) || strlen($arrItem['job_site']) <= 0)
             $arrItem ['job_site'] = \Scooper\strScrub($this->siteName, DEFAULT_SCRUB);
