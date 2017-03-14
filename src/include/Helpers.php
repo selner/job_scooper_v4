@@ -935,6 +935,10 @@ function loadTemplate($path)
 //    $renderer = include($renderFile);
 // Get the render function
     $renderer = LightnCandy::prepare($phpStr);
+    if($renderer == false)
+    {
+        throw new Exception("Error: unable to compile template '$path'");
+    }
 
 
     return $renderer;
