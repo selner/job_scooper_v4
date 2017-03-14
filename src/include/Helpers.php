@@ -896,7 +896,7 @@ function readJobsListFromLocalJsonFile($fileKey, $returnFailedSearches = true, $
 
     if (!is_null($data) && is_array($data)) {
         if (array_key_exists("jobslist", $data)) {
-            $retJobs = array_filter($data['jobslist'], "isIncludedJobSite");
+            $retJobs = array_filter($data['jobslist'], "isNotExcludedJobSite");
         }
 
         return $retJobs;
