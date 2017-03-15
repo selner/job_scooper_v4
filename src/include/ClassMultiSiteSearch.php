@@ -87,17 +87,13 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
 
         foreach($this->arrPluginClassesToRun as $classPluginForSearch)
         {
-            $class = new $classPluginForSearch['class_name']($GLOBALS['USERDATA']['directories']['stage1'], $classPluginForSearch);
+            $class = new $classPluginForSearch['class_name'](\Scooper\getFullPathFromFileDetails($this->detailsMyFileOut), $classPluginForSearch);
             try
             {
 
-                if($class->isBitFlagSet(C__JOB_USE_SELENIUM)) {
-                    SeleniumSession::startSeleniumServer();
-                    $this->selenium = new SeleniumSession();
-                }
-
                 $GLOBALS['logger']->logLine("Setting up " . count($classPluginForSearch['searches']) . " search(es) for ". $classPluginForSearch['name'] . "...", \Scooper\C__DISPLAY_SECTION_START__);
                 $class->addSearches($classPluginForSearch['searches']);
+
                 $arrResults = $class->getUpdatedJobsForAllSearches();
                 addJobsToJobsList($retJobList, $arrResults);
                 $class = null;
@@ -118,7 +114,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
 
                 }
                 else
-                    handleException($classError, "Unable to run searches for ". $classPluginForSearch['class_name'] . ": %s", $raise = true);
+                    handleException($classError, "Unable to run searches for ". $classPluginForSearch['class_name'] . ": %s", $raise = false);
 
                 $GLOBALS['logger']->logLine('ERROR:  Plugin ' .$classPluginForSearch['name'] . ' failed due to an error:  ' . $err .PHP_EOL. 'Skipping it\'s remaining searches and continuing with other plugins.', \Scooper\C__DISPLAY_ERROR__);
                 $arrFail = getFailedSearchesByPlugin();

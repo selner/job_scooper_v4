@@ -61,6 +61,7 @@ Required Parameters:
  * To run as part of app:  download [selenium-server-standalone-3.0.1.jar](http://selenium-release.storage.googleapis.com/index.html?path=3.0.1) and copy it to the /src/lib directory.   
 * Oracle](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)  Selenium Standalone Server requires Java 8 on macOS 10.12. 
 
+=======
 ## Other Stuff
 * Version:  v4.0.alpha1 [release notes](https://github.com/selner/jobs_scooper/releases)
 * Author:  Bryan Selner (dev at recoilvelocity dot com)

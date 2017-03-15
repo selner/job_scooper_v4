@@ -20,7 +20,6 @@ if (!strlen(__ROOT__) > 0) {
 }
 require_once(__ROOT__ . '/include/SitePlugins.php');
 require_once(__ROOT__ . '/include/ClassMultiSiteSearch.php');
-require_once(__ROOT__ . '/include/S3Manager.php');
 require_once(__ROOT__ . '/include/ErrorManager.php');
 require_once(__ROOT__ . '/include/ClassJobsNotifier.php');
 require_once(__ROOT__ . '/include/JobsAutoMarker.php');
@@ -29,188 +28,13 @@ const JOBLIST_TYPE_UNFILTERED = "unfiltered";
 const JOBLIST_TYPE_MARKED = "marked";
 const JSON_FILENAME = "-alljobsites.json";
 
-
-class S3JobListManager extends ClassJobsSiteCommon
-{
-    protected $arrLatestJobs_UnfilteredByUserInput = array();
-    protected $arrMarkedJobs = array();
-    protected $s3Manager = null;
-    protected $logger = null;
-
-    function __construct($logger)
-    {
-        parent::__construct(null);
-
-        if ($logger)
-            $this->logger = $logger;
-        elseif ($GLOBALS['logger'])
-            $this->logger = $GLOBALS['logger'];
-        else
-            $this->logger = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['stage1']);
-
-        $this->s3Manager = new S3Manager($GLOBALS['USERDATA']['AWS']['S3']['bucket'], $GLOBALS['USERDATA']['AWS']['S3']['region']);
-    }
-
-    public function publishS3JobsList($stageNumber, $listType)
-    {
-
-        try {
-            $data = $this->_getJobsListDataForS3_($stageNumber, $listType);
-            if (is_null($data)) return null;
-            $keyparts = explode("/", $data['key']);
-
-            $path = implode("/", array_slice($keyparts, 2));
-            writeJobsListDataToLocalJSONFile($path, $data['jobslist'], $listType, $stageNumber, $searchDetails = null);
-            if ($this->s3Manager->isConnected() === true) {
-
-                $this->s3Manager->uploadObject($data['key'], $data['jobslist']);
-            }
-
-            return $data['key'];
-
-        } catch (Exception $e) {
-            $msg = "Failed to load " . $listType . " joblist to S3:  " . $e->getMessage();
-            $this->logger->logLine($msg);
-            throw new Exception($msg);
-        }
-    }
-
-    public function getS3JobsList($stageNumber, $listType)
-    {
-
-        try {
-            $data = $this->_getJobsListDataForS3_($stageNumber, $listType);
-            if (is_null($data)) return null;
-            return $this->s3Manager->getObject($data['key']);
-
-
-        } catch (Exception $e) {
-            $msg = "Warning:  could not find object for " . $listType . " joblist in S3:  " . $e->getMessage();
-            $this->logger->logLine($msg, \Scooper\C__DISPLAY_WARNING__);
-            return array();
-        }
-    }
-
-    public function migrateAndLoadS3JobListsIntoStage($thisStageNumber)
-    {
-        $this->migrateAndLoadS3JobListForStage($thisStageNumber, JOBLIST_TYPE_UNFILTERED);
-        $this->migrateAndLoadS3JobListForStage($thisStageNumber, JOBLIST_TYPE_MARKED);
-    }
-
-    public function migrateAndLoadS3JobListForStage($thisStageNumber, $listType)
-    {
-        $prevStageNumber = \Scooper\intceil($thisStageNumber) - 1;
-        $arrRetJobs = array();
-        $result = $this->getS3JobsList($thisStageNumber, $listType);
-
-        if (!is_null($result) && is_array($result) && array_key_exists('BodyDecoded', $result)) {
-            $arrJobsCurrStage = $result['BodyDecoded'];
-        } else {
-            $data = $this->_getJobsListDataForS3_($thisStageNumber, $listType);
-            $keyparts = explode("/", $data['key']);
-            $path = implode("/", array_slice($keyparts, 2));
-            $arrJobsCurrStage = readJobsListFromLocalJsonFile($path, $thisStageNumber);
-        }
-        if (countJobRecords($arrJobsCurrStage) > 0) {
-            addJobsToJobsList($arrRetJobs, $arrJobsCurrStage);
-        }
-
-        if ($prevStageNumber > 0) {
-            $result = $this->getS3JobsList($prevStageNumber, $listType);
-            if (!is_null($result) && is_array($result) && array_key_exists('BodyDecoded', $result)) {
-                $arrJobsPrevStage = $result['BodyDecoded'];
-            } else {
-                $data = $this->_getJobsListDataForS3_($prevStageNumber, $listType);
-                $keyparts = explode("/", $data['key']);
-                $path = implode("/", array_slice($keyparts, 2));
-                $arrJobsPrevStage = readJobsListFromLocalJsonFile($path, $prevStageNumber);
-            }
-            if (countJobRecords($arrJobsPrevStage) > 0) {
-                addJobsToJobsList($arrRetJobs, $arrJobsPrevStage);
-            }
-        }
-
-        switch ($listType) {
-            case JOBLIST_TYPE_UNFILTERED:
-                $this->arrLatestJobs_UnfilteredByUserInput = $arrRetJobs;
-                break;
-            case JOBLIST_TYPE_MARKED:
-                $this->arrMarkedJobs = $arrRetJobs;
-                break;
-
-            default:
-                throw new Exception("Invalid job list type specified: " . $listType);
-        }
-
-        writeJobsListDataToLocalJSONFile(("migrated-to-stage" . $thisStageNumber), $dataJobs = $arrRetJobs, $listType, $stageNumber = $thisStageNumber, $searchDetails = null);
-        if ($this->s3Manager->isConnected() === true) {
-            $this->publishS3JobsList($thisStageNumber, $listType);
-            if ($prevStageNumber > 0)
-                $this->deleteS3JobsList($prevStageNumber, $listType);
-        }
-    }
-
-    public function deleteS3JobsList($stageNumber, $listType)
-    {
-        $key = "unknown";
-        try {
-            $data = $this->_getJobsListDataForS3_($stageNumber, $listType);
-            if (is_null($data)) return null;
-
-            $key = $data['key'];
-            $this->s3Manager->deleteObjects($key);
-
-        } catch (Exception $e) {
-            $msg = "Warning:  failed to delete object " . $key . " for " . $listType . " joblist in S3:  " . $e->getMessage();
-            $this->logger->logLine($msg, \Scooper\C__DISPLAY_WARNING__);
-        }
-
-    }
-
-
-    public function getS3KeyForStage($stageNumber, $listType)
-    {
-        $result = $this->_getJobsListDataForS3_($stageNumber, $listType);
-        if (array_key_exists('key', $result) == true)
-            return $result['key'];
-        return null;
-    }
-
-    private function _getJobsListDataForS3_($stageNumber, $listType)
-    {
-        $jobList = null;
-
-        switch ($listType) {
-            case JOBLIST_TYPE_UNFILTERED:
-                $jobList = $this->arrLatestJobs_UnfilteredByUserInput;
-                $keyEnding = JOBLIST_TYPE_UNFILTERED . JSON_FILENAME;
-                break;
-            case JOBLIST_TYPE_MARKED:
-                $jobList = $this->arrMarkedJobs;
-                $keyEnding = JOBLIST_TYPE_MARKED . JSON_FILENAME;
-                break;
-
-            default:
-                throw new Exception("Invalid job list type specified: " . $listType);
-        }
-
-        $key = getStageKeyPrefix($stageNumber, STAGE_FLAG_INCLUDEDATE, "") . "-" . $keyEnding;
-        $data = array(
-            'key' => $key,
-            'type' => $listType,
-            'jobslist' => $jobList
-        );
-
-        return $data;
-    }
-
-
-}
-
-class StageManager extends S3JobListManager
+class StageManager extends ClassJobsSiteCommon
 {
     protected $siteName = "StageManager";
     protected $classConfig = null;
+    protected $logger = null;
+    protected $pathAllMatchedJobs = null;
+    protected $pathAllExcludedJobs = null;
 
     function __construct()
     {
@@ -219,7 +43,18 @@ class StageManager extends S3JobListManager
             $this->classConfig->initialize();
             $logger = $this->classConfig->getLogger();
 
-            parent::__construct($logger);
+            if ($logger)
+                $this->logger = $logger;
+            elseif ($GLOBALS['logger'])
+                $this->logger = $GLOBALS['logger'];
+            else
+                $this->logger = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['debug']);
+
+            parent::__construct(null);
+
+            $this->pathAllExcludedJobs = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], "all-excluded-jobs"));
+            $this->pathAllMatchedJobs = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], "all-job-matches"));
+
 
         } catch (Exception $ex) {
 //            handleException($ex, null, true);
@@ -279,19 +114,11 @@ class StageManager extends S3JobListManager
         }
     }
 
-
     public function doStage1()
     {
 
         if (isset($this->logger)) $this->logger->logLine("Stage 1: Downloading Latest Matching Jobs ", \Scooper\C__DISPLAY_ITEM_RESULT__);
         try {
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //
-            // Load the jobs list we need to process in this stage
-            //
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            $this->migrateAndLoadS3JobListsIntoStage(1);
 
             //
             // let's start with the searches specified with the details in the the config.ini
@@ -338,18 +165,16 @@ class StageManager extends S3JobListManager
                     // the searches in the list and returning us the combined set of new jobs
                     // (with the exception of Amazon for historical reasons)
                     //
-                    $classMulti = new ClassMultiSiteSearch($this->classConfig->getFileDetails('output_subfolder')['directory']);
+                    $classMulti = new ClassMultiSiteSearch($GLOBALS['USERDATA']['directories']['listings-raw']);
                     $classMulti->addMultipleSearches($arrSearchesToRun, null);
                     $arrUpdatedJobs = $classMulti->updateJobsForAllPlugins();
-                    $this->arrLatestJobs_UnfilteredByUserInput = \Scooper\array_copy($arrUpdatedJobs);
-                    $this->publishS3JobsList(1, JOBLIST_TYPE_UNFILTERED);
 
                 } else {
                     throw new ErrorException("No searches have been set to be run.");
                 }
             }
         } catch (Exception $ex) {
-            handleException($ex, null, true);
+            handleException($ex, null, false);
         }
 
     }
@@ -358,91 +183,156 @@ class StageManager extends S3JobListManager
     {
         try {
             if (isset($this->logger)) $this->logger->logLine("Stage 2:  Tokenizing Jobs ", \Scooper\C__DISPLAY_SECTION_START__);
+            $marker = new JobsAutoMarker();
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             //
             // Load the jobs list we need to process in this stage
             //
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            $this->migrateAndLoadS3JobListsIntoStage(2);
 
-            if (countAssociativeArrayValues($this->arrLatestJobs_UnfilteredByUserInput) == 0) {
-                if (isset($this->logger)) $this->logger->logLine("No jobs found to process. Skipping Stage 2.", \Scooper\C__DISPLAY_WARNING__);
-                return;
+            foreach($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $site)
+            {
+                $arrSiteJobs = $this->mergeAllJobsJsonInDir($GLOBALS['USERDATA']['directories']['listings-raw'], $site);
+                if(countAssociativeArrayValues($arrSiteJobs) > 0)
+                    writeJobsListDataToLocalJSONFile($site, $arrSiteJobs, JOBLIST_TYPE_UNFILTERED, $dirKey = "listings-rawbysite");
+                $arrSiteJobs = null;
             }
+            $filelist = $this->getAllIncludedFilesForDir($GLOBALS['USERDATA']['directories']['listings-rawbysite']);
+            $jsonfiles = array_filter($filelist, function ($var) {
+                if(strtolower(pathinfo($var, PATHINFO_EXTENSION)) == "json" && substr($var, 0, strlen("tokenized_")) != "tokenized_")
+                    return true;
+                return false;
+                });
 
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //
-            // Tokenize the job listings found in the stage 2 prefix on S3
-            //
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            $stage1Key = $this->getS3KeyForStage(1, JOBLIST_TYPE_UNFILTERED);
-            $stage2Key = $this->getS3KeyForStage(2, JOBLIST_TYPE_UNFILTERED);
+            foreach($jsonfiles as $jfile)
+            {
+                $this->logger->logLine(PHP_EOL . "Processing " . $jfile , \Scooper\C__DISPLAY_NORMAL__);
+                $outjfile = "tokenized_" .$jfile;
+                $jfilefullpath = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['listings-rawbysite'], $jfile));
+                $outjfilefullpath = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['listings-tokenized'], $outjfile));
 
-            $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/normalizeS3JobListings.py");
-            $sourceparam = "";
-            $bucketparam = "";
+                ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //
+                // Tokenize the job listings found in the stage 2 prefix on S3
+                //
+                ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            if (array_key_exists('AWS', $GLOBALS['USERDATA']) && array_key_exists('S3', $GLOBALS['USERDATA']['AWS']) && array_key_exists('bucket', $GLOBALS['USERDATA']['AWS']['S3']) && strlen($GLOBALS['USERDATA']['AWS']['S3']['bucket']) > 0) {
-                $sourceparam = "--source s3";
-                $bucketparam = "-b " . $GLOBALS['USERDATA']['AWS']['S3']['bucket'];
-            } else {
-                $sourceparam = "--source " . escapeshellarg($GLOBALS['OPTS']['output']);
+                $this->logger->logLine(PHP_EOL . "    ~~~~~~ Tokenizing job titles ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+                $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/normalizeJobListingFile.py");
+
+                $cmd = "python " . $PYTHONPATH . " --infile " . escapeshellarg($jfilefullpath) . " --outfile " . escapeshellarg($outjfilefullpath) ." --column job_title --index key_jobsite_siteid";
+                $this->logger->logLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd ."  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+
+                doExec($cmd);
+
+                $arrJobs = readJobsListFromLocalJsonFile(pathinfo($outjfilefullpath, PATHINFO_BASENAME), $returnFailedSearches = true, $dirKey = "listings-tokenized");
+                if(countAssociativeArrayValues($arrJobs) > 0)
+                {
+                    $this->logger->logLine(PHP_EOL . "    ~~~~~~ Auto-marking jobs based on user settings ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+                    $marker->setJobsList($arrJobs);
+                    $marker->markJobsList();
+                    $arrMarkedJobs = $marker->getMarkedJobs();
+
+
+                    $arrJobsInterestedJobs = array_filter($arrMarkedJobs, "isMarked_InterestedOrBlank");
+                    $arrJobsNotInterested = array_filter($arrMarkedJobs, "isMarked_NotInterested");
+
+                    if(countAssociativeArrayValues($arrJobsInterestedJobs) > 0)
+                        writeJobsListDataToLocalJSONFile($jfile, $arrJobsInterestedJobs, JOBLIST_TYPE_MARKED,  $dirKey = "listings-userinterested");
+
+                    if(countAssociativeArrayValues($arrJobsNotInterested) > 0)
+                        writeJobsListDataToLocalJSONFile($jfile, $arrJobsNotInterested, JOBLIST_TYPE_MARKED, $dirKey = "listings-usernotinterested");
+                }
             }
-            $cmd = "python " . $PYTHONPATH . " " . $bucketparam . " " . $sourceparam . " --inkey " . escapeshellarg($stage1Key) . " --outkey " . escapeshellarg($stage2Key) . " --column job_title --index key_jobsite_siteid";
-            $this->logger->logLine("Running command: " . $cmd, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-            doExec($cmd);
-
-//        $this->logger->logLine("Loading results and saving for next stage...", \Scooper\C__DISPLAY_SECTION_START__);
-//        $keyparts = explode("/", $stage2Key);
-//        $path = implode("/", array_slice($keyparts,2));
-//
-//        $this->arrLatestJobs_UnfilteredByUserInput = readJobsListFromLocalJsonFile($path, 2);
-//        $this->publishS3JobsList(2, JOBLIST_TYPE_UNFILTERED);
         } catch (Exception $ex) {
             handleException($ex, null, true);
         }
 
     }
 
-    public function doStage3()
+    private function getAllIncludedFilesForDir($directory, $matchFileName=null)
     {
+        $filelist = array_diff(scandir($directory), array(".", ".."));
+        if(!is_null($matchFileName))
+        {
+            $filelist = array_filter($filelist, function ($var) use ($matchFileName) {
+                if(stristr($var, $matchFileName) != false)
+                    return true;
+                return false;
+            });
+        }
 
-        try {
-
-            $this->logger->logLine("Stage 3:  Automarking Jobs ", \Scooper\C__DISPLAY_SECTION_START__);
-
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //
-            // Load the jobs list we need to process in this stage
-            //
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            $this->migrateAndLoadS3JobListsIntoStage(3);
-
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //
-            // Filter the full jobs list looking for duplicates, etc.
-            //
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            if (countJobRecords($this->arrLatestJobs_UnfilteredByUserInput) == 0) {
-                $this->logger->logLine("No jobs were loaded to auto-mark.  Skipping Stage 3.", \Scooper\C__DISPLAY_WARNING__);
-                return;
+        $includedfiles = array_filter($filelist, function ($var) {
+            $matches = array();
+            $res = substr_count_multi($var, $GLOBALS['USERDATA']['configuration_settings']['included_sites'], $matches);
+            if (count($matches) > 0)
+            {
+                return true;
             }
 
-            $this->logger->logLine(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
-            $marker = new JobsAutoMarker($this->arrLatestJobs_UnfilteredByUserInput);
-            $marker->markJobsList();
-            $this->arrMarkedJobs = $marker->getMarkedJobs();
+            return false;
+        });
+        return $includedfiles;
+    }
 
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //
-            // Save the automarked jobs back to stage 4 on S3
-            //
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            $this->publishS3JobsList(3, JOBLIST_TYPE_MARKED);
+    private function mergeAllJobsJsonInDir($directory, $matchFileName = null)
+    {
+        $filelist = $this->getAllIncludedFilesForDir($directory, $matchFileName);
+
+
+        $jsMerged = array();
+        foreach($filelist as $file)
+        {
+            if(strtolower(pathinfo($file, PATHINFO_EXTENSION)) == "json") {
+                $filepath = join(DIRECTORY_SEPARATOR, array($directory, $file));
+                $jsobj = loadJSON($filepath);
+                if (is_array($jsobj['jobslist']) && countAssociativeArrayValues($jsobj['jobslist']) > 0)
+                {
+                    foreach(array_keys($jsobj['jobslist']) as $key)
+                    {
+                        if(!array_key_exists($key, $jsMerged))
+                            $jsMerged[$key] = $jsobj['jobslist'][$key];
+                    }
+               }
+            }
+        }
+
+        return $jsMerged;
+    }
+
+    public function doStage3()
+    {
+        
+        try {
+            $this->logger->logLine("Stage 3:  Aggregating results from all jobs sites ", \Scooper\C__DISPLAY_SECTION_START__);
+            $this->logger->logLine("Merging matched job site results into single file: " . $this->pathAllMatchedJobs."[.json and .csv]", \Scooper\C__DISPLAY_NORMAL__);
+            $jobsinterested = $this->mergeAllJobsJsonInDir($GLOBALS['USERDATA']['directories']['listings-userinterested']);
+            $jobsnotinterested= $this->mergeAllJobsJsonInDir($GLOBALS['USERDATA']['directories']['listings-usernotinterested']);
+
+            foreach(array(array($this->pathAllMatchedJobs, $jobsinterested), array($this->pathAllExcludedJobs, $jobsnotinterested)) as $jobset) {
+                $data = array('key' => null, 'listtype' => JOBLIST_TYPE_MARKED, 'jobs_count' => countJobRecords($jobset[1]), 'jobslist' => $jobset[1], 'search' => null);
+                writeJSON($data, $jobset[0].".json");
+                $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/jobsjson_to_csv.py");
+                $cmd = "python " . $PYTHONPATH . " -i " . escapeshellarg($jobset[0].".json") . " -o " . escapeshellarg($jobset[0].".csv");
+                $this->logger->logLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd . "  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+                doExec($cmd);
+            }
+
+//            $this->logger->logLine("Merging excluded job site results into single file: " . $this->pathAllExcludedJobs, \Scooper\C__DISPLAY_NORMAL__);
+//            $data = array('key' => null, 'listtype' => JOBLIST_TYPE_MARKED, 'jobs_count' => countJobRecords($jobsnotinterested ), 'jobslist' => $jobsnotinterested , 'search' => null);
+//            writeJSON($data, $this->pathAllExcludedJobs);
+//
+//            $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/jobsjson_to_csv.py");
+//            $csvPath = join(DIRECTORY_SEPARATOR, array(dirname($this->pathAllMatchedJobs), (basename($this->pathAllMatchedJobs) . ".csv")))
+//            $cmd = "python " . $PYTHONPATH . " --infile " . escapeshellarg($this->pathAllMatchedJobs) . " --outfile " . escapeshellarg($csvPath) ." --column job_title --index key_jobsite_siteid";
+//            $this->logger->logLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd ."  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+//            doExec($cmd);
+//
+//
+            $this->logger->logLine("End of stage 3.", \Scooper\C__DISPLAY_NORMAL__);
+
+
         } catch (Exception $ex) {
             handleException($ex, null, true);
         }
@@ -452,20 +342,17 @@ class StageManager extends S3JobListManager
     {
         try {
 
-            $this->migrateAndLoadS3JobListsIntoStage(4);
             $this->logger->logLine("Stage 4: Notifying User", \Scooper\C__DISPLAY_SECTION_START__);
 
-            if ((countJobRecords($this->arrMarkedJobs) + countJobRecords($this->arrLatestJobs_UnfilteredByUserInput)) == 0) {
-                $this->logger->logLine("No jobs were loaded for notification. Skipping Stage 4.", \Scooper\C__DISPLAY_WARNING__);
-                return;
-            }
+//            if ((countJobRecords($arrMatchedJobs)) == 0) {
+//                $this->logger->logLine("No jobs were loaded for notification. Skipping Stage 4.", \Scooper\C__DISPLAY_WARNING__);
+//                return;
+//            }
 
-            $notifier = new ClassJobsNotifier($this->arrLatestJobs_UnfilteredByUserInput, $this->arrMarkedJobs);
+            $notifier = new ClassJobsNotifier($this->pathAllMatchedJobs, $this->pathAllExcludedJobs, $GLOBALS['USERDATA']['directories']['results']);
             $notifier->processNotifications();
         } catch (Exception $ex) {
             handleException($ex, null, true);
         }
     }
-
-
 }

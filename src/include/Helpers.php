@@ -144,7 +144,7 @@ function exportToDebugJSON($obj, $strBaseFileName)
     unset($key);
 
     $jsonSelf = json_encode($saveArr, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
-    $debugJSONFile = $GLOBALS['USERDATA']['directories']['stage1'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_" . $strBaseFileName, $strExt = "", $delim = "-") . ".json";
+    $debugJSONFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_" . $strBaseFileName, $strExt = "", $delim = "-") . ".json";
     file_put_contents($debugJSONFile, $jsonSelf);
 
     return $debugJSONFile;
@@ -232,14 +232,22 @@ function sortByCountDesc($a, $b)
     return ($al < $bl) ? +1 : -1;
 }
 
-/**
- * TODO:  DOC
- *
- *
- * @param  string TODO DOC
- * @param  string TODO DOC
- * @return string TODO DOC
- */
+function sortByErrorThenCount($a, $b)
+{
+    $rank = array($a['name'] => 0, $b['name'] => 0);
+
+    if ($a['had_error'] > $b['had_error']) {
+        return 1;
+    } elseif ($a['had_error'] < $b['had_error']) {
+        return -1;
+    }
+
+    if ($a["total_listings"] == $b["total_listings"]) {
+        return 0;
+    }
+
+    return ($a["total_listings"] < $b["total_listings"]) ? +1 : -1;
+}
 
 function getArrayKeyValueForJob($job)
 {
@@ -534,7 +542,7 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 {
     $GLOBALS['logger']->logLine("Tokenizing title exclusion matches from " . $inputfile . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
     if (!$outputFile)
-        $outputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tempCallTokenizer.csv";
+        $outputFile = $GLOBALS['USERDATA']['directories']['debug'] . "/tempCallTokenizer.csv";
     $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/");
     $cmd = "python " . $PYTHONPATH . "/normalizeStrings.py -i " . $inputfile . " -o " . $outputFile . " -k " . $keyname;
     if ($indexKeyName != null)
@@ -572,8 +580,8 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 
 function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "keywords", $indexKeyName = null)
 {
-    $inputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-" . $tempFileKey . "-token-input.csv";
-    $outputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-" . $tempFileKey . "-token-output.csv";
+    $inputFile = $GLOBALS['USERDATA']['directories']['debug'] . "/tmp-" . $tempFileKey . "-token-input.csv";
+    $outputFile = $GLOBALS['USERDATA']['directories']['debug'] . "/tmp-" . $tempFileKey . "-token-output.csv";
 
     $headers = array($dataKeyName);
     if (array_key_exists($dataKeyName, $arrData)) $headers = array_keys($arrData);
@@ -613,8 +621,8 @@ function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "ke
 
 function tokenizeMultiDimensionArray($arrData, $tempFileKey, $dataKeyName, $indexKeyName = null)
 {
-    $inputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-" . $tempFileKey . "-token-input.csv";
-    $outputFile = $GLOBALS['USERDATA']['directories']['stage2'] . "/tmp-" . $tempFileKey . "-token-output.csv";
+    $inputFile = $GLOBALS['USERDATA']['directories']['debug'] . "/tmp-" . $tempFileKey . "-token-input.csv";
+    $outputFile = $GLOBALS['USERDATA']['directories']['debug'] . "/tmp-" . $tempFileKey . "-token-output.csv";
 
     if (is_file($inputFile)) {
         unlink($inputFile);
@@ -780,14 +788,6 @@ function isValueURLEncoded($str)
 }
 
 
-const STAGE1_PATHKEY = "stage1-rawlistings/";
-const STAGE2_PATHKEY = "stage2-rawlistings/";
-const STAGE3_PATHKEY = "stage3-automarkedlistings/";
-const STAGE4_PATHKEY = "stage4-notifyuser/";
-const STAGE_FLAG_STAGEONLY = 0x0;
-const STAGE_FLAG_INCLUDEUSER = 0x1;
-const STAGE_FLAG_INCLUDEDATE = 0x2;
-
 function addDelimIfNeeded($currString, $delim, $strToAdd)
 {
     $result = $currString;
@@ -798,56 +798,27 @@ function addDelimIfNeeded($currString, $delim, $strToAdd)
     return $result;
 }
 
-function getStageKeyPrefix($stageNumber, $fileFlags = STAGE_FLAG_STAGEONLY, $delim = "")
-{
-    $prefix = "";
-
-    if (($fileFlags & STAGE_FLAG_INCLUDEUSER) == true)
-        $prefix = addDelimIfNeeded($prefix, $delim, $GLOBALS['USERDATA']['user_unique_key']);
-
-    if (($fileFlags & STAGE_FLAG_INCLUDEDATE) == true)
-        $prefix = addDelimIfNeeded($prefix, $delim, \Scooper\getTodayAsString(""));
-
-    $rootPrefix = $GLOBALS['USERDATA']['user_unique_key'] . "/";
-    switch ($stageNumber) {
-        case 1:
-            $prefix = STAGE1_PATHKEY . $prefix;
-            break;
-        case 2:
-            $prefix = STAGE2_PATHKEY . $prefix;
-            break;
-        case 3:
-            $prefix = STAGE3_PATHKEY . $prefix;
-            break;
-        case 4:
-            $prefix = STAGE4_PATHKEY . $prefix;
-            break;
-        default:
-            throw new IndexOutOfBoundsException("Error: invalid stage number passed '" . $stageNumber . "'");
-            break;
-    }
-
-    return ($rootPrefix . $prefix);
-}
-
-function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stageNumber = null, $searchDetails = null)
+function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $dirKey = null, $searchDetails = null)
 {
     if (is_null($dataJobs))
         $dataJobs = array();
 
-    if (is_null($stageNumber))
-        $stageNumber = 1;
+    $fileKey = str_replace(" ", "", $fileKey);
 
-        $stageName = "stage" . $stageNumber;
-        $fileKey = str_replace(" ", "", $fileKey);
-        $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], strtolower($fileKey)));
-        if (stripos($fileKey, ".json") === false)
-            $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
+    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$dirKey], strtolower($fileKey)));
 
-    $data = array('key' => $fileKey, 'stage' => $stageNumber, 'listtype' => $listType, 'jobs_count' => countJobRecords($dataJobs), 'jobslist' => $dataJobs, 'search' => $searchDetails);
+    if (stripos($fileKey, ".json") === false)
+        $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
 
-    $jobsJson = json_encode($data, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
-    if ($jobsJson === false) {
+
+    $data = array('key' => $fileKey, 'listtype' => $listType, 'jobs_count' => countJobRecords($dataJobs), 'jobslist' => $dataJobs, 'search' => $searchDetails);
+    return writeJSON($data, $resultsFile);
+}
+
+function writeJSON($data, $filepath)
+{
+    $jsonData = json_encode($data, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+    if ($jsonData === false) {
         $err = json_last_error_msg();
         $errMsg = "Error:  Unable to convert jobs list data to json due to error   " . $err;
         $GLOBALS['logger']->logLine($errMsg, \Scooper\C__DISPLAY_ERROR__);
@@ -855,21 +826,21 @@ function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $stage
 
     }
 
-    $GLOBALS['logger']->logLine("Writing final job data pull results to json file " . $resultsFile);
-    if (file_put_contents($resultsFile, $jobsJson, FILE_TEXT) === false) {
+    $GLOBALS['logger']->logLine("Writing final job data pull results to json file " . $filepath);
+    if (file_put_contents($filepath, $jsonData, FILE_TEXT) === false) {
         $err = error_get_last();
-        $errMsg = "Error:  Unable to save JSON results to file " . $resultsFile . " due to error   " . $err;
+        $errMsg = "Error:  Unable to save JSON results to file " . $filepath . " due to error   " . $err;
         $GLOBALS['logger']->logLine($errMsg, \Scooper\C__DISPLAY_ERROR__);
         throw new Exception($errMsg);
 
     }
 
-    return $resultsFile;
+    return $filepath;
 }
 
 function loadJSON($file)
 {
-    $GLOBALS['logger']->logLine("Reading json data from file " . $file);
+    $GLOBALS['logger']->logLine("Reading json data from file " . $file, \Scooper\C__DISPLAY_ITEM_DETAIL__);
     $jsonText = file_get_contents($file, FILE_TEXT);
 
     $data = json_decode($jsonText, $assoc = true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
@@ -878,29 +849,37 @@ function loadJSON($file)
 
 }
 
-function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber, $returnFailedSearches = true)
+function readJobsListDataFromLocalJsonFile($fileKey, $returnFailedSearches = true, $dirKey = null)
 {
-    if (is_null($stageNumber))
-        $stageNumber = 1;
 
+    assert(!is_null($dirKey));
 
-    $stageName = "stage" . $stageNumber;
     $fileKey = str_replace(" ", "", $fileKey);
-    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$stageName], strtolower($fileKey)));
+    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$dirKey], strtolower($fileKey)));
     if (stripos($fileKey, ".json") === false)
         $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
 
-    if (is_file($resultsFile)) {
-        $GLOBALS['logger']->logLine("Reading json data from file " . $resultsFile);
-        $jsonText = file_get_contents($resultsFile, FILE_TEXT);
+    return readJobsListDataFromLocalFile($resultsFile, $returnFailedSearches);
+}
 
-        $data = json_decode($jsonText, $assoc = true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+function readJobsListDataFromLocalFile($filepath, $returnFailedSearches = true)
+{
 
-        if ($returnFailedSearches === false) {
-            if ($data['search']['search_run_result']['success'] !== true) {
-                $GLOBALS['logger']->logLine("Ignoring incomplete search results found in file with key " . $fileKey);
-                $data = null;
-            }
+    if (stripos($filepath, ".json") === false)
+        $filepath = $filepath . "-" . strtolower(getTodayAsString("")) . ".json";
+
+        if (is_file($filepath)) {
+            $GLOBALS['logger']->logLine("Reading json data from file " . $filepath, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            $data = loadJSON($filepath);
+//            $jsonText = file_get_contents($filepath, FILE_TEXT);
+//
+//            $data = json_decode($jsonText, $assoc = true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+
+            if ($returnFailedSearches === false) {
+                if ($data['search']['search_run_result']['success'] !== true) {
+                    $GLOBALS['logger']->logLine("Ignoring incomplete search results found in file with key " . $filepath);
+                    $data = null;
+                }
         }
 
 
@@ -910,14 +889,14 @@ function readJobsListDataFromLocalJsonFile($fileKey, $stageNumber, $returnFailed
     return array();
 }
 
-function readJobsListFromLocalJsonFile($fileKey, $stageNumber = 1, $returnFailedSearches = true)
+function readJobsListFromLocalJsonFile($fileKey, $returnFailedSearches = true, $dirKey = null)
 {
     $retJobs = null;
-    $data = readJobsListDataFromLocalJsonFile($fileKey, $stageNumber, $returnFailedSearches);
+    $data = readJobsListDataFromLocalJsonFile($fileKey, $returnFailedSearches, $dirKey);
 
     if (!is_null($data) && is_array($data)) {
         if (array_key_exists("jobslist", $data)) {
-            $retJobs = array_filter($data['jobslist'], "isIncludedJobSite");
+            $retJobs = array_filter($data['jobslist'], "isNotExcludedJobSite");
         }
 
         return $retJobs;
@@ -926,6 +905,44 @@ function readJobsListFromLocalJsonFile($fileKey, $stageNumber = 1, $returnFailed
     return null;
 }
 
+use LightnCandy\LightnCandy;
+
+function loadTemplate($path)
+{
+    $template  = file_get_contents($path);
+
+
+    $partialDir = dirname($path) . "/partials";
+
+    $phpStr = LightnCandy::compile($template, Array(
+        'flags' => LightnCandy::FLAG_RENDER_DEBUG | LightnCandy::FLAG_ERROR_LOG| LightnCandy::FLAG_ERROR_EXCEPTION| LightnCandy::FLAG_HANDLEBARSJS_FULL,
+        'partialresolver' => function ($cx, $name) use($partialDir) {
+            $partialpath = "$partialDir/$name.tmpl";
+            if (file_exists($partialpath)) {
+                return file_get_contents($partialpath);
+            }
+            return "[partial (file:$partialpath) not found]";
+        }
+
+    ));  // set compiled PHP code into $phpStr
+
+    // Save the compiled PHP code into a php file
+    $renderFile = basename($path) .'-render.php';
+
+    file_put_contents($renderFile, '<?php ' . $phpStr . '?>');
+
+    // Get the render function from the php file
+//    $renderer = include($renderFile);
+// Get the render function
+    $renderer = LightnCandy::prepare($phpStr);
+    if($renderer == false)
+    {
+        throw new Exception("Error: unable to compile template '$path'");
+    }
+
+
+    return $renderer;
+}
 
 function getPhpMemoryUsage()
 {
@@ -968,6 +985,28 @@ function getFailedSearchesByPlugin()
         }
     }
     unset($search);
+
+    return $arrFailedPluginsReport;
+}
+function getFailedSearches()
+{
+    if (!array_key_exists('search_results', $GLOBALS['USERDATA']) || is_null($GLOBALS['USERDATA']['search_results']))
+        return null;
+
+    $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function ($k) {
+        return ($k['search_run_result']['success'] !== true);
+    });
+
+    if (is_null($arrFailedSearches) || !is_array($arrFailedSearches))
+        return null;
+
+    $arrFailedPluginsReport = array();
+    foreach ($arrFailedSearches as $search) {
+        if (!is_null($search['search_run_result']['success'])) {
+
+            $arrFailedPluginsReport[$search['key']] = $search;
+        }
+    }
 
     return $arrFailedPluginsReport;
 }

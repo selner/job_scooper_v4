@@ -17,7 +17,7 @@
 //
 // If installed as part of the package, uses Klogger v0.1 version (http://codefury.net/projects/klogger/)
 //
-define('__APP_VERSION__', "Job Scooper v4");
+define('__APP_VERSION__', "Job Scooper v4.alpha1");
 
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/lib/pharse.php');
@@ -90,18 +90,6 @@ function __initializeArgs__()
             'required'      => false,
             'short'      => 'notify',
         ),
-        's3bucket' => array(
-            'description'   => 'Name of the S3 bucket to publish to',
-            'default'       => "",
-            'type'          => Pharse::PHARSE_STRING,
-            'required'      => false
-        ),
-        's3region' => array(
-            'description'   => 'Name of the AWS region to use for the S3 bucket',
-            'default'       => "",
-            'type'          => Pharse::PHARSE_STRING,
-            'required'      => false
-        ),
         'stages' => array(
             'description'   => 'Comma-separated list of stage numbers to execute.  All stages are run if not present.',
             'default'       => "1,2,3,4",
@@ -141,7 +129,7 @@ function addUserOptionForSitePlugins()
     }
 }
 
-function is_IncludeSite($strName)
+function is_OptionIncludedSite($strName)
 {
     $strIncludeSiteKey = "include_" . strtolower($strName);
     $strGivenKey = $strIncludeSiteKey."_given";
@@ -170,7 +158,7 @@ function is_IncludeSite($strName)
             $GLOBALS['OPTS'][$strIncludeSiteKey] = true;
             $ret = $GLOBALS['OPTS'][$strIncludeSiteKey];
         }
-
+    
 
 
     return $ret;

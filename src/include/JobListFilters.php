@@ -149,3 +149,8 @@ function isIncludedJobSite($var)
 {
     return (in_array(strtolower($var['job_site']), $GLOBALS['USERDATA']['configuration_settings']['included_sites']) === true);
 }
+
+function isNotExcludedJobSite($var)
+{
+    return (!in_array(strtolower($var['job_site']), $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']) === true);
+}

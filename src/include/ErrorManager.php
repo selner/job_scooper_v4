@@ -24,9 +24,6 @@ require_once(__ROOT__ . '/include/ClassJobsNotifier.php');
 // Use composer autoloader
 require_once(__ROOT__ . '/vendor/autoload.php');
 
-use LightnCandy\LightnCandy;
-
-
 class ErrorManager {
 
     function __construct()
@@ -57,7 +54,7 @@ class ErrorManager {
 
             $htmlBody = "<HTML><BODY>" . $htmlBody . "</BODY></HTML>";
 
-            $notifier = new ClassJobsNotifier(null, null);
+            $notifier = new ClassJobsNotifier(null, null, null);
 
             return $notifier->sendEmail($txtBody, $htmlBody, $attachments, $subject, "error");
         }
@@ -66,37 +63,30 @@ class ErrorManager {
 
     }
 
-    private function _getFailedSearchesNotification_Content()
+
+    function getFailedSearchesNotificationBody()
     {
         $strErrorText = null;
         $attachments = array();
-        $arrFailedPluginsReport = getFailedSearchesByPlugin();
+        $arrFailedPluginsReport = getFailedSearches();
 
-        if(countAssociativeArrayValues($arrFailedPluginsReport) > 0)
-        {
-            $jsonFailedSearches = json_encode($arrFailedPluginsReport, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
-
-            $strErrorText = "The following site plugins returned an error or had zero listings found unexpectedly:  " . PHP_EOL . $jsonFailedSearches . PHP_EOL . PHP_EOL . "App version = " . __APP_VERSION__;
-            if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Errors detected for the run searches.  attempting to send error notification email:  " . PHP_EOL . $strErrorText, \Scooper\C__DISPLAY_NORMAL__); }
-        }
-        else
+        if(countAssociativeArrayValues($arrFailedPluginsReport) == 0)
         {
             if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("No error notification necessary:  no errors detected for the run searches.", \Scooper\C__DISPLAY_NORMAL__); }
+            return array('body' => null, 'attachments' => null);
         }
 
-        if(!is_null($arrFailedPluginsReport) && is_array($arrFailedPluginsReport)) {
-            foreach (array_keys($arrFailedPluginsReport) as $plugin) {
-                foreach (array_keys($arrFailedPluginsReport[$plugin]) as $reportKey) {
+//        $renderer = loadTemplate(dirname(__FILE__).'/templates/mc_html_email_base_boxed_basic_query.mustache');
+        $renderer = loadTemplate(dirname(__FILE__).'/templates/html_email_body_include_pluginerrors.tmpl');
 
-                    if (array_key_exists("search_run_result", $arrFailedPluginsReport[$plugin][$reportKey]) && array_key_exists("error_files", $arrFailedPluginsReport[$plugin][$reportKey]['search_run_result'])) {
-                        foreach ($arrFailedPluginsReport[$plugin][$reportKey]['search_run_result']['error_files'] as $file) {
-                            $attachments[$file] = \Scooper\getFilePathDetailsFromString($file);
-                        }
-                    }
-                }
-            }
-        }
-        return array('body' => $strErrorText, 'attachments' => $attachments);
+        $data = Array(
+            "subject" => "SUBJECT", 
+            "server" => gethostname(),
+            "app_version" => __APP_VERSION__,
+            "plugins_with_errors" =>array_values($arrFailedPluginsReport));
+        $htmlContent = $renderer($data);
+
+        return array('body' => $htmlContent, 'attachments' => $attachments);
 
     }
 
@@ -140,7 +130,7 @@ class ErrorManager {
 
     function _appendSearchErrorsContent_(&$htmlBody, &$txtBody, &$attachments)
     {
-        $failedReports = $this->_getFailedSearchesNotification_Content();
+        $failedReports = $this->getFailedSearchesNotificationBody();
         $strBodyText = $failedReports['body'];
         if(strlen($strBodyText) == 0)
             return null;

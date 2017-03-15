@@ -108,7 +108,7 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
         {
             if($searchDetails['location_search_value'] == VALUE_NOT_SUPPORTED)
             {
-                $msg = "Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() ." set.  Skipping search '". $searchDetails['name'] .".";
+                $msg = "Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() ." set.  Skipping search '". $searchDetails['key'] .".";
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
                 throw new IndexOutOfBoundsException($msg);
             }
@@ -119,7 +119,7 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
         }
 
         if($strURL == null) {
-            throw new ErrorException("Location value is required for " . $this->siteName . ", but was not set for the search '" . $searchDetails['name'] ."'.". " Aborting all searches for ". $this->siteName, \Scooper\C__DISPLAY_ERROR__);
+            throw new ErrorException("Location value is required for " . $this->siteName . ", but was not set for the search '" . $searchDetails['key'] ."'.". " Aborting all searches for ". $this->siteName, \Scooper\C__DISPLAY_ERROR__);
         }
 
         return $strURL;

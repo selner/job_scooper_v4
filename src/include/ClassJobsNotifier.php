@@ -17,27 +17,28 @@
 
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/SitePlugins.php');
-require_once(__ROOT__.'/include/S3Manager.php');
 require_once(__ROOT__.'/include/JobListFilters.php');
-
-const C__RESULTS_INDEX_ALL = '***TOTAL_ALL***';
-const C__RESULTS_INDEX_USER = '***TOTAL_USER***';
 
 class ClassJobsNotifier extends ClassJobsSiteCommon
 {
     protected $siteName = "ClassJobsNotifier";
-    protected $arrUserInputJobs = null;
-    protected $arrUserInputJobs_Active = null;
-    protected $arrUserInputJobs_Inactive = null;
-    protected $arrLatestJobs_UnfilteredByUserInput = array();
-    protected $arrLatestJobs = array();
+    protected $arrMatchedJobs = array();
+    protected $arrExcludedJobs = array();
+    protected $pathsMatchedJobs = array();
 
-    function __construct($arrJobs_Unfiltered, $arrJobs_AutoMarked)
+    protected $pathsAllExcludedJobs = array();
+
+    function __construct($basepathMatchedJobs = null, $basepathExcludedJobs = null, $strOutputDirectory = null)
     {
-        if(!is_null($arrJobs_Unfiltered))
-            $this->arrLatestJobs_UnfilteredByUserInput = \Scooper\array_copy($arrJobs_Unfiltered);
-        if(!is_null($arrJobs_AutoMarked))
-            $this->arrLatestJobs = \Scooper\array_copy($arrJobs_AutoMarked);
+        parent::__construct($strOutputDirectory);
+        if(!is_null($basepathMatchedJobs)) {
+            $this->pathsMatchedJobs['json'] = $basepathMatchedJobs .".json";
+            $this->pathsMatchedJobs['csv'] = $basepathMatchedJobs .".csv";
+        }
+        if(!is_null($basepathMatchedJobs)) {
+            $this->pathsAllExcludedJobs['json'] = $basepathExcludedJobs . ".json";
+            $this->pathsAllExcludedJobs['csv'] = $basepathExcludedJobs . ".csv";
+        }
     }
 
     function __destruct()
@@ -168,8 +169,13 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         // Create a copy of the jobs list that is sorted by that value.
         //
         $arrFinalJobs_SortedByCompanyRole = array();
-        if (countJobRecords($this->arrLatestJobs) > 0) {
-            foreach ($this->arrLatestJobs as $job) {
+        $arrMatchedJobs = null;
+        $arrMatchedJobData = loadJSON($this->pathsMatchedJobs['json']);
+        if(!is_null($arrMatchedJobData) && array_key_exists('jobslist', $arrMatchedJobData))
+            $arrMatchedJobs = $arrMatchedJobData['jobslist'];
+
+        if (countJobRecords($arrMatchedJobs) > 0) {
+            foreach ($arrMatchedJobs as $job) {
                 // Need to add uniq key of job site id to the end or it will collapse duplicate job titles that
                 // are actually multiple open posts
                 $arrFinalJobs_SortedByCompanyRole [$job['key_company_role'] . "-" . $job['key_jobsite_siteid']] = $job;
@@ -178,26 +184,34 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         ksort($arrFinalJobs_SortedByCompanyRole);
         $GLOBALS['logger']->logLine(PHP_EOL . "Writing final list of " . count($arrFinalJobs_SortedByCompanyRole) . " jobs to output files." . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
 
-        $detailsMainResultsCSVFile = \Scooper\getFilePathDetailsFromString(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['stage4'], getDefaultJobsOutputFileName("results", "", "csv"))), \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-        $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", $detailsMainResultsCSVFile);
+//        $detailsMainResultsCSVFile = \Scooper\getFilePathDetailsFromString(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], getDefaultJobsOutputFileName("results", "", "csv"))), \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+//        $this->_filterAndWriteListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", $detailsMainResultsCSVFile);
+//        $this->writeRunsJobsToFile($detailsMainResultsCSVFile['full_file_path'], $arrFinalJobs_SortedByCompanyRole, "all matches - isMarked_InterestedOrBlank");
 
         // Output only new records that haven't been looked at yet
 //        $allupdatedjobsfile = $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isJobUpdatedToday", "-allchangedjobs", "CSV");
 
-        $detailsMainResultsXLSFile = \Scooper\array_copy($detailsMainResultsCSVFile);
-        $detailsMainResultsXLSFile['file_extension'] = "xls";
-        $detailsMainResultsXLSFile = \Scooper\parseFilePath(\Scooper\getFullPathFromFileDetails($detailsMainResultsXLSFile));
+        $detailsMainResultsXLSFile = \Scooper\getFilePathDetailsFromString(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], getDefaultJobsOutputFileName("results", "", "xls"))), \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
 
         // Output all records that were automatically excluded
-        $fileExcludedJobs = $this->_filterAndWriteListToAlternateFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", "ExcludedJobs", "CSV", "excluded jobs", true);
+//        $fileExcludedJobs = $this->_filterAndWriteListToAlternateFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_NotInterested", "ExcludedJobs", "CSV", "excluded jobs", true);
 //        $this->_filterAndWriteListToAlternateFile_($arrFinalJobs_SortedByCompanyRole, "isMarkedBlank", "NotMarkedJobs", "CSV", "NotMarkedJobs", true);
+//        $detailsExcludedJobs = $this->__getAlternateOutputFileDetails__("", "ExcludedJobs", "CSV");
+//        $this->writeRunsJobsToFile($detailsExcludedJobs['full_file_path'], $this->arrExcludedJobs, "all matches - isMarked_InterestedOrBlank");
 
         // Output only new records that haven't been looked at yet
 //        $this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "-AllUnmarkedJobs", "CSV");
         $detailsHTMLFile = \Scooper\parseFilePath($this->_outputFilteredJobsListToFile_($arrFinalJobs_SortedByCompanyRole, "isMarked_InterestedOrBlank", "-AllUnmarkedJobs", "HTML"));
 
-        $arrResultFilesToCombine = array($detailsMainResultsCSVFile, \Scooper\parseFilePath($fileExcludedJobs));
-        $arrFilesToAttach = array($detailsMainResultsXLSFile, $detailsHTMLFile, $detailsMainResultsCSVFile);
+//        $arrResultFilesToCombine = array($detailsMainResultsCSVFile, \Scooper\parseFilePath($fileExcludedJobs));
+        $arrResultFilesToCombine = array(\Scooper\parseFilePath($this->pathsMatchedJobs['csv']));
+        $arrFilesToAttach = array($detailsMainResultsXLSFile, $detailsHTMLFile);
+
+        if(filesize($this->pathsAllExcludedJobs['csv']) < 10*1024*1024)
+        {
+            $arrFilesToAttach[] = \Scooper\parseFilePath($this->pathsAllExcludedJobs['csv']);
+        }
+
 
         //
         // In a debug run, include the full details of the keywords we used for auto-matching
@@ -235,14 +249,18 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
 
         $GLOBALS['logger']->logSectionHeader("Generating text email content for user" . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
+        $arrExcludedJobs = null;
+        $arrExcludedJobData = loadJSON($this->pathsAllExcludedJobs['json']);
+        if(!is_null($arrExcludedJobData) && array_key_exists('jobslist', $arrExcludedJobData))
+            $arrExcludedJobs = $arrExcludedJobData['jobslist'];
 
-        $strResultCountsText = $this->getListingCountsByPlugin("text", $arrFinalJobs_SortedByCompanyRole);
+        $strResultCountsText = $this->getListingCountsByPlugin("text", $arrFinalJobs_SortedByCompanyRole, $arrExcludedJobs);
         $strResultText = "Job Scooper Results for ". getRunDateRange() . PHP_EOL . $strResultCountsText . PHP_EOL;
 
         $GLOBALS['logger']->logSectionHeader("Generating text html content for user" . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
 
 
-        $messageHtml = $this->getListingCountsByPlugin("html", $arrFinalJobs_SortedByCompanyRole, $detailsHTMLFile);
+        $messageHtml = $this->getListingCountsByPlugin("html", $arrFinalJobs_SortedByCompanyRole, $arrExcludedJobs, $detailsHTMLFile);
 
         $this->_wrapCSSStyleOnHTML_($messageHtml);
         $subject = "New Job Postings: " . getRunDateRange();
@@ -296,7 +314,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
     private function __getAlternateOutputFileDetails__($strNamePrepend = "results", $strNameAppend = "", $ext = "")
     {
         $fileName = getDefaultJobsOutputFileName($strNamePrepend, $strNameAppend, $ext, "");
-        $detailsRet = \Scooper\parseFilePath(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['stage4'], $fileName)), false);
+        $detailsRet = \Scooper\parseFilePath(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], $fileName)), false);
         return $detailsRet;
     }
 
@@ -473,6 +491,9 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
                 'allow_self_signed' => true
             )
         );
+        $GLOBALS['logger']->logLine("Email to:\t" . $strToAddys , \Scooper\C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine("Email from:\t" . $emailAddrs['from']['address'], \Scooper\C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine("Email bcc:\t" . $strBCCAddys, \Scooper\C__DISPLAY_NORMAL__);
 
 
         $mail->WordWrap = 120;                                          // Set word wrap to 120 characters
@@ -559,7 +580,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
     }
 
 
-    private function getListingCountsByPlugin($fLayoutType, $arrPluginJobsUnfiltered = null, $detailsHTMLBodyInclude = null)
+    private function getListingCountsByPlugin($fLayoutType, $arrPluginJobsUnfiltered = null, $arrExcludedJobs = null, $detailsHTMLBodyInclude = null)
     {
 
         $arrCounts = null;
@@ -570,18 +591,28 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
         $arrFailedPluginsReport = getFailedSearchesByPlugin();
 
-        foreach($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $plugin) {
-            if ($arrPluginJobsUnfiltered == null || !is_array($arrPluginJobsUnfiltered) || countJobRecords($arrPluginJobsUnfiltered) == 0) {
-                $arrPluginJobs = array();
-            } else {
-                $arrPluginJobs = array_filter($arrPluginJobsUnfiltered, function ($var) use ($plugin) { return (strcasecmp($var['job_site'], $plugin) == 0); } );
+        $arrSitesToReport = array_unique(array_column($arrPluginJobsUnfiltered, "job_site")) + array_unique(array_column($arrExcludedJobs, "job_site"));
+
+        foreach($arrSitesToReport as $plugin) {
+
+            $arrPluginJobMatches  = array();
+            if ($arrPluginJobsUnfiltered != null && is_array($arrPluginJobsUnfiltered) && countJobRecords($arrPluginJobsUnfiltered) > 0) {
+                $arrPluginJobMatches = array_filter($arrPluginJobsUnfiltered, function ($var) use ($plugin) { return (strcasecmp($var['job_site'], $plugin) == 0); } );
             }
+
+            $arrPluginExcludesJobs  = array();
+            if ($arrPluginJobsUnfiltered != null && is_array($arrPluginJobsUnfiltered) && countJobRecords($arrPluginJobsUnfiltered) > 0) {
+                $arrPluginExcludesJobs = array_filter($arrExcludedJobs, function ($var) use ($plugin) { return (strcasecmp($var['job_site'], $plugin) == 0); } );
+            }
+
+            $arrPluginJobs = $arrPluginJobMatches + $arrPluginExcludesJobs;
 
             $arrCounts[$plugin]['name'] = $plugin;
             $arrCounts[$plugin]['for_review'] = count(array_filter($arrPluginJobs, "isMarkedBlank"));
             $arrCounts[$plugin]['total_not_interested'] = count(array_filter($arrPluginJobs, "isMarked_NotInterested"));
             $arrCounts[$plugin]['total_active'] = count(array_filter($arrPluginJobs, "isMarked_InterestedOrBlank"));
             $arrCounts[$plugin]['total_listings'] = count($arrPluginJobs);
+            $arrCounts[$plugin]['had_error'] = false;
 
             //
             // if the plugin also errored, then add an asterisk to the name
@@ -590,8 +621,11 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             if(!is_null($arrFailedPluginsReport) && in_array($plugin, array_keys($arrFailedPluginsReport)) === true)
             {
                 $arrCounts[$plugin]['name'] = "**" . $plugin;
+                $arrCounts[$plugin]['had_error'] = true;
             }
         }
+
+        usort($arrCounts, "sortByErrorThenCount");
 
 
         switch ($fLayoutType)
@@ -617,20 +651,17 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         $strOut = "";
         $fFirstCol = true;
 
-        // Fixup the names for our special case values
-        switch($arrRow['name'])
+        $style = 'class="job_scooper"';
+
+        if ($arrRow['had_error'] == true)
         {
-            case C__RESULTS_INDEX_ALL:
-                $arrRow['name'] = "Total";
-                break;
-            case C__RESULTS_INDEX_USER:
-                $arrRow['name'] = "User Input";
-                break;
+            $style = ' class="job_scooper jobsite_error" style="color=Grey;"';
+            unset($arrRow['had_error']);
         }
 
         if($strType == "HTML")
         {
-            $strOut .=  PHP_EOL . "<tr class='job_scooper'>". PHP_EOL;
+            $strOut .=  PHP_EOL . "<tr " . $style .">". PHP_EOL;
         }
 
         foreach($arrRow as $value)
@@ -640,11 +671,11 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
                 case "HTML":
                     if($fFirstCol == true)
                     {
-                        $strOut .= "<td class='job_scooper' width='20%' align='left'>" . $value . "</td>" . PHP_EOL;
+                        $strOut .= "<td width='20%' align='left'><span " . $style . " >" . $value . "</span></td>" . PHP_EOL;
                         $fFirstCol = false;
                     }
                     else
-                        $strOut .= "<td class='job_scooper' width='10%' align='center'>" . $value . "</td>" . PHP_EOL;
+                        $strOut .= "<td width='10%' align='center'><span " . $style . " >" . $value . "</span></td>" . PHP_EOL;
                     break;
 
                 case "TEXT":
@@ -677,18 +708,9 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             }
             $strOut .=  PHP_EOL . sprintf("%'-100s","") . PHP_EOL;
 
-            usort($arrCounts, "sortByCountDesc");
             foreach($arrCounts as $site)
             {
-                if($site['name'] == C__RESULTS_INDEX_ALL) {
-                    $arrCounts_TotalAll = $site;
-                } elseif($site['name'] == C__RESULTS_INDEX_USER) {
-                    $arrCounts_TotalUser = $site;
-                }
-                else
-                {
-                    $strOut .= $this->_printResultsLine_($site, "TEXT");
-                }
+                $strOut .= $this->_printResultsLine_($site, "TEXT");
             }
 
 
@@ -745,18 +767,9 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             }
             $strOut .=  PHP_EOL . "</thead>". PHP_EOL;
 
-            usort($arrCounts, "sortByCountDesc");
             foreach($arrCounts as $site)
             {
-                if($site['name'] == C__RESULTS_INDEX_ALL) {
-                    $arrCounts_TotalAll = $site;
-                } elseif($site['name'] == C__RESULTS_INDEX_USER) {
-                    $arrCounts_TotalUser = $site;
-                }
-                else
-                {
-                    $strOut .= $this->_printResultsLine_($site, "HTML");
-                }
+                $strOut .= $this->_printResultsLine_($site, "HTML");
             }
 
             $strOut .=  PHP_EOL . "<tr class='job_scooper totaluser'>". PHP_EOL;
@@ -766,9 +779,12 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             $strOut .=  PHP_EOL . "</tr>". PHP_EOL;
 
             $strOut .=  PHP_EOL . "</table>". PHP_EOL. PHP_EOL;
-            $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
         }
 
+        $strOut .=  PHP_EOL . "<div class=\"job_scooper section\">". PHP_EOL;
+        $strOut .=  PHP_EOL .  "<p style=\"min-height: 15px;\">&nbsp;</p><span style=\"font-size: xx-small; color: SlateBlue;\">Generated by " . __APP_VERSION__. " (" . gethostname() . ") " . \Scooper\getTodayAsString() . ".</span>" . PHP_EOL;
+        $strOut .= "</div>";
+        $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
 
 
         if($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] != null && count($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']) > 0)
@@ -787,7 +803,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         //
         // Include the contents of the HTML file if passed
         //
-        if(!is_null($detailsHTMLBodyInclude)) {
+        if(!is_null($detailsHTMLBodyInclude) && array_key_exists('has_file', $detailsHTMLBodyInclude) && $detailsHTMLBodyInclude['has_file'] == true ) {
             $strOut .= PHP_EOL . "<div class=\"job_scooper section\">" . PHP_EOL;
             $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
             $strOut .= '<H2>New Job Matches</H2>' . PHP_EOL . PHP_EOL;
@@ -802,27 +818,30 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         {
             $strOut .=  PHP_EOL . "<div class=\"job_scooper section\">". PHP_EOL;
             sort($arrFailedPlugins);
-            $strOut .=  PHP_EOL . "<div class='job_scooper section' style=' color: DarkRed; '>". PHP_EOL;
-            $strOut .=  PHP_EOL .  "* The following job site plugins failed due to unexpected errors:" . PHP_EOL;
-            $strOut .=  PHP_EOL . "<ul class='job_scooper'>". PHP_EOL;
 
-            foreach($arrFailedPlugins as $site)
-            {
-                foreach($site as $search) {
-                    $strOut .= "<li>" . $search['site_name'] . ": <span style=\"color: Grey\">" . $search['search_run_result']['details'] . "</span></li>" . PHP_EOL;
-                }
-            }
+            $errMgr = new ErrorManager();
+            $errHTML = $errMgr->getFailedSearchesNotificationBody();
 
-            $strOut .=  PHP_EOL . "</ul>". PHP_EOL;
+            $strOut .=  PHP_EOL . "<!-- BEGIN ERROR MANAGER OUTPUT -->". PHP_EOL;
+            $strOut .= '<H2>Plugin Errors</H2>' . PHP_EOL . PHP_EOL;
+            $strOut .= $errHTML['body'];
+//            $strOut .=  PHP_EOL . "<ul class='job_scooper'>". PHP_EOL;
+//
+//            foreach($arrFailedPlugins as $site)
+//            {
+//                foreach($site as $search) {
+//                    $strOut .= "<li>" . $search['site_name'] . ": <span style=\"color: Grey\">" . $search['search_run_result']['details'] . "</span></li>" . PHP_EOL;
+//                }
+//            }
+//
+//            $strOut .=  PHP_EOL . "</ul>". PHP_EOL;
             $strOut .= "</div>";
+
+            $strOut .=  PHP_EOL . "<!-- END ERROR MANAGER OUTPUT -->". PHP_EOL;
             $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
         }
 
 
-        $strOut .=  PHP_EOL . "<div class=\"job_scooper section\">". PHP_EOL;
-        $strOut .=  PHP_EOL .  "<p style=\"min-height: 15px;\">&nbsp;</p><span style=\"font-size: xx-small; color: SlateBlue;\">Generated by " . __APP_VERSION__. " (" . gethostname() . ") " . \Scooper\getTodayAsString() . ".</span>" . PHP_EOL;
-        $strOut .= "</div>";
-        $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
 
         return $strOut;
     }

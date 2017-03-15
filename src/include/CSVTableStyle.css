@@ -21,6 +21,11 @@
     border-top-left-radius: 0px;
 }
 
+.jobsite_error {
+    color: #666666;
+    font-style: italic;
+}
+
 .CSVTable table {
     width: 100%;
     height: 100%;

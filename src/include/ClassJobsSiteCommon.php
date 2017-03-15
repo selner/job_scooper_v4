@@ -49,22 +49,8 @@ class ClassJobsSiteCommon
             $this->detailsMyFileOut = \Scooper\parseFilePath($strOutputDirectory, false);
         }
 
-//        if(is_array($this->_flags_))
-//        {
-//            $arrSettings = $this->_flags_;
-//            $this->_flags_ = null;
-//            foreach($arrSettings as $flag)
-//                $this->_flags_ = $this->_flags_ | $flag;
-//        }
     }
 
-
-    function isBitFlagSet($flagToCheck)
-    {
-        $ret = \Scooper\isBitFlagSet($this->_flags_, $flagToCheck);
-        if($ret == $flagToCheck) { return true; }
-        return false;
-    }
 
     function getLocationSettingType() { return $this->typeLocationSearchNeeded; }
 
@@ -74,7 +60,7 @@ class ClassJobsSiteCommon
     {
         return array(
             'key' => null,
-            'name' => null,
+            'is_cached' => false,
             'site_name' => null,
             'search_start_url' => null,
             'keywords_string_for_url' => null,
@@ -246,7 +232,7 @@ class ClassJobsSiteCommon
 
         // For reference, DEFAULT_SCRUB =  REMOVE_PUNCT | HTML_DECODE | LOWERCASE | REMOVE_EXTRA_WHITESPACE
         $arrItem['date_pulled'] = getTodayAsString();
-        $arrItem['site_name'] = $this->siteName;
+        $arrItem['job_site'] = $this->siteName;
 
         if(is_null($arrItem['job_site']) || strlen($arrItem['job_site']) <= 0)
             $arrItem ['job_site'] = \Scooper\strScrub($this->siteName, DEFAULT_SCRUB);

@@ -102,7 +102,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         foreach($GLOBALS['JOBSITE_PLUGINS']  as $site)
         {
             assert(isset($site['name']));
-            $GLOBALS['JOBSITE_PLUGINS'][$site['name']]['include_in_run'] = is_IncludeSite($site['name']);
+            $GLOBALS['JOBSITE_PLUGINS'][$site['name']]['include_in_run'] = is_OptionIncludedSite($site['name']);
         }
         $includedsites = array_filter($GLOBALS['JOBSITE_PLUGINS'], function($k) {
             return $k['include_in_run'];
@@ -145,11 +145,10 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         // Now setup all the output folders
         $this->__setupOutputFolders__($userOutfileDetails['directory']);
 
-        if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['stage1'] );
+        if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['debug'] );
 
         $strOutfileArrString = getArrayValuesAsString( $GLOBALS['USERDATA']['directories']);
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output folders configured: " . $strOutfileArrString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        $GLOBALS['USERDATA']['AWS'] = array("S3" => array("bucket" => \Scooper\get_PharseOptionValue("s3bucket"), "region" => \Scooper\get_PharseOptionValue("s3region") ));
 
         if($GLOBALS['OPTS']['use_config_ini_given'])
         {
@@ -206,11 +205,12 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             throw new ErrorException("Required value for the output folder was not specified. Exiting.");
         }
 
-        for($n=1; $n <= 4; $n++)
-        {
-            $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getStageKeyPrefix($n, STAGE_FLAG_STAGEONLY)));
+        $workingDirs = ["debug", "listings-raw", "results", "listings-userinterested", "listings-rawbysite", "listings-tokenized", "listings-usernotinterested"];
+        foreach($workingDirs as $d) {
+            $prefix = $GLOBALS['USERDATA']['user_unique_key'];
+            $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), $d, $prefix));
             $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-            $GLOBALS['USERDATA']['directories']["stage".$n] = realpath($details['directory']);
+            $GLOBALS['USERDATA']['directories'][$d] = realpath($details['directory']);
         }
 
     }
@@ -428,7 +428,6 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($iniSearch['jobsite'] . "search " .$iniSearch['name'] . " was not added; " . $strJobSiteKey . " is excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
             return null;
         }
-        $tempSearch['name'] = (isset($iniSearch['jobsite']) ? $iniSearch['jobsite'] . ': ' : "") . $iniSearch['name'];
         if(isset($iniSearch['url_format'])) $tempSearch['base_url_format']  = $iniSearch['url_format'];
         if(isset($iniSearch['location'])) $tempSearch['location_user_specified_override']  = $iniSearch['location'];
 
@@ -439,11 +438,6 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             {
                 $tempSearch['user_flag_settings'] = $flagType;
             }
-        }
-
-        if(!isset($tempSearch['key']) || strlen($tempSearch['key']) <= 0)
-        {
-            $tempSearch['key'] = \Scooper\strScrub($tempSearch['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($tempSearch['name'], FOR_LOOKUP_VALUE_MATCHING);
         }
 
         $strSearchAsString = getArrayValuesAsString($tempSearch);
@@ -486,7 +480,10 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                     {
                         $excludedSite = strtolower(trim($excludedSite));
                         $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$excludedSite] = $excludedSite;
-                        if(isset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite])) unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite]);
+                        if(array_key_exists($excludedSite, $GLOBALS['USERDATA']['configuration_settings']['included_sites'])) 
+                        {   
+                            unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite]);
+                        }
                         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting " . $excludedSite . " as excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                     }
                 }
@@ -568,7 +565,6 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                         $strSetName = \Scooper\strScrub($strSetName, FOR_LOOKUP_VALUE_MATCHING);
 
                         $arrNewLocationSet['key'] = $strSetName;
-                        $arrNewLocationSet['name'] = $strSetName ;
                         $arrNewLocationSet = $this->_parseAndAddLocationSet_($arrNewLocationSet, $iniSettings);
 
                         $strSettingStrings = getArrayValuesAsString($arrNewLocationSet);
@@ -677,7 +673,6 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                         {
                             $classPlug = new $GLOBALS['JOBSITE_PLUGINS'][$siteToSearch]['class_name'](null, null);
                             $thisSearch = $this->getEmptySearchDetailsRecord();
-                            $thisSearch ['name'] =  \Scooper\strScrub($keywordSet['key'], FOR_LOOKUP_VALUE_MATCHING);
                             $thisSearch ['key'] = \Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($keywordSet['key'], FOR_LOOKUP_VALUE_MATCHING);
                             $thisSearch ['site_name']  = $siteToSearch;
                             $thisSearch ['user_setting_flags'] = $keywordSet['keyword_match_type_flag'];
@@ -702,7 +697,6 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                                 {
                                     $newSearch = \Scooper\array_copy($thisSearch);
                                     $newSearch['key'] = $newSearch['key']."-".\Scooper\strScrub($key, FOR_LOOKUP_VALUE_MATCHING);
-                                    $newSearch['name'] = $newSearch['key'];
                                     $newSearch['keywords_array'] = array($keywordSet['keywords_array'][$key]);
                                     $newSearch['keywords_array_tokenized'] = array($keywordSet['keywords_array_tokenized'][$key]);
 
@@ -741,7 +735,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             return;
         }
 
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Updating all searches with primary location set '" . $primaryLocationSet['name'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Updating all searches with primary location set '" . $primaryLocationSet['key'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
 
         //
         // The first location set will be added to all searches always.
@@ -784,7 +778,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                 if(array_key_exists($locTypeNeeded, $primaryLocationSet))
                     $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value'] = $primaryLocationSet[$locTypeNeeded];
                 else {
-                    $err = "Error:  unable to add search because the required location type '" . $locTypeNeeded ."' was not found in the location set '" . $primaryLocationSet['key'] . "'. Excluding searches for " . $curSiteName .".";
+                    $err = "Error:  unable to add search '" . $searchKey . "' because the required location type '" . $locTypeNeeded ."' was not found in the location set '" . $primaryLocationSet['key'] . "'. Excluding searches for " . $curSiteName .".";
                     handleException(new IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' is not valid.", $locTypeNeeded)), $err, $raise=false);
                     $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$curSiteName] = $curSiteName;
 
@@ -811,8 +805,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                 }
 
 
-                $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['key'] = $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['key'] . "-loc-" . strtolower($primaryLocationSet['name']);
-                $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['name'] = $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['name'] . "-loc-" . strtolower($primaryLocationSet['name']);
+                $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['key'] = $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['key'] . "-loc-" . strtolower($primaryLocationSet['key']);
 
                 // BUGBUG:  Workaround for a single plugin, Dice, to be able to get more than one location set parameter
                 $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_set_key'] = $primaryLocationSet['key'];
@@ -883,10 +876,9 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                     else
                         throw new IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' is not valid.", $locTypeNeeded));
 
-                    $strOldSearchKey = $newSearch['key'] . "-" . strtolower($locSet['name']);
+                    $strOldSearchKey = $newSearch['key'] . "-" . strtolower($locSet['key']);
                     if(substr_count($strOldSearchKey, "-loc-") > 0) { $strOldSearchKey = explode("-loc-", $strOldSearchKey)[0]; }
-                    $newSearch['key'] = $strOldSearchKey . "-loc-" . strtolower($locSet['name']);
-                    $newSearch['name'] = $strOldSearchKey . "-loc-" . strtolower($locSet['name']);
+                    $newSearch['key'] = $strOldSearchKey . "-loc-" . strtolower($locSet['key']);
                     $newSearch['location_search_value'] = $strSearchLocation;
 
                     // BUGBUG:  Workaround for a single plugin, Dice, to be able to get more than one location set parameter
@@ -988,8 +980,6 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
     {
         return array(
             'key' => null,
-            'name' => null,
-//            'excluded_jobsites' => array(),
         );
     }
 
