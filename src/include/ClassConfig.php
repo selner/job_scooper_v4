@@ -213,6 +213,10 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             $GLOBALS['USERDATA']['directories'][$d] = realpath($details['directory']);
         }
 
+        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), "listings-rawbysite", "all-users"));
+        $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+        $GLOBALS['USERDATA']['directories']['listings-rawbysite-allusers'] = realpath($details['directory']);
+
     }
 
 

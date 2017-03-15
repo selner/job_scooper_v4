@@ -198,6 +198,17 @@ class StageManager extends ClassJobsSiteCommon
                     writeJobsListDataToLocalJSONFile($site, $arrSiteJobs, JOBLIST_TYPE_UNFILTERED, $dirKey = "listings-rawbysite");
                 $arrSiteJobs = null;
             }
+
+            $filelist = $this->getAllIncludedFilesForDir($GLOBALS['USERDATA']['directories']['listings-rawbysite-allusers']);
+            foreach($filelist as $allfile)
+            {
+                copy(
+                    join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['listings-rawbysite-allusers'], $allfile)),
+                    join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['listings-rawbysite'], $allfile))
+                );
+            }
+
+
             $filelist = $this->getAllIncludedFilesForDir($GLOBALS['USERDATA']['directories']['listings-rawbysite']);
             $jsonfiles = array_filter($filelist, function ($var) {
                 if(strtolower(pathinfo($var, PATHINFO_EXTENSION)) == "json" && substr($var, 0, strlen("tokenized_")) != "tokenized_")
@@ -253,6 +264,11 @@ class StageManager extends ClassJobsSiteCommon
 
     private function getAllIncludedFilesForDir($directory, $matchFileName=null)
     {
+        return $this->getAllNotExcludedFilesForDir($directory, $matchFileName);
+    }
+
+    private function getAllNotExcludedFilesForDir($directory, $matchFileName=null)
+    {
         $filelist = array_diff(scandir($directory), array(".", ".."));
         if(!is_null($matchFileName))
         {
@@ -263,17 +279,18 @@ class StageManager extends ClassJobsSiteCommon
             });
         }
 
-        $includedfiles = array_filter($filelist, function ($var) {
+        $resultfiles = array_filter($filelist, function ($var) {
             $matches = array();
-            $res = substr_count_multi($var, $GLOBALS['USERDATA']['configuration_settings']['included_sites'], $matches);
+            $res = substr_count_multi($var, $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'], $matches);
             if (count($matches) > 0)
             {
-                return true;
+                return false;
             }
 
-            return false;
+            return true;
         });
-        return $includedfiles;
+
+        return $resultfiles;
     }
 
     private function mergeAllJobsJsonInDir($directory, $matchFileName = null)
