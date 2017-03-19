@@ -583,7 +583,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
     private function getListingCountsByPlugin($fLayoutType, $arrPluginJobsUnfiltered = null, $arrExcludedJobs = null, $detailsHTMLBodyInclude = null)
     {
 
-        $arrCounts = null;
+        $arrCounts = array();
         $arrExcluded = null;
 
         $strOut = "                ";
@@ -856,7 +856,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
     private function _wrapCSSStyleOnHTML_($strHTML)
     {
         $cssToInlineStyles = new \TijsVerkoyen\CssToInlineStyles\CssToInlineStyles();
-        $css = file_get_contents(dirname(dirname(__FILE__)) . '/include/CSVTableStyle.css');
+        $css = file_get_contents(dirname(dirname(__FILE__)) . '/include/static/CSVTableStyle.css');
         $cssToInlineStyles->setHTML($strHTML);
         $cssToInlineStyles->setCSS($css);
         return $cssToInlineStyles->convert();
