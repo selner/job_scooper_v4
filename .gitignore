@@ -24,3 +24,4 @@ chromedriver
 geckodriver
 src/uncommitted-patches
 vendor
+*.diff
