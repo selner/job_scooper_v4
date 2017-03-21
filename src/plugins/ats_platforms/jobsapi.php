@@ -64,7 +64,8 @@ class PluginUSAJobs extends ClassBaseJobsAPIPlugin
     protected $siteName = 'USAJobs';
     protected $nJobListingsPerPage = 25;
     protected $typeLocationSearchNeeded = 'location-city-comma-state';
-
+    protected $authorization_key = null;
+    
     function getSearchJobsFromAPI($searchDetails, $pageNumber = 1)
     {
         $strKeywords = $this->getCombinedKeywordString($searchDetails['keywords_array']);

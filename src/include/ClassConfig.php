@@ -455,17 +455,23 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading plugin setup information from config file...", \Scooper\C__DISPLAY_ITEM_START__);
 
-        foreach($GLOBALS['JOBSITE_PLUGINS'] as $classPlugin)
+        if(array_key_exists('plugin_settings', $config) == true && is_array($config['plugin_settings']) && count($config['plugin_settings']) > 0)
         {
-            $name = strtolower($classPlugin['class_name']) . "_settings";
-            if(isset($config[$name]) && is_array($config[$name]))
+            //
+            // plugin setting config items are structured like this:
+            //      [plugin_settings.usajobs]
+            //      authorization_key="XxXxXxXxXxXxXxXxXxXx="
+            foreach(array_keys($config['plugin_settings']) as $pluginname)
             {
-                $GLOBALS['JOBSITE_PLUGINS'][$classPlugin['name']]['other_settings'] = $config[$name];
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Found settings for " . $name, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
+                if (array_key_exists($pluginname, $GLOBALS['JOBSITE_PLUGINS']))
+                {
+                    foreach(array_keys($config['plugin_settings'][$pluginname]) as $settingkey) {
+                        $GLOBALS['JOBSITE_PLUGINS'][$pluginname]['other_settings'][$settingkey] = $config['plugin_settings'][$pluginname][$settingkey];
+                        $GLOBALS['USERDATA']['configuration_settings']['plugin_settings'][$pluginname][$settingkey] = $config['plugin_settings'][$pluginname][$settingkey];
+                    }
+                }
             }
         }
-
     }
 
     private function _parseGlobalSearchParamtersFromConfig_($config)

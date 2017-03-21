@@ -34,7 +34,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         if(array_key_exists("JOBSITE_PLUGINS", $GLOBALS) && (array_key_exists(strtolower($this->siteName), $GLOBALS['JOBSITE_PLUGINS'])))
         {
             $plugin = $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->siteName)];
-            if(array_key_exists("other_settings", $plugin))
+            if(array_key_exists("other_settings", $plugin) && is_array($plugin['other_settings']))
             {
                 $keys = array_keys($plugin['other_settings']);
                 foreach($keys as $attrib_name)
