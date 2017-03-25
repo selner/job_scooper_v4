@@ -585,6 +585,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[" . $searchDetails['key']) . "]", \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPTOPLEVEL__);
         $this->_logMemoryUsage_();
         $arrSearchJobList = null;
+        $retLastEx = null;
 
         try {
 
@@ -645,7 +646,8 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 $strError = "Failed to download jobs from " . $this->siteName . " jobs for search '" . $searchDetails['key'] . "[URL=" . $searchDetails['search_start_url'] . "].  " . $ex->getMessage() . PHP_EOL . "Exception Details: " . $ex;
                 $this->_setSearchResultError_($searchDetails, $strError, $ex, $arrSearchJobList, null);
                 $this->_setJobsToFileStoreForSearch_($searchDetails, $arrSearchJobList);
-                handleException(new Exception($strError), null, true);
+                $retLastEx = new Exception($strError);
+                handleException($retLastEx, null, false);
             }
         }
 
@@ -659,6 +661,11 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         {
             $strError = "The search " . $searchDetails['key'] . " on " . $this->siteName . " downloaded 0 jobs yet we did not have any keyword filter is use.  Logging as a potential error since we should have had something returned. [URL=" . $searchDetails['search_start_url'] . "].  ";
             handleException(new Exception($strError), null, true);
+        }
+
+        if (!is_null($retLastEx))
+        {
+            throw $retLastEx;
         }
 
     }
