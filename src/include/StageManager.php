@@ -199,7 +199,7 @@ class StageManager extends ClassJobsSiteCommon
                 $arrSiteJobs = null;
             }
 
-            $filelist = $this->getAllIncludedFilesForDir($GLOBALS['USERDATA']['directories']['listings-rawbysite-allusers']);
+            $filelist = $this->getAllNotExcludedFilesForDir($GLOBALS['USERDATA']['directories']['listings-rawbysite-allusers']);
             foreach($filelist as $allfile)
             {
                 copy(
@@ -245,6 +245,9 @@ class StageManager extends ClassJobsSiteCommon
                     $marker->markJobsList();
                     $arrMarkedJobs = $marker->getMarkedJobs();
 
+                    // before saving, go through and do another dedupe pass
+                    // just to be sure.
+                    $marker->_markJobsList_SetLikelyDuplicatePosts_($arrMarkedJobs);
 
                     $arrJobsInterestedJobs = array_filter($arrMarkedJobs, "isMarked_InterestedOrBlank");
                     $arrJobsNotInterested = array_filter($arrMarkedJobs, "isMarked_NotInterested");
