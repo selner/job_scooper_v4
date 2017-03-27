@@ -25,6 +25,7 @@ class PluginFacebook extends ClassClientHTMLJobSitePlugin
     protected $strBaseURLFormat = "https://www.facebook.com/careers/search/?q=&location=***LOCATION***";
     protected $typeLocationSearchNeeded = 'location-city';
 protected $additionalFlags = [C__JOB_SINGLEPAGE_RESULTS, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_REQUIRES_LOWERCASE, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
+    protected $nJobListingsPerPage = C__TOTAL_ITEMS_UNKNOWN__;
 
     protected $arrListingTagSetup = array(
         'tag_listings_count' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'_1dc4', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
