@@ -36,7 +36,6 @@
         "composer/composer": "*",
         "selner/scooperlib": "master",
         "austinhyde/iniparser": "dev-master",
-        "linclark/microdata-php": "*",
         "facebook/webdriver": "*",
         "PHPMailer/PHPMailer": "*",
         "voku/portable-utf8": "3.1.15",
@@ -46,7 +45,6 @@
         "jobapis/jobs-common": "^2.0",
         "jobapis/jobs-govt": "^1.0",
         "jobapis/jobs-usajobs": "^0.2.0",
-        "jobapis/jobs-dice": "^1.0",
         "zordius/lightncandy": "^1.0@dev"
     }
 }

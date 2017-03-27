@@ -993,12 +993,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                     try
                     {
 
-                        if($this->isBitFlagSet(C__JOB_PREFER_MICRODATA))
-                        {
-                            $arrPageJobsList = $this->_getJobsFromMicroData_($objSimpleHTML);
-                        }
-                        else
-                        {
                             $arrPageJobsList = $this->parseJobsListForPage($objSimpleHTML);
                             if(!is_array($arrPageJobsList) )
                             {
@@ -1099,66 +1093,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         return $this->siteName;
     }
 
-    private function _getJobsFromMicroData_($objSimpleHTML)
-    {
-        $config  = array('html' => (string)$objSimpleHTML);
-        $obj = new linclark\MicrodataPHP\MicrodataPhp($config);
-        $micro = $obj->obj();
-        $ret = null;
-
-        if($micro && $micro->items && count($micro->items) > 0)
-        {
-            foreach($micro->items as $mditem)
-            {
-                if (isset($mditem->type) && strcasecmp(parse_url($mditem->type[0], PHP_URL_PATH), "/JobPosting") == 0) {
-
-                    $item = $this->getEmptyJobListingRecord();
-
-                    $item['job_title'] = $mditem->properties["title"][0];
-                    if(isset($mditem->properties["url"]))
-                        $item['job_post_url'] = $mditem->properties["url"][0];
-                    elseif(isset($mditem->properties["mainEntityOfPage"]))
-                        $item['job_post_url'] = $mditem->properties["mainEntityOfPage"][0];
-
-                    if (isset($mditem->properties['hiringOrganization']))
-                        $item['company'] = $mditem->properties['hiringOrganization'][0]->properties['name'][0];
-
-                    if (isset($mditem->properties['datePosted']))
-                        $item['job_site_date'] = $mditem->properties['datePosted'][0];
-
-
-                    if (isset($mditem->properties['jobLocation']) && is_array($mditem->properties['jobLocation']))
-                    {
-                        if (is_array($mditem->properties['jobLocation']))
-                        {
-                            if (isset($mditem->properties['jobLocation'][0]->properties['address']) && is_array($mditem->properties['jobLocation'][0]->properties['address']))
-                            {
-                                $city = "";
-                                $region = "";
-                                $zip = "";
-
-                                if (isset($mditem->properties['jobLocation'][0]->properties['address'][0]->properties['addressLocality']))
-                                    $city = $mditem->properties['jobLocation'][0]->properties['address'][0]->properties['addressLocality'][0];
-                                if (isset($mditem->properties['jobLocation'][0]->properties['address'][0]->properties['addressRegion']))
-                                    $region = $mditem->properties['jobLocation'][0]->properties['address'][0]->properties['addressRegion'][0];
-                                if (isset($mditem->properties['jobLocation'][0]->properties['address'][0]->properties['postalCode']))
-                                    $zip = $mditem->properties['jobLocation'][0]->properties['address'][0]->properties['postalCode'][0];
-                                $item["location"] = $city . " " . $region . " " & $zip;
-                            }
-
-                        }
-                        else
-                        {
-                            $item["location"] = $mditem->properties['jobLocation'][0];
-                        }
-                    }
-                    $item['company'] = $this->siteName;
-                }
-            }
-        }
-
-        return $ret;
-    }
 
     protected function getSearchJobsFromAPI($searchDetails) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); }
 

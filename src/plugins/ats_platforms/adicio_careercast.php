@@ -26,16 +26,6 @@ abstract class AlternateAdicioCareerCastPlugin extends BaseAdicioCareerCastPlugi
     protected $nJobListingsPerPage = 20;
 }
 
-abstract class MicrodataAdicioCareerCastPlugin extends BaseAdicioCareerCastPlugin
-{
-
-    function __construct($strOutputDirectory = null)
-    {
-        $this->additionalFlags[] = C__JOB_PREFER_MICRODATA;
-        parent::__construct($strOutputDirectory);
-    }
-}
-
 abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = '';
