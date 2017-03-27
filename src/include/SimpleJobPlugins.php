@@ -34,6 +34,7 @@ abstract class ClassClientHTMLJobSitePlugin extends ClassBaseHTMLJobSitePlugin
 }
 
 
+
 abstract class ClassHTMLJobSitePlugin extends ClassBaseHTMLJobSitePlugin
 {
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
@@ -303,37 +304,37 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
     function takeNextPageAction($driver)
     {
-        if (array_key_exists('tag_next_button', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_next_button'])) {
-            $strMatch = $this->getTagSelector($this->arrListingTagSetup['tag_next_button']);
-            if (isset($strMatch)) {
-                try {
-                    $GLOBALS['logger']->logLine("Going to next page of results via CSS object " . $strMatch, \Scooper\C__DISPLAY_NORMAL__);
-                    $arrArgs = array();
-                    $ret = $driver->executeScript(sprintf("function callNextPage() { var elem = window.document.querySelector('" . $strMatch . "');  if (elem != null) { console.log('attempting next button click on element " . $strMatch . "'); elem.click(); return true; } else return false; } ; return callNextPage();", $arrArgs));
-                    if ($ret === false) {
-                        $ex = new Exception("Failed to find and click the control to go to the next page of results for " . $this->siteName);
-                        handleException($ex, $fmtLogMsg = null, $raise = true);
-                    }
-                    else
-                        sleep($this->additionalLoadDelaySeconds);
-                    $GLOBALS['logger']->logLine("Next page of job listings loaded successfully.  ", \Scooper\C__DISPLAY_NORMAL__);
+        if (array_key_exists('tag_next_button', $this->arrListingTagSetup)) {
+            if (!is_null($this->arrListingTagSetup['tag_next_button'])) {
+                $strMatch = $this->getTagSelector($this->arrListingTagSetup['tag_next_button']);
+                if (isset($strMatch)) {
+                    try {
+                        $GLOBALS['logger']->logLine("Going to next page of results via CSS object " . $strMatch, \Scooper\C__DISPLAY_NORMAL__);
+                        $arrArgs = array();
+                        $ret = $driver->executeScript(sprintf("function callNextPage() { var elem = window.document.querySelector('" . $strMatch . "');  if (elem != null) { console.log('attempting next button click on element " . $strMatch . "'); elem.click(); return true; } else return false; } ; return callNextPage();", $arrArgs));
+                        if ($ret === false) {
+                            $ex = new Exception("Failed to find and click the control to go to the next page of results for " . $this->siteName);
+                            handleException($ex, $fmtLogMsg = null, $raise = true);
+                        } else
+                            sleep($this->additionalLoadDelaySeconds);
+                        $GLOBALS['logger']->logLine("Next page of job listings loaded successfully.  ", \Scooper\C__DISPLAY_NORMAL__);
 
-                } catch (Exception $ex) {
-                    $strError = "Error clicking next: " . $ex->getMessage();
-                    handleException(new Exception($strError), $fmtLogMsg = null, $raise = true);
+                    } catch (Exception $ex) {
+                        $strError = "Error clicking next: " . $ex->getMessage();
+                        handleException(new Exception($strError), $fmtLogMsg = null, $raise = true);
+                    }
                 }
+            } elseif (!is_null($this->nextPageScript)) {
+                $script = "function callNextPage() { " . $this->nextPageScript . " } ; callNextPage();";
+                $GLOBALS['logger']->logLine("Going to next page of results via script: " . $script, \Scooper\C__DISPLAY_NORMAL__);
+                $driver->executeScript($script);
+                sleep($this->additionalLoadDelaySeconds);
             }
-            return;
         }
-        elseif(!is_null($this->nextPageScript ))
+        else
         {
-            $script = "function callNextPage() { " . $this->nextPageScript ." } ; callNextPage();";
-            $GLOBALS['logger']->logLine("Going to next page of results via script: " . $script  , \Scooper\C__DISPLAY_NORMAL__);
-            $driver->executeScript($script);
-            sleep($this->additionalLoadDelaySeconds);
-            return ;
+            throw new Exception(sprintf("Error: plugin for %s is missing tag definition for the next page button to click. Cannot complete search.", $this->siteName));
         }
-        throw new Exception(sprintf("Error: plugin for %s is missing tag definition for the next page button to click. Cannot complete search.", $this->siteName));
     }
 
     protected function getNextInfiniteScrollSet($driver)
