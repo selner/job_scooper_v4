@@ -26,7 +26,7 @@ class PluginDice extends ClassClientHTMLJobSitePlugin
     protected $strBaseURLFormat = 'https://www.dice.com/jobs/advancedResult.html?for_one=&for_all=***KEYWORDS***&for_exact=&for_none=&for_jt=&for_com=&for_loc=***LOCATION***&sort=date&limit=100&radius=50';
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $nJobListingsPerPage = 100;
-    protected $additionalLoadDelaySeconds = 5;
+    protected $additionalLoadDelaySeconds = 10;
     protected $nextPageScript = " 
     
     xp = \"//*[@id='dice_paging_btm']/ul/li/a[@title='Go to next page']\";
