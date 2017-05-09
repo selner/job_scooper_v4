@@ -23,7 +23,7 @@ class PluginSmashingMagazine extends ClassClientHTMLJobSitePlugin
 protected $siteName = 'SmashingMagazine';
 protected $childSiteURLBase = 'http://jobs.smashingmagazine.com';
 protected $childSiteListingPage = 'http://jobs.smashingmagazine.com';
-protected $additionalFlags = [C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
+protected $additionalFlags = [C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
 
 protected $arrListingTagSetup = array(
 'tag_listings_section' => array(array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' =>'entry-list compact'), array('tag' => 'li')),

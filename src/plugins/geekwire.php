@@ -29,7 +29,7 @@ class PluginGeekwire extends ClassBaseClientSideHTMLJobSitePlugin
 //    protected $strBaseURLFormat = "http://www.geekwork.com/jobs/?search_keywords=***KEYWORDS***&search_location=***LOCATION***";
     protected $typeLocationSearchNeeded = 'location-statecode';
     protected $additionalLoadDelaySeconds = 20;
-    protected $additionalFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
+    protected $additionalFlags = [C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
 
     function parseJobsListForPage($objSimpHTML)
     {

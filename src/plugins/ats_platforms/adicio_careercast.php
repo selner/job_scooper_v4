@@ -251,7 +251,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
 
 abstract class OptimizedAdicioCareerCastPlugin extends BaseAdicioCareerCastPlugin
 {
-    protected $additionalFlags = [C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED];
+    protected $additionalFlags = [C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED];
 
     function __construct($strOutputDirectory = null)
     {

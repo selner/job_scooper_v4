@@ -30,6 +30,8 @@ class PluginHibbettSports extends BasePluginiCIMS
     function __construct($strBaseDir = null)
     {
         $additionalFlags[] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
+        $additionalFlags[] = C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED;
+
 
         $this->arrListingTagSetup['tag_pages_count'] = array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'iCIMS_Paginator_Bottom'), array('tag' => 'div') , array('tag' => 'div') , array('tag' => 'div'), 'index' => 1, 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?of\s+(\d+).*/');
         parent::__construct($strBaseDir);

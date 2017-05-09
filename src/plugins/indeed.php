@@ -18,19 +18,56 @@ if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 
 
-class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
+class PluginIndeed extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = 'Indeed';
     protected $nJobListingsPerPage = 50;
     protected $siteBaseURL = 'http://www.Indeed.com';
 //    protected $strBaseURLFormat = "https://www.indeed.com/jobs?q=***KEYWORDS***&l=***LOCATION***&radius=50&sort=date&limit=50&fromage=***NUMBER_DAYS***&filter=0***ITEM_NUMBER***";
 //    protected $strBaseURLFormat = "https://www.indeed.com/jobs?as_and=***KEYWORDS***&as_phr=&as_any=&as_not=&as_ttl=&as_cmp=&jt=all&st=&salary=&radius=50&l=***LOCATION***&fromage=***NUMBER_DAYS***&limit=50&sort=date&psf=advsrch&start=***ITEM_NUMBER***";
-    protected $strBaseURLFormat = "https://www.indeed.com/jobs?q=***KEYWORDS***&l=***LOCATION***&radius=50&sort=date&limit=50&fromage=***NUMBER_DAYS***&filter=0=***ITEM_NUMBER***";
-
+    protected $strBaseURLFormat = "https://www.indeed.com/jobs?as_and=***KEYWORDS***&as_phr=&as_any=&as_not=&as_ttl=&as_cmp=&jt=all&st=&salary=&radius=50&l=***LOCATION***&fromage=1&limit=50&sort=date***ITEM_NUMBER***&filter=0&psf=advsrch";
+## "https://www.indeed.com/jobs?q=manager&l=seattle%2C+wa&radius=50&sort=date&start=10&pp=AAoAAAAAAAAAAAAAAAEGhv7TAQACQTTTq6vIeafYA9VSkkIu49ommzZTDUNeuzGSQg";
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $strKeywordDelimiter = "OR";
-    protected $additionalFlags = [C__JOB_IGNORE_MISMATCHED_JOB_COUNTS];
+    protected $additionalFlags = [C__JOB_IGNORE_MISMATCHED_JOB_COUNTS, C__JOB_CLIENTSIDE_PAGE_VIA_JS];
+//    protected $nextPageScript = '
+//
+//        var $next = document.querySelector("span.np");
+//        if ($next!= null)
+//        {
+//            $next.parentNode.parentNode.click();
+//        }
+//        else
+//        {
+//            var $pagenodes = document.querySelectorAll("div.pagination span span");
+//            if ($pagenodes != null)
+//            {
+//                console.log("No pagination nodes found to click.");
+//            }
+//            else
+//            {
+//                console.log($pagenodes[1].textContent);
+//                if ($pagenodes.length >= 1 && $pagenodes[$pagenodes.length - 1].textContent.startsWith("Next"))
+//                {
+//                    console.log("Clicking pagination node #" + ($pagenodes.length - 1));
+//                    $pagenodes[$pagenodes.length - 1].click();
+//                } else {
+//                    console.log("No Page Node found to click.");
+//                }
+//            }
+//        }';
 
+    function takeNextPageAction($driver)
+    {
+        $link = $driver->findElement(
+            WebDriverBy::className('np')
+        );
+        $link->click();
+//        $searchBtn = $driver.findElement(WebDriverBy::id("searchbtn"));
+//        $action = $$driver.actions();
+//        $action.contextClick($searchBtn);
+//        $action.build().perform();
+    }
 
     function __construct($strBaseDir = null)
     {
@@ -38,21 +75,6 @@ class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
         //        too many potentia hits to be worth it.
         parent::__construct($strBaseDir);
     }
-
-//    protected function _getBaseURLFormat_($searchDetails = null)
-//    {
-//        $strURL = parent::_getBaseURLFormat_($searchDetails);
-//        if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_BE_IN_TITLE) || \Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_MUST_EQUAL_TITLE))
-//        {
-//            $strURL = $strURL . "&as_ttl=***KEYWORDS***&l=***LOCATION***";
-//        }
-//        else
-//        {
-//            $strURL = $strURL . "&q=***KEYWORDS***&l=***LOCATION***";
-//        }
-//
-//        return $strURL;
-//    }
 
     function getItemURLValue($nItem)
     {
@@ -94,9 +116,6 @@ class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
        return $ret;
 
     }
-//
-//    function parseJobsListForPage($objSimpHTML)
-//    { return $this->_scrapeItemsFromHTML_($objSimpHTML); }
 
 
     function parseTotalResultsCount($objSimpHTML)
@@ -112,7 +131,7 @@ class PluginIndeed extends ClassBaseServerHTMLJobSitePlugin
     }
 
 
-    protected function parseJobsListForPage($objSimpleHTML)
+    public function parseJobsListForPage($objSimpleHTML)
     {
         $ret = null;
         $cntNode = $objSimpleHTML->find("div[id='searchCount']");

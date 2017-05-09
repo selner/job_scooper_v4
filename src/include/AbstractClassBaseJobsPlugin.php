@@ -84,12 +84,18 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     public function addSearches(&$arrSearches)
     {
 
-        if(!is_array($arrSearches[0])) { $arrSearches[] = $arrSearches; }
+        if (!is_array($arrSearches[0])) {
+            $arrSearches[] = $arrSearches;
+        }
 
-        foreach($arrSearches as $searchDetails)
-        {
+        if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED)) {
+            $soleSearch = $arrSearches[0];
+            $arrSearches = array();
+            $arrSearches[] = $soleSearch;
+        }
+
+        foreach ($arrSearches as $searchDetails) {
             $this->_addSearch_($searchDetails);
-
         }
     }
 
@@ -404,7 +410,18 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
             assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || ($searchDetails['location_search_value'] !== VALUE_NOT_SUPPORTED && strlen($searchDetails['location_search_value']) > 0));
 
+            if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED)) {
+                // null out any generalized keyword set values we previously had
+                $searchDetails['keywords_array'] = null;
+                $searchDetails['keywords_array_tokenized'] = null;
+                $searchDetails['keywords_string_for_url'] = null;
+                $searchDetails['key'] = $searchDetails['site_name'] . '-' . $searchDetails['location_set_key'];
+            }
+            else
+            {
             $this->_setKeywordStringsForSearch_($searchDetails);
+            }
+
             $this->_setStartingUrlForSearch_($searchDetails);
 
 
@@ -495,11 +512,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $strRetCombinedKeywords = str_replace("+", "-", $strRetCombinedKeywords);
         }
 
-        if($this->isBitFlagSet(C__JOB_KEYWORD_SUPPORTS_PLUS_PREFIX))
-        {
-            $strRetCombinedKeywords = "%2B" . $strRetCombinedKeywords;
-        }
-
         return $strRetCombinedKeywords;
     }
 
@@ -531,16 +543,30 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         }
 
         $key = $prefix . \Scooper\strip_punctuation($GLOBALS['USERDATA']['configuration_settings']['number_days'] . $searchSettings['key']);
+        if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED))
+            $key = $prefix . \Scooper\strip_punctuation($GLOBALS['USERDATA']['configuration_settings']['number_days'] . $searchSettings['site_name']);
 
         return $key;
     }
+
+    private function _getDirKey_()
+    {
+        $dirKey = "listings-raw";
+        if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED))
+            $dirKey = "listings-rawbysite-allusers";
+
+
+        return $dirKey;
+    }
+        
 
     private function _getJobsfromFileStoreForSearch_(&$searchSettings, $returnFailedSearches = true)
     {
         $retJobs = null;
 
         $key = $this->_getFileStoreKeyForSearch($searchSettings, "");
-        $data = readJobsListDataFromLocalJsonFile($key, $returnFailedSearches, $dirKey = "listings-raw");
+
+        $data = readJobsListDataFromLocalJsonFile($key, $returnFailedSearches, $dirKey = $this->_getDirKey_());
         if (!is_null($data) && is_array($data)) {
             if (array_key_exists("jobslist", $data)) {
                 $retJobs = array_filter($data['jobslist'], "isIncludedJobSite");
@@ -557,7 +583,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     private function _setJobsToFileStoreForSearch_($searchSettings, $dataJobs)
     {
         $key = $this->_getFileStoreKeyForSearch($searchSettings, "");
-        return writeJobsListDataToLocalJSONFile($key, $dataJobs, JOBLIST_TYPE_UNFILTERED, $dirKey = "listings-raw", $searchDetails = $searchSettings);
+        return writeJobsListDataToLocalJSONFile($key, $dataJobs, JOBLIST_TYPE_UNFILTERED, $dirKey = $this->_getDirKey_(), $searchDetails = $searchSettings);
     }
 
     //************************************************************************
