@@ -601,7 +601,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             }
 
             $arrPluginExcludesJobs  = array();
-            if ($arrPluginJobsUnfiltered != null && is_array($arrPluginJobsUnfiltered) && countJobRecords($arrPluginJobsUnfiltered) > 0) {
+            if ($arrExcludedJobs != null && is_array($arrExcludedJobs) && countJobRecords($arrExcludedJobs) > 0) {
                 $arrPluginExcludesJobs = array_filter($arrExcludedJobs, function ($var) use ($plugin) { return (strcasecmp($var['job_site'], $plugin) == 0); } );
             }
 
