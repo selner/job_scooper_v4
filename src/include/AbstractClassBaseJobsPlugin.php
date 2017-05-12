@@ -136,14 +136,21 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             // assert this search is actually for the job site supported by this plugin
             assert(strcasecmp(strtolower($search['site_name']), strtolower($this->siteName)) == 0);
 
-            if($this->isSearchCached($search) == true) {
+            if ($this->isSearchCached($search) == true) {
                 $GLOBALS['logger']->logLine("Jobs data for '" . $search['key'] . " has already been cached.  Skipping jobs download.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 continue;
             }
 
-            if($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
-                SeleniumSession::startSeleniumServer();
-                $this->selenium = new SeleniumSession();
+            if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
+                try
+                {
+                    if ($GLOBALS['USERDATA']['selenium']['autostart'] == True) {
+                        SeleniumSession::startSeleniumServer();
+                    }
+                    $this->selenium = new SeleniumSession();
+                } catch (Exception $ex) {
+                    handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->siteName ."'", true);
+                }
             }
 
             $this->_updateJobsDataForSearch_($search);
@@ -156,7 +163,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     function getName() {
         $name = strtolower($this->siteName);
         if(is_null($name) || strlen($name) == 0)
-        {
+    {
             $name = str_replace("plugin", "", get_class($this));
         }
         return $name;
@@ -193,10 +200,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         if(!is_null($this->arrSearchesToReturn) && count($this->arrSearchesToReturn) > 0)
         {
-            $filenm = exportToDebugJSON(\Scooper\object_to_array($this),($this->siteName . "-plugin-state-data"));
-            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("JSON state data for plugin '" . $this->siteName . "' written to " . $filenm .".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            $filenm = exportToDebugJSON(\Scooper\object_to_array($this), ($this->siteName . "-plugin-state-data"));
+            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("JSON state data for plugin '" . $this->siteName . "' written to " . $filenm . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-            return $filenm ;
+            return $filenm;
         }
     }
 
@@ -250,7 +257,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         }
 
         // Did the user specify an override at the search level in the INI?
-        if($searchDetails != null && isset($searchDetails['location_user_specified_override']) && strlen($searchDetails['location_user_specified_override']) > 0)
+        if ($searchDetails != null && isset($searchDetails['location_user_specified_override']) && strlen($searchDetails['location_user_specified_override']) > 0)
         {
             $strReturnLocation = $searchDetails['location_user_specified_override'];
         }
@@ -263,7 +270,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Plugin for '" . $searchDetails['site_name'] . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails['key'] . "' with settings '" . $locSettingSets['key'] . "'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 return $strReturnLocation;
             }
-
+            
             if(isset($locSettingSets) && count($locSettingSets) > 0 && isset($locSettingSets[$locTypeNeeded]))
             {
                 $strReturnLocation = $locSettingSets[$locTypeNeeded];
@@ -375,8 +382,8 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     function __destruct()
     {
-        if(isDebug()==true) {
-        $this->_exportObjectToJSON_();
+        if (isDebug() == true) {
+            $this->_exportObjectToJSON_();
         }
 
     }
@@ -419,7 +426,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             }
             else
             {
-            $this->_setKeywordStringsForSearch_($searchDetails);
+                $this->_setKeywordStringsForSearch_($searchDetails);
             }
 
             $this->_setStartingUrlForSearch_($searchDetails);
@@ -427,7 +434,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
             // Check the cached data to see if we already have jobs saved for this search & timeframe.
             // if so, mark the search as cached
-            $arrSearchJobList = $this->_getJobsfromFileStoreForSearch_($searchSettings=$searchDetails, $returnFailedSearches=false);
+            $arrSearchJobList = $this->_getJobsfromFileStoreForSearch_($searchSettings = $searchDetails, $returnFailedSearches = false);
             if((is_null($arrSearchJobList) || !is_array($arrSearchJobList)) == false)
             {
                 // we have previously cached good search results for this search timeframe
@@ -1019,18 +1026,18 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                     try
                     {
 
-                            $arrPageJobsList = $this->parseJobsListForPage($objSimpleHTML);
-                            if(!is_array($arrPageJobsList) )
-                            {
-                                // we likely hit a page where jobs started to be hidden.
-                                // Go ahead and bail on the loop here
-                                $strWarnHiddenListings = "Could not get all job results back from " . $this->siteName . " for this search starting on page " . $nPageCount . ".";
-                                if ($nPageCount < $totalPagesCount)
-                                    $strWarnHiddenListings .= "  They likely have hidden the remaining " . ($totalPagesCount - $nPageCount) . " pages worth. ";
+                        $arrPageJobsList = $this->parseJobsListForPage($objSimpleHTML);
+                        if(!is_array($arrPageJobsList) )
+                        {
+                            // we likely hit a page where jobs started to be hidden.
+                            // Go ahead and bail on the loop here
+                            $strWarnHiddenListings = "Could not get all job results back from " . $this->siteName . " for this search starting on page " . $nPageCount . ".";
+                            if ($nPageCount < $totalPagesCount)
+                                $strWarnHiddenListings .= "  They likely have hidden the remaining " . ($totalPagesCount - $nPageCount) . " pages worth. ";
 
-                                $GLOBALS['logger']->logLine($strWarnHiddenListings, \Scooper\C__DISPLAY_ITEM_START__);
-                                $nPageCount = $totalPagesCount;
-                            }
+                            $GLOBALS['logger']->logLine($strWarnHiddenListings, \Scooper\C__DISPLAY_ITEM_START__);
+                            $nPageCount = $totalPagesCount;
+                        }
 
                         }
 
