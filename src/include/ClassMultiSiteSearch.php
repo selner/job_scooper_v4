@@ -28,8 +28,9 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
 
     function __destruct()
     {
-        if(!is_null($this->selenium))
+        if(!is_null($this->selenium) && ($GLOBALS['USERDATA']['selenium']['autostart'] == True)) {
             $this->selenium->terminate();
+        }
 
         if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
     }
