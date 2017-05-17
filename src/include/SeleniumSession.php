@@ -224,7 +224,7 @@ class SeleniumSession extends PropertyObject
                     sleep(10);
                     $GLOBALS['selenium_started'] = true;
                 }
-                else {
+                else if(stripos($GLOBALS['USERDATA']['selenium']['host_location'], "localhost") != false || (stripos($GLOBALS['USERDATA']['selenium']['host_location'], "127.0.0.1") != false)) {
 
                     $strCmdToRun = "java ";
                     if (array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
