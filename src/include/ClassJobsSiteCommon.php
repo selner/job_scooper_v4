@@ -279,7 +279,7 @@ class ClassJobsSiteCommon
         // Restructure locations like "US-VA-Richmond" to be "Richmond, VA"
         //
         $arrMatches = array();
-        $matched = preg_match('/.*(\w{2})\s*\-\s*.*(\w{2})\s*\-\s*([\w]+)/', $arrItem ['location'], $arrMatches);
+        $matched = preg_match('/.*(\w{2})\s*[\-,]\s*.*(\w{2})\s*[\-,]s*([\w]+)/', $arrItem ['location'], $arrMatches);
         if ($matched !== false && count($arrMatches) == 4)
         {
             $arrItem['location'] = $arrMatches[3] . ", " . $arrMatches[2];
