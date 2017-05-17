@@ -776,12 +776,14 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         $line= null;
         $code = null;
         $msg = null;
+        $file = null;
 
         if(!is_null($exception))
         {
             $line = $exception->getLine();
             $code = $exception->getCode();
             $msg = $exception->getMessage();
+            $file = $exception->getFile();
         }
         $searchDetails['search_run_result'] = array(
             'success' => $success,
@@ -790,6 +792,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             'exception_code' => $code,
             'exception_message' => $msg,
             'exception_line' => $line,
+            'exception_file' => $file,
             'error_files' => $errFiles
         );
         $GLOBALS['USERDATA']['search_results'][$searchDetails['key']]['search_run_result'] = $searchDetails['search_run_result'];

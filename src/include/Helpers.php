@@ -97,9 +97,9 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
     $debugData = array(
         "error_time" => $now->format('Y-m-d\TH:i:s'),
         "exception_code" => $ex->getCode(),
-        "error_message" => $msg,
-        "file" => $ex->getFile(),
-        "line_number" => $ex->getLine(),
+        "exception_message" => $msg,
+        "exception_file" => $ex->getFile(),
+        "exception_line" => $ex->getLine(),
         "exception" => \Scooper\object_to_array($ex)
 //        "object_properties" => null,
 ////        "debug_backtrace" => var_export(debug_backtrace(), true),
