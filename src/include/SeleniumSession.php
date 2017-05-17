@@ -71,6 +71,7 @@ class SeleniumSession extends PropertyObject
     function terminate()
     {
         $this->doneWithRemoteWebDriver();
+        $this->shutdownSelenium();
     }
 
     function loadPage($url)
@@ -248,6 +249,36 @@ class SeleniumSession extends PropertyObject
             }
         }
     }
+//
+//    function isServerUp()
+//    {
+//        $hostHubPageURL = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
+//        $msg = "Checking Selenium server up.... ";
+//
+//        $ret = false;
+//
+//        try{
+//
+//            $objSimplHtml = \SimpleHtmlDom\file_get_html($hostHubPageURL);
+//            $tag = $objSimplHtml->find("title");
+//            if (is_null($tag) != true && count($tag) >= 1)
+//            {
+//                $title = $tag[0]->plaintext;
+//                $msg = $msg . " Found hub page " . $title;
+//                $ret = true;
+//            }
+//
+//        }
+//        catch (Exception $ex)
+//        {
+//            $msg = $msg . " Error retrieving hub page: " . $ex->getMessage();
+//        }
+//        finally
+//        {
+//            $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_NORMAL__);
+//            return $ret;
+//        }
+//    }
 
     function get_driver()
     {
