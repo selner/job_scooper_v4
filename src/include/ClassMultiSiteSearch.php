@@ -102,8 +102,12 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
             catch (Exception $classError)
             {
                 $err = $classError;
-                if (($classError->getCode() == 4096 || $classError->getCode() == 0) && !is_null($this->selenium))
+                if (($classError->getCode() == 4096 || $classError->getCode() == 0) && $class->isBitFlagSet(C__JOB_USE_SELENIUM))
                 {
+                    if(is_null($this->selenium))
+                    {
+                        handleException($classError, "Plugin ". $classPluginForSearch['class_name'] . " requires Selenium but the service could not be started: %s", $raise = false);
+                    }
                     try {
                         $this->selenium->killAllAndRestartSelenium();
                         $arrResults = $class->getUpdatedJobsForAllSearches();
@@ -112,7 +116,6 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
                     {
                         $err = $classError;
                     }
-
                 }
                 else
                     handleException($classError, "Unable to run searches for ". $classPluginForSearch['class_name'] . ": %s", $raise = false);
