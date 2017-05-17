@@ -294,7 +294,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     protected function getPageURLfromBaseFmt($searchDetails, $nPage = null, $nItem = null)
     {
-        $strURL = $this->_getBaseURLFormat_($searchDetails);
+        $strURL = $this->_getBaseURLFormat_($searchDetails, $nPage, $nItem);
 
 
         $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($GLOBALS['USERDATA']['configuration_settings']['number_days']), $strURL);
@@ -334,7 +334,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     //
     //************************************************************************
 
-    protected function _getBaseURLFormat_($searchDetails = null)
+    protected function _getBaseURLFormat_($searchDetails = null, $nPage = null, $nItem = null)
     {
         $strBaseURL = VALUE_NOT_SUPPORTED;
 
@@ -913,10 +913,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 {
                     $totalPagesCount = 0;
                 }
-                elseif($this->isBitFlagSet(C__JOB_SINGLEPAGE_RESULTS))
-                {
-                    $totalPagesCount = 1;
-                }
                 elseif($nTotalListings != C__TOTAL_ITEMS_UNKNOWN__)
                 {
                     if ($nTotalListings > C_JOB_MAX_RESULTS_PER_SEARCH) {
@@ -934,7 +930,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             // then only bring back the first page and/or first 10 or so results to verify.  We don't need to bring
             // back hundreds of results to test things are running successfully.
             //
-            if (isTestRun() && !$this->isBitFlagSet(C__JOB_SINGLEPAGE_RESULTS))
+            if (isTestRun())
             {
                 $maxListings = $this->nJobListingsPerPage * 2;
                 if($nTotalListings > $maxListings)
@@ -967,7 +963,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                     {
                         try
                         {
-                            if($this->isBitFlagSet( C__JOB_PAGE_VIA_URL) || $this->isBitFlagSet( C__JOB_SINGLEPAGE_RESULTS))
+                            if($this->isBitFlagSet( C__JOB_PAGE_VIA_URL))
                             {
                                 $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
                                 if ($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
@@ -1042,8 +1038,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                             $nPageCount = $totalPagesCount;
                         }
 
-                        }
-
                         if(is_array($arrPageJobsList))
                         {
                             $this->normalizeJobList($arrPageJobsList);
@@ -1083,7 +1077,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                         $err = "Retrieved only " . $nItemCount . " of the " . $this->nJobListingsPerPage . " job listings on page " . $nPageCount . " for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
                     elseif ($nJobsFound < $nTotalListings && $nPageCount == $totalPagesCount && !$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__))
                         $err = "Retrieved only " . $nJobsFound . " of the " . $nTotalListings . " listings that we expected for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
-                    elseif ($nJobsFound > $nTotalListings && $nPageCount == $totalPagesCount) {
+                    elseif ($nJobsFound > $nTotalListings && $nPageCount == $totalPagesCount && !$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__)) {
                         $warnMsg = "Warning:  Downloaded " . ($nJobsFound - $nTotalListings) . " jobs more than the " . $nTotalListings . " expected for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
                         $GLOBALS['logger']->logLine($warnMsg, \Scooper\C__DISPLAY_WARNING__);
                     }
