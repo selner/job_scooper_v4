@@ -135,7 +135,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         {
             // assert this search is actually for the job site supported by this plugin
             assert(strcasecmp(strtolower($search['site_name']), strtolower($this->siteName)) == 0);
-            $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[" . $searchDetails['key']) . "]", \Scooper\C__NAPPTOPLEVEL__, \Scooper\C__SECTION_BEGIN__);
+            $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[" . $search['key']) . "]", \Scooper\C__NAPPTOPLEVEL__, \Scooper\C__SECTION_BEGIN__);
 
             if ($this->isSearchCached($search) == true) {
                 $GLOBALS['logger']->logLine("Jobs data for '" . $search['key'] . " has already been cached.  Skipping jobs download.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
