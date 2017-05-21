@@ -135,6 +135,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         {
             // assert this search is actually for the job site supported by this plugin
             assert(strcasecmp(strtolower($search['site_name']), strtolower($this->siteName)) == 0);
+            $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[" . $searchDetails['key']) . "]", \Scooper\C__NAPPTOPLEVEL__, \Scooper\C__SECTION_BEGIN__);
 
             if ($this->isSearchCached($search) == true) {
                 $GLOBALS['logger']->logLine("Jobs data for '" . $search['key'] . " has already been cached.  Skipping jobs download.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -615,7 +616,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     private function _updateJobsDataForSearch_($searchDetails)
     {
-        $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[" . $searchDetails['key']) . "]", \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPTOPLEVEL__);
+        $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[" . $searchDetails['key']) . "]", \Scooper\C__NAPPTOPLEVEL__, \Scooper\C__SECTION_BEGIN__);
         $this->_logMemoryUsage_();
         $arrSearchJobList = null;
         $retLastEx = null;
@@ -650,7 +651,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
             }
 
-            $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->siteName . "[" . $searchDetails['key'] . "]"), \Scooper\C__SECTION_END__, \Scooper\C__NAPPTOPLEVEL__);
         } catch (Exception $ex) {
 
             //
@@ -682,6 +682,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 $retLastEx = new Exception($strError);
                 handleException($retLastEx, null, false);
             }
+        }
+        finally
+        {
+            $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->siteName . "[" . $searchDetails['key'] . "]"), \Scooper\C__NAPPTOPLEVEL__, \Scooper\C__SECTION_END__);
         }
 
 
