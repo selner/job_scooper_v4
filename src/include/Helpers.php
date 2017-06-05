@@ -402,7 +402,7 @@ function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strD
         } elseif (is_array($val) && !(\Scooper\is_array_multidimensional($val))) {
             $strVal = join(" | ", $val);
         } else {
-            $strVal = var_export($val, true);
+            $strVal = print_r($val, true);
         }
 
         if ($fIsFirstItem == true) {
