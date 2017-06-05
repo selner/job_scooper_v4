@@ -39,8 +39,8 @@ class SeleniumSession extends PropertyObject
     {
         foreach ($this->lastCookies as $cookie) {
             $this->driver->manage()->addCookie(array(
-                'name' => 'cookie_name',
-                'value' => 'cookie_value',
+                'name' => $cookie['cookie_name'],
+                'value' => $cookie['cookie_value'],
             ));
         }
         $this->loadPage($url);
