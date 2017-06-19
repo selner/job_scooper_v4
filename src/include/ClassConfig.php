@@ -213,6 +213,10 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             $GLOBALS['USERDATA']['directories'][$d] = realpath($details['directory']);
         }
 
+        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), "listings-rawbysite", "all-users"));
+        $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+        $GLOBALS['USERDATA']['directories']['listings-rawbysite-allusers'] = realpath($details['directory']);
+
     }
 
 
@@ -451,17 +455,23 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading plugin setup information from config file...", \Scooper\C__DISPLAY_ITEM_START__);
 
-        foreach($GLOBALS['JOBSITE_PLUGINS'] as $classPlugin)
+        if(array_key_exists('plugin_settings', $config) == true && is_array($config['plugin_settings']) && count($config['plugin_settings']) > 0)
         {
-            $name = strtolower($classPlugin['class_name']) . "_settings";
-            if(isset($config[$name]) && is_array($config[$name]))
+            //
+            // plugin setting config items are structured like this:
+            //      [plugin_settings.usajobs]
+            //      authorization_key="XxXxXxXxXxXxXxXxXxXx="
+            foreach(array_keys($config['plugin_settings']) as $pluginname)
             {
-                $GLOBALS['JOBSITE_PLUGINS'][$classPlugin['name']]['other_settings'] = $config[$name];
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Found settings for " . $name, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
+                if (array_key_exists($pluginname, $GLOBALS['JOBSITE_PLUGINS']))
+                {
+                    foreach(array_keys($config['plugin_settings'][$pluginname]) as $settingkey) {
+                        $GLOBALS['JOBSITE_PLUGINS'][$pluginname]['other_settings'][$settingkey] = $config['plugin_settings'][$pluginname][$settingkey];
+                        $GLOBALS['USERDATA']['configuration_settings']['plugin_settings'][$pluginname][$settingkey] = $config['plugin_settings'][$pluginname][$settingkey];
+                    }
+                }
             }
         }
-
     }
 
     private function _parseGlobalSearchParamtersFromConfig_($config)
@@ -506,15 +516,15 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                 $GLOBALS['USERDATA']['selenium'][$k] = trim($config['selenium'][$k]);
         }
 
-        if (!((array_key_exists('autostart', $GLOBALS['USERDATA']['selenium']) === true && array_key_exists('port', $GLOBALS['USERDATA']['selenium']) === true ) || array_key_exists('start_command', $GLOBALS['USERDATA']['selenium']) === true ))
-            throw new Exception("Required parameters for Selenium are missing; app cannot start.  You must set either 'autostart' and 'port' or 'start_command' in your configuration files.");
+//        if (!((array_key_exists('autostart', $GLOBALS['USERDATA']['selenium']) === true && array_key_exists('port', $GLOBALS['USERDATA']['selenium']) === true ) || array_key_exists('start_command', $GLOBALS['USERDATA']['selenium']) === true ))
+//            throw new Exception("Required parameters for Selenium are missing; app cannot start.  You must set either 'autostart' and 'port' or 'start_command' in your configuration files.");
 
         $GLOBALS['USERDATA']['selenium']['autostart'] = \Scooper\intceil($GLOBALS['USERDATA']['selenium']['autostart']);
-
-        if(! array_key_exists('start_command', $GLOBALS['USERDATA']['selenium']) === true ) {
-            if ($GLOBALS['USERDATA']['selenium']['autostart'] == 1 && !(array_key_exists('jar', $GLOBALS['USERDATA']['selenium']) === true && array_key_exists('postfix_switches', $GLOBALS['USERDATA']['selenium']) === true))
-                throw new Exception("Required parameters to autostart Selenium are missing; you must set both 'jar' and 'postfix_switches' in your configuration files.");
-        }
+//
+//        if(! array_key_exists('start_command', $GLOBALS['USERDATA']['selenium']) === true ) {
+//            if ($GLOBALS['USERDATA']['selenium']['autostart'] == 1 && !(array_key_exists('jar', $GLOBALS['USERDATA']['selenium']) === true && array_key_exists('postfix_switches', $GLOBALS['USERDATA']['selenium']) === true))
+//                throw new Exception("Required parameters to autostart Selenium are missing; you must set both 'jar' and 'postfix_switches' in your configuration files.");
+//        }
 
         if (!(array_key_exists('server', $GLOBALS['USERDATA']['selenium']) === true))
             $GLOBALS['USERDATA']['selenium']['server'] = "localhost";

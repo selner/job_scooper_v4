@@ -583,7 +583,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
     private function getListingCountsByPlugin($fLayoutType, $arrPluginJobsUnfiltered = null, $arrExcludedJobs = null, $detailsHTMLBodyInclude = null)
     {
 
-        $arrCounts = null;
+        $arrCounts = array();
         $arrExcluded = null;
 
         $strOut = "                ";
@@ -601,7 +601,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             }
 
             $arrPluginExcludesJobs  = array();
-            if ($arrPluginJobsUnfiltered != null && is_array($arrPluginJobsUnfiltered) && countJobRecords($arrPluginJobsUnfiltered) > 0) {
+            if ($arrExcludedJobs != null && is_array($arrExcludedJobs) && countJobRecords($arrExcludedJobs) > 0) {
                 $arrPluginExcludesJobs = array_filter($arrExcludedJobs, function ($var) use ($plugin) { return (strcasecmp($var['job_site'], $plugin) == 0); } );
             }
 
@@ -856,7 +856,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
     private function _wrapCSSStyleOnHTML_($strHTML)
     {
         $cssToInlineStyles = new \TijsVerkoyen\CssToInlineStyles\CssToInlineStyles();
-        $css = file_get_contents(dirname(dirname(__FILE__)) . '/include/CSVTableStyle.css');
+        $css = file_get_contents(dirname(dirname(__FILE__)) . '/include/static/CSVTableStyle.css');
         $cssToInlineStyles->setHTML($strHTML);
         $cssToInlineStyles->setCSS($css);
         return $cssToInlineStyles->convert();

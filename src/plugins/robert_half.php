@@ -24,8 +24,9 @@ class PluginRobertHalf extends ClassClientHTMLJobSitePlugin
 {
 protected $siteName = 'RobertHalf';
 protected $siteBaseURL = "https://www.roberthalf.com";
-protected $strBaseURLFormat = 'https://www.roberthalf.com/technology/jobs/***KEYWORDS***/***LOCATION***?pageSize=1500';
-protected $additionalFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_DAYS_VALUE_NOTAPPLICABLE__  ];
+#    protected $strBaseURLFormat = 'https://www.roberthalf.com/technology/jobs/***KEYWORDS***/***LOCATION***?pageSize=1500';
+protected $strBaseURLFormat = 'https://www.roberthalf.com/technology/jobs/all-jobs/***LOCATION***?pageSize=1500';
+protected $additionalFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED ];
 protected $typeLocationSearchNeeded = 'location-city';
 protected $nJobListingsPerPage = 1500;
 

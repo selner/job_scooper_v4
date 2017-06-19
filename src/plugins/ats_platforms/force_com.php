@@ -20,7 +20,7 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 class BaseForceComClass extends ClassClientHTMLJobSitePlugin
 {
-protected $additionalFlags = [ C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED ] ;
+protected $additionalFlags = [ C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED ] ;
 protected $additionalLoadDelaySeconds = 3;
 protected $nJobListingsPerPage = 50;
 protected $nextPageScript = "function contains(selector, text) {

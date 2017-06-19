@@ -34,7 +34,7 @@ protected $nJobListingsPerPage = 500;
 protected $strBaseURLFormat = "https://betalist.com/jobs?q=%20&hPP=500&p=***PAGE_NUMBER***&dFR%5Bcommitment%5D%5B0%5D=Full-Time&dFR%5Bcommitment%5D%5B1%5D=Part-Time&dFR%5Bcommitment%5D%5B2%5D=Contractor&dFR%5Bcommitment%5D%5B3%5D=Internship&is_v=1";
 #    protected $strBaseURLFormat = "https://betalist.com/jobs?q=***KEYWORDS***&hPP=500&p=***PAGE_NUMBER***&dFR%5Bcommitment%5D%5B0%5D=Full-Time&dFR%5Bcommitment%5D%5B1%5D=Part-Time&dFR%5Bcommitment%5D%5B2%5D=Contractor&dFR%5Bcommitment%5D%5B3%5D=Internship&is_v=1";
 
-protected $additionalFlags = [  C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGE_VIA_URL, C__JOB_IGNORE_MISMATCHED_JOB_COUNTS ];  // TODO:  Add Lat/Long support for BetaList location search.
+protected $additionalFlags = [  C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGE_VIA_URL, C__JOB_IGNORE_MISMATCHED_JOB_COUNTS ];  // TODO:  Add Lat/Long support for BetaList location search.
 protected $additionalLoadDelaySeconds = 10;
 protected function getPageURLValue($nPage) { return ($nPage - 1); }
 

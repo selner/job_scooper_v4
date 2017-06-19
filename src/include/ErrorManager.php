@@ -69,7 +69,7 @@ class ErrorManager {
         $strErrorText = null;
         $attachments = array();
         $arrFailedPluginsReport = getFailedSearches();
-
+        
         if(countAssociativeArrayValues($arrFailedPluginsReport) == 0)
         {
             if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("No error notification necessary:  no errors detected for the run searches.", \Scooper\C__DISPLAY_NORMAL__); }

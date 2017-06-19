@@ -156,7 +156,7 @@ class JobsAutoMarker extends ClassJobsSiteCommon
 //    }
 
 
-    private function _markJobsList_SetLikelyDuplicatePosts_(&$arrJobsList)
+    function _markJobsList_SetLikelyDuplicatePosts_(&$arrJobsList)
     {
         if(count($arrJobsList) == 0) return;
 

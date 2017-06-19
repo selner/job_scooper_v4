@@ -26,16 +26,6 @@ abstract class AlternateAdicioCareerCastPlugin extends BaseAdicioCareerCastPlugi
     protected $nJobListingsPerPage = 20;
 }
 
-abstract class MicrodataAdicioCareerCastPlugin extends BaseAdicioCareerCastPlugin
-{
-
-    function __construct($strOutputDirectory = null)
-    {
-        $this->additionalFlags[] = C__JOB_PREFER_MICRODATA;
-        parent::__construct($strOutputDirectory);
-    }
-}
-
 abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = '';
@@ -52,7 +42,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
     protected $strBaseURLPathSection = "/jobs/results/keyword/***KEYWORDS***?view=List_Detail&SearchNetworks=US&networkView=national&location=***LOCATION***&radius=50&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***&postDate=***NUMBER_DAYS***";
 #    protected $strBaseURLPathSection = "/jobs/search/results?kwsJobTitleOnly=true&view=List_Detail&networkView=national&radius=50&&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***&postDate=***NUMBER_DAYS***";
     protected $additionalLoadDelaySeconds = 10;
-    protected $typeLocationSearchNeeded = 'location-city-comma-state';
+    protected $typeLocationSearchNeeded = 'location-city-comma-statecode-comma-countrycode';
 
     protected $arrListingTagSetup = array(
         'tag_listings_noresults' => array(array('tag' => 'div', 'attribute'=>'id', 'attribute_value' => 'aiAppWrapperBox'), array('tag' => 'form'), array('tag' => 'h2'), 'return_attribute' => 'plaintext'),
@@ -261,7 +251,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
 
 abstract class OptimizedAdicioCareerCastPlugin extends BaseAdicioCareerCastPlugin
 {
-    protected $additionalFlags = [C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED];
+    protected $additionalFlags = [C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED];
 
     function __construct($strOutputDirectory = null)
     {

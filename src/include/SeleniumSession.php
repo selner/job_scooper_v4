@@ -39,8 +39,8 @@ class SeleniumSession extends PropertyObject
     {
         foreach ($this->lastCookies as $cookie) {
             $this->driver->manage()->addCookie(array(
-                'name' => 'cookie_name',
-                'value' => 'cookie_value',
+                'name' => $cookie['name'],
+                'value' => $cookie['value'],
             ));
         }
         $this->loadPage($url);
@@ -71,6 +71,7 @@ class SeleniumSession extends PropertyObject
     function terminate()
     {
         $this->doneWithRemoteWebDriver();
+        $this->shutdownSelenium();
     }
 
     function loadPage($url)
@@ -179,39 +180,48 @@ class SeleniumSession extends PropertyObject
 
     static function startSeleniumServer()
     {
-//                    $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | echo `sed \'s/.*port \([0-9]*\).*/\1/\'`';
-        // $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | ps -p `awk \'NR!=1 {print $2}\'` -o command=';
-//                    $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'] . '| ps -o command= -p `awk \'NR != 1 {print $2}\'` | sed -n 2p';
-        $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'];
 
-        $seleniumStarted = false;
-        $pscmd = doExec($cmd);
-        if (!is_null($pscmd) && (is_array($pscmd) && count($pscmd) > 1))
-        {
-            $pidLine = preg_split('/\s+/', $pscmd[1]);
-            if(count($pidLine) >1)
+        $seleniumStarted = SeleniumSession::isServerUp();
+        if($seleniumStarted == true) {
+            $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \Scooper\C__DISPLAY_WARNING__);
+
+            if($GLOBALS['USERDATA']['selenium']['autostart'] == 1)
             {
-                $pid = $pidLine[1];
-                $cmd = 'ps -o command= -p ' . $pid;
+//                    $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | echo `sed \'s/.*port \([0-9]*\).*/\1/\'`';
+                // $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | ps -p `awk \'NR!=1 {print $2}\'` -o command=';
+//                    $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'] . '| ps -o command= -p `awk \'NR != 1 {print $2}\'` | sed -n 2p';
+                $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'];
+
+                $seleniumStarted = false;
                 $pscmd = doExec($cmd);
-
-                if(preg_match('/selenium/', $pscmd) !== false)
+                if (!is_null($pscmd) && (is_array($pscmd) && count($pscmd) > 1))
                 {
-                    $seleniumStarted = true;
-                    $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \Scooper\C__DISPLAY_WARNING__);
-                }
-                else
-                {
-                    $msg = "Error: port " . $GLOBALS['USERDATA']['selenium']['port'] . " is being used by process other than Selenium (" . var_export($pscmd, true) . ").  Aborting.";
-                    $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
-                    throw new Exception($msg);
+                    $pidLine = preg_split('/\s+/', $pscmd[1]);
+                    if(count($pidLine) >1)
+                    {
+                        $pid = $pidLine[1];
+                        $cmd = 'ps -o command= -p ' . $pid;
+                        $pscmd = doExec($cmd);
 
+                        if(preg_match('/selenium/', $pscmd) !== false)
+                        {
+                            $seleniumStarted = true;
+                            $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \Scooper\C__DISPLAY_WARNING__);
+                        }
+                        else
+                        {
+                            $msg = "Error: port " . $GLOBALS['USERDATA']['selenium']['port'] . " is being used by process other than Selenium (" . var_export($pscmd, true) . ").  Aborting.";
+                            $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
+                            throw new Exception($msg);
+
+                        }
+                    }
                 }
             }
         }
-
-        if($seleniumStarted === false)
+        else
         {
+        #        if($seleniumStarted === false)
             if($GLOBALS['USERDATA']['selenium']['autostart'] == 1)
             {
 
@@ -224,7 +234,7 @@ class SeleniumSession extends PropertyObject
                     sleep(10);
                     $GLOBALS['selenium_started'] = true;
                 }
-                else {
+                else if(stripos($GLOBALS['USERDATA']['selenium']['host_location'], "localhost") != false || (stripos($GLOBALS['USERDATA']['selenium']['host_location'], "127.0.0.1") != false)) {
 
                     $strCmdToRun = "java ";
                     if (array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
@@ -247,6 +257,43 @@ class SeleniumSession extends PropertyObject
                 throw new Exception("Selenium is not running and was not set to autostart. Cannot continue without an instance of Selenium running.");
             }
         }
+    }
+
+    static function isServerUp()
+    {
+        $hostHubPageURL = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
+        $msg = "Checking Selenium server up.... ";
+
+        $ret = false;
+
+        try{
+
+            $objSimplHtml = \SimpleHtmlDom\file_get_html($hostHubPageURL);
+            if ($objSimplHtml === false)
+            {
+                $ret = false;
+                return $ret;
+            }
+
+            $tag = $objSimplHtml->find("title");
+            if (is_null($tag) != true && count($tag) >= 1)
+            {
+                $title = $tag[0]->plaintext;
+                $msg = $msg . " Found hub server page '" . $title . "' as expected.  Selenium server is up.'";
+                $ret = true;
+            }
+
+        }
+        catch (Exception $ex)
+        {
+            $msg = $msg . " Error retrieving hub page: " . $ex->getMessage();
+        }
+        finally
+        {
+            $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_NORMAL__);
+        }
+
+        return $ret;
     }
 
     function get_driver()

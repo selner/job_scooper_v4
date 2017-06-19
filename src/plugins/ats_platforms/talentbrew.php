@@ -56,7 +56,7 @@ class PluginDisney extends BasePluginTalentBrew
     protected $siteName = 'Disney';
     protected $siteBaseURL = 'https://jobs.disneycareers.com';
 //    protected $additionalFlags = [ C__JOB_CLIENTSIDE_INFSCROLLPAGE ];
-    protected $additionalFlags = [ C__JOB_ITEMCOUNT_NOTAPPLICABLE__ ];
+    protected $additionalFlags = [ C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED ];
     protected $nJobListingsPerPage = 15;
 
     function __construct($strBaseDir = null)
@@ -64,8 +64,10 @@ class PluginDisney extends BasePluginTalentBrew
         parent::__construct($strBaseDir);
         unset($this->arrListingTagSetup['tag_listings_count']);  // hp doesn't support a results count
         $this->arrListingTagSetup['tag_listings_section'] = array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results-list'), array('tag' => 'table'),array('tag' => 'tr'));
+        $this->arrListingTagSetup['tag_next_button'] = array(array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'next', 'index' => 0));
 
-        $this->strBaseURLFormat = $this->strBaseURLFormat  . "?orgIds=391-5733-5732&kt=1";
+
+        $this->strBaseURLFormat = $this->siteBaseURL . "/search-jobs?k=&alp=6252001-5815135&alt=3";
     }
 
 }

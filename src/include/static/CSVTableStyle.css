@@ -96,12 +96,12 @@
 }
 
 .CSVTable tr:first-child td {
-    background: -o-linear-gradient(bottom, #005fbf 5%, #005fbf 100%);
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #005fbf), color-stop(1, #005fbf));
-    background: -moz-linear-gradient(center top, #005fbf 5%, #005fbf 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#005fbf", endColorstr="#005fbf");
-    background: -o-linear-gradient(top, #005fbf, 005 fbf);
-    background-color: #005fbf;
+    background: -o-linear-gradient(bottom, #4f3168 5%, #4f3168 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #4f3168), color-stop(1, #4f3168));
+    background: -moz-linear-gradient(center top, #4f3168 5%, #4f3168 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#4f3168", endColorstr="#4f3168");
+    background: -o-linear-gradient(top, #4f3168, 005 fbf);
+    background-color: #4f3168;
     border: 0px solid #000000;
     text-align: center;
     border-width: 0px 0px 1px 1px;
@@ -112,12 +112,12 @@
 }
 
 .CSVTable tr:first-child:hover td {
-    background: -o-linear-gradient(bottom, #005fbf 5%, #005fbf 100%);
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #005fbf), color-stop(1, #005fbf));
-    background: -moz-linear-gradient(center top, #005fbf 5%, #005fbf 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#005fbf", endColorstr="#005fbf");
-    background: -o-linear-gradient(top, #005fbf, 005 fbf);
-    background-color: #005fbf;
+    background: -o-linear-gradient(bottom, #4f3168 5%, #4f3168 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #4f3168), color-stop(1, #4f3168));
+    background: -moz-linear-gradient(center top, #4f3168 5%, #4f3168 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#4f3168", endColorstr="#4f3168");
+    background: -o-linear-gradient(top, #4f3168, 005 fbf);
+    background-color: #4f3168;
 }
 
 .CSVTable tr:first-child td:first-child {
@@ -132,7 +132,7 @@
 
 
 .odd_row {
-    background-color: #aad4ff;
+    background-color: #ece3f9;
 }
 
 .even_row {
@@ -140,12 +140,12 @@
 }
 
 .CSVTableHeaderRow {
-    background: -o-linear-gradient(bottom, #005fbf 5%, #005fbf 100%);
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #005fbf), color-stop(1, #005fbf));
-    background: -moz-linear-gradient(center top, #005fbf 5%, #005fbf 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#005fbf", endColorstr="#005fbf");
-    background: -o-linear-gradient(top, #005fbf, 005 fbf);
-    background-color: #005fbf;
+    background: -o-linear-gradient(bottom, #4f3168 5%, #4f3168 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #4f3168), color-stop(1, #4f3168));
+    background: -moz-linear-gradient(center top, #4f3168 5%, #4f3168 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#4f3168", endColorstr="#4f3168");
+    background: -o-linear-gradient(top, #4f3168, 005 fbf);
+    background-color: #4f3168;
     border: 0px solid #000000;
     text-align: center;
     border-width: 0px 0px 1px 1px;

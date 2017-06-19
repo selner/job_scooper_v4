@@ -28,8 +28,9 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
 
     function __destruct()
     {
-        if(!is_null($this->selenium))
+        if(!is_null($this->selenium) && ($GLOBALS['USERDATA']['selenium']['autostart'] == True)) {
             $this->selenium->terminate();
+        }
 
         if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
     }
@@ -101,17 +102,21 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
             catch (Exception $classError)
             {
                 $err = $classError;
-                if (($classError->getCode() == 4096 || $classError->getCode() == 0) && !is_null($this->selenium))
+                if (($classError->getCode() == 4096 || $classError->getCode() == 0) && $class->isBitFlagSet(C__JOB_USE_SELENIUM))
                 {
-                    try {
-                        $this->selenium->killAllAndRestartSelenium();
-                        $arrResults = $class->getUpdatedJobsForAllSearches();
-                        addJobsToJobsList($retJobList, $arrResults);
-                    } catch (Exception $classError)
+                    if(is_null($this->selenium))
                     {
-                        $err = $classError;
+                        handleException($classError, "Plugin ". $classPluginForSearch['class_name'] . " requires Selenium but the service could not be started: %s", $raise = false);
                     }
-
+                    else {
+                        try {
+                            $this->selenium->killAllAndRestartSelenium();
+                            $arrResults = $class->getUpdatedJobsForAllSearches();
+                            addJobsToJobsList($retJobList, $arrResults);
+                        } catch (Exception $classError) {
+                            $err = $classError;
+                        }
+                    }
                 }
                 else
                     handleException($classError, "Unable to run searches for ". $classPluginForSearch['class_name'] . ": %s", $raise = false);
@@ -128,7 +133,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
                         }
                         return false;
                     });
-                    if(count($arrWebDriverFail) > 2)
+                    if(count($arrWebDriverFail) > 2 && !is_null($this->selenium))
                     {
                         $this->selenium->killAllAndRestartSelenium();
 
