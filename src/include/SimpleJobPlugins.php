@@ -218,9 +218,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
                 if (preg_match($propertyRegEx, $ret, $match) !== false && count($match) > 1)
                     $ret = $match[1];
                 else {
-                    $strError = sprintf("%s plugin failed to find match for regex '%s' for tag '%s' with value '%s' as expected.", $this->siteName, $propertyRegEx, getArrayValuesAsString($arrTag), $ret);
-                    $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-                    throw new Exception($strError);
+                    handleException(new Exception(sprintf("%s plugin failed to find match for regex '%s' for tag '%s' with value '%s' as expected.", $this->siteName, $propertyRegEx, getArrayValuesAsString($arrTag), $ret)), "", true);
                 }
             }
         }

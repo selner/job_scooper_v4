@@ -736,21 +736,23 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     {
         if(isDebug())
         {
-            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Writing debug files for plugin " . $this->siteName ."'s search". $searchDetails['key'], \Scooper\C__DISPLAY_NORMAL__);
+            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Writing debug files for plugin " . $this->siteName ."'s search". $searchDetails['key'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
             $debugHTMLFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "html", $delim = "-");
             $debugCSVFile = substr($debugHTMLFile, 0, strlen($debugHTMLFile) - 4) . ".csv";
 
             if (!is_null($objSimpleHTMLResults)) {
-                saveDomToFile($objSimpleHTMLResults, $debugHTMLFile);
-                $arrErrorFiles[$debugHTMLFile] = $debugHTMLFile;
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML out to " . $debugHTMLFile, \Scooper\C__DISPLAY_NORMAL__);
+                saveDomToFile($objSimpleHTMLResults, $debugHTMLVarFile);
+                $arrErrorFiles[$debugHTMLVarFile] = $debugHTMLVarFile;
+                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML variable out to " . $debugHTMLVarFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            }
+
             }
 
             if (!is_null($arrSearchedJobs) && is_array($arrSearchedJobs) && countJobRecords($arrSearchedJobs) > 0) {
                 $this->writeJobsListToFile($debugCSVFile, $arrSearchedJobs);
                 $arrErrorFiles[$debugCSVFile] = $debugCSVFile;
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote results CSV data to " . $debugCSVFile, \Scooper\C__DISPLAY_NORMAL__);
+                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote results CSV data to " . $debugCSVFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             }
         }
     }
