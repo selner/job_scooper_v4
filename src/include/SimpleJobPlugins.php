@@ -302,7 +302,14 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
     function takeNextPageAction($driver)
     {
-        if (array_key_exists('tag_next_button', $this->arrListingTagSetup)) {
+        if (!is_null($this->nextPageScript)) {
+            $script = "function callNextPage() { " . $this->nextPageScript . " } ; callNextPage();";
+            $GLOBALS['logger']->logLine("Going to next page of results via script: " . $script, \Scooper\C__DISPLAY_NORMAL__);
+            $driver->executeScript($script);
+            sleep($this->additionalLoadDelaySeconds);
+        }
+        elseif (array_key_exists('tag_next_button', $this->arrListingTagSetup))
+        {
             if (!is_null($this->arrListingTagSetup['tag_next_button'])) {
                 $strMatch = $this->getTagSelector($this->arrListingTagSetup['tag_next_button']);
                 if (isset($strMatch)) {
@@ -322,11 +329,6 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
                         handleException(new Exception($strError), $fmtLogMsg = null, $raise = true);
                     }
                 }
-            } elseif (!is_null($this->nextPageScript)) {
-                $script = "function callNextPage() { " . $this->nextPageScript . " } ; callNextPage();";
-                $GLOBALS['logger']->logLine("Going to next page of results via script: " . $script, \Scooper\C__DISPLAY_NORMAL__);
-                $driver->executeScript($script);
-                sleep($this->additionalLoadDelaySeconds);
             }
         }
         else
