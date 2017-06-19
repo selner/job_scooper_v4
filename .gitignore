@@ -25,3 +25,4 @@ geckodriver
 src/uncommitted-patches
 vendor
 *.diff
+sshkeys
