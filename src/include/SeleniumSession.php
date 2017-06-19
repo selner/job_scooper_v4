@@ -39,8 +39,8 @@ class SeleniumSession extends PropertyObject
     {
         foreach ($this->lastCookies as $cookie) {
             $this->driver->manage()->addCookie(array(
-                'name' => $cookie['cookie_name'],
-                'value' => $cookie['cookie_value'],
+                'name' => $cookie['name'],
+                'value' => $cookie['value'],
             ));
         }
         $this->loadPage($url);
@@ -188,35 +188,35 @@ class SeleniumSession extends PropertyObject
             if($GLOBALS['USERDATA']['selenium']['autostart'] == 1)
             {
 //                    $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | echo `sed \'s/.*port \([0-9]*\).*/\1/\'`';
-        // $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | ps -p `awk \'NR!=1 {print $2}\'` -o command=';
+                // $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | ps -p `awk \'NR!=1 {print $2}\'` -o command=';
 //                    $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'] . '| ps -o command= -p `awk \'NR != 1 {print $2}\'` | sed -n 2p';
-        $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'];
+                $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'];
 
-        $seleniumStarted = false;
-        $pscmd = doExec($cmd);
-        if (!is_null($pscmd) && (is_array($pscmd) && count($pscmd) > 1))
-        {
-            $pidLine = preg_split('/\s+/', $pscmd[1]);
-            if(count($pidLine) >1)
-            {
-                $pid = $pidLine[1];
-                $cmd = 'ps -o command= -p ' . $pid;
+                $seleniumStarted = false;
                 $pscmd = doExec($cmd);
-
-                if(preg_match('/selenium/', $pscmd) !== false)
+                if (!is_null($pscmd) && (is_array($pscmd) && count($pscmd) > 1))
                 {
-                    $seleniumStarted = true;
-                    $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \Scooper\C__DISPLAY_WARNING__);
-                }
-                else
-                {
-                    $msg = "Error: port " . $GLOBALS['USERDATA']['selenium']['port'] . " is being used by process other than Selenium (" . var_export($pscmd, true) . ").  Aborting.";
-                    $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
-                    throw new Exception($msg);
+                    $pidLine = preg_split('/\s+/', $pscmd[1]);
+                    if(count($pidLine) >1)
+                    {
+                        $pid = $pidLine[1];
+                        $cmd = 'ps -o command= -p ' . $pid;
+                        $pscmd = doExec($cmd);
 
+                        if(preg_match('/selenium/', $pscmd) !== false)
+                        {
+                            $seleniumStarted = true;
+                            $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \Scooper\C__DISPLAY_WARNING__);
+                        }
+                        else
+                        {
+                            $msg = "Error: port " . $GLOBALS['USERDATA']['selenium']['port'] . " is being used by process other than Selenium (" . var_export($pscmd, true) . ").  Aborting.";
+                            $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
+                            throw new Exception($msg);
+
+                        }
+                    }
                 }
-            }
-        }
             }
         }
         else
