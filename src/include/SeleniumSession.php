@@ -180,6 +180,13 @@ class SeleniumSession extends PropertyObject
 
     static function startSeleniumServer()
     {
+
+        $seleniumStarted = SeleniumSession::isServerUp();
+        if($seleniumStarted == true) {
+            $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \Scooper\C__DISPLAY_WARNING__);
+
+            if($GLOBALS['USERDATA']['selenium']['autostart'] == 1)
+            {
 //                    $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | echo `sed \'s/.*port \([0-9]*\).*/\1/\'`';
         // $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | ps -p `awk \'NR!=1 {print $2}\'` -o command=';
 //                    $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'] . '| ps -o command= -p `awk \'NR != 1 {print $2}\'` | sed -n 2p';
@@ -210,9 +217,11 @@ class SeleniumSession extends PropertyObject
                 }
             }
         }
-
-        if($seleniumStarted === false)
+            }
+        }
+        else
         {
+        #        if($seleniumStarted === false)
             if($GLOBALS['USERDATA']['selenium']['autostart'] == 1)
             {
 
@@ -249,36 +258,43 @@ class SeleniumSession extends PropertyObject
             }
         }
     }
-//
-//    function isServerUp()
-//    {
-//        $hostHubPageURL = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
-//        $msg = "Checking Selenium server up.... ";
-//
-//        $ret = false;
-//
-//        try{
-//
-//            $objSimplHtml = \SimpleHtmlDom\file_get_html($hostHubPageURL);
-//            $tag = $objSimplHtml->find("title");
-//            if (is_null($tag) != true && count($tag) >= 1)
-//            {
-//                $title = $tag[0]->plaintext;
-//                $msg = $msg . " Found hub page " . $title;
-//                $ret = true;
-//            }
-//
-//        }
-//        catch (Exception $ex)
-//        {
-//            $msg = $msg . " Error retrieving hub page: " . $ex->getMessage();
-//        }
-//        finally
-//        {
-//            $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_NORMAL__);
-//            return $ret;
-//        }
-//    }
+
+    static function isServerUp()
+    {
+        $hostHubPageURL = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
+        $msg = "Checking Selenium server up.... ";
+
+        $ret = false;
+
+        try{
+
+            $objSimplHtml = \SimpleHtmlDom\file_get_html($hostHubPageURL);
+            if ($objSimplHtml === false)
+            {
+                $ret = false;
+                return $ret;
+            }
+
+            $tag = $objSimplHtml->find("title");
+            if (is_null($tag) != true && count($tag) >= 1)
+            {
+                $title = $tag[0]->plaintext;
+                $msg = $msg . " Found hub server page '" . $title . "' as expected.  Selenium server is up.'";
+                $ret = true;
+            }
+
+        }
+        catch (Exception $ex)
+        {
+            $msg = $msg . " Error retrieving hub page: " . $ex->getMessage();
+        }
+        finally
+        {
+            $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_NORMAL__);
+        }
+
+        return $ret;
+    }
 
     function get_driver()
     {
