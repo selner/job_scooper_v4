@@ -763,6 +763,16 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML variable out to " . $debugHTMLVarFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             }
 
+            if($this->selenium != null)
+            {
+                $driver = $this->selenium->get_driver();
+                $html = $driver->getPageSource();
+                file_put_contents($debugHTMLSelenFile, $html);
+                $arrErrorFiles[$debugHTMLSelenFile] = $debugHTMLSelenFile;
+                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML from Selenium out to " . $debugHTMLSelenFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+                $driver->takeScreenshot($debugSSFile);
+                $arrErrorFiles[$debugSSFile] = $debugSSFile;
                 if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Saved screenshot from Selenium out to " . $debugSSFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             }
 
