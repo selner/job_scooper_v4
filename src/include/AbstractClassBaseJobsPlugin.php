@@ -184,6 +184,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     protected $additionalFlags = [];
     protected $secsPageTimeout = null;
     protected $pluginResultsType;
+    protected $selenium = null;
 
     protected $strKeywordDelimiter = null;
     protected $additionalLoadDelaySeconds = 0;
@@ -191,6 +192,15 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
 //    function takeNextPageAction($driver, $nextPageNum) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); return null;}
 
+    protected function getActiveWebdriver()
+    {
+        if (!is_null($this->selenium) && !is_null($this->webdriver))
+        {
+            return $this->webdriver;
+        }
+        else
+            throw new Exception("Error:  active webdriver for Selenium not found as expected.");
+    }
 
     protected function _exportObjectToJSON_()
     {
@@ -362,9 +372,12 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     protected function parseTotalResultsCount($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); }
 
-    protected function getNextInfiniteScrollSet($driver)
+    protected function getNextInfiniteScrollSet()
     {
+
         // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
+        $driver = $this->getActiveWebdriver();
+
         $driver->executeScript("window.scrollBy(500,5000);");
 
         sleep(5);
@@ -868,7 +881,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         $nItemCount = 1;
         $nPageCount = 1;
         $arrSearchReturnedJobs = null;
-        $selen = null;
         $objSimpleHTML = null;
 
         $GLOBALS['logger']->logLine("Getting count of " . $this->siteName . " jobs for search '" . $searchDetails['key'] . "': " . $searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -879,8 +891,8 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             {
                 try
                 {
-                    $selen = new SeleniumSession($this->additionalLoadDelaySeconds);
-                    $html = $selen->getPageHTML($searchDetails['search_start_url']);
+                    $this->selenium = new SeleniumSession($this->additionalLoadDelaySeconds);
+                    $html = $this->selenium->getPageHTML($searchDetails['search_start_url']);
                     $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
                 } catch (Exception $ex) {
                     $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
@@ -974,15 +986,15 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                                 $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
                                 if ($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
                                     return null;
-                                $selen->loadPage($strURL);
+                                $this->selenium->loadPage($strURL);
                             }
                             elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE))
                             {
-                                $selen->loadPage($strURL);
+                                $this->selenium->loadPage($strURL);
                                 while($nPageCount <= $totalPagesCount)
                                 {
                                     if(isDebug() && isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("... getting infinite results page #".$nPageCount." of " .$totalPagesCount, \Scooper\C__DISPLAY_NORMAL__); }
-                                    $this->getNextInfiniteScrollSet($selen->driver);
+                                    $this->getNextInfiniteScrollSet($this->selenium->driver);
                                     $nPageCount = $nPageCount + 1;
                                 }
                             }
@@ -993,15 +1005,15 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                                     // otherwise we're out of results so end the loop here.
                                     //
                                     try {
-                                        $this->takeNextPageAction($selen->driver);
+                                        $this->takeNextPageAction($this->selenium->driver);
                                     } catch (Exception $ex) {
                                         handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
                                     }
                                 }
                             }
 
-                            $strURL = $selen->driver->getCurrentURL();
-                            $html = $selen->driver->getPageSource();
+                            $strURL = $this->selenium->driver->getCurrentURL();
+                            $html = $this->selenium->driver->getPageSource();
                             $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
                             //
                             // If we are in debug mode, save the HTML we got back for the listing count page to disk so it is
