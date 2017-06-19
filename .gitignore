@@ -8,8 +8,6 @@ src/vendor/*
 
 ScoopJobs.app*
 
-build*
-
 *IGNORE*
 
 configs/*
