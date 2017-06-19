@@ -664,6 +664,16 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
             }
 
+            // Let's do another check to make sure we got any listings at all for those that weren't
+            // filtered by keyword.  If we returned zero jobs for any given city and no keyword filter
+            // then we are likely broken somehow unexpectedly.   Make sure to error so that we note
+            // it in the results & error notifications so that a developer can take a look.
+            if($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$this->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED) && countJobRecords($arrSearchJobList) == 0)
+            {
+                $strError = "The search " . $searchDetails['key'] . " on " . $this->siteName . " downloaded 0 jobs yet we did not have any keyword filter is use.  Logging as a potential error since we should have had something returned. [URL=" . $searchDetails['search_start_url'] . "].  ";
+                handleException(new Exception($strError), null, true);
+            }
+
         } catch (Exception $ex) {
 
             //
@@ -703,15 +713,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
 
 
-        // Let's do another check to make sure we got any listings at all for those that weren't
-        // filtered by keyword.  If we returned zero jobs for any given city and no keyword filter
-        // then we are likely broken somehow unexpectedly.   Make sure to error so that we note
-        // it in the results & error notifications so that a developer can take a look.
-        if($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$this->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED) && countJobRecords($arrSearchJobList) == 0)
-        {
-            $strError = "The search " . $searchDetails['key'] . " on " . $this->siteName . " downloaded 0 jobs yet we did not have any keyword filter is use.  Logging as a potential error since we should have had something returned. [URL=" . $searchDetails['search_start_url'] . "].  ";
-            handleException(new Exception($strError), null, true);
-        }
 
         if (!is_null($retLastEx))
         {
