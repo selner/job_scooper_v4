@@ -76,13 +76,15 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         $GLOBALS['logger']->logLine(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
 
-        $this->_markJobsList_SetLikelyDuplicatePosts_($this->arrMasterJobList);
-        $this->_markJobsList_SetOutOfArea_($this->arrMasterJobList);
+        $masterCopy = \Scooper\array_copy($this->arrMasterJobList);
 
-        $arrJobs_AutoUpdatable = array_filter($this->arrMasterJobList, "isJobAutoUpdatable");
+        $arrJobs_AutoUpdatable = array_filter($masterCopy, "isJobAutoUpdatable");
+        $this->_markJobsList_SetLikelyDuplicatePosts_($arrJobs_AutoUpdatable);
+        $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
         $this->_markJobsList_withAutoItems_($arrJobs_AutoUpdatable);
-        $masterCopy = $this->arrMasterJobList;
-        $this->arrMasterJobList= array_replace_recursive($masterCopy, $arrJobs_AutoUpdatable);
+        $newMaster = array_replace_recursive($masterCopy, $arrJobs_AutoUpdatable);
+
+        $this->arrMasterJobList = \Scooper\array_copy($newMaster);
     }
 
     public function getMarkedJobs()
@@ -161,15 +163,9 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         if(count($arrJobsList) == 0) return;
 
         $nJobsMatched = 0;
-
-        $arrKeys_CompanyAndRole = array_column ( $arrJobsList, 'key_company_role');
-        $arrKeys_JobSiteAndJobID = array_column ( $arrJobsList, 'key_jobsite_siteid');
-
-
-        $arrUniqIds = array_unique($arrKeys_CompanyAndRole);
-        $nUniqJobs = countAssociativeArrayValues($arrUniqIds);
-        $arrOneJobListingPerCompanyAndRole = array_unique_multidimensional(array_combine($arrKeys_JobSiteAndJobID, $arrKeys_CompanyAndRole));
-        $arrLookup_JobListing_ByCompanyRole = array_flip($arrOneJobListingPerCompanyAndRole);
+        $arrAllJobSiteIds_byCompanyAndRole = array_column ( $arrJobsList, 'key_company_role', 'key_jobsite_siteid' );
+        $arrUniqJobSiteIds_byCompanyAndRole = array_unique($arrAllJobSiteIds_byCompanyAndRole);
+        $nUniqJobs = countAssociativeArrayValues($arrUniqJobSiteIds_byCompanyAndRole);
 
         $GLOBALS['logger']->logLine("Marking Duplicate Job Roles" , \Scooper\C__DISPLAY_NORMAL__);
         $GLOBALS['logger']->logLine($nUniqJobs . "/" . countAssociativeArrayValues($arrJobsList) . " jobs have immediately been marked as non-duplicate based on company/role pairing. " , \Scooper\C__DISPLAY_NORMAL__);
@@ -181,11 +177,13 @@ class JobsAutoMarker extends ClassJobsSiteCommon
                 continue;  // only mark dupes that haven't yet been marked with anything
             }
 
-            $indexPrevListingForCompanyRole = $arrLookup_JobListing_ByCompanyRole[$job['key_company_role']];
+            if (array_key_exists($job['key_jobsite_siteid'], $arrUniqJobSiteIds_byCompanyAndRole) == false)
+            {
+
             // Another listing already exists with that title at that company
             // (and we're not going to be updating the record we're checking)
+            $indexPrevListingForCompanyRole = array_flip($arrUniqJobSiteIds_byCompanyAndRole)[$job['key_company_role']];
             if($indexPrevListingForCompanyRole != null && strcasecmp($indexPrevListingForCompanyRole, $job['key_jobsite_siteid'])!=0)
-            {
                 //
                 // Add a note to the previous listing that it had a new duplicate
                 //
@@ -200,7 +198,6 @@ class JobsAutoMarker extends ClassJobsSiteCommon
             }
 
         }
-        unset($job);
 
         $strTotalRowsText = "/".count($arrJobsList);
         $GLOBALS['logger']->logLine("Marked  ".$nJobsMatched .$strTotalRowsText ." roles as likely duplicates based on company/role. " , \Scooper\C__DISPLAY_NORMAL__);
