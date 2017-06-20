@@ -35,6 +35,7 @@ class StageManager extends ClassJobsSiteCommon
     protected $logger = null;
     protected $pathAllMatchedJobs = null;
     protected $pathAllExcludedJobs = null;
+    protected $pathAllJobs = null;
 
     function __construct()
     {
@@ -54,6 +55,7 @@ class StageManager extends ClassJobsSiteCommon
 
             $this->pathAllExcludedJobs = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], "all-excluded-jobs"));
             $this->pathAllMatchedJobs = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], "all-job-matches"));
+            $this->pathAllJobs = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], "all-jobs"));
 
 
         } catch (Exception $ex) {
@@ -244,11 +246,7 @@ class StageManager extends ClassJobsSiteCommon
                     $marker->setJobsList($arrJobs);
                     $marker->markJobsList();
                     $arrMarkedJobs = $marker->getMarkedJobs();
-
-                    // before saving, go through and do another dedupe pass
-                    // just to be sure.
-                    $marker->_markJobsList_SetLikelyDuplicatePosts_($arrMarkedJobs);
-
+                    
                     $arrJobsInterestedJobs = array_filter($arrMarkedJobs, "isMarked_InterestedOrBlank");
                     $arrJobsNotInterested = array_filter($arrMarkedJobs, "isMarked_NotInterested");
 
@@ -321,6 +319,24 @@ class StageManager extends ClassJobsSiteCommon
         return $jsMerged;
     }
 
+    private function splitJobListByMarkedOrNot($jobsList)
+    {
+        $ret = array('interested' => array(), 'not_interested' => array());
+
+        if (countJobRecords($jobsList) > 0) {
+            $this->logger->logLine(PHP_EOL . "    ~~~~~~ Auto-marking jobs based on user settings ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+            $marker = new JobsAutoMarker();
+            $marker->setJobsList($jobsList);
+            $marker->markJobsList();
+            $arrAllJobsMarked = $marker->getMarkedJobs();
+
+            $ret['interested'] = array_filter($arrAllJobsMarked, "isMarked_InterestedOrBlank");
+            $ret['not_interested'] = array_filter($arrAllJobsMarked, "isMarked_NotInterested");
+        }
+
+        return $ret;
+    }
+
     public function doStage3()
     {
         
@@ -328,16 +344,48 @@ class StageManager extends ClassJobsSiteCommon
             $this->logger->logLine("Stage 3:  Aggregating results from all jobs sites ", \Scooper\C__DISPLAY_SECTION_START__);
             $this->logger->logLine("Merging matched job site results into single file: " . $this->pathAllMatchedJobs."[.json and .csv]", \Scooper\C__DISPLAY_NORMAL__);
             $jobsinterested = $this->mergeAllJobsJsonInDir($GLOBALS['USERDATA']['directories']['listings-userinterested']);
-            $jobsnotinterested= $this->mergeAllJobsJsonInDir($GLOBALS['USERDATA']['directories']['listings-usernotinterested']);
-
-            foreach(array(array($this->pathAllMatchedJobs, $jobsinterested), array($this->pathAllExcludedJobs, $jobsnotinterested)) as $jobset) {
-                $data = array('key' => null, 'listtype' => JOBLIST_TYPE_MARKED, 'jobs_count' => countJobRecords($jobset[1]), 'jobslist' => $jobset[1], 'search' => null);
-                writeJSON($data, $jobset[0].".json");
-                $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/jobsjson_to_csv.py");
-                $cmd = "python " . $PYTHONPATH . " -i " . escapeshellarg($jobset[0].".json") . " -o " . escapeshellarg($jobset[0].".csv");
-                $this->logger->logLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd . "  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
-                doExec($cmd);
+            $arrFullJobList = $this->mergeAllJobsJsonInDir($GLOBALS['USERDATA']['directories']['listings-usernotinterested']);
+            if (countJobRecords($arrFullJobList) > 0)
+            {
+                foreach(array_keys($jobsinterested) as $key)
+                {
+                    if(!array_key_exists($key, $arrFullJobList))
+                        $arrFullJobList[$key] = $jobsinterested[$key];
+                }
             }
+            else {
+                $arrFullJobList = $jobsinterested;
+            }
+
+            $marker = new JobsAutoMarker();
+            $marker->setJobsList($arrFullJobList);
+            $marker->markJobsList();
+            $arrFullJobList = $marker->getMarkedJobs();
+
+//            foreach(array(array($this->pathAllMatchedJobs, $jobsinterested), array($this->pathAllExcludedJobs, $jobsnotinterested)) as $jobset) {
+//                $data = array('key' => null, 'listtype' => JOBLIST_TYPE_MARKED, 'jobs_count' => countJobRecords($jobset[1]), 'jobslist' => $jobset[1], 'search' => null);
+//                writeJSON($data, $jobset[0].".json");
+//                $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/jobsjson_to_csv.py");
+//                $cmd = "python " . $PYTHONPATH . " -i " . escapeshellarg($jobset[0].".json") . " -o " . escapeshellarg($jobset[0].".csv");
+//                $this->logger->logLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd . "  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+//                doExec($cmd);
+//            }
+//
+            $data = array('key' => null, 'listtype' => JOBLIST_TYPE_MARKED, 'jobs_count' => countJobRecords($arrFullJobList), 'jobslist' => $arrFullJobList, 'search' => null);
+            writeJSON($data, $this->pathAllJobs.".json");
+            $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/jobsjson_to_csv.py");
+            $cmd = "python " . $PYTHONPATH . " -i " . escapeshellarg($this->pathAllJobs.".json") . " -o " . escapeshellarg($this->pathAllJobs.".csv");
+            $this->logger->logLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd . "  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+            doExec($cmd);
+
+
+            $arrJobsInterestedJobs = array_filter($arrFullJobList, "isMarked_InterestedOrBlank");
+            if(countJobRecords($arrJobsInterestedJobs) > 0)
+                writeJobsListDataToFile($this->pathAllMatchedJobs.".json", $fileKey = null, $arrJobsInterestedJobs, JOBLIST_TYPE_MARKED,  $dirKey = "listings-userinterested");
+
+            $arrJobsNotInterestedJobs = array_filter($arrFullJobList, "isMarked_NotInterested");
+            if(countJobRecords($arrJobsNotInterestedJobs) > 0)
+                writeJobsListDataToFile($this->pathAllExcludedJobs.".json", $fileKey = null, $arrJobsNotInterestedJobs, JOBLIST_TYPE_MARKED,  $dirKey = "listings-usernotinterested");
 
 //            $this->logger->logLine("Merging excluded job site results into single file: " . $this->pathAllExcludedJobs, \Scooper\C__DISPLAY_NORMAL__);
 //            $data = array('key' => null, 'listtype' => JOBLIST_TYPE_MARKED, 'jobs_count' => countJobRecords($jobsnotinterested ), 'jobslist' => $jobsnotinterested , 'search' => null);
