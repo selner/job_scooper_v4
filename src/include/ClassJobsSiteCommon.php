@@ -416,11 +416,15 @@ class ClassJobsSiteCommon
         $classCombined = new \Scooper\ScooperSimpleCSV($strOutFilePath , "w");
 
         $arrRecordsToOutput = array_unique_multidimensional($arrJobsRecordsToUse);
-        ksort($arrRecordsToOutput);
         if (!is_array($arrRecordsToOutput))
         {
             $arrRecordsToOutput = array();
         }
+        else
+        {
+            sortJobsListByCompanyRole($arrRecordsToOutput);
+        }
+        
         if ($keysToOutput == null && count($arrRecordsToOutput) > 0)
         {
             $exampleRec = $arrRecordsToOutput[array_keys($arrRecordsToOutput)[0]];

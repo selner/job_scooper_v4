@@ -506,6 +506,28 @@ function getMergedJobRecord($prevJobRecord, $newerJobRecord)
 
 }
 
+function sortJobsListByCompanyRole(&$arrJobList)
+{
+
+    if (countJobRecords($arrJobList) > 0) {
+        $arrFinalJobIDs_SortedByCompanyRole = array();
+        $finalJobIDs_CompanyRole = array_column($arrJobList, 'key_company_role', 'key_jobsite_siteid');
+        foreach (array_keys($finalJobIDs_CompanyRole) as $key) {
+            // Need to add uniq key of job site id to the end or it will collapse duplicate job titles that
+            // are actually multiple open posts
+            $arrFinalJobIDs_SortedByCompanyRole[$finalJobIDs_CompanyRole[$key] . "-" . $key] = $key;
+        }
+
+        ksort($arrFinalJobIDs_SortedByCompanyRole);
+        $arrFinalJobs_SortedByCompanyRole = array();
+        foreach ($arrFinalJobIDs_SortedByCompanyRole as $jobid) {
+            $arrFinalJobs_SortedByCompanyRole[$jobid] = $arrJobList[$jobid];
+        }
+        $arrJobList = $arrFinalJobs_SortedByCompanyRole;
+    }
+
+}
+
 function loadCSV($filename, $indexKeyName = null)
 {
     if (!is_file($filename)) {
