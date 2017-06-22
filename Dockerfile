@@ -62,40 +62,40 @@ RUN composer --version
 ##
 ## TODO:  Install PHP XDebug
 ##
-########################################################
+#######################################################
 #
-# RUN pecl install xdebug
+#RUN pecl install xdebug
 #
-# RUN docker-php-ext-enable xdebug
+#RUN docker-php-ext-enable xdebug
 #
 # EXPOSE 9000
 #
-# RUN echo "zend_extension=/usr/lib/php5/20131226/xdebug.so" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-# RUN echo "xdebug.remote_enable = 1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-# RUN echo "xdebug.default_enable = 0" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-# RUN echo "xdebug.remote_autostart = 1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-# RUN echo "xdebug.remote_handler=dbgp" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-# RUN echo "xdebug.remote_mode=req" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-# RUN echo "xdebug.remote_port=10000" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-# RUN echo "xdebug.remote_log=/var/log/xdebug_remote.log" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-# RUN echo "xdebug.idekey=PHPSTORM" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-# RUN echo "xdebug.remote_connect_back = 0" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-# RUN echo "xdebug.profiler_enable = 0" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-# RUN echo "xdebug.remote_host = 192.168.24.202" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+#RUN echo "zend_extension=/usr/lib/php5/20131226/xdebug.so" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+#RUN echo "xdebug.remote_enable = 1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+#RUN echo "xdebug.default_enable = 0" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+#RUN echo "xdebug.remote_autostart = 1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+#RUN echo "xdebug.remote_handler=dbgp" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+#RUN echo "xdebug.remote_mode=req" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+#RUN echo "xdebug.remote_port=10000" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+#RUN echo "xdebug.remote_log=/var/log/xdebug_remote.log" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+#RUN echo "xdebug.idekey=PHPSTORM" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+#RUN echo "xdebug.remote_connect_back = 0" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+#RUN echo "xdebug.profiler_enable = 0" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+#RUN echo "xdebug.remote_host = 192.168.24.202" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
-########################################################
-##
-## Configure SSH for Github repos
-##
-## Copy the SSH keys you will use into ./sshkeys and
-## rename them to docker_rsa and docker_rsa.pub.
-##
-## Note:  ./sshkeys/* is excluded in .gitignore so those
-##        keys will never get committed to github.
-##
-## Learn more at https://help.github.com/articles/connecting-to-github-with-ssh/.
-##
-########################################################
+######################################################
+#
+# Configure SSH for Github repos
+#
+# Copy the SSH keys you will use into ./sshkeys and
+# rename them to docker_rsa and docker_rsa.pub.
+#
+# Note:  ./sshkeys/* is excluded in .gitignore so those
+#        keys will never get committed to github.
+#
+# Learn more at https://help.github.com/articles/connecting-to-github-with-ssh/.
+#
+######################################################
 
 # Make ssh dir
 RUN mkdir /root/.ssh/
@@ -121,56 +121,72 @@ RUN ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts
 
 
 ########################################################
-##
-## Set up data volume for job output that will be
-## mapped to the local hard drive of the actual PC
-##
+###
+### Set up data volume for job output that will be
+### mapped to the local hard drive of the actual PC
+###
 ########################################################
 VOLUME "/var/local/jobs_scooper"
+VOLUME "/root/nltk_data"
 
 
 ########################################################
-##
-## Clone the github source repo to the container
-## and install the dependencies
-##
+###
+### Clone the github source repo to the container
+### and install the dependencies
+###
 ########################################################
 
 WORKDIR /opt/jobs_scooper
+
+#
+# Clone the current repo from Github 
+#
 RUN git clone https://github.com/selner/job_scooper_v4.git /opt/jobs_scooper
 
-##
-## To use local source files, comment out the previous line and
-## use these lines instead
-##
-# ADD . /opt/jobs_scooper
-# RUN rm /opt/jobs_scooper/src/*.lock
-# RUN rm -Rf /opt/jobs_scooper/src/vendor
-RUN ls /opt/jobs_scooper/src
+#
+# Alternatively, you can uncomment this section and use your local source
+# code in the docker image
+#
+#ADD . /opt/jobs_scooper
+#RUN rm /opt/jobs_scooper/src/*.lock
+#RUN rm -Rf /opt/jobs_scooper/src/vendor/*.lock
+#ADD run_scoop_allusers.sh .
 
+#
+# Set any scripts to be executable
+#
+RUN chmod +x /opt/jobs_scooper/*.sh
+
+
+#RUN ls -al /opt/jobs_scooper
+#RUN ls -al /opt/jobs_scooper/src
+
+
+########################################################
+###
+### Install PHP dependencies
+###
+########################################################
 WORKDIR /opt/jobs_scooper/src
-
-
-########################################################
-##
-## Install PHP dependencies
-##
-########################################################
 RUN composer install --no-interaction
 
 
 ########################################################
-##
-## Install python dependencies
-##
+###
+### Install python dependencies
+###
 ########################################################
 RUN pip install --no-cache-dir -v -r /opt/jobs_scooper/src/python/pyJobNormalizer/requirements.txt
 
 
 ########################################################
-##
-## Run job_scooper for a given config
-##
+###
+### Run job_scooper for a given config
+###
 ########################################################
 
-ENTRYPOINT php runJobs.php -ini /var/local/jobs_scooper/configs/evan/job_scooper_config.ini -all -days 1 --output /var/local/jobs_scooper/output -notify=1 -stages=1,2,3,4
+WORKDIR /opt/jobs_scooper
+
+# ENTRYPOINT php runJobs.php -ini /var/local/jobs_scooper/configs/evan/job_scooper_config.ini -all -days 1 --output /var/local/jobs_scooper/output -notify=1 
+CMD bash -C '/opt/jobs_scooper/run_scoop_allusers.sh';'bash'
