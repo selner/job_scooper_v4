@@ -235,6 +235,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         {
             $settingFiles = $tempConfigSettings['settings_files'];
             foreach($settingFiles as $nextConfigFile)
+            if(isset($tempConfigSettings['settings_files']))
             {
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Recursing into child settings file ".$nextConfigFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 $this->_LoadAndMergeAllConfigFilesRecursive($nextConfigFile);
