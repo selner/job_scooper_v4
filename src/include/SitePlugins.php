@@ -28,12 +28,12 @@ require_once(__ROOT__.'/include/ClassConfig.php');
 require_once(__ROOT__.'/include/StageManager.php');
 require_once (__ROOT__.'/include/ClassMultiSiteSearch.php');
 
-$files = glob(__ROOT__.'/plugins/' . '/*.php');
+$files = glob(__ROOT__.'/plugins/' . '*.php');
 foreach ($files as $file) {
     require_once($file);
 }
 
-$files = glob(__ROOT__.'/plugins/ats_platforms/' . '/*.php');
+$files = glob(__ROOT__.'/plugins/ats_platforms/' . '*.php');
 foreach ($files as $file) {
     require_once($file);
 }
