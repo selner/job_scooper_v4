@@ -229,27 +229,30 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         $iniParser->use_array_object = false;
         $tempConfigSettings = $iniParser->parse();
         $iniParser = null;
-        $this->_arrConfigFileSettings_[$fileConfigToLoad] = \Scooper\array_copy($tempConfigSettings);
-
-        if(isset($tempConfigSettings['settings_files']))
+        if(!array_key_exists($fileConfigToLoad, $this->_arrConfigFileSettings_))
         {
-            $settingFiles = $tempConfigSettings['settings_files'];
-            foreach($settingFiles as $nextConfigFile)
+
+            $this->_arrConfigFileSettings_[$fileConfigToLoad] = \Scooper\array_copy($tempConfigSettings);
+
             if(isset($tempConfigSettings['settings_files']))
             {
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Recursing into child settings file ".$nextConfigFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                $this->_LoadAndMergeAllConfigFilesRecursive($nextConfigFile);
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added child settings file ".$nextConfigFile, \Scooper\C__DISPLAY_ITEM_RESULT__);
+                foreach($tempConfigSettings['settings_files'] as $nextConfigFile)
+                {
+                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Recursing into child settings file ".$nextConfigFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    $this->_LoadAndMergeAllConfigFilesRecursive($nextConfigFile);
+                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added child settings file ".$nextConfigFile, \Scooper\C__DISPLAY_ITEM_RESULT__);
+                }
             }
+
+            $allConfigfileSettings = [];
+            foreach($this->_arrConfigFileSettings_ as $tempConfig)
+            {
+                $allConfigfileSettings = array_merge_recursive($allConfigfileSettings, $tempConfig);
+            }
+
+            $this->allConfigFileSettings = $allConfigfileSettings;
         }
 
-        $allConfigfileSettings = [];
-        foreach($this->_arrConfigFileSettings_ as $tempConfig)
-        {
-            $allConfigfileSettings = array_merge_recursive($allConfigfileSettings, $tempConfig);
-        }
-
-        $this->allConfigFileSettings = $allConfigfileSettings;
     }
 
 
