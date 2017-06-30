@@ -215,7 +215,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
             if (!is_null($propertyRegEx) && is_string($ret) && strlen($ret) > 0) {
                 $match = array();
-                if (preg_match($propertyRegEx, $ret, $match) !== false && count($match) > 1)
+                if (preg_match($propertyRegEx, $ret, $match) !== false && count($match) >= 1)
                     $ret = $match[1];
                 else {
                     handleException(new Exception(sprintf("%s plugin failed to find match for regex '%s' for tag '%s' with value '%s' as expected.", $this->siteName, $propertyRegEx, getArrayValuesAsString($arrTag), $ret)), "", true);
@@ -296,6 +296,8 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
             }
         }
+
+        $GLOBALS['logger']->logLine($this->siteName . " returned " . countJobRecords($ret) . " jobs from page.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         return $ret;
     }
