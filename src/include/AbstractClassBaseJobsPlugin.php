@@ -589,10 +589,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         $data = readJobsListDataFromLocalJsonFile($key, $returnFailedSearches, $dirKey = $this->_getDirKey_());
         if (!is_null($data) && is_array($data)) {
-            if (array_key_exists("jobslist", $data)) {
+            if (array_key_exists("jobslist", $data) && !is_null($data['jobslist']) && is_array($data['jobslist'])) {
                 $retJobs = array_filter($data['jobslist'], "isIncludedJobSite");
             }
-            if (array_key_exists("search", $data)) {
+            if (array_key_exists("search", $data) && !is_null($data['search']) && is_array($data['search'])) {
                 $searchSettings = \Scooper\array_copy($data['search']);
             }
         }
@@ -932,7 +932,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
                 //
                 // If we are in debug mode, save the HTML we got back for the listing count page to disk so it is
-                // easy for a develooper to review it
+                // easy for a developer to review it
                 //
                 if(isDebug() && !is_null($objSimpleHTML) && !is_null($objSimpleHTML->root))
                 {
