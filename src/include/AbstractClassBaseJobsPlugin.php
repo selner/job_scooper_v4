@@ -748,7 +748,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     private function _writeDebugFiles_(&$searchDetails, $keyName = "UNKNOWN", $arrSearchedJobs = null, $objSimpleHTMLResults = null)
     {
-        if(isDebug())
+        if(isDebug() === true)
         {
             if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Writing debug files for plugin " . $this->siteName ."'s search". $searchDetails['key'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
@@ -934,7 +934,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 // If we are in debug mode, save the HTML we got back for the listing count page to disk so it is
                 // easy for a developer to review it
                 //
-                if(isDebug() && !is_null($objSimpleHTML) && !is_null($objSimpleHTML->root))
+                if(isDebug() == true && !is_null($objSimpleHTML) && !is_null($objSimpleHTML->root))
                 {
                     $this->_writeDebugFiles_($searchDetails, "parseTotalResultsCount", null, $objSimpleHTML->root);
                 }

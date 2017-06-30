@@ -283,7 +283,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         //
         $this->_parseGlobalSearchParamtersFromConfig_($config);
 
-        if(isDebug() && isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded all configuration settings:  " . var_export($this->allConfigFileSettings, true), \Scooper\C__DISPLAY_SUMMARY__);
+        if(isDebug() == true && isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded all configuration settings:  " . var_export($this->allConfigFileSettings, true), \Scooper\C__DISPLAY_SUMMARY__);
 
 
         $this->_parseEmailSetupFromINI_($config);
@@ -505,7 +505,11 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                 {
                     $GLOBALS['USERDATA']['configuration_settings'][$gso] = $config['global_search_options'][$gso];
                     if(strtolower($gso) == 'debug' && (!array_key_exists('DEBUG', $GLOBALS['OPTS']) || $GLOBALS['USERDATA']['configuration_settings']['debug'] === false)) {
-                        $GLOBALS['USERDATA']['configuration_settings']['debug'] =  ( \Scooper\intceil($config['global_search_options'][$gso]) == 1 ) ? true : false;
+                        if (\Scooper\intceil($config['global_search_options'][$gso]) == 1)
+                        {
+                            $GLOBALS['USERDATA']['configuration_settings']['debug'] =  true;
+                        }
+                        $GLOBALS['USERDATA']['configuration_settings']['debug'] = false;
                     }
                 }
             }
@@ -1030,7 +1034,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         catch (Exception $ex)
         {
             $GLOBALS['logger']->logLine($ex->getMessage(), \Scooper\C__DISPLAY_ERROR__);
-            if(isDebug()) { throw $ex; }
+            if(isDebug() == true) { throw $ex; }
         }
         return $rx;
     }
@@ -1182,7 +1186,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                                     {
                                         $strError = "Regex test failed on company regex pattern " . $rxItem .".  Skipping.  Error: '".$ex->getMessage();
                                         $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-                                        if(isDebug()) { throw new ErrorException( $strError); }
+                                        if(isDebug() == true) { throw new ErrorException( $strError); }
                                     }
                                 }
                             }

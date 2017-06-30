@@ -198,7 +198,7 @@ class ClassJobsSiteCommon
 
     protected function _logMemoryUsage_()
     {
-        if(isDebug()) {
+        if(isDebug() == true) {
 
             $usage = getPhpMemoryUsage();
 

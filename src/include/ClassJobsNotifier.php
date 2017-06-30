@@ -211,7 +211,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             //
             // In a debug run, include the full details of the keywords we used for auto-matching
             //
-            if(isDebug()) {
+            if(isDebug() == true) {
                 foreach ($GLOBALS['USERDATA']['user_input_files_details'] as $inputfile) {
                     array_push($arrResultFilesToCombine, $inputfile['details']);
                 }
