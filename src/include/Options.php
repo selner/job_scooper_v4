@@ -42,7 +42,7 @@ function isVerbose() {
 }
 
 function isDebug() {
-    if(isset($GLOBALS['OPTS']) && isset($GLOBALS['USERDATA']['configuration_settings']['debug']) && ($GLOBALS['USERDATA']['configuration_settings']['debug'] === true || $GLOBALS['USERDATA']['configuration_settings']['debug'] == 1)) return true;
+    if(isset($GLOBALS['USERDATA']) && isset($GLOBALS['USERDATA']['configuration_settings']['debug']) && ($GLOBALS['USERDATA']['configuration_settings']['debug'] === true || $GLOBALS['USERDATA']['configuration_settings']['debug'] == 1)) return true;
     return false;
 }
 
