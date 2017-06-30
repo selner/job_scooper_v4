@@ -194,9 +194,9 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     protected function getActiveWebdriver()
     {
-        if (!is_null($this->selenium) && !is_null($this->webdriver))
+        if (!is_null($this->selenium))
         {
-            return $this->webdriver;
+            return $this->selenium->get_driver();
         }
         else
             throw new Exception("Error:  active webdriver for Selenium not found as expected.");
