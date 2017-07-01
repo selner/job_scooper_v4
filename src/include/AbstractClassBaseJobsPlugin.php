@@ -255,7 +255,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         return $strRetCombinedKeywords;
     }
 
-    protected function parseJobsListForPage($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); }
+    protected function parseJobsListForPage($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method  " . __METHOD__ . " called on class \"%s \".", __CLASS__)); }
 
     protected function getLocationURLValue($searchDetails, $locSettingSets = null)
     {
@@ -369,7 +369,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     protected function getItemURLValue($nItem) { return ($nItem == null || $nItem == "") ? 0 : $nItem; }
 
-    protected function parseTotalResultsCount($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); }
+    protected function parseTotalResultsCount($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method " . __METHOD__ . " called on class \"%s \".", __CLASS__)); }
 
     protected function goToEndOfResultsSet($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); }
 
@@ -900,7 +900,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $jscript = "function phpcall() { " . $jscript . " }; return phpcall();";
         }
 
-        $GLOBALS['logger']->logLine("Executing JavaScript in browser:  ", $jscript, \Scooper\C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine("Executing JavaScript in browser:  ", $jscript, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $ret = $driver->executeScript($jscript);
 
@@ -1190,7 +1190,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     }
 
 
-    protected function getSearchJobsFromAPI($searchDetails) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); }
+    protected function getSearchJobsFromAPI($searchDetails) {   throw new \BadMethodCallException(sprintf("Not implemented method " . __METHOD__ . " called on class \"%s \".", __CLASS__)); }
 
     protected function normalizeJobItemWithoutJobID($arrItem)
     {
