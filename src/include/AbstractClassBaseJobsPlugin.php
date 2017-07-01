@@ -190,8 +190,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     protected $additionalLoadDelaySeconds = 0;
     protected $_flags_ = null;
 
-//    function takeNextPageAction($driver, $nextPageNum) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); return null;}
-
     protected function getActiveWebdriver()
     {
         if (!is_null($this->selenium))
@@ -887,6 +885,25 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         $GLOBALS['logger']->logLine($this->siteName . "[" . $searchDetails['key'] . "]" . ": " . $nItemCount . " jobs found." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
         return $arrSearchReturnedJobs;
+    }
+
+
+    protected function runJavaScriptSnippet($jscript= "", $wrap_in_func = true)
+    {
+        $driver = $this->getActiveWebdriver();
+
+        if ($wrap_in_func === true)
+        {
+            $jscript = "function phpcall() { " . $jscript . " }; return phpcall();";
+        }
+
+        $GLOBALS['logger']->logLine("Executing JavaScript in browser:  ", $jscript, \Scooper\C__DISPLAY_NORMAL__);
+
+        $ret = $driver->executeScript($jscript);
+
+        sleep(5);
+
+        return $ret;
     }
 
     private function _getMyJobsForSearchFromWebpage_(&$searchDetails)
