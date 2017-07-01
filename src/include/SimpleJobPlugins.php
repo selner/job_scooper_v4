@@ -310,7 +310,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             $driver->executeScript($script);
             sleep($this->additionalLoadDelaySeconds);
         }
-        elseif (array_key_exists('tag_next_button', $this->arrListingTagSetup))
+        elseif (array_key_exists('tag_next_button', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_next_button']))
         {
             if (!is_null($this->arrListingTagSetup['tag_next_button'])) {
                 $strMatch = $this->getTagSelector($this->arrListingTagSetup['tag_next_button']);
