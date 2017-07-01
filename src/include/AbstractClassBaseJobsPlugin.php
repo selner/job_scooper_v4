@@ -185,6 +185,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     protected $secsPageTimeout = null;
     protected $pluginResultsType;
     protected $selenium = null;
+    protected $nextPageScript = null;
 
     protected $strKeywordDelimiter = null;
     protected $additionalLoadDelaySeconds = 0;
@@ -370,7 +371,9 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     protected function parseTotalResultsCount($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); }
 
-    protected function getNextInfiniteScrollSet()
+    protected function goToEndOfResultsSet($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); }
+
+    protected function moveDownOnePageInBrowser()
     {
 
         // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
@@ -1022,26 +1025,40 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                             elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE))
                             {
                                 $this->selenium->loadPage($strURL);
-                                while($nPageCount <= $totalPagesCount)
-                                {
-                                    if(isDebug() && isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("... getting infinite results page #".$nPageCount." of " .$totalPagesCount, \Scooper\C__DISPLAY_NORMAL__); }
-                                    $this->getNextInfiniteScrollSet($this->selenium->driver);
-                                    $nPageCount = $nPageCount + 1;
-                                }
-                            }
-                            elseif(!$this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE)) {
-                                if (method_exists($this, 'takeNextPageAction') && $nPageCount > 1 && $nPageCount <= $totalPagesCount) {
+                                if ($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__)) {
                                     //
-                                    // if we got a driver instance back, then we got a new page
-                                    // otherwise we're out of results so end the loop here.
+                                    // If we dont know how many pages to go down,
+                                    // call the method to go down to the very end so we see the whole page
+                                    // and whole results set
                                     //
-                                    try {
-                                        $this->takeNextPageAction($this->selenium->driver);
-                                    } catch (Exception $ex) {
-                                        handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
+                                    $this->goToEndOfResultsSet($this->selenium->driver);
+                                } else {
+                                    //
+                                    // if we know how many pages to do do, call the page down method
+                                    // until we get to the right number of pages
+                                    //
+                                    while ($nPageCount <= $totalPagesCount) {
+                                        if (isDebug() == true && isset($GLOBALS['logger'])) {
+                                            $GLOBALS['logger']->logLine("... getting infinite results page #" . $nPageCount . " of " . $totalPagesCount, \Scooper\C__DISPLAY_NORMAL__);
+                                        }
+                                        $this->moveDownOnePageInBrowser($this->selenium->driver);
+                                        $nPageCount = $nPageCount + 1;
                                     }
                                 }
                             }
+                            elseif(!$this->isBitFlagSet(C__JOB_CLIENTSIDE_INFSCROLLPAGE)) {
+                            if (method_exists($this, 'takeNextPageAction') && $nPageCount > 1 && $nPageCount <= $totalPagesCount) {
+                                //
+                                // if we got a driver instance back, then we got a new page
+                                // otherwise we're out of results so end the loop here.
+                                //
+                                try {
+                                    $this->takeNextPageAction($this->selenium->driver);
+                                } catch (Exception $ex) {
+                                    handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
+                                }
+                            }
+                        }
 
                             $strURL = $this->selenium->driver->getCurrentURL();
                             $html = $this->selenium->driver->getPageSource();
