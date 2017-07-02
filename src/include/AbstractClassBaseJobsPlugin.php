@@ -900,7 +900,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $jscript = "function phpcall() { " . $jscript . " }; return phpcall();";
         }
 
-        $GLOBALS['logger']->logLine("Executing JavaScript in browser:  ", $jscript, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Executing JavaScript in browser:  ". $jscript, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $ret = $driver->executeScript($jscript);
 

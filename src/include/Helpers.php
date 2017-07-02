@@ -832,7 +832,7 @@ function writeJobsListDataToLocalJSONFile($fileKey, $dataJobs, $listType, $dirKe
     if (stripos($fileKey, ".json") === false)
         $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
 
-    return writeJobsListDataToFile($resultsFile, $fileKey, $dataJobs, $listType, $searchDetails = null);
+    return writeJobsListDataToFile($resultsFile, $fileKey, $dataJobs, $listType, $searchDetails);
 }
 
 function writeJobsListDataToFile($filepath, $fileKey = null, $dataJobs, $listType, $searchDetails = null)
