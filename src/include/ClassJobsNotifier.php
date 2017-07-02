@@ -566,12 +566,8 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         $arrHeaders = array("For Review", "Auto-Filtered", "Active Jobs", "Downloaded Listings");
 
         $arrFailedPluginsReport = getFailedSearchesByPlugin();
-
-        $arrSitesToReport = array_keys(array_filter($GLOBALS['JOBSITE_PLUGINS'], function($k) {
-            return $k['include_in_run'];
-        }));
-
-        foreach($arrSitesToReport as $plugin) {
+        
+        foreach($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $plugin) {
 
             $arrPluginJobMatches  = array();
             if ($arrPluginJobsUnfiltered != null && is_array($arrPluginJobsUnfiltered) && countJobRecords($arrPluginJobsUnfiltered) > 0) {
