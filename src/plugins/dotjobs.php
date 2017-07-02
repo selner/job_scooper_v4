@@ -20,25 +20,39 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 class PluginDotJobs extends ClassClientHTMLJobSitePlugin
 {
-protected $siteName = 'dotjobs';
-// BUGBUG:  hard coded to be washington state
-protected $siteBaseURL = 'http://washington.jobs';
-protected $nJobListingsPerPage = 20;
-protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_INFSCROLLPAGE ];
-protected $strBaseURLFormat = "http://washington.jobs/jobs?location=***LOCATION***&q=***KEYWORDS***";
-protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
-protected $additionalLoadDelaySeconds = 3;
+    protected $siteName = 'dotjobs';
+    // BUGBUG:  hard coded to be washington state
+    protected $siteBaseURL = 'http://washington.jobs';
+    protected $nJobListingsPerPage = 20;
+    protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE ];
+    protected $strBaseURLFormat = "http://washington.jobs/jobs?location=***LOCATION***&q=***KEYWORDS***";
+    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
+    protected $additionalLoadDelaySeconds = 10;
+    protected $selectorMoreListings = "#button_moreJobs";
 
-protected $arrListingTagSetup = array(
-'tag_listings_count' => array('tag' => 'h3', 'attribute'=>'class', 'attribute_value' => 'direct_highlightedText', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/.*?(\d+)\s*jobs/i'),
-'tag_listings_section' => array(array('tag' => 'ul', 'attribute'=>'class', 'attribute_value' => 'default_jobListing'), array('tag' => 'li')),
-'tag_title' =>  array(array('tag' => 'h4'), array('tag' => 'a'), array('tag' => 'span'), 'return_attribute' => 'plaintext'),
-'tag_link' =>  array(array('tag' => 'h4'), array('tag' => 'a'), 'return_attribute' => 'href'),
-'tag_company' =>  array(array('tag' => 'div'), array('tag' => 'span'),array('tag' => 'b'), 'return_attribute' => 'plaintext'),
-'tag_location' =>  array(array('tag' => 'div'), array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'hiringPlace'), array('tag' => 'span'), array('tag' => 'span'), 'index' => 0, 'return_attribute' => 'plaintext'),
-'tag_job_id' =>  array(array('tag' => 'h4'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>  '/\/([\w\d]+)\/job.*/i'),
-'tag_load_more' =>  array('tag' => 'a', 'attribute' => 'id', 'attribute_value' =>'button_moreJobs')
-);
+
+    protected function goToEndOfResultsSetViaLoadMore()
+    {
+
+        $js = "
+            document.getElementById(\"direct_moreLessLinks_listingDiv\").setAttribute(\"data-num-items\", 50);
+        ";
+
+        $this->runJavaScriptSnippet($js, false);
+
+        parent::goToEndOfResultsSetViaLoadMore();
+    }
+
+    protected $arrListingTagSetup = array(
+        'tag_listings_count' => array('tag' => 'h3', 'attribute'=>'class', 'attribute_value' => 'direct_highlightedText', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/.*?(\d+)\s*jobs/i'),
+        'tag_listings_section' => array(array('tag' => 'ul', 'attribute'=>'class', 'attribute_value' => 'default_jobListing'), array('tag' => 'li')),
+        'tag_title' =>  array(array('tag' => 'h4'), array('tag' => 'a'), array('tag' => 'span'), 'return_attribute' => 'plaintext'),
+        'tag_link' =>  array(array('tag' => 'h4'), array('tag' => 'a'), 'return_attribute' => 'href'),
+        'tag_company' =>  array(array('tag' => 'div'), array('tag' => 'span'),array('tag' => 'b'), 'return_attribute' => 'plaintext'),
+        'tag_location' =>  array(array('tag' => 'div'), array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'hiringPlace'), array('tag' => 'span'), array('tag' => 'span'), 'index' => 0, 'return_attribute' => 'plaintext'),
+        'tag_job_id' =>  array(array('tag' => 'h4'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>  '/\/([\w\d]+)\/job.*/i'),
+        'tag_load_more' =>  array('tag' => 'a', 'attribute' => 'id', 'attribute_value' =>'button_moreJobs')
+    );
 
 
 }

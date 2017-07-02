@@ -23,10 +23,9 @@ class PluginAuthenticJobs extends ClassClientHTMLJobSitePlugin
 protected $siteName = 'AuthenticJobs';
 protected $siteBaseURL = "https://authenticjobs.com";
 protected $strBaseURLFormat = 'https://authenticjobs.com/#location=***LOCATION***&query=***KEYWORDS***';
-protected $additionalFlags = [C__JOB_CLIENTSIDE_INFSCROLLPAGE, C__JOB_PAGECOUNT_NOTAPPLICABLE__ , C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
+protected $additionalFlags = [C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE, C__JOB_PAGECOUNT_NOTAPPLICABLE__ , C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
 protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
 protected $nJobListingsPerPage = 50;
-
 
 protected $arrListingTagSetup = array(
 'tag_listings_count' => array(array('tag' => 'ul', 'attribute'=>'id', 'attribute_value' => 'listings'), 'return_attribute' => 'data-total'),

@@ -186,6 +186,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     protected $pluginResultsType;
     protected $selenium = null;
     protected $nextPageScript = null;
+    protected $selectorMoreListings = null;
 
     protected $strKeywordDelimiter = null;
     protected $additionalLoadDelaySeconds = 0;
@@ -371,7 +372,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     protected function parseTotalResultsCount($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method " . __METHOD__ . " called on class \"%s \".", __CLASS__)); }
 
-    protected function goToEndOfResultsSet($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method called on class \"%s \".", __CLASS__)); }
 
     protected function moveDownOnePageInBrowser()
     {
@@ -379,9 +379,9 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
         $driver = $this->getActiveWebdriver();
 
-        $driver->executeScript("window.scrollBy(500,5000);");
+        $driver->executeScript("window.scrollTo(0,document.body.scrollHeight);");
 
-        sleep(5);
+        sleep($this->additionalLoadDelaySeconds + 1);
 
     }
 
@@ -400,6 +400,50 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         if (isDebug() == true) {
             $this->_exportObjectToJSON_();
         }
+
+    }
+
+
+    protected function goToEndOfResultsSetViaLoadMore($nTotalItems = null)
+    {
+        $this->moveDownOnePageInBrowser();
+
+        $js = "
+            scroll = setTimeout(doLoadMore, 250);
+            function doLoadMore() 
+            {
+              window.scrollTo(0,document.body.scrollHeight);
+              console.log('paged-down-before-click');
+
+                var loadmore = document.querySelector('" . $this->selectorMoreListings . "');
+                if(loadmore != null && !typeof(loadmore .click) !== \"function\" && loadmore.length >= 1) {
+                    loadmore = loadmore[0];
+                } 
+    
+                if(loadmore != null && loadmore.style.display === \"\") 
+                { 
+                    loadmore.click();  
+                    console.log(\"Clicked load more control...\");
+                        
+                    scroll = setTimeout(doLoadMore, " . $this->additionalLoadDelaySeconds * 1000 . ");
+                }
+              window.scrollTo(0,document.body.scrollHeight);
+              console.log('paged-down-after-click');
+            }  
+        ";
+
+        $this->runJavaScriptSnippet($js, false);
+
+        if(is_null($nTotalItems))
+        {
+            $nTotalItems = C_JOB_MAX_RESULTS_PER_SEARCH;
+        }
+
+        $nSleepTimeToLoad = $nTotalItems / $this->nJobListingsPerPage * ($this->additionalLoadDelaySeconds - 1);
+        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        sleep($nSleepTimeToLoad);
+
+        $this->moveDownOnePageInBrowser();
 
     }
 
@@ -897,7 +941,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         if ($wrap_in_func === true)
         {
-            $jscript = "function phpcall() { " . $jscript . " }; return phpcall();";
+            $jscript = "function call_from_php() { " . $jscript . " }; call_from_php();";
         }
 
         $GLOBALS['logger']->logLine("Executing JavaScript in browser:  ". $jscript, \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -1022,43 +1066,51 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                                     return null;
                                 $this->selenium->loadPage($strURL);
                             }
-                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE))
+                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE)) {
+                                $this->selenium->loadPage($strURL);
+                                //
+                                // If we dont know how many pages to go down,
+                                // call the method to go down to the very end so we see the whole page
+                                // and whole results set
+                                //
+                                $this->goToEndOfResultsSetViaLoadMore($nTotalListings);
+                                $totalPagesCount = 1;
+                            }
+                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL))
                             {
                                 $this->selenium->loadPage($strURL);
-                                if ($this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__)) {
+                                //
+                                // if we know how many pages to do do, call the page down method
+                                // until we get to the right number of pages
+                                //
+                                while ($nPageCount <= $totalPagesCount) {
+                                    if (isDebug() == true && isset($GLOBALS['logger'])) {
+                                        $GLOBALS['logger']->logLine("... getting infinite results page #" . $nPageCount . " of " . $totalPagesCount, \Scooper\C__DISPLAY_NORMAL__);
+                                    }
+                                    $this->moveDownOnePageInBrowser();
+                                    $nPageCount = $nPageCount + 1;
+                                }
+                                $totalPagesCount = $nPageCount;
+                            }
+                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_PAGE_VIA_JS))
+                            {
+                                if (method_exists($this, 'takeNextPageAction') && $nPageCount > 1 && $nPageCount <= $totalPagesCount) {
                                     //
-                                    // If we dont know how many pages to go down,
-                                    // call the method to go down to the very end so we see the whole page
-                                    // and whole results set
+                                    // if we got a driver instance back, then we got a new page
+                                    // otherwise we're out of results so end the loop here.
                                     //
-                                    $this->goToEndOfResultsSet($this->selenium->driver);
-                                } else {
-                                    //
-                                    // if we know how many pages to do do, call the page down method
-                                    // until we get to the right number of pages
-                                    //
-                                    while ($nPageCount <= $totalPagesCount) {
-                                        if (isDebug() == true && isset($GLOBALS['logger'])) {
-                                            $GLOBALS['logger']->logLine("... getting infinite results page #" . $nPageCount . " of " . $totalPagesCount, \Scooper\C__DISPLAY_NORMAL__);
-                                        }
-                                        $this->moveDownOnePageInBrowser($this->selenium->driver);
-                                        $nPageCount = $nPageCount + 1;
+                                    try {
+                                        $this->takeNextPageAction($this->selenium->driver);
+                                    } catch (Exception $ex) {
+                                        handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
                                     }
                                 }
+
                             }
-                            elseif(!$this->isBitFlagSet(C__JOB_CLIENTSIDE_INFSCROLLPAGE)) {
-                            if (method_exists($this, 'takeNextPageAction') && $nPageCount > 1 && $nPageCount <= $totalPagesCount) {
-                                //
-                                // if we got a driver instance back, then we got a new page
-                                // otherwise we're out of results so end the loop here.
-                                //
-                                try {
-                                    $this->takeNextPageAction($this->selenium->driver);
-                                } catch (Exception $ex) {
-                                    handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
-                                }
+                            else
+                            {
+                                handleException(new Exception("No pagination method defined for plugin " . $this->siteName), "", false);
                             }
-                        }
 
                             $strURL = $this->selenium->driver->getCurrentURL();
                             $html = $this->selenium->driver->getPageSource();

@@ -57,8 +57,14 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         if (strlen($this->strBaseURLFormat) == 0)
             $this->strBaseURLFormat = $this->childSiteURLBase;
 
-        parent::__construct($strBaseDir);
 
+
+        if (array_key_exists('tag_next_button', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_next_button']))
+        {
+            $this->selectorMoreListings = $this->getTagSelector( $this->arrListingTagSetup['tag_next_button']);
+        }
+
+        parent::__construct($strBaseDir);
     }
 
 
@@ -337,27 +343,6 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         {
             throw new Exception(sprintf("Error: plugin for %s is missing tag definition for the next page button to click. Cannot complete search.", $this->siteName));
         }
-    }
-
-    protected function getNextInfiniteScrollSet($driver)
-    {
-        if (array_key_exists('tag_load_more', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_load_more'])) {
-            $strMatch = $this->getTagSelector($this->arrListingTagSetup['tag_load_more']);
-            if (isset($strMatch)) {
-                $GLOBALS['logger']->logLine("Loading more results via CSS object " . $strMatch, \Scooper\C__DISPLAY_NORMAL__);
-                $arrArgs = array();
-                $ret = $driver->executeScript(sprintf("function callLoadMore() { var elem = document.querySelector('" . $strMatch . "');  if (elem != null) { console.log('Attempting more button click on element " . $strMatch . "'); elem.click(); return true; } else { return false; }; } ; return callLoadMore();", $arrArgs));
-                if ($ret === false)
-                    $GLOBALS['logger']->logLine("Failed to find and click the control to load the next set of results...", \Scooper\C__DISPLAY_ERROR__);
-                else
-                    sleep($this->additionalLoadDelaySeconds);
-                $GLOBALS['logger']->logLine("Next page of job listings loaded successfully.  ", \Scooper\C__DISPLAY_NORMAL__);
-                sleep($this->additionalLoadDelaySeconds);
-                return;
-            }
-        }
-        throw new Exception(sprintf("Error: plugin for %s is missing tag definition for the infinite scroll button to click. Cannot complete search.", $this->siteName));
-
     }
 
 }

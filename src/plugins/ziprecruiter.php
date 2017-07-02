@@ -24,10 +24,10 @@ class PluginZipRecruiter extends ClassClientHTMLJobSitePlugin
     protected $siteBaseURL = 'www.ziprecruiter.com';
     protected $nJobListingsPerPage = C__TOTAL_ITEMS_UNKNOWN__; // we use this to make sure we only have 1 single results page
 
-    protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_INFSCROLLPAGE ];
+    protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE ];
     protected $strBaseURLFormat = "https://www.ziprecruiter.com/candidate/search?search=%22***KEYWORDS***%22&include_near_duplicates=1&location=***LOCATION***&radius=25&days=***NUMBER_DAYS***";
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
-
+    protected $selectorMoreListings = ".load_more_jobs";
 
     protected $arrListingTagSetup = array(
         'tag_listings_noresults'    => array('selector' => '#job_results div div section h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "PluginZipRecruiter::isNoJobsFound"),
@@ -47,24 +47,6 @@ class PluginZipRecruiter extends ClassClientHTMLJobSitePlugin
             return 0;
 
         return null;
-    }
-
-    protected function goToEndOfResultsSet()
-    {
-
-        $this->runJavaScriptSnippet("
-            if(document.getElementsByClassName(\"load_more_jobs\").length >= 1)
-            {
-                while(document.getElementsByClassName(\"load_more_jobs\")[0].style.display === \"\") 
-                { 
-                    document.getElementsByClassName(\"load_more_jobs\")[0].click(); 
-                }
-             }
-        ");
-
-        $this->moveDownOnePageInBrowser($this->selenium->driver);
-        $this->moveDownOnePageInBrowser($this->selenium->driver);
-
     }
 
 

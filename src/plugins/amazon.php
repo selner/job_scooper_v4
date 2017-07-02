@@ -40,7 +40,7 @@ class PluginAmazon extends ClassBaseClientSideHTMLJobSitePlugin
     protected $nJobListingsPerPage = 100;
     protected $siteBaseURL = 'http://www.amazon.jobs';
     protected $strBaseURLFormat = "https://www.amazon.jobs/en/search?base_query=***KEYWORDS***&location%5B%5D=***LOCATION***&result_limit=100&sort=recent&cache";
-    protected $additionalFlags = [C__JOB_CLIENTSIDE_INFSCROLLPAGE];
+    protected $additionalFlags = [C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE];
     protected $typeLocationSearchNeeded = 'location-city-dash-statecode';
 
     function parseTotalResultsCount($objSimpHTML)
@@ -56,15 +56,6 @@ class PluginAmazon extends ClassBaseClientSideHTMLJobSitePlugin
         return 0;
 
     }
-
-    protected function getNextInfiniteScrollSet($driver)
-    {
-        // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
-        $driver->executeScript("window.scrollBy(500,5000);  var btn = document.getElementsByClassName(\"load-more btn\"); if(btn && Object.keys(btn).length >= 1) { btn[0].click(); }");
-
-        sleep(1);
-    }
-
 
 
     function parseJobsListForPage($objSimpHTML)
