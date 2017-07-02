@@ -1137,13 +1137,14 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                     // Throw an error for this search instead and move on.
                     //
                     $err = null;
+                    $marginOfErrorAllowed = .05;
                     if ($nTotalListings > 0 && $nItemCount == 0) // We got zero listings but should have found some
                         $err = "Retrieved 0 of the expected " . $nTotalListings . " listings for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
                     elseif ($nItemCount < $this->nJobListingsPerPage && $nPageCount < $totalPagesCount)
                         $err = "Retrieved only " . $nItemCount . " of the " . $this->nJobListingsPerPage . " job listings on page " . $nPageCount . " for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
-                    elseif ($nJobsFound < $nTotalListings && $nPageCount == $totalPagesCount && !$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__))
+                    elseif ($nJobsFound < $nTotalListings * (1-$marginOfErrorAllowed) && $nPageCount == $totalPagesCount && !$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__))
                         $err = "Retrieved only " . $nJobsFound . " of the " . $nTotalListings . " listings that we expected for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
-                    elseif ($nJobsFound > $nTotalListings && $nPageCount == $totalPagesCount && !$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__)) {
+                    elseif ($nJobsFound > $nTotalListings * (1+$marginOfErrorAllowed) && $nPageCount == $totalPagesCount && !$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__)) {
                         $warnMsg = "Warning:  Downloaded " . ($nJobsFound - $nTotalListings) . " jobs more than the " . $nTotalListings . " expected for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
                         $GLOBALS['logger']->logLine($warnMsg, \Scooper\C__DISPLAY_WARNING__);
                     }
