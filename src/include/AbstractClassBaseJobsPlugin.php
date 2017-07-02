@@ -638,7 +638,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 $retJobs = array_filter($data['jobslist'], "isIncludedJobSite");
             }
             if (array_key_exists("search", $data) && !is_null($data['search']) && is_array($data['search'])) {
-                $searchSettings = \Scooper\array_copy($data['search']);
+                if (!is_null($data['search']))
+                {
+                    $searchSettings = \Scooper\array_copy($data['search']);
+                }
             }
         }
 
