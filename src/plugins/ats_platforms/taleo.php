@@ -30,9 +30,19 @@ class PluginEntercom extends BaseTaleoPlugin
 
 class PluginSeattleGenetics extends BaseTaleoPlugin
 {
-    protected $siteBaseURL = 'http://www.seattlegenetics.com/careers';
+    protected $server = "http://chp.tbe.taleo.net/chp04/ats/careers/searchResults.jsp";
     protected $taleoOrgID = "SEAGEN";
-    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleocontent', 'index'=>1);
+
+    function parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, $divTagType, $divTagValue, $trIndex)
+    {
+        $nodeHelper = new CSimpleHTMLHelper($objSimpHTML);
+        $node = $nodeHelper->get("div.inner table tbody tr[2] td b", 0, true);
+        $totalItemsText = $node->innertext();
+
+        return $totalItemsText;
+    }
+
+    protected $arrResultsCountTag = array('type' =>'class', 'value'=>'inner', 'index'=>0);
 }
 
 class PluginInternetBrands extends BaseTaleoPlugin
