@@ -20,7 +20,7 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 class BaseForceComClass extends ClassClientHTMLJobSitePlugin
 {
-protected $additionalFlags = [ C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED ] ;
+protected $additionalFlags = [ C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_CLIENTSIDE_PAGE_VIA_JS ] ;
 protected $additionalLoadDelaySeconds = 3;
 protected $nJobListingsPerPage = 50;
 protected $nextPageScript = "function contains(selector, text) {
@@ -65,18 +65,9 @@ linkNext[0].click();
         'tag_department' =>  array(array('tag' => 'td'), array('tag' => 'span'), 'index' => 0),
         'tag_location' =>  array(array('tag' => 'td'), array('tag' => 'span'), 'index' => 1),
         'tag_company' =>  array('return_value_callback' => 'ClassBaseHTMLJobSitePlugin::setCompanyToSiteName'),
+        'tag_next_button' => array('selector' => '#j_id0:j_id1:atsForm:j_id154'),
         'regex_link_job_id' => '/.*?jobId=([^&]+)/i'
     );
-
-    public function takeNextPageAction($driver)
-    {
-        $GLOBALS['logger']->logLine("Going to next page of results via script: " . $this->nextPageScript  , \Scooper\C__DISPLAY_NORMAL__);
-        $driver->executeScript("function callNextPage() { " . $this->nextPageScript ." } ; callNextPage();");
-        sleep($this->additionalLoadDelaySeconds);
-        return $driver;
-
-    }
-
 
 }
 
