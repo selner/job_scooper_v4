@@ -567,7 +567,9 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
         $arrFailedPluginsReport = getFailedSearchesByPlugin();
 
-        $arrSitesToReport = array_unique(array_column($arrPluginJobsUnfiltered, "job_site")) + array_unique(array_column($arrExcludedJobs, "job_site"));
+        $arrSitesToReport = array_keys(array_filter($GLOBALS['JOBSITE_PLUGINS'], function($k) {
+            return $k['include_in_run'];
+        }));
 
         foreach($arrSitesToReport as $plugin) {
 
