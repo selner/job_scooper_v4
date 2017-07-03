@@ -187,6 +187,8 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     protected $selenium = null;
     protected $nextPageScript = null;
     protected $selectorMoreListings = null;
+    protected $nMaxJobsToReturn = C_JOB_MAX_RESULTS_PER_SEARCH;
+
 
     protected $strKeywordDelimiter = null;
     protected $additionalLoadDelaySeconds = 0;
@@ -439,10 +441,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         if(is_null($nTotalItems))
         {
-            $nTotalItems = C_JOB_MAX_RESULTS_PER_SEARCH;
+            $nTotalItems = $this->nMaxJobsToReturn;
         }
 
-        $nSleepTimeToLoad = $nTotalItems / $this->nJobListingsPerPage * ($this->additionalLoadDelaySeconds - 1);
+        $nSleepTimeToLoad = ($nTotalItems / $this->nJobListingsPerPage) * $this->additionalLoadDelaySeconds;
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results", \Scooper\C__DISPLAY_ITEM_DETAIL__);
         sleep($nSleepTimeToLoad > 0 ? $nSleepTimeToLoad : 2);
 
@@ -1017,9 +1019,9 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 }
                 elseif($nTotalListings != C__TOTAL_ITEMS_UNKNOWN__)
                 {
-                    if ($nTotalListings > C_JOB_MAX_RESULTS_PER_SEARCH) {
-                        $GLOBALS['logger']->logLine("Search '" . $searchDetails['key'] . "' returned more results than allowed.  Only retrieving the first " . C_JOB_MAX_RESULTS_PER_SEARCH . " of  " . $nTotalListings . " job listings.", \Scooper\C__DISPLAY_WARNING__);
-                        $nTotalListings = C_JOB_MAX_RESULTS_PER_SEARCH;
+                    if ($nTotalListings > $this->nMaxJobsToReturn) {
+                        $GLOBALS['logger']->logLine("Search '" . $searchDetails['key'] . "' returned more results than allowed.  Only retrieving the first " . $this->nMaxJobsToReturn . " of  " . $nTotalListings . " job listings.", \Scooper\C__DISPLAY_WARNING__);
+                        $nTotalListings = $this->nMaxJobsToReturn;
                     }
                     $totalPagesCount = \Scooper\intceil($nTotalListings / $this->nJobListingsPerPage); // round up always
                     if ($totalPagesCount < 1) $totalPagesCount = 1;
@@ -1074,6 +1076,8 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                             }
                             elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE)) {
                                 $this->selenium->loadPage($strURL);
+                                sleep($this->additionalLoadDelaySeconds + 1);
+
                                 //
                                 // If we dont know how many pages to go down,
                                 // call the method to go down to the very end so we see the whole page
@@ -1085,6 +1089,8 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                             elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL))
                             {
                                 $this->selenium->loadPage($strURL);
+                                sleep($this->additionalLoadDelaySeconds + 1);
+
                                 //
                                 // if we know how many pages to do do, call the page down method
                                 // until we get to the right number of pages
