@@ -43,6 +43,8 @@ class PluginAmazon extends ClassBaseClientSideHTMLJobSitePlugin
     protected $additionalFlags = [C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE];
     protected $typeLocationSearchNeeded = 'location-city-dash-statecode';
 
+    protected $selectorMoreListings = ".load-more";
+
     function parseTotalResultsCount($objSimpHTML)
     {
         $subnode = $objSimpHTML->find("div[id=search-paging] div[class=container] div[class=row] div");
