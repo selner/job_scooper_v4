@@ -26,25 +26,8 @@ class PluginDice extends ClassClientHTMLJobSitePlugin
     protected $strBaseURLFormat = 'https://www.dice.com/jobs/advancedResult.html?for_one=&for_all=***KEYWORDS***&for_exact=&for_none=&for_jt=&for_com=&for_loc=***LOCATION***&sort=date&limit=100&radius=50';
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $nJobListingsPerPage = 100;
-    protected $additionalLoadDelaySeconds = 10;
-    protected $nextPageScript = " 
-    
-    xp = \"//*[@id='dice_paging_btm']/ul/li/a[@title='Go to next page']\";
-    var nodes = document.evaluate(xp, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-    
-    var btn = new Array(nodes.snapshotLength); // faster for chrome to know how long this'll be
-    for(var i = 0, length = nodes.snapshotLength; i < length; i++) {
-        btn[i] = nodes.snapshotItem(i);
-    }
-
-    if (btn != null && btn[0] != null) { btn[0].click(); };
-";
-
-
-    function __construct($strOutputDirectory = null)
-    {
-        parent::__construct($strOutputDirectory);
-    }
+    protected $additionalLoadDelaySeconds = 15;
+    protected $additionalFlags = [ C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_PAGE_VIA_JS ] ;
 
     function isNoResults($var)
     {
@@ -63,13 +46,10 @@ class PluginDice extends ClassClientHTMLJobSitePlugin
         'tag_title' => array('selector' => 'div.serp-result-content ul:nth-child(3) li:nth-child(1) h3 a', 'return_attribute' => 'plaintext'),
         'tag_link' => array('selector' => 'div.serp-result-content ul:nth-child(3) li:nth-child(1) h3 a', 'return_attribute' => 'href'),
         'tag_job_id' => array('selector' => 'div.serp-result-content ul:nth-child(3) li:nth-child(1) h3 a', 'return_attribute' => 'value'),
-//        'tag_link' => array(array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'dice-btn-link loggedInVisited'), 'return_attribute' => 'href'),
-//        'tag_job_id' => array(array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'dice-btn-link loggedInVisited'), 'return_attribute' => 'value'),
         'tag_company' => array(array('tag' => 'li', 'attribute' => 'class', 'attribute_value' => 'employer'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'hidden-xs'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
         'tag_location' => array(array('tag' => 'li', 'attribute' => 'class', 'attribute_value' => 'location'), 'return_attribute' => 'plaintext'),
         'tag_job_posting_date' => array(array('li' => 'span', 'attribute' => 'class', 'attribute_value' => 'posted'), 'return_attribute' => 'plaintext'),
-//        'tag_next_button' => array('selector' => '#dice_paging_top > ul > li:nth-child(8) > a > span')
-        //        'regex_link_job_id' => '/.*?\/(\d+)|.*?;ad=-(.{1,})$/'
+        'tag_next_button' => array('selector' => 'a[title="Go to next page"]')
     );
 
 }
