@@ -407,6 +407,9 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     protected function goToEndOfResultsSetViaLoadMore($nTotalItems = null)
     {
         $this->moveDownOnePageInBrowser();
+        $secs = $this->additionalLoadDelaySeconds * 1000;
+        if($secs <= 0)
+            $secs = 1000;
 
         $js = "
             scroll = setTimeout(doLoadMore, 250);
@@ -425,7 +428,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                     loadmore.click();  
                     console.log(\"Clicked load more control...\");
                         
-                    scroll = setTimeout(doLoadMore, " . $this->additionalLoadDelaySeconds * 1000 . ");
+                    scroll = setTimeout(doLoadMore, " . $secs . ");
                 }
               window.scrollTo(0,document.body.scrollHeight);
               console.log('paged-down-after-click');
@@ -441,7 +444,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         $nSleepTimeToLoad = $nTotalItems / $this->nJobListingsPerPage * ($this->additionalLoadDelaySeconds - 1);
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        sleep($nSleepTimeToLoad);
+        sleep($nSleepTimeToLoad > 0 ? $nSleepTimeToLoad : 2);
 
         $this->moveDownOnePageInBrowser();
 
