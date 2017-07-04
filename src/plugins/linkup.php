@@ -21,33 +21,32 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 
 
 
-class PluginLinkUp extends ClassBaseServerHTMLJobSitePlugin
+class PluginLinkUp extends ClassHTMLJobSitePlugin
 {
     protected $siteName = 'LinkUp';
     protected $nJobListingsPerPage = 50;
     protected $siteBaseURL = 'http://www.linkup.com';
     protected $strBaseURLFormat = "http://www.linkup.com/results.php?q=***KEYWORDS***&l=***LOCATION***&sort=d&tm=***NUMBER_DAYS***&page=***PAGE_NUMBER***&p=50";
-    protected $additionalFlags = C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED;
+    protected $additionalFlags = [C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED, C__JOB_PAGE_VIA_URL];
     protected $typeLocationSearchNeeded = 'location-city-comma-state';
     protected $strKeywordDelimiter = "or";
 
-    function getDaysURLValue($days = null) {
+    function getDaysURLValue($days = null)
+    {
         $ret = "1d";
 
-        if($days != null)
-        {
-            switch($days)
-            {
-                case ($days>3 && $days<=7):
+        if ($days != null) {
+            switch ($days) {
+                case ($days > 3 && $days <= 7):
                     $ret = "7d";
                     break;
 
-                case ($days>=3 && $days<7):
+                case ($days >= 3 && $days < 7):
                     $ret = "3d";
                     break;
 
 
-                case $days<=1:
+                case $days <= 1:
                 default:
                     $ret = "1d";
                     break;
@@ -59,55 +58,30 @@ class PluginLinkUp extends ClassBaseServerHTMLJobSitePlugin
 
     }
 
+    protected $arrListingTagSetup = array(
+        'tag_listings_count' => array('tag' => '#search-showing', 'return_value_regex' => '/\d+\s\-\s\d+[\sof]+([\d,]+).*/'),
+        'tag_listings_section' => array('selector' => 'div.listing', 'return_value_callback' => "PluginLinkup::filterSponsoredAds"),
+        'tag_title' => array('selector' => 'a.listing-title strong'),
+        'tag_job_id' => array('selector' => 'div.listing', 'return_attribute' => 'data-hash'),
+        'tag_link' => array('selector' => 'a.listing-title', 'return_attribute' => 'href'),
+        'tag_company' => array('selector' => 'span.listing-company', 'return_attribute' => 'plaintext'),
+        'tag_location' => array('selector' => 'span.listing-location', 'return_attribute' => 'plaintext'),
+        'tag_job_posting_date' => array('selector' => 'span.listing-date', 'return_attribute' => 'plaintext'),
+        'tag_department' => array('selector' => 'span.listing-tag', 'return_attribute' => 'plaintext')
+    );
 
-    function parseTotalResultsCount($objSimpHTML)
+
+    function filterSponsoredAds($var)
     {
-        $nodeHelper = new CSimpleHTMLHelper($objSimpHTML);
-
-        $pageText = $nodeHelper->getText("div[id='search-showing']", 0, false);
-        // # of items to parse
-        $arrItemItems = explode(" ", trim($pageText));
-        if(isset($arrItemItems) && count($arrItemItems) >= 5)
-            return $arrItemItems[4];
-        else
-            return null;
-    }
-
-    function parseJobsListForPage($objSimpHTML)
-    {
-        $ret = null;
-
-
-        $nodesJobs= $objSimpHTML->find('div[class="listing js-listing"]');
-
-
-        foreach($nodesJobs as $node)
-        {
-            $item = $this->getEmptyJobListingRecord();
-            $nodeHelper = new CSimpleHTMLHelper($node);
-
-            $item['job_title'] = $nodeHelper->getAllChildrenText("a[class='listing-title']", 0, false);
-            if($item['job_title'] == '') continue;
-
-            $item['job_site'] = $this->siteName;
-            $item['job_post_url'] = $nodeHelper->getProperty("a[class='listing-title']", 0, "href", false );
-            $item['company'] = $nodeHelper->getText("span[class='listing-company']", 0, false );
-
-
-            $item['job_id'] = $nodeHelper->getAttribute(null, null, "data-hash", false );
-            $item['location'] = $nodeHelper->getText("span[class='listing-location'] span", 0, false ) . "-" . $nodeHelper->getText("span[class='listing-location'] span", 1, false );
-
-            $item['date_pulled'] = getTodayAsString();
-
-            $item['job_site_category'] = $nodeHelper->getText("span[class='listing-tag']", 0, false );
-            $dateText = $nodeHelper->getText("span[class='listing-date']", 0, false );
-            $item['job_site_date'] = getDateForDaysAgo($dateText);
-
-            $ret[] = $this->normalizeJobItem($item);
-
+        $retArray = Array();
+        if (!is_null($var) && is_array($var) && count($var) > 0) {
+            foreach ($var as $jobnode) {
+                if (array_key_exists('class', $jobnode->attr) && stristr($jobnode->attr['class'], "sponsor") != "")
+                    continue;
+                $retArray[] = $jobnode;
+            }
         }
+        return $retArray;
 
-        return $ret;
     }
-
 }
