@@ -137,29 +137,29 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
             try
             {
-            // assert this search is actually for the job site supported by this plugin
-            assert(strcasecmp(strtolower($search['site_name']), strtolower($this->siteName)) == 0);
-            $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[" . $search['key']) . "]", \Scooper\C__NAPPTOPLEVEL__, \Scooper\C__SECTION_BEGIN__);
+                // assert this search is actually for the job site supported by this plugin
+                assert(strcasecmp(strtolower($search['site_name']), strtolower($this->siteName)) == 0);
+                $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[" . $search['key']) . "]", \Scooper\C__NAPPTOPLEVEL__, \Scooper\C__SECTION_BEGIN__);
 
-            if ($this->isSearchCached($search) == true) {
-                $GLOBALS['logger']->logLine("Jobs data for '" . $search['key'] . " has already been cached.  Skipping jobs download.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                continue;
-            }
-
-            if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
-                try
-                {
-                    if ($GLOBALS['USERDATA']['selenium']['autostart'] == True) {
-                        SeleniumSession::startSeleniumServer();
-                    }
-                    $this->selenium = new SeleniumSession();
-                } catch (Exception $ex) {
-                    handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->siteName ."'", true);
+                if ($this->isSearchCached($search) == true) {
+                    $GLOBALS['logger']->logLine("Jobs data for '" . $search['key'] . " has already been cached.  Skipping jobs download.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    continue;
                 }
-            }
 
-            $this->_updateJobsDataForSearch_($search);
-        }
+                if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
+                    try
+                    {
+                        if ($GLOBALS['USERDATA']['selenium']['autostart'] == True) {
+                            SeleniumSession::startSeleniumServer();
+                        }
+                        $this->selenium = new SeleniumSession();
+                    } catch (Exception $ex) {
+                        handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->siteName ."'", true);
+                    }
+                }
+
+                $this->_updateJobsDataForSearch_($search);
+            }
             catch (Exception $ex)
             {
                 throw $ex;
@@ -826,52 +826,52 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     }
 
     protected function _writeDebugFiles_(&$searchDetails, $keyName = "UNKNOWN", $arrSearchedJobs = null, $objSimpleHTMLResults = null)
-        {
-            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Writing debug files for plugin " . $this->siteName ."'s search". $searchDetails['key'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
+    {
+        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Writing debug files for plugin " . $this->siteName ."'s search". $searchDetails['key'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-            $debugHTMLVarFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlvar_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "html", $delim = "-");
-            $debugHTMLSelenFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlselen_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "html", $delim = "-");
-            $debugSSFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlselen_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "png", $delim = "-");
-            $debugCSVFile = substr($debugHTMLVarFile, 0, strlen($debugHTMLVarFile) - 4) . ".csv";
+        $debugHTMLVarFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlvar_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "html", $delim = "-");
+        $debugHTMLSelenFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlselen_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "html", $delim = "-");
+        $debugSSFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlselen_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "png", $delim = "-");
+        $debugCSVFile = substr($debugHTMLVarFile, 0, strlen($debugHTMLVarFile) - 4) . ".csv";
 
-            if (!is_null($objSimpleHTMLResults)) {
+        if (!is_null($objSimpleHTMLResults)) {
             $html = strval($objSimpleHTMLResults);
             $html = $this->_insertBaseURL_($html, $searchDetails['search_start_url']);
             file_put_contents($debugHTMLSelenFile, $html);
 
 //            saveDomToFile($objSimpleHTMLResults, $debugHTMLVarFile);
-                $arrErrorFiles[$debugHTMLVarFile] = $debugHTMLVarFile;
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML variable out to " . $debugHTMLVarFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            }
+            $arrErrorFiles[$debugHTMLVarFile] = $debugHTMLVarFile;
+            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML variable out to " . $debugHTMLVarFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        }
 
-            if($this->selenium != null)
-            {
-                $driver = $this->selenium->get_driver();
-                $html = $driver->getPageSource();
+        if($this->selenium != null)
+        {
+            $driver = $this->selenium->get_driver();
+            $html = $driver->getPageSource();
             $html = $this->_insertBaseURL_($html, $searchDetails['search_start_url']);
 
-                file_put_contents($debugHTMLSelenFile, $html);
-                $arrErrorFiles[$debugHTMLSelenFile] = $debugHTMLSelenFile;
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML from Selenium out to " . $debugHTMLSelenFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            file_put_contents($debugHTMLSelenFile, $html);
+            $arrErrorFiles[$debugHTMLSelenFile] = $debugHTMLSelenFile;
+            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML from Selenium out to " . $debugHTMLSelenFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-                $driver->takeScreenshot($debugSSFile);
-                $arrErrorFiles[$debugSSFile] = $debugSSFile;
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Saved screenshot from Selenium out to " . $debugSSFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            }
-
-            if (!is_null($arrSearchedJobs) && is_array($arrSearchedJobs) && countJobRecords($arrSearchedJobs) > 0) {
-                $this->writeJobsListToFile($debugCSVFile, $arrSearchedJobs);
-                $arrErrorFiles[$debugCSVFile] = $debugCSVFile;
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote results CSV data to " . $debugCSVFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            }
+            $driver->takeScreenshot($debugSSFile);
+            $arrErrorFiles[$debugSSFile] = $debugSSFile;
+            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Saved screenshot from Selenium out to " . $debugSSFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
         }
+
+        if (!is_null($arrSearchedJobs) && is_array($arrSearchedJobs) && countJobRecords($arrSearchedJobs) > 0) {
+            $this->writeJobsListToFile($debugCSVFile, $arrSearchedJobs);
+            $arrErrorFiles[$debugCSVFile] = $debugCSVFile;
+            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote results CSV data to " . $debugCSVFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        }
+    }
 
 
 
     private function _setSearchSuccessResult_(&$searchDetails, $success = null, $details = "UNKNOWN RESULT.", $arrSearchedJobs = null, $objSimpleHTMLResults = null)
     {
         if(isDebug() === true)
-        $this->_writeDebugFiles_($searchDetails, "SUCCESS", $arrSearchedJobs, $objSimpleHTMLResults);
+            $this->_writeDebugFiles_($searchDetails, "SUCCESS", $arrSearchedJobs, $objSimpleHTMLResults);
         $this->_setSearchResult_($searchDetails, $success, $details, null, $files = array());
     }
 
@@ -1134,9 +1134,28 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                                 }
                                 $totalPagesCount = $nPageCount;
                             }
-                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_PAGE_VIA_JS))
+                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIA_JS))
                             {
-                                if (method_exists($this, 'takeNextPageAction') && $nPageCount > 1 && $nPageCount <= $totalPagesCount) {
+                                if(is_null($this->nextPageScript))
+                                {
+                                    handleException(new Exception("Plugin " . $this->siteName . " is missing nextPageScript settings for the defined pagination type."), "", true);
+
+                                }
+                                $this->selenium->loadPage($strURL);
+                                sleep($this->additionalLoadDelaySeconds);
+
+                                if( $nPageCount > 1 && $nPageCount <= $totalPagesCount) {
+                                    $this->runJavaScriptSnippet($this->nextPageScript, true);
+                                    sleep($this->additionalLoadDelaySeconds + 1);
+                                }
+                            }
+                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_PAGE_VIA_CALLBACK)) 
+                            {
+                                if (!method_exists($this, 'takeNextPageAction')) {
+                                    handleException(new Exception("Plugin " . $this->siteName . " is missing takeNextPageAction method definiton required for its pagination type."), "", true);
+                                }
+
+                                if($nPageCount > 1 && $nPageCount <= $totalPagesCount) {
                                     //
                                     // if we got a driver instance back, then we got a new page
                                     // otherwise we're out of results so end the loop here.
@@ -1147,8 +1166,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                                         handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
                                     }
                                 }
-
-                            }
+                            } 
                             else
                             {
                                 handleException(new Exception("No pagination method defined for plugin " . $this->siteName), "", false);

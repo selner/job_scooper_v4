@@ -27,7 +27,7 @@ class PluginDice extends ClassClientHTMLJobSitePlugin
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $nJobListingsPerPage = 100;
     protected $additionalLoadDelaySeconds = 5;
-    protected $additionalFlags = [ C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_PAGE_VIA_JS ] ;
+    protected $additionalFlags = [ C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_PAGE_VIA_CALLBACK ] ;
 
     function isNoResults($var)
     {
@@ -38,6 +38,10 @@ class PluginDice extends ClassClientHTMLJobSitePlugin
         return null;
     }
 
+    function takeNextPageAction($driver)
+    {
+        $this->runJavaScriptSnippet("nextPagingData(parseInt(document.getElementById(\"pageNo\").value) + 1);", false);
+    }
     protected $arrListingTagSetup = array(
 
         'tag_listings_count' => array(array('tag' => 'span', 'attribute' => 'id', 'attribute_value' => 'posiCountId'), 'attribute_value' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
@@ -49,7 +53,7 @@ class PluginDice extends ClassClientHTMLJobSitePlugin
         'tag_company' => array(array('tag' => 'li', 'attribute' => 'class', 'attribute_value' => 'employer'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'hidden-xs'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
         'tag_location' => array(array('tag' => 'li', 'attribute' => 'class', 'attribute_value' => 'location'), 'return_attribute' => 'plaintext'),
         'tag_job_posting_date' => array(array('li' => 'span', 'attribute' => 'class', 'attribute_value' => 'posted'), 'return_attribute' => 'plaintext'),
-        'tag_next_button' => array('selector' => 'span.icon-filled-arrow-66')
+//        'tag_next_button' => array('selector' => 'span.icon-filled-arrow-66')
     );
 
 }
