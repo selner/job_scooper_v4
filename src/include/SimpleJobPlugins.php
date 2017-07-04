@@ -302,6 +302,11 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
             }
         }
+        else
+        {
+            $this->_writeDebugFiles_($this->currentSearchBeingRun, 'failed-find-listings', null, $objSimpHTML->root);
+            handleException(new Exception("Could not find matching job elements in HTML for " . $strNodeMatch . " in plugin " . $this->siteName), null, true);
+        }
 
         $GLOBALS['logger']->logLine($this->siteName . " returned " . countJobRecords($ret) . " jobs from page.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 

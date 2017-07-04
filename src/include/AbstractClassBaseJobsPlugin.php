@@ -133,6 +133,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         foreach($this->arrSearchesToReturn as $search)
         {
+            $this->currentSearchBeingRun = $search;
+
+            try
+            {
             // assert this search is actually for the job site supported by this plugin
             assert(strcasecmp(strtolower($search['site_name']), strtolower($this->siteName)) == 0);
             $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[" . $search['key']) . "]", \Scooper\C__NAPPTOPLEVEL__, \Scooper\C__SECTION_BEGIN__);
@@ -155,6 +159,15 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             }
 
             $this->_updateJobsDataForSearch_($search);
+        }
+            catch (Exception $ex)
+            {
+                throw $ex;
+            }
+            finally
+            {
+                $this->currentSearchBeingRun = null;
+            }
         }
 
 
@@ -188,7 +201,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     protected $nextPageScript = null;
     protected $selectorMoreListings = null;
     protected $nMaxJobsToReturn = C_JOB_MAX_RESULTS_PER_SEARCH;
-
+    protected $currentSearchBeingRun = null;
 
     protected $strKeywordDelimiter = null;
     protected $additionalLoadDelaySeconds = 0;
@@ -797,11 +810,21 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     }
 
 
-
-
-    private function _writeDebugFiles_(&$searchDetails, $keyName = "UNKNOWN", $arrSearchedJobs = null, $objSimpleHTMLResults = null)
+    private function _insertBaseURL_($html, $baseurl)
     {
-        if(isDebug() === true)
+        $newhtml = $html;
+        $matches = Array();
+        $MATCH_HEAD_TAG = "(<[Hh][Ee][Aa][Dd].*?>)";
+        if(preg_match($MATCH_HEAD_TAG, $html, $matches) !== false)
+        {
+            $newhead = $matches[0] . "<base href=\"" . $baseurl . "\" target=\"_blank\">";
+            $newhtml = preg_replace($MATCH_HEAD_TAG, $html, $newhead);
+        }
+
+        return $newhtml;
+    }
+
+    protected function _writeDebugFiles_(&$searchDetails, $keyName = "UNKNOWN", $arrSearchedJobs = null, $objSimpleHTMLResults = null)
         {
             if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Writing debug files for plugin " . $this->siteName ."'s search". $searchDetails['key'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
@@ -811,7 +834,11 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $debugCSVFile = substr($debugHTMLVarFile, 0, strlen($debugHTMLVarFile) - 4) . ".csv";
 
             if (!is_null($objSimpleHTMLResults)) {
-                saveDomToFile($objSimpleHTMLResults, $debugHTMLVarFile);
+            $html = strval($objSimpleHTMLResults);
+            $html = $this->_insertBaseURL_($html, $searchDetails['search_start_url']);
+            file_put_contents($debugHTMLSelenFile, $html);
+
+//            saveDomToFile($objSimpleHTMLResults, $debugHTMLVarFile);
                 $arrErrorFiles[$debugHTMLVarFile] = $debugHTMLVarFile;
                 if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML variable out to " . $debugHTMLVarFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             }
@@ -820,6 +847,8 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             {
                 $driver = $this->selenium->get_driver();
                 $html = $driver->getPageSource();
+            $html = $this->_insertBaseURL_($html, $searchDetails['search_start_url']);
+
                 file_put_contents($debugHTMLSelenFile, $html);
                 $arrErrorFiles[$debugHTMLSelenFile] = $debugHTMLSelenFile;
                 if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML from Selenium out to " . $debugHTMLSelenFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -835,12 +864,12 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote results CSV data to " . $debugCSVFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             }
         }
-    }
 
 
 
     private function _setSearchSuccessResult_(&$searchDetails, $success = null, $details = "UNKNOWN RESULT.", $arrSearchedJobs = null, $objSimpleHTMLResults = null)
     {
+        if(isDebug() === true)
         $this->_writeDebugFiles_($searchDetails, "SUCCESS", $arrSearchedJobs, $objSimpleHTMLResults);
         $this->_setSearchResult_($searchDetails, $success, $details, null, $files = array());
     }
