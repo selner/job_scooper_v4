@@ -26,7 +26,7 @@ class PluginDice extends ClassClientHTMLJobSitePlugin
     protected $strBaseURLFormat = 'https://www.dice.com/jobs/advancedResult.html?for_one=&for_all=***KEYWORDS***&for_exact=&for_none=&for_jt=&for_com=&for_loc=***LOCATION***&sort=date&limit=100&radius=50';
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $nJobListingsPerPage = 100;
-    protected $additionalLoadDelaySeconds = 15;
+    protected $additionalLoadDelaySeconds = 5;
     protected $additionalFlags = [ C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_PAGE_VIA_JS ] ;
 
     function isNoResults($var)
@@ -49,7 +49,7 @@ class PluginDice extends ClassClientHTMLJobSitePlugin
         'tag_company' => array(array('tag' => 'li', 'attribute' => 'class', 'attribute_value' => 'employer'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'hidden-xs'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
         'tag_location' => array(array('tag' => 'li', 'attribute' => 'class', 'attribute_value' => 'location'), 'return_attribute' => 'plaintext'),
         'tag_job_posting_date' => array(array('li' => 'span', 'attribute' => 'class', 'attribute_value' => 'posted'), 'return_attribute' => 'plaintext'),
-        'tag_next_button' => array('selector' => 'a[title="Go to next page"]')
+        'tag_next_button' => array('selector' => 'span.icon-filled-arrow-66')
     );
 
 }
