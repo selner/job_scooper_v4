@@ -815,10 +815,11 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         $newhtml = $html;
         $matches = Array();
         $MATCH_HEAD_TAG = "(<[Hh][Ee][Aa][Dd].*?>)";
-        if(preg_match($MATCH_HEAD_TAG, $html, $matches) !== false)
+        preg_match($MATCH_HEAD_TAG, $html, $matches);
+        if(count($matches)>=1)
         {
-            $newhead = $matches[0] . "<base href=\"" . $baseurl . "\" target=\"_blank\">";
-            $newhtml = preg_replace($MATCH_HEAD_TAG, $html, $newhead);
+            $newhead = $matches[0] . "<base href=\"" . $baseurl . "\" target=\"_blank\"><script>document.baseURI = \"" . $baseurl . "\";</script>";
+            $newhtml = preg_replace($MATCH_HEAD_TAG, $newhead, $html);
         }
 
         return $newhtml;
