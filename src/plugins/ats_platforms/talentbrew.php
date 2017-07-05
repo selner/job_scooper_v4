@@ -23,15 +23,12 @@ class PluginHP extends BasePluginTalentBrew
     protected $siteName = "HP";
     protected $siteBaseURL = 'https://h30631.www3.hp.com';
     protected $nJobListingsPerPage = 15;
-//    protected $additionalFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
-    protected $typeLocationSearchNeeded = 'location-state';  // HP only supports specific cities in each state so cleaner to just filter by the state now and location later
-    protected $strBaseURLFormat = "/search-jobs/***LOCATION***";  // HP's keyword search is a little squirrelly so more successful if we don't filter up front and get the mismatches removed later
+    protected $strBaseURLFormat = "/search-jobs";  // HP's keyword search is a little squirrelly so more successful if we don't filter up front and get the mismatches removed later
 
     function __construct($strBaseDir = null)
     {
 
         parent::__construct($strBaseDir);
-//        unset($this->arrListingTagSetup['tag_listings_count']);  // hp doesn't support a results count
     }
 
 }
@@ -42,8 +39,7 @@ class PluginBoeing extends BasePluginTalentBrew
     protected $siteName = 'Boeing';
     protected $siteBaseURL = 'https://jobs.boeing.com';
     protected $nJobListingsPerPage = 20;
-    protected $strBaseURLFormat = "/search-jobs/***LOCATION***";  // HP's keyword search is a little squirrelly so more successful if we don't filter up front and get the mismatches removed later
-    protected $typeLocationSearchNeeded = 'location-state';  // HP only supports specific cities in each state so cleaner to just filter by the state now and location later
+    protected $strBaseURLFormat = "/search-jobs";
 
     function __construct($strBaseDir)
     {
@@ -55,14 +51,13 @@ class PluginDisney extends BasePluginTalentBrew
 {
     protected $siteName = 'Disney';
     protected $siteBaseURL = 'https://jobs.disneycareers.com';
-//    protected $additionalFlags = [ C__JOB_CLIENTSIDE_INFSCROLLPAGE ];
-    protected $additionalFlags = [ C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED ];
+    protected $additionalFlags = [ C__JOB_ITEMCOUNT_NOTAPPLICABLE__ ];
     protected $nJobListingsPerPage = 15;
 
     function __construct($strBaseDir = null)
     {
         parent::__construct($strBaseDir);
-        unset($this->arrListingTagSetup['tag_listings_count']);  // hp doesn't support a results count
+        unset($this->arrListingTagSetup['tag_listings_count']);
         $this->arrListingTagSetup['tag_listings_section'] = array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results-list'), array('tag' => 'table'),array('tag' => 'tr'));
         $this->arrListingTagSetup['tag_next_button'] = array(array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'next', 'index' => 0));
 
@@ -79,7 +74,7 @@ class BasePluginTalentBrew extends ClassClientHTMLJobSitePlugin
     // BUGBUG:  Disney & Boeing are both hit or miss around returning the full set of listings correctly.
     //          Setting to ignore_mismatched to avoid the error results that will happen when they do.
     //
-    protected $additionalFlags = [ C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE, C__JOB_IGNORE_MISMATCHED_JOB_COUNTS ];
+    protected $additionalFlags = [ C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $additionalLoadDelaySeconds = 5;
 

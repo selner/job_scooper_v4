@@ -29,7 +29,7 @@ class PluginCyclon extends ClassHTMLJobSitePlugin
     // BUGBUG: We shouldn't have to do C__JOB_IGNORE_MISMATCHED_JOB_COUNTS here, but have not yet figured out what is causing lower counts
     //         to sporadically happen
     //
-    protected $additionalFlags = [C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_IGNORE_MISMATCHED_JOB_COUNTS];
+    protected $additionalFlags = [C__JOB_DAYS_VALUE_NOTAPPLICABLE__];
     protected $nJobListingsPerPage = 15;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
 
