@@ -74,13 +74,24 @@ class SeleniumSession extends PropertyObject
         $this->shutdownSelenium();
     }
 
-    function loadPage($url)
+    function loadPage($url, $waitTime=null)
     {
         try
         {
+
+            if (!is_null($waitTime))
+            {
+                $timeoutval = $waitTime + 10;
+                $GLOBALS['logger']->logLine("Setting Selenium javascript and page timeouts to seconds=" . $timeoutval, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                $timeouts = $this->driver->manage()->timeouts();
+                
+                $timeouts->setScriptTimeout($timeoutval);
+                $timeouts->pageLoadTimeout($timeoutval);
+            }
+
             $this->driver->get($url);
 
-            sleep(2+$this->additionalLoadDelaySeconds);
+            sleep(1+$waitTime);
 
         } catch (Exception $ex) {
             $strMsg = "Error retrieving Selenium page at " . $url . ":  ". $ex;

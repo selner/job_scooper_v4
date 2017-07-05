@@ -40,7 +40,7 @@ class PluginDice extends ClassClientHTMLJobSitePlugin
 
     function takeNextPageAction($driver)
     {
-        $this->runJavaScriptSnippet("nextPagingData(parseInt(document.getElementById(\"pageNo\").value) + 1);", false);
+        $this->runJavaScriptSnippet("nextPagingData(parseInt(document.getElementById(\"pageNo\").value) + 1);", false, $this->additionalLoadDelaySeconds + 10);
     }
     protected $arrListingTagSetup = array(
 

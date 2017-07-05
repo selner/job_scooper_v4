@@ -56,6 +56,11 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 }
             }
         }
+        
+        if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED))
+            $this->nJobListingsPerPage = $this->nMaxJobsToReturn;
+        elseif($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED))
+           $this->nJobListingsPerPage = $this->nMaxJobsToReturn * 3;
     }
 
 
@@ -393,6 +398,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
         $driver = $this->getActiveWebdriver();
+        $timeouts = $driver->manage()->timeouts();
+        $timeoutval = $this->additionalLoadDelaySeconds + 10;
+        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting Selenium javascript and page timeouts to seconds=" . $timeoutval, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $timeouts->setScriptTimeout($timeoutval);
 
         $driver->executeScript("window.scrollTo(0,document.body.scrollHeight);");
 
@@ -450,7 +459,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             }  
         ";
 
-        $this->runJavaScriptSnippet($js, false);
 
         if(is_null($nTotalItems))
         {
@@ -459,6 +467,9 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         $nSleepTimeToLoad = ($nTotalItems / $this->nJobListingsPerPage) * $this->additionalLoadDelaySeconds;
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+        $this->runJavaScriptSnippet($js, false, $nSleepTimeToLoad > 0 ? $nSleepTimeToLoad : null);
+
         sleep($nSleepTimeToLoad > 0 ? $nSleepTimeToLoad : 2);
 
         $this->moveDownOnePageInBrowser();
@@ -973,7 +984,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     }
 
 
-    protected function runJavaScriptSnippet($jscript= "", $wrap_in_func = true)
+    protected function runJavaScriptSnippet($jscript= "", $wrap_in_func = true, $waittime=null)
     {
         $driver = $this->getActiveWebdriver();
 
@@ -982,11 +993,18 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $jscript = "function call_from_php() { " . $jscript . " }; call_from_php();";
         }
 
+        if(!is_null($waittime))
+        {
+            $GLOBALS['logger']->logLine("Setting Selenium javascript timeout to seconds=" . $waittime, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            $timeouts = $driver->manage()->timeouts();
+
+            $timeouts->setScriptTimeout($waittime+10);
+        }
         $GLOBALS['logger']->logLine("Executing JavaScript in browser:  ". $jscript, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $ret = $driver->executeScript($jscript);
 
-        sleep(5);
+        sleep($waittime);
 
         return $ret;
     }
@@ -1102,11 +1120,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                                 $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
                                 if ($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
                                     return null;
-                                $this->selenium->loadPage($strURL);
+                                $this->selenium->loadPage($strURL, $this->additionalLoadDelaySeconds);
                             }
                             elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE)) {
-                                $this->selenium->loadPage($strURL);
-                                sleep($this->additionalLoadDelaySeconds + 1);
+                                $this->selenium->loadPage($strURL, $this->additionalLoadDelaySeconds);
 
                                 //
                                 // If we dont know how many pages to go down,
@@ -1118,8 +1135,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                             }
                             elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL))
                             {
-                                $this->selenium->loadPage($strURL);
-                                sleep($this->additionalLoadDelaySeconds + 1);
+                                $this->selenium->loadPage($strURL, $this->additionalLoadDelaySeconds);
 
                                 //
                                 // if we know how many pages to do do, call the page down method
@@ -1141,11 +1157,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                                     handleException(new Exception("Plugin " . $this->siteName . " is missing nextPageScript settings for the defined pagination type."), "", true);
 
                                 }
-                                $this->selenium->loadPage($strURL);
-                                sleep($this->additionalLoadDelaySeconds);
+                                $this->selenium->loadPage($strURL, $this->additionalLoadDelaySeconds);
 
                                 if( $nPageCount > 1 && $nPageCount <= $totalPagesCount) {
-                                    $this->runJavaScriptSnippet($this->nextPageScript, true);
+                                    $this->runJavaScriptSnippet($this->nextPageScript, true, $this->additionalLoadDelaySeconds + 10);
                                     sleep($this->additionalLoadDelaySeconds + 1);
                                 }
                             }
