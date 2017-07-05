@@ -62,6 +62,9 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         if (array_key_exists('tag_next_button', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_next_button']))
         {
             $this->selectorMoreListings = $this->getTagSelector( $this->arrListingTagSetup['tag_next_button']);
+
+            $this->_flags_ = $this->_flags_ & C__JOB_CLIENTSIDE_PAGE_VIA_NEXTBUTTON;
+
         }
 
         parent::__construct($strBaseDir);

@@ -477,6 +477,36 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     }
 
 
+    protected function goToNextPageOfResultsViaNextButton()
+    {
+        $secs = $this->additionalLoadDelaySeconds * 1000;
+        if($secs <= 0)
+            $secs = 1000;
+
+        $js = "
+            scroll = setTimeout(doLoadMore, 250);
+            function doLoadMore() 
+            {
+                var loadmore = document.querySelector('" . $this->selectorMoreListings . "');
+                if(loadmore != null && !typeof(loadmore .click) !== \"function\" && loadmore.length >= 1) {
+                    loadmore = loadmore[0];
+                } 
+    
+                if(loadmore != null && loadmore.style.display === \"\") 
+                { 
+                    loadmore.click();  
+                    console.log(\"Clicked load more control...\");
+                }
+            }  
+        ";
+
+        $this->runJavaScriptSnippet($js, false, $this->additionalLoadDelaySeconds + 10);
+
+        sleep($this->additionalLoadDelaySeconds > 0 ? $this->additionalLoadDelaySeconds : 2);
+
+    }
+
+
     //************************************************************************
     //
     //
@@ -1164,7 +1194,20 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                                     sleep($this->additionalLoadDelaySeconds + 1);
                                 }
                             }
-                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_PAGE_VIA_CALLBACK)) 
+                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_PAGE_VIA_NEXTBUTTON))
+                            {
+                                if(is_null($this->nextPageScript))
+                                {
+                                    handleException(new Exception("Plugin " . $this->siteName . " is missing selectorMoreListings setting for the defined pagination type."), "", true);
+
+                                }
+                                $this->selenium->loadPage($strURL, $this->additionalLoadDelaySeconds);
+
+                                if( $nPageCount > 1 && $nPageCount <= $totalPagesCount) {
+                                    $this->goToNextPageOfResultsViaNextButton();
+                                }
+                            }
+                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_PAGE_VIA_CALLBACK))
                             {
                                 if (!method_exists($this, 'takeNextPageAction')) {
                                     handleException(new Exception("Plugin " . $this->siteName . " is missing takeNextPageAction method definiton required for its pagination type."), "", true);

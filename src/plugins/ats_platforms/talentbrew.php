@@ -74,7 +74,7 @@ class BasePluginTalentBrew extends ClassClientHTMLJobSitePlugin
     // BUGBUG:  Disney & Boeing are both hit or miss around returning the full set of listings correctly.
     //          Setting to ignore_mismatched to avoid the error results that will happen when they do.
     //
-    protected $additionalFlags = [ C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED];
+    protected $additionalFlags = [ C__JOB_CLIENTSIDE_PAGE_VIA_NEXTBUTTON, C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $additionalLoadDelaySeconds = 5;
 
