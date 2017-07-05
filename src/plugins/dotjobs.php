@@ -27,7 +27,8 @@ class PluginDotJobs extends ClassClientHTMLJobSitePlugin
     protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE ];
     protected $strBaseURLFormat = "http://washington.jobs/jobs?location=***LOCATION***&q=***KEYWORDS***";
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
-    protected $additionalLoadDelaySeconds = 10;
+    protected $additionalLoadDelaySeconds = 4;
+    protected $nMaxJobsToReturn = 2000; 
     protected $selectorMoreListings = "#button_moreJobs";
 
 
@@ -44,7 +45,7 @@ class PluginDotJobs extends ClassClientHTMLJobSitePlugin
     }
 
     protected $arrListingTagSetup = array(
-        'tag_listings_count' => array('tag' => 'h3', 'attribute'=>'class', 'attribute_value' => 'direct_highlightedText', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/.*?(\d+)\s*jobs/i'),
+        'tag_listings_count' => array('tag' => 'h3', 'attribute'=>'class', 'attribute_value' => 'direct_highlightedText', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/.*?([,\d]+)\s*jobs/i'),
         'tag_listings_section' => array(array('tag' => 'ul', 'attribute'=>'class', 'attribute_value' => 'default_jobListing'), array('tag' => 'li')),
         'tag_title' =>  array(array('tag' => 'h4'), array('tag' => 'a'), array('tag' => 'span'), 'return_attribute' => 'plaintext'),
         'tag_link' =>  array(array('tag' => 'h4'), array('tag' => 'a'), 'return_attribute' => 'href'),
