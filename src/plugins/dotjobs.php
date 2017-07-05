@@ -27,12 +27,12 @@ class PluginDotJobs extends ClassClientHTMLJobSitePlugin
     protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE ];
     protected $strBaseURLFormat = "http://washington.jobs/jobs?location=***LOCATION***&q=***KEYWORDS***";
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
-    protected $additionalLoadDelaySeconds = 4;
+    protected $additionalLoadDelaySeconds = 10;
     protected $nMaxJobsToReturn = 2000; 
     protected $selectorMoreListings = "#button_moreJobs";
 
 
-    protected function goToEndOfResultsSetViaLoadMore()
+    protected function goToEndOfResultsSetViaLoadMore($nTotalListings)
     {
 
         $js = "
@@ -40,8 +40,9 @@ class PluginDotJobs extends ClassClientHTMLJobSitePlugin
         ";
 
         $this->runJavaScriptSnippet($js, false);
+        $this->nJobListingsPerPage = 50;
 
-        parent::goToEndOfResultsSetViaLoadMore();
+        parent::goToEndOfResultsSetViaLoadMore($nTotalListings);
     }
 
     protected $arrListingTagSetup = array(
