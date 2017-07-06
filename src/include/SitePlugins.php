@@ -85,6 +85,9 @@ $GLOBALS['DATA']['location_types'] = array('location-city', 'location-city-comma
 
 function setupPlugins()
 {
+    $jsPlugins = new JSONPlugins();
+    $jsPlugins->init();
+    
     $arrAddedPlugins = null;
     $classList = get_declared_classes();
     print('Getting job site plugin list...'. PHP_EOL);

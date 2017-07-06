@@ -1,0 +1,193 @@
+{
+  "AgentName": "Capitalonecareers",
+  "CreatedOn": "6/29/2017, 10:12:40 AM",
+  "CreatedBy": "Advanced Web Scraper - 3.0",
+  "Version": 3,
+  "About": "Scraping agent by https://www.datascraping.co",
+  "SourceURL": "https://www.capitalonecareers.com/search-jobs",
+  "Collections": [
+    {
+      "Name": "Collection1",
+      "Fields": [
+        {
+          "Name": "tag_location",
+          "Selector": ".job-location",
+          "Extract": "HTML",
+          "Attribute": null,
+          "Type": "CSS",
+          "From": null,
+          "Visible": true,
+          "CleanTrim": true,
+          "JoinResult": false,
+          "PostProcessing": []
+        },
+        {
+          "Name": "tag_link",
+          "Selector": "h2",
+          "Extract": "HTML",
+          "Attribute": "href",
+          "Type": "CSS",
+          "From": null,
+          "Visible": true,
+          "CleanTrim": true,
+          "JoinResult": false,
+          "PostProcessing": []
+        },
+        {
+          "Name": "tag_job_posting_date",
+          "Selector": ".job-date-posted",
+          "Extract": "HTML",
+          "Attribute": null,
+          "Type": "CSS",
+          "From": null,
+          "Visible": true,
+          "CleanTrim": true,
+          "JoinResult": false,
+          "PostProcessing": []
+        },
+        {
+          "Name": "tag_job_id",
+          "Selector": ".job-id",
+          "Extract": "HTML",
+          "Attribute": null,
+          "Type": "CSS",
+          "From": null,
+          "Visible": true,
+          "CleanTrim": true,
+          "JoinResult": false,
+          "PostProcessing": []
+        },
+        {
+          "Name": "tag_listings_section",
+          "Selector": "a",
+          "Extract": "HTML",
+          "Attribute": null,
+          "Type": "CSS",
+          "From": null,
+          "Visible": true,
+          "CleanTrim": true,
+          "JoinResult": false,
+          "PostProcessing": []
+        },
+        {
+          "Name": "tag_link",
+          "Selector": "h2",
+          "Extract": "HTML",
+          "Attribute": null,
+          "Type": "CSS",
+          "From": null,
+          "Visible": true,
+          "CleanTrim": true,
+          "JoinResult": false,
+          "PostProcessing": []
+        }
+      ]
+    }
+  ],
+  "DynamicSelectors": {
+    "Enabled": false,
+    "ListId": null,
+    "Data": []
+  },
+  "Header": {
+    "Method": "GET",
+    "Encoding": "utf-8",
+    "TimeOut": 10,
+    "ReadWriteTimeout": 10,
+    "KeepSameURL": false,
+    "ConnectionAlive": true,
+    "HttpPost": {
+      "Url": null,
+      "PostData": null,
+      "ContentType": "application/x-www-form-urlencoded"
+    },
+    "Data": [
+      {
+        "Key": "Accept",
+        "Value": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      },
+      {
+        "Key": "User-Agent",
+        "Value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.104 Safari/537.36"
+      },
+      {
+        "Key": "Accept-Language",
+        "Value": "*"
+      }
+    ]
+  },
+  "Proxy": {
+    "Enabled": false,
+    "Type": null,
+    "Rotate": 0,
+    "Address": null,
+    "UserName": null,
+    "Password": null,
+    "Domain": null,
+    "DynamicField": null
+  },
+  "AutoRedirect": {
+    "Enabled": true,
+    "MaxAutoRedirect": 3
+  },
+  "Throttling": {
+    "Enabled": false,
+    "DelayType": null,
+    "DelaySeconds": 0
+  },
+  "FailRetry": {
+    "Enabled": false,
+    "MaxTryCount": 0,
+    "MaxTryTime": 0,
+    "TryInterval": 0
+  },
+  "Options": {
+    "AlwaysExtract": false
+  },
+  "Login": {
+    "Enabled": false,
+    "AuthenticationType": "FORM",
+    "Data": []
+  },
+  "FormSubmit": {
+    "Enabled": false,
+    "Data": []
+  },
+  "RequestViaBrowser": {
+    "Enabled": false,
+    "AjaxEnabled": false,
+    "ImagesEnabled": false,
+    "WaitForAjaxElement": 5
+  },
+  "Pagination": {
+    "Enabled": false,
+    "Type": null,
+    "Selector": null,
+    "PageLimit": 10
+  },
+  "Output": {
+    "Type": null,
+    "Path": null,
+    "FileName": "output.csv",
+    "PostDataOnAbortCancel": false,
+    "IncludeHeader": true
+  },
+  "Input": {
+    "Type": "DIRECT",
+    "Path": null,
+    "FileType": null,
+    "HasHeaders": false,
+    "InlineContent": false,
+    "ConnectAgent": null,
+    "Limit": {
+      "Enabled": false,
+      "StartAt": 0,
+      "StopAt": 0
+    },
+    "Data": [
+      {
+        "COLUMN1": "https://www.capitalonecareers.com/search-jobs"
+      }
+    ]
+  }
+}

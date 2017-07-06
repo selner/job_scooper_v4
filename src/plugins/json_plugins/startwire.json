@@ -1,0 +1,234 @@
+{
+  "AgentName": "Startwire",
+  "CreatedOn": "7/3/2017, 8:51:02 PM",
+  "CreatedBy": "Advanced Web Scraper - 3.0",
+  "Version": 3,
+  "About": "Scraping agent by https://www.agenty.com",
+  "SourceURL": "https://www.startwire.com/search",
+  "Collections": [
+    {
+      "Name": "Collection1",
+      "Fields": [
+        {
+          "Name": "tag_listings_section",
+          "Selector": ".search-job-wrapper",
+          "Extract": "HTML",
+          "Attribute": null,
+          "Type": "CSS",
+          "From": null,
+          "Visible": true,
+          "CleanTrim": true,
+          "JoinResult": false,
+          "PostProcessing": []
+        },
+        {
+          "Name": "tag_title",
+          "Selector": ".title",
+          "Extract": "TEXT",
+          "Attribute": null,
+          "Type": "CSS",
+          "From": null,
+          "Visible": true,
+          "CleanTrim": true,
+          "JoinResult": false,
+          "PostProcessing": []
+        },
+        {
+          "Name": "tag_location",
+          "Selector": ".search-job-wrapper .location",
+          "Extract": "TEXT",
+          "Attribute": null,
+          "Type": "CSS",
+          "From": null,
+          "Visible": true,
+          "CleanTrim": true,
+          "JoinResult": false,
+          "PostProcessing": []
+        },
+        {
+          "Name": "tag_company",
+          "Selector": ".company-name",
+          "Extract": "TEXT",
+          "Attribute": null,
+          "Type": "CSS",
+          "From": null,
+          "Visible": true,
+          "CleanTrim": true,
+          "JoinResult": false,
+          "PostProcessing": []
+        },
+        {
+          "Name": "tag_logo",
+          "Selector": ".search-job-wrapper img",
+          "Extract": "ATTR",
+          "Attribute": "href",
+          "Type": "CSS",
+          "From": null,
+          "Visible": true,
+          "CleanTrim": true,
+          "JoinResult": false,
+          "PostProcessing": []
+        },
+        {
+          "Name": "tag_link",
+          "Selector": ".search-job-wrapper a.link-job",
+          "Extract": "ATTR",
+          "Attribute": "href",
+          "Type": "CSS",
+          "From": null,
+          "Visible": true,
+          "CleanTrim": true,
+          "JoinResult": false,
+          "PostProcessing": []
+        },
+        {
+          "Name": "tag_pages_count",
+          "Selector": ".js-infinite-scroll",
+          "Extract": "ATTR",
+          "Attribute": "data-total-pages",
+          "Type": "CSS",
+          "From": null,
+          "Visible": true,
+          "CleanTrim": true,
+          "JoinResult": false,
+          "PostProcessing": []
+        },
+        {
+          "Name": "tag_listings_count",
+          "Selector": ".number",
+          "Extract": "TEXT",
+          "Attribute": null,
+          "Type": "CSS",
+          "From": null,
+          "Visible": true,
+          "CleanTrim": true,
+          "JoinResult": false,
+          "PostProcessing": []
+        },
+        {
+          "Name": "tag_job_posting_date",
+          "Selector": "span.date",
+          "Extract": "HTML",
+          "Attribute": null,
+          "Type": "CSS",
+          "From": null,
+          "Visible": true,
+          "CleanTrim": true,
+          "JoinResult": false,
+          "PostProcessing": []
+        }
+      ]
+    }
+  ],
+  "DynamicSelectors": {
+    "Enabled": false,
+    "ListId": null,
+    "Data": []
+  },
+  "Header": {
+    "Method": "GET",
+    "Encoding": "utf-8",
+    "TimeOut": 10,
+    "ReadWriteTimeout": 10,
+    "KeepSameURL": false,
+    "ConnectionAlive": true,
+    "HttpPost": {
+      "Url": null,
+      "PostData": null,
+      "ContentType": "application/x-www-form-urlencoded"
+    },
+    "Data": [
+      {
+        "Key": "Accept",
+        "Value": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      },
+      {
+        "Key": "User-Agent",
+        "Value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.104 Safari/537.36"
+      },
+      {
+        "Key": "Accept-Language",
+        "Value": "*"
+      }
+    ]
+  },
+  "Proxy": {
+    "Enabled": false,
+    "Type": null,
+    "Rotate": 0,
+    "Address": null,
+    "UserName": null,
+    "Password": null,
+    "Domain": null,
+    "DynamicField": null
+  },
+  "AutoRedirect": {
+    "Enabled": true,
+    "MaxAutoRedirect": 3
+  },
+  "Throttling": {
+    "Enabled": false,
+    "DelayType": null,
+    "DelaySeconds": 0
+  },
+  "FailRetry": {
+    "Enabled": false,
+    "MaxTryCount": 0,
+    "MaxTryTime": 0,
+    "TryInterval": 0
+  },
+  "Options": {
+    "AlwaysExtract": false
+  },
+  "Login": {
+    "Enabled": false,
+    "AuthenticationType": "FORM",
+    "Data": [],
+    "BasicAuthentication": {
+      "Domain": null,
+      "UserName": null,
+      "Password": null
+    }
+  },
+  "FormSubmit": {
+    "Enabled": false,
+    "Data": []
+  },
+  "RequestViaBrowser": {
+    "Enabled": false,
+    "AjaxEnabled": false,
+    "ImagesEnabled": false,
+    "WaitForAjaxElement": 5
+  },
+  "Pagination": {
+    "Enabled": false,
+    "Type": null,
+    "Selector": null,
+    "PageLimit": 10
+  },
+  "Output": {
+    "Type": null,
+    "Path": null,
+    "FileName": "output.csv",
+    "PostDataOnAbortCancel": false,
+    "IncludeHeader": true
+  },
+  "Input": {
+    "Type": "DIRECT",
+    "Path": null,
+    "FileType": null,
+    "HasHeaders": false,
+    "InlineContent": false,
+    "ConnectAgent": null,
+    "Limit": {
+      "Enabled": false,
+      "StartAt": 0,
+      "StopAt": 0
+    },
+    "Data": [
+      {
+        "COLUMN1": "https://www.startwire.com/search"
+      }
+    ]
+  }
+}
