@@ -25,7 +25,7 @@ class PluginZipRecruiter extends ClassClientHTMLJobSitePlugin
     protected $nJobListingsPerPage = C__TOTAL_ITEMS_UNKNOWN__; // we use this to make sure we only have 1 single results page
 
     protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE ];
-    protected $strBaseURLFormat = "https://www.ziprecruiter.com/candidate/search?search=%22***KEYWORDS***%22&include_near_duplicates=1&location=***LOCATION***&radius=25&days=***NUMBER_DAYS***";
+    protected $strBaseURLFormat = "https://www.ziprecruiter.com/candidate/search?search=***KEYWORDS***&include_near_duplicates=1&location=***LOCATION***&radius=25&days=***NUMBER_DAYS***";
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $selectorMoreListings = ".load_more_jobs";
 
