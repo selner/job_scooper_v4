@@ -1199,9 +1199,9 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                             }
                             elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_PAGE_VIA_NEXTBUTTON))
                             {
-                                if(is_null($this->nextPageScript))
+                                if(is_null($this->selectorMoreListings))
                                 {
-                                    handleException(new Exception("Plugin " . $this->siteName . " is missing selectorMoreListings setting for the defined pagination type."), "", true);
+                                    throw(new Exception("Plugin " . $this->siteName . " is missing selectorMoreListings setting for the defined pagination type."));
 
                                 }
                                 $this->selenium->loadPage($strURL, $this->additionalLoadDelaySeconds);
