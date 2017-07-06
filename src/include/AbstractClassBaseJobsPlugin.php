@@ -57,10 +57,13 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             }
         }
         
-        if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED))
+        if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED)) {
+            $this->nMaxJobsToReturn = $this->nMaxJobsToReturn * 3;
+        }
+
+        if($this->isBitFlagSet(C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL)) {
             $this->nJobListingsPerPage = $this->nMaxJobsToReturn;
-        elseif($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED))
-           $this->nJobListingsPerPage = $this->nMaxJobsToReturn * 3;
+        }
     }
 
 

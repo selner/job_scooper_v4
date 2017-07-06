@@ -38,7 +38,8 @@ foreach ($files as $file) {
     require_once($file);
 }
 
-const C_JOB_MAX_RESULTS_PER_SEARCH = 1000;
+const C__TOTAL_ITEMS_UNKNOWN__ = 1111;
+const C_JOB_MAX_RESULTS_PER_SEARCH = C__TOTAL_ITEMS_UNKNOWN__;
 const C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__  = "SERVER_HTML";
 const C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__  = "CLIENT_HTML";
 const C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__ = "JOBAPI";
@@ -80,7 +81,6 @@ const C__USER_KEYWORD_MATCH_DEFAULT = C__USER_KEYWORD_MUST_BE_IN_TITLE;
 define('C__JOB_BASETYPE_WEBPAGE_FLAGS', 0);
 
 $GLOBALS['DATA']['location_types'] = array('location-city', 'location-city-comma-statecode', 'location-city-dash-statecode', 'location-city-comma-nospace-statecode', 'location-city-comma-statecode-underscores-and-dashes', 'location-city-comma-state', 'location-city-comma-state-country', 'location-statecode', 'location-state', 'location-city-comma-state-country-no-commas', 'location-countrycode');
-const C__TOTAL_ITEMS_UNKNOWN__ = 1111;
 
 
 function setupPlugins()
