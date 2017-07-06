@@ -487,17 +487,17 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $secs = 1000;
 
         $js = "
-            scroll = setTimeout(doLoadMore, 250);
-            function doLoadMore() 
+            scroll = setTimeout(doNextPage, " . $secs . ");
+            function doNextPage() 
             {
-                var loadmore = document.querySelector('" . $this->selectorMoreListings . "');
-                if(loadmore != null && !typeof(loadmore .click) !== \"function\" && loadmore.length >= 1) {
-                    loadmore = loadmore[0];
+                var loadnext = document.querySelector('" . $this->selectorMoreListings . "');
+                if(loadnext != null && !typeof(loadnext .click) !== \"function\" && loadnext.length >= 1) {
+                    loadnext = loadnext[0];
                 } 
     
-                if(loadmore != null && loadmore.style.display === \"\") 
+                if(loadnext != null && loadnext.style.display === \"\") 
                 { 
-                    loadmore.click();  
+                    loadnext.click();  
                     console.log(\"Clicked load more control...\");
                 }
             }  
