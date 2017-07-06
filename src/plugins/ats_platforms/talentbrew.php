@@ -43,6 +43,7 @@ class PluginBoeing extends BasePluginTalentBrew
 
     function __construct($strBaseDir)
     {
+        unset($this->arrListingTagSetup['tag_listings_count']);
         parent::__construct($strBaseDir);
     }
 }
