@@ -163,6 +163,23 @@ function saveDomToFile($htmlNode, $filepath)
 
 }
 
+function array_find_closest_key_match($search, $arr) {
+    $closest = null;
+    $closestScore = null;
+    $percent = 0;
+    foreach (array_keys($arr) as $item) {
+        similar_text($search, $item, $percent);
+        if($percent > $closestScore) {
+            $closestScore = $percent;
+            $closest = $item;
+        }
+//        if ($closest === null || abs($search - $closest) > abs($item - $search)) {
+//            $closest = $item;
+//        }
+    }
+    return $closest;
+}
+
 function clean_utf8($string, $control = true)
 {
     $string = iconv('UTF-8', 'UTF-8//IGNORE', $string);
