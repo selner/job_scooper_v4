@@ -606,6 +606,9 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     {
 
         $searchStartURL = $this->getPageURLfromBaseFmt($searchDetails, 1, 1);
+        if(is_null($searchStartURL) || strlen($searchStartURL) == 0)
+            $searchStartURL = $this->siteBaseURL;
+
         $searchDetails['search_start_url'] = $searchStartURL;
         $GLOBALS['logger']->logLine("Setting start URL for " . $this->siteName . "[" . $searchDetails['key'] . " to: " . PHP_EOL . $searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
