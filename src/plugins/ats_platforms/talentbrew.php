@@ -85,13 +85,13 @@ class BasePluginTalentBrew extends ClassClientHTMLJobSitePlugin
         'tag_listings_count' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results'), array('tag' => 'h1'), 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/(.*?) .*/'),
         'tag_pages_count' => array(array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'pagination-total-pages'), 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/of (.*)/'),
         'tag_listings_section' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results-list'), array('tag' => 'ul'),array('tag' => 'li')),
-        'tag_title' =>  array(array('tag' => 'a'), array('tag' => 'h2')),
-        'tag_link' =>  array(array('tag' => 'a'), 'return_attribute' => 'href'),
-        'tag_job_id' =>  array(array('tag' => 'a'), 'return_attribute' => 'data-job-id'),
+        'tag_title' =>  array('selector' => 'a h2'),
+        'tag_link' =>  array('tag' => 'a', 'return_attribute' => 'href'),
+        'tag_job_id' =>  array('tag' => 'a', 'return_attribute' => 'data-job-id'),
         'tag_company' =>  array('return_value_callback' => 'ClassBaseHTMLJobSitePlugin::setCompanyToSiteName'),
         'tag_location' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'job-location'),
         'tag_job_posting_date' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'job-date-posted'),
-        'tag_next_button' => array('selector' => '#pagination-bottom > div.pagination-paging > a.next')
+        'tag_next_button' => array('selector' => '#pagination-bottom a.next')
     );
     function __construct($strBaseDir = null)
     {
