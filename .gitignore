@@ -24,3 +24,4 @@ src/uncommitted-patches
 vendor
 *.diff
 sshkeys
+src/include/static/source_files
