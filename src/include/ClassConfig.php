@@ -281,14 +281,14 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         // Load the global search data that will be used to create
         // and configure all searches
         //
-        $this->_parseGlobalSearchParamtersFromConfig_($config);
+        $this->_parseGlobalSearchParametersFromConfig_($config);
 
         if(isDebug() == true && isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded all configuration settings:  " . var_export($this->allConfigFileSettings, true), \Scooper\C__DISPLAY_SUMMARY__);
 
 
         $this->_parseEmailSetupFromINI_($config);
 
-        $this->_parseSeleniumParamtersFromConfig_($config);
+        $this->_parseSeleniumParametersFromConfig_($config);
 
         //
         // Load Plugin Specific settings from the config
@@ -478,7 +478,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         }
     }
 
-    private function _parseGlobalSearchParamtersFromConfig_($config)
+    private function _parseGlobalSearchParametersFromConfig_($config)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading global search settings from config file...", \Scooper\C__DISPLAY_ITEM_START__);
 
@@ -515,7 +515,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             }
         }
     }
-    private function _parseSeleniumParamtersFromConfig_($config)
+    private function _parseSeleniumParametersFromConfig_($config)
     {
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading Selenium settings from config file...", \Scooper\C__DISPLAY_ITEM_START__);
         if(isset($config['selenium']) && is_array($config['selenium']))
