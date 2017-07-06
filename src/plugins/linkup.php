@@ -58,8 +58,19 @@ class PluginLinkUp extends ClassHTMLJobSitePlugin
 
     }
 
+    function isNoResults($var)
+    {
+        if (stristr($var, "Your search returned no results") != "") {
+            return 0;
+        }
+
+        return null;
+    }
+
+
     protected $arrListingTagSetup = array(
         'tag_listings_count' => array('tag' => '#search-showing', 'return_value_regex' => '/\d+\s\-\s\d+[\sof]+([\d,]+).*/'),
+        'tag_listings_noresults' => array('selector' => 'section.results-messages h1', 'return_attribute' => 'plaintext', 'return_value_callback' => "PluginLinkup::isNoResults"),
         'tag_listings_section' => array('selector' => 'div.listing', 'return_value_callback' => "PluginLinkup::filterSponsoredAds"),
         'tag_title' => array('selector' => 'a.listing-title strong'),
         'tag_job_id' => array('selector' => 'div.listing', 'return_attribute' => 'data-hash'),
