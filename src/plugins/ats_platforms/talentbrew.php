@@ -18,20 +18,32 @@
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(dirname(__FILE__)))); }
 require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
-class PluginHP extends BasePluginTalentBrew
+/*class PluginHP extends BasePluginTalentBrew
 {
     protected $siteName = "HP";
     protected $siteBaseURL = 'https://h30631.www3.hp.com';
     protected $nJobListingsPerPage = 15;
     protected $strBaseURLFormat = "/search-jobs";  // HP's keyword search is a little squirrelly so more successful if we don't filter up front and get the mismatches removed later
+    protected $additionalFlags = [ C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL];
 
     function __construct($strBaseDir = null)
     {
+        unset($this->arrListingTagSetup['tag_next_button']);
 
         parent::__construct($strBaseDir);
     }
 
-}
+    function takeNextPageAction($driver)
+    {
+        $this->runJavaScriptSnippet("document.getElementsByClassName(\"next\")[0].setAttribute(\"class\", \"pagination-show-all\"); document.getElementsByClassName(\"pagination-show-all\")[0].click();", false, $this->additionalLoadDelaySeconds + 10);
+        sleep($this->additionalLoadDelaySeconds+1 );
+        $this->nMaxJobsToReturn = C_JOB_MAX_RESULTS_PER_SEARCH * 3;
+        $this->nJobListingsPerPage = $this->nMaxJobsToReturn;
+
+        $this->moveDownOnePageInBrowser();
+        
+    }
+}*/
 
 
 class PluginBoeing extends BasePluginTalentBrew
