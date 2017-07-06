@@ -78,6 +78,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         'tag_link' => null,
         'tag_department' => null,
         'tag_location' => null,
+        'tag_job_category' => null,
         'tag_company' => null,
         'tag_job_posting_date' => null,
         'tag_employment_type' => null,
@@ -288,6 +289,9 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
                 if (array_key_exists('tag_location', $this->arrListingTagSetup))
                     $item['location'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_location'], 'plaintext');
+
+                if (array_key_exists('tag_job_category', $this->arrListingTagSetup))
+                    $item['job_site_category'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_job_category'], 'plaintext');
 
                 if (array_key_exists('tag_job_posting_date', $this->arrListingTagSetup))
                     $item['job_site_date'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_job_posting_date'], 'plaintext');

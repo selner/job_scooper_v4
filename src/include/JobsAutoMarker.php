@@ -25,9 +25,9 @@ class JobsAutoMarker extends ClassJobsSiteCommon
     protected $siteName = "JobsAutoMarker";
     protected $arrLatestJobs_UnfilteredByUserInput = array();
     protected $arrMasterJobList = array();
-    protected $cbsaList  = null;
-    protected $cbsaCityMapping  = null;
-    protected $cbsaLocSetMapping = null;
+    protected $cbsaList  = array();
+    protected $cbsaPlaces  = array();
+    protected $cbsaLocSetMapping = array();
 
     function __construct($arrJobs_Unfiltered = array(), $strOutputDirectory = null)
     {
@@ -35,23 +35,29 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         $this->arrMasterJobList = \Scooper\array_copy($arrJobs_Unfiltered);
 
         $this->cbsaList = loadJSON(__ROOT__ . '/include/static/cbsa_list.json');
-        $this->cbsaCityMapping = loadJSON(__ROOT__ . '/include/static/city_to_cbsa_mapping.json');
-        $this->cbsaLocSetMapping = array();
+        $cbsaCityMapping = loadCSV(__ROOT__ . '/include/static/us_place_to_csba_mapping.csv', 'PlaceKey');
 
         foreach($GLOBALS['USERDATA']['configuration_settings']['location_sets'] as $locset)
         {
-            if(array_key_exists('location-city', $locset) === true && array_key_exists($locset['location-city'], $this->cbsaCityMapping))
+            if(array_key_exists('location-city', $locset) === true && (array_key_exists('location-statecode', $locset)))
             {
-                $cbsa = $this->cbsaCityMapping[$locset['location-city']];
-                if(strcasecmp($locset['location-statecode'], $cbsa['CBSA State Code'] ) == 0)
-                {
-                    $this->cbsaLocSetMapping[$locset['key']] = $cbsa['CBSACode'];
-
-                }
+                $placekey = strtoupper($locset['location-city'])."_".strtoupper($locset['location-statecode']);
+                $cbsa = $cbsaCityMapping[$placekey];
+                $this->cbsaLocSetMapping[$locset['key']] = $cbsa['CBSA'];
             }
-
         }
+
+        $cbsaInUsa = array_unique($this->cbsaLocSetMapping);
+        foreach($cbsaCityMapping as $place)
+        {
+            if(array_search($place['CBSA'], $cbsaInUsa) !== false)
+            {
+                $this->cbsaPlaces[$place['PlaceKey']] = $place;
+            }
+        }
+
         unset($locset);
+        unset($cbsaCityMapping);
 
     }
 
@@ -204,6 +210,11 @@ class JobsAutoMarker extends ClassJobsSiteCommon
 
     }
 
+    private function _getLocationMatchKey_($locString)
+    {
+        return strtoupper(str_replace(" ", "", str_replace("Greater", "", str_replace(", ", "_", $locString))));
+
+    }
     private function _markJobsList_SetOutOfArea_(&$arrJobsList)
     {
         if(count($arrJobsList) == 0) return;
@@ -214,21 +225,18 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         $lookupcbsa = array();
 
         $arrKeys_Locations = array_column ( $arrJobsList, 'location');
-        array_unique($arrKeys_Locations);
-        $citycbsaKeys = array_keys($this->cbsaCityMapping);
-        foreach($arrKeys_Locations as $locstr)
+        sort($arrKeys_Locations);
+        $uniqListingLocs = array_unique($arrKeys_Locations);
+        foreach($uniqListingLocs as $listingLocation)
         {
             $cbsaResult = null;
-            if(in_array($locstr, $citycbsaKeys ))
-            {
-                $cbsaResult = $this->cbsaCityMapping[$locstr];
-                if($cbsaResult !== false)
-                {
-                    $lookupcbsa[$locstr] = $cbsaResult;
-                }
-            }
+            $matchkey = $this->_getLocationMatchKey_($listingLocation);
+            $placeKey = array_find_closest_key_match($matchkey, $this->cbsaPlaces);
+            if(strncmp($placeKey, $matchkey, 5) == 0)
+                $lookupcbsa[$listingLocation] = $placeKey;
         }
-        unset($locstr);
+        $matchkey = null;
+        unset($placeKey);
 
         $nJobsSkipped = 0;
 
@@ -236,34 +244,29 @@ class JobsAutoMarker extends ClassJobsSiteCommon
 
         foreach($arrJobsList as &$job)
         {
-            if(isMarkedBlank($job) == true || (substr_count($job['interested'], "New") == 1) ) {
+            if(substr_count($job['interested'], "New") == 1) {
                 $nJobsSkipped += 1;
             }
             else
             {
                 $matched = false;
                 if(array_key_exists('location', $job)) {
-                    $locStr = trim(explode(",", $job['location'])[0]);
-
-                    if (array_key_exists($locStr, $this->cbsaCityMapping)) {
-                        $cbsa = $this->cbsaCityMapping[$locStr];
-
-                        if (!in_array($cbsa['CBSACode'], $this->cbsaLocSetMapping)) {
-                            $job['interested'] = 'No (Out of Search Area)' . C__STR_TAG_AUTOMARKEDJOB__;
-                            appendJobColumnData($job, 'match_notes', "|", "Matched " . getArrayValuesAsString($cbsa));
-                            $job['date_last_updated'] = getTodayAsString();
-                            $nJobsMarkedAutoExcluded++;
-                            $matched = true;
-                        }
+                    $matchkey = $this->_getLocationMatchKey_($job['location']);
+                    if (!in_array($matchkey, $lookupcbsa)) {
+                        $job['interested'] = 'No (Out of Search Area)' . C__STR_TAG_AUTOMARKEDJOB__;
+                        appendJobColumnData($job, 'match_notes', "|", "Did not match CBSA for location.");
+                        $job['date_last_updated'] = getTodayAsString();
+                        $nJobsMarkedAutoExcluded++;
+                        $matched = true;
                     }
-                    if ($matched === false) {
-                        $nJobsNotMarked = $nJobsNotMarked + 1;
-                    }
+                }
+
+                if ($matched === false) {
+                    $nJobsNotMarked = $nJobsNotMarked + 1;
                 }
 
             }
         }
-        unset($job);
 
         $nJobsSkipped = count($arrJobsList) - $nJobsMarkedAutoExcluded - $nJobsNotMarked;
 
