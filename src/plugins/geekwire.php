@@ -21,51 +21,24 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 
 
 
-class PluginGeekwire extends ClassBaseClientSideHTMLJobSitePlugin
+class PluginGeekwire extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = 'Geekwire';
-    protected $siteBaseURL = 'http://www.geekwire.com/jobs/';
+    protected $siteBaseURL = 'http://www.geekwire.com/';
     protected $strBaseURLFormat = "http://www.geekwire.com/jobs/";
-//    protected $strBaseURLFormat = "http://www.geekwork.com/jobs/?search_keywords=***KEYWORDS***&search_location=***LOCATION***";
-    protected $typeLocationSearchNeeded = 'location-statecode';
     protected $additionalLoadDelaySeconds = 20;
-    protected $additionalFlags = [C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
-
-    function parseJobsListForPage($objSimpHTML)
-    {
-
-        $ret = null;
-
-        $nodesJobs = $objSimpHTML->find("ul[class='job_listings'] li[class='type-job_listing']");
-
-        foreach($nodesJobs as $node)
-        {
-            $item = $this->getEmptyJobListingRecord();
-            $item['job_site'] = $this->siteName;
-
-            $item['job_title'] = $node->find("h3")[0]->plaintext;
-            $item['job_post_url'] = $node->find("a")[0]->href;
-
-            $item['location'] = $node->find("div[class='location']")[0]->plaintext;
-
-            $item['company'] = $node->find("div[class='company'] span")[0]->plaintext;
-            $item['date_pulled'] = getTodayAsString();
-
-            $item['job_site_date'] = $node->find("li[class='date']")[0]->plaintext;
-            $item['job_site_category'] = $node->find("ul[class='meta'] li")[0]->plaintext;
+    protected $additionalFlags = [C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL, C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
+    protected $arrListingTagSetup = array(
+        'tag_listings_section' => array('selector' => 'ul.job_listings li.type-job_listing'),
+        'tag_title' => array('tag' => 'h3'),
+        'tag_link' => array('tag' => 'a', 'index' => 0, 'return_attribute' => 'href'),
+        'tag_company' => array('selector' => 'div.company span', 'index' => 0),
+        'tag_location' => array('selector' => 'div.location'),
+        'tag_job_posting_date' => array('selector' => 'date', 'index' => 0),
+        'tag_job_category' => array('selector' => 'ul.meta li', 'index' => 0),
+        'tag_job_id' =>  array('tag' => 'a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' =>  '/\/jobs\/job\/(.*)/i')
+    );
 
 
-            $arrLIParts = explode(" ", $node->attr['class']);
-            $item['job_id'] = str_ireplace("http://www.geekwire.com/jobs/job/", "", $item['job_post_url']);
-
-            $ret[] = $this->normalizeJobItem($item);
-
-        }
-
-        return $ret;
-    }
 
 }
-
-
-?>
