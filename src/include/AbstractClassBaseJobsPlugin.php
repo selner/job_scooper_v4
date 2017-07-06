@@ -367,9 +367,13 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         {
             $strBaseURL = $searchDetails['base_url_format'];
         }
-        elseif(isset($this->strBaseURLFormat))
+        elseif(!is_null($this->strBaseURLFormat) && strlen($this->strBaseURLFormat) > 0)
         {
             $strBaseURL = $searchDetails['base_url_format'] = $this->strBaseURLFormat;
+        }
+        elseif(!is_null($this->siteBaseURL) && strlen($this->siteBaseURL) > 0)
+        {
+            $strBaseURL = $searchDetails['base_url_format'] = $this->siteBaseURL;
         }
         else
         {
