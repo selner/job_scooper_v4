@@ -56,6 +56,14 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 }
             }
         }
+        
+        if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED)) {
+            $this->nMaxJobsToReturn = $this->nMaxJobsToReturn * 3;
+        }
+
+        if($this->isBitFlagSet(C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL)) {
+            $this->nJobListingsPerPage = $this->nMaxJobsToReturn;
+        }
     }
 
 
@@ -133,9 +141,13 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         foreach($this->arrSearchesToReturn as $search)
         {
-            // assert this search is actually for the job site supported by this plugin
-            assert(strcasecmp(strtolower($search['site_name']), strtolower($this->siteName)) == 0);
-            $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[" . $search['key']) . "]", \Scooper\C__NAPPTOPLEVEL__, \Scooper\C__SECTION_BEGIN__);
+            $this->currentSearchBeingRun = $search;
+
+            try
+            {
+                // assert this search is actually for the job site supported by this plugin
+                assert(strcasecmp(strtolower($search['site_name']), strtolower($this->siteName)) == 0);
+                $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[" . $search['key']) . "]", \Scooper\C__NAPPTOPLEVEL__, \Scooper\C__SECTION_BEGIN__);
 
             if ($this->isSearchCached($search) == true) {
                 $GLOBALS['logger']->logLine("Jobs data for '" . $search['key'] . " has already been cached.  Skipping jobs download.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -841,7 +853,8 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     private function _setSearchSuccessResult_(&$searchDetails, $success = null, $details = "UNKNOWN RESULT.", $arrSearchedJobs = null, $objSimpleHTMLResults = null)
     {
-        $this->_writeDebugFiles_($searchDetails, "SUCCESS", $arrSearchedJobs, $objSimpleHTMLResults);
+        if(isDebug() === true)
+            $this->_writeDebugFiles_($searchDetails, "SUCCESS", $arrSearchedJobs, $objSimpleHTMLResults);
         $this->_setSearchResult_($searchDetails, $success, $details, null, $files = array());
     }
 
