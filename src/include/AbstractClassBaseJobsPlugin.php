@@ -149,24 +149,33 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 assert(strcasecmp(strtolower($search['site_name']), strtolower($this->siteName)) == 0);
                 $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[" . $search['key']) . "]", \Scooper\C__NAPPTOPLEVEL__, \Scooper\C__SECTION_BEGIN__);
 
-            if ($this->isSearchCached($search) == true) {
-                $GLOBALS['logger']->logLine("Jobs data for '" . $search['key'] . " has already been cached.  Skipping jobs download.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                continue;
-            }
-
-            if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
-                try
-                {
-                    if ($GLOBALS['USERDATA']['selenium']['autostart'] == True) {
-                        SeleniumSession::startSeleniumServer();
-                    }
-                    $this->selenium = new SeleniumSession();
-                } catch (Exception $ex) {
-                    handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->siteName ."'", true);
+                if ($this->isSearchCached($search) == true) {
+                    $GLOBALS['logger']->logLine("Jobs data for '" . $search['key'] . " has already been cached.  Skipping jobs download.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    continue;
                 }
-            }
 
-            $this->_updateJobsDataForSearch_($search);
+                if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
+                    try
+                    {
+                        if ($GLOBALS['USERDATA']['selenium']['autostart'] == True) {
+                            SeleniumSession::startSeleniumServer();
+                        }
+                        $this->selenium = new SeleniumSession();
+                    } catch (Exception $ex) {
+                        handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->siteName ."'", true);
+                    }
+                }
+
+                $this->_updateJobsDataForSearch_($search);
+            }
+            catch (Exception $ex)
+            {
+                throw $ex;
+            }
+            finally
+            {
+                $this->currentSearchBeingRun = null;
+            }
         }
 
 
@@ -200,7 +209,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     protected $nextPageScript = null;
     protected $selectorMoreListings = null;
     protected $nMaxJobsToReturn = C_JOB_MAX_RESULTS_PER_SEARCH;
-
+    protected $currentSearchBeingRun = null;
 
     protected $strKeywordDelimiter = null;
     protected $additionalLoadDelaySeconds = 0;
@@ -465,6 +474,36 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         sleep($nSleepTimeToLoad > 0 ? $nSleepTimeToLoad : 2);
 
         $this->moveDownOnePageInBrowser();
+
+    }
+
+
+    protected function goToNextPageOfResultsViaNextButton()
+    {
+        $secs = $this->additionalLoadDelaySeconds * 1000;
+        if($secs <= 0)
+            $secs = 1000;
+
+        $js = "
+            scroll = setTimeout(doNextPage, " . $secs . ");
+            function doNextPage() 
+            {
+                var loadnext = document.querySelector('" . $this->selectorMoreListings . "');
+                if(loadnext != null && !typeof(loadnext .click) !== \"function\" && loadnext.length >= 1) {
+                    loadnext = loadnext[0];
+                } 
+    
+                if(loadnext != null && loadnext.style.display === \"\") 
+                { 
+                    loadnext.click();  
+                    console.log(\"Clicked load more control...\");
+                }
+            }  
+        ";
+
+        $this->runJavaScriptSnippet($js, false, $this->additionalLoadDelaySeconds + 10);
+
+        sleep($this->additionalLoadDelaySeconds > 0 ? $this->additionalLoadDelaySeconds : 2);
 
     }
 
@@ -1141,7 +1180,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                             }
                             else
                             {
-                                handleException(new Exception("No pagination method defined for plugin " . $this->siteName), "", false);
+                                handleException(null, "No pagination method defined for plugin " . $this->siteName, false);
                             }
 
                             $strURL = $this->selenium->driver->getCurrentURL();
