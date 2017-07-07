@@ -24,6 +24,7 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 require_once(__ROOT__ .'/include/AbstractClassBaseJobsPlugin.php');
 require_once(__ROOT__ .'/include/JobSitePluginsTypes.php');
 require_once(__ROOT__ . '/include/SimpleJobPlugins.php');
+require_once(__ROOT__ . '/include/JsonConfigPlugins.php');
 require_once(__ROOT__.'/include/ClassConfig.php');
 require_once(__ROOT__.'/include/StageManager.php');
 require_once (__ROOT__.'/include/ClassMultiSiteSearch.php');

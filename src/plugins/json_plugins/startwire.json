@@ -7,12 +7,12 @@
   "SourceURL": "https://www.startwire.com/search",
   "Collections": [
     {
-      "Name": "Collection1",
+      "Name": "PageFields",
       "Fields": [
         {
-          "Name": "tag_listings_section",
-          "Selector": ".search-job-wrapper",
-          "Extract": "HTML",
+          "Name": "tag_listings_count",
+          "Selector": ".number",
+          "Extract": "TEXT",
           "Attribute": null,
           "Type": "CSS",
           "From": null,
@@ -21,6 +21,35 @@
           "JoinResult": false,
           "PostProcessing": []
         },
+        {
+          "Name": "tag_listings_section",
+          "Selector": ".js-job",
+          "Extract": "HTML",
+          "Attribute": "node",
+          "Type": "CSS",
+          "From": null,
+          "Visible": true,
+          "CleanTrim": true,
+          "JoinResult": false,
+          "PostProcessing": []
+        },
+        {
+          "Name": "tag_pages_count",
+          "Selector": "div.js-infinite-scroll",
+          "Extract": "ATTR",
+          "Attribute": "data-total-pages",
+          "Type": "CSS",
+          "From": null,
+          "Visible": true,
+          "CleanTrim": true,
+          "JoinResult": false,
+          "PostProcessing": []
+        }
+      ]
+    },
+    {
+      "Name": "ItemFields",
+      "Fields": [
         {
           "Name": "tag_title",
           "Selector": ".title",
@@ -35,7 +64,7 @@
         },
         {
           "Name": "tag_location",
-          "Selector": ".search-job-wrapper .location",
+          "Selector": "span.location",
           "Extract": "TEXT",
           "Attribute": null,
           "Type": "CSS",
@@ -59,7 +88,7 @@
         },
         {
           "Name": "tag_logo",
-          "Selector": ".search-job-wrapper img",
+          "Selector": "img",
           "Extract": "ATTR",
           "Attribute": "href",
           "Type": "CSS",
@@ -71,9 +100,10 @@
         },
         {
           "Name": "tag_link",
-          "Selector": ".search-job-wrapper a.link-job",
+          "Selector": "a[class*='link-job']",
           "Extract": "ATTR",
           "Attribute": "href",
+          "Index": 0,
           "Type": "CSS",
           "From": null,
           "Visible": true,
@@ -82,32 +112,15 @@
           "PostProcessing": []
         },
         {
-          "Name": "tag_pages_count",
-          "Selector": ".js-infinite-scroll",
-          "Extract": "ATTR",
-          "Attribute": "data-total-pages",
-          "Type": "CSS",
-          "From": null,
-          "Visible": true,
-          "CleanTrim": true,
-          "JoinResult": false,
-          "PostProcessing": []
-        },
-        {
-          "Name": "tag_listings_count",
-          "Selector": ".number",
-          "Extract": "TEXT",
-          "Attribute": null,
-          "Type": "CSS",
-          "From": null,
-          "Visible": true,
-          "CleanTrim": true,
-          "JoinResult": false,
-          "PostProcessing": []
+          "Name": "tag_job_id",
+          "Pattern": "/.*express_apply_jobs\\/(.*)$/",
+          "Extract": "REGEX",
+          "Index": 1,
+          "Field": "job_post_url"
         },
         {
           "Name": "tag_job_posting_date",
-          "Selector": "span.date",
+          "Selector": "div.posted-date span",
           "Extract": "HTML",
           "Attribute": null,
           "Type": "CSS",

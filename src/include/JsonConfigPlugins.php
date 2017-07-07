@@ -21,7 +21,7 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 abstract class ClassJSONJobsitePlugin extends ClassClientHTMLJobSitePlugin
 {
-    protected $additionalFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED  ];
+    protected $additionalFlags = [C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL, C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED  ];
 }
 
 class JSONPlugins
@@ -32,7 +32,7 @@ class JSONPlugins
     }
     private function _loadPluginConfigFileData_()
     {
-        $jsonconfigsdir = dirname(__FILE__) . "/json_plugins";
+        $jsonconfigsdir = dirname(dirname(__FILE__)) . "/plugins/json_plugins";
         $arrAddedPlugins = null;
         print('Getting job site plugin list...'. PHP_EOL);
         $filelist = array_diff(scandir($jsonconfigsdir), array(".", ".."));
@@ -70,21 +70,46 @@ class JSONPlugins
 
         if(array_key_exists("Collections", $configData) && !is_null($configData->Collections) && is_array($configData->Collections) && count($configData->Collections) > 0 && array_key_exists("Fields", $configData->Collections[0]))
         {
-            foreach($configData->Collections[0]->Fields as $field)
+            foreach($configData->Collections as $coll)
             {
-                $select = $field->Selector;
-                $name = $field->Name;
-//                $tagfieldname = array_find_closest_key_match($name, array_keys($arrListingTagSetup));
-                $attrib = is_null($field->Attribute) ? 'plaintext' : $field->Attribute;
-                $extract = is_null($field->Extract) ? 'text' : ($field->Exctract == "HTML" ? 'innerHtml' : 'plaintext');
+                foreach($coll->Fields as $field)
+                {
+                    $keyFieldArray = "arrListingTagSetup";
+                    
+                    $select = $field->Selector;
+                    $name = $field->Name;
+                    $attrib = null;
 
-                $pluginData['arrListingTagSetup'][$name] = array(
-                    'selector' => $select,
-                    'return_attribute' => is_null($attrib) ? $extract : $attrib
-                );
-                
+                    if(!is_null($select)) {
+                        if ((strcasecmp($field->Extract, "HTML") == 0) || (strcasecmp($field->Extract, "ATTR") == 0)) {
+                            $attrib = $field->Attribute;
+                        } elseif (strcasecmp($field->Extract, "TEXT") == 0) {
+                            $attrib = "plaintext";
+                        } elseif (!is_null($field->Attribute)) {
+                            $attrib = $field->Attribute;
+                        }
+
+                        $pluginData['arrListingTagSetup'][$name] = array(
+                            'selector' => $select,
+                            'return_attribute' => $attrib,
+                            'type' => 'CSS'
+                        );
+
+                        if(array_key_exists("Index", $field))
+                        {
+                            $pluginData[$keyFieldArray][$name]['index'] = $field->Index;
+                        }
+                    }
+                    elseif (strcasecmp($field->Extract, "REGEX") == 0) {
+                        $pluginData['arrListingTagSetup'][$name] = array(
+                            'pattern' => $field->Pattern,
+                            'field' => $field->Field,
+                            'index' => $field->Index,
+                            'type' => 'REGEX'
+                        );
+                    }
+                }
             }
-
             if(isset($GLOBALS['logger']))
                 $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($pluginData) . " JSON configs for new plugins.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
@@ -104,7 +129,6 @@ class JSONPlugins
             protected \$nJobListingsPerPage = C_JOB_MAX_RESULTS_PER_SEARCH;
             protected \$arrListingTagSetup = $setup;
             };";
-//        print $evalStmt . PHP_EOL;
 
         eval($evalStmt);
         $classinst = new $className(null, null);

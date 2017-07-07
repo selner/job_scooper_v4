@@ -193,12 +193,67 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         return $strMatch;
     }
 
-    protected function _getTagMatchValue_($node, $arrTag, $returnAttribute = 'plaintext', $propertyRegEx = null)
+    protected function _getTagMatchValue_($node, $arrTag, $returnAttribute = 'plaintext', $item = null)
+    {
+        if (array_key_exists("type", $arrTag) && !is_null($arrTag['type'])) {
+            switch(strtoupper($arrTag['type']))
+            {
+                case 'CSS':
+                    return $this->_getTagMatchValueCSS_($node, $arrTag, $returnAttribute);
+                    break;
+
+                case 'REGEX':
+                    return $this->_getTagMatchValueRegex_($node, $arrTag, $item);
+                    break;
+
+                default:
+                    throw new Exception("Unknown field definition type of " . $arrTag['type']);
+            }
+        }
+
+    }
+
+    protected function _getTagMatchValueRegex_($node, $arrTag, $item)
+    {
+        $ret = null;
+        if (array_key_exists("pattern", $arrTag) && !is_null($arrTag['pattern'])) {
+            $pattern = $arrTag['pattern'];
+
+            if (array_key_exists("field", $arrTag) && !is_null($arrTag['field'])) {
+                if (in_array($arrTag['field'], array_keys($item))) {
+                    $value = $item[$arrTag['field']];
+                    if(is_null($value) || strlen($value) == 0)
+                        $ret = null;
+                    elseif (preg_match($pattern, $value, $matches) > 0) {
+                        switch($arrTag['index'])
+                        {
+                            case null:
+                                $ret = $matches[1];
+                                break;
+
+                            case "LAST":
+                                $ret = $matches[count($matches) - 1];
+                                break;
+
+                            default:
+                                $ret = $matches[$arrTag['index']];
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $ret;
+    }
+
+        protected function _getTagMatchValueCSS_($node, $arrTag, $returnAttribute = 'plaintext')
     {
         $ret = null;
         $fReturnNodeObject = false;
+        $propertyRegEx = null;
 
-        if (array_key_exists("return_attribute", $arrTag)) {
+        if (array_key_exists("return_attribute", $arrTag) && !is_null($arrTag['return_attribute'])) {
             $returnAttribute = $arrTag['return_attribute'];
         }
         if($returnAttribute == 'collection' || $returnAttribute == 'node')
@@ -291,7 +346,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         $GLOBALS['logger']->logLine($this->siteName . " finding nodes matching: " . $strNodeMatch, \Scooper\C__DISPLAY_ITEM_DETAIL__);
         $nodesJobRows = $this->_getTagMatchValue_($objSimpHTML, $tagSetup['tag_listings_section'], 'collection');
 
-        if (isset($nodesJobRows) && $nodesJobRows != null && count($nodesJobRows) > 0) {
+        if ($nodesJobRows === false || (isset($nodesJobRows) && $nodesJobRows != null && count($nodesJobRows) > 0)) {
             foreach ($nodesJobRows as $node) {
                 //
                 // get a new record with all columns set to null
@@ -304,30 +359,26 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
                 if (strlen($item['job_title']) == 0)
                     continue;
 
-                if (array_key_exists('tag_company', $tagSetup)) {
-                    $item['company'] = $this->_getTagMatchValue_($node, $tagSetup['tag_company'], 'plaintext');
-                }
+                if (array_key_exists('tag_company', $tagSetup) && count($tagSetup['tag_company']) >= 1)
+                    $item['company'] = $this->_getTagMatchValue_($node, $tagSetup['tag_company'], 'plaintext', $item);
 
-                if (array_key_exists('tag_job_id', $tagSetup))
-                    $item['job_id'] = $this->_getTagMatchValue_($node, $tagSetup['tag_job_id'], 'plaintext');
+                if (array_key_exists('tag_department', $tagSetup) && count($tagSetup['tag_department']) >= 1)
+                    $item['job_site_category'] = $this->_getTagMatchValue_($node, $tagSetup['tag_department'], 'plaintext', $item);
 
-                if (array_key_exists('tag_department', $tagSetup))
-                    $item['job_site_category'] = $this->_getTagMatchValue_($node, $tagSetup['tag_department'], 'plaintext');
+                if (array_key_exists('tag_location', $tagSetup) && count($tagSetup['tag_location']) >= 1)
+                    $item['location'] = $this->_getTagMatchValue_($node, $tagSetup['tag_location'], 'plaintext', $item);
 
-                if (array_key_exists('tag_location', $tagSetup))
-                    $item['location'] = $this->_getTagMatchValue_($node, $tagSetup['tag_location'], 'plaintext');
+                if (array_key_exists('tag_job_posting_date', $tagSetup) && count($tagSetup['tag_job_posting_date']) >= 1)
+                    $item['job_site_date'] = $this->_getTagMatchValue_($node, $tagSetup['tag_job_posting_date'], 'plaintext', $item);
 
-                if (array_key_exists('tag_job_category', $tagSetup))
-                    $item['job_site_category'] = $this->_getTagMatchValue_($node, $tagSetup['tag_job_category'], 'plaintext');
+                if (array_key_exists('tag_employment_type', $tagSetup) && count($tagSetup['tag_employment_type']) >= 1)
+                    $item['employment_type'] = $this->_getTagMatchValue_($node, $tagSetup['tag_employment_type'], 'plaintext', $item);
 
-                if (array_key_exists('tag_job_posting_date', $tagSetup))
-                    $item['job_site_date'] = $this->_getTagMatchValue_($node, $tagSetup['tag_job_posting_date'], 'plaintext');
-
-                if (array_key_exists('tag_employment_type', $tagSetup))
-                    $item['employment_type'] = $this->_getTagMatchValue_($node, $tagSetup['tag_employment_type'], 'plaintext');
-
-                if (array_key_exists('regex_link_job_id', $tagSetup))
+                if (array_key_exists('regex_link_job_id', $tagSetup) && count($tagSetup['regex_link_job_id']) >= 1)
                     $this->regex_link_job_id = $tagSetup['regex_link_job_id'];
+
+                if (array_key_exists('tag_job_id', $tagSetup) && count($tagSetup['tag_job_id']) >= 1)
+                    $item['job_id'] = $this->_getTagMatchValue_($node, $tagSetup['tag_job_id'], 'plaintext', $item);
 
                 $ret[] = $this->normalizeJobItem($item);
 
