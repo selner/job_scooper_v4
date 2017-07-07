@@ -59,7 +59,8 @@ function object_to_array($obj)
 function handleException($ex, $fmtLogMsg = null, $raise = true)
 {
     $err = new Exception();
-
+    if (is_null($ex))
+        $err = $ex = new Exception($fmtLogMsg);
 
     if (!array_key_exists('ERROR_REPORT_FILES', $GLOBALS['USERDATA']))
         $GLOBALS['USERDATA']['ERROR_REPORT_FILES'] = array();
