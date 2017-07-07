@@ -502,7 +502,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 if(loadnext != null && loadnext.style.display === \"\") 
                 { 
                     loadnext.click();  
-                    console.log(\"Clicked load more control...\");
+                    console.log(\"Clicked load next results control '" . $this->selectorMoreListings . "'...\");
                 }
             }  
         ";
@@ -1237,7 +1237,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                             } 
                             else
                             {
-                                handleException(new Exception("No pagination method defined for plugin " . $this->siteName), "", false);
+                                handleException(null, "No pagination method defined for plugin " . $this->siteName, false);
                             }
 
                             $strURL = $this->selenium->driver->getCurrentURL();
