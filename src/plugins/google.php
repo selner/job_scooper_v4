@@ -32,6 +32,10 @@ class PluginGoogle extends ClassClientHTMLJobSitePlugin
     protected $additionalLoadDelaySeconds = 4;
     protected $nextPageScript = "var elem = document.getElementById('gjsrpn');  if (elem != null) { console.log('attempting next button click on element ID gjsrpn'); elem.click(); };";
 
+    protected $arrListingTagSetup = array(
+        'tag_next_button' => array('selector' => 'span.GXRRIBB-B-e')
+    );
+    
     function getItemURLValue($nItem)
     {
         if($nItem == null || $nItem <= 10 ) { return "li=0"; }
