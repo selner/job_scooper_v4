@@ -260,21 +260,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $arrKeywords = array_mapk(function ($k, $v) { return "\"{$v}\""; }, $arrKeywords);
         }
 
-
-        if(($this->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED)) && count($arrKeywords) > 1)
-        {
-            if($this->strKeywordDelimiter == null)
-            {
-                throw new ErrorException($this->siteName . " supports multiple keyword terms, but has not set the \$strKeywordDelimiter value in " . get_class($this) . ". Aborting search because cannot create the URL.");
-            }
-
-            $strRetCombinedKeywords = implode((" " . $this->strKeywordDelimiter . " "), $arrKeywords);
-
-        }
-        else
-        {
-            $strRetCombinedKeywords = array_shift($arrKeywords);
-        }
+        $strRetCombinedKeywords = array_shift($arrKeywords);
 
         return $strRetCombinedKeywords;
     }
@@ -541,7 +527,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 $searchDetails['keywords_array'] = null;
                 $searchDetails['keywords_array_tokenized'] = null;
                 $searchDetails['keywords_string_for_url'] = null;
-                $searchDetails['key'] = $searchDetails['site_name'] . '-' . $searchDetails['location_set_key'];
             }
             else
             {
@@ -649,7 +634,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $searchStartURL = $this->siteBaseURL;
 
         $searchDetails['search_start_url'] = $searchStartURL;
-        $GLOBALS['logger']->logLine("Setting start URL for " . $this->siteName . "[" . $searchDetails['key'] . " to: " . PHP_EOL . $searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Setting start URL for " . $this->siteName . "[" . $searchDetails['key'] . "] to: " . PHP_EOL . $searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
     }
 

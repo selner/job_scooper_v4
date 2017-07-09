@@ -701,11 +701,9 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                                 continue;
                             }
 
-                            if($classPlug->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) || $classPlug->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
+                            if($classPlug->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) || $classPlug->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED))
                             {
-                                $thisSearch['keywords_array'] = $keywordSet['keywords_array'];
-                                $thisSearch['keywords_array_tokenized'] = $keywordSet['keywords_array_tokenized'];
-
+                                $thisSearch['key'] = $siteToSearch . "-alljobs";
                                 $GLOBALS['USERDATA']['configuration_settings']['searches'][$thisSearch['key']] = $thisSearch;
                             }
                             else // if not, we need to add search for each keyword using that word as a single value in a keyword set
