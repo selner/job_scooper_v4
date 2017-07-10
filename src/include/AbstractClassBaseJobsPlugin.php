@@ -523,8 +523,12 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         {
             return false;
         }
-
-
+        else
+        {
+            if(stristr($node[0]->attr["style"], "display: none") !== false) {
+                return false;
+            }
+        }
 
         $js = "
             scroll = setTimeout(doNextPage, " . $secs . ");
@@ -1300,7 +1304,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                     }
                     if (!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for " . $strURL);
 
-                    $GLOBALS['logger']->logLine("Getting page # " . $nPageCount . " of jobs from " . $strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    $GLOBALS['logger']->logLine("Getting jobs page # " . $nPageCount . " of " . $totalPagesCount ." from " . $strURL .".  Total listings loaded:  " . $nItemCount . "/" . $nTotalListings . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                     try
                     {
 
