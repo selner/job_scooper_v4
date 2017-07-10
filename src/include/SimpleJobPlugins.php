@@ -203,7 +203,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
                     break;
 
                 case 'REGEX':
-                    return $this->_getTagMatchValueRegex_($node, $arrTag, $item);
+                    return $this->_getTagMatchValueRegex_($node, $arrTag, $returnAttribute, $item);
                     break;
 
                 default:
@@ -213,33 +213,37 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
     }
 
-    protected function _getTagMatchValueRegex_($node, $arrTag, $item)
+    protected function _getTagMatchValueRegex_($node, $arrTag, $returnAttribute, $item)
     {
         $ret = null;
         if (array_key_exists("pattern", $arrTag) && !is_null($arrTag['pattern'])) {
             $pattern = $arrTag['pattern'];
-
-            if (array_key_exists("field", $arrTag) && !is_null($arrTag['field'])) {
+            $value = "";
+            if (array_key_exists("selector", $arrTag) && !is_null($arrTag['selector'])) {
+                $value = $this->_getTagMatchValueCSS_($node, $arrTag, $returnAttribute);
+            }
+            elseif (array_key_exists("field", $arrTag) && !is_null($arrTag['field'])) {
                 if (in_array($arrTag['field'], array_keys($item))) {
                     $value = $item[$arrTag['field']];
-                    if(is_null($value) || strlen($value) == 0)
-                        $ret = null;
-                    elseif (preg_match($pattern, $value, $matches) > 0) {
-                        switch($arrTag['index'])
-                        {
-                            case null:
-                                $ret = $matches[1];
-                                break;
+                }
+            }
 
-                            case "LAST":
-                                $ret = $matches[count($matches) - 1];
-                                break;
+            if(is_null($value) || strlen($value) == 0)
+                $ret = null;
+            elseif (preg_match($pattern, $value, $matches) > 0) {
+                switch($arrTag['index'])
+                {
+                    case null:
+                        $ret = $matches[1];
+                        break;
 
-                            default:
-                                $ret = $matches[$arrTag['index']];
-                                break;
-                        }
-                    }
+                    case "LAST":
+                        $ret = $matches[count($matches) - 1];
+                        break;
+
+                    default:
+                        $ret = $matches[$arrTag['index']];
+                        break;
                 }
             }
         }
@@ -287,12 +291,15 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             }
             $ret = $nodeMatches[$index];
         } elseif (!is_null($ret) && is_array($ret)) {
-            if (count($ret) > 1) {
+            if (!(array_key_exists("return_value_callback", $arrTag) && strlen($arrTag['return_value_callback']) > 0)) {
+
+                if (count($ret) > 1) {
                 $strError = sprintf("Warning:  %s plugin matched %d nodes to selector '%s' but did not specify an index.  Assuming first node.", $this->siteName, count($ret), $strMatch);
                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_WARNING__);
 //                    throw new Exception($strError);
+                }
+                $ret = $ret[0];
             }
-            $ret = $ret[0];
         }
 
 

@@ -55,6 +55,11 @@ class JSONPlugins
         $pluginData = array(
             'siteName' => null,
             'siteBaseURL' => null,
+            'strBaseURLFormat' => null,
+            'PageLimit' => null,
+            'LocationType' => null,
+            'AdditionalFlags' => array(),
+            'nJobListingsPerPage' => C_JOB_MAX_RESULTS_PER_SEARCH,
             'arrListingTagSetup' => \Scooper\array_copy(ClassBaseHTMLJobSitePlugin::getEmptyListingTagSetup())
         );
 
@@ -66,7 +71,51 @@ class JSONPlugins
         if(array_key_exists("SourceURL", $configData))
         {
             $pluginData['siteBaseURL'] = $configData->SourceURL;
+            $pluginData['strBaseURLFormat'] = $configData->SourceURL;
+
+            if(stristr($pluginData['strBaseURLFormat'], "***KEYWORDS***") == "")
+                $pluginData['AdditionalFlags'][] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
+
+            if(stristr($pluginData['strBaseURLFormat'], "***LOCATION***") == "")
+                $pluginData['AdditionalFlags'][] = C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
+
+            if(stristr($pluginData['strBaseURLFormat'], "***NUMBER_DAYS***") == "")
+                $pluginData['AdditionalFlags'][] = C__JOB_DAYS_VALUE_NOTAPPLICABLE__;
+
         }
+
+
+        if(array_key_exists("LocationType", $configData))
+        {
+            $pluginData['LocationType'] = $configData->LocationType;
+        }
+
+
+        if(array_key_exists("Pagination", $configData)) {
+            if (array_key_exists("PageLimit", $configData->Pagination)) {
+                $pluginData['nJobListingsPerPage'] = $configData->Pagination->PageLimit;
+            }
+
+            if (array_key_exists("Selector", $configData->Pagination)) {
+
+                switch (strtoupper($configData->Pagination->Type))
+                {
+                    case 'NEXT-BUTTON':
+
+                        $pluginData['arrListingTagSetup']['tag_next_button'] = array(
+                            'selector' => $configData->Pagination->Selector,
+                            'index' => $configData->Pagination->Index,
+                            'type' => 'CSS'
+                        );
+                        break;
+
+                    default:
+                        break;
+                }
+
+            }
+        }
+
 
         if(array_key_exists("Collections", $configData) && !is_null($configData->Collections) && is_array($configData->Collections) && count($configData->Collections) > 0 && array_key_exists("Fields", $configData->Collections[0]))
         {
@@ -74,40 +123,37 @@ class JSONPlugins
             {
                 foreach($coll->Fields as $field)
                 {
-                    $keyFieldArray = "arrListingTagSetup";
-                    
                     $select = $field->Selector;
                     $name = $field->Name;
                     $attrib = null;
+                    $index = null;
 
-                    if(!is_null($select)) {
-                        if ((strcasecmp($field->Extract, "HTML") == 0) || (strcasecmp($field->Extract, "ATTR") == 0)) {
-                            $attrib = $field->Attribute;
-                        } elseif (strcasecmp($field->Extract, "TEXT") == 0) {
-                            $attrib = "plaintext";
-                        } elseif (!is_null($field->Attribute)) {
-                            $attrib = $field->Attribute;
-                        }
-
-                        $pluginData['arrListingTagSetup'][$name] = array(
-                            'selector' => $select,
-                            'return_attribute' => $attrib,
-                            'type' => 'CSS'
-                        );
-
-                        if(array_key_exists("Index", $field))
-                        {
-                            $pluginData[$keyFieldArray][$name]['index'] = $field->Index;
-                        }
+                    if(array_key_exists("Index", $field))
+                    {
+                        $index = $field->Index;
                     }
-                    elseif (strcasecmp($field->Extract, "REGEX") == 0) {
-                        $pluginData['arrListingTagSetup'][$name] = array(
-                            'pattern' => $field->Pattern,
-                            'field' => $field->Field,
-                            'index' => $field->Index,
-                            'type' => 'REGEX'
-                        );
+
+
+                    $type = $field->Type;
+                    if ((strcasecmp($field->Extract, "HTML") == 0) || (strcasecmp($field->Extract, "ATTR") == 0)) {
+                        $attrib = $field->Attribute;
+                        $type = "CSS";
+                    } elseif (strcasecmp($field->Extract, "TEXT") == 0) {
+                        $attrib = "plaintext";
+                        $type = "CSS";
+                    } elseif (!is_null($field->Attribute)) {
+                        $attrib = $field->Attribute;
                     }
+
+                    $pluginData['arrListingTagSetup'][$name] = array(
+                        'selector' => $select,
+                        'index' => $index,
+                        'return_attribute' => $attrib,
+                        'type' => $type,
+                        'field' => $field->Field,
+                        'return_value_regex' => $field->Pattern,
+                        'return_value_callback' => $field->Callback
+                    );
                 }
             }
             if(isset($GLOBALS['logger']))
@@ -123,10 +169,16 @@ class JSONPlugins
         $class = null;
         $className = "Plugin" . $pluginConfig['siteName'];
         $setup = var_export($pluginConfig['arrListingTagSetup'], true);
+
+        $flags = "[" . join(", ", array_values($pluginConfig['AdditionalFlags'])) . "]";
+
         $evalStmt = "class $className extends ClassJSONJobsitePlugin { 
             protected \$siteName = \"{$pluginConfig['siteName']}\";
             protected \$siteBaseURL = \"{$pluginConfig['siteBaseURL']}\";
-            protected \$nJobListingsPerPage = C_JOB_MAX_RESULTS_PER_SEARCH;
+            protected \$strBaseURLFormat = \"{$pluginConfig['strBaseURLFormat']}\";
+            protected \$typeLocationSearchNeeded = \"{$pluginConfig['LocationType']}\";
+            protected \$additionalFlags = {$flags};
+            protected \$nJobListingsPerPage = \"{$pluginConfig['nJobListingsPerPage']}\";
             protected \$arrListingTagSetup = $setup;
             };";
 

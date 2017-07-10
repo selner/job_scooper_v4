@@ -240,6 +240,27 @@ function combineTextAllChildren($node, $fRecursed = false)
 
 }
 
+function combineTextAllNodes($nodes)
+{
+
+    $retStr = "";
+    if ($nodes) {
+        foreach ($nodes as $node) {
+            if($retStr != "")
+                $retStr = $retStr . ", ";
+
+            $retStr = $retStr . \Scooper\strScrub($node->plaintext . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
+            if(!is_null($node->childNodes())) {
+                foreach ($node->childNodes() as $child) {
+                    $retStr = $retStr . " " . combineTextAllChildren($child, true);
+                }
+            }
+        }
+    }
+    return $retStr;
+
+}
+
 function sortByCountDesc($a, $b)
 {
     $al = $a["total_listings"];
