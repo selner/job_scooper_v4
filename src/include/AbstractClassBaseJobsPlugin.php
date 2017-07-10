@@ -426,8 +426,23 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         $js = "
             scroll = setTimeout(doLoadMore, 250);
+            function getRunTime()
+            {
+                var startTime = localStorage.getItem(\"startTime\");
+                var endTime = Date.now();
+                runtime = Math.floor((endTime-startTime)/(1000));
+                return (runtime + ' seconds');
+            }
+
             function doLoadMore() 
             {
+                var startTime = localStorage.getItem(\"startTime\");
+                if(startTime == null) 
+                {
+                    localStorage.setItem(\"startTime\", Date.now());
+                    localStorage.setItem(\"pageNum\", 1);
+                }
+
               window.scrollTo(0,document.body.scrollHeight);
               console.log('paged-down-before-click');
 
@@ -436,15 +451,29 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                     loadmore = loadmore[0];
                 } 
     
+                runtime = getRunTime();
                 if(loadmore != null && loadmore.style.display === \"\") 
                 { 
+                    var pageNum = parseInt(localStorage.getItem(\"pageNum\"));
+                    if (pageNum != null)
+                    {   
+                        console.log('Results for page # ' + pageNum + ' loaded.  Time spent so far:  ' + runtime + ' Going to next page...');
+                        localStorage.setItem(\"pageNum\", pageNum + 1);
+                    }
                     loadmore.click();  
                     console.log(\"Clicked load more control...\");
                         
                     scroll = setTimeout(doLoadMore, " . $secs . ");
-                }
               window.scrollTo(0,document.body.scrollHeight);
               console.log('paged-down-after-click');
+            }  
+                else
+                {
+                    console.log('Load more button no longer active; done paginating the results.');
+                    console.log('Script needed a minimum of ' + runtime + ' seconds to load all the results.');
+                    localStorage.removeItem(\"startTime\");
+
+                }
             }  
         ";
 
