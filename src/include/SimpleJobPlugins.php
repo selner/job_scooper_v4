@@ -53,16 +53,8 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
     function __construct($strBaseDir = null)
     {
-        if(is_null($this->_rootListingTagSetup))
-            $this->_rootListingTagSetup = ClassBaseHTMLJobSitePlugin::getEmptyListingTagSetup();
-
-        if(!is_null($this->arrListingTagSetup) && is_array($this->arrListingTagSetup) && count($this->arrListingTagSetup) >= 1)
-            foreach(array_keys($this->arrListingTagSetup) as $tag)
-            {
-                $this->_rootListingTagSetup[$tag] = $this->arrListingTagSetup[$tag];
-            }
-
-
+        if (is_null($this->arrListingTagSetup))
+            $this->arrListingTagSetup = ClassBaseHTMLJobSitePlugin::getEmptyListingTagSetup();
 
         if (strlen($this->siteBaseURL) == 0)
             $this->siteBaseURL = $this->childSiteURLBase;
@@ -87,6 +79,8 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         {
             $this->additionalFlags[]  = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
         }
+
+
         parent::__construct($strBaseDir);
     }
 
@@ -112,12 +106,6 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         return $arrListingTagSetup;
     }
 
-    protected $_rootListingTagSetup = null;
-
-    function getListingTagSetup()
-    {
-        return $this->_rootListingTagSetup;
-    }
 
     /**
      * parseTotalResultsCount
@@ -134,11 +122,10 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
      */
     function parseTotalResultsCount($objSimpHTML)
     {
-        $tagSetup = $this->getListingTagSetup();
-        if (array_key_exists('tag_listings_noresults', $tagSetup) && !is_null($tagSetup['tag_listings_noresults'])) {
+        if (array_key_exists('tag_listings_noresults', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_listings_noresults'])) {
             try
             {
-                $noResultsVal = $this->_getTagMatchValue_($objSimpHTML, $tagSetup['tag_listings_noresults'], $propertyName = 'plaintext');
+                $noResultsVal = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_listings_noresults'], $propertyName = 'plaintext');
                 if (!is_null($noResultsVal)) {
                     $GLOBALS['logger']->logLine("Search returned " . $noResultsVal . " and matched expected 'No results' tag for " . $this->siteName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
                     return $noResultsVal;
@@ -149,14 +136,14 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         }
 
         $retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
-        if (array_key_exists('tag_listings_count', $tagSetup) && is_array($tagSetup['tag_listings_count']) && count($tagSetup['tag_listings_count']) > 0) {
-            $retJobCount = $this->_getTagMatchValue_($objSimpHTML, $tagSetup['tag_listings_count'], $propertyName = 'plaintext');
+        if (array_key_exists('tag_listings_count', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['tag_listings_count']) && count($this->arrListingTagSetup['tag_listings_count']) > 0) {
+            $retJobCount = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_listings_count'], $propertyName = 'plaintext');
             if (is_null($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
-                throw new Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($tagSetup['tag_listings_count']));
-        } else if (array_key_exists('tag_pages_count', $tagSetup) && is_array($tagSetup['tag_pages_count']) && count($tagSetup['tag_pages_count']) > 0) {
-            $retPageCount = $this->_getTagMatchValue_($objSimpHTML, $tagSetup['tag_pages_count'], $propertyName = 'plaintext');
+                throw new Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['tag_listings_count']));
+        } else if (array_key_exists('tag_pages_count', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['tag_pages_count']) && count($this->arrListingTagSetup['tag_pages_count']) > 0) {
+            $retPageCount = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_pages_count'], $propertyName = 'plaintext');
             if (is_null($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
-                throw new Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($tagSetup['tag_pages_count']));
+                throw new Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['tag_pages_count']));
 
             $retJobCount = $retPageCount * $this->nJobListingsPerPage;
         } elseif ($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__))
@@ -358,7 +345,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
     {
         $ret = null;
         $item = null;
-        $tagSetup = $this->getListingTagSetup();
+        $tagSetup = $this->arrListingTagSetup;
 
         // first looked for the detail view layout and parse that
         $strNodeMatch = $this->getTagSelector($tagSetup['tag_listings_section']);
@@ -420,7 +407,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
     function takeNextPageAction($driver)
     {
-        $tagSetup = $this->getListingTagSetup();
+        $tagSetup = $this->arrListingTagSetup;
 
         if (!is_null($this->nextPageScript)) {
             $script = "function callNextPage() { " . $this->nextPageScript . " } ; callNextPage();";
