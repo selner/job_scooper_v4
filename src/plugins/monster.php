@@ -25,7 +25,8 @@ class PluginMonster extends ClassBaseServerHTMLJobSitePlugin
     protected $siteBaseURL = 'http://www.monster.com';
     protected $strBaseURLFormat = "https://www.monster.com/jobs/search/?q=***KEYWORDS***&sort=dt.rv.di&where=***LOCATION***&tm=***NUMBER_DAYS***&pg=***PAGE_NUMBER***";
     protected $nJobListingsPerPage = 25;
-    protected $additionalFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_PAGE_VIA_URL];
+    protected $additionalFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES];
+    protected $paginationType = C__JOB_PAGE_VIA_URL;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode-underscores-and-dashes';
     protected $regex_link_job_id = '/\.com\/([^\/]+\/)?([^\.]+)/i';
     protected $strKeywordDelimiter = ",";

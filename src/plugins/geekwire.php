@@ -27,7 +27,8 @@ class PluginGeekwire extends ClassClientHTMLJobSitePlugin
     protected $siteBaseURL = 'http://www.geekwire.com/';
     protected $strBaseURLFormat = "http://www.geekwire.com/jobs/";
     protected $additionalLoadDelaySeconds = 20;
-    protected $additionalFlags = [C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL, C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_PAGECOUNT_NOTAPPLICABLE__];
+    protected $paginationType = C__PAGINATION_INFSCROLLPAGE_NOCONTROL;
+
     protected $arrListingTagSetup = array(
         'tag_listings_section' => array('selector' => 'ul.job_listings li.type-job_listing'),
         'tag_title' => array('tag' => 'h3'),

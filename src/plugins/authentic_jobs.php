@@ -23,21 +23,20 @@ class PluginAuthenticJobs extends ClassClientHTMLJobSitePlugin
 protected $siteName = 'AuthenticJobs';
 protected $siteBaseURL = "https://authenticjobs.com";
 protected $strBaseURLFormat = 'https://authenticjobs.com/#location=***LOCATION***&query=***KEYWORDS***';
-protected $additionalFlags = [C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE, C__JOB_PAGECOUNT_NOTAPPLICABLE__ , C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
 protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
 protected $nJobListingsPerPage = 50;
 
 protected $arrListingTagSetup = array(
-'tag_listings_count' => array(array('tag' => 'ul', 'attribute'=>'id', 'attribute_value' => 'listings'), 'return_attribute' => 'data-total'),
-'tag_listings_section' => array(array('tag' => 'ul', 'attribute'=>'id', 'attribute_value' => 'listings'), array('tag' => 'li')),
-'tag_title' =>  array(array('tag' => 'a'), array('tag' => 'div'),array('tag' => 'h3'), 'return_attribute' => 'plaintext'),
-'tag_link' =>  array(array('tag' => 'a'), 'return_attribute' => 'href'),
-'tag_company' =>  array(array('tag' => 'a'), array('tag' => 'div'),array('tag' => 'h4'), 'return_attribute' => 'plaintext'),
-'tag_location' =>  array(array('tag' => 'a'), array('tag' => 'ul'),array('tag' => 'li', 'attribute' => 'class', 'attribute_value' =>'location'), 'return_attribute' => 'plaintext'),
-'tag_employment_type' =>  array(array('tag' => 'a'), array('tag' => 'ul'),array('tag' => 'li', 'index' => 0), 'return_attribute' => 'plaintext'),
-'tag_job_id' =>  array(array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>  '/\/jobs\/([^?]+)/i'),
-'tag_load_more' =>  array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'ladda-button')
-);
+    'tag_listings_count' => array(array('tag' => 'ul', 'attribute'=>'id', 'attribute_value' => 'listings'), 'return_attribute' => 'data-total'),
+    'tag_listings_section' => array(array('tag' => 'ul', 'attribute'=>'id', 'attribute_value' => 'listings'), array('tag' => 'li')),
+    'tag_title' =>  array(array('tag' => 'a'), array('tag' => 'div'),array('tag' => 'h3'), 'return_attribute' => 'plaintext'),
+    'tag_link' =>  array(array('tag' => 'a'), 'return_attribute' => 'href'),
+    'tag_company' =>  array(array('tag' => 'a'), array('tag' => 'div'),array('tag' => 'h4'), 'return_attribute' => 'plaintext'),
+    'tag_location' =>  array(array('tag' => 'a'), array('tag' => 'ul'),array('tag' => 'li', 'attribute' => 'class', 'attribute_value' =>'location'), 'return_attribute' => 'plaintext'),
+    'tag_employment_type' =>  array(array('tag' => 'a'), array('tag' => 'ul'),array('tag' => 'li', 'index' => 0), 'return_attribute' => 'plaintext'),
+    'tag_job_id' =>  array(array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>  '/\/jobs\/([^?]+)/i'),
+    'tag_load_more' =>  array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'ladda-button')
+    );
 
 }
 

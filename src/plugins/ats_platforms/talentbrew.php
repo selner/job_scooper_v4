@@ -24,7 +24,7 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
     protected $siteBaseURL = 'https://h30631.www3.hp.com';
     protected $nJobListingsPerPage = 15;
     protected $strBaseURLFormat = "/search-jobs";  // HP's keyword search is a little squirrelly so more successful if we don't filter up front and get the mismatches removed later
-    protected $additionalFlags = [ C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL];
+    protected $additionalFlags = [ C__PAGINATION_INFSCROLLPAGE_NOCONTROL];
 
     function __construct($strBaseDir = null)
     {
@@ -87,7 +87,6 @@ class BasePluginTalentBrew extends ClassClientHTMLJobSitePlugin
     // BUGBUG:  Disney & Boeing are both hit or miss around returning the full set of listings correctly.
     //          Setting to ignore_mismatched to avoid the error results that will happen when they do.
     //
-    protected $additionalFlags = [ C__JOB_CLIENTSIDE_PAGE_VIA_NEXTBUTTON, C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED];
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $additionalLoadDelaySeconds = 5;
 

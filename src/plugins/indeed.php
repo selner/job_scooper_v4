@@ -29,7 +29,8 @@ class PluginIndeed extends ClassClientHTMLJobSitePlugin
 ## "https://www.indeed.com/jobs?q=manager&l=seattle%2C+wa&radius=50&sort=date&start=10&pp=AAoAAAAAAAAAAAAAAAEGhv7TAQACQTTTq6vIeafYA9VSkkIu49ommzZTDUNeuzGSQg";
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $strKeywordDelimiter = "OR";
-    protected $additionalFlags = [C__JOB_IGNORE_MISMATCHED_JOB_COUNTS, C__JOB_CLIENTSIDE_PAGE_VIA_CALLBACK];
+    protected $additionalFlags = [C__JOB_IGNORE_MISMATCHED_JOB_COUNTS];
+    protected $paginationType = C__PAGINATION_PAGE_VIA_CALLBACK;
 //    protected $nextPageScript = '
 //
 //        var $next = document.querySelector("span.np");

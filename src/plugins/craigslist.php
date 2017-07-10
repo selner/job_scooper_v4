@@ -28,8 +28,9 @@ class PluginCraigslist extends ClassClientHTMLJobSitePlugin
 //    protected $strBaseURLFormat = "http://***LOCATION***.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=***KEYWORDS***&srchType=T&bundleDuplicates=1";
     // BUGBUG: craigslist treats sub-rows differently for counting results in different cases.  When a single page of results is returned, they are included in the overall count
     //         But when a multi-page result set is returned, they are not! Setting C__JOB_IGNORE_MISMATCHED_JOB_COUNTS to work around this.
-    protected $additionalFlags = [C__JOB_LOCATION_REQUIRES_LOWERCASE, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS, C__JOB_PAGE_VIA_URL, C__JOB_IGNORE_MISMATCHED_JOB_COUNTS];
+    protected $additionalFlags = [C__JOB_LOCATION_REQUIRES_LOWERCASE, C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS, C__JOB_IGNORE_MISMATCHED_JOB_COUNTS];
     protected $typeLocationSearchNeeded = 'location-city';
+    protected $paginationType = C__JOB_PAGE_VIA_URL;
     protected $strKeywordDelimiter = "|";
 
     protected $arrListingTagSetup = array(

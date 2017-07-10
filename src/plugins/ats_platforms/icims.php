@@ -29,10 +29,6 @@ class PluginHibbettSports extends BasePluginiCIMS
     protected $arrResultsRowTDIndex = array('tag_title' => 0, 'tag_link' => 0, 'tag_job_id' => null, 'tag_department' => 1, 'tag_location' => 2, 'tag_job_posting_date' => null  );
     function __construct($strBaseDir = null)
     {
-        $additionalFlags[] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
-        $additionalFlags[] = C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED;
-
-
         $this->arrListingTagSetup['tag_pages_count'] = array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'iCIMS_Paginator_Bottom'), array('tag' => 'div') , array('tag' => 'div') , array('tag' => 'div'), 'index' => 1, 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?of\s+(\d+).*/');
         parent::__construct($strBaseDir);
         $this->strBaseURLFormat = $this->siteBaseURL . "/jobs/search?pr=***PAGE_NUMBER***&in_iframe=1";
@@ -75,12 +71,10 @@ class BasePluginiCIMS extends ClassHTMLJobSitePlugin
 
     function __construct($strBaseDir = null)
     {
-        $additionalFlags[] = C__JOB_DAYS_VALUE_NOTAPPLICABLE__;
-        $additionalFlags[] = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
-        $additionalFlags[] = C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
         $this->strInitialReferer = $this->siteBaseURL . "/jobs/search?pr=0";
         $this->strBaseURLFormat = $this->siteBaseURL . "/jobs/search?pr=***PAGE_NUMBER***&in_iframe=1&searchKeyword=***KEYWORDS***";
-
+        $this->paginationType = C__JOB_PAGE_VIA_URL;
+        
         if(is_null($this->arrResultsRowTDIndex))
             throw new InvalidArgumentException("Error in iCIMS plugin:  you must map the columns in the results table to the correct indexes for HTML tag matching. Aborting.");
 

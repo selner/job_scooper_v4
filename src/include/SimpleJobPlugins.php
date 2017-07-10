@@ -70,11 +70,13 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             $this->strBaseURLFormat = $this->childSiteURLBase;
 
 
-        if (array_key_exists('tag_next_button', $this->_rootListingTagSetup) && !is_null($this->_rootListingTagSetup['tag_next_button']))
-        {
-            $this->selectorMoreListings = $this->getTagSelector( $this->_rootListingTagSetup['tag_next_button']);
+        if (array_key_exists('tag_next_button', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['tag_next_button']) && count($this->arrListingTagSetup['tag_next_button'])) {
+            $this->selectorMoreListings = $this->getTagSelector($this->arrListingTagSetup['tag_next_button']);
 
-            $this->_flags_ = $this->_flags_ | C__JOB_CLIENTSIDE_PAGE_VIA_NEXTBUTTON;
+            $this->paginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
+        } elseif (array_key_exists('tag_load_more', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['tag_load_more']) && count($this->arrListingTagSetup['tag_load_more'])) {
+            $this->paginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
+        }
 
         if (!array_key_exists('tag_listing_count', $this->arrListingTagSetup) &&  !in_array(C__JOB_ITEMCOUNT_NOTAPPLICABLE__, $this->additionalFlags))
         {

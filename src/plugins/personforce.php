@@ -26,12 +26,7 @@ class PluginPersonForce extends ClassClientHTMLJobSitePlugin
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $nJobListingsPerPage = 20;
     protected $additionalLoadDelaySeconds = 5;
-
-    function __construct($strOutputDirectory = null)
-    {
-        $this->additionalFlags[] = C__JOB_PAGE_VIA_URL;
-        parent::__construct($strOutputDirectory);
-    }
+    protected $paginationType = C__JOB_PAGE_VIA_URL;
 
 
     protected $arrListingTagSetup = array(

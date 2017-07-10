@@ -27,7 +27,7 @@ class PluginDice extends ClassClientHTMLJobSitePlugin
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $nJobListingsPerPage = 100;
     protected $additionalLoadDelaySeconds = 5;
-    protected $additionalFlags = [ C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_PAGE_VIA_CALLBACK ] ;
+    protected $paginationType = C__PAGINATION_PAGE_VIA_CALLBACK;
 
     function isNoResults($var)
     {

@@ -26,7 +26,8 @@ class PluginGroupon extends ClassBaseClientSideHTMLJobSitePlugin
     protected $siteName = 'Groupon';
     protected $siteBaseURL = 'https://jobs.groupon.com';
     protected $strBaseURLFormat = "https://jobs.groupon.com/locations/***LOCATION***";
-    protected $additionalFlags = [C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
+    protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
+    protected $paginationType = C__PAGINATION_INFSCROLLPAGE_NOCONTROL;
     protected $typeLocationSearchNeeded = 'location-city';
 
 

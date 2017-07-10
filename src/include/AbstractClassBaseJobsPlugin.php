@@ -54,11 +54,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         if(stristr($this->strBaseURLFormat, "***NUMBER_DAYS***") == false)
             $this->additionalFlags[] = C__JOB_DAYS_VALUE_NOTAPPLICABLE__;
 
-        if (!in_array(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, $this->additionalFlags))
-        {
-            $this->additionalFlags[] = C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED;
-        }
-
         if(is_array($this->additionalFlags))
         {
             foreach($this->additionalFlags as $flag)
@@ -71,13 +66,14 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 }
             }
         }
-        
-        if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED)) {
+
+        if($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
             $this->nMaxJobsToReturn = $this->nMaxJobsToReturn * 3;
         }
 
-        if($this->isBitFlagSet(C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL)) {
+        if($this->paginationType == C__PAGINATION_INFSCROLLPAGE_NOCONTROL) {
             $this->nJobListingsPerPage = $this->nMaxJobsToReturn;
+            
         }
     }
 
@@ -111,7 +107,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $arrSearches[] = $arrSearches;
         }
 
-        if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED)) {
+        if($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
             $soleSearch = $arrSearches[0];
             $arrSearches = array();
             $arrSearches[] = $soleSearch;
@@ -218,6 +214,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     protected $nJobListingsPerPage = 20;
     protected $additionalFlags = array();
+    protected $paginationType = null;
     protected $secsPageTimeout = null;
     protected $pluginResultsType;
     protected $selenium = null;
@@ -583,7 +580,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
             assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || ($searchDetails['location_search_value'] !== VALUE_NOT_SUPPORTED && strlen($searchDetails['location_search_value']) > 0));
 
-            if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED)) {
+            if($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
                 // null out any generalized keyword set values we previously had
                 $searchDetails['keywords_array'] = null;
                 $searchDetails['keywords_array_tokenized'] = null;
@@ -728,7 +725,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     private function _getDirKey_()
     {
-        if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED))
+        if($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
             return "listings-rawbysite-allusers";
         else
             return "listings-raw";
@@ -1116,13 +1113,26 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
             $totalPagesCount = C__TOTAL_ITEMS_UNKNOWN__;
             $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__; // placeholder because we don't know how many are on the page
-            if($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) && $this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__) )
+            if($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) && $this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
             {
-                // if we can't get a number of pages AND we can't get a number of items,
-                // we must assume there is, at most, only one page of results.
-                $totalPagesCount = 1;
-                $nTotalListings = $this->nJobListingsPerPage;
+                switch($this->paginationType) {
 
+                    case C__PAGINATION_INFSCROLLPAGE_NOCONTROL:
+                    case C__PAGINATION_INFSCROLLPAGE_VIALOADMORE:
+                    case C__PAGINATION_PAGE_VIA_NEXTBUTTON:
+                    case C__PAGINATION_INFSCROLLPAGE_VIA_JS:
+                    case C__PAGINATION_PAGE_VIA_CALLBACK:
+                        $totalPagesCount = C__TOTAL_ITEMS_UNKNOWN__;
+                        $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__;
+                        break;
+
+                    default:
+                        // if we can't get a number of pages AND we can't get a number of items,
+                        // we must assume there is, at most, only one page of results.
+                        $totalPagesCount = 1;
+                        $nTotalListings = $this->nJobListingsPerPage;
+                        break;
+                }
             } elseif(!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__)) {
 
                 //
@@ -1189,92 +1199,95 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                     if($this->isBitFlagSet(C__JOB_USE_SELENIUM))
                     {
                         try
-                        {
-
-                            if($this->isBitFlagSet( C__JOB_PAGE_VIA_URL))
+                        {   
+                            switch(strtoupper($this->paginationType))
                             {
+                                
+                                case C__JOB_PAGE_VIA_URL:
                                 $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
                                 if ($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
                                     return null;
                                 $this->selenium->loadPage($strURL);
-                            }
-                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE)) {
-                                $this->selenium->loadPage($strURL);
-                                //
-                                // If we dont know how many pages to go down,
-                                // call the method to go down to the very end so we see the whole page
-                                // and whole results set
-                                //
-                                $this->goToEndOfResultsSetViaLoadMore($nTotalListings);
-                                $totalPagesCount = 1;
-                            }
-                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL))
-                            {
-                                $this->selenium->loadPage($strURL);
-                                //
-                                // if we know how many pages to do do, call the page down method
-                                // until we get to the right number of pages
-                                //
-                                while ($nPageCount <= $totalPagesCount) {
-                                    if (isDebug() == true && isset($GLOBALS['logger'])) {
-                                        $GLOBALS['logger']->logLine("... getting infinite results page #" . $nPageCount . " of " . $totalPagesCount, \Scooper\C__DISPLAY_NORMAL__);
-                                    }
-                                    $this->moveDownOnePageInBrowser();
-                                    $nPageCount = $nPageCount + 1;
-                                }
-                                $totalPagesCount = $nPageCount;
-                            }
-                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIA_JS))
-                            {
-                                if(is_null($this->nextPageScript))
-                                {
-                                    handleException(new Exception("Plugin " . $this->siteName . " is missing nextPageScript settings for the defined pagination type."), "", true);
-
-                                }
-                                $this->selenium->loadPage($strURL);
-
-                                if( $nPageCount > 1 && $nPageCount <= $totalPagesCount) {
-                                    $this->runJavaScriptSnippet($this->nextPageScript, true);
-                                    sleep($this->additionalLoadDelaySeconds + 1);
-                                }
-                            }
-                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_PAGE_VIA_NEXTBUTTON))
-                            {
-                                if(is_null($this->selectorMoreListings))
-                                {
-                                    throw(new Exception("Plugin " . $this->siteName . " is missing selectorMoreListings setting for the defined pagination type."));
-
-                                }
-                                $this->selenium->loadPage($strURL);
-
-                                if( $nPageCount > 1 && ($totalPagesCount = C__TOTAL_ITEMS_UNKNOWN__ || $nPageCount <= $totalPagesCount)) {
-                                    $ret = $this->goToNextPageOfResultsViaNextButton();
-                                    if($ret == false)
-                                        $totalPagesCount = $nPageCount;
-                                }
-                            }
-                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_PAGE_VIA_CALLBACK))
-                            {
-                                if (!method_exists($this, 'takeNextPageAction')) {
-                                    handleException(new Exception("Plugin " . $this->siteName . " is missing takeNextPageAction method definiton required for its pagination type."), "", true);
-                                }
-
-                                if($nPageCount > 1 && $nPageCount <= $totalPagesCount) {
+                                break;
+                                
+                                
+                                case C__PAGINATION_INFSCROLLPAGE_VIALOADMORE:
+                                    $this->selenium->loadPage($strURL);
                                     //
-                                    // if we got a driver instance back, then we got a new page
-                                    // otherwise we're out of results so end the loop here.
+                                    // If we dont know how many pages to go down,
+                                    // call the method to go down to the very end so we see the whole page
+                                    // and whole results set
                                     //
-                                    try {
-                                        $this->takeNextPageAction($this->selenium->driver);
-                                    } catch (Exception $ex) {
-                                        handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
-                                    }
-                                }
+                                    $this->goToEndOfResultsSetViaLoadMore($nTotalListings);
+                                    $totalPagesCount = 1;
+                                    break;
 
-                            }
-                            else
-                            {
+                                case C__PAGINATION_INFSCROLLPAGE_NOCONTROL:
+                                    $this->selenium->loadPage($strURL);
+                                    //
+                                    // if we know how many pages to do do, call the page down method
+                                    // until we get to the right number of pages
+                                    //
+                                    while ($nPageCount <= $totalPagesCount) {
+                                        if (isDebug() == true && isset($GLOBALS['logger'])) {
+                                            $GLOBALS['logger']->logLine("... getting infinite results page #" . $nPageCount . " of " . $totalPagesCount, \Scooper\C__DISPLAY_NORMAL__);
+                                        }
+                                        $this->moveDownOnePageInBrowser();
+                                        $nPageCount = $nPageCount + 1;
+                                    }
+                                    $totalPagesCount = $nPageCount;
+                                    break;
+
+                                case C__PAGINATION_INFSCROLLPAGE_VIA_JS:    
+                                    if(is_null($this->nextPageScript))
+                                    {
+                                        handleException(new Exception("Plugin " . $this->siteName . " is missing nextPageScript settings for the defined pagination type."), "", true);
+    
+                                    }
+                                    $this->selenium->loadPage($strURL);
+    
+                                    if( $nPageCount > 1 && $nPageCount <= $totalPagesCount) {
+                                        $this->runJavaScriptSnippet($this->nextPageScript, true);
+                                        sleep($this->additionalLoadDelaySeconds + 1);
+                                    }
+                                break;
+                                
+                                case C__PAGINATION_PAGE_VIA_NEXTBUTTON:
+                                    if(is_null($this->selectorMoreListings))
+                                    {
+                                        throw(new Exception("Plugin " . $this->siteName . " is missing selectorMoreListings setting for the defined pagination type."));
+    
+                                    }
+                                    $this->selenium->loadPage($strURL);
+    
+                                    if( $nPageCount > 1 && ($totalPagesCount == C__TOTAL_ITEMS_UNKNOWN__ || $nPageCount <= $totalPagesCount)) {
+                                        $ret = $this->goToNextPageOfResultsViaNextButton();
+                                        if($ret == false)
+                                            $totalPagesCount = $nPageCount;
+                                    }
+                                    break;
+                                
+                                case C__PAGINATION_PAGE_VIA_CALLBACK:
+                                    if (!method_exists($this, 'takeNextPageAction')) {
+                                        handleException(new Exception("Plugin " . $this->siteName . " is missing takeNextPageAction method definiton required for its pagination type."), "", true);
+                                    }
+    
+                                    if($nPageCount > 1 && $nPageCount <= $totalPagesCount) {
+                                        //
+                                        // if we got a driver instance back, then we got a new page
+                                        // otherwise we're out of results so end the loop here.
+                                        //
+                                        try {
+                                            $this->takeNextPageAction($this->selenium->driver);
+                                        } catch (Exception $ex) {
+                                            handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
+                                        }
+                                    }
+                                    break;
+    
+                                default:
                                 handleException(null, "No pagination method defined for plugin " . $this->siteName, false);
+                                    break;
                             }
 
                             $strURL = $this->selenium->driver->getCurrentURL();

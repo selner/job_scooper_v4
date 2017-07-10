@@ -21,7 +21,6 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 abstract class ClassJSONJobsitePlugin extends ClassClientHTMLJobSitePlugin
 {
-    protected $additionalFlags = [C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL, C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED  ];
 }
 
 class JSONPlugins
@@ -73,27 +72,23 @@ class JSONPlugins
             $pluginData['siteBaseURL'] = $configData->SourceURL;
             $pluginData['strBaseURLFormat'] = $configData->SourceURL;
 
-
         }
-
 
         if(array_key_exists("LocationType", $configData))
         {
             $pluginData['LocationType'] = $configData->LocationType;
         }
 
-
         if(array_key_exists("Pagination", $configData)) {
             if (array_key_exists("PageLimit", $configData->Pagination)) {
                 $pluginData['nJobListingsPerPage'] = $configData->Pagination->PageLimit;
             }
 
-            if (array_key_exists("Selector", $configData->Pagination)) {
 
+            $pluginData['paginationType'] = strtoupper($configData->Pagination->Type);
                 switch (strtoupper($configData->Pagination->Type))
                 {
                     case 'NEXT-BUTTON':
-
                         $pluginData['arrListingTagSetup']['tag_next_button'] = array(
                             'selector' => $configData->Pagination->Selector,
                             'index' => $configData->Pagination->Index,
@@ -104,8 +99,6 @@ class JSONPlugins
                     default:
                         break;
                 }
-
-            }
         }
 
 

@@ -25,8 +25,6 @@ class PluginDotJobs extends ClassClientHTMLJobSitePlugin
     protected $siteBaseURL = 'http://www.my.jobs';
     protected $nJobListingsPerPage = 20;
 
-    protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE, C__JOB_DAYS_VALUE_NOTAPPLICABLE__ ];
-
     protected $strBaseURLFormat = "http://www.my.jobs/jobs/?location=***LOCATION***&q=***KEYWORDS***";
     protected $typeLocationSearchNeeded = 'location-city-comma-state';
     protected $additionalLoadDelaySeconds = 4;

@@ -24,10 +24,8 @@ class PluginZipRecruiter extends ClassClientHTMLJobSitePlugin
     protected $siteBaseURL = 'www.ziprecruiter.com';
     protected $nJobListingsPerPage = C__TOTAL_ITEMS_UNKNOWN__; // we use this to make sure we only have 1 single results page
 
-    protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE ];
     protected $strBaseURLFormat = "https://www.ziprecruiter.com/candidate/search?search=***KEYWORDS***&include_near_duplicates=1&location=***LOCATION***&radius=25&days=***NUMBER_DAYS***";
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
-    protected $selectorMoreListings = ".load_more_jobs";
 
     protected $arrListingTagSetup = array(
         'tag_listings_noresults'    => array('selector' => '#job_results div div section h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "PluginZipRecruiter::isNoJobsFound"),
@@ -38,7 +36,7 @@ class PluginZipRecruiter extends ClassClientHTMLJobSitePlugin
         'tag_company'               => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => 't_org_link name', 'return_attribute' => 'plaintext'),
         'tag_location'              => array('tag' => '*', 'attribute'=>'class', 'attribute_value' => 'location', 'return_attribute' => 'plaintext'),
         'tag_job_id'                => array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'just_job_title', 'return_attribute' => 'data-job-id'),
-//        'tag_next_button'           => array('tag' => 'button', 'attribute'=>'class', 'attribute_value' => 'load_more_jobs')
+        'tag_load_more'           => array('selector' => '.load_more_jobs')
     );
 
     function isNoJobsFound($var)

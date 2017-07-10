@@ -701,7 +701,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                                 continue;
                             }
 
-                            if($classPlug->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) || $classPlug->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED))
+                            if($classPlug->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
                             {
                                 $thisSearch['key'] = $siteToSearch . "-alljobs";
                                 $GLOBALS['USERDATA']['configuration_settings']['searches'][$thisSearch['key']] = $thisSearch;

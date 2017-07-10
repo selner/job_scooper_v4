@@ -20,12 +20,10 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 class BaseForceComClass extends ClassClientHTMLJobSitePlugin
 {
-protected $additionalFlags = [ C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_CLIENTSIDE_PAGE_VIA_CALLBACK ] ;
-protected $additionalLoadDelaySeconds = 3;
-protected $nJobListingsPerPage = 50;
+    protected $additionalLoadDelaySeconds = 3;
+    protected $nJobListingsPerPage = 50;
+    protected $paginationType = C__PAGINATION_PAGE_VIA_CALLBACK;
 
-//    A4J.AJAX.Submit('j_id0:j_id1:atsForm',event,{'similarityGroupingId':'j_id0:j_id1:atsForm:j_id123','containerId':'j_id0:j_id1:atsForm:j_id77','parameters':{'j_id0:j_id1:atsForm:j_id123':'j_id0:j_id1:atsForm:j_id123'} ,'status':'j_id0:j_id1:atsForm:ats_pagination_status'} );return false;";
-//
     function takeNextPageAction($driver)
     {
         $nextPageJS = "function contains(selector, text) {
