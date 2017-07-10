@@ -1,7 +1,5 @@
 {
   "AgentName": "Salesforce",
-  "CreatedOn": "7/3/2017, 8:51:02 PM",
-  "Version": 3,
   "SourceURL": "http://salesforce.careermount.com/candidate/job_search/quick/results?location=***LOCATION***&keyword=***KEYWORDS***&sort_dir=desc&sort_field=post_date",
   "LocationType": "location-city",
   "Collections": [
