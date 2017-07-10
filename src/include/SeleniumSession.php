@@ -74,24 +74,13 @@ class SeleniumSession extends PropertyObject
         $this->shutdownSelenium();
     }
 
-    function loadPage($url, $waitTime=null)
+    function loadPage($url)
     {
         try
         {
-
-            if (!is_null($waitTime))
-            {
-                $timeoutval = $waitTime + 10;
-                $GLOBALS['logger']->logLine("Setting Selenium javascript and page timeouts to seconds=" . $timeoutval, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                $timeouts = $this->driver->manage()->timeouts();
-                
-                $timeouts->setScriptTimeout($timeoutval);
-                $timeouts->pageLoadTimeout($timeoutval);
+            if(strncmp($this->driver->getCurrentURL(), $url, strlen($url)) != 0) {
+                $this->driver->get($url);
             }
-
-            $this->driver->get($url);
-
-            sleep(1+$waitTime);
 
         } catch (Exception $ex) {
             $strMsg = "Error retrieving Selenium page at " . $url . ":  ". $ex;
@@ -381,13 +370,7 @@ class SeleniumSession extends PropertyObject
         $capabilities->setCapability("setThrowExceptionOnScriptError", false);
 
 
-        $this->remoteWebDriver = RemoteWebDriver::create(
-            $host,
-            $desired_capabilities = $capabilities,
-            $connection_timeout_in_ms = 60000,
-            $request_timeout_in_ms = 60000
-        );
-
+        $this->remoteWebDriver = RemoteWebDriver::create($host, $desired_capabilities = $capabilities, 5000);
     }
 
 

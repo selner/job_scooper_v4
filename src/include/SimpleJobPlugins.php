@@ -70,10 +70,9 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             $this->strBaseURLFormat = $this->childSiteURLBase;
 
 
-        $tagSetup = $this->getListingTagSetup();
-        if (array_key_exists('tag_next_button', $tagSetup) && !is_null($tagSetup['tag_next_button']))
+        if (array_key_exists('tag_next_button', $this->_rootListingTagSetup) && !is_null($this->_rootListingTagSetup['tag_next_button']))
         {
-            $this->selectorMoreListings = $this->getTagSelector( $tagSetup['tag_next_button']);
+            $this->selectorMoreListings = $this->getTagSelector( $this->_rootListingTagSetup['tag_next_button']);
 
             $this->_flags_ = $this->_flags_ | C__JOB_CLIENTSIDE_PAGE_VIA_NEXTBUTTON;
 
@@ -141,11 +140,11 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         }
 
         $retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
-        if (array_key_exists('tag_listings_count', $tagSetup) && !is_null($tagSetup['tag_listings_count'])) {
+        if (array_key_exists('tag_listings_count', $tagSetup) && is_array($tagSetup['tag_listings_count']) && count($tagSetup['tag_listings_count']) > 0) {
             $retJobCount = $this->_getTagMatchValue_($objSimpHTML, $tagSetup['tag_listings_count'], $propertyName = 'plaintext');
             if (is_null($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
                 throw new Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($tagSetup['tag_listings_count']));
-        } else if (array_key_exists('tag_pages_count', $tagSetup) && !is_null($tagSetup['tag_pages_count'])) {
+        } else if (array_key_exists('tag_pages_count', $tagSetup) && is_array($tagSetup['tag_pages_count']) && count($tagSetup['tag_pages_count']) > 0) {
             $retPageCount = $this->_getTagMatchValue_($objSimpHTML, $tagSetup['tag_pages_count'], $propertyName = 'plaintext');
             if (is_null($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
                 throw new Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($tagSetup['tag_pages_count']));
@@ -209,6 +208,11 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
                 default:
                     throw new Exception("Unknown field definition type of " . $arrTag['type']);
             }
+        }
+        else
+        {
+            return $this->_getTagMatchValueCSS_($node, $arrTag, $returnAttribute);
+
         }
 
     }
@@ -380,6 +384,9 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
                 if (array_key_exists('tag_employment_type', $tagSetup) && count($tagSetup['tag_employment_type']) >= 1)
                     $item['employment_type'] = $this->_getTagMatchValue_($node, $tagSetup['tag_employment_type'], 'plaintext', $item);
+
+                if (array_key_exists('tag_job_posting_date', $this->arrListingTagSetup))
+                    $item['job_site_date'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_job_posting_date'], 'plaintext');
 
                 if (array_key_exists('regex_link_job_id', $tagSetup) && count($tagSetup['regex_link_job_id']) >= 1)
                     $this->regex_link_job_id = $tagSetup['regex_link_job_id'];

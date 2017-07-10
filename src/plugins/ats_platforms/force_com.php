@@ -42,7 +42,7 @@ protected $nJobListingsPerPage = 50;
             }
         ";
 
-        $this->runJavaScriptSnippet($nextPageJS, false, $this->additionalLoadDelaySeconds);
+        $this->runJavaScriptSnippet($nextPageJS, false);
     }
 
     function parseTotalResultsCount($objSimpHTML)

@@ -260,21 +260,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $arrKeywords = array_mapk(function ($k, $v) { return "\"{$v}\""; }, $arrKeywords);
         }
 
-
-        if(($this->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED)) && count($arrKeywords) > 1)
-        {
-            if($this->strKeywordDelimiter == null)
-            {
-                throw new ErrorException($this->siteName . " supports multiple keyword terms, but has not set the \$strKeywordDelimiter value in " . get_class($this) . ". Aborting search because cannot create the URL.");
-            }
-
-            $strRetCombinedKeywords = implode((" " . $this->strKeywordDelimiter . " "), $arrKeywords);
-
-        }
-        else
-        {
-            $strRetCombinedKeywords = array_shift($arrKeywords);
-        }
+        $strRetCombinedKeywords = array_shift($arrKeywords);
 
         return $strRetCombinedKeywords;
     }
@@ -405,10 +391,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
         $driver = $this->getActiveWebdriver();
-        $timeouts = $driver->manage()->timeouts();
-        $timeoutval = $this->additionalLoadDelaySeconds + 10;
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting Selenium javascript and page timeouts to seconds=" . $timeoutval, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        $timeouts->setScriptTimeout($timeoutval);
 
         $driver->executeScript("window.scrollTo(0,document.body.scrollHeight);");
 
@@ -444,25 +426,54 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         $js = "
             scroll = setTimeout(doLoadMore, 250);
+            function getRunTime()
+            {
+                var startTime = localStorage.getItem(\"startTime\");
+                var endTime = Date.now();
+                runtime = Math.floor((endTime-startTime)/(1000));
+                return (runtime + ' seconds');
+            }
+
             function doLoadMore() 
             {
-              window.scrollTo(0,document.body.scrollHeight);
-              console.log('paged-down-before-click');
+                var startTime = localStorage.getItem(\"startTime\");
+                if(startTime == null) 
+                {
+                    localStorage.setItem(\"startTime\", Date.now());
+                    localStorage.setItem(\"pageNum\", 1);
+                }
 
-                var loadmore = document.querySelector('" . $this->selectorMoreListings . "');
-                if(loadmore != null && !typeof(loadmore .click) !== \"function\" && loadmore.length >= 1) {
+                window.scrollTo(0,document.body.scrollHeight);
+                console.log('paged-down-before-click');
+
+                var loadmore = document.querySelector(\"" . $this->selectorMoreListings . "\");
+                if(loadmore != null && !typeof(loadmore.click) !== \"function\" && loadmore.length >= 1) {
                     loadmore = loadmore[0];
                 } 
     
+                runtime = getRunTime();
                 if(loadmore != null && loadmore.style.display === \"\") 
                 { 
+                    var pageNum = parseInt(localStorage.getItem(\"pageNum\"));
+                    if (pageNum != null)
+                    {   
+                        console.log('Results for page # ' + pageNum + ' loaded.  Time spent so far:  ' + runtime + ' Going to next page...');
+                        localStorage.setItem(\"pageNum\", pageNum + 1);
+                    }
                     loadmore.click();  
                     console.log(\"Clicked load more control...\");
                         
                     scroll = setTimeout(doLoadMore, " . $secs . ");
+                    window.scrollTo(0,document.body.scrollHeight);
+                    console.log('paged-down-after-click');
                 }
-              window.scrollTo(0,document.body.scrollHeight);
-              console.log('paged-down-after-click');
+                else
+                {
+                    console.log('Load more button no longer active; done paginating the results.');
+                    console.log('Script needed a minimum of ' + runtime + ' seconds to load all the results.');
+                    localStorage.removeItem(\"startTime\");
+
+                }
             }  
         ";
 
@@ -475,7 +486,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         $nSleepTimeToLoad = ($nTotalItems / $this->nJobListingsPerPage) * $this->additionalLoadDelaySeconds;
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-        $this->runJavaScriptSnippet($js, false, $nSleepTimeToLoad > 0 ? $nSleepTimeToLoad : null);
+        $this->runJavaScriptSnippet($js, false);
 
         sleep($nSleepTimeToLoad > 0 ? $nSleepTimeToLoad : 2);
 
@@ -490,11 +501,21 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         if($secs <= 0)
             $secs = 1000;
 
+        $objSimplHtml = $this->getSimpleHtmlDomFromSeleniumPage();
+
+        $node = $objSimplHtml->find($this->selectorMoreListings);
+        if($node == null || count($node) == 0)
+        {
+            return false;
+        }
+
+
+
         $js = "
             scroll = setTimeout(doNextPage, " . $secs . ");
             function doNextPage() 
             {
-                var loadnext = document.querySelector('" . $this->selectorMoreListings . "');
+                var loadnext = document.querySelector(\"" . $this->selectorMoreListings . "\");
                 if(loadnext != null && !typeof(loadnext .click) !== \"function\" && loadnext.length >= 1) {
                     loadnext = loadnext[0];
                 } 
@@ -502,15 +523,16 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 if(loadnext != null && loadnext.style.display === \"\") 
                 { 
                     loadnext.click();  
-                    console.log(\"Clicked load next results control '" . $this->selectorMoreListings . "'...\");
+                    console.log(\"Clicked load next results control " . $this->selectorMoreListings . "...\");
                 }
             }  
         ";
 
-        $this->runJavaScriptSnippet($js, false, $this->additionalLoadDelaySeconds + 10);
+        $this->runJavaScriptSnippet($js, false);
 
         sleep($this->additionalLoadDelaySeconds > 0 ? $this->additionalLoadDelaySeconds : 2);
 
+        return true;
     }
 
 
@@ -547,7 +569,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 $searchDetails['keywords_array'] = null;
                 $searchDetails['keywords_array_tokenized'] = null;
                 $searchDetails['keywords_string_for_url'] = null;
-                $searchDetails['key'] = $searchDetails['site_name'] . '-' . $searchDetails['location_set_key'];
             }
             else
             {
@@ -655,7 +676,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $searchStartURL = $this->siteBaseURL;
 
         $searchDetails['search_start_url'] = $searchStartURL;
-        $GLOBALS['logger']->logLine("Setting start URL for " . $this->siteName . "[" . $searchDetails['key'] . " to: " . PHP_EOL . $searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Setting start URL for " . $this->siteName . "[" . $searchDetails['key'] . "] to: " . PHP_EOL . $searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
     }
 
@@ -677,21 +698,22 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $prefix = $prefix . $this->siteName;
         }
 
-        $key = $prefix . \Scooper\strip_punctuation($GLOBALS['USERDATA']['configuration_settings']['number_days'] . $searchSettings['key']);
-        if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED))
-            $key = $prefix . \Scooper\strip_punctuation($GLOBALS['USERDATA']['configuration_settings']['number_days'] . $searchSettings['site_name']);
+        $key = $prefix;
 
+        if(!$this->isBitFlagSet(C__JOB_DAYS_VALUE_NOTAPPLICABLE__))
+            $key = $key . \Scooper\strip_punctuation($GLOBALS['USERDATA']['configuration_settings']['number_days'] );
+
+        $key = $key . $searchSettings['key'];
         return $key;
     }
 
     private function _getDirKey_()
     {
-        $dirKey = "listings-raw";
         if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED))
-            $dirKey = "listings-rawbysite-allusers";
+            return "listings-rawbysite-allusers";
+        else
+            return "listings-raw";
 
-
-        return $dirKey;
     }
         
 
@@ -861,59 +883,43 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     }
 
 
-    private function _insertBaseURL_($html, $baseurl)
-    {
-        $newhtml = $html;
-        $matches = Array();
-        $MATCH_HEAD_TAG = "(<[Hh][Ee][Aa][Dd].*?>)";
-        preg_match($MATCH_HEAD_TAG, $html, $matches);
-        if(count($matches)>=1)
-        {
-            $newhead = $matches[0] . "<base href=\"" . $baseurl . "\" target=\"_blank\"><script>document.baseURI = \"" . $baseurl . "\";</script>";
-            $newhtml = preg_replace($MATCH_HEAD_TAG, $newhead, $html);
-        }
 
-        return $newhtml;
-    }
 
     protected function _writeDebugFiles_(&$searchDetails, $keyName = "UNKNOWN", $arrSearchedJobs = null, $objSimpleHTMLResults = null)
     {
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Writing debug files for plugin " . $this->siteName ."'s search". $searchDetails['key'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-        $debugHTMLVarFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlvar_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "html", $delim = "-");
-        $debugHTMLSelenFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlselen_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "html", $delim = "-");
-        $debugSSFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlselen_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "png", $delim = "-");
-        $debugCSVFile = substr($debugHTMLVarFile, 0, strlen($debugHTMLVarFile) - 4) . ".csv";
-
-        if (!is_null($objSimpleHTMLResults)) {
-            $html = strval($objSimpleHTMLResults);
-            $html = $this->_insertBaseURL_($html, $searchDetails['search_start_url']);
-            file_put_contents($debugHTMLSelenFile, $html);
-
-//            saveDomToFile($objSimpleHTMLResults, $debugHTMLVarFile);
-            $arrErrorFiles[$debugHTMLVarFile] = $debugHTMLVarFile;
-            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML variable out to " . $debugHTMLVarFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        }
-
-        if($this->selenium != null)
+        if(isDebug() === true)
         {
-            $driver = $this->selenium->get_driver();
-            $html = $driver->getPageSource();
-            $html = $this->_insertBaseURL_($html, $searchDetails['search_start_url']);
+            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Writing debug files for plugin " . $this->siteName ."'s search". $searchDetails['key'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-            file_put_contents($debugHTMLSelenFile, $html);
-            $arrErrorFiles[$debugHTMLSelenFile] = $debugHTMLSelenFile;
-            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML from Selenium out to " . $debugHTMLSelenFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            $debugHTMLVarFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlvar_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "html", $delim = "-");
+            $debugHTMLSelenFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlselen_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "html", $delim = "-");
+            $debugSSFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlselen_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "png", $delim = "-");
+            $debugCSVFile = substr($debugHTMLVarFile, 0, strlen($debugHTMLVarFile) - 4) . ".csv";
 
-            $driver->takeScreenshot($debugSSFile);
-            $arrErrorFiles[$debugSSFile] = $debugSSFile;
-            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Saved screenshot from Selenium out to " . $debugSSFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        }
+            if (!is_null($objSimpleHTMLResults)) {
+                saveDomToFile($objSimpleHTMLResults, $debugHTMLVarFile);
+                $arrErrorFiles[$debugHTMLVarFile] = $debugHTMLVarFile;
+                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML variable out to " . $debugHTMLVarFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            }
 
-        if (!is_null($arrSearchedJobs) && is_array($arrSearchedJobs) && countJobRecords($arrSearchedJobs) > 0) {
-            $this->writeJobsListToFile($debugCSVFile, $arrSearchedJobs);
-            $arrErrorFiles[$debugCSVFile] = $debugCSVFile;
-            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote results CSV data to " . $debugCSVFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            if($this->selenium != null)
+            {
+                $driver = $this->selenium->get_driver();
+                $html = $driver->getPageSource();
+                file_put_contents($debugHTMLSelenFile, $html);
+                $arrErrorFiles[$debugHTMLSelenFile] = $debugHTMLSelenFile;
+                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML from Selenium out to " . $debugHTMLSelenFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+                $driver->takeScreenshot($debugSSFile);
+                $arrErrorFiles[$debugSSFile] = $debugSSFile;
+                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Saved screenshot from Selenium out to " . $debugSSFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            }
+
+            if (!is_null($arrSearchedJobs) && is_array($arrSearchedJobs) && countJobRecords($arrSearchedJobs) > 0) {
+                $this->writeJobsListToFile($debugCSVFile, $arrSearchedJobs);
+                $arrErrorFiles[$debugCSVFile] = $debugCSVFile;
+                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote results CSV data to " . $debugCSVFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            }
         }
     }
 
@@ -1024,7 +1030,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     }
 
 
-    protected function runJavaScriptSnippet($jscript= "", $wrap_in_func = true, $waittime=null)
+    protected function runJavaScriptSnippet($jscript= "", $wrap_in_func = true)
     {
         $driver = $this->getActiveWebdriver();
 
@@ -1033,20 +1039,27 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $jscript = "function call_from_php() { " . $jscript . " }; call_from_php();";
         }
 
-        if(!is_null($waittime))
-        {
-            $GLOBALS['logger']->logLine("Setting Selenium javascript timeout to seconds=" . $waittime, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            $timeouts = $driver->manage()->timeouts();
-
-            $timeouts->setScriptTimeout($waittime+10);
-        }
         $GLOBALS['logger']->logLine("Executing JavaScript in browser:  ". $jscript, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $ret = $driver->executeScript($jscript);
 
-        sleep($waittime);
+        sleep(5);
 
         return $ret;
+    }
+
+    protected function getSimpleHtmlDomFromSeleniumPage()
+    {
+        $objSimpleHTML = null;
+        try
+        {
+            $html = $this->getActiveWebdriver()->getPageSource();
+            $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+        } catch (Exception $ex) {
+            $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
+            handleException(new Exception($strError), null, true);
+        }
+        return $objSimpleHTML;
     }
 
     private function _getMyJobsForSearchFromWebpage_(&$searchDetails)
@@ -1065,7 +1078,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             {
                 try
                 {
-                    $this->selenium = new SeleniumSession($this->additionalLoadDelaySeconds);
+                    if(is_null($this->selenium))
+                    {
+                        $this->selenium = new SeleniumSession($this->additionalLoadDelaySeconds);
+                    }
                     $html = $this->selenium->getPageHTML($searchDetails['search_start_url']);
                     $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
                 } catch (Exception $ex) {
@@ -1155,16 +1171,16 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                     {
                         try
                         {
+
                             if($this->isBitFlagSet( C__JOB_PAGE_VIA_URL))
                             {
                                 $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
                                 if ($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
                                     return null;
-                                $this->selenium->loadPage($strURL, $this->additionalLoadDelaySeconds);
+                                $this->selenium->loadPage($strURL);
                             }
                             elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE)) {
-                                $this->selenium->loadPage($strURL, $this->additionalLoadDelaySeconds);
-
+                                $this->selenium->loadPage($strURL);
                                 //
                                 // If we dont know how many pages to go down,
                                 // call the method to go down to the very end so we see the whole page
@@ -1175,8 +1191,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                             }
                             elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL))
                             {
-                                $this->selenium->loadPage($strURL, $this->additionalLoadDelaySeconds);
-
+                                $this->selenium->loadPage($strURL);
                                 //
                                 // if we know how many pages to do do, call the page down method
                                 // until we get to the right number of pages
@@ -1197,10 +1212,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                                     handleException(new Exception("Plugin " . $this->siteName . " is missing nextPageScript settings for the defined pagination type."), "", true);
 
                                 }
-                                $this->selenium->loadPage($strURL, $this->additionalLoadDelaySeconds);
+                                $this->selenium->loadPage($strURL);
 
                                 if( $nPageCount > 1 && $nPageCount <= $totalPagesCount) {
-                                    $this->runJavaScriptSnippet($this->nextPageScript, true, $this->additionalLoadDelaySeconds + 10);
+                                    $this->runJavaScriptSnippet($this->nextPageScript, true);
                                     sleep($this->additionalLoadDelaySeconds + 1);
                                 }
                             }
@@ -1211,10 +1226,12 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                                     throw(new Exception("Plugin " . $this->siteName . " is missing selectorMoreListings setting for the defined pagination type."));
 
                                 }
-                                $this->selenium->loadPage($strURL, $this->additionalLoadDelaySeconds);
+                                $this->selenium->loadPage($strURL);
 
-                                if( $nPageCount > 1 && $nPageCount <= $totalPagesCount) {
-                                    $this->goToNextPageOfResultsViaNextButton();
+                                if( $nPageCount > 1 && ($totalPagesCount = C__TOTAL_ITEMS_UNKNOWN__ || $nPageCount <= $totalPagesCount)) {
+                                    $ret = $this->goToNextPageOfResultsViaNextButton();
+                                    if($ret == false)
+                                        $totalPagesCount = $nPageCount;
                                 }
                             }
                             elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_PAGE_VIA_CALLBACK))
@@ -1234,7 +1251,8 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                                         handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
                                     }
                                 }
-                            } 
+
+                            }
                             else
                             {
                                 handleException(null, "No pagination method defined for plugin " . $this->siteName, false);

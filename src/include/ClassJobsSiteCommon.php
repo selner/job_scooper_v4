@@ -38,7 +38,7 @@ class ClassJobsSiteCommon
     protected $typeLocationSearchNeeded = null;
     protected $siteName = 'NAME-NOT-SET';
     protected $prevCookies = "";
-    protected $prevURL = "";
+    protected $prevURL = null;
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
 
 
