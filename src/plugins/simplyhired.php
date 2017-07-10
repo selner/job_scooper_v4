@@ -30,7 +30,7 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $strKeywordDelimiter = "or";
     protected $strBaseURLFormat = "http://www.simplyhired.com/search?q=***KEYWORDS***&l=***LOCATION***&fdb=***NUMBER_DAYS***&&ws=25&mi=50&sb=dd&pn=***PAGE_NUMBER***";
-    protected $paginationType = C__JOB_PAGE_VIA_URL;
+    protected $paginationType = C__PAGINATION_PAGE_VIA_URL;
     
     function getItemURLValue($nItem)
     {

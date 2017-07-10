@@ -26,7 +26,7 @@ class PluginPersonForce extends ClassClientHTMLJobSitePlugin
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
     protected $nJobListingsPerPage = 20;
     protected $additionalLoadDelaySeconds = 5;
-    protected $paginationType = C__JOB_PAGE_VIA_URL;
+    protected $paginationType = C__PAGINATION_PAGE_VIA_URL;
 
 
     protected $arrListingTagSetup = array(

@@ -73,7 +73,7 @@ class BasePluginiCIMS extends ClassHTMLJobSitePlugin
     {
         $this->strInitialReferer = $this->siteBaseURL . "/jobs/search?pr=0";
         $this->strBaseURLFormat = $this->siteBaseURL . "/jobs/search?pr=***PAGE_NUMBER***&in_iframe=1&searchKeyword=***KEYWORDS***";
-        $this->paginationType = C__JOB_PAGE_VIA_URL;
+        $this->paginationType = C__PAGINATION_PAGE_VIA_URL;
         
         if(is_null($this->arrResultsRowTDIndex))
             throw new InvalidArgumentException("Error in iCIMS plugin:  you must map the columns in the results table to the correct indexes for HTML tag matching. Aborting.");

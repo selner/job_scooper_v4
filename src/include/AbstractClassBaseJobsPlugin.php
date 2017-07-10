@@ -1202,15 +1202,19 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                         {   
                             switch(strtoupper($this->paginationType))
                             {
-                                
-                                case C__JOB_PAGE_VIA_URL:
-                                $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
-                                if ($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
-                                    return null;
-                                $this->selenium->loadPage($strURL);
-                                break;
-                                
-                                
+
+                                case C__PAGINATION_NONE:
+                                    $totalPagesCount = 1;
+                                    $this->selenium->loadPage($strURL);
+                                    break;
+
+                                case C__PAGINATION_PAGE_VIA_URL:
+                                    $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
+                                    if ($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
+                                        return null;
+                                    $this->selenium->loadPage($strURL);
+                                    break;
+
                                 case C__PAGINATION_INFSCROLLPAGE_VIALOADMORE:
                                     $this->selenium->loadPage($strURL);
                                     //

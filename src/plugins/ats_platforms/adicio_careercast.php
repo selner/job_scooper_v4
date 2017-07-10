@@ -51,7 +51,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
     function __construct($strOutputDirectory = null)
     {
         $this->additionalFlags[] = C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES;
-        $this->paginationType = C__JOB_PAGE_VIA_URL;
+        $this->paginationType = C__PAGINATION_PAGE_VIA_URL;
 
         $this->siteBaseURL = $this->childSiteURLBase;
         $this->strBaseURLFormat = $this->childSiteURLBase . $this->strBaseURLPathSection . $this->strBaseURLPathSuffix;
