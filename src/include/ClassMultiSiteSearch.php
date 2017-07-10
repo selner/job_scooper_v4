@@ -22,7 +22,6 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 class ClassMultiSiteSearch extends ClassJobsSiteCommon
 {
     protected $siteName = 'Multisite';
-    protected $arrSearchLocationSetsToRun = null;
     private $arrPluginClassesToRun = array();
     private $selenium = null;
 
@@ -37,7 +36,6 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
 
     function addMultipleSearches($arrSearches, $locSettingSets = null)
     {
-        $this->arrSearchLocationSetsToRun = $locSettingSets;
         $this->arrSearchesToReturn = $arrSearches;
     }
 
@@ -154,5 +152,3 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
     }
 
 }
-
-?>
