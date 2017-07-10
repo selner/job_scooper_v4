@@ -45,13 +45,13 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         }
 
 
-        if(stristr($this->strBaseURLFormat, "***KEYWORDS***") == "")
+        if(stristr($this->strBaseURLFormat, "***KEYWORDS***") == false)
             $this->additionalFlags[] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
 
-        if(stristr($this->strBaseURLFormat, "***LOCATION***") == "")
+        if(stristr($this->strBaseURLFormat, "***LOCATION***") == false)
             $this->additionalFlags[] = C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
 
-        if(stristr($this->strBaseURLFormat, "***NUMBER_DAYS***") == "")
+        if(stristr($this->strBaseURLFormat, "***NUMBER_DAYS***") == false)
             $this->additionalFlags[] = C__JOB_DAYS_VALUE_NOTAPPLICABLE__;
 
         if (!in_array(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, $this->additionalFlags))

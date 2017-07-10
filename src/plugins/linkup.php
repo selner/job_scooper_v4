@@ -60,7 +60,7 @@ class PluginLinkUp extends ClassHTMLJobSitePlugin
 
     function isNoResults($var)
     {
-        if (stristr($var, "Your search returned no results") != "") {
+        if (stristr($var, "Your search returned no results") != false) {
             return 0;
         }
 

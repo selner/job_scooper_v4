@@ -128,7 +128,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
 
                         $arrFailureKeywords = array("curl", "WebDriverException", "WebDriverCurlException", "connection refused", "timed out");
                         foreach ($arrFailureKeywords as $failWord) {
-                            if (stristr($var['search_run_result']['details'], $failWord) != "")
+                            if (stristr($var['search_run_result']['details'], $failWord) != false)
                                 return true;
                         }
                         return false;
