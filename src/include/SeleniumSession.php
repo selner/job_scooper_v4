@@ -80,8 +80,10 @@ class SeleniumSession extends PropertyObject
         {
             if(strncmp($this->driver->getCurrentURL(), $url, strlen($url)) != 0) {
                 $this->driver->get($url);
-            }
-
+	        sleep(2+$this->additionalLoadDelaySeconds);
+	    }
+           
+           
         } catch (Exception $ex) {
             $strMsg = "Error retrieving Selenium page at " . $url . ":  ". $ex;
 
@@ -370,7 +372,13 @@ class SeleniumSession extends PropertyObject
         $capabilities->setCapability("setThrowExceptionOnScriptError", false);
 
 
-        $this->remoteWebDriver = RemoteWebDriver::create($host, $desired_capabilities = $capabilities, 5000);
+        $this->remoteWebDriver = RemoteWebDriver::create(
+            $host,
+            $desired_capabilities = $capabilities,
+            $connection_timeout_in_ms = 60000,
+            $request_timeout_in_ms = 60000
+        );
+
     }
 
 
