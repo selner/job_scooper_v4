@@ -75,7 +75,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         {
             $this->selectorMoreListings = $this->getTagSelector( $tagSetup['tag_next_button']);
 
-            $this->_flags_ = $this->_flags_ & C__JOB_CLIENTSIDE_PAGE_VIA_NEXTBUTTON;
+            $this->_flags_ = $this->_flags_ | C__JOB_CLIENTSIDE_PAGE_VIA_NEXTBUTTON;
 
         }
 
@@ -89,6 +89,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             'tag_listings_noresults' => array(),
             'tag_listings_count' => array(),
             'tag_listings_section' => array(),
+            'tag_next_button' => array(),
             'tag_job_id' => array(),
             'tag_title' => array(),
             'tag_link' => array(),
@@ -98,7 +99,6 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             'tag_company' => array(),
             'tag_job_posting_date' => array(),
             'tag_employment_type' => array(),
-            'tag_next_button' => array(),
             'regex_link_job_id' => array(),
         );
         return $arrListingTagSetup;
