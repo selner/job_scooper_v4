@@ -29,7 +29,7 @@ class PluginDotJobs extends ClassClientHTMLJobSitePlugin
     protected $strBaseURLFormat = "http://www.my.jobs/jobs/?location=***LOCATION***&q=***KEYWORDS***";
     protected $typeLocationSearchNeeded = 'location-city-comma-state';
     protected $additionalLoadDelaySeconds = 4;
-    protected $nMaxJobsToReturn = 9000;
+    protected $nMaxJobsToReturn = 3000;
     protected $selectorMoreListings = "#button_moreJobs";
 
 
