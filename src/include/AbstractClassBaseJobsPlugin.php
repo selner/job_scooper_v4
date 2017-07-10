@@ -443,8 +443,8 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                     localStorage.setItem(\"pageNum\", 1);
                 }
 
-              window.scrollTo(0,document.body.scrollHeight);
-              console.log('paged-down-before-click');
+                window.scrollTo(0,document.body.scrollHeight);
+                console.log('paged-down-before-click');
 
                 var loadmore = document.querySelector('" . $this->selectorMoreListings . "');
                 if(loadmore != null && !typeof(loadmore .click) !== \"function\" && loadmore.length >= 1) {
@@ -464,9 +464,9 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                     console.log(\"Clicked load more control...\");
                         
                     scroll = setTimeout(doLoadMore, " . $secs . ");
-              window.scrollTo(0,document.body.scrollHeight);
-              console.log('paged-down-after-click');
-            }  
+                    window.scrollTo(0,document.body.scrollHeight);
+                    console.log('paged-down-after-click');
+                }
                 else
                 {
                     console.log('Load more button no longer active; done paginating the results.');
@@ -685,21 +685,22 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $prefix = $prefix . $this->siteName;
         }
 
-        $key = $prefix . \Scooper\strip_punctuation($GLOBALS['USERDATA']['configuration_settings']['number_days'] . $searchSettings['key']);
-        if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED))
-            $key = $prefix . \Scooper\strip_punctuation($GLOBALS['USERDATA']['configuration_settings']['number_days'] . $searchSettings['site_name']);
+        $key = $prefix;
 
+        if(!$this->isBitFlagSet(C__JOB_DAYS_VALUE_NOTAPPLICABLE__))
+            $key = $key . \Scooper\strip_punctuation($GLOBALS['USERDATA']['configuration_settings']['number_days'] );
+
+        $key = $key . $searchSettings['key'];
         return $key;
     }
 
     private function _getDirKey_()
     {
-        $dirKey = "listings-raw";
         if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED))
-            $dirKey = "listings-rawbysite-allusers";
+            return "listings-rawbysite-allusers";
+        else
+            return "listings-raw";
 
-
-        return $dirKey;
     }
         
 
