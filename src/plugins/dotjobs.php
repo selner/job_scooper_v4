@@ -22,13 +22,14 @@ class PluginDotJobs extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = 'dotjobs';
     // BUGBUG:  hard coded to be washington state
-    protected $siteBaseURL = 'http://washington.jobs';
+    protected $siteBaseURL = 'http://www.my.jobs';
     protected $nJobListingsPerPage = 20;
-    protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE ];
-    protected $strBaseURLFormat = "http://washington.jobs/jobs?location=***LOCATION***&q=***KEYWORDS***";
-    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
+    protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE, C__JOB_DAYS_VALUE_NOTAPPLICABLE__ ];
+
+    protected $strBaseURLFormat = "http://www.my.jobs/jobs/?location=***LOCATION***&q=***KEYWORDS***";
+    protected $typeLocationSearchNeeded = 'location-city-comma-state';
     protected $additionalLoadDelaySeconds = 4;
-    protected $nMaxJobsToReturn = 2000; 
+    protected $nMaxJobsToReturn = 9000;
     protected $selectorMoreListings = "#button_moreJobs";
 
 
