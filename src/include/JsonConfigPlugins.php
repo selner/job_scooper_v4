@@ -37,7 +37,7 @@ class JSONPlugins
         print('Getting job site plugin list...'. PHP_EOL);
         $filelist = array_diff(scandir($jsonconfigsdir), array(".", ".."));
         $filelist = array_filter($filelist, function ($var) {
-            if(strtolower(pathinfo($var, PATHINFO_EXTENSION)) == "json")
+            if(preg_match("/json$/", pathinfo($var, PATHINFO_EXTENSION)))
                 return true;
             return false;
         });
