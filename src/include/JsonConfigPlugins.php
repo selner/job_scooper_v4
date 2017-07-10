@@ -73,14 +73,6 @@ class JSONPlugins
             $pluginData['siteBaseURL'] = $configData->SourceURL;
             $pluginData['strBaseURLFormat'] = $configData->SourceURL;
 
-            if(stristr($pluginData['strBaseURLFormat'], "***KEYWORDS***") == "")
-                $pluginData['AdditionalFlags'][] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
-
-            if(stristr($pluginData['strBaseURLFormat'], "***LOCATION***") == "")
-                $pluginData['AdditionalFlags'][] = C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
-
-            if(stristr($pluginData['strBaseURLFormat'], "***NUMBER_DAYS***") == "")
-                $pluginData['AdditionalFlags'][] = C__JOB_DAYS_VALUE_NOTAPPLICABLE__;
 
         }
 

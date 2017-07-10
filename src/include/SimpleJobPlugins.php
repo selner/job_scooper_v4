@@ -76,8 +76,15 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
             $this->_flags_ = $this->_flags_ | C__JOB_CLIENTSIDE_PAGE_VIA_NEXTBUTTON;
 
+        if (!array_key_exists('tag_listing_count', $this->arrListingTagSetup) &&  !in_array(C__JOB_ITEMCOUNT_NOTAPPLICABLE__, $this->additionalFlags))
+        {
+            $this->additionalFlags[]  = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
         }
 
+        if (!array_key_exists('tag_page_count', $this->arrListingTagSetup) &&  !in_array(C__JOB_PAGECOUNT_NOTAPPLICABLE__, $this->additionalFlags))
+        {
+            $this->additionalFlags[]  = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
+        }
         parent::__construct($strBaseDir);
     }
 

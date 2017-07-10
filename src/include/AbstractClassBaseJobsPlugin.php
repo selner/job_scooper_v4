@@ -44,6 +44,21 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             }
         }
 
+
+        if(stristr($this->strBaseURLFormat, "***KEYWORDS***") == "")
+            $this->additionalFlags[] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
+
+        if(stristr($this->strBaseURLFormat, "***LOCATION***") == "")
+            $this->additionalFlags[] = C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
+
+        if(stristr($this->strBaseURLFormat, "***NUMBER_DAYS***") == "")
+            $this->additionalFlags[] = C__JOB_DAYS_VALUE_NOTAPPLICABLE__;
+
+        if (!in_array(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, $this->additionalFlags))
+        {
+            $this->additionalFlags[] = C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED;
+        }
+
         if(is_array($this->additionalFlags))
         {
             foreach($this->additionalFlags as $flag)
@@ -202,7 +217,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     //************************************************************************
 
     protected $nJobListingsPerPage = 20;
-    protected $additionalFlags = [];
+    protected $additionalFlags = array();
     protected $secsPageTimeout = null;
     protected $pluginResultsType;
     protected $selenium = null;
