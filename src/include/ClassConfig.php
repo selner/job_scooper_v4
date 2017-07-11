@@ -1113,8 +1113,9 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                 $tokens = explode("|", $titleRecord['tokenized']);
                 $GLOBALS['USERDATA']['title_negative_keyword_tokens'][] = $tokens;
             }
-
-            $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokens to use for filtering titles from '" . getArrayValuesAsString($this->getInputFilesByType("negative_title_keywords")) . "'." , \Scooper\C__DISPLAY_WARNING__);
+            
+            $inputfiles = array_column($this->getInputFilesByType("negative_title_keywords"), 'full_file_path');
+            $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokens to use for filtering titles from '" . getArrayValuesAsString($inputfiles) . "'." , \Scooper\C__DISPLAY_WARNING__);
 
         }
 
@@ -1199,16 +1200,18 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             }
         }
 
+        $inputfiles = array_column($arrFileInput, 'full_file_path');
+
         if($fCompaniesLoaded == false)
         {
             if(count($arrFileInput) == 0)
-                $GLOBALS['logger']->logLine("No file specified for companies regexes to exclude from '" . getArrayValuesAsString($arrFileInput) . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
+                $GLOBALS['logger']->logLine("No file specified for companies regexes to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
             else
-                $GLOBALS['logger']->logLine("Could not load regex list for companies to exclude from '" . getArrayValuesAsString($arrFileInput) . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
+                $GLOBALS['logger']->logLine("Could not load regex list for companies to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
         }
         else
         {
-            $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']). " regexes to use for filtering companies from " . getArrayValuesAsString($arrFileInput)  , \Scooper\C__DISPLAY_WARNING__);
+            $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']). " regexes to use for filtering companies from " . getArrayValuesAsString($inputfiles)  , \Scooper\C__DISPLAY_NORMAL__);
 
         }
     }
