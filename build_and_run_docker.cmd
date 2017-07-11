@@ -1,13 +1,21 @@
-docker rm -f jobs
+@ECHO OFF
+IF %~1.==. SET branch=master
+IF NOT %~1.==. SET branch=%1
 
-docker build --tag selner/js4 .
+SET jobsname=jobs-%branch%
+SET imagetag=selner/js4-%branch%
+echo Branch is %branch%.
+echo Container name is %jobsname%.
+echo Image tag is %imagetag%.
+@ECHO ON
 
-#
-# To use on macos or linux:
-#     1.  change the PC's volume path to be "/Users/bryan/Dropbox/var-jobs_scooper::/var/local/jobs_scooper --volume /devcode/nltk_data:/root/nltk_data" style instead
-#     2.  save as a .sh file
-#
-docker run --volume C:\Users\bryan\Dropbox\var-jobs_scooper:/var/local/jobs_scooper --volume c:\devcode\nltk_data:/root/nltk_data --name jobs -d selner/js4
 
-docker logs -f jobs
+docker rm -f %jobsname%
+docker rmi %imagetag%
+
+docker build --build-arg BRANCH=%branch% -t %imagetag% . 
+
+docker run --volume C:\Users\bryan\Dropbox\var-local-jobs_scooper:/var/local/jobs_scooper --volume c:\dev\nltk_data:/root/nltk_data --name %jobsname% -d %imagetag%
+
+docker logs -f %jobsname%
 
