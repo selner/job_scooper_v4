@@ -495,7 +495,14 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $nTotalItems = $this->nMaxJobsToReturn;
         }
 
-        $nSleepTimeToLoad = ($nTotalItems / $this->nJobListingsPerPage) * $this->additionalLoadDelaySeconds;
+        if($nTotalItems == C__TOTAL_ITEMS_UNKNOWN__)
+        {
+            $nSleepTimeToLoad = 30 + $this->additionalLoadDelaySeconds;
+        }
+        else {
+            $nSleepTimeToLoad = ($nTotalItems / $this->nJobListingsPerPage) * $this->additionalLoadDelaySeconds;
+        }
+
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $this->runJavaScriptSnippet($js, false);
