@@ -70,12 +70,12 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             $this->paginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
         }
 
-        if (!array_key_exists('tag_listing_count', $this->arrListingTagSetup) &&  !in_array(C__JOB_ITEMCOUNT_NOTAPPLICABLE__, $this->additionalFlags))
+        if (!array_key_exists('tag_listings_count', $this->arrListingTagSetup) &&  !in_array(C__JOB_ITEMCOUNT_NOTAPPLICABLE__, $this->additionalFlags))
         {
             $this->additionalFlags[]  = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
         }
 
-        if (!array_key_exists('tag_page_count', $this->arrListingTagSetup) &&  !in_array(C__JOB_PAGECOUNT_NOTAPPLICABLE__, $this->additionalFlags))
+        if (!array_key_exists('tag_pages_count', $this->arrListingTagSetup) &&  !in_array(C__JOB_PAGECOUNT_NOTAPPLICABLE__, $this->additionalFlags))
         {
             $this->additionalFlags[]  = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
         }
