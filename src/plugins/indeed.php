@@ -23,40 +23,31 @@ class PluginIndeed extends ClassClientHTMLJobSitePlugin
     protected $siteName = 'Indeed';
     protected $nJobListingsPerPage = 50;
     protected $siteBaseURL = 'http://www.Indeed.com';
-//    protected $strBaseURLFormat = "https://www.indeed.com/jobs?q=***KEYWORDS***&l=***LOCATION***&radius=50&sort=date&limit=50&fromage=***NUMBER_DAYS***&filter=0***ITEM_NUMBER***";
-//    protected $strBaseURLFormat = "https://www.indeed.com/jobs?as_and=***KEYWORDS***&as_phr=&as_any=&as_not=&as_ttl=&as_cmp=&jt=all&st=&salary=&radius=50&l=***LOCATION***&fromage=***NUMBER_DAYS***&limit=50&sort=date&psf=advsrch&start=***ITEM_NUMBER***";
     protected $strBaseURLFormat = "https://www.indeed.com/jobs?as_and=***KEYWORDS***&as_phr=&as_any=&as_not=&as_ttl=&as_cmp=&jt=all&st=&salary=&radius=50&l=***LOCATION***&fromage=1&limit=50&sort=date***ITEM_NUMBER***&filter=0&psf=advsrch";
-## "https://www.indeed.com/jobs?q=manager&l=seattle%2C+wa&radius=50&sort=date&start=10&pp=AAoAAAAAAAAAAAAAAAEGhv7TAQACQTTTq6vIeafYA9VSkkIu49ommzZTDUNeuzGSQg";
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
-    protected $strKeywordDelimiter = "OR";
+
+    // Note:  C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS intentioanlly not set although Indeed supports it.  However, their support is too explicit of a search a will weed out
+    //        too many potential hits to be worth it.
     protected $additionalFlags = [C__JOB_IGNORE_MISMATCHED_JOB_COUNTS];
     protected $paginationType = C__PAGINATION_PAGE_VIA_CALLBACK;
-//    protected $nextPageScript = '
-//
-//        var $next = document.querySelector("span.np");
-//        if ($next!= null)
-//        {
-//            $next.parentNode.parentNode.click();
-//        }
-//        else
-//        {
-//            var $pagenodes = document.querySelectorAll("div.pagination span span");
-//            if ($pagenodes != null)
-//            {
-//                console.log("No pagination nodes found to click.");
-//            }
-//            else
-//            {
-//                console.log($pagenodes[1].textContent);
-//                if ($pagenodes.length >= 1 && $pagenodes[$pagenodes.length - 1].textContent.startsWith("Next"))
-//                {
-//                    console.log("Clicking pagination node #" + ($pagenodes.length - 1));
-//                    $pagenodes[$pagenodes.length - 1].click();
-//                } else {
-//                    console.log("No Page Node found to click.");
-//                }
-//            }
-//        }';
+
+
+
+
+    protected $arrListingTagSetup = array(
+        'tag_listings_count' =>  array('selector' => '#searchCount', 'return_value_regex' => '/.*?of\s*(\d+).*?/'),
+        'tag_listings_noresults' =>  array('selector' => 'div.bad_query h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "PluginIndeed::isNoJobsFound")
+    );
+
+
+    function isNoJobsFound($var)
+    {
+        if(stristr(strtoupper($var), strtoupper("did not match any jobs")) != false)
+            return 0;
+
+        return null;
+    }
+
 
     function takeNextPageAction($driver)
     {
@@ -64,73 +55,14 @@ class PluginIndeed extends ClassClientHTMLJobSitePlugin
             WebDriverBy::className('np')
         );
         $link->click();
-//        $searchBtn = $driver.findElement(WebDriverBy::id("searchbtn"));
-//        $action = $$driver.actions();
-//        $action.contextClick($searchBtn);
-//        $action.build().perform();
-    }
-
-    function __construct($strBaseDir = null)
-    {
-        // Note:  C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS intentioanlly not set although Indeed supports it.  However, their support is too explicit of a search a will weed out
-        //        too many potentia hits to be worth it.
-        parent::__construct($strBaseDir);
     }
 
     function getItemURLValue($nItem)
     {
         if($nItem == null || $nItem == 1) { return ""; }
 
-/*        return "&start=" . $nItem. "&pp=";*/
         return "&start=" . $nItem;
     }
-
-    function getDaysURLValue($nDays = null)
-    {
-
-        switch($nDays)
-        {
-            case $nDays > 15:
-                $ret = "any";
-                break;
-
-            case $nDays > 7 && $nDays <= 15:
-                $ret = 15;
-                break;
-
-            case $nDays > 3 && $nDays <= 7:
-                $ret = 7;
-                break;
-
-            case $nDays > 1 && $nDays <= 3:
-                $ret = 3;
-                break;
-
-            case $nDays = 1:
-                $ret = 1;
-                break;
-
-            default:
-                $ret = "any";
-                break;
-        }
-       return $ret;
-
-    }
-
-
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        $nodeHelper = new CSimpleHTMLHelper($objSimpHTML);
-
-        $pageText = $nodeHelper->getText("div[id='searchCount']", 0, false);
-        $fMatchedID = preg_match('/.*?of\s*(\d+).*?/', $pageText, $idMatches);
-        if($fMatchedID && count($idMatches) >= 1)
-        {
-            return $idMatches[1];
-        }
-    }
-
 
     public function parseJobsListForPage($objSimpleHTML)
     {
@@ -162,15 +94,6 @@ class PluginIndeed extends ClassClientHTMLJobSitePlugin
                 $item['job_title'] = $subNodes[0]->attr['title'];
                 $item['job_post_url'] = $subNodes[0]->attr['href'];
             }
-//
-//            if(is_null($item['job_id']) || empty($item['job_id'])) {
-//                $id = $this->getIDFromLink('\/jobs\/.{1,}-(\w+).*', $item['job_post_url']);
-//                if($id !== false && !is_null($id))
-//                    $item['job_id'] = $id;
-//            }
-
-
-
 
             $coNode = $node->find("span[itemprop='hiringOrganization']");
             if(isset($coNode) && count($coNode) >= 1)
