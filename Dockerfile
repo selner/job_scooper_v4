@@ -138,9 +138,9 @@ VOLUME "/root/nltk_data"
 ########################################################
 
 WORKDIR /opt/jobs_scooper
-ARG CACHEBUST=1
 ARG BRANCH
 RUN echo $BRANCH
+ARG CACHEBUST=1
 RUN git clone https://github.com/selner/job_scooper_v4.git /opt/jobs_scooper -b $BRANCH
 
 #ADD . /opt/jobs_scooper
