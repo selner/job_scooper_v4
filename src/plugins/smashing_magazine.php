@@ -23,7 +23,7 @@ class PluginSmashingMagazine extends ClassClientHTMLJobSitePlugin
     protected $siteName = 'SmashingMagazine';
     protected $childSiteURLBase = 'http://jobs.smashingmagazine.com';
     protected $childSiteListingPage = 'http://jobs.smashingmagazine.com';
-    protected $paginationType = C__PAGINATION_INFSCROLLPAGE_NOCONTROL;
+    protected $paginationType = C__PAGINATION_NONE;
 
     protected $arrListingTagSetup = array(
         'tag_listings_section' => array(array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' =>'entry-list compact'), array('tag' => 'li')),
