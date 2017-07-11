@@ -160,7 +160,7 @@ RUN ls -al /opt/jobs_scooper
 ###
 ########################################################
 WORKDIR /opt/jobs_scooper/src
-RUN composer install --no-interaction
+RUN composer install --no-interaction -vv
 
 
 ########################################################
