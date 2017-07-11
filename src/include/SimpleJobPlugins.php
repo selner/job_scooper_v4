@@ -131,7 +131,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
                     return $noResultsVal;
                 }
             } catch (Exception $ex) {
-                $GLOBALS['logger']->logLine("Warning: Did not find matched expected 'No results' tag for " . $this->siteName . ".  %s", \Scooper\C__DISPLAY_WARNING__);
+                $GLOBALS['logger']->logLine("Warning: Did not find matched expected 'No results' tag for " . $this->siteName . ".  Error:" . $ex->getMessage(), \Scooper\C__DISPLAY_WARNING__);
             }
         }
 
