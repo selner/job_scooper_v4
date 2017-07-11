@@ -20,23 +20,49 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 class PluginAuthenticJobs extends ClassClientHTMLJobSitePlugin
 {
-protected $siteName = 'AuthenticJobs';
-protected $siteBaseURL = "https://authenticjobs.com";
-protected $strBaseURLFormat = 'https://authenticjobs.com/#location=***LOCATION***&query=***KEYWORDS***';
-protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
-protected $nJobListingsPerPage = 50;
+    protected $siteName = 'AuthenticJobs';
+    protected $siteBaseURL = "https://authenticjobs.com";
+    protected $strBaseURLFormat = 'https://authenticjobs.com/#location=***LOCATION***';
+#    protected $strBaseURLFormat = 'https://authenticjobs.com/#location=***LOCATION***&query=***KEYWORDS***';
+    protected $typeLocationSearchNeeded = 'location-city';
+    protected $nJobListingsPerPage = 50;
 
-protected $arrListingTagSetup = array(
-    'tag_listings_count' => array(array('tag' => 'ul', 'attribute'=>'id', 'attribute_value' => 'listings'), 'return_attribute' => 'data-total'),
-    'tag_listings_section' => array(array('tag' => 'ul', 'attribute'=>'id', 'attribute_value' => 'listings'), array('tag' => 'li')),
-    'tag_title' =>  array(array('tag' => 'a'), array('tag' => 'div'),array('tag' => 'h3'), 'return_attribute' => 'plaintext'),
-    'tag_link' =>  array(array('tag' => 'a'), 'return_attribute' => 'href'),
-    'tag_company' =>  array(array('tag' => 'a'), array('tag' => 'div'),array('tag' => 'h4'), 'return_attribute' => 'plaintext'),
-    'tag_location' =>  array(array('tag' => 'a'), array('tag' => 'ul'),array('tag' => 'li', 'attribute' => 'class', 'attribute_value' =>'location'), 'return_attribute' => 'plaintext'),
-    'tag_employment_type' =>  array(array('tag' => 'a'), array('tag' => 'ul'),array('tag' => 'li', 'index' => 0), 'return_attribute' => 'plaintext'),
-    'tag_job_id' =>  array(array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>  '/\/jobs\/([^?]+)/i'),
-    'tag_load_more' =>  array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'ladda-button')
+    protected $arrListingTagSetup = array(
+        'tag_listings_noresults'    => array('selector' => 'ul#listings li#no-results', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
+        'tag_listings_section'      => array('selector' => 'ul#listings li'),
+        'tag_title'                 =>  array('selector' => 'a div h3', 'return_attribute' => 'plaintext'),
+        'tag_link'                  =>  array('selector' => 'a', 'return_attribute' => 'href'),
+        'tag_company'               =>  array('selector' => 'a div h4', 'return_attribute' => 'plaintext'),
+        'tag_location'              =>  array('selector' => 'a ul li.location', 'return_attribute' => 'plaintext'),
+        'tag_employment_type'       =>  array('selector' => 'a ul li', 'index' => 0, 'return_attribute' => 'plaintext'),
+        'tag_job_id'                =>  array('selector' => 'a', 'return_attribute' => 'href', 'return_value_regex' =>  '/\/jobs\/([^?]+)/i'),
+        'tag_load_more'             =>  array('selector' => 'a.ladda-button')
     );
+
+    function isNoJobResults($var)
+    {
+        return noJobStringMatch($var, "No jobs");
+    }
+
+
+    protected function goToEndOfResultsSetViaLoadMore()
+    {
+        $objSimplHtml = $this->getSimpleHtmlDomFromSeleniumPage();
+
+        $node = $objSimplHtml->find("p.more");
+        if($node == null || count($node) == 0)
+        {
+            return false;
+        }
+        else
+        {
+            if(stristr($node[0]->attr["style"], "display: none") !== false) {
+                return false;
+            }
+        }
+
+        return parent::goToEndOfResultsSetViaLoadMore();
+    }
 
 }
 
