@@ -260,7 +260,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         if (array_key_exists("return_attribute", $arrTag) && !is_null($arrTag['return_attribute'])) {
             $returnAttribute = $arrTag['return_attribute'];
         }
-        if($returnAttribute == 'collection' || $returnAttribute == 'node')
+        if(strtolower($returnAttribute) == 'collection' || strtolower($returnAttribute) == 'node')
         {
             $returnAttribute = null;
             $fReturnNodeObject = true;
