@@ -1419,7 +1419,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         }
     }
 
-    protected function setCompanyToSiteName($var)
+    function setCompanyToSiteName($var)
     {
         return $this->siteName;
     }

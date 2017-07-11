@@ -99,6 +99,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             'tag_location' => array(),
             'tag_job_category' => array(),
             'tag_company' => array(),
+            'tag_company_logo' => array(),
             'tag_job_posting_date' => array(),
             'tag_employment_type' => array(),
             'regex_link_job_id' => array(),
@@ -291,21 +292,16 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             }
             $ret = $nodeMatches[$index];
         } elseif (!is_null($ret) && is_array($ret)) {
-            if (!(array_key_exists("return_value_callback", $arrTag) && strlen($arrTag['return_value_callback']) > 0)) {
-
-                if (count($ret) > 1) {
+            if (count($ret) > 1) {
                 $strError = sprintf("Warning:  %s plugin matched %d nodes to selector '%s' but did not specify an index.  Assuming first node.", $this->siteName, count($ret), $strMatch);
                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_WARNING__);
-//                    throw new Exception($strError);
-                }
-                $ret = $ret[0];
             }
+            $ret = $ret[0];
         }
 
 
 
         if ($fReturnNodeObject === false && !is_null($ret)) {
-            assert(!is_array($ret));
             $ret = $ret->$returnAttribute;
 
             if (!is_null($propertyRegEx) && is_string($ret) && strlen($ret) > 0) {
@@ -318,13 +314,14 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             }
         }
 
-        if (array_key_exists("return_value_callback", $arrTag) && strlen($arrTag['return_value_callback']) > 0) {
-            if (!is_callable($arrTag['return_value_callback'])) {
-                $strError = sprintf("%s plugin failed could not call the tag callback method '%s' for attribute name '%s'.", $this->siteName, $arrTag['return_value_callback'], $returnAttribute);
+        if (!is_null($ret) && array_key_exists("return_value_callback", $arrTag) && (strlen($arrTag['return_value_callback']) > 0)) {
+            $callback = get_class($this) . "::" . $arrTag['return_value_callback'];
+            if (!method_exists($this, $arrTag['return_value_callback'])) {
+                $strError = sprintf("%s plugin failed could not call the tag callback method '%s' for attribute name '%s'.", $this->siteName, $callback, $returnAttribute);
                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
                 throw new Exception($strError);
             }
-            $ret = call_user_func($arrTag['return_value_callback'], $ret);
+            $ret = call_user_func($callback, $ret);
         }
 
 

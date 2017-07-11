@@ -36,7 +36,7 @@ class PluginRobertHalf extends ClassClientHTMLJobSitePlugin
         'tag_listings_section' => array(array('tag' => 'table', 'attribute'=>'class', 'attribute_value' => 'job-search-results'), array('tag' => 'tr', 'attribute' => 'class', 'attribute_value' =>'job-search-page')),
         'tag_title' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
         'tag_link' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'a'), 'return_attribute' => 'href'),
-        'tag_company' =>  array('return_value_callback' => 'ClassBaseHTMLJobSitePlugin::setCompanyToSiteName'),
+        'tag_company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
         'tag_job_id' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>  '/\/technology\/job\/([^?]+)/i'),
         'tag_location' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'city')),
         'tag_job_posting_date' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'postDate')),

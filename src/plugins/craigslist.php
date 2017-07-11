@@ -34,28 +34,23 @@ class PluginCraigslist extends ClassClientHTMLJobSitePlugin
     protected $strKeywordDelimiter = "|";
 
     protected $arrListingTagSetup = array(
-        'tag_listings_noresults' => array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'noresults', 'return_attribute' => 'plaintext', 'return_value_callback' => "PluginCraigslist::getNoResultsCount"),
+        'tag_listings_noresults' => array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'noresults', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
         'tag_listings_count' => array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'totalcount', 'index'=> 0, 'return_attribute' => 'plaintext'),
-        'tag_listings_section' => array('selector' => 'li[data-pid]', 'return_value_callback' => "PluginCraigslist::filterListingNodes"),
+        'tag_listings_section' => array('selector' => 'li[data-pid]', 'return_value_callback' => "filterListingNodes"),
         'tag_link' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'index'=> 0, 'return_attribute' => 'href'),
         'tag_title' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'index'=> 0, 'return_attribute' => 'plaintext'),
-        'tag_job_id' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'index'=> 0, 'return_attribute' => 'data-id', 'return_value_callback' => "PluginCraigslist::getNoResultsCount"),
+        'tag_job_id' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'index'=> 0, 'return_attribute' => 'data-id'),
         'tag_department' => array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'listing-department', 'index'=> 0),
         'tag_location' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'result-hood', 'index'=> 0),
-        'tag_postdate' => array('tag' => 'time', 'attribute' => 'class', 'attribute_value' =>'result-date', 'index'=> 0)
+        'tag_job_posting_date' => array('tag' => 'time', 'attribute' => 'class', 'attribute_value' =>'result-date', 'index'=> 0)
     );
 
-    function getNoResultsCount($var)
+    static function isNoJobResults($var)
     {
-        $nPos = strpos(strtolower($var), "nothing found");
-        if ($nPos !== false)
-            return 0;
-
-        return null;
+        return noJobStringMatch($var, "nothing found");
     }
 
-
-    function filterListingNodes($var)
+    static function filterListingNodes($var)
     {
         $retNodes = array();
         foreach($var as $v)

@@ -36,18 +36,14 @@ class PluginIndeed extends ClassClientHTMLJobSitePlugin
 
     protected $arrListingTagSetup = array(
         'tag_listings_count' =>  array('selector' => '#searchCount', 'return_value_regex' => '/.*?of\s*(\d+).*?/'),
-        'tag_listings_noresults' =>  array('selector' => 'div.bad_query h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "PluginIndeed::isNoJobsFound")
+        'tag_listings_noresults' =>  array('selector' => 'div.bad_query h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults")
     );
 
 
-    function isNoJobsFound($var)
+    static function isNoJobResults($var)
     {
-        if(stristr(strtoupper($var), strtoupper("did not match any jobs")) != false)
-            return 0;
-
-        return null;
+        return noJobStringMatch($var, "did not match any jobs");
     }
-
 
     function takeNextPageAction($driver)
     {

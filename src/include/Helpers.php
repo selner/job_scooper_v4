@@ -1084,5 +1084,14 @@ function getFailedSearches()
     return $arrFailedPluginsReport;
 }
 
+function noJobStringMatch($var, $matchString)
+{
+    if(is_null($matchString) || strlen($matchString) == 0)
+        throw new Exception("Invalid match string passed to helper noJobStringMatch.");
+        
+    if(stristr(strtoupper($var), strtoupper($matchString)) !== false)
+        return 0;
 
-?>
+    return null;
+}
+

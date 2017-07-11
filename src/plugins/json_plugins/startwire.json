@@ -46,7 +46,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_logo",
+          "Name": "tag_company_logo",
           "Selector": "img",
           "Extract": "ATTR",
           "Attribute": "href",

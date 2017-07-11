@@ -67,7 +67,7 @@ class BaseForceComClass extends ClassClientHTMLJobSitePlugin
         'tag_link' =>  array(array('tag' => 'td', 'index' => 0), array('tag' => 'a'), 'return_attribute' => 'href'),
         'tag_department' =>  array(array('tag' => 'td'), array('tag' => 'span'), 'index' => 0),
         'tag_location' =>  array(array('tag' => 'td'), array('tag' => 'span'), 'index' => 1),
-        'tag_company' =>  array('return_value_callback' => 'ClassBaseHTMLJobSitePlugin::setCompanyToSiteName'),
+        'tag_company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
         'tag_next_button' => array('selector' => '#j_id0:j_id1:atsForm:j_id154'),
         'regex_link_job_id' => '/.*?jobId=([^&]+)/i'
     );

@@ -49,6 +49,26 @@ abstract class BaseMadgexATSPlugin extends ClassClientHTMLJobSitePlugin
 
     }
 
+    static function isNoJobResults($var)
+    {
+        return noJobStringMatch($var, "Found 0 jobs");
+    }
+
+    protected $arrListingTagSetup = array(
+        'tag_listings_noresults'    => array('selector' => 'h1#searching', 'return_attribute' => 'plaintext', 'return_value_callback' => 'isNoJobResults'),
+        'tag_listings_count'        => array('selector' => 'h1#searching', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/\b(\d+)\b/i'),
+        'tag_listings_section'      => array('selector' => 'li.lister__item'),
+        'tag_title'                 => array('selector' => 'h3 a.js-clickable-area-link span[itemprop="title"]', 'return_attribute' => 'plaintext'),
+        'tag_link'                  => array('selector' => 'h3 a.js-clickable-area-link ', 'return_attribute' => 'href'),
+        'tag_company'               => array('selector' => 'li[itemprop="hiringOrganization"]', 'return_attribute' => 'plaintext'),
+        'tag_location'              => array('selector' => 'li[itemprop="location"]', 'return_attribute' => 'plaintext'),
+        'tag_job_id'                =>  array('selector' => 'li.lister__item', 'return_attribute' => 'id', 'return_value_regex' =>  '/item\-(\d+)/i'),
+        'tag_job_posted_date'       => array('selector' => 'li.job-actions__action pipe', 'index=0'),
+        'tag_company_logo'          => array('selector' => 'img.lister__logo', 'return_attribute' => 'src'),
+        'tag_next_button'           => array('selector' => 'li.paginator__item a[rel="next"]')
+    );
+
+
     function parseTotalResultsCount(&$objSimpHTML)
     {
 
@@ -69,8 +89,7 @@ abstract class BaseMadgexATSPlugin extends ClassClientHTMLJobSitePlugin
                     $this->locationid = $arrMatches[1];
                 }
 
-                $selen = new SeleniumSession($this->additionalLoadDelaySeconds);
-                $html = $selen->getPageHTML($url);
+                $html = $this->selenium->getPageHTML($url);
                 $objSimpHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
             } catch (Exception $ex) {
                 $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
@@ -78,35 +97,8 @@ abstract class BaseMadgexATSPlugin extends ClassClientHTMLJobSitePlugin
             }
         }
 
-
-        $nTotalResults = C__TOTAL_ITEMS_UNKNOWN__;
-
-        //
-        // Find the HTML node that holds the result count
-        $nodeCounts = $objSimpHTML->find("h1");
-        if($nodeCounts != null && is_array($nodeCounts) && isset($nodeCounts[0]))
-        {
-            $counts = explode(" ", $nodeCounts[0]->plaintext);
-            $nTotalResults = \Scooper\intceil($counts[1]);
-        }
-
-
-        return $nTotalResults;
-
+        return parent::parseTotalResultsCount($objSimpHTML);
     }
-
-    protected $arrListingTagSetup = array(
-        'tag_listings_section' => array('selector' => "li.lister__item"),
-        'tag_link' =>  array('selector' => 'a.js-clickable-area-link', 'return_attribute' => 'href'),
-        'tag_title' =>  array('selector' => 'a.js-clickable-area-link span', 'return_attribute' => 'plaintext'),
-        'tag_job_id' =>  array('selector' => 'li.lister__item', 'return_attribute' => 'id'),
-        'tag_location' =>  array('selector' => 'p.lister__meta span', 'index' => 0),
-        'tag_company' =>  array('selector' => 'p.lister__meta span', 'index' => 2),
-        'tag_job_posted' =>  array('selector' => 'ul.job-actions li', 'index' => 0),
-        'tag_next_button' =>  array('selector' => 'a[title="Next page"]')
-
-    );
-
 }
 
 class PluginTheGuardian extends BaseMadgexATSPlugin

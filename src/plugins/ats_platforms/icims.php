@@ -102,7 +102,7 @@ class BasePluginiCIMS extends ClassHTMLJobSitePlugin
         'tag_link' =>  array(array('tag' => 'td', 'index' =>null), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' => '/(.*?)\?.*/'),
         'tag_job_id' =>  array('tag' => 'td', 'index' =>null, 'return_attribute' => 'href', 'return_value_regex' => '/.*?([\d\-]+).*?$/'),
         'tag_location' =>  array('tag' => 'td', 'index' =>null, 'return_attribute' => 'plaintext',  'return_value_regex' => '/.*?Loc[\w]+:&nbsp;\s*([\w\s[:punct:]]+)?$/'),
-        'tag_company' =>  array('return_value_callback' => 'ClassBaseHTMLJobSitePlugin::setCompanyToSiteName'),
+        'tag_company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
 //        'tag_title' =>  array(array('tag' => 'td', 'index' =>1), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
 //        'tag_link' =>  array(array('tag' => 'td', 'index' =>1), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' => '/(.*?)\?.*/'),
 //        'tag_job_id' =>  array('tag' => 'td', 'index' =>1), 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+\-\d+).*?/'),

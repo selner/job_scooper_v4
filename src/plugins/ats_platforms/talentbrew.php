@@ -99,7 +99,7 @@ class BasePluginTalentBrew extends ClassClientHTMLJobSitePlugin
         'tag_title' =>  array('selector' => 'a h2'),
         'tag_link' =>  array('tag' => 'a', 'return_attribute' => 'href'),
         'tag_job_id' =>  array('tag' => 'a', 'return_attribute' => 'data-job-id'),
-        'tag_company' =>  array('return_value_callback' => 'ClassBaseHTMLJobSitePlugin::setCompanyToSiteName'),
+        'tag_company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
         'tag_location' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'job-location'),
         'tag_job_posting_date' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'job-date-posted'),
         'tag_next_button' => array('selector' => '#pagination-bottom a.next')

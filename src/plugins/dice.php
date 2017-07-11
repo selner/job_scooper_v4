@@ -29,13 +29,9 @@ class PluginDice extends ClassClientHTMLJobSitePlugin
     protected $additionalLoadDelaySeconds = 5;
     protected $paginationType = C__PAGINATION_PAGE_VIA_CALLBACK;
 
-    function isNoResults($var)
+    static function isNoJobResults($var)
     {
-        if (stristr($var, "No jobs found") != "") {
-            return true;
-        }
-
-        return null;
+        return noJobStringMatch($var, "No jobs found");
     }
 
     function takeNextPageAction($driver)
@@ -45,7 +41,7 @@ class PluginDice extends ClassClientHTMLJobSitePlugin
     protected $arrListingTagSetup = array(
 
         'tag_listings_count' => array(array('tag' => 'span', 'attribute' => 'id', 'attribute_value' => 'posiCountId'), 'attribute_value' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
-        'tag_listings_noresults' => array('selector' => 'h1', 'return_attribute' => 'plaintext', 'return_value_callback' => "PluginDice::isNoResults"),
+        'tag_listings_noresults' => array('selector' => 'h1', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
         'tag_listings_section' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'complete-serp-result-div'),
         'tag_title' => array('selector' => 'div.serp-result-content ul:nth-child(3) li:nth-child(1) h3 a', 'return_attribute' => 'plaintext'),
         'tag_link' => array('selector' => 'div.serp-result-content ul:nth-child(3) li:nth-child(1) h3 a', 'return_attribute' => 'href'),

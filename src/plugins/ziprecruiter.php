@@ -28,7 +28,7 @@ class PluginZipRecruiter extends ClassClientHTMLJobSitePlugin
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
 
     protected $arrListingTagSetup = array(
-        'tag_listings_noresults'    => array('selector' => '#job_results div div section h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "PluginZipRecruiter::isNoJobsFound"),
+        'tag_listings_noresults'    => array('selector' => '#job_results div div section h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
         'tag_listings_count'        => array('selector' => '#h1.headline', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/\b(\d+)\b/i'),
         'tag_listings_section'      => array('selector' => '#job_list div article'),
         'tag_title'                 => array('selector' => 'span.just_job_title', 'return_attribute' => 'plaintext'),
@@ -39,13 +39,10 @@ class PluginZipRecruiter extends ClassClientHTMLJobSitePlugin
         'tag_load_more'           => array('selector' => '.load_more_jobs')
     );
 
-    function isNoJobsFound($var)
+    function isNoJobResults($var)
     {
-        if(stristr($var, "No jobs") != "")
-            return 0;
-
-        return null;
+        return noJobStringMatch($var, "No jobs");
     }
-
+    
 
 }
