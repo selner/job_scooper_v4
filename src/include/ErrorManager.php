@@ -42,21 +42,23 @@ class ErrorManager {
     {
         $subject = "JobScooper[" . gethostname() . "] Errors for " . getRunDateRange();
 
-        $htmlBody = "";
-        $txtBody = "";
-        $attachments = array();
-
-        $this->_appendGlobalErrorsContent_($htmlBody, $txtBody, $attachments);
-        $this->_appendSearchErrorsContent_($htmlBody, $txtBody, $attachments);
+        $errs = $this->getErrorsEmailContent();
 
 
-        if(strlen($htmlBody) > 0) {
+        if(strlen($errs['htmlbody']) > 0) {
 
-            $htmlBody = "<HTML><BODY>" . $htmlBody . "</BODY></HTML>";
+            $renderer = loadTemplate(dirname(__FILE__).'/templates/html_email_error_alerts.tmpl');
+
+            $data = Array(
+                "email_content" =>  $errs['htmlbody']
+            );
+
+            $htmlemail = $renderer($data);
+
 
             $notifier = new ClassJobsNotifier(null, null, null);
 
-            return $notifier->sendEmail($txtBody, $htmlBody, $attachments, $subject, "error");
+            return $notifier->sendEmail($errs['txtbody'], $htmlemail, $errs['attachments'], $subject, "error");
         }
 
         return null;
@@ -77,13 +79,15 @@ class ErrorManager {
         }
 
 //        $renderer = loadTemplate(dirname(__FILE__).'/templates/mc_html_email_base_boxed_basic_query.mustache');
-        $renderer = loadTemplate(dirname(__FILE__).'/templates/html_email_body_include_pluginerrors.tmpl');
+        $renderer = loadTemplate(dirname(__FILE__).'/templates/html_email_body_include_plugin_errors.tmpl');
 
         $data = Array(
             "subject" => "SUBJECT", 
             "server" => gethostname(),
             "app_version" => __APP_VERSION__,
-            "plugins_with_errors" =>array_values($arrFailedPluginsReport));
+            "plugins_with_errors" =>array_values($arrFailedPluginsReport)
+        );
+
         $htmlContent = $renderer($data);
 
         return array('body' => $htmlContent, 'attachments' => $attachments);
@@ -91,19 +95,25 @@ class ErrorManager {
     }
 
 
+    function _appendConfigSetupContent_(&$htmlBody, &$txtBody, &$attachments)
+    {
+        $renderer = loadTemplate(dirname(__FILE__).'/templates/partials/html_email_body_search_config_details.tmpl');
+
+        $htmlBody = $renderer($GLOBALS['USERDATA']['configuration_settings']);
+
+    }
     function _appendGlobalErrorsContent_(&$htmlBody, &$txtBody, &$attachments)
     {
-
         if (array_key_exists('ERROR_REPORT_FILES', $GLOBALS['USERDATA']))
         {
-            $htmlBody .= "<h2>Global Exceptions</h2>";
+            $htmlBody .= "<h2>Other Global Exceptions</h2>";
             $txtBody .= " *********  GLOBAL EXCEPTIONS   *********" . PHP_EOL;
             foreach($GLOBALS['USERDATA']['ERROR_REPORT_FILES'] as $errfile)
             {
                 $attachments[] = $errfile;
                 $objErr = loadJSON($errfile['full_file_path']);
-                $htmlBody .=  "<h3>Error:  " . $objErr['error_message'] . "</h3>";
-                $txtBody .= PHP_EOL . "ERROR:  ". $objErr['error_message'] . PHP_EOL;
+                $htmlBody .=  "<h3>Error:  " . $objErr['exception_message'] . "</h3>";
+                $txtBody .= PHP_EOL . "ERROR:  ". $objErr['exception_message'] . PHP_EOL;
                 $jsonErr = json_encode($objErr, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
                 $htmlBody .= "<pre>" . $jsonErr . "</pre><br/><br/>";
                 $txtBody .= $jsonErr . PHP_EOL;
@@ -114,129 +124,35 @@ class ErrorManager {
 
     function getErrorsEmailContent()
     {
-        $htmlBody = "";
         $txtBody = "";
         $attachments = array();
+        $ret = array('htmlbody' => "", 'txtbody' => "", 'attachments' => array());
 
+        $content = "";
         $errGlobal = "";
-        $errSearches = "";
+        $errConfig = "";
+
         $this->_appendGlobalErrorsContent_($errGlobal, $txtBody, $attachments);
-        $this->_appendSearchErrorsContent_($errSearches, $txtBody, $attachments);
+        $this->_appendConfigSetupContent_($errConfig, $txtBody, $attachments);
 
-        $content = (strlen($errGlobal) == 0? "" : $errGlobal) . ((strlen($errSearches) == 0) ? "" : $errSearches);
-
-        return $content;
-    }
-
-    function _appendSearchErrorsContent_(&$htmlBody, &$txtBody, &$attachments)
-    {
         $failedReports = $this->getFailedSearchesNotificationBody();
-        $strBodyText = $failedReports['body'];
-        if(strlen($strBodyText) == 0)
-            return null;
-
-        $attachments = $failedReports['attachments'];
-
-
-        //
-        // Setup the plaintext content
-        //
-        if($strBodyText != null && strlen($strBodyText) > 0)
+        if(!is_null($failedReports))
         {
-            $htmlBody .= "<h2>Exceptions for Specific Searches</h2>";
-            $txtBody .= PHP_EOL . PHP_EOL . " *********  Exceptions for Specific Searches *********" . PHP_EOL;
-
-            //
-            // Setup the plaintext message text value
-            //
-            $txtBody .= $strBodyText;
-            $htmlBody = '<pre>' . $strBodyText . "</pre>";
-            $htmlBody .= PHP_EOL ;
-
+            $content = $content . $failedReports['body'];
+            $attachments = array_merge($attachments, $failedReports['attachments']);
         }
+
+        if (strlen($errGlobal) > 0)
+            $content = $content . $errGlobal;
+
+        if (strlen($content) > 0)
+            $content = $content . $errConfig;
+
+        if(strlen($content) > 0)
+        {
+            $ret = array('htmlbody' => $content, 'txtbody' => $txtBody, 'attachments' => $attachments);
+        }
+
+        return $ret;
     }
-
 }
-
-/*
-        {
-            errors: {
-            "badthing" : {
-                "error_time"  : "<ERROR TIMESTAMP>",
-        "error_message" : "<ERROR MESSAGE>",
-        "exception" : "<EXCEPTION AS ARRAY>",
-        "object_properties" : "<OBJECT PROPERTIES>",
-        "debug_backtrace" : "<DEBUG BACKTRACE>",
-            "exception_stack_trace" : "<EXCEPTION STACK>"
-        },
-            "differentbadthing" : {
-                "error_time"  : "<ERROR TIMESTAMP>",
-        "error_message" : "<ERROR MESSAGE>",
-        "exception" : "<EXCEPTION AS ARRAY>",
-        "object_properties" : "<OBJECT PROPERTIES>",
-        "debug_backtrace" : "<DEBUG BACKTRACE>",
-            "exception_stack_trace" : "<EXCEPTION STACK>"
-        }
-        },
-
-            title: "This is my first post!"
-        }
-        */
-/*
-//
-//
-//        $template = "Welcome {{name}} , You win \${{value}} dollars!!\n";
-//
-//
-//        $phpStr = LightnCandy::compile($template);  // set compiled PHP code into $phpStr
-//        $detailsRen = \Scooper\parseFilePath(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['stage4'], "template-render.php")), false);
-//        $pathRenderer = \Scooper\getFullPathFromFileDetails($detailsRen);
-//        // Save the compiled PHP code into a php file
-//        file_put_contents($pathRenderer, '<?php ' . $phpStr . '?>');
-//
-//        // Get the render function from the php file
-//        $renderer = include($pathRenderer);
-//
-//        // Render by different data
-//        echo "Template is:\n$template\n";
-//        echo $renderer(array('name' => 'John', 'value' => 10000));
-//        echo $renderer(array('name' => 'Peter', 'value' => 1000));
-//
-
-
-//        $template = "Hello! {{name}} is {{gender}}.
-//            Test1: {{@root.name}}
-//            Test2: {{@root.gender}}
-//            Test3: {{../test3}}
-//            Test4: {{../../test4}}
-//            Test5: {{../../.}}
-//            Test6: {{../../[test'6]}}
-//            {{#each .}}
-//            each Value: {{.}}
-//            {{/each}}
-//            {{#.}}
-//            section Value: {{.}}
-//            {{/.}}
-//            {{#if .}}IF OK!{{/if}}
-//            {{#unless .}}Unless not OK!{{/unless}}
-//            ";
-//
-//                // compile to debug version
-//                $php = LightnCandy::compile($template, Array(
-//                    'flags' => LightnCandy::FLAG_RENDER_DEBUG | LightnCandy::FLAG_HANDLEBARSJS
-//                ));
-//
-//                // Get the render function
-//                $renderer = LightnCandy::prepare($php);
-//
-//                // error_log() when missing data:
-//                //   LightnCandy\Runtime: [gender] is not exist
-//                //   LightnCandy\Runtime: ../[test] is not exist
-//                $renderer(Array('name' => 'John'), array('debug' => LightnCandy\Runtime::DEBUG_ERROR_LOG));
-//
-//                // Output visual debug template with ANSI color:
-//                echo $renderer(Array('name' => 'John'), array('debug' => LightnCandy\Runtime::DEBUG_TAGS_ANSI));
-//
-//                // Output debug template with HTML comments:
-//                echo $renderer(Array('name' => 'John'), array('debug' => LightnCandy\Runtime::DEBUG_TAGS_HTML));
-*/

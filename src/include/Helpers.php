@@ -1000,7 +1000,7 @@ function loadTemplate($path)
     ));  // set compiled PHP code into $phpStr
 
     // Save the compiled PHP code into a php file
-    $renderFile = basename($path) .'-render.php';
+    $renderFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" .basename($path) .'-render.php';
 
     file_put_contents($renderFile, '<?php ' . $phpStr . '?>');
 
