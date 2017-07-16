@@ -1431,6 +1431,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         return $this->siteName;
     }
 
+    function combineTextAllNodes($nodes)
+    {
+        return combineTextAllNodes($nodes);
+    }
 
     protected function getSearchJobsFromAPI($searchDetails) {   throw new \BadMethodCallException(sprintf("Not implemented method " . __METHOD__ . " called on class \"%s \".", __CLASS__)); }
 

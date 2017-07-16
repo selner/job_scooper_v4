@@ -7,6 +7,16 @@
       "Name": "PageFields",
       "Fields": [
         {
+          "Name": "tag_listings_noresults",
+          "Selector": "div.main p b",
+          "Extract": "TEXT",
+          "Index" : 0,
+          "Callback" : "matchesNoResultsPattern",
+          "CallBackParameter": "no jobs found",
+          "Attribute": null,
+          "Type": "CSS"
+        },
+        {
           "Name": "tag_listings_count",
           "Selector": "td.td-result",
           "Extract": "REGEX",
@@ -18,7 +28,7 @@
           "Name": "tag_listings_section",
           "Selector": ".s-res",
           "Extract": "CSS",
-          "Attribute": "node",
+          "Attribute": "collection",
           "Type": "CSS"
         }
       ]
@@ -45,7 +55,7 @@
           "Name": "tag_location",
           "Selector": "p.search-result-item-company-name a",
           "Extract": "ATTR",
-          "Attribute": "node",
+          "Attribute": "collection",
           "Type": "CSS",
           "Callback": "combineTextAllNodes"
         },

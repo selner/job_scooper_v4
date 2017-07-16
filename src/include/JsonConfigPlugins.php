@@ -137,7 +137,8 @@ class JSONPlugins
                         'type' => $type,
                         'field' => $field->Field,
                         'return_value_regex' => $field->Pattern,
-                        'return_value_callback' => $field->Callback
+                        'return_value_callback' => $field->Callback,
+                        'callback_parameter' => $field->CallBackParameter
                     );
                 }
             }
@@ -148,6 +149,7 @@ class JSONPlugins
         }
 
     }
+
 
     private function _instantiatePlugin_($pluginConfig)
     {
@@ -165,7 +167,9 @@ class JSONPlugins
             protected \$additionalFlags = {$flags};
             protected \$nJobListingsPerPage = \"{$pluginConfig['nJobListingsPerPage']}\";
             protected \$arrListingTagSetup = $setup;
-            };";
+            };
+            
+            ";
 
         eval($evalStmt);
         $classinst = new $className(null, null);

@@ -80,7 +80,6 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             $this->additionalFlags[]  = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
         }
 
-
         parent::__construct($strBaseDir);
     }
 
@@ -107,6 +106,15 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         return $arrListingTagSetup;
     }
 
+    function matchesNoResultsPattern($var)
+    {
+        $val = $var[0];
+        $match_value = $var[1];
+
+        if(is_null($match_value))
+            throw new Exception("Plugin " . $this->siteName  . " definition missing pattern match value for isNoJobResults callback.");
+        return noJobStringMatch($val, $match_value);
+    }
 
     /**
      * parseTotalResultsCount
@@ -321,7 +329,11 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
                 throw new Exception($strError);
             }
-            $ret = call_user_func($callback, $ret);
+
+            if (array_key_exists("callback_parameter", $arrTag) && (strlen($arrTag['callback_parameter']) > 0))
+                $ret = call_user_func($callback, array($ret, $arrTag['callback_parameter']));
+            else
+                $ret = call_user_func($callback, $ret);
         }
 
 
