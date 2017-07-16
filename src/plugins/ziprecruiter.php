@@ -25,6 +25,7 @@ class PluginZipRecruiter extends ClassClientHTMLJobSitePlugin
     protected $nJobListingsPerPage = C__TOTAL_ITEMS_UNKNOWN__; // we use this to make sure we only have 1 single results page
 
     protected $strBaseURLFormat = "https://www.ziprecruiter.com/candidate/search?search=***KEYWORDS***&include_near_duplicates=1&location=***LOCATION***&radius=25&days=***NUMBER_DAYS***";
+    protected $paginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
 
     protected $arrListingTagSetup = array(
@@ -36,7 +37,6 @@ class PluginZipRecruiter extends ClassClientHTMLJobSitePlugin
         'tag_company'               => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => 't_org_link name', 'return_attribute' => 'plaintext'),
         'tag_location'              => array('tag' => '*', 'attribute'=>'class', 'attribute_value' => 'location', 'return_attribute' => 'plaintext'),
         'tag_job_id'                => array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'just_job_title', 'return_attribute' => 'data-job-id'),
-        'tag_load_more'           => array('selector' => '.load_more_jobs')
     );
 
     function isNoJobResults($var)
@@ -44,5 +44,34 @@ class PluginZipRecruiter extends ClassClientHTMLJobSitePlugin
         return noJobStringMatch($var, "No jobs");
     }
     
+    function parseTotalResultsCount($objSimpl)
+    {
+        sleep($this->additionalLoadDelaySeconds + 1);
+
+        $dismissPopup = "
+            var popupstyle = document.querySelector('div#createAlertPop').getAttribute('style'); 
+            if (popupstyle.indexOf('display: none') < 0) {
+                var close = document.querySelector('.modal-close'); 
+                if (close != null) 
+                {
+                    console.log('Clicking close on modal popup dialog...');
+                    close.click();
+                }
+            }
+        ";
+
+        $this->runJavaScriptSnippet($dismissPopup, true);
+
+        return parent::parseTotalResultsCount($objSimpl);
+    }
+
+    protected function goToEndOfResultsSetViaLoadMore($nTotalItems = null)
+    {
+        $this->selectorMoreListings = ".load_more_jobs";
+        parent::goToEndOfResultsSetViaLoadMore($nTotalItems);
+
+        parent::goToEndOfResultsSetViaPageDown($nTotalItems);
+
+    }
 
 }
