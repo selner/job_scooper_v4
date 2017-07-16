@@ -16,7 +16,7 @@ echo "Image tag is "$IMAGETAG"."
 docker rm -f $JOBSNAME
 docker rmi $IMAGETAG
 
-docker build --build-arg BRANCH=$BRANCH -t $IMAGETAG . 
+docker build --build-arg BRANCH=$BRANCH --build-arg CACHEBUST="$(date)" -t $IMAGETAG .
 
 #
 # To use on macos or linux:
