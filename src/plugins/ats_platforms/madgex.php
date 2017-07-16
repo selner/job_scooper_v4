@@ -25,7 +25,6 @@ abstract class BaseMadgexATSPlugin extends ClassClientHTMLJobSitePlugin
     function __construct($strOutputDirectory = null)
     {
         $this->prevURL = $this->childSiteURLBase;
-        $this->additionalFlags[] = C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES;
         $this->paginationType = C__PAGINATION_PAGE_VIA_URL;
 
         $this->siteBaseURL = $this->childSiteURLBase;
@@ -138,7 +137,7 @@ class PluginMediaBistro extends BaseMadgexATSPlugin
 class PluginWashingtonPost extends BaseMadgexATSPlugin
 {
     protected $siteName = 'washingtonpost';
-    protected $childSiteURLBase = 'https://jobs.washingtonpost.com/jobs';
+    protected $childSiteURLBase = 'https://jobs.washingtonpost.com/searchjobs';
 }
 
 class PluginJobfinderUSA extends BaseMadgexATSPlugin
