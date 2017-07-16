@@ -79,7 +79,7 @@ const C__PAGINATION_NONE = "NONE";
 
 define('C__JOB_BASETYPE_WEBPAGE_FLAGS', 0);
 
-$GLOBALS['DATA']['location_types'] = array('location-city', 'location-city-comma-statecode', 'location-city-dash-statecode', 'location-city-comma-nospace-statecode', 'location-city-comma-statecode-underscores-and-dashes', 'location-city-comma-state', 'location-city-comma-state-country', 'location-statecode', 'location-state', 'location-city-comma-state-country-no-commas', 'location-countrycode');
+$GLOBALS['DATA']['location_types'] = array('location-city', 'location-city-comma-statecode', 'location-city-dash-statecode', 'location-city-comma-nospace-statecode', 'location-city-comma-statecode-underscores-and-dashes', 'location-city-comma-state', 'location-city-comma-state-country', 'location-statecode', 'location-state', 'location-city-comma-state-country-no-commas', 'location-city-comma-statecode-comma-countrycode', 'location-countrycode');
 
 
 function setupPlugins()
