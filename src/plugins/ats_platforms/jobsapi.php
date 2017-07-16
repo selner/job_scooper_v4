@@ -71,7 +71,7 @@ class PluginUSAJobs extends ClassBaseJobsAPIPlugin
         // Add parameters to the query via the constructor
         $options = [
             'AuthorizationKey' => $this->authorization_key,
-//            'Keyword' => $strKeywords,
+
             'LocationName' => $searchDetails['location_search_value'],
             'Page' => $pageNumber
         ];
