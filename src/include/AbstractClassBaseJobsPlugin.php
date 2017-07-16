@@ -324,7 +324,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     }
 
 
-    protected function getPageURLfromBaseFmt($searchDetails, $nPage = null, $nItem = null)
+    protected function getPageURLfromBaseFmt(&$searchDetails, $nPage = null, $nItem = null)
     {
         $strURL = $this->_getBaseURLFormat_($searchDetails, $nPage, $nItem);
 

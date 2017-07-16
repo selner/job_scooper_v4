@@ -21,8 +21,10 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 abstract class BaseMadgexATSPlugin extends ClassClientHTMLJobSitePlugin
 {
+
     function __construct($strOutputDirectory = null)
     {
+        $this->prevURL = $this->childSiteURLBase;
         $this->additionalFlags[] = C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES;
         $this->paginationType = C__PAGINATION_PAGE_VIA_URL;
 
@@ -34,17 +36,26 @@ abstract class BaseMadgexATSPlugin extends ClassClientHTMLJobSitePlugin
     protected $siteName = 'madgexats';
     protected $strBaseURLFormat = '?Keywords=***KEYWORDS***&radialtown=***LOCATION***&LocationId=&RadialLocation=50&NearFacetsShown=true&countrycode=***COUNTRYCODE***&Page=***PAGE_NUMBER***';
     protected $locationid = null;
+    protected $currentSearchAlternateURL = null;
 
     protected $typeLocationSearchNeeded = 'location-city-comma-state';
 
-    protected function getPageURLfromBaseFmt($searchDetails, $nPage = null, $nItem = null)
+    protected function getPageURLfromBaseFmt(&$searchDetails, $nPage = null, $nItem = null)
     {
-        $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
-        $strURL = str_ireplace("***COUNTRYCODE***", $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-countrycode'], $strURL);
+        if(is_null($this->currentSearchAlternateURL)) {
+            $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
+            $strURL = str_ireplace("***COUNTRYCODE***", $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-countrycode'], $strURL);
 
-        if (!is_null($this->locationid))
-            $strURL = $strURL . "&LocationID=" . $this->locationid;
-
+            if (!is_null($this->locationid))
+                $strURL = $strURL . "&LocationID=" . $this->locationid;
+        }
+        else
+        {
+            $searchDetails['base_url_format'] = $this->currentSearchAlternateURL;
+            $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
+        }
+        $searchDetails['base_url_format'] = preg_replace('/[Ppage]{4}=\d+/', 'Page=***PAGE_NUMBER***', $strURL);
+        $this->strBaseURLFormat = $searchDetails['base_url_format'];
         return $strURL;
 
     }
@@ -68,34 +79,46 @@ abstract class BaseMadgexATSPlugin extends ClassClientHTMLJobSitePlugin
         'tag_next_button'           => array('selector' => 'li.paginator__item a[rel="next"]')
     );
 
+    function parseAndRedirectToLocation(&$objSimpHTML)
+    {
+        $locationSelectNode = $objSimpHTML->find("h2");
+        if (!is_null($locationSelectNode) && count($locationSelectNode) == 1)
+        {
+            if(stristr($locationSelectNode[0]->plaintext, "select a location") !== false)
+            {
+                $nodeLocs = $objSimpHTML->find("li.lap-larger__item a");
+                if (!is_null($nodeLocs) && count($nodeLocs) > 1)
+                {
+                    try
+                    {
+                        $newUrlPath = $nodeLocs[0]->href;
+                        $newUrlPath = str_ireplace("&amp;", "&", $newUrlPath);
+                        $arrMatches = array();
+                        $matched = preg_match('/.*LocationId=(\d+).*/', $newUrlPath, $arrMatches);
+                        if ($matched !== false && count($arrMatches) > 1)
+                        {
+                            $this->locationid = $arrMatches[1];
+                        }
+                        $url = parse_url($this->childSiteURLBase, PHP_URL_SCHEME) . "://" . parse_url($this->childSiteURLBase, PHP_URL_HOST) . $newUrlPath . "&RadialLocation=50";
+                        $this->currentSearchBeingRun['search_start_url'] = $url;
+                        $this->currentSearchAlternateURL = preg_replace('/[Ppage]{4}=\d+/', 'Page=***PAGE_NUMBER***', $url);
+
+                        $this->selenium->loadPage($url);
+                        $html = $this->selenium->getPageHTML($url);
+                        $objSimpHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+                    } catch (Exception $ex) {
+                        $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
+                        handleException(new Exception($strError), null, true);
+                    }
+                }
+            }
+        }
+    }
 
     function parseTotalResultsCount(&$objSimpHTML)
     {
 
-
-        $nodeLocs = $objSimpHTML->find("li.lap-larger__item a");
-        if (!is_null($nodeLocs) && count($nodeLocs) > 1)
-        {
-            try
-            {
-
-                $url = parse_url($this->childSiteURLBase, PHP_URL_SCHEME) . "://" . parse_url($this->childSiteURLBase, PHP_URL_HOST) . $nodeLocs['0']->href . "&RadialLocation=50";
-                $url = str_ireplace("&amp;", "&", $url);
-
-                $arrMatches = array();
-                $matched = preg_match('/.*LocationId=(\d+).*/', $url, $arrMatches);
-                if ($matched !== false && count($arrMatches) > 1)
-                {
-                    $this->locationid = $arrMatches[1];
-                }
-
-                $html = $this->selenium->getPageHTML($url);
-                $objSimpHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
-            } catch (Exception $ex) {
-                $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
-                handleException(new Exception($strError), null, true);
-            }
-        }
+        $this->parseAndRedirectToLocation($objSimpHTML);
 
         return parent::parseTotalResultsCount($objSimpHTML);
     }

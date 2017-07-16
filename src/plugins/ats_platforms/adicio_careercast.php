@@ -58,11 +58,6 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
         parent::__construct($strOutputDirectory);
     }
 
-    protected function getPageURLfromBaseFmt($searchDetails, $nPage = null, $nItem = null)
-    {
-        return parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
-    }
-
     protected function getKeywordURLValue($searchDetails) {
         $searchDetails['keywords_string_for_url'] = strtolower($searchDetails['keywords_string_for_url']);
         return parent::getKeywordURLValue($searchDetails);

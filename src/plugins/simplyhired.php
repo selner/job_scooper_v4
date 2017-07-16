@@ -87,8 +87,10 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
         return $ret;
     }
 
-    protected function getPageURLfromBaseFmt($searchDetails, $nPage = null, $nItem = null)
+    protected function getPageURLfromBaseFmt(&$searchDetails, $nPage = null, $nItem = null)
     {
+        $searchDetailsBackup = \Scooper\array_copy($searchDetails);
+        
         $strURL = $this->_getBaseURLFormat_($searchDetails);
 
         $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($GLOBALS['OPTS']['number_days']), $strURL );
@@ -122,6 +124,8 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
         if($strURL == null) {
             throw new ErrorException("Location value is required for " . $this->siteName . ", but was not set for the search '" . $searchDetails['key'] ."'.". " Aborting all searches for ". $this->siteName, \Scooper\C__DISPLAY_ERROR__);
         }
+
+        $searchDetails = \Scooper\array_copy($searchDetailsBackup);
 
         return $strURL;
     }
