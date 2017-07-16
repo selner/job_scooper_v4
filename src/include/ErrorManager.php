@@ -90,7 +90,7 @@ class ErrorManager {
 
         $htmlContent = $renderer($data);
 
-        return array('body' => $htmlContent, 'attachments' => $attachments);
+        return $htmlContent;
 
     }
 
@@ -139,7 +139,6 @@ class ErrorManager {
         if(!is_null($failedReports))
         {
             $content = $content . $failedReports['body'];
-            $attachments = array_merge($attachments, $failedReports['attachments']);
         }
 
         if (strlen($errGlobal) > 0)
