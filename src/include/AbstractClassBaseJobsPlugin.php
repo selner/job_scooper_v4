@@ -428,8 +428,71 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     }
 
+    protected function goToEndOfResultsSetViaPageDown($nTotalItems = null)
+    {
+        $this->moveDownOnePageInBrowser();
+        $secs = $this->additionalLoadDelaySeconds * 1000;
+        if($secs <= 0)
+            $secs = 1000;
 
-    protected function goToEndOfResultsSetViaLoadMore($nTotalItems = null)
+        $js = "
+            localStorage.setItem('startTime', Date.now());
+            localStorage.setItem('prevHeight', 0);
+            scroll = setTimeout(gotoPageBottom, 250);
+            function getRunTime()
+            {
+                var startTime = localStorage.getItem('startTime');
+                var endTime = Date.now();
+                runtime = Math.floor((endTime-startTime)/(1000));
+                return runtime;
+            }
+
+            function gotoPageBottom() 
+            {
+                runtime = getRunTime();
+                prevHeight = localStorage.getItem('prevHeight');
+                
+                window.scrollTo(0,document.body.scrollHeight);
+                if(prevHeight == null || (prevHeight < document.body.scrollHeight && runtime <= 60))
+                {
+                    localStorage.setItem('prevHeight', document.body.scrollHeight);
+                    setTimeout(gotoPageBottom, " . $secs . ");
+                }
+                else
+                {
+                    console.log('Load more button no longer active; done paginating the results.');
+                    console.log('Script needed a minimum of ' + runtime + ' seconds to load all the results.');
+                    localStorage.removeItem('startTime');
+                    localStorage.removeItem('prevHeight');
+
+                }
+            }  
+        ";
+
+
+        if(is_null($nTotalItems))
+        {
+            $nTotalItems = $this->nMaxJobsToReturn;
+        }
+
+        if($nTotalItems == C__TOTAL_ITEMS_UNKNOWN__)
+        {
+            $nSleepTimeToLoad = 30 + $this->additionalLoadDelaySeconds;
+        }
+        else {
+            $nSleepTimeToLoad = ($nTotalItems / $this->nJobListingsPerPage) * $this->additionalLoadDelaySeconds;
+        }
+
+        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+        $this->runJavaScriptSnippet($js, false);
+
+        sleep($nSleepTimeToLoad > 0 ? $nSleepTimeToLoad : 2);
+
+        $this->moveDownOnePageInBrowser();
+
+    }
+    protected function goToEndOfResultsSetViaLoadMore($nTotalItems)
     {
         $this->moveDownOnePageInBrowser();
         $secs = $this->additionalLoadDelaySeconds * 1000;
