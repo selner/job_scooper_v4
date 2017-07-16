@@ -60,7 +60,7 @@ use JobApis\Jobs\Client\Providers\DiceProvider;
 class PluginUSAJobs extends ClassBaseJobsAPIPlugin
 {
     protected $siteBaseURL = 'http://search.digitalgov.gov/developer/jobs.html';
-    protected $strBaseURLFormat = 'http://search.digitalgov.gov/developer/jobs.html';
+    protected $strBaseURLFormat = 'https://api.usa.gov/jobs/search.json?query=in+***LOCATION***';
     protected $siteName = 'USAJobs';
     protected $nJobListingsPerPage = 25;
     protected $typeLocationSearchNeeded = 'location-city-comma-state';
@@ -68,12 +68,10 @@ class PluginUSAJobs extends ClassBaseJobsAPIPlugin
     
     function getSearchJobsFromAPI($searchDetails, $pageNumber = 1)
     {
-        $strKeywords = $this->getCombinedKeywordString($searchDetails['keywords_array']);
-
         // Add parameters to the query via the constructor
         $options = [
             'AuthorizationKey' => $this->authorization_key,
-            'Keyword' => $strKeywords,
+//            'Keyword' => $strKeywords,
             'LocationName' => $searchDetails['location_search_value'],
             'Page' => $pageNumber
         ];
