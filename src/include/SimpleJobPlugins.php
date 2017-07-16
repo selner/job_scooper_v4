@@ -64,10 +64,10 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
         if (array_key_exists('tag_next_button', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['tag_next_button']) && count($this->arrListingTagSetup['tag_next_button'])) {
             $this->selectorMoreListings = $this->getTagSelector($this->arrListingTagSetup['tag_next_button']);
-
             $this->paginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
         } elseif (array_key_exists('tag_load_more', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['tag_load_more']) && count($this->arrListingTagSetup['tag_load_more'])) {
             $this->paginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
+            $this->selectorMoreListings = $this->getTagSelector($this->arrListingTagSetup['tag_load_more']);
         }
 
         if (!array_key_exists('tag_listings_count', $this->arrListingTagSetup) &&  !in_array(C__JOB_ITEMCOUNT_NOTAPPLICABLE__, $this->additionalFlags))
