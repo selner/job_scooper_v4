@@ -73,8 +73,12 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         if($this->paginationType == C__PAGINATION_INFSCROLLPAGE_NOCONTROL) {
             $this->nJobListingsPerPage = $this->nMaxJobsToReturn;
-            
         }
+
+        if(!is_null($this->selectorMoreListings) && strlen($this->selectorMoreListings) > 0)
+//            $this->selectorMoreListings = str_replace("\"", "\\\"", $this->selectorMoreListings);
+            $this->selectorMoreListings = preg_replace('/(\'|"|\\")/', '\"', $this->selectorMoreListings);
+
     }
 
 

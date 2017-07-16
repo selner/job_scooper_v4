@@ -40,7 +40,7 @@ class PluginRobertHalf extends ClassClientHTMLJobSitePlugin
         'tag_job_id' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>  '/\/technology\/job\/([^?]+)/i'),
         'tag_location' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'city')),
         'tag_job_posting_date' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'postDate')),
-        'tag_next_button' => array('selector' => 'li[data-pg=\"next\"] a')
+        'tag_next_button' => array('selector' => 'li[data-pg="next"] a')
     );
 
 }
