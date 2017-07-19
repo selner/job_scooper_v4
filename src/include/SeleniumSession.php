@@ -339,6 +339,9 @@ class SeleniumSession extends PropertyObject
 
     private function create_remote_webdriver()
     {
+        $host = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
+
+        try {
         $webdriver = $this->getWebDriverKind();
         //
         // First we need to make sure we don't have a conflicting session already hanging out
@@ -378,7 +381,11 @@ class SeleniumSession extends PropertyObject
             $connection_timeout_in_ms = 60000,
             $request_timeout_in_ms = 60000
         );
-
+    }
+        catch (Exception $ex)
+        {
+            handleException($ex, "Unable to get Selenium Webdriver from " . $host, true);
+        }
     }
 
 
