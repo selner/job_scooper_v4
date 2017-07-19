@@ -187,7 +187,7 @@ class PluginCyberJobs extends ClassClientHTMLJobSitePlugin
 }
 ```
 
-** Get the full set of feature addtions and updates in the [release notes].**
+**Get the full set of feature additions and updates in the [release notes](../../releases).**
 
 ## Other Stuff
 * Version:  v4.0.beta1 [release notes](../../releases)
