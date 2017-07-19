@@ -141,7 +141,7 @@ WORKDIR /opt/jobs_scooper
 ARG BRANCH
 RUN echo $BRANCH
 ARG CACHEBUST=1
-RUN git clone https://github.com/selner/job_scooper_v4.git /opt/jobs_scooper -b $BRANCH
+RUN git clone https://github.com/selner/job_scooper_v4.git /opt/jobs_scooper -b $BRANCH -v
 
 #ADD . /opt/jobs_scooper
 #RUN rm /opt/jobs_scooper/src/*.lock
@@ -179,5 +179,4 @@ RUN pip install --no-cache-dir -v -r /opt/jobs_scooper/src/python/pyJobNormalize
 
 WORKDIR /opt/jobs_scooper
 
-# ENTRYPOINT php runJobs.php -ini /var/local/jobs_scooper/configs/evan/job_scooper_config.ini -all -days 1 --output /var/local/jobs_scooper/output -notify=1 
 CMD bash -C '/opt/jobs_scooper/scoop_docker.sh';'bash'
