@@ -1,5 +1,5 @@
 # Job Scooper v4
-** Get automatic email alerts for all new job postings from 70+ job boards and career websites based on your keywords and location.
+## Get automatic email alerts for all new job postings from 70+ job boards and career websites based on your keywords and location.
 
 ![Example: Job Scooper Email Notification on Mobile](http://www.bryanselner.com/www-root-wpblog/wp-content/uploads/2014/07/JobScooperResultEmailMobile-250pxw.png "Example: Job Scooper Email Notification on Mobile")
 
@@ -64,7 +64,7 @@ Required Parameters:
 
 ## What's New in JobScooper V4
 ### 🆕 Job Site Plugin Authoring Using Agenty's Data Scraping Studio  ✏️ 
-Non-developers can now author plugins using (https://www.agenty.com/data-extraction-software.aspx)[Data Scraping Studio] or the (https://chrome.google.com/webstore/detail/agenty-advanced-web-scrap/gpolcofcjjiooogejfbaamdgmgfehgff?hl=en-US]Advanced Web Scraper)[Chrome extension] from (http://www.agenty.com)[Agenty].  
+Non-developers can now author plugins using [Data Scraping Studio](https://www.agenty.com/data-extraction-software.aspx) or the [Advanced Web Scraper Chrome extension](https://chrome.google.com/webstore/detail/agenty-advanced-web-scrap/gpolcofcjjiooogejfbaamdgmgfehgff?hl=en-US) from (http://www.agenty.com)[Agenty].  
 
 Just tag the specific job results page fields for the site and set the Agenty field names to match the corresponding Job Scooper field: 
 ```php
