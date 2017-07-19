@@ -15,7 +15,7 @@ docker rmi %imagetag%
 
 docker build --build-arg BRANCH=%branch% --build-arg CACHEBUST="%DATE%%TIME%" -t %imagetag% .
 
-docker run --volume C:\Users\bryan\Dropbox\var-local-jobs_scooper:/var/local/jobs_scooper --volume c:\dev\nltk_data:/root/nltk_data --name %jobsname% -d %imagetag%
+docker run --volume C:\Users\bryan\Dropbox\var-local-jobs_scooper:/var/local/jobs_scooper --volume c:\dev\nltk_data:/root/nltk_data --hostname %COMPUTERNAME%_docker --name %jobsname% -d %imagetag%
 
 docker logs -f %jobsname%
 
