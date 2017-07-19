@@ -22,24 +22,25 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 class PluginRobertHalf extends ClassClientHTMLJobSitePlugin
 {
-protected $siteName = 'RobertHalf';
-protected $siteBaseURL = "https://www.roberthalf.com";
-#    protected $strBaseURLFormat = 'https://www.roberthalf.com/technology/jobs/***KEYWORDS***/***LOCATION***?pageSize=1500';
-protected $strBaseURLFormat = 'https://www.roberthalf.com/technology/jobs/all-jobs/***LOCATION***?pageSize=1500';
-protected $additionalFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED ];
-protected $typeLocationSearchNeeded = 'location-city';
-protected $nJobListingsPerPage = 1500;
+    protected $siteName = 'RobertHalf';
+    protected $siteBaseURL = "https://www.roberthalf.com";
+    #    protected $strBaseURLFormat = 'https://www.roberthalf.com/technology/jobs/***KEYWORDS***/***LOCATION***?pageSize=1500';
+    protected $strBaseURLFormat = 'https://www.roberthalf.com/technology/jobs/all-jobs/***LOCATION***?pageSize=1500';
+    protected $additionalFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES];
+    protected $typeLocationSearchNeeded = 'location-city';
+    protected $nJobListingsPerPage = 1500;
 
 
-protected $arrListingTagSetup = array(
-'tag_listings_count' => array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'job-search-result-counter pg-1 first'), 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?of (\d+).*?/'),
-'tag_listings_section' => array(array('tag' => 'table', 'attribute'=>'class', 'attribute_value' => 'job-search-results'), array('tag' => 'tr', 'attribute' => 'class', 'attribute_value' =>'job-search-page')),
-'tag_title' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
-'tag_link' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'a'), 'return_attribute' => 'href'),
-'tag_company' =>  array('return_value_callback' => 'ClassBaseHTMLJobSitePlugin::setCompanyToSiteName'),
-'tag_job_id' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>  '/\/technology\/job\/([^?]+)/i'),
-'tag_location' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'city')),
-'tag_job_posting_date' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'postDate')),
-);
+    protected $arrListingTagSetup = array(
+        'tag_listings_count' => array('selector' => 'div.job-search-result-counter', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?of (\d+).*?/'),
+        'tag_listings_section' => array(array('tag' => 'table', 'attribute'=>'class', 'attribute_value' => 'job-search-results'), array('tag' => 'tr', 'attribute' => 'class', 'attribute_value' =>'job-search-page')),
+        'tag_title' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+        'tag_link' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'a'), 'return_attribute' => 'href'),
+        'tag_company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
+        'tag_job_id' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>  '/\/technology\/job\/([^?]+)/i'),
+        'tag_location' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'city')),
+        'tag_job_posting_date' =>  array(array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'JobTitle'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'postDate')),
+        'tag_next_button' => array('selector' => 'li[data-pg="next"] a')
+    );
 
 }

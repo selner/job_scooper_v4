@@ -20,17 +20,17 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 class PluginSmashingMagazine extends ClassClientHTMLJobSitePlugin
 {
-protected $siteName = 'SmashingMagazine';
-protected $childSiteURLBase = 'http://jobs.smashingmagazine.com';
-protected $childSiteListingPage = 'http://jobs.smashingmagazine.com';
-protected $additionalFlags = [C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
+    protected $siteName = 'SmashingMagazine';
+    protected $childSiteURLBase = 'http://jobs.smashingmagazine.com';
+    protected $childSiteListingPage = 'http://jobs.smashingmagazine.com';
+    protected $paginationType = C__PAGINATION_NONE;
 
-protected $arrListingTagSetup = array(
-'tag_listings_section' => array(array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' =>'entry-list compact'), array('tag' => 'li')),
-'tag_title' => array('tag' => 'h2'),
-'tag_link' =>  array(array('tag' => 'a'), 'return_attribute' => 'href'),
-'tag_job_id' =>  array(array('tag' => 'article'), 'return_attribute' => 'id'),
-'tag_company' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'entry-company'),
-);
+    protected $arrListingTagSetup = array(
+        'tag_listings_section' => array(array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' =>'entry-list compact'), array('tag' => 'li')),
+        'tag_title' => array('tag' => 'h2'),
+        'tag_link' =>  array(array('tag' => 'a'), 'return_attribute' => 'href'),
+        'tag_job_id' =>  array(array('tag' => 'article'), 'return_attribute' => 'id'),
+        'tag_company' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'entry-company'),
+        );
 
 }

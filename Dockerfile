@@ -52,7 +52,7 @@ RUN apt-get update && apt-get install -y \
 #######################################################
 
 # Install Composer and make it available in the PATH
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
+RUN curl https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
 
 ## Display version information.
 RUN composer --version
@@ -138,29 +138,20 @@ VOLUME "/root/nltk_data"
 ########################################################
 
 WORKDIR /opt/jobs_scooper
+ARG BRANCH
+RUN echo $BRANCH
+ARG CACHEBUST=1
+RUN git clone https://github.com/selner/job_scooper_v4.git /opt/jobs_scooper -b $BRANCH
 
-#
-# Clone the current repo from Github 
-#
-RUN git clone https://github.com/selner/job_scooper_v4.git /opt/jobs_scooper
-
-#
-# Alternatively, you can uncomment this section and use your local source
-# code in the docker image
-#
 #ADD . /opt/jobs_scooper
 #RUN rm /opt/jobs_scooper/src/*.lock
 #RUN rm -Rf /opt/jobs_scooper/src/vendor/*.lock
-#ADD run_scoop_allusers.sh .
+RUN cat /opt/jobs_scooper/src/include/Options.php | grep "__APP_VERSION__"
+RUN ls -al /opt/jobs_scooper/src
 
-#
-# Set any scripts to be executable
-#
+ADD scoop_docker.sh .
 RUN chmod +x /opt/jobs_scooper/*.sh
-
-
-#RUN ls -al /opt/jobs_scooper
-#RUN ls -al /opt/jobs_scooper/src
+RUN ls -al /opt/jobs_scooper
 
 
 ########################################################
@@ -169,7 +160,7 @@ RUN chmod +x /opt/jobs_scooper/*.sh
 ###
 ########################################################
 WORKDIR /opt/jobs_scooper/src
-RUN composer install --no-interaction
+RUN composer install --no-interaction -vv
 
 
 ########################################################
@@ -189,4 +180,4 @@ RUN pip install --no-cache-dir -v -r /opt/jobs_scooper/src/python/pyJobNormalize
 WORKDIR /opt/jobs_scooper
 
 # ENTRYPOINT php runJobs.php -ini /var/local/jobs_scooper/configs/evan/job_scooper_config.ini -all -days 1 --output /var/local/jobs_scooper/output -notify=1 
-CMD bash -C '/opt/jobs_scooper/run_scoop_allusers.sh';'bash'
+CMD bash -C '/opt/jobs_scooper/scoop_docker.sh';'bash'

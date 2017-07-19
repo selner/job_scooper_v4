@@ -25,18 +25,23 @@ class PluginGoogle extends ClassClientHTMLJobSitePlugin
 
 
     protected $siteName = 'Google';
-    protected $siteBaseURL = 'https://www.google.com/about/careers/jobs';
-    protected $additionalFlags = [C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_PAGE_VIA_NEXTBUTTON];
-    // BUGBUG:  Hard coded to use Seattle, Sea-Tac and Mountain View locations for the time being
-    protected $strBaseURLFormat = 'https://www.google.com/about/careers/jobs#t=sq&q=j&li=20&l=false&jlo=en-US&jcoid=7c8c6665-81cf-4e11-8fc9-ec1d6a69120c&jcoid=e43afd0d-d215-45db-a154-5386c9036525&jl=47.6062095%3A-122.3320708%3ASeattle%2C+WA%2C+USA%3AUS%3AUS%3A9.901219492788272%3ALOCALITY%3A%3A%3A%3A%3A%3A&jl=47.7881528%3A-122.3087405%3AMountlake+Terrace%2C+WA%2C+USA%3AUS%3AUS%3A1.8843888568290035%3ALOCALITY%3A%3A%3A%3A%3A%3A&jl=47.4435903%3A-122.2960726%3ASeaTac%2C+WA%2C+USA%3AUS%3AUS%3A3.5844312389483015%3ALOCALITY%3A%3A%3A%3A%3A%3A&jl=37.3860517%3A-122.0838511%3AMountain+View%2C+CA%2C+USA%3AUS%3AUnited+States%3A9.901223692706639%3ALOCALITY%3A%3A%3A%3ACA%3ASanta+Clara+County%3AMountain+View&jld=100&j=***KEYWORDS***';
-    protected $additionalLoadDelaySeconds = 4;
+    protected $siteBaseURL = 'https://careers.google.com/jobs';
+    protected $prevURL = 'https://careers.google.com/jobs';
+    protected $additionalFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
+    protected $strBaseURLFormat = "https://careers.google.com/jobs#t=sq&q=j&so=dt_pd&li=20&l=false&jlo=en-US&";
+
+    protected $additionalLoadDelaySeconds = 6;
     protected $nextPageScript = "var elem = document.getElementById('gjsrpn');  if (elem != null) { console.log('attempting next button click on element ID gjsrpn'); elem.click(); };";
 
-    function getItemURLValue($nItem)
-    {
-        if($nItem == null || $nItem <= 10 ) { return "li=0"; }
-        return "li=".$nItem."&st=".($nItem+10);
-    }
+    protected $arrListingTagSetup = array(
+        'tag_next_button' => array('selector' => 'button[aria-label=\'Next page\']')
+    );
+    
+//    function getItemURLValue($nItem)
+//    {
+//        if($nItem == null || $nItem <= 10 ) { return "li=0"; }
+//        return "li=".$nItem."&st=".($nItem+10);
+//    }
 
     function __construct($strBaseDir = null)
     {
@@ -50,7 +55,7 @@ class PluginGoogle extends ClassClientHTMLJobSitePlugin
     {
         $ret = null;
 
-        $nodesJobs= $objSimpHTML->find("div[role='listitem']");
+        $nodesJobs= $objSimpHTML->find(".GXRRIBB-vb-g");
 
         if(!$nodesJobs) return null;
 
@@ -58,9 +63,9 @@ class PluginGoogle extends ClassClientHTMLJobSitePlugin
         {
             $item = $this->getEmptyJobListingRecord();
 
-            $item['job_id'] = $node->attr['id'];;
+            $item['job_id'] = $node->attr['id'];
 
-            $subNode = $node->find("div[class='sr-content-container'] h2 a");
+            $subNode = $node->find("h2 a");
             if(isset($subNode) && count($subNode) >= 1)
             {
                 $item['job_post_url'] = $subNode[0]->attr['href'];

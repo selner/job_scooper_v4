@@ -24,6 +24,7 @@ require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 require_once(__ROOT__ .'/include/AbstractClassBaseJobsPlugin.php');
 require_once(__ROOT__ .'/include/JobSitePluginsTypes.php');
 require_once(__ROOT__ . '/include/SimpleJobPlugins.php');
+require_once(__ROOT__ . '/include/JsonConfigPlugins.php');
 require_once(__ROOT__.'/include/ClassConfig.php');
 require_once(__ROOT__.'/include/StageManager.php');
 require_once (__ROOT__.'/include/ClassMultiSiteSearch.php');
@@ -46,12 +47,6 @@ const C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__ = "JOBAPI";
 const C__JOB_SEARCH_RESULTS_TYPE_UNKNOWN__ = "ERROR_UNKNOWN_TYPE";
 
 const C__JOB_USE_SELENIUM = 0x1;
-const C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE = 0x2;
-const C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL= 0x800000;
-const C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIA_JS = 0x4;
-const C__JOB_CLIENTSIDE_PAGE_VIA_CALLBACK = 0x1000000;
-const C__JOB_CLIENTSIDE_PAGE_VIA_NEXTBUTTON = 0x2000000;
-const C__JOB_PAGE_VIA_URL = 0x8;
 
 const C__JOB_PAGECOUNT_NOTAPPLICABLE__= 0x10;
 const C__JOB_DAYS_VALUE_NOTAPPLICABLE__ = 0x20;
@@ -61,14 +56,10 @@ const C__JOB_LOCATION_REQUIRES_LOWERCASE = 0x100;
 const C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED = 0x200;
 const C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES = 0x400;
 const C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE = 0x800;
+const C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS = 0x1000;
 
-const C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED = 0x1000;
-const C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS = 0x2000;
-const C__JOB_SETTINGS_URL_VALUE_REQUIRED = 0x4000;
-const C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED = 0x8000;
-
-//const C__JOB_HTTP_POST = 0x10000;
-const C__JOB_IGNORE_MISMATCHED_JOB_COUNTS = 0x40000;
+const C__JOB_SETTINGS_URL_VALUE_REQUIRED = 0x2000;
+const C__JOB_IGNORE_MISMATCHED_JOB_COUNTS = 0x4000;
 
 const C__USER_KEYWORD_ANYWHERE = 0x100000;
 const C__USER_KEYWORD_ANYWHERE_AS_STRING = "any";
@@ -78,13 +69,24 @@ const C__USER_KEYWORD_MUST_BE_IN_TITLE = 0x400000;
 const C__USER_KEYWORD_MUST_BE_IN_TITLE_AS_STRING = "in-title";
 const C__USER_KEYWORD_MATCH_DEFAULT = C__USER_KEYWORD_MUST_BE_IN_TITLE;
 
+const C__PAGINATION_INFSCROLLPAGE_VIALOADMORE = "LOAD-MORE";
+const C__PAGINATION_INFSCROLLPAGE_NOCONTROL= "INFINITE-SCROLL-NO-CONTROL";
+const C__PAGINATION_INFSCROLLPAGE_VIA_JS = "INFINITE-SCROLL-VIA-JAVASCRIPT";
+const C__PAGINATION_PAGE_VIA_CALLBACK = "PAGE-CALLBACK";
+const C__PAGINATION_PAGE_VIA_NEXTBUTTON = "NEXT-BUTTON";
+const C__PAGINATION_PAGE_VIA_URL = "PAGE-VIA-URL";
+const C__PAGINATION_NONE = "NONE";
+
 define('C__JOB_BASETYPE_WEBPAGE_FLAGS', 0);
 
-$GLOBALS['DATA']['location_types'] = array('location-city', 'location-city-comma-statecode', 'location-city-dash-statecode', 'location-city-comma-nospace-statecode', 'location-city-comma-statecode-underscores-and-dashes', 'location-city-comma-state', 'location-city-comma-state-country', 'location-statecode', 'location-state', 'location-city-comma-state-country-no-commas', 'location-countrycode');
+$GLOBALS['DATA']['location_types'] = array('location-city', 'location-city-comma-statecode', 'location-city-dash-statecode', 'location-city-comma-nospace-statecode', 'location-city-comma-statecode-underscores-and-dashes', 'location-city-comma-state', 'location-city-comma-state-country', 'location-statecode', 'location-state', 'location-city-comma-state-country-no-commas', 'location-city-comma-statecode-comma-countrycode', 'location-countrycode');
 
 
 function setupPlugins()
 {
+    $jsPlugins = new JSONPlugins();
+    $jsPlugins->init();
+    
     $arrAddedPlugins = null;
     $classList = get_declared_classes();
     print('Getting job site plugin list...'. PHP_EOL);

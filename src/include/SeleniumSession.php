@@ -74,25 +74,16 @@ class SeleniumSession extends PropertyObject
         $this->shutdownSelenium();
     }
 
-    function loadPage($url, $waitTime=null)
+    function loadPage($url)
     {
         try
         {
-
-            if (!is_null($waitTime))
-            {
-                $timeoutval = $waitTime + 10;
-                $GLOBALS['logger']->logLine("Setting Selenium javascript and page timeouts to seconds=" . $timeoutval, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                $timeouts = $this->driver->manage()->timeouts();
-                
-                $timeouts->setScriptTimeout($timeoutval);
-                $timeouts->pageLoadTimeout($timeoutval);
-            }
-
-            $this->driver->get($url);
-
-            sleep(1+$waitTime);
-
+            if(strncmp($this->driver->getCurrentURL(), $url, strlen($url)) != 0) {
+                $this->driver->get($url);
+	        sleep(2+$this->additionalLoadDelaySeconds);
+	    }
+           
+           
         } catch (Exception $ex) {
             $strMsg = "Error retrieving Selenium page at " . $url . ":  ". $ex;
 
@@ -348,6 +339,9 @@ class SeleniumSession extends PropertyObject
 
     private function create_remote_webdriver()
     {
+        $host = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
+
+        try {
         $webdriver = $this->getWebDriverKind();
         //
         // First we need to make sure we don't have a conflicting session already hanging out
@@ -387,7 +381,11 @@ class SeleniumSession extends PropertyObject
             $connection_timeout_in_ms = 60000,
             $request_timeout_in_ms = 60000
         );
-
+    }
+        catch (Exception $ex)
+        {
+            handleException($ex, "Unable to get Selenium Webdriver from " . $host, true);
+        }
     }
 
 

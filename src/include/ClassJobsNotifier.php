@@ -164,6 +164,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
         $arrMatchedJobs = array();
         $arrExcludedJobs = array();
+        $detailsHTMLFile = null;
 
         //
         // For our final output, we want the jobs to be sorted by company and then role name.
@@ -786,36 +787,6 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
             $strOut .= "</div>";
             $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
         }
-
-
-        if(!is_null($arrFailedPlugins) && is_array($arrFailedPlugins) && count($arrFailedPlugins) > 0)
-        {
-            $strOut .=  PHP_EOL . "<div class=\"job_scooper section\">". PHP_EOL;
-            sort($arrFailedPlugins);
-
-            $errMgr = new ErrorManager();
-            $errHTML = $errMgr->getFailedSearchesNotificationBody();
-
-            $strOut .=  PHP_EOL . "<!-- BEGIN ERROR MANAGER OUTPUT -->". PHP_EOL;
-            $strOut .= '<H2>Plugin Errors</H2>' . PHP_EOL . PHP_EOL;
-            $strOut .= $errHTML['body'];
-//            $strOut .=  PHP_EOL . "<ul class='job_scooper'>". PHP_EOL;
-//
-//            foreach($arrFailedPlugins as $site)
-//            {
-//                foreach($site as $search) {
-//                    $strOut .= "<li>" . $search['site_name'] . ": <span style=\"color: Grey\">" . $search['search_run_result']['details'] . "</span></li>" . PHP_EOL;
-//                }
-//            }
-//
-//            $strOut .=  PHP_EOL . "</ul>". PHP_EOL;
-            $strOut .= "</div>";
-
-            $strOut .=  PHP_EOL . "<!-- END ERROR MANAGER OUTPUT -->". PHP_EOL;
-            $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
-        }
-
-
 
         return $strOut;
     }

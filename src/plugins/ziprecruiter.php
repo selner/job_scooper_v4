@@ -24,13 +24,12 @@ class PluginZipRecruiter extends ClassClientHTMLJobSitePlugin
     protected $siteBaseURL = 'www.ziprecruiter.com';
     protected $nJobListingsPerPage = C__TOTAL_ITEMS_UNKNOWN__; // we use this to make sure we only have 1 single results page
 
-    protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE ];
     protected $strBaseURLFormat = "https://www.ziprecruiter.com/candidate/search?search=***KEYWORDS***&include_near_duplicates=1&location=***LOCATION***&radius=25&days=***NUMBER_DAYS***";
+    protected $paginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
-    protected $selectorMoreListings = ".load_more_jobs";
 
     protected $arrListingTagSetup = array(
-        'tag_listings_noresults'    => array('selector' => '#job_results div div section h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "PluginZipRecruiter::isNoJobsFound"),
+        'tag_listings_noresults'    => array('selector' => '#job_results div div section h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
         'tag_listings_count'        => array('selector' => '#h1.headline', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/\b(\d+)\b/i'),
         'tag_listings_section'      => array('selector' => '#job_list div article'),
         'tag_title'                 => array('selector' => 'span.just_job_title', 'return_attribute' => 'plaintext'),
@@ -38,16 +37,41 @@ class PluginZipRecruiter extends ClassClientHTMLJobSitePlugin
         'tag_company'               => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => 't_org_link name', 'return_attribute' => 'plaintext'),
         'tag_location'              => array('tag' => '*', 'attribute'=>'class', 'attribute_value' => 'location', 'return_attribute' => 'plaintext'),
         'tag_job_id'                => array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'just_job_title', 'return_attribute' => 'data-job-id'),
-//        'tag_next_button'           => array('tag' => 'button', 'attribute'=>'class', 'attribute_value' => 'load_more_jobs')
     );
 
-    function isNoJobsFound($var)
+    function isNoJobResults($var)
     {
-        if(stristr($var, "No jobs") != "")
-            return 0;
+        return noJobStringMatch($var, "No jobs");
+    }
+    
+    function parseTotalResultsCount($objSimpl)
+    {
+        sleep($this->additionalLoadDelaySeconds + 1);
 
-        return null;
+        $dismissPopup = "
+            var popupstyle = document.querySelector('div#createAlertPop').getAttribute('style'); 
+            if (popupstyle.indexOf('display: none') < 0) {
+                var close = document.querySelector('.modal-close'); 
+                if (close != null) 
+                {
+                    console.log('Clicking close on modal popup dialog...');
+                    close.click();
+                }
+            }
+        ";
+
+        $this->runJavaScriptSnippet($dismissPopup, true);
+
+        return parent::parseTotalResultsCount($objSimpl);
     }
 
+    protected function goToEndOfResultsSetViaLoadMore($nTotalItems = null)
+    {
+        $this->selectorMoreListings = ".load_more_jobs";
+        parent::goToEndOfResultsSetViaLoadMore($nTotalItems);
+
+        parent::goToEndOfResultsSetViaPageDown($nTotalItems);
+
+    }
 
 }

@@ -24,7 +24,7 @@ class PluginCyberCoders extends ClassClientHTMLJobSitePlugin
     protected $siteBaseURL = "https://www.cybercoders.com";
     protected $strBaseURLFormat = "https://www.cybercoders.com/search/?page=***PAGE_NUMBER***&searchterms=***KEYWORDS***&searchlocation=***LOCATION***&newsearch=true&originalsearch=true&sorttype=date";
 
-    protected $additionalFlags = [C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_PAGE_VIA_URL];
+    protected $paginationType = C__PAGINATION_PAGE_VIA_URL;
 //    protected $nJobListingsPerPage = 40;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
 

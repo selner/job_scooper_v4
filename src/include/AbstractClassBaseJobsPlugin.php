@@ -44,6 +44,16 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             }
         }
 
+
+        if(stristr($this->strBaseURLFormat, "***KEYWORDS***") == false)
+            $this->additionalFlags[] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
+
+        if(stristr($this->strBaseURLFormat, "***LOCATION***") == false)
+            $this->additionalFlags[] = C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
+
+        if(stristr($this->strBaseURLFormat, "***NUMBER_DAYS***") == false)
+            $this->additionalFlags[] = C__JOB_DAYS_VALUE_NOTAPPLICABLE__;
+
         if(is_array($this->additionalFlags))
         {
             foreach($this->additionalFlags as $flag)
@@ -56,14 +66,19 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 }
             }
         }
-        
-        if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED)) {
+
+        if($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
             $this->nMaxJobsToReturn = $this->nMaxJobsToReturn * 3;
         }
 
-        if($this->isBitFlagSet(C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL)) {
+        if($this->paginationType == C__PAGINATION_INFSCROLLPAGE_NOCONTROL) {
             $this->nJobListingsPerPage = $this->nMaxJobsToReturn;
         }
+
+        if(!is_null($this->selectorMoreListings) && strlen($this->selectorMoreListings) > 0)
+//            $this->selectorMoreListings = str_replace("\"", "\\\"", $this->selectorMoreListings);
+            $this->selectorMoreListings = preg_replace('/(\'|"|\\")/', '\"', $this->selectorMoreListings);
+
     }
 
 
@@ -96,7 +111,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $arrSearches[] = $arrSearches;
         }
 
-        if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED)) {
+        if($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
             $soleSearch = $arrSearches[0];
             $arrSearches = array();
             $arrSearches[] = $soleSearch;
@@ -202,7 +217,8 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     //************************************************************************
 
     protected $nJobListingsPerPage = 20;
-    protected $additionalFlags = [];
+    protected $additionalFlags = array();
+    protected $paginationType = null;
     protected $secsPageTimeout = null;
     protected $pluginResultsType;
     protected $selenium = null;
@@ -260,21 +276,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $arrKeywords = array_mapk(function ($k, $v) { return "\"{$v}\""; }, $arrKeywords);
         }
 
-
-        if(($this->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED)) && count($arrKeywords) > 1)
-        {
-            if($this->strKeywordDelimiter == null)
-            {
-                throw new ErrorException($this->siteName . " supports multiple keyword terms, but has not set the \$strKeywordDelimiter value in " . get_class($this) . ". Aborting search because cannot create the URL.");
-            }
-
-            $strRetCombinedKeywords = implode((" " . $this->strKeywordDelimiter . " "), $arrKeywords);
-
-        }
-        else
-        {
-            $strRetCombinedKeywords = array_shift($arrKeywords);
-        }
+        $strRetCombinedKeywords = array_shift($arrKeywords);
 
         return $strRetCombinedKeywords;
     }
@@ -326,7 +328,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     }
 
 
-    protected function getPageURLfromBaseFmt($searchDetails, $nPage = null, $nItem = null)
+    protected function getPageURLfromBaseFmt(&$searchDetails, $nPage = null, $nItem = null)
     {
         $strURL = $this->_getBaseURLFormat_($searchDetails, $nPage, $nItem);
 
@@ -405,10 +407,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
         $driver = $this->getActiveWebdriver();
-        $timeouts = $driver->manage()->timeouts();
-        $timeoutval = $this->additionalLoadDelaySeconds + 10;
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting Selenium javascript and page timeouts to seconds=" . $timeoutval, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        $timeouts->setScriptTimeout($timeoutval);
 
         $driver->executeScript("window.scrollTo(0,document.body.scrollHeight);");
 
@@ -434,8 +432,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     }
 
-
-    protected function goToEndOfResultsSetViaLoadMore($nTotalItems = null)
+    protected function goToEndOfResultsSetViaPageDown($nTotalItems = null)
     {
         $this->moveDownOnePageInBrowser();
         $secs = $this->additionalLoadDelaySeconds * 1000;
@@ -443,26 +440,36 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $secs = 1000;
 
         $js = "
-            scroll = setTimeout(doLoadMore, 250);
-            function doLoadMore() 
+            localStorage.setItem('startTime', Date.now());
+            localStorage.setItem('prevHeight', 0);
+            scroll = setTimeout(gotoPageBottom, 250);
+            function getRunTime()
             {
-              window.scrollTo(0,document.body.scrollHeight);
-              console.log('paged-down-before-click');
+                var startTime = localStorage.getItem('startTime');
+                var endTime = Date.now();
+                runtime = Math.floor((endTime-startTime)/(1000));
+                return runtime;
+            }
 
-                var loadmore = document.querySelector('" . $this->selectorMoreListings . "');
-                if(loadmore != null && !typeof(loadmore .click) !== \"function\" && loadmore.length >= 1) {
-                    loadmore = loadmore[0];
-                } 
-    
-                if(loadmore != null && loadmore.style.display === \"\") 
-                { 
-                    loadmore.click();  
-                    console.log(\"Clicked load more control...\");
-                        
-                    scroll = setTimeout(doLoadMore, " . $secs . ");
+            function gotoPageBottom() 
+            {
+                runtime = getRunTime();
+                prevHeight = localStorage.getItem('prevHeight');
+                
+                window.scrollTo(0,document.body.scrollHeight);
+                if(prevHeight == null || (prevHeight < document.body.scrollHeight && runtime <= 60))
+                {
+                    localStorage.setItem('prevHeight', document.body.scrollHeight);
+                    setTimeout(gotoPageBottom, " . $secs . ");
                 }
-              window.scrollTo(0,document.body.scrollHeight);
-              console.log('paged-down-after-click');
+                else
+                {
+                    console.log('Load more button no longer active; done paginating the results.');
+                    console.log('Script needed a minimum of ' + runtime + ' seconds to load all the results.');
+                    localStorage.removeItem('startTime');
+                    localStorage.removeItem('prevHeight');
+
+                }
             }  
         ";
 
@@ -472,10 +479,100 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $nTotalItems = $this->nMaxJobsToReturn;
         }
 
-        $nSleepTimeToLoad = ($nTotalItems / $this->nJobListingsPerPage) * $this->additionalLoadDelaySeconds;
+        if($nTotalItems == C__TOTAL_ITEMS_UNKNOWN__)
+        {
+            $nSleepTimeToLoad = 30 + $this->additionalLoadDelaySeconds;
+        }
+        else {
+            $nSleepTimeToLoad = ($nTotalItems / $this->nJobListingsPerPage) * $this->additionalLoadDelaySeconds;
+        }
+
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-        $this->runJavaScriptSnippet($js, false, $nSleepTimeToLoad > 0 ? $nSleepTimeToLoad : null);
+        $this->runJavaScriptSnippet($js, false);
+
+        sleep($nSleepTimeToLoad > 0 ? $nSleepTimeToLoad : 2);
+
+        $this->moveDownOnePageInBrowser();
+
+    }
+    protected function goToEndOfResultsSetViaLoadMore($nTotalItems)
+    {
+        $this->moveDownOnePageInBrowser();
+        $secs = $this->additionalLoadDelaySeconds * 1000;
+        if($secs <= 0)
+            $secs = 1000;
+
+        $js = "
+            scroll = setTimeout(doLoadMore, 250);
+            function getRunTime()
+            {
+                var startTime = localStorage.getItem(\"startTime\");
+                var endTime = Date.now();
+                runtime = Math.floor((endTime-startTime)/(1000));
+                return (runtime + ' seconds');
+            }
+
+            function doLoadMore() 
+            {
+                var startTime = localStorage.getItem(\"startTime\");
+                if(startTime == null) 
+                {
+                    localStorage.setItem(\"startTime\", Date.now());
+                    localStorage.setItem(\"pageNum\", 1);
+                }
+
+                window.scrollTo(0,document.body.scrollHeight);
+                console.log('paged-down-before-click');
+
+                var loadmore = document.querySelector(\"" . $this->selectorMoreListings . "\");
+                if(loadmore != null && !typeof(loadmore.click) !== \"function\" && loadmore.length >= 1) {
+                    loadmore = loadmore[0];
+                } 
+    
+                runtime = getRunTime();
+                if(loadmore != null && loadmore.style.display === \"\") 
+                { 
+                    var pageNum = parseInt(localStorage.getItem(\"pageNum\"));
+                    if (pageNum != null)
+                    {   
+                        console.log('Results for page # ' + pageNum + ' loaded.  Time spent so far:  ' + runtime + ' Going to next page...');
+                        localStorage.setItem(\"pageNum\", pageNum + 1);
+                    }
+                    loadmore.click();  
+                    console.log(\"Clicked load more control...\");
+                        
+                    scroll = setTimeout(doLoadMore, " . $secs . ");
+                    window.scrollTo(0,document.body.scrollHeight);
+                    console.log('paged-down-after-click');
+                }
+                else
+                {
+                    console.log('Load more button no longer active; done paginating the results.');
+                    console.log('Script needed a minimum of ' + runtime + ' seconds to load all the results.');
+                    localStorage.removeItem(\"startTime\");
+
+                }
+            }  
+        ";
+
+
+        if(is_null($nTotalItems))
+        {
+            $nTotalItems = $this->nMaxJobsToReturn;
+        }
+
+        if($nTotalItems == C__TOTAL_ITEMS_UNKNOWN__)
+        {
+            $nSleepTimeToLoad = 30 + $this->additionalLoadDelaySeconds;
+        }
+        else {
+            $nSleepTimeToLoad = ($nTotalItems / $this->nJobListingsPerPage) * $this->additionalLoadDelaySeconds;
+        }
+
+        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+        $this->runJavaScriptSnippet($js, false);
 
         sleep($nSleepTimeToLoad > 0 ? $nSleepTimeToLoad : 2);
 
@@ -490,11 +587,25 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         if($secs <= 0)
             $secs = 1000;
 
+        $objSimplHtml = $this->getSimpleHtmlDomFromSeleniumPage();
+
+        $node = $objSimplHtml->find($this->selectorMoreListings);
+        if($node == null || count($node) == 0)
+        {
+            return false;
+        }
+        else
+        {
+            if(stristr($node[0]->attr["style"], "display: none") !== false) {
+                return false;
+            }
+        }
+
         $js = "
             scroll = setTimeout(doNextPage, " . $secs . ");
             function doNextPage() 
             {
-                var loadnext = document.querySelector('" . $this->selectorMoreListings . "');
+                var loadnext = document.querySelector(\"" . $this->selectorMoreListings . "\");
                 if(loadnext != null && !typeof(loadnext .click) !== \"function\" && loadnext.length >= 1) {
                     loadnext = loadnext[0];
                 } 
@@ -502,15 +613,16 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 if(loadnext != null && loadnext.style.display === \"\") 
                 { 
                     loadnext.click();  
-                    console.log(\"Clicked load more control...\");
+                    console.log(\"Clicked load next results control " . $this->selectorMoreListings . "...\");
                 }
             }  
         ";
 
-        $this->runJavaScriptSnippet($js, false, $this->additionalLoadDelaySeconds + 10);
+        $this->runJavaScriptSnippet($js, false);
 
         sleep($this->additionalLoadDelaySeconds > 0 ? $this->additionalLoadDelaySeconds : 2);
 
+        return true;
     }
 
 
@@ -542,12 +654,11 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
             assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || ($searchDetails['location_search_value'] !== VALUE_NOT_SUPPORTED && strlen($searchDetails['location_search_value']) > 0));
 
-            if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED)) {
+            if($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
                 // null out any generalized keyword set values we previously had
                 $searchDetails['keywords_array'] = null;
                 $searchDetails['keywords_array_tokenized'] = null;
                 $searchDetails['keywords_string_for_url'] = null;
-                $searchDetails['key'] = $searchDetails['site_name'] . '-' . $searchDetails['location_set_key'];
             }
             else
             {
@@ -651,8 +762,11 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     {
 
         $searchStartURL = $this->getPageURLfromBaseFmt($searchDetails, 1, 1);
+        if(is_null($searchStartURL) || strlen($searchStartURL) == 0)
+            $searchStartURL = $this->siteBaseURL;
+
         $searchDetails['search_start_url'] = $searchStartURL;
-        $GLOBALS['logger']->logLine("Setting start URL for " . $this->siteName . "[" . $searchDetails['key'] . " to: " . PHP_EOL . $searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Setting start URL for " . $this->siteName . "[" . $searchDetails['key'] . "] to: " . PHP_EOL . $searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
     }
 
@@ -674,21 +788,22 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $prefix = $prefix . $this->siteName;
         }
 
-        $key = $prefix . \Scooper\strip_punctuation($GLOBALS['USERDATA']['configuration_settings']['number_days'] . $searchSettings['key']);
-        if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED))
-            $key = $prefix . \Scooper\strip_punctuation($GLOBALS['USERDATA']['configuration_settings']['number_days'] . $searchSettings['site_name']);
+        $key = $prefix;
 
+        if(!$this->isBitFlagSet(C__JOB_DAYS_VALUE_NOTAPPLICABLE__))
+            $key = $key . \Scooper\strip_punctuation($GLOBALS['USERDATA']['configuration_settings']['number_days'] );
+
+        $key = $key . $searchSettings['key'];
         return $key;
     }
 
     private function _getDirKey_()
     {
-        $dirKey = "listings-raw";
-        if($this->isBitFlagSet(C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED))
-            $dirKey = "listings-rawbysite-allusers";
+        if($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
+            return "listings-rawbysite-allusers";
+        else
+            return "listings-raw";
 
-
-        return $dirKey;
     }
         
 
@@ -858,59 +973,43 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     }
 
 
-    private function _insertBaseURL_($html, $baseurl)
-    {
-        $newhtml = $html;
-        $matches = Array();
-        $MATCH_HEAD_TAG = "(<[Hh][Ee][Aa][Dd].*?>)";
-        preg_match($MATCH_HEAD_TAG, $html, $matches);
-        if(count($matches)>=1)
-        {
-            $newhead = $matches[0] . "<base href=\"" . $baseurl . "\" target=\"_blank\"><script>document.baseURI = \"" . $baseurl . "\";</script>";
-            $newhtml = preg_replace($MATCH_HEAD_TAG, $newhead, $html);
-        }
 
-        return $newhtml;
-    }
 
     protected function _writeDebugFiles_(&$searchDetails, $keyName = "UNKNOWN", $arrSearchedJobs = null, $objSimpleHTMLResults = null)
     {
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Writing debug files for plugin " . $this->siteName ."'s search". $searchDetails['key'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
-
-        $debugHTMLVarFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlvar_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "html", $delim = "-");
-        $debugHTMLSelenFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlselen_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "html", $delim = "-");
-        $debugSSFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlselen_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "png", $delim = "-");
-        $debugCSVFile = substr($debugHTMLVarFile, 0, strlen($debugHTMLVarFile) - 4) . ".csv";
-
-        if (!is_null($objSimpleHTMLResults)) {
-            $html = strval($objSimpleHTMLResults);
-            $html = $this->_insertBaseURL_($html, $searchDetails['search_start_url']);
-            file_put_contents($debugHTMLSelenFile, $html);
-
-//            saveDomToFile($objSimpleHTMLResults, $debugHTMLVarFile);
-            $arrErrorFiles[$debugHTMLVarFile] = $debugHTMLVarFile;
-            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML variable out to " . $debugHTMLVarFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        }
-
-        if($this->selenium != null)
+        if(isDebug() === true)
         {
-            $driver = $this->selenium->get_driver();
-            $html = $driver->getPageSource();
-            $html = $this->_insertBaseURL_($html, $searchDetails['search_start_url']);
+            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Writing debug files for plugin " . $this->siteName ."'s search". $searchDetails['key'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-            file_put_contents($debugHTMLSelenFile, $html);
-            $arrErrorFiles[$debugHTMLSelenFile] = $debugHTMLSelenFile;
-            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML from Selenium out to " . $debugHTMLSelenFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            $debugHTMLVarFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlvar_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "html", $delim = "-");
+            $debugHTMLSelenFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlselen_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "html", $delim = "-");
+            $debugSSFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlselen_". "-". $keyName, $strBase = $searchDetails['key'] , $strExt = "png", $delim = "-");
+            $debugCSVFile = substr($debugHTMLVarFile, 0, strlen($debugHTMLVarFile) - 4) . ".csv";
 
-            $driver->takeScreenshot($debugSSFile);
-            $arrErrorFiles[$debugSSFile] = $debugSSFile;
-            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Saved screenshot from Selenium out to " . $debugSSFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        }
+            if (!is_null($objSimpleHTMLResults)) {
+                saveDomToFile($objSimpleHTMLResults, $debugHTMLVarFile);
+                $arrErrorFiles[$debugHTMLVarFile] = $debugHTMLVarFile;
+                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML variable out to " . $debugHTMLVarFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            }
 
-        if (!is_null($arrSearchedJobs) && is_array($arrSearchedJobs) && countJobRecords($arrSearchedJobs) > 0) {
-            $this->writeJobsListToFile($debugCSVFile, $arrSearchedJobs);
-            $arrErrorFiles[$debugCSVFile] = $debugCSVFile;
-            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote results CSV data to " . $debugCSVFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            if($this->selenium != null)
+            {
+                $driver = $this->selenium->get_driver();
+                $html = $driver->getPageSource();
+                file_put_contents($debugHTMLSelenFile, $html);
+                $arrErrorFiles[$debugHTMLSelenFile] = $debugHTMLSelenFile;
+                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML from Selenium out to " . $debugHTMLSelenFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+                $driver->takeScreenshot($debugSSFile);
+                $arrErrorFiles[$debugSSFile] = $debugSSFile;
+                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Saved screenshot from Selenium out to " . $debugSSFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            }
+
+            if (!is_null($arrSearchedJobs) && is_array($arrSearchedJobs) && countJobRecords($arrSearchedJobs) > 0) {
+                $this->writeJobsListToFile($debugCSVFile, $arrSearchedJobs);
+                $arrErrorFiles[$debugCSVFile] = $debugCSVFile;
+                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote results CSV data to " . $debugCSVFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            }
         }
     }
 
@@ -1021,7 +1120,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     }
 
 
-    protected function runJavaScriptSnippet($jscript= "", $wrap_in_func = true, $waittime=null)
+    protected function runJavaScriptSnippet($jscript= "", $wrap_in_func = true)
     {
         $driver = $this->getActiveWebdriver();
 
@@ -1030,20 +1129,27 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $jscript = "function call_from_php() { " . $jscript . " }; call_from_php();";
         }
 
-        if(!is_null($waittime))
-        {
-            $GLOBALS['logger']->logLine("Setting Selenium javascript timeout to seconds=" . $waittime, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            $timeouts = $driver->manage()->timeouts();
-
-            $timeouts->setScriptTimeout($waittime+10);
-        }
         $GLOBALS['logger']->logLine("Executing JavaScript in browser:  ". $jscript, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $ret = $driver->executeScript($jscript);
 
-        sleep($waittime);
+        sleep(5);
 
         return $ret;
+    }
+
+    protected function getSimpleHtmlDomFromSeleniumPage()
+    {
+        $objSimpleHTML = null;
+        try
+        {
+            $html = $this->getActiveWebdriver()->getPageSource();
+            $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+        } catch (Exception $ex) {
+            $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
+            handleException(new Exception($strError), null, true);
+        }
+        return $objSimpleHTML;
     }
 
     private function _getMyJobsForSearchFromWebpage_(&$searchDetails)
@@ -1062,7 +1168,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             {
                 try
                 {
-                    $this->selenium = new SeleniumSession($this->additionalLoadDelaySeconds);
+                    if(is_null($this->selenium))
+                    {
+                        $this->selenium = new SeleniumSession($this->additionalLoadDelaySeconds);
+                    }
                     $html = $this->selenium->getPageHTML($searchDetails['search_start_url']);
                     $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
                 } catch (Exception $ex) {
@@ -1078,13 +1187,26 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
             $totalPagesCount = C__TOTAL_ITEMS_UNKNOWN__;
             $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__; // placeholder because we don't know how many are on the page
-            if($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) && $this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__) )
+            if($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) && $this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
             {
-                // if we can't get a number of pages AND we can't get a number of items,
-                // we must assume there is, at most, only one page of results.
-                $totalPagesCount = 1;
-                $nTotalListings = $this->nJobListingsPerPage;
+                switch($this->paginationType) {
 
+                    case C__PAGINATION_INFSCROLLPAGE_NOCONTROL:
+                    case C__PAGINATION_INFSCROLLPAGE_VIALOADMORE:
+                    case C__PAGINATION_PAGE_VIA_NEXTBUTTON:
+                    case C__PAGINATION_INFSCROLLPAGE_VIA_JS:
+                    case C__PAGINATION_PAGE_VIA_CALLBACK:
+                        $totalPagesCount = C__TOTAL_ITEMS_UNKNOWN__;
+                        $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__;
+                        break;
+
+                    default:
+                        // if we can't get a number of pages AND we can't get a number of items,
+                        // we must assume there is, at most, only one page of results.
+                        $totalPagesCount = 1;
+                        $nTotalListings = $this->nJobListingsPerPage;
+                        break;
+                }
             } elseif(!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__)) {
 
                 //
@@ -1151,90 +1273,99 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                     if($this->isBitFlagSet(C__JOB_USE_SELENIUM))
                     {
                         try
-                        {
-                            if($this->isBitFlagSet( C__JOB_PAGE_VIA_URL))
+                        {   
+                            switch(strtoupper($this->paginationType))
                             {
-                                $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
-                                if ($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
-                                    return null;
-                                $this->selenium->loadPage($strURL, $this->additionalLoadDelaySeconds);
-                            }
-                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE)) {
-                                $this->selenium->loadPage($strURL, $this->additionalLoadDelaySeconds);
 
-                                //
-                                // If we dont know how many pages to go down,
-                                // call the method to go down to the very end so we see the whole page
-                                // and whole results set
-                                //
-                                $this->goToEndOfResultsSetViaLoadMore($nTotalListings);
-                                $totalPagesCount = 1;
-                            }
-                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE_NOCONTROL))
-                            {
-                                $this->selenium->loadPage($strURL, $this->additionalLoadDelaySeconds);
+                                case C__PAGINATION_NONE:
+                                    $totalPagesCount = 1;
+                                    $this->selenium->loadPage($strURL);
+                                    break;
 
-                                //
-                                // if we know how many pages to do do, call the page down method
-                                // until we get to the right number of pages
-                                //
-                                while ($nPageCount <= $totalPagesCount) {
-                                    if (isDebug() == true && isset($GLOBALS['logger'])) {
-                                        $GLOBALS['logger']->logLine("... getting infinite results page #" . $nPageCount . " of " . $totalPagesCount, \Scooper\C__DISPLAY_NORMAL__);
-                                    }
-                                    $this->moveDownOnePageInBrowser();
-                                    $nPageCount = $nPageCount + 1;
-                                }
-                                $totalPagesCount = $nPageCount;
-                            }
-                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIA_JS))
-                            {
-                                if(is_null($this->nextPageScript))
-                                {
-                                    handleException(new Exception("Plugin " . $this->siteName . " is missing nextPageScript settings for the defined pagination type."), "", true);
+                                case C__PAGINATION_PAGE_VIA_URL:
+                                    $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
+                                    if ($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
+                                        return null;
+                                    $this->selenium->loadPage($strURL);
+                                    break;
 
-                                }
-                                $this->selenium->loadPage($strURL, $this->additionalLoadDelaySeconds);
-
-                                if( $nPageCount > 1 && $nPageCount <= $totalPagesCount) {
-                                    $this->runJavaScriptSnippet($this->nextPageScript, true, $this->additionalLoadDelaySeconds + 10);
-                                    sleep($this->additionalLoadDelaySeconds + 1);
-                                }
-                            }
-                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_PAGE_VIA_NEXTBUTTON))
-                            {
-                                if(is_null($this->selectorMoreListings))
-                                {
-                                    throw(new Exception("Plugin " . $this->siteName . " is missing selectorMoreListings setting for the defined pagination type."));
-
-                                }
-                                $this->selenium->loadPage($strURL, $this->additionalLoadDelaySeconds);
-
-                                if( $nPageCount > 1 && $nPageCount <= $totalPagesCount) {
-                                    $this->goToNextPageOfResultsViaNextButton();
-                                }
-                            }
-                            elseif($this->isBitFlagSet( C__JOB_CLIENTSIDE_PAGE_VIA_CALLBACK))
-                            {
-                                if (!method_exists($this, 'takeNextPageAction')) {
-                                    handleException(new Exception("Plugin " . $this->siteName . " is missing takeNextPageAction method definiton required for its pagination type."), "", true);
-                                }
-
-                                if($nPageCount > 1 && $nPageCount <= $totalPagesCount) {
+                                case C__PAGINATION_INFSCROLLPAGE_VIALOADMORE:
+                                    $this->selenium->loadPage($strURL);
                                     //
-                                    // if we got a driver instance back, then we got a new page
-                                    // otherwise we're out of results so end the loop here.
+                                    // If we dont know how many pages to go down,
+                                    // call the method to go down to the very end so we see the whole page
+                                    // and whole results set
                                     //
-                                    try {
-                                        $this->takeNextPageAction($this->selenium->driver);
-                                    } catch (Exception $ex) {
-                                        handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
+                                    $this->goToEndOfResultsSetViaLoadMore($nTotalListings);
+                                    $totalPagesCount = 1;
+                                    break;
+
+                                case C__PAGINATION_INFSCROLLPAGE_NOCONTROL:
+                                    $this->selenium->loadPage($strURL);
+                                    //
+                                    // if we know how many pages to do do, call the page down method
+                                    // until we get to the right number of pages
+                                    //
+                                    while ($nPageCount <= $totalPagesCount) {
+                                        if (isDebug() == true && isset($GLOBALS['logger'])) {
+                                            $GLOBALS['logger']->logLine("... getting infinite results page #" . $nPageCount . " of " . $totalPagesCount, \Scooper\C__DISPLAY_NORMAL__);
+                                        }
+                                        $this->moveDownOnePageInBrowser();
+                                        $nPageCount = $nPageCount + 1;
                                     }
-                                }
-                            } 
-                            else
-                            {
-                                handleException(new Exception("No pagination method defined for plugin " . $this->siteName), "", false);
+                                    $totalPagesCount = $nPageCount;
+                                    break;
+
+                                case C__PAGINATION_INFSCROLLPAGE_VIA_JS:    
+                                    if(is_null($this->nextPageScript))
+                                    {
+                                        handleException(new Exception("Plugin " . $this->siteName . " is missing nextPageScript settings for the defined pagination type."), "", true);
+    
+                                    }
+                                    $this->selenium->loadPage($strURL);
+    
+                                    if( $nPageCount > 1 && $nPageCount <= $totalPagesCount) {
+                                        $this->runJavaScriptSnippet($this->nextPageScript, true);
+                                        sleep($this->additionalLoadDelaySeconds + 1);
+                                    }
+                                break;
+                                
+                                case C__PAGINATION_PAGE_VIA_NEXTBUTTON:
+                                    if(is_null($this->selectorMoreListings))
+                                    {
+                                        throw(new Exception("Plugin " . $this->siteName . " is missing selectorMoreListings setting for the defined pagination type."));
+    
+                                    }
+                                    $this->selenium->loadPage($strURL);
+    
+                                    if( $nPageCount > 1 && ($totalPagesCount == C__TOTAL_ITEMS_UNKNOWN__ || $nPageCount <= $totalPagesCount)) {
+                                        $ret = $this->goToNextPageOfResultsViaNextButton();
+                                        if($ret == false)
+                                            $totalPagesCount = $nPageCount;
+                                    }
+                                    break;
+                                
+                                case C__PAGINATION_PAGE_VIA_CALLBACK:
+                                    if (!method_exists($this, 'takeNextPageAction')) {
+                                        handleException(new Exception("Plugin " . $this->siteName . " is missing takeNextPageAction method definiton required for its pagination type."), "", true);
+                                    }
+    
+                                    if($nPageCount > 1 && $nPageCount <= $totalPagesCount) {
+                                        //
+                                        // if we got a driver instance back, then we got a new page
+                                        // otherwise we're out of results so end the loop here.
+                                        //
+                                        try {
+                                            $this->takeNextPageAction($this->selenium->driver);
+                                        } catch (Exception $ex) {
+                                            handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
+                                        }
+                                    }
+                                    break;
+    
+                                default:
+                                handleException(null, "No pagination method defined for plugin " . $this->siteName, false);
+                                    break;
                             }
 
                             $strURL = $this->selenium->driver->getCurrentURL();
@@ -1264,7 +1395,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                     }
                     if (!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for " . $strURL);
 
-                    $GLOBALS['logger']->logLine("Getting page # " . $nPageCount . " of jobs from " . $strURL, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    $GLOBALS['logger']->logLine("Getting jobs page # " . $nPageCount . " of " . $totalPagesCount ." from " . $strURL .".  Total listings loaded:  " . ($nItemCount == 1 ? 0 : $nItemCount) . "/" . $nTotalListings . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                     try
                     {
 
@@ -1362,11 +1493,15 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         }
     }
 
-    protected function setCompanyToSiteName($var)
+    function setCompanyToSiteName($var)
     {
         return $this->siteName;
     }
 
+    function combineTextAllNodes($nodes)
+    {
+        return combineTextAllNodes($nodes);
+    }
 
     protected function getSearchJobsFromAPI($searchDetails) {   throw new \BadMethodCallException(sprintf("Not implemented method " . __METHOD__ . " called on class \"%s \".", __CLASS__)); }
 

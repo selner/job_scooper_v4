@@ -58,18 +58,17 @@ function object_to_array($obj)
 
 function handleException($ex, $fmtLogMsg = null, $raise = true)
 {
-    $err = new Exception();
-
+    if (is_null($ex))
+        $ex = new Exception($fmtLogMsg);
 
     if (!array_key_exists('ERROR_REPORT_FILES', $GLOBALS['USERDATA']))
         $GLOBALS['USERDATA']['ERROR_REPORT_FILES'] = array();
 
 
     $toThrow = $ex;
-    $msg = $ex->getMessage();
     if (!is_null($fmtLogMsg)) {
         $msg = sprintf($fmtLogMsg, $ex->getMessage());
-        $toThrow = new Exception($msg);
+        $toThrow = new Exception($msg, $ex->getCode(), $previous=$ex);
     }
 
 //    $msg .= PHP_EOL . "PHP memory usage: " . getPhpMemoryUsage() . PHP_EOL;
@@ -235,6 +234,27 @@ function combineTextAllChildren($node, $fRecursed = false)
         $retStr = \Scooper\strScrub($node->plaintext . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
     }
 
+    return $retStr;
+
+}
+
+function combineTextAllNodes($nodes)
+{
+
+    $retStr = "";
+    if ($nodes) {
+        foreach ($nodes as $node) {
+            if($retStr != "")
+                $retStr = $retStr . ", ";
+
+            $retStr = $retStr . \Scooper\strScrub($node->plaintext . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
+            if(!is_null($node->childNodes())) {
+                foreach ($node->childNodes() as $child) {
+                    $retStr = $retStr . " " . combineTextAllChildren($child, true);
+                }
+            }
+        }
+    }
     return $retStr;
 
 }
@@ -978,7 +998,7 @@ function loadTemplate($path)
     ));  // set compiled PHP code into $phpStr
 
     // Save the compiled PHP code into a php file
-    $renderFile = basename($path) .'-render.php';
+    $renderFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" .basename($path) .'-render.php';
 
     file_put_contents($renderFile, '<?php ' . $phpStr . '?>');
 
@@ -1062,5 +1082,14 @@ function getFailedSearches()
     return $arrFailedPluginsReport;
 }
 
+function noJobStringMatch($var, $matchString)
+{
+    if(is_null($matchString) || strlen($matchString) == 0)
+        throw new Exception("Invalid match string passed to helper noJobStringMatch.");
+        
+    if(stristr(strtoupper($var), strtoupper($matchString)) !== false)
+        return 0;
 
-?>
+    return null;
+}
+

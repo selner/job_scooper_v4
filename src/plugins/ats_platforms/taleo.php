@@ -79,6 +79,8 @@ abstract class BaseTaleoPlugin extends ClassBaseServerHTMLJobSitePlugin
 
     function __construct($strOutputDirectory = null)
     {
+        $this->paginationType = C__PAGINATION_PAGE_VIA_URL;
+        
         if(!isset($this->server) or strlen($this->server) <= 0) {
             $this->server = "https://ch.tbe.taleo.net/CH11/ats/careers/searchResults.jsp";
         }
@@ -109,7 +111,6 @@ abstract class BaseTaleoPlugin extends ClassBaseServerHTMLJobSitePlugin
 
 
     protected $strBaseURLFormat = null;
-    protected $additionalFlags = [C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED];
 
     function getItemURLValue($nItem)
     {
@@ -185,5 +186,3 @@ abstract class BaseTaleoPlugin extends ClassBaseServerHTMLJobSitePlugin
     }
 
 }
-
-?>

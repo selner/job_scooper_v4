@@ -27,7 +27,7 @@ class PluginLinkUp extends ClassHTMLJobSitePlugin
     protected $nJobListingsPerPage = 50;
     protected $siteBaseURL = 'http://www.linkup.com';
     protected $strBaseURLFormat = "http://www.linkup.com/results.php?q=***KEYWORDS***&l=***LOCATION***&sort=d&tm=***NUMBER_DAYS***&page=***PAGE_NUMBER***&p=50";
-    protected $additionalFlags = [C__JOB_PAGE_VIA_URL];
+    protected $paginationType = C__PAGINATION_PAGE_VIA_URL;
     protected $typeLocationSearchNeeded = 'location-city-comma-state';
     protected $strKeywordDelimiter = "or";
 
@@ -60,7 +60,7 @@ class PluginLinkUp extends ClassHTMLJobSitePlugin
 
     function isNoResults($var)
     {
-        if (stristr($var, "Your search returned no results") != "") {
+        if (stristr($var, "Your search returned no results") != false) {
             return 0;
         }
 
@@ -70,8 +70,8 @@ class PluginLinkUp extends ClassHTMLJobSitePlugin
 
     protected $arrListingTagSetup = array(
         'tag_listings_count' => array('tag' => '#search-showing', 'return_value_regex' => '/\d+\s\-\s\d+[\sof]+([\d,]+).*/'),
-        'tag_listings_noresults' => array('selector' => 'section.results-messages h1', 'return_attribute' => 'plaintext', 'return_value_callback' => "PluginLinkup::isNoResults"),
-        'tag_listings_section' => array('selector' => 'div.listing', 'return_value_callback' => "PluginLinkup::filterSponsoredAds"),
+        'tag_listings_noresults' => array('selector' => 'section.results-messages h1', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoResults"),
+        'tag_listings_section' => array('selector' => 'div.listing', 'return_value_callback' => "filterSponsoredAds"),
         'tag_title' => array('selector' => 'a.listing-title strong'),
         'tag_job_id' => array('selector' => 'div.listing', 'return_attribute' => 'data-hash'),
         'tag_link' => array('selector' => 'a.listing-title', 'return_attribute' => 'href'),
@@ -82,7 +82,7 @@ class PluginLinkUp extends ClassHTMLJobSitePlugin
     );
 
 
-    function filterSponsoredAds($var)
+    static function filterSponsoredAds($var)
     {
         $retArray = Array();
         if (!is_null($var) && is_array($var) && count($var) > 0) {

@@ -21,10 +21,11 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 abstract class BaseMadgexATSPlugin extends ClassClientHTMLJobSitePlugin
 {
+
     function __construct($strOutputDirectory = null)
     {
-        $this->additionalFlags[] = C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES;
-        $this->additionalFlags[] = C__JOB_PAGE_VIA_URL;
+        $this->prevURL = $this->childSiteURLBase;
+        $this->paginationType = C__PAGINATION_PAGE_VIA_URL;
 
         $this->siteBaseURL = $this->childSiteURLBase;
         $this->strBaseURLFormat = $this->childSiteURLBase . $this->strBaseURLFormat;
@@ -34,79 +35,92 @@ abstract class BaseMadgexATSPlugin extends ClassClientHTMLJobSitePlugin
     protected $siteName = 'madgexats';
     protected $strBaseURLFormat = '?Keywords=***KEYWORDS***&radialtown=***LOCATION***&LocationId=&RadialLocation=50&NearFacetsShown=true&countrycode=***COUNTRYCODE***&Page=***PAGE_NUMBER***';
     protected $locationid = null;
+    protected $currentSearchAlternateURL = null;
 
     protected $typeLocationSearchNeeded = 'location-city-comma-state';
 
-    protected function getPageURLfromBaseFmt($searchDetails, $nPage = null, $nItem = null)
+    protected function getPageURLfromBaseFmt(&$searchDetails, $nPage = null, $nItem = null)
     {
-        $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
-        $strURL = str_ireplace("***COUNTRYCODE***", $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-countrycode'], $strURL);
+        if(is_null($this->currentSearchAlternateURL)) {
+            $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
+            $strURL = str_ireplace("***COUNTRYCODE***", $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-countrycode'], $strURL);
 
-        if (!is_null($this->locationid))
-            $strURL = $strURL . "&LocationID=" . $this->locationid;
-
+            if (!is_null($this->locationid))
+                $strURL = $strURL . "&LocationID=" . $this->locationid;
+        }
+        else
+        {
+            $searchDetails['base_url_format'] = $this->currentSearchAlternateURL;
+            $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
+        }
+        $searchDetails['base_url_format'] = preg_replace('/[Ppage]{4}=\d+/', 'Page=***PAGE_NUMBER***', $strURL);
+        $this->strBaseURLFormat = $searchDetails['base_url_format'];
         return $strURL;
 
+    }
+
+    static function isNoJobResults($var)
+    {
+        return noJobStringMatch($var, "Found 0 jobs");
+    }
+
+    protected $arrListingTagSetup = array(
+        'tag_listings_noresults'    => array('selector' => 'h1#searching', 'return_attribute' => 'plaintext', 'return_value_callback' => 'isNoJobResults'),
+        'tag_listings_count'        => array('selector' => 'h1#searching', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/\b(\d+)\b/i'),
+        'tag_listings_section'      => array('selector' => 'li.lister__item'),
+        'tag_title'                 => array('selector' => 'h3 a.js-clickable-area-link span[itemprop="title"]', 'return_attribute' => 'plaintext'),
+        'tag_link'                  => array('selector' => 'h3 a.js-clickable-area-link ', 'return_attribute' => 'href'),
+        'tag_company'               => array('selector' => 'li[itemprop="hiringOrganization"]', 'return_attribute' => 'plaintext'),
+        'tag_location'              => array('selector' => 'li[itemprop="location"]', 'return_attribute' => 'plaintext'),
+        'tag_job_id'                =>  array('selector' => 'li.lister__item', 'return_attribute' => 'id', 'return_value_regex' =>  '/item\-(\d+)/i'),
+        'tag_job_posted_date'       => array('selector' => 'li.job-actions__action pipe', 'index=0'),
+        'tag_company_logo'          => array('selector' => 'img.lister__logo', 'return_attribute' => 'src'),
+        'tag_next_button'           => array('selector' => 'li.paginator__item a[rel="next"]')
+    );
+
+    function parseAndRedirectToLocation(&$objSimpHTML)
+    {
+        $locationSelectNode = $objSimpHTML->find("h2");
+        if (!is_null($locationSelectNode) && count($locationSelectNode) == 1)
+        {
+            if(stristr($locationSelectNode[0]->plaintext, "select a location") !== false)
+            {
+                $nodeLocs = $objSimpHTML->find("li.lap-larger__item a");
+                if (!is_null($nodeLocs) && count($nodeLocs) > 1)
+                {
+                    try
+                    {
+                        $newUrlPath = $nodeLocs[0]->href;
+                        $newUrlPath = str_ireplace("&amp;", "&", $newUrlPath);
+                        $arrMatches = array();
+                        $matched = preg_match('/.*LocationId=(\d+).*/', $newUrlPath, $arrMatches);
+                        if ($matched !== false && count($arrMatches) > 1)
+                        {
+                            $this->locationid = $arrMatches[1];
+                        }
+                        $url = parse_url($this->childSiteURLBase, PHP_URL_SCHEME) . "://" . parse_url($this->childSiteURLBase, PHP_URL_HOST) . $newUrlPath . "&RadialLocation=50";
+                        $this->currentSearchBeingRun['search_start_url'] = $url;
+                        $this->currentSearchAlternateURL = preg_replace('/[Ppage]{4}=\d+/', 'Page=***PAGE_NUMBER***', $url);
+
+                        $this->selenium->loadPage($url);
+                        $html = $this->selenium->getPageHTML($url);
+                        $objSimpHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+                    } catch (Exception $ex) {
+                        $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
+                        handleException(new Exception($strError), null, true);
+                    }
+                }
+            }
+        }
     }
 
     function parseTotalResultsCount(&$objSimpHTML)
     {
 
+        $this->parseAndRedirectToLocation($objSimpHTML);
 
-        $nodeLocs = $objSimpHTML->find("li.lap-larger__item a");
-        if (!is_null($nodeLocs) && count($nodeLocs) > 1)
-        {
-            try
-            {
-
-                $url = parse_url($this->childSiteURLBase, PHP_URL_SCHEME) . "://" . parse_url($this->childSiteURLBase, PHP_URL_HOST) . $nodeLocs['0']->href . "&RadialLocation=50";
-                $url = str_ireplace("&amp;", "&", $url);
-
-                $arrMatches = array();
-                $matched = preg_match('/.*LocationId=(\d+).*/', $url, $arrMatches);
-                if ($matched !== false && count($arrMatches) > 1)
-                {
-                    $this->locationid = $arrMatches[1];
-                }
-
-                $selen = new SeleniumSession($this->additionalLoadDelaySeconds);
-                $html = $selen->getPageHTML($url);
-                $objSimpHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
-            } catch (Exception $ex) {
-                $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
-                handleException(new Exception($strError), null, true);
-            }
-        }
-
-
-        $nTotalResults = C__TOTAL_ITEMS_UNKNOWN__;
-
-        //
-        // Find the HTML node that holds the result count
-        $nodeCounts = $objSimpHTML->find("h1");
-        if($nodeCounts != null && is_array($nodeCounts) && isset($nodeCounts[0]))
-        {
-            $counts = explode(" ", $nodeCounts[0]->plaintext);
-            $nTotalResults = \Scooper\intceil($counts[1]);
-        }
-
-
-        return $nTotalResults;
-
+        return parent::parseTotalResultsCount($objSimpHTML);
     }
-
-    protected $arrListingTagSetup = array(
-        'tag_listings_section' => array('selector' => "li.lister__item"),
-        'tag_link' =>  array('selector' => 'a.js-clickable-area-link', 'return_attribute' => 'href'),
-        'tag_title' =>  array('selector' => 'a.js-clickable-area-link span', 'return_attribute' => 'plaintext'),
-        'tag_job_id' =>  array('selector' => 'li.lister__item', 'return_attribute' => 'id'),
-        'tag_location' =>  array('selector' => 'p.lister__meta span', 'index' => 0),
-        'tag_company' =>  array('selector' => 'p.lister__meta span', 'index' => 2),
-        'tag_job_posted' =>  array('selector' => 'ul.job-actions li', 'index' => 0),
-        'tag_next_button' =>  array('selector' => 'a[title="Next page"]')
-
-    );
-
 }
 
 class PluginTheGuardian extends BaseMadgexATSPlugin
@@ -123,7 +137,7 @@ class PluginMediaBistro extends BaseMadgexATSPlugin
 class PluginWashingtonPost extends BaseMadgexATSPlugin
 {
     protected $siteName = 'washingtonpost';
-    protected $childSiteURLBase = 'https://jobs.washingtonpost.com/jobs';
+    protected $childSiteURLBase = 'https://jobs.washingtonpost.com/searchjobs';
 }
 
 class PluginJobfinderUSA extends BaseMadgexATSPlugin

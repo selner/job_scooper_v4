@@ -49,45 +49,72 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
     protected $childSiteListingPage = '';
     protected $additionalLoadDelaySeconds = 2;
     protected $nextPageScript = null;
+    protected $arrListingTagSetup = array();
 
     function __construct($strBaseDir = null)
     {
+        if (is_null($this->arrListingTagSetup))
+            $this->arrListingTagSetup = ClassBaseHTMLJobSitePlugin::getEmptyListingTagSetup();
+
         if (strlen($this->siteBaseURL) == 0)
             $this->siteBaseURL = $this->childSiteURLBase;
         if (strlen($this->strBaseURLFormat) == 0)
             $this->strBaseURLFormat = $this->childSiteURLBase;
 
 
+        if (array_key_exists('tag_next_button', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['tag_next_button']) && count($this->arrListingTagSetup['tag_next_button'])) {
+            $this->selectorMoreListings = $this->getTagSelector($this->arrListingTagSetup['tag_next_button']);
+            $this->paginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
+        } elseif (array_key_exists('tag_load_more', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['tag_load_more']) && count($this->arrListingTagSetup['tag_load_more'])) {
+            $this->paginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
+            $this->selectorMoreListings = $this->getTagSelector($this->arrListingTagSetup['tag_load_more']);
+        }
 
-        if (array_key_exists('tag_next_button', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_next_button']))
+        if (!array_key_exists('tag_listings_count', $this->arrListingTagSetup) &&  !in_array(C__JOB_ITEMCOUNT_NOTAPPLICABLE__, $this->additionalFlags))
         {
-            $this->selectorMoreListings = $this->getTagSelector( $this->arrListingTagSetup['tag_next_button']);
+            $this->additionalFlags[]  = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
+        }
 
-            $this->_flags_ = $this->_flags_ & C__JOB_CLIENTSIDE_PAGE_VIA_NEXTBUTTON;
-
+        if (!array_key_exists('tag_pages_count', $this->arrListingTagSetup) &&  !in_array(C__JOB_PAGECOUNT_NOTAPPLICABLE__, $this->additionalFlags))
+        {
+            $this->additionalFlags[]  = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
         }
 
         parent::__construct($strBaseDir);
     }
 
+    static function getEmptyListingTagSetup()
+    {
+        $arrListingTagSetup = array(
+            'tag_pages_count' => array(),
+            'tag_listings_noresults' => array(),
+            'tag_listings_count' => array(),
+            'tag_listings_section' => array(),
+            'tag_next_button' => array(),
+            'tag_job_id' => array(),
+            'tag_title' => array(),
+            'tag_link' => array(),
+            'tag_department' => array(),
+            'tag_location' => array(),
+            'tag_job_category' => array(),
+            'tag_company' => array(),
+            'tag_company_logo' => array(),
+            'tag_job_posting_date' => array(),
+            'tag_employment_type' => array(),
+            'regex_link_job_id' => array(),
+        );
+        return $arrListingTagSetup;
+    }
 
-    protected $arrListingTagSetup = array(
-        'tag_listings_noresults' => null,
-        'tag_listings_count' => null,
-        'tag_pages_count' => null,
-        'tag_listings_section' => null,
-        'tag_job_id' => null,
-        'tag_title' => null,
-        'tag_link' => null,
-        'tag_department' => null,
-        'tag_location' => null,
-        'tag_job_category' => null,
-        'tag_company' => null,
-        'tag_job_posting_date' => null,
-        'tag_employment_type' => null,
-        'tag_next_button' => null,
-        'regex_link_job_id' => null,
-    );
+    function matchesNoResultsPattern($var)
+    {
+        $val = $var[0];
+        $match_value = $var[1];
+
+        if(is_null($match_value))
+            throw new Exception("Plugin " . $this->siteName  . " definition missing pattern match value for isNoJobResults callback.");
+        return noJobStringMatch($val, $match_value);
+    }
 
     /**
      * parseTotalResultsCount
@@ -113,16 +140,16 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
                     return $noResultsVal;
                 }
             } catch (Exception $ex) {
-                $GLOBALS['logger']->logLine("Warning: Did not find matched expected 'No results' tag for " . $this->siteName . ".  %s", \Scooper\C__DISPLAY_WARNING__);
+                $GLOBALS['logger']->logLine("Warning: Did not find matched expected 'No results' tag for " . $this->siteName . ".  Error:" . $ex->getMessage(), \Scooper\C__DISPLAY_WARNING__);
             }
         }
 
         $retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
-        if (array_key_exists('tag_listings_count', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_listings_count'])) {
+        if (array_key_exists('tag_listings_count', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['tag_listings_count']) && count($this->arrListingTagSetup['tag_listings_count']) > 0) {
             $retJobCount = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_listings_count'], $propertyName = 'plaintext');
             if (is_null($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
                 throw new Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['tag_listings_count']));
-        } else if (array_key_exists('tag_pages_count', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_pages_count'])) {
+        } else if (array_key_exists('tag_pages_count', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['tag_pages_count']) && count($this->arrListingTagSetup['tag_pages_count']) > 0) {
             $retPageCount = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_pages_count'], $propertyName = 'plaintext');
             if (is_null($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
                 throw new Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['tag_pages_count']));
@@ -170,15 +197,79 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         return $strMatch;
     }
 
-    protected function _getTagMatchValue_($node, $arrTag, $returnAttribute = 'plaintext', $propertyRegEx = null)
+    protected function _getTagMatchValue_($node, $arrTag, $returnAttribute = 'plaintext', $item = null)
+    {
+        if (array_key_exists("type", $arrTag) && !is_null($arrTag['type'])) {
+            switch(strtoupper($arrTag['type']))
+            {
+                case 'CSS':
+                    return $this->_getTagMatchValueCSS_($node, $arrTag, $returnAttribute);
+                    break;
+
+                case 'REGEX':
+                    return $this->_getTagMatchValueRegex_($node, $arrTag, $returnAttribute, $item);
+                    break;
+
+                default:
+                    throw new Exception("Unknown field definition type of " . $arrTag['type']);
+            }
+        }
+        else
+        {
+            return $this->_getTagMatchValueCSS_($node, $arrTag, $returnAttribute);
+
+        }
+
+    }
+
+    protected function _getTagMatchValueRegex_($node, $arrTag, $returnAttribute, $item)
+    {
+        $ret = null;
+        if (array_key_exists("pattern", $arrTag) && !is_null($arrTag['pattern'])) {
+            $pattern = $arrTag['pattern'];
+            $value = "";
+            if (array_key_exists("selector", $arrTag) && !is_null($arrTag['selector'])) {
+                $value = $this->_getTagMatchValueCSS_($node, $arrTag, $returnAttribute);
+            }
+            elseif (array_key_exists("field", $arrTag) && !is_null($arrTag['field'])) {
+                if (in_array($arrTag['field'], array_keys($item))) {
+                    $value = $item[$arrTag['field']];
+                }
+            }
+
+            if(is_null($value) || strlen($value) == 0)
+                $ret = null;
+            elseif (preg_match($pattern, $value, $matches) > 0) {
+                switch($arrTag['index'])
+                {
+                    case null:
+                        $ret = $matches[1];
+                        break;
+
+                    case "LAST":
+                        $ret = $matches[count($matches) - 1];
+                        break;
+
+                    default:
+                        $ret = $matches[$arrTag['index']];
+                        break;
+                }
+            }
+        }
+
+        return $ret;
+    }
+
+        protected function _getTagMatchValueCSS_($node, $arrTag, $returnAttribute = 'plaintext')
     {
         $ret = null;
         $fReturnNodeObject = false;
+        $propertyRegEx = null;
 
-        if (array_key_exists("return_attribute", $arrTag)) {
+        if (array_key_exists("return_attribute", $arrTag) && !is_null($arrTag['return_attribute'])) {
             $returnAttribute = $arrTag['return_attribute'];
         }
-        if($returnAttribute == 'collection' || $returnAttribute == 'node')
+        if(strtolower($returnAttribute) == 'collection' || strtolower($returnAttribute) == 'node')
         {
             $returnAttribute = null;
             $fReturnNodeObject = true;
@@ -212,7 +303,6 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             if (count($ret) > 1) {
                 $strError = sprintf("Warning:  %s plugin matched %d nodes to selector '%s' but did not specify an index.  Assuming first node.", $this->siteName, count($ret), $strMatch);
                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_WARNING__);
-//                    throw new Exception($strError);
             }
             $ret = $ret[0];
         }
@@ -220,7 +310,6 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
 
         if ($fReturnNodeObject === false && !is_null($ret)) {
-            assert(!is_array($ret));
             $ret = $ret->$returnAttribute;
 
             if (!is_null($propertyRegEx) && is_string($ret) && strlen($ret) > 0) {
@@ -233,13 +322,18 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             }
         }
 
-        if (array_key_exists("return_value_callback", $arrTag) && strlen($arrTag['return_value_callback']) > 0) {
-            if (!is_callable($arrTag['return_value_callback'])) {
-                $strError = sprintf("%s plugin failed could not call the tag callback method '%s' for attribute name '%s'.", $this->siteName, $arrTag['return_value_callback'], $returnAttribute);
+        if (!is_null($ret) && array_key_exists("return_value_callback", $arrTag) && (strlen($arrTag['return_value_callback']) > 0)) {
+            $callback = get_class($this) . "::" . $arrTag['return_value_callback'];
+            if (!method_exists($this, $arrTag['return_value_callback'])) {
+                $strError = sprintf("%s plugin failed could not call the tag callback method '%s' for attribute name '%s'.", $this->siteName, $callback, $returnAttribute);
                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
                 throw new Exception($strError);
             }
-            $ret = call_user_func($arrTag['return_value_callback'], $ret);
+
+            if (array_key_exists("callback_parameter", $arrTag) && (strlen($arrTag['callback_parameter']) > 0))
+                $ret = call_user_func($callback, array($ret, $arrTag['callback_parameter']));
+            else
+                $ret = call_user_func($callback, $ret);
         }
 
 
@@ -260,50 +354,50 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
     {
         $ret = null;
         $item = null;
+        $tagSetup = $this->arrListingTagSetup;
 
         // first looked for the detail view layout and parse that
-        $strNodeMatch = $this->getTagSelector($this->arrListingTagSetup['tag_listings_section']);
+        $strNodeMatch = $this->getTagSelector($tagSetup['tag_listings_section']);
 
         $GLOBALS['logger']->logLine($this->siteName . " finding nodes matching: " . $strNodeMatch, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        $nodesJobRows = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_listings_section'], 'collection');
+        $nodesJobRows = $this->_getTagMatchValue_($objSimpHTML, $tagSetup['tag_listings_section'], 'collection');
 
-        if (isset($nodesJobRows) && $nodesJobRows != null && count($nodesJobRows) > 0) {
+        if ($nodesJobRows === false || (isset($nodesJobRows) && $nodesJobRows != null && count($nodesJobRows) > 0)) {
             foreach ($nodesJobRows as $node) {
                 //
                 // get a new record with all columns set to null
                 //
                 $item = $this->getEmptyJobListingRecord();
 
-                $item['job_title'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_title'], 'plaintext');
-                $item['job_post_url'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_link'], 'href');
+                $item['job_title'] = $this->_getTagMatchValue_($node, $tagSetup['tag_title'], 'plaintext');
+                $item['job_post_url'] = $this->_getTagMatchValue_($node, $tagSetup['tag_link'], 'href');
 
                 if (strlen($item['job_title']) == 0)
                     continue;
 
-                if (array_key_exists('tag_company', $this->arrListingTagSetup)) {
-                    $item['company'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_company'], 'plaintext');
-                }
+                if (array_key_exists('tag_company', $tagSetup) && count($tagSetup['tag_company']) >= 1)
+                    $item['company'] = $this->_getTagMatchValue_($node, $tagSetup['tag_company'], 'plaintext', $item);
 
-                if (array_key_exists('tag_job_id', $this->arrListingTagSetup))
-                    $item['job_id'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_job_id'], 'plaintext');
+                if (array_key_exists('tag_department', $tagSetup) && count($tagSetup['tag_department']) >= 1)
+                    $item['job_site_category'] = $this->_getTagMatchValue_($node, $tagSetup['tag_department'], 'plaintext', $item);
 
-                if (array_key_exists('tag_department', $this->arrListingTagSetup))
-                    $item['job_site_category'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_department'], 'plaintext');
+                if (array_key_exists('tag_location', $tagSetup) && count($tagSetup['tag_location']) >= 1)
+                    $item['location'] = $this->_getTagMatchValue_($node, $tagSetup['tag_location'], 'plaintext', $item);
 
-                if (array_key_exists('tag_location', $this->arrListingTagSetup))
-                    $item['location'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_location'], 'plaintext');
+                if (array_key_exists('tag_job_posting_date', $tagSetup) && count($tagSetup['tag_job_posting_date']) >= 1)
+                    $item['job_site_date'] = $this->_getTagMatchValue_($node, $tagSetup['tag_job_posting_date'], 'plaintext', $item);
 
-                if (array_key_exists('tag_job_category', $this->arrListingTagSetup))
-                    $item['job_site_category'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_job_category'], 'plaintext');
+                if (array_key_exists('tag_employment_type', $tagSetup) && count($tagSetup['tag_employment_type']) >= 1)
+                    $item['employment_type'] = $this->_getTagMatchValue_($node, $tagSetup['tag_employment_type'], 'plaintext', $item);
 
                 if (array_key_exists('tag_job_posting_date', $this->arrListingTagSetup))
                     $item['job_site_date'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_job_posting_date'], 'plaintext');
 
-                if (array_key_exists('tag_employment_type', $this->arrListingTagSetup))
-                    $item['employment_type'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_employment_type'], 'plaintext');
+                if (array_key_exists('regex_link_job_id', $tagSetup) && count($tagSetup['regex_link_job_id']) >= 1)
+                    $this->regex_link_job_id = $tagSetup['regex_link_job_id'];
 
-                if (array_key_exists('regex_link_job_id', $this->arrListingTagSetup))
-                    $this->regex_link_job_id = $this->arrListingTagSetup['regex_link_job_id'];
+                if (array_key_exists('tag_job_id', $tagSetup) && count($tagSetup['tag_job_id']) >= 1)
+                    $item['job_id'] = $this->_getTagMatchValue_($node, $tagSetup['tag_job_id'], 'plaintext', $item);
 
                 $ret[] = $this->normalizeJobItem($item);
 
@@ -322,16 +416,18 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
     function takeNextPageAction($driver)
     {
+        $tagSetup = $this->arrListingTagSetup;
+
         if (!is_null($this->nextPageScript)) {
             $script = "function callNextPage() { " . $this->nextPageScript . " } ; callNextPage();";
             $GLOBALS['logger']->logLine("Going to next page of results via script: " . $script, \Scooper\C__DISPLAY_NORMAL__);
             $driver->executeScript($script);
             sleep($this->additionalLoadDelaySeconds);
         }
-        elseif (array_key_exists('tag_next_button', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_next_button']))
+        elseif (array_key_exists('tag_next_button', $tagSetup) && !is_null($tagSetup['tag_next_button']))
         {
-            if (!is_null($this->arrListingTagSetup['tag_next_button'])) {
-                $strMatch = $this->getTagSelector($this->arrListingTagSetup['tag_next_button']);
+            if (!is_null($tagSetup['tag_next_button'])) {
+                $strMatch = $this->getTagSelector($tagSetup['tag_next_button']);
                 if (isset($strMatch)) {
                     try {
                         $GLOBALS['logger']->logLine("Going to next page of results via CSS object " . $strMatch, \Scooper\C__DISPLAY_NORMAL__);

@@ -701,11 +701,9 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                                 continue;
                             }
 
-                            if($classPlug->isBitFlagSet(C__JOB_KEYWORD_MULTIPLE_TERMS_SUPPORTED) || $classPlug->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
+                            if($classPlug->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
                             {
-                                $thisSearch['keywords_array'] = $keywordSet['keywords_array'];
-                                $thisSearch['keywords_array_tokenized'] = $keywordSet['keywords_array_tokenized'];
-
+                                $thisSearch['key'] = $siteToSearch . "-alljobs";
                                 $GLOBALS['USERDATA']['configuration_settings']['searches'][$thisSearch['key']] = $thisSearch;
                             }
                             else // if not, we need to add search for each keyword using that word as a single value in a keyword set
@@ -793,40 +791,44 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                 }
 
                 $locTypeNeeded = $classPlug->getLocationSettingType();
-                if(array_key_exists($locTypeNeeded, $primaryLocationSet))
-                    $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value'] = $primaryLocationSet[$locTypeNeeded];
-                else {
-                    $err = "Error:  unable to add search '" . $searchKey . "' because the required location type '" . $locTypeNeeded ."' was not found in the location set '" . $primaryLocationSet['key'] . "'. Excluding searches for " . $curSiteName .".";
-                    handleException(new IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' is not valid.", $locTypeNeeded)), $err, $raise=false);
-                    $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$curSiteName] = $curSiteName;
-
-                    $arrNewSearchList = array_filter($GLOBALS['USERDATA']['configuration_settings']['searches'], function ($var) use ($curSiteName) {
-                        if (strcasecmp($var['site_name'], $curSiteName) == 0)
-                            return false;
-                        return true;
-                    });
-
-                    $GLOBALS['USERDATA']['configuration_settings']['searches'] = \Scooper\array_copy($arrNewSearchList);
-                    $this->_addLocationSetToInitialSetOfSearches_();
-                    return;
-
-                }
-
-                if(!isValueURLEncoded($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value']))
+                if(!is_null($locTypeNeeded))
                 {
-                    $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value'] = urlencode($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value']);
+                    if(array_key_exists($locTypeNeeded, $primaryLocationSet))
+                        $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value'] = $primaryLocationSet[$locTypeNeeded];
+                    else {
+                        $err = "Error:  unable to add search '" . $searchKey . "' because the required location type '" . $locTypeNeeded ."' was not found in the location set '" . $primaryLocationSet['key'] . "'. Excluding searches for " . $curSiteName .".";
+                        handleException(new IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' is not valid.", $locTypeNeeded)), $err, $raise=false);
+                        $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$curSiteName] = $curSiteName;
+
+                        $arrNewSearchList = array_filter($GLOBALS['USERDATA']['configuration_settings']['searches'], function ($var) use ($curSiteName) {
+                            if (strcasecmp($var['site_name'], $curSiteName) == 0)
+                                return false;
+                            return true;
+                        });
+
+                        $GLOBALS['USERDATA']['configuration_settings']['searches'] = \Scooper\array_copy($arrNewSearchList);
+                        $this->_addLocationSetToInitialSetOfSearches_();
+                        return;
+
+                    }
+
+                    if(!isValueURLEncoded($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value']))
+                    {
+                        $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value'] = urlencode($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value']);
+                    }
+
+                    if($classPlug->isBitFlagSet(C__JOB_LOCATION_REQUIRES_LOWERCASE))
+                    {
+                        $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value'] = strtolower($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value']);
+                    }
+
+
+                    $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['key'] = $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['key'] . "-loc-" . strtolower($primaryLocationSet['key']);
+
+                    // BUGBUG:  Workaround for a single plugin, Dice, to be able to get more than one location set parameter
+                    $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_set_key'] = $primaryLocationSet['key'];
                 }
 
-                if($classPlug->isBitFlagSet(C__JOB_LOCATION_REQUIRES_LOWERCASE))
-                {
-                    $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value'] = strtolower($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value']);
-                }
-
-
-                $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['key'] = $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['key'] . "-loc-" . strtolower($primaryLocationSet['key']);
-
-                // BUGBUG:  Workaround for a single plugin, Dice, to be able to get more than one location set parameter
-                $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_set_key'] = $primaryLocationSet['key'];
             }
         }
     }
@@ -1111,8 +1113,9 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                 $tokens = explode("|", $titleRecord['tokenized']);
                 $GLOBALS['USERDATA']['title_negative_keyword_tokens'][] = $tokens;
             }
-
-            $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokens to use for filtering titles from '" . getArrayValuesAsString($this->getInputFilesByType("negative_title_keywords")) . "'." , \Scooper\C__DISPLAY_WARNING__);
+            
+            $inputfiles = array_column($this->getInputFilesByType("negative_title_keywords"), 'full_file_path');
+            $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokens to use for filtering titles from '" . getArrayValuesAsString($inputfiles) . "'." , \Scooper\C__DISPLAY_WARNING__);
 
         }
 
@@ -1197,16 +1200,18 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             }
         }
 
+        $inputfiles = array_column($arrFileInput, 'full_file_path');
+
         if($fCompaniesLoaded == false)
         {
             if(count($arrFileInput) == 0)
-                $GLOBALS['logger']->logLine("No file specified for companies regexes to exclude from '" . getArrayValuesAsString($arrFileInput) . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
+                $GLOBALS['logger']->logLine("No file specified for companies regexes to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
             else
-                $GLOBALS['logger']->logLine("Could not load regex list for companies to exclude from '" . getArrayValuesAsString($arrFileInput) . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
+                $GLOBALS['logger']->logLine("Could not load regex list for companies to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
         }
         else
         {
-            $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']). " regexes to use for filtering companies from " . getArrayValuesAsString($arrFileInput)  , \Scooper\C__DISPLAY_WARNING__);
+            $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']). " regexes to use for filtering companies from " . getArrayValuesAsString($inputfiles)  , \Scooper\C__DISPLAY_NORMAL__);
 
         }
     }

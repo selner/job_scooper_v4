@@ -51,16 +51,11 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
     function __construct($strOutputDirectory = null)
     {
         $this->additionalFlags[] = C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES;
-        $this->additionalFlags[] = C__JOB_PAGE_VIA_URL;
+        $this->paginationType = C__PAGINATION_PAGE_VIA_URL;
 
         $this->siteBaseURL = $this->childSiteURLBase;
         $this->strBaseURLFormat = $this->childSiteURLBase . $this->strBaseURLPathSection . $this->strBaseURLPathSuffix;
         parent::__construct($strOutputDirectory);
-    }
-
-    protected function getPageURLfromBaseFmt($searchDetails, $nPage = null, $nItem = null)
-    {
-        return parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
     }
 
     protected function getKeywordURLValue($searchDetails) {
@@ -251,8 +246,6 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
 
 abstract class OptimizedAdicioCareerCastPlugin extends BaseAdicioCareerCastPlugin
 {
-    protected $additionalFlags = [C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED];
-
     function __construct($strOutputDirectory = null)
     {
         $this->strBaseURLPathSection = str_replace("/jobs/results/keyword/***KEYWORDS***", "/jobs/search/results", $this->strBaseURLPathSection);

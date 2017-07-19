@@ -40,7 +40,7 @@ class PluginAmazon extends ClassBaseClientSideHTMLJobSitePlugin
     protected $nJobListingsPerPage = 100;
     protected $siteBaseURL = 'http://www.amazon.jobs';
     protected $strBaseURLFormat = "https://www.amazon.jobs/en/search?base_query=***KEYWORDS***&location%5B%5D=***LOCATION***&result_limit=100&sort=recent&cache";
-    protected $additionalFlags = [C__JOB_CLIENTSIDE_INFSCROLLPAGE_VIALOADMORE];
+    protected $paginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
     protected $typeLocationSearchNeeded = 'location-city-dash-statecode';
     protected $nMaxJobsToReturn = 2000; // Amazon maxes out at 2000 jobs in the list
     protected $additionalLoadDelaySeconds = 1;

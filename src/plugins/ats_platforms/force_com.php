@@ -20,12 +20,10 @@ require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 class BaseForceComClass extends ClassClientHTMLJobSitePlugin
 {
-protected $additionalFlags = [ C__JOB_SETTINGS_GET_ALL_JOBS_UNFILTERED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_CLIENTSIDE_PAGE_VIA_CALLBACK ] ;
-protected $additionalLoadDelaySeconds = 3;
-protected $nJobListingsPerPage = 50;
+    protected $additionalLoadDelaySeconds = 3;
+    protected $nJobListingsPerPage = 50;
+    protected $paginationType = C__PAGINATION_PAGE_VIA_CALLBACK;
 
-//    A4J.AJAX.Submit('j_id0:j_id1:atsForm',event,{'similarityGroupingId':'j_id0:j_id1:atsForm:j_id123','containerId':'j_id0:j_id1:atsForm:j_id77','parameters':{'j_id0:j_id1:atsForm:j_id123':'j_id0:j_id1:atsForm:j_id123'} ,'status':'j_id0:j_id1:atsForm:ats_pagination_status'} );return false;";
-//
     function takeNextPageAction($driver)
     {
         $nextPageJS = "function contains(selector, text) {
@@ -42,7 +40,7 @@ protected $nJobListingsPerPage = 50;
             }
         ";
 
-        $this->runJavaScriptSnippet($nextPageJS, false, $this->additionalLoadDelaySeconds);
+        $this->runJavaScriptSnippet($nextPageJS, false);
     }
 
     function parseTotalResultsCount($objSimpHTML)
@@ -69,7 +67,7 @@ protected $nJobListingsPerPage = 50;
         'tag_link' =>  array(array('tag' => 'td', 'index' => 0), array('tag' => 'a'), 'return_attribute' => 'href'),
         'tag_department' =>  array(array('tag' => 'td'), array('tag' => 'span'), 'index' => 0),
         'tag_location' =>  array(array('tag' => 'td'), array('tag' => 'span'), 'index' => 1),
-        'tag_company' =>  array('return_value_callback' => 'ClassBaseHTMLJobSitePlugin::setCompanyToSiteName'),
+        'tag_company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
         'tag_next_button' => array('selector' => '#j_id0:j_id1:atsForm:j_id154'),
         'regex_link_job_id' => '/.*?jobId=([^&]+)/i'
     );
@@ -84,13 +82,3 @@ class PluginAltasource extends BaseForceComClass
     protected $nJobListingsPerPage = 25;
     protected $strBaseURLFormat = "http://altasourcegroup.force.com/careers";
 }
-
-class PluginSalesforce extends BaseForceComClass
-{
-    protected $siteName = 'Salesforce';
-    protected $siteBaseURL = "https://careers.secure.force.com";
-    protected $strBaseURLFormat = "https://careers.secure.force.com/jobs";
-
-// Alternate job site that could be used instead:   http://salesforce.careermount.com/candidate/job_search/quick/results?location=seattle&keyword=developer&sort_dir=desc&sort_field=post_date&relevance=false
-}
-
