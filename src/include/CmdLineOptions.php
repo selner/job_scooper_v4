@@ -17,7 +17,7 @@
 //
 // If installed as part of the package, uses Klogger v0.1 version (http://codefury.net/projects/klogger/)
 //
-define('__APP_VERSION__', "Job Scooper v4.add_json_config_plugins");
+define('__APP_VERSION__', "Job Scooper v4.plugin_definition_cleanup");
 
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/lib/pharse.php');
@@ -29,6 +29,7 @@ if (file_exists(BASE_DIR . '/vendor/autoload.php')) {
 } else {
     trigger_error("Composer required to run this app.");
 }
+
 
 $GLOBALS['OPTS']['VERBOSE'] = false;
 $GLOBALS['OPTS']['VERBOSE_API_CALLS'] = false;
@@ -135,30 +136,30 @@ function is_OptionIncludedSite($strName)
     $strGivenKey = $strIncludeSiteKey."_given";
     $ret = false;
 
-        if (isset($GLOBALS['OPTS'][$strGivenKey]) && $GLOBALS['OPTS'][$strGivenKey] == true)
+    if (isset($GLOBALS['OPTS'][$strGivenKey]) && $GLOBALS['OPTS'][$strGivenKey] == true)
+    {
+        switch($GLOBALS['OPTS'][$strIncludeSiteKey])
         {
-           switch($GLOBALS['OPTS'][$strIncludeSiteKey])
-           {
-               case 0:
-                   $GLOBALS['OPTS'][$strIncludeSiteKey] = false;
-                    break;
+            case 0:
+                $GLOBALS['OPTS'][$strIncludeSiteKey] = false;
+                break;
 
-               case -1:
-               case 1:
-               default:
-               $GLOBALS['OPTS'][$strIncludeSiteKey] = true;
-               break;
+            case -1:
+            case 1:
+            default:
+                $GLOBALS['OPTS'][$strIncludeSiteKey] = true;
+                break;
 
-           }
-           $ret = $GLOBALS['OPTS'][$strIncludeSiteKey];
         }
-        elseif(isset($GLOBALS['OPTS']['include_all_given']) && $GLOBALS['OPTS']['include_all_given'] == true)
-        {
-            $GLOBALS['OPTS'][$strGivenKey] = true;
-            $GLOBALS['OPTS'][$strIncludeSiteKey] = true;
-            $ret = $GLOBALS['OPTS'][$strIncludeSiteKey];
-        }
-    
+        $ret = $GLOBALS['OPTS'][$strIncludeSiteKey];
+    }
+    elseif(isset($GLOBALS['OPTS']['include_all_given']) && $GLOBALS['OPTS']['include_all_given'] == true)
+    {
+        $GLOBALS['OPTS'][$strGivenKey] = true;
+        $GLOBALS['OPTS'][$strIncludeSiteKey] = true;
+        $ret = $GLOBALS['OPTS'][$strIncludeSiteKey];
+    }
+
 
 
     return $ret;

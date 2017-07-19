@@ -43,7 +43,7 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
     /**
      * If the site does not have a URL parameter for number of days
      * then set the plugin flag to C__JOB_DAYS_VALUE_NOTAPPLICABLE__
-     * in the SitePlugins.php file and just comment out this function.
+     * in the PluginOptions.php file and just comment out this function.
      *
      * getDaysURLValue returns the value that is used to replace
      * the ***DAYS*** token in the search URL for the number of

@@ -121,7 +121,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
      *
      * If the site does not show the total number of results
      * then set the plugin flag to C__JOB_PAGECOUNT_NOTAPPLICABLE__
-     * in the SitePlugins.php file and just comment out this function.
+     * in the PluginOptions.php file and just comment out this function.
      *
      * parseTotalResultsCount returns the total number of listings that
      * the search returned by parsing the value from the returned HTML

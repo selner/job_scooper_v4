@@ -15,7 +15,7 @@
  * under the License.
  */
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
-require_once(__ROOT__.'/include/Options.php');
+require_once(__ROOT__.'/include/CmdLineOptions.php');
 require_once(__ROOT__.'/include/SeleniumSession.php');
 require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
 header('Content-Type: text/html');
@@ -640,52 +640,44 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     private function _addSearch_(&$searchDetails)
     {
 
-        if(\Scooper\isBitFlagSet($searchDetails['user_setting_flags'], C__USER_KEYWORD_ANYWHERE) && $this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
-        {
-            $strErr = "Skipping " . $searchDetails['key'] . " search on " . $this->siteName . ".  The plugin only can return all results and therefore cannot be matched with the requested keyword string [Search requested keyword match=anywhere].  ";
-            $GLOBALS['logger']->logLine($strErr, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+        if ($searchDetails['key'] == "") {
+            $searchDetails['key'] = \Scooper\strScrub($searchDetails['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($searchDetails['key'], FOR_LOOKUP_VALUE_MATCHING);
+        }
+
+        assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || ($searchDetails['location_search_value'] !== VALUE_NOT_SUPPORTED && strlen($searchDetails['location_search_value']) > 0));
+
+        if($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
+            // null out any generalized keyword set values we previously had
+            $searchDetails['keywords_array'] = null;
+            $searchDetails['keywords_array_tokenized'] = null;
+            $searchDetails['keywords_string_for_url'] = null;
         }
         else
         {
-
-            if ($searchDetails['key'] == "") {
-                $searchDetails['key'] = \Scooper\strScrub($searchDetails['site_name'], FOR_LOOKUP_VALUE_MATCHING) . "-" . \Scooper\strScrub($searchDetails['key'], FOR_LOOKUP_VALUE_MATCHING);
-            }
-
-            assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || ($searchDetails['location_search_value'] !== VALUE_NOT_SUPPORTED && strlen($searchDetails['location_search_value']) > 0));
-
-            if($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
-                // null out any generalized keyword set values we previously had
-                $searchDetails['keywords_array'] = null;
-                $searchDetails['keywords_array_tokenized'] = null;
-                $searchDetails['keywords_string_for_url'] = null;
-            }
-            else
-            {
-                $this->_setKeywordStringsForSearch_($searchDetails);
-            }
-
-            $this->_setStartingUrlForSearch_($searchDetails);
-
-
-            // Check the cached data to see if we already have jobs saved for this search & timeframe.
-            // if so, mark the search as cached
-            $arrSearchJobList = $this->_getJobsfromFileStoreForSearch_($searchSettings = $searchDetails, $returnFailedSearches = false);
-            if((is_null($arrSearchJobList) || !is_array($arrSearchJobList)) == false)
-            {
-                // we have previously cached good search results for this search timeframe
-                $searchDetails['is_cached'] = true;
-            }
-
-            // add a global record for the search so we can report errors
-            $GLOBALS['USERDATA']['search_results'][$searchDetails['key']] = \Scooper\array_copy($searchDetails);
-
-            //
-            // Add the search to the list of ones to run
-            //
-            $this->arrSearchesToReturn[] = $searchDetails;
-            $GLOBALS['logger']->logLine($this->siteName . ": added search (" . $searchDetails['key'] . ")", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            $this->_setKeywordStringsForSearch_($searchDetails);
         }
+
+        $this->_setStartingUrlForSearch_($searchDetails);
+
+
+        // Check the cached data to see if we already have jobs saved for this search & timeframe.
+        // if so, mark the search as cached
+        $arrSearchJobList = $this->_getJobsfromFileStoreForSearch_($searchSettings = $searchDetails, $returnFailedSearches = false);
+        if((is_null($arrSearchJobList) || !is_array($arrSearchJobList)) == false)
+        {
+            // we have previously cached good search results for this search timeframe
+            $searchDetails['is_cached'] = true;
+        }
+
+        // add a global record for the search so we can report errors
+        $GLOBALS['USERDATA']['search_results'][$searchDetails['key']] = \Scooper\array_copy($searchDetails);
+
+        //
+        // Add the search to the list of ones to run
+        //
+        $this->arrSearchesToReturn[] = $searchDetails;
+        $GLOBALS['logger']->logLine($this->siteName . ": added search (" . $searchDetails['key'] . ")", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
     }
 
