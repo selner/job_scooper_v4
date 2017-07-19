@@ -61,7 +61,7 @@ Required Parameters:
  * To run as part of app:  download [selenium-server-standalone-3.0.1.jar](http://selenium-release.storage.googleapis.com/index.html?path=3.0.1) and copy it to the /src/lib directory.   
 * Oracle](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)  Selenium Standalone Server requires Java 8 on macOS 10.12. 
 
-=======
+
 ## What's New in JobScooper V4
 ### 🆕 Job Site Plugin Authoring Using Agenty's Data Scraping Studio  ✏️ 
 Non-developers can now author plugins using (https://www.agenty.com/data-extraction-software.aspx)[Data Scraping Studio] or the (https://chrome.google.com/webstore/detail/agenty-advanced-web-scrap/gpolcofcjjiooogejfbaamdgmgfehgff?hl=en-US]Advanced Web Scraper)[Chrome extension] from (http://www.agenty.com)[Agenty].  
@@ -150,8 +150,8 @@ You can define the full configuration for a job site plugin in a single JSON fil
     "Type": "INFINITE-SCROLL-NO-CONTROL"
   }
 }
-
 ```
+
 ### 🆕 Job Scooper now Supports Running under Docker 🖥 
 Setting up and running job scooper anywhere is now made easier through Docker.  With just a few tweaks to the Dockerfile and associated run scripts, you can have Job Scooper quickly up and running in a container quickly.
 
@@ -189,7 +189,6 @@ class PluginCyberJobs extends ClassClientHTMLJobSitePlugin
 
 ** Get the full set of feature addtions and updates in the [release notes].**
 
-=======
 ## Other Stuff
 * Version:  v4.0.beta1 [release notes](../../releases)
 * Author:  Bryan Selner (dev at recoilvelocity dot com)
