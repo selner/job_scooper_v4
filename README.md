@@ -1,5 +1,5 @@
 # Job Scooper v4
-** Get automatic email alerts for all new job postings from 70+ job boards and career websites based on your keywords and location.**
+** Get automatic email alerts for all new job postings from 70+ job boards and career websites based on your keywords and location.
 
 ![Example: Job Scooper Email Notification on Mobile](http://www.bryanselner.com/www-root-wpblog/wp-content/uploads/2014/07/JobScooperResultEmailMobile-250pxw.png "Example: Job Scooper Email Notification on Mobile")
 
@@ -62,8 +62,136 @@ Required Parameters:
 * Oracle](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)  Selenium Standalone Server requires Java 8 on macOS 10.12. 
 
 =======
+## What's New in JobScooper V4
+### 🆕 Job Site Plugin Authoring Using Agenty's Data Scraping Studio  ✏️ 
+Non-developers can now author plugins using (https://www.agenty.com/data-extraction-software.aspx)[Data Scraping Studio] or the (https://chrome.google.com/webstore/detail/agenty-advanced-web-scrap/gpolcofcjjiooogejfbaamdgmgfehgff?hl=en-US]Advanced Web Scraper)[Chrome extension] from (http://www.agenty.com)[Agenty].  
+
+Just tag the specific job results page fields for the site and set the Agenty field names to match the corresponding Job Scooper field: 
+```php
+(
+        'tag_pages_count',
+	'tag_listings_noresults',
+	'tag_listings_count',
+	'tag_listings_section',
+	'tag_next_button',
+	'tag_job_id',
+	'tag_title',
+	'tag_link',
+	'tag_department',
+	'tag_location',
+	'tag_job_category',
+	'tag_company',
+	'tag_company_logo',
+	'tag_job_posting_date',
+	'tag_employment_type',
+);
+```
+
+Once you've tagged the fields that are available, export the Agenty data scraping agent configuration you authored out to a JSON file.  In that JSON file, add a key/value under Pagination called "Type" with a value equal to the corresponding Job Scooper value for the job sites pagination and load more results style.
+
+```javascript
+"Pagination": {
+    "Type": "INFINITE-SCROLL-NO-CONTROL"
+  }
+```
+
+The currently list of pagination types supported by Job Scooper can be found in SitePlugins.php. 
+
+Save your updated Agenty JSON config file to the plugins/json_plugins directory and kick off a job scooper run.  Your new Agenty-authored plugin will run exactly like any other plugin built for Job Scooper. 
+
+### 🆕 Don't Know PHP?  Add a plugin solely via JSON instead!  ✏️ 
+You can define the full configuration for a job site plugin in a single JSON file.  Just drop the new file into the plugins/json_plugins folder and let it rip.  
+
+```javascript
+{
+  "AgentName": "Startjobs",
+  "SourceURL": "https://start.jobs/search",
+  "Collections": [
+    {
+      "Name": "PageFields",
+      "Fields": [
+      {
+          "Name": "tag_listings_section",
+          "Selector": ".js-job",
+          "Extract": "HTML",
+          "Attribute": "node",
+          "Type": "CSS"
+        },
+        {
+          "Name": "tag_pages_count",
+          "Selector": "div.js-infinite-scroll",
+          "Extract": "ATTR",
+          "Attribute": "data-total-pages",
+          "Type": "CSS"
+        }
+      ]
+    },
+    {
+      "Name": "ItemFields",
+      "Fields": [
+        {
+          "Name": "tag_title",
+          "Selector": ".title",
+          "Extract": "TEXT",
+          "Attribute": null,
+          "Type": "CSS"
+        },
+        {
+          "Name": "tag_location",
+          "Selector": "span.location",
+          "Extract": "TEXT",
+          "Attribute": null,
+          "Type": "CSS"
+        }
+      }
+    }
+  ],
+  "Pagination": {
+    "Type": "INFINITE-SCROLL-NO-CONTROL"
+  }
+}
+
+```
+### 🆕 Job Scooper now Supports Running under Docker 🖥 
+Setting up and running job scooper anywhere is now made easier through Docker.  With just a few tweaks to the Dockerfile and associated run scripts, you can have Job Scooper quickly up and running in a container quickly.
+
+Check out the Dockerfile and build_and_run_docker.* files in the repo for a set of base files that should get you 90% of the way there for your system.
+
+Job Scooper also now supports running Selenium for AJAX job sites in a Docker container. 
+
+
+### Plugins Are Even Now Easier to Author in PHP ✏️ 
+Using the new Simple Job Site base plugin classes, developers can now add an entire new plugin for a job site in fewer than 40 lines of code!  Here's a fully-featured job site plugin example of how to do it:
+
+ ```php
+class PluginCyberJobs extends ClassClientHTMLJobSitePlugin
+{
+    protected $siteName = 'CyberJobs';
+    protected $siteBaseURL = "https://cyber.jobs";
+    protected $strBaseURLFormat = "https://cyber.jobs/search/?page=***PAGE_NUMBER***&searchterms=***KEYWORDS***&searchlocation=***LOCATION***&newsearch=true&originalsearch=true&sorttype=date";
+
+    protected $paginationType = C__PAGINATION_PAGE_VIA_URL;
+    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
+
+    protected $arrListingTagSetup = array(
+        'tag_listings_count' =>  array('tag' => 'span', 'attribute' => 'id', 'attribute_value' =>'total-result-count', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
+        'tag_listings_section' => array('selector' => '.job-details-container'),
+        'tag_title' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+        'tag_link' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
+        'tag_job_id' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>'/.*?(\d+)$/'),
+        'tag_employment_type' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'wage'), array('tag' => 'span')),
+        'tag_location' =>  array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'location'),
+        'tag_job_posting_date' =>  array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'posted')
+    );
+
+}
+```
+
+** Get the full set of feature addtions and updates in the [release notes].**
+
+=======
 ## Other Stuff
-* Version:  v4.0.alpha1 [release notes](https://github.com/selner/jobs_scooper/releases)
+* Version:  v4.0.beta1 [release notes](../../releases)
 * Author:  Bryan Selner (dev at recoilvelocity dot com)
 * Tested mainly on Mac OS 10.11 and 10.12.  Your mileage might vary on other platforms.
 * Issues/Bugs:  [Please report them!](../../issues)
