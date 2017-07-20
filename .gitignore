@@ -2,7 +2,7 @@
 
 *.lock
 
-src/vendor/*
+vendor
 
 *obsolete*
 
@@ -20,8 +20,7 @@ configs*
 *.pyc
 chromedriver
 geckodriver
-src/uncommitted-patches
-vendor
+uncommitted-patches
 *.diff
 sshkeys
-src/include/static/source_files
+include/static/source_files

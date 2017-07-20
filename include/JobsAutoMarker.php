@@ -15,6 +15,7 @@
  * under the License.
  */
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
+use \Khartnett\Normalization as Normalize;
 
 class JobsAutoMarker extends ClassJobsSiteCommon
 {
@@ -22,13 +23,16 @@ class JobsAutoMarker extends ClassJobsSiteCommon
     protected $arrLatestJobs_UnfilteredByUserInput = array();
     protected $arrMasterJobList = array();
     protected $cbsaList  = array();
+    protected $normalizer  = null;
     protected $cbsaPlaces  = array();
     protected $cbsaLocSetMapping = array();
+    protected $validCityValues = array();
 
     function __construct($arrJobs_Unfiltered = array(), $strOutputDirectory = null)
     {
         parent::__construct($strOutputDirectory);
         $this->arrMasterJobList = \Scooper\array_copy($arrJobs_Unfiltered);
+        $this->normalizer = new Normalize();
 
         $this->cbsaList = loadJSON(__ROOT__.'/include/static/cbsa_list.json');
         $cbsaCityMapping = loadCSV(__ROOT__.'/include/static/us_place_to_csba_mapping.csv', 'PlaceKey');
@@ -37,15 +41,20 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         {
             if(array_key_exists('location-city', $locset) === true && (array_key_exists('location-statecode', $locset)))
             {
-                $placekey = strtoupper($locset['location-city'])."_".strtoupper($locset['location-statecode']);
+                $cityName = $this->_normalizeLocation_($locset['location-city'])."_".strtoupper($locset['location-statecode']);
+                $placekey = strtoupper($cityName);
                 $cbsa = $cbsaCityMapping[$placekey];
                 $this->cbsaLocSetMapping[$locset['key']] = $cbsa['CBSA'];
             }
         }
 
+        $this->validCities = array();
+
         $cbsaInUsa = array_unique($this->cbsaLocSetMapping);
         foreach($cbsaCityMapping as $place)
         {
+            $placeName = $this->_normalizeLocation_($place['Place'] . ", " . $place['StateCode'] );
+            $this->validCityValues[$placeName] = $placeName;
             if(array_search($place['CBSA'], $cbsaInUsa) !== false)
             {
                 $this->cbsaPlaces[$place['PlaceKey']] = $place;
@@ -206,9 +215,19 @@ class JobsAutoMarker extends ClassJobsSiteCommon
 
     }
 
+    private function _normalizeLocation_($locString)
+    {
+        $stringToNormalize = "111 Bogus St, " . $locString;
+        $location = $this->normalizer->parse($stringToNormalize);
+        if ($location !== false)
+            $locString = $location['city'] . ", " . $location['state'];
+        return $locString;
+    }
+
     private function _getLocationMatchKey_($locString)
     {
-        return strtoupper(str_replace(" ", "", str_replace("Greater", "", str_replace(", ", "_", $locString))));
+        $citystate = $this->_normalizeLocation_($locString);
+        return strtoupper(str_replace(" ", "", str_replace("Greater", "", str_replace(", ", "_", $citystate))));
 
     }
     private function _markJobsList_SetOutOfArea_(&$arrJobsList)
@@ -223,13 +242,18 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         $arrKeys_Locations = array_column ( $arrJobsList, 'location');
         sort($arrKeys_Locations);
         $uniqListingLocs = array_unique($arrKeys_Locations);
+        $arrKeys_Locations = null;
         foreach($uniqListingLocs as $listingLocation)
         {
             $cbsaResult = null;
             $matchkey = $this->_getLocationMatchKey_($listingLocation);
             $placeKey = array_find_closest_key_match($matchkey, $this->cbsaPlaces);
-            if(strncmp($placeKey, $matchkey, 5) == 0)
+            if(strncmp($placeKey, $matchkey, 5) == 0) {
                 $lookupcbsa[$listingLocation] = $placeKey;
+            }
+            else {
+                $lookupcbsa[$listingLocation] = false;
+            }
         }
         $matchkey = null;
         unset($placeKey);
@@ -246,14 +270,16 @@ class JobsAutoMarker extends ClassJobsSiteCommon
             else
             {
                 $matched = false;
-                if(array_key_exists('location', $job)) {
+                if(array_key_exists('location', $job) === true && !is_null($job['location'] && strlen($job['location'] > 0))) {
                     $matchkey = $this->_getLocationMatchKey_($job['location']);
-                    if (!in_array($matchkey, $lookupcbsa)) {
-                        $job['interested'] = 'No (Out of Search Area)' . C__STR_TAG_AUTOMARKEDJOB__;
-                        appendJobColumnData($job, 'match_notes', "|", "Did not match CBSA for location.");
-                        $job['date_last_updated'] = getTodayAsString();
-                        $nJobsMarkedAutoExcluded++;
-                        $matched = true;
+                    if (!in_array($matchkey, $lookupcbsa) || $lookupcbsa[$matchkey] === false) {
+                        if (array_key_exists($job['location'], $this->validCityValues)) {
+                            $job['interested'] = 'No (Out of Search Area)' . C__STR_TAG_AUTOMARKEDJOB__;
+                            appendJobColumnData($job, 'match_notes', "|", "Did not match CBSA for location.");
+                            $job['date_last_updated'] = getTodayAsString();
+                            $nJobsMarkedAutoExcluded++;
+                            $matched = true;
+                        }
                     }
                 }
 
@@ -278,7 +304,8 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         $nJobsMarkedAutoExcluded = 0;
 
         $GLOBALS['logger']->logLine("Excluding Jobs by Companies Regex Matches", \Scooper\C__DISPLAY_NORMAL__);
-        $GLOBALS['logger']->logLine("Checking ".count($arrJobsList) ." roles against ". count($GLOBALS['USERDATA']['companies_regex_to_filter']) ." excluded companies.", \Scooper\C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine("Checking ".count($arrJobsList) ." roles against ". count($GLOBALS['USERDATA']['companies_regex_to_filter']) ." excluded companies.", 
+            \Scooper\C__DISPLAY_NORMAL__);
         $arrJobs_AutoUpdatable= array_filter($arrJobsList, "isJobAutoUpdatable");
         $nJobsSkipped = count($arrJobsList) - count($arrJobs_AutoUpdatable);
 

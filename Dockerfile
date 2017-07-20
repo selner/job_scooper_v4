@@ -146,8 +146,8 @@ RUN git clone https://github.com/selner/job_scooper_v4.git /opt/jobs_scooper -b 
 #ADD . /opt/jobs_scooper
 #RUN rm /opt/jobs_scooper/src/*.lock
 #RUN rm -Rf /opt/jobs_scooper/src/vendor/*.lock
-RUN cat /opt/jobs_scooper/include/CmdLineOptions.php | grep "__APP_VERSION__"
-RUN ls -al /opt/jobs_scooper/src
+RUN cat /opt/jobs_scooper/bootstrap.php | grep "__APP_VERSION__"
+RUN ls -al /opt/jobs_scooper
 
 ADD scoop_docker.sh .
 RUN chmod +x /opt/jobs_scooper/*.sh
@@ -159,7 +159,7 @@ RUN ls -al /opt/jobs_scooper
 ### Install PHP dependencies
 ###
 ########################################################
-WORKDIR /opt/jobs_scooper/src
+WORKDIR /opt/jobs_scooper
 RUN composer install --no-interaction -vv
 
 
@@ -168,7 +168,7 @@ RUN composer install --no-interaction -vv
 ### Install python dependencies
 ###
 ########################################################
-RUN pip install --no-cache-dir -v -r /opt/jobs_scooper/src/python/pyJobNormalizer/requirements.txt
+RUN pip install --no-cache-dir -v -r /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
 
 
 ########################################################

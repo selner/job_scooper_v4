@@ -27,11 +27,12 @@ class PluginGeekwire extends ClassClientHTMLJobSitePlugin
     protected $arrListingTagSetup = array(
         'tag_listings_section' => array('selector' => 'ul.job_listings li.type-job_listing'),
         'tag_title' => array('tag' => 'h3'),
-        'tag_link' => array('tag' => 'a', 'index' => 0, 'return_attribute' => 'href'),
-        'tag_company' => array('selector' => 'div.company span', 'index' => 0),
-        'tag_location' => array('selector' => 'div.location'),
+        'tag_link' => array('tag' => 'a.job_listing-clickbox', 'index' => 0, 'return_attribute' => 'href'),
+        'tag_company' => array('selector' => 'div.job_listing-company strong', 'return_attribute' => 'plaintext'),
+        'tag_location' => array('selector' => 'div.job_listing-location a', 'return_attribute' => 'plaintext'),
         'tag_job_posting_date' => array('selector' => 'date', 'index' => 0),
         'tag_job_category' => array('selector' => 'ul.meta li', 'index' => 0),
+        'tag_company_logo' => array('selector' => 'img.company_logo'),
         'tag_job_id' =>  array('tag' => 'a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' =>  '/\/jobs\/job\/(.*)/i')
     );
 

@@ -23,6 +23,8 @@ define('JOBS_SCOOPER_MAX_FILE_SIZE', 1024000);
 
 define('REXPR_PARTIAL_MATCH_URL_DOMAIN', '^https*.{3}[^\/]*');
 define('REXPR_MATCH_URL_DOMAIN', '/^https*.{3}[^\/]*/');
+use \Khartnett\Normalization as Normalize;
+
 class ClassJobsSiteCommon
 {
 
@@ -38,6 +40,7 @@ class ClassJobsSiteCommon
     protected $prevCookies = "";
     protected $prevURL = null;
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
+    protected $normalizer  = null;
 
 
     function __construct($strOutputDirectory = null)
@@ -46,6 +49,7 @@ class ClassJobsSiteCommon
         {
             $this->detailsMyFileOut = \Scooper\parseFilePath($strOutputDirectory, false);
         }
+        $this->normalizer = new Normalize();
 
     }
 
@@ -230,7 +234,10 @@ class ClassJobsSiteCommon
         {
             $arrItem['location'] = $arrMatches[3] . ", " . $arrMatches[2];
         }
-
+        $stringToNormalize = "111 Bogus St, " . $arrItem['location'];
+        $location = $this->normalizer->parse($stringToNormalize);
+        if($location !== false)
+            $arrItem['location'] = $location['city'] . ", " . $location['state'];
 
         if (is_null($arrItem['company']) || strlen($arrItem['company']) == 0) {
             $arrItem ['company'] = '[UNKNOWN]';

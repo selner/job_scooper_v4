@@ -906,12 +906,18 @@ function writeJSON($data, $filepath)
 
 function loadJSON($file)
 {
-    $GLOBALS['logger']->logLine("Reading json data from file " . $file, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-    $jsonText = file_get_contents($file, FILE_TEXT);
+    if(is_file($file)) {
+        $GLOBALS['logger']->logLine("Reading json data from file " . $file, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $jsonText = file_get_contents($file, FILE_TEXT);
 
-    $data = json_decode($jsonText, $assoc = true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
-
-    return $data;
+        $data = json_decode($jsonText, $assoc = true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+        return $data;
+    }
+    else
+    {
+        $GLOBALS['logger']->logLine("Unable to load json data from file " . $file, \Scooper\C__DISPLAY_ERROR__);
+        return null;
+    }
 
 }
 
