@@ -16,8 +16,7 @@
  */
 
 
-if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
-require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
+require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
 class ClassMultiSiteSearch extends ClassJobsSiteCommon
 {

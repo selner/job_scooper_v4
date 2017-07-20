@@ -15,14 +15,7 @@
  * under the License.
  */
 
-if (!strlen(__ROOT__) > 0) {
-    define('__ROOT__', dirname(dirname(__FILE__)));
-}
-require_once(__ROOT__.'/include/PluginOptions.php');
-require_once(__ROOT__.'/include/ClassJobsNotifier.php');
-
-// Use composer autoloader
-require_once(__ROOT__ . '/vendor/autoload.php');
+require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
 class ErrorManager {
 
@@ -75,7 +68,7 @@ class ErrorManager {
         if(countAssociativeArrayValues($arrFailedPluginsReport) == 0)
         {
             if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("No error notification necessary:  no errors detected for the run searches.", \Scooper\C__DISPLAY_NORMAL__); }
-            return array('body' => null, 'attachments' => null);
+            return null;
         }
 
 //        $renderer = loadTemplate(dirname(__FILE__).'/templates/mc_html_email_base_boxed_basic_query.mustache');

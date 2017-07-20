@@ -15,9 +15,7 @@
      * License for the specific language governing permissions and limitations
      * under the License.
      */
-if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
-require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
-
+require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
 //.// http://expediajobs.findly.com/candidate/job_search/advanced/results?job_type=5517&state=2336&country=5492&sort=date
 

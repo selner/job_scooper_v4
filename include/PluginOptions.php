@@ -14,17 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
-require_once(__ROOT__.'/include/CSimpleHTMLHelper.php');
-require_once(__ROOT__.'/include/CmdLineOptions.php');
-require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
-require_once(__ROOT__.'/include/ClassMultiSiteSearch.php');
-require_once(__ROOT__.'/include/PluginsAbstractJobsBaseClass.php');
-require_once(__ROOT__.'/include/PluginClassTypes.php');
-require_once(__ROOT__.'/include/ClassConfig.php');
-require_once(__ROOT__.'/include/StageManager.php');
-require_once(__ROOT__.'/include/PluginSimpleJobClasses.php');
-require_once(__ROOT__.'/include/PluginJsonConfigSupport.php');
+require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
 ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
 
