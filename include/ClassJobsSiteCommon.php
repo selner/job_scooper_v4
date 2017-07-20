@@ -14,9 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
-require_once(__ROOT__.'/include/CmdLineOptions.php');
-require_once(__ROOT__.'/include/Helpers.php');
+require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
 define('TITLE_NEG_KWD_MATCH', 'No (Title Excluded Via Negative Keyword)');
 define('NO_TITLE_MATCHES', 'No (Title Did Not Match Search Keywords))');

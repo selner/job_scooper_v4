@@ -19,17 +19,6 @@
 //
 define('__APP_VERSION__', "Job Scooper v4.master.beta-1");
 
-if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
-require_once(__ROOT__.'/lib/pharse.php');
-require_once(__ROOT__.'/lib/Linkify.php');
-
-if (file_exists(__ROOT__ . '/vendor/autoload.php')) {
-    require_once(__ROOT__. '/vendor/autoload.php');
-} else {
-    trigger_error("Composer required to run this app.");
-}
-
-
 $GLOBALS['OPTS']['VERBOSE'] = false;
 $GLOBALS['OPTS']['VERBOSE_API_CALLS'] = false;
 const C__STR_USER_AGENT__ = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36";

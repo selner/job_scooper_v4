@@ -15,47 +15,13 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(dirname(__FILE__)))); }
-
-require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
+require_once dirname(dirname(dirname(__FILE__)))."/bootstrap.php";
 use JobApis\Jobs\Client\Queries\GovtQuery;
 use JobApis\Jobs\Client\Queries\DiceQuery;
 use JobApis\Jobs\Client\Queries\UsajobsQuery;
 use JobApis\Jobs\Client\Providers\GovtProvider;
 use JobApis\Jobs\Client\Providers\UsajobsProvider;
 use JobApis\Jobs\Client\Providers\DiceProvider;
-//
-//
-//class PluginGovtJobs extends ClassBaseJobsAPIPlugin
-//{
-//    protected $siteBaseURL = 'http://search.digitalgov.gov/developer/jobs.html';
-//    protected $strBaseURLFormat = 'http://search.digitalgov.gov/developer/jobs.html';
-//    protected $siteName = 'GovtJobs';
-//    protected $nJobListingsPerPage = 100;
-//
-//
-//    function getSearchJobsFromAPI($searchDetails)
-//    {
-//        $strKeywords = $this->getCombinedKeywordString($searchDetails['keyword_set']);
-//
-//        // Add parameters to the query via the constructor
-//        $options = [
-//            'query' => $strKeywords,
-//            'size' => 100,
-//        ];
-//        $query = new GovtQuery($options);
-//
-//        $client = new GovtProvider($query);
-//        $GLOBALS['logger']->logLine("Getting jobs from " . $query->getUrl() . "[". $searchDetails['name'] , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-//
-//        // Get a Collection of Jobs
-//        $apiJobs = $client->getJobs();
-//        return $apiJobs->all();
-//
-//    }
-//
-//}
-
 
 class PluginUSAJobs extends ClassBaseJobsAPIPlugin
 {

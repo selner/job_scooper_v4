@@ -14,11 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
-require_once(__ROOT__.'/include/CmdLineOptions.php');
-require_once(__ROOT__.'/include/SeleniumSession.php');
-require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
-header('Content-Type: text/html');
+require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
 const VALUE_NOT_SUPPORTED = -1;
 const BASE_URL_TAG_LOCATION = "***LOCATION***";

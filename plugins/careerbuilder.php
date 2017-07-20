@@ -15,8 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
-require_once(__ROOT__.'/include/ClassJobsSiteCommon.php');
+require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
 
 // TODO:  Make abstract class to power sites like http://www.careerbuilder.com/jobs/greenbay,wisconsin/category/engineering/?channel=en&siteid=gagbp037&sc_cmp1=JS_Sub_Loc_EN&lr=cbga_gbp
