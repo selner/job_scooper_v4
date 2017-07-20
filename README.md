@@ -10,23 +10,14 @@ Make a copy of the [example_config.ini](examples/example_config.ini) and edit it
 ```INI
 [search_keyword_set]
 [search_keyword_set.analytics]
-keywords[]="analytics manager"   ;# will pick up analytics manager and senior/sr analytics manager
-keywords[]="Digital market"
-keywords[]="director"
-keyword_match_type="in-title"
-settings_scope="all-sites"
-excluded_jobsites[]="AcandiaAdvocate"
+keywords=["analytics manager", "Digital market", "director"]   ;# will pick up analytics manager and senior/sr analytics manager
 
 [search_location_setting_set]
 
 [search_location_setting_set.Seattle]
 name="Seattle"
 location-city="Seattle"
-location-city-comma-statecode="seattle, wa"
-location-city-comma-statecode-underscores-and-dashes="seattle__2c-wa"
-location-city-comma-state="seattle, washington"
-location-city-comma-state-country="seattle, washington, united states"
-location-city-comma-state-country-no-commas="seattle washington united states"
+location-state="Washington"
 ```
 
 Then update config.ini values for your notification email address and output folder path.  That's it!  [Run Jobs Scooper](../wiki/Running-Jobs-Scooper) and let it do the work for you.
@@ -34,7 +25,7 @@ Then update config.ini values for your notification email address and output fol
 ##Power Up Your Results!
 If you're looking at job listings across many sites, Job Scooper has some built-in features to make that work much easier:
 * **Automatic duplication detection:**  if the same job is posted on multiple sites, job scooper automatically marks all but the first one as duplicates so you don't waste time reviewing the same job again.
-* **Filter to title-only matches for the keywords:**  The majority of sites do not support filtering your search to match only the job title.  One of the best features of Job Scooper is that it let's you filter to title-only matches for any site, regardless of whether the site supports it or not!
+* **Automatically filtered to match titles by your keywords:**  The majority of sites do not support filtering your search to match only the job title.  One of the best features of Job Scooper is that it let's you filter to title-only matches for any site, regardless of whether the site supports it or not!
 * **Exclude specific companies automatically**
 * **Exclude particular job title matches automatically**
 
