@@ -17,7 +17,7 @@
 //
 // If installed as part of the package, uses Klogger v0.1 version (http://codefury.net/projects/klogger/)
 //
-define('__APP_VERSION__', "Job Scooper v4.plugin_definition_cleanup");
+define('__APP_VERSION__', "Job Scooper v4.master.beta-1");
 
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
 require_once(__ROOT__.'/lib/pharse.php');
