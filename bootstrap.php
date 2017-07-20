@@ -33,7 +33,7 @@ require_once(dirname(__FILE__).'/lib/pharse.php');
 require_once(dirname(__FILE__).'/lib/Linkify.php');
 require_once(dirname(__FILE__).'/lib/AddressNormalization.php');
 
-require_once(dirname(__FILE__).'/include/helpers.php');
+require_once(dirname(__FILE__).'/include/Helpers.php');
 require_once(dirname(__FILE__).'/include/JobListFilters.php');
 require_once(dirname(__FILE__).'/include/ErrorManager.php');
 require_once(dirname(__FILE__).'/include/SeleniumSession.php');
