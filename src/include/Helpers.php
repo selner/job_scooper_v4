@@ -18,7 +18,7 @@ if (!strlen(__ROOT__) > 0) {
     define('__ROOT__', dirname(dirname(__FILE__)));
 }
 
-require_once(__ROOT__ . '/include/Options.php');
+require_once(__ROOT__ . '/include/CmdLineOptions.php');
 require_once(__ROOT__ . '/include/ClassJobsSiteCommon.php');
 
 const C__STR_TAG_AUTOMARKEDJOB__ = "[auto-marked]";

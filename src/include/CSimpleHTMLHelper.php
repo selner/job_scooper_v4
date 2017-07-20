@@ -15,7 +15,7 @@
  * under the License.
  */
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
-require_once(__ROOT__.'/include/Options.php');
+require_once(__ROOT__.'/include/CmdLineOptions.php');
 
 const C__SIMPLEHTML_THROWEXCEPTION = 0x1;
 const C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR = 0x2;

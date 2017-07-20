@@ -16,7 +16,7 @@
  */
 
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
-require_once(__ROOT__.'/include/SitePlugins.php');
+require_once(__ROOT__.'/include/PluginOptions.php');
 
 
 class ClassConfig extends AbstractClassBaseJobsPlugin
@@ -438,15 +438,6 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         }
         if(isset($iniSearch['url_format'])) $tempSearch['base_url_format']  = $iniSearch['url_format'];
         if(isset($iniSearch['location'])) $tempSearch['location_user_specified_override']  = $iniSearch['location'];
-
-        if(array_key_exists('keyword_match_type_string', $iniSearch) && strlen($iniSearch['keyword_match_type_string'] ) > 0)
-        {
-            $flagType = $this->_getKeywordMatchFlagFromString_($iniSearch['keyword_match_type_string'] );
-            if($flagType != null)
-            {
-                $tempSearch['user_flag_settings'] = $flagType;
-            }
-        }
 
         $strSearchAsString = getArrayValuesAsString($tempSearch);
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search loaded from config INI: " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -956,23 +947,11 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
     private function _getNewKeywordSettingsSet_($setkey=null, $iniKeywordSetup)
     {
-        $flagType = null;
-        if(array_key_exists('keyword_match_type_string', $iniKeywordSetup) && strlen($iniKeywordSetup['keyword_match_type_string'] ) > 0)
-        {
-            $flagType = $this->_getKeywordMatchFlagFromString_($iniKeywordSetup['keyword_match_type'] );
-        }
-
-
-        $set =  array(
+         $set =  array(
             'key' => $setkey,
             'name' =>  $setkey,
             'source_config_file_settings' => \Scooper\array_copy($iniKeywordSetup),
-            'keywords_array' => null,
-            'keyword_match_type_string' => (array_key_exists('keyword_match_type', $iniKeywordSetup)) ? $iniKeywordSetup['keyword_match_type'] : null,
-            'keyword_match_type_flag' => $flagType,
-//            'excluded_jobsites' => $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'],
-//            'included_jobsites' => $GLOBALS['USERDATA']['configuration_settings']['included_sites'],
-//            'settings_scope' => $iniKeywordSetup['settings_scope']
+            'keywords_array' => null
         );
 
         // If keywords are in a string, split them out into an array instead before continuing

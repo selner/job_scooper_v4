@@ -16,7 +16,7 @@
  */
 
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
-require_once(__ROOT__.'/include/SitePlugins.php');
+require_once(__ROOT__.'/include/PluginOptions.php');
 require_once(__ROOT__.'/include/JobListFilters.php');
 
 class ClassJobsNotifier extends ClassJobsSiteCommon

@@ -15,7 +15,7 @@
  * under the License.
  */
 if (!strlen(__ROOT__) > 0) { define('__ROOT__', dirname(dirname(__FILE__))); }
-require_once(__ROOT__.'/include/Options.php');
+require_once(__ROOT__.'/include/CmdLineOptions.php');
 require_once(__ROOT__ . '/include/Helpers.php');
 
 define('TITLE_NEG_KWD_MATCH', 'No (Title Excluded Via Negative Keyword)');
@@ -65,7 +65,6 @@ class ClassJobsSiteCommon
             'search_start_url' => null,
             'keywords_string_for_url' => null,
             'base_url_format' => null,
-            'user_setting_flags' => C__USER_KEYWORD_MATCH_DEFAULT,
             'location_user_specified_override' => null,
             'location_search_value' => VALUE_NOT_SUPPORTED,
             'keyword_search_override' => null,
@@ -114,57 +113,6 @@ class ClassJobsSiteCommon
             'key_company_role' => '',
             'job_title_tokenized' => '',
          );
-    }
-
-    protected  function _getKeywordMatchFlagFromString_($strMatchType = null)
-    {
-        $retFlag = null;
-
-        if($strMatchType)
-        {
-            switch($strMatchType)
-            {
-                case C__USER_KEYWORD_MUST_BE_IN_TITLE_AS_STRING:
-                    $retFlag = C__USER_KEYWORD_MUST_BE_IN_TITLE;
-                    break;
-
-                case C__USER_KEYWORD_MUST_EQUAL_TITLE_AS_STRING:
-                    $retFlag = C__USER_KEYWORD_MUST_EQUAL_TITLE;
-                    break;
-
-                case C__USER_KEYWORD_ANYWHERE_AS_STRING:
-                default:
-                    $retFlag = C__USER_KEYWORD_ANYWHERE;
-                    break;
-            }
-        }
-
-        return $retFlag;
-    }
-
-    protected function _getKeywordMatchStringFromFlag_($flag)
-    {
-        $retString = null;
-
-        if($flag)
-        {
-            switch($flag)
-            {
-                case C__USER_KEYWORD_MUST_BE_IN_TITLE:
-                    $retString = C__USER_KEYWORD_MUST_BE_IN_TITLE_AS_STRING;
-                    break;
-
-                case C__USER_KEYWORD_MUST_EQUAL_TITLE:
-                    $retString = C__USER_KEYWORD_MUST_EQUAL_TITLE_AS_STRING;
-                    break;
-
-                case C__USER_KEYWORD_ANYWHERE:
-                    $retString = C__USER_KEYWORD_ANYWHERE_AS_STRING;
-                    break;
-            }
-        }
-
-        return $retString;
     }
 
     function normalizeJobList(&$arrJobList)
@@ -681,6 +629,3 @@ class ClassJobsSiteCommon
 
 }
 
-
-
-?>

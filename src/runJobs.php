@@ -17,7 +17,7 @@
 const C__APPNAME__ = "jobs_scooper";
 
 define('__ROOT__', dirname(__FILE__));
-require_once(__ROOT__ . '/include/SitePlugins.php');
+require_once(__ROOT__.'/include/PluginOptions.php');
 
 $classRunJobs = new StageManager();
 $classRunJobs->runAll();
