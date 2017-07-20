@@ -169,7 +169,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         // Create a copy of the jobs list that is sorted by that value.
         //
         $tmpJobsFileData = loadJSON($this->pathsMatchedJobs['json']);
-        if(array_key_exists('jobslist', $tmpJobsFileData) && countJobRecords($tmpJobsFileData['jobslist']) > 0 )
+        if(!is_null($tmpJobsFileData) && array_key_exists('jobslist', $tmpJobsFileData) && countJobRecords($tmpJobsFileData['jobslist']) > 0 )
         {
             $arrJobsData = $tmpJobsFileData['jobslist'];
             $arrMatchedJobs = array_filter($arrJobsData, 'isIncludedJobSite' );
@@ -187,7 +187,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
 
         $arrExcludedJobData = loadJSON($this->pathsAllExcludedJobs['json']);
-        if(array_key_exists('jobslist', $arrExcludedJobData) && countJobRecords($arrExcludedJobData['jobslist']) > 0 ) {
+        if(!is_null($arrExcludedJobData) && array_key_exists('jobslist', $arrExcludedJobData) && countJobRecords($arrExcludedJobData['jobslist']) > 0 ) {
             $arrJobsData = $arrExcludedJobData['jobslist'];
             $arrExcludedJobs = array_filter($arrJobsData, 'isIncludedJobSite' );
 
