@@ -146,7 +146,7 @@ RUN git clone https://github.com/selner/job_scooper_v4.git /opt/jobs_scooper -b 
 #ADD . /opt/jobs_scooper
 #RUN rm /opt/jobs_scooper/src/*.lock
 #RUN rm -Rf /opt/jobs_scooper/src/vendor/*.lock
-RUN cat /opt/jobs_scooper/src/include/CmdLineOptions.php | grep "__APP_VERSION__"
+RUN cat /opt/jobs_scooper/include/CmdLineOptions.php | grep "__APP_VERSION__"
 RUN ls -al /opt/jobs_scooper/src
 
 ADD scoop_docker.sh .

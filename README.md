@@ -54,7 +54,7 @@ Required Parameters:
 ## Requirements: 
 * PHP 5.6.24 
 * Python 2.7
-* pip:  To install the other required Python modules, run "pip install -r /python/pyJobNormalizer/requirements.txt"
+* pip:  To install the other required Python modules, run "pip install -r ./python/pyJobNormalizer/requirements.txt"
 * NTLK for Python:  You will also need the NTLK data available at http://www.nltk.org/data.html.
 * Selenium server standalone:  required for dynamic/client-side websites.  
  * You can configure the app to run selenium locally or pointing to a Selenium instance running on another host or in Docker.
