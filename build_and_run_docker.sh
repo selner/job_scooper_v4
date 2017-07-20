@@ -8,7 +8,7 @@ fi
 
 JOBSNAME="jobs-"$BRANCH
 IMAGETAG="selner/js4-"$BRANCH
-HOSTNAME=$(hostname)"_docker"
+DOCKERHOSTNAME=$(hostname)"_docker"
 
 echo "Branch is "$BRANCH"."
 echo "Container name is "$JOBSNAME"."
@@ -25,7 +25,7 @@ docker build --build-arg BRANCH=$BRANCH --build-arg CACHEBUST="$(date)" -t $IMAG
 #     1.  change the PC's volume path to be "/Users/bryan/Dropbox/var-jobs_scooper:/var/local/jobs_scooper --volume /devcode/nltk_data:/root/nltk_data" style instead
 #     2.  save as a .sh file
 #
-docker run --volume C:\Users\bryan\Dropbox\var-local-jobs_scooper:/var/local/jobs_scooper --volume c:\dev\nltk_data:/root/nltk_data  --hostname $HOSTNAME --name $JOBSNAME -d $IMAGETAG
+docker run --volume C:\Users\bryan\Dropbox\var-local-jobs_scooper:/var/local/jobs_scooper --volume c:\dev\nltk_data:/root/nltk_data  --hostname $DOCKERHOSTNAME --name $JOBSNAME -d $IMAGETAG
 
 docker logs -f $JOBSNAME
 
