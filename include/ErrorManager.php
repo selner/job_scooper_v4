@@ -128,10 +128,10 @@ class ErrorManager {
         $this->_appendGlobalErrorsContent_($errGlobal, $txtBody, $attachments);
         $this->_appendConfigSetupContent_($errConfig, $txtBody, $attachments);
 
-        $failedReports = $this->getFailedSearchesNotificationBody();
-        if(!is_null($failedReports))
+        $failedSearchHtml = $this->getFailedSearchesNotificationBody();
+        if(!is_null($failedSearchHtml))
         {
-            $content = $content . $failedReports['body'];
+            $content = $content . $failedSearchHtml;
         }
 
         if (strlen($errGlobal) > 0)
