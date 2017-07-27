@@ -17,6 +17,7 @@
 //
 // If installed as part of the package, uses Klogger v0.1 version (http://codefury.net/projects/klogger/)
 //
+require_once(dirname(dirname(__FILE__)) . "/bootstrap.php");
 
 $GLOBALS['OPTS']['VERBOSE'] = false;
 $GLOBALS['OPTS']['VERBOSE_API_CALLS'] = false;

@@ -907,7 +907,7 @@ function writeJSON($data, $filepath)
 function loadJSON($file)
 {
     if(is_file($file)) {
-        $GLOBALS['logger']->logLine("Reading json data from file " . $file, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        if(!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Reading json data from file " . $file, \Scooper\C__DISPLAY_ITEM_DETAIL__);
         $jsonText = file_get_contents($file, FILE_TEXT);
 
         $data = json_decode($jsonText, $assoc = true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
@@ -915,7 +915,7 @@ function loadJSON($file)
     }
     else
     {
-        $GLOBALS['logger']->logLine("Unable to load json data from file " . $file, \Scooper\C__DISPLAY_ERROR__);
+        if(!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Unable to load json data from file " . $file, \Scooper\C__DISPLAY_ERROR__);
         return null;
     }
 
@@ -941,7 +941,7 @@ function readJobsListDataFromLocalFile($filepath, $returnFailedSearches = true)
         $filepath = $filepath . "-" . strtolower(getTodayAsString("")) . ".json";
 
         if (is_file($filepath)) {
-            $GLOBALS['logger']->logLine("Reading json data from file " . $filepath, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            if(!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Reading json data from file " . $filepath, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             $data = loadJSON($filepath);
 //            $jsonText = file_get_contents($filepath, FILE_TEXT);
 //
@@ -949,7 +949,7 @@ function readJobsListDataFromLocalFile($filepath, $returnFailedSearches = true)
 
             if ($returnFailedSearches === false) {
                 if ($data['search']['search_run_result']['success'] !== true) {
-                    $GLOBALS['logger']->logLine("Ignoring incomplete search results found in file with key " . $filepath);
+                    if(!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Ignoring incomplete search results found in file with key " . $filepath);
                     $data = null;
                 }
         }
