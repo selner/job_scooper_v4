@@ -10,24 +10,20 @@ if (file_exists(dirname(__FILE__).'/vendor/autoload.php')) {
 }
 
 
-/*
-// Create a simple "default" Doctrine ORM configuration for XML Mapping
-$isDevMode = true;
-// $config = Setup::createAnnotationMetadataConfiguration(array(__DIR__."/src"), $isDevMode);
-// or if you prefer yaml or annotations
-$config = Setup::createXMLMetadataConfiguration(array(__DIR__."/include/static/xml/JobPosting.dcm.xml"), $isDevMode);
-//$config = Setup::createXMLMetadataConfiguration(array(__DIR__."/config/xml"), $isDevMode);
-//$config = Setup::createYAMLMetadataConfiguration(array(__DIR__."/config/yaml"), $isDevMode);
 
-// database configuration parameters
-$conn = array(
-    'driver' => 'pdo_sqlite',
-    'path' => __DIR__ . '/db.sqlite',
-);
+// setup Propel
+require_once(dirname(__FILE__).'/config/generated-conf/config.php');
 
-// obtaining the entity manager
-$entityManager = \Doctrine\ORM\EntityManager::create($conn, $config);
-*/
+require_once(dirname(__FILE__).'/include/HelpersBase.php');
+//require_once(dirname(__FILE__).'/lib/ArrayAccessBehavior.php');
+
+//use Monolog\Logger;
+//use Monolog\Handler\StreamHandler;
+//
+//$defaultLogger = new Logger('defaultLogger');
+//$defaultLogger->pushHandler(new StreamHandler('/var/log/propel.log', Logger::WARNING));
+//
+//$serviceContainer->setLogger('defaultLogger', $defaultLogger);
 
 require_once(dirname(__FILE__).'/lib/pharse.php');
 require_once(dirname(__FILE__).'/lib/Linkify.php');
