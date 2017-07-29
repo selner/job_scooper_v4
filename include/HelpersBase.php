@@ -16,23 +16,6 @@
  */
 
 
-function getColumnMappingFromJobToDB() {
-    return array(
-        "job_title" => "Title",
-        "job_title_tokenized"  => "JobTitleTokens",
-        "job_post_url"  => "Url",
-        "job_site"  => "Jobsite",
-        "job_id"  => "SiteID",
-        "company"  => "Company",
-        "location"  => "Location",
-        "job_site_category"  => "Category",
-        "employment_type"  => "EmploymentType",
-        "date_last_updated"  => "UpdatedAt",
-        "job_site_date"  => "PostedAt",
-        "date_pulled"  => "FirstSeenAt",
-        "normalized"  => "IsNormalized");
-}
-//
 
 function object_to_array($obj)
 {

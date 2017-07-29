@@ -1024,3 +1024,77 @@ function noJobStringMatch($var, $matchString)
     return null;
 }
 
+
+function getColumnMappingFromJobToDB() {
+    return array(
+        "job_title" => "Title",
+        "job_title_tokenized"  => "JobTitleTokens",
+        "job_post_url"  => "Url",
+        "job_site"  => "Jobsite",
+        "job_id"  => "JobSitePostID",
+        "company"  => "Company",
+        "location"  => "Location",
+        "job_site_category"  => "Category",
+        "employment_type"  => "EmploymentType",
+        "date_last_updated"  => "UpdatedAt",
+        "job_site_date"  => "PostedAt",
+        "date_pulled"  => "FirstSeenAt"
+    );
+}
+//
+
+function convertToJobPostingObj($job)
+{
+    $colmap = getColumnMappingFromJobToDB();
+    $newJob = new JobScooper\JobPosting();
+    foreach(array_keys($job) as $key)
+    {
+        if(array_key_exists($key,$colmap)) {
+            $newKey = $colmap[$key];
+            $method = "set" . $newKey;
+            $newJob->$method($job[$key]);
+        }
+    }
+
+    return $newJob;
+
+}
+
+
+/**
+ * Cleanup a string to make a slug of it
+ * Removes special characters, replaces blanks with a separator, and trim it
+ *
+ * @param     string $slug        the text to slugify
+ * @param     string $replacement the separator used by slug
+ * @return    string               the slugified text
+ */
+function cleanupSlugPart($slug, $replacement = '-')
+{
+    // transliterate
+    if (function_exists('iconv')) {
+        $slug = iconv('utf-8', 'us-ascii//TRANSLIT', $slug);
+    }
+
+    // lowercase
+    if (function_exists('mb_strtolower')) {
+        $slug = mb_strtolower($slug);
+    } else {
+        $slug = strtolower($slug);
+    }
+
+    // remove accents resulting from OSX's iconv
+    $slug = str_replace(array('\'', '`', '^'), '', $slug);
+
+    // replace non letter or digits with separator
+    $slug = preg_replace('/\W+/', $replacement, $slug);
+
+    // trim
+    $slug = trim($slug, $replacement);
+
+    if (empty($slug)) {
+        return 'n-a';
+    }
+
+    return $slug;
+}

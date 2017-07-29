@@ -61,23 +61,61 @@
             As for the other column attributes, `required`, `primaryKey`, and `autoIncrement`, they mean exactly
             what their names imply.
         -->
-        <column name="job_post_id" phpName="JobPostId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+
+
+        <!--
+            Alternate unique key for every job post is jobsite + jobsite post id
+        -->
+        <column name="jobsite" phpName="JobSite" type="varchar" size="255" required="true"/>
+        <column name="jobsite_post_id" phpName="JobSitePostID" type="varchar" size="255" required="true"/>
+        <unique name="index_jobsite_and_post_id/">
+            <unique-column name="jobsite"/>
+            <unique-column name="jobsite_post_id"/>
+        </unique>
+
+        <!--
+            Job posting facts
+        -->
         <column name="title" phpName="Title" type="varchar" size="255" required="true"/>
         <column name="title_tokens" phpName="JobTitleTokens" type="varchar" size="255" required="false"/>
         <column name="url" type="varchar" size="1024" required="true"/>
-        <column name="company" type="varchar" size="255" required="false"/>
-        <column name="jobsite" type="varchar" size="255" required="true"/>
-        <column name="site_id" phpName="SiteID" type="varchar" size="255" required="true"/>
+        <unique name="index_jobsite_url/">
+            <unique-column name="url"/>
+        </unique>
+        <column name="company" type="varchar" size="100" required="false"/>
         <!--        <column name="company_id" phpName="CompanyId" type="varchar" size="255" required="false"/> -->
         <column name="location" type="varchar" size="255" required="false"/>
-        <column name="category" type="varchar" size="255" required="false"/>
-        <column name="employment_type" phpName="EmploymentType" type="varchar" size="255" required="false"/>
+        <column name="employment_type" phpName="EmploymentType" type="varchar" size="100" required="false"/>
         <column name="department" type="varchar" size="255" required="false"/>
-        <column name="last_updated" phpName="UpdatedAt" type="timestamp" required="false"/>
-        <column name="date_posted" phpName="PostedAt" type="timestamp" required="false"/>
-        <column name="date_first_seen" phpName="FirstSeenAt" type="timestamp" required="false"/>
-        <column name="date_post_removed" phpName="RemovedAt" type="timestamp" required="false"/>
-        <column name="is_normalized" phpName="IsNormalized" type="boolean" required="true" defaultValue="0"/>
+        <column name="category" type="varchar" size="100" required="false"/>
+
+        <!--
+            Date & times for various events related to this particular job posting
+        -->
+        <column name="last_updated_at" phpName="UpdatedAt" type="timestamp" required="true"/>
+        <column name="posted_at" phpName="PostedAt" type="timestamp" required="false"/>
+        <column name="first_seen_at" phpName="FirstSeenAt" type="timestamp" required="true"/>
+        <behavior name="timestampable">
+            <parameter name="create_column" value="first_seen_at" />
+            <parameter name="update_column" value="last_updated_at" />
+        </behavior>
+        <column name="post_removed_at" phpName="RemovedAt" type="timestamp" required="false"/>
+
+        <!--
+            The following columns are automatically set via code in the JobPosting class
+        -->
+        <column name="key_site_and_post_id" phpName="KeySiteAndPostID" type="varchar" size="255" required="true"/>
+        <column name="key_company_and_title" phpName="KeyCompanyAndTitle" type="varchar" size="255" required="true"/>
+
+        <!--<column name="slug_site_and_post_id" phpName="SlugSiteAndPostID" type="varchar" size="255" required="true"/>-->
+        <!--<behavior name="sluggable">-->
+            <!--<parameter name="slug_column" value="jobsite" />-->
+            <!--<parameter name="slug_column" value="jobsite_post_id" />-->
+            <!--<parameter name="slug_pattern" value="{JobSite}{JobSitePostID}" />-->
+            <!--<parameter name="replace_pattern" value="/[^\w\/]+/u" />-->
+            <!--<parameter name="replacement" value="-" />-->
+        <!--</behavior>-->
 
         <!--
                     A foreign key represents a relationship. Just like a table or a column, a relationship has a `phpName`.
@@ -103,7 +141,8 @@
     -->
     <table name="user" phpName="User">
         <column name="user_id" phpName="userId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
-        <column name="first_name" phpName="firstName" type="varchar" size="128" required="false"/>
+        <column name="name" phpName="firstName" type="varchar" size="128" required="true"/>
+        <behavior name="sluggable"/>
         <column name="last_name" phpName="lastName" type="varchar" size="128" required="false"/>
         <column name="email_address" phpName="emailAddress" type="varchar" size="128" required="false"/>
         <column name="configuration_file_path" phpName="configFilePath" type="varchar" size="128" required="false"/>
@@ -111,14 +150,15 @@
 
     <table name="user_job_matches" isCrossRef="true">
         <column name="user_id" phpName="userId" type="integer" primaryKey="true"/>
-        <column name="job_post_id" phpName="jobPostId" type="integer" primaryKey="true"/>
-        <column name="user_notification_state" phpName="userNotificationState" type="integer"/>
-        <column name="user_match_status" phpName="userMatchStatus" type="varchar" size="128"/>
+        <column name="jobposting_id" phpName="JobPostingId" type="integer" primaryKey="true"/>
+        <column name="user_notification_state" phpName="userNotificationState" type="enum" valueSet="none,ready-to-send,sent"/>
+        <column name="user_match_status" phpName="userMatchStatus" type="enum" valueSet="none, include-match, exclude-match"/>
+        <column name="user_match_exclude_reason" phpName="userMatchExcludeReason" type="varchar" size="1024"/>
         <foreign-key foreignTable="user">
             <reference local="user_id" foreign="user_id"/>
         </foreign-key>
         <foreign-key foreignTable="jobposting">
-            <reference local="job_post_id" foreign="job_post_id"/>
+            <reference local="jobposting_id" foreign="jobposting_id"/>
         </foreign-key>
     </table>
 
