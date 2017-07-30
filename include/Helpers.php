@@ -1098,3 +1098,22 @@ function cleanupSlugPart($slug, $replacement = '-')
 
     return $slug;
 }
+
+function upsertJob($jobSite, $jobSiteJobID)
+{
+    if(is_null($jobSite) || is_null($jobSiteJobID))
+        return null;
+
+    $job = \JobScooper\JobPostingQuery::create()
+        ->filterByJobSite($jobSite)
+        ->filterByJobSitePostID($jobSiteJobID)
+        ->findOne();
+
+    if(is_null($job))
+        return new \JobScooper\JobPosting();
+    else
+        return $job;
+
+}
+
+
