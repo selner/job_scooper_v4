@@ -1030,7 +1030,7 @@ function getColumnMappingFromJobToDB() {
         "job_title" => "Title",
         "job_title_tokenized"  => "JobTitleTokens",
         "job_post_url"  => "Url",
-        "job_site"  => "Jobsite",
+        "job_site"  => "JobSite",
         "job_id"  => "JobSitePostID",
         "company"  => "Company",
         "location"  => "Location",
