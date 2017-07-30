@@ -25,13 +25,13 @@ class JobPosting extends \JobScooper\Base\JobPosting
     protected function updateAutoColumns()
     {
         $this->setKeyCompanyAndTitle($this->getCompany() . $this->getTitle());
-        $this->setKeySiteAndPostID($this->getJobsite() . $this->getJobSitePostID());
+        $this->setKeySiteAndPostID($this->getJobSite() . $this->getJobSitePostID());
     }
 
     public function setAutoColumnRelatedProperty($method, $v)
     {
         if(is_null($v) || strlen($v) <= 0)
-            $v = "_VALUENOTSET_"
+            $v = "_VALUENOTSET_";
         $ret = parent::$method($v);
         $this->updateAutoColumns();
         return $ret;
