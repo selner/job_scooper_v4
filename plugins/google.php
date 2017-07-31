@@ -82,7 +82,7 @@ class PluginGoogle extends ClassClientHTMLJobSitePlugin
             else
                 $item['company'] = $this->siteName;
 
-            $ret[] = $this->normalizeJobItem($item);
+            $ret[] = $item;
 
         }
 

@@ -52,7 +52,7 @@ class PluginGroupon extends ClassBaseClientSideHTMLJobSitePlugin
             $item['company'] = $this->siteName;
             $item['job_id'] = $this->getIDFromLink('/\/jobs\/([^\/]+)/i', $item['job_post_url']);
             if($item['job_title'] == '') continue;
-            $ret[] = $this->normalizeJobItem($item);
+            $ret[] = $item;
 
         }
 

@@ -177,7 +177,7 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
 
             $item['job_id'] = $this->getIDFromLink('/\/a\/job-details\/\?a=([^\/]+)/i', $item['job_post_url']);
 
-            $ret[] = $this->normalizeJobItem($item);
+            $ret[] = $item;
         }
 
         return $ret;

@@ -160,7 +160,7 @@ class PluginMonster extends ClassBaseServerHTMLJobSitePlugin
                 $item['location'] = $item['location'] . ", " . $stateNode->plaintext;
             }
 
-            $ret[] = $this->normalizeJobItem($item);
+            $ret[] = $item;
 
         }
 
