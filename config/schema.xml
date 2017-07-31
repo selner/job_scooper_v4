@@ -94,7 +94,7 @@
             Date & times for various events related to this particular job posting
         -->
         <column name="last_updated_at" phpName="UpdatedAt" type="timestamp" required="true"/>
-        <column name="posted_at" phpName="PostedAt" type="timestamp" required="false"/>
+        <column name="job_posted_date" phpName="PostedAt" type="varchar" required="false"/>
         <column name="first_seen_at" phpName="FirstSeenAt" type="timestamp" required="true"/>
         <behavior name="timestampable">
             <parameter name="create_column" value="first_seen_at" />
@@ -140,20 +140,21 @@
     </table>
     -->
     <table name="user" phpName="User">
-        <column name="user_id" phpName="userId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
-        <column name="name" phpName="firstName" type="varchar" size="128" required="true"/>
         <behavior name="sluggable"/>
-        <column name="last_name" phpName="lastName" type="varchar" size="128" required="false"/>
-        <column name="email_address" phpName="emailAddress" type="varchar" size="128" required="false"/>
-        <column name="configuration_file_path" phpName="configFilePath" type="varchar" size="128" required="false"/>
+        <column name="name" phpName="Name" type="varchar" size="128" required="true" primaryString="true"/>
+
+        <column name="user_id" phpName="UserId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="email_address" phpName="EmailAddress" type="varchar" size="128" required="false"/>
+        <column name="configuration_file_path" phpName="ConfigFilePath" type="varchar" size="128" required="false"/>
+    </table>
     </table>
 
-    <table name="user_job_matches" isCrossRef="true">
-        <column name="user_id" phpName="userId" type="integer" primaryKey="true"/>
+    <table name="user_job_match" isCrossRef="true">
+        <column name="user_id" phpName="UserId" type="integer" primaryKey="true"/>
         <column name="jobposting_id" phpName="JobPostingId" type="integer" primaryKey="true"/>
-        <column name="user_notification_state" phpName="userNotificationState" type="enum" valueSet="none,ready-to-send,sent"/>
-        <column name="user_match_status" phpName="userMatchStatus" type="enum" valueSet="none, include-match, exclude-match"/>
-        <column name="user_match_exclude_reason" phpName="userMatchExcludeReason" type="varchar" size="1024"/>
+        <column name="user_notification_state" phpName="UserNotificationState" type="enum" valueSet="none,ready-to-send,sent"/>
+        <column name="user_match_status" phpName="UserMatchStatus" type="enum" valueSet="none, include-match, exclude-match"/>
+        <column name="user_match_exclude_reason" phpName="UserMatchExcludeReason" type="varchar" size="1024"/>
         <foreign-key foreignTable="user">
             <reference local="user_id" foreign="user_id"/>
         </foreign-key>

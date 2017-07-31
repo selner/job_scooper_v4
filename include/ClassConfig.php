@@ -74,6 +74,16 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         return $retArr;
     }
 
+    function getEmailRecords($strEmailKind, $addressType)
+    {
+        $retArr = null;
+
+        $retEmails = array_filter($this->allConfigFileSettings['emails'], function ($var) use ($strEmailKind, $addressType) {
+            return (strcasecmp($var['emailkind'], $strEmailKind) == 0 && strcasecmp($var['type'], $addressType) == 0);
+        });
+        return $retEmails;
+    }
+
 
 
     function initialize()
@@ -157,6 +167,20 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration file details from " . $this->arrFileDetails['config_ini']['full_file_path'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
             $this->_LoadAndMergeAllConfigFilesRecursive($this->arrFileDetails['config_ini']['full_file_path']);
+
+            $userDetails = array();
+            $userDetails['ConfigFilePath'] = $this->arrFileDetails['config_ini']['full_file_path'];
+            $emails = $this->getEmailRecords("results", "to");
+            foreach($emails as $email)
+            {
+                $userDetails['Name'] = $email['name'];
+                $userDetails['EmailAddress'] = $email['address'];
+            }
+            
+            $retUserData = upsertUser($userDetails);
+            $userDetails['UserId'] = $retUserData->getUserId();
+            $userDetails['Slug'] = $retUserData->getSlug();
+            $GLOBALS['USERDATA']['configuration_settings']['user_details'] = \Scooper\array_copy($userDetails);
 
             if (isset($this->arrFileDetails['config_ini'])) {
                 if(!is_file($this->arrFileDetails['config_ini']['full_file_path']))

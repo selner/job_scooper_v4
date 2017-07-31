@@ -1099,6 +1099,27 @@ function cleanupSlugPart($slug, $replacement = '-')
     return $slug;
 }
 
+function getDBMappedJob($job)
+{
+    $colMap = getColumnMappingFromJobToDB();
+
+    $newJob = upsertJob($job['job_site'], $job['job_id']);
+    $keysNotMapped = array();
+    foreach(array_keys($job) as $key)
+    {
+        if(array_key_exists($key, $colMap)) {
+            $newKey = $colMap[$key];
+            $method = "set" . $newKey;
+            $newJob->$method($job[$key]);
+        }
+        else
+        {
+            $newJob->$key = $job[$key];
+        }
+    }
+    return $newJob;
+}
+
 function upsertJob($jobSite, $jobSiteJobID)
 {
     if(is_null($jobSite) || is_null($jobSiteJobID))
@@ -1114,6 +1135,39 @@ function upsertJob($jobSite, $jobSiteJobID)
     else
         return $job;
 
+}
+
+
+function getUserBySlug($slug)
+{
+    $user = \JobScooper\UserQuery::create()
+        ->filterBySlug($slug)
+        ->findOne();
+
+    return $user;
+}
+
+function getUserByName($username)
+{
+    $slug = cleanupSlugPart($username);
+    return getUserBySlug($slug);
+
+}
+function upsertUser($arrUserDetails)
+{
+    if(is_null($arrUserDetails) || !is_array($arrUserDetails))
+        return null;
+    $user = getUserByName($arrUserDetails['Name']);
+
+    if(is_null($user))
+        $userrec = new \JobScooper\User();
+    else
+        $userrec = $user;
+
+    $userrec->fromArray($arrUserDetails);
+    $userrec->save();
+
+    return $userrec;
 }
 
 
