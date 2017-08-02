@@ -141,15 +141,14 @@ WORKDIR /opt/jobs_scooper
 ARG BRANCH
 RUN echo $BRANCH
 ARG CACHEBUST=1
-RUN git clone https://github.com/selner/job_scooper_v4.git /opt/jobs_scooper -b $BRANCH -v
+RUN git clone https://github.com/selner/job_scooper_v4.git /opt/jobs_scooper -b $BRANCH
 
-#ADD . /opt/jobs_scooper
-#RUN rm /opt/jobs_scooper/src/*.lock
-#RUN rm -Rf /opt/jobs_scooper/src/vendor/*.lock
+# ADD . /opt/jobs_scooper
+# RUN rm /opt/jobs_scooper/src/*.lock
+# RUN rm -Rf /opt/jobs_scooper/src/vendor/*.lock
+# ADD ./scoop_docker.sh .
+
 RUN cat /opt/jobs_scooper/bootstrap.php | grep "__APP_VERSION__"
-RUN ls -al /opt/jobs_scooper
-
-ADD scoop_docker.sh .
 RUN chmod +x /opt/jobs_scooper/*.sh
 RUN ls -al /opt/jobs_scooper
 
