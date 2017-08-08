@@ -351,6 +351,7 @@ class SeleniumSession extends PropertyObject
         // and possibly dead.  If we don't clear it, nothing will work.
         //
         $host = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
+	/*
         $currentSessions = RemoteWebDriver::getAllSessions($host);
         if($currentSessions != null && is_array($currentSessions))
         {
@@ -368,6 +369,7 @@ class SeleniumSession extends PropertyObject
                 }
             }
         }
+	*/
 
 
         $driver = null;
