@@ -161,23 +161,26 @@ class SeleniumSession extends PropertyObject
 
     }
 
-    protected function doneWithRemoteWebDriver()
+     protected function doneWithRemoteWebDriver()
     {
-        if(!is_null($this->remoteWebDriver))
+        $driver = $this->get_driver();
+
+        if(!is_null($driver))
         {
             try {
-                $this->remoteWebDriver->close();
+                $driver->quit();
             }
-            catch (Exception $ex) {  };
-
-            try {
-                $this->remoteWebDriver->quit();
+            catch (Exception $ex) {
+                if(isset($GLOBALS['logger'])) {
+                    handleException($ex, "Failed to quit Webdriver: ", false);
+                }
             }
-            catch (Exception $ex) {  };
-
+            finally
+            {
+                $driver = null;
+                $this->remoteWebDriver = null;
+            }
         }
-
-        $this->remoteWebDriver = null;
     }
 
     static function startSeleniumServer()
