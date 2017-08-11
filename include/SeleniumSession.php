@@ -27,7 +27,6 @@ class SeleniumSession extends PropertyObject
     function __construct($additionalLoadDelaySeconds = 0)
     {
         $this->additionalLoadDelaySeconds = $additionalLoadDelaySeconds;
-        $this->create_remote_webdriver();
     }
 
     function __destruct()
@@ -37,17 +36,20 @@ class SeleniumSession extends PropertyObject
 
     function getPageHTML($url, $recursed=false)
     {
-        foreach ($this->lastCookies as $cookie) {
-            $this->driver->manage()->addCookie(array(
+        $driver = $this->get_driver();
+
+        foreach($this->lastCookies as $cookie) {
+            $driver->manage()->addCookie(array(
                 'name' => $cookie['name'],
                 'value' => $cookie['value'],
             ));
         }
         $this->loadPage($url);
 
-        $this->lastCookies = $this->driver->manage()->getCookies();
+        $this->lastCookies = $driver->manage()->getCookies();
 
-        $src = $this->driver->getPageSource();
+        $src = $driver->getPageSource();
+
 
         // BUGBUG:  Firefox has started to return "This tab has crashed" responses often as of late February 2017.
         //          Adding check for that case and a session kill/reload when it happens
@@ -78,12 +80,11 @@ class SeleniumSession extends PropertyObject
     {
         try
         {
-            if(strncmp($this->driver->getCurrentURL(), $url, strlen($url)) != 0) {
-                $this->driver->get($url);
-	        sleep(2+$this->additionalLoadDelaySeconds);
-	    }
-           
-           
+            $driver = $this->get_driver();
+            if(strncmp($driver->getCurrentURL(), $url, strlen($url)) != 0) {
+                $driver->get($url);
+                sleep(2+$this->additionalLoadDelaySeconds);
+            }
         } catch (Exception $ex) {
             $strMsg = "Error retrieving Selenium page at " . $url . ":  ". $ex;
 
@@ -163,18 +164,24 @@ class SeleniumSession extends PropertyObject
 
     protected function doneWithRemoteWebDriver()
     {
-        if(!is_null($this->remoteWebDriver))
+        $driver = $this->get_driver();
+
+        if(!is_null($driver))
         {
             try {
-                $this->remoteWebDriver->close();
+                $driver->quit();
             }
-            catch (Exception $ex) {  };
-
-            try {
-                $this->remoteWebDriver->quit();
+            catch (Exception $ex) {  
+                if(isset($GLOBALS['logger'])) {
+                    handleException($ex, "Failed to quit Webdriver: ", false);
+                }
             }
-            catch (Exception $ex) {  };
-
+            finally 
+            {
+                $driver = null;
+                $this->remoteWebDriver = null;
+            }
+            
         }
 
         $this->remoteWebDriver = null;
@@ -319,10 +326,17 @@ class SeleniumSession extends PropertyObject
 //                $driver->takeScreenshot('/tmp/screen.png');
 //                $driver->quit();
 
-        if (is_null($this->remoteWebDriver))
-            $this->create_remote_webdriver();
+        try
+        {
+            if (is_null($this->remoteWebDriver))
+                $this->create_remote_webdriver();
+            return $this->remoteWebDriver;
+        }
+        catch (Exception $ex)
+        {
+            handleException($ex, "Failed to get Selenium remote webdriver: ", true);
+        }
 
-        return $this->remoteWebDriver;
     }
 
     function getWebDriverKind()
@@ -342,45 +356,29 @@ class SeleniumSession extends PropertyObject
         $host = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
 
         try {
-        $webdriver = $this->getWebDriverKind();
-        //
-        // First we need to make sure we don't have a conflicting session already hanging out
-        // and possibly dead.  If we don't clear it, nothing will work.
-        //
-        $host = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
-        $currentSessions = RemoteWebDriver::getAllSessions($host);
-        if($currentSessions != null && is_array($currentSessions))
-        {
-            foreach($currentSessions as $session)
-            {
-                if(strcasecmp($webdriver, $session['capabilities']['browserName']) == 0)
-                {
-                    if($webdriver == "safari")
-                    {
-                        $oldSessionDriver = RemoteWebDriver::createBySessionID($session['id'], $host);
-                        if(!is_null($oldSessionDriver)) {
-                            $oldSessionDriver->quit();
-                        }
-                    }
-                }
-            }
-        }
+            $webdriver = $this->getWebDriverKind();
+            //
+            // First we need to make sure we don't have a conflicting session already hanging out
+            // and possibly dead.  If we don't clear it, nothing will work.
+            //
+            $host = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
+
+            $driver = null;
+
+            $capabilities = DesiredCapabilities::$webdriver();
+
+            $capabilities->setCapability("nativeEvents", true);
+            $capabilities->setCapability("setThrowExceptionOnScriptError", false);
 
 
-        $driver = null;
+            $this->remoteWebDriver = RemoteWebDriver::create(
+                $host,
+                $desired_capabilities = $capabilities,
+                $connection_timeout_in_ms = 60000,
+                $request_timeout_in_ms = 60000
+            );
 
-        $capabilities = DesiredCapabilities::$webdriver();
-
-        $capabilities->setCapability("nativeEvents", true);
-        $capabilities->setCapability("setThrowExceptionOnScriptError", false);
-
-
-        $this->remoteWebDriver = RemoteWebDriver::create(
-            $host,
-            $desired_capabilities = $capabilities,
-            $connection_timeout_in_ms = 60000,
-            $request_timeout_in_ms = 60000
-        );
+            return $this->remoteWebDriver;
     }
         catch (Exception $ex)
         {
