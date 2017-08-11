@@ -153,7 +153,7 @@ abstract class BaseTaleoPlugin extends ClassBaseServerHTMLJobSitePlugin
             if(isset($tds) && isset($tds[1])) $item['location'] = $node->find("td")[1]->plaintext;
             if(isset($tds) && isset($tds[2]))$item['job_site_category'] = $tds[2]->plaintext;
 
-            $ret[] = $this->normalizeJobItem($item);
+            $ret[] = $item;
         }
 
         return $ret;

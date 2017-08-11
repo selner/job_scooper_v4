@@ -86,7 +86,7 @@ class PluginAmazon extends ClassBaseClientSideHTMLJobSitePlugin
             if(isset($dateVal))
                 $item['job_site_date'] = $dateVal->format('m/d/y');
 
-            $ret[] = $this->normalizeJobItem($item);
+            $ret[] = $item;
         }
         return $ret;
     }

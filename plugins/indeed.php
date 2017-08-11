@@ -109,7 +109,7 @@ class PluginIndeed extends ClassClientHTMLJobSitePlugin
             }
 
             if($item['job_title'] == '') continue;
-            $ret[] = $this->normalizeJobItem($item);
+            $ret[] = $item;
 
         }
 

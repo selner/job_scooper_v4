@@ -92,7 +92,7 @@ class PluginExpedia extends ClassBaseClientSideHTMLJobSitePlugin
 
             $item['job_site_date'] = str_ireplace("date posted: ","", $node->find("span[class='search-result-item-post-date']")[0]->plaintext);
 
-            $ret[] = $this->normalizeJobItem($item);
+            $ret[] = $item;
         }
 
         return $ret;

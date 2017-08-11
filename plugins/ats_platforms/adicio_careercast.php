@@ -185,7 +185,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
                 $item['job_site_date'] = $detailLIs[2]->plaintext;
                 $item['job_site_category'] = $detailLIs[3]->plaintext;
 
-                $ret[] = $this->normalizeJobItem($item);
+                $ret[] = $item;
             }
         }
         else
@@ -224,7 +224,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
                     $companyNode = $node->find("td[class='aiResultsCompany']");
                     $item['company'] = $companyNode[0]->plaintext;
 
-                    $ret[] = $this->normalizeJobItem($item);
+                    $ret[] = $item;
                 }
             }
 
