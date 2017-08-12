@@ -105,7 +105,7 @@
         <!--
             The following columns are automatically set via code in the JobPosting class
         -->
-        <column name="key_site_and_post_id" phpName="KeySiteAndPostID" type="varchar" size="255" required="true"/>
+        <column name="key_site_and_post_id" phpName="KeySiteAndPostID" type="varchar" size="255" required="true" primaryString="true"/>
         <column name="key_company_and_title" phpName="KeyCompanyAndTitle" type="varchar" size="255" required="true"/>
 
         <!--<column name="slug_site_and_post_id" phpName="SlugSiteAndPostID" type="varchar" size="255" required="true"/>-->
