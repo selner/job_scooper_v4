@@ -1140,6 +1140,7 @@ function upsertJob($jobSite, $jobSiteJobID)
 
 function getUserBySlug($slug)
 {
+    $GLOBALS['logger']->logLine("Searching for database user '" . $slug ."'", \Scooper\C__DISPLAY_NORMAL__);
     $user = \JobScooper\UserQuery::create()
         ->filterBySlug($slug)
         ->findOne();
