@@ -147,6 +147,24 @@
         <column name="email_address" phpName="EmailAddress" type="varchar" size="128" required="false"/>
         <column name="configuration_file_path" phpName="ConfigFilePath" type="varchar" size="128" required="false"/>
     </table>
+
+    <table name="user_search" phpName="UserSearch" reloadOnUpdate="true">
+        <column name="key" phpName="Key" type="varchar" size="128" required="true" primaryKey="true" primaryString="true"/>
+        <column name="date_search_run" phpName="RunDate" type="timestamp" required="true" primaryKey="true"/>
+        <behavior name="timestampable">
+            <parameter name="create_column" value="date_search_run" />
+            <parameter name="update_column" value="date_search_run" />
+        </behavior>
+        <column name="jobsite" phpName="JobSite" type="varchar" size="255" required="true"/>
+        <column name="user_id" phpName="UserId" type="integer" required="true" primaryString="true"/>
+        <column name="search_settings" phpName="SearchSettings" type="object"/>
+        <column name="search_run_result" phpName="SearchRunResult" type="object"/>
+        <column name="run_result_code" field="run_code" phpName="RunResultCode" type="enum",  valueSet="none,ready-to-send,sent"/>
+        <column name="run_result_details" fieldname="details" phpName="RunResultDetails" type="longvarchar"/>
+        <column name="run_result_errorfiles" fieldname="errorfiles" phpName="RunResultErrorFiles" type="array"/>
+        <foreign-key foreignTable="user">
+            <reference local="user_id" foreign="user_id"/>
+        </foreign-key>
     </table>
 
     <table name="user_job_match" isCrossRef="true">
