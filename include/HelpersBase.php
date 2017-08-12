@@ -32,18 +32,23 @@ function object_to_array($obj)
 
 function handleException($ex, $fmtLogMsg = null, $raise = true)
 {
-    if (is_null($ex))
-        $ex = new Exception($fmtLogMsg);
+    $toThrow = $ex;
+    if (is_null($toThrow))
+        $toThrow = new Exception($fmtLogMsg);
 
     if (!array_key_exists('ERROR_REPORT_FILES', $GLOBALS['USERDATA']))
         $GLOBALS['USERDATA']['ERROR_REPORT_FILES'] = array();
 
-
-    $toThrow = $ex;
-    if (!is_null($fmtLogMsg)) {
+    if (!is_null($fmtLogMsg) && !is_null($ex)) {
         $msg = sprintf($fmtLogMsg, $ex->getMessage());
         $toThrow = new Exception($msg, $ex->getCode(), $previous=$ex);
     }
+    else if(!is_null($ex))
+    {
+        $msg = $ex->getMessage();
+    }
+    else
+        $msg = $fmtLogMsg;
 
 //    $msg .= PHP_EOL . "PHP memory usage: " . getPhpMemoryUsage() . PHP_EOL;
 
