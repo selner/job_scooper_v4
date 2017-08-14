@@ -24,7 +24,6 @@ class StageManager extends ClassJobsSiteCommon
 {
     protected $siteName = "StageManager";
     protected $classConfig = null;
-    protected $logger = null;
     protected $pathAllMatchedJobs = null;
     protected $pathAllExcludedJobs = null;
     protected $pathAllJobs = null;
@@ -34,14 +33,9 @@ class StageManager extends ClassJobsSiteCommon
         try {
             $this->classConfig = new ClassConfig();
             $this->classConfig->initialize();
-            $logger = $this->classConfig->getLogger();
 
-            if ($logger)
-                $this->logger = $logger;
-            elseif ($GLOBALS['logger'])
-                $this->logger = $GLOBALS['logger'];
-            else
-                $this->logger = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['debug']);
+            if (!$GLOBALS['logger'])
+                $GLOBALS['logger'] = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['debug']);
 
             parent::__construct(null);
 
@@ -59,7 +53,7 @@ class StageManager extends ClassJobsSiteCommon
 
     function __destruct()
     {
-        if (isset($this->logger)) $this->logger->logLine("Closing " . $this->siteName . " instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__);
+        LogLine("Closing " . $this->siteName . " instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__);
 
 
 
@@ -80,7 +74,7 @@ class StageManager extends ClassJobsSiteCommon
             $arrRunStages = explode(",", \Scooper\get_PharseOptionValue("stages"));
             if (is_array($arrRunStages) && count($arrRunStages) >= 1 && strlen($arrRunStages[0]) > 0) {
                 foreach ($arrRunStages as $stage) {
-                    if (isset($this->logger)) $this->logger->logLine("StageManager starting stage " . $stage, \Scooper\C__DISPLAY_SECTION_START__);
+                    LogLine("StageManager starting stage " . $stage, \Scooper\C__DISPLAY_SECTION_START__);
                     $stageFunc = "doStage" . $stage;
                     try {
                         call_user_func(array($this, $stageFunc));
@@ -89,7 +83,7 @@ class StageManager extends ClassJobsSiteCommon
                     }
                     finally
                     {
-                        if (isset($this->logger)) $this->logger->logLine("StageManager ended stage " . $stage, \Scooper\C__DISPLAY_ITEM_RESULT__);
+                        LogLine("StageManager ended stage " . $stage, \Scooper\C__DISPLAY_ITEM_RESULT__);
                     }
                 }
             } else {
@@ -129,17 +123,17 @@ class StageManager extends ClassJobsSiteCommon
 //            print($js . PHP_EOL);
 //            var_dump($newJob);
             $newJob->save();
-            print("Saved " . $job['job_post_id'] . " to database.");
+            LogLine("Saved " . $job['job_post_id'] . " to database.");
         }
 
-        print("Stored " . countJobRecords($jobs) . " to database from file '".$path."''.");
+        LogLine("Stored " . countJobRecords($jobs) . " to database from file '".$path."''.");
     }
 
 
     public function doStage1()
     {
 
-        if (isset($this->logger)) $this->logger->logLine("Stage 1: Downloading Latest Matching Jobs ", \Scooper\C__DISPLAY_ITEM_RESULT__);
+        LogLine("Stage 1: Downloading Latest Matching Jobs ", \Scooper\C__DISPLAY_ITEM_RESULT__);
         try {
 
             //
@@ -161,7 +155,7 @@ class StageManager extends ClassJobsSiteCommon
                         $valInclude = \Scooper\get_PharseOptionValue($strIncludeKey);
 
                         if (!isset($valInclude) || $valInclude == 0) {
-                            $this->logger->logLine($curSearch['site_name'] . " excluded, so dropping its searches from the run.", \Scooper\C__DISPLAY_ITEM_START__);
+                            LogLine($curSearch['site_name'] . " excluded, so dropping its searches from the run.", \Scooper\C__DISPLAY_ITEM_START__);
                             unset($arrSearchesToRun[$z]);
                         }
                     }
@@ -179,7 +173,7 @@ class StageManager extends ClassJobsSiteCommon
                     // Download all the job listings for all the users searches
                     //
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    $this->logger->logLine(PHP_EOL . "**************  Starting Run of " . count($arrSearchesToRun) . " Searches  **************  " . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+                    LogLine(PHP_EOL . "**************  Starting Run of " . count($arrSearchesToRun) . " Searches  **************  " . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
 
 
                     //
@@ -204,7 +198,7 @@ class StageManager extends ClassJobsSiteCommon
     public function doStage2()
     {
         try {
-            if (isset($this->logger)) $this->logger->logLine("Stage 2:  Tokenizing Jobs ", \Scooper\C__DISPLAY_SECTION_START__);
+            LogLine("Stage 2:  Tokenizing Jobs ", \Scooper\C__DISPLAY_SECTION_START__);
             $marker = new JobsAutoMarker();
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -240,7 +234,7 @@ class StageManager extends ClassJobsSiteCommon
 
             foreach($jsonfiles as $jfile)
             {
-                $this->logger->logLine(PHP_EOL . "Processing " . $jfile , \Scooper\C__DISPLAY_NORMAL__);
+                LogLine(PHP_EOL . "Processing " . $jfile , \Scooper\C__DISPLAY_NORMAL__);
                 $outjfile = "tokenized_" .$jfile;
                 $jfilefullpath = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['listings-rawbysite'], $jfile));
                 $outjfilefullpath = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['listings-tokenized'], $outjfile));
@@ -251,18 +245,18 @@ class StageManager extends ClassJobsSiteCommon
                 //
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-                $this->logger->logLine(PHP_EOL . "    ~~~~~~ Tokenizing job titles ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+                LogLine(PHP_EOL . "    ~~~~~~ Tokenizing job titles ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
                 $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/normalizeJobListingFile.py");
 
                 $cmd = "python " . $PYTHONPATH . " --infile " . escapeshellarg($jfilefullpath) . " --outfile " . escapeshellarg($outjfilefullpath) ." --column job_title --index key_jobsite_siteid";
-                $this->logger->logLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd ."  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+                LogLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd ."  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
 
                 doExec($cmd);
 
                 $arrJobs = readJobsListFromLocalJsonFile(pathinfo($outjfilefullpath, PATHINFO_BASENAME), $returnFailedSearches = true, $dirKey = "listings-tokenized");
                 if(countAssociativeArrayValues($arrJobs) > 0)
                 {
-                    $this->logger->logLine(PHP_EOL . "    ~~~~~~ Auto-marking jobs based on user settings ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+                    LogLine(PHP_EOL . "    ~~~~~~ Auto-marking jobs based on user settings ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
                     $marker->setJobsList($arrJobs);
                     $marker->markJobsList();
                     $arrMarkedJobs = $marker->getMarkedJobs();
@@ -344,7 +338,7 @@ class StageManager extends ClassJobsSiteCommon
         $ret = array('interested' => array(), 'not_interested' => array());
 
         if (countJobRecords($jobsList) > 0) {
-            $this->logger->logLine(PHP_EOL . "    ~~~~~~ Auto-marking jobs based on user settings ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+            LogLine(PHP_EOL . "    ~~~~~~ Auto-marking jobs based on user settings ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
             $marker = new JobsAutoMarker();
             $marker->setJobsList($jobsList);
             $marker->markJobsList();
@@ -361,8 +355,8 @@ class StageManager extends ClassJobsSiteCommon
     {
         
         try {
-            $this->logger->logLine("Stage 3:  Aggregating results from all jobs sites ", \Scooper\C__DISPLAY_SECTION_START__);
-            $this->logger->logLine("Merging matched job site results into single file: " . $this->pathAllMatchedJobs."[.json and .csv]", \Scooper\C__DISPLAY_NORMAL__);
+            LogLine("Stage 3:  Aggregating results from all jobs sites ", \Scooper\C__DISPLAY_SECTION_START__);
+            LogLine("Merging matched job site results into single file: " . $this->pathAllMatchedJobs."[.json and .csv]", \Scooper\C__DISPLAY_NORMAL__);
             $jobsinterested = $this->mergeAllJobsJsonInDir($GLOBALS['USERDATA']['directories']['listings-userinterested']);
             $arrFullJobList = $this->mergeAllJobsJsonInDir($GLOBALS['USERDATA']['directories']['listings-usernotinterested']);
             if (countJobRecords($arrFullJobList) > 0)
@@ -387,7 +381,7 @@ class StageManager extends ClassJobsSiteCommon
 //                writeJSON($data, $jobset[0].".json");
 //                $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/jobsjson_to_csv.py");
 //                $cmd = "python " . $PYTHONPATH . " -i " . escapeshellarg($jobset[0].".json") . " -o " . escapeshellarg($jobset[0].".csv");
-//                $this->logger->logLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd . "  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+//                LogLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd . "  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
 //                doExec($cmd);
 //            }
 //
@@ -395,7 +389,7 @@ class StageManager extends ClassJobsSiteCommon
             writeJSON($data, $this->pathAllJobs.".json");
             $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/jobsjson_to_csv.py");
             $cmd = "python " . $PYTHONPATH . " -i " . escapeshellarg($this->pathAllJobs.".json") . " -o " . escapeshellarg($this->pathAllJobs.".csv");
-            $this->logger->logLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd . "  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+            LogLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd . "  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
             doExec($cmd);
 
 
@@ -407,18 +401,18 @@ class StageManager extends ClassJobsSiteCommon
             if(countJobRecords($arrJobsNotInterestedJobs) > 0)
                 writeJobsListDataToFile($this->pathAllExcludedJobs.".json", $fileKey = null, $arrJobsNotInterestedJobs, JOBLIST_TYPE_MARKED,  $dirKey = "listings-usernotinterested");
 
-//            $this->logger->logLine("Merging excluded job site results into single file: " . $this->pathAllExcludedJobs, \Scooper\C__DISPLAY_NORMAL__);
+//            LogLine("Merging excluded job site results into single file: " . $this->pathAllExcludedJobs, \Scooper\C__DISPLAY_NORMAL__);
 //            $data = array('key' => null, 'listtype' => JOBLIST_TYPE_MARKED, 'jobs_count' => countJobRecords($jobsnotinterested ), 'jobslist' => $jobsnotinterested , 'search' => null);
 //            writeJSON($data, $this->pathAllExcludedJobs);
 //
 //            $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/jobsjson_to_csv.py");
 //            $csvPath = join(DIRECTORY_SEPARATOR, array(dirname($this->pathAllMatchedJobs), (basename($this->pathAllMatchedJobs) . ".csv")))
 //            $cmd = "python " . $PYTHONPATH . " --infile " . escapeshellarg($this->pathAllMatchedJobs) . " --outfile " . escapeshellarg($csvPath) ." --column job_title --index key_jobsite_siteid";
-//            $this->logger->logLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd ."  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+//            LogLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd ."  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
 //            doExec($cmd);
 //
 //
-            $this->logger->logLine("End of stage 3.", \Scooper\C__DISPLAY_NORMAL__);
+            LogLine("End of stage 3.", \Scooper\C__DISPLAY_NORMAL__);
 
 
         } catch (Exception $ex) {
@@ -430,10 +424,10 @@ class StageManager extends ClassJobsSiteCommon
     {
         try {
 
-            $this->logger->logLine("Stage 4: Notifying User", \Scooper\C__DISPLAY_SECTION_START__);
+            LogLine("Stage 4: Notifying User", \Scooper\C__DISPLAY_SECTION_START__);
 
 //            if ((countJobRecords($arrMatchedJobs)) == 0) {
-//                $this->logger->logLine("No jobs were loaded for notification. Skipping Stage 4.", \Scooper\C__DISPLAY_WARNING__);
+//                LogLine("No jobs were loaded for notification. Skipping Stage 4.", \Scooper\C__DISPLAY_WARNING__);
 //                return;
 //            }
 
