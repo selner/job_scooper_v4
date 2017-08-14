@@ -41,6 +41,16 @@ propel:
         defaultConnection: default
         connections:
             - default
+        log:
+            defaultLogger:
+                type: stream
+                path: /var/log/propel.log
+                level: 100 # DEBUG
+            default:
+                type: stream
+                path: /var/log/propel_bookstore.log
+
+
     generator:
         defaultConnection: default
         connections:
