@@ -19,6 +19,7 @@
 //
 require_once(dirname(dirname(__FILE__)) . "/bootstrap.php");
 
+use Propel\Runtime\Connection\ConnectionInterface;
 
 class JobPosting extends \JobScooper\Base\JobPosting
 {
@@ -112,9 +113,21 @@ class SearchRunResult extends ArrayObject
     }
 }
 
-class UserSearchRun extends \JobScooper\Base\UserSearch implements ArrayAccess
+class UserSearchRun extends \JobScooper\Base\UserSearchAudit implements ArrayAccess
 {
-//    private $plugin = null;
+    private $plugin = null;
+    private $pluginClass = null;
+    private $searchSettingKeys = array(
+        'search_start_url',
+        'keywords_string_for_url',
+        'base_url_format',
+        'location_user_specified_override',
+        'location_search_value',
+        'location_set_key',
+        'keyword_search_override',
+        'keywords_array',
+        'keywords_array_tokenized');
+
 
     public function __construct($arrSearchDetails = null, $userId = null, $outputDirectory = null)
     {
@@ -125,7 +138,6 @@ class UserSearchRun extends \JobScooper\Base\UserSearch implements ArrayAccess
         if ($this->getSearchSettings()) {
             $this->setSearchSettings(new SearchSettings());
         }
-
 
         $this->setRunDate(new DateTime('NOW'));
         if (is_null($userId))
@@ -148,12 +160,49 @@ class UserSearchRun extends \JobScooper\Base\UserSearch implements ArrayAccess
 //            $this->plugin = new $pluginclass['class_name']($outputDirectory);
 //        }
 
-        $this->save();
     }
 
 
     function __destruct()
     {
+    }
+
+    private function _setPluginClass($outputDirectory = null)
+    {
+        if(is_null($this->getJobSite()))
+            throw new Exception("Unable to look up plugin class because the job site is unknown.");
+
+        $this->pluginClass = $GLOBALS['JOBSITE_PLUGINS'][$this->getJobSite()]['class_name'];
+        $this->plugin = new $this->pluginClass($outputDirectory, null);
+    }
+
+    function getPlugin($outputDirectory = null)
+    {
+        if(is_null($this->plugin))
+            $this->_setPluginClass($outputDirectory);
+
+        return $this->plugin;
+    }
+
+    function getPluginClass()
+    {
+        if(is_null($this->plugin))
+            $this->_setPluginClass();
+
+        return $this->pluginClass;
+    }
+
+    function isSearchIncludedInRun()
+    {
+        $strIncludeKey = 'include_'.strtolower($this->getJobSite());
+        $valInclude = \Scooper\get_PharseOptionValue($strIncludeKey);
+        if(is_null($valInclude) || $valInclude == 0 || $valInclude === false)
+        {
+            return false;
+        }
+
+        return true;
+
     }
 
     private function _setOldNameToNewColumn($keyOldName, $arrDetails)
@@ -178,13 +227,16 @@ class UserSearchRun extends \JobScooper\Base\UserSearch implements ArrayAccess
                     $valueSet = true;
                     break;
 
-                case 'search_start_url':
-                case 'keywords_string_for_url':
-                case 'base_url_format':
-                case 'location_user_specified_override':
-                case 'location_search_value':
-                case 'keyword_search_override':
-                case 'keywords_array':
+                case in_array($keyOldName, $this->searchSettingKeys):
+//                case 'search_start_url':
+//                case 'keywords_string_for_url':
+//                case 'base_url_format':
+//                case 'location_user_specified_override':
+//                case 'location_search_value':
+//                case 'location_set_key':
+//                case 'keyword_search_override':
+//                case 'keywords_array':
+//                case 'keywords_array_tokenized':
                     $settings = $this->getSearchSettings();
                     $settings[$keyOldName] = $arrDetails[$keyOldName];
                     $this->setSearchSettings($settings);
@@ -213,19 +265,37 @@ class UserSearchRun extends \JobScooper\Base\UserSearch implements ArrayAccess
         }
     }
 
+    public function setSearchRunResult($v)
+    {
+        parent::setSearchRunResult($v);
+        if(!is_null($this->getKey()))
+            $this->save();
+    }
+
+    public function setJobSite($v)
+    {
+        parent::setJobSite($v);
+        $this->_setPluginClass();
+
+    }
+
+
+
 
     public function set($name, $value)
     {
 
         switch ($name) {
-
-            case 'search_start_url':
-            case 'keywords_string_for_url':
-            case 'base_url_format':
-            case 'location_user_specified_override':
-            case 'location_search_value':
-            case 'keyword_search_override':
-            case 'keywords_array':
+            case in_array($name, $this->searchSettingKeys):
+//
+//            case 'search_start_url':
+//            case 'keywords_string_for_url':
+//            case 'base_url_format':
+//            case 'location_user_specified_override':
+//            case 'location_search_value':
+//            case 'keyword_search_override':
+//            case 'keywords_array':
+//            case 'keywords_array_tokenized':
                 $settings = $this->getSearchSettings();
                 $settings[$name] = $value;
                 $this->setSearchSettings($settings);
@@ -245,21 +315,21 @@ class UserSearchRun extends \JobScooper\Base\UserSearch implements ArrayAccess
                 }
 
                 try {
-                    $this->setByName($name, \JobScooper\Map\UserSearchTableMap::TYPE_FIELDNAME, $value);
+                    $this->setByName($name, \JobScooper\Map\UserSearchAuditTableMap::TYPE_FIELDNAME, $value);
                     $throwEx = null;
                 } catch (Exception $ex) {
                     $throwEx = $ex;
                 }
 
                 try {
-                    $this->setByName($name, \JobScooper\Map\UserSearchTableMap::TYPE_COLNAME, $value);
+                    $this->setByName($name, \JobScooper\Map\UserSearchAuditTableMap::TYPE_COLNAME, $value);
                     $throwEx = null;
                 } catch (Exception $ex) {
                     $throwEx = $ex;
                 }
 
                 try {
-                    $this->setByName($name, \JobScooper\Map\UserSearchTableMap::TYPE_CAMELNAME, $value);
+                    $this->setByName($name, \JobScooper\Map\UserSearchAuditTableMap::TYPE_CAMELNAME, $value);
                     $throwEx = null;
                 } catch (Exception $ex) {
                     $throwEx = $ex;
@@ -269,24 +339,49 @@ class UserSearchRun extends \JobScooper\Base\UserSearch implements ArrayAccess
                     throw $throwEx;
 
                 break;
-
-
         }
+
     }
 
+    public function save(ConnectionInterface $con = null, $skipReload = false)
+    {
+        try
+        {
+            parent::save($con, $skipReload);
+        }
+        catch (Exception $ex)
+        {
+            try
+            {
+                $pk = $this->getPrimaryKey();
+            }
+            catch (Exception $exother)
+            {
+                $pk = "unknown-primary-key";
+            }
+//            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Error saving object " . __CLASS__ . " key " . $pk . ": " . $ex->getMessage() . PHP_EOL . "Class data = " . getArrayValuesAsString($this->toArray()), \Scooper\C__DISPLAY_ERROR__);
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Skipping failed save of object " . __CLASS__ . " key " . $pk . ": " . $ex->getMessage(), \Scooper\C__DISPLAY_WARNING__);
+
+            // TODO:  BUGBUG -- fix the save issues
+//            throw $ex;
+        }
+    }
     public function &get($name)
     {
 
         switch ($name) {
 
-
-            case 'search_start_url':
-            case 'keywords_string_for_url':
-            case 'base_url_format':
-            case 'location_user_specified_override':
-            case 'location_search_value':
-            case 'keyword_search_override':
-            case 'keywords_array':
+            case in_array($name, $this->searchSettingKeys):
+//
+//            case 'search_start_url':
+//            case 'keywords_string_for_url':
+//            case 'base_url_format':
+//            case 'location_user_specified_override':
+//            case 'location_search_value':
+//            case 'location_set_key':
+//            case 'keyword_search_override':
+//            case 'keywords_array':
+//            case 'keywords_array_tokenized':
                 $settings = $this->getSearchSettings();
                 return $settings[$name];
                 break;
@@ -304,13 +399,13 @@ class UserSearchRun extends \JobScooper\Base\UserSearch implements ArrayAccess
                 }
 
                 try {
-                    return $this->getByName($name, \JobScooper\Map\UserSearchTableMap::TYPE_FIELDNAME);
+                    return $this->getByName($name, \JobScooper\Map\UserSearchAuditTableMap::TYPE_FIELDNAME);
                 } catch (Exception $ex) {
                     $throwEx = $ex;
                 }
 
                 try {
-                    return $this->getByName($name, \JobScooper\Map\UserSearchTableMap::TYPE_COLNAME);
+                    return $this->getByName($name, \JobScooper\Map\UserSearchAuditTableMap::TYPE_COLNAME);
                 } catch (Exception $ex) {
                     $throwEx = $ex;
                 }
