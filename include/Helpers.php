@@ -524,18 +524,18 @@ function loadCSV($filename, $indexKeyName = null)
 
 function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 {
-    $GLOBALS['logger']->logLine("Tokenizing title exclusion matches from " . $inputfile . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+    LogLine("Tokenizing title exclusion matches from " . $inputfile . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
     if (!$outputFile)
         $outputFile = $GLOBALS['USERDATA']['directories']['debug'] . "/tempCallTokenizer.csv";
     $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/");
     $cmd = "python " . $PYTHONPATH . "/normalizeStrings.py -i " . $inputfile . " -o " . $outputFile . " -k " . $keyname;
     if ($indexKeyName != null)
         $cmd .= " --index " . $indexKeyName;
-    $GLOBALS['logger']->logLine("Running command: " . $cmd, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+    LogLine("Running command: " . $cmd, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
     doExec($cmd);
 
-    $GLOBALS['logger']->logLine("Loading tokens for " . $inputfile . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+    LogLine("Loading tokens for " . $inputfile . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
     $file = fopen($outputFile, "r");
     if (is_bool($file)) {
         throw new Exception("Specified input file '" . $outputFile . "' could not be opened.  Aborting.");
@@ -817,16 +817,16 @@ function writeJSON($data, $filepath)
     if ($jsonData === false) {
         $err = json_last_error_msg();
         $errMsg = "Error:  Unable to convert jobs list data to json due to error   " . $err;
-        $GLOBALS['logger']->logLine($errMsg, \Scooper\C__DISPLAY_ERROR__);
+        LogLine($errMsg, \Scooper\C__DISPLAY_ERROR__);
         throw new Exception($errMsg);
 
     }
 
-    $GLOBALS['logger']->logLine("Writing final job data pull results to json file " . $filepath);
+    LogLine("Writing final job data pull results to json file " . $filepath);
     if (file_put_contents($filepath, $jsonData, FILE_TEXT) === false) {
         $err = error_get_last();
         $errMsg = "Error:  Unable to save JSON results to file " . $filepath . " due to error   " . $err;
-        $GLOBALS['logger']->logLine($errMsg, \Scooper\C__DISPLAY_ERROR__);
+        LogLine($errMsg, \Scooper\C__DISPLAY_ERROR__);
         throw new Exception($errMsg);
 
     }
@@ -837,7 +837,7 @@ function writeJSON($data, $filepath)
 function loadJSON($file)
 {
     if(is_file($file)) {
-        if(!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Reading json data from file " . $file, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Reading json data from file " . $file, \Scooper\C__DISPLAY_ITEM_DETAIL__);
         $jsonText = file_get_contents($file, FILE_TEXT);
 
         $data = json_decode($jsonText, $assoc = true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
@@ -845,7 +845,7 @@ function loadJSON($file)
     }
     else
     {
-        if(!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Unable to load json data from file " . $file, \Scooper\C__DISPLAY_ERROR__);
+        LogLine("Unable to load json data from file " . $file, \Scooper\C__DISPLAY_ERROR__);
         return null;
     }
 
@@ -871,15 +871,15 @@ function readJobsListDataFromLocalFile($filepath, $returnFailedSearches = true)
         $filepath = $filepath . "-" . strtolower(getTodayAsString("")) . ".json";
 
         if (is_file($filepath)) {
-            if(!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Reading json data from file " . $filepath, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Reading json data from file " . $filepath, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             $data = loadJSON($filepath);
 //            $jsonText = file_get_contents($filepath, FILE_TEXT);
 //
 //            $data = json_decode($jsonText, $assoc = true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
 
             if ($returnFailedSearches === false) {
-                if ($data['search']['search_run_result']['success'] !== true) {
-                    if(!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Ignoring incomplete search results found in file with key " . $filepath);
+                if ($data['search']['   search_run_result']['success'] !== true) {
+                    LogLine("Ignoring incomplete search results found in file with key " . $filepath);
                     $data = null;
                 }
         }
@@ -961,7 +961,7 @@ function getFailedSearchesByPlugin()
         return null;
 
     $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function ($k) {
-        return ($k['search_run_result']['success'] !== true);
+        return ($k->getSearchRunResult()['success'] !== true);
     });
 
     if (is_null($arrFailedSearches) || !is_array($arrFailedSearches))
@@ -969,11 +969,11 @@ function getFailedSearchesByPlugin()
 
     $arrFailedPluginsReport = array();
     foreach ($arrFailedSearches as $search) {
-        if (!is_null($search['search_run_result']['success'])) {
-            if (!array_key_exists($search['site_name'], $arrFailedPluginsReport))
-                $arrFailedPluginsReport[$search['site_name']] = array();
+        if (!is_null($search->getSearchRunResult()['success'])) {
+            if (!array_key_exists($search->getJobSite(), $arrFailedPluginsReport))
+                $arrFailedPluginsReport[$search->getJobSite()]= array();
 
-            $arrFailedPluginsReport[$search['site_name']][$search['key']] = cloneArray($search, array(
+            $arrFailedPluginsReport[$search->getJobSite()][$search->getKey()] = cloneArray($search, array(
                 'keywords_string_for_url',
                 'base_url_format',
                 'keywords_array_tokenized',
@@ -1138,9 +1138,10 @@ function upsertJob($jobSite, $jobSiteJobID)
 }
 
 
+
 function getUserBySlug($slug)
 {
-    $GLOBALS['logger']->logLine("Searching for database user '" . $slug ."'", \Scooper\C__DISPLAY_NORMAL__);
+    LogLine("Searching for database user '" . $slug ."'", \Scooper\C__DISPLAY_NORMAL__);
     $user = \JobScooper\UserQuery::create()
         ->filterBySlug($slug)
         ->findOne();

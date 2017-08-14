@@ -17,6 +17,24 @@
 
 
 
+function LogLine($msg, $scooper_level=Scooper\C__DISPLAY_NORMAL__)
+{
+    if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
+    {
+        print($msg);
+    }
+    else
+    {
+        $GLOBALS['logger']->logLine($msg, $scooper_level);
+    }
+}
+
+function LogWarning($msg)
+{
+    LogLine($msg, Scooper\C__DISPLAY_WARNING__);
+}
+
+
 function object_to_array($obj)
 {
     $arr = is_object($obj) ? get_object_vars($obj) : $obj;
@@ -63,12 +81,9 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
             throw $toThrow;
     }
 
-
-    if (isset($GLOBALS['logger'])) {
-        $GLOBALS['logger']->logLine(PHP_EOL . PHP_EOL . PHP_EOL);
-        $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
-        $GLOBALS['logger']->logLine(PHP_EOL . PHP_EOL . PHP_EOL);
-    }
+    LogLine(PHP_EOL . PHP_EOL . PHP_EOL);
+    LogLine($msg, \Scooper\C__DISPLAY_ERROR__);
+    LogLine(PHP_EOL . PHP_EOL . PHP_EOL);
 
     $now = new DateTime('NOW');
 
