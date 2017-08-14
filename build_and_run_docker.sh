@@ -9,7 +9,7 @@ fi
 JOBSNAME="jobs-"$BRANCH
 IMAGETAG="selner/js4-"$BRANCH
 DOCKERHOSTNAME=$(hostname)"_docker"
-
+NOW=$(date "+%F-%H-%M-%S")
 echo "Branch is "$BRANCH"."
 echo "Container name is "$JOBSNAME"."
 echo "Image tag is "$IMAGETAG"."
@@ -18,7 +18,7 @@ echo "Image tag is "$IMAGETAG"."
 docker rm -f $JOBSNAME
 docker rmi $IMAGETAG
 
-docker build --build-arg BRANCH=$BRANCH --build-arg CACHEBUST="$(date)" -t $IMAGETAG .
+docker build --build-arg BRANCH=$BRANCH --build-arg CACHEBUST=$NOW -t $IMAGETAG .
 
 #
 # To use on macos or linux:
