@@ -60,7 +60,7 @@ function __initializeArgs__()
         ),
         'number_days' => array(
             'description'   => 'Number of days ago to pull job listings for.',
-            'default'       => 0,
+            'default'       => 1,
             'type'          => Pharse::PHARSE_INTEGER,
             'required'      => false,
             'short'      => 'days',
