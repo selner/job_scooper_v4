@@ -18,6 +18,9 @@
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
 
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
 class ClassConfig extends AbstractClassBaseJobsPlugin
 {
     protected $nNumDaysToSearch = -1;
@@ -155,6 +158,12 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         $this->__setupOutputFolders__($userOutfileDetails['directory']);
 
         if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['debug'] );
+        $defaultLogger = new Logger('defaultLogger');
+        $defaultLogger->pushHandler(new StreamHandler($GLOBALS['USERDATA']['directories']['debug'] . '/propel.log', Logger::DEBUG));
+        $defaultLogger->pushHandler(new StreamHandler('php://stderr', Logger::DEBUG));
+
+        $serviceContainer = \Propel\Runtime\Propel::getServiceContainer();
+        $serviceContainer->setLogger('defaultLogger', $defaultLogger);
 
         $strOutfileArrString = getArrayValuesAsString( $GLOBALS['USERDATA']['directories']);
         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output folders configured: " . $strOutfileArrString, \Scooper\C__DISPLAY_ITEM_DETAIL__);

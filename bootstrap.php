@@ -14,15 +14,6 @@ if (file_exists(dirname(__FILE__).'/vendor/autoload.php')) {
 require_once(dirname(__FILE__).'/config/generated-conf/config.php');
 
 require_once(dirname(__FILE__).'/include/HelpersBase.php');
-require_once(dirname(__FILE__).'/include/BusinessObjects.php');
-
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-
-$defaultLogger = new Logger('defaultLogger');
-$defaultLogger->pushHandler(new StreamHandler('/var/log/propel.log', Logger::DEBUG));
-
-$serviceContainer->setLogger('defaultLogger', $defaultLogger);
 
 require_once(dirname(__FILE__).'/lib/pharse.php');
 require_once(dirname(__FILE__).'/lib/Linkify.php');
