@@ -60,7 +60,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
     {
         $class = null;
 
-        $retJobList = array();
+        $arrResults = array();
 
 
         foreach(array_keys($this->arrSearchesByPlugin) as $className)
@@ -73,7 +73,6 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
                 $class->addSearches($searches);
 
                 $arrResults = $class->getUpdatedJobsForAllSearches();
-                addJobsToJobsList($retJobList, $arrResults);
                 $class = null;
             }
             catch (Exception $classError)
@@ -89,7 +88,6 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
                         try {
                             $this->selenium->killAllAndRestartSelenium();
                             $arrResults = $class->getUpdatedJobsForAllSearches();
-                            addJobsToJobsList($retJobList, $arrResults);
                         } catch (Exception $classError) {
                             $err = $classError;
                         }
@@ -127,7 +125,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
         }
 
 
-        return $retJobList;
+        return $arrResults;
     }
 
 }

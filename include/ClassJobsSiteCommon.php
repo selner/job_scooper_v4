@@ -48,24 +48,15 @@ class ClassJobsSiteCommon
     function getEmptyJobListingRecord()
     {
         return array(
-            'normalized' => false,
             'job_site' => '',
             'job_id' => '',
             'company' => '',
             'job_title' => '',
-            'interested' => '',
             'job_post_url' => '',
             'location' => '',
-//            'status' => '',
             'job_site_category' => '',
             'job_site_date' =>'',
             'employment_type' => '',
-            'match_notes' => '',
-            'date_pulled' => '',
-            'date_last_updated' => '',
-            'key_jobsite_siteid' => '',
-            'key_company_role' => '',
-            'job_title_tokenized' => '',
          );
     }
 
@@ -210,42 +201,42 @@ class ClassJobsSiteCommon
      * @param  Array $arrMyRecordsToInclude An array of optional job records to combine into the file output CSV
      * @param  integer $fIncludeFilteredJobsInResults False if you do not want jobs marked as interested = "No *" excluded from the results
      * @return string $strOutFilePath The file the jobs was written to or null if failed.
-     */
-    function loadJobsListFromCSVs($arrFilesToLoad)
-    {
-        $arrRetJobsList = null;
-
-        if(!is_array($arrFilesToLoad) || count($arrFilesToLoad) == 0)
-        {
-            throw new ErrorException("Error: loadJobsListFromCSVs called with an empty array of file names to load. ");
-
-        }
-
-
-        $GLOBALS['logger']->logLine("Loading jobs from " . count($arrFilesToLoad) . " CSV input files: " . var_export($arrFilesToLoad, true), \Scooper\C__DISPLAY_ITEM_START__);
-
-        foreach($arrFilesToLoad as $fileInput)
-        {
-            $strFilePath = $fileInput['details']['full_file_path'];
-            $arrCurFileJobs = loadCSV($strFilePath, 'key_jobsite_siteid');
-//            $classCombinedRead = new \Scooper\ScooperSimpleCSV($strFilePath , "r");
-//            $arrCurFileJobs = $classCombinedRead->readAllRecords(true, array_keys($this->getEmptyJobListingRecord()));
-//            $arrCurFileJobs = $arrCurFileJobs['data_rows'];
-//            $classCombinedRead = null;
-            if($arrCurFileJobs != null)
-            {
-                $this->saveJobList($arrCurFileJobs);
-
-                addJobsToJobsList($arrRetJobsList, $arrCurFileJobs);
-            }
-        }
-
-
-        $GLOBALS['logger']->logLine("Loaded " .count($arrRetJobsList)." jobs from " . count($arrFilesToLoad) . " CSV input files.", \Scooper\C__DISPLAY_ITEM_RESULT__);
-
-        return $arrRetJobsList;
-
-    }
+//     */
+//    function loadJobsListFromCSVs($arrFilesToLoad)
+//    {
+//        $arrRetJobsList = null;
+//
+//        if(!is_array($arrFilesToLoad) || count($arrFilesToLoad) == 0)
+//        {
+//            throw new ErrorException("Error: loadJobsListFromCSVs called with an empty array of file names to load. ");
+//
+//        }
+//
+//
+//        $GLOBALS['logger']->logLine("Loading jobs from " . count($arrFilesToLoad) . " CSV input files: " . var_export($arrFilesToLoad, true), \Scooper\C__DISPLAY_ITEM_START__);
+//
+//        foreach($arrFilesToLoad as $fileInput)
+//        {
+//            $strFilePath = $fileInput['details']['full_file_path'];
+//            $arrCurFileJobs = loadCSV($strFilePath, 'key_jobsite_siteid');
+////            $classCombinedRead = new \Scooper\ScooperSimpleCSV($strFilePath , "r");
+////            $arrCurFileJobs = $classCombinedRead->readAllRecords(true, array_keys($this->getEmptyJobListingRecord()));
+////            $arrCurFileJobs = $arrCurFileJobs['data_rows'];
+////            $classCombinedRead = null;
+//            if($arrCurFileJobs != null)
+//            {
+//                $this->saveJobList($arrCurFileJobs);
+//
+//                addJobsToJobsList($arrRetJobsList, $arrCurFileJobs);
+//            }
+//        }
+//
+//
+//        $GLOBALS['logger']->logLine("Loaded " .count($arrRetJobsList)." jobs from " . count($arrFilesToLoad) . " CSV input files.", \Scooper\C__DISPLAY_ITEM_RESULT__);
+//
+//        return $arrRetJobsList;
+//
+//    }
 
 
     /**

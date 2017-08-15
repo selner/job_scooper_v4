@@ -1,79 +1,20 @@
 <?php
+
+namespace JobScooper;
+
+use JobScooper\Base\UserSearchRun as BaseUserSearchRun;
+
 /**
- * Copyright 2014-17 Bryan Selner
+ * Skeleton subclass for representing a row from the 'user_search_run' table.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License. You may obtain
- * a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ * You should add additional methods to this class to meet the
+ * application requirements.  This class will only be generated as
+ * long as it does not already exist in the output directory.
+ *
  */
-//
-// If installed as part of the package, uses Klogger v0.1 version (http://codefury.net/projects/klogger/)
-//
-require_once(dirname(dirname(__FILE__)) . "/bootstrap.php");
-
-use Propel\Runtime\Connection\ConnectionInterface;
-
-class JobPosting extends \JobScooper\Base\JobPosting
-{
-    protected function updateAutoColumns()
-    {
-        $this->setKeyCompanyAndTitle($this->getCompany() . $this->getTitle());
-        $this->setKeySiteAndPostID($this->getJobSite() . $this->getJobSitePostID());
-    }
-
-    public function setAutoColumnRelatedProperty($method, $v)
-    {
-        if (is_null($v) || strlen($v) <= 0)
-            $v = "_VALUENOTSET_";
-        $ret = parent::$method($v);
-        $this->updateAutoColumns();
-        return $ret;
-    }
-
-    public function setCompany($v)
-    {
-        return $this->setAutoColumnRelatedProperty(__METHOD__, $v);
-    }
-
-    public function setJobsite($v)
-    {
-        return $this->setAutoColumnRelatedProperty(__METHOD__, $v);
-    }
-
-    public function setJobSitePostID($v)
-    {
-        return $this->setAutoColumnRelatedProperty(__METHOD__, $v);
-    }
-
-    public function setTitle($v)
-    {
-        return $this->setAutoColumnRelatedProperty(__METHOD__, $v);
-    }
-
-
-    public function preInsert(\Propel\Runtime\Connection\ConnectionInterface $con = null)
-    {
-        $this->updateAutoColumns();
-
-        if (is_callable('parent::preInsert')) {
-            return parent::preInsert($con);
-        }
-        return true;
-    }
-
-
-}
-
-
-class SearchSettings extends ArrayObject
+class SearchSettings extends \ArrayObject
 {
 
     function __construct()
@@ -89,19 +30,19 @@ class SearchSettings extends ArrayObject
             'keyword_search_override' => null,
             'keywords_array' => null,
         );
-        parent::__construct($arrFields, ArrayObject::ARRAY_AS_PROPS);
+        parent::__construct($arrFields, \ArrayObject::ARRAY_AS_PROPS);
 
         return $this;
     }
 }
 
-class SearchRunResult extends ArrayObject
+class SearchRunResult extends \ArrayObject
 {
     function __construct()
     {
         $arrFields = Array(
             'success' => false,
-            'error_datetime' => new DateTime(),
+            'error_datetime' => new \DateTime(),
             'error_details' => null,
             'exception_code' => null,
             'exception_message' => null,
@@ -109,11 +50,11 @@ class SearchRunResult extends ArrayObject
             'exception_file' => null,
             'error_files' => array()
         );
-        return parent::__construct($arrFields, ArrayObject::ARRAY_AS_PROPS);
+        return parent::__construct($arrFields, \ArrayObject::ARRAY_AS_PROPS);
     }
 }
 
-class UserSearchRun extends \JobScooper\Base\UserSearchAudit implements ArrayAccess
+class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
 {
     private $plugin = null;
     private $pluginClass = null;
@@ -129,7 +70,9 @@ class UserSearchRun extends \JobScooper\Base\UserSearchAudit implements ArrayAcc
         'keywords_array_tokenized');
 
 
-    public function __construct($arrSearchDetails = null, $userId = null, $outputDirectory = null)
+    private $userObject = null;
+
+    public function __construct($arrSearchDetails = null, $outputDirectory = null)
     {
         parent::__construct();
         if (is_null($this->getSearchRunResult())) {
@@ -138,27 +81,14 @@ class UserSearchRun extends \JobScooper\Base\UserSearchAudit implements ArrayAcc
         if ($this->getSearchSettings()) {
             $this->setSearchSettings(new SearchSettings());
         }
+        $this->setAppRunId($GLOBALS['USERDATA']['configuration_settings']['app_run_id']);
 
-        $this->setRunDate(new DateTime('NOW'));
-        if (is_null($userId))
-            $this->setUserId($GLOBALS['USERDATA']['configuration_settings']['user_details']['UserId']);
-        else
-            $this->setUserId($userId);
+        $this->userObject = $GLOBALS['USERDATA']['configuration_settings']['user_details'];
+        $this->setUserSlug($this->userObject->getUserSlug());
 
         if (!is_null($arrSearchDetails) && is_array($arrSearchDetails) && count($arrSearchDetails) > 0) {
             $this->fromSearchDetailsArray($arrSearchDetails);
         }
-
-
-//        if (!is_null($this->getJobSite()) && strlen($this->getJobSite()) > 0)
-//        {
-//            $pluginclass = $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->getJobSite())];
-//            if(!is_null($outputDirectory))
-//            {
-//                $pathDetails = \Scooper\getFullPathFromFileDetails($outputDirectory), $pluginclass);
-//            }
-//            $this->plugin = new $pluginclass['class_name']($outputDirectory);
-//        }
 
     }
 
@@ -228,15 +158,6 @@ class UserSearchRun extends \JobScooper\Base\UserSearchAudit implements ArrayAcc
                     break;
 
                 case in_array($keyOldName, $this->searchSettingKeys):
-//                case 'search_start_url':
-//                case 'keywords_string_for_url':
-//                case 'base_url_format':
-//                case 'location_user_specified_override':
-//                case 'location_search_value':
-//                case 'location_set_key':
-//                case 'keyword_search_override':
-//                case 'keywords_array':
-//                case 'keywords_array_tokenized':
                     $settings = $this->getSearchSettings();
                     $settings[$keyOldName] = $arrDetails[$keyOldName];
                     $this->setSearchSettings($settings);
@@ -355,6 +276,7 @@ class UserSearchRun extends \JobScooper\Base\UserSearchAudit implements ArrayAcc
 //            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Skipping failed save of object " . __CLASS__ . " key " . $pk . ": " . $ex->getMessage(), \Scooper\C__DISPLAY_WARNING__);
         }
     }
+
     public function &get($name)
     {
 
@@ -431,5 +353,4 @@ class UserSearchRun extends \JobScooper\Base\UserSearchAudit implements ArrayAcc
         }
     }
 }
-
 

@@ -288,71 +288,6 @@ function countJobRecords($arrJobs)
     return countAssociativeArrayValues($arrJobs);
 }
 
-
-function addJobsToJobsList(&$arrJobsListToUpdate, $arrAddJobs)
-{
-    if ($arrAddJobs == null) return;
-
-    if (!is_array($arrAddJobs) || count($arrAddJobs) == 0) {
-        // skip. no jobs to add
-        return;
-    }
-    if ($arrJobsListToUpdate == null) $arrJobsListToUpdate = array();
-
-    foreach ($arrAddJobs as $jobRecord) {
-        addJobToJobsList($arrJobsListToUpdate, $jobRecord);
-    }
-    unset($jobRecord);
-
-
-}
-
-
-function addJobToJobsList(&$arrJobsListToUpdate, $job)
-{
-    if ($arrJobsListToUpdate == null) $arrJobsListToUpdate = array();
-
-    $jobToAdd = \Scooper\array_copy($job);
-
-
-    if (isset($arrJobsListToUpdate[$job['key_jobsite_siteid']])) {
-        $jobToAdd = getMergedJobRecord($arrJobsListToUpdate[$job['key_jobsite_siteid']], $job);
-    }
-
-
-    $arrJobsListToUpdate[$job['key_jobsite_siteid']] = $jobToAdd;
-}
-
-
-function updateJobColumn(&$job, $newJob, $strColumn, $fAllowEmptyValueOverwrite = false)
-{
-    $prevJob = \Scooper\array_copy($job);
-
-    if (strlen($job[$strColumn]) == 0) {
-        $job[$strColumn] = $newJob[$strColumn];
-    } elseif (strlen($newJob[$strColumn]) == 0) {
-        if ($fAllowEmptyValueOverwrite == true) {
-            $job[$strColumn] = $newJob[$strColumn];
-            $job['match_notes'] .= $strColumn . " value '" . $prevJob[$strColumn] . "' removed.'" . PHP_EOL;
-        }
-    } else {
-        if (strcasecmp(\Scooper\strScrub($job[$strColumn]), \Scooper\strScrub($newJob[$strColumn])) != 0) {
-            $job[$strColumn] = $newJob[$strColumn];
-            $job['match_notes'] .= PHP_EOL . $strColumn . ": old[" . $prevJob[$strColumn] . "], new[" . $job[$strColumn] . "]" . PHP_EOL;
-        }
-    }
-
-}
-
-function appendJobColumnData(&$job, $strColumn, $delim, $newData)
-{
-    if (is_string($job[$strColumn]) && strlen($job[$strColumn]) > 0) {
-        $job[$strColumn] .= $delim . " ";
-    }
-    $job[$strColumn] .= $newData;
-
-}
-
 function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strDelimiter = "", $strIntro = "", $fIncludeKey = true)
 {
     $strReturn = "";
@@ -426,46 +361,6 @@ function getArrayValuesAsString($arrDetails, $strDelimiter = ", ", $strIntro = "
     }
 
     return $strReturn;
-}
-
-function updateJobRecord($prevJobRecord, $jobRecordChanges)
-{
-
-    return getMergedJobRecord($prevJobRecord, $jobRecordChanges);
-}
-
-function getMergedJobRecord($prevJobRecord, $newerJobRecord)
-{
-    if ($prevJobRecord['key_jobsite_siteid'] == $newerJobRecord['key_jobsite_siteid']) {
-        return $prevJobRecord; // don't update yourself.
-    }
-
-    // Since we already had a job record for this particular listing,
-    // we'll merge the new info into the old one.  For most fields,
-    // the latter (aka the passed in $job) values will win.  For some
-    // fields such as Notes, the values will be combined.
-    //
-    $mergedJob = \Scooper\array_copy($prevJobRecord);
-
-    updateJobColumn($mergedJob, $newerJobRecord, 'company', false);
-    updateJobColumn($mergedJob, $newerJobRecord, 'job_title', false);
-//    updateJobColumn($mergedJob, $newerJobRecord, 'location', false);
-//    updateJobColumn($mergedJob, $newerJobRecord, 'job_site_category', false);
-//    updateJobColumn($mergedJob, $newerJobRecord, 'date_pulled', false);
-//    updateJobColumn($mergedJob, $newerJobRecord, 'job_post_url', false);
-//    updateJobColumn($mergedJob, $newerJobRecord, 'job_site_date', false);
-
-    if (!isMarked_InterestedOrBlank($prevJobRecord)) {
-        updateJobColumn($mergedJob, $newerJobRecord, 'interested', false);
-//        updateJobColumn($mergedJob, $newerJobRecord, 'status', false);
-    }
-
-
-    $mergedJob['match_notes'] = $newerJobRecord['match_notes'] . ' ' . $mergedJob['match_notes'];
-    $mergedJob['date_last_updated'] = getTodayAsString();
-
-    return $mergedJob;
-
 }
 
 function sortJobsListByCompanyRole(&$arrJobList)
@@ -1025,24 +920,6 @@ function noJobStringMatch($var, $matchString)
 }
 
 
-function getColumnMappingFromJobToDB() {
-    return array(
-        "job_title" => "Title",
-        "job_title_tokenized"  => "JobTitleTokens",
-        "job_post_url"  => "Url",
-        "job_site"  => "JobSite",
-        "job_id"  => "JobSitePostID",
-        "company"  => "Company",
-        "location"  => "Location",
-        "job_site_category"  => "Category",
-        "employment_type"  => "EmploymentType",
-        "date_last_updated"  => "UpdatedAt",
-        "job_site_date"  => "PostedAt",
-        "date_pulled"  => "FirstSeenAt"
-    );
-}
-//
-
 function convertToJobPostingObj($job)
 {
     $colmap = getColumnMappingFromJobToDB();
@@ -1099,43 +976,39 @@ function cleanupSlugPart($slug, $replacement = '-')
     return $slug;
 }
 
-function getDBMappedJob($job)
+function findOrCreateJobPosting($jobSite, $jobSiteJobID)
 {
-    $colMap = getColumnMappingFromJobToDB();
-
-    $newJob = upsertJob($job['job_site'], $job['job_id']);
-    $keysNotMapped = array();
-    foreach(array_keys($job) as $key)
-    {
-        if(array_key_exists($key, $colMap)) {
-            $newKey = $colMap[$key];
-            $method = "set" . $newKey;
-            $newJob->$method($job[$key]);
-        }
-        else
-        {
-            $newJob->$key = $job[$key];
-        }
-    }
-    return $newJob;
-}
-
-function upsertJob($jobSite, $jobSiteJobID)
-{
-    if(is_null($jobSite) || is_null($jobSiteJobID))
+    if(is_null($jobSiteJobID))
         return null;
 
-    $job = \JobScooper\JobPostingQuery::create()
+    return \JobScooper\JobPostingQuery::create()
         ->filterByJobSite($jobSite)
         ->filterByJobSitePostID($jobSiteJobID)
-        ->findOne();
-
-    if(is_null($job))
-        return new \JobScooper\JobPosting();
-    else
-        return $job;
-
+        ->findOneOrCreate();
 }
+
+function updateOrCreateJobPosting($job)
+{
+    if(is_null($job) || !is_array($job))
+        return null;
+
+    try {
+        if((is_null($job['job_site']) || strlen($job['job_site']) == 0) && !is_null($job['company']))
+            $job['job_site'] = strtolower($job['company']);
+
+        $jobRecord = findOrCreateJobPosting($job['job_site'], $job['job_id']);
+    }
+    catch (Exception $ex)
+    {
+        $jobRecord = new \JobScooper\JobPosting();
+    }
+
+    $jobRecord->fromArray($job);
+    $jobRecord->save();
+    return $jobRecord;
+}
+
+
 
 
 
@@ -1143,8 +1016,20 @@ function getUserBySlug($slug)
 {
     LogLine("Searching for database user '" . $slug ."'", \Scooper\C__DISPLAY_NORMAL__);
     $user = \JobScooper\UserQuery::create()
-        ->filterBySlug($slug)
+        ->filterByPrimaryKey($slug)
         ->findOne();
+
+    return $user;
+}
+
+function findOrCreateUser($value)
+{
+    $slug = cleanupSlugPart($value);
+
+    LogLine("Searching for database user '" . $slug ."'", \Scooper\C__DISPLAY_NORMAL__);
+    $user = \JobScooper\UserQuery::create()
+        ->filterByPrimaryKey($slug)
+        ->findOneOrCreate();
 
     return $user;
 }
@@ -1155,20 +1040,21 @@ function getUserByName($username)
     return getUserBySlug($slug);
 
 }
-function upsertUser($arrUserDetails)
+function updateOrCreateUser($arrUserDetails)
 {
     if(is_null($arrUserDetails) || !is_array($arrUserDetails))
         return null;
-    $user = getUserByName($arrUserDetails['Name']);
 
-    if(is_null($user))
+    try {
+        $userrec = findOrCreateUser($arrUserDetails['Name']);
+    }
+    catch (Exception $ex)
+    {
         $userrec = new \JobScooper\User();
-    else
-        $userrec = $user;
+    }
 
     $userrec->fromArray($arrUserDetails);
     $userrec->save();
-
     return $userrec;
 }
 

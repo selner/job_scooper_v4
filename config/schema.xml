@@ -80,9 +80,9 @@
         <column name="title" phpName="Title" type="varchar" size="255" required="true"/>
         <column name="title_tokens" phpName="JobTitleTokens" type="varchar" size="255" required="false"/>
         <column name="url" type="varchar" size="1024" required="true"/>
-        <unique name="index_jobsite_url/">
-            <unique-column name="url"/>
-        </unique>
+        <!--<unique name="index_jobsite_url/">-->
+            <!--<unique-column name="url"/>-->
+        <!--</unique>-->
         <column name="company" type="varchar" size="100" required="false"/>
         <!--        <column name="company_id" phpName="CompanyId" type="varchar" size="255" required="false"/> -->
         <column name="location" type="varchar" size="255" required="false"/>
@@ -133,11 +133,9 @@
 
 
 
-    <table name="user" phpName="User">
-        <behavior name="sluggable"/>
-        <column name="name" phpName="Name" type="varchar" size="128" required="true" primaryString="true"/>
-
-        <column name="user_id" phpName="UserId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+    <table name="user" phpName="User" allowPkInsert="true">
+        <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true" primaryKey="true" primaryString="true"/>
+        <column name="name" phpName="Name" type="varchar" size="128" required="true"/>
         <column name="email_address" phpName="EmailAddress" type="varchar" size="128" required="false"/>
         <column name="configuration_file_path" phpName="ConfigFilePath" type="varchar" size="128" required="false"/>
     </table>
@@ -145,14 +143,14 @@
 
 
 
-    <table name="user_search_audit" phpName="UserSearchAudit" reloadOnUpdate="true">
-        <column name="user_search_run_id" phpName="UserSearchId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+    <table name="user_search_run" phpName="UserSearchRun" reloadOnUpdate="true">
+        <column name="user_search_run_id" phpName="UserSearchRunId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
         <column name="key" phpName="Key" type="varchar" size="128"/>
-        <column name="date_search_run" phpName="RunDate" type="timestamp"/>
-        <column name="user_id" phpName="UserId" type="integer"/>
+        <column name="app_run_id" phpName="AppRunId" type="varchar" size="75"/>
+        <column name="user_slug" phpName="UserSlug"  type="varchar" size="128"/>
+        <column name="date_search_run" type="timestamp" />
         <behavior name="timestampable">
             <parameter name="create_column" value="date_search_run" />
-            <parameter name="update_column" value="date_search_run" />
         </behavior>
         <column name="jobsite" phpName="JobSite" type="varchar" size="255"/>
         <column name="search_settings" phpName="SearchSettings" type="array"/>
@@ -161,21 +159,22 @@
         <!--<column name="run_result_details" fieldname="details" phpName="RunResultDetails" type="longvarchar"/>-->
         <!--<column name="run_result_errorfiles" fieldname="errorfiles" phpName="RunResultErrorFiles" type="array"/>-->
         <foreign-key foreignTable="user">
-            <reference local="user_id" foreign="user_id"/>
+            <reference local="user_slug" foreign="user_slug"/>
         </foreign-key>
     </table>
 
 
 
 
-    <table name="user_job_match" isCrossRef="true">
-        <column name="user_id" phpName="UserId" type="integer" primaryKey="true"/>
+    <table name="user_job_match" phpName="UserJobMatch" isCrossRef="true">
+        <column name="user_slug" phpName="UserSlug" type="varchar" size="128" primaryKey="true"/>
         <column name="jobposting_id" phpName="JobPostingId" type="integer" primaryKey="true"/>
         <column name="user_notification_state" phpName="UserNotificationState" type="enum" valueSet="none,ready-to-send,sent"/>
         <column name="user_match_status" phpName="UserMatchStatus" type="enum" valueSet="none, include-match, exclude-match"/>
         <column name="user_match_exclude_reason" phpName="UserMatchExcludeReason" type="varchar" size="1024"/>
+        <column name="app_run_id" phpName="AppRunId" type="varchar" size="75"/>
         <foreign-key foreignTable="user">
-            <reference local="user_id" foreign="user_id"/>
+            <reference local="user_slug" foreign="user_slug"/>
         </foreign-key>
         <foreign-key foreignTable="jobposting">
             <reference local="jobposting_id" foreign="jobposting_id"/>

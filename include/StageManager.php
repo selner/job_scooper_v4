@@ -106,22 +106,10 @@ class StageManager extends ClassJobsSiteCommon
     {
         $data = readJobsListDataFromLocalFile($path);
         $jobs = $data['jobslist'];
-        $colMap = getColumnMappingFromJobToDB();
 
         foreach($jobs as $job) {
-            $newJob = new JobScooper\JobPosting();
-            foreach(array_keys($job) as $key)
-            {
-                if(array_key_exists($key, $colMap)) {
-                    $newKey = $colMap[$key];
-                    $method = "set" . $newKey;
-                    $newJob->$method($job[$key]);
-                }
-            }
-
-//            $js = $newJob->toJSON();
-//            print($js . PHP_EOL);
-//            var_dump($newJob);
+            $newJob = new \JobScooper\JobPosting();
+            $newJob->fromArray($job);
             $newJob->save();
             LogLine("Saved " . $job['job_post_id'] . " to database.");
         }

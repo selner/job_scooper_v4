@@ -702,7 +702,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                         foreach($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $siteToSearch)
                         {
 
-                            $newSearch = new UserSearchRun();
+                            $newSearch = new \JobScooper\UserSearchRun();
                             $newSearch->setKey(\Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($keywordSet['key'], FOR_LOOKUP_VALUE_MATCHING));
                             $newSearch->setJobSite($siteToSearch);
                             $classPlug = $newSearch->getPlugin();
@@ -988,10 +988,8 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             $userDetails['EmailAddress'] = $email['address'];
         }
 
-        $retUserData = upsertUser($userDetails);
-        $userDetails['UserId'] = $retUserData->getUserId();
-        $userDetails['Slug'] = $retUserData->getSlug();
-        $GLOBALS['USERDATA']['configuration_settings']['user_details'] = \Scooper\array_copy($userDetails);
+        $retUserData = updateOrCreateUser($userDetails);
+        $GLOBALS['USERDATA']['configuration_settings']['user_details'] = $retUserData->copy();
 
 
 
