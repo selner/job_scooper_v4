@@ -107,6 +107,9 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         $GLOBALS['USERDATA']['companies_regex_to_filter'] = null;
         $GLOBALS['USERDATA']['configuration_settings'] = array();
 
+        $now = new DateTime();
+        $GLOBALS['USERDATA']['configuration_settings']['app_run_id'] = __APP_VERSION__ . $now->format('Y-m-d-h-s');
+
         // and to make sure our notes get updated on active jobs
         // that we'd seen previously
         // Now go see what we got back for each of the sites
@@ -861,7 +864,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
     // TODO:  BUGBUG -- need to update for new UserSearchRun structure
     private function _addSearchesForAdditionalLocationSets_()
     {
-        throw new \Symfony\Component\Intl\Exception\NotImplementedException("BUGBUG -- need to update for new UserSearchRun structure");
+//        throw new \Symfony\Component\Intl\Exception\NotImplementedException("BUGBUG -- need to update for new UserSearchRun structure");
 
 //        if(count($GLOBALS['USERDATA']['configuration_settings']['searches']) <= 0)
 //        {
