@@ -157,7 +157,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             try {
                 // assert this search is actually for the job site supported by this plugin
                 assert(strcasecmp(strtolower($search->getJobSite()), strtolower($this->siteName)) == 0);
-                $GLOBALS['logger']->logSectionHeader("Starting data pull for " . $this->siteName . "[" . $search->getKey() . "]", \Scooper\C__NAPPTOPLEVEL__, \Scooper\C__SECTION_BEGIN__);
 
                 if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
                     try {
@@ -802,7 +801,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     private function _updateJobsDataForSearch_($searchDetails)
     {
-        $GLOBALS['logger']->logSectionHeader(("Starting data pull for " . $this->siteName . "[" . $searchDetails['key']) . "]", \Scooper\C__NAPPTOPLEVEL__, \Scooper\C__SECTION_BEGIN__);
         $this->_logMemoryUsage_();
         $arrSearchJobList = null;
         $retLastEx = null;
