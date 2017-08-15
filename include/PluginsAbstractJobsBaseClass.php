@@ -19,9 +19,15 @@ require_once dirname(dirname(__FILE__))."/bootstrap.php";
 const VALUE_NOT_SUPPORTED = -1;
 const BASE_URL_TAG_LOCATION = "***LOCATION***";
 const BASE_URL_TAG_KEYWORDS = "***KEYWORDS***";
+use \Khartnett\Normalization as Normalize;
 
 abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 {
+    protected $arrSearchesToReturn = null;
+    protected $strBaseURLFormat = null;
+    protected $siteBaseURL = null;
+    protected $typeLocationSearchNeeded = null;
+    protected $siteName = 'NAME-NOT-SET';
 
     function __construct($strOutputDirectory = null, $attributes = null)
     {
@@ -37,6 +43,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             }
         }
 
+        $this->normalizer = new Normalize();
 
         if (stristr($this->strBaseURLFormat, "***KEYWORDS***") == false)
             $this->additionalFlags[] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
@@ -204,7 +211,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     protected $additionalFlags = array();
     protected $paginationType = null;
     protected $secsPageTimeout = null;
-    protected $pluginResultsType;
     protected $selenium = null;
     protected $nextPageScript = null;
     protected $selectorMoreListings = null;
@@ -215,6 +221,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     protected $strKeywordDelimiter = null;
     protected $additionalLoadDelaySeconds = 0;
     protected $_flags_ = null;
+    protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
+    protected $normalizer  = null;
+
+    function getLocationSettingType() { return $this->typeLocationSearchNeeded; }
 
     protected function getActiveWebdriver()
     {
@@ -342,6 +352,20 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     //
     //
     //************************************************************************
+    function getIDFromLink($regex_link_job_id, $url)
+    {
+        if(isset($regex_link_job_id))
+        {
+            $fMatchedID = preg_match($regex_link_job_id, $url, $idMatches);
+            if($fMatchedID && count($idMatches) >= 1)
+            {
+                return $idMatches[count($idMatches)-1];
+            }
+        }
+        return "";
+    }
+
+
 
     protected function _getBaseURLFormat_($searchDetails = null, $nPage = null, $nItem = null)
     {

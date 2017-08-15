@@ -23,7 +23,6 @@ define('JOBS_SCOOPER_MAX_FILE_SIZE', 1024000);
 
 define('REXPR_PARTIAL_MATCH_URL_DOMAIN', '^https*.{3}[^\/]*');
 define('REXPR_MATCH_URL_DOMAIN', '/^https*.{3}[^\/]*/');
-use \Khartnett\Normalization as Normalize;
 
 class ClassJobsSiteCommon
 {
@@ -31,16 +30,9 @@ class ClassJobsSiteCommon
     private $arrKeysForDeduping = array('key_jobsite_siteid');
 
     protected $detailsMyFileOut= "";
-    protected $arrSearchesToReturn = null;
-    protected $siteBaseURL = null;
     protected $regex_link_job_id = null;
-    protected $strBaseURLFormat = null;
-    protected $typeLocationSearchNeeded = null;
-    protected $siteName = 'NAME-NOT-SET';
     protected $prevCookies = "";
     protected $prevURL = null;
-    protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
-    protected $normalizer  = null;
 
 
     function __construct($strOutputDirectory = null)
@@ -49,12 +41,9 @@ class ClassJobsSiteCommon
         {
             $this->detailsMyFileOut = \Scooper\parseFilePath($strOutputDirectory, false);
         }
-        $this->normalizer = new Normalize();
 
     }
 
-
-    function getLocationSettingType() { return $this->typeLocationSearchNeeded; }
 
     function getEmptyJobListingRecord()
     {
@@ -108,20 +97,6 @@ class ClassJobsSiteCommon
             if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("~~~~ PHP memory usage is ".$usage." ~~~~", \Scooper\C__DISPLAY_NORMAL__); }
         }
     }
-
-    function getIDFromLink($regex_link_job_id, $url)
-    {
-        if(isset($regex_link_job_id))
-        {
-            $fMatchedID = preg_match($regex_link_job_id, $url, $idMatches);
-            if($fMatchedID && count($idMatches) >= 1)
-            {
-                return $idMatches[count($idMatches)-1];
-            }
-        }
-        return "";
-    }
-
 
 
 
