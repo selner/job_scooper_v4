@@ -1,6 +1,10 @@
 .idea*
-
+*backup*
 *.lock
+*.sq3
+config/generated-conf/config.php
+config/generated-sql*
+config/generated-migrations*
 
 vendor
 
@@ -9,9 +13,6 @@ vendor
 ScoopJobs.app*
 
 *IGNORE*
-
-configs/*
-
 
 *.jar
 output
