@@ -76,7 +76,6 @@ class PluginAmazon extends ClassBaseClientSideHTMLJobSitePlugin
             $item['job_title'] = $subNode[0]->plaintext;
 
             $item['company'] = 'Amazon';
-            $item['date_pulled'] = getTodayAsString();
             $subNode = $node->find("div[class=location-and-id] span]");
             $item['location'] = explode("|", $subNode[0]->plaintext)[0];
 

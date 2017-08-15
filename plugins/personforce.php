@@ -44,7 +44,18 @@ class PluginPersonForce extends ClassClientHTMLJobSitePlugin
 
     protected function normalizeJobItem($arrItem)
     {
-        return $this->normalizeJobItemWithoutJobID($arrItem);
+
+        $arrItem ['job_site_date'] = \Scooper\strScrub($arrItem['job_site_date'], REMOVE_EXTRA_WHITESPACE | LOWERCASE | HTML_DECODE );
+        $dateVal = strtotime($arrItem ['job_site_date'], $now = time());
+        if(!($dateVal === false))
+        {
+            $arrItem['job_site_date'] = date('Y-m-d', $dateVal);
+        }
+
+
+        $arrItem['job_id'] = \Scooper\strScrub($arrItem['company'], FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($arrItem['job_title'], FOR_LOOKUP_VALUE_MATCHING). \Scooper\strScrub($arrItem['job_site_date'], FOR_LOOKUP_VALUE_MATCHING);
+
+        return parent::normalizeJobItem($arrItem);
     }
 
 

@@ -32,7 +32,7 @@ class PluginGroupon extends ClassBaseClientSideHTMLJobSitePlugin
         $ret = null;
 
 
-        $nodesJobs= $objSimpHTML->find("a[class='ng-binding']");
+        $nodesJobs= $objSimpHTML->find("div[class='body-text'] ul[class='block-grid'] li[class='ng-scope'] a[class='ng-binding']");
 
         $nCounter = -1;
 
@@ -48,7 +48,6 @@ class PluginGroupon extends ClassBaseClientSideHTMLJobSitePlugin
 
             $item['job_title'] = $node->plaintext;
             $item['job_post_url'] = $node->href;
-            $item['date_pulled'] = getTodayAsString();
             $item['company'] = $this->siteName;
             $item['job_id'] = $this->getIDFromLink('/\/jobs\/([^\/]+)/i', $item['job_post_url']);
             if($item['job_title'] == '') continue;
