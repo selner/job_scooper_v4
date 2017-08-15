@@ -21,9 +21,9 @@ require_once dirname(dirname(__FILE__))."/bootstrap.php";
 class ClassMultiSiteSearch extends ClassJobsSiteCommon
 {
     protected $siteName = 'Multisite';
-    private $arrPluginClassesToRun = array();
     private $arrSearchesByPlugin = array();
     private $selenium = null;
+    private $arrSearchesToReturn = array();
 
     function __destruct()
     {
@@ -98,7 +98,7 @@ class ClassMultiSiteSearch extends ClassJobsSiteCommon
                 else
                     handleException($classError, "Unable to run searches for ". $className . ": %s", $raise = false);
 
-                $GLOBALS['logger']->logLine('ERROR:  ' . $className . ' failed due to an error:  ' . $err .PHP_EOL. 'Skipping it\'s remaining searches and continuing with other plugins.', \Scooper\C__DISPLAY_ERROR__);
+                LogLine('ERROR:  ' . $className . ' failed due to an error:  ' . $err .PHP_EOL. 'Skipping it\'s remaining searches and continuing with other plugins.', \Scooper\C__DISPLAY_ERROR__);
                 $arrFail = getFailedSearchesByPlugin();
                 if(countAssociativeArrayValues($arrFail) > 2) {
                     $arrWebDriverFail = array_filter($arrFail, function ($var) {

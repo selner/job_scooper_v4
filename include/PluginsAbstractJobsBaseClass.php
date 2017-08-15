@@ -149,12 +149,12 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         $strIncludeKey = 'include_' . strtolower($this->siteName);
 
         if (isset($GLOBALS['OPTS'][$strIncludeKey]) && $GLOBALS['OPTS'][$strIncludeKey] == 0) {
-            $GLOBALS['logger']->logLine($this->siteName . ": excluded for run. Skipping '" . count($this->arrSearchesToReturn) . "' site search(es).", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            LogLine($this->siteName . ": excluded for run. Skipping '" . count($this->arrSearchesToReturn) . "' site search(es).", \Scooper\C__DISPLAY_ITEM_DETAIL__);
             return array();
         }
 
         if (count($this->arrSearchesToReturn) == 0) {
-            $GLOBALS['logger']->logLine($this->siteName . ": no searches set. Skipping...", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            LogLine($this->siteName . ": no searches set. Skipping...", \Scooper\C__DISPLAY_ITEM_DETAIL__);
             return array();
         }
 
@@ -243,7 +243,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         if (!is_null($this->arrSearchesToReturn) && count($this->arrSearchesToReturn) > 0) {
             $filenm = exportToDebugJSON(\Scooper\object_to_array($this), ($this->siteName . "-plugin-state-data"));
-            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("JSON state data for plugin '" . $this->siteName . "' written to " . $filenm . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            LogLine("JSON state data for plugin '" . $this->siteName . "' written to " . $filenm . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
             return $filenm;
         }
@@ -259,7 +259,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $arrKeywords = $arrKeywordSet;
         }
 
-        $strRetCombinedKeywords = VALUE_NOT_SUPPORTED;
         if ($this->isBitFlagSet(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS)) {
             $arrKeywords = array_mapk(function ($k, $v) {
                 return "\"{$v}\"";
@@ -291,7 +290,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             // No override, so let's see if the search settings have defined one for us
             $locTypeNeeded = $this->getLocationSettingType();
             if ($locTypeNeeded == null || $locTypeNeeded == "") {
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Plugin for '" . $searchDetails['site_name'] . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails['key'] . "' with settings '" . $locSettingSets['key'] . "'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Plugin for '" . $searchDetails['site_name'] . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails['key'] . "' with settings '" . $locSettingSets['key'] . "'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 return $strReturnLocation;
             }
 
@@ -300,7 +299,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             }
 
             if ($strReturnLocation == null || $strReturnLocation == VALUE_NOT_SUPPORTED) {
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Plugin for '" . $searchDetails['site_name'] . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails['key'] . "' with settings '" . $locSettingSets['key'] . "'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Plugin for '" . $searchDetails['site_name'] . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails['key'] . "' with settings '" . $locSettingSets['key'] . "'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 return $strReturnLocation;
             }
         }
@@ -329,7 +328,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         if (!$this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) && $nSubtermMatches > 0) {
             $strLocationValue = $searchDetails['location_search_value'];
             if ($strLocationValue == VALUE_NOT_SUPPORTED) {
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() . " set.  Skipping search '" . $searchDetails['key'] . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() . " set.  Skipping search '" . $searchDetails['key'] . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 $strURL = VALUE_NOT_SUPPORTED;
             } else {
                 $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $strLocationValue, $strURL);
@@ -486,7 +485,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $nSleepTimeToLoad = ($nTotalItems / $this->nJobListingsPerPage) * $this->additionalLoadDelaySeconds;
         }
 
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $this->runJavaScriptSnippet($js, false);
 
@@ -567,7 +566,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $nSleepTimeToLoad = ($nTotalItems / $this->nJobListingsPerPage) * $this->additionalLoadDelaySeconds;
         }
 
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $this->runJavaScriptSnippet($js, false);
 
@@ -661,7 +660,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         // Add the search to the list of ones to run
         //
         $this->arrSearchesToReturn[$searchDetails->getKey()] = $searchDetails;
-        $GLOBALS['logger']->logLine($this->siteName . ": added search (" . $searchDetails->getKey() . ")", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        LogLine($this->siteName . ": added search (" . $searchDetails->getKey() . ")", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
     }
 
@@ -734,7 +733,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $searchStartURL = $this->siteBaseURL;
 
         $searchDetails['search_start_url'] = $searchStartURL;
-        $GLOBALS['logger']->logLine("Setting start URL for " . $this->siteName . "[" . $searchDetails['key'] . "] to: " . PHP_EOL . $searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Setting start URL for " . $this->siteName . "[" . $searchDetails['key'] . "] to: " . PHP_EOL . $searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
     }
 
@@ -838,10 +837,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $arrSearchJobList = $this->_getJobsfromFileStoreForSearch_($searchDetails, false);
             if (isset($arrSearchJobList)) {
                 $this->_setSearchSuccessResult_($searchDetails, $success = true, $details = 'Using cached results for ' . countAssociativeArrayValues($arrSearchJobList) . ' matching, unfiltered jobs.', $arrSearchJobList);
-                $GLOBALS['logger']->logLine("Using cached " . $this->siteName . "[" . $searchDetails['key'] . "]" . ": " . countJobRecords($arrSearchJobList) . " jobs found." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+                LogLine("Using cached " . $this->siteName . "[" . $searchDetails['key'] . "]" . ": " . countJobRecords($arrSearchJobList) . " jobs found." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
 
             } else {
-                $GLOBALS['logger']->logLine(("Starting data pull for " . $this->siteName . "[" . $searchDetails['key'] . "] (no cache file found.)"), \Scooper\C__DISPLAY_ITEM_RESULT__);
+                LogLine(("Starting data pull for " . $this->siteName . "[" . $searchDetails['key'] . "] (no cache file found.)"), \Scooper\C__DISPLAY_ITEM_RESULT__);
 
                 if ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__) {
                     $arrSearchJobList = $this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
@@ -882,7 +881,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 (substr_count($ex->getMessage(), "HTTP error #404") > 0)
             ) {
                 $strError = $this->siteName . " plugin returned a 404 page for the search.  This is not an error; it means zero results found.";
-                $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                LogLine($strError, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
                 $this->_setSearchSuccessResult_($searchDetails, $success = true, $details = 'Search found no matching, unfiltered jobs.', array());
 
@@ -912,14 +911,14 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     {
         if ($strURL == null) throw new ErrorException("Skipping " . $this->siteName . " search '" . $details['key'] . "' because a valid URL could not be set.");
         return $strURL;
-        // if($strURL == VALUE_NOT_SUPPORTED) $GLOBALS['logger']->logLine("Skipping " . $this->siteName ." search '".$details['key']. "' because a valid URL could not be set.");
+        // if($strURL == VALUE_NOT_SUPPORTED) LogLine("Skipping " . $this->siteName ." search '".$details['key']. "' because a valid URL could not be set.");
     }
 
 
     private function _setSearchResultError_(&$searchDetails, $err = "UNKNOWN Error.", $exception = null, $arrSearchedJobs = array(), $objSimpleHTMLResults = null)
     {
         $arrErrorFiles = array();
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting error for search '" . $searchDetails['key'] . "' with error '" . $err . "'.", \Scooper\C__DISPLAY_ERROR__);
+        LogLine("Setting error for search '" . $searchDetails['key'] . "' with error '" . $err . "'.", \Scooper\C__DISPLAY_ERROR__);
 
         if (!array_key_exists($searchDetails['key'], $GLOBALS['USERDATA']['search_results'])) {
             throw new Exception("Error - Cannot Set Search Result for key " . $searchDetails['key'] . ".  Key does not exist in search results array.");
@@ -934,7 +933,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     protected function _writeDebugFiles_(&$searchDetails, $keyName = "UNKNOWN", $arrSearchedJobs = null, $objSimpleHTMLResults = null)
     {
         if (isDebug() === true) {
-            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Writing debug files for plugin " . $this->siteName . "'s search" . $searchDetails['key'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Writing debug files for plugin " . $this->siteName . "'s search" . $searchDetails['key'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
             $debugHTMLVarFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlvar_" . "-" . $keyName, $strBase = $searchDetails['key'], $strExt = "html", $delim = "-");
             $debugHTMLSelenFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlselen_" . "-" . $keyName, $strBase = $searchDetails['key'], $strExt = "html", $delim = "-");
@@ -944,7 +943,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             if (!is_null($objSimpleHTMLResults)) {
                 saveDomToFile($objSimpleHTMLResults, $debugHTMLVarFile);
                 $arrErrorFiles[$debugHTMLVarFile] = $debugHTMLVarFile;
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML variable out to " . $debugHTMLVarFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Wrote page HTML variable out to " . $debugHTMLVarFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             }
 
             if ($this->selenium != null) {
@@ -952,17 +951,17 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 $html = $driver->getPageSource();
                 file_put_contents($debugHTMLSelenFile, $html);
                 $arrErrorFiles[$debugHTMLSelenFile] = $debugHTMLSelenFile;
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote page HTML from Selenium out to " . $debugHTMLSelenFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Wrote page HTML from Selenium out to " . $debugHTMLSelenFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
                 $driver->takeScreenshot($debugSSFile);
                 $arrErrorFiles[$debugSSFile] = $debugSSFile;
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Saved screenshot from Selenium out to " . $debugSSFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Saved screenshot from Selenium out to " . $debugSSFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             }
 
             if (!is_null($arrSearchedJobs) && is_array($arrSearchedJobs) && countJobRecords($arrSearchedJobs) > 0) {
                 $this->writeJobsListToFile($debugCSVFile, $arrSearchedJobs);
                 $arrErrorFiles[$debugCSVFile] = $debugCSVFile;
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Wrote results CSV data to " . $debugCSVFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Wrote results CSV data to " . $debugCSVFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             }
         }
     }
@@ -978,7 +977,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     private function _setSearchResult_(&$searchDetails, $success = null, $details = "UNKNOWN RESULT.", $exception = null, $files = array())
     {
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting result value for search '" . $searchDetails['key'] . "' equal to " . ($success == 1 ? "true" : "false") . " with details '" . $details . "'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Setting result value for search '" . $searchDetails['key'] . "' equal to " . ($success == 1 ? "true" : "false") . " with details '" . $details . "'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         if (!array_key_exists($searchDetails['key'], $GLOBALS['USERDATA']['search_results']))
             throw new Exception("Error - Cannot Set Search Result for key " . $searchDetails['key'] . ".  Key does not exist in search results array.");
@@ -1022,7 +1021,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     {
         $nItemCount = 0;
 
-        $GLOBALS['logger']->logLine("Downloading count of " . $this->siteName . " jobs for search '" . $searchDetails['key'] . "'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Downloading count of " . $this->siteName . " jobs for search '" . $searchDetails['key'] . "'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $pageNumber = 1;
         $noMoreJobs = false;
@@ -1030,7 +1029,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $arrPageJobsList = [];
             $apiJobs = $this->getSearchJobsFromAPI($searchDetails, $pageNumber);
             if (is_null($apiJobs)) {
-                $GLOBALS['logger']->logLine("Warning: " . $this->siteName . "[" . $searchDetails['key'] . "] returned zero jobs from the API." . PHP_EOL, \Scooper\C__DISPLAY_WARNING__);
+                LogLine("Warning: " . $this->siteName . "[" . $searchDetails['key'] . "] returned zero jobs from the API." . PHP_EOL, \Scooper\C__DISPLAY_WARNING__);
                 return null;
             }
 
@@ -1063,7 +1062,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $pageNumber++;
         }
 
-        $GLOBALS['logger']->logLine($this->siteName . "[" . $searchDetails['key'] . "]" . ": " . $nItemCount . " jobs found." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+        LogLine($this->siteName . "[" . $searchDetails['key'] . "]" . ": " . $nItemCount . " jobs found." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
         return $this->arrSearchReturnedJobs;
     }
 
@@ -1076,7 +1075,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $jscript = "function call_from_php() { " . $jscript . " }; call_from_php();";
         }
 
-        $GLOBALS['logger']->logLine("Executing JavaScript in browser:  " . $jscript, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Executing JavaScript in browser:  " . $jscript, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $ret = $driver->executeScript($jscript);
 
@@ -1357,7 +1356,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         $nPageCount = 1;
         $objSimpleHTML = null;
 
-        $GLOBALS['logger']->logLine("Getting count of " . $this->siteName . " jobs for search '" . $searchDetails['key'] . "': " . $searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Getting count of " . $this->siteName . " jobs for search '" . $searchDetails['key'] . "': " . $searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         try
         {
@@ -1424,7 +1423,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 elseif($nTotalListings != C__TOTAL_ITEMS_UNKNOWN__)
                 {
                     if ($nTotalListings > $this->nMaxJobsToReturn) {
-                        $GLOBALS['logger']->logLine("Search '" . $searchDetails['key'] . "' returned more results than allowed.  Only retrieving the first " . $this->nMaxJobsToReturn . " of  " . $nTotalListings . " job listings.", \Scooper\C__DISPLAY_WARNING__);
+                        LogLine("Search '" . $searchDetails['key'] . "' returned more results than allowed.  Only retrieving the first " . $this->nMaxJobsToReturn . " of  " . $nTotalListings . " job listings.", \Scooper\C__DISPLAY_WARNING__);
                         $nTotalListings = $this->nMaxJobsToReturn;
                     }
                     $totalPagesCount = \Scooper\intceil($nTotalListings / $this->nJobListingsPerPage); // round up always
@@ -1451,7 +1450,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
             if($nTotalListings <= 0)
             {
-                $GLOBALS['logger']->logLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['key'] . "'.", \Scooper\C__DISPLAY_ITEM_START__);
+                LogLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['key'] . "'.", \Scooper\C__DISPLAY_ITEM_START__);
                 return array();
             }
             else
@@ -1459,7 +1458,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 $nJobsFound = 0;
                 $prevPageURL = "";
                 
-                $GLOBALS['logger']->logLine("Querying " . $this->siteName . " for " . $totalPagesCount . " pages with " . ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ ? "an unknown number of" : $nTotalListings) . " jobs:  " . $searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_START__);
+                LogLine("Querying " . $this->siteName . " for " . $totalPagesCount . " pages with " . ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ ? "an unknown number of" : $nTotalListings) . " jobs:  " . $searchDetails['search_start_url'], \Scooper\C__DISPLAY_ITEM_START__);
 
                 $strURL = $searchDetails['search_start_url'];
                 while ($nPageCount <= $totalPagesCount )
@@ -1504,8 +1503,8 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                                     // until we get to the right number of pages
                                     //
                                     while ($nPageCount <= $totalPagesCount) {
-                                        if (isDebug() == true && isset($GLOBALS['logger'])) {
-                                            $GLOBALS['logger']->logLine("... getting infinite results page #" . $nPageCount . " of " . $totalPagesCount, \Scooper\C__DISPLAY_NORMAL__);
+                                        if (isDebug() == true) {
+                                            LogLine("... getting infinite results page #" . $nPageCount . " of " . $totalPagesCount, \Scooper\C__DISPLAY_NORMAL__);
                                         }
                                         $this->moveDownOnePageInBrowser();
                                         $nPageCount = $nPageCount + 1;
@@ -1592,7 +1591,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                     }
                     if (!$objSimpleHTML) throw new ErrorException("Error:  unable to get SimpleHTML object for " . $strURL);
 
-                    $GLOBALS['logger']->logLine("Getting jobs page # " . $nPageCount . " of " . $totalPagesCount ." from " . $strURL .".  Total listings loaded:  " . ($nItemCount == 1 ? 0 : $nItemCount) . "/" . $nTotalListings . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    LogLine("Getting jobs page # " . $nPageCount . " of " . $totalPagesCount ." from " . $strURL .".  Total listings loaded:  " . ($nItemCount == 1 ? 0 : $nItemCount) . "/" . $nTotalListings . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                     try
                     {
 
@@ -1605,7 +1604,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                             if ($nPageCount < $totalPagesCount)
                                 $strWarnHiddenListings .= "  They likely have hidden the remaining " . ($totalPagesCount - $nPageCount) . " pages worth. ";
 
-                            $GLOBALS['logger']->logLine($strWarnHiddenListings, \Scooper\C__DISPLAY_ITEM_START__);
+                            LogLine($strWarnHiddenListings, \Scooper\C__DISPLAY_ITEM_START__);
                             $nPageCount = $totalPagesCount;
                         }
 
@@ -1626,7 +1625,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                                 $nTotalListings = countAssociativeArrayValues($this->arrSearchReturnedJobs);
                             }
 
-                            $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($this->arrSearchReturnedJobs) . " of " . $nTotalListings . " job listings from " . $this->siteName, \Scooper\C__DISPLAY_NORMAL__);
+                            LogLine("Loaded " . countAssociativeArrayValues($this->arrSearchReturnedJobs) . " of " . $nTotalListings . " job listings from " . $this->siteName, \Scooper\C__DISPLAY_NORMAL__);
                         }
                     } catch (Exception $ex) {
                         handleException($ex, ($this->siteName . " error: %s"), true);
@@ -1650,17 +1649,17 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                         $err = "Retrieved only " . $nJobsFound . " of the " . $nTotalListings . " listings that we expected for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
                     elseif ($nJobsFound > $nTotalListings * (1+$marginOfErrorAllowed) && $nPageCount == $totalPagesCount && !$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__)) {
                         $warnMsg = "Warning:  Downloaded " . ($nJobsFound - $nTotalListings) . " jobs more than the " . $nTotalListings . " expected for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
-                        $GLOBALS['logger']->logLine($warnMsg, \Scooper\C__DISPLAY_WARNING__);
+                        LogLine($warnMsg, \Scooper\C__DISPLAY_WARNING__);
                     }
 
                     if (!is_null($err)) {
                         if ($this->isBitFlagSet(C__JOB_IGNORE_MISMATCHED_JOB_COUNTS) || $this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) === true)
                         {
-                            $GLOBALS['logger']->logLine("Warning: " . $err, \Scooper\C__DISPLAY_WARNING__);
+                            LogLine("Warning: " . $err, \Scooper\C__DISPLAY_WARNING__);
                         }
                         else {
                             $err = "Error: " . $err . "  Aborting job site plugin to prevent further errors.";
-                            $GLOBALS['logger']->logLine($err, \Scooper\C__DISPLAY_ERROR__);
+                            LogLine($err, \Scooper\C__DISPLAY_ERROR__);
                             handleException(new Exception($err), null, true);
                         }
                     }
@@ -1670,7 +1669,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
             }
 
-            $GLOBALS['logger']->logLine($this->siteName . "[" . $searchDetails['key'] . "]" . ": " . $nJobsFound . " jobs found." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+            LogLine($this->siteName . "[" . $searchDetails['key'] . "]" . ": " . $nJobsFound . " jobs found." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
             return $this->arrSearchReturnedJobs;
 
         } catch (Exception $ex) {
