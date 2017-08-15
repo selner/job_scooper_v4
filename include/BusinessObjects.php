@@ -287,15 +287,6 @@ class UserSearchRun extends \JobScooper\Base\UserSearchAudit implements ArrayAcc
 
         switch ($name) {
             case in_array($name, $this->searchSettingKeys):
-//
-//            case 'search_start_url':
-//            case 'keywords_string_for_url':
-//            case 'base_url_format':
-//            case 'location_user_specified_override':
-//            case 'location_search_value':
-//            case 'keyword_search_override':
-//            case 'keywords_array':
-//            case 'keywords_array_tokenized':
                 $settings = $this->getSearchSettings();
                 $settings[$name] = $value;
                 $this->setSearchSettings($settings);
@@ -359,11 +350,9 @@ class UserSearchRun extends \JobScooper\Base\UserSearchAudit implements ArrayAcc
             {
                 $pk = "unknown-primary-key";
             }
-//            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Error saving object " . __CLASS__ . " key " . $pk . ": " . $ex->getMessage() . PHP_EOL . "Class data = " . getArrayValuesAsString($this->toArray()), \Scooper\C__DISPLAY_ERROR__);
-            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Skipping failed save of object " . __CLASS__ . " key " . $pk . ": " . $ex->getMessage(), \Scooper\C__DISPLAY_WARNING__);
-
-            // TODO:  BUGBUG -- fix the save issues
-//            throw $ex;
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Error saving object " . __CLASS__ . " key " . $pk . ": " . $ex->getMessage() . PHP_EOL . "Class data = " . getArrayValuesAsString($this->toArray()), \Scooper\C__DISPLAY_ERROR__);
+            throw $ex;
+//            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Skipping failed save of object " . __CLASS__ . " key " . $pk . ": " . $ex->getMessage(), \Scooper\C__DISPLAY_WARNING__);
         }
     }
     public function &get($name)
@@ -372,16 +361,6 @@ class UserSearchRun extends \JobScooper\Base\UserSearchAudit implements ArrayAcc
         switch ($name) {
 
             case in_array($name, $this->searchSettingKeys):
-//
-//            case 'search_start_url':
-//            case 'keywords_string_for_url':
-//            case 'base_url_format':
-//            case 'location_user_specified_override':
-//            case 'location_search_value':
-//            case 'location_set_key':
-//            case 'keyword_search_override':
-//            case 'keywords_array':
-//            case 'keywords_array_tokenized':
                 $settings = $this->getSearchSettings();
                 return $settings[$name];
                 break;

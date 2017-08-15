@@ -56,43 +56,6 @@ class ClassJobsSiteCommon
 
     function getLocationSettingType() { return $this->typeLocationSearchNeeded; }
 
-
-
-    function getEmptySearchDetailsRecord()
-    {
-        return array(
-            'key' => null,
-            'is_cached' => false,
-            'site_name' => null,
-            'search_start_url' => null,
-            'keywords_string_for_url' => null,
-            'base_url_format' => null,
-            'location_user_specified_override' => null,
-            'location_search_value' => VALUE_NOT_SUPPORTED,
-            'keyword_search_override' => null,
-            'keywords_array' => null,
-            'search_run_result' => array('success' => null, 'details' => 'Search result is unknown; it is likely the search was not attempted.', 'error_files' => array())
-        );
-    }
-
-    function cloneSearchDetailsRecordExceptFor($srcDetails, $arrDontCopyTheseKeys = array())
-    {
-        $retDetails = $this->getEmptySearchDetailsRecord();
-
-        // Never clone the search's previous results as they will likely never
-        // be valid or the same for any new search.  Leaving it set is more likely
-        // to cause unexpected issues than any savings in cloning it for an edge case.
-        unset($srcDetails['search_run_result']);
-
-        $retDetails = array_merge($retDetails, $srcDetails);
-        foreach($arrDontCopyTheseKeys as $key)
-        {
-            $retDetails[$key] = null;
-        }
-
-        return $retDetails;
-    }
-
     function getEmptyJobListingRecord()
     {
         return array(

@@ -434,24 +434,24 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
     private function _parseSearchFromINI_($iniSearch)
     {
-        $tempSearch = $this->getEmptySearchDetailsRecord();
+        $newSearch = new UserSearchRun();
 
-        if(isset($iniSearch['key'])) $tempSearch['key'] = \Scooper\strScrub($iniSearch['key'], REMOVE_EXTRA_WHITESPACE | LOWERCASE );
-        if(isset($iniSearch['jobsite'])) $tempSearch['site_name'] = \Scooper\strScrub($iniSearch['jobsite'], REMOVE_EXTRA_WHITESPACE | LOWERCASE );
-        assert(isset($iniSearch['jobsite']));
-        $strJobSiteKey = \Scooper\strScrub($iniSearch['jobsite'], FOR_LOOKUP_VALUE_MATCHING | LOWERCASE );
+        $newSearch->setKey(\Scooper\strScrub($iniSearch['key'], REMOVE_EXTRA_WHITESPACE | LOWERCASE ));
+        $newSearch->setJobSite(\Scooper\strScrub($iniSearch['jobsite'], REMOVE_EXTRA_WHITESPACE | LOWERCASE ));
+
+        $strJobSiteKey = $newSearch->getJobSite();
         if(isset($GLOBALS['USERDATA']['configuration_settings']['included_sites']) && !isset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$strJobSiteKey]))
         {
-            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($iniSearch['jobsite'] . "search " .$iniSearch['name'] . " was not added; " . $strJobSiteKey . " is excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            LogLine($iniSearch['jobsite'] . "search " .$iniSearch['name'] . " was not added; " . $strJobSiteKey . " is excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
             return null;
         }
-        if(isset($iniSearch['url_format'])) $tempSearch['base_url_format']  = $iniSearch['url_format'];
-        if(isset($iniSearch['location'])) $tempSearch['location_user_specified_override']  = $iniSearch['location'];
+        $searchSettings = new SearchSettings();
+        $searchSettings['base_url_format'] = array_key_exists('url_format', $iniSearch) ? $iniSearch['url_format'] : null;
+        $searchSettings['location_user_specified_override'] = array_key_exists('location', $iniSearch) ? $iniSearch['location'] : null;
 
-        $strSearchAsString = getArrayValuesAsString($tempSearch);
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search loaded from config INI: " . $strSearchAsString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search loaded from config INI: " . $newSearch->getKey(), \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
-        return $tempSearch;
+        return $newSearch;
     }
 
 
@@ -722,38 +722,6 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                                     $GLOBALS['USERDATA']['configuration_settings']['searches'][$thisSearch->getKey()] = $thisSearch;
                                 }
                             }
-
-
-//                            $classPlug = new $GLOBALS['JOBSITE_PLUGINS'][$siteToSearch]['class_name'](null, null);
-//                            $thisSearch = $this->getEmptySearchDetailsRecord();
-//                            $thisSearch ['key'] = \Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($keywordSet['key'], FOR_LOOKUP_VALUE_MATCHING);
-//                            $thisSearch ['site_name']  = $siteToSearch;
-//                            $thisSearch ['user_setting_flags'] = $keywordSet['keyword_match_type_flag'];
-//
-//                            if($classPlug->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED))
-//                            {
-//                                $arrSkippedPlugins[] = $siteToSearch;
-//                                continue;
-//                            }
-//
-//                            if($classPlug->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
-//                            {
-//                                $thisSearch['key'] = $siteToSearch . "-alljobs";
-//                                $GLOBALS['USERDATA']['configuration_settings']['searches'][$thisSearch['key']] = $thisSearch;
-//                            }
-//                            else // if not, we need to add search for each keyword using that word as a single value in a keyword set
-//                            {
-//                                $arrKeys = array_keys($keywordSet['keywords_array']);
-//                                foreach($arrKeys as $key)
-//                                {
-//                                    $newSearch = \Scooper\array_copy($thisSearch);
-//                                    $newSearch['key'] = $newSearch['key']."-".\Scooper\strScrub($key, FOR_LOOKUP_VALUE_MATCHING);
-//                                    $newSearch['keywords_array'] = array($keywordSet['keywords_array'][$key]);
-//                                    $newSearch['keywords_array_tokenized'] = array($keywordSet['keywords_array_tokenized'][$key]);
-//
-//                                    $GLOBALS['USERDATA']['configuration_settings']['searches'][$newSearch['key']] = $newSearch;
-//                                }
-//                            }
                         }
                     }
                     else
