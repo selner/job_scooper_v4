@@ -725,7 +725,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             // get the url for the first page/items in the results
             if ($this->_checkInvalidURL_($searchDetails, $searchDetails['search_start_url']) == VALUE_NOT_SUPPORTED) return;
 
-            LogLine(("Starting data pull for " . $this->siteName . "[" . $searchDetails['key'] . "] (no cache file found.)"), \Scooper\C__DISPLAY_ITEM_RESULT__);
+            LogLine(("Starting data pull for " . $this->siteName . "[" . $searchDetails['key'] . "]"), \Scooper\C__DISPLAY_ITEM_RESULT__);
 
             if ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__) {
                 $this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
@@ -770,7 +770,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 // if we should have thrown one
                 //
                 $strError = "Failed to download jobs from " . $this->siteName . " jobs for search '" . $searchDetails['key'] . "[URL=" . $searchDetails['search_start_url'] . "].  " . $ex->getMessage() . PHP_EOL . "Exception Details: " . $ex;
-                $this->_setSearchResultError_($searchDetails, $strError, $ex, $arrSearchJobList, null);
+                $this->_setSearchResultError_($searchDetails, $strError, $ex, $this->arrSearchReturnedJobs, null);
                 handleException($ex, $strError, false);
             }
         } finally {
@@ -996,7 +996,8 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     {
 
         $arrJobsBySitePostId = array_column($arrJobList, null, "job_id");
-        $this->arrSearchReturnedJobs[$searchDetails->getKey()] = array();
+        if(!array_key_exists($searchDetails->getKey(), $this->arrSearchReturnedJobs))
+            $this->arrSearchReturnedJobs[$searchDetails->getKey()] = array();
 
         foreach (array_keys($arrJobsBySitePostId) as $JobSitePostId) {
             $arrJob = $this->cleanupJobItemFields($arrJobsBySitePostId[$JobSitePostId]);
@@ -1325,7 +1326,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
                         if (is_array($arrPageJobsList)) {
                             $this->saveUserJobMatches($arrPageJobsList, $searchDetails);
-                            $nJobsFound = countJobRecords($this->arrSearchReturnedJobs[$searchDetails->getKey()]);
+                            $nJobsFound = count($this->arrSearchReturnedJobs[$searchDetails->getKey()]);
 
                             if ($nItemCount == 1) {
                                 $nItemCount = 0;

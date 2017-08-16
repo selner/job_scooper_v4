@@ -54,6 +54,7 @@ class JSONPlugins
             'siteBaseURL' => null,
             'strBaseURLFormat' => null,
             'PageLimit' => null,
+            'PaginationType' => null,
             'LocationType' => null,
             'AdditionalFlags' => array(),
             'nJobListingsPerPage' => C_JOB_MAX_RESULTS_PER_SEARCH,
@@ -82,21 +83,21 @@ class JSONPlugins
                 $pluginData['nJobListingsPerPage'] = $configData->Pagination->PageLimit;
             }
 
+            $pluginData['PaginationType'] = strtoupper($configData->Pagination->Type);
+            switch ($pluginData['PaginationType'])
+            {
+                case 'NEXT-BUTTON':
+                    $pluginData['arrListingTagSetup']['tag_next_button'] = array(
+                        'selector' => $configData->Pagination->Selector,
+                        'index' => $configData->Pagination->Index,
+                        'type' => 'CSS'
+                    );
+                    break;
 
-            $pluginData['paginationType'] = strtoupper($configData->Pagination->Type);
-                switch (strtoupper($configData->Pagination->Type))
-                {
-                    case 'NEXT-BUTTON':
-                        $pluginData['arrListingTagSetup']['tag_next_button'] = array(
-                            'selector' => $configData->Pagination->Selector,
-                            'index' => $configData->Pagination->Index,
-                            'type' => 'CSS'
-                        );
-                        break;
+                default:
 
-                    default:
-                        break;
-                }
+                    break;
+            }
         }
 
 
@@ -164,7 +165,9 @@ class JSONPlugins
             protected \$strBaseURLFormat = \"{$pluginConfig['strBaseURLFormat']}\";
             protected \$typeLocationSearchNeeded = \"{$pluginConfig['LocationType']}\";
             protected \$additionalFlags = {$flags};
+            protected \$additionalLoadDelaySeconds = 2;
             protected \$nJobListingsPerPage = \"{$pluginConfig['nJobListingsPerPage']}\";
+            protected \$paginationType = \"{$pluginConfig['PaginationType']}\";
             protected \$arrListingTagSetup = $setup;
             };
             

@@ -1,6 +1,6 @@
 {
   "AgentName": "Salesforce",
-  "SourceURL": "http://salesforce.careermount.com/candidate/job_search/quick/results?sort_dir=desc&sort_field=post_date",
+  "SourceURL": "http://salesforce.careermount.com/candidate/job_search/quick/results/***PAGE_NUMBER***?sort_dir=desc&sort_field=post_date",
   "Collections": [
     {
       "Name": "PageFields",
@@ -96,8 +96,7 @@
     }
   ],
   "Pagination": {
-    "Type": "next-button",
-    "Selector": "p.next a",
+    "Type": "page-via-url",
     "PageLimit": 10
   }
 }
