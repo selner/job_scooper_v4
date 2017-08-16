@@ -48,6 +48,23 @@ function object_to_array($obj)
     return $arr;
 }
 
+function exportToDebugJSON($obj, $strBaseFileName)
+{
+    $saveArr = array();
+    $arrObj = object_to_array($obj);
+    foreach (array_keys($arrObj) as $key) {
+        $saveArr[$key] = json_encode($arrObj[$key], JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+    }
+    unset($key);
+
+    $jsonSelf = json_encode($saveArr, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+    $debugJSONFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_" . $strBaseFileName, $strExt = "", $delim = "-") . ".json";
+    file_put_contents($debugJSONFile, $jsonSelf);
+
+    return $debugJSONFile;
+
+}
+
 function handleException($ex, $fmtLogMsg = null, $raise = true)
 {
     $toThrow = $ex;

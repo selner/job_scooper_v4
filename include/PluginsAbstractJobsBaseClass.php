@@ -856,6 +856,18 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         $this->_setSearchResult_($searchDetails, $success = false, $details = $err, $exception, $files = $arrErrorFiles);
     }
 
+    function saveDomToFile($htmlNode, $filepath)
+    {
+
+        $strHTML = strval($htmlNode);
+
+        $htmlTmp = \voku\helper\HtmlDomParser::str_get_html($strHTML);
+        $htmlTmp->save($filepath);
+
+        return $strHTML;
+
+    }
+
 
     protected function _writeDebugFiles_(&$searchDetails, $keyName = "UNKNOWN", $arrSearchedJobs = null, $objSimpleHTMLResults = null)
     {
@@ -868,7 +880,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             $debugCSVFile = substr($debugHTMLVarFile, 0, strlen($debugHTMLVarFile) - 4) . ".csv";
 
             if (!is_null($objSimpleHTMLResults)) {
-                saveDomToFile($objSimpleHTMLResults, $debugHTMLVarFile);
+                $this->saveDomToFile($objSimpleHTMLResults, $debugHTMLVarFile);
                 $arrErrorFiles[$debugHTMLVarFile] = $debugHTMLVarFile;
                 LogLine("Wrote page HTML variable out to " . $debugHTMLVarFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             }
@@ -925,7 +937,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                     $item['job_site_date'] = $job->datePosted->format('Y-m-d');
                 $item['job_post_url'] = $job->url;
 
-                $strCurrentJobIndex = getArrayKeyValueForJob($item);
+                $strCurrentJobIndex = $job['key_jobsite_siteid'];
                 $arrPageJobsList[$strCurrentJobIndex] = $item;
                 $nItemCount += 1;
             }

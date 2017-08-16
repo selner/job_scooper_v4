@@ -153,3 +153,44 @@ function isNotExcludedJobSite($var)
 {
     return (!in_array(strtolower($var['job_site']), $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']) === true);
 }
+
+
+function sortByErrorThenCount($a, $b)
+{
+    $rank = array($a['name'] => 0, $b['name'] => 0);
+
+    if ($a['had_error'] > $b['had_error']) {
+        return 1;
+    } elseif ($a['had_error'] < $b['had_error']) {
+        return -1;
+    }
+
+    if ($a["total_listings"] == $b["total_listings"]) {
+        return 0;
+    }
+
+    return ($a["total_listings"] < $b["total_listings"]) ? +1 : -1;
+}
+
+function sortJobsListByCompanyRole(&$arrJobList)
+{
+
+    if (countJobRecords($arrJobList) > 0) {
+        $arrFinalJobIDs_SortedByCompanyRole = array();
+        $finalJobIDs_CompanyRole = array_column($arrJobList, 'key_company_role', 'key_jobsite_siteid');
+        foreach (array_keys($finalJobIDs_CompanyRole) as $key) {
+            // Need to add uniq key of job site id to the end or it will collapse duplicate job titles that
+            // are actually multiple open posts
+            $arrFinalJobIDs_SortedByCompanyRole[$finalJobIDs_CompanyRole[$key] . "-" . $key] = $key;
+        }
+
+        ksort($arrFinalJobIDs_SortedByCompanyRole);
+        $arrFinalJobs_SortedByCompanyRole = array();
+        foreach ($arrFinalJobIDs_SortedByCompanyRole as $jobid) {
+            $arrFinalJobs_SortedByCompanyRole[$jobid] = $arrJobList[$jobid];
+        }
+        $arrJobList = $arrFinalJobs_SortedByCompanyRole;
+    }
+
+}
+
