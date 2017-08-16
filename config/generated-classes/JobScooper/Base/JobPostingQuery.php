@@ -663,19 +663,37 @@ abstract class JobPostingQuery extends ModelCriteria
      *
      * Example usage:
      * <code>
-     * $query->filterByPostedAt('fooValue');   // WHERE job_posted_date = 'fooValue'
-     * $query->filterByPostedAt('%fooValue%', Criteria::LIKE); // WHERE job_posted_date LIKE '%fooValue%'
+     * $query->filterByPostedAt('2011-03-14'); // WHERE job_posted_date = '2011-03-14'
+     * $query->filterByPostedAt('now'); // WHERE job_posted_date = '2011-03-14'
+     * $query->filterByPostedAt(array('max' => 'yesterday')); // WHERE job_posted_date > '2011-03-13'
      * </code>
      *
-     * @param     string $postedAt The value to use as filter.
+     * @param     mixed $postedAt The value to use as filter.
+     *              Values can be integers (unix timestamps), DateTime objects, or strings.
+     *              Empty strings are treated as NULL.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildJobPostingQuery The current query, for fluid interface
      */
     public function filterByPostedAt($postedAt = null, $comparison = null)
     {
-        if (null === $comparison) {
-            if (is_array($postedAt)) {
+        if (is_array($postedAt)) {
+            $useMinMax = false;
+            if (isset($postedAt['min'])) {
+                $this->addUsingAlias(JobPostingTableMap::COL_JOB_POSTED_DATE, $postedAt['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($postedAt['max'])) {
+                $this->addUsingAlias(JobPostingTableMap::COL_JOB_POSTED_DATE, $postedAt['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
                 $comparison = Criteria::IN;
             }
         }

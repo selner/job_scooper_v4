@@ -153,7 +153,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * The value for the job_posted_date field.
      *
-     * @var        string
+     * @var        DateTime
      */
     protected $job_posted_date;
 
@@ -561,13 +561,23 @@ abstract class JobPosting implements ActiveRecordInterface
     }
 
     /**
-     * Get the [job_posted_date] column value.
+     * Get the [optionally formatted] temporal [job_posted_date] column value.
      *
-     * @return string
+     *
+     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     *                            If format is NULL, then the raw DateTime object will be returned.
+     *
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL
+     *
+     * @throws PropelException - if unable to parse/validate the date/time value.
      */
-    public function getPostedAt()
+    public function getPostedAt($format = NULL)
     {
-        return $this->job_posted_date;
+        if ($format === null) {
+            return $this->job_posted_date;
+        } else {
+            return $this->job_posted_date instanceof \DateTimeInterface ? $this->job_posted_date->format($format) : null;
+        }
     }
 
     /**
@@ -871,21 +881,21 @@ abstract class JobPosting implements ActiveRecordInterface
     } // setUpdatedAt()
 
     /**
-     * Set the value of [job_posted_date] column.
+     * Sets the value of [job_posted_date] column to a normalized version of the date/time value specified.
      *
-     * @param string $v new value
+     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
+     *               Empty strings are treated as NULL.
      * @return $this|\JobScooper\JobPosting The current object (for fluent API support)
      */
     public function setPostedAt($v)
     {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->job_posted_date !== $v) {
-            $this->job_posted_date = $v;
-            $this->modifiedColumns[JobPostingTableMap::COL_JOB_POSTED_DATE] = true;
-        }
+        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
+        if ($this->job_posted_date !== null || $dt !== null) {
+            if ($this->job_posted_date === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->job_posted_date->format("Y-m-d H:i:s.u")) {
+                $this->job_posted_date = $dt === null ? null : clone $dt;
+                $this->modifiedColumns[JobPostingTableMap::COL_JOB_POSTED_DATE] = true;
+            }
+        } // if either are not null
 
         return $this;
     } // setPostedAt()
@@ -1043,7 +1053,7 @@ abstract class JobPosting implements ActiveRecordInterface
             $this->last_updated_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : JobPostingTableMap::translateFieldName('PostedAt', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->job_posted_date = (null !== $col) ? (string) $col : null;
+            $this->job_posted_date = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 13 + $startcol : JobPostingTableMap::translateFieldName('FirstSeenAt', TableMap::TYPE_PHPNAME, $indexType)];
             $this->first_seen_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
@@ -1395,7 +1405,7 @@ abstract class JobPosting implements ActiveRecordInterface
                         $stmt->bindValue($identifier, $this->last_updated_at ? $this->last_updated_at->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
                         break;
                     case 'job_posted_date':
-                        $stmt->bindValue($identifier, $this->job_posted_date, PDO::PARAM_STR);
+                        $stmt->bindValue($identifier, $this->job_posted_date ? $this->job_posted_date->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
                         break;
                     case 'first_seen_at':
                         $stmt->bindValue($identifier, $this->first_seen_at ? $this->first_seen_at->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
@@ -1572,6 +1582,10 @@ abstract class JobPosting implements ActiveRecordInterface
         );
         if ($result[$keys[11]] instanceof \DateTimeInterface) {
             $result[$keys[11]] = $result[$keys[11]]->format('c');
+        }
+
+        if ($result[$keys[12]] instanceof \DateTimeInterface) {
+            $result[$keys[12]] = $result[$keys[12]]->format('c');
         }
 
         if ($result[$keys[13]] instanceof \DateTimeInterface) {

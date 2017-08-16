@@ -94,7 +94,7 @@
             Date & times for various events related to this particular job posting
         -->
         <column name="last_updated_at" phpName="UpdatedAt" type="timestamp" required="true"/>
-        <column name="job_posted_date" phpName="PostedAt" type="varchar" required="false"/>
+        <column name="job_posted_date" phpName="PostedAt" type="timestamp" required="false"/>
         <column name="first_seen_at" phpName="FirstSeenAt" type="timestamp" required="true"/>
         <behavior name="timestampable">
             <parameter name="create_column" value="first_seen_at" />
@@ -142,6 +142,21 @@
 
 
 
+
+    <table name="jobsite_plugin_last_run" phpName="JobSitePluginLastRun" reloadOnUpdate="true">
+        <column name="jobsite" phpName="JobSite" type="varchar" size="255" primaryString="true" primaryKey="true"/>
+        <column name="last_user_search_run_id" phpName="LastUserSearchRunId" type="integer"/>
+        <column name="date_first_run"  phpName="FirstRunAt" type="timestamp" />
+        <column name="date_last_run"  phpName="LastRunAt" type="timestamp" />
+        <column name="date_last_succeeded" phpName="LastSucceededAt" type="timestamp" />
+        <column name="date_last_failed" phpName="LastFailedAt" type="timestamp" />
+        <behavior name="timestampable">
+            <parameter name="create_column" value="date_first_run" />
+            <parameter name="update_column" value="date_last_run" />
+        </behavior>
+        <column name="was_successful" phpName="WasSuccessful" type="boolean"/>
+        <column name="error_details" phpName="RecentErrorDetails" type="array"/>
+    </table>
 
     <table name="user_search_run" phpName="UserSearchRun" reloadOnUpdate="true">
         <column name="user_search_run_id" phpName="UserSearchRunId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>

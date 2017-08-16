@@ -218,7 +218,7 @@ class JobPostingTableMap extends TableMap
         $this->addColumn('department', 'Department', 'VARCHAR', false, 255, null);
         $this->addColumn('category', 'Category', 'VARCHAR', false, 100, null);
         $this->addColumn('last_updated_at', 'UpdatedAt', 'TIMESTAMP', true, null, null);
-        $this->addColumn('job_posted_date', 'PostedAt', 'VARCHAR', false, 255, null);
+        $this->addColumn('job_posted_date', 'PostedAt', 'TIMESTAMP', false, null, null);
         $this->addColumn('first_seen_at', 'FirstSeenAt', 'TIMESTAMP', true, null, null);
         $this->addColumn('post_removed_at', 'RemovedAt', 'TIMESTAMP', false, null, null);
         $this->addColumn('key_site_and_post_id', 'KeySiteAndPostID', 'VARCHAR', true, 255, null);

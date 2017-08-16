@@ -126,7 +126,7 @@ function getUserJobMatchesForAppRun()
     $query = \JobScooper\UserJobMatchQuery::create()
         ->filterByUserMatchStatus(null)
         ->filterByUserSlug($userObject->getUserSlug())
-        ->filterBy("AppRunId", $GLOBALS['USERDATA']['configuration_settings']['app_run_id'])
+//        ->filterBy("AppRunId", $GLOBALS['USERDATA']['configuration_settings']['app_run_id'])
         ->joinWithJobPosting();
 
     $results =  $query->find();
