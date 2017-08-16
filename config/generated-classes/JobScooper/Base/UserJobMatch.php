@@ -92,11 +92,18 @@ abstract class UserJobMatch implements ActiveRecordInterface
     protected $user_notification_state;
 
     /**
-     * The value for the user_match_status field.
+     * The value for the user_match field.
      *
      * @var        int
      */
-    protected $user_match_status;
+    protected $user_match;
+
+    /**
+     * The value for the user_match_reason field.
+     *
+     * @var        string
+     */
+    protected $user_match_reason;
 
     /**
      * The value for the match_notes field.
@@ -405,22 +412,32 @@ abstract class UserJobMatch implements ActiveRecordInterface
     }
 
     /**
-     * Get the [user_match_status] column value.
+     * Get the [user_match] column value.
      *
      * @return string
      * @throws \Propel\Runtime\Exception\PropelException
      */
     public function getUserMatchStatus()
     {
-        if (null === $this->user_match_status) {
+        if (null === $this->user_match) {
             return null;
         }
-        $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_MATCH_STATUS);
-        if (!isset($valueSet[$this->user_match_status])) {
-            throw new PropelException('Unknown stored enum key: ' . $this->user_match_status);
+        $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_MATCH);
+        if (!isset($valueSet[$this->user_match])) {
+            throw new PropelException('Unknown stored enum key: ' . $this->user_match);
         }
 
-        return $valueSet[$this->user_match_status];
+        return $valueSet[$this->user_match];
+    }
+
+    /**
+     * Get the [user_match_reason] column value.
+     *
+     * @return string
+     */
+    public function getUserMatchReason()
+    {
+        return $this->user_match_reason;
     }
 
     /**
@@ -537,7 +554,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     } // setUserNotificationState()
 
     /**
-     * Set the value of [user_match_status] column.
+     * Set the value of [user_match] column.
      *
      * @param  string $v new value
      * @return $this|\JobScooper\UserJobMatch The current object (for fluent API support)
@@ -546,20 +563,40 @@ abstract class UserJobMatch implements ActiveRecordInterface
     public function setUserMatchStatus($v)
     {
         if ($v !== null) {
-            $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_MATCH_STATUS);
+            $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_MATCH);
             if (!in_array($v, $valueSet)) {
                 throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $v));
             }
             $v = array_search($v, $valueSet);
         }
 
-        if ($this->user_match_status !== $v) {
-            $this->user_match_status = $v;
-            $this->modifiedColumns[UserJobMatchTableMap::COL_USER_MATCH_STATUS] = true;
+        if ($this->user_match !== $v) {
+            $this->user_match = $v;
+            $this->modifiedColumns[UserJobMatchTableMap::COL_USER_MATCH] = true;
         }
 
         return $this;
     } // setUserMatchStatus()
+
+    /**
+     * Set the value of [user_match_reason] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\UserJobMatch The current object (for fluent API support)
+     */
+    public function setUserMatchReason($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->user_match_reason !== $v) {
+            $this->user_match_reason = $v;
+            $this->modifiedColumns[UserJobMatchTableMap::COL_USER_MATCH_REASON] = true;
+        }
+
+        return $this;
+    } // setUserMatchReason()
 
     /**
      * Set the value of [match_notes] column.
@@ -650,12 +687,15 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $this->user_notification_state = (null !== $col) ? (int) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserJobMatchTableMap::translateFieldName('UserMatchStatus', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->user_match_status = (null !== $col) ? (int) $col : null;
+            $this->user_match = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserJobMatchTableMap::translateFieldName('MatchNotes', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserJobMatchTableMap::translateFieldName('UserMatchReason', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->user_match_reason = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserJobMatchTableMap::translateFieldName('MatchNotes', TableMap::TYPE_PHPNAME, $indexType)];
             $this->match_notes = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserJobMatchTableMap::translateFieldName('AppRunId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : UserJobMatchTableMap::translateFieldName('AppRunId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->app_run_id = (null !== $col) ? (string) $col : null;
             $this->resetModified();
 
@@ -665,7 +705,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 7; // 7 = UserJobMatchTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 8; // 8 = UserJobMatchTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\UserJobMatch'), 0, $e);
@@ -905,8 +945,11 @@ abstract class UserJobMatch implements ActiveRecordInterface
         if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE)) {
             $modifiedColumns[':p' . $index++]  = 'user_notification_state';
         }
-        if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_MATCH_STATUS)) {
-            $modifiedColumns[':p' . $index++]  = 'user_match_status';
+        if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_MATCH)) {
+            $modifiedColumns[':p' . $index++]  = 'user_match';
+        }
+        if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_MATCH_REASON)) {
+            $modifiedColumns[':p' . $index++]  = 'user_match_reason';
         }
         if ($this->isColumnModified(UserJobMatchTableMap::COL_MATCH_NOTES)) {
             $modifiedColumns[':p' . $index++]  = 'match_notes';
@@ -937,8 +980,11 @@ abstract class UserJobMatch implements ActiveRecordInterface
                     case 'user_notification_state':
                         $stmt->bindValue($identifier, $this->user_notification_state, PDO::PARAM_INT);
                         break;
-                    case 'user_match_status':
-                        $stmt->bindValue($identifier, $this->user_match_status, PDO::PARAM_INT);
+                    case 'user_match':
+                        $stmt->bindValue($identifier, $this->user_match, PDO::PARAM_INT);
+                        break;
+                    case 'user_match_reason':
+                        $stmt->bindValue($identifier, $this->user_match_reason, PDO::PARAM_STR);
                         break;
                     case 'match_notes':
                         $stmt->bindValue($identifier, $this->match_notes, PDO::PARAM_STR);
@@ -1024,9 +1070,12 @@ abstract class UserJobMatch implements ActiveRecordInterface
                 return $this->getUserMatchStatus();
                 break;
             case 5:
-                return $this->getMatchNotes();
+                return $this->getUserMatchReason();
                 break;
             case 6:
+                return $this->getMatchNotes();
+                break;
+            case 7:
                 return $this->getAppRunId();
                 break;
             default:
@@ -1064,8 +1113,9 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $keys[2] => $this->getJobPostingId(),
             $keys[3] => $this->getUserNotificationState(),
             $keys[4] => $this->getUserMatchStatus(),
-            $keys[5] => $this->getMatchNotes(),
-            $keys[6] => $this->getAppRunId(),
+            $keys[5] => $this->getUserMatchReason(),
+            $keys[6] => $this->getMatchNotes(),
+            $keys[7] => $this->getAppRunId(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1154,16 +1204,19 @@ abstract class UserJobMatch implements ActiveRecordInterface
                 $this->setUserNotificationState($value);
                 break;
             case 4:
-                $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_MATCH_STATUS);
+                $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_MATCH);
                 if (isset($valueSet[$value])) {
                     $value = $valueSet[$value];
                 }
                 $this->setUserMatchStatus($value);
                 break;
             case 5:
-                $this->setMatchNotes($value);
+                $this->setUserMatchReason($value);
                 break;
             case 6:
+                $this->setMatchNotes($value);
+                break;
+            case 7:
                 $this->setAppRunId($value);
                 break;
         } // switch()
@@ -1208,10 +1261,13 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $this->setUserMatchStatus($arr[$keys[4]]);
         }
         if (array_key_exists($keys[5], $arr)) {
-            $this->setMatchNotes($arr[$keys[5]]);
+            $this->setUserMatchReason($arr[$keys[5]]);
         }
         if (array_key_exists($keys[6], $arr)) {
-            $this->setAppRunId($arr[$keys[6]]);
+            $this->setMatchNotes($arr[$keys[6]]);
+        }
+        if (array_key_exists($keys[7], $arr)) {
+            $this->setAppRunId($arr[$keys[7]]);
         }
     }
 
@@ -1266,8 +1322,11 @@ abstract class UserJobMatch implements ActiveRecordInterface
         if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE)) {
             $criteria->add(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE, $this->user_notification_state);
         }
-        if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_MATCH_STATUS)) {
-            $criteria->add(UserJobMatchTableMap::COL_USER_MATCH_STATUS, $this->user_match_status);
+        if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_MATCH)) {
+            $criteria->add(UserJobMatchTableMap::COL_USER_MATCH, $this->user_match);
+        }
+        if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_MATCH_REASON)) {
+            $criteria->add(UserJobMatchTableMap::COL_USER_MATCH_REASON, $this->user_match_reason);
         }
         if ($this->isColumnModified(UserJobMatchTableMap::COL_MATCH_NOTES)) {
             $criteria->add(UserJobMatchTableMap::COL_MATCH_NOTES, $this->match_notes);
@@ -1365,6 +1424,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
         $copyObj->setJobPostingId($this->getJobPostingId());
         $copyObj->setUserNotificationState($this->getUserNotificationState());
         $copyObj->setUserMatchStatus($this->getUserMatchStatus());
+        $copyObj->setUserMatchReason($this->getUserMatchReason());
         $copyObj->setMatchNotes($this->getMatchNotes());
         $copyObj->setAppRunId($this->getAppRunId());
         if ($makeNew) {
@@ -1514,7 +1574,8 @@ abstract class UserJobMatch implements ActiveRecordInterface
         $this->user_slug = null;
         $this->jobposting_id = null;
         $this->user_notification_state = null;
-        $this->user_match_status = null;
+        $this->user_match = null;
+        $this->user_match_reason = null;
         $this->match_notes = null;
         $this->app_run_id = null;
         $this->alreadyInSave = false;

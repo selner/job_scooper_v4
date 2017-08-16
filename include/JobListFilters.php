@@ -21,14 +21,14 @@
 //
 function isInterested_MarkedDuplicateAutomatically($var)
 {
-    if(substr_count($var['interested'], C__STR_TAG_DUPLICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__) > 0) return true;
+    if(substr_count($var->getUserMatchStatus(), C__STR_TAG_DUPLICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__) > 0) return true;
 
     return false;
 }
 
 function isInterested_MarkedAutomatically($var)
 {
-    if(substr_count($var['interested'], C__STR_TAG_AUTOMARKEDJOB__) > 0)
+    if(substr_count($var->getUserMatchStatus(), C__STR_TAG_AUTOMARKEDJOB__) > 0)
     {
         return true;
     };
@@ -43,7 +43,7 @@ function isNewJobToday_Interested_IsBlank($var)
 
 function onlyBadTitlesAndRoles($var)
 {
-    if(substr_count($var['interested'], C__STR_TAG_BAD_TITLE_POST__) > 0)
+    if(substr_count($var->getUserMatchStatus(), C__STR_TAG_BAD_TITLE_POST__) > 0)
     {
         return true;
     };
@@ -86,14 +86,10 @@ function isJobUpdatedTodayNotInterested($var)
 
 function isMarkedBlank($var)
 {
-    $ret = false;
-    if($var['interested'] == "")
-        $ret = true;
+    if(is_null($var->getUserMatchStatus()) || $var->getUserMatchStatus() == "")
+        return true;
 
-    if(strlen($var['interested']) == 0)
-        $ret = true;
-
-    return $ret;
+    return false;
 }
 
 function isMarkedNotBlank($var)
@@ -110,10 +106,9 @@ function isMarked_InterestedOrBlank($var)
 // TODO: Test that isMarked_NotInterested() == isMarked_InterestedOrBlank().  They should match, no?
 function isMarked_NotInterested($var)
 {
-    if(substr_count($var['interested'], "No ") <= 0) return false;
+    if(substr_count($var->getUserMatchStatus(), "No ") <= 0) return false;
     return true;
 }
-
 
 function isMarked_NotInterestedAndNotBlank($var)
 {
@@ -122,13 +117,13 @@ function isMarked_NotInterestedAndNotBlank($var)
 
 function isMarked_ManuallyNotInterested($var)
 {
-    if((substr_count($var['interested'], "No ") > 0) && isInterested_MarkedAutomatically($var) == false) return true;
+    if((substr_count($var->getUserMatchStatus(), "No ") > 0) && isInterested_MarkedAutomatically($var) == false) return true;
     return false;
 }
 
 function isJobAutoUpdatable($var)
 {
-    if(isMarkedBlank($var) == true || (substr_count($var['interested'], "New") == 1) ) return true;
+    if(isMarkedBlank($var) == true || (substr_count($var->getUserMatchStatus(), "New") == 1) ) return true;
 
     return false;
 }

@@ -24,7 +24,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatchQuery orderByUserSlug($order = Criteria::ASC) Order by the user_slug column
  * @method     ChildUserJobMatchQuery orderByJobPostingId($order = Criteria::ASC) Order by the jobposting_id column
  * @method     ChildUserJobMatchQuery orderByUserNotificationState($order = Criteria::ASC) Order by the user_notification_state column
- * @method     ChildUserJobMatchQuery orderByUserMatchStatus($order = Criteria::ASC) Order by the user_match_status column
+ * @method     ChildUserJobMatchQuery orderByUserMatchStatus($order = Criteria::ASC) Order by the user_match column
+ * @method     ChildUserJobMatchQuery orderByUserMatchReason($order = Criteria::ASC) Order by the user_match_reason column
  * @method     ChildUserJobMatchQuery orderByMatchNotes($order = Criteria::ASC) Order by the match_notes column
  * @method     ChildUserJobMatchQuery orderByAppRunId($order = Criteria::ASC) Order by the app_run_id column
  *
@@ -32,7 +33,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatchQuery groupByUserSlug() Group by the user_slug column
  * @method     ChildUserJobMatchQuery groupByJobPostingId() Group by the jobposting_id column
  * @method     ChildUserJobMatchQuery groupByUserNotificationState() Group by the user_notification_state column
- * @method     ChildUserJobMatchQuery groupByUserMatchStatus() Group by the user_match_status column
+ * @method     ChildUserJobMatchQuery groupByUserMatchStatus() Group by the user_match column
+ * @method     ChildUserJobMatchQuery groupByUserMatchReason() Group by the user_match_reason column
  * @method     ChildUserJobMatchQuery groupByMatchNotes() Group by the match_notes column
  * @method     ChildUserJobMatchQuery groupByAppRunId() Group by the app_run_id column
  *
@@ -73,7 +75,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatch findOneByUserSlug(string $user_slug) Return the first ChildUserJobMatch filtered by the user_slug column
  * @method     ChildUserJobMatch findOneByJobPostingId(int $jobposting_id) Return the first ChildUserJobMatch filtered by the jobposting_id column
  * @method     ChildUserJobMatch findOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column
- * @method     ChildUserJobMatch findOneByUserMatchStatus(int $user_match_status) Return the first ChildUserJobMatch filtered by the user_match_status column
+ * @method     ChildUserJobMatch findOneByUserMatchStatus(int $user_match) Return the first ChildUserJobMatch filtered by the user_match column
+ * @method     ChildUserJobMatch findOneByUserMatchReason(string $user_match_reason) Return the first ChildUserJobMatch filtered by the user_match_reason column
  * @method     ChildUserJobMatch findOneByMatchNotes(string $match_notes) Return the first ChildUserJobMatch filtered by the match_notes column
  * @method     ChildUserJobMatch findOneByAppRunId(string $app_run_id) Return the first ChildUserJobMatch filtered by the app_run_id column *
 
@@ -84,7 +87,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatch requireOneByUserSlug(string $user_slug) Return the first ChildUserJobMatch filtered by the user_slug column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByJobPostingId(int $jobposting_id) Return the first ChildUserJobMatch filtered by the jobposting_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserJobMatch requireOneByUserMatchStatus(int $user_match_status) Return the first ChildUserJobMatch filtered by the user_match_status column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneByUserMatchStatus(int $user_match) Return the first ChildUserJobMatch filtered by the user_match column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneByUserMatchReason(string $user_match_reason) Return the first ChildUserJobMatch filtered by the user_match_reason column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByMatchNotes(string $match_notes) Return the first ChildUserJobMatch filtered by the match_notes column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByAppRunId(string $app_run_id) Return the first ChildUserJobMatch filtered by the app_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
@@ -93,7 +97,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatch[]|ObjectCollection findByUserSlug(string $user_slug) Return ChildUserJobMatch objects filtered by the user_slug column
  * @method     ChildUserJobMatch[]|ObjectCollection findByJobPostingId(int $jobposting_id) Return ChildUserJobMatch objects filtered by the jobposting_id column
  * @method     ChildUserJobMatch[]|ObjectCollection findByUserNotificationState(int $user_notification_state) Return ChildUserJobMatch objects filtered by the user_notification_state column
- * @method     ChildUserJobMatch[]|ObjectCollection findByUserMatchStatus(int $user_match_status) Return ChildUserJobMatch objects filtered by the user_match_status column
+ * @method     ChildUserJobMatch[]|ObjectCollection findByUserMatchStatus(int $user_match) Return ChildUserJobMatch objects filtered by the user_match column
+ * @method     ChildUserJobMatch[]|ObjectCollection findByUserMatchReason(string $user_match_reason) Return ChildUserJobMatch objects filtered by the user_match_reason column
  * @method     ChildUserJobMatch[]|ObjectCollection findByMatchNotes(string $match_notes) Return ChildUserJobMatch objects filtered by the match_notes column
  * @method     ChildUserJobMatch[]|ObjectCollection findByAppRunId(string $app_run_id) Return ChildUserJobMatch objects filtered by the app_run_id column
  * @method     ChildUserJobMatch[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
@@ -194,7 +199,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_job_match_id, user_slug, jobposting_id, user_notification_state, user_match_status, match_notes, app_run_id FROM user_job_match WHERE user_job_match_id = :p0';
+        $sql = 'SELECT user_job_match_id, user_slug, jobposting_id, user_notification_state, user_match, user_match_reason, match_notes, app_run_id FROM user_job_match WHERE user_job_match_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -427,7 +432,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the user_match_status column
+     * Filter the query on the user_match column
      *
      * @param     mixed $userMatchStatus The value to use as filter
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
@@ -436,7 +441,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
      */
     public function filterByUserMatchStatus($userMatchStatus = null, $comparison = null)
     {
-        $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_MATCH_STATUS);
+        $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_MATCH);
         if (is_scalar($userMatchStatus)) {
             if (!in_array($userMatchStatus, $valueSet)) {
                 throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $userMatchStatus));
@@ -456,7 +461,32 @@ abstract class UserJobMatchQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_MATCH_STATUS, $userMatchStatus, $comparison);
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_MATCH, $userMatchStatus, $comparison);
+    }
+
+    /**
+     * Filter the query on the user_match_reason column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByUserMatchReason('fooValue');   // WHERE user_match_reason = 'fooValue'
+     * $query->filterByUserMatchReason('%fooValue%', Criteria::LIKE); // WHERE user_match_reason LIKE '%fooValue%'
+     * </code>
+     *
+     * @param     string $userMatchReason The value to use as filter.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function filterByUserMatchReason($userMatchReason = null, $comparison = null)
+    {
+        if (null === $comparison) {
+            if (is_array($userMatchReason)) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_MATCH_REASON, $userMatchReason, $comparison);
     }
 
     /**

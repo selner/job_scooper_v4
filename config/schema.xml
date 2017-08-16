@@ -171,7 +171,8 @@
         <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true"/>
         <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true"/>
         <column name="user_notification_state" phpName="UserNotificationState" type="enum" valueSet="none,ready-to-send,sent"/>
-        <column name="user_match_status" phpName="UserMatchStatus" type="enum" valueSet="none, include-match, exclude-match"/>
+        <column name="user_match" phpName="UserMatchStatus" type="enum" valueSet="none, include-match, exclude-match"/>
+        <column name="user_match_reason" phpName="UserMatchReason" type="varchar" size="50"/>
         <column name="match_notes" phpName="MatchNotes" type="varchar" size="200"/>
         <column name="app_run_id" phpName="AppRunId" type="varchar" size="75"/>
         <foreign-key foreignTable="user">

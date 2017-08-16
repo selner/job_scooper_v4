@@ -21,18 +21,18 @@ class UserJobMatch extends BaseUserJobMatch
         $this->setAppRunId($GLOBALS['USERDATA']['configuration_settings']['app_run_id']);
     }
 
-//    private $delim = ' | ';
-//
-//    function updateMatchExclusionReason($newData)
-//    {
-//        $current = $this->getUserMatchExcludeReason();
-//        if (is_string($current) && strlen($current) > 0) {
-//            $this->setUserMatchExcludeReason($current . $this->delim . $newData);
-//        }
-//        else
-//        {
-//            $this->setUserMatchExcludeReason($newData);
-//        }
-//    }
+    private $delim = ' | ';
+
+    function updateMatchNotes($newData)
+    {
+        $current = $this->getMatchNotes();
+        if (is_string($current) && strlen($current) > 0) {
+            $this->setMatchNotes($current . $this->delim . $newData);
+        }
+        else
+        {
+            $this->setMatchNotes($newData);
+        }
+    }
 
 }

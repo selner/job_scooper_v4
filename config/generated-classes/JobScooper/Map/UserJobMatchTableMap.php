@@ -59,7 +59,7 @@ class UserJobMatchTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 7;
+    const NUM_COLUMNS = 8;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class UserJobMatchTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 7;
+    const NUM_HYDRATE_COLUMNS = 8;
 
     /**
      * the column name for the user_job_match_id field
@@ -92,9 +92,14 @@ class UserJobMatchTableMap extends TableMap
     const COL_USER_NOTIFICATION_STATE = 'user_job_match.user_notification_state';
 
     /**
-     * the column name for the user_match_status field
+     * the column name for the user_match field
      */
-    const COL_USER_MATCH_STATUS = 'user_job_match.user_match_status';
+    const COL_USER_MATCH = 'user_job_match.user_match';
+
+    /**
+     * the column name for the user_match_reason field
+     */
+    const COL_USER_MATCH_REASON = 'user_job_match.user_match_reason';
 
     /**
      * the column name for the match_notes field
@@ -116,10 +121,10 @@ class UserJobMatchTableMap extends TableMap
     const COL_USER_NOTIFICATION_STATE_READY_TO_SEND = 'ready-to-send';
     const COL_USER_NOTIFICATION_STATE_SENT = 'sent';
 
-    /** The enumerated values for the user_match_status field */
-    const COL_USER_MATCH_STATUS_NONE = 'none';
-    const COL_USER_MATCH_STATUS_INCLUDE_MATCH = 'include-match';
-    const COL_USER_MATCH_STATUS_EXCLUDE_MATCH = 'exclude-match';
+    /** The enumerated values for the user_match field */
+    const COL_USER_MATCH_NONE = 'none';
+    const COL_USER_MATCH_INCLUDE_MATCH = 'include-match';
+    const COL_USER_MATCH_EXCLUDE_MATCH = 'exclude-match';
 
     /**
      * holds an array of fieldnames
@@ -128,11 +133,11 @@ class UserJobMatchTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('UserJobMatchId', 'UserSlug', 'JobPostingId', 'UserNotificationState', 'UserMatchStatus', 'MatchNotes', 'AppRunId', ),
-        self::TYPE_CAMELNAME     => array('userJobMatchId', 'userSlug', 'jobPostingId', 'userNotificationState', 'userMatchStatus', 'matchNotes', 'appRunId', ),
-        self::TYPE_COLNAME       => array(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, UserJobMatchTableMap::COL_USER_SLUG, UserJobMatchTableMap::COL_JOBPOSTING_ID, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE, UserJobMatchTableMap::COL_USER_MATCH_STATUS, UserJobMatchTableMap::COL_MATCH_NOTES, UserJobMatchTableMap::COL_APP_RUN_ID, ),
-        self::TYPE_FIELDNAME     => array('user_job_match_id', 'user_slug', 'jobposting_id', 'user_notification_state', 'user_match_status', 'match_notes', 'app_run_id', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, )
+        self::TYPE_PHPNAME       => array('UserJobMatchId', 'UserSlug', 'JobPostingId', 'UserNotificationState', 'UserMatchStatus', 'UserMatchReason', 'MatchNotes', 'AppRunId', ),
+        self::TYPE_CAMELNAME     => array('userJobMatchId', 'userSlug', 'jobPostingId', 'userNotificationState', 'userMatchStatus', 'userMatchReason', 'matchNotes', 'appRunId', ),
+        self::TYPE_COLNAME       => array(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, UserJobMatchTableMap::COL_USER_SLUG, UserJobMatchTableMap::COL_JOBPOSTING_ID, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE, UserJobMatchTableMap::COL_USER_MATCH, UserJobMatchTableMap::COL_USER_MATCH_REASON, UserJobMatchTableMap::COL_MATCH_NOTES, UserJobMatchTableMap::COL_APP_RUN_ID, ),
+        self::TYPE_FIELDNAME     => array('user_job_match_id', 'user_slug', 'jobposting_id', 'user_notification_state', 'user_match', 'user_match_reason', 'match_notes', 'app_run_id', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, )
     );
 
     /**
@@ -142,11 +147,11 @@ class UserJobMatchTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('UserJobMatchId' => 0, 'UserSlug' => 1, 'JobPostingId' => 2, 'UserNotificationState' => 3, 'UserMatchStatus' => 4, 'MatchNotes' => 5, 'AppRunId' => 6, ),
-        self::TYPE_CAMELNAME     => array('userJobMatchId' => 0, 'userSlug' => 1, 'jobPostingId' => 2, 'userNotificationState' => 3, 'userMatchStatus' => 4, 'matchNotes' => 5, 'appRunId' => 6, ),
-        self::TYPE_COLNAME       => array(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID => 0, UserJobMatchTableMap::COL_USER_SLUG => 1, UserJobMatchTableMap::COL_JOBPOSTING_ID => 2, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE => 3, UserJobMatchTableMap::COL_USER_MATCH_STATUS => 4, UserJobMatchTableMap::COL_MATCH_NOTES => 5, UserJobMatchTableMap::COL_APP_RUN_ID => 6, ),
-        self::TYPE_FIELDNAME     => array('user_job_match_id' => 0, 'user_slug' => 1, 'jobposting_id' => 2, 'user_notification_state' => 3, 'user_match_status' => 4, 'match_notes' => 5, 'app_run_id' => 6, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, )
+        self::TYPE_PHPNAME       => array('UserJobMatchId' => 0, 'UserSlug' => 1, 'JobPostingId' => 2, 'UserNotificationState' => 3, 'UserMatchStatus' => 4, 'UserMatchReason' => 5, 'MatchNotes' => 6, 'AppRunId' => 7, ),
+        self::TYPE_CAMELNAME     => array('userJobMatchId' => 0, 'userSlug' => 1, 'jobPostingId' => 2, 'userNotificationState' => 3, 'userMatchStatus' => 4, 'userMatchReason' => 5, 'matchNotes' => 6, 'appRunId' => 7, ),
+        self::TYPE_COLNAME       => array(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID => 0, UserJobMatchTableMap::COL_USER_SLUG => 1, UserJobMatchTableMap::COL_JOBPOSTING_ID => 2, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE => 3, UserJobMatchTableMap::COL_USER_MATCH => 4, UserJobMatchTableMap::COL_USER_MATCH_REASON => 5, UserJobMatchTableMap::COL_MATCH_NOTES => 6, UserJobMatchTableMap::COL_APP_RUN_ID => 7, ),
+        self::TYPE_FIELDNAME     => array('user_job_match_id' => 0, 'user_slug' => 1, 'jobposting_id' => 2, 'user_notification_state' => 3, 'user_match' => 4, 'user_match_reason' => 5, 'match_notes' => 6, 'app_run_id' => 7, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, )
     );
 
     /** The enumerated values for this table */
@@ -156,10 +161,10 @@ class UserJobMatchTableMap extends TableMap
             self::COL_USER_NOTIFICATION_STATE_READY_TO_SEND,
             self::COL_USER_NOTIFICATION_STATE_SENT,
         ),
-                UserJobMatchTableMap::COL_USER_MATCH_STATUS => array(
-                            self::COL_USER_MATCH_STATUS_NONE,
-            self::COL_USER_MATCH_STATUS_INCLUDE_MATCH,
-            self::COL_USER_MATCH_STATUS_EXCLUDE_MATCH,
+                UserJobMatchTableMap::COL_USER_MATCH => array(
+                            self::COL_USER_MATCH_NONE,
+            self::COL_USER_MATCH_INCLUDE_MATCH,
+            self::COL_USER_MATCH_EXCLUDE_MATCH,
         ),
     );
 
@@ -210,12 +215,13 @@ class UserJobMatchTableMap extends TableMap
   1 => 'ready-to-send',
   2 => 'sent',
 ));
-        $this->addColumn('user_match_status', 'UserMatchStatus', 'ENUM', false, null, null);
-        $this->getColumn('user_match_status')->setValueSet(array (
+        $this->addColumn('user_match', 'UserMatchStatus', 'ENUM', false, null, null);
+        $this->getColumn('user_match')->setValueSet(array (
   0 => 'none',
   1 => 'include-match',
   2 => 'exclude-match',
 ));
+        $this->addColumn('user_match_reason', 'UserMatchReason', 'VARCHAR', false, 50, null);
         $this->addColumn('match_notes', 'MatchNotes', 'VARCHAR', false, 200, null);
         $this->addColumn('app_run_id', 'AppRunId', 'VARCHAR', false, 75, null);
     } // initialize()
@@ -386,7 +392,8 @@ class UserJobMatchTableMap extends TableMap
             $criteria->addSelectColumn(UserJobMatchTableMap::COL_USER_SLUG);
             $criteria->addSelectColumn(UserJobMatchTableMap::COL_JOBPOSTING_ID);
             $criteria->addSelectColumn(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
-            $criteria->addSelectColumn(UserJobMatchTableMap::COL_USER_MATCH_STATUS);
+            $criteria->addSelectColumn(UserJobMatchTableMap::COL_USER_MATCH);
+            $criteria->addSelectColumn(UserJobMatchTableMap::COL_USER_MATCH_REASON);
             $criteria->addSelectColumn(UserJobMatchTableMap::COL_MATCH_NOTES);
             $criteria->addSelectColumn(UserJobMatchTableMap::COL_APP_RUN_ID);
         } else {
@@ -394,7 +401,8 @@ class UserJobMatchTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.user_slug');
             $criteria->addSelectColumn($alias . '.jobposting_id');
             $criteria->addSelectColumn($alias . '.user_notification_state');
-            $criteria->addSelectColumn($alias . '.user_match_status');
+            $criteria->addSelectColumn($alias . '.user_match');
+            $criteria->addSelectColumn($alias . '.user_match_reason');
             $criteria->addSelectColumn($alias . '.match_notes');
             $criteria->addSelectColumn($alias . '.app_run_id');
         }
