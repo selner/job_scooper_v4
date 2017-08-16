@@ -937,6 +937,28 @@ function convertToJobPostingObj($job)
 
 }
 
+/******************************************************************************
+ *
+ *
+ *
+ *
+ *  New, Propel-Related Helpers
+ *
+ *
+ *
+ *
+ *
+ ******************************************************************************/
+
+
+
+
+/******************************************************************************
+ *
+ *  Database Helper Functions
+ *
+ ******************************************************************************/
+
 
 /**
  * Cleanup a string to make a slug of it
@@ -976,39 +998,129 @@ function cleanupSlugPart($slug, $replacement = '-')
     return $slug;
 }
 
-function findOrCreateJobPosting($jobSite, $jobSiteJobID)
-{
-    if(is_null($jobSiteJobID))
-        return null;
 
-    return \JobScooper\JobPostingQuery::create()
-        ->filterByJobSite($jobSite)
-        ->filterByJobSitePostID($jobSiteJobID)
-        ->findOneOrCreate();
-}
+/******************************************************************************
+ *
+ *  JobPosting Helper Functions
+ *
+ ******************************************************************************/
 
-function updateOrCreateJobPosting($job)
+function updateOrCreateJobPosting($jobArray)
 {
-    if(is_null($job) || !is_array($job))
+    if(is_null($jobArray) || !is_array($jobArray))
         return null;
 
     try {
-        if((is_null($job['job_site']) || strlen($job['job_site']) == 0) && !is_null($job['company']))
-            $job['job_site'] = strtolower($job['company']);
+        if(array_key_exists('JobPostingId', $jobArray) && !is_null($jobArray['JobPostingId'])) {
+            $jobRecord =  \JobScooper\JobPostingQuery::create()
+                ->filterByPrimaryKey($jobArray['JobPostingId'])
+                ->findOneOrCreate();
+        }
+        else {
+            if((is_null($jobArray['job_site']) || strlen($jobArray['job_site']) == 0) && !is_null($jobArray['company']))
+                $jobArray['job_site'] = strtolower($jobArray['company']);
 
-        $jobRecord = findOrCreateJobPosting($job['job_site'], $job['job_id']);
+            $jobRecord = \JobScooper\JobPostingQuery::create()
+                ->filterByJobSite($jobArray['job_site'])
+                ->filterByJobSitePostID($jobArray['job_id'])
+                ->findOneOrCreate();
+        }
     }
     catch (Exception $ex)
     {
         $jobRecord = new \JobScooper\JobPosting();
     }
 
-    $jobRecord->fromArray($job);
+    $jobRecord->fromArray($jobArray);
     $jobRecord->save();
     return $jobRecord;
 }
 
 
+function getUserJobMatchesForAppRun()
+{
+    $userObject = $GLOBALS['USERDATA']['configuration_settings']['user_details'];
+    $query = \JobScooper\UserJobMatchQuery::create()
+        ->filterByUserMatchStatus(null)
+        ->filterByUserSlug($userObject->getUserSlug())
+        ->filterBy("AppRunId", $GLOBALS['USERDATA']['configuration_settings']['app_run_id'])
+        ->joinWithJobPosting();
+
+    $results =  $query->find();
+    return $results->getData();
+}
+
+/******************************************************************************
+ *
+ *  JobPostings <-> JSON Helper Functions
+ *
+ ******************************************************************************/
+
+
+/**
+ * Writes JSON encoded file of an array of JobPosting records named "jobslist"
+ *
+ * @param String $filepath The output json file to save to
+ * @param array $arrJobRecords The array of JobPosting objects to export
+ *
+ * @returns String Returns filepath of exported file if successful
+ */
+function writeJobRecordsToJson($filepath, $arrJobRecords)
+{
+    if (is_null($arrJobRecords))
+        $arrJobRecords = array();
+
+
+    $arrOfJobs = array();
+    foreach($arrJobRecords as $jobRecord)
+    {
+        $arrOfJobs[$jobRecord->getJobPostingId()] = $jobRecord->getJobPosting()->toArray();
+    }
+
+    $data = array('jobs_count' => count($arrJobRecords), 'jobslist' => $arrOfJobs);
+    return writeJSON($data, $filepath);
+}
+
+/**
+ * Reads JSON encoded file with an array of JobPosting records named "jobslist"
+ * and updates the database with the values for each job
+ *
+ * @param String $filepath The input json file to load
+ *
+ * @returns array Returns array of JobPostings if successful; empty array if not.
+ */
+function updateJobRecordsFromJson($filepath)
+{
+    $arrJobRecs = array();
+
+    if (stripos($filepath, ".json") === false)
+        $filepath = $filepath . "-" . strtolower(getTodayAsString("")) . ".json";
+
+    if (is_file($filepath)) {
+        LogLine("Reading json data from file " . $filepath, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $data = loadJSON($filepath);
+
+        $arrJobsArray = $data['jobslist'];
+
+        foreach(array_keys($arrJobsArray) as $jobkey)
+        {
+            $item = $arrJobsArray[$jobkey];
+            $jobRec = updateOrCreateJobPosting($item);
+            $arrJobRecs[$jobkey] = $jobRec;
+        }
+
+    }
+
+    return $arrJobRecs;
+}
+
+
+
+/******************************************************************************
+ *
+ *  User Object Helper Functions
+ *
+ ******************************************************************************/
 
 
 

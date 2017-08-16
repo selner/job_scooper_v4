@@ -167,7 +167,6 @@ class UserTableMap extends TableMap
     1 => ':user_slug',
   ),
 ), null, null, 'UserJobMatches', false);
-        $this->addRelation('JobPosting', '\\JobScooper\\JobPosting', RelationMap::MANY_TO_MANY, array(), null, null, 'JobPostings');
     } // buildRelations()
 
     /**

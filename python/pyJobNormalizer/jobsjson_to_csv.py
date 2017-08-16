@@ -48,7 +48,7 @@ if __name__ == '__main__':
     dataJobs = json.load(fp=f, encoding="utf-8")
     dictJobs = dataJobs['jobslist']
 
-    writedicttocsv(outfile, dictJobs, keys=["company", "job_title", "job_post_url", "location", "employment_type", "job_site_category", "job_site_date", "interested", "site_name", "job_id"])
+    writedicttocsv(outfile, dictJobs, keys=["JobPostingId", "JobSite", "JobSitePostID", "Title", "TitleTokens", "Url", "Company", "Location", "EmploymentType", "Department", "Category", "UpdatedAt", "PostedAt", "FirstSeenAt", "RemovedAt", "KeySiteAndPostID", "KeyCompanyAndTitle"])
 
     print (u"CSV results written to %s" % outfile)
 

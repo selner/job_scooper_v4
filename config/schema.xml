@@ -78,7 +78,7 @@
             Job posting facts
         -->
         <column name="title" phpName="Title" type="varchar" size="255" required="true"/>
-        <column name="title_tokens" phpName="JobTitleTokens" type="varchar" size="255" required="false"/>
+        <column name="title_tokens" phpName="TitleTokens" type="varchar" size="255" required="false"/>
         <column name="url" type="varchar" size="1024" required="true"/>
         <!--<unique name="index_jobsite_url/">-->
             <!--<unique-column name="url"/>-->
@@ -166,12 +166,13 @@
 
 
 
-    <table name="user_job_match" phpName="UserJobMatch" isCrossRef="true">
-        <column name="user_slug" phpName="UserSlug" type="varchar" size="128" primaryKey="true"/>
-        <column name="jobposting_id" phpName="JobPostingId" type="integer" primaryKey="true"/>
+    <table name="user_job_match" phpName="UserJobMatch">
+        <column name="user_job_match_id" phpName="UserJobMatchId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true"/>
+        <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true"/>
         <column name="user_notification_state" phpName="UserNotificationState" type="enum" valueSet="none,ready-to-send,sent"/>
         <column name="user_match_status" phpName="UserMatchStatus" type="enum" valueSet="none, include-match, exclude-match"/>
-        <column name="user_match_exclude_reason" phpName="UserMatchExcludeReason" type="varchar" size="1024"/>
+        <column name="match_notes" phpName="MatchNotes" type="varchar" size="200"/>
         <column name="app_run_id" phpName="AppRunId" type="varchar" size="75"/>
         <foreign-key foreignTable="user">
             <reference local="user_slug" foreign="user_slug"/>
@@ -180,6 +181,15 @@
             <reference local="jobposting_id" foreign="jobposting_id"/>
         </foreign-key>
     </table>
+
+    <!--<table name="user_job_match_exclude_reason" phpName="UserJobMatchExcludeReason">-->
+        <!--<column name="user_job_match_exclude_reason_id" phpName="UserJobMatchExcludeReasonId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>-->
+        <!--<column name="user_job_match_id" phpName="UserJobMatchId" type="varchar" size="128"/>-->
+        <!--<column name="reason_details" phpName="ReasonDetails" type="varchar" size="1024" />-->
+        <!--<foreign-key foreignTable="user_job_match">-->
+            <!--<reference local="user_job_match_id" foreign="user_job_match_id"/>-->
+        <!--</foreign-key>-->
+    <!--</table>-->
 
 
 

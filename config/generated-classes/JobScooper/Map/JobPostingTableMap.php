@@ -168,8 +168,8 @@ class JobPostingTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('JobPostingId', 'JobSite', 'JobSitePostID', 'Title', 'JobTitleTokens', 'Url', 'Company', 'Location', 'EmploymentType', 'Department', 'Category', 'UpdatedAt', 'PostedAt', 'FirstSeenAt', 'RemovedAt', 'KeySiteAndPostID', 'KeyCompanyAndTitle', ),
-        self::TYPE_CAMELNAME     => array('jobPostingId', 'jobSite', 'jobSitePostID', 'title', 'jobTitleTokens', 'url', 'company', 'location', 'employmentType', 'department', 'category', 'updatedAt', 'postedAt', 'firstSeenAt', 'removedAt', 'keySiteAndPostID', 'keyCompanyAndTitle', ),
+        self::TYPE_PHPNAME       => array('JobPostingId', 'JobSite', 'JobSitePostID', 'Title', 'TitleTokens', 'Url', 'Company', 'Location', 'EmploymentType', 'Department', 'Category', 'UpdatedAt', 'PostedAt', 'FirstSeenAt', 'RemovedAt', 'KeySiteAndPostID', 'KeyCompanyAndTitle', ),
+        self::TYPE_CAMELNAME     => array('jobPostingId', 'jobSite', 'jobSitePostID', 'title', 'titleTokens', 'url', 'company', 'location', 'employmentType', 'department', 'category', 'updatedAt', 'postedAt', 'firstSeenAt', 'removedAt', 'keySiteAndPostID', 'keyCompanyAndTitle', ),
         self::TYPE_COLNAME       => array(JobPostingTableMap::COL_JOBPOSTING_ID, JobPostingTableMap::COL_JOBSITE, JobPostingTableMap::COL_JOBSITE_POST_ID, JobPostingTableMap::COL_TITLE, JobPostingTableMap::COL_TITLE_TOKENS, JobPostingTableMap::COL_URL, JobPostingTableMap::COL_COMPANY, JobPostingTableMap::COL_LOCATION, JobPostingTableMap::COL_EMPLOYMENT_TYPE, JobPostingTableMap::COL_DEPARTMENT, JobPostingTableMap::COL_CATEGORY, JobPostingTableMap::COL_LAST_UPDATED_AT, JobPostingTableMap::COL_JOB_POSTED_DATE, JobPostingTableMap::COL_FIRST_SEEN_AT, JobPostingTableMap::COL_POST_REMOVED_AT, JobPostingTableMap::COL_KEY_SITE_AND_POST_ID, JobPostingTableMap::COL_KEY_COMPANY_AND_TITLE, ),
         self::TYPE_FIELDNAME     => array('jobposting_id', 'jobsite', 'jobsite_post_id', 'title', 'title_tokens', 'url', 'company', 'location', 'employment_type', 'department', 'category', 'last_updated_at', 'job_posted_date', 'first_seen_at', 'post_removed_at', 'key_site_and_post_id', 'key_company_and_title', ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, )
@@ -182,8 +182,8 @@ class JobPostingTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('JobPostingId' => 0, 'JobSite' => 1, 'JobSitePostID' => 2, 'Title' => 3, 'JobTitleTokens' => 4, 'Url' => 5, 'Company' => 6, 'Location' => 7, 'EmploymentType' => 8, 'Department' => 9, 'Category' => 10, 'UpdatedAt' => 11, 'PostedAt' => 12, 'FirstSeenAt' => 13, 'RemovedAt' => 14, 'KeySiteAndPostID' => 15, 'KeyCompanyAndTitle' => 16, ),
-        self::TYPE_CAMELNAME     => array('jobPostingId' => 0, 'jobSite' => 1, 'jobSitePostID' => 2, 'title' => 3, 'jobTitleTokens' => 4, 'url' => 5, 'company' => 6, 'location' => 7, 'employmentType' => 8, 'department' => 9, 'category' => 10, 'updatedAt' => 11, 'postedAt' => 12, 'firstSeenAt' => 13, 'removedAt' => 14, 'keySiteAndPostID' => 15, 'keyCompanyAndTitle' => 16, ),
+        self::TYPE_PHPNAME       => array('JobPostingId' => 0, 'JobSite' => 1, 'JobSitePostID' => 2, 'Title' => 3, 'TitleTokens' => 4, 'Url' => 5, 'Company' => 6, 'Location' => 7, 'EmploymentType' => 8, 'Department' => 9, 'Category' => 10, 'UpdatedAt' => 11, 'PostedAt' => 12, 'FirstSeenAt' => 13, 'RemovedAt' => 14, 'KeySiteAndPostID' => 15, 'KeyCompanyAndTitle' => 16, ),
+        self::TYPE_CAMELNAME     => array('jobPostingId' => 0, 'jobSite' => 1, 'jobSitePostID' => 2, 'title' => 3, 'titleTokens' => 4, 'url' => 5, 'company' => 6, 'location' => 7, 'employmentType' => 8, 'department' => 9, 'category' => 10, 'updatedAt' => 11, 'postedAt' => 12, 'firstSeenAt' => 13, 'removedAt' => 14, 'keySiteAndPostID' => 15, 'keyCompanyAndTitle' => 16, ),
         self::TYPE_COLNAME       => array(JobPostingTableMap::COL_JOBPOSTING_ID => 0, JobPostingTableMap::COL_JOBSITE => 1, JobPostingTableMap::COL_JOBSITE_POST_ID => 2, JobPostingTableMap::COL_TITLE => 3, JobPostingTableMap::COL_TITLE_TOKENS => 4, JobPostingTableMap::COL_URL => 5, JobPostingTableMap::COL_COMPANY => 6, JobPostingTableMap::COL_LOCATION => 7, JobPostingTableMap::COL_EMPLOYMENT_TYPE => 8, JobPostingTableMap::COL_DEPARTMENT => 9, JobPostingTableMap::COL_CATEGORY => 10, JobPostingTableMap::COL_LAST_UPDATED_AT => 11, JobPostingTableMap::COL_JOB_POSTED_DATE => 12, JobPostingTableMap::COL_FIRST_SEEN_AT => 13, JobPostingTableMap::COL_POST_REMOVED_AT => 14, JobPostingTableMap::COL_KEY_SITE_AND_POST_ID => 15, JobPostingTableMap::COL_KEY_COMPANY_AND_TITLE => 16, ),
         self::TYPE_FIELDNAME     => array('jobposting_id' => 0, 'jobsite' => 1, 'jobsite_post_id' => 2, 'title' => 3, 'title_tokens' => 4, 'url' => 5, 'company' => 6, 'location' => 7, 'employment_type' => 8, 'department' => 9, 'category' => 10, 'last_updated_at' => 11, 'job_posted_date' => 12, 'first_seen_at' => 13, 'post_removed_at' => 14, 'key_site_and_post_id' => 15, 'key_company_and_title' => 16, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, )
@@ -210,7 +210,7 @@ class JobPostingTableMap extends TableMap
         $this->addColumn('jobsite', 'JobSite', 'VARCHAR', true, 255, null);
         $this->addColumn('jobsite_post_id', 'JobSitePostID', 'VARCHAR', true, 255, null);
         $this->addColumn('title', 'Title', 'VARCHAR', true, 255, null);
-        $this->addColumn('title_tokens', 'JobTitleTokens', 'VARCHAR', false, 255, null);
+        $this->addColumn('title_tokens', 'TitleTokens', 'VARCHAR', false, 255, null);
         $this->addColumn('url', 'Url', 'VARCHAR', true, 1024, null);
         $this->addColumn('company', 'Company', 'VARCHAR', false, 100, null);
         $this->addColumn('location', 'Location', 'VARCHAR', false, 255, null);
@@ -238,7 +238,6 @@ class JobPostingTableMap extends TableMap
     1 => ':jobposting_id',
   ),
 ), null, null, 'UserJobMatches', false);
-        $this->addRelation('User', '\\JobScooper\\User', RelationMap::MANY_TO_MANY, array(), null, null, 'Users');
     } // buildRelations()
 
     /**

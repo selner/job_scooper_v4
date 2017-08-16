@@ -24,7 +24,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPostingQuery orderByJobSite($order = Criteria::ASC) Order by the jobsite column
  * @method     ChildJobPostingQuery orderByJobSitePostID($order = Criteria::ASC) Order by the jobsite_post_id column
  * @method     ChildJobPostingQuery orderByTitle($order = Criteria::ASC) Order by the title column
- * @method     ChildJobPostingQuery orderByJobTitleTokens($order = Criteria::ASC) Order by the title_tokens column
+ * @method     ChildJobPostingQuery orderByTitleTokens($order = Criteria::ASC) Order by the title_tokens column
  * @method     ChildJobPostingQuery orderByUrl($order = Criteria::ASC) Order by the url column
  * @method     ChildJobPostingQuery orderByCompany($order = Criteria::ASC) Order by the company column
  * @method     ChildJobPostingQuery orderByLocation($order = Criteria::ASC) Order by the location column
@@ -42,7 +42,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPostingQuery groupByJobSite() Group by the jobsite column
  * @method     ChildJobPostingQuery groupByJobSitePostID() Group by the jobsite_post_id column
  * @method     ChildJobPostingQuery groupByTitle() Group by the title column
- * @method     ChildJobPostingQuery groupByJobTitleTokens() Group by the title_tokens column
+ * @method     ChildJobPostingQuery groupByTitleTokens() Group by the title_tokens column
  * @method     ChildJobPostingQuery groupByUrl() Group by the url column
  * @method     ChildJobPostingQuery groupByCompany() Group by the company column
  * @method     ChildJobPostingQuery groupByLocation() Group by the location column
@@ -83,7 +83,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting findOneByJobSite(string $jobsite) Return the first ChildJobPosting filtered by the jobsite column
  * @method     ChildJobPosting findOneByJobSitePostID(string $jobsite_post_id) Return the first ChildJobPosting filtered by the jobsite_post_id column
  * @method     ChildJobPosting findOneByTitle(string $title) Return the first ChildJobPosting filtered by the title column
- * @method     ChildJobPosting findOneByJobTitleTokens(string $title_tokens) Return the first ChildJobPosting filtered by the title_tokens column
+ * @method     ChildJobPosting findOneByTitleTokens(string $title_tokens) Return the first ChildJobPosting filtered by the title_tokens column
  * @method     ChildJobPosting findOneByUrl(string $url) Return the first ChildJobPosting filtered by the url column
  * @method     ChildJobPosting findOneByCompany(string $company) Return the first ChildJobPosting filtered by the company column
  * @method     ChildJobPosting findOneByLocation(string $location) Return the first ChildJobPosting filtered by the location column
@@ -104,7 +104,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting requireOneByJobSite(string $jobsite) Return the first ChildJobPosting filtered by the jobsite column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByJobSitePostID(string $jobsite_post_id) Return the first ChildJobPosting filtered by the jobsite_post_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByTitle(string $title) Return the first ChildJobPosting filtered by the title column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildJobPosting requireOneByJobTitleTokens(string $title_tokens) Return the first ChildJobPosting filtered by the title_tokens column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildJobPosting requireOneByTitleTokens(string $title_tokens) Return the first ChildJobPosting filtered by the title_tokens column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByUrl(string $url) Return the first ChildJobPosting filtered by the url column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByCompany(string $company) Return the first ChildJobPosting filtered by the company column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByLocation(string $location) Return the first ChildJobPosting filtered by the location column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -123,7 +123,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting[]|ObjectCollection findByJobSite(string $jobsite) Return ChildJobPosting objects filtered by the jobsite column
  * @method     ChildJobPosting[]|ObjectCollection findByJobSitePostID(string $jobsite_post_id) Return ChildJobPosting objects filtered by the jobsite_post_id column
  * @method     ChildJobPosting[]|ObjectCollection findByTitle(string $title) Return ChildJobPosting objects filtered by the title column
- * @method     ChildJobPosting[]|ObjectCollection findByJobTitleTokens(string $title_tokens) Return ChildJobPosting objects filtered by the title_tokens column
+ * @method     ChildJobPosting[]|ObjectCollection findByTitleTokens(string $title_tokens) Return ChildJobPosting objects filtered by the title_tokens column
  * @method     ChildJobPosting[]|ObjectCollection findByUrl(string $url) Return ChildJobPosting objects filtered by the url column
  * @method     ChildJobPosting[]|ObjectCollection findByCompany(string $company) Return ChildJobPosting objects filtered by the company column
  * @method     ChildJobPosting[]|ObjectCollection findByLocation(string $location) Return ChildJobPosting objects filtered by the location column
@@ -445,24 +445,24 @@ abstract class JobPostingQuery extends ModelCriteria
      *
      * Example usage:
      * <code>
-     * $query->filterByJobTitleTokens('fooValue');   // WHERE title_tokens = 'fooValue'
-     * $query->filterByJobTitleTokens('%fooValue%', Criteria::LIKE); // WHERE title_tokens LIKE '%fooValue%'
+     * $query->filterByTitleTokens('fooValue');   // WHERE title_tokens = 'fooValue'
+     * $query->filterByTitleTokens('%fooValue%', Criteria::LIKE); // WHERE title_tokens LIKE '%fooValue%'
      * </code>
      *
-     * @param     string $jobTitleTokens The value to use as filter.
+     * @param     string $titleTokens The value to use as filter.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildJobPostingQuery The current query, for fluid interface
      */
-    public function filterByJobTitleTokens($jobTitleTokens = null, $comparison = null)
+    public function filterByTitleTokens($titleTokens = null, $comparison = null)
     {
         if (null === $comparison) {
-            if (is_array($jobTitleTokens)) {
+            if (is_array($titleTokens)) {
                 $comparison = Criteria::IN;
             }
         }
 
-        return $this->addUsingAlias(JobPostingTableMap::COL_TITLE_TOKENS, $jobTitleTokens, $comparison);
+        return $this->addUsingAlias(JobPostingTableMap::COL_TITLE_TOKENS, $titleTokens, $comparison);
     }
 
     /**
@@ -890,23 +890,6 @@ abstract class JobPostingQuery extends ModelCriteria
         return $this
             ->joinUserJobMatch($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'UserJobMatch', '\JobScooper\UserJobMatchQuery');
-    }
-
-    /**
-     * Filter the query by a related User object
-     * using the user_job_match table as cross reference
-     *
-     * @param User $user the related object to use as filter
-     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return ChildJobPostingQuery The current query, for fluid interface
-     */
-    public function filterByUser($user, $comparison = Criteria::EQUAL)
-    {
-        return $this
-            ->useUserJobMatchQuery()
-            ->filterByUser($user, $comparison)
-            ->endUse();
     }
 
     /**

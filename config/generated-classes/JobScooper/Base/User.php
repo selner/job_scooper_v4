@@ -4,8 +4,6 @@ namespace JobScooper\Base;
 
 use \Exception;
 use \PDO;
-use JobScooper\JobPosting as ChildJobPosting;
-use JobScooper\JobPostingQuery as ChildJobPostingQuery;
 use JobScooper\User as ChildUser;
 use JobScooper\UserJobMatch as ChildUserJobMatch;
 use JobScooper\UserJobMatchQuery as ChildUserJobMatchQuery;
@@ -110,28 +108,12 @@ abstract class User implements ActiveRecordInterface
     protected $collUserJobMatchesPartial;
 
     /**
-     * @var        ObjectCollection|ChildJobPosting[] Cross Collection to store aggregation of ChildJobPosting objects.
-     */
-    protected $collJobPostings;
-
-    /**
-     * @var bool
-     */
-    protected $collJobPostingsPartial;
-
-    /**
      * Flag to prevent endless save loop, if this object is referenced
      * by another object which falls in this transaction.
      *
      * @var boolean
      */
     protected $alreadyInSave = false;
-
-    /**
-     * An array of objects scheduled for deletion.
-     * @var ObjectCollection|ChildJobPosting[]
-     */
-    protected $jobPostingsScheduledForDeletion = null;
 
     /**
      * An array of objects scheduled for deletion.
@@ -610,7 +592,6 @@ abstract class User implements ActiveRecordInterface
 
             $this->collUserJobMatches = null;
 
-            $this->collJobPostings = null;
         } // if (deep)
     }
 
@@ -724,35 +705,6 @@ abstract class User implements ActiveRecordInterface
                 }
                 $this->resetModified();
             }
-
-            if ($this->jobPostingsScheduledForDeletion !== null) {
-                if (!$this->jobPostingsScheduledForDeletion->isEmpty()) {
-                    $pks = array();
-                    foreach ($this->jobPostingsScheduledForDeletion as $entry) {
-                        $entryPk = [];
-
-                        $entryPk[0] = $this->getUserSlug();
-                        $entryPk[1] = $entry->getJobPostingId();
-                        $pks[] = $entryPk;
-                    }
-
-                    \JobScooper\UserJobMatchQuery::create()
-                        ->filterByPrimaryKeys($pks)
-                        ->delete($con);
-
-                    $this->jobPostingsScheduledForDeletion = null;
-                }
-
-            }
-
-            if ($this->collJobPostings) {
-                foreach ($this->collJobPostings as $jobPosting) {
-                    if (!$jobPosting->isDeleted() && ($jobPosting->isNew() || $jobPosting->isModified())) {
-                        $jobPosting->save($con);
-                    }
-                }
-            }
-
 
             if ($this->userSearchRunsScheduledForDeletion !== null) {
                 if (!$this->userSearchRunsScheduledForDeletion->isEmpty()) {
@@ -1624,10 +1576,7 @@ abstract class User implements ActiveRecordInterface
         $userJobMatchesToDelete = $this->getUserJobMatches(new Criteria(), $con)->diff($userJobMatches);
 
 
-        //since at least one column in the foreign key is at the same time a PK
-        //we can not just set a PK to NULL in the lines below. We have to store
-        //a backup of all values, so we are able to manipulate these items based on the onDelete value later.
-        $this->userJobMatchesScheduledForDeletion = clone $userJobMatchesToDelete;
+        $this->userJobMatchesScheduledForDeletion = $userJobMatchesToDelete;
 
         foreach ($userJobMatchesToDelete as $userJobMatchRemoved) {
             $userJobMatchRemoved->setUser(null);
@@ -1758,249 +1707,6 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Clears out the collJobPostings collection
-     *
-     * This does not modify the database; however, it will remove any associated objects, causing
-     * them to be refetched by subsequent calls to accessor method.
-     *
-     * @return void
-     * @see        addJobPostings()
-     */
-    public function clearJobPostings()
-    {
-        $this->collJobPostings = null; // important to set this to NULL since that means it is uninitialized
-    }
-
-    /**
-     * Initializes the collJobPostings crossRef collection.
-     *
-     * By default this just sets the collJobPostings collection to an empty collection (like clearJobPostings());
-     * however, you may wish to override this method in your stub class to provide setting appropriate
-     * to your application -- for example, setting the initial array to the values stored in database.
-     *
-     * @return void
-     */
-    public function initJobPostings()
-    {
-        $collectionClassName = UserJobMatchTableMap::getTableMap()->getCollectionClassName();
-
-        $this->collJobPostings = new $collectionClassName;
-        $this->collJobPostingsPartial = true;
-        $this->collJobPostings->setModel('\JobScooper\JobPosting');
-    }
-
-    /**
-     * Checks if the collJobPostings collection is loaded.
-     *
-     * @return bool
-     */
-    public function isJobPostingsLoaded()
-    {
-        return null !== $this->collJobPostings;
-    }
-
-    /**
-     * Gets a collection of ChildJobPosting objects related by a many-to-many relationship
-     * to the current object by way of the user_job_match cross-reference table.
-     *
-     * If the $criteria is not null, it is used to always fetch the results from the database.
-     * Otherwise the results are fetched from the database the first time, then cached.
-     * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildUser is new, it will return
-     * an empty collection or the current collection; the criteria is ignored on a new object.
-     *
-     * @param      Criteria $criteria Optional query object to filter the query
-     * @param      ConnectionInterface $con Optional connection object
-     *
-     * @return ObjectCollection|ChildJobPosting[] List of ChildJobPosting objects
-     */
-    public function getJobPostings(Criteria $criteria = null, ConnectionInterface $con = null)
-    {
-        $partial = $this->collJobPostingsPartial && !$this->isNew();
-        if (null === $this->collJobPostings || null !== $criteria || $partial) {
-            if ($this->isNew()) {
-                // return empty collection
-                if (null === $this->collJobPostings) {
-                    $this->initJobPostings();
-                }
-            } else {
-
-                $query = ChildJobPostingQuery::create(null, $criteria)
-                    ->filterByUser($this);
-                $collJobPostings = $query->find($con);
-                if (null !== $criteria) {
-                    return $collJobPostings;
-                }
-
-                if ($partial && $this->collJobPostings) {
-                    //make sure that already added objects gets added to the list of the database.
-                    foreach ($this->collJobPostings as $obj) {
-                        if (!$collJobPostings->contains($obj)) {
-                            $collJobPostings[] = $obj;
-                        }
-                    }
-                }
-
-                $this->collJobPostings = $collJobPostings;
-                $this->collJobPostingsPartial = false;
-            }
-        }
-
-        return $this->collJobPostings;
-    }
-
-    /**
-     * Sets a collection of JobPosting objects related by a many-to-many relationship
-     * to the current object by way of the user_job_match cross-reference table.
-     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
-     * and new objects from the given Propel collection.
-     *
-     * @param  Collection $jobPostings A Propel collection.
-     * @param  ConnectionInterface $con Optional connection object
-     * @return $this|ChildUser The current object (for fluent API support)
-     */
-    public function setJobPostings(Collection $jobPostings, ConnectionInterface $con = null)
-    {
-        $this->clearJobPostings();
-        $currentJobPostings = $this->getJobPostings();
-
-        $jobPostingsScheduledForDeletion = $currentJobPostings->diff($jobPostings);
-
-        foreach ($jobPostingsScheduledForDeletion as $toDelete) {
-            $this->removeJobPosting($toDelete);
-        }
-
-        foreach ($jobPostings as $jobPosting) {
-            if (!$currentJobPostings->contains($jobPosting)) {
-                $this->doAddJobPosting($jobPosting);
-            }
-        }
-
-        $this->collJobPostingsPartial = false;
-        $this->collJobPostings = $jobPostings;
-
-        return $this;
-    }
-
-    /**
-     * Gets the number of JobPosting objects related by a many-to-many relationship
-     * to the current object by way of the user_job_match cross-reference table.
-     *
-     * @param      Criteria $criteria Optional query object to filter the query
-     * @param      boolean $distinct Set to true to force count distinct
-     * @param      ConnectionInterface $con Optional connection object
-     *
-     * @return int the number of related JobPosting objects
-     */
-    public function countJobPostings(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
-    {
-        $partial = $this->collJobPostingsPartial && !$this->isNew();
-        if (null === $this->collJobPostings || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->collJobPostings) {
-                return 0;
-            } else {
-
-                if ($partial && !$criteria) {
-                    return count($this->getJobPostings());
-                }
-
-                $query = ChildJobPostingQuery::create(null, $criteria);
-                if ($distinct) {
-                    $query->distinct();
-                }
-
-                return $query
-                    ->filterByUser($this)
-                    ->count($con);
-            }
-        } else {
-            return count($this->collJobPostings);
-        }
-    }
-
-    /**
-     * Associate a ChildJobPosting to this object
-     * through the user_job_match cross reference table.
-     *
-     * @param ChildJobPosting $jobPosting
-     * @return ChildUser The current object (for fluent API support)
-     */
-    public function addJobPosting(ChildJobPosting $jobPosting)
-    {
-        if ($this->collJobPostings === null) {
-            $this->initJobPostings();
-        }
-
-        if (!$this->getJobPostings()->contains($jobPosting)) {
-            // only add it if the **same** object is not already associated
-            $this->collJobPostings->push($jobPosting);
-            $this->doAddJobPosting($jobPosting);
-        }
-
-        return $this;
-    }
-
-    /**
-     *
-     * @param ChildJobPosting $jobPosting
-     */
-    protected function doAddJobPosting(ChildJobPosting $jobPosting)
-    {
-        $userJobMatch = new ChildUserJobMatch();
-
-        $userJobMatch->setJobPosting($jobPosting);
-
-        $userJobMatch->setUser($this);
-
-        $this->addUserJobMatch($userJobMatch);
-
-        // set the back reference to this object directly as using provided method either results
-        // in endless loop or in multiple relations
-        if (!$jobPosting->isUsersLoaded()) {
-            $jobPosting->initUsers();
-            $jobPosting->getUsers()->push($this);
-        } elseif (!$jobPosting->getUsers()->contains($this)) {
-            $jobPosting->getUsers()->push($this);
-        }
-
-    }
-
-    /**
-     * Remove jobPosting of this object
-     * through the user_job_match cross reference table.
-     *
-     * @param ChildJobPosting $jobPosting
-     * @return ChildUser The current object (for fluent API support)
-     */
-    public function removeJobPosting(ChildJobPosting $jobPosting)
-    {
-        if ($this->getJobPostings()->contains($jobPosting)) {
-            $userJobMatch = new ChildUserJobMatch();
-            $userJobMatch->setJobPosting($jobPosting);
-            if ($jobPosting->isUsersLoaded()) {
-                //remove the back reference if available
-                $jobPosting->getUsers()->removeObject($this);
-            }
-
-            $userJobMatch->setUser($this);
-            $this->removeUserJobMatch(clone $userJobMatch);
-            $userJobMatch->clear();
-
-            $this->collJobPostings->remove($this->collJobPostings->search($jobPosting));
-
-            if (null === $this->jobPostingsScheduledForDeletion) {
-                $this->jobPostingsScheduledForDeletion = clone $this->collJobPostings;
-                $this->jobPostingsScheduledForDeletion->clear();
-            }
-
-            $this->jobPostingsScheduledForDeletion->push($jobPosting);
-        }
-
-
-        return $this;
-    }
-
-    /**
      * Clears the current object, sets all attributes to their default values and removes
      * outgoing references as well as back-references (from other objects to this one. Results probably in a database
      * change of those foreign objects when you call `save` there).
@@ -2039,16 +1745,10 @@ abstract class User implements ActiveRecordInterface
                     $o->clearAllReferences($deep);
                 }
             }
-            if ($this->collJobPostings) {
-                foreach ($this->collJobPostings as $o) {
-                    $o->clearAllReferences($deep);
-                }
-            }
         } // if ($deep)
 
         $this->collUserSearchRuns = null;
         $this->collUserJobMatches = null;
-        $this->collJobPostings = null;
     }
 
     /**

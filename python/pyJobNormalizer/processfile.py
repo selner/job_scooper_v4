@@ -122,7 +122,7 @@ def tokenizeStrings(listStrings, fieldTokenized = "tokenized"):
         k = keys.pop()
         v = listStrings.pop(k)
 
-        retData[k] = { "original" : v, fieldTokenized : []}
+        retData[k] = { "Title" : v, fieldTokenized : []}
         if len(k) == 0:
             print "String value for key was empty.  Skipping..."
             continue;
@@ -199,7 +199,7 @@ def tokenizeJSONFile(inputFile, outputFile, dataKey=None, indexKey=None):
             if('jobslist' in inputData and isinstance(inputData['jobslist'], dict) and len(inputData['jobslist']) > 0):
                 for k, v in inputData['jobslist'].items():
                     dictStrings[k] = v[dataKey]
-                outData = tokenizeStrings(dictStrings, "job_title_tokenized")
+                outData = tokenizeStrings(dictStrings, "TitleTokens")
                 combined = combine_dicts(inputData['jobslist'], outData)
                 inputData[u'jobslist'] = combined
                 outf = open(outputFile, "w")
