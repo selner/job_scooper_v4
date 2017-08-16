@@ -1,6 +1,7 @@
 {
   "AgentName": "Salesforce",
-  "SourceURL": "http://salesforce.careermount.com/candidate/job_search/quick/results/***PAGE_NUMBER***?sort_dir=desc&sort_field=post_date",
+  "SourceURL": "http://salesforce.careermount.com/candidate/job_search/quick/results?location=***LOCATION***&keyword=***KEYWORDS***&sort_dir=desc&sort_field=post_date",
+  "LocationType": "location-city",
   "Collections": [
     {
       "Name": "PageFields",
