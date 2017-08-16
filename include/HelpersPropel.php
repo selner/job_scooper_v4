@@ -180,7 +180,7 @@ function updateJobRecordsFromJson($filepath)
         $filepath = $filepath . "-" . strtolower(getTodayAsString("")) . ".json";
 
     if (is_file($filepath)) {
-        LogLine("Reading json data from file " . $filepath, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Loading and updating JobPostings from from json file '" . $filepath ."'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
         $data = loadJSON($filepath);
 
         $arrJobsArray = $data['jobslist'];

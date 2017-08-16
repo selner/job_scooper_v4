@@ -108,7 +108,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         $GLOBALS['USERDATA']['configuration_settings'] = array();
 
         $now = new DateTime();
-        $GLOBALS['USERDATA']['configuration_settings']['app_run_id'] = __APP_VERSION__ . $now->format('Y-m-d-h-s');
+        $GLOBALS['USERDATA']['configuration_settings']['app_run_id'] = __APP_VERSION__ . $now->format('Y-m-d-H-i-s');
 
         // and to make sure our notes get updated on active jobs
         // that we'd seen previously
