@@ -134,6 +134,7 @@ class JSONPlugins
                         'return_attribute' => $attrib,
                         'type' => $type,
                         'field' => $field->Field,
+                        'value' => $field->Value,
                         'return_value_regex' => $field->Pattern,
                         'return_value_callback' => $field->Callback,
                         'callback_parameter' => $field->CallBackParameter

@@ -90,6 +90,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             'tag_job_id' => array(),
             'tag_title' => array(),
             'tag_link' => array(),
+            'tag_jobsite' => array(),
             'tag_department' => array(),
             'tag_location' => array(),
             'tag_job_category' => array(),
@@ -202,6 +203,10 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
                     return $this->_getTagMatchValueCSS_($node, $arrTag, $returnAttribute);
                     break;
 
+                case 'STATIC':
+                    return $this->_getTagMatchValueStatic_($arrTag);
+                    break;
+
                 case 'REGEX':
                     return $this->_getTagMatchValueRegex_($node, $arrTag, $returnAttribute, $item);
                     break;
@@ -218,9 +223,26 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
     }
 
+    protected function _getTagMatchValueStatic_($arrTag)
+    {
+        $ret = null;
+        if (array_key_exists("value", $arrTag) && !is_null($arrTag['value'])) {
+            $value  = $arrTag['value'];
+
+            if(is_null($value) || strlen($value) == 0)
+                $ret = null;
+            else
+                $ret = $value;
+        }
+
+        return $ret;
+    }
+
     protected function _getTagMatchValueRegex_($node, $arrTag, $returnAttribute, $item)
     {
         $ret = null;
+        if (array_key_exists("return_value_regex", $arrTag) && !is_null($arrTag['return_value_regex']))
+            $arrTag['pattern'] = $arrTag['return_value_regex'];
         if (array_key_exists("pattern", $arrTag) && !is_null($arrTag['pattern'])) {
             $pattern = $arrTag['pattern'];
             $value = "";
@@ -256,7 +278,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         return $ret;
     }
 
-        protected function _getTagMatchValueCSS_($node, $arrTag, $returnAttribute = 'plaintext')
+    protected function _getTagMatchValueCSS_($node, $arrTag, $returnAttribute = 'plaintext')
     {
         $ret = null;
         $fReturnNodeObject = false;
@@ -276,46 +298,50 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         }
 
         $strMatch = $this->getTagSelector($arrTag);
-        if (!isset($strMatch)) {
+        if (is_null($strMatch)) {
             return $ret;
         }
-
-        $nodeMatches = $node->find($strMatch);
-        if (isset($nodeMatches) && !is_null($nodeMatches) && count($nodeMatches) >=1) {
-            $ret = $nodeMatches;
-        }
-
-        if ($fReturnNodeObject === true) {
-            // do nothing.  We already have the ndoe set correctly
-        } elseif (!is_null($ret) && isset($arrTag['index']) && is_array($ret) && intval($arrTag['index']) < count($ret)) {
-            $index = $arrTag['index'];
-            if (count($nodeMatches) <= $index) {
-                $strError = sprintf("%s plugin failed to find index #%d in the %d nodes matching '%s'. ", $this->siteName, $index, count($nodeMatches), $strMatch);
-                $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-                throw new Exception($strError);
+        elseif(strlen($strMatch) > 0)
+        {
+            $nodeMatches = $node->find($strMatch);
+            if (isset($nodeMatches) && !is_null($nodeMatches) && count($nodeMatches) >=1) {
+                $ret = $nodeMatches;
             }
-            $ret = $nodeMatches[$index];
-        } elseif (!is_null($ret) && is_array($ret)) {
-            if (count($ret) > 1) {
-                $strError = sprintf("Warning:  %s plugin matched %d nodes to selector '%s' but did not specify an index.  Assuming first node.", $this->siteName, count($ret), $strMatch);
-                $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_WARNING__);
+
+            if ($fReturnNodeObject === true) {
+                // do nothing.  We already have the ndoe set correctly
+            } elseif (!is_null($ret) && isset($arrTag['index']) && is_array($ret) && intval($arrTag['index']) < count($ret)) {
+                $index = $arrTag['index'];
+                if (count($nodeMatches) <= $index) {
+                    $strError = sprintf("%s plugin failed to find index #%d in the %d nodes matching '%s'. ", $this->siteName, $index, count($nodeMatches), $strMatch);
+                    $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
+                    throw new Exception($strError);
+                }
+                $ret = $nodeMatches[$index];
+            } elseif (!is_null($ret) && is_array($ret)) {
+                if (count($ret) > 1) {
+                    $strError = sprintf("Warning:  %s plugin matched %d nodes to selector '%s' but did not specify an index.  Assuming first node.", $this->siteName, count($ret), $strMatch);
+                    $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_WARNING__);
+                }
+                $ret = $ret[0];
             }
-            $ret = $ret[0];
-        }
 
+            if ($fReturnNodeObject === false && !is_null($ret)) {
+                $ret = $ret->$returnAttribute;
 
-
-        if ($fReturnNodeObject === false && !is_null($ret)) {
-            $ret = $ret->$returnAttribute;
-
-            if (!is_null($propertyRegEx) && is_string($ret) && strlen($ret) > 0) {
-                $match = array();
-                if (preg_match($propertyRegEx, $ret, $match) !== false && count($match) >= 1)
-                    $ret = $match[1];
-                else {
-                    handleException(new Exception(sprintf("%s plugin failed to find match for regex '%s' for tag '%s' with value '%s' as expected.", $this->siteName, $propertyRegEx, getArrayValuesAsString($arrTag), $ret)), "", true);
+                if (!is_null($propertyRegEx) && is_string($ret) && strlen($ret) > 0) {
+                    $match = array();
+                    if (preg_match($propertyRegEx, $ret, $match) !== false && count($match) >= 1)
+                        $ret = $match[1];
+                    else {
+                        handleException(new Exception(sprintf("%s plugin failed to find match for regex '%s' for tag '%s' with value '%s' as expected.", $this->siteName, $propertyRegEx, getArrayValuesAsString($arrTag), $ret)), "", true);
+                    }
                 }
             }
+        }
+        else
+        {
+            $ret = $strMatch;
         }
 
         if (!is_null($ret) && array_key_exists("return_value_callback", $arrTag) && (strlen($arrTag['return_value_callback']) > 0)) {
@@ -331,7 +357,6 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             else
                 $ret = call_user_func($callback, $ret);
         }
-
 
         return $ret;
     }

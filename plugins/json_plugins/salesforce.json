@@ -1,7 +1,6 @@
 {
   "AgentName": "Salesforce",
-  "SourceURL": "http://salesforce.careermount.com/candidate/job_search/quick/results?location=***LOCATION***&keyword=***KEYWORDS***&sort_dir=desc&sort_field=post_date",
-  "LocationType": "location-city",
+  "SourceURL": "http://salesforce.careermount.com/candidate/job_search/quick/results?sort_dir=desc&sort_field=post_date",
   "Collections": [
     {
       "Name": "PageFields",
@@ -52,6 +51,16 @@
           "Type": "CSS"
         },
         {
+          "Name": "tag_company",
+          "Value": "Salesforce",
+          "Type": "STATIC"
+        },
+        {
+          "Name": "tag_jobsite",
+          "Value": "Salesforce",
+          "Type": "STATIC"
+        },
+        {
           "Name": "tag_location",
           "Selector": "p.search-result-item-company-name a",
           "Extract": "ATTR",
@@ -61,7 +70,7 @@
         },
         {
           "Name": "tag_department",
-          "Selector": "table.searchResAdd tr td",
+          "Selector": "table.searchResAdd tr td a",
           "Index" : 1,
           "Extract": "TEXT",
           "Attribute": null,
@@ -71,7 +80,7 @@
 
         {
           "Name": "tag_job_id",
-          "Pattern": "/\/career\/(.*?)\/.*/",
+          "Pattern": "/.*?([0-9]+).*/",
           "Extract": "REGEX",
           "Type": "REGEX",
           "Field": "job_post_url"

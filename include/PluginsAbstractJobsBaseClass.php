@@ -693,6 +693,18 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     }
 
+
+    function setCompanyToSiteName($var)
+    {
+        return $this->siteName;
+    }
+
+    function combineTextAllNodes($var)
+    {
+        return combineTextAllNodes($var);
+    }
+
+
     //************************************************************************
     //
     //
@@ -947,14 +959,48 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
         return $ret;
     }
+    
+    function cleanupJobItemFields($arrItem)
+    {
+        $arrItem ['job_post_url'] = trim($arrItem['job_post_url']); // DO NOT LOWER, BREAKS URLS
+
+        if (!is_null($arrItem['job_post_url']) || strlen($arrItem['job_post_url']) > 0) {
+            $arrMatches = array();
+            $matchedHTTP = preg_match(REXPR_MATCH_URL_DOMAIN, $arrItem['job_post_url'], $arrMatches);
+            if (!$matchedHTTP) {
+                $sep = "";
+                if (substr($arrItem['job_post_url'], 0, 1) != "/")
+                    $sep = "/";
+                $arrItem['job_post_url'] = $this->siteBaseURL . $sep . $arrItem['job_post_url'];
+            }
+        } else {
+            $arrItem['job_post_url'] = "[UNKNOWN]";
+        }
+
+        if (is_null($arrItem['job_id']) || strlen($arrItem['job_id']) <= 0)
+            $arrItem['job_id'] = $arrItem['job_post_url'];
+
+        $arrItem['job_id'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $arrItem['job_id']);
+        $arrItem ['job_id'] = \Scooper\strScrub($arrItem['job_id'], FOR_LOOKUP_VALUE_MATCHING);
+        if (is_null($arrItem['job_id']) || strlen($arrItem['job_id']) == 0) {
+            if (isset($this->regex_link_job_id)) {
+                $item['job_id'] = $this->getIDFromLink($this->regex_link_job_id, $arrItem['job_post_url']);
+            }
+        }
+
+        return $arrItem;
+
+    }
 
     function saveUserJobMatches($arrJobList, $searchDetails)
     {
+
         $arrJobsBySitePostId = array_column($arrJobList, null, "job_id");
         $this->arrSearchReturnedJobs[$searchDetails->getKey()] = array();
 
         foreach (array_keys($arrJobsBySitePostId) as $JobSitePostId) {
-            $job = updateOrCreateJobPosting($arrJobsBySitePostId[$JobSitePostId]);
+            $arrJob = $this->cleanupJobItemFields($arrJobsBySitePostId[$JobSitePostId]);
+            $job = updateOrCreateJobPosting($arrJob);
 
             $newMatch = \JobScooper\UserJobMatchQuery::create()
                 ->filterByUserSlug($this->userObject->getUserSlug())
@@ -963,6 +1009,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
             $newMatch->setJobPostingId($job->getJobPostingId());
             $newMatch->setUserSlug($this->userObject->getUserSlug());
+            $newMatch->setAppRunId($GLOBALS['USERDATA']['configuration_settings']['app_run_id']);
             $newMatch->save();
             $this->arrSearchReturnedJobs[$searchDetails->getKey()][$job->getKeySiteAndPostID()] = $job->getJobPostingId();
 

@@ -3,7 +3,8 @@
 namespace JobScooper;
 
 use JobScooper\Base\JobPosting as BaseJobPosting;
-use Propel\Runtime\Map\TableMap;
+use \Khartnett\Normalization as Normalize;
+
 /**
  * Skeleton subclass for representing a row from the 'jobposting' table.
  *
@@ -18,8 +19,8 @@ class JobPosting extends \JobScooper\Base\JobPosting implements \ArrayAccess
 {
     protected function updateAutoColumns()
     {
-        $this->setKeyCompanyAndTitle($this->getCompany() . $this->getTitle());
-        $this->setKeySiteAndPostID($this->getJobSite() . $this->getJobSitePostID());
+        $this->setKeyCompanyAndTitle(cleanupSlugPart($this->getCompany() . $this->getTitle()));
+        $this->setKeySiteAndPostID(cleanupSlugPart($this->getJobSite() . $this->getJobSitePostID()));
     }
 
     public function setAutoColumnRelatedProperty($method, $v)
@@ -31,10 +32,15 @@ class JobPosting extends \JobScooper\Base\JobPosting implements \ArrayAccess
         return $ret;
     }
 
-    public function preInsert(\Propel\Runtime\Connection\ConnectionInterface $con = null)
+    public function normalizeJobRecord()
     {
         $this->updateAutoColumns();
+        $this->setJobSite(cleanupSlugPart($this->getJobSite()));
 
+    }
+    public function preInsert(\Propel\Runtime\Connection\ConnectionInterface $con = null)
+    {
+        $this->normalizeJobRecord();
         if (is_callable('parent::preInsert')) {
             return parent::preInsert($con);
         }
@@ -43,7 +49,7 @@ class JobPosting extends \JobScooper\Base\JobPosting implements \ArrayAccess
 
     public function preUpdate(\Propel\Runtime\Connection\ConnectionInterface $con = null)
     {
-        $this->updateAutoColumns();
+        $this->normalizeJobRecord();
 
         if (is_callable('parent::preUpdate')) {
             return parent::preUpdate($con);
@@ -51,84 +57,61 @@ class JobPosting extends \JobScooper\Base\JobPosting implements \ArrayAccess
         return true;
     }
 
-
-    protected function normalizeJobItem($arrItem)
+    private function _cleanupTextValue($v)
     {
-        //
-        // If this listing has already been normalized, don't re-do the normalization or
-        // errors might be introduced
-        //
-        if (array_key_exists('normalized', $arrItem) && $arrItem['normalized'] === true)
-            return $arrItem;
+        $v = html_entity_decode($v);
+        $v = preg_replace(array('/\s{2,}/', '/[\t\n]/'), ' ', $v);
+        $v = clean_utf8($v);
 
-        $normalizer = new Normalizer();
-
-        // For reference, DEFAULT_SCRUB =  REMOVE_PUNCT | HTML_DECODE | LOWERCASE | REMOVE_EXTRA_WHITESPACE
-        $arrItem['date_pulled'] = getTodayAsString();
-        $arrItem['job_site'] = $this->siteName;
-
-        if (is_null($arrItem['job_site']) || strlen($arrItem['job_site']) <= 0)
-            $arrItem ['job_site'] = \Scooper\strScrub($this->siteName, DEFAULT_SCRUB);
-
-        $arrItem ['job_post_url'] = trim($arrItem['job_post_url']); // DO NOT LOWER, BREAKS URLS
-
-        if (!is_null($arrItem['job_post_url']) || strlen($arrItem['job_post_url']) > 0) {
-            $arrMatches = array();
-            $matchedHTTP = preg_match(REXPR_MATCH_URL_DOMAIN, $arrItem['job_post_url'], $arrMatches);
-            if (!$matchedHTTP) {
-                $sep = "";
-                if (substr($arrItem['job_post_url'], 0, 1) != "/")
-                    $sep = "/";
-                $arrItem['job_post_url'] = $this->siteBaseURL . $sep . $arrItem['job_post_url'];
-            }
-        } else {
-            $arrItem['job_post_url'] = "[UNKNOWN]";
-        }
-
-        if (is_null($arrItem['job_id']) || strlen($arrItem['job_id']) <= 0)
-            $arrItem['job_id'] = $arrItem['job_post_url'];
-
-        $arrItem['job_id'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $arrItem['job_id']);
-        $arrItem ['job_id'] = \Scooper\strScrub($arrItem['job_id'], FOR_LOOKUP_VALUE_MATCHING);
-        if (is_null($arrItem['job_id']) || strlen($arrItem['job_id']) == 0) {
-            if (isset($this->regex_link_job_id)) {
-                $item['job_id'] = $this->getIDFromLink($this->regex_link_job_id, $arrItem['job_post_url']);
-            }
-        }
-
-
+        return $v;
+    }
+    public function setTitle($v)
+    {
         // Removes " NEW!", etc from the job title.  ZipRecruiter tends to occasionally
         // have that appended which then fails de-duplication. (Fixes issue #45) Glassdoor has "- easy apply" as well.
-        $arrItem ['job_title'] = str_ireplace(" NEW!", "", $arrItem['job_title']);
-        $arrItem ['job_title'] = str_ireplace("- new", "", $arrItem['job_title']);
-        $arrItem ['job_title'] = str_ireplace("- easy apply", "", $arrItem['job_title']);
-        $arrItem ['job_title'] = \Scooper\strScrub($arrItem['job_title'], SIMPLE_TEXT_CLEANUP);
+        $v = str_ireplace(" NEW!", "", $v);
+        $v = str_ireplace("- new", "", $v);
+        $v = str_ireplace("- easy apply", "", $v);
+        $v = $this->_cleanupTextValue($v);
+        parent::setTitle($v);
+    }
 
-        $arrItem ['location'] = preg_replace('#(^\s*\(+|\)+\s*$)#', "", $arrItem['location']); // strip leading & ending () chars
-        $arrItem ['location'] = \Scooper\strScrub($arrItem['location'], SIMPLE_TEXT_CLEANUP);
+    public function setLocation($v)
+    {
+        $normalizer = new Normalize();
+        $v = preg_replace('#(^\s*\(+|\)+\s*$)#', "", $v); // strip leading & ending () chars
+        $v = $this->_cleanupTextValue($v);
 
         //
         // Restructure locations like "US-VA-Richmond" to be "Richmond, VA"
         //
         $arrMatches = array();
-        $matched = preg_match('/.*(\w{2})\s*[\-,]\s*.*(\w{2})\s*[\-,]s*([\w]+)/', $arrItem ['location'], $arrMatches);
+        $matched = preg_match('/.*(\w{2})\s*[\-,]\s*.*(\w{2})\s*[\-,]s*([\w]+)/', $v, $arrMatches);
         if ($matched !== false && count($arrMatches) == 4) {
             $arrItem['location'] = $arrMatches[3] . ", " . $arrMatches[2];
         }
-        $stringToNormalize = "111 Bogus St, " . $arrItem['location'];
+        $stringToNormalize = "111 Bogus St, " . $v;
         $location = $normalizer->parse($stringToNormalize);
         if ($location !== false)
-            $arrItem['location'] = $location['city'] . ", " . $location['state'];
+            $v = $location['city'] . ", " . $location['state'];
 
-        if (is_null($arrItem['company']) || strlen($arrItem['company']) == 0) {
-            $arrItem ['company'] = '[UNKNOWN]';
+        parent::setLocation($v);
+    }
+
+    public function setCompany($v)
+    {
+        $v = $this->_cleanupTextValue($v);
+
+        if (is_null($v) || strlen($v) == 0) {
+            $v = '[UNKNOWN]';
         } else {
-            $arrItem ['company'] = \Scooper\strScrub($arrItem['company'], ADVANCED_TEXT_CLEANUP);
+            $v = strip_punctuation($v);
+
             // Remove common company name extensions like "Corporation" or "Inc." so we have
             // a higher match likelihood
-            $arrItem ['company'] = preg_replace(array('/\s[Cc]orporat[e|ion]/', '/\s[Cc]orp\W{0,1}/', '/\.com/', '/\W{0,}\s[iI]nc/', '/\W{0,}\s[lL][lL][cC]/', '/\W{0,}\s[lL][tT][dD]/'), "", $arrItem['company']);
+            $v = preg_replace(array('/\s[Cc]orporat[e|ion]/', '/\s[Cc]orp\W{0,1}/', '/\.com/', '/\W{0,}\s[iI]nc/', '/\W{0,}\s[lL][lL][cC]/', '/\W{0,}\s[lL][tT][dD]/'), "", $v);
 
-            switch (\Scooper\strScrub($arrItem ['company'])) {
+            switch (\Scooper\strScrub($v)) {
                 case "amazon":
                 case "amazon com":
                 case "a2z":
@@ -137,13 +120,13 @@ class JobPosting extends \JobScooper\Base\JobPosting implements \ArrayAccess
                 case "amazon fulfillment services":
                 case "amazonwebservices":
                 case "amazon (seattle)":
-                    $arrItem ['company'] = "Amazon";
+                    $v = "Amazon";
                     break;
 
                 case "market leader":
                 case "market leader inc":
                 case "market leader llc":
-                    $arrItem ['company'] = "Market Leader";
+                    $v = "Market Leader";
                     break;
 
 
@@ -160,51 +143,42 @@ class JobPosting extends \JobScooper\Base\JobPosting implements \ArrayAccess
                 case "walt disney parks resorts careers":
                 case "walt disney parks &amp resorts careers":
                 case "disney":
-                    $arrItem ['company'] = "Disney";
+                    $v = "Disney";
                     break;
 
             }
         }
+        parent::setCompany($v);
 
-        $arrItem ['job_site_category'] = \Scooper\strScrub($arrItem['job_site_category'], SIMPLE_TEXT_CLEANUP);
+    }
 
-        $arrItem ['job_site_date'] = \Scooper\strScrub($arrItem['job_site_date'], REMOVE_EXTRA_WHITESPACE | LOWERCASE | HTML_DECODE);
-        $dateVal = strtotime($arrItem ['job_site_date'], $now = time());
+    public function setDepartment($v)
+    {
+        $v = $this->_cleanupTextValue($v);
+        parent::setDepartment($v);
+    }
+
+    public function setEmploymentType($v)
+    {
+        $v = $this->_cleanupTextValue($v);
+        parent::setEmploymentType($v);
+    }
+
+    public function setCategory($v)
+    {
+        $v = $this->_cleanupTextValue($v);
+        parent::setCategory($v);
+    }
+
+    public function setPostedAt($v)
+    {
+        $v = strtolower($this->_cleanupTextValue($v));
+        $dateVal = strtotime($v, $now = time());
         if (!($dateVal === false)) {
-            $arrItem['job_site_date'] = date('Y-m-d', $dateVal);
+            $v = date('Y-m-d', $dateVal);
         }
 
-
-        if (strlen($arrItem['key_company_role']) <= 0) {
-            $compForKey = $arrItem['company'] . $arrItem['job_title'];
-            if (strcasecmp($compForKey, "[UNKNOWN]") == 0)
-                $compForKey = $compForKey . $arrItem['job_id'];
-            $arrItem['key_company_role'] = \Scooper\strScrub(($compForKey), FOR_LOOKUP_VALUE_MATCHING);
-        }
-
-        if (strlen($arrItem['key_jobsite_siteid']) <= 0) {
-            $arrItem['key_jobsite_siteid'] = \Scooper\strScrub($arrItem['job_site'], FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($arrItem['job_id'], FOR_LOOKUP_VALUE_MATCHING);
-        }
-
-        if (strlen($arrItem['date_last_updated']) <= 0) {
-            $arrItem['date_last_updated'] = $arrItem['date_pulled'];
-        }
-
-
-        //
-        // And finally, lets scrub the returned data to make sure it's valid UTF-8.  If we don't,
-        // we will end up with errors down the line such as when we try to save the results to file.
-        //
-        foreach (array_keys($arrItem) as $k) {
-            if (is_string($arrItem[$k])) {
-                $arrItem[$k] = clean_utf8($arrItem[$k]);
-            }
-        }
-
-
-        $arrItem['normalized'] = true;
-
-        return $arrItem;
+        parent::setPostedAt($v);
     }
 
     function __construct($arrJobFacts = null)
@@ -263,12 +237,30 @@ class JobPosting extends \JobScooper\Base\JobPosting implements \ArrayAccess
         );
     }
 
-    public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
+    public function fromArray($arr, $keyType = \Propel\Runtime\Map\TableMap::TYPE_PHPNAME)
     {
+        try
+        {
+            $jobPostingKeys = \JobScooper\Map\JobPostingTableMap::getFieldNames($keyType);
+            $arrJobPostingFields = array();
+            foreach($jobPostingKeys as $k)
+            {
+                if(array_key_exists($k, $arr))
+                {
+                    $arrJobPostingFields[$k] = $arr[$k];
+                    unset($arr[$k]);
+                }
+            }
+            parent::fromArray($arrJobPostingFields, $keyType);
+        }
+        catch (\Exception $ex)
+        {
+            print $ex;
+        }
+
         foreach(array_keys($arr) as $k)
             $this->set($k, $arr[$k]);
 
-        parent::fromArray($arr, $keyType);
     }
 
     public function set($name, $value)
@@ -291,28 +283,28 @@ class JobPosting extends \JobScooper\Base\JobPosting implements \ArrayAccess
                 try {
                     $this->{$name} = $value;
                     $throwEx = null;
-                } catch (Exception $ex) {
+                } catch (\Exception $ex) {
                     $throwEx = $ex;
                 }
 
                 try {
                     $this->setByName($name, \JobScooper\Map\UserSearchAuditTableMap::TYPE_FIELDNAME, $value);
                     $throwEx = null;
-                } catch (Exception $ex) {
+                } catch (\Exception $ex) {
                     $throwEx = $ex;
                 }
 
                 try {
                     $this->setByName($name, \JobScooper\Map\UserSearchAuditTableMap::TYPE_COLNAME, $value);
                     $throwEx = null;
-                } catch (Exception $ex) {
+                } catch (\Exception $ex) {
                     $throwEx = $ex;
                 }
 
                 try {
                     $this->setByName($name, \JobScooper\Map\UserSearchAuditTableMap::TYPE_CAMELNAME, $value);
                     $throwEx = null;
-                } catch (Exception $ex) {
+                } catch (\Exception $ex) {
                     $throwEx = $ex;
                 }
 

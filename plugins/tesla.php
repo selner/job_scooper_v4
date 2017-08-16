@@ -20,17 +20,22 @@ require_once dirname(dirname(__FILE__))."/bootstrap.php";
 class PluginTesla extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = 'Tesla';
-    protected $childSiteURLBase = 'https://www.tesla.com/careers/search#';
-    protected $childSiteListingPage = 'https://www.tesla.com/careers/search#';
+
+    // BUGBUG:  Hard coded to region = North America (#4)
+    protected $childSiteURLBase = 'https://www.tesla.com/careers/search#/filter/?region=4';
+    protected $childSiteListingPage = 'https://www.tesla.com/careers/search#/filter/?region=4';
+    protected $paginationType = C__PAGINATION_NONE;
+    protected $nMaxJobsToReturn = C_JOB_MAX_RESULTS_PER_SEARCH;
+    protected $nJobListingsPerPage = C_JOB_MAX_RESULTS_PER_SEARCH;
 
     protected $arrListingTagSetup = array(
-        'tag_listings_section' => array(array('tag' => 'table', 'attribute' => 'class', 'attribute_value' =>'table'), array('tag' => 'tbody', 'attribute' => 'class', 'attribute_value' =>'table-body'), array('tag' => 'tr', 'attribute' => 'class', 'attribute_value' =>'table-row')),
-        'tag_title' => array(array('tag' => 'th', 'attribute' => 'class', 'attribute_value' => 'listing-title'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
-        'tag_link' => array(array('tag' => 'th', 'attribute' => 'class', 'attribute_value' => 'listing-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
+        'tag_listings_section' => array('selector' => "table tr.table-row" ),
+        'tag_title' => array('selector' => 'th.listing-title a', 'return_attribute' => 'plaintext'),
+        'tag_link' => array('selector' => 'th.listing-title a', 'return_attribute' => 'href'),
         'tag_company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
-        'tag_job_id' => array(array('tag' => 'th', 'attribute' => 'class', 'attribute_value' => 'listing-title'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>  '/.*?-(\d+)/i'),
-        'tag_department' => array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'listing-department'),
-        'tag_location' => array('tag' => 'td', 'attribute' => 'class', 'attribute_value' =>'listing-location')
+        'tag_job_id' => array('selector' => 'th.listing-title a', 'return_attribute' => 'href', 'return_value_regex' =>  '/.*?-(\d+)/i'),
+        'tag_department' => array('selector' => 'td.listing-department'),
+        'tag_location' => array('selector' => 'td.listing-location')
     );
 
 }
