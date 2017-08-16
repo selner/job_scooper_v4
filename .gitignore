@@ -25,3 +25,4 @@ uncommitted-patches
 *.diff
 sshkeys
 include/static/source_files
+python/pyJobNormalizerVirtualEnv
