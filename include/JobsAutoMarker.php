@@ -20,10 +20,10 @@ use \Khartnett\Normalization as Normalize;
 
 
 const C__STR_TAG_AUTOMARKEDJOB__ = "[auto-marked]";
-const C__STR_TAG_DUPLICATE_POST__ = "No (Duplicate Job Post?)";
-const C__STR_TAG_BAD_TITLE_POST__ = "No (Bad Title & Role)";
-const C__STR_TAG_NOT_A_KEYWORD_TITLE_MATCH__ = "No (Not a Keyword Title Match)";
-const C__STR_TAG_NOT_EXACT_TITLE_MATCH__ = "No (Not an Exact Title Match)";
+const C__STR_TAG_DUPLICATE_POST__ = "Duplicate Job Post " . C__STR_TAG_AUTOMARKEDJOB__;
+const C__STR_TAG_BAD_TITLE_POST__ = "Bad Title & Role " . C__STR_TAG_AUTOMARKEDJOB__;
+const C__STR_TAG_NOT_A_KEYWORD_TITLE_MATCH__ = "Not a Keyword Title Match " . C__STR_TAG_AUTOMARKEDJOB__;
+const C__STR_TAG_NOT_EXACT_TITLE_MATCH__ = "Not an Exact Title Match " . C__STR_TAG_AUTOMARKEDJOB__;
 
 
 class JobsAutoMarker extends ClassJobsSiteCommon
@@ -168,7 +168,7 @@ class JobsAutoMarker extends ClassJobsSiteCommon
                 // Add a note to the duplicate listing that tells user which is the original post
                 //
                 $dupeJobMatch->setUserMatchStatus("exclude-match");
-                $dupeJobMatch->setUserMatchReason(C__STR_TAG_DUPLICATE_POST__ . " " . C__STR_TAG_AUTOMARKEDJOB__);
+                $dupeJobMatch->setUserMatchReason(C__STR_TAG_DUPLICATE_POST__);
                 $dupeJobMatch->updateMatchNotes($this->getNotesWithDupeIDAdded($dupeJobMatch->getMatchNotes(), $origJobMatch->getJobPosting()->getKeySiteAndPostID() ));
                 $dupeJobMatch->save();
             }
@@ -206,7 +206,7 @@ class JobsAutoMarker extends ClassJobsSiteCommon
         }
 
         $placeKey = array_find_closest_key_match($locationKey, array_keys($this->userMatchedCBSAPlaces));
-        if (strncmp($placeKey, $locationKey, 5) == 0 || !array_key_exists($locationKey, array_keys($this->validCityValues))) {
+        if (!is_null($placeKey) && (strncmp($placeKey, $locationKey, 5) == 0 || !array_key_exists($locationKey, array_keys($this->validCityValues)))) {
             return true;
         }
 
@@ -221,7 +221,6 @@ class JobsAutoMarker extends ClassJobsSiteCommon
 
             LogLine("Marking Out of Area Jobs", \Scooper\C__DISPLAY_ITEM_START__);
 
-            $arrJobsByLocationKey = array();
             $nJobsSkipped = 0;
             $nJobsMarkedAutoExcluded = 0;
             $nJobsNotMarked = 0;
@@ -240,8 +239,8 @@ class JobsAutoMarker extends ClassJobsSiteCommon
                 else
                 {
                     $jobMatch->setUserMatchStatus("exclude-match");
-                    $jobMatch->setUserMatchReason("Out of Search Area" . C__STR_TAG_AUTOMARKEDJOB__);
-                    $jobMatch->updateMatchNotes("location '" . $locKey . "' did not match CBSA for user's search.");
+                    $jobMatch->setUserMatchReason("Out of Search Area ");
+                    $jobMatch->updateMatchNotes($locValue . " not in user's search area.");
                     $jobMatch->save();
                     $nJobsMarkedAutoExcluded++;
                 }
