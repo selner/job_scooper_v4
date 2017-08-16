@@ -14,3 +14,6 @@ $PROPEL config:convert -vvv
 $PROPEL build -vvv
 $PROPEL sql:build --overwrite -vvv
 $PROPEL sql:insert -vvv
+
+cd ..
+composer dump
