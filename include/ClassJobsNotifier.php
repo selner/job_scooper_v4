@@ -16,6 +16,11 @@
  */
 
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
+//Import PHPMailer classes into the global namespace
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+
 
 class ClassJobsNotifier extends ClassJobsSiteCommon
 {
@@ -424,7 +429,7 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
         $settings = $GLOBALS['USERDATA']['configuration_settings']['email'];
 
         $mail = new PHPMailer();
-
+    
         $smtpSettings = $settings['PHPMailer_SMTPSetup'];
 
         if($smtpSettings != null && is_array($smtpSettings))
