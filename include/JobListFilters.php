@@ -84,13 +84,6 @@ function isJobUpdatedTodayNotInterested($var)
 }
 
 
-function isMarkedBlank($var)
-{
-    if(is_null($var->getUserMatchStatus()) || $var->getUserMatchStatus() == "")
-        return true;
-
-    return false;
-}
 
 function isMarkedNotBlank($var)
 {
@@ -103,11 +96,37 @@ function isMarked_InterestedOrBlank($var)
    return $res;
 }
 
-// TODO: Test that isMarked_NotInterested() == isMarked_InterestedOrBlank().  They should match, no?
+function isMarked_Value($var, $value)
+{
+    if (method_exists($var, "getUserMatchStatus") === true)
+    {
+        if(substr_count($var->getUserMatchStatus(), $value) <= 0) return false;
+    }
+    else
+    {
+        if(array_key_exists("interested", $var) === true)
+            if(substr_count($var['interested'], $value) <= 0) return false;
+    }
+    return true;
+}
+
+function isMarkedBlank($var)
+{
+    if (method_exists($var, "getUserMatchStatus") === true)
+    {
+        if(strlen($var->getUserMatchStatus()) == 0) return true;
+    }
+    else
+    {
+        if(array_key_exists("interested", $var) === true)
+            if(strlen($var['interested']) == 0) return true;
+    }
+    return false;
+}
+
 function isMarked_NotInterested($var)
 {
-    if(substr_count($var->getUserMatchStatus(), "No ") <= 0) return false;
-    return true;
+    return isMarked_Value($var, "No ");
 }
 
 function isMarked_NotInterestedAndNotBlank($var)
