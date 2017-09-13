@@ -20,10 +20,10 @@ require_once dirname(dirname(__FILE__))."/bootstrap.php";
 class PluginTesla extends ClassClientHTMLJobSitePlugin
 {
     protected $siteName = 'Tesla';
-
+    protected $siteBaseURL = 'http://www.tesla.com/careers';
     // BUGBUG:  Hard coded to region = North America (#4)
-    protected $childSiteURLBase = 'https://www.tesla.com/careers/search#/filter/?region=4';
-    protected $childSiteListingPage = 'https://www.tesla.com/careers/search#/filter/?region=4';
+    protected $strBaseURLFormat = 'https://www.tesla.com/careers/search#/filter/?region=4';
+
     protected $paginationType = C__PAGINATION_NONE;
     protected $nMaxJobsToReturn = C_JOB_MAX_RESULTS_PER_SEARCH;
     protected $nJobListingsPerPage = C_JOB_MAX_RESULTS_PER_SEARCH;
