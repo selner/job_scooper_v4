@@ -32,7 +32,7 @@ propel:
         connections:
             default:
                 adapter: sqlite
-                dsn: sqlite:/Users/bryan/code/jobs_scooper_v4/config/jobscooper_db.sq3
+                dsn: sqlite:%env.JOBSCOOPER_OUTPUT%/job_scooper_db.sq3
                 user: root
                 password: 
                 settings:

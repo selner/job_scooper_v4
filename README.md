@@ -32,7 +32,9 @@ If you're looking at job listings across many sites, Job Scooper has some built-
 That's just the start of [what Jobs Scooper can do...](../../wiki).
 
 ## Running Jobs_Scooper
-To run Jobs Scooper, type:
+To run Jobs Scooper, first set an environment variable named JOBSCOOPER_OUTPUT to your output directory on disk.
+
+Then type:
 ``/usr/bin/php runJobs.php -all -days 3 -ini myconfig.ini``
 
 Required Parameters:
