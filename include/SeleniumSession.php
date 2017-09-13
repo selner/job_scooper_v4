@@ -162,7 +162,7 @@ class SeleniumSession extends PropertyObject
 
     }
 
-    protected function doneWithRemoteWebDriver()
+     protected function doneWithRemoteWebDriver()
     {
         $driver = $this->get_driver();
 
@@ -171,20 +171,18 @@ class SeleniumSession extends PropertyObject
             try {
                 $driver->quit();
             }
-            catch (Exception $ex) {  
+
+            catch (Exception $ex) {
                 if(isset($GLOBALS['logger'])) {
                     handleException($ex, "Failed to quit Webdriver: ", false);
                 }
             }
-            finally 
+            finally
             {
                 $driver = null;
                 $this->remoteWebDriver = null;
             }
-            
         }
-
-        $this->remoteWebDriver = null;
     }
 
     static function startSeleniumServer()
@@ -357,19 +355,13 @@ class SeleniumSession extends PropertyObject
 
         try {
             $webdriver = $this->getWebDriverKind();
-            //
-            // First we need to make sure we don't have a conflicting session already hanging out
-            // and possibly dead.  If we don't clear it, nothing will work.
-            //
             $host = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
-
             $driver = null;
 
             $capabilities = DesiredCapabilities::$webdriver();
 
             $capabilities->setCapability("nativeEvents", true);
             $capabilities->setCapability("setThrowExceptionOnScriptError", false);
-
 
             $this->remoteWebDriver = RemoteWebDriver::create(
                 $host,
