@@ -40,7 +40,7 @@ function getRunDateRange()
     return $strDateRange;
 }
 
-class ClassJobsNotifier extends ClassJobsSiteCommon
+class ClassJobsNotifier
 {
     protected $siteName = "ClassJobsNotifier";
     protected $arrMatchedJobs = array();
@@ -51,7 +51,6 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
     function __construct($basepathMatchedJobs = null, $basepathExcludedJobs = null, $strOutputDirectory = null)
     {
-        parent::__construct($strOutputDirectory);
         if(!is_null($basepathMatchedJobs)) {
             $this->pathsMatchedJobs['json'] = $basepathMatchedJobs .".json";
             $this->pathsMatchedJobs['csv'] = $basepathMatchedJobs .".csv";
@@ -855,12 +854,112 @@ class ClassJobsNotifier extends ClassJobsSiteCommon
 
     private function getKeysForUserCSVOutput()
     {
-        $arr = $this->getEmptyJobListingRecord();
+        $arr = getEmptyJobListingRecord();
 
         $allKeys  = array_diff(array_keys($arr), array('job_title_tokenized', 'normalized', 'job_title_linked', 'job_id', 'date_last_updated', 'match_notes'));
         return $allKeys;
 
     }
+
+
+    function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true, $loggedFileType = null, $ext = "CSV", $keysToOutput=null, $detailsCSSToInclude = null)
+    {
+        if(is_null($keysToOutput))
+            $keysToOutput = array();
+
+        if(!$strOutFilePath || strlen($strOutFilePath) <= 0)
+        {
+            throw new ErrorException("Error: writeJobsListToFile called without an output file path to use.");
+        }
+
+        if(count($arrJobsRecordsToUse) == 0)
+        {
+            $GLOBALS['logger']->logLine("Warning: writeJobsListToFile had no records to write to  " . $strOutFilePath, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+        }
+
+        if($fIncludeFilteredJobsInResults == false)
+        {
+            $arrJobsRecordsToUse = array_filter($arrJobsRecordsToUse, "includeJobInFilteredList");
+//            $arrJobsRecordsToUse = $this->filterOutUninterestedJobs($arrJobsRecordsToUse, $fIncludeFilteredJobsInResults);
+
+        }
+
+
+        $classCombined = new \Scooper\ScooperSimpleCSV($strOutFilePath , "w");
+
+        $arrRecordsToOutput = array_unique_multidimensional($arrJobsRecordsToUse);
+        if (!is_array($arrRecordsToOutput))
+        {
+            $arrRecordsToOutput = array();
+        }
+        else
+        {
+            sortJobsListByCompanyRole($arrRecordsToOutput);
+        }
+
+        if ($keysToOutput == null && count($arrRecordsToOutput) > 0)
+        {
+            $exampleRec = $arrRecordsToOutput[array_keys($arrRecordsToOutput)[0]];
+
+            $arrKeys = array_keys($exampleRec);
+            $arrKeysInOrder = array();
+            $tmpKeyOrderWithDupes = array_merge($keysToOutput, $arrKeys);
+            foreach($tmpKeyOrderWithDupes as $key)
+            {
+                if(!in_array($key, $arrKeysInOrder))
+                    $arrKeysInOrder[] = $key;
+            }
+            $keysToOutput = $arrKeysInOrder;
+        }
+        elseif($keysToOutput == null)
+        {
+            $keysToOutput = getEmptyJobListingRecord();
+        }
+
+        if($arrRecordsToOutput != null && count($arrRecordsToOutput) > 0)
+        {
+            foreach($arrRecordsToOutput as $reckey => $rec)
+            {
+                $out = array();
+                foreach($keysToOutput as $k)
+                {
+                    $out[$k] = $rec[$k];
+                }
+                $arrRecordsToOutput[$reckey] = \Scooper\array_copy($out);
+            }
+        }
+
+        if($ext == 'HTML')
+        {
+            $strCSS = null;
+            if($detailsCSSToInclude['has_file'])
+            {
+                // $strCSS = file_get_contents(dirname(__FILE__) . '/../include/CSVTableStyle.css');
+                $strCSS = file_get_contents($detailsCSSToInclude['full_file_path']);
+            }
+            $classCombined->writeArrayToHTMLFile($arrRecordsToOutput, $keysToOutput, $this->arrKeysForDeduping, $strCSS);
+
+        }
+        else
+        {
+            array_unshift($arrRecordsToOutput, $keysToOutput);
+            $objPHPExcel = new PHPExcel();
+            $objPHPExcel->getActiveSheet()->fromArray($arrRecordsToOutput, null, 'A1');
+            $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, "CSV");
+
+//            $spreadsheet->removeSheetByIndex(0);
+            $objWriter->save($strOutFilePath);
+
+//            $classCombined->writeArrayToCSVFile($arrJobsRecordsToUse, $keysToOutput, $this->arrKeysForDeduping);
+        }
+        $GLOBALS['logger']->logLine($loggedFileType . ($loggedFileType  != "" ? " jobs" : "Jobs") ." list had  ". count($arrJobsRecordsToUse) . " jobs and was written to " . $strOutFilePath , \Scooper\C__DISPLAY_ITEM_START__);
+
+        return $strOutFilePath;
+
+    }
+
+
 
 
 

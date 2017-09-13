@@ -2,10 +2,10 @@
 
 namespace JobScooper;
 
-use JobScooper\Base\JobSitePluginLastRun as BaseJobSitePluginLastRun;
+use JobScooper\Base\JobSitePluginQuery as BaseJobSitePluginQuery;
 
 /**
- * Skeleton subclass for representing a row from the 'jobsite_plugin_last_run' table.
+ * Skeleton subclass for performing query and update operations on the 'jobsite_plugin' table.
  *
  *
  *
@@ -14,7 +14,7 @@ use JobScooper\Base\JobSitePluginLastRun as BaseJobSitePluginLastRun;
  * long as it does not already exist in the output directory.
  *
  */
-class JobSitePluginLastRun extends BaseJobSitePluginLastRun
+class JobSitePluginQuery extends BaseJobSitePluginQuery
 {
 
 }

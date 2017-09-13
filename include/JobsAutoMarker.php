@@ -26,7 +26,7 @@ const C__STR_TAG_NOT_A_KEYWORD_TITLE_MATCH__ = "Not a Keyword Title Match " . C_
 const C__STR_TAG_NOT_EXACT_TITLE_MATCH__ = "Not an Exact Title Match " . C__STR_TAG_AUTOMARKEDJOB__;
 
 
-class JobsAutoMarker extends ClassJobsSiteCommon
+class JobsAutoMarker
 {
     protected $siteName = "JobsAutoMarker";
     protected $arrLatestJobs_UnfilteredByUserInput = array();
@@ -39,8 +39,6 @@ class JobsAutoMarker extends ClassJobsSiteCommon
 
     function __construct($arrJobObjsToMark = array(), $strOutputDirectory = null)
     {
-        parent::__construct($strOutputDirectory);
-
         if (!is_null($arrJobObjsToMark) && count($arrJobObjsToMark) > 0)
             $this->arrMasterJobList = $arrJobObjsToMark;
 

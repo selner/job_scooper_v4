@@ -20,7 +20,7 @@ const JOBLIST_TYPE_UNFILTERED = "unfiltered";
 const JOBLIST_TYPE_MARKED = "marked";
 const JSON_FILENAME = "-alljobsites.json";
 
-class StageManager extends ClassJobsSiteCommon
+class StageManager
 {
     protected $siteName = "StageManager";
     protected $classConfig = null;
@@ -36,8 +36,6 @@ class StageManager extends ClassJobsSiteCommon
 
             if (!$GLOBALS['logger'])
                 $GLOBALS['logger'] = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['debug']);
-
-            parent::__construct(null);
 
             $this->pathAllExcludedJobs = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], "all-excluded-jobs"));
             $this->pathAllMatchedJobs = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], "all-job-matches"));

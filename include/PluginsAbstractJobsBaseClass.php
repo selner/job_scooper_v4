@@ -21,7 +21,7 @@ const BASE_URL_TAG_LOCATION = "***LOCATION***";
 const BASE_URL_TAG_KEYWORDS = "***KEYWORDS***";
 use \Khartnett\Normalization as Normalize;
 
-abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
+abstract class AbstractClassBaseJobsPlugin extends \JobScooper\JobSitePlugin
 {
     protected $arrSearchesToReturn = null;
     protected $strBaseURLFormat = null;
@@ -32,7 +32,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     function __construct($strOutputDirectory = null, $attributes = null)
     {
-        parent::__construct($strOutputDirectory);
+        parent::__construct();
 
         if (array_key_exists("JOBSITE_PLUGINS", $GLOBALS) && (array_key_exists(strtolower($this->siteName), $GLOBALS['JOBSITE_PLUGINS']))) {
             $plugin = $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->siteName)];
@@ -196,6 +196,11 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
     protected $nMaxJobsToReturn = C_JOB_MAX_RESULTS_PER_SEARCH;
     protected $currentSearchBeingRun = null;
     protected $arrSearchReturnedJobs = array();
+
+    protected $detailsMyFileOut= "";
+    protected $regex_link_job_id = null;
+    protected $prevCookies = "";
+    protected $prevURL = null;
 
     protected $strKeywordDelimiter = null;
     protected $additionalLoadDelaySeconds = 0;
@@ -717,7 +722,6 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     private function _updateJobsDataForSearch_($searchDetails)
     {
-        $this->_logMemoryUsage_();
         $ex = null;
 
         try {
@@ -897,13 +901,75 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                 LogLine("Saved screenshot from Selenium out to " . $debugSSFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
             }
 
-            if (!is_null($arrSearchedJobs) && is_array($arrSearchedJobs) && countJobRecords($arrSearchedJobs) > 0) {
-                $this->writeJobsListToFile($debugCSVFile, $arrSearchedJobs);
-                $arrErrorFiles[$debugCSVFile] = $debugCSVFile;
-                LogLine("Wrote results CSV data to " . $debugCSVFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-            }
+//            if (!is_null($arrSearchedJobs) && is_array($arrSearchedJobs) && countJobRecords($arrSearchedJobs) > 0) {
+//                $this->writeJobsListToFile($debugCSVFile, $arrSearchedJobs);
+//                $arrErrorFiles[$debugCSVFile] = $debugCSVFile;
+//                LogLine("Wrote results CSV data to " . $debugCSVFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+//            }
         }
     }
+    function getSimpleObjFromPathOrURL($filePath = "", $strURL = "", $optTimeout = null, $referrer = null, $cookies = null)
+    {
+        $objSimpleHTML = null;
+
+        if(isDebug()==true) {
+
+            $GLOBALS['logger']->logLine("URL        = " . $strURL, \Scooper\C__DISPLAY_NORMAL__);
+            $GLOBALS['logger']->logLine("Referrer   = " . $referrer, \Scooper\C__DISPLAY_NORMAL__);
+            $GLOBALS['logger']->logLine("Cookies    = " . $cookies, \Scooper\C__DISPLAY_NORMAL__);
+        }
+
+        if(!$objSimpleHTML && ($filePath && strlen($filePath) > 0))
+        {
+            $GLOBALS['logger']->logLine("Loading ALTERNATE results from ".$filePath, \Scooper\C__DISPLAY_ITEM_START__);
+            $objSimpleHTML =  $this->getSimpleHTMLObjForFileContents($filePath);
+        }
+
+
+        if(!$objSimpleHTML && $strURL && strlen($strURL) > 0)
+        {
+            $class = new \Scooper\ScooperDataAPIWrapper();
+            if(isVerbose()) $class->setVerbose(true);
+
+            $retObj = $class->cURL($strURL, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = $optTimeout, $cookies = $cookies, $referrer = $referrer);
+            if(!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0)
+            {
+                $objSimpleHTML = SimpleHtmlDom\str_get_html($retObj['output']);
+                $this->prevCookies = $retObj['cookies'];
+                $this->prevURL = $strURL;
+            }
+            else
+            {
+                $options  = array('http' => array( 'timeout' => 30, 'user_agent' => C__STR_USER_AGENT__));
+                $context  = stream_context_create($options);
+                $objSimpleHTML = SimpleHtmlDom\file_get_html($strURL, false, $context);
+            }
+        }
+
+        if(!$objSimpleHTML)
+        {
+            throw new ErrorException('Error:  unable to get SimpleHtmlDom\SimpleHTMLDom object from file('.$filePath.') or '.$strURL);
+        }
+
+        return $objSimpleHTML;
+    }
+    function getSimpleHTMLObjForFileContents($strInputFileFullPath)
+    {
+        $objSimpleHTML = null;
+        $GLOBALS['logger']->logLine("Loading HTML from ".$strInputFileFullPath, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+        if(!file_exists($strInputFileFullPath) && !is_file($strInputFileFullPath))  return $objSimpleHTML;
+        $fp = fopen($strInputFileFullPath , 'r');
+        if(!$fp ) return $objSimpleHTML;
+
+        $strHTML = fread($fp, JOBS_SCOOPER_MAX_FILE_SIZE);
+        $dom = new SimpleHtmlDom\simple_html_dom(null, null, true, null, null, null, null);
+        $objSimpleHTML = $dom->load($strHTML);
+        fclose($fp);
+
+        return $objSimpleHTML;
+    }
+
 
     protected function _getMyJobsForSearchFromJobsAPI_(&$searchDetails)
     {
@@ -922,7 +988,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             }
 
             foreach ($apiJobs as $job) {
-                $item = $this->getEmptyJobListingRecord();
+                $item = getEmptyJobListingRecord();
                 $item['job_title'] = $job->name;
                 $item['job_id'] = $job->sourceId;
                 if ($item['job_id'] == null)

@@ -78,7 +78,7 @@ class PluginIndeed extends ClassClientHTMLJobSitePlugin
             }
             assert($node->attr['itemtype'] == "http://schema.org/JobPosting");
 
-            $item = $this->getEmptyJobListingRecord();
+            $item = getEmptyJobListingRecord();
 
             if(isset($node) && isset($node->attr['data-jk']))
                 $item['job_id'] = $node->attr['data-jk'];

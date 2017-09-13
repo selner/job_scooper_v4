@@ -149,7 +149,7 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
         foreach($nodesJobs as $node)
         {
 
-            $item = $this->getEmptyJobListingRecord();
+            $item = getEmptyJobListingRecord();
 
             $titlelink = $node->find('a[class="card-link js-job-link"]');
             $item['job_title'] = combineTextAllChildren($titlelink[0]);;

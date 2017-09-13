@@ -388,7 +388,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
                 //
                 // get a new record with all columns set to null
                 //
-                $item = $this->getEmptyJobListingRecord();
+                $item = getEmptyJobListingRecord();
 
                 $item['job_title'] = $this->_getTagMatchValue_($node, $tagSetup['tag_title'], 'plaintext');
                 $item['job_post_url'] = $this->_getTagMatchValue_($node, $tagSetup['tag_link'], 'href');

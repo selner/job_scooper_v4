@@ -27,7 +27,6 @@ require_once(dirname(__FILE__).'/include/ErrorManager.php');
 require_once(dirname(__FILE__).'/include/SeleniumSession.php');
 require_once(dirname(__FILE__).'/include/CSimpleHTMLHelper.php');
 require_once(dirname(__FILE__).'/include/CmdLineOptions.php');
-require_once(dirname(__FILE__).'/include/ClassJobsSiteCommon.php');
 require_once(dirname(__FILE__).'/include/ClassMultiSiteSearch.php');
 require_once(dirname(__FILE__).'/include/PluginsAbstractJobsBaseClass.php');
 require_once(dirname(__FILE__).'/include/PluginClassTypes.php');

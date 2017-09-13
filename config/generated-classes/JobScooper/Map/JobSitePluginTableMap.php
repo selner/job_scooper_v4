@@ -2,8 +2,8 @@
 
 namespace JobScooper\Map;
 
-use JobScooper\JobSitePluginLastRun;
-use JobScooper\JobSitePluginLastRunQuery;
+use JobScooper\JobSitePlugin;
+use JobScooper\JobSitePluginQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\InstancePoolTrait;
@@ -16,7 +16,7 @@ use Propel\Runtime\Map\TableMapTrait;
 
 
 /**
- * This class defines the structure of the 'jobsite_plugin_last_run' table.
+ * This class defines the structure of the 'jobsite_plugin' table.
  *
  *
  *
@@ -26,7 +26,7 @@ use Propel\Runtime\Map\TableMapTrait;
  * (i.e. if it's a text column type).
  *
  */
-class JobSitePluginLastRunTableMap extends TableMap
+class JobSitePluginTableMap extends TableMap
 {
     use InstancePoolTrait;
     use TableMapTrait;
@@ -34,7 +34,7 @@ class JobSitePluginLastRunTableMap extends TableMap
     /**
      * The (dot-path) name of this class
      */
-    const CLASS_NAME = 'JobScooper.Map.JobSitePluginLastRunTableMap';
+    const CLASS_NAME = 'JobScooper.Map.JobSitePluginTableMap';
 
     /**
      * The default database name for this class
@@ -44,22 +44,22 @@ class JobSitePluginLastRunTableMap extends TableMap
     /**
      * The table name for this class
      */
-    const TABLE_NAME = 'jobsite_plugin_last_run';
+    const TABLE_NAME = 'jobsite_plugin';
 
     /**
      * The related Propel class for this table
      */
-    const OM_CLASS = '\\JobScooper\\JobSitePluginLastRun';
+    const OM_CLASS = '\\JobScooper\\JobSitePlugin';
 
     /**
      * A class that can be returned by this tableMap
      */
-    const CLASS_DEFAULT = 'JobScooper.JobSitePluginLastRun';
+    const CLASS_DEFAULT = 'JobScooper.JobSitePlugin';
 
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 8;
+    const NUM_COLUMNS = 7;
 
     /**
      * The number of lazy-loaded columns
@@ -69,47 +69,42 @@ class JobSitePluginLastRunTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 8;
+    const NUM_HYDRATE_COLUMNS = 7;
 
     /**
      * the column name for the jobsite field
      */
-    const COL_JOBSITE = 'jobsite_plugin_last_run.jobsite';
+    const COL_JOBSITE = 'jobsite_plugin.jobsite';
 
     /**
-     * the column name for the last_user_search_run_id field
+     * the column name for the display_name field
      */
-    const COL_LAST_USER_SEARCH_RUN_ID = 'jobsite_plugin_last_run.last_user_search_run_id';
-
-    /**
-     * the column name for the date_first_run field
-     */
-    const COL_DATE_FIRST_RUN = 'jobsite_plugin_last_run.date_first_run';
+    const COL_DISPLAY_NAME = 'jobsite_plugin.display_name';
 
     /**
      * the column name for the date_last_run field
      */
-    const COL_DATE_LAST_RUN = 'jobsite_plugin_last_run.date_last_run';
+    const COL_DATE_LAST_RUN = 'jobsite_plugin.date_last_run';
 
     /**
-     * the column name for the date_last_succeeded field
+     * the column name for the last_user_search_run_id field
      */
-    const COL_DATE_LAST_SUCCEEDED = 'jobsite_plugin_last_run.date_last_succeeded';
-
-    /**
-     * the column name for the date_last_failed field
-     */
-    const COL_DATE_LAST_FAILED = 'jobsite_plugin_last_run.date_last_failed';
+    const COL_LAST_USER_SEARCH_RUN_ID = 'jobsite_plugin.last_user_search_run_id';
 
     /**
      * the column name for the was_successful field
      */
-    const COL_WAS_SUCCESSFUL = 'jobsite_plugin_last_run.was_successful';
+    const COL_WAS_SUCCESSFUL = 'jobsite_plugin.was_successful';
 
     /**
-     * the column name for the error_details field
+     * the column name for the date_next_run field
      */
-    const COL_ERROR_DETAILS = 'jobsite_plugin_last_run.error_details';
+    const COL_DATE_NEXT_RUN = 'jobsite_plugin.date_next_run';
+
+    /**
+     * the column name for the date_last_failed field
+     */
+    const COL_DATE_LAST_FAILED = 'jobsite_plugin.date_last_failed';
 
     /**
      * The default string format for model objects of the related table
@@ -123,11 +118,11 @@ class JobSitePluginLastRunTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('JobSite', 'LastUserSearchRunId', 'FirstRunAt', 'LastRunAt', 'LastSucceededAt', 'LastFailedAt', 'WasSuccessful', 'RecentErrorDetails', ),
-        self::TYPE_CAMELNAME     => array('jobSite', 'lastUserSearchRunId', 'firstRunAt', 'lastRunAt', 'lastSucceededAt', 'lastFailedAt', 'wasSuccessful', 'recentErrorDetails', ),
-        self::TYPE_COLNAME       => array(JobSitePluginLastRunTableMap::COL_JOBSITE, JobSitePluginLastRunTableMap::COL_LAST_USER_SEARCH_RUN_ID, JobSitePluginLastRunTableMap::COL_DATE_FIRST_RUN, JobSitePluginLastRunTableMap::COL_DATE_LAST_RUN, JobSitePluginLastRunTableMap::COL_DATE_LAST_SUCCEEDED, JobSitePluginLastRunTableMap::COL_DATE_LAST_FAILED, JobSitePluginLastRunTableMap::COL_WAS_SUCCESSFUL, JobSitePluginLastRunTableMap::COL_ERROR_DETAILS, ),
-        self::TYPE_FIELDNAME     => array('jobsite', 'last_user_search_run_id', 'date_first_run', 'date_last_run', 'date_last_succeeded', 'date_last_failed', 'was_successful', 'error_details', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, )
+        self::TYPE_PHPNAME       => array('JobSite', 'DisplayName', 'LastRunAt', 'LastUserSearchRunId', 'LastRunWasSuccessful', 'StartNextRunAfter', 'LastFailedAt', ),
+        self::TYPE_CAMELNAME     => array('jobSite', 'displayName', 'lastRunAt', 'lastUserSearchRunId', 'lastRunWasSuccessful', 'startNextRunAfter', 'lastFailedAt', ),
+        self::TYPE_COLNAME       => array(JobSitePluginTableMap::COL_JOBSITE, JobSitePluginTableMap::COL_DISPLAY_NAME, JobSitePluginTableMap::COL_DATE_LAST_RUN, JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID, JobSitePluginTableMap::COL_WAS_SUCCESSFUL, JobSitePluginTableMap::COL_DATE_NEXT_RUN, JobSitePluginTableMap::COL_DATE_LAST_FAILED, ),
+        self::TYPE_FIELDNAME     => array('jobsite', 'display_name', 'date_last_run', 'last_user_search_run_id', 'was_successful', 'date_next_run', 'date_last_failed', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, )
     );
 
     /**
@@ -137,11 +132,11 @@ class JobSitePluginLastRunTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('JobSite' => 0, 'LastUserSearchRunId' => 1, 'FirstRunAt' => 2, 'LastRunAt' => 3, 'LastSucceededAt' => 4, 'LastFailedAt' => 5, 'WasSuccessful' => 6, 'RecentErrorDetails' => 7, ),
-        self::TYPE_CAMELNAME     => array('jobSite' => 0, 'lastUserSearchRunId' => 1, 'firstRunAt' => 2, 'lastRunAt' => 3, 'lastSucceededAt' => 4, 'lastFailedAt' => 5, 'wasSuccessful' => 6, 'recentErrorDetails' => 7, ),
-        self::TYPE_COLNAME       => array(JobSitePluginLastRunTableMap::COL_JOBSITE => 0, JobSitePluginLastRunTableMap::COL_LAST_USER_SEARCH_RUN_ID => 1, JobSitePluginLastRunTableMap::COL_DATE_FIRST_RUN => 2, JobSitePluginLastRunTableMap::COL_DATE_LAST_RUN => 3, JobSitePluginLastRunTableMap::COL_DATE_LAST_SUCCEEDED => 4, JobSitePluginLastRunTableMap::COL_DATE_LAST_FAILED => 5, JobSitePluginLastRunTableMap::COL_WAS_SUCCESSFUL => 6, JobSitePluginLastRunTableMap::COL_ERROR_DETAILS => 7, ),
-        self::TYPE_FIELDNAME     => array('jobsite' => 0, 'last_user_search_run_id' => 1, 'date_first_run' => 2, 'date_last_run' => 3, 'date_last_succeeded' => 4, 'date_last_failed' => 5, 'was_successful' => 6, 'error_details' => 7, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, )
+        self::TYPE_PHPNAME       => array('JobSite' => 0, 'DisplayName' => 1, 'LastRunAt' => 2, 'LastUserSearchRunId' => 3, 'LastRunWasSuccessful' => 4, 'StartNextRunAfter' => 5, 'LastFailedAt' => 6, ),
+        self::TYPE_CAMELNAME     => array('jobSite' => 0, 'displayName' => 1, 'lastRunAt' => 2, 'lastUserSearchRunId' => 3, 'lastRunWasSuccessful' => 4, 'startNextRunAfter' => 5, 'lastFailedAt' => 6, ),
+        self::TYPE_COLNAME       => array(JobSitePluginTableMap::COL_JOBSITE => 0, JobSitePluginTableMap::COL_DISPLAY_NAME => 1, JobSitePluginTableMap::COL_DATE_LAST_RUN => 2, JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID => 3, JobSitePluginTableMap::COL_WAS_SUCCESSFUL => 4, JobSitePluginTableMap::COL_DATE_NEXT_RUN => 5, JobSitePluginTableMap::COL_DATE_LAST_FAILED => 6, ),
+        self::TYPE_FIELDNAME     => array('jobsite' => 0, 'display_name' => 1, 'date_last_run' => 2, 'last_user_search_run_id' => 3, 'was_successful' => 4, 'date_next_run' => 5, 'date_last_failed' => 6, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, )
     );
 
     /**
@@ -154,22 +149,21 @@ class JobSitePluginLastRunTableMap extends TableMap
     public function initialize()
     {
         // attributes
-        $this->setName('jobsite_plugin_last_run');
-        $this->setPhpName('JobSitePluginLastRun');
+        $this->setName('jobsite_plugin');
+        $this->setPhpName('JobSitePlugin');
         $this->setIdentifierQuoting(false);
-        $this->setClassName('\\JobScooper\\JobSitePluginLastRun');
+        $this->setClassName('\\JobScooper\\JobSitePlugin');
         $this->setPackage('JobScooper');
         $this->setUseIdGenerator(false);
         // columns
-        $this->addPrimaryKey('jobsite', 'JobSite', 'VARCHAR', true, 255, null);
+        $this->addPrimaryKey('jobsite', 'JobSite', 'VARCHAR', true, 100, null);
         $this->getColumn('jobsite')->setPrimaryString(true);
-        $this->addColumn('last_user_search_run_id', 'LastUserSearchRunId', 'INTEGER', false, null, null);
-        $this->addColumn('date_first_run', 'FirstRunAt', 'TIMESTAMP', false, null, null);
+        $this->addColumn('display_name', 'DisplayName', 'VARCHAR', false, 255, null);
         $this->addColumn('date_last_run', 'LastRunAt', 'TIMESTAMP', false, null, null);
-        $this->addColumn('date_last_succeeded', 'LastSucceededAt', 'TIMESTAMP', false, null, null);
+        $this->addForeignKey('last_user_search_run_id', 'LastUserSearchRunId', 'INTEGER', 'user_search_run', 'user_search_run_id', false, null, null);
+        $this->addColumn('was_successful', 'LastRunWasSuccessful', 'BOOLEAN', false, null, null);
+        $this->addColumn('date_next_run', 'StartNextRunAfter', 'TIMESTAMP', false, null, null);
         $this->addColumn('date_last_failed', 'LastFailedAt', 'TIMESTAMP', false, null, null);
-        $this->addColumn('was_successful', 'WasSuccessful', 'BOOLEAN', false, null, null);
-        $this->addColumn('error_details', 'RecentErrorDetails', 'ARRAY', false, null, null);
     } // initialize()
 
     /**
@@ -177,20 +171,14 @@ class JobSitePluginLastRunTableMap extends TableMap
      */
     public function buildRelations()
     {
+        $this->addRelation('UserSearchRun', '\\JobScooper\\UserSearchRun', RelationMap::MANY_TO_ONE, array (
+  0 =>
+  array (
+    0 => ':last_user_search_run_id',
+    1 => ':user_search_run_id',
+  ),
+), null, null, null, false);
     } // buildRelations()
-
-    /**
-     *
-     * Gets the list of behaviors registered for this table
-     *
-     * @return array Associative array (name => parameters) of behaviors
-     */
-    public function getBehaviors()
-    {
-        return array(
-            'timestampable' => array('create_column' => 'date_first_run', 'update_column' => 'date_last_run', 'disable_created_at' => 'false', 'disable_updated_at' => 'false', ),
-        );
-    } // getBehaviors()
 
     /**
      * Retrieves a string version of the primary key from the DB resultset row that can be used to uniquely identify a row in this table.
@@ -249,7 +237,7 @@ class JobSitePluginLastRunTableMap extends TableMap
      */
     public static function getOMClass($withPrefix = true)
     {
-        return $withPrefix ? JobSitePluginLastRunTableMap::CLASS_DEFAULT : JobSitePluginLastRunTableMap::OM_CLASS;
+        return $withPrefix ? JobSitePluginTableMap::CLASS_DEFAULT : JobSitePluginTableMap::OM_CLASS;
     }
 
     /**
@@ -263,22 +251,22 @@ class JobSitePluginLastRunTableMap extends TableMap
      *
      * @throws PropelException Any exceptions caught during processing will be
      *                         rethrown wrapped into a PropelException.
-     * @return array           (JobSitePluginLastRun object, last column rank)
+     * @return array           (JobSitePlugin object, last column rank)
      */
     public static function populateObject($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-        $key = JobSitePluginLastRunTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
-        if (null !== ($obj = JobSitePluginLastRunTableMap::getInstanceFromPool($key))) {
+        $key = JobSitePluginTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
+        if (null !== ($obj = JobSitePluginTableMap::getInstanceFromPool($key))) {
             // We no longer rehydrate the object, since this can cause data loss.
             // See http://www.propelorm.org/ticket/509
             // $obj->hydrate($row, $offset, true); // rehydrate
-            $col = $offset + JobSitePluginLastRunTableMap::NUM_HYDRATE_COLUMNS;
+            $col = $offset + JobSitePluginTableMap::NUM_HYDRATE_COLUMNS;
         } else {
-            $cls = JobSitePluginLastRunTableMap::OM_CLASS;
-            /** @var JobSitePluginLastRun $obj */
+            $cls = JobSitePluginTableMap::OM_CLASS;
+            /** @var JobSitePlugin $obj */
             $obj = new $cls();
             $col = $obj->hydrate($row, $offset, false, $indexType);
-            JobSitePluginLastRunTableMap::addInstanceToPool($obj, $key);
+            JobSitePluginTableMap::addInstanceToPool($obj, $key);
         }
 
         return array($obj, $col);
@@ -301,18 +289,18 @@ class JobSitePluginLastRunTableMap extends TableMap
         $cls = static::getOMClass(false);
         // populate the object(s)
         while ($row = $dataFetcher->fetch()) {
-            $key = JobSitePluginLastRunTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
-            if (null !== ($obj = JobSitePluginLastRunTableMap::getInstanceFromPool($key))) {
+            $key = JobSitePluginTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
+            if (null !== ($obj = JobSitePluginTableMap::getInstanceFromPool($key))) {
                 // We no longer rehydrate the object, since this can cause data loss.
                 // See http://www.propelorm.org/ticket/509
                 // $obj->hydrate($row, 0, true); // rehydrate
                 $results[] = $obj;
             } else {
-                /** @var JobSitePluginLastRun $obj */
+                /** @var JobSitePlugin $obj */
                 $obj = new $cls();
                 $obj->hydrate($row);
                 $results[] = $obj;
-                JobSitePluginLastRunTableMap::addInstanceToPool($obj, $key);
+                JobSitePluginTableMap::addInstanceToPool($obj, $key);
             } // if key exists
         }
 
@@ -333,23 +321,21 @@ class JobSitePluginLastRunTableMap extends TableMap
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
-            $criteria->addSelectColumn(JobSitePluginLastRunTableMap::COL_JOBSITE);
-            $criteria->addSelectColumn(JobSitePluginLastRunTableMap::COL_LAST_USER_SEARCH_RUN_ID);
-            $criteria->addSelectColumn(JobSitePluginLastRunTableMap::COL_DATE_FIRST_RUN);
-            $criteria->addSelectColumn(JobSitePluginLastRunTableMap::COL_DATE_LAST_RUN);
-            $criteria->addSelectColumn(JobSitePluginLastRunTableMap::COL_DATE_LAST_SUCCEEDED);
-            $criteria->addSelectColumn(JobSitePluginLastRunTableMap::COL_DATE_LAST_FAILED);
-            $criteria->addSelectColumn(JobSitePluginLastRunTableMap::COL_WAS_SUCCESSFUL);
-            $criteria->addSelectColumn(JobSitePluginLastRunTableMap::COL_ERROR_DETAILS);
+            $criteria->addSelectColumn(JobSitePluginTableMap::COL_JOBSITE);
+            $criteria->addSelectColumn(JobSitePluginTableMap::COL_DISPLAY_NAME);
+            $criteria->addSelectColumn(JobSitePluginTableMap::COL_DATE_LAST_RUN);
+            $criteria->addSelectColumn(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID);
+            $criteria->addSelectColumn(JobSitePluginTableMap::COL_WAS_SUCCESSFUL);
+            $criteria->addSelectColumn(JobSitePluginTableMap::COL_DATE_NEXT_RUN);
+            $criteria->addSelectColumn(JobSitePluginTableMap::COL_DATE_LAST_FAILED);
         } else {
             $criteria->addSelectColumn($alias . '.jobsite');
-            $criteria->addSelectColumn($alias . '.last_user_search_run_id');
-            $criteria->addSelectColumn($alias . '.date_first_run');
+            $criteria->addSelectColumn($alias . '.display_name');
             $criteria->addSelectColumn($alias . '.date_last_run');
-            $criteria->addSelectColumn($alias . '.date_last_succeeded');
-            $criteria->addSelectColumn($alias . '.date_last_failed');
+            $criteria->addSelectColumn($alias . '.last_user_search_run_id');
             $criteria->addSelectColumn($alias . '.was_successful');
-            $criteria->addSelectColumn($alias . '.error_details');
+            $criteria->addSelectColumn($alias . '.date_next_run');
+            $criteria->addSelectColumn($alias . '.date_last_failed');
         }
     }
 
@@ -362,7 +348,7 @@ class JobSitePluginLastRunTableMap extends TableMap
      */
     public static function getTableMap()
     {
-        return Propel::getServiceContainer()->getDatabaseMap(JobSitePluginLastRunTableMap::DATABASE_NAME)->getTable(JobSitePluginLastRunTableMap::TABLE_NAME);
+        return Propel::getServiceContainer()->getDatabaseMap(JobSitePluginTableMap::DATABASE_NAME)->getTable(JobSitePluginTableMap::TABLE_NAME);
     }
 
     /**
@@ -370,16 +356,16 @@ class JobSitePluginLastRunTableMap extends TableMap
      */
     public static function buildTableMap()
     {
-        $dbMap = Propel::getServiceContainer()->getDatabaseMap(JobSitePluginLastRunTableMap::DATABASE_NAME);
-        if (!$dbMap->hasTable(JobSitePluginLastRunTableMap::TABLE_NAME)) {
-            $dbMap->addTableObject(new JobSitePluginLastRunTableMap());
+        $dbMap = Propel::getServiceContainer()->getDatabaseMap(JobSitePluginTableMap::DATABASE_NAME);
+        if (!$dbMap->hasTable(JobSitePluginTableMap::TABLE_NAME)) {
+            $dbMap->addTableObject(new JobSitePluginTableMap());
         }
     }
 
     /**
-     * Performs a DELETE on the database, given a JobSitePluginLastRun or Criteria object OR a primary key value.
+     * Performs a DELETE on the database, given a JobSitePlugin or Criteria object OR a primary key value.
      *
-     * @param mixed               $values Criteria or JobSitePluginLastRun object or primary key or array of primary keys
+     * @param mixed               $values Criteria or JobSitePlugin object or primary key or array of primary keys
      *              which is used to create the DELETE statement
      * @param  ConnectionInterface $con the connection to use
      * @return int             The number of affected rows (if supported by underlying database driver).  This includes CASCADE-related rows
@@ -390,27 +376,27 @@ class JobSitePluginLastRunTableMap extends TableMap
      public static function doDelete($values, ConnectionInterface $con = null)
      {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(JobSitePluginLastRunTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(JobSitePluginTableMap::DATABASE_NAME);
         }
 
         if ($values instanceof Criteria) {
             // rename for clarity
             $criteria = $values;
-        } elseif ($values instanceof \JobScooper\JobSitePluginLastRun) { // it's a model object
+        } elseif ($values instanceof \JobScooper\JobSitePlugin) { // it's a model object
             // create criteria based on pk values
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
-            $criteria = new Criteria(JobSitePluginLastRunTableMap::DATABASE_NAME);
-            $criteria->add(JobSitePluginLastRunTableMap::COL_JOBSITE, (array) $values, Criteria::IN);
+            $criteria = new Criteria(JobSitePluginTableMap::DATABASE_NAME);
+            $criteria->add(JobSitePluginTableMap::COL_JOBSITE, (array) $values, Criteria::IN);
         }
 
-        $query = JobSitePluginLastRunQuery::create()->mergeWith($criteria);
+        $query = JobSitePluginQuery::create()->mergeWith($criteria);
 
         if ($values instanceof Criteria) {
-            JobSitePluginLastRunTableMap::clearInstancePool();
+            JobSitePluginTableMap::clearInstancePool();
         } elseif (!is_object($values)) { // it's a primary key, or an array of pks
             foreach ((array) $values as $singleval) {
-                JobSitePluginLastRunTableMap::removeInstanceFromPool($singleval);
+                JobSitePluginTableMap::removeInstanceFromPool($singleval);
             }
         }
 
@@ -418,20 +404,20 @@ class JobSitePluginLastRunTableMap extends TableMap
     }
 
     /**
-     * Deletes all rows from the jobsite_plugin_last_run table.
+     * Deletes all rows from the jobsite_plugin table.
      *
      * @param ConnectionInterface $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).
      */
     public static function doDeleteAll(ConnectionInterface $con = null)
     {
-        return JobSitePluginLastRunQuery::create()->doDeleteAll($con);
+        return JobSitePluginQuery::create()->doDeleteAll($con);
     }
 
     /**
-     * Performs an INSERT on the database, given a JobSitePluginLastRun or Criteria object.
+     * Performs an INSERT on the database, given a JobSitePlugin or Criteria object.
      *
-     * @param mixed               $criteria Criteria or JobSitePluginLastRun object containing data that is used to create the INSERT statement.
+     * @param mixed               $criteria Criteria or JobSitePlugin object containing data that is used to create the INSERT statement.
      * @param ConnectionInterface $con the ConnectionInterface connection to use
      * @return mixed           The new primary key.
      * @throws PropelException Any exceptions caught during processing will be
@@ -440,18 +426,18 @@ class JobSitePluginLastRunTableMap extends TableMap
     public static function doInsert($criteria, ConnectionInterface $con = null)
     {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(JobSitePluginLastRunTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(JobSitePluginTableMap::DATABASE_NAME);
         }
 
         if ($criteria instanceof Criteria) {
             $criteria = clone $criteria; // rename for clarity
         } else {
-            $criteria = $criteria->buildCriteria(); // build Criteria from JobSitePluginLastRun object
+            $criteria = $criteria->buildCriteria(); // build Criteria from JobSitePlugin object
         }
 
 
         // Set the correct dbName
-        $query = JobSitePluginLastRunQuery::create()->mergeWith($criteria);
+        $query = JobSitePluginQuery::create()->mergeWith($criteria);
 
         // use transaction because $criteria could contain info
         // for more than one table (I guess, conceivably)
@@ -460,7 +446,7 @@ class JobSitePluginLastRunTableMap extends TableMap
         });
     }
 
-} // JobSitePluginLastRunTableMap
+} // JobSitePluginTableMap
 // This is the static code needed to register the TableMap for this table with the main Propel class.
 //
-JobSitePluginLastRunTableMap::buildTableMap();
+JobSitePluginTableMap::buildTableMap();

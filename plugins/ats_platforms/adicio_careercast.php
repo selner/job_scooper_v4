@@ -157,7 +157,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
                 //
                 // get a new record with all columns set to null
                 //
-                $item = $this->getEmptyJobListingRecord();
+                $item = getEmptyJobListingRecord();
 
 
                 $divMain = $node->find("div[class='aiResultsMainDiv']");
@@ -202,7 +202,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
                     //
                     // get a new record with all columns set to null
                     //
-                    $item = $this->getEmptyJobListingRecord();
+                    $item = getEmptyJobListingRecord();
 
                     $titleLink = $node->find("a")[0];
                     $item['job_title'] = $titleLink->plaintext;

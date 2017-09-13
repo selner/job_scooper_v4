@@ -5,9 +5,10 @@ namespace JobScooper\Base;
 use \DateTime;
 use \Exception;
 use \PDO;
-use JobScooper\JobSitePluginLastRun as ChildJobSitePluginLastRun;
-use JobScooper\JobSitePluginLastRunQuery as ChildJobSitePluginLastRunQuery;
-use JobScooper\Map\JobSitePluginLastRunTableMap;
+use JobScooper\JobSitePluginQuery as ChildJobSitePluginQuery;
+use JobScooper\UserSearchRun as ChildUserSearchRun;
+use JobScooper\UserSearchRunQuery as ChildUserSearchRunQuery;
+use JobScooper\Map\JobSitePluginTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -22,18 +23,18 @@ use Propel\Runtime\Parser\AbstractParser;
 use Propel\Runtime\Util\PropelDateTime;
 
 /**
- * Base class that represents a row from the 'jobsite_plugin_last_run' table.
+ * Base class that represents a row from the 'jobsite_plugin' table.
  *
  *
  *
  * @package    propel.generator.JobScooper.Base
  */
-abstract class JobSitePluginLastRun implements ActiveRecordInterface
+abstract class JobSitePlugin implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      */
-    const TABLE_MAP = '\\JobScooper\\Map\\JobSitePluginLastRunTableMap';
+    const TABLE_MAP = '\\JobScooper\\Map\\JobSitePluginTableMap';
 
 
     /**
@@ -70,18 +71,11 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
     protected $jobsite;
 
     /**
-     * The value for the last_user_search_run_id field.
+     * The value for the display_name field.
      *
-     * @var        int
+     * @var        string
      */
-    protected $last_user_search_run_id;
-
-    /**
-     * The value for the date_first_run field.
-     *
-     * @var        DateTime
-     */
-    protected $date_first_run;
+    protected $display_name;
 
     /**
      * The value for the date_last_run field.
@@ -91,18 +85,11 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
     protected $date_last_run;
 
     /**
-     * The value for the date_last_succeeded field.
+     * The value for the last_user_search_run_id field.
      *
-     * @var        DateTime
+     * @var        int
      */
-    protected $date_last_succeeded;
-
-    /**
-     * The value for the date_last_failed field.
-     *
-     * @var        DateTime
-     */
-    protected $date_last_failed;
+    protected $last_user_search_run_id;
 
     /**
      * The value for the was_successful field.
@@ -112,18 +99,23 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
     protected $was_successful;
 
     /**
-     * The value for the error_details field.
+     * The value for the date_next_run field.
      *
-     * @var        array
+     * @var        DateTime
      */
-    protected $error_details;
+    protected $date_next_run;
 
     /**
-     * The unserialized $error_details value - i.e. the persisted object.
-     * This is necessary to avoid repeated calls to unserialize() at runtime.
-     * @var object
+     * The value for the date_last_failed field.
+     *
+     * @var        DateTime
      */
-    protected $error_details_unserialized;
+    protected $date_last_failed;
+
+    /**
+     * @var        ChildUserSearchRun
+     */
+    protected $aUserSearchRun;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -134,7 +126,7 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
     protected $alreadyInSave = false;
 
     /**
-     * Initializes internal state of JobScooper\Base\JobSitePluginLastRun object.
+     * Initializes internal state of JobScooper\Base\JobSitePlugin object.
      */
     public function __construct()
     {
@@ -229,9 +221,9 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
     }
 
     /**
-     * Compares this with another <code>JobSitePluginLastRun</code> instance.  If
-     * <code>obj</code> is an instance of <code>JobSitePluginLastRun</code>, delegates to
-     * <code>equals(JobSitePluginLastRun)</code>.  Otherwise, returns <code>false</code>.
+     * Compares this with another <code>JobSitePlugin</code> instance.  If
+     * <code>obj</code> is an instance of <code>JobSitePlugin</code>, delegates to
+     * <code>equals(JobSitePlugin)</code>.  Otherwise, returns <code>false</code>.
      *
      * @param  mixed   $obj The object to compare to.
      * @return boolean Whether equal to the object specified.
@@ -297,7 +289,7 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return $this|JobSitePluginLastRun The current object, for fluid interface
+     * @return $this|JobSitePlugin The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -369,33 +361,13 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
     }
 
     /**
-     * Get the [last_user_search_run_id] column value.
+     * Get the [display_name] column value.
      *
-     * @return int
+     * @return string
      */
-    public function getLastUserSearchRunId()
+    public function getDisplayName()
     {
-        return $this->last_user_search_run_id;
-    }
-
-    /**
-     * Get the [optionally formatted] temporal [date_first_run] column value.
-     *
-     *
-     * @param      string $format The date/time format string (either date()-style or strftime()-style).
-     *                            If format is NULL, then the raw DateTime object will be returned.
-     *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL
-     *
-     * @throws PropelException - if unable to parse/validate the date/time value.
-     */
-    public function getFirstRunAt($format = NULL)
-    {
-        if ($format === null) {
-            return $this->date_first_run;
-        } else {
-            return $this->date_first_run instanceof \DateTimeInterface ? $this->date_first_run->format($format) : null;
-        }
+        return $this->display_name;
     }
 
     /**
@@ -419,7 +391,37 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
     }
 
     /**
-     * Get the [optionally formatted] temporal [date_last_succeeded] column value.
+     * Get the [last_user_search_run_id] column value.
+     *
+     * @return int
+     */
+    public function getLastUserSearchRunId()
+    {
+        return $this->last_user_search_run_id;
+    }
+
+    /**
+     * Get the [was_successful] column value.
+     *
+     * @return boolean
+     */
+    public function getLastRunWasSuccessful()
+    {
+        return $this->was_successful;
+    }
+
+    /**
+     * Get the [was_successful] column value.
+     *
+     * @return boolean
+     */
+    public function isLastRunWasSuccessful()
+    {
+        return $this->getLastRunWasSuccessful();
+    }
+
+    /**
+     * Get the [optionally formatted] temporal [date_next_run] column value.
      *
      *
      * @param      string $format The date/time format string (either date()-style or strftime()-style).
@@ -429,12 +431,12 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
      */
-    public function getLastSucceededAt($format = NULL)
+    public function getStartNextRunAfter($format = NULL)
     {
         if ($format === null) {
-            return $this->date_last_succeeded;
+            return $this->date_next_run;
         } else {
-            return $this->date_last_succeeded instanceof \DateTimeInterface ? $this->date_last_succeeded->format($format) : null;
+            return $this->date_next_run instanceof \DateTimeInterface ? $this->date_next_run->format($format) : null;
         }
     }
 
@@ -459,59 +461,10 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
     }
 
     /**
-     * Get the [was_successful] column value.
-     *
-     * @return boolean
-     */
-    public function getWasSuccessful()
-    {
-        return $this->was_successful;
-    }
-
-    /**
-     * Get the [was_successful] column value.
-     *
-     * @return boolean
-     */
-    public function isWasSuccessful()
-    {
-        return $this->getWasSuccessful();
-    }
-
-    /**
-     * Get the [error_details] column value.
-     *
-     * @return array
-     */
-    public function getRecentErrorDetails()
-    {
-        if (null === $this->error_details_unserialized) {
-            $this->error_details_unserialized = array();
-        }
-        if (!$this->error_details_unserialized && null !== $this->error_details) {
-            $error_details_unserialized = substr($this->error_details, 2, -2);
-            $this->error_details_unserialized = '' !== $error_details_unserialized ? explode(' | ', $error_details_unserialized) : array();
-        }
-
-        return $this->error_details_unserialized;
-    }
-
-    /**
-     * Test the presence of a value in the [error_details] array column value.
-     * @param      mixed $value
-     *
-     * @return boolean
-     */
-    public function hasRecentErrorDetail($value)
-    {
-        return in_array($value, $this->getRecentErrorDetails());
-    } // hasRecentErrorDetail()
-
-    /**
      * Set the value of [jobsite] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\JobSitePluginLastRun The current object (for fluent API support)
+     * @return $this|\JobScooper\JobSitePlugin The current object (for fluent API support)
      */
     public function setJobSite($v)
     {
@@ -521,17 +474,57 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
 
         if ($this->jobsite !== $v) {
             $this->jobsite = $v;
-            $this->modifiedColumns[JobSitePluginLastRunTableMap::COL_JOBSITE] = true;
+            $this->modifiedColumns[JobSitePluginTableMap::COL_JOBSITE] = true;
         }
 
         return $this;
     } // setJobSite()
 
     /**
+     * Set the value of [display_name] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\JobSitePlugin The current object (for fluent API support)
+     */
+    public function setDisplayName($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->display_name !== $v) {
+            $this->display_name = $v;
+            $this->modifiedColumns[JobSitePluginTableMap::COL_DISPLAY_NAME] = true;
+        }
+
+        return $this;
+    } // setDisplayName()
+
+    /**
+     * Sets the value of [date_last_run] column to a normalized version of the date/time value specified.
+     *
+     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
+     *               Empty strings are treated as NULL.
+     * @return $this|\JobScooper\JobSitePlugin The current object (for fluent API support)
+     */
+    public function setLastRunAt($v)
+    {
+        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
+        if ($this->date_last_run !== null || $dt !== null) {
+            if ($this->date_last_run === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->date_last_run->format("Y-m-d H:i:s.u")) {
+                $this->date_last_run = $dt === null ? null : clone $dt;
+                $this->modifiedColumns[JobSitePluginTableMap::COL_DATE_LAST_RUN] = true;
+            }
+        } // if either are not null
+
+        return $this;
+    } // setLastRunAt()
+
+    /**
      * Set the value of [last_user_search_run_id] column.
      *
      * @param int $v new value
-     * @return $this|\JobScooper\JobSitePluginLastRun The current object (for fluent API support)
+     * @return $this|\JobScooper\JobSitePlugin The current object (for fluent API support)
      */
     public function setLastUserSearchRunId($v)
     {
@@ -541,91 +534,15 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
 
         if ($this->last_user_search_run_id !== $v) {
             $this->last_user_search_run_id = $v;
-            $this->modifiedColumns[JobSitePluginLastRunTableMap::COL_LAST_USER_SEARCH_RUN_ID] = true;
+            $this->modifiedColumns[JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID] = true;
+        }
+
+        if ($this->aUserSearchRun !== null && $this->aUserSearchRun->getUserSearchRunId() !== $v) {
+            $this->aUserSearchRun = null;
         }
 
         return $this;
     } // setLastUserSearchRunId()
-
-    /**
-     * Sets the value of [date_first_run] column to a normalized version of the date/time value specified.
-     *
-     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
-     *               Empty strings are treated as NULL.
-     * @return $this|\JobScooper\JobSitePluginLastRun The current object (for fluent API support)
-     */
-    public function setFirstRunAt($v)
-    {
-        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
-        if ($this->date_first_run !== null || $dt !== null) {
-            if ($this->date_first_run === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->date_first_run->format("Y-m-d H:i:s.u")) {
-                $this->date_first_run = $dt === null ? null : clone $dt;
-                $this->modifiedColumns[JobSitePluginLastRunTableMap::COL_DATE_FIRST_RUN] = true;
-            }
-        } // if either are not null
-
-        return $this;
-    } // setFirstRunAt()
-
-    /**
-     * Sets the value of [date_last_run] column to a normalized version of the date/time value specified.
-     *
-     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
-     *               Empty strings are treated as NULL.
-     * @return $this|\JobScooper\JobSitePluginLastRun The current object (for fluent API support)
-     */
-    public function setLastRunAt($v)
-    {
-        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
-        if ($this->date_last_run !== null || $dt !== null) {
-            if ($this->date_last_run === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->date_last_run->format("Y-m-d H:i:s.u")) {
-                $this->date_last_run = $dt === null ? null : clone $dt;
-                $this->modifiedColumns[JobSitePluginLastRunTableMap::COL_DATE_LAST_RUN] = true;
-            }
-        } // if either are not null
-
-        return $this;
-    } // setLastRunAt()
-
-    /**
-     * Sets the value of [date_last_succeeded] column to a normalized version of the date/time value specified.
-     *
-     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
-     *               Empty strings are treated as NULL.
-     * @return $this|\JobScooper\JobSitePluginLastRun The current object (for fluent API support)
-     */
-    public function setLastSucceededAt($v)
-    {
-        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
-        if ($this->date_last_succeeded !== null || $dt !== null) {
-            if ($this->date_last_succeeded === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->date_last_succeeded->format("Y-m-d H:i:s.u")) {
-                $this->date_last_succeeded = $dt === null ? null : clone $dt;
-                $this->modifiedColumns[JobSitePluginLastRunTableMap::COL_DATE_LAST_SUCCEEDED] = true;
-            }
-        } // if either are not null
-
-        return $this;
-    } // setLastSucceededAt()
-
-    /**
-     * Sets the value of [date_last_failed] column to a normalized version of the date/time value specified.
-     *
-     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
-     *               Empty strings are treated as NULL.
-     * @return $this|\JobScooper\JobSitePluginLastRun The current object (for fluent API support)
-     */
-    public function setLastFailedAt($v)
-    {
-        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
-        if ($this->date_last_failed !== null || $dt !== null) {
-            if ($this->date_last_failed === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->date_last_failed->format("Y-m-d H:i:s.u")) {
-                $this->date_last_failed = $dt === null ? null : clone $dt;
-                $this->modifiedColumns[JobSitePluginLastRunTableMap::COL_DATE_LAST_FAILED] = true;
-            }
-        } // if either are not null
-
-        return $this;
-    } // setLastFailedAt()
 
     /**
      * Sets the value of the [was_successful] column.
@@ -635,9 +552,9 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
      * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
      *
      * @param  boolean|integer|string $v The new value
-     * @return $this|\JobScooper\JobSitePluginLastRun The current object (for fluent API support)
+     * @return $this|\JobScooper\JobSitePlugin The current object (for fluent API support)
      */
-    public function setWasSuccessful($v)
+    public function setLastRunWasSuccessful($v)
     {
         if ($v !== null) {
             if (is_string($v)) {
@@ -649,62 +566,51 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
 
         if ($this->was_successful !== $v) {
             $this->was_successful = $v;
-            $this->modifiedColumns[JobSitePluginLastRunTableMap::COL_WAS_SUCCESSFUL] = true;
+            $this->modifiedColumns[JobSitePluginTableMap::COL_WAS_SUCCESSFUL] = true;
         }
 
         return $this;
-    } // setWasSuccessful()
+    } // setLastRunWasSuccessful()
 
     /**
-     * Set the value of [error_details] column.
+     * Sets the value of [date_next_run] column to a normalized version of the date/time value specified.
      *
-     * @param array $v new value
-     * @return $this|\JobScooper\JobSitePluginLastRun The current object (for fluent API support)
+     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
+     *               Empty strings are treated as NULL.
+     * @return $this|\JobScooper\JobSitePlugin The current object (for fluent API support)
      */
-    public function setRecentErrorDetails($v)
+    public function setStartNextRunAfter($v)
     {
-        if ($this->error_details_unserialized !== $v) {
-            $this->error_details_unserialized = $v;
-            $this->error_details = '| ' . implode(' | ', $v) . ' |';
-            $this->modifiedColumns[JobSitePluginLastRunTableMap::COL_ERROR_DETAILS] = true;
-        }
-
-        return $this;
-    } // setRecentErrorDetails()
-
-    /**
-     * Adds a value to the [error_details] array column value.
-     * @param  mixed $value
-     *
-     * @return $this|\JobScooper\JobSitePluginLastRun The current object (for fluent API support)
-     */
-    public function addRecentErrorDetail($value)
-    {
-        $currentArray = $this->getRecentErrorDetails();
-        $currentArray []= $value;
-        $this->setRecentErrorDetails($currentArray);
-
-        return $this;
-    } // addRecentErrorDetail()
-
-    /**
-     * Removes a value from the [error_details] array column value.
-     * @param  mixed $value
-     *
-     * @return $this|\JobScooper\JobSitePluginLastRun The current object (for fluent API support)
-     */
-    public function removeRecentErrorDetail($value)
-    {
-        $targetArray = array();
-        foreach ($this->getRecentErrorDetails() as $element) {
-            if ($element != $value) {
-                $targetArray []= $element;
+        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
+        if ($this->date_next_run !== null || $dt !== null) {
+            if ($this->date_next_run === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->date_next_run->format("Y-m-d H:i:s.u")) {
+                $this->date_next_run = $dt === null ? null : clone $dt;
+                $this->modifiedColumns[JobSitePluginTableMap::COL_DATE_NEXT_RUN] = true;
             }
-        }
-        $this->setRecentErrorDetails($targetArray);
+        } // if either are not null
 
         return $this;
-    } // removeRecentErrorDetail()
+    } // setStartNextRunAfter()
+
+    /**
+     * Sets the value of [date_last_failed] column to a normalized version of the date/time value specified.
+     *
+     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
+     *               Empty strings are treated as NULL.
+     * @return $this|\JobScooper\JobSitePlugin The current object (for fluent API support)
+     */
+    public function setLastFailedAt($v)
+    {
+        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
+        if ($this->date_last_failed !== null || $dt !== null) {
+            if ($this->date_last_failed === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->date_last_failed->format("Y-m-d H:i:s.u")) {
+                $this->date_last_failed = $dt === null ? null : clone $dt;
+                $this->modifiedColumns[JobSitePluginTableMap::COL_DATE_LAST_FAILED] = true;
+            }
+        } // if either are not null
+
+        return $this;
+    } // setLastFailedAt()
 
     /**
      * Indicates whether the columns in this object are only set to default values.
@@ -742,30 +648,26 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
     {
         try {
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : JobSitePluginLastRunTableMap::translateFieldName('JobSite', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : JobSitePluginTableMap::translateFieldName('JobSite', TableMap::TYPE_PHPNAME, $indexType)];
             $this->jobsite = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : JobSitePluginLastRunTableMap::translateFieldName('LastUserSearchRunId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->last_user_search_run_id = (null !== $col) ? (int) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : JobSitePluginTableMap::translateFieldName('DisplayName', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->display_name = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : JobSitePluginLastRunTableMap::translateFieldName('FirstRunAt', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->date_first_run = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : JobSitePluginLastRunTableMap::translateFieldName('LastRunAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : JobSitePluginTableMap::translateFieldName('LastRunAt', TableMap::TYPE_PHPNAME, $indexType)];
             $this->date_last_run = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : JobSitePluginLastRunTableMap::translateFieldName('LastSucceededAt', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->date_last_succeeded = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : JobSitePluginTableMap::translateFieldName('LastUserSearchRunId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->last_user_search_run_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : JobSitePluginLastRunTableMap::translateFieldName('LastFailedAt', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->date_last_failed = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : JobSitePluginLastRunTableMap::translateFieldName('WasSuccessful', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : JobSitePluginTableMap::translateFieldName('LastRunWasSuccessful', TableMap::TYPE_PHPNAME, $indexType)];
             $this->was_successful = (null !== $col) ? (boolean) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : JobSitePluginLastRunTableMap::translateFieldName('RecentErrorDetails', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->error_details = $col;
-            $this->error_details_unserialized = null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : JobSitePluginTableMap::translateFieldName('StartNextRunAfter', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->date_next_run = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : JobSitePluginTableMap::translateFieldName('LastFailedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->date_last_failed = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -774,10 +676,10 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 8; // 8 = JobSitePluginLastRunTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 7; // 7 = JobSitePluginTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\JobSitePluginLastRun'), 0, $e);
+            throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\JobSitePlugin'), 0, $e);
         }
     }
 
@@ -796,6 +698,9 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
+        if ($this->aUserSearchRun !== null && $this->last_user_search_run_id !== $this->aUserSearchRun->getUserSearchRunId()) {
+            $this->aUserSearchRun = null;
+        }
     } // ensureConsistency
 
     /**
@@ -819,13 +724,13 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(JobSitePluginLastRunTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getReadConnection(JobSitePluginTableMap::DATABASE_NAME);
         }
 
         // We don't need to alter the object instance pool; we're just modifying this instance
         // already in the pool.
 
-        $dataFetcher = ChildJobSitePluginLastRunQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
+        $dataFetcher = ChildJobSitePluginQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
         $row = $dataFetcher->fetch();
         $dataFetcher->close();
         if (!$row) {
@@ -835,6 +740,7 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
+            $this->aUserSearchRun = null;
         } // if (deep)
     }
 
@@ -844,8 +750,8 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
      * @param      ConnectionInterface $con
      * @return void
      * @throws PropelException
-     * @see JobSitePluginLastRun::setDeleted()
-     * @see JobSitePluginLastRun::isDeleted()
+     * @see JobSitePlugin::setDeleted()
+     * @see JobSitePlugin::isDeleted()
      */
     public function delete(ConnectionInterface $con = null)
     {
@@ -854,11 +760,11 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(JobSitePluginLastRunTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(JobSitePluginTableMap::DATABASE_NAME);
         }
 
         $con->transaction(function () use ($con) {
-            $deleteQuery = ChildJobSitePluginLastRunQuery::create()
+            $deleteQuery = ChildJobSitePluginQuery::create()
                 ->filterByPrimaryKey($this->getPrimaryKey());
             $ret = $this->preDelete($con);
             if ($ret) {
@@ -898,7 +804,7 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(JobSitePluginLastRunTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(JobSitePluginTableMap::DATABASE_NAME);
         }
 
         return $con->transaction(function () use ($con, $skipReload) {
@@ -906,20 +812,8 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
             $isInsert = $this->isNew();
             if ($isInsert) {
                 $ret = $ret && $this->preInsert($con);
-                // timestampable behavior
-
-                if (!$this->isColumnModified(JobSitePluginLastRunTableMap::COL_DATE_FIRST_RUN)) {
-                    $this->setFirstRunAt(\Propel\Runtime\Util\PropelDateTime::createHighPrecision());
-                }
-                if (!$this->isColumnModified(JobSitePluginLastRunTableMap::COL_DATE_LAST_RUN)) {
-                    $this->setLastRunAt(\Propel\Runtime\Util\PropelDateTime::createHighPrecision());
-                }
             } else {
                 $ret = $ret && $this->preUpdate($con);
-                // timestampable behavior
-                if ($this->isModified() && !$this->isColumnModified(JobSitePluginLastRunTableMap::COL_DATE_LAST_RUN)) {
-                    $this->setLastRunAt(\Propel\Runtime\Util\PropelDateTime::createHighPrecision());
-                }
             }
             if ($ret) {
                 $affectedRows = $this->doSave($con, $skipReload);
@@ -929,7 +823,7 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                JobSitePluginLastRunTableMap::addInstanceToPool($this);
+                JobSitePluginTableMap::addInstanceToPool($this);
             } else {
                 $affectedRows = 0;
             }
@@ -957,6 +851,18 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
             $this->alreadyInSave = true;
 
             $reloadObject = false;
+
+            // We call the save method on the following object(s) if they
+            // were passed to this object by their corresponding set
+            // method.  This object relates to these object(s) by a
+            // foreign key reference.
+
+            if ($this->aUserSearchRun !== null) {
+                if ($this->aUserSearchRun->isModified() || $this->aUserSearchRun->isNew()) {
+                    $affectedRows += $this->aUserSearchRun->save($con);
+                }
+                $this->setUserSearchRun($this->aUserSearchRun);
+            }
 
             if ($this->isNew() || $this->isModified()) {
                 // persist changes
@@ -998,33 +904,30 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
 
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(JobSitePluginLastRunTableMap::COL_JOBSITE)) {
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_JOBSITE)) {
             $modifiedColumns[':p' . $index++]  = 'jobsite';
         }
-        if ($this->isColumnModified(JobSitePluginLastRunTableMap::COL_LAST_USER_SEARCH_RUN_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'last_user_search_run_id';
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_DISPLAY_NAME)) {
+            $modifiedColumns[':p' . $index++]  = 'display_name';
         }
-        if ($this->isColumnModified(JobSitePluginLastRunTableMap::COL_DATE_FIRST_RUN)) {
-            $modifiedColumns[':p' . $index++]  = 'date_first_run';
-        }
-        if ($this->isColumnModified(JobSitePluginLastRunTableMap::COL_DATE_LAST_RUN)) {
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_DATE_LAST_RUN)) {
             $modifiedColumns[':p' . $index++]  = 'date_last_run';
         }
-        if ($this->isColumnModified(JobSitePluginLastRunTableMap::COL_DATE_LAST_SUCCEEDED)) {
-            $modifiedColumns[':p' . $index++]  = 'date_last_succeeded';
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'last_user_search_run_id';
         }
-        if ($this->isColumnModified(JobSitePluginLastRunTableMap::COL_DATE_LAST_FAILED)) {
-            $modifiedColumns[':p' . $index++]  = 'date_last_failed';
-        }
-        if ($this->isColumnModified(JobSitePluginLastRunTableMap::COL_WAS_SUCCESSFUL)) {
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_WAS_SUCCESSFUL)) {
             $modifiedColumns[':p' . $index++]  = 'was_successful';
         }
-        if ($this->isColumnModified(JobSitePluginLastRunTableMap::COL_ERROR_DETAILS)) {
-            $modifiedColumns[':p' . $index++]  = 'error_details';
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_DATE_NEXT_RUN)) {
+            $modifiedColumns[':p' . $index++]  = 'date_next_run';
+        }
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_DATE_LAST_FAILED)) {
+            $modifiedColumns[':p' . $index++]  = 'date_last_failed';
         }
 
         $sql = sprintf(
-            'INSERT INTO jobsite_plugin_last_run (%s) VALUES (%s)',
+            'INSERT INTO jobsite_plugin (%s) VALUES (%s)',
             implode(', ', $modifiedColumns),
             implode(', ', array_keys($modifiedColumns))
         );
@@ -1036,26 +939,23 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
                     case 'jobsite':
                         $stmt->bindValue($identifier, $this->jobsite, PDO::PARAM_STR);
                         break;
-                    case 'last_user_search_run_id':
-                        $stmt->bindValue($identifier, $this->last_user_search_run_id, PDO::PARAM_INT);
-                        break;
-                    case 'date_first_run':
-                        $stmt->bindValue($identifier, $this->date_first_run ? $this->date_first_run->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
+                    case 'display_name':
+                        $stmt->bindValue($identifier, $this->display_name, PDO::PARAM_STR);
                         break;
                     case 'date_last_run':
                         $stmt->bindValue($identifier, $this->date_last_run ? $this->date_last_run->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
                         break;
-                    case 'date_last_succeeded':
-                        $stmt->bindValue($identifier, $this->date_last_succeeded ? $this->date_last_succeeded->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
-                        break;
-                    case 'date_last_failed':
-                        $stmt->bindValue($identifier, $this->date_last_failed ? $this->date_last_failed->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
+                    case 'last_user_search_run_id':
+                        $stmt->bindValue($identifier, $this->last_user_search_run_id, PDO::PARAM_INT);
                         break;
                     case 'was_successful':
                         $stmt->bindValue($identifier, $this->was_successful, PDO::PARAM_BOOL);
                         break;
-                    case 'error_details':
-                        $stmt->bindValue($identifier, $this->error_details, PDO::PARAM_STR);
+                    case 'date_next_run':
+                        $stmt->bindValue($identifier, $this->date_next_run ? $this->date_next_run->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
+                        break;
+                    case 'date_last_failed':
+                        $stmt->bindValue($identifier, $this->date_last_failed ? $this->date_last_failed->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -1096,7 +996,7 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
      */
     public function getByName($name, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = JobSitePluginLastRunTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = JobSitePluginTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
         $field = $this->getByPosition($pos);
 
         return $field;
@@ -1116,25 +1016,22 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
                 return $this->getJobSite();
                 break;
             case 1:
-                return $this->getLastUserSearchRunId();
+                return $this->getDisplayName();
                 break;
             case 2:
-                return $this->getFirstRunAt();
-                break;
-            case 3:
                 return $this->getLastRunAt();
                 break;
+            case 3:
+                return $this->getLastUserSearchRunId();
+                break;
             case 4:
-                return $this->getLastSucceededAt();
+                return $this->getLastRunWasSuccessful();
                 break;
             case 5:
-                return $this->getLastFailedAt();
+                return $this->getStartNextRunAfter();
                 break;
             case 6:
-                return $this->getWasSuccessful();
-                break;
-            case 7:
-                return $this->getRecentErrorDetails();
+                return $this->getLastFailedAt();
                 break;
             default:
                 return null;
@@ -1153,41 +1050,37 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
      *                    Defaults to TableMap::TYPE_PHPNAME.
      * @param     boolean $includeLazyLoadColumns (optional) Whether to include lazy loaded columns. Defaults to TRUE.
      * @param     array $alreadyDumpedObjects List of objects to skip to avoid recursion
+     * @param     boolean $includeForeignObjects (optional) Whether to include hydrated related objects. Default to FALSE.
      *
      * @return array an associative array containing the field names (as keys) and field values
      */
-    public function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array())
+    public function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
     {
 
-        if (isset($alreadyDumpedObjects['JobSitePluginLastRun'][$this->hashCode()])) {
+        if (isset($alreadyDumpedObjects['JobSitePlugin'][$this->hashCode()])) {
             return '*RECURSION*';
         }
-        $alreadyDumpedObjects['JobSitePluginLastRun'][$this->hashCode()] = true;
-        $keys = JobSitePluginLastRunTableMap::getFieldNames($keyType);
+        $alreadyDumpedObjects['JobSitePlugin'][$this->hashCode()] = true;
+        $keys = JobSitePluginTableMap::getFieldNames($keyType);
         $result = array(
             $keys[0] => $this->getJobSite(),
-            $keys[1] => $this->getLastUserSearchRunId(),
-            $keys[2] => $this->getFirstRunAt(),
-            $keys[3] => $this->getLastRunAt(),
-            $keys[4] => $this->getLastSucceededAt(),
-            $keys[5] => $this->getLastFailedAt(),
-            $keys[6] => $this->getWasSuccessful(),
-            $keys[7] => $this->getRecentErrorDetails(),
+            $keys[1] => $this->getDisplayName(),
+            $keys[2] => $this->getLastRunAt(),
+            $keys[3] => $this->getLastUserSearchRunId(),
+            $keys[4] => $this->getLastRunWasSuccessful(),
+            $keys[5] => $this->getStartNextRunAfter(),
+            $keys[6] => $this->getLastFailedAt(),
         );
         if ($result[$keys[2]] instanceof \DateTimeInterface) {
             $result[$keys[2]] = $result[$keys[2]]->format('c');
         }
 
-        if ($result[$keys[3]] instanceof \DateTimeInterface) {
-            $result[$keys[3]] = $result[$keys[3]]->format('c');
-        }
-
-        if ($result[$keys[4]] instanceof \DateTimeInterface) {
-            $result[$keys[4]] = $result[$keys[4]]->format('c');
-        }
-
         if ($result[$keys[5]] instanceof \DateTimeInterface) {
             $result[$keys[5]] = $result[$keys[5]]->format('c');
+        }
+
+        if ($result[$keys[6]] instanceof \DateTimeInterface) {
+            $result[$keys[6]] = $result[$keys[6]]->format('c');
         }
 
         $virtualColumns = $this->virtualColumns;
@@ -1195,6 +1088,23 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
             $result[$key] = $virtualColumn;
         }
 
+        if ($includeForeignObjects) {
+            if (null !== $this->aUserSearchRun) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'userSearchRun';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'user_search_run';
+                        break;
+                    default:
+                        $key = 'UserSearchRun';
+                }
+
+                $result[$key] = $this->aUserSearchRun->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+        }
 
         return $result;
     }
@@ -1208,11 +1118,11 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
      *                one of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
      *                TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM.
      *                Defaults to TableMap::TYPE_PHPNAME.
-     * @return $this|\JobScooper\JobSitePluginLastRun
+     * @return $this|\JobScooper\JobSitePlugin
      */
     public function setByName($name, $value, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = JobSitePluginLastRunTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = JobSitePluginTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
 
         return $this->setByPosition($pos, $value);
     }
@@ -1223,7 +1133,7 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
      *
      * @param  int $pos position in xml schema
      * @param  mixed $value field value
-     * @return $this|\JobScooper\JobSitePluginLastRun
+     * @return $this|\JobScooper\JobSitePlugin
      */
     public function setByPosition($pos, $value)
     {
@@ -1232,29 +1142,22 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
                 $this->setJobSite($value);
                 break;
             case 1:
-                $this->setLastUserSearchRunId($value);
+                $this->setDisplayName($value);
                 break;
             case 2:
-                $this->setFirstRunAt($value);
-                break;
-            case 3:
                 $this->setLastRunAt($value);
                 break;
+            case 3:
+                $this->setLastUserSearchRunId($value);
+                break;
             case 4:
-                $this->setLastSucceededAt($value);
+                $this->setLastRunWasSuccessful($value);
                 break;
             case 5:
-                $this->setLastFailedAt($value);
+                $this->setStartNextRunAfter($value);
                 break;
             case 6:
-                $this->setWasSuccessful($value);
-                break;
-            case 7:
-                if (!is_array($value)) {
-                    $v = trim(substr($value, 2, -2));
-                    $value = $v ? explode(' | ', $v) : array();
-                }
-                $this->setRecentErrorDetails($value);
+                $this->setLastFailedAt($value);
                 break;
         } // switch()
 
@@ -1280,31 +1183,28 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
-        $keys = JobSitePluginLastRunTableMap::getFieldNames($keyType);
+        $keys = JobSitePluginTableMap::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) {
             $this->setJobSite($arr[$keys[0]]);
         }
         if (array_key_exists($keys[1], $arr)) {
-            $this->setLastUserSearchRunId($arr[$keys[1]]);
+            $this->setDisplayName($arr[$keys[1]]);
         }
         if (array_key_exists($keys[2], $arr)) {
-            $this->setFirstRunAt($arr[$keys[2]]);
+            $this->setLastRunAt($arr[$keys[2]]);
         }
         if (array_key_exists($keys[3], $arr)) {
-            $this->setLastRunAt($arr[$keys[3]]);
+            $this->setLastUserSearchRunId($arr[$keys[3]]);
         }
         if (array_key_exists($keys[4], $arr)) {
-            $this->setLastSucceededAt($arr[$keys[4]]);
+            $this->setLastRunWasSuccessful($arr[$keys[4]]);
         }
         if (array_key_exists($keys[5], $arr)) {
-            $this->setLastFailedAt($arr[$keys[5]]);
+            $this->setStartNextRunAfter($arr[$keys[5]]);
         }
         if (array_key_exists($keys[6], $arr)) {
-            $this->setWasSuccessful($arr[$keys[6]]);
-        }
-        if (array_key_exists($keys[7], $arr)) {
-            $this->setRecentErrorDetails($arr[$keys[7]]);
+            $this->setLastFailedAt($arr[$keys[6]]);
         }
     }
 
@@ -1325,7 +1225,7 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
      * @param string $data The source data to import from
      * @param string $keyType The type of keys the array uses.
      *
-     * @return $this|\JobScooper\JobSitePluginLastRun The current object, for fluid interface
+     * @return $this|\JobScooper\JobSitePlugin The current object, for fluid interface
      */
     public function importFrom($parser, $data, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -1345,31 +1245,28 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
      */
     public function buildCriteria()
     {
-        $criteria = new Criteria(JobSitePluginLastRunTableMap::DATABASE_NAME);
+        $criteria = new Criteria(JobSitePluginTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(JobSitePluginLastRunTableMap::COL_JOBSITE)) {
-            $criteria->add(JobSitePluginLastRunTableMap::COL_JOBSITE, $this->jobsite);
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_JOBSITE)) {
+            $criteria->add(JobSitePluginTableMap::COL_JOBSITE, $this->jobsite);
         }
-        if ($this->isColumnModified(JobSitePluginLastRunTableMap::COL_LAST_USER_SEARCH_RUN_ID)) {
-            $criteria->add(JobSitePluginLastRunTableMap::COL_LAST_USER_SEARCH_RUN_ID, $this->last_user_search_run_id);
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_DISPLAY_NAME)) {
+            $criteria->add(JobSitePluginTableMap::COL_DISPLAY_NAME, $this->display_name);
         }
-        if ($this->isColumnModified(JobSitePluginLastRunTableMap::COL_DATE_FIRST_RUN)) {
-            $criteria->add(JobSitePluginLastRunTableMap::COL_DATE_FIRST_RUN, $this->date_first_run);
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_DATE_LAST_RUN)) {
+            $criteria->add(JobSitePluginTableMap::COL_DATE_LAST_RUN, $this->date_last_run);
         }
-        if ($this->isColumnModified(JobSitePluginLastRunTableMap::COL_DATE_LAST_RUN)) {
-            $criteria->add(JobSitePluginLastRunTableMap::COL_DATE_LAST_RUN, $this->date_last_run);
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID)) {
+            $criteria->add(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID, $this->last_user_search_run_id);
         }
-        if ($this->isColumnModified(JobSitePluginLastRunTableMap::COL_DATE_LAST_SUCCEEDED)) {
-            $criteria->add(JobSitePluginLastRunTableMap::COL_DATE_LAST_SUCCEEDED, $this->date_last_succeeded);
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_WAS_SUCCESSFUL)) {
+            $criteria->add(JobSitePluginTableMap::COL_WAS_SUCCESSFUL, $this->was_successful);
         }
-        if ($this->isColumnModified(JobSitePluginLastRunTableMap::COL_DATE_LAST_FAILED)) {
-            $criteria->add(JobSitePluginLastRunTableMap::COL_DATE_LAST_FAILED, $this->date_last_failed);
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_DATE_NEXT_RUN)) {
+            $criteria->add(JobSitePluginTableMap::COL_DATE_NEXT_RUN, $this->date_next_run);
         }
-        if ($this->isColumnModified(JobSitePluginLastRunTableMap::COL_WAS_SUCCESSFUL)) {
-            $criteria->add(JobSitePluginLastRunTableMap::COL_WAS_SUCCESSFUL, $this->was_successful);
-        }
-        if ($this->isColumnModified(JobSitePluginLastRunTableMap::COL_ERROR_DETAILS)) {
-            $criteria->add(JobSitePluginLastRunTableMap::COL_ERROR_DETAILS, $this->error_details);
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_DATE_LAST_FAILED)) {
+            $criteria->add(JobSitePluginTableMap::COL_DATE_LAST_FAILED, $this->date_last_failed);
         }
 
         return $criteria;
@@ -1387,8 +1284,8 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
      */
     public function buildPkeyCriteria()
     {
-        $criteria = ChildJobSitePluginLastRunQuery::create();
-        $criteria->add(JobSitePluginLastRunTableMap::COL_JOBSITE, $this->jobsite);
+        $criteria = ChildJobSitePluginQuery::create();
+        $criteria->add(JobSitePluginTableMap::COL_JOBSITE, $this->jobsite);
 
         return $criteria;
     }
@@ -1450,7 +1347,7 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param      object $copyObj An object of \JobScooper\JobSitePluginLastRun (or compatible) type.
+     * @param      object $copyObj An object of \JobScooper\JobSitePlugin (or compatible) type.
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param      boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
@@ -1458,13 +1355,12 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
         $copyObj->setJobSite($this->getJobSite());
-        $copyObj->setLastUserSearchRunId($this->getLastUserSearchRunId());
-        $copyObj->setFirstRunAt($this->getFirstRunAt());
+        $copyObj->setDisplayName($this->getDisplayName());
         $copyObj->setLastRunAt($this->getLastRunAt());
-        $copyObj->setLastSucceededAt($this->getLastSucceededAt());
+        $copyObj->setLastUserSearchRunId($this->getLastUserSearchRunId());
+        $copyObj->setLastRunWasSuccessful($this->getLastRunWasSuccessful());
+        $copyObj->setStartNextRunAfter($this->getStartNextRunAfter());
         $copyObj->setLastFailedAt($this->getLastFailedAt());
-        $copyObj->setWasSuccessful($this->getWasSuccessful());
-        $copyObj->setRecentErrorDetails($this->getRecentErrorDetails());
         if ($makeNew) {
             $copyObj->setNew(true);
         }
@@ -1479,7 +1375,7 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
      * objects.
      *
      * @param  boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return \JobScooper\JobSitePluginLastRun Clone of current object.
+     * @return \JobScooper\JobSitePlugin Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -1493,21 +1389,73 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
     }
 
     /**
+     * Declares an association between this object and a ChildUserSearchRun object.
+     *
+     * @param  ChildUserSearchRun $v
+     * @return $this|\JobScooper\JobSitePlugin The current object (for fluent API support)
+     * @throws PropelException
+     */
+    public function setUserSearchRun(ChildUserSearchRun $v = null)
+    {
+        if ($v === null) {
+            $this->setLastUserSearchRunId(NULL);
+        } else {
+            $this->setLastUserSearchRunId($v->getUserSearchRunId());
+        }
+
+        $this->aUserSearchRun = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildUserSearchRun object, it will not be re-added.
+        if ($v !== null) {
+            $v->addJobSitePlugin($this);
+        }
+
+
+        return $this;
+    }
+
+
+    /**
+     * Get the associated ChildUserSearchRun object
+     *
+     * @param  ConnectionInterface $con Optional Connection object.
+     * @return ChildUserSearchRun The associated ChildUserSearchRun object.
+     * @throws PropelException
+     */
+    public function getUserSearchRun(ConnectionInterface $con = null)
+    {
+        if ($this->aUserSearchRun === null && ($this->last_user_search_run_id != 0)) {
+            $this->aUserSearchRun = ChildUserSearchRunQuery::create()->findPk($this->last_user_search_run_id, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aUserSearchRun->addJobSitePlugins($this);
+             */
+        }
+
+        return $this->aUserSearchRun;
+    }
+
+    /**
      * Clears the current object, sets all attributes to their default values and removes
      * outgoing references as well as back-references (from other objects to this one. Results probably in a database
      * change of those foreign objects when you call `save` there).
      */
     public function clear()
     {
+        if (null !== $this->aUserSearchRun) {
+            $this->aUserSearchRun->removeJobSitePlugin($this);
+        }
         $this->jobsite = null;
-        $this->last_user_search_run_id = null;
-        $this->date_first_run = null;
+        $this->display_name = null;
         $this->date_last_run = null;
-        $this->date_last_succeeded = null;
-        $this->date_last_failed = null;
+        $this->last_user_search_run_id = null;
         $this->was_successful = null;
-        $this->error_details = null;
-        $this->error_details_unserialized = null;
+        $this->date_next_run = null;
+        $this->date_last_failed = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();
@@ -1528,6 +1476,7 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
         if ($deep) {
         } // if ($deep)
 
+        $this->aUserSearchRun = null;
     }
 
     /**
@@ -1538,20 +1487,6 @@ abstract class JobSitePluginLastRun implements ActiveRecordInterface
     public function __toString()
     {
         return (string) $this->getJobSite();
-    }
-
-    // timestampable behavior
-
-    /**
-     * Mark the current object so that the update date doesn't get updated during next save
-     *
-     * @return     $this|ChildJobSitePluginLastRun The current object (for fluent API support)
-     */
-    public function keepUpdateDateUnchanged()
-    {
-        $this->modifiedColumns[JobSitePluginLastRunTableMap::COL_DATE_LAST_RUN] = true;
-
-        return $this;
     }
 
     /**

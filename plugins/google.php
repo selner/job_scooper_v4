@@ -59,7 +59,7 @@ class PluginGoogle extends ClassClientHTMLJobSitePlugin
 
         foreach($nodesJobs as $node)
         {
-            $item = $this->getEmptyJobListingRecord();
+            $item = getEmptyJobListingRecord();
 
             $item['job_id'] = $node->attr['id'];
 

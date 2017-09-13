@@ -67,7 +67,7 @@ class PluginAmazon extends ClassBaseClientSideHTMLJobSitePlugin
 
         foreach($nodesjobs as $node)
         {
-            $item = $this->getEmptyJobListingRecord();
+            $item = getEmptyJobListingRecord();
 
             $item['job_id'] = str_ireplace("/en/jobs/", "", $node->href);
             $item['job_post_url'] = $this->siteBaseURL . $node->href;

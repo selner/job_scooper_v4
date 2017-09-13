@@ -142,7 +142,7 @@ abstract class BaseTaleoPlugin extends ClassBaseServerHTMLJobSitePlugin
             } // skip the header row
             $counter++;
 
-            $item = $this->getEmptyJobListingRecord();
+            $item = getEmptyJobListingRecord();
             $item['company'] = $this->siteName;
             $item['job_post_url'] = $node->find("td a")[0]->href;
             $item['job_title'] = $node->find("td a")[0]->plaintext;

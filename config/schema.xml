@@ -140,22 +140,17 @@
         <column name="configuration_file_path" phpName="ConfigFilePath" type="varchar" size="128" required="false"/>
     </table>
 
-
-
-
-    <table name="jobsite_plugin_last_run" phpName="JobSitePluginLastRun" reloadOnUpdate="true">
-        <column name="jobsite" phpName="JobSite" type="varchar" size="255" primaryString="true" primaryKey="true"/>
+    <table name="jobsite_plugin" phpName="JobSitePlugin" reloadOnUpdate="true">
+        <column name="jobsite" phpName="JobSite" type="varchar" size="100" primaryString="true" primaryKey="true"/>
+        <column name="display_name" phpName="DisplayName" type="varchar" size="255" primaryString="false" primaryKey="false"/>
+        <column name="date_last_run" phpName="LastRunAt" type="timestamp" />
         <column name="last_user_search_run_id" phpName="LastUserSearchRunId" type="integer"/>
-        <column name="date_first_run"  phpName="FirstRunAt" type="timestamp" />
-        <column name="date_last_run"  phpName="LastRunAt" type="timestamp" />
-        <column name="date_last_succeeded" phpName="LastSucceededAt" type="timestamp" />
+        <column name="was_successful" phpName="LastRunWasSuccessful" type="boolean"/>
+        <column name="date_next_run" phpName="StartNextRunAfter" type="timestamp" />
         <column name="date_last_failed" phpName="LastFailedAt" type="timestamp" />
-        <behavior name="timestampable">
-            <parameter name="create_column" value="date_first_run" />
-            <parameter name="update_column" value="date_last_run" />
-        </behavior>
-        <column name="was_successful" phpName="WasSuccessful" type="boolean"/>
-        <column name="error_details" phpName="RecentErrorDetails" type="array"/>
+        <foreign-key foreignTable="user_search_run">
+            <reference local="last_user_search_run_id" foreign="user_search_run_id"/>
+        </foreign-key>
     </table>
 
     <table name="user_search_run" phpName="UserSearchRun" reloadOnUpdate="true">
@@ -167,7 +162,7 @@
         <behavior name="timestampable">
             <parameter name="create_column" value="date_search_run" />
         </behavior>
-        <column name="jobsite" phpName="JobSite" type="varchar" size="255"/>
+        <column name="jobsite" phpName="JobSite" type="varchar" size="100"/>
         <column name="search_settings" phpName="SearchSettings" type="array"/>
         <column name="search_run_result" phpName="SearchRunResult" type="object"/>
         <!--<column name="run_result_code" field="run_code" phpName="RunResultCode" type="boolean"/>-->

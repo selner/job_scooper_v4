@@ -171,7 +171,7 @@ class UserSearchRunTableMap extends TableMap
         $this->addColumn('app_run_id', 'AppRunId', 'VARCHAR', false, 75, null);
         $this->addForeignKey('user_slug', 'UserSlug', 'VARCHAR', 'user', 'user_slug', false, 128, null);
         $this->addColumn('date_search_run', 'DateSearchRun', 'TIMESTAMP', false, null, null);
-        $this->addColumn('jobsite', 'JobSite', 'VARCHAR', false, 255, null);
+        $this->addColumn('jobsite', 'JobSite', 'VARCHAR', false, 100, null);
         $this->addColumn('search_settings', 'SearchSettings', 'ARRAY', false, null, null);
         $this->addColumn('search_run_result', 'SearchRunResult', 'OBJECT', false, null, null);
         $this->addColumn('updated_at', 'UpdatedAt', 'TIMESTAMP', false, null, null);
@@ -189,6 +189,13 @@ class UserSearchRunTableMap extends TableMap
     1 => ':user_slug',
   ),
 ), null, null, null, false);
+        $this->addRelation('JobSitePlugin', '\\JobScooper\\JobSitePlugin', RelationMap::ONE_TO_MANY, array (
+  0 =>
+  array (
+    0 => ':last_user_search_run_id',
+    1 => ':user_search_run_id',
+  ),
+), null, null, 'JobSitePlugins', false);
     } // buildRelations()
 
     /**

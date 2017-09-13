@@ -74,7 +74,7 @@ class PluginExpedia extends ClassBaseClientSideHTMLJobSitePlugin
         $nodesJobs= $parent[0]->find('li');
         foreach($nodesJobs as $node)
         {
-            $item = $this->getEmptyJobListingRecord();
+            $item = getEmptyJobListingRecord();
             $item['company'] = 'Expedia';
 
             $titleLink = $node->find("h3 a")[0];

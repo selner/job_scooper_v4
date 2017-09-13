@@ -44,7 +44,7 @@ class PluginGroupon extends ClassBaseClientSideHTMLJobSitePlugin
                 continue;
             }
 
-            $item = $this->getEmptyJobListingRecord();
+            $item = getEmptyJobListingRecord();
 
             $item['job_title'] = $node->plaintext;
             $item['job_post_url'] = $node->href;
