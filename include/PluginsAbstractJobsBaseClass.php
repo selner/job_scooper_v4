@@ -16,12 +16,14 @@
  */
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
+use JobScooper\JobSitePluginQuery as JobSitePluginQuery;
+
 const VALUE_NOT_SUPPORTED = -1;
 const BASE_URL_TAG_LOCATION = "***LOCATION***";
 const BASE_URL_TAG_KEYWORDS = "***KEYWORDS***";
 use \Khartnett\Normalization as Normalize;
 
-abstract class AbstractClassBaseJobsPlugin extends \JobScooper\JobSitePlugin
+abstract class AbstractClassBaseJobsPlugin
 {
     protected $arrSearchesToReturn = null;
     protected $strBaseURLFormat = null;
@@ -29,12 +31,17 @@ abstract class AbstractClassBaseJobsPlugin extends \JobScooper\JobSitePlugin
     protected $typeLocationSearchNeeded = null;
     protected $siteName = 'NAME-NOT-SET';
     private $userObject = null;
+    private $dbRecord = null;
 
     function __construct($strOutputDirectory = null, $attributes = null)
     {
-        parent::__construct();
 
-        if (array_key_exists("JOBSITE_PLUGINS", $GLOBALS) && (array_key_exists(strtolower($this->siteName), $GLOBALS['JOBSITE_PLUGINS']))) {
+        $this->dbRecord = \JobScooper\JobSitePluginQuery::create()
+            ->filterByPrimaryKey($this->getName())
+            ->findOneOrCreate();
+
+
+       if (array_key_exists("JOBSITE_PLUGINS", $GLOBALS) && (array_key_exists(strtolower($this->siteName), $GLOBALS['JOBSITE_PLUGINS']))) {
             $plugin = $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->siteName)];
             if (array_key_exists("other_settings", $plugin) && is_array($plugin['other_settings'])) {
                 $keys = array_keys($plugin['other_settings']);
@@ -126,6 +133,7 @@ abstract class AbstractClassBaseJobsPlugin extends \JobScooper\JobSitePlugin
     public function getUpdatedJobsForAllSearches()
     {
         $strIncludeKey = 'include_' . strtolower($this->siteName);
+        $boolSearchSuccess = null;
 
         if (isset($GLOBALS['OPTS'][$strIncludeKey]) && $GLOBALS['OPTS'][$strIncludeKey] == 0) {
             LogLine($this->siteName . ": excluded for run. Skipping '" . count($this->arrSearchesToReturn) . "' site search(es).", \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -137,31 +145,43 @@ abstract class AbstractClassBaseJobsPlugin extends \JobScooper\JobSitePlugin
             return array();
         }
 
-        foreach ($this->arrSearchesToReturn as $search) {
-            $this->currentSearchBeingRun = $search;
+        if($this->dbRecord->shouldRunNow()) {
+            $this->dbRecord->setLastRunAt(time());
+            $this->dbRecord->save();
 
-            try {
-                // assert this search is actually for the job site supported by this plugin
-                assert(strcasecmp(strtolower($search->getJobSite()), strtolower($this->siteName)) == 0);
+            foreach ($this->arrSearchesToReturn as $search) {
+                $this->currentSearchBeingRun = $search;
+                $this->dbRecord->setLastUserSearchRunId($search['user_search_run_id']);
 
-                if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
-                    try {
-                        if ($GLOBALS['USERDATA']['selenium']['autostart'] == True) {
-                            SeleniumSession::startSeleniumServer();
+                try {
+                    // assert this search is actually for the job site supported by this plugin
+                    assert(strcasecmp(strtolower($search->getJobSite()), strtolower($this->siteName)) == 0);
+
+                    if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
+                        try {
+                            if ($GLOBALS['USERDATA']['selenium']['autostart'] == True) {
+                                SeleniumSession::startSeleniumServer();
+                            }
+                            $this->selenium = new SeleniumSession();
+                        } catch (Exception $ex) {
+                            handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->siteName . "'", true);
                         }
-                        $this->selenium = new SeleniumSession();
-                    } catch (Exception $ex) {
-                        handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->siteName . "'", true);
                     }
-                }
 
-                $this->_updateJobsDataForSearch_($search);
-            } catch (Exception $ex) {
-                throw $ex;
-            } finally {
-                $this->currentSearchBeingRun = null;
+                    $this->_updateJobsDataForSearch_($search);
+                    $boolSearchSuccess = true;
+                } catch (Exception $ex) {
+                    $boolSearchSuccess = false;
+                    throw $ex;
+                } finally {
+                    $this->dbRecord->setSuccess($boolSearchSuccess);
+                    $this->dbRecord->save();
+                    $this->currentSearchBeingRun = null;
+                }
             }
         }
+        else
+            LogLine($this->siteName . " just recently ran so skipping for a short period...", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
 
         return $this->getMyJobsList();
