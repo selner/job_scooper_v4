@@ -21,25 +21,6 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 
-
-function getRunDateRange()
-{
-    $strDateRange = null;
-    $startDate = new DateTime();
-    $strMod = "-".$GLOBALS['USERDATA']['configuration_settings']['number_days']." days";
-    $startDate = $startDate->modify($strMod);
-    $today = new DateTime();
-    if($startDate->format('Y-m-d') != $today->format('Y-m-d'))
-    {
-        $strDateRange = $startDate->format('D, M d') . " - " . $today->format('D, M d');
-    }
-    else
-    {
-        $strDateRange = $today->format('D, M d');
-    }
-    return $strDateRange;
-}
-
 class ClassJobsNotifier
 {
     protected $siteName = "ClassJobsNotifier";
