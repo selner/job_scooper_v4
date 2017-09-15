@@ -186,6 +186,13 @@ abstract class JobPosting implements ActiveRecordInterface
     protected $key_company_and_title;
 
     /**
+     * The value for the title_linked field.
+     *
+     * @var        string
+     */
+    protected $title_linked;
+
+    /**
      * @var        ObjectCollection|ChildUserJobMatch[] Collection to store aggregation of ChildUserJobMatch objects.
      */
     protected $collUserJobMatches;
@@ -641,6 +648,16 @@ abstract class JobPosting implements ActiveRecordInterface
     }
 
     /**
+     * Get the [title_linked] column value.
+     *
+     * @return string
+     */
+    public function getJobTitleLinked()
+    {
+        return $this->title_linked;
+    }
+
+    /**
      * Set the value of [jobposting_id] column.
      *
      * @param int $v new value
@@ -981,6 +998,26 @@ abstract class JobPosting implements ActiveRecordInterface
     } // setKeyCompanyAndTitle()
 
     /**
+     * Set the value of [title_linked] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\JobPosting The current object (for fluent API support)
+     */
+    public function setJobTitleLinked($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->title_linked !== $v) {
+            $this->title_linked = $v;
+            $this->modifiedColumns[JobPostingTableMap::COL_TITLE_LINKED] = true;
+        }
+
+        return $this;
+    } // setJobTitleLinked()
+
+    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -1066,6 +1103,9 @@ abstract class JobPosting implements ActiveRecordInterface
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 16 + $startcol : JobPostingTableMap::translateFieldName('KeyCompanyAndTitle', TableMap::TYPE_PHPNAME, $indexType)];
             $this->key_company_and_title = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 17 + $startcol : JobPostingTableMap::translateFieldName('JobTitleLinked', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->title_linked = (null !== $col) ? (string) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -1074,7 +1114,7 @@ abstract class JobPosting implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 17; // 17 = JobPostingTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 18; // 18 = JobPostingTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\JobPosting'), 0, $e);
@@ -1357,6 +1397,9 @@ abstract class JobPosting implements ActiveRecordInterface
         if ($this->isColumnModified(JobPostingTableMap::COL_KEY_COMPANY_AND_TITLE)) {
             $modifiedColumns[':p' . $index++]  = 'key_company_and_title';
         }
+        if ($this->isColumnModified(JobPostingTableMap::COL_TITLE_LINKED)) {
+            $modifiedColumns[':p' . $index++]  = 'title_linked';
+        }
 
         $sql = sprintf(
             'INSERT INTO jobposting (%s) VALUES (%s)',
@@ -1418,6 +1461,9 @@ abstract class JobPosting implements ActiveRecordInterface
                         break;
                     case 'key_company_and_title':
                         $stmt->bindValue($identifier, $this->key_company_and_title, PDO::PARAM_STR);
+                        break;
+                    case 'title_linked':
+                        $stmt->bindValue($identifier, $this->title_linked, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -1532,6 +1578,9 @@ abstract class JobPosting implements ActiveRecordInterface
             case 16:
                 return $this->getKeyCompanyAndTitle();
                 break;
+            case 17:
+                return $this->getJobTitleLinked();
+                break;
             default:
                 return null;
                 break;
@@ -1579,6 +1628,7 @@ abstract class JobPosting implements ActiveRecordInterface
             $keys[14] => $this->getRemovedAt(),
             $keys[15] => $this->getKeySiteAndPostID(),
             $keys[16] => $this->getKeyCompanyAndTitle(),
+            $keys[17] => $this->getJobTitleLinked(),
         );
         if ($result[$keys[11]] instanceof \DateTimeInterface) {
             $result[$keys[11]] = $result[$keys[11]]->format('c');
@@ -1702,6 +1752,9 @@ abstract class JobPosting implements ActiveRecordInterface
             case 16:
                 $this->setKeyCompanyAndTitle($value);
                 break;
+            case 17:
+                $this->setJobTitleLinked($value);
+                break;
         } // switch()
 
         return $this;
@@ -1778,6 +1831,9 @@ abstract class JobPosting implements ActiveRecordInterface
         }
         if (array_key_exists($keys[16], $arr)) {
             $this->setKeyCompanyAndTitle($arr[$keys[16]]);
+        }
+        if (array_key_exists($keys[17], $arr)) {
+            $this->setJobTitleLinked($arr[$keys[17]]);
         }
     }
 
@@ -1870,6 +1926,9 @@ abstract class JobPosting implements ActiveRecordInterface
         }
         if ($this->isColumnModified(JobPostingTableMap::COL_KEY_COMPANY_AND_TITLE)) {
             $criteria->add(JobPostingTableMap::COL_KEY_COMPANY_AND_TITLE, $this->key_company_and_title);
+        }
+        if ($this->isColumnModified(JobPostingTableMap::COL_TITLE_LINKED)) {
+            $criteria->add(JobPostingTableMap::COL_TITLE_LINKED, $this->title_linked);
         }
 
         return $criteria;
@@ -1973,6 +2032,7 @@ abstract class JobPosting implements ActiveRecordInterface
         $copyObj->setRemovedAt($this->getRemovedAt());
         $copyObj->setKeySiteAndPostID($this->getKeySiteAndPostID());
         $copyObj->setKeyCompanyAndTitle($this->getKeyCompanyAndTitle());
+        $copyObj->setJobTitleLinked($this->getJobTitleLinked());
 
         if ($deepCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
@@ -2306,6 +2366,7 @@ abstract class JobPosting implements ActiveRecordInterface
         $this->post_removed_at = null;
         $this->key_site_and_post_id = null;
         $this->key_company_and_title = null;
+        $this->title_linked = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();

@@ -96,16 +96,16 @@ abstract class User implements ActiveRecordInterface
     protected $configuration_file_path;
 
     /**
-     * @var        ObjectCollection|ChildUserSearchRun[] Collection to store aggregation of ChildUserSearchRun objects.
-     */
-    protected $collUserSearchRuns;
-    protected $collUserSearchRunsPartial;
-
-    /**
      * @var        ObjectCollection|ChildUserJobMatch[] Collection to store aggregation of ChildUserJobMatch objects.
      */
     protected $collUserJobMatches;
     protected $collUserJobMatchesPartial;
+
+    /**
+     * @var        ObjectCollection|ChildUserSearchRun[] Collection to store aggregation of ChildUserSearchRun objects.
+     */
+    protected $collUserSearchRuns;
+    protected $collUserSearchRunsPartial;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -117,15 +117,15 @@ abstract class User implements ActiveRecordInterface
 
     /**
      * An array of objects scheduled for deletion.
-     * @var ObjectCollection|ChildUserSearchRun[]
-     */
-    protected $userSearchRunsScheduledForDeletion = null;
-
-    /**
-     * An array of objects scheduled for deletion.
      * @var ObjectCollection|ChildUserJobMatch[]
      */
     protected $userJobMatchesScheduledForDeletion = null;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var ObjectCollection|ChildUserSearchRun[]
+     */
+    protected $userSearchRunsScheduledForDeletion = null;
 
     /**
      * Initializes internal state of JobScooper\Base\User object.
@@ -588,9 +588,9 @@ abstract class User implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->collUserSearchRuns = null;
-
             $this->collUserJobMatches = null;
+
+            $this->collUserSearchRuns = null;
 
         } // if (deep)
     }
@@ -706,6 +706,23 @@ abstract class User implements ActiveRecordInterface
                 $this->resetModified();
             }
 
+            if ($this->userJobMatchesScheduledForDeletion !== null) {
+                if (!$this->userJobMatchesScheduledForDeletion->isEmpty()) {
+                    \JobScooper\UserJobMatchQuery::create()
+                        ->filterByPrimaryKeys($this->userJobMatchesScheduledForDeletion->getPrimaryKeys(false))
+                        ->delete($con);
+                    $this->userJobMatchesScheduledForDeletion = null;
+                }
+            }
+
+            if ($this->collUserJobMatches !== null) {
+                foreach ($this->collUserJobMatches as $referrerFK) {
+                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
+                        $affectedRows += $referrerFK->save($con);
+                    }
+                }
+            }
+
             if ($this->userSearchRunsScheduledForDeletion !== null) {
                 if (!$this->userSearchRunsScheduledForDeletion->isEmpty()) {
                     foreach ($this->userSearchRunsScheduledForDeletion as $userSearchRun) {
@@ -718,23 +735,6 @@ abstract class User implements ActiveRecordInterface
 
             if ($this->collUserSearchRuns !== null) {
                 foreach ($this->collUserSearchRuns as $referrerFK) {
-                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
-                        $affectedRows += $referrerFK->save($con);
-                    }
-                }
-            }
-
-            if ($this->userJobMatchesScheduledForDeletion !== null) {
-                if (!$this->userJobMatchesScheduledForDeletion->isEmpty()) {
-                    \JobScooper\UserJobMatchQuery::create()
-                        ->filterByPrimaryKeys($this->userJobMatchesScheduledForDeletion->getPrimaryKeys(false))
-                        ->delete($con);
-                    $this->userJobMatchesScheduledForDeletion = null;
-                }
-            }
-
-            if ($this->collUserJobMatches !== null) {
-                foreach ($this->collUserJobMatches as $referrerFK) {
                     if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
                         $affectedRows += $referrerFK->save($con);
                     }
@@ -906,21 +906,6 @@ abstract class User implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->collUserSearchRuns) {
-
-                switch ($keyType) {
-                    case TableMap::TYPE_CAMELNAME:
-                        $key = 'userSearchRuns';
-                        break;
-                    case TableMap::TYPE_FIELDNAME:
-                        $key = 'user_search_runs';
-                        break;
-                    default:
-                        $key = 'UserSearchRuns';
-                }
-
-                $result[$key] = $this->collUserSearchRuns->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
-            }
             if (null !== $this->collUserJobMatches) {
 
                 switch ($keyType) {
@@ -935,6 +920,21 @@ abstract class User implements ActiveRecordInterface
                 }
 
                 $result[$key] = $this->collUserJobMatches->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
+            }
+            if (null !== $this->collUserSearchRuns) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'userSearchRuns';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'user_search_runs';
+                        break;
+                    default:
+                        $key = 'UserSearchRuns';
+                }
+
+                $result[$key] = $this->collUserSearchRuns->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
         }
 
@@ -1169,15 +1169,15 @@ abstract class User implements ActiveRecordInterface
             // the getter/setter methods for fkey referrer objects.
             $copyObj->setNew(false);
 
-            foreach ($this->getUserSearchRuns() as $relObj) {
-                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
-                    $copyObj->addUserSearchRun($relObj->copy($deepCopy));
-                }
-            }
-
             foreach ($this->getUserJobMatches() as $relObj) {
                 if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
                     $copyObj->addUserJobMatch($relObj->copy($deepCopy));
+                }
+            }
+
+            foreach ($this->getUserSearchRuns() as $relObj) {
+                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
+                    $copyObj->addUserSearchRun($relObj->copy($deepCopy));
                 }
             }
 
@@ -1221,239 +1221,14 @@ abstract class User implements ActiveRecordInterface
      */
     public function initRelation($relationName)
     {
-        if ('UserSearchRun' == $relationName) {
-            $this->initUserSearchRuns();
-            return;
-        }
         if ('UserJobMatch' == $relationName) {
             $this->initUserJobMatches();
             return;
         }
-    }
-
-    /**
-     * Clears out the collUserSearchRuns collection
-     *
-     * This does not modify the database; however, it will remove any associated objects, causing
-     * them to be refetched by subsequent calls to accessor method.
-     *
-     * @return void
-     * @see        addUserSearchRuns()
-     */
-    public function clearUserSearchRuns()
-    {
-        $this->collUserSearchRuns = null; // important to set this to NULL since that means it is uninitialized
-    }
-
-    /**
-     * Reset is the collUserSearchRuns collection loaded partially.
-     */
-    public function resetPartialUserSearchRuns($v = true)
-    {
-        $this->collUserSearchRunsPartial = $v;
-    }
-
-    /**
-     * Initializes the collUserSearchRuns collection.
-     *
-     * By default this just sets the collUserSearchRuns collection to an empty array (like clearcollUserSearchRuns());
-     * however, you may wish to override this method in your stub class to provide setting appropriate
-     * to your application -- for example, setting the initial array to the values stored in database.
-     *
-     * @param      boolean $overrideExisting If set to true, the method call initializes
-     *                                        the collection even if it is not empty
-     *
-     * @return void
-     */
-    public function initUserSearchRuns($overrideExisting = true)
-    {
-        if (null !== $this->collUserSearchRuns && !$overrideExisting) {
+        if ('UserSearchRun' == $relationName) {
+            $this->initUserSearchRuns();
             return;
         }
-
-        $collectionClassName = UserSearchRunTableMap::getTableMap()->getCollectionClassName();
-
-        $this->collUserSearchRuns = new $collectionClassName;
-        $this->collUserSearchRuns->setModel('\JobScooper\UserSearchRun');
-    }
-
-    /**
-     * Gets an array of ChildUserSearchRun objects which contain a foreign key that references this object.
-     *
-     * If the $criteria is not null, it is used to always fetch the results from the database.
-     * Otherwise the results are fetched from the database the first time, then cached.
-     * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildUser is new, it will return
-     * an empty collection or the current collection; the criteria is ignored on a new object.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @return ObjectCollection|ChildUserSearchRun[] List of ChildUserSearchRun objects
-     * @throws PropelException
-     */
-    public function getUserSearchRuns(Criteria $criteria = null, ConnectionInterface $con = null)
-    {
-        $partial = $this->collUserSearchRunsPartial && !$this->isNew();
-        if (null === $this->collUserSearchRuns || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collUserSearchRuns) {
-                // return empty collection
-                $this->initUserSearchRuns();
-            } else {
-                $collUserSearchRuns = ChildUserSearchRunQuery::create(null, $criteria)
-                    ->filterByUser($this)
-                    ->find($con);
-
-                if (null !== $criteria) {
-                    if (false !== $this->collUserSearchRunsPartial && count($collUserSearchRuns)) {
-                        $this->initUserSearchRuns(false);
-
-                        foreach ($collUserSearchRuns as $obj) {
-                            if (false == $this->collUserSearchRuns->contains($obj)) {
-                                $this->collUserSearchRuns->append($obj);
-                            }
-                        }
-
-                        $this->collUserSearchRunsPartial = true;
-                    }
-
-                    return $collUserSearchRuns;
-                }
-
-                if ($partial && $this->collUserSearchRuns) {
-                    foreach ($this->collUserSearchRuns as $obj) {
-                        if ($obj->isNew()) {
-                            $collUserSearchRuns[] = $obj;
-                        }
-                    }
-                }
-
-                $this->collUserSearchRuns = $collUserSearchRuns;
-                $this->collUserSearchRunsPartial = false;
-            }
-        }
-
-        return $this->collUserSearchRuns;
-    }
-
-    /**
-     * Sets a collection of ChildUserSearchRun objects related by a one-to-many relationship
-     * to the current object.
-     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
-     * and new objects from the given Propel collection.
-     *
-     * @param      Collection $userSearchRuns A Propel collection.
-     * @param      ConnectionInterface $con Optional connection object
-     * @return $this|ChildUser The current object (for fluent API support)
-     */
-    public function setUserSearchRuns(Collection $userSearchRuns, ConnectionInterface $con = null)
-    {
-        /** @var ChildUserSearchRun[] $userSearchRunsToDelete */
-        $userSearchRunsToDelete = $this->getUserSearchRuns(new Criteria(), $con)->diff($userSearchRuns);
-
-
-        $this->userSearchRunsScheduledForDeletion = $userSearchRunsToDelete;
-
-        foreach ($userSearchRunsToDelete as $userSearchRunRemoved) {
-            $userSearchRunRemoved->setUser(null);
-        }
-
-        $this->collUserSearchRuns = null;
-        foreach ($userSearchRuns as $userSearchRun) {
-            $this->addUserSearchRun($userSearchRun);
-        }
-
-        $this->collUserSearchRuns = $userSearchRuns;
-        $this->collUserSearchRunsPartial = false;
-
-        return $this;
-    }
-
-    /**
-     * Returns the number of related UserSearchRun objects.
-     *
-     * @param      Criteria $criteria
-     * @param      boolean $distinct
-     * @param      ConnectionInterface $con
-     * @return int             Count of related UserSearchRun objects.
-     * @throws PropelException
-     */
-    public function countUserSearchRuns(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
-    {
-        $partial = $this->collUserSearchRunsPartial && !$this->isNew();
-        if (null === $this->collUserSearchRuns || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->collUserSearchRuns) {
-                return 0;
-            }
-
-            if ($partial && !$criteria) {
-                return count($this->getUserSearchRuns());
-            }
-
-            $query = ChildUserSearchRunQuery::create(null, $criteria);
-            if ($distinct) {
-                $query->distinct();
-            }
-
-            return $query
-                ->filterByUser($this)
-                ->count($con);
-        }
-
-        return count($this->collUserSearchRuns);
-    }
-
-    /**
-     * Method called to associate a ChildUserSearchRun object to this object
-     * through the ChildUserSearchRun foreign key attribute.
-     *
-     * @param  ChildUserSearchRun $l ChildUserSearchRun
-     * @return $this|\JobScooper\User The current object (for fluent API support)
-     */
-    public function addUserSearchRun(ChildUserSearchRun $l)
-    {
-        if ($this->collUserSearchRuns === null) {
-            $this->initUserSearchRuns();
-            $this->collUserSearchRunsPartial = true;
-        }
-
-        if (!$this->collUserSearchRuns->contains($l)) {
-            $this->doAddUserSearchRun($l);
-
-            if ($this->userSearchRunsScheduledForDeletion and $this->userSearchRunsScheduledForDeletion->contains($l)) {
-                $this->userSearchRunsScheduledForDeletion->remove($this->userSearchRunsScheduledForDeletion->search($l));
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param ChildUserSearchRun $userSearchRun The ChildUserSearchRun object to add.
-     */
-    protected function doAddUserSearchRun(ChildUserSearchRun $userSearchRun)
-    {
-        $this->collUserSearchRuns[]= $userSearchRun;
-        $userSearchRun->setUser($this);
-    }
-
-    /**
-     * @param  ChildUserSearchRun $userSearchRun The ChildUserSearchRun object to remove.
-     * @return $this|ChildUser The current object (for fluent API support)
-     */
-    public function removeUserSearchRun(ChildUserSearchRun $userSearchRun)
-    {
-        if ($this->getUserSearchRuns()->contains($userSearchRun)) {
-            $pos = $this->collUserSearchRuns->search($userSearchRun);
-            $this->collUserSearchRuns->remove($pos);
-            if (null === $this->userSearchRunsScheduledForDeletion) {
-                $this->userSearchRunsScheduledForDeletion = clone $this->collUserSearchRuns;
-                $this->userSearchRunsScheduledForDeletion->clear();
-            }
-            $this->userSearchRunsScheduledForDeletion[]= $userSearchRun;
-            $userSearchRun->setUser(null);
-        }
-
-        return $this;
     }
 
     /**
@@ -1707,6 +1482,231 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
+     * Clears out the collUserSearchRuns collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return void
+     * @see        addUserSearchRuns()
+     */
+    public function clearUserSearchRuns()
+    {
+        $this->collUserSearchRuns = null; // important to set this to NULL since that means it is uninitialized
+    }
+
+    /**
+     * Reset is the collUserSearchRuns collection loaded partially.
+     */
+    public function resetPartialUserSearchRuns($v = true)
+    {
+        $this->collUserSearchRunsPartial = $v;
+    }
+
+    /**
+     * Initializes the collUserSearchRuns collection.
+     *
+     * By default this just sets the collUserSearchRuns collection to an empty array (like clearcollUserSearchRuns());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @param      boolean $overrideExisting If set to true, the method call initializes
+     *                                        the collection even if it is not empty
+     *
+     * @return void
+     */
+    public function initUserSearchRuns($overrideExisting = true)
+    {
+        if (null !== $this->collUserSearchRuns && !$overrideExisting) {
+            return;
+        }
+
+        $collectionClassName = UserSearchRunTableMap::getTableMap()->getCollectionClassName();
+
+        $this->collUserSearchRuns = new $collectionClassName;
+        $this->collUserSearchRuns->setModel('\JobScooper\UserSearchRun');
+    }
+
+    /**
+     * Gets an array of ChildUserSearchRun objects which contain a foreign key that references this object.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this ChildUser is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @return ObjectCollection|ChildUserSearchRun[] List of ChildUserSearchRun objects
+     * @throws PropelException
+     */
+    public function getUserSearchRuns(Criteria $criteria = null, ConnectionInterface $con = null)
+    {
+        $partial = $this->collUserSearchRunsPartial && !$this->isNew();
+        if (null === $this->collUserSearchRuns || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collUserSearchRuns) {
+                // return empty collection
+                $this->initUserSearchRuns();
+            } else {
+                $collUserSearchRuns = ChildUserSearchRunQuery::create(null, $criteria)
+                    ->filterByUser($this)
+                    ->find($con);
+
+                if (null !== $criteria) {
+                    if (false !== $this->collUserSearchRunsPartial && count($collUserSearchRuns)) {
+                        $this->initUserSearchRuns(false);
+
+                        foreach ($collUserSearchRuns as $obj) {
+                            if (false == $this->collUserSearchRuns->contains($obj)) {
+                                $this->collUserSearchRuns->append($obj);
+                            }
+                        }
+
+                        $this->collUserSearchRunsPartial = true;
+                    }
+
+                    return $collUserSearchRuns;
+                }
+
+                if ($partial && $this->collUserSearchRuns) {
+                    foreach ($this->collUserSearchRuns as $obj) {
+                        if ($obj->isNew()) {
+                            $collUserSearchRuns[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collUserSearchRuns = $collUserSearchRuns;
+                $this->collUserSearchRunsPartial = false;
+            }
+        }
+
+        return $this->collUserSearchRuns;
+    }
+
+    /**
+     * Sets a collection of ChildUserSearchRun objects related by a one-to-many relationship
+     * to the current object.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param      Collection $userSearchRuns A Propel collection.
+     * @param      ConnectionInterface $con Optional connection object
+     * @return $this|ChildUser The current object (for fluent API support)
+     */
+    public function setUserSearchRuns(Collection $userSearchRuns, ConnectionInterface $con = null)
+    {
+        /** @var ChildUserSearchRun[] $userSearchRunsToDelete */
+        $userSearchRunsToDelete = $this->getUserSearchRuns(new Criteria(), $con)->diff($userSearchRuns);
+
+
+        $this->userSearchRunsScheduledForDeletion = $userSearchRunsToDelete;
+
+        foreach ($userSearchRunsToDelete as $userSearchRunRemoved) {
+            $userSearchRunRemoved->setUser(null);
+        }
+
+        $this->collUserSearchRuns = null;
+        foreach ($userSearchRuns as $userSearchRun) {
+            $this->addUserSearchRun($userSearchRun);
+        }
+
+        $this->collUserSearchRuns = $userSearchRuns;
+        $this->collUserSearchRunsPartial = false;
+
+        return $this;
+    }
+
+    /**
+     * Returns the number of related UserSearchRun objects.
+     *
+     * @param      Criteria $criteria
+     * @param      boolean $distinct
+     * @param      ConnectionInterface $con
+     * @return int             Count of related UserSearchRun objects.
+     * @throws PropelException
+     */
+    public function countUserSearchRuns(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    {
+        $partial = $this->collUserSearchRunsPartial && !$this->isNew();
+        if (null === $this->collUserSearchRuns || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collUserSearchRuns) {
+                return 0;
+            }
+
+            if ($partial && !$criteria) {
+                return count($this->getUserSearchRuns());
+            }
+
+            $query = ChildUserSearchRunQuery::create(null, $criteria);
+            if ($distinct) {
+                $query->distinct();
+            }
+
+            return $query
+                ->filterByUser($this)
+                ->count($con);
+        }
+
+        return count($this->collUserSearchRuns);
+    }
+
+    /**
+     * Method called to associate a ChildUserSearchRun object to this object
+     * through the ChildUserSearchRun foreign key attribute.
+     *
+     * @param  ChildUserSearchRun $l ChildUserSearchRun
+     * @return $this|\JobScooper\User The current object (for fluent API support)
+     */
+    public function addUserSearchRun(ChildUserSearchRun $l)
+    {
+        if ($this->collUserSearchRuns === null) {
+            $this->initUserSearchRuns();
+            $this->collUserSearchRunsPartial = true;
+        }
+
+        if (!$this->collUserSearchRuns->contains($l)) {
+            $this->doAddUserSearchRun($l);
+
+            if ($this->userSearchRunsScheduledForDeletion and $this->userSearchRunsScheduledForDeletion->contains($l)) {
+                $this->userSearchRunsScheduledForDeletion->remove($this->userSearchRunsScheduledForDeletion->search($l));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param ChildUserSearchRun $userSearchRun The ChildUserSearchRun object to add.
+     */
+    protected function doAddUserSearchRun(ChildUserSearchRun $userSearchRun)
+    {
+        $this->collUserSearchRuns[]= $userSearchRun;
+        $userSearchRun->setUser($this);
+    }
+
+    /**
+     * @param  ChildUserSearchRun $userSearchRun The ChildUserSearchRun object to remove.
+     * @return $this|ChildUser The current object (for fluent API support)
+     */
+    public function removeUserSearchRun(ChildUserSearchRun $userSearchRun)
+    {
+        if ($this->getUserSearchRuns()->contains($userSearchRun)) {
+            $pos = $this->collUserSearchRuns->search($userSearchRun);
+            $this->collUserSearchRuns->remove($pos);
+            if (null === $this->userSearchRunsScheduledForDeletion) {
+                $this->userSearchRunsScheduledForDeletion = clone $this->collUserSearchRuns;
+                $this->userSearchRunsScheduledForDeletion->clear();
+            }
+            $this->userSearchRunsScheduledForDeletion[]= $userSearchRun;
+            $userSearchRun->setUser(null);
+        }
+
+        return $this;
+    }
+
+    /**
      * Clears the current object, sets all attributes to their default values and removes
      * outgoing references as well as back-references (from other objects to this one. Results probably in a database
      * change of those foreign objects when you call `save` there).
@@ -1735,20 +1735,20 @@ abstract class User implements ActiveRecordInterface
     public function clearAllReferences($deep = false)
     {
         if ($deep) {
-            if ($this->collUserSearchRuns) {
-                foreach ($this->collUserSearchRuns as $o) {
-                    $o->clearAllReferences($deep);
-                }
-            }
             if ($this->collUserJobMatches) {
                 foreach ($this->collUserJobMatches as $o) {
                     $o->clearAllReferences($deep);
                 }
             }
+            if ($this->collUserSearchRuns) {
+                foreach ($this->collUserSearchRuns as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
         } // if ($deep)
 
-        $this->collUserSearchRuns = null;
         $this->collUserJobMatches = null;
+        $this->collUserSearchRuns = null;
     }
 
     /**

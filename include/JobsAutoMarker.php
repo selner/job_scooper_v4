@@ -86,7 +86,7 @@ class JobsAutoMarker
     public function markJobs()
     {
         if (is_null($this->arrMasterJobList) || count($this->arrMasterJobList) <= 0)
-            $this->arrMasterJobList = getUserJobMatchesForAppRun();
+            $this->arrMasterJobList = getAllUserMatchesNotNotified();
 
         if(is_null($this->arrMasterJobList) || count($this->arrMasterJobList) <= 0)
             throw new Exception("No jobs found to auto-mark.");

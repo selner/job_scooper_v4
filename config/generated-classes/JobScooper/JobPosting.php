@@ -37,6 +37,9 @@ class JobPosting extends \JobScooper\Base\JobPosting implements \ArrayAccess
         $this->updateAutoColumns();
         $this->setJobSite(cleanupSlugPart($this->getJobSite()));
 
+        $this->setJobTitleLinked('<a href="'.$this->getUrl().'" target="new">'.$this->getTitle().'</a>');
+
+
     }
     public function preInsert(\Propel\Runtime\Connection\ConnectionInterface $con = null)
     {

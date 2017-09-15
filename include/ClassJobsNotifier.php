@@ -30,16 +30,8 @@ class ClassJobsNotifier
 
     protected $pathsAllExcludedJobs = array();
 
-    function __construct($basepathMatchedJobs = null, $basepathExcludedJobs = null, $strOutputDirectory = null)
+    function __construct($strOutputDirectory = null)
     {
-        if(!is_null($basepathMatchedJobs)) {
-            $this->pathsMatchedJobs['json'] = $basepathMatchedJobs .".json";
-            $this->pathsMatchedJobs['csv'] = $basepathMatchedJobs .".csv";
-        }
-        if(!is_null($basepathMatchedJobs)) {
-            $this->pathsAllExcludedJobs['json'] = $basepathExcludedJobs . ".json";
-            $this->pathsAllExcludedJobs['csv'] = $basepathExcludedJobs . ".csv";
-        }
     }
 
     function __destruct()
@@ -163,73 +155,37 @@ class ClassJobsNotifier
         $arrFilesToAttach = array();
         $arrResultFilesToCombine = array();
 
-        $arrMatchedJobs = array();
-        $arrExcludedJobs = array();
+        $this->arrMatchedJobs = getAllUserMatchesNotNotified();
+        $this->arrExcludedJobs = array_filter($this->arrMatchedJobs, "isMarked_NotInterested");
         $detailsHTMLFile = null;
 
         //
         // For our final output, we want the jobs to be sorted by company and then role name.
         // Create a copy of the jobs list that is sorted by that value.
         //
-        $tmpJobsFileData = loadJSON($this->pathsMatchedJobs['json']);
-        if(!is_null($tmpJobsFileData) && array_key_exists('jobslist', $tmpJobsFileData) && countJobRecords($tmpJobsFileData['jobslist']) > 0 )
-        {
-            $arrJobsData = $tmpJobsFileData['jobslist'];
-            $arrMatchedJobs = array_filter($arrJobsData, 'isIncludedJobSite' );
+        $arrJobsData = $this->arrMatchedJobs;
+        $arrMatchedJobs = array_filter($arrJobsData, 'isIncludedJobSite' );
 
-            $GLOBALS['logger']->logLine(PHP_EOL . "Writing final list of " . count($arrMatchedJobs) . " jobs to output files." . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine(PHP_EOL . "Writing final list of " . count($arrMatchedJobs) . " jobs to output files." . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
 
-            // Output only new records that haven't been looked at yet
-            $detailsCSVFile = \Scooper\parseFilePath($this->_outputFilteredJobsListToFile_($arrMatchedJobs, "isMarked_InterestedOrBlank", "-finalmatchedjobs", "CSV"));
-            $detailsHTMLFile = \Scooper\parseFilePath($this->_outputFilteredJobsListToFile_($arrMatchedJobs, "isMarked_InterestedOrBlank", "-finalmatchedjobs", "HTML"));
+        // Output only new records that haven't been looked at yet
+        $detailsCSVFile = \Scooper\parseFilePath($this->_outputFilteredJobsListToFile_($arrMatchedJobs, "isMarkedBlank", "-finalmatchedjobs", "CSV"));
+        $detailsHTMLFile = \Scooper\parseFilePath($this->_outputFilteredJobsListToFile_($arrMatchedJobs, "isMarkedBlank", "-finalmatchedjobs", "HTML"));
 
-            $arrResultFilesToCombine[] = $detailsCSVFile;
-            $arrFilesToAttach[] = $detailsCSVFile;
-            $arrFilesToAttach[] =  $detailsHTMLFile;
-        }
+        $arrResultFilesToCombine[] = $detailsCSVFile;
+        $arrFilesToAttach[] = $detailsCSVFile;
+        $arrFilesToAttach[] =  $detailsHTMLFile;
 
+        $arrJobsData = $this->arrExcludedJobs;
+        $arrExcludedJobs = array_filter($arrJobsData, 'isIncludedJobSite' );
 
-        $arrExcludedJobData = loadJSON($this->pathsAllExcludedJobs['json']);
-        if(!is_null($arrExcludedJobData) && array_key_exists('jobslist', $arrExcludedJobData) && countJobRecords($arrExcludedJobData['jobslist']) > 0 ) {
-            $arrJobsData = $arrExcludedJobData['jobslist'];
-            $arrExcludedJobs = array_filter($arrJobsData, 'isIncludedJobSite' );
+        $detailsExcludedCSVFile = \Scooper\parseFilePath($this->_outputFilteredJobsListToFile_($arrExcludedJobs, "isMarked_NotInterested", "-finalexcludedjobs", "CSV"));
 
-            $detailsExcludedCSVFile = \Scooper\parseFilePath($this->_outputFilteredJobsListToFile_($arrExcludedJobData['jobslist'], "isMarked_NotInterested", "-finalexcludedjobs", "CSV"));
-
-            if ((filesize($detailsExcludedCSVFile['full_file_path']) < 10 * 1024 * 1024) || isDebug()) {
-                $arrFilesToAttach[] = $detailsExcludedCSVFile;
-            }
+        if ((filesize($detailsExcludedCSVFile['full_file_path']) < 10 * 1024 * 1024) || isDebug()) {
+            $arrFilesToAttach[] = $detailsExcludedCSVFile;
         }
 
         $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \Scooper\C__SECTION_END__, \Scooper\C__NAPPSECONDLEVEL__);
-
-
-        //
-        // Output debugging / interim files if asked to
-        //
-
-        if(isDebug() === true) {
-            $GLOBALS['logger']->logSectionHeader("DEBUG ONLY:  Writing out interim, developer files (user does not ever see these)..." . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
-
-
-
-            //
-            // In a debug run, include the full details of the keywords we used for auto-matching
-            //
-            if(isDebug() == true) {
-                foreach ($GLOBALS['USERDATA']['user_input_files_details'] as $inputfile) {
-                    array_push($arrResultFilesToCombine, $inputfile['details']);
-                }
-            }
-
-            //
-            // Now, output the various subsets of the total jobs list
-            //
-
-            $this->_filterAndWriteListToAlternateFile_($arrMatchedJobs, "isJobUpdatedTodayOrIsInterestedOrBlank", "", "CSV", "updated today", false);
-
-            $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \Scooper\C__SECTION_END__, \Scooper\C__NAPPSECONDLEVEL__);
-        }
 
         $xlsOutputFile = $this->_combineCSVsToExcel($detailsMainResultsXLSFile, $arrResultFilesToCombine);
         array_push($arrFilesToAttach, $xlsOutputFile);
@@ -325,14 +281,6 @@ class ClassJobsNotifier
         }
         else
             $arrJobs = array_filter($arrJobsList, $strFilterToApply);
-
-        if(strcasecmp($fileDetails['file_extension'], "HTML") == 0)
-        {
-            foreach(array_keys($arrJobs) as $jobKey)
-            {
-                $arrJobs[$jobKey]['job_title_linked'] = '<a href="'.$arrJobs[$jobKey]['job_post_url'].'" target="new">'.$arrJobs[$jobKey]['job_title'].'</a>';
-            }
-        }
 
         $this->writeRunsJobsToFile($fileDetails['full_file_path'], $arrJobs, $strFilterToApply, $fileDetails['file_extension']);
 
@@ -568,7 +516,7 @@ class ClassJobsNotifier
         $arrExcluded = null;
 
         $strOut = "                ";
-        $arrHeaders = array("For Review", "Auto-Filtered", "Active Jobs", "Downloaded Listings");
+        $arrHeaders = array("For Review", "Auto-Filtered", "New Listings");
 
         $arrFailedPluginsReport = getFailedSearchesByPlugin();
         
@@ -576,12 +524,12 @@ class ClassJobsNotifier
 
             $arrPluginJobMatches  = array();
             if ($arrPluginJobsUnfiltered != null && is_array($arrPluginJobsUnfiltered) && countJobRecords($arrPluginJobsUnfiltered) > 0) {
-                $arrPluginJobMatches = array_filter($arrPluginJobsUnfiltered, function ($var) use ($plugin) { return (strcasecmp($var['job_site'], $plugin) == 0); } );
+                $arrPluginJobMatches = array_filter($arrPluginJobsUnfiltered, function ($var) use ($plugin) { return (strcasecmp($var->getJobPosting()->getJobSite(), $plugin) == 0); } );
             }
 
             $arrPluginExcludesJobs  = array();
             if ($arrExcludedJobs != null && is_array($arrExcludedJobs) && countJobRecords($arrExcludedJobs) > 0) {
-                $arrPluginExcludesJobs = array_filter($arrExcludedJobs, function ($var) use ($plugin) { return (strcasecmp($var['job_site'], $plugin) == 0); } );
+                $arrPluginExcludesJobs = array_filter($arrExcludedJobs, function ($var) use ($plugin) { return (strcasecmp($var->getJobPosting()->getJobSite(), $plugin) == 0); } );
             }
 
             $arrPluginJobs = $arrPluginJobMatches + $arrPluginExcludesJobs;
@@ -589,7 +537,6 @@ class ClassJobsNotifier
             $arrCounts[$plugin]['name'] = $plugin;
             $arrCounts[$plugin]['for_review'] = count(array_filter($arrPluginJobs, "isMarkedBlank"));
             $arrCounts[$plugin]['total_not_interested'] = count(array_filter($arrPluginJobs, "isMarked_NotInterested"));
-            $arrCounts[$plugin]['total_active'] = count(array_filter($arrPluginJobs, "isMarked_InterestedOrBlank"));
             $arrCounts[$plugin]['total_listings'] = count($arrPluginJobs);
             $arrCounts[$plugin]['had_error'] = false;
 
@@ -815,15 +762,15 @@ class ClassJobsNotifier
     private function getKeysForHTMLOutput()
     {
         return array(
-            'company',
+            'Company',
 //            'job_title',
-            'job_title_linked',
+            'JobTitleLinked',
 //            'job_post_url',
 //            'job_site_date' =>'',
 //            'interested',
 //            'match_notes',
 //            'status',
-            'location',
+            'Location',
 //            'job_site_category',
 //            'job_site',
 //            'job_id',
@@ -837,7 +784,7 @@ class ClassJobsNotifier
     {
         $arr = getEmptyJobListingRecord();
 
-        $allKeys  = array_diff(array_keys($arr), array('job_title_tokenized', 'normalized', 'job_title_linked', 'job_id', 'date_last_updated', 'match_notes'));
+        $allKeys  = array_diff(array_keys($arr), array('TitleTokens', 'JobTitleLinked', 'JobPostingId', 'MatchStatus', 'MatchNotes', "FirstSeenAt", "RemovedAt", "PostedAt", "UpdatedAT", "JobSitePostID"));
         return $allKeys;
 
     }
@@ -869,14 +816,24 @@ class ClassJobsNotifier
 
         $classCombined = new \Scooper\ScooperSimpleCSV($strOutFilePath , "w");
 
-        $arrRecordsToOutput = array_unique_multidimensional($arrJobsRecordsToUse);
+        $arrCSVRecs = array();
+        foreach($arrJobsRecordsToUse as $job)
+        {
+            $item = $job->getJobPosting()->toArray();
+            $item['MatchStatus'] = $job->getUserMatchStatus();
+            $item['MatchNotes'] = $job->getMatchNotes();
+
+            $arrCSVRecs[$item['KeySiteAndPostID']] = $item;
+        }
+
+        $arrRecordsToOutput = array_unique_multidimensional($arrCSVRecs);
         if (!is_array($arrRecordsToOutput))
         {
             $arrRecordsToOutput = array();
         }
         else
         {
-            sortJobsListByCompanyRole($arrRecordsToOutput);
+            $this->sortJobsCSVArrayByCompanyRole($arrRecordsToOutput);
         }
 
         if ($keysToOutput == null && count($arrRecordsToOutput) > 0)
@@ -919,7 +876,7 @@ class ClassJobsNotifier
                 // $strCSS = file_get_contents(dirname(__FILE__) . '/../include/CSVTableStyle.css');
                 $strCSS = file_get_contents($detailsCSSToInclude['full_file_path']);
             }
-            $classCombined->writeArrayToHTMLFile($arrRecordsToOutput, $keysToOutput, $this->arrKeysForDeduping, $strCSS);
+            $classCombined->writeArrayToHTMLFile($arrRecordsToOutput, $keysToOutput, null, $strCSS);
 
         }
         else
@@ -942,6 +899,28 @@ class ClassJobsNotifier
 
 
 
+
+    function sortJobsCSVArrayByCompanyRole(&$arrJobList)
+    {
+
+        if (countJobRecords($arrJobList) > 0) {
+            $arrFinalJobIDs_SortedByCompanyRole = array();
+            $finalJobIDs_CompanyRole = array_column($arrJobList, 'KeyCompanyAndTitle', 'KeySiteAndPostID');
+            foreach (array_keys($finalJobIDs_CompanyRole) as $key) {
+                // Need to add uniq key of job site id to the end or it will collapse duplicate job titles that
+                // are actually multiple open posts
+                $arrFinalJobIDs_SortedByCompanyRole[$finalJobIDs_CompanyRole[$key] . "-" . $key] = $key;
+            }
+
+            ksort($arrFinalJobIDs_SortedByCompanyRole);
+            $arrFinalJobs_SortedByCompanyRole = array();
+            foreach ($arrFinalJobIDs_SortedByCompanyRole as $jobid) {
+                $arrFinalJobs_SortedByCompanyRole[$jobid] = $arrJobList[$jobid];
+            }
+            $arrJobList = $arrFinalJobs_SortedByCompanyRole;
+        }
+
+    }
 
 
 

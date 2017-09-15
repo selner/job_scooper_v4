@@ -186,7 +186,7 @@ class StageManager
     {
         try {
             LogLine("Stage 2:  Tokenizing Job Titles... ", \Scooper\C__DISPLAY_SECTION_START__);
-            $arrJobsList = getUserJobMatchesForAppRun();
+            $arrJobsList = getAllUserMatchesNotNotified();
             if(count($arrJobsList) > 0)
             {
                 $injfile = "alljobmatches.json";

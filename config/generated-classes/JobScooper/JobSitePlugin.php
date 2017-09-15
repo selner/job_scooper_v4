@@ -31,37 +31,19 @@ class JobSitePlugin extends BaseJobSitePlugin
         }
     }
 
-    public function preInsert(\Propel\Runtime\Connection\ConnectionInterface $con = null)
-    {
-        $this->updateNextRunDate();
-        if (is_callable('parent::preInsert')) {
-            return parent::preInsert($con);
-        }
-        return true;
-    }
-
-    public function preUpdate(\Propel\Runtime\Connection\ConnectionInterface $con = null)
-    {
-        $this->updateNextRunDate();
-
-        if (is_callable('parent::preUpdate')) {
-            return parent::preUpdate($con);
-        }
-        return true;
-    }
-
     function setSuccess($boolVal)
     {
-        if($boolVal == false) {
+        if($boolVal !== true) {
             $this->setLastFailedAt(time());
             $this->setLastRunWasSuccessful(false);
         }
         else
         {
+            $this->updateNextRunDate();
             $this->setLastFailedAt(null);
             $this->setLastRunWasSuccessful(true);
-
         }
+
     }
 
     public function shouldRunNow()

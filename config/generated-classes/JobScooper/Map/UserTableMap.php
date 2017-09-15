@@ -153,13 +153,6 @@ class UserTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('UserSearchRun', '\\JobScooper\\UserSearchRun', RelationMap::ONE_TO_MANY, array (
-  0 =>
-  array (
-    0 => ':user_slug',
-    1 => ':user_slug',
-  ),
-), null, null, 'UserSearchRuns', false);
         $this->addRelation('UserJobMatch', '\\JobScooper\\UserJobMatch', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
@@ -167,6 +160,13 @@ class UserTableMap extends TableMap
     1 => ':user_slug',
   ),
 ), null, null, 'UserJobMatches', false);
+        $this->addRelation('UserSearchRun', '\\JobScooper\\UserSearchRun', RelationMap::ONE_TO_MANY, array (
+  0 =>
+  array (
+    0 => ':user_slug',
+    1 => ':user_slug',
+  ),
+), null, null, 'UserSearchRuns', false);
     } // buildRelations()
 
     /**

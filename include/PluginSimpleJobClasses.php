@@ -392,6 +392,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
                 $item['job_title'] = $this->_getTagMatchValue_($node, $tagSetup['tag_title'], 'plaintext');
                 $item['job_post_url'] = $this->_getTagMatchValue_($node, $tagSetup['tag_link'], 'href');
+                $item['job_site'] = $this->siteName;
 
                 if (strlen($item['job_title']) == 0)
                     continue;

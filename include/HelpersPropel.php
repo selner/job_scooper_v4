@@ -100,33 +100,47 @@ function updateOrCreateJobPosting($jobArray)
                 ->findOneOrCreate();
         }
         else {
-            if((is_null($jobArray['job_site']) || strlen($jobArray['job_site']) == 0) && !is_null($jobArray['company']))
-                $jobArray['job_site'] = strtolower($jobArray['company']);
+            if(is_null($jobArray['job_site']) || strlen($jobArray['job_site']) == 0)
+                throw new InvalidArgumentException("Attempted to create a new job posting record without a valid jobsite value set.");
 
             $jobRecord = \JobScooper\JobPostingQuery::create()
                 ->filterByJobSite($jobArray['job_site'])
                 ->filterByJobSitePostID($jobArray['job_id'])
                 ->findOneOrCreate();
         }
+
+        $jobRecord->fromArray($jobArray);
+        $jobRecord->save();
+        return $jobRecord;
+
     }
     catch (Exception $ex)
     {
-        $jobRecord = new \JobScooper\JobPosting();
+        handleException($ex);
     }
 
-    $jobRecord->fromArray($jobArray);
-    $jobRecord->save();
-    return $jobRecord;
 }
 
+//
+//function getUserJobMatchesForAppRun()
+//{
+//    $userObject = $GLOBALS['USERDATA']['configuration_settings']['user_details'];
+//    $query = \JobScooper\UserJobMatchQuery::create()
+//        ->filterByUserMatchStatus(null)
+//        ->filterByUserSlug($userObject->getUserSlug())
+////        ->filterBy("AppRunId", $GLOBALS['USERDATA']['configuration_settings']['app_run_id'])
+//        ->joinWithJobPosting();
+//
+//    $results =  $query->find();
+//    return $results->getData();
+//}
 
-function getUserJobMatchesForAppRun()
+function getAllUserMatchesNotNotified()
 {
     $userObject = $GLOBALS['USERDATA']['configuration_settings']['user_details'];
     $query = \JobScooper\UserJobMatchQuery::create()
-        ->filterByUserMatchStatus(null)
+        ->filterByUserNotificationState(null)
         ->filterByUserSlug($userObject->getUserSlug())
-//        ->filterBy("AppRunId", $GLOBALS['USERDATA']['configuration_settings']['app_run_id'])
         ->joinWithJobPosting();
 
     $results =  $query->find();

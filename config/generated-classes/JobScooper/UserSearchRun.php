@@ -98,58 +98,58 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
     {
     }
 
-    public function updateJobSitePluginLastRun()
-    {
-        $searchResult = $this->getSearchRunResult();
-        if(!is_null($searchResult) && array_key_exists('success', $searchResult) && !is_null($searchResult['success']))
-        {
-            LogLine("Updating Job Site Plugin Run Details...", \Scooper\C__DISPLAY_NORMAL__);
-            $jobpluginrun = \JobScooper\JobSitePluginLastRunQuery::create()
-                ->filterByPrimaryKey($this->getJobSite())
-                ->findOneOrCreate();
-
-            $dtNow = new \DateTime();
-            $dbValNow = $dtNow->format("Y-m-d H:i:s.u");
-
-            $jobpluginrun->setLastUserSearchRunId($this->getUserSearchRunId());
-
-            if($searchResult['success'] === true) {
-                $jobpluginrun->setWasSuccessful($searchResult['success']);
-                $jobpluginrun->setLastSucceededAt($dbValNow);
-            }
-            else
-            {
-                $arrErrDetails = $jobpluginrun->getRecentErrorDetails();
-                $jobpluginrun->setLastFailedAt($dbValNow);
-                if(is_null($arrErrDetails))
-                    $arrErrDetails = array();
-                $arrErrDetails[] = $searchResult['error_details'];
-                $jobpluginrun->setRecentErrorDetails($arrErrDetails);
-            }
-            $jobpluginrun->save();
-        }
-    }
-    public function postInsert(\Propel\Runtime\Connection\ConnectionInterface $con = null)
-    {
-        $this->updateJobSitePluginLastRun();
-
-        if (is_callable('parent::postInsert')) {
-            parent::postInsert($con);
-        }
-
-        return true;
-    }
-
-    public function postUpdate(\Propel\Runtime\Connection\ConnectionInterface $con = null)
-    {
-        $this->updateJobSitePluginLastRun();
-
-        if (is_callable('parent::postUpdate')) {
-            parent::postUpdate($con);
-        }
-
-        return true;
-    }
+//    public function updateJobSitePluginLastRun()
+//    {
+//        $searchResult = $this->getSearchRunResult();
+//        if(!is_null($searchResult) && array_key_exists('success', $searchResult) && !is_null($searchResult['success']))
+//        {
+//            LogLine("Updating Job Site Plugin Run Details...", \Scooper\C__DISPLAY_NORMAL__);
+//            $jobpluginrun = \JobScooper\Job::create()
+//                ->filterByPrimaryKey($this->getJobSite())
+//                ->findOneOrCreate();
+//
+//            $dtNow = new \DateTime();
+//            $dbValNow = $dtNow->format("Y-m-d H:i:s.u");
+//
+//            $jobpluginrun->setLastUserSearchRunId($this->getUserSearchRunId());
+//
+//            if($searchResult['success'] === true) {
+//                $jobpluginrun->setWasSuccessful($searchResult['success']);
+//                $jobpluginrun->setLastSucceededAt($dbValNow);
+//            }
+//            else
+//            {
+//                $arrErrDetails = $jobpluginrun->getRecentErrorDetails();
+//                $jobpluginrun->setLastFailedAt($dbValNow);
+//                if(is_null($arrErrDetails))
+//                    $arrErrDetails = array();
+//                $arrErrDetails[] = $searchResult['error_details'];
+//                $jobpluginrun->setRecentErrorDetails($arrErrDetails);
+//            }
+//            $jobpluginrun->save();
+//        }
+//    }
+//    public function postInsert(\Propel\Runtime\Connection\ConnectionInterface $con = null)
+//    {
+//        $this->updateJobSitePluginLastRun();
+//
+//        if (is_callable('parent::postInsert')) {
+//            parent::postInsert($con);
+//        }
+//
+//        return true;
+//    }
+//
+//    public function postUpdate(\Propel\Runtime\Connection\ConnectionInterface $con = null)
+//    {
+//        $this->updateJobSitePluginLastRun();
+//
+//        if (is_callable('parent::postUpdate')) {
+//            parent::postUpdate($con);
+//        }
+//
+//        return true;
+//    }
 
     private function _setPluginClass($outputDirectory = null)
     {

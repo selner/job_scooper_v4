@@ -1060,6 +1060,11 @@ abstract class AbstractClassBaseJobsPlugin
     
     function cleanupJobItemFields($arrItem)
     {
+        if(is_null($arrItem['job_site']) || strlen($arrItem['job_site']) == 0)
+            $arrItem['job_site'] = $this->siteName;
+
+        $arrItem['job_site'] = cleanupSlugPart($arrItem['job_site']);
+
         $arrItem ['job_post_url'] = trim($arrItem['job_post_url']); // DO NOT LOWER, BREAKS URLS
 
         if (!is_null($arrItem['job_post_url']) || strlen($arrItem['job_post_url']) > 0) {
@@ -1140,7 +1145,7 @@ abstract class AbstractClassBaseJobsPlugin
     {
         $addedJobIds = array();
         foreach ($arrJobs as $job) {
-            $savedJob = updateOrCreateJobPosting($job);
+            $savedJob = $this->saveJob($job);
             $addedJobIds[] = $savedJob->getJobPostingId();
         }
 
@@ -1158,27 +1163,6 @@ abstract class AbstractClassBaseJobsPlugin
         $jobResults = $queryData->toArray();
 
         return $jobResults;
-    }
-
-//    protected function getJobsFromDB($arrJobs)
-//    {
-//        $arrIds = array_column($arrJobs, 'job_id', 'job_id');
-//        $queryData = \JobScooper\JobPostingQuery::create()
-//            ->filterByJobSite($this->siteName)
-//            ->filterByJobSitePostID(array_values($arrIds))
-//            ->find();
-//
-//        return $queryData;
-//    }
-//
-
-
-    function saveJob($job)
-    {
-        if (!array_key_exists("job_id", $job) || strlen($job['job_id']) <= 0)
-            return null;
-        $job['job_site'] = $this->siteName;
-        return updateOrCreateJobPosting($job);
     }
 
 

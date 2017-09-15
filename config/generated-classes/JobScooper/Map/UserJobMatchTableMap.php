@@ -117,7 +117,6 @@ class UserJobMatchTableMap extends TableMap
     const DEFAULT_STRING_FORMAT = 'YAML';
 
     /** The enumerated values for the user_notification_state field */
-    const COL_USER_NOTIFICATION_STATE_NONE = 'none';
     const COL_USER_NOTIFICATION_STATE_READY_TO_SEND = 'ready-to-send';
     const COL_USER_NOTIFICATION_STATE_SENT = 'sent';
 
@@ -157,8 +156,7 @@ class UserJobMatchTableMap extends TableMap
     /** The enumerated values for this table */
     protected static $enumValueSets = array(
                 UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE => array(
-                            self::COL_USER_NOTIFICATION_STATE_NONE,
-            self::COL_USER_NOTIFICATION_STATE_READY_TO_SEND,
+                            self::COL_USER_NOTIFICATION_STATE_READY_TO_SEND,
             self::COL_USER_NOTIFICATION_STATE_SENT,
         ),
                 UserJobMatchTableMap::COL_USER_MATCH => array(
@@ -211,9 +209,8 @@ class UserJobMatchTableMap extends TableMap
         $this->addForeignKey('jobposting_id', 'JobPostingId', 'INTEGER', 'jobposting', 'jobposting_id', true, null, null);
         $this->addColumn('user_notification_state', 'UserNotificationState', 'ENUM', false, null, null);
         $this->getColumn('user_notification_state')->setValueSet(array (
-  0 => 'none',
-  1 => 'ready-to-send',
-  2 => 'sent',
+  0 => 'ready-to-send',
+  1 => 'sent',
 ));
         $this->addColumn('user_match', 'UserMatchStatus', 'ENUM', false, null, null);
         $this->getColumn('user_match')->setValueSet(array (
