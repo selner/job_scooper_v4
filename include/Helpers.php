@@ -447,6 +447,7 @@ function getFailedSearchesByPlugin()
 
     return $arrFailedPluginsReport;
 }
+
 function getFailedSearches()
 {
     if (!array_key_exists('search_results', $GLOBALS['USERDATA']) || is_null($GLOBALS['USERDATA']['search_results']))

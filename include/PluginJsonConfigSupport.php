@@ -53,6 +53,7 @@ class JSONPlugins
             'siteName' => null,
             'siteBaseURL' => null,
             'strBaseURLFormat' => null,
+            'countryCodes' => null,
             'PageLimit' => null,
             'PaginationType' => null,
             'LocationType' => null,
@@ -64,6 +65,11 @@ class JSONPlugins
         if(array_key_exists("AgentName", $configData))
         {
             $pluginData['siteName'] = $configData->AgentName;
+        }
+
+        if(array_key_exists("CountryCodes", $configData))
+        {
+            $pluginData['countryCodes'] = $configData->CountryCodes;
         }
 
         if(array_key_exists("SourceURL", $configData))

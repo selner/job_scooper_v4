@@ -227,6 +227,7 @@ abstract class AbstractClassBaseJobsPlugin
     protected $_flags_ = null;
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
     protected $normalizer = null;
+    protected $countryCodes = array("US");
 
     function getLocationSettingType()
     {
@@ -260,6 +261,14 @@ abstract class AbstractClassBaseJobsPlugin
         $strRetCombinedKeywords = array_shift($arrKeywords);
 
         return $strRetCombinedKeywords;
+    }
+
+    public function getSupportedCountryCodes()
+    {
+        if(is_null($this->typeLocationSearchNeeded))
+            return null;
+
+        return $this->countryCodes;
     }
 
     protected function parseJobsListForPage($objSimpHTML)
