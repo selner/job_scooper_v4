@@ -104,6 +104,7 @@ class JobsAutoMarker
         $this->_markJobsList_SetLikelyDuplicatePosts_($arrJobs_AutoUpdatable);
         $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
         $this->_markJobsList_SearchKeywordsNotFound_($arrJobs_AutoUpdatable);
+        $this->_markJobsList_UserExcludedKeywords_($arrJobs_AutoUpdatable);
         $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($arrJobs_AutoUpdatable);
 
 
@@ -284,6 +285,73 @@ class JobsAutoMarker
             handleException($ex, "Error in SetAutoExcludedCompaniesFromRegex: %s", true);
         }
     }
+
+
+
+    private function _markJobsList_UserExcludedKeywords_(&$arrJobsList)
+    {
+        $nJobsSkipped = 0;
+        $nJobsMarkedAutoExcluded = 0;
+        $nJobsNotMarked = 0;
+
+        try
+        {
+            if(count($arrJobsList) == 0 || is_null($GLOBALS['USERDATA']['title_negative_keyword_tokens']) || count($GLOBALS['USERDATA']['title_negative_keyword_tokens']) == 0) return;
+
+            LogLine("Excluding Jobs by Negative Title Keyword Token Matches", \Scooper\C__DISPLAY_ITEM_START__);
+            LogLine("Checking ".count($arrJobsList) ." roles against ". count($GLOBALS['USERDATA']['title_negative_keyword_tokens']) ." negative title keywords to be excluded.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+
+
+            try {
+
+                $titleKeywords = $this->_getTitleKeywords();
+                $negKeywords = array_diff_assoc($GLOBALS['USERDATA']['title_negative_keyword_tokens'], array_values($titleKeywords) );
+
+                foreach ($arrJobsList as $jobMatch)
+                {
+                    $arrKeywordsMatched = array();
+                    if(in_array($jobMatch->getUserMatchStatus(), array("exclude-match")) == 1) {
+                        $nJobsSkipped += 1;
+                    }
+                    else
+                    {
+                        foreach ($negKeywords as $kywdtoken) {
+                            $matched = substr_count_multi($jobMatch->getJobPosting()->getTitleTokens(), $kywdtoken, $kwdTokenMatches, true);
+                            if ($matched === true) {
+                                $strTitleTokenMatches = getArrayValuesAsString(array_values($kwdTokenMatches), " ", "", false);
+
+                                if (count($kwdTokenMatches) === count($kywdtoken)) {
+                                    $arrKeywordsMatched[$strTitleTokenMatches] = $kwdTokenMatches;
+                                }
+                            }
+                        }
+
+                        if(count($arrKeywordsMatched) > 0)
+                        {
+                            $jobMatch->setUserMatchStatus("exclude-match");
+                            $jobMatch->setUserMatchReason(TITLE_NEG_KWD_MATCH);
+                            $jobMatch->updateMatchNotes("Title matched negative user keywords [" . getArrayValuesAsString($arrKeywordsMatched) . "]");
+                            $nJobsMarkedAutoExcluded += 1;
+                        }
+                        else
+                        {
+                            $nJobsNotMarked += 1;
+                        }
+                    }
+                    $jobMatch->save();
+
+                }
+            } catch (Exception $ex) {
+                handleException($ex, 'ERROR:  Failed to verify titles against negative keywords due to error: %s', isDebug());
+            }
+            LogLine("Processed " . countAssociativeArrayValues($arrJobsList) . " titles for auto-marking against negative title keywords: " . $nJobsSkipped . "/" . count($arrJobsList) . " skipped; " . $nJobsNotMarked. "/" . countAssociativeArrayValues($arrJobsList) . " marked included; " . $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) . " marked excluded.", \Scooper\C__DISPLAY_ITEM_RESULT__);
+        }
+        catch (Exception $ex)
+        {
+            handleException($ex, "Error in SearchKeywordsNotFound: %s", true);
+        }
+
+    }
     private function getNotesWithDupeIDAdded($strNote, $strNewDupe)
     {
         $strDupeNotes = null;
@@ -315,6 +383,20 @@ class JobsAutoMarker
 
     }
 
+    private function _getTitleKeywords()
+    {
+        $keywordsToMatch = array();
+        foreach ($GLOBALS['USERDATA']['configuration_settings']['searches'] as $searchDetails) {
+            $search = $searchDetails->getSearchSettings();
+            if (array_key_exists('keywords_array_tokenized', $search)) {
+                foreach ($search['keywords_array_tokenized'] as $kwdset) {
+                    $arrKwdSet[$kwdset] = explode(" ", $kwdset);
+                }
+                $keywordsToMatch = \Scooper\my_merge_add_new_keys($keywordsToMatch, $arrKwdSet);
+            }
+        }
+        return $keywordsToMatch;
+    }
 
     private function _markJobsList_SearchKeywordsNotFound_(&$arrJobsList)
     {
@@ -324,18 +406,9 @@ class JobsAutoMarker
 
         try {
             if (count($arrJobsList) == 0) return null;
+            $titleKeywords = $this->_getTitleKeywords();
 
-            $keywordsToMatch = array();
-            foreach ($GLOBALS['USERDATA']['configuration_settings']['searches'] as $search) {
-                if (array_key_exists('keywords_array_tokenized', $search)) {
-                    foreach ($search['keywords_array_tokenized'] as $kwdset) {
-                        $arrKwdSet[$kwdset] = explode(" ", $kwdset);
-                    }
-                    $keywordsToMatch = \Scooper\my_merge_add_new_keys($keywordsToMatch, $arrKwdSet);
-                }
-            }
-
-            LogLine("Checking " . count($arrJobsList) . " roles against " . count($keywordsToMatch) . " keywords in titles...", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Checking " . count($arrJobsList) . " roles against " . count($titleKeywords) . " keywords in titles...", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
             try {
 
@@ -347,7 +420,7 @@ class JobsAutoMarker
                     }
                     else
                     {
-                       foreach ($keywordsToMatch as $kywdtoken) {
+                       foreach ($titleKeywords as $kywdtoken) {
                             $matched = substr_count_multi($jobMatch->getJobPosting()->getTitleTokens(), $kywdtoken, $kwdTokenMatches, true);
                             if ($matched === true) {
                                 $strTitleTokenMatches = getArrayValuesAsString(array_values($kwdTokenMatches), " ", "", false);
@@ -367,10 +440,12 @@ class JobsAutoMarker
                         }
                         else
                         {
-                            $jobMatch->updateMatchNotes("matched title keywords [" . getArrayValuesAsString($arrKeywordsMatched) . "]");
+//                            $jobMatch->updateMatchNotes("matched title keywords [" . getArrayValuesAsString($arrKeywordsMatched) . "]");
                             $nJobsNotMarked += 1;
                         }
                     }
+                    $jobMatch->save();
+
                 }
             } catch (Exception $ex) {
                 handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s', isDebug());
