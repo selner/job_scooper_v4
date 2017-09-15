@@ -1082,12 +1082,20 @@ abstract class AbstractClassBaseJobsPlugin
         $arrItem ['job_id'] = \Scooper\strScrub($arrItem['job_id'], FOR_LOOKUP_VALUE_MATCHING);
         if (is_null($arrItem['job_id']) || strlen($arrItem['job_id']) == 0) {
             if (isset($this->regex_link_job_id)) {
-                $item['job_id'] = $this->getIDFromLink($this->regex_link_job_id, $arrItem['job_post_url']);
+                $arrItem['job_id'] = $this->getIDFromLink($this->regex_link_job_id, $arrItem['job_post_url']);
             }
         }
 
         return $arrItem;
 
+    }
+
+    function saveJob($arrItem)
+    {
+        $arrJob = $this->cleanupJobItemFields($arrItem);
+        $job = updateOrCreateJobPosting($arrJob);
+
+        return $job;
     }
 
     function saveUserJobMatches($arrJobList, $searchDetails)
@@ -1098,8 +1106,7 @@ abstract class AbstractClassBaseJobsPlugin
             $this->arrSearchReturnedJobs[$searchDetails->getKey()] = array();
 
         foreach (array_keys($arrJobsBySitePostId) as $JobSitePostId) {
-            $arrJob = $this->cleanupJobItemFields($arrJobsBySitePostId[$JobSitePostId]);
-            $job = updateOrCreateJobPosting($arrJob);
+            $job = $this->saveJob($arrJobsBySitePostId[$JobSitePostId]);
 
             $newMatch = \JobScooper\UserJobMatchQuery::create()
                 ->filterByUserSlug($this->userObject->getUserSlug())
