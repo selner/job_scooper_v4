@@ -34,9 +34,9 @@ class PluginCareerBuilder extends ClassClientHTMLJobSitePlugin
     protected $arrListingTagSetup = array(
         'tag_listings_count' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => "count"), 'return_attribute' => 'plaintext', 'return_value_regex' => '/[^\d]+(\d+).*?/'),
         'tag_listings_section' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'jobs'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'job-row')),
-        'tag_title' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row', 'index' =>1), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'column small-10'), array('tag' => 'h2'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
-        'tag_link' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row', 'index' =>1), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'column small-10'), array('tag' => 'h2'), array('tag' => 'a'), 'return_attribute' => 'href'),
-        'tag_job_id' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row', 'index' =>1), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'column small-10'), array('tag' => 'h2'), array('tag' => 'a'), 'return_attribute' => 'data-job-did'),
+        'tag_title' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row', 'index' =>1), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'column small-10'), array('tag' => 'h2'), array('tag' => 'a'), 'index'=> 0, 'return_attribute' => 'plaintext'),
+        'tag_link' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row', 'index' =>1), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'column small-10'), array('tag' => 'h2'), array('tag' => 'a'), 'index'=> 0, 'return_attribute' => 'href'),
+        'tag_job_id' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row', 'index' =>1), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'column small-10'), array('tag' => 'h2'), array('tag' => 'a'), 'index'=> 0, 'return_attribute' => 'data-job-did'),
         'tag_company' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row job-information'), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'columns large-2 medium-3 small-12'), array('tag' => 'h4', 'attribute'=>'class', 'attribute_value'=>'job-text'),  array('tag' => 'a'), 'return_attribute' => 'plaintext'),
         'tag_location' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row job-information'), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'columns end large-2 medium-3 small-12'), array('tag' => 'h4', 'attribute'=>'class', 'attribute_value'=>'job-text'), 'return_attribute' => 'plaintext'),
         'tag_job_posting_date' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'column small-2 time-posted'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'show-for-medium-up'), 'return_attribute' => 'plaintext'),
@@ -48,40 +48,42 @@ class PluginCareerBuilder extends ClassClientHTMLJobSitePlugin
         $keywordval = parent::getKeywordURLValue($searchDetails);
         return strtolower($keywordval);
     }
+}
 
-    function getDaysURLValue($days = null) {
-        $ret = "1";
 
-        if($days != null)
-        {
-            switch($days)
-            {
-                case ($days>7 && $days<=30):
-                    $ret = "30";
-                    break;
+class PluginCareerBuilderUK extends ClassClientHTMLJobSitePlugin
+{
+    protected $siteName = 'CareerBuilderUk';
+    protected $nJobListingsPerPage = 20;
+    protected $siteBaseURL = 'http://https://www.careerbuilder.co.uk';
+    protected $strBaseURLFormat = "https://www.careerbuilder.co.uk/search?q=***KEYWORDS***&sc=1&loc=***LOCATION***&pg=***PAGE_NUMBER***";
+    protected $additionalFlags = [];
+    protected $typeLocationSearchNeeded = 'location-city';
+    protected $strKeywordDelimiter = "|";
+    protected $paginationType = C__PAGINATION_PAGE_VIA_URL;
+    protected $countryCodes = array("UK");
 
-                case ($days>30):
-                    $ret = "";
-                    break;
+    protected $arrListingTagSetup = array(
+        'tag_listings_noresults' => array('selector' => 'h1', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
+        'tag_listings_count' => array('selector' => 'h1', 'index'=> 0, 'return_attribute' => 'plaintext', 'return_value_regex' => '/(\d+).*?/'),
+        'tag_listings_section' => array('selector' => 'article.job-list'),
+        'tag_link' => array('selector' => 'a.job-title', 'return_attribute' => 'href'),
+        'tag_title' => array('selector' => 'a.job-title', 'return_attribute' => 'plaintext'),
+        'tag_location' => array('selector' => 'ul.inline-list li span', 'index' => 0, 'return_attribute' => 'plaintext'),
+        'tag_category' => array('selector' => 'ul.inline-list li span', 'index' => 2, 'return_attribute' => 'plaintext'),
+//        'tag_job_posting_date' => array('selector' => 'ul.inline-list li', 'index' => 3, 'return_attribute' => 'plaintext', 'return_value_callback' => 'combineTextAllChildren', 'return_value_regex' => '/Posted\s*(.*?)/'),
+        'tag_company' => array('selector' => 'a.show-for-large-up', 'index' => 0, 'return_attribute' => 'plaintext'),
+        'tag_job_id' => array('selector' => 'a.job-title', 'return_attribute' => 'href', 'return_value_regex' => '/.*?\/(.*?)\/\?.*/'),
+    );
 
-                case ($days>3 && $days<=7):
-                    $ret = "7";
-                    break;
+    static function isNoJobResults($var)
+    {
+        return noJobStringMatch($var, "Nothing found");
+    }
 
-                case ($days>=3 && $days<7):
-                    $ret = "3";
-                    break;
-
-                case $days<=1:
-                default:
-                    $ret = "1";
-                    break;
-
-            }
-        }
-
-        return $ret;
-
+    protected function getKeywordURLValue($searchDetails) {
+        $keywordval = parent::getKeywordURLValue($searchDetails);
+        return strtolower($keywordval);
     }
 
 }
