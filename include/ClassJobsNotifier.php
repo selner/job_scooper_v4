@@ -19,6 +19,7 @@ require_once dirname(dirname(__FILE__))."/bootstrap.php";
 //Import PHPMailer classes into the global namespace
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use JobScooper\JobPosting as JobPosting;
 
 
 class ClassJobsNotifier
@@ -782,11 +783,10 @@ class ClassJobsNotifier
 
     private function getKeysForUserCSVOutput()
     {
-        $arr = getEmptyJobListingRecord();
-
-        $allKeys  = array_diff(array_keys($arr), array('TitleTokens', 'JobTitleLinked', 'JobPostingId', 'MatchStatus', 'MatchNotes', "FirstSeenAt", "RemovedAt", "PostedAt", "UpdatedAT", "JobSitePostID"));
+        $jobPost = new JobPosting();
+        $arrKeys = array_keys($jobPost->toArray());
+        $allKeys  = array_diff($arrKeys, array('TitleTokens', 'JobTitleLinked', 'JobPostingId', 'MatchStatus', 'MatchNotes', "FirstSeenAt", "RemovedAt", "PostedAt", "UpdatedAt", "JobSitePostID", "KeySiteAndPostID", "KeyCompanyAndTitle"));
         return $allKeys;
-
     }
 
 
@@ -809,8 +809,6 @@ class ClassJobsNotifier
         if($fIncludeFilteredJobsInResults == false)
         {
             $arrJobsRecordsToUse = array_filter($arrJobsRecordsToUse, "includeJobInFilteredList");
-//            $arrJobsRecordsToUse = $this->filterOutUninterestedJobs($arrJobsRecordsToUse, $fIncludeFilteredJobsInResults);
-
         }
 
 
