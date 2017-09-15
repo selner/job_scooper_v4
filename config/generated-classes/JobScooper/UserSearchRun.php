@@ -17,7 +17,6 @@ use \Exception as Exception;
  */
 class SearchSettings extends \ArrayObject
 {
-
     function __construct()
     {
         $arrFields = Array(

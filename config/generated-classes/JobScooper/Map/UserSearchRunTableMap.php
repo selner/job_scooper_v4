@@ -172,7 +172,7 @@ class UserSearchRunTableMap extends TableMap
         $this->addForeignKey('user_slug', 'UserSlug', 'VARCHAR', 'user', 'user_slug', false, 128, null);
         $this->addColumn('date_search_run', 'DateSearchRun', 'TIMESTAMP', false, null, null);
         $this->addColumn('jobsite', 'JobSite', 'VARCHAR', false, 100, null);
-        $this->addColumn('search_settings', 'SearchSettings', 'ARRAY', false, null, null);
+        $this->addColumn('search_settings', 'SearchSettings', 'OBJECT', false, null, null);
         $this->addColumn('search_run_result', 'SearchRunResult', 'OBJECT', false, null, null);
         $this->addColumn('updated_at', 'UpdatedAt', 'TIMESTAMP', false, null, null);
     } // initialize()

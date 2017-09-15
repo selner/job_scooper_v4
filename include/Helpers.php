@@ -430,7 +430,7 @@ function getFailedSearchesByPlugin()
             if (!array_key_exists($search->getJobSite(), $arrFailedPluginsReport))
                 $arrFailedPluginsReport[$search->getJobSite()]= array();
 
-            $arrFailedPluginsReport[$search->getJobSite()][$search->getKey()] = cloneArray($search, array(
+            $arrFailedPluginsReport[$search->getJobSite()][$search->getKey()] = cloneArray($search->toArray(), array(
                 'keywords_string_for_url',
                 'base_url_format',
                 'keywords_array_tokenized',

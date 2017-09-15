@@ -36,11 +36,12 @@ class JobSitePlugin extends BaseJobSitePlugin
         if($boolVal !== true) {
             $this->setLastFailedAt(time());
             $this->setLastRunWasSuccessful(false);
+            $this->setStartNextRunAfter("");
         }
         else
         {
             $this->updateNextRunDate();
-            $this->setLastFailedAt(null);
+            $this->setLastFailedAt("");
             $this->setLastRunWasSuccessful(true);
         }
 

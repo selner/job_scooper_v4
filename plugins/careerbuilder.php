@@ -45,8 +45,8 @@ class PluginCareerBuilder extends ClassClientHTMLJobSitePlugin
     );
 
     protected function getKeywordURLValue($searchDetails) {
-        $searchDetails['keywords_string_for_url'] = strtolower($searchDetails['keywords_string_for_url']);
-        return parent::getKeywordURLValue($searchDetails);
+        $keywordval = parent::getKeywordURLValue($searchDetails);
+        return strtolower($keywordval);
     }
 
     function getDaysURLValue($days = null) {

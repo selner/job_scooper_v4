@@ -164,7 +164,7 @@
             <parameter name="create_column" value="date_search_run" />
         </behavior>
         <column name="jobsite" phpName="JobSite" type="varchar" size="100"/>
-        <column name="search_settings" phpName="SearchSettings" type="array"/>
+        <column name="search_settings" phpName="SearchSettings" type="object"/>
         <column name="search_run_result" phpName="SearchRunResult" type="object"/>
         <!--<column name="run_result_code" field="run_code" phpName="RunResultCode" type="boolean"/>-->
         <!--<column name="run_result_details" fieldname="details" phpName="RunResultDetails" type="longvarchar"/>-->

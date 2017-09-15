@@ -408,8 +408,8 @@ abstract class AbstractClassBaseJobsPlugin
     protected function getKeywordURLValue($searchDetails)
     {
         if (!$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
-            assert($searchDetails['keywords_string_for_url'] != VALUE_NOT_SUPPORTED);
-            return $searchDetails['keywords_string_for_url'];
+            assert($searchDetails->getSearchSettings()['keywords_string_for_url'] != VALUE_NOT_SUPPORTED);
+            return $searchDetails->getSearchSettings()['keywords_string_for_url'];
         }
         return "";
     }

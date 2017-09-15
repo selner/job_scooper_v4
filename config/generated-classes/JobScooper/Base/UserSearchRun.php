@@ -113,7 +113,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
     /**
      * The value for the search_settings field.
      *
-     * @var        array
+     * @var
      */
     protected $search_settings;
 
@@ -468,31 +468,18 @@ abstract class UserSearchRun implements ActiveRecordInterface
     /**
      * Get the [search_settings] column value.
      *
-     * @return array
+     * @return mixed
      */
     public function getSearchSettings()
     {
-        if (null === $this->search_settings_unserialized) {
-            $this->search_settings_unserialized = array();
-        }
-        if (!$this->search_settings_unserialized && null !== $this->search_settings) {
-            $search_settings_unserialized = substr($this->search_settings, 2, -2);
-            $this->search_settings_unserialized = '' !== $search_settings_unserialized ? explode(' | ', $search_settings_unserialized) : array();
+        if (null == $this->search_settings_unserialized && is_resource($this->search_settings)) {
+            if ($serialisedString = stream_get_contents($this->search_settings)) {
+                $this->search_settings_unserialized = unserialize($serialisedString);
+            }
         }
 
         return $this->search_settings_unserialized;
     }
-
-    /**
-     * Test the presence of a value in the [search_settings] array column value.
-     * @param      mixed $value
-     *
-     * @return boolean
-     */
-    public function hasSearchSetting($value)
-    {
-        return in_array($value, $this->getSearchSettings());
-    } // hasSearchSetting()
 
     /**
      * Get the [search_run_result] column value.
@@ -657,53 +644,21 @@ abstract class UserSearchRun implements ActiveRecordInterface
     /**
      * Set the value of [search_settings] column.
      *
-     * @param array $v new value
+     * @param mixed $v new value
      * @return $this|\JobScooper\UserSearchRun The current object (for fluent API support)
      */
     public function setSearchSettings($v)
     {
-        if ($this->search_settings_unserialized !== $v) {
+        if (null === $this->search_settings || stream_get_contents($this->search_settings) !== serialize($v)) {
             $this->search_settings_unserialized = $v;
-            $this->search_settings = '| ' . implode(' | ', $v) . ' |';
+            $this->search_settings = fopen('php://memory', 'r+');
+            fwrite($this->search_settings, serialize($v));
             $this->modifiedColumns[UserSearchRunTableMap::COL_SEARCH_SETTINGS] = true;
         }
+        rewind($this->search_settings);
 
         return $this;
     } // setSearchSettings()
-
-    /**
-     * Adds a value to the [search_settings] array column value.
-     * @param  mixed $value
-     *
-     * @return $this|\JobScooper\UserSearchRun The current object (for fluent API support)
-     */
-    public function addSearchSetting($value)
-    {
-        $currentArray = $this->getSearchSettings();
-        $currentArray []= $value;
-        $this->setSearchSettings($currentArray);
-
-        return $this;
-    } // addSearchSetting()
-
-    /**
-     * Removes a value from the [search_settings] array column value.
-     * @param  mixed $value
-     *
-     * @return $this|\JobScooper\UserSearchRun The current object (for fluent API support)
-     */
-    public function removeSearchSetting($value)
-    {
-        $targetArray = array();
-        foreach ($this->getSearchSettings() as $element) {
-            if ($element != $value) {
-                $targetArray []= $element;
-            }
-        }
-        $this->setSearchSettings($targetArray);
-
-        return $this;
-    } // removeSearchSetting()
 
     /**
      * Set the value of [search_run_result] column.
@@ -799,8 +754,13 @@ abstract class UserSearchRun implements ActiveRecordInterface
             $this->jobsite = (null !== $col) ? (string) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserSearchRunTableMap::translateFieldName('SearchSettings', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->search_settings = $col;
-            $this->search_settings_unserialized = null;
+            if (null !== $col) {
+                $this->search_settings = fopen('php://memory', 'r+');
+                fwrite($this->search_settings, $col);
+                rewind($this->search_settings);
+            } else {
+                $this->search_settings = null;
+            }
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : UserSearchRunTableMap::translateFieldName('SearchRunResult', TableMap::TYPE_PHPNAME, $indexType)];
             if (null !== $col) {
@@ -1034,6 +994,11 @@ abstract class UserSearchRun implements ActiveRecordInterface
                         $reloadObject = true;
                     }
                 }
+                // Rewind the search_settings LOB column, since PDO does not rewind after inserting value.
+                if ($this->search_settings !== null && is_resource($this->search_settings)) {
+                    rewind($this->search_settings);
+                }
+
                 // Rewind the search_run_result LOB column, since PDO does not rewind after inserting value.
                 if ($this->search_run_result !== null && is_resource($this->search_run_result)) {
                     rewind($this->search_run_result);
@@ -1147,7 +1112,10 @@ abstract class UserSearchRun implements ActiveRecordInterface
                         $stmt->bindValue($identifier, $this->jobsite, PDO::PARAM_STR);
                         break;
                     case 'search_settings':
-                        $stmt->bindValue($identifier, $this->search_settings, PDO::PARAM_STR);
+                        if (is_resource($this->search_settings)) {
+                            rewind($this->search_settings);
+                        }
+                        $stmt->bindValue($identifier, $this->search_settings, PDO::PARAM_LOB);
                         break;
                     case 'search_run_result':
                         if (is_resource($this->search_run_result)) {
@@ -1384,10 +1352,6 @@ abstract class UserSearchRun implements ActiveRecordInterface
                 $this->setJobSite($value);
                 break;
             case 6:
-                if (!is_array($value)) {
-                    $v = trim(substr($value, 2, -2));
-                    $value = $v ? explode(' | ', $v) : array();
-                }
                 $this->setSearchSettings($value);
                 break;
             case 7:

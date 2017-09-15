@@ -79,7 +79,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRun findOneByUserSlug(string $user_slug) Return the first ChildUserSearchRun filtered by the user_slug column
  * @method     ChildUserSearchRun findOneByDateSearchRun(string $date_search_run) Return the first ChildUserSearchRun filtered by the date_search_run column
  * @method     ChildUserSearchRun findOneByJobSite(string $jobsite) Return the first ChildUserSearchRun filtered by the jobsite column
- * @method     ChildUserSearchRun findOneBySearchSettings(array $search_settings) Return the first ChildUserSearchRun filtered by the search_settings column
+ * @method     ChildUserSearchRun findOneBySearchSettings( $search_settings) Return the first ChildUserSearchRun filtered by the search_settings column
  * @method     ChildUserSearchRun findOneBySearchRunResult( $search_run_result) Return the first ChildUserSearchRun filtered by the search_run_result column
  * @method     ChildUserSearchRun findOneByUpdatedAt(string $updated_at) Return the first ChildUserSearchRun filtered by the updated_at column *
 
@@ -92,7 +92,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRun requireOneByUserSlug(string $user_slug) Return the first ChildUserSearchRun filtered by the user_slug column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByDateSearchRun(string $date_search_run) Return the first ChildUserSearchRun filtered by the date_search_run column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByJobSite(string $jobsite) Return the first ChildUserSearchRun filtered by the jobsite column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserSearchRun requireOneBySearchSettings(array $search_settings) Return the first ChildUserSearchRun filtered by the search_settings column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchRun requireOneBySearchSettings( $search_settings) Return the first ChildUserSearchRun filtered by the search_settings column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneBySearchRunResult( $search_run_result) Return the first ChildUserSearchRun filtered by the search_run_result column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByUpdatedAt(string $updated_at) Return the first ChildUserSearchRun filtered by the updated_at column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
@@ -103,7 +103,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRun[]|ObjectCollection findByUserSlug(string $user_slug) Return ChildUserSearchRun objects filtered by the user_slug column
  * @method     ChildUserSearchRun[]|ObjectCollection findByDateSearchRun(string $date_search_run) Return ChildUserSearchRun objects filtered by the date_search_run column
  * @method     ChildUserSearchRun[]|ObjectCollection findByJobSite(string $jobsite) Return ChildUserSearchRun objects filtered by the jobsite column
- * @method     ChildUserSearchRun[]|ObjectCollection findBySearchSettings(array $search_settings) Return ChildUserSearchRun objects filtered by the search_settings column
+ * @method     ChildUserSearchRun[]|ObjectCollection findBySearchSettings( $search_settings) Return ChildUserSearchRun objects filtered by the search_settings column
  * @method     ChildUserSearchRun[]|ObjectCollection findBySearchRunResult( $search_run_result) Return ChildUserSearchRun objects filtered by the search_run_result column
  * @method     ChildUserSearchRun[]|ObjectCollection findByUpdatedAt(string $updated_at) Return ChildUserSearchRun objects filtered by the updated_at column
  * @method     ChildUserSearchRun[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
@@ -481,79 +481,15 @@ abstract class UserSearchRunQuery extends ModelCriteria
     /**
      * Filter the query on the search_settings column
      *
-     * @param     array $searchSettings The values to use as filter.
+     * @param     mixed $searchSettings The value to use as filter
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
      */
     public function filterBySearchSettings($searchSettings = null, $comparison = null)
     {
-        $key = $this->getAliasedColName(UserSearchRunTableMap::COL_SEARCH_SETTINGS);
-        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
-            foreach ($searchSettings as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addAnd($key, $value, Criteria::LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::LIKE);
-                }
-            }
-
-            return $this;
-        } elseif ($comparison == Criteria::CONTAINS_SOME) {
-            foreach ($searchSettings as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addOr($key, $value, Criteria::LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::LIKE);
-                }
-            }
-
-            return $this;
-        } elseif ($comparison == Criteria::CONTAINS_NONE) {
-            foreach ($searchSettings as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addAnd($key, $value, Criteria::NOT_LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::NOT_LIKE);
-                }
-            }
-            $this->addOr($key, null, Criteria::ISNULL);
-
-            return $this;
-        }
-
-        return $this->addUsingAlias(UserSearchRunTableMap::COL_SEARCH_SETTINGS, $searchSettings, $comparison);
-    }
-
-    /**
-     * Filter the query on the search_settings column
-     * @param     mixed $searchSettings The value to use as filter
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::CONTAINS_ALL
-     *
-     * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
-     */
-    public function filterBySearchSetting($searchSettings = null, $comparison = null)
-    {
-        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
-            if (is_scalar($searchSettings)) {
-                $searchSettings = '%| ' . $searchSettings . ' |%';
-                $comparison = Criteria::LIKE;
-            }
-        } elseif ($comparison == Criteria::CONTAINS_NONE) {
-            $searchSettings = '%| ' . $searchSettings . ' |%';
-            $comparison = Criteria::NOT_LIKE;
-            $key = $this->getAliasedColName(UserSearchRunTableMap::COL_SEARCH_SETTINGS);
-            if ($this->containsKey($key)) {
-                $this->addAnd($key, $searchSettings, $comparison);
-            } else {
-                $this->addAnd($key, $searchSettings, $comparison);
-            }
-            $this->addOr($key, null, Criteria::ISNULL);
-
-            return $this;
+        if (is_object($searchSettings)) {
+            $searchSettings = serialize($searchSettings);
         }
 
         return $this->addUsingAlias(UserSearchRunTableMap::COL_SEARCH_SETTINGS, $searchSettings, $comparison);
