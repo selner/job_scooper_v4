@@ -226,7 +226,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             throw new ErrorException("Required value for the output folder was not specified. Exiting.");
         }
 
-        $workingDirs = ["debug", "listings-raw", "results", "listings-userinterested", "listings-rawbysite", "listings-tokenized", "listings-usernotinterested"];
+        $workingDirs = ["debug", "results"];
         foreach($workingDirs as $d) {
             $prefix = $GLOBALS['USERDATA']['user_unique_key'];
             $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), $d, $prefix));
@@ -234,12 +234,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             $GLOBALS['USERDATA']['directories'][$d] = realpath($details['directory']);
         }
 
-        $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), "listings-rawbysite", "all-users"));
-        $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-        $GLOBALS['USERDATA']['directories']['listings-rawbysite-allusers'] = realpath($details['directory']);
-
     }
-
 
 
     private function _LoadAndMergeAllConfigFilesRecursive($fileConfigToLoad)
