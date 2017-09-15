@@ -35,6 +35,7 @@ class JobsAutoMarker
     protected $normalizer  = null;
     protected $userMatchedCBSAPlaces  = array();
     protected $cbsaLocSetMapping = array();
+    protected $locationCities = array();
     protected $validCityValues = array();
 
     function __construct($arrJobObjsToMark = array(), $strOutputDirectory = null)
@@ -55,6 +56,11 @@ class JobsAutoMarker
                 $placekey = strtoupper($cityName);
                 $cbsa = $cbsaCityMapping[$placekey];
                 $this->cbsaLocSetMapping[$locset['key']] = $cbsa['CBSA'];
+            }
+            elseif(array_key_exists('location-city', $locset) === true)
+            {
+                $cityName = $this->_normalizeLocation_($locset['location-city']);
+                $this->locationCities[$this->getLocationLookupKey($cityName)] = $cityName;
             }
         }
 
@@ -171,7 +177,12 @@ class JobsAutoMarker
         $stringToNormalize = "111 Bogus St, " . $locString;
         $location = $this->normalizer->parse($stringToNormalize);
         if ($location !== false)
-            $locString = $location['city'] . ", " . $location['state'];
+        {
+            $locString = $location['city'];
+            if (strlen($location['state']) > 0)
+                 $locString .= ", " . $location['state'];
+        }
+
         return $locString;
     }
 
@@ -184,14 +195,22 @@ class JobsAutoMarker
 
     private function _doesLocationMatchUserSearch($locationKey)
     {
-        if (in_array($locationKey, array_keys($this->userMatchedCBSAPlaces)))
+        if(in_array("US", $GLOBALS['USERDATA']['configuration_settings']['country_codes']))
         {
-            return true;
-        }
 
-        $placeKey = array_find_closest_key_match($locationKey, array_keys($this->userMatchedCBSAPlaces));
-        if (!is_null($placeKey) && (strncmp($placeKey, $locationKey, 5) == 0 || !array_key_exists($locationKey, array_keys($this->validCityValues)))) {
-            return true;
+            if (in_array($locationKey, array_keys($this->userMatchedCBSAPlaces))) {
+                return true;
+            }
+
+            $placeKey = array_find_closest_key_match($locationKey, array_keys($this->userMatchedCBSAPlaces));
+            if (!is_null($placeKey) && (strncmp($placeKey, $locationKey, 5) == 0 || !array_key_exists($locationKey, array_keys($this->validCityValues)))) {
+                return true;
+            }
+        }
+        else
+        {
+            if(substr_count_multi($this->getLocationLookupKey($locationKey), array_keys($this->locationCities), $matches) == true)
+                return true;
         }
 
         return false;
@@ -214,14 +233,11 @@ class JobsAutoMarker
                 $locValue = $jobMatch->getJobPosting()->getLocation();
                 $locKey = $this->getLocationLookupKey($locValue);
 
-                if(in_array($jobMatch->getUserMatchStatus(), array("exclude-match")) == 1) {
+                if (in_array($jobMatch->getUserMatchStatus(), array("exclude-match")) == 1) {
                     $nJobsSkipped += 1;
-                }
-                elseif($this->_doesLocationMatchUserSearch($locKey)) {
+                } elseif ($this->_doesLocationMatchUserSearch($locKey)) {
                     $nJobsNotMarked++;
-                }
-                else
-                {
+                } else {
                     $jobMatch->setUserMatchStatus("exclude-match");
                     $jobMatch->setUserMatchReason("Out of Search Area ");
                     $jobMatch->updateMatchNotes($locValue . " not in user's search area.");
@@ -297,15 +313,16 @@ class JobsAutoMarker
         try
         {
             if(count($arrJobsList) == 0 || is_null($GLOBALS['USERDATA']['title_negative_keyword_tokens']) || count($GLOBALS['USERDATA']['title_negative_keyword_tokens']) == 0) return;
+            $titleKeywords = $this->_getTitleKeywords();
+            if (count($arrJobsList) == 0 || is_null($titleKeywords)) return null;
+            $negKeywords = array_diff_assoc($GLOBALS['USERDATA']['title_negative_keyword_tokens'], array_values($titleKeywords) );
 
             LogLine("Excluding Jobs by Negative Title Keyword Token Matches", \Scooper\C__DISPLAY_ITEM_START__);
-            LogLine("Checking ".count($arrJobsList) ." roles against ". count($GLOBALS['USERDATA']['title_negative_keyword_tokens']) ." negative title keywords to be excluded.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Checking ".count($arrJobsList) ." roles against ". count($negKeywords) ." negative title keywords to be excluded.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
 
             try {
 
-                $titleKeywords = $this->_getTitleKeywords();
-                $negKeywords = array_diff_assoc($GLOBALS['USERDATA']['title_negative_keyword_tokens'], array_values($titleKeywords) );
 
                 foreach ($arrJobsList as $jobMatch)
                 {
@@ -388,7 +405,9 @@ class JobsAutoMarker
         $keywordsToMatch = array();
         foreach ($GLOBALS['USERDATA']['configuration_settings']['searches'] as $searchDetails) {
             $search = $searchDetails->getSearchSettings();
-            if (array_key_exists('keywords_array_tokenized', $search)) {
+            if(is_null($search))
+                return null;
+            elseif (array_key_exists('keywords_array_tokenized', $search)) {
                 foreach ($search['keywords_array_tokenized'] as $kwdset) {
                     $arrKwdSet[$kwdset] = explode(" ", $kwdset);
                 }
@@ -405,8 +424,8 @@ class JobsAutoMarker
         $nJobsNotMarked = 0;
 
         try {
-            if (count($arrJobsList) == 0) return null;
             $titleKeywords = $this->_getTitleKeywords();
+            if (count($arrJobsList) == 0 || is_null($titleKeywords)) return null;
 
             LogLine("Checking " . count($arrJobsList) . " roles against " . count($titleKeywords) . " keywords in titles...", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 

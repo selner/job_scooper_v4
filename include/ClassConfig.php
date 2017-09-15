@@ -321,7 +321,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         foreach($GLOBALS['USERDATA']['configuration_settings']['location_sets'] as $lset)
         {
             if(array_key_exists("location-countrycode", $lset))
-                $countryCodes[$lset['location-countrycode']] = $lset['location-countrycode'];
+                $GLOBALS['USERDATA']['configuration_settings']['country_codes'][$lset['location-countrycode']] = $lset['location-countrycode'];
         }
 
         foreach(array_keys($GLOBALS['USERDATA']['configuration_settings']['included_sites']) as $pluginKey) {
@@ -330,12 +330,12 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             $pluginCountries = $plugin->getSupportedCountryCodes();
             if(is_null($pluginCountries))
                 continue;
-            $matchedCountries = array_intersect($pluginCountries, $countryCodes);
+            $matchedCountries = array_intersect($pluginCountries, $GLOBALS['USERDATA']['configuration_settings']['country_codes']);
             if (count($matchedCountries) == 0) {
 //                $GLOBALS['JOBSITE_PLUGINS'][$pluginKey]['include_in_run'] = false;
                 $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$pluginKey] = $pluginKey;
                 unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$pluginKey]);
-                LogLine("Set " . $pluginKey . " to excluded because it does not support any of the country codes required (" . getArrayValuesAsString($countryCodes));
+                LogLine("Set " . $pluginKey . " to excluded because it does not support any of the country codes required (" . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['country_codes']));
             }
         }
 
