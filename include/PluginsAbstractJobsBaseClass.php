@@ -77,11 +77,7 @@ abstract class AbstractClassBaseJobsPlugin
             $this->nMaxJobsToReturn = $this->nMaxJobsToReturn * 3;
         }
 
-        if ($this->paginationType == C__PAGINATION_INFSCROLLPAGE_NOCONTROL) {
-            $this->nJobListingsPerPage = $this->nMaxJobsToReturn;
-        }
-
-        if (!is_null($this->selectorMoreListings) && strlen($this->selectorMoreListings) > 0)
+        if(!is_null($this->selectorMoreListings) && strlen($this->selectorMoreListings) > 0)
             $this->selectorMoreListings = preg_replace('/(\'|"|\\")/', '\"', $this->selectorMoreListings);
 
     }
