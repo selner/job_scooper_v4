@@ -393,7 +393,15 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
     protected function getPageURLValue($nPage) { return ($nPage == null || $nPage == "") ? "" : $nPage; }
 
-    protected function getItemURLValue($nItem) { return ($nItem == null || $nItem == "") ? 0 : $nItem; }
+    protected function getItemURLValue($nItem) {
+
+        if($this->isBitFlagSet(C__JOB_ITEMCOUNT_STARTSATZERO__) && $nItem > 0)
+        {
+            $nItem = $nItem - 1;
+        }
+
+        return ($nItem == null || $nItem == "") ? 0 : $nItem;
+    }
 
     protected function parseTotalResultsCount($objSimpHTML) {   throw new \BadMethodCallException(sprintf("Not implemented method " . __METHOD__ . " called on class \"%s \".", __CLASS__)); }
 
