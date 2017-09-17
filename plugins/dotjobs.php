@@ -17,23 +17,18 @@
  */
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginDotJobs extends ClassClientHTMLJobSitePlugin
+
+/**
+ * Class AbstractDotJobs
+ *
+ *       Used by dotjobs.json plugin configuration to override single method
+ */
+abstract class AbstractDotJobs extends ClassClientHTMLJobSitePlugin
 {
-    protected $siteName = 'dotjobs';
-    // BUGBUG:  hard coded to be washington state
-    protected $siteBaseURL = 'http://www.my.jobs';
-    protected $nJobListingsPerPage = 20;
-
-    protected $strBaseURLFormat = "http://www.my.jobs/jobs/?location=***LOCATION***&q=***KEYWORDS***";
-    protected $typeLocationSearchNeeded = 'location-city-comma-state';
-    protected $additionalLoadDelaySeconds = 4;
-    protected $nMaxJobsToReturn = 3000;
-
-    protected $selectorMoreListings = "#button_moreJobs";
-
-
     protected function goToEndOfResultsSetViaLoadMore($nTotalListings)
     {
+
+        $this->selectorMoreListings = "#button_moreJobs";
 
         $js = "
             document.getElementById(\"direct_moreLessLinks_listingDiv\").setAttribute(\"data-num-items\", 50);
@@ -44,17 +39,4 @@ class PluginDotJobs extends ClassClientHTMLJobSitePlugin
 
         parent::goToEndOfResultsSetViaLoadMore($nTotalListings);
     }
-
-    protected $arrListingTagSetup = array(
-        'tag_listings_count' => array('tag' => 'h3', 'attribute'=>'class', 'attribute_value' => 'direct_highlightedText', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/.*?([,\d]+)\s*jobs/i'),
-        'tag_listings_section' => array(array('tag' => 'ul', 'attribute'=>'class', 'attribute_value' => 'default_jobListing'), array('tag' => 'li')),
-        'tag_title' =>  array(array('tag' => 'h4'), array('tag' => 'a'), array('tag' => 'span'), 'return_attribute' => 'plaintext'),
-        'tag_link' =>  array(array('tag' => 'h4'), array('tag' => 'a'), 'return_attribute' => 'href'),
-        'tag_company' =>  array(array('tag' => 'div'), array('tag' => 'span'),array('tag' => 'b'), 'return_attribute' => 'plaintext'),
-        'tag_location' =>  array(array('tag' => 'div'), array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'hiringPlace'), array('tag' => 'span'), array('tag' => 'span'), 'index' => 0, 'return_attribute' => 'plaintext'),
-        'tag_job_id' =>  array(array('tag' => 'h4'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>  '/\/([\w\d]+)\/job.*/i'),
-        'tag_load_more' =>  array('tag' => 'a', 'attribute' => 'id', 'attribute_value' =>'button_moreJobs')
-    );
-
-
 }
