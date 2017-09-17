@@ -112,7 +112,7 @@ abstract class BaseMadgexATSPlugin extends ClassClientHTMLJobSitePlugin
         }
     }
 
-    function parseTotalResultsCount(&$objSimpHTML)
+    function parseTotalResultsCount($objSimpHTML)
     {
 
         $this->parseAndRedirectToLocation($objSimpHTML);
