@@ -81,6 +81,10 @@ class JSONPlugins
                     $pluginData['siteBaseURL'] = $arrConfigData['BaseURL'];
                     break;
 
+                case "CountryCodes":
+                    $pluginData['countryCodes'] = $arrConfigData['CountryCodes'];
+                    break;
+
                 default:
                     if(array_key_exists($datakey, $pluginData))
                         $pluginData[$datakey] = $arrConfigData[$datakey];
