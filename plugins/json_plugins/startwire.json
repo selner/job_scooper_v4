@@ -13,6 +13,12 @@
           "Type": "CSS"
         },
         {
+          "Name": "tag_listings_count",
+          "Selector": "div.count-jobs div.number",
+          "Extract": "TEXT",
+          "Type": "CSS"
+        },
+        {
           "Name": "tag_pages_count",
           "Selector": "div.js-infinite-scroll",
           "Extract": "ATTR",
@@ -78,6 +84,7 @@
     }
   ],
   "Pagination": {
-    "Type": "INFINITE-SCROLL-NO-CONTROL"
+    "Type": "INFINITE-SCROLL-NO-CONTROL",
+    "PageLimit" : 40
   }
 }
