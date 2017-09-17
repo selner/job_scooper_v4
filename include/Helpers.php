@@ -51,19 +51,26 @@ function object_to_array($obj)
     return $arr;
 }
 
+
 function handleException($ex, $fmtLogMsg = null, $raise = true)
 {
-    if (is_null($ex))
-        $ex = new Exception($fmtLogMsg);
+    $toThrow = $ex;
+    if (is_null($toThrow))
+        $toThrow = new Exception($fmtLogMsg);
 
     if (!array_key_exists('ERROR_REPORT_FILES', $GLOBALS['USERDATA']))
         $GLOBALS['USERDATA']['ERROR_REPORT_FILES'] = array();
 
-
-    $toThrow = $ex;
-    if (!is_null($fmtLogMsg)) {
-        $msg = sprintf($fmtLogMsg, $ex->getMessage());
-        $toThrow = new Exception($msg, $ex->getCode(), $previous=$ex);
+    $msg = $fmtLogMsg;
+    if (!is_null($toThrow) && !is_null($fmtLogMsg) && !is_null($ex) && strlen($fmtLogMsg) > 0 &&
+        stristr($fmtLogMsg, "%s") !== false)
+    {
+        $msg = sprintf($fmtLogMsg, $toThrow->getMessage());
+        $toThrow = new Exception($msg, $toThrow->getCode(), $previous=$ex);
+    }
+    elseif(!is_null($ex))
+    {
+        $msg = $toThrow->getMessage();
     }
 
 //    $msg .= PHP_EOL . "PHP memory usage: " . getPhpMemoryUsage() . PHP_EOL;
@@ -79,7 +86,6 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
             throw $toThrow;
     }
 
-
     if (isset($GLOBALS['logger'])) {
         $GLOBALS['logger']->logLine(PHP_EOL . PHP_EOL . PHP_EOL);
         $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
@@ -90,10 +96,10 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
 
     $debugData = array(
         "error_time" => $now->format('Y-m-d\TH:i:s'),
-        "exception_code" => $ex->getCode(),
+        "exception_code" => $toThrow->getCode(),
         "exception_message" => $msg,
-        "exception_file" => $ex->getFile(),
-        "exception_line" => $ex->getLine(),
+        "exception_file" => $toThrow->getFile(),
+        "exception_line" => $toThrow->getLine(),
         "exception" => \Scooper\object_to_array($ex)
 //        "object_properties" => null,
 ////        "debug_backtrace" => var_export(debug_backtrace(), true),
@@ -108,7 +114,6 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
         throw $toThrow;
     }
 }
-
 
 function getRunDateRange()
 {
