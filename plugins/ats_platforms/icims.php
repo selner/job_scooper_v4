@@ -39,6 +39,7 @@ class PluginFredHutch extends BasePluginiCIMS
 {
     protected $siteName = 'FredHutch';
     protected $siteBaseURL = "https://hub-fhcrc.icims.com";
+    protected $nJobListingsPerPage = 167;
 
     // Results Columns:  "Posting date", "Job ID", "Job title", "Department", "Location", "Remote base"
     protected $arrResultsRowTDIndex = array('tag_job_posting_date' => null, 'tag_job_id' => 0, 'tag_title' => 1, 'tag_link' => 1, 'tag_department' => null, 'tag_location' => 2 );
@@ -71,7 +72,8 @@ class BasePluginiCIMS extends ClassHTMLJobSitePlugin
     function __construct($strBaseDir = null)
     {
         $this->strInitialReferer = $this->siteBaseURL . "/jobs/search?pr=0";
-        $this->strBaseURLFormat = $this->siteBaseURL . "/jobs/search?pr=***PAGE_NUMBER***&in_iframe=1&searchKeyword=***KEYWORDS***";
+#        $this->strBaseURLFormat = $this->siteBaseURL . "/jobs/search?pr=***PAGE_NUMBER***&in_iframe=1&searchKeyword=***KEYWORDS***";
+        $this->strBaseURLFormat = $this->siteBaseURL . "/jobs/search?pr=***PAGE_NUMBER***&in_iframe=1";
         $this->paginationType = C__PAGINATION_PAGE_VIA_URL;
         
         if(is_null($this->arrResultsRowTDIndex))
@@ -94,7 +96,7 @@ class BasePluginiCIMS extends ClassHTMLJobSitePlugin
     }
 
     protected $arrListingTagSetup = array(
-        'tag_listings_noresults' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'iCIMS_ListingsPage', 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Job Listings\s*(Sorry)/'),
+#        'tag_listings_noresults' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'iCIMS_ListingsPage', 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Job Listings\s*(Sorry)/'),
         'tag_pages_count' => array('selector' => '#iCIMS_Paginator', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?\s+(\d+)\s*$/'),
         'tag_listings_section' => array(array('tag' => 'table', 'attribute'=>'class', 'attribute_value' => 'iCIMS_JobsTable iCIMS_Table'), array('tag' => 'tr')),
         'tag_title' =>  array(array('tag' => 'td', 'index' =>null), array('tag' => 'a'), 'return_attribute' => 'plaintext'),

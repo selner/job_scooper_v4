@@ -283,7 +283,13 @@ abstract class AbstractClassBaseJobsPlugin
         // Did the user specify an override at the search level in the INI?
         if ($searchDetails != null && isset($searchDetails['location_user_specified_override']) && strlen($searchDetails['location_user_specified_override']) > 0) {
             $strReturnLocation = $searchDetails['location_user_specified_override'];
-        } else {
+        }
+        elseif ($searchDetails != null && isset($searchDetails['location_search_value']) && strlen($searchDetails['location_search_value']) > 0)
+        {
+            $strReturnLocation = $searchDetails['location_search_value'];
+        }
+        else
+        {
             // No override, so let's see if the search settings have defined one for us
             $locTypeNeeded = $this->getLocationSettingType();
             if ($locTypeNeeded == null || $locTypeNeeded == "") {
@@ -327,8 +333,10 @@ abstract class AbstractClassBaseJobsPlugin
             if ($strLocationValue == VALUE_NOT_SUPPORTED) {
                 LogLine("Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() . " set.  Skipping search '" . $searchDetails['key'] . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
                 $strURL = VALUE_NOT_SUPPORTED;
-            } else {
-                $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $strLocationValue, $strURL);
+            }
+            else
+            {
+                $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $this->getLocationURLValue($searchDetails), $strURL);
             }
         }
 
@@ -1239,8 +1247,10 @@ abstract class AbstractClassBaseJobsPlugin
                         $nTotalListings = $this->nJobListingsPerPage;
                         break;
                 }
-            } elseif (!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__)) {
+            }
 
+            if($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) || $this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
+            {
                 //
                 // If we are in debug mode, save the HTML we got back for the listing count page to disk so it is
                 // easy for a developer to review it
