@@ -116,19 +116,52 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
      */
     function parseTotalResultsCount($objSimpHTML)
     {
+        $noResultsText = null;
+        $totalItemsText = C__TOTAL_ITEMS_UNKNOWN__;
 
         //
-        // Find the HTML node that holds the result count
+        // Find the HTML node that holds the no results text
         //
-        $resultsSection = $objSimpHTML->find("span[id='retCountNumber']");
-
+        $resultsSection = $objSimpHTML->find("div#aiSearchResultsSuccess h2");
         if($resultsSection && isset($resultsSection[0]))
         {
             // get the text value of that node
-            $totalItemsText = $resultsSection[0]->plaintext;
+            $noResultsText = $resultsSection[0]->plaintext;
         }
         else
-            $totalItemsText = 0;
+        {
+            //
+            // Find the HTML node that holds the no results text
+            //
+            $resultsSection = $objSimpHTML->find("div#arNoResultsContainer div h5");
+            if($resultsSection && isset($resultsSection[0]))
+            {
+                // get the text value of that node
+                $noResultsText = $resultsSection[0]->plaintext;
+            }
+
+        }
+
+        if(!is_null($noResultsText))
+        {
+            if(strcasecmp($noResultsText, "Oops! Nothing was found.") == 0)
+            {
+                $totalItemsText = 0;
+            }
+
+        }
+
+        if($totalItemsText != 0) {
+            //
+            // Find the HTML node that holds the result count
+            //
+            $resultsSection = $objSimpHTML->find("span[id='retCountNumber']");
+
+            if ($resultsSection && isset($resultsSection[0])) {
+                // get the text value of that node
+                $totalItemsText = $resultsSection[0]->plaintext;
+            }
+        }
 
         return $totalItemsText;
     }

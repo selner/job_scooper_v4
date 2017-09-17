@@ -1202,8 +1202,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                         $nTotalListings = $this->nJobListingsPerPage;
                         break;
                 }
-            } elseif(!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__)) {
+            }
 
+            if($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) || $this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
+            {
                 //
                 // If we are in debug mode, save the HTML we got back for the listing count page to disk so it is
                 // easy for a developer to review it
