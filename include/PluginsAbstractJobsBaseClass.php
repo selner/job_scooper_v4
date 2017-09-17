@@ -1295,19 +1295,17 @@ abstract class AbstractClassBaseJobsPlugin
 
                     $arrPageJobsList = null;
 
+                    //
+                    // First, if this is an infinite page or a single page of listings, we
+                    // need to make the calls to load the full results set into the page HTML
+                    // We do this only for certain pagination types (INFSCROLLPAGE)
+                    //
                     if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
                         try {
                             switch (strtoupper($this->paginationType)) {
 
                                 case C__PAGINATION_NONE:
                                     $totalPagesCount = 1;
-                                    $this->selenium->loadPage($strURL);
-                                    break;
-
-                                case C__PAGINATION_PAGE_VIA_URL:
-                                    $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
-                                    if ($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
-                                        return null;
                                     $this->selenium->loadPage($strURL);
                                     break;
 
@@ -1349,42 +1347,6 @@ abstract class AbstractClassBaseJobsPlugin
                                         $this->runJavaScriptSnippet($this->nextPageScript, true);
                                         sleep($this->additionalLoadDelaySeconds + 1);
                                     }
-                                    break;
-
-                                case C__PAGINATION_PAGE_VIA_NEXTBUTTON:
-                                    if (is_null($this->selectorMoreListings)) {
-                                        throw(new Exception("Plugin " . $this->siteName . " is missing selectorMoreListings setting for the defined pagination type."));
-
-                                    }
-                                    $this->selenium->loadPage($strURL);
-
-                                    if ($nPageCount > 1 && ($totalPagesCount == C__TOTAL_ITEMS_UNKNOWN__ || $nPageCount <= $totalPagesCount)) {
-                                        $ret = $this->goToNextPageOfResultsViaNextButton();
-                                        if ($ret == false)
-                                            $totalPagesCount = $nPageCount;
-                                    }
-                                    break;
-
-                                case C__PAGINATION_PAGE_VIA_CALLBACK:
-                                    if (!method_exists($this, 'takeNextPageAction')) {
-                                        handleException(new Exception("Plugin " . $this->siteName . " is missing takeNextPageAction method definiton required for its pagination type."), "", true);
-                                    }
-
-                                    if ($nPageCount > 1 && $nPageCount <= $totalPagesCount) {
-                                        //
-                                        // if we got a driver instance back, then we got a new page
-                                        // otherwise we're out of results so end the loop here.
-                                        //
-                                        try {
-                                            $this->takeNextPageAction($this->selenium->driver);
-                                        } catch (Exception $ex) {
-                                            handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
-                                        }
-                                    }
-                                    break;
-
-                                default:
-                                    handleException(null, "No pagination method defined for plugin " . $this->siteName, false);
                                     break;
                             }
 
@@ -1483,6 +1445,63 @@ abstract class AbstractClassBaseJobsPlugin
                     }
 
                     $nPageCount++;
+
+                    //
+                    // OK, we're done loading the results set from that page.  Now we need to
+                    // move the browser session to the next page of results. (Unless we were on
+                    // an infinite scroll page, if we were, then there isn't another page to load.)
+                    //
+                    if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
+                        try {
+                            switch (strtoupper($this->paginationType)) {
+                                case C__PAGINATION_PAGE_VIA_URL:
+                                    $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
+                                    if ($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
+                                        return null;
+                                    $this->selenium->loadPage($strURL);
+                                    break;
+
+                                case C__PAGINATION_PAGE_VIA_NEXTBUTTON:
+                                    if (is_null($this->selectorMoreListings)) {
+                                        throw(new Exception("Plugin " . $this->siteName . " is missing selectorMoreListings setting for the defined pagination type."));
+
+                                    }
+                                    $this->selenium->loadPage($strURL);
+
+                                    if ($nPageCount > 1 && ($totalPagesCount == C__TOTAL_ITEMS_UNKNOWN__ || $nPageCount <= $totalPagesCount)) {
+                                        $ret = $this->goToNextPageOfResultsViaNextButton();
+                                        if ($ret == false)
+                                            $totalPagesCount = $nPageCount;
+                                    }
+                                    break;
+
+                                case C__PAGINATION_PAGE_VIA_CALLBACK:
+                                    if (!method_exists($this, 'takeNextPageAction')) {
+                                        handleException(new Exception("Plugin " . $this->siteName . " is missing takeNextPageAction method definiton required for its pagination type."), "", true);
+                                    }
+
+                                    if ($nPageCount > 1 && $nPageCount <= $totalPagesCount) {
+                                        //
+                                        // if we got a driver instance back, then we got a new page
+                                        // otherwise we're out of results so end the loop here.
+                                        //
+                                        try {
+                                            $this->takeNextPageAction($this->selenium->driver);
+                                        } catch (Exception $ex) {
+                                            handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
+                                        }
+                                    }
+                                    break;
+
+                                default:
+                                    handleException(null, "No pagination method defined for plugin " . $this->siteName, false);
+                                    break;
+                            }
+
+                        } catch (Exception $ex) {
+                            handleException($ex, "Failed to get dynamic HTML via Selenium due to error:  %s", true);
+                        }
+                    }
                 }
 
             }
