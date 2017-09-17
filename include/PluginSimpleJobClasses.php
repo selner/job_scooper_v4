@@ -196,6 +196,9 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
     protected function _getTagMatchValue_($node, $arrTag, $returnAttribute = 'plaintext', $item = null)
     {
+        if(!is_array($arrTag) || count($arrTag) == 0 )
+            return null;
+
         if (array_key_exists("type", $arrTag) && !is_null($arrTag['type'])) {
             switch(strtoupper($arrTag['type']))
             {
