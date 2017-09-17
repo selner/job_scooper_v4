@@ -74,16 +74,17 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
     if (!array_key_exists('ERROR_REPORT_FILES', $GLOBALS['USERDATA']))
         $GLOBALS['USERDATA']['ERROR_REPORT_FILES'] = array();
 
-    if (!is_null($fmtLogMsg) && !is_null($ex)) {
-        $msg = sprintf($fmtLogMsg, $ex->getMessage());
-        $toThrow = new Exception($msg, $ex->getCode(), $previous=$ex);
-    }
-    else if(!is_null($ex))
+    $msg = $fmtLogMsg;
+    if (!is_null($toThrow) && !is_null($fmtLogMsg) && !is_null($ex) && strlen($fmtLogMsg) > 0 &&
+        stristr($fmtLogMsg, "%s") !== false)
     {
-        $msg = $ex->getMessage();
+        $msg = sprintf($fmtLogMsg, $toThrow->getMessage());
+        $toThrow = new Exception($msg, $toThrow->getCode(), $previous=$ex);
     }
-    else
-        $msg = $fmtLogMsg;
+    elseif(!is_null($ex))
+    {
+        $msg = $toThrow->getMessage();
+    }
 
 //    $msg .= PHP_EOL . "PHP memory usage: " . getPhpMemoryUsage() . PHP_EOL;
 
@@ -106,10 +107,10 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
 
     $debugData = array(
         "error_time" => $now->format('Y-m-d\TH:i:s'),
-        "exception_code" => $ex->getCode(),
+        "exception_code" => $toThrow->getCode(),
         "exception_message" => $msg,
-        "exception_file" => $ex->getFile(),
-        "exception_line" => $ex->getLine(),
+        "exception_file" => $toThrow->getFile(),
+        "exception_line" => $toThrow->getLine(),
         "exception" => \Scooper\object_to_array($ex)
 //        "object_properties" => null,
 ////        "debug_backtrace" => var_export(debug_backtrace(), true),
