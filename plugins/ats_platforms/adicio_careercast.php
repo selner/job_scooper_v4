@@ -42,6 +42,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
 
     protected $arrListingTagSetup = array(
         'tag_listings_noresults' => array(array('tag' => 'div', 'attribute'=>'id', 'attribute_value' => 'aiAppWrapperBox'), array('tag' => 'form'), array('tag' => 'h2'), 'return_attribute' => 'plaintext'),
+        'tag_listings_count' => array()  # BUGBUG:  need this empty array so that the parent class doesn't auto-set to C__JOB_ITEMCOUNT_NOTAPPLICABLE__
     );
 
     function __construct($strOutputDirectory = null)
