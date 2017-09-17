@@ -108,6 +108,14 @@ class JSONPlugins
                     );
                     break;
 
+                case 'LOAD-MORE':
+                    $pluginData['arrListingTagSetup']['tag_load_more'] = array(
+                        'selector' => $configData->Pagination->Selector,
+                        'index' => $configData->Pagination->Index,
+                        'type' => 'CSS'
+                    );
+                    break;
+
                 default:
 
                     break;
