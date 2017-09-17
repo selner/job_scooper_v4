@@ -288,6 +288,10 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         {
             $strReturnLocation = $searchDetails['location_user_specified_override'];
         }
+        elseif ($searchDetails != null && isset($searchDetails['location_search_value']) && strlen($searchDetails['location_search_value']) > 0)
+        {
+            $strReturnLocation = $searchDetails['location_search_value'];
+        }
         else
         {
             // No override, so let's see if the search settings have defined one for us
@@ -342,7 +346,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
             }
             else
             {
-                $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $strLocationValue, $strURL);
+                $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $this->getLocationURLValue($searchDetails), $strURL);
             }
         }
 
