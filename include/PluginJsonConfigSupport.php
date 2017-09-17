@@ -194,7 +194,7 @@ class JSONPlugins
             protected \$additionalFlags = {$flags};
             protected \$additionalLoadDelaySeconds = 2;
             protected \$nJobListingsPerPage = \"{$pluginConfig['nJobListingsPerPage']}\";
-            protected \$paginationType = \"{$pluginConfig['PaginationType']}\";
+            protected \$paginationType = \"{$pluginConfig['paginationType']}\";
             protected \$arrListingTagSetup = $setup;
             };
             
