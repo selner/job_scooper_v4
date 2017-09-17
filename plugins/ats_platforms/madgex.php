@@ -76,6 +76,14 @@ abstract class BaseMadgexATSPlugin extends ClassClientHTMLJobSitePlugin
         'tag_next_button'           => array('selector' => 'li.paginator__item a[rel="next"]')
     );
 
+    protected function getLocationURLValue($searchDetails, $locSettingSets = null)
+    {
+        $ret = parent::getLocationURLValue($searchDetails, $locSettingSets);
+        if (stristr($ret, "%2C+washington") !== false)
+            $ret .= "+state";
+        return $ret;
+    }
+
     function parseAndRedirectToLocation(&$objSimpHTML)
     {
         $locationSelectNode = $objSimpHTML->find("h2");
