@@ -49,6 +49,8 @@ class JSONPlugins
 
     private function _parsePluginConfig_($configData)
     {
+        $arrConfigData = get_object_vars($configData);
+
         $pluginData = array(
             'siteName' => null,
             'siteBaseURL' => null,
@@ -60,21 +62,28 @@ class JSONPlugins
             'arrListingTagSetup' => \Scooper\array_copy(ClassBaseHTMLJobSitePlugin::getEmptyListingTagSetup())
         );
 
-        if(array_key_exists("AgentName", $configData))
+        foreach(array_keys($arrConfigData) as $datakey)
         {
-            $pluginData['siteName'] = $configData->AgentName;
-        }
-
-        if(array_key_exists("SourceURL", $configData))
+            switch($datakey)
         {
-            $pluginData['siteBaseURL'] = $configData->SourceURL;
-            $pluginData['strBaseURLFormat'] = $configData->SourceURL;
 
-        }
+                case "AgentName":
+                    $pluginData['siteName'] = $arrConfigData['AgentName'];
+                    break;
 
-        if(array_key_exists("LocationType", $configData))
-        {
-            $pluginData['LocationType'] = $configData->LocationType;
+                case "SourceURL":
+                    $pluginData['strBaseURLFormat'] = $arrConfigData['SourceURL'];
+                    break;
+
+                case "BaseURL":
+                    $pluginData['siteBaseURL'] = $arrConfigData['BaseURL'];
+                    break;
+
+                default:
+                    if(array_key_exists($datakey, $pluginData))
+                        $pluginData[$datakey] = $arrConfigData[$datakey];
+                    break;
+            }
         }
 
         if(array_key_exists("Pagination", $configData)) {
@@ -161,6 +170,7 @@ class JSONPlugins
             protected \$siteName = \"{$pluginConfig['siteName']}\";
             protected \$siteBaseURL = \"{$pluginConfig['siteBaseURL']}\";
             protected \$strBaseURLFormat = \"{$pluginConfig['strBaseURLFormat']}\";
+            protected \$paginationType = \"{$pluginConfig['paginationType']}\";
             protected \$typeLocationSearchNeeded = \"{$pluginConfig['LocationType']}\";
             protected \$additionalFlags = {$flags};
             protected \$nJobListingsPerPage = \"{$pluginConfig['nJobListingsPerPage']}\";
