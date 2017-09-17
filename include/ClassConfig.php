@@ -20,6 +20,7 @@ require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use JobScooper\UserSearchRun;
 
 class ClassConfig extends AbstractClassBaseJobsPlugin
 {
