@@ -173,7 +173,6 @@ class JSONPlugins
             protected \$siteName = \"{$pluginConfig['siteName']}\";
             protected \$siteBaseURL = \"{$pluginConfig['siteBaseURL']}\";
             protected \$strBaseURLFormat = \"{$pluginConfig['strBaseURLFormat']}\";
-            protected \$paginationType = \"{$pluginConfig['paginationType']}\";
             protected \$typeLocationSearchNeeded = \"{$pluginConfig['LocationType']}\";
             protected \$additionalFlags = {$flags};
             protected \$additionalLoadDelaySeconds = 2;
