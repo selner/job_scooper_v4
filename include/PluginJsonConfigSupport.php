@@ -175,13 +175,18 @@ class JSONPlugins
 
     private function _instantiatePlugin_($pluginConfig)
     {
-        $class = null;
         $className = "Plugin" . $pluginConfig['siteName'];
         $setup = var_export($pluginConfig['arrListingTagSetup'], true);
 
+        $extendsClass = "ClassJSONJobsitePlugin";
+        if(array_key_exists("PluginExtendsClassName", $pluginConfig) && !is_null($pluginConfig['PluginExtendsClassName']) && strlen($pluginConfig['PluginExtendsClassName']))
+        {
+            $extendsClass = $pluginConfig['PluginExtendsClassName'];
+        }
+
         $flags = "[" . join(", ", array_values($pluginConfig['AdditionalFlags'])) . "]";
 
-        $evalStmt = "class $className extends ClassJSONJobsitePlugin { 
+        $evalStmt = "class $className extends {$extendsClass} { 
             protected \$siteName = \"{$pluginConfig['siteName']}\";
             protected \$siteBaseURL = \"{$pluginConfig['siteBaseURL']}\";
             protected \$strBaseURLFormat = \"{$pluginConfig['strBaseURLFormat']}\";
@@ -196,10 +201,9 @@ class JSONPlugins
             ";
 
         eval($evalStmt);
-        $classinst = new $className(null, null);
-
-        return $class;
+        return new $className(null, null);
     }
+
     function __construct($strBaseDir = null)
     {
         $this->_loadPluginConfigFileData_();
