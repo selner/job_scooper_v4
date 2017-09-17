@@ -803,7 +803,7 @@ abstract class AbstractClassBaseJobsPlugin
                 // Not the known issue case, so log the error and re-throw the exception
                 // if we should have thrown one
                 //
-                $strError = "Failed to download jobs from " . $this->siteName . " jobs for search '" . $searchDetails['key'] . "[URL=" . $searchDetails['search_start_url'] . "].  " . $ex->getMessage() . PHP_EOL . "Exception Details: " . $ex;
+                $strError = "Failed to download jobs from " . $this->siteName . " jobs for search '" . $searchDetails['key'] . "[URL=" . $searchDetails['search_start_url'] . "]. Exception Details: ";
                 $this->_setSearchResultError_($searchDetails, $strError, $ex, $this->arrSearchReturnedJobs, null);
                 handleException($ex, $strError, false);
             }
