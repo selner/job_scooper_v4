@@ -1488,10 +1488,6 @@ abstract class AbstractClassBaseJobsPlugin
                                         }
                                     }
                                     break;
-
-                                default:
-                                    handleException(null, "No pagination method defined for plugin " . $this->siteName, false);
-                                    break;
                             }
 
                         } catch (Exception $ex) {
