@@ -27,14 +27,15 @@ class PluginIndeed extends ClassClientHTMLJobSitePlugin
     // Note:  C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS intentioanlly not set although Indeed supports it.  However, their support is too explicit of a search a will weed out
     //        too many potential hits to be worth it.
     protected $additionalFlags = [C__JOB_IGNORE_MISMATCHED_JOB_COUNTS];
-    protected $paginationType = C__PAGINATION_PAGE_VIA_CALLBACK;
+    protected $paginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
 
 
 
 
     protected $arrListingTagSetup = array(
         'tag_listings_count' =>  array('selector' => '#searchCount', 'return_value_regex' => '/.*?of\s*(\d+).*?/'),
-        'tag_listings_noresults' =>  array('selector' => 'div.bad_query h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults")
+        'tag_listings_noresults' =>  array('selector' => 'div.bad_query h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
+        'tag_next_button' => array('selector' => 'span.np')
     );
 
 
@@ -43,13 +44,6 @@ class PluginIndeed extends ClassClientHTMLJobSitePlugin
         return noJobStringMatch($var, "did not match any jobs");
     }
 
-    function takeNextPageAction($driver)
-    {
-        $link = $driver->findElement(
-            WebDriverBy::className('np')
-        );
-        $link->click();
-    }
 
     function getItemURLValue($nItem)
     {
