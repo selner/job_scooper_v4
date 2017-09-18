@@ -525,8 +525,8 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                     {
                         $excludedSite = strtolower(trim($excludedSite));
                         $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$excludedSite] = $excludedSite;
-                        if(array_key_exists($excludedSite, $GLOBALS['USERDATA']['configuration_settings']['included_sites'])) 
-                        {   
+                        if(array_key_exists($excludedSite, $GLOBALS['USERDATA']['configuration_settings']['included_sites']))
+                        {
                             unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite]);
                         }
                         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting " . $excludedSite . " as excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -614,6 +614,34 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                         $strSetName = \Scooper\strScrub($strSetName, FOR_LOOKUP_VALUE_MATCHING);
 
                         $arrNewLocationSet['key'] = $strSetName;
+
+                        if(array_key_exists("city", $iniSettings) && array_key_exists("state", $iniSettings) && array_key_exists("statecode", $iniSettings) && array_key_exists("country", $iniSettings) && array_key_exists("countrycode", $iniSettings))
+                        {
+                            $computedLocValues = array(
+                                'location-city' => $iniSettings['city'],
+                                'location-city-comma-statecode' => $iniSettings['city'] . ", " . $iniSettings['statecode'],
+                                'location-city-comma-nospace-statecode' => $iniSettings['city'] . "," . $iniSettings['statecode'],
+                                'location-city-dash-statecode' => $iniSettings['city'] . "-" . $iniSettings['statecode'],
+                                'location-city-comma-statecode-underscores-and-dashes' => $iniSettings['city'] . "__2c-" . $iniSettings['statecode'],
+                                'location-city-comma-state' => $iniSettings['city'] . ", " . $iniSettings['state'],
+                                'location-city-comma-state-country' => $iniSettings['city'] . ", " . $iniSettings['state'] . " " . $iniSettings['country'],
+                                'location-city-comma-state-comma-country' => $iniSettings['city'] . ", " . $iniSettings['state'] . ", " . $iniSettings['country'],
+                                'location-city-comma-state-comma-countrycode' => $iniSettings['city'] . ", " . $iniSettings['state'] . ", " . $iniSettings['countrycode'],
+                                'location-city-comma-statecode-comma-countrycode' => $iniSettings['city'] . ", " . $iniSettings['statecode'] . ", " . $iniSettings['countrycode'],
+                                'location-city-comma-statecode-comma-country' => $iniSettings['city'] . ", " . $iniSettings['statecode'] . ", " . $iniSettings['country'],
+                                'location-city-comma-countrycode' => $iniSettings['city'] . ", " . $iniSettings['countrycode'],
+                                'location-city-comma-country' => $iniSettings['city'] . ", " . $iniSettings['country'],
+                                'location-city-state-country-no-commas'=> $iniSettings['city'] . " " . $iniSettings['state'] . " " . $iniSettings['country'],
+                                'location-city-country-no-commas'=> $iniSettings['city'] . " " . $iniSettings['country'],
+                                'location-state' => $iniSettings['state'],
+                                'location-statecode' => $iniSettings['statecode'],
+                                'location-countrycode' => $iniSettings['countrycode']
+                            );
+
+                            $iniSettings = array_merge($computedLocValues, $iniSettings);
+
+                        }
+
                         $arrNewLocationSet = $this->_parseAndAddLocationSet_($arrNewLocationSet, $iniSettings);
 
                         $strSettingStrings = getArrayValuesAsString($arrNewLocationSet);

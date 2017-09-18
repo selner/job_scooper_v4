@@ -16,8 +16,11 @@ keywords=["analytics manager", "Digital market", "director"]   ;# will pick up a
 
 [search_location_setting_set.Seattle]
 name="Seattle"
-location-city="Seattle"
-location-state="Washington"
+city="Seattle"
+state="Washington"
+statecode="WA"
+country="United States"
+countrycode="US"
 ```
 
 Then update config.ini values for your notification email address and output folder path.  That's it!  [Run Jobs Scooper](../wiki/Running-Jobs-Scooper) and let it do the work for you.
