@@ -68,10 +68,17 @@ $GLOBALS['DATA']['location_types'] = array(
     'location-city-comma-statecode-underscores-and-dashes',
     'location-city-comma-state',
     'location-city-comma-state-country',
-    'location-statecode',
-    'location-state',
+    'location-city-comma-state-comma-country',
     'location-city-comma-state-country-no-commas',
+    'location-city-comma-state-comma-country',
+    'location-city-comma-state-comma-countrycode',
+    'location-city-comma-country',
+    'location-city--comma-countrycode',
+    'location-city-comma-statecode-comma-country',
     'location-city-comma-statecode-comma-countrycode',
+    'location-city-country-no-commas',
+    'location-state',
+    'location-statecode',
     'location-countrycode');
 
 //************************************************************************
