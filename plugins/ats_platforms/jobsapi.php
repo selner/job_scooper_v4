@@ -16,12 +16,8 @@
  * under the License.
  */
 require_once dirname(dirname(dirname(__FILE__)))."/bootstrap.php";
-use JobApis\Jobs\Client\Queries\GovtQuery;
-use JobApis\Jobs\Client\Queries\DiceQuery;
 use JobApis\Jobs\Client\Queries\UsajobsQuery;
-use JobApis\Jobs\Client\Providers\GovtProvider;
 use JobApis\Jobs\Client\Providers\UsajobsProvider;
-use JobApis\Jobs\Client\Providers\DiceProvider;
 
 class PluginUSAJobs extends ClassBaseJobsAPIPlugin
 {
