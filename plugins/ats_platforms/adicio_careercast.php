@@ -102,6 +102,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
 
 
 
+
     /**
      * parseTotalResultsCount
      *
@@ -123,11 +124,11 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
         //
         // Find the HTML node that holds the no results text
         //
-        $resultsSection = $objSimpHTML->find("div#aiSearchResultsSuccess h2");
-        if($resultsSection && isset($resultsSection[0]))
+        $resultsSection = $objSimpHTML->find("div#aiSearchResultsSuccess div h2");
+        if($resultsSection && count($resultsSection) > 1 && isset($resultsSection[1]))
         {
             // get the text value of that node
-            $noResultsText = $resultsSection[0]->plaintext;
+            $noResultsText = $resultsSection[1]->plaintext;
         }
         else
         {
@@ -167,7 +168,6 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
         return $totalItemsText;
     }
 
-    /**
     /**
      * parseJobsListForPage
      *
