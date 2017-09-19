@@ -87,8 +87,13 @@ class JSONPlugins
         }
 
         if(array_key_exists("Pagination", $configData)) {
+
             if (array_key_exists("PageLimit", $configData->Pagination)) {
                 $pluginData['nJobListingsPerPage'] = $configData->Pagination->PageLimit;
+            }
+
+            if (array_key_exists("PageDelaySeconds", $configData->Pagination)) {
+                $pluginData['additionalLoadDelaySeconds'] = $configData->Pagination->PageLimit;
             }
 
 
