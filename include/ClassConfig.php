@@ -21,6 +21,7 @@ require_once dirname(dirname(__FILE__))."/bootstrap.php";
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use JobScooper\UserSearchRun;
+use \JobScooper\SearchSettings;
 
 class ClassConfig extends AbstractClassBaseJobsPlugin
 {
@@ -593,7 +594,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                 {
                     if(count($iniSettings) > 1)
                     {
-                        $arrNewLocationSet = $this->_getEmptyLocationSettingsSet_();
+                        $arrNewLocationSet = array();
                         $strSetName = 'LocationSet' . (count($GLOBALS['USERDATA']['configuration_settings']['location_sets']) + 1);
                         if(isset($iniSettings['name']))
                         {
@@ -615,34 +616,42 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
                         $arrNewLocationSet['key'] = $strSetName;
 
-                        if(array_key_exists("city", $iniSettings) && array_key_exists("state", $iniSettings) && array_key_exists("statecode", $iniSettings) && array_key_exists("country", $iniSettings) && array_key_exists("countrycode", $iniSettings))
+                        $arrLocSet = array();
+                        foreach(array_keys($iniSettings) as $loctype)
+                        {
+                            if(isset($iniSettings[$loctype]) && strlen($iniSettings[$loctype]) > 0)
+                            {
+                                $arrNewLocationSet[$loctype] = strScrub($iniSettings[$loctype], REMOVE_EXTRA_WHITESPACE);
+                            }
+                        }
+
+                        $computedLocValues = array();
+                        if(array_key_exists("city", $arrNewLocationSet) && array_key_exists("state", $arrNewLocationSet) && array_key_exists("statecode", $arrNewLocationSet) && array_key_exists("country", $arrNewLocationSet) && array_key_exists("countrycode", $arrNewLocationSet))
                         {
                             $computedLocValues = array(
-                                'location-city' => $iniSettings['city'],
-                                'location-city-comma-statecode' => $iniSettings['city'] . ", " . $iniSettings['statecode'],
-                                'location-city-comma-nospace-statecode' => $iniSettings['city'] . "," . $iniSettings['statecode'],
-                                'location-city-dash-statecode' => $iniSettings['city'] . "-" . $iniSettings['statecode'],
-                                'location-city-comma-statecode-underscores-and-dashes' => $iniSettings['city'] . "__2c-" . $iniSettings['statecode'],
-                                'location-city-comma-state' => $iniSettings['city'] . ", " . $iniSettings['state'],
-                                'location-city-comma-state-country' => $iniSettings['city'] . ", " . $iniSettings['state'] . " " . $iniSettings['country'],
-                                'location-city-comma-state-comma-country' => $iniSettings['city'] . ", " . $iniSettings['state'] . ", " . $iniSettings['country'],
-                                'location-city-comma-state-comma-countrycode' => $iniSettings['city'] . ", " . $iniSettings['state'] . ", " . $iniSettings['countrycode'],
-                                'location-city-comma-statecode-comma-countrycode' => $iniSettings['city'] . ", " . $iniSettings['statecode'] . ", " . $iniSettings['countrycode'],
-                                'location-city-comma-statecode-comma-country' => $iniSettings['city'] . ", " . $iniSettings['statecode'] . ", " . $iniSettings['country'],
-                                'location-city-comma-countrycode' => $iniSettings['city'] . ", " . $iniSettings['countrycode'],
-                                'location-city-comma-country' => $iniSettings['city'] . ", " . $iniSettings['country'],
-                                'location-city-state-country-no-commas'=> $iniSettings['city'] . " " . $iniSettings['state'] . " " . $iniSettings['country'],
-                                'location-city-country-no-commas'=> $iniSettings['city'] . " " . $iniSettings['country'],
-                                'location-state' => $iniSettings['state'],
-                                'location-statecode' => $iniSettings['statecode'],
-                                'location-countrycode' => $iniSettings['countrycode']
+                                'location-city' => $arrNewLocationSet['city'],
+                                'location-city-comma-statecode' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['statecode'],
+                                'location-city-comma-nospace-statecode' => $arrNewLocationSet['city'] . "," . $arrNewLocationSet['statecode'],
+                                'location-city-dash-statecode' => $arrNewLocationSet['city'] . "-" . $arrNewLocationSet['statecode'],
+                                'location-city-comma-statecode-underscores-and-dashes' => $arrNewLocationSet['city'] . "__2c-" . $arrNewLocationSet['statecode'],
+                                'location-city-comma-state' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['state'],
+                                'location-city-comma-state-country' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['state'] . " " . $arrNewLocationSet['country'],
+                                'location-city-comma-state-comma-country' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['state'] . ", " . $arrNewLocationSet['country'],
+                                'location-city-comma-state-comma-countrycode' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['state'] . ", " . $arrNewLocationSet['countrycode'],
+                                'location-city-comma-statecode-comma-countrycode' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['statecode'] . ", " . $arrNewLocationSet['countrycode'],
+                                'location-city-comma-statecode-comma-country' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['statecode'] . ", " . $arrNewLocationSet['country'],
+                                'location-city-comma-countrycode' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['countrycode'],
+                                'location-city-comma-country' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['country'],
+                                'location-city-state-country-no-commas'=> $arrNewLocationSet['city'] . " " . $arrNewLocationSet['state'] . " " . $arrNewLocationSet['country'],
+                                'location-city-country-no-commas'=> $arrNewLocationSet['city'] . " " . $arrNewLocationSet['country'],
+                                'location-state' => $arrNewLocationSet['state'],
+                                'location-statecode' => $arrNewLocationSet['statecode'],
+                                'location-countrycode' => $arrNewLocationSet['countrycode']
                             );
-
-                            $iniSettings = array_merge($computedLocValues, $iniSettings);
 
                         }
 
-                        $arrNewLocationSet = $this->_parseAndAddLocationSet_($arrNewLocationSet, $iniSettings);
+                        $arrNewLocationSet = array_merge($arrNewLocationSet, $computedLocValues);
 
                         $strSettingStrings = getArrayValuesAsString($arrNewLocationSet);
                         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added location search settings '" . $strSetName . ": " . $strSettingStrings, \C__DISPLAY_ITEM_DETAIL__);
@@ -656,21 +665,6 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['configuration_settings']['location_sets']) . " location sets. ", \C__DISPLAY_ITEM_RESULT__);
         }
     }
-
-    private function _parseAndAddLocationSet_($arrLocSet, $iniSearchSetting)
-    {
-        foreach($GLOBALS['DATA']['location_types'] as $loctype)
-        {
-            if(isset($iniSearchSetting[$loctype]) && strlen($iniSearchSetting[$loctype]) > 0)
-            {
-                $arrLocSet[$loctype] = strScrub($iniSearchSetting[$loctype], REMOVE_EXTRA_WHITESPACE);
-                $arrLocSet[$loctype] = $iniSearchSetting[$loctype];
-            }
-        }
-
-        return $arrLocSet;
-    }
-
 
     private function _parseKeywordSetsFromConfig_($config)
     {
@@ -830,13 +824,13 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             {
                 $searchKey = $search->getKey();
 
-//                $curSiteName = strScrub($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['site_name'], FOR_LOOKUP_VALUE_MATCHING);
-//                if(array_key_exists($curSiteName, $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']))
-//                {
-//                    // this site was excluded for this location set, so continue.
-//                    continue;
-//                }
-//
+                $curSiteName = strScrub($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['site_name'], FOR_LOOKUP_VALUE_MATCHING);
+                if(array_key_exists($curSiteName, $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']))
+                {
+                    // this site was excluded for this run
+                    continue;
+                }
+
                 if($search->isSearchIncludedInRun() !== true) {
                     // this site was excluded for this location set, so continue.
                     continue;
@@ -866,8 +860,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                     if(array_key_exists($locTypeNeeded, $primaryLocationSet))
                         $search['location_search_value'] = $primaryLocationSet[$locTypeNeeded];
                     else {
-                        $err = "Error:  unable to add search '" . $searchKey . "' because the required location type '" . $locTypeNeeded ."' was not found in the location set '" . $primaryLocationSet['key'] . "'. Excluding searches for " . $curSiteName .".";
-                        handleException(new IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' is not valid.", $locTypeNeeded)), $err, $raise=false);
+                        handleException(new IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' was not found in the location set %s.", $locTypeNeeded, $primaryLocationSet['key'])), null, $raise=false);
                         $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$curSiteName] = $curSiteName;
 
                         $arrNewSearchList = array_filter($GLOBALS['USERDATA']['configuration_settings']['searches'], function ($var) use ($curSiteName) {
@@ -1072,13 +1065,6 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         }
 
         return $set;
-    }
-
-    private function _getEmptyLocationSettingsSet_()
-    {
-        return array(
-            'key' => null,
-        );
     }
 
 
