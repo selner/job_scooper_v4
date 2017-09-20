@@ -135,7 +135,8 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
 
     function isSearchIncludedInRun()
     {
-        if(in_array(strtolower($this->getJobSite()), $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']) === true)
+        $curSiteName = strScrub($this->getJobSite()], FOR_LOOKUP_VALUE_MATCHING);
+        if(array_key_exists($curSiteName, $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']))
         {
             return false;
         }
