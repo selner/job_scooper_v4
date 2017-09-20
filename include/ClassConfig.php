@@ -476,7 +476,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             LogLine($iniSearch['jobsite'] . "search " .$iniSearch['name'] . " was not added; " . $strJobSiteKey . " is excluded for this run.", \C__DISPLAY_ITEM_DETAIL__);
             return null;
         }
-        $searchSettings = new SearchSettings();
+        $searchSettings = new \JobScooper\SearchSettings();
         $searchSettings['base_url_format'] = array_key_exists('url_format', $iniSearch) ? $iniSearch['url_format'] : null;
         $searchSettings['location_user_specified_override'] = array_key_exists('location', $iniSearch) ? $iniSearch['location'] : null;
 
