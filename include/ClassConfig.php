@@ -335,8 +335,8 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             $matchedCountries = array_intersect($pluginCountries, $GLOBALS['USERDATA']['configuration_settings']['country_codes']);
             if (count($matchedCountries) == 0) {
 //                $GLOBALS['JOBSITE_PLUGINS'][$pluginKey]['include_in_run'] = false;
-                $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$pluginKey] = $pluginKey;
-                unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$pluginKey]);
+                setSiteAsExcluded($pluginKey);
+
                 LogLine("Set " . $pluginKey . " to excluded because it does not support any of the country codes required (" . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['country_codes']));
             }
         }
@@ -524,13 +524,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                     if(!is_array($config['global_search_options']['excluded_jobsites'])) { $config['global_search_options']['excluded_jobsites'] = array($config['global_search_options']['excluded_jobsites']); }
                     foreach($config['global_search_options']['excluded_jobsites'] as $excludedSite)
                     {
-                        $excludedSite = strtolower(trim($excludedSite));
-                        $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$excludedSite] = $excludedSite;
-                        if(array_key_exists($excludedSite, $GLOBALS['USERDATA']['configuration_settings']['included_sites']))
-                        {
-                            unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite]);
-                        }
-                        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting " . $excludedSite . " as excluded for this run.", \C__DISPLAY_ITEM_DETAIL__);
+                        setSiteAsExcluded($excludedSite);
                     }
                 }
                 else
@@ -853,8 +847,9 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                     if(array_key_exists($locTypeNeeded, $primaryLocationSet))
                         $search['location_search_value'] = $primaryLocationSet[$locTypeNeeded];
                     else {
-                        handleException(new IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' was not found in the location set %s.", $locTypeNeeded, $primaryLocationSet['key'])), null, $raise=false);
-                        $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$curSiteName] = $curSiteName;
+                        $curSiteName = strtolower($this->siteName);
+                        handleException(new IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' for %s was not found in the location set %s.  Location set values: %s", $locTypeNeeded, $curSiteName, $primaryLocationSet['key'], var_export($primaryLocationSet, true))), null, $raise=false);
+                        setSiteAsExcluded($curSiteName);
 
                         $arrNewSearchList = array_filter($GLOBALS['USERDATA']['configuration_settings']['searches'], function ($var) use ($curSiteName) {
                             if (strcasecmp($var->getJobSite(), $curSiteName) == 0)

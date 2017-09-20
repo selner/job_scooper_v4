@@ -460,6 +460,19 @@ function getFailedSearchesByPlugin()
     return $arrFailedPluginsReport;
 }
 
+function setSiteAsExcluded($excludedSite)
+{
+    $excludedSite = strtolower(trim($excludedSite));
+
+    $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$excludedSite] = $excludedSite;
+    if(array_key_exists($excludedSite, $GLOBALS['USERDATA']['configuration_settings']['included_sites']))
+    {
+        unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite]);
+    }
+    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting " . $excludedSite . " as excluded for this run.", \C__DISPLAY_ITEM_DETAIL__);
+
+}
+
 function getFailedSearches()
 {
     if (!array_key_exists('search_results', $GLOBALS['USERDATA']) || is_null($GLOBALS['USERDATA']['search_results']))
