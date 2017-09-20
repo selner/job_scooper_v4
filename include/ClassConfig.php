@@ -831,7 +831,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                     continue;
                 }
 
-                if(in_array($curSiteName, $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']) === true) {
+                if($search->isSearchIncludedInRun() !== true) {
                     // this site was excluded for this location set, so continue.
                     continue;
                 }
