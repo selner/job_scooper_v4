@@ -22,7 +22,7 @@ function LogLine($msg, $scooper_level=\C__DISPLAY_NORMAL__)
 {
     if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
     {
-        print($msg);
+        print($msg . PHP_EOL);
     }
     else
     {

@@ -396,7 +396,6 @@ function readJobsListDataFromLocalFile($filepath, $returnFailedSearches = true)
         $filepath = $filepath . "-" . strtolower(getTodayAsString("")) . ".json";
 
         if (is_file($filepath)) {
-            LogLine("Reading json data from file " . $filepath, \C__DISPLAY_ITEM_DETAIL__);
             $data = loadJSON($filepath);
 //            $jsonText = file_get_contents($filepath, FILE_TEXT);
 //
