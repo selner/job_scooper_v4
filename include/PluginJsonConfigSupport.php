@@ -40,9 +40,7 @@ class JSONPlugins
         });
 
         foreach($filelist as $f) {
-            $text = file_get_contents($jsonconfigsdir . "/" . $f);
-            $configData = json_decode($text);
-            $this->pluginConfigs[$f] = $configData;
+            $this->pluginConfigs[$f] = loadJSON($jsonconfigsdir . "/" . $f);
         }
 
     }
