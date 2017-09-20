@@ -5,6 +5,7 @@
   "LocationType": "location-city-comma-statecode",
   "CountryCodes" : ["US"],
   "AdditionalFlags" : ["C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS"],
+  "PluginExtendsClassName" : "AbstractDice",
   "Collections": [
     {
       "Name": "PageFields",
@@ -86,10 +87,8 @@
     }
   ],
   "Pagination": {
-    "Type": "NEXT-BUTTON",
-    "Selector" : "a[title='Go to next page']",
-    "Index" : 0,
     "PageLimit": 100,
+    "Type": "PAGE-CALLBACK",
     "PageDelaySeconds" : 5
   }
 }

@@ -1341,7 +1341,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                                         // otherwise we're out of results so end the loop here.
                                         //
                                         try {
-                                            $this->takeNextPageAction($this->selenium->driver);
+                                            $this->takeNextPageAction($this->getItemURLValue($nItemCount), $this->getPageURLValue($nPageCount));
                                         } catch (Exception $ex) {
                                             handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
                                         }

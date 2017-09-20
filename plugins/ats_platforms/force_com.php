@@ -23,7 +23,7 @@ class BaseForceComClass extends ClassClientHTMLJobSitePlugin
     protected $nJobListingsPerPage = 50;
     protected $paginationType = C__PAGINATION_PAGE_VIA_CALLBACK;
 
-    function takeNextPageAction($driver)
+    function takeNextPageAction($nItem=null, $nPage=null)
     {
         $nextPageJS = "function contains(selector, text) {
                 var elements = document.querySelectorAll(selector);
