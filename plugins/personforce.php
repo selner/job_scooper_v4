@@ -45,7 +45,7 @@ class PluginPersonForce extends ClassClientHTMLJobSitePlugin
     protected function normalizeJobItem($arrItem)
     {
 
-        $arrItem ['job_site_date'] = \Scooper\strScrub($arrItem['job_site_date'], REMOVE_EXTRA_WHITESPACE | LOWERCASE | HTML_DECODE );
+        $arrItem ['job_site_date'] = strScrub($arrItem['job_site_date'], REMOVE_EXTRA_WHITESPACE | LOWERCASE | HTML_DECODE );
         $dateVal = strtotime($arrItem ['job_site_date'], $now = time());
         if(!($dateVal === false))
         {
@@ -53,7 +53,7 @@ class PluginPersonForce extends ClassClientHTMLJobSitePlugin
         }
 
 
-        $arrItem['job_id'] = \Scooper\strScrub($arrItem['company'], FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($arrItem['job_title'], FOR_LOOKUP_VALUE_MATCHING). \Scooper\strScrub($arrItem['job_site_date'], FOR_LOOKUP_VALUE_MATCHING);
+        $arrItem['job_id'] = strScrub($arrItem['company'], FOR_LOOKUP_VALUE_MATCHING) . strScrub($arrItem['job_title'], FOR_LOOKUP_VALUE_MATCHING). strScrub($arrItem['job_site_date'], FOR_LOOKUP_VALUE_MATCHING);
 
         return parent::normalizeJobItem($arrItem);
     }

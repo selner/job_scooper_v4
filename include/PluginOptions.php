@@ -178,7 +178,7 @@ function setupPlugins()
     }
     $strLog = "Added " . count($GLOBALS['JOBSITE_PLUGINS']) ." plugins: " . getArrayValuesAsString(array_column($GLOBALS['JOBSITE_PLUGINS'], "name"), ", ", null, false). ".";
     if(isset($GLOBALS['logger']))
-        $GLOBALS['logger']->logLine($strLog , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine($strLog , \C__DISPLAY_ITEM_DETAIL__);
     else
         print($strLog . PHP_EOL);
 

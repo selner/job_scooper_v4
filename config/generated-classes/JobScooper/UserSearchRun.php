@@ -136,7 +136,7 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
     function isSearchIncludedInRun()
     {
         $strIncludeKey = 'include_'.strtolower($this->getJobSite());
-        $valInclude = \Scooper\get_PharseOptionValue($strIncludeKey);
+        $valInclude = get_PharseOptionValue($strIncludeKey);
         if(is_null($valInclude) || $valInclude == 0 || $valInclude === false)
         {
             return false;
@@ -282,9 +282,9 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
             {
                 $pk = "unknown-primary-key";
             }
-            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Error saving object " . __CLASS__ . " key " . $pk . ": " . $ex->getMessage() . PHP_EOL . "Class data = " . getArrayValuesAsString($this->toArray()), \Scooper\C__DISPLAY_ERROR__);
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Error saving object " . __CLASS__ . " key " . $pk . ": " . $ex->getMessage() . PHP_EOL . "Class data = " . getArrayValuesAsString($this->toArray()), \C__DISPLAY_ERROR__);
             throw $ex;
-//            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Skipping failed save of object " . __CLASS__ . " key " . $pk . ": " . $ex->getMessage(), \Scooper\C__DISPLAY_WARNING__);
+//            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Skipping failed save of object " . __CLASS__ . " key " . $pk . ": " . $ex->getMessage(), \C__DISPLAY_WARNING__);
         }
     }
 

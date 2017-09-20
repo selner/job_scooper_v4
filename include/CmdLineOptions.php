@@ -95,7 +95,7 @@ function __initializeArgs__()
 //    Pharse::setBanner($banner);
     if(isset($GLOBALS['logger']))
     {
-        $GLOBALS['logger']->logLine('Options set: '.var_export($GLOBALS['OPTS'], true).PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine('Options set: '.var_export($GLOBALS['OPTS'], true).PHP_EOL, \C__DISPLAY_NORMAL__);
     }
     else { print('Options set: '.var_export($GLOBALS['OPTS'], true).PHP_EOL); }
 

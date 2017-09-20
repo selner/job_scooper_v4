@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
+require_once __ROOT__ . "/bootstrap.php";
 
 
 
@@ -72,7 +72,7 @@ function writeJSON($data, $filepath)
     if ($jsonData === false) {
         $err = json_last_error_msg();
         $errMsg = "Error:  Unable to convert jobs list data to json due to error   " . $err;
-        LogLine($errMsg, \Scooper\C__DISPLAY_ERROR__);
+        LogLine($errMsg, \C__DISPLAY_ERROR__);
         throw new Exception($errMsg);
 
     }
@@ -81,7 +81,7 @@ function writeJSON($data, $filepath)
     if (file_put_contents($filepath, $jsonData, FILE_TEXT) === false) {
         $err = error_get_last();
         $errMsg = "Error:  Unable to save JSON results to file " . $filepath . " due to error   " . $err;
-        LogLine($errMsg, \Scooper\C__DISPLAY_ERROR__);
+        LogLine($errMsg, \C__DISPLAY_ERROR__);
         throw new Exception($errMsg);
 
     }
@@ -92,7 +92,8 @@ function writeJSON($data, $filepath)
 function loadJSON($file)
 {
     if(is_file($file)) {
-        LogLine("Reading json data from file " . $file, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+#        LogLine("Reading json data from file " . $file, \C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Reading json data from file " . $file);
         $jsonText = file_get_contents($file, FILE_TEXT);
 
         $data = json_decode($jsonText, $assoc = true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
@@ -100,12 +101,11 @@ function loadJSON($file)
     }
     else
     {
-        LogLine("Unable to load json data from file " . $file, \Scooper\C__DISPLAY_ERROR__);
+        LogLine("Unable to load json data from file " . $file, \C__DISPLAY_ERROR__);
         return null;
     }
 
 }
-
 
 
 use LightnCandy\LightnCandy;

@@ -31,7 +31,7 @@ class ClassMultiSiteSearch
             $this->selenium->terminate();
         }
 
-        LogLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__);
+        LogLine("Closing ".$this->siteName." instance of class " . get_class($this), \C__DISPLAY_ITEM_START__);
     }
 
     function addMultipleSearches($arrSearches)
@@ -45,7 +45,7 @@ class ClassMultiSiteSearch
                 $this->arrSearchesByPlugin[$pluginClass][$search->getKey()] = $search->copy();
             else
             {
-                LogLine($search->getJobSite() . " excluded, so skipping its searches.", \Scooper\C__DISPLAY_ITEM_START__);
+                LogLine($search->getJobSite() . " excluded, so skipping its searches.", \C__DISPLAY_ITEM_START__);
                 $srr = array('success' => true, 'details' => 'Search was excluded from run by a command line setting.', 'error_files' => array());
                 $search->setSearchRunResult($srr);
             }
@@ -66,10 +66,10 @@ class ClassMultiSiteSearch
         foreach(array_keys($this->arrSearchesByPlugin) as $className)
         {
             $searches = $this->arrSearchesByPlugin[$className];
-            $class = new $className(\Scooper\getFullPathFromFileDetails($this->detailsMyFileOut), $searches);
+            $class = new $className(getFullPathFromFileDetails($this->detailsMyFileOut), $searches);
             try
             {
-                LogLine("Setting up " . count($searches) . " search(es) for ". $className . "...", \Scooper\C__DISPLAY_SECTION_START__);
+                LogLine("Setting up " . count($searches) . " search(es) for ". $className . "...", \C__DISPLAY_SECTION_START__);
                 $class->addSearches($searches);
 
                 $arrResults = $class->getUpdatedJobsForAllSearches();
@@ -96,7 +96,7 @@ class ClassMultiSiteSearch
                 else
                     handleException($classError, "Unable to run searches for ". $className . ": %s", $raise = false);
 
-                LogLine('ERROR:  ' . $className . ' failed due to an error:  ' . $err .PHP_EOL. 'Skipping it\'s remaining searches and continuing with other plugins.', \Scooper\C__DISPLAY_ERROR__);
+                LogLine('ERROR:  ' . $className . ' failed due to an error:  ' . $err .PHP_EOL. 'Skipping it\'s remaining searches and continuing with other plugins.', \C__DISPLAY_ERROR__);
                 $arrFail = getFailedSearchesByPlugin();
                 if(countAssociativeArrayValues($arrFail) > 2) {
                     $arrWebDriverFail = array_filter($arrFail, function ($var) {

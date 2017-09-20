@@ -85,7 +85,7 @@ class JobsAutoMarker
 
     function __destruct()
     {
-        LogLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Closing ".$this->siteName." instance of class " . get_class($this), \C__DISPLAY_ITEM_DETAIL__);
 
     }
 
@@ -102,9 +102,9 @@ class JobsAutoMarker
         // Filter the full jobs list looking for duplicates, etc.
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        LogLine(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+        LogLine(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL, \C__DISPLAY_NORMAL__);
 
-        $masterCopy = \Scooper\array_copy($this->arrMasterJobList);
+        $masterCopy = array_copy($this->arrMasterJobList);
 
         $arrJobs_AutoUpdatable = array_filter($masterCopy, "isJobAutoUpdatable");
         $this->_markJobsList_SetLikelyDuplicatePosts_($arrJobs_AutoUpdatable);
@@ -130,7 +130,7 @@ class JobsAutoMarker
             $origJobMatchForEachCompanyRole = array();
             $dupeJobMatchesForEachCompanyRole = array();
 
-            LogLine("Finding Duplicate Job Roles" , \Scooper\C__DISPLAY_ITEM_START__);
+            LogLine("Finding Duplicate Job Roles" , \C__DISPLAY_ITEM_START__);
             foreach($arrJobsList as $job)
             {
                 $indexKey = $job->getJobPosting()->getKeySiteAndPostID();
@@ -141,7 +141,7 @@ class JobsAutoMarker
                     $dupeJobMatchesForEachCompanyRole[$indexKey] = $job;
             }
 
-            LogLine("Marking jobs as duplicate..." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Marking jobs as duplicate..." , \C__DISPLAY_ITEM_DETAIL__);
 
             foreach($dupeJobMatchesForEachCompanyRole as $dupeJobMatch)
             {
@@ -163,7 +163,7 @@ class JobsAutoMarker
                 $dupeJobMatch->save();
             }
             
-            LogLine(count($dupeJobMatchesForEachCompanyRole). "/" . countAssociativeArrayValues($arrJobsList) . " jobs have immediately been marked as duplicate based on company/role pairing. " , \Scooper\C__DISPLAY_ITEM_RESULT__);
+            LogLine(count($dupeJobMatchesForEachCompanyRole). "/" . countAssociativeArrayValues($arrJobsList) . " jobs have immediately been marked as duplicate based on company/role pairing. " , \C__DISPLAY_ITEM_RESULT__);
 
         }
         catch (Exception $ex)
@@ -222,13 +222,13 @@ class JobsAutoMarker
         {
             if (count($arrJobsList) == 0) return;
 
-            LogLine("Marking Out of Area Jobs", \Scooper\C__DISPLAY_ITEM_START__);
+            LogLine("Marking Out of Area Jobs", \C__DISPLAY_ITEM_START__);
 
             $nJobsSkipped = 0;
             $nJobsMarkedAutoExcluded = 0;
             $nJobsNotMarked = 0;
 
-            LogLine("Building jobs by locations list and excluding failed matches...", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Building jobs by locations list and excluding failed matches...", \C__DISPLAY_ITEM_DETAIL__);
             foreach ($arrJobsList as $jobMatch) {
                 $locValue = $jobMatch->getJobPosting()->getLocation();
                 $locKey = $this->getLocationLookupKey($locValue);
@@ -248,7 +248,7 @@ class JobsAutoMarker
 
             assert(count($arrJobsList) == $nJobsMarkedAutoExcluded + $nJobsSkipped + $nJobsNotMarked);
 
-            LogLine("Jobs marked as out of area: marked ".$nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) .", skipped " . $nJobsSkipped . "/" . countAssociativeArrayValues($arrJobsList) .", not marked ". $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
+            LogLine("Jobs marked as out of area: marked ".$nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) .", skipped " . $nJobsSkipped . "/" . countAssociativeArrayValues($arrJobsList) .", not marked ". $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).")" , \C__DISPLAY_ITEM_RESULT__);
         }
         catch (Exception $ex)
         {
@@ -266,8 +266,8 @@ class JobsAutoMarker
         {
             if(count($arrJobsList) == 0 || is_null($GLOBALS['USERDATA']['companies_regex_to_filter']) || count($GLOBALS['USERDATA']['companies_regex_to_filter']) == 0) return;
 
-            LogLine("Excluding Jobs by Companies Regex Matches", \Scooper\C__DISPLAY_ITEM_START__);
-            LogLine("Checking ".count($arrJobsList) ." roles against ". count($GLOBALS['USERDATA']['companies_regex_to_filter']) ." excluded companies.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Excluding Jobs by Companies Regex Matches", \C__DISPLAY_ITEM_START__);
+            LogLine("Checking ".count($arrJobsList) ." roles against ". count($GLOBALS['USERDATA']['companies_regex_to_filter']) ." excluded companies.", \C__DISPLAY_ITEM_DETAIL__);
 
             foreach ($arrJobsList as $jobMatch) {
                 if(in_array($jobMatch->getUserMatchStatus(), array("exclude-match")) == 1) {
@@ -278,7 +278,7 @@ class JobsAutoMarker
                     $matched_exclusion = false;
                     foreach($GLOBALS['USERDATA']['companies_regex_to_filter'] as $rxInput )
                     {
-                        if(preg_match($rxInput, \Scooper\strScrub($jobMatch->getJobPosting()->getCompany(), DEFAULT_SCRUB)))
+                        if(preg_match($rxInput, strScrub($jobMatch->getJobPosting()->getCompany(), DEFAULT_SCRUB)))
                         {
                             $jobMatch->setUserMatchStatus("exclude-match");
                             $jobMatch->setUserMatchReason('Wrong Company ' . C__STR_TAG_AUTOMARKEDJOB__);
@@ -294,7 +294,7 @@ class JobsAutoMarker
                 }
             }
 
-            LogLine("Jobs marked not interested via companies regex: marked ".$nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) .", skipped " . $nJobsSkipped . "/" . countAssociativeArrayValues($arrJobsList) .", not marked ". $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).")" , \Scooper\C__DISPLAY_ITEM_RESULT__);
+            LogLine("Jobs marked not interested via companies regex: marked ".$nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) .", skipped " . $nJobsSkipped . "/" . countAssociativeArrayValues($arrJobsList) .", not marked ". $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).")" , \C__DISPLAY_ITEM_RESULT__);
         }
         catch (Exception $ex)
         {
@@ -317,8 +317,8 @@ class JobsAutoMarker
             if (count($arrJobsList) == 0 || is_null($titleKeywords)) return null;
             $negKeywords = array_diff_assoc($GLOBALS['USERDATA']['title_negative_keyword_tokens'], array_values($titleKeywords) );
 
-            LogLine("Excluding Jobs by Negative Title Keyword Token Matches", \Scooper\C__DISPLAY_ITEM_START__);
-            LogLine("Checking ".count($arrJobsList) ." roles against ". count($negKeywords) ." negative title keywords to be excluded.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Excluding Jobs by Negative Title Keyword Token Matches", \C__DISPLAY_ITEM_START__);
+            LogLine("Checking ".count($arrJobsList) ." roles against ". count($negKeywords) ." negative title keywords to be excluded.", \C__DISPLAY_ITEM_DETAIL__);
 
 
             try {
@@ -361,7 +361,7 @@ class JobsAutoMarker
             } catch (Exception $ex) {
                 handleException($ex, 'ERROR:  Failed to verify titles against negative keywords due to error: %s', isDebug());
             }
-            LogLine("Processed " . countAssociativeArrayValues($arrJobsList) . " titles for auto-marking against negative title keywords: " . $nJobsSkipped . "/" . count($arrJobsList) . " skipped; " . $nJobsNotMarked. "/" . countAssociativeArrayValues($arrJobsList) . " marked included; " . $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) . " marked excluded.", \Scooper\C__DISPLAY_ITEM_RESULT__);
+            LogLine("Processed " . countAssociativeArrayValues($arrJobsList) . " titles for auto-marking against negative title keywords: " . $nJobsSkipped . "/" . count($arrJobsList) . " skipped; " . $nJobsNotMarked. "/" . countAssociativeArrayValues($arrJobsList) . " marked included; " . $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) . " marked excluded.", \C__DISPLAY_ITEM_RESULT__);
         }
         catch (Exception $ex)
         {
@@ -411,7 +411,7 @@ class JobsAutoMarker
                 foreach ($search['keywords_array_tokenized'] as $kwdset) {
                     $arrKwdSet[$kwdset] = explode(" ", $kwdset);
                 }
-                $keywordsToMatch = \Scooper\my_merge_add_new_keys($keywordsToMatch, $arrKwdSet);
+                $keywordsToMatch = my_merge_add_new_keys($keywordsToMatch, $arrKwdSet);
             }
         }
         return $keywordsToMatch;
@@ -427,7 +427,7 @@ class JobsAutoMarker
             $titleKeywords = $this->_getTitleKeywords();
             if (count($arrJobsList) == 0 || is_null($titleKeywords)) return null;
 
-            LogLine("Checking " . count($arrJobsList) . " roles against " . count($titleKeywords) . " keywords in titles...", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Checking " . count($arrJobsList) . " roles against " . count($titleKeywords) . " keywords in titles...", \C__DISPLAY_ITEM_DETAIL__);
 
             try {
 
@@ -469,7 +469,7 @@ class JobsAutoMarker
             } catch (Exception $ex) {
                 handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s', isDebug());
             }
-            LogLine("Processed " . countAssociativeArrayValues($arrJobsList) . " titles for auto-marking against search title keywords: " . $nJobsSkipped . "/" . count($arrJobsList) . " skipped; " . $nJobsNotMarked. "/" . countAssociativeArrayValues($arrJobsList) . " marked included; " . $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) . " marked excluded.", \Scooper\C__DISPLAY_ITEM_RESULT__);
+            LogLine("Processed " . countAssociativeArrayValues($arrJobsList) . " titles for auto-marking against search title keywords: " . $nJobsSkipped . "/" . count($arrJobsList) . " skipped; " . $nJobsNotMarked. "/" . countAssociativeArrayValues($arrJobsList) . " marked included; " . $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) . " marked excluded.", \C__DISPLAY_ITEM_RESULT__);
         }
         catch (Exception $ex)
         {

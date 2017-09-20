@@ -55,7 +55,7 @@ class SeleniumSession extends PropertyObject
         //          Adding check for that case and a session kill/reload when it happens
         if (stristr($src, "tab has crashed") != false)
         {
-            $GLOBALS['logger']->logLine("Error in Firefox WebDriver:  tab has crashed retrieving page at " . $url .".  Killing WebDriver and trying one more time...", \Scooper\C__DISPLAY_WARNING__);
+            $GLOBALS['logger']->logLine("Error in Firefox WebDriver:  tab has crashed retrieving page at " . $url .".  Killing WebDriver and trying one more time...", \C__DISPLAY_WARNING__);
             // We found "tab has crashed" in the response, so we can't use it.
             if ($recursed != true) {
                 $this->killAllAndRestartSelenium();
@@ -88,7 +88,7 @@ class SeleniumSession extends PropertyObject
         } catch (Exception $ex) {
             $strMsg = "Error retrieving Selenium page at " . $url . ":  ". $ex;
 
-            $GLOBALS['logger']->logLine($strMsg, \Scooper\C__DISPLAY_ERROR__);
+            $GLOBALS['logger']->logLine($strMsg, \C__DISPLAY_ERROR__);
             throw new ErrorException($strMsg);
         }
     }
@@ -105,7 +105,7 @@ class SeleniumSession extends PropertyObject
         }
         catch (Exception $ex)
         {
-            $GLOBALS['logger']->logLine("Error stopping active Selenium sessions: " . $ex, \Scooper\C__DISPLAY_ERROR__);
+            $GLOBALS['logger']->logLine("Error stopping active Selenium sessions: " . $ex, \C__DISPLAY_ERROR__);
         }
 
         $webdriver = $this->getWebDriverKind();
@@ -123,9 +123,9 @@ class SeleniumSession extends PropertyObject
             
             if(array_key_exists('stop_command', $GLOBALS['USERDATA']['selenium']) && !is_null($GLOBALS['USERDATA']['selenium']['stop_command']))
             {
-                $GLOBALS['logger']->logLine("Attempting to stop Selenium server with command \"" . $GLOBALS['USERDATA']['selenium']['stop_command'] . "\"", \Scooper\C__DISPLAY_NORMAL__);
+                $GLOBALS['logger']->logLine("Attempting to stop Selenium server with command \"" . $GLOBALS['USERDATA']['selenium']['stop_command'] . "\"", \C__DISPLAY_NORMAL__);
                 $res = doExec($GLOBALS['USERDATA']['selenium']['stop_command']);
-                $GLOBALS['logger']->logLine("Stop Selenium server result: "  . $res, \Scooper\C__DISPLAY_NORMAL__);
+                $GLOBALS['logger']->logLine("Stop Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
 
                 $GLOBALS['selenium_started'] = false;
 
@@ -138,15 +138,15 @@ class SeleniumSession extends PropertyObject
                     //
                     $cmd = 'pid=`ps -eo pid,args | grep selenium-server | grep -v grep | cut -c1-6`; if [ "$pid" ]; then kill -9 $pid; echo "Killed Selenium process #"$pid; else echo "Selenium server is not running."; fi';
                     if (isset($GLOBALS['logger'])) {
-                        $GLOBALS['logger']->logLine("Killing Selenium server process with command \"" . $cmd . "\"", \Scooper\C__DISPLAY_NORMAL__);
+                        $GLOBALS['logger']->logLine("Killing Selenium server process with command \"" . $cmd . "\"", \C__DISPLAY_NORMAL__);
                     }
                     $res = doExec($cmd);
-                    $GLOBALS['logger']->logLine("Killing Selenium server result: "  . $res, \Scooper\C__DISPLAY_NORMAL__);
+                    $GLOBALS['logger']->logLine("Killing Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
                     $GLOBALS['selenium_started'] = false;
                 } catch (Exception $ex) {
                     $pscmd = doExec("pkill -i selenium");
                     if (isset($GLOBALS['logger'])) {
-                        $GLOBALS['logger']->logLine("Failed to send shutdown to Selenium server.  Attempted to kill process, however you may need to manually shut it down.", \Scooper\C__DISPLAY_ERROR__);
+                        $GLOBALS['logger']->logLine("Failed to send shutdown to Selenium server.  Attempted to kill process, however you may need to manually shut it down.", \C__DISPLAY_ERROR__);
                     }
                 } finally {
                     $GLOBALS['selenium_started'] = false;
@@ -156,7 +156,7 @@ class SeleniumSession extends PropertyObject
         else
         {
             if (isset($GLOBALS['logger'])) {
-                $GLOBALS['logger']->logLine("Skipping Selenium server shutdown since we did not start it.", \Scooper\C__DISPLAY_WARNING__);
+                $GLOBALS['logger']->logLine("Skipping Selenium server shutdown since we did not start it.", \C__DISPLAY_WARNING__);
             }
         }
 
@@ -190,7 +190,7 @@ class SeleniumSession extends PropertyObject
 
         $seleniumStarted = SeleniumSession::isServerUp();
         if($seleniumStarted == true) {
-            $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \Scooper\C__DISPLAY_WARNING__);
+            $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \C__DISPLAY_WARNING__);
 
             if($GLOBALS['USERDATA']['selenium']['autostart'] == 1)
             {
@@ -213,12 +213,12 @@ class SeleniumSession extends PropertyObject
                         if(preg_match('/selenium/', $pscmd) !== false)
                         {
                             $seleniumStarted = true;
-                            $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \Scooper\C__DISPLAY_WARNING__);
+                            $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \C__DISPLAY_WARNING__);
                         }
                         else
                         {
                             $msg = "Error: port " . $GLOBALS['USERDATA']['selenium']['port'] . " is being used by process other than Selenium (" . var_export($pscmd, true) . ").  Aborting.";
-                            $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
+                            $GLOBALS['logger']->logLine($msg, \C__DISPLAY_ERROR__);
                             throw new Exception($msg);
 
                         }
@@ -234,9 +234,9 @@ class SeleniumSession extends PropertyObject
 
                 if(array_key_exists('start_command', $GLOBALS['USERDATA']['selenium']) && !is_null($GLOBALS['USERDATA']['selenium']['start_command']))
                 {
-                    $GLOBALS['logger']->logLine("Attempting to start Selenium server with command \"" . $GLOBALS['USERDATA']['selenium']['start_command'] . "\"", \Scooper\C__DISPLAY_NORMAL__);
+                    $GLOBALS['logger']->logLine("Attempting to start Selenium server with command \"" . $GLOBALS['USERDATA']['selenium']['start_command'] . "\"", \C__DISPLAY_NORMAL__);
                     $res = doExec($GLOBALS['USERDATA']['selenium']['start_command']);
-                    $GLOBALS['logger']->logLine("Starting Selenium server result: "  . $res, \Scooper\C__DISPLAY_NORMAL__);
+                    $GLOBALS['logger']->logLine("Starting Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
 
                     sleep(10);
                     $GLOBALS['selenium_started'] = true;
@@ -253,10 +253,10 @@ class SeleniumSession extends PropertyObject
 
                     $strCmdToRun .= " >/dev/null &";
 
-                    $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \Scooper\C__DISPLAY_ITEM_RESULT__);
+                    $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \C__DISPLAY_ITEM_RESULT__);
                     $res = doExec($strCmdToRun);
                     sleep(10);
-                    $GLOBALS['logger']->logLine("Starting Selenium server result: "  . $res, \Scooper\C__DISPLAY_NORMAL__);
+                    $GLOBALS['logger']->logLine("Starting Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
                     $GLOBALS['selenium_started'] = true;
                 }
             }
@@ -275,7 +275,7 @@ class SeleniumSession extends PropertyObject
 
         try{
 
-            $objSimplHtml = \SimpleHtmlDom\file_get_html($hostHubPageURL);
+            $objSimplHtml = SimpleHTMLHelper::file_get_html($hostHubPageURL);
             if ($objSimplHtml === false)
             {
                 $ret = false;
@@ -297,7 +297,7 @@ class SeleniumSession extends PropertyObject
         }
         finally
         {
-            $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_NORMAL__);
+            $GLOBALS['logger']->logLine($msg, \C__DISPLAY_NORMAL__);
         }
 
         return $ret;

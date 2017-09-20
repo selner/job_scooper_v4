@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
+require_once __ROOT__ . "/bootstrap.php";
 
 const C__SIMPLEHTML_THROWEXCEPTION = 0x1;
 const C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR = 0x2;
@@ -24,8 +24,10 @@ const C__SIMPLEHTML_FOUND_RETURN_PROPERTY = 0x10;
 const C__SIMPLEHTML_FOUND_RETURN_ATTRIB = 0x20;
 const C__SIMPLEHTML_FOUND_RETURN_NODE = 0x40;
 const C__SIMPLEHTML_FOUND_RETURN_ALLCHILDREN = 0x80;
+use Sunra\PhpSimple\HtmlDomParser;
 
-class CSimpleHTMLHelper
+
+class SimpleHTMLHelper extends Sunra\PhpSimple\HtmlDomParser
 {
     private $nodeObj = null;
 
@@ -58,6 +60,14 @@ class CSimpleHTMLHelper
         return $this->getNodeValue($strNodePath, $retIndex, $flags);
     }
 
+
+    // dump html dom tree
+    static function dump_html_tree($node, $show_attr=true, $deep=0)
+    {
+        $node->dump($node);
+    }
+
+
     function getProperty($strNodePath, $retIndex, $optPropOrAttrName, $fRequired = false)
     {
         $flags = C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR | C__SIMPLEHTML_FOUND_RETURN_PROPERTY;
@@ -77,7 +87,7 @@ class CSimpleHTMLHelper
     function getNodeValue($strNodePath, $retIndex, $flags, $optPropOrAttrName = null)
     {
         $ret = null;
-        if(\Scooper\isBitFlagSet($flags,C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR ))
+        if(isBitFlagSet($flags,C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR ))
         {
             $ret = "";
         }
@@ -100,7 +110,7 @@ class CSimpleHTMLHelper
 
 
 
-            if(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_NODE ))
+            if(isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_NODE ))
             {
                 $ret = $subNode;
                 if(isset($retIndex) && isset($subNode[$retIndex]))
@@ -125,11 +135,11 @@ class CSimpleHTMLHelper
                 if(isVerbose())
                 {
                     print ("Node path(" . (isset($strNodePath)?$strNodePath :"null").")[index=".(isset($retIndex)?$retIndex:"null")."] => " .PHP_EOL);
-                    \SimpleHtmlDom\dump_html_tree($subNodeElement);
+                    $this->dump_html_tree($subNodeElement);
                     print ("<= end " .PHP_EOL);
                 }
 
-                if(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_PROPERTY ))
+                if(isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_PROPERTY ))
                 {
                     if(!isset($optPropOrAttrName) || !isset($subNodeElement->$optPropOrAttrName))
                     {
@@ -140,7 +150,7 @@ class CSimpleHTMLHelper
                         $ret = $subNodeElement->$optPropOrAttrName;
                     }
                 }
-                elseif(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_ATTRIB ))
+                elseif(isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_ATTRIB ))
                 {
                     if(!isset($optPropOrAttrName) || !isset($subNodeElement->attr[$optPropOrAttrName]))
                     {
@@ -151,15 +161,15 @@ class CSimpleHTMLHelper
                         $ret = $subNodeElement->attr[$optPropOrAttrName];
                     }
                 }
-                elseif(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_ALLCHILDREN))
+                elseif(isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_ALLCHILDREN))
                 {
                     $ret = combineTextAllChildren($subNodeElement, false);
-                    if(!isset($ret) && \Scooper\isBitFlagSet($flags, C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR ))
+                    if(!isset($ret) && isBitFlagSet($flags, C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR ))
                     {
                         $ret = "";
                     }
                 }
-                elseif(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_PLAINTEXT ))
+                elseif(isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_PLAINTEXT ))
                 {
                     if(!isset($subNodeElement->plaintext))
                     {
@@ -173,14 +183,14 @@ class CSimpleHTMLHelper
             }
         } catch (Exception $ex) {
             $strErr = $ex->getMessage();
-            if(\Scooper\isBitFlagSet($flags, C__SIMPLEHTML_THROWEXCEPTION ))
+            if(isBitFlagSet($flags, C__SIMPLEHTML_THROWEXCEPTION ))
             {
-                $GLOBALS['logger']->logLine("Error getting SimpleObjectHTML node:  " . $strErr, \Scooper\C__DISPLAY_ERROR__);
+                $GLOBALS['logger']->logLine("Error getting SimpleObjectHTML node:  " . $strErr, \C__DISPLAY_ERROR__);
                 throw $ex;
             }
             else
             {
-                if(isDebug()) $GLOBALS['logger']->logLine("" . $strErr, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                if(isDebug()) $GLOBALS['logger']->logLine("" . $strErr, \C__DISPLAY_ITEM_DETAIL__);
             }
         }
 

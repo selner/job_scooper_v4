@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
+require_once __ROOT__."/bootstrap.php";
 
 abstract class ClassJSONJobsitePlugin extends ClassClientHTMLJobSitePlugin
 {
@@ -31,7 +31,7 @@ class JSONPlugins
     {
         $jsonconfigsdir = dirname(dirname(__FILE__)) . "/plugins/json_plugins";
         $arrAddedPlugins = null;
-        print('Getting job site plugin list...'. PHP_EOL);
+        print('Getting JSON plugin list...'. PHP_EOL);
         $filelist = array_diff(scandir($jsonconfigsdir), array(".", ".."));
         $filelist = array_filter($filelist, function ($var) {
             if(preg_match("/json$/", pathinfo($var, PATHINFO_EXTENSION)))
@@ -49,44 +49,12 @@ class JSONPlugins
     {
 
         $pluginData = array(
-            'siteName' => null,
-            'siteBaseURL' => null,
-            'strBaseURLFormat' => null,
-            'countryCodes' => null,
-            'PageLimit' => null,
-            'PaginationType' => null,
-            'LocationType' => null,
-            'AdditionalFlags' => array(),
-            'nJobListingsPerPage' => C_JOB_MAX_RESULTS_PER_SEARCH,
-            'arrListingTagSetup' => \Scooper\array_copy(ClassBaseHTMLJobSitePlugin::getEmptyListingTagSetup())
+            'siteName' => getArrayItem('AgentName', $arrConfigData),
+            'siteBaseURL' => getArrayItem('BaseURL', $arrConfigData),
+            'strBaseURLFormat' => getArrayItem('SourceURL', $arrConfigData),
+            'countryCodes' => getArrayItem('CountryCodes', $arrConfigData),
+            'arrListingTagSetup' => ClassBaseHTMLJobSitePlugin::getEmptyListingTagSetup()
         );
-
-        foreach(array_keys($arrConfigData) as $datakey)
-        {
-            switch($datakey)
-            {
-
-                case "AgentName":
-                    $pluginData['siteName'] = $arrConfigData['AgentName'];
-                    break;
-
-                case "SourceURL":
-                    $pluginData['strBaseURLFormat'] = $arrConfigData['SourceURL'];
-                    break;
-
-                case "BaseURL":
-                    $pluginData['siteBaseURL'] = $arrConfigData['BaseURL'];
-                    break;
-
-                case "CountryCodes":
-                    $pluginData['countryCodes'] = $arrConfigData['CountryCodes'];
-                    break;
-
-                default:
-                    $pluginData[$datakey] = $arrConfigData[$datakey];
-                    break;
-            }
-        }
 
         if(array_key_exists("Pagination", $arrConfigData)) {
 
@@ -123,6 +91,12 @@ class JSONPlugins
                 }
             }
         }
+        foreach(array_keys($arrConfigData) as $datakey)
+        {
+            if(!array_key_exists($datakey, $pluginData) && !in_array($datakey, array("Collections", "Fields")))
+                $pluginData[$datakey] = getArrayItem($datakey, $arrConfigData);
+        }
+
 
         if(array_key_exists("Collections", $arrConfigData) && !is_null($arrConfigData['Collections']) && is_array($arrConfigData['Collections']) && count($arrConfigData['Collections']) > 0 && array_key_exists("Fields", $arrConfigData['Collections'][0]))
         {
@@ -162,7 +136,7 @@ class JSONPlugins
                 }
             }
             if(isset($GLOBALS['logger']))
-                $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($pluginData) . " JSON configs for new plugins.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($pluginData) . " JSON configs for new plugins.", \C__DISPLAY_ITEM_DETAIL__);
 
             return $pluginData;
         }

@@ -59,7 +59,7 @@ class PluginBetalist extends ClassClientHTMLJobSitePlugin
         }
 
 
-        $this->additionalLoadDelaySeconds = $this->additionalLoadDelaySeconds + \Scooper\intceil($this->nJobListingsPerPage / 100) * 2;
+        $this->additionalLoadDelaySeconds = $this->additionalLoadDelaySeconds + intceil($this->nJobListingsPerPage / 100) * 2;
 
 //
 // Betalist maxes out at a 1000 listings.  If we're over that, reduce the count to 1000 so we don't try to download more

@@ -79,7 +79,7 @@ class PluginMonster extends ClassBaseServerHTMLJobSitePlugin
         {
             if(strncasecmp('Sorry,', trim($noResults[0]->plaintext), 6) == 0)
             {
-                $GLOBALS['logger']->logLine("Search returned no jobs found and matched expected 'No results' tag for " . $this->siteName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                $GLOBALS['logger']->logLine("Search returned no jobs found and matched expected 'No results' tag for " . $this->siteName, \C__DISPLAY_ITEM_DETAIL__);
                 return null;
             }
         }

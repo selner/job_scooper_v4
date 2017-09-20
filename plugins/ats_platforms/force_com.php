@@ -52,7 +52,7 @@ class BaseForceComClass extends ClassClientHTMLJobSitePlugin
         if($nodeCounts != null && is_array($nodeCounts) && isset($nodeCounts[0]))
         {
             $counts = explode("&nbsp", $nodeCounts[0]->plaintext);
-            $nTotalResults = \Scooper\intceil($counts[0]);
+            $nTotalResults = intceil($counts[0]);
         } 
 
 

@@ -35,7 +35,7 @@ class StageManager
             $this->classConfig->initialize();
 
             if (!$GLOBALS['logger'])
-                $GLOBALS['logger'] = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['debug']);
+                $GLOBALS['logger'] = new ScooperLogger($GLOBALS['USERDATA']['directories']['debug']);
 
             $this->pathAllExcludedJobs = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], "all-excluded-jobs"));
             $this->pathAllMatchedJobs = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], "all-job-matches"));
@@ -51,7 +51,7 @@ class StageManager
 
     function __destruct()
     {
-        LogLine("Closing " . $this->siteName . " instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__);
+        LogLine("Closing " . $this->siteName . " instance of class " . get_class($this), \C__DISPLAY_ITEM_START__);
 
 
 
@@ -69,10 +69,10 @@ class StageManager
     public function runAll()
     {
         try {
-            $arrRunStages = explode(",", \Scooper\get_PharseOptionValue("stages"));
+            $arrRunStages = explode(",", get_PharseOptionValue("stages"));
             if (is_array($arrRunStages) && count($arrRunStages) >= 1 && strlen($arrRunStages[0]) > 0) {
                 foreach ($arrRunStages as $stage) {
-                    LogLine("StageManager starting stage " . $stage, \Scooper\C__DISPLAY_SECTION_START__);
+                    LogLine("StageManager starting stage " . $stage, \C__DISPLAY_SECTION_START__);
                     $stageFunc = "doStage" . $stage;
                     try {
                         call_user_func(array($this, $stageFunc));
@@ -81,7 +81,7 @@ class StageManager
                     }
                     finally
                     {
-                        LogLine("StageManager ended stage " . $stage, \Scooper\C__DISPLAY_ITEM_RESULT__);
+                        LogLine("StageManager ended stage " . $stage, \C__DISPLAY_ITEM_RESULT__);
                     }
                 }
             } else {
@@ -119,7 +119,7 @@ class StageManager
     public function doStage1()
     {
 
-        LogLine("Stage 1: Downloading Latest Matching Jobs ", \Scooper\C__DISPLAY_ITEM_RESULT__);
+        LogLine("Stage 1: Downloading Latest Matching Jobs ", \C__DISPLAY_ITEM_RESULT__);
         try {
 
             //
@@ -138,10 +138,10 @@ class StageManager
 
                         $strIncludeKey = 'include_' . $curSearch['site_name'];
 
-                        $valInclude = \Scooper\get_PharseOptionValue($strIncludeKey);
+                        $valInclude = get_PharseOptionValue($strIncludeKey);
 
                         if (!isset($valInclude) || $valInclude == 0) {
-                            LogLine($curSearch['site_name'] . " excluded, so dropping its searches from the run.", \Scooper\C__DISPLAY_ITEM_START__);
+                            LogLine($curSearch['site_name'] . " excluded, so dropping its searches from the run.", \C__DISPLAY_ITEM_START__);
                             unset($arrSearchesToRun[$z]);
                         }
                     }
@@ -159,7 +159,7 @@ class StageManager
                     // Download all the job listings for all the users searches
                     //
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    LogLine(PHP_EOL . "**************  Starting Run of " . count($arrSearchesToRun) . " Searches  **************  " . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+                    LogLine(PHP_EOL . "**************  Starting Run of " . count($arrSearchesToRun) . " Searches  **************  " . PHP_EOL, \C__DISPLAY_NORMAL__);
 
 
                     //
@@ -185,7 +185,7 @@ class StageManager
     public function doStage2()
     {
         try {
-            LogLine("Stage 2:  Tokenizing Job Titles... ", \Scooper\C__DISPLAY_SECTION_START__);
+            LogLine("Stage 2:  Tokenizing Job Titles... ", \C__DISPLAY_SECTION_START__);
             $arrJobsList = getAllUserMatchesNotNotified();
             if(count($arrJobsList) > 0)
             {
@@ -195,7 +195,7 @@ class StageManager
 
                 writeJobRecordsToJson($jfilefullpath, $arrJobsList);
 
-                LogLine(PHP_EOL . "Processing " . $jfilefullpath, \Scooper\C__DISPLAY_NORMAL__);
+                LogLine(PHP_EOL . "Processing " . $jfilefullpath, \C__DISPLAY_NORMAL__);
                 $outjfilefullpath = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['debug'], $outjfile));
 
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -204,11 +204,11 @@ class StageManager
                 //
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-                LogLine(PHP_EOL . "    ~~~~~~ Tokenizing job titles ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
-                $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/normalizeJobListingFile.py");
+                LogLine(PHP_EOL . "    ~~~~~~ Tokenizing job titles ~~~~~~~" . PHP_EOL, \C__DISPLAY_NORMAL__);
+                $PYTHONPATH = realpath(__ROOT__. "/python/pyJobNormalizer/normalizeJobListingFile.py");
 
                 $cmd = "python " . $PYTHONPATH . " --infile " . escapeshellarg($jfilefullpath) . " --outfile " . escapeshellarg($outjfilefullpath) ." --column Title --index KeySiteAndPostID";
-                LogLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd ."  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+                LogLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd ."  ~~~~~~~" . PHP_EOL, \C__DISPLAY_NORMAL__);
 
                 doExec($cmd);
 
@@ -220,7 +220,7 @@ class StageManager
         }
         finally
         {
-            LogLine("End of stage 2 (tokenizing titles).", \Scooper\C__DISPLAY_NORMAL__);
+            LogLine("End of stage 2 (tokenizing titles).", \C__DISPLAY_NORMAL__);
         }
 
     }
@@ -229,7 +229,7 @@ class StageManager
     {
         
         try {
-            LogLine("Stage 3:  Auto-marking all user job matches...", \Scooper\C__DISPLAY_SECTION_START__);
+            LogLine("Stage 3:  Auto-marking all user job matches...", \C__DISPLAY_SECTION_START__);
             $marker = new JobsAutoMarker();
             $marker->markJobs();
         } catch (Exception $ex) {
@@ -237,7 +237,7 @@ class StageManager
         }
         finally
         {
-            LogLine("End of stage 3 (auto-marking).", \Scooper\C__DISPLAY_NORMAL__);
+            LogLine("End of stage 3 (auto-marking).", \C__DISPLAY_NORMAL__);
         }
     }
 
@@ -245,10 +245,10 @@ class StageManager
     {
         try {
 
-            LogLine("Stage 4: Notifying User", \Scooper\C__DISPLAY_SECTION_START__);
+            LogLine("Stage 4: Notifying User", \C__DISPLAY_SECTION_START__);
 
 //            if ((countJobRecords($arrMatchedJobs)) == 0) {
-//                LogLine("No jobs were loaded for notification. Skipping Stage 4.", \Scooper\C__DISPLAY_WARNING__);
+//                LogLine("No jobs were loaded for notification. Skipping Stage 4.", \C__DISPLAY_WARNING__);
 //                return;
 //            }
 

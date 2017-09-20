@@ -133,11 +133,11 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             {
                 $noResultsVal = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_listings_noresults'], $propertyName = 'plaintext');
                 if (!is_null($noResultsVal)) {
-                    $GLOBALS['logger']->logLine("Search returned " . $noResultsVal . " and matched expected 'No results' tag for " . $this->siteName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    $GLOBALS['logger']->logLine("Search returned " . $noResultsVal . " and matched expected 'No results' tag for " . $this->siteName, \C__DISPLAY_ITEM_DETAIL__);
                     return $noResultsVal;
                 }
             } catch (Exception $ex) {
-                $GLOBALS['logger']->logLine("Warning: Did not find matched expected 'No results' tag for " . $this->siteName . ".  Error:" . $ex->getMessage(), \Scooper\C__DISPLAY_WARNING__);
+                $GLOBALS['logger']->logLine("Warning: Did not find matched expected 'No results' tag for " . $this->siteName . ".  Error:" . $ex->getMessage(), \C__DISPLAY_WARNING__);
             }
         }
 
@@ -317,14 +317,14 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
                 $index = $arrTag['index'];
                 if (count($nodeMatches) <= $index) {
                     $strError = sprintf("%s plugin failed to find index #%d in the %d nodes matching '%s'. ", $this->siteName, $index, count($nodeMatches), $strMatch);
-                    $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
+                    $GLOBALS['logger']->logLine($strError, \C__DISPLAY_ERROR__);
                     throw new Exception($strError);
                 }
                 $ret = $nodeMatches[$index];
             } elseif (!is_null($ret) && is_array($ret)) {
                 if (count($ret) > 1) {
                     $strError = sprintf("Warning:  %s plugin matched %d nodes to selector '%s' but did not specify an index.  Assuming first node.", $this->siteName, count($ret), $strMatch);
-                    $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_WARNING__);
+                    $GLOBALS['logger']->logLine($strError, \C__DISPLAY_WARNING__);
                 }
                 $ret = $ret[0];
             }
@@ -351,7 +351,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             $callback = get_class($this) . "::" . $arrTag['return_value_callback'];
             if (!method_exists($this, $arrTag['return_value_callback'])) {
                 $strError = sprintf("%s plugin failed could not call the tag callback method '%s' for attribute name '%s'.", $this->siteName, $callback, $returnAttribute);
-                $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
+                $GLOBALS['logger']->logLine($strError, \C__DISPLAY_ERROR__);
                 throw new Exception($strError);
             }
 
@@ -371,8 +371,6 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
      * This does the heavy lifting of parsing each job record from the
      * page's HTML it was passed.
      * *
-     * @param \voku\helper\SimpleHtmlDom $objSimpHTML
-     * @return array|null
      */
     function parseJobsListForPage($objSimpHTML)
     {
@@ -383,7 +381,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         // first looked for the detail view layout and parse that
         $strNodeMatch = $this->getTagSelector($tagSetup['tag_listings_section']);
 
-        $GLOBALS['logger']->logLine($this->siteName . " finding nodes matching: " . $strNodeMatch, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine($this->siteName . " finding nodes matching: " . $strNodeMatch, \C__DISPLAY_ITEM_DETAIL__);
         $nodesJobRows = $this->_getTagMatchValue_($objSimpHTML, $tagSetup['tag_listings_section'], 'collection');
 
         if ($nodesJobRows === false || (isset($nodesJobRows) && $nodesJobRows != null && count($nodesJobRows) > 0)) {
@@ -430,11 +428,11 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         }
         else
         {
-            $this->_writeDebugFiles_($this->currentSearchBeingRun, 'failed-find-listings', null, $objSimpHTML->root);
+            $this->_writeDebugFiles_($this->currentSearchBeingRun, 'failed-find-listings', null, $objSimpHTML);
             handleException(new Exception("Could not find matching job elements in HTML for " . $strNodeMatch . " in plugin " . $this->siteName), null, true);
         }
 
-        $GLOBALS['logger']->logLine($this->siteName . " returned " . countJobRecords($ret) . " jobs from page.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine($this->siteName . " returned " . countJobRecords($ret) . " jobs from page.", \C__DISPLAY_ITEM_DETAIL__);
 
         return $ret;
     }

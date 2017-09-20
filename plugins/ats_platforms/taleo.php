@@ -34,7 +34,7 @@ class PluginSeattleGenetics extends BaseTaleoPlugin
 
     function parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, $divTagType, $divTagValue, $trIndex)
     {
-        $nodeHelper = new CSimpleHTMLHelper($objSimpHTML);
+        $nodeHelper = new SimpleHTMLHelper($objSimpHTML);
         $node = $nodeHelper->get("div.inner table tbody tr[2] td b", 0, true);
         $totalItemsText = $node->innertext();
 
@@ -171,12 +171,12 @@ abstract class BaseTaleoPlugin extends ClassBaseServerHTMLJobSitePlugin
 
     function parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, $divTagType, $divTagValue, $trIndex)
     {
-        $nodeHelper = new CSimpleHTMLHelper($objSimpHTML);
+        $nodeHelper = new SimpleHTMLHelper($objSimpHTML);
 
 
         $node = $nodeHelper->get("div[". $divTagType . "='".$divTagValue."'] table tbody tr", $trIndex, true);
 
-        $trSecond = new CSimpleHTMLHelper($node);
+        $trSecond = new SimpleHTMLHelper($node);
         $totalItemsText = $trSecond->getText("td", 0, true);
         $arrItemsFirstSplit = explode("found ", trim($totalItemsText));
         $strTotalItemsCount = explode(" matching", trim($arrItemsFirstSplit[1]));

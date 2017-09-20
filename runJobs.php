@@ -17,7 +17,7 @@
 const C__APPNAME__ = "jobs_scooper";
 
 define('__ROOT__', dirname(__FILE__));
-require_once dirname(__FILE__)."/bootstrap.php";
+require_once __ROOT__."/bootstrap.php";
 
 $classRunJobs = new StageManager();
 $classRunJobs->runAll();

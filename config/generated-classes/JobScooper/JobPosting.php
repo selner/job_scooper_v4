@@ -129,7 +129,7 @@ class JobPosting extends \JobScooper\Base\JobPosting implements \ArrayAccess
             // a higher match likelihood
             $v = preg_replace(array('/\s[Cc]orporat[e|ion]/', '/\s[Cc]orp\W{0,1}/', '/\.com/', '/\W{0,}\s[iI]nc/', '/\W{0,}\s[lL][lL][cC]/', '/\W{0,}\s[lL][tT][dD]/'), "", $v);
 
-            switch (\Scooper\strScrub($v)) {
+            switch (strScrub($v)) {
                 case "amazon":
                 case "amazon com":
                 case "a2z":

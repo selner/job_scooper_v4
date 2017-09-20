@@ -39,7 +39,7 @@ class PluginUSAJobs extends ClassBaseJobsAPIPlugin
         ];
         $query = new UsajobsQuery($options);
         $client = new UsajobsProvider($query);
-        $GLOBALS['logger']->logLine("Getting jobs from " . $query->getUrl() . "[". $searchDetails['key'] , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        $GLOBALS['logger']->logLine("Getting jobs from " . $query->getUrl() . "[". $searchDetails['key'] , \C__DISPLAY_ITEM_DETAIL__);
         $apiJobs = $client->getJobs();
         return $apiJobs->all();
 

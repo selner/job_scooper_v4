@@ -26,7 +26,7 @@ class ErrorManager {
 
     function __destruct()
     {
-        if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Destruct fired for instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
+        if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Destruct fired for instance of class " . get_class($this), \C__DISPLAY_ITEM_START__); }
     }
 
 
@@ -67,7 +67,7 @@ class ErrorManager {
         
         if(countAssociativeArrayValues($arrFailedPluginsReport) == 0)
         {
-            if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("No error notification necessary:  no errors detected for the run searches.", \Scooper\C__DISPLAY_NORMAL__); }
+            if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("No error notification necessary:  no errors detected for the run searches.", \C__DISPLAY_NORMAL__); }
             return null;
         }
 

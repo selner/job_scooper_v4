@@ -37,14 +37,14 @@ class ClassJobsNotifier
 
     function __destruct()
     {
-        if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \Scooper\C__DISPLAY_ITEM_START__); }
+        if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \C__DISPLAY_ITEM_START__); }
     }
 
     private function _combineCSVsToExcel($outfileDetails, $arrCSVFiles)
     {
         $spreadsheet = new PHPExcel();
         $objWriter = PHPExcel_IOFactory::createWriter($spreadsheet, "Excel2007");
-        $GLOBALS['logger']->logLine("Creating output XLS file '" . $outfileDetails['full_file_path'] . "'." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+        $GLOBALS['logger']->logLine("Creating output XLS file '" . $outfileDetails['full_file_path'] . "'." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
         $style_all = array(
             'alignment' => array(
                 'vertical' => PHPExcel_Style_Alignment::VERTICAL_TOP,
@@ -121,7 +121,7 @@ class ClassJobsNotifier
                 }
 
 
-                $GLOBALS['logger']->logLine("Added data from CSV '" . $csvFile['full_file_path'] . "' to output XLS file." . PHP_EOL, \Scooper\C__DISPLAY_ITEM_RESULT__);
+                $GLOBALS['logger']->logLine("Added data from CSV '" . $csvFile['full_file_path'] . "' to output XLS file." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
             }
         }
 
@@ -142,8 +142,8 @@ class ClassJobsNotifier
         // Output the full jobs list into a file and into files for different cuts at the jobs list data
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        $GLOBALS['logger']->logSectionHeader("Writing Results Files", \Scooper\C__DISPLAY_SECTION_START__, \Scooper\C__NAPPFIRSTLEVEL__);
-        $GLOBALS['logger']->logSectionHeader("Files Sent To User", \Scooper\C__DISPLAY_SECTION_START__, \Scooper\C__NAPPSECONDLEVEL__);
+        $GLOBALS['logger']->logSectionHeader("Writing Results Files", \C__DISPLAY_SECTION_START__, \C__NAPPFIRSTLEVEL__);
+        $GLOBALS['logger']->logSectionHeader("Files Sent To User", \C__DISPLAY_SECTION_START__, \C__NAPPSECONDLEVEL__);
         $class = null;
 
 
@@ -152,7 +152,7 @@ class ClassJobsNotifier
         //
 
         // Output all records that match the user's interest and are still active
-        $detailsMainResultsXLSFile = \Scooper\getFilePathDetailsFromString(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], getDefaultJobsOutputFileName("results", "", "xls"))), \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+        $detailsMainResultsXLSFile = getFilePathDetailsFromString(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], getDefaultJobsOutputFileName("results", "", "xls"))), \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
         $arrFilesToAttach = array();
         $arrResultFilesToCombine = array();
 
@@ -167,11 +167,11 @@ class ClassJobsNotifier
         $arrJobsData = $this->arrMatchedJobs;
         $arrMatchedJobs = array_filter($arrJobsData, 'isIncludedJobSite' );
 
-        $GLOBALS['logger']->logLine(PHP_EOL . "Writing final list of " . count($arrMatchedJobs) . " jobs to output files." . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine(PHP_EOL . "Writing final list of " . count($arrMatchedJobs) . " jobs to output files." . PHP_EOL, \C__DISPLAY_NORMAL__);
 
         // Output only new records that haven't been looked at yet
-        $detailsCSVFile = \Scooper\parseFilePath($this->_outputFilteredJobsListToFile_($arrMatchedJobs, "isMarkedBlank", "-finalmatchedjobs", "CSV"));
-        $detailsHTMLFile = \Scooper\parseFilePath($this->_outputFilteredJobsListToFile_($arrMatchedJobs, "isMarkedBlank", "-finalmatchedjobs", "HTML"));
+        $detailsCSVFile = parseFilePath($this->_outputFilteredJobsListToFile_($arrMatchedJobs, "isMarkedBlank", "-finalmatchedjobs", "CSV"));
+        $detailsHTMLFile = parseFilePath($this->_outputFilteredJobsListToFile_($arrMatchedJobs, "isMarkedBlank", "-finalmatchedjobs", "HTML"));
 
         $arrResultFilesToCombine[] = $detailsCSVFile;
         $arrFilesToAttach[] = $detailsCSVFile;
@@ -180,24 +180,24 @@ class ClassJobsNotifier
         $arrJobsData = $this->arrExcludedJobs;
         $arrExcludedJobs = array_filter($arrJobsData, 'isIncludedJobSite' );
 
-        $detailsExcludedCSVFile = \Scooper\parseFilePath($this->_outputFilteredJobsListToFile_($arrExcludedJobs, "isMarked_NotInterested", "-finalexcludedjobs", "CSV"));
+        $detailsExcludedCSVFile = parseFilePath($this->_outputFilteredJobsListToFile_($arrExcludedJobs, "isMarked_NotInterested", "-finalexcludedjobs", "CSV"));
 
         if ((filesize($detailsExcludedCSVFile['full_file_path']) < 10 * 1024 * 1024) || isDebug()) {
             $arrFilesToAttach[] = $detailsExcludedCSVFile;
         }
 
-        $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \Scooper\C__SECTION_END__, \Scooper\C__NAPPSECONDLEVEL__);
+        $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \C__SECTION_END__, \C__NAPPSECONDLEVEL__);
 
         $xlsOutputFile = $this->_combineCSVsToExcel($detailsMainResultsXLSFile, $arrResultFilesToCombine);
         array_push($arrFilesToAttach, $xlsOutputFile);
 
 
-        $GLOBALS['logger']->logSectionHeader("Generating text email content for user" . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
+        $GLOBALS['logger']->logSectionHeader("Generating text email content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
 
         $strResultCountsText = $this->getListingCountsByPlugin("text", $arrMatchedJobs, $arrExcludedJobs);
         $strResultText = "Job Scooper Results for ". getRunDateRange() . PHP_EOL . $strResultCountsText . PHP_EOL;
 
-        $GLOBALS['logger']->logSectionHeader("Generating text html content for user" . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
+        $GLOBALS['logger']->logSectionHeader("Generating text html content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
 
 
         $messageHtml = $this->getListingCountsByPlugin("html", $arrMatchedJobs, $arrExcludedJobs, $detailsHTMLFile);
@@ -205,14 +205,14 @@ class ClassJobsNotifier
         $this->_wrapCSSStyleOnHTML_($messageHtml);
         $subject = "New Job Postings: " . getRunDateRange();
 
-        $GLOBALS['logger']->logSectionHeader("Generating text html content for user" . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
+        $GLOBALS['logger']->logSectionHeader("Generating text html content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
 
-        $GLOBALS['logger']->logLine($strResultText, \Scooper\C__DISPLAY_SUMMARY__);
+        $GLOBALS['logger']->logLine($strResultText, \C__DISPLAY_SUMMARY__);
 
         //
         // Send the email notification out for the completed job
         //
-        $GLOBALS['logger']->logSectionHeader("Sending email to user..." . PHP_EOL, \Scooper\C__SECTION_BEGIN__, \Scooper\C__NAPPSECONDLEVEL__);
+        $GLOBALS['logger']->logSectionHeader("Sending email to user..." . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
         $ret = $this->sendEmail($strResultText, $messageHtml, $arrFilesToAttach, $subject, "results");
 
         //
@@ -222,14 +222,14 @@ class ClassJobsNotifier
         if (isDebug() !== true) {
             foreach ($arrFilesToAttach as $fileDetail) {
                 if (file_exists($fileDetail['full_file_path']) && is_file($fileDetail ['full_file_path'])) {
-                    $GLOBALS['logger']->logLine("Deleting local attachment file " . $fileDetail['full_file_path'] . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+                    $GLOBALS['logger']->logLine("Deleting local attachment file " . $fileDetail['full_file_path'] . PHP_EOL, \C__DISPLAY_NORMAL__);
                     unlink($fileDetail['full_file_path']);
                 }
             }
         }
-        $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \Scooper\C__SECTION_END__, \Scooper\C__NAPPSECONDLEVEL__);
+        $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \C__SECTION_END__, \C__NAPPSECONDLEVEL__);
 
-        $GLOBALS['logger']->logLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, \C__DISPLAY_NORMAL__);
 
         return $ret;
     }
@@ -254,7 +254,7 @@ class ClassJobsNotifier
     private function __getAlternateOutputFileDetails__($strNamePrepend = "results", $strNameAppend = "", $ext = "")
     {
         $fileName = getDefaultJobsOutputFileName($strNamePrepend, $strNameAppend, $ext, "");
-        $detailsRet = \Scooper\parseFilePath(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], $fileName)), false);
+        $detailsRet = parseFilePath(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], $fileName)), false);
         return $detailsRet;
     }
 
@@ -277,7 +277,7 @@ class ClassJobsNotifier
 
         if($strFilterToApply == null || function_exists($strFilterToApply) === false)
         {
-            $GLOBALS['logger']->logLine("No filter function supplied; outputting all results...", \Scooper\C__DISPLAY_WARNING__);
+            $GLOBALS['logger']->logLine("No filter function supplied; outputting all results...", \C__DISPLAY_WARNING__);
             $arrJobs = $arrJobsList;
         }
         else
@@ -285,7 +285,7 @@ class ClassJobsNotifier
 
         $this->writeRunsJobsToFile($fileDetails['full_file_path'], $arrJobs, $strFilterToApply, $fileDetails['file_extension']);
 
-        $GLOBALS['logger']->logLine($strFilterToApply . " " . count($arrJobs). " job listings output to  " . $fileDetails['full_file_path'], \Scooper\C__DISPLAY_ITEM_RESULT__);
+        $GLOBALS['logger']->logLine($strFilterToApply . " " . count($arrJobs). " job listings output to  " . $fileDetails['full_file_path'], \C__DISPLAY_ITEM_RESULT__);
 
         return $fileDetails['full_file_path'];
 
@@ -343,18 +343,18 @@ class ClassJobsNotifier
         if(!isset($retEmails["to"]) || count($retEmails["to"]) < 1 || strlen(current($retEmails["to"])['address']) <= 0)
         {
             $msg = "Could not find 'to:' email address in configuration file. Notification will not be sent.";
-            $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
+            $GLOBALS['logger']->logLine($msg, \C__DISPLAY_ERROR__);
             throw new InvalidArgumentException($msg);
         }
 
         if(count($retEmails['from']) > 1)
         {
-            $GLOBALS['logger']->logLine("Multiple 'from:' email addresses found. Notification will be from first one only (" . $retEmails['from']['address'][0] . ").", \Scooper\C__DISPLAY_WARNING__);
+            $GLOBALS['logger']->logLine("Multiple 'from:' email addresses found. Notification will be from first one only (" . $retEmails['from']['address'][0] . ").", \C__DISPLAY_WARNING__);
         }
         elseif(count($retEmails['from']) != 1)
         {
             $msg = "Could not find 'from:' email address in configuration file. Notification will not be sent.";
-            $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
+            $GLOBALS['logger']->logLine($msg, \C__DISPLAY_ERROR__);
             throw new InvalidArgumentException($msg);
         }
         $retEmails['from'] = $retEmails['from'][0];
@@ -367,8 +367,8 @@ class ClassJobsNotifier
     function sendEmail($strBodyText = null, $strBodyHTML = null, $arrDetailsAttachFiles = array(), $subject="No subject", $emailKind='results')
     {
         if (!isset($GLOBALS['OPTS']['send_notifications']) || $GLOBALS['OPTS']['send_notifications'] != 1) {
-            $GLOBALS['logger']->logLine(PHP_EOL . "User set -send_notifications = false so skipping email notification.)" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
-            $GLOBALS['logger']->logLine("Mail contents would have been:" . PHP_EOL . $strBodyText, \Scooper\C__DISPLAY_NORMAL__);
+            $GLOBALS['logger']->logLine(PHP_EOL . "User set -send_notifications = false so skipping email notification.)" . PHP_EOL, \C__DISPLAY_NORMAL__);
+            $GLOBALS['logger']->logLine("Mail contents would have been:" . PHP_EOL . $strBodyText, \C__DISPLAY_NORMAL__);
             return null;
         }
 
@@ -421,9 +421,9 @@ class ClassJobsNotifier
                 'allow_self_signed' => true
             )
         );
-        $GLOBALS['logger']->logLine("Email to:\t" . $strToAddys , \Scooper\C__DISPLAY_NORMAL__);
-        $GLOBALS['logger']->logLine("Email from:\t" . $emailAddrs['from']['address'], \Scooper\C__DISPLAY_NORMAL__);
-        $GLOBALS['logger']->logLine("Email bcc:\t" . $strBCCAddys, \Scooper\C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine("Email to:\t" . $strToAddys , \C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine("Email from:\t" . $emailAddrs['from']['address'], \C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine("Email bcc:\t" . $strBCCAddys, \C__DISPLAY_NORMAL__);
 
 
         $mail->WordWrap = 120;                                          // Set word wrap to 120 characters
@@ -454,19 +454,19 @@ class ClassJobsNotifier
             // If we don't do this, we just get "failed" without any useful details.
             //
             $msg = "Failed to send notification email with error = ".$mail->ErrorInfo . PHP_EOL . "Retrying email send with debug enabled to log error details...";
-            $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
+            $GLOBALS['logger']->logLine($msg, \C__DISPLAY_ERROR__);
             $mail->SMTPDebug = 1;
             $ret = $mail->send();
             if($ret === true) return $ret;
 
             $msg = "Failed second attempt to send notification email.  Debug error details should be logged above.  Error: " . PHP_EOL .$mail->ErrorInfo;
-            $GLOBALS['logger']->logLine($msg, \Scooper\C__DISPLAY_ERROR__);
+            $GLOBALS['logger']->logLine($msg, \C__DISPLAY_ERROR__);
             throw new Exception($msg);
 
         }
         else
         {
-            $GLOBALS['logger']->logLine("Email notification sent to '" . $strToAddys . "' from '" . $emailAddrs['from']['address'] . "' with BCCs to '" . $strBCCAddys ."'", \Scooper\C__DISPLAY_ITEM_RESULT__);
+            $GLOBALS['logger']->logLine("Email notification sent to '" . $strToAddys . "' from '" . $emailAddrs['from']['address'] . "' with BCCs to '" . $strBCCAddys ."'", \C__DISPLAY_ITEM_RESULT__);
         }
         return $ret;
 
@@ -480,7 +480,7 @@ class ClassJobsNotifier
 
         if(strlen($filePath) < 0)
         {
-            $GLOBALS['logger']->logLine("Unable to get contents from '". var_export($detailsFile, true) ."' to include in email.  Failing notification.", \Scooper\C__DISPLAY_ERROR__);
+            $GLOBALS['logger']->logLine("Unable to get contents from '". var_export($detailsFile, true) ."' to include in email.  Failing notification.", \C__DISPLAY_ERROR__);
             return null;
         }
 
@@ -488,7 +488,7 @@ class ClassJobsNotifier
         $file = fopen( $filePath, "r" );
         if( $file == false )
         {
-            $GLOBALS['logger']->logLine("Unable to open file '". $filePath ."' for to get contents for notification mail.  Failing notification.", \Scooper\C__DISPLAY_ERROR__);
+            $GLOBALS['logger']->logLine("Unable to open file '". $filePath ."' for to get contents for notification mail.  Failing notification.", \C__DISPLAY_ERROR__);
             return null;
         }
 
@@ -709,7 +709,7 @@ class ClassJobsNotifier
         }
 
         $strOut .=  PHP_EOL . "<div class=\"job_scooper section\">". PHP_EOL;
-        $strOut .=  PHP_EOL .  "<p style=\"min-height: 15px;\">&nbsp;</p><span style=\"font-size: xx-small; color: 116644;\">Generated by " . gethostname() . " running " . __APP_VERSION__. " on " . \Scooper\getTodayAsString() . ".</span></p>" . PHP_EOL;
+        $strOut .=  PHP_EOL .  "<p style=\"min-height: 15px;\">&nbsp;</p><span style=\"font-size: xx-small; color: 116644;\">Generated by " . gethostname() . " running " . __APP_VERSION__. " on " . getTodayAsString() . ".</span></p>" . PHP_EOL;
         $strOut .= "</div>";
         $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
 
@@ -802,7 +802,7 @@ class ClassJobsNotifier
 
         if(count($arrJobsRecordsToUse) == 0)
         {
-            $GLOBALS['logger']->logLine("Warning: writeJobsListToFile had no records to write to  " . $strOutFilePath, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            $GLOBALS['logger']->logLine("Warning: writeJobsListToFile had no records to write to  " . $strOutFilePath, \C__DISPLAY_ITEM_DETAIL__);
 
         }
 
@@ -812,7 +812,7 @@ class ClassJobsNotifier
         }
 
 
-        $classCombined = new \Scooper\ScooperSimpleCSV($strOutFilePath , "w");
+        $classCombined = new \SimpleCSV($strOutFilePath , "w");
 
         $arrCSVRecs = array();
         foreach($arrJobsRecordsToUse as $job)
@@ -862,7 +862,7 @@ class ClassJobsNotifier
                 {
                     $out[$k] = $rec[$k];
                 }
-                $arrRecordsToOutput[$reckey] = \Scooper\array_copy($out);
+                $arrRecordsToOutput[$reckey] = array_copy($out);
             }
         }
 
@@ -889,7 +889,7 @@ class ClassJobsNotifier
 
 //            $classCombined->writeArrayToCSVFile($arrJobsRecordsToUse, $keysToOutput, $this->arrKeysForDeduping);
         }
-        $GLOBALS['logger']->logLine($loggedFileType . ($loggedFileType  != "" ? " jobs" : "Jobs") ." list had  ". count($arrJobsRecordsToUse) . " jobs and was written to " . $strOutFilePath , \Scooper\C__DISPLAY_ITEM_START__);
+        $GLOBALS['logger']->logLine($loggedFileType . ($loggedFileType  != "" ? " jobs" : "Jobs") ." list had  ". count($arrJobsRecordsToUse) . " jobs and was written to " . $strOutFilePath , \C__DISPLAY_ITEM_START__);
 
         return $strOutFilePath;
 

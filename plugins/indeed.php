@@ -67,7 +67,7 @@ class PluginIndeed extends ClassClientHTMLJobSitePlugin
 
             if(!array_key_exists('itemtype', $node->attr))
             {
-                $GLOBALS['logger']->logLine("Skipping job node without itemtype attribute; likely a sponsored and therefore not an organic search result.", \Scooper\C__DISPLAY_MOMENTARY_INTERUPPT__);
+                $GLOBALS['logger']->logLine("Skipping job node without itemtype attribute; likely a sponsored and therefore not an organic search result.", \C__DISPLAY_MOMENTARY_INTERUPPT__);
                 continue;
             }
             assert($node->attr['itemtype'] == "http://schema.org/JobPosting");

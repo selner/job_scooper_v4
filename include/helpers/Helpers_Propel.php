@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
+require_once __ROOT__ . "/bootstrap.php";
 
 
 
@@ -194,7 +194,7 @@ function updateJobRecordsFromJson($filepath)
         $filepath = $filepath . "-" . strtolower(getTodayAsString("")) . ".json";
 
     if (is_file($filepath)) {
-        LogLine("Loading and updating JobPostings from from json file '" . $filepath ."'", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Loading and updating JobPostings from from json file '" . $filepath ."'", \C__DISPLAY_ITEM_DETAIL__);
         $data = loadJSON($filepath);
 
         $arrJobsArray = $data['jobslist'];
@@ -222,7 +222,7 @@ function updateJobRecordsFromJson($filepath)
 
 function getUserBySlug($slug)
 {
-    LogLine("Searching for database user '" . $slug ."'", \Scooper\C__DISPLAY_NORMAL__);
+    LogLine("Searching for database user '" . $slug ."'", \C__DISPLAY_NORMAL__);
     $user = \JobScooper\UserQuery::create()
         ->filterByPrimaryKey($slug)
         ->findOne();
@@ -234,7 +234,7 @@ function findOrCreateUser($value)
 {
     $slug = cleanupSlugPart($value);
 
-    LogLine("Searching for database user '" . $slug ."'", \Scooper\C__DISPLAY_NORMAL__);
+    LogLine("Searching for database user '" . $slug ."'", \C__DISPLAY_NORMAL__);
     $user = \JobScooper\UserQuery::create()
         ->filterByPrimaryKey($slug)
         ->findOneOrCreate();

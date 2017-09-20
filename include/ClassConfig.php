@@ -101,7 +101,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         $GLOBALS['USERDATA'] = array();
         __initializeArgs__();
 
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting up application... ", \Scooper\C__DISPLAY_SECTION_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting up application... ", \C__DISPLAY_SECTION_START__);
         # After you've configured Pharse, run it like so:
         $GLOBALS['OPTS'] = Pharse::options($GLOBALS['OPTS_SETTINGS']);
 
@@ -141,7 +141,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
         // Override any INI file setting with the command line output file path & name
         // the user specificed (if they did)
-        $userOutfileDetails = \Scooper\get_FileDetails_fromPharseOption("output", false);
+        $userOutfileDetails = get_FileDetails_fromPharseOption("output", false);
         if(!$userOutfileDetails['has_directory'])
         {
             throw new ErrorException("Required value for the output folder was not specified. Exiting.");
@@ -149,7 +149,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
         if($GLOBALS['OPTS']['use_config_ini_given'])
         {
-            $this->arrFileDetails['config_ini'] = \Scooper\set_FileDetails_fromPharseSetting("use_config_ini", 'config_file_details', true);
+            $this->arrFileDetails['config_ini'] = set_FileDetails_fromPharseSetting("use_config_ini", 'config_file_details', true);
             $name = str_replace(DIRECTORY_SEPARATOR, "", $this->arrFileDetails['config_ini']['directory']);
             $name = substr($name, max([strlen($name)-31-strlen(".ini"), 0]), 31);
             $GLOBALS['USERDATA']['user_unique_key'] = md5($name);
@@ -162,7 +162,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         // Now setup all the output folders
         $this->__setupOutputFolders__($userOutfileDetails['directory']);
 
-        if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($GLOBALS['USERDATA']['directories']['debug'] );
+        if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \ScooperLogger($GLOBALS['USERDATA']['directories']['debug'] );
         $defaultLogger = new Logger('defaultLogger');
         $defaultLogger->pushHandler(new StreamHandler($GLOBALS['USERDATA']['directories']['debug'] . '/propel.log', Logger::DEBUG));
         $defaultLogger->pushHandler(new StreamHandler('php://stderr', Logger::DEBUG));
@@ -171,14 +171,14 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         $serviceContainer->setLogger('defaultLogger', $defaultLogger);
 
         $strOutfileArrString = getArrayValuesAsString( $GLOBALS['USERDATA']['directories']);
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output folders configured: " . $strOutfileArrString, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output folders configured: " . $strOutfileArrString, \C__DISPLAY_ITEM_DETAIL__);
 
         if($GLOBALS['OPTS']['use_config_ini_given'])
         {
-            if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \Scooper\ScooperLogger($this->arrFileDetails['config_ini']['directory'] );
-            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Log file for run being written to: " . $this->arrFileDetails['config_ini']['directory'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            if(!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \ScooperLogger($this->arrFileDetails['config_ini']['directory'] );
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Log file for run being written to: " . $this->arrFileDetails['config_ini']['directory'], \C__DISPLAY_ITEM_DETAIL__);
 
-            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration file details from " . $this->arrFileDetails['config_ini']['full_file_path'], \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration file details from " . $this->arrFileDetails['config_ini']['full_file_path'], \C__DISPLAY_ITEM_DETAIL__);
 
             $this->_LoadAndMergeAllConfigFilesRecursive($this->arrFileDetails['config_ini']['full_file_path']);
 
@@ -186,11 +186,11 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                 if(!is_file($this->arrFileDetails['config_ini']['full_file_path']))
                 {
                     $altFileDetails = null;
-                    $altFileDetails = Scooper\parseFilePath($this->arrFileDetails['config_ini']['full_file_path']);
+                    $altFileDetails = parseFilePath($this->arrFileDetails['config_ini']['full_file_path']);
                     if(!is_dir($altFileDetails['config_ini']['directory']))
                     {
                         if(is_dir(is_file($altFileDetails['config_ini']['full_file_path']))) {
-                            Scooper\parseFilePath($this->arrFileDetails['config_ini']['directory'] . "/". $altFileDetails['config_ini']['filename']);
+                            parseFilePath($this->arrFileDetails['config_ini']['directory'] . "/". $altFileDetails['config_ini']['filename']);
                         }
                     }
 
@@ -202,17 +202,17 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         }
 
 
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Configuring specific settings for this run... ", \Scooper\C__DISPLAY_SECTION_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Configuring specific settings for this run... ", \C__DISPLAY_SECTION_START__);
 
-        $GLOBALS['USERDATA']['configuration_settings']['number_days']= \Scooper\get_PharseOptionValue('number_days');
+        $GLOBALS['USERDATA']['configuration_settings']['number_days']= get_PharseOptionValue('number_days');
         if($GLOBALS['USERDATA']['configuration_settings']['number_days'] === false) {
             $GLOBALS['USERDATA']['configuration_settings']['number_days'] = 1;
         }
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($GLOBALS['USERDATA']['configuration_settings']['number_days'] . " days configured for run. ", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($GLOBALS['USERDATA']['configuration_settings']['number_days'] . " days configured for run. ", \C__DISPLAY_ITEM_DETAIL__);
 
 //        $this->_setPreviouslyReviewedJobsInputFiles__setPreviouslyReviewedJobsInputFiles_();
 
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Completed configuration load.", \Scooper\C__DISPLAY_SUMMARY__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Completed configuration load.", \C__DISPLAY_SUMMARY__);
 
     }
 
@@ -232,7 +232,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         foreach($workingDirs as $d) {
             $prefix = $GLOBALS['USERDATA']['user_unique_key'];
             $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), $d, $prefix));
-            $details = \Scooper\getFilePathDetailsFromString($path, \Scooper\C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+            $details = getFilePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
             $GLOBALS['USERDATA']['directories'][$d] = realpath($details['directory']);
         }
 
@@ -241,7 +241,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
     private function _LoadAndMergeAllConfigFilesRecursive($fileConfigToLoad)
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading INI file: ".$fileConfigToLoad, \Scooper\C__DISPLAY_SECTION_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading INI file: ".$fileConfigToLoad, \C__DISPLAY_SECTION_START__);
 
         $iniParser = new IniParser($fileConfigToLoad);
         $iniParser->use_array_object = false;
@@ -250,15 +250,15 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         if(!array_key_exists($fileConfigToLoad, $this->_arrConfigFileSettings_))
         {
 
-            $this->_arrConfigFileSettings_[$fileConfigToLoad] = \Scooper\array_copy($tempConfigSettings);
+            $this->_arrConfigFileSettings_[$fileConfigToLoad] = array_copy($tempConfigSettings);
 
             if(isset($tempConfigSettings['settings_files']))
             {
                 foreach($tempConfigSettings['settings_files'] as $nextConfigFile)
                 {
-                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Recursing into child settings file ".$nextConfigFile, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Recursing into child settings file ".$nextConfigFile, \C__DISPLAY_ITEM_DETAIL__);
                     $this->_LoadAndMergeAllConfigFilesRecursive($nextConfigFile);
-                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added child settings file ".$nextConfigFile, \Scooper\C__DISPLAY_ITEM_RESULT__);
+                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added child settings file ".$nextConfigFile, \C__DISPLAY_ITEM_RESULT__);
                 }
             }
 
@@ -278,7 +278,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
     {
         if(isset($config['input']) && isset($config['input']['folder']))
         {
-            $this->arrFileDetails['input_folder']  = \Scooper\parseFilePath($config['input']['folder']);
+            $this->arrFileDetails['input_folder']  = parseFilePath($config['input']['folder']);
         }
 
         if(isset($config['inputfiles']))
@@ -291,7 +291,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                 elseif(isset($iniInputFile['filename']) && strlen($iniInputFile['filename']) > 0)
                      $strFileName = $iniInputFile['filename'];
 
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Processing input file '" . $strFileName. "' with type of '". $iniInputFile['type'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Processing input file '" . $strFileName. "' with type of '". $iniInputFile['type'] . "'...", \C__DISPLAY_NORMAL__);
                 $this->__addInputFile__($iniInputFile);
             }
         }
@@ -301,7 +301,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         //
         $this->_parseGlobalSearchParametersFromConfig_($config);
 
-        if(isDebug() == true && isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded all configuration settings:  " . var_export($this->allConfigFileSettings, true), \Scooper\C__DISPLAY_SUMMARY__);
+        if(isDebug() == true && isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded all configuration settings:  " . var_export($this->allConfigFileSettings, true), \C__DISPLAY_SUMMARY__);
 
 
         $this->_parseEmailSetupFromINI_($config);
@@ -354,7 +354,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             $this->_updateSearchesWithKeywordSet_($primarySet);
         }
 
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("All INI files loaded. Finalizing configuration for run...", \Scooper\C__DISPLAY_SECTION_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("All INI files loaded. Finalizing configuration for run...", \C__DISPLAY_SECTION_START__);
 
         //
         // Create searches needed to run all the keyword sets
@@ -400,12 +400,12 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         $tempFileDetails = null;
         if(isset($iniInputFileItem['path']))
         {
-            $tempFileDetails = \Scooper\parseFilePath($iniInputFileItem['path'], true);
+            $tempFileDetails = parseFilePath($iniInputFileItem['path'], true);
 
         }
         elseif(isset($iniInputFileItem['filename']))
         {
-            $tempFileDetails = \Scooper\parseFilePath($this->arrFileDetails['input_folder']['directory'].$iniInputFileItem['filename'], true);
+            $tempFileDetails = parseFilePath($this->arrFileDetails['input_folder']['directory'].$iniInputFileItem['filename'], true);
         }
 
         if(!is_file($tempFileDetails['full_file_path']))
@@ -442,7 +442,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
     private function _parseSearchesFromConfig__($config)
     {
         if(!$config) throw new ErrorException("Invalid configuration.  Cannot load user's searches.");
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading searches from config file...", \Scooper\C__DISPLAY_ITEM_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading searches from config file...", \C__DISPLAY_ITEM_START__);
 
         if(isset($config['search']))
         {
@@ -460,27 +460,27 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                 if(isset($retSearch)) $GLOBALS['USERDATA']['configuration_settings']['searches'][$retSearch['key']] = $retSearch;
             }
         }
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['configuration_settings']['searches']) . " searches. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['configuration_settings']['searches']) . " searches. ", \C__DISPLAY_ITEM_RESULT__);
     }
 
     private function _parseSearchFromINI_($iniSearch)
     {
         $newSearch = new UserSearchRun();
 
-        $newSearch->setKey(\Scooper\strScrub($iniSearch['key'], REMOVE_EXTRA_WHITESPACE | LOWERCASE ));
-        $newSearch->setJobSite(\Scooper\strScrub($iniSearch['jobsite'], REMOVE_EXTRA_WHITESPACE | LOWERCASE ));
+        $newSearch->setKey(strScrub($iniSearch['key'], REMOVE_EXTRA_WHITESPACE | LOWERCASE ));
+        $newSearch->setJobSite(strScrub($iniSearch['jobsite'], REMOVE_EXTRA_WHITESPACE | LOWERCASE ));
 
         $strJobSiteKey = $newSearch->getJobSite();
         if(isset($GLOBALS['USERDATA']['configuration_settings']['included_sites']) && !isset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$strJobSiteKey]))
         {
-            LogLine($iniSearch['jobsite'] . "search " .$iniSearch['name'] . " was not added; " . $strJobSiteKey . " is excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            LogLine($iniSearch['jobsite'] . "search " .$iniSearch['name'] . " was not added; " . $strJobSiteKey . " is excluded for this run.", \C__DISPLAY_ITEM_DETAIL__);
             return null;
         }
         $searchSettings = new SearchSettings();
         $searchSettings['base_url_format'] = array_key_exists('url_format', $iniSearch) ? $iniSearch['url_format'] : null;
         $searchSettings['location_user_specified_override'] = array_key_exists('location', $iniSearch) ? $iniSearch['location'] : null;
 
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search loaded from config INI: " . $newSearch->getKey(), \Scooper\C__DISPLAY_ITEM_DETAIL__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search loaded from config INI: " . $newSearch->getKey(), \C__DISPLAY_ITEM_DETAIL__);
 
         return $newSearch;
     }
@@ -488,7 +488,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
     private function _parsePluginSettingsFromConfig_($config)
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading plugin setup information from config file...", \Scooper\C__DISPLAY_ITEM_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading plugin setup information from config file...", \C__DISPLAY_ITEM_START__);
 
         if(array_key_exists('plugin_settings', $config) == true && is_array($config['plugin_settings']) && count($config['plugin_settings']) > 0)
         {
@@ -511,7 +511,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
     private function _parseGlobalSearchParametersFromConfig_($config)
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading global search settings from config file...", \Scooper\C__DISPLAY_ITEM_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading global search settings from config file...", \C__DISPLAY_ITEM_START__);
 
         if (array_key_exists('global_search_options', $config))
         {
@@ -529,14 +529,14 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                         {
                             unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite]);
                         }
-                        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting " . $excludedSite . " as excluded for this run.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting " . $excludedSite . " as excluded for this run.", \C__DISPLAY_ITEM_DETAIL__);
                     }
                 }
                 else
                 {
                     $GLOBALS['USERDATA']['configuration_settings'][$gso] = $config['global_search_options'][$gso];
                     if(strtolower($gso) == 'debug' && (!array_key_exists('DEBUG', $GLOBALS['OPTS']) || $GLOBALS['USERDATA']['configuration_settings']['debug'] === false)) {
-                        if (\Scooper\intceil($config['global_search_options'][$gso]) == 1)
+                        if (intceil($config['global_search_options'][$gso]) == 1)
                         {
                             $GLOBALS['USERDATA']['configuration_settings']['debug'] =  true;
                         }
@@ -548,7 +548,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
     }
     private function _parseSeleniumParametersFromConfig_($config)
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading Selenium settings from config file...", \Scooper\C__DISPLAY_ITEM_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading Selenium settings from config file...", \C__DISPLAY_ITEM_START__);
         if(isset($config['selenium']) && is_array($config['selenium']))
         {
             foreach(array_keys($config['selenium']) as $k)
@@ -558,7 +558,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 //        if (!((array_key_exists('autostart', $GLOBALS['USERDATA']['selenium']) === true && array_key_exists('port', $GLOBALS['USERDATA']['selenium']) === true ) || array_key_exists('start_command', $GLOBALS['USERDATA']['selenium']) === true ))
 //            throw new Exception("Required parameters for Selenium are missing; app cannot start.  You must set either 'autostart' and 'port' or 'start_command' in your configuration files.");
 
-        $GLOBALS['USERDATA']['selenium']['autostart'] = \Scooper\intceil($GLOBALS['USERDATA']['selenium']['autostart']);
+        $GLOBALS['USERDATA']['selenium']['autostart'] = intceil($GLOBALS['USERDATA']['selenium']['autostart']);
 //
 //        if(! array_key_exists('start_command', $GLOBALS['USERDATA']['selenium']) === true ) {
 //            if ($GLOBALS['USERDATA']['selenium']['autostart'] == 1 && !(array_key_exists('jar', $GLOBALS['USERDATA']['selenium']) === true && array_key_exists('postfix_switches', $GLOBALS['USERDATA']['selenium']) === true))
@@ -582,7 +582,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
         if(isset($config['search_location_setting_set']))
         {
-            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading search locations from config file...", \Scooper\C__DISPLAY_ITEM_START__);
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading search locations from config file...", \C__DISPLAY_ITEM_START__);
             //
             // Check if this is a single search setting or if it's a set of search settings
             //
@@ -611,7 +611,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                             $strSetName = $iniSettings['key'];
 
                         }
-                        $strSetName = \Scooper\strScrub($strSetName, FOR_LOOKUP_VALUE_MATCHING);
+                        $strSetName = strScrub($strSetName, FOR_LOOKUP_VALUE_MATCHING);
 
                         $arrNewLocationSet['key'] = $strSetName;
 
@@ -645,7 +645,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                         $arrNewLocationSet = $this->_parseAndAddLocationSet_($arrNewLocationSet, $iniSettings);
 
                         $strSettingStrings = getArrayValuesAsString($arrNewLocationSet);
-                        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added location search settings '" . $strSetName . ": " . $strSettingStrings, \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added location search settings '" . $strSetName . ": " . $strSettingStrings, \C__DISPLAY_ITEM_DETAIL__);
 
                         $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$strSetName] = $arrNewLocationSet;
 
@@ -653,7 +653,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                 }
             }
 
-            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['configuration_settings']['location_sets']) . " location sets. ", \Scooper\C__DISPLAY_ITEM_RESULT__);
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['configuration_settings']['location_sets']) . " location sets. ", \C__DISPLAY_ITEM_RESULT__);
         }
     }
 
@@ -663,7 +663,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         {
             if(isset($iniSearchSetting[$loctype]) && strlen($iniSearchSetting[$loctype]) > 0)
             {
-                $arrLocSet[$loctype] = \Scooper\strScrub($iniSearchSetting[$loctype], REMOVE_EXTRA_WHITESPACE);
+                $arrLocSet[$loctype] = strScrub($iniSearchSetting[$loctype], REMOVE_EXTRA_WHITESPACE);
                 $arrLocSet[$loctype] = $iniSearchSetting[$loctype];
             }
         }
@@ -674,7 +674,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
     private function _parseKeywordSetsFromConfig_($config)
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading keyword set from config file...", \Scooper\C__DISPLAY_ITEM_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading keyword set from config file...", \C__DISPLAY_ITEM_START__);
         if(!array_key_exists('keyword_sets', $GLOBALS['USERDATA']['configuration_settings']))
         {
             $GLOBALS['USERDATA']['configuration_settings']['keyword_sets'] = array();
@@ -698,7 +698,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
                 $GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey] = $this->_getNewKeywordSettingsSet_(strtolower($strSetKey), $ini_keyword_set);
 
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added keyword set '" . $GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey]['name'] . "' with keywords = " . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey]['keywords_array']) . ((array_key_exists('keyword_match_type', $ini_keyword_set) && strlen($ini_keyword_set['keyword_match_type'] ) > 0) ? " matching " . $ini_keyword_set['keyword_match_type'] : ""), \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added keyword set '" . $GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey]['name'] . "' with keywords = " . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey]['keywords_array']) . ((array_key_exists('keyword_match_type', $ini_keyword_set) && strlen($ini_keyword_set['keyword_match_type'] ) > 0) ? " matching " . $ini_keyword_set['keyword_match_type'] : ""), \C__DISPLAY_ITEM_DETAIL__);
 
             }
 
@@ -708,7 +708,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
     private function _updateSearchesWithKeywordSet_($keywordSet)
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Updating user-specified searches with keyword set details", \Scooper\C__DISPLAY_ITEM_START__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Updating user-specified searches with keyword set details", \C__DISPLAY_ITEM_START__);
         //for($c = 0; $c < count($GLOBALS['USERDATA']['configuration_settings']['searches']); $c++)
         foreach(array_keys($GLOBALS['USERDATA']['configuration_settings']['searches']) as $c)
         {
@@ -736,7 +736,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         //
         if(isset($GLOBALS['USERDATA']['configuration_settings']['keyword_sets']) && count($GLOBALS['USERDATA']['configuration_settings']['keyword_sets']) > 0)
         {
-            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Adding new searches for user's keyword sets ", \Scooper\C__DISPLAY_ITEM_START__);
+            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Adding new searches for user's keyword sets ", \C__DISPLAY_ITEM_START__);
 
             foreach($GLOBALS['USERDATA']['configuration_settings']['keyword_sets'] as $keywordSet)
             {
@@ -750,7 +750,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                         {
 
                             $newSearch = new \JobScooper\UserSearchRun();
-                            $newSearch->setKey(\Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($keywordSet['key'], FOR_LOOKUP_VALUE_MATCHING));
+                            $newSearch->setKey(strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . strScrub($keywordSet['key'], FOR_LOOKUP_VALUE_MATCHING));
                             $newSearch->setJobSite($siteToSearch);
                             $classPlug = $newSearch->getPlugin();
 
@@ -774,7 +774,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                                 foreach($arrKeys as $key)
                                 {
                                     $thisSearch = $newSearch->copy(true);
-                                    $thisSearch->setKey($newSearch->getKey()."-".\Scooper\strScrub($key, FOR_LOOKUP_VALUE_MATCHING));
+                                    $thisSearch->setKey($newSearch->getKey()."-".strScrub($key, FOR_LOOKUP_VALUE_MATCHING));
                                     $thisSearch['keywords_array'] = array($keywordSet['keywords_array'][$key]);
                                     $thisSearch['keywords_array_tokenized'] = array($keywordSet['keywords_array_tokenized'][$key]);
 
@@ -785,11 +785,11 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                     }
                     else
                     {
-                        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("No searches were set for keyword set " . $keywordSet['name'] , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("No searches were set for keyword set " . $keywordSet['name'] , \C__DISPLAY_ITEM_DETAIL__);
                     }
                 }
                 if(count($arrSkippedPlugins) > 0)
-                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Keyword set " . $keywordSet['name'] . " did not generate searches for " . count($arrSkippedPlugins) ." plugins because they do not support keyword search: " . getArrayValuesAsString($arrSkippedPlugins, ", ", null, false). "." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Keyword set " . $keywordSet['name'] . " did not generate searches for " . count($arrSkippedPlugins) ." plugins because they do not support keyword search: " . getArrayValuesAsString($arrSkippedPlugins, ", ", null, false). "." , \C__DISPLAY_ITEM_DETAIL__);
             }
         }
     }
@@ -813,7 +813,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             return;
         }
 
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Updating all searches with primary location set '" . $primaryLocationSet['key'] . "'...", \Scooper\C__DISPLAY_NORMAL__);
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Updating all searches with primary location set '" . $primaryLocationSet['key'] . "'...", \C__DISPLAY_NORMAL__);
 
         //
         // The first location set will be added to all searches always.
@@ -830,7 +830,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             {
                 $searchKey = $search->getKey();
 
-//                $curSiteName = \Scooper\strScrub($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['site_name'], FOR_LOOKUP_VALUE_MATCHING);
+//                $curSiteName = strScrub($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['site_name'], FOR_LOOKUP_VALUE_MATCHING);
 //                if(array_key_exists($curSiteName, $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']))
 //                {
 //                    // this site was excluded for this location set, so continue.
@@ -852,7 +852,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                     continue;
                 }
 
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Adding primary location set to " . $searchKey . " searches...", \Scooper\C__DISPLAY_NORMAL__);
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Adding primary location set to " . $searchKey . " searches...", \C__DISPLAY_NORMAL__);
 
                 $classPlug = $search->getPlugin();
                 if ($classPlug->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || $classPlug->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED)) {
@@ -876,7 +876,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                             return true;
                         });
 
-                        $GLOBALS['USERDATA']['configuration_settings']['searches'] = \Scooper\array_copy($arrNewSearchList);
+                        $GLOBALS['USERDATA']['configuration_settings']['searches'] = array_copy($arrNewSearchList);
                         $this->_addLocationSetToInitialSetOfSearches_();
                         return;
 
@@ -918,7 +918,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 //            return;
 //        }
 //
-//        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Creating searches for additional location sets after the primary by cloning and updating all searches", \Scooper\C__DISPLAY_ITEM_START__);
+//        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Creating searches for additional location sets after the primary by cloning and updating all searches", \C__DISPLAY_ITEM_START__);
 //        $arrSkippedPlugins = null;
 //
 //
@@ -959,7 +959,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 //                        continue;
 //                    }
 //
-//                    $curSiteName = \Scooper\strScrub($GLOBALS['USERDATA']['configuration_settings']['searches'][$l]['site_name'], FOR_LOOKUP_VALUE_MATCHING);
+//                    $curSiteName = strScrub($GLOBALS['USERDATA']['configuration_settings']['searches'][$l]['site_name'], FOR_LOOKUP_VALUE_MATCHING);
 //                    if(array_key_exists($curSiteName, $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']))
 //                    {
 //                        // this site was excluded for this location set, so continue.
@@ -1019,12 +1019,12 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                 if (isset($emailItem['type'])) {
                     $tempEmail['type'] = $emailItem['type'];
                 }
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added email from config.ini: '" . getArrayValuesAsString($tempEmail), \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added email from config.ini: '" . getArrayValuesAsString($tempEmail), \C__DISPLAY_ITEM_DETAIL__);
                 $settingsEmail['email_addresses'][] = $tempEmail;
             }
         }
 
-        $GLOBALS['USERDATA']['configuration_settings']['email'] = \Scooper\array_copy($settingsEmail);
+        $GLOBALS['USERDATA']['configuration_settings']['email'] = array_copy($settingsEmail);
 
         $userDetails = array();
         $userDetails['ConfigFilePath'] = $this->arrFileDetails['config_ini']['full_file_path'];
@@ -1049,7 +1049,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
          $set =  array(
             'key' => $setkey,
             'name' =>  $setkey,
-            'source_config_file_settings' => \Scooper\array_copy($iniKeywordSetup),
+            'source_config_file_settings' => array_copy($iniKeywordSetup),
             'keywords_array' => null
         );
 
@@ -1060,7 +1060,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             $arrKeywords = array();
             foreach($tmpKeywordArray as $kwd)
             {
-                $scrubbedKwd = \Scooper\strScrub($kwd, ADVANCED_TEXT_CLEANUP);
+                $scrubbedKwd = strScrub($kwd, ADVANCED_TEXT_CLEANUP);
                 $arrKeywords[$scrubbedKwd] = $scrubbedKwd;
             }
             $set['keywords_array'] = $arrKeywords;
@@ -1091,7 +1091,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 //            {
 //                if($fileDetails)
 //                {
-//                    $GLOBALS['userdata']['previous_files_details'][$fileDetails['file_name_base']] = \Scooper\array_copy($fileDetails);
+//                    $GLOBALS['userdata']['previous_files_details'][$fileDetails['file_name_base']] = array_copy($fileDetails);
 //                }
 //            }
 //        }
@@ -1113,7 +1113,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         }
         catch (Exception $ex)
         {
-            $GLOBALS['logger']->logLine($ex->getMessage(), \Scooper\C__DISPLAY_ERROR__);
+            $GLOBALS['logger']->logLine($ex->getMessage(), \C__DISPLAY_ERROR__);
             if(isDebug() == true) { throw $ex; }
         }
         return $rx;
@@ -1131,14 +1131,14 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         if(isset($GLOBALS['USERDATA']['title_negative_keyword_tokens']) && count($GLOBALS['USERDATA']['title_negative_keyword_tokens']) > 0)
         {
             // We've already loaded the titles; go ahead and return right away
-            $GLOBALS['logger']->logLine("Using previously loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokenized title strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            $GLOBALS['logger']->logLine("Using previously loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokenized title strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
             return;
         }
 
         if(!is_array($arrFileInput))
         {
             // No files were found, so bail
-            $GLOBALS['logger']->logLine("No input files were found with title token strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            $GLOBALS['logger']->logLine("No input files were found with title token strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
             return;
         }
 
@@ -1178,7 +1178,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
         if(count($arrTitlesTemp) <= 0)
         {
-            $GLOBALS['logger']->logLine("Warning: No title negative keywords were found in the input source files " . getArrayValuesAsString($arrFileInput) . " to be filtered from job listings." , \Scooper\C__DISPLAY_WARNING__);
+            $GLOBALS['logger']->logLine("Warning: No title negative keywords were found in the input source files " . getArrayValuesAsString($arrFileInput) . " to be filtered from job listings." , \C__DISPLAY_WARNING__);
         }
         else
         {
@@ -1193,7 +1193,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             }
             
             $inputfiles = array_column($this->getInputFilesByType("negative_title_keywords"), 'full_file_path');
-            $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokens to use for filtering titles from '" . getArrayValuesAsString($inputfiles) . "'." , \Scooper\C__DISPLAY_WARNING__);
+            $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokens to use for filtering titles from '" . getArrayValuesAsString($inputfiles) . "'." , \C__DISPLAY_WARNING__);
 
         }
 
@@ -1211,7 +1211,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         if(isset($GLOBALS['USERDATA']['companies_regex_to_filter']) && count($GLOBALS['USERDATA']['companies_regex_to_filter']) > 0)
         {
             // We've already loaded the companies; go ahead and return right away
-            $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']) . " regexed company strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']) . " regexed company strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
             return;
         }
         $arrFileInput = $this->getInputFilesByType("regex_filter_companies");
@@ -1221,7 +1221,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         if(isset($GLOBALS['USERDATA']['companies_regex_to_filter']) && count($GLOBALS['USERDATA']['companies_regex_to_filter']) > 0)
         {
             // We've already loaded the titles; go ahead and return right away
-            $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']) . " regexed title strings to exclude." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+            $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']) . " regexed title strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
             return;
         }
         $fCompaniesLoaded = false;
@@ -1239,11 +1239,11 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                 {
                     if(file_exists($fileDetail ['full_file_path'] ) && is_file($fileDetail ['full_file_path'] ))
                     {
-                        $GLOBALS['logger']->logLine("Loading job Company regexes to filter from ".$fileDetail ['full_file_path']."." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
-                        $classCSVFile = new \Scooper\ScooperSimpleCSV($fileDetail ['full_file_path'] , 'r');
+                        $GLOBALS['logger']->logLine("Loading job Company regexes to filter from ".$fileDetail ['full_file_path']."." , \C__DISPLAY_ITEM_DETAIL__);
+                        $classCSVFile = new \SimpleCSV($fileDetail ['full_file_path'] , 'r');
                         $arrCompaniesTemp = $classCSVFile->readAllRecords(true,array('match_regex'));
                         $arrCompaniesTemp = $arrCompaniesTemp['data_rows'];
-                        $GLOBALS['logger']->logLine(count($arrCompaniesTemp) . " companies found in the source file that will be automatically filtered from job listings." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
+                        $GLOBALS['logger']->logLine(count($arrCompaniesTemp) . " companies found in the source file that will be automatically filtered from job listings." , \C__DISPLAY_ITEM_DETAIL__);
 
                         //
                         // Add each Company we found in the file to our list in this class, setting the key for
@@ -1266,7 +1266,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                                     catch (Exception $ex)
                                     {
                                         $strError = "Regex test failed on company regex pattern " . $rxItem .".  Skipping.  Error: '".$ex->getMessage();
-                                        $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
+                                        $GLOBALS['logger']->logLine($strError, \C__DISPLAY_ERROR__);
                                         if(isDebug() == true) { throw new ErrorException( $strError); }
                                     }
                                 }
@@ -1283,13 +1283,13 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         if($fCompaniesLoaded == false)
         {
             if(count($arrFileInput) == 0)
-                $GLOBALS['logger']->logLine("No file specified for companies regexes to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
+                $GLOBALS['logger']->logLine("No file specified for companies regexes to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." , \C__DISPLAY_WARNING__);
             else
-                $GLOBALS['logger']->logLine("Could not load regex list for companies to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." , \Scooper\C__DISPLAY_WARNING__);
+                $GLOBALS['logger']->logLine("Could not load regex list for companies to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." , \C__DISPLAY_WARNING__);
         }
         else
         {
-            $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']). " regexes to use for filtering companies from " . getArrayValuesAsString($inputfiles)  , \Scooper\C__DISPLAY_NORMAL__);
+            $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']). " regexes to use for filtering companies from " . getArrayValuesAsString($inputfiles)  , \C__DISPLAY_NORMAL__);
 
         }
     }
