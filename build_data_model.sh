@@ -2,10 +2,12 @@
 PROPEL=`pwd`"/vendor/bin/propel"
 ROOTDIR=`pwd`
 CONFIGDIR=`pwd`"/config"
+OUTDIR=`echo $JOBSCOOPER_OUTPUT`
 NOW=$(date "+%F-%H-%M-%S")
 
+echo "Moving current db to backup ($OUTDIR/job_scooper_db.sq3)..."
+mv "$OUTDIR/job_scooper_db.sq3" "$OUTDIR/job_scooper_db.sq3.backup-"$NOW
 cd $CONFIGDIR
-mv "jobscooper_db.sq3" "jobscooper_db.sq3.backup-"$NOW
 rm -Rf ./generated-classes/Base
 rm -Rf ./generated-classes/Map
 cp -R ./generated-classes "./generated-classes.backup-"$NOW
