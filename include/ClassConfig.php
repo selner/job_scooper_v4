@@ -824,15 +824,8 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             {
                 $searchKey = $search->getKey();
 
-                $curSiteName = strScrub($GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['site_name'], FOR_LOOKUP_VALUE_MATCHING);
-                if(array_key_exists($curSiteName, $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']))
-                {
-                    // this site was excluded for this run
-                    continue;
-                }
-
                 if($search->isSearchIncludedInRun() !== true) {
-                    // this site was excluded for this location set, so continue.
+                    // this site was excluded for this run, so continue.
                     continue;
                 }
 
