@@ -16,7 +16,7 @@
           "Extract": "TEXT",
           "Index" : 0,
           "Callback" : "matchesNoResultsPattern",
-          "CallBackParameter": "No jobs found",
+          "CallbackParameter": "No jobs found",
           "Attribute": null,
           "Type": "CSS"
         },

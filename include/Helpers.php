@@ -824,6 +824,13 @@ function getTodayAsString($delim = "-")
     return date($fmt);
 }
 
+function getArrayItem($key, $arr)
+{
+    if(array_key_exists($key, $arr))
+        return stripslashes($arr[$key]);
+
+    return null;
+}
 
 function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strExt = '', $delim = "")
 {

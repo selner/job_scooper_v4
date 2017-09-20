@@ -12,7 +12,7 @@
           "Extract": "TEXT",
           "Index" : 0,
           "Callback" : "matchesNoResultsPattern",
-          "CallBackParameter": "0 of 0",
+          "CallbackParameter": "0 of 0",
           "Attribute": null,
           "Type": "CSS"
         },
