@@ -68,8 +68,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         }
 
         if(!is_null($this->selectorMoreListings) && strlen($this->selectorMoreListings) > 0)
-            $this->selectorMoreListings = preg_replace('/(\'|"|\\")/', '\"', $this->selectorMoreListings);
-
+            $this->selectorMoreListings = preg_replace("/\\\?[\"']/", "'", $this->selectorMoreListings);
     }
 
 
@@ -590,19 +589,8 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
         if($secs <= 0)
             $secs = 1000;
 
-        $objSimplHtml = $this->getSimpleHtmlDomFromSeleniumPage();
 
-        $node = $objSimplHtml->find($this->selectorMoreListings);
-        if($node == null || count($node) == 0)
-        {
-            return false;
-        }
-        else
-        {
-            if(stristr($node[0]->attr["style"], "display: none") !== false) {
-                return false;
-            }
-        }
+        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Clicking button [" . $this->selectorMoreListings . "] to go to the next page of results...", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $js = "
             scroll = setTimeout(doNextPage, " . $secs . ");
