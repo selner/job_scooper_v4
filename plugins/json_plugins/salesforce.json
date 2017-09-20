@@ -12,7 +12,7 @@
           "Extract": "TEXT",
           "Index" : 0,
           "Callback" : "matchesNoResultsPattern",
-          "CallBackParameter": "no jobs found",
+          "CallbackParameter": "no jobs found",
           "Attribute": null,
           "Type": "CSS"
         },

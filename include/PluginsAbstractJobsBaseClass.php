@@ -78,8 +78,7 @@ abstract class AbstractClassBaseJobsPlugin
         }
 
         if(!is_null($this->selectorMoreListings) && strlen($this->selectorMoreListings) > 0)
-            $this->selectorMoreListings = preg_replace('/(\'|"|\\")/', '\"', $this->selectorMoreListings);
-
+            $this->selectorMoreListings = preg_replace("/\\\?[\"']/", "'", $this->selectorMoreListings);
     }
 
 
@@ -582,16 +581,7 @@ abstract class AbstractClassBaseJobsPlugin
         if ($secs <= 0)
             $secs = 1000;
 
-        $objSimplHtml = $this->getSimpleHtmlDomFromSeleniumPage();
-
-        $node = $objSimplHtml->find($this->selectorMoreListings);
-        if ($node == null || count($node) == 0) {
-            return false;
-        } else {
-            if (stristr($node[0]->attr["style"], "display: none") !== false) {
-                return false;
-            }
-        }
+        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Clicking button [" . $this->selectorMoreListings . "] to go to the next page of results...", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $js = "
             scroll = setTimeout(doNextPage, " . $secs . ");
@@ -1353,6 +1343,10 @@ abstract class AbstractClassBaseJobsPlugin
                                         $this->runJavaScriptSnippet($this->nextPageScript, true);
                                         sleep($this->additionalLoadDelaySeconds + 1);
                                     }
+                                break;
+                                
+                                default:
+                                    handleException(null, "No pagination method defined for plugin " . $this->siteName, false);
                                     break;
                             }
 
@@ -1486,18 +1480,19 @@ abstract class AbstractClassBaseJobsPlugin
                                         handleException(new Exception("Plugin " . $this->siteName . " is missing takeNextPageAction method definiton required for its pagination type."), "", true);
                                     }
 
-                                    if ($nPageCount > 1 && $nPageCount <= $totalPagesCount) {
+                                    if($nPageCount > 1 && $nPageCount <= $totalPagesCount) {
                                         //
                                         // if we got a driver instance back, then we got a new page
                                         // otherwise we're out of results so end the loop here.
                                         //
                                         try {
-                                            $this->takeNextPageAction($this->selenium->driver);
+                                            $this->takeNextPageAction($this->getItemURLValue($nItemCount), $this->getPageURLValue($nPageCount));
                                         } catch (Exception $ex) {
                                             handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
                                         }
                                     }
                                     break;
+
                             }
 
                         } catch (Exception $ex) {

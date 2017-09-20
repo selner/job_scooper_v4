@@ -18,37 +18,21 @@
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
 
-class PluginDice extends ClassClientHTMLJobSitePlugin
+/**
+ * Class AbstractDice
+ *
+ *       Used by dice.json plugin configuration to override single method
+ */
+abstract class AbstractDice extends ClassClientHTMLJobSitePlugin
 {
-    protected $siteName = 'dice';
-    protected $siteBaseURL = 'http://www.dice.com';
-    protected $strBaseURLFormat = 'https://www.dice.com/jobs/advancedResult.html?for_one=&for_all=***KEYWORDS***&for_exact=&for_none=&for_jt=&for_com=&for_loc=***LOCATION***&sort=date&limit=100&radius=50';
-    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
-    protected $nJobListingsPerPage = 100;
-    protected $additionalLoadDelaySeconds = 5;
-    protected $paginationType = C__PAGINATION_PAGE_VIA_CALLBACK;
-
-    static function isNoJobResults($var)
+    function takeNextPageAction($nItem=null, $nPage=null)
     {
-        return noJobStringMatch($var, "No jobs found");
-    }
 
-    function takeNextPageAction($driver)
-    {
-        $this->runJavaScriptSnippet("nextPagingData(parseInt(document.getElementById(\"pageNo\").value) + 1);", false);
-    }
-    protected $arrListingTagSetup = array(
+        $js = "
+            nextPagingData(" . $nPage . ");
+        ";
 
-        'tag_listings_count' => array(array('tag' => 'span', 'attribute' => 'id', 'attribute_value' => 'posiCountId'), 'attribute_value' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
-        'tag_listings_noresults' => array('selector' => 'h1', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
-        'tag_listings_section' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'complete-serp-result-div'),
-        'tag_title' => array('selector' => 'div.serp-result-content ul:nth-child(3) li:nth-child(1) h3 a', 'return_attribute' => 'plaintext'),
-        'tag_link' => array('selector' => 'div.serp-result-content ul:nth-child(3) li:nth-child(1) h3 a', 'return_attribute' => 'href'),
-        'tag_job_id' => array('selector' => 'div.serp-result-content ul:nth-child(3) li:nth-child(1) h3 a', 'return_attribute' => 'value'),
-        'tag_company' => array(array('tag' => 'li', 'attribute' => 'class', 'attribute_value' => 'employer'), array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'hidden-xs'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
-        'tag_location' => array(array('tag' => 'li', 'attribute' => 'class', 'attribute_value' => 'location'), 'return_attribute' => 'plaintext'),
-        'tag_job_posting_date' => array(array('li' => 'span', 'attribute' => 'class', 'attribute_value' => 'posted'), 'return_attribute' => 'plaintext'),
-//        'tag_next_button' => array('selector' => 'span.icon-filled-arrow-66')
-    );
-
+        $this->runJavaScriptSnippet($js, false);
+        sleep($this->additionalLoadDelaySeconds+2);
+   }
 }

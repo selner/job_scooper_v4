@@ -1,33 +1,34 @@
 {
-  "AgentName": "LinkUp",
-  "SourceURL": "https://www.linkup.com/search/results/***KEYWORDS***-jobs?location=***LOCATION***&pageNum=***PAGE_NUMBER***&sort=d",
-  "LocationType": "location-city-comma-state",
+  "AgentName": "Dice",
+  "BaseURL": "http://www.dice.com/",
+  "SourceURL": "https://www.dice.com/jobs/advancedResult.html?for_one=&for_all=***KEYWORDS***&for_exact=&for_none=&for_jt=&for_com=&for_loc=***LOCATION***&sort=date&limit=100&radius=50",
+  "LocationType": "location-city-comma-statecode",
+  "CountryCodes" : ["US"],
+  "AdditionalFlags" : ["C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS"],
+  "PluginExtendsClassName" : "AbstractDice",
   "Collections": [
     {
       "Name": "PageFields",
       "Fields": [
         {
           "Name": "tag_listings_noresults",
-          "Selector": "div.search-details p span",
+          "Selector": "h1.h1",
           "Extract": "TEXT",
           "Index" : 0,
           "Callback" : "matchesNoResultsPattern",
-          "CallbackParameter": "0 of 0",
+          "CallbackParameter": "No jobs found",
           "Attribute": null,
           "Type": "CSS"
         },
         {
           "Name": "tag_listings_count",
-          "Selector": "div.search-details p span",
-          "Index" : 0,
-          "Extract": "REGEX",
-          "Pattern": "/\\s*of\\s*([\\d,]+)\\s*/",
-          "Attribute": null,
+          "Selector": "span#posiCountId",
+          "Extract": "TEXT",
           "Type": "CSS"
         },
         {
           "Name": "tag_listings_section",
-          "Selector": "div.row .job-listing",
+          "Selector": "div.complete-serp-result-div",
           "Extract": "CSS",
           "Attribute": "collection",
           "Type": "CSS"
@@ -39,14 +40,14 @@
       "Fields": [
         {
           "Name": "tag_title",
-          "Selector": "a.search-result-link",
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Selector": "h3 a.dice-btn-link",
+          "Extract": "ATTR",
+          "Attribute": "title",
           "Type": "CSS"
         },
         {
           "Name": "tag_link",
-          "Selector": "a.search-result-link",
+          "Selector": "h3 a.dice-btn-link",
           "Extract": "ATTR",
           "Attribute": "href",
           "Index": 0,
@@ -54,14 +55,13 @@
         },
         {
           "Name": "tag_job_id",
-          "Pattern": "/.*?\/(.*?)/",
-          "Extract": "REGEX",
-          "Type": "REGEX",
-          "Field": "job_post_url"
+          "Selector": "h3 a.dice-btn-link",
+          "Extract": "ATTR",
+          "Attribute": "value"
         },
         {
           "Name": "tag_location",
-          "Selector": "div.show-on-large .hide-on-med-and-down p span",
+          "Selector": "span.jobLoc",
           "Index" : 0,
           "Extract": "TEXT",
           "Attribute": null,
@@ -69,17 +69,16 @@
         },
         {
           "Name": "tag_company",
-          "Selector": "div.show-on-large .hide-on-med-and-down p span",
-          "Index" : 1,
+          "Selector": "span.compName",
+          "Index" : 0,
           "Extract": "TEXT",
           "Attribute": null,
           "Type": "CSS"
         },
-
         {
           "Name": "tag_job_posting_date",
-          "Selector": "div.show-on-large .hide-on-med-and-down p span",
-          "Index" : 2,
+          "Selector": "span[itemprop=datePosted]",
+          "Index" : 0,
           "Extract": "TEXT",
           "Attribute": null,
           "Type": "CSS"
@@ -88,7 +87,8 @@
     }
   ],
   "Pagination": {
-    "Type": "PAGE-VIA-URL",
-    "PageLimit": 25
+    "PageLimit": 100,
+    "Type": "PAGE-CALLBACK",
+    "PageDelaySeconds" : 5
   }
 }

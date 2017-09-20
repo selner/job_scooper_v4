@@ -40,16 +40,13 @@ class JSONPlugins
         });
 
         foreach($filelist as $f) {
-            $text = file_get_contents($jsonconfigsdir . "/" . $f);
-            $configData = json_decode($text);
-            $this->pluginConfigs[$f] = $configData;
+            $this->pluginConfigs[$f] = loadJSON($jsonconfigsdir . "/" . $f);
         }
 
     }
 
-    private function _parsePluginConfig_($configData)
+    private function _parsePluginConfig_($arrConfigData)
     {
-        $arrConfigData = get_object_vars($configData);
 
         $pluginData = array(
             'siteName' => null,
@@ -86,69 +83,69 @@ class JSONPlugins
                     break;
 
                 default:
-                    if(array_key_exists($datakey, $pluginData))
-                        $pluginData[$datakey] = $arrConfigData[$datakey];
+                    $pluginData[$datakey] = $arrConfigData[$datakey];
                     break;
             }
         }
 
-        if(array_key_exists("Pagination", $configData)) {
-            if (array_key_exists("PageLimit", $configData->Pagination)) {
-                $pluginData['nJobListingsPerPage'] = $configData->Pagination->PageLimit;
+        if(array_key_exists("Pagination", $arrConfigData)) {
+
+            if (array_key_exists("PageLimit", $arrConfigData['Pagination'])) {
+                $pluginData['nJobListingsPerPage'] = $arrConfigData['Pagination']['PageLimit'];
             }
 
-            $pluginData['PaginationType'] = strtoupper($configData->Pagination->Type);
-            switch ($pluginData['PaginationType'])
-            {
-                case 'NEXT-BUTTON':
-                    $pluginData['arrListingTagSetup']['tag_next_button'] = array(
-                        'selector' => $configData->Pagination->Selector,
-                        'index' => $configData->Pagination->Index,
-                        'type' => 'CSS'
-                    );
-                    break;
+            if (array_key_exists("PageDelaySeconds", $arrConfigData['Pagination'])) {
+                $pluginData['additionalLoadDelaySeconds'] = $arrConfigData['Pagination']['PageLimit'];
+            }
 
-                case 'LOAD-MORE':
-                    $pluginData['arrListingTagSetup']['tag_load_more'] = array(
-                        'selector' => $configData->Pagination->Selector,
-                        'index' => $configData->Pagination->Index,
-                        'type' => 'CSS'
-                    );
-                    break;
+            if (array_key_exists("Type", $arrConfigData['Pagination'])) {
 
-                default:
+                $pluginData['paginationType'] = strtoupper($arrConfigData['Pagination']['Type']);
+                switch (strtoupper($arrConfigData['Pagination']['Type'])) {
+                    case 'NEXT-BUTTON':
+                        $pluginData['arrListingTagSetup']['tag_next_button'] = array(
+                            'selector' => $arrConfigData['Pagination']['Selector'],
+                            'index' => $arrConfigData['Pagination']['Index'],
+                            'type' => 'CSS'
+                        );
+                        break;
 
-                    break;
+                    case 'LOAD-MORE':
+                        $pluginData['arrListingTagSetup']['tag_load_more'] = array(
+                            'selector' => $arrConfigData['Pagination']['Selector'],
+                            'index' => $arrConfigData['Pagination']['Index'],
+                            'type' => 'CSS'
+                        );
+                        break;
+
+                    default:
+                        break;
+                }
             }
         }
 
-
-        if(array_key_exists("Collections", $configData) && !is_null($configData->Collections) && is_array($configData->Collections) && count($configData->Collections) > 0 && array_key_exists("Fields", $configData->Collections[0]))
+        if(array_key_exists("Collections", $arrConfigData) && !is_null($arrConfigData['Collections']) && is_array($arrConfigData['Collections']) && count($arrConfigData['Collections']) > 0 && array_key_exists("Fields", $arrConfigData['Collections'][0]))
         {
-            foreach($configData->Collections as $coll)
+            foreach($arrConfigData['Collections'] as $coll)
             {
-                foreach($coll->Fields as $field)
+                foreach($coll['Fields'] as $field)
                 {
-                    $select = $field->Selector;
-                    $name = $field->Name;
+                    $select = getArrayItem('Selector', $field);
+                    $name = getArrayItem('Name', $field);
                     $attrib = null;
-                    $index = null;
 
-                    if(array_key_exists("Index", $field))
-                    {
-                        $index = $field->Index;
-                    }
+                    $index = getArrayItem('Index', $field);
+                    $type = getArrayItem('Type', $field);
 
 
-                    $type = $field->Type;
-                    if ((strcasecmp($field->Extract, "HTML") == 0) || (strcasecmp($field->Extract, "ATTR") == 0)) {
-                        $attrib = $field->Attribute;
+                    if ((strcasecmp($field['Extract'], "HTML") == 0) || (strcasecmp($field['Extract'], "ATTR") == 0)) {
+                        $attrib = getArrayItem('Attribute', $field);
                         $type = "CSS";
-                    } elseif (strcasecmp($field->Extract, "TEXT") == 0) {
+                    } elseif (strcasecmp($field['Extract'], "TEXT") == 0) {
                         $attrib = "plaintext";
                         $type = "CSS";
-                    } elseif (!is_null($field->Attribute)) {
-                        $attrib = $field->Attribute;
+                    } elseif (!is_null($field['Attribute'])) {
+                        $attrib = getArrayItem('Attribute', $field);
                     }
 
                     $pluginData['arrListingTagSetup'][$name] = array(
@@ -156,11 +153,11 @@ class JSONPlugins
                         'index' => $index,
                         'return_attribute' => $attrib,
                         'type' => $type,
-                        'field' => $field->Field,
-                        'value' => $field->Value,
-                        'return_value_regex' => $field->Pattern,
-                        'return_value_callback' => $field->Callback,
-                        'callback_parameter' => $field->CallBackParameter
+                        'field' => getArrayItem('Field', $field),
+                        'value' => getArrayItem('Value', $field),
+                        'return_value_regex' => getArrayItem('Pattern', $field),
+                        'return_value_callback' => getArrayItem('Callback', $field),
+                        'callback_parameter' => getArrayItem('CallbackParameter', $field)
                     );
                 }
             }
@@ -184,7 +181,9 @@ class JSONPlugins
             $extendsClass = $pluginConfig['PluginExtendsClassName'];
         }
 
-        $flags = "[" . join(", ", array_values($pluginConfig['AdditionalFlags'])) . "]";
+        $flags = "null";
+        if(array_key_exists('AdditionalFlags', $pluginConfig))
+            $flags = "[" . join(", ", array_values($pluginConfig['AdditionalFlags'])) . "]";
 
         $evalStmt = "class $className extends {$extendsClass} { 
             protected \$siteName = \"{$pluginConfig['siteName']}\";
@@ -195,7 +194,7 @@ class JSONPlugins
             protected \$additionalLoadDelaySeconds = 2;
             protected \$nJobListingsPerPage = \"{$pluginConfig['nJobListingsPerPage']}\";
             protected \$paginationType = \"{$pluginConfig['paginationType']}\";
-            protected \$arrListingTagSetup = $setup;
+            protected \$arrListingTagSetup = {$setup};
             };
             
             ";

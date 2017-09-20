@@ -362,6 +362,11 @@ class SeleniumSession extends PropertyObject
 
             $capabilities->setCapability("nativeEvents", true);
             $capabilities->setCapability("setThrowExceptionOnScriptError", false);
+            $capabilities->setCapability("webStorageEnabled", true);
+            $capabilities->setCapability("databaseEnabled", true);
+            $capabilities->setCapability("applicationCacheEnabled", true);
+            $capabilities->setCapability("locationContextEnabled", true);
+            $capabilities->setCapability("unexpectedAlertBehaviour", "dismiss");
 
             $this->remoteWebDriver = RemoteWebDriver::create(
                 $host,
@@ -371,7 +376,7 @@ class SeleniumSession extends PropertyObject
             );
 
             return $this->remoteWebDriver;
-    }
+        }
         catch (Exception $ex)
         {
             handleException($ex, "Unable to get Selenium Webdriver from " . $host, true);

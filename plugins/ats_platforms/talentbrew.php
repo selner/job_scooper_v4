@@ -32,7 +32,7 @@ require_once dirname(dirname(dirname(__FILE__)))."/bootstrap.php";
         parent::__construct($strBaseDir);
     }
 
-    function takeNextPageAction($driver)
+    function takeNextPageAction($nItem=null, $nPage=null)
     {
         $this->runJavaScriptSnippet("document.getElementsByClassName(\"next\")[0].setAttribute(\"class\", \"pagination-show-all\"); document.getElementsByClassName(\"pagination-show-all\")[0].click();", false, $this->additionalLoadDelaySeconds + 10);
         sleep($this->additionalLoadDelaySeconds+1 );
