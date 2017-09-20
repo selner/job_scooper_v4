@@ -345,48 +345,55 @@ class SeleniumSession extends PropertyObject
         $host = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
 
         try {
-        $webdriver = $this->getWebDriverKind();
-        //
-        // First we need to make sure we don't have a conflicting session already hanging out
-        // and possibly dead.  If we don't clear it, nothing will work.
-        //
-        $host = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
-	/*
-        $currentSessions = RemoteWebDriver::getAllSessions($host);
-        if($currentSessions != null && is_array($currentSessions))
-        {
-            foreach($currentSessions as $session)
-            {
-                if(strcasecmp($webdriver, $session['capabilities']['browserName']) == 0)
+            $webdriver = $this->getWebDriverKind();
+            //
+            // First we need to make sure we don't have a conflicting session already hanging out
+            // and possibly dead.  If we don't clear it, nothing will work.
+            //
+            $host = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
+            /*
+                $currentSessions = RemoteWebDriver::getAllSessions($host);
+                if($currentSessions != null && is_array($currentSessions))
                 {
-                    if($webdriver == "safari")
+                    foreach($currentSessions as $session)
                     {
-                        $oldSessionDriver = RemoteWebDriver::createBySessionID($session['id'], $host);
-                        if(!is_null($oldSessionDriver)) {
-                            $oldSessionDriver->quit();
+                        if(strcasecmp($webdriver, $session['capabilities']['browserName']) == 0)
+                        {
+                            if($webdriver == "safari")
+                            {
+                                $oldSessionDriver = RemoteWebDriver::createBySessionID($session['id'], $host);
+                                if(!is_null($oldSessionDriver)) {
+                                    $oldSessionDriver->quit();
+                                }
+                            }
                         }
                     }
                 }
-            }
+            */
+
+
+            $driver = null;
+
+            $capabilities = DesiredCapabilities::$webdriver();
+
+            $capabilities->setCapability("nativeEvents", true);
+            $capabilities->setCapability("setThrowExceptionOnScriptError", false);
+            $capabilities->setCapability("webStorageEnabled", true);
+            $capabilities->setCapability("databaseEnabled", true);
+            $capabilities->setCapability("applicationCacheEnabled", true);
+            $capabilities->setCapability("locationContextEnabled", true);
+            $capabilities->setCapability("unexpectedAlertBehaviour", "dismiss");
+
+
+
+
+            $this->remoteWebDriver = RemoteWebDriver::create(
+                $host,
+                $desired_capabilities = $capabilities,
+                $connection_timeout_in_ms = 60000,
+                $request_timeout_in_ms = 60000
+            );
         }
-	*/
-
-
-        $driver = null;
-
-        $capabilities = DesiredCapabilities::$webdriver();
-
-        $capabilities->setCapability("nativeEvents", true);
-        $capabilities->setCapability("setThrowExceptionOnScriptError", false);
-
-
-        $this->remoteWebDriver = RemoteWebDriver::create(
-            $host,
-            $desired_capabilities = $capabilities,
-            $connection_timeout_in_ms = 60000,
-            $request_timeout_in_ms = 60000
-        );
-    }
         catch (Exception $ex)
         {
             handleException($ex, "Unable to get Selenium Webdriver from " . $host, true);
