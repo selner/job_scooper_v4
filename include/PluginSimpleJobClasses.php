@@ -286,7 +286,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         }
 
         if ($fReturnNodeObject === true) {
-            // do nothing.  We already have the ndoe set correctly
+            // do nothing.  We already have the node set correctly
         } elseif (!is_null($ret) && isset($arrTag['index']) && is_array($ret) && intval($arrTag['index']) < count($ret)) {
             $index = $arrTag['index'];
             if (count($nodeMatches) <= $index) {
@@ -408,45 +408,6 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         $GLOBALS['logger']->logLine($this->siteName . " returned " . countJobRecords($ret) . " jobs from page.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         return $ret;
-    }
-
-    function takeNextPageAction($driver)
-    {
-        $tagSetup = $this->arrListingTagSetup;
-
-        if (!is_null($this->nextPageScript)) {
-            $script = "function callNextPage() { " . $this->nextPageScript . " } ; callNextPage();";
-            $GLOBALS['logger']->logLine("Going to next page of results via script: " . $script, \Scooper\C__DISPLAY_NORMAL__);
-            $driver->executeScript($script);
-            sleep($this->additionalLoadDelaySeconds);
-        }
-        elseif (array_key_exists('tag_next_button', $tagSetup) && !is_null($tagSetup['tag_next_button']))
-        {
-            if (!is_null($tagSetup['tag_next_button'])) {
-                $strMatch = $this->getTagSelector($tagSetup['tag_next_button']);
-                if (isset($strMatch)) {
-                    try {
-                        $GLOBALS['logger']->logLine("Going to next page of results via CSS object " . $strMatch, \Scooper\C__DISPLAY_NORMAL__);
-                        $arrArgs = array();
-                        $ret = $driver->executeScript(sprintf("function callNextPage() { var elem = window.document.querySelector('" . $strMatch . "');  if (elem != null) { console.log('attempting next button click on element " . $strMatch . "'); elem.click(); return true; } else return false; } ; return callNextPage();", $arrArgs));
-                        if ($ret === false) {
-                            $ex = new Exception("Failed to find and click the control to go to the next page of results for " . $this->siteName);
-                            handleException($ex, $fmtLogMsg = null, $raise = true);
-                        } else
-                            sleep($this->additionalLoadDelaySeconds);
-                        $GLOBALS['logger']->logLine("Next page of job listings loaded successfully.  ", \Scooper\C__DISPLAY_NORMAL__);
-
-                    } catch (Exception $ex) {
-                        $strError = "Error clicking next: " . $ex->getMessage();
-                        handleException(new Exception($strError), $fmtLogMsg = null, $raise = true);
-                    }
-                }
-            }
-        }
-        else
-        {
-            throw new Exception(sprintf("Error: plugin for %s is missing tag definition for the next page button to click. Cannot complete search.", $this->siteName));
-        }
     }
 
 }
