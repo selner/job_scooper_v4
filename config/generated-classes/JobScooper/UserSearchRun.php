@@ -108,19 +108,26 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
 
     }
 
-    private function _setPluginClass($outputDirectory = null)
+    private function _instantiateJobSiteClass($outputDirectory = null)
     {
-        if(is_null($this->getJobSite()))
-            throw new Exception("Unable to look up plugin class because the job site is unknown.");
+            if (is_null($this->getJobSite()))
+                throw new Exception("Unable to look up plugin class because the job site is unknown.");
 
-        $this->pluginClass = $GLOBALS['JOBSITE_PLUGINS'][$this->getJobSite()]['class_name'];
-        $this->plugin = new $this->pluginClass($outputDirectory, null);
+        try {
+            LogLine("Instantiating plugin: " . getArrayValuesAsString($GLOBALS['JOBSITE_PLUGINS'][$this->getJobSite()]));
+            $class = $GLOBALS['JOBSITE_PLUGINS'][$this->getJobSite()]['class_name'];
+            $this->plugin = new $class($outputDirectory, null);
+        }
+        catch (\Exception $ex)
+        {
+            handleException($ex, "Error instantiating jobsite plugin [" . getArrayValuesAsString($GLOBALS['JOBSITE_PLUGINS'][$this->getJobSite()]) . ":  %s");
+        }
     }
 
     function getPlugin($outputDirectory = null)
     {
         if(is_null($this->plugin))
-            $this->_setPluginClass($outputDirectory);
+            $this->_instantiateJobSiteClass($outputDirectory);
 
         return $this->plugin;
     }
@@ -128,7 +135,7 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
     function getPluginClass()
     {
         if(is_null($this->plugin))
-            $this->_setPluginClass();
+            $this->_instantiateJobSiteClass();
 
         return $this->pluginClass;
     }
@@ -206,7 +213,7 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
     public function setJobSite($v)
     {
         parent::setJobSite($v);
-        $this->_setPluginClass();
+        $this->_instantiateJobSiteClass();
 
     }
 
