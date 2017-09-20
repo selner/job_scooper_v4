@@ -1,6 +1,6 @@
 <?php
 
-define('__APP_VERSION__', "Job Scooper v4.master.beta-1");
+define('__APP_VERSION__', "Job Scooper v4.master.1.0");
 
 //use Doctrine\ORM\Tools\Setup;
 if (file_exists(dirname(__FILE__).'/vendor/autoload.php')) {
