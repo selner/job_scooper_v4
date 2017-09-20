@@ -195,6 +195,23 @@ class JobPosting extends \JobScooper\Base\JobPosting implements \ArrayAccess
         if (!($dateVal === false)) {
             $v = date('Y-m-d', $dateVal);
         }
+        else
+        {
+            $info = date_parse($v);
+            $date = "";
+            foreach(array("month", "day", "year") as $dateval)
+            {
+                if($info[$dateval] !== false)
+                {
+                    $date .= strval($info[$dateval]);
+                }
+                else
+                {
+                    $date .= strval(getdate()[$dateval]);
+                }
+            }
+            $v = $date;
+        }
 
         parent::setPostedAt($v);
     }
