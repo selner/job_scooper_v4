@@ -22,28 +22,32 @@
 
 function isMarkedNotBlank($var)
 {
-    return !(isMarkedBlank($var));
+    return !(isSuccessfulUserMatch($var));
 }
 
-function isMarked_InterestedValue($var, $value)
+function isUserMatchValueOf($var, $value)
 {
     if (method_exists($var, "getUserMatchStatus") === true)
     {
-        if(substr_count($var->getUserMatchStatus(), $value) <= 0) return false;
+        $matchStatus = $var->getUserMatchStatus();
+        if(strcasecmp($matchStatus, $value) == 0)
+            return true;
     }
     else
     {
         if(array_key_exists("interested", $var) === true)
             if(substr_count($var['interested'], $value) <= 0) return false;
     }
-    return true;
+    return false;
 }
 
-function isMarkedBlank($var)
+function isSuccessfulUserMatch($var)
 {
     if (method_exists($var, "getUserMatchStatus") === true)
     {
-        if(strlen($var->getUserMatchStatus()) == 0) return true;
+        $matchStatus = $var->getUserMatchStatus();
+        if(in_array($matchStatus, array("none", "include-match", null)))
+            return true;
     }
     else
     {
@@ -53,24 +57,24 @@ function isMarkedBlank($var)
     return false;
 }
 
-function isMarked_NotInterested($var)
+function isNotUserJobMatch($var)
 {
-    return isMarked_InterestedValue($var, "exclude-match");
+    return isUserMatchValueOf($var, "exclude-match");
 }
 
-function isMarked_NotInterestedAndNotBlank($var)
+function isNotUserJobMatchAndNotBlank($var)
 {
-    return !(isMarkedBlank($var));
+    return !(isSuccessfulUserMatch($var));
 }
 
 function isJobAutoUpdatable($var)
 {
-    return isMarkedBlank($var);
+    return isSuccessfulUserMatch($var);
 }
 
 function includeJobInFilteredList($var)
 {
-    return !(isMarked_NotInterestedAndNotBlank($var) == true);
+    return !(isNotUserJobMatchAndNotBlank($var) == true);
 
 }
 
@@ -78,6 +82,8 @@ function isIncludedJobSite($var)
 {
     return (in_array(strtolower($var->getJobPosting()->getJobSite()), $GLOBALS['USERDATA']['configuration_settings']['included_sites']) === true);
 }
+
+
 
 
 function sortByErrorThenCount($a, $b)

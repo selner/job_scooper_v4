@@ -156,31 +156,29 @@ class ClassJobsNotifier
         $arrFilesToAttach = array();
         $arrResultFilesToCombine = array();
 
-        $this->arrMatchedJobs = getAllUserMatchesNotNotified();
-        $this->arrExcludedJobs = array_filter($this->arrMatchedJobs, "isMarked_NotInterested");
+        $arrUnnotifiedJobsAllRuns = getAllUserMatchesNotNotified();
+        $this->arrAllUnnotifiedJobs = array_filter($arrUnnotifiedJobsAllRuns, 'isIncludedJobSite' );
         $detailsHTMLFile = null;
 
         //
         // For our final output, we want the jobs to be sorted by company and then role name.
         // Create a copy of the jobs list that is sorted by that value.
         //
-        $arrJobsData = $this->arrMatchedJobs;
-        $arrMatchedJobs = array_filter($arrJobsData, 'isIncludedJobSite' );
+        $arrJobsData = $this->arrAllUnnotifiedJobs;
+        $this->arrExcludedJobs = array_filter($this->arrAllUnnotifiedJobs, "isNotUserJobMatch");
 
-        $GLOBALS['logger']->logLine(PHP_EOL . "Writing final list of " . count($arrMatchedJobs) . " jobs to output files." . PHP_EOL, \C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine(PHP_EOL . "Writing final list of " . count($this->arrAllUnnotifiedJobs) . " jobs to output files." . PHP_EOL, \C__DISPLAY_NORMAL__);
 
         // Output only new records that haven't been looked at yet
-        $detailsCSVFile = parseFilePath($this->_outputFilteredJobsListToFile_($arrMatchedJobs, "isMarkedBlank", "-finalmatchedjobs", "CSV"));
-        $detailsHTMLFile = parseFilePath($this->_outputFilteredJobsListToFile_($arrMatchedJobs, "isMarkedBlank", "-finalmatchedjobs", "HTML"));
+        $detailsCSVFile = parseFilePath($this->_outputFilteredJobsListToFile_($this->arrAllUnnotifiedJobs, "isSuccessfulUserMatch", "-finalmatchedjobs", "CSV"));
+        $detailsHTMLFile = parseFilePath($this->_outputFilteredJobsListToFile_($this->arrAllUnnotifiedJobs, "isSuccessfulUserMatch", "-finalmatchedjobs", "HTML"));
 
         $arrResultFilesToCombine[] = $detailsCSVFile;
         $arrFilesToAttach[] = $detailsCSVFile;
         $arrFilesToAttach[] =  $detailsHTMLFile;
 
-        $arrJobsData = $this->arrExcludedJobs;
-        $arrExcludedJobs = array_filter($arrJobsData, 'isIncludedJobSite' );
 
-        $detailsExcludedCSVFile = parseFilePath($this->_outputFilteredJobsListToFile_($arrExcludedJobs, "isMarked_NotInterested", "-finalexcludedjobs", "CSV"));
+        $detailsExcludedCSVFile = parseFilePath($this->_outputFilteredJobsListToFile_($this->arrExcludedJobs, "isNotUserJobMatch", "-finalexcludedjobs", "CSV"));
 
         if ((filesize($detailsExcludedCSVFile['full_file_path']) < 10 * 1024 * 1024) || isDebug()) {
             $arrFilesToAttach[] = $detailsExcludedCSVFile;
@@ -194,13 +192,13 @@ class ClassJobsNotifier
 
         $GLOBALS['logger']->logSectionHeader("Generating text email content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
 
-        $strResultCountsText = $this->getListingCountsByPlugin("text", $arrMatchedJobs, $arrExcludedJobs);
+        $strResultCountsText = $this->getListingCountsByPlugin("text", $this->arrAllUnnotifiedJobs, $this->arrExcludedJobs);
         $strResultText = "Job Scooper Results for ". getRunDateRange() . PHP_EOL . $strResultCountsText . PHP_EOL;
 
         $GLOBALS['logger']->logSectionHeader("Generating text html content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
 
 
-        $messageHtml = $this->getListingCountsByPlugin("html", $arrMatchedJobs, $arrExcludedJobs, $detailsHTMLFile);
+        $messageHtml = $this->getListingCountsByPlugin("html", $this->arrAllUnnotifiedJobs, $this->arrExcludedJobs, $detailsHTMLFile);
 
         $this->_wrapCSSStyleOnHTML_($messageHtml);
         $subject = "New Job Postings: " . getRunDateRange();
@@ -536,8 +534,8 @@ class ClassJobsNotifier
             $arrPluginJobs = $arrPluginJobMatches + $arrPluginExcludesJobs;
 
             $arrCounts[$plugin]['name'] = $plugin;
-            $arrCounts[$plugin]['for_review'] = count(array_filter($arrPluginJobs, "isMarkedBlank"));
-            $arrCounts[$plugin]['total_not_interested'] = count(array_filter($arrPluginJobs, "isMarked_NotInterested"));
+            $arrCounts[$plugin]['for_review'] = count(array_filter($arrPluginJobs, "isSuccessfulUserMatch"));
+            $arrCounts[$plugin]['total_not_interested'] = count(array_filter($arrPluginJobs, "isNotUserJobMatch"));
             $arrCounts[$plugin]['total_listings'] = count($arrPluginJobs);
             $arrCounts[$plugin]['had_error'] = false;
 
@@ -558,12 +556,12 @@ class ClassJobsNotifier
         switch ($fLayoutType)
         {
             case "html":
-                $content = $this->_getResultsTextHTML_($arrHeaders, $arrCounts, $arrFailedPluginsReport, $detailsHTMLBodyInclude);
+                $content = $this->_getResultsTextHTML_($arrHeaders, $arrCounts, $detailsHTMLBodyInclude);
                 break;
 
             default:
             case "text":
-                $content = $this->_getResultsTextPlain_($arrHeaders, $arrCounts, $arrFailedPluginsReport);
+                $content = $this->_getResultsTextPlain_($arrHeaders, $arrCounts);
                 break;
 
         }
