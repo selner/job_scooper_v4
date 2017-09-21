@@ -45,14 +45,14 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
         'tag_listings_count' => array()  # BUGBUG:  need this empty array so that the parent class doesn't auto-set to C__JOB_ITEMCOUNT_NOTAPPLICABLE__
     );
 
-    function __construct($strOutputDirectory = null)
+    function __construct()
     {
         $this->additionalFlags[] = C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES;
         $this->paginationType = C__PAGINATION_PAGE_VIA_URL;
 
         $this->siteBaseURL = $this->childSiteURLBase;
         $this->strBaseURLFormat = $this->childSiteURLBase . $this->strBaseURLPathSection . $this->strBaseURLPathSuffix;
-        parent::__construct($strOutputDirectory);
+        parent::__construct();
     }
 
     protected function getKeywordURLValue($searchDetails) {
@@ -276,11 +276,11 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
 
 abstract class OptimizedAdicioCareerCastPlugin extends BaseAdicioCareerCastPlugin
 {
-    function __construct($strOutputDirectory = null)
+    function __construct()
     {
         $this->strBaseURLPathSection = str_replace("/jobs/results/keyword/***KEYWORDS***", "/jobs/search/results", $this->strBaseURLPathSection);
         $this->strBaseURLPathSection = str_replace("&kwsMustContain=***KEYWORDS***", "", $this->strBaseURLPathSection);
-        parent::__construct($strOutputDirectory);
+        parent::__construct();
     }
 
 }
@@ -450,7 +450,7 @@ class PluginVindy extends BaseAdicioCareerCastPlugin
     protected $childSiteURLBase = 'http://careers.vindy.com';
 }
 
-class PluginAdicioCareerCast extends BaseAdicioCareerCastPlugin
+class PluginCareerCast extends BaseAdicioCareerCastPlugin
 {
     protected $siteName = 'CareerCast';
     protected $childSiteURLBase = 'http://www.careercast.com';

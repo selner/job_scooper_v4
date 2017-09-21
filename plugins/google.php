@@ -41,10 +41,10 @@ class PluginGoogle extends ClassClientHTMLJobSitePlugin
 //        return "li=".$nItem."&st=".($nItem+10);
 //    }
 
-    function __construct($strBaseDir = null)
+    function __construct()
     {
         $this->regex_link_job_id = '/' . REXPR_PARTIAL_MATCH_URL_DOMAIN . '/.*?jid=([^&]*)/i';
-        parent::__construct($strBaseDir);
+        parent::__construct();
     }
 
 

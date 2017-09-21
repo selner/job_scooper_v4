@@ -67,7 +67,11 @@
         <!--
             Alternate unique key for every job post is jobsite + jobsite post id
         -->
-        <column name="jobsite" phpName="JobSite" type="varchar" size="255" required="true"/>
+        <column name="jobsite" phpName="JobSite" type="varchar" size="100" required="true"/>
+        <!--<foreign-key foreignTable="jobsite_plugin" onUpdate="none" onDelete="none">-->
+            <!--<reference local="jobsite" foreign="key"/>-->
+        <!--</foreign-key>-->
+
         <column name="jobsite_post_id" phpName="JobSitePostID" type="varchar" size="255" required="true"/>
         <unique name="index_jobsite_and_post_id/">
             <unique-column name="jobsite"/>
@@ -113,18 +117,25 @@
 
 
 
-    <table name="jobsite_plugin" phpName="JobSitePlugin" reloadOnUpdate="true">
-        <column name="jobsite" phpName="JobSite" type="varchar" size="100" primaryString="true" primaryKey="true"/>
+    <table name="jobsite_plugin" phpName="JobSitePlugin" reloadOnUpdate="true" reloadOnInsert="true">
+        <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" primaryString="true" primaryKey="true"/>
+        <column name="plugin_class_name" phpName="PluginClassName" type="varchar" size="100" primaryString="false" primaryKey="false"/>
         <column name="display_name" phpName="DisplayName" type="varchar" size="255" primaryString="false" primaryKey="false"/>
         <column name="date_last_run" phpName="LastRunAt" type="timestamp" />
-        <column name="last_user_search_run_id" phpName="LastUserSearchRunId" type="integer"/>
         <column name="was_successful" phpName="LastRunWasSuccessful" type="boolean"/>
         <column name="date_next_run" phpName="StartNextRunAfter" type="timestamp" />
         <column name="date_last_failed" phpName="LastFailedAt" type="timestamp" />
-        <foreign-key foreignTable="user_search_run">
+
+        <column name="last_user_search_run_id" phpName="LastUserSearchRunId" type="integer" lazyLoad="true"/>
+        <foreign-key foreignTable="user_search_run" onUpdate="none" onDelete="none">
             <reference local="last_user_search_run_id" foreign="user_search_run_id"/>
         </foreign-key>
+
+        <column name="supported_country_codes" phpName="SupportedCountryCodes" type="array"/>
+
     </table>
+
+
 
     <table name="user" phpName="User" allowPkInsert="true">
         <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true" primaryKey="true" primaryString="true"/>
@@ -140,8 +151,8 @@
         <column name="user_job_match_id" phpName="UserJobMatchId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
         <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true"/>
         <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true"/>
-        <column name="user_notification_state" phpName="UserNotificationState" type="enum" valueSet="ready-to-send,sent"/>
-        <column name="user_match" phpName="UserMatchStatus" type="enum" valueSet="none, include-match, exclude-match"/>
+        <column name="user_notification_state" phpName="UserNotificationState" type="enum" valueSet="not-ready,ready,sent" defaultValue="not-ready"/>
+        <column name="user_match" phpName="UserMatchStatus" type="enum" valueSet="none, include-match, exclude-match" defaultValue="none"/>
         <column name="user_match_reason" phpName="UserMatchReason" type="varchar" size="50"/>
         <column name="match_notes" phpName="MatchNotes" type="varchar" size="200"/>
         <column name="app_run_id" phpName="AppRunId" type="varchar" size="75"/>
@@ -163,12 +174,11 @@
         <behavior name="timestampable">
             <parameter name="create_column" value="date_search_run" />
         </behavior>
-        <column name="jobsite" phpName="JobSite" type="varchar" size="100"/>
+        <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100"/>
+
         <column name="search_settings" phpName="SearchSettings" type="object"/>
-        <column name="search_run_result" phpName="SearchRunResult" type="object"/>
-        <!--<column name="run_result_code" field="run_code" phpName="RunResultCode" type="boolean"/>-->
-        <!--<column name="run_result_details" fieldname="details" phpName="RunResultDetails" type="longvarchar"/>-->
-        <!--<column name="run_result_errorfiles" fieldname="errorfiles" phpName="RunResultErrorFiles" type="array"/>-->
+        <column name="run_result" field="run_result_code" phpName="RunResultCode" type="enum" valueSet="not-run,failed,excluded,successful" defaultValue="not-run"/>-->
+        <column name="run_error_details" phpName="RunErrorDetails" type="array"/>
         <foreign-key foreignTable="user">
             <reference local="user_slug" foreign="user_slug"/>
         </foreign-key>

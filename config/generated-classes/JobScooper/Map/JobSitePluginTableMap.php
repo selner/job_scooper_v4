@@ -59,22 +59,27 @@ class JobSitePluginTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 7;
+    const NUM_COLUMNS = 9;
 
     /**
      * The number of lazy-loaded columns
      */
-    const NUM_LAZY_LOAD_COLUMNS = 0;
+    const NUM_LAZY_LOAD_COLUMNS = 1;
 
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 7;
+    const NUM_HYDRATE_COLUMNS = 8;
 
     /**
-     * the column name for the jobsite field
+     * the column name for the jobsite_key field
      */
-    const COL_JOBSITE = 'jobsite_plugin.jobsite';
+    const COL_JOBSITE_KEY = 'jobsite_plugin.jobsite_key';
+
+    /**
+     * the column name for the plugin_class_name field
+     */
+    const COL_PLUGIN_CLASS_NAME = 'jobsite_plugin.plugin_class_name';
 
     /**
      * the column name for the display_name field
@@ -85,11 +90,6 @@ class JobSitePluginTableMap extends TableMap
      * the column name for the date_last_run field
      */
     const COL_DATE_LAST_RUN = 'jobsite_plugin.date_last_run';
-
-    /**
-     * the column name for the last_user_search_run_id field
-     */
-    const COL_LAST_USER_SEARCH_RUN_ID = 'jobsite_plugin.last_user_search_run_id';
 
     /**
      * the column name for the was_successful field
@@ -107,6 +107,16 @@ class JobSitePluginTableMap extends TableMap
     const COL_DATE_LAST_FAILED = 'jobsite_plugin.date_last_failed';
 
     /**
+     * the column name for the last_user_search_run_id field
+     */
+    const COL_LAST_USER_SEARCH_RUN_ID = 'jobsite_plugin.last_user_search_run_id';
+
+    /**
+     * the column name for the supported_country_codes field
+     */
+    const COL_SUPPORTED_COUNTRY_CODES = 'jobsite_plugin.supported_country_codes';
+
+    /**
      * The default string format for model objects of the related table
      */
     const DEFAULT_STRING_FORMAT = 'YAML';
@@ -118,11 +128,11 @@ class JobSitePluginTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('JobSite', 'DisplayName', 'LastRunAt', 'LastUserSearchRunId', 'LastRunWasSuccessful', 'StartNextRunAfter', 'LastFailedAt', ),
-        self::TYPE_CAMELNAME     => array('jobSite', 'displayName', 'lastRunAt', 'lastUserSearchRunId', 'lastRunWasSuccessful', 'startNextRunAfter', 'lastFailedAt', ),
-        self::TYPE_COLNAME       => array(JobSitePluginTableMap::COL_JOBSITE, JobSitePluginTableMap::COL_DISPLAY_NAME, JobSitePluginTableMap::COL_DATE_LAST_RUN, JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID, JobSitePluginTableMap::COL_WAS_SUCCESSFUL, JobSitePluginTableMap::COL_DATE_NEXT_RUN, JobSitePluginTableMap::COL_DATE_LAST_FAILED, ),
-        self::TYPE_FIELDNAME     => array('jobsite', 'display_name', 'date_last_run', 'last_user_search_run_id', 'was_successful', 'date_next_run', 'date_last_failed', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, )
+        self::TYPE_PHPNAME       => array('JobSiteKey', 'PluginClassName', 'DisplayName', 'LastRunAt', 'LastRunWasSuccessful', 'StartNextRunAfter', 'LastFailedAt', 'LastUserSearchRunId', 'SupportedCountryCodes', ),
+        self::TYPE_CAMELNAME     => array('jobSiteKey', 'pluginClassName', 'displayName', 'lastRunAt', 'lastRunWasSuccessful', 'startNextRunAfter', 'lastFailedAt', 'lastUserSearchRunId', 'supportedCountryCodes', ),
+        self::TYPE_COLNAME       => array(JobSitePluginTableMap::COL_JOBSITE_KEY, JobSitePluginTableMap::COL_PLUGIN_CLASS_NAME, JobSitePluginTableMap::COL_DISPLAY_NAME, JobSitePluginTableMap::COL_DATE_LAST_RUN, JobSitePluginTableMap::COL_WAS_SUCCESSFUL, JobSitePluginTableMap::COL_DATE_NEXT_RUN, JobSitePluginTableMap::COL_DATE_LAST_FAILED, JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID, JobSitePluginTableMap::COL_SUPPORTED_COUNTRY_CODES, ),
+        self::TYPE_FIELDNAME     => array('jobsite_key', 'plugin_class_name', 'display_name', 'date_last_run', 'was_successful', 'date_next_run', 'date_last_failed', 'last_user_search_run_id', 'supported_country_codes', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, )
     );
 
     /**
@@ -132,11 +142,11 @@ class JobSitePluginTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('JobSite' => 0, 'DisplayName' => 1, 'LastRunAt' => 2, 'LastUserSearchRunId' => 3, 'LastRunWasSuccessful' => 4, 'StartNextRunAfter' => 5, 'LastFailedAt' => 6, ),
-        self::TYPE_CAMELNAME     => array('jobSite' => 0, 'displayName' => 1, 'lastRunAt' => 2, 'lastUserSearchRunId' => 3, 'lastRunWasSuccessful' => 4, 'startNextRunAfter' => 5, 'lastFailedAt' => 6, ),
-        self::TYPE_COLNAME       => array(JobSitePluginTableMap::COL_JOBSITE => 0, JobSitePluginTableMap::COL_DISPLAY_NAME => 1, JobSitePluginTableMap::COL_DATE_LAST_RUN => 2, JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID => 3, JobSitePluginTableMap::COL_WAS_SUCCESSFUL => 4, JobSitePluginTableMap::COL_DATE_NEXT_RUN => 5, JobSitePluginTableMap::COL_DATE_LAST_FAILED => 6, ),
-        self::TYPE_FIELDNAME     => array('jobsite' => 0, 'display_name' => 1, 'date_last_run' => 2, 'last_user_search_run_id' => 3, 'was_successful' => 4, 'date_next_run' => 5, 'date_last_failed' => 6, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, )
+        self::TYPE_PHPNAME       => array('JobSiteKey' => 0, 'PluginClassName' => 1, 'DisplayName' => 2, 'LastRunAt' => 3, 'LastRunWasSuccessful' => 4, 'StartNextRunAfter' => 5, 'LastFailedAt' => 6, 'LastUserSearchRunId' => 7, 'SupportedCountryCodes' => 8, ),
+        self::TYPE_CAMELNAME     => array('jobSiteKey' => 0, 'pluginClassName' => 1, 'displayName' => 2, 'lastRunAt' => 3, 'lastRunWasSuccessful' => 4, 'startNextRunAfter' => 5, 'lastFailedAt' => 6, 'lastUserSearchRunId' => 7, 'supportedCountryCodes' => 8, ),
+        self::TYPE_COLNAME       => array(JobSitePluginTableMap::COL_JOBSITE_KEY => 0, JobSitePluginTableMap::COL_PLUGIN_CLASS_NAME => 1, JobSitePluginTableMap::COL_DISPLAY_NAME => 2, JobSitePluginTableMap::COL_DATE_LAST_RUN => 3, JobSitePluginTableMap::COL_WAS_SUCCESSFUL => 4, JobSitePluginTableMap::COL_DATE_NEXT_RUN => 5, JobSitePluginTableMap::COL_DATE_LAST_FAILED => 6, JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID => 7, JobSitePluginTableMap::COL_SUPPORTED_COUNTRY_CODES => 8, ),
+        self::TYPE_FIELDNAME     => array('jobsite_key' => 0, 'plugin_class_name' => 1, 'display_name' => 2, 'date_last_run' => 3, 'was_successful' => 4, 'date_next_run' => 5, 'date_last_failed' => 6, 'last_user_search_run_id' => 7, 'supported_country_codes' => 8, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, )
     );
 
     /**
@@ -156,14 +166,16 @@ class JobSitePluginTableMap extends TableMap
         $this->setPackage('JobScooper');
         $this->setUseIdGenerator(false);
         // columns
-        $this->addPrimaryKey('jobsite', 'JobSite', 'VARCHAR', true, 100, null);
-        $this->getColumn('jobsite')->setPrimaryString(true);
+        $this->addPrimaryKey('jobsite_key', 'JobSiteKey', 'VARCHAR', true, 100, null);
+        $this->getColumn('jobsite_key')->setPrimaryString(true);
+        $this->addColumn('plugin_class_name', 'PluginClassName', 'VARCHAR', false, 100, null);
         $this->addColumn('display_name', 'DisplayName', 'VARCHAR', false, 255, null);
         $this->addColumn('date_last_run', 'LastRunAt', 'TIMESTAMP', false, null, null);
-        $this->addForeignKey('last_user_search_run_id', 'LastUserSearchRunId', 'INTEGER', 'user_search_run', 'user_search_run_id', false, null, null);
         $this->addColumn('was_successful', 'LastRunWasSuccessful', 'BOOLEAN', false, null, null);
         $this->addColumn('date_next_run', 'StartNextRunAfter', 'TIMESTAMP', false, null, null);
         $this->addColumn('date_last_failed', 'LastFailedAt', 'TIMESTAMP', false, null, null);
+        $this->addForeignKey('last_user_search_run_id', 'LastUserSearchRunId', 'INTEGER', 'user_search_run', 'user_search_run_id', false, null, null);
+        $this->addColumn('supported_country_codes', 'SupportedCountryCodes', 'ARRAY', false, null, null);
     } // initialize()
 
     /**
@@ -196,11 +208,11 @@ class JobSitePluginTableMap extends TableMap
     public static function getPrimaryKeyHashFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
         // If the PK cannot be derived from the row, return NULL.
-        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSite', TableMap::TYPE_PHPNAME, $indexType)] === null) {
+        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSiteKey', TableMap::TYPE_PHPNAME, $indexType)] === null) {
             return null;
         }
 
-        return null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSite', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSite', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSite', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSite', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSite', TableMap::TYPE_PHPNAME, $indexType)];
+        return null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSiteKey', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSiteKey', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSiteKey', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSiteKey', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSiteKey', TableMap::TYPE_PHPNAME, $indexType)];
     }
 
     /**
@@ -220,7 +232,7 @@ class JobSitePluginTableMap extends TableMap
         return (string) $row[
             $indexType == TableMap::TYPE_NUM
                 ? 0 + $offset
-                : self::translateFieldName('JobSite', TableMap::TYPE_PHPNAME, $indexType)
+                : self::translateFieldName('JobSiteKey', TableMap::TYPE_PHPNAME, $indexType)
         ];
     }
 
@@ -321,21 +333,23 @@ class JobSitePluginTableMap extends TableMap
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
-            $criteria->addSelectColumn(JobSitePluginTableMap::COL_JOBSITE);
+            $criteria->addSelectColumn(JobSitePluginTableMap::COL_JOBSITE_KEY);
+            $criteria->addSelectColumn(JobSitePluginTableMap::COL_PLUGIN_CLASS_NAME);
             $criteria->addSelectColumn(JobSitePluginTableMap::COL_DISPLAY_NAME);
             $criteria->addSelectColumn(JobSitePluginTableMap::COL_DATE_LAST_RUN);
-            $criteria->addSelectColumn(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID);
             $criteria->addSelectColumn(JobSitePluginTableMap::COL_WAS_SUCCESSFUL);
             $criteria->addSelectColumn(JobSitePluginTableMap::COL_DATE_NEXT_RUN);
             $criteria->addSelectColumn(JobSitePluginTableMap::COL_DATE_LAST_FAILED);
+            $criteria->addSelectColumn(JobSitePluginTableMap::COL_SUPPORTED_COUNTRY_CODES);
         } else {
-            $criteria->addSelectColumn($alias . '.jobsite');
+            $criteria->addSelectColumn($alias . '.jobsite_key');
+            $criteria->addSelectColumn($alias . '.plugin_class_name');
             $criteria->addSelectColumn($alias . '.display_name');
             $criteria->addSelectColumn($alias . '.date_last_run');
-            $criteria->addSelectColumn($alias . '.last_user_search_run_id');
             $criteria->addSelectColumn($alias . '.was_successful');
             $criteria->addSelectColumn($alias . '.date_next_run');
             $criteria->addSelectColumn($alias . '.date_last_failed');
+            $criteria->addSelectColumn($alias . '.supported_country_codes');
         }
     }
 
@@ -387,7 +401,7 @@ class JobSitePluginTableMap extends TableMap
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
             $criteria = new Criteria(JobSitePluginTableMap::DATABASE_NAME);
-            $criteria->add(JobSitePluginTableMap::COL_JOBSITE, (array) $values, Criteria::IN);
+            $criteria->add(JobSitePluginTableMap::COL_JOBSITE_KEY, (array) $values, Criteria::IN);
         }
 
         $query = JobSitePluginQuery::create()->mergeWith($criteria);

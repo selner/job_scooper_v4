@@ -20,14 +20,14 @@ require_once dirname(dirname(dirname(__FILE__)))."/bootstrap.php";
 abstract class BaseMadgexATSPlugin extends ClassClientHTMLJobSitePlugin
 {
 
-    function __construct($strOutputDirectory = null)
+    function __construct()
     {
         $this->prevURL = $this->childSiteURLBase;
         $this->paginationType = C__PAGINATION_PAGE_VIA_URL;
 
         $this->siteBaseURL = $this->childSiteURLBase;
         $this->strBaseURLFormat = $this->childSiteURLBase . $this->strBaseURLFormat;
-        parent::__construct($strOutputDirectory);
+        parent::__construct();
     }
 
     protected $siteName = 'madgexats';

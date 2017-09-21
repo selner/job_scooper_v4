@@ -76,7 +76,7 @@ abstract class BaseTaleoPlugin extends ClassBaseServerHTMLJobSitePlugin
     protected $siteName = null;
     protected $server = null;
 
-    function __construct($strOutputDirectory = null)
+    function __construct()
     {
         $this->paginationType = C__PAGINATION_PAGE_VIA_URL;
         
@@ -96,7 +96,7 @@ abstract class BaseTaleoPlugin extends ClassBaseServerHTMLJobSitePlugin
             $this->siteName = $strPluginSite;
         }
 
-        return parent::__construct($strOutputDirectory);
+        return parent::__construct();
     }
 
     function parseTotalResultsCount($objSimpHTML)

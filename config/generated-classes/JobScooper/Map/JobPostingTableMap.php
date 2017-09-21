@@ -212,7 +212,7 @@ class JobPostingTableMap extends TableMap
         $this->setUseIdGenerator(true);
         // columns
         $this->addPrimaryKey('jobposting_id', 'JobPostingId', 'INTEGER', true, null, null);
-        $this->addColumn('jobsite', 'JobSite', 'VARCHAR', true, 255, null);
+        $this->addColumn('jobsite', 'JobSite', 'VARCHAR', true, 100, null);
         $this->addColumn('jobsite_post_id', 'JobSitePostID', 'VARCHAR', true, 255, null);
         $this->addColumn('title', 'Title', 'VARCHAR', true, 255, null);
         $this->addColumn('title_tokens', 'TitleTokens', 'VARCHAR', false, 255, null);

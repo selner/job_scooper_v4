@@ -20,6 +20,7 @@ require_once dirname(dirname(dirname(dirname(__FILE__))))."/bootstrap.php";
 
 use Exception as Exception;
 use JobScooper\Base\UserSearchRun as BaseUserSearchRun;
+use Propel\Runtime\Connection\ConnectionInterface;
 
 /**
  * Skeleton subclass for representing a row from the 'user_search_run' table.
@@ -52,28 +53,8 @@ class SearchSettings extends \ArrayObject
     }
 }
 
-class SearchRunResult extends \ArrayObject
-{
-    function __construct()
-    {
-        $arrFields = Array(
-            'success' => null,
-            'error_datetime' => new \DateTime(),
-            'error_details' => null,
-            'exception_code' => null,
-            'exception_message' => null,
-            'exception_line' => null,
-            'exception_file' => null,
-            'error_files' => array()
-        );
-        return parent::__construct($arrFields, \ArrayObject::ARRAY_AS_PROPS);
-    }
-}
-
 class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
 {
-    private $plugin = null;
-    private $pluginClass = null;
     private $searchSettingKeys = array(
         'search_start_url',
         'keywords_string_for_url',
@@ -91,9 +72,7 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
     public function __construct($arrSearchDetails = null, $outputDirectory = null)
     {
         parent::__construct();
-        if (is_null($this->getSearchRunResult())) {
-            $this->setSearchRunResult(new SearchRunResult());
-        }
+
         if ($this->getSearchSettings()) {
             $this->setSearchSettings(new SearchSettings());
         }
@@ -105,50 +84,6 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
         if (!is_null($arrSearchDetails) && is_array($arrSearchDetails) && count($arrSearchDetails) > 0) {
             $this->fromSearchDetailsArray($arrSearchDetails);
         }
-
-    }
-
-    private function _instantiateJobSiteClass($outputDirectory = null)
-    {
-            if (is_null($this->getJobSite()))
-                throw new Exception("Unable to look up plugin class because the job site is unknown.");
-
-        try {
-            LogLine("Instantiating plugin: " . getArrayValuesAsString($GLOBALS['JOBSITE_PLUGINS'][$this->getJobSite()]));
-            $class = $GLOBALS['JOBSITE_PLUGINS'][$this->getJobSite()]['class_name'];
-            $this->plugin = new $class($outputDirectory, null);
-        }
-        catch (\Exception $ex)
-        {
-            handleException($ex, "Error instantiating jobsite plugin [" . getArrayValuesAsString($GLOBALS['JOBSITE_PLUGINS'][$this->getJobSite()]) . ":  %s");
-        }
-    }
-
-    function getPlugin($outputDirectory = null)
-    {
-        if(is_null($this->plugin))
-            $this->_instantiateJobSiteClass($outputDirectory);
-
-        return $this->plugin;
-    }
-
-    function getPluginClass()
-    {
-        if(is_null($this->plugin))
-            $this->_instantiateJobSiteClass();
-
-        return $this->pluginClass;
-    }
-
-    function isSearchIncludedInRun()
-    {
-        $curSiteName = strScrub($this->getJobSite(), FOR_LOOKUP_VALUE_MATCHING);
-        if(array_key_exists($curSiteName, $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']))
-        {
-            return false;
-        }
-
-        return true;
 
     }
 
@@ -165,12 +100,7 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
                     break;
 
                 case 'site_name':
-                    $this->setJobSite($arrDetails[$keyOldName]);
-                    $valueSet = true;
-                    break;
-
-                case 'search_run_result':
-                    $this->setSearchRunResult($arrDetails[$keyOldName]);
+                    $this->setJobSiteKey($arrDetails[$keyOldName]);
                     $valueSet = true;
                     break;
 
@@ -191,9 +121,6 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
 
     public function fromSearchDetailsArray($arrDetails)
     {
-        if (is_null($this->getSearchRunResult())) {
-            $this->setSearchRunResult(new SearchRunResult());
-        }
         if ($this->getSearchSettings()) {
             $this->setSearchSettings(new SearchSettings());
         }
@@ -203,22 +130,37 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
         }
     }
 
-    public function setSearchRunResult($v)
+    public function setRunResult($run_result, $errDetails=array())
     {
-        parent::setSearchRunResult($v);
-        if(!is_null($this->getKey()))
-            $this->save();
+        $this->setRunResultCode($run_result);
+        if(!is_null($errDetails) && is_array($errDetails))
+        {
+            $this->setRunErrorDetails($errDetails);
+        }
     }
 
-    public function setJobSite($v)
+    public function setJobSiteKey($v)
     {
-        parent::setJobSite($v);
-        $this->_instantiateJobSiteClass();
-
+        $slug = cleanupSlugPart($v);
+        findOrCreateJobSitePlugin($slug);
+        parent::setJobSiteKey($slug);
     }
 
+    public function getJobSitePluginObject()
+    {
+        return getPluginObjectForJobSite($this->getJobSiteKey());
+    }
 
+    public function getJobSiteObject()
+    {
+        $jobsiteObj = findOrCreateJobSitePlugin($this->getJobSiteKey());
+        return $jobsiteObj;
+    }
 
+    function isSearchIncludedInRun()
+    {
+        return $this->getJobSiteObject()->isSearchIncludedInRun();
+    }
 
     public function set($name, $value)
     {
@@ -231,7 +173,7 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
                 break;
 
             case 'site_name':
-                return $this->setJobSite($value);
+                return $this->setJobSiteKey($value);
                 break;
 
             default:
@@ -305,7 +247,7 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
                 break;
 
             case 'site_name':
-                return $this->getJobSite();
+                return $this->getJobSiteKey();
                 break;
 
             default:

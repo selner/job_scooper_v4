@@ -376,45 +376,6 @@ function isValueURLEncoded($str)
 }
 
 
-function readJobsListDataFromLocalJsonFile($fileKey, $returnFailedSearches = true, $dirKey = null)
-{
-
-    assert(!is_null($dirKey));
-
-    $fileKey = str_replace(" ", "", $fileKey);
-    $resultsFile = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories'][$dirKey], strtolower($fileKey)));
-    if (stripos($fileKey, ".json") === false)
-        $resultsFile = $resultsFile . "-" . strtolower(getTodayAsString("")) . ".json";
-
-    return readJobsListDataFromLocalFile($resultsFile, $returnFailedSearches);
-}
-
-function readJobsListDataFromLocalFile($filepath, $returnFailedSearches = true)
-{
-
-    if (stripos($filepath, ".json") === false)
-        $filepath = $filepath . "-" . strtolower(getTodayAsString("")) . ".json";
-
-        if (is_file($filepath)) {
-            $data = loadJSON($filepath);
-//            $jsonText = file_get_contents($filepath, FILE_TEXT);
-//
-//            $data = json_decode($jsonText, $assoc = true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
-
-            if ($returnFailedSearches === false) {
-                if ($data['search']['   search_run_result']['success'] !== true) {
-                    LogLine("Ignoring incomplete search results found in file with key " . $filepath);
-                    $data = null;
-                }
-        }
-
-
-        return $data;
-    }
-
-    return array();
-}
-
 function getPhpMemoryUsage()
 {
     $size = memory_get_usage(true);
@@ -424,45 +385,45 @@ function getPhpMemoryUsage()
     return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
 }
 
+
 function getFailedSearchesByPlugin()
 {
-    if (!array_key_exists('search_results', $GLOBALS['USERDATA']) || is_null($GLOBALS['USERDATA']['search_results']))
-        return null;
+    return getSearchesByRunResult("failed");
+}
 
-    $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function ($k) {
-        return ($k->getSearchRunResult()['success'] !== true);
-    });
+function getSearchesByRunResult($resultCode)
+{
+    $arrSearchReportByPlugin = array();
+    foreach ($GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'] as $jobsite) {
+        foreach($jobsite as $search)
+        {
+            if($search->getRunResultCode() == "failed") {
+                if (!array_key_exists($search->getJobSiteKey(), $arrSearchReportByPlugin))
+                    $arrSearchReportByPlugin[$search->getJobSiteKey()] = array();
 
-    if (is_null($arrFailedSearches) || !is_array($arrFailedSearches))
-        return null;
-
-    $arrFailedPluginsReport = array();
-    foreach ($arrFailedSearches as $search) {
-        if (!is_null($search->getSearchRunResult()['success'])) {
-            if (!array_key_exists($search->getJobSite(), $arrFailedPluginsReport))
-                $arrFailedPluginsReport[$search->getJobSite()]= array();
-
-            $arrFailedPluginsReport[$search->getJobSite()][$search->getKey()] = cloneArray($search->toArray(), array(
-                'keywords_string_for_url',
-                'base_url_format',
-                'keywords_array_tokenized',
-                'user_setting_flags',
-                'search_start_url',
-                'location_set_key',
-                'location_user_specified_override',
-                'location_search_value',
-                'keyword_search_override',
-                'keywords_array'));
+                $arrSearchReportByPlugin[$search->getJobSiteKey()][$search->getKey()] = cloneArray($search->toArray(), array(
+                    'keywords_string_for_url',
+                    'base_url_format',
+                    'keywords_array_tokenized',
+                    'user_setting_flags',
+                    'search_start_url',
+                    'location_set_key',
+                    'location_user_specified_override',
+                    'location_search_value',
+                    'keyword_search_override',
+                    'keywords_array'));
+            }
         }
     }
-    unset($search);
 
-    return $arrFailedPluginsReport;
+    return $arrSearchReportByPlugin;
 }
 
 function setSiteAsExcluded($excludedSite)
 {
-    $excludedSite = strtolower(trim($excludedSite));
+    $excludedSite = cleanupSlugPart($excludedSite);
+    if(!array_key_exists('JOBSITES_AND_SEARCHES_TO_RUN', $GLOBALS))
+        $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'] = array();
 
     $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$excludedSite] = $excludedSite;
     if(array_key_exists($excludedSite, $GLOBALS['USERDATA']['configuration_settings']['included_sites']))
@@ -471,29 +432,15 @@ function setSiteAsExcluded($excludedSite)
     }
     if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting " . $excludedSite . " as excluded for this run.", \C__DISPLAY_ITEM_DETAIL__);
 
-}
-
-function getFailedSearches()
-{
-    if (!array_key_exists('search_results', $GLOBALS['USERDATA']) || is_null($GLOBALS['USERDATA']['search_results']))
-        return null;
-
-    $arrFailedSearches = array_filter($GLOBALS['USERDATA']['search_results'], function ($k) {
-        return ($k['search_run_result']['success'] !== true);
-    });
-
-    if (is_null($arrFailedSearches) || !is_array($arrFailedSearches))
-        return null;
-
-    $arrFailedPluginsReport = array();
-    foreach ($arrFailedSearches as $search) {
-        if (!is_null($search['search_run_result']['success'])) {
-
-            $arrFailedPluginsReport[$search['key']] = $search;
+    if(array_key_exists($excludedSite, $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'])) {
+        foreach($GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'][$excludedSite] as $search)
+        {
+            $search->setRunResult("excluded");
+            $search->save();
         }
     }
 
-    return $arrFailedPluginsReport;
+    LogLine($excludedSite . " excluded, so skipping its searches.", \C__DISPLAY_ITEM_START__);
 }
 
 function noJobStringMatch($var, $matchString)

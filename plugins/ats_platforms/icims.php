@@ -29,7 +29,7 @@ class PluginHibbettSports extends BasePluginiCIMS
     function __construct($strBaseDir = null)
     {
         $this->arrListingTagSetup['tag_pages_count'] = array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'iCIMS_Paginator_Bottom'), array('tag' => 'div') , array('tag' => 'div') , array('tag' => 'div'), 'index' => 1, 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?of\s+(\d+).*/');
-        parent::__construct($strBaseDir);
+        parent::__construct();
         $this->strBaseURLFormat = $this->siteBaseURL . "/jobs/search?pr=***PAGE_NUMBER***&in_iframe=1";
     }
 }
@@ -91,7 +91,7 @@ class BasePluginiCIMS extends ClassHTMLJobSitePlugin
             }
         }
 
-        parent::__construct($strBaseDir);
+        parent::__construct();
 
     }
 

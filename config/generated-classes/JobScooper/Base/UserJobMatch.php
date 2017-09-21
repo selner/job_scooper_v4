@@ -87,6 +87,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * The value for the user_notification_state field.
      *
+     * Note: this column has a database default value of: 0
      * @var        int
      */
     protected $user_notification_state;
@@ -94,6 +95,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * The value for the user_match field.
      *
+     * Note: this column has a database default value of: 0
      * @var        int
      */
     protected $user_match;
@@ -138,10 +140,24 @@ abstract class UserJobMatch implements ActiveRecordInterface
     protected $alreadyInSave = false;
 
     /**
+     * Applies default values to this object.
+     * This method should be called from the object's constructor (or
+     * equivalent initialization method).
+     * @see __construct()
+     */
+    public function applyDefaultValues()
+    {
+        $this->user_notification_state = 0;
+        $this->user_match = 0;
+    }
+
+    /**
      * Initializes internal state of JobScooper\Base\UserJobMatch object.
+     * @see applyDefaults()
      */
     public function __construct()
     {
+        $this->applyDefaultValues();
     }
 
     /**
@@ -648,6 +664,14 @@ abstract class UserJobMatch implements ActiveRecordInterface
      */
     public function hasOnlyDefaultValues()
     {
+            if ($this->user_notification_state !== 0) {
+                return false;
+            }
+
+            if ($this->user_match !== 0) {
+                return false;
+            }
+
         // otherwise, everything was equal, so return TRUE
         return true;
     } // hasOnlyDefaultValues()
@@ -1580,6 +1604,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
         $this->app_run_id = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
+        $this->applyDefaultValues();
         $this->resetModified();
         $this->setNew(true);
         $this->setDeleted(false);

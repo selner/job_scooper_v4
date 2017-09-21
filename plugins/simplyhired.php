@@ -85,7 +85,7 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
 
     protected function getPageURLfromBaseFmt(&$searchDetails, $nPage = null, $nItem = null)
     {
-        $searchDetailsBackup = array_copy($searchDetails);
+        $searchDetailsBackup = $searchDetails->copy();
         
         $strURL = $this->_getBaseURLFormat_($searchDetails);
 
@@ -121,7 +121,7 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
             throw new ErrorException("Location value is required for " . $this->siteName . ", but was not set for the search '" . $searchDetails['key'] ."'.". " Aborting all searches for ". $this->siteName, \C__DISPLAY_ERROR__);
         }
 
-        $searchDetails = array_copy($searchDetailsBackup);
+        $searchDetails = $searchDetailsBackup->copy();
 
         return $strURL;
     }

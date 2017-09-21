@@ -64,11 +64,18 @@ abstract class JobSitePlugin implements ActiveRecordInterface
     protected $virtualColumns = array();
 
     /**
-     * The value for the jobsite field.
+     * The value for the jobsite_key field.
      *
      * @var        string
      */
-    protected $jobsite;
+    protected $jobsite_key;
+
+    /**
+     * The value for the plugin_class_name field.
+     *
+     * @var        string
+     */
+    protected $plugin_class_name;
 
     /**
      * The value for the display_name field.
@@ -83,13 +90,6 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * @var        DateTime
      */
     protected $date_last_run;
-
-    /**
-     * The value for the last_user_search_run_id field.
-     *
-     * @var        int
-     */
-    protected $last_user_search_run_id;
 
     /**
      * The value for the was_successful field.
@@ -111,6 +111,34 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * @var        DateTime
      */
     protected $date_last_failed;
+
+    /**
+     * The value for the last_user_search_run_id field.
+     *
+     * @var        int
+     */
+    protected $last_user_search_run_id;
+
+    /**
+     * Whether the lazy-loaded $last_user_search_run_id value has been loaded from database.
+     * This is necessary to avoid repeated lookups if $last_user_search_run_id column is NULL in the db.
+     * @var boolean
+     */
+    protected $last_user_search_run_id_isLoaded = false;
+
+    /**
+     * The value for the supported_country_codes field.
+     *
+     * @var        array
+     */
+    protected $supported_country_codes;
+
+    /**
+     * The unserialized $supported_country_codes value - i.e. the persisted object.
+     * This is necessary to avoid repeated calls to unserialize() at runtime.
+     * @var object
+     */
+    protected $supported_country_codes_unserialized;
 
     /**
      * @var        ChildUserSearchRun
@@ -351,13 +379,23 @@ abstract class JobSitePlugin implements ActiveRecordInterface
     }
 
     /**
-     * Get the [jobsite] column value.
+     * Get the [jobsite_key] column value.
      *
      * @return string
      */
-    public function getJobSite()
+    public function getJobSiteKey()
     {
-        return $this->jobsite;
+        return $this->jobsite_key;
+    }
+
+    /**
+     * Get the [plugin_class_name] column value.
+     *
+     * @return string
+     */
+    public function getPluginClassName()
+    {
+        return $this->plugin_class_name;
     }
 
     /**
@@ -388,16 +426,6 @@ abstract class JobSitePlugin implements ActiveRecordInterface
         } else {
             return $this->date_last_run instanceof \DateTimeInterface ? $this->date_last_run->format($format) : null;
         }
-    }
-
-    /**
-     * Get the [last_user_search_run_id] column value.
-     *
-     * @return int
-     */
-    public function getLastUserSearchRunId()
-    {
-        return $this->last_user_search_run_id;
     }
 
     /**
@@ -461,24 +489,116 @@ abstract class JobSitePlugin implements ActiveRecordInterface
     }
 
     /**
-     * Set the value of [jobsite] column.
+     * Get the [last_user_search_run_id] column value.
+     *
+     * @param      ConnectionInterface $con An optional ConnectionInterface connection to use for fetching this lazy-loaded column.
+     * @return int
+     */
+    public function getLastUserSearchRunId(ConnectionInterface $con = null)
+    {
+        if (!$this->last_user_search_run_id_isLoaded && $this->last_user_search_run_id === null && !$this->isNew()) {
+            $this->loadLastUserSearchRunId($con);
+        }
+
+        return $this->last_user_search_run_id;
+    }
+
+    /**
+     * Load the value for the lazy-loaded [last_user_search_run_id] column.
+     *
+     * This method performs an additional query to return the value for
+     * the [last_user_search_run_id] column, since it is not populated by
+     * the hydrate() method.
+     *
+     * @param      $con ConnectionInterface (optional) The ConnectionInterface connection to use.
+     * @return void
+     * @throws PropelException - any underlying error will be wrapped and re-thrown.
+     */
+    protected function loadLastUserSearchRunId(ConnectionInterface $con = null)
+    {
+        $c = $this->buildPkeyCriteria();
+        $c->addSelectColumn(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID);
+        try {
+            $dataFetcher = ChildJobSitePluginQuery::create(null, $c)->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
+            $row = $dataFetcher->fetch();
+            $dataFetcher->close();
+
+        $firstColumn = $row ? current($row) : null;
+
+            $this->last_user_search_run_id = ($firstColumn !== null) ? (int) $firstColumn : null;
+            $this->last_user_search_run_id_isLoaded = true;
+        } catch (Exception $e) {
+            throw new PropelException("Error loading value for [last_user_search_run_id] column on demand.", 0, $e);
+        }
+    }
+    /**
+     * Get the [supported_country_codes] column value.
+     *
+     * @return array
+     */
+    public function getSupportedCountryCodes()
+    {
+        if (null === $this->supported_country_codes_unserialized) {
+            $this->supported_country_codes_unserialized = array();
+        }
+        if (!$this->supported_country_codes_unserialized && null !== $this->supported_country_codes) {
+            $supported_country_codes_unserialized = substr($this->supported_country_codes, 2, -2);
+            $this->supported_country_codes_unserialized = '' !== $supported_country_codes_unserialized ? explode(' | ', $supported_country_codes_unserialized) : array();
+        }
+
+        return $this->supported_country_codes_unserialized;
+    }
+
+    /**
+     * Test the presence of a value in the [supported_country_codes] array column value.
+     * @param      mixed $value
+     *
+     * @return boolean
+     */
+    public function hasSupportedCountryCode($value)
+    {
+        return in_array($value, $this->getSupportedCountryCodes());
+    } // hasSupportedCountryCode()
+
+    /**
+     * Set the value of [jobsite_key] column.
      *
      * @param string $v new value
      * @return $this|\JobScooper\JobSitePlugin The current object (for fluent API support)
      */
-    public function setJobSite($v)
+    public function setJobSiteKey($v)
     {
         if ($v !== null) {
             $v = (string) $v;
         }
 
-        if ($this->jobsite !== $v) {
-            $this->jobsite = $v;
-            $this->modifiedColumns[JobSitePluginTableMap::COL_JOBSITE] = true;
+        if ($this->jobsite_key !== $v) {
+            $this->jobsite_key = $v;
+            $this->modifiedColumns[JobSitePluginTableMap::COL_JOBSITE_KEY] = true;
         }
 
         return $this;
-    } // setJobSite()
+    } // setJobSiteKey()
+
+    /**
+     * Set the value of [plugin_class_name] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\JobSitePlugin The current object (for fluent API support)
+     */
+    public function setPluginClassName($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->plugin_class_name !== $v) {
+            $this->plugin_class_name = $v;
+            $this->modifiedColumns[JobSitePluginTableMap::COL_PLUGIN_CLASS_NAME] = true;
+        }
+
+        return $this;
+    } // setPluginClassName()
 
     /**
      * Set the value of [display_name] column.
@@ -519,30 +639,6 @@ abstract class JobSitePlugin implements ActiveRecordInterface
 
         return $this;
     } // setLastRunAt()
-
-    /**
-     * Set the value of [last_user_search_run_id] column.
-     *
-     * @param int $v new value
-     * @return $this|\JobScooper\JobSitePlugin The current object (for fluent API support)
-     */
-    public function setLastUserSearchRunId($v)
-    {
-        if ($v !== null) {
-            $v = (int) $v;
-        }
-
-        if ($this->last_user_search_run_id !== $v) {
-            $this->last_user_search_run_id = $v;
-            $this->modifiedColumns[JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID] = true;
-        }
-
-        if ($this->aUserSearchRun !== null && $this->aUserSearchRun->getUserSearchRunId() !== $v) {
-            $this->aUserSearchRun = null;
-        }
-
-        return $this;
-    } // setLastUserSearchRunId()
 
     /**
      * Sets the value of the [was_successful] column.
@@ -613,6 +709,87 @@ abstract class JobSitePlugin implements ActiveRecordInterface
     } // setLastFailedAt()
 
     /**
+     * Set the value of [last_user_search_run_id] column.
+     *
+     * @param int $v new value
+     * @return $this|\JobScooper\JobSitePlugin The current object (for fluent API support)
+     */
+    public function setLastUserSearchRunId($v)
+    {
+        // explicitly set the is-loaded flag to true for this lazy load col;
+        // it doesn't matter if the value is actually set or not (logic below) as
+        // any attempt to set the value means that no db lookup should be performed
+        // when the getLastUserSearchRunId() method is called.
+        $this->last_user_search_run_id_isLoaded = true;
+
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->last_user_search_run_id !== $v) {
+            $this->last_user_search_run_id = $v;
+            $this->modifiedColumns[JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID] = true;
+        }
+
+        if ($this->aUserSearchRun !== null && $this->aUserSearchRun->getUserSearchRunId() !== $v) {
+            $this->aUserSearchRun = null;
+        }
+
+        return $this;
+    } // setLastUserSearchRunId()
+
+    /**
+     * Set the value of [supported_country_codes] column.
+     *
+     * @param array $v new value
+     * @return $this|\JobScooper\JobSitePlugin The current object (for fluent API support)
+     */
+    public function setSupportedCountryCodes($v)
+    {
+        if ($this->supported_country_codes_unserialized !== $v) {
+            $this->supported_country_codes_unserialized = $v;
+            $this->supported_country_codes = '| ' . implode(' | ', $v) . ' |';
+            $this->modifiedColumns[JobSitePluginTableMap::COL_SUPPORTED_COUNTRY_CODES] = true;
+        }
+
+        return $this;
+    } // setSupportedCountryCodes()
+
+    /**
+     * Adds a value to the [supported_country_codes] array column value.
+     * @param  mixed $value
+     *
+     * @return $this|\JobScooper\JobSitePlugin The current object (for fluent API support)
+     */
+    public function addSupportedCountryCode($value)
+    {
+        $currentArray = $this->getSupportedCountryCodes();
+        $currentArray []= $value;
+        $this->setSupportedCountryCodes($currentArray);
+
+        return $this;
+    } // addSupportedCountryCode()
+
+    /**
+     * Removes a value from the [supported_country_codes] array column value.
+     * @param  mixed $value
+     *
+     * @return $this|\JobScooper\JobSitePlugin The current object (for fluent API support)
+     */
+    public function removeSupportedCountryCode($value)
+    {
+        $targetArray = array();
+        foreach ($this->getSupportedCountryCodes() as $element) {
+            if ($element != $value) {
+                $targetArray []= $element;
+            }
+        }
+        $this->setSupportedCountryCodes($targetArray);
+
+        return $this;
+    } // removeSupportedCountryCode()
+
+    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -648,17 +825,17 @@ abstract class JobSitePlugin implements ActiveRecordInterface
     {
         try {
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : JobSitePluginTableMap::translateFieldName('JobSite', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->jobsite = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : JobSitePluginTableMap::translateFieldName('JobSiteKey', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->jobsite_key = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : JobSitePluginTableMap::translateFieldName('DisplayName', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : JobSitePluginTableMap::translateFieldName('PluginClassName', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->plugin_class_name = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : JobSitePluginTableMap::translateFieldName('DisplayName', TableMap::TYPE_PHPNAME, $indexType)];
             $this->display_name = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : JobSitePluginTableMap::translateFieldName('LastRunAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : JobSitePluginTableMap::translateFieldName('LastRunAt', TableMap::TYPE_PHPNAME, $indexType)];
             $this->date_last_run = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : JobSitePluginTableMap::translateFieldName('LastUserSearchRunId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->last_user_search_run_id = (null !== $col) ? (int) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : JobSitePluginTableMap::translateFieldName('LastRunWasSuccessful', TableMap::TYPE_PHPNAME, $indexType)];
             $this->was_successful = (null !== $col) ? (boolean) $col : null;
@@ -668,6 +845,10 @@ abstract class JobSitePlugin implements ActiveRecordInterface
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : JobSitePluginTableMap::translateFieldName('LastFailedAt', TableMap::TYPE_PHPNAME, $indexType)];
             $this->date_last_failed = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : JobSitePluginTableMap::translateFieldName('SupportedCountryCodes', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->supported_country_codes = $col;
+            $this->supported_country_codes_unserialized = null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -676,7 +857,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 7; // 7 = JobSitePluginTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 8; // 8 = JobSitePluginTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\JobSitePlugin'), 0, $e);
@@ -738,6 +919,10 @@ abstract class JobSitePlugin implements ActiveRecordInterface
         }
         $this->hydrate($row, 0, true, $dataFetcher->getIndexType()); // rehydrate
 
+        // Reset the last_user_search_run_id lazy-load column
+        $this->last_user_search_run_id = null;
+        $this->last_user_search_run_id_isLoaded = false;
+
         if ($deep) {  // also de-associate any related objects?
 
             $this->aUserSearchRun = null;
@@ -785,6 +970,10 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      *
      * Since this table was configured to reload rows on update, the object will
      * be reloaded from the database if an UPDATE operation is performed (unless
+     * the $skipReload parameter is TRUE).
+     *
+     * Since this table was configured to reload rows on insert, the object will
+     * be reloaded from the database if an INSERT operation is performed (unless
      * the $skipReload parameter is TRUE).
      *
      * @param      ConnectionInterface $con
@@ -869,6 +1058,9 @@ abstract class JobSitePlugin implements ActiveRecordInterface
                 if ($this->isNew()) {
                     $this->doInsert($con);
                     $affectedRows += 1;
+                    if (!$skipReload) {
+                        $reloadObject = true;
+                    }
                 } else {
                     $affectedRows += $this->doUpdate($con);
                     if (!$skipReload) {
@@ -904,17 +1096,17 @@ abstract class JobSitePlugin implements ActiveRecordInterface
 
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(JobSitePluginTableMap::COL_JOBSITE)) {
-            $modifiedColumns[':p' . $index++]  = 'jobsite';
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_JOBSITE_KEY)) {
+            $modifiedColumns[':p' . $index++]  = 'jobsite_key';
+        }
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_PLUGIN_CLASS_NAME)) {
+            $modifiedColumns[':p' . $index++]  = 'plugin_class_name';
         }
         if ($this->isColumnModified(JobSitePluginTableMap::COL_DISPLAY_NAME)) {
             $modifiedColumns[':p' . $index++]  = 'display_name';
         }
         if ($this->isColumnModified(JobSitePluginTableMap::COL_DATE_LAST_RUN)) {
             $modifiedColumns[':p' . $index++]  = 'date_last_run';
-        }
-        if ($this->isColumnModified(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'last_user_search_run_id';
         }
         if ($this->isColumnModified(JobSitePluginTableMap::COL_WAS_SUCCESSFUL)) {
             $modifiedColumns[':p' . $index++]  = 'was_successful';
@@ -924,6 +1116,12 @@ abstract class JobSitePlugin implements ActiveRecordInterface
         }
         if ($this->isColumnModified(JobSitePluginTableMap::COL_DATE_LAST_FAILED)) {
             $modifiedColumns[':p' . $index++]  = 'date_last_failed';
+        }
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'last_user_search_run_id';
+        }
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_SUPPORTED_COUNTRY_CODES)) {
+            $modifiedColumns[':p' . $index++]  = 'supported_country_codes';
         }
 
         $sql = sprintf(
@@ -936,17 +1134,17 @@ abstract class JobSitePlugin implements ActiveRecordInterface
             $stmt = $con->prepare($sql);
             foreach ($modifiedColumns as $identifier => $columnName) {
                 switch ($columnName) {
-                    case 'jobsite':
-                        $stmt->bindValue($identifier, $this->jobsite, PDO::PARAM_STR);
+                    case 'jobsite_key':
+                        $stmt->bindValue($identifier, $this->jobsite_key, PDO::PARAM_STR);
+                        break;
+                    case 'plugin_class_name':
+                        $stmt->bindValue($identifier, $this->plugin_class_name, PDO::PARAM_STR);
                         break;
                     case 'display_name':
                         $stmt->bindValue($identifier, $this->display_name, PDO::PARAM_STR);
                         break;
                     case 'date_last_run':
                         $stmt->bindValue($identifier, $this->date_last_run ? $this->date_last_run->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
-                        break;
-                    case 'last_user_search_run_id':
-                        $stmt->bindValue($identifier, $this->last_user_search_run_id, PDO::PARAM_INT);
                         break;
                     case 'was_successful':
                         $stmt->bindValue($identifier, $this->was_successful, PDO::PARAM_BOOL);
@@ -956,6 +1154,12 @@ abstract class JobSitePlugin implements ActiveRecordInterface
                         break;
                     case 'date_last_failed':
                         $stmt->bindValue($identifier, $this->date_last_failed ? $this->date_last_failed->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
+                        break;
+                    case 'last_user_search_run_id':
+                        $stmt->bindValue($identifier, $this->last_user_search_run_id, PDO::PARAM_INT);
+                        break;
+                    case 'supported_country_codes':
+                        $stmt->bindValue($identifier, $this->supported_country_codes, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -1013,16 +1217,16 @@ abstract class JobSitePlugin implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                return $this->getJobSite();
+                return $this->getJobSiteKey();
                 break;
             case 1:
-                return $this->getDisplayName();
+                return $this->getPluginClassName();
                 break;
             case 2:
-                return $this->getLastRunAt();
+                return $this->getDisplayName();
                 break;
             case 3:
-                return $this->getLastUserSearchRunId();
+                return $this->getLastRunAt();
                 break;
             case 4:
                 return $this->getLastRunWasSuccessful();
@@ -1032,6 +1236,12 @@ abstract class JobSitePlugin implements ActiveRecordInterface
                 break;
             case 6:
                 return $this->getLastFailedAt();
+                break;
+            case 7:
+                return $this->getLastUserSearchRunId();
+                break;
+            case 8:
+                return $this->getSupportedCountryCodes();
                 break;
             default:
                 return null;
@@ -1063,16 +1273,18 @@ abstract class JobSitePlugin implements ActiveRecordInterface
         $alreadyDumpedObjects['JobSitePlugin'][$this->hashCode()] = true;
         $keys = JobSitePluginTableMap::getFieldNames($keyType);
         $result = array(
-            $keys[0] => $this->getJobSite(),
-            $keys[1] => $this->getDisplayName(),
-            $keys[2] => $this->getLastRunAt(),
-            $keys[3] => $this->getLastUserSearchRunId(),
+            $keys[0] => $this->getJobSiteKey(),
+            $keys[1] => $this->getPluginClassName(),
+            $keys[2] => $this->getDisplayName(),
+            $keys[3] => $this->getLastRunAt(),
             $keys[4] => $this->getLastRunWasSuccessful(),
             $keys[5] => $this->getStartNextRunAfter(),
             $keys[6] => $this->getLastFailedAt(),
+            $keys[7] => ($includeLazyLoadColumns) ? $this->getLastUserSearchRunId() : null,
+            $keys[8] => $this->getSupportedCountryCodes(),
         );
-        if ($result[$keys[2]] instanceof \DateTimeInterface) {
-            $result[$keys[2]] = $result[$keys[2]]->format('c');
+        if ($result[$keys[3]] instanceof \DateTimeInterface) {
+            $result[$keys[3]] = $result[$keys[3]]->format('c');
         }
 
         if ($result[$keys[5]] instanceof \DateTimeInterface) {
@@ -1139,16 +1351,16 @@ abstract class JobSitePlugin implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                $this->setJobSite($value);
+                $this->setJobSiteKey($value);
                 break;
             case 1:
-                $this->setDisplayName($value);
+                $this->setPluginClassName($value);
                 break;
             case 2:
-                $this->setLastRunAt($value);
+                $this->setDisplayName($value);
                 break;
             case 3:
-                $this->setLastUserSearchRunId($value);
+                $this->setLastRunAt($value);
                 break;
             case 4:
                 $this->setLastRunWasSuccessful($value);
@@ -1158,6 +1370,16 @@ abstract class JobSitePlugin implements ActiveRecordInterface
                 break;
             case 6:
                 $this->setLastFailedAt($value);
+                break;
+            case 7:
+                $this->setLastUserSearchRunId($value);
+                break;
+            case 8:
+                if (!is_array($value)) {
+                    $v = trim(substr($value, 2, -2));
+                    $value = $v ? explode(' | ', $v) : array();
+                }
+                $this->setSupportedCountryCodes($value);
                 break;
         } // switch()
 
@@ -1186,16 +1408,16 @@ abstract class JobSitePlugin implements ActiveRecordInterface
         $keys = JobSitePluginTableMap::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) {
-            $this->setJobSite($arr[$keys[0]]);
+            $this->setJobSiteKey($arr[$keys[0]]);
         }
         if (array_key_exists($keys[1], $arr)) {
-            $this->setDisplayName($arr[$keys[1]]);
+            $this->setPluginClassName($arr[$keys[1]]);
         }
         if (array_key_exists($keys[2], $arr)) {
-            $this->setLastRunAt($arr[$keys[2]]);
+            $this->setDisplayName($arr[$keys[2]]);
         }
         if (array_key_exists($keys[3], $arr)) {
-            $this->setLastUserSearchRunId($arr[$keys[3]]);
+            $this->setLastRunAt($arr[$keys[3]]);
         }
         if (array_key_exists($keys[4], $arr)) {
             $this->setLastRunWasSuccessful($arr[$keys[4]]);
@@ -1205,6 +1427,12 @@ abstract class JobSitePlugin implements ActiveRecordInterface
         }
         if (array_key_exists($keys[6], $arr)) {
             $this->setLastFailedAt($arr[$keys[6]]);
+        }
+        if (array_key_exists($keys[7], $arr)) {
+            $this->setLastUserSearchRunId($arr[$keys[7]]);
+        }
+        if (array_key_exists($keys[8], $arr)) {
+            $this->setSupportedCountryCodes($arr[$keys[8]]);
         }
     }
 
@@ -1247,17 +1475,17 @@ abstract class JobSitePlugin implements ActiveRecordInterface
     {
         $criteria = new Criteria(JobSitePluginTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(JobSitePluginTableMap::COL_JOBSITE)) {
-            $criteria->add(JobSitePluginTableMap::COL_JOBSITE, $this->jobsite);
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_JOBSITE_KEY)) {
+            $criteria->add(JobSitePluginTableMap::COL_JOBSITE_KEY, $this->jobsite_key);
+        }
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_PLUGIN_CLASS_NAME)) {
+            $criteria->add(JobSitePluginTableMap::COL_PLUGIN_CLASS_NAME, $this->plugin_class_name);
         }
         if ($this->isColumnModified(JobSitePluginTableMap::COL_DISPLAY_NAME)) {
             $criteria->add(JobSitePluginTableMap::COL_DISPLAY_NAME, $this->display_name);
         }
         if ($this->isColumnModified(JobSitePluginTableMap::COL_DATE_LAST_RUN)) {
             $criteria->add(JobSitePluginTableMap::COL_DATE_LAST_RUN, $this->date_last_run);
-        }
-        if ($this->isColumnModified(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID)) {
-            $criteria->add(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID, $this->last_user_search_run_id);
         }
         if ($this->isColumnModified(JobSitePluginTableMap::COL_WAS_SUCCESSFUL)) {
             $criteria->add(JobSitePluginTableMap::COL_WAS_SUCCESSFUL, $this->was_successful);
@@ -1267,6 +1495,12 @@ abstract class JobSitePlugin implements ActiveRecordInterface
         }
         if ($this->isColumnModified(JobSitePluginTableMap::COL_DATE_LAST_FAILED)) {
             $criteria->add(JobSitePluginTableMap::COL_DATE_LAST_FAILED, $this->date_last_failed);
+        }
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID)) {
+            $criteria->add(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID, $this->last_user_search_run_id);
+        }
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_SUPPORTED_COUNTRY_CODES)) {
+            $criteria->add(JobSitePluginTableMap::COL_SUPPORTED_COUNTRY_CODES, $this->supported_country_codes);
         }
 
         return $criteria;
@@ -1285,7 +1519,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
     public function buildPkeyCriteria()
     {
         $criteria = ChildJobSitePluginQuery::create();
-        $criteria->add(JobSitePluginTableMap::COL_JOBSITE, $this->jobsite);
+        $criteria->add(JobSitePluginTableMap::COL_JOBSITE_KEY, $this->jobsite_key);
 
         return $criteria;
     }
@@ -1298,7 +1532,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      */
     public function hashCode()
     {
-        $validPk = null !== $this->getJobSite();
+        $validPk = null !== $this->getJobSiteKey();
 
         $validPrimaryKeyFKs = 0;
         $primaryKeyFKs = [];
@@ -1318,18 +1552,18 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      */
     public function getPrimaryKey()
     {
-        return $this->getJobSite();
+        return $this->getJobSiteKey();
     }
 
     /**
-     * Generic method to set the primary key (jobsite column).
+     * Generic method to set the primary key (jobsite_key column).
      *
      * @param       string $key Primary key.
      * @return void
      */
     public function setPrimaryKey($key)
     {
-        $this->setJobSite($key);
+        $this->setJobSiteKey($key);
     }
 
     /**
@@ -1338,7 +1572,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      */
     public function isPrimaryKeyNull()
     {
-        return null === $this->getJobSite();
+        return null === $this->getJobSiteKey();
     }
 
     /**
@@ -1354,13 +1588,15 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      */
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
-        $copyObj->setJobSite($this->getJobSite());
+        $copyObj->setJobSiteKey($this->getJobSiteKey());
+        $copyObj->setPluginClassName($this->getPluginClassName());
         $copyObj->setDisplayName($this->getDisplayName());
         $copyObj->setLastRunAt($this->getLastRunAt());
-        $copyObj->setLastUserSearchRunId($this->getLastUserSearchRunId());
         $copyObj->setLastRunWasSuccessful($this->getLastRunWasSuccessful());
         $copyObj->setStartNextRunAfter($this->getStartNextRunAfter());
         $copyObj->setLastFailedAt($this->getLastFailedAt());
+        $copyObj->setLastUserSearchRunId($this->getLastUserSearchRunId());
+        $copyObj->setSupportedCountryCodes($this->getSupportedCountryCodes());
         if ($makeNew) {
             $copyObj->setNew(true);
         }
@@ -1449,13 +1685,17 @@ abstract class JobSitePlugin implements ActiveRecordInterface
         if (null !== $this->aUserSearchRun) {
             $this->aUserSearchRun->removeJobSitePlugin($this);
         }
-        $this->jobsite = null;
+        $this->jobsite_key = null;
+        $this->plugin_class_name = null;
         $this->display_name = null;
         $this->date_last_run = null;
-        $this->last_user_search_run_id = null;
         $this->was_successful = null;
         $this->date_next_run = null;
         $this->date_last_failed = null;
+        $this->last_user_search_run_id = null;
+        $this->last_user_search_run_id_isLoaded = false;
+        $this->supported_country_codes = null;
+        $this->supported_country_codes_unserialized = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();
@@ -1482,11 +1722,11 @@ abstract class JobSitePlugin implements ActiveRecordInterface
     /**
      * Return the string representation of this object
      *
-     * @return string The value of the 'jobsite' column
+     * @return string The value of the 'jobsite_key' column
      */
     public function __toString()
     {
-        return (string) $this->getJobSite();
+        return (string) $this->getJobSiteKey();
     }
 
     /**

@@ -29,25 +29,19 @@ abstract class AbstractClassBaseJobsPlugin
     protected $typeLocationSearchNeeded = null;
     protected $siteName = 'NAME-NOT-SET';
     private $userObject = null;
-    private $dbRecord = null;
 
-    function __construct($strOutputDirectory = null, $attributes = null)
+    function __construct()
     {
 
-        $this->dbRecord = \JobScooper\JobSitePluginQuery::create()
-            ->filterByPrimaryKey($this->getName())
-            ->findOneOrCreate();
-
-
-       if (array_key_exists("JOBSITE_PLUGINS", $GLOBALS) && (array_key_exists(strtolower($this->siteName), $GLOBALS['JOBSITE_PLUGINS']))) {
-            $plugin = $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->siteName)];
-            if (array_key_exists("other_settings", $plugin) && is_array($plugin['other_settings'])) {
-                $keys = array_keys($plugin['other_settings']);
-                foreach ($keys as $attrib_name) {
-                    $this->$attrib_name = $plugin['other_settings'][$attrib_name];
-                }
-            }
-        }
+//       if (array_key_exists("JOBSITE_PLUGINS", $GLOBALS) && (array_key_exists(strtolower($this->siteName), $GLOBALS['JOBSITE_PLUGINS']))) {
+//            $plugin = $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->siteName)];
+//            if (array_key_exists("other_settings", $plugin) && is_array($plugin['other_settings'])) {
+//                $keys = array_keys($plugin['other_settings']);
+//                foreach ($keys as $attrib_name) {
+//                    $this->$attrib_name = $plugin['other_settings'][$attrib_name];
+//                }
+//            }
+//        }
         $this->userObject = $GLOBALS['USERDATA']['configuration_settings']['user_details'];
 
         $this->normalizer = new Normalize();
@@ -79,6 +73,10 @@ abstract class AbstractClassBaseJobsPlugin
             $this->selectorMoreListings = preg_replace("/\\\?[\"']/", "'", $this->selectorMoreListings);
     }
 
+    private function getJobSiteObject()
+    {
+        return $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->siteName)]['jobsite_db_object'];
+    }
 
     //************************************************************************
     //
@@ -141,17 +139,17 @@ abstract class AbstractClassBaseJobsPlugin
 
         try
         {
-            if($this->dbRecord->shouldRunNow()) {
-                $this->dbRecord->setLastRunAt(time());
-                $this->dbRecord->save();
+            if($this->getJobSiteObject()->shouldRunNow()) {
+                $this->getJobSiteObject()->setLastRunAt(time());
+                $this->getJobSiteObject()->save();
 
                 foreach ($this->arrSearchesToReturn as $search) {
                     $this->currentSearchBeingRun = $search;
-                    $this->dbRecord->setLastUserSearchRunId($search['user_search_run_id']);
+                    $this->getJobSiteObject()->setLastUserSearchRunId($search['user_search_run_id']);
 
                     try {
                         // assert this search is actually for the job site supported by this plugin
-                        assert(strcasecmp(strtolower($search->getJobSite()), strtolower($this->siteName)) == 0);
+                        assert(strcasecmp($search->getJobSiteKey(), cleanupSlugPart($this->siteName)) == 0);
 
                         if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
                             try {
@@ -178,8 +176,8 @@ abstract class AbstractClassBaseJobsPlugin
             $boolSearchSuccess = false;
             throw $ex;
         } finally {
-            $this->dbRecord->setSuccess($boolSearchSuccess);
-            $this->dbRecord->save();
+            $this->getJobSiteObject()->setSuccess($boolSearchSuccess);
+            $this->getJobSiteObject()->save();
             $this->currentSearchBeingRun = null;
         }
 
@@ -234,6 +232,11 @@ abstract class AbstractClassBaseJobsPlugin
         return $this->typeLocationSearchNeeded;
     }
 
+    function getSupportedCountryCodes()
+    {
+        return $this->countryCodes;
+    }
+
     protected function getActiveWebdriver()
     {
         if (!is_null($this->selenium)) {
@@ -261,14 +264,6 @@ abstract class AbstractClassBaseJobsPlugin
         $strRetCombinedKeywords = array_shift($arrKeywords);
 
         return $strRetCombinedKeywords;
-    }
-
-    public function getSupportedCountryCodes()
-    {
-        if(is_null($this->typeLocationSearchNeeded))
-            return null;
-
-        return $this->countryCodes;
     }
 
     protected function parseJobsListForPage($objSimpHTML)
@@ -376,7 +371,7 @@ abstract class AbstractClassBaseJobsPlugin
     {
         $strBaseURL = VALUE_NOT_SUPPORTED;
 
-        if ($searchDetails != null && isset($searchDetails['base_url_format'])) {
+        if ($searchDetails != null && array_key_exists('base_url_format', $searchDetails)) {
             $strBaseURL = $searchDetails['base_url_format'];
         } elseif (!is_null($this->strBaseURLFormat) && strlen($this->strBaseURLFormat) > 0) {
             $strBaseURL = $searchDetails['base_url_format'] = $this->strBaseURLFormat;
@@ -629,7 +624,7 @@ abstract class AbstractClassBaseJobsPlugin
 
 
         if ($searchDetails->getKey() == "") {
-            $searchDetails->setKey(strScrub($searchDetails->getJobSite(), FOR_LOOKUP_VALUE_MATCHING) . "-" . strScrub($searchDetails->getKey(), FOR_LOOKUP_VALUE_MATCHING));
+            $searchDetails->setKey(strScrub($searchDetails->getJobSiteKey(), FOR_LOOKUP_VALUE_MATCHING) . "-" . strScrub($searchDetails->getKey(), FOR_LOOKUP_VALUE_MATCHING));
         }
 
         assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || ($searchDetails['location_search_value'] !== VALUE_NOT_SUPPORTED && strlen($searchDetails['location_search_value']) > 0));
@@ -646,9 +641,6 @@ abstract class AbstractClassBaseJobsPlugin
         $this->_setStartingUrlForSearch_($searchDetails);
 
         $searchDetails->save();
-
-        // add a global record for the search so we can report errors
-        $GLOBALS['USERDATA']['search_results'][$searchDetails['key']] = $searchDetails;
 
         //
         // Add the search to the list of ones to run
@@ -791,9 +783,8 @@ abstract class AbstractClassBaseJobsPlugin
             // See https://github.com/selner/jobs_scooper/issues/23 for more details on
             // this particular underlying problem
             //
-            if ((isset($GLOBALS['JOBSITE_PLUGINS']['employmentguide']) && (strcasecmp($this->siteName, $GLOBALS['JOBSITE_PLUGINS']['employmentguide']['name']) == 0) ||
-                    (isset($GLOBALS['JOBSITE_PLUGINS']['careerbuilder']) && strcasecmp($this->siteName, $GLOBALS['JOBSITE_PLUGINS']['careerbuilder']['name']) == 0) ||
-                    (isset($GLOBALS['JOBSITE_PLUGINS']['ziprecruiter']) && strcasecmp($this->siteName, $GLOBALS['JOBSITE_PLUGINS']['ziprecruiter']['name']) == 0)) &&
+            $jobsitekey = $this->getJobSiteObject()->getJobSiteKey();
+            if (in_array($jobsitekey, array('employmentguide', 'careerbuilder', 'ziprecruiter')) &&
                 (substr_count($ex->getMessage(), "HTTP error #404") > 0)
             ) {
                 $strError = $this->siteName . " plugin returned a 404 page for the search.  This is not an error; it means zero results found.";
@@ -836,46 +827,42 @@ abstract class AbstractClassBaseJobsPlugin
     }
 
 
-    private function _setSearchResult_(&$searchDetails, $success = null, $details = "UNKNOWN RESULT.", $exception = null, $files = array())
+    private function _setSearchResult_(&$searchDetails, $success = null, $err_details = "UNKNOWN RESULT.", $except = null, $debugfiles = array())
     {
-        LogLine("Setting result value for search '" . $searchDetails['key'] . "' equal to " . ($success == 1 ? "true" : "false") . " with details '" . $details . "'.", \C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Setting result value for search '" . $searchDetails['key'] . "' equal to " . strval($success) . " with details '" . $err_details . "'.", \C__DISPLAY_ITEM_DETAIL__);
 
-        if (!array_key_exists($searchDetails['key'], $GLOBALS['USERDATA']['search_results']))
-            throw new Exception("Error - Cannot Set Search Result for key " . $searchDetails['key'] . ".  Key does not exist in search results array.");
-
-        $srr = $searchDetails->getSearchRunResult();
-
-        $errFiles = $srr['error_files'];
-        if (is_null($errFiles)) $errFiles = array();
-        if (count($files) > 0) {
-            foreach ($files as $f)
-                $errFiles[$f] = $f;
+        if(!is_null($success) && is_bool($success))
+        {
+            $resultcode = $success ? "successful" : "failed";
+            $searchDetails->setRunResultCode($resultcode);
+            $searchDetails->setRunErrorDetails(array());
         }
 
-        $line = null;
-        $code = null;
-        $msg = null;
-        $file = null;
+        if($success === false)
+        {
+            $line = null;
+            $code = null;
+            $msg = null;
+            $file = null;
 
-        if (!is_null($exception)) {
-            $line = $exception->getLine();
-            $code = $exception->getCode();
-            $msg = $exception->getMessage();
-            $file = $exception->getFile();
+            if (!is_null($except)) {
+                $line = $except->getLine();
+                $code = $except->getCode();
+                $msg = $except->getMessage();
+                $file = $except->getFile();
+            }
+            $srr = array(
+                'error_details' => $err_details,
+                'exception_code' => $code,
+                'exception_message' => $msg,
+                'exception_line' => $line,
+                'exception_file' => $file,
+                'error_datetime' => new DateTime(),
+                'error_debug_files' => $debugfiles
+            );
+
+            $searchDetails->setRunErrorDetails($srr);
         }
-        $srr = array(
-            'success' => $success,
-            'error_datetime' => new DateTime(),
-            'error_details' => $details,
-            'exception_code' => $code,
-            'exception_message' => $msg,
-            'exception_line' => $line,
-            'exception_file' => $file,
-            'error_files' => $errFiles
-        );
-        $searchDetails->setSearchRunResult($srr);
-
-        $GLOBALS['USERDATA']['search_results'][$searchDetails['key']] = $searchDetails;
     }
 
 
@@ -883,10 +870,6 @@ abstract class AbstractClassBaseJobsPlugin
     {
         $arrErrorFiles = array();
         LogLine("Setting error for search '" . $searchDetails['key'] . "' with error '" . $err . "'.", \C__DISPLAY_ERROR__);
-
-        if (!array_key_exists($searchDetails['key'], $GLOBALS['USERDATA']['search_results'])) {
-            throw new Exception("Error - Cannot Set Search Result for key " . $searchDetails['key'] . ".  Key does not exist in search results array.");
-        }
 
         $this->_writeDebugFiles_($searchDetails, "ERROR", $arrSearchedJobs, $objSimpleHTMLResults);
 

@@ -29,7 +29,7 @@ require_once dirname(dirname(dirname(__FILE__)))."/bootstrap.php";
     {
         unset($this->arrListingTagSetup['tag_next_button']);
 
-        parent::__construct($strBaseDir);
+        parent::__construct();
     }
 
     function takeNextPageAction($nItem=null, $nPage=null)
@@ -52,10 +52,10 @@ class PluginBoeing extends BasePluginTalentBrew
     protected $nJobListingsPerPage = 20;
     protected $strBaseURLFormat = "/search-jobs";
 
-    function __construct($strBaseDir)
+    function __construct()
     {
         unset($this->arrListingTagSetup['tag_listings_count']);
-        parent::__construct($strBaseDir);
+        parent::__construct();
     }
 }
 
@@ -66,9 +66,9 @@ class PluginDisney extends BasePluginTalentBrew
     protected $additionalFlags = [ C__JOB_ITEMCOUNT_NOTAPPLICABLE__ ];
     protected $nJobListingsPerPage = 15;
 
-    function __construct($strBaseDir = null)
+    function __construct()
     {
-        parent::__construct($strBaseDir);
+        parent::__construct();
         unset($this->arrListingTagSetup['tag_listings_count']);
         $this->arrListingTagSetup['tag_listings_section'] = array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results-list'), array('tag' => 'table'),array('tag' => 'tr'));
         $this->arrListingTagSetup['tag_next_button'] = array(array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'next', 'index' => 0));
@@ -103,10 +103,10 @@ class BasePluginTalentBrew extends ClassClientHTMLJobSitePlugin
         'tag_job_posting_date' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'job-date-posted'),
         'tag_next_button' => array('selector' => '#pagination-bottom a.next')
     );
-    function __construct($strBaseDir = null)
+    function __construct()
     {
 
-        parent::__construct($strBaseDir);
+        parent::__construct();
         $this->strBaseURLFormat = $this->siteBaseURL . $this->strBaseURLFormat;
     }
 

@@ -25,9 +25,10 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRunQuery orderByAppRunId($order = Criteria::ASC) Order by the app_run_id column
  * @method     ChildUserSearchRunQuery orderByUserSlug($order = Criteria::ASC) Order by the user_slug column
  * @method     ChildUserSearchRunQuery orderByDateSearchRun($order = Criteria::ASC) Order by the date_search_run column
- * @method     ChildUserSearchRunQuery orderByJobSite($order = Criteria::ASC) Order by the jobsite column
+ * @method     ChildUserSearchRunQuery orderByJobSiteKey($order = Criteria::ASC) Order by the jobsite_key column
  * @method     ChildUserSearchRunQuery orderBySearchSettings($order = Criteria::ASC) Order by the search_settings column
- * @method     ChildUserSearchRunQuery orderBySearchRunResult($order = Criteria::ASC) Order by the search_run_result column
+ * @method     ChildUserSearchRunQuery orderByRunResultCode($order = Criteria::ASC) Order by the run_result column
+ * @method     ChildUserSearchRunQuery orderByRunErrorDetails($order = Criteria::ASC) Order by the run_error_details column
  * @method     ChildUserSearchRunQuery orderByUpdatedAt($order = Criteria::ASC) Order by the updated_at column
  *
  * @method     ChildUserSearchRunQuery groupByUserSearchRunId() Group by the user_search_run_id column
@@ -35,9 +36,10 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRunQuery groupByAppRunId() Group by the app_run_id column
  * @method     ChildUserSearchRunQuery groupByUserSlug() Group by the user_slug column
  * @method     ChildUserSearchRunQuery groupByDateSearchRun() Group by the date_search_run column
- * @method     ChildUserSearchRunQuery groupByJobSite() Group by the jobsite column
+ * @method     ChildUserSearchRunQuery groupByJobSiteKey() Group by the jobsite_key column
  * @method     ChildUserSearchRunQuery groupBySearchSettings() Group by the search_settings column
- * @method     ChildUserSearchRunQuery groupBySearchRunResult() Group by the search_run_result column
+ * @method     ChildUserSearchRunQuery groupByRunResultCode() Group by the run_result column
+ * @method     ChildUserSearchRunQuery groupByRunErrorDetails() Group by the run_error_details column
  * @method     ChildUserSearchRunQuery groupByUpdatedAt() Group by the updated_at column
  *
  * @method     ChildUserSearchRunQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
@@ -78,9 +80,10 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRun findOneByAppRunId(string $app_run_id) Return the first ChildUserSearchRun filtered by the app_run_id column
  * @method     ChildUserSearchRun findOneByUserSlug(string $user_slug) Return the first ChildUserSearchRun filtered by the user_slug column
  * @method     ChildUserSearchRun findOneByDateSearchRun(string $date_search_run) Return the first ChildUserSearchRun filtered by the date_search_run column
- * @method     ChildUserSearchRun findOneByJobSite(string $jobsite) Return the first ChildUserSearchRun filtered by the jobsite column
+ * @method     ChildUserSearchRun findOneByJobSiteKey(string $jobsite_key) Return the first ChildUserSearchRun filtered by the jobsite_key column
  * @method     ChildUserSearchRun findOneBySearchSettings( $search_settings) Return the first ChildUserSearchRun filtered by the search_settings column
- * @method     ChildUserSearchRun findOneBySearchRunResult( $search_run_result) Return the first ChildUserSearchRun filtered by the search_run_result column
+ * @method     ChildUserSearchRun findOneByRunResultCode(int $run_result) Return the first ChildUserSearchRun filtered by the run_result column
+ * @method     ChildUserSearchRun findOneByRunErrorDetails(array $run_error_details) Return the first ChildUserSearchRun filtered by the run_error_details column
  * @method     ChildUserSearchRun findOneByUpdatedAt(string $updated_at) Return the first ChildUserSearchRun filtered by the updated_at column *
 
  * @method     ChildUserSearchRun requirePk($key, ConnectionInterface $con = null) Return the ChildUserSearchRun by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -91,9 +94,10 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRun requireOneByAppRunId(string $app_run_id) Return the first ChildUserSearchRun filtered by the app_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByUserSlug(string $user_slug) Return the first ChildUserSearchRun filtered by the user_slug column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByDateSearchRun(string $date_search_run) Return the first ChildUserSearchRun filtered by the date_search_run column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserSearchRun requireOneByJobSite(string $jobsite) Return the first ChildUserSearchRun filtered by the jobsite column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchRun requireOneByJobSiteKey(string $jobsite_key) Return the first ChildUserSearchRun filtered by the jobsite_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneBySearchSettings( $search_settings) Return the first ChildUserSearchRun filtered by the search_settings column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserSearchRun requireOneBySearchRunResult( $search_run_result) Return the first ChildUserSearchRun filtered by the search_run_result column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchRun requireOneByRunResultCode(int $run_result) Return the first ChildUserSearchRun filtered by the run_result column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchRun requireOneByRunErrorDetails(array $run_error_details) Return the first ChildUserSearchRun filtered by the run_error_details column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByUpdatedAt(string $updated_at) Return the first ChildUserSearchRun filtered by the updated_at column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildUserSearchRun[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildUserSearchRun objects based on current ModelCriteria
@@ -102,9 +106,10 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRun[]|ObjectCollection findByAppRunId(string $app_run_id) Return ChildUserSearchRun objects filtered by the app_run_id column
  * @method     ChildUserSearchRun[]|ObjectCollection findByUserSlug(string $user_slug) Return ChildUserSearchRun objects filtered by the user_slug column
  * @method     ChildUserSearchRun[]|ObjectCollection findByDateSearchRun(string $date_search_run) Return ChildUserSearchRun objects filtered by the date_search_run column
- * @method     ChildUserSearchRun[]|ObjectCollection findByJobSite(string $jobsite) Return ChildUserSearchRun objects filtered by the jobsite column
+ * @method     ChildUserSearchRun[]|ObjectCollection findByJobSiteKey(string $jobsite_key) Return ChildUserSearchRun objects filtered by the jobsite_key column
  * @method     ChildUserSearchRun[]|ObjectCollection findBySearchSettings( $search_settings) Return ChildUserSearchRun objects filtered by the search_settings column
- * @method     ChildUserSearchRun[]|ObjectCollection findBySearchRunResult( $search_run_result) Return ChildUserSearchRun objects filtered by the search_run_result column
+ * @method     ChildUserSearchRun[]|ObjectCollection findByRunResultCode(int $run_result) Return ChildUserSearchRun objects filtered by the run_result column
+ * @method     ChildUserSearchRun[]|ObjectCollection findByRunErrorDetails(array $run_error_details) Return ChildUserSearchRun objects filtered by the run_error_details column
  * @method     ChildUserSearchRun[]|ObjectCollection findByUpdatedAt(string $updated_at) Return ChildUserSearchRun objects filtered by the updated_at column
  * @method     ChildUserSearchRun[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
@@ -204,7 +209,7 @@ abstract class UserSearchRunQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_search_run_id, key, app_run_id, user_slug, date_search_run, jobsite, search_settings, search_run_result, updated_at FROM user_search_run WHERE user_search_run_id = :p0';
+        $sql = 'SELECT user_search_run_id, key, app_run_id, user_slug, date_search_run, jobsite_key, search_settings, run_result, run_error_details, updated_at FROM user_search_run WHERE user_search_run_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -454,28 +459,28 @@ abstract class UserSearchRunQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the jobsite column
+     * Filter the query on the jobsite_key column
      *
      * Example usage:
      * <code>
-     * $query->filterByJobSite('fooValue');   // WHERE jobsite = 'fooValue'
-     * $query->filterByJobSite('%fooValue%', Criteria::LIKE); // WHERE jobsite LIKE '%fooValue%'
+     * $query->filterByJobSiteKey('fooValue');   // WHERE jobsite_key = 'fooValue'
+     * $query->filterByJobSiteKey('%fooValue%', Criteria::LIKE); // WHERE jobsite_key LIKE '%fooValue%'
      * </code>
      *
-     * @param     string $jobSite The value to use as filter.
+     * @param     string $jobSiteKey The value to use as filter.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
      */
-    public function filterByJobSite($jobSite = null, $comparison = null)
+    public function filterByJobSiteKey($jobSiteKey = null, $comparison = null)
     {
         if (null === $comparison) {
-            if (is_array($jobSite)) {
+            if (is_array($jobSiteKey)) {
                 $comparison = Criteria::IN;
             }
         }
 
-        return $this->addUsingAlias(UserSearchRunTableMap::COL_JOBSITE, $jobSite, $comparison);
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_JOBSITE_KEY, $jobSiteKey, $comparison);
     }
 
     /**
@@ -496,20 +501,117 @@ abstract class UserSearchRunQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the search_run_result column
+     * Filter the query on the run_result column
      *
-     * @param     mixed $searchRunResult The value to use as filter
+     * @param     mixed $runResultCode The value to use as filter
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
      */
-    public function filterBySearchRunResult($searchRunResult = null, $comparison = null)
+    public function filterByRunResultCode($runResultCode = null, $comparison = null)
     {
-        if (is_object($searchRunResult)) {
-            $searchRunResult = serialize($searchRunResult);
+        $valueSet = UserSearchRunTableMap::getValueSet(UserSearchRunTableMap::COL_RUN_RESULT);
+        if (is_scalar($runResultCode)) {
+            if (!in_array($runResultCode, $valueSet)) {
+                throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $runResultCode));
+            }
+            $runResultCode = array_search($runResultCode, $valueSet);
+        } elseif (is_array($runResultCode)) {
+            $convertedValues = array();
+            foreach ($runResultCode as $value) {
+                if (!in_array($value, $valueSet)) {
+                    throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $value));
+                }
+                $convertedValues []= array_search($value, $valueSet);
+            }
+            $runResultCode = $convertedValues;
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
         }
 
-        return $this->addUsingAlias(UserSearchRunTableMap::COL_SEARCH_RUN_RESULT, $searchRunResult, $comparison);
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_RUN_RESULT, $runResultCode, $comparison);
+    }
+
+    /**
+     * Filter the query on the run_error_details column
+     *
+     * @param     array $runErrorDetails The values to use as filter.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
+     */
+    public function filterByRunErrorDetails($runErrorDetails = null, $comparison = null)
+    {
+        $key = $this->getAliasedColName(UserSearchRunTableMap::COL_RUN_ERROR_DETAILS);
+        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
+            foreach ($runErrorDetails as $value) {
+                $value = '%| ' . $value . ' |%';
+                if ($this->containsKey($key)) {
+                    $this->addAnd($key, $value, Criteria::LIKE);
+                } else {
+                    $this->add($key, $value, Criteria::LIKE);
+                }
+            }
+
+            return $this;
+        } elseif ($comparison == Criteria::CONTAINS_SOME) {
+            foreach ($runErrorDetails as $value) {
+                $value = '%| ' . $value . ' |%';
+                if ($this->containsKey($key)) {
+                    $this->addOr($key, $value, Criteria::LIKE);
+                } else {
+                    $this->add($key, $value, Criteria::LIKE);
+                }
+            }
+
+            return $this;
+        } elseif ($comparison == Criteria::CONTAINS_NONE) {
+            foreach ($runErrorDetails as $value) {
+                $value = '%| ' . $value . ' |%';
+                if ($this->containsKey($key)) {
+                    $this->addAnd($key, $value, Criteria::NOT_LIKE);
+                } else {
+                    $this->add($key, $value, Criteria::NOT_LIKE);
+                }
+            }
+            $this->addOr($key, null, Criteria::ISNULL);
+
+            return $this;
+        }
+
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_RUN_ERROR_DETAILS, $runErrorDetails, $comparison);
+    }
+
+    /**
+     * Filter the query on the run_error_details column
+     * @param     mixed $runErrorDetails The value to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::CONTAINS_ALL
+     *
+     * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
+     */
+    public function filterByRunErrorDetail($runErrorDetails = null, $comparison = null)
+    {
+        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
+            if (is_scalar($runErrorDetails)) {
+                $runErrorDetails = '%| ' . $runErrorDetails . ' |%';
+                $comparison = Criteria::LIKE;
+            }
+        } elseif ($comparison == Criteria::CONTAINS_NONE) {
+            $runErrorDetails = '%| ' . $runErrorDetails . ' |%';
+            $comparison = Criteria::NOT_LIKE;
+            $key = $this->getAliasedColName(UserSearchRunTableMap::COL_RUN_ERROR_DETAILS);
+            if ($this->containsKey($key)) {
+                $this->addAnd($key, $runErrorDetails, $comparison);
+            } else {
+                $this->addAnd($key, $runErrorDetails, $comparison);
+            }
+            $this->addOr($key, null, Criteria::ISNULL);
+
+            return $this;
+        }
+
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_RUN_ERROR_DETAILS, $runErrorDetails, $comparison);
     }
 
     /**

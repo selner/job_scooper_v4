@@ -25,7 +25,7 @@ abstract class ClassBaseJobsAPIPlugin extends AbstractClassBaseJobsPlugin
         $this->additionalFlags[] = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
         $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__;
 
-        parent::__construct($strBaseDir);
+        parent::__construct();
 
     }
 }
@@ -36,7 +36,7 @@ abstract class ClassBaseServerHTMLJobSitePlugin extends AbstractClassBaseJobsPlu
     {
         $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
 
-        parent::__construct($strBaseDir);
+        parent::__construct();
 
     }
 
@@ -48,7 +48,7 @@ abstract class ClassBaseClientSideHTMLJobSitePlugin extends AbstractClassBaseJob
     {
         $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__;
         $this->additionalFlags[] = C__JOB_USE_SELENIUM;
-        parent::__construct($strBaseDir);
+        parent::__construct();
 
     }
 

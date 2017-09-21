@@ -117,7 +117,8 @@ class UserJobMatchTableMap extends TableMap
     const DEFAULT_STRING_FORMAT = 'YAML';
 
     /** The enumerated values for the user_notification_state field */
-    const COL_USER_NOTIFICATION_STATE_READY_TO_SEND = 'ready-to-send';
+    const COL_USER_NOTIFICATION_STATE_NOT_READY = 'not-ready';
+    const COL_USER_NOTIFICATION_STATE_READY = 'ready';
     const COL_USER_NOTIFICATION_STATE_SENT = 'sent';
 
     /** The enumerated values for the user_match field */
@@ -156,7 +157,8 @@ class UserJobMatchTableMap extends TableMap
     /** The enumerated values for this table */
     protected static $enumValueSets = array(
                 UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE => array(
-                            self::COL_USER_NOTIFICATION_STATE_READY_TO_SEND,
+                            self::COL_USER_NOTIFICATION_STATE_NOT_READY,
+            self::COL_USER_NOTIFICATION_STATE_READY,
             self::COL_USER_NOTIFICATION_STATE_SENT,
         ),
                 UserJobMatchTableMap::COL_USER_MATCH => array(
@@ -207,12 +209,13 @@ class UserJobMatchTableMap extends TableMap
         $this->addPrimaryKey('user_job_match_id', 'UserJobMatchId', 'INTEGER', true, null, null);
         $this->addForeignKey('user_slug', 'UserSlug', 'VARCHAR', 'user', 'user_slug', true, 128, null);
         $this->addForeignKey('jobposting_id', 'JobPostingId', 'INTEGER', 'jobposting', 'jobposting_id', true, null, null);
-        $this->addColumn('user_notification_state', 'UserNotificationState', 'ENUM', false, null, null);
+        $this->addColumn('user_notification_state', 'UserNotificationState', 'ENUM', false, null, 'not-ready');
         $this->getColumn('user_notification_state')->setValueSet(array (
-  0 => 'ready-to-send',
-  1 => 'sent',
+  0 => 'not-ready',
+  1 => 'ready',
+  2 => 'sent',
 ));
-        $this->addColumn('user_match', 'UserMatchStatus', 'ENUM', false, null, null);
+        $this->addColumn('user_match', 'UserMatchStatus', 'ENUM', false, null, 'none');
         $this->getColumn('user_match')->setValueSet(array (
   0 => 'none',
   1 => 'include-match',

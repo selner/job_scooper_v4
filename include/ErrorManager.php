@@ -63,7 +63,7 @@ class ErrorManager {
     {
         $strErrorText = null;
         $attachments = array();
-        $arrFailedPluginsReport = getFailedSearches();
+        $arrFailedPluginsReport = getFailedSearchesByPlugin();
         
         if(countAssociativeArrayValues($arrFailedPluginsReport) == 0)
         {

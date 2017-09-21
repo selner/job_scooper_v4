@@ -20,21 +20,25 @@ use Propel\Runtime\Exception\PropelException;
  *
  *
  *
- * @method     ChildJobSitePluginQuery orderByJobSite($order = Criteria::ASC) Order by the jobsite column
+ * @method     ChildJobSitePluginQuery orderByJobSiteKey($order = Criteria::ASC) Order by the jobsite_key column
+ * @method     ChildJobSitePluginQuery orderByPluginClassName($order = Criteria::ASC) Order by the plugin_class_name column
  * @method     ChildJobSitePluginQuery orderByDisplayName($order = Criteria::ASC) Order by the display_name column
  * @method     ChildJobSitePluginQuery orderByLastRunAt($order = Criteria::ASC) Order by the date_last_run column
- * @method     ChildJobSitePluginQuery orderByLastUserSearchRunId($order = Criteria::ASC) Order by the last_user_search_run_id column
  * @method     ChildJobSitePluginQuery orderByLastRunWasSuccessful($order = Criteria::ASC) Order by the was_successful column
  * @method     ChildJobSitePluginQuery orderByStartNextRunAfter($order = Criteria::ASC) Order by the date_next_run column
  * @method     ChildJobSitePluginQuery orderByLastFailedAt($order = Criteria::ASC) Order by the date_last_failed column
+ * @method     ChildJobSitePluginQuery orderByLastUserSearchRunId($order = Criteria::ASC) Order by the last_user_search_run_id column
+ * @method     ChildJobSitePluginQuery orderBySupportedCountryCodes($order = Criteria::ASC) Order by the supported_country_codes column
  *
- * @method     ChildJobSitePluginQuery groupByJobSite() Group by the jobsite column
+ * @method     ChildJobSitePluginQuery groupByJobSiteKey() Group by the jobsite_key column
+ * @method     ChildJobSitePluginQuery groupByPluginClassName() Group by the plugin_class_name column
  * @method     ChildJobSitePluginQuery groupByDisplayName() Group by the display_name column
  * @method     ChildJobSitePluginQuery groupByLastRunAt() Group by the date_last_run column
- * @method     ChildJobSitePluginQuery groupByLastUserSearchRunId() Group by the last_user_search_run_id column
  * @method     ChildJobSitePluginQuery groupByLastRunWasSuccessful() Group by the was_successful column
  * @method     ChildJobSitePluginQuery groupByStartNextRunAfter() Group by the date_next_run column
  * @method     ChildJobSitePluginQuery groupByLastFailedAt() Group by the date_last_failed column
+ * @method     ChildJobSitePluginQuery groupByLastUserSearchRunId() Group by the last_user_search_run_id column
+ * @method     ChildJobSitePluginQuery groupBySupportedCountryCodes() Group by the supported_country_codes column
  *
  * @method     ChildJobSitePluginQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildJobSitePluginQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -59,33 +63,39 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobSitePlugin findOne(ConnectionInterface $con = null) Return the first ChildJobSitePlugin matching the query
  * @method     ChildJobSitePlugin findOneOrCreate(ConnectionInterface $con = null) Return the first ChildJobSitePlugin matching the query, or a new ChildJobSitePlugin object populated from the query conditions when no match is found
  *
- * @method     ChildJobSitePlugin findOneByJobSite(string $jobsite) Return the first ChildJobSitePlugin filtered by the jobsite column
+ * @method     ChildJobSitePlugin findOneByJobSiteKey(string $jobsite_key) Return the first ChildJobSitePlugin filtered by the jobsite_key column
+ * @method     ChildJobSitePlugin findOneByPluginClassName(string $plugin_class_name) Return the first ChildJobSitePlugin filtered by the plugin_class_name column
  * @method     ChildJobSitePlugin findOneByDisplayName(string $display_name) Return the first ChildJobSitePlugin filtered by the display_name column
  * @method     ChildJobSitePlugin findOneByLastRunAt(string $date_last_run) Return the first ChildJobSitePlugin filtered by the date_last_run column
- * @method     ChildJobSitePlugin findOneByLastUserSearchRunId(int $last_user_search_run_id) Return the first ChildJobSitePlugin filtered by the last_user_search_run_id column
  * @method     ChildJobSitePlugin findOneByLastRunWasSuccessful(boolean $was_successful) Return the first ChildJobSitePlugin filtered by the was_successful column
  * @method     ChildJobSitePlugin findOneByStartNextRunAfter(string $date_next_run) Return the first ChildJobSitePlugin filtered by the date_next_run column
- * @method     ChildJobSitePlugin findOneByLastFailedAt(string $date_last_failed) Return the first ChildJobSitePlugin filtered by the date_last_failed column *
+ * @method     ChildJobSitePlugin findOneByLastFailedAt(string $date_last_failed) Return the first ChildJobSitePlugin filtered by the date_last_failed column
+ * @method     ChildJobSitePlugin findOneByLastUserSearchRunId(int $last_user_search_run_id) Return the first ChildJobSitePlugin filtered by the last_user_search_run_id column
+ * @method     ChildJobSitePlugin findOneBySupportedCountryCodes(array $supported_country_codes) Return the first ChildJobSitePlugin filtered by the supported_country_codes column *
 
  * @method     ChildJobSitePlugin requirePk($key, ConnectionInterface $con = null) Return the ChildJobSitePlugin by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobSitePlugin requireOne(ConnectionInterface $con = null) Return the first ChildJobSitePlugin matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
- * @method     ChildJobSitePlugin requireOneByJobSite(string $jobsite) Return the first ChildJobSitePlugin filtered by the jobsite column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildJobSitePlugin requireOneByJobSiteKey(string $jobsite_key) Return the first ChildJobSitePlugin filtered by the jobsite_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildJobSitePlugin requireOneByPluginClassName(string $plugin_class_name) Return the first ChildJobSitePlugin filtered by the plugin_class_name column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobSitePlugin requireOneByDisplayName(string $display_name) Return the first ChildJobSitePlugin filtered by the display_name column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobSitePlugin requireOneByLastRunAt(string $date_last_run) Return the first ChildJobSitePlugin filtered by the date_last_run column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildJobSitePlugin requireOneByLastUserSearchRunId(int $last_user_search_run_id) Return the first ChildJobSitePlugin filtered by the last_user_search_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobSitePlugin requireOneByLastRunWasSuccessful(boolean $was_successful) Return the first ChildJobSitePlugin filtered by the was_successful column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobSitePlugin requireOneByStartNextRunAfter(string $date_next_run) Return the first ChildJobSitePlugin filtered by the date_next_run column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobSitePlugin requireOneByLastFailedAt(string $date_last_failed) Return the first ChildJobSitePlugin filtered by the date_last_failed column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildJobSitePlugin requireOneByLastUserSearchRunId(int $last_user_search_run_id) Return the first ChildJobSitePlugin filtered by the last_user_search_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildJobSitePlugin requireOneBySupportedCountryCodes(array $supported_country_codes) Return the first ChildJobSitePlugin filtered by the supported_country_codes column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildJobSitePlugin[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildJobSitePlugin objects based on current ModelCriteria
- * @method     ChildJobSitePlugin[]|ObjectCollection findByJobSite(string $jobsite) Return ChildJobSitePlugin objects filtered by the jobsite column
+ * @method     ChildJobSitePlugin[]|ObjectCollection findByJobSiteKey(string $jobsite_key) Return ChildJobSitePlugin objects filtered by the jobsite_key column
+ * @method     ChildJobSitePlugin[]|ObjectCollection findByPluginClassName(string $plugin_class_name) Return ChildJobSitePlugin objects filtered by the plugin_class_name column
  * @method     ChildJobSitePlugin[]|ObjectCollection findByDisplayName(string $display_name) Return ChildJobSitePlugin objects filtered by the display_name column
  * @method     ChildJobSitePlugin[]|ObjectCollection findByLastRunAt(string $date_last_run) Return ChildJobSitePlugin objects filtered by the date_last_run column
- * @method     ChildJobSitePlugin[]|ObjectCollection findByLastUserSearchRunId(int $last_user_search_run_id) Return ChildJobSitePlugin objects filtered by the last_user_search_run_id column
  * @method     ChildJobSitePlugin[]|ObjectCollection findByLastRunWasSuccessful(boolean $was_successful) Return ChildJobSitePlugin objects filtered by the was_successful column
  * @method     ChildJobSitePlugin[]|ObjectCollection findByStartNextRunAfter(string $date_next_run) Return ChildJobSitePlugin objects filtered by the date_next_run column
  * @method     ChildJobSitePlugin[]|ObjectCollection findByLastFailedAt(string $date_last_failed) Return ChildJobSitePlugin objects filtered by the date_last_failed column
+ * @method     ChildJobSitePlugin[]|ObjectCollection findByLastUserSearchRunId(int $last_user_search_run_id) Return ChildJobSitePlugin objects filtered by the last_user_search_run_id column
+ * @method     ChildJobSitePlugin[]|ObjectCollection findBySupportedCountryCodes(array $supported_country_codes) Return ChildJobSitePlugin objects filtered by the supported_country_codes column
  * @method     ChildJobSitePlugin[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  */
@@ -184,7 +194,7 @@ abstract class JobSitePluginQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT jobsite, display_name, date_last_run, last_user_search_run_id, was_successful, date_next_run, date_last_failed FROM jobsite_plugin WHERE jobsite = :p0';
+        $sql = 'SELECT jobsite_key, plugin_class_name, display_name, date_last_run, was_successful, date_next_run, date_last_failed, supported_country_codes FROM jobsite_plugin WHERE jobsite_key = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_STR);
@@ -258,7 +268,7 @@ abstract class JobSitePluginQuery extends ModelCriteria
     public function filterByPrimaryKey($key)
     {
 
-        return $this->addUsingAlias(JobSitePluginTableMap::COL_JOBSITE, $key, Criteria::EQUAL);
+        return $this->addUsingAlias(JobSitePluginTableMap::COL_JOBSITE_KEY, $key, Criteria::EQUAL);
     }
 
     /**
@@ -271,32 +281,57 @@ abstract class JobSitePluginQuery extends ModelCriteria
     public function filterByPrimaryKeys($keys)
     {
 
-        return $this->addUsingAlias(JobSitePluginTableMap::COL_JOBSITE, $keys, Criteria::IN);
+        return $this->addUsingAlias(JobSitePluginTableMap::COL_JOBSITE_KEY, $keys, Criteria::IN);
     }
 
     /**
-     * Filter the query on the jobsite column
+     * Filter the query on the jobsite_key column
      *
      * Example usage:
      * <code>
-     * $query->filterByJobSite('fooValue');   // WHERE jobsite = 'fooValue'
-     * $query->filterByJobSite('%fooValue%', Criteria::LIKE); // WHERE jobsite LIKE '%fooValue%'
+     * $query->filterByJobSiteKey('fooValue');   // WHERE jobsite_key = 'fooValue'
+     * $query->filterByJobSiteKey('%fooValue%', Criteria::LIKE); // WHERE jobsite_key LIKE '%fooValue%'
      * </code>
      *
-     * @param     string $jobSite The value to use as filter.
+     * @param     string $jobSiteKey The value to use as filter.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildJobSitePluginQuery The current query, for fluid interface
      */
-    public function filterByJobSite($jobSite = null, $comparison = null)
+    public function filterByJobSiteKey($jobSiteKey = null, $comparison = null)
     {
         if (null === $comparison) {
-            if (is_array($jobSite)) {
+            if (is_array($jobSiteKey)) {
                 $comparison = Criteria::IN;
             }
         }
 
-        return $this->addUsingAlias(JobSitePluginTableMap::COL_JOBSITE, $jobSite, $comparison);
+        return $this->addUsingAlias(JobSitePluginTableMap::COL_JOBSITE_KEY, $jobSiteKey, $comparison);
+    }
+
+    /**
+     * Filter the query on the plugin_class_name column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByPluginClassName('fooValue');   // WHERE plugin_class_name = 'fooValue'
+     * $query->filterByPluginClassName('%fooValue%', Criteria::LIKE); // WHERE plugin_class_name LIKE '%fooValue%'
+     * </code>
+     *
+     * @param     string $pluginClassName The value to use as filter.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildJobSitePluginQuery The current query, for fluid interface
+     */
+    public function filterByPluginClassName($pluginClassName = null, $comparison = null)
+    {
+        if (null === $comparison) {
+            if (is_array($pluginClassName)) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(JobSitePluginTableMap::COL_PLUGIN_CLASS_NAME, $pluginClassName, $comparison);
     }
 
     /**
@@ -365,49 +400,6 @@ abstract class JobSitePluginQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(JobSitePluginTableMap::COL_DATE_LAST_RUN, $lastRunAt, $comparison);
-    }
-
-    /**
-     * Filter the query on the last_user_search_run_id column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByLastUserSearchRunId(1234); // WHERE last_user_search_run_id = 1234
-     * $query->filterByLastUserSearchRunId(array(12, 34)); // WHERE last_user_search_run_id IN (12, 34)
-     * $query->filterByLastUserSearchRunId(array('min' => 12)); // WHERE last_user_search_run_id > 12
-     * </code>
-     *
-     * @see       filterByUserSearchRun()
-     *
-     * @param     mixed $lastUserSearchRunId The value to use as filter.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildJobSitePluginQuery The current query, for fluid interface
-     */
-    public function filterByLastUserSearchRunId($lastUserSearchRunId = null, $comparison = null)
-    {
-        if (is_array($lastUserSearchRunId)) {
-            $useMinMax = false;
-            if (isset($lastUserSearchRunId['min'])) {
-                $this->addUsingAlias(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID, $lastUserSearchRunId['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($lastUserSearchRunId['max'])) {
-                $this->addUsingAlias(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID, $lastUserSearchRunId['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID, $lastUserSearchRunId, $comparison);
     }
 
     /**
@@ -524,6 +516,130 @@ abstract class JobSitePluginQuery extends ModelCriteria
     }
 
     /**
+     * Filter the query on the last_user_search_run_id column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByLastUserSearchRunId(1234); // WHERE last_user_search_run_id = 1234
+     * $query->filterByLastUserSearchRunId(array(12, 34)); // WHERE last_user_search_run_id IN (12, 34)
+     * $query->filterByLastUserSearchRunId(array('min' => 12)); // WHERE last_user_search_run_id > 12
+     * </code>
+     *
+     * @see       filterByUserSearchRun()
+     *
+     * @param     mixed $lastUserSearchRunId The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildJobSitePluginQuery The current query, for fluid interface
+     */
+    public function filterByLastUserSearchRunId($lastUserSearchRunId = null, $comparison = null)
+    {
+        if (is_array($lastUserSearchRunId)) {
+            $useMinMax = false;
+            if (isset($lastUserSearchRunId['min'])) {
+                $this->addUsingAlias(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID, $lastUserSearchRunId['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($lastUserSearchRunId['max'])) {
+                $this->addUsingAlias(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID, $lastUserSearchRunId['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID, $lastUserSearchRunId, $comparison);
+    }
+
+    /**
+     * Filter the query on the supported_country_codes column
+     *
+     * @param     array $supportedCountryCodes The values to use as filter.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildJobSitePluginQuery The current query, for fluid interface
+     */
+    public function filterBySupportedCountryCodes($supportedCountryCodes = null, $comparison = null)
+    {
+        $key = $this->getAliasedColName(JobSitePluginTableMap::COL_SUPPORTED_COUNTRY_CODES);
+        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
+            foreach ($supportedCountryCodes as $value) {
+                $value = '%| ' . $value . ' |%';
+                if ($this->containsKey($key)) {
+                    $this->addAnd($key, $value, Criteria::LIKE);
+                } else {
+                    $this->add($key, $value, Criteria::LIKE);
+                }
+            }
+
+            return $this;
+        } elseif ($comparison == Criteria::CONTAINS_SOME) {
+            foreach ($supportedCountryCodes as $value) {
+                $value = '%| ' . $value . ' |%';
+                if ($this->containsKey($key)) {
+                    $this->addOr($key, $value, Criteria::LIKE);
+                } else {
+                    $this->add($key, $value, Criteria::LIKE);
+                }
+            }
+
+            return $this;
+        } elseif ($comparison == Criteria::CONTAINS_NONE) {
+            foreach ($supportedCountryCodes as $value) {
+                $value = '%| ' . $value . ' |%';
+                if ($this->containsKey($key)) {
+                    $this->addAnd($key, $value, Criteria::NOT_LIKE);
+                } else {
+                    $this->add($key, $value, Criteria::NOT_LIKE);
+                }
+            }
+            $this->addOr($key, null, Criteria::ISNULL);
+
+            return $this;
+        }
+
+        return $this->addUsingAlias(JobSitePluginTableMap::COL_SUPPORTED_COUNTRY_CODES, $supportedCountryCodes, $comparison);
+    }
+
+    /**
+     * Filter the query on the supported_country_codes column
+     * @param     mixed $supportedCountryCodes The value to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::CONTAINS_ALL
+     *
+     * @return $this|ChildJobSitePluginQuery The current query, for fluid interface
+     */
+    public function filterBySupportedCountryCode($supportedCountryCodes = null, $comparison = null)
+    {
+        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
+            if (is_scalar($supportedCountryCodes)) {
+                $supportedCountryCodes = '%| ' . $supportedCountryCodes . ' |%';
+                $comparison = Criteria::LIKE;
+            }
+        } elseif ($comparison == Criteria::CONTAINS_NONE) {
+            $supportedCountryCodes = '%| ' . $supportedCountryCodes . ' |%';
+            $comparison = Criteria::NOT_LIKE;
+            $key = $this->getAliasedColName(JobSitePluginTableMap::COL_SUPPORTED_COUNTRY_CODES);
+            if ($this->containsKey($key)) {
+                $this->addAnd($key, $supportedCountryCodes, $comparison);
+            } else {
+                $this->addAnd($key, $supportedCountryCodes, $comparison);
+            }
+            $this->addOr($key, null, Criteria::ISNULL);
+
+            return $this;
+        }
+
+        return $this->addUsingAlias(JobSitePluginTableMap::COL_SUPPORTED_COUNTRY_CODES, $supportedCountryCodes, $comparison);
+    }
+
+    /**
      * Filter the query by a related \JobScooper\UserSearchRun object
      *
      * @param \JobScooper\UserSearchRun|ObjectCollection $userSearchRun The related object(s) to use as filter
@@ -610,7 +726,7 @@ abstract class JobSitePluginQuery extends ModelCriteria
     public function prune($jobSitePlugin = null)
     {
         if ($jobSitePlugin) {
-            $this->addUsingAlias(JobSitePluginTableMap::COL_JOBSITE, $jobSitePlugin->getJobSite(), Criteria::NOT_EQUAL);
+            $this->addUsingAlias(JobSitePluginTableMap::COL_JOBSITE_KEY, $jobSitePlugin->getJobSiteKey(), Criteria::NOT_EQUAL);
         }
 
         return $this;

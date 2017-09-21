@@ -102,7 +102,7 @@ class StageManager
 
     public function insertJobsFromJSON($path)
     {
-        $data = readJobsListDataFromLocalFile($path);
+        $data = loadJSON($path);
         $jobs = $data['jobslist'];
 
         foreach($jobs as $job) {
@@ -120,63 +120,42 @@ class StageManager
     {
 
         LogLine("Stage 1: Downloading Latest Matching Jobs ", \C__DISPLAY_ITEM_RESULT__);
-        try {
 
+        //
+        // let's start with the searches specified with the details in the the config.ini
+        //
+        $arrSearchesToRunBySite = $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'];
+
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //
+        // OK, now we have our list of searches & sites we are going to actually run
+        // Let's go get the jobs for those searches
+        //
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        if ($arrSearchesToRunBySite != null) {
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             //
-            // let's start with the searches specified with the details in the the config.ini
+            // Download all the job listings for all the users searches
             //
-            $arrSearchesToRun = $this->classConfig->getSearchConfiguration('searches');
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            LogLine(PHP_EOL . "**************  Starting Run of Searches for " . count($arrSearchesToRunBySite) . " Job Sites **************  " . PHP_EOL, \C__DISPLAY_NORMAL__);
 
-            if (isset($arrSearchesToRun)) {
-                if (count($arrSearchesToRun) > 0) {
+            try {
 
-                    //
-                    // Remove any sites that were excluded in this run from the searches list
-                    //
-                    foreach (array_keys($arrSearchesToRun) as $z) {
-                        $curSearch = $arrSearchesToRun[$z];
-
-                        $strIncludeKey = 'include_' . $curSearch['site_name'];
-
-                        $valInclude = get_PharseOptionValue($strIncludeKey);
-
-                        if (!isset($valInclude) || $valInclude == 0) {
-                            LogLine($curSearch['site_name'] . " excluded, so dropping its searches from the run.", \C__DISPLAY_ITEM_START__);
-                            unset($arrSearchesToRun[$z]);
-                        }
-                    }
-                }
-
-                ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //
-                // OK, now we have our list of searches & sites we are going to actually run
-                // Let's go get the jobs for those searches
+                // the Multisite class handles the heavy lifting for us by executing all
+                // the searches in the list and returning us the combined set of new jobs
+                // (with the exception of Amazon for historical reasons)
                 //
-                ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                if ($arrSearchesToRun != null) {
-                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    //
-                    // Download all the job listings for all the users searches
-                    //
-                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    LogLine(PHP_EOL . "**************  Starting Run of " . count($arrSearchesToRun) . " Searches  **************  " . PHP_EOL, \C__DISPLAY_NORMAL__);
-
-
-                    //
-                    // the Multisite class handles the heavy lifting for us by executing all
-                    // the searches in the list and returning us the combined set of new jobs
-                    // (with the exception of Amazon for historical reasons)
-                    //
-                    $classMulti = new ClassMultiSiteSearch($GLOBALS['USERDATA']['directories']['listings-raw']);
-                    $classMulti->addMultipleSearches($arrSearchesToRun, null);
-                    $arrUpdatedJobs = $classMulti->updateJobsForAllPlugins();
-
-                } else {
-                    throw new ErrorException("No searches have been set to be run.");
-                }
+                $classMulti = new ClassMultiSiteSearch();
+                $classMulti->updateJobsForAllJobSites($arrSearchesToRunBySite);
+            } catch (Exception $ex) {
+                handleException($ex, null, false);
             }
-        } catch (Exception $ex) {
-            handleException($ex, null, false);
+
+        } else {
+            throw new ErrorException("No searches have been set to be run.");
         }
 
     }
@@ -252,7 +231,7 @@ class StageManager
 //                return;
 //            }
 
-            $notifier = new ClassJobsNotifier($this->pathAllMatchedJobs, $this->pathAllExcludedJobs, $GLOBALS['USERDATA']['directories']['results']);
+            $notifier = new ClassJobsNotifier();
             $notifier->processNotifications();
         } catch (Exception $ex) {
             handleException($ex, null, true);

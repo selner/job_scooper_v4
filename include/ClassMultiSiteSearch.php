@@ -21,7 +21,7 @@ require_once dirname(dirname(__FILE__))."/bootstrap.php";
 class ClassMultiSiteSearch
 {
     protected $siteName = 'Multisite';
-    private $arrSearchesByPlugin = array();
+    private $arrSearchesByJobSite = array();
     private $selenium = null;
     private $arrSearchesToReturn = array();
 
@@ -34,93 +34,63 @@ class ClassMultiSiteSearch
         LogLine("Closing ".$this->siteName." instance of class " . get_class($this), \C__DISPLAY_ITEM_START__);
     }
 
-    function addMultipleSearches($arrSearches)
+    function updateJobsForAllJobSites($arrSearchesByJobSite)
     {
-
-        foreach($arrSearches as $search)
-        {
-            $this->arrSearchesToReturn[] = $search;
-            $pluginClass = $search->getPluginClass();
-            if($search->isSearchIncludedInRun())
-                $this->arrSearchesByPlugin[$pluginClass][$search->getKey()] = $search->copy();
-            else
-            {
-                LogLine($search->getJobSite() . " excluded, so skipping its searches.", \C__DISPLAY_ITEM_START__);
-                $srr = array('success' => true, 'details' => 'Search was excluded from run by a command line setting.', 'error_files' => array());
-                $search->setSearchRunResult($srr);
-            }
-            $search->save();
-        }
-
-
-    }
-
-
-    function updateJobsForAllPlugins()
-    {
-        $class = null;
-
         $arrResults = array();
 
-
-        foreach(array_keys($this->arrSearchesByPlugin) as $className)
+        $this->arrSearchesByJobSite = $arrSearchesByJobSite;
+        foreach(array_keys($this->arrSearchesByJobSite) as $sitename)
         {
-            $searches = $this->arrSearchesByPlugin[$className];
-            $class = new $className(getFullPathFromFileDetails($this->detailsMyFileOut), $searches);
+            $searches = $this->arrSearchesByJobSite[$sitename];
+            $plugin = getPluginObjectForJobSite($sitename);
             try
             {
-                LogLine("Setting up " . count($searches) . " search(es) for ". $className . "...", \C__DISPLAY_SECTION_START__);
-                $class->addSearches($searches);
+                LogLine("Setting up " . count($searches) . " search(es) for ". $sitename . "...", \C__DISPLAY_SECTION_START__);
+                $plugin->addSearches($searches);
 
-                $arrResults = $class->getUpdatedJobsForAllSearches();
-                $class = null;
+                $arrResults = $plugin->getUpdatedJobsForAllSearches();
             }
             catch (Exception $classError)
             {
                 $err = $classError;
-                if (($classError->getCode() == 4096 || $classError->getCode() == 0) && $class->isBitFlagSet(C__JOB_USE_SELENIUM))
+                if (($classError->getCode() == 4096 || $classError->getCode() == 0) && $plugin->isBitFlagSet(C__JOB_USE_SELENIUM))
                 {
                     if(is_null($this->selenium))
                     {
-                        handleException($classError, $className . " requires Selenium but the service could not be started: %s", $raise = false);
+                        handleException($classError, $GLOBALS['JOBSITE_PLUGINS'][$sitename]['class_name'] . " requires Selenium but the service could not be started: %s", $raise = false);
                     }
                     else {
                         try {
                             $this->selenium->killAllAndRestartSelenium();
-                            $arrResults = $class->getUpdatedJobsForAllSearches();
+                            $arrResults = $plugin->getUpdatedJobsForAllSearches();
                         } catch (Exception $classError) {
                             $err = $classError;
                         }
                     }
                 }
                 else
-                    handleException($classError, "Unable to run searches for ". $className . ": %s", $raise = false);
+                    handleException($classError, "Unable to run searches for ". $sitename . ": %s", $raise = false);
 
-                LogLine('ERROR:  ' . $className . ' failed due to an error:  ' . $err .PHP_EOL. 'Skipping it\'s remaining searches and continuing with other plugins.', \C__DISPLAY_ERROR__);
-                $arrFail = getFailedSearchesByPlugin();
-                if(countAssociativeArrayValues($arrFail) > 2) {
-                    $arrWebDriverFail = array_filter($arrFail, function ($var) {
-
-                        $arrFailureKeywords = array("curl", "WebDriverException", "WebDriverCurlException", "connection refused", "timed out");
-                        foreach ($arrFailureKeywords as $failWord) {
-                            if (stristr($var['search_run_result']['details'], $failWord) != false)
-                                return true;
-                        }
-                        return false;
-                    });
-                    if(count($arrWebDriverFail) > 2 && !is_null($this->selenium))
-                    {
-                        $this->selenium->killAllAndRestartSelenium();
-
-                        // BUGBUG:  Add a counter so we don't infinitely loop and restart forever
-                        $this->updateJobsForAllPlugins();
-                    }
-                }
-            }
-            finally
-            {
-                $classPluginForSearch = null;
-                $class = null;
+//                LogLine('ERROR:  ' . $sitename . ' failed due to an error:  ' . $err .PHP_EOL. 'Skipping it\'s remaining searches and continuing with other plugins.', \C__DISPLAY_ERROR__);
+//                $arrFail = getFailedSearchesByPlugin();
+//                if(countAssociativeArrayValues($arrFail) > 2) {
+//                    $arrWebDriverFail = array_filter($arrFail, function ($var) {
+//
+//                        $arrFailureKeywords = array("curl", "WebDriverException", "WebDriverCurlException", "connection refused", "timed out");
+//                        foreach ($arrFailureKeywords as $failWord) {
+//                            if (stristr($var['run_error_details']['details'], $failWord) != false)
+//                                return true;
+//                        }
+//                        return false;
+//                    });
+//                    if(count($arrWebDriverFail) > 2 && !is_null($this->selenium))
+//                    {
+//                        $this->selenium->killAllAndRestartSelenium();
+//
+//                        // BUGBUG:  Add a counter so we don't infinitely loop and restart forever
+//                        $this->updateJobsForAllPlugins();
+//                    }
+//                }
             }
         }
 

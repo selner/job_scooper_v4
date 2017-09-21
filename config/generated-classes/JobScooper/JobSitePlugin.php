@@ -34,6 +34,9 @@ use JobScooper\Base\JobSitePlugin as BaseJobSitePlugin;
  */
 class JobSitePlugin extends BaseJobSitePlugin
 {
+
+    private $_pluginObject = null;
+
     protected function updateNextRunDate()
     {
         if(!is_null($this->getLastRunAt()))
@@ -73,5 +76,82 @@ class JobSitePlugin extends BaseJobSitePlugin
 
         return true;
     }
+
+
+    function getJobSitePluginObject()
+    {
+        if(is_null($this->_pluginObject))
+            $this->_instantiateJobSiteClass();
+
+        return $this->_pluginObject;
+    }
+
+    function getPluginClassName()
+    {
+        return getJobSitePluginClassName($this->getJobSiteKey());
+    }
+
+    function isSearchIncludedInRun()
+    {
+        if(array_key_exists($this->getJobSiteKey(), $GLOBALS['USERDATA']['configuration_settings']['excluded_sites']))
+        {
+            return false;
+        }
+        else
+        {
+            $strIncludeKey = 'include_' . $this->getJobSiteKey();
+
+            $valInclude = get_PharseOptionValue($strIncludeKey);
+
+            if (!isset($valInclude) || $valInclude == 0) {
+                setSiteAsExcluded($this->getJobSiteKey());
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    private function _instantiateJobSiteClass()
+    {
+        if (is_null($this->getPluginClassName()))
+            throw new \Exception("Missing jobsite plugin class name.");
+
+        try {
+            $class = $this->getPluginClassName();
+            $this->save();
+            $this->_pluginObject = new $class();
+
+            $this->setSupportedCountryCodes($this->_pluginObject->getSupportedCountryCodes());
+
+        }
+        catch (\Exception $ex)
+        {
+            handleException($ex, "Error instantiating jobsite plugin object" . $this->getDisplayName() . " with class name [" . $this->getPluginClassName() ."]:  %s");
+        }
+    }
+
+    private function _updateAutoColumns()
+    {
+        $classname = $this->getPluginClassName();
+        $this->setPluginClassName($classname);
+
+    }
+
+    public function preSave(\Propel\Runtime\Connection\ConnectionInterface $con = null)
+    {
+        $this->_updateAutoColumns();
+        return parent::preSave($con);
+    }
+
+    protected function doInsert(\Propel\Runtime\Connection\ConnectionInterface $con)
+
+    {
+        LogLine("Inserting new JobSitePlugin record: " . $this->getPluginClassName());
+        parent::doInsert($con);
+
+    }
+
 
 }

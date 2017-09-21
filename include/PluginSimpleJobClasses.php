@@ -21,10 +21,10 @@ abstract class ClassClientHTMLJobSitePlugin extends ClassBaseHTMLJobSitePlugin
 {
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__;
 
-    function __construct($strBaseDir = null)
+    function __construct()
     {
         $this->additionalFlags[] = C__JOB_USE_SELENIUM;
-        parent::__construct($strBaseDir);
+        parent::__construct();
 
     }
 }
@@ -47,7 +47,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
     protected $nextPageScript = null;
     protected $arrListingTagSetup = array();
 
-    function __construct($strBaseDir = null)
+    function __construct()
     {
         if (is_null($this->arrListingTagSetup))
             $this->arrListingTagSetup = ClassBaseHTMLJobSitePlugin::getEmptyListingTagSetup();
@@ -76,7 +76,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             $this->additionalFlags[]  = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
         }
 
-        parent::__construct($strBaseDir);
+        parent::__construct();
     }
 
     static function getEmptyListingTagSetup()

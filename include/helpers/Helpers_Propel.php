@@ -138,8 +138,9 @@ function updateOrCreateJobPosting($jobArray)
 function getAllUserMatchesNotNotified()
 {
     $userObject = $GLOBALS['USERDATA']['configuration_settings']['user_details'];
+
     $query = \JobScooper\UserJobMatchQuery::create()
-        ->filterByUserNotificationState(null)
+        ->filterByUserNotificationState(array("not-ready", "ready"))
         ->filterByUserSlug($userObject->getUserSlug())
         ->joinWithJobPosting();
 
@@ -240,6 +241,61 @@ function findOrCreateUser($value)
         ->findOneOrCreate();
 
     return $user;
+}
+
+function getJobSitePluginClassName($jobsite)
+{
+    $plugin_classname = null;
+
+    if (!is_null($jobsite)) {
+        $slug = cleanupSlugPart($jobsite);
+        if (!array_key_exists($slug, $GLOBALS['JOBSITE_PLUGINS']) &&
+            !is_null($GLOBALS['JOBSITE_PLUGINS'][$slug]['class_name'])) {
+            return $GLOBALS['JOBSITE_PLUGINS'][$slug]['class_name'];
+        } else {
+            $classnamematch = "plugin" . $slug;
+            $classList = get_declared_classes();
+            foreach ($classList as $class) {
+                if (strcasecmp($class, $classnamematch) == 0) {
+                    return $class;
+                }
+            }
+        }
+    }
+
+    return null;
+}
+
+function findOrCreateJobSitePlugin($jobsite, $plugin_classname=null)
+{
+    $slug = cleanupSlugPart($jobsite);
+
+    if(!is_array($GLOBALS['JOBSITE_PLUGINS']))
+        $GLOBALS['JOBSITE_PLUGINS'] = array();
+
+    if (!array_key_exists($slug, $GLOBALS['JOBSITE_PLUGINS'])) {
+        $GLOBALS['JOBSITE_PLUGINS'][$slug] = array('name' => $jobsite, 'class_name' => getJobSitePluginClassName($slug), 'jobsite_db_object' => null, 'include_in_run' => false, 'other_settings' => []);
+    }
+
+    if (is_null($GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object']))
+    {
+        $GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object'] = \JobScooper\JobSitePluginQuery::create()
+            ->filterByPrimaryKey($slug)
+            ->findOneOrCreate();
+
+        if($GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object']->isNew()) {
+            $GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object']->setJobSiteKey($slug);
+            $GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object']->save();
+        }
+    }
+
+    return $GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object'];
+}
+
+function getPluginObjectForJobSite($jobsite)
+{
+    $objJobSite = findOrCreateJobSitePlugin($jobsite);
+    return $objJobSite->getJobSitePluginObject();
 }
 
 function getUserByName($username)
