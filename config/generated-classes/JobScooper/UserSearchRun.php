@@ -130,13 +130,10 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
         }
     }
 
-    public function setRunResult($run_result, $errDetails=array())
+    public function setRunErrorDetails($v)
     {
-        $this->setRunResultCode($run_result);
-        if(!is_null($errDetails) && is_array($errDetails))
-        {
-            $this->setRunErrorDetails($errDetails);
-        }
+        $arrV = object_to_array($v);
+        parent::setRunErrorDetails($arrV);
     }
 
     public function setJobSiteKey($v)

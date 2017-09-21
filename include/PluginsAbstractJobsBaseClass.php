@@ -835,7 +835,8 @@ abstract class AbstractClassBaseJobsPlugin
         {
             $resultcode = $success ? "successful" : "failed";
             $searchDetails->setRunResultCode($resultcode);
-            $searchDetails->setRunErrorDetails(array());
+            if($success === true)
+                $searchDetails->setRunErrorDetails(array());
         }
 
         if($success === false)
@@ -863,6 +864,7 @@ abstract class AbstractClassBaseJobsPlugin
 
             $searchDetails->setRunErrorDetails($srr);
         }
+        $searchDetails->save();
     }
 
 

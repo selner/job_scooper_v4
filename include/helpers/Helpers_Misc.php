@@ -435,7 +435,7 @@ function setSiteAsExcluded($excludedSite)
     if(array_key_exists($excludedSite, $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'])) {
         foreach($GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'][$excludedSite] as $search)
         {
-            $search->setRunResult("excluded");
+            $search->setRunResultCode("excluded");
             $search->save();
         }
     }

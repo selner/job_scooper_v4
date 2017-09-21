@@ -43,8 +43,6 @@ function object_to_array($obj)
         $val = (is_array($val) || is_object($val)) ? object_to_array($val) : $val;
         $arr[$key] = $val;
     }
-    unset($key);
-    unset($val);
 
     return $arr;
 }
