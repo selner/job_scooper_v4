@@ -62,7 +62,7 @@
 }
 
 .CSVTable tr:nth-child(odd) {
-    background-color: #77bb66;
+    background-color: #e7dcd7;
 }
 
 .CSVTable tr:nth-child(even) {
@@ -96,12 +96,12 @@
 }
 
 .CSVTable tr:first-child td {
-    background: -o-linear-gradient(bottom, #116644 5%, #116644 100%);
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #116644), color-stop(1, #116644));
-    background: -moz-linear-gradient(center top, #116644 5%, #116644 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#116644", endColorstr="#116644");
-    background: -o-linear-gradient(top, #116644, 005 fbf);
-    background-color: #116644;
+    background: -o-linear-gradient(bottom, #49332D 5%, #49332D 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #49332D), color-stop(1, #49332D));
+    background: -moz-linear-gradient(center top, #49332D 5%, #49332D 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#49332D", endColorstr="#49332D");
+    background: -o-linear-gradient(top, #49332D, 005 fbf);
+    background-color: #49332D;
     border: 0px solid #000000;
     text-align: center;
     border-width: 0px 0px 1px 1px;
@@ -112,12 +112,12 @@
 }
 
 .CSVTable tr:first-child:hover td {
-    background: -o-linear-gradient(bottom, #116644 5%, #116644 100%);
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #116644), color-stop(1, #116644));
-    background: -moz-linear-gradient(center top, #116644 5%, #116644 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#116644", endColorstr="#116644");
-    background: -o-linear-gradient(top, #116644, 005 fbf);
-    background-color: #116644;
+    background: -o-linear-gradient(bottom, #49332D 5%, #49332D 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #49332D), color-stop(1, #49332D));
+    background: -moz-linear-gradient(center top, #49332D 5%, #49332D 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#49332D", endColorstr="#49332D");
+    background: -o-linear-gradient(top, #49332D, 005 fbf);
+    background-color: #49332D;
 }
 
 .CSVTable tr:first-child td:first-child {
@@ -132,7 +132,7 @@
 
 
 .odd_row {
-    background-color: #b2e0b0;
+    background-color: #e7dcd7;
 }
 
 .even_row {
@@ -140,12 +140,12 @@
 }
 
 .CSVTableHeaderRow {
-    background: -o-linear-gradient(bottom, #116644 5%, #116644 100%);
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #116644), color-stop(1, #116644));
-    background: -moz-linear-gradient(center top, #116644 5%, #116644 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#116644", endColorstr="#116644");
-    background: -o-linear-gradient(top, #116644, 005 fbf);
-    background-color: #116644;
+    background: -o-linear-gradient(bottom, #49332D 5%, #49332D 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #49332D), color-stop(1, #49332D));
+    background: -moz-linear-gradient(center top, #49332D 5%, #49332D 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#49332D", endColorstr="#49332D");
+    background: -o-linear-gradient(top, #49332D, 005 fbf);
+    background-color: #49332D;
     border: 0px solid #000000;
     text-align: center;
     border-width: 0px 0px 1px 1px;

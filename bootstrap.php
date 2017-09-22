@@ -15,7 +15,7 @@
  * under the License.
  */
 
-define('__APP_VERSION__', "Job Scooper v4.0.0-use-propel-orm");
+define('__APP_VERSION__', "Job Scooper v4.1.0-use-propel-orm");
 define('MAX_FILE_SIZE', 5000000);
 
 //use Doctrine\ORM\Tools\Setup;
