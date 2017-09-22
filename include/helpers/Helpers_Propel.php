@@ -17,6 +17,10 @@
 require_once __ROOT__ . "/bootstrap.php";
 
 
+use JobScooper\Map\UserSearchRunTableMap;
+use JobScooper\Map\UserJobMatchTableMap;
+use JobScooper\Map\JobPostingTableMap;
+use JobScooper\Map\JobSitePluginTableMap;
 
 
 
@@ -32,7 +36,6 @@ require_once __ROOT__ . "/bootstrap.php";
  *
  *
  ******************************************************************************/
-
 
 
 
@@ -121,19 +124,6 @@ function updateOrCreateJobPosting($jobArray)
 
 }
 
-//
-//function getUserJobMatchesForAppRun()
-//{
-//    $userObject = $GLOBALS['USERDATA']['configuration_settings']['user_details'];
-//    $query = \JobScooper\UserJobMatchQuery::create()
-//        ->filterByUserMatchStatus(null)
-//        ->filterByUserSlug($userObject->getUserSlug())
-////        ->filterBy("AppRunId", $GLOBALS['USERDATA']['configuration_settings']['app_run_id'])
-//        ->joinWithJobPosting();
-//
-//    $results =  $query->find();
-//    return $results->getData();
-//}
 
 function getAllUserMatchesNotNotified()
 {
@@ -146,6 +136,44 @@ function getAllUserMatchesNotNotified()
 
     $results =  $query->find();
     return $results->getData();
+}
+
+function getAllSearchesThatWereIncluded()
+{
+    $arrSearchesRun = array();
+
+    foreach($GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'] as $siteSearches)
+    {
+        if(is_array($siteSearches))
+            foreach($siteSearches as $search)
+            {
+                $arrSearchesRun[$search->getKey()] = $search;
+            }
+    }
+
+    return $arrSearchesRun;
+}
+function getAllJobSitesThatWereLastRun()
+{
+    $runSearches = getAllSearchesThatWereLastRun();
+    $jobSitesRun = array_unique(array_column($runSearches, 'JobSiteKey'));
+    return $jobSitesRun;
+}
+
+function getAllSearchesThatWereLastRun()
+{
+    $lastSearches = getAllSearchesThatWereIncluded();
+    return $lastSearches;
+
+//    $valSet = UserSearchRunTableMap::getValueSet(UserSearchRunTableMap::COL_RUN_RESULT);
+//    $didRunVals = array(array_search("successful", $valSet),array_search("failed", $valSet));
+//
+//    $runSearches = array_filter($lastSearches, function ($var) use ($didRunVals) {
+//        return in_array($var->getRunResultCode(), $didRunVals);
+//    });
+//
+//    return $runSearches;
+
 }
 
 /******************************************************************************

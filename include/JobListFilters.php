@@ -15,7 +15,6 @@
  * under the License.
  */
 
-
 //
 // Jobs List Filter Functions
 //
@@ -45,8 +44,11 @@ function isSuccessfulUserMatch($var)
 {
     if (method_exists($var, "getUserMatchStatus") === true)
     {
+//        $valSet = \JobScooper\Map\UserJobMatchTableMap::getValueSet(\JobScooper\Map\UserJobMatchTableMap::COL_USER_MATCH);
+//        $didMatchVals = array(array_search("none", $valSet),array_search("include-match", $valSet));
+//
         $matchStatus = $var->getUserMatchStatus();
-        if(in_array($matchStatus, array("none", "include-match", null)))
+        if(in_array($matchStatus, array("none", "include-match")))
             return true;
     }
     else

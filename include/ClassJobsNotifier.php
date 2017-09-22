@@ -27,6 +27,8 @@ class ClassJobsNotifier
     protected $siteName = "ClassJobsNotifier";
     protected $arrMatchedJobs = array();
     protected $arrExcludedJobs = array();
+    protected $arrAllUnnotifiedJobs = array();
+
     protected $pathsMatchedJobs = array();
 
     protected $pathsAllExcludedJobs = array();

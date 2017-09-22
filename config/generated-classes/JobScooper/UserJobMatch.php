@@ -35,6 +35,7 @@ class UserJobMatch extends BaseUserJobMatch
     public function __construct()
     {
         $this->setAppRunId($GLOBALS['USERDATA']['configuration_settings']['app_run_id']);
+        parent::__construct();
     }
 
     private $delim = ' | ';
