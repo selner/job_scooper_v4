@@ -737,7 +737,7 @@ class ClassJobsNotifier
         {
             $strOut .= PHP_EOL . "<div class=\"job_scooper section\">" . PHP_EOL;
             $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
-            $strOut .= '<H2>No new jobs found for review..</H2>' . PHP_EOL . PHP_EOL;
+            $strOut .= '<H2>No new jobs found for review.</H2>' . PHP_EOL . PHP_EOL;
             $strOut .= PHP_EOL . PHP_EOL;
             $strOut .= "</div>";
             $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
