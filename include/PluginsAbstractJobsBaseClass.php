@@ -27,11 +27,17 @@ abstract class AbstractClassBaseJobsPlugin
     protected $strBaseURLFormat = null;
     protected $siteBaseURL = null;
     protected $typeLocationSearchNeeded = null;
-    protected $siteName = 'NAME-NOT-SET';
+    protected $siteName = null;
     private $userObject = null;
 
     function __construct()
     {
+        if(is_null($this->siteName) || strlen($this->siteName) == 0) {
+            $classname = get_class($this);
+            if (preg_match('/^Plugin(\w+)/', $classname, $matches) > 0) {
+                $this->siteName = $matches[1];
+            }
+        }
 
 //       if (array_key_exists("JOBSITE_PLUGINS", $GLOBALS) && (array_key_exists(strtolower($this->siteName), $GLOBALS['JOBSITE_PLUGINS']))) {
 //            $plugin = $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->siteName)];

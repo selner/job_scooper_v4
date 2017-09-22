@@ -20,8 +20,18 @@ require_once dirname(dirname(dirname(__FILE__)))."/bootstrap.php";
 class BaseForceComClass extends ClassClientHTMLJobSitePlugin
 {
     protected $additionalLoadDelaySeconds = 3;
-    protected $nJobListingsPerPage = 50;
+    protected $nJobListingsPerPage = 25;
     protected $paginationType = C__PAGINATION_PAGE_VIA_CALLBACK;
+
+    function __construct()
+    {
+        parent::__construct();
+
+        if(is_null($this->strBaseURLFormat) || strlen($this->strBaseURLFormat) == 0) {
+            $this->siteBaseURL = "http://" . strtolower($this->siteName) . ".force.com/careers";
+            $this->strBaseURLFormat = "http://" . strtolower($this->siteName) . ".force.com/careers";
+        }
+    }
 
     function takeNextPageAction($nItem=null, $nPage=null)
     {
@@ -63,6 +73,18 @@ class PluginAltasource extends BaseForceComClass
 {
     protected $siteName = 'Altasource';
     protected $siteBaseURL = "http://altasourcegroup.force.com";
-    protected $nJobListingsPerPage = 25;
     protected $strBaseURLFormat = "http://altasourcegroup.force.com/careers";
+
+}
+
+
+class PluginSlalom extends BaseForceComClass
+{
+    function __construct()
+    {
+        parent::__construct();
+        $this->arrListingTagSetup['tag_department'] = null;
+        $this->arrListingTagSetup['tag_location']['index'] = 1;
+        $this->arrListingTagSetup['tag_job_posting_date']['index'] = 2;
+    }
 }
