@@ -1470,6 +1470,7 @@ abstract class AbstractClassBaseJobsPlugin
                                         //
                                         try {
                                             $this->takeNextPageAction($this->getItemURLValue($nItemCount), $this->getPageURLValue($nPageCount));
+                                            sleep($this->additionalLoadDelaySeconds+2);
                                         } catch (Exception $ex) {
                                             handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
                                         }

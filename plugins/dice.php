@@ -33,6 +33,5 @@ abstract class AbstractDice extends ClassClientHTMLJobSitePlugin
         ";
 
         $this->runJavaScriptSnippet($js, false);
-        sleep($this->additionalLoadDelaySeconds+2);
    }
 }
