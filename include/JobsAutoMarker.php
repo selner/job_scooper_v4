@@ -31,7 +31,7 @@ class JobsAutoMarker
     protected $siteName = "JobsAutoMarker";
     protected $arrLatestJobs_UnfilteredByUserInput = array();
     protected $arrMasterJobList = array();
-    protected $cbsaList  = array();
+    protected $cbsaList  = null;
     protected $normalizer  = null;
     protected $userMatchedCBSAPlaces  = array();
     protected $cbsaLocSetMapping = array();
@@ -45,44 +45,52 @@ class JobsAutoMarker
 
         $this->normalizer = new Normalize();
 
-        $this->cbsaList = loadJSON(__ROOT__.'/include/static/cbsa_list.json');
-        $cbsaCityMapping = loadCSV(__ROOT__.'/include/static/us_place_to_csba_mapping.csv', 'PlaceKey');
-
-        foreach($GLOBALS['USERDATA']['configuration_settings']['location_sets'] as $locset)
-        {
-            if(array_key_exists('location-city', $locset) === true && (array_key_exists('location-statecode', $locset)))
-            {
-                $cityName = $this->_normalizeLocation_($locset['location-city'])."_".strtoupper($locset['location-statecode']);
-                $placekey = strtoupper($cityName);
-                $cbsa = $cbsaCityMapping[$placekey];
-                $this->cbsaLocSetMapping[$locset['key']] = $cbsa['CBSA'];
-            }
-            elseif(array_key_exists('location-city', $locset) === true)
-            {
-                $cityName = $this->_normalizeLocation_($locset['location-city']);
-                $this->locationCities[$this->getLocationLookupKey($cityName)] = $cityName;
-            }
-        }
-
-        $this->validCities = array();
-
-        $cbsaInUsa = array_unique($this->cbsaLocSetMapping);
-        foreach($cbsaCityMapping as $place)
-        {
-            $placeName = $this->_normalizeLocation_($place['Place'] . ", " . $place['StateCode'] );
-            $placeKey = $this->getLocationLookupKey($placeName);
-            $this->validCityValues[$placeKey] = $placeName;
-            if(array_search($place['CBSA'], $cbsaInUsa) !== false)
-            {
-                $this->userMatchedCBSAPlaces[$place['PlaceKey']] = $place;
-            }
-        }
-
-        unset($locset);
-        unset($cbsaCityMapping);
-        
     }
 
+    private function _loadCityData()
+    {
+
+        if(is_null($this->cbsaList))
+        {
+            LogLine("Loading city data", \C__DISPLAY_ITEM_DETAIL__);
+
+            $this->cbsaList = loadJSON(__ROOT__.'/include/static/cbsa_list.json');
+            $cbsaCityMapping = loadCSV(__ROOT__.'/include/static/us_place_to_csba_mapping.csv', 'PlaceKey');
+
+            foreach($GLOBALS['USERDATA']['configuration_settings']['location_sets'] as $locset)
+            {
+                if(array_key_exists('location-city', $locset) === true && (array_key_exists('location-statecode', $locset)))
+                {
+                    $cityName = $this->_normalizeLocation_($locset['location-city'])."_".strtoupper($locset['location-statecode']);
+                    $placekey = strtoupper($cityName);
+                    $cbsa = $cbsaCityMapping[$placekey];
+                    $this->cbsaLocSetMapping[$locset['key']] = $cbsa['CBSA'];
+                }
+                elseif(array_key_exists('location-city', $locset) === true)
+                {
+                    $cityName = $this->_normalizeLocation_($locset['location-city']);
+                    $this->locationCities[$this->getLocationLookupKey($cityName)] = $cityName;
+                }
+            }
+
+            $this->validCities = array();
+
+            $cbsaInUsa = array_unique($this->cbsaLocSetMapping);
+            foreach($cbsaCityMapping as $place)
+            {
+                $placeName = $this->_normalizeLocation_($place['Place'] . ", " . $place['StateCode'] );
+                $placeKey = $this->getLocationLookupKey($placeName);
+                $this->validCityValues[$placeKey] = $placeName;
+                if(array_search($place['CBSA'], $cbsaInUsa) !== false)
+                {
+                    $this->userMatchedCBSAPlaces[$place['PlaceKey']] = $place;
+                }
+            }
+
+            unset($locset);
+            unset($cbsaCityMapping);
+        }
+    }
     function __destruct()
     {
         LogLine("Closing ".$this->siteName." instance of class " . get_class($this), \C__DISPLAY_ITEM_DETAIL__);
@@ -224,6 +232,7 @@ class JobsAutoMarker
 
             LogLine("Marking Out of Area Jobs", \C__DISPLAY_ITEM_START__);
 
+            $this->_loadCityData();
             $nJobsSkipped = 0;
             $nJobsMarkedAutoExcluded = 0;
             $nJobsNotMarked = 0;
