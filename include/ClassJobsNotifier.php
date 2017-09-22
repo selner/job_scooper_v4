@@ -727,8 +727,17 @@ class ClassJobsNotifier
         if(!is_null($detailsHTMLBodyInclude) && array_key_exists('has_file', $detailsHTMLBodyInclude) && $detailsHTMLBodyInclude['has_file'] == true ) {
             $strOut .= PHP_EOL . "<div class=\"job_scooper section\">" . PHP_EOL;
             $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
-            $strOut .= '<H2>New Job Matches</H2>' . PHP_EOL . PHP_EOL;
+            $strOut .= '<H2>New Jobs for Review</H2>' . PHP_EOL . PHP_EOL;
             $strOut .= $this->_getFullFileContents_($detailsHTMLBodyInclude);
+            $strOut .= PHP_EOL . PHP_EOL;
+            $strOut .= "</div>";
+            $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
+        }
+        else
+        {
+            $strOut .= PHP_EOL . "<div class=\"job_scooper section\">" . PHP_EOL;
+            $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
+            $strOut .= '<H2>No new jobs found for review..</H2>' . PHP_EOL . PHP_EOL;
             $strOut .= PHP_EOL . PHP_EOL;
             $strOut .= "</div>";
             $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
