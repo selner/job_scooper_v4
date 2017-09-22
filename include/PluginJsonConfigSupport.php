@@ -135,11 +135,12 @@ class JSONPlugins
                     );
                 }
             }
-            if(isset($GLOBALS['logger']))
-                $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($pluginData) . " JSON configs for new plugins.", \C__DISPLAY_ITEM_DETAIL__);
-
-            return $pluginData;
         }
+
+        if(isset($GLOBALS['logger']))
+            $GLOBALS['logger']->logLine("Loaded JSON config for new plugin: " . $pluginData['siteName'], \C__DISPLAY_ITEM_DETAIL__);
+
+        return $pluginData;
 
     }
 
@@ -184,7 +185,7 @@ class JSONPlugins
 
         foreach($this->pluginConfigs as $configData) {
             $retSetup = $this->_parsePluginConfig_($configData);
-            $arrPluginSetups[$retSetup['siteName']] = $retSetup;
+            $arrPluginSetups[cleanupSlugPart($configData['AgentName'])] = $retSetup;
 
             if(isset($GLOBALS['logger']))
                 print("Initializing JSON plugin for " . $retSetup['siteName'] . PHP_EOL);
