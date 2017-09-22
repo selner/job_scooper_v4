@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 PROPEL=`pwd`"/vendor/bin/propel"
-ROOTDIR=`pwd`
+CODEDIR=`pwd`
 CONFIGDIR=`pwd`"/config"
-OUTDIR=`echo $JOBSCOOPER_OUTPUT`
+OUTDIR=`echo ${JOBSCOOPER_OUTPUT}`
 NOW=$(date "+%F-%H-%M-%S")
-
+
 echo "Moving current db to backup ($OUTDIR/job_scooper_db.sq3)..."
 mv "$OUTDIR/job_scooper_db.sq3" "$OUTDIR/job_scooper_db.sq3.backup-"$NOW
 cd $CONFIGDIR
@@ -16,6 +16,8 @@ $PROPEL config:convert -vvv
 $PROPEL build -vvv
 $PROPEL sql:build --overwrite -vvv
 $PROPEL sql:insert -vvv
+
+cp -f "$OUTDIR/job_scooper_db.sq3" "$CODEDIR/examples/job_scooper_db.sq3"
 
 cd ..
 composer dump
