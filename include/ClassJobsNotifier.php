@@ -28,6 +28,7 @@ class ClassJobsNotifier
     protected $arrMatchedJobs = array();
     protected $arrExcludedJobs = array();
     protected $arrAllUnnotifiedJobs = array();
+    protected $arrJobSitesForRun = null;
 
     protected $pathsMatchedJobs = array();
 
@@ -136,6 +137,15 @@ class ClassJobsNotifier
     }
 
 
+    protected function _isIncludedJobSite($var)
+    {
+
+        if(is_null($this->arrJobSitesForRun))
+            $this->arrJobSitesForRun = getAllJobSitesThatWereLastRun();
+
+        return in_array(strtolower($var->getJobPosting()->getJobSite()), $this->arrJobSitesForRun);
+
+    }
 
     function processNotifications()
     {
@@ -159,21 +169,21 @@ class ClassJobsNotifier
         $arrResultFilesToCombine = array();
 
         $arrUnnotifiedJobsAllRuns = getAllUserMatchesNotNotified();
-        $this->arrAllUnnotifiedJobs = array_filter($arrUnnotifiedJobsAllRuns, 'isIncludedJobSite' );
+        $this->arrAllUnnotifiedJobs = array_filter($arrUnnotifiedJobsAllRuns, array($this, '_isIncludedJobSite') );
         $detailsHTMLFile = null;
 
         //
         // For our final output, we want the jobs to be sorted by company and then role name.
         // Create a copy of the jobs list that is sorted by that value.
         //
-        $arrJobsData = $this->arrAllUnnotifiedJobs;
+        $this->arrMatchedJobs = array_filter($this->arrAllUnnotifiedJobs, "isSuccessfulUserMatch");
         $this->arrExcludedJobs = array_filter($this->arrAllUnnotifiedJobs, "isNotUserJobMatch");
 
         $GLOBALS['logger']->logLine(PHP_EOL . "Writing final list of " . count($this->arrAllUnnotifiedJobs) . " jobs to output files." . PHP_EOL, \C__DISPLAY_NORMAL__);
 
         // Output only new records that haven't been looked at yet
-        $detailsCSVFile = parseFilePath($this->_outputFilteredJobsListToFile_($this->arrAllUnnotifiedJobs, "isSuccessfulUserMatch", "-finalmatchedjobs", "CSV"));
-        $detailsHTMLFile = parseFilePath($this->_outputFilteredJobsListToFile_($this->arrAllUnnotifiedJobs, "isSuccessfulUserMatch", "-finalmatchedjobs", "HTML"));
+        $detailsCSVFile = parseFilePath($this->_outputFilteredJobsListToFile_($this->arrMatchedJobs, null, "-finalmatchedjobs", "CSV"));
+        $detailsHTMLFile = parseFilePath($this->_outputFilteredJobsListToFile_($this->arrMatchedJobs, null, "-finalmatchedjobs", "HTML"));
 
         $arrResultFilesToCombine[] = $detailsCSVFile;
         $arrFilesToAttach[] = $detailsCSVFile;
@@ -200,7 +210,7 @@ class ClassJobsNotifier
         $GLOBALS['logger']->logSectionHeader("Generating text html content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
 
 
-        $messageHtml = $this->getListingCountsByPlugin("html", $this->arrAllUnnotifiedJobs, $this->arrExcludedJobs, $detailsHTMLFile);
+        $messageHtml = $this->getListingCountsByPlugin("html", $this->arrMatchedJobs, $this->arrExcludedJobs, $detailsHTMLFile);
 
         $this->_wrapCSSStyleOnHTML_($messageHtml);
         $subject = "New Job Postings: " . getRunDateRange();
@@ -510,7 +520,7 @@ class ClassJobsNotifier
     }
 
 
-    private function getListingCountsByPlugin($fLayoutType, $arrPluginJobsUnfiltered = null, $arrExcludedJobs = null, $detailsHTMLBodyInclude = null)
+    private function getListingCountsByPlugin($fLayoutType, $arrMatchedJobs = null, $arrExcludedJobs = null, $detailsHTMLBodyInclude = null)
     {
 
         $arrCounts = array();
@@ -524,8 +534,8 @@ class ClassJobsNotifier
         foreach($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $plugin) {
 
             $arrPluginJobMatches  = array();
-            if ($arrPluginJobsUnfiltered != null && is_array($arrPluginJobsUnfiltered) && countJobRecords($arrPluginJobsUnfiltered) > 0) {
-                $arrPluginJobMatches = array_filter($arrPluginJobsUnfiltered, function ($var) use ($plugin) { return (strcasecmp($var->getJobPosting()->getJobSite(), $plugin) == 0); } );
+            if ($arrMatchedJobs != null && is_array($arrMatchedJobs) && countJobRecords($arrMatchedJobs) > 0) {
+                $arrPluginJobMatches = array_filter($arrMatchedJobs, function ($var) use ($plugin) { return (strcasecmp($var->getJobPosting()->getJobSite(), $plugin) == 0); } );
             }
 
             $arrPluginExcludesJobs  = array();
