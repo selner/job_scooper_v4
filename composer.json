@@ -33,7 +33,6 @@
     ],
     "require": {
         "php": ">=5.6.0",
-        "doctrine/orm": "*",
         "symfony/yaml": "2.*",
         "composer/composer": "*",
         "selner/scooperlib": "master",

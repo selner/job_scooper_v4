@@ -20,8 +20,18 @@ require_once dirname(dirname(dirname(__FILE__)))."/bootstrap.php";
 class BaseForceComClass extends ClassClientHTMLJobSitePlugin
 {
     protected $additionalLoadDelaySeconds = 3;
-    protected $nJobListingsPerPage = 50;
+    protected $nJobListingsPerPage = 25;
     protected $paginationType = C__PAGINATION_PAGE_VIA_CALLBACK;
+
+    function __construct()
+    {
+        parent::__construct();
+
+        if(is_null($this->strBaseURLFormat) || strlen($this->strBaseURLFormat) == 0) {
+            $this->siteBaseURL = "http://" . strtolower($this->siteName) . ".force.com/careers";
+            $this->strBaseURLFormat = "http://" . strtolower($this->siteName) . ".force.com/careers";
+        }
+    }
 
     function takeNextPageAction($nItem=null, $nPage=null)
     {
@@ -42,33 +52,18 @@ class BaseForceComClass extends ClassClientHTMLJobSitePlugin
         $this->runJavaScriptSnippet($nextPageJS, false);
     }
 
-    function parseTotalResultsCount($objSimpHTML)
-    {
-        $nTotalResults = C__TOTAL_ITEMS_UNKNOWN__;
 
-        //
-        // Find the HTML node that holds the result count
-        $nodeCounts = $objSimpHTML->find("div[id='atsSearchResultsText']");
-        if($nodeCounts != null && is_array($nodeCounts) && isset($nodeCounts[0]))
-        {
-            $counts = explode("&nbsp", $nodeCounts[0]->plaintext);
-            $nTotalResults = \Scooper\intceil($counts[0]);
-        } 
-
-
-        return $nTotalResults;
-
-    }
 
     protected $arrListingTagSetup = array(
+        'tag_listings_count' => array('selector' => 'div#atsSearchResultsText', 'return_value_regex' => '/(\d+).*?/'),
         'tag_listings_section' => array('selector' => "table.atsSearchResultsTable tbody tr"),
-        'tag_title' =>  array(array('tag' => 'td', 'index' => 0), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
-        'tag_link' =>  array(array('tag' => 'td', 'index' => 0), array('tag' => 'a'), 'return_attribute' => 'href'),
-        'tag_department' =>  array(array('tag' => 'td'), array('tag' => 'span'), 'index' => 0),
-        'tag_location' =>  array(array('tag' => 'td'), array('tag' => 'span'), 'index' => 1),
-        'tag_company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
-        'tag_next_button' => array('selector' => '#j_id0:j_id1:atsForm:j_id154'),
-        'regex_link_job_id' => '/.*?jobId=([^&]+)/i'
+        'tag_title' =>  array('selector' => 'td a', 'index' => 0, 'return_attribute' => 'plaintext'),
+        'tag_link' =>  array('selector' => 'td a', 'index' => 0, 'return_attribute' => 'href'),
+        'tag_job_id' =>  array('selector' => 'td a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' => '/.*?jobId=(\w+)&.*?/'),
+        'tag_department' =>  array('selector' => 'td span', 'index' => 1, 'return_attribute' => 'plaintext'),
+        'tag_location' =>  array('selector' => 'td span', 'index' => 2, 'return_attribute' => 'plaintext'),
+        'tag_job_posting_date' =>  array('selector' => 'td  pan', 'index' => 3, 'return_attribute' => 'plaintext'),
+        'tag_company' =>  array('return_value_callback' => 'setCompanyToSiteName')
     );
 
 }
@@ -78,6 +73,19 @@ class PluginAltasource extends BaseForceComClass
 {
     protected $siteName = 'Altasource';
     protected $siteBaseURL = "http://altasourcegroup.force.com";
-    protected $nJobListingsPerPage = 25;
     protected $strBaseURLFormat = "http://altasourcegroup.force.com/careers";
+
+}
+
+
+class PluginSlalom extends BaseForceComClass
+{
+    function __construct()
+    {
+        $this->siteName = 'Slalom';
+        parent::__construct();
+        $this->arrListingTagSetup['tag_department'] = null;
+        $this->arrListingTagSetup['tag_location']['index'] = 1;
+        $this->arrListingTagSetup['tag_job_posting_date']['index'] = 2;
+    }
 }
