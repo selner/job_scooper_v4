@@ -827,7 +827,7 @@ function getTodayAsString($delim = "-")
 function getArrayItem($key, $arr)
 {
     if(array_key_exists($key, $arr))
-        return stripslashes($arr[$key]);
+        return $arr[$key];
 
     return null;
 }

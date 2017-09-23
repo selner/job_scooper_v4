@@ -1,8 +1,8 @@
 {
-  "AgentName": "Cylcon",
-  "BaseURL": "http://www.cylcon.com/",
-  "SourceURL": "http://www.cylcon.com/jobs.php?q=***KEYWORDS***&l=***LOCATION***&sort=date&radius=50&start=***ITEM_NUMBER***",
-  "LocationType": "location-city-comma-statecode",
+  "AgentName" : "Cylcon",
+  "BaseURL" : "http://cylcon.com/",
+  "SourceURL" : "http://cylcon.com/jobs.php?q=***KEYWORDS***&l=***LOCATION***&sort=date&radius=50&start=***ITEM_NUMBER***",
+  "LocationType" : "location-city-comma-statecode",
   "AdditionalFlags" : ["C__JOB_ITEMCOUNT_STARTSATZERO__"],
   "Collections": [
     {
