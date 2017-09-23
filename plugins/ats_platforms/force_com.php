@@ -82,6 +82,7 @@ class PluginSlalom extends BaseForceComClass
 {
     function __construct()
     {
+        $this->siteName = 'Slalom';
         parent::__construct();
         $this->arrListingTagSetup['tag_department'] = null;
         $this->arrListingTagSetup['tag_location']['index'] = 1;
