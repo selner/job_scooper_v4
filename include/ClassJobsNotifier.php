@@ -301,30 +301,6 @@ class ClassJobsNotifier
 
     }
 
-    private function _filterAndWriteListToAlternateFile_($arrJobsList, $strFilterToApply, $strFileNameAppend, $strFileNameExt, $strFilterDescription = null, $fOverrideInterimFileOption = false)
-    {
-        if($strFileNameAppend == null && isset($strFilterToApply))
-        {
-            $strFileNameAppend = $strFilterToApply;
-        }
-
-        $details = $this->__getAlternateOutputFileDetails__("", $strFileNameAppend, $strFileNameExt);
-
-        $dataRet = $this->_filterAndWriteListToFile_($arrJobsList, $strFilterToApply, $details);
-
-        //
-        // If the user hasn't asked for interim files to be written,
-        // just return the filtered jobs.  Don't write the file.
-        //
-        if($fOverrideInterimFileOption == false && isDebug() !== true)
-        {
-            unlink($details['full_file_path']);
-            return $dataRet;
-        }
-
-        return $dataRet;
-    }
-
     function _getEmailAddressesByEmailType_($emailKind=null)
     {
 
@@ -820,9 +796,7 @@ class ClassJobsNotifier
         $arrCSVRecs = array();
         foreach($arrJobsRecordsToUse as $job)
         {
-            $item = $job->getJobPosting()->toArray();
-            $item['MatchStatus'] = $job->getUserMatchStatus();
-            $item['MatchNotes'] = $job->getMatchNotes();
+            $item = array_unique(array_merge($job->getJobPosting()->toArray(), $job->toArray()));
 
             $arrCSVRecs[$item['KeySiteAndPostID']] = $item;
         }
