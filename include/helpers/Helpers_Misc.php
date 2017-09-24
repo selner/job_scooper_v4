@@ -405,7 +405,6 @@ function getSearchesByRunResult($resultCode)
                     'keywords_string_for_url',
                     'base_url_format',
                     'keywords_array_tokenized',
-                    'user_setting_flags',
                     'search_start_url',
                     'location_set_key',
                     'location_user_specified_override',

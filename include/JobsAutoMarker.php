@@ -412,8 +412,11 @@ class JobsAutoMarker
     private function _getTitleKeywords()
     {
         $keywordsToMatch = array();
-        foreach ($GLOBALS['USERDATA']['configuration_settings']['searches'] as $searchDetails) {
+        $runSearches = getAllSearchesThatWereIncluded();
+
+        foreach ($runSearches as $searchDetails) {
             $search = $searchDetails->getSearchSettings();
+            $arrKwdSet = array();
             if(is_null($search))
                 return null;
             elseif (array_key_exists('keywords_array_tokenized', $search)) {
