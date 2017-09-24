@@ -688,8 +688,9 @@ class ClassJobsNotifier
             sort($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']);
 
             $strExcluded = getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'], ", ", "", false);
+            $strOut  .= "<H2>Excluded Job Sites</H2>".PHP_EOL. PHP_EOL;
 
-            $strOut .=  PHP_EOL .  "<span style=\"font-size: xx-small; color: #8e959c;\">Excluded sites for this run:" . $strExcluded . "</span>" . PHP_EOL;
+            $strOut .=  PHP_EOL .  "<span style=\"font-size: xx-small; \">Excluded sites for this run:" . $strExcluded . "</span>" . PHP_EOL;
             $strOut .= "</div>";
             $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
         }
