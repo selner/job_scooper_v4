@@ -217,7 +217,24 @@ class ClassJobsNotifier
         // Send the email notification out for the completed job
         //
         $GLOBALS['logger']->logSectionHeader("Sending email to user..." . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
+
+        try {
             $ret = $this->sendEmail($strResultText, $messageHtml, $arrFilesToAttach, $subject, "results");
+            if($ret !== false || $ret !== null)
+            {
+                $arrToMarkNotified = array_from_orm_object_list_by_array_keys($this->arrAllUnnotifiedJobs, array("JobPostingId"));
+                $ids = array_column($arrToMarkNotified, "JobPostingId");
+                $rowsAffected = \JobScooper\UserJobMatchQuery::create()
+                    ->filterByJobPostingId($ids)
+                    ->update(array('UserNotificationState' => 'sent'), null, true);
+                if($rowsAffected != count($arrToMarkNotified))
+                    LogLine("Warning:  marked only {count($rowsAffected)} of {count($arrToMarkNotified)} UserJobMatch records as notified.");
+            }
+
+        } catch (Exception $ex)
+        {
+            throw $ex;
+        }
 
         //
         // We only keep interim files around in debug mode, so
