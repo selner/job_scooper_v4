@@ -707,9 +707,10 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                     {
                         foreach($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $siteToSearch)
                         {
+                            $keyPrefix = \Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($keywordSet['key'], FOR_LOOKUP_VALUE_MATCHING);
                             $classPlug = new $GLOBALS['JOBSITE_PLUGINS'][$siteToSearch]['class_name'](null, null);
                             $thisSearch = $this->getEmptySearchDetailsRecord();
-                            $thisSearch ['key'] = \Scooper\strScrub($siteToSearch, FOR_LOOKUP_VALUE_MATCHING) . \Scooper\strScrub($keywordSet['key'], FOR_LOOKUP_VALUE_MATCHING);
+                            $thisSearch ['key'] = $keyPrefix;
                             $thisSearch ['site_name']  = $siteToSearch;
                             $thisSearch ['user_setting_flags'] = $keywordSet['keyword_match_type_flag'];
 
@@ -730,7 +731,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                                 foreach($arrKeys as $key)
                                 {
                                     $newSearch = \Scooper\array_copy($thisSearch);
-                                    $newSearch['key'] = $newSearch['key']."-".\Scooper\strScrub($key, FOR_LOOKUP_VALUE_MATCHING);
+                                    $newSearch['key'] = $keyPrefix . "-" .\Scooper\strScrub($key, FOR_LOOKUP_VALUE_MATCHING);
                                     $newSearch['keywords_array'] = array($keywordSet['keywords_array'][$key]);
                                     $newSearch['keywords_array_tokenized'] = array($keywordSet['keywords_array_tokenized'][$key]);
 
@@ -841,7 +842,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                     }
 
 
-                    $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['key'] = $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['key'] . "-loc-" . strtolower($primaryLocationSet['key']);
+                    $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['key'] = $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['key'] . "~" . strtolower($primaryLocationSet['key']);
 
                     // BUGBUG:  Workaround for a single plugin, Dice, to be able to get more than one location set parameter
                     $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_set_key'] = $primaryLocationSet['key'];
@@ -915,8 +916,8 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                         throw new IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' is not valid.", $locTypeNeeded));
 
                     $strOldSearchKey = $newSearch['key'] . "-" . strtolower($locSet['key']);
-                    if(substr_count($strOldSearchKey, "-loc-") > 0) { $strOldSearchKey = explode("-loc-", $strOldSearchKey)[0]; }
-                    $newSearch['key'] = $strOldSearchKey . "-loc-" . strtolower($locSet['key']);
+                    if(substr_count($strOldSearchKey, "~") > 0) { $strOldSearchKey = explode("~", $strOldSearchKey)[0]; }
+                    $newSearch['key'] = $strOldSearchKey . "~" . strtolower($locSet['key']);
                     $newSearch['location_search_value'] = $strSearchLocation;
 
                     // BUGBUG:  Workaround for a single plugin, Dice, to be able to get more than one location set parameter
