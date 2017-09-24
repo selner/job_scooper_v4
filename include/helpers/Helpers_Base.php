@@ -366,3 +366,15 @@ function strip_punctuation( $text )
         ' ',
         $text );
 }
+
+
+function array_subset(array $haystack, array $needle)
+{
+    return array_intersect_key($haystack, array_flip($needle));
+}
+
+function array_from_orm_object_list_by_array_keys(array $list, array $keysToReturn)
+{
+    return array_map(function ($v) use ($keysToReturn) {return array_subset($v->toArray(), $keysToReturn);} , $list);
+}
+

@@ -25,14 +25,8 @@ use JobScooper\JobPosting as JobPosting;
 class ClassJobsNotifier
 {
     protected $siteName = "ClassJobsNotifier";
-    protected $arrMatchedJobs = array();
-    protected $arrExcludedJobs = array();
     protected $arrAllUnnotifiedJobs = array();
     protected $arrJobSitesForRun = null;
-
-    protected $pathsMatchedJobs = array();
-
-    protected $pathsAllExcludedJobs = array();
 
     function __construct()
     {
@@ -176,21 +170,21 @@ class ClassJobsNotifier
         // For our final output, we want the jobs to be sorted by company and then role name.
         // Create a copy of the jobs list that is sorted by that value.
         //
-        $this->arrMatchedJobs = array_filter($this->arrAllUnnotifiedJobs, "isSuccessfulUserMatch");
-        $this->arrExcludedJobs = array_filter($this->arrAllUnnotifiedJobs, "isNotUserJobMatch");
+        $arrMatchedJobs = array_filter($this->arrAllUnnotifiedJobs, "isSuccessfulUserMatch");
+        $arrExcludedJobs = array_filter($this->arrAllUnnotifiedJobs, "isNotUserJobMatch");
 
         $GLOBALS['logger']->logLine(PHP_EOL . "Writing final list of " . count($this->arrAllUnnotifiedJobs) . " jobs to output files." . PHP_EOL, \C__DISPLAY_NORMAL__);
 
         // Output only new records that haven't been looked at yet
-        $detailsCSVFile = parseFilePath($this->_filterAndWriteListToFile_($this->arrMatchedJobs, null, "-finalmatchedjobs", "CSV"));
-        $detailsHTMLFile = parseFilePath($this->_filterAndWriteListToFile_($this->arrMatchedJobs, null, "-finalmatchedjobs", "HTML"));
+        $detailsCSVFile = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedJobs, null, "-finalmatchedjobs", "CSV"));
+        $detailsHTMLFile = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedJobs, null, "-finalmatchedjobs", "HTML"));
 
         $arrResultFilesToCombine[] = $detailsCSVFile;
         $arrFilesToAttach[] = $detailsCSVFile;
         $arrFilesToAttach[] =  $detailsHTMLFile;
 
 
-        $detailsExcludedCSVFile = parseFilePath($this->_filterAndWriteListToFile_($this->arrExcludedJobs, "isNotUserJobMatch", "-finalexcludedjobs", "CSV"));
+        $detailsExcludedCSVFile = parseFilePath($this->_filterAndWriteListToFile_($arrExcludedJobs, "isNotUserJobMatch", "-finalexcludedjobs", "CSV"));
 
         if ((filesize($detailsExcludedCSVFile['full_file_path']) < 10 * 1024 * 1024) || isDebug()) {
             $arrFilesToAttach[] = $detailsExcludedCSVFile;
@@ -204,13 +198,13 @@ class ClassJobsNotifier
 
         $GLOBALS['logger']->logSectionHeader("Generating text email content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
 
-        $strResultCountsText = $this->getListingCountsByPlugin("text", $this->arrAllUnnotifiedJobs, $this->arrExcludedJobs);
+        $strResultCountsText = $this->getListingCountsByPlugin("text", $this->arrAllUnnotifiedJobs, $arrExcludedJobs);
         $strResultText = "Job Scooper Results for ". getRunDateRange() . PHP_EOL . $strResultCountsText . PHP_EOL;
 
-        $GLOBALS['logger']->logSectionHeader("Generating text html content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
+        $GLOBALS['logger']->logSectionHeader("Generating html email content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
 
 
-        $messageHtml = $this->getListingCountsByPlugin("html", $this->arrMatchedJobs, $this->arrExcludedJobs, $detailsHTMLFile);
+        $messageHtml = $this->getListingCountsByPlugin("html", $arrMatchedJobs, $arrExcludedJobs, $detailsHTMLFile);
 
         $this->_wrapCSSStyleOnHTML_($messageHtml);
         $subject = "New Job Postings: " . getRunDateRange();
@@ -223,7 +217,7 @@ class ClassJobsNotifier
         // Send the email notification out for the completed job
         //
         $GLOBALS['logger']->logSectionHeader("Sending email to user..." . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
-        $ret = $this->sendEmail($strResultText, $messageHtml, $arrFilesToAttach, $subject, "results");
+            $ret = $this->sendEmail($strResultText, $messageHtml, $arrFilesToAttach, $subject, "results");
 
         //
         // We only keep interim files around in debug mode, so
@@ -634,10 +628,36 @@ class ClassJobsNotifier
         $arrCounts_TotalUser = null;
         $strOut = "<div class='job_scooper outer'>";
 
-        $strOut  .= "<H2>New Job Postings for " . getRunDateRange() . "</H2>".PHP_EOL. PHP_EOL;
+        $strOut  .= "<H1>Job Postings to Review for " . getRunDateRange() . "</H1>".PHP_EOL. PHP_EOL;
+
+        //
+        // Include the contents of the HTML file if passed
+        //
+        if(!is_null($detailsHTMLBodyInclude) && array_key_exists('has_file', $detailsHTMLBodyInclude) && $detailsHTMLBodyInclude['has_file'] == true ) {
+            $strOut .= PHP_EOL . "<div class=\"job_scooper section\">" . PHP_EOL;
+            $strOut .= $this->_getFullFileContents_($detailsHTMLBodyInclude);
+            $strOut .= PHP_EOL . PHP_EOL;
+            $strOut .= "</div>";
+            $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
+        }
+        else
+        {
+            $strOut .= PHP_EOL . "<div class=\"job_scooper section\">" . PHP_EOL;
+            $strOut  .= "No new jobs were found that matched your search terms.". PHP_EOL. PHP_EOL;
+            $strOut .= PHP_EOL . PHP_EOL;
+            $strOut .= "</div>";
+            $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
+        }
+
+        $strOut .=  PHP_EOL . "<div class=\"job_scooper section\">". PHP_EOL;
+        $strOut .=  PHP_EOL .  "<p style=\"min-height: 15px;\">&nbsp;</p><span style=\"font-size: xx-small; color: #49332D;\">Generated by " . gethostname() . " running " . __APP_VERSION__. " on " . getTodayAsString() . ".</span></p>" . PHP_EOL;
+        $strOut .= "</div>";
+        $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
+
 
         if($arrCounts != null && count($arrCounts) > 0)
         {
+            $strOut  .= "<H2>Search Results by Job Site</H2>".PHP_EOL. PHP_EOL;
             $strOut .= "<table id='resultscount' class='job_scooper'>" . PHP_EOL . "<thead>". PHP_EOL;
             $strOut .= "<th class='job_scooper' width='20%' align='left'>Job Site</td>" . PHP_EOL;
 
@@ -661,11 +681,6 @@ class ClassJobsNotifier
             $strOut .=  PHP_EOL . "</table>". PHP_EOL. PHP_EOL;
         }
 
-        $strOut .=  PHP_EOL . "<div class=\"job_scooper section\">". PHP_EOL;
-        $strOut .=  PHP_EOL .  "<p style=\"min-height: 15px;\">&nbsp;</p><span style=\"font-size: xx-small; color: #49332D;\">Generated by " . gethostname() . " running " . __APP_VERSION__. " on " . getTodayAsString() . ".</span></p>" . PHP_EOL;
-        $strOut .= "</div>";
-        $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
-
 
         if($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] != null && count($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']) > 0)
         {
@@ -679,28 +694,6 @@ class ClassJobsNotifier
             $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
         }
 
-
-        //
-        // Include the contents of the HTML file if passed
-        //
-        if(!is_null($detailsHTMLBodyInclude) && array_key_exists('has_file', $detailsHTMLBodyInclude) && $detailsHTMLBodyInclude['has_file'] == true ) {
-            $strOut .= PHP_EOL . "<div class=\"job_scooper section\">" . PHP_EOL;
-            $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
-            $strOut .= '<H2>New Jobs for Review</H2>' . PHP_EOL . PHP_EOL;
-            $strOut .= $this->_getFullFileContents_($detailsHTMLBodyInclude);
-            $strOut .= PHP_EOL . PHP_EOL;
-            $strOut .= "</div>";
-            $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
-        }
-        else
-        {
-            $strOut .= PHP_EOL . "<div class=\"job_scooper section\">" . PHP_EOL;
-            $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
-            $strOut .= '<H2>No new jobs found for review.</H2>' . PHP_EOL . PHP_EOL;
-            $strOut .= PHP_EOL . PHP_EOL;
-            $strOut .= "</div>";
-            $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
-        }
 
         return $strOut;
     }
@@ -743,12 +736,19 @@ class ClassJobsNotifier
         );
     }
 
-    private function getKeysForUserCSVOutput()
+    private function getKeysForUserCSVOutput($optimizedView=true)
     {
         $jobPost = new JobPosting();
-        $arrKeys = array_keys($jobPost->toArray());
-        $allKeys  = array_diff($arrKeys, array('TitleTokens', 'JobTitleLinked', 'JobPostingId', 'MatchStatus', 'MatchNotes', "FirstSeenAt", "RemovedAt", "PostedAt", "UpdatedAt", "JobSitePostID", "KeySiteAndPostID", "KeyCompanyAndTitle"));
-        return $allKeys;
+
+        if($optimizedView) {
+            $arrKeys = array_keys($jobPost->toArray());
+            $retKeys = array_diff($arrKeys, array('TitleTokens', 'JobTitleLinked', 'JobPostingId', 'MatchStatus', 'MatchNotes', "FirstSeenAt", "RemovedAt", "PostedAt", "UpdatedAt", "JobSitePostID", "KeySiteAndPostID", "KeyCompanyAndTitle"));
+        }
+        else {
+            $match = new \JobScooper\UserJobMatch();
+            $retKeys = array_merge(array_keys($jobPost->toArray()), array_keys($match->toArray()));
+        }
+        return $retKeys;
     }
 
 
