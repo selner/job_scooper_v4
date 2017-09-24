@@ -158,7 +158,7 @@ function getAllJobSitesThatWereLastRun()
     $sites = array();
     $runSearches = getAllSearchesThatWereLastRun();
     foreach($runSearches as $search)
-        $sites[] = $runSearches['craigslistit_titles-helpdesk-tier1-loc-seattle-loc-seattle']->getJobSiteKey();
+        $sites[] = $search->getJobSiteKey();
     return array_unique($sites);
 }
 
