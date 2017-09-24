@@ -11,16 +11,16 @@
       "Fields": [
         {
           "Name": "tag_listings_count",
-          "Selector": "div.rh-job-result-table__counter",
+          "Selector": "div.rh-job-result-table__counter label",
+          "Index" : 1,
           "Extract": "REGEX",
-          "Pattern": "/.*?(\\d+)/",
-          "Callback": "combineTextAllNodes",
-          "Attribute": null,
+          "Pattern": "/of\\s*(\\d+)/",
+          "Attribute": "plaintext",
           "Type": "CSS"
         },
         {
           "Name": "tag_listings_section",
-          "Selector": "div.row.rh-job-result-table__row",
+          "Selector": "div.row .rh-job-result-table__row",
           "Extract": "CSS",
           "Attribute": "collection",
           "Type": "CSS"
@@ -63,7 +63,7 @@
         },
         {
           "Name": "tag_job_id",
-          "Pattern": "/\/job\/([^?]+)/i",
+          "Pattern": "/\\/job\\/([^?]+)/i",
           "Extract": "REGEX",
           "Type": "REGEX",
           "Field": "job_post_url"

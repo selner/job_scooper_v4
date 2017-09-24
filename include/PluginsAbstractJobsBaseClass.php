@@ -1192,6 +1192,10 @@ abstract class AbstractClassBaseJobsPlugin
                     if (is_null($this->selenium)) {
                         $this->selenium = new SeleniumSession($this->additionalLoadDelaySeconds);
                     }
+
+                    if(method_exists($this, "doFirstPageLoad") && $nPageCount == 1)
+                        $html = $this->doFirstPageLoad($searchDetails);
+                    else
                     $html = $this->selenium->getPageHTML($searchDetails['search_start_url']);
                     $objSimpleHTML = SimpleHTMLHelper::str_get_html($html);
                 } catch (Exception $ex) {

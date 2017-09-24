@@ -89,3 +89,51 @@ class PluginSlalom extends BaseForceComClass
         $this->arrListingTagSetup['tag_job_posting_date']['index'] = 2;
     }
 }
+class PluginRobertHalfExecSearch extends BaseForceComClass
+{
+    protected $siteName= "RobertHalfExecSearch";
+    protected $siteBaseURL = "http://roberthalf.force.com";
+    protected $strBaseURLFormat = "http://roberthalf.force.com/careers";
+    protected $additionalFlags = [ C__JOB_USE_SELENIUM ];
+
+    function doFirstPageLoad($searchDetails)
+    {
+        $js = "
+            setTimeout(clickSearchButton, " . strval($this->additionalLoadDelaySeconds) .");
+
+            function clickSearchButton() 
+            {
+                var btnSearch = document.querySelector(\"input[value=Search]\");
+                if(btnSearch != null && !typeof(btnSearch.click) !== \"function\" && btnSearch.length >= 1) {
+                    btnSearch = btnSearch[0];
+                } 
+                
+                if(btnSearch != null && btnSearch.style.display === \"\") 
+                { 
+                    btnSearch.click();  
+                    console.log(\"Clicked search button control...\");
+                }
+                else
+                {
+                    console.log('Search button was not active.');
+                }
+            }  
+        ";
+
+        $this->selenium->getPageHTML($searchDetails['search_start_url']);
+
+        $this->runJavaScriptSnippet($js, false);
+        sleep($this->additionalLoadDelaySeconds + 2);
+
+        $html = $this->getActiveWebdriver()->getPageSource();
+        return $html;
+    }
+
+    function __construct()
+    {
+        parent::__construct();
+        $this->arrListingTagSetup['tag_department'] = null;
+        $this->arrListingTagSetup['tag_location']['index'] = 1;
+        $this->arrListingTagSetup['tag_job_posting_date']['index'] = 2;
+    }
+}
