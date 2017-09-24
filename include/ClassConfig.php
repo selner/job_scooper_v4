@@ -605,7 +605,14 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
     private function _addSearchesForKeywordSets_()
     {
 
-        $arrSearchesPreLocation = $GLOBALS['USERDATA']['configuration_settings']['defined-searches'];
+        foreach($GLOBALS['USERDATA']['configuration_settings']['defined-searches'] as &$searchDetails)
+        {
+            $searchSettings = new SearchSettings();
+            $searchSettings['keywords_array'] = $keywordSet['keywords_array'];
+            $searchSettings['keywords_array_tokenized'] = $keywordSet['keywords_array_tokenized'];
+
+        }
+
         //
         // explode any keyword sets we loaded into separate searches
         //
@@ -632,6 +639,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                             $searchSettings = new SearchSettings();
                             $searchSettings['keywords_array'] = $keywordSet['keywords_array'];
                             $searchSettings['keywords_array_tokenized'] = $keywordSet['keywords_array_tokenized'];
+                            $newSearch->setSearchSettings($searchSettings);
 
                             if ($plugin->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED)) {
                                 $arrSkippedPlugins[] = $siteToSearch;
@@ -641,13 +649,14 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                             if ($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
                                 $newSearch->setKey($siteToSearch . "-alljobs");
                                 $arrSearchesPreLocation[$newSearch->getKey()] = $newSearch;
-                            } else // if not, we need to add search for each keyword using that word as a single value in a keyword set
+                            }
+                            else // if not, we need to add search for each keyword using that word as a single value in a keyword set
                             {
                                 $arrKeys = array_keys($keywordSet['keywords_array']);
                                 foreach ($arrKeys as $kwdkey) {
                                     $thisSearch = $newSearch->copy();
+
                                     $thisSearch->setKey($keyPrefix . "-" . strScrub($kwdkey, FOR_LOOKUP_VALUE_MATCHING));
-                                    $searchSettings = new SearchSettings();
 
                                     $searchSettings['keywords_array'] = array($keywordSet['keywords_array'][$kwdkey]);
                                     $searchSettings['keywords_array_tokenized'] = array($keywordSet['keywords_array_tokenized'][$kwdkey]);
@@ -660,6 +669,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("No searches were set for keyword set " . $keywordSet['name'], \C__DISPLAY_ITEM_DETAIL__);
                     }
                 }
+
                 if (count($arrSkippedPlugins) > 0)
                     if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Keyword set " . $keywordSet['name'] . " did not generate searches for " . count($arrSkippedPlugins) . " plugins because they do not support keyword search: " . getArrayValuesAsString($arrSkippedPlugins, ", ", null, false) . ".", \C__DISPLAY_ITEM_DETAIL__);
             }

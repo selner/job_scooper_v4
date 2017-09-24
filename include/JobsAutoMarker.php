@@ -415,12 +415,12 @@ class JobsAutoMarker
         $runSearches = getAllSearchesThatWereIncluded();
 
         foreach ($runSearches as $searchDetails) {
-            $search = $searchDetails->getSearchSettings();
+            $searchSettings = $searchDetails->getSearchSettings();
             $arrKwdSet = array();
-            if(is_null($search))
+            if(is_null($searchSettings))
                 return null;
-            elseif (array_key_exists('keywords_array_tokenized', $search)) {
-                foreach ($search['keywords_array_tokenized'] as $kwdset) {
+            elseif (array_key_exists('keywords_array_tokenized', $searchSettings) && is_array($searchSettings['keywords_array_tokenized'])) {
+                foreach ($searchSettings['keywords_array_tokenized'] as $kwdset) {
                     $arrKwdSet[$kwdset] = explode(" ", $kwdset);
                 }
                 $keywordsToMatch = my_merge_add_new_keys($keywordsToMatch, $arrKwdSet);
