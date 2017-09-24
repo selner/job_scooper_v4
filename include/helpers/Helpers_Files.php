@@ -51,7 +51,7 @@ function loadCSV($filename, $indexKeyName = null)
 }
 
 
-function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strExt = '', $delim = "")
+function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strExt = '', $delim = "", $directoryKey = null)
 {
     $strFilename = '';
     if (strlen($strFilePrefix) > 0) $strFilename .= $strFilePrefix . "-";
@@ -63,6 +63,8 @@ function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strEx
     if (strlen($strBase) > 0) $strFilename .= "-" . $strBase;
     if (strlen($strExt) > 0) $strFilename .= "." . $strExt;
 
+    if(!is_null($directoryKey) && array_key_exists($directoryKey, $GLOBALS['USERDATA']['directories']))
+        $strFilename = $GLOBALS['USERDATA']['directories'][$directoryKey] . "/" . $strFilename;
     return $strFilename;
 }
 

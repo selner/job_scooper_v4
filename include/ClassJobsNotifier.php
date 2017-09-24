@@ -182,15 +182,15 @@ class ClassJobsNotifier
         $GLOBALS['logger']->logLine(PHP_EOL . "Writing final list of " . count($this->arrAllUnnotifiedJobs) . " jobs to output files." . PHP_EOL, \C__DISPLAY_NORMAL__);
 
         // Output only new records that haven't been looked at yet
-        $detailsCSVFile = parseFilePath($this->_outputFilteredJobsListToFile_($this->arrMatchedJobs, null, "-finalmatchedjobs", "CSV"));
-        $detailsHTMLFile = parseFilePath($this->_outputFilteredJobsListToFile_($this->arrMatchedJobs, null, "-finalmatchedjobs", "HTML"));
+        $detailsCSVFile = parseFilePath($this->_filterAndWriteListToFile_($this->arrMatchedJobs, null, "-finalmatchedjobs", "CSV"));
+        $detailsHTMLFile = parseFilePath($this->_filterAndWriteListToFile_($this->arrMatchedJobs, null, "-finalmatchedjobs", "HTML"));
 
         $arrResultFilesToCombine[] = $detailsCSVFile;
         $arrFilesToAttach[] = $detailsCSVFile;
         $arrFilesToAttach[] =  $detailsHTMLFile;
 
 
-        $detailsExcludedCSVFile = parseFilePath($this->_outputFilteredJobsListToFile_($this->arrExcludedJobs, "isNotUserJobMatch", "-finalexcludedjobs", "CSV"));
+        $detailsExcludedCSVFile = parseFilePath($this->_filterAndWriteListToFile_($this->arrExcludedJobs, "isNotUserJobMatch", "-finalexcludedjobs", "CSV"));
 
         if ((filesize($detailsExcludedCSVFile['full_file_path']) < 10 * 1024 * 1024) || isDebug()) {
             $arrFilesToAttach[] = $detailsExcludedCSVFile;
@@ -261,28 +261,11 @@ class ClassJobsNotifier
 
     }
 
-    private function __getAlternateOutputFileDetails__($strNamePrepend = "results", $strNameAppend = "", $ext = "")
+    private function _filterAndWriteListToFile_($arrJobsList, $strFilterToApply, $strFileNameBase, $strExt = "CSV")
     {
-        $fileName = getDefaultJobsOutputFileName($strNamePrepend, $strNameAppend, $ext, "");
-        $detailsRet = parseFilePath(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], $fileName)), false);
-        return $detailsRet;
-    }
+        $filePath = getDefaultJobsOutputFileName($strFileNameBase, $strFilterToApply, $strExt, "_", 'results');
 
-    private function _outputFilteredJobsListToFile_($arrJobsList, $strFilterToApply, $strFileNameBase, $strExt = "CSV")
-    {
-        if($strFileNameBase == null && isset($strFilterToApply))
-        {
-            $strFileNameBase = $strFilterToApply;
-        }
 
-        $details = $this->__getAlternateOutputFileDetails__("results", $strFileNameBase, $strExt );
-
-        return $this->_filterAndWriteListToFile_($arrJobsList, $strFilterToApply, $details);
-    }
-
-    private function _filterAndWriteListToFile_($arrJobsList, $strFilterToApply = null, $fileDetails)
-    {
-        assert(strlen($fileDetails['full_file_path'])>0);
         if(countJobRecords($arrJobsList) == 0) return $arrJobsList;
 
         if($strFilterToApply == null || function_exists($strFilterToApply) === false)
@@ -293,11 +276,11 @@ class ClassJobsNotifier
         else
             $arrJobs = array_filter($arrJobsList, $strFilterToApply);
 
-        $this->writeRunsJobsToFile($fileDetails['full_file_path'], $arrJobs, $strFilterToApply, $fileDetails['file_extension']);
+        $this->writeRunsJobsToFile($filePath, $arrJobs, $strFilterToApply, $strExt);
 
-        $GLOBALS['logger']->logLine($strFilterToApply . " " . count($arrJobs). " job listings output to  " . $fileDetails['full_file_path'], \C__DISPLAY_ITEM_RESULT__);
+        $GLOBALS['logger']->logLine($strFilterToApply . " " . count($arrJobs). " job listings output to  " . $filePath, \C__DISPLAY_ITEM_RESULT__);
 
-        return $fileDetails['full_file_path'];
+        return $filePath;
 
     }
 
