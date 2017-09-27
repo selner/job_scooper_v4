@@ -17,6 +17,7 @@
 
 define('__APP_VERSION__', "Job Scooper v4.1.0-use-propel-orm");
 define('MAX_FILE_SIZE', 5000000);
+ini_set('auto_detect_line_endings', true);
 
 //use Doctrine\ORM\Tools\Setup;
 if (file_exists(dirname(__FILE__).'/vendor/autoload.php')) {

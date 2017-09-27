@@ -91,22 +91,22 @@ Class ScooperLogger extends \Katzgrau\KLogger\Logger
                     break;
 
                 case C__DISPLAY_WARNING__:
-                    $strLineBeginning = PHP_EOL.PHP_EOL.'^^^^^^^^^^ "';
-                    $strLineEnd = '" ^^^^^^^^^^ '.PHP_EOL;
+                    $strLineBeginning = "\r\n"."\r\n".'^^^^^^^^^^ "';
+                    $strLineEnd = '" ^^^^^^^^^^ '."\r\n";
                     $logLevel = "warning";
                     break;
 
                 case C__DISPLAY_SUMMARY__:
 
-                    $strLineBeginning = PHP_EOL."************************************************************************************".PHP_EOL. PHP_EOL;
-                    $strLineEnd = PHP_EOL.PHP_EOL."************************************************************************************".PHP_EOL;
+                    $strLineBeginning = "\r\n"."************************************************************************************"."\r\n". "\r\n";
+                    $strLineEnd = "\r\n"."\r\n"."************************************************************************************"."\r\n";
 
                     $logLevel = "info";
                     break;
 
                 case C__DISPLAY_SECTION_START__:
-                    $strLineBeginning = PHP_EOL."####################################################################################".PHP_EOL. PHP_EOL;
-                    $strLineEnd = PHP_EOL.PHP_EOL."####################################################################################".PHP_EOL;
+                    $strLineBeginning = "\r\n"."####################################################################################"."\r\n". "\r\n";
+                    $strLineEnd = "\r\n"."\r\n"."####################################################################################"."\r\n";
 
                     $logLevel = "info";
                     break;
@@ -167,7 +167,7 @@ Class ScooperLogger extends \Katzgrau\KLogger\Logger
     {
         if($level == LOG_ERR) {  $this->arrCumulativeErrors[] = $message; }
 
-        print($message .PHP_EOL);
+        print($message ."\r\n");
         parent::log($level, $message, $context);
 
 
@@ -187,9 +187,9 @@ Class ScooperLogger extends \Katzgrau\KLogger\Logger
         {
 
             case(C__NAPPTOPLEVEL__):
-                if($nType == C__SECTION_BEGIN__) { $strPaddingBefore = PHP_EOL.PHP_EOL; }
+                if($nType == C__SECTION_BEGIN__) { $strPaddingBefore = "\r\n"."\r\n"; }
                 $strSeparatorChars = "#";
-                if($nType == C__SECTION_END__) { $strPaddingAfter = PHP_EOL.PHP_EOL; }
+                if($nType == C__SECTION_END__) { $strPaddingAfter = "\r\n"."\r\n"; }
                 break;
 
             case(C__NAPPFIRSTLEVEL__):
@@ -232,7 +232,7 @@ Class ScooperLogger extends \Katzgrau\KLogger\Logger
         {
             echo $strPaddingBefore;
             echo $strSectionIntroSeparatorLine;
-            echo ' '.$strSectionType.' '.PHP_EOL;
+            echo ' '.$strSectionType.' '."\r\n";
             echo $strSectionIntroSeparatorLine;
             if($nSectionLevel == C__NAPPTOPLEVEL__ )
             {
@@ -242,7 +242,7 @@ Class ScooperLogger extends \Katzgrau\KLogger\Logger
         }
         else // C__SECTION_END__ $strSectionType = "      Done.  ";}
         {
-            echo PHP_EOL . ' '.$strSectionType.' ' .PHP_EOL. $strSectionIntroSeparatorLine . PHP_EOL;
+            echo "\r\n" . ' '.$strSectionType.' ' ."\r\n". $strSectionIntroSeparatorLine . "\r\n";
         }
     }
 
