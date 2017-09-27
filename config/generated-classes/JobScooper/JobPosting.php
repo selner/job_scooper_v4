@@ -121,7 +121,7 @@ class JobPosting extends \JobScooper\Base\JobPosting implements \ArrayAccess
         $v = $this->_cleanupTextValue($v);
 
         if (is_null($v) || strlen($v) == 0) {
-            $v = '[UNKNOWN]';
+            $v = '[Listed on ' . $this->getJobSite() .']';
         } else {
             $v = strip_punctuation($v);
 
