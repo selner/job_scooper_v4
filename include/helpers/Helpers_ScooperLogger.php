@@ -71,6 +71,16 @@ Class ScooperLogger extends \Katzgrau\KLogger\Logger
         parent::__construct($strOutputDirPath, LogLevel::DEBUG);
 
         $GLOBALS['logger'] = $this;
+
+        $now = new DateTime('NOW');
+        $this->logLine("Logging started to {$strOutputDirPath} for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'), C__DISPLAY_NORMAL__);
+    }
+
+    function __destruct()
+    {
+        $now = new DateTime('NOW');
+        $this->logLine("Logging ended for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'),C__DISPLAY_NORMAL__);
+        parent::__destruct();
     }
 
 
