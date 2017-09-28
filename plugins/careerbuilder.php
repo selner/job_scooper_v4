@@ -69,9 +69,10 @@ class PluginCareerBuilderUK extends ClassClientHTMLJobSitePlugin
         'tag_listings_section' => array('selector' => 'article.job-list'),
         'tag_link' => array('selector' => 'a.job-title', 'return_attribute' => 'href'),
         'tag_title' => array('selector' => 'a.job-title', 'return_attribute' => 'plaintext'),
-        'tag_location' => array('selector' => 'ul.inline-list li span', 'index' => 0, 'return_attribute' => 'plaintext'),
-        'tag_category' => array('selector' => 'ul.inline-list li span', 'index' => 2, 'return_attribute' => 'plaintext'),
-//        'tag_job_posting_date' => array('selector' => 'ul.inline-list li', 'index' => 3, 'return_attribute' => 'plaintext', 'return_value_callback' => 'combineTextAllChildren', 'return_value_regex' => '/Posted\s*(.*?)/'),
+        'tag_location' => array('selector' => 'ul.inline-list li', 'index' => 0, 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Location\s*(\w+)\s*/'),
+        'tag_payrange' => array('selector' => 'ul.inline-list li', 'index' => 1, 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Type\s*(\w+)\s*/'),
+        'tag_category' => array('selector' => 'ul.inline-list li', 'index' => 2, 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Posted\s*Posted\s*(\w+)\s*/'),
+        'tag_job_posting_date' => array('selector' => 'ul.inline-list li span', 'index' => 4, 'return_attribute' => 'plaintext'),
         'tag_company' => array('selector' => 'a.show-for-large-up', 'index' => 0, 'return_attribute' => 'plaintext'),
         'tag_job_id' => array('selector' => 'a.job-title', 'return_attribute' => 'href', 'return_value_regex' => '/.*?\/(.*?)\/\?.*/'),
     );
