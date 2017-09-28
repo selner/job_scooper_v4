@@ -363,9 +363,6 @@ function getArrayItem($key, $arr)
         $ret = $arr[$key];
     }
 
-    if(is_string($ret))
-        $ret = stripslashes($ret);
-
     return $ret;
 }
 

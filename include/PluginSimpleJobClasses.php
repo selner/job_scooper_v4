@@ -334,6 +334,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
                 if (!is_null($propertyRegEx) && is_string($ret) && strlen($ret) > 0) {
                     $match = array();
+                    $propertyRegEx = str_replace("\\\\", "\\", $propertyRegEx);
                     if (preg_match($propertyRegEx, $ret, $match) !== false && count($match) >= 1)
                         $ret = $match[1];
                     else {

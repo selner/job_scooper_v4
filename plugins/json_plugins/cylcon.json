@@ -11,9 +11,9 @@
       "Fields": [
         {
           "Name": "tag_listings_count",
-          "Selector": "#searchCount",
+          "Selector": "div#searchCount",
           "Extract": "REGEX",
-          "Pattern": "/.*?of\\s+(\\d+).*?/",
+          "Pattern": "/.*?of\\s+(\\d+)/",
           "Attribute": null,
           "Type": "CSS"
         },
@@ -62,7 +62,7 @@
         {
           "Name": "tag_location",
           "Selector": "p strong span.location",
-          "Pattern": "/-(.*?).*/",
+          "Pattern": "/.*?[\\-]{1}(.*)/",
           "Extract": "TEXT",
           "Type": "CSS"
         },
