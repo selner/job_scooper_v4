@@ -760,7 +760,8 @@ class ClassJobsNotifier
 
         if($optimizedView) {
             $arrKeys = array_keys($jobPost->toArray());
-            $retKeys = array_diff($arrKeys, array('TitleTokens', 'JobTitleLinked', 'JobPostingId', 'MatchStatus', 'MatchNotes', "FirstSeenAt", "RemovedAt", "PostedAt", "UpdatedAt", "JobSitePostID", "KeySiteAndPostID", "KeyCompanyAndTitle"));
+#            $retKeys = array_diff($arrKeys, array('TitleTokens', 'JobTitleLinked', 'JobPostingId', 'MatchStatus', 'MatchNotes', "FirstSeenAt", "RemovedAt", "UpdatedAt", "KeySiteAndPostID", "KeyCompanyAndTitle"));
+            $retKeys = array_diff($arrKeys, array('TitleTokens', 'JobTitleLinked', "FirstSeenAt", "RemovedAt", "UpdatedAt", "KeySiteAndPostID", "KeyCompanyAndTitle"));
         }
         else {
             $match = new \JobScooper\UserJobMatch();
