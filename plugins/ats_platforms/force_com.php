@@ -17,7 +17,7 @@
  */
 require_once dirname(dirname(dirname(__FILE__)))."/bootstrap.php";
 
-class BaseForceComClass extends ClassClientHTMLJobSitePlugin
+abstract class BaseForceComClass extends ClassClientHTMLJobSitePlugin
 {
     protected $additionalLoadDelaySeconds = 3;
     protected $nJobListingsPerPage = 25;
@@ -60,9 +60,9 @@ class BaseForceComClass extends ClassClientHTMLJobSitePlugin
         'tag_title' =>  array('selector' => 'td a', 'index' => 0, 'return_attribute' => 'plaintext'),
         'tag_link' =>  array('selector' => 'td a', 'index' => 0, 'return_attribute' => 'href'),
         'tag_job_id' =>  array('selector' => 'td a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' => '/.*?jobId=(\w+)&.*?/'),
-        'tag_department' =>  array('selector' => 'td span', 'index' => 1, 'return_attribute' => 'plaintext'),
-        'tag_location' =>  array('selector' => 'td span', 'index' => 2, 'return_attribute' => 'plaintext'),
-        'tag_job_posting_date' =>  array('selector' => 'td  pan', 'index' => 3, 'return_attribute' => 'plaintext'),
+        'tag_department' =>  array('selector' => 'td span', 'index' => 0, 'return_attribute' => 'plaintext'),
+        'tag_location' =>  array('selector' => 'td span', 'index' => 1, 'return_attribute' => 'plaintext'),
+        'tag_job_posting_date' =>  array('selector' => 'td span', 'index' => 2, 'return_attribute' => 'plaintext'),
         'tag_company' =>  array('return_value_callback' => 'setCompanyToSiteName')
     );
 
@@ -75,23 +75,28 @@ class PluginAltasource extends BaseForceComClass
     protected $siteBaseURL = "http://altasourcegroup.force.com";
     protected $strBaseURLFormat = "http://altasourcegroup.force.com/careers";
 
+
 }
 
 
-class PluginSlalom extends BaseForceComClass
+abstract class BaseNoDeptForceComClass extends BaseForceComClass
 {
     function __construct()
     {
-        $this->siteName = 'Slalom';
         parent::__construct();
         $this->arrListingTagSetup['tag_department'] = null;
-        $this->arrListingTagSetup['tag_location']['index'] = 1;
-        $this->arrListingTagSetup['tag_job_posting_date']['index'] = 2;
+        $this->arrListingTagSetup['tag_location']['index'] = 0;
+        $this->arrListingTagSetup['tag_job_posting_date']['index'] = 1;
     }
 }
-class PluginRobertHalfExecSearch extends BaseForceComClass
+
+class PluginSlalom extends BaseNoDeptForceComClass
 {
-    protected $siteName= "RobertHalfExecSearch";
+    protected $siteName = "Slalom";
+}
+class PluginRobertHalfExec extends BaseNoDeptForceComClass
+{
+    protected $siteName= "RobertHalfExec";
     protected $siteBaseURL = "http://roberthalf.force.com";
     protected $strBaseURLFormat = "http://roberthalf.force.com/careers";
     protected $additionalFlags = [ C__JOB_USE_SELENIUM ];
@@ -129,11 +134,4 @@ class PluginRobertHalfExecSearch extends BaseForceComClass
         return $html;
     }
 
-    function __construct()
-    {
-        parent::__construct();
-        $this->arrListingTagSetup['tag_department'] = null;
-        $this->arrListingTagSetup['tag_location']['index'] = 1;
-        $this->arrListingTagSetup['tag_job_posting_date']['index'] = 2;
-    }
 }
