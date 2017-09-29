@@ -96,9 +96,9 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         ini_set('memory_limit', '1024M');
         ini_set("auto_detect_line_endings", true);
         $envDirOut = getenv('JOBSCOOPER_OUTPUT');
-        if(is_null($envDirOut) || strlen($envDirOut) || !is_dir(realpath($envDirOut)))
-            $outputDir = sys_get_temp_dir();
-        $outputDirectoryDetails = parseFilePath($outputDir);
+        if(is_null($envDirOut) || strlen($envDirOut) == 0)
+            $envDirOut = sys_get_temp_dir();
+        $outputDirectoryDetails = getFilePathDetailsFromString($envDirOut, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
 
         $GLOBALS['USERDATA'] = array();
         __initializeArgs__();
