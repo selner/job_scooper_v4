@@ -453,17 +453,19 @@ function noJobStringMatch($var, $matchString)
 
 function getRunDateRange()
 {
+    $configNumDays = getConfigurationSettings('number_days');
+    $num_days = filter_var($configNumDays, FILTER_VALIDATE_INT);
+    if($num_days === false)
+        $num_days = 1;
+
     $strDateRange = null;
     $startDate = new DateTime();
-    $strMod = "-".$GLOBALS['USERDATA']['configuration_settings']['number_days']." days";
+    $strMod = "-" . $num_days . " days";
     $startDate = $startDate->modify($strMod);
     $today = new DateTime();
-    if($startDate->format('Y-m-d') != $today->format('Y-m-d'))
-    {
+    if ($startDate->format('Y-m-d') != $today->format('Y-m-d')) {
         $strDateRange = $startDate->format('D, M d') . " - " . $today->format('D, M d');
-    }
-    else
-    {
+    } else {
         $strDateRange = $today->format('D, M d');
     }
     return $strDateRange;
