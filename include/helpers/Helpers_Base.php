@@ -30,6 +30,18 @@ function LogLine($msg, $scooper_level=\C__DISPLAY_NORMAL__)
     }
 }
 
+function LogPlainText($msg, $scooper_level=\C__DISPLAY_NORMAL__)
+{
+    $textParts = preg_split("/[\\r\\n|" . PHP_EOL . "]/", $msg);
+    if(($textParts === false) || is_null($textParts))
+        logLine($msg);
+    else {
+        foreach ($textParts as $part) {
+            logLine($part);
+        }
+    }
+}
+
 function LogWarning($msg)
 {
     LogLine($msg, \C__DISPLAY_WARNING__);
