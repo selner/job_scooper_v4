@@ -24,9 +24,6 @@ class StageManager
 {
     protected $siteName = "StageManager";
     protected $classConfig = null;
-    protected $pathAllMatchedJobs = null;
-    protected $pathAllExcludedJobs = null;
-    protected $pathAllJobs = null;
 
     function __construct()
     {
@@ -35,11 +32,6 @@ class StageManager
             $this->classConfig->initialize();
 
             if (!$GLOBALS['logger'])
-                $GLOBALS['logger'] = new ScooperLogger($GLOBALS['USERDATA']['directories']['debug']);
-
-            $this->pathAllExcludedJobs = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], "all-excluded-jobs"));
-            $this->pathAllMatchedJobs = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], "all-job-matches"));
-            $this->pathAllJobs = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], "all-jobs"));
 
 
         } catch (Exception $ex) {
@@ -168,14 +160,11 @@ class StageManager
             $arrJobsList = getAllUserMatchesNotNotified();
             if(count($arrJobsList) > 0)
             {
-                $injfile = "alljobmatches.json";
-                $outjfile = "alljobmatches_tokenized.json";
-                $jfilefullpath = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['debug'], $injfile));
-
+                $jfilefullpath = generateOutputFileName("alljobmatches", "json");
+                $outjfilefullpath = generateOutputFileName("alljobmatches_tokenized", "json");
                 writeJobRecordsToJson($jfilefullpath, $arrJobsList);
 
                 LogLine(PHP_EOL . "Processing " . $jfilefullpath, \C__DISPLAY_NORMAL__);
-                $outjfilefullpath = join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['debug'], $outjfile));
 
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //
