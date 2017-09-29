@@ -153,13 +153,19 @@ function getAllSearchesThatWereIncluded()
 
     return $arrSearchesRun;
 }
+
 function getAllJobSitesThatWereLastRun()
 {
     $sites = array();
     $runSearches = getAllSearchesThatWereLastRun();
     foreach($runSearches as $search)
-        $sites[] = $search->getJobSiteKey();
-    return array_unique($sites);
+        if(!in_array($search->getRunResultCode(), array("excluded", "not-run")))
+            $sites[] = $search->getJobSiteKey();
+    $ret = array_unique($sites);
+    if(!is_array($ret))
+        $ret = array();
+
+    return $ret;
 }
 
 function getAllSearchesThatWereLastRun()

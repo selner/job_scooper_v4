@@ -26,7 +26,7 @@ class ClassJobsNotifier
 {
     protected $siteName = "ClassJobsNotifier";
     protected $arrAllUnnotifiedJobs = array();
-    protected $arrJobSitesForRun = null;
+    private $_arrJobSitesForRun = null;
 
     function __construct()
     {
@@ -133,11 +133,9 @@ class ClassJobsNotifier
 
     protected function _isIncludedJobSite($var)
     {
+        $sites = $this->_getJobSitesRunRecently();
 
-        if(is_null($this->arrJobSitesForRun))
-            $this->arrJobSitesForRun = getAllJobSitesThatWereLastRun();
-
-        return in_array(strtolower($var->getJobPosting()->getJobSite()), $this->arrJobSitesForRun);
+        return in_array(cleanupSlugPart($var->getJobPosting()->getJobSite()), $sites);
 
     }
 
@@ -162,18 +160,18 @@ class ClassJobsNotifier
         $arrFilesToAttach = array();
         $arrResultFilesToCombine = array();
 
-        $arrUnnotifiedJobsAllRuns = getAllUserMatchesNotNotified();
-        $this->arrAllUnnotifiedJobs = array_filter($arrUnnotifiedJobsAllRuns, array($this, '_isIncludedJobSite') );
+        $this->arrAllUnnotifiedJobs = getAllUserMatchesNotNotified();
+        $arrJobsToNotify = array_filter($this->arrAllUnnotifiedJobs, array($this, '_isIncludedJobSite') );
         $detailsHTMLFile = null;
 
         //
         // For our final output, we want the jobs to be sorted by company and then role name.
         // Create a copy of the jobs list that is sorted by that value.
         //
-        $arrMatchedJobs = array_filter($this->arrAllUnnotifiedJobs, "isSuccessfulUserMatch");
-        $arrExcludedJobs = array_filter($this->arrAllUnnotifiedJobs, "isNotUserJobMatch");
+        $arrMatchedJobs = array_filter($arrJobsToNotify, "isSuccessfulUserMatch");
+        $arrExcludedJobs = array_filter($arrJobsToNotify, "isNotUserJobMatch");
 
-        $GLOBALS['logger']->logLine(PHP_EOL . "Writing final list of " . count($this->arrAllUnnotifiedJobs) . " jobs to output files." . PHP_EOL, \C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine(PHP_EOL . "Writing final list of " . count($arrJobsToNotify) . " jobs to output files." . PHP_EOL, \C__DISPLAY_NORMAL__);
 
         // Output only new records that haven't been looked at yet
         $detailsCSVFile = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedJobs, null, "-finalmatchedjobs", "CSV"));
@@ -198,7 +196,7 @@ class ClassJobsNotifier
 
         $GLOBALS['logger']->logSectionHeader("Generating text email content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
 
-        $strResultCountsText = $this->getListingCountsByPlugin("text", $this->arrAllUnnotifiedJobs, $arrExcludedJobs);
+        $strResultCountsText = $this->getListingCountsByPlugin("text", $arrJobsToNotify, $arrExcludedJobs);
         $strResultText = "Job Scooper Results for ". getRunDateRange() . PHP_EOL . $strResultCountsText . PHP_EOL;
 
         $GLOBALS['logger']->logSectionHeader("Generating html email content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
@@ -489,7 +487,22 @@ class ClassJobsNotifier
         throw new ErrorException("parseTotalResultsCount not supported for class " . get_class($this));
     }
 
+    private function _getJobSitesRunRecently()
+    {
+        if(is_null($this->_arrJobSitesForRun)) {
+            $this->_arrJobSitesForRun = getAllJobSitesThatWereLastRun();
 
+            $sites = array_map(function ($var) {
+                return $var->getJobPosting()->getJobSite();
+            }, $this->arrAllUnnotifiedJobs);
+            $uniqSites = array_unique($sites);
+
+            $this->_arrJobSitesForRun = array_merge($this->_arrJobSitesForRun, $uniqSites);
+        }
+
+        return $this->_arrJobSitesForRun;
+
+    }
     private function getListingCountsByPlugin($fLayoutType, $arrMatchedJobs = null, $arrExcludedJobs = null, $detailsHTMLBodyInclude = null)
     {
 
@@ -770,6 +783,19 @@ class ClassJobsNotifier
         return $retKeys;
     }
 
+    private function _convertToJobsArrays($arrJobObjects)
+    {
+        $arrRet = array();
+        foreach($arrJobObjects as $job)
+        {
+            $item = array_unique(array_merge($job->getJobPosting()->toArray(), $job->toArray()));
+
+            $arrRet[$item['KeySiteAndPostID']] = $item;
+        }
+
+        return $arrRet;
+
+    }
 
     function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true, $loggedFileType = null, $ext = "CSV", $keysToOutput=null, $detailsCSSToInclude = null)
     {
@@ -795,13 +821,7 @@ class ClassJobsNotifier
 
         $classCombined = new \SimpleCSV($strOutFilePath , "w");
 
-        $arrCSVRecs = array();
-        foreach($arrJobsRecordsToUse as $job)
-        {
-            $item = array_unique(array_merge($job->getJobPosting()->toArray(), $job->toArray()));
-
-            $arrCSVRecs[$item['KeySiteAndPostID']] = $item;
-        }
+        $arrCSVRecs = $this->_convertToJobsArrays($arrJobsRecordsToUse);
 
         $arrRecordsToOutput = array_unique_multidimensional($arrCSVRecs);
         if (!is_array($arrRecordsToOutput))
