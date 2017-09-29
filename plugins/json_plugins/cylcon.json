@@ -12,7 +12,7 @@
           "Name": "tag_listings_count",
           "Selector": "#searchCount",
           "Extract": "REGEX",
-          "Pattern": "/.*?of\\s+(\\d+).*?/",
+          "Pattern": "/.*?of\\s+(\\d+)/",
           "Attribute": null,
           "Type": "CSS"
         },

@@ -916,13 +916,14 @@ function writeJSON($data, $filepath)
     return $filepath;
 }
 
-function loadJSON($file)
+function loadJSON($file, $options=JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP)
 {
     if(is_file($file)) {
         if(!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Reading json data from file " . $file, \Scooper\C__DISPLAY_ITEM_DETAIL__);
-        $jsonText = file_get_contents($file, FILE_TEXT);
 
-        $data = json_decode($jsonText, $assoc = true, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+        $jsonText = file_get_contents($file, FILE_TEXT);
+        $jsonText = str_replace('\\', '\\\\', $jsonText);
+        $data = json_decode($jsonText, $assoc = true, $depth=512, $options);
         return $data;
     }
     else
@@ -932,6 +933,8 @@ function loadJSON($file)
     }
 
 }
+
+
 
 function readJobsListDataFromLocalJsonFile($fileKey, $returnFailedSearches = true, $dirKey = null)
 {
