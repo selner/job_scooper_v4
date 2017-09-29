@@ -205,6 +205,8 @@ class ClassJobsNotifier
         $messageHtml = $this->getListingCountsByPlugin("html", $arrMatchedJobs, $arrExcludedJobs, $detailsHTMLFile);
 
         $this->_wrapCSSStyleOnHTML_($messageHtml);
+
+        $messageHtml = $this->_wrapCSSStyleOnHTML_($messageHtml);
         $subject = "New Job Postings: " . getRunDateRange();
 
         $GLOBALS['logger']->logSectionHeader("Generating text html content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
@@ -734,15 +736,32 @@ class ClassJobsNotifier
 
     private function _addCSSStyleToHTMLFile_($strFilePath)
     {
+
         $strHTMLContent = file_get_contents($strFilePath);
         $retWrapped = $this->_wrapCSSStyleOnHTML_($strHTMLContent);
+
         file_put_contents($strFilePath, $retWrapped);
+
     }
 
     private function _wrapCSSStyleOnHTML_($strHTML)
     {
+        $cssData = array(
+            'color-primary' => "#49332D",
+            'color-secondary' => "#e7dcd7",
+            'color-level-1' => '#6d4d41',
+            'color-level-2' => '#61443a',
+            'color-level-3' => '#553c33',
+            'color-level-4' => '#49332c',
+            'color-level-5' => '#3d2b24'
+        );
+
+
+        $renderer = loadTemplate(dirname(__FILE__). "/templates/html_notification_email_css.tmpl");
+
+        $css = renderTemplate($renderer, $cssData);
+
         $cssToInlineStyles = new \TijsVerkoyen\CssToInlineStyles\CssToInlineStyles();
-        $css = file_get_contents(dirname(dirname(__FILE__)) . '/include/static/CSVTableStyle.css');
         $cssToInlineStyles->setHTML($strHTML);
         $cssToInlineStyles->setCSS($css);
         return $cssToInlineStyles->convert();
@@ -870,12 +889,6 @@ class ClassJobsNotifier
 
         if($ext == 'HTML')
         {
-            $strCSS = null;
-            if($detailsCSSToInclude['has_file'])
-            {
-                // $strCSS = file_get_contents(dirname(__FILE__) . '/../include/CSVTableStyle.css');
-                $strCSS = file_get_contents($detailsCSSToInclude['full_file_path']);
-            }
             $classCombined->writeArrayToHTMLFile($arrRecordsToOutput, $keysToOutput, null, $strCSS);
 
         }
