@@ -16,7 +16,10 @@
  */
 
 use Psr\Log\LogLevel as LogLevel;
-use \Katzgrau\KLogger\Logger;
+use \Katzgrau\KLogger\Logger as KLogger;
+use \Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+
 
 /****************************************************************************************************************/
 /****                                                                                                        ****/
@@ -51,9 +54,10 @@ const C__DISPLAY_SUMMARY__ = 750;
 /****                                                                                                        ****/
 /****************************************************************************************************************/
 
-Class ScooperLogger extends \Katzgrau\KLogger\Logger
+Class ScooperLogger extends \Monolog\Logger
 {
     protected $arrCumulativeErrors = array();
+    private $strOutputDir = null;
 
 
     function addToErrs(&$strErr, $strNew)
@@ -62,25 +66,28 @@ Class ScooperLogger extends \Katzgrau\KLogger\Logger
         $this->arrCumulativeErrors[] = $strNew;
     }
 
-
-    function __construct($strOutputDirPath = null )
+    public function __construct($name, array $handlers = array(), array $processors = array())
     {
         $GLOBALS['logger'] = null;
 
-        if(!isset($strOutputDirPath)) { $strOutputDirPath = sys_get_temp_dir(); }
-        parent::__construct($strOutputDirPath, LogLevel::DEBUG);
-
         $GLOBALS['logger'] = $this;
+        $this->strOutputDir = getOutputDirectory('logs');
+        $today = getTodayAsString("-");
+        $name = C__APPNAME__;
+        $arrHandlers = array(
+            new StreamHandler($this->strOutputDir . "/{$name}-{$today}.log", isDebug() ? Logger::DEBUG : Logger::INFO),
+            new StreamHandler('php://stderr', isDebug() ? Logger::DEBUG : Logger::INFO)
+        );
+        parent::__construct($name, $handlers = $arrHandlers);
 
         $now = new DateTime('NOW');
-        $this->logLine("Logging started to {$strOutputDirPath} for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'), C__DISPLAY_NORMAL__);
+        $this->logLine("Logging started to {$this->strOutputDir} for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'), C__DISPLAY_NORMAL__);
     }
 
     function __destruct()
     {
         $now = new DateTime('NOW');
         $this->logLine("Logging ended for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'),C__DISPLAY_NORMAL__);
-        parent::__destruct();
     }
 
 
@@ -177,8 +184,8 @@ Class ScooperLogger extends \Katzgrau\KLogger\Logger
     {
         if($level == LOG_ERR) {  $this->arrCumulativeErrors[] = $message; }
 
-        print($message ."\r\n");
-        parent::log($level, $message, $context);
+        if(parent::log($level, $message, $context) === false)
+            print($message ."\r\n");
 
 
     }

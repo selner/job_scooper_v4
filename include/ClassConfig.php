@@ -162,7 +162,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         // Now setup all the output folders
         $this->__setupOutputFolders__($outputDirectoryDetails['directory']);
 
-        if (!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \ScooperLogger($GLOBALS['USERDATA']['directories']['debug']);
+        if (!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \ScooperLogger(C__APPNAME__);
 
         $strOutfileArrString = getArrayValuesAsString($GLOBALS['USERDATA']['directories']);
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output folders configured: " . $strOutfileArrString, \C__DISPLAY_ITEM_DETAIL__);
@@ -369,11 +369,14 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
     private function _setupPropelForRun()
     {
         LogLine("Configuring Propel global options and logging...", C__DISPLAY_ITEM_DETAIL__);
+        $defaultLogger = $this->getLogger();
+        if(is_null($defaultLogger)) {
             $pathLog = getOutputDirectory('logs') . '/propel-' .getTodayAsString("-").'.log';
             LogLine("Could not find global logger object so configuring propel logging separately at {$pathLog}", C__DISPLAY_WARNING__);
-        $defaultLogger = new Logger('defaultLogger');
+            $defaultLogger = new Logger('defaultLogger');
             $defaultLogger->pushHandler(new StreamHandler($pathLog, Logger::DEBUG));
-        $defaultLogger->pushHandler(new StreamHandler('php://stderr', Logger::DEBUG));
+            $defaultLogger->pushHandler(new StreamHandler('php://stderr', Logger::DEBUG));
+        }
 
         $serviceContainer = Propel::getServiceContainer();
         $serviceContainer->setLogger('defaultLogger', $defaultLogger);
@@ -384,7 +387,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         }
     }
 
-private function __getInputFilesByValue__($valKey, $val)
+    private function __getInputFilesByValue__($valKey, $val)
     {
         $ret = null;
         if (isset($GLOBALS['USERDATA']['user_input_files_details']) && (is_array($GLOBALS['USERDATA']['user_input_files_details']) || is_array($GLOBALS['USERDATA']['user_input_files_details']))) {

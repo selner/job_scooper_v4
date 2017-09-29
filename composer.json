@@ -17,7 +17,6 @@
         "symfony/yaml": "2.*",
         "composer/composer": "*",
         "austinhyde/iniparser": "dev-master",
-        "katzgrau/klogger": "1.0",
         "facebook/webdriver": "*",
         "phpmailer/phpmailer": "~6.0",
         "sunra/php-simple-html-dom-parser": "1.5.2",

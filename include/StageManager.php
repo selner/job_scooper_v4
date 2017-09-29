@@ -32,6 +32,7 @@ class StageManager
             $this->classConfig->initialize();
 
             if (!$GLOBALS['logger'])
+                $GLOBALS['logger'] = new ScooperLogger(C__APPNAME__);
 
 
         } catch (Exception $ex) {
