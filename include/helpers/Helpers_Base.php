@@ -248,7 +248,8 @@ function exportToDebugJSON($obj, $strBaseFileName)
     unset($key);
 
     $jsonSelf = json_encode($saveArr, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
-    $debugJSONFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_" . $strBaseFileName, $strExt = "", $delim = "-") . ".json";
+    $basefile = getDefaultJobsOutputFileName($strFilePrefix = "_debug_" . $strBaseFileName, $strExt = "", $delim = "-");
+    $debugJSONFile = generateOutputFileName($basefile, $ext="json");
     file_put_contents($debugJSONFile, $jsonSelf);
 
     return $debugJSONFile;

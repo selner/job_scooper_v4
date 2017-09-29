@@ -250,8 +250,8 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 
 function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "keywords", $indexKeyName = null)
 {
-    $inputFile = $GLOBALS['USERDATA']['directories']['debug'] . "/tmp-" . $tempFileKey . "-token-input.csv";
-    $outputFile = $GLOBALS['USERDATA']['directories']['debug'] . "/tmp-" . $tempFileKey . "-token-output.csv";
+    $inputFile = generateOutputFileName("tmp-" . $tempFileKey . "-token-input.", "csv");
+    $outputFile = generateOutputFileName( "tmp-" . $tempFileKey . "-token-output", "csv");
 
     $headers = array($dataKeyName);
     if (array_key_exists($dataKeyName, $arrData)) $headers = array_keys($arrData);
@@ -353,6 +353,12 @@ function getTodayAsString($delim = "-")
 {
     $fmt = "Y" . $delim . "m" . $delim . "d";
     return date($fmt);
+}
+
+function getNowAsString($delim = "-")
+{
+    $fmt = join($delim, array("%Y", "%m", "%d", "%H", "%M", "%S"));
+    return strftime($fmt, time());
 }
 
 function getArrayItem($key, $arr)

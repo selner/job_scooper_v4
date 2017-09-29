@@ -119,7 +119,7 @@ function getCurrentUserDetails()
 }
 
 
-function generateOutputFileName($baseFileName="missing_filename", $ext="missing_file_extension", $isUserSpecific=true, $dirKey="debug")
+function generateOutputFileName($baseFileName="missing_filename", $ext="missing_file_extension", $isUserSpecific=true, $dirKey="debug", $includeRunID=false)
 {
     $outDir = getOutputDirectory($dirKey);
     $today = "_" . getTodayAsString("-");
@@ -131,6 +131,16 @@ function generateOutputFileName($baseFileName="missing_filename", $ext="missing_
             $user = "_" . $objUser->getUserSlug();
         }
     }
-    $ret = "{$outDir}/{$baseFileName}{$user}{$today}.{$ext}";
+    $appRun = "";
+    if($includeRunID === true) {
+
+        $appRun = getConfigurationSettings('app_run_id');
+        if (!is_null($appRun)) {
+            $appRun = "_" . $appRun;
+        } else
+            $appRun = "_" . getNowAsString();
+    }
+
+    $ret = "{$outDir}/{$baseFileName}{$user}{$today}{$appRun}.{$ext}";
     return $ret;
 }

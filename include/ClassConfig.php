@@ -218,8 +218,15 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             throw new ErrorException("Required value for the output folder was not specified. Exiting.");
         }
 
-        $workingDirs = ["debug", "results"];
-        foreach ($workingDirs as $d) {
+        $globalDirs = ["debug", "logs"];
+        foreach ($globalDirs as $d) {
+            $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), $d));
+            $details = getFilePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+            $GLOBALS['USERDATA']['directories'][$d] = realpath($details['directory']);
+        }
+
+        $userWorkingDirs = ["results"];
+        foreach ($userWorkingDirs as $d) {
             $prefix = $GLOBALS['USERDATA']['user_unique_key'];
             $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), $d, $prefix));
             $details = getFilePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
@@ -361,8 +368,11 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
     private function _setupPropelForRun()
     {
+        LogLine("Configuring Propel global options and logging...", C__DISPLAY_ITEM_DETAIL__);
+            $pathLog = getOutputDirectory('logs') . '/propel-' .getTodayAsString("-").'.log';
+            LogLine("Could not find global logger object so configuring propel logging separately at {$pathLog}", C__DISPLAY_WARNING__);
         $defaultLogger = new Logger('defaultLogger');
-        $defaultLogger->pushHandler(new StreamHandler($GLOBALS['USERDATA']['directories']['debug'] . '/propel.log', Logger::DEBUG));
+            $defaultLogger->pushHandler(new StreamHandler($pathLog, Logger::DEBUG));
         $defaultLogger->pushHandler(new StreamHandler('php://stderr', Logger::DEBUG));
 
         $serviceContainer = Propel::getServiceContainer();
@@ -370,6 +380,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         if(isDebug()) {
             $con = Propel::getWriteConnection(\JobScooper\Map\JobPostingTableMap::DATABASE_NAME);
             $con->useDebug(true);
+            LogLine("Enabled debug logging for Propel.", C__DISPLAY_ITEM_DETAIL__);
         }
     }
 
