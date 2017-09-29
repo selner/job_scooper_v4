@@ -101,3 +101,36 @@ function isDebug() {
 function isTestRun() {
     return getGlobalConfigOptionBoolean('test_run');
 }
+
+function getOutputDirectory($key)
+{
+    $ret =  sys_get_temp_dir();
+    if(array_key_exists('USERDATA', $GLOBALS) && array_key_exists('directories', $GLOBALS['USERDATA']) && !is_null($GLOBALS['USERDATA']['directories']) && is_array($GLOBALS['USERDATA']['directories'])) {
+        if (array_key_exists($key, $GLOBALS['USERDATA']['directories']))
+            $ret = $GLOBALS['USERDATA']['directories'][$key];
+    }
+
+    return $ret;
+}
+
+function getCurrentUserDetails()
+{
+    return getConfigurationSettings('user_details');
+}
+
+
+function generateOutputFileName($baseFileName="missing_filename", $ext="missing_file_extension", $isUserSpecific=true, $dirKey="debug")
+{
+    $outDir = getOutputDirectory($dirKey);
+    $today = "_" . getTodayAsString("-");
+    $user = "";
+    if($isUserSpecific === true) {
+        $objUser = getCurrentUserDetails();
+        if(!is_null($objUser))
+        {
+            $user = "_" . $objUser->getUserSlug();
+        }
+    }
+    $ret = "{$outDir}/{$baseFileName}{$user}{$today}.{$ext}";
+    return $ret;
+}
