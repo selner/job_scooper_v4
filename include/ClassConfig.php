@@ -95,6 +95,10 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
         ini_set('memory_limit', '1024M');
         ini_set("auto_detect_line_endings", true);
+        $envDirOut = getenv('JOBSCOOPER_OUTPUT');
+        if(is_null($envDirOut) || strlen($envDirOut) || !is_dir(realpath($envDirOut)))
+            $outputDir = sys_get_temp_dir();
+        $outputDirectoryDetails = parseFilePath($outputDir);
 
         $GLOBALS['USERDATA'] = array();
         __initializeArgs__();
@@ -137,11 +141,13 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         $GLOBALS['USERDATA']['configuration_settings']['searches'] = array();
         $GLOBALS['USERDATA']['configuration_settings']['country_codes'] = array();
 
+        
+        
         // Override any INI file setting with the command line output file path & name
         // the user specificed (if they did)
-        $userOutfileDetails = get_FileDetails_fromPharseOption("output", false);
-        if (!$userOutfileDetails['has_directory']) {
-            throw new ErrorException("Required value for the output folder was not specified. Exiting.");
+        $cmdlineOutDir = get_FileDetails_fromPharseOption("output", false);
+        if ($cmdlineOutDir['has_directory']) {
+            $outputDirectoryDetails = $cmdlineOutDir;
         }
 
         if ($GLOBALS['OPTS']['use_config_ini_given']) {
@@ -154,7 +160,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         }
 
         // Now setup all the output folders
-        $this->__setupOutputFolders__($userOutfileDetails['directory']);
+        $this->__setupOutputFolders__($outputDirectoryDetails['directory']);
 
         if (!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \ScooperLogger($GLOBALS['USERDATA']['directories']['debug']);
 
