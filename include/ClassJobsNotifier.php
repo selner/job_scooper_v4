@@ -209,7 +209,7 @@ class ClassJobsNotifier
 
         $GLOBALS['logger']->logSectionHeader("Generating text html content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
 
-        $GLOBALS['logger']->logLine($strResultText, \C__DISPLAY_SUMMARY__);
+        LogPlainText($strResultText, \C__DISPLAY_SUMMARY__);
 
         //
         // Send the email notification out for the completed job
@@ -220,7 +220,8 @@ class ClassJobsNotifier
             $ret = $this->sendEmail($strResultText, $messageHtml, $arrFilesToAttach, $subject, "results");
             if($ret !== false || $ret !== null)
             {
-                $arrToMarkNotified = array_from_orm_object_list_by_array_keys($this->arrAllUnnotifiedJobs, array("JobPostingId"));
+                if(!isDebug()) {
+                    $arrToMarkNotified = array_from_orm_object_list_by_array_keys($arrJobsToNotify, array("JobPostingId"));
                     $ids = array_column($arrToMarkNotified, "JobPostingId");
                     $rowsAffected = \JobScooper\UserJobMatchQuery::create()
                         ->filterByJobPostingId($ids)
@@ -228,6 +229,7 @@ class ClassJobsNotifier
                     if ($rowsAffected != count($arrToMarkNotified))
                         LogLine("Warning:  marked only {count($rowsAffected)} of {count($arrToMarkNotified)} UserJobMatch records as notified.");
                 }
+            }
 
         } catch (Exception $ex)
         {
