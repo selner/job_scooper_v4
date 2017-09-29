@@ -55,7 +55,7 @@ function __initializeArgs__()
             'description'   => 'Full file path to use for results output.',
             'default'       => null,
             'type'          => Pharse::PHARSE_STRING,
-            'required'      => true,
+            'required'      => false,
             'short'      => 'o',
         ),
         'send_notifications' => array(
