@@ -391,6 +391,9 @@ function getFailedSearchesByPlugin()
 function getSearchesByRunResult($resultCode)
 {
     $arrSearchReportByPlugin = array();
+    if(is_null($GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN']))
+        return array();
+
     foreach ($GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'] as $jobsite) {
         foreach($jobsite as $search)
         {
