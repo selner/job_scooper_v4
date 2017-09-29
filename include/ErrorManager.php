@@ -46,10 +46,10 @@ class ErrorManager {
                 "email_content" =>  $errs['htmlbody']
             );
 
-            $htmlemail = $renderer($data);
+            $htmlemail = renderTemplate($renderer, $data);
 
 
-            $notifier = new ClassJobsNotifier(null, null, null);
+            $notifier = new ClassJobsNotifier();
 
             return $notifier->sendEmail($errs['txtbody'], $htmlemail, $errs['attachments'], $subject, "error");
         }
@@ -81,7 +81,7 @@ class ErrorManager {
             "plugins_with_errors" =>array_values($arrFailedPluginsReport)
         );
 
-        $htmlContent = $renderer($data);
+        $htmlContent = renderTemplate($renderer, $data);
 
         return $htmlContent;
 

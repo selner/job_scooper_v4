@@ -24,7 +24,7 @@
         "phpoffice/Phpexcel": "^1.8",
         "jobapis/jobs-common": "^2.0",
         "jobapis/jobs-usajobs": "^0.2.0",
-        "zordius/lightncandy": "^1.0@dev",
+        "zordius/lightncandy": "~1.2",
         "monolog/monolog": "1.x-dev"
     },
     "autoload": {
