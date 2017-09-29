@@ -73,6 +73,7 @@ abstract class AbstractClassBaseJobsPlugin
 
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
             $this->nMaxJobsToReturn = $this->nMaxJobsToReturn * 3;
+            $objJobSite = $this->getJobSiteObject();
         }
 
         if(!is_null($this->selectorMoreListings) && strlen($this->selectorMoreListings) > 0)
@@ -108,6 +109,17 @@ abstract class AbstractClassBaseJobsPlugin
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
             $firstKey = array_keys($arrSearches)[0];
             $arrSearches = array($firstKey => $arrSearches[$firstKey]);
+
+            $objJobSite = $this->getJobSiteObject();
+            if(!is_null($objJobSite))
+            {
+                if ($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
+                    $objJobSite->setResultsFilterType("all-by-location");
+                else
+                    $objJobSite->setResultsFilterType("all-only");
+                $objJobSite->save();
+            }
+
         }
 
         foreach ($arrSearches as $searchDetails) {
@@ -131,6 +143,8 @@ abstract class AbstractClassBaseJobsPlugin
     {
         $strIncludeKey = 'include_' . strtolower($this->siteName);
         $boolSearchSuccess = null;
+        $searchSkipped = false;
+
 
         if (isset($GLOBALS['OPTS'][$strIncludeKey]) && $GLOBALS['OPTS'][$strIncludeKey] == 0) {
             LogLine($this->siteName . ": excluded for run. Skipping '" . count($this->arrSearchesToReturn) . "' site search(es).", \C__DISPLAY_ITEM_DETAIL__);
@@ -145,7 +159,11 @@ abstract class AbstractClassBaseJobsPlugin
 
         try
         {
-            if($this->getJobSiteObject()->shouldRunNow()) {
+            /*
+                Check to see if we should pull new job listings now.  If we ran too recently, this will skip the run
+            */
+            if($this->getJobSiteObject()->shouldRunNow())
+            {
                 $this->getJobSiteObject()->setLastRunAt(time());
                 $this->getJobSiteObject()->save();
 
@@ -169,6 +187,7 @@ abstract class AbstractClassBaseJobsPlugin
                         }
 
                         $this->_updateJobsDataForSearch_($search);
+                        $this->_addJobMatchesToUser($search);
                     } catch (Exception $ex) {
                         throw $ex;
                     } finally {
@@ -176,14 +195,60 @@ abstract class AbstractClassBaseJobsPlugin
                     }
                 }
             }
-            else
-                LogLine($this->siteName . " just recently ran so skipping for a short period...", \C__DISPLAY_ITEM_DETAIL__);
+            else {
+                LogLine("Skipping {$this->siteName} jobs download since it just ran recently.", \C__DISPLAY_ITEM_DETAIL__);
+                $searchSkipped = true;
+            }
+
+            /*
+             *  If this plugin is not user-filterable (aka no keywords filter), then any jobs from it can be applied
+             *  to all users.  If that is the case, update user matches to include any jobs that were loaded previously
+             *  but the user is currently missing from their potential job matches.
+             */
+            $objJobSite = $this->getJobSiteObject();
+            $pluginResultsType = $objJobSite->getResultsFilterType();
+            if ((strcasecmp($pluginResultsType, "all-only") == 0) || (strcasecmp($pluginResultsType, "all-by-location") == 0)) {
+                try
+                {
+                    LogLine("Checking for missing " . $this->getName() . " jobs for user " . $this->userObject->getUserSlug() . ".", \C__DISPLAY_ITEM_DETAIL__);
+                    $queryExistingUserJobUserMatches = \JobScooper\UserJobMatchQuery::create()
+                        ->filterByUserSlug($this->userObject->getUserSlug())
+                        ->useJobPostingQuery()
+                        ->filterByJobSite($objJobSite->getJobSiteKey())
+                        ->endUse()
+                        ->select("JobPosting.JobPostingId")
+                        ->find();
+                    $dataExistingUserJobMatchIds = $queryExistingUserJobUserMatches->getData();
+
+                    $queryJobIdsToAddToUser = \JobScooper\JobPostingQuery::create()
+                        ->filterByJobSite($objJobSite->getJobSiteKey())
+                        ->filterByJobPostingId($dataExistingUserJobMatchIds, \Propel\Runtime\ActiveQuery\Criteria::NOT_IN)
+                        ->select("JobPosting.JobPostingId")
+                        ->find();
+                    $dataJobsIdsToAddToUserMatch = $queryJobIdsToAddToUser->getData();
+
+                    if(!is_null($dataJobsIdsToAddToUserMatch) && count($dataJobsIdsToAddToUserMatch) > 0) {
+                        LogLine("Found " . count($dataJobsIdsToAddToUserMatch) . " " . $this->getName() . " jobs not yet assigned to user " . $this->userObject->getUserSlug() . ".", \C__DISPLAY_ITEM_DETAIL__);
+                        $this->_addJobMatchIdsToUser($dataJobsIdsToAddToUserMatch);
+                        LogLine("Successfully added " . count($dataJobsIdsToAddToUserMatch) . " " . $this->getName() . " jobs to user " . $this->userObject->getUserSlug() . ".", \C__DISPLAY_ITEM_DETAIL__);
+                    }
+                    else
+                    {
+                        LogLine("User " . $this->userObject->getUserSlug() . " had no missing previously loaded listings from ". $this->getName() . ".", \C__DISPLAY_ITEM_DETAIL__);
+                    }
+                } catch (Exception $ex) {
+                    handleException($ex);
+                }
+            }
+
         } catch (Exception $ex) {
             $boolSearchSuccess = false;
             throw $ex;
         } finally {
-            $this->getJobSiteObject()->setSuccess($boolSearchSuccess);
-            $this->getJobSiteObject()->save();
+            if ($searchSkipped === false) {
+                $this->getJobSiteObject()->setSuccess($boolSearchSuccess);
+                $this->getJobSiteObject()->save();
+            }
             $this->currentSearchBeingRun = null;
         }
 
@@ -1024,11 +1089,9 @@ abstract class AbstractClassBaseJobsPlugin
                 $arrPageJobsList[$strCurrentJobIndex] = $item;
                 $nItemCount += 1;
             }
+            $this->saveSearchReturnedJobs($arrPageJobsList, $searchDetails);
             if (count($arrPageJobsList) < $this->nJobListingsPerPage) {
-                $this->saveUserJobMatches($arrPageJobsList, $searchDetails);
                 $noMoreJobs = true;
-            } else {
-                $this->saveUserJobMatches($arrPageJobsList, $searchDetails);
             }
             $pageNumber++;
         }
@@ -1100,43 +1163,63 @@ abstract class AbstractClassBaseJobsPlugin
         return $job;
     }
 
-    function saveUserJobMatches($arrJobList, $searchDetails)
+    function saveSearchReturnedJobs($arrJobList, $searchDetails)
     {
-
         $arrJobsBySitePostId = array_column($arrJobList, null, "job_id");
-        if(!array_key_exists($searchDetails->getKey(), $this->arrSearchReturnedJobs))
+        if (!array_key_exists($searchDetails->getKey(), $this->arrSearchReturnedJobs))
             $this->arrSearchReturnedJobs[$searchDetails->getKey()] = array();
 
         foreach (array_keys($arrJobsBySitePostId) as $JobSitePostId) {
             $job = $this->saveJob($arrJobsBySitePostId[$JobSitePostId]);
-
-            $newMatch = \JobScooper\UserJobMatchQuery::create()
-                ->filterByUserSlug($this->userObject->getUserSlug())
-                ->filterByJobPostingId($job->getJobPostingId())
-                ->findOneOrCreate();
-
-            $newMatch->setJobPostingId($job->getJobPostingId());
-            $newMatch->setUserSlug($this->userObject->getUserSlug());
-            $newMatch->setAppRunId($GLOBALS['USERDATA']['configuration_settings']['app_run_id']);
-            $newMatch->save();
-            $this->arrSearchReturnedJobs[$searchDetails->getKey()][$job->getKeySiteAndPostID()] = $job->getJobPostingId();
-
+            $this->arrSearchReturnedJobs[$searchDetails->getKey()][$job->getJobPostingId()] = $job;
         }
     }
 
-//    function saveJobList(&$arrJobList)
-//    {
-//        if ($arrJobList == null) return null;
+    private function _addJobMatchIdsToUser($arrJobIds)
+    {
+        foreach ($arrJobIds as $jobId) {
+            $newMatch = \JobScooper\UserJobMatchQuery::create()
+                ->filterByUserSlug($this->userObject->getUserSlug())
+                ->filterByJobPostingId($jobId)
+                ->findOneOrCreate();
+
+            $newMatch->setUserSlug($this->userObject->getUserSlug());
+            $newMatch->setAppRunId($GLOBALS['USERDATA']['configuration_settings']['app_run_id']);
+            $newMatch->save();
+        }
+    }
+
+    private function _addJobMatchesToUser($searchDetails)
+    {
+        $this->_addJobMatchIdsToUser(array_keys($this->arrSearchReturnedJobs[$searchDetails->getKey()]));
+    }
+
+    //
+//        $arrReturnedJobIds = array_keys($this->arrSearchReturnedJobs);
 //
-//        foreach (array_keys($arrJobList) as $k) {
-////            $this->normalizeJobItem($arrJobList[$k]);
+//            $arrJobsBySitePostId = array_column($arrJobList, null, "job_id");
+//            if(!array_key_exists($searchDetails->getKey(), $this->arrSearchReturnedJobs))
+//                $this->arrSearchReturnedJobs[$searchDetails->getKey()] = array();
+//
+//            foreach (array_keys($arrJobsBySitePostId) as $JobSitePostId) {
+//                $job = $this->saveJob($arrJobsBySitePostId[$JobSitePostId]);
+//                $this->arrSearchReturnedJobs[$job->getJobPostingId()] = $job->getJobPostingId();
+//            }
+//
+//            $newMatch = \JobScooper\UserJobMatchQuery::create()
+//                ->filterByUserSlug($this->userObject->getUserSlug())
+//                ->filterByJobPostingId($arrReturnedJobIds)
+//                ->findOneOrCreate();
+//
+////            $newMatch->setJobPostingId($job->getJobPostingId());
+//            $newMatch->setUserSlug($this->userObject->getUserSlug());
+//            $newMatch->setAppRunId($GLOBALS['USERDATA']['configuration_settings']['app_run_id']);
+//            $newMatch->save();
+////            $this->arrSearchReturnedJobs[$searchDetails->getKey()][$job->getKeySiteAndPostID()] = $job->getJobPostingId();
+
 //        }
-//        $savedJobIds = $this->addNewJobsToDB($arrJobList);
-//
-//        return $savedJobIds;
-//
 //    }
-//
+
 
     function saveJobList($arrJobs)
     {
@@ -1383,7 +1466,7 @@ abstract class AbstractClassBaseJobsPlugin
                         }
 
                         if (is_array($arrPageJobsList)) {
-                            $this->saveUserJobMatches($arrPageJobsList, $searchDetails);
+                            $this->saveSearchReturnedJobs($arrPageJobsList, $searchDetails);
                             $nJobsFound = count($this->arrSearchReturnedJobs[$searchDetails->getKey()]);
 
                             if ($nItemCount == 1) {

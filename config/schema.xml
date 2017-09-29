@@ -132,7 +132,7 @@
         </foreign-key>
 
         <column name="supported_country_codes" phpName="SupportedCountryCodes" type="array"/>
-
+        <column name="results_filter_type" phpName="ResultsFilterType" type="enum" valueSet="all-only, all-by-location, user-filtered"/>
     </table>
 
 

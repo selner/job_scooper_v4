@@ -141,6 +141,13 @@ abstract class JobSitePlugin implements ActiveRecordInterface
     protected $supported_country_codes_unserialized;
 
     /**
+     * The value for the results_filter_type field.
+     *
+     * @var        int
+     */
+    protected $results_filter_type;
+
+    /**
      * @var        ChildUserSearchRun
      */
     protected $aUserSearchRun;
@@ -561,6 +568,25 @@ abstract class JobSitePlugin implements ActiveRecordInterface
     } // hasSupportedCountryCode()
 
     /**
+     * Get the [results_filter_type] column value.
+     *
+     * @return string
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
+    public function getResultsFilterType()
+    {
+        if (null === $this->results_filter_type) {
+            return null;
+        }
+        $valueSet = JobSitePluginTableMap::getValueSet(JobSitePluginTableMap::COL_RESULTS_FILTER_TYPE);
+        if (!isset($valueSet[$this->results_filter_type])) {
+            throw new PropelException('Unknown stored enum key: ' . $this->results_filter_type);
+        }
+
+        return $valueSet[$this->results_filter_type];
+    }
+
+    /**
      * Set the value of [jobsite_key] column.
      *
      * @param string $v new value
@@ -790,6 +816,31 @@ abstract class JobSitePlugin implements ActiveRecordInterface
     } // removeSupportedCountryCode()
 
     /**
+     * Set the value of [results_filter_type] column.
+     *
+     * @param  string $v new value
+     * @return $this|\JobScooper\JobSitePlugin The current object (for fluent API support)
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
+    public function setResultsFilterType($v)
+    {
+        if ($v !== null) {
+            $valueSet = JobSitePluginTableMap::getValueSet(JobSitePluginTableMap::COL_RESULTS_FILTER_TYPE);
+            if (!in_array($v, $valueSet)) {
+                throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $v));
+            }
+            $v = array_search($v, $valueSet);
+        }
+
+        if ($this->results_filter_type !== $v) {
+            $this->results_filter_type = $v;
+            $this->modifiedColumns[JobSitePluginTableMap::COL_RESULTS_FILTER_TYPE] = true;
+        }
+
+        return $this;
+    } // setResultsFilterType()
+
+    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -849,6 +900,9 @@ abstract class JobSitePlugin implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : JobSitePluginTableMap::translateFieldName('SupportedCountryCodes', TableMap::TYPE_PHPNAME, $indexType)];
             $this->supported_country_codes = $col;
             $this->supported_country_codes_unserialized = null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : JobSitePluginTableMap::translateFieldName('ResultsFilterType', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->results_filter_type = (null !== $col) ? (int) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -857,7 +911,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 8; // 8 = JobSitePluginTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 9; // 9 = JobSitePluginTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\JobSitePlugin'), 0, $e);
@@ -1123,6 +1177,9 @@ abstract class JobSitePlugin implements ActiveRecordInterface
         if ($this->isColumnModified(JobSitePluginTableMap::COL_SUPPORTED_COUNTRY_CODES)) {
             $modifiedColumns[':p' . $index++]  = 'supported_country_codes';
         }
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_RESULTS_FILTER_TYPE)) {
+            $modifiedColumns[':p' . $index++]  = 'results_filter_type';
+        }
 
         $sql = sprintf(
             'INSERT INTO jobsite_plugin (%s) VALUES (%s)',
@@ -1160,6 +1217,9 @@ abstract class JobSitePlugin implements ActiveRecordInterface
                         break;
                     case 'supported_country_codes':
                         $stmt->bindValue($identifier, $this->supported_country_codes, PDO::PARAM_STR);
+                        break;
+                    case 'results_filter_type':
+                        $stmt->bindValue($identifier, $this->results_filter_type, PDO::PARAM_INT);
                         break;
                 }
             }
@@ -1243,6 +1303,9 @@ abstract class JobSitePlugin implements ActiveRecordInterface
             case 8:
                 return $this->getSupportedCountryCodes();
                 break;
+            case 9:
+                return $this->getResultsFilterType();
+                break;
             default:
                 return null;
                 break;
@@ -1282,6 +1345,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
             $keys[6] => $this->getLastFailedAt(),
             $keys[7] => ($includeLazyLoadColumns) ? $this->getLastUserSearchRunId() : null,
             $keys[8] => $this->getSupportedCountryCodes(),
+            $keys[9] => $this->getResultsFilterType(),
         );
         if ($result[$keys[3]] instanceof \DateTimeInterface) {
             $result[$keys[3]] = $result[$keys[3]]->format('c');
@@ -1381,6 +1445,13 @@ abstract class JobSitePlugin implements ActiveRecordInterface
                 }
                 $this->setSupportedCountryCodes($value);
                 break;
+            case 9:
+                $valueSet = JobSitePluginTableMap::getValueSet(JobSitePluginTableMap::COL_RESULTS_FILTER_TYPE);
+                if (isset($valueSet[$value])) {
+                    $value = $valueSet[$value];
+                }
+                $this->setResultsFilterType($value);
+                break;
         } // switch()
 
         return $this;
@@ -1433,6 +1504,9 @@ abstract class JobSitePlugin implements ActiveRecordInterface
         }
         if (array_key_exists($keys[8], $arr)) {
             $this->setSupportedCountryCodes($arr[$keys[8]]);
+        }
+        if (array_key_exists($keys[9], $arr)) {
+            $this->setResultsFilterType($arr[$keys[9]]);
         }
     }
 
@@ -1501,6 +1575,9 @@ abstract class JobSitePlugin implements ActiveRecordInterface
         }
         if ($this->isColumnModified(JobSitePluginTableMap::COL_SUPPORTED_COUNTRY_CODES)) {
             $criteria->add(JobSitePluginTableMap::COL_SUPPORTED_COUNTRY_CODES, $this->supported_country_codes);
+        }
+        if ($this->isColumnModified(JobSitePluginTableMap::COL_RESULTS_FILTER_TYPE)) {
+            $criteria->add(JobSitePluginTableMap::COL_RESULTS_FILTER_TYPE, $this->results_filter_type);
         }
 
         return $criteria;
@@ -1597,6 +1674,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
         $copyObj->setLastFailedAt($this->getLastFailedAt());
         $copyObj->setLastUserSearchRunId($this->getLastUserSearchRunId());
         $copyObj->setSupportedCountryCodes($this->getSupportedCountryCodes());
+        $copyObj->setResultsFilterType($this->getResultsFilterType());
         if ($makeNew) {
             $copyObj->setNew(true);
         }
@@ -1696,6 +1774,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
         $this->last_user_search_run_id_isLoaded = false;
         $this->supported_country_codes = null;
         $this->supported_country_codes_unserialized = null;
+        $this->results_filter_type = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();

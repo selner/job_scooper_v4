@@ -29,6 +29,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobSitePluginQuery orderByLastFailedAt($order = Criteria::ASC) Order by the date_last_failed column
  * @method     ChildJobSitePluginQuery orderByLastUserSearchRunId($order = Criteria::ASC) Order by the last_user_search_run_id column
  * @method     ChildJobSitePluginQuery orderBySupportedCountryCodes($order = Criteria::ASC) Order by the supported_country_codes column
+ * @method     ChildJobSitePluginQuery orderByResultsFilterType($order = Criteria::ASC) Order by the results_filter_type column
  *
  * @method     ChildJobSitePluginQuery groupByJobSiteKey() Group by the jobsite_key column
  * @method     ChildJobSitePluginQuery groupByPluginClassName() Group by the plugin_class_name column
@@ -39,6 +40,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobSitePluginQuery groupByLastFailedAt() Group by the date_last_failed column
  * @method     ChildJobSitePluginQuery groupByLastUserSearchRunId() Group by the last_user_search_run_id column
  * @method     ChildJobSitePluginQuery groupBySupportedCountryCodes() Group by the supported_country_codes column
+ * @method     ChildJobSitePluginQuery groupByResultsFilterType() Group by the results_filter_type column
  *
  * @method     ChildJobSitePluginQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildJobSitePluginQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -71,7 +73,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobSitePlugin findOneByStartNextRunAfter(string $date_next_run) Return the first ChildJobSitePlugin filtered by the date_next_run column
  * @method     ChildJobSitePlugin findOneByLastFailedAt(string $date_last_failed) Return the first ChildJobSitePlugin filtered by the date_last_failed column
  * @method     ChildJobSitePlugin findOneByLastUserSearchRunId(int $last_user_search_run_id) Return the first ChildJobSitePlugin filtered by the last_user_search_run_id column
- * @method     ChildJobSitePlugin findOneBySupportedCountryCodes(array $supported_country_codes) Return the first ChildJobSitePlugin filtered by the supported_country_codes column *
+ * @method     ChildJobSitePlugin findOneBySupportedCountryCodes(array $supported_country_codes) Return the first ChildJobSitePlugin filtered by the supported_country_codes column
+ * @method     ChildJobSitePlugin findOneByResultsFilterType(int $results_filter_type) Return the first ChildJobSitePlugin filtered by the results_filter_type column *
 
  * @method     ChildJobSitePlugin requirePk($key, ConnectionInterface $con = null) Return the ChildJobSitePlugin by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobSitePlugin requireOne(ConnectionInterface $con = null) Return the first ChildJobSitePlugin matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -85,6 +88,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobSitePlugin requireOneByLastFailedAt(string $date_last_failed) Return the first ChildJobSitePlugin filtered by the date_last_failed column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobSitePlugin requireOneByLastUserSearchRunId(int $last_user_search_run_id) Return the first ChildJobSitePlugin filtered by the last_user_search_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobSitePlugin requireOneBySupportedCountryCodes(array $supported_country_codes) Return the first ChildJobSitePlugin filtered by the supported_country_codes column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildJobSitePlugin requireOneByResultsFilterType(int $results_filter_type) Return the first ChildJobSitePlugin filtered by the results_filter_type column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildJobSitePlugin[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildJobSitePlugin objects based on current ModelCriteria
  * @method     ChildJobSitePlugin[]|ObjectCollection findByJobSiteKey(string $jobsite_key) Return ChildJobSitePlugin objects filtered by the jobsite_key column
@@ -96,6 +100,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobSitePlugin[]|ObjectCollection findByLastFailedAt(string $date_last_failed) Return ChildJobSitePlugin objects filtered by the date_last_failed column
  * @method     ChildJobSitePlugin[]|ObjectCollection findByLastUserSearchRunId(int $last_user_search_run_id) Return ChildJobSitePlugin objects filtered by the last_user_search_run_id column
  * @method     ChildJobSitePlugin[]|ObjectCollection findBySupportedCountryCodes(array $supported_country_codes) Return ChildJobSitePlugin objects filtered by the supported_country_codes column
+ * @method     ChildJobSitePlugin[]|ObjectCollection findByResultsFilterType(int $results_filter_type) Return ChildJobSitePlugin objects filtered by the results_filter_type column
  * @method     ChildJobSitePlugin[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  */
@@ -194,7 +199,7 @@ abstract class JobSitePluginQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT jobsite_key, plugin_class_name, display_name, date_last_run, was_successful, date_next_run, date_last_failed, supported_country_codes FROM jobsite_plugin WHERE jobsite_key = :p0';
+        $sql = 'SELECT jobsite_key, plugin_class_name, display_name, date_last_run, was_successful, date_next_run, date_last_failed, supported_country_codes, results_filter_type FROM jobsite_plugin WHERE jobsite_key = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_STR);
@@ -637,6 +642,39 @@ abstract class JobSitePluginQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(JobSitePluginTableMap::COL_SUPPORTED_COUNTRY_CODES, $supportedCountryCodes, $comparison);
+    }
+
+    /**
+     * Filter the query on the results_filter_type column
+     *
+     * @param     mixed $resultsFilterType The value to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildJobSitePluginQuery The current query, for fluid interface
+     */
+    public function filterByResultsFilterType($resultsFilterType = null, $comparison = null)
+    {
+        $valueSet = JobSitePluginTableMap::getValueSet(JobSitePluginTableMap::COL_RESULTS_FILTER_TYPE);
+        if (is_scalar($resultsFilterType)) {
+            if (!in_array($resultsFilterType, $valueSet)) {
+                throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $resultsFilterType));
+            }
+            $resultsFilterType = array_search($resultsFilterType, $valueSet);
+        } elseif (is_array($resultsFilterType)) {
+            $convertedValues = array();
+            foreach ($resultsFilterType as $value) {
+                if (!in_array($value, $valueSet)) {
+                    throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $value));
+                }
+                $convertedValues []= array_search($value, $valueSet);
+            }
+            $resultsFilterType = $convertedValues;
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(JobSitePluginTableMap::COL_RESULTS_FILTER_TYPE, $resultsFilterType, $comparison);
     }
 
     /**
