@@ -221,13 +221,13 @@ class ClassJobsNotifier
             if($ret !== false || $ret !== null)
             {
                 $arrToMarkNotified = array_from_orm_object_list_by_array_keys($this->arrAllUnnotifiedJobs, array("JobPostingId"));
-                $ids = array_column($arrToMarkNotified, "JobPostingId");
-                $rowsAffected = \JobScooper\UserJobMatchQuery::create()
-                    ->filterByJobPostingId($ids)
-                    ->update(array('UserNotificationState' => 'sent'), null, true);
-                if($rowsAffected != count($arrToMarkNotified))
-                    LogLine("Warning:  marked only {count($rowsAffected)} of {count($arrToMarkNotified)} UserJobMatch records as notified.");
-            }
+                    $ids = array_column($arrToMarkNotified, "JobPostingId");
+                    $rowsAffected = \JobScooper\UserJobMatchQuery::create()
+                        ->filterByJobPostingId($ids)
+                        ->update(array('UserNotificationState' => 'sent'), null, true);
+                    if ($rowsAffected != count($arrToMarkNotified))
+                        LogLine("Warning:  marked only {count($rowsAffected)} of {count($arrToMarkNotified)} UserJobMatch records as notified.");
+                }
 
         } catch (Exception $ex)
         {
@@ -513,8 +513,9 @@ class ClassJobsNotifier
         $arrHeaders = array("For Review", "Auto-Filtered", "New Listings");
 
         $arrFailedPluginsReport = getFailedSearchesByPlugin();
-        
-        foreach($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $plugin) {
+
+
+        foreach($this->_getJobSitesRunRecently() as $plugin) {
 
             $arrPluginJobMatches  = array();
             if ($arrMatchedJobs != null && is_array($arrMatchedJobs) && countJobRecords($arrMatchedJobs) > 0) {
