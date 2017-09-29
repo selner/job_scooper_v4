@@ -32,16 +32,6 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
     protected $arrEmail_PHPMailer_SMTPSetup = null;
     protected $allConfigFileSettings = null;
 
-    function getConfigurationSettings($strSubkey = null)
-    {
-        if (isset($strSubkey) && (isset($GLOBALS['USERDATA']['configuration_settings'][$strSubkey]) || $GLOBALS['USERDATA']['configuration_settings'][$strSubkey] == null))
-            $ret = $GLOBALS['USERDATA']['configuration_settings'][$strSubkey];
-        else
-            $ret = $GLOBALS['USERDATA']['configuration_settings'];
-
-        return $ret;
-    }
-
     function getSMTPSettings()
     {
         if (isset($this->arrEmail_PHPMailer_SMTPSetup)) {
@@ -269,6 +259,8 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
     private function _setupRunFromConfig_($config)
     {
+
+
         if (isset($config['input']) && isset($config['input']['folder'])) {
             $this->arrFileDetails['input_folder'] = parseFilePath($config['input']['folder']);
         }
@@ -362,7 +354,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         }
     }
 
-    private function __getInputFilesByValue__($valKey, $val)
+private function __getInputFilesByValue__($valKey, $val)
     {
         $ret = null;
         if (isset($GLOBALS['USERDATA']['user_input_files_details']) && (is_array($GLOBALS['USERDATA']['user_input_files_details']) || is_array($GLOBALS['USERDATA']['user_input_files_details']))) {
@@ -458,13 +450,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                     }
                 } else {
                     $GLOBALS['USERDATA']['configuration_settings'][$gso] = $config['global_search_options'][$gso];
-                    if (strtolower($gso) == 'debug' && (!array_key_exists('DEBUG', $GLOBALS['OPTS']) || $GLOBALS['USERDATA']['configuration_settings']['debug'] === false)) {
-                        if (intceil($config['global_search_options'][$gso]) == 1) {
-                            $GLOBALS['USERDATA']['configuration_settings']['debug'] = true;
-                        }
-                        $GLOBALS['USERDATA']['configuration_settings']['debug'] = false;
-                    }
-                }
+               }
             }
         }
     }
@@ -682,7 +668,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
             if(count($arrSearchesPreLocation) > 0)
             {
-                $arrLocations = $this->getConfigurationSettings('location_sets');
+                $arrLocations = getConfigurationSettings('location_sets');
                 if(isset($arrLocations) && is_array($arrLocations) && count($arrLocations) >= 1) {
                     foreach ($arrSearchesPreLocation as $search) {
                         $plugin = getPluginObjectForJobSite($search->getJobSiteKey());
@@ -772,7 +758,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         //
         // let's start with the searches specified with the details in the the config.ini
         //
-        $arrSearchConfigSettings = $this->getConfigurationSettings('searches');
+        $arrSearchConfigSettings = getConfigurationSettings('searches');
         LogLine(" Creating search instances for this run from " . strval(count($arrSearchConfigSettings)) . " search config settings.", \C__DISPLAY_ITEM_DETAIL__);
         $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'] = array();
 
