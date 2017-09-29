@@ -230,13 +230,15 @@ function updateJobRecordsFromJson($filepath)
 
         $arrJobsArray = $data['jobslist'];
 
-        foreach(array_keys($arrJobsArray) as $jobkey)
+        if(!is_null($arrJobsArray) && is_array($arrJobsArray))
         {
-            $item = $arrJobsArray[$jobkey];
-            $jobRec = updateOrCreateJobPosting($item);
-            $arrJobRecs[$jobkey] = $jobRec;
+            foreach(array_keys($arrJobsArray) as $jobkey)
+            {
+                $item = $arrJobsArray[$jobkey];
+                $jobRec = updateOrCreateJobPosting($item);
+                $arrJobRecs[$jobkey] = $jobRec;
+            }
         }
-
     }
 
     return $arrJobRecs;
