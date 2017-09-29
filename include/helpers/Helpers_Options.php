@@ -67,3 +67,37 @@ function get_FileDetails_fromPharseOption($optUserKeyName, $fFileRequired)
     return $ret;
 
 }
+
+function getConfigurationSettings($strSubkey = null)
+{
+    $ret = null;
+    if(array_key_exists('USERDATA', $GLOBALS) && array_key_exists('configuration_settings', $GLOBALS['USERDATA']) && !is_null($GLOBALS['USERDATA']['configuration_settings']) && is_array($GLOBALS['USERDATA']['configuration_settings'])) {
+        if (isset($strSubkey) && (isset($GLOBALS['USERDATA']['configuration_settings'][$strSubkey]) || $GLOBALS['USERDATA']['configuration_settings'][$strSubkey] == null))
+            $ret = $GLOBALS['USERDATA']['configuration_settings'][$strSubkey];
+        else
+            $ret = $GLOBALS['USERDATA']['configuration_settings'];
+    }
+
+    return $ret;
+}
+
+
+function isVerbose() {
+    if(isset($GLOBALS['OPTS']) && isset($GLOBALS['OPTS']['VERBOSE']))
+        return filter_var($GLOBALS['OPTS']['VERBOSE'], FILTER_VALIDATE_BOOLEAN);
+
+    return filter_var(getConfigurationSettings('verbose'), FILTER_VALIDATE_BOOLEAN);
+}
+
+function getGlobalConfigOptionBoolean($key)
+{
+    return filter_var(getConfigurationSettings($key), FILTER_VALIDATE_BOOLEAN);
+}
+
+function isDebug() {
+    return getGlobalConfigOptionBoolean('debug');
+}
+
+function isTestRun() {
+    return getGlobalConfigOptionBoolean('test_run');
+}

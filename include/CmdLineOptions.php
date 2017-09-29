@@ -25,20 +25,6 @@ const C__STR_USER_AGENT__ = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) Appl
 
 date_default_timezone_set("America/Los_Angeles");
 
-function isVerbose() {
-    if(isset($GLOBALS['OPTS']) && isset($GLOBALS['OPTS']['VERBOSE']) && $GLOBALS['OPTS']['VERBOSE'] == true) return true;
-    return false;
-}
-
-function isDebug() {
-    if(isset($GLOBALS['USERDATA']) && isset($GLOBALS['USERDATA']['configuration_settings']['debug']) && ($GLOBALS['USERDATA']['configuration_settings']['debug'] === true || $GLOBALS['USERDATA']['configuration_settings']['debug'] == 1)) return true;
-    return false;
-}
-
-function isTestRun() {
-    return (array_key_exists('test_run', $GLOBALS['USERDATA']['configuration_settings']) && intval(($GLOBALS['USERDATA']['configuration_settings']['test_run']) == 1));
-}
-
 function __initializeArgs__()
 {
     setupPlugins();
