@@ -241,25 +241,28 @@ Class ScooperLogger extends \Monolog\Logger
             $strSectionType = "  BEGIN:  ".$headerText;
         } else
         {
-            $strSectionType = "  END:    ".$headerText;}
+            $strSectionType = "  END:    ".$headerText;
+        }
+
+
         //
         // Output the section header
         //
         if($nType == C__SECTION_BEGIN__ || $nSectionLevel == C__NAPPTOPLEVEL__ )
         {
-            echo $strPaddingBefore;
-            echo $strSectionIntroSeparatorLine;
-            echo ' '.$strSectionType.' '."\r\n";
-            echo $strSectionIntroSeparatorLine;
+            logLine("{$strPaddingBefore}{$strSectionIntroSeparatorLine}{$strSectionType}");
+            $strLinesToPrint = $strSectionIntroSeparatorLine;
             if($nSectionLevel == C__NAPPTOPLEVEL__ )
             {
-                echo $strPaddingAfter;
+                $strLinesToPrint .= $strPaddingAfter;
             }
-
+            logLine($strLinesToPrint);
         }
         else // C__SECTION_END__ $strSectionType = "      Done.  ";}
         {
-            echo "\r\n" . ' '.$strSectionType.' ' ."\r\n". $strSectionIntroSeparatorLine . "\r\n";
+            logLine("");
+            logLine($strSectionType);
+            logLine($strSectionIntroSeparatorLine);
         }
     }
 
