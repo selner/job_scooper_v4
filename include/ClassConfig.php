@@ -22,6 +22,9 @@ use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use JobScooper\UserSearchRun;
 use \JobScooper\SearchSettings;
+use  \Propel\Runtime\Propel;
+use \Propel\Runtime\ServiceContainer\ServiceContainerInterface;
+
 
 class ClassConfig extends AbstractClassBaseJobsPlugin
 {
@@ -154,12 +157,6 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         $this->__setupOutputFolders__($userOutfileDetails['directory']);
 
         if (!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \ScooperLogger($GLOBALS['USERDATA']['directories']['debug']);
-        $defaultLogger = new Logger('defaultLogger');
-        $defaultLogger->pushHandler(new StreamHandler($GLOBALS['USERDATA']['directories']['debug'] . '/propel.log', Logger::DEBUG));
-        $defaultLogger->pushHandler(new StreamHandler('php://stderr', Logger::DEBUG));
-
-        $serviceContainer = \Propel\Runtime\Propel::getServiceContainer();
-        $serviceContainer->setLogger('defaultLogger', $defaultLogger);
 
         $strOutfileArrString = getArrayValuesAsString($GLOBALS['USERDATA']['directories']);
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output folders configured: " . $strOutfileArrString, \C__DISPLAY_ITEM_DETAIL__);
@@ -286,6 +283,8 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         if (isDebug() == true && isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded all configuration settings:  " . var_export($this->allConfigFileSettings, true), \C__DISPLAY_SUMMARY__);
 
 
+        $this->_setupPropelForRun();
+
         $this->_parseEmailSetupFromINI_($config);
 
         $this->_parseSeleniumParametersFromConfig_($config);
@@ -351,6 +350,20 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         if (isset($tempFileDetails)) {
 
             $GLOBALS['USERDATA']['user_input_files_details'][] = array('details' => $tempFileDetails, 'data_type' => $iniInputFileItem['type']);
+        }
+    }
+
+    private function _setupPropelForRun()
+    {
+        $defaultLogger = new Logger('defaultLogger');
+        $defaultLogger->pushHandler(new StreamHandler($GLOBALS['USERDATA']['directories']['debug'] . '/propel.log', Logger::DEBUG));
+        $defaultLogger->pushHandler(new StreamHandler('php://stderr', Logger::DEBUG));
+
+        $serviceContainer = Propel::getServiceContainer();
+        $serviceContainer->setLogger('defaultLogger', $defaultLogger);
+        if(isDebug()) {
+            $con = Propel::getWriteConnection(\JobScooper\Map\JobPostingTableMap::DATABASE_NAME);
+            $con->useDebug(true);
         }
     }
 
