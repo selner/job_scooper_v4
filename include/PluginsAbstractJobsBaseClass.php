@@ -198,6 +198,13 @@ abstract class AbstractClassBaseJobsPlugin
             else {
                 LogLine("Skipping {$this->siteName} jobs download since it just ran recently.", \C__DISPLAY_ITEM_DETAIL__);
                 $searchSkipped = true;
+                foreach ($this->arrSearchesToReturn as $search) {
+                    $search->setRunResultCode("excluded");
+                    $search->save();
+                }
+                $this->getJobSiteObject()->setSuccess($boolSearchSuccess);
+                $this->getJobSiteObject()->save();
+
             }
 
             /*
