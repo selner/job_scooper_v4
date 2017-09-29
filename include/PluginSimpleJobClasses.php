@@ -260,20 +260,25 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
 
             if(is_null($value) || strlen($value) == 0)
                 $ret = null;
-            elseif (preg_match($pattern, $value, $matches) > 0) {
-                switch($arrTag['index'])
-                {
-                    case null:
-                        $ret = $matches[1];
-                        break;
+            else
+            {
+                $newPattern = str_replace("\\\\", "\\", $pattern);
 
-                    case "LAST":
-                        $ret = $matches[count($matches) - 1];
-                        break;
+                if (preg_match($newPattern, $value, $matches) > 0) {
+                    switch($arrTag['index'])
+                    {
+                        case null:
+                            $ret = $matches[1];
+                            break;
 
-                    default:
-                        $ret = $matches[$arrTag['index']];
-                        break;
+                        case "LAST":
+                            $ret = $matches[count($matches) - 1];
+                            break;
+
+                        default:
+                            $ret = $matches[$arrTag['index']];
+                            break;
+                    }
                 }
             }
         }
