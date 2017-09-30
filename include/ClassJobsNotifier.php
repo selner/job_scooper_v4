@@ -258,14 +258,89 @@ class ClassJobsNotifier
     }
 
 
-    private function writeRunsJobsToFile($strFileOut, $arrJobsToOutput, $strLogDescriptor, $strExt = "CSV")
+    private function writeRunsJobsToFile($strFileOut, $arrJobsToOutput, $strExt = "CSV")
     {
         if($strExt == "HTML")
-            $keys = $this->getKeysForHTMLOutput();
+            $keysToOutput = $this->getKeysForHTMLOutput();
         else
-            $keys = $this->getKeysForUserCSVOutput();
+            $keysToOutput = $this->getKeysForUserCSVOutput();
 
-        $this->writeJobsListToFile($strFileOut, $arrJobsToOutput, true, "ClassJobRunner-".$strLogDescriptor, $strExt, $keys);
+        if(is_null($keysToOutput))
+            $keysToOutput = array();
+
+        if(!$strFileOut || strlen($strFileOut) <= 0)
+        {
+            throw new ErrorException("Error: writeJobsListToFile called without an output file path to use.");
+        }
+
+        if(count($strFileOut) == 0)
+        {
+            $GLOBALS['logger']->logLine("Warning: writeJobsListToFile had no records to write to  " . $strFileOut, \C__DISPLAY_ITEM_DETAIL__);
+
+        }
+
+        $arrRecordsToOutput = $this->_convertToJobsArrays($arrJobsToOutput);
+
+        $classCombined = new \SimpleCSV($strFileOut , "w");
+        if (!is_array($arrRecordsToOutput))
+        {
+            $arrRecordsToOutput = array();
+        }
+        else
+        {
+            $this->sortJobsCSVArrayByCompanyRole($arrRecordsToOutput);
+        }
+
+        if ($keysToOutput == null && count($arrRecordsToOutput) > 0)
+        {
+            $exampleRec = $arrRecordsToOutput[array_keys($arrRecordsToOutput)[0]];
+
+            $arrKeys = array_keys($exampleRec);
+            $arrKeysInOrder = array();
+            $tmpKeyOrderWithDupes = array_merge($keysToOutput, $arrKeys);
+            foreach($tmpKeyOrderWithDupes as $key)
+            {
+                if(!in_array($key, $arrKeysInOrder))
+                    $arrKeysInOrder[] = $key;
+            }
+            $keysToOutput = $arrKeysInOrder;
+        }
+        elseif($keysToOutput == null)
+        {
+            $keysToOutput = getEmptyJobListingRecord();
+        }
+
+        if($arrRecordsToOutput != null && count($arrRecordsToOutput) > 0)
+        {
+            foreach($arrRecordsToOutput as $reckey => $rec)
+            {
+                $out = array();
+                foreach($keysToOutput as $k)
+                {
+                    $out[$k] = $rec[$k];
+                }
+                $arrRecordsToOutput[$reckey] = array_copy($out);
+            }
+        }
+
+        if($strExt == 'HTML')
+        {
+            $classCombined->writeArrayToHTMLFile($arrRecordsToOutput, $keysToOutput, null, $strCSS);
+
+        }
+        else
+        {
+            array_unshift($arrRecordsToOutput, $keysToOutput);
+            $objPHPExcel = new PHPExcel();
+            $objPHPExcel->getActiveSheet()->fromArray($arrRecordsToOutput, null, 'A1');
+            $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, "CSV");
+
+//            $spreadsheet->removeSheetByIndex(0);
+            $objWriter->save($strFileOut);
+
+//            $classCombined->writeArrayToCSVFile($arrJobsRecordsToUse, $keysToOutput, $this->arrKeysForDeduping);
+        }
+        $GLOBALS['logger']->logLine("Jobs list had  ". count($arrRecordsToOutput) . " jobs and was written to " . $strFileOut , \C__DISPLAY_ITEM_START__);
 
         if($strExt == "HTML")
             $this->_addCSSStyleToHTMLFile_($strFileOut);
@@ -289,7 +364,7 @@ class ClassJobsNotifier
         else
             $arrJobs = array_filter($arrJobsList, $strFilterToApply);
 
-        $this->writeRunsJobsToFile($filePath, $arrJobs, $strFilterToApply, $strExt);
+        $this->writeRunsJobsToFile($filePath, $arrJobs, $strExt);
 
         $GLOBALS['logger']->logLine($strFilterToApply . " " . count($arrJobs). " job listings output to  " . $filePath, \C__DISPLAY_ITEM_RESULT__);
 
@@ -787,18 +862,18 @@ class ClassJobsNotifier
 
     private function getKeysForUserCSVOutput($optimizedView=true)
     {
+        $match = new \JobScooper\UserJobMatch();
         $jobPost = new JobPosting();
+        $allKeys = array_merge(array_keys($jobPost->toArray()), array_keys($match->toArray()));
+
 
         if($optimizedView) {
-            $arrKeys = array_keys($jobPost->toArray());
-#            $retKeys = array_diff($arrKeys, array('TitleTokens', 'JobTitleLinked', 'JobPostingId', 'MatchStatus', 'MatchNotes', "FirstSeenAt", "RemovedAt", "UpdatedAt", "KeySiteAndPostID", "KeyCompanyAndTitle"));
-            $retKeys = array_diff($arrKeys, array('TitleTokens', 'JobTitleLinked', "FirstSeenAt", "RemovedAt", "UpdatedAt", "KeySiteAndPostID", "KeyCompanyAndTitle"));
+            $retKeys = array_diff($allKeys, array('AppRunId', 'UserJobMatchId', 'UserNotificationState', 'TitleTokens', 'JobTitleLinked', "FirstSeenAt", "RemovedAt", "UpdatedAt", "KeySiteAndPostID", "KeyCompanyAndTitle"));
         }
         else {
-            $match = new \JobScooper\UserJobMatch();
-            $retKeys = array_merge(array_keys($jobPost->toArray()), array_keys($match->toArray()));
+            $retKeys = $allKeys;
         }
-        return $retKeys;
+        return array_unique($retKeys);
     }
 
     private function _convertToJobsArrays($arrJobObjects)
@@ -814,98 +889,6 @@ class ClassJobsNotifier
         return $arrRet;
 
     }
-
-    function writeJobsListToFile($strOutFilePath, $arrJobsRecordsToUse, $fIncludeFilteredJobsInResults = true, $loggedFileType = null, $ext = "CSV", $keysToOutput=null, $detailsCSSToInclude = null)
-    {
-        if(is_null($keysToOutput))
-            $keysToOutput = array();
-
-        if(!$strOutFilePath || strlen($strOutFilePath) <= 0)
-        {
-            throw new ErrorException("Error: writeJobsListToFile called without an output file path to use.");
-        }
-
-        if(count($arrJobsRecordsToUse) == 0)
-        {
-            $GLOBALS['logger']->logLine("Warning: writeJobsListToFile had no records to write to  " . $strOutFilePath, \C__DISPLAY_ITEM_DETAIL__);
-
-        }
-
-        if($fIncludeFilteredJobsInResults == false)
-        {
-            $arrJobsRecordsToUse = array_filter($arrJobsRecordsToUse, "includeJobInFilteredList");
-        }
-
-
-        $classCombined = new \SimpleCSV($strOutFilePath , "w");
-
-        $arrCSVRecs = $this->_convertToJobsArrays($arrJobsRecordsToUse);
-
-        $arrRecordsToOutput = array_unique_multidimensional($arrCSVRecs);
-        if (!is_array($arrRecordsToOutput))
-        {
-            $arrRecordsToOutput = array();
-        }
-        else
-        {
-            $this->sortJobsCSVArrayByCompanyRole($arrRecordsToOutput);
-        }
-
-        if ($keysToOutput == null && count($arrRecordsToOutput) > 0)
-        {
-            $exampleRec = $arrRecordsToOutput[array_keys($arrRecordsToOutput)[0]];
-
-            $arrKeys = array_keys($exampleRec);
-            $arrKeysInOrder = array();
-            $tmpKeyOrderWithDupes = array_merge($keysToOutput, $arrKeys);
-            foreach($tmpKeyOrderWithDupes as $key)
-            {
-                if(!in_array($key, $arrKeysInOrder))
-                    $arrKeysInOrder[] = $key;
-            }
-            $keysToOutput = $arrKeysInOrder;
-        }
-        elseif($keysToOutput == null)
-        {
-            $keysToOutput = getEmptyJobListingRecord();
-        }
-
-        if($arrRecordsToOutput != null && count($arrRecordsToOutput) > 0)
-        {
-            foreach($arrRecordsToOutput as $reckey => $rec)
-            {
-                $out = array();
-                foreach($keysToOutput as $k)
-                {
-                    $out[$k] = $rec[$k];
-                }
-                $arrRecordsToOutput[$reckey] = array_copy($out);
-            }
-        }
-
-        if($ext == 'HTML')
-        {
-            $classCombined->writeArrayToHTMLFile($arrRecordsToOutput, $keysToOutput, null, $strCSS);
-
-        }
-        else
-        {
-            array_unshift($arrRecordsToOutput, $keysToOutput);
-            $objPHPExcel = new PHPExcel();
-            $objPHPExcel->getActiveSheet()->fromArray($arrRecordsToOutput, null, 'A1');
-            $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, "CSV");
-
-//            $spreadsheet->removeSheetByIndex(0);
-            $objWriter->save($strOutFilePath);
-
-//            $classCombined->writeArrayToCSVFile($arrJobsRecordsToUse, $keysToOutput, $this->arrKeysForDeduping);
-        }
-        $GLOBALS['logger']->logLine($loggedFileType . ($loggedFileType  != "" ? " jobs" : "Jobs") ." list had  ". count($arrJobsRecordsToUse) . " jobs and was written to " . $strOutFilePath , \C__DISPLAY_ITEM_START__);
-
-        return $strOutFilePath;
-
-    }
-
 
 
 
