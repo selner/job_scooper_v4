@@ -974,9 +974,10 @@ abstract class AbstractClassBaseJobsPlugin
         if (isDebug() === true) {
             LogLine("Writing debug files for plugin " . $this->siteName . "'s search" . $searchDetails['key'], \C__DISPLAY_ITEM_DETAIL__);
 
-            $debugHTMLVarFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlvar_" . "-" . $keyName, $strBase = $searchDetails['key'], $strExt = "html", $delim = "-");
-            $debugHTMLSelenFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlselen_" . "-" . $keyName, $strBase = $searchDetails['key'], $strExt = "html", $delim = "-");
-            $debugSSFile = $GLOBALS['USERDATA']['directories']['debug'] . "/" . getDefaultJobsOutputFileName($strFilePrefix = "_debug_htmlselen_" . "-" . $keyName, $strBase = $searchDetails['key'], $strExt = "png", $delim = "-");
+            $debugHTMLVarFile = generateOutputFileName( "_debug_htmlvar_" . "-" . $keyName . $searchDetails['key'], "html", true, 'debug', true);
+            $debugHTMLSelenFile = generateOutputFileName( "_debug_htmlselen_" . "-" . $keyName . $searchDetails['key'], "html", true, 'debug, true');
+            $debugSSFile = generateOutputFileName( "_debug_htmlselen_" . "-" . $keyName . $searchDetails['key'], "png", true, 'debug', true);
+
             $debugCSVFile = substr($debugHTMLVarFile, 0, strlen($debugHTMLVarFile) - 4) . ".csv";
 
             if (!is_null($objSimpleHTMLResults)) {

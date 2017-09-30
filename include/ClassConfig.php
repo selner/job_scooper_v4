@@ -225,7 +225,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
             $GLOBALS['USERDATA']['directories'][$d] = realpath($details['directory']);
         }
 
-        $userWorkingDirs = ["results"];
+        $userWorkingDirs = ["notifications"];
         foreach ($userWorkingDirs as $d) {
             $prefix = $GLOBALS['USERDATA']['user_unique_key'];
             $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), $d, $prefix));

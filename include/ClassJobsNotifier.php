@@ -156,7 +156,7 @@ class ClassJobsNotifier
         //
 
         // Output all records that match the user's interest and are still active
-        $detailsMainResultsXLSFile = getFilePathDetailsFromString(join(DIRECTORY_SEPARATOR, array($GLOBALS['USERDATA']['directories']['results'], getDefaultJobsOutputFileName("results", "", "xls"))), \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+        $detailsMainResultsXLSFile = getFilePathDetailsFromString(generateOutputFileName("results", "xls", true, 'notifications', true), \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);;
         $arrFilesToAttach = array();
         $arrResultFilesToCombine = array();
 
@@ -276,7 +276,7 @@ class ClassJobsNotifier
 
     private function _filterAndWriteListToFile_($arrJobsList, $strFilterToApply, $strFileNameBase, $strExt = "CSV")
     {
-        $filePath = getDefaultJobsOutputFileName($strFileNameBase, $strFilterToApply, $strExt, "_", 'results');
+        $filePath = getDefaultJobsOutputFileName($strFileNameBase, $strFilterToApply, $strExt, "_", 'notifications');
 
 
         if(countJobRecords($arrJobsList) == 0) return $arrJobsList;

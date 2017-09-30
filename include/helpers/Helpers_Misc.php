@@ -212,7 +212,7 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 {
     LogLine("Tokenizing title exclusion matches from " . $inputfile . ".", \C__DISPLAY_ITEM_DETAIL__);
     if (!$outputFile)
-        $outputFile = $GLOBALS['USERDATA']['directories']['debug'] . "/tempCallTokenizer.csv";
+        $outputFile = getOutputDirectory('debug') . "/tempCallTokenizer.csv";
     $PYTHONPATH = realpath(__ROOT__ . "/python/pyJobNormalizer/");
     $cmd = "python " . $PYTHONPATH . "/normalizeStrings.py -i " . $inputfile . " -o " . $outputFile . " -k " . $keyname;
     if ($indexKeyName != null)
@@ -250,8 +250,8 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 
 function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "keywords", $indexKeyName = null)
 {
-    $inputFile = generateOutputFileName("tmp-" . $tempFileKey . "-token-input.", "csv");
-    $outputFile = generateOutputFileName( "tmp-" . $tempFileKey . "-token-output", "csv");
+    $inputFile = generateOutputFileName("tmp-" . $tempFileKey . "-token-input.", "csv", true, 'debug', true);
+    $outputFile = generateOutputFileName( "tmp-" . $tempFileKey . "-token-output", "csv", true, 'debug', true);
 
     $headers = array($dataKeyName);
     if (array_key_exists($dataKeyName, $arrData)) $headers = array_keys($arrData);
