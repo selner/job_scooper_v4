@@ -15,7 +15,7 @@
  * under the License.
  */
 
-define('__APP_VERSION__', "Job Scooper v4.1.0-use-propel-orm");
+define('__APP_VERSION__', "v4.1.0-use-propel-orm");
 define('MAX_FILE_SIZE', 5000000);
 $lineEnding = ini_get('auto_detect_line_endings');
 ini_set('auto_detect_line_endings', true);
