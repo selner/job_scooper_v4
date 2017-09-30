@@ -352,6 +352,7 @@ class SeleniumSession extends PropertyObject
     private function create_remote_webdriver()
     {
         $host = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
+        logLine("Creating Selenium remote web driver to host {$host}...");
 
         try {
             $webdriver = $this->getWebDriverKind();
@@ -374,6 +375,8 @@ class SeleniumSession extends PropertyObject
                 $connection_timeout_in_ms = 60000,
                 $request_timeout_in_ms = 60000
             );
+
+            logLine("Remote web driver instantiated.");
 
             return $this->remoteWebDriver;
         }
