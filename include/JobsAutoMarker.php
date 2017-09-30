@@ -112,12 +112,15 @@ class JobsAutoMarker
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         LogLine(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL, \C__DISPLAY_NORMAL__);
 
-        $masterCopy = array_copy($this->arrMasterJobList);
-
-        $arrJobs_AutoUpdatable = array_filter($masterCopy, "isJobAutoUpdatable");
-        $this->_markJobsList_SetLikelyDuplicatePosts_($arrJobs_AutoUpdatable);
-        $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
+        $arrJobs_AutoUpdatable = $this->arrMasterJobList;
         $this->_markJobsList_SearchKeywordsNotFound_($arrJobs_AutoUpdatable);
+
+        //BUGBUG/TODO DEBUG AND PUT BACK
+//        $this->_markJobsList_SetLikelyDuplicatePosts_($arrJobs_AutoUpdatable);
+
+        //BUGBUG/TODO DEBUG AND PUT BACK
+//        $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
+
         $this->_markJobsList_UserExcludedKeywords_($arrJobs_AutoUpdatable);
         $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($arrJobs_AutoUpdatable);
 
@@ -436,10 +439,10 @@ class JobsAutoMarker
         $nJobsNotMarked = 0;
 
         try {
-            $titleKeywords = $this->_getTitleKeywords();
-            if (count($arrJobsList) == 0 || is_null($titleKeywords)) return null;
+            $userSearchKeywords = $this->_getTitleKeywords();
+            if (count($arrJobsList) == 0 || is_null($userSearchKeywords)) return null;
 
-            LogLine("Checking " . count($arrJobsList) . " roles against " . count($titleKeywords) . " keywords in titles...", \C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Checking " . count($arrJobsList) . " roles against " . count($userSearchKeywords) . " keyword phrases in titles...", \C__DISPLAY_ITEM_DETAIL__);
 
             try {
 
@@ -451,12 +454,13 @@ class JobsAutoMarker
                     }
                     else
                     {
-                       foreach ($titleKeywords as $kywdtoken) {
-                            $matched = substr_count_multi($jobMatch->getJobPosting()->getTitleTokens(), $kywdtoken, $kwdTokenMatches, true);
+                       foreach ($userSearchKeywords as $usrSearchKeywordItem) {
+                           $jobTitleTokens = $jobMatch->getJobPosting()->getTitleTokens();
+                            $matched = substr_count_multi($jobTitleTokens, $usrSearchKeywordItem, $kwdTokenMatches, true);
                             if ($matched === true) {
                                 $strTitleTokenMatches = getArrayValuesAsString(array_values($kwdTokenMatches), " ", "", false);
 
-                                if (count($kwdTokenMatches) === count($kywdtoken)) {
+                                if (count($kwdTokenMatches) === count($usrSearchKeywordItem)) {
                                     $arrKeywordsMatched[$strTitleTokenMatches] = $kwdTokenMatches;
                                 }
                             }
@@ -466,7 +470,7 @@ class JobsAutoMarker
                         {
                                 $jobMatch->setUserMatchStatus("exclude-match");
                                 $jobMatch->setUserMatchReason(NO_TITLE_MATCHES);
-                                $jobMatch->updateMatchNotes("title keywords not matched to terms [" . getArrayValuesAsString($keywordsToMatch) . "]");
+                                $jobMatch->updateMatchNotes("title keywords not matched to terms [" . getArrayValuesAsString($userSearchKeywords) . "]");
                                 $nJobsMarkedAutoExcluded += 1;
                         }
                         else
@@ -474,9 +478,8 @@ class JobsAutoMarker
 //                            $jobMatch->updateMatchNotes("matched title keywords [" . getArrayValuesAsString($arrKeywordsMatched) . "]");
                             $nJobsNotMarked += 1;
                         }
-                    }
                     $jobMatch->save();
-
+                    }
                 }
             } catch (Exception $ex) {
                 handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s', isDebug());

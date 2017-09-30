@@ -91,13 +91,17 @@ function writeJSON($data, $filepath)
     return $filepath;
 }
 
-function loadJSON($file, $options=JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP)
+function loadJSON($file, $options=null, $boolEscapeBackslashes=false)
 {
+    if(is_null($options))
+        $options = JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP;
+
     if(is_file($file)) {
 #        LogLine("Reading json data from file " . $file, \C__DISPLAY_ITEM_DETAIL__);
         LogLine("Reading json data from file " . $file);
         $jsonText = file_get_contents($file, FILE_TEXT);
-        $jsonText = str_replace('\\', '\\\\', $jsonText);
+        if($boolEscapeBackslashes === true)
+            $jsonText = str_replace('\\', '\\\\', $jsonText);
         $data = json_decode($jsonText, $assoc = true, $depth=512, $options);
         return $data;
     }

@@ -40,7 +40,7 @@ class JSONPlugins
         });
 
         foreach($filelist as $f) {
-            $this->pluginConfigs[$f] = loadJSON($jsonconfigsdir . "/" . $f);
+            $this->pluginConfigs[$f] = loadJSON($jsonconfigsdir . "/" . $f, null, true);
         }
 
     }
