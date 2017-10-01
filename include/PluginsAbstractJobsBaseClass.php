@@ -1744,12 +1744,12 @@ class CurlWrapper {
             $full_url .= "?page=" . $pagenum;
         }
         $header = array();
-        if($onbehalf != null) $header[] = 'X-On-Behalf-Of: ' . $onbehalf;
-        if($content_type  != null) $header[] = 'Content-type: ' . $content_type;
-        if($content_type  != null) $header[] = 'Accept: ' . $content_type;
+        if(!is_null($onbehalf)) $header[] = 'X-On-Behalf-Of: ' . $onbehalf;
+        if(!is_null($content_type)) $header[] = 'Content-type: ' . $content_type;
+        if(!is_null($content_type)) $header[] = 'Accept: ' . $content_type;
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_REFERER, $referrer);
+        if(!is_null($referrer)) curl_setopt($ch, CURLOPT_REFERER, $referrer);
         curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10 );
