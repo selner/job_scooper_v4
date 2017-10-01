@@ -90,6 +90,12 @@
         <column name="company" type="varchar" size="100" required="false"/>
         <!--        <column name="company_id" phpName="CompanyId" type="varchar" size="255" required="false"/> -->
         <column name="location" type="varchar" size="255" required="false"/>
+        <column name="job_location_id" type="integer" required="false"/>
+        <foreign-key foreignTable="job_location" onUpdate="none" onDelete="none">
+            <reference local="job_location_id" foreign="location_id"/>
+        </foreign-key>
+
+
         <column name="employment_type" phpName="EmploymentType" type="varchar" size="100" required="false"/>
         <column name="department" type="varchar" size="255" required="false"/>
         <column name="category" type="varchar" size="100" required="false"/>
@@ -113,8 +119,40 @@
         <column name="key_company_and_title" phpName="KeyCompanyAndTitle" type="varchar" size="255" required="true"/>
         <column name="title_linked" phpName="JobTitleLinked" type="varchar" size="1024" required="true"/>
 
+        <!--<column name="duplicates_posting_id" phpName="DuplicatesJobPostingId" type="integer" required="false"/>-->
+        <!--<foreign-key foreignTable="jobposting" onUpdate="none" onDelete="none">-->
+            <!--<reference local="duplicates_posting_id" foreign="jobposting_id"/>-->
+        <!--</foreign-key>-->
+
     </table>
 
+    <table name="job_location" phpName="JobLocation" reloadOnUpdate="true" reloadOnInsert="true">
+        <column name="location_id" phpName="LocationId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="lat" phpName="Latitude" type="float"/>
+        <column name="lon" phpName="Logitude" type="float"/>
+        <column name="full_display_name" phpName="DisplayName" type="varchar" size="100" />
+        <column name="primary_name" phpName="PrimaryName" type="varchar" size="100" />
+        <column name="place" phpName="Place" type="varchar" size="100" />
+        <column name="county" phpName="County" type="varchar" size="100" />
+        <column name="state" phpName="State" type="varchar" size="100" />
+        <column name="statecode" phpName="StateCode" type="varchar" size="2" />
+        <column name="country" phpName="Country" type="varchar" size="100" />
+        <column name="countrycode" phpName="CountryCode" type="varchar" size="2" />
+        <column name="alternate_names" phpName="AlternateNames" type="array" />
+        <column name="openstreetmap_id" phpName="OpenStreetMapId" type="integer"/>
+        <unique name="uniq_openstreetmap_id/">
+            <unique-column name="openstreetmap_id"/>
+        </unique>
+    </table>
+
+    <table name="job_place_lookup" phpName="JobPlaceLookup">
+        <column name="place_alternate_name" phpName="PlaceAlternateName" type="varchar" size="100" required="true" primaryKey="true" primaryString="true"/>
+        <column name="job_location_id" phpName="LocationId" type="integer" required="true" primaryKey="true" />
+        <foreign-key foreignTable="job_location" onUpdate="none" onDelete="none">
+            <reference local="job_location_id" foreign="location_id"/>
+        </foreign-key>
+        <behavior name="sluggable"/>
+    </table>
 
 
     <table name="jobsite_plugin" phpName="JobSitePlugin" reloadOnUpdate="true" reloadOnInsert="true">

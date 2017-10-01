@@ -1287,7 +1287,7 @@ abstract class AbstractClassBaseJobsPlugin
                     if(method_exists($this, "doFirstPageLoad") && $nPageCount == 1)
                         $html = $this->doFirstPageLoad($searchDetails);
                     else
-                    $html = $this->selenium->getPageHTML($searchDetails['search_start_url']);
+                        $html = $this->selenium->getPageHTML($searchDetails['search_start_url']);
                     $objSimpleHTML = SimpleHTMLHelper::str_get_html($html);
                 } catch (Exception $ex) {
                     $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();

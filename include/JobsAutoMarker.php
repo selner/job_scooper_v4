@@ -113,14 +113,13 @@ class JobsAutoMarker
         LogLine(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL, \C__DISPLAY_NORMAL__);
 
         $arrJobs_AutoUpdatable = $this->arrMasterJobList;
-        $this->_markJobsList_SearchKeywordsNotFound_($arrJobs_AutoUpdatable);
-
         //BUGBUG/TODO DEBUG AND PUT BACK
 //        $this->_markJobsList_SetLikelyDuplicatePosts_($arrJobs_AutoUpdatable);
 
-        //BUGBUG/TODO DEBUG AND PUT BACK
+//        BUGBUG/TODO DEBUG AND PUT BACK
 //        $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
 
+        $this->_markJobsList_SearchKeywordsNotFound_($arrJobs_AutoUpdatable);
         $this->_markJobsList_UserExcludedKeywords_($arrJobs_AutoUpdatable);
         $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($arrJobs_AutoUpdatable);
 
@@ -168,6 +167,8 @@ class JobsAutoMarker
                 //
                 // Add a note to the duplicate listing that tells user which is the original post
                 //
+                $dupeJob = $dupeJobMatch->getJobPosting();
+//                $dupeJob->setDuplicatesJobPostingId($origJobMatch->getJobPostingId());
                 $dupeJobMatch->setUserMatchStatus("exclude-match");
                 $dupeJobMatch->setUserMatchReason(C__STR_TAG_DUPLICATE_POST__);
                 $dupeJobMatch->updateMatchNotes($this->getNotesWithDupeIDAdded($dupeJobMatch->getMatchNotes(), $origJobMatch->getJobPosting()->getKeySiteAndPostID() ));
@@ -242,7 +243,7 @@ class JobsAutoMarker
 
             LogLine("Building jobs by locations list and excluding failed matches...", \C__DISPLAY_ITEM_DETAIL__);
             foreach ($arrJobsList as $jobMatch) {
-                $locValue = $jobMatch->getJobPosting()->getLocation();
+                $locValue = $jobMatch->getJobPosting()->getLocationString();
                 $locKey = $this->getLocationLookupKey($locValue);
 
                 if (in_array($jobMatch->getUserMatchStatus(), array("exclude-match")) == 1) {
@@ -478,7 +479,7 @@ class JobsAutoMarker
 //                            $jobMatch->updateMatchNotes("matched title keywords [" . getArrayValuesAsString($arrKeywordsMatched) . "]");
                             $nJobsNotMarked += 1;
                         }
-                    $jobMatch->save();
+                        $jobMatch->save();
                     }
                 }
             } catch (Exception $ex) {

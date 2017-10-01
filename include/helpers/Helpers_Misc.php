@@ -647,3 +647,99 @@ function my_merge_add_new_keys( $arr1, $arr2 )
     if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine('returning from ' . $strFunc, C__DISPLAY_FUNCTION__, true);
     return $arrMerged;
 }
+
+$STATE_CODES = array(
+    "alabama" => "AL",
+    "alaska" => "AK",
+    "american samoa" => "AS",
+    "arizona" => "AZ",
+    "arkansas" => "AR",
+    "california" => "CA",
+    "colorado" => "CO",
+    "connecticut" => "CT",
+    "delaware" => "DE",
+    "district of columbia" => "DC",
+    "federated states of micronesia" => "FM",
+    "florida" => "FL",
+    "georgia" => "GA",
+    "guam" => "GU",
+    "hawaii" => "HI",
+    "idaho" => "ID",
+    "illinois" => "IL",
+    "indiana" => "IN",
+    "iowa" => "IA",
+    "kansas" => "KS",
+    "kentucky" => "KY",
+    "louisiana" => "LA",
+    "maine" => "ME",
+    "marshall islands" => "MH",
+    "maryland" => "MD",
+    "massachusetts" => "MA",
+    "michigan" => "MI",
+    "minnesota" => "MN",
+    "mississippi" => "MS",
+    "missouri" => "MO",
+    "montana" => "MT",
+    "nebraska" => "NE",
+    "nevada" => "NV",
+    "new hampshire" => "NH",
+    "new jersey" => "NJ",
+    "new mexico" => "NM",
+    "new york" => "NY",
+    "north carolina" => "NC",
+    "north dakota" => "ND",
+    "northern mariana islands" => "MP",
+    "ohio" => "OH",
+    "oklahoma" => "OK",
+    "oregon" => "OR",
+    "palau" => "PW",
+    "pennsylvania" => "PA",
+    "puerto rico" => "PR",
+    "rhode island" => "RI",
+    "south carolina" => "SC",
+    "south dakota" => "SD",
+    "tennessee" => "TN",
+    "texas" => "TX",
+    "utah" => "UT",
+    "vermont" => "VT",
+    "virgin islands" => "VI",
+    "virginia" => "VA",
+    "washington" => "WA",
+    "west virginia" => "WV",
+    "wisconsin" => "WI",
+    "wyoming" => "WY"
+);
+
+$stateNames = array_flip($STATE_CODES);
+
+function getOpenStreetMapFacts($query)
+{
+    $ret = null;
+    $data = null;
+    $osmquery = "http://nominatim.openstreetmap.org/search?q=%s&format=json&addressdetails=1&extradetails=1&namedetails=1&countrycodes=US&dedupe=1";
+    $apiCall = sprintf($osmquery, urlencode($query));
+    $curl = new \CurlWrapper();
+
+    try {
+        $data = $curl->curl($full_url = $apiCall, $json = null, $action = 'GET', $content_type = "application/json; charset=UTF-8", $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = null, $referrer = "http://github.com/selner/job_scooper_v4");
+        if (array_key_exists('output', $data))
+            if (!is_null($data['output'])) {
+                $objData = json_decode($data['output']);
+                $osmPlace = object_to_array($objData);
+                if(is_array($osmPlace) && count($osmPlace) > 0) {
+                    $ret =  $osmPlace[0];
+                }
+                else
+                    $ret = $osmPlace;
+            }
+    }
+    catch (Exception $ex)
+    {
+        handleException($ex);
+    }
+
+    $ret['primary_name'] = $query;
+    return $ret;
+
+}
+

@@ -36,6 +36,10 @@ class JobPosting extends \JobScooper\Base\JobPosting implements \ArrayAccess
     {
         $this->setKeyCompanyAndTitle(cleanupSlugPart($this->getCompany() . $this->getTitle()));
         $this->setKeySiteAndPostID(cleanupSlugPart($this->getJobSite() . $this->getJobSitePostID()));
+
+
+        $locationId = getLocationIdByAlternateName($this->getLocation());
+        $this->setJobLocationId($locationId);
     }
 
     public function setAutoColumnRelatedProperty($method, $v)
@@ -44,6 +48,20 @@ class JobPosting extends \JobScooper\Base\JobPosting implements \ArrayAccess
             $v = "_VALUENOTSET_";
         $ret = parent::$method($v);
         $this->updateAutoColumns();
+        return $ret;
+    }
+
+    public function getLocationString()
+    {
+        $ret = $this->getLocation();
+        $location = $this->getJobLocation();
+        if(!is_null($location))
+        {
+            $ret .= $location->getPlace() ? " {$location->getPlace()}" : "";
+            $ret .= $location->getStateCode() ? " {$location->getStateCode()}" : "";
+            $ret .= $location->getCountryCode() ? " {$location->getCountryCode()}" : "";
+        }
+
         return $ret;
     }
 
@@ -96,6 +114,9 @@ class JobPosting extends \JobScooper\Base\JobPosting implements \ArrayAccess
 
     public function setLocation($v)
     {
+        // clear any previous job location ID when we set a new location string
+        $this->setJobLocationId(null);
+
         $normalizer = new Normalize();
         $v = preg_replace('#(^\s*\(+|\)+\s*$)#', "", $v); // strip leading & ending () chars
         $v = $this->_cleanupTextValue($v);
@@ -106,14 +127,15 @@ class JobPosting extends \JobScooper\Base\JobPosting implements \ArrayAccess
         $arrMatches = array();
         $matched = preg_match('/.*(\w{2})\s*[\-,]\s*.*(\w{2})\s*[\-,]s*([\w]+)/', $v, $arrMatches);
         if ($matched !== false && count($arrMatches) == 4) {
-            $arrItem['location'] = $arrMatches[3] . ", " . $arrMatches[2];
+            $v = $arrMatches[3] . ", " . $arrMatches[2];
         }
-        $stringToNormalize = "111 Bogus St, " . $v;
-        $location = $normalizer->parse($stringToNormalize);
-        if ($location !== false)
-            $v = $location['city'] . ", " . $location['state'];
+//
+//        $stringToNormalize = "111 Bogus St, " . $v;
+//        $location = $normalizer->parse($stringToNormalize);
+//        if ($location !== false)
+//            $v = $location['city'] . ", " . $location['state'];
 
-        parent::setLocation($v);
+        parent::setLocation(trim($v));
     }
 
     public function setCompany($v)

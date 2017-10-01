@@ -330,6 +330,26 @@ function findOrCreateJobSitePlugin($jobsite, $plugin_classname=null)
     return $GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object'];
 }
 
+function getLocationIdByAlternateName($strLocation)
+{
+
+    $slug = cleanupSlugPart($strLocation);
+
+    LogLine("Searching for database location name '" . $slug ."'", \C__DISPLAY_NORMAL__);
+    $placelookup = \JobScooper\JobPlaceLookupQuery::create()
+        ->filterBySlug($slug)
+        ->findOneOrCreate();
+
+    if(is_null($placelookup->getLocationId()))
+    {
+        $placelookup->setPlaceAlternateName($strLocation);
+        $placelookup->save();
+    }
+
+    return $placelookup->getLocationId();
+}
+
+
 function getPluginObjectForJobSite($jobsite)
 {
     $objJobSite = findOrCreateJobSitePlugin($jobsite);
