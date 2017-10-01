@@ -94,12 +94,19 @@ class PluginSlalom extends BaseNoDeptForceComClass
 {
     protected $siteName = "Slalom";
 }
-class PluginRobertHalfExec extends BaseNoDeptForceComClass
+class PluginRobertHalfExec extends BaseForceComClass
 {
     protected $siteName= "RobertHalfExec";
     protected $siteBaseURL = "http://roberthalf.force.com";
     protected $strBaseURLFormat = "http://roberthalf.force.com/careers";
     protected $additionalFlags = [ C__JOB_USE_SELENIUM ];
+    function __construct()
+    {
+        parent::__construct();
+        $this->arrListingTagSetup['tag_department']['index'] = 1;
+        $this->arrListingTagSetup['tag_location']['index'] = 2;
+        $this->arrListingTagSetup['tag_job_posting_date'] = null;
+    }
 
     function doFirstPageLoad($searchDetails)
     {
