@@ -28,7 +28,7 @@ function loadTemplate($path)
     $partialsDir = $tmplDir . DIRECTORY_SEPARATOR . "partials/";
     $template = file_get_contents($tmplFile);
 
-    LogLine("Compiling Mustache template: {$template}...");
+    LogLine("Compiling Mustache template ({$tmplFile}...");
     $tmpl = LightnCandy::compile($template,
         Array(
             'flags' => LightnCandy::FLAG_RENDER_DEBUG | LightnCandy::FLAG_ERROR_LOG | LightnCandy::FLAG_ERROR_EXCEPTION | LightnCandy::FLAG_HANDLEBARSJS_FULL | LightnCandy::FLAG_THIS | LightnCandy::FLAG_PROPERTY | LightnCandy::FLAG_JSOBJECT,
