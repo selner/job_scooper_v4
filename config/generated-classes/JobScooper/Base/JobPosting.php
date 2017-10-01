@@ -202,9 +202,27 @@ abstract class JobPosting implements ActiveRecordInterface
     protected $title_linked;
 
     /**
+     * The value for the duplicates_posting_id field.
+     *
+     * @var        int
+     */
+    protected $duplicates_posting_id;
+
+    /**
      * @var        ChildJobLocation
      */
     protected $aJobLocation;
+
+    /**
+     * @var        ChildJobPosting
+     */
+    protected $aJobPostingRelatedByDuplicatesJobPostingId;
+
+    /**
+     * @var        ObjectCollection|ChildJobPosting[] Collection to store aggregation of ChildJobPosting objects.
+     */
+    protected $collJobPostingsRelatedByJobPostingId;
+    protected $collJobPostingsRelatedByJobPostingIdPartial;
 
     /**
      * @var        ObjectCollection|ChildUserJobMatch[] Collection to store aggregation of ChildUserJobMatch objects.
@@ -219,6 +237,12 @@ abstract class JobPosting implements ActiveRecordInterface
      * @var boolean
      */
     protected $alreadyInSave = false;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var ObjectCollection|ChildJobPosting[]
+     */
+    protected $jobPostingsRelatedByJobPostingIdScheduledForDeletion = null;
 
     /**
      * An array of objects scheduled for deletion.
@@ -682,6 +706,16 @@ abstract class JobPosting implements ActiveRecordInterface
     }
 
     /**
+     * Get the [duplicates_posting_id] column value.
+     *
+     * @return int
+     */
+    public function getDuplicatesJobPostingId()
+    {
+        return $this->duplicates_posting_id;
+    }
+
+    /**
      * Set the value of [jobposting_id] column.
      *
      * @param int $v new value
@@ -1066,6 +1100,30 @@ abstract class JobPosting implements ActiveRecordInterface
     } // setJobTitleLinked()
 
     /**
+     * Set the value of [duplicates_posting_id] column.
+     *
+     * @param int $v new value
+     * @return $this|\JobScooper\JobPosting The current object (for fluent API support)
+     */
+    public function setDuplicatesJobPostingId($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->duplicates_posting_id !== $v) {
+            $this->duplicates_posting_id = $v;
+            $this->modifiedColumns[JobPostingTableMap::COL_DUPLICATES_POSTING_ID] = true;
+        }
+
+        if ($this->aJobPostingRelatedByDuplicatesJobPostingId !== null && $this->aJobPostingRelatedByDuplicatesJobPostingId->getJobPostingId() !== $v) {
+            $this->aJobPostingRelatedByDuplicatesJobPostingId = null;
+        }
+
+        return $this;
+    } // setDuplicatesJobPostingId()
+
+    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -1157,6 +1215,9 @@ abstract class JobPosting implements ActiveRecordInterface
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 18 + $startcol : JobPostingTableMap::translateFieldName('JobTitleLinked', TableMap::TYPE_PHPNAME, $indexType)];
             $this->title_linked = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 19 + $startcol : JobPostingTableMap::translateFieldName('DuplicatesJobPostingId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->duplicates_posting_id = (null !== $col) ? (int) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -1165,7 +1226,7 @@ abstract class JobPosting implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 19; // 19 = JobPostingTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 20; // 20 = JobPostingTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\JobPosting'), 0, $e);
@@ -1189,6 +1250,9 @@ abstract class JobPosting implements ActiveRecordInterface
     {
         if ($this->aJobLocation !== null && $this->job_location_id !== $this->aJobLocation->getLocationId()) {
             $this->aJobLocation = null;
+        }
+        if ($this->aJobPostingRelatedByDuplicatesJobPostingId !== null && $this->duplicates_posting_id !== $this->aJobPostingRelatedByDuplicatesJobPostingId->getJobPostingId()) {
+            $this->aJobPostingRelatedByDuplicatesJobPostingId = null;
         }
     } // ensureConsistency
 
@@ -1230,6 +1294,9 @@ abstract class JobPosting implements ActiveRecordInterface
         if ($deep) {  // also de-associate any related objects?
 
             $this->aJobLocation = null;
+            $this->aJobPostingRelatedByDuplicatesJobPostingId = null;
+            $this->collJobPostingsRelatedByJobPostingId = null;
+
             $this->collUserJobMatches = null;
 
         } // if (deep)
@@ -1359,6 +1426,13 @@ abstract class JobPosting implements ActiveRecordInterface
                 $this->setJobLocation($this->aJobLocation);
             }
 
+            if ($this->aJobPostingRelatedByDuplicatesJobPostingId !== null) {
+                if ($this->aJobPostingRelatedByDuplicatesJobPostingId->isModified() || $this->aJobPostingRelatedByDuplicatesJobPostingId->isNew()) {
+                    $affectedRows += $this->aJobPostingRelatedByDuplicatesJobPostingId->save($con);
+                }
+                $this->setJobPostingRelatedByDuplicatesJobPostingId($this->aJobPostingRelatedByDuplicatesJobPostingId);
+            }
+
             if ($this->isNew() || $this->isModified()) {
                 // persist changes
                 if ($this->isNew()) {
@@ -1368,6 +1442,24 @@ abstract class JobPosting implements ActiveRecordInterface
                     $affectedRows += $this->doUpdate($con);
                 }
                 $this->resetModified();
+            }
+
+            if ($this->jobPostingsRelatedByJobPostingIdScheduledForDeletion !== null) {
+                if (!$this->jobPostingsRelatedByJobPostingIdScheduledForDeletion->isEmpty()) {
+                    foreach ($this->jobPostingsRelatedByJobPostingIdScheduledForDeletion as $jobPostingRelatedByJobPostingId) {
+                        // need to save related object because we set the relation to null
+                        $jobPostingRelatedByJobPostingId->save($con);
+                    }
+                    $this->jobPostingsRelatedByJobPostingIdScheduledForDeletion = null;
+                }
+            }
+
+            if ($this->collJobPostingsRelatedByJobPostingId !== null) {
+                foreach ($this->collJobPostingsRelatedByJobPostingId as $referrerFK) {
+                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
+                        $affectedRows += $referrerFK->save($con);
+                    }
+                }
             }
 
             if ($this->userJobMatchesScheduledForDeletion !== null) {
@@ -1470,6 +1562,9 @@ abstract class JobPosting implements ActiveRecordInterface
         if ($this->isColumnModified(JobPostingTableMap::COL_TITLE_LINKED)) {
             $modifiedColumns[':p' . $index++]  = 'title_linked';
         }
+        if ($this->isColumnModified(JobPostingTableMap::COL_DUPLICATES_POSTING_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'duplicates_posting_id';
+        }
 
         $sql = sprintf(
             'INSERT INTO jobposting (%s) VALUES (%s)',
@@ -1537,6 +1632,9 @@ abstract class JobPosting implements ActiveRecordInterface
                         break;
                     case 'title_linked':
                         $stmt->bindValue($identifier, $this->title_linked, PDO::PARAM_STR);
+                        break;
+                    case 'duplicates_posting_id':
+                        $stmt->bindValue($identifier, $this->duplicates_posting_id, PDO::PARAM_INT);
                         break;
                 }
             }
@@ -1657,6 +1755,9 @@ abstract class JobPosting implements ActiveRecordInterface
             case 18:
                 return $this->getJobTitleLinked();
                 break;
+            case 19:
+                return $this->getDuplicatesJobPostingId();
+                break;
             default:
                 return null;
                 break;
@@ -1706,6 +1807,7 @@ abstract class JobPosting implements ActiveRecordInterface
             $keys[16] => $this->getKeySiteAndPostID(),
             $keys[17] => $this->getKeyCompanyAndTitle(),
             $keys[18] => $this->getJobTitleLinked(),
+            $keys[19] => $this->getDuplicatesJobPostingId(),
         );
         if ($result[$keys[12]] instanceof \DateTimeInterface) {
             $result[$keys[12]] = $result[$keys[12]]->format('c');
@@ -1743,6 +1845,36 @@ abstract class JobPosting implements ActiveRecordInterface
                 }
 
                 $result[$key] = $this->aJobLocation->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->aJobPostingRelatedByDuplicatesJobPostingId) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'jobPosting';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'jobposting';
+                        break;
+                    default:
+                        $key = 'JobPosting';
+                }
+
+                $result[$key] = $this->aJobPostingRelatedByDuplicatesJobPostingId->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->collJobPostingsRelatedByJobPostingId) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'jobPostings';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'jobpostings';
+                        break;
+                    default:
+                        $key = 'JobPostings';
+                }
+
+                $result[$key] = $this->collJobPostingsRelatedByJobPostingId->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
             if (null !== $this->collUserJobMatches) {
 
@@ -1850,6 +1982,9 @@ abstract class JobPosting implements ActiveRecordInterface
             case 18:
                 $this->setJobTitleLinked($value);
                 break;
+            case 19:
+                $this->setDuplicatesJobPostingId($value);
+                break;
         } // switch()
 
         return $this;
@@ -1932,6 +2067,9 @@ abstract class JobPosting implements ActiveRecordInterface
         }
         if (array_key_exists($keys[18], $arr)) {
             $this->setJobTitleLinked($arr[$keys[18]]);
+        }
+        if (array_key_exists($keys[19], $arr)) {
+            $this->setDuplicatesJobPostingId($arr[$keys[19]]);
         }
     }
 
@@ -2030,6 +2168,9 @@ abstract class JobPosting implements ActiveRecordInterface
         }
         if ($this->isColumnModified(JobPostingTableMap::COL_TITLE_LINKED)) {
             $criteria->add(JobPostingTableMap::COL_TITLE_LINKED, $this->title_linked);
+        }
+        if ($this->isColumnModified(JobPostingTableMap::COL_DUPLICATES_POSTING_ID)) {
+            $criteria->add(JobPostingTableMap::COL_DUPLICATES_POSTING_ID, $this->duplicates_posting_id);
         }
 
         return $criteria;
@@ -2135,11 +2276,18 @@ abstract class JobPosting implements ActiveRecordInterface
         $copyObj->setKeySiteAndPostID($this->getKeySiteAndPostID());
         $copyObj->setKeyCompanyAndTitle($this->getKeyCompanyAndTitle());
         $copyObj->setJobTitleLinked($this->getJobTitleLinked());
+        $copyObj->setDuplicatesJobPostingId($this->getDuplicatesJobPostingId());
 
         if ($deepCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
             // the getter/setter methods for fkey referrer objects.
             $copyObj->setNew(false);
+
+            foreach ($this->getJobPostingsRelatedByJobPostingId() as $relObj) {
+                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
+                    $copyObj->addJobPostingRelatedByJobPostingId($relObj->copy($deepCopy));
+                }
+            }
 
             foreach ($this->getUserJobMatches() as $relObj) {
                 if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
@@ -2228,6 +2376,57 @@ abstract class JobPosting implements ActiveRecordInterface
         return $this->aJobLocation;
     }
 
+    /**
+     * Declares an association between this object and a ChildJobPosting object.
+     *
+     * @param  ChildJobPosting $v
+     * @return $this|\JobScooper\JobPosting The current object (for fluent API support)
+     * @throws PropelException
+     */
+    public function setJobPostingRelatedByDuplicatesJobPostingId(ChildJobPosting $v = null)
+    {
+        if ($v === null) {
+            $this->setDuplicatesJobPostingId(NULL);
+        } else {
+            $this->setDuplicatesJobPostingId($v->getJobPostingId());
+        }
+
+        $this->aJobPostingRelatedByDuplicatesJobPostingId = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildJobPosting object, it will not be re-added.
+        if ($v !== null) {
+            $v->addJobPostingRelatedByJobPostingId($this);
+        }
+
+
+        return $this;
+    }
+
+
+    /**
+     * Get the associated ChildJobPosting object
+     *
+     * @param  ConnectionInterface $con Optional Connection object.
+     * @return ChildJobPosting The associated ChildJobPosting object.
+     * @throws PropelException
+     */
+    public function getJobPostingRelatedByDuplicatesJobPostingId(ConnectionInterface $con = null)
+    {
+        if ($this->aJobPostingRelatedByDuplicatesJobPostingId === null && ($this->duplicates_posting_id != 0)) {
+            $this->aJobPostingRelatedByDuplicatesJobPostingId = ChildJobPostingQuery::create()->findPk($this->duplicates_posting_id, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aJobPostingRelatedByDuplicatesJobPostingId->addJobPostingsRelatedByJobPostingId($this);
+             */
+        }
+
+        return $this->aJobPostingRelatedByDuplicatesJobPostingId;
+    }
+
 
     /**
      * Initializes a collection based on the name of a relation.
@@ -2239,10 +2438,264 @@ abstract class JobPosting implements ActiveRecordInterface
      */
     public function initRelation($relationName)
     {
+        if ('JobPostingRelatedByJobPostingId' == $relationName) {
+            $this->initJobPostingsRelatedByJobPostingId();
+            return;
+        }
         if ('UserJobMatch' == $relationName) {
             $this->initUserJobMatches();
             return;
         }
+    }
+
+    /**
+     * Clears out the collJobPostingsRelatedByJobPostingId collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return void
+     * @see        addJobPostingsRelatedByJobPostingId()
+     */
+    public function clearJobPostingsRelatedByJobPostingId()
+    {
+        $this->collJobPostingsRelatedByJobPostingId = null; // important to set this to NULL since that means it is uninitialized
+    }
+
+    /**
+     * Reset is the collJobPostingsRelatedByJobPostingId collection loaded partially.
+     */
+    public function resetPartialJobPostingsRelatedByJobPostingId($v = true)
+    {
+        $this->collJobPostingsRelatedByJobPostingIdPartial = $v;
+    }
+
+    /**
+     * Initializes the collJobPostingsRelatedByJobPostingId collection.
+     *
+     * By default this just sets the collJobPostingsRelatedByJobPostingId collection to an empty array (like clearcollJobPostingsRelatedByJobPostingId());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @param      boolean $overrideExisting If set to true, the method call initializes
+     *                                        the collection even if it is not empty
+     *
+     * @return void
+     */
+    public function initJobPostingsRelatedByJobPostingId($overrideExisting = true)
+    {
+        if (null !== $this->collJobPostingsRelatedByJobPostingId && !$overrideExisting) {
+            return;
+        }
+
+        $collectionClassName = JobPostingTableMap::getTableMap()->getCollectionClassName();
+
+        $this->collJobPostingsRelatedByJobPostingId = new $collectionClassName;
+        $this->collJobPostingsRelatedByJobPostingId->setModel('\JobScooper\JobPosting');
+    }
+
+    /**
+     * Gets an array of ChildJobPosting objects which contain a foreign key that references this object.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this ChildJobPosting is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @return ObjectCollection|ChildJobPosting[] List of ChildJobPosting objects
+     * @throws PropelException
+     */
+    public function getJobPostingsRelatedByJobPostingId(Criteria $criteria = null, ConnectionInterface $con = null)
+    {
+        $partial = $this->collJobPostingsRelatedByJobPostingIdPartial && !$this->isNew();
+        if (null === $this->collJobPostingsRelatedByJobPostingId || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collJobPostingsRelatedByJobPostingId) {
+                // return empty collection
+                $this->initJobPostingsRelatedByJobPostingId();
+            } else {
+                $collJobPostingsRelatedByJobPostingId = ChildJobPostingQuery::create(null, $criteria)
+                    ->filterByJobPostingRelatedByDuplicatesJobPostingId($this)
+                    ->find($con);
+
+                if (null !== $criteria) {
+                    if (false !== $this->collJobPostingsRelatedByJobPostingIdPartial && count($collJobPostingsRelatedByJobPostingId)) {
+                        $this->initJobPostingsRelatedByJobPostingId(false);
+
+                        foreach ($collJobPostingsRelatedByJobPostingId as $obj) {
+                            if (false == $this->collJobPostingsRelatedByJobPostingId->contains($obj)) {
+                                $this->collJobPostingsRelatedByJobPostingId->append($obj);
+                            }
+                        }
+
+                        $this->collJobPostingsRelatedByJobPostingIdPartial = true;
+                    }
+
+                    return $collJobPostingsRelatedByJobPostingId;
+                }
+
+                if ($partial && $this->collJobPostingsRelatedByJobPostingId) {
+                    foreach ($this->collJobPostingsRelatedByJobPostingId as $obj) {
+                        if ($obj->isNew()) {
+                            $collJobPostingsRelatedByJobPostingId[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collJobPostingsRelatedByJobPostingId = $collJobPostingsRelatedByJobPostingId;
+                $this->collJobPostingsRelatedByJobPostingIdPartial = false;
+            }
+        }
+
+        return $this->collJobPostingsRelatedByJobPostingId;
+    }
+
+    /**
+     * Sets a collection of ChildJobPosting objects related by a one-to-many relationship
+     * to the current object.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param      Collection $jobPostingsRelatedByJobPostingId A Propel collection.
+     * @param      ConnectionInterface $con Optional connection object
+     * @return $this|ChildJobPosting The current object (for fluent API support)
+     */
+    public function setJobPostingsRelatedByJobPostingId(Collection $jobPostingsRelatedByJobPostingId, ConnectionInterface $con = null)
+    {
+        /** @var ChildJobPosting[] $jobPostingsRelatedByJobPostingIdToDelete */
+        $jobPostingsRelatedByJobPostingIdToDelete = $this->getJobPostingsRelatedByJobPostingId(new Criteria(), $con)->diff($jobPostingsRelatedByJobPostingId);
+
+
+        $this->jobPostingsRelatedByJobPostingIdScheduledForDeletion = $jobPostingsRelatedByJobPostingIdToDelete;
+
+        foreach ($jobPostingsRelatedByJobPostingIdToDelete as $jobPostingRelatedByJobPostingIdRemoved) {
+            $jobPostingRelatedByJobPostingIdRemoved->setJobPostingRelatedByDuplicatesJobPostingId(null);
+        }
+
+        $this->collJobPostingsRelatedByJobPostingId = null;
+        foreach ($jobPostingsRelatedByJobPostingId as $jobPostingRelatedByJobPostingId) {
+            $this->addJobPostingRelatedByJobPostingId($jobPostingRelatedByJobPostingId);
+        }
+
+        $this->collJobPostingsRelatedByJobPostingId = $jobPostingsRelatedByJobPostingId;
+        $this->collJobPostingsRelatedByJobPostingIdPartial = false;
+
+        return $this;
+    }
+
+    /**
+     * Returns the number of related JobPosting objects.
+     *
+     * @param      Criteria $criteria
+     * @param      boolean $distinct
+     * @param      ConnectionInterface $con
+     * @return int             Count of related JobPosting objects.
+     * @throws PropelException
+     */
+    public function countJobPostingsRelatedByJobPostingId(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    {
+        $partial = $this->collJobPostingsRelatedByJobPostingIdPartial && !$this->isNew();
+        if (null === $this->collJobPostingsRelatedByJobPostingId || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collJobPostingsRelatedByJobPostingId) {
+                return 0;
+            }
+
+            if ($partial && !$criteria) {
+                return count($this->getJobPostingsRelatedByJobPostingId());
+            }
+
+            $query = ChildJobPostingQuery::create(null, $criteria);
+            if ($distinct) {
+                $query->distinct();
+            }
+
+            return $query
+                ->filterByJobPostingRelatedByDuplicatesJobPostingId($this)
+                ->count($con);
+        }
+
+        return count($this->collJobPostingsRelatedByJobPostingId);
+    }
+
+    /**
+     * Method called to associate a ChildJobPosting object to this object
+     * through the ChildJobPosting foreign key attribute.
+     *
+     * @param  ChildJobPosting $l ChildJobPosting
+     * @return $this|\JobScooper\JobPosting The current object (for fluent API support)
+     */
+    public function addJobPostingRelatedByJobPostingId(ChildJobPosting $l)
+    {
+        if ($this->collJobPostingsRelatedByJobPostingId === null) {
+            $this->initJobPostingsRelatedByJobPostingId();
+            $this->collJobPostingsRelatedByJobPostingIdPartial = true;
+        }
+
+        if (!$this->collJobPostingsRelatedByJobPostingId->contains($l)) {
+            $this->doAddJobPostingRelatedByJobPostingId($l);
+
+            if ($this->jobPostingsRelatedByJobPostingIdScheduledForDeletion and $this->jobPostingsRelatedByJobPostingIdScheduledForDeletion->contains($l)) {
+                $this->jobPostingsRelatedByJobPostingIdScheduledForDeletion->remove($this->jobPostingsRelatedByJobPostingIdScheduledForDeletion->search($l));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param ChildJobPosting $jobPostingRelatedByJobPostingId The ChildJobPosting object to add.
+     */
+    protected function doAddJobPostingRelatedByJobPostingId(ChildJobPosting $jobPostingRelatedByJobPostingId)
+    {
+        $this->collJobPostingsRelatedByJobPostingId[]= $jobPostingRelatedByJobPostingId;
+        $jobPostingRelatedByJobPostingId->setJobPostingRelatedByDuplicatesJobPostingId($this);
+    }
+
+    /**
+     * @param  ChildJobPosting $jobPostingRelatedByJobPostingId The ChildJobPosting object to remove.
+     * @return $this|ChildJobPosting The current object (for fluent API support)
+     */
+    public function removeJobPostingRelatedByJobPostingId(ChildJobPosting $jobPostingRelatedByJobPostingId)
+    {
+        if ($this->getJobPostingsRelatedByJobPostingId()->contains($jobPostingRelatedByJobPostingId)) {
+            $pos = $this->collJobPostingsRelatedByJobPostingId->search($jobPostingRelatedByJobPostingId);
+            $this->collJobPostingsRelatedByJobPostingId->remove($pos);
+            if (null === $this->jobPostingsRelatedByJobPostingIdScheduledForDeletion) {
+                $this->jobPostingsRelatedByJobPostingIdScheduledForDeletion = clone $this->collJobPostingsRelatedByJobPostingId;
+                $this->jobPostingsRelatedByJobPostingIdScheduledForDeletion->clear();
+            }
+            $this->jobPostingsRelatedByJobPostingIdScheduledForDeletion[]= $jobPostingRelatedByJobPostingId;
+            $jobPostingRelatedByJobPostingId->setJobPostingRelatedByDuplicatesJobPostingId(null);
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this JobPosting is new, it will return
+     * an empty collection; or if this JobPosting has previously
+     * been saved, it will retrieve related JobPostingsRelatedByJobPostingId from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in JobPosting.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return ObjectCollection|ChildJobPosting[] List of ChildJobPosting objects
+     */
+    public function getJobPostingsRelatedByJobPostingIdJoinJobLocation(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    {
+        $query = ChildJobPostingQuery::create(null, $criteria);
+        $query->joinWith('JobLocation', $joinBehavior);
+
+        return $this->getJobPostingsRelatedByJobPostingId($query, $con);
     }
 
     /**
@@ -2505,6 +2958,9 @@ abstract class JobPosting implements ActiveRecordInterface
         if (null !== $this->aJobLocation) {
             $this->aJobLocation->removeJobPosting($this);
         }
+        if (null !== $this->aJobPostingRelatedByDuplicatesJobPostingId) {
+            $this->aJobPostingRelatedByDuplicatesJobPostingId->removeJobPostingRelatedByJobPostingId($this);
+        }
         $this->jobposting_id = null;
         $this->jobsite = null;
         $this->jobsite_post_id = null;
@@ -2524,6 +2980,7 @@ abstract class JobPosting implements ActiveRecordInterface
         $this->key_site_and_post_id = null;
         $this->key_company_and_title = null;
         $this->title_linked = null;
+        $this->duplicates_posting_id = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();
@@ -2542,6 +2999,11 @@ abstract class JobPosting implements ActiveRecordInterface
     public function clearAllReferences($deep = false)
     {
         if ($deep) {
+            if ($this->collJobPostingsRelatedByJobPostingId) {
+                foreach ($this->collJobPostingsRelatedByJobPostingId as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
             if ($this->collUserJobMatches) {
                 foreach ($this->collUserJobMatches as $o) {
                     $o->clearAllReferences($deep);
@@ -2549,8 +3011,10 @@ abstract class JobPosting implements ActiveRecordInterface
             }
         } // if ($deep)
 
+        $this->collJobPostingsRelatedByJobPostingId = null;
         $this->collUserJobMatches = null;
         $this->aJobLocation = null;
+        $this->aJobPostingRelatedByDuplicatesJobPostingId = null;
     }
 
     /**

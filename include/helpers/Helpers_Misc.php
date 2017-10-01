@@ -308,6 +308,115 @@ function tokenizeKeywords($arrKeywords)
 }
 
 /**
+ * routine to return -1 if there is no match for strpos
+ *
+ *
+ * @author William Jaspers, IV <wjaspers4@gmail.com>
+ * @created 2009-02-27 17:00:00 +6:00:00 GMT
+ * @access public
+ * @ref http://www.php.net/manual/en/function.preg-match.php#89252
+ *
+ * @param $haystack
+ * @param $needle
+ * @return bool|int
+ */
+function inStr($haystack, $needle)
+{
+    $pos=strpos($haystack, $needle);
+    if ($pos !== false)
+    {
+        return $pos;
+    }
+    else
+    {
+        return -1;
+    }
+}
+/**
+ *
+ * in_string_array that takes an array of values to match against a string.
+ * note the stupid argument order (to match strpos).  Returns
+ * true if all needles are found in haystack or false if not.
+ *
+ * @param $haystack
+ * @param $needle
+ * @return bool|int
+ */
+function in_string_array($haystack, $needle)
+{
+    if(!is_array($needle))
+    {
+        if(!is_string($needle))
+            $needle = strval($needle);
+
+        $needle = array($needle);
+    }
+
+    foreach($needle as $what) {
+        if(($pos = strpos($haystack, $what))===false) return false;
+    }
+    return true;
+}
+
+
+function flattenWithKeys(array $array, $childPrefix = '.', $root = '', $result = array()) {
+    //if(!is_array($array)) return $result;
+
+    ### print_r(array(__LINE__, 'arr' => $array, 'prefix' => $childPrefix, 'root' => $root, 'result' => $result));
+
+    foreach($array as $k => $v) {
+        if(is_array($v) || is_object($v)) $result = flattenWithKeys( (array) $v, $childPrefix, $root . $k . $childPrefix, $result);
+        else $result[ $root . $k ] = $v;
+    }
+    return $result;
+}
+
+/**
+ * array_merge_recursive does indeed merge arrays, but it converts values with duplicate
+ * keys to arrays rather than overwriting the value in the first array with the duplicate
+ * value in the second array, as array_merge does. I.e., with array_merge_recursive,
+ * this happens (documented behavior):
+ *
+ * array_merge_recursive(array('key' => 'org value'), array('key' => 'new value'));
+ *     => array('key' => array('org value', 'new value'));
+ *
+ * array_merge_recursive_distinct does not change the datatypes of the values in the arrays.
+ * Matching keys' values in the second array overwrite those in the first array, as is the
+ * case with array_merge, i.e.:
+ *
+ * array_merge_recursive_distinct(array('key' => 'org value'), array('key' => 'new value'));
+ *     => array('key' => array('new value'));
+ *
+ * Parameters are passed by reference, though only for performance reasons. They're not
+ * altered by this function.
+ *
+ * @param array $array1
+ * @param array $array2
+ * @return array
+ * @author Daniel <daniel (at) danielsmedegaardbuus (dot) dk>
+ * @author Gabriel Sobrinho <gabriel (dot) sobrinho (at) gmail (dot) com>
+ */
+function array_merge_recursive_distinct ( array &$array1, array &$array2 )
+{
+    $merged = $array1;
+
+    foreach ( $array2 as $key => &$value )
+    {
+        if ( is_array ( $value ) && isset ( $merged [$key] ) && is_array ( $merged [$key] ) )
+        {
+            $merged [$key] = array_merge_recursive_distinct ( $merged [$key], $value );
+        }
+        else
+        {
+            $merged [$key] = $value;
+        }
+    }
+
+    return $merged;
+}
+
+
+/**
  * Allows multiple expressions to be tested on one string.
  * This will return a boolean, however you may want to alter this.
  *
@@ -331,19 +440,19 @@ function substr_count_multi($subject = "", array $patterns = array(), &$findings
         $count = substr_count_array($subject, $pattern);
         if (0 < $count) {
             $findings[$name] = $pattern;
-        } else {
 
             if ($boolMustMatchAllKeywords == true)
                 return (sizeof($findings) === sizeof($patterns));
 
-//            if (PREG_NO_ERROR !== ($code = preg_last_error() )) {
-//                $errors[$name] = $code;
-//            }
-//            else
-//            {
-            // No match was found, so don't return it in the findings
-            // $findings[$name] = array();
-//            }
+        } else {
+            if (PREG_NO_ERROR !== ($code = preg_last_error() )) {
+                $errors[$name] = $code;
+            }
+            else
+            {
+                // No match was found, so don't return it in the findings
+             $findings[$name] = array();
+            }
         }
     }
     return !(0 === sizeof($findings));

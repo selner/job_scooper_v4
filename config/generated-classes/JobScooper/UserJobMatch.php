@@ -19,6 +19,9 @@ namespace JobScooper;
 require_once dirname(dirname(dirname(dirname(__FILE__))))."/bootstrap.php";
 
 use JobScooper\Base\UserJobMatch as BaseUserJobMatch;
+use Propel\Runtime\Connection\ConnectionInterface;
+use Propel\Runtime\Map\TableMap;
+
 
 /**
  * Skeleton subclass for representing a row from the 'user_job_match' table.
@@ -40,16 +43,52 @@ class UserJobMatch extends BaseUserJobMatch
 
     private $delim = ' | ';
 
-    function updateMatchNotes($newData)
+    private function _setMatchStatus()
     {
-        $current = $this->getMatchNotes();
-        if (is_string($current) && strlen($current) > 0) {
-            $this->setMatchNotes($current . $this->delim . $newData);
-        }
-        else
-        {
-            $this->setMatchNotes($newData);
-        }
+        $matchStatus = $this->getUserMatchState();
+
+        if(count($this->getMatchedUserKeywords()) > 0 )
+            $matchStatus = "matched";
+
+        if(count($this->getMatchedNegativeTitleKeywords()) > 0 )
+            $matchStatus = "not-matched";
+
+        if(count($this->getMatchedNegativeCompanyKeywords()) > 0 )
+            $matchStatus = "not-matched";
+
+        if($this->isOutOfUserArea() === true)
+            $matchStatus = "not-matched";
+
+        $this->setUserMatchState($matchStatus);
     }
+
+    /**
+     * Code to be run before persisting the object
+     * @param  ConnectionInterface $con
+     * @return boolean
+     */
+    public function preSave(ConnectionInterface $con = null)
+    {
+        $this->_setMatchStatus();
+
+        if (is_callable('parent::preSave')) {
+            return parent::preSave($con);
+        }
+        return true;
+    }
+
+    public function toFlatArray()
+    {
+        $arrUserJobMatch = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
+        $arrItem = array_merge_recursive_distinct($arrUserJobMatch, $this->getJobPosting()->toFlatArray());
+
+        foreach(array_keys($arrItem) as $key)
+            if(is_array($arrItem[$key]))
+                $arrItem[$key] = join("|", flattenWithKeys(array($key => $arrItem[$key])));
+
+        return $arrItem;
+
+    }
+
 
 }

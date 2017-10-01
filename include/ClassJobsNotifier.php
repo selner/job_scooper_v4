@@ -168,7 +168,7 @@ class ClassJobsNotifier
         // For our final output, we want the jobs to be sorted by company and then role name.
         // Create a copy of the jobs list that is sorted by that value.
         //
-        $arrMatchedJobs = array_filter($arrJobsToNotify, "isSuccessfulUserMatch");
+        $arrMatchedJobs = array_filter($arrJobsToNotify, "isSuccessfulUserJobMatch");
         $arrExcludedJobs = array_filter($arrJobsToNotify, "isNotUserJobMatch");
 
         $GLOBALS['logger']->logLine(PHP_EOL . "Writing final list of " . count($arrJobsToNotify) . " jobs to output files." . PHP_EOL, \C__DISPLAY_NORMAL__);
@@ -609,7 +609,7 @@ class ClassJobsNotifier
             $arrPluginJobs = $arrPluginJobMatches + $arrPluginExcludesJobs;
 
             $arrCounts[$plugin]['name'] = $plugin;
-            $arrCounts[$plugin]['for_review'] = count(array_filter($arrPluginJobs, "isSuccessfulUserMatch"));
+            $arrCounts[$plugin]['for_review'] = count(array_filter($arrPluginJobs, "isSuccessfulUserJobMatch"));
             $arrCounts[$plugin]['total_not_interested'] = count(array_filter($arrPluginJobs, "isNotUserJobMatch"));
             $arrCounts[$plugin]['total_listings'] = count($arrPluginJobs);
             $arrCounts[$plugin]['had_error'] = false;
@@ -879,10 +879,9 @@ class ClassJobsNotifier
     private function _convertToJobsArrays($arrJobObjects)
     {
         $arrRet = array();
-        foreach($arrJobObjects as $job)
+        foreach($arrJobObjects as $jobMatch)
         {
-            $item = array_unique(array_merge($job->getJobPosting()->toArray(), $job->toArray()));
-
+            $item = $jobMatch->toFlatArray();
             $arrRet[$item['KeySiteAndPostID']] = $item;
         }
 

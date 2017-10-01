@@ -119,10 +119,10 @@
         <column name="key_company_and_title" phpName="KeyCompanyAndTitle" type="varchar" size="255" required="true"/>
         <column name="title_linked" phpName="JobTitleLinked" type="varchar" size="1024" required="true"/>
 
-        <!--<column name="duplicates_posting_id" phpName="DuplicatesJobPostingId" type="integer" required="false"/>-->
-        <!--<foreign-key foreignTable="jobposting" onUpdate="none" onDelete="none">-->
-            <!--<reference local="duplicates_posting_id" foreign="jobposting_id"/>-->
-        <!--</foreign-key>-->
+        <column name="duplicates_posting_id" phpName="DuplicatesJobPostingId" type="integer" required="false"/>
+        <foreign-key foreignTable="jobposting" onUpdate="none" onDelete="none">
+            <reference local="duplicates_posting_id" foreign="jobposting_id"/>
+        </foreign-key>
 
     </table>
 
@@ -190,9 +190,11 @@
         <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true"/>
         <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true"/>
         <column name="user_notification_state" phpName="UserNotificationState" type="enum" valueSet="not-ready,ready,sent" defaultValue="not-ready"/>
-        <column name="user_match" phpName="UserMatchStatus" type="enum" valueSet="none, include-match, exclude-match" defaultValue="none"/>
-        <column name="user_match_reason" phpName="UserMatchReason" type="varchar" size="50"/>
-        <column name="match_notes" phpName="MatchNotes" type="varchar" size="200"/>
+        <column name="user_match_state" phpName="UserMatchState" type="enum" valueSet="none,matched,not-matched" defaultValue="none"/>
+        <column name="matched_user_keywords" phpName="MatchedUserKeywords" type="array"/>
+        <column name="matched_negative_title_keywords" phpName="MatchedNegativeTitleKeywords" type="array"/>
+        <column name="matched_negative_company_keywords" phpName="MatchedNegativeCompanyKeywords" type="array"/>
+        <column name="out_of_user_area" phpName="OutOfUserArea" type="boolean"/>
         <column name="app_run_id" phpName="AppRunId" type="varchar" size="75"/>
         <foreign-key foreignTable="user">
             <reference local="user_slug" foreign="user_slug"/>

@@ -113,13 +113,14 @@ class JobsAutoMarker
         LogLine(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL, \C__DISPLAY_NORMAL__);
 
         $arrJobs_AutoUpdatable = $this->arrMasterJobList;
+        $this->_markJobsList_SearchKeywordsFound_($arrJobs_AutoUpdatable);
+
         //BUGBUG/TODO DEBUG AND PUT BACK
 //        $this->_markJobsList_SetLikelyDuplicatePosts_($arrJobs_AutoUpdatable);
 
 //        BUGBUG/TODO DEBUG AND PUT BACK
 //        $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
 
-        $this->_markJobsList_SearchKeywordsNotFound_($arrJobs_AutoUpdatable);
         $this->_markJobsList_UserExcludedKeywords_($arrJobs_AutoUpdatable);
         $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($arrJobs_AutoUpdatable);
 
@@ -246,14 +247,12 @@ class JobsAutoMarker
                 $locValue = $jobMatch->getJobPosting()->getLocationString();
                 $locKey = $this->getLocationLookupKey($locValue);
 
-                if (in_array($jobMatch->getUserMatchStatus(), array("exclude-match")) == 1) {
+                if (in_array($jobMatch->getUserMatchState(), array("not-matched")) == 1) {
                     $nJobsSkipped += 1;
                 } elseif ($this->_doesLocationMatchUserSearch($locKey)) {
                     $nJobsNotMarked++;
                 } else {
-                    $jobMatch->setUserMatchStatus("exclude-match");
-                    $jobMatch->setUserMatchReason("Out of Search Area ");
-                    $jobMatch->updateMatchNotes($locValue . " not in user's search area.");
+                    $jobMatch->setIsOutOfUserArea(true);
                     $jobMatch->save();
                     $nJobsMarkedAutoExcluded++;
                 }
@@ -283,31 +282,24 @@ class JobsAutoMarker
             LogLine("Checking ".count($arrJobsList) ." roles against ". count($GLOBALS['USERDATA']['companies_regex_to_filter']) ." excluded companies.", \C__DISPLAY_ITEM_DETAIL__);
 
             foreach ($arrJobsList as $jobMatch) {
-                if(in_array($jobMatch->getUserMatchStatus(), array("exclude-match")) == 1) {
-                    $nJobsSkipped += 1;
-                }
-                else
+                $matched_exclusion = false;
+                foreach($GLOBALS['USERDATA']['companies_regex_to_filter'] as $rxInput )
                 {
-                    $matched_exclusion = false;
-                    foreach($GLOBALS['USERDATA']['companies_regex_to_filter'] as $rxInput )
+                    if(preg_match($rxInput, strScrub($jobMatch->getJobPosting()->getCompany(), DEFAULT_SCRUB)))
                     {
-                        if(preg_match($rxInput, strScrub($jobMatch->getJobPosting()->getCompany(), DEFAULT_SCRUB)))
-                        {
-                            $jobMatch->setUserMatchStatus("exclude-match");
-                            $jobMatch->setUserMatchReason('Wrong Company ' . C__STR_TAG_AUTOMARKEDJOB__);
-                            $jobMatch->updateMatchNotes("Matched company exclusion regex [". $rxInput ."]");
-                            $nJobsMarkedAutoExcluded++;
-                            $matched_exclusion = true;
-                            break;
-                        }
+                        $jobMatch->setMatchedNegativeCompanyKeywords(array($rxInput));
+                        $jobMatch->save();
+                        $nJobsMarkedAutoExcluded++;
+                        $matched_exclusion = true;
+                        break;
                     }
-
-                    if($matched_exclusion !== true)
-                        $nJobsNotMarked += 1;
                 }
+
+                if($matched_exclusion !== true)
+                    $nJobsNotMarked += 1;
             }
 
-            LogLine("Jobs marked not interested via companies regex: marked ".$nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) .", skipped " . $nJobsSkipped . "/" . countAssociativeArrayValues($arrJobsList) .", not marked ". $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).")" , \C__DISPLAY_ITEM_RESULT__);
+            LogLine("Jobs marked with excluded companies: ".$nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ." marked as excluded; not marked ". $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList) , \C__DISPLAY_ITEM_RESULT__);
         }
         catch (Exception $ex)
         {
@@ -326,55 +318,32 @@ class JobsAutoMarker
         try
         {
             if(count($arrJobsList) == 0 || is_null($GLOBALS['USERDATA']['title_negative_keyword_tokens']) || count($GLOBALS['USERDATA']['title_negative_keyword_tokens']) == 0) return;
-            $titleKeywords = $this->_getTitleKeywords();
-            if (count($arrJobsList) == 0 || is_null($titleKeywords)) return null;
-            $negKeywords = array_diff_assoc($GLOBALS['USERDATA']['title_negative_keyword_tokens'], array_values($titleKeywords) );
 
+            $usrSearchKeywords = $this->_getUserSearchTitleKeywords();
+            $negKeywords = array_diff_assoc($GLOBALS['USERDATA']['title_negative_keyword_tokens'], array_values($usrSearchKeywords) );
             LogLine("Excluding Jobs by Negative Title Keyword Token Matches", \C__DISPLAY_ITEM_START__);
             LogLine("Checking ".count($arrJobsList) ." roles against ". count($negKeywords) ." negative title keywords to be excluded.", \C__DISPLAY_ITEM_DETAIL__);
 
-
             try {
-
-
-                foreach ($arrJobsList as $jobMatch)
-                {
-                    $arrKeywordsMatched = array();
-                    if(in_array($jobMatch->getUserMatchStatus(), array("exclude-match")) == 1) {
-                        $nJobsSkipped += 1;
-                    }
-                    else
-                    {
-                        foreach ($negKeywords as $kywdtoken) {
-                            $matched = substr_count_multi($jobMatch->getJobPosting()->getTitleTokens(), $kywdtoken, $kwdTokenMatches, true);
-                            if ($matched === true) {
-                                $strTitleTokenMatches = getArrayValuesAsString(array_values($kwdTokenMatches), " ", "", false);
-
-                                if (count($kwdTokenMatches) === count($kywdtoken)) {
-                                    $arrKeywordsMatched[$strTitleTokenMatches] = $kwdTokenMatches;
-                                }
-                            }
-                        }
-
-                        if(count($arrKeywordsMatched) > 0)
-                        {
-                            $jobMatch->setUserMatchStatus("exclude-match");
-                            $jobMatch->setUserMatchReason(TITLE_NEG_KWD_MATCH);
-                            $jobMatch->updateMatchNotes("Title matched negative user keywords [" . getArrayValuesAsString($arrKeywordsMatched) . "]");
+                foreach ($arrJobsList as $jobMatch) {
+                    $foundNegKeywordItem = false;
+                    $strJobTitleTokens = $jobMatch->getJobPosting()->getTitleTokens();
+                    foreach ($negKeywords as $negKeywordItem) {
+                        $foundNegKeywordItem = in_string_array($strJobTitleTokens, $negKeywordItem);
+                        if ($foundNegKeywordItem === true) {
+                            $jobMatch->setMatchedNegativeTitleKeywords($negKeywordItem);
+                            $jobMatch->save();
                             $nJobsMarkedAutoExcluded += 1;
-                        }
-                        else
-                        {
-                            $nJobsNotMarked += 1;
+                            break;
                         }
                     }
-                    $jobMatch->save();
-
+                    if($foundNegKeywordItem !== true)
+                        $nJobsNotMarked += 1;
                 }
             } catch (Exception $ex) {
                 handleException($ex, 'ERROR:  Failed to verify titles against negative keywords due to error: %s', isDebug());
             }
-            LogLine("Processed " . countAssociativeArrayValues($arrJobsList) . " titles for auto-marking against negative title keywords: " . $nJobsSkipped . "/" . count($arrJobsList) . " skipped; " . $nJobsNotMarked. "/" . countAssociativeArrayValues($arrJobsList) . " marked included; " . $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) . " marked excluded.", \C__DISPLAY_ITEM_RESULT__);
+            LogLine("Processed " . countAssociativeArrayValues($arrJobsList) . " titles for auto-marking against negative title keywords: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) . " marked excluded; " . $nJobsNotMarked. "/" . countAssociativeArrayValues($arrJobsList) . " not marked.", \C__DISPLAY_ITEM_RESULT__);
         }
         catch (Exception $ex)
         {
@@ -413,7 +382,7 @@ class JobsAutoMarker
 
     }
 
-    private function _getTitleKeywords()
+    private function _getUserSearchTitleKeywords()
     {
         $keywordsToMatch = array();
         $runSearches = getAllSearchesThatWereIncluded();
@@ -433,59 +402,37 @@ class JobsAutoMarker
         return $keywordsToMatch;
     }
 
-    private function _markJobsList_SearchKeywordsNotFound_(&$arrJobsList)
+    private function _markJobsList_SearchKeywordsFound_(&$arrJobsList)
     {
-        $nJobsSkipped = 0;
-        $nJobsMarkedAutoExcluded = 0;
+        $nJobsMarkedInclude = 0;
         $nJobsNotMarked = 0;
 
         try {
-            $userSearchKeywords = $this->_getTitleKeywords();
-            if (count($arrJobsList) == 0 || is_null($userSearchKeywords)) return null;
+            $usrSearchKeywords = $this->_getUserSearchTitleKeywords();
+            if (count($arrJobsList) == 0 || is_null($usrSearchKeywords)) return null;
 
-            LogLine("Checking " . count($arrJobsList) . " roles against " . count($userSearchKeywords) . " keyword phrases in titles...", \C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Checking " . count($arrJobsList) . " roles against " . count($usrSearchKeywords) . " keyword phrases in titles...", \C__DISPLAY_ITEM_DETAIL__);
 
             try {
-
-                foreach ($arrJobsList as $jobMatch)
-                {
-                    $arrKeywordsMatched = array();
-                    if(in_array($jobMatch->getUserMatchStatus(), array("exclude-match")) == 1) {
-                        $nJobsSkipped += 1;
+                foreach ($arrJobsList as $jobMatch) {
+                    $foundAllUserKeywords = false;
+                    $strJobTitleTokens = $jobMatch->getJobPosting()->getTitleTokens();
+                    foreach ($usrSearchKeywords as $usrSearchKeywordItem) {
+                        $foundAllUserKeywords = in_string_array($strJobTitleTokens, $usrSearchKeywordItem);
+                        if ($foundAllUserKeywords !== false) {
+                            $jobMatch->setMatchedUserKeywords($usrSearchKeywordItem);
+                            $jobMatch->save();
+                            $nJobsMarkedInclude += 1;
+                            break;
+                        }
                     }
-                    else
-                    {
-                       foreach ($userSearchKeywords as $usrSearchKeywordItem) {
-                           $jobTitleTokens = $jobMatch->getJobPosting()->getTitleTokens();
-                            $matched = substr_count_multi($jobTitleTokens, $usrSearchKeywordItem, $kwdTokenMatches, true);
-                            if ($matched === true) {
-                                $strTitleTokenMatches = getArrayValuesAsString(array_values($kwdTokenMatches), " ", "", false);
-
-                                if (count($kwdTokenMatches) === count($usrSearchKeywordItem)) {
-                                    $arrKeywordsMatched[$strTitleTokenMatches] = $kwdTokenMatches;
-                                }
-                            }
-                        }
-
-                        if(count($arrKeywordsMatched) == 0)
-                        {
-                                $jobMatch->setUserMatchStatus("exclude-match");
-                                $jobMatch->setUserMatchReason(NO_TITLE_MATCHES);
-                                $jobMatch->updateMatchNotes("title keywords not matched to terms [" . getArrayValuesAsString($userSearchKeywords) . "]");
-                                $nJobsMarkedAutoExcluded += 1;
-                        }
-                        else
-                        {
-//                            $jobMatch->updateMatchNotes("matched title keywords [" . getArrayValuesAsString($arrKeywordsMatched) . "]");
-                            $nJobsNotMarked += 1;
-                        }
-                        $jobMatch->save();
-                    }
+                    if($foundAllUserKeywords !== true)
+                        $nJobsNotMarked += 1;
                 }
             } catch (Exception $ex) {
                 handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s', isDebug());
             }
-            LogLine("Processed " . countAssociativeArrayValues($arrJobsList) . " titles for auto-marking against search title keywords: " . $nJobsSkipped . "/" . count($arrJobsList) . " skipped; " . $nJobsNotMarked. "/" . countAssociativeArrayValues($arrJobsList) . " marked included; " . $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) . " marked excluded.", \C__DISPLAY_ITEM_RESULT__);
+            LogLine("Processed " . countAssociativeArrayValues($arrJobsList) . " titles for auto-marking against search title keywords: " . $nJobsMarkedInclude . "/" . count($arrJobsList) . " marked as matches; " . $nJobsNotMarked . "/" . count($arrJobsList) . " not marked.", \C__DISPLAY_ITEM_RESULT__);
         }
         catch (Exception $ex)
         {

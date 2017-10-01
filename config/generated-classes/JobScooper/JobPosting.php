@@ -19,6 +19,7 @@ namespace JobScooper;
 require_once dirname(dirname(dirname(dirname(__FILE__))))."/bootstrap.php";
 
 use \Khartnett\Normalization as Normalize;
+use Propel\Runtime\Map\TableMap;
 
 /**
  * Skeleton subclass for representing a row from the 'jobposting' table.
@@ -32,6 +33,21 @@ use \Khartnett\Normalization as Normalize;
  */
 class JobPosting extends \JobScooper\Base\JobPosting implements \ArrayAccess
 {
+
+    public function toFlatArray()
+    {
+        $arrJobPosting = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
+        $location = $this->getJobLocation()->toArray();
+        $arrItem = array_merge_recursive_distinct($arrJobPosting, $location);
+
+        foreach(array_keys($arrItem) as $key)
+            if(is_array($arrItem[$key]))
+                $arrItem[$key] = join("|", flattenWithKeys(array($key => $arrItem[$key])));
+
+        return $arrItem;
+
+    }
+
     protected function updateAutoColumns()
     {
         $this->setKeyCompanyAndTitle(cleanupSlugPart($this->getCompany() . $this->getTitle()));

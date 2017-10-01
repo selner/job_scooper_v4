@@ -24,18 +24,22 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatchQuery orderByUserSlug($order = Criteria::ASC) Order by the user_slug column
  * @method     ChildUserJobMatchQuery orderByJobPostingId($order = Criteria::ASC) Order by the jobposting_id column
  * @method     ChildUserJobMatchQuery orderByUserNotificationState($order = Criteria::ASC) Order by the user_notification_state column
- * @method     ChildUserJobMatchQuery orderByUserMatchStatus($order = Criteria::ASC) Order by the user_match column
- * @method     ChildUserJobMatchQuery orderByUserMatchReason($order = Criteria::ASC) Order by the user_match_reason column
- * @method     ChildUserJobMatchQuery orderByMatchNotes($order = Criteria::ASC) Order by the match_notes column
+ * @method     ChildUserJobMatchQuery orderByUserMatchState($order = Criteria::ASC) Order by the user_match_state column
+ * @method     ChildUserJobMatchQuery orderByMatchedUserKeywords($order = Criteria::ASC) Order by the matched_user_keywords column
+ * @method     ChildUserJobMatchQuery orderByMatchedNegativeTitleKeywords($order = Criteria::ASC) Order by the matched_negative_title_keywords column
+ * @method     ChildUserJobMatchQuery orderByMatchedNegativeCompanyKeywords($order = Criteria::ASC) Order by the matched_negative_company_keywords column
+ * @method     ChildUserJobMatchQuery orderByOutOfUserArea($order = Criteria::ASC) Order by the out_of_user_area column
  * @method     ChildUserJobMatchQuery orderByAppRunId($order = Criteria::ASC) Order by the app_run_id column
  *
  * @method     ChildUserJobMatchQuery groupByUserJobMatchId() Group by the user_job_match_id column
  * @method     ChildUserJobMatchQuery groupByUserSlug() Group by the user_slug column
  * @method     ChildUserJobMatchQuery groupByJobPostingId() Group by the jobposting_id column
  * @method     ChildUserJobMatchQuery groupByUserNotificationState() Group by the user_notification_state column
- * @method     ChildUserJobMatchQuery groupByUserMatchStatus() Group by the user_match column
- * @method     ChildUserJobMatchQuery groupByUserMatchReason() Group by the user_match_reason column
- * @method     ChildUserJobMatchQuery groupByMatchNotes() Group by the match_notes column
+ * @method     ChildUserJobMatchQuery groupByUserMatchState() Group by the user_match_state column
+ * @method     ChildUserJobMatchQuery groupByMatchedUserKeywords() Group by the matched_user_keywords column
+ * @method     ChildUserJobMatchQuery groupByMatchedNegativeTitleKeywords() Group by the matched_negative_title_keywords column
+ * @method     ChildUserJobMatchQuery groupByMatchedNegativeCompanyKeywords() Group by the matched_negative_company_keywords column
+ * @method     ChildUserJobMatchQuery groupByOutOfUserArea() Group by the out_of_user_area column
  * @method     ChildUserJobMatchQuery groupByAppRunId() Group by the app_run_id column
  *
  * @method     ChildUserJobMatchQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
@@ -75,9 +79,11 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatch findOneByUserSlug(string $user_slug) Return the first ChildUserJobMatch filtered by the user_slug column
  * @method     ChildUserJobMatch findOneByJobPostingId(int $jobposting_id) Return the first ChildUserJobMatch filtered by the jobposting_id column
  * @method     ChildUserJobMatch findOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column
- * @method     ChildUserJobMatch findOneByUserMatchStatus(int $user_match) Return the first ChildUserJobMatch filtered by the user_match column
- * @method     ChildUserJobMatch findOneByUserMatchReason(string $user_match_reason) Return the first ChildUserJobMatch filtered by the user_match_reason column
- * @method     ChildUserJobMatch findOneByMatchNotes(string $match_notes) Return the first ChildUserJobMatch filtered by the match_notes column
+ * @method     ChildUserJobMatch findOneByUserMatchState(int $user_match_state) Return the first ChildUserJobMatch filtered by the user_match_state column
+ * @method     ChildUserJobMatch findOneByMatchedUserKeywords(array $matched_user_keywords) Return the first ChildUserJobMatch filtered by the matched_user_keywords column
+ * @method     ChildUserJobMatch findOneByMatchedNegativeTitleKeywords(array $matched_negative_title_keywords) Return the first ChildUserJobMatch filtered by the matched_negative_title_keywords column
+ * @method     ChildUserJobMatch findOneByMatchedNegativeCompanyKeywords(array $matched_negative_company_keywords) Return the first ChildUserJobMatch filtered by the matched_negative_company_keywords column
+ * @method     ChildUserJobMatch findOneByOutOfUserArea(boolean $out_of_user_area) Return the first ChildUserJobMatch filtered by the out_of_user_area column
  * @method     ChildUserJobMatch findOneByAppRunId(string $app_run_id) Return the first ChildUserJobMatch filtered by the app_run_id column *
 
  * @method     ChildUserJobMatch requirePk($key, ConnectionInterface $con = null) Return the ChildUserJobMatch by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -87,9 +93,11 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatch requireOneByUserSlug(string $user_slug) Return the first ChildUserJobMatch filtered by the user_slug column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByJobPostingId(int $jobposting_id) Return the first ChildUserJobMatch filtered by the jobposting_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserJobMatch requireOneByUserMatchStatus(int $user_match) Return the first ChildUserJobMatch filtered by the user_match column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserJobMatch requireOneByUserMatchReason(string $user_match_reason) Return the first ChildUserJobMatch filtered by the user_match_reason column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserJobMatch requireOneByMatchNotes(string $match_notes) Return the first ChildUserJobMatch filtered by the match_notes column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneByUserMatchState(int $user_match_state) Return the first ChildUserJobMatch filtered by the user_match_state column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneByMatchedUserKeywords(array $matched_user_keywords) Return the first ChildUserJobMatch filtered by the matched_user_keywords column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneByMatchedNegativeTitleKeywords(array $matched_negative_title_keywords) Return the first ChildUserJobMatch filtered by the matched_negative_title_keywords column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneByMatchedNegativeCompanyKeywords(array $matched_negative_company_keywords) Return the first ChildUserJobMatch filtered by the matched_negative_company_keywords column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneByOutOfUserArea(boolean $out_of_user_area) Return the first ChildUserJobMatch filtered by the out_of_user_area column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByAppRunId(string $app_run_id) Return the first ChildUserJobMatch filtered by the app_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildUserJobMatch[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildUserJobMatch objects based on current ModelCriteria
@@ -97,9 +105,11 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatch[]|ObjectCollection findByUserSlug(string $user_slug) Return ChildUserJobMatch objects filtered by the user_slug column
  * @method     ChildUserJobMatch[]|ObjectCollection findByJobPostingId(int $jobposting_id) Return ChildUserJobMatch objects filtered by the jobposting_id column
  * @method     ChildUserJobMatch[]|ObjectCollection findByUserNotificationState(int $user_notification_state) Return ChildUserJobMatch objects filtered by the user_notification_state column
- * @method     ChildUserJobMatch[]|ObjectCollection findByUserMatchStatus(int $user_match) Return ChildUserJobMatch objects filtered by the user_match column
- * @method     ChildUserJobMatch[]|ObjectCollection findByUserMatchReason(string $user_match_reason) Return ChildUserJobMatch objects filtered by the user_match_reason column
- * @method     ChildUserJobMatch[]|ObjectCollection findByMatchNotes(string $match_notes) Return ChildUserJobMatch objects filtered by the match_notes column
+ * @method     ChildUserJobMatch[]|ObjectCollection findByUserMatchState(int $user_match_state) Return ChildUserJobMatch objects filtered by the user_match_state column
+ * @method     ChildUserJobMatch[]|ObjectCollection findByMatchedUserKeywords(array $matched_user_keywords) Return ChildUserJobMatch objects filtered by the matched_user_keywords column
+ * @method     ChildUserJobMatch[]|ObjectCollection findByMatchedNegativeTitleKeywords(array $matched_negative_title_keywords) Return ChildUserJobMatch objects filtered by the matched_negative_title_keywords column
+ * @method     ChildUserJobMatch[]|ObjectCollection findByMatchedNegativeCompanyKeywords(array $matched_negative_company_keywords) Return ChildUserJobMatch objects filtered by the matched_negative_company_keywords column
+ * @method     ChildUserJobMatch[]|ObjectCollection findByOutOfUserArea(boolean $out_of_user_area) Return ChildUserJobMatch objects filtered by the out_of_user_area column
  * @method     ChildUserJobMatch[]|ObjectCollection findByAppRunId(string $app_run_id) Return ChildUserJobMatch objects filtered by the app_run_id column
  * @method     ChildUserJobMatch[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
@@ -199,7 +209,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_job_match_id, user_slug, jobposting_id, user_notification_state, user_match, user_match_reason, match_notes, app_run_id FROM user_job_match WHERE user_job_match_id = :p0';
+        $sql = 'SELECT user_job_match_id, user_slug, jobposting_id, user_notification_state, user_match_state, matched_user_keywords, matched_negative_title_keywords, matched_negative_company_keywords, out_of_user_area, app_run_id FROM user_job_match WHERE user_job_match_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -432,86 +442,306 @@ abstract class UserJobMatchQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the user_match column
+     * Filter the query on the user_match_state column
      *
-     * @param     mixed $userMatchStatus The value to use as filter
+     * @param     mixed $userMatchState The value to use as filter
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
      */
-    public function filterByUserMatchStatus($userMatchStatus = null, $comparison = null)
+    public function filterByUserMatchState($userMatchState = null, $comparison = null)
     {
-        $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_MATCH);
-        if (is_scalar($userMatchStatus)) {
-            if (!in_array($userMatchStatus, $valueSet)) {
-                throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $userMatchStatus));
+        $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_MATCH_STATE);
+        if (is_scalar($userMatchState)) {
+            if (!in_array($userMatchState, $valueSet)) {
+                throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $userMatchState));
             }
-            $userMatchStatus = array_search($userMatchStatus, $valueSet);
-        } elseif (is_array($userMatchStatus)) {
+            $userMatchState = array_search($userMatchState, $valueSet);
+        } elseif (is_array($userMatchState)) {
             $convertedValues = array();
-            foreach ($userMatchStatus as $value) {
+            foreach ($userMatchState as $value) {
                 if (!in_array($value, $valueSet)) {
                     throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $value));
                 }
                 $convertedValues []= array_search($value, $valueSet);
             }
-            $userMatchStatus = $convertedValues;
+            $userMatchState = $convertedValues;
             if (null === $comparison) {
                 $comparison = Criteria::IN;
             }
         }
 
-        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_MATCH, $userMatchStatus, $comparison);
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_MATCH_STATE, $userMatchState, $comparison);
     }
 
     /**
-     * Filter the query on the user_match_reason column
+     * Filter the query on the matched_user_keywords column
      *
-     * Example usage:
-     * <code>
-     * $query->filterByUserMatchReason('fooValue');   // WHERE user_match_reason = 'fooValue'
-     * $query->filterByUserMatchReason('%fooValue%', Criteria::LIKE); // WHERE user_match_reason LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $userMatchReason The value to use as filter.
+     * @param     array $matchedUserKeywords The values to use as filter.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
      */
-    public function filterByUserMatchReason($userMatchReason = null, $comparison = null)
+    public function filterByMatchedUserKeywords($matchedUserKeywords = null, $comparison = null)
     {
-        if (null === $comparison) {
-            if (is_array($userMatchReason)) {
-                $comparison = Criteria::IN;
+        $key = $this->getAliasedColName(UserJobMatchTableMap::COL_MATCHED_USER_KEYWORDS);
+        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
+            foreach ($matchedUserKeywords as $value) {
+                $value = '%| ' . $value . ' |%';
+                if ($this->containsKey($key)) {
+                    $this->addAnd($key, $value, Criteria::LIKE);
+                } else {
+                    $this->add($key, $value, Criteria::LIKE);
+                }
             }
+
+            return $this;
+        } elseif ($comparison == Criteria::CONTAINS_SOME) {
+            foreach ($matchedUserKeywords as $value) {
+                $value = '%| ' . $value . ' |%';
+                if ($this->containsKey($key)) {
+                    $this->addOr($key, $value, Criteria::LIKE);
+                } else {
+                    $this->add($key, $value, Criteria::LIKE);
+                }
+            }
+
+            return $this;
+        } elseif ($comparison == Criteria::CONTAINS_NONE) {
+            foreach ($matchedUserKeywords as $value) {
+                $value = '%| ' . $value . ' |%';
+                if ($this->containsKey($key)) {
+                    $this->addAnd($key, $value, Criteria::NOT_LIKE);
+                } else {
+                    $this->add($key, $value, Criteria::NOT_LIKE);
+                }
+            }
+            $this->addOr($key, null, Criteria::ISNULL);
+
+            return $this;
         }
 
-        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_MATCH_REASON, $userMatchReason, $comparison);
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_MATCHED_USER_KEYWORDS, $matchedUserKeywords, $comparison);
     }
 
     /**
-     * Filter the query on the match_notes column
+     * Filter the query on the matched_user_keywords column
+     * @param     mixed $matchedUserKeywords The value to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::CONTAINS_ALL
      *
-     * Example usage:
-     * <code>
-     * $query->filterByMatchNotes('fooValue');   // WHERE match_notes = 'fooValue'
-     * $query->filterByMatchNotes('%fooValue%', Criteria::LIKE); // WHERE match_notes LIKE '%fooValue%'
-     * </code>
+     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function filterByMatchedUserKeyword($matchedUserKeywords = null, $comparison = null)
+    {
+        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
+            if (is_scalar($matchedUserKeywords)) {
+                $matchedUserKeywords = '%| ' . $matchedUserKeywords . ' |%';
+                $comparison = Criteria::LIKE;
+            }
+        } elseif ($comparison == Criteria::CONTAINS_NONE) {
+            $matchedUserKeywords = '%| ' . $matchedUserKeywords . ' |%';
+            $comparison = Criteria::NOT_LIKE;
+            $key = $this->getAliasedColName(UserJobMatchTableMap::COL_MATCHED_USER_KEYWORDS);
+            if ($this->containsKey($key)) {
+                $this->addAnd($key, $matchedUserKeywords, $comparison);
+            } else {
+                $this->addAnd($key, $matchedUserKeywords, $comparison);
+            }
+            $this->addOr($key, null, Criteria::ISNULL);
+
+            return $this;
+        }
+
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_MATCHED_USER_KEYWORDS, $matchedUserKeywords, $comparison);
+    }
+
+    /**
+     * Filter the query on the matched_negative_title_keywords column
      *
-     * @param     string $matchNotes The value to use as filter.
+     * @param     array $matchedNegativeTitleKeywords The values to use as filter.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
      */
-    public function filterByMatchNotes($matchNotes = null, $comparison = null)
+    public function filterByMatchedNegativeTitleKeywords($matchedNegativeTitleKeywords = null, $comparison = null)
     {
-        if (null === $comparison) {
-            if (is_array($matchNotes)) {
-                $comparison = Criteria::IN;
+        $key = $this->getAliasedColName(UserJobMatchTableMap::COL_MATCHED_NEGATIVE_TITLE_KEYWORDS);
+        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
+            foreach ($matchedNegativeTitleKeywords as $value) {
+                $value = '%| ' . $value . ' |%';
+                if ($this->containsKey($key)) {
+                    $this->addAnd($key, $value, Criteria::LIKE);
+                } else {
+                    $this->add($key, $value, Criteria::LIKE);
+                }
             }
+
+            return $this;
+        } elseif ($comparison == Criteria::CONTAINS_SOME) {
+            foreach ($matchedNegativeTitleKeywords as $value) {
+                $value = '%| ' . $value . ' |%';
+                if ($this->containsKey($key)) {
+                    $this->addOr($key, $value, Criteria::LIKE);
+                } else {
+                    $this->add($key, $value, Criteria::LIKE);
+                }
+            }
+
+            return $this;
+        } elseif ($comparison == Criteria::CONTAINS_NONE) {
+            foreach ($matchedNegativeTitleKeywords as $value) {
+                $value = '%| ' . $value . ' |%';
+                if ($this->containsKey($key)) {
+                    $this->addAnd($key, $value, Criteria::NOT_LIKE);
+                } else {
+                    $this->add($key, $value, Criteria::NOT_LIKE);
+                }
+            }
+            $this->addOr($key, null, Criteria::ISNULL);
+
+            return $this;
         }
 
-        return $this->addUsingAlias(UserJobMatchTableMap::COL_MATCH_NOTES, $matchNotes, $comparison);
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_MATCHED_NEGATIVE_TITLE_KEYWORDS, $matchedNegativeTitleKeywords, $comparison);
+    }
+
+    /**
+     * Filter the query on the matched_negative_title_keywords column
+     * @param     mixed $matchedNegativeTitleKeywords The value to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::CONTAINS_ALL
+     *
+     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function filterByMatchedNegativeTitleKeyword($matchedNegativeTitleKeywords = null, $comparison = null)
+    {
+        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
+            if (is_scalar($matchedNegativeTitleKeywords)) {
+                $matchedNegativeTitleKeywords = '%| ' . $matchedNegativeTitleKeywords . ' |%';
+                $comparison = Criteria::LIKE;
+            }
+        } elseif ($comparison == Criteria::CONTAINS_NONE) {
+            $matchedNegativeTitleKeywords = '%| ' . $matchedNegativeTitleKeywords . ' |%';
+            $comparison = Criteria::NOT_LIKE;
+            $key = $this->getAliasedColName(UserJobMatchTableMap::COL_MATCHED_NEGATIVE_TITLE_KEYWORDS);
+            if ($this->containsKey($key)) {
+                $this->addAnd($key, $matchedNegativeTitleKeywords, $comparison);
+            } else {
+                $this->addAnd($key, $matchedNegativeTitleKeywords, $comparison);
+            }
+            $this->addOr($key, null, Criteria::ISNULL);
+
+            return $this;
+        }
+
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_MATCHED_NEGATIVE_TITLE_KEYWORDS, $matchedNegativeTitleKeywords, $comparison);
+    }
+
+    /**
+     * Filter the query on the matched_negative_company_keywords column
+     *
+     * @param     array $matchedNegativeCompanyKeywords The values to use as filter.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function filterByMatchedNegativeCompanyKeywords($matchedNegativeCompanyKeywords = null, $comparison = null)
+    {
+        $key = $this->getAliasedColName(UserJobMatchTableMap::COL_MATCHED_NEGATIVE_COMPANY_KEYWORDS);
+        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
+            foreach ($matchedNegativeCompanyKeywords as $value) {
+                $value = '%| ' . $value . ' |%';
+                if ($this->containsKey($key)) {
+                    $this->addAnd($key, $value, Criteria::LIKE);
+                } else {
+                    $this->add($key, $value, Criteria::LIKE);
+                }
+            }
+
+            return $this;
+        } elseif ($comparison == Criteria::CONTAINS_SOME) {
+            foreach ($matchedNegativeCompanyKeywords as $value) {
+                $value = '%| ' . $value . ' |%';
+                if ($this->containsKey($key)) {
+                    $this->addOr($key, $value, Criteria::LIKE);
+                } else {
+                    $this->add($key, $value, Criteria::LIKE);
+                }
+            }
+
+            return $this;
+        } elseif ($comparison == Criteria::CONTAINS_NONE) {
+            foreach ($matchedNegativeCompanyKeywords as $value) {
+                $value = '%| ' . $value . ' |%';
+                if ($this->containsKey($key)) {
+                    $this->addAnd($key, $value, Criteria::NOT_LIKE);
+                } else {
+                    $this->add($key, $value, Criteria::NOT_LIKE);
+                }
+            }
+            $this->addOr($key, null, Criteria::ISNULL);
+
+            return $this;
+        }
+
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_MATCHED_NEGATIVE_COMPANY_KEYWORDS, $matchedNegativeCompanyKeywords, $comparison);
+    }
+
+    /**
+     * Filter the query on the matched_negative_company_keywords column
+     * @param     mixed $matchedNegativeCompanyKeywords The value to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::CONTAINS_ALL
+     *
+     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function filterByMatchedNegativeCompanyKeyword($matchedNegativeCompanyKeywords = null, $comparison = null)
+    {
+        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
+            if (is_scalar($matchedNegativeCompanyKeywords)) {
+                $matchedNegativeCompanyKeywords = '%| ' . $matchedNegativeCompanyKeywords . ' |%';
+                $comparison = Criteria::LIKE;
+            }
+        } elseif ($comparison == Criteria::CONTAINS_NONE) {
+            $matchedNegativeCompanyKeywords = '%| ' . $matchedNegativeCompanyKeywords . ' |%';
+            $comparison = Criteria::NOT_LIKE;
+            $key = $this->getAliasedColName(UserJobMatchTableMap::COL_MATCHED_NEGATIVE_COMPANY_KEYWORDS);
+            if ($this->containsKey($key)) {
+                $this->addAnd($key, $matchedNegativeCompanyKeywords, $comparison);
+            } else {
+                $this->addAnd($key, $matchedNegativeCompanyKeywords, $comparison);
+            }
+            $this->addOr($key, null, Criteria::ISNULL);
+
+            return $this;
+        }
+
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_MATCHED_NEGATIVE_COMPANY_KEYWORDS, $matchedNegativeCompanyKeywords, $comparison);
+    }
+
+    /**
+     * Filter the query on the out_of_user_area column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByOutOfUserArea(true); // WHERE out_of_user_area = true
+     * $query->filterByOutOfUserArea('yes'); // WHERE out_of_user_area = true
+     * </code>
+     *
+     * @param     boolean|string $outOfUserArea The value to use as filter.
+     *              Non-boolean arguments are converted using the following rules:
+     *                * 1, '1', 'true',  'on',  and 'yes' are converted to boolean true
+     *                * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
+     *              Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function filterByOutOfUserArea($outOfUserArea = null, $comparison = null)
+    {
+        if (is_string($outOfUserArea)) {
+            $outOfUserArea = in_array(strtolower($outOfUserArea), array('false', 'off', '-', 'no', 'n', '0', '')) ? false : true;
+        }
+
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_OUT_OF_USER_AREA, $outOfUserArea, $comparison);
     }
 
     /**
