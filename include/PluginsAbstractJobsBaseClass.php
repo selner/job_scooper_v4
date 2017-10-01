@@ -1199,6 +1199,7 @@ abstract class AbstractClassBaseJobsPlugin
 
     private function _addJobMatchesToUser($searchDetails)
     {
+        if(array_key_exists($searchDetails->getKey(), $this->arrSearchReturnedJobs) && !is_null($this->arrSearchReturnedJobs[$searchDetails->getKey()]) && is_array($this->arrSearchReturnedJobs[$searchDetails->getKey()]))
         $this->_addJobMatchIdsToUser(array_keys($this->arrSearchReturnedJobs[$searchDetails->getKey()]));
     }
 
