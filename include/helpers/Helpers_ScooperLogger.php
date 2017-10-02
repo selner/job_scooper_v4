@@ -34,6 +34,7 @@ const C__SECTION_BEGIN__ = 1;
 const C__SECTION_END__ = 2;
 const C__DISPLAY_NORMAL__ = 100;
 const C__DISPLAY_SECTION_START__ = 250;
+const C__DISPLAY_SECTION_END__ = 275;
 const C__DISPLAY_ITEM_START__ = 200;
 const C__DISPLAY_ITEM_DETAIL__ = 300;
 const C__DISPLAY_ITEM_RESULT__ = 350;
@@ -121,9 +122,17 @@ Class ScooperLogger extends \Monolog\Logger
                     $logLevel = "info";
                     break;
 
+                    
                 case C__DISPLAY_SECTION_START__:
                     $strLineBeginning = "\r\n"."####################################################################################"."\r\n". "\r\n";
                     $strLineEnd = "\r\n"."\r\n"."####################################################################################"."\r\n";
+
+                    $logLevel = "info";
+                    break;
+
+                case C__DISPLAY_SECTION_END__:
+                    $strLineBeginning = "\r\n"."~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"."\r\n". "\r\n";
+                    $strLineEnd = "\r\n"."\r\n"."~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"."\r\n";
 
                     $logLevel = "info";
                     break;
