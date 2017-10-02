@@ -16,14 +16,6 @@
  */
 require_once __ROOT__ . "/bootstrap.php";
 
-
-use JobScooper\Map\UserSearchRunTableMap;
-use JobScooper\Map\UserJobMatchTableMap;
-use JobScooper\Map\JobPostingTableMap;
-use JobScooper\Map\JobSitePluginTableMap;
-
-
-
 /******************************************************************************
  *
  *
