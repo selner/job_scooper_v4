@@ -268,6 +268,13 @@ class UserSearchRunTableMap extends TableMap
     1 => ':user_slug',
   ),
 ), null, null, null, false);
+        $this->addRelation('JobSitePlugin', '\\JobScooper\\JobSitePlugin', RelationMap::ONE_TO_MANY, array (
+  0 =>
+  array (
+    0 => ':last_user_search_run_id',
+    1 => ':user_search_run_id',
+  ),
+), null, null, 'JobSitePlugins', false);
     } // buildRelations()
 
     /**

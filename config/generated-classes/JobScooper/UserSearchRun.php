@@ -97,32 +97,41 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
     {
         if(!is_null($this->getLastRunAt()))
         {
-            if ($this->getLastRunWasSuccessful() == true || is_null($this->getLastRunWasSuccessful())) {
-                $nextDate = $this->getLastRunAt();
-                if (is_null($nextDate))
-                    $nextDate = new \DateTime();
-                date_add($nextDate, date_interval_create_from_date_string('18 hours'));
+            $nextDate = $this->getLastRunAt();
+            if (is_null($nextDate))
+                $nextDate = new \DateTime();
+            date_add($nextDate, date_interval_create_from_date_string('18 hours'));
 
-                $this->setStartNextRunAfter($nextDate);
-            }
+            $this->setStartNextRunAfter($nextDate);
         }
+    }
+
+
+    function setLastRunWasSuccessful($v)
+    {
+        if($v === true) {
+            $this->updateNextRunDate();
+            $this->setLastFailedAt(null);
+        }
+        else
+        {
+            $this->setLastFailedAt(time());
+        }
+
+        return parent::setLastRunWasSuccessful($v);
     }
 
     function setRunResultCode($val)
     {
         if($val == "failed") {
-            $this->setLastFailedAt(time());
             $this->setLastRunWasSuccessful(false);
-            $this->setStartNextRunAfter("");
         }
         elseif($val == "success")
         {
-            $this->updateNextRunDate();
-            $this->setLastFailedAt("");
             $this->setLastRunWasSuccessful(true);
         }
 
-        parent::setRunResultCode($val);
+        return parent::setRunResultCode($val);
     }
 
     public function shouldRunNow()
@@ -134,6 +143,17 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
         return true;
     }
 
+    protected function createSlug()
+    {
+        // create the slug based on the `slug_pattern` and the object properties
+        $slug = $this->createRawSlug();
+        // truncate the slug to accommodate the size of the slug column
+        $slug = $this->limitSlugSize($slug);
+//        // add an incremental index to make sure the slug is unique
+//        $slug = $this->makeSlugUnique($slug);
+
+        return $slug;
+    }
 
     private function _setOldNameToNewColumn($keyOldName, $arrDetails)
     {
@@ -274,6 +294,10 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
 
             case 'site_name':
                 return $this->getJobSiteKey();
+                break;
+
+            case 'key':
+                return $this->getUserSearchRunKey();
                 break;
 
             default:

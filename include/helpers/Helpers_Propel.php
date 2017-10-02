@@ -388,18 +388,25 @@ function findOrCreateUserSearchRun($searchKey, $jobsiteKey, $locationKey="no-loc
     $userObject = $GLOBALS['USERDATA']['configuration_settings']['user_details'];
     $userSlug = $userObject->getUserSlug();
 
-    $searchSlug = cleanupSlugPart($searchKey);
-    LogLine("Searching for user '{$userSlug} / plugin {$jobsiteKey} / search '{$searchSlug}'...", \C__DISPLAY_NORMAL__);
+    LogLine("Searching for user '{$userSlug} / jobsite {$jobsiteKey} / search '{$searchKey} / search '{$locationKey}'...", \C__DISPLAY_NORMAL__);
 
     $search = \JobScooper\UserSearchRunQuery::create()
         ->filterByUserSlug($userSlug)
         ->filterByJobSiteKey($jobsiteKey)
-        ->filterBySearchKey($searchSlug)
+        ->filterBySearchKey($searchKey)
         ->filterByLocationKey($locationKey)
-        ->findOneOrCreate();
+        ->findOne();
 
-    if($search->isNew())
+    if(!$search) {
+        LogLine("Search Not Found -- Creating New User Search Run for user '{$userSlug} / plugin {$jobsiteKey} / search '{$searchKey} / search '{$locationKey}'...", \C__DISPLAY_WARNING__);
+        $search = new \JobScooper\UserSearchRun();
+
+        $search->setSearchKey($searchKey);
+        $search->setJobSiteKey($jobsiteKey);
+        $search->setUserSlug($userSlug);
+        $search->setLocationKey($locationKey);
+
         $search->save();
-
+    }
     return $search;
 }

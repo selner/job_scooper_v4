@@ -648,10 +648,12 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
                     if (count($GLOBALS['USERDATA']['configuration_settings']['included_sites']) > 0) {
                         foreach ($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $siteToSearch) {
-                            $searchKey = cleanupSlugPart($keywordSet['key']);
-
-                            $newSearch = findOrCreateUserSearchRun($searchKey, $siteToSearch);
                             $plugin = getPluginObjectForJobSite($siteToSearch);
+                            $searchKey = cleanupSlugPart($keywordSet['key']);
+                            if ($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
+                                $searchKey = "alljobs";
+                            }
+                            $newSearch = findOrCreateUserSearchRun($searchKey, $siteToSearch);
 
                             $searchSettings = new SearchSettings();
                             $searchSettings['keywords_array'] = $keywordSet['keywords_array'];
@@ -662,9 +664,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                                 $arrSkippedPlugins[] = $siteToSearch;
                                 continue;
                             }
-
-                            if ($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
-                                $newSearch->setSearchKey($siteToSearch . "-alljobs");
+                            elseif($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
                                 $newSearch->save();
                                 $arrSearchesPreLocation[$newSearch->getUserSearchRunKey()] = $newSearch;
                             }
@@ -680,8 +680,8 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                                     $thisSearch->setSearchSettings($searchSettings);
                                     $thisSearch->save();
                                     $arrSearchesPreLocation[$thisSearch->getUserSearchRunKey()] = $thisSearch;
-
                                 }
+                                $newSearch->delete();
                             }
                         }
                     } else {
@@ -726,13 +726,12 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
                                 }
                             }
 
-                            $searchForLoc = $search->copy();
-                            $this->_addLocationToSearch_($searchForLoc, $locset);
-                            $searchForLoc->save();
+                            $searchForLoc = $this->_getSearchForLocation_($search, $locset);
 
                             $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchForLoc->getUserSearchRunKey()] = $searchForLoc;
                             $searchForLoc = null;
                         }
+                        $search->delete();
                     }
                 }
             }
@@ -743,7 +742,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
     }
 
 
-    private function _addLocationToSearch_(&$search, $locset)
+    private function _getSearchForLocation_($search, $locset)
     {
         $searchRunKey = $search->getUserSearchRunKey();
 
@@ -763,24 +762,28 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
 
         $locTypeNeeded = $plugin->getLocationSettingType();
         if (!is_null($locTypeNeeded)) {
+
+            $newSearch = findOrCreateUserSearchRun($search->getSearchKey(), $search->getJobSiteKey(), $locset['key']);
+            $newSearchFacts = array_diff_key($search->toArray(), array_fill_keys(array("UserSearchRunId", "SearchKey", "JobSiteKey", "UserSearchRunKey", "LocationKey"), ""));
+            $newSearch->fromArray($newSearchFacts);
+
             if (array_key_exists($locTypeNeeded, $locset))
-                $search['location_search_value'] = $locset[$locTypeNeeded];
+                $newSearch['location_search_value'] = $locset[$locTypeNeeded];
             else {
                 handleException(new IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' for %s was not found in the location set %s.  Location set values: %s", $locTypeNeeded, $search->getJobSiteKey(), $locset['key'], var_export($locset['key'], true))), null, $raise = false);
-                setSiteAsExcluded($search->getJobSiteKey());
+                setSiteAsExcluded($$newSearch->getJobSiteKey());
             }
 
-            if (!isValueURLEncoded($search['location_search_value'])) {
-                $search['location_search_value'] = urlencode($search['location_search_value']);
+            if (!isValueURLEncoded($newSearch['location_search_value'])) {
+                $newSearch['location_search_value'] = urlencode($newSearch['location_search_value']);
             }
 
             if ($plugin->isBitFlagSet(C__JOB_LOCATION_REQUIRES_LOWERCASE)) {
-                $search['location_search_value'] = strtolower($search['location_search_value']);
+                $newSearch['location_search_value'] = strtolower($newSearch['location_search_value']);
             }
 
-            // BUGBUG:  Workaround for a single plugin, Dice, to be able to get more than one location set parameter
-            $search->setLocationKey($locset['key']);
-            $search->save();
+            $newSearch->save();
+            return $newSearch;
         }
 
     }
