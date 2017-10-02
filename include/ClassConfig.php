@@ -426,7 +426,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
     {
         $newSearch = new \JobScooper\UserSearchRun();
 
-        $newSearch->setKey(strScrub($iniSearch['key'], REMOVE_EXTRA_WHITESPACE | LOWERCASE));
+        $newSearch->setSearchKey(strScrub($iniSearch['key'], REMOVE_EXTRA_WHITESPACE | LOWERCASE));
         $newSearch->setJobSiteKey(strScrub($iniSearch['jobsite'], REMOVE_EXTRA_WHITESPACE | LOWERCASE));
 
         $strJobSiteKey = $newSearch->getJobSiteKey();
@@ -439,7 +439,7 @@ class ClassConfig extends AbstractClassBaseJobsPlugin
         $searchSettings['location_user_specified_override'] = array_key_exists('location', $iniSearch) ? $iniSearch['location'] : null;
         $newSearch->setSearchSettings($searchSettings);
 
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search loaded from config INI: " . $newSearch->getKey(), \C__DISPLAY_ITEM_DETAIL__);
+        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search loaded from config INI: " . $newSearch->getUserSearchRunKey(), \C__DISPLAY_ITEM_DETAIL__);
 
         return $newSearch;
     }
