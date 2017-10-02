@@ -339,11 +339,7 @@ function getLocationIdByAlternateName($strLocation)
 {
 
     $slug = cleanupSlugPart($strLocation);
-
-    LogLine("Searching for location name '" . $slug ."'", \C__DISPLAY_NORMAL__);
-    $placelookup = \JobScooper\JobPlaceLookupQuery::create()
-        ->filterBySlug($slug)
-        ->findOneOrCreate();
+    $placelookup = getJobPlaceLookup($slug);
 
     if(is_null($placelookup->getLocationId()))
     {

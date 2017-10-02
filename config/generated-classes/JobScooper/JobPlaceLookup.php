@@ -18,6 +18,13 @@ use Propel\Runtime\Connection\ConnectionInterface;
 class JobPlaceLookup extends BaseJobPlaceLookup
 {
 
+    public function postSave(ConnectionInterface $con = null)
+    {
+        $ret = parent::postSave($con);
+
+        reloadLocationNamesCache();
+        return $ret;
+    }
 
     /**
      * Code to be run before inserting to database
@@ -30,9 +37,7 @@ class JobPlaceLookup extends BaseJobPlaceLookup
         if(is_null($locId)) {
             $osm = getOpenStreetMapFacts($this->getPlaceAlternateName());
             if(!is_null($osm) && is_array($osm)) {
-                $loc = JobLocationQuery::create()
-                    ->filterByOpenStreetMapId($osm['osm_id'])
-                    ->findOne();
+                $loc = getJobLocationByOsmId($osm['osm_id']);
                 if (!$loc) {
                     $loc = new \JobScooper\JobLocation();
                     $loc->fromOSMData($osm);

@@ -38,6 +38,15 @@ class JobLocation extends BaseJobLocation
         return true;
     }
 
+    public function postSave(ConnectionInterface $con = null)
+    {
+        $ret = parent::postSave($con);
+
+        reloadJobLocationCache();
+        return $ret;
+    }
+
+
     public function fromOSMData($osmPlace)
     {
     

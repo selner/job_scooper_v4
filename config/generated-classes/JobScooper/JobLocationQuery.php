@@ -17,4 +17,5 @@ use JobScooper\Base\JobLocationQuery as BaseJobLocationQuery;
 class JobLocationQuery extends BaseJobLocationQuery
 {
 
+
 }
