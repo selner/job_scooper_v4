@@ -37,45 +37,7 @@ class JobSitePlugin extends BaseJobSitePlugin
 
     private $_pluginObject = null;
 
-    protected function updateNextRunDate()
-    {
-        if(!is_null($this->getLastRunAt()))
-        {
-            if ($this->getLastRunWasSuccessful() == true || is_null($this->getLastRunWasSuccessful())) {
-                $nextDate = $this->getLastRunAt();
-                if (is_null($nextDate))
-                    $nextDate = new \DateTime();
-                date_add($nextDate, date_interval_create_from_date_string('18 hours'));
 
-                $this->setStartNextRunAfter($nextDate);
-            }
-        }
-    }
-
-    function setSuccess($boolVal)
-    {
-        if($boolVal !== true) {
-            $this->setLastFailedAt(time());
-            $this->setLastRunWasSuccessful(false);
-            $this->setStartNextRunAfter("");
-        }
-        else
-        {
-            $this->updateNextRunDate();
-            $this->setLastFailedAt("");
-            $this->setLastRunWasSuccessful(true);
-        }
-
-    }
-
-    public function shouldRunNow()
-    {
-        $nextTime = $this->getStartNextRunAfter();
-        if(!is_null($nextTime))
-            return (time() > $nextTime->getTimestamp());
-
-        return true;
-    }
 
 
     function getJobSitePluginObject()
@@ -128,7 +90,7 @@ class JobSitePlugin extends BaseJobSitePlugin
         }
         catch (\Exception $ex)
         {
-            handleException($ex, "Error instantiating jobsite plugin object" . $this->getDisplayName() . " with class name [" . $this->getPluginClassName() ."]:  %s");
+            handleException($ex, "Error instantiating jobsite plugin object" . $this->getJobSiteKey() . " with class name [" . $this->getPluginClassName() ."]:  %s");
         }
     }
 

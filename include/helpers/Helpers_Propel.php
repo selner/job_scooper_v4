@@ -117,7 +117,7 @@ function updateOrCreateJobPosting($jobArray)
 }
 
 
-function getAllUserMatchesNotNotified()
+function getAllUserMatchesNotNotified($appRunId=null, $jobsiteKey=null)
 {
     $userObject = $GLOBALS['USERDATA']['configuration_settings']['user_details'];
 
@@ -125,6 +125,18 @@ function getAllUserMatchesNotNotified()
         ->filterByUserNotificationState(array("not-ready", "ready"))
         ->filterByUserSlug($userObject->getUserSlug())
         ->joinWithJobPosting();
+
+    if(!is_null($appRunId))
+    {
+        $query->filterBy("AppRunId",$appRunId);
+    }
+
+    if(!is_null($jobsiteKey))
+    {
+        $query->useJobPostingQuery();
+        $query->filterByJobSite($jobsiteKey);
+        $query->endUse();
+    }
 
     $results =  $query->find();
     return $results->getData();
@@ -328,7 +340,7 @@ function getLocationIdByAlternateName($strLocation)
 
     $slug = cleanupSlugPart($strLocation);
 
-    LogLine("Searching for database location name '" . $slug ."'", \C__DISPLAY_NORMAL__);
+    LogLine("Searching for location name '" . $slug ."'", \C__DISPLAY_NORMAL__);
     $placelookup = \JobScooper\JobPlaceLookupQuery::create()
         ->filterBySlug($slug)
         ->findOneOrCreate();
@@ -374,3 +386,24 @@ function updateOrCreateUser($arrUserDetails)
 }
 
 
+
+function findOrCreateUserSearchRun($searchKey, $jobsiteKey, $locationKey="no-location")
+{
+    $userObject = $GLOBALS['USERDATA']['configuration_settings']['user_details'];
+    $userSlug = $userObject->getUserSlug();
+
+    $searchSlug = cleanupSlugPart($searchKey);
+    LogLine("Searching for user '{$userSlug} / plugin {$jobsiteKey} / search '{$searchSlug}'...", \C__DISPLAY_NORMAL__);
+
+    $search = \JobScooper\UserSearchRunQuery::create()
+        ->filterByUserSlug($userSlug)
+        ->filterByJobSiteKey($jobsiteKey)
+        ->filterBySearchKey($searchSlug)
+        ->filterByLocationKey($locationKey)
+        ->findOneOrCreate();
+
+    if($search->isNew())
+        $search->save();
+
+    return $search;
+}

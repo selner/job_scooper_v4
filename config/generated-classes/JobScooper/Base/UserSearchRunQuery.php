@@ -21,25 +21,35 @@ use Propel\Runtime\Exception\PropelException;
  *
  *
  * @method     ChildUserSearchRunQuery orderByUserSearchRunId($order = Criteria::ASC) Order by the user_search_run_id column
- * @method     ChildUserSearchRunQuery orderByKey($order = Criteria::ASC) Order by the key column
- * @method     ChildUserSearchRunQuery orderByAppRunId($order = Criteria::ASC) Order by the app_run_id column
+ * @method     ChildUserSearchRunQuery orderBySearchKey($order = Criteria::ASC) Order by the search_key column
  * @method     ChildUserSearchRunQuery orderByUserSlug($order = Criteria::ASC) Order by the user_slug column
- * @method     ChildUserSearchRunQuery orderByDateSearchRun($order = Criteria::ASC) Order by the date_search_run column
  * @method     ChildUserSearchRunQuery orderByJobSiteKey($order = Criteria::ASC) Order by the jobsite_key column
+ * @method     ChildUserSearchRunQuery orderByLocationKey($order = Criteria::ASC) Order by the location_key column
+ * @method     ChildUserSearchRunQuery orderByUserSearchRunKey($order = Criteria::ASC) Order by the user_search_run_key column
  * @method     ChildUserSearchRunQuery orderBySearchSettings($order = Criteria::ASC) Order by the search_settings column
+ * @method     ChildUserSearchRunQuery orderByAppRunId($order = Criteria::ASC) Order by the last_app_run_id column
  * @method     ChildUserSearchRunQuery orderByRunResultCode($order = Criteria::ASC) Order by the run_result column
  * @method     ChildUserSearchRunQuery orderByRunErrorDetails($order = Criteria::ASC) Order by the run_error_details column
+ * @method     ChildUserSearchRunQuery orderByLastRunAt($order = Criteria::ASC) Order by the date_last_run column
+ * @method     ChildUserSearchRunQuery orderByLastRunWasSuccessful($order = Criteria::ASC) Order by the was_successful column
+ * @method     ChildUserSearchRunQuery orderByStartNextRunAfter($order = Criteria::ASC) Order by the date_next_run column
+ * @method     ChildUserSearchRunQuery orderByLastFailedAt($order = Criteria::ASC) Order by the date_last_failed column
  * @method     ChildUserSearchRunQuery orderByUpdatedAt($order = Criteria::ASC) Order by the updated_at column
  *
  * @method     ChildUserSearchRunQuery groupByUserSearchRunId() Group by the user_search_run_id column
- * @method     ChildUserSearchRunQuery groupByKey() Group by the key column
- * @method     ChildUserSearchRunQuery groupByAppRunId() Group by the app_run_id column
+ * @method     ChildUserSearchRunQuery groupBySearchKey() Group by the search_key column
  * @method     ChildUserSearchRunQuery groupByUserSlug() Group by the user_slug column
- * @method     ChildUserSearchRunQuery groupByDateSearchRun() Group by the date_search_run column
  * @method     ChildUserSearchRunQuery groupByJobSiteKey() Group by the jobsite_key column
+ * @method     ChildUserSearchRunQuery groupByLocationKey() Group by the location_key column
+ * @method     ChildUserSearchRunQuery groupByUserSearchRunKey() Group by the user_search_run_key column
  * @method     ChildUserSearchRunQuery groupBySearchSettings() Group by the search_settings column
+ * @method     ChildUserSearchRunQuery groupByAppRunId() Group by the last_app_run_id column
  * @method     ChildUserSearchRunQuery groupByRunResultCode() Group by the run_result column
  * @method     ChildUserSearchRunQuery groupByRunErrorDetails() Group by the run_error_details column
+ * @method     ChildUserSearchRunQuery groupByLastRunAt() Group by the date_last_run column
+ * @method     ChildUserSearchRunQuery groupByLastRunWasSuccessful() Group by the was_successful column
+ * @method     ChildUserSearchRunQuery groupByStartNextRunAfter() Group by the date_next_run column
+ * @method     ChildUserSearchRunQuery groupByLastFailedAt() Group by the date_last_failed column
  * @method     ChildUserSearchRunQuery groupByUpdatedAt() Group by the updated_at column
  *
  * @method     ChildUserSearchRunQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
@@ -60,56 +70,61 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRunQuery rightJoinWithUser() Adds a RIGHT JOIN clause and with to the query using the User relation
  * @method     ChildUserSearchRunQuery innerJoinWithUser() Adds a INNER JOIN clause and with to the query using the User relation
  *
- * @method     ChildUserSearchRunQuery leftJoinJobSitePlugin($relationAlias = null) Adds a LEFT JOIN clause to the query using the JobSitePlugin relation
- * @method     ChildUserSearchRunQuery rightJoinJobSitePlugin($relationAlias = null) Adds a RIGHT JOIN clause to the query using the JobSitePlugin relation
- * @method     ChildUserSearchRunQuery innerJoinJobSitePlugin($relationAlias = null) Adds a INNER JOIN clause to the query using the JobSitePlugin relation
- *
- * @method     ChildUserSearchRunQuery joinWithJobSitePlugin($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the JobSitePlugin relation
- *
- * @method     ChildUserSearchRunQuery leftJoinWithJobSitePlugin() Adds a LEFT JOIN clause and with to the query using the JobSitePlugin relation
- * @method     ChildUserSearchRunQuery rightJoinWithJobSitePlugin() Adds a RIGHT JOIN clause and with to the query using the JobSitePlugin relation
- * @method     ChildUserSearchRunQuery innerJoinWithJobSitePlugin() Adds a INNER JOIN clause and with to the query using the JobSitePlugin relation
- *
- * @method     \JobScooper\UserQuery|\JobScooper\JobSitePluginQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
+ * @method     \JobScooper\UserQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildUserSearchRun findOne(ConnectionInterface $con = null) Return the first ChildUserSearchRun matching the query
  * @method     ChildUserSearchRun findOneOrCreate(ConnectionInterface $con = null) Return the first ChildUserSearchRun matching the query, or a new ChildUserSearchRun object populated from the query conditions when no match is found
  *
  * @method     ChildUserSearchRun findOneByUserSearchRunId(int $user_search_run_id) Return the first ChildUserSearchRun filtered by the user_search_run_id column
- * @method     ChildUserSearchRun findOneByKey(string $key) Return the first ChildUserSearchRun filtered by the key column
- * @method     ChildUserSearchRun findOneByAppRunId(string $app_run_id) Return the first ChildUserSearchRun filtered by the app_run_id column
+ * @method     ChildUserSearchRun findOneBySearchKey(string $search_key) Return the first ChildUserSearchRun filtered by the search_key column
  * @method     ChildUserSearchRun findOneByUserSlug(string $user_slug) Return the first ChildUserSearchRun filtered by the user_slug column
- * @method     ChildUserSearchRun findOneByDateSearchRun(string $date_search_run) Return the first ChildUserSearchRun filtered by the date_search_run column
  * @method     ChildUserSearchRun findOneByJobSiteKey(string $jobsite_key) Return the first ChildUserSearchRun filtered by the jobsite_key column
+ * @method     ChildUserSearchRun findOneByLocationKey(string $location_key) Return the first ChildUserSearchRun filtered by the location_key column
+ * @method     ChildUserSearchRun findOneByUserSearchRunKey(string $user_search_run_key) Return the first ChildUserSearchRun filtered by the user_search_run_key column
  * @method     ChildUserSearchRun findOneBySearchSettings( $search_settings) Return the first ChildUserSearchRun filtered by the search_settings column
+ * @method     ChildUserSearchRun findOneByAppRunId(string $last_app_run_id) Return the first ChildUserSearchRun filtered by the last_app_run_id column
  * @method     ChildUserSearchRun findOneByRunResultCode(int $run_result) Return the first ChildUserSearchRun filtered by the run_result column
  * @method     ChildUserSearchRun findOneByRunErrorDetails(array $run_error_details) Return the first ChildUserSearchRun filtered by the run_error_details column
+ * @method     ChildUserSearchRun findOneByLastRunAt(string $date_last_run) Return the first ChildUserSearchRun filtered by the date_last_run column
+ * @method     ChildUserSearchRun findOneByLastRunWasSuccessful(boolean $was_successful) Return the first ChildUserSearchRun filtered by the was_successful column
+ * @method     ChildUserSearchRun findOneByStartNextRunAfter(string $date_next_run) Return the first ChildUserSearchRun filtered by the date_next_run column
+ * @method     ChildUserSearchRun findOneByLastFailedAt(string $date_last_failed) Return the first ChildUserSearchRun filtered by the date_last_failed column
  * @method     ChildUserSearchRun findOneByUpdatedAt(string $updated_at) Return the first ChildUserSearchRun filtered by the updated_at column *
 
  * @method     ChildUserSearchRun requirePk($key, ConnectionInterface $con = null) Return the ChildUserSearchRun by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOne(ConnectionInterface $con = null) Return the first ChildUserSearchRun matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildUserSearchRun requireOneByUserSearchRunId(int $user_search_run_id) Return the first ChildUserSearchRun filtered by the user_search_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserSearchRun requireOneByKey(string $key) Return the first ChildUserSearchRun filtered by the key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserSearchRun requireOneByAppRunId(string $app_run_id) Return the first ChildUserSearchRun filtered by the app_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchRun requireOneBySearchKey(string $search_key) Return the first ChildUserSearchRun filtered by the search_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByUserSlug(string $user_slug) Return the first ChildUserSearchRun filtered by the user_slug column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserSearchRun requireOneByDateSearchRun(string $date_search_run) Return the first ChildUserSearchRun filtered by the date_search_run column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByJobSiteKey(string $jobsite_key) Return the first ChildUserSearchRun filtered by the jobsite_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchRun requireOneByLocationKey(string $location_key) Return the first ChildUserSearchRun filtered by the location_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchRun requireOneByUserSearchRunKey(string $user_search_run_key) Return the first ChildUserSearchRun filtered by the user_search_run_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneBySearchSettings( $search_settings) Return the first ChildUserSearchRun filtered by the search_settings column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchRun requireOneByAppRunId(string $last_app_run_id) Return the first ChildUserSearchRun filtered by the last_app_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByRunResultCode(int $run_result) Return the first ChildUserSearchRun filtered by the run_result column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByRunErrorDetails(array $run_error_details) Return the first ChildUserSearchRun filtered by the run_error_details column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchRun requireOneByLastRunAt(string $date_last_run) Return the first ChildUserSearchRun filtered by the date_last_run column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchRun requireOneByLastRunWasSuccessful(boolean $was_successful) Return the first ChildUserSearchRun filtered by the was_successful column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchRun requireOneByStartNextRunAfter(string $date_next_run) Return the first ChildUserSearchRun filtered by the date_next_run column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchRun requireOneByLastFailedAt(string $date_last_failed) Return the first ChildUserSearchRun filtered by the date_last_failed column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByUpdatedAt(string $updated_at) Return the first ChildUserSearchRun filtered by the updated_at column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildUserSearchRun[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildUserSearchRun objects based on current ModelCriteria
  * @method     ChildUserSearchRun[]|ObjectCollection findByUserSearchRunId(int $user_search_run_id) Return ChildUserSearchRun objects filtered by the user_search_run_id column
- * @method     ChildUserSearchRun[]|ObjectCollection findByKey(string $key) Return ChildUserSearchRun objects filtered by the key column
- * @method     ChildUserSearchRun[]|ObjectCollection findByAppRunId(string $app_run_id) Return ChildUserSearchRun objects filtered by the app_run_id column
+ * @method     ChildUserSearchRun[]|ObjectCollection findBySearchKey(string $search_key) Return ChildUserSearchRun objects filtered by the search_key column
  * @method     ChildUserSearchRun[]|ObjectCollection findByUserSlug(string $user_slug) Return ChildUserSearchRun objects filtered by the user_slug column
- * @method     ChildUserSearchRun[]|ObjectCollection findByDateSearchRun(string $date_search_run) Return ChildUserSearchRun objects filtered by the date_search_run column
  * @method     ChildUserSearchRun[]|ObjectCollection findByJobSiteKey(string $jobsite_key) Return ChildUserSearchRun objects filtered by the jobsite_key column
+ * @method     ChildUserSearchRun[]|ObjectCollection findByLocationKey(string $location_key) Return ChildUserSearchRun objects filtered by the location_key column
+ * @method     ChildUserSearchRun[]|ObjectCollection findByUserSearchRunKey(string $user_search_run_key) Return ChildUserSearchRun objects filtered by the user_search_run_key column
  * @method     ChildUserSearchRun[]|ObjectCollection findBySearchSettings( $search_settings) Return ChildUserSearchRun objects filtered by the search_settings column
+ * @method     ChildUserSearchRun[]|ObjectCollection findByAppRunId(string $last_app_run_id) Return ChildUserSearchRun objects filtered by the last_app_run_id column
  * @method     ChildUserSearchRun[]|ObjectCollection findByRunResultCode(int $run_result) Return ChildUserSearchRun objects filtered by the run_result column
  * @method     ChildUserSearchRun[]|ObjectCollection findByRunErrorDetails(array $run_error_details) Return ChildUserSearchRun objects filtered by the run_error_details column
+ * @method     ChildUserSearchRun[]|ObjectCollection findByLastRunAt(string $date_last_run) Return ChildUserSearchRun objects filtered by the date_last_run column
+ * @method     ChildUserSearchRun[]|ObjectCollection findByLastRunWasSuccessful(boolean $was_successful) Return ChildUserSearchRun objects filtered by the was_successful column
+ * @method     ChildUserSearchRun[]|ObjectCollection findByStartNextRunAfter(string $date_next_run) Return ChildUserSearchRun objects filtered by the date_next_run column
+ * @method     ChildUserSearchRun[]|ObjectCollection findByLastFailedAt(string $date_last_failed) Return ChildUserSearchRun objects filtered by the date_last_failed column
  * @method     ChildUserSearchRun[]|ObjectCollection findByUpdatedAt(string $updated_at) Return ChildUserSearchRun objects filtered by the updated_at column
  * @method     ChildUserSearchRun[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
@@ -209,7 +224,7 @@ abstract class UserSearchRunQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_search_run_id, key, app_run_id, user_slug, date_search_run, jobsite_key, search_settings, run_result, run_error_details, updated_at FROM user_search_run WHERE user_search_run_id = :p0';
+        $sql = 'SELECT user_search_run_id, search_key, user_slug, jobsite_key, location_key, user_search_run_key, search_settings, last_app_run_id, run_result, run_error_details, date_last_run, was_successful, date_next_run, date_last_failed, updated_at FROM user_search_run WHERE user_search_run_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -341,53 +356,28 @@ abstract class UserSearchRunQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the key column
+     * Filter the query on the search_key column
      *
      * Example usage:
      * <code>
-     * $query->filterByKey('fooValue');   // WHERE key = 'fooValue'
-     * $query->filterByKey('%fooValue%', Criteria::LIKE); // WHERE key LIKE '%fooValue%'
+     * $query->filterBySearchKey('fooValue');   // WHERE search_key = 'fooValue'
+     * $query->filterBySearchKey('%fooValue%', Criteria::LIKE); // WHERE search_key LIKE '%fooValue%'
      * </code>
      *
-     * @param     string $key The value to use as filter.
+     * @param     string $searchKey The value to use as filter.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
      */
-    public function filterByKey($key = null, $comparison = null)
+    public function filterBySearchKey($searchKey = null, $comparison = null)
     {
         if (null === $comparison) {
-            if (is_array($key)) {
+            if (is_array($searchKey)) {
                 $comparison = Criteria::IN;
             }
         }
 
-        return $this->addUsingAlias(UserSearchRunTableMap::COL_KEY, $key, $comparison);
-    }
-
-    /**
-     * Filter the query on the app_run_id column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByAppRunId('fooValue');   // WHERE app_run_id = 'fooValue'
-     * $query->filterByAppRunId('%fooValue%', Criteria::LIKE); // WHERE app_run_id LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $appRunId The value to use as filter.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
-     */
-    public function filterByAppRunId($appRunId = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($appRunId)) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(UserSearchRunTableMap::COL_APP_RUN_ID, $appRunId, $comparison);
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_SEARCH_KEY, $searchKey, $comparison);
     }
 
     /**
@@ -416,49 +406,6 @@ abstract class UserSearchRunQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the date_search_run column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByDateSearchRun('2011-03-14'); // WHERE date_search_run = '2011-03-14'
-     * $query->filterByDateSearchRun('now'); // WHERE date_search_run = '2011-03-14'
-     * $query->filterByDateSearchRun(array('max' => 'yesterday')); // WHERE date_search_run > '2011-03-13'
-     * </code>
-     *
-     * @param     mixed $dateSearchRun The value to use as filter.
-     *              Values can be integers (unix timestamps), DateTime objects, or strings.
-     *              Empty strings are treated as NULL.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
-     */
-    public function filterByDateSearchRun($dateSearchRun = null, $comparison = null)
-    {
-        if (is_array($dateSearchRun)) {
-            $useMinMax = false;
-            if (isset($dateSearchRun['min'])) {
-                $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_SEARCH_RUN, $dateSearchRun['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($dateSearchRun['max'])) {
-                $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_SEARCH_RUN, $dateSearchRun['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_SEARCH_RUN, $dateSearchRun, $comparison);
-    }
-
-    /**
      * Filter the query on the jobsite_key column
      *
      * Example usage:
@@ -484,6 +431,56 @@ abstract class UserSearchRunQuery extends ModelCriteria
     }
 
     /**
+     * Filter the query on the location_key column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByLocationKey('fooValue');   // WHERE location_key = 'fooValue'
+     * $query->filterByLocationKey('%fooValue%', Criteria::LIKE); // WHERE location_key LIKE '%fooValue%'
+     * </code>
+     *
+     * @param     string $locationKey The value to use as filter.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
+     */
+    public function filterByLocationKey($locationKey = null, $comparison = null)
+    {
+        if (null === $comparison) {
+            if (is_array($locationKey)) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_LOCATION_KEY, $locationKey, $comparison);
+    }
+
+    /**
+     * Filter the query on the user_search_run_key column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByUserSearchRunKey('fooValue');   // WHERE user_search_run_key = 'fooValue'
+     * $query->filterByUserSearchRunKey('%fooValue%', Criteria::LIKE); // WHERE user_search_run_key LIKE '%fooValue%'
+     * </code>
+     *
+     * @param     string $userSearchRunKey The value to use as filter.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
+     */
+    public function filterByUserSearchRunKey($userSearchRunKey = null, $comparison = null)
+    {
+        if (null === $comparison) {
+            if (is_array($userSearchRunKey)) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_USER_SEARCH_RUN_KEY, $userSearchRunKey, $comparison);
+    }
+
+    /**
      * Filter the query on the search_settings column
      *
      * @param     mixed $searchSettings The value to use as filter
@@ -498,6 +495,31 @@ abstract class UserSearchRunQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(UserSearchRunTableMap::COL_SEARCH_SETTINGS, $searchSettings, $comparison);
+    }
+
+    /**
+     * Filter the query on the last_app_run_id column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByAppRunId('fooValue');   // WHERE last_app_run_id = 'fooValue'
+     * $query->filterByAppRunId('%fooValue%', Criteria::LIKE); // WHERE last_app_run_id LIKE '%fooValue%'
+     * </code>
+     *
+     * @param     string $appRunId The value to use as filter.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
+     */
+    public function filterByAppRunId($appRunId = null, $comparison = null)
+    {
+        if (null === $comparison) {
+            if (is_array($appRunId)) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_LAST_APP_RUN_ID, $appRunId, $comparison);
     }
 
     /**
@@ -615,6 +637,162 @@ abstract class UserSearchRunQuery extends ModelCriteria
     }
 
     /**
+     * Filter the query on the date_last_run column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByLastRunAt('2011-03-14'); // WHERE date_last_run = '2011-03-14'
+     * $query->filterByLastRunAt('now'); // WHERE date_last_run = '2011-03-14'
+     * $query->filterByLastRunAt(array('max' => 'yesterday')); // WHERE date_last_run > '2011-03-13'
+     * </code>
+     *
+     * @param     mixed $lastRunAt The value to use as filter.
+     *              Values can be integers (unix timestamps), DateTime objects, or strings.
+     *              Empty strings are treated as NULL.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
+     */
+    public function filterByLastRunAt($lastRunAt = null, $comparison = null)
+    {
+        if (is_array($lastRunAt)) {
+            $useMinMax = false;
+            if (isset($lastRunAt['min'])) {
+                $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_LAST_RUN, $lastRunAt['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($lastRunAt['max'])) {
+                $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_LAST_RUN, $lastRunAt['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_LAST_RUN, $lastRunAt, $comparison);
+    }
+
+    /**
+     * Filter the query on the was_successful column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByLastRunWasSuccessful(true); // WHERE was_successful = true
+     * $query->filterByLastRunWasSuccessful('yes'); // WHERE was_successful = true
+     * </code>
+     *
+     * @param     boolean|string $lastRunWasSuccessful The value to use as filter.
+     *              Non-boolean arguments are converted using the following rules:
+     *                * 1, '1', 'true',  'on',  and 'yes' are converted to boolean true
+     *                * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
+     *              Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
+     */
+    public function filterByLastRunWasSuccessful($lastRunWasSuccessful = null, $comparison = null)
+    {
+        if (is_string($lastRunWasSuccessful)) {
+            $lastRunWasSuccessful = in_array(strtolower($lastRunWasSuccessful), array('false', 'off', '-', 'no', 'n', '0', '')) ? false : true;
+        }
+
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_WAS_SUCCESSFUL, $lastRunWasSuccessful, $comparison);
+    }
+
+    /**
+     * Filter the query on the date_next_run column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByStartNextRunAfter('2011-03-14'); // WHERE date_next_run = '2011-03-14'
+     * $query->filterByStartNextRunAfter('now'); // WHERE date_next_run = '2011-03-14'
+     * $query->filterByStartNextRunAfter(array('max' => 'yesterday')); // WHERE date_next_run > '2011-03-13'
+     * </code>
+     *
+     * @param     mixed $startNextRunAfter The value to use as filter.
+     *              Values can be integers (unix timestamps), DateTime objects, or strings.
+     *              Empty strings are treated as NULL.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
+     */
+    public function filterByStartNextRunAfter($startNextRunAfter = null, $comparison = null)
+    {
+        if (is_array($startNextRunAfter)) {
+            $useMinMax = false;
+            if (isset($startNextRunAfter['min'])) {
+                $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_NEXT_RUN, $startNextRunAfter['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($startNextRunAfter['max'])) {
+                $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_NEXT_RUN, $startNextRunAfter['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_NEXT_RUN, $startNextRunAfter, $comparison);
+    }
+
+    /**
+     * Filter the query on the date_last_failed column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByLastFailedAt('2011-03-14'); // WHERE date_last_failed = '2011-03-14'
+     * $query->filterByLastFailedAt('now'); // WHERE date_last_failed = '2011-03-14'
+     * $query->filterByLastFailedAt(array('max' => 'yesterday')); // WHERE date_last_failed > '2011-03-13'
+     * </code>
+     *
+     * @param     mixed $lastFailedAt The value to use as filter.
+     *              Values can be integers (unix timestamps), DateTime objects, or strings.
+     *              Empty strings are treated as NULL.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
+     */
+    public function filterByLastFailedAt($lastFailedAt = null, $comparison = null)
+    {
+        if (is_array($lastFailedAt)) {
+            $useMinMax = false;
+            if (isset($lastFailedAt['min'])) {
+                $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_LAST_FAILED, $lastFailedAt['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($lastFailedAt['max'])) {
+                $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_LAST_FAILED, $lastFailedAt['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_LAST_FAILED, $lastFailedAt, $comparison);
+    }
+
+    /**
      * Filter the query on the updated_at column
      *
      * Example usage:
@@ -692,7 +870,7 @@ abstract class UserSearchRunQuery extends ModelCriteria
      *
      * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
      */
-    public function joinUser($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function joinUser($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
         $relationMap = $tableMap->getRelation('User');
@@ -727,84 +905,11 @@ abstract class UserSearchRunQuery extends ModelCriteria
      *
      * @return \JobScooper\UserQuery A secondary query class using the current class as primary query
      */
-    public function useUserQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function useUserQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
             ->joinUser($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'User', '\JobScooper\UserQuery');
-    }
-
-    /**
-     * Filter the query by a related \JobScooper\JobSitePlugin object
-     *
-     * @param \JobScooper\JobSitePlugin|ObjectCollection $jobSitePlugin the related object to use as filter
-     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return ChildUserSearchRunQuery The current query, for fluid interface
-     */
-    public function filterByJobSitePlugin($jobSitePlugin, $comparison = null)
-    {
-        if ($jobSitePlugin instanceof \JobScooper\JobSitePlugin) {
-            return $this
-                ->addUsingAlias(UserSearchRunTableMap::COL_USER_SEARCH_RUN_ID, $jobSitePlugin->getLastUserSearchRunId(), $comparison);
-        } elseif ($jobSitePlugin instanceof ObjectCollection) {
-            return $this
-                ->useJobSitePluginQuery()
-                ->filterByPrimaryKeys($jobSitePlugin->getPrimaryKeys())
-                ->endUse();
-        } else {
-            throw new PropelException('filterByJobSitePlugin() only accepts arguments of type \JobScooper\JobSitePlugin or Collection');
-        }
-    }
-
-    /**
-     * Adds a JOIN clause to the query using the JobSitePlugin relation
-     *
-     * @param     string $relationAlias optional alias for the relation
-     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
-     *
-     * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
-     */
-    public function joinJobSitePlugin($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
-    {
-        $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('JobSitePlugin');
-
-        // create a ModelJoin object for this join
-        $join = new ModelJoin();
-        $join->setJoinType($joinType);
-        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
-        if ($previousJoin = $this->getPreviousJoin()) {
-            $join->setPreviousJoin($previousJoin);
-        }
-
-        // add the ModelJoin to the current object
-        if ($relationAlias) {
-            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
-            $this->addJoinObject($join, $relationAlias);
-        } else {
-            $this->addJoinObject($join, 'JobSitePlugin');
-        }
-
-        return $this;
-    }
-
-    /**
-     * Use the JobSitePlugin relation JobSitePlugin object
-     *
-     * @see useQuery()
-     *
-     * @param     string $relationAlias optional alias for the relation,
-     *                                   to be used as main alias in the secondary query
-     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
-     *
-     * @return \JobScooper\JobSitePluginQuery A secondary query class using the current class as primary query
-     */
-    public function useJobSitePluginQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
-    {
-        return $this
-            ->joinJobSitePlugin($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'JobSitePlugin', '\JobScooper\JobSitePluginQuery');
     }
 
     /**
@@ -884,6 +989,33 @@ abstract class UserSearchRunQuery extends ModelCriteria
         });
     }
 
+    // sluggable behavior
+
+    /**
+     * Filter the query on the slug column
+     *
+     * @param     string $slug The value to use as filter.
+     *
+     * @return    $this|ChildUserSearchRunQuery The current query, for fluid interface
+     */
+    public function filterBySlug($slug)
+    {
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_USER_SEARCH_RUN_KEY, $slug, Criteria::EQUAL);
+    }
+
+    /**
+     * Find one object based on its slug
+     *
+     * @param     string $slug The value to use as filter.
+     * @param     ConnectionInterface $con The optional connection object
+     *
+     * @return    ChildUserSearchRun the result, formatted by the current formatter
+     */
+    public function findOneBySlug($slug, $con = null)
+    {
+        return $this->filterBySlug($slug)->findOne($con);
+    }
+
     // timestampable behavior
 
     /**
@@ -925,7 +1057,7 @@ abstract class UserSearchRunQuery extends ModelCriteria
      */
     public function lastCreatedFirst()
     {
-        return $this->addDescendingOrderByColumn(UserSearchRunTableMap::COL_DATE_SEARCH_RUN);
+        return $this->addDescendingOrderByColumn(UserSearchRunTableMap::COL_DATE_LAST_RUN);
     }
 
     /**
@@ -937,7 +1069,7 @@ abstract class UserSearchRunQuery extends ModelCriteria
      */
     public function recentlyCreated($nbDays = 7)
     {
-        return $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_SEARCH_RUN, time() - $nbDays * 24 * 60 * 60, Criteria::GREATER_EQUAL);
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_LAST_RUN, time() - $nbDays * 24 * 60 * 60, Criteria::GREATER_EQUAL);
     }
 
     /**
@@ -947,7 +1079,7 @@ abstract class UserSearchRunQuery extends ModelCriteria
      */
     public function firstCreatedFirst()
     {
-        return $this->addAscendingOrderByColumn(UserSearchRunTableMap::COL_DATE_SEARCH_RUN);
+        return $this->addAscendingOrderByColumn(UserSearchRunTableMap::COL_DATE_LAST_RUN);
     }
 
 } // UserSearchRunQuery

@@ -207,23 +207,43 @@
     </table>
 
 
-    <table name="user_search_run" phpName="UserSearchRun" reloadOnUpdate="true">
-        <column name="user_search_run_id" phpName="UserSearchRunId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
-        <column name="key" phpName="Key" type="varchar" size="128"/>
-        <column name="app_run_id" phpName="AppRunId" type="varchar" size="75"/>
-        <column name="user_slug" phpName="UserSlug"  type="varchar" size="128"/>
-        <column name="date_search_run" type="timestamp" />
-        <behavior name="timestampable">
-            <parameter name="create_column" value="date_search_run" />
+    <table name="user_search_run" phpName="UserSearchRun" reloadOnUpdate="true" reloadOnInsert="true">
+        <column name="user_search_run_id" phpName="UserSearchRunId" type="integer" required="true" autoIncrement="true" primaryKey="true"/>
+        <column name="search_key" phpName="SearchKey" type="varchar" size="128" required="true"/>
+        <column name="user_slug" phpName="UserSlug"  type="varchar" size="128" required="true"/>
+        <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" required="true"/>
+        <column name="location_key" phpName="LocationKey" type="varchar" size="100" required="true"/>
+        <!--<unique name="uniq_user_searchkey/">-->
+            <!--<unique-column name="user_slug"/>-->
+            <!--<unique-column name="search_key"/>-->
+            <!--<unique-column name="jobsite_key"/>-->
+            <!--<unique-column name="location_key"/>-->
+        <!--</unique>-->
+
+        <column name="user_search_run_key" type="varchar" size="100" required="true"/>
+        <behavior name="sluggable">
+            <parameter name="slug_column" value="user_search_run_key" />
+            <parameter name="slug_pattern" value="{JobSiteKey}-{UserSlug}-{SearchKey}-{LocationKey}" />
+            <parameter name="replace_pattern" value="/[^\w\/]+/u" />
+            <parameter name="replacement" value="" />
+            <parameter name="separator" value="-" />
+            <parameter name="permanent" value="true" />
         </behavior>
-        <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100"/>
 
         <column name="search_settings" phpName="SearchSettings" type="object"/>
+        <column name="last_app_run_id" phpName="AppRunId" type="varchar" size="75"/>
         <column name="run_result" field="run_result_code" phpName="RunResultCode" type="enum" valueSet="not-run,failed,excluded,successful" defaultValue="not-run"/>-->
         <column name="run_error_details" phpName="RunErrorDetails" type="array"/>
         <foreign-key foreignTable="user">
             <reference local="user_slug" foreign="user_slug"/>
         </foreign-key>
+        <column name="date_last_run" phpName="LastRunAt" type="timestamp" />
+        <behavior name="timestampable">
+            <parameter name="create_column" value="date_last_run" />
+        </behavior>
+        <column name="was_successful" phpName="LastRunWasSuccessful" type="boolean"/>
+        <column name="date_next_run" phpName="StartNextRunAfter" type="timestamp" />
+        <column name="date_last_failed" phpName="LastFailedAt" type="timestamp" />
     </table>
 
 

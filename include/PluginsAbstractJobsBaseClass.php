@@ -129,21 +129,13 @@ abstract class AbstractClassBaseJobsPlugin
 
     public function getMyJobsList()
     {
-        return \JobScooper\UserJobMatchQuery::create()
-            ->filterByUserMatchStatus(null)
-            ->filterByUserSlug($this->userObject->getUserSlug())
-            ->filterBy("AppRunId", $GLOBALS['USERDATA']['configuration_settings']['app_run_id'])
-            ->useJobPostingQuery()
-                ->filterByJobSite($this->siteName)
-            ->find();
-
+        return getAllUserMatchesNotNotified($GLOBALS['USERDATA']['configuration_settings']['app_run_id'], $this->siteName);
     }
 
     public function getUpdatedJobsForAllSearches()
     {
         $strIncludeKey = 'include_' . strtolower($this->siteName);
         $boolSearchSuccess = null;
-        $searchSkipped = false;
 
 
         if (isset($GLOBALS['OPTS'][$strIncludeKey]) && $GLOBALS['OPTS'][$strIncludeKey] == 0) {
@@ -155,21 +147,20 @@ abstract class AbstractClassBaseJobsPlugin
             LogLine($this->siteName . ": no searches set. Skipping...", \C__DISPLAY_ITEM_DETAIL__);
             return array();
         }
-        $boolSearchSuccess = true;
 
         try
         {
             /*
                 Check to see if we should pull new job listings now.  If we ran too recently, this will skip the run
             */
-            if($this->getJobSiteObject()->shouldRunNow())
+            foreach ($this->arrSearchesToReturn as $search)
             {
-                $this->getJobSiteObject()->setLastRunAt(time());
-                $this->getJobSiteObject()->save();
-
-                foreach ($this->arrSearchesToReturn as $search) {
+                if($search->shouldRunNow())
+                {
                     $this->currentSearchBeingRun = $search;
-                    $this->getJobSiteObject()->setLastUserSearchRunId($search['user_search_run_id']);
+
+                    $search->setLastRunAt(time());
+                    $search->save();
 
                     try {
                         // assert this search is actually for the job site supported by this plugin
@@ -188,23 +179,20 @@ abstract class AbstractClassBaseJobsPlugin
 
                         $this->_updateJobsDataForSearch_($search);
                         $this->_addJobMatchesToUser($search);
+                        $this->_setSearchResult_($search, true);
                     } catch (Exception $ex) {
+                        $this->_setSearchResultError_($search, "Unable to download jobs: %s", $ex);
                         throw $ex;
                     } finally {
                         $this->currentSearchBeingRun = null;
                     }
                 }
-            }
-            else {
-                LogLine("Skipping {$this->siteName} jobs download since it just ran recently.", \C__DISPLAY_ITEM_DETAIL__);
-                $searchSkipped = true;
-                foreach ($this->arrSearchesToReturn as $search) {
-                    $search->setRunResultCode("excluded");
-                    $search->save();
+                else
+                {
+                    LogLine("Skipping {$search->getKey()} jobs download since it just ran recently.", \C__DISPLAY_ITEM_DETAIL__);
+                        $search->setRunResultCode("excluded");
+                        $search->save();
                 }
-                $this->getJobSiteObject()->setSuccess($boolSearchSuccess);
-                $this->getJobSiteObject()->save();
-
             }
 
             /*
@@ -214,7 +202,8 @@ abstract class AbstractClassBaseJobsPlugin
              */
             $objJobSite = $this->getJobSiteObject();
             $pluginResultsType = $objJobSite->getResultsFilterType();
-            if ((strcasecmp($pluginResultsType, "all-only") == 0) || (strcasecmp($pluginResultsType, "all-by-location") == 0)) {
+            if ((strcasecmp($pluginResultsType, "all-only") == 0) || (strcasecmp($pluginResultsType, "all-by-location") == 0))
+            {
                 try
                 {
                     LogLine("Checking for missing " . $this->getName() . " jobs for user " . $this->userObject->getUserSlug() . ".", \C__DISPLAY_ITEM_DETAIL__);
@@ -249,13 +238,8 @@ abstract class AbstractClassBaseJobsPlugin
             }
 
         } catch (Exception $ex) {
-            $boolSearchSuccess = false;
             throw $ex;
         } finally {
-            if ($searchSkipped === false) {
-                $this->getJobSiteObject()->setSuccess($boolSearchSuccess);
-                $this->getJobSiteObject()->save();
-            }
             $this->currentSearchBeingRun = null;
         }
 
@@ -939,7 +923,6 @@ abstract class AbstractClassBaseJobsPlugin
                 'error_datetime' => new DateTime(),
                 'error_debug_files' => $debugfiles
             );
-
             $searchDetails->setRunErrorDetails($srr);
         }
         $searchDetails->save();
@@ -1005,6 +988,7 @@ abstract class AbstractClassBaseJobsPlugin
 //            }
         }
     }
+
     function getSimpleObjFromPathOrURL($filePath = "", $strURL = "", $optTimeout = null, $referrer = null, $cookies = null)
     {
         $objSimpleHTML = null;

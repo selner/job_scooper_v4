@@ -20,6 +20,7 @@ require_once dirname(dirname(dirname(dirname(__FILE__))))."/bootstrap.php";
 
 use Exception as Exception;
 use JobScooper\Base\UserSearchRun as BaseUserSearchRun;
+use JobScooper\Map\UserSearchRunTableMap;
 use Propel\Runtime\Connection\ConnectionInterface;
 
 /**
@@ -87,6 +88,53 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
 
     }
 
+    public function getKey()
+    {
+        return $this->getUserSearchRunKey();
+    }
+
+    protected function updateNextRunDate()
+    {
+        if(!is_null($this->getLastRunAt()))
+        {
+            if ($this->getLastRunWasSuccessful() == true || is_null($this->getLastRunWasSuccessful())) {
+                $nextDate = $this->getLastRunAt();
+                if (is_null($nextDate))
+                    $nextDate = new \DateTime();
+                date_add($nextDate, date_interval_create_from_date_string('18 hours'));
+
+                $this->setStartNextRunAfter($nextDate);
+            }
+        }
+    }
+
+    function setRunResultCode($val)
+    {
+        if($val == "failed") {
+            $this->setLastFailedAt(time());
+            $this->setLastRunWasSuccessful(false);
+            $this->setStartNextRunAfter("");
+        }
+        elseif($val == "success")
+        {
+            $this->updateNextRunDate();
+            $this->setLastFailedAt("");
+            $this->setLastRunWasSuccessful(true);
+        }
+
+        parent::setRunResultCode($val);
+    }
+
+    public function shouldRunNow()
+    {
+        $nextTime = $this->getStartNextRunAfter();
+        if(!is_null($nextTime))
+            return (time() > $nextTime->getTimestamp());
+
+        return true;
+    }
+
+
     private function _setOldNameToNewColumn($keyOldName, $arrDetails)
     {
         $valueSet = false;
@@ -95,7 +143,7 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
             switch ($keyOldName) {
 
                 case 'key':
-                    $this->setKey($arrDetails[$keyOldName]);
+                    $this->setSearchKey($arrDetails[$keyOldName]);
                     $valueSet = true;
                     break;
 
@@ -173,6 +221,9 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
                 return $this->setJobSiteKey($value);
                 break;
 
+            case 'user_search_run_id':
+                break;
+
             default:
                 $throwEx = null;
                 try {
@@ -183,21 +234,21 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
                 }
 
                 try {
-                    $this->setByName($name, \JobScooper\Map\UserSearchAuditTableMap::TYPE_FIELDNAME, $value);
+                    $this->setByName($name, \JobScooper\Map\UserSearchRunTableMap::TYPE_FIELDNAME, $value);
                     $throwEx = null;
                 } catch (Exception $ex) {
                     $throwEx = $ex;
                 }
 
                 try {
-                    $this->setByName($name, \JobScooper\Map\UserSearchAuditTableMap::TYPE_COLNAME, $value);
+                    $this->setByName($name, \JobScooper\Map\UserSearchRunTableMap::TYPE_COLNAME, $value);
                     $throwEx = null;
                 } catch (Exception $ex) {
                     $throwEx = $ex;
                 }
 
                 try {
-                    $this->setByName($name, \JobScooper\Map\UserSearchAuditTableMap::TYPE_CAMELNAME, $value);
+                    $this->setByName($name, \JobScooper\Map\UserSearchRunTableMap::TYPE_CAMELNAME, $value);
                     $throwEx = null;
                 } catch (Exception $ex) {
                     $throwEx = $ex;
@@ -209,28 +260,6 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
                 break;
         }
 
-    }
-
-    public function save(ConnectionInterface $con = null, $skipReload = false)
-    {
-        try
-        {
-            parent::save($con, $skipReload);
-        }
-        catch (Exception $ex)
-        {
-            try
-            {
-                $pk = $this->getPrimaryKey();
-            }
-            catch (Exception $exother)
-            {
-                $pk = "unknown-primary-key";
-            }
-            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Error saving object " . __CLASS__ . " key " . $pk . ": " . $ex->getMessage() . PHP_EOL . "Class data = " . getArrayValuesAsString($this->toArray()), \C__DISPLAY_ERROR__);
-            throw $ex;
-//            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Skipping failed save of object " . __CLASS__ . " key " . $pk . ": " . $ex->getMessage(), \C__DISPLAY_WARNING__);
-        }
     }
 
     public function &get($name)
@@ -256,13 +285,13 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
                 }
 
                 try {
-                    return $this->getByName($name, \JobScooper\Map\UserSearchAuditTableMap::TYPE_FIELDNAME);
+                    return $this->getByName($name, \JobScooper\Map\UserSearchRunTableMap::TYPE_FIELDNAME);
                 } catch (Exception $ex) {
                     $throwEx = $ex;
                 }
 
                 try {
-                    return $this->getByName($name, \JobScooper\Map\UserSearchAuditTableMap::TYPE_COLNAME);
+                    return $this->getByName($name, \JobScooper\Map\UserSearchRunTableMap::TYPE_COLNAME);
                 } catch (Exception $ex) {
                     $throwEx = $ex;
                 }
@@ -271,6 +300,26 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
         }
     }
 
+
+
+    /**
+     * Code to be run before inserting to database
+     * @param  ConnectionInterface $con
+     * @return boolean
+     */
+    public function preInsert(ConnectionInterface $con = null)
+    {
+
+        if ($this->isColumnModified(UserSearchRunTableMap::COL_USER_SEARCH_RUN_ID)) {
+            $this->setUserSearchRunId(null);
+        }
+
+        if (is_callable('parent::preInsert')) {
+            return parent::preInsert($con);
+        }
+        return true;
+
+    }
 
     public function offsetGet($offset)
     {

@@ -42,55 +42,34 @@ class ClassMultiSiteSearch
         foreach(array_keys($this->arrSearchesByJobSite) as $sitename)
         {
             $searches = $this->arrSearchesByJobSite[$sitename];
+            LogLine("Setting up " . count($searches) . " search(es) for ". $sitename . "...", \C__DISPLAY_SECTION_START__);
             $plugin = getPluginObjectForJobSite($sitename);
             try
             {
-                LogLine("Setting up " . count($searches) . " search(es) for ". $sitename . "...", \C__DISPLAY_SECTION_START__);
                 $plugin->addSearches($searches);
+            }
+            catch (Exception $classError)
+            {
+                handleException($classError, "Unable to add searches to {$GLOBALS['JOBSITE_PLUGINS'][$sitename]['class_name']} plugin: %s", $raise = false);
+            }
+            finally
+            {
+                LogLine("Search(es) added ". $sitename . ".", \C__DISPLAY_SECTION_END__);
+            }
+
+            try
+            {
+                LogLine("Downloading updated jobs on " . count($searches) . " search(es) for ". $sitename . "...", \C__DISPLAY_SECTION_START__);
 
                 $arrResults = $plugin->getUpdatedJobsForAllSearches();
             }
             catch (Exception $classError)
             {
-                $err = $classError;
-                if (($classError->getCode() == 4096 || $classError->getCode() == 0) && $plugin->isBitFlagSet(C__JOB_USE_SELENIUM))
-                {
-                    if(is_null($this->selenium))
-                    {
-                        handleException($classError, $GLOBALS['JOBSITE_PLUGINS'][$sitename]['class_name'] . " requires Selenium but the service could not be started: %s", $raise = false);
-                    }
-                    else {
-                        try {
-                            $this->selenium->killAllAndRestartSelenium();
-                            $arrResults = $plugin->getUpdatedJobsForAllSearches();
-                        } catch (Exception $classError) {
-                            $err = $classError;
-                        }
-                    }
-                }
-                else
-                    handleException($classError, "Unable to run searches for ". $sitename . ": %s", $raise = false);
-
-//                LogLine('ERROR:  ' . $sitename . ' failed due to an error:  ' . $err .PHP_EOL. 'Skipping it\'s remaining searches and continuing with other plugins.', \C__DISPLAY_ERROR__);
-//                $arrFail = getFailedSearchesByPlugin();
-//                if(countAssociativeArrayValues($arrFail) > 2) {
-//                    $arrWebDriverFail = array_filter($arrFail, function ($var) {
-//
-//                        $arrFailureKeywords = array("curl", "WebDriverException", "WebDriverCurlException", "connection refused", "timed out");
-//                        foreach ($arrFailureKeywords as $failWord) {
-//                            if (stristr($var['run_error_details']['details'], $failWord) != false)
-//                                return true;
-//                        }
-//                        return false;
-//                    });
-//                    if(count($arrWebDriverFail) > 2 && !is_null($this->selenium))
-//                    {
-//                        $this->selenium->killAllAndRestartSelenium();
-//
-//                        // BUGBUG:  Add a counter so we don't infinitely loop and restart forever
-//                        $this->updateJobsForAllPlugins();
-//                    }
-//                }
+                handleException($classError, $GLOBALS['JOBSITE_PLUGINS'][$sitename]['class_name'] . " failed to download job postings: %s", $raise = false);
+            }
+            finally
+            {
+                LogLine("Downloads complete for ". $sitename . ".", \C__DISPLAY_SECTION_END__);
             }
         }
 

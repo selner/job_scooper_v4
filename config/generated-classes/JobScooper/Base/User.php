@@ -725,10 +725,9 @@ abstract class User implements ActiveRecordInterface
 
             if ($this->userSearchRunsScheduledForDeletion !== null) {
                 if (!$this->userSearchRunsScheduledForDeletion->isEmpty()) {
-                    foreach ($this->userSearchRunsScheduledForDeletion as $userSearchRun) {
-                        // need to save related object because we set the relation to null
-                        $userSearchRun->save($con);
-                    }
+                    \JobScooper\UserSearchRunQuery::create()
+                        ->filterByPrimaryKeys($this->userSearchRunsScheduledForDeletion->getPrimaryKeys(false))
+                        ->delete($con);
                     $this->userSearchRunsScheduledForDeletion = null;
                 }
             }
@@ -1699,7 +1698,7 @@ abstract class User implements ActiveRecordInterface
                 $this->userSearchRunsScheduledForDeletion = clone $this->collUserSearchRuns;
                 $this->userSearchRunsScheduledForDeletion->clear();
             }
-            $this->userSearchRunsScheduledForDeletion[]= $userSearchRun;
+            $this->userSearchRunsScheduledForDeletion[]= clone $userSearchRun;
             $userSearchRun->setUser(null);
         }
 

@@ -473,7 +473,7 @@ abstract class UserQuery extends ModelCriteria
      *
      * @return $this|ChildUserQuery The current query, for fluid interface
      */
-    public function joinUserSearchRun($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function joinUserSearchRun($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
         $relationMap = $tableMap->getRelation('UserSearchRun');
@@ -508,7 +508,7 @@ abstract class UserQuery extends ModelCriteria
      *
      * @return \JobScooper\UserSearchRunQuery A secondary query class using the current class as primary query
      */
-    public function useUserSearchRunQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function useUserSearchRunQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
             ->joinUserSearchRun($relationAlias, $joinType)
