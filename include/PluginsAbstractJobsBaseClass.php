@@ -207,26 +207,27 @@ abstract class AbstractClassBaseJobsPlugin
                 try
                 {
                     LogLine("Checking for missing " . $this->getName() . " jobs for user " . $this->userObject->getUserSlug() . ".", \C__DISPLAY_ITEM_DETAIL__);
-                    $queryExistingUserJobUserMatches = \JobScooper\UserJobMatchQuery::create()
+                    $dataExistingUserJobMatchIds = \JobScooper\UserJobMatchQuery::create()
+                        ->select("JobPostingId")
                         ->filterByUserSlug($this->userObject->getUserSlug())
                         ->useJobPostingQuery()
-                        ->filterByJobSite($objJobSite->getJobSiteKey())
+                            ->filterByJobSite($objJobSite->getJobSiteKey())
                         ->endUse()
-                        ->select("JobPosting.JobPostingId")
-                        ->find();
-                    $dataExistingUserJobMatchIds = $queryExistingUserJobUserMatches->getData();
+                        ->find()
+                        ->getData();
 
-                    $queryJobIdsToAddToUser = \JobScooper\JobPostingQuery::create()
+                    $queryAllJobsFromJobSite = \JobScooper\JobPostingQuery::create()
                         ->filterByJobSite($objJobSite->getJobSiteKey())
-                        ->filterByJobPostingId($dataExistingUserJobMatchIds, \Propel\Runtime\ActiveQuery\Criteria::NOT_IN)
-                        ->select("JobPosting.JobPostingId")
-                        ->find();
-                    $dataJobsIdsToAddToUserMatch = $queryJobIdsToAddToUser->getData();
+                        ->select("JobPostingId")
+                        ->find()
+                        ->getData();
 
-                    if(!is_null($dataJobsIdsToAddToUserMatch) && count($dataJobsIdsToAddToUserMatch) > 0) {
-                        LogLine("Found " . count($dataJobsIdsToAddToUserMatch) . " " . $this->getName() . " jobs not yet assigned to user " . $this->userObject->getUserSlug() . ".", \C__DISPLAY_ITEM_DETAIL__);
-                        $this->_addJobMatchIdsToUser($dataJobsIdsToAddToUserMatch);
-                        LogLine("Successfully added " . count($dataJobsIdsToAddToUserMatch) . " " . $this->getName() . " jobs to user " . $this->userObject->getUserSlug() . ".", \C__DISPLAY_ITEM_DETAIL__);
+                    $jobIdsToAddToUser = array_diff($queryAllJobsFromJobSite, $dataExistingUserJobMatchIds);
+
+                    if(!is_null($jobIdsToAddToUser) && count($jobIdsToAddToUser) > 0) {
+                        LogLine("Found " . count($jobIdsToAddToUser) . " " . $this->getName() . " jobs not yet assigned to user " . $this->userObject->getUserSlug() . ".", \C__DISPLAY_ITEM_DETAIL__);
+                        $this->_addJobMatchIdsToUser($jobIdsToAddToUser);
+                        LogLine("Successfully added " . count($jobIdsToAddToUser) . " " . $this->getName() . " jobs to user " . $this->userObject->getUserSlug() . ".", \C__DISPLAY_ITEM_DETAIL__);
                     }
                     else
                     {
@@ -893,39 +894,39 @@ abstract class AbstractClassBaseJobsPlugin
     {
         LogLine("Setting result value for search '{$searchDetails->getUserSearchRunKey()}' equal to " . strval($success) . " with details '" . $err_details . "'.", \C__DISPLAY_ITEM_DETAIL__);
 
-        if(!is_null($success) && is_bool($success))
+
+        if (!is_null($success) && is_bool($success))
         {
-            $resultcode = $success ? "successful" : "failed";
-            $searchDetails->setRunResultCode($resultcode);
+            $searchDetails->setLastRunWasSuccessful($success);
             if($success === true)
                 $searchDetails->setRunErrorDetails(array());
-        }
 
-        if($success === false)
-        {
-            $line = null;
-            $code = null;
-            $msg = null;
-            $file = null;
+            else
+            {
+                $line = null;
+                $code = null;
+                $msg = null;
+                $file = null;
 
-            if (!is_null($except)) {
-                $line = $except->getLine();
-                $code = $except->getCode();
-                $msg = $except->getMessage();
-                $file = $except->getFile();
+                if (!is_null($except)) {
+                    $line = $except->getLine();
+                    $code = $except->getCode();
+                    $msg = $except->getMessage();
+                    $file = $except->getFile();
+                }
+                $srr = array(
+                    'error_details' => $err_details,
+                    'exception_code' => $code,
+                    'exception_message' => $msg,
+                    'exception_line' => $line,
+                    'exception_file' => $file,
+                    'error_datetime' => new DateTime(),
+                    'error_debug_files' => $debugfiles
+                );
+                $searchDetails->setRunErrorDetails($srr);
             }
-            $srr = array(
-                'error_details' => $err_details,
-                'exception_code' => $code,
-                'exception_message' => $msg,
-                'exception_line' => $line,
-                'exception_file' => $file,
-                'error_datetime' => new DateTime(),
-                'error_debug_files' => $debugfiles
-            );
-            $searchDetails->setRunErrorDetails($srr);
+            $searchDetails->save();
         }
-        $searchDetails->save();
     }
 
 

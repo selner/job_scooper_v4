@@ -133,9 +133,9 @@ function getAllUserMatchesNotNotified($appRunId=null, $jobsiteKey=null)
 
     if(!is_null($jobsiteKey))
     {
-        $query->useJobPostingQuery();
-        $query->filterByJobSite($jobsiteKey);
-        $query->endUse();
+        $query->useJobPostingQuery()
+            ->filterByJobSite($jobsiteKey)
+            ->endUse();
     }
 
     $results =  $query->find();
