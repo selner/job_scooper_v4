@@ -278,11 +278,17 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
         $GLOBALS['USERDATA']['ERROR_REPORT_FILES'] = array();
 
     $msg = $fmtLogMsg;
-    if (!is_null($toThrow) && !is_null($fmtLogMsg) && !is_null($ex) && strlen($fmtLogMsg) > 0 &&
-        stristr($fmtLogMsg, "%s") !== false)
+    if (!is_null($toThrow) && !is_null($fmtLogMsg) && !is_null($ex) && strlen($fmtLogMsg) > 0)
     {
-        $msg = sprintf($fmtLogMsg, $toThrow->getMessage());
-        $toThrow = new Exception($msg, $toThrow->getCode(), $previous=$ex);
+        if(stristr($fmtLogMsg, "%s") !== false)
+        {
+            $msg = sprintf($fmtLogMsg, $toThrow->getMessage());
+            $toThrow = new Exception($msg, $toThrow->getCode(), $previous=$ex);
+        }
+        else
+        {
+            $msg = $fmtLogMsg . PHP_EOL . " ~ " . $toThrow->getMessage();
+        }
     }
     elseif(!is_null($ex))
     {
