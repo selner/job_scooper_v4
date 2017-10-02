@@ -88,11 +88,6 @@ class UserSearchRun extends BaseUserSearchRun implements \ArrayAccess
 
     }
 
-    public function getKey()
-    {
-        return $this->getUserSearchRunKey();
-    }
-
     protected function updateNextRunDate()
     {
         if(!is_null($this->getLastRunAt()))
