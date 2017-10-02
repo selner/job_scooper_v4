@@ -227,17 +227,6 @@
     </table>
 
 
-    <!--<table name="user_job_match_exclude_reason" phpName="UserJobMatchExcludeReason">-->
-        <!--<column name="user_job_match_exclude_reason_id" phpName="UserJobMatchExcludeReasonId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>-->
-        <!--<column name="user_job_match_id" phpName="UserJobMatchId" type="varchar" size="128"/>-->
-        <!--<column name="reason_details" phpName="ReasonDetails" type="varchar" size="1024" />-->
-        <!--<foreign-key foreignTable="user_job_match">-->
-            <!--<reference local="user_job_match_id" foreign="user_job_match_id"/>-->
-        <!--</foreign-key>-->
-    <!--</table>-->
-
-
-
     <!--
 
     <table name="company" phpName="Company">
