@@ -891,7 +891,7 @@ abstract class AbstractClassBaseJobsPlugin
 
     private function _setSearchResult_(&$searchDetails, $success = null, $err_details = "UNKNOWN RESULT.", $except = null, $debugfiles = array())
     {
-        LogLine("Setting result value for search '" . $searchDetails['key'] . "' equal to " . strval($success) . " with details '" . $err_details . "'.", \C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Setting result value for search '{$searchDetails->getUserSearchRunKey()}' equal to " . strval($success) . " with details '" . $err_details . "'.", \C__DISPLAY_ITEM_DETAIL__);
 
         if(!is_null($success) && is_bool($success))
         {
