@@ -34,14 +34,14 @@ class ClassJobsNotifier
 
     function __destruct()
     {
-        if(isset($GLOBALS['logger'])) { $GLOBALS['logger']->logLine("Closing ".$this->siteName." instance of class " . get_class($this), \C__DISPLAY_ITEM_START__); }
+        if(isset($GLOBALS['logger'])) { logLine("Closing ".$this->siteName." instance of class " . get_class($this), \C__DISPLAY_ITEM_START__); }
     }
 
     private function _combineCSVsToExcel($outfileDetails, $arrCSVFiles)
     {
         $spreadsheet = new PHPExcel();
         $objWriter = PHPExcel_IOFactory::createWriter($spreadsheet, "Excel2007");
-        $GLOBALS['logger']->logLine("Creating output XLS file '" . $outfileDetails['full_file_path'] . "'." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
+        logLine("Creating output XLS file '" . $outfileDetails['full_file_path'] . "'." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
         $style_all = array(
             'alignment' => array(
                 'vertical' => PHPExcel_Style_Alignment::VERTICAL_TOP,
@@ -118,7 +118,7 @@ class ClassJobsNotifier
                 }
 
 
-                $GLOBALS['logger']->logLine("Added data from CSV '" . $csvFile['full_file_path'] . "' to output XLS file." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
+                logLine("Added data from CSV '" . $csvFile['full_file_path'] . "' to output XLS file." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
             }
         }
 
@@ -171,7 +171,7 @@ class ClassJobsNotifier
         $arrMatchedJobs = array_filter($arrJobsToNotify, "isSuccessfulUserJobMatch");
         $arrExcludedJobs = array_filter($arrJobsToNotify, "isNotUserJobMatch");
 
-        $GLOBALS['logger']->logLine(PHP_EOL . "Writing final list of " . count($arrJobsToNotify) . " jobs to output files." . PHP_EOL, \C__DISPLAY_NORMAL__);
+        logLine(PHP_EOL . "Writing final list of " . count($arrJobsToNotify) . " jobs to output files." . PHP_EOL, \C__DISPLAY_NORMAL__);
 
         // Output only new records that haven't been looked at yet
         $detailsCSVFile = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedJobs, null, "-finalmatchedjobs", "CSV"));
@@ -250,14 +250,14 @@ class ClassJobsNotifier
         if (isDebug() !== true) {
             foreach ($arrFilesToAttach as $fileDetail) {
                 if (file_exists($fileDetail['full_file_path']) && is_file($fileDetail ['full_file_path'])) {
-                    $GLOBALS['logger']->logLine("Deleting local attachment file " . $fileDetail['full_file_path'] . PHP_EOL, \C__DISPLAY_NORMAL__);
+                    logLine("Deleting local attachment file " . $fileDetail['full_file_path'] . PHP_EOL, \C__DISPLAY_NORMAL__);
                     unlink($fileDetail['full_file_path']);
                 }
             }
         }
         $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \C__SECTION_END__, \C__NAPPSECONDLEVEL__);
 
-        $GLOBALS['logger']->logLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, \C__DISPLAY_NORMAL__);
+        logLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, \C__DISPLAY_NORMAL__);
 
         return $ret;
     }
@@ -280,7 +280,7 @@ class ClassJobsNotifier
 
         if(count($strFileOut) == 0)
         {
-            $GLOBALS['logger']->logLine("Warning: writeJobsListToFile had no records to write to  " . $strFileOut, \C__DISPLAY_ITEM_DETAIL__);
+            logLine("Warning: writeJobsListToFile had no records to write to  " . $strFileOut, \C__DISPLAY_ITEM_DETAIL__);
 
         }
 
@@ -345,7 +345,7 @@ class ClassJobsNotifier
 
 //            $classCombined->writeArrayToCSVFile($arrJobsRecordsToUse, $keysToOutput, $this->arrKeysForDeduping);
         }
-        $GLOBALS['logger']->logLine("Jobs list had  ". count($arrRecordsToOutput) . " jobs and was written to " . $strFileOut , \C__DISPLAY_ITEM_START__);
+        logLine("Jobs list had  ". count($arrRecordsToOutput) . " jobs and was written to " . $strFileOut , \C__DISPLAY_ITEM_START__);
 
         if($strExt == "HTML")
             $this->_addCSSStyleToHTMLFile_($strFileOut);
@@ -363,7 +363,7 @@ class ClassJobsNotifier
 
         if($strFilterToApply == null || function_exists($strFilterToApply) === false)
         {
-            $GLOBALS['logger']->logLine("No filter function supplied; outputting all results...", \C__DISPLAY_WARNING__);
+            logLine("No filter function supplied; outputting all results...", \C__DISPLAY_WARNING__);
             $arrJobs = $arrJobsList;
         }
         else
@@ -371,7 +371,7 @@ class ClassJobsNotifier
 
         $this->writeRunsJobsToFile($filePath, $arrJobs, $strExt);
 
-        $GLOBALS['logger']->logLine($strFilterToApply . " " . count($arrJobs). " job listings output to  " . $filePath, \C__DISPLAY_ITEM_RESULT__);
+        logLine($strFilterToApply . " " . count($arrJobs). " job listings output to  " . $filePath, \C__DISPLAY_ITEM_RESULT__);
 
         return $filePath;
 
@@ -405,18 +405,18 @@ class ClassJobsNotifier
         if(!isset($retEmails["to"]) || count($retEmails["to"]) < 1 || strlen(current($retEmails["to"])['address']) <= 0)
         {
             $msg = "Could not find 'to:' email address in configuration file. Notification will not be sent.";
-            $GLOBALS['logger']->logLine($msg, \C__DISPLAY_ERROR__);
+            logLine($msg, \C__DISPLAY_ERROR__);
             throw new InvalidArgumentException($msg);
         }
 
         if(count($retEmails['from']) > 1)
         {
-            $GLOBALS['logger']->logLine("Multiple 'from:' email addresses found. Notification will be from first one only (" . $retEmails['from']['address'][0] . ").", \C__DISPLAY_WARNING__);
+            logLine("Multiple 'from:' email addresses found. Notification will be from first one only (" . $retEmails['from']['address'][0] . ").", \C__DISPLAY_WARNING__);
         }
         elseif(count($retEmails['from']) != 1)
         {
             $msg = "Could not find 'from:' email address in configuration file. Notification will not be sent.";
-            $GLOBALS['logger']->logLine($msg, \C__DISPLAY_ERROR__);
+            logLine($msg, \C__DISPLAY_ERROR__);
             throw new InvalidArgumentException($msg);
         }
         $retEmails['from'] = $retEmails['from'][0];
@@ -429,8 +429,8 @@ class ClassJobsNotifier
     function sendEmail($strBodyText = null, $strBodyHTML = null, $arrDetailsAttachFiles = array(), $subject="No subject", $emailKind='results')
     {
         if (!isset($GLOBALS['OPTS']['send_notifications']) || $GLOBALS['OPTS']['send_notifications'] != 1) {
-            $GLOBALS['logger']->logLine(PHP_EOL . "User set -send_notifications = false so skipping email notification.)" . PHP_EOL, \C__DISPLAY_NORMAL__);
-            $GLOBALS['logger']->logLine("Mail contents would have been:" . PHP_EOL . $strBodyText, \C__DISPLAY_NORMAL__);
+            logLine(PHP_EOL . "User set -send_notifications = false so skipping email notification.)" . PHP_EOL, \C__DISPLAY_NORMAL__);
+            logLine("Mail contents would have been:" . PHP_EOL . $strBodyText, \C__DISPLAY_NORMAL__);
             return null;
         }
 
@@ -483,9 +483,9 @@ class ClassJobsNotifier
                 'allow_self_signed' => true
             )
         );
-        $GLOBALS['logger']->logLine("Email to:\t" . $strToAddys , \C__DISPLAY_NORMAL__);
-        $GLOBALS['logger']->logLine("Email from:\t" . $emailAddrs['from']['address'], \C__DISPLAY_NORMAL__);
-        $GLOBALS['logger']->logLine("Email bcc:\t" . $strBCCAddys, \C__DISPLAY_NORMAL__);
+        logLine("Email to:\t" . $strToAddys , \C__DISPLAY_NORMAL__);
+        logLine("Email from:\t" . $emailAddrs['from']['address'], \C__DISPLAY_NORMAL__);
+        logLine("Email bcc:\t" . $strBCCAddys, \C__DISPLAY_NORMAL__);
 
 
         $mail->WordWrap = 120;                                          // Set word wrap to 120 characters
@@ -516,19 +516,19 @@ class ClassJobsNotifier
             // If we don't do this, we just get "failed" without any useful details.
             //
             $msg = "Failed to send notification email with error = ".$mail->ErrorInfo . PHP_EOL . "Retrying email send with debug enabled to log error details...";
-            $GLOBALS['logger']->logLine($msg, \C__DISPLAY_ERROR__);
+            logLine($msg, \C__DISPLAY_ERROR__);
             $mail->SMTPDebug = 1;
             $ret = $mail->send();
             if($ret === true) return $ret;
 
             $msg = "Failed second attempt to send notification email.  Debug error details should be logged above.  Error: " . PHP_EOL .$mail->ErrorInfo;
-            $GLOBALS['logger']->logLine($msg, \C__DISPLAY_ERROR__);
+            logLine($msg, \C__DISPLAY_ERROR__);
             throw new Exception($msg);
 
         }
         else
         {
-            $GLOBALS['logger']->logLine("Email notification sent to '" . $strToAddys . "' from '" . $emailAddrs['from']['address'] . "' with BCCs to '" . $strBCCAddys ."'", \C__DISPLAY_ITEM_RESULT__);
+            logLine("Email notification sent to '" . $strToAddys . "' from '" . $emailAddrs['from']['address'] . "' with BCCs to '" . $strBCCAddys ."'", \C__DISPLAY_ITEM_RESULT__);
         }
         return $ret;
 
@@ -542,7 +542,7 @@ class ClassJobsNotifier
 
         if(strlen($filePath) < 0)
         {
-            $GLOBALS['logger']->logLine("Unable to get contents from '". var_export($detailsFile, true) ."' to include in email.  Failing notification.", \C__DISPLAY_ERROR__);
+            logLine("Unable to get contents from '". var_export($detailsFile, true) ."' to include in email.  Failing notification.", \C__DISPLAY_ERROR__);
             return null;
         }
 
@@ -550,7 +550,7 @@ class ClassJobsNotifier
         $file = fopen( $filePath, "r" );
         if( $file == false )
         {
-            $GLOBALS['logger']->logLine("Unable to open file '". $filePath ."' for to get contents for notification mail.  Failing notification.", \C__DISPLAY_ERROR__);
+            logLine("Unable to open file '". $filePath ."' for to get contents for notification mail.  Failing notification.", \C__DISPLAY_ERROR__);
             return null;
         }
 
