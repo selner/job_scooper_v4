@@ -151,7 +151,7 @@ function getAllSearchesThatWereIncluded()
         if(is_array($siteSearches))
             foreach($siteSearches as $search)
             {
-                $arrSearchesRun[$search->getKey()] = $search;
+                $arrSearchesRun[$search->getUserSearchRunKey()] = $search;
             }
     }
 

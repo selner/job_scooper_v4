@@ -516,7 +516,7 @@ function getSearchesByRunResult($resultCode)
                 if (!array_key_exists($search->getJobSiteKey(), $arrSearchReportByPlugin))
                     $arrSearchReportByPlugin[$search->getJobSiteKey()] = array();
 
-                $arrSearchReportByPlugin[$search->getJobSiteKey()][$search->getKey()] = cloneArray($search->toArray(), array(
+                $arrSearchReportByPlugin[$search->getJobSiteKey()][$search->getUserSearchRunKey()] = cloneArray($search->toArray(), array(
                     'keywords_string_for_url',
                     'base_url_format',
                     'keywords_array_tokenized',

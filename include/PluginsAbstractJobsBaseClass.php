@@ -189,7 +189,7 @@ abstract class AbstractClassBaseJobsPlugin
                 }
                 else
                 {
-                    LogLine("Skipping {$search->getKey()} jobs download since it just ran recently.", \C__DISPLAY_ITEM_DETAIL__);
+                    LogLine("Skipping {$search->getUserSearchRunKey()} jobs download since it just ran recently.", \C__DISPLAY_ITEM_DETAIL__);
                         $search->setRunResultCode("excluded");
                         $search->save();
                 }
@@ -355,7 +355,7 @@ abstract class AbstractClassBaseJobsPlugin
             // No override, so let's see if the search settings have defined one for us
             $locTypeNeeded = $this->getLocationSettingType();
             if ($locTypeNeeded == null || $locTypeNeeded == "") {
-                LogLine("Plugin for '" . $searchDetails['site_name'] . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails['key'] . "' with settings '" . $locSettingSets['key'] . "'.", \C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Plugin for '" . $searchDetails['site_name'] . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchRunKey() . "' with settings '" . $locSettingSets['key'] . "'.", \C__DISPLAY_ITEM_DETAIL__);
                 return $strReturnLocation;
             }
 
@@ -364,7 +364,7 @@ abstract class AbstractClassBaseJobsPlugin
             }
 
             if ($strReturnLocation == null || $strReturnLocation == VALUE_NOT_SUPPORTED) {
-                LogLine("Plugin for '" . $searchDetails['site_name'] . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails['key'] . "' with settings '" . $locSettingSets['key'] . "'.", \C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Plugin for '" . $searchDetails['site_name'] . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchRunKey() . "' with settings '" . $locSettingSets['key'] . "'.", \C__DISPLAY_ITEM_DETAIL__);
                 return $strReturnLocation;
             }
         }
@@ -393,7 +393,7 @@ abstract class AbstractClassBaseJobsPlugin
         if (!$this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) && $nSubtermMatches > 0) {
             $strLocationValue = $searchDetails['location_search_value'];
             if ($strLocationValue == VALUE_NOT_SUPPORTED) {
-                LogLine("Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() . " set.  Skipping search '" . $searchDetails['key'] . ".", \C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() . " set.  Skipping search '" . $searchDetails->getUserSearchRunKey() . ".", \C__DISPLAY_ITEM_DETAIL__);
                 $strURL = VALUE_NOT_SUPPORTED;
             }
             else
@@ -403,7 +403,7 @@ abstract class AbstractClassBaseJobsPlugin
         }
 
         if ($strURL == null) {
-            throw new ErrorException("Location value is required for " . $this->siteName . ", but was not set for the search '" . $searchDetails['key'] . "'." . " Aborting all searches for " . $this->siteName, \C__DISPLAY_ERROR__);
+            throw new ErrorException("Location value is required for " . $this->siteName . ", but was not set for the search '" . $searchDetails->getUserSearchRunKey() . "'." . " Aborting all searches for " . $this->siteName, \C__DISPLAY_ERROR__);
         }
 
         return $strURL;
@@ -685,11 +685,6 @@ abstract class AbstractClassBaseJobsPlugin
     private function _addSearch_(&$searchDetails)
     {
 
-
-        if ($searchDetails->getKey() == "") {
-            $searchDetails->setKey(strScrub($searchDetails->getJobSiteKey(), FOR_LOOKUP_VALUE_MATCHING) . "-" . strScrub($searchDetails->getKey(), FOR_LOOKUP_VALUE_MATCHING));
-        }
-
         assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || ($searchDetails['location_search_value'] !== VALUE_NOT_SUPPORTED && strlen($searchDetails['location_search_value']) > 0));
 
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
@@ -708,8 +703,8 @@ abstract class AbstractClassBaseJobsPlugin
         //
         // Add the search to the list of ones to run
         //
-        $this->arrSearchesToReturn[$searchDetails->getKey()] = $searchDetails;
-        LogLine($this->siteName . ": added search (" . $searchDetails->getKey() . ")", \C__DISPLAY_ITEM_DETAIL__);
+        $this->arrSearchesToReturn[$searchDetails->getUserSearchRunKey()] = $searchDetails;
+        LogLine($this->siteName . ": added search (" . $searchDetails->getUserSearchRunKey() . ")", \C__DISPLAY_ITEM_DETAIL__);
 
     }
 
@@ -782,7 +777,7 @@ abstract class AbstractClassBaseJobsPlugin
             $searchStartURL = $this->siteBaseURL;
 
         $searchDetails['search_start_url'] = $searchStartURL;
-        LogLine("Setting start URL for " . $this->siteName . "[" . $searchDetails['key'] . "] to: " . PHP_EOL . $searchDetails['search_start_url'], \C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Setting start URL for " . $this->siteName . "[" . $searchDetails->getUserSearchRunKey() . "] to: " . PHP_EOL . $searchDetails['search_start_url'], \C__DISPLAY_ITEM_DETAIL__);
 
     }
 
@@ -817,7 +812,7 @@ abstract class AbstractClassBaseJobsPlugin
             // get the url for the first page/items in the results
             if ($this->_checkInvalidURL_($searchDetails, $searchDetails['search_start_url']) == VALUE_NOT_SUPPORTED) return;
 
-            LogLine(("Starting data pull for " . $this->siteName . "[" . $searchDetails['key'] . "]"), \C__DISPLAY_ITEM_RESULT__);
+            LogLine(("Starting data pull for " . $this->siteName . "[" . $searchDetails->getUserSearchRunKey() . "]"), \C__DISPLAY_ITEM_RESULT__);
 
             if ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__) {
                 $this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
@@ -833,8 +828,8 @@ abstract class AbstractClassBaseJobsPlugin
             // filtered by keyword.  If we returned zero jobs for any given city and no keyword filter
             // then we are likely broken somehow unexpectedly.   Make sure to error so that we note
             // it in the results & error notifications so that a developer can take a look.
-            if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$this->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED) && countJobRecords($this->arrSearchReturnedJobs[$searchDetails->getKey()]) == 0) {
-                $strError = "The search " . $searchDetails['key'] . " on " . $this->siteName . " downloaded 0 jobs yet we did not have any keyword filter is use.  Logging as a potential error since we should have had something returned. [URL=" . $searchDetails['search_start_url'] . "].  ";
+            if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$this->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED) && countJobRecords($this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()]) == 0) {
+                $strError = "The search " . $searchDetails->getUserSearchRunKey() . " on " . $this->siteName . " downloaded 0 jobs yet we did not have any keyword filter is use.  Logging as a potential error since we should have had something returned. [URL=" . $searchDetails['search_start_url'] . "].  ";
                 handleException(new Exception($strError), null, true);
             }
 
@@ -860,12 +855,12 @@ abstract class AbstractClassBaseJobsPlugin
                 // Not the known issue case, so log the error and re-throw the exception
                 // if we should have thrown one
                 //
-                $strError = "Failed to download jobs from " . $this->siteName . " jobs for search '" . $searchDetails['key'] . "[URL=" . $searchDetails['search_start_url'] . "]. Exception Details: ";
+                $strError = "Failed to download jobs from " . $this->siteName . " jobs for search '" . $searchDetails->getUserSearchRunKey() . "[URL=" . $searchDetails['search_start_url'] . "]. Exception Details: ";
                 $this->_setSearchResultError_($searchDetails, $strError, $ex, $this->arrSearchReturnedJobs, null);
                 handleException($ex, $strError, false);
             }
         } finally {
-            $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->siteName . "[" . $searchDetails['key'] . "]"), \C__NAPPTOPLEVEL__, \C__SECTION_END__);
+            $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->siteName . "[" . $searchDetails->getUserSearchRunKey() . "]"), \C__NAPPTOPLEVEL__, \C__SECTION_END__);
         }
 
         if (!is_null($ex)) {
@@ -933,7 +928,7 @@ abstract class AbstractClassBaseJobsPlugin
     private function _setSearchResultError_(&$searchDetails, $err = "UNKNOWN Error.", $exception = null, $arrSearchedJobs = array(), $objSimpleHTMLResults = null)
     {
         $arrErrorFiles = array();
-        LogLine("Setting error for search '" . $searchDetails['key'] . "' with error '" . $err . "'.", \C__DISPLAY_ERROR__);
+        LogLine("Setting error for search '" . $searchDetails->getUserSearchRunKey() . "' with error '" . $err . "'.", \C__DISPLAY_ERROR__);
 
         $this->_writeDebugFiles_($searchDetails, "ERROR", $arrSearchedJobs, $objSimpleHTMLResults);
 
@@ -956,11 +951,11 @@ abstract class AbstractClassBaseJobsPlugin
     protected function _writeDebugFiles_(&$searchDetails, $keyName = "UNKNOWN", $arrSearchedJobs = null, $objSimpleHTMLResults = null)
     {
         if (isDebug() === true) {
-            LogLine("Writing debug files for plugin " . $this->siteName . "'s search" . $searchDetails['key'], \C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Writing debug files for plugin " . $this->siteName . "'s search" . $searchDetails->getUserSearchRunKey(), \C__DISPLAY_ITEM_DETAIL__);
 
-            $debugHTMLVarFile = generateOutputFileName( "_debug_htmlvar_" . "-" . $keyName . $searchDetails['key'], "html", true, 'debug', true);
-            $debugHTMLSelenFile = generateOutputFileName( "_debug_htmlselen_" . "-" . $keyName . $searchDetails['key'], "html", true, 'debug, true');
-            $debugSSFile = generateOutputFileName( "_debug_htmlselen_" . "-" . $keyName . $searchDetails['key'], "png", true, 'debug', true);
+            $debugHTMLVarFile = generateOutputFileName( "_debug_htmlvar_" . "-" . $keyName . $searchDetails->getUserSearchRunKey(), "html", true, 'debug', true);
+            $debugHTMLSelenFile = generateOutputFileName( "_debug_htmlselen_" . "-" . $keyName . $searchDetails->getUserSearchRunKey(), "html", true, 'debug, true');
+            $debugSSFile = generateOutputFileName( "_debug_htmlselen_" . "-" . $keyName . $searchDetails->getUserSearchRunKey(), "png", true, 'debug', true);
 
             $debugCSVFile = substr($debugHTMLVarFile, 0, strlen($debugHTMLVarFile) - 4) . ".csv";
 
@@ -1050,7 +1045,7 @@ abstract class AbstractClassBaseJobsPlugin
     {
         $nItemCount = 0;
 
-        LogLine("Downloading count of " . $this->siteName . " jobs for search '" . $searchDetails['key'] . "'", \C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Downloading count of " . $this->siteName . " jobs for search '" . $searchDetails->getUserSearchRunKey() . "'", \C__DISPLAY_ITEM_DETAIL__);
 
         $pageNumber = 1;
         $noMoreJobs = false;
@@ -1058,7 +1053,7 @@ abstract class AbstractClassBaseJobsPlugin
             $arrPageJobsList = [];
             $apiJobs = $this->getSearchJobsFromAPI($searchDetails);
             if (is_null($apiJobs)) {
-                LogLine("Warning: " . $this->siteName . "[" . $searchDetails['key'] . "] returned zero jobs from the API." . PHP_EOL, \C__DISPLAY_WARNING__);
+                LogLine("Warning: " . $this->siteName . "[" . $searchDetails->getUserSearchRunKey() . "] returned zero jobs from the API." . PHP_EOL, \C__DISPLAY_WARNING__);
                 return null;
             }
 
@@ -1089,7 +1084,7 @@ abstract class AbstractClassBaseJobsPlugin
             $pageNumber++;
         }
 
-        LogLine($this->siteName . "[" . $searchDetails['key'] . "]" . ": " . $nItemCount . " jobs found." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
+        LogLine($this->siteName . "[" . $searchDetails->getUserSearchRunKey() . "]" . ": " . $nItemCount . " jobs found." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
 
     }
 
@@ -1159,12 +1154,12 @@ abstract class AbstractClassBaseJobsPlugin
     function saveSearchReturnedJobs($arrJobList, $searchDetails)
     {
         $arrJobsBySitePostId = array_column($arrJobList, null, "job_id");
-        if (!array_key_exists($searchDetails->getKey(), $this->arrSearchReturnedJobs))
-            $this->arrSearchReturnedJobs[$searchDetails->getKey()] = array();
+        if (!array_key_exists($searchDetails->getUserSearchRunKey(), $this->arrSearchReturnedJobs))
+            $this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()] = array();
 
         foreach (array_keys($arrJobsBySitePostId) as $JobSitePostId) {
             $job = $this->saveJob($arrJobsBySitePostId[$JobSitePostId]);
-            $this->arrSearchReturnedJobs[$searchDetails->getKey()][$job->getJobPostingId()] = $job;
+            $this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()][$job->getJobPostingId()] = $job;
         }
     }
 
@@ -1184,16 +1179,16 @@ abstract class AbstractClassBaseJobsPlugin
 
     private function _addJobMatchesToUser($searchDetails)
     {
-        if(array_key_exists($searchDetails->getKey(), $this->arrSearchReturnedJobs) && !is_null($this->arrSearchReturnedJobs[$searchDetails->getKey()]) && is_array($this->arrSearchReturnedJobs[$searchDetails->getKey()]))
-        $this->_addJobMatchIdsToUser(array_keys($this->arrSearchReturnedJobs[$searchDetails->getKey()]));
+        if(array_key_exists($searchDetails->getUserSearchRunKey(), $this->arrSearchReturnedJobs) && !is_null($this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()]) && is_array($this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()]))
+        $this->_addJobMatchIdsToUser(array_keys($this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()]));
     }
 
     //
 //        $arrReturnedJobIds = array_keys($this->arrSearchReturnedJobs);
 //
 //            $arrJobsBySitePostId = array_column($arrJobList, null, "job_id");
-//            if(!array_key_exists($searchDetails->getKey(), $this->arrSearchReturnedJobs))
-//                $this->arrSearchReturnedJobs[$searchDetails->getKey()] = array();
+//            if(!array_key_exists($searchDetails->getUserSearchRunKey(), $this->arrSearchReturnedJobs))
+//                $this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()] = array();
 //
 //            foreach (array_keys($arrJobsBySitePostId) as $JobSitePostId) {
 //                $job = $this->saveJob($arrJobsBySitePostId[$JobSitePostId]);
@@ -1209,7 +1204,7 @@ abstract class AbstractClassBaseJobsPlugin
 //            $newMatch->setUserSlug($this->userObject->getUserSlug());
 //            $newMatch->setAppRunId($GLOBALS['USERDATA']['configuration_settings']['app_run_id']);
 //            $newMatch->save();
-////            $this->arrSearchReturnedJobs[$searchDetails->getKey()][$job->getKeySiteAndPostID()] = $job->getJobPostingId();
+////            $this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()][$job->getKeySiteAndPostID()] = $job->getJobPostingId();
 
 //        }
 //    }
@@ -1261,7 +1256,7 @@ abstract class AbstractClassBaseJobsPlugin
         $nPageCount = 1;
         $objSimpleHTML = null;
 
-        LogLine("Getting count of " . $this->siteName . " jobs for search '" . $searchDetails['key'] . "': " . $searchDetails['search_start_url'], \C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Getting count of " . $this->siteName . " jobs for search '" . $searchDetails->getUserSearchRunKey() . "': " . $searchDetails['search_start_url'], \C__DISPLAY_ITEM_DETAIL__);
 
         try {
             if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
@@ -1325,7 +1320,7 @@ abstract class AbstractClassBaseJobsPlugin
                     $totalPagesCount = 0;
                 } elseif ($nTotalListings != C__TOTAL_ITEMS_UNKNOWN__) {
                     if ($nTotalListings > $this->nMaxJobsToReturn) {
-                        LogLine("Search '" . $searchDetails['key'] . "' returned more results than allowed.  Only retrieving the first " . $this->nMaxJobsToReturn . " of  " . $nTotalListings . " job listings.", \C__DISPLAY_WARNING__);
+                        LogLine("Search '" . $searchDetails->getUserSearchRunKey() . "' returned more results than allowed.  Only retrieving the first " . $this->nMaxJobsToReturn . " of  " . $nTotalListings . " job listings.", \C__DISPLAY_WARNING__);
                         $nTotalListings = $this->nMaxJobsToReturn;
                     }
                     $totalPagesCount = intceil($nTotalListings / $this->nJobListingsPerPage); // round up always
@@ -1349,7 +1344,7 @@ abstract class AbstractClassBaseJobsPlugin
 
 
             if ($nTotalListings <= 0) {
-                LogLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails['key'] . "'.", \C__DISPLAY_ITEM_START__);
+                LogLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails->getUserSearchRunKey() . "'.", \C__DISPLAY_ITEM_START__);
                 return array();
             } else {
                 $nJobsFound = 0;
@@ -1461,7 +1456,7 @@ abstract class AbstractClassBaseJobsPlugin
 
                         if (is_array($arrPageJobsList)) {
                             $this->saveSearchReturnedJobs($arrPageJobsList, $searchDetails);
-                            $nJobsFound = count($this->arrSearchReturnedJobs[$searchDetails->getKey()]);
+                            $nJobsFound = count($this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()]);
 
                             if ($nItemCount == 1) {
                                 $nItemCount = 0;
@@ -1474,10 +1469,10 @@ abstract class AbstractClassBaseJobsPlugin
                             //
                             if ($totalPagesCount > 1 && $nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ && countAssociativeArrayValues($arrPageJobsList) < $this->nJobListingsPerPage) {
                                 $totalPagesCount = $nPageCount;
-                                $nTotalListings = countAssociativeArrayValues($this->arrSearchReturnedJobs[$searchDetails->getKey()]);
+                                $nTotalListings = countAssociativeArrayValues($this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()]);
                             }
 
-                            LogLine("Loaded " . countAssociativeArrayValues($this->arrSearchReturnedJobs[$searchDetails->getKey()]) . " of " . $nTotalListings . " job listings from " . $this->siteName, \C__DISPLAY_NORMAL__);
+                            LogLine("Loaded " . countAssociativeArrayValues($this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()]) . " of " . $nTotalListings . " job listings from " . $this->siteName, \C__DISPLAY_NORMAL__);
                         }
                     } catch (Exception $ex) {
                         handleException($ex, ($this->siteName . " error: %s"), true);
@@ -1494,13 +1489,13 @@ abstract class AbstractClassBaseJobsPlugin
                     $err = null;
                     $marginOfErrorAllowed = .05;
                     if ($nTotalListings > 0 && $nItemCount == 0) // We got zero listings but should have found some
-                        $err = "Retrieved 0 of the expected " . $nTotalListings . " listings for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
+                        $err = "Retrieved 0 of the expected " . $nTotalListings . " listings for " . $this->siteName . " (search = " . $searchDetails->getUserSearchRunKey() . ")";
                     elseif ($nItemCount < $this->nJobListingsPerPage && $nPageCount < $totalPagesCount)
-                        $err = "Retrieved only " . $nItemCount . " of the " . $this->nJobListingsPerPage . " job listings on page " . $nPageCount . " for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
+                        $err = "Retrieved only " . $nItemCount . " of the " . $this->nJobListingsPerPage . " job listings on page " . $nPageCount . " for " . $this->siteName . " (search = " . $searchDetails->getUserSearchRunKey() . ")";
                     elseif ($nJobsFound < $nTotalListings * (1 - $marginOfErrorAllowed) && $nPageCount == $totalPagesCount && !$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__))
-                        $err = "Retrieved only " . $nJobsFound . " of the " . $nTotalListings . " listings that we expected for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
+                        $err = "Retrieved only " . $nJobsFound . " of the " . $nTotalListings . " listings that we expected for " . $this->siteName . " (search = " . $searchDetails->getUserSearchRunKey() . ")";
                     elseif ($nJobsFound > $nTotalListings * (1 + $marginOfErrorAllowed) && $nPageCount == $totalPagesCount && !$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__)) {
-                        $warnMsg = "Warning:  Downloaded " . ($nJobsFound - $nTotalListings) . " jobs more than the " . $nTotalListings . " expected for " . $this->siteName . " (search = " . $searchDetails['key'] . ")";
+                        $warnMsg = "Warning:  Downloaded " . ($nJobsFound - $nTotalListings) . " jobs more than the " . $nTotalListings . " expected for " . $this->siteName . " (search = " . $searchDetails->getUserSearchRunKey() . ")";
                         LogLine($warnMsg, \C__DISPLAY_WARNING__);
                     }
 
@@ -1574,7 +1569,7 @@ abstract class AbstractClassBaseJobsPlugin
 
             }
 
-            LogLine($this->siteName . "[" . $searchDetails['key'] . "]" . ": " . $nJobsFound . " jobs found." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
+            LogLine($this->siteName . "[" . $searchDetails->getUserSearchRunKey() . "]" . ": " . $nJobsFound . " jobs found." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
 
         } catch (Exception $ex) {
             $this->_setSearchResultError_($searchDetails, "Error: " . $ex->getMessage(), $ex, $this->arrSearchReturnedJobs, $objSimpleHTML);
