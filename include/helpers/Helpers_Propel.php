@@ -304,7 +304,8 @@ function getJobSitePluginClassName($jobsite)
     return null;
 }
 
-function findOrCreateJobSitePlugin($jobsite, $plugin_classname=null)
+
+function findOrCreateJobSitePlugin($jobsite)
 {
     $slug = cleanupSlugPart($jobsite);
 
