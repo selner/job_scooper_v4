@@ -181,7 +181,7 @@ abstract class AbstractClassBaseJobsPlugin
                         $this->_addJobMatchesToUser($search);
                         $this->_setSearchResult_($search, true);
                     } catch (Exception $ex) {
-                        $this->_setSearchResultError_($search, "Unable to download jobs: %s", $ex);
+                        $this->_setSearchResult_($search, false, new Exception("Unable to download jobs: " .strval($ex)));
                         throw $ex;
                     } finally {
                         $this->currentSearchBeingRun = null;
@@ -848,7 +848,7 @@ abstract class AbstractClassBaseJobsPlugin
                 $strError = $this->siteName . " plugin returned a 404 page for the search.  This is not an error; it means zero results found.";
                 LogLine($strError, \C__DISPLAY_ITEM_DETAIL__);
 
-                $this->_setSearchSuccessResult_($searchDetails, $success = true, $details = 'Search found no matching, unfiltered jobs.', array());
+                $this->_setSearchResult_($searchDetails, $success = true);
 
             } else {
                 //
@@ -856,7 +856,7 @@ abstract class AbstractClassBaseJobsPlugin
                 // if we should have thrown one
                 //
                 $strError = "Failed to download jobs from " . $this->siteName . " jobs for search '" . $searchDetails->getUserSearchRunKey() . "[URL=" . $searchDetails['search_start_url'] . "]. Exception Details: ";
-                $this->_setSearchResultError_($searchDetails, $strError, $ex, $this->arrSearchReturnedJobs, null);
+                $this->_setSearchResult_($searchDetails, false, new Exception($strError . strval($ex)));
                 handleException($ex, $strError, false);
             }
         } finally {
@@ -876,19 +876,9 @@ abstract class AbstractClassBaseJobsPlugin
         // if($strURL == VALUE_NOT_SUPPORTED) LogLine("Skipping " . $this->siteName ." search '".$details['key']. "' because a valid URL could not be set.");
     }
 
-
-    private function _setSearchSuccessResult_(&$searchDetails, $success = null, $details = "UNKNOWN RESULT.", $arrSearchedJobs = null, $objSimpleHTMLResults = null)
+    private function _setSearchResult_(&$searchDetails, $success = null, $except = null, $debugfiles = array())
     {
-        if (isDebug() === true)
-            $this->_writeDebugFiles_($searchDetails, "SUCCESS", $arrSearchedJobs, $objSimpleHTMLResults);
-        $this->_setSearchResult_($searchDetails, $success, $details, null, $files = array());
-    }
-
-
-    private function _setSearchResult_(&$searchDetails, $success = null, $err_details = "UNKNOWN RESULT.", $except = null, $debugfiles = array())
-    {
-        LogLine("Setting result value for search '{$searchDetails->getUserSearchRunKey()}' equal to " . strval($success) . " with details '" . $err_details . "'.", \C__DISPLAY_ITEM_DETAIL__);
-
+        LogLine("Setting result value for search '{$searchDetails->getUserSearchRunKey()}' equal to " . strval($success), \C__DISPLAY_ITEM_DETAIL__);
 
         if (!is_null($success) && is_bool($success))
         {
@@ -908,31 +898,20 @@ abstract class AbstractClassBaseJobsPlugin
                     $code = $except->getCode();
                     $msg = $except->getMessage();
                     $file = $except->getFile();
+                    $srr = array(
+                        'error_details' => strval($except),
+                        'exception_code' => $code,
+                        'exception_message' => $msg,
+                        'exception_line' => $line,
+                        'exception_file' => $file,
+                        'error_datetime' => new DateTime(),
+                        'error_debug_files' => $debugfiles
+                    );
+                    $searchDetails->setRunErrorDetails($srr);
                 }
-                $srr = array(
-                    'error_details' => $err_details,
-                    'exception_code' => $code,
-                    'exception_message' => $msg,
-                    'exception_line' => $line,
-                    'exception_file' => $file,
-                    'error_datetime' => new DateTime(),
-                    'error_debug_files' => $debugfiles
-                );
-                $searchDetails->setRunErrorDetails($srr);
             }
             $searchDetails->save();
         }
-    }
-
-
-    private function _setSearchResultError_(&$searchDetails, $err = "UNKNOWN Error.", $exception = null, $arrSearchedJobs = array(), $objSimpleHTMLResults = null)
-    {
-        $arrErrorFiles = array();
-        LogLine("Setting error for search '" . $searchDetails->getUserSearchRunKey() . "' with error '" . $err . "'.", \C__DISPLAY_ERROR__);
-
-        $this->_writeDebugFiles_($searchDetails, "ERROR", $arrSearchedJobs, $objSimpleHTMLResults);
-
-        $this->_setSearchResult_($searchDetails, $success = false, $details = $err, $exception, $files = $arrErrorFiles);
     }
 
     function saveDomToFile($htmlNode, $filepath)
@@ -1572,7 +1551,7 @@ abstract class AbstractClassBaseJobsPlugin
             LogLine($this->siteName . "[" . $searchDetails->getUserSearchRunKey() . "]" . ": " . $nJobsFound . " jobs found." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
 
         } catch (Exception $ex) {
-            $this->_setSearchResultError_($searchDetails, "Error: " . $ex->getMessage(), $ex, $this->arrSearchReturnedJobs, $objSimpleHTML);
+            $this->_setSearchResult_($searchDetails, false, $ex);
             handleException($ex, null, true);
         } finally {
             // clean up memory
