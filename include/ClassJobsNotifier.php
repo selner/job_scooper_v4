@@ -225,9 +225,14 @@ class ClassJobsNotifier
                 if(!isDebug()) {
                     $arrToMarkNotified = array_from_orm_object_list_by_array_keys($arrJobsToNotify, array("JobPostingId"));
                     $ids = array_column($arrToMarkNotified, "JobPostingId");
-                    $rowsAffected = \JobScooper\UserJobMatchQuery::create()
-                        ->filterByJobPostingId($ids)
-                        ->update(array('UserNotificationState' => 'sent'), null, true);
+                    $rowsAffected = 0;
+                    foreach(array_chunk($ids, 100) as $arrChunkIds)
+                    {
+                        $results = \JobScooper\UserJobMatchQuery::create()
+                            ->filterByJobPostingId($arrChunkIds)
+                            ->update(array('UserNotificationState' => 'sent'), null, true);
+                        $rowsAffected .= count(results);
+                    }
                     if ($rowsAffected != count($arrToMarkNotified))
                         LogLine("Warning:  marked only {count($rowsAffected)} of {count($arrToMarkNotified)} UserJobMatch records as notified.");
                 }
