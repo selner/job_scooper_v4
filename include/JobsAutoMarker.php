@@ -238,7 +238,6 @@ class JobsAutoMarker
             LogLine("Marking Out of Area Jobs", \C__DISPLAY_ITEM_START__);
 
             $this->_loadCityData();
-            $nJobsSkipped = 0;
             $nJobsMarkedAutoExcluded = 0;
             $nJobsNotMarked = 0;
 
@@ -247,9 +246,7 @@ class JobsAutoMarker
                 $locValue = $jobMatch->getJobPosting()->getLocationString();
                 $locKey = $this->getLocationLookupKey($locValue);
 
-                if (in_array($jobMatch->getUserMatchState(), array("not-matched")) == 1) {
-                    $nJobsSkipped += 1;
-                } elseif ($this->_doesLocationMatchUserSearch($locKey)) {
+                if ($this->_doesLocationMatchUserSearch($locKey)) {
                     $nJobsNotMarked++;
                 } else {
                     $jobMatch->setIsOutOfUserArea(true);
@@ -258,9 +255,8 @@ class JobsAutoMarker
                 }
             }
 
-            assert(count($arrJobsList) == $nJobsMarkedAutoExcluded + $nJobsSkipped + $nJobsNotMarked);
 
-            LogLine("Jobs marked as out of area: marked ".$nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) .", skipped " . $nJobsSkipped . "/" . countAssociativeArrayValues($arrJobsList) .", not marked ". $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).")" , \C__DISPLAY_ITEM_RESULT__);
+           LogLine("Jobs excluded as out of area: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ." marked; " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).", not marked " , \C__DISPLAY_ITEM_RESULT__);
         }
         catch (Exception $ex)
         {

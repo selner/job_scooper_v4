@@ -24,7 +24,9 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatchQuery orderByUserSlug($order = Criteria::ASC) Order by the user_slug column
  * @method     ChildUserJobMatchQuery orderByJobPostingId($order = Criteria::ASC) Order by the jobposting_id column
  * @method     ChildUserJobMatchQuery orderByUserNotificationState($order = Criteria::ASC) Order by the user_notification_state column
- * @method     ChildUserJobMatchQuery orderByUserMatchState($order = Criteria::ASC) Order by the user_match_state column
+ * @method     ChildUserJobMatchQuery orderByIsJobMatch($order = Criteria::ASC) Order by the is_job_match column
+ * @method     ChildUserJobMatchQuery orderByIsExcluded($order = Criteria::ASC) Order by the is_excluded column
+ * @method     ChildUserJobMatchQuery orderByIsIncludeInNotifications($order = Criteria::ASC) Order by the is_include_in_notifications column
  * @method     ChildUserJobMatchQuery orderByMatchedUserKeywords($order = Criteria::ASC) Order by the matched_user_keywords column
  * @method     ChildUserJobMatchQuery orderByMatchedNegativeTitleKeywords($order = Criteria::ASC) Order by the matched_negative_title_keywords column
  * @method     ChildUserJobMatchQuery orderByMatchedNegativeCompanyKeywords($order = Criteria::ASC) Order by the matched_negative_company_keywords column
@@ -35,7 +37,9 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatchQuery groupByUserSlug() Group by the user_slug column
  * @method     ChildUserJobMatchQuery groupByJobPostingId() Group by the jobposting_id column
  * @method     ChildUserJobMatchQuery groupByUserNotificationState() Group by the user_notification_state column
- * @method     ChildUserJobMatchQuery groupByUserMatchState() Group by the user_match_state column
+ * @method     ChildUserJobMatchQuery groupByIsJobMatch() Group by the is_job_match column
+ * @method     ChildUserJobMatchQuery groupByIsExcluded() Group by the is_excluded column
+ * @method     ChildUserJobMatchQuery groupByIsIncludeInNotifications() Group by the is_include_in_notifications column
  * @method     ChildUserJobMatchQuery groupByMatchedUserKeywords() Group by the matched_user_keywords column
  * @method     ChildUserJobMatchQuery groupByMatchedNegativeTitleKeywords() Group by the matched_negative_title_keywords column
  * @method     ChildUserJobMatchQuery groupByMatchedNegativeCompanyKeywords() Group by the matched_negative_company_keywords column
@@ -79,7 +83,9 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatch findOneByUserSlug(string $user_slug) Return the first ChildUserJobMatch filtered by the user_slug column
  * @method     ChildUserJobMatch findOneByJobPostingId(int $jobposting_id) Return the first ChildUserJobMatch filtered by the jobposting_id column
  * @method     ChildUserJobMatch findOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column
- * @method     ChildUserJobMatch findOneByUserMatchState(int $user_match_state) Return the first ChildUserJobMatch filtered by the user_match_state column
+ * @method     ChildUserJobMatch findOneByIsJobMatch(boolean $is_job_match) Return the first ChildUserJobMatch filtered by the is_job_match column
+ * @method     ChildUserJobMatch findOneByIsExcluded(boolean $is_excluded) Return the first ChildUserJobMatch filtered by the is_excluded column
+ * @method     ChildUserJobMatch findOneByIsIncludeInNotifications(boolean $is_include_in_notifications) Return the first ChildUserJobMatch filtered by the is_include_in_notifications column
  * @method     ChildUserJobMatch findOneByMatchedUserKeywords(array $matched_user_keywords) Return the first ChildUserJobMatch filtered by the matched_user_keywords column
  * @method     ChildUserJobMatch findOneByMatchedNegativeTitleKeywords(array $matched_negative_title_keywords) Return the first ChildUserJobMatch filtered by the matched_negative_title_keywords column
  * @method     ChildUserJobMatch findOneByMatchedNegativeCompanyKeywords(array $matched_negative_company_keywords) Return the first ChildUserJobMatch filtered by the matched_negative_company_keywords column
@@ -93,7 +99,9 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatch requireOneByUserSlug(string $user_slug) Return the first ChildUserJobMatch filtered by the user_slug column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByJobPostingId(int $jobposting_id) Return the first ChildUserJobMatch filtered by the jobposting_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserJobMatch requireOneByUserMatchState(int $user_match_state) Return the first ChildUserJobMatch filtered by the user_match_state column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneByIsJobMatch(boolean $is_job_match) Return the first ChildUserJobMatch filtered by the is_job_match column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneByIsExcluded(boolean $is_excluded) Return the first ChildUserJobMatch filtered by the is_excluded column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneByIsIncludeInNotifications(boolean $is_include_in_notifications) Return the first ChildUserJobMatch filtered by the is_include_in_notifications column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByMatchedUserKeywords(array $matched_user_keywords) Return the first ChildUserJobMatch filtered by the matched_user_keywords column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByMatchedNegativeTitleKeywords(array $matched_negative_title_keywords) Return the first ChildUserJobMatch filtered by the matched_negative_title_keywords column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByMatchedNegativeCompanyKeywords(array $matched_negative_company_keywords) Return the first ChildUserJobMatch filtered by the matched_negative_company_keywords column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -105,7 +113,9 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatch[]|ObjectCollection findByUserSlug(string $user_slug) Return ChildUserJobMatch objects filtered by the user_slug column
  * @method     ChildUserJobMatch[]|ObjectCollection findByJobPostingId(int $jobposting_id) Return ChildUserJobMatch objects filtered by the jobposting_id column
  * @method     ChildUserJobMatch[]|ObjectCollection findByUserNotificationState(int $user_notification_state) Return ChildUserJobMatch objects filtered by the user_notification_state column
- * @method     ChildUserJobMatch[]|ObjectCollection findByUserMatchState(int $user_match_state) Return ChildUserJobMatch objects filtered by the user_match_state column
+ * @method     ChildUserJobMatch[]|ObjectCollection findByIsJobMatch(boolean $is_job_match) Return ChildUserJobMatch objects filtered by the is_job_match column
+ * @method     ChildUserJobMatch[]|ObjectCollection findByIsExcluded(boolean $is_excluded) Return ChildUserJobMatch objects filtered by the is_excluded column
+ * @method     ChildUserJobMatch[]|ObjectCollection findByIsIncludeInNotifications(boolean $is_include_in_notifications) Return ChildUserJobMatch objects filtered by the is_include_in_notifications column
  * @method     ChildUserJobMatch[]|ObjectCollection findByMatchedUserKeywords(array $matched_user_keywords) Return ChildUserJobMatch objects filtered by the matched_user_keywords column
  * @method     ChildUserJobMatch[]|ObjectCollection findByMatchedNegativeTitleKeywords(array $matched_negative_title_keywords) Return ChildUserJobMatch objects filtered by the matched_negative_title_keywords column
  * @method     ChildUserJobMatch[]|ObjectCollection findByMatchedNegativeCompanyKeywords(array $matched_negative_company_keywords) Return ChildUserJobMatch objects filtered by the matched_negative_company_keywords column
@@ -209,7 +219,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_job_match_id, user_slug, jobposting_id, user_notification_state, user_match_state, matched_user_keywords, matched_negative_title_keywords, matched_negative_company_keywords, out_of_user_area, app_run_id FROM user_job_match WHERE user_job_match_id = :p0';
+        $sql = 'SELECT user_job_match_id, user_slug, jobposting_id, user_notification_state, is_job_match, is_excluded, is_include_in_notifications, matched_user_keywords, matched_negative_title_keywords, matched_negative_company_keywords, out_of_user_area, app_run_id FROM user_job_match WHERE user_job_match_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -442,36 +452,84 @@ abstract class UserJobMatchQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the user_match_state column
+     * Filter the query on the is_job_match column
      *
-     * @param     mixed $userMatchState The value to use as filter
+     * Example usage:
+     * <code>
+     * $query->filterByIsJobMatch(true); // WHERE is_job_match = true
+     * $query->filterByIsJobMatch('yes'); // WHERE is_job_match = true
+     * </code>
+     *
+     * @param     boolean|string $isJobMatch The value to use as filter.
+     *              Non-boolean arguments are converted using the following rules:
+     *                * 1, '1', 'true',  'on',  and 'yes' are converted to boolean true
+     *                * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
+     *              Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
      */
-    public function filterByUserMatchState($userMatchState = null, $comparison = null)
+    public function filterByIsJobMatch($isJobMatch = null, $comparison = null)
     {
-        $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_MATCH_STATE);
-        if (is_scalar($userMatchState)) {
-            if (!in_array($userMatchState, $valueSet)) {
-                throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $userMatchState));
-            }
-            $userMatchState = array_search($userMatchState, $valueSet);
-        } elseif (is_array($userMatchState)) {
-            $convertedValues = array();
-            foreach ($userMatchState as $value) {
-                if (!in_array($value, $valueSet)) {
-                    throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $value));
-                }
-                $convertedValues []= array_search($value, $valueSet);
-            }
-            $userMatchState = $convertedValues;
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
+        if (is_string($isJobMatch)) {
+            $isJobMatch = in_array(strtolower($isJobMatch), array('false', 'off', '-', 'no', 'n', '0', '')) ? false : true;
         }
 
-        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_MATCH_STATE, $userMatchState, $comparison);
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_IS_JOB_MATCH, $isJobMatch, $comparison);
+    }
+
+    /**
+     * Filter the query on the is_excluded column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByIsExcluded(true); // WHERE is_excluded = true
+     * $query->filterByIsExcluded('yes'); // WHERE is_excluded = true
+     * </code>
+     *
+     * @param     boolean|string $isExcluded The value to use as filter.
+     *              Non-boolean arguments are converted using the following rules:
+     *                * 1, '1', 'true',  'on',  and 'yes' are converted to boolean true
+     *                * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
+     *              Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function filterByIsExcluded($isExcluded = null, $comparison = null)
+    {
+        if (is_string($isExcluded)) {
+            $isExcluded = in_array(strtolower($isExcluded), array('false', 'off', '-', 'no', 'n', '0', '')) ? false : true;
+        }
+
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_IS_EXCLUDED, $isExcluded, $comparison);
+    }
+
+    /**
+     * Filter the query on the is_include_in_notifications column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByIsIncludeInNotifications(true); // WHERE is_include_in_notifications = true
+     * $query->filterByIsIncludeInNotifications('yes'); // WHERE is_include_in_notifications = true
+     * </code>
+     *
+     * @param     boolean|string $isIncludeInNotifications The value to use as filter.
+     *              Non-boolean arguments are converted using the following rules:
+     *                * 1, '1', 'true',  'on',  and 'yes' are converted to boolean true
+     *                * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
+     *              Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function filterByIsIncludeInNotifications($isIncludeInNotifications = null, $comparison = null)
+    {
+        if (is_string($isIncludeInNotifications)) {
+            $isIncludeInNotifications = in_array(strtolower($isIncludeInNotifications), array('false', 'off', '-', 'no', 'n', '0', '')) ? false : true;
+        }
+
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_IS_INCLUDE_IN_NOTIFICATIONS, $isIncludeInNotifications, $comparison);
     }
 
     /**

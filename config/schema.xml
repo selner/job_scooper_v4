@@ -190,7 +190,9 @@
         <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true"/>
         <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true"/>
         <column name="user_notification_state" phpName="UserNotificationState" type="enum" valueSet="not-ready,ready,sent" defaultValue="not-ready"/>
-        <column name="user_match_state" phpName="UserMatchState" type="enum" valueSet="none,matched,not-matched" defaultValue="none"/>
+        <column name="is_job_match" phpName="IsJobMatch" type="boolean"/>
+        <column name="is_excluded" phpName="IsExcluded" type="boolean"/>
+        <column name="is_include_in_notifications" phpName="IsIncludeInNotifications" type="boolean"/>
         <column name="matched_user_keywords" phpName="MatchedUserKeywords" type="array"/>
         <column name="matched_negative_title_keywords" phpName="MatchedNegativeTitleKeywords" type="array"/>
         <column name="matched_negative_company_keywords" phpName="MatchedNegativeCompanyKeywords" type="array"/>

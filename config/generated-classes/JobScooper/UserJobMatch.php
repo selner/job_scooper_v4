@@ -45,21 +45,20 @@ class UserJobMatch extends BaseUserJobMatch
 
     private function _setMatchStatus()
     {
-        $matchStatus = $this->getUserMatchState();
-
         if(count($this->getMatchedUserKeywords()) > 0 )
-            $matchStatus = "matched";
+            $this->setIsJobMatch(true);
 
         if(count($this->getMatchedNegativeTitleKeywords()) > 0 )
-            $matchStatus = "not-matched";
+            $this->setIsExcluded(true);
 
         if(count($this->getMatchedNegativeCompanyKeywords()) > 0 )
-            $matchStatus = "not-matched";
+            $this->setIsExcluded(true);
 
         if($this->isOutOfUserArea() === true)
-            $matchStatus = "not-matched";
+            $this->setIsExcluded(true);
 
-        $this->setUserMatchState($matchStatus);
+//        if($this->getIsJobMatch() === true)
+            $this->setIsIncludeInNotifications(true);
     }
 
     /**

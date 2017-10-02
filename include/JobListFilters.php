@@ -22,30 +22,20 @@
 
 function isSuccessfulUserJobMatch($var)
 {
-    assert(method_exists($var, "getUserMatchState") === true);
-
-    $matchStatus = $var->getUserMatchState();
-    if(in_array($matchStatus, array("matched")))
-        return true;
-
-    return false;
+    assert(method_exists($var, "getIsJobMatch") === true);
+    return $var->getIsJobMatch();
 }
-
-function isUserJobMatchOrMatchNone($var)
-{
-    return (!isNotUserJobMatch($var));
-}
-
 
 function isNotUserJobMatch($var)
 {
-    assert(method_exists($var, "getUserMatchState") === true);
+    return !isSuccessfulUserJobMatch($var);
+}
 
-    $matchStatus = $var->getUserMatchState();
-    if(in_array($matchStatus, array("not-matched")))
-        return true;
 
-    return false;
+function isExcludedJob($var)
+{
+    assert(method_exists($var, "setIsExcluded") === true);
+    return $var->setIsExcluded();
 }
 
 function isIncludedJobSite($var)
