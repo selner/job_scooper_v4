@@ -17,7 +17,7 @@
  */
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginAuthenticJobs extends ClassClientHTMLJobSitePlugin
+class PluginAuthenticJobs extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'AuthenticJobs';
     protected $siteBaseURL = "https://authenticjobs.com";

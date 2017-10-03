@@ -32,7 +32,7 @@ require_once dirname(dirname(__FILE__))."/bootstrap.php";
  *
  */
 
-class PluginAmazon extends ClassBaseClientSideHTMLJobSitePlugin
+class PluginAmazon extends \JobScooper\Plugins\Base\AjaxHtmlPlugin
 {
     protected $siteName = 'Amazon';
     protected $nJobListingsPerPage = 100;

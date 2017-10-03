@@ -67,7 +67,7 @@ class PluginPorch extends BaseTaleoPlugin
 }
 
 
-abstract class BaseTaleoPlugin extends ClassBaseServerHTMLJobSitePlugin
+abstract class BaseTaleoPlugin extends \JobScooper\Plugins\Base\ServerHtmlPlugin
 {
     protected $use1ToTDForCount = False;
     protected $taleoOrgID = null;
@@ -166,6 +166,7 @@ abstract class BaseTaleoPlugin extends ClassBaseServerHTMLJobSitePlugin
             return $nodes[1]->plaintext;
         }
 
+        return null;
     }
 
 

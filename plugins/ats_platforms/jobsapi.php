@@ -15,11 +15,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(dirname(__FILE__)))."/bootstrap.php";
+require_once __ROOT__ ."/bootstrap.php";
 use JobApis\Jobs\Client\Queries\UsajobsQuery;
 use JobApis\Jobs\Client\Providers\UsajobsProvider;
 
-class PluginUSAJobs extends ClassBaseJobsAPIPlugin
+class PluginUSAJobs extends \JobScooper\Plugins\Base\JobsAPIPlugin
 {
     protected $siteBaseURL = 'http://search.digitalgov.gov/developer/jobs.html';
     protected $strBaseURLFormat = 'https://api.usa.gov/jobs/search.json?query=in+***LOCATION***';

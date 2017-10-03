@@ -17,7 +17,7 @@
  */
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginZipRecruiter extends ClassClientHTMLJobSitePlugin
+class PluginZipRecruiter extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'ziprecruiter';
     protected $siteBaseURL = 'www.ziprecruiter.com';

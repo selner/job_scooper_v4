@@ -17,7 +17,7 @@
  */
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginPersonForce extends ClassClientHTMLJobSitePlugin
+class PluginPersonForce extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'PersonForce';
     protected $siteBaseURL = 'http://www.personforce.com';

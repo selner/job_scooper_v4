@@ -17,7 +17,7 @@
  */
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginSmashingMagazine extends ClassClientHTMLJobSitePlugin
+class PluginSmashingMagazine extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'SmashingMagazine';
     protected $childSiteURLBase = 'http://jobs.smashingmagazine.com';

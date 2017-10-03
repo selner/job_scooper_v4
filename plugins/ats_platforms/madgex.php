@@ -15,9 +15,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(dirname(__FILE__)))."/bootstrap.php";
+require_once __ROOT__."/bootstrap.php";
 
-abstract class BaseMadgexATSPlugin extends ClassClientHTMLJobSitePlugin
+abstract class BaseMadgexATSPlugin extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
 
     function __construct()

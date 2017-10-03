@@ -17,8 +17,11 @@
 */
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
+use const JobScooper\Plugins\Base\VALUE_NOT_SUPPORTED;
+use const \JobScooper\Plugins\Base\BASE_URL_TAG_KEYWORDS;
+use const \JobScooper\Plugins\Base\BASE_URL_TAG_LOCATION;
 
-class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
+class PluginSimplyHired extends \JobScooper\Plugins\Base\ServerHtmlPlugin
 {
     protected $siteBaseURL = 'http://www.simplyhired.com';
     protected $siteName = 'SimplyHired';
@@ -39,7 +42,7 @@ class PluginSimplyHired extends ClassBaseServerHTMLJobSitePlugin
     /**
      * If the site does not have a URL parameter for number of days
      * then set the plugin flag to C__JOB_DAYS_VALUE_NOTAPPLICABLE__
-     * in the PluginOptions.php file and just comment out this function.
+     * in the LoadPlugins.php file and just comment out this function.
      *
      * getDaysURLValue returns the value that is used to replace
      * the ***DAYS*** token in the search URL for the number of

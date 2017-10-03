@@ -23,7 +23,7 @@ require_once dirname(dirname(__FILE__))."/bootstrap.php";
  *
  *       Used by dotjobs.json plugin configuration to override single method
  */
-abstract class AbstractDotJobs extends ClassClientHTMLJobSitePlugin
+abstract class AbstractDotJobs extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
     protected function goToEndOfResultsSetViaLoadMore($nTotalListings)
     {

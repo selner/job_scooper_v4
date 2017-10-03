@@ -17,7 +17,7 @@
  */
 require_once dirname(dirname(dirname(__FILE__)))."/bootstrap.php";
 
-abstract class BaseForceComClass extends ClassClientHTMLJobSitePlugin
+abstract class BaseForceComClass extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
     protected $additionalLoadDelaySeconds = 3;
     protected $nJobListingsPerPage = 25;

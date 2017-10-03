@@ -17,7 +17,7 @@
  */
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginGoogle extends ClassClientHTMLJobSitePlugin
+class PluginGoogle extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
     // BUGBUG: currently does not handle pagination of job listings
 
@@ -90,5 +90,3 @@ class PluginGoogle extends ClassClientHTMLJobSitePlugin
     }
 
 }
-
-?>

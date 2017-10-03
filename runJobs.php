@@ -19,9 +19,9 @@ const C__APPNAME__ = "jobs_scooper";
 define('__ROOT__', dirname(__FILE__));
 require_once __ROOT__."/bootstrap.php";
 
-$classRunJobs = new StageManager();
+var_dump(get_included_files());
+
+$classRunJobs = new \Jobscooper\Manager\StageManager();
 $classRunJobs->runAll();
-//$classRunJobs->doStage1();
-//$classRunJobs->doStage4();
 
 

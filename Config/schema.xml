@@ -1,0 +1,279 @@
+<!--
+    Awesome, your propel set up is nearly done! You just have to describe how you want your database to look like.
+
+    You can let propel set up your sqlite database by running `vendor/bin/propel database:create && vendor/bin/propel database:insert-sql`.
+    This will create your database including all the tables.
+-->
+
+<!--
+    The root tag of the XML schema is the <database> tag.
+
+    The `name` attribute defines the name of the connection that Propel uses for the tables in this schema. It is not
+    necessarily the name of the actual database. In fact, Propel uses some configuration properties to link a connection
+    name with real connection settings (like database name, user and password).
+
+    The `defaultIdMethod` attribute indicates that the tables in this schema use the database's "native"
+    auto-increment/sequence features to handle id columns that are set to auto-increment.
+
+   [TIP]: You can define several schemas for a single project. Just make sure that each of the schema
+          filenames end with schema.xml.
+-->
+<database name="default" defaultIdMethod="native"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://xsd.propelorm.org/1.6/database.xsd"
+          namespace="JobScooper\DataAccess"
+          defaultPhpNamingMethod="clean"
+        >
+    <!-- Within the <database> tag, Propel expects one <table> tag for each table -->
+
+
+    <!--
+        Each table element should have a `name` attribute. It will be used for naming the sql table.
+
+        The `phpName` is the name that Propel will use for the generated PHP class. By default, Propel uses a
+        CamelCase version of the table name as its phpName - that means that you could omit the `phpName` attribute
+        on our `book` table.
+    -->
+    <!--
+        Each table element should have a `name` attribute. It will be used for naming the sql table.
+
+        The `phpName` is the name that Propel will use for the generated PHP class. By default, Propel uses a
+        CamelCase version of the table name as its phpName - that means that you could omit the `phpName` attribute
+        on our `book` table.
+    -->
+    <table name="jobposting" phpName="JobPosting">
+        <!--
+            Each column has a `name` (the one used by the database), and an optional `phpName` attribute. Once again,
+            the Propel default behavior is to use a CamelCase version of the name as `phpName` when not specified.
+
+            Each column also requires a `type`. The XML schema is database agnostic, so the column types and attributes
+            are probably not exactly the same as the one you use in your own database. But Propel knows how to map the
+            schema types with SQL types for many database vendors. Existing Propel column types are:
+            `boolean`, `tinyint`, `smallint`, `integer`, `bigint`, `double`, `float`, `real`, `decimal`, `char`,
+            `varchar`, `longvarchar`, `date`, `time`, `timestamp`, `blob`, `clob`, `object`, and `array`.
+
+            Some column types use a size (like `varchar` and `int`), some have unlimited size (`longvarchar`, `clob`,
+            `blob`).
+
+            Check the (schema reference)[http://propelorm.org/reference/schema.html] for more details
+            on each column type.
+
+            As for the other column attributes, `required`, `primaryKey`, and `autoIncrement`, they mean exactly
+            what their names imply.
+        -->
+        <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+
+
+        <!--
+            Alternate unique key for every job post is jobsite + jobsite post id
+        -->
+        <column name="jobsite" phpName="JobSite" type="varchar" size="100" required="true"/>
+        <!--<foreign-key foreignTable="jobsite_plugin" onUpdate="none" onDelete="none">-->
+            <!--<reference local="jobsite" foreign="key"/>-->
+        <!--</foreign-key>-->
+
+        <column name="jobsite_post_id" phpName="JobSitePostID" type="varchar" size="255" required="true"/>
+        <unique name="index_jobsite_and_post_id/">
+            <unique-column name="jobsite"/>
+            <unique-column name="jobsite_post_id"/>
+        </unique>
+
+        <!--
+            Job posting facts
+        -->
+        <column name="title" phpName="Title" type="varchar" size="255" required="true"/>
+        <column name="title_tokens" phpName="TitleTokens" type="varchar" size="255" required="false"/>
+        <column name="url" type="varchar" size="1024" required="true"/>
+        <!--<unique name="index_jobsite_url/">-->
+            <!--<unique-column name="url"/>-->
+        <!--</unique>-->
+        <column name="company" type="varchar" size="100" required="false"/>
+        <!--        <column name="company_id" phpName="CompanyId" type="varchar" size="255" required="false"/> -->
+        <column name="location" type="varchar" size="255" required="false"/>
+        <column name="job_location_id" type="integer" required="false"/>
+        <foreign-key foreignTable="job_location" onUpdate="none" onDelete="none">
+            <reference local="job_location_id" foreign="location_id"/>
+        </foreign-key>
+
+
+        <column name="employment_type" phpName="EmploymentType" type="varchar" size="100" required="false"/>
+        <column name="department" type="varchar" size="255" required="false"/>
+        <column name="category" type="varchar" size="100" required="false"/>
+
+        <!--
+            Date & times for various events related to this particular job posting
+        -->
+        <column name="last_updated_at" phpName="UpdatedAt" type="timestamp" required="true"/>
+        <column name="job_posted_date" phpName="PostedAt" type="timestamp" required="false"/>
+        <column name="first_seen_at" phpName="FirstSeenAt" type="timestamp" required="true"/>
+        <behavior name="timestampable">
+            <parameter name="create_column" value="first_seen_at" />
+            <parameter name="update_column" value="last_updated_at" />
+        </behavior>
+        <column name="post_removed_at" phpName="RemovedAt" type="timestamp" required="false"/>
+
+        <!--
+            The following columns are automatically set via code in the JobPosting class
+        -->
+        <column name="key_site_and_post_id" phpName="KeySiteAndPostID" type="varchar" size="255" required="true" primaryString="true"/>
+        <column name="key_company_and_title" phpName="KeyCompanyAndTitle" type="varchar" size="255" required="true"/>
+        <column name="title_linked" phpName="JobTitleLinked" type="varchar" size="1024" required="true"/>
+
+        <column name="duplicates_posting_id" phpName="DuplicatesJobPostingId" type="integer" required="false"/>
+        <foreign-key foreignTable="jobposting" onUpdate="none" onDelete="none">
+            <reference local="duplicates_posting_id" foreign="jobposting_id"/>
+        </foreign-key>
+
+    </table>
+
+    <table name="job_location" phpName="JobLocation" reloadOnUpdate="true" reloadOnInsert="true">
+        <column name="location_id" phpName="LocationId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="lat" phpName="Latitude" type="float"/>
+        <column name="lon" phpName="Logitude" type="float"/>
+        <column name="full_display_name" phpName="DisplayName" type="varchar" size="100" />
+        <column name="primary_name" phpName="PrimaryName" type="varchar" size="100" />
+        <column name="place" phpName="Place" type="varchar" size="100" />
+        <column name="county" phpName="County" type="varchar" size="100" />
+        <column name="state" phpName="State" type="varchar" size="100" />
+        <column name="statecode" phpName="StateCode" type="varchar" size="2" />
+        <column name="country" phpName="Country" type="varchar" size="100" />
+        <column name="countrycode" phpName="CountryCode" type="varchar" size="2" />
+        <column name="alternate_names" phpName="AlternateNames" type="array" />
+        <column name="openstreetmap_id" phpName="OpenStreetMapId" type="integer"/>
+        <unique name="uniq_openstreetmap_id/">
+            <unique-column name="openstreetmap_id"/>
+        </unique>
+    </table>
+
+    <table name="job_place_lookup" phpName="JobPlaceLookup">
+        <column name="place_alternate_name" phpName="PlaceAlternateName" type="varchar" size="100" required="true" primaryKey="true" primaryString="true"/>
+        <column name="job_location_id" phpName="LocationId" type="integer" required="true" primaryKey="true" />
+        <foreign-key foreignTable="job_location" onUpdate="none" onDelete="none">
+            <reference local="job_location_id" foreign="location_id"/>
+        </foreign-key>
+        <behavior name="sluggable"/>
+    </table>
+
+
+    <table name="jobsite_plugin" phpName="JobSitePlugin" reloadOnUpdate="true" reloadOnInsert="true">
+        <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" primaryString="true" primaryKey="true"/>
+        <column name="plugin_class_name" phpName="PluginClassName" type="varchar" size="100" primaryString="false" primaryKey="false"/>
+        <column name="display_name" phpName="DisplayName" type="varchar" size="255" primaryString="false" primaryKey="false"/>
+        <column name="date_last_run" phpName="LastRunAt" type="timestamp" />
+        <column name="was_successful" phpName="LastRunWasSuccessful" type="boolean"/>
+        <column name="date_next_run" phpName="StartNextRunAfter" type="timestamp" />
+        <column name="date_last_failed" phpName="LastFailedAt" type="timestamp" />
+
+        <column name="last_user_search_run_id" phpName="LastUserSearchRunId" type="integer" lazyLoad="true"/>
+        <foreign-key foreignTable="user_search_run" onUpdate="none" onDelete="none">
+            <reference local="last_user_search_run_id" foreign="user_search_run_id"/>
+        </foreign-key>
+
+        <column name="supported_country_codes" phpName="SupportedCountryCodes" type="array"/>
+        <column name="results_filter_type" phpName="ResultsFilterType" type="enum" valueSet="all-only, all-by-location, user-filtered"/>
+    </table>
+
+
+
+    <table name="user" phpName="User" allowPkInsert="true">
+        <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true" primaryKey="true" primaryString="true"/>
+        <column name="name" phpName="Name" type="varchar" size="128" required="true"/>
+        <column name="email_address" phpName="EmailAddress" type="varchar" size="128" required="false"/>
+        <column name="configuration_file_path" phpName="ConfigFilePath" type="varchar" size="128" required="false"/>
+    </table>
+
+
+
+
+    <table name="user_job_match" phpName="UserJobMatch">
+        <column name="user_job_match_id" phpName="UserJobMatchId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true"/>
+        <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true"/>
+        <column name="user_notification_state" phpName="UserNotificationState" type="enum" valueSet="not-ready,ready,sent" defaultValue="not-ready"/>
+        <column name="is_job_match" phpName="IsJobMatch" type="boolean"/>
+        <column name="is_excluded" phpName="IsExcluded" type="boolean"/>
+        <column name="is_include_in_notifications" phpName="IsIncludeInNotifications" type="boolean"/>
+        <column name="matched_user_keywords" phpName="MatchedUserKeywords" type="array"/>
+        <column name="matched_negative_title_keywords" phpName="MatchedNegativeTitleKeywords" type="array"/>
+        <column name="matched_negative_company_keywords" phpName="MatchedNegativeCompanyKeywords" type="array"/>
+        <column name="out_of_user_area" phpName="OutOfUserArea" type="boolean"/>
+        <column name="app_run_id" phpName="AppRunId" type="varchar" size="75"/>
+        <foreign-key foreignTable="user">
+            <reference local="user_slug" foreign="user_slug"/>
+        </foreign-key>
+        <foreign-key foreignTable="jobposting">
+            <reference local="jobposting_id" foreign="jobposting_id"/>
+        </foreign-key>
+    </table>
+
+
+    <table name="user_search_run" phpName="UserSearchRun" reloadOnUpdate="true" reloadOnInsert="true">
+        <column name="user_search_run_id" phpName="UserSearchRunId" type="integer" required="true" autoIncrement="true" primaryKey="true"/>
+        <column name="search_key" phpName="SearchKey" type="varchar" size="128" required="true"/>
+        <column name="user_slug" phpName="UserSlug"  type="varchar" size="128" required="true"/>
+        <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" required="true"/>
+        <column name="location_key" phpName="LocationKey" type="varchar" size="100" required="true"/>
+        <!--<unique name="uniq_user_searchkey/">-->
+            <!--<unique-column name="user_slug"/>-->
+            <!--<unique-column name="search_key"/>-->
+            <!--<unique-column name="jobsite_key"/>-->
+            <!--<unique-column name="location_key"/>-->
+        <!--</unique>-->
+
+        <column name="user_search_run_key" type="varchar" size="100" required="true"/>
+        <behavior name="sluggable">
+            <parameter name="slug_column" value="user_search_run_key" />
+            <parameter name="slug_pattern" value="{JobSiteKey}-{UserSlug}-{SearchKey}-{LocationKey}" />
+            <parameter name="replace_pattern" value="/[^\w\/]+/u" />
+            <parameter name="replacement" value="" />
+            <parameter name="separator" value="-" />
+            <parameter name="permanent" value="true" />
+        </behavior>
+
+        <column name="search_settings" phpName="SearchSettings" type="object"/>
+        <column name="last_app_run_id" phpName="AppRunId" type="varchar" size="75"/>
+        <column name="run_result" field="run_result_code" phpName="RunResultCode" type="enum" valueSet="not-run,failed,excluded,skipped,successful" defaultValue="not-run"/>-->
+        <column name="run_error_details" phpName="RunErrorDetails" type="array"/>
+        <foreign-key foreignTable="user">
+            <reference local="user_slug" foreign="user_slug"/>
+        </foreign-key>
+        <column name="date_last_run" phpName="LastRunAt" type="timestamp" />
+        <behavior name="timestampable">
+            <parameter name="create_column" value="date_last_run" />
+        </behavior>
+        <column name="date_next_run" phpName="StartNextRunAfter" type="timestamp" />
+        <column name="date_last_failed" phpName="LastFailedAt" type="timestamp" />
+    </table>
+
+
+    <!--
+
+    <table name="company" phpName="Company">
+        <column name="company_id" phpName="companyId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="name" type="varchar" size="128" required="true"/>
+        <column name="logo" type="varchar" size="1024" required="false"/>
+        <column name="base_url" phpName="baseUrl" type="varchar" size="1024" required="false"/>
+    </table>
+
+    <table name="company_job_postings" isCrossRef="true">
+        <column name="company_id" phpName="companyId" type="integer" primaryKey="true"/>
+        <column name="job_post_id" phpName="jobPostId" type="integer" primaryKey="true"/>
+        <foreign-key foreignTable="company">
+            <reference local="company_id" foreign="company_id"/>
+        </foreign-key>
+        <foreign-key foreignTable="jobposting">
+            <reference local="job_post_id" foreign="job_post_id"/>
+        </foreign-key>
+    </table>
+
+-->
+    <!--
+        When you're done with editing, open a terminal and run
+            `$ cd /Users/bryan/code/jobs_scooper_v4/config`
+            `$ vendor/bin/propel build`
+        to generate the model classes.
+
+        You should now be able to perform basic crud operations with your models. To learn how to use these models
+        please look into our documentation: http://propelorm.org/documentation/03-basic-crud.html
+    -->
+</database>

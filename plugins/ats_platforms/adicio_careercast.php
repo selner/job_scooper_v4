@@ -22,7 +22,7 @@ abstract class AlternateAdicioCareerCastPlugin extends BaseAdicioCareerCastPlugi
     protected $nJobListingsPerPage = 20;
 }
 
-abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
+abstract class BaseAdicioCareerCastPlugin extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
     protected $siteName = '';
     protected $siteBaseURL = '';
@@ -63,7 +63,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
     /**
      * If the site does not have a URL parameter for number of days
      * then set the plugin flag to C__JOB_DAYS_VALUE_NOTAPPLICABLE__
-     * in the PluginOptions.php file and just comment out this function.
+     * in the LoadPlugins.php file and just comment out this function.
      *
      * getDaysURLValue returns the value that is used to replace
      * the ***DAYS*** token in the search URL for the number of
@@ -108,7 +108,7 @@ abstract class BaseAdicioCareerCastPlugin extends ClassClientHTMLJobSitePlugin
      *
      * If the site does not show the total number of results
      * then set the plugin flag to C__JOB_PAGECOUNT_NOTAPPLICABLE__
-     * in the PluginOptions.php file and just comment out this function.
+     * in the LoadPlugins.php file and just comment out this function.
      *
      * parseTotalResultsCount returns the total number of listings that
      * the search returned by parsing the value from the returned HTML

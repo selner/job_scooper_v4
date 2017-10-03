@@ -22,35 +22,22 @@ ini_set('auto_detect_line_endings', true);
 
 
 //use Doctrine\ORM\Tools\Setup;
-if (file_exists(dirname(__FILE__).'/vendor/autoload.php')) {
-    require_once(dirname(__FILE__).'/vendor/autoload.php');
+if (file_exists(__ROOT__ . '/vendor/autoload.php')) {
+    require_once(__ROOT__ . '/vendor/autoload.php');
 } else {
     trigger_error("Composer required to run this app.");
 }
 
+require_once(__ROOT__ . '/autoloader.php');
 
 // setup Propel
-require_once(dirname(__FILE__).'/config/generated-conf/config.php');
+require_once(__ROOT__ . '/src/Runtime/config.php');
 
-require_once(dirname(__FILE__) . '/include/Helpers.php');
+$files = glob(__ROOT__ . "/src/util/" . '*.php');
+foreach ($files as $file) {
+    require_once($file);
+}
 
-require_once(dirname(__FILE__).'/lib/pharse.php');
-require_once(dirname(__FILE__).'/lib/Linkify.php');
-require_once(dirname(__FILE__).'/lib/AddressNormalization.php');
-
-require_once(dirname(__FILE__).'/include/JobListFilters.php');
-require_once(dirname(__FILE__).'/include/ErrorManager.php');
-
-require_once(dirname(__FILE__).'/include/SeleniumSession.php');
-require_once(dirname(__FILE__).'/include/CmdLineOptions.php');
-require_once(dirname(__FILE__).'/include/PluginsAbstractJobsBaseClass.php');
-
-require_once(dirname(__FILE__).'/include/PluginClassTypes.php');
-require_once(dirname(__FILE__).'/include/ClassConfig.php');
-require_once(dirname(__FILE__).'/include/StageManager.php');
-require_once(dirname(__FILE__).'/include/PluginSimpleJobClasses.php');
-require_once(dirname(__FILE__).'/include/PluginJsonConfigSupport.php');
-require_once(dirname(__FILE__).'/include/JobsAutoMarker.php');
-require_once(dirname(__FILE__).'/include/ClassJobsNotifier.php');
-require_once(dirname(__FILE__).'/include/PluginOptions.php');
+require_once(__ROOT__ . '/src/CmdLineOptions.php');
+require_once(__ROOT__ . '/src/LoadPlugins.php');
 

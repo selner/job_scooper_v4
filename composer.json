@@ -28,7 +28,9 @@
         "monolog/monolog": "1.x-dev"
     },
     "autoload": {
-        "classmap": ["config/generated-classes/JobScooper/"]
+        "psr-0": {
+            "JobScooper": "src/"
+        }
     }
 
 }
