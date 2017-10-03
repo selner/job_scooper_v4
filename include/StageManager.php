@@ -36,26 +36,21 @@ class StageManager
 
 
         } catch (Exception $ex) {
-//            handleException($ex, null, true);
-            print $ex;
+            LogLine("Unable to start Stage Manager: " . $ex->getMessage());
+            throw $ex;
         }
 
     }
 
     function __destruct()
     {
-        LogLine("Closing " . $this->siteName . " instance of class " . get_class($this), \C__DISPLAY_ITEM_START__);
-
-
-
+        LogLine("Closing StageManager instance.", \C__DISPLAY_ITEM_START__);
     }
 
     function _cleanUpBeforeExiting()
     {
         $err = new ErrorManager();
         $err->processAndAlertErrors();
-
-
     }
 
 
@@ -89,7 +84,6 @@ class StageManager
         finally
         {
             $this->_cleanUpBeforeExiting();
-
         }
     }
 
@@ -119,30 +113,64 @@ class StageManager
         //
         $arrSearchesToRunBySite = $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'];
 
-
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //
         // OK, now we have our list of searches & sites we are going to actually run
         // Let's go get the jobs for those searches
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        if ($arrSearchesToRunBySite != null) {
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //
-            // Download all the job listings for all the users searches
-            //
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        if ($arrSearchesToRunBySite != null)
+        {
             LogLine(PHP_EOL . "**************  Starting Run of Searches for " . count($arrSearchesToRunBySite) . " Job Sites **************  " . PHP_EOL, \C__DISPLAY_NORMAL__);
 
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //
+            // Run each plugin, set the searches to run and then download the jobs from that jobsite
+            //
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             try {
+                foreach(array_keys($arrSearchesToRunBySite) as $sitename)
+                {
+                    $searches = $arrSearchesToRunBySite[$sitename];
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    //
+                    // Add the user's searches to the plugin
+                    //
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    LogLine("Setting up " . count($searches) . " search(es) for ". $sitename . "...", \C__DISPLAY_SECTION_START__);
+                    $plugin = getPluginObjectForJobSite($sitename);
+                    try
+                    {
+                        $plugin->addSearches($searches);
+                    }
+                    catch (Exception $classError)
+                    {
+                        handleException($classError, "Unable to add searches to {$GLOBALS['JOBSITE_PLUGINS'][$sitename]['class_name']} plugin: %s", $raise = false);
+                    }
+                    finally
+                    {
+                        LogLine("Search(es) added ". $sitename . ".", \C__DISPLAY_SECTION_END__);
+                    }
 
-                //
-                // the Multisite class handles the heavy lifting for us by executing all
-                // the searches in the list and returning us the combined set of new jobs
-                // (with the exception of Amazon for historical reasons)
-                //
-                $classMulti = new ClassMultiSiteSearch();
-                $classMulti->updateJobsForAllJobSites($arrSearchesToRunBySite);
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    //
+                    // Download all the job listings for all the users searches for this plugin
+                    //
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    try
+                    {
+                        LogLine("Downloading updated jobs on " . count($searches) . " search(es) for ". $sitename . "...", \C__DISPLAY_SECTION_START__);
+                        $plugin->getUpdatedJobsForAllSearches();
+                    }
+                    catch (Exception $classError)
+                    {
+                        handleException($classError, $GLOBALS['JOBSITE_PLUGINS'][$sitename]['class_name'] . " failed to download job postings: %s", $raise = false);
+                    }
+                    finally
+                    {
+                        LogLine("Job downloads have ended for ". $sitename . ".", \C__DISPLAY_SECTION_END__);
+                    }
+                }
             } catch (Exception $ex) {
                 handleException($ex, null, false);
             }
@@ -215,11 +243,6 @@ class StageManager
         try {
 
             LogLine("Stage 4: Notifying User", \C__DISPLAY_SECTION_START__);
-
-//            if ((countJobRecords($arrMatchedJobs)) == 0) {
-//                LogLine("No jobs were loaded for notification. Skipping Stage 4.", \C__DISPLAY_WARNING__);
-//                return;
-//            }
 
             $notifier = new ClassJobsNotifier();
             $notifier->processNotifications();
