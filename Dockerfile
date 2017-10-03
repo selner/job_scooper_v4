@@ -111,16 +111,6 @@ RUN cat /opt/jobs_scooper/bootstrap.php | grep "__APP_VERSION__"
 
 ########################################################
 ###
-### Add any user files to the image
-###
-########################################################
-RUN echo "Looking for `pwd`/usersfiles/scoop_docker.sh to copy to image..."
-RUN ls -al /opt/jobs_scooper/userfiles
-RUN [ -f /opt/job_scooper/userfiles/scoop_docker.sh ] && echo "Using user-specific version of scoop_docker.sh" || CAT "echo Missing userfiles/scoop_docker.sh script file to run." > /opt/job_scooper/userfiles/scoop_docker.sh
-RUN chmod +x /opt/jobs_scooper/userfiles/*.sh
-
-########################################################
-###
 ### Run job_scooper for a given config
 ###
 ########################################################
