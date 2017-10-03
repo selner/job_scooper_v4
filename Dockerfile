@@ -100,11 +100,31 @@ RUN pip install --no-cache-dir -v -r /opt/jobs_scooper/python/pyJobNormalizer/re
 ### to the image
 ###
 ########################################################
+RUN echo "Adding all source files from `pwd` to /opt/jobs_scooper"
 ADD ./ /opt/jobs_scooper/
 
-RUN cat /opt/jobs_scooper/bootstrap.php | grep "__APP_VERSION__"RUN ls -al /opt/jobs_scooper########################################################
+RUN echo "Verifying correct source installed..."
+RUN ls -al /opt/jobs_scooper
+RUN cat /opt/jobs_scooper/bootstrap.php | grep "__APP_VERSION__"
+
+########################################################
 ###
 ### Add any user files to the image
 ###
 ########################################################
-RUN ls -al /opt/jobs_scooper/userfilesRUN [ -f /opt/job_scooper/userfiles/scoop_docker.sh ] && echo "Using user-specific version of scoop_docker.sh" || CAT "echo Missing userfiles/scoop_docker.sh script file to run." > /opt/job_scooper/userfiles/scoop_docker.shRUN chmod +x /opt/jobs_scooper/userfiles/*.sh############################################################## Run job_scooper for a given config###########################################################WORKDIR /opt/jobs_scooper# Commenting Out Entry Point for Builds.  Needs to be called from# container start instead now.# CMD bash -C '/opt/jobs_scooper/userfiles/scoop_docker.sh;/bin/bash';'bash'
+RUN echo "Looking for `pwd`/usersfiles/scoop_docker.sh to copy to image..."
+RUN ls -al /opt/jobs_scooper/userfiles
+RUN [ -f /opt/job_scooper/userfiles/scoop_docker.sh ] && echo "Using user-specific version of scoop_docker.sh" || CAT "echo Missing userfiles/scoop_docker.sh script file to run." > /opt/job_scooper/userfiles/scoop_docker.sh
+RUN chmod +x /opt/jobs_scooper/userfiles/*.sh
+
+########################################################
+###
+### Run job_scooper for a given config
+###
+########################################################
+
+WORKDIR /opt/jobs_scooper
+
+# Commenting Out Entry Point for Builds.  Needs to be called from
+# container start instead now.
+# CMD bash -C '/opt/jobs_scooper/userfiles/scoop_docker.sh;/bin/bash';'bash'
