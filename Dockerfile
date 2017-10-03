@@ -71,10 +71,12 @@ VOLUME "/root/nltk_data"
 
 ########################################################
 ###
-### Create the main source code directory on the image
+### Create the main source code directory structure on
+### the image
 ###
 ########################################################
 RUN mkdir /opt/jobs_scooper
+RUN mkdir /opt/jobs_scooper/userfiles
 
 ########################################################
 ###
