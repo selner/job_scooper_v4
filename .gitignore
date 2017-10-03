@@ -1,13 +1,13 @@
 .idea*
 *backup*
 *.lock
-config/generated-sql*
-config/generated-migrations*
+*/generated-sql*
+*/generated-migrations*
 vendor/*
 *obsolete*
-scripts
 *.pyc
 *.diff
 sshkeys
-include/static/source_files
+*/static/source_files
 python/pyJobNormalizerVirtualEnv
+/scripts/personal/*
