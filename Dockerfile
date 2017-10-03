@@ -115,5 +115,5 @@ RUN ls -al /opt/jobs_scooper
 ### local shared volume for results and config data
 ###
 ########################################################
-WORKDIR /opt/jobs_scooper
-CMD bash -C '/var/local/jobs_scooper/start_jobscooper.sh;';'bash'
+WORKDIR /var/local/jobs_scooper
+CMD bash -C '/var/local/jobs_scooper/start_jobscooper.sh';'bash'
