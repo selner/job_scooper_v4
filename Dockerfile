@@ -115,12 +115,13 @@ RUN ls -al /opt/jobs_scooper
 ### generate one if not.
 ###
 ########################################################
-RUN echo "Looking for user-specific scoop_docker.sh file to start container with..."
-RUN ls -al /opt/jobs_scooper/userfiles
-
-RUN [ -f /opt/job_scooper/userfiles/scoop_docker.sh ] && echo "Successfully found user-specific version of scoop_docker.sh"
-RUN [ ! -f $USERFILES/scoop_docker.sh ] && MISSINGMSG="Missing `pwd`/userfiles/scoop_docker.sh script file to run.  Created placeholder file."; echo $MISSINGMSG > $USERFILES/scoop_docker.sh; echo $MISSINGMSG
-
+# BUGBUG:  this is still not functional so commenting out for the time being
+# RUN echo "Looking for user-specific scoop_docker.sh file to start container with..."
+# RUN ls -al /opt/jobs_scooper/userfiles
+# 
+# RUN [ -f /opt/job_scooper/userfiles/scoop_docker.sh ] && echo "Successfully found user-specific version of scoop_docker.sh"
+# RUN [ ! -f $USERFILES/scoop_docker.sh ] && MISSINGMSG="Missing `pwd`/userfiles/scoop_docker.sh script file to run.  Created placeholder file."; echo $MISSINGMSG > $USERFILES/scoop_docker.sh; echo $MISSINGMSG
+# 
 RUN chmod +x /opt/jobs_scooper/userfiles/*.sh
 
 ########################################################
