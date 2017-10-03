@@ -111,26 +111,9 @@ RUN ls -al /opt/jobs_scooper
 
 ########################################################
 ###
-### Verify we have a scoop_docker.sh file to execute;
-### generate one if not.
-###
-########################################################
-# BUGBUG:  this is still not functional so commenting out for the time being
-# RUN echo "Looking for user-specific scoop_docker.sh file to start container with..."
-# RUN ls -al /opt/jobs_scooper/userfiles
-# 
-# RUN [ -f /opt/job_scooper/userfiles/scoop_docker.sh ] && echo "Successfully found user-specific version of scoop_docker.sh"
-# RUN [ ! -f $USERFILES/scoop_docker.sh ] && MISSINGMSG="Missing `pwd`/userfiles/scoop_docker.sh script file to run.  Created placeholder file."; echo $MISSINGMSG > $USERFILES/scoop_docker.sh; echo $MISSINGMSG
-# 
-RUN chmod +x /opt/jobs_scooper/userfiles/*.sh
-
-########################################################
-###
-### Run job_scooper via the userfiles/scoop_docker.sh file
+### Run the user's start_jobscooper.sh script in the 
+### local shared volume for results and config data
 ###
 ########################################################
 WORKDIR /opt/jobs_scooper
-
-# Commenting Out Entry Point for Builds.  Needs to be called from
-# container start instead now.
-CMD bash -C '/opt/jobs_scooper/userfiles/scoop_docker.sh;';'bash'
+CMD bash -C '/var/local/jobs_scooper/start_jobscooper.sh;';'bash'
