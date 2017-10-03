@@ -5,15 +5,15 @@ steps:
     title: Free styling
     image: alpine:latest
     #The directory should be relative to git repository that is used for cloning
-    working_directory: ${{main_clone}}
+    working_directory: ${{CF_VOLUME_PATH}}
     commands:
-        - ${{main_clone}}/scripts/prep_userfiles_for_build.sh
+        - ${{CF_VOLUME_PATH}}/scripts/prep_userfiles_for_build.sh
 
   BuildingDockerImage:
     title: Building Docker Image
     type: build
     image_name: selner/js4-${{CF_BRANCH_TAG_NORMALIZED}}
-    working_directory: ${{AddingUserFilesToBuildSource}}
+    working_directory: ${{CF_VOLUME_PATH}}
     dockerfile: Dockerfile
     metadata: # Declare the metadata attribute
       set: # Specify the set operation
