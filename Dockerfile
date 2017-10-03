@@ -69,42 +69,42 @@ RUN composer --version
 VOLUME "/var/local/jobs_scooper"
 VOLUME "/root/nltk_data"
 
+########################################################
+###
+### Create the main source code directory on the image
+###
+########################################################
+RUN mkdir /opt/jobs_scooper
 
 ########################################################
 ###
-### Clone the github source repo to the container
+### Add the PHP composer configuration file into image
 ### and install the dependencies
 ###
 ########################################################
-
-RUN mkdir /opt/jobs_scooper
 WORKDIR /opt/jobs_scooper
-ADD ./ /opt/jobs_scooper/
-
-RUN cat /opt/jobs_scooper/bootstrap.php | grep "__APP_VERSION__"RUN ls -al /opt/jobs_scooperRUN ls -al /opt/jobs_scooper/userfilesRUN [ -f /opt/job_scooper/userfiles/scoop_docker.sh ] && echo "Using user-specific version of scoop_docker.sh" || cp /opt/job_scooper/examples/scoop_docker.sh /opt/job_scooper/userfiles/scoop_docker.shRUN chmod +x /opt/jobs_scooper/userfiles/*.sh
-########################################################
-###
-### Install PHP dependencies
-###
-########################################################
-WORKDIR /opt/jobs_scooper
+ADD composer.json /opt/jobs_scooper
 RUN composer install --no-interaction -vv
-
 
 ########################################################
 ###
 ### Install python dependencies
 ###
 ########################################################
+ADD ./python/pyJobNormalizer/requirements.txt /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
 RUN pip install --no-cache-dir -v -r /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
 
-
 ########################################################
 ###
-### Run job_scooper for a given config
+### Add the full, remaining source code from the repo
+### to the image
 ###
 ########################################################
+ADD ./ /opt/jobs_scooper/
 
-WORKDIR /opt/jobs_scooper
-
-CMD bash -C '/opt/jobs_scooper/userfiles/scoop_docker.sh';'bash'
+RUN cat /opt/jobs_scooper/bootstrap.php | grep "__APP_VERSION__"RUN ls -al /opt/jobs_scooper########################################################
+###
+### Add any user files to the image
+###
+########################################################
+RUN ls -al /opt/jobs_scooper/userfilesRUN [ -f /opt/job_scooper/userfiles/scoop_docker.sh ] && echo "Using user-specific version of scoop_docker.sh" || CAT "echo Missing userfiles/scoop_docker.sh script file to run." > /opt/job_scooper/userfiles/scoop_docker.shRUN chmod +x /opt/jobs_scooper/userfiles/*.sh############################################################## Run job_scooper for a given config###########################################################WORKDIR /opt/jobs_scooper# Commenting Out Entry Point for Builds.  Needs to be called from# container start instead now.# CMD bash -C '/opt/jobs_scooper/userfiles/scoop_docker.sh;/bin/bash';'bash'
