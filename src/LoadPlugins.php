@@ -15,7 +15,6 @@
  * under the License.
  */
 require_once __ROOT__ . "/bootstrap.php";
-require_once __ROOT__ . "/src/IJobSitePlugin.php";
 
 ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
 
