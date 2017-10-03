@@ -19,19 +19,18 @@ steps:
       set: # Specify the set operation
         - qa: pending
         - commit_message: ${{CF_COMMIT_MESSAGE}}
-#        - build_branch: ${{CF_BRANCH}}
-#        - build_id: ${{CF_BUILD_ID}}
-#        - build_time: ${{CF_BUILD_TIMESTAMP}}
-#        - build_url: ${{CF_BUILD_URL}}
-#        - build_initiated_by: ${{CF_BUILD_TRIGGER}}
-#        - build_triggered_by: github ${{CF_REVISION}} by ${{CF_COMMIT_AUTHOR}} ~~ ${{CF_COMMIT_MESSAGE}}
+        - build_branch: ${{CF_BRANCH}}
+        - build_id: ${{CF_BUILD_ID}}
+        - build_time: ${{CF_BUILD_TIMESTAMP}}
+        - build_url: ${{CF_BUILD_URL}}
+        - build_initiated_by: ${{CF_BUILD_TRIGGER}}
+        - build_triggered_by: github ${{CF_REVISION}} by ${{CF_COMMIT_AUTHOR}} ~~ ${{CF_COMMIT_MESSAGE}}
 
-  PushingToDockerRegistryBuildId:
-    title: Pushing to Docker Registry
-    type: push
-    candidate: '${{BuildingDockerImage}}'
-    tag: {{CF_BUILD_ID}}
-    registry: codefresh_bryanselner
+#  PushingToDockerRegistryBuildId:
+#    title: Pushing to Docker Registry
+#    type: push
+#    candidate: '${{BuildingDockerImage}}'
+#    registry: codefresh_bryanselner
 
   PushingToDockerRegistryLatest:
     title: Pushing to Docker Registry
