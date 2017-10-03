@@ -1,0 +1,25 @@
+version: '1.0'
+steps:
+  AddingUserFilesToBuildSource:
+    description: Freestyle step..
+    title: Free styling
+    image: alpine:latest
+    #The directory should be relative to git repository that is used for cloning
+    working_directory: ${{main_clone}}
+    commands:
+        - ${{main_clone}}/scripts/prep_userfiles_for_build.sh
+
+  BuildingDockerImage:
+    title: Building Docker Image
+    type: build
+    image_name: selner/js4-${{CF_BRANCH_TAG_NORMALIZED}}
+    working_directory: ${{AddingUserFilesToBuildSource}}
+    dockerfile: Dockerfile
+    tag: '${{CF_BRANCH_TAG_NORMALIZED}}'
+
+  PushingToDockerRegistry:
+    title: Pushing to Docker Registry
+    type: push
+    candidate: '${{BuildingDockerImage}}'
+    tag: '${{CF_BRANCH_TAG_NORMALIZED}}'
+    registry: codefresh_bryanselner
