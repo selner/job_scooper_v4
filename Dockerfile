@@ -74,6 +74,7 @@ VOLUME "/var/local/jobs_scooper"
 ### Download the full nltk data set needed for python
 ###
 ########################################################
+RUN pip install --no-cache-dir -v nltk
 RUN python -m nltk.downloader -d /root/nltk_data all
 
 ########################################################
