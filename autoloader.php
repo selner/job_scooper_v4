@@ -17,7 +17,8 @@ function loadClass($className) {
     if (file_exists($fullFileName)) {
         require $fullFileName;
     } else {
-        echo 'Class "'.$className.'" does not exist.';
+        if(isDebug())
+            LogLine('Autoloader:  class "'.$className.'" was not found.', C__DISPLAY_WARNING__);
     }
 }
 spl_autoload_register('loadClass'); // Registers the autoloader
