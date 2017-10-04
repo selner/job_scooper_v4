@@ -19,33 +19,33 @@ require_once __ROOT__ ."/bootstrap.php";
 use JobApis\Jobs\Client\Queries\UsajobsQuery;
 use JobApis\Jobs\Client\Providers\UsajobsProvider;
 use \JobScooper\Plugins\Base\JobsAPIPlugin;
-
-class PluginUSAJobs extends JobsAPIPlugin
-{
-    protected $siteBaseURL = 'http://search.digitalgov.gov/developer/jobs.html';
-    protected $strBaseURLFormat = 'https://api.usa.gov/jobs/search.json?query=in+***LOCATION***';
-    protected $siteName = 'USAJobs';
-    protected $nJobListingsPerPage = 25;
-    protected $typeLocationSearchNeeded = 'location-city-comma-state';
-    protected $authorization_key = null;
-    
-    function getSearchJobsFromAPI($searchDetails, $pageNumber = 1)
-    {
-        // Add parameters to the query via the constructor
-        $options = [
-            'AuthorizationKey' => $this->authorization_key,
-
-            'LocationName' => $searchDetails['location_search_value'],
-            'Page' => $pageNumber
-        ];
-        $query = new UsajobsQuery($options);
-        $client = new UsajobsProvider($query);
-        $GLOBALS['logger']->logLine("Getting jobs from " . $query->getUrl() . "[". $searchDetails->getUserSearchRunKey() , \C__DISPLAY_ITEM_DETAIL__);
-        $apiJobs = $client->getJobs();
-        return $apiJobs->all();
-
-    }
-}
-
+//
+//class PluginUSAJobs extends JobsAPIPlugin
+//{
+//    protected $siteBaseURL = 'http://search.digitalgov.gov/developer/jobs.html';
+//    protected $strBaseURLFormat = 'https://api.usa.gov/jobs/search.json?query=in+***LOCATION***';
+//    protected $siteName = 'USAJobs';
+//    protected $nJobListingsPerPage = 25;
+//    protected $typeLocationSearchNeeded = 'location-city-comma-state';
+//    protected $authorization_key = null;
+//
+//    function getSearchJobsFromAPI($searchDetails, $pageNumber = 1)
+//    {
+//        // Add parameters to the query via the constructor
+//        $options = [
+//            'AuthorizationKey' => $this->authorization_key,
+//
+//            'LocationName' => $searchDetails['location_search_value'],
+//            'Page' => $pageNumber
+//        ];
+//        $query = new UsajobsQuery($options);
+//        $client = new UsajobsProvider($query);
+//        $GLOBALS['logger']->logLine("Getting jobs from " . $query->getUrl() . "[". $searchDetails->getUserSearchRunKey() , \C__DISPLAY_ITEM_DETAIL__);
+//        $apiJobs = $client->getJobs();
+//        return $apiJobs->all();
+//
+//    }
+//}
+//
 
 
