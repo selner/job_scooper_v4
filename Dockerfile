@@ -67,7 +67,14 @@ RUN composer --version
 ###
 ########################################################
 VOLUME "/var/local/jobs_scooper"
-VOLUME "/root/nltk_data"
+
+
+########################################################
+###
+### Download the full nltk data set needed for python
+###
+########################################################
+python -m nltk.downloader -d /root/nltk_data all
 
 ########################################################
 ###

@@ -47,7 +47,7 @@ ECHO ""
 ECHO "Starting docker container %CONTAINER_NAME%"
 ECHO ""
 ECHO "***************************************************************"
-docker run --volume C:\var\local\jobs_scooper:/var/local/jobs_scooper --volume c:\dev\nltk_data:/root/nltk_data --hostname %COMPUTERNAME%_docker --name %CONTAINER_NAME% -d %DOCKER_REPO_IMAGE%
+docker run --volume C:\var\local\jobs_scooper:/var/local/jobs_scooper --hostname %COMPUTERNAME%_docker --name %CONTAINER_NAME% -d %DOCKER_REPO_IMAGE%
 
 POPD
 docker logs -f %CONTAINER_NAME%
