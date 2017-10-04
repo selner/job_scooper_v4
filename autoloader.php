@@ -1,24 +1,25 @@
 <?php
-function loadClass($className) {
-    $fileName = '';
-    $namespace = 'JobScooper';
-
-    // Sets the include path as the "src" directory
-    $includePath = __ROOT__.DIRECTORY_SEPARATOR.'src';
-
-    if (false !== ($lastNsPos = strripos($className, '\\'))) {
-        $namespace = substr($className, 0, $lastNsPos);
-        $className = substr($className, $lastNsPos + 1);
-        $fileName = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
+/**
+ * Register Autoload
+ */
+spl_autoload_register(function ($entity) {
+    $module = explode('\\', $entity, 2);
+    if (!in_array('Jobscooper', $module)) {
+        /**
+         * Not a part of Jobscooper file
+         * then we return here.
+         */
+        return;
     }
-    $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
-    $fullFileName = $includePath . DIRECTORY_SEPARATOR . $fileName;
 
-    if (file_exists($fullFileName)) {
-        require $fullFileName;
+    $entity = str_replace('\\', DIRECTORY_SEPARATOR, $entity);
+    $path = __ROOT__ . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . $entity . '.php';
+
+    if (is_readable($path)) {
+        require_once $path;
     } else {
         if(isDebug())
-            LogLine('Autoloader:  class "'.$className.'" was not found.', C__DISPLAY_WARNING__);
+            LogLine("Autoloader:  could not find expected source file '{$path}' for class {$entity}.", C__DISPLAY_WARNING__);
     }
-}
-spl_autoload_register('loadClass'); // Registers the autoloader
+
+});
