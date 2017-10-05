@@ -20,10 +20,9 @@ class JobPlaceLookup extends BaseJobPlaceLookup
 
     public function postSave(ConnectionInterface $con = null)
     {
-        $ret = parent::postSave($con);
+        parent::postSave($con);
 
         reloadLocationNamesCache();
-        return $ret;
     }
 
     /**
