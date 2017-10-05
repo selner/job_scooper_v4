@@ -53,10 +53,6 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
     {
         $this->setKeyCompanyAndTitle(cleanupSlugPart($this->getCompany() . $this->getTitle()));
         $this->setKeySiteAndPostID(cleanupSlugPart($this->getJobSite() . $this->getJobSitePostID()));
-
-
-        $locationId = getLocationIdByAlternateName($this->getLocation());
-        $this->setJobLocationId($locationId);
     }
 
     public function setAutoColumnRelatedProperty($method, $v)
@@ -68,18 +64,18 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
         return $ret;
     }
 
-    public function getLocationString()
+    private function _setDenormalizedLocationDisplayValue_()
     {
-        $ret = $this->getLocation();
+        $val = "";
+
         $location = $this->getJobLocation();
         if(!is_null($location))
         {
-            $ret .= $location->getPlace() ? " {$location->getPlace()}" : "";
-            $ret .= $location->getStateCode() ? " {$location->getStateCode()}" : "";
-            $ret .= $location->getCountryCode() ? " {$location->getCountryCode()}" : "";
+            $val = $location->getDisplayName();
         }
 
-        return $ret;
+        $val = $this->_cleanupTextValue($val);
+        $this->setLocationDisplayValue($val);
     }
 
     public function normalizeJobRecord()
@@ -115,6 +111,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
         $v = html_entity_decode($v);
         $v = preg_replace(array('/\s{2,}/', '/[\t\n]/'), ' ', $v);
         $v = clean_utf8($v);
+        $v = trim($v);
 
         return $v;
     }
@@ -129,12 +126,11 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
         parent::setTitle($v);
     }
 
-    public function setLocation($v)
+    public function setLocationFromSource($v)
     {
         // clear any previous job location ID when we set a new location string
-        $this->setJobLocationId(null);
+        $this->setJobLocation(null);
 
-        $normalizer = new Normalize();
         $v = preg_replace('#(^\s*\(+|\)+\s*$)#', "", $v); // strip leading & ending () chars
         $v = $this->_cleanupTextValue($v);
 
@@ -146,13 +142,20 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
         if ($matched !== false && count($arrMatches) == 4) {
             $v = $arrMatches[3] . ", " . $arrMatches[2];
         }
-//
-//        $stringToNormalize = "111 Bogus St, " . $v;
-//        $location = $normalizer->parse($stringToNormalize);
-//        if ($location !== false)
-//            $v = $location['city'] . ", " . $location['state'];
 
-        parent::setLocation(trim($v));
+        parent::setLocationFromSource(trim($v));
+
+        if(!is_null($v) && strlen($v) > 0)
+            $this->_findAndSetJobLocationRelation_();
+    }
+
+    private function _findAndSetJobLocationRelation_()
+    {
+        $orig_loc_str = $this->getLocationFromSource();
+
+        $locationId = getLocationIdByAlternateName($orig_loc_str);
+        $this->setJobLocationId($locationId);
+        $this->_setDenormalizedLocationDisplayValue_();
     }
 
     public function setCompany($v)
@@ -303,7 +306,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
             "job_post_url"  => "Url",
             "job_id"  => "JobSitePostID",
             "company"  => "Company",
-            "location"  => "Location",
+            "location"  => "LocationFromSource",
             "job_site_category"  => "Category",
             "employment_type"  => "EmploymentType",
             "date_last_updated"  => "UpdatedAt",

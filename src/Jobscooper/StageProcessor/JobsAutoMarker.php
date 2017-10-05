@@ -246,7 +246,7 @@ class JobsAutoMarker
 
             LogLine("Building jobs by locations list and excluding failed matches...", \C__DISPLAY_ITEM_DETAIL__);
             foreach ($arrJobsList as $jobMatch) {
-                $locValue = $jobMatch->getJobPosting()->getLocationString();
+                $locValue = $jobMatch->getJobPosting()->getLocationDisplayValue();
                 $locKey = $this->getLocationLookupKey($locValue);
 
                 if ($this->_doesLocationMatchUserSearch($locKey)) {

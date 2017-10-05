@@ -118,11 +118,18 @@ abstract class JobPosting implements ActiveRecordInterface
     protected $company;
 
     /**
-     * The value for the location field.
+     * The value for the location_from_source field.
      *
      * @var        string
      */
-    protected $location;
+    protected $location_from_source;
+
+    /**
+     * The value for the location_display_value field.
+     *
+     * @var        string
+     */
+    protected $location_display_value;
 
     /**
      * The value for the job_location_id field.
@@ -546,13 +553,23 @@ abstract class JobPosting implements ActiveRecordInterface
     }
 
     /**
-     * Get the [location] column value.
+     * Get the [location_from_source] column value.
      *
      * @return string
      */
-    public function getLocation()
+    public function getLocationFromSource()
     {
-        return $this->location;
+        return $this->location_from_source;
+    }
+
+    /**
+     * Get the [location_display_value] column value.
+     *
+     * @return string
+     */
+    public function getLocationDisplayValue()
+    {
+        return $this->location_display_value;
     }
 
     /**
@@ -856,24 +873,44 @@ abstract class JobPosting implements ActiveRecordInterface
     } // setCompany()
 
     /**
-     * Set the value of [location] column.
+     * Set the value of [location_from_source] column.
      *
      * @param string $v new value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
-    public function setLocation($v)
+    public function setLocationFromSource($v)
     {
         if ($v !== null) {
             $v = (string) $v;
         }
 
-        if ($this->location !== $v) {
-            $this->location = $v;
-            $this->modifiedColumns[JobPostingTableMap::COL_LOCATION] = true;
+        if ($this->location_from_source !== $v) {
+            $this->location_from_source = $v;
+            $this->modifiedColumns[JobPostingTableMap::COL_LOCATION_FROM_SOURCE] = true;
         }
 
         return $this;
-    } // setLocation()
+    } // setLocationFromSource()
+
+    /**
+     * Set the value of [location_display_value] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
+     */
+    public function setLocationDisplayValue($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->location_display_value !== $v) {
+            $this->location_display_value = $v;
+            $this->modifiedColumns[JobPostingTableMap::COL_LOCATION_DISPLAY_VALUE] = true;
+        }
+
+        return $this;
+    } // setLocationDisplayValue()
 
     /**
      * Set the value of [job_location_id] column.
@@ -1180,43 +1217,46 @@ abstract class JobPosting implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : JobPostingTableMap::translateFieldName('Company', TableMap::TYPE_PHPNAME, $indexType)];
             $this->company = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : JobPostingTableMap::translateFieldName('Location', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->location = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : JobPostingTableMap::translateFieldName('LocationFromSource', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->location_from_source = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : JobPostingTableMap::translateFieldName('JobLocationId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : JobPostingTableMap::translateFieldName('LocationDisplayValue', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->location_display_value = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : JobPostingTableMap::translateFieldName('JobLocationId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->job_location_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : JobPostingTableMap::translateFieldName('EmploymentType', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : JobPostingTableMap::translateFieldName('EmploymentType', TableMap::TYPE_PHPNAME, $indexType)];
             $this->employment_type = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : JobPostingTableMap::translateFieldName('Department', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : JobPostingTableMap::translateFieldName('Department', TableMap::TYPE_PHPNAME, $indexType)];
             $this->department = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : JobPostingTableMap::translateFieldName('Category', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : JobPostingTableMap::translateFieldName('Category', TableMap::TYPE_PHPNAME, $indexType)];
             $this->category = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : JobPostingTableMap::translateFieldName('UpdatedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 13 + $startcol : JobPostingTableMap::translateFieldName('UpdatedAt', TableMap::TYPE_PHPNAME, $indexType)];
             $this->last_updated_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 13 + $startcol : JobPostingTableMap::translateFieldName('PostedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 14 + $startcol : JobPostingTableMap::translateFieldName('PostedAt', TableMap::TYPE_PHPNAME, $indexType)];
             $this->job_posted_date = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 14 + $startcol : JobPostingTableMap::translateFieldName('FirstSeenAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 15 + $startcol : JobPostingTableMap::translateFieldName('FirstSeenAt', TableMap::TYPE_PHPNAME, $indexType)];
             $this->first_seen_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 15 + $startcol : JobPostingTableMap::translateFieldName('RemovedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 16 + $startcol : JobPostingTableMap::translateFieldName('RemovedAt', TableMap::TYPE_PHPNAME, $indexType)];
             $this->post_removed_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 16 + $startcol : JobPostingTableMap::translateFieldName('KeySiteAndPostID', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 17 + $startcol : JobPostingTableMap::translateFieldName('KeySiteAndPostID', TableMap::TYPE_PHPNAME, $indexType)];
             $this->key_site_and_post_id = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 17 + $startcol : JobPostingTableMap::translateFieldName('KeyCompanyAndTitle', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 18 + $startcol : JobPostingTableMap::translateFieldName('KeyCompanyAndTitle', TableMap::TYPE_PHPNAME, $indexType)];
             $this->key_company_and_title = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 18 + $startcol : JobPostingTableMap::translateFieldName('JobTitleLinked', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 19 + $startcol : JobPostingTableMap::translateFieldName('JobTitleLinked', TableMap::TYPE_PHPNAME, $indexType)];
             $this->title_linked = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 19 + $startcol : JobPostingTableMap::translateFieldName('DuplicatesJobPostingId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 20 + $startcol : JobPostingTableMap::translateFieldName('DuplicatesJobPostingId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->duplicates_posting_id = (null !== $col) ? (int) $col : null;
             $this->resetModified();
 
@@ -1226,7 +1266,7 @@ abstract class JobPosting implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 20; // 20 = JobPostingTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 21; // 21 = JobPostingTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\JobPosting'), 0, $e);
@@ -1526,8 +1566,11 @@ abstract class JobPosting implements ActiveRecordInterface
         if ($this->isColumnModified(JobPostingTableMap::COL_COMPANY)) {
             $modifiedColumns[':p' . $index++]  = 'company';
         }
-        if ($this->isColumnModified(JobPostingTableMap::COL_LOCATION)) {
-            $modifiedColumns[':p' . $index++]  = 'location';
+        if ($this->isColumnModified(JobPostingTableMap::COL_LOCATION_FROM_SOURCE)) {
+            $modifiedColumns[':p' . $index++]  = 'location_from_source';
+        }
+        if ($this->isColumnModified(JobPostingTableMap::COL_LOCATION_DISPLAY_VALUE)) {
+            $modifiedColumns[':p' . $index++]  = 'location_display_value';
         }
         if ($this->isColumnModified(JobPostingTableMap::COL_JOB_LOCATION_ID)) {
             $modifiedColumns[':p' . $index++]  = 'job_location_id';
@@ -1597,8 +1640,11 @@ abstract class JobPosting implements ActiveRecordInterface
                     case 'company':
                         $stmt->bindValue($identifier, $this->company, PDO::PARAM_STR);
                         break;
-                    case 'location':
-                        $stmt->bindValue($identifier, $this->location, PDO::PARAM_STR);
+                    case 'location_from_source':
+                        $stmt->bindValue($identifier, $this->location_from_source, PDO::PARAM_STR);
+                        break;
+                    case 'location_display_value':
+                        $stmt->bindValue($identifier, $this->location_display_value, PDO::PARAM_STR);
                         break;
                     case 'job_location_id':
                         $stmt->bindValue($identifier, $this->job_location_id, PDO::PARAM_INT);
@@ -1720,42 +1766,45 @@ abstract class JobPosting implements ActiveRecordInterface
                 return $this->getCompany();
                 break;
             case 7:
-                return $this->getLocation();
+                return $this->getLocationFromSource();
                 break;
             case 8:
-                return $this->getJobLocationId();
+                return $this->getLocationDisplayValue();
                 break;
             case 9:
-                return $this->getEmploymentType();
+                return $this->getJobLocationId();
                 break;
             case 10:
-                return $this->getDepartment();
+                return $this->getEmploymentType();
                 break;
             case 11:
-                return $this->getCategory();
+                return $this->getDepartment();
                 break;
             case 12:
-                return $this->getUpdatedAt();
+                return $this->getCategory();
                 break;
             case 13:
-                return $this->getPostedAt();
+                return $this->getUpdatedAt();
                 break;
             case 14:
-                return $this->getFirstSeenAt();
+                return $this->getPostedAt();
                 break;
             case 15:
-                return $this->getRemovedAt();
+                return $this->getFirstSeenAt();
                 break;
             case 16:
-                return $this->getKeySiteAndPostID();
+                return $this->getRemovedAt();
                 break;
             case 17:
-                return $this->getKeyCompanyAndTitle();
+                return $this->getKeySiteAndPostID();
                 break;
             case 18:
-                return $this->getJobTitleLinked();
+                return $this->getKeyCompanyAndTitle();
                 break;
             case 19:
+                return $this->getJobTitleLinked();
+                break;
+            case 20:
                 return $this->getDuplicatesJobPostingId();
                 break;
             default:
@@ -1795,24 +1844,21 @@ abstract class JobPosting implements ActiveRecordInterface
             $keys[4] => $this->getTitleTokens(),
             $keys[5] => $this->getUrl(),
             $keys[6] => $this->getCompany(),
-            $keys[7] => $this->getLocation(),
-            $keys[8] => $this->getJobLocationId(),
-            $keys[9] => $this->getEmploymentType(),
-            $keys[10] => $this->getDepartment(),
-            $keys[11] => $this->getCategory(),
-            $keys[12] => $this->getUpdatedAt(),
-            $keys[13] => $this->getPostedAt(),
-            $keys[14] => $this->getFirstSeenAt(),
-            $keys[15] => $this->getRemovedAt(),
-            $keys[16] => $this->getKeySiteAndPostID(),
-            $keys[17] => $this->getKeyCompanyAndTitle(),
-            $keys[18] => $this->getJobTitleLinked(),
-            $keys[19] => $this->getDuplicatesJobPostingId(),
+            $keys[7] => $this->getLocationFromSource(),
+            $keys[8] => $this->getLocationDisplayValue(),
+            $keys[9] => $this->getJobLocationId(),
+            $keys[10] => $this->getEmploymentType(),
+            $keys[11] => $this->getDepartment(),
+            $keys[12] => $this->getCategory(),
+            $keys[13] => $this->getUpdatedAt(),
+            $keys[14] => $this->getPostedAt(),
+            $keys[15] => $this->getFirstSeenAt(),
+            $keys[16] => $this->getRemovedAt(),
+            $keys[17] => $this->getKeySiteAndPostID(),
+            $keys[18] => $this->getKeyCompanyAndTitle(),
+            $keys[19] => $this->getJobTitleLinked(),
+            $keys[20] => $this->getDuplicatesJobPostingId(),
         );
-        if ($result[$keys[12]] instanceof \DateTimeInterface) {
-            $result[$keys[12]] = $result[$keys[12]]->format('c');
-        }
-
         if ($result[$keys[13]] instanceof \DateTimeInterface) {
             $result[$keys[13]] = $result[$keys[13]]->format('c');
         }
@@ -1823,6 +1869,10 @@ abstract class JobPosting implements ActiveRecordInterface
 
         if ($result[$keys[15]] instanceof \DateTimeInterface) {
             $result[$keys[15]] = $result[$keys[15]]->format('c');
+        }
+
+        if ($result[$keys[16]] instanceof \DateTimeInterface) {
+            $result[$keys[16]] = $result[$keys[16]]->format('c');
         }
 
         $virtualColumns = $this->virtualColumns;
@@ -1947,42 +1997,45 @@ abstract class JobPosting implements ActiveRecordInterface
                 $this->setCompany($value);
                 break;
             case 7:
-                $this->setLocation($value);
+                $this->setLocationFromSource($value);
                 break;
             case 8:
-                $this->setJobLocationId($value);
+                $this->setLocationDisplayValue($value);
                 break;
             case 9:
-                $this->setEmploymentType($value);
+                $this->setJobLocationId($value);
                 break;
             case 10:
-                $this->setDepartment($value);
+                $this->setEmploymentType($value);
                 break;
             case 11:
-                $this->setCategory($value);
+                $this->setDepartment($value);
                 break;
             case 12:
-                $this->setUpdatedAt($value);
+                $this->setCategory($value);
                 break;
             case 13:
-                $this->setPostedAt($value);
+                $this->setUpdatedAt($value);
                 break;
             case 14:
-                $this->setFirstSeenAt($value);
+                $this->setPostedAt($value);
                 break;
             case 15:
-                $this->setRemovedAt($value);
+                $this->setFirstSeenAt($value);
                 break;
             case 16:
-                $this->setKeySiteAndPostID($value);
+                $this->setRemovedAt($value);
                 break;
             case 17:
-                $this->setKeyCompanyAndTitle($value);
+                $this->setKeySiteAndPostID($value);
                 break;
             case 18:
-                $this->setJobTitleLinked($value);
+                $this->setKeyCompanyAndTitle($value);
                 break;
             case 19:
+                $this->setJobTitleLinked($value);
+                break;
+            case 20:
                 $this->setDuplicatesJobPostingId($value);
                 break;
         } // switch()
@@ -2033,43 +2086,46 @@ abstract class JobPosting implements ActiveRecordInterface
             $this->setCompany($arr[$keys[6]]);
         }
         if (array_key_exists($keys[7], $arr)) {
-            $this->setLocation($arr[$keys[7]]);
+            $this->setLocationFromSource($arr[$keys[7]]);
         }
         if (array_key_exists($keys[8], $arr)) {
-            $this->setJobLocationId($arr[$keys[8]]);
+            $this->setLocationDisplayValue($arr[$keys[8]]);
         }
         if (array_key_exists($keys[9], $arr)) {
-            $this->setEmploymentType($arr[$keys[9]]);
+            $this->setJobLocationId($arr[$keys[9]]);
         }
         if (array_key_exists($keys[10], $arr)) {
-            $this->setDepartment($arr[$keys[10]]);
+            $this->setEmploymentType($arr[$keys[10]]);
         }
         if (array_key_exists($keys[11], $arr)) {
-            $this->setCategory($arr[$keys[11]]);
+            $this->setDepartment($arr[$keys[11]]);
         }
         if (array_key_exists($keys[12], $arr)) {
-            $this->setUpdatedAt($arr[$keys[12]]);
+            $this->setCategory($arr[$keys[12]]);
         }
         if (array_key_exists($keys[13], $arr)) {
-            $this->setPostedAt($arr[$keys[13]]);
+            $this->setUpdatedAt($arr[$keys[13]]);
         }
         if (array_key_exists($keys[14], $arr)) {
-            $this->setFirstSeenAt($arr[$keys[14]]);
+            $this->setPostedAt($arr[$keys[14]]);
         }
         if (array_key_exists($keys[15], $arr)) {
-            $this->setRemovedAt($arr[$keys[15]]);
+            $this->setFirstSeenAt($arr[$keys[15]]);
         }
         if (array_key_exists($keys[16], $arr)) {
-            $this->setKeySiteAndPostID($arr[$keys[16]]);
+            $this->setRemovedAt($arr[$keys[16]]);
         }
         if (array_key_exists($keys[17], $arr)) {
-            $this->setKeyCompanyAndTitle($arr[$keys[17]]);
+            $this->setKeySiteAndPostID($arr[$keys[17]]);
         }
         if (array_key_exists($keys[18], $arr)) {
-            $this->setJobTitleLinked($arr[$keys[18]]);
+            $this->setKeyCompanyAndTitle($arr[$keys[18]]);
         }
         if (array_key_exists($keys[19], $arr)) {
-            $this->setDuplicatesJobPostingId($arr[$keys[19]]);
+            $this->setJobTitleLinked($arr[$keys[19]]);
+        }
+        if (array_key_exists($keys[20], $arr)) {
+            $this->setDuplicatesJobPostingId($arr[$keys[20]]);
         }
     }
 
@@ -2133,8 +2189,11 @@ abstract class JobPosting implements ActiveRecordInterface
         if ($this->isColumnModified(JobPostingTableMap::COL_COMPANY)) {
             $criteria->add(JobPostingTableMap::COL_COMPANY, $this->company);
         }
-        if ($this->isColumnModified(JobPostingTableMap::COL_LOCATION)) {
-            $criteria->add(JobPostingTableMap::COL_LOCATION, $this->location);
+        if ($this->isColumnModified(JobPostingTableMap::COL_LOCATION_FROM_SOURCE)) {
+            $criteria->add(JobPostingTableMap::COL_LOCATION_FROM_SOURCE, $this->location_from_source);
+        }
+        if ($this->isColumnModified(JobPostingTableMap::COL_LOCATION_DISPLAY_VALUE)) {
+            $criteria->add(JobPostingTableMap::COL_LOCATION_DISPLAY_VALUE, $this->location_display_value);
         }
         if ($this->isColumnModified(JobPostingTableMap::COL_JOB_LOCATION_ID)) {
             $criteria->add(JobPostingTableMap::COL_JOB_LOCATION_ID, $this->job_location_id);
@@ -2264,7 +2323,8 @@ abstract class JobPosting implements ActiveRecordInterface
         $copyObj->setTitleTokens($this->getTitleTokens());
         $copyObj->setUrl($this->getUrl());
         $copyObj->setCompany($this->getCompany());
-        $copyObj->setLocation($this->getLocation());
+        $copyObj->setLocationFromSource($this->getLocationFromSource());
+        $copyObj->setLocationDisplayValue($this->getLocationDisplayValue());
         $copyObj->setJobLocationId($this->getJobLocationId());
         $copyObj->setEmploymentType($this->getEmploymentType());
         $copyObj->setDepartment($this->getDepartment());
@@ -2968,7 +3028,8 @@ abstract class JobPosting implements ActiveRecordInterface
         $this->title_tokens = null;
         $this->url = null;
         $this->company = null;
-        $this->location = null;
+        $this->location_from_source = null;
+        $this->location_display_value = null;
         $this->job_location_id = null;
         $this->employment_type = null;
         $this->department = null;

@@ -33,6 +33,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobLocationQuery orderByCountryCode($order = Criteria::ASC) Order by the countrycode column
  * @method     ChildJobLocationQuery orderByAlternateNames($order = Criteria::ASC) Order by the alternate_names column
  * @method     ChildJobLocationQuery orderByOpenStreetMapId($order = Criteria::ASC) Order by the openstreetmap_id column
+ * @method     ChildJobLocationQuery orderByFullOsmData($order = Criteria::ASC) Order by the full_osm_data column
  *
  * @method     ChildJobLocationQuery groupByLocationId() Group by the location_id column
  * @method     ChildJobLocationQuery groupByLatitude() Group by the lat column
@@ -47,6 +48,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobLocationQuery groupByCountryCode() Group by the countrycode column
  * @method     ChildJobLocationQuery groupByAlternateNames() Group by the alternate_names column
  * @method     ChildJobLocationQuery groupByOpenStreetMapId() Group by the openstreetmap_id column
+ * @method     ChildJobLocationQuery groupByFullOsmData() Group by the full_osm_data column
  *
  * @method     ChildJobLocationQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildJobLocationQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -93,7 +95,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobLocation findOneByCountry(string $country) Return the first ChildJobLocation filtered by the country column
  * @method     ChildJobLocation findOneByCountryCode(string $countrycode) Return the first ChildJobLocation filtered by the countrycode column
  * @method     ChildJobLocation findOneByAlternateNames(array $alternate_names) Return the first ChildJobLocation filtered by the alternate_names column
- * @method     ChildJobLocation findOneByOpenStreetMapId(int $openstreetmap_id) Return the first ChildJobLocation filtered by the openstreetmap_id column *
+ * @method     ChildJobLocation findOneByOpenStreetMapId(int $openstreetmap_id) Return the first ChildJobLocation filtered by the openstreetmap_id column
+ * @method     ChildJobLocation findOneByFullOsmData(string $full_osm_data) Return the first ChildJobLocation filtered by the full_osm_data column *
 
  * @method     ChildJobLocation requirePk($key, ConnectionInterface $con = null) Return the ChildJobLocation by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobLocation requireOne(ConnectionInterface $con = null) Return the first ChildJobLocation matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -111,6 +114,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobLocation requireOneByCountryCode(string $countrycode) Return the first ChildJobLocation filtered by the countrycode column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobLocation requireOneByAlternateNames(array $alternate_names) Return the first ChildJobLocation filtered by the alternate_names column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobLocation requireOneByOpenStreetMapId(int $openstreetmap_id) Return the first ChildJobLocation filtered by the openstreetmap_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildJobLocation requireOneByFullOsmData(string $full_osm_data) Return the first ChildJobLocation filtered by the full_osm_data column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildJobLocation[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildJobLocation objects based on current ModelCriteria
  * @method     ChildJobLocation[]|ObjectCollection findByLocationId(int $location_id) Return ChildJobLocation objects filtered by the location_id column
@@ -126,6 +130,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobLocation[]|ObjectCollection findByCountryCode(string $countrycode) Return ChildJobLocation objects filtered by the countrycode column
  * @method     ChildJobLocation[]|ObjectCollection findByAlternateNames(array $alternate_names) Return ChildJobLocation objects filtered by the alternate_names column
  * @method     ChildJobLocation[]|ObjectCollection findByOpenStreetMapId(int $openstreetmap_id) Return ChildJobLocation objects filtered by the openstreetmap_id column
+ * @method     ChildJobLocation[]|ObjectCollection findByFullOsmData(string $full_osm_data) Return ChildJobLocation objects filtered by the full_osm_data column
  * @method     ChildJobLocation[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  */
@@ -224,7 +229,7 @@ abstract class JobLocationQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT location_id, lat, lon, full_display_name, primary_name, place, county, state, statecode, country, countrycode, alternate_names, openstreetmap_id FROM job_location WHERE location_id = :p0';
+        $sql = 'SELECT location_id, lat, lon, full_display_name, primary_name, place, county, state, statecode, country, countrycode, alternate_names, openstreetmap_id, full_osm_data FROM job_location WHERE location_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -757,6 +762,31 @@ abstract class JobLocationQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(JobLocationTableMap::COL_OPENSTREETMAP_ID, $openStreetMapId, $comparison);
+    }
+
+    /**
+     * Filter the query on the full_osm_data column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByFullOsmData('fooValue');   // WHERE full_osm_data = 'fooValue'
+     * $query->filterByFullOsmData('%fooValue%', Criteria::LIKE); // WHERE full_osm_data LIKE '%fooValue%'
+     * </code>
+     *
+     * @param     string $fullOsmData The value to use as filter.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildJobLocationQuery The current query, for fluid interface
+     */
+    public function filterByFullOsmData($fullOsmData = null, $comparison = null)
+    {
+        if (null === $comparison) {
+            if (is_array($fullOsmData)) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(JobLocationTableMap::COL_FULL_OSM_DATA, $fullOsmData, $comparison);
     }
 
     /**

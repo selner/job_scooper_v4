@@ -59,7 +59,7 @@ class JobLocationTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 13;
+    const NUM_COLUMNS = 14;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class JobLocationTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 13;
+    const NUM_HYDRATE_COLUMNS = 14;
 
     /**
      * the column name for the location_id field
@@ -137,6 +137,11 @@ class JobLocationTableMap extends TableMap
     const COL_OPENSTREETMAP_ID = 'job_location.openstreetmap_id';
 
     /**
+     * the column name for the full_osm_data field
+     */
+    const COL_FULL_OSM_DATA = 'job_location.full_osm_data';
+
+    /**
      * The default string format for model objects of the related table
      */
     const DEFAULT_STRING_FORMAT = 'YAML';
@@ -148,11 +153,11 @@ class JobLocationTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('LocationId', 'Latitude', 'Logitude', 'DisplayName', 'PrimaryName', 'Place', 'County', 'State', 'StateCode', 'Country', 'CountryCode', 'AlternateNames', 'OpenStreetMapId', ),
-        self::TYPE_CAMELNAME     => array('locationId', 'latitude', 'logitude', 'displayName', 'primaryName', 'place', 'county', 'state', 'stateCode', 'country', 'countryCode', 'alternateNames', 'openStreetMapId', ),
-        self::TYPE_COLNAME       => array(JobLocationTableMap::COL_LOCATION_ID, JobLocationTableMap::COL_LAT, JobLocationTableMap::COL_LON, JobLocationTableMap::COL_FULL_DISPLAY_NAME, JobLocationTableMap::COL_PRIMARY_NAME, JobLocationTableMap::COL_PLACE, JobLocationTableMap::COL_COUNTY, JobLocationTableMap::COL_STATE, JobLocationTableMap::COL_STATECODE, JobLocationTableMap::COL_COUNTRY, JobLocationTableMap::COL_COUNTRYCODE, JobLocationTableMap::COL_ALTERNATE_NAMES, JobLocationTableMap::COL_OPENSTREETMAP_ID, ),
-        self::TYPE_FIELDNAME     => array('location_id', 'lat', 'lon', 'full_display_name', 'primary_name', 'place', 'county', 'state', 'statecode', 'country', 'countrycode', 'alternate_names', 'openstreetmap_id', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, )
+        self::TYPE_PHPNAME       => array('LocationId', 'Latitude', 'Logitude', 'DisplayName', 'PrimaryName', 'Place', 'County', 'State', 'StateCode', 'Country', 'CountryCode', 'AlternateNames', 'OpenStreetMapId', 'FullOsmData', ),
+        self::TYPE_CAMELNAME     => array('locationId', 'latitude', 'logitude', 'displayName', 'primaryName', 'place', 'county', 'state', 'stateCode', 'country', 'countryCode', 'alternateNames', 'openStreetMapId', 'fullOsmData', ),
+        self::TYPE_COLNAME       => array(JobLocationTableMap::COL_LOCATION_ID, JobLocationTableMap::COL_LAT, JobLocationTableMap::COL_LON, JobLocationTableMap::COL_FULL_DISPLAY_NAME, JobLocationTableMap::COL_PRIMARY_NAME, JobLocationTableMap::COL_PLACE, JobLocationTableMap::COL_COUNTY, JobLocationTableMap::COL_STATE, JobLocationTableMap::COL_STATECODE, JobLocationTableMap::COL_COUNTRY, JobLocationTableMap::COL_COUNTRYCODE, JobLocationTableMap::COL_ALTERNATE_NAMES, JobLocationTableMap::COL_OPENSTREETMAP_ID, JobLocationTableMap::COL_FULL_OSM_DATA, ),
+        self::TYPE_FIELDNAME     => array('location_id', 'lat', 'lon', 'full_display_name', 'primary_name', 'place', 'county', 'state', 'statecode', 'country', 'countrycode', 'alternate_names', 'openstreetmap_id', 'full_osm_data', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, )
     );
 
     /**
@@ -162,11 +167,11 @@ class JobLocationTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('LocationId' => 0, 'Latitude' => 1, 'Logitude' => 2, 'DisplayName' => 3, 'PrimaryName' => 4, 'Place' => 5, 'County' => 6, 'State' => 7, 'StateCode' => 8, 'Country' => 9, 'CountryCode' => 10, 'AlternateNames' => 11, 'OpenStreetMapId' => 12, ),
-        self::TYPE_CAMELNAME     => array('locationId' => 0, 'latitude' => 1, 'logitude' => 2, 'displayName' => 3, 'primaryName' => 4, 'place' => 5, 'county' => 6, 'state' => 7, 'stateCode' => 8, 'country' => 9, 'countryCode' => 10, 'alternateNames' => 11, 'openStreetMapId' => 12, ),
-        self::TYPE_COLNAME       => array(JobLocationTableMap::COL_LOCATION_ID => 0, JobLocationTableMap::COL_LAT => 1, JobLocationTableMap::COL_LON => 2, JobLocationTableMap::COL_FULL_DISPLAY_NAME => 3, JobLocationTableMap::COL_PRIMARY_NAME => 4, JobLocationTableMap::COL_PLACE => 5, JobLocationTableMap::COL_COUNTY => 6, JobLocationTableMap::COL_STATE => 7, JobLocationTableMap::COL_STATECODE => 8, JobLocationTableMap::COL_COUNTRY => 9, JobLocationTableMap::COL_COUNTRYCODE => 10, JobLocationTableMap::COL_ALTERNATE_NAMES => 11, JobLocationTableMap::COL_OPENSTREETMAP_ID => 12, ),
-        self::TYPE_FIELDNAME     => array('location_id' => 0, 'lat' => 1, 'lon' => 2, 'full_display_name' => 3, 'primary_name' => 4, 'place' => 5, 'county' => 6, 'state' => 7, 'statecode' => 8, 'country' => 9, 'countrycode' => 10, 'alternate_names' => 11, 'openstreetmap_id' => 12, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, )
+        self::TYPE_PHPNAME       => array('LocationId' => 0, 'Latitude' => 1, 'Logitude' => 2, 'DisplayName' => 3, 'PrimaryName' => 4, 'Place' => 5, 'County' => 6, 'State' => 7, 'StateCode' => 8, 'Country' => 9, 'CountryCode' => 10, 'AlternateNames' => 11, 'OpenStreetMapId' => 12, 'FullOsmData' => 13, ),
+        self::TYPE_CAMELNAME     => array('locationId' => 0, 'latitude' => 1, 'logitude' => 2, 'displayName' => 3, 'primaryName' => 4, 'place' => 5, 'county' => 6, 'state' => 7, 'stateCode' => 8, 'country' => 9, 'countryCode' => 10, 'alternateNames' => 11, 'openStreetMapId' => 12, 'fullOsmData' => 13, ),
+        self::TYPE_COLNAME       => array(JobLocationTableMap::COL_LOCATION_ID => 0, JobLocationTableMap::COL_LAT => 1, JobLocationTableMap::COL_LON => 2, JobLocationTableMap::COL_FULL_DISPLAY_NAME => 3, JobLocationTableMap::COL_PRIMARY_NAME => 4, JobLocationTableMap::COL_PLACE => 5, JobLocationTableMap::COL_COUNTY => 6, JobLocationTableMap::COL_STATE => 7, JobLocationTableMap::COL_STATECODE => 8, JobLocationTableMap::COL_COUNTRY => 9, JobLocationTableMap::COL_COUNTRYCODE => 10, JobLocationTableMap::COL_ALTERNATE_NAMES => 11, JobLocationTableMap::COL_OPENSTREETMAP_ID => 12, JobLocationTableMap::COL_FULL_OSM_DATA => 13, ),
+        self::TYPE_FIELDNAME     => array('location_id' => 0, 'lat' => 1, 'lon' => 2, 'full_display_name' => 3, 'primary_name' => 4, 'place' => 5, 'county' => 6, 'state' => 7, 'statecode' => 8, 'country' => 9, 'countrycode' => 10, 'alternate_names' => 11, 'openstreetmap_id' => 12, 'full_osm_data' => 13, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, )
     );
 
     /**
@@ -199,6 +204,7 @@ class JobLocationTableMap extends TableMap
         $this->addColumn('countrycode', 'CountryCode', 'VARCHAR', false, 2, null);
         $this->addColumn('alternate_names', 'AlternateNames', 'ARRAY', false, null, null);
         $this->addColumn('openstreetmap_id', 'OpenStreetMapId', 'INTEGER', false, null, null);
+        $this->addColumn('full_osm_data', 'FullOsmData', 'LONGVARCHAR', false, null, null);
     } // initialize()
 
     /**
@@ -376,6 +382,7 @@ class JobLocationTableMap extends TableMap
             $criteria->addSelectColumn(JobLocationTableMap::COL_COUNTRYCODE);
             $criteria->addSelectColumn(JobLocationTableMap::COL_ALTERNATE_NAMES);
             $criteria->addSelectColumn(JobLocationTableMap::COL_OPENSTREETMAP_ID);
+            $criteria->addSelectColumn(JobLocationTableMap::COL_FULL_OSM_DATA);
         } else {
             $criteria->addSelectColumn($alias . '.location_id');
             $criteria->addSelectColumn($alias . '.lat');
@@ -390,6 +397,7 @@ class JobLocationTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.countrycode');
             $criteria->addSelectColumn($alias . '.alternate_names');
             $criteria->addSelectColumn($alias . '.openstreetmap_id');
+            $criteria->addSelectColumn($alias . '.full_osm_data');
         }
     }
 

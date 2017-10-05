@@ -89,7 +89,8 @@
         <!--</unique>-->
         <column name="company" type="varchar" size="100" required="false"/>
         <!--        <column name="company_id" phpName="CompanyId" type="varchar" size="255" required="false"/> -->
-        <column name="location" type="varchar" size="255" required="false"/>
+        <column name="location_from_source" phpName="LocationFromSource" type="varchar" size="255" required="false"/>
+        <column name="location_display_value" phpName="LocationDisplayValue" type="varchar" size="255" required="false"/>
         <column name="job_location_id" type="integer" required="false"/>
         <foreign-key foreignTable="job_location" onUpdate="none" onDelete="none">
             <reference local="job_location_id" foreign="location_id"/>
@@ -143,6 +144,8 @@
         <unique name="uniq_openstreetmap_id/">
             <unique-column name="openstreetmap_id"/>
         </unique>
+        <column name="full_osm_data" phpName="FullOsmData" type="LONGVARCHAR" />
+
     </table>
 
     <table name="job_place_lookup" phpName="JobPlaceLookup">

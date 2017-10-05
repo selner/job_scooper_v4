@@ -166,6 +166,13 @@ abstract class JobLocation implements ActiveRecordInterface
     protected $openstreetmap_id;
 
     /**
+     * The value for the full_osm_data field.
+     *
+     * @var        string
+     */
+    protected $full_osm_data;
+
+    /**
      * @var        ObjectCollection|ChildJobPosting[] Collection to store aggregation of ChildJobPosting objects.
      */
     protected $collJobPostings;
@@ -572,6 +579,16 @@ abstract class JobLocation implements ActiveRecordInterface
     }
 
     /**
+     * Get the [full_osm_data] column value.
+     *
+     * @return string
+     */
+    public function getFullOsmData()
+    {
+        return $this->full_osm_data;
+    }
+
+    /**
      * Set the value of [location_id] column.
      *
      * @param int $v new value
@@ -863,6 +880,26 @@ abstract class JobLocation implements ActiveRecordInterface
     } // setOpenStreetMapId()
 
     /**
+     * Set the value of [full_osm_data] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     */
+    public function setFullOsmData($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->full_osm_data !== $v) {
+            $this->full_osm_data = $v;
+            $this->modifiedColumns[JobLocationTableMap::COL_FULL_OSM_DATA] = true;
+        }
+
+        return $this;
+    } // setFullOsmData()
+
+    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -937,6 +974,9 @@ abstract class JobLocation implements ActiveRecordInterface
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : JobLocationTableMap::translateFieldName('OpenStreetMapId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->openstreetmap_id = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 13 + $startcol : JobLocationTableMap::translateFieldName('FullOsmData', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->full_osm_data = (null !== $col) ? (string) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -945,7 +985,7 @@ abstract class JobLocation implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 13; // 13 = JobLocationTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 14; // 14 = JobLocationTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\JobLocation'), 0, $e);
@@ -1246,6 +1286,9 @@ abstract class JobLocation implements ActiveRecordInterface
         if ($this->isColumnModified(JobLocationTableMap::COL_OPENSTREETMAP_ID)) {
             $modifiedColumns[':p' . $index++]  = 'openstreetmap_id';
         }
+        if ($this->isColumnModified(JobLocationTableMap::COL_FULL_OSM_DATA)) {
+            $modifiedColumns[':p' . $index++]  = 'full_osm_data';
+        }
 
         $sql = sprintf(
             'INSERT INTO job_location (%s) VALUES (%s)',
@@ -1295,6 +1338,9 @@ abstract class JobLocation implements ActiveRecordInterface
                         break;
                     case 'openstreetmap_id':
                         $stmt->bindValue($identifier, $this->openstreetmap_id, PDO::PARAM_INT);
+                        break;
+                    case 'full_osm_data':
+                        $stmt->bindValue($identifier, $this->full_osm_data, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -1397,6 +1443,9 @@ abstract class JobLocation implements ActiveRecordInterface
             case 12:
                 return $this->getOpenStreetMapId();
                 break;
+            case 13:
+                return $this->getFullOsmData();
+                break;
             default:
                 return null;
                 break;
@@ -1440,6 +1489,7 @@ abstract class JobLocation implements ActiveRecordInterface
             $keys[10] => $this->getCountryCode(),
             $keys[11] => $this->getAlternateNames(),
             $keys[12] => $this->getOpenStreetMapId(),
+            $keys[13] => $this->getFullOsmData(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1554,6 +1604,9 @@ abstract class JobLocation implements ActiveRecordInterface
             case 12:
                 $this->setOpenStreetMapId($value);
                 break;
+            case 13:
+                $this->setFullOsmData($value);
+                break;
         } // switch()
 
         return $this;
@@ -1618,6 +1671,9 @@ abstract class JobLocation implements ActiveRecordInterface
         }
         if (array_key_exists($keys[12], $arr)) {
             $this->setOpenStreetMapId($arr[$keys[12]]);
+        }
+        if (array_key_exists($keys[13], $arr)) {
+            $this->setFullOsmData($arr[$keys[13]]);
         }
     }
 
@@ -1698,6 +1754,9 @@ abstract class JobLocation implements ActiveRecordInterface
         }
         if ($this->isColumnModified(JobLocationTableMap::COL_OPENSTREETMAP_ID)) {
             $criteria->add(JobLocationTableMap::COL_OPENSTREETMAP_ID, $this->openstreetmap_id);
+        }
+        if ($this->isColumnModified(JobLocationTableMap::COL_FULL_OSM_DATA)) {
+            $criteria->add(JobLocationTableMap::COL_FULL_OSM_DATA, $this->full_osm_data);
         }
 
         return $criteria;
@@ -1797,6 +1856,7 @@ abstract class JobLocation implements ActiveRecordInterface
         $copyObj->setCountryCode($this->getCountryCode());
         $copyObj->setAlternateNames($this->getAlternateNames());
         $copyObj->setOpenStreetMapId($this->getOpenStreetMapId());
+        $copyObj->setFullOsmData($this->getFullOsmData());
 
         if ($deepCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
@@ -2365,6 +2425,7 @@ abstract class JobLocation implements ActiveRecordInterface
         $this->alternate_names = null;
         $this->alternate_names_unserialized = null;
         $this->openstreetmap_id = null;
+        $this->full_osm_data = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();
