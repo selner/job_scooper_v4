@@ -68,7 +68,7 @@ function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strEx
     return $strFilename;
 }
 
-function writeJSON($data, $filepath)
+function encodeJSON($data)
 {
     $jsonData = json_encode($data, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
     if ($jsonData === false) {
@@ -76,8 +76,13 @@ function writeJSON($data, $filepath)
         $errMsg = "Error:  Unable to convert jobs list data to json due to error   " . $err;
         LogLine($errMsg, \C__DISPLAY_ERROR__);
         throw new Exception($errMsg);
-
     }
+    return $jsonData;
+}
+
+function writeJSON($data, $filepath)
+{
+    $jsonData = encodeJSON($data);
 
     LogLine("Writing final job data pull results to json file " . $filepath);
     if (file_put_contents($filepath, $jsonData, FILE_TEXT) === false) {
@@ -91,19 +96,26 @@ function writeJSON($data, $filepath)
     return $filepath;
 }
 
-function loadJSON($file, $options=null, $boolEscapeBackslashes=false)
+function decodeJSON($strJsonText, $options=null, $boolEscapeBackSlashes=false)
 {
     if(is_null($options))
         $options = JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP;
 
+
+    if($boolEscapeBackSlashes === true)
+        $jsonText = str_replace('\\', '\\\\', $strJsonText);
+    $data = json_decode($strJsonText, $assoc = true, $depth=512, $options);
+    return $data;
+
+}
+
+function loadJSON($file, $options=null, $boolEscapeBackSlashes=false)
+{
     if(is_file($file)) {
 #        LogLine("Reading json data from file " . $file, \C__DISPLAY_ITEM_DETAIL__);
         LogLine("Reading json data from file " . $file);
         $jsonText = file_get_contents($file, FILE_TEXT);
-        if($boolEscapeBackslashes === true)
-            $jsonText = str_replace('\\', '\\\\', $jsonText);
-        $data = json_decode($jsonText, $assoc = true, $depth=512, $options);
-        return $data;
+        return decodeJSON($jsonText, $options, $boolEscapeBackSlashes);
     }
     else
     {
