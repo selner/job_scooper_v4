@@ -17,6 +17,10 @@
  */
 require_once __ROOT__ . "/bootstrap.php";
 
+const C__API_RETURN_TYPE_OBJECT__ = 33;
+const C__API_RETURN_TYPE_ARRAY__ = 44;
+
+
 class CurlWrapper {
 
     /****************************************************************************************************************/
