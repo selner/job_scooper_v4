@@ -18,7 +18,7 @@
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
 
-class PluginBetalist extends \Jobscooper\Plugins\Base\AjaxHtmlSimplePlugin
+class PluginBetalist extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'Betalist';
     protected $siteBaseURL = "https://betalist.com";

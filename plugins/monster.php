@@ -17,7 +17,7 @@
      */
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginMonster extends \Jobscooper\Plugins\Base\ServerHtmlSimplePlugin
+class PluginMonster extends \JobScooper\Plugins\Base\ServerHtmlSimplePlugin
 {
     protected $siteName = 'Monster';
     protected $siteBaseURL = 'http://www.monster.com';

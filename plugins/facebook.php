@@ -18,7 +18,7 @@
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
 
-class PluginFacebook extends \Jobscooper\Plugins\Base\AjaxHtmlSimplePlugin
+class PluginFacebook extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'Facebook';
     protected $siteBaseURL = 'https://www.facebook.com/careers/';

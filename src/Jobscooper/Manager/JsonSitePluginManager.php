@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-namespace Jobscooper\Manager;
+namespace JobScooper\Manager;
 
 require_once __ROOT__ . "/bootstrap.php";
 
@@ -51,7 +51,7 @@ class JsonSitePluginManager
             'siteBaseURL' => getArrayItem('BaseURL', $arrConfigData),
             'strBaseURLFormat' => getArrayItem('SourceURL', $arrConfigData),
             'countryCodes' => getArrayItem('CountryCodes', $arrConfigData),
-            'arrListingTagSetup' => \Jobscooper\Plugins\Base\SimplePlugin::getEmptyListingTagSetup()
+            'arrListingTagSetup' => \JobScooper\Plugins\Base\SimplePlugin::getEmptyListingTagSetup()
         );
 
         if(array_key_exists("Pagination", $arrConfigData)) {
@@ -148,7 +148,7 @@ class JsonSitePluginManager
         $className = "Plugin" . $pluginConfig['siteName'];
         $setup = var_export($pluginConfig['arrListingTagSetup'], true);
 
-        $extendsClass = "Jobscooper\Plugins\Base\AjaxHtmlSimplePlugin";
+        $extendsClass = "JobScooper\Plugins\Base\AjaxHtmlSimplePlugin";
         if(array_key_exists("PluginExtendsClassName", $pluginConfig) && !is_null($pluginConfig['PluginExtendsClassName']) && strlen($pluginConfig['PluginExtendsClassName']))
         {
             $extendsClass = $pluginConfig['PluginExtendsClassName'];

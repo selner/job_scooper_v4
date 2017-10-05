@@ -21,7 +21,7 @@ require_once __ROOT__."/bootstrap.php";
 
 var_dump(get_included_files());
 
-$classRunJobs = new \Jobscooper\Manager\StageManager();
+$classRunJobs = new \JobScooper\Manager\StageManager();
 $classRunJobs->runAll();
 
 

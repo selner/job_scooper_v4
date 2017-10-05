@@ -62,7 +62,7 @@ class PluginParivedaSolutions extends BasePluginiCIMS
     protected $arrResultsRowTDIndex = array('tag_job_posting_date' => null, 'tag_job_id' => 0, 'tag_title' => 1, 'tag_link' => 1, 'tag_department' => null, 'tag_location' => 2 );
 }
 
-class BasePluginiCIMS extends \Jobscooper\Plugins\Base\ServerHtmlSimplePlugin
+class BasePluginiCIMS extends \JobScooper\Plugins\Base\ServerHtmlSimplePlugin
 {
     protected $additionalFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED];
     protected $nJobListingsPerPage = 20;

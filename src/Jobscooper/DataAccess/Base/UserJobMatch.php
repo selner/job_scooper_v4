@@ -1,15 +1,15 @@
 <?php
 
-namespace Jobscooper\DataAccess\Base;
+namespace JobScooper\DataAccess\Base;
 
 use \Exception;
 use \PDO;
-use Jobscooper\DataAccess\JobPosting as ChildJobPosting;
-use Jobscooper\DataAccess\JobPostingQuery as ChildJobPostingQuery;
-use Jobscooper\DataAccess\User as ChildUser;
-use Jobscooper\DataAccess\UserJobMatchQuery as ChildUserJobMatchQuery;
-use Jobscooper\DataAccess\UserQuery as ChildUserQuery;
-use Jobscooper\DataAccess\Map\UserJobMatchTableMap;
+use JobScooper\DataAccess\JobPosting as ChildJobPosting;
+use JobScooper\DataAccess\JobPostingQuery as ChildJobPostingQuery;
+use JobScooper\DataAccess\User as ChildUser;
+use JobScooper\DataAccess\UserJobMatchQuery as ChildUserJobMatchQuery;
+use JobScooper\DataAccess\UserQuery as ChildUserQuery;
+use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -27,14 +27,14 @@ use Propel\Runtime\Parser\AbstractParser;
  *
  *
  *
- * @package    propel.generator.Jobscooper.DataAccess.Base
+ * @package    propel.generator.JobScooper.DataAccess.Base
  */
 abstract class UserJobMatch implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      */
-    const TABLE_MAP = '\\Jobscooper\\DataAccess\\Map\\UserJobMatchTableMap';
+    const TABLE_MAP = '\\JobScooper\\DataAccess\\Map\\UserJobMatchTableMap';
 
 
     /**
@@ -199,7 +199,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     }
 
     /**
-     * Initializes internal state of Jobscooper\DataAccess\Base\UserJobMatch object.
+     * Initializes internal state of JobScooper\DataAccess\Base\UserJobMatch object.
      * @see applyDefaults()
      */
     public function __construct()
@@ -655,7 +655,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Set the value of [user_job_match_id] column.
      *
      * @param int $v new value
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setUserJobMatchId($v)
     {
@@ -675,7 +675,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Set the value of [user_slug] column.
      *
      * @param string $v new value
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setUserSlug($v)
     {
@@ -699,7 +699,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Set the value of [jobposting_id] column.
      *
      * @param int $v new value
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setJobPostingId($v)
     {
@@ -723,7 +723,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Set the value of [user_notification_state] column.
      *
      * @param  string $v new value
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      * @throws \Propel\Runtime\Exception\PropelException
      */
     public function setUserNotificationState($v)
@@ -752,7 +752,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
      *
      * @param  boolean|integer|string $v The new value
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setIsJobMatch($v)
     {
@@ -780,7 +780,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
      *
      * @param  boolean|integer|string $v The new value
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setIsExcluded($v)
     {
@@ -808,7 +808,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
      *
      * @param  boolean|integer|string $v The new value
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setIsIncludeInNotifications($v)
     {
@@ -832,7 +832,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Set the value of [matched_user_keywords] column.
      *
      * @param array $v new value
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setMatchedUserKeywords($v)
     {
@@ -849,7 +849,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Adds a value to the [matched_user_keywords] array column value.
      * @param  mixed $value
      *
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function addMatchedUserKeyword($value)
     {
@@ -864,7 +864,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Removes a value from the [matched_user_keywords] array column value.
      * @param  mixed $value
      *
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function removeMatchedUserKeyword($value)
     {
@@ -883,7 +883,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Set the value of [matched_negative_title_keywords] column.
      *
      * @param array $v new value
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setMatchedNegativeTitleKeywords($v)
     {
@@ -900,7 +900,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Adds a value to the [matched_negative_title_keywords] array column value.
      * @param  mixed $value
      *
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function addMatchedNegativeTitleKeyword($value)
     {
@@ -915,7 +915,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Removes a value from the [matched_negative_title_keywords] array column value.
      * @param  mixed $value
      *
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function removeMatchedNegativeTitleKeyword($value)
     {
@@ -934,7 +934,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Set the value of [matched_negative_company_keywords] column.
      *
      * @param array $v new value
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setMatchedNegativeCompanyKeywords($v)
     {
@@ -951,7 +951,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Adds a value to the [matched_negative_company_keywords] array column value.
      * @param  mixed $value
      *
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function addMatchedNegativeCompanyKeyword($value)
     {
@@ -966,7 +966,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Removes a value from the [matched_negative_company_keywords] array column value.
      * @param  mixed $value
      *
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function removeMatchedNegativeCompanyKeyword($value)
     {
@@ -989,7 +989,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
      *
      * @param  boolean|integer|string $v The new value
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setOutOfUserArea($v)
     {
@@ -1013,7 +1013,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Set the value of [app_run_id] column.
      *
      * @param string $v new value
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setAppRunId($v)
     {
@@ -1118,7 +1118,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
             return $startcol + 12; // 12 = UserJobMatchTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException(sprintf('Error populating %s object', '\\Jobscooper\\DataAccess\\UserJobMatch'), 0, $e);
+            throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\UserJobMatch'), 0, $e);
         }
     }
 
@@ -1617,7 +1617,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      *                one of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
      *                TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM.
      *                Defaults to TableMap::TYPE_PHPNAME.
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch
+     * @return $this|\JobScooper\DataAccess\UserJobMatch
      */
     public function setByName($name, $value, $type = TableMap::TYPE_PHPNAME)
     {
@@ -1632,7 +1632,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      *
      * @param  int $pos position in xml schema
      * @param  mixed $value field value
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch
+     * @return $this|\JobScooper\DataAccess\UserJobMatch
      */
     public function setByPosition($pos, $value)
     {
@@ -1770,7 +1770,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * @param string $data The source data to import from
      * @param string $keyType The type of keys the array uses.
      *
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object, for fluid interface
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object, for fluid interface
      */
     public function importFrom($parser, $data, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -1907,7 +1907,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param      object $copyObj An object of \Jobscooper\DataAccess\UserJobMatch (or compatible) type.
+     * @param      object $copyObj An object of \JobScooper\DataAccess\UserJobMatch (or compatible) type.
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param      boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
@@ -1940,7 +1940,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * objects.
      *
      * @param  boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return \Jobscooper\DataAccess\UserJobMatch Clone of current object.
+     * @return \JobScooper\DataAccess\UserJobMatch Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -1957,7 +1957,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Declares an association between this object and a ChildUser object.
      *
      * @param  ChildUser $v
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      * @throws PropelException
      */
     public function setUser(ChildUser $v = null)
@@ -2008,7 +2008,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Declares an association between this object and a ChildJobPosting object.
      *
      * @param  ChildJobPosting $v
-     * @return $this|\Jobscooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      * @throws PropelException
      */
     public function setJobPosting(ChildJobPosting $v = null)

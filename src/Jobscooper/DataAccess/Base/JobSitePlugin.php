@@ -1,14 +1,14 @@
 <?php
 
-namespace Jobscooper\DataAccess\Base;
+namespace JobScooper\DataAccess\Base;
 
 use \DateTime;
 use \Exception;
 use \PDO;
-use Jobscooper\DataAccess\JobSitePluginQuery as ChildJobSitePluginQuery;
-use Jobscooper\DataAccess\UserSearchRun as ChildUserSearchRun;
-use Jobscooper\DataAccess\UserSearchRunQuery as ChildUserSearchRunQuery;
-use Jobscooper\DataAccess\Map\JobSitePluginTableMap;
+use JobScooper\DataAccess\JobSitePluginQuery as ChildJobSitePluginQuery;
+use JobScooper\DataAccess\UserSearchRun as ChildUserSearchRun;
+use JobScooper\DataAccess\UserSearchRunQuery as ChildUserSearchRunQuery;
+use JobScooper\DataAccess\Map\JobSitePluginTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -27,14 +27,14 @@ use Propel\Runtime\Util\PropelDateTime;
  *
  *
  *
- * @package    propel.generator.Jobscooper.DataAccess.Base
+ * @package    propel.generator.JobScooper.DataAccess.Base
  */
 abstract class JobSitePlugin implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      */
-    const TABLE_MAP = '\\Jobscooper\\DataAccess\\Map\\JobSitePluginTableMap';
+    const TABLE_MAP = '\\JobScooper\\DataAccess\\Map\\JobSitePluginTableMap';
 
 
     /**
@@ -161,7 +161,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
     protected $alreadyInSave = false;
 
     /**
-     * Initializes internal state of Jobscooper\DataAccess\Base\JobSitePlugin object.
+     * Initializes internal state of JobScooper\DataAccess\Base\JobSitePlugin object.
      */
     public function __construct()
     {
@@ -590,7 +590,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * Set the value of [jobsite_key] column.
      *
      * @param string $v new value
-     * @return $this|\Jobscooper\DataAccess\JobSitePlugin The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\JobSitePlugin The current object (for fluent API support)
      */
     public function setJobSiteKey($v)
     {
@@ -610,7 +610,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * Set the value of [plugin_class_name] column.
      *
      * @param string $v new value
-     * @return $this|\Jobscooper\DataAccess\JobSitePlugin The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\JobSitePlugin The current object (for fluent API support)
      */
     public function setPluginClassName($v)
     {
@@ -630,7 +630,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * Set the value of [display_name] column.
      *
      * @param string $v new value
-     * @return $this|\Jobscooper\DataAccess\JobSitePlugin The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\JobSitePlugin The current object (for fluent API support)
      */
     public function setDisplayName($v)
     {
@@ -651,7 +651,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      *
      * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
      *               Empty strings are treated as NULL.
-     * @return $this|\Jobscooper\DataAccess\JobSitePlugin The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\JobSitePlugin The current object (for fluent API support)
      */
     public function setLastRunAt($v)
     {
@@ -674,7 +674,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
      *
      * @param  boolean|integer|string $v The new value
-     * @return $this|\Jobscooper\DataAccess\JobSitePlugin The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\JobSitePlugin The current object (for fluent API support)
      */
     public function setLastRunWasSuccessful($v)
     {
@@ -699,7 +699,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      *
      * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
      *               Empty strings are treated as NULL.
-     * @return $this|\Jobscooper\DataAccess\JobSitePlugin The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\JobSitePlugin The current object (for fluent API support)
      */
     public function setStartNextRunAfter($v)
     {
@@ -719,7 +719,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      *
      * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
      *               Empty strings are treated as NULL.
-     * @return $this|\Jobscooper\DataAccess\JobSitePlugin The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\JobSitePlugin The current object (for fluent API support)
      */
     public function setLastFailedAt($v)
     {
@@ -738,7 +738,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * Set the value of [last_user_search_run_id] column.
      *
      * @param int $v new value
-     * @return $this|\Jobscooper\DataAccess\JobSitePlugin The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\JobSitePlugin The current object (for fluent API support)
      */
     public function setLastUserSearchRunId($v)
     {
@@ -768,7 +768,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * Set the value of [supported_country_codes] column.
      *
      * @param array $v new value
-     * @return $this|\Jobscooper\DataAccess\JobSitePlugin The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\JobSitePlugin The current object (for fluent API support)
      */
     public function setSupportedCountryCodes($v)
     {
@@ -785,7 +785,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * Adds a value to the [supported_country_codes] array column value.
      * @param  mixed $value
      *
-     * @return $this|\Jobscooper\DataAccess\JobSitePlugin The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\JobSitePlugin The current object (for fluent API support)
      */
     public function addSupportedCountryCode($value)
     {
@@ -800,7 +800,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * Removes a value from the [supported_country_codes] array column value.
      * @param  mixed $value
      *
-     * @return $this|\Jobscooper\DataAccess\JobSitePlugin The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\JobSitePlugin The current object (for fluent API support)
      */
     public function removeSupportedCountryCode($value)
     {
@@ -819,7 +819,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * Set the value of [results_filter_type] column.
      *
      * @param  string $v new value
-     * @return $this|\Jobscooper\DataAccess\JobSitePlugin The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\JobSitePlugin The current object (for fluent API support)
      * @throws \Propel\Runtime\Exception\PropelException
      */
     public function setResultsFilterType($v)
@@ -914,7 +914,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
             return $startcol + 9; // 9 = JobSitePluginTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException(sprintf('Error populating %s object', '\\Jobscooper\\DataAccess\\JobSitePlugin'), 0, $e);
+            throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\JobSitePlugin'), 0, $e);
         }
     }
 
@@ -1394,7 +1394,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      *                one of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
      *                TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM.
      *                Defaults to TableMap::TYPE_PHPNAME.
-     * @return $this|\Jobscooper\DataAccess\JobSitePlugin
+     * @return $this|\JobScooper\DataAccess\JobSitePlugin
      */
     public function setByName($name, $value, $type = TableMap::TYPE_PHPNAME)
     {
@@ -1409,7 +1409,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      *
      * @param  int $pos position in xml schema
      * @param  mixed $value field value
-     * @return $this|\Jobscooper\DataAccess\JobSitePlugin
+     * @return $this|\JobScooper\DataAccess\JobSitePlugin
      */
     public function setByPosition($pos, $value)
     {
@@ -1527,7 +1527,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * @param string $data The source data to import from
      * @param string $keyType The type of keys the array uses.
      *
-     * @return $this|\Jobscooper\DataAccess\JobSitePlugin The current object, for fluid interface
+     * @return $this|\JobScooper\DataAccess\JobSitePlugin The current object, for fluid interface
      */
     public function importFrom($parser, $data, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -1658,7 +1658,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param      object $copyObj An object of \Jobscooper\DataAccess\JobSitePlugin (or compatible) type.
+     * @param      object $copyObj An object of \JobScooper\DataAccess\JobSitePlugin (or compatible) type.
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param      boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
@@ -1689,7 +1689,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * objects.
      *
      * @param  boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return \Jobscooper\DataAccess\JobSitePlugin Clone of current object.
+     * @return \JobScooper\DataAccess\JobSitePlugin Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -1706,7 +1706,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * Declares an association between this object and a ChildUserSearchRun object.
      *
      * @param  ChildUserSearchRun $v
-     * @return $this|\Jobscooper\DataAccess\JobSitePlugin The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\JobSitePlugin The current object (for fluent API support)
      * @throws PropelException
      */
     public function setUserSearchRun(ChildUserSearchRun $v = null)

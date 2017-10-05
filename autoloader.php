@@ -4,9 +4,9 @@
  */
 spl_autoload_register(function ($entity) {
     $module = explode('\\', $entity, 2);
-    if (!in_array('Jobscooper', $module)) {
+    if (!in_array('JobScooper', $module)) {
         /**
-         * Not a part of Jobscooper file
+         * Not a part of JobScooper file
          * then we return here.
          */
         return;

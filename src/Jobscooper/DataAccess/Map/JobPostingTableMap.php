@@ -1,9 +1,9 @@
 <?php
 
-namespace Jobscooper\DataAccess\Map;
+namespace JobScooper\DataAccess\Map;
 
-use Jobscooper\DataAccess\JobPosting;
-use Jobscooper\DataAccess\JobPostingQuery;
+use JobScooper\DataAccess\JobPosting;
+use JobScooper\DataAccess\JobPostingQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\InstancePoolTrait;
@@ -34,7 +34,7 @@ class JobPostingTableMap extends TableMap
     /**
      * The (dot-path) name of this class
      */
-    const CLASS_NAME = 'Jobscooper.DataAccess.Map.JobPostingTableMap';
+    const CLASS_NAME = 'JobScooper.DataAccess.Map.JobPostingTableMap';
 
     /**
      * The default database name for this class
@@ -49,12 +49,12 @@ class JobPostingTableMap extends TableMap
     /**
      * The related Propel class for this table
      */
-    const OM_CLASS = '\\Jobscooper\\DataAccess\\JobPosting';
+    const OM_CLASS = '\\JobScooper\\DataAccess\\JobPosting';
 
     /**
      * A class that can be returned by this tableMap
      */
-    const CLASS_DEFAULT = 'Jobscooper.DataAccess.JobPosting';
+    const CLASS_DEFAULT = 'JobScooper.DataAccess.JobPosting';
 
     /**
      * The total number of columns
@@ -217,8 +217,8 @@ class JobPostingTableMap extends TableMap
         $this->setName('jobposting');
         $this->setPhpName('JobPosting');
         $this->setIdentifierQuoting(false);
-        $this->setClassName('\\Jobscooper\\DataAccess\\JobPosting');
-        $this->setPackage('Jobscooper.DataAccess');
+        $this->setClassName('\\JobScooper\\DataAccess\\JobPosting');
+        $this->setPackage('JobScooper.DataAccess');
         $this->setUseIdGenerator(true);
         // columns
         $this->addPrimaryKey('jobposting_id', 'JobPostingId', 'INTEGER', true, null, null);
@@ -249,28 +249,28 @@ class JobPostingTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('JobLocation', '\\Jobscooper\\DataAccess\\JobLocation', RelationMap::MANY_TO_ONE, array (
+        $this->addRelation('JobLocation', '\\JobScooper\\DataAccess\\JobLocation', RelationMap::MANY_TO_ONE, array (
   0 =>
   array (
     0 => ':job_location_id',
     1 => ':location_id',
   ),
 ), null, null, null, false);
-        $this->addRelation('JobPostingRelatedByDuplicatesJobPostingId', '\\Jobscooper\\DataAccess\\JobPosting', RelationMap::MANY_TO_ONE, array (
+        $this->addRelation('JobPostingRelatedByDuplicatesJobPostingId', '\\JobScooper\\DataAccess\\JobPosting', RelationMap::MANY_TO_ONE, array (
   0 =>
   array (
     0 => ':duplicates_posting_id',
     1 => ':jobposting_id',
   ),
 ), null, null, null, false);
-        $this->addRelation('JobPostingRelatedByJobPostingId', '\\Jobscooper\\DataAccess\\JobPosting', RelationMap::ONE_TO_MANY, array (
+        $this->addRelation('JobPostingRelatedByJobPostingId', '\\JobScooper\\DataAccess\\JobPosting', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
     0 => ':duplicates_posting_id',
     1 => ':jobposting_id',
   ),
 ), null, null, 'JobPostingsRelatedByJobPostingId', false);
-        $this->addRelation('UserJobMatch', '\\Jobscooper\\DataAccess\\UserJobMatch', RelationMap::ONE_TO_MANY, array (
+        $this->addRelation('UserJobMatch', '\\JobScooper\\DataAccess\\UserJobMatch', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
     0 => ':jobposting_id',
@@ -520,7 +520,7 @@ class JobPostingTableMap extends TableMap
         if ($values instanceof Criteria) {
             // rename for clarity
             $criteria = $values;
-        } elseif ($values instanceof \Jobscooper\DataAccess\JobPosting) { // it's a model object
+        } elseif ($values instanceof \JobScooper\DataAccess\JobPosting) { // it's a model object
             // create criteria based on pk values
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks

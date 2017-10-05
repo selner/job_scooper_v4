@@ -14,9 +14,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-namespace Jobscooper\Manager;
+namespace JobScooper\Manager;
 
-use Jobscooper\Config;
+use JobScooper\Config;
 use JobScooper\StageProcessor\JobsAutoMarker;
 use JobScooper\StageProcessor\NotifierErrors;
 use JobScooper\StageProcessor\NotifierJobAlerts;

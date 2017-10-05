@@ -18,7 +18,7 @@ namespace JobScooper\Config;
 
 require_once __ROOT__ . "/bootstrap.php";
 
-use const Jobscooper\Plugins\Base\VALUE_NOT_SUPPORTED;
+use const JobScooper\Plugins\Base\VALUE_NOT_SUPPORTED;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use JobScooper\DataAccess\UserSearchRun;

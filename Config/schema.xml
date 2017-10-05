@@ -21,7 +21,7 @@
 <database name="default" defaultIdMethod="native"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:noNamespaceSchemaLocation="http://xsd.propelorm.org/1.6/database.xsd"
-          namespace="Jobscooper\DataAccess"
+          namespace="JobScooper\DataAccess"
           defaultPhpNamingMethod="clean"
         >
     <!-- Within the <database> tag, Propel expects one <table> tag for each table -->

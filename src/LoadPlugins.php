@@ -159,7 +159,7 @@ foreach ($files as $file) {
 
 function setupPlugins()
 {
-    $jsPlugins = new \Jobscooper\Manager\JsonSitePluginManager();
+    $jsPlugins = new \JobScooper\Manager\JsonSitePluginManager();
     $jsPlugins->init();
 
     $arrAddedPlugins = null;
@@ -176,7 +176,7 @@ function setupPlugins()
 //
 //            $GLOBALS['JOBSITE_PLUGINS'][$namekey] = array('name'=> $namekey, 'class_name' => $class, 'jobsite_db_object' => null, 'include_in_run' => false, 'other_settings' => [] );
 //
-//            $GLOBALS['JOBSITE_PLUGINS'][$namekey]['jobsite_db_object'] = \Jobscooper\DataAccess\JobSitePluginQuery::create()
+//            $GLOBALS['JOBSITE_PLUGINS'][$namekey]['jobsite_db_object'] = \JobScooper\DataAccess\JobSitePluginQuery::create()
 //                ->filterByPrimaryKey($namekey)
 //                ->findOneOrCreate();
 //

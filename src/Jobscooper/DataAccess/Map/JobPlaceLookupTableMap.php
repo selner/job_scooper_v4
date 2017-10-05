@@ -1,9 +1,9 @@
 <?php
 
-namespace Jobscooper\DataAccess\Map;
+namespace JobScooper\DataAccess\Map;
 
-use Jobscooper\DataAccess\JobPlaceLookup;
-use Jobscooper\DataAccess\JobPlaceLookupQuery;
+use JobScooper\DataAccess\JobPlaceLookup;
+use JobScooper\DataAccess\JobPlaceLookupQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\InstancePoolTrait;
@@ -34,7 +34,7 @@ class JobPlaceLookupTableMap extends TableMap
     /**
      * The (dot-path) name of this class
      */
-    const CLASS_NAME = 'Jobscooper.DataAccess.Map.JobPlaceLookupTableMap';
+    const CLASS_NAME = 'JobScooper.DataAccess.Map.JobPlaceLookupTableMap';
 
     /**
      * The default database name for this class
@@ -49,12 +49,12 @@ class JobPlaceLookupTableMap extends TableMap
     /**
      * The related Propel class for this table
      */
-    const OM_CLASS = '\\Jobscooper\\DataAccess\\JobPlaceLookup';
+    const OM_CLASS = '\\JobScooper\\DataAccess\\JobPlaceLookup';
 
     /**
      * A class that can be returned by this tableMap
      */
-    const CLASS_DEFAULT = 'Jobscooper.DataAccess.JobPlaceLookup';
+    const CLASS_DEFAULT = 'JobScooper.DataAccess.JobPlaceLookup';
 
     /**
      * The total number of columns
@@ -132,8 +132,8 @@ class JobPlaceLookupTableMap extends TableMap
         $this->setName('job_place_lookup');
         $this->setPhpName('JobPlaceLookup');
         $this->setIdentifierQuoting(false);
-        $this->setClassName('\\Jobscooper\\DataAccess\\JobPlaceLookup');
-        $this->setPackage('Jobscooper.DataAccess');
+        $this->setClassName('\\JobScooper\\DataAccess\\JobPlaceLookup');
+        $this->setPackage('JobScooper.DataAccess');
         $this->setUseIdGenerator(false);
         // columns
         $this->addPrimaryKey('place_alternate_name', 'PlaceAlternateName', 'VARCHAR', true, 100, null);
@@ -147,7 +147,7 @@ class JobPlaceLookupTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('JobLocation', '\\Jobscooper\\DataAccess\\JobLocation', RelationMap::MANY_TO_ONE, array (
+        $this->addRelation('JobLocation', '\\JobScooper\\DataAccess\\JobLocation', RelationMap::MANY_TO_ONE, array (
   0 =>
   array (
     0 => ':job_location_id',
@@ -177,7 +177,7 @@ class JobPlaceLookupTableMap extends TableMap
      * to the cache in order to ensure that the same objects are always returned by find*()
      * and findPk*() calls.
      *
-     * @param \Jobscooper\DataAccess\JobPlaceLookup $obj A \Jobscooper\DataAccess\JobPlaceLookup object.
+     * @param \JobScooper\DataAccess\JobPlaceLookup $obj A \JobScooper\DataAccess\JobPlaceLookup object.
      * @param string $key             (optional) key to use for instance map (for performance boost if key was already calculated externally).
      */
     public static function addInstanceToPool($obj, $key = null)
@@ -198,12 +198,12 @@ class JobPlaceLookupTableMap extends TableMap
      * methods in your stub classes -- you may need to explicitly remove objects
      * from the cache in order to prevent returning objects that no longer exist.
      *
-     * @param mixed $value A \Jobscooper\DataAccess\JobPlaceLookup object or a primary key value.
+     * @param mixed $value A \JobScooper\DataAccess\JobPlaceLookup object or a primary key value.
      */
     public static function removeInstanceFromPool($value)
     {
         if (Propel::isInstancePoolingEnabled() && null !== $value) {
-            if (is_object($value) && $value instanceof \Jobscooper\DataAccess\JobPlaceLookup) {
+            if (is_object($value) && $value instanceof \JobScooper\DataAccess\JobPlaceLookup) {
                 $key = serialize([(null === $value->getPlaceAlternateName() || is_scalar($value->getPlaceAlternateName()) || is_callable([$value->getPlaceAlternateName(), '__toString']) ? (string) $value->getPlaceAlternateName() : $value->getPlaceAlternateName()), (null === $value->getLocationId() || is_scalar($value->getLocationId()) || is_callable([$value->getLocationId(), '__toString']) ? (string) $value->getLocationId() : $value->getLocationId())]);
 
             } elseif (is_array($value) && count($value) === 2) {
@@ -214,7 +214,7 @@ class JobPlaceLookupTableMap extends TableMap
 
                 return;
             } else {
-                $e = new PropelException("Invalid value passed to removeInstanceFromPool().  Expected primary key or \Jobscooper\DataAccess\JobPlaceLookup object; got " . (is_object($value) ? get_class($value) . ' object.' : var_export($value, true)));
+                $e = new PropelException("Invalid value passed to removeInstanceFromPool().  Expected primary key or \JobScooper\DataAccess\JobPlaceLookup object; got " . (is_object($value) ? get_class($value) . ' object.' : var_export($value, true)));
                 throw $e;
             }
 
@@ -425,7 +425,7 @@ class JobPlaceLookupTableMap extends TableMap
         if ($values instanceof Criteria) {
             // rename for clarity
             $criteria = $values;
-        } elseif ($values instanceof \Jobscooper\DataAccess\JobPlaceLookup) { // it's a model object
+        } elseif ($values instanceof \JobScooper\DataAccess\JobPlaceLookup) { // it's a model object
             // create criteria based on pk values
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks

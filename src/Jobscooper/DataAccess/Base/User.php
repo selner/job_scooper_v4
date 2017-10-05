@@ -1,18 +1,18 @@
 <?php
 
-namespace Jobscooper\DataAccess\Base;
+namespace JobScooper\DataAccess\Base;
 
 use \Exception;
 use \PDO;
-use Jobscooper\DataAccess\User as ChildUser;
-use Jobscooper\DataAccess\UserJobMatch as ChildUserJobMatch;
-use Jobscooper\DataAccess\UserJobMatchQuery as ChildUserJobMatchQuery;
-use Jobscooper\DataAccess\UserQuery as ChildUserQuery;
-use Jobscooper\DataAccess\UserSearchRun as ChildUserSearchRun;
-use Jobscooper\DataAccess\UserSearchRunQuery as ChildUserSearchRunQuery;
-use Jobscooper\DataAccess\Map\UserJobMatchTableMap;
-use Jobscooper\DataAccess\Map\UserSearchRunTableMap;
-use Jobscooper\DataAccess\Map\UserTableMap;
+use JobScooper\DataAccess\User as ChildUser;
+use JobScooper\DataAccess\UserJobMatch as ChildUserJobMatch;
+use JobScooper\DataAccess\UserJobMatchQuery as ChildUserJobMatchQuery;
+use JobScooper\DataAccess\UserQuery as ChildUserQuery;
+use JobScooper\DataAccess\UserSearchRun as ChildUserSearchRun;
+use JobScooper\DataAccess\UserSearchRunQuery as ChildUserSearchRunQuery;
+use JobScooper\DataAccess\Map\UserJobMatchTableMap;
+use JobScooper\DataAccess\Map\UserSearchRunTableMap;
+use JobScooper\DataAccess\Map\UserTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -31,14 +31,14 @@ use Propel\Runtime\Parser\AbstractParser;
  *
  *
  *
- * @package    propel.generator.Jobscooper.DataAccess.Base
+ * @package    propel.generator.JobScooper.DataAccess.Base
  */
 abstract class User implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      */
-    const TABLE_MAP = '\\Jobscooper\\DataAccess\\Map\\UserTableMap';
+    const TABLE_MAP = '\\JobScooper\\DataAccess\\Map\\UserTableMap';
 
 
     /**
@@ -128,7 +128,7 @@ abstract class User implements ActiveRecordInterface
     protected $userSearchRunsScheduledForDeletion = null;
 
     /**
-     * Initializes internal state of Jobscooper\DataAccess\Base\User object.
+     * Initializes internal state of JobScooper\DataAccess\Base\User object.
      */
     public function __construct()
     {
@@ -396,7 +396,7 @@ abstract class User implements ActiveRecordInterface
      * Set the value of [user_slug] column.
      *
      * @param string $v new value
-     * @return $this|\Jobscooper\DataAccess\User The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
      */
     public function setUserSlug($v)
     {
@@ -416,7 +416,7 @@ abstract class User implements ActiveRecordInterface
      * Set the value of [name] column.
      *
      * @param string $v new value
-     * @return $this|\Jobscooper\DataAccess\User The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
      */
     public function setName($v)
     {
@@ -436,7 +436,7 @@ abstract class User implements ActiveRecordInterface
      * Set the value of [email_address] column.
      *
      * @param string $v new value
-     * @return $this|\Jobscooper\DataAccess\User The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
      */
     public function setEmailAddress($v)
     {
@@ -456,7 +456,7 @@ abstract class User implements ActiveRecordInterface
      * Set the value of [configuration_file_path] column.
      *
      * @param string $v new value
-     * @return $this|\Jobscooper\DataAccess\User The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
      */
     public function setConfigFilePath($v)
     {
@@ -530,7 +530,7 @@ abstract class User implements ActiveRecordInterface
             return $startcol + 4; // 4 = UserTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException(sprintf('Error populating %s object', '\\Jobscooper\\DataAccess\\User'), 0, $e);
+            throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\User'), 0, $e);
         }
     }
 
@@ -708,7 +708,7 @@ abstract class User implements ActiveRecordInterface
 
             if ($this->userJobMatchesScheduledForDeletion !== null) {
                 if (!$this->userJobMatchesScheduledForDeletion->isEmpty()) {
-                    \Jobscooper\DataAccess\UserJobMatchQuery::create()
+                    \JobScooper\DataAccess\UserJobMatchQuery::create()
                         ->filterByPrimaryKeys($this->userJobMatchesScheduledForDeletion->getPrimaryKeys(false))
                         ->delete($con);
                     $this->userJobMatchesScheduledForDeletion = null;
@@ -725,7 +725,7 @@ abstract class User implements ActiveRecordInterface
 
             if ($this->userSearchRunsScheduledForDeletion !== null) {
                 if (!$this->userSearchRunsScheduledForDeletion->isEmpty()) {
-                    \Jobscooper\DataAccess\UserSearchRunQuery::create()
+                    \JobScooper\DataAccess\UserSearchRunQuery::create()
                         ->filterByPrimaryKeys($this->userSearchRunsScheduledForDeletion->getPrimaryKeys(false))
                         ->delete($con);
                     $this->userSearchRunsScheduledForDeletion = null;
@@ -949,7 +949,7 @@ abstract class User implements ActiveRecordInterface
      *                one of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
      *                TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM.
      *                Defaults to TableMap::TYPE_PHPNAME.
-     * @return $this|\Jobscooper\DataAccess\User
+     * @return $this|\JobScooper\DataAccess\User
      */
     public function setByName($name, $value, $type = TableMap::TYPE_PHPNAME)
     {
@@ -964,7 +964,7 @@ abstract class User implements ActiveRecordInterface
      *
      * @param  int $pos position in xml schema
      * @param  mixed $value field value
-     * @return $this|\Jobscooper\DataAccess\User
+     * @return $this|\JobScooper\DataAccess\User
      */
     public function setByPosition($pos, $value)
     {
@@ -1038,7 +1038,7 @@ abstract class User implements ActiveRecordInterface
      * @param string $data The source data to import from
      * @param string $keyType The type of keys the array uses.
      *
-     * @return $this|\Jobscooper\DataAccess\User The current object, for fluid interface
+     * @return $this|\JobScooper\DataAccess\User The current object, for fluid interface
      */
     public function importFrom($parser, $data, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -1151,7 +1151,7 @@ abstract class User implements ActiveRecordInterface
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param      object $copyObj An object of \Jobscooper\DataAccess\User (or compatible) type.
+     * @param      object $copyObj An object of \JobScooper\DataAccess\User (or compatible) type.
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param      boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
@@ -1196,7 +1196,7 @@ abstract class User implements ActiveRecordInterface
      * objects.
      *
      * @param  boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return \Jobscooper\DataAccess\User Clone of current object.
+     * @return \JobScooper\DataAccess\User Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -1273,7 +1273,7 @@ abstract class User implements ActiveRecordInterface
         $collectionClassName = UserJobMatchTableMap::getTableMap()->getCollectionClassName();
 
         $this->collUserJobMatches = new $collectionClassName;
-        $this->collUserJobMatches->setModel('\Jobscooper\DataAccess\UserJobMatch');
+        $this->collUserJobMatches->setModel('\JobScooper\DataAccess\UserJobMatch');
     }
 
     /**
@@ -1406,7 +1406,7 @@ abstract class User implements ActiveRecordInterface
      * through the ChildUserJobMatch foreign key attribute.
      *
      * @param  ChildUserJobMatch $l ChildUserJobMatch
-     * @return $this|\Jobscooper\DataAccess\User The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
      */
     public function addUserJobMatch(ChildUserJobMatch $l)
     {
@@ -1523,7 +1523,7 @@ abstract class User implements ActiveRecordInterface
         $collectionClassName = UserSearchRunTableMap::getTableMap()->getCollectionClassName();
 
         $this->collUserSearchRuns = new $collectionClassName;
-        $this->collUserSearchRuns->setModel('\Jobscooper\DataAccess\UserSearchRun');
+        $this->collUserSearchRuns->setModel('\JobScooper\DataAccess\UserSearchRun');
     }
 
     /**
@@ -1656,7 +1656,7 @@ abstract class User implements ActiveRecordInterface
      * through the ChildUserSearchRun foreign key attribute.
      *
      * @param  ChildUserSearchRun $l ChildUserSearchRun
-     * @return $this|\Jobscooper\DataAccess\User The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
      */
     public function addUserSearchRun(ChildUserSearchRun $l)
     {

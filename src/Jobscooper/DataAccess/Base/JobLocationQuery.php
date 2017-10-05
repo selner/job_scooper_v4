@@ -1,12 +1,12 @@
 <?php
 
-namespace Jobscooper\DataAccess\Base;
+namespace JobScooper\DataAccess\Base;
 
 use \Exception;
 use \PDO;
-use Jobscooper\DataAccess\JobLocation as ChildJobLocation;
-use Jobscooper\DataAccess\JobLocationQuery as ChildJobLocationQuery;
-use Jobscooper\DataAccess\Map\JobLocationTableMap;
+use JobScooper\DataAccess\JobLocation as ChildJobLocation;
+use JobScooper\DataAccess\JobLocationQuery as ChildJobLocationQuery;
+use JobScooper\DataAccess\Map\JobLocationTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -76,7 +76,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobLocationQuery rightJoinWithJobPlaceLookup() Adds a RIGHT JOIN clause and with to the query using the JobPlaceLookup relation
  * @method     ChildJobLocationQuery innerJoinWithJobPlaceLookup() Adds a INNER JOIN clause and with to the query using the JobPlaceLookup relation
  *
- * @method     \Jobscooper\DataAccess\JobPostingQuery|\Jobscooper\DataAccess\JobPlaceLookupQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
+ * @method     \JobScooper\DataAccess\JobPostingQuery|\JobScooper\DataAccess\JobPlaceLookupQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildJobLocation findOne(ConnectionInterface $con = null) Return the first ChildJobLocation matching the query
  * @method     ChildJobLocation findOneOrCreate(ConnectionInterface $con = null) Return the first ChildJobLocation matching the query, or a new ChildJobLocation object populated from the query conditions when no match is found
@@ -134,13 +134,13 @@ abstract class JobLocationQuery extends ModelCriteria
     protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityNotFoundException';
 
     /**
-     * Initializes internal state of \Jobscooper\DataAccess\Base\JobLocationQuery object.
+     * Initializes internal state of \JobScooper\DataAccess\Base\JobLocationQuery object.
      *
      * @param     string $dbName The database name
      * @param     string $modelName The phpName of a model, e.g. 'Book'
      * @param     string $modelAlias The alias for the model in this query, e.g. 'b'
      */
-    public function __construct($dbName = 'default', $modelName = '\\Jobscooper\\DataAccess\\JobLocation', $modelAlias = null)
+    public function __construct($dbName = 'default', $modelName = '\\JobScooper\\DataAccess\\JobLocation', $modelAlias = null)
     {
         parent::__construct($dbName, $modelName, $modelAlias);
     }
@@ -760,16 +760,16 @@ abstract class JobLocationQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query by a related \Jobscooper\DataAccess\JobPosting object
+     * Filter the query by a related \JobScooper\DataAccess\JobPosting object
      *
-     * @param \Jobscooper\DataAccess\JobPosting|ObjectCollection $jobPosting the related object to use as filter
+     * @param \JobScooper\DataAccess\JobPosting|ObjectCollection $jobPosting the related object to use as filter
      * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return ChildJobLocationQuery The current query, for fluid interface
      */
     public function filterByJobPosting($jobPosting, $comparison = null)
     {
-        if ($jobPosting instanceof \Jobscooper\DataAccess\JobPosting) {
+        if ($jobPosting instanceof \JobScooper\DataAccess\JobPosting) {
             return $this
                 ->addUsingAlias(JobLocationTableMap::COL_LOCATION_ID, $jobPosting->getJobLocationId(), $comparison);
         } elseif ($jobPosting instanceof ObjectCollection) {
@@ -778,7 +778,7 @@ abstract class JobLocationQuery extends ModelCriteria
                 ->filterByPrimaryKeys($jobPosting->getPrimaryKeys())
                 ->endUse();
         } else {
-            throw new PropelException('filterByJobPosting() only accepts arguments of type \Jobscooper\DataAccess\JobPosting or Collection');
+            throw new PropelException('filterByJobPosting() only accepts arguments of type \JobScooper\DataAccess\JobPosting or Collection');
         }
     }
 
@@ -823,26 +823,26 @@ abstract class JobLocationQuery extends ModelCriteria
      *                                   to be used as main alias in the secondary query
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
-     * @return \Jobscooper\DataAccess\JobPostingQuery A secondary query class using the current class as primary query
+     * @return \JobScooper\DataAccess\JobPostingQuery A secondary query class using the current class as primary query
      */
     public function useJobPostingQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
     {
         return $this
             ->joinJobPosting($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'JobPosting', '\Jobscooper\DataAccess\JobPostingQuery');
+            ->useQuery($relationAlias ? $relationAlias : 'JobPosting', '\JobScooper\DataAccess\JobPostingQuery');
     }
 
     /**
-     * Filter the query by a related \Jobscooper\DataAccess\JobPlaceLookup object
+     * Filter the query by a related \JobScooper\DataAccess\JobPlaceLookup object
      *
-     * @param \Jobscooper\DataAccess\JobPlaceLookup|ObjectCollection $jobPlaceLookup the related object to use as filter
+     * @param \JobScooper\DataAccess\JobPlaceLookup|ObjectCollection $jobPlaceLookup the related object to use as filter
      * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return ChildJobLocationQuery The current query, for fluid interface
      */
     public function filterByJobPlaceLookup($jobPlaceLookup, $comparison = null)
     {
-        if ($jobPlaceLookup instanceof \Jobscooper\DataAccess\JobPlaceLookup) {
+        if ($jobPlaceLookup instanceof \JobScooper\DataAccess\JobPlaceLookup) {
             return $this
                 ->addUsingAlias(JobLocationTableMap::COL_LOCATION_ID, $jobPlaceLookup->getLocationId(), $comparison);
         } elseif ($jobPlaceLookup instanceof ObjectCollection) {
@@ -851,7 +851,7 @@ abstract class JobLocationQuery extends ModelCriteria
                 ->filterByPrimaryKeys($jobPlaceLookup->getPrimaryKeys())
                 ->endUse();
         } else {
-            throw new PropelException('filterByJobPlaceLookup() only accepts arguments of type \Jobscooper\DataAccess\JobPlaceLookup or Collection');
+            throw new PropelException('filterByJobPlaceLookup() only accepts arguments of type \JobScooper\DataAccess\JobPlaceLookup or Collection');
         }
     }
 
@@ -896,13 +896,13 @@ abstract class JobLocationQuery extends ModelCriteria
      *                                   to be used as main alias in the secondary query
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
-     * @return \Jobscooper\DataAccess\JobPlaceLookupQuery A secondary query class using the current class as primary query
+     * @return \JobScooper\DataAccess\JobPlaceLookupQuery A secondary query class using the current class as primary query
      */
     public function useJobPlaceLookupQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
             ->joinJobPlaceLookup($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'JobPlaceLookup', '\Jobscooper\DataAccess\JobPlaceLookupQuery');
+            ->useQuery($relationAlias ? $relationAlias : 'JobPlaceLookup', '\JobScooper\DataAccess\JobPlaceLookupQuery');
     }
 
     /**

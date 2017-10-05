@@ -17,7 +17,7 @@
  */
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginOuterwall extends \Jobscooper\Plugins\Base\ServerHtmlSimplePlugin
+class PluginOuterwall extends \JobScooper\Plugins\Base\ServerHtmlSimplePlugin
 {
     protected $siteName = 'Outerwall';
     protected $siteBaseURL = 'http://outerwall.jobs';

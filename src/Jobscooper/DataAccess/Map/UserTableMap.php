@@ -1,9 +1,9 @@
 <?php
 
-namespace Jobscooper\DataAccess\Map;
+namespace JobScooper\DataAccess\Map;
 
-use Jobscooper\DataAccess\User;
-use Jobscooper\DataAccess\UserQuery;
+use JobScooper\DataAccess\User;
+use JobScooper\DataAccess\UserQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\InstancePoolTrait;
@@ -34,7 +34,7 @@ class UserTableMap extends TableMap
     /**
      * The (dot-path) name of this class
      */
-    const CLASS_NAME = 'Jobscooper.DataAccess.Map.UserTableMap';
+    const CLASS_NAME = 'JobScooper.DataAccess.Map.UserTableMap';
 
     /**
      * The default database name for this class
@@ -49,12 +49,12 @@ class UserTableMap extends TableMap
     /**
      * The related Propel class for this table
      */
-    const OM_CLASS = '\\Jobscooper\\DataAccess\\User';
+    const OM_CLASS = '\\JobScooper\\DataAccess\\User';
 
     /**
      * A class that can be returned by this tableMap
      */
-    const CLASS_DEFAULT = 'Jobscooper.DataAccess.User';
+    const CLASS_DEFAULT = 'JobScooper.DataAccess.User';
 
     /**
      * The total number of columns
@@ -137,8 +137,8 @@ class UserTableMap extends TableMap
         $this->setName('user');
         $this->setPhpName('User');
         $this->setIdentifierQuoting(false);
-        $this->setClassName('\\Jobscooper\\DataAccess\\User');
-        $this->setPackage('Jobscooper.DataAccess');
+        $this->setClassName('\\JobScooper\\DataAccess\\User');
+        $this->setPackage('JobScooper.DataAccess');
         $this->setUseIdGenerator(false);
         // columns
         $this->addPrimaryKey('user_slug', 'UserSlug', 'VARCHAR', true, 128, null);
@@ -153,14 +153,14 @@ class UserTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('UserJobMatch', '\\Jobscooper\\DataAccess\\UserJobMatch', RelationMap::ONE_TO_MANY, array (
+        $this->addRelation('UserJobMatch', '\\JobScooper\\DataAccess\\UserJobMatch', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
     0 => ':user_slug',
     1 => ':user_slug',
   ),
 ), null, null, 'UserJobMatches', false);
-        $this->addRelation('UserSearchRun', '\\Jobscooper\\DataAccess\\UserSearchRun', RelationMap::ONE_TO_MANY, array (
+        $this->addRelation('UserSearchRun', '\\JobScooper\\DataAccess\\UserSearchRun', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
     0 => ':user_slug',
@@ -365,7 +365,7 @@ class UserTableMap extends TableMap
         if ($values instanceof Criteria) {
             // rename for clarity
             $criteria = $values;
-        } elseif ($values instanceof \Jobscooper\DataAccess\User) { // it's a model object
+        } elseif ($values instanceof \JobScooper\DataAccess\User) { // it's a model object
             // create criteria based on pk values
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks

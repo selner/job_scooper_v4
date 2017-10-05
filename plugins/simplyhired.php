@@ -17,11 +17,11 @@
 */
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-use const Jobscooper\Plugins\Base\VALUE_NOT_SUPPORTED;
-use const \Jobscooper\Plugins\Base\BASE_URL_TAG_KEYWORDS;
-use const \Jobscooper\Plugins\Base\BASE_URL_TAG_LOCATION;
+use const JobScooper\Plugins\Base\VALUE_NOT_SUPPORTED;
+use const \JobScooper\Plugins\Base\BASE_URL_TAG_KEYWORDS;
+use const \JobScooper\Plugins\Base\BASE_URL_TAG_LOCATION;
 
-class PluginSimplyHired extends \Jobscooper\Plugins\Base\ServerHtmlPlugin
+class PluginSimplyHired extends \JobScooper\Plugins\Base\ServerHtmlPlugin
 {
     protected $siteBaseURL = 'http://www.simplyhired.com';
     protected $siteName = 'SimplyHired';

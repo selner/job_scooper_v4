@@ -17,7 +17,7 @@
  */
 require_once dirname(dirname(dirname(__FILE__)))."/bootstrap.php";
 
-abstract class ClassBaseResumatorDivPlugin extends \Jobscooper\Plugins\Base\ServerHtmlSimplePlugin
+abstract class ClassBaseResumatorDivPlugin extends \JobScooper\Plugins\Base\ServerHtmlSimplePlugin
 {
     protected $arrListingTagSetup = array(
         'tag_listings_section' => array(array('tag' => 'div', 'attribute' => 'id', 'attribute_value' =>'resumator-content-left-wrapper'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'resumator-job')),

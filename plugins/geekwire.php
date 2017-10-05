@@ -16,7 +16,7 @@
  */
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginGeekwire extends \Jobscooper\Plugins\Base\AjaxHtmlSimplePlugin
+class PluginGeekwire extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'Geekwire';
     protected $siteBaseURL = 'http://www.geekwire.com/';

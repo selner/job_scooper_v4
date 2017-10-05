@@ -15,7 +15,7 @@
  * under the License.
  */
 
-namespace Jobscooper\Plugins\Base;
+namespace JobScooper\Plugins\Base;
 
 require_once __ROOT__ . "/bootstrap.php";
 
@@ -1119,7 +1119,7 @@ abstract class BaseJobsSite
 //                $this->arrSearchReturnedJobs[$job->getJobPostingId()] = $job->getJobPostingId();
 //            }
 //
-//            $newMatch = \Jobscooper\DataAccess\UserJobMatchQuery::create()
+//            $newMatch = \JobScooper\DataAccess\UserJobMatchQuery::create()
 //                ->filterByUserSlug($this->userObject->getUserSlug())
 //                ->filterByJobPostingId($arrReturnedJobIds)
 //                ->findOneOrCreate();

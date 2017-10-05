@@ -35,7 +35,7 @@ class NotifierErrors {
 
     function processAndAlertErrors()
     {
-        $subject = "Jobscooper[" . gethostname() . "] Errors for " . getRunDateRange();
+        $subject = "JobScooper[" . gethostname() . "] Errors for " . getRunDateRange();
 
         $errs = $this->getErrorsEmailContent();
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace Jobscooper\DataAccess\Base;
+namespace JobScooper\DataAccess\Base;
 
 use \Exception;
 use \PDO;
-use Jobscooper\DataAccess\UserJobMatch as ChildUserJobMatch;
-use Jobscooper\DataAccess\UserJobMatchQuery as ChildUserJobMatchQuery;
-use Jobscooper\DataAccess\Map\UserJobMatchTableMap;
+use JobScooper\DataAccess\UserJobMatch as ChildUserJobMatch;
+use JobScooper\DataAccess\UserJobMatchQuery as ChildUserJobMatchQuery;
+use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -74,7 +74,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatchQuery rightJoinWithJobPosting() Adds a RIGHT JOIN clause and with to the query using the JobPosting relation
  * @method     ChildUserJobMatchQuery innerJoinWithJobPosting() Adds a INNER JOIN clause and with to the query using the JobPosting relation
  *
- * @method     \Jobscooper\DataAccess\UserQuery|\Jobscooper\DataAccess\JobPostingQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
+ * @method     \JobScooper\DataAccess\UserQuery|\JobScooper\DataAccess\JobPostingQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildUserJobMatch findOne(ConnectionInterface $con = null) Return the first ChildUserJobMatch matching the query
  * @method     ChildUserJobMatch findOneOrCreate(ConnectionInterface $con = null) Return the first ChildUserJobMatch matching the query, or a new ChildUserJobMatch object populated from the query conditions when no match is found
@@ -129,13 +129,13 @@ abstract class UserJobMatchQuery extends ModelCriteria
     protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityNotFoundException';
 
     /**
-     * Initializes internal state of \Jobscooper\DataAccess\Base\UserJobMatchQuery object.
+     * Initializes internal state of \JobScooper\DataAccess\Base\UserJobMatchQuery object.
      *
      * @param     string $dbName The database name
      * @param     string $modelName The phpName of a model, e.g. 'Book'
      * @param     string $modelAlias The alias for the model in this query, e.g. 'b'
      */
-    public function __construct($dbName = 'default', $modelName = '\\Jobscooper\\DataAccess\\UserJobMatch', $modelAlias = null)
+    public function __construct($dbName = 'default', $modelName = '\\JobScooper\\DataAccess\\UserJobMatch', $modelAlias = null)
     {
         parent::__construct($dbName, $modelName, $modelAlias);
     }
@@ -828,9 +828,9 @@ abstract class UserJobMatchQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query by a related \Jobscooper\DataAccess\User object
+     * Filter the query by a related \JobScooper\DataAccess\User object
      *
-     * @param \Jobscooper\DataAccess\User|ObjectCollection $user The related object(s) to use as filter
+     * @param \JobScooper\DataAccess\User|ObjectCollection $user The related object(s) to use as filter
      * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @throws \Propel\Runtime\Exception\PropelException
@@ -839,7 +839,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
      */
     public function filterByUser($user, $comparison = null)
     {
-        if ($user instanceof \Jobscooper\DataAccess\User) {
+        if ($user instanceof \JobScooper\DataAccess\User) {
             return $this
                 ->addUsingAlias(UserJobMatchTableMap::COL_USER_SLUG, $user->getUserSlug(), $comparison);
         } elseif ($user instanceof ObjectCollection) {
@@ -850,7 +850,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
             return $this
                 ->addUsingAlias(UserJobMatchTableMap::COL_USER_SLUG, $user->toKeyValue('PrimaryKey', 'UserSlug'), $comparison);
         } else {
-            throw new PropelException('filterByUser() only accepts arguments of type \Jobscooper\DataAccess\User or Collection');
+            throw new PropelException('filterByUser() only accepts arguments of type \JobScooper\DataAccess\User or Collection');
         }
     }
 
@@ -895,19 +895,19 @@ abstract class UserJobMatchQuery extends ModelCriteria
      *                                   to be used as main alias in the secondary query
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
-     * @return \Jobscooper\DataAccess\UserQuery A secondary query class using the current class as primary query
+     * @return \JobScooper\DataAccess\UserQuery A secondary query class using the current class as primary query
      */
     public function useUserQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
             ->joinUser($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'User', '\Jobscooper\DataAccess\UserQuery');
+            ->useQuery($relationAlias ? $relationAlias : 'User', '\JobScooper\DataAccess\UserQuery');
     }
 
     /**
-     * Filter the query by a related \Jobscooper\DataAccess\JobPosting object
+     * Filter the query by a related \JobScooper\DataAccess\JobPosting object
      *
-     * @param \Jobscooper\DataAccess\JobPosting|ObjectCollection $jobPosting The related object(s) to use as filter
+     * @param \JobScooper\DataAccess\JobPosting|ObjectCollection $jobPosting The related object(s) to use as filter
      * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @throws \Propel\Runtime\Exception\PropelException
@@ -916,7 +916,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
      */
     public function filterByJobPosting($jobPosting, $comparison = null)
     {
-        if ($jobPosting instanceof \Jobscooper\DataAccess\JobPosting) {
+        if ($jobPosting instanceof \JobScooper\DataAccess\JobPosting) {
             return $this
                 ->addUsingAlias(UserJobMatchTableMap::COL_JOBPOSTING_ID, $jobPosting->getJobPostingId(), $comparison);
         } elseif ($jobPosting instanceof ObjectCollection) {
@@ -927,7 +927,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
             return $this
                 ->addUsingAlias(UserJobMatchTableMap::COL_JOBPOSTING_ID, $jobPosting->toKeyValue('PrimaryKey', 'JobPostingId'), $comparison);
         } else {
-            throw new PropelException('filterByJobPosting() only accepts arguments of type \Jobscooper\DataAccess\JobPosting or Collection');
+            throw new PropelException('filterByJobPosting() only accepts arguments of type \JobScooper\DataAccess\JobPosting or Collection');
         }
     }
 
@@ -972,13 +972,13 @@ abstract class UserJobMatchQuery extends ModelCriteria
      *                                   to be used as main alias in the secondary query
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
-     * @return \Jobscooper\DataAccess\JobPostingQuery A secondary query class using the current class as primary query
+     * @return \JobScooper\DataAccess\JobPostingQuery A secondary query class using the current class as primary query
      */
     public function useJobPostingQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
             ->joinJobPosting($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'JobPosting', '\Jobscooper\DataAccess\JobPostingQuery');
+            ->useQuery($relationAlias ? $relationAlias : 'JobPosting', '\JobScooper\DataAccess\JobPostingQuery');
     }
 
     /**

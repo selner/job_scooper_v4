@@ -1,13 +1,13 @@
 <?php
 
-namespace Jobscooper\DataAccess\Base;
+namespace JobScooper\DataAccess\Base;
 
 use \Exception;
 use \PDO;
-use Jobscooper\DataAccess\JobLocation as ChildJobLocation;
-use Jobscooper\DataAccess\JobLocationQuery as ChildJobLocationQuery;
-use Jobscooper\DataAccess\JobPlaceLookupQuery as ChildJobPlaceLookupQuery;
-use Jobscooper\DataAccess\Map\JobPlaceLookupTableMap;
+use JobScooper\DataAccess\JobLocation as ChildJobLocation;
+use JobScooper\DataAccess\JobLocationQuery as ChildJobLocationQuery;
+use JobScooper\DataAccess\JobPlaceLookupQuery as ChildJobPlaceLookupQuery;
+use JobScooper\DataAccess\Map\JobPlaceLookupTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -25,14 +25,14 @@ use Propel\Runtime\Parser\AbstractParser;
  *
  *
  *
- * @package    propel.generator.Jobscooper.DataAccess.Base
+ * @package    propel.generator.JobScooper.DataAccess.Base
  */
 abstract class JobPlaceLookup implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      */
-    const TABLE_MAP = '\\Jobscooper\\DataAccess\\Map\\JobPlaceLookupTableMap';
+    const TABLE_MAP = '\\JobScooper\\DataAccess\\Map\\JobPlaceLookupTableMap';
 
 
     /**
@@ -96,7 +96,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
     protected $alreadyInSave = false;
 
     /**
-     * Initializes internal state of Jobscooper\DataAccess\Base\JobPlaceLookup object.
+     * Initializes internal state of JobScooper\DataAccess\Base\JobPlaceLookup object.
      */
     public function __construct()
     {
@@ -354,7 +354,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      * Set the value of [place_alternate_name] column.
      *
      * @param string $v new value
-     * @return $this|\Jobscooper\DataAccess\JobPlaceLookup The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\JobPlaceLookup The current object (for fluent API support)
      */
     public function setPlaceAlternateName($v)
     {
@@ -374,7 +374,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      * Set the value of [job_location_id] column.
      *
      * @param int $v new value
-     * @return $this|\Jobscooper\DataAccess\JobPlaceLookup The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\JobPlaceLookup The current object (for fluent API support)
      */
     public function setLocationId($v)
     {
@@ -398,7 +398,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      * Set the value of [slug] column.
      *
      * @param string $v new value
-     * @return $this|\Jobscooper\DataAccess\JobPlaceLookup The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\JobPlaceLookup The current object (for fluent API support)
      */
     public function setSlug($v)
     {
@@ -469,7 +469,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
             return $startcol + 3; // 3 = JobPlaceLookupTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException(sprintf('Error populating %s object', '\\Jobscooper\\DataAccess\\JobPlaceLookup'), 0, $e);
+            throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\JobPlaceLookup'), 0, $e);
         }
     }
 
@@ -848,7 +848,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      *                one of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
      *                TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM.
      *                Defaults to TableMap::TYPE_PHPNAME.
-     * @return $this|\Jobscooper\DataAccess\JobPlaceLookup
+     * @return $this|\JobScooper\DataAccess\JobPlaceLookup
      */
     public function setByName($name, $value, $type = TableMap::TYPE_PHPNAME)
     {
@@ -863,7 +863,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      *
      * @param  int $pos position in xml schema
      * @param  mixed $value field value
-     * @return $this|\Jobscooper\DataAccess\JobPlaceLookup
+     * @return $this|\JobScooper\DataAccess\JobPlaceLookup
      */
     public function setByPosition($pos, $value)
     {
@@ -931,7 +931,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      * @param string $data The source data to import from
      * @param string $keyType The type of keys the array uses.
      *
-     * @return $this|\Jobscooper\DataAccess\JobPlaceLookup The current object, for fluid interface
+     * @return $this|\JobScooper\DataAccess\JobPlaceLookup The current object, for fluid interface
      */
     public function importFrom($parser, $data, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -1056,7 +1056,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param      object $copyObj An object of \Jobscooper\DataAccess\JobPlaceLookup (or compatible) type.
+     * @param      object $copyObj An object of \JobScooper\DataAccess\JobPlaceLookup (or compatible) type.
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param      boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
@@ -1080,7 +1080,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      * objects.
      *
      * @param  boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return \Jobscooper\DataAccess\JobPlaceLookup Clone of current object.
+     * @return \JobScooper\DataAccess\JobPlaceLookup Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -1097,7 +1097,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      * Declares an association between this object and a ChildJobLocation object.
      *
      * @param  ChildJobLocation $v
-     * @return $this|\Jobscooper\DataAccess\JobPlaceLookup The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\JobPlaceLookup The current object (for fluent API support)
      * @throws PropelException
      */
     public function setJobLocation(ChildJobLocation $v = null)
@@ -1288,7 +1288,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
         } else {
             $slug2 = $slug . $separator;
 
-            $count = \Jobscooper\DataAccess\JobPlaceLookupQuery::create()
+            $count = \JobScooper\DataAccess\JobPlaceLookupQuery::create()
                 ->filterBySlug($this->getSlug())
                 ->filterByPrimaryKey($this->getPrimaryKey())
             ->count();
@@ -1302,7 +1302,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
         $col = 'q.Slug';
         $compare = $alreadyExists ? $adapter->compareRegex($col, '?') : sprintf('%s = ?', $col);
 
-        $query = \Jobscooper\DataAccess\JobPlaceLookupQuery::create('q')
+        $query = \JobScooper\DataAccess\JobPlaceLookupQuery::create('q')
             ->where($compare, $alreadyExists ? '^' . $slug2 . '[0-9]+$' : $slug2)
             ->prune($this)
         ;

@@ -23,7 +23,7 @@ require_once dirname(dirname(__FILE__))."/bootstrap.php";
  *
  *       Used by dice.json plugin configuration to override single method
  */
-abstract class AbstractDice extends \Jobscooper\Plugins\Base\AjaxHtmlSimplePlugin
+abstract class AbstractDice extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
     function takeNextPageAction($nItem=null, $nPage=null)
     {

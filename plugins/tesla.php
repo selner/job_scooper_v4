@@ -17,7 +17,7 @@
  */
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginTesla extends \Jobscooper\Plugins\Base\AjaxHtmlSimplePlugin
+class PluginTesla extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'Tesla';
     protected $siteBaseURL = 'http://www.tesla.com/careers';
