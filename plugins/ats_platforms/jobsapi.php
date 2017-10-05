@@ -18,7 +18,7 @@
 require_once __ROOT__ ."/bootstrap.php";
 use JobApis\Jobs\Client\Queries\UsajobsQuery;
 use JobApis\Jobs\Client\Providers\UsajobsProvider;
-use \JobScooper\Plugins\Base\JobsApiPlugin;
+use \Jobscooper\Plugins\Base\JobsApiPlugin;
 
 class PluginUSAJobs extends JobsApiPlugin
 {

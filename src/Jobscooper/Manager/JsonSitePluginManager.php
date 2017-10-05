@@ -51,7 +51,7 @@ class JsonSitePluginManager
             'siteBaseURL' => getArrayItem('BaseURL', $arrConfigData),
             'strBaseURLFormat' => getArrayItem('SourceURL', $arrConfigData),
             'countryCodes' => getArrayItem('CountryCodes', $arrConfigData),
-            'arrListingTagSetup' => \JobScooper\Plugins\Base\SimplePlugin::getEmptyListingTagSetup()
+            'arrListingTagSetup' => \Jobscooper\Plugins\Base\SimplePlugin::getEmptyListingTagSetup()
         );
 
         if(array_key_exists("Pagination", $arrConfigData)) {

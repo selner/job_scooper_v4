@@ -16,7 +16,7 @@
  */
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginIndeed extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+class PluginIndeed extends \Jobscooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'Indeed';
     protected $nJobListingsPerPage = 50;

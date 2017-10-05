@@ -15,7 +15,7 @@
  * under the License.
  */
 
-namespace JobScooper\Plugins\Base;
+namespace Jobscooper\Plugins\Base;
 
 require_once __ROOT__ . "/bootstrap.php";
 

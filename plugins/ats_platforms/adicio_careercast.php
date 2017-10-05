@@ -22,7 +22,7 @@ abstract class AlternateAdicioCareerCastPlugin extends BaseAdicioCareerCastPlugi
     protected $nJobListingsPerPage = 20;
 }
 
-abstract class BaseAdicioCareerCastPlugin extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+abstract class BaseAdicioCareerCastPlugin extends \Jobscooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
     protected $siteName = '';
     protected $siteBaseURL = '';

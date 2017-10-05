@@ -17,7 +17,7 @@
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
 
-class PluginCraigslist extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+class PluginCraigslist extends \Jobscooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'Craigslist';
     protected $nJobListingsPerPage = 120;

@@ -20,7 +20,7 @@ require_once dirname(dirname(__FILE__))."/bootstrap.php";
 //.// http://expediajobs.findly.com/candidate/job_search/advanced/results?job_type=5517&state=2336&country=5492&sort=date
 
 
-class PluginExpedia extends \JobScooper\Plugins\Base\AjaxHtmlPlugin
+class PluginExpedia extends \Jobscooper\Plugins\Base\AjaxHtmlPlugin
 {
     protected $siteName = 'Expedia';
     protected $siteBaseURL = 'https://expedia.wd5.myworkdayjobs.com/search/jobs/';

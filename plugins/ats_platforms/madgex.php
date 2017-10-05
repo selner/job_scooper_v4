@@ -17,7 +17,7 @@
  */
 require_once __ROOT__."/bootstrap.php";
 
-abstract class BaseMadgexATSPlugin extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+abstract class BaseMadgexATSPlugin extends \Jobscooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
 
     function __construct()

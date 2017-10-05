@@ -79,7 +79,7 @@ class PluginDisney extends BasePluginTalentBrew
 
 }
 
-class BasePluginTalentBrew extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+class BasePluginTalentBrew extends \Jobscooper\Plugins\Base\AjaxHtmlSimplePlugin
 {
     protected $strBaseURLFormat = "/search-jobs/***KEYWORDS***/***LOCATION***";
     //

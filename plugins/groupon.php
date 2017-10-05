@@ -17,7 +17,7 @@
  */
 require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginGroupon extends \JobScooper\Plugins\Base\AjaxHtmlPlugin
+class PluginGroupon extends \Jobscooper\Plugins\Base\AjaxHtmlPlugin
 {
     protected $siteName = 'Groupon';
     protected $siteBaseURL = 'https://jobs.groupon.com';
