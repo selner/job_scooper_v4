@@ -64,7 +64,7 @@ class StageManager
     public function runAll()
     {
         try {
-            $arrRunStages = explode(",", get_PharseOptionValue("StageProcessor"));
+            $arrRunStages = explode(",", get_PharseOptionValue("stages"));
             if (is_array($arrRunStages) && count($arrRunStages) >= 1 && strlen($arrRunStages[0]) > 0) {
                 foreach ($arrRunStages as $stage) {
                     LogLine("StageManager starting stage " . $stage, \C__DISPLAY_SECTION_START__);
