@@ -84,7 +84,6 @@ RUN python -m nltk.downloader -d /root/nltk_data all
 ###
 ########################################################
 RUN mkdir /opt/jobs_scooper
-RUN mkdir /opt/jobs_scooper/userfiles
 
 ########################################################
 ###
