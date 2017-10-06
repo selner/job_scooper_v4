@@ -113,7 +113,7 @@ RUN echo "Adding all source files from `pwd` to /opt/jobs_scooper"
 ADD ./ /opt/jobs_scooper/
 
 RUN echo "Verifying correct source installed..."
-RUN cat /opt/jobs_scooper/bootstrap.php | grep "__APP_VERSION__"
+RUN cat /opt/jobs_scooper/runJobs.php | grep "__APP_VERSION__"
 RUN ls -al /opt/jobs_scooper
 
 ########################################################
