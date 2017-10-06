@@ -107,6 +107,8 @@ ECHO ""
 ECHO "***************************************************************"
 docker run --volume C:\var\local\jobs_scooper:/var/local/jobs_scooper --volume c:\dev\nltk_data:/root/nltk_data --hostname %COMPUTERNAME%_docker --name %jobsname% -d %imagetag%
 
+docker run --volume /private/var/local/jobs_scooper:/var/local/jobs_scooper --name jobs-use-propel-orm -d selner/js4-use-propel-orm
+
 POPD
 docker logs -f %jobsname%
 
