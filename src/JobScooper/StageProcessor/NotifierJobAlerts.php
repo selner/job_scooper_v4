@@ -183,17 +183,22 @@ class NotifierJobAlerts
         // For our final output, we want the jobs to be sorted by company and then role name.
         // Create a copy of the jobs list that is sorted by that value.
         //
-        $arrMatchedJobs = array_filter($arrJobsToNotify, "isSuccessfulUserJobMatch");
+        $arrMatchedJobs = array_filter($arrJobsToNotify, "isUserJobMatch");
         $arrExcludedJobs = array_filter($arrJobsToNotify, "isNotUserJobMatch");
 
         logLine(PHP_EOL . "Writing final list of " . count($arrJobsToNotify) . " jobs to output files." . PHP_EOL, \C__DISPLAY_NORMAL__);
 
-        // Output only new records that haven't been looked at yet
-        $detailsCSVFile = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedJobs, null, "-finalmatchedjobs", "CSV"));
-        $detailsHTMLFile = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedJobs, null, "-finalmatchedjobs", "HTML"));
+        $arrMatchedAndExcludedJobs = array_filter($arrMatchedJobs, "isUserJobMatchButExcluded");
+        $arrMatchedAndNotExcludedJobs = array_filter($arrMatchedJobs, "isUserJobMatchAndNotExcluded");
 
-        $arrResultFilesToCombine[] = $detailsCSVFile;
-        $arrFilesToAttach[] = $detailsCSVFile;
+        $detailsMatchOnlyCSV = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedAndNotExcludedJobs, null, "Matches", "CSV"));
+        $detailsMatchExcludedCSV = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedAndExcludedJobs, null, "ExcludedMatches", "CSV"));
+        $detailsHTMLFile = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedAndNotExcludedJobs, null, "Matches", "HTML"));
+
+        $arrResultFilesToCombine[] = $detailsMatchOnlyCSV;
+        $arrFilesToAttach[] = $detailsMatchOnlyCSV;
+        $arrResultFilesToCombine[] = $detailsMatchExcludedCSV;
+        $arrFilesToAttach[] = $detailsMatchExcludedCSV;
         $arrFilesToAttach[] =  $detailsHTMLFile;
 
 
@@ -265,14 +270,14 @@ class NotifierJobAlerts
         if (isDebug() !== true) {
             foreach ($arrFilesToAttach as $fileDetail) {
                 if (file_exists($fileDetail['full_file_path']) && is_file($fileDetail ['full_file_path'])) {
-                    logLine("Deleting local attachment file " . $fileDetail['full_file_path'] . PHP_EOL, \C__DISPLAY_NORMAL__);
+                    LogLine("Deleting local attachment file " . $fileDetail['full_file_path'] . PHP_EOL, \C__DISPLAY_NORMAL__);
                     unlink($fileDetail['full_file_path']);
                 }
             }
         }
         $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \C__SECTION_END__, \C__NAPPSECONDLEVEL__);
 
-        logLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, \C__DISPLAY_NORMAL__);
+        LogLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, \C__DISPLAY_NORMAL__);
 
         return $ret;
     }
@@ -295,7 +300,7 @@ class NotifierJobAlerts
 
         if(count($strFileOut) == 0)
         {
-            logLine("Warning: writeJobsListToFile had no records to write to  " . $strFileOut, \C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Warning: writeJobsListToFile had no records to write to  " . $strFileOut, \C__DISPLAY_ITEM_DETAIL__);
 
         }
 
@@ -360,7 +365,7 @@ class NotifierJobAlerts
 
 //            $classCombined->writeArrayToCSVFile($arrJobsRecordsToUse, $keysToOutput, $this->arrKeysForDeduping);
         }
-        logLine("Jobs list had  ". count($arrRecordsToOutput) . " jobs and was written to " . $strFileOut , \C__DISPLAY_ITEM_START__);
+        LogLine("Jobs list had  ". count($arrRecordsToOutput) . " jobs and was written to " . $strFileOut , \C__DISPLAY_ITEM_START__);
 
         if($strExt == "HTML")
             $this->_addCSSStyleToHTMLFile_($strFileOut);
@@ -378,7 +383,7 @@ class NotifierJobAlerts
 
         if($strFilterToApply == null || function_exists($strFilterToApply) === false)
         {
-            logLine("No filter function supplied; outputting all results...", \C__DISPLAY_WARNING__);
+            LogLine("No filter function supplied; outputting all results...", \C__DISPLAY_WARNING__);
             $arrJobs = $arrJobsList;
         }
         else
@@ -386,7 +391,7 @@ class NotifierJobAlerts
 
         $this->writeRunsJobsToFile($filePath, $arrJobs, $strExt);
 
-        logLine($strFilterToApply . " " . count($arrJobs). " job listings output to  " . $filePath, \C__DISPLAY_ITEM_RESULT__);
+        LogLine($strFilterToApply . " " . count($arrJobs). " job listings output to  " . $filePath, \C__DISPLAY_ITEM_RESULT__);
 
         return $filePath;
 
@@ -420,18 +425,18 @@ class NotifierJobAlerts
         if(!isset($retEmails["to"]) || count($retEmails["to"]) < 1 || strlen(current($retEmails["to"])['address']) <= 0)
         {
             $msg = "Could not find 'to:' email address in configuration file. Notification will not be sent.";
-            logLine($msg, \C__DISPLAY_ERROR__);
+            LogLine($msg, \C__DISPLAY_ERROR__);
             throw new InvalidArgumentException($msg);
         }
 
         if(count($retEmails['from']) > 1)
         {
-            logLine("Multiple 'from:' email addresses found. Notification will be from first one only (" . $retEmails['from']['address'][0] . ").", \C__DISPLAY_WARNING__);
+            LogLine("Multiple 'from:' email addresses found. Notification will be from first one only (" . $retEmails['from']['address'][0] . ").", \C__DISPLAY_WARNING__);
         }
         elseif(count($retEmails['from']) != 1)
         {
             $msg = "Could not find 'from:' email address in configuration file. Notification will not be sent.";
-            logLine($msg, \C__DISPLAY_ERROR__);
+            LogLine($msg, \C__DISPLAY_ERROR__);
             throw new InvalidArgumentException($msg);
         }
         $retEmails['from'] = $retEmails['from'][0];
@@ -444,8 +449,8 @@ class NotifierJobAlerts
     function sendEmail($strBodyText = null, $strBodyHTML = null, $arrDetailsAttachFiles = array(), $subject="No subject", $emailKind='results')
     {
         if (!isset($GLOBALS['OPTS']['send_notifications']) || $GLOBALS['OPTS']['send_notifications'] != 1) {
-            logLine(PHP_EOL . "User set -send_notifications = false so skipping email notification.)" . PHP_EOL, \C__DISPLAY_NORMAL__);
-            logLine("Mail contents would have been:" . PHP_EOL . $strBodyText, \C__DISPLAY_NORMAL__);
+            LogLine(PHP_EOL . "User set -send_notifications = false so skipping email notification.)" . PHP_EOL, \C__DISPLAY_NORMAL__);
+            LogLine("Mail contents would have been:" . PHP_EOL . $strBodyText, \C__DISPLAY_NORMAL__);
             return null;
         }
 
@@ -498,9 +503,9 @@ class NotifierJobAlerts
                 'allow_self_signed' => true
             )
         );
-        logLine("Email to:\t" . $strToAddys , \C__DISPLAY_NORMAL__);
-        logLine("Email from:\t" . $emailAddrs['from']['address'], \C__DISPLAY_NORMAL__);
-        logLine("Email bcc:\t" . $strBCCAddys, \C__DISPLAY_NORMAL__);
+        LogLine("Email to:\t" . $strToAddys , \C__DISPLAY_NORMAL__);
+        LogLine("Email from:\t" . $emailAddrs['from']['address'], \C__DISPLAY_NORMAL__);
+        LogLine("Email bcc:\t" . $strBCCAddys, \C__DISPLAY_NORMAL__);
 
 
         $mail->WordWrap = 120;                                          // Set word wrap to 120 characters
@@ -531,19 +536,19 @@ class NotifierJobAlerts
             // If we don't do this, we just get "failed" without any useful details.
             //
             $msg = "Failed to send notification email with error = ".$mail->ErrorInfo . PHP_EOL . "Retrying email send with debug enabled to log error details...";
-            logLine($msg, \C__DISPLAY_ERROR__);
+            LogLine($msg, \C__DISPLAY_ERROR__);
             $mail->SMTPDebug = 1;
             $ret = $mail->send();
             if($ret === true) return $ret;
 
             $msg = "Failed second attempt to send notification email.  Debug error details should be logged above.  Error: " . PHP_EOL .$mail->ErrorInfo;
-            logLine($msg, \C__DISPLAY_ERROR__);
+            LogLine($msg, \C__DISPLAY_ERROR__);
             throw new Exception($msg);
 
         }
         else
         {
-            logLine("Email notification sent to '" . $strToAddys . "' from '" . $emailAddrs['from']['address'] . "' with BCCs to '" . $strBCCAddys ."'", \C__DISPLAY_ITEM_RESULT__);
+            LogLine("Email notification sent to '" . $strToAddys . "' from '" . $emailAddrs['from']['address'] . "' with BCCs to '" . $strBCCAddys ."'", \C__DISPLAY_ITEM_RESULT__);
         }
         return $ret;
 
@@ -557,7 +562,7 @@ class NotifierJobAlerts
 
         if(strlen($filePath) < 0)
         {
-            logLine("Unable to get contents from '". var_export($detailsFile, true) ."' to assets in email.  Failing notification.", \C__DISPLAY_ERROR__);
+            LogLine("Unable to get contents from '". var_export($detailsFile, true) ."' to assets in email.  Failing notification.", \C__DISPLAY_ERROR__);
             return null;
         }
 
@@ -565,7 +570,7 @@ class NotifierJobAlerts
         $file = fopen( $filePath, "r" );
         if( $file == false )
         {
-            logLine("Unable to open file '". $filePath ."' for to get contents for notification mail.  Failing notification.", \C__DISPLAY_ERROR__);
+            LogLine("Unable to open file '". $filePath ."' for to get contents for notification mail.  Failing notification.", \C__DISPLAY_ERROR__);
             return null;
         }
 
@@ -609,7 +614,7 @@ class NotifierJobAlerts
         $arrExcluded = null;
 
         $strOut = "                ";
-        $arrHeaders = array("For Review", "Auto-Filtered", "New Listings");
+        $arrHeaders = array("New Matches to Review", "Matches Auto-Excluded", "Total Jobs");
 
         $arrFailedPluginsReport = getFailedSearchesByPlugin();
 
@@ -629,8 +634,8 @@ class NotifierJobAlerts
             $arrPluginJobs = $arrPluginJobMatches + $arrPluginExcludesJobs;
 
             $arrCounts[$plugin]['name'] = $plugin;
-            $arrCounts[$plugin]['for_review'] = count(array_filter($arrPluginJobs, "isSuccessfulUserJobMatch"));
-            $arrCounts[$plugin]['total_not_interested'] = count(array_filter($arrPluginJobs, "isNotUserJobMatch"));
+            $arrCounts[$plugin]['matches_to_review'] = count(array_filter($arrPluginJobs, "isUserJobMatchAndNotExcluded"));
+            $arrCounts[$plugin]['matches_excluded'] = count(array_filter($arrPluginJobs, "isUserJobMatchButExcluded"));
             $arrCounts[$plugin]['total_listings'] = count($arrPluginJobs);
             $arrCounts[$plugin]['had_error'] = false;
 

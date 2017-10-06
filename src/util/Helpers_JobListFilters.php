@@ -21,7 +21,7 @@
 
 
 
-function isSuccessfulUserJobMatch($var)
+function isUserJobMatch($var)
 {
     assert(method_exists($var, "getIsJobMatch") === true);
     return $var->getIsJobMatch();
@@ -29,21 +29,37 @@ function isSuccessfulUserJobMatch($var)
 
 function isNotUserJobMatch($var)
 {
-    return !isSuccessfulUserJobMatch($var);
+    return !isUserJobMatch($var);
 }
 
-
-function isExcludedJob($var)
+function isUserJobMatchButExcluded($var)
 {
-    assert(method_exists($var, "setIsExcluded") === true);
-    return $var->setIsExcluded();
+    assert(method_exists($var, "getIsExcluded") === true);
+
+    return ($var->getIsExcluded() && isUserJobMatch($var));
+
 }
+
+function isUserJobMatchAndNotExcluded($var)
+{
+    return (!$var->getIsExcluded()) && isUserJobMatch($var);
+
+}
+
+
+//
+// Jobs Site Filter Functions
+//
 
 function isIncludedJobSite($var)
 {
     return (in_array(strtolower($var->getJobPosting()->getJobSite()), $GLOBALS['USERDATA']['configuration_settings']['included_sites']) === true);
 }
 
+
+//
+// Jobs List Sort Functions
+//
 
 function sortByErrorThenCount($a, $b)
 {
