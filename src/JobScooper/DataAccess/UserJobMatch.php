@@ -47,6 +47,9 @@ class UserJobMatch extends BaseUserJobMatch
     {
         if(count($this->getMatchedUserKeywords()) > 0 )
             $this->setIsJobMatch(true);
+        else
+            $this->setIsJobMatch(false);
+
 
         if(count($this->getMatchedNegativeTitleKeywords()) > 0 )
             $this->setIsExcluded(true);

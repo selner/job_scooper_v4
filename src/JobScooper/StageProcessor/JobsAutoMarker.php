@@ -416,6 +416,9 @@ class JobsAutoMarker
                 foreach ($arrJobsList as $jobMatch) {
                     $foundAllUserKeywords = false;
                     $strJobTitleTokens = $jobMatch->getJobPosting()->getTitleTokens();
+                    $jobId = $jobMatch->getJobPostingId();
+                    if(is_null($strJobTitleTokens) || strlen($strJobTitleTokens) == 0 )
+                        throw new Exception("Cannot match user search keywords against job title token.  JobTitleTokens column for job_posting id#{$jobId} is null.");
                     foreach ($usrSearchKeywords as $usrSearchKeywordItem) {
                         $foundAllUserKeywords = in_string_array($strJobTitleTokens, $usrSearchKeywordItem);
                         if ($foundAllUserKeywords !== false) {

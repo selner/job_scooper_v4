@@ -165,7 +165,7 @@ class NotifierJobAlerts
         //
 
         // Output all records that match the user's interest and are still active
-        $detailsMainResultsXLSFile = getFilePathDetailsFromString(generateOutputFileName("results", "xls", true, 'notifications', true), \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);;
+        $detailsMainResultsXLSFile = getFilePathDetailsFromString(generateOutputFileName("results", "xls", true, 'notifications'), \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);;
         $arrFilesToAttach = array();
         $arrResultFilesToCombine = array();
 

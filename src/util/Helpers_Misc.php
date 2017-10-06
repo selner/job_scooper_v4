@@ -250,8 +250,8 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 
 function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "keywords", $indexKeyName = null)
 {
-    $inputFile = generateOutputFileName("tmp-" . $tempFileKey . "-token-input.", "csv", true, 'debug', true);
-    $outputFile = generateOutputFileName( "tmp-" . $tempFileKey . "-token-output", "csv", true, 'debug', true);
+    $inputFile = generateOutputFileName("tmp-" . $tempFileKey . "-token-input.", "csv", true, 'debug');
+    $outputFile = generateOutputFileName( "tmp-" . $tempFileKey . "-token-output", "csv", true, 'debug');
 
     $headers = array($dataKeyName);
     if (array_key_exists($dataKeyName, $arrData)) $headers = array_keys($arrData);
