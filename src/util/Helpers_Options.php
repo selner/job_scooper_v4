@@ -135,14 +135,7 @@ function generateOutputFileName($baseFileName="NONAME", $ext="UNK", $isUserSpeci
         }
     }
     $appRun = "";
-    if($includeRunID === true) {
-        $appRun = getConfigurationSettings('app_run_id');
-        if (!is_null($appRun)) {
-            $appRun = "_" . $appRun;
-            $today = "";  // AppRunID includes the datetime stamp already so drop it from the earlier part
-        }
-    }
 
-    $ret = "{$outDir}/{$baseFileName}{$user}{$today}{$appRun}.{$ext}";
+    $ret = "{$outDir}/{$baseFileName}{$user}{$today}.{$ext}";
     return $ret;
 }
