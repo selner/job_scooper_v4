@@ -35,7 +35,7 @@ function LogPlainText($msg, $scooper_level=\C__DISPLAY_NORMAL__)
         logLine($msg);
     else {
         foreach ($textParts as $part) {
-            logLine($part);
+            LogLine($part);
         }
     }
 }
