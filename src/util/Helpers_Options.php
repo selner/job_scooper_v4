@@ -125,7 +125,6 @@ function getCurrentUserDetails()
 function generateOutputFileName($baseFileName="NONAME", $ext="UNK", $isUserSpecific=true, $dirKey="debug", $includeRunID=false)
 {
     $outDir = getOutputDirectory($dirKey);
-    $today = "_" . getNowAsString("-");
     $user = "";
     if($isUserSpecific === true) {
         $objUser = getCurrentUserDetails();
