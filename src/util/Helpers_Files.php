@@ -103,7 +103,7 @@ function decodeJSON($strJsonText, $options=null, $boolEscapeBackSlashes=false)
 
 
     if($boolEscapeBackSlashes === true)
-        $jsonText = str_replace('\\', '\\\\', $strJsonText);
+        $strJsonText = str_replace('\\', '\\\\', $strJsonText);
     $data = json_decode($strJsonText, $assoc = true, $depth=512, $options);
     return $data;
 
