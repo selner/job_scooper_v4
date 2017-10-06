@@ -16,7 +16,7 @@
  */
 namespace JobScooper\StageProcessor;
 
-require_once __ROOT__ . "/bootstrap.php";
+
 use \Khartnett\Normalization as Normalize;
 use Exception;
 

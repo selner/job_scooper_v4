@@ -16,12 +16,11 @@
  */
 namespace JobScooper\Manager;
 
-use JobScooper\Config;
 use JobScooper\StageProcessor\JobsAutoMarker;
 use JobScooper\StageProcessor\NotifierErrors;
 use JobScooper\StageProcessor\NotifierJobAlerts;
 
-require_once __ROOT__ . "/bootstrap.php";
+
 
 const JOBLIST_TYPE_UNFILTERED = "unfiltered";
 const JOBLIST_TYPE_MARKED = "marked";
@@ -35,7 +34,8 @@ class StageManager
     function __construct()
     {
         try {
-            $this->classConfig = new \JobScooper\Config\Config();
+            $this->classConfig = new ConfigManager();
+
             $this->classConfig->initialize();
 
             if (!$GLOBALS['logger'])

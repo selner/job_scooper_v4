@@ -16,7 +16,7 @@
  */
 
 namespace JobScooper\DataAccess;
-require_once __ROOT__ . "/bootstrap.php";
+
 
 namespace JobScooper\DataAccess;
 
@@ -108,8 +108,8 @@ class JobSitePlugin extends BaseJobSitePlugin
     }
 
     protected function doInsert(\Propel\Runtime\Connection\ConnectionInterface $con)
-
     {
+        assert(strlen($this->getPluginClassName()) > 0 && "Plugin is missing class name!" );
         LogLine("Inserting new JobSitePlugin record: " . $this->getPluginClassName());
         parent::doInsert($con);
 

@@ -1,22 +1,10 @@
 <?php
-
 namespace JobScooper\DataAccess;
 
 use JobScooper\DataAccess\Base\JobLocation as BaseJobLocation;
 use Propel\Runtime\Connection\ConnectionInterface;
 
 
-
-/**
- * Skeleton subclass for representing a row from the 'job_location' table.
- *
- *
- *
- * You should add additional methods to this class to meet the
- * application requirements.  This class will only be generated as
- * long as it does not already exist in the output directory.
- *
- */
 class JobLocation extends BaseJobLocation
 {
 
@@ -98,7 +86,7 @@ class JobLocation extends BaseJobLocation
 
     public function fromOSMData($osmPlace)
     {
-    
+
         if(!is_null($osmPlace) && is_array($osmPlace) && count($osmPlace) > 0)
         {
             $this->setOpenStreetMapId($osmPlace['osm_id']);

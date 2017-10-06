@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
+
 
 /****************************************************************************************************************/
 /***                                                                                                         ****/
@@ -31,8 +31,9 @@ require_once dirname(dirname(__FILE__))."/bootstrap.php";
  * is the value you should set in the INI file to get the right filtered results.
  *
  */
+use JobScooper\Plugins\lib\AjaxHtmlPlugin;
 
-class PluginAmazon extends \JobScooper\Plugins\Base\AjaxHtmlPlugin
+class PluginAmazon extends AjaxHtmlPlugin
 {
     protected $siteName = 'Amazon';
     protected $nJobListingsPerPage = 100;

@@ -15,10 +15,10 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
 
-class PluginFacebook extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+
+class PluginFacebook extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'Facebook';
     protected $siteBaseURL = 'https://www.facebook.com/careers/';

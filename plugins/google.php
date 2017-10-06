@@ -15,9 +15,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginGoogle extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+
+class PluginGoogle extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
     // BUGBUG: currently does not handle pagination of job listings
 

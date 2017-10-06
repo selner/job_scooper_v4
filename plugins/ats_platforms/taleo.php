@@ -15,9 +15,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(dirname(__FILE__)))."/bootstrap.php";
 
-class PluginEntercom extends BaseTaleoPlugin
+
+class PluginEntercom extends AbstractTaleo
 {
     protected $use1ToTDForCount = True;
     protected $taleoOrgID = "ENTERCOM";
@@ -27,7 +27,7 @@ class PluginEntercom extends BaseTaleoPlugin
 }
 
 
-class PluginSeattleGenetics extends BaseTaleoPlugin
+class PluginSeattleGenetics extends AbstractTaleo
 {
     protected $server = "http://chp.tbe.taleo.net/chp04/ats/careers/searchResults.jsp";
     protected $taleoOrgID = "SEAGEN";
@@ -44,21 +44,21 @@ class PluginSeattleGenetics extends BaseTaleoPlugin
     protected $arrResultsCountTag = array('type' =>'class', 'value'=>'inner', 'index'=>0);
 }
 
-class PluginInternetBrands extends BaseTaleoPlugin
+class PluginInternetBrands extends AbstractTaleo
 {
     protected $siteBaseURL = 'http://www.internetbrands.com/work-with-us/';
     protected $taleoOrgID = "CARSDIRECT";
     protected $arrResultsCountTag = array('type' =>'class', 'value'=>'avada-row', 'index'=>1);
 }
 
-class PluginTraderJoes extends BaseTaleoPlugin
+class PluginTraderJoes extends AbstractTaleo
 {
     protected $use1ToTDForCount = True;
     protected $siteBaseURL = 'http://www.traderjoes.com/careers/index.asp';
     protected $taleoOrgID = "TRADERJOES";
     protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleoContent', 'index'=>1);
 }
-class PluginPorch extends BaseTaleoPlugin
+class PluginPorch extends AbstractTaleo
 {
     protected $use1ToTDForCount = True;
     protected $siteBaseURL = 'http://about.porch.com/careers';
@@ -67,7 +67,7 @@ class PluginPorch extends BaseTaleoPlugin
 }
 
 
-abstract class BaseTaleoPlugin extends \JobScooper\Plugins\Base\ServerHtmlPlugin
+abstract class AbstractTaleo extends \JobScooper\Plugins\lib\ServerHtmlPlugin
 {
     protected $use1ToTDForCount = False;
     protected $taleoOrgID = null;

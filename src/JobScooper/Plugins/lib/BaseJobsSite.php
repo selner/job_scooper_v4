@@ -15,10 +15,11 @@
  * under the License.
  */
 
-namespace JobScooper\Plugins\Base;
+namespace JobScooper\Plugins\lib;
 
-require_once __ROOT__ . "/bootstrap.php";
 
+
+use JobScooper\Plugins\Interfaces\IJobSitePlugin;
 use JobScooper\Manager\SeleniumManager;
 use \Khartnett\Normalization as Normalize;
 
@@ -27,7 +28,7 @@ const BASE_URL_TAG_LOCATION = "***LOCATION***";
 const BASE_URL_TAG_KEYWORDS = "***KEYWORDS***";
 use Exception;
 
-abstract class BaseJobsSite
+abstract class BaseJobsSite implements IJobSitePlugin
 {
     protected $arrSearchesToReturn = null;
     protected $strBaseURLFormat = null;
@@ -335,7 +336,7 @@ abstract class BaseJobsSite
         return $strRetCombinedKeywords;
     }
 
-    protected function parseJobsListForPage($objSimpHTML)
+    function parseJobsListForPage($objSimpHTML)
     {
         throw new \BadMethodCallException(sprintf("Not implemented method  " . __METHOD__ . " called on class \"%s \".", __CLASS__));
     }
@@ -472,7 +473,7 @@ abstract class BaseJobsSite
         return ($nItem == null || $nItem == "") ? 0 : $nItem;
     }
 
-    protected function parseTotalResultsCount($objSimpHTML)
+    function parseTotalResultsCount($objSimpHTML)
     {
         throw new \BadMethodCallException(sprintf("Not implemented method " . __METHOD__ . " called on class \"%s \".", __CLASS__));
     }

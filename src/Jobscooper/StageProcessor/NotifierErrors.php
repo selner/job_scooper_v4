@@ -17,7 +17,7 @@
 namespace JobScooper\StageProcessor;
 
 
-require_once __ROOT__ . "/bootstrap.php";
+
 
 class NotifierErrors {
 

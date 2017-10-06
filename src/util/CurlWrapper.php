@@ -15,7 +15,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once __ROOT__ . "/bootstrap.php";
 
 const C__API_RETURN_TYPE_OBJECT__ = 33;
 const C__API_RETURN_TYPE_ARRAY__ = 44;

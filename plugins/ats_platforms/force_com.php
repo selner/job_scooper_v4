@@ -15,9 +15,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(dirname(__FILE__)))."/bootstrap.php";
 
-abstract class BaseForceComClass extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+
+abstract class BaseForceComClass extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
     protected $additionalLoadDelaySeconds = 3;
     protected $nJobListingsPerPage = 25;

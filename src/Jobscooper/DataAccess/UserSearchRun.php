@@ -16,12 +16,12 @@
  */
 
 namespace JobScooper\DataAccess;
-require_once __ROOT__ . "/bootstrap.php";
+
 
 use Exception as Exception;
 use JobScooper\DataAccess\Base\UserSearchRun as BaseUserSearchRun;
 use JobScooper\DataAccess\Map\UserSearchRunTableMap;
-use const JobScooper\Plugins\Base\VALUE_NOT_SUPPORTED;
+use const JobScooper\Plugins\lib\VALUE_NOT_SUPPORTED;
 use Propel\Runtime\Connection\ConnectionInterface;
 
 /**

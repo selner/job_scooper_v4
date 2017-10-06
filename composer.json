@@ -28,9 +28,11 @@
         "monolog/monolog": "1.x-dev"
     },
     "autoload": {
-        "psr-0": {
-            "JobScooper": "src/"
-        }
+        "psr-4": {
+            "JobScooper\\": "src/JobScooper"
+        },
+        "files": ["src/util/autoload.php"]
+
     }
 
 }

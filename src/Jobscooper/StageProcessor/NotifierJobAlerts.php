@@ -17,7 +17,7 @@
 namespace JobScooper\StageProcessor;
 
 
-require_once __ROOT__ . "/bootstrap.php";
+
 
 //Import PHPMailer classes into the global namespace
 use PHPMailer\PHPMailer\PHPMailer;

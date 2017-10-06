@@ -14,12 +14,27 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const C__APPNAME__ = "jobs_scooper";
-
 define('__ROOT__', dirname(__FILE__));
-require_once __ROOT__."/bootstrap.php";
 
-var_dump(get_included_files());
+$autoload = join(DIRECTORY_SEPARATOR, array(__ROOT__, 'vendor', 'autoload.php'));
+if (file_exists($autoload)) {
+    require_once($autoload);
+} else {
+    trigger_error("Composer required to run this app.");
+}
+
+const C__APPNAME__ = "jobs_scooper";
+define('__APP_VERSION__', "v4.1.0-use-propel-orm");
+define('MAX_FILE_SIZE', 5000000);
+$lineEnding = ini_get('auto_detect_line_endings');
+ini_set('auto_detect_line_endings', true);
+
+$propelConfig = join(DIRECTORY_SEPARATOR, array(__ROOT__, 'Config', 'config.php'));
+if (file_exists($propelConfig)) {
+    require_once($propelConfig);
+} else {
+    trigger_error("Missing runtime configuration file at {$propelConfig} for your setup. ");
+}
 
 $classRunJobs = new \JobScooper\Manager\StageManager();
 $classRunJobs->runAll();

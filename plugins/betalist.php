@@ -15,10 +15,10 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
 
-class PluginBetalist extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+
+class PluginBetalist extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'Betalist';
     protected $siteBaseURL = "https://betalist.com";

@@ -15,9 +15,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginOuterwall extends \JobScooper\Plugins\Base\ServerHtmlSimplePlugin
+
+class PluginOuterwall extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
 {
     protected $siteName = 'Outerwall';
     protected $siteBaseURL = 'http://outerwall.jobs';

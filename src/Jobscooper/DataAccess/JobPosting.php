@@ -16,29 +16,20 @@
  */
 
 namespace JobScooper\DataAccess;
-require_once __ROOT__ . "/bootstrap.php";
 
-use \Khartnett\Normalization as Normalize;
 use Propel\Runtime\Map\TableMap;
 use Exception;
 
-/**
- * Skeleton subclass for representing a row from the 'jobposting' table.
- *
- *
- *
- * You should add additional methods to this class to meet the
- * application requirements.  This class will only be generated as
- * long as it does not already exist in the output directory.
- *
- */
 class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \ArrayAccess
 {
 
     public function toFlatArray()
     {
+        $location = array();
         $arrJobPosting = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
-        $location = $this->getJobLocation()->toArray();
+        $jobloc = $this->getJobLocation();
+        if(!is_null($jobloc))
+            $location = $jobloc->toArray();
         $arrItem = array_merge_recursive_distinct($arrJobPosting, $location);
 
         foreach(array_keys($arrItem) as $key)

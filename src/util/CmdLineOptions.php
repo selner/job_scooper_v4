@@ -17,7 +17,7 @@
 //
 // If installed as part of the package, uses Klogger v0.1 version (http://codefury.net/projects/klogger/)
 //
-require_once __ROOT__ . "/bootstrap.php";
+
 
 $GLOBALS['OPTS']['VERBOSE'] = false;
 $GLOBALS['OPTS']['VERBOSE_API_CALLS'] = false;
@@ -25,9 +25,11 @@ const C__STR_USER_AGENT__ = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) Appl
 
 date_default_timezone_set("America/Los_Angeles");
 
-function __initializeArgs__()
+function __initializeArgs__($rootdir)
 {
-    setupPlugins();
+    $pluginsDir = realpath($rootdir. DIRECTORY_SEPARATOR . "plugins");
+    $mgrPlugins = new \JobScooper\Manager\JobSitePluginManager($pluginsDir);
+
 
     $GLOBALS['OPTS_SETTINGS']  = array(
         'use_config_ini' => array(
@@ -71,6 +73,12 @@ function __initializeArgs__()
             'type'          => Pharse::PHARSE_STRING,
             'required'      => false
         ),
+        'debug' => array(
+            'description'   => 'Output debug logging',
+            'default'       => 0,
+            'type'          => Pharse::PHARSE_INTEGER,
+            'required'      => false
+        ),
     );
 
 
@@ -89,6 +97,7 @@ function __initializeArgs__()
 
 function addUserOptionForSitePlugins()
 {
+
     foreach($GLOBALS['JOBSITE_PLUGINS'] as $site)
     {
         $sitename = strtolower($site['name']);

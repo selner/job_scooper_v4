@@ -15,9 +15,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(dirname(__FILE__)))."/bootstrap.php";
 
-abstract class ClassBaseResumatorDivPlugin extends \JobScooper\Plugins\Base\ServerHtmlSimplePlugin
+
+abstract class AbstractResumator extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
 {
     protected $arrListingTagSetup = array(
         'tag_listings_section' => array(array('tag' => 'div', 'attribute' => 'id', 'attribute_value' =>'resumator-content-left-wrapper'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'resumator-job')),
@@ -31,7 +31,7 @@ abstract class ClassBaseResumatorDivPlugin extends \JobScooper\Plugins\Base\Serv
 
 
 
-class PluginAtlanticMedia extends ClassBaseResumatorDivPlugin
+class PluginAtlanticMedia extends AbstractResumator
 {
     protected $siteName = 'AtlanticMedia';
     protected $childSiteURLBase = 'http://atlanticmedia.theresumator.com/';
@@ -39,7 +39,7 @@ class PluginAtlanticMedia extends ClassBaseResumatorDivPlugin
 }
 
 
-class PluginMashableCorporate extends ClassBaseResumatorDivPlugin
+class PluginMashableCorporate extends AbstractResumator
 {
     protected $siteName = 'MashableCorporate';
     protected $childSiteURLBase = 'http://mashable.theresumator.com/';

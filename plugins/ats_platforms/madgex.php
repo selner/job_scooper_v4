@@ -15,9 +15,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once __ROOT__."/bootstrap.php";
 
-abstract class BaseMadgexATSPlugin extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+
+abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
 
     function __construct()
@@ -129,49 +129,49 @@ abstract class BaseMadgexATSPlugin extends \JobScooper\Plugins\Base\AjaxHtmlSimp
     }
 }
 
-class PluginTheGuardian extends BaseMadgexATSPlugin
+class PluginTheGuardian extends AbstractMadgexATS
 {
     protected $siteName = 'theguardian';
     protected $childSiteURLBase = 'https://jobs.theguardian.com/searchjobs';
 }
 
-class PluginMediaBistro extends BaseMadgexATSPlugin
+class PluginMediaBistro extends AbstractMadgexATS
 {
     protected $siteName = 'mediabistro';
     protected $childSiteURLBase = 'https://www.mediabistro.com/jobs/search';
 }
-class PluginWashingtonPost extends BaseMadgexATSPlugin
+class PluginWashingtonPost extends AbstractMadgexATS
 {
     protected $siteName = 'washingtonpost';
     protected $childSiteURLBase = 'https://jobs.washingtonpost.com/searchjobs';
 }
 
-class PluginJobfinderUSA extends BaseMadgexATSPlugin
+class PluginJobfinderUSA extends AbstractMadgexATS
 {
     protected $siteName = 'jobfinderusa';
     protected $childSiteURLBase = "https://www.jobfinderusa.com/searchjobs/";
 }
 
-class PluginGreatJobSpot extends BaseMadgexATSPlugin
+class PluginGreatJobSpot extends AbstractMadgexATS
 {
     protected $siteName = 'greatjobspot';
     protected $childSiteURLBase = "https://www.greatjobspot.com/searchjobs/";
 }
 
 
-class PluginExecAppointments extends BaseMadgexATSPlugin
+class PluginExecAppointments extends AbstractMadgexATS
 {
     protected $siteName = 'execappointments';
     protected $childSiteURLBase = "https://www.exec-appointments.com/searchjobs/";
 }
 
-class PluginEconomist extends BaseMadgexATSPlugin
+class PluginEconomist extends AbstractMadgexATS
 {
     protected $siteName = 'economist';
     protected $childSiteURLBase = "http://jobs.economist.com/searchjobs";
 }
 
-class PluginStarTribune extends BaseMadgexATSPlugin
+class PluginStarTribune extends AbstractMadgexATS
 {
     protected $siteName = 'startribune';
     protected $childSiteURLBase = "http://jobs.startribune.com/searchjobs/";

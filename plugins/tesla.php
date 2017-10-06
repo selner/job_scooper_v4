@@ -15,9 +15,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginTesla extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+
+class PluginTesla extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'Tesla';
     protected $siteBaseURL = 'http://www.tesla.com/careers';

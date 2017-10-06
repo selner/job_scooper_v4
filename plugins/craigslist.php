@@ -14,10 +14,10 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
 
-class PluginCraigslist extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+
+class PluginCraigslist extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'Craigslist';
     protected $nJobListingsPerPage = 120;

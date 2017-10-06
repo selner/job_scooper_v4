@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
+
 
 
 /**
@@ -23,7 +23,7 @@ require_once dirname(dirname(__FILE__))."/bootstrap.php";
  *
  *       Used by dotjobs.json plugin configuration to override single method
  */
-abstract class AbstractDotJobs extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+abstract class AbstractDotJobs extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
     protected function goToEndOfResultsSetViaLoadMore($nTotalListings)
     {

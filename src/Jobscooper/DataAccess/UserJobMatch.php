@@ -16,7 +16,7 @@
  */
 
 namespace JobScooper\DataAccess;
-require_once __ROOT__ . "/bootstrap.php";
+
 
 use JobScooper\DataAccess\Base\UserJobMatch as BaseUserJobMatch;
 use Propel\Runtime\Connection\ConnectionInterface;

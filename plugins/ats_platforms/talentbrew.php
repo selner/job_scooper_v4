@@ -15,9 +15,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(dirname(__FILE__)))."/bootstrap.php";
 
-/*class PluginHP extends BasePluginTalentBrew
+
+/*class PluginHP extends AbstractTalentBrew
 {
     protected $siteName = "HP";
     protected $siteBaseURL = 'https://h30631.www3.hp.com';
@@ -45,7 +45,7 @@ require_once dirname(dirname(dirname(__FILE__)))."/bootstrap.php";
 }*/
 
 
-class PluginBoeing extends BasePluginTalentBrew
+class PluginBoeing extends AbstractTalentBrew
 {
     protected $siteName = 'Boeing';
     protected $siteBaseURL = 'https://jobs.boeing.com';
@@ -59,7 +59,7 @@ class PluginBoeing extends BasePluginTalentBrew
     }
 }
 
-class PluginDisney extends BasePluginTalentBrew
+class PluginDisney extends AbstractTalentBrew
 {
     protected $siteName = 'Disney';
     protected $siteBaseURL = 'https://jobs.disneycareers.com';
@@ -79,7 +79,7 @@ class PluginDisney extends BasePluginTalentBrew
 
 }
 
-class BasePluginTalentBrew extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+class AbstractTalentBrew extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
     protected $strBaseURLFormat = "/search-jobs/***KEYWORDS***/***LOCATION***";
     //

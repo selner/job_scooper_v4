@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once __ROOT__ . "/bootstrap.php";
+
 
 ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
 
@@ -143,7 +143,9 @@ define('REXPR_MATCH_URL_DOMAIN', '/^https*.{3}[^\/]*/');
 //
 // Load all plugins files found in /plugins/
 //
-$files = glob(__ROOT__.'/plugins/' . '*.php');
+$pluginsDir = realpath(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "plugins". DIRECTORY_SEPARATOR ;
+
+$files = glob($pluginsDir . '*.php');
 foreach ($files as $file) {
     require_once($file);
 }
@@ -151,55 +153,8 @@ foreach ($files as $file) {
 //
 // Load all ATS system plugins files found in /plugins/ats_platforms/
 //
-$files = glob(__ROOT__.'/plugins/ats_platforms/' . '*.php');
+$files = glob(join(DIRECTORY_SEPARATOR, array($pluginsDir, "ats_platforms",'*.php')));
 foreach ($files as $file) {
     require_once($file);
 }
 
-
-function setupPlugins()
-{
-    $jsPlugins = new \JobScooper\Manager\JsonSitePluginManager();
-    $jsPlugins->init();
-
-    $arrAddedPlugins = null;
-    $classList = get_declared_classes();
-    print('Getting job site plugin list...'. PHP_EOL);
-    $matches = array();
-
-    foreach($classList as $class)
-    {
-        if(preg_match('/^Plugin(\w+)/', $class, $matches) > 0)
-        {
-            $namekey = strtolower($matches[1]);
-            findOrCreateJobSitePlugin($namekey);
-//
-//            $GLOBALS['JOBSITE_PLUGINS'][$namekey] = array('name'=> $namekey, 'class_name' => $class, 'jobsite_db_object' => null, 'include_in_run' => false, 'other_settings' => [] );
-//
-//            $GLOBALS['JOBSITE_PLUGINS'][$namekey]['jobsite_db_object'] = \JobScooper\DataAccess\JobSitePluginQuery::create()
-//                ->filterByPrimaryKey($namekey)
-//                ->findOneOrCreate();
-//
-//            $GLOBALS['JOBSITE_PLUGINS'][$namekey]['jobsite_db_object']->setKey($namekey);
-//            $GLOBALS['JOBSITE_PLUGINS'][$namekey]['jobsite_db_object']->save();
-
-//            if (array_key_exists("JOBSITE_PLUGINS", $GLOBALS) && (array_key_exists(strtolower($this->siteName), $GLOBALS['JOBSITE_PLUGINS']))) {
-//                $plugin = $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->siteName)];
-//                if (array_key_exists("other_settings", $plugin) && is_array($plugin['other_settings'])) {
-//                    $keys = array_keys($plugin['other_settings']);
-//                    foreach ($keys as $attrib_name) {
-//                        $this->$attrib_name = $plugin['other_settings'][$attrib_name];
-//                    }
-//                }
-//            }
-//            $GLOBALS['JOBSITE_PLUGINS'][$name] = array('name'=> $name, 'class_name' => $class, 'include_in_run' => false, 'other_settings' => [] );
-//            $classinst=null;
-        }
-    }
-    $strLog = "Added " . count($GLOBALS['JOBSITE_PLUGINS']) ." plugins: " . getArrayValuesAsString(array_column($GLOBALS['JOBSITE_PLUGINS'], "name"), ", ", null, false). ".";
-    if(isset($GLOBALS['logger']))
-        $GLOBALS['logger']->logLine($strLog , \C__DISPLAY_ITEM_DETAIL__);
-    else
-        print($strLog . PHP_EOL);
-
-}

@@ -14,11 +14,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-namespace JobScooper\Config;
+namespace JobScooper\Manager;
 
-require_once __ROOT__ . "/bootstrap.php";
 
-use const JobScooper\Plugins\Base\VALUE_NOT_SUPPORTED;
+
+use const JobScooper\Plugins\lib\VALUE_NOT_SUPPORTED;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use JobScooper\DataAccess\UserSearchRun;
@@ -26,7 +26,7 @@ use JobScooper\DataAccess\SearchSettings;
 use  \Propel\Runtime\Propel;
 
 
-class Config # extends BaseJobsSitePlugin
+class ConfigManager
 {
     protected $nNumDaysToSearch = -1;
     public $arrFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null, 'user_input_files_details' => null);
@@ -101,7 +101,9 @@ class Config # extends BaseJobsSitePlugin
         $outputDirectoryDetails = getFilePathDetailsFromString($envDirOut, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
 
         $GLOBALS['USERDATA'] = array();
-        __initializeArgs__();
+        $rootdir = realpath(dirname(dirname(dirname(dirname(__FILE__)))));
+
+        __initializeArgs__($rootdir);
 
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting up application... ", \C__DISPLAY_SECTION_START__);
         # After you've configured Pharse, run it like so:

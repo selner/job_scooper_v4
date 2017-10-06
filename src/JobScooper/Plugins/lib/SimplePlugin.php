@@ -15,9 +15,9 @@
  * under the License.
  */
 
-namespace JobScooper\Plugins\Base;
+namespace JobScooper\Plugins\lib;
 
-require_once __ROOT__ . "/bootstrap.php";
+
 
 
 class SimplePlugin extends BaseJobsSite

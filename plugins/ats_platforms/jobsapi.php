@@ -15,10 +15,10 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once __ROOT__ ."/bootstrap.php";
+
 use JobApis\Jobs\Client\Queries\UsajobsQuery;
 use JobApis\Jobs\Client\Providers\UsajobsProvider;
-use \JobScooper\Plugins\Base\JobsApiPlugin;
+use \JobScooper\Plugins\lib\JobsApiPlugin;
 
 class PluginUSAJobs extends JobsApiPlugin
 {

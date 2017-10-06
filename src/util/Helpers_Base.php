@@ -16,8 +16,6 @@
  */
 
 
-require_once(__ROOT__ . "/bootstrap.php");
-
 function LogLine($msg, $scooper_level=\C__DISPLAY_NORMAL__)
 {
     if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))

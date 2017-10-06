@@ -15,9 +15,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginPersonForce extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+
+class PluginPersonForce extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'PersonForce';
     protected $siteBaseURL = 'http://www.personforce.com';

@@ -17,28 +17,74 @@
  */
 namespace JobScooper\Manager;
 
-require_once __ROOT__ . "/bootstrap.php";
 
-class JsonSitePluginManager
+
+use Exception;
+
+class JobSitePluginManager
 {
-    function init()
+    protected $_dirPluginsRoot = null;
+    protected $_dirJsonConfigs = null;
+    protected $_configJsonFiles = array();
+    protected $_jsonPluginSetups = array();
+
+    function __construct($pathPluginDirectory)
     {
-        return;
+        if(is_null($pathPluginDirectory) || strlen($pathPluginDirectory) == 0)
+            throw new Exception("Path to plugins source directory was not set.");
+        
+        $this->_dirPluginsRoot = realpath($pathPluginDirectory . DIRECTORY_SEPARATOR);
+
+        $this->_dirJsonConfigs = realpath($this->_dirPluginsRoot . DIRECTORY_SEPARATOR . "json_plugins" . DIRECTORY_SEPARATOR);
+
+        $this->_loadJsonPluginConfigFiles_();
+        $this->_initializeAllPlugins();
+
+
     }
-    private function _loadPluginConfigFileData_()
+    
+    
+    function _initializeAllPlugins()
     {
-        $jsonconfigsdir = __ROOT__ . "/plugins/json_plugins";
         $arrAddedPlugins = null;
-        print('Getting JSON plugin list...'. PHP_EOL);
-        $filelist = array_diff(scandir($jsonconfigsdir), array(".", ".."));
-        $filelist = array_filter($filelist, function ($var) {
-            if(preg_match("/json$/", pathinfo($var, PATHINFO_EXTENSION)))
-                return true;
-            return false;
+        LogLine('Initializing all job site plugins...', C__DISPLAY_ITEM_START__);
+
+        LogLine('Generating classes for ' . count($this->_jsonPluginSetups) .' JSON-loaded plugins...', C__DISPLAY_ITEM_DETAIL__);
+        foreach(array_keys($this->_jsonPluginSetups) as $agentkey) {
+            LogLine("Generating plugin class for " . $agentkey, C__DISPLAY_ITEM_DETAIL__);
+            eval($this->_jsonPluginSetups[$agentkey]['evalcode']);
+//            return new $className(null, null);
+        }
+
+        LogLine('Instantiating objects for all job site plugins...', C__DISPLAY_ITEM_DETAIL__);
+        $classList = get_declared_classes();
+        sort($classList);
+        $pluginClasses = array_filter($classList, function ($class) {
+            return (stripos($class, "Plugin") !== false) && stripos($class, "\\Lib\\") === false && in_array("JobScooper\Plugins\Interfaces\IJobSitePlugin", class_implements($class));
         });
 
-        foreach($filelist as $f) {
-            $this->pluginConfigs[$f] = loadJSON($jsonconfigsdir . "/" . $f, null, true);
+        foreach($pluginClasses as $class)
+        {
+            $namekey = strtolower(str_replace("Plugin", "", $class));
+            findOrCreateJobSitePlugin($namekey);
+        }
+
+
+        LogLine("Added " . count($GLOBALS['JOBSITE_PLUGINS']) ." plugins: " . getArrayValuesAsString(array_column($GLOBALS['JOBSITE_PLUGINS'], "name"), ", ", null, false). ".", C__DISPLAY_ITEM_DETAIL__);
+    }
+
+    
+    
+    private function _loadJsonPluginConfigFiles_()
+    {
+        $this->_configJsonFiles = glob($this->_dirJsonConfigs . DIRECTORY_SEPARATOR . "*.json");
+        foreach($this->_configJsonFiles as $f) {
+            $jsonPlugin = array("file" => $this->_dirJsonConfigs . DIRECTORY_SEPARATOR . $f);
+            $jsonPlugin['configdata'] = loadJSON($f, null, true);
+            $jsonPlugin['plugindata'] = $this->_parsePluginConfig_($jsonPlugin['configdata']);
+            $jsonPlugin['evalcode'] = $evalCode = $this->_getClassInstantiationCode($jsonPlugin['plugindata']);
+            $jsonPlugin['classname'] = "Plugin" . $jsonPlugin['configdata']['AgentName'];
+            $this->_jsonPluginSetups[$jsonPlugin['classname']] = $jsonPlugin;
         }
 
     }
@@ -51,7 +97,7 @@ class JsonSitePluginManager
             'siteBaseURL' => getArrayItem('BaseURL', $arrConfigData),
             'strBaseURLFormat' => getArrayItem('SourceURL', $arrConfigData),
             'countryCodes' => getArrayItem('CountryCodes', $arrConfigData),
-            'arrListingTagSetup' => \JobScooper\Plugins\Base\SimplePlugin::getEmptyListingTagSetup()
+            'arrListingTagSetup' => \JobScooper\Plugins\lib\SimplePlugin::getEmptyListingTagSetup()
         );
 
         if(array_key_exists("Pagination", $arrConfigData)) {
@@ -143,12 +189,12 @@ class JsonSitePluginManager
     }
 
 
-    private function _instantiatePlugin_($pluginConfig)
+    private function _getClassInstantiationCode($pluginConfig)
     {
         $className = "Plugin" . $pluginConfig['siteName'];
         $setup = var_export($pluginConfig['arrListingTagSetup'], true);
 
-        $extendsClass = "JobScooper\Plugins\Base\AjaxHtmlSimplePlugin";
+        $extendsClass = "JobScooper\Plugins\lib\AjaxHtmlSimplePlugin";
         if(array_key_exists("PluginExtendsClassName", $pluginConfig) && !is_null($pluginConfig['PluginExtendsClassName']) && strlen($pluginConfig['PluginExtendsClassName']))
         {
             $extendsClass = $pluginConfig['PluginExtendsClassName'];
@@ -172,26 +218,6 @@ class JsonSitePluginManager
             
             ";
 
-        eval($evalStmt);
-        return new $className(null, null);
+        return $evalStmt;
     }
-
-    function __construct($strBaseDir = null)
-    {
-        $this->_loadPluginConfigFileData_();
-        $arrPluginSetups = array();
-
-        foreach($this->pluginConfigs as $configData) {
-            $retSetup = $this->_parsePluginConfig_($configData);
-            $arrPluginSetups[cleanupSlugPart($configData['AgentName'])] = $retSetup;
-
-            if(isset($GLOBALS['logger']))
-                print("Initializing JSON plugin for " . $retSetup['siteName'] . PHP_EOL);
-            $this->_instantiatePlugin_($retSetup);
-
-        }
-
-
-    }
-    protected $pluginConfigs = Array();
 }

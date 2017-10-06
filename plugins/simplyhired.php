@@ -15,13 +15,13 @@
 * License for the specific language governing permissions and limitations
 * under the License.
 */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-use const JobScooper\Plugins\Base\VALUE_NOT_SUPPORTED;
-use const \JobScooper\Plugins\Base\BASE_URL_TAG_KEYWORDS;
-use const \JobScooper\Plugins\Base\BASE_URL_TAG_LOCATION;
 
-class PluginSimplyHired extends \JobScooper\Plugins\Base\ServerHtmlPlugin
+use const JobScooper\Plugins\lib\VALUE_NOT_SUPPORTED;
+use const \JobScooper\Plugins\lib\BASE_URL_TAG_KEYWORDS;
+use const \JobScooper\Plugins\lib\BASE_URL_TAG_LOCATION;
+
+class PluginSimplyHired extends \JobScooper\Plugins\lib\ServerHtmlPlugin
 {
     protected $siteBaseURL = 'http://www.simplyhired.com';
     protected $siteName = 'SimplyHired';

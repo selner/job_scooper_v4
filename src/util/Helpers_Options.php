@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once __ROOT__ . "/bootstrap.php";
+
 
 
 function get_PharseOptionValue($strOptName)
@@ -95,7 +95,10 @@ function getGlobalConfigOptionBoolean($key)
 }
 
 function isDebug() {
-    return getGlobalConfigOptionBoolean('debug');
+    $cmdline = get_PharseOptionValue('debug');
+    $dbgCmdLine = filter_var(getConfigurationSettings($cmdline), FILTER_VALIDATE_BOOLEAN);
+
+    return getGlobalConfigOptionBoolean('debug') || $dbgCmdLine;
 }
 
 function isTestRun() {

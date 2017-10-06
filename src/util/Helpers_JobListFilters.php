@@ -18,7 +18,7 @@
 //
 // Jobs List Filter Functions
 //
-require_once __ROOT__ . "/bootstrap.php";
+
 
 
 function isSuccessfulUserJobMatch($var)

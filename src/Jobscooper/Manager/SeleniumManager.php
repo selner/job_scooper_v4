@@ -19,7 +19,7 @@ namespace JobScooper\Manager;
 use ErrorException;
 use Exception;
 
-require_once __ROOT__ . "/bootstrap.php";
+
 
 class SeleniumManager extends \PropertyObject
 {

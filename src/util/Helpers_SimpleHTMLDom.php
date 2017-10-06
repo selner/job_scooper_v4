@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once __ROOT__ . "/bootstrap.php";
+
 
 const C__SIMPLEHTML_THROWEXCEPTION = 0x1;
 const C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR = 0x2;

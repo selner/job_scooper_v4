@@ -15,9 +15,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginCyberCoders extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+
+class PluginCyberCoders extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'CyberCoders';
     protected $siteBaseURL = "https://www.cybercoders.com";

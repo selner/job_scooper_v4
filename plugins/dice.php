@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
+
 
 
 /**
@@ -23,7 +23,7 @@ require_once dirname(dirname(__FILE__))."/bootstrap.php";
  *
  *       Used by dice.json plugin configuration to override single method
  */
-abstract class AbstractDice extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+abstract class AbstractDice extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
     function takeNextPageAction($nItem=null, $nPage=null)
     {

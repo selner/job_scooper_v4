@@ -15,9 +15,9 @@
      * License for the specific language governing permissions and limitations
      * under the License.
      */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginMonster extends \JobScooper\Plugins\Base\ServerHtmlSimplePlugin
+
+class PluginMonster extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
 {
     protected $siteName = 'Monster';
     protected $siteBaseURL = 'http://www.monster.com';

@@ -14,9 +14,9 @@
 * License for the specific language governing permissions and limitations
 * under the License.
  */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
 
-class PluginGeekwire extends \JobScooper\Plugins\Base\AjaxHtmlSimplePlugin
+
+class PluginGeekwire extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'Geekwire';
     protected $siteBaseURL = 'http://www.geekwire.com/';

@@ -15,18 +15,19 @@
  * under the License.
  */
 
-namespace JobScooper\Plugins\Base;
+namespace JobScooper\Plugins\lib;
 
-require_once __ROOT__ . "/bootstrap.php";
 
-class JobsApiPlugin extends BaseJobsSite
+
+abstract class ServerHtmlPlugin extends BaseJobsSite
 {
     function __construct($strBaseDir = null)
     {
-        $this->additionalFlags[] = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
-        $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__;
+        $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
 
         parent::__construct();
 
     }
+
 }
+
