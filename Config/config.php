@@ -4,7 +4,7 @@ $serviceContainer->checkVersion('2.0.0-dev');
 $serviceContainer->setAdapterClass('default', 'sqlite');
 $manager = new \Propel\Runtime\Connection\ConnectionManagerSingle();
 $manager->setConfiguration(array (
-  'dsn' => 'sqlite:/private/var/local/jobs_scooper/output/job_scooper_db.sq3',
+  'dsn' => 'sqlite:/var/local/jobs_scooper/output/job_scooper_db.sq3',
   'user' => 'root',
   'password' => '',
   'settings' =>
