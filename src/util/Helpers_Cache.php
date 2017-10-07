@@ -37,7 +37,7 @@ function reloadJobLocationCache()
 
 function getJobLocationById($locationId)
 {
-    if(!(array_key_exists('CACHE', $GLOBALS) && array_key_exists('JobLocationsById', $GLOBALS['CACHE'])))
+    if(!(array_key_exists('CACHE', $GLOBALS) && is_array($GLOBALS['CACHE']['JobLocationsById']) && array_key_exists('JobLocationsById', $GLOBALS['CACHE'])))
         reloadJobLocationCache();
 
     if(!array_key_exists($locationId, $GLOBALS['CACHE']['JobLocationsById']))
