@@ -2,8 +2,8 @@
 
 namespace JobScooper\DataAccess\Map;
 
-use JobScooper\DataAccess\JobPlaceLookup;
-use JobScooper\DataAccess\JobPlaceLookupQuery;
+use JobScooper\DataAccess\LocationNames;
+use JobScooper\DataAccess\LocationNamesQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\InstancePoolTrait;
@@ -16,7 +16,7 @@ use Propel\Runtime\Map\TableMapTrait;
 
 
 /**
- * This class defines the structure of the 'job_place_lookup' table.
+ * This class defines the structure of the 'location_names' table.
  *
  *
  *
@@ -26,7 +26,7 @@ use Propel\Runtime\Map\TableMapTrait;
  * (i.e. if it's a text column type).
  *
  */
-class JobPlaceLookupTableMap extends TableMap
+class LocationNamesTableMap extends TableMap
 {
     use InstancePoolTrait;
     use TableMapTrait;
@@ -34,7 +34,7 @@ class JobPlaceLookupTableMap extends TableMap
     /**
      * The (dot-path) name of this class
      */
-    const CLASS_NAME = 'JobScooper.DataAccess.Map.JobPlaceLookupTableMap';
+    const CLASS_NAME = 'JobScooper.DataAccess.Map.LocationNamesTableMap';
 
     /**
      * The default database name for this class
@@ -44,17 +44,17 @@ class JobPlaceLookupTableMap extends TableMap
     /**
      * The table name for this class
      */
-    const TABLE_NAME = 'job_place_lookup';
+    const TABLE_NAME = 'location_names';
 
     /**
      * The related Propel class for this table
      */
-    const OM_CLASS = '\\JobScooper\\DataAccess\\JobPlaceLookup';
+    const OM_CLASS = '\\JobScooper\\DataAccess\\LocationNames';
 
     /**
      * A class that can be returned by this tableMap
      */
-    const CLASS_DEFAULT = 'JobScooper.DataAccess.JobPlaceLookup';
+    const CLASS_DEFAULT = 'JobScooper.DataAccess.LocationNames';
 
     /**
      * The total number of columns
@@ -72,19 +72,19 @@ class JobPlaceLookupTableMap extends TableMap
     const NUM_HYDRATE_COLUMNS = 3;
 
     /**
-     * the column name for the place_alternate_name field
+     * the column name for the location_alternate_name field
      */
-    const COL_PLACE_ALTERNATE_NAME = 'job_place_lookup.place_alternate_name';
+    const COL_LOCATION_ALTERNATE_NAME = 'location_names.location_alternate_name';
 
     /**
-     * the column name for the job_location_id field
+     * the column name for the location_id field
      */
-    const COL_JOB_LOCATION_ID = 'job_place_lookup.job_location_id';
+    const COL_LOCATION_ID = 'location_names.location_id';
 
     /**
      * the column name for the slug field
      */
-    const COL_SLUG = 'job_place_lookup.slug';
+    const COL_SLUG = 'location_names.slug';
 
     /**
      * The default string format for model objects of the related table
@@ -98,10 +98,10 @@ class JobPlaceLookupTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('PlaceAlternateName', 'LocationId', 'Slug', ),
-        self::TYPE_CAMELNAME     => array('placeAlternateName', 'locationId', 'slug', ),
-        self::TYPE_COLNAME       => array(JobPlaceLookupTableMap::COL_PLACE_ALTERNATE_NAME, JobPlaceLookupTableMap::COL_JOB_LOCATION_ID, JobPlaceLookupTableMap::COL_SLUG, ),
-        self::TYPE_FIELDNAME     => array('place_alternate_name', 'job_location_id', 'slug', ),
+        self::TYPE_PHPNAME       => array('LocationAlternateName', 'LocationId', 'Slug', ),
+        self::TYPE_CAMELNAME     => array('locationAlternateName', 'locationId', 'slug', ),
+        self::TYPE_COLNAME       => array(LocationNamesTableMap::COL_LOCATION_ALTERNATE_NAME, LocationNamesTableMap::COL_LOCATION_ID, LocationNamesTableMap::COL_SLUG, ),
+        self::TYPE_FIELDNAME     => array('location_alternate_name', 'location_id', 'slug', ),
         self::TYPE_NUM           => array(0, 1, 2, )
     );
 
@@ -112,10 +112,10 @@ class JobPlaceLookupTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('PlaceAlternateName' => 0, 'LocationId' => 1, 'Slug' => 2, ),
-        self::TYPE_CAMELNAME     => array('placeAlternateName' => 0, 'locationId' => 1, 'slug' => 2, ),
-        self::TYPE_COLNAME       => array(JobPlaceLookupTableMap::COL_PLACE_ALTERNATE_NAME => 0, JobPlaceLookupTableMap::COL_JOB_LOCATION_ID => 1, JobPlaceLookupTableMap::COL_SLUG => 2, ),
-        self::TYPE_FIELDNAME     => array('place_alternate_name' => 0, 'job_location_id' => 1, 'slug' => 2, ),
+        self::TYPE_PHPNAME       => array('LocationAlternateName' => 0, 'LocationId' => 1, 'Slug' => 2, ),
+        self::TYPE_CAMELNAME     => array('locationAlternateName' => 0, 'locationId' => 1, 'slug' => 2, ),
+        self::TYPE_COLNAME       => array(LocationNamesTableMap::COL_LOCATION_ALTERNATE_NAME => 0, LocationNamesTableMap::COL_LOCATION_ID => 1, LocationNamesTableMap::COL_SLUG => 2, ),
+        self::TYPE_FIELDNAME     => array('location_alternate_name' => 0, 'location_id' => 1, 'slug' => 2, ),
         self::TYPE_NUM           => array(0, 1, 2, )
     );
 
@@ -129,16 +129,16 @@ class JobPlaceLookupTableMap extends TableMap
     public function initialize()
     {
         // attributes
-        $this->setName('job_place_lookup');
-        $this->setPhpName('JobPlaceLookup');
+        $this->setName('location_names');
+        $this->setPhpName('LocationNames');
         $this->setIdentifierQuoting(false);
-        $this->setClassName('\\JobScooper\\DataAccess\\JobPlaceLookup');
+        $this->setClassName('\\JobScooper\\DataAccess\\LocationNames');
         $this->setPackage('JobScooper.DataAccess');
         $this->setUseIdGenerator(false);
         // columns
-        $this->addPrimaryKey('place_alternate_name', 'PlaceAlternateName', 'VARCHAR', true, 100, null);
-        $this->getColumn('place_alternate_name')->setPrimaryString(true);
-        $this->addForeignPrimaryKey('job_location_id', 'LocationId', 'INTEGER' , 'job_location', 'location_id', true, null, null);
+        $this->addPrimaryKey('location_alternate_name', 'LocationAlternateName', 'VARCHAR', true, 100, null);
+        $this->getColumn('location_alternate_name')->setPrimaryString(true);
+        $this->addForeignPrimaryKey('location_id', 'LocationId', 'INTEGER' , 'location', 'location_id', true, null, null);
         $this->addColumn('slug', 'Slug', 'VARCHAR', false, 255, null);
     } // initialize()
 
@@ -147,10 +147,10 @@ class JobPlaceLookupTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('JobLocation', '\\JobScooper\\DataAccess\\JobLocation', RelationMap::MANY_TO_ONE, array (
+        $this->addRelation('Location', '\\JobScooper\\DataAccess\\Location', RelationMap::MANY_TO_ONE, array (
   0 =>
   array (
-    0 => ':job_location_id',
+    0 => ':location_id',
     1 => ':location_id',
   ),
 ), null, null, null, false);
@@ -177,14 +177,14 @@ class JobPlaceLookupTableMap extends TableMap
      * to the cache in order to ensure that the same objects are always returned by find*()
      * and findPk*() calls.
      *
-     * @param \JobScooper\DataAccess\JobPlaceLookup $obj A \JobScooper\DataAccess\JobPlaceLookup object.
+     * @param \JobScooper\DataAccess\LocationNames $obj A \JobScooper\DataAccess\LocationNames object.
      * @param string $key             (optional) key to use for instance map (for performance boost if key was already calculated externally).
      */
     public static function addInstanceToPool($obj, $key = null)
     {
         if (Propel::isInstancePoolingEnabled()) {
             if (null === $key) {
-                $key = serialize([(null === $obj->getPlaceAlternateName() || is_scalar($obj->getPlaceAlternateName()) || is_callable([$obj->getPlaceAlternateName(), '__toString']) ? (string) $obj->getPlaceAlternateName() : $obj->getPlaceAlternateName()), (null === $obj->getLocationId() || is_scalar($obj->getLocationId()) || is_callable([$obj->getLocationId(), '__toString']) ? (string) $obj->getLocationId() : $obj->getLocationId())]);
+                $key = serialize([(null === $obj->getLocationAlternateName() || is_scalar($obj->getLocationAlternateName()) || is_callable([$obj->getLocationAlternateName(), '__toString']) ? (string) $obj->getLocationAlternateName() : $obj->getLocationAlternateName()), (null === $obj->getLocationId() || is_scalar($obj->getLocationId()) || is_callable([$obj->getLocationId(), '__toString']) ? (string) $obj->getLocationId() : $obj->getLocationId())]);
             } // if key === null
             self::$instances[$key] = $obj;
         }
@@ -198,13 +198,13 @@ class JobPlaceLookupTableMap extends TableMap
      * methods in your stub classes -- you may need to explicitly remove objects
      * from the cache in order to prevent returning objects that no longer exist.
      *
-     * @param mixed $value A \JobScooper\DataAccess\JobPlaceLookup object or a primary key value.
+     * @param mixed $value A \JobScooper\DataAccess\LocationNames object or a primary key value.
      */
     public static function removeInstanceFromPool($value)
     {
         if (Propel::isInstancePoolingEnabled() && null !== $value) {
-            if (is_object($value) && $value instanceof \JobScooper\DataAccess\JobPlaceLookup) {
-                $key = serialize([(null === $value->getPlaceAlternateName() || is_scalar($value->getPlaceAlternateName()) || is_callable([$value->getPlaceAlternateName(), '__toString']) ? (string) $value->getPlaceAlternateName() : $value->getPlaceAlternateName()), (null === $value->getLocationId() || is_scalar($value->getLocationId()) || is_callable([$value->getLocationId(), '__toString']) ? (string) $value->getLocationId() : $value->getLocationId())]);
+            if (is_object($value) && $value instanceof \JobScooper\DataAccess\LocationNames) {
+                $key = serialize([(null === $value->getLocationAlternateName() || is_scalar($value->getLocationAlternateName()) || is_callable([$value->getLocationAlternateName(), '__toString']) ? (string) $value->getLocationAlternateName() : $value->getLocationAlternateName()), (null === $value->getLocationId() || is_scalar($value->getLocationId()) || is_callable([$value->getLocationId(), '__toString']) ? (string) $value->getLocationId() : $value->getLocationId())]);
 
             } elseif (is_array($value) && count($value) === 2) {
                 // assume we've been passed a primary key";
@@ -214,7 +214,7 @@ class JobPlaceLookupTableMap extends TableMap
 
                 return;
             } else {
-                $e = new PropelException("Invalid value passed to removeInstanceFromPool().  Expected primary key or \JobScooper\DataAccess\JobPlaceLookup object; got " . (is_object($value) ? get_class($value) . ' object.' : var_export($value, true)));
+                $e = new PropelException("Invalid value passed to removeInstanceFromPool().  Expected primary key or \JobScooper\DataAccess\LocationNames object; got " . (is_object($value) ? get_class($value) . ' object.' : var_export($value, true)));
                 throw $e;
             }
 
@@ -238,11 +238,11 @@ class JobPlaceLookupTableMap extends TableMap
     public static function getPrimaryKeyHashFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
         // If the PK cannot be derived from the row, return NULL.
-        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('PlaceAlternateName', TableMap::TYPE_PHPNAME, $indexType)] === null && $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
+        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('LocationAlternateName', TableMap::TYPE_PHPNAME, $indexType)] === null && $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
             return null;
         }
 
-        return serialize([(null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('PlaceAlternateName', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('PlaceAlternateName', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('PlaceAlternateName', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('PlaceAlternateName', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('PlaceAlternateName', TableMap::TYPE_PHPNAME, $indexType)]), (null === $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)])]);
+        return serialize([(null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('LocationAlternateName', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('LocationAlternateName', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('LocationAlternateName', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('LocationAlternateName', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('LocationAlternateName', TableMap::TYPE_PHPNAME, $indexType)]), (null === $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)])]);
     }
 
     /**
@@ -264,7 +264,7 @@ class JobPlaceLookupTableMap extends TableMap
         $pks[] = (string) $row[
             $indexType == TableMap::TYPE_NUM
                 ? 0 + $offset
-                : self::translateFieldName('PlaceAlternateName', TableMap::TYPE_PHPNAME, $indexType)
+                : self::translateFieldName('LocationAlternateName', TableMap::TYPE_PHPNAME, $indexType)
         ];
         $pks[] = (int) $row[
             $indexType == TableMap::TYPE_NUM
@@ -288,7 +288,7 @@ class JobPlaceLookupTableMap extends TableMap
      */
     public static function getOMClass($withPrefix = true)
     {
-        return $withPrefix ? JobPlaceLookupTableMap::CLASS_DEFAULT : JobPlaceLookupTableMap::OM_CLASS;
+        return $withPrefix ? LocationNamesTableMap::CLASS_DEFAULT : LocationNamesTableMap::OM_CLASS;
     }
 
     /**
@@ -302,22 +302,22 @@ class JobPlaceLookupTableMap extends TableMap
      *
      * @throws PropelException Any exceptions caught during processing will be
      *                         rethrown wrapped into a PropelException.
-     * @return array           (JobPlaceLookup object, last column rank)
+     * @return array           (LocationNames object, last column rank)
      */
     public static function populateObject($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-        $key = JobPlaceLookupTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
-        if (null !== ($obj = JobPlaceLookupTableMap::getInstanceFromPool($key))) {
+        $key = LocationNamesTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
+        if (null !== ($obj = LocationNamesTableMap::getInstanceFromPool($key))) {
             // We no longer rehydrate the object, since this can cause data loss.
             // See http://www.propelorm.org/ticket/509
             // $obj->hydrate($row, $offset, true); // rehydrate
-            $col = $offset + JobPlaceLookupTableMap::NUM_HYDRATE_COLUMNS;
+            $col = $offset + LocationNamesTableMap::NUM_HYDRATE_COLUMNS;
         } else {
-            $cls = JobPlaceLookupTableMap::OM_CLASS;
-            /** @var JobPlaceLookup $obj */
+            $cls = LocationNamesTableMap::OM_CLASS;
+            /** @var LocationNames $obj */
             $obj = new $cls();
             $col = $obj->hydrate($row, $offset, false, $indexType);
-            JobPlaceLookupTableMap::addInstanceToPool($obj, $key);
+            LocationNamesTableMap::addInstanceToPool($obj, $key);
         }
 
         return array($obj, $col);
@@ -340,18 +340,18 @@ class JobPlaceLookupTableMap extends TableMap
         $cls = static::getOMClass(false);
         // populate the object(s)
         while ($row = $dataFetcher->fetch()) {
-            $key = JobPlaceLookupTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
-            if (null !== ($obj = JobPlaceLookupTableMap::getInstanceFromPool($key))) {
+            $key = LocationNamesTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
+            if (null !== ($obj = LocationNamesTableMap::getInstanceFromPool($key))) {
                 // We no longer rehydrate the object, since this can cause data loss.
                 // See http://www.propelorm.org/ticket/509
                 // $obj->hydrate($row, 0, true); // rehydrate
                 $results[] = $obj;
             } else {
-                /** @var JobPlaceLookup $obj */
+                /** @var LocationNames $obj */
                 $obj = new $cls();
                 $obj->hydrate($row);
                 $results[] = $obj;
-                JobPlaceLookupTableMap::addInstanceToPool($obj, $key);
+                LocationNamesTableMap::addInstanceToPool($obj, $key);
             } // if key exists
         }
 
@@ -372,12 +372,12 @@ class JobPlaceLookupTableMap extends TableMap
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
-            $criteria->addSelectColumn(JobPlaceLookupTableMap::COL_PLACE_ALTERNATE_NAME);
-            $criteria->addSelectColumn(JobPlaceLookupTableMap::COL_JOB_LOCATION_ID);
-            $criteria->addSelectColumn(JobPlaceLookupTableMap::COL_SLUG);
+            $criteria->addSelectColumn(LocationNamesTableMap::COL_LOCATION_ALTERNATE_NAME);
+            $criteria->addSelectColumn(LocationNamesTableMap::COL_LOCATION_ID);
+            $criteria->addSelectColumn(LocationNamesTableMap::COL_SLUG);
         } else {
-            $criteria->addSelectColumn($alias . '.place_alternate_name');
-            $criteria->addSelectColumn($alias . '.job_location_id');
+            $criteria->addSelectColumn($alias . '.location_alternate_name');
+            $criteria->addSelectColumn($alias . '.location_id');
             $criteria->addSelectColumn($alias . '.slug');
         }
     }
@@ -391,7 +391,7 @@ class JobPlaceLookupTableMap extends TableMap
      */
     public static function getTableMap()
     {
-        return Propel::getServiceContainer()->getDatabaseMap(JobPlaceLookupTableMap::DATABASE_NAME)->getTable(JobPlaceLookupTableMap::TABLE_NAME);
+        return Propel::getServiceContainer()->getDatabaseMap(LocationNamesTableMap::DATABASE_NAME)->getTable(LocationNamesTableMap::TABLE_NAME);
     }
 
     /**
@@ -399,16 +399,16 @@ class JobPlaceLookupTableMap extends TableMap
      */
     public static function buildTableMap()
     {
-        $dbMap = Propel::getServiceContainer()->getDatabaseMap(JobPlaceLookupTableMap::DATABASE_NAME);
-        if (!$dbMap->hasTable(JobPlaceLookupTableMap::TABLE_NAME)) {
-            $dbMap->addTableObject(new JobPlaceLookupTableMap());
+        $dbMap = Propel::getServiceContainer()->getDatabaseMap(LocationNamesTableMap::DATABASE_NAME);
+        if (!$dbMap->hasTable(LocationNamesTableMap::TABLE_NAME)) {
+            $dbMap->addTableObject(new LocationNamesTableMap());
         }
     }
 
     /**
-     * Performs a DELETE on the database, given a JobPlaceLookup or Criteria object OR a primary key value.
+     * Performs a DELETE on the database, given a LocationNames or Criteria object OR a primary key value.
      *
-     * @param mixed               $values Criteria or JobPlaceLookup object or primary key or array of primary keys
+     * @param mixed               $values Criteria or LocationNames object or primary key or array of primary keys
      *              which is used to create the DELETE statement
      * @param  ConnectionInterface $con the connection to use
      * @return int             The number of affected rows (if supported by underlying database driver).  This includes CASCADE-related rows
@@ -419,17 +419,17 @@ class JobPlaceLookupTableMap extends TableMap
      public static function doDelete($values, ConnectionInterface $con = null)
      {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(JobPlaceLookupTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(LocationNamesTableMap::DATABASE_NAME);
         }
 
         if ($values instanceof Criteria) {
             // rename for clarity
             $criteria = $values;
-        } elseif ($values instanceof \JobScooper\DataAccess\JobPlaceLookup) { // it's a model object
+        } elseif ($values instanceof \JobScooper\DataAccess\LocationNames) { // it's a model object
             // create criteria based on pk values
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
-            $criteria = new Criteria(JobPlaceLookupTableMap::DATABASE_NAME);
+            $criteria = new Criteria(LocationNamesTableMap::DATABASE_NAME);
             // primary key is composite; we therefore, expect
             // the primary key passed to be an array of pkey values
             if (count($values) == count($values, COUNT_RECURSIVE)) {
@@ -437,19 +437,19 @@ class JobPlaceLookupTableMap extends TableMap
                 $values = array($values);
             }
             foreach ($values as $value) {
-                $criterion = $criteria->getNewCriterion(JobPlaceLookupTableMap::COL_PLACE_ALTERNATE_NAME, $value[0]);
-                $criterion->addAnd($criteria->getNewCriterion(JobPlaceLookupTableMap::COL_JOB_LOCATION_ID, $value[1]));
+                $criterion = $criteria->getNewCriterion(LocationNamesTableMap::COL_LOCATION_ALTERNATE_NAME, $value[0]);
+                $criterion->addAnd($criteria->getNewCriterion(LocationNamesTableMap::COL_LOCATION_ID, $value[1]));
                 $criteria->addOr($criterion);
             }
         }
 
-        $query = JobPlaceLookupQuery::create()->mergeWith($criteria);
+        $query = LocationNamesQuery::create()->mergeWith($criteria);
 
         if ($values instanceof Criteria) {
-            JobPlaceLookupTableMap::clearInstancePool();
+            LocationNamesTableMap::clearInstancePool();
         } elseif (!is_object($values)) { // it's a primary key, or an array of pks
             foreach ((array) $values as $singleval) {
-                JobPlaceLookupTableMap::removeInstanceFromPool($singleval);
+                LocationNamesTableMap::removeInstanceFromPool($singleval);
             }
         }
 
@@ -457,20 +457,20 @@ class JobPlaceLookupTableMap extends TableMap
     }
 
     /**
-     * Deletes all rows from the job_place_lookup table.
+     * Deletes all rows from the location_names table.
      *
      * @param ConnectionInterface $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).
      */
     public static function doDeleteAll(ConnectionInterface $con = null)
     {
-        return JobPlaceLookupQuery::create()->doDeleteAll($con);
+        return LocationNamesQuery::create()->doDeleteAll($con);
     }
 
     /**
-     * Performs an INSERT on the database, given a JobPlaceLookup or Criteria object.
+     * Performs an INSERT on the database, given a LocationNames or Criteria object.
      *
-     * @param mixed               $criteria Criteria or JobPlaceLookup object containing data that is used to create the INSERT statement.
+     * @param mixed               $criteria Criteria or LocationNames object containing data that is used to create the INSERT statement.
      * @param ConnectionInterface $con the ConnectionInterface connection to use
      * @return mixed           The new primary key.
      * @throws PropelException Any exceptions caught during processing will be
@@ -479,18 +479,18 @@ class JobPlaceLookupTableMap extends TableMap
     public static function doInsert($criteria, ConnectionInterface $con = null)
     {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(JobPlaceLookupTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(LocationNamesTableMap::DATABASE_NAME);
         }
 
         if ($criteria instanceof Criteria) {
             $criteria = clone $criteria; // rename for clarity
         } else {
-            $criteria = $criteria->buildCriteria(); // build Criteria from JobPlaceLookup object
+            $criteria = $criteria->buildCriteria(); // build Criteria from LocationNames object
         }
 
 
         // Set the correct dbName
-        $query = JobPlaceLookupQuery::create()->mergeWith($criteria);
+        $query = LocationNamesQuery::create()->mergeWith($criteria);
 
         // use transaction because $criteria could contain info
         // for more than one table (I guess, conceivably)
@@ -499,7 +499,7 @@ class JobPlaceLookupTableMap extends TableMap
         });
     }
 
-} // JobPlaceLookupTableMap
+} // LocationNamesTableMap
 // This is the static code needed to register the TableMap for this table with the main Propel class.
 //
-JobPlaceLookupTableMap::buildTableMap();
+LocationNamesTableMap::buildTableMap();

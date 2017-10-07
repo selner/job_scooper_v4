@@ -7,6 +7,8 @@ use \Exception;
 use \PDO;
 use JobScooper\DataAccess\JobSitePlugin as ChildJobSitePlugin;
 use JobScooper\DataAccess\JobSitePluginQuery as ChildJobSitePluginQuery;
+use JobScooper\DataAccess\Location as ChildLocation;
+use JobScooper\DataAccess\LocationQuery as ChildLocationQuery;
 use JobScooper\DataAccess\User as ChildUser;
 use JobScooper\DataAccess\UserQuery as ChildUserQuery;
 use JobScooper\DataAccess\UserSearchRun as ChildUserSearchRun;
@@ -104,6 +106,13 @@ abstract class UserSearchRun implements ActiveRecordInterface
     protected $location_key;
 
     /**
+     * The value for the location_id field.
+     *
+     * @var        int
+     */
+    protected $location_id;
+
+    /**
      * The value for the user_search_run_key field.
      *
      * @var        string
@@ -180,6 +189,11 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * @var        DateTime
      */
     protected $updated_at;
+
+    /**
+     * @var        ChildLocation
+     */
+    protected $aLocation;
 
     /**
      * @var        ChildUser
@@ -495,6 +509,16 @@ abstract class UserSearchRun implements ActiveRecordInterface
     }
 
     /**
+     * Get the [location_id] column value.
+     *
+     * @return int
+     */
+    public function getLocationId()
+    {
+        return $this->location_id;
+    }
+
+    /**
      * Get the [user_search_run_key] column value.
      *
      * @return string
@@ -761,6 +785,30 @@ abstract class UserSearchRun implements ActiveRecordInterface
 
         return $this;
     } // setLocationKey()
+
+    /**
+     * Set the value of [location_id] column.
+     *
+     * @param int $v new value
+     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
+     */
+    public function setLocationId($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->location_id !== $v) {
+            $this->location_id = $v;
+            $this->modifiedColumns[UserSearchRunTableMap::COL_LOCATION_ID] = true;
+        }
+
+        if ($this->aLocation !== null && $this->aLocation->getLocationId() !== $v) {
+            $this->aLocation = null;
+        }
+
+        return $this;
+    } // setLocationId()
 
     /**
      * Set the value of [user_search_run_key] column.
@@ -1032,10 +1080,13 @@ abstract class UserSearchRun implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserSearchRunTableMap::translateFieldName('LocationKey', TableMap::TYPE_PHPNAME, $indexType)];
             $this->location_key = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserSearchRunTableMap::translateFieldName('UserSearchRunKey', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserSearchRunTableMap::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->location_id = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserSearchRunTableMap::translateFieldName('UserSearchRunKey', TableMap::TYPE_PHPNAME, $indexType)];
             $this->user_search_run_key = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserSearchRunTableMap::translateFieldName('SearchSettings', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : UserSearchRunTableMap::translateFieldName('SearchSettings', TableMap::TYPE_PHPNAME, $indexType)];
             if (null !== $col) {
                 $this->search_settings = fopen('php://memory', 'r+');
                 fwrite($this->search_settings, $col);
@@ -1044,26 +1095,26 @@ abstract class UserSearchRun implements ActiveRecordInterface
                 $this->search_settings = null;
             }
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : UserSearchRunTableMap::translateFieldName('AppRunId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : UserSearchRunTableMap::translateFieldName('AppRunId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->last_app_run_id = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : UserSearchRunTableMap::translateFieldName('RunResultCode', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : UserSearchRunTableMap::translateFieldName('RunResultCode', TableMap::TYPE_PHPNAME, $indexType)];
             $this->run_result = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : UserSearchRunTableMap::translateFieldName('RunErrorDetails', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : UserSearchRunTableMap::translateFieldName('RunErrorDetails', TableMap::TYPE_PHPNAME, $indexType)];
             $this->run_error_details = $col;
             $this->run_error_details_unserialized = null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : UserSearchRunTableMap::translateFieldName('LastRunAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : UserSearchRunTableMap::translateFieldName('LastRunAt', TableMap::TYPE_PHPNAME, $indexType)];
             $this->date_last_run = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : UserSearchRunTableMap::translateFieldName('StartNextRunAfter', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : UserSearchRunTableMap::translateFieldName('StartNextRunAfter', TableMap::TYPE_PHPNAME, $indexType)];
             $this->date_next_run = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : UserSearchRunTableMap::translateFieldName('LastFailedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 13 + $startcol : UserSearchRunTableMap::translateFieldName('LastFailedAt', TableMap::TYPE_PHPNAME, $indexType)];
             $this->date_last_failed = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 13 + $startcol : UserSearchRunTableMap::translateFieldName('UpdatedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 14 + $startcol : UserSearchRunTableMap::translateFieldName('UpdatedAt', TableMap::TYPE_PHPNAME, $indexType)];
             $this->updated_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
             $this->resetModified();
 
@@ -1073,7 +1124,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 14; // 14 = UserSearchRunTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 15; // 15 = UserSearchRunTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\UserSearchRun'), 0, $e);
@@ -1097,6 +1148,9 @@ abstract class UserSearchRun implements ActiveRecordInterface
     {
         if ($this->aUser !== null && $this->user_slug !== $this->aUser->getUserSlug()) {
             $this->aUser = null;
+        }
+        if ($this->aLocation !== null && $this->location_id !== $this->aLocation->getLocationId()) {
+            $this->aLocation = null;
         }
     } // ensureConsistency
 
@@ -1137,6 +1191,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
+            $this->aLocation = null;
             $this->aUser = null;
             $this->collJobSitePlugins = null;
 
@@ -1279,6 +1334,13 @@ abstract class UserSearchRun implements ActiveRecordInterface
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
+            if ($this->aLocation !== null) {
+                if ($this->aLocation->isModified() || $this->aLocation->isNew()) {
+                    $affectedRows += $this->aLocation->save($con);
+                }
+                $this->setLocation($this->aLocation);
+            }
+
             if ($this->aUser !== null) {
                 if ($this->aUser->isModified() || $this->aUser->isNew()) {
                     $affectedRows += $this->aUser->save($con);
@@ -1371,6 +1433,9 @@ abstract class UserSearchRun implements ActiveRecordInterface
         if ($this->isColumnModified(UserSearchRunTableMap::COL_LOCATION_KEY)) {
             $modifiedColumns[':p' . $index++]  = 'location_key';
         }
+        if ($this->isColumnModified(UserSearchRunTableMap::COL_LOCATION_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'location_id';
+        }
         if ($this->isColumnModified(UserSearchRunTableMap::COL_USER_SEARCH_RUN_KEY)) {
             $modifiedColumns[':p' . $index++]  = 'user_search_run_key';
         }
@@ -1423,6 +1488,9 @@ abstract class UserSearchRun implements ActiveRecordInterface
                         break;
                     case 'location_key':
                         $stmt->bindValue($identifier, $this->location_key, PDO::PARAM_STR);
+                        break;
+                    case 'location_id':
+                        $stmt->bindValue($identifier, $this->location_id, PDO::PARAM_INT);
                         break;
                     case 'user_search_run_key':
                         $stmt->bindValue($identifier, $this->user_search_run_key, PDO::PARAM_STR);
@@ -1532,30 +1600,33 @@ abstract class UserSearchRun implements ActiveRecordInterface
                 return $this->getLocationKey();
                 break;
             case 5:
-                return $this->getUserSearchRunKey();
+                return $this->getLocationId();
                 break;
             case 6:
-                return $this->getSearchSettings();
+                return $this->getUserSearchRunKey();
                 break;
             case 7:
-                return $this->getAppRunId();
+                return $this->getSearchSettings();
                 break;
             case 8:
-                return $this->getRunResultCode();
+                return $this->getAppRunId();
                 break;
             case 9:
-                return $this->getRunErrorDetails();
+                return $this->getRunResultCode();
                 break;
             case 10:
-                return $this->getLastRunAt();
+                return $this->getRunErrorDetails();
                 break;
             case 11:
-                return $this->getStartNextRunAfter();
+                return $this->getLastRunAt();
                 break;
             case 12:
-                return $this->getLastFailedAt();
+                return $this->getStartNextRunAfter();
                 break;
             case 13:
+                return $this->getLastFailedAt();
+                break;
+            case 14:
                 return $this->getUpdatedAt();
                 break;
             default:
@@ -1593,20 +1664,17 @@ abstract class UserSearchRun implements ActiveRecordInterface
             $keys[2] => $this->getUserSlug(),
             $keys[3] => $this->getJobSiteKey(),
             $keys[4] => $this->getLocationKey(),
-            $keys[5] => $this->getUserSearchRunKey(),
-            $keys[6] => $this->getSearchSettings(),
-            $keys[7] => $this->getAppRunId(),
-            $keys[8] => $this->getRunResultCode(),
-            $keys[9] => $this->getRunErrorDetails(),
-            $keys[10] => $this->getLastRunAt(),
-            $keys[11] => $this->getStartNextRunAfter(),
-            $keys[12] => $this->getLastFailedAt(),
-            $keys[13] => $this->getUpdatedAt(),
+            $keys[5] => $this->getLocationId(),
+            $keys[6] => $this->getUserSearchRunKey(),
+            $keys[7] => $this->getSearchSettings(),
+            $keys[8] => $this->getAppRunId(),
+            $keys[9] => $this->getRunResultCode(),
+            $keys[10] => $this->getRunErrorDetails(),
+            $keys[11] => $this->getLastRunAt(),
+            $keys[12] => $this->getStartNextRunAfter(),
+            $keys[13] => $this->getLastFailedAt(),
+            $keys[14] => $this->getUpdatedAt(),
         );
-        if ($result[$keys[10]] instanceof \DateTimeInterface) {
-            $result[$keys[10]] = $result[$keys[10]]->format('c');
-        }
-
         if ($result[$keys[11]] instanceof \DateTimeInterface) {
             $result[$keys[11]] = $result[$keys[11]]->format('c');
         }
@@ -1619,12 +1687,31 @@ abstract class UserSearchRun implements ActiveRecordInterface
             $result[$keys[13]] = $result[$keys[13]]->format('c');
         }
 
+        if ($result[$keys[14]] instanceof \DateTimeInterface) {
+            $result[$keys[14]] = $result[$keys[14]]->format('c');
+        }
+
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
             $result[$key] = $virtualColumn;
         }
 
         if ($includeForeignObjects) {
+            if (null !== $this->aLocation) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'location';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'location';
+                        break;
+                    default:
+                        $key = 'Location';
+                }
+
+                $result[$key] = $this->aLocation->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
             if (null !== $this->aUser) {
 
                 switch ($keyType) {
@@ -1705,38 +1792,41 @@ abstract class UserSearchRun implements ActiveRecordInterface
                 $this->setLocationKey($value);
                 break;
             case 5:
-                $this->setUserSearchRunKey($value);
+                $this->setLocationId($value);
                 break;
             case 6:
-                $this->setSearchSettings($value);
+                $this->setUserSearchRunKey($value);
                 break;
             case 7:
-                $this->setAppRunId($value);
+                $this->setSearchSettings($value);
                 break;
             case 8:
+                $this->setAppRunId($value);
+                break;
+            case 9:
                 $valueSet = UserSearchRunTableMap::getValueSet(UserSearchRunTableMap::COL_RUN_RESULT);
                 if (isset($valueSet[$value])) {
                     $value = $valueSet[$value];
                 }
                 $this->setRunResultCode($value);
                 break;
-            case 9:
+            case 10:
                 if (!is_array($value)) {
                     $v = trim(substr($value, 2, -2));
                     $value = $v ? explode(' | ', $v) : array();
                 }
                 $this->setRunErrorDetails($value);
                 break;
-            case 10:
+            case 11:
                 $this->setLastRunAt($value);
                 break;
-            case 11:
+            case 12:
                 $this->setStartNextRunAfter($value);
                 break;
-            case 12:
+            case 13:
                 $this->setLastFailedAt($value);
                 break;
-            case 13:
+            case 14:
                 $this->setUpdatedAt($value);
                 break;
         } // switch()
@@ -1781,31 +1871,34 @@ abstract class UserSearchRun implements ActiveRecordInterface
             $this->setLocationKey($arr[$keys[4]]);
         }
         if (array_key_exists($keys[5], $arr)) {
-            $this->setUserSearchRunKey($arr[$keys[5]]);
+            $this->setLocationId($arr[$keys[5]]);
         }
         if (array_key_exists($keys[6], $arr)) {
-            $this->setSearchSettings($arr[$keys[6]]);
+            $this->setUserSearchRunKey($arr[$keys[6]]);
         }
         if (array_key_exists($keys[7], $arr)) {
-            $this->setAppRunId($arr[$keys[7]]);
+            $this->setSearchSettings($arr[$keys[7]]);
         }
         if (array_key_exists($keys[8], $arr)) {
-            $this->setRunResultCode($arr[$keys[8]]);
+            $this->setAppRunId($arr[$keys[8]]);
         }
         if (array_key_exists($keys[9], $arr)) {
-            $this->setRunErrorDetails($arr[$keys[9]]);
+            $this->setRunResultCode($arr[$keys[9]]);
         }
         if (array_key_exists($keys[10], $arr)) {
-            $this->setLastRunAt($arr[$keys[10]]);
+            $this->setRunErrorDetails($arr[$keys[10]]);
         }
         if (array_key_exists($keys[11], $arr)) {
-            $this->setStartNextRunAfter($arr[$keys[11]]);
+            $this->setLastRunAt($arr[$keys[11]]);
         }
         if (array_key_exists($keys[12], $arr)) {
-            $this->setLastFailedAt($arr[$keys[12]]);
+            $this->setStartNextRunAfter($arr[$keys[12]]);
         }
         if (array_key_exists($keys[13], $arr)) {
-            $this->setUpdatedAt($arr[$keys[13]]);
+            $this->setLastFailedAt($arr[$keys[13]]);
+        }
+        if (array_key_exists($keys[14], $arr)) {
+            $this->setUpdatedAt($arr[$keys[14]]);
         }
     }
 
@@ -1862,6 +1955,9 @@ abstract class UserSearchRun implements ActiveRecordInterface
         }
         if ($this->isColumnModified(UserSearchRunTableMap::COL_LOCATION_KEY)) {
             $criteria->add(UserSearchRunTableMap::COL_LOCATION_KEY, $this->location_key);
+        }
+        if ($this->isColumnModified(UserSearchRunTableMap::COL_LOCATION_ID)) {
+            $criteria->add(UserSearchRunTableMap::COL_LOCATION_ID, $this->location_id);
         }
         if ($this->isColumnModified(UserSearchRunTableMap::COL_USER_SEARCH_RUN_KEY)) {
             $criteria->add(UserSearchRunTableMap::COL_USER_SEARCH_RUN_KEY, $this->user_search_run_key);
@@ -1980,6 +2076,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
         $copyObj->setUserSlug($this->getUserSlug());
         $copyObj->setJobSiteKey($this->getJobSiteKey());
         $copyObj->setLocationKey($this->getLocationKey());
+        $copyObj->setLocationId($this->getLocationId());
         $copyObj->setUserSearchRunKey($this->getUserSearchRunKey());
         $copyObj->setSearchSettings($this->getSearchSettings());
         $copyObj->setAppRunId($this->getAppRunId());
@@ -2029,6 +2126,57 @@ abstract class UserSearchRun implements ActiveRecordInterface
         $this->copyInto($copyObj, $deepCopy);
 
         return $copyObj;
+    }
+
+    /**
+     * Declares an association between this object and a ChildLocation object.
+     *
+     * @param  ChildLocation $v
+     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
+     * @throws PropelException
+     */
+    public function setLocation(ChildLocation $v = null)
+    {
+        if ($v === null) {
+            $this->setLocationId(NULL);
+        } else {
+            $this->setLocationId($v->getLocationId());
+        }
+
+        $this->aLocation = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildLocation object, it will not be re-added.
+        if ($v !== null) {
+            $v->addUserSearchRun($this);
+        }
+
+
+        return $this;
+    }
+
+
+    /**
+     * Get the associated ChildLocation object
+     *
+     * @param  ConnectionInterface $con Optional Connection object.
+     * @return ChildLocation The associated ChildLocation object.
+     * @throws PropelException
+     */
+    public function getLocation(ConnectionInterface $con = null)
+    {
+        if ($this->aLocation === null && ($this->location_id != 0)) {
+            $this->aLocation = ChildLocationQuery::create()->findPk($this->location_id, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aLocation->addUserSearchRuns($this);
+             */
+        }
+
+        return $this->aLocation;
     }
 
     /**
@@ -2331,6 +2479,9 @@ abstract class UserSearchRun implements ActiveRecordInterface
      */
     public function clear()
     {
+        if (null !== $this->aLocation) {
+            $this->aLocation->removeUserSearchRun($this);
+        }
         if (null !== $this->aUser) {
             $this->aUser->removeUserSearchRun($this);
         }
@@ -2339,6 +2490,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
         $this->user_slug = null;
         $this->jobsite_key = null;
         $this->location_key = null;
+        $this->location_id = null;
         $this->user_search_run_key = null;
         $this->search_settings = null;
         $this->search_settings_unserialized = null;
@@ -2377,6 +2529,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
         } // if ($deep)
 
         $this->collJobSitePlugins = null;
+        $this->aLocation = null;
         $this->aUser = null;
     }
 

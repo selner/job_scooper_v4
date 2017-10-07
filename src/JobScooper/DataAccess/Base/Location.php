@@ -4,15 +4,18 @@ namespace JobScooper\DataAccess\Base;
 
 use \Exception;
 use \PDO;
-use JobScooper\DataAccess\JobLocation as ChildJobLocation;
-use JobScooper\DataAccess\JobLocationQuery as ChildJobLocationQuery;
-use JobScooper\DataAccess\JobPlaceLookup as ChildJobPlaceLookup;
-use JobScooper\DataAccess\JobPlaceLookupQuery as ChildJobPlaceLookupQuery;
 use JobScooper\DataAccess\JobPosting as ChildJobPosting;
 use JobScooper\DataAccess\JobPostingQuery as ChildJobPostingQuery;
-use JobScooper\DataAccess\Map\JobLocationTableMap;
-use JobScooper\DataAccess\Map\JobPlaceLookupTableMap;
+use JobScooper\DataAccess\Location as ChildLocation;
+use JobScooper\DataAccess\LocationNames as ChildLocationNames;
+use JobScooper\DataAccess\LocationNamesQuery as ChildLocationNamesQuery;
+use JobScooper\DataAccess\LocationQuery as ChildLocationQuery;
+use JobScooper\DataAccess\UserSearchRun as ChildUserSearchRun;
+use JobScooper\DataAccess\UserSearchRunQuery as ChildUserSearchRunQuery;
 use JobScooper\DataAccess\Map\JobPostingTableMap;
+use JobScooper\DataAccess\Map\LocationNamesTableMap;
+use JobScooper\DataAccess\Map\LocationTableMap;
+use JobScooper\DataAccess\Map\UserSearchRunTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -27,18 +30,18 @@ use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
 
 /**
- * Base class that represents a row from the 'job_location' table.
+ * Base class that represents a row from the 'location' table.
  *
  *
  *
  * @package    propel.generator.JobScooper.DataAccess.Base
  */
-abstract class JobLocation implements ActiveRecordInterface
+abstract class Location implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      */
-    const TABLE_MAP = '\\JobScooper\\DataAccess\\Map\\JobLocationTableMap';
+    const TABLE_MAP = '\\JobScooper\\DataAccess\\Map\\LocationTableMap';
 
 
     /**
@@ -173,16 +176,29 @@ abstract class JobLocation implements ActiveRecordInterface
     protected $full_osm_data;
 
     /**
+     * The value for the extra_details_data field.
+     *
+     * @var        string
+     */
+    protected $extra_details_data;
+
+    /**
      * @var        ObjectCollection|ChildJobPosting[] Collection to store aggregation of ChildJobPosting objects.
      */
     protected $collJobPostings;
     protected $collJobPostingsPartial;
 
     /**
-     * @var        ObjectCollection|ChildJobPlaceLookup[] Collection to store aggregation of ChildJobPlaceLookup objects.
+     * @var        ObjectCollection|ChildLocationNames[] Collection to store aggregation of ChildLocationNames objects.
      */
-    protected $collJobPlaceLookups;
-    protected $collJobPlaceLookupsPartial;
+    protected $collLocationNamess;
+    protected $collLocationNamessPartial;
+
+    /**
+     * @var        ObjectCollection|ChildUserSearchRun[] Collection to store aggregation of ChildUserSearchRun objects.
+     */
+    protected $collUserSearchRuns;
+    protected $collUserSearchRunsPartial;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -200,12 +216,18 @@ abstract class JobLocation implements ActiveRecordInterface
 
     /**
      * An array of objects scheduled for deletion.
-     * @var ObjectCollection|ChildJobPlaceLookup[]
+     * @var ObjectCollection|ChildLocationNames[]
      */
-    protected $jobPlaceLookupsScheduledForDeletion = null;
+    protected $locationNamessScheduledForDeletion = null;
 
     /**
-     * Initializes internal state of JobScooper\DataAccess\Base\JobLocation object.
+     * An array of objects scheduled for deletion.
+     * @var ObjectCollection|ChildUserSearchRun[]
+     */
+    protected $userSearchRunsScheduledForDeletion = null;
+
+    /**
+     * Initializes internal state of JobScooper\DataAccess\Base\Location object.
      */
     public function __construct()
     {
@@ -300,9 +322,9 @@ abstract class JobLocation implements ActiveRecordInterface
     }
 
     /**
-     * Compares this with another <code>JobLocation</code> instance.  If
-     * <code>obj</code> is an instance of <code>JobLocation</code>, delegates to
-     * <code>equals(JobLocation)</code>.  Otherwise, returns <code>false</code>.
+     * Compares this with another <code>Location</code> instance.  If
+     * <code>obj</code> is an instance of <code>Location</code>, delegates to
+     * <code>equals(Location)</code>.  Otherwise, returns <code>false</code>.
      *
      * @param  mixed   $obj The object to compare to.
      * @return boolean Whether equal to the object specified.
@@ -368,7 +390,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return $this|JobLocation The current object, for fluid interface
+     * @return $this|Location The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -454,7 +476,7 @@ abstract class JobLocation implements ActiveRecordInterface
      *
      * @return double
      */
-    public function getLogitude()
+    public function getLongitude()
     {
         return $this->lon;
     }
@@ -589,10 +611,20 @@ abstract class JobLocation implements ActiveRecordInterface
     }
 
     /**
+     * Get the [extra_details_data] column value.
+     *
+     * @return string
+     */
+    public function getExtraDetailsData()
+    {
+        return $this->extra_details_data;
+    }
+
+    /**
      * Set the value of [location_id] column.
      *
      * @param int $v new value
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
     public function setLocationId($v)
     {
@@ -602,7 +634,7 @@ abstract class JobLocation implements ActiveRecordInterface
 
         if ($this->location_id !== $v) {
             $this->location_id = $v;
-            $this->modifiedColumns[JobLocationTableMap::COL_LOCATION_ID] = true;
+            $this->modifiedColumns[LocationTableMap::COL_LOCATION_ID] = true;
         }
 
         return $this;
@@ -612,7 +644,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * Set the value of [lat] column.
      *
      * @param double $v new value
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
     public function setLatitude($v)
     {
@@ -622,7 +654,7 @@ abstract class JobLocation implements ActiveRecordInterface
 
         if ($this->lat !== $v) {
             $this->lat = $v;
-            $this->modifiedColumns[JobLocationTableMap::COL_LAT] = true;
+            $this->modifiedColumns[LocationTableMap::COL_LAT] = true;
         }
 
         return $this;
@@ -632,9 +664,9 @@ abstract class JobLocation implements ActiveRecordInterface
      * Set the value of [lon] column.
      *
      * @param double $v new value
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
-    public function setLogitude($v)
+    public function setLongitude($v)
     {
         if ($v !== null) {
             $v = (double) $v;
@@ -642,17 +674,17 @@ abstract class JobLocation implements ActiveRecordInterface
 
         if ($this->lon !== $v) {
             $this->lon = $v;
-            $this->modifiedColumns[JobLocationTableMap::COL_LON] = true;
+            $this->modifiedColumns[LocationTableMap::COL_LON] = true;
         }
 
         return $this;
-    } // setLogitude()
+    } // setLongitude()
 
     /**
      * Set the value of [full_display_name] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
     public function setDisplayName($v)
     {
@@ -662,7 +694,7 @@ abstract class JobLocation implements ActiveRecordInterface
 
         if ($this->full_display_name !== $v) {
             $this->full_display_name = $v;
-            $this->modifiedColumns[JobLocationTableMap::COL_FULL_DISPLAY_NAME] = true;
+            $this->modifiedColumns[LocationTableMap::COL_FULL_DISPLAY_NAME] = true;
         }
 
         return $this;
@@ -672,7 +704,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * Set the value of [primary_name] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
     public function setPrimaryName($v)
     {
@@ -682,7 +714,7 @@ abstract class JobLocation implements ActiveRecordInterface
 
         if ($this->primary_name !== $v) {
             $this->primary_name = $v;
-            $this->modifiedColumns[JobLocationTableMap::COL_PRIMARY_NAME] = true;
+            $this->modifiedColumns[LocationTableMap::COL_PRIMARY_NAME] = true;
         }
 
         return $this;
@@ -692,7 +724,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * Set the value of [place] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
     public function setPlace($v)
     {
@@ -702,7 +734,7 @@ abstract class JobLocation implements ActiveRecordInterface
 
         if ($this->place !== $v) {
             $this->place = $v;
-            $this->modifiedColumns[JobLocationTableMap::COL_PLACE] = true;
+            $this->modifiedColumns[LocationTableMap::COL_PLACE] = true;
         }
 
         return $this;
@@ -712,7 +744,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * Set the value of [county] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
     public function setCounty($v)
     {
@@ -722,7 +754,7 @@ abstract class JobLocation implements ActiveRecordInterface
 
         if ($this->county !== $v) {
             $this->county = $v;
-            $this->modifiedColumns[JobLocationTableMap::COL_COUNTY] = true;
+            $this->modifiedColumns[LocationTableMap::COL_COUNTY] = true;
         }
 
         return $this;
@@ -732,7 +764,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * Set the value of [state] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
     public function setState($v)
     {
@@ -742,7 +774,7 @@ abstract class JobLocation implements ActiveRecordInterface
 
         if ($this->state !== $v) {
             $this->state = $v;
-            $this->modifiedColumns[JobLocationTableMap::COL_STATE] = true;
+            $this->modifiedColumns[LocationTableMap::COL_STATE] = true;
         }
 
         return $this;
@@ -752,7 +784,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * Set the value of [statecode] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
     public function setStateCode($v)
     {
@@ -762,7 +794,7 @@ abstract class JobLocation implements ActiveRecordInterface
 
         if ($this->statecode !== $v) {
             $this->statecode = $v;
-            $this->modifiedColumns[JobLocationTableMap::COL_STATECODE] = true;
+            $this->modifiedColumns[LocationTableMap::COL_STATECODE] = true;
         }
 
         return $this;
@@ -772,7 +804,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * Set the value of [country] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
     public function setCountry($v)
     {
@@ -782,7 +814,7 @@ abstract class JobLocation implements ActiveRecordInterface
 
         if ($this->country !== $v) {
             $this->country = $v;
-            $this->modifiedColumns[JobLocationTableMap::COL_COUNTRY] = true;
+            $this->modifiedColumns[LocationTableMap::COL_COUNTRY] = true;
         }
 
         return $this;
@@ -792,7 +824,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * Set the value of [countrycode] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
     public function setCountryCode($v)
     {
@@ -802,7 +834,7 @@ abstract class JobLocation implements ActiveRecordInterface
 
         if ($this->countrycode !== $v) {
             $this->countrycode = $v;
-            $this->modifiedColumns[JobLocationTableMap::COL_COUNTRYCODE] = true;
+            $this->modifiedColumns[LocationTableMap::COL_COUNTRYCODE] = true;
         }
 
         return $this;
@@ -812,14 +844,14 @@ abstract class JobLocation implements ActiveRecordInterface
      * Set the value of [alternate_names] column.
      *
      * @param array $v new value
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
     public function setAlternateNames($v)
     {
         if ($this->alternate_names_unserialized !== $v) {
             $this->alternate_names_unserialized = $v;
             $this->alternate_names = '| ' . implode(' | ', $v) . ' |';
-            $this->modifiedColumns[JobLocationTableMap::COL_ALTERNATE_NAMES] = true;
+            $this->modifiedColumns[LocationTableMap::COL_ALTERNATE_NAMES] = true;
         }
 
         return $this;
@@ -829,7 +861,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * Adds a value to the [alternate_names] array column value.
      * @param  mixed $value
      *
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
     public function addAlternateName($value)
     {
@@ -844,7 +876,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * Removes a value from the [alternate_names] array column value.
      * @param  mixed $value
      *
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
     public function removeAlternateName($value)
     {
@@ -863,7 +895,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * Set the value of [openstreetmap_id] column.
      *
      * @param int $v new value
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
     public function setOpenStreetMapId($v)
     {
@@ -873,7 +905,7 @@ abstract class JobLocation implements ActiveRecordInterface
 
         if ($this->openstreetmap_id !== $v) {
             $this->openstreetmap_id = $v;
-            $this->modifiedColumns[JobLocationTableMap::COL_OPENSTREETMAP_ID] = true;
+            $this->modifiedColumns[LocationTableMap::COL_OPENSTREETMAP_ID] = true;
         }
 
         return $this;
@@ -883,7 +915,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * Set the value of [full_osm_data] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
     public function setFullOsmData($v)
     {
@@ -893,11 +925,31 @@ abstract class JobLocation implements ActiveRecordInterface
 
         if ($this->full_osm_data !== $v) {
             $this->full_osm_data = $v;
-            $this->modifiedColumns[JobLocationTableMap::COL_FULL_OSM_DATA] = true;
+            $this->modifiedColumns[LocationTableMap::COL_FULL_OSM_DATA] = true;
         }
 
         return $this;
     } // setFullOsmData()
+
+    /**
+     * Set the value of [extra_details_data] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
+     */
+    public function setExtraDetailsData($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->extra_details_data !== $v) {
+            $this->extra_details_data = $v;
+            $this->modifiedColumns[LocationTableMap::COL_EXTRA_DETAILS_DATA] = true;
+        }
+
+        return $this;
+    } // setExtraDetailsData()
 
     /**
      * Indicates whether the columns in this object are only set to default values.
@@ -935,48 +987,51 @@ abstract class JobLocation implements ActiveRecordInterface
     {
         try {
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : JobLocationTableMap::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : LocationTableMap::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->location_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : JobLocationTableMap::translateFieldName('Latitude', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : LocationTableMap::translateFieldName('Latitude', TableMap::TYPE_PHPNAME, $indexType)];
             $this->lat = (null !== $col) ? (double) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : JobLocationTableMap::translateFieldName('Logitude', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : LocationTableMap::translateFieldName('Longitude', TableMap::TYPE_PHPNAME, $indexType)];
             $this->lon = (null !== $col) ? (double) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : JobLocationTableMap::translateFieldName('DisplayName', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : LocationTableMap::translateFieldName('DisplayName', TableMap::TYPE_PHPNAME, $indexType)];
             $this->full_display_name = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : JobLocationTableMap::translateFieldName('PrimaryName', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : LocationTableMap::translateFieldName('PrimaryName', TableMap::TYPE_PHPNAME, $indexType)];
             $this->primary_name = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : JobLocationTableMap::translateFieldName('Place', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : LocationTableMap::translateFieldName('Place', TableMap::TYPE_PHPNAME, $indexType)];
             $this->place = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : JobLocationTableMap::translateFieldName('County', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : LocationTableMap::translateFieldName('County', TableMap::TYPE_PHPNAME, $indexType)];
             $this->county = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : JobLocationTableMap::translateFieldName('State', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : LocationTableMap::translateFieldName('State', TableMap::TYPE_PHPNAME, $indexType)];
             $this->state = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : JobLocationTableMap::translateFieldName('StateCode', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : LocationTableMap::translateFieldName('StateCode', TableMap::TYPE_PHPNAME, $indexType)];
             $this->statecode = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : JobLocationTableMap::translateFieldName('Country', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : LocationTableMap::translateFieldName('Country', TableMap::TYPE_PHPNAME, $indexType)];
             $this->country = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : JobLocationTableMap::translateFieldName('CountryCode', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : LocationTableMap::translateFieldName('CountryCode', TableMap::TYPE_PHPNAME, $indexType)];
             $this->countrycode = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : JobLocationTableMap::translateFieldName('AlternateNames', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : LocationTableMap::translateFieldName('AlternateNames', TableMap::TYPE_PHPNAME, $indexType)];
             $this->alternate_names = $col;
             $this->alternate_names_unserialized = null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : JobLocationTableMap::translateFieldName('OpenStreetMapId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : LocationTableMap::translateFieldName('OpenStreetMapId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->openstreetmap_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 13 + $startcol : JobLocationTableMap::translateFieldName('FullOsmData', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 13 + $startcol : LocationTableMap::translateFieldName('FullOsmData', TableMap::TYPE_PHPNAME, $indexType)];
             $this->full_osm_data = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 14 + $startcol : LocationTableMap::translateFieldName('ExtraDetailsData', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->extra_details_data = (null !== $col) ? (string) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -985,10 +1040,10 @@ abstract class JobLocation implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 14; // 14 = JobLocationTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 15; // 15 = LocationTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\JobLocation'), 0, $e);
+            throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\Location'), 0, $e);
         }
     }
 
@@ -1030,13 +1085,13 @@ abstract class JobLocation implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(JobLocationTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getReadConnection(LocationTableMap::DATABASE_NAME);
         }
 
         // We don't need to alter the object instance pool; we're just modifying this instance
         // already in the pool.
 
-        $dataFetcher = ChildJobLocationQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
+        $dataFetcher = ChildLocationQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
         $row = $dataFetcher->fetch();
         $dataFetcher->close();
         if (!$row) {
@@ -1048,7 +1103,9 @@ abstract class JobLocation implements ActiveRecordInterface
 
             $this->collJobPostings = null;
 
-            $this->collJobPlaceLookups = null;
+            $this->collLocationNamess = null;
+
+            $this->collUserSearchRuns = null;
 
         } // if (deep)
     }
@@ -1059,8 +1116,8 @@ abstract class JobLocation implements ActiveRecordInterface
      * @param      ConnectionInterface $con
      * @return void
      * @throws PropelException
-     * @see JobLocation::setDeleted()
-     * @see JobLocation::isDeleted()
+     * @see Location::setDeleted()
+     * @see Location::isDeleted()
      */
     public function delete(ConnectionInterface $con = null)
     {
@@ -1069,11 +1126,11 @@ abstract class JobLocation implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(JobLocationTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(LocationTableMap::DATABASE_NAME);
         }
 
         $con->transaction(function () use ($con) {
-            $deleteQuery = ChildJobLocationQuery::create()
+            $deleteQuery = ChildLocationQuery::create()
                 ->filterByPrimaryKey($this->getPrimaryKey());
             $ret = $this->preDelete($con);
             if ($ret) {
@@ -1117,7 +1174,7 @@ abstract class JobLocation implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(JobLocationTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(LocationTableMap::DATABASE_NAME);
         }
 
         return $con->transaction(function () use ($con, $skipReload) {
@@ -1136,7 +1193,7 @@ abstract class JobLocation implements ActiveRecordInterface
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                JobLocationTableMap::addInstanceToPool($this);
+                LocationTableMap::addInstanceToPool($this);
             } else {
                 $affectedRows = 0;
             }
@@ -1200,17 +1257,35 @@ abstract class JobLocation implements ActiveRecordInterface
                 }
             }
 
-            if ($this->jobPlaceLookupsScheduledForDeletion !== null) {
-                if (!$this->jobPlaceLookupsScheduledForDeletion->isEmpty()) {
-                    \JobScooper\DataAccess\JobPlaceLookupQuery::create()
-                        ->filterByPrimaryKeys($this->jobPlaceLookupsScheduledForDeletion->getPrimaryKeys(false))
+            if ($this->locationNamessScheduledForDeletion !== null) {
+                if (!$this->locationNamessScheduledForDeletion->isEmpty()) {
+                    \JobScooper\DataAccess\LocationNamesQuery::create()
+                        ->filterByPrimaryKeys($this->locationNamessScheduledForDeletion->getPrimaryKeys(false))
                         ->delete($con);
-                    $this->jobPlaceLookupsScheduledForDeletion = null;
+                    $this->locationNamessScheduledForDeletion = null;
                 }
             }
 
-            if ($this->collJobPlaceLookups !== null) {
-                foreach ($this->collJobPlaceLookups as $referrerFK) {
+            if ($this->collLocationNamess !== null) {
+                foreach ($this->collLocationNamess as $referrerFK) {
+                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
+                        $affectedRows += $referrerFK->save($con);
+                    }
+                }
+            }
+
+            if ($this->userSearchRunsScheduledForDeletion !== null) {
+                if (!$this->userSearchRunsScheduledForDeletion->isEmpty()) {
+                    foreach ($this->userSearchRunsScheduledForDeletion as $userSearchRun) {
+                        // need to save related object because we set the relation to null
+                        $userSearchRun->save($con);
+                    }
+                    $this->userSearchRunsScheduledForDeletion = null;
+                }
+            }
+
+            if ($this->collUserSearchRuns !== null) {
+                foreach ($this->collUserSearchRuns as $referrerFK) {
                     if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
                         $affectedRows += $referrerFK->save($con);
                     }
@@ -1241,57 +1316,60 @@ abstract class JobLocation implements ActiveRecordInterface
         $modifiedColumns = array();
         $index = 0;
 
-        $this->modifiedColumns[JobLocationTableMap::COL_LOCATION_ID] = true;
+        $this->modifiedColumns[LocationTableMap::COL_LOCATION_ID] = true;
         if (null !== $this->location_id) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key (' . JobLocationTableMap::COL_LOCATION_ID . ')');
+            throw new PropelException('Cannot insert a value for auto-increment primary key (' . LocationTableMap::COL_LOCATION_ID . ')');
         }
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(JobLocationTableMap::COL_LOCATION_ID)) {
+        if ($this->isColumnModified(LocationTableMap::COL_LOCATION_ID)) {
             $modifiedColumns[':p' . $index++]  = 'location_id';
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_LAT)) {
+        if ($this->isColumnModified(LocationTableMap::COL_LAT)) {
             $modifiedColumns[':p' . $index++]  = 'lat';
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_LON)) {
+        if ($this->isColumnModified(LocationTableMap::COL_LON)) {
             $modifiedColumns[':p' . $index++]  = 'lon';
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_FULL_DISPLAY_NAME)) {
+        if ($this->isColumnModified(LocationTableMap::COL_FULL_DISPLAY_NAME)) {
             $modifiedColumns[':p' . $index++]  = 'full_display_name';
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_PRIMARY_NAME)) {
+        if ($this->isColumnModified(LocationTableMap::COL_PRIMARY_NAME)) {
             $modifiedColumns[':p' . $index++]  = 'primary_name';
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_PLACE)) {
+        if ($this->isColumnModified(LocationTableMap::COL_PLACE)) {
             $modifiedColumns[':p' . $index++]  = 'place';
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_COUNTY)) {
+        if ($this->isColumnModified(LocationTableMap::COL_COUNTY)) {
             $modifiedColumns[':p' . $index++]  = 'county';
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_STATE)) {
+        if ($this->isColumnModified(LocationTableMap::COL_STATE)) {
             $modifiedColumns[':p' . $index++]  = 'state';
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_STATECODE)) {
+        if ($this->isColumnModified(LocationTableMap::COL_STATECODE)) {
             $modifiedColumns[':p' . $index++]  = 'statecode';
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_COUNTRY)) {
+        if ($this->isColumnModified(LocationTableMap::COL_COUNTRY)) {
             $modifiedColumns[':p' . $index++]  = 'country';
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_COUNTRYCODE)) {
+        if ($this->isColumnModified(LocationTableMap::COL_COUNTRYCODE)) {
             $modifiedColumns[':p' . $index++]  = 'countrycode';
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_ALTERNATE_NAMES)) {
+        if ($this->isColumnModified(LocationTableMap::COL_ALTERNATE_NAMES)) {
             $modifiedColumns[':p' . $index++]  = 'alternate_names';
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_OPENSTREETMAP_ID)) {
+        if ($this->isColumnModified(LocationTableMap::COL_OPENSTREETMAP_ID)) {
             $modifiedColumns[':p' . $index++]  = 'openstreetmap_id';
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_FULL_OSM_DATA)) {
+        if ($this->isColumnModified(LocationTableMap::COL_FULL_OSM_DATA)) {
             $modifiedColumns[':p' . $index++]  = 'full_osm_data';
+        }
+        if ($this->isColumnModified(LocationTableMap::COL_EXTRA_DETAILS_DATA)) {
+            $modifiedColumns[':p' . $index++]  = 'extra_details_data';
         }
 
         $sql = sprintf(
-            'INSERT INTO job_location (%s) VALUES (%s)',
+            'INSERT INTO location (%s) VALUES (%s)',
             implode(', ', $modifiedColumns),
             implode(', ', array_keys($modifiedColumns))
         );
@@ -1342,6 +1420,9 @@ abstract class JobLocation implements ActiveRecordInterface
                     case 'full_osm_data':
                         $stmt->bindValue($identifier, $this->full_osm_data, PDO::PARAM_STR);
                         break;
+                    case 'extra_details_data':
+                        $stmt->bindValue($identifier, $this->extra_details_data, PDO::PARAM_STR);
+                        break;
                 }
             }
             $stmt->execute();
@@ -1388,7 +1469,7 @@ abstract class JobLocation implements ActiveRecordInterface
      */
     public function getByName($name, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = JobLocationTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = LocationTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
         $field = $this->getByPosition($pos);
 
         return $field;
@@ -1411,7 +1492,7 @@ abstract class JobLocation implements ActiveRecordInterface
                 return $this->getLatitude();
                 break;
             case 2:
-                return $this->getLogitude();
+                return $this->getLongitude();
                 break;
             case 3:
                 return $this->getDisplayName();
@@ -1446,6 +1527,9 @@ abstract class JobLocation implements ActiveRecordInterface
             case 13:
                 return $this->getFullOsmData();
                 break;
+            case 14:
+                return $this->getExtraDetailsData();
+                break;
             default:
                 return null;
                 break;
@@ -1470,15 +1554,15 @@ abstract class JobLocation implements ActiveRecordInterface
     public function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
     {
 
-        if (isset($alreadyDumpedObjects['JobLocation'][$this->hashCode()])) {
+        if (isset($alreadyDumpedObjects['Location'][$this->hashCode()])) {
             return '*RECURSION*';
         }
-        $alreadyDumpedObjects['JobLocation'][$this->hashCode()] = true;
-        $keys = JobLocationTableMap::getFieldNames($keyType);
+        $alreadyDumpedObjects['Location'][$this->hashCode()] = true;
+        $keys = LocationTableMap::getFieldNames($keyType);
         $result = array(
             $keys[0] => $this->getLocationId(),
             $keys[1] => $this->getLatitude(),
-            $keys[2] => $this->getLogitude(),
+            $keys[2] => $this->getLongitude(),
             $keys[3] => $this->getDisplayName(),
             $keys[4] => $this->getPrimaryName(),
             $keys[5] => $this->getPlace(),
@@ -1490,6 +1574,7 @@ abstract class JobLocation implements ActiveRecordInterface
             $keys[11] => $this->getAlternateNames(),
             $keys[12] => $this->getOpenStreetMapId(),
             $keys[13] => $this->getFullOsmData(),
+            $keys[14] => $this->getExtraDetailsData(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1512,20 +1597,35 @@ abstract class JobLocation implements ActiveRecordInterface
 
                 $result[$key] = $this->collJobPostings->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
-            if (null !== $this->collJobPlaceLookups) {
+            if (null !== $this->collLocationNamess) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
-                        $key = 'jobPlaceLookups';
+                        $key = 'locationNamess';
                         break;
                     case TableMap::TYPE_FIELDNAME:
-                        $key = 'job_place_lookups';
+                        $key = 'location_namess';
                         break;
                     default:
-                        $key = 'JobPlaceLookups';
+                        $key = 'LocationNamess';
                 }
 
-                $result[$key] = $this->collJobPlaceLookups->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
+                $result[$key] = $this->collLocationNamess->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
+            }
+            if (null !== $this->collUserSearchRuns) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'userSearchRuns';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'user_search_runs';
+                        break;
+                    default:
+                        $key = 'UserSearchRuns';
+                }
+
+                $result[$key] = $this->collUserSearchRuns->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
         }
 
@@ -1541,11 +1641,11 @@ abstract class JobLocation implements ActiveRecordInterface
      *                one of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
      *                TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM.
      *                Defaults to TableMap::TYPE_PHPNAME.
-     * @return $this|\JobScooper\DataAccess\JobLocation
+     * @return $this|\JobScooper\DataAccess\Location
      */
     public function setByName($name, $value, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = JobLocationTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = LocationTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
 
         return $this->setByPosition($pos, $value);
     }
@@ -1556,7 +1656,7 @@ abstract class JobLocation implements ActiveRecordInterface
      *
      * @param  int $pos position in xml schema
      * @param  mixed $value field value
-     * @return $this|\JobScooper\DataAccess\JobLocation
+     * @return $this|\JobScooper\DataAccess\Location
      */
     public function setByPosition($pos, $value)
     {
@@ -1568,7 +1668,7 @@ abstract class JobLocation implements ActiveRecordInterface
                 $this->setLatitude($value);
                 break;
             case 2:
-                $this->setLogitude($value);
+                $this->setLongitude($value);
                 break;
             case 3:
                 $this->setDisplayName($value);
@@ -1607,6 +1707,9 @@ abstract class JobLocation implements ActiveRecordInterface
             case 13:
                 $this->setFullOsmData($value);
                 break;
+            case 14:
+                $this->setExtraDetailsData($value);
+                break;
         } // switch()
 
         return $this;
@@ -1631,7 +1734,7 @@ abstract class JobLocation implements ActiveRecordInterface
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
-        $keys = JobLocationTableMap::getFieldNames($keyType);
+        $keys = LocationTableMap::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) {
             $this->setLocationId($arr[$keys[0]]);
@@ -1640,7 +1743,7 @@ abstract class JobLocation implements ActiveRecordInterface
             $this->setLatitude($arr[$keys[1]]);
         }
         if (array_key_exists($keys[2], $arr)) {
-            $this->setLogitude($arr[$keys[2]]);
+            $this->setLongitude($arr[$keys[2]]);
         }
         if (array_key_exists($keys[3], $arr)) {
             $this->setDisplayName($arr[$keys[3]]);
@@ -1675,6 +1778,9 @@ abstract class JobLocation implements ActiveRecordInterface
         if (array_key_exists($keys[13], $arr)) {
             $this->setFullOsmData($arr[$keys[13]]);
         }
+        if (array_key_exists($keys[14], $arr)) {
+            $this->setExtraDetailsData($arr[$keys[14]]);
+        }
     }
 
      /**
@@ -1694,7 +1800,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * @param string $data The source data to import from
      * @param string $keyType The type of keys the array uses.
      *
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object, for fluid interface
+     * @return $this|\JobScooper\DataAccess\Location The current object, for fluid interface
      */
     public function importFrom($parser, $data, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -1714,49 +1820,52 @@ abstract class JobLocation implements ActiveRecordInterface
      */
     public function buildCriteria()
     {
-        $criteria = new Criteria(JobLocationTableMap::DATABASE_NAME);
+        $criteria = new Criteria(LocationTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(JobLocationTableMap::COL_LOCATION_ID)) {
-            $criteria->add(JobLocationTableMap::COL_LOCATION_ID, $this->location_id);
+        if ($this->isColumnModified(LocationTableMap::COL_LOCATION_ID)) {
+            $criteria->add(LocationTableMap::COL_LOCATION_ID, $this->location_id);
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_LAT)) {
-            $criteria->add(JobLocationTableMap::COL_LAT, $this->lat);
+        if ($this->isColumnModified(LocationTableMap::COL_LAT)) {
+            $criteria->add(LocationTableMap::COL_LAT, $this->lat);
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_LON)) {
-            $criteria->add(JobLocationTableMap::COL_LON, $this->lon);
+        if ($this->isColumnModified(LocationTableMap::COL_LON)) {
+            $criteria->add(LocationTableMap::COL_LON, $this->lon);
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_FULL_DISPLAY_NAME)) {
-            $criteria->add(JobLocationTableMap::COL_FULL_DISPLAY_NAME, $this->full_display_name);
+        if ($this->isColumnModified(LocationTableMap::COL_FULL_DISPLAY_NAME)) {
+            $criteria->add(LocationTableMap::COL_FULL_DISPLAY_NAME, $this->full_display_name);
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_PRIMARY_NAME)) {
-            $criteria->add(JobLocationTableMap::COL_PRIMARY_NAME, $this->primary_name);
+        if ($this->isColumnModified(LocationTableMap::COL_PRIMARY_NAME)) {
+            $criteria->add(LocationTableMap::COL_PRIMARY_NAME, $this->primary_name);
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_PLACE)) {
-            $criteria->add(JobLocationTableMap::COL_PLACE, $this->place);
+        if ($this->isColumnModified(LocationTableMap::COL_PLACE)) {
+            $criteria->add(LocationTableMap::COL_PLACE, $this->place);
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_COUNTY)) {
-            $criteria->add(JobLocationTableMap::COL_COUNTY, $this->county);
+        if ($this->isColumnModified(LocationTableMap::COL_COUNTY)) {
+            $criteria->add(LocationTableMap::COL_COUNTY, $this->county);
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_STATE)) {
-            $criteria->add(JobLocationTableMap::COL_STATE, $this->state);
+        if ($this->isColumnModified(LocationTableMap::COL_STATE)) {
+            $criteria->add(LocationTableMap::COL_STATE, $this->state);
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_STATECODE)) {
-            $criteria->add(JobLocationTableMap::COL_STATECODE, $this->statecode);
+        if ($this->isColumnModified(LocationTableMap::COL_STATECODE)) {
+            $criteria->add(LocationTableMap::COL_STATECODE, $this->statecode);
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_COUNTRY)) {
-            $criteria->add(JobLocationTableMap::COL_COUNTRY, $this->country);
+        if ($this->isColumnModified(LocationTableMap::COL_COUNTRY)) {
+            $criteria->add(LocationTableMap::COL_COUNTRY, $this->country);
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_COUNTRYCODE)) {
-            $criteria->add(JobLocationTableMap::COL_COUNTRYCODE, $this->countrycode);
+        if ($this->isColumnModified(LocationTableMap::COL_COUNTRYCODE)) {
+            $criteria->add(LocationTableMap::COL_COUNTRYCODE, $this->countrycode);
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_ALTERNATE_NAMES)) {
-            $criteria->add(JobLocationTableMap::COL_ALTERNATE_NAMES, $this->alternate_names);
+        if ($this->isColumnModified(LocationTableMap::COL_ALTERNATE_NAMES)) {
+            $criteria->add(LocationTableMap::COL_ALTERNATE_NAMES, $this->alternate_names);
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_OPENSTREETMAP_ID)) {
-            $criteria->add(JobLocationTableMap::COL_OPENSTREETMAP_ID, $this->openstreetmap_id);
+        if ($this->isColumnModified(LocationTableMap::COL_OPENSTREETMAP_ID)) {
+            $criteria->add(LocationTableMap::COL_OPENSTREETMAP_ID, $this->openstreetmap_id);
         }
-        if ($this->isColumnModified(JobLocationTableMap::COL_FULL_OSM_DATA)) {
-            $criteria->add(JobLocationTableMap::COL_FULL_OSM_DATA, $this->full_osm_data);
+        if ($this->isColumnModified(LocationTableMap::COL_FULL_OSM_DATA)) {
+            $criteria->add(LocationTableMap::COL_FULL_OSM_DATA, $this->full_osm_data);
+        }
+        if ($this->isColumnModified(LocationTableMap::COL_EXTRA_DETAILS_DATA)) {
+            $criteria->add(LocationTableMap::COL_EXTRA_DETAILS_DATA, $this->extra_details_data);
         }
 
         return $criteria;
@@ -1774,8 +1883,8 @@ abstract class JobLocation implements ActiveRecordInterface
      */
     public function buildPkeyCriteria()
     {
-        $criteria = ChildJobLocationQuery::create();
-        $criteria->add(JobLocationTableMap::COL_LOCATION_ID, $this->location_id);
+        $criteria = ChildLocationQuery::create();
+        $criteria->add(LocationTableMap::COL_LOCATION_ID, $this->location_id);
 
         return $criteria;
     }
@@ -1837,7 +1946,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param      object $copyObj An object of \JobScooper\DataAccess\JobLocation (or compatible) type.
+     * @param      object $copyObj An object of \JobScooper\DataAccess\Location (or compatible) type.
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param      boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
@@ -1845,7 +1954,7 @@ abstract class JobLocation implements ActiveRecordInterface
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
         $copyObj->setLatitude($this->getLatitude());
-        $copyObj->setLogitude($this->getLogitude());
+        $copyObj->setLongitude($this->getLongitude());
         $copyObj->setDisplayName($this->getDisplayName());
         $copyObj->setPrimaryName($this->getPrimaryName());
         $copyObj->setPlace($this->getPlace());
@@ -1857,6 +1966,7 @@ abstract class JobLocation implements ActiveRecordInterface
         $copyObj->setAlternateNames($this->getAlternateNames());
         $copyObj->setOpenStreetMapId($this->getOpenStreetMapId());
         $copyObj->setFullOsmData($this->getFullOsmData());
+        $copyObj->setExtraDetailsData($this->getExtraDetailsData());
 
         if ($deepCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
@@ -1869,9 +1979,15 @@ abstract class JobLocation implements ActiveRecordInterface
                 }
             }
 
-            foreach ($this->getJobPlaceLookups() as $relObj) {
+            foreach ($this->getLocationNamess() as $relObj) {
                 if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
-                    $copyObj->addJobPlaceLookup($relObj->copy($deepCopy));
+                    $copyObj->addLocationNames($relObj->copy($deepCopy));
+                }
+            }
+
+            foreach ($this->getUserSearchRuns() as $relObj) {
+                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
+                    $copyObj->addUserSearchRun($relObj->copy($deepCopy));
                 }
             }
 
@@ -1892,7 +2008,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * objects.
      *
      * @param  boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return \JobScooper\DataAccess\JobLocation Clone of current object.
+     * @return \JobScooper\DataAccess\Location Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -1920,8 +2036,12 @@ abstract class JobLocation implements ActiveRecordInterface
             $this->initJobPostings();
             return;
         }
-        if ('JobPlaceLookup' == $relationName) {
-            $this->initJobPlaceLookups();
+        if ('LocationNames' == $relationName) {
+            $this->initLocationNamess();
+            return;
+        }
+        if ('UserSearchRun' == $relationName) {
+            $this->initUserSearchRuns();
             return;
         }
     }
@@ -1978,7 +2098,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * If the $criteria is not null, it is used to always fetch the results from the database.
      * Otherwise the results are fetched from the database the first time, then cached.
      * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildJobLocation is new, it will return
+     * If this ChildLocation is new, it will return
      * an empty collection or the current collection; the criteria is ignored on a new object.
      *
      * @param      Criteria $criteria optional Criteria object to narrow the query
@@ -1995,7 +2115,7 @@ abstract class JobLocation implements ActiveRecordInterface
                 $this->initJobPostings();
             } else {
                 $collJobPostings = ChildJobPostingQuery::create(null, $criteria)
-                    ->filterByJobLocation($this)
+                    ->filterByLocation($this)
                     ->find($con);
 
                 if (null !== $criteria) {
@@ -2038,7 +2158,7 @@ abstract class JobLocation implements ActiveRecordInterface
      *
      * @param      Collection $jobPostings A Propel collection.
      * @param      ConnectionInterface $con Optional connection object
-     * @return $this|ChildJobLocation The current object (for fluent API support)
+     * @return $this|ChildLocation The current object (for fluent API support)
      */
     public function setJobPostings(Collection $jobPostings, ConnectionInterface $con = null)
     {
@@ -2049,7 +2169,7 @@ abstract class JobLocation implements ActiveRecordInterface
         $this->jobPostingsScheduledForDeletion = $jobPostingsToDelete;
 
         foreach ($jobPostingsToDelete as $jobPostingRemoved) {
-            $jobPostingRemoved->setJobLocation(null);
+            $jobPostingRemoved->setLocation(null);
         }
 
         $this->collJobPostings = null;
@@ -2090,7 +2210,7 @@ abstract class JobLocation implements ActiveRecordInterface
             }
 
             return $query
-                ->filterByJobLocation($this)
+                ->filterByLocation($this)
                 ->count($con);
         }
 
@@ -2102,7 +2222,7 @@ abstract class JobLocation implements ActiveRecordInterface
      * through the ChildJobPosting foreign key attribute.
      *
      * @param  ChildJobPosting $l ChildJobPosting
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
     public function addJobPosting(ChildJobPosting $l)
     {
@@ -2128,12 +2248,12 @@ abstract class JobLocation implements ActiveRecordInterface
     protected function doAddJobPosting(ChildJobPosting $jobPosting)
     {
         $this->collJobPostings[]= $jobPosting;
-        $jobPosting->setJobLocation($this);
+        $jobPosting->setLocation($this);
     }
 
     /**
      * @param  ChildJobPosting $jobPosting The ChildJobPosting object to remove.
-     * @return $this|ChildJobLocation The current object (for fluent API support)
+     * @return $this|ChildLocation The current object (for fluent API support)
      */
     public function removeJobPosting(ChildJobPosting $jobPosting)
     {
@@ -2145,7 +2265,7 @@ abstract class JobLocation implements ActiveRecordInterface
                 $this->jobPostingsScheduledForDeletion->clear();
             }
             $this->jobPostingsScheduledForDeletion[]= $jobPosting;
-            $jobPosting->setJobLocation(null);
+            $jobPosting->setLocation(null);
         }
 
         return $this;
@@ -2155,13 +2275,13 @@ abstract class JobLocation implements ActiveRecordInterface
     /**
      * If this collection has already been initialized with
      * an identical criteria, it returns the collection.
-     * Otherwise if this JobLocation is new, it will return
-     * an empty collection; or if this JobLocation has previously
+     * Otherwise if this Location is new, it will return
+     * an empty collection; or if this Location has previously
      * been saved, it will retrieve related JobPostings from storage.
      *
      * This method is protected by default in order to keep the public
      * api reasonable.  You can provide public methods for those you
-     * actually need in JobLocation.
+     * actually need in Location.
      *
      * @param      Criteria $criteria optional Criteria object to narrow the query
      * @param      ConnectionInterface $con optional connection object
@@ -2177,31 +2297,31 @@ abstract class JobLocation implements ActiveRecordInterface
     }
 
     /**
-     * Clears out the collJobPlaceLookups collection
+     * Clears out the collLocationNamess collection
      *
      * This does not modify the database; however, it will remove any associated objects, causing
      * them to be refetched by subsequent calls to accessor method.
      *
      * @return void
-     * @see        addJobPlaceLookups()
+     * @see        addLocationNamess()
      */
-    public function clearJobPlaceLookups()
+    public function clearLocationNamess()
     {
-        $this->collJobPlaceLookups = null; // important to set this to NULL since that means it is uninitialized
+        $this->collLocationNamess = null; // important to set this to NULL since that means it is uninitialized
     }
 
     /**
-     * Reset is the collJobPlaceLookups collection loaded partially.
+     * Reset is the collLocationNamess collection loaded partially.
      */
-    public function resetPartialJobPlaceLookups($v = true)
+    public function resetPartialLocationNamess($v = true)
     {
-        $this->collJobPlaceLookupsPartial = $v;
+        $this->collLocationNamessPartial = $v;
     }
 
     /**
-     * Initializes the collJobPlaceLookups collection.
+     * Initializes the collLocationNamess collection.
      *
-     * By default this just sets the collJobPlaceLookups collection to an empty array (like clearcollJobPlaceLookups());
+     * By default this just sets the collLocationNamess collection to an empty array (like clearcollLocationNamess());
      * however, you may wish to override this method in your stub class to provide setting appropriate
      * to your application -- for example, setting the initial array to the values stored in database.
      *
@@ -2210,165 +2330,165 @@ abstract class JobLocation implements ActiveRecordInterface
      *
      * @return void
      */
-    public function initJobPlaceLookups($overrideExisting = true)
+    public function initLocationNamess($overrideExisting = true)
     {
-        if (null !== $this->collJobPlaceLookups && !$overrideExisting) {
+        if (null !== $this->collLocationNamess && !$overrideExisting) {
             return;
         }
 
-        $collectionClassName = JobPlaceLookupTableMap::getTableMap()->getCollectionClassName();
+        $collectionClassName = LocationNamesTableMap::getTableMap()->getCollectionClassName();
 
-        $this->collJobPlaceLookups = new $collectionClassName;
-        $this->collJobPlaceLookups->setModel('\JobScooper\DataAccess\JobPlaceLookup');
+        $this->collLocationNamess = new $collectionClassName;
+        $this->collLocationNamess->setModel('\JobScooper\DataAccess\LocationNames');
     }
 
     /**
-     * Gets an array of ChildJobPlaceLookup objects which contain a foreign key that references this object.
+     * Gets an array of ChildLocationNames objects which contain a foreign key that references this object.
      *
      * If the $criteria is not null, it is used to always fetch the results from the database.
      * Otherwise the results are fetched from the database the first time, then cached.
      * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildJobLocation is new, it will return
+     * If this ChildLocation is new, it will return
      * an empty collection or the current collection; the criteria is ignored on a new object.
      *
      * @param      Criteria $criteria optional Criteria object to narrow the query
      * @param      ConnectionInterface $con optional connection object
-     * @return ObjectCollection|ChildJobPlaceLookup[] List of ChildJobPlaceLookup objects
+     * @return ObjectCollection|ChildLocationNames[] List of ChildLocationNames objects
      * @throws PropelException
      */
-    public function getJobPlaceLookups(Criteria $criteria = null, ConnectionInterface $con = null)
+    public function getLocationNamess(Criteria $criteria = null, ConnectionInterface $con = null)
     {
-        $partial = $this->collJobPlaceLookupsPartial && !$this->isNew();
-        if (null === $this->collJobPlaceLookups || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collJobPlaceLookups) {
+        $partial = $this->collLocationNamessPartial && !$this->isNew();
+        if (null === $this->collLocationNamess || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collLocationNamess) {
                 // return empty collection
-                $this->initJobPlaceLookups();
+                $this->initLocationNamess();
             } else {
-                $collJobPlaceLookups = ChildJobPlaceLookupQuery::create(null, $criteria)
-                    ->filterByJobLocation($this)
+                $collLocationNamess = ChildLocationNamesQuery::create(null, $criteria)
+                    ->filterByLocation($this)
                     ->find($con);
 
                 if (null !== $criteria) {
-                    if (false !== $this->collJobPlaceLookupsPartial && count($collJobPlaceLookups)) {
-                        $this->initJobPlaceLookups(false);
+                    if (false !== $this->collLocationNamessPartial && count($collLocationNamess)) {
+                        $this->initLocationNamess(false);
 
-                        foreach ($collJobPlaceLookups as $obj) {
-                            if (false == $this->collJobPlaceLookups->contains($obj)) {
-                                $this->collJobPlaceLookups->append($obj);
+                        foreach ($collLocationNamess as $obj) {
+                            if (false == $this->collLocationNamess->contains($obj)) {
+                                $this->collLocationNamess->append($obj);
                             }
                         }
 
-                        $this->collJobPlaceLookupsPartial = true;
+                        $this->collLocationNamessPartial = true;
                     }
 
-                    return $collJobPlaceLookups;
+                    return $collLocationNamess;
                 }
 
-                if ($partial && $this->collJobPlaceLookups) {
-                    foreach ($this->collJobPlaceLookups as $obj) {
+                if ($partial && $this->collLocationNamess) {
+                    foreach ($this->collLocationNamess as $obj) {
                         if ($obj->isNew()) {
-                            $collJobPlaceLookups[] = $obj;
+                            $collLocationNamess[] = $obj;
                         }
                     }
                 }
 
-                $this->collJobPlaceLookups = $collJobPlaceLookups;
-                $this->collJobPlaceLookupsPartial = false;
+                $this->collLocationNamess = $collLocationNamess;
+                $this->collLocationNamessPartial = false;
             }
         }
 
-        return $this->collJobPlaceLookups;
+        return $this->collLocationNamess;
     }
 
     /**
-     * Sets a collection of ChildJobPlaceLookup objects related by a one-to-many relationship
+     * Sets a collection of ChildLocationNames objects related by a one-to-many relationship
      * to the current object.
      * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
      * and new objects from the given Propel collection.
      *
-     * @param      Collection $jobPlaceLookups A Propel collection.
+     * @param      Collection $locationNamess A Propel collection.
      * @param      ConnectionInterface $con Optional connection object
-     * @return $this|ChildJobLocation The current object (for fluent API support)
+     * @return $this|ChildLocation The current object (for fluent API support)
      */
-    public function setJobPlaceLookups(Collection $jobPlaceLookups, ConnectionInterface $con = null)
+    public function setLocationNamess(Collection $locationNamess, ConnectionInterface $con = null)
     {
-        /** @var ChildJobPlaceLookup[] $jobPlaceLookupsToDelete */
-        $jobPlaceLookupsToDelete = $this->getJobPlaceLookups(new Criteria(), $con)->diff($jobPlaceLookups);
+        /** @var ChildLocationNames[] $locationNamessToDelete */
+        $locationNamessToDelete = $this->getLocationNamess(new Criteria(), $con)->diff($locationNamess);
 
 
         //since at least one column in the foreign key is at the same time a PK
         //we can not just set a PK to NULL in the lines below. We have to store
         //a backup of all values, so we are able to manipulate these items based on the onDelete value later.
-        $this->jobPlaceLookupsScheduledForDeletion = clone $jobPlaceLookupsToDelete;
+        $this->locationNamessScheduledForDeletion = clone $locationNamessToDelete;
 
-        foreach ($jobPlaceLookupsToDelete as $jobPlaceLookupRemoved) {
-            $jobPlaceLookupRemoved->setJobLocation(null);
+        foreach ($locationNamessToDelete as $locationNamesRemoved) {
+            $locationNamesRemoved->setLocation(null);
         }
 
-        $this->collJobPlaceLookups = null;
-        foreach ($jobPlaceLookups as $jobPlaceLookup) {
-            $this->addJobPlaceLookup($jobPlaceLookup);
+        $this->collLocationNamess = null;
+        foreach ($locationNamess as $locationNames) {
+            $this->addLocationNames($locationNames);
         }
 
-        $this->collJobPlaceLookups = $jobPlaceLookups;
-        $this->collJobPlaceLookupsPartial = false;
+        $this->collLocationNamess = $locationNamess;
+        $this->collLocationNamessPartial = false;
 
         return $this;
     }
 
     /**
-     * Returns the number of related JobPlaceLookup objects.
+     * Returns the number of related LocationNames objects.
      *
      * @param      Criteria $criteria
      * @param      boolean $distinct
      * @param      ConnectionInterface $con
-     * @return int             Count of related JobPlaceLookup objects.
+     * @return int             Count of related LocationNames objects.
      * @throws PropelException
      */
-    public function countJobPlaceLookups(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    public function countLocationNamess(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
     {
-        $partial = $this->collJobPlaceLookupsPartial && !$this->isNew();
-        if (null === $this->collJobPlaceLookups || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->collJobPlaceLookups) {
+        $partial = $this->collLocationNamessPartial && !$this->isNew();
+        if (null === $this->collLocationNamess || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collLocationNamess) {
                 return 0;
             }
 
             if ($partial && !$criteria) {
-                return count($this->getJobPlaceLookups());
+                return count($this->getLocationNamess());
             }
 
-            $query = ChildJobPlaceLookupQuery::create(null, $criteria);
+            $query = ChildLocationNamesQuery::create(null, $criteria);
             if ($distinct) {
                 $query->distinct();
             }
 
             return $query
-                ->filterByJobLocation($this)
+                ->filterByLocation($this)
                 ->count($con);
         }
 
-        return count($this->collJobPlaceLookups);
+        return count($this->collLocationNamess);
     }
 
     /**
-     * Method called to associate a ChildJobPlaceLookup object to this object
-     * through the ChildJobPlaceLookup foreign key attribute.
+     * Method called to associate a ChildLocationNames object to this object
+     * through the ChildLocationNames foreign key attribute.
      *
-     * @param  ChildJobPlaceLookup $l ChildJobPlaceLookup
-     * @return $this|\JobScooper\DataAccess\JobLocation The current object (for fluent API support)
+     * @param  ChildLocationNames $l ChildLocationNames
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
      */
-    public function addJobPlaceLookup(ChildJobPlaceLookup $l)
+    public function addLocationNames(ChildLocationNames $l)
     {
-        if ($this->collJobPlaceLookups === null) {
-            $this->initJobPlaceLookups();
-            $this->collJobPlaceLookupsPartial = true;
+        if ($this->collLocationNamess === null) {
+            $this->initLocationNamess();
+            $this->collLocationNamessPartial = true;
         }
 
-        if (!$this->collJobPlaceLookups->contains($l)) {
-            $this->doAddJobPlaceLookup($l);
+        if (!$this->collLocationNamess->contains($l)) {
+            $this->doAddLocationNames($l);
 
-            if ($this->jobPlaceLookupsScheduledForDeletion and $this->jobPlaceLookupsScheduledForDeletion->contains($l)) {
-                $this->jobPlaceLookupsScheduledForDeletion->remove($this->jobPlaceLookupsScheduledForDeletion->search($l));
+            if ($this->locationNamessScheduledForDeletion and $this->locationNamessScheduledForDeletion->contains($l)) {
+                $this->locationNamessScheduledForDeletion->remove($this->locationNamessScheduledForDeletion->search($l));
             }
         }
 
@@ -2376,32 +2496,282 @@ abstract class JobLocation implements ActiveRecordInterface
     }
 
     /**
-     * @param ChildJobPlaceLookup $jobPlaceLookup The ChildJobPlaceLookup object to add.
+     * @param ChildLocationNames $locationNames The ChildLocationNames object to add.
      */
-    protected function doAddJobPlaceLookup(ChildJobPlaceLookup $jobPlaceLookup)
+    protected function doAddLocationNames(ChildLocationNames $locationNames)
     {
-        $this->collJobPlaceLookups[]= $jobPlaceLookup;
-        $jobPlaceLookup->setJobLocation($this);
+        $this->collLocationNamess[]= $locationNames;
+        $locationNames->setLocation($this);
     }
 
     /**
-     * @param  ChildJobPlaceLookup $jobPlaceLookup The ChildJobPlaceLookup object to remove.
-     * @return $this|ChildJobLocation The current object (for fluent API support)
+     * @param  ChildLocationNames $locationNames The ChildLocationNames object to remove.
+     * @return $this|ChildLocation The current object (for fluent API support)
      */
-    public function removeJobPlaceLookup(ChildJobPlaceLookup $jobPlaceLookup)
+    public function removeLocationNames(ChildLocationNames $locationNames)
     {
-        if ($this->getJobPlaceLookups()->contains($jobPlaceLookup)) {
-            $pos = $this->collJobPlaceLookups->search($jobPlaceLookup);
-            $this->collJobPlaceLookups->remove($pos);
-            if (null === $this->jobPlaceLookupsScheduledForDeletion) {
-                $this->jobPlaceLookupsScheduledForDeletion = clone $this->collJobPlaceLookups;
-                $this->jobPlaceLookupsScheduledForDeletion->clear();
+        if ($this->getLocationNamess()->contains($locationNames)) {
+            $pos = $this->collLocationNamess->search($locationNames);
+            $this->collLocationNamess->remove($pos);
+            if (null === $this->locationNamessScheduledForDeletion) {
+                $this->locationNamessScheduledForDeletion = clone $this->collLocationNamess;
+                $this->locationNamessScheduledForDeletion->clear();
             }
-            $this->jobPlaceLookupsScheduledForDeletion[]= clone $jobPlaceLookup;
-            $jobPlaceLookup->setJobLocation(null);
+            $this->locationNamessScheduledForDeletion[]= clone $locationNames;
+            $locationNames->setLocation(null);
         }
 
         return $this;
+    }
+
+    /**
+     * Clears out the collUserSearchRuns collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return void
+     * @see        addUserSearchRuns()
+     */
+    public function clearUserSearchRuns()
+    {
+        $this->collUserSearchRuns = null; // important to set this to NULL since that means it is uninitialized
+    }
+
+    /**
+     * Reset is the collUserSearchRuns collection loaded partially.
+     */
+    public function resetPartialUserSearchRuns($v = true)
+    {
+        $this->collUserSearchRunsPartial = $v;
+    }
+
+    /**
+     * Initializes the collUserSearchRuns collection.
+     *
+     * By default this just sets the collUserSearchRuns collection to an empty array (like clearcollUserSearchRuns());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @param      boolean $overrideExisting If set to true, the method call initializes
+     *                                        the collection even if it is not empty
+     *
+     * @return void
+     */
+    public function initUserSearchRuns($overrideExisting = true)
+    {
+        if (null !== $this->collUserSearchRuns && !$overrideExisting) {
+            return;
+        }
+
+        $collectionClassName = UserSearchRunTableMap::getTableMap()->getCollectionClassName();
+
+        $this->collUserSearchRuns = new $collectionClassName;
+        $this->collUserSearchRuns->setModel('\JobScooper\DataAccess\UserSearchRun');
+    }
+
+    /**
+     * Gets an array of ChildUserSearchRun objects which contain a foreign key that references this object.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this ChildLocation is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @return ObjectCollection|ChildUserSearchRun[] List of ChildUserSearchRun objects
+     * @throws PropelException
+     */
+    public function getUserSearchRuns(Criteria $criteria = null, ConnectionInterface $con = null)
+    {
+        $partial = $this->collUserSearchRunsPartial && !$this->isNew();
+        if (null === $this->collUserSearchRuns || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collUserSearchRuns) {
+                // return empty collection
+                $this->initUserSearchRuns();
+            } else {
+                $collUserSearchRuns = ChildUserSearchRunQuery::create(null, $criteria)
+                    ->filterByLocation($this)
+                    ->find($con);
+
+                if (null !== $criteria) {
+                    if (false !== $this->collUserSearchRunsPartial && count($collUserSearchRuns)) {
+                        $this->initUserSearchRuns(false);
+
+                        foreach ($collUserSearchRuns as $obj) {
+                            if (false == $this->collUserSearchRuns->contains($obj)) {
+                                $this->collUserSearchRuns->append($obj);
+                            }
+                        }
+
+                        $this->collUserSearchRunsPartial = true;
+                    }
+
+                    return $collUserSearchRuns;
+                }
+
+                if ($partial && $this->collUserSearchRuns) {
+                    foreach ($this->collUserSearchRuns as $obj) {
+                        if ($obj->isNew()) {
+                            $collUserSearchRuns[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collUserSearchRuns = $collUserSearchRuns;
+                $this->collUserSearchRunsPartial = false;
+            }
+        }
+
+        return $this->collUserSearchRuns;
+    }
+
+    /**
+     * Sets a collection of ChildUserSearchRun objects related by a one-to-many relationship
+     * to the current object.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param      Collection $userSearchRuns A Propel collection.
+     * @param      ConnectionInterface $con Optional connection object
+     * @return $this|ChildLocation The current object (for fluent API support)
+     */
+    public function setUserSearchRuns(Collection $userSearchRuns, ConnectionInterface $con = null)
+    {
+        /** @var ChildUserSearchRun[] $userSearchRunsToDelete */
+        $userSearchRunsToDelete = $this->getUserSearchRuns(new Criteria(), $con)->diff($userSearchRuns);
+
+
+        $this->userSearchRunsScheduledForDeletion = $userSearchRunsToDelete;
+
+        foreach ($userSearchRunsToDelete as $userSearchRunRemoved) {
+            $userSearchRunRemoved->setLocation(null);
+        }
+
+        $this->collUserSearchRuns = null;
+        foreach ($userSearchRuns as $userSearchRun) {
+            $this->addUserSearchRun($userSearchRun);
+        }
+
+        $this->collUserSearchRuns = $userSearchRuns;
+        $this->collUserSearchRunsPartial = false;
+
+        return $this;
+    }
+
+    /**
+     * Returns the number of related UserSearchRun objects.
+     *
+     * @param      Criteria $criteria
+     * @param      boolean $distinct
+     * @param      ConnectionInterface $con
+     * @return int             Count of related UserSearchRun objects.
+     * @throws PropelException
+     */
+    public function countUserSearchRuns(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    {
+        $partial = $this->collUserSearchRunsPartial && !$this->isNew();
+        if (null === $this->collUserSearchRuns || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collUserSearchRuns) {
+                return 0;
+            }
+
+            if ($partial && !$criteria) {
+                return count($this->getUserSearchRuns());
+            }
+
+            $query = ChildUserSearchRunQuery::create(null, $criteria);
+            if ($distinct) {
+                $query->distinct();
+            }
+
+            return $query
+                ->filterByLocation($this)
+                ->count($con);
+        }
+
+        return count($this->collUserSearchRuns);
+    }
+
+    /**
+     * Method called to associate a ChildUserSearchRun object to this object
+     * through the ChildUserSearchRun foreign key attribute.
+     *
+     * @param  ChildUserSearchRun $l ChildUserSearchRun
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
+     */
+    public function addUserSearchRun(ChildUserSearchRun $l)
+    {
+        if ($this->collUserSearchRuns === null) {
+            $this->initUserSearchRuns();
+            $this->collUserSearchRunsPartial = true;
+        }
+
+        if (!$this->collUserSearchRuns->contains($l)) {
+            $this->doAddUserSearchRun($l);
+
+            if ($this->userSearchRunsScheduledForDeletion and $this->userSearchRunsScheduledForDeletion->contains($l)) {
+                $this->userSearchRunsScheduledForDeletion->remove($this->userSearchRunsScheduledForDeletion->search($l));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param ChildUserSearchRun $userSearchRun The ChildUserSearchRun object to add.
+     */
+    protected function doAddUserSearchRun(ChildUserSearchRun $userSearchRun)
+    {
+        $this->collUserSearchRuns[]= $userSearchRun;
+        $userSearchRun->setLocation($this);
+    }
+
+    /**
+     * @param  ChildUserSearchRun $userSearchRun The ChildUserSearchRun object to remove.
+     * @return $this|ChildLocation The current object (for fluent API support)
+     */
+    public function removeUserSearchRun(ChildUserSearchRun $userSearchRun)
+    {
+        if ($this->getUserSearchRuns()->contains($userSearchRun)) {
+            $pos = $this->collUserSearchRuns->search($userSearchRun);
+            $this->collUserSearchRuns->remove($pos);
+            if (null === $this->userSearchRunsScheduledForDeletion) {
+                $this->userSearchRunsScheduledForDeletion = clone $this->collUserSearchRuns;
+                $this->userSearchRunsScheduledForDeletion->clear();
+            }
+            $this->userSearchRunsScheduledForDeletion[]= $userSearchRun;
+            $userSearchRun->setLocation(null);
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this Location is new, it will return
+     * an empty collection; or if this Location has previously
+     * been saved, it will retrieve related UserSearchRuns from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in Location.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return ObjectCollection|ChildUserSearchRun[] List of ChildUserSearchRun objects
+     */
+    public function getUserSearchRunsJoinUser(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    {
+        $query = ChildUserSearchRunQuery::create(null, $criteria);
+        $query->joinWith('User', $joinBehavior);
+
+        return $this->getUserSearchRuns($query, $con);
     }
 
     /**
@@ -2426,6 +2796,7 @@ abstract class JobLocation implements ActiveRecordInterface
         $this->alternate_names_unserialized = null;
         $this->openstreetmap_id = null;
         $this->full_osm_data = null;
+        $this->extra_details_data = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();
@@ -2449,15 +2820,21 @@ abstract class JobLocation implements ActiveRecordInterface
                     $o->clearAllReferences($deep);
                 }
             }
-            if ($this->collJobPlaceLookups) {
-                foreach ($this->collJobPlaceLookups as $o) {
+            if ($this->collLocationNamess) {
+                foreach ($this->collLocationNamess as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
+            if ($this->collUserSearchRuns) {
+                foreach ($this->collUserSearchRuns as $o) {
                     $o->clearAllReferences($deep);
                 }
             }
         } // if ($deep)
 
         $this->collJobPostings = null;
-        $this->collJobPlaceLookups = null;
+        $this->collLocationNamess = null;
+        $this->collUserSearchRuns = null;
     }
 
     /**
@@ -2467,7 +2844,7 @@ abstract class JobLocation implements ActiveRecordInterface
      */
     public function __toString()
     {
-        return (string) $this->exportTo(JobLocationTableMap::DEFAULT_STRING_FORMAT);
+        return (string) $this->exportTo(LocationTableMap::DEFAULT_STRING_FORMAT);
     }
 
     /**

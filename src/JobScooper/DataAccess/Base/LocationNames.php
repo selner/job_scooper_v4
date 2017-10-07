@@ -4,10 +4,10 @@ namespace JobScooper\DataAccess\Base;
 
 use \Exception;
 use \PDO;
-use JobScooper\DataAccess\JobLocation as ChildJobLocation;
-use JobScooper\DataAccess\JobLocationQuery as ChildJobLocationQuery;
-use JobScooper\DataAccess\JobPlaceLookupQuery as ChildJobPlaceLookupQuery;
-use JobScooper\DataAccess\Map\JobPlaceLookupTableMap;
+use JobScooper\DataAccess\Location as ChildLocation;
+use JobScooper\DataAccess\LocationNamesQuery as ChildLocationNamesQuery;
+use JobScooper\DataAccess\LocationQuery as ChildLocationQuery;
+use JobScooper\DataAccess\Map\LocationNamesTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -21,18 +21,18 @@ use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
 
 /**
- * Base class that represents a row from the 'job_place_lookup' table.
+ * Base class that represents a row from the 'location_names' table.
  *
  *
  *
  * @package    propel.generator.JobScooper.DataAccess.Base
  */
-abstract class JobPlaceLookup implements ActiveRecordInterface
+abstract class LocationNames implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      */
-    const TABLE_MAP = '\\JobScooper\\DataAccess\\Map\\JobPlaceLookupTableMap';
+    const TABLE_MAP = '\\JobScooper\\DataAccess\\Map\\LocationNamesTableMap';
 
 
     /**
@@ -62,18 +62,18 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
     protected $virtualColumns = array();
 
     /**
-     * The value for the place_alternate_name field.
+     * The value for the location_alternate_name field.
      *
      * @var        string
      */
-    protected $place_alternate_name;
+    protected $location_alternate_name;
 
     /**
-     * The value for the job_location_id field.
+     * The value for the location_id field.
      *
      * @var        int
      */
-    protected $job_location_id;
+    protected $location_id;
 
     /**
      * The value for the slug field.
@@ -83,9 +83,9 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
     protected $slug;
 
     /**
-     * @var        ChildJobLocation
+     * @var        ChildLocation
      */
-    protected $aJobLocation;
+    protected $aLocation;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -96,7 +96,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
     protected $alreadyInSave = false;
 
     /**
-     * Initializes internal state of JobScooper\DataAccess\Base\JobPlaceLookup object.
+     * Initializes internal state of JobScooper\DataAccess\Base\LocationNames object.
      */
     public function __construct()
     {
@@ -191,9 +191,9 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
     }
 
     /**
-     * Compares this with another <code>JobPlaceLookup</code> instance.  If
-     * <code>obj</code> is an instance of <code>JobPlaceLookup</code>, delegates to
-     * <code>equals(JobPlaceLookup)</code>.  Otherwise, returns <code>false</code>.
+     * Compares this with another <code>LocationNames</code> instance.  If
+     * <code>obj</code> is an instance of <code>LocationNames</code>, delegates to
+     * <code>equals(LocationNames)</code>.  Otherwise, returns <code>false</code>.
      *
      * @param  mixed   $obj The object to compare to.
      * @return boolean Whether equal to the object specified.
@@ -259,7 +259,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return $this|JobPlaceLookup The current object, for fluid interface
+     * @return $this|LocationNames The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -321,23 +321,23 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
     }
 
     /**
-     * Get the [place_alternate_name] column value.
+     * Get the [location_alternate_name] column value.
      *
      * @return string
      */
-    public function getPlaceAlternateName()
+    public function getLocationAlternateName()
     {
-        return $this->place_alternate_name;
+        return $this->location_alternate_name;
     }
 
     /**
-     * Get the [job_location_id] column value.
+     * Get the [location_id] column value.
      *
      * @return int
      */
     public function getLocationId()
     {
-        return $this->job_location_id;
+        return $this->location_id;
     }
 
     /**
@@ -351,30 +351,30 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
     }
 
     /**
-     * Set the value of [place_alternate_name] column.
+     * Set the value of [location_alternate_name] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\JobPlaceLookup The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\LocationNames The current object (for fluent API support)
      */
-    public function setPlaceAlternateName($v)
+    public function setLocationAlternateName($v)
     {
         if ($v !== null) {
             $v = (string) $v;
         }
 
-        if ($this->place_alternate_name !== $v) {
-            $this->place_alternate_name = $v;
-            $this->modifiedColumns[JobPlaceLookupTableMap::COL_PLACE_ALTERNATE_NAME] = true;
+        if ($this->location_alternate_name !== $v) {
+            $this->location_alternate_name = $v;
+            $this->modifiedColumns[LocationNamesTableMap::COL_LOCATION_ALTERNATE_NAME] = true;
         }
 
         return $this;
-    } // setPlaceAlternateName()
+    } // setLocationAlternateName()
 
     /**
-     * Set the value of [job_location_id] column.
+     * Set the value of [location_id] column.
      *
      * @param int $v new value
-     * @return $this|\JobScooper\DataAccess\JobPlaceLookup The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\LocationNames The current object (for fluent API support)
      */
     public function setLocationId($v)
     {
@@ -382,13 +382,13 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
             $v = (int) $v;
         }
 
-        if ($this->job_location_id !== $v) {
-            $this->job_location_id = $v;
-            $this->modifiedColumns[JobPlaceLookupTableMap::COL_JOB_LOCATION_ID] = true;
+        if ($this->location_id !== $v) {
+            $this->location_id = $v;
+            $this->modifiedColumns[LocationNamesTableMap::COL_LOCATION_ID] = true;
         }
 
-        if ($this->aJobLocation !== null && $this->aJobLocation->getLocationId() !== $v) {
-            $this->aJobLocation = null;
+        if ($this->aLocation !== null && $this->aLocation->getLocationId() !== $v) {
+            $this->aLocation = null;
         }
 
         return $this;
@@ -398,7 +398,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      * Set the value of [slug] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\JobPlaceLookup The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\LocationNames The current object (for fluent API support)
      */
     public function setSlug($v)
     {
@@ -408,7 +408,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
 
         if ($this->slug !== $v) {
             $this->slug = $v;
-            $this->modifiedColumns[JobPlaceLookupTableMap::COL_SLUG] = true;
+            $this->modifiedColumns[LocationNamesTableMap::COL_SLUG] = true;
         }
 
         return $this;
@@ -450,13 +450,13 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
     {
         try {
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : JobPlaceLookupTableMap::translateFieldName('PlaceAlternateName', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->place_alternate_name = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : LocationNamesTableMap::translateFieldName('LocationAlternateName', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->location_alternate_name = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : JobPlaceLookupTableMap::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->job_location_id = (null !== $col) ? (int) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : LocationNamesTableMap::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->location_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : JobPlaceLookupTableMap::translateFieldName('Slug', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : LocationNamesTableMap::translateFieldName('Slug', TableMap::TYPE_PHPNAME, $indexType)];
             $this->slug = (null !== $col) ? (string) $col : null;
             $this->resetModified();
 
@@ -466,10 +466,10 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 3; // 3 = JobPlaceLookupTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 3; // 3 = LocationNamesTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\JobPlaceLookup'), 0, $e);
+            throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\LocationNames'), 0, $e);
         }
     }
 
@@ -488,8 +488,8 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
-        if ($this->aJobLocation !== null && $this->job_location_id !== $this->aJobLocation->getLocationId()) {
-            $this->aJobLocation = null;
+        if ($this->aLocation !== null && $this->location_id !== $this->aLocation->getLocationId()) {
+            $this->aLocation = null;
         }
     } // ensureConsistency
 
@@ -514,13 +514,13 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(JobPlaceLookupTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getReadConnection(LocationNamesTableMap::DATABASE_NAME);
         }
 
         // We don't need to alter the object instance pool; we're just modifying this instance
         // already in the pool.
 
-        $dataFetcher = ChildJobPlaceLookupQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
+        $dataFetcher = ChildLocationNamesQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
         $row = $dataFetcher->fetch();
         $dataFetcher->close();
         if (!$row) {
@@ -530,7 +530,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->aJobLocation = null;
+            $this->aLocation = null;
         } // if (deep)
     }
 
@@ -540,8 +540,8 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      * @param      ConnectionInterface $con
      * @return void
      * @throws PropelException
-     * @see JobPlaceLookup::setDeleted()
-     * @see JobPlaceLookup::isDeleted()
+     * @see LocationNames::setDeleted()
+     * @see LocationNames::isDeleted()
      */
     public function delete(ConnectionInterface $con = null)
     {
@@ -550,11 +550,11 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(JobPlaceLookupTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(LocationNamesTableMap::DATABASE_NAME);
         }
 
         $con->transaction(function () use ($con) {
-            $deleteQuery = ChildJobPlaceLookupQuery::create()
+            $deleteQuery = ChildLocationNamesQuery::create()
                 ->filterByPrimaryKey($this->getPrimaryKey());
             $ret = $this->preDelete($con);
             if ($ret) {
@@ -589,7 +589,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(JobPlaceLookupTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(LocationNamesTableMap::DATABASE_NAME);
         }
 
         return $con->transaction(function () use ($con) {
@@ -597,7 +597,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
             $isInsert = $this->isNew();
             // sluggable behavior
 
-            if ($this->isColumnModified(JobPlaceLookupTableMap::COL_SLUG) && $this->getSlug()) {
+            if ($this->isColumnModified(LocationNamesTableMap::COL_SLUG) && $this->getSlug()) {
                 $this->setSlug($this->makeSlugUnique($this->getSlug()));
             } else {
                 $this->setSlug($this->createSlug());
@@ -615,7 +615,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                JobPlaceLookupTableMap::addInstanceToPool($this);
+                LocationNamesTableMap::addInstanceToPool($this);
             } else {
                 $affectedRows = 0;
             }
@@ -646,11 +646,11 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
-            if ($this->aJobLocation !== null) {
-                if ($this->aJobLocation->isModified() || $this->aJobLocation->isNew()) {
-                    $affectedRows += $this->aJobLocation->save($con);
+            if ($this->aLocation !== null) {
+                if ($this->aLocation->isModified() || $this->aLocation->isNew()) {
+                    $affectedRows += $this->aLocation->save($con);
                 }
-                $this->setJobLocation($this->aJobLocation);
+                $this->setLocation($this->aLocation);
             }
 
             if ($this->isNew() || $this->isModified()) {
@@ -686,18 +686,18 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
 
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(JobPlaceLookupTableMap::COL_PLACE_ALTERNATE_NAME)) {
-            $modifiedColumns[':p' . $index++]  = 'place_alternate_name';
+        if ($this->isColumnModified(LocationNamesTableMap::COL_LOCATION_ALTERNATE_NAME)) {
+            $modifiedColumns[':p' . $index++]  = 'location_alternate_name';
         }
-        if ($this->isColumnModified(JobPlaceLookupTableMap::COL_JOB_LOCATION_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'job_location_id';
+        if ($this->isColumnModified(LocationNamesTableMap::COL_LOCATION_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'location_id';
         }
-        if ($this->isColumnModified(JobPlaceLookupTableMap::COL_SLUG)) {
+        if ($this->isColumnModified(LocationNamesTableMap::COL_SLUG)) {
             $modifiedColumns[':p' . $index++]  = 'slug';
         }
 
         $sql = sprintf(
-            'INSERT INTO job_place_lookup (%s) VALUES (%s)',
+            'INSERT INTO location_names (%s) VALUES (%s)',
             implode(', ', $modifiedColumns),
             implode(', ', array_keys($modifiedColumns))
         );
@@ -706,11 +706,11 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
             $stmt = $con->prepare($sql);
             foreach ($modifiedColumns as $identifier => $columnName) {
                 switch ($columnName) {
-                    case 'place_alternate_name':
-                        $stmt->bindValue($identifier, $this->place_alternate_name, PDO::PARAM_STR);
+                    case 'location_alternate_name':
+                        $stmt->bindValue($identifier, $this->location_alternate_name, PDO::PARAM_STR);
                         break;
-                    case 'job_location_id':
-                        $stmt->bindValue($identifier, $this->job_location_id, PDO::PARAM_INT);
+                    case 'location_id':
+                        $stmt->bindValue($identifier, $this->location_id, PDO::PARAM_INT);
                         break;
                     case 'slug':
                         $stmt->bindValue($identifier, $this->slug, PDO::PARAM_STR);
@@ -754,7 +754,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      */
     public function getByName($name, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = JobPlaceLookupTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = LocationNamesTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
         $field = $this->getByPosition($pos);
 
         return $field;
@@ -771,7 +771,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                return $this->getPlaceAlternateName();
+                return $this->getLocationAlternateName();
                 break;
             case 1:
                 return $this->getLocationId();
@@ -803,13 +803,13 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
     public function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
     {
 
-        if (isset($alreadyDumpedObjects['JobPlaceLookup'][$this->hashCode()])) {
+        if (isset($alreadyDumpedObjects['LocationNames'][$this->hashCode()])) {
             return '*RECURSION*';
         }
-        $alreadyDumpedObjects['JobPlaceLookup'][$this->hashCode()] = true;
-        $keys = JobPlaceLookupTableMap::getFieldNames($keyType);
+        $alreadyDumpedObjects['LocationNames'][$this->hashCode()] = true;
+        $keys = LocationNamesTableMap::getFieldNames($keyType);
         $result = array(
-            $keys[0] => $this->getPlaceAlternateName(),
+            $keys[0] => $this->getLocationAlternateName(),
             $keys[1] => $this->getLocationId(),
             $keys[2] => $this->getSlug(),
         );
@@ -819,20 +819,20 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->aJobLocation) {
+            if (null !== $this->aLocation) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
-                        $key = 'jobLocation';
+                        $key = 'location';
                         break;
                     case TableMap::TYPE_FIELDNAME:
-                        $key = 'job_location';
+                        $key = 'location';
                         break;
                     default:
-                        $key = 'JobLocation';
+                        $key = 'Location';
                 }
 
-                $result[$key] = $this->aJobLocation->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+                $result[$key] = $this->aLocation->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
         }
 
@@ -848,11 +848,11 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      *                one of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
      *                TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM.
      *                Defaults to TableMap::TYPE_PHPNAME.
-     * @return $this|\JobScooper\DataAccess\JobPlaceLookup
+     * @return $this|\JobScooper\DataAccess\LocationNames
      */
     public function setByName($name, $value, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = JobPlaceLookupTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = LocationNamesTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
 
         return $this->setByPosition($pos, $value);
     }
@@ -863,13 +863,13 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      *
      * @param  int $pos position in xml schema
      * @param  mixed $value field value
-     * @return $this|\JobScooper\DataAccess\JobPlaceLookup
+     * @return $this|\JobScooper\DataAccess\LocationNames
      */
     public function setByPosition($pos, $value)
     {
         switch ($pos) {
             case 0:
-                $this->setPlaceAlternateName($value);
+                $this->setLocationAlternateName($value);
                 break;
             case 1:
                 $this->setLocationId($value);
@@ -901,10 +901,10 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
-        $keys = JobPlaceLookupTableMap::getFieldNames($keyType);
+        $keys = LocationNamesTableMap::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) {
-            $this->setPlaceAlternateName($arr[$keys[0]]);
+            $this->setLocationAlternateName($arr[$keys[0]]);
         }
         if (array_key_exists($keys[1], $arr)) {
             $this->setLocationId($arr[$keys[1]]);
@@ -931,7 +931,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      * @param string $data The source data to import from
      * @param string $keyType The type of keys the array uses.
      *
-     * @return $this|\JobScooper\DataAccess\JobPlaceLookup The current object, for fluid interface
+     * @return $this|\JobScooper\DataAccess\LocationNames The current object, for fluid interface
      */
     public function importFrom($parser, $data, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -951,16 +951,16 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      */
     public function buildCriteria()
     {
-        $criteria = new Criteria(JobPlaceLookupTableMap::DATABASE_NAME);
+        $criteria = new Criteria(LocationNamesTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(JobPlaceLookupTableMap::COL_PLACE_ALTERNATE_NAME)) {
-            $criteria->add(JobPlaceLookupTableMap::COL_PLACE_ALTERNATE_NAME, $this->place_alternate_name);
+        if ($this->isColumnModified(LocationNamesTableMap::COL_LOCATION_ALTERNATE_NAME)) {
+            $criteria->add(LocationNamesTableMap::COL_LOCATION_ALTERNATE_NAME, $this->location_alternate_name);
         }
-        if ($this->isColumnModified(JobPlaceLookupTableMap::COL_JOB_LOCATION_ID)) {
-            $criteria->add(JobPlaceLookupTableMap::COL_JOB_LOCATION_ID, $this->job_location_id);
+        if ($this->isColumnModified(LocationNamesTableMap::COL_LOCATION_ID)) {
+            $criteria->add(LocationNamesTableMap::COL_LOCATION_ID, $this->location_id);
         }
-        if ($this->isColumnModified(JobPlaceLookupTableMap::COL_SLUG)) {
-            $criteria->add(JobPlaceLookupTableMap::COL_SLUG, $this->slug);
+        if ($this->isColumnModified(LocationNamesTableMap::COL_SLUG)) {
+            $criteria->add(LocationNamesTableMap::COL_SLUG, $this->slug);
         }
 
         return $criteria;
@@ -978,9 +978,9 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      */
     public function buildPkeyCriteria()
     {
-        $criteria = ChildJobPlaceLookupQuery::create();
-        $criteria->add(JobPlaceLookupTableMap::COL_PLACE_ALTERNATE_NAME, $this->place_alternate_name);
-        $criteria->add(JobPlaceLookupTableMap::COL_JOB_LOCATION_ID, $this->job_location_id);
+        $criteria = ChildLocationNamesQuery::create();
+        $criteria->add(LocationNamesTableMap::COL_LOCATION_ALTERNATE_NAME, $this->location_alternate_name);
+        $criteria->add(LocationNamesTableMap::COL_LOCATION_ID, $this->location_id);
 
         return $criteria;
     }
@@ -993,14 +993,14 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      */
     public function hashCode()
     {
-        $validPk = null !== $this->getPlaceAlternateName() &&
+        $validPk = null !== $this->getLocationAlternateName() &&
             null !== $this->getLocationId();
 
         $validPrimaryKeyFKs = 1;
         $primaryKeyFKs = [];
 
-        //relation job_place_lookup_fk_7cba1d to table job_location
-        if ($this->aJobLocation && $hash = spl_object_hash($this->aJobLocation)) {
+        //relation location_names_fk_b65c03 to table location
+        if ($this->aLocation && $hash = spl_object_hash($this->aLocation)) {
             $primaryKeyFKs[] = $hash;
         } else {
             $validPrimaryKeyFKs = false;
@@ -1023,7 +1023,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
     public function getPrimaryKey()
     {
         $pks = array();
-        $pks[0] = $this->getPlaceAlternateName();
+        $pks[0] = $this->getLocationAlternateName();
         $pks[1] = $this->getLocationId();
 
         return $pks;
@@ -1037,7 +1037,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      */
     public function setPrimaryKey($keys)
     {
-        $this->setPlaceAlternateName($keys[0]);
+        $this->setLocationAlternateName($keys[0]);
         $this->setLocationId($keys[1]);
     }
 
@@ -1047,7 +1047,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      */
     public function isPrimaryKeyNull()
     {
-        return (null === $this->getPlaceAlternateName()) && (null === $this->getLocationId());
+        return (null === $this->getLocationAlternateName()) && (null === $this->getLocationId());
     }
 
     /**
@@ -1056,14 +1056,14 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param      object $copyObj An object of \JobScooper\DataAccess\JobPlaceLookup (or compatible) type.
+     * @param      object $copyObj An object of \JobScooper\DataAccess\LocationNames (or compatible) type.
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param      boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
      */
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
-        $copyObj->setPlaceAlternateName($this->getPlaceAlternateName());
+        $copyObj->setLocationAlternateName($this->getLocationAlternateName());
         $copyObj->setLocationId($this->getLocationId());
         $copyObj->setSlug($this->getSlug());
         if ($makeNew) {
@@ -1080,7 +1080,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      * objects.
      *
      * @param  boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return \JobScooper\DataAccess\JobPlaceLookup Clone of current object.
+     * @return \JobScooper\DataAccess\LocationNames Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -1094,13 +1094,13 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
     }
 
     /**
-     * Declares an association between this object and a ChildJobLocation object.
+     * Declares an association between this object and a ChildLocation object.
      *
-     * @param  ChildJobLocation $v
-     * @return $this|\JobScooper\DataAccess\JobPlaceLookup The current object (for fluent API support)
+     * @param  ChildLocation $v
+     * @return $this|\JobScooper\DataAccess\LocationNames The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setJobLocation(ChildJobLocation $v = null)
+    public function setLocation(ChildLocation $v = null)
     {
         if ($v === null) {
             $this->setLocationId(NULL);
@@ -1108,12 +1108,12 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
             $this->setLocationId($v->getLocationId());
         }
 
-        $this->aJobLocation = $v;
+        $this->aLocation = $v;
 
         // Add binding for other direction of this n:n relationship.
-        // If this object has already been added to the ChildJobLocation object, it will not be re-added.
+        // If this object has already been added to the ChildLocation object, it will not be re-added.
         if ($v !== null) {
-            $v->addJobPlaceLookup($this);
+            $v->addLocationNames($this);
         }
 
 
@@ -1122,26 +1122,26 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
 
 
     /**
-     * Get the associated ChildJobLocation object
+     * Get the associated ChildLocation object
      *
      * @param  ConnectionInterface $con Optional Connection object.
-     * @return ChildJobLocation The associated ChildJobLocation object.
+     * @return ChildLocation The associated ChildLocation object.
      * @throws PropelException
      */
-    public function getJobLocation(ConnectionInterface $con = null)
+    public function getLocation(ConnectionInterface $con = null)
     {
-        if ($this->aJobLocation === null && ($this->job_location_id != 0)) {
-            $this->aJobLocation = ChildJobLocationQuery::create()->findPk($this->job_location_id, $con);
+        if ($this->aLocation === null && ($this->location_id != 0)) {
+            $this->aLocation = ChildLocationQuery::create()->findPk($this->location_id, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aJobLocation->addJobPlaceLookups($this);
+                $this->aLocation->addLocationNamess($this);
              */
         }
 
-        return $this->aJobLocation;
+        return $this->aLocation;
     }
 
     /**
@@ -1151,11 +1151,11 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
      */
     public function clear()
     {
-        if (null !== $this->aJobLocation) {
-            $this->aJobLocation->removeJobPlaceLookup($this);
+        if (null !== $this->aLocation) {
+            $this->aLocation->removeLocationNames($this);
         }
-        $this->place_alternate_name = null;
-        $this->job_location_id = null;
+        $this->location_alternate_name = null;
+        $this->location_id = null;
         $this->slug = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
@@ -1177,17 +1177,17 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
         if ($deep) {
         } // if ($deep)
 
-        $this->aJobLocation = null;
+        $this->aLocation = null;
     }
 
     /**
      * Return the string representation of this object
      *
-     * @return string The value of the 'place_alternate_name' column
+     * @return string The value of the 'location_alternate_name' column
      */
     public function __toString()
     {
-        return (string) $this->getPlaceAlternateName();
+        return (string) $this->getLocationAlternateName();
     }
 
     // sluggable behavior
@@ -1288,7 +1288,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
         } else {
             $slug2 = $slug . $separator;
 
-            $count = \JobScooper\DataAccess\JobPlaceLookupQuery::create()
+            $count = \JobScooper\DataAccess\LocationNamesQuery::create()
                 ->filterBySlug($this->getSlug())
                 ->filterByPrimaryKey($this->getPrimaryKey())
             ->count();
@@ -1302,7 +1302,7 @@ abstract class JobPlaceLookup implements ActiveRecordInterface
         $col = 'q.Slug';
         $compare = $alreadyExists ? $adapter->compareRegex($col, '?') : sprintf('%s = ?', $col);
 
-        $query = \JobScooper\DataAccess\JobPlaceLookupQuery::create('q')
+        $query = \JobScooper\DataAccess\LocationNamesQuery::create('q')
             ->where($compare, $alreadyExists ? '^' . $slug2 . '[0-9]+$' : $slug2)
             ->prune($this)
         ;

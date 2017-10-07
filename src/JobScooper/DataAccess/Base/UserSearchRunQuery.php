@@ -25,6 +25,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRunQuery orderByUserSlug($order = Criteria::ASC) Order by the user_slug column
  * @method     ChildUserSearchRunQuery orderByJobSiteKey($order = Criteria::ASC) Order by the jobsite_key column
  * @method     ChildUserSearchRunQuery orderByLocationKey($order = Criteria::ASC) Order by the location_key column
+ * @method     ChildUserSearchRunQuery orderByLocationId($order = Criteria::ASC) Order by the location_id column
  * @method     ChildUserSearchRunQuery orderByUserSearchRunKey($order = Criteria::ASC) Order by the user_search_run_key column
  * @method     ChildUserSearchRunQuery orderBySearchSettings($order = Criteria::ASC) Order by the search_settings column
  * @method     ChildUserSearchRunQuery orderByAppRunId($order = Criteria::ASC) Order by the last_app_run_id column
@@ -40,6 +41,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRunQuery groupByUserSlug() Group by the user_slug column
  * @method     ChildUserSearchRunQuery groupByJobSiteKey() Group by the jobsite_key column
  * @method     ChildUserSearchRunQuery groupByLocationKey() Group by the location_key column
+ * @method     ChildUserSearchRunQuery groupByLocationId() Group by the location_id column
  * @method     ChildUserSearchRunQuery groupByUserSearchRunKey() Group by the user_search_run_key column
  * @method     ChildUserSearchRunQuery groupBySearchSettings() Group by the search_settings column
  * @method     ChildUserSearchRunQuery groupByAppRunId() Group by the last_app_run_id column
@@ -57,6 +59,16 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRunQuery leftJoinWith($relation) Adds a LEFT JOIN clause and with to the query
  * @method     ChildUserSearchRunQuery rightJoinWith($relation) Adds a RIGHT JOIN clause and with to the query
  * @method     ChildUserSearchRunQuery innerJoinWith($relation) Adds a INNER JOIN clause and with to the query
+ *
+ * @method     ChildUserSearchRunQuery leftJoinLocation($relationAlias = null) Adds a LEFT JOIN clause to the query using the Location relation
+ * @method     ChildUserSearchRunQuery rightJoinLocation($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Location relation
+ * @method     ChildUserSearchRunQuery innerJoinLocation($relationAlias = null) Adds a INNER JOIN clause to the query using the Location relation
+ *
+ * @method     ChildUserSearchRunQuery joinWithLocation($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the Location relation
+ *
+ * @method     ChildUserSearchRunQuery leftJoinWithLocation() Adds a LEFT JOIN clause and with to the query using the Location relation
+ * @method     ChildUserSearchRunQuery rightJoinWithLocation() Adds a RIGHT JOIN clause and with to the query using the Location relation
+ * @method     ChildUserSearchRunQuery innerJoinWithLocation() Adds a INNER JOIN clause and with to the query using the Location relation
  *
  * @method     ChildUserSearchRunQuery leftJoinUser($relationAlias = null) Adds a LEFT JOIN clause to the query using the User relation
  * @method     ChildUserSearchRunQuery rightJoinUser($relationAlias = null) Adds a RIGHT JOIN clause to the query using the User relation
@@ -78,7 +90,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRunQuery rightJoinWithJobSitePlugin() Adds a RIGHT JOIN clause and with to the query using the JobSitePlugin relation
  * @method     ChildUserSearchRunQuery innerJoinWithJobSitePlugin() Adds a INNER JOIN clause and with to the query using the JobSitePlugin relation
  *
- * @method     \JobScooper\DataAccess\UserQuery|\JobScooper\DataAccess\JobSitePluginQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
+ * @method     \JobScooper\DataAccess\LocationQuery|\JobScooper\DataAccess\UserQuery|\JobScooper\DataAccess\JobSitePluginQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildUserSearchRun findOne(ConnectionInterface $con = null) Return the first ChildUserSearchRun matching the query
  * @method     ChildUserSearchRun findOneOrCreate(ConnectionInterface $con = null) Return the first ChildUserSearchRun matching the query, or a new ChildUserSearchRun object populated from the query conditions when no match is found
@@ -88,6 +100,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRun findOneByUserSlug(string $user_slug) Return the first ChildUserSearchRun filtered by the user_slug column
  * @method     ChildUserSearchRun findOneByJobSiteKey(string $jobsite_key) Return the first ChildUserSearchRun filtered by the jobsite_key column
  * @method     ChildUserSearchRun findOneByLocationKey(string $location_key) Return the first ChildUserSearchRun filtered by the location_key column
+ * @method     ChildUserSearchRun findOneByLocationId(int $location_id) Return the first ChildUserSearchRun filtered by the location_id column
  * @method     ChildUserSearchRun findOneByUserSearchRunKey(string $user_search_run_key) Return the first ChildUserSearchRun filtered by the user_search_run_key column
  * @method     ChildUserSearchRun findOneBySearchSettings( $search_settings) Return the first ChildUserSearchRun filtered by the search_settings column
  * @method     ChildUserSearchRun findOneByAppRunId(string $last_app_run_id) Return the first ChildUserSearchRun filtered by the last_app_run_id column
@@ -106,6 +119,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRun requireOneByUserSlug(string $user_slug) Return the first ChildUserSearchRun filtered by the user_slug column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByJobSiteKey(string $jobsite_key) Return the first ChildUserSearchRun filtered by the jobsite_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByLocationKey(string $location_key) Return the first ChildUserSearchRun filtered by the location_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchRun requireOneByLocationId(int $location_id) Return the first ChildUserSearchRun filtered by the location_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByUserSearchRunKey(string $user_search_run_key) Return the first ChildUserSearchRun filtered by the user_search_run_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneBySearchSettings( $search_settings) Return the first ChildUserSearchRun filtered by the search_settings column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByAppRunId(string $last_app_run_id) Return the first ChildUserSearchRun filtered by the last_app_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -122,6 +136,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRun[]|ObjectCollection findByUserSlug(string $user_slug) Return ChildUserSearchRun objects filtered by the user_slug column
  * @method     ChildUserSearchRun[]|ObjectCollection findByJobSiteKey(string $jobsite_key) Return ChildUserSearchRun objects filtered by the jobsite_key column
  * @method     ChildUserSearchRun[]|ObjectCollection findByLocationKey(string $location_key) Return ChildUserSearchRun objects filtered by the location_key column
+ * @method     ChildUserSearchRun[]|ObjectCollection findByLocationId(int $location_id) Return ChildUserSearchRun objects filtered by the location_id column
  * @method     ChildUserSearchRun[]|ObjectCollection findByUserSearchRunKey(string $user_search_run_key) Return ChildUserSearchRun objects filtered by the user_search_run_key column
  * @method     ChildUserSearchRun[]|ObjectCollection findBySearchSettings( $search_settings) Return ChildUserSearchRun objects filtered by the search_settings column
  * @method     ChildUserSearchRun[]|ObjectCollection findByAppRunId(string $last_app_run_id) Return ChildUserSearchRun objects filtered by the last_app_run_id column
@@ -229,7 +244,7 @@ abstract class UserSearchRunQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_search_run_id, search_key, user_slug, jobsite_key, location_key, user_search_run_key, search_settings, last_app_run_id, run_result, run_error_details, date_last_run, date_next_run, date_last_failed, updated_at FROM user_search_run WHERE user_search_run_id = :p0';
+        $sql = 'SELECT user_search_run_id, search_key, user_slug, jobsite_key, location_key, location_id, user_search_run_key, search_settings, last_app_run_id, run_result, run_error_details, date_last_run, date_next_run, date_last_failed, updated_at FROM user_search_run WHERE user_search_run_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -458,6 +473,49 @@ abstract class UserSearchRunQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(UserSearchRunTableMap::COL_LOCATION_KEY, $locationKey, $comparison);
+    }
+
+    /**
+     * Filter the query on the location_id column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByLocationId(1234); // WHERE location_id = 1234
+     * $query->filterByLocationId(array(12, 34)); // WHERE location_id IN (12, 34)
+     * $query->filterByLocationId(array('min' => 12)); // WHERE location_id > 12
+     * </code>
+     *
+     * @see       filterByLocation()
+     *
+     * @param     mixed $locationId The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
+     */
+    public function filterByLocationId($locationId = null, $comparison = null)
+    {
+        if (is_array($locationId)) {
+            $useMinMax = false;
+            if (isset($locationId['min'])) {
+                $this->addUsingAlias(UserSearchRunTableMap::COL_LOCATION_ID, $locationId['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($locationId['max'])) {
+                $this->addUsingAlias(UserSearchRunTableMap::COL_LOCATION_ID, $locationId['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_LOCATION_ID, $locationId, $comparison);
     }
 
     /**
@@ -811,6 +869,83 @@ abstract class UserSearchRunQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(UserSearchRunTableMap::COL_UPDATED_AT, $updatedAt, $comparison);
+    }
+
+    /**
+     * Filter the query by a related \JobScooper\DataAccess\Location object
+     *
+     * @param \JobScooper\DataAccess\Location|ObjectCollection $location The related object(s) to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return ChildUserSearchRunQuery The current query, for fluid interface
+     */
+    public function filterByLocation($location, $comparison = null)
+    {
+        if ($location instanceof \JobScooper\DataAccess\Location) {
+            return $this
+                ->addUsingAlias(UserSearchRunTableMap::COL_LOCATION_ID, $location->getLocationId(), $comparison);
+        } elseif ($location instanceof ObjectCollection) {
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+
+            return $this
+                ->addUsingAlias(UserSearchRunTableMap::COL_LOCATION_ID, $location->toKeyValue('PrimaryKey', 'LocationId'), $comparison);
+        } else {
+            throw new PropelException('filterByLocation() only accepts arguments of type \JobScooper\DataAccess\Location or Collection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the Location relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
+     */
+    public function joinLocation($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('Location');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'Location');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the Location relation Location object
+     *
+     * @see useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return \JobScooper\DataAccess\LocationQuery A secondary query class using the current class as primary query
+     */
+    public function useLocationQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        return $this
+            ->joinLocation($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'Location', '\JobScooper\DataAccess\LocationQuery');
     }
 
     /**

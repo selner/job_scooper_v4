@@ -2,8 +2,8 @@
 
 namespace JobScooper\DataAccess\Map;
 
-use JobScooper\DataAccess\JobLocation;
-use JobScooper\DataAccess\JobLocationQuery;
+use JobScooper\DataAccess\Location;
+use JobScooper\DataAccess\LocationQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\InstancePoolTrait;
@@ -16,7 +16,7 @@ use Propel\Runtime\Map\TableMapTrait;
 
 
 /**
- * This class defines the structure of the 'job_location' table.
+ * This class defines the structure of the 'location' table.
  *
  *
  *
@@ -26,7 +26,7 @@ use Propel\Runtime\Map\TableMapTrait;
  * (i.e. if it's a text column type).
  *
  */
-class JobLocationTableMap extends TableMap
+class LocationTableMap extends TableMap
 {
     use InstancePoolTrait;
     use TableMapTrait;
@@ -34,7 +34,7 @@ class JobLocationTableMap extends TableMap
     /**
      * The (dot-path) name of this class
      */
-    const CLASS_NAME = 'JobScooper.DataAccess.Map.JobLocationTableMap';
+    const CLASS_NAME = 'JobScooper.DataAccess.Map.LocationTableMap';
 
     /**
      * The default database name for this class
@@ -44,22 +44,22 @@ class JobLocationTableMap extends TableMap
     /**
      * The table name for this class
      */
-    const TABLE_NAME = 'job_location';
+    const TABLE_NAME = 'location';
 
     /**
      * The related Propel class for this table
      */
-    const OM_CLASS = '\\JobScooper\\DataAccess\\JobLocation';
+    const OM_CLASS = '\\JobScooper\\DataAccess\\Location';
 
     /**
      * A class that can be returned by this tableMap
      */
-    const CLASS_DEFAULT = 'JobScooper.DataAccess.JobLocation';
+    const CLASS_DEFAULT = 'JobScooper.DataAccess.Location';
 
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 14;
+    const NUM_COLUMNS = 15;
 
     /**
      * The number of lazy-loaded columns
@@ -69,77 +69,82 @@ class JobLocationTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 14;
+    const NUM_HYDRATE_COLUMNS = 15;
 
     /**
      * the column name for the location_id field
      */
-    const COL_LOCATION_ID = 'job_location.location_id';
+    const COL_LOCATION_ID = 'location.location_id';
 
     /**
      * the column name for the lat field
      */
-    const COL_LAT = 'job_location.lat';
+    const COL_LAT = 'location.lat';
 
     /**
      * the column name for the lon field
      */
-    const COL_LON = 'job_location.lon';
+    const COL_LON = 'location.lon';
 
     /**
      * the column name for the full_display_name field
      */
-    const COL_FULL_DISPLAY_NAME = 'job_location.full_display_name';
+    const COL_FULL_DISPLAY_NAME = 'location.full_display_name';
 
     /**
      * the column name for the primary_name field
      */
-    const COL_PRIMARY_NAME = 'job_location.primary_name';
+    const COL_PRIMARY_NAME = 'location.primary_name';
 
     /**
      * the column name for the place field
      */
-    const COL_PLACE = 'job_location.place';
+    const COL_PLACE = 'location.place';
 
     /**
      * the column name for the county field
      */
-    const COL_COUNTY = 'job_location.county';
+    const COL_COUNTY = 'location.county';
 
     /**
      * the column name for the state field
      */
-    const COL_STATE = 'job_location.state';
+    const COL_STATE = 'location.state';
 
     /**
      * the column name for the statecode field
      */
-    const COL_STATECODE = 'job_location.statecode';
+    const COL_STATECODE = 'location.statecode';
 
     /**
      * the column name for the country field
      */
-    const COL_COUNTRY = 'job_location.country';
+    const COL_COUNTRY = 'location.country';
 
     /**
      * the column name for the countrycode field
      */
-    const COL_COUNTRYCODE = 'job_location.countrycode';
+    const COL_COUNTRYCODE = 'location.countrycode';
 
     /**
      * the column name for the alternate_names field
      */
-    const COL_ALTERNATE_NAMES = 'job_location.alternate_names';
+    const COL_ALTERNATE_NAMES = 'location.alternate_names';
 
     /**
      * the column name for the openstreetmap_id field
      */
-    const COL_OPENSTREETMAP_ID = 'job_location.openstreetmap_id';
+    const COL_OPENSTREETMAP_ID = 'location.openstreetmap_id';
 
     /**
      * the column name for the full_osm_data field
      */
-    const COL_FULL_OSM_DATA = 'job_location.full_osm_data';
+    const COL_FULL_OSM_DATA = 'location.full_osm_data';
+
+    /**
+     * the column name for the extra_details_data field
+     */
+    const COL_EXTRA_DETAILS_DATA = 'location.extra_details_data';
 
     /**
      * The default string format for model objects of the related table
@@ -153,11 +158,11 @@ class JobLocationTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('LocationId', 'Latitude', 'Logitude', 'DisplayName', 'PrimaryName', 'Place', 'County', 'State', 'StateCode', 'Country', 'CountryCode', 'AlternateNames', 'OpenStreetMapId', 'FullOsmData', ),
-        self::TYPE_CAMELNAME     => array('locationId', 'latitude', 'logitude', 'displayName', 'primaryName', 'place', 'county', 'state', 'stateCode', 'country', 'countryCode', 'alternateNames', 'openStreetMapId', 'fullOsmData', ),
-        self::TYPE_COLNAME       => array(JobLocationTableMap::COL_LOCATION_ID, JobLocationTableMap::COL_LAT, JobLocationTableMap::COL_LON, JobLocationTableMap::COL_FULL_DISPLAY_NAME, JobLocationTableMap::COL_PRIMARY_NAME, JobLocationTableMap::COL_PLACE, JobLocationTableMap::COL_COUNTY, JobLocationTableMap::COL_STATE, JobLocationTableMap::COL_STATECODE, JobLocationTableMap::COL_COUNTRY, JobLocationTableMap::COL_COUNTRYCODE, JobLocationTableMap::COL_ALTERNATE_NAMES, JobLocationTableMap::COL_OPENSTREETMAP_ID, JobLocationTableMap::COL_FULL_OSM_DATA, ),
-        self::TYPE_FIELDNAME     => array('location_id', 'lat', 'lon', 'full_display_name', 'primary_name', 'place', 'county', 'state', 'statecode', 'country', 'countrycode', 'alternate_names', 'openstreetmap_id', 'full_osm_data', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, )
+        self::TYPE_PHPNAME       => array('LocationId', 'Latitude', 'Longitude', 'DisplayName', 'PrimaryName', 'Place', 'County', 'State', 'StateCode', 'Country', 'CountryCode', 'AlternateNames', 'OpenStreetMapId', 'FullOsmData', 'ExtraDetailsData', ),
+        self::TYPE_CAMELNAME     => array('locationId', 'latitude', 'longitude', 'displayName', 'primaryName', 'place', 'county', 'state', 'stateCode', 'country', 'countryCode', 'alternateNames', 'openStreetMapId', 'fullOsmData', 'extraDetailsData', ),
+        self::TYPE_COLNAME       => array(LocationTableMap::COL_LOCATION_ID, LocationTableMap::COL_LAT, LocationTableMap::COL_LON, LocationTableMap::COL_FULL_DISPLAY_NAME, LocationTableMap::COL_PRIMARY_NAME, LocationTableMap::COL_PLACE, LocationTableMap::COL_COUNTY, LocationTableMap::COL_STATE, LocationTableMap::COL_STATECODE, LocationTableMap::COL_COUNTRY, LocationTableMap::COL_COUNTRYCODE, LocationTableMap::COL_ALTERNATE_NAMES, LocationTableMap::COL_OPENSTREETMAP_ID, LocationTableMap::COL_FULL_OSM_DATA, LocationTableMap::COL_EXTRA_DETAILS_DATA, ),
+        self::TYPE_FIELDNAME     => array('location_id', 'lat', 'lon', 'full_display_name', 'primary_name', 'place', 'county', 'state', 'statecode', 'country', 'countrycode', 'alternate_names', 'openstreetmap_id', 'full_osm_data', 'extra_details_data', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, )
     );
 
     /**
@@ -167,11 +172,11 @@ class JobLocationTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('LocationId' => 0, 'Latitude' => 1, 'Logitude' => 2, 'DisplayName' => 3, 'PrimaryName' => 4, 'Place' => 5, 'County' => 6, 'State' => 7, 'StateCode' => 8, 'Country' => 9, 'CountryCode' => 10, 'AlternateNames' => 11, 'OpenStreetMapId' => 12, 'FullOsmData' => 13, ),
-        self::TYPE_CAMELNAME     => array('locationId' => 0, 'latitude' => 1, 'logitude' => 2, 'displayName' => 3, 'primaryName' => 4, 'place' => 5, 'county' => 6, 'state' => 7, 'stateCode' => 8, 'country' => 9, 'countryCode' => 10, 'alternateNames' => 11, 'openStreetMapId' => 12, 'fullOsmData' => 13, ),
-        self::TYPE_COLNAME       => array(JobLocationTableMap::COL_LOCATION_ID => 0, JobLocationTableMap::COL_LAT => 1, JobLocationTableMap::COL_LON => 2, JobLocationTableMap::COL_FULL_DISPLAY_NAME => 3, JobLocationTableMap::COL_PRIMARY_NAME => 4, JobLocationTableMap::COL_PLACE => 5, JobLocationTableMap::COL_COUNTY => 6, JobLocationTableMap::COL_STATE => 7, JobLocationTableMap::COL_STATECODE => 8, JobLocationTableMap::COL_COUNTRY => 9, JobLocationTableMap::COL_COUNTRYCODE => 10, JobLocationTableMap::COL_ALTERNATE_NAMES => 11, JobLocationTableMap::COL_OPENSTREETMAP_ID => 12, JobLocationTableMap::COL_FULL_OSM_DATA => 13, ),
-        self::TYPE_FIELDNAME     => array('location_id' => 0, 'lat' => 1, 'lon' => 2, 'full_display_name' => 3, 'primary_name' => 4, 'place' => 5, 'county' => 6, 'state' => 7, 'statecode' => 8, 'country' => 9, 'countrycode' => 10, 'alternate_names' => 11, 'openstreetmap_id' => 12, 'full_osm_data' => 13, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, )
+        self::TYPE_PHPNAME       => array('LocationId' => 0, 'Latitude' => 1, 'Longitude' => 2, 'DisplayName' => 3, 'PrimaryName' => 4, 'Place' => 5, 'County' => 6, 'State' => 7, 'StateCode' => 8, 'Country' => 9, 'CountryCode' => 10, 'AlternateNames' => 11, 'OpenStreetMapId' => 12, 'FullOsmData' => 13, 'ExtraDetailsData' => 14, ),
+        self::TYPE_CAMELNAME     => array('locationId' => 0, 'latitude' => 1, 'longitude' => 2, 'displayName' => 3, 'primaryName' => 4, 'place' => 5, 'county' => 6, 'state' => 7, 'stateCode' => 8, 'country' => 9, 'countryCode' => 10, 'alternateNames' => 11, 'openStreetMapId' => 12, 'fullOsmData' => 13, 'extraDetailsData' => 14, ),
+        self::TYPE_COLNAME       => array(LocationTableMap::COL_LOCATION_ID => 0, LocationTableMap::COL_LAT => 1, LocationTableMap::COL_LON => 2, LocationTableMap::COL_FULL_DISPLAY_NAME => 3, LocationTableMap::COL_PRIMARY_NAME => 4, LocationTableMap::COL_PLACE => 5, LocationTableMap::COL_COUNTY => 6, LocationTableMap::COL_STATE => 7, LocationTableMap::COL_STATECODE => 8, LocationTableMap::COL_COUNTRY => 9, LocationTableMap::COL_COUNTRYCODE => 10, LocationTableMap::COL_ALTERNATE_NAMES => 11, LocationTableMap::COL_OPENSTREETMAP_ID => 12, LocationTableMap::COL_FULL_OSM_DATA => 13, LocationTableMap::COL_EXTRA_DETAILS_DATA => 14, ),
+        self::TYPE_FIELDNAME     => array('location_id' => 0, 'lat' => 1, 'lon' => 2, 'full_display_name' => 3, 'primary_name' => 4, 'place' => 5, 'county' => 6, 'state' => 7, 'statecode' => 8, 'country' => 9, 'countrycode' => 10, 'alternate_names' => 11, 'openstreetmap_id' => 12, 'full_osm_data' => 13, 'extra_details_data' => 14, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, )
     );
 
     /**
@@ -184,16 +189,16 @@ class JobLocationTableMap extends TableMap
     public function initialize()
     {
         // attributes
-        $this->setName('job_location');
-        $this->setPhpName('JobLocation');
+        $this->setName('location');
+        $this->setPhpName('Location');
         $this->setIdentifierQuoting(false);
-        $this->setClassName('\\JobScooper\\DataAccess\\JobLocation');
+        $this->setClassName('\\JobScooper\\DataAccess\\Location');
         $this->setPackage('JobScooper.DataAccess');
         $this->setUseIdGenerator(true);
         // columns
         $this->addPrimaryKey('location_id', 'LocationId', 'INTEGER', true, null, null);
         $this->addColumn('lat', 'Latitude', 'FLOAT', false, null, null);
-        $this->addColumn('lon', 'Logitude', 'FLOAT', false, null, null);
+        $this->addColumn('lon', 'Longitude', 'FLOAT', false, null, null);
         $this->addColumn('full_display_name', 'DisplayName', 'VARCHAR', false, 100, null);
         $this->addColumn('primary_name', 'PrimaryName', 'VARCHAR', false, 100, null);
         $this->addColumn('place', 'Place', 'VARCHAR', false, 100, null);
@@ -205,6 +210,7 @@ class JobLocationTableMap extends TableMap
         $this->addColumn('alternate_names', 'AlternateNames', 'ARRAY', false, null, null);
         $this->addColumn('openstreetmap_id', 'OpenStreetMapId', 'INTEGER', false, null, null);
         $this->addColumn('full_osm_data', 'FullOsmData', 'LONGVARCHAR', false, null, null);
+        $this->addColumn('extra_details_data', 'ExtraDetailsData', 'LONGVARCHAR', false, null, null);
     } // initialize()
 
     /**
@@ -215,17 +221,24 @@ class JobLocationTableMap extends TableMap
         $this->addRelation('JobPosting', '\\JobScooper\\DataAccess\\JobPosting', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
-    0 => ':job_location_id',
+    0 => ':location_id',
     1 => ':location_id',
   ),
 ), null, null, 'JobPostings', false);
-        $this->addRelation('JobPlaceLookup', '\\JobScooper\\DataAccess\\JobPlaceLookup', RelationMap::ONE_TO_MANY, array (
+        $this->addRelation('LocationNames', '\\JobScooper\\DataAccess\\LocationNames', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
-    0 => ':job_location_id',
+    0 => ':location_id',
     1 => ':location_id',
   ),
-), null, null, 'JobPlaceLookups', false);
+), null, null, 'LocationNamess', false);
+        $this->addRelation('UserSearchRun', '\\JobScooper\\DataAccess\\UserSearchRun', RelationMap::ONE_TO_MANY, array (
+  0 =>
+  array (
+    0 => ':location_id',
+    1 => ':location_id',
+  ),
+), null, null, 'UserSearchRuns', false);
     } // buildRelations()
 
     /**
@@ -285,7 +298,7 @@ class JobLocationTableMap extends TableMap
      */
     public static function getOMClass($withPrefix = true)
     {
-        return $withPrefix ? JobLocationTableMap::CLASS_DEFAULT : JobLocationTableMap::OM_CLASS;
+        return $withPrefix ? LocationTableMap::CLASS_DEFAULT : LocationTableMap::OM_CLASS;
     }
 
     /**
@@ -299,22 +312,22 @@ class JobLocationTableMap extends TableMap
      *
      * @throws PropelException Any exceptions caught during processing will be
      *                         rethrown wrapped into a PropelException.
-     * @return array           (JobLocation object, last column rank)
+     * @return array           (Location object, last column rank)
      */
     public static function populateObject($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-        $key = JobLocationTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
-        if (null !== ($obj = JobLocationTableMap::getInstanceFromPool($key))) {
+        $key = LocationTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
+        if (null !== ($obj = LocationTableMap::getInstanceFromPool($key))) {
             // We no longer rehydrate the object, since this can cause data loss.
             // See http://www.propelorm.org/ticket/509
             // $obj->hydrate($row, $offset, true); // rehydrate
-            $col = $offset + JobLocationTableMap::NUM_HYDRATE_COLUMNS;
+            $col = $offset + LocationTableMap::NUM_HYDRATE_COLUMNS;
         } else {
-            $cls = JobLocationTableMap::OM_CLASS;
-            /** @var JobLocation $obj */
+            $cls = LocationTableMap::OM_CLASS;
+            /** @var Location $obj */
             $obj = new $cls();
             $col = $obj->hydrate($row, $offset, false, $indexType);
-            JobLocationTableMap::addInstanceToPool($obj, $key);
+            LocationTableMap::addInstanceToPool($obj, $key);
         }
 
         return array($obj, $col);
@@ -337,18 +350,18 @@ class JobLocationTableMap extends TableMap
         $cls = static::getOMClass(false);
         // populate the object(s)
         while ($row = $dataFetcher->fetch()) {
-            $key = JobLocationTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
-            if (null !== ($obj = JobLocationTableMap::getInstanceFromPool($key))) {
+            $key = LocationTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
+            if (null !== ($obj = LocationTableMap::getInstanceFromPool($key))) {
                 // We no longer rehydrate the object, since this can cause data loss.
                 // See http://www.propelorm.org/ticket/509
                 // $obj->hydrate($row, 0, true); // rehydrate
                 $results[] = $obj;
             } else {
-                /** @var JobLocation $obj */
+                /** @var Location $obj */
                 $obj = new $cls();
                 $obj->hydrate($row);
                 $results[] = $obj;
-                JobLocationTableMap::addInstanceToPool($obj, $key);
+                LocationTableMap::addInstanceToPool($obj, $key);
             } // if key exists
         }
 
@@ -369,20 +382,21 @@ class JobLocationTableMap extends TableMap
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
-            $criteria->addSelectColumn(JobLocationTableMap::COL_LOCATION_ID);
-            $criteria->addSelectColumn(JobLocationTableMap::COL_LAT);
-            $criteria->addSelectColumn(JobLocationTableMap::COL_LON);
-            $criteria->addSelectColumn(JobLocationTableMap::COL_FULL_DISPLAY_NAME);
-            $criteria->addSelectColumn(JobLocationTableMap::COL_PRIMARY_NAME);
-            $criteria->addSelectColumn(JobLocationTableMap::COL_PLACE);
-            $criteria->addSelectColumn(JobLocationTableMap::COL_COUNTY);
-            $criteria->addSelectColumn(JobLocationTableMap::COL_STATE);
-            $criteria->addSelectColumn(JobLocationTableMap::COL_STATECODE);
-            $criteria->addSelectColumn(JobLocationTableMap::COL_COUNTRY);
-            $criteria->addSelectColumn(JobLocationTableMap::COL_COUNTRYCODE);
-            $criteria->addSelectColumn(JobLocationTableMap::COL_ALTERNATE_NAMES);
-            $criteria->addSelectColumn(JobLocationTableMap::COL_OPENSTREETMAP_ID);
-            $criteria->addSelectColumn(JobLocationTableMap::COL_FULL_OSM_DATA);
+            $criteria->addSelectColumn(LocationTableMap::COL_LOCATION_ID);
+            $criteria->addSelectColumn(LocationTableMap::COL_LAT);
+            $criteria->addSelectColumn(LocationTableMap::COL_LON);
+            $criteria->addSelectColumn(LocationTableMap::COL_FULL_DISPLAY_NAME);
+            $criteria->addSelectColumn(LocationTableMap::COL_PRIMARY_NAME);
+            $criteria->addSelectColumn(LocationTableMap::COL_PLACE);
+            $criteria->addSelectColumn(LocationTableMap::COL_COUNTY);
+            $criteria->addSelectColumn(LocationTableMap::COL_STATE);
+            $criteria->addSelectColumn(LocationTableMap::COL_STATECODE);
+            $criteria->addSelectColumn(LocationTableMap::COL_COUNTRY);
+            $criteria->addSelectColumn(LocationTableMap::COL_COUNTRYCODE);
+            $criteria->addSelectColumn(LocationTableMap::COL_ALTERNATE_NAMES);
+            $criteria->addSelectColumn(LocationTableMap::COL_OPENSTREETMAP_ID);
+            $criteria->addSelectColumn(LocationTableMap::COL_FULL_OSM_DATA);
+            $criteria->addSelectColumn(LocationTableMap::COL_EXTRA_DETAILS_DATA);
         } else {
             $criteria->addSelectColumn($alias . '.location_id');
             $criteria->addSelectColumn($alias . '.lat');
@@ -398,6 +412,7 @@ class JobLocationTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.alternate_names');
             $criteria->addSelectColumn($alias . '.openstreetmap_id');
             $criteria->addSelectColumn($alias . '.full_osm_data');
+            $criteria->addSelectColumn($alias . '.extra_details_data');
         }
     }
 
@@ -410,7 +425,7 @@ class JobLocationTableMap extends TableMap
      */
     public static function getTableMap()
     {
-        return Propel::getServiceContainer()->getDatabaseMap(JobLocationTableMap::DATABASE_NAME)->getTable(JobLocationTableMap::TABLE_NAME);
+        return Propel::getServiceContainer()->getDatabaseMap(LocationTableMap::DATABASE_NAME)->getTable(LocationTableMap::TABLE_NAME);
     }
 
     /**
@@ -418,16 +433,16 @@ class JobLocationTableMap extends TableMap
      */
     public static function buildTableMap()
     {
-        $dbMap = Propel::getServiceContainer()->getDatabaseMap(JobLocationTableMap::DATABASE_NAME);
-        if (!$dbMap->hasTable(JobLocationTableMap::TABLE_NAME)) {
-            $dbMap->addTableObject(new JobLocationTableMap());
+        $dbMap = Propel::getServiceContainer()->getDatabaseMap(LocationTableMap::DATABASE_NAME);
+        if (!$dbMap->hasTable(LocationTableMap::TABLE_NAME)) {
+            $dbMap->addTableObject(new LocationTableMap());
         }
     }
 
     /**
-     * Performs a DELETE on the database, given a JobLocation or Criteria object OR a primary key value.
+     * Performs a DELETE on the database, given a Location or Criteria object OR a primary key value.
      *
-     * @param mixed               $values Criteria or JobLocation object or primary key or array of primary keys
+     * @param mixed               $values Criteria or Location object or primary key or array of primary keys
      *              which is used to create the DELETE statement
      * @param  ConnectionInterface $con the connection to use
      * @return int             The number of affected rows (if supported by underlying database driver).  This includes CASCADE-related rows
@@ -438,27 +453,27 @@ class JobLocationTableMap extends TableMap
      public static function doDelete($values, ConnectionInterface $con = null)
      {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(JobLocationTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(LocationTableMap::DATABASE_NAME);
         }
 
         if ($values instanceof Criteria) {
             // rename for clarity
             $criteria = $values;
-        } elseif ($values instanceof \JobScooper\DataAccess\JobLocation) { // it's a model object
+        } elseif ($values instanceof \JobScooper\DataAccess\Location) { // it's a model object
             // create criteria based on pk values
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
-            $criteria = new Criteria(JobLocationTableMap::DATABASE_NAME);
-            $criteria->add(JobLocationTableMap::COL_LOCATION_ID, (array) $values, Criteria::IN);
+            $criteria = new Criteria(LocationTableMap::DATABASE_NAME);
+            $criteria->add(LocationTableMap::COL_LOCATION_ID, (array) $values, Criteria::IN);
         }
 
-        $query = JobLocationQuery::create()->mergeWith($criteria);
+        $query = LocationQuery::create()->mergeWith($criteria);
 
         if ($values instanceof Criteria) {
-            JobLocationTableMap::clearInstancePool();
+            LocationTableMap::clearInstancePool();
         } elseif (!is_object($values)) { // it's a primary key, or an array of pks
             foreach ((array) $values as $singleval) {
-                JobLocationTableMap::removeInstanceFromPool($singleval);
+                LocationTableMap::removeInstanceFromPool($singleval);
             }
         }
 
@@ -466,20 +481,20 @@ class JobLocationTableMap extends TableMap
     }
 
     /**
-     * Deletes all rows from the job_location table.
+     * Deletes all rows from the location table.
      *
      * @param ConnectionInterface $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).
      */
     public static function doDeleteAll(ConnectionInterface $con = null)
     {
-        return JobLocationQuery::create()->doDeleteAll($con);
+        return LocationQuery::create()->doDeleteAll($con);
     }
 
     /**
-     * Performs an INSERT on the database, given a JobLocation or Criteria object.
+     * Performs an INSERT on the database, given a Location or Criteria object.
      *
-     * @param mixed               $criteria Criteria or JobLocation object containing data that is used to create the INSERT statement.
+     * @param mixed               $criteria Criteria or Location object containing data that is used to create the INSERT statement.
      * @param ConnectionInterface $con the ConnectionInterface connection to use
      * @return mixed           The new primary key.
      * @throws PropelException Any exceptions caught during processing will be
@@ -488,22 +503,22 @@ class JobLocationTableMap extends TableMap
     public static function doInsert($criteria, ConnectionInterface $con = null)
     {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(JobLocationTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(LocationTableMap::DATABASE_NAME);
         }
 
         if ($criteria instanceof Criteria) {
             $criteria = clone $criteria; // rename for clarity
         } else {
-            $criteria = $criteria->buildCriteria(); // build Criteria from JobLocation object
+            $criteria = $criteria->buildCriteria(); // build Criteria from Location object
         }
 
-        if ($criteria->containsKey(JobLocationTableMap::COL_LOCATION_ID) && $criteria->keyContainsValue(JobLocationTableMap::COL_LOCATION_ID) ) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key ('.JobLocationTableMap::COL_LOCATION_ID.')');
+        if ($criteria->containsKey(LocationTableMap::COL_LOCATION_ID) && $criteria->keyContainsValue(LocationTableMap::COL_LOCATION_ID) ) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key ('.LocationTableMap::COL_LOCATION_ID.')');
         }
 
 
         // Set the correct dbName
-        $query = JobLocationQuery::create()->mergeWith($criteria);
+        $query = LocationQuery::create()->mergeWith($criteria);
 
         // use transaction because $criteria could contain info
         // for more than one table (I guess, conceivably)
@@ -512,7 +527,7 @@ class JobLocationTableMap extends TableMap
         });
     }
 
-} // JobLocationTableMap
+} // LocationTableMap
 // This is the static code needed to register the TableMap for this table with the main Propel class.
 //
-JobLocationTableMap::buildTableMap();
+LocationTableMap::buildTableMap();

@@ -91,9 +91,9 @@
         <!--        <column name="company_id" phpName="CompanyId" type="varchar" size="255" required="false"/> -->
         <column name="location_from_source" phpName="LocationFromSource" type="varchar" size="255" required="false"/>
         <column name="location_display_value" phpName="LocationDisplayValue" type="varchar" size="255" required="false"/>
-        <column name="job_location_id" type="integer" required="false"/>
-        <foreign-key foreignTable="job_location" onUpdate="none" onDelete="none">
-            <reference local="job_location_id" foreign="location_id"/>
+        <column name="location_id" type="integer" required="false"/>
+        <foreign-key foreignTable="location" onUpdate="none" onDelete="none">
+            <reference local="location_id" foreign="location_id"/>
         </foreign-key>
 
 
@@ -127,10 +127,10 @@
 
     </table>
 
-    <table name="job_location" phpName="JobLocation" reloadOnUpdate="true" reloadOnInsert="true">
+    <table name="location" phpName="Location" reloadOnUpdate="true" reloadOnInsert="true">
         <column name="location_id" phpName="LocationId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
         <column name="lat" phpName="Latitude" type="float"/>
-        <column name="lon" phpName="Logitude" type="float"/>
+        <column name="lon" phpName="Longitude" type="float"/>
         <column name="full_display_name" phpName="DisplayName" type="varchar" size="100" />
         <column name="primary_name" phpName="PrimaryName" type="varchar" size="100" />
         <column name="place" phpName="Place" type="varchar" size="100" />
@@ -145,14 +145,15 @@
             <unique-column name="openstreetmap_id"/>
         </unique>
         <column name="full_osm_data" phpName="FullOsmData" type="LONGVARCHAR" />
+        <column name="extra_details_data" phpName="ExtraDetailsData" type="LONGVARCHAR" />
 
     </table>
 
-    <table name="job_place_lookup" phpName="JobPlaceLookup">
-        <column name="place_alternate_name" phpName="PlaceAlternateName" type="varchar" size="100" required="true" primaryKey="true" primaryString="true"/>
-        <column name="job_location_id" phpName="LocationId" type="integer" required="true" primaryKey="true" />
-        <foreign-key foreignTable="job_location" onUpdate="none" onDelete="none">
-            <reference local="job_location_id" foreign="location_id"/>
+    <table name="location_names" phpName="LocationNames">
+        <column name="location_alternate_name" phpName="LocationAlternateName" type="varchar" size="100" required="true" primaryKey="true" primaryString="true"/>
+        <column name="location_id" phpName="LocationId" type="integer" required="true" primaryKey="true" />
+        <foreign-key foreignTable="location" onUpdate="none" onDelete="none">
+            <reference local="location_id" foreign="location_id"/>
         </foreign-key>
         <behavior name="sluggable"/>
     </table>
@@ -216,12 +217,11 @@
         <column name="user_slug" phpName="UserSlug"  type="varchar" size="128" required="true"/>
         <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" required="true"/>
         <column name="location_key" phpName="LocationKey" type="varchar" size="100" required="true"/>
-        <!--<unique name="uniq_user_searchkey/">-->
-            <!--<unique-column name="user_slug"/>-->
-            <!--<unique-column name="search_key"/>-->
-            <!--<unique-column name="jobsite_key"/>-->
-            <!--<unique-column name="location_key"/>-->
-        <!--</unique>-->
+
+        <column name="location_id" phpName="LocationId" type="integer"/>
+        <foreign-key foreignTable="location" onUpdate="none" onDelete="none">
+            <reference local="location_id" foreign="location_id"/>
+        </foreign-key>
 
         <column name="user_search_run_key" type="varchar" size="100" required="true"/>
         <behavior name="sluggable">
@@ -235,6 +235,7 @@
 
         <column name="search_settings" phpName="SearchSettings" type="object"/>
         <column name="last_app_run_id" phpName="AppRunId" type="varchar" size="75"/>
+
         <column name="run_result" field="run_result_code" phpName="RunResultCode" type="enum" valueSet="not-run,failed,excluded,skipped,successful" defaultValue="not-run"/>-->
         <column name="run_error_details" phpName="RunErrorDetails" type="array"/>
         <foreign-key foreignTable="user">

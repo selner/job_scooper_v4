@@ -1,11 +1,26 @@
 <?php
+/**
+ * Copyright 2014-17 Bryan Selner
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
 namespace JobScooper\DataAccess;
 
-use JobScooper\DataAccess\Base\JobLocation as BaseJobLocation;
+use JobScooper\DataAccess\Base\Location as BaseLocation;
 use Propel\Runtime\Connection\ConnectionInterface;
 
-
-class JobLocation extends BaseJobLocation
+class Location extends BaseLocation
 {
 
     /**
@@ -31,7 +46,7 @@ class JobLocation extends BaseJobLocation
     {
         parent::postSave($con);
 
-        reloadJobLocationCache();
+        reloadLocationCache();
     }
 
 
@@ -92,7 +107,7 @@ class JobLocation extends BaseJobLocation
             $this->setOpenStreetMapId($osmPlace['osm_id']);
             $this->setFullOsmDataFromArray($osmPlace);
             $this->setLatitude($osmPlace['lat']);
-            $this->setLogitude($osmPlace['lon']);
+            $this->setLongitude($osmPlace['lon']);
             if(array_key_exists('primary_name', $osmPlace))
                 $this->setDisplayName($osmPlace['primary_name']);
             elseif (array_key_exists('display_name', $osmPlace))
@@ -123,5 +138,4 @@ class JobLocation extends BaseJobLocation
 //if(!is_null($state) && strlen($state) > 0)
 //$this->setStateCode($STATE_CODES[$state]);
 //
-
 }

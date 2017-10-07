@@ -5,10 +5,10 @@ namespace JobScooper\DataAccess\Base;
 use \DateTime;
 use \Exception;
 use \PDO;
-use JobScooper\DataAccess\JobLocation as ChildJobLocation;
-use JobScooper\DataAccess\JobLocationQuery as ChildJobLocationQuery;
 use JobScooper\DataAccess\JobPosting as ChildJobPosting;
 use JobScooper\DataAccess\JobPostingQuery as ChildJobPostingQuery;
+use JobScooper\DataAccess\Location as ChildLocation;
+use JobScooper\DataAccess\LocationQuery as ChildLocationQuery;
 use JobScooper\DataAccess\UserJobMatch as ChildUserJobMatch;
 use JobScooper\DataAccess\UserJobMatchQuery as ChildUserJobMatchQuery;
 use JobScooper\DataAccess\Map\JobPostingTableMap;
@@ -132,11 +132,11 @@ abstract class JobPosting implements ActiveRecordInterface
     protected $location_display_value;
 
     /**
-     * The value for the job_location_id field.
+     * The value for the location_id field.
      *
      * @var        int
      */
-    protected $job_location_id;
+    protected $location_id;
 
     /**
      * The value for the employment_type field.
@@ -216,9 +216,9 @@ abstract class JobPosting implements ActiveRecordInterface
     protected $duplicates_posting_id;
 
     /**
-     * @var        ChildJobLocation
+     * @var        ChildLocation
      */
-    protected $aJobLocation;
+    protected $aLocation;
 
     /**
      * @var        ChildJobPosting
@@ -573,13 +573,13 @@ abstract class JobPosting implements ActiveRecordInterface
     }
 
     /**
-     * Get the [job_location_id] column value.
+     * Get the [location_id] column value.
      *
      * @return int
      */
-    public function getJobLocationId()
+    public function getLocationId()
     {
-        return $this->job_location_id;
+        return $this->location_id;
     }
 
     /**
@@ -913,28 +913,28 @@ abstract class JobPosting implements ActiveRecordInterface
     } // setLocationDisplayValue()
 
     /**
-     * Set the value of [job_location_id] column.
+     * Set the value of [location_id] column.
      *
      * @param int $v new value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
-    public function setJobLocationId($v)
+    public function setLocationId($v)
     {
         if ($v !== null) {
             $v = (int) $v;
         }
 
-        if ($this->job_location_id !== $v) {
-            $this->job_location_id = $v;
-            $this->modifiedColumns[JobPostingTableMap::COL_JOB_LOCATION_ID] = true;
+        if ($this->location_id !== $v) {
+            $this->location_id = $v;
+            $this->modifiedColumns[JobPostingTableMap::COL_LOCATION_ID] = true;
         }
 
-        if ($this->aJobLocation !== null && $this->aJobLocation->getLocationId() !== $v) {
-            $this->aJobLocation = null;
+        if ($this->aLocation !== null && $this->aLocation->getLocationId() !== $v) {
+            $this->aLocation = null;
         }
 
         return $this;
-    } // setJobLocationId()
+    } // setLocationId()
 
     /**
      * Set the value of [employment_type] column.
@@ -1223,8 +1223,8 @@ abstract class JobPosting implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : JobPostingTableMap::translateFieldName('LocationDisplayValue', TableMap::TYPE_PHPNAME, $indexType)];
             $this->location_display_value = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : JobPostingTableMap::translateFieldName('JobLocationId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->job_location_id = (null !== $col) ? (int) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : JobPostingTableMap::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->location_id = (null !== $col) ? (int) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : JobPostingTableMap::translateFieldName('EmploymentType', TableMap::TYPE_PHPNAME, $indexType)];
             $this->employment_type = (null !== $col) ? (string) $col : null;
@@ -1288,8 +1288,8 @@ abstract class JobPosting implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
-        if ($this->aJobLocation !== null && $this->job_location_id !== $this->aJobLocation->getLocationId()) {
-            $this->aJobLocation = null;
+        if ($this->aLocation !== null && $this->location_id !== $this->aLocation->getLocationId()) {
+            $this->aLocation = null;
         }
         if ($this->aJobPostingRelatedByDuplicatesJobPostingId !== null && $this->duplicates_posting_id !== $this->aJobPostingRelatedByDuplicatesJobPostingId->getJobPostingId()) {
             $this->aJobPostingRelatedByDuplicatesJobPostingId = null;
@@ -1333,7 +1333,7 @@ abstract class JobPosting implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->aJobLocation = null;
+            $this->aLocation = null;
             $this->aJobPostingRelatedByDuplicatesJobPostingId = null;
             $this->collJobPostingsRelatedByJobPostingId = null;
 
@@ -1459,11 +1459,11 @@ abstract class JobPosting implements ActiveRecordInterface
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
-            if ($this->aJobLocation !== null) {
-                if ($this->aJobLocation->isModified() || $this->aJobLocation->isNew()) {
-                    $affectedRows += $this->aJobLocation->save($con);
+            if ($this->aLocation !== null) {
+                if ($this->aLocation->isModified() || $this->aLocation->isNew()) {
+                    $affectedRows += $this->aLocation->save($con);
                 }
-                $this->setJobLocation($this->aJobLocation);
+                $this->setLocation($this->aLocation);
             }
 
             if ($this->aJobPostingRelatedByDuplicatesJobPostingId !== null) {
@@ -1572,8 +1572,8 @@ abstract class JobPosting implements ActiveRecordInterface
         if ($this->isColumnModified(JobPostingTableMap::COL_LOCATION_DISPLAY_VALUE)) {
             $modifiedColumns[':p' . $index++]  = 'location_display_value';
         }
-        if ($this->isColumnModified(JobPostingTableMap::COL_JOB_LOCATION_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'job_location_id';
+        if ($this->isColumnModified(JobPostingTableMap::COL_LOCATION_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'location_id';
         }
         if ($this->isColumnModified(JobPostingTableMap::COL_EMPLOYMENT_TYPE)) {
             $modifiedColumns[':p' . $index++]  = 'employment_type';
@@ -1646,8 +1646,8 @@ abstract class JobPosting implements ActiveRecordInterface
                     case 'location_display_value':
                         $stmt->bindValue($identifier, $this->location_display_value, PDO::PARAM_STR);
                         break;
-                    case 'job_location_id':
-                        $stmt->bindValue($identifier, $this->job_location_id, PDO::PARAM_INT);
+                    case 'location_id':
+                        $stmt->bindValue($identifier, $this->location_id, PDO::PARAM_INT);
                         break;
                     case 'employment_type':
                         $stmt->bindValue($identifier, $this->employment_type, PDO::PARAM_STR);
@@ -1772,7 +1772,7 @@ abstract class JobPosting implements ActiveRecordInterface
                 return $this->getLocationDisplayValue();
                 break;
             case 9:
-                return $this->getJobLocationId();
+                return $this->getLocationId();
                 break;
             case 10:
                 return $this->getEmploymentType();
@@ -1846,7 +1846,7 @@ abstract class JobPosting implements ActiveRecordInterface
             $keys[6] => $this->getCompany(),
             $keys[7] => $this->getLocationFromSource(),
             $keys[8] => $this->getLocationDisplayValue(),
-            $keys[9] => $this->getJobLocationId(),
+            $keys[9] => $this->getLocationId(),
             $keys[10] => $this->getEmploymentType(),
             $keys[11] => $this->getDepartment(),
             $keys[12] => $this->getCategory(),
@@ -1881,20 +1881,20 @@ abstract class JobPosting implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->aJobLocation) {
+            if (null !== $this->aLocation) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
-                        $key = 'jobLocation';
+                        $key = 'location';
                         break;
                     case TableMap::TYPE_FIELDNAME:
-                        $key = 'job_location';
+                        $key = 'location';
                         break;
                     default:
-                        $key = 'JobLocation';
+                        $key = 'Location';
                 }
 
-                $result[$key] = $this->aJobLocation->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+                $result[$key] = $this->aLocation->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
             if (null !== $this->aJobPostingRelatedByDuplicatesJobPostingId) {
 
@@ -2003,7 +2003,7 @@ abstract class JobPosting implements ActiveRecordInterface
                 $this->setLocationDisplayValue($value);
                 break;
             case 9:
-                $this->setJobLocationId($value);
+                $this->setLocationId($value);
                 break;
             case 10:
                 $this->setEmploymentType($value);
@@ -2092,7 +2092,7 @@ abstract class JobPosting implements ActiveRecordInterface
             $this->setLocationDisplayValue($arr[$keys[8]]);
         }
         if (array_key_exists($keys[9], $arr)) {
-            $this->setJobLocationId($arr[$keys[9]]);
+            $this->setLocationId($arr[$keys[9]]);
         }
         if (array_key_exists($keys[10], $arr)) {
             $this->setEmploymentType($arr[$keys[10]]);
@@ -2195,8 +2195,8 @@ abstract class JobPosting implements ActiveRecordInterface
         if ($this->isColumnModified(JobPostingTableMap::COL_LOCATION_DISPLAY_VALUE)) {
             $criteria->add(JobPostingTableMap::COL_LOCATION_DISPLAY_VALUE, $this->location_display_value);
         }
-        if ($this->isColumnModified(JobPostingTableMap::COL_JOB_LOCATION_ID)) {
-            $criteria->add(JobPostingTableMap::COL_JOB_LOCATION_ID, $this->job_location_id);
+        if ($this->isColumnModified(JobPostingTableMap::COL_LOCATION_ID)) {
+            $criteria->add(JobPostingTableMap::COL_LOCATION_ID, $this->location_id);
         }
         if ($this->isColumnModified(JobPostingTableMap::COL_EMPLOYMENT_TYPE)) {
             $criteria->add(JobPostingTableMap::COL_EMPLOYMENT_TYPE, $this->employment_type);
@@ -2325,7 +2325,7 @@ abstract class JobPosting implements ActiveRecordInterface
         $copyObj->setCompany($this->getCompany());
         $copyObj->setLocationFromSource($this->getLocationFromSource());
         $copyObj->setLocationDisplayValue($this->getLocationDisplayValue());
-        $copyObj->setJobLocationId($this->getJobLocationId());
+        $copyObj->setLocationId($this->getLocationId());
         $copyObj->setEmploymentType($this->getEmploymentType());
         $copyObj->setDepartment($this->getDepartment());
         $copyObj->setCategory($this->getCategory());
@@ -2386,24 +2386,24 @@ abstract class JobPosting implements ActiveRecordInterface
     }
 
     /**
-     * Declares an association between this object and a ChildJobLocation object.
+     * Declares an association between this object and a ChildLocation object.
      *
-     * @param  ChildJobLocation $v
+     * @param  ChildLocation $v
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setJobLocation(ChildJobLocation $v = null)
+    public function setLocation(ChildLocation $v = null)
     {
         if ($v === null) {
-            $this->setJobLocationId(NULL);
+            $this->setLocationId(NULL);
         } else {
-            $this->setJobLocationId($v->getLocationId());
+            $this->setLocationId($v->getLocationId());
         }
 
-        $this->aJobLocation = $v;
+        $this->aLocation = $v;
 
         // Add binding for other direction of this n:n relationship.
-        // If this object has already been added to the ChildJobLocation object, it will not be re-added.
+        // If this object has already been added to the ChildLocation object, it will not be re-added.
         if ($v !== null) {
             $v->addJobPosting($this);
         }
@@ -2414,26 +2414,26 @@ abstract class JobPosting implements ActiveRecordInterface
 
 
     /**
-     * Get the associated ChildJobLocation object
+     * Get the associated ChildLocation object
      *
      * @param  ConnectionInterface $con Optional Connection object.
-     * @return ChildJobLocation The associated ChildJobLocation object.
+     * @return ChildLocation The associated ChildLocation object.
      * @throws PropelException
      */
-    public function getJobLocation(ConnectionInterface $con = null)
+    public function getLocation(ConnectionInterface $con = null)
     {
-        if ($this->aJobLocation === null && ($this->job_location_id != 0)) {
-            $this->aJobLocation = ChildJobLocationQuery::create()->findPk($this->job_location_id, $con);
+        if ($this->aLocation === null && ($this->location_id != 0)) {
+            $this->aLocation = ChildLocationQuery::create()->findPk($this->location_id, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aJobLocation->addJobPostings($this);
+                $this->aLocation->addJobPostings($this);
              */
         }
 
-        return $this->aJobLocation;
+        return $this->aLocation;
     }
 
     /**
@@ -2750,10 +2750,10 @@ abstract class JobPosting implements ActiveRecordInterface
      * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
      * @return ObjectCollection|ChildJobPosting[] List of ChildJobPosting objects
      */
-    public function getJobPostingsRelatedByJobPostingIdJoinJobLocation(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    public function getJobPostingsRelatedByJobPostingIdJoinLocation(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
     {
         $query = ChildJobPostingQuery::create(null, $criteria);
-        $query->joinWith('JobLocation', $joinBehavior);
+        $query->joinWith('Location', $joinBehavior);
 
         return $this->getJobPostingsRelatedByJobPostingId($query, $con);
     }
@@ -3015,8 +3015,8 @@ abstract class JobPosting implements ActiveRecordInterface
      */
     public function clear()
     {
-        if (null !== $this->aJobLocation) {
-            $this->aJobLocation->removeJobPosting($this);
+        if (null !== $this->aLocation) {
+            $this->aLocation->removeJobPosting($this);
         }
         if (null !== $this->aJobPostingRelatedByDuplicatesJobPostingId) {
             $this->aJobPostingRelatedByDuplicatesJobPostingId->removeJobPostingRelatedByJobPostingId($this);
@@ -3030,7 +3030,7 @@ abstract class JobPosting implements ActiveRecordInterface
         $this->company = null;
         $this->location_from_source = null;
         $this->location_display_value = null;
-        $this->job_location_id = null;
+        $this->location_id = null;
         $this->employment_type = null;
         $this->department = null;
         $this->category = null;
@@ -3074,7 +3074,7 @@ abstract class JobPosting implements ActiveRecordInterface
 
         $this->collJobPostingsRelatedByJobPostingId = null;
         $this->collUserJobMatches = null;
-        $this->aJobLocation = null;
+        $this->aLocation = null;
         $this->aJobPostingRelatedByDuplicatesJobPostingId = null;
     }
 

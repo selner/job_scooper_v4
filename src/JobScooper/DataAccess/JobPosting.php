@@ -27,7 +27,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
     {
         $location = array();
         $arrJobPosting = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
-        $jobloc = $this->getJobLocation();
+        $jobloc = $this->getLocation();
         if(!is_null($jobloc))
             $location = $jobloc->toArray();
         $arrItem = array_merge_recursive_distinct($arrJobPosting, $location);
@@ -59,7 +59,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
     {
         $val = "";
 
-        $location = $this->getJobLocation();
+        $location = $this->getLocation();
         if(!is_null($location))
         {
             $val = $location->getDisplayName();
@@ -120,7 +120,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
     public function setLocationFromSource($v)
     {
         // clear any previous job location ID when we set a new location string
-        $this->setJobLocation(null);
+        $this->setLocation(null);
 
         $v = preg_replace('#(^\s*\(+|\)+\s*$)#', "", $v); // strip leading & ending () chars
         $v = $this->_cleanupTextValue($v);
@@ -137,15 +137,15 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
         parent::setLocationFromSource(trim($v));
 
         if(!is_null($v) && strlen($v) > 0)
-            $this->_findAndSetJobLocationRelation_();
+            $this->_findAndSetLocationRelation_();
     }
 
-    private function _findAndSetJobLocationRelation_()
+    private function _findAndSetLocationRelation_()
     {
         $orig_loc_str = $this->getLocationFromSource();
 
         $locationId = getLocationIdByAlternateName($orig_loc_str);
-        $this->setJobLocationId($locationId);
+        $this->setLocationId($locationId);
         $this->_setDenormalizedLocationDisplayValue_();
     }
 

@@ -18,84 +18,85 @@
 
 
 
-function reloadJobLocationCache()
+function reloadLocationCache()
 {
     LogLine("....reloading Job Location table cache....", \C__DISPLAY_ITEM_DETAIL__);
-    $allLocs = \JobScooper\DataAccess\JobLocationQuery::create()
+    $allLocs = \JobScooper\DataAccess\LocationQuery::create()
         ->find();
 
     if (!array_key_exists('CACHE', $GLOBALS))
         $GLOBALS['CACHE'] = array();
-    $GLOBALS['CACHE']['JobLocationsById'] = array();
-    $GLOBALS['CACHE']['JobLocationsByOsm'] = array();
+
+    $GLOBALS['CACHE']['LocationsById'] = array();
+    $GLOBALS['CACHE']['LocationsByOsmId'] = array();
     foreach ($allLocs as $loc) {
-        $GLOBALS['CACHE']['JobLocationsById'][$loc->getLocationId()] = $loc;
-        $GLOBALS['CACHE']['JobLocationsByOsmId'][$loc->getOpenStreetMapId()] = $loc;
+        $GLOBALS['CACHE']['LocationsById'][$loc->getLocationId()] = $loc;
+        $GLOBALS['CACHE']['LocationsByOsmId'][$loc->getOpenStreetMapId()] = $loc;
     }
 }
 
 
-function getJobLocationById($locationId)
+function getLocationById($locationId)
 {
-    if(!(array_key_exists('CACHE', $GLOBALS) && is_array($GLOBALS['CACHE']['JobLocationsById']) && array_key_exists('JobLocationsById', $GLOBALS['CACHE'])))
-        reloadJobLocationCache();
+    if(!(array_key_exists('CACHE', $GLOBALS) && is_array($GLOBALS['CACHE']['LocationsById']) && array_key_exists('LocationsById', $GLOBALS['CACHE'])))
+        reloadLocationCache();
 
-    if(!array_key_exists($locationId, $GLOBALS['CACHE']['JobLocationsById']))
-        return \JobScooper\DataAccess\JobLocationQuery::create()
+    if(!array_key_exists($locationId, $GLOBALS['CACHE']['LocationsById']))
+        return \JobScooper\DataAccess\LocationQuery::create()
             ->filterByLocationId($locationId)
             ->findOne();
 
-    return $GLOBALS['CACHE']['JobLocationsById'][$locationId];
+    return $GLOBALS['CACHE']['LocationsById'][$locationId];
 }
 
-function getJobLocationByOsmId($osmId)
+function getLocationByOsmId($osmId)
 {
-    if(!array_key_exists('CACHE', $GLOBALS) || !array_key_exists('JobLocationsByOsmId', $GLOBALS['CACHE']))
-        reloadJobLocationCache();
+    if(!array_key_exists('CACHE', $GLOBALS) || !array_key_exists('LocationsByOsmId', $GLOBALS['CACHE']))
+        reloadLocationCache();
 
-    if(!array_key_exists($osmId, $GLOBALS['CACHE']['JobLocationsByOsmId']))
+    if(!array_key_exists($osmId, $GLOBALS['CACHE']['LocationsByOsmId']))
     {
-        return \JobScooper\DataAccess\JobLocationQuery::create()
+        return \JobScooper\DataAccess\LocationQuery::create()
             ->filterByOpenStreetMapId($osmId)
             ->findOne();
     }
 
-    return $GLOBALS['CACHE']['JobLocationsByOsmId'][$osmId];
+    return $GLOBALS['CACHE']['LocationsByOsmId'][$osmId];
 }
 
 
 function reloadLocationNamesCache()
 {
     LogLine("....reloading Job Location Names Lookup table cache....", \C__DISPLAY_ITEM_DETAIL__);
-    $allLocs = \JobScooper\DataAccess\JobPlaceLookupQuery::create()
+    $allLocs = \JobScooper\DataAccess\LocationNamesQuery::create()
         ->find();
 
     if (!array_key_exists('CACHE', $GLOBALS))
         $GLOBALS['CACHE'] = array();
 
-    $GLOBALS['CACHE']['JobPlaceLookup'] = array();
+    $GLOBALS['CACHE']['LocationAlternateNames'] = array();
 
     foreach ($allLocs as $loc) {
-        $GLOBALS['CACHE']['JobPlaceLookup'][$loc->getSlug()] = $loc;
+        $GLOBALS['CACHE']['LocationAlternateNames'][$loc->getSlug()] = $loc;
     }
 }
 
 
-function getJobPlaceLookup($slug)
+function getLocationByNameLookup($slug)
 {
-    if(!array_key_exists('CACHE', $GLOBALS) || !array_key_exists('JobPlaceLookup', $GLOBALS['CACHE']))
+    if(!array_key_exists('CACHE', $GLOBALS) || !array_key_exists('LocationAlternateNames', $GLOBALS['CACHE']))
         reloadLocationNamesCache();
 
-    if(!array_key_exists($slug, $GLOBALS['CACHE']['JobPlaceLookup']))
+    if(!array_key_exists($slug, $GLOBALS['CACHE']['LocationAlternateNames']))
     {
         LogLine("Cache missed; looking up location in database by name string '" . $slug ."'", \C__DISPLAY_NORMAL__);
-        return \JobScooper\DataAccess\JobPlaceLookupQuery::create()
+        return \JobScooper\DataAccess\LocationNamesQuery::create()
             ->filterBySlug($slug)
             ->findOneOrCreate();
 
     }
 
-    return $GLOBALS['CACHE']['JobPlaceLookup'][$slug];
+    return $GLOBALS['CACHE']['LocationAlternateNames'][$slug];
 
 }
 

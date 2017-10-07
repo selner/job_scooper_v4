@@ -341,11 +341,11 @@ function getLocationIdByAlternateName($strLocation)
 {
 
     $slug = cleanupSlugPart($strLocation);
-    $placelookup = getJobPlaceLookup($slug);
+    $placelookup = getLocationByNameLookup($slug);
 
     if(is_null($placelookup->getLocationId()))
     {
-        $placelookup->setPlaceAlternateName($strLocation);
+        $placelookup->setLocationAlternateName($strLocation);
         $placelookup->save();
     }
 
