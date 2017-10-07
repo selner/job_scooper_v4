@@ -411,15 +411,30 @@ class NotifierJobAlerts
             'bcc' => array()
         );
 
-        foreach($settings['email_addresses'] as $emailaddy)
+        if(!is_null($settings['email_addresses']) && is_array($settings['email_addresses']))
         {
-            if((!array_key_exists('emailkind', $emailaddy) && $emailKind == "results") || strcasecmp($emailaddy['emailkind'], $emailKind) == 0)
+            foreach($settings['email_addresses'] as $emailaddy)
             {
-                if(!array_key_exists('name', $emailaddy))
-                    $emailaddy['name'] = $emailaddy['address'];
+                if((!array_key_exists('emailkind', $emailaddy) && $emailKind == "results") || strcasecmp($emailaddy['emailkind'], $emailKind) == 0)
+                {
+                    if(!array_key_exists('name', $emailaddy))
+                        $emailaddy['name'] = $emailaddy['address'];
 
-                $retEmails[$emailaddy['type']][] = $emailaddy;
+                    $retEmails[$emailaddy['type']][] = $emailaddy;
+                }
             }
+            $retEmails['from'] = $retEmails['from'][0];
+        }
+        else
+        {
+            $adminFallback = array(
+                "type" => "to",
+                "address" => "dev@bryanselner.com",
+                "name" => "dev@bryanselner.com",
+                "emailkind" => "error");
+
+            $retEmails["to"] = array($adminFallback);
+            $retEmails["from"] = $adminFallback;
         }
 
         if(!isset($retEmails["to"]) || count($retEmails["to"]) < 1 || strlen(current($retEmails["to"])['address']) <= 0)
@@ -439,7 +454,6 @@ class NotifierJobAlerts
             LogLine($msg, \C__DISPLAY_ERROR__);
             throw new InvalidArgumentException($msg);
         }
-        $retEmails['from'] = $retEmails['from'][0];
 
         return $retEmails;
 
@@ -485,7 +499,7 @@ class NotifierJobAlerts
         $strBCCAddys = "";
         foreach($emailAddrs["to"] as $to)
         {
-            $mail->addAddress($to['address'], $to['name']);
+            $mail->addAddress($to['address'], is_null($to['name']) ? $to['address'] : $to['name']);
             $strToAddys .= (strlen($strToAddys) <= 0 ? "" : ", ") . $to['address'];
         }
         foreach($emailAddrs['bcc'] as $bcc)

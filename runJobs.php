@@ -28,6 +28,7 @@ define('__APP_VERSION__', "v4.1.0-use-propel-orm");
 define('MAX_FILE_SIZE', 5000000);
 $lineEnding = ini_get('auto_detect_line_endings');
 ini_set('auto_detect_line_endings', true);
+$GLOBALS['logger'] = new \JobScooper\Manager\LoggingManager(C__APPNAME__);
 
 $propelConfig = join(DIRECTORY_SEPARATOR, array(__ROOT__, 'Config', 'config.php'));
 if (file_exists($propelConfig)) {

@@ -15,6 +15,33 @@
  * under the License.
  */
 
+/****************************************************************************************************************/
+/****                                                                                                        ****/
+/****         Logging                                                                                        ****/
+/****                                                                                                        ****/
+/****************************************************************************************************************/
+
+const C__NAPPTOPLEVEL__ = 0;
+const C__NAPPFIRSTLEVEL__ = 1;
+const C__NAPPSECONDLEVEL__ = 2;
+const C__SECTION_BEGIN__ = 1;
+const C__SECTION_END__ = 2;
+const C__DISPLAY_NORMAL__ = 100;
+const C__DISPLAY_SECTION_START__ = 250;
+const C__DISPLAY_SECTION_END__ = 275;
+const C__DISPLAY_ITEM_START__ = 200;
+const C__DISPLAY_ITEM_DETAIL__ = 300;
+const C__DISPLAY_ITEM_RESULT__ = 350;
+
+const C__DISPLAY_MOMENTARY_INTERUPPT__ = 400;
+const C__DISPLAY_WARNING__ = 405;
+const C__DISPLAY_ERROR__ = 500;
+const C__DISPLAY_RESULT__ = 600;
+const C__DISPLAY_FUNCTION__= 700;
+const C__DISPLAY_SUMMARY__ = 750;
+
+
+
 
 function LogLine($msg, $scooper_level=\C__DISPLAY_NORMAL__)
 {

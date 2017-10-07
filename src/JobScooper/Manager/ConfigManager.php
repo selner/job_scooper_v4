@@ -164,13 +164,11 @@ class ConfigManager
         // Now setup all the output folders
         $this->__setupOutputFolders__($outputDirectoryDetails['directory']);
 
-        if (!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \ScooperLogger(C__APPNAME__);
-
         $strOutfileArrString = getArrayValuesAsString($GLOBALS['USERDATA']['directories']);
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output folders configured: " . $strOutfileArrString, \C__DISPLAY_ITEM_DETAIL__);
 
         if ($GLOBALS['OPTS']['use_config_ini_given']) {
-            if (!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \ScooperLogger($this->arrFileDetails['config_ini']['directory']);
+            if (!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \LoggingManager($this->arrFileDetails['config_ini']['directory']);
             if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Log file for run being written to: " . $this->arrFileDetails['config_ini']['directory'], \C__DISPLAY_ITEM_DETAIL__);
 
             if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration file details from " . $this->arrFileDetails['config_ini']['full_file_path'], \C__DISPLAY_ITEM_DETAIL__);
@@ -235,6 +233,7 @@ class ConfigManager
             $GLOBALS['USERDATA']['directories'][$d] = realpath($details['directory']);
         }
 
+        $GLOBALS['logger']->addFileHandler(getOutputDirectory('logs'));
     }
 
 

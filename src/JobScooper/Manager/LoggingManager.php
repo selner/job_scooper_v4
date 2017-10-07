@@ -14,38 +14,13 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+namespace JobScooper\Manager;
 
+use Monolog\ErrorHandler;
 use Psr\Log\LogLevel as LogLevel;
 use \Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-
-
-/****************************************************************************************************************/
-/****                                                                                                        ****/
-/****         Logging                                                                                        ****/
-/****                                                                                                        ****/
-/****************************************************************************************************************/
-
-const C__NAPPTOPLEVEL__ = 0;
-const C__NAPPFIRSTLEVEL__ = 1;
-const C__NAPPSECONDLEVEL__ = 2;
-const C__SECTION_BEGIN__ = 1;
-const C__SECTION_END__ = 2;
-const C__DISPLAY_NORMAL__ = 100;
-const C__DISPLAY_SECTION_START__ = 250;
-const C__DISPLAY_SECTION_END__ = 275;
-const C__DISPLAY_ITEM_START__ = 200;
-const C__DISPLAY_ITEM_DETAIL__ = 300;
-const C__DISPLAY_ITEM_RESULT__ = 350;
-
-const C__DISPLAY_MOMENTARY_INTERUPPT__ = 400;
-const C__DISPLAY_WARNING__ = 405;
-const C__DISPLAY_ERROR__ = 500;
-const C__DISPLAY_RESULT__ = 600;
-const C__DISPLAY_FUNCTION__= 700;
-const C__DISPLAY_SUMMARY__ = 750;
-
-
+use DateTime;
 
 
 /****************************************************************************************************************/
@@ -54,10 +29,12 @@ const C__DISPLAY_SUMMARY__ = 750;
 /****                                                                                                        ****/
 /****************************************************************************************************************/
 
-Class ScooperLogger extends \Monolog\Logger
+Class LoggingManager extends \Monolog\Logger
 {
     protected $arrCumulativeErrors = array();
-    private $strOutputDir = null;
+
+    private $_handlersByType = array();
+    private $_loggerName = "default";
 
 
     function addToErrs(&$strErr, $strNew)
@@ -71,27 +48,40 @@ Class ScooperLogger extends \Monolog\Logger
         $GLOBALS['logger'] = null;
 
         $GLOBALS['logger'] = $this;
-        $this->strOutputDir = getOutputDirectory('logs');
-        $today = getTodayAsString("-");
+
         $name = C__APPNAME__;
-        $arrHandlers = array(
-            new StreamHandler($this->strOutputDir . "/{$name}-{$today}.log", isDebug() ? Logger::DEBUG : Logger::INFO),
-            new StreamHandler('php://stderr', isDebug() ? Logger::DEBUG : Logger::INFO)
+        $this->_handlersByType = array(
+            'stderr' => new StreamHandler('php://stderr', isDebug() ? Logger::DEBUG : Logger::INFO),
+            'bufferedmail' => new \Monolog\Handler\BufferHandler(new ErrorEmailHandler(Logger::ERROR, true), $bufferLimit = 100, $level = Logger::ERROR, $bubble = false, $flushOnOverflow = true)
         );
-        parent::__construct($name, $handlers = $arrHandlers);
+        parent::__construct($name, $handlers = $this->_handlersByType);
+
+        ErrorHandler::register($this);
 
         $now = new DateTime('NOW');
-        $this->logLine("Logging started to {$this->strOutputDir} for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'), C__DISPLAY_NORMAL__);
+        $this->logLine("Logging started for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'), C__DISPLAY_NORMAL__);
+    }
+
+    public function addFileHandler($logPath)
+    {
+        $today = getTodayAsString("-");
+        $this->_handlersByType['logfile'] = new StreamHandler($logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$today}.log", isDebug() ? Logger::DEBUG : Logger::INFO);
+        $this->pushHandler($this->_handlersByType['logfile']);
+        $this->logLine("Logging started to logfile at {$logPath}", C__DISPLAY_NORMAL__);
     }
 
     function __destruct()
     {
+        $this->flushErrorNotifications();
         $now = new DateTime('NOW');
         $this->logLine("Logging ended for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'),C__DISPLAY_NORMAL__);
     }
 
+    function flushErrorNotifications()
+    {
+        $this->_handlersByType['bufferedmail']->flush();
 
-
+    }
 
     function logLine($strToPrint, $varDisplayStyle = C__DISPLAY_NORMAL__, $fDebuggingOnly = false)
     {
@@ -183,12 +173,12 @@ Class ScooperLogger extends \Monolog\Logger
             }
 
 
-            $this->log($strLineBeginning . $strToPrint . $strLineEnd, $logLevel);
+            $this->log($logLevel, $strLineBeginning . $strToPrint . $strLineEnd);
 
         }
     }
 
-    public function log($message, $level, array $context = array())
+    public function log($level, $message, array $context = array())
     {
         if($level == LOG_ERR) {  $this->arrCumulativeErrors[] = $message; }
 

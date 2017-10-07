@@ -39,7 +39,7 @@ class StageManager
             $this->classConfig->initialize();
 
             if (!$GLOBALS['logger'])
-                $GLOBALS['logger'] = new \ScooperLogger(C__APPNAME__);
+                $GLOBALS['logger'] = new LoggingManager(C__APPNAME__);
 
 
         } catch (\Exception $ex) {
@@ -52,12 +52,6 @@ class StageManager
     function __destruct()
     {
         LogLine("Closing StageManager instance.", \C__DISPLAY_ITEM_START__);
-    }
-
-    function _cleanUpBeforeExiting()
-    {
-        $err = new NotifierErrors();
-        $err->processAndAlertErrors();
     }
 
 
@@ -87,10 +81,6 @@ class StageManager
             }
         } catch (\Exception $ex) {
             handleException($ex, null, true);
-        }
-        finally
-        {
-            $this->_cleanUpBeforeExiting();
         }
     }
 
