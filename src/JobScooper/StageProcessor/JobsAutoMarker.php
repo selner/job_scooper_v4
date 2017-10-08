@@ -121,7 +121,6 @@ class JobsAutoMarker
             //BUGBUG/TODO DEBUG AND PUT BACK
             //        $this->_markJobsList_SetLikelyDuplicatePosts_($arrJobs_AutoUpdatable);
 
-            //        BUGBUG/TODO DEBUG AND PUT BACK
             $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
 
             $this->_markJobsList_UserExcludedKeywords_($arrJobs_AutoUpdatable);

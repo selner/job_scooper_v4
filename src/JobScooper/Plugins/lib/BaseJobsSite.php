@@ -694,15 +694,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     private function _addSearch_(&$searchDetails)
     {
-
-        /// TODO / BUGBUG
-        /// TODO / BUGBUG
-        /// TODO / BUGBUG
-        /// TODO / BUGBUG
-        /// TODO / BUGBUG
-        /// TODO / BUGBUG
-        /// TODO / BUGBUG
-
         assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || ($searchDetails->getSearchParameter('location_search_value') !== VALUE_NOT_SUPPORTED && strlen($searchDetails->getSearchParameter('location_search_value')) > 0));
 
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
