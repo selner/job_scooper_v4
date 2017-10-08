@@ -15,6 +15,12 @@
  * under the License.
  */
 define('__ROOT__', dirname(__FILE__));
+ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
+define('MAX_FILE_SIZE', 5000000);
+const C__APPNAME__ = "jobs_scooper";
+define('__APP_VERSION__', "v4.1.0-use-propel-orm");
+$lineEnding = ini_get('auto_detect_line_endings');
+ini_set('auto_detect_line_endings', true);
 
 $autoload = join(DIRECTORY_SEPARATOR, array(__ROOT__, 'vendor', 'autoload.php'));
 if (file_exists($autoload)) {
@@ -23,11 +29,6 @@ if (file_exists($autoload)) {
     trigger_error("Composer required to run this app.");
 }
 
-const C__APPNAME__ = "jobs_scooper";
-define('__APP_VERSION__', "v4.1.0-use-propel-orm");
-define('MAX_FILE_SIZE', 5000000);
-$lineEnding = ini_get('auto_detect_line_endings');
-ini_set('auto_detect_line_endings', true);
 $GLOBALS['logger'] = new \JobScooper\Manager\LoggingManager(C__APPNAME__);
 
 $propelConfig = join(DIRECTORY_SEPARATOR, array(__ROOT__, 'Config', 'config.php'));

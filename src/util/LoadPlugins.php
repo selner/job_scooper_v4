@@ -16,7 +16,6 @@
  */
 
 
-ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
 
 //************************************************************************
 //
@@ -123,8 +122,6 @@ const C_JOB_MAX_RESULTS_PER_SEARCH = C__TOTAL_ITEMS_UNKNOWN__;
 
 define('TITLE_NEG_KWD_MATCH', 'No (Title Excluded Via Negative Keyword)');
 define('NO_TITLE_MATCHES', 'No (Title Did Not Match Search Keywords))');
-
-define('JOBS_SCOOPER_MAX_FILE_SIZE', 1024000);
 
 define('REXPR_PARTIAL_MATCH_URL_DOMAIN', '^https*.{3}[^\/]*');
 define('REXPR_MATCH_URL_DOMAIN', '/^https*.{3}[^\/]*/');
