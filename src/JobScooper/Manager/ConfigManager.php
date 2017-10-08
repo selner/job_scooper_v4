@@ -293,7 +293,7 @@ class ConfigManager
         //
         $this->_parseGlobalSearchParametersFromConfig_($config);
 
-        if (isDebug() == true && isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded all configuration settings:  " . var_export($this->allConfigFileSettings, true), \C__DISPLAY_SUMMARY__);
+        LogLine("Loaded all configuration settings" . isDebug() ? ": " . PHP_EOL . var_export($this->allConfigFileSettings, true) : "", \C__DISPLAY_SUMMARY__);
 
 
         $this->_setupPropelForRun();
