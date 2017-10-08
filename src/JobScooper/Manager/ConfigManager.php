@@ -783,7 +783,7 @@ class ConfigManager
             return $search;
         }
 
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Adding " . $search->getLocationKey() . " to search " . $search->getSearchKey() . " ...", \C__DISPLAY_NORMAL__);
+        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Initializing new search for " . $search->getSearchKey() . " with location " . $arrSearchLocation['location_name_key'] . "...", \C__DISPLAY_NORMAL__);
 
 
         $plugin = getPluginObjectForJobSite($search->getJobSiteKey());
