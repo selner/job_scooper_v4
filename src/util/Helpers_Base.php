@@ -298,10 +298,7 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
     $toThrow = $ex;
     if (is_null($toThrow))
         $toThrow = new Exception($fmtLogMsg);
-
-    if (!array_key_exists('ERROR_REPORT_FILES', $GLOBALS['USERDATA']))
-        $GLOBALS['USERDATA']['ERROR_REPORT_FILES'] = array();
-
+    
     $msg = $fmtLogMsg;
     if (!is_null($toThrow) && !is_null($fmtLogMsg) && !is_null($ex) && strlen($fmtLogMsg) > 0)
     {
@@ -320,40 +317,9 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
         $msg = $toThrow->getMessage();
     }
 
-//    $msg .= PHP_EOL . "PHP memory usage: " . getPhpMemoryUsage() . PHP_EOL;
-
-    $excKey = md5($msg);
-
-    //
-    // Error key = <md5 msg hash><line#>
-    //
-    if (array_key_exists($excKey, $GLOBALS['USERDATA']['ERROR_REPORT_FILES']) === true) {
-        // we already stored this error so need to re-store it.  Just throw it if needed.
-        if ($raise === true)
-            throw $toThrow;
-    }
-
     LogLine(PHP_EOL . PHP_EOL . PHP_EOL);
     LogLine($msg, \C__DISPLAY_ERROR__);
     LogLine(PHP_EOL . PHP_EOL . PHP_EOL);
-
-    $now = new DateTime('NOW');
-
-    $debugData = array(
-        "error_time" => $now->format('Y-m-d\TH:i:s'),
-        "exception_code" => $toThrow->getCode(),
-        "exception_message" => $msg,
-        "exception_file" => $toThrow->getFile(),
-        "exception_line" => $toThrow->getLine(),
-        "exception" => object_to_array($toThrow)
-//        "object_properties" => null,
-////        "debug_backtrace" => var_export(debug_backtrace(), true),
-//        "exception_stack_trace" => $ex->getTraceAsString()
-    );
-    $filenm = exportToDebugJSON($debugData, "exception" . $excKey);
-
-    $GLOBALS['USERDATA']['ERROR_REPORT_FILES'][$excKey] = getFilePathDetailsFromString($filenm);
-
 
     if ($raise == true) {
         throw $toThrow;
