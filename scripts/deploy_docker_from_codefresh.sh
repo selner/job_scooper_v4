@@ -50,7 +50,7 @@ ECHO ""
 ECHO "Starting docker container $CONTAINER_NAME from image $DOCKER_IMAGE"
 ECHO ""
 ECHO "***************************************************************"
-DOCKER_RUN="docker run --volume /private/var/local/jobs_scooper:/var/local/jobs_scooper -name $CONTAINER_NAME $DOCKER_IMAGE"
+DOCKER_RUN="docker run --volume /private/var/local/jobs_scooper:/var/local/jobs_scooper --name $CONTAINER_NAME $DOCKER_REPO_IMAGE"
 echo $DOCKER_RUN
 $DOCKER_RUN
 
