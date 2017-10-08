@@ -350,19 +350,19 @@ abstract class BaseJobsSite implements IJobSitePlugin
         }
 
         // Did the user specify an override at the search level in the INI?
-        if ($searchDetails != null && isset($searchDetails['location_user_specified_override']) && strlen($searchDetails['location_user_specified_override']) > 0) {
-            $strReturnLocation = $searchDetails['location_user_specified_override'];
+        if ($searchDetails != null && !is_null($searchDetails->getSearchParameter('location_user_specified_override')) && strlen($searchDetails->getSearchParameter('location_user_specified_override')) > 0) {
+            $strReturnLocation = $searchDetails->getSearchParameter('location_user_specified_override');
         }
-        elseif ($searchDetails != null && isset($searchDetails['location_search_value']) && strlen($searchDetails['location_search_value']) > 0)
+        elseif ($searchDetails != null && !is_null($searchDetails->getSearchParameter('location_search_value')) && strlen($searchDetails->getSearchParameter('location_search_value')) > 0)
         {
-            $strReturnLocation = $searchDetails['location_search_value'];
+            $strReturnLocation = $searchDetails->getSearchParameter('location_search_value');
         }
         else
         {
             // No override, so let's see if the search settings have defined one for us
             $locTypeNeeded = $this->getLocationSettingType();
             if ($locTypeNeeded == null || $locTypeNeeded == "") {
-                LogLine("Plugin for '" . $searchDetails['site_name'] . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchRunKey() . "' with settings '" . $locSettingSets['key'] . "'.", \C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchRunKey() . "' with settings '" . $locSettingSets['key'] . "'.", \C__DISPLAY_ITEM_DETAIL__);
                 return $strReturnLocation;
             }
 
@@ -371,7 +371,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
             }
 
             if ($strReturnLocation == null || $strReturnLocation == VALUE_NOT_SUPPORTED) {
-                LogLine("Plugin for '" . $searchDetails['site_name'] . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchRunKey() . "' with settings '" . $locSettingSets['key'] . "'.", \C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchRunKey() . "' with settings '" . $locSettingSets['key'] . "'.", \C__DISPLAY_ITEM_DETAIL__);
                 return $strReturnLocation;
             }
         }
@@ -398,7 +398,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         $nSubtermMatches = substr_count($strURL, BASE_URL_TAG_LOCATION);
 
         if (!$this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) && $nSubtermMatches > 0) {
-            $strLocationValue = $searchDetails['location_search_value'];
+            $strLocationValue = $searchDetails->getSearchParameter('location_search_value');
             if ($strLocationValue == VALUE_NOT_SUPPORTED) {
                 LogLine("Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() . " set.  Skipping search '" . $searchDetails->getUserSearchRunKey() . ".", \C__DISPLAY_ITEM_DETAIL__);
                 $strURL = VALUE_NOT_SUPPORTED;
@@ -441,12 +441,14 @@ abstract class BaseJobsSite implements IJobSitePlugin
     {
         $strBaseURL = VALUE_NOT_SUPPORTED;
 
-        if ($searchDetails != null && array_key_exists('base_url_format', $searchDetails)) {
-            $strBaseURL = $searchDetails['base_url_format'];
+        if (!is_null($searchDetails->getSearchParameter('base_url_format'))) {
+            $strBaseURL = $searchDetails->getSearchParameter('base_url_format');
         } elseif (!is_null($this->strBaseURLFormat) && strlen($this->strBaseURLFormat) > 0) {
-            $strBaseURL = $searchDetails['base_url_format'] = $this->strBaseURLFormat;
+            $strBaseURL = $this->strBaseURLFormat;
+            $searchDetails->setSearchParameter('base_url_format', $strBaseURL);
         } elseif (!is_null($this->siteBaseURL) && strlen($this->siteBaseURL) > 0) {
-            $strBaseURL = $searchDetails['base_url_format'] = $this->siteBaseURL;
+            $strBaseURL = $this->siteBaseURL;
+            $searchDetails->setSearchParameter('base_url_format', $strBaseURL);
         } else {
             throw new \ErrorException("Could not find base URL format for " . $this->siteName . ".  Aborting all searches for " . $this->siteName, \C__DISPLAY_ERROR__);
         }
@@ -495,8 +497,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
     protected function getKeywordURLValue($searchDetails)
     {
         if (!$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
-            assert($searchDetails->getSearchSettings()['keywords_string_for_url'] != VALUE_NOT_SUPPORTED);
-            return $searchDetails->getSearchSettings()['keywords_string_for_url'];
+            assert($searchDetails->getSearchParameter('keywords_string_for_url') != VALUE_NOT_SUPPORTED);
+            return $searchDetails->getSearchParameter('keywords_string_for_url');
         }
         return "";
     }
@@ -692,13 +694,21 @@ abstract class BaseJobsSite implements IJobSitePlugin
     private function _addSearch_(&$searchDetails)
     {
 
-        assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || ($searchDetails['location_search_value'] !== VALUE_NOT_SUPPORTED && strlen($searchDetails['location_search_value']) > 0));
+        /// TODO / BUGBUG
+        /// TODO / BUGBUG
+        /// TODO / BUGBUG
+        /// TODO / BUGBUG
+        /// TODO / BUGBUG
+        /// TODO / BUGBUG
+        /// TODO / BUGBUG
+
+        assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || ($searchDetails->getSearchParameter('location_search_value') !== VALUE_NOT_SUPPORTED && strlen($searchDetails->getSearchParameter('location_search_value')) > 0));
 
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
             // null out any generalized keyword set values we previously had
-            $searchDetails['keywords_array'] = null;
-            $searchDetails['keywords_array_tokenized'] = null;
-            $searchDetails['keywords_string_for_url'] = null;
+            $searchDetails->setSearchParameter('keywords_array', null);
+            $searchDetails->setSearchParameter('keywords_array_tokenized_array', null);
+            $searchDetails->setSearchParameter('keywords_string_for_url', null);
         } else {
             $this->_setKeywordStringsForSearch_($searchDetails);
         }
@@ -719,32 +729,32 @@ abstract class BaseJobsSite implements IJobSitePlugin
     {
         // Does this search have a set of keywords specific to it that override
         // all the general settings?
-        if (isset($searchDetails['keyword_search_override']) && strlen($searchDetails['keyword_search_override']) > 0) {
+        if (is_null($searchDetails->getSearchParameter('keyword_search_override')) && strlen($searchDetails->getSearchParameter('keyword_search_override')) > 0) {
             // keyword_search_override should only ever be a string value for any given search
-            assert(!is_array($searchDetails['keyword_search_override']));
+            assert(!is_array($searchDetails->getSearchParameter('keyword_search_override')));
 
             // null out any generalized keyword set values we previously had
-            $searchDetails['keywords_array'] = null;
-            $searchDetails['keywords_string_for_url'] = null;
+            $searchDetails->setSearchParameter('keywords_array', null);
+            $searchDetails->setSearchParameter('keywords_string_for_url', null);
 
             //
             // Now take the override value and setup the keywords_array
             // and URL value for that particular string
             //
-            $searchDetails['keywords_array'] = array($searchDetails['keyword_search_override']);
+            $searchDetails->setSearchParameter('keywords_array', array($searchDetails->getSearchParameter('keyword_search_override')));
         }
 
-        if (isset($searchDetails['keywords_array'])) {
-            assert(is_array($searchDetails['keywords_array']));
-
-            $searchDetails['keywords_string_for_url'] = $this->_getCombinedKeywordStringForURL_($searchDetails['keywords_array']);
+        if (!is_null($searchDetails->getSearchParameter('keywords_array')))
+        {
+            $searchDetails->setSearchParameter('keywords_string_for_url', $this->_getCombinedKeywordStringForURL_($searchDetails->getSearchParameter('keywords_array')));
+            $searchDetails->setSearchParameter('keywords_array', array());
         }
 
         // Lastly, check if we support keywords in the URL at all for this
         // plugin.  If not, remove any keywords_string_for_url value we'd set
         // and set it to "not supported"
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
-            $searchDetails['keywords_string_for_url'] = VALUE_NOT_SUPPORTED;
+            $searchDetails->setSearchParameter('keywords_string_for_url', VALUE_NOT_SUPPORTED);
         }
     }
 
@@ -783,8 +793,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
         if (is_null($searchStartURL) || strlen($searchStartURL) == 0)
             $searchStartURL = $this->siteBaseURL;
 
-        $searchDetails['search_start_url'] = $searchStartURL;
-        LogLine("Setting start URL for " . $this->siteName . "[" . $searchDetails->getUserSearchRunKey() . "] to: " . PHP_EOL . $searchDetails['search_start_url'], \C__DISPLAY_ITEM_DETAIL__);
+        $searchDetails->setSearchParameter('search_start_url', $searchStartURL);
+        LogLine("Setting start URL for " . $this->siteName . "[" . $searchDetails->getUserSearchRunKey() . "] to: " . PHP_EOL . $searchDetails->getSearchParameter('search_start_url'), \C__DISPLAY_ITEM_DETAIL__);
 
     }
 
@@ -817,7 +827,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         try {
 
             // get the url for the first page/items in the results
-            if ($this->_checkInvalidURL_($searchDetails, $searchDetails['search_start_url']) == VALUE_NOT_SUPPORTED) return;
+            if ($this->_checkInvalidURL_($searchDetails, $searchDetails->getSearchParameter('search_start_url')) == VALUE_NOT_SUPPORTED) return;
 
             LogLine(("Starting data pull for " . $this->siteName . "[" . $searchDetails->getUserSearchRunKey() . "]"), \C__DISPLAY_ITEM_RESULT__);
 
@@ -836,7 +846,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
             // then we are likely broken somehow unexpectedly.   Make sure to error so that we note
             // it in the results & error notifications so that a developer can take a look.
             if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$this->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED) && countJobRecords($this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()]) == 0) {
-                $strError = "The search " . $searchDetails->getUserSearchRunKey() . " on " . $this->siteName . " downloaded 0 jobs yet we did not have any keyword filter is use.  Logging as a potential error since we should have had something returned. [URL=" . $searchDetails['search_start_url'] . "].  ";
+                $strError = "The search " . $searchDetails->getUserSearchRunKey() . " on " . $this->siteName . " downloaded 0 jobs yet we did not have any keyword filter is use.  Logging as a potential error since we should have had something returned. [URL=" . $searchDetails->getSearchParameter('search_start_url') . "].  ";
                 handleException(new Exception($strError), null, true);
             }
 
@@ -862,7 +872,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 // Not the known issue case, so log the error and re-throw the exception
                 // if we should have thrown one
                 //
-                $strError = "Failed to download jobs from " . $this->siteName . " jobs for search '" . $searchDetails->getUserSearchRunKey() . "[URL=" . $searchDetails['search_start_url'] . "]. Exception Details: ";
+                $strError = "Failed to download jobs from " . $this->siteName . " jobs for search '" . $searchDetails->getUserSearchRunKey() . "[URL=" . $searchDetails->getSearchParameter('search_start_url') . "]. Exception Details: ";
                 $this->_setSearchResult_($searchDetails, false, new Exception($strError . strval($ex)));
                 handleException($ex, $strError, false);
             }
@@ -878,9 +888,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     private function _checkInvalidURL_($details, $strURL)
     {
-        if ($strURL == null) throw new \ErrorException("Skipping " . $this->siteName . " search '" . $details['key'] . "' because a valid URL could not be set.");
+        if ($strURL == null) throw new \ErrorException("Skipping " . $this->siteName . " search '" . $details->getUserSearchKey() . "' because a valid URL could not be set.");
         return $strURL;
-        // if($strURL == VALUE_NOT_SUPPORTED) LogLine("Skipping " . $this->siteName ." search '".$details['key']. "' because a valid URL could not be set.");
     }
 
     private function _setSearchResult_(&$searchDetails, $success = null, $except = null, $runWasSkipped=false)
@@ -1181,29 +1190,29 @@ abstract class BaseJobsSite implements IJobSitePlugin
         $nPageCount = 1;
         $objSimpleHTML = null;
 
-        LogLine("Getting count of " . $this->siteName . " jobs for search '" . $searchDetails->getUserSearchRunKey() . "': " . $searchDetails['search_start_url'], \C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Getting count of " . $this->siteName . " jobs for search '" . $searchDetails->getUserSearchRunKey() . "': " . $searchDetails->getSearchParameter('search_start_url'), \C__DISPLAY_ITEM_DETAIL__);
 
         try {
             if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
                 try {
                     if (is_null($this->selenium)) {
-                        $this->selenium = new \SeleniumManager($this->additionalLoadDelaySeconds);
+                        $this->selenium = new SeleniumManager($this->additionalLoadDelaySeconds);
                     }
 
                     if(method_exists($this, "doFirstPageLoad") && $nPageCount == 1)
                         $html = $this->doFirstPageLoad($searchDetails);
                     else
-                        $html = $this->selenium->getPageHTML($searchDetails['search_start_url']);
+                        $html = $this->selenium->getPageHTML($searchDetails->getSearchParameter('search_start_url'));
                     $objSimpleHTML = \SimpleHTMLHelper::str_get_html($html);
                 } catch (Exception $ex) {
                     $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
                     handleException(new Exception($strError), null, true);
                 }
             } else {
-                $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $searchDetails['search_start_url'], $this->secsPageTimeout, $referrer = $this->prevURL, $cookies = $this->prevCookies);
+                $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $searchDetails->getSearchParameter('search_start_url'), $this->secsPageTimeout, $referrer = $this->prevURL, $cookies = $this->prevCookies);
             }
             if (!$objSimpleHTML) {
-                throw new \ErrorException("Error:  unable to get SimpleHTML object for " . $searchDetails['search_start_url']);
+                throw new \ErrorException("Error:  unable to get SimpleHTML object for " . $searchDetails->getSearchParameter('search_start_url'));
             }
 
             $totalPagesCount = C__TOTAL_ITEMS_UNKNOWN__;
@@ -1266,9 +1275,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
             } else {
                 $nJobsFound = 0;
 
-                LogLine("Querying " . $this->siteName . " for " . $totalPagesCount . " pages with " . ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ ? "an unknown number of" : $nTotalListings) . " jobs:  " . $searchDetails['search_start_url'], \C__DISPLAY_ITEM_START__);
+                LogLine("Querying " . $this->siteName . " for " . $totalPagesCount . " pages with " . ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ ? "an unknown number of" : $nTotalListings) . " jobs:  " . $searchDetails->getSearchParameter('search_start_url'), \C__DISPLAY_ITEM_START__);
 
-                $strURL = $searchDetails['search_start_url'];
+                $strURL = $searchDetails->getSearchParameter('search_start_url');
                 while ($nPageCount <= $totalPagesCount) {
 
                     $arrPageJobsList = null;

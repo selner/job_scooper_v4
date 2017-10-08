@@ -20,7 +20,7 @@
 
 function reloadLocationCache()
 {
-    LogLine("....reloading Job Location table cache....", \C__DISPLAY_ITEM_DETAIL__);
+    LogLine("....reloading Location table cache....", \C__DISPLAY_ITEM_DETAIL__);
     $allLocs = \JobScooper\DataAccess\LocationQuery::create()
         ->find();
 
@@ -67,7 +67,7 @@ function getLocationByOsmId($osmId)
 
 function reloadLocationNamesCache()
 {
-    LogLine("....reloading Job Location Names Lookup table cache....", \C__DISPLAY_ITEM_DETAIL__);
+    LogLine("....reloading Location Names Lookup table cache....", \C__DISPLAY_ITEM_DETAIL__);
     $allLocs = \JobScooper\DataAccess\LocationNamesQuery::create()
         ->find();
 

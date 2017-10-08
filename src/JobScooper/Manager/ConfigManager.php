@@ -22,7 +22,6 @@ use const JobScooper\Plugins\lib\VALUE_NOT_SUPPORTED;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use JobScooper\DataAccess\UserSearchRun;
-use JobScooper\DataAccess\SearchSettings;
 use  \Propel\Runtime\Propel;
 
 
@@ -308,15 +307,9 @@ class ConfigManager
         //
         $this->_parsePluginSettingsFromConfig_($config);
 
-
         $this->_parseKeywordSetsFromConfig_($config);
 
         $this->_parseLocationSetsFromConfig_($config);
-
-        //
-        // Load any specific searches specified by the user in the config
-        //
-        $this->_parseSearchesFromConfig__($config);
 
 
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("All INI files loaded. Finalizing configuration for run...", \C__DISPLAY_SECTION_START__);
@@ -401,51 +394,6 @@ class ConfigManager
         return $ret;
     }
 
-
-    private function _parseSearchesFromConfig__($config)
-    {
-        $GLOBALS['USERDATA']['configuration_settings']['defined-searches'] = array();
-
-        if (!$config) throw new \ErrorException("Invalid configuration.  Cannot load user's searches.");
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading searches from config file...", \C__DISPLAY_ITEM_START__);
-
-        if (isset($config['search'])) {
-            if (!is_array($config['search'])) {
-                $config['search'] = array($config['search']);
-            }
-            foreach (array_keys($config['search']) as $searchKey) {
-                $iniSearch = $config['search'][$searchKey];
-                $iniSearch['key'] = $searchKey;
-                $retSearch = $this->_parseSearchFromINI_($iniSearch);
-                if (isset($retSearch)) $GLOBALS['USERDATA']['configuration_settings']['defined-searches'][$retSearch['key']] = $retSearch;
-            }
-        }
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['configuration_settings']['defined-searches']) . " searches. ", \C__DISPLAY_ITEM_RESULT__);
-    }
-
-    private function _parseSearchFromINI_($iniSearch)
-    {
-        $newSearch = new \JobScooper\DataAccess\UserSearchRun();
-
-        $newSearch->setSearchKey(strScrub($iniSearch['key'], REMOVE_EXTRA_WHITESPACE | LOWERCASE));
-        $newSearch->setJobSiteKey(strScrub($iniSearch['jobsite'], REMOVE_EXTRA_WHITESPACE | LOWERCASE));
-
-        $strJobSiteKey = $newSearch->getJobSiteKey();
-        if (isset($GLOBALS['USERDATA']['configuration_settings']['included_sites']) && !isset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$strJobSiteKey])) {
-            LogLine($iniSearch['jobsite'] . "search " . $iniSearch['name'] . " was not added; " . $strJobSiteKey . " is excluded for this run.", \C__DISPLAY_ITEM_DETAIL__);
-            return null;
-        }
-        $searchSettings = new \JobScooper\DataAccess\SearchSettings();
-        $searchSettings['base_url_format'] = array_key_exists('url_format', $iniSearch) ? $iniSearch['url_format'] : null;
-        $searchSettings['location_user_specified_override'] = array_key_exists('location', $iniSearch) ? $iniSearch['location'] : null;
-        $newSearch->setSearchSettings($searchSettings);
-
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Search loaded from config INI: " . $newSearch->getUserSearchRunKey(), \C__DISPLAY_ITEM_DETAIL__);
-
-        return $newSearch;
-    }
-
-
     private function _parsePluginSettingsFromConfig_($config)
     {
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading plugin setup information from config file...", \C__DISPLAY_ITEM_START__);
@@ -471,19 +419,37 @@ class ConfigManager
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading global search settings from config file...", \C__DISPLAY_ITEM_START__);
 
         if (array_key_exists('global_search_options', $config)) {
-            foreach (array_keys($config['global_search_options']) as $gso) {
-                if ((strtolower($gso) == 'excluded_jobsites') && isset($config['global_search_options']['excluded_jobsites'])) {
-                    if (is_string($config['global_search_options']['excluded_jobsites'])) {
-                        $config['global_search_options']['excluded_jobsites'] = explode(",", $config['global_search_options']['excluded_jobsites']);
+            foreach (array_keys($config['global_search_options']) as $gso)
+            {
+                if(!is_null($config['global_search_options'][$gso]) && isset($config['global_search_options'][$gso]))
+                {
+                    switch (strtoupper($gso))
+                    {
+                        case 'EXCLUDED_JOBSITES':
+                            if (is_string($config['global_search_options']['excluded_jobsites'])) {
+                                $config['global_search_options']['excluded_jobsites'] = explode(",", $config['global_search_options']['excluded_jobsites']);
+                            }
+                            if (!is_array($config['global_search_options']['excluded_jobsites'])) {
+                                $config['global_search_options']['excluded_jobsites'] = array($config['global_search_options']['excluded_jobsites']);
+                            }
+                            foreach ($config['global_search_options']['excluded_jobsites'] as $excludedSite) {
+                                setSiteAsExcluded($excludedSite);
+                            }
+                            break;
+
+                        case 'SEARCH_LOCATION':
+                            if (!is_array($config['global_search_options'][$gso]))
+                                $config['global_search_options'][$gso] = array($config['global_search_options'][$gso]);
+                            foreach ($config['global_search_options'][$gso] as $search_location)
+                            {
+                                $this->_configureSearchLocation_($search_location);
+                            }
+                        break;
+
+                        default:
+                        $GLOBALS['USERDATA']['configuration_settings'][$gso] = $config['global_search_options'][$gso];
+                            break;
                     }
-                    if (!is_array($config['global_search_options']['excluded_jobsites'])) {
-                        $config['global_search_options']['excluded_jobsites'] = array($config['global_search_options']['excluded_jobsites']);
-                    }
-                    foreach ($config['global_search_options']['excluded_jobsites'] as $excludedSite) {
-                        setSiteAsExcluded($excludedSite);
-                    }
-                } else {
-                    $GLOBALS['USERDATA']['configuration_settings'][$gso] = $config['global_search_options'][$gso];
                }
             }
         }
@@ -514,6 +480,26 @@ class ConfigManager
         $GLOBALS['USERDATA']['selenium']['host_location'] = 'http://' . $GLOBALS['USERDATA']['selenium']['server'] . ":" . $GLOBALS['USERDATA']['selenium']['port'];
 
     }
+    private function _configureSearchLocation_($location_string)
+    {
+        if (!$location_string) throw new \ErrorException("Invalid configuration: search location value was empty.");
+        if (!array_key_exists('search_locations', $GLOBALS['USERDATA']['configuration_settings']))
+            $GLOBALS['USERDATA']['configuration_settings']['search_locations'] = array();
+
+        $loclookup = findOrCreateLocationLookupFromName($location_string);
+
+
+        if(!is_null($loclookup))
+        {
+            $loc = $loclookup->getLocation();
+            $GLOBALS['USERDATA']['configuration_settings']['search_locations'][$loc->getLocationKey()] = array(
+                'location_raw_source_value' => $location_string,
+                'location_name_key' => $loclookup->getSlug(),
+                'location_name_lookup' => $loclookup);
+        }
+
+    }
+
 
     private function _parseLocationSetsFromConfig_($config)
     {
@@ -622,17 +608,10 @@ class ConfigManager
     }
 
 
+
+
     private function _addSearchesForKeywordSets_()
     {
-
-        foreach($GLOBALS['USERDATA']['configuration_settings']['defined-searches'] as &$searchDetails)
-        {
-            $searchSettings = new SearchSettings();
-            $searchSettings['keywords_array'] = $searchDetails['keywords_array'];
-            $searchSettings['keywords_array_tokenized'] = $searchDetails['keywords_array_tokenized'];
-
-        }
-
         $arrSearchesPreLocation = array();
         //
         // explode any keyword sets we loaded into separate searches
@@ -645,49 +624,45 @@ class ConfigManager
 
             foreach ($GLOBALS['USERDATA']['configuration_settings']['keyword_sets'] as $keywordSet) {
                 $arrSkippedPlugins = null;
-                if (isset($GLOBALS['USERDATA']['configuration_settings']['included_sites'])) {
-
-                    if (count($GLOBALS['USERDATA']['configuration_settings']['included_sites']) > 0) {
-                        foreach ($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $siteToSearch) {
-                            $plugin = getPluginObjectForJobSite($siteToSearch);
-                            $searchKey = cleanupSlugPart($keywordSet['key']);
-                            if ($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
-                                $searchKey = "alljobs";
-                            }
-                            $newSearch = findOrCreateUserSearchRun($searchKey, $siteToSearch);
-
-                            $searchSettings = new SearchSettings();
-                            $searchSettings['keywords_array'] = $keywordSet['keywords_array'];
-                            $searchSettings['keywords_array_tokenized'] = $keywordSet['keywords_array_tokenized'];
-                            $newSearch->setSearchSettings($searchSettings);
-
-                            if ($plugin->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED)) {
-                                $arrSkippedPlugins[] = $siteToSearch;
-                                continue;
-                            }
-                            elseif($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
-                                $newSearch->save();
-                                $arrSearchesPreLocation[$newSearch->getUserSearchRunKey()] = $newSearch;
-                            }
-                            else // if not, we need to add search for each keyword using that word as a single value in a keyword set
-                            {
-                                $arrKeys = array_keys($keywordSet['keywords_array']);
-                                foreach ($arrKeys as $kwdkey) {
-                                    $thisSearchKey = $searchKey . "-" . strScrub($kwdkey, FOR_LOOKUP_VALUE_MATCHING);
-                                    $thisSearch = findOrCreateUserSearchRun($thisSearchKey, $newSearch->getJobSiteKey(), $newSearch->getLocationKey());
-
-                                    $searchSettings['keywords_array'] = array($keywordSet['keywords_array'][$kwdkey]);
-                                    $searchSettings['keywords_array_tokenized'] = array($keywordSet['keywords_array_tokenized'][$kwdkey]);
-                                    $thisSearch->setSearchSettings($searchSettings);
-                                    $thisSearch->save();
-                                    $arrSearchesPreLocation[$thisSearch->getUserSearchRunKey()] = $thisSearch;
-                                }
-                                $newSearch->delete();
-                            }
+                if (isset($GLOBALS['USERDATA']['configuration_settings']['included_sites']) && count($GLOBALS['USERDATA']['configuration_settings']['included_sites']) > 0)
+                {
+                    foreach ($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $siteToSearch)
+                    {
+                        $plugin = getPluginObjectForJobSite($siteToSearch);
+                        $searchKey = cleanupSlugPart($keywordSet['key']);
+                        if ($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
+                            $searchKey = "alljobs";
                         }
-                    } else {
-                        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("No searches were set for keyword set " . $keywordSet['name'], \C__DISPLAY_ITEM_DETAIL__);
+                        $newSearch = findOrCreateUserSearchRun($searchKey, $siteToSearch);
+
+                        $newSearch->setSearchParameter('keywords_array', $keywordSet['keywords_array']);
+                        $newSearch->setSearchParameter('keywords_array_tokenized', $keywordSet['keywords_array_tokenized']);
+
+                        if ($plugin->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED)) {
+                            $arrSkippedPlugins[] = $siteToSearch;
+                            continue;
+                        }
+                        elseif($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
+                            $newSearch->save();
+                            $arrSearchesPreLocation[$newSearch->getUserSearchRunKey()] = $newSearch;
+                        }
+                        else // if not, we need to add search for each keyword using that word as a single value in a keyword set
+                        {
+                            $arrKeys = array_keys($keywordSet['keywords_array']);
+                            foreach ($arrKeys as $kwdkey) {
+                                $thisSearchKey = $searchKey . "-" . strScrub($kwdkey, FOR_LOOKUP_VALUE_MATCHING);
+                                $thisSearch = findOrCreateUserSearchRun($thisSearchKey, $newSearch->getJobSiteKey(), $newSearch->getLocationKey(), $newSearch);
+
+                                $thisSearch->setSearchParameter('keywords_array', array($keywordSet['keywords_array'][$kwdkey]));
+                                $thisSearch->setSearchParameter('keywords_array_tokenized', $keywordSet['keywords_array_tokenized'][$kwdkey]);
+                                $thisSearch->save();
+                                $arrSearchesPreLocation[$thisSearch->getUserSearchRunKey()] = $thisSearch;
+                            }
+                            $newSearch->delete();
+                        }
                     }
+                } else {
+                    if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("No searches were set for keyword set " . $keywordSet['name'], \C__DISPLAY_ITEM_DETAIL__);
                 }
 
                 if (count($arrSkippedPlugins) > 0)
@@ -702,35 +677,43 @@ class ConfigManager
 
             if(count($arrSearchesPreLocation) > 0)
             {
-                $arrLocations = getConfigurationSettings('location_sets');
-                if(isset($arrLocations) && is_array($arrLocations) && count($arrLocations) >= 1) {
-                    foreach ($arrSearchesPreLocation as $search) {
+                $arrLocations = getConfigurationSettings('search_locations');
+                if(isset($arrLocations) && is_array($arrLocations) && count($arrLocations) >= 1)
+                {
+                    foreach ($arrSearchesPreLocation as $search)
+                    {
                         $plugin = getPluginObjectForJobSite($search->getJobSiteKey());
-                        if ($plugin->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || $plugin->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED)) {
+
+                        if ($plugin->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || $plugin->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED))
+                        {
                             // this search doesn't support specifying locations so we shouldn't clone it for a second location set
                             $GLOBALS['USERDATA']['configuration_settings']['searches'][$search->getUserSearchRunKey()] = $search;
                             continue;
                         }
 
-                        foreach ( $arrLocations as $locset)
+                        foreach ( $arrLocations as $searchlocation)
                         {
-                            if (array_key_exists("location-countrycode", $locset) )
-                                $GLOBALS['USERDATA']['configuration_settings']['country_codes'][$locset['country_code']] = $locset['location-countrycode'];
+                            $loc = $searchlocation['location_name_lookup']->getLocation();
+
+                            if (!is_null($loc->getCountryCode() ))
+                                $GLOBALS['USERDATA']['configuration_settings']['country_codes'][$loc->getCountryCode()] = $loc->getCountryCode();
 
                             $plugin = getPluginObjectForJobSite($search->getJobSiteKey());
                             $pluginCountries = $plugin->getSupportedCountryCodes();
-                            if (!is_null($pluginCountries)) {
+                            if (!is_null($pluginCountries))
+                            {
                                 $matchedCountries = array_intersect($pluginCountries, $GLOBALS['USERDATA']['configuration_settings']['country_codes']);
-                                if ($matchedCountries === false || count($matchedCountries) == 0) {
+                                if ($matchedCountries === false || count($matchedCountries) == 0)
+                                {
                                     LogLine("Skipping search " . $search->getUserSearchRunKey() . " because it does not support any of the country codes required (" . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['country_codes']));
                                     continue;
                                 }
                             }
 
-                            $searchForLoc = $this->_getSearchForLocation_($search, $locset);
+                            $searchForLoc = $this->_getSearchForSpecificLocationName_($search, $searchlocation);
 
-                            $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchForLoc->getUserSearchRunKey()] = $searchForLoc;
-                            $searchForLoc = null;
+                            if(!is_null($searchForLoc))
+                                $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchForLoc->getUserSearchRunKey()] = $searchForLoc;
                         }
                         $search->delete();
                     }
@@ -739,51 +722,99 @@ class ConfigManager
             else
                 $GLOBALS['USERDATA']['configuration_settings']['searches'] = $arrSearchesPreLocation;
 
+//
+//            //
+//            // Full set of searches loaded (location-agnostic).  We've now
+//            // got the full set of searches, so update the set with the
+//            // primary location data we have in the config.
+//            //
+//
+//            if(count($arrSearchesPreLocation) > 0)
+//            {
+//                $arrLocations = getConfigurationSettings('location_sets');
+//                if(isset($arrLocations) && is_array($arrLocations) && count($arrLocations) >= 1) {
+//                    foreach ($arrSearchesPreLocation as $search) {
+//                        $plugin = getPluginObjectForJobSite($search->getJobSiteKey());
+//                        if ($plugin->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || $plugin->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED)) {
+//                            // this search doesn't support specifying locations so we shouldn't clone it for a second location set
+//                            $GLOBALS['USERDATA']['configuration_settings']['searches'][$search->getUserSearchRunKey()] = $search;
+//                            continue;
+//                        }
+//
+//                        foreach ( $arrLocations as $locset)
+//                        {
+//                            if (array_key_exists("location-countrycode", $locset) )
+//                                $GLOBALS['USERDATA']['configuration_settings']['country_codes'][$locset['country_code']] = $locset['location-countrycode'];
+//
+//                            $plugin = getPluginObjectForJobSite($search->getJobSiteKey());
+//                            $pluginCountries = $plugin->getSupportedCountryCodes();
+//                            if (!is_null($pluginCountries)) {
+//                                $matchedCountries = array_intersect($pluginCountries, $GLOBALS['USERDATA']['configuration_settings']['country_codes']);
+//                                if ($matchedCountries === false || count($matchedCountries) == 0) {
+//                                    LogLine("Skipping search " . $search->getUserSearchRunKey() . " because it does not support any of the country codes required (" . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['country_codes']));
+//                                    continue;
+//                                }
+//                            }
+//
+//                            $searchForLoc = $this->_getSearchForLocation_($search, $locset);
+//
+//                            $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchForLoc->getUserSearchRunKey()] = $searchForLoc;
+//                            $searchForLoc = null;
+//                        }
+//                        $search->delete();
+//                    }
+//                }
+//            }
+//            else
+//                $GLOBALS['USERDATA']['configuration_settings']['searches'] = $arrSearchesPreLocation;
+
         }
     }
-
-
-    private function _getSearchForLocation_($search, $locset)
+    private function _getSearchForSpecificLocationName_($search, $arrSearchLocation)
     {
-        $searchRunKey = $search->getUserSearchRunKey();
-
+        $locNameLookup = $arrSearchLocation['location_name_lookup'];
         if ($search->isSearchIncludedInRun() !== true) {
             // this site was excluded for this run, so continue.
             return $search;
         }
 
-        if (!is_null($search['location_user_specified_override'])) {
+        if (!is_null($search->getSearchParameter('location_user_specified_override'))) {
             // this search already has a location from the user, so we just do nothing else
             return $search;
         }
 
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Adding " . $locset['key'] . " location set to " . $searchRunKey . " searches...", \C__DISPLAY_NORMAL__);
+        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Adding " . $search->getLocationKey() . " to search " . $search->getSearchKey() . " ...", \C__DISPLAY_NORMAL__);
+
 
         $plugin = getPluginObjectForJobSite($search->getJobSiteKey());
 
         $locTypeNeeded = $plugin->getLocationSettingType();
         if (!is_null($locTypeNeeded)) {
 
-            $newSearch = findOrCreateUserSearchRun($search->getSearchKey(), $search->getJobSiteKey(), $locset['key']);
-            $newSearchFacts = array_diff_key($search->toArray(), array_fill_keys(array("UserSearchRunId", "SearchKey", "JobSiteKey", "UserSearchRunKey", "LocationKey"), ""));
-            $newSearch->fromArray($newSearchFacts);
+            $newSearch = findOrCreateUserSearchRun($search->getSearchKey(), $search->getJobSiteKey(), $arrSearchLocation['location_name_key'], $search);
 
-            if (array_key_exists($locTypeNeeded, $locset))
-                $newSearch['location_search_value'] = $locset[$locTypeNeeded];
-            else {
-                handleException(new \IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' for %s was not found in the location set %s.  Location set values: %s", $locTypeNeeded, $search->getJobSiteKey(), $locset['key'], var_export($locset['key'], true))), null, $raise = false);
-                setSiteAsExcluded($$newSearch->getJobSiteKey());
+            $location = $locNameLookup->getLocation();
+            $newSearch->setLocation($location);
+
+            $formatted_search_term = $location->formatLocationByLocationType($locTypeNeeded);
+            $newSearch->setSearchParameter('location_search_value', $formatted_search_term);
+            if (is_null($formatted_search_term) || strlen($formatted_search_term) == 0)
+            {
+                LogLine(sprintf("Requested location type setting of '%s' for %s was not found for search location %s.", $locTypeNeeded, $search->getJobSiteKey(), $arrSearchLocation['location_name_key']), C__DISPLAY_WARNING__);
+                return null;
             }
 
-            if (!isValueURLEncoded($newSearch['location_search_value'])) {
-                $newSearch['location_search_value'] = urlencode($newSearch['location_search_value']);
+            if (!isValueURLEncoded($newSearch->getSearchParameter('location_search_value'))) {
+                $newSearch->setSearchParameter('location_search_value', urlencode($newSearch->getSearchParameter('location_search_value')));
             }
 
             if ($plugin->isBitFlagSet(C__JOB_LOCATION_REQUIRES_LOWERCASE)) {
-                $newSearch['location_search_value'] = strtolower($newSearch['location_search_value']);
+                $newSearch->setSearchParameter('location_search_value', strtolower($newSearch->getSearchParameter('location_search_value')));
             }
 
             $newSearch->save();
+
+            // BUGBUG:  2nd search returns Seattle as search string value when it should be blank
             return $newSearch;
         }
 
@@ -807,14 +838,14 @@ class ConfigManager
             //
             foreach (array_keys($arrSearchConfigSettings) as $z) {
                 $curSearchSettings = $arrSearchConfigSettings[$z];
-                $jobsitekey = cleanupSlugPart($curSearchSettings['site_name']);
+                $jobsitekey = cleanupSlugPart($curSearchSettings->getJobSiteKey());
 
                 if($curSearchSettings->getJobSiteObject()->isSearchIncludedInRun())
                 {
                     if(!array_key_exists($jobsitekey, $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN']))
                         $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'][$jobsitekey] = array();
 
-                    $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'][$jobsitekey][$curSearchSettings['key']] = $curSearchSettings;
+                    $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'][$jobsitekey][$curSearchSettings->getUserSearchRunKey()] = $curSearchSettings;
                 }
             }
         }

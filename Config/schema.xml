@@ -23,7 +23,7 @@
           xsi:noNamespaceSchemaLocation="http://xsd.propelorm.org/1.6/database.xsd"
           namespace="JobScooper\DataAccess"
           defaultPhpNamingMethod="clean"
-        >
+>
     <!-- Within the <database> tag, Propel expects one <table> tag for each table -->
 
 
@@ -61,7 +61,8 @@
             As for the other column attributes, `required`, `primaryKey`, and `autoIncrement`, they mean exactly
             what their names imply.
         -->
-        <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true" primaryKey="true"
+                autoIncrement="true"/>
 
 
         <!--
@@ -69,7 +70,7 @@
         -->
         <column name="jobsite" phpName="JobSite" type="varchar" size="100" required="true"/>
         <!--<foreign-key foreignTable="jobsite_plugin" onUpdate="none" onDelete="none">-->
-            <!--<reference local="jobsite" foreign="key"/>-->
+        <!--<reference local="jobsite" foreign="key"/>-->
         <!--</foreign-key>-->
 
         <column name="jobsite_post_id" phpName="JobSitePostID" type="varchar" size="255" required="true"/>
@@ -85,12 +86,13 @@
         <column name="title_tokens" phpName="TitleTokens" type="varchar" size="255" required="false"/>
         <column name="url" type="varchar" size="1024" required="true"/>
         <!--<unique name="index_jobsite_url/">-->
-            <!--<unique-column name="url"/>-->
+        <!--<unique-column name="url"/>-->
         <!--</unique>-->
         <column name="company" type="varchar" size="100" required="false"/>
         <!--        <column name="company_id" phpName="CompanyId" type="varchar" size="255" required="false"/> -->
         <column name="location_from_source" phpName="LocationFromSource" type="varchar" size="255" required="false"/>
-        <column name="location_display_value" phpName="LocationDisplayValue" type="varchar" size="255" required="false"/>
+        <column name="location_display_value" phpName="LocationDisplayValue" type="varchar" size="255"
+                required="false"/>
         <column name="location_id" type="integer" required="false"/>
         <foreign-key foreignTable="location" onUpdate="none" onDelete="none">
             <reference local="location_id" foreign="location_id"/>
@@ -108,15 +110,16 @@
         <column name="job_posted_date" phpName="PostedAt" type="timestamp" required="false"/>
         <column name="first_seen_at" phpName="FirstSeenAt" type="timestamp" required="true"/>
         <behavior name="timestampable">
-            <parameter name="create_column" value="first_seen_at" />
-            <parameter name="update_column" value="last_updated_at" />
+            <parameter name="create_column" value="first_seen_at"/>
+            <parameter name="update_column" value="last_updated_at"/>
         </behavior>
         <column name="post_removed_at" phpName="RemovedAt" type="timestamp" required="false"/>
 
         <!--
             The following columns are automatically set via code in the JobPosting class
         -->
-        <column name="key_site_and_post_id" phpName="KeySiteAndPostID" type="varchar" size="255" required="true" primaryString="true"/>
+        <column name="key_site_and_post_id" phpName="KeySiteAndPostID" type="varchar" size="255" required="true"
+                primaryString="true"/>
         <column name="key_company_and_title" phpName="KeyCompanyAndTitle" type="varchar" size="255" required="true"/>
         <column name="title_linked" phpName="JobTitleLinked" type="varchar" size="1024" required="true"/>
 
@@ -128,30 +131,42 @@
     </table>
 
     <table name="location" phpName="Location" reloadOnUpdate="true" reloadOnInsert="true">
-        <column name="location_id" phpName="LocationId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="location_id" phpName="LocationId" type="integer" required="true" primaryKey="true"
+                autoIncrement="true"/>
         <column name="lat" phpName="Latitude" type="float"/>
         <column name="lon" phpName="Longitude" type="float"/>
-        <column name="full_display_name" phpName="DisplayName" type="varchar" size="100" />
-        <column name="primary_name" phpName="PrimaryName" type="varchar" size="100" />
-        <column name="place" phpName="Place" type="varchar" size="100" />
-        <column name="county" phpName="County" type="varchar" size="100" />
-        <column name="state" phpName="State" type="varchar" size="100" />
-        <column name="statecode" phpName="StateCode" type="varchar" size="2" />
-        <column name="country" phpName="Country" type="varchar" size="100" />
-        <column name="countrycode" phpName="CountryCode" type="varchar" size="2" />
-        <column name="alternate_names" phpName="AlternateNames" type="array" />
+        <column name="full_display_name" phpName="DisplayName" type="varchar" size="100" primaryString="true"/>
+        <column name="location_key" type="varchar" size="100" required="true"/>
+        <behavior name="sluggable">
+            <parameter name="slug_column" value="location_key"/>
+            <parameter name="slug_pattern" value="{DisplayName}"/>
+            <parameter name="replace_pattern" value="/[^\w\/]+/u"/>
+            <parameter name="replacement" value=""/>
+            <parameter name="separator" value="-"/>
+            <parameter name="permanent" value="true"/>
+        </behavior>
+
+        <column name="primary_name" phpName="PrimaryName" type="varchar" size="100"/>
+        <column name="place" phpName="Place" type="varchar" size="100"/>
+        <column name="county" phpName="County" type="varchar" size="100"/>
+        <column name="state" phpName="State" type="varchar" size="100"/>
+        <column name="statecode" phpName="StateCode" type="varchar" size="2"/>
+        <column name="country" phpName="Country" type="varchar" size="100"/>
+        <column name="countrycode" phpName="CountryCode" type="varchar" size="2"/>
+        <column name="alternate_names" phpName="AlternateNames" type="array"/>
         <column name="openstreetmap_id" phpName="OpenStreetMapId" type="integer"/>
         <unique name="uniq_openstreetmap_id/">
             <unique-column name="openstreetmap_id"/>
         </unique>
-        <column name="full_osm_data" phpName="FullOsmData" type="LONGVARCHAR" />
-        <column name="extra_details_data" phpName="ExtraDetailsData" type="LONGVARCHAR" />
+        <column name="full_osm_data" phpName="FullOsmData" type="LONGVARCHAR"/>
+        <column name="extra_details_data" phpName="ExtraDetailsData" type="LONGVARCHAR"/>
 
     </table>
 
     <table name="location_names" phpName="LocationNames">
-        <column name="location_alternate_name" phpName="LocationAlternateName" type="varchar" size="100" required="true" primaryKey="true" primaryString="true"/>
-        <column name="location_id" phpName="LocationId" type="integer" required="true" primaryKey="true" />
+        <column name="location_alternate_name" phpName="LocationAlternateName" type="varchar" size="100" required="true"
+                primaryKey="true" primaryString="true"/>
+        <column name="location_id" phpName="LocationId" type="integer" required="true" primaryKey="true"/>
         <foreign-key foreignTable="location" onUpdate="none" onDelete="none">
             <reference local="location_id" foreign="location_id"/>
         </foreign-key>
@@ -160,13 +175,16 @@
 
 
     <table name="jobsite_plugin" phpName="JobSitePlugin" reloadOnUpdate="true" reloadOnInsert="true">
-        <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" primaryString="true" primaryKey="true"/>
-        <column name="plugin_class_name" phpName="PluginClassName" type="varchar" size="100" primaryString="false" primaryKey="false"/>
-        <column name="display_name" phpName="DisplayName" type="varchar" size="255" primaryString="false" primaryKey="false"/>
-        <column name="date_last_run" phpName="LastRunAt" type="timestamp" />
+        <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" primaryString="true"
+                primaryKey="true"/>
+        <column name="plugin_class_name" phpName="PluginClassName" type="varchar" size="100" primaryString="false"
+                primaryKey="false"/>
+        <column name="display_name" phpName="DisplayName" type="varchar" size="255" primaryString="false"
+                primaryKey="false"/>
+        <column name="date_last_run" phpName="LastRunAt" type="timestamp"/>
         <column name="was_successful" phpName="LastRunWasSuccessful" type="boolean"/>
-        <column name="date_next_run" phpName="StartNextRunAfter" type="timestamp" />
-        <column name="date_last_failed" phpName="LastFailedAt" type="timestamp" />
+        <column name="date_next_run" phpName="StartNextRunAfter" type="timestamp"/>
+        <column name="date_last_failed" phpName="LastFailedAt" type="timestamp"/>
 
         <column name="last_user_search_run_id" phpName="LastUserSearchRunId" type="integer" lazyLoad="true"/>
         <foreign-key foreignTable="user_search_run" onUpdate="none" onDelete="none">
@@ -174,26 +192,27 @@
         </foreign-key>
 
         <column name="supported_country_codes" phpName="SupportedCountryCodes" type="array"/>
-        <column name="results_filter_type" phpName="ResultsFilterType" type="enum" valueSet="all-only, all-by-location, user-filtered"/>
+        <column name="results_filter_type" phpName="ResultsFilterType" type="enum"
+                valueSet="all-only, all-by-location, user-filtered"/>
     </table>
 
 
-
     <table name="user" phpName="User" allowPkInsert="true">
-        <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true" primaryKey="true" primaryString="true"/>
+        <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true" primaryKey="true"
+                primaryString="true"/>
         <column name="name" phpName="Name" type="varchar" size="128" required="true"/>
         <column name="email_address" phpName="EmailAddress" type="varchar" size="128" required="false"/>
         <column name="configuration_file_path" phpName="ConfigFilePath" type="varchar" size="128" required="false"/>
     </table>
 
 
-
-
     <table name="user_job_match" phpName="UserJobMatch">
-        <column name="user_job_match_id" phpName="UserJobMatchId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="user_job_match_id" phpName="UserJobMatchId" type="integer" required="true" primaryKey="true"
+                autoIncrement="true"/>
         <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true"/>
         <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true"/>
-        <column name="user_notification_state" phpName="UserNotificationState" type="enum" valueSet="not-ready,ready,sent" defaultValue="not-ready"/>
+        <column name="user_notification_state" phpName="UserNotificationState" type="enum"
+                valueSet="not-ready,ready,sent" defaultValue="not-ready"/>
         <column name="is_job_match" phpName="IsJobMatch" type="boolean"/>
         <column name="is_excluded" phpName="IsExcluded" type="boolean"/>
         <column name="is_include_in_notifications" phpName="IsIncludeInNotifications" type="boolean"/>
@@ -211,10 +230,11 @@
     </table>
 
 
-    <table name="user_search_run" phpName="UserSearchRun" reloadOnUpdate="true" reloadOnInsert="true">
-        <column name="user_search_run_id" phpName="UserSearchRunId" type="integer" required="true" autoIncrement="true" primaryKey="true"/>
+    <table name="user_search_run" phpName="UserSearchRun" reloadOnInsert="true" reloadOnUpdate="true">
+        <column name="user_search_run_id" phpName="UserSearchRunId" type="integer" required="true" autoIncrement="true"
+                primaryKey="true"/>
         <column name="search_key" phpName="SearchKey" type="varchar" size="128" required="true"/>
-        <column name="user_slug" phpName="UserSlug"  type="varchar" size="128" required="true"/>
+        <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true"/>
         <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" required="true"/>
         <column name="location_key" phpName="LocationKey" type="varchar" size="100" required="true"/>
 
@@ -225,28 +245,32 @@
 
         <column name="user_search_run_key" type="varchar" size="100" required="true"/>
         <behavior name="sluggable">
-            <parameter name="slug_column" value="user_search_run_key" />
-            <parameter name="slug_pattern" value="{JobSiteKey}-{UserSlug}-{SearchKey}-{LocationKey}" />
-            <parameter name="replace_pattern" value="/[^\w\/]+/u" />
-            <parameter name="replacement" value="" />
-            <parameter name="separator" value="-" />
-            <parameter name="permanent" value="true" />
+            <parameter name="slug_column" value="user_search_run_key"/>
+            <parameter name="slug_pattern" value="{JobSiteKey}-{UserSlug}-{SearchKey}-{LocationKey}"/>
+            <parameter name="replace_pattern" value="/[^\w\/]+/u"/>
+            <parameter name="replacement" value=""/>
+            <parameter name="separator" value="-"/>
+            <parameter name="permanent" value="false"/>
         </behavior>
 
-        <column name="search_settings" phpName="SearchSettings" type="object"/>
+        <!--<column name="search_settings" phpName="SearchSettings" type="object"/>-->
+
+        <column name="search_parameters_data" phpName="SearchParametersData" type="LONGVARCHAR"/>
+
         <column name="last_app_run_id" phpName="AppRunId" type="varchar" size="75"/>
 
-        <column name="run_result" field="run_result_code" phpName="RunResultCode" type="enum" valueSet="not-run,failed,excluded,skipped,successful" defaultValue="not-run"/>-->
+        <column name="run_result" field="run_result_code" phpName="RunResultCode" type="enum"
+                valueSet="not-run,failed,excluded,skipped,successful" defaultValue="not-run"/>-->
         <column name="run_error_details" phpName="RunErrorDetails" type="array"/>
         <foreign-key foreignTable="user">
             <reference local="user_slug" foreign="user_slug"/>
         </foreign-key>
-        <column name="date_last_run" phpName="LastRunAt" type="timestamp" />
+        <column name="date_last_run" phpName="LastRunAt" type="timestamp"/>
         <behavior name="timestampable">
-            <parameter name="create_column" value="date_last_run" />
+            <parameter name="create_column" value="date_last_run"/>
         </behavior>
-        <column name="date_next_run" phpName="StartNextRunAfter" type="timestamp" />
-        <column name="date_last_failed" phpName="LastFailedAt" type="timestamp" />
+        <column name="date_next_run" phpName="StartNextRunAfter" type="timestamp"/>
+        <column name="date_last_failed" phpName="LastFailedAt" type="timestamp"/>
     </table>
 
 

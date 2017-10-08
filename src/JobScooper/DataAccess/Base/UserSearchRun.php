@@ -120,18 +120,11 @@ abstract class UserSearchRun implements ActiveRecordInterface
     protected $user_search_run_key;
 
     /**
-     * The value for the search_settings field.
+     * The value for the search_parameters_data field.
      *
-     * @var
+     * @var        string
      */
-    protected $search_settings;
-
-    /**
-     * The unserialized $search_settings value - i.e. the persisted object.
-     * This is necessary to avoid repeated calls to unserialize() at runtime.
-     * @var object
-     */
-    protected $search_settings_unserialized;
+    protected $search_parameters_data;
 
     /**
      * The value for the last_app_run_id field.
@@ -529,19 +522,13 @@ abstract class UserSearchRun implements ActiveRecordInterface
     }
 
     /**
-     * Get the [search_settings] column value.
+     * Get the [search_parameters_data] column value.
      *
-     * @return mixed
+     * @return string
      */
-    public function getSearchSettings()
+    public function getSearchParametersData()
     {
-        if (null == $this->search_settings_unserialized && is_resource($this->search_settings)) {
-            if ($serialisedString = stream_get_contents($this->search_settings)) {
-                $this->search_settings_unserialized = unserialize($serialisedString);
-            }
-        }
-
-        return $this->search_settings_unserialized;
+        return $this->search_parameters_data;
     }
 
     /**
@@ -831,23 +818,24 @@ abstract class UserSearchRun implements ActiveRecordInterface
     } // setUserSearchRunKey()
 
     /**
-     * Set the value of [search_settings] column.
+     * Set the value of [search_parameters_data] column.
      *
-     * @param mixed $v new value
+     * @param string $v new value
      * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
      */
-    public function setSearchSettings($v)
+    public function setSearchParametersData($v)
     {
-        if (null === $this->search_settings || stream_get_contents($this->search_settings) !== serialize($v)) {
-            $this->search_settings_unserialized = $v;
-            $this->search_settings = fopen('php://memory', 'r+');
-            fwrite($this->search_settings, serialize($v));
-            $this->modifiedColumns[UserSearchRunTableMap::COL_SEARCH_SETTINGS] = true;
+        if ($v !== null) {
+            $v = (string) $v;
         }
-        rewind($this->search_settings);
+
+        if ($this->search_parameters_data !== $v) {
+            $this->search_parameters_data = $v;
+            $this->modifiedColumns[UserSearchRunTableMap::COL_SEARCH_PARAMETERS_DATA] = true;
+        }
 
         return $this;
-    } // setSearchSettings()
+    } // setSearchParametersData()
 
     /**
      * Set the value of [last_app_run_id] column.
@@ -1086,14 +1074,8 @@ abstract class UserSearchRun implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserSearchRunTableMap::translateFieldName('UserSearchRunKey', TableMap::TYPE_PHPNAME, $indexType)];
             $this->user_search_run_key = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : UserSearchRunTableMap::translateFieldName('SearchSettings', TableMap::TYPE_PHPNAME, $indexType)];
-            if (null !== $col) {
-                $this->search_settings = fopen('php://memory', 'r+');
-                fwrite($this->search_settings, $col);
-                rewind($this->search_settings);
-            } else {
-                $this->search_settings = null;
-            }
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : UserSearchRunTableMap::translateFieldName('SearchParametersData', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->search_parameters_data = (null !== $col) ? (string) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : UserSearchRunTableMap::translateFieldName('AppRunId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->last_app_run_id = (null !== $col) ? (string) $col : null;
@@ -1272,7 +1254,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
 
             if ($this->isColumnModified(UserSearchRunTableMap::COL_USER_SEARCH_RUN_KEY) && $this->getUserSearchRunKey()) {
                 $this->setUserSearchRunKey($this->makeSlugUnique($this->getUserSearchRunKey()));
-            } elseif (!$this->getUserSearchRunKey()) {
+            } else {
                 $this->setUserSearchRunKey($this->createSlug());
             }
             if ($isInsert) {
@@ -1362,11 +1344,6 @@ abstract class UserSearchRun implements ActiveRecordInterface
                         $reloadObject = true;
                     }
                 }
-                // Rewind the search_settings LOB column, since PDO does not rewind after inserting value.
-                if ($this->search_settings !== null && is_resource($this->search_settings)) {
-                    rewind($this->search_settings);
-                }
-
                 $this->resetModified();
             }
 
@@ -1439,8 +1416,8 @@ abstract class UserSearchRun implements ActiveRecordInterface
         if ($this->isColumnModified(UserSearchRunTableMap::COL_USER_SEARCH_RUN_KEY)) {
             $modifiedColumns[':p' . $index++]  = 'user_search_run_key';
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_SEARCH_SETTINGS)) {
-            $modifiedColumns[':p' . $index++]  = 'search_settings';
+        if ($this->isColumnModified(UserSearchRunTableMap::COL_SEARCH_PARAMETERS_DATA)) {
+            $modifiedColumns[':p' . $index++]  = 'search_parameters_data';
         }
         if ($this->isColumnModified(UserSearchRunTableMap::COL_LAST_APP_RUN_ID)) {
             $modifiedColumns[':p' . $index++]  = 'last_app_run_id';
@@ -1495,11 +1472,8 @@ abstract class UserSearchRun implements ActiveRecordInterface
                     case 'user_search_run_key':
                         $stmt->bindValue($identifier, $this->user_search_run_key, PDO::PARAM_STR);
                         break;
-                    case 'search_settings':
-                        if (is_resource($this->search_settings)) {
-                            rewind($this->search_settings);
-                        }
-                        $stmt->bindValue($identifier, $this->search_settings, PDO::PARAM_LOB);
+                    case 'search_parameters_data':
+                        $stmt->bindValue($identifier, $this->search_parameters_data, PDO::PARAM_STR);
                         break;
                     case 'last_app_run_id':
                         $stmt->bindValue($identifier, $this->last_app_run_id, PDO::PARAM_STR);
@@ -1606,7 +1580,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
                 return $this->getUserSearchRunKey();
                 break;
             case 7:
-                return $this->getSearchSettings();
+                return $this->getSearchParametersData();
                 break;
             case 8:
                 return $this->getAppRunId();
@@ -1666,7 +1640,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
             $keys[4] => $this->getLocationKey(),
             $keys[5] => $this->getLocationId(),
             $keys[6] => $this->getUserSearchRunKey(),
-            $keys[7] => $this->getSearchSettings(),
+            $keys[7] => $this->getSearchParametersData(),
             $keys[8] => $this->getAppRunId(),
             $keys[9] => $this->getRunResultCode(),
             $keys[10] => $this->getRunErrorDetails(),
@@ -1798,7 +1772,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
                 $this->setUserSearchRunKey($value);
                 break;
             case 7:
-                $this->setSearchSettings($value);
+                $this->setSearchParametersData($value);
                 break;
             case 8:
                 $this->setAppRunId($value);
@@ -1877,7 +1851,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
             $this->setUserSearchRunKey($arr[$keys[6]]);
         }
         if (array_key_exists($keys[7], $arr)) {
-            $this->setSearchSettings($arr[$keys[7]]);
+            $this->setSearchParametersData($arr[$keys[7]]);
         }
         if (array_key_exists($keys[8], $arr)) {
             $this->setAppRunId($arr[$keys[8]]);
@@ -1962,8 +1936,8 @@ abstract class UserSearchRun implements ActiveRecordInterface
         if ($this->isColumnModified(UserSearchRunTableMap::COL_USER_SEARCH_RUN_KEY)) {
             $criteria->add(UserSearchRunTableMap::COL_USER_SEARCH_RUN_KEY, $this->user_search_run_key);
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_SEARCH_SETTINGS)) {
-            $criteria->add(UserSearchRunTableMap::COL_SEARCH_SETTINGS, $this->search_settings);
+        if ($this->isColumnModified(UserSearchRunTableMap::COL_SEARCH_PARAMETERS_DATA)) {
+            $criteria->add(UserSearchRunTableMap::COL_SEARCH_PARAMETERS_DATA, $this->search_parameters_data);
         }
         if ($this->isColumnModified(UserSearchRunTableMap::COL_LAST_APP_RUN_ID)) {
             $criteria->add(UserSearchRunTableMap::COL_LAST_APP_RUN_ID, $this->last_app_run_id);
@@ -2078,7 +2052,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
         $copyObj->setLocationKey($this->getLocationKey());
         $copyObj->setLocationId($this->getLocationId());
         $copyObj->setUserSearchRunKey($this->getUserSearchRunKey());
-        $copyObj->setSearchSettings($this->getSearchSettings());
+        $copyObj->setSearchParametersData($this->getSearchParametersData());
         $copyObj->setAppRunId($this->getAppRunId());
         $copyObj->setRunResultCode($this->getRunResultCode());
         $copyObj->setRunErrorDetails($this->getRunErrorDetails());
@@ -2492,8 +2466,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
         $this->location_key = null;
         $this->location_id = null;
         $this->user_search_run_key = null;
-        $this->search_settings = null;
-        $this->search_settings_unserialized = null;
+        $this->search_parameters_data = null;
         $this->last_app_run_id = null;
         $this->run_result = null;
         $this->run_error_details = null;

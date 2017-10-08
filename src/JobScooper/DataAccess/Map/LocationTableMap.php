@@ -59,7 +59,7 @@ class LocationTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 15;
+    const NUM_COLUMNS = 16;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class LocationTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 15;
+    const NUM_HYDRATE_COLUMNS = 16;
 
     /**
      * the column name for the location_id field
@@ -90,6 +90,11 @@ class LocationTableMap extends TableMap
      * the column name for the full_display_name field
      */
     const COL_FULL_DISPLAY_NAME = 'location.full_display_name';
+
+    /**
+     * the column name for the location_key field
+     */
+    const COL_LOCATION_KEY = 'location.location_key';
 
     /**
      * the column name for the primary_name field
@@ -158,11 +163,11 @@ class LocationTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('LocationId', 'Latitude', 'Longitude', 'DisplayName', 'PrimaryName', 'Place', 'County', 'State', 'StateCode', 'Country', 'CountryCode', 'AlternateNames', 'OpenStreetMapId', 'FullOsmData', 'ExtraDetailsData', ),
-        self::TYPE_CAMELNAME     => array('locationId', 'latitude', 'longitude', 'displayName', 'primaryName', 'place', 'county', 'state', 'stateCode', 'country', 'countryCode', 'alternateNames', 'openStreetMapId', 'fullOsmData', 'extraDetailsData', ),
-        self::TYPE_COLNAME       => array(LocationTableMap::COL_LOCATION_ID, LocationTableMap::COL_LAT, LocationTableMap::COL_LON, LocationTableMap::COL_FULL_DISPLAY_NAME, LocationTableMap::COL_PRIMARY_NAME, LocationTableMap::COL_PLACE, LocationTableMap::COL_COUNTY, LocationTableMap::COL_STATE, LocationTableMap::COL_STATECODE, LocationTableMap::COL_COUNTRY, LocationTableMap::COL_COUNTRYCODE, LocationTableMap::COL_ALTERNATE_NAMES, LocationTableMap::COL_OPENSTREETMAP_ID, LocationTableMap::COL_FULL_OSM_DATA, LocationTableMap::COL_EXTRA_DETAILS_DATA, ),
-        self::TYPE_FIELDNAME     => array('location_id', 'lat', 'lon', 'full_display_name', 'primary_name', 'place', 'county', 'state', 'statecode', 'country', 'countrycode', 'alternate_names', 'openstreetmap_id', 'full_osm_data', 'extra_details_data', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, )
+        self::TYPE_PHPNAME       => array('LocationId', 'Latitude', 'Longitude', 'DisplayName', 'LocationKey', 'PrimaryName', 'Place', 'County', 'State', 'StateCode', 'Country', 'CountryCode', 'AlternateNames', 'OpenStreetMapId', 'FullOsmData', 'ExtraDetailsData', ),
+        self::TYPE_CAMELNAME     => array('locationId', 'latitude', 'longitude', 'displayName', 'locationKey', 'primaryName', 'place', 'county', 'state', 'stateCode', 'country', 'countryCode', 'alternateNames', 'openStreetMapId', 'fullOsmData', 'extraDetailsData', ),
+        self::TYPE_COLNAME       => array(LocationTableMap::COL_LOCATION_ID, LocationTableMap::COL_LAT, LocationTableMap::COL_LON, LocationTableMap::COL_FULL_DISPLAY_NAME, LocationTableMap::COL_LOCATION_KEY, LocationTableMap::COL_PRIMARY_NAME, LocationTableMap::COL_PLACE, LocationTableMap::COL_COUNTY, LocationTableMap::COL_STATE, LocationTableMap::COL_STATECODE, LocationTableMap::COL_COUNTRY, LocationTableMap::COL_COUNTRYCODE, LocationTableMap::COL_ALTERNATE_NAMES, LocationTableMap::COL_OPENSTREETMAP_ID, LocationTableMap::COL_FULL_OSM_DATA, LocationTableMap::COL_EXTRA_DETAILS_DATA, ),
+        self::TYPE_FIELDNAME     => array('location_id', 'lat', 'lon', 'full_display_name', 'location_key', 'primary_name', 'place', 'county', 'state', 'statecode', 'country', 'countrycode', 'alternate_names', 'openstreetmap_id', 'full_osm_data', 'extra_details_data', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, )
     );
 
     /**
@@ -172,11 +177,11 @@ class LocationTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('LocationId' => 0, 'Latitude' => 1, 'Longitude' => 2, 'DisplayName' => 3, 'PrimaryName' => 4, 'Place' => 5, 'County' => 6, 'State' => 7, 'StateCode' => 8, 'Country' => 9, 'CountryCode' => 10, 'AlternateNames' => 11, 'OpenStreetMapId' => 12, 'FullOsmData' => 13, 'ExtraDetailsData' => 14, ),
-        self::TYPE_CAMELNAME     => array('locationId' => 0, 'latitude' => 1, 'longitude' => 2, 'displayName' => 3, 'primaryName' => 4, 'place' => 5, 'county' => 6, 'state' => 7, 'stateCode' => 8, 'country' => 9, 'countryCode' => 10, 'alternateNames' => 11, 'openStreetMapId' => 12, 'fullOsmData' => 13, 'extraDetailsData' => 14, ),
-        self::TYPE_COLNAME       => array(LocationTableMap::COL_LOCATION_ID => 0, LocationTableMap::COL_LAT => 1, LocationTableMap::COL_LON => 2, LocationTableMap::COL_FULL_DISPLAY_NAME => 3, LocationTableMap::COL_PRIMARY_NAME => 4, LocationTableMap::COL_PLACE => 5, LocationTableMap::COL_COUNTY => 6, LocationTableMap::COL_STATE => 7, LocationTableMap::COL_STATECODE => 8, LocationTableMap::COL_COUNTRY => 9, LocationTableMap::COL_COUNTRYCODE => 10, LocationTableMap::COL_ALTERNATE_NAMES => 11, LocationTableMap::COL_OPENSTREETMAP_ID => 12, LocationTableMap::COL_FULL_OSM_DATA => 13, LocationTableMap::COL_EXTRA_DETAILS_DATA => 14, ),
-        self::TYPE_FIELDNAME     => array('location_id' => 0, 'lat' => 1, 'lon' => 2, 'full_display_name' => 3, 'primary_name' => 4, 'place' => 5, 'county' => 6, 'state' => 7, 'statecode' => 8, 'country' => 9, 'countrycode' => 10, 'alternate_names' => 11, 'openstreetmap_id' => 12, 'full_osm_data' => 13, 'extra_details_data' => 14, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, )
+        self::TYPE_PHPNAME       => array('LocationId' => 0, 'Latitude' => 1, 'Longitude' => 2, 'DisplayName' => 3, 'LocationKey' => 4, 'PrimaryName' => 5, 'Place' => 6, 'County' => 7, 'State' => 8, 'StateCode' => 9, 'Country' => 10, 'CountryCode' => 11, 'AlternateNames' => 12, 'OpenStreetMapId' => 13, 'FullOsmData' => 14, 'ExtraDetailsData' => 15, ),
+        self::TYPE_CAMELNAME     => array('locationId' => 0, 'latitude' => 1, 'longitude' => 2, 'displayName' => 3, 'locationKey' => 4, 'primaryName' => 5, 'place' => 6, 'county' => 7, 'state' => 8, 'stateCode' => 9, 'country' => 10, 'countryCode' => 11, 'alternateNames' => 12, 'openStreetMapId' => 13, 'fullOsmData' => 14, 'extraDetailsData' => 15, ),
+        self::TYPE_COLNAME       => array(LocationTableMap::COL_LOCATION_ID => 0, LocationTableMap::COL_LAT => 1, LocationTableMap::COL_LON => 2, LocationTableMap::COL_FULL_DISPLAY_NAME => 3, LocationTableMap::COL_LOCATION_KEY => 4, LocationTableMap::COL_PRIMARY_NAME => 5, LocationTableMap::COL_PLACE => 6, LocationTableMap::COL_COUNTY => 7, LocationTableMap::COL_STATE => 8, LocationTableMap::COL_STATECODE => 9, LocationTableMap::COL_COUNTRY => 10, LocationTableMap::COL_COUNTRYCODE => 11, LocationTableMap::COL_ALTERNATE_NAMES => 12, LocationTableMap::COL_OPENSTREETMAP_ID => 13, LocationTableMap::COL_FULL_OSM_DATA => 14, LocationTableMap::COL_EXTRA_DETAILS_DATA => 15, ),
+        self::TYPE_FIELDNAME     => array('location_id' => 0, 'lat' => 1, 'lon' => 2, 'full_display_name' => 3, 'location_key' => 4, 'primary_name' => 5, 'place' => 6, 'county' => 7, 'state' => 8, 'statecode' => 9, 'country' => 10, 'countrycode' => 11, 'alternate_names' => 12, 'openstreetmap_id' => 13, 'full_osm_data' => 14, 'extra_details_data' => 15, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, )
     );
 
     /**
@@ -200,6 +205,8 @@ class LocationTableMap extends TableMap
         $this->addColumn('lat', 'Latitude', 'FLOAT', false, null, null);
         $this->addColumn('lon', 'Longitude', 'FLOAT', false, null, null);
         $this->addColumn('full_display_name', 'DisplayName', 'VARCHAR', false, 100, null);
+        $this->getColumn('full_display_name')->setPrimaryString(true);
+        $this->addColumn('location_key', 'LocationKey', 'VARCHAR', true, 100, null);
         $this->addColumn('primary_name', 'PrimaryName', 'VARCHAR', false, 100, null);
         $this->addColumn('place', 'Place', 'VARCHAR', false, 100, null);
         $this->addColumn('county', 'County', 'VARCHAR', false, 100, null);
@@ -240,6 +247,19 @@ class LocationTableMap extends TableMap
   ),
 ), null, null, 'UserSearchRuns', false);
     } // buildRelations()
+
+    /**
+     *
+     * Gets the list of behaviors registered for this table
+     *
+     * @return array Associative array (name => parameters) of behaviors
+     */
+    public function getBehaviors()
+    {
+        return array(
+            'sluggable' => array('slug_column' => 'location_key', 'slug_pattern' => '{DisplayName}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '-', 'permanent' => 'true', 'scope_column' => '', 'unique_constraint' => 'true', ),
+        );
+    } // getBehaviors()
 
     /**
      * Retrieves a string version of the primary key from the DB resultset row that can be used to uniquely identify a row in this table.
@@ -386,6 +406,7 @@ class LocationTableMap extends TableMap
             $criteria->addSelectColumn(LocationTableMap::COL_LAT);
             $criteria->addSelectColumn(LocationTableMap::COL_LON);
             $criteria->addSelectColumn(LocationTableMap::COL_FULL_DISPLAY_NAME);
+            $criteria->addSelectColumn(LocationTableMap::COL_LOCATION_KEY);
             $criteria->addSelectColumn(LocationTableMap::COL_PRIMARY_NAME);
             $criteria->addSelectColumn(LocationTableMap::COL_PLACE);
             $criteria->addSelectColumn(LocationTableMap::COL_COUNTY);
@@ -402,6 +423,7 @@ class LocationTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.lat');
             $criteria->addSelectColumn($alias . '.lon');
             $criteria->addSelectColumn($alias . '.full_display_name');
+            $criteria->addSelectColumn($alias . '.location_key');
             $criteria->addSelectColumn($alias . '.primary_name');
             $criteria->addSelectColumn($alias . '.place');
             $criteria->addSelectColumn($alias . '.county');

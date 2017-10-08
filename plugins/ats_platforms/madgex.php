@@ -41,18 +41,22 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
     {
         if(is_null($this->currentSearchAlternateURL)) {
             $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
-            $strURL = str_ireplace("***COUNTRYCODE***", $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$searchDetails['location_set_key']]['location-countrycode'], $strURL);
+            $location = $searchDetails->getLocation();
+            $ccode = "";
+            if(!is_null($location))
+                $ccode = $location->getCountryCode();
+            $strURL = str_ireplace("***COUNTRYCODE***", $ccode, $strURL);
 
             if (!is_null($this->locationid))
                 $strURL = $strURL . "&LocationID=" . $this->locationid;
         }
         else
         {
-            $searchDetails['base_url_format'] = $this->currentSearchAlternateURL;
+            $searchDetails->setSearchParameter('base_url_format', $this->currentSearchAlternateURL);
             $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
         }
-        $searchDetails['base_url_format'] = preg_replace('/[Ppage]{4}=\d+/', 'Page=***PAGE_NUMBER***', $strURL);
-        $this->strBaseURLFormat = $searchDetails['base_url_format'];
+        $searchDetails->setSearchParameter('base_url_format', preg_replace('/[Ppage]{4}=\d+/', 'Page=***PAGE_NUMBER***', $strURL));
+        $this->strBaseURLFormat = $searchDetails->getSearchParameter('base_url_format');
         return $strURL;
 
     }
@@ -105,7 +109,7 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
                             $this->locationid = $arrMatches[1];
                         }
                         $url = parse_url($this->childSiteURLBase, PHP_URL_SCHEME) . "://" . parse_url($this->childSiteURLBase, PHP_URL_HOST) . $newUrlPath . "&RadialLocation=50";
-                        $this->currentSearchBeingRun['search_start_url'] = $url;
+                        $this->currentSearchBeingRun->setSearchParameter('search_start_url', $url);
                         $this->currentSearchAlternateURL = preg_replace('/[Ppage]{4}=\d+/', 'Page=***PAGE_NUMBER***', $url);
 
                         $this->selenium->loadPage($url);

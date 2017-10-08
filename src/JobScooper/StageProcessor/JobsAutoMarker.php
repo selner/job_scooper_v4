@@ -122,7 +122,7 @@ class JobsAutoMarker
             //        $this->_markJobsList_SetLikelyDuplicatePosts_($arrJobs_AutoUpdatable);
 
             //        BUGBUG/TODO DEBUG AND PUT BACK
-            //        $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
+            $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
 
             $this->_markJobsList_UserExcludedKeywords_($arrJobs_AutoUpdatable);
             $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($arrJobs_AutoUpdatable);
@@ -252,7 +252,7 @@ class JobsAutoMarker
                 if ($this->_doesLocationMatchUserSearch($locKey)) {
                     $nJobsNotMarked++;
                 } else {
-                    $jobMatch->setIsOutOfUserArea(true);
+                    $jobMatch->setOutOfUserArea(true);
                     $jobMatch->save();
                     $nJobsMarkedAutoExcluded++;
                 }
@@ -386,13 +386,11 @@ class JobsAutoMarker
         $keywordsToMatch = array();
         $runSearches = getAllSearchesThatWereIncluded();
 
-        foreach ($runSearches as $searchDetails) {
-            $searchSettings = $searchDetails->getSearchSettings();
-            $arrKwdSet = array();
-            if(is_null($searchSettings))
-                return null;
-            elseif (array_key_exists('keywords_array_tokenized', $searchSettings) && is_array($searchSettings['keywords_array_tokenized'])) {
-                foreach ($searchSettings['keywords_array_tokenized'] as $kwdset) {
+        foreach ($runSearches as $searchDetails)
+        {
+            $kwd_tokenized = $searchDetails->getSearchParameter('keywords_array_tokenized');
+            if (!is_null($kwd_tokenized) && is_array($kwd_tokenized)) {
+                foreach ($kwd_tokenized as $kwdset) {
                     $arrKwdSet[$kwdset] = explode(" ", $kwdset);
                 }
                 $keywordsToMatch = my_merge_add_new_keys($keywordsToMatch, $arrKwdSet);

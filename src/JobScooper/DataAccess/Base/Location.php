@@ -99,6 +99,13 @@ abstract class Location implements ActiveRecordInterface
     protected $full_display_name;
 
     /**
+     * The value for the location_key field.
+     *
+     * @var        string
+     */
+    protected $location_key;
+
+    /**
      * The value for the primary_name field.
      *
      * @var        string
@@ -492,6 +499,16 @@ abstract class Location implements ActiveRecordInterface
     }
 
     /**
+     * Get the [location_key] column value.
+     *
+     * @return string
+     */
+    public function getLocationKey()
+    {
+        return $this->location_key;
+    }
+
+    /**
      * Get the [primary_name] column value.
      *
      * @return string
@@ -699,6 +716,26 @@ abstract class Location implements ActiveRecordInterface
 
         return $this;
     } // setDisplayName()
+
+    /**
+     * Set the value of [location_key] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
+     */
+    public function setLocationKey($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->location_key !== $v) {
+            $this->location_key = $v;
+            $this->modifiedColumns[LocationTableMap::COL_LOCATION_KEY] = true;
+        }
+
+        return $this;
+    } // setLocationKey()
 
     /**
      * Set the value of [primary_name] column.
@@ -999,38 +1036,41 @@ abstract class Location implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : LocationTableMap::translateFieldName('DisplayName', TableMap::TYPE_PHPNAME, $indexType)];
             $this->full_display_name = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : LocationTableMap::translateFieldName('PrimaryName', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : LocationTableMap::translateFieldName('LocationKey', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->location_key = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : LocationTableMap::translateFieldName('PrimaryName', TableMap::TYPE_PHPNAME, $indexType)];
             $this->primary_name = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : LocationTableMap::translateFieldName('Place', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : LocationTableMap::translateFieldName('Place', TableMap::TYPE_PHPNAME, $indexType)];
             $this->place = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : LocationTableMap::translateFieldName('County', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : LocationTableMap::translateFieldName('County', TableMap::TYPE_PHPNAME, $indexType)];
             $this->county = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : LocationTableMap::translateFieldName('State', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : LocationTableMap::translateFieldName('State', TableMap::TYPE_PHPNAME, $indexType)];
             $this->state = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : LocationTableMap::translateFieldName('StateCode', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : LocationTableMap::translateFieldName('StateCode', TableMap::TYPE_PHPNAME, $indexType)];
             $this->statecode = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : LocationTableMap::translateFieldName('Country', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : LocationTableMap::translateFieldName('Country', TableMap::TYPE_PHPNAME, $indexType)];
             $this->country = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : LocationTableMap::translateFieldName('CountryCode', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : LocationTableMap::translateFieldName('CountryCode', TableMap::TYPE_PHPNAME, $indexType)];
             $this->countrycode = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : LocationTableMap::translateFieldName('AlternateNames', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : LocationTableMap::translateFieldName('AlternateNames', TableMap::TYPE_PHPNAME, $indexType)];
             $this->alternate_names = $col;
             $this->alternate_names_unserialized = null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : LocationTableMap::translateFieldName('OpenStreetMapId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 13 + $startcol : LocationTableMap::translateFieldName('OpenStreetMapId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->openstreetmap_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 13 + $startcol : LocationTableMap::translateFieldName('FullOsmData', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 14 + $startcol : LocationTableMap::translateFieldName('FullOsmData', TableMap::TYPE_PHPNAME, $indexType)];
             $this->full_osm_data = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 14 + $startcol : LocationTableMap::translateFieldName('ExtraDetailsData', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 15 + $startcol : LocationTableMap::translateFieldName('ExtraDetailsData', TableMap::TYPE_PHPNAME, $indexType)];
             $this->extra_details_data = (null !== $col) ? (string) $col : null;
             $this->resetModified();
 
@@ -1040,7 +1080,7 @@ abstract class Location implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 15; // 15 = LocationTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 16; // 16 = LocationTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\Location'), 0, $e);
@@ -1180,6 +1220,13 @@ abstract class Location implements ActiveRecordInterface
         return $con->transaction(function () use ($con, $skipReload) {
             $ret = $this->preSave($con);
             $isInsert = $this->isNew();
+            // sluggable behavior
+
+            if ($this->isColumnModified(LocationTableMap::COL_LOCATION_KEY) && $this->getLocationKey()) {
+                $this->setLocationKey($this->makeSlugUnique($this->getLocationKey()));
+            } elseif (!$this->getLocationKey()) {
+                $this->setLocationKey($this->createSlug());
+            }
             if ($isInsert) {
                 $ret = $ret && $this->preInsert($con);
             } else {
@@ -1334,6 +1381,9 @@ abstract class Location implements ActiveRecordInterface
         if ($this->isColumnModified(LocationTableMap::COL_FULL_DISPLAY_NAME)) {
             $modifiedColumns[':p' . $index++]  = 'full_display_name';
         }
+        if ($this->isColumnModified(LocationTableMap::COL_LOCATION_KEY)) {
+            $modifiedColumns[':p' . $index++]  = 'location_key';
+        }
         if ($this->isColumnModified(LocationTableMap::COL_PRIMARY_NAME)) {
             $modifiedColumns[':p' . $index++]  = 'primary_name';
         }
@@ -1389,6 +1439,9 @@ abstract class Location implements ActiveRecordInterface
                         break;
                     case 'full_display_name':
                         $stmt->bindValue($identifier, $this->full_display_name, PDO::PARAM_STR);
+                        break;
+                    case 'location_key':
+                        $stmt->bindValue($identifier, $this->location_key, PDO::PARAM_STR);
                         break;
                     case 'primary_name':
                         $stmt->bindValue($identifier, $this->primary_name, PDO::PARAM_STR);
@@ -1498,36 +1551,39 @@ abstract class Location implements ActiveRecordInterface
                 return $this->getDisplayName();
                 break;
             case 4:
-                return $this->getPrimaryName();
+                return $this->getLocationKey();
                 break;
             case 5:
-                return $this->getPlace();
+                return $this->getPrimaryName();
                 break;
             case 6:
-                return $this->getCounty();
+                return $this->getPlace();
                 break;
             case 7:
-                return $this->getState();
+                return $this->getCounty();
                 break;
             case 8:
-                return $this->getStateCode();
+                return $this->getState();
                 break;
             case 9:
-                return $this->getCountry();
+                return $this->getStateCode();
                 break;
             case 10:
-                return $this->getCountryCode();
+                return $this->getCountry();
                 break;
             case 11:
-                return $this->getAlternateNames();
+                return $this->getCountryCode();
                 break;
             case 12:
-                return $this->getOpenStreetMapId();
+                return $this->getAlternateNames();
                 break;
             case 13:
-                return $this->getFullOsmData();
+                return $this->getOpenStreetMapId();
                 break;
             case 14:
+                return $this->getFullOsmData();
+                break;
+            case 15:
                 return $this->getExtraDetailsData();
                 break;
             default:
@@ -1564,17 +1620,18 @@ abstract class Location implements ActiveRecordInterface
             $keys[1] => $this->getLatitude(),
             $keys[2] => $this->getLongitude(),
             $keys[3] => $this->getDisplayName(),
-            $keys[4] => $this->getPrimaryName(),
-            $keys[5] => $this->getPlace(),
-            $keys[6] => $this->getCounty(),
-            $keys[7] => $this->getState(),
-            $keys[8] => $this->getStateCode(),
-            $keys[9] => $this->getCountry(),
-            $keys[10] => $this->getCountryCode(),
-            $keys[11] => $this->getAlternateNames(),
-            $keys[12] => $this->getOpenStreetMapId(),
-            $keys[13] => $this->getFullOsmData(),
-            $keys[14] => $this->getExtraDetailsData(),
+            $keys[4] => $this->getLocationKey(),
+            $keys[5] => $this->getPrimaryName(),
+            $keys[6] => $this->getPlace(),
+            $keys[7] => $this->getCounty(),
+            $keys[8] => $this->getState(),
+            $keys[9] => $this->getStateCode(),
+            $keys[10] => $this->getCountry(),
+            $keys[11] => $this->getCountryCode(),
+            $keys[12] => $this->getAlternateNames(),
+            $keys[13] => $this->getOpenStreetMapId(),
+            $keys[14] => $this->getFullOsmData(),
+            $keys[15] => $this->getExtraDetailsData(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1674,40 +1731,43 @@ abstract class Location implements ActiveRecordInterface
                 $this->setDisplayName($value);
                 break;
             case 4:
-                $this->setPrimaryName($value);
+                $this->setLocationKey($value);
                 break;
             case 5:
-                $this->setPlace($value);
+                $this->setPrimaryName($value);
                 break;
             case 6:
-                $this->setCounty($value);
+                $this->setPlace($value);
                 break;
             case 7:
-                $this->setState($value);
+                $this->setCounty($value);
                 break;
             case 8:
-                $this->setStateCode($value);
+                $this->setState($value);
                 break;
             case 9:
-                $this->setCountry($value);
+                $this->setStateCode($value);
                 break;
             case 10:
-                $this->setCountryCode($value);
+                $this->setCountry($value);
                 break;
             case 11:
+                $this->setCountryCode($value);
+                break;
+            case 12:
                 if (!is_array($value)) {
                     $v = trim(substr($value, 2, -2));
                     $value = $v ? explode(' | ', $v) : array();
                 }
                 $this->setAlternateNames($value);
                 break;
-            case 12:
+            case 13:
                 $this->setOpenStreetMapId($value);
                 break;
-            case 13:
+            case 14:
                 $this->setFullOsmData($value);
                 break;
-            case 14:
+            case 15:
                 $this->setExtraDetailsData($value);
                 break;
         } // switch()
@@ -1749,37 +1809,40 @@ abstract class Location implements ActiveRecordInterface
             $this->setDisplayName($arr[$keys[3]]);
         }
         if (array_key_exists($keys[4], $arr)) {
-            $this->setPrimaryName($arr[$keys[4]]);
+            $this->setLocationKey($arr[$keys[4]]);
         }
         if (array_key_exists($keys[5], $arr)) {
-            $this->setPlace($arr[$keys[5]]);
+            $this->setPrimaryName($arr[$keys[5]]);
         }
         if (array_key_exists($keys[6], $arr)) {
-            $this->setCounty($arr[$keys[6]]);
+            $this->setPlace($arr[$keys[6]]);
         }
         if (array_key_exists($keys[7], $arr)) {
-            $this->setState($arr[$keys[7]]);
+            $this->setCounty($arr[$keys[7]]);
         }
         if (array_key_exists($keys[8], $arr)) {
-            $this->setStateCode($arr[$keys[8]]);
+            $this->setState($arr[$keys[8]]);
         }
         if (array_key_exists($keys[9], $arr)) {
-            $this->setCountry($arr[$keys[9]]);
+            $this->setStateCode($arr[$keys[9]]);
         }
         if (array_key_exists($keys[10], $arr)) {
-            $this->setCountryCode($arr[$keys[10]]);
+            $this->setCountry($arr[$keys[10]]);
         }
         if (array_key_exists($keys[11], $arr)) {
-            $this->setAlternateNames($arr[$keys[11]]);
+            $this->setCountryCode($arr[$keys[11]]);
         }
         if (array_key_exists($keys[12], $arr)) {
-            $this->setOpenStreetMapId($arr[$keys[12]]);
+            $this->setAlternateNames($arr[$keys[12]]);
         }
         if (array_key_exists($keys[13], $arr)) {
-            $this->setFullOsmData($arr[$keys[13]]);
+            $this->setOpenStreetMapId($arr[$keys[13]]);
         }
         if (array_key_exists($keys[14], $arr)) {
-            $this->setExtraDetailsData($arr[$keys[14]]);
+            $this->setFullOsmData($arr[$keys[14]]);
+        }
+        if (array_key_exists($keys[15], $arr)) {
+            $this->setExtraDetailsData($arr[$keys[15]]);
         }
     }
 
@@ -1833,6 +1896,9 @@ abstract class Location implements ActiveRecordInterface
         }
         if ($this->isColumnModified(LocationTableMap::COL_FULL_DISPLAY_NAME)) {
             $criteria->add(LocationTableMap::COL_FULL_DISPLAY_NAME, $this->full_display_name);
+        }
+        if ($this->isColumnModified(LocationTableMap::COL_LOCATION_KEY)) {
+            $criteria->add(LocationTableMap::COL_LOCATION_KEY, $this->location_key);
         }
         if ($this->isColumnModified(LocationTableMap::COL_PRIMARY_NAME)) {
             $criteria->add(LocationTableMap::COL_PRIMARY_NAME, $this->primary_name);
@@ -1956,6 +2022,7 @@ abstract class Location implements ActiveRecordInterface
         $copyObj->setLatitude($this->getLatitude());
         $copyObj->setLongitude($this->getLongitude());
         $copyObj->setDisplayName($this->getDisplayName());
+        $copyObj->setLocationKey($this->getLocationKey());
         $copyObj->setPrimaryName($this->getPrimaryName());
         $copyObj->setPlace($this->getPlace());
         $copyObj->setCounty($this->getCounty());
@@ -2785,6 +2852,7 @@ abstract class Location implements ActiveRecordInterface
         $this->lat = null;
         $this->lon = null;
         $this->full_display_name = null;
+        $this->location_key = null;
         $this->primary_name = null;
         $this->place = null;
         $this->county = null;
@@ -2840,11 +2908,169 @@ abstract class Location implements ActiveRecordInterface
     /**
      * Return the string representation of this object
      *
-     * @return string
+     * @return string The value of the 'full_display_name' column
      */
     public function __toString()
     {
-        return (string) $this->exportTo(LocationTableMap::DEFAULT_STRING_FORMAT);
+        return (string) $this->getDisplayName();
+    }
+
+    // sluggable behavior
+
+    /**
+     * Wrap the setter for slug value
+     *
+     * @param   string
+     * @return  $this|Location
+     */
+    public function setSlug($v)
+    {
+        return $this->setLocationKey($v);
+    }
+
+    /**
+     * Wrap the getter for slug value
+     *
+     * @return  string
+     */
+    public function getSlug()
+    {
+        return $this->getLocationKey();
+    }
+
+    /**
+     * Create a unique slug based on the object
+     *
+     * @return string The object slug
+     */
+    protected function createSlug()
+    {
+        $slug = $this->createRawSlug();
+        $slug = $this->limitSlugSize($slug);
+        $slug = $this->makeSlugUnique($slug);
+
+        return $slug;
+    }
+
+    /**
+     * Create the slug from the appropriate columns
+     *
+     * @return string
+     */
+    protected function createRawSlug()
+    {
+        return '' . $this->cleanupSlugPart($this->getDisplayName()) . '';
+    }
+
+    /**
+     * Cleanup a string to make a slug of it
+     * Removes special characters, replaces blanks with a separator, and trim it
+     *
+     * @param     string $slug        the text to slugify
+     * @param     string $replacement the separator used by slug
+     * @return    string               the slugified text
+     */
+    protected static function cleanupSlugPart($slug, $replacement = '')
+    {
+        // transliterate
+        if (function_exists('iconv')) {
+            $slug = iconv('utf-8', 'us-ascii//TRANSLIT', $slug);
+        }
+
+        // lowercase
+        if (function_exists('mb_strtolower')) {
+            $slug = mb_strtolower($slug);
+        } else {
+            $slug = strtolower($slug);
+        }
+
+        // remove accents resulting from OSX's iconv
+        $slug = str_replace(array('\'', '`', '^'), '', $slug);
+
+        // replace non letter or digits with separator
+        $slug = preg_replace('/[^\w\/]+/u', $replacement, $slug);
+
+        // trim
+        $slug = trim($slug, $replacement);
+
+        if (empty($slug)) {
+            return 'n-a';
+        }
+
+        return $slug;
+    }
+
+
+    /**
+     * Make sure the slug is short enough to accommodate the column size
+     *
+     * @param    string $slug            the slug to check
+     *
+     * @return string                        the truncated slug
+     */
+    protected static function limitSlugSize($slug, $incrementReservedSpace = 3)
+    {
+        // check length, as suffix could put it over maximum
+        if (strlen($slug) > (100 - $incrementReservedSpace)) {
+            $slug = substr($slug, 0, 100 - $incrementReservedSpace);
+        }
+
+        return $slug;
+    }
+
+
+    /**
+     * Get the slug, ensuring its uniqueness
+     *
+     * @param    string $slug            the slug to check
+     * @param    string $separator       the separator used by slug
+     * @param    int    $alreadyExists   false for the first try, true for the second, and take the high count + 1
+     * @return   string                   the unique slug
+     */
+    protected function makeSlugUnique($slug, $separator = '-', $alreadyExists = false)
+    {
+        if (!$alreadyExists) {
+            $slug2 = $slug;
+        } else {
+            $slug2 = $slug . $separator;
+        }
+
+        $adapter = \Propel\Runtime\Propel::getServiceContainer()->getAdapter('default');
+        $col = 'q.LocationKey';
+        $compare = $alreadyExists ? $adapter->compareRegex($col, '?') : sprintf('%s = ?', $col);
+
+        $query = \JobScooper\DataAccess\LocationQuery::create('q')
+            ->where($compare, $alreadyExists ? '^' . $slug2 . '[0-9]+$' : $slug2)
+            ->prune($this)
+        ;
+
+        if (!$alreadyExists) {
+            $count = $query->count();
+            if ($count > 0) {
+                return $this->makeSlugUnique($slug, $separator, true);
+            }
+
+            return $slug2;
+        }
+
+        $adapter = \Propel\Runtime\Propel::getServiceContainer()->getAdapter('default');
+        // Already exists
+        $object = $query
+            ->addDescendingOrderByColumn($adapter->strLength('location_key'))
+            ->addDescendingOrderByColumn('location_key')
+        ->findOne();
+
+        // First duplicate slug
+        if (null == $object) {
+            return $slug2 . '1';
+        }
+
+        $slugNum = substr($object->getLocationKey(), strlen($slug) + 1);
+        if (0 == $slugNum[0]) {
+            $slugNum[0] = 1;
+        }
+
+        return $slug2 . ($slugNum + 1);
     }
 
     /**

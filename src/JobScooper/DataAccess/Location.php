@@ -58,7 +58,7 @@ class Location extends BaseLocation
         $newCode = getStateCodeFromState($v);
 
         if(is_null($this->getStateCode()))
-            $this->setStateCode($newCode);
+            parent::setStateCode($newCode);
     }
 
     public function setStateCode($v)
@@ -133,9 +133,94 @@ class Location extends BaseLocation
         }
     }
 
+    public function formatLocation($formatString)
+    {
+        return replaceTokensInString($formatString, $this->toArray());
+    }
 
-//$state = $this->getState();
-//if(!is_null($state) && strlen($state) > 0)
-//$this->setStateCode($STATE_CODES[$state]);
-//
+    public function formatLocationByLocationType($locFormatNeeded)
+    {
+        switch ($locFormatNeeded)
+        {
+
+            case 'location-city':
+                $locFormatString = "{PLACE}";
+                break;
+
+            case 'location-city-comma-statecode':
+                $locFormatString = "{PLACE}, {STATECODE}";
+                break;
+
+            case 'location-city-dash-statecode':
+                $locFormatString = "{PLACE}-{STATECODE}";
+                break;
+
+            case 'location-city-comma-nospace-statecode':
+                $locFormatString = "{PLACE},{STATECODE}";
+                break;
+
+            case 'location-city-comma-statecode-underscores-and-dashes':
+                $locFormatString = "{PLACE}__2c-{STATECODE}";
+                break;
+
+            case 'location-city-comma-state':
+                $locFormatString = "{PLACE}, {STATE}";
+                break;
+
+            case 'location-city-comma-state-country':
+                $locFormatString = "{PLACE}, {STATE}, {COUNTRY}";
+                break;
+
+            case 'location-city-comma-state-country-no-commas':
+                $locFormatString = "{PLACE} {STATE} {COUNTRY}";
+                break;
+
+            case 'location-city-comma-state-comma-country':
+                $locFormatString = "{PLACE}, {STATE}, {COUNTRY}";
+                break;
+
+            case 'location-city-comma-statecode-comma-country':
+                $locFormatString = "{PLACE}, {STATECODE}, {COUNTRY}";
+                break;
+
+            case 'location-city-comma-state-comma-countrycode':
+                $locFormatString = "{PLACE}, {STATE}, {COUNTRYCODE}";
+                break;
+
+            case 'location-city-comma-country':
+                $locFormatString = "{PLACE}, {COUNTRY}";
+                break;
+
+            case 'location-city--comma-countrycode':
+                $locFormatString = "{PLACE}, {COUNTRYCODE}";
+                break;
+
+            case 'location-city-comma-statecode-comma-countrycode':
+                $locFormatString = "{PLACE}, {STATECODE}, {COUNTRYCODE}";
+                break;
+
+            case 'location-countrycode':
+                $locFormatString = "{COUNTRYCODE}";
+                break;
+
+            case 'location-city-country-no-commas':
+                $locFormatString = "{PLACE} {COUNTRY}";
+                break;
+
+            case 'location-state':
+                $locFormatString = "{STATE}";
+                break;
+
+            case 'location-statecode':
+                $locFormatString = "{STATECODE}";
+                break;
+
+            default:
+                $locFormatString = "{DISPLAYNAME}";
+                break;
+        }
+
+        return $this->formatLocation($locFormatString);
+    }
+
 }

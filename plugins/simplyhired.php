@@ -97,8 +97,8 @@ class PluginSimplyHired extends \JobScooper\Plugins\lib\ServerHtmlPlugin
         $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
         if(!$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
         {
-            assert($searchDetails['keywords_string_for_url'] != VALUE_NOT_SUPPORTED);
-            $strURL = str_ireplace(BASE_URL_TAG_KEYWORDS, $searchDetails['keywords_string_for_url'], $strURL );
+            assert($searchDetails->getSearchParameter('keywords_string_for_url') != VALUE_NOT_SUPPORTED);
+            $strURL = str_ireplace(BASE_URL_TAG_KEYWORDS, $searchDetails->getSearchParameter('keywords_string_for_url', $strURL ));
         }
 
 
@@ -108,7 +108,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\lib\ServerHtmlPlugin
 
         if(!$this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) && $nSubtermMatches > 0)
         {
-            if($searchDetails['location_search_value'] == VALUE_NOT_SUPPORTED)
+            if($searchDetails->getSearchParameter('location_search_value') == VALUE_NOT_SUPPORTED)
             {
                 $msg = "Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() ." set.  Skipping search '". $searchDetails->getUserSearchRunKey() .".";
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($msg, \C__DISPLAY_ERROR__);
@@ -116,7 +116,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\lib\ServerHtmlPlugin
             }
             else
             {
-                $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $searchDetails['location_search_value'], $strURL);
+                $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $searchDetails->getSearchParameter('location_search_value'), $strURL);
             }
         }
 

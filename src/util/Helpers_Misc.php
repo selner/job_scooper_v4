@@ -16,7 +16,18 @@
  */
 
 
+function replaceTokensInString($formatString, $arrVariables)
+{
+//    $variables = array("first_name"=>"John","last_name"=>"Smith","status"=>"won");
+//    $string = 'Dear {FIRST_NAME} {LAST_NAME}, we wanted to tell you that you {STATUS} the competition.';
+    $ret = $formatString;
+    foreach($arrVariables as $key => $value){
+        $ret = str_replace('{'.strtoupper($key).'}', $value, $ret);
+//        $ret = str_replace('***'.strtoupper($key).'***', $value, $ret);
+    }
 
+    return $ret;
+}
 
 
 function array_find_closest_key_match($search, $arr) {
@@ -823,7 +834,7 @@ function getStateFromStateCode($code)
         "WY" => "WYOMING"
     );
 
-    $slug= cleanupSlugPart($code);
+    $slug= strtoupper(cleanupSlugPart($code));
     if(array_key_exists($slug, $STATE_CODES))
         return $STATE_CODES[$slug];
     return null;
@@ -894,7 +905,7 @@ function getStateCodeFromState($state)
         "WYOMING" => "WY"
     );
 
-    $slug= cleanupSlugPart($state);
+    $slug= strtoupper(cleanupSlugPart($state));
     if(array_key_exists($slug, $STATE_CODES))
         return $STATE_CODES[$slug];
     return null;
@@ -905,7 +916,7 @@ function getOpenStreetMapFacts($query)
 {
     $ret = null;
     $data = null;
-    $osmquery = "http://nominatim.openstreetmap.org/search?q=%s&format=json&addressdetails=1&extradetails=1&namedetails=1&countrycodes=US&dedupe=1";
+    $osmquery = "http://nominatim.openstreetmap.org/search?q=%s&format=json&addressdetails=1&extradetails=1&namedetails=1&dedupe=1";
     $apiCall = sprintf($osmquery, urlencode($query));
 
     $curl = new \CurlWrapper();

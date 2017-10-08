@@ -337,19 +337,18 @@ function findOrCreateJobSitePlugin($jobsite)
     return $GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object'];
 }
 
-function getLocationIdByAlternateName($strLocation)
+function findOrCreateLocationLookupFromName($strLocation)
 {
-
     $slug = cleanupSlugPart($strLocation);
-    $placelookup = getLocationByNameLookup($slug);
+    $loclookup = getLocationByNameLookup($slug);
 
-    if(is_null($placelookup->getLocationId()))
+    if(is_null($loclookup->getLocationId()))
     {
-        $placelookup->setLocationAlternateName($strLocation);
-        $placelookup->save();
+        $loclookup->setLocationAlternateName($strLocation);
+        $loclookup->save();
     }
 
-    return $placelookup->getLocationId();
+    return $loclookup;
 }
 
 
@@ -385,12 +384,12 @@ function updateOrCreateUser($arrUserDetails)
 
 
 
-function findOrCreateUserSearchRun($searchKey, $jobsiteKey, $locationKey="no-location")
+function findOrCreateUserSearchRun($searchKey, $jobsiteKey, $locationKey="any-location", $copyFrom=null)
 {
     $userObject = $GLOBALS['USERDATA']['configuration_settings']['user_details'];
     $userSlug = $userObject->getUserSlug();
 
-    LogLine("Searching for user '{$userSlug} / jobsite {$jobsiteKey} / search '{$searchKey} / search '{$locationKey}'...", \C__DISPLAY_NORMAL__);
+    LogLine("Searching for user '{$userSlug} / jobsite {$jobsiteKey} / search '{$searchKey} / location '{$locationKey}'...", \C__DISPLAY_NORMAL__);
 
     $search = \JobScooper\DataAccess\UserSearchRunQuery::create()
         ->filterByUserSlug($userSlug)
@@ -399,16 +398,32 @@ function findOrCreateUserSearchRun($searchKey, $jobsiteKey, $locationKey="no-loc
         ->filterByLocationKey($locationKey)
         ->findOne();
 
-    if(!$search) {
-        LogLine("Search Not Found -- Creating New User Search Run for user '{$userSlug} / plugin {$jobsiteKey} / search '{$searchKey} / search '{$locationKey}'...", \C__DISPLAY_WARNING__);
+    if (!$search) {
+        LogLine("Search Not Found -- Creating New User Search Run for user '{$userSlug} / plugin {$jobsiteKey} / search '{$searchKey} / location '{$locationKey}'...", \C__DISPLAY_WARNING__);
         $search = new \JobScooper\DataAccess\UserSearchRun();
-
-        $search->setSearchKey($searchKey);
-        $search->setJobSiteKey($jobsiteKey);
-        $search->setUserSlug($userSlug);
-        $search->setLocationKey($locationKey);
-
-        $search->save();
     }
+
+
+    if (!is_null($copyFrom))
+    {
+        $allFields = \JobScooper\DataAccess\Map\UserSearchRunTableMap::getTableMap(\Propel\Runtime\Map\TableMap::TYPE_PHPNAME);
+        foreach($allFields->getColumns() as $v) {
+            $field = $v->getPhpName();
+            if (!in_array($field, array('UserSearchRunId', 'UserSlug', 'RunResult', 'RunErrorDetails')))
+            {
+                $getCall = "get" . $field;
+                $setCall = "set" . $field;
+                $curval = call_user_func(array($copyFrom, $getCall));
+                call_user_func(array($search, $setCall), $curval);
+            }
+        }
+    }
+
+    $search->setSearchKey($searchKey);
+    $search->setJobSiteKey($jobsiteKey);
+    $search->setUserSlug($userSlug);
+    $search->setLocationKey($locationKey);
+
+    $search->save();
     return $search;
 }

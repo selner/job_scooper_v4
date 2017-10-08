@@ -8,19 +8,13 @@ Jobs Scooper currently **supports [over 70 different sites](../../wiki/Job-Sites
 ## Configuring Search Terms for a User
 Make a copy of the [example_config.ini](examples/example_config.ini) and edit it's settings to match the search keywords and locations that you want for that user:
 ```INI
+[global_search_options]
+search_location[] = "Seattle, WA"
+
 [search_keyword_set]
 [search_keyword_set.analytics]
 keywords=["analytics manager", "Digital market", "director"]   ;# will pick up analytics manager and senior/sr analytics manager
 
-[search_location_setting_set]
-
-[search_location_setting_set.Seattle]
-name="Seattle"
-city="Seattle"
-state="Washington"
-statecode="WA"
-country="United States"
-countrycode="US"
 ```
 
 Then update config.ini values for your notification email address and output folder path.  That's it!  [Run Jobs Scooper](../wiki/Running-Jobs-Scooper) and let it do the work for you.
@@ -160,7 +154,7 @@ Job Scooper also now supports running Selenium for AJAX job sites in a Docker co
 Using the new Simple Job Site base plugin classes, developers can now add an entire new plugin for a job site in fewer than 40 lines of code!  Here's a fully-featured job site plugin example of how to do it:
 
  ```php
-class PluginCyberJobs extends ClassClientHTMLJobSitePlugin
+class PluginCyberJobs extends AjaxHtmlSimplePlugin
 {
     protected $siteName = 'CyberJobs';
     protected $siteBaseURL = "https://cyber.jobs";
@@ -188,5 +182,5 @@ class PluginCyberJobs extends ClassClientHTMLJobSitePlugin
 ## Other Stuff
 * Version:  v4.0.beta1 [release notes](../../releases)
 * Author:  Bryan Selner (dev at recoilvelocity dot com)
-* Tested mainly on Mac OS 10.11 and 10.12.  Your mileage might vary on other platforms.
+* Tested mainly in Linux under Docker (see Dockerfile) and macOS 12.12.  Your mileage might vary on other platforms.
 * Issues/Bugs:  [Please report them!](../../issues)

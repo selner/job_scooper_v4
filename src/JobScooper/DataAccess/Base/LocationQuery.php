@@ -24,6 +24,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildLocationQuery orderByLatitude($order = Criteria::ASC) Order by the lat column
  * @method     ChildLocationQuery orderByLongitude($order = Criteria::ASC) Order by the lon column
  * @method     ChildLocationQuery orderByDisplayName($order = Criteria::ASC) Order by the full_display_name column
+ * @method     ChildLocationQuery orderByLocationKey($order = Criteria::ASC) Order by the location_key column
  * @method     ChildLocationQuery orderByPrimaryName($order = Criteria::ASC) Order by the primary_name column
  * @method     ChildLocationQuery orderByPlace($order = Criteria::ASC) Order by the place column
  * @method     ChildLocationQuery orderByCounty($order = Criteria::ASC) Order by the county column
@@ -40,6 +41,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildLocationQuery groupByLatitude() Group by the lat column
  * @method     ChildLocationQuery groupByLongitude() Group by the lon column
  * @method     ChildLocationQuery groupByDisplayName() Group by the full_display_name column
+ * @method     ChildLocationQuery groupByLocationKey() Group by the location_key column
  * @method     ChildLocationQuery groupByPrimaryName() Group by the primary_name column
  * @method     ChildLocationQuery groupByPlace() Group by the place column
  * @method     ChildLocationQuery groupByCounty() Group by the county column
@@ -99,6 +101,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildLocation findOneByLatitude(double $lat) Return the first ChildLocation filtered by the lat column
  * @method     ChildLocation findOneByLongitude(double $lon) Return the first ChildLocation filtered by the lon column
  * @method     ChildLocation findOneByDisplayName(string $full_display_name) Return the first ChildLocation filtered by the full_display_name column
+ * @method     ChildLocation findOneByLocationKey(string $location_key) Return the first ChildLocation filtered by the location_key column
  * @method     ChildLocation findOneByPrimaryName(string $primary_name) Return the first ChildLocation filtered by the primary_name column
  * @method     ChildLocation findOneByPlace(string $place) Return the first ChildLocation filtered by the place column
  * @method     ChildLocation findOneByCounty(string $county) Return the first ChildLocation filtered by the county column
@@ -118,6 +121,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildLocation requireOneByLatitude(double $lat) Return the first ChildLocation filtered by the lat column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildLocation requireOneByLongitude(double $lon) Return the first ChildLocation filtered by the lon column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildLocation requireOneByDisplayName(string $full_display_name) Return the first ChildLocation filtered by the full_display_name column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildLocation requireOneByLocationKey(string $location_key) Return the first ChildLocation filtered by the location_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildLocation requireOneByPrimaryName(string $primary_name) Return the first ChildLocation filtered by the primary_name column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildLocation requireOneByPlace(string $place) Return the first ChildLocation filtered by the place column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildLocation requireOneByCounty(string $county) Return the first ChildLocation filtered by the county column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -135,6 +139,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildLocation[]|ObjectCollection findByLatitude(double $lat) Return ChildLocation objects filtered by the lat column
  * @method     ChildLocation[]|ObjectCollection findByLongitude(double $lon) Return ChildLocation objects filtered by the lon column
  * @method     ChildLocation[]|ObjectCollection findByDisplayName(string $full_display_name) Return ChildLocation objects filtered by the full_display_name column
+ * @method     ChildLocation[]|ObjectCollection findByLocationKey(string $location_key) Return ChildLocation objects filtered by the location_key column
  * @method     ChildLocation[]|ObjectCollection findByPrimaryName(string $primary_name) Return ChildLocation objects filtered by the primary_name column
  * @method     ChildLocation[]|ObjectCollection findByPlace(string $place) Return ChildLocation objects filtered by the place column
  * @method     ChildLocation[]|ObjectCollection findByCounty(string $county) Return ChildLocation objects filtered by the county column
@@ -244,7 +249,7 @@ abstract class LocationQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT location_id, lat, lon, full_display_name, primary_name, place, county, state, statecode, country, countrycode, alternate_names, openstreetmap_id, full_osm_data, extra_details_data FROM location WHERE location_id = :p0';
+        $sql = 'SELECT location_id, lat, lon, full_display_name, location_key, primary_name, place, county, state, statecode, country, countrycode, alternate_names, openstreetmap_id, full_osm_data, extra_details_data FROM location WHERE location_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -480,6 +485,31 @@ abstract class LocationQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(LocationTableMap::COL_FULL_DISPLAY_NAME, $displayName, $comparison);
+    }
+
+    /**
+     * Filter the query on the location_key column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByLocationKey('fooValue');   // WHERE location_key = 'fooValue'
+     * $query->filterByLocationKey('%fooValue%', Criteria::LIKE); // WHERE location_key LIKE '%fooValue%'
+     * </code>
+     *
+     * @param     string $locationKey The value to use as filter.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildLocationQuery The current query, for fluid interface
+     */
+    public function filterByLocationKey($locationKey = null, $comparison = null)
+    {
+        if (null === $comparison) {
+            if (is_array($locationKey)) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(LocationTableMap::COL_LOCATION_KEY, $locationKey, $comparison);
     }
 
     /**
@@ -1123,6 +1153,33 @@ abstract class LocationQuery extends ModelCriteria
 
             return $affectedRows;
         });
+    }
+
+    // sluggable behavior
+
+    /**
+     * Filter the query on the slug column
+     *
+     * @param     string $slug The value to use as filter.
+     *
+     * @return    $this|ChildLocationQuery The current query, for fluid interface
+     */
+    public function filterBySlug($slug)
+    {
+        return $this->addUsingAlias(LocationTableMap::COL_LOCATION_KEY, $slug, Criteria::EQUAL);
+    }
+
+    /**
+     * Find one object based on its slug
+     *
+     * @param     string $slug The value to use as filter.
+     * @param     ConnectionInterface $con The optional connection object
+     *
+     * @return    ChildLocation the result, formatted by the current formatter
+     */
+    public function findOneBySlug($slug, $con = null)
+    {
+        return $this->filterBySlug($slug)->findOne($con);
     }
 
 } // LocationQuery

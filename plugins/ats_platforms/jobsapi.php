@@ -35,7 +35,7 @@ class PluginUSAJobs extends JobsApiPlugin
         $options = [
             'AuthorizationKey' => $this->authorization_key,
 
-            'LocationName' => $searchDetails['location_search_value'],
+            'LocationName' => $searchDetails->getSearchParameter('location_search_value'),
             'Page' => $pageNumber
         ];
         $query = new UsajobsQuery($options);

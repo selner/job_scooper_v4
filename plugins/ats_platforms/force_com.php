@@ -132,7 +132,7 @@ class PluginRobertHalfExec extends BaseForceComClass
             }  
         ";
 
-        $this->selenium->getPageHTML($searchDetails['search_start_url']);
+        $this->selenium->getPageHTML($searchDetails->getSearchParameter('search_start_url'));
 
         $this->runJavaScriptSnippet($js, false);
         sleep($this->additionalLoadDelaySeconds + 2);

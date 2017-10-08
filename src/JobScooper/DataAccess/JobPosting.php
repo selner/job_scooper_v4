@@ -144,9 +144,11 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
     {
         $orig_loc_str = $this->getLocationFromSource();
 
-        $locationId = getLocationIdByAlternateName($orig_loc_str);
-        $this->setLocationId($locationId);
-        $this->_setDenormalizedLocationDisplayValue_();
+        $loclookup = findOrCreateLocationLookupFromName($orig_loc_str);
+        if(!is_null($loclookup)) {
+            $this->setLocationId($loclookup->getLocationId());
+            $this->_setDenormalizedLocationDisplayValue_();
+        }
     }
 
     public function setCompany($v)

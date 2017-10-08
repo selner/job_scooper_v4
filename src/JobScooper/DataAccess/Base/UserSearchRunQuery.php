@@ -27,7 +27,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRunQuery orderByLocationKey($order = Criteria::ASC) Order by the location_key column
  * @method     ChildUserSearchRunQuery orderByLocationId($order = Criteria::ASC) Order by the location_id column
  * @method     ChildUserSearchRunQuery orderByUserSearchRunKey($order = Criteria::ASC) Order by the user_search_run_key column
- * @method     ChildUserSearchRunQuery orderBySearchSettings($order = Criteria::ASC) Order by the search_settings column
+ * @method     ChildUserSearchRunQuery orderBySearchParametersData($order = Criteria::ASC) Order by the search_parameters_data column
  * @method     ChildUserSearchRunQuery orderByAppRunId($order = Criteria::ASC) Order by the last_app_run_id column
  * @method     ChildUserSearchRunQuery orderByRunResultCode($order = Criteria::ASC) Order by the run_result column
  * @method     ChildUserSearchRunQuery orderByRunErrorDetails($order = Criteria::ASC) Order by the run_error_details column
@@ -43,7 +43,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRunQuery groupByLocationKey() Group by the location_key column
  * @method     ChildUserSearchRunQuery groupByLocationId() Group by the location_id column
  * @method     ChildUserSearchRunQuery groupByUserSearchRunKey() Group by the user_search_run_key column
- * @method     ChildUserSearchRunQuery groupBySearchSettings() Group by the search_settings column
+ * @method     ChildUserSearchRunQuery groupBySearchParametersData() Group by the search_parameters_data column
  * @method     ChildUserSearchRunQuery groupByAppRunId() Group by the last_app_run_id column
  * @method     ChildUserSearchRunQuery groupByRunResultCode() Group by the run_result column
  * @method     ChildUserSearchRunQuery groupByRunErrorDetails() Group by the run_error_details column
@@ -102,7 +102,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRun findOneByLocationKey(string $location_key) Return the first ChildUserSearchRun filtered by the location_key column
  * @method     ChildUserSearchRun findOneByLocationId(int $location_id) Return the first ChildUserSearchRun filtered by the location_id column
  * @method     ChildUserSearchRun findOneByUserSearchRunKey(string $user_search_run_key) Return the first ChildUserSearchRun filtered by the user_search_run_key column
- * @method     ChildUserSearchRun findOneBySearchSettings( $search_settings) Return the first ChildUserSearchRun filtered by the search_settings column
+ * @method     ChildUserSearchRun findOneBySearchParametersData(string $search_parameters_data) Return the first ChildUserSearchRun filtered by the search_parameters_data column
  * @method     ChildUserSearchRun findOneByAppRunId(string $last_app_run_id) Return the first ChildUserSearchRun filtered by the last_app_run_id column
  * @method     ChildUserSearchRun findOneByRunResultCode(int $run_result) Return the first ChildUserSearchRun filtered by the run_result column
  * @method     ChildUserSearchRun findOneByRunErrorDetails(array $run_error_details) Return the first ChildUserSearchRun filtered by the run_error_details column
@@ -121,7 +121,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRun requireOneByLocationKey(string $location_key) Return the first ChildUserSearchRun filtered by the location_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByLocationId(int $location_id) Return the first ChildUserSearchRun filtered by the location_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByUserSearchRunKey(string $user_search_run_key) Return the first ChildUserSearchRun filtered by the user_search_run_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserSearchRun requireOneBySearchSettings( $search_settings) Return the first ChildUserSearchRun filtered by the search_settings column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchRun requireOneBySearchParametersData(string $search_parameters_data) Return the first ChildUserSearchRun filtered by the search_parameters_data column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByAppRunId(string $last_app_run_id) Return the first ChildUserSearchRun filtered by the last_app_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByRunResultCode(int $run_result) Return the first ChildUserSearchRun filtered by the run_result column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByRunErrorDetails(array $run_error_details) Return the first ChildUserSearchRun filtered by the run_error_details column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -138,7 +138,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRun[]|ObjectCollection findByLocationKey(string $location_key) Return ChildUserSearchRun objects filtered by the location_key column
  * @method     ChildUserSearchRun[]|ObjectCollection findByLocationId(int $location_id) Return ChildUserSearchRun objects filtered by the location_id column
  * @method     ChildUserSearchRun[]|ObjectCollection findByUserSearchRunKey(string $user_search_run_key) Return ChildUserSearchRun objects filtered by the user_search_run_key column
- * @method     ChildUserSearchRun[]|ObjectCollection findBySearchSettings( $search_settings) Return ChildUserSearchRun objects filtered by the search_settings column
+ * @method     ChildUserSearchRun[]|ObjectCollection findBySearchParametersData(string $search_parameters_data) Return ChildUserSearchRun objects filtered by the search_parameters_data column
  * @method     ChildUserSearchRun[]|ObjectCollection findByAppRunId(string $last_app_run_id) Return ChildUserSearchRun objects filtered by the last_app_run_id column
  * @method     ChildUserSearchRun[]|ObjectCollection findByRunResultCode(int $run_result) Return ChildUserSearchRun objects filtered by the run_result column
  * @method     ChildUserSearchRun[]|ObjectCollection findByRunErrorDetails(array $run_error_details) Return ChildUserSearchRun objects filtered by the run_error_details column
@@ -244,7 +244,7 @@ abstract class UserSearchRunQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_search_run_id, search_key, user_slug, jobsite_key, location_key, location_id, user_search_run_key, search_settings, last_app_run_id, run_result, run_error_details, date_last_run, date_next_run, date_last_failed, updated_at FROM user_search_run WHERE user_search_run_id = :p0';
+        $sql = 'SELECT user_search_run_id, search_key, user_slug, jobsite_key, location_key, location_id, user_search_run_key, search_parameters_data, last_app_run_id, run_result, run_error_details, date_last_run, date_next_run, date_last_failed, updated_at FROM user_search_run WHERE user_search_run_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -544,20 +544,28 @@ abstract class UserSearchRunQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the search_settings column
+     * Filter the query on the search_parameters_data column
      *
-     * @param     mixed $searchSettings The value to use as filter
+     * Example usage:
+     * <code>
+     * $query->filterBySearchParametersData('fooValue');   // WHERE search_parameters_data = 'fooValue'
+     * $query->filterBySearchParametersData('%fooValue%', Criteria::LIKE); // WHERE search_parameters_data LIKE '%fooValue%'
+     * </code>
+     *
+     * @param     string $searchParametersData The value to use as filter.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
      */
-    public function filterBySearchSettings($searchSettings = null, $comparison = null)
+    public function filterBySearchParametersData($searchParametersData = null, $comparison = null)
     {
-        if (is_object($searchSettings)) {
-            $searchSettings = serialize($searchSettings);
+        if (null === $comparison) {
+            if (is_array($searchParametersData)) {
+                $comparison = Criteria::IN;
+            }
         }
 
-        return $this->addUsingAlias(UserSearchRunTableMap::COL_SEARCH_SETTINGS, $searchSettings, $comparison);
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_SEARCH_PARAMETERS_DATA, $searchParametersData, $comparison);
     }
 
     /**
