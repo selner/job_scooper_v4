@@ -52,38 +52,6 @@ const C__PAGINATION_NONE = "NONE";
 //
 //
 //
-//  Supported Location Types
-//
-//
-//
-//************************************************************************
-
-// TODO: refactor into more of a sprintf style definition (e.g. "%c,%S" would be "City, STATECODE")
-$GLOBALS['DATA']['location_types'] = array(
-    'location-city',
-    'location-city-comma-statecode',
-    'location-city-dash-statecode',
-    'location-city-comma-nospace-statecode',
-    'location-city-comma-statecode-underscores-and-dashes',
-    'location-city-comma-state',
-    'location-city-comma-state-country',
-    'location-city-comma-state-comma-country',
-    'location-city-comma-state-country-no-commas',
-    'location-city-comma-state-comma-country',
-    'location-city-comma-state-comma-countrycode',
-    'location-city-comma-country',
-    'location-city--comma-countrycode',
-    'location-city-comma-statecode-comma-country',
-    'location-city-comma-statecode-comma-countrycode',
-    'location-city-country-no-commas',
-    'location-state',
-    'location-statecode',
-    'location-countrycode');
-
-//************************************************************************
-//
-//
-//
 //  Supported Plugin Configuration Flags
 //
 //

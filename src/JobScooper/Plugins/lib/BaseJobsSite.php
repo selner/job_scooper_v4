@@ -342,7 +342,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         throw new \BadMethodCallException(sprintf("Not implemented method  " . __METHOD__ . " called on class \"%s \".", __CLASS__));
     }
 
-    protected function getLocationURLValue($searchDetails, $locSettingSets = null)
+    protected function getLocationURLValue($searchDetails)
     {
         $strReturnLocation = VALUE_NOT_SUPPORTED;
 
@@ -363,16 +363,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
             // No override, so let's see if the search settings have defined one for us
             $locTypeNeeded = $this->getLocationSettingType();
             if ($locTypeNeeded == null || $locTypeNeeded == "") {
-                LogLine("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchRunKey() . "' with settings '" . $locSettingSets['key'] . "'.", \C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchRunKey() . ".", \C__DISPLAY_ITEM_DETAIL__);
                 return $strReturnLocation;
             }
 
-            if (isset($locSettingSets) && count($locSettingSets) > 0 && isset($locSettingSets[$locTypeNeeded])) {
-                $strReturnLocation = $locSettingSets[$locTypeNeeded];
-            }
-
             if ($strReturnLocation == null || $strReturnLocation == VALUE_NOT_SUPPORTED) {
-                LogLine("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchRunKey() . "' with settings '" . $locSettingSets['key'] . "'.", \C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchRunKey() . ".", \C__DISPLAY_ITEM_DETAIL__);
                 return $strReturnLocation;
             }
         }

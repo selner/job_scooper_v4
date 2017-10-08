@@ -80,9 +80,9 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
         'tag_next_button'           => array('selector' => 'li.paginator__item a[rel="next"]')
     );
 
-    protected function getLocationURLValue($searchDetails, $locSettingSets = null)
+    protected function getLocationURLValue($searchDetails)
     {
-        $ret = parent::getLocationURLValue($searchDetails, $locSettingSets);
+        $ret = parent::getLocationURLValue($searchDetails);
         if (stristr($ret, "%2C+washington") !== false)
             $ret .= "+state";
         return $ret;

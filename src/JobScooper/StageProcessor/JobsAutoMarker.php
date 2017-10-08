@@ -56,19 +56,16 @@ class JobsAutoMarker
             $this->cbsaList = loadJSON(__ROOT__.'/assets/static/cbsa_list.json');
             $cbsaCityMapping = loadCSV(__ROOT__.'/assets/static/us_place_to_csba_mapping.csv', 'PlaceKey');
 
-            foreach($GLOBALS['USERDATA']['configuration_settings']['location_sets'] as $locset)
+            foreach(getConfigurationSettings('search_location') as $search_location)
             {
-                if(array_key_exists('location-city', $locset) === true && (array_key_exists('location-statecode', $locset)))
+                $loclookup = findOrCreateLocationLookupFromName($search_location);
+                $location = null;
+                if(!is_null($loclookup))
+                    $location = $loclookup->getLocation();
+
+                if(!is_null($location))
                 {
-                    $cityName = $this->_normalizeLocation_($locset['location-city'])."_".strtoupper($locset['location-statecode']);
-                    $placekey = strtoupper($cityName);
-                    $cbsa = $cbsaCityMapping[$placekey];
-                    $this->cbsaLocSetMapping[$locset['key']] = $cbsa['CBSA'];
-                }
-                elseif(array_key_exists('location-city', $locset) === true)
-                {
-                    $cityName = $this->_normalizeLocation_($locset['location-city']);
-                    $this->locationCities[$this->getLocationLookupKey($cityName)] = $cityName;
+                    $this->locationCities[$location->getLocationKey()] = $location->getDisplayName();
                 }
             }
 
@@ -86,7 +83,6 @@ class JobsAutoMarker
                 }
             }
 
-            unset($locset);
             unset($cbsaCityMapping);
         }
     }

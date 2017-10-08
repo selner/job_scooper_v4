@@ -337,18 +337,75 @@ function findOrCreateJobSitePlugin($jobsite)
     return $GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object'];
 }
 
+
+
+function findLocationByNameLookup($slug)
+{
+    if(!array_key_exists('CACHE', $GLOBALS) || !array_key_exists('LocationAlternateNames', $GLOBALS['CACHE']))
+        reloadLocationNamesCache();
+
+    if(!array_key_exists($slug, $GLOBALS['CACHE']['LocationAlternateNames']))
+    {
+        LogLine("Cache missed; looking up location in database by name string '" . $slug ."'", \C__DISPLAY_NORMAL__);
+        $loclookupFound = \JobScooper\DataAccess\LocationNamesQuery::create()
+            ->filterBySlug($slug)
+            ->findOne();
+        return is_array_multidimensional($loclookupFound) ? $loclookupFound[0] : $loclookupFound;
+    }
+
+    return $GLOBALS['CACHE']['LocationAlternateNames'][$slug];
+
+}
+
+
 function findOrCreateLocationLookupFromName($strLocation)
 {
     $slug = cleanupSlugPart($strLocation);
-    $loclookup = getLocationByNameLookup($slug);
-
-    if(is_null($loclookup->getLocationId()))
+    $loclookup = findLocationByNameLookup($slug);
+    if(is_null($loclookup))
     {
-        $loclookup->setLocationAlternateName($strLocation);
-        $loclookup->save();
+        $location = findOrCreateLocationFromOSMQuery($strLocation);
+        if(!is_null($location))
+        {
+            $loclookup = new \JobScooper\DataAccess\LocationNames();
+            $loclookup->setLocation($location);
+            $loclookup->setLocationAlternateName($strLocation);
+            $loclookup->save();
+            return $loclookup;
+        }
     }
 
     return $loclookup;
+}
+
+function findOrCreateLocationFromOSMQuery($query)
+{
+    $place = getPlaceFromOpenStreetMap($query);
+    if(!is_null($place))
+    {
+        if(is_array_multidimensional($place))
+            $place = $place[0];
+
+        $osmid = $place['osm_id'];
+        $dbQuery = \JobScooper\DataAccess\LocationQuery::create()
+            ->findOneByOpenStreetMapId($osmid);
+        if(!is_null($dbQuery))
+        {
+            if(is_array_multidimensional($dbQuery))
+                return $dbQuery[0];
+            else
+                return $dbQuery;
+        }
+        else
+        {
+            $location = new \JobScooper\DataAccess\Location();
+            $location->fromOSMData($place);
+            $location->save();
+            return $location;
+        }
+    }
+
+    return null;
 }
 
 

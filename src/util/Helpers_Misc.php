@@ -532,7 +532,6 @@ function getSearchesByRunResult($resultCode)
                     'base_url_format',
                     'keywords_array_tokenized',
                     'search_start_url',
-                    'location_set_key',
                     'location_user_specified_override',
                     'location_search_value',
                     'keyword_search_override',
@@ -555,7 +554,8 @@ function setSiteAsExcluded($excludedSite)
     {
         unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite]);
     }
-    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting " . $excludedSite . " as excluded for this run.", \C__DISPLAY_ITEM_DETAIL__);
+
+    if(isset($GLOBALS['logger']) && isDebug()) $GLOBALS['logger']->logLine("Setting " . $excludedSite . " as excluded for this run.", \C__DISPLAY_ITEM_DETAIL__);
 
     if(array_key_exists($excludedSite, $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'])) {
         foreach($GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'][$excludedSite] as $search)
@@ -564,8 +564,6 @@ function setSiteAsExcluded($excludedSite)
             $search->save();
         }
     }
-
-    LogLine($excludedSite . " excluded, so skipping its searches.", \C__DISPLAY_ITEM_START__);
 }
 
 function noJobStringMatch($var, $matchString)

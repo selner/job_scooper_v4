@@ -31,10 +31,8 @@ class Location extends BaseLocation
     public function preSave(ConnectionInterface $con = null)
     {
 
-        if(is_null($this->getOpenStreetMapId()))
-        {
-            if(!is_null($this->getPrimaryName()))
-            {
+        if (is_null($this->getOpenStreetMapId())) {
+            if (!is_null($this->getPrimaryName())) {
                 $osm = getPlaceFromOpenStreetMap($this->getPrimaryName());
                 $this->fromOSMData($osm);
             }
@@ -50,27 +48,26 @@ class Location extends BaseLocation
     }
 
 
-
     public function setState($v)
     {
         parent::setState($v);
 
         $newCode = getStateCodeFromState($v);
 
-        if(is_null($this->getStateCode()))
+        if (is_null($this->getStateCode()))
             parent::setStateCode($newCode);
     }
 
     public function setStateCode($v)
     {
-        if(!is_null($v) && strlen($v) > 0)
+        if (!is_null($v) && strlen($v) > 0)
             $v = strtoupper($v);
 
         parent::setStateCode($v);
 
         $newState = getStateFromStateCode($v);
 
-        if(is_null($this->getState()))
+        if (is_null($this->getState()))
             $this->setState($newState);
 
     }
@@ -94,24 +91,18 @@ class Location extends BaseLocation
     public function getFullOsmDataAsArray()
     {
         $osmJsonText = parent::getFullOsmData();
-        if(!is_null($osmJsonText) && strlen($osmJsonText) > 0)
+        if (!is_null($osmJsonText) && strlen($osmJsonText) > 0)
             return decodeJSON($osmJsonText);
         return null;
     }
 
     public function fromOSMData($osmPlace)
     {
-
-        if(!is_null($osmPlace) && is_array($osmPlace) && count($osmPlace) > 0)
-        {
+        if (!is_null($osmPlace) && is_array($osmPlace) && count($osmPlace) > 0) {
             $this->setOpenStreetMapId($osmPlace['osm_id']);
             $this->setFullOsmDataFromArray($osmPlace);
             $this->setLatitude($osmPlace['lat']);
             $this->setLongitude($osmPlace['lon']);
-            if(array_key_exists('primary_name', $osmPlace))
-                $this->setDisplayName($osmPlace['primary_name']);
-            elseif (array_key_exists('display_name', $osmPlace))
-                $this->setDisplayName($osmPlace['display_name']);
             if (array_key_exists('place_name', $osmPlace))
                 $this->setPlace($osmPlace['place_name']);
             $this->setAlternateNames($osmPlace['namedetails']);
@@ -130,7 +121,17 @@ class Location extends BaseLocation
                 if (array_key_exists('country_code', $osmPlace['address']))
                     $this->setCountryCode($osmPlace['address']['country_code']);
             }
+
+            if (array_key_exists('primary_name', $osmPlace))
+                $this->setDisplayName($osmPlace['primary_name']);
+            elseif (!is_null($this->getPlace())) {
+                $dispName = $this->getPlace();
+                $dispName .= !is_null($this->getStateCode()) ? ", " . $this->getStateCode() : "";
+                $this->setDisplayName($dispName);
+            } elseif (array_key_exists('display_name', $osmPlace))
+                $this->setDisplayName($osmPlace['display_name']);
         }
+
     }
 
     public function formatLocation($formatString)

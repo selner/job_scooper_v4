@@ -80,23 +80,3 @@ function reloadLocationNamesCache()
         $GLOBALS['CACHE']['LocationAlternateNames'][$loc->getSlug()] = $loc;
     }
 }
-
-
-function getLocationByNameLookup($slug)
-{
-    if(!array_key_exists('CACHE', $GLOBALS) || !array_key_exists('LocationAlternateNames', $GLOBALS['CACHE']))
-        reloadLocationNamesCache();
-
-    if(!array_key_exists($slug, $GLOBALS['CACHE']['LocationAlternateNames']))
-    {
-        LogLine("Cache missed; looking up location in database by name string '" . $slug ."'", \C__DISPLAY_NORMAL__);
-        return \JobScooper\DataAccess\LocationNamesQuery::create()
-            ->filterBySlug($slug)
-            ->findOneOrCreate();
-
-    }
-
-    return $GLOBALS['CACHE']['LocationAlternateNames'][$slug];
-
-}
-

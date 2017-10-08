@@ -30,39 +30,39 @@ class LocationNames extends BaseLocationNames
         reloadLocationNamesCache();
     }
 
-    /**
-     * Code to be run before inserting to database
-     * @param  ConnectionInterface $con
-     * @return boolean
-     */
-    public function preSave(ConnectionInterface $con = null)
-    {
-        $locId = $this->getLocationId();
-        if(is_null($locId)) {
-            $osm = getPlaceFromOpenStreetMap($this->getLocationAlternateName());
-            if(!is_null($osm) && is_array($osm) && array_key_exists('osm_id', $osm) && !is_null($osm['osm_id']))
-            {
-                $loc = getLocationByOsmId($osm['osm_id']);
-                if (!$loc) {
-                    $loc = new \JobScooper\DataAccess\Location();
-                    $loc->fromOSMData($osm);
-                    $loc->save();
-                }
-                $this->setLocation($loc);
-
-                if (is_callable('parent::preSave')) {
-                    return parent::preSave($con);
-                }
-            }
-            else
-            {
-                $this->delete();
-            }
-        }
-
-        return false;
-
-    }
-
+//    /**
+//     * Code to be run before inserting to database
+//     * @param  ConnectionInterface $con
+//     * @return boolean
+//     */
+//    public function preSave(ConnectionInterface $con = null)
+//    {
+//        $locId = $this->getLocationId();
+//        if(is_null($locId)) {
+//            $osm = getPlaceFromOpenStreetMap($this->getLocationAlternateName());
+//            if(!is_null($osm) && is_array($osm) && array_key_exists('osm_id', $osm) && !is_null($osm['osm_id']))
+//            {
+//                $loc = getLocationByOsmId($osm['osm_id']);
+//                if (!$loc) {
+//                    $loc = new \JobScooper\DataAccess\Location();
+//                    $loc->fromOSMData($osm);
+//                    $loc->save();
+//                }
+//                $this->setLocation($loc);
+//
+//                if (is_callable('parent::preSave')) {
+//                    return parent::preSave($con);
+//                }
+//            }
+//            else
+//            {
+//                $this->delete();
+//            }
+//        }
+//
+//        return false;
+//
+//    }
+//
 
 }

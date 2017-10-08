@@ -30,7 +30,7 @@ class ConfigManager
     protected $nNumDaysToSearch = -1;
     public $arrFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null, 'user_input_files_details' => null);
     protected $arrEmailAddresses = null;
-    protected $configSettings = array('searches' => null, 'keyword_sets' => null, 'location_sets' => null, 'number_days' => VALUE_NOT_SUPPORTED, 'included_sites' => array(), 'excluded_sites' => array());
+    protected $configSettings = array('searches' => null, 'keyword_sets' => null, 'number_days' => VALUE_NOT_SUPPORTED, 'included_sites' => array(), 'excluded_sites' => array());
     protected $arrEmail_PHPMailer_SMTPSetup = null;
     protected $allConfigFileSettings = null;
 
@@ -309,8 +309,6 @@ class ConfigManager
 
         $this->_parseKeywordSetsFromConfig_($config);
 
-        $this->_parseLocationSetsFromConfig_($config);
-
 
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("All INI files loaded. Finalizing configuration for run...", \C__DISPLAY_SECTION_START__);
 
@@ -483,7 +481,7 @@ class ConfigManager
     private function _configureSearchLocation_($location_string)
     {
         if (!$location_string) throw new \ErrorException("Invalid configuration: search location value was empty.");
-        if (!array_key_exists('search_locations', $GLOBALS['USERDATA']['configuration_settings']))
+        if (!array_key_exists('search_location', $GLOBALS['USERDATA']['configuration_settings']))
             $GLOBALS['USERDATA']['configuration_settings']['search_locations'] = array();
 
         $loclookup = findOrCreateLocationLookupFromName($location_string);
@@ -493,92 +491,12 @@ class ConfigManager
         {
             $loc = $loclookup->getLocation();
             if(!is_null($loc))
-                $GLOBALS['USERDATA']['configuration_settings']['search_locations'][$loc->getLocationKey()] = array(
+                $GLOBALS['USERDATA']['configuration_settings']['search_location'][$loc->getLocationKey()] = array(
                     'location_raw_source_value' => $location_string,
                     'location_name_key' => $loclookup->getSlug(),
                     'location_name_lookup' => $loclookup);
         }
 
-    }
-
-
-    private function _parseLocationSetsFromConfig_($config)
-    {
-        if (!$config) throw new \ErrorException("Invalid configuration.  Cannot load user's searches.");
-
-        if (!array_key_exists('location_sets', $GLOBALS['USERDATA']['configuration_settings']))
-            $GLOBALS['USERDATA']['configuration_settings']['location_sets'] = array();
-
-        if (isset($config['search_location_setting_set'])) {
-            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading search locations from config file...", \C__DISPLAY_ITEM_START__);
-            //
-            // Check if this is a single search setting or if it's a set of search settings
-            //
-            $strSettingsName = null;
-            if ($config['search_location_setting_set'] && is_array($config['search_location_setting_set'])) {
-                foreach ($config['search_location_setting_set'] as $iniSettings) {
-                    if (count($iniSettings) > 1) {
-                        $arrNewLocationSet = array();
-                        $strSetName = 'LocationSet' . (count($GLOBALS['USERDATA']['configuration_settings']['location_sets']) + 1);
-                        if (isset($iniSettings['name'])) {
-                            if (is_array($iniSettings['name'])) {
-                                throw new \Exception("Error: Invalid location set data loaded from configs.  Did you inadvertently assets the same location set [" . $iniSettings['name'][0] . "] twice?");
-                            }
-                            if (strlen($iniSettings['name']) > 0) {
-                                $strSetName = $iniSettings['name'];
-                            }
-                        } elseif (isset($iniSettings['key']) && strlen($iniSettings['key']) > 0) {
-                            $strSetName = $iniSettings['key'];
-
-                        }
-                        $strSetName = strScrub($strSetName, FOR_LOOKUP_VALUE_MATCHING);
-
-                        $arrNewLocationSet['key'] = $strSetName;
-
-                        foreach (array_keys($iniSettings) as $loctype) {
-                            if (isset($iniSettings[$loctype])) {
-                                $arrNewLocationSet[$loctype] = strScrub($iniSettings[$loctype], REMOVE_EXTRA_WHITESPACE);
-                            }
-                        }
-
-                        $computedLocValues = array();
-                        if (array_key_exists("city", $arrNewLocationSet) && array_key_exists("state", $arrNewLocationSet) && array_key_exists("statecode", $arrNewLocationSet) && array_key_exists("country", $arrNewLocationSet) && array_key_exists("countrycode", $arrNewLocationSet)) {
-                            $computedLocValues = array(
-                                'location-city' => $arrNewLocationSet['city'],
-                                'location-city-comma-statecode' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['statecode'],
-                                'location-city-comma-nospace-statecode' => $arrNewLocationSet['city'] . "," . $arrNewLocationSet['statecode'],
-                                'location-city-dash-statecode' => $arrNewLocationSet['city'] . "-" . $arrNewLocationSet['statecode'],
-                                'location-city-comma-statecode-underscores-and-dashes' => $arrNewLocationSet['city'] . "__2c-" . $arrNewLocationSet['statecode'],
-                                'location-city-comma-state' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['state'],
-                                'location-city-comma-state-country' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['state'] . " " . $arrNewLocationSet['country'],
-                                'location-city-comma-state-comma-country' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['state'] . ", " . $arrNewLocationSet['country'],
-                                'location-city-comma-state-comma-countrycode' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['state'] . ", " . $arrNewLocationSet['countrycode'],
-                                'location-city-comma-statecode-comma-countrycode' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['statecode'] . ", " . $arrNewLocationSet['countrycode'],
-                                'location-city-comma-statecode-comma-country' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['statecode'] . ", " . $arrNewLocationSet['country'],
-                                'location-city-comma-countrycode' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['countrycode'],
-                                'location-city-comma-country' => $arrNewLocationSet['city'] . ", " . $arrNewLocationSet['country'],
-                                'location-city-state-country-no-commas' => $arrNewLocationSet['city'] . " " . $arrNewLocationSet['state'] . " " . $arrNewLocationSet['country'],
-                                'location-city-country-no-commas' => $arrNewLocationSet['city'] . " " . $arrNewLocationSet['country'],
-                                'location-state' => $arrNewLocationSet['state'],
-                                'location-statecode' => $arrNewLocationSet['statecode'],
-                                'location-countrycode' => $arrNewLocationSet['countrycode']
-                            );
-
-                        }
-
-                        $arrNewLocationSet = array_merge($arrNewLocationSet, $computedLocValues);
-
-                        $strSettingStrings = getArrayValuesAsString($arrNewLocationSet);
-                        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added location search settings '" . $strSetName . ": " . $strSettingStrings, \C__DISPLAY_ITEM_DETAIL__);
-
-                        $GLOBALS['USERDATA']['configuration_settings']['location_sets'][$strSetName] = $arrNewLocationSet;
-
-                    }
-                }
-            }
-
-            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['configuration_settings']['location_sets']) . " location sets. ", \C__DISPLAY_ITEM_RESULT__);
-        }
     }
 
     private function _parseKeywordSetsFromConfig_($config)
@@ -678,7 +596,7 @@ class ConfigManager
 
             if(count($arrSearchesPreLocation) > 0)
             {
-                $arrLocations = getConfigurationSettings('search_locations');
+                $arrLocations = getConfigurationSettings('search_location');
                 if(isset($arrLocations) && is_array($arrLocations) && count($arrLocations) >= 1)
                 {
                     foreach ($arrSearchesPreLocation as $search)
@@ -722,52 +640,6 @@ class ConfigManager
             }
             else
                 $GLOBALS['USERDATA']['configuration_settings']['searches'] = $arrSearchesPreLocation;
-
-//
-//            //
-//            // Full set of searches loaded (location-agnostic).  We've now
-//            // got the full set of searches, so update the set with the
-//            // primary location data we have in the config.
-//            //
-//
-//            if(count($arrSearchesPreLocation) > 0)
-//            {
-//                $arrLocations = getConfigurationSettings('location_sets');
-//                if(isset($arrLocations) && is_array($arrLocations) && count($arrLocations) >= 1) {
-//                    foreach ($arrSearchesPreLocation as $search) {
-//                        $plugin = getPluginObjectForJobSite($search->getJobSiteKey());
-//                        if ($plugin->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || $plugin->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED)) {
-//                            // this search doesn't support specifying locations so we shouldn't clone it for a second location set
-//                            $GLOBALS['USERDATA']['configuration_settings']['searches'][$search->getUserSearchRunKey()] = $search;
-//                            continue;
-//                        }
-//
-//                        foreach ( $arrLocations as $locset)
-//                        {
-//                            if (array_key_exists("location-countrycode", $locset) )
-//                                $GLOBALS['USERDATA']['configuration_settings']['country_codes'][$locset['country_code']] = $locset['location-countrycode'];
-//
-//                            $plugin = getPluginObjectForJobSite($search->getJobSiteKey());
-//                            $pluginCountries = $plugin->getSupportedCountryCodes();
-//                            if (!is_null($pluginCountries)) {
-//                                $matchedCountries = array_intersect($pluginCountries, $GLOBALS['USERDATA']['configuration_settings']['country_codes']);
-//                                if ($matchedCountries === false || count($matchedCountries) == 0) {
-//                                    LogLine("Skipping search " . $search->getUserSearchRunKey() . " because it does not support any of the country codes required (" . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['country_codes']));
-//                                    continue;
-//                                }
-//                            }
-//
-//                            $searchForLoc = $this->_getSearchForLocation_($search, $locset);
-//
-//                            $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchForLoc->getUserSearchRunKey()] = $searchForLoc;
-//                            $searchForLoc = null;
-//                        }
-//                        $search->delete();
-//                    }
-//                }
-//            }
-//            else
-//                $GLOBALS['USERDATA']['configuration_settings']['searches'] = $arrSearchesPreLocation;
 
         }
     }
