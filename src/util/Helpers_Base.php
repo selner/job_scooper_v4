@@ -305,7 +305,7 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
         if(stristr($fmtLogMsg, "%s") !== false)
         {
             $msg = sprintf($fmtLogMsg, $toThrow->getMessage());
-            $toThrow = new Exception($msg, $toThrow->getCode(), $previous=$ex);
+            $toThrow = new Exception($msg, null, $ex);
         }
         else
         {
