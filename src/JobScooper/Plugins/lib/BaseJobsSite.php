@@ -46,15 +46,16 @@ abstract class BaseJobsSite implements IJobSitePlugin
             }
         }
 
-//       if (array_key_exists("JOBSITE_PLUGINS", $GLOBALS) && (array_key_exists(strtolower($this->siteName), $GLOBALS['JOBSITE_PLUGINS']))) {
-//            $plugin = $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->siteName)];
-//            if (array_key_exists("other_settings", $plugin) && is_array($plugin['other_settings'])) {
-//                $keys = array_keys($plugin['other_settings']);
-//                foreach ($keys as $attrib_name) {
-//                    $this->$attrib_name = $plugin['other_settings'][$attrib_name];
-//                }
-//            }
-//        }
+       if (array_key_exists("JOBSITE_PLUGINS", $GLOBALS) && (array_key_exists(strtolower($this->siteName), $GLOBALS['JOBSITE_PLUGINS']))) {
+            $plugin = $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->siteName)];
+            if (array_key_exists("other_settings", $plugin) && is_array($plugin['other_settings'])) {
+                $keys = array_keys($plugin['other_settings']);
+                foreach ($keys as $attrib_name) {
+                    $this->$attrib_name = $plugin['other_settings'][$attrib_name];
+                }
+            }
+        }
+
         $this->userObject = $GLOBALS['USERDATA']['configuration_settings']['user_details'];
 
         $this->normalizer = new Normalize();
@@ -1007,7 +1008,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                     $item['job_site_date'] = $job->datePosted->format('Y-m-d');
                 $item['job_post_url'] = $job->url;
 
-                $strCurrentJobIndex = $job['key_jobsite_siteid'];
+                $strCurrentJobIndex = cleanupSlugPart($this->siteName) . cleanupSlugPart($item['job_id']);
                 $arrPageJobsList[$strCurrentJobIndex] = $item;
                 $nItemCount += 1;
             }
