@@ -246,6 +246,18 @@ class JobsAutoMarker
 
             LogLine("Building jobs by locations list and excluding failed matches...", \C__DISPLAY_ITEM_DETAIL__);
             foreach ($arrJobsList as $jobMatch) {
+
+                // first check if we have a location mapped at all to the job.  if we
+                // don't, then we can't verify in or out, so we err on the side of leaving
+                // the result in the set rather than exclude it
+                //
+                $locationId = $locValue = $jobMatch->getJobPosting()->getLocationId();
+                if (is_null($locationId))
+                {
+                    $nJobsNotMarked++;
+                    continue;
+                }
+
                 $locValue = $jobMatch->getJobPosting()->getLocationDisplayValue();
                 $locKey = $this->getLocationLookupKey($locValue);
 
