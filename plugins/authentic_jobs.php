@@ -60,7 +60,7 @@ class PluginAuthenticJobs extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
             }
         }
 
-        return parent::goToEndOfResultsSetViaLoadMore();
+        return parent::goToEndOfResultsSetViaLoadMore($nTotalItems);
     }
 
 }
