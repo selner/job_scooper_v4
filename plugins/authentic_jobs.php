@@ -44,7 +44,7 @@ class PluginAuthenticJobs extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     }
 
 
-    protected function goToEndOfResultsSetViaLoadMore()
+    protected function goToEndOfResultsSetViaLoadMore($nTotalItems)
     {
         $objSimplHtml = $this->getSimpleHtmlDomFromSeleniumPage();
 
