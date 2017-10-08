@@ -39,29 +39,28 @@ class LocationNames extends BaseLocationNames
     {
         $locId = $this->getLocationId();
         if(is_null($locId)) {
-            $osm = getOpenStreetMapFacts($this->getLocationAlternateName());
-            if(!is_null($osm) && is_array($osm)) {
+            $osm = getPlaceFromOpenStreetMap($this->getLocationAlternateName());
+            if(!is_null($osm) && is_array($osm) && array_key_exists('osm_id', $osm) && !is_null($osm['osm_id']))
+            {
                 $loc = getLocationByOsmId($osm['osm_id']);
                 if (!$loc) {
                     $loc = new \JobScooper\DataAccess\Location();
                     $loc->fromOSMData($osm);
                     $loc->save();
                 }
+                $this->setLocation($loc);
+
+                if (is_callable('parent::preSave')) {
+                    return parent::preSave($con);
+                }
             }
             else
             {
-                $loc = new \JobScooper\DataAccess\Location();
-                $loc->setPrimaryName($this->getLocationAlternateName());
-                $loc->save();
+                $this->delete();
             }
-            $this->setLocation($loc);
         }
 
-        if (is_callable('parent::preSave')) {
-            return parent::preSave($con);
-        }
-
-        return true;
+        return false;
 
     }
 

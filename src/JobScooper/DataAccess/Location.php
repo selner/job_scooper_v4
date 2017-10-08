@@ -35,7 +35,7 @@ class Location extends BaseLocation
         {
             if(!is_null($this->getPrimaryName()))
             {
-                $osm = getOpenStreetMapFacts($this->getPrimaryName());
+                $osm = getPlaceFromOpenStreetMap($this->getPrimaryName());
                 $this->fromOSMData($osm);
             }
         }

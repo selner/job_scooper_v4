@@ -911,6 +911,22 @@ function getStateCodeFromState($state)
     return null;
 }
 
+function getPlaceFromOpenStreetMap($query)
+{
+    $retMatches = null;
+    $facts = getOpenStreetMapFacts($query);
+    if(!is_null($facts))
+    {
+        $facts = \JBZoo\Utils\Arr::wrap($facts);
+        $retMatches = array_filter($facts, function ($osmloc) {
+            return (array_key_exists('class', $osmloc) && !is_null($osmloc['class']) && strcasecmp('place', $osmloc['class']) == 0);
+        });
+    }
+    if(count($retMatches) > 1)
+        $retMatches = $retMatches[0];
+
+    return $retMatches;
+}
 
 function getOpenStreetMapFacts($query)
 {
@@ -925,12 +941,8 @@ function getOpenStreetMapFacts($query)
         if (array_key_exists('output', $data))
             if (!is_null($data['output'])) {
                 $objData = json_decode($data['output']);
-                $osmPlace = object_to_array($objData);
-                if(is_array($osmPlace) && count($osmPlace) > 0) {
-                    $ret =  $osmPlace[0];
-                }
-                else
-                    $ret = $osmPlace;
+                $osmPlaces = object_to_array($objData);
+                return $osmPlaces;
             }
     }
     catch (Exception $ex)
