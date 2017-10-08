@@ -492,10 +492,11 @@ class ConfigManager
         if(!is_null($loclookup))
         {
             $loc = $loclookup->getLocation();
-            $GLOBALS['USERDATA']['configuration_settings']['search_locations'][$loc->getLocationKey()] = array(
-                'location_raw_source_value' => $location_string,
-                'location_name_key' => $loclookup->getSlug(),
-                'location_name_lookup' => $loclookup);
+            if(!is_null($loc))
+                $GLOBALS['USERDATA']['configuration_settings']['search_locations'][$loc->getLocationKey()] = array(
+                    'location_raw_source_value' => $location_string,
+                    'location_name_key' => $loclookup->getSlug(),
+                    'location_name_lookup' => $loclookup);
         }
 
     }
