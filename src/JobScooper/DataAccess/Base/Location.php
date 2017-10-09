@@ -78,18 +78,18 @@ abstract class Location implements ActiveRecordInterface
     protected $location_id;
 
     /**
-     * The value for the lat field.
+     * The value for the latitude field.
      *
      * @var        double
      */
-    protected $lat;
+    protected $latitude;
 
     /**
-     * The value for the lon field.
+     * The value for the longitude field.
      *
      * @var        double
      */
-    protected $lon;
+    protected $longitude;
 
     /**
      * The value for the full_display_name field.
@@ -469,23 +469,23 @@ abstract class Location implements ActiveRecordInterface
     }
 
     /**
-     * Get the [lat] column value.
+     * Get the [latitude] column value.
      *
      * @return double
      */
     public function getLatitude()
     {
-        return $this->lat;
+        return $this->latitude;
     }
 
     /**
-     * Get the [lon] column value.
+     * Get the [longitude] column value.
      *
      * @return double
      */
     public function getLongitude()
     {
-        return $this->lon;
+        return $this->longitude;
     }
 
     /**
@@ -658,7 +658,7 @@ abstract class Location implements ActiveRecordInterface
     } // setLocationId()
 
     /**
-     * Set the value of [lat] column.
+     * Set the value of [latitude] column.
      *
      * @param double $v new value
      * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
@@ -669,16 +669,16 @@ abstract class Location implements ActiveRecordInterface
             $v = (double) $v;
         }
 
-        if ($this->lat !== $v) {
-            $this->lat = $v;
-            $this->modifiedColumns[LocationTableMap::COL_LAT] = true;
+        if ($this->latitude !== $v) {
+            $this->latitude = $v;
+            $this->modifiedColumns[LocationTableMap::COL_LATITUDE] = true;
         }
 
         return $this;
     } // setLatitude()
 
     /**
-     * Set the value of [lon] column.
+     * Set the value of [longitude] column.
      *
      * @param double $v new value
      * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
@@ -689,9 +689,9 @@ abstract class Location implements ActiveRecordInterface
             $v = (double) $v;
         }
 
-        if ($this->lon !== $v) {
-            $this->lon = $v;
-            $this->modifiedColumns[LocationTableMap::COL_LON] = true;
+        if ($this->longitude !== $v) {
+            $this->longitude = $v;
+            $this->modifiedColumns[LocationTableMap::COL_LONGITUDE] = true;
         }
 
         return $this;
@@ -1028,10 +1028,10 @@ abstract class Location implements ActiveRecordInterface
             $this->location_id = (null !== $col) ? (int) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : LocationTableMap::translateFieldName('Latitude', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->lat = (null !== $col) ? (double) $col : null;
+            $this->latitude = (null !== $col) ? (double) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : LocationTableMap::translateFieldName('Longitude', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->lon = (null !== $col) ? (double) $col : null;
+            $this->longitude = (null !== $col) ? (double) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : LocationTableMap::translateFieldName('DisplayName', TableMap::TYPE_PHPNAME, $indexType)];
             $this->full_display_name = (null !== $col) ? (string) $col : null;
@@ -1372,11 +1372,11 @@ abstract class Location implements ActiveRecordInterface
         if ($this->isColumnModified(LocationTableMap::COL_LOCATION_ID)) {
             $modifiedColumns[':p' . $index++]  = 'location_id';
         }
-        if ($this->isColumnModified(LocationTableMap::COL_LAT)) {
-            $modifiedColumns[':p' . $index++]  = 'lat';
+        if ($this->isColumnModified(LocationTableMap::COL_LATITUDE)) {
+            $modifiedColumns[':p' . $index++]  = 'latitude';
         }
-        if ($this->isColumnModified(LocationTableMap::COL_LON)) {
-            $modifiedColumns[':p' . $index++]  = 'lon';
+        if ($this->isColumnModified(LocationTableMap::COL_LONGITUDE)) {
+            $modifiedColumns[':p' . $index++]  = 'longitude';
         }
         if ($this->isColumnModified(LocationTableMap::COL_FULL_DISPLAY_NAME)) {
             $modifiedColumns[':p' . $index++]  = 'full_display_name';
@@ -1431,11 +1431,11 @@ abstract class Location implements ActiveRecordInterface
                     case 'location_id':
                         $stmt->bindValue($identifier, $this->location_id, PDO::PARAM_INT);
                         break;
-                    case 'lat':
-                        $stmt->bindValue($identifier, $this->lat, PDO::PARAM_STR);
+                    case 'latitude':
+                        $stmt->bindValue($identifier, $this->latitude, PDO::PARAM_STR);
                         break;
-                    case 'lon':
-                        $stmt->bindValue($identifier, $this->lon, PDO::PARAM_STR);
+                    case 'longitude':
+                        $stmt->bindValue($identifier, $this->longitude, PDO::PARAM_STR);
                         break;
                     case 'full_display_name':
                         $stmt->bindValue($identifier, $this->full_display_name, PDO::PARAM_STR);
@@ -1888,11 +1888,11 @@ abstract class Location implements ActiveRecordInterface
         if ($this->isColumnModified(LocationTableMap::COL_LOCATION_ID)) {
             $criteria->add(LocationTableMap::COL_LOCATION_ID, $this->location_id);
         }
-        if ($this->isColumnModified(LocationTableMap::COL_LAT)) {
-            $criteria->add(LocationTableMap::COL_LAT, $this->lat);
+        if ($this->isColumnModified(LocationTableMap::COL_LATITUDE)) {
+            $criteria->add(LocationTableMap::COL_LATITUDE, $this->latitude);
         }
-        if ($this->isColumnModified(LocationTableMap::COL_LON)) {
-            $criteria->add(LocationTableMap::COL_LON, $this->lon);
+        if ($this->isColumnModified(LocationTableMap::COL_LONGITUDE)) {
+            $criteria->add(LocationTableMap::COL_LONGITUDE, $this->longitude);
         }
         if ($this->isColumnModified(LocationTableMap::COL_FULL_DISPLAY_NAME)) {
             $criteria->add(LocationTableMap::COL_FULL_DISPLAY_NAME, $this->full_display_name);
@@ -2849,8 +2849,8 @@ abstract class Location implements ActiveRecordInterface
     public function clear()
     {
         $this->location_id = null;
-        $this->lat = null;
-        $this->lon = null;
+        $this->latitude = null;
+        $this->longitude = null;
         $this->full_display_name = null;
         $this->location_key = null;
         $this->primary_name = null;
@@ -2913,6 +2913,90 @@ abstract class Location implements ActiveRecordInterface
     public function __toString()
     {
         return (string) $this->getDisplayName();
+    }
+
+    // geocodable behavior
+
+    /**
+     * Convenient method to set latitude and longitude values.
+     *
+     * @param double $latitude     A latitude value.
+     * @param double $longitude    A longitude value.
+     */
+    public function setCoordinates($latitude, $longitude)
+    {
+        $this->setLatitude($latitude);
+        $this->setLongitude($longitude);
+    }
+
+    /**
+     * Returns an array with latitude and longitude values.
+     *
+     * @return array
+     */
+    public function getCoordinates()
+    {
+        return array(
+            'latitude'  => $this->getLatitude(),
+            'longitude' => $this->getLongitude()
+        );
+    }
+
+    /**
+     * Returns whether this object has been geocoded or not.
+     *
+     * @return boolean
+     */
+    public function isGeocoded()
+    {
+        $lat = $this->getLatitude();
+        $lng = $this->getLongitude();
+
+        return (!empty($lat) && !empty($lng));
+    }
+
+    /**
+     * Calculates the distance between a given location and this one.
+     *
+     * @param \JobScooper\DataAccess\Location $location    A \JobScooper\DataAccess\Location object.
+     * @param double $unit     The unit measure.
+     *
+     * @return double   The distance between the two objects.
+     */
+    public function getDistanceTo(\JobScooper\DataAccess\Location $location, $unit = LocationTableMap::KILOMETERS_UNIT)
+    {
+        $dist = rad2deg(acos(round(sin(deg2rad($this->getLatitude())) * sin(deg2rad($location->getLatitude())) +  cos(deg2rad($this->getLatitude())) * cos(deg2rad($location->getLatitude())) * cos(deg2rad($this->getLongitude() - $location->getLongitude())),14))) * 60 * LocationTableMap::MILES_UNIT;
+
+        if (LocationTableMap::MILES_UNIT === $unit) {
+            return $dist;
+        } elseif (LocationTableMap::NAUTICAL_MILES_UNIT === $unit) {
+            return $dist * LocationTableMap::NAUTICAL_MILES_UNIT;
+        }
+
+        return $dist * LocationTableMap::KILOMETERS_UNIT;
+    }
+
+    /**
+     * Update geocode information.
+     * You can extend this method to fill in other fields.
+     *
+     * @return \Geocoder\Result\ResultInterface|null
+     */
+    public function geocode()
+    {
+        // Do nothing as both 'geocode_ip', and 'geocode_address' are turned off.
+        return null;
+    }
+
+    /**
+     * Check whether the current object is required to be geocoded (again).
+     *
+     * @return boolean
+     */
+    public function isGeocodingNecessary()
+    {
+
+        return false;
     }
 
     // sluggable behavior

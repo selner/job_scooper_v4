@@ -36,6 +36,37 @@
  *  Database Helper Functions
  *
  ******************************************************************************/
+function loadSqlite3MathExtensions()
+{
+    $con = \Propel\Runtime\Propel::getConnection();
+    $outDir = getOutputDirectory('root');
+//    $dbPath = $outDir . DIRECTORY_SEPARATOR . "job_scooper_db.sq3";
+//    $sql1 = "sqlite3_enable_load_extension('{$dbPath}', 1);";
+//    logLine($sql1);
+//    $stmt = $con->prepare($sql1);
+//    $stmt->execute();
+
+    foreach (array(
+                 '/opt/sqlite/extensions/libsqlitefunctions.sqlext',
+                 '/opt/sqlite/extensions/libsqlitefunctions.dylib',
+                 '/opt/sqlite/extensions/libsqlitefunctions',
+                 'libsqlitefunctions.sqlext',
+                 'libsqlitefunctions.dylib',
+                 'libsqlitefunctions'
+             ) as $case) {
+        try {
+            $sql2 = "SELECT load_extension('{$case}');";
+            LogLine("Trying " . $sql2);
+            $stmt = $con->prepare($sql2);
+            $stmt->execute();
+        } catch (Exception $ex) {
+            LogLine("FAILED " . $sql2);
+            handleException($ex, null, false);
+        }
+    }
+
+
+}
 
 
 /**

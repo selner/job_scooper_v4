@@ -133,8 +133,20 @@
     <table name="location" phpName="Location" reloadOnUpdate="true" reloadOnInsert="true">
         <column name="location_id" phpName="LocationId" type="integer" required="true" primaryKey="true"
                 autoIncrement="true"/>
-        <column name="lat" phpName="Latitude" type="float"/>
-        <column name="lon" phpName="Longitude" type="float"/>
+        <column name="latitude" phpName="Latitude" type="float"/>
+        <column name="longitude" phpName="Longitude" type="float"/>
+
+
+        <behavior name="geocodable">
+            <parameter name="auto_update" value="false" />
+
+            <parameter name="latitude_column" value="latitude" />
+            <parameter name="longitude_column" value="longitude" />
+            <parameter name="type" value="DOUBLE" />
+            <parameter name="size" value="11" />
+            <parameter name="scale" value="8" />
+        </behavior>
+
         <column name="full_display_name" phpName="DisplayName" type="varchar" size="100" primaryString="true"/>
         <column name="location_key" type="varchar" size="100" required="true"/>
         <behavior name="sluggable">

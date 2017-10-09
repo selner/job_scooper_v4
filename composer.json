@@ -26,7 +26,8 @@
         "jobapis/jobs-usajobs": "^0.2.0",
         "zordius/lightncandy": "~1.2",
         "monolog/monolog": "1.x-dev",
-        "jbzoo/utils": "^1.0@dev"
+        "jbzoo/utils": "^1.0@dev",
+        "nolazybits/propel2-geocodable-behavior": "dev-master"
     },
     "autoload": {
         "psr-4": {

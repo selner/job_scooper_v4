@@ -89,11 +89,6 @@ class ConfigManager
 
     function initialize()
     {
-        # increase memory consumed to fit larger job searches
-        print "Starting memory is " . getPhpMemoryUsage() . PHP_EOL;
-
-        ini_set('memory_limit', '1024M');
-        ini_set("auto_detect_line_endings", true);
         $envDirOut = getenv('JOBSCOOPER_OUTPUT');
         if(is_null($envDirOut) || strlen($envDirOut) == 0)
             $envDirOut = sys_get_temp_dir();
@@ -187,6 +182,8 @@ class ConfigManager
                 }
             }
 
+            loadSqlite3MathExtensions();
+
             $this->_setupRunFromConfig_($this->allConfigFileSettings);
 
         }
@@ -231,6 +228,10 @@ class ConfigManager
             $details = getFilePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
             $GLOBALS['USERDATA']['directories'][$d] = realpath($details['directory']);
         }
+
+        $path = $outputDirectory;
+        $details = getFilePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+        $GLOBALS['USERDATA']['directories']['root'] = realpath($details['directory']);
 
         $GLOBALS['logger']->addFileHandler(getOutputDirectory('logs'));
     }

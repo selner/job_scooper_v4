@@ -17,8 +17,11 @@
 namespace JobScooper\StageProcessor;
 
 
+use JobScooper\DataAccess\LocationQuery;
+use JobScooper\DataAccess\Map\LocationTableMap;
 use \Khartnett\Normalization as Normalize;
 use Exception;
+use Propel\Runtime\ActiveQuery\Criteria;
 
 
 const C__STR_TAG_AUTOMARKEDJOB__ = "[auto-marked]";
@@ -235,35 +238,54 @@ class JobsAutoMarker
 
             LogLine("Marking Out of Area Jobs", \C__DISPLAY_ITEM_START__);
 
-            $this->_loadCityData();
-            $nJobsMarkedAutoExcluded = 0;
-            $nJobsNotMarked = 0;
+            $searchLocations = getConfigurationSettings('search_location');
 
-            LogLine("Building jobs by locations list and excluding failed matches...", \C__DISPLAY_ITEM_DETAIL__);
-            foreach ($arrJobsList as $jobMatch) {
+            $arrNearbyIds = array();
 
-                // first check if we have a location mapped at all to the job.  if we
-                // don't, then we can't verify in or out, so we err on the side of leaving
-                // the result in the set rather than exclude it
-                //
-                $locationId = $locValue = $jobMatch->getJobPosting()->getLocationId();
-                if (is_null($locationId))
+            /* Find all locations that are within 50 miles of any of our search locations */
+
+            LogLine("Getting locationIDs within 50 miles of search locations...", \C__DISPLAY_ITEM_DETAIL__);
+            foreach($searchLocations as $searchLocation)
+            {
+                $locLookup = $searchLocation['location_name_lookup'];
+                if(!is_null($locLookup))
                 {
-                    $nJobsNotMarked++;
-                    continue;
-                }
+                    $location = $locLookup->getLocation();
+                    if(!is_null($location))
+                    {
+                        $nearbyLocations = LocationQuery::create()
+                            ->filterByDistanceFrom($location->getLatitude(), $location->getLongitude(), 50, LocationTableMap::MILES_UNIT, Criteria::LESS_THAN)
+                            ->find();
 
-                $locValue = $jobMatch->getJobPosting()->getLocationDisplayValue();
-                $locKey = $this->getLocationLookupKey($locValue);
-
-                if ($this->_doesLocationMatchUserSearch($locKey)) {
-                    $nJobsNotMarked++;
-                } else {
-                    $jobMatch->setOutOfUserArea(true);
-                    $jobMatch->save();
-                    $nJobsMarkedAutoExcluded++;
+                        if(!is_null($nearbyLocations))
+                        {
+                            foreach($nearbyLocations as $near)
+                                $arrNearbyIds[] = $near->getLocationId();
+                        }
+                    }
                 }
             }
+
+            LogLine("Gathering job postings not in those areas...", \C__DISPLAY_ITEM_DETAIL__);
+            $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrNearbyIds) {
+                $posting = $v->getJobPosting();
+                $locId = $posting->getLocationId();
+                if(is_null($locId))
+                    return true;  // if we don't have a location, assume nearby
+
+                return in_array($locId, $arrNearbyIds);
+            });
+
+            LogLine("Marking user job matches as out of area for " . count($arrJobsOutOfArea) . " matches ...", \C__DISPLAY_ITEM_DETAIL__);
+
+            foreach ($arrJobsOutOfArea as $jobOutofArea) {
+                $jobOutofArea->setOutOfArea(true);
+                $jobOutofArea->save();
+            }
+
+
+            $nJobsMarkedAutoExcluded = count($arrJobsOutOfArea);
+            $nJobsNotMarked = count($arrJobsList) - $nJobsMarkedAutoExcluded;
 
 
            LogLine("Jobs excluded as out of area: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ." marked; " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).", not marked " , \C__DISPLAY_ITEM_RESULT__);

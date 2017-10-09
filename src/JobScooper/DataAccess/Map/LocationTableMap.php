@@ -77,14 +77,14 @@ class LocationTableMap extends TableMap
     const COL_LOCATION_ID = 'location.location_id';
 
     /**
-     * the column name for the lat field
+     * the column name for the latitude field
      */
-    const COL_LAT = 'location.lat';
+    const COL_LATITUDE = 'location.latitude';
 
     /**
-     * the column name for the lon field
+     * the column name for the longitude field
      */
-    const COL_LON = 'location.lon';
+    const COL_LONGITUDE = 'location.longitude';
 
     /**
      * the column name for the full_display_name field
@@ -156,6 +156,23 @@ class LocationTableMap extends TableMap
      */
     const DEFAULT_STRING_FORMAT = 'YAML';
 
+    // geocodable behavior
+
+    /**
+     * Kilometers unit
+     */
+    const KILOMETERS_UNIT = 1.609344;
+
+    /**
+     * Miles unit
+     */
+    const MILES_UNIT = 1.1515;
+
+    /**
+     * Nautical miles unit
+     */
+    const NAUTICAL_MILES_UNIT = 0.8684;
+
     /**
      * holds an array of fieldnames
      *
@@ -165,8 +182,8 @@ class LocationTableMap extends TableMap
     protected static $fieldNames = array (
         self::TYPE_PHPNAME       => array('LocationId', 'Latitude', 'Longitude', 'DisplayName', 'LocationKey', 'PrimaryName', 'Place', 'County', 'State', 'StateCode', 'Country', 'CountryCode', 'AlternateNames', 'OpenStreetMapId', 'FullOsmData', 'ExtraDetailsData', ),
         self::TYPE_CAMELNAME     => array('locationId', 'latitude', 'longitude', 'displayName', 'locationKey', 'primaryName', 'place', 'county', 'state', 'stateCode', 'country', 'countryCode', 'alternateNames', 'openStreetMapId', 'fullOsmData', 'extraDetailsData', ),
-        self::TYPE_COLNAME       => array(LocationTableMap::COL_LOCATION_ID, LocationTableMap::COL_LAT, LocationTableMap::COL_LON, LocationTableMap::COL_FULL_DISPLAY_NAME, LocationTableMap::COL_LOCATION_KEY, LocationTableMap::COL_PRIMARY_NAME, LocationTableMap::COL_PLACE, LocationTableMap::COL_COUNTY, LocationTableMap::COL_STATE, LocationTableMap::COL_STATECODE, LocationTableMap::COL_COUNTRY, LocationTableMap::COL_COUNTRYCODE, LocationTableMap::COL_ALTERNATE_NAMES, LocationTableMap::COL_OPENSTREETMAP_ID, LocationTableMap::COL_FULL_OSM_DATA, LocationTableMap::COL_EXTRA_DETAILS_DATA, ),
-        self::TYPE_FIELDNAME     => array('location_id', 'lat', 'lon', 'full_display_name', 'location_key', 'primary_name', 'place', 'county', 'state', 'statecode', 'country', 'countrycode', 'alternate_names', 'openstreetmap_id', 'full_osm_data', 'extra_details_data', ),
+        self::TYPE_COLNAME       => array(LocationTableMap::COL_LOCATION_ID, LocationTableMap::COL_LATITUDE, LocationTableMap::COL_LONGITUDE, LocationTableMap::COL_FULL_DISPLAY_NAME, LocationTableMap::COL_LOCATION_KEY, LocationTableMap::COL_PRIMARY_NAME, LocationTableMap::COL_PLACE, LocationTableMap::COL_COUNTY, LocationTableMap::COL_STATE, LocationTableMap::COL_STATECODE, LocationTableMap::COL_COUNTRY, LocationTableMap::COL_COUNTRYCODE, LocationTableMap::COL_ALTERNATE_NAMES, LocationTableMap::COL_OPENSTREETMAP_ID, LocationTableMap::COL_FULL_OSM_DATA, LocationTableMap::COL_EXTRA_DETAILS_DATA, ),
+        self::TYPE_FIELDNAME     => array('location_id', 'latitude', 'longitude', 'full_display_name', 'location_key', 'primary_name', 'place', 'county', 'state', 'statecode', 'country', 'countrycode', 'alternate_names', 'openstreetmap_id', 'full_osm_data', 'extra_details_data', ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, )
     );
 
@@ -179,8 +196,8 @@ class LocationTableMap extends TableMap
     protected static $fieldKeys = array (
         self::TYPE_PHPNAME       => array('LocationId' => 0, 'Latitude' => 1, 'Longitude' => 2, 'DisplayName' => 3, 'LocationKey' => 4, 'PrimaryName' => 5, 'Place' => 6, 'County' => 7, 'State' => 8, 'StateCode' => 9, 'Country' => 10, 'CountryCode' => 11, 'AlternateNames' => 12, 'OpenStreetMapId' => 13, 'FullOsmData' => 14, 'ExtraDetailsData' => 15, ),
         self::TYPE_CAMELNAME     => array('locationId' => 0, 'latitude' => 1, 'longitude' => 2, 'displayName' => 3, 'locationKey' => 4, 'primaryName' => 5, 'place' => 6, 'county' => 7, 'state' => 8, 'stateCode' => 9, 'country' => 10, 'countryCode' => 11, 'alternateNames' => 12, 'openStreetMapId' => 13, 'fullOsmData' => 14, 'extraDetailsData' => 15, ),
-        self::TYPE_COLNAME       => array(LocationTableMap::COL_LOCATION_ID => 0, LocationTableMap::COL_LAT => 1, LocationTableMap::COL_LON => 2, LocationTableMap::COL_FULL_DISPLAY_NAME => 3, LocationTableMap::COL_LOCATION_KEY => 4, LocationTableMap::COL_PRIMARY_NAME => 5, LocationTableMap::COL_PLACE => 6, LocationTableMap::COL_COUNTY => 7, LocationTableMap::COL_STATE => 8, LocationTableMap::COL_STATECODE => 9, LocationTableMap::COL_COUNTRY => 10, LocationTableMap::COL_COUNTRYCODE => 11, LocationTableMap::COL_ALTERNATE_NAMES => 12, LocationTableMap::COL_OPENSTREETMAP_ID => 13, LocationTableMap::COL_FULL_OSM_DATA => 14, LocationTableMap::COL_EXTRA_DETAILS_DATA => 15, ),
-        self::TYPE_FIELDNAME     => array('location_id' => 0, 'lat' => 1, 'lon' => 2, 'full_display_name' => 3, 'location_key' => 4, 'primary_name' => 5, 'place' => 6, 'county' => 7, 'state' => 8, 'statecode' => 9, 'country' => 10, 'countrycode' => 11, 'alternate_names' => 12, 'openstreetmap_id' => 13, 'full_osm_data' => 14, 'extra_details_data' => 15, ),
+        self::TYPE_COLNAME       => array(LocationTableMap::COL_LOCATION_ID => 0, LocationTableMap::COL_LATITUDE => 1, LocationTableMap::COL_LONGITUDE => 2, LocationTableMap::COL_FULL_DISPLAY_NAME => 3, LocationTableMap::COL_LOCATION_KEY => 4, LocationTableMap::COL_PRIMARY_NAME => 5, LocationTableMap::COL_PLACE => 6, LocationTableMap::COL_COUNTY => 7, LocationTableMap::COL_STATE => 8, LocationTableMap::COL_STATECODE => 9, LocationTableMap::COL_COUNTRY => 10, LocationTableMap::COL_COUNTRYCODE => 11, LocationTableMap::COL_ALTERNATE_NAMES => 12, LocationTableMap::COL_OPENSTREETMAP_ID => 13, LocationTableMap::COL_FULL_OSM_DATA => 14, LocationTableMap::COL_EXTRA_DETAILS_DATA => 15, ),
+        self::TYPE_FIELDNAME     => array('location_id' => 0, 'latitude' => 1, 'longitude' => 2, 'full_display_name' => 3, 'location_key' => 4, 'primary_name' => 5, 'place' => 6, 'county' => 7, 'state' => 8, 'statecode' => 9, 'country' => 10, 'countrycode' => 11, 'alternate_names' => 12, 'openstreetmap_id' => 13, 'full_osm_data' => 14, 'extra_details_data' => 15, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, )
     );
 
@@ -202,8 +219,8 @@ class LocationTableMap extends TableMap
         $this->setUseIdGenerator(true);
         // columns
         $this->addPrimaryKey('location_id', 'LocationId', 'INTEGER', true, null, null);
-        $this->addColumn('lat', 'Latitude', 'FLOAT', false, null, null);
-        $this->addColumn('lon', 'Longitude', 'FLOAT', false, null, null);
+        $this->addColumn('latitude', 'Latitude', 'FLOAT', false, null, null);
+        $this->addColumn('longitude', 'Longitude', 'FLOAT', false, null, null);
         $this->addColumn('full_display_name', 'DisplayName', 'VARCHAR', false, 100, null);
         $this->getColumn('full_display_name')->setPrimaryString(true);
         $this->addColumn('location_key', 'LocationKey', 'VARCHAR', true, 100, null);
@@ -257,6 +274,7 @@ class LocationTableMap extends TableMap
     public function getBehaviors()
     {
         return array(
+            'geocodable' => array('auto_update' => 'false', 'latitude_column' => 'latitude', 'longitude_column' => 'longitude', 'type' => 'DOUBLE', 'size' => '11', 'scale' => '8', 'geocode_ip' => 'false', 'ip_column' => 'ip_address', 'geocode_address' => 'false', 'address_columns' => 'street,locality,region,postal_code,country', 'geocoder_provider' => '\Geocoder\Provider\OpenStreetMapProvider', 'geocoder_adapter' => '\Geocoder\HttpAdapter\CurlHttpAdapter', 'geocoder_api_key' => 'false', 'geocoder_api_key_provider' => 'false', ),
             'sluggable' => array('slug_column' => 'location_key', 'slug_pattern' => '{DisplayName}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '-', 'permanent' => 'true', 'scope_column' => '', 'unique_constraint' => 'true', ),
         );
     } // getBehaviors()
@@ -403,8 +421,8 @@ class LocationTableMap extends TableMap
     {
         if (null === $alias) {
             $criteria->addSelectColumn(LocationTableMap::COL_LOCATION_ID);
-            $criteria->addSelectColumn(LocationTableMap::COL_LAT);
-            $criteria->addSelectColumn(LocationTableMap::COL_LON);
+            $criteria->addSelectColumn(LocationTableMap::COL_LATITUDE);
+            $criteria->addSelectColumn(LocationTableMap::COL_LONGITUDE);
             $criteria->addSelectColumn(LocationTableMap::COL_FULL_DISPLAY_NAME);
             $criteria->addSelectColumn(LocationTableMap::COL_LOCATION_KEY);
             $criteria->addSelectColumn(LocationTableMap::COL_PRIMARY_NAME);
@@ -420,8 +438,8 @@ class LocationTableMap extends TableMap
             $criteria->addSelectColumn(LocationTableMap::COL_EXTRA_DETAILS_DATA);
         } else {
             $criteria->addSelectColumn($alias . '.location_id');
-            $criteria->addSelectColumn($alias . '.lat');
-            $criteria->addSelectColumn($alias . '.lon');
+            $criteria->addSelectColumn($alias . '.latitude');
+            $criteria->addSelectColumn($alias . '.longitude');
             $criteria->addSelectColumn($alias . '.full_display_name');
             $criteria->addSelectColumn($alias . '.location_key');
             $criteria->addSelectColumn($alias . '.primary_name');

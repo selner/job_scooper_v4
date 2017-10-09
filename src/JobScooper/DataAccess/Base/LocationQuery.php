@@ -21,8 +21,8 @@ use Propel\Runtime\Exception\PropelException;
  *
  *
  * @method     ChildLocationQuery orderByLocationId($order = Criteria::ASC) Order by the location_id column
- * @method     ChildLocationQuery orderByLatitude($order = Criteria::ASC) Order by the lat column
- * @method     ChildLocationQuery orderByLongitude($order = Criteria::ASC) Order by the lon column
+ * @method     ChildLocationQuery orderByLatitude($order = Criteria::ASC) Order by the latitude column
+ * @method     ChildLocationQuery orderByLongitude($order = Criteria::ASC) Order by the longitude column
  * @method     ChildLocationQuery orderByDisplayName($order = Criteria::ASC) Order by the full_display_name column
  * @method     ChildLocationQuery orderByLocationKey($order = Criteria::ASC) Order by the location_key column
  * @method     ChildLocationQuery orderByPrimaryName($order = Criteria::ASC) Order by the primary_name column
@@ -38,8 +38,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildLocationQuery orderByExtraDetailsData($order = Criteria::ASC) Order by the extra_details_data column
  *
  * @method     ChildLocationQuery groupByLocationId() Group by the location_id column
- * @method     ChildLocationQuery groupByLatitude() Group by the lat column
- * @method     ChildLocationQuery groupByLongitude() Group by the lon column
+ * @method     ChildLocationQuery groupByLatitude() Group by the latitude column
+ * @method     ChildLocationQuery groupByLongitude() Group by the longitude column
  * @method     ChildLocationQuery groupByDisplayName() Group by the full_display_name column
  * @method     ChildLocationQuery groupByLocationKey() Group by the location_key column
  * @method     ChildLocationQuery groupByPrimaryName() Group by the primary_name column
@@ -98,8 +98,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildLocation findOneOrCreate(ConnectionInterface $con = null) Return the first ChildLocation matching the query, or a new ChildLocation object populated from the query conditions when no match is found
  *
  * @method     ChildLocation findOneByLocationId(int $location_id) Return the first ChildLocation filtered by the location_id column
- * @method     ChildLocation findOneByLatitude(double $lat) Return the first ChildLocation filtered by the lat column
- * @method     ChildLocation findOneByLongitude(double $lon) Return the first ChildLocation filtered by the lon column
+ * @method     ChildLocation findOneByLatitude(double $latitude) Return the first ChildLocation filtered by the latitude column
+ * @method     ChildLocation findOneByLongitude(double $longitude) Return the first ChildLocation filtered by the longitude column
  * @method     ChildLocation findOneByDisplayName(string $full_display_name) Return the first ChildLocation filtered by the full_display_name column
  * @method     ChildLocation findOneByLocationKey(string $location_key) Return the first ChildLocation filtered by the location_key column
  * @method     ChildLocation findOneByPrimaryName(string $primary_name) Return the first ChildLocation filtered by the primary_name column
@@ -118,8 +118,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildLocation requireOne(ConnectionInterface $con = null) Return the first ChildLocation matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildLocation requireOneByLocationId(int $location_id) Return the first ChildLocation filtered by the location_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildLocation requireOneByLatitude(double $lat) Return the first ChildLocation filtered by the lat column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildLocation requireOneByLongitude(double $lon) Return the first ChildLocation filtered by the lon column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildLocation requireOneByLatitude(double $latitude) Return the first ChildLocation filtered by the latitude column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildLocation requireOneByLongitude(double $longitude) Return the first ChildLocation filtered by the longitude column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildLocation requireOneByDisplayName(string $full_display_name) Return the first ChildLocation filtered by the full_display_name column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildLocation requireOneByLocationKey(string $location_key) Return the first ChildLocation filtered by the location_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildLocation requireOneByPrimaryName(string $primary_name) Return the first ChildLocation filtered by the primary_name column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -136,8 +136,8 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     ChildLocation[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildLocation objects based on current ModelCriteria
  * @method     ChildLocation[]|ObjectCollection findByLocationId(int $location_id) Return ChildLocation objects filtered by the location_id column
- * @method     ChildLocation[]|ObjectCollection findByLatitude(double $lat) Return ChildLocation objects filtered by the lat column
- * @method     ChildLocation[]|ObjectCollection findByLongitude(double $lon) Return ChildLocation objects filtered by the lon column
+ * @method     ChildLocation[]|ObjectCollection findByLatitude(double $latitude) Return ChildLocation objects filtered by the latitude column
+ * @method     ChildLocation[]|ObjectCollection findByLongitude(double $longitude) Return ChildLocation objects filtered by the longitude column
  * @method     ChildLocation[]|ObjectCollection findByDisplayName(string $full_display_name) Return ChildLocation objects filtered by the full_display_name column
  * @method     ChildLocation[]|ObjectCollection findByLocationKey(string $location_key) Return ChildLocation objects filtered by the location_key column
  * @method     ChildLocation[]|ObjectCollection findByPrimaryName(string $primary_name) Return ChildLocation objects filtered by the primary_name column
@@ -249,7 +249,7 @@ abstract class LocationQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT location_id, lat, lon, full_display_name, location_key, primary_name, place, county, state, statecode, country, countrycode, alternate_names, openstreetmap_id, full_osm_data, extra_details_data FROM location WHERE location_id = :p0';
+        $sql = 'SELECT location_id, latitude, longitude, full_display_name, location_key, primary_name, place, county, state, statecode, country, countrycode, alternate_names, openstreetmap_id, full_osm_data, extra_details_data FROM location WHERE location_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -381,13 +381,13 @@ abstract class LocationQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the lat column
+     * Filter the query on the latitude column
      *
      * Example usage:
      * <code>
-     * $query->filterByLatitude(1234); // WHERE lat = 1234
-     * $query->filterByLatitude(array(12, 34)); // WHERE lat IN (12, 34)
-     * $query->filterByLatitude(array('min' => 12)); // WHERE lat > 12
+     * $query->filterByLatitude(1234); // WHERE latitude = 1234
+     * $query->filterByLatitude(array(12, 34)); // WHERE latitude IN (12, 34)
+     * $query->filterByLatitude(array('min' => 12)); // WHERE latitude > 12
      * </code>
      *
      * @param     mixed $latitude The value to use as filter.
@@ -403,11 +403,11 @@ abstract class LocationQuery extends ModelCriteria
         if (is_array($latitude)) {
             $useMinMax = false;
             if (isset($latitude['min'])) {
-                $this->addUsingAlias(LocationTableMap::COL_LAT, $latitude['min'], Criteria::GREATER_EQUAL);
+                $this->addUsingAlias(LocationTableMap::COL_LATITUDE, $latitude['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
             if (isset($latitude['max'])) {
-                $this->addUsingAlias(LocationTableMap::COL_LAT, $latitude['max'], Criteria::LESS_EQUAL);
+                $this->addUsingAlias(LocationTableMap::COL_LATITUDE, $latitude['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -418,17 +418,17 @@ abstract class LocationQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(LocationTableMap::COL_LAT, $latitude, $comparison);
+        return $this->addUsingAlias(LocationTableMap::COL_LATITUDE, $latitude, $comparison);
     }
 
     /**
-     * Filter the query on the lon column
+     * Filter the query on the longitude column
      *
      * Example usage:
      * <code>
-     * $query->filterByLongitude(1234); // WHERE lon = 1234
-     * $query->filterByLongitude(array(12, 34)); // WHERE lon IN (12, 34)
-     * $query->filterByLongitude(array('min' => 12)); // WHERE lon > 12
+     * $query->filterByLongitude(1234); // WHERE longitude = 1234
+     * $query->filterByLongitude(array(12, 34)); // WHERE longitude IN (12, 34)
+     * $query->filterByLongitude(array('min' => 12)); // WHERE longitude > 12
      * </code>
      *
      * @param     mixed $longitude The value to use as filter.
@@ -444,11 +444,11 @@ abstract class LocationQuery extends ModelCriteria
         if (is_array($longitude)) {
             $useMinMax = false;
             if (isset($longitude['min'])) {
-                $this->addUsingAlias(LocationTableMap::COL_LON, $longitude['min'], Criteria::GREATER_EQUAL);
+                $this->addUsingAlias(LocationTableMap::COL_LONGITUDE, $longitude['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
             if (isset($longitude['max'])) {
-                $this->addUsingAlias(LocationTableMap::COL_LON, $longitude['max'], Criteria::LESS_EQUAL);
+                $this->addUsingAlias(LocationTableMap::COL_LONGITUDE, $longitude['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -459,7 +459,7 @@ abstract class LocationQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(LocationTableMap::COL_LON, $longitude, $comparison);
+        return $this->addUsingAlias(LocationTableMap::COL_LONGITUDE, $longitude, $comparison);
     }
 
     /**
@@ -1153,6 +1153,98 @@ abstract class LocationQuery extends ModelCriteria
 
             return $affectedRows;
         });
+    }
+
+    // geocodable behavior
+
+    /**
+     * Adds distance from a given origin column to query.
+     *
+     * @param double $latitude       The latitude of the origin point.
+     * @param double $longitude      The longitude of the origin point.
+     * @param double $unit           The unit measure.
+     *
+     * @return \JobScooper\DataAccess\LocationQuery The current query, for fluid interface
+     */
+    public function withDistance($latitude, $longitude, $unit = LocationTableMap::KILOMETERS_UNIT)
+    {
+        if (LocationTableMap::MILES_UNIT === $unit) {
+            $earthRadius = 3959;
+        } elseif (LocationTableMap::NAUTICAL_MILES_UNIT === $unit) {
+            $earthRadius = 3440;
+        } else {
+            $earthRadius = 6371;
+        }
+
+        $sql = 'ABS(%s * ACOS( ROUND(%s * COS(RADIANS(%s)) * COS(RADIANS(%s) - %s) + %s * SIN(RADIANS(%s)),14)))';
+        $preparedSql = sprintf($sql,
+            $earthRadius,
+            cos(deg2rad($latitude)),
+            $this->getAliasedColName(LocationTableMap::COL_LATITUDE),
+            $this->getAliasedColName(LocationTableMap::COL_LONGITUDE),
+            deg2rad($longitude),
+            sin(deg2rad($latitude)),
+            $this->getAliasedColName(LocationTableMap::COL_LATITUDE)
+        );
+
+        return $this
+            ->withColumn($preparedSql, 'Distance');
+    }
+
+    /**
+     * Filters objects by distance from a given origin.
+     *
+     * @param double $latitude       The latitude of the origin point.
+     * @param double $longitude      The longitude of the origin point.
+     * @param double $distance       The distance between the origin and the objects to find.
+     * @param double $unit           The unit measure.
+     * @param Criteria $comparison   Comparison sign (default is: `<`).
+     *
+     * @return \JobScooper\DataAccess\LocationQuery The current query, for fluid interface
+     */
+    public function filterByDistanceFrom($latitude, $longitude, $distance, $unit = LocationTableMap::KILOMETERS_UNIT, $comparison = Criteria::LESS_THAN)
+    {
+        if (LocationTableMap::MILES_UNIT === $unit) {
+            $earthRadius = 3959;
+        } elseif (LocationTableMap::NAUTICAL_MILES_UNIT === $unit) {
+            $earthRadius = 3440;
+        } else {
+            $earthRadius = 6371;
+        }
+
+        $sql = 'ABS(%s * ACOS( ROUND (%s * COS(RADIANS(%s)) * COS(RADIANS(%s) - %s) + %s * SIN(RADIANS(%s)),14)))';
+        $preparedSql = sprintf($sql,
+            $earthRadius,
+            cos(deg2rad($latitude)),
+            $this->getAliasedColName(LocationTableMap::COL_LATITUDE),
+            $this->getAliasedColName(LocationTableMap::COL_LONGITUDE),
+            deg2rad($longitude),
+            sin(deg2rad($latitude)),
+            $this->getAliasedColName(LocationTableMap::COL_LATITUDE)
+        );
+
+        return $this
+            ->withColumn($preparedSql, 'Distance')
+            ->where(sprintf('%s %s ?', $preparedSql, $comparison), $distance, PDO::PARAM_STR)
+            ;
+    }
+    /**
+     * Filters objects near a given \JobScooper\DataAccess\Location object.
+     *
+     * @param \JobScooper\DataAccess\Location $location A \JobScooper\DataAccess\Location object.
+     * @param double $distance The distance between the origin and the objects to find.
+     * @param double $unit     The unit measure.
+     *
+     * @return \JobScooper\DataAccess\LocationQuery The current query, for fluid interface
+     */
+    public function filterNear(\JobScooper\DataAccess\Location $location, $distance = 5, $unit = LocationTableMap::KILOMETERS_UNIT)
+    {
+        return $this
+            ->filterByDistanceFrom(
+                $location->getLatitude(),
+                $location->getLongitude(),
+                $distance, $unit
+            );
     }
 
     // sluggable behavior
