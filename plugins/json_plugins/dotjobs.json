@@ -1,6 +1,6 @@
 {
   "AgentName": "DotJobs",
-  "BaseURL": "http://www.my.jobs/",
+  "BaseURL": "http://www.my.jobs",
   "SourceURL": "http://www.my.jobs/jobs/?location=***LOCATION***&q=***KEYWORDS***",
   "LocationType": "location-city-comma-state",
   "CountryCodes" : ["US"],
@@ -46,11 +46,12 @@
         },
         {
           "Name": "tag_location",
-          "Selector": "div span.hiringPlace span span",
+          "Selector": "div span[itemprop='address']",
           "Index" : 0,
-          "Extract": "TEXT",
-          "Attribute": null,
-          "Type": "CSS"
+          "Extract": "CSS",
+          "Attribute": "collection",
+          "Type": "CSS",
+          "Callback": "combineTextAllNodes"
         },
         {
           "Name": "tag_company",
