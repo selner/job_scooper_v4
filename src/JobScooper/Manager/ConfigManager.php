@@ -182,8 +182,6 @@ class ConfigManager
                 }
             }
 
-            loadSqlite3MathExtensions();
-
             $this->_setupRunFromConfig_($this->allConfigFileSettings);
 
         }

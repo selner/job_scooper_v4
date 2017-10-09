@@ -230,70 +230,140 @@ class JobsAutoMarker
         return false;
 
     }
+
+    private function _isGeoSpatialWorking()
+    {
+        try {
+            loadSqlite3MathExtensions();
+            LogLine("Successfully loaded the necessary math functions for SQLite to do geospatial filtering.", C__DISPLAY_NORMAL__);
+            return true;
+
+        } catch (\Exception $ex) {
+            LogLine("Failed to load the necessary math functions for SQLite to do geospatial filtering.  Falling back to county-level instead.", C__DISPLAY_WARNING__);
+        }
+
+        return false;
+    }
+
     private function _markJobsList_SetOutOfArea_(&$arrJobsList)
     {
-        try
+        if (count($arrJobsList) == 0) return;
+
+        LogLine("Marking Out of Area Jobs", \C__DISPLAY_ITEM_START__);
+
+        if ($this->_isGeoSpatialWorking()) {
+            $this->_markJobsList_OutOfArea_Geospatial($arrJobsList);
+        }
+        else {
+            $this->_markJobsList_OutOfArea_CountyFiltered($arrJobsList);
+        }
+    }
+
+    private function _markJobsList_OutOfArea_CountyFiltered(&$arrJobsList)
+    {
+        $searchLocations = getConfigurationSettings('search_location');
+
+        $arrIncludeCounties = array();
+
+        /* Find all locations that are within 50 miles of any of our search locations */
+
+        LogLine("Auto-marking postings not in same counties as the search locations...", \C__DISPLAY_ITEM_DETAIL__);
+        foreach($searchLocations as $searchLocation)
         {
-            if (count($arrJobsList) == 0) return;
-
-            LogLine("Marking Out of Area Jobs", \C__DISPLAY_ITEM_START__);
-
-            $searchLocations = getConfigurationSettings('search_location');
-
-            $arrNearbyIds = array();
-
-            /* Find all locations that are within 50 miles of any of our search locations */
-
-            LogLine("Getting locationIDs within 50 miles of search locations...", \C__DISPLAY_ITEM_DETAIL__);
-            foreach($searchLocations as $searchLocation)
+            $locLookup = $searchLocation['location_name_lookup'];
+            if(!is_null($locLookup))
             {
-                $locLookup = $searchLocation['location_name_lookup'];
-                if(!is_null($locLookup))
+                $location = $locLookup->getLocation();
+                if(!is_null($location))
                 {
-                    $location = $locLookup->getLocation();
-                    if(!is_null($location))
-                    {
-                        $nearbyLocations = LocationQuery::create()
-                            ->filterByDistanceFrom($location->getLatitude(), $location->getLongitude(), 50, LocationTableMap::MILES_UNIT, Criteria::LESS_THAN)
-                            ->find();
+                    $arrIncludeCounties[] = array("county" => $location->getCounty(), "state" => $location->getState());
+                }
+            }
+        }
 
-                        if(!is_null($nearbyLocations))
-                        {
-                            foreach($nearbyLocations as $near)
-                                $arrNearbyIds[] = $near->getLocationId();
-                        }
+        LogLine("Gathering job postings not in the following counties & states ...", \C__DISPLAY_ITEM_DETAIL__);
+        $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrIncludeCounties) {
+            $posting = $v->getJobPosting();
+            $locId = $posting->getLocationId();
+            if(is_null($locId))
+                return true;  // if we don't have a location, assume nearby
+
+            $location = $posting->getLocation();
+            $county = $location->getCounty();
+            $state = $location->getState();
+            if(!is_null($county) && in_array($county, array_column($arrIncludeCounties, "county")) && in_array($state, array_column($arrIncludeCounties, "state")))
+                return true;
+            return false;
+        });
+
+        LogLine("Marking user job matches as out of area for " . count($arrJobsOutOfArea) . " matches ...", \C__DISPLAY_ITEM_DETAIL__);
+
+        foreach ($arrJobsOutOfArea as $jobOutofArea) {
+            $jobOutofArea->setOutOfUserArea(true);
+            $jobOutofArea->save();
+        }
+
+
+        $nJobsMarkedAutoExcluded = count($arrJobsOutOfArea);
+        $nJobsNotMarked = count($arrJobsList) - $nJobsMarkedAutoExcluded;
+
+
+        LogLine("Jobs excluded as out of area: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ." marked; " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).", not marked " , \C__DISPLAY_ITEM_RESULT__);
+    }
+
+    private function _markJobsList_OutOfArea_Geospatial(&$arrJobsList)
+    {
+        $searchLocations = getConfigurationSettings('search_location');
+
+        $arrNearbyIds = array();
+
+        /* Find all locations that are within 50 miles of any of our search locations */
+
+        LogLine("Getting locationIDs within 50 miles of search locations...", \C__DISPLAY_ITEM_DETAIL__);
+        foreach($searchLocations as $searchLocation)
+        {
+            $locLookup = $searchLocation['location_name_lookup'];
+            if(!is_null($locLookup))
+            {
+                $location = $locLookup->getLocation();
+                if(!is_null($location))
+                {
+                    $nearbyLocations = LocationQuery::create()
+                        ->filterByDistanceFrom($location->getLatitude(), $location->getLongitude(), 50, LocationTableMap::MILES_UNIT, Criteria::LESS_THAN)
+                        ->find();
+
+                    if(!is_null($nearbyLocations))
+                    {
+                        foreach($nearbyLocations as $near)
+                            $arrNearbyIds[] = $near->getLocationId();
                     }
                 }
             }
-
-            LogLine("Gathering job postings not in those areas...", \C__DISPLAY_ITEM_DETAIL__);
-            $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrNearbyIds) {
-                $posting = $v->getJobPosting();
-                $locId = $posting->getLocationId();
-                if(is_null($locId))
-                    return true;  // if we don't have a location, assume nearby
-
-                return in_array($locId, $arrNearbyIds);
-            });
-
-            LogLine("Marking user job matches as out of area for " . count($arrJobsOutOfArea) . " matches ...", \C__DISPLAY_ITEM_DETAIL__);
-
-            foreach ($arrJobsOutOfArea as $jobOutofArea) {
-                $jobOutofArea->setOutOfArea(true);
-                $jobOutofArea->save();
-            }
-
-
-            $nJobsMarkedAutoExcluded = count($arrJobsOutOfArea);
-            $nJobsNotMarked = count($arrJobsList) - $nJobsMarkedAutoExcluded;
-
-
-           LogLine("Jobs excluded as out of area: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ." marked; " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).", not marked " , \C__DISPLAY_ITEM_RESULT__);
         }
-        catch (Exception $ex)
-        {
-            handleException($ex, "Error in SetOutOfArea: %s", true);
+
+        LogLine("Gathering job postings not in those areas...", \C__DISPLAY_ITEM_DETAIL__);
+        $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrNearbyIds) {
+            $posting = $v->getJobPosting();
+            $locId = $posting->getLocationId();
+            if(is_null($locId))
+                return true;  // if we don't have a location, assume nearby
+
+            return in_array($locId, $arrNearbyIds);
+        });
+
+        LogLine("Marking user job matches as out of area for " . count($arrJobsOutOfArea) . " matches ...", \C__DISPLAY_ITEM_DETAIL__);
+
+        foreach ($arrJobsOutOfArea as $jobOutofArea) {
+            $jobOutofArea->setOutOfUserArea(true);
+            $jobOutofArea->save();
         }
+
+
+        $nJobsMarkedAutoExcluded = count($arrJobsOutOfArea);
+        $nJobsNotMarked = count($arrJobsList) - $nJobsMarkedAutoExcluded;
+
+
+       LogLine("Jobs excluded as out of area: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ." marked; " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).", not marked " , \C__DISPLAY_ITEM_RESULT__);
     }
 
     private function _markJobsList_SetAutoExcludedCompaniesFromRegex_(&$arrJobsList)
