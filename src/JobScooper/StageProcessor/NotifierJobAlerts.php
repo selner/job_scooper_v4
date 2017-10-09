@@ -882,20 +882,8 @@ class NotifierJobAlerts
     {
         return array(
             'Company',
-//            'job_title',
             'JobTitleLinked',
-//            'job_post_url',
-//            'job_site_date' =>'',
-//            'interested',
-//            'match_notes',
-//            'status',
-            'Location',
-//            'job_site_category',
-//            'job_site',
-//            'job_id',
-//            'key_jobsite_siteid',
-//            'key_company_role',
-//            'date_last_updated',
+            'LocationDisplayValue'
         );
     }
 
