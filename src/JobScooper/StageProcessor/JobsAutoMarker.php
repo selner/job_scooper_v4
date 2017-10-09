@@ -19,13 +19,9 @@ namespace JobScooper\StageProcessor;
 
 use JobScooper\DataAccess\LocationQuery;
 use JobScooper\DataAccess\Map\LocationTableMap;
-use \Khartnett\Normalization as Normalize;
+
 use Exception;
 use Propel\Runtime\ActiveQuery\Criteria;
-
-
-const C__STR_TAG_AUTOMARKEDJOB__ = "[auto-marked]";
-const C__STR_TAG_DUPLICATE_POST__ = "Duplicate Job Post " . C__STR_TAG_AUTOMARKEDJOB__;
 
 
 class JobsAutoMarker
@@ -33,12 +29,6 @@ class JobsAutoMarker
     protected $siteName = "JobsAutoMarker";
     protected $arrLatestJobs_UnfilteredByUserInput = array();
     protected $arrMasterJobList = array();
-    protected $cbsaList  = null;
-    protected $normalizer  = null;
-    protected $userMatchedCBSAPlaces  = array();
-    protected $cbsaLocSetMapping = array();
-    protected $locationCities = array();
-    protected $validCityValues = array();
 
     function __construct($arrJobObjsToMark = array(), $strOutputDirectory = null)
     {
@@ -49,46 +39,6 @@ class JobsAutoMarker
 
     }
 
-    private function _loadCityData()
-    {
-
-        if(is_null($this->cbsaList))
-        {
-            LogLine("Loading city data", \C__DISPLAY_ITEM_DETAIL__);
-
-            $this->cbsaList = loadJSON(__ROOT__.'/assets/static/cbsa_list.json');
-            $cbsaCityMapping = loadCSV(__ROOT__.'/assets/static/us_place_to_csba_mapping.csv', 'PlaceKey');
-
-            foreach(getConfigurationSettings('search_location') as $search_location)
-            {
-                $loclookup = findOrCreateLocationLookupFromName($search_location);
-                $location = null;
-                if(!is_null($loclookup))
-                    $location = $loclookup->getLocation();
-
-                if(!is_null($location))
-                {
-                    $this->locationCities[$location->getLocationKey()] = $location->getDisplayName();
-                }
-            }
-
-            $this->validCities = array();
-
-            $cbsaInUsa = array_unique($this->cbsaLocSetMapping);
-            foreach($cbsaCityMapping as $place)
-            {
-                $placeName = $this->_normalizeLocation_($place['Place'] . ", " . $place['StateCode'] );
-                $placeKey = $this->getLocationLookupKey($placeName);
-                $this->validCityValues[$placeKey] = $placeName;
-                if(array_search($place['CBSA'], $cbsaInUsa) !== false)
-                {
-                    $this->userMatchedCBSAPlaces[$place['PlaceKey']] = $place;
-                }
-            }
-
-            unset($cbsaCityMapping);
-        }
-    }
     function __destruct()
     {
         LogLine("Closing ".$this->siteName." instance of class " . get_class($this), \C__DISPLAY_ITEM_DETAIL__);
@@ -184,51 +134,6 @@ class JobsAutoMarker
         {
             handleException($ex, "Error in SetLikelyDuplicatePosts: %s", true);
         }
-    }
-
-    private function _normalizeLocation_($locString)
-    {
-        $stringToNormalize = "111 Bogus St, " . $locString;
-        $location = $this->normalizer->parse($stringToNormalize);
-        if ($location !== false)
-        {
-            $locString = $location['city'];
-            if (strlen($location['state']) > 0)
-                 $locString .= ", " . $location['state'];
-        }
-
-        return $locString;
-    }
-
-    private function getLocationLookupKey($locString)
-    {
-        $citystate = $this->_normalizeLocation_($locString);
-        return strtoupper(str_replace(" ", "", str_replace("Greater", "", str_replace(", ", "_", $citystate))));
-
-    }
-
-    private function _doesLocationMatchUserSearch($locationKey)
-    {
-        if(in_array("US", $GLOBALS['USERDATA']['configuration_settings']['country_codes']))
-        {
-
-            if (in_array($locationKey, array_keys($this->userMatchedCBSAPlaces))) {
-                return true;
-            }
-
-            $placeKey = array_find_closest_key_match($locationKey, array_keys($this->userMatchedCBSAPlaces));
-            if (!is_null($placeKey) && (strncmp($placeKey, $locationKey, 5) == 0 || !array_key_exists($locationKey, array_keys($this->validCityValues)))) {
-                return true;
-            }
-        }
-        else
-        {
-            if(substr_count_multi($this->getLocationLookupKey($locationKey), array_keys($this->locationCities), $matches) == true)
-                return true;
-        }
-
-        return false;
-
     }
 
     private function _isGeoSpatialWorking()

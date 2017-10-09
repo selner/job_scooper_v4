@@ -7,9 +7,6 @@ vendor/*
 *obsolete*
 *.pyc
 *.diff
-sshkeys
-assets/static/source_files/
-python/pyJobNormalizerVirtualEnv
 /scripts/personal/*
 
 

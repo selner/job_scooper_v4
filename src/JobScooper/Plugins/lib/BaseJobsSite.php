@@ -21,7 +21,6 @@ namespace JobScooper\Plugins\lib;
 
 use JobScooper\Plugins\Interfaces\IJobSitePlugin;
 use JobScooper\Manager\SeleniumManager;
-use \Khartnett\Normalization as Normalize;
 
 const VALUE_NOT_SUPPORTED = -1;
 const BASE_URL_TAG_LOCATION = "***LOCATION***";
@@ -58,7 +57,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
         $this->userObject = $GLOBALS['USERDATA']['configuration_settings']['user_details'];
 
-        $this->normalizer = new Normalize();
 
         if (stristr($this->strBaseURLFormat, "***KEYWORDS***") == false)
             $this->additionalFlags[] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
@@ -295,7 +293,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     protected $additionalLoadDelaySeconds = 0;
     protected $_flags_ = null;
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
-    protected $normalizer = null;
+
     protected $countryCodes = array("US");
 
     function getLocationSettingType()
