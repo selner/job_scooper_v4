@@ -47,8 +47,7 @@ RUN apt-get update && apt-get install -y \
     php5-intl \
     php5-mcrypt \
     php5-xsl \
-    php5-sqlite \
-	--no-install-recommends && rm -r /var/lib/apt/lists/*
+    php5-sqlite
 
 
 
