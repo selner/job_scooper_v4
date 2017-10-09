@@ -536,6 +536,8 @@ class NotifierJobAlerts
 
         $mail->isHTML(true);                                            // Set email format to HTML
 
+        if(strlen($strBodyText) == 0 || strlen($strBodyHTML) > 0)
+            $strBodyText = strip_tags($strBodyHTML);
 
         $mail->Body    = $strBodyHTML;
         $mail->AltBody = $strBodyText;

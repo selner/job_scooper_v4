@@ -20,7 +20,8 @@ RUN apt-get install -y \
     apt-transport-https \
     apt-utils \
     sqlite3 \
-    vim
+    vim \
+    sendmail
 
 #######################################################
 ##
@@ -47,6 +48,7 @@ RUN apt-get update && apt-get install -y \
     php5-mcrypt \
     php5-xsl \
     php5-sqlite
+	--no-install-recommends && rm -r /var/lib/apt/lists/*
 
 
 
