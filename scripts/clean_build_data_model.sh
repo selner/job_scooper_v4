@@ -12,7 +12,7 @@ echo "current dir is `pwd`"
 echo "Moving current db to backup ($OUTDIR/job_scooper_db.sq3)..."
 mv "$OUTDIR/job_scooper_db.sq3" "$OUTDIR/job_scooper_db.sq3.backup-"$NOW
 
-rm -Rf $CODEDIR/src/DataAccess/lib
+rm -Rf $CODEDIR/src/DataAccess/Base
 rm -Rf $CODEDIR/src/DataAccess/Map
 cp -R $CODEDIR/src/DataAccess "$CODEDIR/generated-classes.backup-"$NOW
 
