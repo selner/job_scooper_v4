@@ -191,9 +191,9 @@ class NotifierJobAlerts
         $arrMatchedAndExcludedJobs = array_filter($arrMatchedJobs, "isUserJobMatchButExcluded");
         $arrMatchedAndNotExcludedJobs = array_filter($arrMatchedJobs, "isUserJobMatchAndNotExcluded");
 
-        $detailsMatchOnlyCSV = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedAndNotExcludedJobs, null, "Matches", "CSV"));
-        $detailsMatchExcludedCSV = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedAndExcludedJobs, null, "ExcludedMatches", "CSV"));
-        $detailsHTMLFile = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedAndNotExcludedJobs, null, "Matches", "HTML"));
+        $detailsMatchOnlyCSV = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedAndNotExcludedJobs, "Matches", "CSV"));
+        $detailsMatchExcludedCSV = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedAndExcludedJobs, "ExcludedMatches", "CSV"));
+        $detailsHTMLFile = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedAndNotExcludedJobs, "Matches", "HTML"));
 
         $arrResultFilesToCombine[] = $detailsMatchOnlyCSV;
         $arrFilesToAttach[] = $detailsMatchOnlyCSV;
@@ -202,7 +202,7 @@ class NotifierJobAlerts
         $arrFilesToAttach[] =  $detailsHTMLFile;
 
 
-        $detailsExcludedCSVFile = parseFilePath($this->_filterAndWriteListToFile_($arrExcludedJobs, "isNotUserJobMatch", "-finalexcludedjobs", "CSV"));
+        $detailsExcludedCSVFile = parseFilePath($this->_filterAndWriteListToFile_($arrExcludedJobs, "-finalexcludedjobs", "CSV"));
 
         if ((filesize($detailsExcludedCSVFile['full_file_path']) < 10 * 1024 * 1024) || isDebug()) {
             $arrFilesToAttach[] = $detailsExcludedCSVFile;
@@ -374,24 +374,16 @@ class NotifierJobAlerts
 
     }
 
-    private function _filterAndWriteListToFile_($arrJobsList, $strFilterToApply, $strFileNameBase, $strExt = "CSV")
+    private function _filterAndWriteListToFile_($arrJobsList, $strFileNameBase, $strExt = "CSV")
     {
-        $filePath = getDefaultJobsOutputFileName($strFileNameBase, $strFilterToApply, $strExt, "_", 'notifications');
+        $filePath = getDefaultJobsOutputFileName($strFileNameBase, $strExt, "_", 'notifications');
 
 
         if(countJobRecords($arrJobsList) == 0) return $arrJobsList;
 
-        if($strFilterToApply == null || function_exists($strFilterToApply) === false)
-        {
-            LogLine("No filter function supplied; outputting all results...", \C__DISPLAY_WARNING__);
-            $arrJobs = $arrJobsList;
-        }
-        else
-            $arrJobs = array_filter($arrJobsList, $strFilterToApply);
+        $this->writeRunsJobsToFile($filePath, $arrJobsList, $strExt);
 
-        $this->writeRunsJobsToFile($filePath, $arrJobs, $strExt);
-
-        LogLine($strFilterToApply . " " . count($arrJobs). " job listings output to  " . $filePath, \C__DISPLAY_ITEM_RESULT__);
+        LogLine("Wrote " . count($arrJobs). " job listings output to  " . $filePath, \C__DISPLAY_ITEM_RESULT__);
 
         return $filePath;
 
@@ -444,9 +436,9 @@ class NotifierJobAlerts
             throw new InvalidArgumentException($msg);
         }
 
-        if(count($retEmails['from']) > 1)
+        if(is_array_multidimensional($retEmails['from']))
         {
-            LogLine("Multiple 'from:' email addresses found. Notification will be from first one only (" . $retEmails['from']['address'][0] . ").", \C__DISPLAY_WARNING__);
+            LogLine("Multiple 'from:' email addresses found. Notification will be from first one only (" . $retEmails['from'][0]['address'] . ").", \C__DISPLAY_WARNING__);
         }
         elseif(count($retEmails['from']) != 1)
         {
