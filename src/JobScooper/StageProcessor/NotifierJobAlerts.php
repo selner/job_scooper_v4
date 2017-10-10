@@ -440,7 +440,7 @@ class NotifierJobAlerts
         {
             LogLine("Multiple 'from:' email addresses found. Notification will be from first one only (" . $retEmails['from'][0]['address'] . ").", \C__DISPLAY_WARNING__);
         }
-        elseif(count($retEmails['from']) != 1)
+        elseif(!is_array($retEmails['from']))
         {
             $msg = "Could not find 'from:' email address in configuration file. Notification will not be sent.";
             LogLine($msg, \C__DISPLAY_ERROR__);
