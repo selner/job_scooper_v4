@@ -89,6 +89,7 @@ class ConfigManager
 
     function initialize()
     {
+
         $envDirOut = getenv('JOBSCOOPER_OUTPUT');
         if(is_null($envDirOut) || strlen($envDirOut) == 0)
             $envDirOut = sys_get_temp_dir();
@@ -99,9 +100,13 @@ class ConfigManager
 
         __initializeArgs__($rootdir);
 
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting up application... ", \C__DISPLAY_SECTION_START__);
+        $cmdLineOpts = \Pharse::options($GLOBALS['OPTS_SETTINGS']);
+
+        LogLine("Initializing application using the passed command line switches: " . getArrayValuesAsString($cmdLineOpts));
+
         # After you've configured Pharse, run it like so:
-        $GLOBALS['OPTS'] = \Pharse::options($GLOBALS['OPTS_SETTINGS']);
+        $GLOBALS['USERDATA']['OPTS'] = $cmdLineOpts;
+        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting up application... ", \C__DISPLAY_SECTION_START__);
 
         $GLOBALS['USERDATA']['companies_regex_to_filter'] = null;
         $GLOBALS['USERDATA']['configuration_settings'] = array();
@@ -146,7 +151,7 @@ class ConfigManager
             $outputDirectoryDetails = $cmdlineOutDir;
         }
 
-        if ($GLOBALS['OPTS']['use_config_ini_given']) {
+        if ($GLOBALS['USERDATA']['OPTS']['use_config_ini_given']) {
             $this->arrFileDetails['config_ini'] = set_FileDetails_fromPharseSetting("use_config_ini", 'config_file_details', true);
             $name = str_replace(DIRECTORY_SEPARATOR, "", $this->arrFileDetails['config_ini']['directory']);
             $name = substr($name, max([strlen($name) - 31 - strlen(".ini"), 0]), 31);
@@ -161,7 +166,7 @@ class ConfigManager
         $strOutfileArrString = getArrayValuesAsString($GLOBALS['USERDATA']['directories']);
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output folders configured: " . $strOutfileArrString, \C__DISPLAY_ITEM_DETAIL__);
 
-        if ($GLOBALS['OPTS']['use_config_ini_given']) {
+        if ($GLOBALS['USERDATA']['OPTS']['use_config_ini_given']) {
             if (!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \LoggingManager($this->arrFileDetails['config_ini']['directory']);
             if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Log file for run being written to: " . $this->arrFileDetails['config_ini']['directory'], \C__DISPLAY_ITEM_DETAIL__);
 

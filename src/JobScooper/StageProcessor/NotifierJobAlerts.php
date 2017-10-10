@@ -454,7 +454,7 @@ class NotifierJobAlerts
 
     function sendEmail($strBodyText = null, $strBodyHTML = null, $arrDetailsAttachFiles = array(), $subject="No subject", $emailKind='results')
     {
-        if (!isset($GLOBALS['OPTS']['send_notifications']) || $GLOBALS['OPTS']['send_notifications'] != 1) {
+        if (!isset($GLOBALS['USERDATA']['OPTS']['send_notifications']) || $GLOBALS['USERDATA']['OPTS']['send_notifications'] != 1) {
             LogLine(PHP_EOL . "User set -send_notifications = false so skipping email notification.)" . PHP_EOL, \C__DISPLAY_NORMAL__);
             LogLine("Mail contents would have been:" . PHP_EOL . $strBodyText, \C__DISPLAY_NORMAL__);
             return null;

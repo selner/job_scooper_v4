@@ -19,8 +19,8 @@
 //
 
 
-$GLOBALS['OPTS']['VERBOSE'] = false;
-$GLOBALS['OPTS']['VERBOSE_API_CALLS'] = false;
+$GLOBALS['USERDATA']['OPTS']['VERBOSE'] = false;
+$GLOBALS['USERDATA']['OPTS']['VERBOSE_API_CALLS'] = false;
 const C__STR_USER_AGENT__ = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36";
 
 date_default_timezone_set("America/Los_Angeles");
@@ -89,9 +89,9 @@ function __initializeArgs__($rootdir)
 //    Pharse::setBanner($banner);
     if(isset($GLOBALS['logger']))
     {
-        $GLOBALS['logger']->logLine('Options set: '.var_export($GLOBALS['OPTS'], true).PHP_EOL, \C__DISPLAY_NORMAL__);
+        $GLOBALS['logger']->logLine('Options set: '.var_export($GLOBALS['USERDATA']['OPTS'], true).PHP_EOL, \C__DISPLAY_NORMAL__);
     }
-    else { print('Options set: '.var_export($GLOBALS['OPTS'], true).PHP_EOL); }
+    else { print('Options set: '.var_export($GLOBALS['USERDATA']['OPTS'], true).PHP_EOL); }
 
 }
 
@@ -119,28 +119,28 @@ function is_OptionIncludedSite($strName)
     $strGivenKey = $strIncludeSiteKey."_given";
     $ret = false;
 
-    if (isset($GLOBALS['OPTS'][$strGivenKey]) && $GLOBALS['OPTS'][$strGivenKey] == true)
+    if (isset($GLOBALS['USERDATA']['OPTS'][$strGivenKey]) && $GLOBALS['USERDATA']['OPTS'][$strGivenKey] == true)
     {
-        switch($GLOBALS['OPTS'][$strIncludeSiteKey])
+        switch($GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey])
         {
             case 0:
-                $GLOBALS['OPTS'][$strIncludeSiteKey] = false;
+                $GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey] = false;
                 break;
 
             case -1:
             case 1:
             default:
-                $GLOBALS['OPTS'][$strIncludeSiteKey] = true;
+                $GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey] = true;
                 break;
 
         }
-        $ret = $GLOBALS['OPTS'][$strIncludeSiteKey];
+        $ret = $GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey];
     }
-    elseif(isset($GLOBALS['OPTS']['include_all_given']) && $GLOBALS['OPTS']['include_all_given'] == true)
+    elseif(isset($GLOBALS['USERDATA']['OPTS']['include_all_given']) && $GLOBALS['USERDATA']['OPTS']['include_all_given'] == true)
     {
-        $GLOBALS['OPTS'][$strGivenKey] = true;
-        $GLOBALS['OPTS'][$strIncludeSiteKey] = true;
-        $ret = $GLOBALS['OPTS'][$strIncludeSiteKey];
+        $GLOBALS['USERDATA']['OPTS'][$strGivenKey] = true;
+        $GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey] = true;
+        $ret = $GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey];
     }
 
 

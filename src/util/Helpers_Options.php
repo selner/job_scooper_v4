@@ -21,10 +21,10 @@ function get_PharseOptionValue($strOptName)
 {
     $retvalue = null;
     $strOptGiven = $strOptName."_given";
-    if(isset($GLOBALS['OPTS']) && isset($GLOBALS['OPTS'][$strOptGiven]) && $GLOBALS['OPTS'][$strOptGiven] == true)
+    if(isset($GLOBALS['USERDATA']['OPTS']) && isset($GLOBALS['USERDATA']['OPTS'][$strOptGiven]) && $GLOBALS['USERDATA']['OPTS'][$strOptGiven] == true)
     {
-        if(isset($GLOBALS['logger']) && isset($GLOBALS['VERBOSE'])) $GLOBALS['logger']->logLine("'".$strOptName ."'"."=[".$GLOBALS['OPTS'][$strOptName] ."]", C__DISPLAY_ITEM_DETAIL__);
-        $retvalue = $GLOBALS['OPTS'][$strOptName];
+        if(isset($GLOBALS['logger']) && isset($GLOBALS['VERBOSE'])) $GLOBALS['logger']->logLine("'".$strOptName ."'"."=[".$GLOBALS['USERDATA']['OPTS'][$strOptName] ."]", C__DISPLAY_ITEM_DETAIL__);
+        $retvalue = $GLOBALS['USERDATA']['OPTS'][$strOptName];
     }
     else
     {
@@ -42,7 +42,7 @@ function setGlobalFileDetails($key, $fRequireFile = false, $fullpath = null)
 
     if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("". $key ." set to [" . var_export($ret, true) . "]", C__DISPLAY_ITEM_DETAIL__);
 
-    $GLOBALS['OPTS'][$key] = $ret;
+    $GLOBALS['USERDATA']['OPTS'][$key] = $ret;
 
     return $ret;
 }
@@ -83,8 +83,8 @@ function getConfigurationSettings($strSubkey = null)
 
 
 function isVerbose() {
-    if(isset($GLOBALS['OPTS']) && isset($GLOBALS['OPTS']['VERBOSE']))
-        return filter_var($GLOBALS['OPTS']['VERBOSE'], FILTER_VALIDATE_BOOLEAN);
+    if(isset($GLOBALS['USERDATA']['OPTS']) && isset($GLOBALS['USERDATA']['OPTS']['VERBOSE']))
+        return filter_var($GLOBALS['USERDATA']['OPTS']['VERBOSE'], FILTER_VALIDATE_BOOLEAN);
 
     return filter_var(getConfigurationSettings('verbose'), FILTER_VALIDATE_BOOLEAN);
 }

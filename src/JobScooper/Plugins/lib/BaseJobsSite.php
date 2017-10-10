@@ -144,7 +144,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         $boolSearchSuccess = null;
 
 
-        if (isset($GLOBALS['OPTS'][$strIncludeKey]) && $GLOBALS['OPTS'][$strIncludeKey] == 0) {
+        if (isset($GLOBALS['USERDATA']['OPTS'][$strIncludeKey]) && $GLOBALS['USERDATA']['OPTS'][$strIncludeKey] == 0) {
             LogLine($this->siteName . ": excluded for run. Skipping '" . count($this->arrSearchesToReturn) . "' site search(es).", \C__DISPLAY_ITEM_DETAIL__);
             return array();
         }
