@@ -73,7 +73,7 @@ function encodeJSON($data)
     $jsonData = json_encode($data, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
     if ($jsonData === false) {
         $err = json_last_error_msg();
-        $errMsg = "Error:  Unable to convert jobs list data to json due to error   " . $err;
+        $errMsg = "Error:  Unable to data to JSON.  Error: " . $err;
         LogLine($errMsg, \C__DISPLAY_ERROR__);
         throw new Exception($errMsg);
     }
@@ -84,7 +84,7 @@ function writeJSON($data, $filepath)
 {
     $jsonData = encodeJSON($data);
 
-    LogLine("Writing final job data pull results to json file " . $filepath);
+    LogLine("Writing data to json file " . $filepath);
     if (file_put_contents($filepath, $jsonData, FILE_TEXT) === false) {
         $err = error_get_last();
         $errMsg = "Error:  Unable to save JSON results to file " . $filepath . " due to error   " . $err;
