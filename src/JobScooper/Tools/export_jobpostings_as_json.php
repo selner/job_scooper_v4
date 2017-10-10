@@ -14,6 +14,12 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+namespace JobScooper\Tools;
+
+
+use JobScooper\DataAccess\UserSearchRunQuery;
+use Propel\Runtime\Map\TableMap;
+
 define('__ROOT__', dirname(__FILE__));
 ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
 define('MAX_FILE_SIZE', 5000000);
@@ -22,7 +28,7 @@ define('__APP_VERSION__', "v4.1.0-use-propel-orm");
 $lineEnding = ini_get('auto_detect_line_endings');
 ini_set('auto_detect_line_endings', true);
 
-$autoload = join(DIRECTORY_SEPARATOR, array(__ROOT__, 'vendor', 'autoload.php'));
+$autoload = realpath(join(DIRECTORY_SEPARATOR, array("..","..","..", 'vendor', 'autoload.php')));
 if (file_exists($autoload)) {
     require_once($autoload);
 } else {
@@ -30,8 +36,7 @@ if (file_exists($autoload)) {
 }
 
 $GLOBALS['logger'] = new \JobScooper\Manager\LoggingManager(C__APPNAME__);
-
-$propelConfig = join(DIRECTORY_SEPARATOR, array(__ROOT__, 'Config', 'config.php'));
+$propelConfig = realpath(join(DIRECTORY_SEPARATOR, array("..","..","..", 'Config', 'config.php')));
 if (file_exists($propelConfig)) {
     require_once($propelConfig);
 } else {
@@ -39,12 +44,28 @@ if (file_exists($propelConfig)) {
 }
 
 
-$allJobs = \JobScooper\DataAccess\JobPostingQuery::create()
-    ->paginate($page = 1, $maxPerPage = 100, $con);
-    ->joinWithLocation()
-    ->find();
-if(!is_null($alljobs))
-foreach($alljobs as $job)
-{
+LogLine("Getting all jobs from the database...", C__DISPLAY_ITEM_START__);
 
+
+$allJobsQuery = \JobScooper\DataAccess\JobPostingQuery::create()
+    ->leftJoinWithLocation()
+    ->find();
+$allJobs = $allJobsQuery->getData();
+
+$arrOutputList = array();
+if(!is_null($allJobs))
+{
+    LogLine("... converting each job to an array ...", C__DISPLAY_ITEM_DETAIL__);
+    foreach($allJobs as $job)
+    {
+        $arrJob = $job->toArray(TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, array(), true);
+        if(array_key_exists('Location', $arrJob) && array_key_exists('JobPostings', $arrJob['Location']))
+            unset($arrJob['Location']['JobPostings']);
+        $arrOutputList[$job->getKeySiteAndPostID()] = $arrJob;
+    }
 }
+
+$outFile = generateOutputFileName("all_job_postings", "json", false );
+writeJSON($arrOutputList, $outFile);
+
+
