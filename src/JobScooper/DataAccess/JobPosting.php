@@ -17,6 +17,7 @@
 
 namespace JobScooper\DataAccess;
 
+use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Map\TableMap;
 use Exception;
 
@@ -37,6 +38,31 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
                 $arrItem[$key] = join("|", flattenWithKeys(array($key => $arrItem[$key])));
 
         return $arrItem;
+
+    }
+    public function checkAndMarkDuplicatePosting()
+    {
+        if(is_null($this->getDuplicatesJobPostingId())) {
+            $this->updateAutoColumns();
+            $sinceWhen = date_add(new \DateTime(), date_interval_create_from_date_string('7 days ago'));
+
+            $masterPost = JobPostingQuery::create()
+                ->filterByDuplicatesJobPostingId(null)
+                ->filterByKeyCompanyAndTitle($this->getKeyCompanyAndTitle())
+                ->filterByPostedAt(array('max' => $sinceWhen))
+                ->filterByJobPostingId($this->getJobPostingId(), Criteria::NOT_EQUAL)
+                ->orderByPostedAt('asc')
+                ->findOne();
+
+            if (!is_null($masterPost) && $masterPost !== false) {
+                $this->setDuplicatesJobPostingId($masterPost->getJobPostingId());
+                return $masterPost->getJobPostingId();
+            }
+        }
+    }
+
+    public function setPostingAsDuplicateOf($jobPosting)
+    {
 
     }
 
@@ -78,21 +104,12 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 
 
     }
-    public function preInsert(\Propel\Runtime\Connection\ConnectionInterface $con = null)
-    {
-        $this->normalizeJobRecord();
-        if (is_callable('parent::preInsert')) {
-            return parent::preInsert($con);
-        }
-        return true;
-    }
-
-    public function preUpdate(\Propel\Runtime\Connection\ConnectionInterface $con = null)
+    public function preSave(\Propel\Runtime\Connection\ConnectionInterface $con = null)
     {
         $this->normalizeJobRecord();
 
-        if (is_callable('parent::preUpdate')) {
-            return parent::preUpdate($con);
+        if (is_callable('parent::preSave')) {
+            return parent::preSave($con);
         }
         return true;
     }

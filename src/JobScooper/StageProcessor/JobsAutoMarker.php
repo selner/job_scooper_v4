@@ -35,8 +35,6 @@ class JobsAutoMarker
         if (!is_null($arrJobObjsToMark) && count($arrJobObjsToMark) > 0)
             $this->arrMasterJobList = $arrJobObjsToMark;
 
-        $this->normalizer = new Normalize();
-
     }
 
     function __destruct()
@@ -67,12 +65,12 @@ class JobsAutoMarker
             $arrJobs_AutoUpdatable = $this->arrMasterJobList;
             $this->_markJobsList_SearchKeywordsFound_($arrJobs_AutoUpdatable);
 
-            //BUGBUG/TODO DEBUG AND PUT BACK
-            //        $this->_markJobsList_SetLikelyDuplicatePosts_($arrJobs_AutoUpdatable);
+            $this->_markJobsList_SetLikelyDuplicatePosts_($arrJobs_AutoUpdatable);
 
             $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
 
             $this->_markJobsList_UserExcludedKeywords_($arrJobs_AutoUpdatable);
+
             $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($arrJobs_AutoUpdatable);
 
         }
@@ -88,47 +86,34 @@ class JobsAutoMarker
         try
         {
             if(count($arrJobsList) == 0) return;
+            $nJobDupes= 0;
+            $nNonDupes = 0;
 
-            $origJobMatchForEachCompanyRole = array();
-            $dupeJobMatchesForEachCompanyRole = array();
+            LogLine("Gathering job postings that are already marked as duplicate...", \C__DISPLAY_ITEM_DETAIL__);
+            $arrDupeMatches = array_filter($arrJobsList, function($v) {
+                $posting = $v->getJobPosting();
+                return (!is_null($posting->getDuplicatesJobPostingId()));
+            });
 
-            LogLine("Finding Duplicate Job Roles" , \C__DISPLAY_ITEM_START__);
-            foreach($arrJobsList as $job)
+            $nJobDupes = count($arrDupeMatches);
+            $arrRemainingJobs = array_diff_assoc($arrJobsList, $arrDupeMatches);
+
+            LogLine("Finding and Marking Duplicate Job Roles" , \C__DISPLAY_ITEM_START__);
+            foreach($arrRemainingJobs as $jobMatch)
             {
-                $indexKey = $job->getJobPosting()->getKeySiteAndPostID();
-                $compKey = $job->getJobPosting()->getKeyCompanyAndTitle();
-                if(!array_key_exists($compKey, $origJobMatchForEachCompanyRole))
-                    $origJobMatchForEachCompanyRole[$compKey] = $job;
+                $posting = $jobMatch->getJobPosting();
+                $dupeId = $posting->checkAndMarkDuplicatePosting();
+                if(!is_null($dupeId) && $dupeId !== false)
+                {
+                    $nJobDupes += 1;
+                    $posting->save();
+                }
                 else
-                    $dupeJobMatchesForEachCompanyRole[$indexKey] = $job;
+                    $nNonDupes += 1;
+
             }
 
-            LogLine("Marking jobs as duplicate..." , \C__DISPLAY_ITEM_DETAIL__);
-
-            foreach($dupeJobMatchesForEachCompanyRole as $dupeJobMatch)
-            {
-                $compKey = $dupeJobMatch->getJobPosting()->getKeyCompanyAndTitle();
-
-                //
-                // Add a note to the previous listing that it had a new duplicate
-                //
-                $origJobMatch = $origJobMatchForEachCompanyRole[$compKey];
-                $origJobMatch->updateMatchNotes($this->getNotesWithDupeIDAdded($origJobMatch->getMatchNotes(), $dupeJobMatch->getJobPosting()->getKeySiteAndPostID()));
-                $origJobMatch->save();
-
-                //
-                // Add a note to the duplicate listing that tells user which is the original post
-                //
-                $dupeJob = $dupeJobMatch->getJobPosting();
-//                $dupeJob->setDuplicatesJobPostingId($origJobMatch->getJobPostingId());
-                $dupeJobMatch->setUserMatchStatus("exclude-match");
-                $dupeJobMatch->setUserMatchReason(C__STR_TAG_DUPLICATE_POST__);
-                $dupeJobMatch->updateMatchNotes($this->getNotesWithDupeIDAdded($dupeJobMatch->getMatchNotes(), $origJobMatch->getJobPosting()->getKeySiteAndPostID() ));
-                $dupeJobMatch->save();
-            }
-            
-            LogLine(count($dupeJobMatchesForEachCompanyRole). "/" . countAssociativeArrayValues($arrJobsList) . " jobs have immediately been marked as duplicate based on company/role pairing. " , \C__DISPLAY_ITEM_RESULT__);
-
+            LogLine($nJobDupes. "/" . countAssociativeArrayValues($arrJobsList) . " jobs have been marked as duplicate based on company/role pairing. " , \C__DISPLAY_ITEM_RESULT__);
         }
         catch (Exception $ex)
         {
@@ -352,36 +337,6 @@ class JobsAutoMarker
         {
             handleException($ex, "Error in SearchKeywordsNotFound: %s", true);
         }
-
-    }
-    private function getNotesWithDupeIDAdded($strNote, $strNewDupe)
-    {
-        $strDupeNotes = null;
-
-        $strDupeMarker_Start = "<dupe>";
-        $strDupeMarker_End = "</dupe>";
-        $strUserNotePart = "";
-
-        if(substr_count($strNote, $strDupeMarker_Start)>0)
-        {
-            $arrNote = explode($strDupeMarker_Start, $strNote);
-            $strUserNotePart = $arrNote[0];
-            $strDupeNotes = $arrNote[1];
-            $arrDupesListed = explode(";", $strDupeNotes);
-            if(count($arrDupesListed) > 3)
-            {
-                $strDupeNotes = $arrDupesListed[0] . "; " . $arrDupesListed[1] . "; " . $arrDupesListed[2] . "; " . $arrDupesListed[3] . "; and more";
-            }
-
-            $strDupeNotes = str_replace($strDupeMarker_End, "", $strDupeNotes);
-            $strDupeNotes .= $strDupeNotes ."; ";
-        }
-        elseif(strlen($strNote) > 0)
-        {
-            $strUserNotePart = $strNote;
-        }
-
-        return (strlen($strUserNotePart) > 0 ? $strUserNotePart . " " . PHP_EOL : "") . $strDupeMarker_Start . $strDupeNotes . $strNewDupe . $strDupeMarker_End;
 
     }
 
