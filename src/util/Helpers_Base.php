@@ -43,7 +43,7 @@ const C__DISPLAY_SUMMARY__ = 750;
 
 
 
-function LogLine($msg, $scooper_level=\C__DISPLAY_NORMAL__)
+function LogLine($msg, $scooper_level=\C__DISPLAY_NORMAL__, $context=array())
 {
     if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
     {
@@ -51,11 +51,42 @@ function LogLine($msg, $scooper_level=\C__DISPLAY_NORMAL__)
     }
     else
     {
-        $GLOBALS['logger']->logLine($msg, $scooper_level);
+        //Debug backtrace called. Find next occurence of class after Logger, or return calling script:
+        $dbg = debug_backtrace();
+        $i = 0;
+        $jobsite = null;
+        $usersearch = null;
+
+        $class = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
+        while ($i < count($dbg) - 1 ) {
+            if (!empty($dbg[$i]['class']) && $dbg[$i]['class'] != 'Logger' ) {
+                $class = $dbg[$i]['class'] . "->" . $dbg[$i]['function'] ."()";
+                if(!empty($dbg[$i]['object']))
+                {
+                    $objclass = get_class($dbg[$i]['object']);
+                    if(strcasecmp($objclass, $dbg[$i]['class']) != 0)
+                    {
+                        $class = "{$objclass} -> {$class}";
+                        try{  $jobsite = $dbg[$i]['object']->getName(); } catch (Exception $ex) { $jobsite = ""; }
+                        try{  $usersearch = count($dbg[$i]['args']) > 0 ? $dbg[$i]['args'][0]->getUserSearchRunKey() : ""; } catch (Exception $ex) { $usersearch = ""; }
+                    }
+                }
+                break;
+            }
+            $i++;
+        }
+
+        $context = array();
+        $context['channel'] = is_null($jobsite) ? "default" : "plugins";
+        $context['class_call'] = $class;
+        $context['plugin_jobsite'] = $jobsite;
+        $context['user_search_run_key'] = $usersearch;
+
+        $GLOBALS['logger']->logLine($msg, $scooper_level, $context);
     }
 }
 
-function LogPlainText($msg, $scooper_level=\C__DISPLAY_NORMAL__)
+function LogPlainText($msg, $context = array())
 {
     $textParts = preg_split("/[\\r\\n|" . PHP_EOL . "]/", $msg);
     if(($textParts === false) || is_null($textParts))
@@ -65,11 +96,6 @@ function LogPlainText($msg, $scooper_level=\C__DISPLAY_NORMAL__)
             LogLine($part);
         }
     }
-}
-
-function LogWarning($msg)
-{
-    LogLine($msg, \C__DISPLAY_WARNING__);
 }
 
 

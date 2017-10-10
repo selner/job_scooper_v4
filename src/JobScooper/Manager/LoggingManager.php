@@ -17,6 +17,8 @@
 namespace JobScooper\Manager;
 
 use Monolog\ErrorHandler;
+use Monolog\Handler\BufferHandler;
+use Psr\Log\InvalidArgumentException;
 use Psr\Log\LogLevel as LogLevel;
 use \Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -29,19 +31,19 @@ use DateTime;
 /****                                                                                                        ****/
 /****************************************************************************************************************/
 
+function getChannelLogger($channel)
+{
+    if(!is_null($GLOBALS['logger']))
+        return $GLOBALS['logger']->getChannelLogger($channel);
+}
+
 Class LoggingManager extends \Monolog\Logger
 {
     protected $arrCumulativeErrors = array();
 
     private $_handlersByType = array();
     private $_loggerName = "default";
-
-
-    function addToErrs(&$strErr, $strNew)
-    {
-        $strErr = (strlen($strErr) > 0 ? "; " : ""). $strNew;
-        $this->arrCumulativeErrors[] = $strNew;
-    }
+    private $_loggers = array();
 
     public function __construct($name, array $handlers = array(), array $processors = array())
     {
@@ -52,14 +54,25 @@ Class LoggingManager extends \Monolog\Logger
         $name = C__APPNAME__;
         $this->_handlersByType = array(
             'stderr' => new StreamHandler('php://stderr', isDebug() ? Logger::DEBUG : Logger::INFO),
-            'bufferedmail' => new \Monolog\Handler\BufferHandler(new ErrorEmailHandler(Logger::ERROR, true), $bufferLimit = 100, $level = Logger::ERROR, $bubble = false, $flushOnOverflow = true)
+            'bufferedmail' => new BufferHandler(new ErrorEmailHandler(Logger::ERROR, true), $bufferLimit = 100, $level = Logger::ERROR, $bubble = false, $flushOnOverflow = true)
         );
         parent::__construct($name, $handlers = $this->_handlersByType);
+
+        $this->_loggers[$this->_loggerName] = $this;
+        $this->_loggers['plugins'] = $this->withName('plugins');
 
         ErrorHandler::register($this);
 
         $now = new DateTime('NOW');
         $this->logLine("Logging started for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'), C__DISPLAY_NORMAL__);
+    }
+
+    public function getChannelLogger($channel)
+    {
+        if( is_null($channel) || !in_array($channel, array_keys($this->_loggers)))
+            $channel = 'default';
+
+        return $this->_loggers[$channel];
     }
 
     public function addFileHandler($logPath)
@@ -83,104 +96,109 @@ Class LoggingManager extends \Monolog\Logger
 
     }
 
-    function logLine($strToPrint, $varDisplayStyle = C__DISPLAY_NORMAL__, $fDebuggingOnly = false)
+    function logLine($strToPrint, $varDisplayStyle = C__DISPLAY_NORMAL__, $context = array())
     {
-        if($fDebuggingOnly != true)
+        $strLineEnd = '';
+        $logLevel = null;
+        switch ($varDisplayStyle)
         {
-            $strLineEnd = '';
-            $logLevel = null;
-            switch ($varDisplayStyle)
-            {
-                case  C__DISPLAY_FUNCTION__:
-                    $strLineBeginning = '<<<<<<<< function "';
-                    $strLineEnd = '" called >>>>>>> ';
-                    $logLevel = "debug";
-                    break;
+            case  C__DISPLAY_FUNCTION__:
+                $strLineBeginning = '<<<<<<<< function "';
+                $strLineEnd = '" called >>>>>>> ';
+                $logLevel = "debug";
+                break;
 
-                case C__DISPLAY_WARNING__:
-                    $strLineBeginning = "\r\n"."\r\n".'^^^^^^^^^^ "';
-                    $strLineEnd = '" ^^^^^^^^^^ '."\r\n";
-                    $logLevel = "warning";
-                    break;
+            case C__DISPLAY_WARNING__:
+                $strLineBeginning = "\r\n"."\r\n".'^^^^^^^^^^ "';
+                $strLineEnd = '" ^^^^^^^^^^ '."\r\n";
+                $logLevel = "warning";
+                break;
 
-                case C__DISPLAY_SUMMARY__:
+            case C__DISPLAY_SUMMARY__:
 
-                    $strLineBeginning = "\r\n"."************************************************************************************"."\r\n". "\r\n";
-                    $strLineEnd = "\r\n"."\r\n"."************************************************************************************"."\r\n";
+                $strLineBeginning = "\r\n"."************************************************************************************"."\r\n". "\r\n";
+                $strLineEnd = "\r\n"."\r\n"."************************************************************************************"."\r\n";
 
-                    $logLevel = "info";
-                    break;
-
-                    
-                case C__DISPLAY_SECTION_START__:
-                    $strLineBeginning = "\r\n"."####################################################################################"."\r\n". "\r\n";
-                    $strLineEnd = "\r\n"."\r\n"."####################################################################################"."\r\n";
-
-                    $logLevel = "info";
-                    break;
-
-                case C__DISPLAY_SECTION_END__:
-                    $strLineBeginning = "\r\n"."~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"."\r\n". "\r\n";
-                    $strLineEnd = "\r\n"."\r\n"."~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"."\r\n";
-
-                    $logLevel = "info";
-                    break;
+                $logLevel = "info";
+                break;
 
 
-                case C__DISPLAY_RESULT__:
-                    $strLineBeginning = '==> ';
+            case C__DISPLAY_SECTION_START__:
+                $strLineBeginning = "\r\n"."####################################################################################"."\r\n". "\r\n";
+                $strLineEnd = "\r\n"."\r\n"."####################################################################################"."\r\n";
 
-                    $logLevel = "info";
-                    break;
+                $logLevel = "info";
+                break;
 
-                case C__DISPLAY_ERROR__:
-                    $strLineBeginning = '!!!!! ';
-                    $logLevel = "error";
-                    break;
+            case C__DISPLAY_SECTION_END__:
+                $strLineBeginning = "\r\n"."~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"."\r\n". "\r\n";
+                $strLineEnd = "\r\n"."\r\n"."~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"."\r\n";
 
-                case C__DISPLAY_ITEM_START__:
-                    $strLineBeginning = '---> ';
-
-                    $logLevel = "info";
-                    break;
-
-                case C__DISPLAY_ITEM_DETAIL__:
-                    $strLineBeginning = '     ';
-
-                    $logLevel = "info";
-                    break;
-
-                case C__DISPLAY_ITEM_RESULT__:
-                    $strLineBeginning = '======> ';
-
-                    $logLevel = "info";
-                    break;
-
-                case C__DISPLAY_MOMENTARY_INTERUPPT__:
-                    $strLineBeginning = '......';
-                    $logLevel = "warning";
-                    break;
-
-                case C__DISPLAY_NORMAL__:
-                    $strLineBeginning = '';
-
-                    $logLevel = "info";
-                    break;
-
-                default:
-                    throw new ErrorException('Invalid type value passed to __debug__printLine.  Value = '.$varDisplayStyle. ".");
-                    break;
-            }
+                $logLevel = "info";
+                break;
 
 
-            $this->log($logLevel, $strLineBeginning . $strToPrint . $strLineEnd);
+            case C__DISPLAY_RESULT__:
+                $strLineBeginning = '==> ';
 
+                $logLevel = "info";
+                break;
+
+            case C__DISPLAY_ERROR__:
+                $strLineBeginning = '!!!!! ';
+                $logLevel = "error";
+                break;
+
+            case C__DISPLAY_ITEM_START__:
+                $strLineBeginning = '---> ';
+
+                $logLevel = "info";
+                break;
+
+            case C__DISPLAY_ITEM_DETAIL__:
+                $strLineBeginning = '     ';
+
+                $logLevel = "info";
+                break;
+
+            case C__DISPLAY_ITEM_RESULT__:
+                $strLineBeginning = '======> ';
+
+                $logLevel = "info";
+                break;
+
+            case C__DISPLAY_MOMENTARY_INTERUPPT__:
+                $strLineBeginning = '......';
+                $logLevel = "warning";
+                break;
+
+            case C__DISPLAY_NORMAL__:
+                $strLineBeginning = '';
+
+                $logLevel = "info";
+                break;
+
+            default:
+                throw new \ErrorException('Invalid type value passed to __debug__printLine.  Value = '.$varDisplayStyle. ".");
+                break;
         }
+
+        if(count($context) > 0)
+        {
+            $channel = array_shift($context);
+            $logger = $this->getChannelLogger($channel);
+        }
+        else
+        {
+            $logger = $this->getChannelLogger('default');
+        }
+
+        $logger->log($logLevel, $strLineBeginning . $strToPrint . $strLineEnd, $context);
+
     }
 
     public function log($level, $message, array $context = array())
     {
-        if($level == LOG_ERR) {  $this->arrCumulativeErrors[] = $message; }
 
         if(parent::log($level, $message, $context) === false)
             print($message ."\r\n");

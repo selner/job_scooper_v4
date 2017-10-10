@@ -31,7 +31,7 @@ class ErrorEmailHandler extends MailHandler
     {
         $searchParams = $this->_getUserSearchRunContent();
 
-        $subject = "JobScooper[" . gethostname() . "] Errors for " . getRunDateRange();
+        $subject = "JobScooper Error: [" . gethostname() . "] for " . getRunDateRange();
 
         $data = array(
             'daterange' => getRunDateRange(),
