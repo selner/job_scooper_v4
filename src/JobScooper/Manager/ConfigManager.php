@@ -925,7 +925,7 @@ class ConfigManager
             }
             
             $inputfiles = array_column($this->getInputFilesByType("negative_title_keywords"), 'full_file_path');
-            $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokens to use for filtering titles from '" . getArrayValuesAsString($inputfiles) . "'." , \C__DISPLAY_WARNING__);
+            $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokens to use for filtering titles from '" . getArrayValuesAsString($inputfiles) . "'." , \C__DISPLAY_ITEM_RESULT__);
 
         }
 
