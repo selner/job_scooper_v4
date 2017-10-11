@@ -39,38 +39,43 @@ class SeleniumManager extends \PropertyObject
 
     function getPageHTML($url, $recursed=false)
     {
-        $driver = $this->get_driver();
+        try {
+            $driver = $this->get_driver();
 
-        foreach($this->lastCookies as $cookie) {
-            $driver->manage()->addCookie(array(
-                'name' => $cookie['name'],
-                'value' => $cookie['value'],
-            ));
-        }
-        $this->loadPage($url);
-
-        $this->lastCookies = $driver->manage()->getCookies();
-
-        $src = $driver->getPageSource();
-
-
-        // BUGBUG:  Firefox has started to return "This tab has crashed" responses often as of late February 2017.
-        //          Adding check for that case and a session kill/reload when it happens
-        if (stristr($src, "tab has crashed") != false)
-        {
-            $GLOBALS['logger']->logLine("Error in Firefox WebDriver:  tab has crashed retrieving page at " . $url .".  Killing WebDriver and trying one more time...", \C__DISPLAY_WARNING__);
-            // We found "tab has crashed" in the response, so we can't use it.
-            if ($recursed != true) {
-                $this->killAllAndRestartSelenium();
-                return $this->getPageHTML($url, $recursed = true);
+            foreach ($this->lastCookies as $cookie) {
+                $driver->manage()->addCookie(array(
+                    'name' => $cookie['name'],
+                    'value' => $cookie['value'],
+                ));
             }
-            else
-            {
-                handleException(new Exception("Error in Firefox WebDriver:  tab has crashed getting " . $url ." a second time.  Cannot load correct results so aborting..."), "%s", $raise=true);
-            }
-        }
+            $this->loadPage($url);
 
-        return $src;
+            $this->lastCookies = $driver->manage()->getCookies();
+
+            $src = $driver->getPageSource();
+
+
+            // BUGBUG:  Firefox has started to return "This tab has crashed" responses often as of late February 2017.
+            //          Adding check for that case and a session kill/reload when it happens
+            if (stristr($src, "tab has crashed") != false) {
+                $GLOBALS['logger']->logLine("Error in Firefox WebDriver:  tab has crashed retrieving page at " . $url . ".  Killing WebDriver and trying one more time...", \C__DISPLAY_WARNING__);
+                // We found "tab has crashed" in the response, so we can't use it.
+                if ($recursed != true) {
+                    $this->killAllAndRestartSelenium();
+                    return $this->getPageHTML($url, $recursed = true);
+                } else {
+                    handleException(new Exception("Error in Firefox WebDriver:  tab has crashed getting " . $url . " a second time.  Cannot load correct results so aborting..."), "%s", $raise = true);
+                }
+            }
+
+            return $src;
+        } catch (\WebDriverCurlException $ex) {
+            handleException(new Exception($ex), null, true);
+        } catch (\WebDriverException $ex) {
+            handleException(new Exception($ex), null, true);
+        } catch (\Exception $ex) {
+            handleException($ex, null, true);
+        }
     }
 
     function terminate()
@@ -88,11 +93,12 @@ class SeleniumManager extends \PropertyObject
                 $driver->get($url);
                 sleep(2+$this->additionalLoadDelaySeconds);
             }
+        } catch (\WebDriverCurlException $ex) {
+            handleException($ex, "Error retrieving Selenium page at {$url}: %s ", false);
+        } catch (\WebDriverException $ex) {
+            handleException($ex, "Error retrieving Selenium page at {$url}: %s ", false);
         } catch (Exception $ex) {
-            $strMsg = "Error retrieving Selenium page at " . $url . ":  ". $ex;
-
-            $GLOBALS['logger']->logLine($strMsg, \C__DISPLAY_ERROR__);
-            throw new ErrorException($strMsg);
+            handleException($ex, "Error retrieving Selenium page at {$url}: %s ", false);
         }
     }
 
@@ -167,24 +173,24 @@ class SeleniumManager extends \PropertyObject
 
      protected function doneWithRemoteWebDriver()
     {
-        $driver = $this->get_driver();
+        try {
 
-        if(!is_null($driver))
-        {
-            try {
+            $driver = $this->get_driver();
+            if(!is_null($driver))
+            {
                 $driver->quit();
             }
-
-            catch (Exception $ex) {
-                if(isset($GLOBALS['logger'])) {
-                    handleException($ex, "Failed to quit Webdriver: ", false);
-                }
-            }
-            finally
-            {
-                $driver = null;
-                $this->remoteWebDriver = null;
-            }
+        } catch (\WebDriverCurlException $ex) {
+            handleException($ex, "Failed to quit Webdriver: ", false);
+        } catch (\WebDriverException $ex) {
+            handleException($ex, "Failed to quit Webdriver: ", false);
+        } catch (Exception $ex) {
+            handleException($ex, "Failed to quit Webdriver: ", false);
+        }
+        finally
+        {
+            $driver = null;
+            $this->remoteWebDriver = null;
         }
     }
 
@@ -383,10 +389,12 @@ class SeleniumManager extends \PropertyObject
             LogLine("Remote web driver instantiated.");
 
             return $this->remoteWebDriver;
-        }
-        catch (Exception $ex)
-        {
-            handleException($ex, "Unable to get Selenium Webdriver from " . $host, true);
+        } catch (\WebDriverCurlException $ex) {
+            handleException($ex, "Failed to get webdriver from {$host}: ", true);
+        } catch (\WebDriverException $ex) {
+            handleException($ex, "Failed to get webdriver from {$host}: ", true);
+        } catch (Exception $ex) {
+            handleException($ex, "Failed to get webdriver from {$host}: ", true);
         }
         return null;
     }

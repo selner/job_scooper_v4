@@ -907,57 +907,58 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     function getSimpleObjFromPathOrURL($filePath = "", $strURL = "", $optTimeout = null, $referrer = null, $cookies = null)
     {
-        $objSimpleHTML = null;
-
-        if(isDebug()==true) {
-
-            $GLOBALS['logger']->logLine("URL        = " . $strURL, \C__DISPLAY_NORMAL__);
-            $GLOBALS['logger']->logLine("Referrer   = " . $referrer, \C__DISPLAY_NORMAL__);
-            $GLOBALS['logger']->logLine("Cookies    = " . $cookies, \C__DISPLAY_NORMAL__);
-        }
-
-        if(!$objSimpleHTML && ($filePath && strlen($filePath) > 0))
-        {
-            $GLOBALS['logger']->logLine("Loading ALTERNATE results from ".$filePath, \C__DISPLAY_ITEM_START__);
+        try {
             $objSimpleHTML = null;
-            $GLOBALS['logger']->logLine("Loading HTML from ".$filePath, \C__DISPLAY_ITEM_DETAIL__);
 
-            if(!file_exists($filePath) && !is_file($filePath))  return $objSimpleHTML;
-            $fp = fopen($filePath , 'r');
-            if(!$fp ) return $objSimpleHTML;
+            if (isDebug() == true) {
 
-            $strHTML = fread($fp, JOBS_SCOOPER_MAX_FILE_SIZE);
-            $objSimpleHTML = \SimpleHTMLHelper::str_get_html($strHTML);
-            fclose($fp);
-        }
-
-
-        if(!$objSimpleHTML && $strURL && strlen($strURL) > 0)
-        {
-            $class = new \CurlWrapper();
-            if(isVerbose()) $class->setVerbose(true);
-
-            $retObj = $class->cURL($strURL, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = $optTimeout, $cookies = $cookies, $referrer = $referrer);
-            if(!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0)
-            {
-                $objSimpleHTML = \SimpleHTMLHelper::str_get_html($retObj['output']);
-                $this->prevCookies = $retObj['cookies'];
-                $this->prevURL = $strURL;
+                $GLOBALS['logger']->logLine("URL        = " . $strURL, \C__DISPLAY_NORMAL__);
+                $GLOBALS['logger']->logLine("Referrer   = " . $referrer, \C__DISPLAY_NORMAL__);
+                $GLOBALS['logger']->logLine("Cookies    = " . $cookies, \C__DISPLAY_NORMAL__);
             }
-            else
-            {
-                $options  = array('http' => array( 'timeout' => 30, 'user_agent' => C__STR_USER_AGENT__));
-                $context  = stream_context_create($options);
-                $objSimpleHTML = \SimpleHTMLHelper::file_get_html($strURL, false, $context);
+
+            if (!$objSimpleHTML && ($filePath && strlen($filePath) > 0)) {
+                $GLOBALS['logger']->logLine("Loading ALTERNATE results from " . $filePath, \C__DISPLAY_ITEM_START__);
+                $objSimpleHTML = null;
+                $GLOBALS['logger']->logLine("Loading HTML from " . $filePath, \C__DISPLAY_ITEM_DETAIL__);
+
+                if (!file_exists($filePath) && !is_file($filePath)) return $objSimpleHTML;
+                $fp = fopen($filePath, 'r');
+                if (!$fp) return $objSimpleHTML;
+
+                $strHTML = fread($fp, JOBS_SCOOPER_MAX_FILE_SIZE);
+                $objSimpleHTML = \SimpleHTMLHelper::str_get_html($strHTML);
+                fclose($fp);
             }
-        }
 
-        if(!$objSimpleHTML)
+
+            if (!$objSimpleHTML && $strURL && strlen($strURL) > 0) {
+                $class = new \CurlWrapper();
+                if (isVerbose()) $class->setVerbose(true);
+
+                $retObj = $class->cURL($strURL, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = $optTimeout, $cookies = $cookies, $referrer = $referrer);
+                if (!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0) {
+                    $objSimpleHTML = \SimpleHTMLHelper::str_get_html($retObj['output']);
+                    $this->prevCookies = $retObj['cookies'];
+                    $this->prevURL = $strURL;
+                } else {
+                    $options = array('http' => array('timeout' => 30, 'user_agent' => C__STR_USER_AGENT__));
+                    $context = stream_context_create($options);
+                    $objSimpleHTML = \SimpleHTMLHelper::file_get_html($strURL, false, $context);
+                }
+            }
+            if(!$objSimpleHTML)
+            {
+                throw new \Exception("Unable to get SimpleHTMLDom object from " . strlen($filePath) > 0 ? $filePath : $strURL);
+            }
+
+            return $objSimpleHTML;
+        }
+        catch (Exception $ex)
         {
-            throw new \ErrorException('Error:  unable to get SimpleHtmlDom\SimpleHTMLDom object from file('.$filePath.') or '.$strURL);
+            handleException($ex, null, true);
         }
 
-        return $objSimpleHTML;
     }
 
 
@@ -1185,7 +1186,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                         $this->selenium = new SeleniumManager($this->additionalLoadDelaySeconds);
                     }
 
-                    if(method_exists($this, "doFirstPageLoad") && $nPageCount == 1)
+                    if (method_exists($this, "doFirstPageLoad") && $nPageCount == 1)
                         $html = $this->doFirstPageLoad($searchDetails);
                     else
                         $html = $this->selenium->getPageHTML($searchDetails->getSearchParameter('search_start_url'));
@@ -1224,8 +1225,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 }
             }
 
-            if(!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__))
-            {
+            if (!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__)) {
                 $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML);
                 $nTotalListings = intval(str_replace(",", "", $strTotalResults));
                 if ($nTotalListings == 0) {
@@ -1320,7 +1320,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                                         $this->runJavaScriptSnippet($this->nextPageScript, true);
                                         sleep($this->additionalLoadDelaySeconds + 1);
                                     }
-                                break;
+                                    break;
                             }
 
                             $strURL = $this->selenium->driver->getCurrentURL();
@@ -1337,8 +1337,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
                         $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout, $referrer = $this->prevURL, $cookies = $this->prevCookies);
                     }
-                    if (!$objSimpleHTML)
-                    {
+                    if (!$objSimpleHTML) {
                         throw new \ErrorException("Error:  unable to get SimpleHTML object for " . $strURL);
                     }
 
@@ -1448,14 +1447,14 @@ abstract class BaseJobsSite implements IJobSitePlugin
                                         handleException(new Exception("Plugin " . $this->siteName . " is missing takeNextPageAction method definiton required for its pagination type."), "", true);
                                     }
 
-                                    if($nPageCount > 1 && $nPageCount <= $totalPagesCount) {
+                                    if ($nPageCount > 1 && $nPageCount <= $totalPagesCount) {
                                         //
                                         // if we got a driver instance back, then we got a new page
                                         // otherwise we're out of results so end the loop here.
                                         //
                                         try {
                                             $this->takeNextPageAction($this->getItemURLValue($nItemCount), $this->getPageURLValue($nPageCount));
-                                            sleep($this->additionalLoadDelaySeconds+2);
+                                            sleep($this->additionalLoadDelaySeconds + 2);
                                         } catch (Exception $ex) {
                                             handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
                                         }
