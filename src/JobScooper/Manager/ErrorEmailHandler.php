@@ -17,10 +17,8 @@
 namespace JobScooper\Manager;
 
 
-use JobScooper\StageProcessor\NotifierJobAlerts;
 use Monolog\Formatter\HtmlFormatter;
 use Monolog\Handler\MailHandler;
-use Monolog\Logger;
 
 class ErrorEmailHandler extends MailHandler
 {
@@ -45,8 +43,8 @@ class ErrorEmailHandler extends MailHandler
 
         $htmlBody = $renderer($data);
 
-        $notifier = new JobsMailManager(true);
-        return $notifier->sendEmail("", $htmlBody, null, $subject, "error");
+        $mailer = new JobsMailManager(true);
+        return $mailer->sendEmail("", $htmlBody, null, $subject, "error");
 
     }
 
