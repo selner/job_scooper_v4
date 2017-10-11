@@ -114,10 +114,9 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
 
                         $this->selenium->loadPage($url);
                         $html = $this->selenium->getPageHTML($url);
-                        $objSimpHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
+                        $objSimpHTML = new \SimpleHTMLHelper($html);
                     } catch (Exception $ex) {
-                        $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
-                        handleException(new Exception($strError), null, true);
+                        handleException(new Exception("Failed to parseAndRedirectToLocation", $ex->getCode(), $ex), null, true);
                     }
                 }
             }
