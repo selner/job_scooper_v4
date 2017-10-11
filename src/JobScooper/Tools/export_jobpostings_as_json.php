@@ -14,6 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
 namespace JobScooper\Tools;
 
 
@@ -28,7 +29,7 @@ define('__APP_VERSION__', "v4.1.0-use-propel-orm");
 $lineEnding = ini_get('auto_detect_line_endings');
 ini_set('auto_detect_line_endings', true);
 
-$autoload = realpath(join(DIRECTORY_SEPARATOR, array("..","..","..", 'vendor', 'autoload.php')));
+$autoload = realpath(join(DIRECTORY_SEPARATOR, array("..", "..", "..", 'vendor', 'autoload.php')));
 if (file_exists($autoload)) {
     require_once($autoload);
 } else {
@@ -36,7 +37,7 @@ if (file_exists($autoload)) {
 }
 
 $GLOBALS['logger'] = new \JobScooper\Manager\LoggingManager(C__APPNAME__);
-$propelConfig = realpath(join(DIRECTORY_SEPARATOR, array("..","..","..", 'Config', 'config.php')));
+$propelConfig = realpath(join(DIRECTORY_SEPARATOR, array("..", "..", "..", 'Config', 'config.php')));
 if (file_exists($propelConfig)) {
     require_once($propelConfig);
 } else {
@@ -46,26 +47,39 @@ if (file_exists($propelConfig)) {
 
 LogLine("Getting all jobs from the database...", C__DISPLAY_ITEM_START__);
 
+const RESULTS_PER_PAGE = 1000;
 
-$allJobsQuery = \JobScooper\DataAccess\JobPostingQuery::create()
+$allJobsPager = \JobScooper\DataAccess\JobPostingQuery::create()
     ->leftJoinWithLocation()
-    ->find();
-$allJobs = $allJobsQuery->getData();
+    ->paginate($page = 1, $maxPerPage = RESULTS_PER_PAGE);
 
-$arrOutputList = array();
-if(!is_null($allJobs))
-{
-    LogLine("... converting each job to an array ...", C__DISPLAY_ITEM_DETAIL__);
-    foreach($allJobs as $job)
+if (!$allJobsPager->isEmpty()) {
+    LogLine("Exporting " . $allJobsPager->getNbResults() . " job postings to JSON");
+
+    $nJobsExported = 0;
+    $outFile = generateOutputFileName("all_job_postings", "json", false);
+    $outdir = dirname($outFile);
+    LogLine("... exporting to files at {$outdir}...", C__DISPLAY_ITEM_DETAIL__);
+
+    while ($allJobsPager->getPage() <= $allJobsPager->getLastPage())
     {
-        $arrJob = $job->toArray(TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, array(), true);
-        if(array_key_exists('Location', $arrJob) && array_key_exists('JobPostings', $arrJob['Location']))
-            unset($arrJob['Location']['JobPostings']);
-        $arrOutputList[$job->getKeySiteAndPostID()] = $arrJob;
+        $arrOutputList = array();
+        $nJobsExportPageEnd = $nJobsExported + RESULTS_PER_PAGE;
+        $outFile = generateOutputFileName("job_postings-{$nJobsExported}-{$nJobsExportPageEnd}", "json", false);
+        LogLine("... exporting job postings {$nJobsExported} - {$nJobsExportPageEnd}...", C__DISPLAY_ITEM_START__);
+        foreach ($allJobsPager as $job) {
+            $arrJob = $job->toArray(TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, array(), true);
+            if (array_key_exists('Location', $arrJob) && array_key_exists('JobPostings', $arrJob['Location']))
+                unset($arrJob['Location']['JobPostings']);
+            $arrOutputList[$job->getKeySiteAndPostID()] = $arrJob;
+        }
+        $pageJsonData = encodeJSON($arrOutputList);
+        file_put_contents($outFile, $pageJsonData);
+        $nJobsExported += RESULTS_PER_PAGE;
+        $allJobsPager->getNextPage();
+
     }
 }
 
-$outFile = generateOutputFileName("all_job_postings", "json", false );
-writeJSON($arrOutputList, $outFile);
 
 
