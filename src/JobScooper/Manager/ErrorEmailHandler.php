@@ -45,7 +45,7 @@ class ErrorEmailHandler extends MailHandler
 
         $htmlBody = $renderer($data);
 
-        $notifier = new NotifierJobAlerts();
+        $notifier = new JobsMailManager(true);
         return $notifier->sendEmail("", $htmlBody, null, $subject, "error");
 
     }
