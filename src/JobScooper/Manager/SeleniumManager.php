@@ -70,9 +70,9 @@ class SeleniumManager extends \PropertyObject
 
             return $src;
         } catch (\WebDriverCurlException $ex) {
-            handleException(new Exception($ex), null, true);
+            handleException(new Exception("Failed to getPageHtml", $ex->getCode(), $ex), null, true);
         } catch (\WebDriverException $ex) {
-            handleException(new Exception($ex), null, true);
+            handleException(new Exception("Failed to getPageHtml", $ex->getCode(), $ex), null, true);
         } catch (\Exception $ex) {
             handleException($ex, null, true);
         }

@@ -173,7 +173,7 @@ class StageManager
             }
 
         } else {
-            throw new \ErrorException("No searches have been set to be run.");
+            LogLine("No searches have been set to be run.", C__DISPLAY_WARNING__);
         }
 
     }

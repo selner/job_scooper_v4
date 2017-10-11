@@ -106,7 +106,7 @@ class ConfigManager
 
         # After you've configured Pharse, run it like so:
         $GLOBALS['USERDATA']['OPTS'] = $cmdLineOpts;
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting up application... ", \C__DISPLAY_SECTION_START__);
+        LogDebug("Setting up application... ", \C__DISPLAY_SECTION_START__);
 
         $GLOBALS['USERDATA']['companies_regex_to_filter'] = null;
         $GLOBALS['USERDATA']['configuration_settings'] = array();
@@ -168,9 +168,9 @@ class ConfigManager
 
         if ($GLOBALS['USERDATA']['OPTS']['use_config_ini_given']) {
             if (!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \LoggingManager($this->arrFileDetails['config_ini']['directory']);
-            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Log file for run being written to: " . $this->arrFileDetails['config_ini']['directory'], \C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Log file for run being written to: " . $this->arrFileDetails['config_ini']['directory'], \C__DISPLAY_ITEM_DETAIL__);
 
-            if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading configuration file details from " . $this->arrFileDetails['config_ini']['full_file_path'], \C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Loading configuration file details from " . $this->arrFileDetails['config_ini']['full_file_path'], \C__DISPLAY_ITEM_DETAIL__);
 
             $this->_LoadAndMergeAllConfigFilesRecursive($this->arrFileDetails['config_ini']['full_file_path']);
 
@@ -192,17 +192,17 @@ class ConfigManager
         }
 
 
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Configuring specific settings for this run... ", \C__DISPLAY_SECTION_START__);
+        LogDebug("Configuring specific settings for this run... ", \C__DISPLAY_SECTION_START__);
 
         $GLOBALS['USERDATA']['configuration_settings']['number_days'] = get_PharseOptionValue('number_days');
         if ($GLOBALS['USERDATA']['configuration_settings']['number_days'] === false) {
             $GLOBALS['USERDATA']['configuration_settings']['number_days'] = 1;
         }
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($GLOBALS['USERDATA']['configuration_settings']['number_days'] . " days configured for run. ", \C__DISPLAY_ITEM_DETAIL__);
+        LogDebug($GLOBALS['USERDATA']['configuration_settings']['number_days'] . " days configured for run. ", \C__DISPLAY_ITEM_DETAIL__);
 
 //        $this->_setPreviouslyReviewedJobsInputFiles__setPreviouslyReviewedJobsInputFiles_();
 
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Completed configuration load.", \C__DISPLAY_SUMMARY__);
+        LogLine("Completed configuration load.", \C__DISPLAY_SUMMARY__);
 
     }
 
@@ -236,7 +236,7 @@ class ConfigManager
         $details = getFilePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
         $GLOBALS['USERDATA']['directories']['root'] = realpath($details['directory']);
 
-        $GLOBALS['logger']->addFileHandler(getOutputDirectory('logs'));
+        $GLOBALS['logger']->addFileHandlers(getOutputDirectory('logs'));
     }
 
 
@@ -314,7 +314,7 @@ class ConfigManager
         $this->_parseKeywordSetsFromConfig_($config);
 
 
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("All INI files loaded. Finalizing configuration for run...", \C__DISPLAY_SECTION_START__);
+        LogDebug("All INI files loaded. Finalizing configuration for run...", \C__DISPLAY_SECTION_START__);
 
         //
         // Create searches needed to run all the keyword sets
@@ -364,7 +364,7 @@ class ConfigManager
 
     private function _setupPropelForRun()
     {
-        LogLine("Configuring Propel global options and logging...", C__DISPLAY_ITEM_DETAIL__);
+        LogDebug("Configuring Propel global options and logging...", C__DISPLAY_ITEM_DETAIL__);
         $defaultLogger = $this->getLogger();
         if(is_null($defaultLogger)) {
             $pathLog = getOutputDirectory('logs') . '/propel-' .getTodayAsString("-").'.log';
@@ -459,7 +459,7 @@ class ConfigManager
 
     private function _parseSeleniumParametersFromConfig_($config)
     {
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading Selenium settings from config file...", \C__DISPLAY_ITEM_START__);
+        LogDebug("Loading Selenium settings from config file...", \C__DISPLAY_ITEM_START__);
         if (isset($config['selenium']) && is_array($config['selenium'])) {
             foreach (array_keys($config['selenium']) as $k)
                 $GLOBALS['USERDATA']['selenium'][$k] = trim($config['selenium'][$k]);
@@ -505,7 +505,7 @@ class ConfigManager
 
     private function _parseKeywordSetsFromConfig_($config)
     {
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading keyword set from config file...", \C__DISPLAY_ITEM_START__);
+        LogLine("Loading search keywords from config...", \C__DISPLAY_ITEM_START__);
         if (!array_key_exists('keyword_sets', $GLOBALS['USERDATA']['configuration_settings'])) {
             $GLOBALS['USERDATA']['configuration_settings']['keyword_sets'] = array();
         }
@@ -523,7 +523,7 @@ class ConfigManager
 
                 $GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey] = $this->_getNewKeywordSettingsSet_(strtolower($strSetKey), $ini_keyword_set);
 
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added keyword set '" . $GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey]['name'] . "' with keywords = " . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey]['keywords_array']) , \C__DISPLAY_ITEM_DETAIL__);
+                LogDebug("Added keyword set '" . $GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey]['name'] . "' with keywords = " . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey]['keywords_array']) , \C__DISPLAY_ITEM_DETAIL__);
 
             }
 
@@ -585,11 +585,11 @@ class ConfigManager
                         }
                     }
                 } else {
-                    if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("No searches were set for keyword set " . $keywordSet['name'], \C__DISPLAY_ITEM_DETAIL__);
+                    LogLine("No searches were set for keyword set " . $keywordSet['name'], \C__DISPLAY_WARNING__);
                 }
 
                 if (count($arrSkippedPlugins) > 0)
-                    if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Keyword set " . $keywordSet['name'] . " did not generate searches for " . count($arrSkippedPlugins) . " plugins because they do not support keyword search: " . getArrayValuesAsString($arrSkippedPlugins, ", ", null, false) . ".", \C__DISPLAY_ITEM_DETAIL__);
+                    LogLine("Keyword set " . $keywordSet['name'] . " did not generate searches for " . count($arrSkippedPlugins) . " plugins because they do not support keyword search: " . getArrayValuesAsString($arrSkippedPlugins, ", ", null, false) . ".", \C__DISPLAY_WARNING__);
             }
 
             //
@@ -628,7 +628,7 @@ class ConfigManager
                                 $matchedCountries = array_intersect($pluginCountries, $GLOBALS['USERDATA']['configuration_settings']['country_codes']);
                                 if ($matchedCountries === false || count($matchedCountries) == 0)
                                 {
-                                    LogLine("Skipping search " . $search->getUserSearchRunKey() . " because it does not support any of the country codes required (" . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['country_codes']));
+                                    LogDebug("Skipping search " . $search->getUserSearchRunKey() . " because it does not support any of the country codes required (" . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['country_codes']));
                                     continue;
                                 }
                             }
@@ -660,7 +660,7 @@ class ConfigManager
             return $search;
         }
 
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Initializing new search for " . $search->getSearchKey() . " with location " . $arrSearchLocation['location_name_key'] . "...", \C__DISPLAY_NORMAL__);
+        LogDebug("Initializing new search for " . $search->getSearchKey() . " with location " . $arrSearchLocation['location_name_key'] . "...", \C__DISPLAY_NORMAL__);
 
 
         $plugin = getPluginObjectForJobSite($search->getJobSiteKey());
@@ -863,14 +863,14 @@ class ConfigManager
         if(isset($GLOBALS['USERDATA']['title_negative_keyword_tokens']) && count($GLOBALS['USERDATA']['title_negative_keyword_tokens']) > 0)
         {
             // We've already loaded the titles; go ahead and return right away
-            $GLOBALS['logger']->logLine("Using previously loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokenized title strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
+            LogDebug("Using previously loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokenized title strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
             return;
         }
 
         if(!is_array($arrFileInput))
         {
             // No files were found, so bail
-            $GLOBALS['logger']->logLine("No input files were found with title token strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
+            LogDebug("No input files were found with title token strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
             return;
         }
 
@@ -910,7 +910,7 @@ class ConfigManager
 
         if(count($arrTitlesTemp) <= 0)
         {
-            $GLOBALS['logger']->logLine("Warning: No title negative keywords were found in the input source files " . getArrayValuesAsString($arrFileInput) . " to be filtered from job listings." , \C__DISPLAY_WARNING__);
+            LogLine("Warning: No title negative keywords were found in the input source files " . getArrayValuesAsString($arrFileInput) . " to be filtered from job listings." , \C__DISPLAY_WARNING__);
         }
         else
         {
@@ -925,7 +925,7 @@ class ConfigManager
             }
             
             $inputfiles = array_column($this->getInputFilesByType("negative_title_keywords"), 'full_file_path');
-            $GLOBALS['logger']->logLine("Loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokens to use for filtering titles from '" . getArrayValuesAsString($inputfiles) . "'." , \C__DISPLAY_ITEM_RESULT__);
+            LogLine("Loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokens to use for filtering titles from '" . getArrayValuesAsString($inputfiles) . "'." , \C__DISPLAY_ITEM_RESULT__);
 
         }
 
@@ -943,7 +943,7 @@ class ConfigManager
         if(isset($GLOBALS['USERDATA']['companies_regex_to_filter']) && count($GLOBALS['USERDATA']['companies_regex_to_filter']) > 0)
         {
             // We've already loaded the companies; go ahead and return right away
-            $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']) . " regexed company strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
+            LogDebug("Using previously loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']) . " regexed company strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
             return;
         }
         $arrFileInput = $this->getInputFilesByType("regex_filter_companies");
@@ -953,7 +953,7 @@ class ConfigManager
         if(isset($GLOBALS['USERDATA']['companies_regex_to_filter']) && count($GLOBALS['USERDATA']['companies_regex_to_filter']) > 0)
         {
             // We've already loaded the titles; go ahead and return right away
-            $GLOBALS['logger']->logLine("Using previously loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']) . " regexed title strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
+            LogDebug("Using previously loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']) . " regexed title strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
             return;
         }
         $fCompaniesLoaded = false;
@@ -971,11 +971,11 @@ class ConfigManager
                 {
                     if(file_exists($fileDetail ['full_file_path'] ) && is_file($fileDetail ['full_file_path'] ))
                     {
-                        $GLOBALS['logger']->logLine("Loading job Company regexes to filter from ".$fileDetail ['full_file_path']."." , \C__DISPLAY_ITEM_DETAIL__);
+                        LogDebug("Loading job Company regexes to filter from ".$fileDetail ['full_file_path']."." , \C__DISPLAY_ITEM_DETAIL__);
                         $classCSVFile = new \SimpleCSV($fileDetail ['full_file_path'] , 'r');
                         $arrCompaniesTemp = $classCSVFile->readAllRecords(true,array('match_regex'));
                         $arrCompaniesTemp = $arrCompaniesTemp['data_rows'];
-                        $GLOBALS['logger']->logLine(count($arrCompaniesTemp) . " companies found in the source file that will be automatically filtered from job listings." , \C__DISPLAY_ITEM_DETAIL__);
+                        LogDebug(count($arrCompaniesTemp) . " companies found in the source file that will be automatically filtered from job listings." , \C__DISPLAY_ITEM_DETAIL__);
 
                         //
                         // Add each Company we found in the file to our list in this class, setting the key for
@@ -998,7 +998,7 @@ class ConfigManager
                                     catch (\Exception $ex)
                                     {
                                         $strError = "Regex test failed on company regex pattern " . $rxItem .".  Skipping.  Error: '".$ex->getMessage();
-                                        $GLOBALS['logger']->logLine($strError, \C__DISPLAY_ERROR__);
+                                        LogError($strError, \C__DISPLAY_ERROR__);
                                         if(isDebug() == true) { throw new \ErrorException( $strError); }
                                     }
                                 }
@@ -1015,13 +1015,13 @@ class ConfigManager
         if($fCompaniesLoaded == false)
         {
             if(count($arrFileInput) == 0)
-                $GLOBALS['logger']->logLine("No file specified for companies regexes to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." , \C__DISPLAY_WARNING__);
+                LogDebug("No file specified for companies regexes to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." , \C__DISPLAY_WARNING__);
             else
-                $GLOBALS['logger']->logLine("Could not load regex list for companies to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." , \C__DISPLAY_WARNING__);
+                LogDebug("Could not load regex list for companies to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." , \C__DISPLAY_WARNING__);
         }
         else
         {
-            $GLOBALS['logger']->logLine("Loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']). " regexes to use for filtering companies from " . getArrayValuesAsString($inputfiles)  , \C__DISPLAY_NORMAL__);
+            LogLine("Loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']). " regexes to use for filtering companies from " . getArrayValuesAsString($inputfiles)  , \C__DISPLAY_NORMAL__);
 
         }
     }

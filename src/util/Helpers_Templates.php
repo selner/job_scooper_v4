@@ -21,14 +21,14 @@ use LightnCandy\LightnCandy;
 
 function loadTemplate($path)
 {
-    LogLine("Loading Mustache template file {$path}...");
+    LogDebug("Loading Mustache template file {$path}...");
     $tmplFile = realpath($path);
     $tmplFileName = pathinfo($tmplFile, PATHINFO_FILENAME);
     $tmplDir = dirname($tmplFile);
     $partialsDir = $tmplDir . DIRECTORY_SEPARATOR . "partials/";
     $template = file_get_contents($tmplFile);
 
-    LogLine("Compiling Mustache template ({$tmplFile}...");
+    LogDebug("Compiling Mustache template ({$tmplFile}...");
     $tmpl = LightnCandy::compile($template,
         Array(
             'flags' => LightnCandy::FLAG_RENDER_DEBUG | LightnCandy::FLAG_ERROR_LOG | LightnCandy::FLAG_ERROR_EXCEPTION | LightnCandy::FLAG_HANDLEBARSJS_FULL | LightnCandy::FLAG_THIS | LightnCandy::FLAG_PROPERTY | LightnCandy::FLAG_JSOBJECT,
@@ -66,7 +66,7 @@ function loadTemplate($path)
         file_put_contents($renderFile, '<?php ' . $tmpl . '?>');
     }
 
-    LogLine("Preparing template renderer...");
+    LogDebug("Preparing template renderer...");
     $renderer = LightnCandy::prepare($tmpl);
 
     // Get the render function from the php file

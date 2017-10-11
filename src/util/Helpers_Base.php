@@ -41,7 +41,51 @@ const C__DISPLAY_FUNCTION__= 700;
 const C__DISPLAY_SUMMARY__ = 750;
 
 
+function getDebugContext()
+{
+    //Debug backtrace called. Find next occurence of class after Logger, or return calling script:
+    $dbg = debug_backtrace();
+    $i = 0;
+    $jobsite = null;
+    $usersearch = null;
 
+    $class = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
+    while ($i < count($dbg) - 1 ) {
+        if (!empty($dbg[$i]['class']) && stripos($dbg[$i]['class'], 'LoggingManager') === false &&
+            (empty($dbg[$i]['function']) || !in_array($dbg[$i]['function'], array("getDebugContent", "handleException"))))
+            {
+            $class = $dbg[$i]['class'] . "->" . $dbg[$i]['function'] ."()";
+            if(!empty($dbg[$i]['object']))
+            {
+                $objclass = get_class($dbg[$i]['object']);
+                if(strcasecmp($objclass, $dbg[$i]['class']) != 0)
+                {
+                    $class = "{$objclass} -> {$class}";
+                    try{  $jobsite = $dbg[$i]['object']->getName(); } catch (Exception $ex) { $jobsite = ""; }
+                    try{
+                        if(array_key_exists('args', $dbg[$i]) & is_array($dbg[$i]['args']))
+                            if(is_object($dbg[$i]['args'][0]) && method_exists(get_class($dbg[$i]['args'][0]), "getUserSearchRunKey"))
+                                $usersearch = $dbg[$i]['args'][0]->getUserSearchRunKey();
+                            else
+                                $usersearch = "";
+                    } catch (Exception $ex) { $usersearch = ""; }
+                }
+                break;
+            }
+        }
+        $i++;
+    }
+
+    $context['channel'] = is_null($jobsite) ? "default" : "plugins";
+    $context['class_call'] = $class;
+    $context['plugin_jobsite'] = $jobsite;
+    $context['user_search_run_key'] = $usersearch;
+    $context['memory_usage'] = memory_get_usage() / 1024 / 1024;
+    $context['trace'] = join("|", \JBZoo\Utils\Arr::flat(object_to_array($dbg)));
+
+
+    return $context;
+}
 
 function LogLine($msg, $scooper_level=\C__DISPLAY_NORMAL__, $context=array())
 {
@@ -89,6 +133,17 @@ function LogLine($msg, $scooper_level=\C__DISPLAY_NORMAL__, $context=array())
         $context['user_search_run_key'] = $usersearch;
 
         $GLOBALS['logger']->logLine($msg, $scooper_level, $context);
+function LogDebug($msg, $scooper_level=C__DISPLAY_NORMAL__)
+{
+    if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
+    {
+        print($msg . "\r\n");
+    }
+    else
+    {
+        $context = getDebugContext();
+
+        $GLOBALS['logger']->logLine($msg, $scooper_level, \Psr\Log\LogLevel::DEBUG, $context);
     }
 }
 
