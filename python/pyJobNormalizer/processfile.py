@@ -80,7 +80,11 @@ def writedicttocsv(csvFileName, data, keys=None):
         for k in data[row].keys():
             if k not in keys:
                 del data[row][k]
-        csv_writer.writerow(data[row])
+        try:
+            csv_writer.writerow(data[row])
+        except Exception:
+            pass
+
     csvfile.close()
     return csvFileName
 
