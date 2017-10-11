@@ -68,10 +68,16 @@ function LogLine($msg, $scooper_level=\C__DISPLAY_NORMAL__, $context=array())
                     {
                         $class = "{$objclass} -> {$class}";
                         try{  $jobsite = $dbg[$i]['object']->getName(); } catch (Exception $ex) { $jobsite = ""; }
-                        try{  $usersearch = count($dbg[$i]['args']) > 0 ? $dbg[$i]['args'][0]->getUserSearchRunKey() : ""; } catch (Exception $ex) { $usersearch = ""; }
+                        try{
+                            if(array_key_exists('args', $dbg[$i]) & is_array($dbg[$i]['args']))
+                                if(method_exists(get_class($dbg[$i]['args'][0]), "getUserSearchRunKey"))
+                                    $usersearch = $dbg[$i]['args'][0]->getUserSearchRunKey();
+                                else
+                                    $usersearch = "";
+                        } catch (Exception $ex) { $usersearch = ""; }
                     }
+                    break;
                 }
-                break;
             }
             $i++;
         }
