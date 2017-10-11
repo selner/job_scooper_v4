@@ -751,8 +751,6 @@ function my_merge_add_new_keys( $arr1, $arr2 )
     if (!is_array($arr1) || !is_array($arr2)) {
         throw new \Exception("Argument is not an array (in function my_merge_add_new_keys.)");
     }
-    $strFunc = "my_merge_add_new_keys(arr1(size=".count($arr1)."),arr2(size=".count($arr2)."))";
-    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($strFunc, C__DISPLAY_FUNCTION__, true);
     $arr1Keys = array_keys($arr1);
     $arr2Keys = array_keys($arr2);
     $arrCombinedKeys = array_merge_recursive($arr1Keys, $arr2Keys);
@@ -762,7 +760,6 @@ function my_merge_add_new_keys( $arr1, $arr2 )
     $arrMerged =  array_replace( $arrNewBlankCombinedRecord, $arr1 );
     $arrMerged =  array_replace( $arrMerged, $arr2 );
 
-    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine('returning from ' . $strFunc, C__DISPLAY_FUNCTION__, true);
     return $arrMerged;
 }
 
