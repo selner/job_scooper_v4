@@ -106,11 +106,25 @@ Class LoggingManager extends \Monolog\Logger
         $this->pushHandler($this->_handlersByType['logfile']);
         $this->logLine("Logging started to logfile at {$mainLog}", C__DISPLAY_ITEM_DETAIL__);
 
+        $now = getNowAsString("-");
+        $csvlog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}-run_errors.csv";
+        $fpcsv = fopen($csvlog, "w");
+        $this->_handlersByType['csverrors'] = new CSVLogHandler($fpcsv, Logger::WARNING);
+        $this->pushHandler($this->_handlersByType['csverrors'] );
+        $this->logLine("Error logging started to CSV file at {$csvlog}", C__DISPLAY_ITEM_DETAIL__);
+
     }
 
     function __destruct()
     {
         $this->flushErrorNotifications();
+
+        if(!is_null($this->_csvHandle))
+        {
+            fclose($this->_csvHandle);
+            $this->_csvHandle = null;
+        }
+
         $now = new DateTime('NOW');
         $this->logLine("Logging ended for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'),C__DISPLAY_NORMAL__);
     }

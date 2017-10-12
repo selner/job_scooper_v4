@@ -124,3 +124,22 @@ function loadJSON($file, $options=null, $boolEscapeBackSlashes=false)
     }
 
 }
+
+
+function file_prepend($prependText, $filepath)
+{
+    $context = stream_context_create();
+    $orig_file = fopen($filepath, 'r', 1, $context);
+    if($orig_file === false)
+        throw new ErrorException("Unable to open file stream {$filepath} for reading.");
+
+    $temp_filename = tempnam(sys_get_temp_dir(), 'php_prepend_');
+    file_put_contents($temp_filename, $prependText);
+    file_put_contents($temp_filename, $orig_file, FILE_APPEND);
+
+    fclose($orig_file);
+    unlink($filepath);
+    rename($temp_filename, $filepath);
+
+}
+
