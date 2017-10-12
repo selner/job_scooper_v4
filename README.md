@@ -47,9 +47,8 @@ Required Parameters:
 * pip:  To install the other required Python modules, run "pip install -r ./python/pyJobNormalizer/requirements.txt"
 * NTLK for Python:  You will also need the NTLK data available at http://www.nltk.org/data.html.
 * Selenium server standalone:  required for dynamic/client-side websites.  
- * You can configure the app to run selenium locally or pointing to a Selenium instance running on another host or in Docker.
- * To run as part of app:  download [selenium-server-standalone-3.0.1.jar](http://selenium-release.storage.googleapis.com/index.html?path=3.0.1) and copy it to the /lib directory.
-* Oracle](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)  Selenium Standalone Server requires Java 8 on macOS 10.12. 
+ * You can configure the app to run selenium locally or pointing to a Selenium instance running on another host or in Docker.  Check out scripts/start_selenium.sh for an example. 
+ * To run as part of app:  download [selenium-server-standalone-3.0.1.jar](http://selenium-release.storage.googleapis.com/index.html?path=3.0.1) and copy it to the /lib directory. Oracle](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)  Selenium Standalone Server requires Java 8 on macOS 10.12. 
 
 
 ## What's New in JobScooper V4
