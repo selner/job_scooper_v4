@@ -18,7 +18,6 @@ namespace JobScooper\Manager;
 
 use Monolog\ErrorHandler;
 use Monolog\Handler\BufferHandler;
-use Psr\Log\InvalidArgumentException;
 use Psr\Log\LogLevel as LogLevel;
 use \Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -74,6 +73,9 @@ Class LoggingManager extends \Monolog\Logger
         $this->_loggers[$this->_loggerName] = $this;
         $this->_loggers['plugins'] = $this->withName('plugins');
 
+        $logOptions = getConfigurationSettings('logging');
+        $this->_doLogContext = filter_var($logOptions['always_log_context'], FILTER_VALIDATE_BOOLEAN);
+
 
         $now = new DateTime('NOW');
         $this->logLine("Logging started for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'), C__DISPLAY_NORMAL__);
@@ -87,12 +89,23 @@ Class LoggingManager extends \Monolog\Logger
         return $this->_loggers[$channel];
     }
 
-    public function addFileHandler($logPath)
+    /**
+     * @private
+     */
+    public function handleException($e)
+    {
+        handleException($e);
+        exit(255);
+    }
+
+    public function addFileHandlers($logPath)
     {
         $today = getTodayAsString("-");
-        $this->_handlersByType['logfile'] = new StreamHandler($logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$today}.log", isDebug() ? Logger::DEBUG : Logger::INFO);
+        $mainLog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$today}.log";
+        $this->_handlersByType['logfile'] = new StreamHandler($mainLog, isDebug() ? Logger::DEBUG : Logger::INFO);
         $this->pushHandler($this->_handlersByType['logfile']);
-        $this->logLine("Logging started to logfile at {$logPath}", C__DISPLAY_NORMAL__);
+        $this->logLine("Logging started to logfile at {$mainLog}", C__DISPLAY_ITEM_DETAIL__);
+
     }
 
     function __destruct()
@@ -108,28 +121,34 @@ Class LoggingManager extends \Monolog\Logger
 
     }
 
-    function logLine($strToPrint, $varDisplayStyle = C__DISPLAY_NORMAL__, $context = array())
+    function logLine($strToPrint, $varDisplayStyle = C__DISPLAY_NORMAL__, $origLogLevel = LogLevel::INFO, $context = array())
     {
+        if($this->_doLogContext && count($context) == 0)
+            $context = getDebugContext();
+        else
+            $context = array_merge_recursive_distinct($context, getDebugContext());
+
+        $strLineBeginning = '';
         $strLineEnd = '';
         $logLevel = null;
         switch ($varDisplayStyle)
         {
             case  C__DISPLAY_FUNCTION__:
-                $strLineBeginning = '<<<<<<<< function "';
-                $strLineEnd = '" called >>>>>>> ';
+//                $strLineBeginning = '<<<<<<<< function "';
+//                $strLineEnd = '" called >>>>>>> ';
                 $logLevel = "debug";
                 break;
 
             case C__DISPLAY_WARNING__:
-                $strLineBeginning = "\r\n"."\r\n".'^^^^^^^^^^ "';
-                $strLineEnd = '" ^^^^^^^^^^ '."\r\n";
+//                $strLineBeginning = "\r\n"."\r\n".'^^^^^^^^^^ "';
+//                $strLineEnd = '" ^^^^^^^^^^ '."\r\n";
                 $logLevel = "warning";
                 break;
 
             case C__DISPLAY_SUMMARY__:
 
-                $strLineBeginning = "\r\n"."************************************************************************************"."\r\n". "\r\n";
-                $strLineEnd = "\r\n"."\r\n"."************************************************************************************"."\r\n";
+//                $strLineBeginning = "\r\n"."************************************************************************************"."\r\n". "\r\n";
+//                $strLineEnd = "\r\n"."\r\n"."************************************************************************************"."\r\n";
 
                 $logLevel = "info";
                 break;
@@ -157,35 +176,35 @@ Class LoggingManager extends \Monolog\Logger
                 break;
 
             case C__DISPLAY_ERROR__:
-                $strLineBeginning = '!!!!! ';
+//                $strLineBeginning = '!!!!! ';
                 $logLevel = "error";
                 break;
 
             case C__DISPLAY_ITEM_START__:
-                $strLineBeginning = '---> ';
+//                $strLineBeginning = '     ---> ';
 
                 $logLevel = "info";
                 break;
 
             case C__DISPLAY_ITEM_DETAIL__:
-                $strLineBeginning = '     ';
+//                $strLineBeginning = '     ';
 
                 $logLevel = "info";
                 break;
 
             case C__DISPLAY_ITEM_RESULT__:
-                $strLineBeginning = '======> ';
+//                $strLineBeginning = '======> ';
 
                 $logLevel = "info";
                 break;
 
             case C__DISPLAY_MOMENTARY_INTERUPPT__:
-                $strLineBeginning = '......';
+//                $strLineBeginning = '......';
                 $logLevel = "warning";
                 break;
 
             case C__DISPLAY_NORMAL__:
-                $strLineBeginning = '';
+//                $strLineBeginning = '';
 
                 $logLevel = "info";
                 break;
@@ -204,6 +223,12 @@ Class LoggingManager extends \Monolog\Logger
         {
             $logger = $this->getChannelLogger('default');
         }
+
+        if(!is_null($origLogLevel))
+            $logLevel = $origLogLevel;
+
+        if($logLevel >= LogLevel::WARNING and empty($context))
+            $context = getDebugContext();
 
         $logger->log($logLevel, $strLineBeginning . $strToPrint . $strLineEnd, $context);
 
