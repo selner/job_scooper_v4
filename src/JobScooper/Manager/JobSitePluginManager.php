@@ -189,6 +189,25 @@ class JobSitePluginManager
     }
 
 
+    private function _getArrayItemForEval($pluginConfig, $key, $quoteItems = true)
+    {
+        $flags = "array()";
+
+        $start = "[";
+        $glue = ", ";
+        $end = "]";
+
+        if($quoteItems === true) {
+            $start = "[\"";
+            $glue = "\", \"";
+            $end = "\"]";
+        }
+        if(array_key_exists($key, $pluginConfig) && !is_null($pluginConfig[$key]) && is_array($pluginConfig[$key]))
+            $flags = $start . join($glue, array_values($pluginConfig[$key])) . $end;
+
+        return $flags;
+
+    }
     private function _getClassInstantiationCode($pluginConfig)
     {
         $className = "Plugin" . $pluginConfig['siteName'];
@@ -200,9 +219,8 @@ class JobSitePluginManager
             $extendsClass = $pluginConfig['PluginExtendsClassName'];
         }
 
-        $flags = "null";
-        if(array_key_exists('AdditionalFlags', $pluginConfig))
-            $flags = "[" . join(", ", array_values($pluginConfig['AdditionalFlags'])) . "]";
+        $flags = $this->_getArrayItemForEval($pluginConfig, 'AdditionalFlags', $quoteItems = false);
+        $countryCodes = $this->_getArrayItemForEval($pluginConfig, 'CountryCodes', $quoteItems = true);
 
         $evalStmt = "class $className extends {$extendsClass} { 
             protected \$siteName = \"{$pluginConfig['siteName']}\";
@@ -210,6 +228,7 @@ class JobSitePluginManager
             protected \$strBaseURLFormat = \"{$pluginConfig['strBaseURLFormat']}\";
             protected \$typeLocationSearchNeeded = \"{$pluginConfig['LocationType']}\";
             protected \$additionalFlags = {$flags};
+            protected \$countryCodes = {$countryCodes};
             protected \$additionalLoadDelaySeconds = 2;
             protected \$nJobListingsPerPage = \"{$pluginConfig['nJobListingsPerPage']}\";
             protected \$paginationType = \"{$pluginConfig['paginationType']}\";
