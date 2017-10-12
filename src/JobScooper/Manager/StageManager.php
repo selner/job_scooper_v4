@@ -70,7 +70,7 @@ class StageManager
                     }
                     finally
                     {
-                        LogLine("StageManager ended stage " . $stage, \C__DISPLAY_ITEM_RESULT__);
+                        LogLine("StageManager ended stage " . $stage, \C__DISPLAY_SECTION_END__);
                     }
                 }
             } else {
