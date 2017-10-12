@@ -18,6 +18,7 @@
 namespace JobScooper\Manager;
 use ErrorException;
 use Exception;
+use GuzzleHttp\Client;
 
 
 
@@ -284,7 +285,17 @@ class SeleniumManager extends \PropertyObject
 
         try{
 
-            $objSimplHtml = \SimpleHTMLHelper::file_get_html($hostHubPageURL);
+            $client = new \GuzzleHttp\Client();
+
+            $res = $client->request('GET', $hostHubPageURL);
+            $rescode = $res->getStatusCode();
+            if($rescode > 200)
+            {
+                return false;
+            }
+            $strHtml = $res->getBody();
+
+            $objSimplHtml = \SimpleHTMLHelper::str_get_html($strHtml);
             if ($objSimplHtml === false)
             {
                 $ret = false;

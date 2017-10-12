@@ -27,7 +27,8 @@
         "zordius/lightncandy": "~1.2",
         "monolog/monolog": "1.x-dev",
         "jbzoo/utils": "^1.0@dev",
-        "nolazybits/propel2-geocodable-behavior": "dev-master"
+        "nolazybits/propel2-geocodable-behavior": "dev-master",
+        "guzzlehttp/guzzle": "~6.0"
     },
     "autoload": {
         "psr-4": {
