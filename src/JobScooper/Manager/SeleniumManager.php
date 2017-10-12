@@ -27,15 +27,25 @@ class SeleniumManager extends \PropertyObject
     private $remoteWebDriver = null;
     private $additionalLoadDelaySeconds = null;
     private $lastCookies = array();
+    private $_seleniumIsRunning = false;
 
     function __construct($additionalLoadDelaySeconds = 0)
     {
         $this->additionalLoadDelaySeconds = $additionalLoadDelaySeconds;
+
+        if ($GLOBALS['USERDATA']['selenium']['autostart'] == True) {
+            SeleniumManager::startSeleniumServer();
+        }
     }
 
     function __destruct()
     {
         $this->doneWithRemoteWebDriver();
+
+        if ($GLOBALS['USERDATA']['selenium']['autostart'] == True) {
+            SeleniumManager::shutdownSelenium();
+        }
+        $this->_seleniumIsRunning = false;
     }
 
     function getPageHTML($url, $recursed=false)
@@ -71,18 +81,12 @@ class SeleniumManager extends \PropertyObject
 
             return $src;
         } catch (\WebDriverCurlException $ex) {
-            handleException(new Exception("Failed to getPageHtml", $ex->getCode(), $ex), null, true);
+            handleException($ex, null, true);
         } catch (\WebDriverException $ex) {
-            handleException(new Exception("Failed to getPageHtml", $ex->getCode(), $ex), null, true);
+            handleException($ex, null, true);
         } catch (\Exception $ex) {
             handleException($ex, null, true);
         }
-    }
-
-    function terminate()
-    {
-        $this->doneWithRemoteWebDriver();
-        $this->shutdownSelenium();
     }
 
     function loadPage($url)
@@ -103,9 +107,10 @@ class SeleniumManager extends \PropertyObject
         }
     }
 
-    function unset_driver()
+    function done()
     {
         $this->doneWithRemoteWebDriver();
+        $this->shutdownSelenium();
     }
 
     function killAllAndRestartSelenium()
@@ -129,13 +134,14 @@ class SeleniumManager extends \PropertyObject
 
     static function shutdownSelenium()
     {
-        if(array_key_exists('selenium_started', $GLOBALS) && $GLOBALS['selenium_started'] === true) {
-            
+        if((array_key_exists('selenium_started', $GLOBALS) && $GLOBALS['selenium_started'] === true) &&
+                $GLOBALS['USERDATA']['selenium']['autostart'] == True) {
+
             if(array_key_exists('stop_command', $GLOBALS['USERDATA']['selenium']) && !is_null($GLOBALS['USERDATA']['selenium']['stop_command']))
             {
                 $GLOBALS['logger']->logLine("Attempting to stop Selenium server with command \"" . $GLOBALS['USERDATA']['selenium']['stop_command'] . "\"", \C__DISPLAY_NORMAL__);
                 $res = doExec($GLOBALS['USERDATA']['selenium']['stop_command']);
-                $GLOBALS['logger']->logLine("Stop Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
+                $GLOBALS['logger']->logLine("Stopping Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
 
                 $GLOBALS['selenium_started'] = false;
 
@@ -195,85 +201,57 @@ class SeleniumManager extends \PropertyObject
         }
     }
 
+    function startSelenium()
+    {
+        $this->_seleniumIsRunning = SeleniumManager::startSeleniumServer();
+
+
+    }
     static function startSeleniumServer()
     {
 
         $seleniumStarted = SeleniumManager::isServerUp();
-        if($seleniumStarted == true) {
-            $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \C__DISPLAY_WARNING__);
-
-            if($GLOBALS['USERDATA']['selenium']['autostart'] == 1)
-            {
-//                    $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | echo `sed \'s/.*port \([0-9]*\).*/\1/\'`';
-                // $cmd = 'ps -eo pid,args | grep selenium-server | grep -v grep | ps -p `awk \'NR!=1 {print $2}\'` -o command=';
-//                    $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'] . '| ps -o command= -p `awk \'NR != 1 {print $2}\'` | sed -n 2p';
-                $cmd = 'lsof -i tcp:' . $GLOBALS['USERDATA']['selenium']['port'];
-
-                $seleniumStarted = false;
-                $pscmd = doExec($cmd);
-                if (!is_null($pscmd) && (is_array($pscmd) && count($pscmd) > 1))
-                {
-                    $pidLine = preg_split('/\s+/', $pscmd[1]);
-                    if(count($pidLine) >1)
-                    {
-                        $pid = $pidLine[1];
-                        $cmd = 'ps -o command= -p ' . $pid;
-                        $pscmd = doExec($cmd);
-
-                        if(preg_match('/selenium/', $pscmd) !== false)
-                        {
-                            $seleniumStarted = true;
-                            $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \C__DISPLAY_WARNING__);
-                        }
-                        else
-                        {
-                            $msg = "Error: port " . $GLOBALS['USERDATA']['selenium']['port'] . " is being used by process other than Selenium (" . var_export($pscmd, true) . ").  Aborting.";
-                            $GLOBALS['logger']->logLine($msg, \C__DISPLAY_ERROR__);
-                            throw new Exception($msg);
-
-                        }
-                    }
-                }
-            }
-        }
-        else
+        if($seleniumStarted == false)
         {
-        #        if($seleniumStarted === false)
-            if($GLOBALS['USERDATA']['selenium']['autostart'] == 1)
+            if(array_key_exists('start_command', $GLOBALS['USERDATA']['selenium']) && !is_null($GLOBALS['USERDATA']['selenium']['start_command']))
             {
+                $GLOBALS['logger']->logLine("Attempting to start Selenium server with command \"" . $GLOBALS['USERDATA']['selenium']['start_command'] . "\"", \C__DISPLAY_NORMAL__);
+                $res = doExec($GLOBALS['USERDATA']['selenium']['start_command']);
+                $GLOBALS['logger']->logLine("Starting Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
 
-                if(array_key_exists('start_command', $GLOBALS['USERDATA']['selenium']) && !is_null($GLOBALS['USERDATA']['selenium']['start_command']))
-                {
-                    $GLOBALS['logger']->logLine("Attempting to start Selenium server with command \"" . $GLOBALS['USERDATA']['selenium']['start_command'] . "\"", \C__DISPLAY_NORMAL__);
-                    $res = doExec($GLOBALS['USERDATA']['selenium']['start_command']);
-                    $GLOBALS['logger']->logLine("Starting Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
+                sleep(10);
+                $seleniumStarted = true;
+                $GLOBALS['selenium_started'] = $seleniumStarted;
+            }
+            else if(stripos($GLOBALS['USERDATA']['selenium']['host_location'], "localhost") != false || (stripos($GLOBALS['USERDATA']['selenium']['host_location'], "127.0.0.1") != false)) {
 
-                    sleep(10);
-                    $GLOBALS['selenium_started'] = true;
-                }
-                else if(stripos($GLOBALS['USERDATA']['selenium']['host_location'], "localhost") != false || (stripos($GLOBALS['USERDATA']['selenium']['host_location'], "127.0.0.1") != false)) {
+                $strCmdToRun = "java ";
+                if (array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
+                    $strCmdToRun .= $GLOBALS['USERDATA']['selenium']['prefix_switches'];
 
-                    $strCmdToRun = "java ";
-                    if (array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
-                        $strCmdToRun .= $GLOBALS['USERDATA']['selenium']['prefix_switches'];
+                $strCmdToRun .= " -jar \"" . $GLOBALS['USERDATA']['selenium']['jar'] . "\" -port " . $GLOBALS['USERDATA']['selenium']['port'] . " ";
+                if (array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
+                    $strCmdToRun .= $GLOBALS['USERDATA']['selenium']['postfix_switches'];
 
-                    $strCmdToRun .= " -jar \"" . $GLOBALS['USERDATA']['selenium']['jar'] . "\" -port " . $GLOBALS['USERDATA']['selenium']['port'] . " ";
-                    if (array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
-                        $strCmdToRun .= $GLOBALS['USERDATA']['selenium']['postfix_switches'];
+                $strCmdToRun .= " >/dev/null &";
 
-                    $strCmdToRun .= " >/dev/null &";
-
-                    $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \C__DISPLAY_ITEM_RESULT__);
-                    $res = doExec($strCmdToRun);
-                    sleep(10);
-                    $GLOBALS['logger']->logLine("Starting Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
-                    $GLOBALS['selenium_started'] = true;
-                }
+                $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \C__DISPLAY_ITEM_RESULT__);
+                $res = doExec($strCmdToRun);
+                sleep(10);
+                $GLOBALS['logger']->logLine("Starting Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
+                $seleniumStarted = true;
+                $GLOBALS['selenium_started'] = true;
             }
             else {
+                $seleniumStarted = false;
                 throw new Exception("Selenium is not running and was not set to autostart. Cannot continue without an instance of Selenium running.");
             }
         }
+        else {
+            $seleniumStarted = true;
+            $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \C__DISPLAY_WARNING__);
+        }
+        return $seleniumStarted;
     }
 
     static function isServerUp()
@@ -310,14 +288,16 @@ class SeleniumManager extends \PropertyObject
                 $ret = true;
             }
 
-        }
-        catch (Exception $ex)
-        {
-            $msg = $msg . " Error retrieving hub page: " . $ex->getMessage();
+        } catch (\WebDriverCurlException $ex) {
+            $msg = $msg . " Selenium not yet running (failed to access the hub page.)";
+        } catch (\WebDriverException $ex) {
+            $msg = $msg . " Selenium not yet running (failed to access the hub page.)";
+        } catch (Exception $ex) {
+            $msg = $msg . " Selenium not yet running (failed to access the hub page.)";
         }
         finally
         {
-            $GLOBALS['logger']->logLine($msg, \C__DISPLAY_NORMAL__);
+            LogLine($msg, \C__DISPLAY_NORMAL__);
         }
 
         return $ret;
@@ -325,25 +305,6 @@ class SeleniumManager extends \PropertyObject
 
     function get_driver()
     {
-//                use \Facebook\WebDriver\Remote\WebDriverCapabilityType;
-//                use \Facebook\WebDriver\Remote\RemoteWebDriver;
-//                use \Facebook\WebDriver\WebDriverDimension;
-//
-//                $host = '127.0.0.1:8910';
-//                $capabilities = array(
-//                    WebDriverCapabilityType::BROWSER_NAME => 'phantomjs',
-//                    'phantomjs.page.settings.userAgent' => 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0',
-//                );
-//                $driver = RemoteWebDriver::create($host, $capabilities, 5000);
-//
-//                $window = new WebDriverDimension(1024, 768);
-//                $driver->manage()->window()->setSize($window);
-//
-//                $driver->get('https://www.google.ru/');
-//
-//                $driver->takeScreenshot('/tmp/screen.png');
-//                $driver->quit();
-
         try
         {
             if (is_null($this->remoteWebDriver))

@@ -174,7 +174,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                         // assert this search is actually for the job site supported by this plugin
                         assert(strcasecmp($search->getJobSiteKey(), cleanupSlugPart($this->siteName)) == 0);
 
-                        if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
+                        if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && is_null($this->selenium)) {
                             try
                             {
                                 $this->selenium = new SeleniumManager();
@@ -247,6 +247,19 @@ abstract class BaseJobsSite implements IJobSitePlugin
         } catch (Exception $ex) {
             throw $ex;
         } finally {
+            try
+            {
+                if(!is_null($this->selenium)) {
+                    $this->selenium->done();
+                }
+            } catch (Exception $ex) {
+                LogLine("Unable to shutdown Selenium server successfully while closing down downloads for {$this->siteName}: " . $ex->getMessage(), C__DISPLAY_WARNING__);
+            }
+            finally
+            {
+                $this->selenium = null;
+            }
+
             $this->currentSearchBeingRun = null;
         }
 
