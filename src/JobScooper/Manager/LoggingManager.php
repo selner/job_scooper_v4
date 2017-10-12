@@ -37,6 +37,16 @@ function getChannelLogger($channel)
         return $GLOBALS['logger']->getChannelLogger($channel);
 }
 
+Class JobsErrorHandler extends ErrorHandler
+{
+    public function handleException($e)
+    {
+        handleException($e, "Uncaught Exception: %s");
+        exit(255);
+    }
+
+}
+
 Class LoggingManager extends \Monolog\Logger
 {
     protected $arrCumulativeErrors = array();
@@ -44,14 +54,17 @@ Class LoggingManager extends \Monolog\Logger
     private $_handlersByType = array();
     private $_loggerName = "default";
     private $_loggers = array();
+    private $_csvHandle = null;
+    private $_doLogContext = false;
 
     public function __construct($name, array $handlers = array(), array $processors = array())
     {
         $GLOBALS['logger'] = null;
-
         $GLOBALS['logger'] = $this;
-
+        
         $name = C__APPNAME__;
+        JobsErrorHandler::register($this, array(), LogLevel::ERROR);
+
         $this->_handlersByType = array(
             'stderr' => new StreamHandler('php://stderr', isDebug() ? Logger::DEBUG : Logger::INFO),
             'bufferedmail' => new BufferHandler(new ErrorEmailHandler(Logger::ERROR, true), $bufferLimit = 100, $level = Logger::ERROR, $bubble = false, $flushOnOverflow = true)
@@ -61,7 +74,6 @@ Class LoggingManager extends \Monolog\Logger
         $this->_loggers[$this->_loggerName] = $this;
         $this->_loggers['plugins'] = $this->withName('plugins');
 
-        ErrorHandler::register($this);
 
         $now = new DateTime('NOW');
         $this->logLine("Logging started for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'), C__DISPLAY_NORMAL__);
