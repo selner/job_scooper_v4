@@ -182,10 +182,9 @@ class SeleniumManager extends \PropertyObject
     {
         try {
 
-            $driver = $this->get_driver();
-            if(!is_null($driver))
+            if(!is_null($this->remoteWebDriver))
             {
-                $driver->quit();
+                $this->remoteWebDriver->quit();
             }
         } catch (\WebDriverCurlException $ex) {
             handleException($ex, "Failed to quit Webdriver: ", false);
