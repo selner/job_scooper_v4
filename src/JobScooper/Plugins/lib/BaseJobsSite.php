@@ -19,6 +19,7 @@ namespace JobScooper\Plugins\lib;
 
 
 
+use JobScooper\DataAccess\UserSearchRun;
 use JobScooper\Plugins\Interfaces\IJobSitePlugin;
 use JobScooper\Manager\SeleniumManager;
 
@@ -26,6 +27,7 @@ const VALUE_NOT_SUPPORTED = -1;
 const BASE_URL_TAG_LOCATION = "***LOCATION***";
 const BASE_URL_TAG_KEYWORDS = "***KEYWORDS***";
 use Exception;
+use Psr\Log\LogLevel;
 
 abstract class BaseJobsSite implements IJobSitePlugin
 {
@@ -110,7 +112,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         return false;
     }
 
-    public function addSearches(&$arrSearches)
+    public function addSearches($arrSearches)
     {
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
             $firstKey = array_keys($arrSearches)[0];
@@ -173,10 +175,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
                         assert(strcasecmp($search->getJobSiteKey(), cleanupSlugPart($this->siteName)) == 0);
 
                         if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
-                            try {
-                                if ($GLOBALS['USERDATA']['selenium']['autostart'] == True) {
-                                    SeleniumManager::startSeleniumServer();
-                                }
+                            try
+                            {
                                 $this->selenium = new SeleniumManager();
                             } catch (Exception $ex) {
                                 handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->siteName . "'", true);
@@ -379,7 +379,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    protected function getPageURLfromBaseFmt(&$searchDetails, $nPage = null, $nItem = null)
+    protected function getPageURLfromBaseFmt($searchDetails, $nPage = null, $nItem = null)
     {
         $strURL = $this->_getBaseURLFormat_($searchDetails, $nPage, $nItem);
 
@@ -686,7 +686,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     //************************************************************************
 
 
-    private function _addSearch_(&$searchDetails)
+    private function _addSearch_($searchDetails)
     {
         assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || ($searchDetails->getSearchParameter('location_search_value') !== VALUE_NOT_SUPPORTED && strlen($searchDetails->getSearchParameter('location_search_value')) > 0));
 
@@ -711,7 +711,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     }
 
-    private function _setKeywordStringsForSearch_(&$searchDetails)
+    private function _setKeywordStringsForSearch_($searchDetails)
     {
         // Does this search have a set of keywords specific to it that override
         // all the general settings?
@@ -772,7 +772,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         return $strRetCombinedKeywords;
     }
 
-    private function _setStartingUrlForSearch_(&$searchDetails)
+    private function _setStartingUrlForSearch_($searchDetails)
     {
 
         $searchStartURL = $this->getPageURLfromBaseFmt($searchDetails, 1, 1);
@@ -878,8 +878,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
         return $strURL;
     }
 
-    private function _setSearchResult_(&$searchDetails, $success = null, $except = null, $runWasSkipped=false)
+    private function _setSearchResult_($searchDetails, $success = null, $except = null, $runWasSkipped=false)
     {
+
         if (!is_null($runWasSkipped) && is_bool($runWasSkipped) && $runWasSkipped === true)
         {
             $searchDetails->setRunResultCode("skipped");
@@ -887,8 +888,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
         elseif (!is_null($success) && is_bool($success)) {
             if($success === true)
                 $searchDetails->setRunSucceeded();
-            else
+            else {
                 $searchDetails->failRunWithException($except);
+            }
         }
         $searchDetails->save();
     }
@@ -962,7 +964,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    protected function _getMyJobsForSearchFromJobsAPI_(&$searchDetails)
+    protected function _getMyJobsForSearchFromJobsAPI_($searchDetails)
     {
         $nItemCount = 0;
 
@@ -1170,16 +1172,15 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    private function _getMyJobsForSearchFromWebpage_(&$searchDetails)
+    private function _getMyJobsForSearchFromWebpage_($searchDetails)
     {
-
-        $nItemCount = 1;
-        $nPageCount = 1;
-        $objSimpleHTML = null;
-
-        LogLine("Getting count of " . $this->siteName . " jobs for search '" . $searchDetails->getUserSearchRunKey() . "': " . $searchDetails->getSearchParameter('search_start_url'), \C__DISPLAY_ITEM_DETAIL__);
-
         try {
+            $nItemCount = 1;
+            $nPageCount = 1;
+            $objSimpleHTML = null;
+
+            LogLine("Getting count of " . $this->siteName . " jobs for search '" . $searchDetails->getUserSearchRunKey() . "': " . $searchDetails->getSearchParameter('search_start_url'), \C__DISPLAY_ITEM_DETAIL__);
+
             if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
                 try {
                     if (is_null($this->selenium)) {
