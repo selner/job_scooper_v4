@@ -893,6 +893,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     private function _setSearchResult_($searchDetails, $success = null, $except = null, $runWasSkipped=false)
     {
+        if(!($searchDetails instanceof UserSearchRun))
+            $searchDetails = $this->currentSearchBeingRun;
 
         if (!is_null($runWasSkipped) && is_bool($runWasSkipped) && $runWasSkipped === true)
         {
