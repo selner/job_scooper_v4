@@ -81,7 +81,6 @@ function getDebugContext()
     $context['plugin_jobsite'] = $jobsite;
     $context['user_search_run_key'] = $usersearch;
     $context['memory_usage'] = memory_get_usage() / 1024 / 1024;
-    $context['trace'] = join("|", \JBZoo\Utils\Arr::flat(object_to_array($dbg)));
 
 
     return $context;
@@ -95,44 +94,24 @@ function LogLine($msg, $scooper_level=\C__DISPLAY_NORMAL__, $context=array())
     }
     else
     {
-        //Debug backtrace called. Find next occurence of class after Logger, or return calling script:
-        $dbg = debug_backtrace();
-        $i = 0;
-        $jobsite = null;
-        $usersearch = null;
+        $GLOBALS['logger']->logLine($msg, $scooper_level, null, $context);
+    }
+}
 
-        $class = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
-        while ($i < count($dbg) - 1 ) {
-            if (!empty($dbg[$i]['class']) && $dbg[$i]['class'] != 'Logger' ) {
-                $class = $dbg[$i]['class'] . "->" . $dbg[$i]['function'] ."()";
-                if(!empty($dbg[$i]['object']))
-                {
-                    $objclass = get_class($dbg[$i]['object']);
-                    if(strcasecmp($objclass, $dbg[$i]['class']) != 0)
-                    {
-                        $class = "{$objclass} -> {$class}";
-                        try{  $jobsite = $dbg[$i]['object']->getName(); } catch (Exception $ex) { $jobsite = ""; }
-                        try{
-                            if(array_key_exists('args', $dbg[$i]) & is_array($dbg[$i]['args']))
-                                if(method_exists(get_class($dbg[$i]['args'][0]), "getUserSearchRunKey"))
-                                    $usersearch = $dbg[$i]['args'][0]->getUserSearchRunKey();
-                                else
-                                    $usersearch = "";
-                        } catch (Exception $ex) { $usersearch = ""; }
-                    }
-                    break;
-                }
-            }
-            $i++;
-        }
+function LogError($msg, $scooper_level=\C__DISPLAY_ERROR__)
+{
+    if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
+    {
+        print($msg . "\r\n");
+    }
+    else
+    {
+        $context = getDebugContext();
 
-        $context = array();
-        $context['channel'] = is_null($jobsite) ? "default" : "plugins";
-        $context['class_call'] = $class;
-        $context['plugin_jobsite'] = $jobsite;
-        $context['user_search_run_key'] = $usersearch;
+        $GLOBALS['logger']->logLine($msg, $scooper_level, \Psr\Log\LogLevel::ERROR, $context);
+    }
+}
 
-        $GLOBALS['logger']->logLine($msg, $scooper_level, $context);
 function LogDebug($msg, $scooper_level=C__DISPLAY_NORMAL__)
 {
     if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
@@ -382,10 +361,12 @@ function exportToDebugJSON($obj, $strBaseFileName)
 
 function handleException($ex, $fmtLogMsg = null, $raise = true)
 {
+    $context = getDebugContext();
     $toThrow = $ex;
     if (is_null($toThrow))
         $toThrow = new Exception($fmtLogMsg);
-    
+
+
     $msg = $fmtLogMsg;
     if (!is_null($toThrow) && !is_null($fmtLogMsg) && !is_null($ex) && strlen($fmtLogMsg) > 0)
     {
@@ -405,61 +386,13 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
     }
 
     LogLine(PHP_EOL . PHP_EOL . PHP_EOL);
-    LogLine($msg, \C__DISPLAY_ERROR__);
+    LogLine($msg, \C__DISPLAY_ERROR__, $context);
     LogLine(PHP_EOL . PHP_EOL . PHP_EOL);
 
     if ($raise == true) {
         throw $toThrow;
     }
 }
-
-
-function exceptionHandler($exception) {
-
-    // these are our templates
-    $traceline = "#%s %s(%s): %s(%s)";
-    $msg = "PHP Fatal error:  Uncaught exception '%s' with message '%s' in %s:%s\nStack trace:\n%s\n  thrown in %s on line %s";
-
-    // alter your trace as you please, here
-    $trace = $exception->getTrace();
-    $key = "unknown";
-    foreach ($trace as $key => $stackPoint) {
-        // I'm converting arguments to their type
-        // (prevents passwords from ever getting logged as anything other than 'string')
-        $trace[$key]['args'] = array_map('gettype', $trace[$key]['args']);
-    }
-
-    // build your tracelines
-    $result = array();
-    foreach ($trace as $key => $stackPoint) {
-        $result[] = sprintf(
-            $traceline,
-            $key,
-            $stackPoint['file'],
-            $stackPoint['line'],
-            $stackPoint['function'],
-            implode(', ', $stackPoint['args'])
-        );
-    }
-    // trace always ends with {main}
-    $result[] = '#' . ++$key . ' {main}';
-
-    // write tracelines into main template
-    $msg = sprintf(
-        $msg,
-        get_class($exception),
-        $exception->getMessage(),
-        $exception->getFile(),
-        $exception->getLine(),
-        implode("\n", $result),
-        $exception->getFile(),
-        $exception->getLine()
-    );
-
-    // log or echo as you please
-    error_log($msg);
-}
-set_exception_handler('exceptionHandler');
 
 
 /**
