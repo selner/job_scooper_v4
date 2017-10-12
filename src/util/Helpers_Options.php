@@ -134,7 +134,6 @@ function generateOutputFileName($baseFileName="NONAME", $ext="UNK", $isUserSpeci
             $user = "_" . $objUser->getUserSlug();
         }
     }
-    $appRun = "";
 
     $ret = "{$outDir}/{$baseFileName}{$user}{$today}.{$ext}";
     return $ret;
