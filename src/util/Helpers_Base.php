@@ -61,7 +61,12 @@ function getDebugContext()
                 if(strcasecmp($objclass, $dbg[$i]['class']) != 0)
                 {
                     $class = "{$objclass} -> {$class}";
-                    try{  $jobsite = $dbg[$i]['object']->getName(); } catch (Exception $ex) { $jobsite = ""; }
+                    try{
+                        if( is_object($dbg[$i]['object']) && method_exists($dbg[$i]['object'], "getName"))
+                            $jobsite = $dbg[$i]['object']->getName();
+                        } catch (Exception $ex) {
+                            $jobsite = "";
+                        }
                     try{
                         if(array_key_exists('args', $dbg[$i]) & is_array($dbg[$i]['args']))
                             if(is_object($dbg[$i]['args'][0]) && method_exists(get_class($dbg[$i]['args'][0]), "getUserSearchRunKey"))
