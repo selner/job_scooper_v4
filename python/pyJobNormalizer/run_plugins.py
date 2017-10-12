@@ -46,7 +46,6 @@ def getPluginFiles():
     return plugins
 
 def runPluginForUser(plug, configini, outpath, stages):
-        print plugin
         RUNARGS = ["php", "/opt/jobs_scooper/runJobs.php", "-days 3", "--use_config_ini " + configini, "-o " + outpath, "-" + plugin]
         if stages:
             RUNARGS.append("--stages {}".format(stages))
@@ -61,7 +60,7 @@ def runPluginForUser(plug, configini, outpath, stages):
         # outfile = os.path.join(outpath, f)
         try:
             # f = codecs.open(outfile, encoding='utf-8', mode='w')
-            p = subprocess.Popen(executable="php", args=RUNARGS, shell=True, stdout=f,
+            p = subprocess.Popen(args=RUNARGS,  stdout=subprocess.PIPE,
                                  stderr=subprocess.STDOUT,
                                  stdin=subprocess.PIPE)
 
@@ -84,7 +83,7 @@ def save_run_log(outpath=None, plugin=None, textdata=None, encoding='utf-8'):
     :return: the path of the file
     """
 
-    file = "{}_runlog_{}.log".format(plugin, datetime.datetime.now().strftime("%m-%d-%Y") + "_")
+    file = "{}_run.log".format(plugin)
     outfile = os.path.join(outpath, file)
     try:
         f = codecs.open(outfile, encoding=encoding, mode='w+')
@@ -98,7 +97,8 @@ def save_run_log(outpath=None, plugin=None, textdata=None, encoding='utf-8'):
 if __name__ == '__main__':
     print " ".join(sys.argv)
     arguments = docopt(cli_usage, version='0.1.1rc')
-    print arguments
+    print ("Run Plugins called with arguments: " + str(arguments))
+    
     import processfile
 
     userKey = arguments['--user']
@@ -117,9 +117,13 @@ if __name__ == '__main__':
     if not outdir:
         outdir = os.environ['JOBSCOOPER_OUTPUT']
 
+    outdir = os.path.join(outdir, "plugin_run_logs", datetime.datetime.now().strftime("%m-%d-%Y"))
+    if not os.path.isdir(outdir):
+        os.makedirs(outdir)
+    
     plugs = getPluginFiles()
     print ("Found {} plugins to run.".format(len(plugs)))
-
+    print ("Parameters:  inidir={}; outdir={}; userKey={}, stages={}".format(inidir, outdir, userKey, stages))
     for fname in os.listdir(inidir):
         f = os.path.join(inidir, fname)
         if os.path.isfile(f) and f.endswith(".ini") and (userKey is None or userKey in f):
