@@ -45,7 +45,10 @@ if __name__ == '__main__':
     import json, codecs
 
     f = codecs.open(infile, encoding='utf-8', mode='rb')
-    dataJobs = json.load(fp=f, encoding="utf-8")
+    txt = "\n".join(f.readlines())
+    print ("length of doc is " + str(len(txt)))
+
+    dataJobs = json.loads(txt, encoding="utf-8")
     dictJobs = dataJobs['jobslist']
 
     writedicttocsv(outfile, dictJobs, keys=["JobPostingId", "JobSite", "JobSitePostID", "Title", "TitleTokens", "Url", "Company", "Location", "EmploymentType", "Department", "Category", "UpdatedAt", "PostedAt", "FirstSeenAt", "RemovedAt", "KeySiteAndPostID", "KeyCompanyAndTitle"])
