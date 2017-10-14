@@ -53,19 +53,20 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_title",
+          "Name": "tag_link",
           "Selector": "td.title a",
-          "Extract": "TEXT",
+          "Extract": "ATTR",
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
         },
         {
           "Name": "tag_job_id",
+          "Pattern" : "/.*?\/(\\w+)\/*$/",
           "Selector": "td.title a",
           "Extract": "REGEX",
-          "Type": "CSS",
-          "Attribute": "href"
+          "Attribute": "href",
+          "Index": 0
         },
 
         {
