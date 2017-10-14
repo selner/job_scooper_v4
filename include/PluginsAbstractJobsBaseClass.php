@@ -1180,6 +1180,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
 
                     case C__PAGINATION_INFSCROLLPAGE_NOCONTROL:
                     case C__PAGINATION_INFSCROLLPAGE_VIALOADMORE:
+                    case C__PAGINATION_INFSCROLLPAGE_PAGEDOWN:
                     case C__PAGINATION_PAGE_VIA_NEXTBUTTON:
                     case C__PAGINATION_INFSCROLLPAGE_VIA_JS:
                     case C__PAGINATION_PAGE_VIA_CALLBACK:
@@ -1278,7 +1279,7 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                                     $this->selenium->loadPage($strURL);
                                     break;
 
-                                case C__PAGINATION_INFSCROLLPAGE_VIALOADMORE:
+                                case C__PAGINATION_INFSCROLLPAGE_NOCONTROL:
                                     $this->selenium->loadPage($strURL);
                                     //
                                     // If we dont know how many pages to go down,
@@ -1286,6 +1287,18 @@ abstract class AbstractClassBaseJobsPlugin extends ClassJobsSiteCommon
                                     // and whole results set
                                     //
                                     $this->goToEndOfResultsSetViaLoadMore($nTotalListings);
+                                    $totalPagesCount = 1;
+                                    break;
+
+
+                                case C__PAGINATION_INFSCROLLPAGE_PAGEDOWN:
+                                    $this->selenium->loadPage($strURL);
+                                    //
+                                    // If we dont know how many pages to go down,
+                                    // call the method to go down to the very end so we see the whole page
+                                    // and whole results set
+                                    //
+                                    $this->goToEndOfResultsSetViaPageDown($nTotalListings);
                                     $totalPagesCount = 1;
                                     break;
 
