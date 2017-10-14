@@ -1224,6 +1224,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 switch ($this->paginationType) {
 
                     case C__PAGINATION_INFSCROLLPAGE_NOCONTROL:
+                    case C__PAGINATION_INFSCROLLPAGE_PAGEDOWN:
                     case C__PAGINATION_INFSCROLLPAGE_VIALOADMORE:
                     case C__PAGINATION_PAGE_VIA_NEXTBUTTON:
                     case C__PAGINATION_INFSCROLLPAGE_VIA_JS:
@@ -1296,6 +1297,17 @@ abstract class BaseJobsSite implements IJobSitePlugin
                                 case C__PAGINATION_NONE:
                                     $totalPagesCount = 1;
                                     $this->selenium->loadPage($strURL);
+                                    break;
+
+                                case C__PAGINATION_INFSCROLLPAGE_PAGEDOWN:
+                                    $this->selenium->loadPage($strURL);
+                                    //
+                                    // If we dont know how many pages to go down,
+                                    // call the method to go down to the very end so we see the whole page
+                                    // and whole results set
+                                    //
+                                    $this->goToEndOfResultsSetViaPageDown($nTotalListings);
+                                    $totalPagesCount = 1;
                                     break;
 
                                 case C__PAGINATION_INFSCROLLPAGE_VIALOADMORE:

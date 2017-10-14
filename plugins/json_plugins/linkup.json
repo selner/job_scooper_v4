@@ -1,6 +1,6 @@
 {
   "AgentName": "LinkUp",
-  "SourceURL": "https://www.linkup.com/search/results/***KEYWORDS***-jobs?location=***LOCATION***&pageNum=***PAGE_NUMBER***&sort=d",
+  "SourceURL": "https://linkup.com/search/results?keyword=***KEYWORDS***&location=***LOCATION***&distance=25&posted=1d&sort=d&pageNum=***PAGE_NUMBER***",
   "LocationType": "location-city-comma-state",
   "Collections": [
     {
@@ -18,10 +18,10 @@
         },
         {
           "Name": "tag_listings_count",
-          "Selector": "div.search-details p span",
+          "Selector": "div.search-details div span.vertical-bar",
           "Index" : 0,
           "Extract": "REGEX",
-          "Pattern": "/\\s*of\\s*([\\d,]+)\\s*/",
+          "Pattern": "/.*?\\s([0-9,]+)\\sJobs/",
           "Attribute": null,
           "Type": "CSS"
         },

@@ -152,6 +152,10 @@ class Location extends BaseLocation
                 $locFormatString = "{PLACE}, {STATECODE}";
                 break;
 
+            case 'location-city-space-statecode':
+                $locFormatString = "{PLACE} {STATECODE}";
+                break;
+
             case 'location-city-dash-statecode':
                 $locFormatString = "{PLACE}-{STATECODE}";
                 break;
