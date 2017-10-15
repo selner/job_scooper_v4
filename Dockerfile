@@ -36,8 +36,6 @@ RUN echo PATH=$PATH
 ## Install PHP5.6 Packages
 ##
 #######################################################
-
-
 RUN apt-get update && apt-get install -y \
     php5-cli \
     php5-dev \
@@ -49,24 +47,18 @@ RUN apt-get update && apt-get install -y \
     php5-xsl \
     php5-sqlite
 
-
-
 #######################################################
 ##
-## Download & build the math extensions for SQLite
-## that we need for geospatial queries
+## Install Docker exe so we can stop/start Selenium
 ##
 #######################################################
-RUN mkdir /opt/sqlite
-RUN mkdir /opt/sqlite/extensions
-RUN echo "Downloading and compiling SQLite3 math extensions..."
-RUN wget https://www.sqlite.org/contrib/download/extension-functions.c?get=25 -O /opt/sqlite/extensions/extension-functions.c
-RUN gcc -fPIC -lm -shared /opt/sqlite/extensions/extension-functions.c -o /opt/sqlite/extensions/libsqlitefunctions.so
-ADD ./Config/etc/30-pdo_sqlite_ext.ini /etc/php5/cli/conf.d/30-pdo_sqlite_ext.ini
+RUN mkdir /etc/apk/
+RUN echo "http://dl-3.alpinelinux.org/alpine/latest-stable/community/x86_64/" >> /etc/apk/repositories
 
+RUN apt-get install -y \
+    docker
 
-
-
+RUN echo "chown -R dev:dev /var/run/docker.sock" >> ~/.bash_profile
 
 #######################################################
 ##
@@ -82,19 +74,36 @@ RUN composer --version
 
 ########################################################
 ###
-### Set up data volume for job output that will be
-### mapped to the local hard drive of the actual PC
-###
-########################################################
-VOLUME "/var/local/jobs_scooper"
-
-########################################################
-###
 ### Download the full nltk data set needed for python
 ###
 ########################################################
 RUN pip install --no-cache-dir -v nltk
 RUN python -m nltk.downloader -d /root/nltk_data all
+
+#RUN curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-17.03.1-ce.tgz33 && \
+#tar --strip-components=1 -xvzf docker-17.03.1-ce.tgz -C /usr/local/bin
+#
+
+#######################################################
+##
+## Download & build the math extensions for SQLite
+## that we need for geospatial queries
+##
+#######################################################
+RUN mkdir /opt/sqlite
+RUN mkdir /opt/sqlite/extensions
+RUN echo "Downloading and compiling SQLite3 math extensions..."
+RUN wget https://www.sqlite.org/contrib/download/extension-functions.c?get=25 -O /opt/sqlite/extensions/extension-functions.c
+RUN gcc -fPIC -lm -shared /opt/sqlite/extensions/extension-functions.c -o /opt/sqlite/extensions/libsqlitefunctions.so
+ADD ./Config/etc/30-pdo_sqlite_ext.ini /etc/php5/cli/conf.d/30-pdo_sqlite_ext.ini
+
+########################################################
+###
+### Set up data volume for job output that will be
+### mapped to the local hard drive of the actual PC
+###
+########################################################
+VOLUME "/var/local/jobs_scooper"
 
 ########################################################
 ###
@@ -106,24 +115,6 @@ RUN mkdir /opt/jobs_scooper
 
 ########################################################
 ###
-### Add the PHP composer configuration file into image
-### and install the dependencies
-###
-########################################################
-WORKDIR /opt/jobs_scooper
-ADD composer.json /opt/jobs_scooper
-RUN composer install --no-interaction -vv
-
-########################################################
-###
-### Install python dependencies
-###
-########################################################
-ADD ./python/pyJobNormalizer/requirements.txt /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
-RUN pip install --no-cache-dir -v -r /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
-
-########################################################
-###
 ### Add the full, remaining source code from the repo
 ### to the image
 ###
@@ -132,8 +123,23 @@ RUN echo "Adding all source files from `pwd` to /opt/jobs_scooper"
 ADD ./ /opt/jobs_scooper/
 
 RUN echo "Verifying correct source installed..."
-RUN cat /opt/jobs_scooper/runJobs.php | grep "__APP_VERSION__"
 RUN ls -al /opt/jobs_scooper
+
+########################################################
+###
+### Add the PHP composer configuration file into image
+### and install the dependencies
+###
+########################################################
+WORKDIR /opt/jobs_scooper
+RUN composer install --no-interaction -vv
+
+########################################################
+###
+### Install python dependencies
+###
+########################################################
+RUN pip install --no-cache-dir -v -r /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
 
 ########################################################
 ###
