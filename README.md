@@ -32,10 +32,13 @@ That's just the start of [what Jobs Scooper can do...](../../wiki).
 To run Jobs Scooper, first set an environment variable named JOBSCOOPER_OUTPUT to your output directory on disk.
 
 Then type:
-``/usr/bin/php runJobs.php -all -days 3 -ini myconfig.ini``
+```
+/usr/bin/php runJobs.php -all -days 3 -ini myconfig.ini
+```
 
+```bash
 Required Parameters:
-```man
+
 -ini : Path to your configuration ini file (see examples/example_config.ini)
 -days X:  number of days before today to download listings for.
 -all:  run all the searches found in the .ini file.  Alternatively, you can specify the name of a single job site to run only that site's searches.  e.g. ``-amazon``
@@ -52,7 +55,7 @@ Required Parameters:
 
 
 ## What's New in JobScooper V4
-### 🆕 Job Site Plugin Authoring Using Agenty's Data Scraping Studio  ✏️ 
+### Job Site Plugin Authoring Using Agenty's Data Scraping Studio  ✏️ 
 Non-developers can now author plugins using [Data Scraping Studio](https://www.agenty.com/data-extraction-software.aspx) or the [Advanced Web Scraper Chrome extension](https://chrome.google.com/webstore/detail/agenty-advanced-web-scrap/gpolcofcjjiooogejfbaamdgmgfehgff?hl=en-US) from (http://www.agenty.com)[Agenty].  
 
 Just tag the specific job results page fields for the site and set the Agenty field names to match the corresponding Job Scooper field: 
@@ -88,7 +91,7 @@ The currently list of pagination types supported by Job Scooper can be found in 
 
 Save your updated Agenty JSON config file to the plugins/json_plugins directory and kick off a job scooper run.  Your new Agenty-authored plugin will run exactly like any other plugin built for Job Scooper. 
 
-### 🆕 Don't Know PHP?  Add a plugin solely via JSON instead!  ✏️ 
+### Don't Know PHP?  Add a plugin solely via JSON instead!  ✏️ 
 You can define the full configuration for a job site plugin in a single JSON file.  Just drop the new file into the plugins/json_plugins folder and let it rip.  
 
 ```javascript
@@ -141,7 +144,7 @@ You can define the full configuration for a job site plugin in a single JSON fil
 }
 ```
 
-### 🆕 Job Scooper now Supports Running under Docker 🖥 
+### Job Scooper now Supports Running under Docker 🖥 
 Setting up and running job scooper anywhere is now made easier through Docker.  With just a few tweaks to the Dockerfile and associated run scripts, you can have Job Scooper quickly up and running in a container quickly.
 
 Check out the Dockerfile and build_and_run_docker.* files in the repo for a set of base files that should get you 90% of the way there for your system.
