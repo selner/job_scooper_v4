@@ -42,20 +42,20 @@ class SimplePlugin extends BaseJobsSite
             $this->strBaseURLFormat = $this->childSiteURLBase;
 
 
-        if (array_key_exists('tag_next_button', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['tag_next_button']) && count($this->arrListingTagSetup['tag_next_button'])) {
-            $this->selectorMoreListings = $this->getTagSelector($this->arrListingTagSetup['tag_next_button']);
+        if (array_key_exists('NextButton', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['NextButton']) && count($this->arrListingTagSetup['NextButton'])) {
+            $this->selectorMoreListings = $this->getTagSelector($this->arrListingTagSetup['NextButton']);
             $this->paginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
-        } elseif (array_key_exists('tag_load_more', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['tag_load_more']) && count($this->arrListingTagSetup['tag_load_more'])) {
+        } elseif (array_key_exists('LoadMoreControl', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['LoadMoreControl']) && count($this->arrListingTagSetup['LoadMoreControl'])) {
             $this->paginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
-            $this->selectorMoreListings = $this->getTagSelector($this->arrListingTagSetup['tag_load_more']);
+            $this->selectorMoreListings = $this->getTagSelector($this->arrListingTagSetup['LoadMoreControl']);
         }
 
-        if (!array_key_exists('tag_listings_count', $this->arrListingTagSetup) &&  !in_array(C__JOB_ITEMCOUNT_NOTAPPLICABLE__, $this->additionalFlags))
+        if (!array_key_exists('TotalPostCount', $this->arrListingTagSetup) &&  !in_array(C__JOB_ITEMCOUNT_NOTAPPLICABLE__, $this->additionalFlags))
         {
             $this->additionalFlags[]  = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
         }
 
-        if (!array_key_exists('tag_pages_count', $this->arrListingTagSetup) &&  !in_array(C__JOB_PAGECOUNT_NOTAPPLICABLE__, $this->additionalFlags))
+        if (!array_key_exists('TotalResultPageCount', $this->arrListingTagSetup) &&  !in_array(C__JOB_PAGECOUNT_NOTAPPLICABLE__, $this->additionalFlags))
         {
             $this->additionalFlags[]  = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
         }
@@ -63,25 +63,43 @@ class SimplePlugin extends BaseJobsSite
         parent::__construct();
     }
 
-    static function getEmptyListingTagSetup()
+    static function getJobItemKeys()
+    {
+        return array(
+            'JobSitePostId',
+            'Title',
+            'Url',
+            'JobSite',
+            'LocationFromSource',
+            'Category',
+            'Department',
+//            'PayRange',
+            'Company',
+//            'company_logo',
+            'PostedAt',
+            'EmploymentType'
+        );
+    }
+
+        static function getEmptyListingTagSetup()
     {
         $arrListingTagSetup = array(
-            'tag_pages_count' => array(),
-            'tag_listings_noresults' => array(),
-            'tag_listings_count' => array(),
-            'tag_listings_section' => array(),
-            'tag_next_button' => array(),
-            'tag_job_id' => array(),
-            'tag_title' => array(),
-            'tag_link' => array(),
-            'tag_jobsite' => array(),
-            'tag_department' => array(),
-            'tag_location' => array(),
-            'tag_job_category' => array(),
-            'tag_company' => array(),
-            'tag_company_logo' => array(),
-            'tag_job_posting_date' => array(),
-            'tag_employment_type' => array(),
+            'TotalResultPageCount' => array(),
+            'NoPostsFound' => array(),
+            'TotalPostCount' => array(),
+            'JobPostItem' => array(),
+            'NextButton' => array(),
+            'JobSitePostId' => array(),
+            'Title' => array(),
+            'Url' => array(),
+            'JobSite' => array(),
+            'Department' => array(),
+            'LocationFromSource' => array(),
+            'Category' => array(),
+            'Company' => array(),
+//            'company_logo' => array(),
+            'PostedAt' => array(),
+            'EmploymentType' => array(),
             'regex_link_job_id' => array(),
         );
         return $arrListingTagSetup;
@@ -112,10 +130,10 @@ class SimplePlugin extends BaseJobsSite
      */
     function parseTotalResultsCount($objSimpHTML)
     {
-        if (array_key_exists('tag_listings_noresults', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_listings_noresults'])) {
+        if (array_key_exists('NoPostsFound', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['NoPostsFound'])) {
             try
             {
-                $noResultsVal = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_listings_noresults'], $propertyName = 'plaintext');
+                $noResultsVal = $this->_getTagValueFromPage_($objSimpHTML, 'NoPostsFound');
                 if (!is_null($noResultsVal)) {
                     $GLOBALS['logger']->logLine("Search returned " . $noResultsVal . " and matched expected 'No results' tag for " . $this->siteName, \C__DISPLAY_ITEM_DETAIL__);
                     return $noResultsVal;
@@ -126,14 +144,14 @@ class SimplePlugin extends BaseJobsSite
         }
 
         $retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
-        if (array_key_exists('tag_listings_count', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['tag_listings_count']) && count($this->arrListingTagSetup['tag_listings_count']) > 0) {
-            $retJobCount = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_listings_count'], $propertyName = 'plaintext');
+        if (array_key_exists('TotalPostCount', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['TotalPostCount']) && count($this->arrListingTagSetup['TotalPostCount']) > 0) {
+            $retJobCount = $this->_getTagValueFromPage_($objSimpHTML, 'TotalPostCount');
             if (is_null($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
-                throw new \Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['tag_listings_count']));
-        } else if (array_key_exists('tag_pages_count', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['tag_pages_count']) && count($this->arrListingTagSetup['tag_pages_count']) > 0) {
-            $retPageCount = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_pages_count'], $propertyName = 'plaintext');
+                throw new \Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['TotalPostCount']));
+        } else if (array_key_exists('TotalResultPageCount', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['TotalResultPageCount']) && count($this->arrListingTagSetup['TotalResultPageCount']) > 0) {
+            $retPageCount = $this->_getTagValueFromPage_($objSimpHTML, 'TotalResultPageCount');
             if (is_null($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
-                throw new \Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['tag_pages_count']));
+                throw new \Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['TotalResultPageCount']));
 
             $retJobCount = $retPageCount * $this->nJobListingsPerPage;
         } elseif ($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__))
@@ -178,8 +196,13 @@ class SimplePlugin extends BaseJobsSite
         return $strMatch;
     }
 
-    protected function _getTagMatchValue_($node, $arrTag, $returnAttribute = 'plaintext', $item = null)
+    protected function _getTagValueFromPage_($node, $tagKey, $item = null)
     {
+        if (!(array_key_exists($tagKey, $this->arrListingTagSetup) && count($this->arrListingTagSetup[$tagKey]) >= 1))
+            return null;
+
+        $arrTag = $this->arrListingTagSetup[$tagKey];
+
         if(!is_array($arrTag) || count($arrTag) == 0 )
             return null;
 
@@ -187,7 +210,7 @@ class SimplePlugin extends BaseJobsSite
             switch(strtoupper($arrTag['type']))
             {
                 case 'CSS':
-                    return $this->_getTagMatchValueCSS_($node, $arrTag, $returnAttribute);
+                    return $this->_getTagMatchValueCSS_($node, $arrTag);
                     break;
 
                 case 'STATIC':
@@ -195,7 +218,7 @@ class SimplePlugin extends BaseJobsSite
                     break;
 
                 case 'REGEX':
-                    return $this->_getTagMatchValueRegex_($node, $arrTag, $returnAttribute, $item);
+                    return $this->_getTagMatchValueRegex_($node, $arrTag, $item);
                     break;
 
                 default:
@@ -204,7 +227,7 @@ class SimplePlugin extends BaseJobsSite
         }
         else
         {
-            return $this->_getTagMatchValueCSS_($node, $arrTag, $returnAttribute);
+            return $this->_getTagMatchValueCSS_($node, $arrTag);
 
         }
 
@@ -225,7 +248,7 @@ class SimplePlugin extends BaseJobsSite
         return $ret;
     }
 
-    protected function _getTagMatchValueRegex_($node, $arrTag, $returnAttribute, $item)
+    protected function _getTagMatchValueRegex_($node, $arrTag, $item)
     {
         $ret = null;
         if (array_key_exists("return_value_regex", $arrTag) && !is_null($arrTag['return_value_regex']))
@@ -234,7 +257,7 @@ class SimplePlugin extends BaseJobsSite
             $pattern = $arrTag['pattern'];
             $value = "";
             if (array_key_exists("selector", $arrTag) && !is_null($arrTag['selector'])) {
-                $value = $this->_getTagMatchValueCSS_($node, $arrTag, $returnAttribute);
+                $value = $this->_getTagMatchValueCSS_($node, $arrTag);
             }
             elseif (array_key_exists("field", $arrTag) && !is_null($arrTag['field'])) {
                 if (in_array($arrTag['field'], array_keys($item))) {
@@ -270,7 +293,7 @@ class SimplePlugin extends BaseJobsSite
         return $ret;
     }
 
-    protected function _getTagMatchValueCSS_($node, $arrTag, $returnAttribute = 'plaintext')
+    protected function _getTagMatchValueCSS_($node, $arrTag)
     {
         $ret = null;
         $fReturnNodeObject = false;
@@ -279,6 +302,9 @@ class SimplePlugin extends BaseJobsSite
         if (array_key_exists("return_attribute", $arrTag) && !is_null($arrTag['return_attribute'])) {
             $returnAttribute = $arrTag['return_attribute'];
         }
+        else
+            $returnAttribute = 'plaintext';
+
         if(strtolower($returnAttribute) == 'collection' || strtolower($returnAttribute) == 'node')
         {
             $returnAttribute = null;
@@ -369,10 +395,10 @@ class SimplePlugin extends BaseJobsSite
         $tagSetup = $this->arrListingTagSetup;
 
         // first looked for the detail view layout and parse that
-        $strNodeMatch = $this->getTagSelector($tagSetup['tag_listings_section']);
+        $strNodeMatch = $this->getTagSelector($tagSetup['JobPostItem']);
 
         $GLOBALS['logger']->logLine($this->siteName . " finding nodes matching: " . $strNodeMatch, \C__DISPLAY_ITEM_DETAIL__);
-        $nodesJobRows = $this->_getTagMatchValue_($objSimpHTML, $tagSetup['tag_listings_section'], 'collection');
+        $nodesJobRows = $this->_getTagValueFromPage_($objSimpHTML, 'JobPostItem', 'collection');
 
         if ($nodesJobRows === false || (isset($nodesJobRows) && $nodesJobRows != null && count($nodesJobRows) > 0)) {
             foreach ($nodesJobRows as $node) {
@@ -381,36 +407,19 @@ class SimplePlugin extends BaseJobsSite
                 //
                 $item = getEmptyJobListingRecord();
 
-                $item['job_title'] = $this->_getTagMatchValue_($node, $tagSetup['tag_title'], 'plaintext');
-                $item['job_post_url'] = $this->_getTagMatchValue_($node, $tagSetup['tag_link'], 'href');
-                $item['job_site'] = $this->siteName;
+                foreach($this->getJobItemKeys() as $itemKey)
+                {
+                    $item[$itemKey] = $this->_getTagValueFromPage_($node, $itemKey, $item);
+                }
 
-                if (strlen($item['job_title']) == 0)
+                if (strlen($item['Title']) == 0)
                     continue;
 
-                if (array_key_exists('tag_company', $tagSetup) && count($tagSetup['tag_company']) >= 1)
-                    $item['company'] = $this->_getTagMatchValue_($node, $tagSetup['tag_company'], 'plaintext', $item);
-
-                if (array_key_exists('tag_department', $tagSetup) && count($tagSetup['tag_department']) >= 1)
-                    $item['job_site_category'] = $this->_getTagMatchValue_($node, $tagSetup['tag_department'], 'plaintext', $item);
-
-                if (array_key_exists('tag_location', $tagSetup) && count($tagSetup['tag_location']) >= 1)
-                    $item['location'] = $this->_getTagMatchValue_($node, $tagSetup['tag_location'], 'plaintext', $item);
-
-                if (array_key_exists('tag_job_posting_date', $tagSetup) && count($tagSetup['tag_job_posting_date']) >= 1)
-                    $item['job_site_date'] = $this->_getTagMatchValue_($node, $tagSetup['tag_job_posting_date'], 'plaintext', $item);
-
-                if (array_key_exists('tag_employment_type', $tagSetup) && count($tagSetup['tag_employment_type']) >= 1)
-                    $item['employment_type'] = $this->_getTagMatchValue_($node, $tagSetup['tag_employment_type'], 'plaintext', $item);
-
-                if (array_key_exists('tag_job_posting_date', $this->arrListingTagSetup))
-                    $item['job_site_date'] = $this->_getTagMatchValue_($node, $this->arrListingTagSetup['tag_job_posting_date'], 'plaintext');
+                if(empty($item['JobSite']))
+                    $item['JobSite'] = $this->siteName;
 
                 if (array_key_exists('regex_link_job_id', $tagSetup) && count($tagSetup['regex_link_job_id']) >= 1)
                     $this->regex_link_job_id = $tagSetup['regex_link_job_id'];
-
-                if (array_key_exists('tag_job_id', $tagSetup) && count($tagSetup['tag_job_id']) >= 1)
-                    $item['job_id'] = $this->_getTagMatchValue_($node, $tagSetup['tag_job_id'], 'plaintext', $item);
 
                 $ret[] = $item;
 

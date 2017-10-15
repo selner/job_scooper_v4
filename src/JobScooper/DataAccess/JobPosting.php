@@ -69,7 +69,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
     protected function updateAutoColumns()
     {
         $this->setKeyCompanyAndTitle(cleanupSlugPart($this->getCompany() . $this->getTitle()));
-        $this->setKeySiteAndPostID(cleanupSlugPart($this->getJobSite() . $this->getJobSitePostID()));
+        $this->setKeySiteAndPostID(cleanupSlugPart($this->getJobSite() . $this->getJobSitePostId()));
     }
 
     public function setAutoColumnRelatedProperty($method, $v)
@@ -281,131 +281,130 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
             $this->save();
         }
     }
+//
+//    public function &get($name)
+//    {
+//
+//        $throwEx = null;
+//        try {
+//            return $this->{$name};
+//        } catch (Exception $ex) {
+//            $throwEx = $ex;
+//        }
+//
+//        try {
+//            return $this->getByName($name, \JobScooper\DataAccess\Map\UserSearchRunTableMap::TYPE_FIELDNAME);
+//        } catch (Exception $ex) {
+//            $throwEx = $ex;
+//        }
+//
+//        try {
+//            return $this->getByName($name, \JobScooper\DataAccess\Map\UserSearchRunTableMap::TYPE_COLNAME);
+//        } catch (Exception $ex) {
+//            $throwEx = $ex;
+//        }
+//
+//        if(!is_null($throwEx))
+//            handleException($throwEx, "Warning: field " . $name . " was not found in job posting object so ignoring it.", false);
+//
+//        return null;
+//    }
 
-    public function &get($name)
-    {
-
-        $throwEx = null;
-        try {
-            return $this->{$name};
-        } catch (Exception $ex) {
-            $throwEx = $ex;
-        }
-
-        try {
-            return $this->getByName($name, \JobScooper\DataAccess\Map\UserSearchRunTableMap::TYPE_FIELDNAME);
-        } catch (Exception $ex) {
-            $throwEx = $ex;
-        }
-
-        try {
-            return $this->getByName($name, \JobScooper\DataAccess\Map\UserSearchRunTableMap::TYPE_COLNAME);
-        } catch (Exception $ex) {
-            $throwEx = $ex;
-        }
-
-        if(!is_null($throwEx))
-            handleException($throwEx, "Warning: field " . $name . " was not found in job posting object so ignoring it.", false);
-
-        return null;
-    }
-
-
-    function getColumnMappingFromJobToDB() {
-        return array(
-            "job_title" => "Title",
-            "job_site" => "JobSite",
-            "job_title_tokenized"  => "JobTitleTokens",
-            "job_post_url"  => "Url",
-            "job_id"  => "JobSitePostID",
-            "company"  => "Company",
-            "location"  => "LocationFromSource",
-            "job_site_category"  => "Category",
-            "employment_type"  => "EmploymentType",
-            "date_last_updated"  => "UpdatedAt",
-            "job_site_date"  => "PostedAt",
-            "date_pulled"  => "FirstSeenAt"
-        );
-    }
-
-    public function fromArray($arr, $keyType = \Propel\Runtime\Map\TableMap::TYPE_PHPNAME)
-    {
-        try
-        {
-            $jobPostingKeys = \JobScooper\DataAccess\Map\JobPostingTableMap::getFieldNames($keyType);
-            $arrJobPostingFields = array();
-            foreach($jobPostingKeys as $k)
-            {
-                if(array_key_exists($k, $arr))
-                {
-                    $arrJobPostingFields[$k] = $arr[$k];
-                    unset($arr[$k]);
-                }
-            }
-            parent::fromArray($arrJobPostingFields, $keyType);
-        }
-        catch (\Exception $ex)
-        {
-            print $ex;
-        }
-
-        foreach(array_keys($arr) as $k)
-            $this->set($k, $arr[$k]);
-
-    }
-
-    public function set($name, $value)
-    {
-
-        switch($name)
-        {
-            case "normalized":
-            case "interested":
-                break;
-
-            case array_key_exists($name, $this->getColumnMappingFromJobToDB()):
-                $newKey = $this->getColumnMappingFromJobToDB()[$name];
-                $method = "set" . $newKey;
-                $this->$method($value);
-                break;
-
-            default:
-                $throwEx = null;
-                try {
-                    $this->{$name} = $value;
-                    $throwEx = null;
-                } catch (\Exception $ex) {
-                    $throwEx = $ex;
-                }
-
-                try {
-                    $this->setByName($name, \JobScooper\DataAccess\Map\UserSearchRunTableMap::TYPE_FIELDNAME, $value);
-                    $throwEx = null;
-                } catch (\Exception $ex) {
-                    $throwEx = $ex;
-                }
-
-                try {
-                    $this->setByName($name, \JobScooper\DataAccess\Map\UserSearchRunTableMap::TYPE_COLNAME, $value);
-                    $throwEx = null;
-                } catch (\Exception $ex) {
-                    $throwEx = $ex;
-                }
-
-                try {
-                    $this->setByName($name, \JobScooper\DataAccess\Map\UserSearchRunTableMap::TYPE_CAMELNAME, $value);
-                    $throwEx = null;
-                } catch (\Exception $ex) {
-                    $throwEx = $ex;
-                }
-
-                if(!is_null($throwEx))
-                    handleException($throwEx, "Warning: field " . $name . " was not found in job posting object so ignoring it.", false);
-
-                break;
-        }
-
-    }
+//
+//    function getColumnMappingFromJobToDB() {
+//        return array(
+//            'Title' => "Title",
+//            'JobSite' => "JobSite",
+//            'TitleTokenized'  => "JobTitleTokens",
+//            'Url'  => "Url",
+//            'JobSitePostId'  => "JobSitePostId",
+//            'Company'  => "Company",
+//            'LocationFromSource'  => "LocationFromSource",
+//            'Department'  => "Department",
+//            'Category'  => "Category",
+//            'EmploymentType'  => "EmploymentType",
+//            'PostedAt'  => "PostedAt",
+//        );
+//    }
+//
+//    public function fromArray($arr, $keyType = \Propel\Runtime\Map\TableMap::TYPE_PHPNAME)
+//    {
+//        try
+//        {
+//            $jobPostingKeys = \JobScooper\DataAccess\Map\JobPostingTableMap::getFieldNames($keyType);
+//            $arrJobPostingFields = array();
+//            foreach($jobPostingKeys as $k)
+//            {
+//                if(array_key_exists($k, $arr))
+//                {
+//                    $arrJobPostingFields[$k] = $arr[$k];
+//                    unset($arr[$k]);
+//                }
+//            }
+//            parent::fromArray($arrJobPostingFields, $keyType);
+//        }
+//        catch (\Exception $ex)
+//        {
+//            print $ex;
+//        }
+//
+//        foreach(array_keys($arr) as $k)
+//            $this->set($k, $arr[$k]);
+//
+//    }
+//
+//    public function set($name, $value)
+//    {
+//
+//        switch($name)
+//        {
+//            case "normalized":
+//            case "interested":
+//                break;
+//
+//            case array_key_exists($name, $this->getColumnMappingFromJobToDB()):
+//                $newKey = $this->getColumnMappingFromJobToDB()[$name];
+//                $method = "set" . $newKey;
+//                $this->$method($value);
+//                break;
+//
+//            default:
+//                $throwEx = null;
+//                try {
+//                    $this->{$name} = $value;
+//                    $throwEx = null;
+//                } catch (\Exception $ex) {
+//                    $throwEx = $ex;
+//                }
+//
+//                try {
+//                    $this->setByName($name, \JobScooper\DataAccess\Map\UserSearchRunTableMap::TYPE_FIELDNAME, $value);
+//                    $throwEx = null;
+//                } catch (\Exception $ex) {
+//                    $throwEx = $ex;
+//                }
+//
+//                try {
+//                    $this->setByName($name, \JobScooper\DataAccess\Map\UserSearchRunTableMap::TYPE_COLNAME, $value);
+//                    $throwEx = null;
+//                } catch (\Exception $ex) {
+//                    $throwEx = $ex;
+//                }
+//
+//                try {
+//                    $this->setByName($name, \JobScooper\DataAccess\Map\UserSearchRunTableMap::TYPE_CAMELNAME, $value);
+//                    $throwEx = null;
+//                } catch (\Exception $ex) {
+//                    $throwEx = $ex;
+//                }
+//
+//                if(!is_null($throwEx))
+//                    handleException($throwEx, "Warning: field " . $name . " was not found in job posting object so ignoring it.", false);
+//
+//                break;
+//        }
+//
+//    }
 
     public function offsetGet($offset)
     {

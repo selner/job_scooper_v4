@@ -10,7 +10,7 @@
       "Name": "PageFields",
       "Fields": [
         {
-          "Name": "tag_listings_count",
+          "Name": "TotalPostCount",
           "Selector": "div.rh-job-result-table__counter label",
           "Index" : 1,
           "Extract": "REGEX",
@@ -19,7 +19,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_listings_section",
+          "Name": "JobPostItem",
           "Selector": "div.row .rh-job-result-table__row",
           "Extract": "CSS",
           "Attribute": "collection",
@@ -31,14 +31,14 @@
       "Name": "ItemFields",
       "Fields": [
         {
-          "Name": "tag_title",
+          "Name": "Title",
           "Selector": "a.rh-job-result-table__job-title",
           "Extract": "TEXT",
           "Attribute": "plaintext",
           "Type": "CSS"
         },
         {
-          "Name": "tag_link",
+          "Name": "Url",
           "Selector": "a.rh-job-result-table__job-title",
           "Extract": "ATTR",
           "Attribute": "href",
@@ -46,7 +46,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_location",
+          "Name": "LocationFromSource",
           "Selector": "span.rh-job-result-table__location",
           "Index" : 1,
           "Extract": "TEXT",
@@ -54,7 +54,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_category",
+          "Name": "Category",
           "Selector": "span.rh-job-result-table__emptype",
           "Index" : 1,
           "Extract": "TEXT",
@@ -62,14 +62,14 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_job_id",
+          "Name": "JobSitePostId",
           "Pattern": "/\\/job\\/([^?]+)/i",
           "Extract": "REGEX",
           "Type": "REGEX",
           "Field": "job_post_url"
         },
         {
-          "Name": "tag_job_posting_date",
+          "Name": "PostedAt",
           "Selector": "span.rh-job-result-table__postdate",
           "Index" : 1,
           "Extract": "TEXT",

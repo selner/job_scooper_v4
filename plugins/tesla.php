@@ -30,13 +30,13 @@ class PluginTesla extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $nJobListingsPerPage = C_JOB_MAX_RESULTS_PER_SEARCH;
 
     protected $arrListingTagSetup = array(
-        'tag_listings_section' => array('selector' => "table tr.table-row" ),
-        'tag_title' => array('selector' => 'th.listing-title a', 'return_attribute' => 'plaintext'),
-        'tag_link' => array('selector' => 'th.listing-title a', 'return_attribute' => 'href'),
-        'tag_company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
-        'tag_job_id' => array('selector' => 'th.listing-title a', 'return_attribute' => 'href', 'return_value_regex' =>  '/.*?-(\d+)/i'),
-        'tag_department' => array('selector' => 'td.listing-department'),
-        'tag_location' => array('selector' => 'td.listing-location')
+        'JobPostItem' => array('selector' => "table tr.table-row" ),
+        'Title' => array('selector' => 'th.listing-title a', 'return_attribute' => 'plaintext'),
+        'Url' => array('selector' => 'th.listing-title a', 'return_attribute' => 'href'),
+        'Company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
+        'JobSitePostId' => array('selector' => 'th.listing-title a', 'return_attribute' => 'href', 'return_value_regex' =>  '/.*?-(\d+)/i'),
+        'Department' => array('selector' => 'td.listing-department'),
+        'LocationFromSource' => array('selector' => 'td.listing-location')
     );
 
 }

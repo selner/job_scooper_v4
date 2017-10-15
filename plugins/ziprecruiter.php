@@ -28,14 +28,14 @@ class PluginZipRecruiter extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
 
     protected $arrListingTagSetup = array(
-        'tag_listings_noresults'    => array('selector' => 'section.no-results h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
-        'tag_listings_count'        => array('selector' => '#h1.headline', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/\b(\d+)\b/i'),
-        'tag_listings_section'      => array('selector' => '#job_list div article'),
-        'tag_title'                 => array('selector' => 'span.just_job_title', 'return_attribute' => 'plaintext'),
-        'tag_link'                  => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => 'job_link', 'return_attribute' => 'href'),
-        'tag_company'               => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => 't_org_link name', 'return_attribute' => 'plaintext'),
-        'tag_location'              => array('tag' => '*', 'attribute'=>'class', 'attribute_value' => 'location', 'return_attribute' => 'plaintext'),
-        'tag_job_id'                => array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'just_job_title', 'return_attribute' => 'data-job-id'),
+        'NoPostsFound'    => array('selector' => 'section.no-results h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
+        'TotalPostCount'        => array('selector' => '#h1.headline', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/\b(\d+)\b/i'),
+        'JobPostItem'      => array('selector' => '#job_list div article'),
+        'Title'                 => array('selector' => 'span.just_job_title', 'return_attribute' => 'plaintext'),
+        'Url'                  => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => 'job_link', 'return_attribute' => 'href'),
+        'Company'               => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => 't_org_link name', 'return_attribute' => 'plaintext'),
+        'LocationFromSource'              => array('tag' => '*', 'attribute'=>'class', 'attribute_value' => 'LocationFromSource', 'return_attribute' => 'plaintext'),
+        'JobSitePostId'                => array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'just_job_title', 'return_attribute' => 'data-job-id'),
     );
 
     function isNoJobResults($var)

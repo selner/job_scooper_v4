@@ -115,7 +115,7 @@ class JobSitePluginManager
                 $pluginData['paginationType'] = strtoupper($arrConfigData['Pagination']['Type']);
                 switch (strtoupper($arrConfigData['Pagination']['Type'])) {
                     case 'NEXT-BUTTON':
-                        $pluginData['arrListingTagSetup']['tag_next_button'] = array(
+                        $pluginData['arrListingTagSetup']['NextButton'] = array(
                             'selector' => $arrConfigData['Pagination']['Selector'],
                             'index' => $arrConfigData['Pagination']['Index'],
                             'type' => 'CSS'
@@ -123,7 +123,7 @@ class JobSitePluginManager
                         break;
 
                     case 'LOAD-MORE':
-                        $pluginData['arrListingTagSetup']['tag_load_more'] = array(
+                        $pluginData['arrListingTagSetup']['LoadMoreControl'] = array(
                             'selector' => $arrConfigData['Pagination']['Selector'],
                             'index' => $arrConfigData['Pagination']['Index'],
                             'type' => 'CSS'

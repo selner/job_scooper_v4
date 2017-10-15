@@ -32,7 +32,7 @@ class PluginGoogle extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $nextPageScript = "var elem = document.getElementById('gjsrpn');  if (elem != null) { console.log('attempting next button click on element ID gjsrpn'); elem.click(); };";
 
     protected $arrListingTagSetup = array(
-        'tag_next_button' => array('selector' => 'button[aria-label=\'Next page\']')
+        'NextButton' => array('selector' => 'button[aria-label=\'Next page\']')
     );
     
 //    function getItemURLValue($nItem)
@@ -61,26 +61,26 @@ class PluginGoogle extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         {
             $item = getEmptyJobListingRecord();
 
-            $item['job_id'] = $node->attr['id'];
+            $item['JobSitePostId'] = $node->attr['id'];
 
             $subNode = $node->find("h2 a");
             if(isset($subNode) && count($subNode) >= 1)
             {
-                $item['job_post_url'] = $subNode[0]->attr['href'];
-                $item['job_title'] = $subNode[0]->attr['title'];
+                $item['Url'] = $subNode[0]->attr['href'];
+                $item['Title'] = $subNode[0]->attr['Title'];
             }
 
-            if($item['job_id'] == '') continue;
+            if($item['JobSitePostId'] == '') continue;
 
             $subNode = $node->find("span[class='location secondary-text']");
             if(isset($subNode))
-                $item['location'] = $subNode[0]->attr['title'];
+                $item['LocationFromSource'] = $subNode[0]->attr['Title'];
 
             $subNode = $node->find("span[class='secondary-text']");
             if(isset($subNode))
-                $item['company'] = $subNode[0]->plaintext;
+                $item['Company'] = $subNode[0]->plaintext;
             else
-                $item['company'] = $this->siteName;
+                $item['Company'] = $this->siteName;
 
             $ret[] = $item;
 

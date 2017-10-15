@@ -20,11 +20,11 @@
 abstract class AbstractResumator extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
 {
     protected $arrListingTagSetup = array(
-        'tag_listings_section' => array(array('tag' => 'div', 'attribute' => 'id', 'attribute_value' =>'resumator-content-left-wrapper'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'resumator-job')),
-        'tag_title' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'resumator-job-title-link'),
-        'tag_link' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'resumator-job-title-link'),
-        'tag_department' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'resumator-job-info'),
-        'tag_location' => null,
+        'JobPostItem' => array(array('tag' => 'div', 'attribute' => 'id', 'attribute_value' =>'resumator-content-left-wrapper'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'resumator-job')),
+        'Title' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'resumator-job-title-link'),
+        'Url' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'resumator-job-title-link'),
+        'Department' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'resumator-job-info'),
+        'LocationFromSource' => null,
         'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
     );
 }
@@ -46,11 +46,11 @@ class PluginMashableCorporate extends AbstractResumator
     protected $childSiteListingPage = 'http://mashable.theresumator.com/';
 
     protected $arrListingTagSetup = array(
-        'tag_listings_section' => array(array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' =>'list-group'), array('tag' => 'li', 'attribute' => 'class', 'attribute_value' => 'list-group-item')),
-        'tag_title' => array(array('tag' => 'h4', 'attribute' => 'class', 'attribute_value' =>'list-group-item-heading'), array('tag' => 'a')),
-        'tag_link' => array(array('tag' => 'h4', 'attribute' => 'class', 'attribute_value' =>'list-group-item-heading'), array('tag' => 'a')),
-        'tag_department' => array(array('tag' => 'ul' ), array('tag' => 'li', 'index' => 0)),
-        'tag_location' => array(array('tag' => 'ul' ), array('tag' => 'li', 'index' => 1)),
+        'JobPostItem' => array(array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' =>'list-group'), array('tag' => 'li', 'attribute' => 'class', 'attribute_value' => 'list-group-item')),
+        'Title' => array(array('tag' => 'h4', 'attribute' => 'class', 'attribute_value' =>'list-group-item-heading'), array('tag' => 'a')),
+        'Url' => array(array('tag' => 'h4', 'attribute' => 'class', 'attribute_value' =>'list-group-item-heading'), array('tag' => 'a')),
+        'Department' => array(array('tag' => 'ul' ), array('tag' => 'li', 'index' => 0)),
+        'LocationFromSource' => array(array('tag' => 'ul' ), array('tag' => 'li', 'index' => 1)),
         'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
     );
 }

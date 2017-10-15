@@ -11,14 +11,14 @@
       "Name": "PageFields",
       "Fields": [
         {
-          "Name": "tag_listings_count",
+          "Name": "TotalPostCount",
           "Selector": "h3.direct_highlightedText",
           "Extract": "REGEX",
           "Pattern": "/.*?([,\\d]+)\\s*[Jj]obs/",
           "Type": "CSS"
         },
         {
-          "Name": "tag_listings_section",
+          "Name": "JobPostItem",
           "Selector": "ul.default_jobListing li",
           "Extract": "CSS",
           "Attribute": "collection",
@@ -30,14 +30,14 @@
       "Name": "ItemFields",
       "Fields": [
         {
-          "Name": "tag_title",
+          "Name": "Title",
           "Selector": "h4 a span",
           "Extract": "TEXT",
           "Attribute": "plaintext",
           "Type": "CSS"
         },
         {
-          "Name": "tag_link",
+          "Name": "Url",
           "Selector": "h4 a ",
           "Extract": "ATTR",
           "Attribute": "href",
@@ -45,7 +45,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_location",
+          "Name": "LocationFromSource",
           "Selector": "div span[itemprop='address']",
           "Index" : 0,
           "Extract": "CSS",
@@ -54,7 +54,7 @@
           "Callback": "combineTextAllNodes"
         },
         {
-          "Name": "tag_company",
+          "Name": "Company",
           "Selector": "div span b",
           "Index" : 0,
           "Extract": "TEXT",
@@ -62,7 +62,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_job_id",
+          "Name": "JobSitePostId",
           "Pattern": "/\\/([\\w\\d]+)\\/job/",
           "Extract": "REGEX",
           "Type": "REGEX",

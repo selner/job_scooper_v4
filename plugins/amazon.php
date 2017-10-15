@@ -71,21 +71,21 @@ class PluginAmazon extends AjaxHtmlPlugin
         {
             $item = getEmptyJobListingRecord();
 
-            $item['job_id'] = str_ireplace("/en/jobs/", "", $node->href);
-            $item['job_post_url'] = $this->siteBaseURL . $node->href;
+            $item['JobSitePostId'] = str_ireplace("/en/jobs/", "", $node->href);
+            $item['Url'] = $this->siteBaseURL . $node->href;
 
             $subNode = $node->find("h2[class=job-title]");
-            $item['job_title'] = $subNode[0]->plaintext;
+            $item['Title'] = $subNode[0]->plaintext;
 
-            $item['company'] = 'Amazon';
+            $item['Company'] = 'Amazon';
             $subNode = $node->find("div[class=location-and-id] span]");
-            $item['location'] = explode("|", $subNode[0]->plaintext)[0];
+            $item['LocationFromSource'] = explode("|", $subNode[0]->plaintext)[0];
 
             $subNode = $node->find("h2[class=posting-date]");
-            $item['job_site_date'] = trim(str_ireplace(array("Posted ", "on"), "", $subNode[0]->plaintext));
-            $dateVal = date_create_from_format("F d, Y", $item['job_site_date']);
+            $item['PostedAt'] = trim(str_ireplace(array("Posted ", "on"), "", $subNode[0]->plaintext));
+            $dateVal = date_create_from_format("F d, Y", $item['PostedAt']);
             if(isset($dateVal))
-                $item['job_site_date'] = $dateVal->format('m/d/y');
+                $item['PostedAt'] = $dateVal->format('m/d/y');
 
             $ret[] = $item;
         }

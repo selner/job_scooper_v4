@@ -8,7 +8,7 @@
       "Name": "PageFields",
       "Fields": [
       {
-          "Name": "tag_listings_section",
+          "Name": "JobPostItem",
           "Selector": "div.jobsearch-results div.grid",
           "Extract": "HTML",
           "Attribute": "node",
@@ -20,14 +20,14 @@
       "Name": "ItemFields",
       "Fields": [
         {
-          "Name": "tag_title",
+          "Name": "Title",
           "Selector": "h3",
           "Extract": "TEXT",
           "Attribute": null,
           "Type": "CSS"
         },
         {
-          "Name": "tag_location",
+          "Name": "LocationFromSource",
           "Selector": "div.jsr-pg",
           "Extract": "TEXT",
           "Index": 1,
@@ -35,7 +35,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_category",
+          "Name": "Category",
           "Selector": "div.jsr-pg",
           "Extract": "TEXT",
           "Index": 0,
@@ -43,7 +43,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_link",
+          "Name": "Url",
           "Selector": "a",
           "Extract": "ATTR",
           "Attribute": "href",
@@ -51,7 +51,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_job_id",
+          "Name": "JobSitePostId",
           "Selector": "a",
           "Extract": "REGEX",
           "Type": "CSS",

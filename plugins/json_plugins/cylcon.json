@@ -10,7 +10,7 @@
       "Name": "PageFields",
       "Fields": [
         {
-          "Name": "tag_listings_count",
+          "Name": "TotalPostCount",
           "Selector": "div#searchCount",
           "Extract": "REGEX",
           "Pattern": "/.*?of\\s+(\\d+)/",
@@ -18,7 +18,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_listings_section",
+          "Name": "JobPostItem",
           "Selector": "div.joblists div.col-lg-10",
           "Extract": "CSS",
           "Attribute": "collection",
@@ -30,7 +30,7 @@
       "Name": "ItemFields",
       "Fields": [
         {
-          "Name": "tag_title",
+          "Name": "Title",
           "Selector": "a",
           "Extract": "TEXT",
           "Attribute": "plaintext",
@@ -38,7 +38,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_link",
+          "Name": "Url",
           "Selector": "a",
           "Extract": "ATTR",
           "Attribute": "href",
@@ -46,7 +46,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_job_id",
+          "Name": "JobSitePostId",
           "Pattern": "/.*?[Rr]edirect[Ww][Ee][Bb]\\.php\\?q=(.*)/",
           "Extract": "REGEX",
           "Type": "REGEX",
@@ -54,20 +54,22 @@
         },
 
         {
-          "Name": "company",
+          "Name": "Company",
           "Selector": "p strong",
           "Extract": "TEXT",
+          "Pattern": "/(.*?)[\\-]{1}.*/",
+          "Index": 0,
           "Type": "CSS"
         },
         {
-          "Name": "tag_location",
+          "Name": "LocationFromSource",
           "Selector": "p strong span.location",
           "Pattern": "/.*?[\\-]{1}(.*)/",
           "Extract": "TEXT",
           "Type": "CSS"
         },
         {
-          "Name": "tag_job_posting_date",
+          "Name": "PostedAt",
           "Selector": "span.date",
           "Index" : 0,
           "Extract": "TEXT",

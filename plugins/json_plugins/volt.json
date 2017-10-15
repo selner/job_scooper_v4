@@ -10,7 +10,7 @@
       "Name": "PageFields",
       "Fields": [
     {
-      "Name": "tag_listings_count",
+      "Name": "TotalPostCount",
       "Selector": "h2.status",
       "Extract": "REGEX",
       "Pattern": "/There are (\\d+).*/",
@@ -18,7 +18,7 @@
       "Type": "CSS"
     },
     {
-          "Name": "tag_listings_section",
+          "Name": "JobPostItem",
           "Selector": "table#results_table tr",
           "Extract": "HTML",
           "Attribute": "node",
@@ -30,14 +30,14 @@
       "Name": "ItemFields",
       "Fields": [
         {
-          "Name": "tag_title",
+          "Name": "Title",
           "Selector": "td.title a",
           "Extract": "TEXT",
           "Attribute": null,
           "Type": "CSS"
         },
         {
-          "Name": "tag_location",
+          "Name": "LocationFromSource",
           "Selector": "td.loc",
           "Extract": "TEXT",
           "Index": 1,
@@ -45,7 +45,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_category",
+          "Name": "Category",
           "Selector": "div.jsr-pg",
           "Extract": "TEXT",
           "Index": 0,
@@ -53,7 +53,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_link",
+          "Name": "Url",
           "Selector": "td.title a",
           "Extract": "ATTR",
           "Attribute": "href",
@@ -61,7 +61,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_job_id",
+          "Name": "JobSitePostId",
           "Pattern" : "/.*?\/(\\w+)\/*$/",
           "Selector": "td.title a",
           "Extract": "REGEX",
@@ -70,7 +70,7 @@
         },
 
         {
-          "Name": "tag_job_posted_date",
+          "Name": "PostedAt",
           "Selector": "td.date",
           "Extract": "TEXT",
           "Index": 0,

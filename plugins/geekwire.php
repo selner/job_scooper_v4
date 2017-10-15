@@ -25,15 +25,15 @@ class PluginGeekwire extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $paginationType = C__PAGINATION_NONE;
 
     protected $arrListingTagSetup = array(
-        'tag_listings_section' => array('selector' => 'ul.job_listings li.type-job_listing'),
-        'tag_title' => array('tag' => 'h3'),
-        'tag_link' => array('tag' => 'a.job_listing-clickbox', 'index' => 0, 'return_attribute' => 'href'),
-        'tag_company' => array('selector' => 'div.job_listing-company strong', 'return_attribute' => 'plaintext'),
-        'tag_location' => array('selector' => 'div.job_listing-location a', 'return_attribute' => 'plaintext'),
-        'tag_job_posting_date' => array('selector' => 'date', 'index' => 0),
-        'tag_job_category' => array('selector' => 'ul.meta li', 'index' => 0),
-        'tag_company_logo' => array('selector' => 'img.company_logo'),
-        'tag_job_id' =>  array('tag' => 'a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' =>  '/\/jobs\/job\/(.*)/i')
+        'JobPostItem' => array('selector' => 'ul.job_listings li.type-job_listing'),
+        'Title' => array('tag' => 'h3'),
+        'Url' => array('tag' => 'a.job_listing-clickbox', 'index' => 0, 'return_attribute' => 'href'),
+        'Company' => array('selector' => 'div.job_listing-company strong', 'return_attribute' => 'plaintext'),
+        'LocationFromSource' => array('selector' => 'div.job_listing-location a', 'return_attribute' => 'plaintext'),
+        'PostedAt' => array('selector' => 'date', 'index' => 0),
+        'Category' => array('selector' => 'ul.meta li', 'index' => 0),
+        'company_logo' => array('selector' => 'img.company_logo'),
+        'JobSitePostId' =>  array('tag' => 'a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' =>  '/\/jobs\/job\/(.*)/i')
     );
 
 

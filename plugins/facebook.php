@@ -29,13 +29,13 @@ class PluginFacebook extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $paginationType = C__PAGINATION_NONE;
     
     protected $arrListingTagSetup = array(
-        'tag_listings_count' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'_1dc4', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
-        'tag_listings_section' => array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => '_3k6i')),
-        'tag_title' => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => '_5144', 'return_attribute' => 'plaintext'),
-        'tag_company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
-        'tag_link' => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => '_5144', 'return_attribute' => 'href'),
-        'tag_job_id' => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => '_5144', 'return_attribute' => 'href', 'return_value_regex' => '/\/careers\/jobs\/([^\/]+)/'),
-        'tag_location' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'_3k6m')
+        'TotalPostCount' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'_1dc4', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
+        'JobPostItem' => array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => '_3k6i')),
+        'Title' => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => '_5144', 'return_attribute' => 'plaintext'),
+        'Company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
+        'Url' => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => '_5144', 'return_attribute' => 'href'),
+        'JobSitePostId' => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => '_5144', 'return_attribute' => 'href', 'return_value_regex' => '/\/careers\/jobs\/([^\/]+)/'),
+        'LocationFromSource' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'_3k6m')
     );
 
 }

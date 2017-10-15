@@ -29,14 +29,14 @@ class PluginCyberCoders extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 
 
     protected $arrListingTagSetup = array(
-        'tag_listings_count' =>  array('tag' => 'span', 'attribute' => 'id', 'attribute_value' =>'total-result-count', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
-        'tag_listings_section' => array('selector' => '.job-details-container'),
-        'tag_title' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
-        'tag_link' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
-        'tag_job_id' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>'/.*?(\d+)$/'),
-        'tag_employment_type' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'wage'), array('tag' => 'span')),
-        'tag_location' =>  array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'location'),
-        'tag_job_posting_date' =>  array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'posted')
+        'TotalPostCount' =>  array('tag' => 'span', 'attribute' => 'id', 'attribute_value' =>'total-result-count', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
+        'JobPostItem' => array('selector' => '.job-details-container'),
+        'Title' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+        'Url' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
+        'JobSitePostId' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>'/.*?(\d+)$/'),
+        'EmploymentType' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'wage'), array('tag' => 'span')),
+        'LocationFromSource' =>  array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'LocationFromSource'),
+        'PostedAt' =>  array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'posted')
     );
 
 }

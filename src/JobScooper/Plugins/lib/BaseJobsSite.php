@@ -997,21 +997,21 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
             foreach ($apiJobs as $job) {
                 $item = getEmptyJobListingRecord();
-                $item['job_title'] = $job->name;
-                $item['job_id'] = $job->sourceId;
-                if ($item['job_id'] == null)
-                    $item['job_id'] = $job->url;
+                $item['Title'] = $job->name;
+                $item['JobSitePostId'] = $job->sourceId;
+                if ($item['JobSitePostId'] == null)
+                    $item['JobSitePostId'] = $job->url;
 
-                if (strlen(trim($item['job_title'])) == 0 || strlen(trim($item['job_id'])) == 0) {
+                if (strlen(trim($item['Title'])) == 0 || strlen(trim($item['JobSitePostId'])) == 0) {
                     continue;
                 }
-                $item['location'] = $job->location;
-                $item['company'] = $job->company;
+                $item['LocationFromSource'] = $job->location;
+                $item['Company'] = $job->company;
                 if ($job->datePosted != null)
-                    $item['job_site_date'] = $job->datePosted->format('Y-m-d');
-                $item['job_post_url'] = $job->url;
+                    $item['PostedAt'] = $job->datePosted->format('Y-m-d');
+                $item['Url'] = $job->url;
 
-                $strCurrentJobIndex = cleanupSlugPart($this->siteName) . cleanupSlugPart($item['job_id']);
+                $strCurrentJobIndex = cleanupSlugPart($this->siteName) . cleanupSlugPart($item['JobSitePostId']);
                 $arrPageJobsList[$strCurrentJobIndex] = $item;
                 $nItemCount += 1;
             }
@@ -1046,34 +1046,34 @@ abstract class BaseJobsSite implements IJobSitePlugin
     
     function cleanupJobItemFields($arrItem)
     {
-        if(is_null($arrItem['job_site']) || strlen($arrItem['job_site']) == 0)
-            $arrItem['job_site'] = $this->siteName;
+        if(is_null($arrItem['JobSite']) || strlen($arrItem['JobSite']) == 0)
+            $arrItem['JobSite'] = $this->siteName;
 
-        $arrItem['job_site'] = cleanupSlugPart($arrItem['job_site']);
+        $arrItem['JobSite'] = cleanupSlugPart($arrItem['JobSite']);
 
-        $arrItem ['job_post_url'] = trim($arrItem['job_post_url']); // DO NOT LOWER, BREAKS URLS
+        $arrItem ['Url'] = trim($arrItem['Url']); // DO NOT LOWER, BREAKS URLS
 
-        if (!is_null($arrItem['job_post_url']) || strlen($arrItem['job_post_url']) > 0) {
+        if (!is_null($arrItem['Url']) || strlen($arrItem['Url']) > 0) {
             $arrMatches = array();
-            $matchedHTTP = preg_match(REXPR_MATCH_URL_DOMAIN, $arrItem['job_post_url'], $arrMatches);
+            $matchedHTTP = preg_match(REXPR_MATCH_URL_DOMAIN, $arrItem['Url'], $arrMatches);
             if (!$matchedHTTP) {
                 $sep = "";
-                if (substr($arrItem['job_post_url'], 0, 1) != "/")
+                if (substr($arrItem['Url'], 0, 1) != "/")
                     $sep = "/";
-                $arrItem['job_post_url'] = $this->siteBaseURL . $sep . $arrItem['job_post_url'];
+                $arrItem['Url'] = $this->siteBaseURL . $sep . $arrItem['Url'];
             }
         } else {
-            $arrItem['job_post_url'] = "[UNKNOWN]";
+            $arrItem['Url'] = "[UNKNOWN]";
         }
 
-        if (is_null($arrItem['job_id']) || strlen($arrItem['job_id']) <= 0)
-            $arrItem['job_id'] = $arrItem['job_post_url'];
+        if (is_null($arrItem['JobSitePostId']) || strlen($arrItem['JobSitePostId']) <= 0)
+            $arrItem['JobSitePostId'] = $arrItem['Url'];
 
-        $arrItem['job_id'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $arrItem['job_id']);
-        $arrItem ['job_id'] = strScrub($arrItem['job_id'], FOR_LOOKUP_VALUE_MATCHING);
-        if (is_null($arrItem['job_id']) || strlen($arrItem['job_id']) == 0) {
+        $arrItem['JobSitePostId'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $arrItem['JobSitePostId']);
+        $arrItem ['JobSitePostId'] = strScrub($arrItem['JobSitePostId'], FOR_LOOKUP_VALUE_MATCHING);
+        if (is_null($arrItem['JobSitePostId']) || strlen($arrItem['JobSitePostId']) == 0) {
             if (isset($this->regex_link_job_id)) {
-                $arrItem['job_id'] = $this->getIDFromLink($this->regex_link_job_id, $arrItem['job_post_url']);
+                $arrItem['JobSitePostId'] = $this->getIDFromLink($this->regex_link_job_id, $arrItem['Url']);
             }
         }
 
@@ -1091,7 +1091,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     function saveSearchReturnedJobs($arrJobList, $searchDetails)
     {
-        $arrJobsBySitePostId = array_column($arrJobList, null, "job_id");
+        $arrJobsBySitePostId = array_column($arrJobList, null, 'JobSitePostId');
         if (!array_key_exists($searchDetails->getUserSearchRunKey(), $this->arrSearchReturnedJobs))
             $this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()] = array();
 
@@ -1124,7 +1124,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     //
 //        $arrReturnedJobIds = array_keys($this->arrSearchReturnedJobs);
 //
-//            $arrJobsBySitePostId = array_column($arrJobList, null, "job_id");
+//            $arrJobsBySitePostId = array_column($arrJobList, null, "JobSitePostId");
 //            if(!array_key_exists($searchDetails->getUserSearchRunKey(), $this->arrSearchReturnedJobs))
 //                $this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()] = array();
 //
@@ -1161,11 +1161,11 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     protected function getJobsDbIds($arrJobs)
     {
-        $arrIds = array_column($arrJobs, 'job_id', 'job_id');
+        $arrIds = array_column($arrJobs, 'JobSitePostId', 'JobSitePostId');
         $queryData = \JobScooper\DataAccess\JobPostingQuery::create()
-            ->select(array("JobPostingId", "JobSitePostID", "JobSite", "KeySiteAndPostID"))
+            ->select(array("JobPostingId", "JobSitePostId", "JobSite", "KeySiteAndPostID"))
             ->filterByJobSite($this->siteName)
-            ->filterByJobSitePostID(array_values($arrIds))
+            ->filterByJobSitePostId(array_values($arrIds))
             ->find();
         $jobResults = $queryData->toArray();
 

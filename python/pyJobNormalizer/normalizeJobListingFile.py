@@ -32,11 +32,11 @@ if __name__ == '__main__':
 
     dataKey = arguments['--column']
     if dataKey is None:
-        dataKey = "job_title"
+        dataKey = "Title"
 
     indexKey = arguments['--index']
     if indexKey is None:
-        indexKey = "key_jobsite_siteid"
+        indexKey = "KeyCompanyAndTitle"
 
     if arguments['--infile']:
         infile = arguments['--infile'].replace("'", "")

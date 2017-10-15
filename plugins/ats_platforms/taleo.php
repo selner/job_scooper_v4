@@ -143,14 +143,14 @@ abstract class AbstractTaleo extends \JobScooper\Plugins\lib\ServerHtmlPlugin
             $counter++;
 
             $item = getEmptyJobListingRecord();
-            $item['company'] = $this->siteName;
-            $item['job_post_url'] = $node->find("td a")[0]->href;
-            $item['job_title'] = $node->find("td a")[0]->plaintext;
-            $item['job_id'] = explode("rid=", $item['job_post_url'])[1];
-            if($item['job_title'] == '') continue;
+            $item['Company'] = $this->siteName;
+            $item['Url'] = $node->find("td a")[0]->href;
+            $item['Title'] = $node->find("td a")[0]->plaintext;
+            $item['JobSitePostId'] = explode("rid=", $item['Url'])[1];
+            if($item['Title'] == '') continue;
 
             $tds = $node->find("td");
-            if(isset($tds) && isset($tds[1])) $item['location'] = $node->find("td")[1]->plaintext;
+            if(isset($tds) && isset($tds[1])) $item['LocationFromSource'] = $node->find("td")[1]->plaintext;
             if(isset($tds) && isset($tds[2]))$item['job_site_category'] = $tds[2]->plaintext;
 
             $ret[] = $item;

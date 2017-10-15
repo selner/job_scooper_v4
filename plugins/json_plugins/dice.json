@@ -11,7 +11,7 @@
       "Name": "PageFields",
       "Fields": [
         {
-          "Name": "tag_listings_noresults",
+          "Name": "NoPostsFound",
           "Selector": "h1.h1",
           "Extract": "TEXT",
           "Index" : 0,
@@ -21,13 +21,13 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_listings_count",
+          "Name": "TotalPostCount",
           "Selector": "span#posiCountId",
           "Extract": "TEXT",
           "Type": "CSS"
         },
         {
-          "Name": "tag_listings_section",
+          "Name": "JobPostItem",
           "Selector": "div.complete-serp-result-div",
           "Extract": "CSS",
           "Attribute": "collection",
@@ -39,14 +39,14 @@
       "Name": "ItemFields",
       "Fields": [
         {
-          "Name": "tag_title",
+          "Name": "Title",
           "Selector": "h3 a.dice-btn-link",
           "Extract": "ATTR",
           "Attribute": "title",
           "Type": "CSS"
         },
         {
-          "Name": "tag_link",
+          "Name": "Url",
           "Selector": "h3 a.dice-btn-link",
           "Extract": "ATTR",
           "Attribute": "href",
@@ -54,13 +54,13 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_job_id",
+          "Name": "JobSitePostId",
           "Selector": "h3 a.dice-btn-link",
           "Extract": "ATTR",
           "Attribute": "value"
         },
         {
-          "Name": "tag_location",
+          "Name": "LocationFromSource",
           "Selector": "span.jobLoc",
           "Index" : 0,
           "Extract": "TEXT",
@@ -68,7 +68,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_company",
+          "Name": "Company",
           "Selector": "span.compName",
           "Index" : 0,
           "Extract": "TEXT",
@@ -76,7 +76,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_job_posting_date",
+          "Name": "PostedAt",
           "Selector": "span[itemprop=datePosted]",
           "Index" : 0,
           "Extract": "TEXT",

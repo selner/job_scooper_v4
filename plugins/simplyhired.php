@@ -155,30 +155,30 @@ class PluginSimplyHired extends \JobScooper\Plugins\lib\ServerHtmlPlugin
             $item = getEmptyJobListingRecord();
 
             $titlelink = $node->find('a[class="card-link js-job-link"]');
-            $item['job_title'] = combineTextAllChildren($titlelink[0]);;
-            $item['job_post_url'] = $this->siteBaseURL . $titlelink[0]->href;
+            $item['Title'] = combineTextAllChildren($titlelink[0]);;
+            $item['Url'] = $this->siteBaseURL . $titlelink[0]->href;
 
-            if($item['job_title'] == '') continue;
+            if($item['Title'] == '') continue;
 
             $datenode = $node->find('span[class="serp-timestamp"]');
             if(isset($datenode) && is_array($datenode))
             {
-                $item['job_site_date'] = $datenode[0]->plaintext;
+                $item['PostedAt'] = $datenode[0]->plaintext;
             }
 
             $companynode = $node->find('span[class="serp-company"]');
             if(isset($companynode ) && is_array($companynode ))
             {
-                $item['company'] = combineTextAllChildren($companynode [0]);
+                $item['Company'] = combineTextAllChildren($companynode [0]);
             }
 
             $locnode = $node->find('span[class="serp-location"] span span[class="serp-location"]');
             if(isset($locnode) && is_array($locnode))
             {
-                $item['location'] = combineTextAllChildren($locnode[0]);
+                $item['LocationFromSource'] = combineTextAllChildren($locnode[0]);
             }
 
-            $item['job_id'] = $this->getIDFromLink('/\/a\/job-details\/\?a=([^\/]+)/i', $item['job_post_url']);
+            $item['JobSitePostId'] = $this->getIDFromLink('/\/a\/job-details\/\?a=([^\/]+)/i', $item['Url']);
 
             $ret[] = $item;
         }

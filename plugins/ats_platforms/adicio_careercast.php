@@ -41,8 +41,8 @@ abstract class AbstractAdicioCareerCast extends \JobScooper\Plugins\lib\AjaxHtml
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode-comma-countrycode';
 
     protected $arrListingTagSetup = array(
-        'tag_listings_noresults' => array(array('tag' => 'div', 'attribute'=>'id', 'attribute_value' => 'aiAppWrapperBox'), array('tag' => 'form'), array('tag' => 'h2'), 'return_attribute' => 'plaintext'),
-        'tag_listings_count' => array()  # BUGBUG:  need this empty array so that the parent class doesn't auto-set to C__JOB_ITEMCOUNT_NOTAPPLICABLE__
+        'NoPostsFound' => array(array('tag' => 'div', 'attribute'=>'id', 'attribute_value' => 'aiAppWrapperBox'), array('tag' => 'form'), array('tag' => 'h2'), 'return_attribute' => 'plaintext'),
+        'TotalPostCount' => array()  # BUGBUG:  need this empty array so that the parent class doesn't auto-set to C__JOB_ITEMCOUNT_NOTAPPLICABLE__
     );
 
     function __construct()
@@ -198,25 +198,25 @@ abstract class AbstractAdicioCareerCast extends \JobScooper\Plugins\lib\AjaxHtml
                 if(isset($divMain) && count($divMain) >= 1)
                 {
                     $divID = $divMain[0]->attr['id'];
-                    $item['job_id']= preg_replace('/[^\d]*/', "", $divID);
+                    $item['JobSitePostId']= preg_replace('/[^\d]*/', "", $divID);
                 }
 
                 $titleLink = $node->find("a")[0];
-                $item['job_title'] = $titleLink->plaintext;
+                $item['Title'] = $titleLink->plaintext;
 
                 // If we couldn't parse the job title, it's not really a job
                 // listing so just continue to the next one
                 //
-                if($item['job_title'] == '') continue;
+                if($item['Title'] == '') continue;
 
 
-                $item['job_post_url'] =  $titleLink->href;
+                $item['Url'] =  $titleLink->href;
 
 
                 $detailLIs = $node->find("ul li");
-                $item['company'] = $detailLIs[0]->plaintext;
-                $item['location'] = $detailLIs[1]->plaintext;
-                $item['job_site_date'] = $detailLIs[2]->plaintext;
+                $item['Company'] = $detailLIs[0]->plaintext;
+                $item['LocationFromSource'] = $detailLIs[1]->plaintext;
+                $item['PostedAt'] = $detailLIs[2]->plaintext;
                 $item['job_site_category'] = $detailLIs[3]->plaintext;
 
                 $ret[] = $item;
@@ -239,24 +239,24 @@ abstract class AbstractAdicioCareerCast extends \JobScooper\Plugins\lib\AjaxHtml
                     $item = getEmptyJobListingRecord();
 
                     $titleLink = $node->find("a")[0];
-                    $item['job_title'] = $titleLink->plaintext;
+                    $item['Title'] = $titleLink->plaintext;
 
 
-                    $item['job_post_url'] = $titleLink->href;
-                    $arrURLParts= explode("-", $item['job_post_url']);
-                    $item['job_id'] = $arrURLParts[count($arrURLParts) - 2];
+                    $item['Url'] = $titleLink->href;
+                    $arrURLParts= explode("-", $item['Url']);
+                    $item['JobSitePostId'] = $arrURLParts[count($arrURLParts) - 2];
 
 
                     // If we couldn't parse the job title, it's not really a job
                     // listing so just continue to the next one
                     //
-                    if($item['job_title'] == '') continue;
+                    if($item['Title'] == '') continue;
 
                     $locNode = $node->find("td[class='aiResultsLocation']");
-                    $item['location'] = $locNode[0]->plaintext;
+                    $item['LocationFromSource'] = $locNode[0]->plaintext;
 
                     $companyNode = $node->find("td[class='aiResultsCompany']");
-                    $item['company'] = $companyNode[0]->plaintext;
+                    $item['Company'] = $companyNode[0]->plaintext;
 
                     $ret[] = $item;
                 }

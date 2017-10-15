@@ -602,15 +602,15 @@ function getRunDateRange()
 function getEmptyJobListingRecord()
 {
     return array(
-        'job_site' => '',
-        'job_id' => '',
-        'company' => '',
-        'job_title' => '',
-        'job_post_url' => '',
-        'location' => '',
-        'job_site_category' => '',
-        'job_site_date' =>'',
-        'employment_type' => '',
+        'JobSite' => '',
+        'JobSitePostId' => '',
+        'Company' => '',
+        'Title' => '',
+        'Url' => '',
+        'LocationFromSource' => '',
+        'Category' => '',
+        'PostedAt' =>'',
+        'EmploymentType' => '',
     );
 }
 

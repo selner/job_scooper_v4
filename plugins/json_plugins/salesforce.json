@@ -7,7 +7,7 @@
       "Name": "PageFields",
       "Fields": [
         {
-          "Name": "tag_listings_noresults",
+          "Name": "NoPostsFound",
           "Selector": "div.main p b",
           "Extract": "TEXT",
           "Index" : 0,
@@ -17,7 +17,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_listings_count",
+          "Name": "TotalPostCount",
           "Selector": "td.td-result",
           "Extract": "REGEX",
           "Pattern": "/.*? of (\\d+).*/",
@@ -25,7 +25,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_listings_section",
+          "Name": "JobPostItem",
           "Selector": ".s-res",
           "Extract": "CSS",
           "Attribute": "collection",
@@ -37,14 +37,14 @@
       "Name": "ItemFields",
       "Fields": [
         {
-          "Name": "tag_title",
+          "Name": "Title",
           "Selector": "h3 a",
           "Extract": "TEXT",
           "Attribute": null,
           "Type": "CSS"
         },
         {
-          "Name": "tag_link",
+          "Name": "Url",
           "Selector": "h3 a",
           "Extract": "ATTR",
           "Attribute": "href",
@@ -52,17 +52,17 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_company",
+          "Name": "Company",
           "Value": "Salesforce",
           "Type": "STATIC"
         },
         {
-          "Name": "tag_jobsite",
+          "Name": "JobSite",
           "Value": "Salesforce",
           "Type": "STATIC"
         },
         {
-          "Name": "tag_location",
+          "Name": "LocationFromSource",
           "Selector": "p.search-result-item-company-name a",
           "Extract": "ATTR",
           "Attribute": "collection",
@@ -70,7 +70,7 @@
           "Callback": "combineTextAllNodes"
         },
         {
-          "Name": "tag_department",
+          "Name": "department",
           "Selector": "table.searchResAdd tr td a",
           "Index" : 1,
           "Extract": "TEXT",
@@ -80,14 +80,14 @@
         },
 
         {
-          "Name": "tag_job_id",
+          "Name": "JobSitePostId",
           "Pattern": "/.*?([0-9]+).*/",
           "Extract": "REGEX",
           "Type": "REGEX",
           "Field": "job_post_url"
         },
         {
-          "Name": "tag_job_posting_date",
+          "Name": "PostedAt",
           "Selector": "span.search-result-item-post-date",
           "Extract": "REGEX",
           "Pattern": "/Date posted:\\s*([\\d\\/]+)/",

@@ -32,15 +32,15 @@ class PluginCraigslist extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $paginationType = C__PAGINATION_PAGE_VIA_URL;
 
     protected $arrListingTagSetup = array(
-        'tag_listings_noresults' => array('selector' => 'div.noresults', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
-        'tag_listings_count' => array('selector' => 'span.totalcount', 'index'=> 0, 'return_attribute' => 'plaintext'),
-        'tag_listings_section' => array('selector' => '#sortable-results ul li'),
-        'tag_link' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'index'=> 0, 'return_attribute' => 'href'),
-        'tag_title' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'index'=> 0, 'return_attribute' => 'plaintext'),
-        'tag_job_id' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'index'=> 0, 'return_attribute' => 'data-id'),
-        'tag_department' => array('selector' => 'td.listing-department', 'index'=> 0),
-        'tag_location' => array('selector' => 'span.result-hood', 'index'=> 0),
-        'tag_job_posting_date' => array('selector' => 'time.result-date', 'index'=> 0)
+        'NoPostsFound' => array('selector' => 'div.noresults', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
+        'TotalPostCount' => array('selector' => 'span.totalcount', 'index'=> 0, 'return_attribute' => 'plaintext'),
+        'JobPostItem' => array('selector' => '#sortable-results ul li'),
+        'Url' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'index'=> 0, 'return_attribute' => 'href'),
+        'Title' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'index'=> 0, 'return_attribute' => 'plaintext'),
+        'JobSitePostId' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'index'=> 0, 'return_attribute' => 'data-id'),
+        'Department' => array('selector' => 'td.listing-department', 'index'=> 0),
+        'LocationFromSource' => array('selector' => 'span.result-hood', 'index'=> 0),
+        'PostedAt' => array('selector' => 'time.result-date', 'index'=> 0)
     );
 
     static function isNoJobResults($var)

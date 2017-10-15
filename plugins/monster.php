@@ -107,11 +107,11 @@ class PluginMonster extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
             $subNode = $node->find("div[class='jobTitle'] h2 a");
             if(isset($subNode) && isset($subNode[0]))
             {
-                $item['job_title'] = $subNode[0]->attr['title'];
-                $item['job_id'] = $subNode[0]->attr['data-m_impr_j_postingid'];
-                if(is_null($item['job_id']) || empty($item['job_id']))
-                    $item['job_id'] = $subNode[0]->attr['data-m_impr_j_jobid'];
-                $item['job_post_url'] = $subNode[0]->attr['href'];
+                $item['Title'] = $subNode[0]->attr['Title'];
+                $item['JobSitePostId'] = $subNode[0]->attr['data-m_impr_j_postingid'];
+                if(is_null($item['JobSitePostId']) || empty($item['JobSitePostId']))
+                    $item['JobSitePostId'] = $subNode[0]->attr['data-m_impr_j_jobid'];
+                $item['Url'] = $subNode[0]->attr['href'];
 
 
                 $mousedownval = html_entity_decode($subNode[0]->attr['onmousedown'], ENT_QUOTES | ENT_XML1, 'UTF-8');
@@ -133,31 +133,31 @@ class PluginMonster extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
                     }
 
                     if(array_key_exists("eVar31", $vars) === true)
-                        $item['location'] = str_replace("_", " ", $vars['eVar31']);
+                        $item['LocationFromSource'] = str_replace("_", " ", $vars['eVar31']);
 
                     if(array_key_exists("prop24", $vars) === true)
                     {
-                        $item['job_site_date'] = str_replace("_", "", $vars["prop24"]);
-                        $dateVal = strtotime($item['job_site_date']);
+                        $item['PostedAt'] = str_replace("_", "", $vars["prop24"]);
+                        $dateVal = strtotime($item['PostedAt']);
                         if(!($dateVal === false))
-                            $item['job_site_date'] = $dateVal->format('Y-m-d');
+                            $item['PostedAt'] = $dateVal->format('Y-m-d');
                     }
                 }
             }
 
-            if($item['job_title'] == '' || $item['job_id'] == '')
+            if($item['Title'] == '' || $item['JobSitePostId'] == '')
                 continue;
 
-            $subNode = $node->find("div[class='company'] a span");
+            $subNode = $node->find("div[class='Company'] a span");
             if(isset($subNode) && isset($subNode[0]))
-                $item['company'] = $subNode[0]->plaintext;
+                $item['Company'] = $subNode[0]->plaintext;
 
             $subNode = $node->find("span[itemprop='address'] span[itemprop='addressLocality']");
             if(isset($subNode) && isset($subNode[0]))
             {
-                $item['location'] = $subNode[0]->plaintext;
+                $item['LocationFromSource'] = $subNode[0]->plaintext;
                 $stateNode = $subNode[0]->nextSibling();
-                $item['location'] = $item['location'] . ", " . $stateNode->plaintext;
+                $item['LocationFromSource'] = $item['LocationFromSource'] . ", " . $stateNode->plaintext;
             }
 
             $ret[] = $item;

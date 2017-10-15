@@ -27,15 +27,15 @@ class PluginAuthenticJobs extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $nJobListingsPerPage = 50;
 
     protected $arrListingTagSetup = array(
-        'tag_listings_noresults'    => array('selector' => 'ul#listings li#no-results', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
-        'tag_listings_section'      => array('selector' => 'ul#listings li'),
-        'tag_title'                 =>  array('selector' => 'a div h3', 'return_attribute' => 'plaintext'),
-        'tag_link'                  =>  array('selector' => 'a', 'return_attribute' => 'href'),
-        'tag_company'               =>  array('selector' => 'a div h4', 'return_attribute' => 'plaintext'),
-        'tag_location'              =>  array('selector' => 'a ul li.location', 'return_attribute' => 'plaintext'),
-        'tag_employment_type'       =>  array('selector' => 'a ul li', 'index' => 0, 'return_attribute' => 'plaintext'),
-        'tag_job_id'                =>  array('selector' => 'a', 'return_attribute' => 'href', 'return_value_regex' =>  '/\/jobs\/([^?]+)/i'),
-        'tag_load_more'             =>  array('selector' => 'a.ladda-button')
+        'NoPostsFound'    => array('selector' => 'ul#listings li#no-results', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
+        'JobPostItem'      => array('selector' => 'ul#listings li'),
+        'Title'                 =>  array('selector' => 'a div h3', 'return_attribute' => 'plaintext'),
+        'Url'                  =>  array('selector' => 'a', 'return_attribute' => 'href'),
+        'Company'               =>  array('selector' => 'a div h4', 'return_attribute' => 'plaintext'),
+        'LocationFromSource'              =>  array('selector' => 'a ul li.location', 'return_attribute' => 'plaintext'),
+        'EmploymentType'       =>  array('selector' => 'a ul li', 'index' => 0, 'return_attribute' => 'plaintext'),
+        'JobSitePostId'                =>  array('selector' => 'a', 'return_attribute' => 'href', 'return_value_regex' =>  '/\/jobs\/([^?]+)/i'),
+        'LoadMoreControl'             =>  array('selector' => 'a.ladda-button')
     );
 
     function isNoJobResults($var)

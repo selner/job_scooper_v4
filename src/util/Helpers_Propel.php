@@ -108,12 +108,12 @@ function updateOrCreateJobPosting($arrJobItem)
                 ->findOneOrCreate();
         }
         else {
-            if(is_null($arrJobItem['job_site']) || strlen($arrJobItem['job_site']) == 0)
+            if(is_null($arrJobItem['JobSite']) || strlen($arrJobItem['JobSite']) == 0)
                 throw new InvalidArgumentException("Attempted to create a new job posting record without a valid jobsite value set.");
 
             $jobRecord = \JobScooper\DataAccess\JobPostingQuery::create()
-                ->filterByJobSite($arrJobItem['job_site'])
-                ->filterByJobSitePostID($arrJobItem['job_id'])
+                ->filterByJobSite($arrJobItem['JobSite'])
+                ->filterByJobSitePostId($arrJobItem['JobSitePostId'])
                 ->findOneOrCreate();
         }
 

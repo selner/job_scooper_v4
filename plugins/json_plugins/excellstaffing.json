@@ -11,7 +11,7 @@
       "Name": "PageFields",
       "Fields": [
         {
-          "Name": "tag_listings_noresults",
+          "Name": "NoPostsFound",
           "Selector": "div.content_container div font",
           "Index" : 0,
           "Extract": "TEXT",
@@ -21,7 +21,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_listings_count",
+          "Name": "TotalPostCount",
           "Selector": "div#pager_container font",
           "Extract": "TEXT",
           "Index" : 1,
@@ -29,7 +29,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_listings_section",
+          "Name": "JobPostItem",
           "Selector": "table#resulttable tr",
           "Extract": "CSS",
           "Attribute": "collection",
@@ -41,14 +41,14 @@
       "Name": "ItemFields",
       "Fields": [
         {
-          "Name": "tag_title",
+          "Name": "Title",
           "Selector": "a.joblink",
           "Extract": "TEXT",
           "Attribute": null,
           "Type": "CSS"
         },
         {
-          "Name": "tag_location",
+          "Name": "LocationFromSource",
           "Selector": "td",
           "Extract": "TEXT",
           "Index": 3,
@@ -56,7 +56,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_link",
+          "Name": "Url",
           "Selector": "a.joblink",
           "Extract": "ATTR",
           "Attribute": "href",
@@ -64,7 +64,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_job_id",
+          "Name": "JobSitePostId",
           "Selector": "td",
           "Extract": "TEXT",
           "Index": 2,
@@ -72,7 +72,7 @@
         },
 
         {
-          "Name": "tag_job_posted_date",
+          "Name": "PostedAt",
           "Selector": "td",
           "Extract": "TEXT",
           "Index": 0,

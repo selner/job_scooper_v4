@@ -33,9 +33,9 @@ class PluginIndeed extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 
 
     protected $arrListingTagSetup = array(
-        'tag_listings_count' =>  array('selector' => '#searchCount', 'return_value_regex' => '/.*?of\s*(\d+).*?/'),
-        'tag_listings_noresults' =>  array('selector' => 'div.bad_query h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
-        'tag_next_button' => array('selector' => 'span.np')
+        'TotalPostCount' =>  array('selector' => '#searchCount', 'return_value_regex' => '/.*?of\s*(\d+).*?/'),
+        'NoPostsFound' =>  array('selector' => 'div.bad_query h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
+        'NextButton' => array('selector' => 'span.np')
     );
 
 
@@ -75,34 +75,34 @@ class PluginIndeed extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
             $item = getEmptyJobListingRecord();
 
             if(isset($node) && isset($node->attr['data-jk']))
-                $item['job_id'] = $node->attr['data-jk'];
+                $item['JobSitePostId'] = $node->attr['data-jk'];
 
             $subNodes = $node->find("a[data-tn-element='jobTitle']");
-            if(isset($subNodes) && array_key_exists('title', $subNodes[0]->attr)) {
-                $item['job_title'] = $subNodes[0]->attr['title'];
-                $item['job_post_url'] = $subNodes[0]->attr['href'];
+            if(isset($subNodes) && array_key_exists('Title', $subNodes[0]->attr)) {
+                $item['Title'] = $subNodes[0]->attr['Title'];
+                $item['Url'] = $subNodes[0]->attr['href'];
             }
 
             $coNode = $node->find("span[itemprop='hiringOrganization']");
             if(isset($coNode) && count($coNode) >= 1)
             {
-                $item['company'] = combineTextAllChildren($coNode[0]);
+                $item['Company'] = combineTextAllChildren($coNode[0]);
             }
 
             $locNode= $node->find("span[itemprop='addressLocality']");
             if(isset($locNode) && count($locNode) >= 1)
             {
-                $item['location'] = $locNode[0]->plaintext;
+                $item['LocationFromSource'] = $locNode[0]->plaintext;
             }
             $dateNode = $node->find("span[class='date']");
             if(isset($dateNode ) && count($dateNode ) >= 1)
             {
-                $item['job_site_date'] = $dateNode[0]->plaintext;
-                if(strcasecmp(trim($item['job_site_date']), "Just posted") == 0)
-                    $item['job_site_date'] = getTodayAsString();
+                $item['PostedAt'] = $dateNode[0]->plaintext;
+                if(strcasecmp(trim($item['PostedAt']), "Just posted") == 0)
+                    $item['PostedAt'] = getTodayAsString();
             }
 
-            if($item['job_title'] == '') continue;
+            if($item['Title'] == '') continue;
             $ret[] = $item;
 
         }

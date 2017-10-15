@@ -6,20 +6,20 @@
       "Name": "PageFields",
       "Fields": [
       {
-          "Name": "tag_listings_section",
+          "Name": "JobPostItem",
           "Selector": ".js-job",
           "Extract": "HTML",
           "Attribute": "node",
           "Type": "CSS"
         },
         {
-          "Name": "tag_listings_count",
+          "Name": "TotalPostCount",
           "Selector": "div.count-jobs div.number",
           "Extract": "TEXT",
           "Type": "CSS"
         },
         {
-          "Name": "tag_pages_count",
+          "Name": "pages_count",
           "Selector": "div.js-infinite-scroll",
           "Extract": "ATTR",
           "Attribute": "data-total-pages",
@@ -31,35 +31,35 @@
       "Name": "ItemFields",
       "Fields": [
         {
-          "Name": "tag_title",
+          "Name": "Title",
           "Selector": ".title",
           "Extract": "TEXT",
           "Attribute": null,
           "Type": "CSS"
         },
         {
-          "Name": "tag_location",
+          "Name": "LocationFromSource",
           "Selector": "span.location",
           "Extract": "TEXT",
           "Attribute": null,
           "Type": "CSS"
         },
         {
-          "Name": "tag_company",
+          "Name": "Company",
           "Selector": ".company-name",
           "Extract": "TEXT",
           "Attribute": null,
           "Type": "CSS"
         },
         {
-          "Name": "tag_company_logo",
+          "Name": "company_logo",
           "Selector": "img",
           "Extract": "ATTR",
           "Attribute": "href",
           "Type": "CSS"
         },
         {
-          "Name": "tag_link",
+          "Name": "Url",
           "Selector": "a[class*='link-job']",
           "Extract": "ATTR",
           "Attribute": "href",
@@ -67,14 +67,14 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_job_id",
+          "Name": "JobSitePostId",
           "Selector": "div.js-job",
           "Extract": "ATTR",
           "Attribute": "data-hash-uniq",
           "Index": 0
         },
         {
-          "Name": "tag_job_posting_date",
+          "Name": "PostedAt",
           "Selector": "div.posted-date span",
           "Extract": "HTML",
           "Attribute": null,

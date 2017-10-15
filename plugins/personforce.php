@@ -30,14 +30,14 @@ class PluginPersonForce extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 
     protected $arrListingTagSetup = array(
 
-    'tag_listings_count' => array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'module_jobs'), array('tag' => 'div', 'attribute_value' =>'plaintext'), 'return_value_regex' => '/.*?of total (\d+).*?/'),
-    'tag_listings_section' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'content-col-content hir left'),array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'row'),array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'row')),
-    'tag_title' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'hir-job-title'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
-    'tag_link' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'hir-job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
-    'tag_company' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'hir-company-title', 'return_value_regex' => '/(.*?) \- .*/'),
-    'tag_location' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'hir-company-title', 'return_value_regex' => '/.*? \- (.*)/'),
-    'tag_next_button' => array('selector' => 'div.pagination ul li.active a'),
-    'tag_job_id' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'hir-job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
+    'TotalPostCount' => array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'module_jobs'), array('tag' => 'div', 'attribute_value' =>'plaintext'), 'return_value_regex' => '/.*?of total (\d+).*?/'),
+    'JobPostItem' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'content-col-content hir left'),array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'row'),array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'row')),
+    'Title' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'hir-job-title'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+    'Url' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'hir-job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
+    'Company' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'hir-company-title', 'return_value_regex' => '/(.*?) \- .*/'),
+    'LocationFromSource' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'hir-company-title', 'return_value_regex' => '/.*? \- (.*)/'),
+    'NextButton' => array('selector' => 'div.pagination ul li.active a'),
+    'JobSitePostId' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'hir-job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
     //        'regex_link_job_id' => '/.*?\/(\d+)|.*?;ad=-(.{1,})$/'
     );
 
@@ -45,15 +45,15 @@ class PluginPersonForce extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected function normalizeJobItem($arrItem)
     {
 
-        $arrItem ['job_site_date'] = strScrub($arrItem['job_site_date'], REMOVE_EXTRA_WHITESPACE | LOWERCASE | HTML_DECODE );
-        $dateVal = strtotime($arrItem ['job_site_date'], $now = time());
+        $arrItem ['PostedAt'] = strScrub($arrItem['PostedAt'], REMOVE_EXTRA_WHITESPACE | LOWERCASE | HTML_DECODE );
+        $dateVal = strtotime($arrItem ['PostedAt'], $now = time());
         if(!($dateVal === false))
         {
-            $arrItem['job_site_date'] = date('Y-m-d', $dateVal);
+            $arrItem['PostedAt'] = date('Y-m-d', $dateVal);
         }
 
 
-        $arrItem['job_id'] = strScrub($arrItem['company'], FOR_LOOKUP_VALUE_MATCHING) . strScrub($arrItem['job_title'], FOR_LOOKUP_VALUE_MATCHING). strScrub($arrItem['job_site_date'], FOR_LOOKUP_VALUE_MATCHING);
+        $arrItem['JobSitePostId'] = strScrub($arrItem['Company'], FOR_LOOKUP_VALUE_MATCHING) . strScrub($arrItem['Title'], FOR_LOOKUP_VALUE_MATCHING). strScrub($arrItem['PostedAt'], FOR_LOOKUP_VALUE_MATCHING);
 
         return parent::normalizeJobItem($arrItem);
     }

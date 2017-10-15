@@ -10,7 +10,7 @@
       "Name": "PageFields",
       "Fields": [
         {
-          "Name": "tag_listings_count",
+          "Name": "TotalPostCount",
           "Selector": "div.job-search-result-counter",
           "Extract": "REGEX",
           "Pattern": "/.*?(\\d+)\\s*/",
@@ -20,7 +20,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_listings_section",
+          "Name": "JobPostItem",
           "Selector": "table.job-search-results tr",
           "Extract": "CSS",
           "Attribute": "collection",
@@ -32,14 +32,14 @@
       "Name": "ItemFields",
       "Fields": [
         {
-          "Name": "tag_title",
+          "Name": "Title",
           "Selector": "td.JobTitle a",
           "Extract": "TEXT",
           "Attribute": "plaintext",
           "Type": "CSS"
         },
         {
-          "Name": "tag_link",
+          "Name": "Url",
           "Selector": "td.JobTitle a",
           "Extract": "ATTR",
           "Attribute": "href",
@@ -47,7 +47,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_location",
+          "Name": "LocationFromSource",
           "Selector": "span.midRight",
           "Index" : 0,
           "Extract": "TEXT",
@@ -55,7 +55,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_category",
+          "Name": "Category",
           "Selector": "span.midLeft",
           "Index" : 0,
           "Extract": "TEXT",
@@ -63,14 +63,14 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_job_id",
+          "Name": "JobSitePostId",
           "Pattern": "/\/job\/([^?]+)/i",
           "Extract": "REGEX",
           "Type": "REGEX",
           "Field": "job_post_url"
         },
         {
-          "Name": "tag_job_posting_date",
+          "Name": "PostedAt",
           "Selector": "span.topRight",
           "Index" : 0,
           "Extract": "TEXT",

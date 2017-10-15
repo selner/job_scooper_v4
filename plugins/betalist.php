@@ -70,11 +70,11 @@ class PluginBetalist extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 
 
     protected $arrListingTagSetup = array(
-        'tag_listings_section' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'ais-hits--item'),
-        'tag_title' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'jobCard__details__title'),
-        'tag_link' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'jobCard__details__title'),
-        'tag_company' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'jobCard__details__company'), array('tag' => 'a')),
-        'tag_location' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'jobCard__details__location'),
+        'JobPostItem' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'ais-hits--item'),
+        'Title' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'jobCard__details__title'),
+        'Url' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'jobCard__details__title'),
+        'Company' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'jobCard__details__company'), array('tag' => 'a')),
+        'LocationFromSource' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'jobCard__details__location'),
         'regex_link_job_id' => '/jobs\/([^\/]+)/i'
     );
 

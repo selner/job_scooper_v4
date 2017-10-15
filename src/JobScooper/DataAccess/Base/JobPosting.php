@@ -507,7 +507,7 @@ abstract class JobPosting implements ActiveRecordInterface
      *
      * @return string
      */
-    public function getJobSitePostID()
+    public function getJobSitePostId()
     {
         return $this->jobsite_post_id;
     }
@@ -778,7 +778,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * @param string $v new value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
-    public function setJobSitePostID($v)
+    public function setJobSitePostId($v)
     {
         if ($v !== null) {
             $v = (string) $v;
@@ -790,7 +790,7 @@ abstract class JobPosting implements ActiveRecordInterface
         }
 
         return $this;
-    } // setJobSitePostID()
+    } // setJobSitePostId()
 
     /**
      * Set the value of [title] column.
@@ -1202,7 +1202,7 @@ abstract class JobPosting implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : JobPostingTableMap::translateFieldName('JobSite', TableMap::TYPE_PHPNAME, $indexType)];
             $this->jobsite = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : JobPostingTableMap::translateFieldName('JobSitePostID', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : JobPostingTableMap::translateFieldName('JobSitePostId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->jobsite_post_id = (null !== $col) ? (string) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : JobPostingTableMap::translateFieldName('Title', TableMap::TYPE_PHPNAME, $indexType)];
@@ -1751,7 +1751,7 @@ abstract class JobPosting implements ActiveRecordInterface
                 return $this->getJobSite();
                 break;
             case 2:
-                return $this->getJobSitePostID();
+                return $this->getJobSitePostId();
                 break;
             case 3:
                 return $this->getTitle();
@@ -1839,7 +1839,7 @@ abstract class JobPosting implements ActiveRecordInterface
         $result = array(
             $keys[0] => $this->getJobPostingId(),
             $keys[1] => $this->getJobSite(),
-            $keys[2] => $this->getJobSitePostID(),
+            $keys[2] => $this->getJobSitePostId(),
             $keys[3] => $this->getTitle(),
             $keys[4] => $this->getTitleTokens(),
             $keys[5] => $this->getUrl(),
@@ -1982,7 +1982,7 @@ abstract class JobPosting implements ActiveRecordInterface
                 $this->setJobSite($value);
                 break;
             case 2:
-                $this->setJobSitePostID($value);
+                $this->setJobSitePostId($value);
                 break;
             case 3:
                 $this->setTitle($value);
@@ -2071,7 +2071,7 @@ abstract class JobPosting implements ActiveRecordInterface
             $this->setJobSite($arr[$keys[1]]);
         }
         if (array_key_exists($keys[2], $arr)) {
-            $this->setJobSitePostID($arr[$keys[2]]);
+            $this->setJobSitePostId($arr[$keys[2]]);
         }
         if (array_key_exists($keys[3], $arr)) {
             $this->setTitle($arr[$keys[3]]);
@@ -2318,7 +2318,7 @@ abstract class JobPosting implements ActiveRecordInterface
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
         $copyObj->setJobSite($this->getJobSite());
-        $copyObj->setJobSitePostID($this->getJobSitePostID());
+        $copyObj->setJobSitePostId($this->getJobSitePostId());
         $copyObj->setTitle($this->getTitle());
         $copyObj->setTitleTokens($this->getTitleTokens());
         $copyObj->setUrl($this->getUrl());

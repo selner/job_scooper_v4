@@ -46,11 +46,11 @@ class PluginGroupon extends \JobScooper\Plugins\lib\AjaxHtmlPlugin
 
             $item = getEmptyJobListingRecord();
 
-            $item['job_title'] = $node->plaintext;
-            $item['job_post_url'] = $node->href;
-            $item['company'] = $this->siteName;
-            $item['job_id'] = $this->getIDFromLink('/\/jobs\/([^\/]+)/i', $item['job_post_url']);
-            if($item['job_title'] == '') continue;
+            $item['Title'] = $node->plaintext;
+            $item['Url'] = $node->href;
+            $item['Company'] = $this->siteName;
+            $item['JobSitePostId'] = $this->getIDFromLink('/\/jobs\/([^\/]+)/i', $item['Url']);
+            if($item['Title'] == '') continue;
             $ret[] = $item;
 
         }

@@ -11,7 +11,7 @@
       "Name": "PageFields",
       "Fields": [
         {
-          "Name": "tag_listings_noresults",
+          "Name": "NoPostsFound",
           "Selector": "div.jobcount",
           "Index" : 0,
           "Extract": "TEXT",
@@ -21,7 +21,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_listings_count",
+          "Name": "TotalPostCount",
           "Selector": "div.jobcount",
           "Index" : 0,
           "Extract": "REGEX",
@@ -30,7 +30,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_listings_section",
+          "Name": "JobPostItem",
           "Selector": "span div.row div.rowheader",
           "Extract": "CSS",
           "Attribute": "collection",
@@ -42,14 +42,14 @@
       "Name": "ItemFields",
       "Fields": [
         {
-          "Name": "tag_title",
+          "Name": "Title",
           "Selector": "div.job",
           "Extract": "TEXT",
           "Attribute": null,
           "Type": "CSS"
         },
         {
-          "Name": "tag_location",
+          "Name": "LocationFromSource",
           "Selector": "div.loc",
           "Extract": "TEXT",
           "Index": 0,
@@ -57,7 +57,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_category",
+          "Name": "Category",
           "Selector": "div.type",
           "Extract": "TEXT",
           "Index": 0,
@@ -65,7 +65,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_link",
+          "Name": "Url",
           "Selector": "div.view a",
           "Extract": "ATTR",
           "Attribute": "href",
@@ -73,7 +73,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_job_id",
+          "Name": "JobSitePostId",
           "Selector": "div.share",
           "Extract": "ATTR",
           "Attribute" : "id",
@@ -82,7 +82,7 @@
         },
 
         {
-          "Name": "tag_job_posted_date",
+          "Name": "PostedAt",
           "Selector": "div.date",
           "Extract": "TEXT",
           "Index": 0,

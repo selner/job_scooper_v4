@@ -75,21 +75,21 @@ class PluginExpedia extends \JobScooper\Plugins\lib\AjaxHtmlPlugin
         foreach($nodesJobs as $node)
         {
             $item = getEmptyJobListingRecord();
-            $item['company'] = 'Expedia';
+            $item['Company'] = 'Expedia';
 
             $titleLink = $node->find("h3 a")[0];
-            $item['job_title'] = $titleLink->plaintext;
-            $item['job_post_url'] = $titleLink->href;
-            if($item['job_title'] == '') continue;
+            $item['Title'] = $titleLink->plaintext;
+            $item['Url'] = $titleLink->href;
+            if($item['Title'] == '') continue;
 
-            $item['job_id'] = str_replace(array("(", ")"), "", $node->find("h3 small")[0]->plaintext);
+            $item['JobSitePostId'] = str_replace(array("(", ")"), "", $node->find("h3 small")[0]->plaintext);
 
-            $item['job_post_url'] = $this->siteBaseURL . $node->find("a")[0]->href;
-            $item['location'] = preg_replace("/(\s{2,})/", " ", $node->find("p[class='search-result-item-company-name']")[0]->plaintext, -1);
+            $item['Url'] = $this->siteBaseURL . $node->find("a")[0]->href;
+            $item['LocationFromSource'] = preg_replace("/(\s{2,})/", " ", $node->find("p[class='search-result-item-company-name']")[0]->plaintext, -1);
 //            $item['brief'] = $node->find("p[class='search-result-item-description']")[0]->plaintext;
 //           $item['brief'] = str_ireplace(array("Position Description ", "position overview", "PositionSummary"), "", $item['brief']);
 
-            $item['job_site_date'] = str_ireplace("date posted: ","", $node->find("span[class='search-result-item-post-date']")[0]->plaintext);
+            $item['PostedAt'] = str_ireplace("date posted: ","", $node->find("span[class='search-result-item-post-date']")[0]->plaintext);
 
             $ret[] = $item;
         }

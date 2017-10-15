@@ -55,15 +55,15 @@ abstract class BaseForceComClass extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
 
 
     protected $arrListingTagSetup = array(
-        'tag_listings_count' => array('selector' => 'div#atsSearchResultsText', 'return_value_regex' => '/(\d+).*?/'),
-        'tag_listings_section' => array('selector' => "table.atsSearchResultsTable tbody tr"),
-        'tag_title' =>  array('selector' => 'td a', 'index' => 0, 'return_attribute' => 'plaintext'),
-        'tag_link' =>  array('selector' => 'td a', 'index' => 0, 'return_attribute' => 'href'),
-        'tag_job_id' =>  array('selector' => 'td a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' => '/.*?jobId=(\w+)&.*?/'),
-        'tag_department' =>  array('selector' => 'td span', 'index' => 0, 'return_attribute' => 'plaintext'),
-        'tag_location' =>  array('selector' => 'td span', 'index' => 1, 'return_attribute' => 'plaintext'),
-        'tag_job_posting_date' =>  array('selector' => 'td span', 'index' => 2, 'return_attribute' => 'plaintext'),
-        'tag_company' =>  array('return_value_callback' => 'setCompanyToSiteName')
+        'TotalPostCount' => array('selector' => 'div#atsSearchResultsText', 'return_value_regex' => '/(\d+).*?/'),
+        'JobPostItem' => array('selector' => "table.atsSearchResultsTable tbody tr"),
+        'Title' =>  array('selector' => 'td a', 'index' => 0, 'return_attribute' => 'plaintext'),
+        'Url' =>  array('selector' => 'td a', 'index' => 0, 'return_attribute' => 'href'),
+        'JobSitePostId' =>  array('selector' => 'td a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' => '/.*?jobId=(\w+)&.*?/'),
+        'Department' =>  array('selector' => 'td span', 'index' => 0, 'return_attribute' => 'plaintext'),
+        'LocationFromSource' =>  array('selector' => 'td span', 'index' => 1, 'return_attribute' => 'plaintext'),
+        'PostedAt' =>  array('selector' => 'td span', 'index' => 2, 'return_attribute' => 'plaintext'),
+        'Company' =>  array('return_value_callback' => 'setCompanyToSiteName')
     );
 
 }
@@ -84,9 +84,9 @@ abstract class BaseNoDeptForceComClass extends BaseForceComClass
     function __construct()
     {
         parent::__construct();
-        $this->arrListingTagSetup['tag_department'] = null;
-        $this->arrListingTagSetup['tag_location']['index'] = 0;
-        $this->arrListingTagSetup['tag_job_posting_date']['index'] = 1;
+        $this->arrListingTagSetup['Department'] = null;
+        $this->arrListingTagSetup['LocationFromSource']['index'] = 0;
+        $this->arrListingTagSetup['PostedAt']['index'] = 1;
     }
 }
 
@@ -103,9 +103,9 @@ class PluginRobertHalfExec extends BaseForceComClass
     function __construct()
     {
         parent::__construct();
-        $this->arrListingTagSetup['tag_department']['index'] = 1;
-        $this->arrListingTagSetup['tag_location']['index'] = 2;
-        $this->arrListingTagSetup['tag_job_posting_date'] = null;
+        $this->arrListingTagSetup['Department']['index'] = 1;
+        $this->arrListingTagSetup['LocationFromSource']['index'] = 2;
+        $this->arrListingTagSetup['PostedAt'] = null;
     }
 
     function doFirstPageLoad($searchDetails)

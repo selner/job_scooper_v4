@@ -67,17 +67,17 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
     }
 
     protected $arrListingTagSetup = array(
-        'tag_listings_noresults'    => array('selector' => 'h1#searching', 'return_attribute' => 'plaintext', 'return_value_callback' => 'isNoJobResults'),
-        'tag_listings_count'        => array('selector' => 'h1#searching', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/\b(\d+)\b/i'),
-        'tag_listings_section'      => array('selector' => 'li.lister__item'),
-        'tag_title'                 => array('selector' => 'h3 a.js-clickable-area-link span[itemprop="title"]', 'return_attribute' => 'plaintext'),
-        'tag_link'                  => array('selector' => 'h3 a.js-clickable-area-link ', 'return_attribute' => 'href'),
-        'tag_company'               => array('selector' => 'li[itemprop="hiringOrganization"]', 'return_attribute' => 'plaintext'),
-        'tag_location'              => array('selector' => 'li[itemprop="location"]', 'return_attribute' => 'plaintext'),
-        'tag_job_id'                =>  array('selector' => 'li.lister__item', 'return_attribute' => 'id', 'return_value_regex' =>  '/item\-(\d+)/i'),
-        'tag_job_posted_date'       => array('selector' => 'li.job-actions__action pipe', 'index=0'),
-        'tag_company_logo'          => array('selector' => 'img.lister__logo', 'return_attribute' => 'src'),
-        'tag_next_button'           => array('selector' => 'li.paginator__item a[rel="next"]')
+        'NoPostsFound'    => array('selector' => 'h1#searching', 'return_attribute' => 'plaintext', 'return_value_callback' => 'isNoJobResults'),
+        'TotalPostCount'        => array('selector' => 'h1#searching', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/\b(\d+)\b/i'),
+        'JobPostItem'      => array('selector' => 'li.lister__item'),
+        'Title'                 => array('selector' => 'h3 a.js-clickable-area-link span[itemprop="title"]', 'return_attribute' => 'plaintext'),
+        'Url'                  => array('selector' => 'h3 a.js-clickable-area-link ', 'return_attribute' => 'href'),
+        'Company'               => array('selector' => 'li[itemprop="hiringOrganization"]', 'return_attribute' => 'plaintext'),
+        'LocationFromSource'              => array('selector' => 'li[itemprop="location"]', 'return_attribute' => 'plaintext'),
+        'JobSitePostId'                =>  array('selector' => 'li.lister__item', 'return_attribute' => 'id', 'return_value_regex' =>  '/item\-(\d+)/i'),
+        'job_posted_date'       => array('selector' => 'li.job-actions__action pipe', 'index=0'),
+        'company_logo'          => array('selector' => 'img.lister__logo', 'return_attribute' => 'src'),
+        'NextButton'           => array('selector' => 'li.paginator__item a[rel="next"]')
     );
 
     protected function getLocationURLValue($searchDetails)

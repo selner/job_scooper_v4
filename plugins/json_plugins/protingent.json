@@ -9,7 +9,7 @@
       "Name": "PageFields",
       "Fields": [
     {
-          "Name": "tag_listings_section",
+          "Name": "JobPostItem",
           "Selector": "div.job-post-row",
           "Extract": "HTML",
           "Attribute": "node",
@@ -21,14 +21,14 @@
       "Name": "ItemFields",
       "Fields": [
         {
-          "Name": "tag_title",
+          "Name": "Title",
           "Selector": "span.POST_TITLE",
           "Extract": "TEXT",
           "Attribute": null,
           "Type": "CSS"
         },
         {
-          "Name": "tag_location",
+          "Name": "LocationFromSource",
           "Selector": "span.job-post-location",
           "Extract": "TEXT",
           "Index": 0,
@@ -36,7 +36,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_category",
+          "Name": "Category",
           "Selector": "span.job-post-emp-type",
           "Extract": "TEXT",
           "Index": 0,
@@ -44,7 +44,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_link",
+          "Name": "Url",
           "Selector": "a.job-post-href",
           "Extract": "ATTR",
           "Attribute": "href",
@@ -52,7 +52,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "tag_job_id",
+          "Name": "JobSitePostId",
           "Selector": "span.POST_JOB_NUMBER",
           "Extract": "TEXT",
           "Index": 0,
@@ -60,7 +60,7 @@
         },
 
         {
-          "Name": "tag_job_posted_date",
+          "Name": "PostedAt",
           "Selector": "span.POST_DATE_F",
           "Extract": "TEXT",
           "Index": 0,

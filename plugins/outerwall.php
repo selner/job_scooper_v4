@@ -26,12 +26,12 @@ class PluginOuterwall extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
 
     protected $arrListingTagSetup = array(
 
-        'tag_listings_count' => array('tag' => 'h3', 'attribute' => 'class', 'attribute_value' =>'direct_highlightedText', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
-        'tag_listings_section' => array(array('tag' => 'ul', 'attribute'=>'class', 'attribute_value' => 'default_jobListing'), array('tag' => 'li')),
-        'tag_title' => array(array('tag' => 'h4'), array('tag' => 'a'), array('tag' => 'span'), 'return_attribute' => 'plaintext'),
-        'tag_company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
-        'tag_link' =>  array(array('tag' => 'h4'), array('tag' => 'a'), 'return_attribute' => 'href'),
-        'tag_location' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'direct_joblocation'),
+        'TotalPostCount' => array('tag' => 'h3', 'attribute' => 'class', 'attribute_value' =>'direct_highlightedText', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
+        'JobPostItem' => array(array('tag' => 'ul', 'attribute'=>'class', 'attribute_value' => 'default_jobListing'), array('tag' => 'li')),
+        'Title' => array(array('tag' => 'h4'), array('tag' => 'a'), array('tag' => 'span'), 'return_attribute' => 'plaintext'),
+        'Company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
+        'Url' =>  array(array('tag' => 'h4'), array('tag' => 'a'), 'return_attribute' => 'href'),
+        'LocationFromSource' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'direct_joblocation'),
         'regex_link_job_id' => '/\/[j\/]{0,2}(.*)/i'
     );
 

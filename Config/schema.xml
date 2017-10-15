@@ -73,7 +73,7 @@
         <!--<reference local="jobsite" foreign="key"/>-->
         <!--</foreign-key>-->
 
-        <column name="jobsite_post_id" phpName="JobSitePostID" type="varchar" size="255" required="true"/>
+        <column name="jobsite_post_id" phpName="JobSitePostId" type="varchar" size="255" required="true"/>
         <unique name="index_jobsite_and_post_id/">
             <unique-column name="jobsite"/>
             <unique-column name="jobsite_post_id"/>

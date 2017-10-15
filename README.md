@@ -61,21 +61,20 @@ Non-developers can now author plugins using [Data Scraping Studio](https://www.a
 Just tag the specific job results page fields for the site and set the Agenty field names to match the corresponding Job Scooper field: 
 ```php
 (
-        'tag_pages_count',
-	'tag_listings_noresults',
-	'tag_listings_count',
-	'tag_listings_section',
-	'tag_next_button',
-	'tag_job_id',
-	'tag_title',
-	'tag_link',
-	'tag_department',
-	'tag_location',
-	'tag_job_category',
-	'tag_company',
-	'tag_company_logo',
-	'tag_job_posting_date',
-	'tag_employment_type',
+        'TotalResultPageCount',
+	'NoPostsFound',
+	'TotalPostCount',
+	'JobPostItem',
+	'NextButton',
+	'JobSitePostId',
+	'Title',
+	'Url',
+	'Department',
+	'LocationFromSource',
+	'Category',
+	'Company',
+	'PostedAt',
+	'EmploymentType',
 );
 ```
 
@@ -103,14 +102,14 @@ You can define the full configuration for a job site plugin in a single JSON fil
       "Name": "PageFields",
       "Fields": [
       {
-          "Name": "tag_listings_section",
+          "Name": "JobPostItem",
           "Selector": ".js-job",
           "Extract": "HTML",
           "Attribute": "node",
           "Type": "CSS"
         },
         {
-          "Name": "tag_pages_count",
+          "Name": "pages_count",
           "Selector": "div.js-infinite-scroll",
           "Extract": "ATTR",
           "Attribute": "data-total-pages",
@@ -122,14 +121,14 @@ You can define the full configuration for a job site plugin in a single JSON fil
       "Name": "ItemFields",
       "Fields": [
         {
-          "Name": "tag_title",
+          "Name": "Title",
           "Selector": ".title",
           "Extract": "TEXT",
           "Attribute": null,
           "Type": "CSS"
         },
         {
-          "Name": "tag_location",
+          "Name": "LocationFromSource",
           "Selector": "span.location",
           "Extract": "TEXT",
           "Attribute": null,
@@ -166,14 +165,14 @@ class PluginCyberJobs extends AjaxHtmlSimplePlugin
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
 
     protected $arrListingTagSetup = array(
-        'tag_listings_count' =>  array('tag' => 'span', 'attribute' => 'id', 'attribute_value' =>'total-result-count', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
-        'tag_listings_section' => array('selector' => '.job-details-container'),
-        'tag_title' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
-        'tag_link' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
-        'tag_job_id' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>'/.*?(\d+)$/'),
-        'tag_employment_type' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'wage'), array('tag' => 'span')),
-        'tag_location' =>  array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'location'),
-        'tag_job_posting_date' =>  array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'posted')
+        'TotalPostCount' =>  array('tag' => 'span', 'attribute' => 'id', 'attribute_value' =>'total-result-count', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
+        'JobPostItem' => array('selector' => '.job-details-container'),
+        'title' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+        'link' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
+        'job_id' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>'/.*?(\d+)$/'),
+        'employment_type' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'wage'), array('tag' => 'span')),
+        'location' =>  array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'location'),
+        'job_posting_date' =>  array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'posted')
     );
 
 }

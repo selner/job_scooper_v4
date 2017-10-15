@@ -22,7 +22,7 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     ChildJobPostingQuery orderByJobPostingId($order = Criteria::ASC) Order by the jobposting_id column
  * @method     ChildJobPostingQuery orderByJobSite($order = Criteria::ASC) Order by the jobsite column
- * @method     ChildJobPostingQuery orderByJobSitePostID($order = Criteria::ASC) Order by the jobsite_post_id column
+ * @method     ChildJobPostingQuery orderByJobSitePostId($order = Criteria::ASC) Order by the jobsite_post_id column
  * @method     ChildJobPostingQuery orderByTitle($order = Criteria::ASC) Order by the title column
  * @method     ChildJobPostingQuery orderByTitleTokens($order = Criteria::ASC) Order by the title_tokens column
  * @method     ChildJobPostingQuery orderByUrl($order = Criteria::ASC) Order by the url column
@@ -44,7 +44,7 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     ChildJobPostingQuery groupByJobPostingId() Group by the jobposting_id column
  * @method     ChildJobPostingQuery groupByJobSite() Group by the jobsite column
- * @method     ChildJobPostingQuery groupByJobSitePostID() Group by the jobsite_post_id column
+ * @method     ChildJobPostingQuery groupByJobSitePostId() Group by the jobsite_post_id column
  * @method     ChildJobPostingQuery groupByTitle() Group by the title column
  * @method     ChildJobPostingQuery groupByTitleTokens() Group by the title_tokens column
  * @method     ChildJobPostingQuery groupByUrl() Group by the url column
@@ -119,7 +119,7 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     ChildJobPosting findOneByJobPostingId(int $jobposting_id) Return the first ChildJobPosting filtered by the jobposting_id column
  * @method     ChildJobPosting findOneByJobSite(string $jobsite) Return the first ChildJobPosting filtered by the jobsite column
- * @method     ChildJobPosting findOneByJobSitePostID(string $jobsite_post_id) Return the first ChildJobPosting filtered by the jobsite_post_id column
+ * @method     ChildJobPosting findOneByJobSitePostId(string $jobsite_post_id) Return the first ChildJobPosting filtered by the jobsite_post_id column
  * @method     ChildJobPosting findOneByTitle(string $title) Return the first ChildJobPosting filtered by the title column
  * @method     ChildJobPosting findOneByTitleTokens(string $title_tokens) Return the first ChildJobPosting filtered by the title_tokens column
  * @method     ChildJobPosting findOneByUrl(string $url) Return the first ChildJobPosting filtered by the url column
@@ -144,7 +144,7 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     ChildJobPosting requireOneByJobPostingId(int $jobposting_id) Return the first ChildJobPosting filtered by the jobposting_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByJobSite(string $jobsite) Return the first ChildJobPosting filtered by the jobsite column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildJobPosting requireOneByJobSitePostID(string $jobsite_post_id) Return the first ChildJobPosting filtered by the jobsite_post_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildJobPosting requireOneByJobSitePostId(string $jobsite_post_id) Return the first ChildJobPosting filtered by the jobsite_post_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByTitle(string $title) Return the first ChildJobPosting filtered by the title column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByTitleTokens(string $title_tokens) Return the first ChildJobPosting filtered by the title_tokens column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByUrl(string $url) Return the first ChildJobPosting filtered by the url column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -167,7 +167,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildJobPosting objects based on current ModelCriteria
  * @method     ChildJobPosting[]|ObjectCollection findByJobPostingId(int $jobposting_id) Return ChildJobPosting objects filtered by the jobposting_id column
  * @method     ChildJobPosting[]|ObjectCollection findByJobSite(string $jobsite) Return ChildJobPosting objects filtered by the jobsite column
- * @method     ChildJobPosting[]|ObjectCollection findByJobSitePostID(string $jobsite_post_id) Return ChildJobPosting objects filtered by the jobsite_post_id column
+ * @method     ChildJobPosting[]|ObjectCollection findByJobSitePostId(string $jobsite_post_id) Return ChildJobPosting objects filtered by the jobsite_post_id column
  * @method     ChildJobPosting[]|ObjectCollection findByTitle(string $title) Return ChildJobPosting objects filtered by the title column
  * @method     ChildJobPosting[]|ObjectCollection findByTitleTokens(string $title_tokens) Return ChildJobPosting objects filtered by the title_tokens column
  * @method     ChildJobPosting[]|ObjectCollection findByUrl(string $url) Return ChildJobPosting objects filtered by the url column
@@ -445,24 +445,24 @@ abstract class JobPostingQuery extends ModelCriteria
      *
      * Example usage:
      * <code>
-     * $query->filterByJobSitePostID('fooValue');   // WHERE jobsite_post_id = 'fooValue'
-     * $query->filterByJobSitePostID('%fooValue%', Criteria::LIKE); // WHERE jobsite_post_id LIKE '%fooValue%'
+     * $query->filterByJobSitePostId('fooValue');   // WHERE jobsite_post_id = 'fooValue'
+     * $query->filterByJobSitePostId('%fooValue%', Criteria::LIKE); // WHERE jobsite_post_id LIKE '%fooValue%'
      * </code>
      *
-     * @param     string $jobSitePostID The value to use as filter.
+     * @param     string $jobSitePostId The value to use as filter.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildJobPostingQuery The current query, for fluid interface
      */
-    public function filterByJobSitePostID($jobSitePostID = null, $comparison = null)
+    public function filterByJobSitePostId($jobSitePostId = null, $comparison = null)
     {
         if (null === $comparison) {
-            if (is_array($jobSitePostID)) {
+            if (is_array($jobSitePostId)) {
                 $comparison = Criteria::IN;
             }
         }
 
-        return $this->addUsingAlias(JobPostingTableMap::COL_JOBSITE_POST_ID, $jobSitePostID, $comparison);
+        return $this->addUsingAlias(JobPostingTableMap::COL_JOBSITE_POST_ID, $jobSitePostId, $comparison);
     }
 
     /**
