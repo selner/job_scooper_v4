@@ -37,7 +37,7 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
 
     protected $typeLocationSearchNeeded = 'location-city-comma-state';
 
-    protected function getPageURLfromBaseFmt(&$searchDetails, $nPage = null, $nItem = null)
+    protected function getPageURLfromBaseFmt($searchDetails, $nPage = null, $nItem = null)
     {
         if(is_null($this->currentSearchAlternateURL)) {
             $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
