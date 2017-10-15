@@ -92,6 +92,9 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
         }
 
         $val = $this->_cleanupTextValue($val);
+        if(is_null($val) || strlen($val) == 0)
+            $val = $this->getLocationFromSource();
+
         $this->setLocationDisplayValue($val);
     }
 
