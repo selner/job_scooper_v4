@@ -1174,7 +1174,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     {
         $arrIds = array_column($arrJobs, 'JobSitePostId', 'JobSitePostId');
         $queryData = \JobScooper\DataAccess\JobPostingQuery::create()
-            ->select(array("JobPostingId", "JobSitePostId", "JobSite", "KeySiteAndPostID"))
+            ->select(array("JobPostingId", "JobSitePostId", "JobSiteKey", "KeySiteAndPostID"))
             ->filterByJobSite($this->siteName)
             ->filterByJobSitePostId(array_values($arrIds))
             ->find();
