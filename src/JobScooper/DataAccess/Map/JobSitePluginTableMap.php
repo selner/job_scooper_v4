@@ -229,13 +229,20 @@ class JobSitePluginTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('UserSearchRun', '\\JobScooper\\DataAccess\\UserSearchRun', RelationMap::MANY_TO_ONE, array (
+        $this->addRelation('UserSearchRunRelatedByLastUserSearchRunId', '\\JobScooper\\DataAccess\\UserSearchRun', RelationMap::MANY_TO_ONE, array (
   0 =>
   array (
     0 => ':last_user_search_run_id',
     1 => ':user_search_run_id',
   ),
 ), null, null, null, false);
+        $this->addRelation('UserSearchRunRelatedByJobSiteKey', '\\JobScooper\\DataAccess\\UserSearchRun', RelationMap::ONE_TO_MANY, array (
+  0 =>
+  array (
+    0 => ':jobsite_key',
+    1 => ':jobsite_key',
+  ),
+), null, null, 'UserSearchRunsRelatedByJobSiteKey', false);
     } // buildRelations()
 
     /**

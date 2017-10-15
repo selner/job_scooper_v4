@@ -60,7 +60,7 @@
           "Field": "job_post_url"
         },
         {
-          "Name": "LocationFromSource",
+          "Name": "Location",
           "Selector": "div.show-on-large .hide-on-med-and-down p span",
           "Index" : 0,
           "Extract": "TEXT",

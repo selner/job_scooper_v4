@@ -62,7 +62,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "LocationFromSource",
+          "Name": "Location",
           "Selector": "p strong span.location",
           "Pattern": "/.*?[\\-]{1}(.*)/",
           "Extract": "TEXT",

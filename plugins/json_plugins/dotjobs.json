@@ -45,7 +45,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "LocationFromSource",
+          "Name": "Location",
           "Selector": "div span[itemprop='address']",
           "Index" : 0,
           "Extract": "CSS",

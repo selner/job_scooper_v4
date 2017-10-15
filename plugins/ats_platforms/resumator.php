@@ -24,7 +24,7 @@ abstract class AbstractResumator extends \JobScooper\Plugins\lib\ServerHtmlSimpl
         'Title' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'resumator-job-title-link'),
         'Url' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'resumator-job-title-link'),
         'Department' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'resumator-job-info'),
-        'LocationFromSource' => null,
+        'Location' => null,
         'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
     );
 }
@@ -50,7 +50,7 @@ class PluginMashableCorporate extends AbstractResumator
         'Title' => array(array('tag' => 'h4', 'attribute' => 'class', 'attribute_value' =>'list-group-item-heading'), array('tag' => 'a')),
         'Url' => array(array('tag' => 'h4', 'attribute' => 'class', 'attribute_value' =>'list-group-item-heading'), array('tag' => 'a')),
         'Department' => array(array('tag' => 'ul' ), array('tag' => 'li', 'index' => 0)),
-        'LocationFromSource' => array(array('tag' => 'ul' ), array('tag' => 'li', 'index' => 1)),
+        'Location' => array(array('tag' => 'ul' ), array('tag' => 'li', 'index' => 1)),
         'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
     );
 }

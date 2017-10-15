@@ -58,12 +58,12 @@ class AbstractIcims extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
         'Title' =>  array(array('tag' => 'td', 'index' =>null), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
         'Url' =>  array(array('tag' => 'td', 'index' =>null), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' => '/(.*?)\?.*/'),
         'JobSitePostId' =>  array('tag' => 'td', 'index' =>null, 'return_attribute' => 'href', 'return_value_regex' => '/.*?([\d\-]+).*?$/'),
-        'LocationFromSource' =>  array('tag' => 'td', 'index' =>null, 'return_attribute' => 'plaintext',  'return_value_regex' => '/.*?Loc[\w]+:&nbsp;\s*([\w\s[:punct:]]+)?$/'),
+        'Location' =>  array('tag' => 'td', 'index' =>null, 'return_attribute' => 'plaintext',  'return_value_regex' => '/.*?Loc[\w]+:&nbsp;\s*([\w\s[:punct:]]+)?$/'),
         'Company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
 //        'Title' =>  array(array('tag' => 'td', 'index' =>1), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
 //        'Url' =>  array(array('tag' => 'td', 'index' =>1), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' => '/(.*?)\?.*/'),
 //        'JobSitePostId' =>  array('tag' => 'td', 'index' =>1), 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+\-\d+).*?/'),
-//        'LocationFromSource' =>  array('tag' => 'td', 'index' =>2, 'return_attribute' => 'plaintext',  'return_value_regex' => '/.*?Loc[\w]+:&nbsp;\s*([\w\s\-]+)?$/')
+//        'Location' =>  array('tag' => 'td', 'index' =>2, 'return_attribute' => 'plaintext',  'return_value_regex' => '/.*?Loc[\w]+:&nbsp;\s*([\w\s\-]+)?$/')
     );
     protected function getPageURLValue($nPage) { return ($nPage - 1); }
 
@@ -76,7 +76,7 @@ class PluginHibbettSports extends AbstractIcims
     protected $regex_link_job_id = '/.*?([\d\-]+).*?$/';
     protected $additionalLoadDelaySeconds = 3;
 
-    protected $arrResultsRowTDIndex = array('Title' => 0, 'Url' => 0, 'JobSitePostId' => null, 'Department' => 1, 'LocationFromSource' => 2, 'PostedAt' => null  );
+    protected $arrResultsRowTDIndex = array('Title' => 0, 'Url' => 0, 'JobSitePostId' => null, 'Department' => 1, 'Location' => 2, 'PostedAt' => null  );
     function __construct($strBaseDir = null)
     {
         $this->arrListingTagSetup['TotalResultPageCount'] = array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'iCIMS_Paginator_Bottom'), array('tag' => 'div') , array('tag' => 'div') , array('tag' => 'div'), 'index' => 1, 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?of\s+(\d+).*/');
@@ -93,7 +93,7 @@ class PluginFredHutch extends AbstractIcims
     protected $nJobListingsPerPage = 167;
 
     // Results Columns:  "Posting date", "Job ID", "Job title", "Department", "Location", "Remote base"
-    protected $arrResultsRowTDIndex = array('PostedAt' => null, 'JobSitePostId' => 0, 'Title' => 1, 'Url' => 1, 'Department' => null, 'LocationFromSource' => 2 );
+    protected $arrResultsRowTDIndex = array('PostedAt' => null, 'JobSitePostId' => 0, 'Title' => 1, 'Url' => 1, 'Department' => null, 'Location' => 2 );
 }
 
 class PluginRedHat extends AbstractIcims
@@ -103,12 +103,12 @@ class PluginRedHat extends AbstractIcims
     protected $siteBaseURL = "https://careers-redhat.icims.com";
 
     // Results Columns:  "Posting date", "Job ID", "Job title", "Department", "Location", "Remote base"
-    protected $arrResultsRowTDIndex = array('PostedAt' => 0, 'JobSitePostId' => 1, 'Title' => 2, 'Url' => 2, 'Department' => 3, 'LocationFromSource' => 4 );
+    protected $arrResultsRowTDIndex = array('PostedAt' => 0, 'JobSitePostId' => 1, 'Title' => 2, 'Url' => 2, 'Department' => 3, 'Location' => 4 );
 }
 
 class PluginParivedaSolutions extends AbstractIcims
 {
     protected $siteName = 'ParivedaSolutions';
     protected $siteBaseURL = "https://careers-parivedasolutions.icims.com";
-    protected $arrResultsRowTDIndex = array('PostedAt' => null, 'JobSitePostId' => 0, 'Title' => 1, 'Url' => 1, 'Department' => null, 'LocationFromSource' => 2 );
+    protected $arrResultsRowTDIndex = array('PostedAt' => null, 'JobSitePostId' => 0, 'Title' => 1, 'Url' => 1, 'Department' => null, 'Location' => 2 );
 }

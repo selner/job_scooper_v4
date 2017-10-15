@@ -31,7 +31,7 @@ class PluginOuterwall extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
         'Title' => array(array('tag' => 'h4'), array('tag' => 'a'), array('tag' => 'span'), 'return_attribute' => 'plaintext'),
         'Company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
         'Url' =>  array(array('tag' => 'h4'), array('tag' => 'a'), 'return_attribute' => 'href'),
-        'LocationFromSource' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'direct_joblocation'),
+        'Location' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'direct_joblocation'),
         'regex_link_job_id' => '/\/[j\/]{0,2}(.*)/i'
     );
 

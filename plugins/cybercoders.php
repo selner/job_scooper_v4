@@ -35,7 +35,7 @@ class PluginCyberCoders extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         'Url' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
         'JobSitePostId' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>'/.*?(\d+)$/'),
         'EmploymentType' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'wage'), array('tag' => 'span')),
-        'LocationFromSource' =>  array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'LocationFromSource'),
+        'Location' =>  array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'Location'),
         'PostedAt' =>  array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'posted')
     );
 

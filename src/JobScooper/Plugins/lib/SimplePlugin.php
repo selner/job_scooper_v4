@@ -69,8 +69,8 @@ class SimplePlugin extends BaseJobsSite
             'JobSitePostId',
             'Title',
             'Url',
-            'JobSite',
-            'LocationFromSource',
+            'JobSiteKey',
+            'Location',
             'Category',
             'Department',
 //            'PayRange',
@@ -92,9 +92,9 @@ class SimplePlugin extends BaseJobsSite
             'JobSitePostId' => array(),
             'Title' => array(),
             'Url' => array(),
-            'JobSite' => array(),
+            'JobSiteKey' => array(),
             'Department' => array(),
-            'LocationFromSource' => array(),
+            'Location' => array(),
             'Category' => array(),
             'Company' => array(),
 //            'company_logo' => array(),
@@ -415,8 +415,8 @@ class SimplePlugin extends BaseJobsSite
                 if (strlen($item['Title']) == 0)
                     continue;
 
-                if(empty($item['JobSite']))
-                    $item['JobSite'] = $this->siteName;
+                if(empty($item['JobSiteKey']))
+                    $item['JobSiteKey'] = $this->siteName;
 
                 if (array_key_exists('regex_link_job_id', $tagSetup) && count($tagSetup['regex_link_job_id']) >= 1)
                     $this->regex_link_job_id = $tagSetup['regex_link_job_id'];

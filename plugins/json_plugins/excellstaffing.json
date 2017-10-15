@@ -48,7 +48,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "LocationFromSource",
+          "Name": "Location",
           "Selector": "td",
           "Extract": "TEXT",
           "Index": 3,

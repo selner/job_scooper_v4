@@ -92,7 +92,7 @@ class PluginIndeed extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
             $locNode= $node->find("span[itemprop='addressLocality']");
             if(isset($locNode) && count($locNode) >= 1)
             {
-                $item['LocationFromSource'] = $locNode[0]->plaintext;
+                $item['Location'] = $locNode[0]->plaintext;
             }
             $dateNode = $node->find("span[class='date']");
             if(isset($dateNode ) && count($dateNode ) >= 1)

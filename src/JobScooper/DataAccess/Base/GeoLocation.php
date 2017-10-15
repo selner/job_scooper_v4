@@ -4,17 +4,14 @@ namespace JobScooper\DataAccess\Base;
 
 use \Exception;
 use \PDO;
+use JobScooper\DataAccess\GeoLocation as ChildGeoLocation;
+use JobScooper\DataAccess\GeoLocationQuery as ChildGeoLocationQuery;
 use JobScooper\DataAccess\JobPosting as ChildJobPosting;
 use JobScooper\DataAccess\JobPostingQuery as ChildJobPostingQuery;
-use JobScooper\DataAccess\Location as ChildLocation;
-use JobScooper\DataAccess\LocationNames as ChildLocationNames;
-use JobScooper\DataAccess\LocationNamesQuery as ChildLocationNamesQuery;
-use JobScooper\DataAccess\LocationQuery as ChildLocationQuery;
 use JobScooper\DataAccess\UserSearchRun as ChildUserSearchRun;
 use JobScooper\DataAccess\UserSearchRunQuery as ChildUserSearchRunQuery;
+use JobScooper\DataAccess\Map\GeoLocationTableMap;
 use JobScooper\DataAccess\Map\JobPostingTableMap;
-use JobScooper\DataAccess\Map\LocationNamesTableMap;
-use JobScooper\DataAccess\Map\LocationTableMap;
 use JobScooper\DataAccess\Map\UserSearchRunTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
@@ -30,18 +27,18 @@ use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
 
 /**
- * Base class that represents a row from the 'location' table.
+ * Base class that represents a row from the 'geolocation' table.
  *
  *
  *
  * @package    propel.generator.JobScooper.DataAccess.Base
  */
-abstract class Location implements ActiveRecordInterface
+abstract class GeoLocation implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      */
-    const TABLE_MAP = '\\JobScooper\\DataAccess\\Map\\LocationTableMap';
+    const TABLE_MAP = '\\JobScooper\\DataAccess\\Map\\GeoLocationTableMap';
 
 
     /**
@@ -71,46 +68,25 @@ abstract class Location implements ActiveRecordInterface
     protected $virtualColumns = array();
 
     /**
-     * The value for the location_id field.
+     * The value for the geolocation_id field.
      *
      * @var        int
      */
-    protected $location_id;
+    protected $geolocation_id;
 
     /**
-     * The value for the latitude field.
-     *
-     * @var        double
-     */
-    protected $latitude;
-
-    /**
-     * The value for the longitude field.
-     *
-     * @var        double
-     */
-    protected $longitude;
-
-    /**
-     * The value for the full_display_name field.
+     * The value for the display_name field.
      *
      * @var        string
      */
-    protected $full_display_name;
+    protected $display_name;
 
     /**
-     * The value for the location_key field.
+     * The value for the geolocation_key field.
      *
      * @var        string
      */
-    protected $location_key;
-
-    /**
-     * The value for the primary_name field.
-     *
-     * @var        string
-     */
-    protected $primary_name;
+    protected $geolocation_key;
 
     /**
      * The value for the place field.
@@ -155,6 +131,34 @@ abstract class Location implements ActiveRecordInterface
     protected $countrycode;
 
     /**
+     * The value for the full_osm_data field.
+     *
+     * @var        string
+     */
+    protected $full_osm_data;
+
+    /**
+     * The value for the openstreetmap_id field.
+     *
+     * @var        int
+     */
+    protected $openstreetmap_id;
+
+    /**
+     * The value for the latitude field.
+     *
+     * @var        double
+     */
+    protected $latitude;
+
+    /**
+     * The value for the longitude field.
+     *
+     * @var        double
+     */
+    protected $longitude;
+
+    /**
      * The value for the alternate_names field.
      *
      * @var        array
@@ -169,37 +173,10 @@ abstract class Location implements ActiveRecordInterface
     protected $alternate_names_unserialized;
 
     /**
-     * The value for the openstreetmap_id field.
-     *
-     * @var        int
-     */
-    protected $openstreetmap_id;
-
-    /**
-     * The value for the full_osm_data field.
-     *
-     * @var        string
-     */
-    protected $full_osm_data;
-
-    /**
-     * The value for the extra_details_data field.
-     *
-     * @var        string
-     */
-    protected $extra_details_data;
-
-    /**
      * @var        ObjectCollection|ChildJobPosting[] Collection to store aggregation of ChildJobPosting objects.
      */
     protected $collJobPostings;
     protected $collJobPostingsPartial;
-
-    /**
-     * @var        ObjectCollection|ChildLocationNames[] Collection to store aggregation of ChildLocationNames objects.
-     */
-    protected $collLocationNamess;
-    protected $collLocationNamessPartial;
 
     /**
      * @var        ObjectCollection|ChildUserSearchRun[] Collection to store aggregation of ChildUserSearchRun objects.
@@ -223,18 +200,12 @@ abstract class Location implements ActiveRecordInterface
 
     /**
      * An array of objects scheduled for deletion.
-     * @var ObjectCollection|ChildLocationNames[]
-     */
-    protected $locationNamessScheduledForDeletion = null;
-
-    /**
-     * An array of objects scheduled for deletion.
      * @var ObjectCollection|ChildUserSearchRun[]
      */
     protected $userSearchRunsScheduledForDeletion = null;
 
     /**
-     * Initializes internal state of JobScooper\DataAccess\Base\Location object.
+     * Initializes internal state of JobScooper\DataAccess\Base\GeoLocation object.
      */
     public function __construct()
     {
@@ -329,9 +300,9 @@ abstract class Location implements ActiveRecordInterface
     }
 
     /**
-     * Compares this with another <code>Location</code> instance.  If
-     * <code>obj</code> is an instance of <code>Location</code>, delegates to
-     * <code>equals(Location)</code>.  Otherwise, returns <code>false</code>.
+     * Compares this with another <code>GeoLocation</code> instance.  If
+     * <code>obj</code> is an instance of <code>GeoLocation</code>, delegates to
+     * <code>equals(GeoLocation)</code>.  Otherwise, returns <code>false</code>.
      *
      * @param  mixed   $obj The object to compare to.
      * @return boolean Whether equal to the object specified.
@@ -397,7 +368,7 @@ abstract class Location implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return $this|Location The current object, for fluid interface
+     * @return $this|GeoLocation The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -459,63 +430,33 @@ abstract class Location implements ActiveRecordInterface
     }
 
     /**
-     * Get the [location_id] column value.
+     * Get the [geolocation_id] column value.
      *
      * @return int
      */
-    public function getLocationId()
+    public function getGeoLocationId()
     {
-        return $this->location_id;
+        return $this->geolocation_id;
     }
 
     /**
-     * Get the [latitude] column value.
-     *
-     * @return double
-     */
-    public function getLatitude()
-    {
-        return $this->latitude;
-    }
-
-    /**
-     * Get the [longitude] column value.
-     *
-     * @return double
-     */
-    public function getLongitude()
-    {
-        return $this->longitude;
-    }
-
-    /**
-     * Get the [full_display_name] column value.
+     * Get the [display_name] column value.
      *
      * @return string
      */
     public function getDisplayName()
     {
-        return $this->full_display_name;
+        return $this->display_name;
     }
 
     /**
-     * Get the [location_key] column value.
+     * Get the [geolocation_key] column value.
      *
      * @return string
      */
-    public function getLocationKey()
+    public function getGeoLocationKey()
     {
-        return $this->location_key;
-    }
-
-    /**
-     * Get the [primary_name] column value.
-     *
-     * @return string
-     */
-    public function getPrimaryName()
-    {
-        return $this->primary_name;
+        return $this->geolocation_key;
     }
 
     /**
@@ -579,6 +520,46 @@ abstract class Location implements ActiveRecordInterface
     }
 
     /**
+     * Get the [full_osm_data] column value.
+     *
+     * @return string
+     */
+    public function getFullOsmData()
+    {
+        return $this->full_osm_data;
+    }
+
+    /**
+     * Get the [openstreetmap_id] column value.
+     *
+     * @return int
+     */
+    public function getOpenStreetMapId()
+    {
+        return $this->openstreetmap_id;
+    }
+
+    /**
+     * Get the [latitude] column value.
+     *
+     * @return double
+     */
+    public function getLatitude()
+    {
+        return $this->latitude;
+    }
+
+    /**
+     * Get the [longitude] column value.
+     *
+     * @return double
+     */
+    public function getLongitude()
+    {
+        return $this->longitude;
+    }
+
+    /**
      * Get the [alternate_names] column value.
      *
      * @return array
@@ -608,100 +589,30 @@ abstract class Location implements ActiveRecordInterface
     } // hasAlternateName()
 
     /**
-     * Get the [openstreetmap_id] column value.
-     *
-     * @return int
-     */
-    public function getOpenStreetMapId()
-    {
-        return $this->openstreetmap_id;
-    }
-
-    /**
-     * Get the [full_osm_data] column value.
-     *
-     * @return string
-     */
-    public function getFullOsmData()
-    {
-        return $this->full_osm_data;
-    }
-
-    /**
-     * Get the [extra_details_data] column value.
-     *
-     * @return string
-     */
-    public function getExtraDetailsData()
-    {
-        return $this->extra_details_data;
-    }
-
-    /**
-     * Set the value of [location_id] column.
+     * Set the value of [geolocation_id] column.
      *
      * @param int $v new value
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
-    public function setLocationId($v)
+    public function setGeoLocationId($v)
     {
         if ($v !== null) {
             $v = (int) $v;
         }
 
-        if ($this->location_id !== $v) {
-            $this->location_id = $v;
-            $this->modifiedColumns[LocationTableMap::COL_LOCATION_ID] = true;
+        if ($this->geolocation_id !== $v) {
+            $this->geolocation_id = $v;
+            $this->modifiedColumns[GeoLocationTableMap::COL_GEOLOCATION_ID] = true;
         }
 
         return $this;
-    } // setLocationId()
+    } // setGeoLocationId()
 
     /**
-     * Set the value of [latitude] column.
-     *
-     * @param double $v new value
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
-     */
-    public function setLatitude($v)
-    {
-        if ($v !== null) {
-            $v = (double) $v;
-        }
-
-        if ($this->latitude !== $v) {
-            $this->latitude = $v;
-            $this->modifiedColumns[LocationTableMap::COL_LATITUDE] = true;
-        }
-
-        return $this;
-    } // setLatitude()
-
-    /**
-     * Set the value of [longitude] column.
-     *
-     * @param double $v new value
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
-     */
-    public function setLongitude($v)
-    {
-        if ($v !== null) {
-            $v = (double) $v;
-        }
-
-        if ($this->longitude !== $v) {
-            $this->longitude = $v;
-            $this->modifiedColumns[LocationTableMap::COL_LONGITUDE] = true;
-        }
-
-        return $this;
-    } // setLongitude()
-
-    /**
-     * Set the value of [full_display_name] column.
+     * Set the value of [display_name] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setDisplayName($v)
     {
@@ -709,59 +620,39 @@ abstract class Location implements ActiveRecordInterface
             $v = (string) $v;
         }
 
-        if ($this->full_display_name !== $v) {
-            $this->full_display_name = $v;
-            $this->modifiedColumns[LocationTableMap::COL_FULL_DISPLAY_NAME] = true;
+        if ($this->display_name !== $v) {
+            $this->display_name = $v;
+            $this->modifiedColumns[GeoLocationTableMap::COL_DISPLAY_NAME] = true;
         }
 
         return $this;
     } // setDisplayName()
 
     /**
-     * Set the value of [location_key] column.
+     * Set the value of [geolocation_key] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
-    public function setLocationKey($v)
+    public function setGeoLocationKey($v)
     {
         if ($v !== null) {
             $v = (string) $v;
         }
 
-        if ($this->location_key !== $v) {
-            $this->location_key = $v;
-            $this->modifiedColumns[LocationTableMap::COL_LOCATION_KEY] = true;
+        if ($this->geolocation_key !== $v) {
+            $this->geolocation_key = $v;
+            $this->modifiedColumns[GeoLocationTableMap::COL_GEOLOCATION_KEY] = true;
         }
 
         return $this;
-    } // setLocationKey()
-
-    /**
-     * Set the value of [primary_name] column.
-     *
-     * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
-     */
-    public function setPrimaryName($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->primary_name !== $v) {
-            $this->primary_name = $v;
-            $this->modifiedColumns[LocationTableMap::COL_PRIMARY_NAME] = true;
-        }
-
-        return $this;
-    } // setPrimaryName()
+    } // setGeoLocationKey()
 
     /**
      * Set the value of [place] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setPlace($v)
     {
@@ -771,7 +662,7 @@ abstract class Location implements ActiveRecordInterface
 
         if ($this->place !== $v) {
             $this->place = $v;
-            $this->modifiedColumns[LocationTableMap::COL_PLACE] = true;
+            $this->modifiedColumns[GeoLocationTableMap::COL_PLACE] = true;
         }
 
         return $this;
@@ -781,7 +672,7 @@ abstract class Location implements ActiveRecordInterface
      * Set the value of [county] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setCounty($v)
     {
@@ -791,7 +682,7 @@ abstract class Location implements ActiveRecordInterface
 
         if ($this->county !== $v) {
             $this->county = $v;
-            $this->modifiedColumns[LocationTableMap::COL_COUNTY] = true;
+            $this->modifiedColumns[GeoLocationTableMap::COL_COUNTY] = true;
         }
 
         return $this;
@@ -801,7 +692,7 @@ abstract class Location implements ActiveRecordInterface
      * Set the value of [state] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setState($v)
     {
@@ -811,7 +702,7 @@ abstract class Location implements ActiveRecordInterface
 
         if ($this->state !== $v) {
             $this->state = $v;
-            $this->modifiedColumns[LocationTableMap::COL_STATE] = true;
+            $this->modifiedColumns[GeoLocationTableMap::COL_STATE] = true;
         }
 
         return $this;
@@ -821,7 +712,7 @@ abstract class Location implements ActiveRecordInterface
      * Set the value of [statecode] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setStateCode($v)
     {
@@ -831,7 +722,7 @@ abstract class Location implements ActiveRecordInterface
 
         if ($this->statecode !== $v) {
             $this->statecode = $v;
-            $this->modifiedColumns[LocationTableMap::COL_STATECODE] = true;
+            $this->modifiedColumns[GeoLocationTableMap::COL_STATECODE] = true;
         }
 
         return $this;
@@ -841,7 +732,7 @@ abstract class Location implements ActiveRecordInterface
      * Set the value of [country] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setCountry($v)
     {
@@ -851,7 +742,7 @@ abstract class Location implements ActiveRecordInterface
 
         if ($this->country !== $v) {
             $this->country = $v;
-            $this->modifiedColumns[LocationTableMap::COL_COUNTRY] = true;
+            $this->modifiedColumns[GeoLocationTableMap::COL_COUNTRY] = true;
         }
 
         return $this;
@@ -861,7 +752,7 @@ abstract class Location implements ActiveRecordInterface
      * Set the value of [countrycode] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setCountryCode($v)
     {
@@ -871,24 +762,104 @@ abstract class Location implements ActiveRecordInterface
 
         if ($this->countrycode !== $v) {
             $this->countrycode = $v;
-            $this->modifiedColumns[LocationTableMap::COL_COUNTRYCODE] = true;
+            $this->modifiedColumns[GeoLocationTableMap::COL_COUNTRYCODE] = true;
         }
 
         return $this;
     } // setCountryCode()
 
     /**
+     * Set the value of [full_osm_data] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
+     */
+    public function setFullOsmData($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->full_osm_data !== $v) {
+            $this->full_osm_data = $v;
+            $this->modifiedColumns[GeoLocationTableMap::COL_FULL_OSM_DATA] = true;
+        }
+
+        return $this;
+    } // setFullOsmData()
+
+    /**
+     * Set the value of [openstreetmap_id] column.
+     *
+     * @param int $v new value
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
+     */
+    public function setOpenStreetMapId($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->openstreetmap_id !== $v) {
+            $this->openstreetmap_id = $v;
+            $this->modifiedColumns[GeoLocationTableMap::COL_OPENSTREETMAP_ID] = true;
+        }
+
+        return $this;
+    } // setOpenStreetMapId()
+
+    /**
+     * Set the value of [latitude] column.
+     *
+     * @param double $v new value
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
+     */
+    public function setLatitude($v)
+    {
+        if ($v !== null) {
+            $v = (double) $v;
+        }
+
+        if ($this->latitude !== $v) {
+            $this->latitude = $v;
+            $this->modifiedColumns[GeoLocationTableMap::COL_LATITUDE] = true;
+        }
+
+        return $this;
+    } // setLatitude()
+
+    /**
+     * Set the value of [longitude] column.
+     *
+     * @param double $v new value
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
+     */
+    public function setLongitude($v)
+    {
+        if ($v !== null) {
+            $v = (double) $v;
+        }
+
+        if ($this->longitude !== $v) {
+            $this->longitude = $v;
+            $this->modifiedColumns[GeoLocationTableMap::COL_LONGITUDE] = true;
+        }
+
+        return $this;
+    } // setLongitude()
+
+    /**
      * Set the value of [alternate_names] column.
      *
      * @param array $v new value
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setAlternateNames($v)
     {
         if ($this->alternate_names_unserialized !== $v) {
             $this->alternate_names_unserialized = $v;
             $this->alternate_names = '| ' . implode(' | ', $v) . ' |';
-            $this->modifiedColumns[LocationTableMap::COL_ALTERNATE_NAMES] = true;
+            $this->modifiedColumns[GeoLocationTableMap::COL_ALTERNATE_NAMES] = true;
         }
 
         return $this;
@@ -898,7 +869,7 @@ abstract class Location implements ActiveRecordInterface
      * Adds a value to the [alternate_names] array column value.
      * @param  mixed $value
      *
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function addAlternateName($value)
     {
@@ -913,7 +884,7 @@ abstract class Location implements ActiveRecordInterface
      * Removes a value from the [alternate_names] array column value.
      * @param  mixed $value
      *
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function removeAlternateName($value)
     {
@@ -927,66 +898,6 @@ abstract class Location implements ActiveRecordInterface
 
         return $this;
     } // removeAlternateName()
-
-    /**
-     * Set the value of [openstreetmap_id] column.
-     *
-     * @param int $v new value
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
-     */
-    public function setOpenStreetMapId($v)
-    {
-        if ($v !== null) {
-            $v = (int) $v;
-        }
-
-        if ($this->openstreetmap_id !== $v) {
-            $this->openstreetmap_id = $v;
-            $this->modifiedColumns[LocationTableMap::COL_OPENSTREETMAP_ID] = true;
-        }
-
-        return $this;
-    } // setOpenStreetMapId()
-
-    /**
-     * Set the value of [full_osm_data] column.
-     *
-     * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
-     */
-    public function setFullOsmData($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->full_osm_data !== $v) {
-            $this->full_osm_data = $v;
-            $this->modifiedColumns[LocationTableMap::COL_FULL_OSM_DATA] = true;
-        }
-
-        return $this;
-    } // setFullOsmData()
-
-    /**
-     * Set the value of [extra_details_data] column.
-     *
-     * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
-     */
-    public function setExtraDetailsData($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->extra_details_data !== $v) {
-            $this->extra_details_data = $v;
-            $this->modifiedColumns[LocationTableMap::COL_EXTRA_DETAILS_DATA] = true;
-        }
-
-        return $this;
-    } // setExtraDetailsData()
 
     /**
      * Indicates whether the columns in this object are only set to default values.
@@ -1024,54 +935,48 @@ abstract class Location implements ActiveRecordInterface
     {
         try {
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : LocationTableMap::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->location_id = (null !== $col) ? (int) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : GeoLocationTableMap::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->geolocation_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : LocationTableMap::translateFieldName('Latitude', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->latitude = (null !== $col) ? (double) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : GeoLocationTableMap::translateFieldName('DisplayName', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->display_name = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : LocationTableMap::translateFieldName('Longitude', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->longitude = (null !== $col) ? (double) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : GeoLocationTableMap::translateFieldName('GeoLocationKey', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->geolocation_key = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : LocationTableMap::translateFieldName('DisplayName', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->full_display_name = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : LocationTableMap::translateFieldName('LocationKey', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->location_key = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : LocationTableMap::translateFieldName('PrimaryName', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->primary_name = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : LocationTableMap::translateFieldName('Place', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : GeoLocationTableMap::translateFieldName('Place', TableMap::TYPE_PHPNAME, $indexType)];
             $this->place = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : LocationTableMap::translateFieldName('County', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : GeoLocationTableMap::translateFieldName('County', TableMap::TYPE_PHPNAME, $indexType)];
             $this->county = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : LocationTableMap::translateFieldName('State', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : GeoLocationTableMap::translateFieldName('State', TableMap::TYPE_PHPNAME, $indexType)];
             $this->state = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : LocationTableMap::translateFieldName('StateCode', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : GeoLocationTableMap::translateFieldName('StateCode', TableMap::TYPE_PHPNAME, $indexType)];
             $this->statecode = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : LocationTableMap::translateFieldName('Country', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : GeoLocationTableMap::translateFieldName('Country', TableMap::TYPE_PHPNAME, $indexType)];
             $this->country = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : LocationTableMap::translateFieldName('CountryCode', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : GeoLocationTableMap::translateFieldName('CountryCode', TableMap::TYPE_PHPNAME, $indexType)];
             $this->countrycode = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : LocationTableMap::translateFieldName('AlternateNames', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->alternate_names = $col;
-            $this->alternate_names_unserialized = null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 13 + $startcol : LocationTableMap::translateFieldName('OpenStreetMapId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->openstreetmap_id = (null !== $col) ? (int) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 14 + $startcol : LocationTableMap::translateFieldName('FullOsmData', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : GeoLocationTableMap::translateFieldName('FullOsmData', TableMap::TYPE_PHPNAME, $indexType)];
             $this->full_osm_data = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 15 + $startcol : LocationTableMap::translateFieldName('ExtraDetailsData', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->extra_details_data = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : GeoLocationTableMap::translateFieldName('OpenStreetMapId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->openstreetmap_id = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : GeoLocationTableMap::translateFieldName('Latitude', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->latitude = (null !== $col) ? (double) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : GeoLocationTableMap::translateFieldName('Longitude', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->longitude = (null !== $col) ? (double) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 13 + $startcol : GeoLocationTableMap::translateFieldName('AlternateNames', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->alternate_names = $col;
+            $this->alternate_names_unserialized = null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -1080,10 +985,10 @@ abstract class Location implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 16; // 16 = LocationTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 14; // 14 = GeoLocationTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\Location'), 0, $e);
+            throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\GeoLocation'), 0, $e);
         }
     }
 
@@ -1125,13 +1030,13 @@ abstract class Location implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(LocationTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getReadConnection(GeoLocationTableMap::DATABASE_NAME);
         }
 
         // We don't need to alter the object instance pool; we're just modifying this instance
         // already in the pool.
 
-        $dataFetcher = ChildLocationQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
+        $dataFetcher = ChildGeoLocationQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
         $row = $dataFetcher->fetch();
         $dataFetcher->close();
         if (!$row) {
@@ -1142,8 +1047,6 @@ abstract class Location implements ActiveRecordInterface
         if ($deep) {  // also de-associate any related objects?
 
             $this->collJobPostings = null;
-
-            $this->collLocationNamess = null;
 
             $this->collUserSearchRuns = null;
 
@@ -1156,8 +1059,8 @@ abstract class Location implements ActiveRecordInterface
      * @param      ConnectionInterface $con
      * @return void
      * @throws PropelException
-     * @see Location::setDeleted()
-     * @see Location::isDeleted()
+     * @see GeoLocation::setDeleted()
+     * @see GeoLocation::isDeleted()
      */
     public function delete(ConnectionInterface $con = null)
     {
@@ -1166,11 +1069,11 @@ abstract class Location implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(LocationTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(GeoLocationTableMap::DATABASE_NAME);
         }
 
         $con->transaction(function () use ($con) {
-            $deleteQuery = ChildLocationQuery::create()
+            $deleteQuery = ChildGeoLocationQuery::create()
                 ->filterByPrimaryKey($this->getPrimaryKey());
             $ret = $this->preDelete($con);
             if ($ret) {
@@ -1214,7 +1117,7 @@ abstract class Location implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(LocationTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(GeoLocationTableMap::DATABASE_NAME);
         }
 
         return $con->transaction(function () use ($con, $skipReload) {
@@ -1222,10 +1125,10 @@ abstract class Location implements ActiveRecordInterface
             $isInsert = $this->isNew();
             // sluggable behavior
 
-            if ($this->isColumnModified(LocationTableMap::COL_LOCATION_KEY) && $this->getLocationKey()) {
-                $this->setLocationKey($this->makeSlugUnique($this->getLocationKey()));
-            } elseif (!$this->getLocationKey()) {
-                $this->setLocationKey($this->createSlug());
+            if ($this->isColumnModified(GeoLocationTableMap::COL_GEOLOCATION_KEY) && $this->getGeoLocationKey()) {
+                $this->setGeoLocationKey($this->makeSlugUnique($this->getGeoLocationKey()));
+            } else {
+                $this->setGeoLocationKey($this->createSlug());
             }
             if ($isInsert) {
                 $ret = $ret && $this->preInsert($con);
@@ -1240,7 +1143,7 @@ abstract class Location implements ActiveRecordInterface
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                LocationTableMap::addInstanceToPool($this);
+                GeoLocationTableMap::addInstanceToPool($this);
             } else {
                 $affectedRows = 0;
             }
@@ -1304,23 +1207,6 @@ abstract class Location implements ActiveRecordInterface
                 }
             }
 
-            if ($this->locationNamessScheduledForDeletion !== null) {
-                if (!$this->locationNamessScheduledForDeletion->isEmpty()) {
-                    \JobScooper\DataAccess\LocationNamesQuery::create()
-                        ->filterByPrimaryKeys($this->locationNamessScheduledForDeletion->getPrimaryKeys(false))
-                        ->delete($con);
-                    $this->locationNamessScheduledForDeletion = null;
-                }
-            }
-
-            if ($this->collLocationNamess !== null) {
-                foreach ($this->collLocationNamess as $referrerFK) {
-                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
-                        $affectedRows += $referrerFK->save($con);
-                    }
-                }
-            }
-
             if ($this->userSearchRunsScheduledForDeletion !== null) {
                 if (!$this->userSearchRunsScheduledForDeletion->isEmpty()) {
                     foreach ($this->userSearchRunsScheduledForDeletion as $userSearchRun) {
@@ -1363,63 +1249,57 @@ abstract class Location implements ActiveRecordInterface
         $modifiedColumns = array();
         $index = 0;
 
-        $this->modifiedColumns[LocationTableMap::COL_LOCATION_ID] = true;
-        if (null !== $this->location_id) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key (' . LocationTableMap::COL_LOCATION_ID . ')');
+        $this->modifiedColumns[GeoLocationTableMap::COL_GEOLOCATION_ID] = true;
+        if (null !== $this->geolocation_id) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key (' . GeoLocationTableMap::COL_GEOLOCATION_ID . ')');
         }
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(LocationTableMap::COL_LOCATION_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'location_id';
+        if ($this->isColumnModified(GeoLocationTableMap::COL_GEOLOCATION_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'geolocation_id';
         }
-        if ($this->isColumnModified(LocationTableMap::COL_LATITUDE)) {
-            $modifiedColumns[':p' . $index++]  = 'latitude';
+        if ($this->isColumnModified(GeoLocationTableMap::COL_DISPLAY_NAME)) {
+            $modifiedColumns[':p' . $index++]  = 'display_name';
         }
-        if ($this->isColumnModified(LocationTableMap::COL_LONGITUDE)) {
-            $modifiedColumns[':p' . $index++]  = 'longitude';
+        if ($this->isColumnModified(GeoLocationTableMap::COL_GEOLOCATION_KEY)) {
+            $modifiedColumns[':p' . $index++]  = 'geolocation_key';
         }
-        if ($this->isColumnModified(LocationTableMap::COL_FULL_DISPLAY_NAME)) {
-            $modifiedColumns[':p' . $index++]  = 'full_display_name';
-        }
-        if ($this->isColumnModified(LocationTableMap::COL_LOCATION_KEY)) {
-            $modifiedColumns[':p' . $index++]  = 'location_key';
-        }
-        if ($this->isColumnModified(LocationTableMap::COL_PRIMARY_NAME)) {
-            $modifiedColumns[':p' . $index++]  = 'primary_name';
-        }
-        if ($this->isColumnModified(LocationTableMap::COL_PLACE)) {
+        if ($this->isColumnModified(GeoLocationTableMap::COL_PLACE)) {
             $modifiedColumns[':p' . $index++]  = 'place';
         }
-        if ($this->isColumnModified(LocationTableMap::COL_COUNTY)) {
+        if ($this->isColumnModified(GeoLocationTableMap::COL_COUNTY)) {
             $modifiedColumns[':p' . $index++]  = 'county';
         }
-        if ($this->isColumnModified(LocationTableMap::COL_STATE)) {
+        if ($this->isColumnModified(GeoLocationTableMap::COL_STATE)) {
             $modifiedColumns[':p' . $index++]  = 'state';
         }
-        if ($this->isColumnModified(LocationTableMap::COL_STATECODE)) {
+        if ($this->isColumnModified(GeoLocationTableMap::COL_STATECODE)) {
             $modifiedColumns[':p' . $index++]  = 'statecode';
         }
-        if ($this->isColumnModified(LocationTableMap::COL_COUNTRY)) {
+        if ($this->isColumnModified(GeoLocationTableMap::COL_COUNTRY)) {
             $modifiedColumns[':p' . $index++]  = 'country';
         }
-        if ($this->isColumnModified(LocationTableMap::COL_COUNTRYCODE)) {
+        if ($this->isColumnModified(GeoLocationTableMap::COL_COUNTRYCODE)) {
             $modifiedColumns[':p' . $index++]  = 'countrycode';
         }
-        if ($this->isColumnModified(LocationTableMap::COL_ALTERNATE_NAMES)) {
-            $modifiedColumns[':p' . $index++]  = 'alternate_names';
-        }
-        if ($this->isColumnModified(LocationTableMap::COL_OPENSTREETMAP_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'openstreetmap_id';
-        }
-        if ($this->isColumnModified(LocationTableMap::COL_FULL_OSM_DATA)) {
+        if ($this->isColumnModified(GeoLocationTableMap::COL_FULL_OSM_DATA)) {
             $modifiedColumns[':p' . $index++]  = 'full_osm_data';
         }
-        if ($this->isColumnModified(LocationTableMap::COL_EXTRA_DETAILS_DATA)) {
-            $modifiedColumns[':p' . $index++]  = 'extra_details_data';
+        if ($this->isColumnModified(GeoLocationTableMap::COL_OPENSTREETMAP_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'openstreetmap_id';
+        }
+        if ($this->isColumnModified(GeoLocationTableMap::COL_LATITUDE)) {
+            $modifiedColumns[':p' . $index++]  = 'latitude';
+        }
+        if ($this->isColumnModified(GeoLocationTableMap::COL_LONGITUDE)) {
+            $modifiedColumns[':p' . $index++]  = 'longitude';
+        }
+        if ($this->isColumnModified(GeoLocationTableMap::COL_ALTERNATE_NAMES)) {
+            $modifiedColumns[':p' . $index++]  = 'alternate_names';
         }
 
         $sql = sprintf(
-            'INSERT INTO location (%s) VALUES (%s)',
+            'INSERT INTO geolocation (%s) VALUES (%s)',
             implode(', ', $modifiedColumns),
             implode(', ', array_keys($modifiedColumns))
         );
@@ -1428,23 +1308,14 @@ abstract class Location implements ActiveRecordInterface
             $stmt = $con->prepare($sql);
             foreach ($modifiedColumns as $identifier => $columnName) {
                 switch ($columnName) {
-                    case 'location_id':
-                        $stmt->bindValue($identifier, $this->location_id, PDO::PARAM_INT);
+                    case 'geolocation_id':
+                        $stmt->bindValue($identifier, $this->geolocation_id, PDO::PARAM_INT);
                         break;
-                    case 'latitude':
-                        $stmt->bindValue($identifier, $this->latitude, PDO::PARAM_STR);
+                    case 'display_name':
+                        $stmt->bindValue($identifier, $this->display_name, PDO::PARAM_STR);
                         break;
-                    case 'longitude':
-                        $stmt->bindValue($identifier, $this->longitude, PDO::PARAM_STR);
-                        break;
-                    case 'full_display_name':
-                        $stmt->bindValue($identifier, $this->full_display_name, PDO::PARAM_STR);
-                        break;
-                    case 'location_key':
-                        $stmt->bindValue($identifier, $this->location_key, PDO::PARAM_STR);
-                        break;
-                    case 'primary_name':
-                        $stmt->bindValue($identifier, $this->primary_name, PDO::PARAM_STR);
+                    case 'geolocation_key':
+                        $stmt->bindValue($identifier, $this->geolocation_key, PDO::PARAM_STR);
                         break;
                     case 'place':
                         $stmt->bindValue($identifier, $this->place, PDO::PARAM_STR);
@@ -1464,17 +1335,20 @@ abstract class Location implements ActiveRecordInterface
                     case 'countrycode':
                         $stmt->bindValue($identifier, $this->countrycode, PDO::PARAM_STR);
                         break;
-                    case 'alternate_names':
-                        $stmt->bindValue($identifier, $this->alternate_names, PDO::PARAM_STR);
+                    case 'full_osm_data':
+                        $stmt->bindValue($identifier, $this->full_osm_data, PDO::PARAM_STR);
                         break;
                     case 'openstreetmap_id':
                         $stmt->bindValue($identifier, $this->openstreetmap_id, PDO::PARAM_INT);
                         break;
-                    case 'full_osm_data':
-                        $stmt->bindValue($identifier, $this->full_osm_data, PDO::PARAM_STR);
+                    case 'latitude':
+                        $stmt->bindValue($identifier, $this->latitude, PDO::PARAM_STR);
                         break;
-                    case 'extra_details_data':
-                        $stmt->bindValue($identifier, $this->extra_details_data, PDO::PARAM_STR);
+                    case 'longitude':
+                        $stmt->bindValue($identifier, $this->longitude, PDO::PARAM_STR);
+                        break;
+                    case 'alternate_names':
+                        $stmt->bindValue($identifier, $this->alternate_names, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -1489,7 +1363,7 @@ abstract class Location implements ActiveRecordInterface
         } catch (Exception $e) {
             throw new PropelException('Unable to get autoincrement id.', 0, $e);
         }
-        $this->setLocationId($pk);
+        $this->setGeoLocationId($pk);
 
         $this->setNew(false);
     }
@@ -1522,7 +1396,7 @@ abstract class Location implements ActiveRecordInterface
      */
     public function getByName($name, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = LocationTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = GeoLocationTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
         $field = $this->getByPosition($pos);
 
         return $field;
@@ -1539,52 +1413,46 @@ abstract class Location implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                return $this->getLocationId();
+                return $this->getGeoLocationId();
                 break;
             case 1:
-                return $this->getLatitude();
-                break;
-            case 2:
-                return $this->getLongitude();
-                break;
-            case 3:
                 return $this->getDisplayName();
                 break;
-            case 4:
-                return $this->getLocationKey();
+            case 2:
+                return $this->getGeoLocationKey();
                 break;
-            case 5:
-                return $this->getPrimaryName();
-                break;
-            case 6:
+            case 3:
                 return $this->getPlace();
                 break;
-            case 7:
+            case 4:
                 return $this->getCounty();
                 break;
-            case 8:
+            case 5:
                 return $this->getState();
                 break;
-            case 9:
+            case 6:
                 return $this->getStateCode();
                 break;
-            case 10:
+            case 7:
                 return $this->getCountry();
                 break;
-            case 11:
+            case 8:
                 return $this->getCountryCode();
                 break;
-            case 12:
-                return $this->getAlternateNames();
-                break;
-            case 13:
-                return $this->getOpenStreetMapId();
-                break;
-            case 14:
+            case 9:
                 return $this->getFullOsmData();
                 break;
-            case 15:
-                return $this->getExtraDetailsData();
+            case 10:
+                return $this->getOpenStreetMapId();
+                break;
+            case 11:
+                return $this->getLatitude();
+                break;
+            case 12:
+                return $this->getLongitude();
+                break;
+            case 13:
+                return $this->getAlternateNames();
                 break;
             default:
                 return null;
@@ -1610,28 +1478,26 @@ abstract class Location implements ActiveRecordInterface
     public function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
     {
 
-        if (isset($alreadyDumpedObjects['Location'][$this->hashCode()])) {
+        if (isset($alreadyDumpedObjects['GeoLocation'][$this->hashCode()])) {
             return '*RECURSION*';
         }
-        $alreadyDumpedObjects['Location'][$this->hashCode()] = true;
-        $keys = LocationTableMap::getFieldNames($keyType);
+        $alreadyDumpedObjects['GeoLocation'][$this->hashCode()] = true;
+        $keys = GeoLocationTableMap::getFieldNames($keyType);
         $result = array(
-            $keys[0] => $this->getLocationId(),
-            $keys[1] => $this->getLatitude(),
-            $keys[2] => $this->getLongitude(),
-            $keys[3] => $this->getDisplayName(),
-            $keys[4] => $this->getLocationKey(),
-            $keys[5] => $this->getPrimaryName(),
-            $keys[6] => $this->getPlace(),
-            $keys[7] => $this->getCounty(),
-            $keys[8] => $this->getState(),
-            $keys[9] => $this->getStateCode(),
-            $keys[10] => $this->getCountry(),
-            $keys[11] => $this->getCountryCode(),
-            $keys[12] => $this->getAlternateNames(),
-            $keys[13] => $this->getOpenStreetMapId(),
-            $keys[14] => $this->getFullOsmData(),
-            $keys[15] => $this->getExtraDetailsData(),
+            $keys[0] => $this->getGeoLocationId(),
+            $keys[1] => $this->getDisplayName(),
+            $keys[2] => $this->getGeoLocationKey(),
+            $keys[3] => $this->getPlace(),
+            $keys[4] => $this->getCounty(),
+            $keys[5] => $this->getState(),
+            $keys[6] => $this->getStateCode(),
+            $keys[7] => $this->getCountry(),
+            $keys[8] => $this->getCountryCode(),
+            $keys[9] => $this->getFullOsmData(),
+            $keys[10] => $this->getOpenStreetMapId(),
+            $keys[11] => $this->getLatitude(),
+            $keys[12] => $this->getLongitude(),
+            $keys[13] => $this->getAlternateNames(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1653,21 +1519,6 @@ abstract class Location implements ActiveRecordInterface
                 }
 
                 $result[$key] = $this->collJobPostings->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
-            }
-            if (null !== $this->collLocationNamess) {
-
-                switch ($keyType) {
-                    case TableMap::TYPE_CAMELNAME:
-                        $key = 'locationNamess';
-                        break;
-                    case TableMap::TYPE_FIELDNAME:
-                        $key = 'location_namess';
-                        break;
-                    default:
-                        $key = 'LocationNamess';
-                }
-
-                $result[$key] = $this->collLocationNamess->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
             if (null !== $this->collUserSearchRuns) {
 
@@ -1698,11 +1549,11 @@ abstract class Location implements ActiveRecordInterface
      *                one of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
      *                TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM.
      *                Defaults to TableMap::TYPE_PHPNAME.
-     * @return $this|\JobScooper\DataAccess\Location
+     * @return $this|\JobScooper\DataAccess\GeoLocation
      */
     public function setByName($name, $value, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = LocationTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = GeoLocationTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
 
         return $this->setByPosition($pos, $value);
     }
@@ -1713,62 +1564,56 @@ abstract class Location implements ActiveRecordInterface
      *
      * @param  int $pos position in xml schema
      * @param  mixed $value field value
-     * @return $this|\JobScooper\DataAccess\Location
+     * @return $this|\JobScooper\DataAccess\GeoLocation
      */
     public function setByPosition($pos, $value)
     {
         switch ($pos) {
             case 0:
-                $this->setLocationId($value);
+                $this->setGeoLocationId($value);
                 break;
             case 1:
-                $this->setLatitude($value);
-                break;
-            case 2:
-                $this->setLongitude($value);
-                break;
-            case 3:
                 $this->setDisplayName($value);
                 break;
-            case 4:
-                $this->setLocationKey($value);
+            case 2:
+                $this->setGeoLocationKey($value);
                 break;
-            case 5:
-                $this->setPrimaryName($value);
-                break;
-            case 6:
+            case 3:
                 $this->setPlace($value);
                 break;
-            case 7:
+            case 4:
                 $this->setCounty($value);
                 break;
-            case 8:
+            case 5:
                 $this->setState($value);
                 break;
-            case 9:
+            case 6:
                 $this->setStateCode($value);
                 break;
-            case 10:
+            case 7:
                 $this->setCountry($value);
                 break;
-            case 11:
+            case 8:
                 $this->setCountryCode($value);
                 break;
+            case 9:
+                $this->setFullOsmData($value);
+                break;
+            case 10:
+                $this->setOpenStreetMapId($value);
+                break;
+            case 11:
+                $this->setLatitude($value);
+                break;
             case 12:
+                $this->setLongitude($value);
+                break;
+            case 13:
                 if (!is_array($value)) {
                     $v = trim(substr($value, 2, -2));
                     $value = $v ? explode(' | ', $v) : array();
                 }
                 $this->setAlternateNames($value);
-                break;
-            case 13:
-                $this->setOpenStreetMapId($value);
-                break;
-            case 14:
-                $this->setFullOsmData($value);
-                break;
-            case 15:
-                $this->setExtraDetailsData($value);
                 break;
         } // switch()
 
@@ -1794,55 +1639,49 @@ abstract class Location implements ActiveRecordInterface
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
-        $keys = LocationTableMap::getFieldNames($keyType);
+        $keys = GeoLocationTableMap::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) {
-            $this->setLocationId($arr[$keys[0]]);
+            $this->setGeoLocationId($arr[$keys[0]]);
         }
         if (array_key_exists($keys[1], $arr)) {
-            $this->setLatitude($arr[$keys[1]]);
+            $this->setDisplayName($arr[$keys[1]]);
         }
         if (array_key_exists($keys[2], $arr)) {
-            $this->setLongitude($arr[$keys[2]]);
+            $this->setGeoLocationKey($arr[$keys[2]]);
         }
         if (array_key_exists($keys[3], $arr)) {
-            $this->setDisplayName($arr[$keys[3]]);
+            $this->setPlace($arr[$keys[3]]);
         }
         if (array_key_exists($keys[4], $arr)) {
-            $this->setLocationKey($arr[$keys[4]]);
+            $this->setCounty($arr[$keys[4]]);
         }
         if (array_key_exists($keys[5], $arr)) {
-            $this->setPrimaryName($arr[$keys[5]]);
+            $this->setState($arr[$keys[5]]);
         }
         if (array_key_exists($keys[6], $arr)) {
-            $this->setPlace($arr[$keys[6]]);
+            $this->setStateCode($arr[$keys[6]]);
         }
         if (array_key_exists($keys[7], $arr)) {
-            $this->setCounty($arr[$keys[7]]);
+            $this->setCountry($arr[$keys[7]]);
         }
         if (array_key_exists($keys[8], $arr)) {
-            $this->setState($arr[$keys[8]]);
+            $this->setCountryCode($arr[$keys[8]]);
         }
         if (array_key_exists($keys[9], $arr)) {
-            $this->setStateCode($arr[$keys[9]]);
+            $this->setFullOsmData($arr[$keys[9]]);
         }
         if (array_key_exists($keys[10], $arr)) {
-            $this->setCountry($arr[$keys[10]]);
+            $this->setOpenStreetMapId($arr[$keys[10]]);
         }
         if (array_key_exists($keys[11], $arr)) {
-            $this->setCountryCode($arr[$keys[11]]);
+            $this->setLatitude($arr[$keys[11]]);
         }
         if (array_key_exists($keys[12], $arr)) {
-            $this->setAlternateNames($arr[$keys[12]]);
+            $this->setLongitude($arr[$keys[12]]);
         }
         if (array_key_exists($keys[13], $arr)) {
-            $this->setOpenStreetMapId($arr[$keys[13]]);
-        }
-        if (array_key_exists($keys[14], $arr)) {
-            $this->setFullOsmData($arr[$keys[14]]);
-        }
-        if (array_key_exists($keys[15], $arr)) {
-            $this->setExtraDetailsData($arr[$keys[15]]);
+            $this->setAlternateNames($arr[$keys[13]]);
         }
     }
 
@@ -1863,7 +1702,7 @@ abstract class Location implements ActiveRecordInterface
      * @param string $data The source data to import from
      * @param string $keyType The type of keys the array uses.
      *
-     * @return $this|\JobScooper\DataAccess\Location The current object, for fluid interface
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object, for fluid interface
      */
     public function importFrom($parser, $data, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -1883,55 +1722,49 @@ abstract class Location implements ActiveRecordInterface
      */
     public function buildCriteria()
     {
-        $criteria = new Criteria(LocationTableMap::DATABASE_NAME);
+        $criteria = new Criteria(GeoLocationTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(LocationTableMap::COL_LOCATION_ID)) {
-            $criteria->add(LocationTableMap::COL_LOCATION_ID, $this->location_id);
+        if ($this->isColumnModified(GeoLocationTableMap::COL_GEOLOCATION_ID)) {
+            $criteria->add(GeoLocationTableMap::COL_GEOLOCATION_ID, $this->geolocation_id);
         }
-        if ($this->isColumnModified(LocationTableMap::COL_LATITUDE)) {
-            $criteria->add(LocationTableMap::COL_LATITUDE, $this->latitude);
+        if ($this->isColumnModified(GeoLocationTableMap::COL_DISPLAY_NAME)) {
+            $criteria->add(GeoLocationTableMap::COL_DISPLAY_NAME, $this->display_name);
         }
-        if ($this->isColumnModified(LocationTableMap::COL_LONGITUDE)) {
-            $criteria->add(LocationTableMap::COL_LONGITUDE, $this->longitude);
+        if ($this->isColumnModified(GeoLocationTableMap::COL_GEOLOCATION_KEY)) {
+            $criteria->add(GeoLocationTableMap::COL_GEOLOCATION_KEY, $this->geolocation_key);
         }
-        if ($this->isColumnModified(LocationTableMap::COL_FULL_DISPLAY_NAME)) {
-            $criteria->add(LocationTableMap::COL_FULL_DISPLAY_NAME, $this->full_display_name);
+        if ($this->isColumnModified(GeoLocationTableMap::COL_PLACE)) {
+            $criteria->add(GeoLocationTableMap::COL_PLACE, $this->place);
         }
-        if ($this->isColumnModified(LocationTableMap::COL_LOCATION_KEY)) {
-            $criteria->add(LocationTableMap::COL_LOCATION_KEY, $this->location_key);
+        if ($this->isColumnModified(GeoLocationTableMap::COL_COUNTY)) {
+            $criteria->add(GeoLocationTableMap::COL_COUNTY, $this->county);
         }
-        if ($this->isColumnModified(LocationTableMap::COL_PRIMARY_NAME)) {
-            $criteria->add(LocationTableMap::COL_PRIMARY_NAME, $this->primary_name);
+        if ($this->isColumnModified(GeoLocationTableMap::COL_STATE)) {
+            $criteria->add(GeoLocationTableMap::COL_STATE, $this->state);
         }
-        if ($this->isColumnModified(LocationTableMap::COL_PLACE)) {
-            $criteria->add(LocationTableMap::COL_PLACE, $this->place);
+        if ($this->isColumnModified(GeoLocationTableMap::COL_STATECODE)) {
+            $criteria->add(GeoLocationTableMap::COL_STATECODE, $this->statecode);
         }
-        if ($this->isColumnModified(LocationTableMap::COL_COUNTY)) {
-            $criteria->add(LocationTableMap::COL_COUNTY, $this->county);
+        if ($this->isColumnModified(GeoLocationTableMap::COL_COUNTRY)) {
+            $criteria->add(GeoLocationTableMap::COL_COUNTRY, $this->country);
         }
-        if ($this->isColumnModified(LocationTableMap::COL_STATE)) {
-            $criteria->add(LocationTableMap::COL_STATE, $this->state);
+        if ($this->isColumnModified(GeoLocationTableMap::COL_COUNTRYCODE)) {
+            $criteria->add(GeoLocationTableMap::COL_COUNTRYCODE, $this->countrycode);
         }
-        if ($this->isColumnModified(LocationTableMap::COL_STATECODE)) {
-            $criteria->add(LocationTableMap::COL_STATECODE, $this->statecode);
+        if ($this->isColumnModified(GeoLocationTableMap::COL_FULL_OSM_DATA)) {
+            $criteria->add(GeoLocationTableMap::COL_FULL_OSM_DATA, $this->full_osm_data);
         }
-        if ($this->isColumnModified(LocationTableMap::COL_COUNTRY)) {
-            $criteria->add(LocationTableMap::COL_COUNTRY, $this->country);
+        if ($this->isColumnModified(GeoLocationTableMap::COL_OPENSTREETMAP_ID)) {
+            $criteria->add(GeoLocationTableMap::COL_OPENSTREETMAP_ID, $this->openstreetmap_id);
         }
-        if ($this->isColumnModified(LocationTableMap::COL_COUNTRYCODE)) {
-            $criteria->add(LocationTableMap::COL_COUNTRYCODE, $this->countrycode);
+        if ($this->isColumnModified(GeoLocationTableMap::COL_LATITUDE)) {
+            $criteria->add(GeoLocationTableMap::COL_LATITUDE, $this->latitude);
         }
-        if ($this->isColumnModified(LocationTableMap::COL_ALTERNATE_NAMES)) {
-            $criteria->add(LocationTableMap::COL_ALTERNATE_NAMES, $this->alternate_names);
+        if ($this->isColumnModified(GeoLocationTableMap::COL_LONGITUDE)) {
+            $criteria->add(GeoLocationTableMap::COL_LONGITUDE, $this->longitude);
         }
-        if ($this->isColumnModified(LocationTableMap::COL_OPENSTREETMAP_ID)) {
-            $criteria->add(LocationTableMap::COL_OPENSTREETMAP_ID, $this->openstreetmap_id);
-        }
-        if ($this->isColumnModified(LocationTableMap::COL_FULL_OSM_DATA)) {
-            $criteria->add(LocationTableMap::COL_FULL_OSM_DATA, $this->full_osm_data);
-        }
-        if ($this->isColumnModified(LocationTableMap::COL_EXTRA_DETAILS_DATA)) {
-            $criteria->add(LocationTableMap::COL_EXTRA_DETAILS_DATA, $this->extra_details_data);
+        if ($this->isColumnModified(GeoLocationTableMap::COL_ALTERNATE_NAMES)) {
+            $criteria->add(GeoLocationTableMap::COL_ALTERNATE_NAMES, $this->alternate_names);
         }
 
         return $criteria;
@@ -1949,8 +1782,8 @@ abstract class Location implements ActiveRecordInterface
      */
     public function buildPkeyCriteria()
     {
-        $criteria = ChildLocationQuery::create();
-        $criteria->add(LocationTableMap::COL_LOCATION_ID, $this->location_id);
+        $criteria = ChildGeoLocationQuery::create();
+        $criteria->add(GeoLocationTableMap::COL_GEOLOCATION_ID, $this->geolocation_id);
 
         return $criteria;
     }
@@ -1963,7 +1796,7 @@ abstract class Location implements ActiveRecordInterface
      */
     public function hashCode()
     {
-        $validPk = null !== $this->getLocationId();
+        $validPk = null !== $this->getGeoLocationId();
 
         $validPrimaryKeyFKs = 0;
         $primaryKeyFKs = [];
@@ -1983,18 +1816,18 @@ abstract class Location implements ActiveRecordInterface
      */
     public function getPrimaryKey()
     {
-        return $this->getLocationId();
+        return $this->getGeoLocationId();
     }
 
     /**
-     * Generic method to set the primary key (location_id column).
+     * Generic method to set the primary key (geolocation_id column).
      *
      * @param       int $key Primary key.
      * @return void
      */
     public function setPrimaryKey($key)
     {
-        $this->setLocationId($key);
+        $this->setGeoLocationId($key);
     }
 
     /**
@@ -2003,7 +1836,7 @@ abstract class Location implements ActiveRecordInterface
      */
     public function isPrimaryKeyNull()
     {
-        return null === $this->getLocationId();
+        return null === $this->getGeoLocationId();
     }
 
     /**
@@ -2012,28 +1845,26 @@ abstract class Location implements ActiveRecordInterface
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param      object $copyObj An object of \JobScooper\DataAccess\Location (or compatible) type.
+     * @param      object $copyObj An object of \JobScooper\DataAccess\GeoLocation (or compatible) type.
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param      boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
      */
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
-        $copyObj->setLatitude($this->getLatitude());
-        $copyObj->setLongitude($this->getLongitude());
         $copyObj->setDisplayName($this->getDisplayName());
-        $copyObj->setLocationKey($this->getLocationKey());
-        $copyObj->setPrimaryName($this->getPrimaryName());
+        $copyObj->setGeoLocationKey($this->getGeoLocationKey());
         $copyObj->setPlace($this->getPlace());
         $copyObj->setCounty($this->getCounty());
         $copyObj->setState($this->getState());
         $copyObj->setStateCode($this->getStateCode());
         $copyObj->setCountry($this->getCountry());
         $copyObj->setCountryCode($this->getCountryCode());
-        $copyObj->setAlternateNames($this->getAlternateNames());
-        $copyObj->setOpenStreetMapId($this->getOpenStreetMapId());
         $copyObj->setFullOsmData($this->getFullOsmData());
-        $copyObj->setExtraDetailsData($this->getExtraDetailsData());
+        $copyObj->setOpenStreetMapId($this->getOpenStreetMapId());
+        $copyObj->setLatitude($this->getLatitude());
+        $copyObj->setLongitude($this->getLongitude());
+        $copyObj->setAlternateNames($this->getAlternateNames());
 
         if ($deepCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
@@ -2043,12 +1874,6 @@ abstract class Location implements ActiveRecordInterface
             foreach ($this->getJobPostings() as $relObj) {
                 if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
                     $copyObj->addJobPosting($relObj->copy($deepCopy));
-                }
-            }
-
-            foreach ($this->getLocationNamess() as $relObj) {
-                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
-                    $copyObj->addLocationNames($relObj->copy($deepCopy));
                 }
             }
 
@@ -2062,7 +1887,7 @@ abstract class Location implements ActiveRecordInterface
 
         if ($makeNew) {
             $copyObj->setNew(true);
-            $copyObj->setLocationId(NULL); // this is a auto-increment column, so set to default value
+            $copyObj->setGeoLocationId(NULL); // this is a auto-increment column, so set to default value
         }
     }
 
@@ -2075,7 +1900,7 @@ abstract class Location implements ActiveRecordInterface
      * objects.
      *
      * @param  boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return \JobScooper\DataAccess\Location Clone of current object.
+     * @return \JobScooper\DataAccess\GeoLocation Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -2101,10 +1926,6 @@ abstract class Location implements ActiveRecordInterface
     {
         if ('JobPosting' == $relationName) {
             $this->initJobPostings();
-            return;
-        }
-        if ('LocationNames' == $relationName) {
-            $this->initLocationNamess();
             return;
         }
         if ('UserSearchRun' == $relationName) {
@@ -2165,7 +1986,7 @@ abstract class Location implements ActiveRecordInterface
      * If the $criteria is not null, it is used to always fetch the results from the database.
      * Otherwise the results are fetched from the database the first time, then cached.
      * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildLocation is new, it will return
+     * If this ChildGeoLocation is new, it will return
      * an empty collection or the current collection; the criteria is ignored on a new object.
      *
      * @param      Criteria $criteria optional Criteria object to narrow the query
@@ -2182,7 +2003,7 @@ abstract class Location implements ActiveRecordInterface
                 $this->initJobPostings();
             } else {
                 $collJobPostings = ChildJobPostingQuery::create(null, $criteria)
-                    ->filterByLocation($this)
+                    ->filterByGeoLocation($this)
                     ->find($con);
 
                 if (null !== $criteria) {
@@ -2225,7 +2046,7 @@ abstract class Location implements ActiveRecordInterface
      *
      * @param      Collection $jobPostings A Propel collection.
      * @param      ConnectionInterface $con Optional connection object
-     * @return $this|ChildLocation The current object (for fluent API support)
+     * @return $this|ChildGeoLocation The current object (for fluent API support)
      */
     public function setJobPostings(Collection $jobPostings, ConnectionInterface $con = null)
     {
@@ -2236,7 +2057,7 @@ abstract class Location implements ActiveRecordInterface
         $this->jobPostingsScheduledForDeletion = $jobPostingsToDelete;
 
         foreach ($jobPostingsToDelete as $jobPostingRemoved) {
-            $jobPostingRemoved->setLocation(null);
+            $jobPostingRemoved->setGeoLocation(null);
         }
 
         $this->collJobPostings = null;
@@ -2277,7 +2098,7 @@ abstract class Location implements ActiveRecordInterface
             }
 
             return $query
-                ->filterByLocation($this)
+                ->filterByGeoLocation($this)
                 ->count($con);
         }
 
@@ -2289,7 +2110,7 @@ abstract class Location implements ActiveRecordInterface
      * through the ChildJobPosting foreign key attribute.
      *
      * @param  ChildJobPosting $l ChildJobPosting
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function addJobPosting(ChildJobPosting $l)
     {
@@ -2315,12 +2136,12 @@ abstract class Location implements ActiveRecordInterface
     protected function doAddJobPosting(ChildJobPosting $jobPosting)
     {
         $this->collJobPostings[]= $jobPosting;
-        $jobPosting->setLocation($this);
+        $jobPosting->setGeoLocation($this);
     }
 
     /**
      * @param  ChildJobPosting $jobPosting The ChildJobPosting object to remove.
-     * @return $this|ChildLocation The current object (for fluent API support)
+     * @return $this|ChildGeoLocation The current object (for fluent API support)
      */
     public function removeJobPosting(ChildJobPosting $jobPosting)
     {
@@ -2332,7 +2153,7 @@ abstract class Location implements ActiveRecordInterface
                 $this->jobPostingsScheduledForDeletion->clear();
             }
             $this->jobPostingsScheduledForDeletion[]= $jobPosting;
-            $jobPosting->setLocation(null);
+            $jobPosting->setGeoLocation(null);
         }
 
         return $this;
@@ -2342,13 +2163,13 @@ abstract class Location implements ActiveRecordInterface
     /**
      * If this collection has already been initialized with
      * an identical criteria, it returns the collection.
-     * Otherwise if this Location is new, it will return
-     * an empty collection; or if this Location has previously
+     * Otherwise if this GeoLocation is new, it will return
+     * an empty collection; or if this GeoLocation has previously
      * been saved, it will retrieve related JobPostings from storage.
      *
      * This method is protected by default in order to keep the public
      * api reasonable.  You can provide public methods for those you
-     * actually need in Location.
+     * actually need in GeoLocation.
      *
      * @param      Criteria $criteria optional Criteria object to narrow the query
      * @param      ConnectionInterface $con optional connection object
@@ -2361,234 +2182,6 @@ abstract class Location implements ActiveRecordInterface
         $query->joinWith('JobPostingRelatedByDuplicatesJobPostingId', $joinBehavior);
 
         return $this->getJobPostings($query, $con);
-    }
-
-    /**
-     * Clears out the collLocationNamess collection
-     *
-     * This does not modify the database; however, it will remove any associated objects, causing
-     * them to be refetched by subsequent calls to accessor method.
-     *
-     * @return void
-     * @see        addLocationNamess()
-     */
-    public function clearLocationNamess()
-    {
-        $this->collLocationNamess = null; // important to set this to NULL since that means it is uninitialized
-    }
-
-    /**
-     * Reset is the collLocationNamess collection loaded partially.
-     */
-    public function resetPartialLocationNamess($v = true)
-    {
-        $this->collLocationNamessPartial = $v;
-    }
-
-    /**
-     * Initializes the collLocationNamess collection.
-     *
-     * By default this just sets the collLocationNamess collection to an empty array (like clearcollLocationNamess());
-     * however, you may wish to override this method in your stub class to provide setting appropriate
-     * to your application -- for example, setting the initial array to the values stored in database.
-     *
-     * @param      boolean $overrideExisting If set to true, the method call initializes
-     *                                        the collection even if it is not empty
-     *
-     * @return void
-     */
-    public function initLocationNamess($overrideExisting = true)
-    {
-        if (null !== $this->collLocationNamess && !$overrideExisting) {
-            return;
-        }
-
-        $collectionClassName = LocationNamesTableMap::getTableMap()->getCollectionClassName();
-
-        $this->collLocationNamess = new $collectionClassName;
-        $this->collLocationNamess->setModel('\JobScooper\DataAccess\LocationNames');
-    }
-
-    /**
-     * Gets an array of ChildLocationNames objects which contain a foreign key that references this object.
-     *
-     * If the $criteria is not null, it is used to always fetch the results from the database.
-     * Otherwise the results are fetched from the database the first time, then cached.
-     * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildLocation is new, it will return
-     * an empty collection or the current collection; the criteria is ignored on a new object.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @return ObjectCollection|ChildLocationNames[] List of ChildLocationNames objects
-     * @throws PropelException
-     */
-    public function getLocationNamess(Criteria $criteria = null, ConnectionInterface $con = null)
-    {
-        $partial = $this->collLocationNamessPartial && !$this->isNew();
-        if (null === $this->collLocationNamess || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collLocationNamess) {
-                // return empty collection
-                $this->initLocationNamess();
-            } else {
-                $collLocationNamess = ChildLocationNamesQuery::create(null, $criteria)
-                    ->filterByLocation($this)
-                    ->find($con);
-
-                if (null !== $criteria) {
-                    if (false !== $this->collLocationNamessPartial && count($collLocationNamess)) {
-                        $this->initLocationNamess(false);
-
-                        foreach ($collLocationNamess as $obj) {
-                            if (false == $this->collLocationNamess->contains($obj)) {
-                                $this->collLocationNamess->append($obj);
-                            }
-                        }
-
-                        $this->collLocationNamessPartial = true;
-                    }
-
-                    return $collLocationNamess;
-                }
-
-                if ($partial && $this->collLocationNamess) {
-                    foreach ($this->collLocationNamess as $obj) {
-                        if ($obj->isNew()) {
-                            $collLocationNamess[] = $obj;
-                        }
-                    }
-                }
-
-                $this->collLocationNamess = $collLocationNamess;
-                $this->collLocationNamessPartial = false;
-            }
-        }
-
-        return $this->collLocationNamess;
-    }
-
-    /**
-     * Sets a collection of ChildLocationNames objects related by a one-to-many relationship
-     * to the current object.
-     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
-     * and new objects from the given Propel collection.
-     *
-     * @param      Collection $locationNamess A Propel collection.
-     * @param      ConnectionInterface $con Optional connection object
-     * @return $this|ChildLocation The current object (for fluent API support)
-     */
-    public function setLocationNamess(Collection $locationNamess, ConnectionInterface $con = null)
-    {
-        /** @var ChildLocationNames[] $locationNamessToDelete */
-        $locationNamessToDelete = $this->getLocationNamess(new Criteria(), $con)->diff($locationNamess);
-
-
-        //since at least one column in the foreign key is at the same time a PK
-        //we can not just set a PK to NULL in the lines below. We have to store
-        //a backup of all values, so we are able to manipulate these items based on the onDelete value later.
-        $this->locationNamessScheduledForDeletion = clone $locationNamessToDelete;
-
-        foreach ($locationNamessToDelete as $locationNamesRemoved) {
-            $locationNamesRemoved->setLocation(null);
-        }
-
-        $this->collLocationNamess = null;
-        foreach ($locationNamess as $locationNames) {
-            $this->addLocationNames($locationNames);
-        }
-
-        $this->collLocationNamess = $locationNamess;
-        $this->collLocationNamessPartial = false;
-
-        return $this;
-    }
-
-    /**
-     * Returns the number of related LocationNames objects.
-     *
-     * @param      Criteria $criteria
-     * @param      boolean $distinct
-     * @param      ConnectionInterface $con
-     * @return int             Count of related LocationNames objects.
-     * @throws PropelException
-     */
-    public function countLocationNamess(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
-    {
-        $partial = $this->collLocationNamessPartial && !$this->isNew();
-        if (null === $this->collLocationNamess || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->collLocationNamess) {
-                return 0;
-            }
-
-            if ($partial && !$criteria) {
-                return count($this->getLocationNamess());
-            }
-
-            $query = ChildLocationNamesQuery::create(null, $criteria);
-            if ($distinct) {
-                $query->distinct();
-            }
-
-            return $query
-                ->filterByLocation($this)
-                ->count($con);
-        }
-
-        return count($this->collLocationNamess);
-    }
-
-    /**
-     * Method called to associate a ChildLocationNames object to this object
-     * through the ChildLocationNames foreign key attribute.
-     *
-     * @param  ChildLocationNames $l ChildLocationNames
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
-     */
-    public function addLocationNames(ChildLocationNames $l)
-    {
-        if ($this->collLocationNamess === null) {
-            $this->initLocationNamess();
-            $this->collLocationNamessPartial = true;
-        }
-
-        if (!$this->collLocationNamess->contains($l)) {
-            $this->doAddLocationNames($l);
-
-            if ($this->locationNamessScheduledForDeletion and $this->locationNamessScheduledForDeletion->contains($l)) {
-                $this->locationNamessScheduledForDeletion->remove($this->locationNamessScheduledForDeletion->search($l));
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param ChildLocationNames $locationNames The ChildLocationNames object to add.
-     */
-    protected function doAddLocationNames(ChildLocationNames $locationNames)
-    {
-        $this->collLocationNamess[]= $locationNames;
-        $locationNames->setLocation($this);
-    }
-
-    /**
-     * @param  ChildLocationNames $locationNames The ChildLocationNames object to remove.
-     * @return $this|ChildLocation The current object (for fluent API support)
-     */
-    public function removeLocationNames(ChildLocationNames $locationNames)
-    {
-        if ($this->getLocationNamess()->contains($locationNames)) {
-            $pos = $this->collLocationNamess->search($locationNames);
-            $this->collLocationNamess->remove($pos);
-            if (null === $this->locationNamessScheduledForDeletion) {
-                $this->locationNamessScheduledForDeletion = clone $this->collLocationNamess;
-                $this->locationNamessScheduledForDeletion->clear();
-            }
-            $this->locationNamessScheduledForDeletion[]= clone $locationNames;
-            $locationNames->setLocation(null);
-        }
-
-        return $this;
     }
 
     /**
@@ -2643,7 +2236,7 @@ abstract class Location implements ActiveRecordInterface
      * If the $criteria is not null, it is used to always fetch the results from the database.
      * Otherwise the results are fetched from the database the first time, then cached.
      * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildLocation is new, it will return
+     * If this ChildGeoLocation is new, it will return
      * an empty collection or the current collection; the criteria is ignored on a new object.
      *
      * @param      Criteria $criteria optional Criteria object to narrow the query
@@ -2660,7 +2253,7 @@ abstract class Location implements ActiveRecordInterface
                 $this->initUserSearchRuns();
             } else {
                 $collUserSearchRuns = ChildUserSearchRunQuery::create(null, $criteria)
-                    ->filterByLocation($this)
+                    ->filterByGeoLocation($this)
                     ->find($con);
 
                 if (null !== $criteria) {
@@ -2703,7 +2296,7 @@ abstract class Location implements ActiveRecordInterface
      *
      * @param      Collection $userSearchRuns A Propel collection.
      * @param      ConnectionInterface $con Optional connection object
-     * @return $this|ChildLocation The current object (for fluent API support)
+     * @return $this|ChildGeoLocation The current object (for fluent API support)
      */
     public function setUserSearchRuns(Collection $userSearchRuns, ConnectionInterface $con = null)
     {
@@ -2714,7 +2307,7 @@ abstract class Location implements ActiveRecordInterface
         $this->userSearchRunsScheduledForDeletion = $userSearchRunsToDelete;
 
         foreach ($userSearchRunsToDelete as $userSearchRunRemoved) {
-            $userSearchRunRemoved->setLocation(null);
+            $userSearchRunRemoved->setGeoLocation(null);
         }
 
         $this->collUserSearchRuns = null;
@@ -2755,7 +2348,7 @@ abstract class Location implements ActiveRecordInterface
             }
 
             return $query
-                ->filterByLocation($this)
+                ->filterByGeoLocation($this)
                 ->count($con);
         }
 
@@ -2767,7 +2360,7 @@ abstract class Location implements ActiveRecordInterface
      * through the ChildUserSearchRun foreign key attribute.
      *
      * @param  ChildUserSearchRun $l ChildUserSearchRun
-     * @return $this|\JobScooper\DataAccess\Location The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function addUserSearchRun(ChildUserSearchRun $l)
     {
@@ -2793,12 +2386,12 @@ abstract class Location implements ActiveRecordInterface
     protected function doAddUserSearchRun(ChildUserSearchRun $userSearchRun)
     {
         $this->collUserSearchRuns[]= $userSearchRun;
-        $userSearchRun->setLocation($this);
+        $userSearchRun->setGeoLocation($this);
     }
 
     /**
      * @param  ChildUserSearchRun $userSearchRun The ChildUserSearchRun object to remove.
-     * @return $this|ChildLocation The current object (for fluent API support)
+     * @return $this|ChildGeoLocation The current object (for fluent API support)
      */
     public function removeUserSearchRun(ChildUserSearchRun $userSearchRun)
     {
@@ -2810,7 +2403,7 @@ abstract class Location implements ActiveRecordInterface
                 $this->userSearchRunsScheduledForDeletion->clear();
             }
             $this->userSearchRunsScheduledForDeletion[]= $userSearchRun;
-            $userSearchRun->setLocation(null);
+            $userSearchRun->setGeoLocation(null);
         }
 
         return $this;
@@ -2820,13 +2413,38 @@ abstract class Location implements ActiveRecordInterface
     /**
      * If this collection has already been initialized with
      * an identical criteria, it returns the collection.
-     * Otherwise if this Location is new, it will return
-     * an empty collection; or if this Location has previously
+     * Otherwise if this GeoLocation is new, it will return
+     * an empty collection; or if this GeoLocation has previously
      * been saved, it will retrieve related UserSearchRuns from storage.
      *
      * This method is protected by default in order to keep the public
      * api reasonable.  You can provide public methods for those you
-     * actually need in Location.
+     * actually need in GeoLocation.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return ObjectCollection|ChildUserSearchRun[] List of ChildUserSearchRun objects
+     */
+    public function getUserSearchRunsJoinJobSitePluginRelatedByJobSiteKey(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    {
+        $query = ChildUserSearchRunQuery::create(null, $criteria);
+        $query->joinWith('JobSitePluginRelatedByJobSiteKey', $joinBehavior);
+
+        return $this->getUserSearchRuns($query, $con);
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this GeoLocation is new, it will return
+     * an empty collection; or if this GeoLocation has previously
+     * been saved, it will retrieve related UserSearchRuns from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in GeoLocation.
      *
      * @param      Criteria $criteria optional Criteria object to narrow the query
      * @param      ConnectionInterface $con optional connection object
@@ -2848,23 +2466,21 @@ abstract class Location implements ActiveRecordInterface
      */
     public function clear()
     {
-        $this->location_id = null;
-        $this->latitude = null;
-        $this->longitude = null;
-        $this->full_display_name = null;
-        $this->location_key = null;
-        $this->primary_name = null;
+        $this->geolocation_id = null;
+        $this->display_name = null;
+        $this->geolocation_key = null;
         $this->place = null;
         $this->county = null;
         $this->state = null;
         $this->statecode = null;
         $this->country = null;
         $this->countrycode = null;
+        $this->full_osm_data = null;
+        $this->openstreetmap_id = null;
+        $this->latitude = null;
+        $this->longitude = null;
         $this->alternate_names = null;
         $this->alternate_names_unserialized = null;
-        $this->openstreetmap_id = null;
-        $this->full_osm_data = null;
-        $this->extra_details_data = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();
@@ -2888,11 +2504,6 @@ abstract class Location implements ActiveRecordInterface
                     $o->clearAllReferences($deep);
                 }
             }
-            if ($this->collLocationNamess) {
-                foreach ($this->collLocationNamess as $o) {
-                    $o->clearAllReferences($deep);
-                }
-            }
             if ($this->collUserSearchRuns) {
                 foreach ($this->collUserSearchRuns as $o) {
                     $o->clearAllReferences($deep);
@@ -2901,102 +2512,17 @@ abstract class Location implements ActiveRecordInterface
         } // if ($deep)
 
         $this->collJobPostings = null;
-        $this->collLocationNamess = null;
         $this->collUserSearchRuns = null;
     }
 
     /**
      * Return the string representation of this object
      *
-     * @return string The value of the 'full_display_name' column
+     * @return string The value of the 'display_name' column
      */
     public function __toString()
     {
         return (string) $this->getDisplayName();
-    }
-
-    // geocodable behavior
-
-    /**
-     * Convenient method to set latitude and longitude values.
-     *
-     * @param double $latitude     A latitude value.
-     * @param double $longitude    A longitude value.
-     */
-    public function setCoordinates($latitude, $longitude)
-    {
-        $this->setLatitude($latitude);
-        $this->setLongitude($longitude);
-    }
-
-    /**
-     * Returns an array with latitude and longitude values.
-     *
-     * @return array
-     */
-    public function getCoordinates()
-    {
-        return array(
-            'latitude'  => $this->getLatitude(),
-            'longitude' => $this->getLongitude()
-        );
-    }
-
-    /**
-     * Returns whether this object has been geocoded or not.
-     *
-     * @return boolean
-     */
-    public function isGeocoded()
-    {
-        $lat = $this->getLatitude();
-        $lng = $this->getLongitude();
-
-        return (!empty($lat) && !empty($lng));
-    }
-
-    /**
-     * Calculates the distance between a given location and this one.
-     *
-     * @param \JobScooper\DataAccess\Location $location    A \JobScooper\DataAccess\Location object.
-     * @param double $unit     The unit measure.
-     *
-     * @return double   The distance between the two objects.
-     */
-    public function getDistanceTo(\JobScooper\DataAccess\Location $location, $unit = LocationTableMap::KILOMETERS_UNIT)
-    {
-        $dist = rad2deg(acos(round(sin(deg2rad($this->getLatitude())) * sin(deg2rad($location->getLatitude())) +  cos(deg2rad($this->getLatitude())) * cos(deg2rad($location->getLatitude())) * cos(deg2rad($this->getLongitude() - $location->getLongitude())),14))) * 60 * LocationTableMap::MILES_UNIT;
-
-        if (LocationTableMap::MILES_UNIT === $unit) {
-            return $dist;
-        } elseif (LocationTableMap::NAUTICAL_MILES_UNIT === $unit) {
-            return $dist * LocationTableMap::NAUTICAL_MILES_UNIT;
-        }
-
-        return $dist * LocationTableMap::KILOMETERS_UNIT;
-    }
-
-    /**
-     * Update geocode information.
-     * You can extend this method to fill in other fields.
-     *
-     * @return \Geocoder\Result\ResultInterface|null
-     */
-    public function geocode()
-    {
-        // Do nothing as both 'geocode_ip', and 'geocode_address' are turned off.
-        return null;
-    }
-
-    /**
-     * Check whether the current object is required to be geocoded (again).
-     *
-     * @return boolean
-     */
-    public function isGeocodingNecessary()
-    {
-
-        return false;
     }
 
     // sluggable behavior
@@ -3005,11 +2531,11 @@ abstract class Location implements ActiveRecordInterface
      * Wrap the setter for slug value
      *
      * @param   string
-     * @return  $this|Location
+     * @return  $this|GeoLocation
      */
     public function setSlug($v)
     {
-        return $this->setLocationKey($v);
+        return $this->setGeoLocationKey($v);
     }
 
     /**
@@ -3019,7 +2545,7 @@ abstract class Location implements ActiveRecordInterface
      */
     public function getSlug()
     {
-        return $this->getLocationKey();
+        return $this->getGeoLocationKey();
     }
 
     /**
@@ -3120,10 +2646,10 @@ abstract class Location implements ActiveRecordInterface
         }
 
         $adapter = \Propel\Runtime\Propel::getServiceContainer()->getAdapter('default');
-        $col = 'q.LocationKey';
+        $col = 'q.GeoLocationKey';
         $compare = $alreadyExists ? $adapter->compareRegex($col, '?') : sprintf('%s = ?', $col);
 
-        $query = \JobScooper\DataAccess\LocationQuery::create('q')
+        $query = \JobScooper\DataAccess\GeoLocationQuery::create('q')
             ->where($compare, $alreadyExists ? '^' . $slug2 . '[0-9]+$' : $slug2)
             ->prune($this)
         ;
@@ -3140,8 +2666,8 @@ abstract class Location implements ActiveRecordInterface
         $adapter = \Propel\Runtime\Propel::getServiceContainer()->getAdapter('default');
         // Already exists
         $object = $query
-            ->addDescendingOrderByColumn($adapter->strLength('location_key'))
-            ->addDescendingOrderByColumn('location_key')
+            ->addDescendingOrderByColumn($adapter->strLength('geolocation_key'))
+            ->addDescendingOrderByColumn('geolocation_key')
         ->findOne();
 
         // First duplicate slug
@@ -3149,12 +2675,96 @@ abstract class Location implements ActiveRecordInterface
             return $slug2 . '1';
         }
 
-        $slugNum = substr($object->getLocationKey(), strlen($slug) + 1);
+        $slugNum = substr($object->getGeoLocationKey(), strlen($slug) + 1);
         if (0 == $slugNum[0]) {
             $slugNum[0] = 1;
         }
 
         return $slug2 . ($slugNum + 1);
+    }
+
+    // geocodable behavior
+
+    /**
+     * Convenient method to set latitude and longitude values.
+     *
+     * @param double $latitude     A latitude value.
+     * @param double $longitude    A longitude value.
+     */
+    public function setCoordinates($latitude, $longitude)
+    {
+        $this->setLatitude($latitude);
+        $this->setLongitude($longitude);
+    }
+
+    /**
+     * Returns an array with latitude and longitude values.
+     *
+     * @return array
+     */
+    public function getCoordinates()
+    {
+        return array(
+            'latitude'  => $this->getLatitude(),
+            'longitude' => $this->getLongitude()
+        );
+    }
+
+    /**
+     * Returns whether this object has been geocoded or not.
+     *
+     * @return boolean
+     */
+    public function isGeocoded()
+    {
+        $lat = $this->getLatitude();
+        $lng = $this->getLongitude();
+
+        return (!empty($lat) && !empty($lng));
+    }
+
+    /**
+     * Calculates the distance between a given geolocation and this one.
+     *
+     * @param \JobScooper\DataAccess\GeoLocation $geolocation    A \JobScooper\DataAccess\GeoLocation object.
+     * @param double $unit     The unit measure.
+     *
+     * @return double   The distance between the two objects.
+     */
+    public function getDistanceTo(\JobScooper\DataAccess\GeoLocation $geolocation, $unit = GeoLocationTableMap::KILOMETERS_UNIT)
+    {
+        $dist = rad2deg(acos(round(sin(deg2rad($this->getLatitude())) * sin(deg2rad($geolocation->getLatitude())) +  cos(deg2rad($this->getLatitude())) * cos(deg2rad($geolocation->getLatitude())) * cos(deg2rad($this->getLongitude() - $geolocation->getLongitude())),14))) * 60 * GeoLocationTableMap::MILES_UNIT;
+
+        if (GeoLocationTableMap::MILES_UNIT === $unit) {
+            return $dist;
+        } elseif (GeoLocationTableMap::NAUTICAL_MILES_UNIT === $unit) {
+            return $dist * GeoLocationTableMap::NAUTICAL_MILES_UNIT;
+        }
+
+        return $dist * GeoLocationTableMap::KILOMETERS_UNIT;
+    }
+
+    /**
+     * Update geocode information.
+     * You can extend this method to fill in other fields.
+     *
+     * @return \Geocoder\Result\ResultInterface|null
+     */
+    public function geocode()
+    {
+        // Do nothing as both 'geocode_ip', and 'geocode_address' are turned off.
+        return null;
+    }
+
+    /**
+     * Check whether the current object is required to be geocoded (again).
+     *
+     * @return boolean
+     */
+    public function isGeocodingNecessary()
+    {
+
+        return false;
     }
 
     /**

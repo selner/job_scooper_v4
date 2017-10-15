@@ -50,15 +50,25 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobSitePluginQuery rightJoinWith($relation) Adds a RIGHT JOIN clause and with to the query
  * @method     ChildJobSitePluginQuery innerJoinWith($relation) Adds a INNER JOIN clause and with to the query
  *
- * @method     ChildJobSitePluginQuery leftJoinUserSearchRun($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSearchRun relation
- * @method     ChildJobSitePluginQuery rightJoinUserSearchRun($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSearchRun relation
- * @method     ChildJobSitePluginQuery innerJoinUserSearchRun($relationAlias = null) Adds a INNER JOIN clause to the query using the UserSearchRun relation
+ * @method     ChildJobSitePluginQuery leftJoinUserSearchRunRelatedByLastUserSearchRunId($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSearchRunRelatedByLastUserSearchRunId relation
+ * @method     ChildJobSitePluginQuery rightJoinUserSearchRunRelatedByLastUserSearchRunId($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSearchRunRelatedByLastUserSearchRunId relation
+ * @method     ChildJobSitePluginQuery innerJoinUserSearchRunRelatedByLastUserSearchRunId($relationAlias = null) Adds a INNER JOIN clause to the query using the UserSearchRunRelatedByLastUserSearchRunId relation
  *
- * @method     ChildJobSitePluginQuery joinWithUserSearchRun($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserSearchRun relation
+ * @method     ChildJobSitePluginQuery joinWithUserSearchRunRelatedByLastUserSearchRunId($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserSearchRunRelatedByLastUserSearchRunId relation
  *
- * @method     ChildJobSitePluginQuery leftJoinWithUserSearchRun() Adds a LEFT JOIN clause and with to the query using the UserSearchRun relation
- * @method     ChildJobSitePluginQuery rightJoinWithUserSearchRun() Adds a RIGHT JOIN clause and with to the query using the UserSearchRun relation
- * @method     ChildJobSitePluginQuery innerJoinWithUserSearchRun() Adds a INNER JOIN clause and with to the query using the UserSearchRun relation
+ * @method     ChildJobSitePluginQuery leftJoinWithUserSearchRunRelatedByLastUserSearchRunId() Adds a LEFT JOIN clause and with to the query using the UserSearchRunRelatedByLastUserSearchRunId relation
+ * @method     ChildJobSitePluginQuery rightJoinWithUserSearchRunRelatedByLastUserSearchRunId() Adds a RIGHT JOIN clause and with to the query using the UserSearchRunRelatedByLastUserSearchRunId relation
+ * @method     ChildJobSitePluginQuery innerJoinWithUserSearchRunRelatedByLastUserSearchRunId() Adds a INNER JOIN clause and with to the query using the UserSearchRunRelatedByLastUserSearchRunId relation
+ *
+ * @method     ChildJobSitePluginQuery leftJoinUserSearchRunRelatedByJobSiteKey($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSearchRunRelatedByJobSiteKey relation
+ * @method     ChildJobSitePluginQuery rightJoinUserSearchRunRelatedByJobSiteKey($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSearchRunRelatedByJobSiteKey relation
+ * @method     ChildJobSitePluginQuery innerJoinUserSearchRunRelatedByJobSiteKey($relationAlias = null) Adds a INNER JOIN clause to the query using the UserSearchRunRelatedByJobSiteKey relation
+ *
+ * @method     ChildJobSitePluginQuery joinWithUserSearchRunRelatedByJobSiteKey($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserSearchRunRelatedByJobSiteKey relation
+ *
+ * @method     ChildJobSitePluginQuery leftJoinWithUserSearchRunRelatedByJobSiteKey() Adds a LEFT JOIN clause and with to the query using the UserSearchRunRelatedByJobSiteKey relation
+ * @method     ChildJobSitePluginQuery rightJoinWithUserSearchRunRelatedByJobSiteKey() Adds a RIGHT JOIN clause and with to the query using the UserSearchRunRelatedByJobSiteKey relation
+ * @method     ChildJobSitePluginQuery innerJoinWithUserSearchRunRelatedByJobSiteKey() Adds a INNER JOIN clause and with to the query using the UserSearchRunRelatedByJobSiteKey relation
  *
  * @method     \JobScooper\DataAccess\UserSearchRunQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
@@ -530,7 +540,7 @@ abstract class JobSitePluginQuery extends ModelCriteria
      * $query->filterByLastUserSearchRunId(array('min' => 12)); // WHERE last_user_search_run_id > 12
      * </code>
      *
-     * @see       filterByUserSearchRun()
+     * @see       filterByUserSearchRunRelatedByLastUserSearchRunId()
      *
      * @param     mixed $lastUserSearchRunId The value to use as filter.
      *              Use scalar values for equality.
@@ -687,7 +697,7 @@ abstract class JobSitePluginQuery extends ModelCriteria
      *
      * @return ChildJobSitePluginQuery The current query, for fluid interface
      */
-    public function filterByUserSearchRun($userSearchRun, $comparison = null)
+    public function filterByUserSearchRunRelatedByLastUserSearchRunId($userSearchRun, $comparison = null)
     {
         if ($userSearchRun instanceof \JobScooper\DataAccess\UserSearchRun) {
             return $this
@@ -700,22 +710,22 @@ abstract class JobSitePluginQuery extends ModelCriteria
             return $this
                 ->addUsingAlias(JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID, $userSearchRun->toKeyValue('PrimaryKey', 'UserSearchRunId'), $comparison);
         } else {
-            throw new PropelException('filterByUserSearchRun() only accepts arguments of type \JobScooper\DataAccess\UserSearchRun or Collection');
+            throw new PropelException('filterByUserSearchRunRelatedByLastUserSearchRunId() only accepts arguments of type \JobScooper\DataAccess\UserSearchRun or Collection');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the UserSearchRun relation
+     * Adds a JOIN clause to the query using the UserSearchRunRelatedByLastUserSearchRunId relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return $this|ChildJobSitePluginQuery The current query, for fluid interface
      */
-    public function joinUserSearchRun($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function joinUserSearchRunRelatedByLastUserSearchRunId($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('UserSearchRun');
+        $relationMap = $tableMap->getRelation('UserSearchRunRelatedByLastUserSearchRunId');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -730,14 +740,14 @@ abstract class JobSitePluginQuery extends ModelCriteria
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'UserSearchRun');
+            $this->addJoinObject($join, 'UserSearchRunRelatedByLastUserSearchRunId');
         }
 
         return $this;
     }
 
     /**
-     * Use the UserSearchRun relation UserSearchRun object
+     * Use the UserSearchRunRelatedByLastUserSearchRunId relation UserSearchRun object
      *
      * @see useQuery()
      *
@@ -747,11 +757,84 @@ abstract class JobSitePluginQuery extends ModelCriteria
      *
      * @return \JobScooper\DataAccess\UserSearchRunQuery A secondary query class using the current class as primary query
      */
-    public function useUserSearchRunQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function useUserSearchRunRelatedByLastUserSearchRunIdQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
     {
         return $this
-            ->joinUserSearchRun($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'UserSearchRun', '\JobScooper\DataAccess\UserSearchRunQuery');
+            ->joinUserSearchRunRelatedByLastUserSearchRunId($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'UserSearchRunRelatedByLastUserSearchRunId', '\JobScooper\DataAccess\UserSearchRunQuery');
+    }
+
+    /**
+     * Filter the query by a related \JobScooper\DataAccess\UserSearchRun object
+     *
+     * @param \JobScooper\DataAccess\UserSearchRun|ObjectCollection $userSearchRun the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildJobSitePluginQuery The current query, for fluid interface
+     */
+    public function filterByUserSearchRunRelatedByJobSiteKey($userSearchRun, $comparison = null)
+    {
+        if ($userSearchRun instanceof \JobScooper\DataAccess\UserSearchRun) {
+            return $this
+                ->addUsingAlias(JobSitePluginTableMap::COL_JOBSITE_KEY, $userSearchRun->getJobSiteKey(), $comparison);
+        } elseif ($userSearchRun instanceof ObjectCollection) {
+            return $this
+                ->useUserSearchRunRelatedByJobSiteKeyQuery()
+                ->filterByPrimaryKeys($userSearchRun->getPrimaryKeys())
+                ->endUse();
+        } else {
+            throw new PropelException('filterByUserSearchRunRelatedByJobSiteKey() only accepts arguments of type \JobScooper\DataAccess\UserSearchRun or Collection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the UserSearchRunRelatedByJobSiteKey relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this|ChildJobSitePluginQuery The current query, for fluid interface
+     */
+    public function joinUserSearchRunRelatedByJobSiteKey($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('UserSearchRunRelatedByJobSiteKey');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'UserSearchRunRelatedByJobSiteKey');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the UserSearchRunRelatedByJobSiteKey relation UserSearchRun object
+     *
+     * @see useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return \JobScooper\DataAccess\UserSearchRunQuery A secondary query class using the current class as primary query
+     */
+    public function useUserSearchRunRelatedByJobSiteKeyQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        return $this
+            ->joinUserSearchRunRelatedByJobSiteKey($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'UserSearchRunRelatedByJobSiteKey', '\JobScooper\DataAccess\UserSearchRunQuery');
     }
 
     /**

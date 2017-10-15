@@ -35,7 +35,7 @@ class PluginFacebook extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         'Company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
         'Url' => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => '_5144', 'return_attribute' => 'href'),
         'JobSitePostId' => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => '_5144', 'return_attribute' => 'href', 'return_value_regex' => '/\/careers\/jobs\/([^\/]+)/'),
-        'LocationFromSource' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'_3k6m')
+        'Location' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'_3k6m')
     );
 
 }

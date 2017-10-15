@@ -108,11 +108,11 @@ function updateOrCreateJobPosting($arrJobItem)
                 ->findOneOrCreate();
         }
         else {
-            if(is_null($arrJobItem['JobSite']) || strlen($arrJobItem['JobSite']) == 0)
+            if(is_null($arrJobItem['JobSiteKey']) || strlen($arrJobItem['JobSiteKey']) == 0)
                 throw new InvalidArgumentException("Attempted to create a new job posting record without a valid jobsite value set.");
 
             $jobRecord = \JobScooper\DataAccess\JobPostingQuery::create()
-                ->filterByJobSite($arrJobItem['JobSite'])
+                ->filterByJobSiteKey($arrJobItem['JobSiteKey'])
                 ->filterByJobSitePostId($arrJobItem['JobSitePostId'])
                 ->findOneOrCreate();
         }
@@ -149,7 +149,7 @@ function getAllUserMatchesNotNotified($appRunId=null, $jobsiteKey=null)
     if(!is_null($jobsiteKey))
     {
         $query->useJobPostingQuery()
-            ->filterByJobSite($jobsiteKey)
+            ->filterByJobSitKey($jobsiteKey)
             ->endUse();
     }
 
@@ -350,78 +350,6 @@ function findOrCreateJobSitePlugin($jobsite)
     return $GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object'];
 }
 
-
-
-function findLocationByNameLookup($slug)
-{
-    if(!array_key_exists('CACHE', $GLOBALS) || !array_key_exists('LocationAlternateNames', $GLOBALS['CACHE']))
-        reloadLocationNamesCache();
-
-    if(!array_key_exists($slug, $GLOBALS['CACHE']['LocationAlternateNames']))
-    {
-        LogLine("Cache missed; looking up location in database by name string '" . $slug ."'", \C__DISPLAY_NORMAL__);
-        $loclookupFound = \JobScooper\DataAccess\LocationNamesQuery::create()
-            ->filterBySlug($slug)
-            ->findOne();
-        return is_array_multidimensional($loclookupFound) ? $loclookupFound[0] : $loclookupFound;
-    }
-
-    return $GLOBALS['CACHE']['LocationAlternateNames'][$slug];
-
-}
-
-
-function findOrCreateLocationLookupFromName($strLocation)
-{
-    $slug = cleanupSlugPart($strLocation);
-    $loclookup = findLocationByNameLookup($slug);
-    if(is_null($loclookup))
-    {
-        $location = findOrCreateLocationFromOSMQuery($strLocation);
-        if(!is_null($location))
-        {
-            $loclookup = new \JobScooper\DataAccess\LocationNames();
-            $loclookup->setLocation($location);
-            $loclookup->setLocationAlternateName($strLocation);
-            $loclookup->save();
-            return $loclookup;
-        }
-    }
-
-    return $loclookup;
-}
-
-function findOrCreateLocationFromOSMQuery($query)
-{
-    $place = getPlaceFromOpenStreetMap($query);
-    if(!is_null($place))
-    {
-        if(is_array_multidimensional($place))
-            $place = $place[0];
-
-        $osmid = $place['osm_id'];
-        $dbQuery = \JobScooper\DataAccess\LocationQuery::create()
-            ->findOneByOpenStreetMapId($osmid);
-        if(!is_null($dbQuery))
-        {
-            if(is_array_multidimensional($dbQuery))
-                return $dbQuery[0];
-            else
-                return $dbQuery;
-        }
-        else
-        {
-            $location = new \JobScooper\DataAccess\Location();
-            $location->fromOSMData($place);
-            $location->save();
-            return $location;
-        }
-    }
-
-    return null;
-}
-
-
 function getPluginObjectForJobSite($jobsite)
 {
     $objJobSite = findOrCreateJobSitePlugin($jobsite);
@@ -466,7 +394,9 @@ function findOrCreateUserSearchRun($searchKey, $jobsiteKey, $locationKey="any-lo
         ->filterByUserSlug($userSlug)
         ->filterByJobSiteKey($jobsiteKey)
         ->filterBySearchKey($searchKey)
-        ->filterByLocationKey($locationKey)
+        ->useGeoLocationQuery()
+            ->filterByGeoLocationKey($locationKey)
+        ->endUse()
         ->findOne();
 
     if (!$search) {
@@ -499,8 +429,27 @@ function findOrCreateUserSearchRun($searchKey, $jobsiteKey, $locationKey="any-lo
     $search->setSearchKey($searchKey);
     $search->setJobSiteKey($jobsiteKey);
     $search->setUserSlug($userSlug);
-    $search->setLocationKey($locationKey);
+    $locId = $search->getGeoLocationId();
+    if(is_null($locId))
+    {
+        $loc = \JobScooper\DataAccess\GeoLocationQuery::create()
+            ->findOneByGeoLocationKey($locationKey);
+        $search->setGeoLocation($loc);
+    }
 
     $search->save();
     return $search;
+}
+
+function cleanupTextValue($v)
+{
+    if(is_null($v) || strlen($v) == 0 || !is_string($v))
+        return $v;
+
+    $v = html_entity_decode($v);
+    $v = preg_replace(array('/\s{2,}/', '/[\t\n]/'), ' ', $v);
+    $v = clean_utf8($v);
+    $v = trim($v);
+
+    return $v;
 }

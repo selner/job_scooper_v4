@@ -34,7 +34,7 @@ class PluginZipRecruiter extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         'Title'                 => array('selector' => 'span.just_job_title', 'return_attribute' => 'plaintext'),
         'Url'                  => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => 'job_link', 'return_attribute' => 'href'),
         'Company'               => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => 't_org_link name', 'return_attribute' => 'plaintext'),
-        'LocationFromSource'              => array('tag' => '*', 'attribute'=>'class', 'attribute_value' => 'LocationFromSource', 'return_attribute' => 'plaintext'),
+        'Location'              => array('tag' => '*', 'attribute'=>'class', 'attribute_value' => 'Location', 'return_attribute' => 'plaintext'),
         'JobSitePostId'                => array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'just_job_title', 'return_attribute' => 'data-job-id'),
     );
 

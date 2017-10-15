@@ -215,7 +215,7 @@ abstract class AbstractAdicioCareerCast extends \JobScooper\Plugins\lib\AjaxHtml
 
                 $detailLIs = $node->find("ul li");
                 $item['Company'] = $detailLIs[0]->plaintext;
-                $item['LocationFromSource'] = $detailLIs[1]->plaintext;
+                $item['Location'] = $detailLIs[1]->plaintext;
                 $item['PostedAt'] = $detailLIs[2]->plaintext;
                 $item['job_site_category'] = $detailLIs[3]->plaintext;
 
@@ -253,7 +253,7 @@ abstract class AbstractAdicioCareerCast extends \JobScooper\Plugins\lib\AjaxHtml
                     if($item['Title'] == '') continue;
 
                     $locNode = $node->find("td[class='aiResultsLocation']");
-                    $item['LocationFromSource'] = $locNode[0]->plaintext;
+                    $item['Location'] = $locNode[0]->plaintext;
 
                     $companyNode = $node->find("td[class='aiResultsCompany']");
                     $item['Company'] = $companyNode[0]->plaintext;

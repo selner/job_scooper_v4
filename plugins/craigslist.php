@@ -39,7 +39,7 @@ class PluginCraigslist extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         'Title' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'index'=> 0, 'return_attribute' => 'plaintext'),
         'JobSitePostId' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'index'=> 0, 'return_attribute' => 'data-id'),
         'Department' => array('selector' => 'td.listing-department', 'index'=> 0),
-        'LocationFromSource' => array('selector' => 'span.result-hood', 'index'=> 0),
+        'Location' => array('selector' => 'span.result-hood', 'index'=> 0),
         'PostedAt' => array('selector' => 'time.result-date', 'index'=> 0)
     );
 

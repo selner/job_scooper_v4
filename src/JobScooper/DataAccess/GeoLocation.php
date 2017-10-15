@@ -17,36 +17,52 @@
 
 namespace JobScooper\DataAccess;
 
-use JobScooper\DataAccess\Base\Location as BaseLocation;
+use JobScooper\DataAccess\Base\GeoLocation as BaseGeoLocation;
+use JobScooper\Manager\GeoLocationManager;
 use Propel\Runtime\Connection\ConnectionInterface;
+use Propel\Runtime\Exception\PropelException;
 
-class Location extends BaseLocation
+class GeoLocation extends BaseGeoLocation
 {
-
-    /**
-     * Code to be run before inserting to database
-     * @param  ConnectionInterface $con
-     * @return boolean
-     */
-    public function preSave(ConnectionInterface $con = null)
+    public function save(ConnectionInterface $con = null, $skipReload = false)
     {
+        try {
+            return parent::save($con, $skipReload);
+        }
+        catch (PropelException $ex)
+        {
+            handleException($ex, "Failed to save GeoLocation: %s", true);
+        }
+    }
 
-        if (is_null($this->getOpenStreetMapId())) {
-            if (!is_null($this->getPrimaryName())) {
-                $osm = getPlaceFromOpenStreetMap($this->getPrimaryName());
-                $this->fromOSMData($osm);
-            }
+    public function preSave(\Propel\Runtime\Connection\ConnectionInterface $con = null)
+    {
+        $this->_normalizeGeoLocationRecord();
+
+        if (is_callable('parent::preSave')) {
+            return parent::preSave($con);
         }
         return true;
     }
+
+    private function _normalizeGeoLocationRecord()
+    {
+        if(is_null($this->getOpenStreetMapId()))
+        {
+            $facts = getOpenStreetMapFacts($this->getDisplayName());
+            $this->fromOSMData($facts);
+        }
+
+    }
+
 
     public function postSave(ConnectionInterface $con = null)
     {
         parent::postSave($con);
 
-        reloadLocationCache();
+        $caches = new GeoLocationManager();
+        $caches->reloadCache();
     }
-
 
     public function setState($v)
     {
@@ -96,42 +112,91 @@ class Location extends BaseLocation
         return null;
     }
 
-    public function fromOSMData($osmPlace)
+    private function _setFactFromOSM($key, $osmData, $osmKey, $overwrite)
     {
-        if (!is_null($osmPlace) && is_array($osmPlace) && count($osmPlace) > 0) {
-            $this->setOpenStreetMapId($osmPlace['osm_id']);
-            $this->setFullOsmDataFromArray($osmPlace);
-            $this->setLatitude($osmPlace['lat']);
-            $this->setLongitude($osmPlace['lon']);
-            if (array_key_exists('place_name', $osmPlace))
-                $this->setPlace($osmPlace['place_name']);
-            $this->setAlternateNames($osmPlace['namedetails']);
-            if (array_key_exists('address', $osmPlace)) {
-                if (array_key_exists('city', $osmPlace['address']))
-                    $this->setPlace($osmPlace['address']['city']);
+        $getfunc = "get" . $key;
+        $setfunc = "set" . $key;
+        $curval = $this->$getfunc();
+        if(is_null($curval) || $overwrite)
+        {
+            $this->$setfunc($osmData[$osmKey]);
+        }
+    }
 
-                if (array_key_exists('state', $osmPlace['address']))
-                    $this->setState($osmPlace['address']['state']);
+    public function fromDisplayString($strloc)
+    {
+        $this->addAlternateName($strloc);
+        if(is_null($this->getDisplayName()))
+            $this->setDisplayName($strloc);
+        $this->_normalizeGeoLocationRecord();
+        $this->save();
+    }
 
-                if (array_key_exists('county', $osmPlace['address']))
-                    $this->setCounty($osmPlace['address']['county']);
+    public function fromOSMData($osmPlace, $overwriteValues = false)
+    {
+        if(!is_null($osmPlace) && is_array($osmPlace) && count($osmPlace) > 0)
+        {
+            if(array_key_exists(0, $osmPlace))
+                $osmPlace = $osmPlace[0];
 
-                if (array_key_exists('country', $osmPlace['address']))
-                    $this->setCountry($osmPlace['address']['country']);
-                if (array_key_exists('country_code', $osmPlace['address']))
-                    $this->setCountryCode($osmPlace['address']['country_code']);
+
+            $locMgr = new GeoLocationManager();
+            $otherLocationId = $locMgr->getGeoLocationIdByOsmId($osmPlace['osm_id']);
+            if(!is_null($otherLocationId) && $otherLocationId !== false) {
+                $otherLocation = $locMgr->getLocationById($otherLocationId);
+                $otherLocation->copyInto($this, false, false);
+            }
+            else {
+                $this->_setFactFromOSM('OpenStreetMapId', $osmPlace, 'osm_id', $overwriteValues);
+                $this->_setFactFromOSM('Latitude', $osmPlace, 'lat', $overwriteValues);
+                $this->_setFactFromOSM('Longitude', $osmPlace, 'long', $overwriteValues);
+                $this->_setFactFromOSM('Place', $osmPlace, 'place_name', $overwriteValues);
+                $this->setFullOsmDataFromArray($osmPlace);
+                if (array_key_exists('address', $osmPlace)) {
+                    $this->_setFactFromOSM('Place', $osmPlace['address'], 'city', $overwriteValues);
+                    $this->_setFactFromOSM('State', $osmPlace['address'], 'state', $overwriteValues);
+                    $this->_setFactFromOSM('County', $osmPlace['address'], 'county', $overwriteValues);
+                    $this->_setFactFromOSM('Country', $osmPlace['address'], 'country', $overwriteValues);
+                    $this->_setFactFromOSM('CountryCode', $osmPlace['address'], 'country_code', $overwriteValues);
+                    $this->_setFactFromOSM('DisplayName', $osmPlace, 'display_name', true);
+                }
+
+                if (array_key_exists('namedetails', $osmPlace))
+                    $this->addAlternateNames($osmPlace['namedetails']);
             }
 
-            if (array_key_exists('primary_name', $osmPlace))
-                $this->setDisplayName($osmPlace['primary_name']);
-            elseif (!is_null($this->getPlace())) {
+            if(!is_null($this->getPlace())) {
                 $dispName = $this->getPlace();
                 $dispName .= !is_null($this->getStateCode()) ? ", " . $this->getStateCode() : "";
                 $this->setDisplayName($dispName);
-            } elseif (array_key_exists('display_name', $osmPlace))
-                $this->setDisplayName($osmPlace['display_name']);
+            }
         }
+    }
 
+    public function setDisplayName($v)
+    {
+        parent::setDisplayName($v);
+        $this->addAlternateName($v);
+    }
+
+    public function addAlternateNames($value)
+    {
+        if(!is_null($value) && is_array($value))
+            $names = $value;
+        else {
+            $names = preg_split("/\s*\|\s*/", $value, $limit = -1, PREG_SPLIT_NO_EMPTY);
+        }
+        foreach($names as $name)
+        {
+            $this->addAlternateName($name);
+        }
+    }
+
+    public function setAlternateNames($value)
+    {
+        if(!is_null($value) && is_array($value))
+            $value = array_unique($value);
+        parent::setAlternateNames($value);
     }
 
     public function formatLocation($formatString)

@@ -60,7 +60,7 @@
           "Attribute": "value"
         },
         {
-          "Name": "LocationFromSource",
+          "Name": "Location",
           "Selector": "span.jobLoc",
           "Index" : 0,
           "Extract": "TEXT",

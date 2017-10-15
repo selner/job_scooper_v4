@@ -61,7 +61,7 @@ abstract class BaseForceComClass extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
         'Url' =>  array('selector' => 'td a', 'index' => 0, 'return_attribute' => 'href'),
         'JobSitePostId' =>  array('selector' => 'td a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' => '/.*?jobId=(\w+)&.*?/'),
         'Department' =>  array('selector' => 'td span', 'index' => 0, 'return_attribute' => 'plaintext'),
-        'LocationFromSource' =>  array('selector' => 'td span', 'index' => 1, 'return_attribute' => 'plaintext'),
+        'Location' =>  array('selector' => 'td span', 'index' => 1, 'return_attribute' => 'plaintext'),
         'PostedAt' =>  array('selector' => 'td span', 'index' => 2, 'return_attribute' => 'plaintext'),
         'Company' =>  array('return_value_callback' => 'setCompanyToSiteName')
     );
@@ -85,7 +85,7 @@ abstract class BaseNoDeptForceComClass extends BaseForceComClass
     {
         parent::__construct();
         $this->arrListingTagSetup['Department'] = null;
-        $this->arrListingTagSetup['LocationFromSource']['index'] = 0;
+        $this->arrListingTagSetup['Location']['index'] = 0;
         $this->arrListingTagSetup['PostedAt']['index'] = 1;
     }
 }
@@ -104,7 +104,7 @@ class PluginRobertHalfExec extends BaseForceComClass
     {
         parent::__construct();
         $this->arrListingTagSetup['Department']['index'] = 1;
-        $this->arrListingTagSetup['LocationFromSource']['index'] = 2;
+        $this->arrListingTagSetup['Location']['index'] = 2;
         $this->arrListingTagSetup['PostedAt'] = null;
     }
 

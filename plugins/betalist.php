@@ -74,7 +74,7 @@ class PluginBetalist extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         'Title' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'jobCard__details__title'),
         'Url' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'jobCard__details__title'),
         'Company' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'jobCard__details__company'), array('tag' => 'a')),
-        'LocationFromSource' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'jobCard__details__location'),
+        'Location' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'jobCard__details__location'),
         'regex_link_job_id' => '/jobs\/([^\/]+)/i'
     );
 

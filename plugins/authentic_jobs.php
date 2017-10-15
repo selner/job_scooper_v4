@@ -32,7 +32,7 @@ class PluginAuthenticJobs extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         'Title'                 =>  array('selector' => 'a div h3', 'return_attribute' => 'plaintext'),
         'Url'                  =>  array('selector' => 'a', 'return_attribute' => 'href'),
         'Company'               =>  array('selector' => 'a div h4', 'return_attribute' => 'plaintext'),
-        'LocationFromSource'              =>  array('selector' => 'a ul li.location', 'return_attribute' => 'plaintext'),
+        'Location'              =>  array('selector' => 'a ul li.location', 'return_attribute' => 'plaintext'),
         'EmploymentType'       =>  array('selector' => 'a ul li', 'index' => 0, 'return_attribute' => 'plaintext'),
         'JobSitePostId'                =>  array('selector' => 'a', 'return_attribute' => 'href', 'return_value_regex' =>  '/\/jobs\/([^?]+)/i'),
         'LoadMoreControl'             =>  array('selector' => 'a.ladda-button')

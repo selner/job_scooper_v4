@@ -38,7 +38,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "LocationFromSource",
+          "Name": "Location",
           "Selector": "span.location",
           "Extract": "TEXT",
           "Attribute": null,

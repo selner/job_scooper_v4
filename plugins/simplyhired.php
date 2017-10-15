@@ -110,7 +110,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\lib\ServerHtmlPlugin
         {
             if($searchDetails->getSearchParameter('location_search_value') == VALUE_NOT_SUPPORTED)
             {
-                $msg = "Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() ." set.  Skipping search '". $searchDetails->getUserSearchRunKey() .".";
+                $msg = "Failed to run search:  search is missing the required location type of " . $this->getGeoLocationSettingType() ." set.  Skipping search '". $searchDetails->getUserSearchRunKey() .".";
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($msg, \C__DISPLAY_ERROR__);
                 throw new IndexOutOfBoundsException($msg);
             }
@@ -175,7 +175,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\lib\ServerHtmlPlugin
             $locnode = $node->find('span[class="serp-location"] span span[class="serp-location"]');
             if(isset($locnode) && is_array($locnode))
             {
-                $item['LocationFromSource'] = combineTextAllChildren($locnode[0]);
+                $item['Location'] = combineTextAllChildren($locnode[0]);
             }
 
             $item['JobSitePostId'] = $this->getIDFromLink('/\/a\/job-details\/\?a=([^\/]+)/i', $item['Url']);

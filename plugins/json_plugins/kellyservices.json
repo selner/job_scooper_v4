@@ -49,7 +49,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "LocationFromSource",
+          "Name": "Location",
           "Selector": "div.loc",
           "Extract": "TEXT",
           "Index": 0,

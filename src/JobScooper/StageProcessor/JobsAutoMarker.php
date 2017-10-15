@@ -17,10 +17,12 @@
 namespace JobScooper\StageProcessor;
 
 
-use JobScooper\DataAccess\LocationQuery;
+use JobScooper\DataAccess\GeoLocationQuery;
+use JobScooper\DataAccess\Map\GeoLocationTableMap;
 use JobScooper\DataAccess\Map\LocationTableMap;
 
 use Exception;
+use JobScooper\Manager\GeoLocationManager;
 use Propel\Runtime\ActiveQuery\Criteria;
 
 
@@ -29,11 +31,14 @@ class JobsAutoMarker
     protected $siteName = "JobsAutoMarker";
     protected $arrLatestJobs_UnfilteredByUserInput = array();
     protected $arrMasterJobList = array();
+    protected $_locmgr = null;
 
     function __construct($arrJobObjsToMark = array(), $strOutputDirectory = null)
     {
         if (!is_null($arrJobObjsToMark) && count($arrJobObjsToMark) > 0)
             $this->arrMasterJobList = $arrJobObjsToMark;
+
+        $this->_locmgr= new GeoLocationManager();
 
     }
 
@@ -160,10 +165,10 @@ class JobsAutoMarker
         LogLine("Auto-marking postings not in same counties as the search locations...", \C__DISPLAY_ITEM_DETAIL__);
         foreach($searchLocations as $searchLocation)
         {
-            $locLookup = $searchLocation['location_name_lookup'];
-            if(!is_null($locLookup))
+            $locId = $searchLocation['location_id'];
+            if(!is_null($locId))
             {
-                $location = $locLookup->getLocation();
+                $location = $this->_locmgr->getLocationById($locId);
                 if(!is_null($location))
                 {
                     $arrIncludeCounties[] = array("county" => $location->getCounty(), "state" => $location->getState());
@@ -174,11 +179,11 @@ class JobsAutoMarker
         LogLine("Gathering job postings not in the following counties & states ...", \C__DISPLAY_ITEM_DETAIL__);
         $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrIncludeCounties) {
             $posting = $v->getJobPosting();
-            $locId = $posting->getLocationId();
+            $locId = $posting->getGeoLocationId();
             if(is_null($locId))
                 return true;  // if we don't have a location, assume nearby
 
-            $location = $posting->getLocation();
+            $location = $posting->getGeoLocation();
             $county = $location->getCounty();
             $state = $location->getState();
             if(!is_null($county) && in_array($county, array_column($arrIncludeCounties, "county")) && in_array($state, array_column($arrIncludeCounties, "state")))
@@ -212,20 +217,20 @@ class JobsAutoMarker
         LogLine("Getting locationIDs within 50 miles of search locations...", \C__DISPLAY_ITEM_DETAIL__);
         foreach($searchLocations as $searchLocation)
         {
-            $locLookup = $searchLocation['location_name_lookup'];
-            if(!is_null($locLookup))
+            $locId = $searchLocation['location_id'];
+            if(!is_null($locId))
             {
-                $location = $locLookup->getLocation();
+                $location = $this->_locmgr->getLocationById($locId);
                 if(!is_null($location))
                 {
-                    $nearbyLocations = LocationQuery::create()
-                        ->filterByDistanceFrom($location->getLatitude(), $location->getLongitude(), 50, LocationTableMap::MILES_UNIT, Criteria::LESS_THAN)
+                    $nearbyLocations = GeoLocationQuery::create()
+                        ->filterByDistanceFrom($location->getLatitude(), $location->getLongitude(), 50, GeoLocationTableMap::MILES_UNIT, Criteria::LESS_THAN)
                         ->find();
 
                     if(!is_null($nearbyLocations))
                     {
                         foreach($nearbyLocations as $near)
-                            $arrNearbyIds[] = $near->getLocationId();
+                            $arrNearbyIds[] = $near->getGeoLocationId();
                     }
                 }
             }
@@ -234,7 +239,7 @@ class JobsAutoMarker
         LogLine("Gathering job postings not in those areas...", \C__DISPLAY_ITEM_DETAIL__);
         $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrNearbyIds) {
             $posting = $v->getJobPosting();
-            $locId = $posting->getLocationId();
+            $locId = $posting->getGeoLocationId();
             if(is_null($locId))
                 return true;  // if we don't have a location, assume nearby
 

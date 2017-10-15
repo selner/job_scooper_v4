@@ -28,7 +28,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "LocationFromSource",
+          "Name": "Location",
           "Selector": "span.job-post-location",
           "Extract": "TEXT",
           "Index": 0,

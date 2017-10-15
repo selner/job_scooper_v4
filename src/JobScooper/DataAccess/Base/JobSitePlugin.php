@@ -5,15 +5,18 @@ namespace JobScooper\DataAccess\Base;
 use \DateTime;
 use \Exception;
 use \PDO;
+use JobScooper\DataAccess\JobSitePlugin as ChildJobSitePlugin;
 use JobScooper\DataAccess\JobSitePluginQuery as ChildJobSitePluginQuery;
 use JobScooper\DataAccess\UserSearchRun as ChildUserSearchRun;
 use JobScooper\DataAccess\UserSearchRunQuery as ChildUserSearchRunQuery;
 use JobScooper\DataAccess\Map\JobSitePluginTableMap;
+use JobScooper\DataAccess\Map\UserSearchRunTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Collection\Collection;
+use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\BadMethodCallException;
 use Propel\Runtime\Exception\LogicException;
@@ -150,7 +153,13 @@ abstract class JobSitePlugin implements ActiveRecordInterface
     /**
      * @var        ChildUserSearchRun
      */
-    protected $aUserSearchRun;
+    protected $aUserSearchRunRelatedByLastUserSearchRunId;
+
+    /**
+     * @var        ObjectCollection|ChildUserSearchRun[] Collection to store aggregation of ChildUserSearchRun objects.
+     */
+    protected $collUserSearchRunsRelatedByJobSiteKey;
+    protected $collUserSearchRunsRelatedByJobSiteKeyPartial;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -159,6 +168,12 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * @var boolean
      */
     protected $alreadyInSave = false;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var ObjectCollection|ChildUserSearchRun[]
+     */
+    protected $userSearchRunsRelatedByJobSiteKeyScheduledForDeletion = null;
 
     /**
      * Initializes internal state of JobScooper\DataAccess\Base\JobSitePlugin object.
@@ -757,8 +772,8 @@ abstract class JobSitePlugin implements ActiveRecordInterface
             $this->modifiedColumns[JobSitePluginTableMap::COL_LAST_USER_SEARCH_RUN_ID] = true;
         }
 
-        if ($this->aUserSearchRun !== null && $this->aUserSearchRun->getUserSearchRunId() !== $v) {
-            $this->aUserSearchRun = null;
+        if ($this->aUserSearchRunRelatedByLastUserSearchRunId !== null && $this->aUserSearchRunRelatedByLastUserSearchRunId->getUserSearchRunId() !== $v) {
+            $this->aUserSearchRunRelatedByLastUserSearchRunId = null;
         }
 
         return $this;
@@ -933,8 +948,8 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
-        if ($this->aUserSearchRun !== null && $this->last_user_search_run_id !== $this->aUserSearchRun->getUserSearchRunId()) {
-            $this->aUserSearchRun = null;
+        if ($this->aUserSearchRunRelatedByLastUserSearchRunId !== null && $this->last_user_search_run_id !== $this->aUserSearchRunRelatedByLastUserSearchRunId->getUserSearchRunId()) {
+            $this->aUserSearchRunRelatedByLastUserSearchRunId = null;
         }
     } // ensureConsistency
 
@@ -979,7 +994,9 @@ abstract class JobSitePlugin implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->aUserSearchRun = null;
+            $this->aUserSearchRunRelatedByLastUserSearchRunId = null;
+            $this->collUserSearchRunsRelatedByJobSiteKey = null;
+
         } // if (deep)
     }
 
@@ -1100,11 +1117,11 @@ abstract class JobSitePlugin implements ActiveRecordInterface
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
-            if ($this->aUserSearchRun !== null) {
-                if ($this->aUserSearchRun->isModified() || $this->aUserSearchRun->isNew()) {
-                    $affectedRows += $this->aUserSearchRun->save($con);
+            if ($this->aUserSearchRunRelatedByLastUserSearchRunId !== null) {
+                if ($this->aUserSearchRunRelatedByLastUserSearchRunId->isModified() || $this->aUserSearchRunRelatedByLastUserSearchRunId->isNew()) {
+                    $affectedRows += $this->aUserSearchRunRelatedByLastUserSearchRunId->save($con);
                 }
-                $this->setUserSearchRun($this->aUserSearchRun);
+                $this->setUserSearchRunRelatedByLastUserSearchRunId($this->aUserSearchRunRelatedByLastUserSearchRunId);
             }
 
             if ($this->isNew() || $this->isModified()) {
@@ -1122,6 +1139,23 @@ abstract class JobSitePlugin implements ActiveRecordInterface
                     }
                 }
                 $this->resetModified();
+            }
+
+            if ($this->userSearchRunsRelatedByJobSiteKeyScheduledForDeletion !== null) {
+                if (!$this->userSearchRunsRelatedByJobSiteKeyScheduledForDeletion->isEmpty()) {
+                    \JobScooper\DataAccess\UserSearchRunQuery::create()
+                        ->filterByPrimaryKeys($this->userSearchRunsRelatedByJobSiteKeyScheduledForDeletion->getPrimaryKeys(false))
+                        ->delete($con);
+                    $this->userSearchRunsRelatedByJobSiteKeyScheduledForDeletion = null;
+                }
+            }
+
+            if ($this->collUserSearchRunsRelatedByJobSiteKey !== null) {
+                foreach ($this->collUserSearchRunsRelatedByJobSiteKey as $referrerFK) {
+                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
+                        $affectedRows += $referrerFK->save($con);
+                    }
+                }
             }
 
             $this->alreadyInSave = false;
@@ -1365,7 +1399,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->aUserSearchRun) {
+            if (null !== $this->aUserSearchRunRelatedByLastUserSearchRunId) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
@@ -1378,7 +1412,22 @@ abstract class JobSitePlugin implements ActiveRecordInterface
                         $key = 'UserSearchRun';
                 }
 
-                $result[$key] = $this->aUserSearchRun->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+                $result[$key] = $this->aUserSearchRunRelatedByLastUserSearchRunId->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->collUserSearchRunsRelatedByJobSiteKey) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'userSearchRuns';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'user_search_runs';
+                        break;
+                    default:
+                        $key = 'UserSearchRuns';
+                }
+
+                $result[$key] = $this->collUserSearchRunsRelatedByJobSiteKey->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
         }
 
@@ -1675,6 +1724,20 @@ abstract class JobSitePlugin implements ActiveRecordInterface
         $copyObj->setLastUserSearchRunId($this->getLastUserSearchRunId());
         $copyObj->setSupportedCountryCodes($this->getSupportedCountryCodes());
         $copyObj->setResultsFilterType($this->getResultsFilterType());
+
+        if ($deepCopy) {
+            // important: temporarily setNew(false) because this affects the behavior of
+            // the getter/setter methods for fkey referrer objects.
+            $copyObj->setNew(false);
+
+            foreach ($this->getUserSearchRunsRelatedByJobSiteKey() as $relObj) {
+                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
+                    $copyObj->addUserSearchRunRelatedByJobSiteKey($relObj->copy($deepCopy));
+                }
+            }
+
+        } // if ($deepCopy)
+
         if ($makeNew) {
             $copyObj->setNew(true);
         }
@@ -1709,7 +1772,7 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * @return $this|\JobScooper\DataAccess\JobSitePlugin The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setUserSearchRun(ChildUserSearchRun $v = null)
+    public function setUserSearchRunRelatedByLastUserSearchRunId(ChildUserSearchRun $v = null)
     {
         if ($v === null) {
             $this->setLastUserSearchRunId(NULL);
@@ -1717,12 +1780,12 @@ abstract class JobSitePlugin implements ActiveRecordInterface
             $this->setLastUserSearchRunId($v->getUserSearchRunId());
         }
 
-        $this->aUserSearchRun = $v;
+        $this->aUserSearchRunRelatedByLastUserSearchRunId = $v;
 
         // Add binding for other direction of this n:n relationship.
         // If this object has already been added to the ChildUserSearchRun object, it will not be re-added.
         if ($v !== null) {
-            $v->addJobSitePlugin($this);
+            $v->addJobSitePluginRelatedByLastUserSearchRunId($this);
         }
 
 
@@ -1737,20 +1800,312 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      * @return ChildUserSearchRun The associated ChildUserSearchRun object.
      * @throws PropelException
      */
-    public function getUserSearchRun(ConnectionInterface $con = null)
+    public function getUserSearchRunRelatedByLastUserSearchRunId(ConnectionInterface $con = null)
     {
-        if ($this->aUserSearchRun === null && ($this->last_user_search_run_id != 0)) {
-            $this->aUserSearchRun = ChildUserSearchRunQuery::create()->findPk($this->last_user_search_run_id, $con);
+        if ($this->aUserSearchRunRelatedByLastUserSearchRunId === null && ($this->last_user_search_run_id != 0)) {
+            $this->aUserSearchRunRelatedByLastUserSearchRunId = ChildUserSearchRunQuery::create()->findPk($this->last_user_search_run_id, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aUserSearchRun->addJobSitePlugins($this);
+                $this->aUserSearchRunRelatedByLastUserSearchRunId->addJobSitePluginsRelatedByLastUserSearchRunId($this);
              */
         }
 
-        return $this->aUserSearchRun;
+        return $this->aUserSearchRunRelatedByLastUserSearchRunId;
+    }
+
+
+    /**
+     * Initializes a collection based on the name of a relation.
+     * Avoids crafting an 'init[$relationName]s' method name
+     * that wouldn't work when StandardEnglishPluralizer is used.
+     *
+     * @param      string $relationName The name of the relation to initialize
+     * @return void
+     */
+    public function initRelation($relationName)
+    {
+        if ('UserSearchRunRelatedByJobSiteKey' == $relationName) {
+            $this->initUserSearchRunsRelatedByJobSiteKey();
+            return;
+        }
+    }
+
+    /**
+     * Clears out the collUserSearchRunsRelatedByJobSiteKey collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return void
+     * @see        addUserSearchRunsRelatedByJobSiteKey()
+     */
+    public function clearUserSearchRunsRelatedByJobSiteKey()
+    {
+        $this->collUserSearchRunsRelatedByJobSiteKey = null; // important to set this to NULL since that means it is uninitialized
+    }
+
+    /**
+     * Reset is the collUserSearchRunsRelatedByJobSiteKey collection loaded partially.
+     */
+    public function resetPartialUserSearchRunsRelatedByJobSiteKey($v = true)
+    {
+        $this->collUserSearchRunsRelatedByJobSiteKeyPartial = $v;
+    }
+
+    /**
+     * Initializes the collUserSearchRunsRelatedByJobSiteKey collection.
+     *
+     * By default this just sets the collUserSearchRunsRelatedByJobSiteKey collection to an empty array (like clearcollUserSearchRunsRelatedByJobSiteKey());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @param      boolean $overrideExisting If set to true, the method call initializes
+     *                                        the collection even if it is not empty
+     *
+     * @return void
+     */
+    public function initUserSearchRunsRelatedByJobSiteKey($overrideExisting = true)
+    {
+        if (null !== $this->collUserSearchRunsRelatedByJobSiteKey && !$overrideExisting) {
+            return;
+        }
+
+        $collectionClassName = UserSearchRunTableMap::getTableMap()->getCollectionClassName();
+
+        $this->collUserSearchRunsRelatedByJobSiteKey = new $collectionClassName;
+        $this->collUserSearchRunsRelatedByJobSiteKey->setModel('\JobScooper\DataAccess\UserSearchRun');
+    }
+
+    /**
+     * Gets an array of ChildUserSearchRun objects which contain a foreign key that references this object.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this ChildJobSitePlugin is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @return ObjectCollection|ChildUserSearchRun[] List of ChildUserSearchRun objects
+     * @throws PropelException
+     */
+    public function getUserSearchRunsRelatedByJobSiteKey(Criteria $criteria = null, ConnectionInterface $con = null)
+    {
+        $partial = $this->collUserSearchRunsRelatedByJobSiteKeyPartial && !$this->isNew();
+        if (null === $this->collUserSearchRunsRelatedByJobSiteKey || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collUserSearchRunsRelatedByJobSiteKey) {
+                // return empty collection
+                $this->initUserSearchRunsRelatedByJobSiteKey();
+            } else {
+                $collUserSearchRunsRelatedByJobSiteKey = ChildUserSearchRunQuery::create(null, $criteria)
+                    ->filterByJobSitePluginRelatedByJobSiteKey($this)
+                    ->find($con);
+
+                if (null !== $criteria) {
+                    if (false !== $this->collUserSearchRunsRelatedByJobSiteKeyPartial && count($collUserSearchRunsRelatedByJobSiteKey)) {
+                        $this->initUserSearchRunsRelatedByJobSiteKey(false);
+
+                        foreach ($collUserSearchRunsRelatedByJobSiteKey as $obj) {
+                            if (false == $this->collUserSearchRunsRelatedByJobSiteKey->contains($obj)) {
+                                $this->collUserSearchRunsRelatedByJobSiteKey->append($obj);
+                            }
+                        }
+
+                        $this->collUserSearchRunsRelatedByJobSiteKeyPartial = true;
+                    }
+
+                    return $collUserSearchRunsRelatedByJobSiteKey;
+                }
+
+                if ($partial && $this->collUserSearchRunsRelatedByJobSiteKey) {
+                    foreach ($this->collUserSearchRunsRelatedByJobSiteKey as $obj) {
+                        if ($obj->isNew()) {
+                            $collUserSearchRunsRelatedByJobSiteKey[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collUserSearchRunsRelatedByJobSiteKey = $collUserSearchRunsRelatedByJobSiteKey;
+                $this->collUserSearchRunsRelatedByJobSiteKeyPartial = false;
+            }
+        }
+
+        return $this->collUserSearchRunsRelatedByJobSiteKey;
+    }
+
+    /**
+     * Sets a collection of ChildUserSearchRun objects related by a one-to-many relationship
+     * to the current object.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param      Collection $userSearchRunsRelatedByJobSiteKey A Propel collection.
+     * @param      ConnectionInterface $con Optional connection object
+     * @return $this|ChildJobSitePlugin The current object (for fluent API support)
+     */
+    public function setUserSearchRunsRelatedByJobSiteKey(Collection $userSearchRunsRelatedByJobSiteKey, ConnectionInterface $con = null)
+    {
+        /** @var ChildUserSearchRun[] $userSearchRunsRelatedByJobSiteKeyToDelete */
+        $userSearchRunsRelatedByJobSiteKeyToDelete = $this->getUserSearchRunsRelatedByJobSiteKey(new Criteria(), $con)->diff($userSearchRunsRelatedByJobSiteKey);
+
+
+        $this->userSearchRunsRelatedByJobSiteKeyScheduledForDeletion = $userSearchRunsRelatedByJobSiteKeyToDelete;
+
+        foreach ($userSearchRunsRelatedByJobSiteKeyToDelete as $userSearchRunRelatedByJobSiteKeyRemoved) {
+            $userSearchRunRelatedByJobSiteKeyRemoved->setJobSitePluginRelatedByJobSiteKey(null);
+        }
+
+        $this->collUserSearchRunsRelatedByJobSiteKey = null;
+        foreach ($userSearchRunsRelatedByJobSiteKey as $userSearchRunRelatedByJobSiteKey) {
+            $this->addUserSearchRunRelatedByJobSiteKey($userSearchRunRelatedByJobSiteKey);
+        }
+
+        $this->collUserSearchRunsRelatedByJobSiteKey = $userSearchRunsRelatedByJobSiteKey;
+        $this->collUserSearchRunsRelatedByJobSiteKeyPartial = false;
+
+        return $this;
+    }
+
+    /**
+     * Returns the number of related UserSearchRun objects.
+     *
+     * @param      Criteria $criteria
+     * @param      boolean $distinct
+     * @param      ConnectionInterface $con
+     * @return int             Count of related UserSearchRun objects.
+     * @throws PropelException
+     */
+    public function countUserSearchRunsRelatedByJobSiteKey(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    {
+        $partial = $this->collUserSearchRunsRelatedByJobSiteKeyPartial && !$this->isNew();
+        if (null === $this->collUserSearchRunsRelatedByJobSiteKey || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collUserSearchRunsRelatedByJobSiteKey) {
+                return 0;
+            }
+
+            if ($partial && !$criteria) {
+                return count($this->getUserSearchRunsRelatedByJobSiteKey());
+            }
+
+            $query = ChildUserSearchRunQuery::create(null, $criteria);
+            if ($distinct) {
+                $query->distinct();
+            }
+
+            return $query
+                ->filterByJobSitePluginRelatedByJobSiteKey($this)
+                ->count($con);
+        }
+
+        return count($this->collUserSearchRunsRelatedByJobSiteKey);
+    }
+
+    /**
+     * Method called to associate a ChildUserSearchRun object to this object
+     * through the ChildUserSearchRun foreign key attribute.
+     *
+     * @param  ChildUserSearchRun $l ChildUserSearchRun
+     * @return $this|\JobScooper\DataAccess\JobSitePlugin The current object (for fluent API support)
+     */
+    public function addUserSearchRunRelatedByJobSiteKey(ChildUserSearchRun $l)
+    {
+        if ($this->collUserSearchRunsRelatedByJobSiteKey === null) {
+            $this->initUserSearchRunsRelatedByJobSiteKey();
+            $this->collUserSearchRunsRelatedByJobSiteKeyPartial = true;
+        }
+
+        if (!$this->collUserSearchRunsRelatedByJobSiteKey->contains($l)) {
+            $this->doAddUserSearchRunRelatedByJobSiteKey($l);
+
+            if ($this->userSearchRunsRelatedByJobSiteKeyScheduledForDeletion and $this->userSearchRunsRelatedByJobSiteKeyScheduledForDeletion->contains($l)) {
+                $this->userSearchRunsRelatedByJobSiteKeyScheduledForDeletion->remove($this->userSearchRunsRelatedByJobSiteKeyScheduledForDeletion->search($l));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param ChildUserSearchRun $userSearchRunRelatedByJobSiteKey The ChildUserSearchRun object to add.
+     */
+    protected function doAddUserSearchRunRelatedByJobSiteKey(ChildUserSearchRun $userSearchRunRelatedByJobSiteKey)
+    {
+        $this->collUserSearchRunsRelatedByJobSiteKey[]= $userSearchRunRelatedByJobSiteKey;
+        $userSearchRunRelatedByJobSiteKey->setJobSitePluginRelatedByJobSiteKey($this);
+    }
+
+    /**
+     * @param  ChildUserSearchRun $userSearchRunRelatedByJobSiteKey The ChildUserSearchRun object to remove.
+     * @return $this|ChildJobSitePlugin The current object (for fluent API support)
+     */
+    public function removeUserSearchRunRelatedByJobSiteKey(ChildUserSearchRun $userSearchRunRelatedByJobSiteKey)
+    {
+        if ($this->getUserSearchRunsRelatedByJobSiteKey()->contains($userSearchRunRelatedByJobSiteKey)) {
+            $pos = $this->collUserSearchRunsRelatedByJobSiteKey->search($userSearchRunRelatedByJobSiteKey);
+            $this->collUserSearchRunsRelatedByJobSiteKey->remove($pos);
+            if (null === $this->userSearchRunsRelatedByJobSiteKeyScheduledForDeletion) {
+                $this->userSearchRunsRelatedByJobSiteKeyScheduledForDeletion = clone $this->collUserSearchRunsRelatedByJobSiteKey;
+                $this->userSearchRunsRelatedByJobSiteKeyScheduledForDeletion->clear();
+            }
+            $this->userSearchRunsRelatedByJobSiteKeyScheduledForDeletion[]= clone $userSearchRunRelatedByJobSiteKey;
+            $userSearchRunRelatedByJobSiteKey->setJobSitePluginRelatedByJobSiteKey(null);
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this JobSitePlugin is new, it will return
+     * an empty collection; or if this JobSitePlugin has previously
+     * been saved, it will retrieve related UserSearchRunsRelatedByJobSiteKey from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in JobSitePlugin.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return ObjectCollection|ChildUserSearchRun[] List of ChildUserSearchRun objects
+     */
+    public function getUserSearchRunsRelatedByJobSiteKeyJoinGeoLocation(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    {
+        $query = ChildUserSearchRunQuery::create(null, $criteria);
+        $query->joinWith('GeoLocation', $joinBehavior);
+
+        return $this->getUserSearchRunsRelatedByJobSiteKey($query, $con);
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this JobSitePlugin is new, it will return
+     * an empty collection; or if this JobSitePlugin has previously
+     * been saved, it will retrieve related UserSearchRunsRelatedByJobSiteKey from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in JobSitePlugin.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return ObjectCollection|ChildUserSearchRun[] List of ChildUserSearchRun objects
+     */
+    public function getUserSearchRunsRelatedByJobSiteKeyJoinUser(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    {
+        $query = ChildUserSearchRunQuery::create(null, $criteria);
+        $query->joinWith('User', $joinBehavior);
+
+        return $this->getUserSearchRunsRelatedByJobSiteKey($query, $con);
     }
 
     /**
@@ -1760,8 +2115,8 @@ abstract class JobSitePlugin implements ActiveRecordInterface
      */
     public function clear()
     {
-        if (null !== $this->aUserSearchRun) {
-            $this->aUserSearchRun->removeJobSitePlugin($this);
+        if (null !== $this->aUserSearchRunRelatedByLastUserSearchRunId) {
+            $this->aUserSearchRunRelatedByLastUserSearchRunId->removeJobSitePluginRelatedByLastUserSearchRunId($this);
         }
         $this->jobsite_key = null;
         $this->plugin_class_name = null;
@@ -1793,9 +2148,15 @@ abstract class JobSitePlugin implements ActiveRecordInterface
     public function clearAllReferences($deep = false)
     {
         if ($deep) {
+            if ($this->collUserSearchRunsRelatedByJobSiteKey) {
+                foreach ($this->collUserSearchRunsRelatedByJobSiteKey as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
         } // if ($deep)
 
-        $this->aUserSearchRun = null;
+        $this->collUserSearchRunsRelatedByJobSiteKey = null;
+        $this->aUserSearchRunRelatedByLastUserSearchRunId = null;
     }
 
     /**

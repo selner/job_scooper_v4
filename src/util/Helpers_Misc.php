@@ -602,12 +602,12 @@ function getRunDateRange()
 function getEmptyJobListingRecord()
 {
     return array(
-        'JobSite' => '',
+        'JobSiteKey' => '',
         'JobSitePostId' => '',
         'Company' => '',
         'Title' => '',
         'Url' => '',
-        'LocationFromSource' => '',
+        'Location' => '',
         'Category' => '',
         'PostedAt' =>'',
         'EmploymentType' => '',
@@ -923,6 +923,32 @@ function getPlaceFromOpenStreetMap($query)
     return $retMatches;
 }
 
+function getOpenStreetMapDataForId($osmid)
+{
+    $ret = null;
+    $data = null;
+    $osmquery = "http://nominatim.openstreetmap.org/lookup?osm_ids=%s&format=json&addressdetails=1&extradetails=1&namedetails=1&dedupe=1";
+    $apiCall = sprintf($osmquery, urlencode($osmid));
+
+    $curl = new \CurlWrapper();
+    try {
+        $data = $curl->curl($full_url = $apiCall, $json = null, $action = 'GET', $content_type = "application/json; charset=UTF-8", $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = null, $referrer = "http://github.com/selner/job_scooper_v4");
+        if (array_key_exists('output', $data))
+            if (!is_null($data['output'])) {
+                $objData = json_decode($data['output']);
+                $osmPlaces = object_to_array($objData);
+                return $osmPlaces;
+            }
+    }
+    catch (Exception $ex)
+    {
+        handleException($ex);
+    }
+
+    return $ret;
+
+}
+
 function getOpenStreetMapFacts($query)
 {
     $ret = null;
@@ -945,7 +971,6 @@ function getOpenStreetMapFacts($query)
         handleException($ex);
     }
 
-    $ret['primary_name'] = $query;
     return $ret;
 
 }

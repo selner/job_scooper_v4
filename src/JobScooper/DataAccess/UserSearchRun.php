@@ -117,9 +117,9 @@ class UserSearchRun extends BaseUserSearchRun
         return parent::setRunResultCode($val);
     }
 
-    public function setLocationKey($v)
+    public function setGeoLocationId($v)
     {
-        parent::setLocationKey($v);
+        parent::setGeoLocationId($v);
         $this->setUserSearchRunKey($this->createSlug());
     }
 

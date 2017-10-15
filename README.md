@@ -70,7 +70,7 @@ Just tag the specific job results page fields for the site and set the Agenty fi
 	'Title',
 	'Url',
 	'Department',
-	'LocationFromSource',
+	'Location',
 	'Category',
 	'Company',
 	'PostedAt',
@@ -128,7 +128,7 @@ You can define the full configuration for a job site plugin in a single JSON fil
           "Type": "CSS"
         },
         {
-          "Name": "LocationFromSource",
+          "Name": "Location",
           "Selector": "span.location",
           "Extract": "TEXT",
           "Attribute": null,

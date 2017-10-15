@@ -150,7 +150,7 @@ abstract class AbstractTaleo extends \JobScooper\Plugins\lib\ServerHtmlPlugin
             if($item['Title'] == '') continue;
 
             $tds = $node->find("td");
-            if(isset($tds) && isset($tds[1])) $item['LocationFromSource'] = $node->find("td")[1]->plaintext;
+            if(isset($tds) && isset($tds[1])) $item['Location'] = $node->find("td")[1]->plaintext;
             if(isset($tds) && isset($tds[2]))$item['job_site_category'] = $tds[2]->plaintext;
 
             $ret[] = $item;

@@ -2,10 +2,10 @@
 
 namespace JobScooper\DataAccess;
 
-use JobScooper\DataAccess\Base\LocationNamesQuery as BaseLocationNamesQuery;
+use JobScooper\DataAccess\Base\GeoLocationQuery as BaseGeoLocationQuery;
 
 /**
- * Skeleton subclass for performing query and update operations on the 'location_names' table.
+ * Skeleton subclass for performing query and update operations on the 'geolocation' table.
  *
  *
  *
@@ -14,7 +14,7 @@ use JobScooper\DataAccess\Base\LocationNamesQuery as BaseLocationNamesQuery;
  * long as it does not already exist in the output directory.
  *
  */
-class LocationNamesQuery extends BaseLocationNamesQuery
+class GeoLocationQuery extends BaseGeoLocationQuery
 {
 
 }

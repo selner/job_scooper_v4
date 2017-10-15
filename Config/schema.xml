@@ -64,18 +64,14 @@
         <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true" primaryKey="true"
                 autoIncrement="true"/>
 
-
         <!--
             Alternate unique key for every job post is jobsite + jobsite post id
         -->
-        <column name="jobsite" phpName="JobSite" type="varchar" size="100" required="true"/>
-        <!--<foreign-key foreignTable="jobsite_plugin" onUpdate="none" onDelete="none">-->
-        <!--<reference local="jobsite" foreign="key"/>-->
-        <!--</foreign-key>-->
+        <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" required="true"/>
 
         <column name="jobsite_post_id" phpName="JobSitePostId" type="varchar" size="255" required="true"/>
         <unique name="index_jobsite_and_post_id/">
-            <unique-column name="jobsite"/>
+            <unique-column name="jobsite_key"/>
             <unique-column name="jobsite_post_id"/>
         </unique>
 
@@ -84,24 +80,13 @@
         -->
         <column name="title" phpName="Title" type="varchar" size="255" required="true"/>
         <column name="title_tokens" phpName="TitleTokens" type="varchar" size="255" required="false"/>
-        <column name="url" type="varchar" size="1024" required="true"/>
-        <!--<unique name="index_jobsite_url/">-->
-        <!--<unique-column name="url"/>-->
-        <!--</unique>-->
-        <column name="company" type="varchar" size="100" required="false"/>
-        <!--        <column name="company_id" phpName="CompanyId" type="varchar" size="255" required="false"/> -->
-        <column name="location_from_source" phpName="LocationFromSource" type="varchar" size="255" required="false"/>
-        <column name="location_display_value" phpName="LocationDisplayValue" type="varchar" size="255"
-                required="false"/>
-        <column name="location_id" type="integer" required="false"/>
-        <foreign-key foreignTable="location" onUpdate="none" onDelete="none">
-            <reference local="location_id" foreign="location_id"/>
-        </foreign-key>
-
-
+        <column name="url" phpName="Url" type="varchar" size="1024" required="true"/>
         <column name="employment_type" phpName="EmploymentType" type="varchar" size="100" required="false"/>
-        <column name="department" type="varchar" size="255" required="false"/>
-        <column name="category" type="varchar" size="100" required="false"/>
+        <column name="pay_range" phpName="PayRange" type="varchar" size="100" required="false"/>
+        <column name="company" phpName="Company" type="varchar" size="100" required="false"/>
+        <column name="location" phpName="Location" type="varchar" size="255" required="false"/>
+        <column name="department" phpName="Department" type="varchar" size="255" required="false"/>
+        <column name="category" phpName="Category" type="varchar" size="100" required="false"/>
 
         <!--
             Date & times for various events related to this particular job posting
@@ -109,11 +94,11 @@
         <column name="last_updated_at" phpName="UpdatedAt" type="timestamp" required="true"/>
         <column name="job_posted_date" phpName="PostedAt" type="timestamp" required="false"/>
         <column name="first_seen_at" phpName="FirstSeenAt" type="timestamp" required="true"/>
+        <column name="post_removed_at" phpName="RemovedAt" type="timestamp" required="false"/>
         <behavior name="timestampable">
             <parameter name="create_column" value="first_seen_at"/>
             <parameter name="update_column" value="last_updated_at"/>
         </behavior>
-        <column name="post_removed_at" phpName="RemovedAt" type="timestamp" required="false"/>
 
         <!--
             The following columns are automatically set via code in the JobPosting class
@@ -123,6 +108,16 @@
         <column name="key_company_and_title" phpName="KeyCompanyAndTitle" type="varchar" size="255" required="true"/>
         <column name="title_linked" phpName="JobTitleLinked" type="varchar" size="1024" required="true"/>
 
+        <!--
+            GeoLocation Data for the Job Posting
+        -->
+        <column name="location_display_value" phpName="LocationDisplayValue" type="varchar" size="255"
+                required="false"/>
+        <column name="geolocation_id" phpName="GeoLocationId" type="integer" required="false"/>
+        <foreign-key foreignTable="geolocation" onUpdate="none" onDelete="none">
+            <reference local="geolocation_id" foreign="geolocation_id"/>
+        </foreign-key>
+
         <column name="duplicates_posting_id" phpName="DuplicatesJobPostingId" type="integer" required="false"/>
         <foreign-key foreignTable="jobposting" onUpdate="none" onDelete="none">
             <reference local="duplicates_posting_id" foreign="jobposting_id"/>
@@ -130,16 +125,37 @@
 
     </table>
 
-    <table name="location" phpName="Location" reloadOnUpdate="true" reloadOnInsert="true">
-        <column name="location_id" phpName="LocationId" type="integer" required="true" primaryKey="true"
+    <table name="geolocation" phpName="GeoLocation" reloadOnUpdate="true" reloadOnInsert="true">
+        <column name="geolocation_id" phpName="GeoLocationId" type="integer" required="true" primaryKey="true"
                 autoIncrement="true"/>
+        <column name="display_name" phpName="DisplayName" type="varchar" size="100" required="true" primaryString="true"/>
+        <column name="geolocation_key" phpName="GeoLocationKey" type="varchar" size="100" required="true"/>
+        <behavior name="sluggable">
+            <parameter name="slug_column" value="geolocation_key"/>
+            <parameter name="slug_pattern" value="{DisplayName}"/>
+            <parameter name="replace_pattern" value="/[^\w\/]+/u"/>
+            <parameter name="replacement" value=""/>
+            <parameter name="separator" value="-"/>
+            <parameter name="permanent" value="false"/>
+        </behavior>
+
+        <column name="place" phpName="Place" type="varchar" size="100"/>
+        <column name="county" phpName="County" type="varchar" size="100"/>
+        <column name="state" phpName="State" type="varchar" size="100"/>
+        <column name="statecode" phpName="StateCode" type="varchar" size="2"/>
+        <column name="country" phpName="Country" type="varchar" size="100"/>
+        <column name="countrycode" phpName="CountryCode" type="varchar" size="2"/>
+
+        <column name="full_osm_data" phpName="FullOsmData" type="LONGVARCHAR"/>
+        <column name="openstreetmap_id" phpName="OpenStreetMapId" type="integer"/>
+        <unique name="uniq_openstreetmap_id/">
+            <unique-column name="openstreetmap_id"/>
+        </unique>
+
         <column name="latitude" phpName="Latitude" type="float"/>
         <column name="longitude" phpName="Longitude" type="float"/>
-
-
         <behavior name="geocodable">
             <parameter name="auto_update" value="false" />
-
             <parameter name="latitude_column" value="latitude" />
             <parameter name="longitude_column" value="longitude" />
             <parameter name="type" value="DOUBLE" />
@@ -147,44 +163,9 @@
             <parameter name="scale" value="8" />
         </behavior>
 
-        <column name="full_display_name" phpName="DisplayName" type="varchar" size="100" primaryString="true"/>
-        <column name="location_key" type="varchar" size="100" required="true"/>
-        <behavior name="sluggable">
-            <parameter name="slug_column" value="location_key"/>
-            <parameter name="slug_pattern" value="{DisplayName}"/>
-            <parameter name="replace_pattern" value="/[^\w\/]+/u"/>
-            <parameter name="replacement" value=""/>
-            <parameter name="separator" value="-"/>
-            <parameter name="permanent" value="true"/>
-        </behavior>
-
-        <column name="primary_name" phpName="PrimaryName" type="varchar" size="100"/>
-        <column name="place" phpName="Place" type="varchar" size="100"/>
-        <column name="county" phpName="County" type="varchar" size="100"/>
-        <column name="state" phpName="State" type="varchar" size="100"/>
-        <column name="statecode" phpName="StateCode" type="varchar" size="2"/>
-        <column name="country" phpName="Country" type="varchar" size="100"/>
-        <column name="countrycode" phpName="CountryCode" type="varchar" size="2"/>
         <column name="alternate_names" phpName="AlternateNames" type="array"/>
-        <column name="openstreetmap_id" phpName="OpenStreetMapId" type="integer"/>
-        <unique name="uniq_openstreetmap_id/">
-            <unique-column name="openstreetmap_id"/>
-        </unique>
-        <column name="full_osm_data" phpName="FullOsmData" type="LONGVARCHAR"/>
-        <column name="extra_details_data" phpName="ExtraDetailsData" type="LONGVARCHAR"/>
 
     </table>
-
-    <table name="location_names" phpName="LocationNames">
-        <column name="location_alternate_name" phpName="LocationAlternateName" type="varchar" size="100" required="true"
-                primaryKey="true" primaryString="true"/>
-        <column name="location_id" phpName="LocationId" type="integer" required="true" primaryKey="true"/>
-        <foreign-key foreignTable="location" onUpdate="none" onDelete="none">
-            <reference local="location_id" foreign="location_id"/>
-        </foreign-key>
-        <behavior name="sluggable"/>
-    </table>
-
 
     <table name="jobsite_plugin" phpName="JobSitePlugin" reloadOnUpdate="true" reloadOnInsert="true">
         <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" primaryString="true"
@@ -241,24 +222,25 @@
         </foreign-key>
     </table>
 
-
     <table name="user_search_run" phpName="UserSearchRun" reloadOnInsert="true" reloadOnUpdate="true">
         <column name="user_search_run_id" phpName="UserSearchRunId" type="integer" required="true" autoIncrement="true"
                 primaryKey="true"/>
         <column name="search_key" phpName="SearchKey" type="varchar" size="128" required="true"/>
         <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true"/>
-        <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" required="true"/>
-        <column name="location_key" phpName="LocationKey" type="varchar" size="100" required="true"/>
+        <column name="geolocation_id" phpName="GeoLocationId" type="integer"/>
+        <foreign-key foreignTable="geolocation" onUpdate="none" onDelete="none">
+            <reference local="geolocation_id" foreign="geolocation_id"/>
+        </foreign-key>
 
-        <column name="location_id" phpName="LocationId" type="integer"/>
-        <foreign-key foreignTable="location" onUpdate="none" onDelete="none">
-            <reference local="location_id" foreign="location_id"/>
+        <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" required="true"/>
+        <foreign-key foreignTable="jobsite_plugin" onUpdate="none" onDelete="none">
+            <reference local="jobsite_key" foreign="jobsite_key"/>
         </foreign-key>
 
         <column name="user_search_run_key" type="varchar" size="100" required="true"/>
         <behavior name="sluggable">
             <parameter name="slug_column" value="user_search_run_key"/>
-            <parameter name="slug_pattern" value="{JobSiteKey}-{UserSlug}-{SearchKey}-{LocationKey}"/>
+            <parameter name="slug_pattern" value="{JobSiteKey}-{UserSlug}-{SearchKey}-{GeoLocationId}"/>
             <parameter name="replace_pattern" value="/[^\w\/]+/u"/>
             <parameter name="replacement" value=""/>
             <parameter name="separator" value="-"/>
@@ -277,9 +259,12 @@
         <foreign-key foreignTable="user">
             <reference local="user_slug" foreign="user_slug"/>
         </foreign-key>
+
+        <column name="date_created" phpName="CreatedAt" type="timestamp"/>
         <column name="date_last_run" phpName="LastRunAt" type="timestamp"/>
         <behavior name="timestampable">
-            <parameter name="create_column" value="date_last_run"/>
+            <parameter name="create_column" value="date_created"/>
+            <parameter name="update_column" value="date_last_run"/>
         </behavior>
         <column name="date_next_run" phpName="StartNextRunAfter" type="timestamp"/>
         <column name="date_last_failed" phpName="LastFailedAt" type="timestamp"/>

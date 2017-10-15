@@ -62,7 +62,7 @@
           "Type": "STATIC"
         },
         {
-          "Name": "LocationFromSource",
+          "Name": "Location",
           "Selector": "p.search-result-item-company-name a",
           "Extract": "ATTR",
           "Attribute": "collection",

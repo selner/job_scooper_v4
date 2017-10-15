@@ -146,7 +146,7 @@ class NotifierJobAlerts extends JobsMailManager
     {
         $sites = $this->_getJobSitesRunRecently();
 
-        return in_array(cleanupSlugPart($var->getJobPosting()->getJobSite()), $sites);
+        return in_array(cleanupSlugPart($var->getJobPosting()->getJobSiteKey()), $sites);
 
     }
 
@@ -422,7 +422,7 @@ class NotifierJobAlerts extends JobsMailManager
             $this->_arrJobSitesForRun = getAllJobSitesThatWereLastRun();
 
             $sites = array_map(function ($var) {
-                return $var->getJobPosting()->getJobSite();
+                return $var->getJobPosting()->getJobSiteKey();
             }, $this->arrAllUnnotifiedJobs);
             $uniqSites = array_unique($sites);
 
@@ -448,12 +448,12 @@ class NotifierJobAlerts extends JobsMailManager
 
             $arrPluginJobMatches  = array();
             if ($arrMatchedJobs != null && is_array($arrMatchedJobs) && countJobRecords($arrMatchedJobs) > 0) {
-                $arrPluginJobMatches = array_filter($arrMatchedJobs, function ($var) use ($plugin) { return (strcasecmp($var->getJobPosting()->getJobSite(), $plugin) == 0); } );
+                $arrPluginJobMatches = array_filter($arrMatchedJobs, function ($var) use ($plugin) { return (strcasecmp($var->getJobPosting()->getJobSiteKey(), $plugin) == 0); } );
             }
 
             $arrPluginExcludesJobs  = array();
             if ($arrExcludedJobs != null && is_array($arrExcludedJobs) && countJobRecords($arrExcludedJobs) > 0) {
-                $arrPluginExcludesJobs = array_filter($arrExcludedJobs, function ($var) use ($plugin) { return (strcasecmp($var->getJobPosting()->getJobSite(), $plugin) == 0); } );
+                $arrPluginExcludesJobs = array_filter($arrExcludedJobs, function ($var) use ($plugin) { return (strcasecmp($var->getJobPosting()->getJobSiteKey(), $plugin) == 0); } );
             }
 
             $arrPluginJobs = $arrPluginJobMatches + $arrPluginExcludesJobs;

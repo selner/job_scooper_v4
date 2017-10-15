@@ -27,7 +27,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "LocationFromSource",
+          "Name": "Location",
           "Selector": "div.jsr-pg",
           "Extract": "TEXT",
           "Index": 1,

@@ -46,7 +46,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "LocationFromSource",
+          "Name": "Location",
           "Selector": "span.rh-job-result-table__location",
           "Index" : 1,
           "Extract": "TEXT",

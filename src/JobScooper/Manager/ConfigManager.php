@@ -488,17 +488,14 @@ class ConfigManager
         if (!array_key_exists('search_location', $GLOBALS['USERDATA']['configuration_settings']))
             $GLOBALS['USERDATA']['configuration_settings']['search_locations'] = array();
 
-        $loclookup = findOrCreateLocationLookupFromName($location_string);
-
-
-        if(!is_null($loclookup))
+        $locmgr = new GeoLocationManager();
+        $location = $locmgr->findOrCreateGeoLocationByName($location_string);
+        if(!is_null($location))
         {
-            $loc = $loclookup->getLocation();
-            if(!is_null($loc))
-                $GLOBALS['USERDATA']['configuration_settings']['search_location'][$loc->getLocationKey()] = array(
-                    'location_raw_source_value' => $location_string,
-                    'location_name_key' => $loclookup->getSlug(),
-                    'location_name_lookup' => $loclookup);
+            $GLOBALS['USERDATA']['configuration_settings']['search_location'][$location->getGeoLocationId()] = array(
+                'location_raw_source_value' => $location_string,
+                'location_name_key' => $location->getSlug(),
+                'location_id' => $location->getGeoLocationId());
         }
 
     }
@@ -574,7 +571,7 @@ class ConfigManager
                             $arrKeys = array_keys($keywordSet['keywords_array']);
                             foreach ($arrKeys as $kwdkey) {
                                 $thisSearchKey = $searchKey . "-" . strScrub($kwdkey, FOR_LOOKUP_VALUE_MATCHING);
-                                $thisSearch = findOrCreateUserSearchRun($thisSearchKey, $newSearch->getJobSiteKey(), $newSearch->getLocationKey(), $newSearch);
+                                $thisSearch = findOrCreateUserSearchRun($thisSearchKey, $newSearch->getJobSiteKey(), $newSearch->getGeoLocationId(), $newSearch);
 
                                 $thisSearch->setSearchParameter('keywords_array', array($keywordSet['keywords_array'][$kwdkey]));
                                 $thisSearch->setSearchParameter('keywords_array_tokenized', $keywordSet['keywords_array_tokenized'][$kwdkey]);
@@ -614,9 +611,11 @@ class ConfigManager
                             continue;
                         }
 
+                        $locmgr = new GeoLocationManager();
                         foreach ( $arrLocations as $searchlocation)
                         {
-                            $loc = $searchlocation['location_name_lookup']->getLocation();
+
+                            $loc = $locmgr->getLocationById($searchlocation['location_id']);
 
                             if (!is_null($loc->getCountryCode() ))
                                 $GLOBALS['USERDATA']['configuration_settings']['country_codes'][$loc->getCountryCode()] = $loc->getCountryCode();
@@ -649,7 +648,7 @@ class ConfigManager
     }
     private function _getSearchForSpecificLocationName_($search, $arrSearchLocation)
     {
-        $locNameLookup = $arrSearchLocation['location_name_lookup'];
+        $locNameLookup = $arrSearchLocation['location_id'];
         if ($search->isSearchIncludedInRun() !== true) {
             // this site was excluded for this run, so continue.
             return $search;
@@ -665,14 +664,13 @@ class ConfigManager
 
         $plugin = getPluginObjectForJobSite($search->getJobSiteKey());
 
-        $locTypeNeeded = $plugin->getLocationSettingType();
+        $locmgr = new GeoLocationManager();
+        $locTypeNeeded = $plugin->getGeoLocationSettingType();
         if (!is_null($locTypeNeeded)) {
 
             $newSearch = findOrCreateUserSearchRun($search->getSearchKey(), $search->getJobSiteKey(), $arrSearchLocation['location_name_key'], $search);
 
-            $location = $locNameLookup->getLocation();
-            $newSearch->setLocation($location);
-
+            $location = $newSearch->getGeoLocation();
             $formatted_search_term = $location->formatLocationByLocationType($locTypeNeeded);
             $newSearch->setSearchParameter('location_search_value', $formatted_search_term);
             if (is_null($formatted_search_term) || strlen($formatted_search_term) == 0)

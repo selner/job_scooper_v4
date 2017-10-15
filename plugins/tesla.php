@@ -36,7 +36,7 @@ class PluginTesla extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         'Company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
         'JobSitePostId' => array('selector' => 'th.listing-title a', 'return_attribute' => 'href', 'return_value_regex' =>  '/.*?-(\d+)/i'),
         'Department' => array('selector' => 'td.listing-department'),
-        'LocationFromSource' => array('selector' => 'td.listing-location')
+        'Location' => array('selector' => 'td.listing-location')
     );
 
 }

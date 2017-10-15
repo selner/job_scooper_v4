@@ -2,8 +2,8 @@
 
 namespace JobScooper\DataAccess\Map;
 
-use JobScooper\DataAccess\Location;
-use JobScooper\DataAccess\LocationQuery;
+use JobScooper\DataAccess\GeoLocation;
+use JobScooper\DataAccess\GeoLocationQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\InstancePoolTrait;
@@ -16,7 +16,7 @@ use Propel\Runtime\Map\TableMapTrait;
 
 
 /**
- * This class defines the structure of the 'location' table.
+ * This class defines the structure of the 'geolocation' table.
  *
  *
  *
@@ -26,7 +26,7 @@ use Propel\Runtime\Map\TableMapTrait;
  * (i.e. if it's a text column type).
  *
  */
-class LocationTableMap extends TableMap
+class GeoLocationTableMap extends TableMap
 {
     use InstancePoolTrait;
     use TableMapTrait;
@@ -34,7 +34,7 @@ class LocationTableMap extends TableMap
     /**
      * The (dot-path) name of this class
      */
-    const CLASS_NAME = 'JobScooper.DataAccess.Map.LocationTableMap';
+    const CLASS_NAME = 'JobScooper.DataAccess.Map.GeoLocationTableMap';
 
     /**
      * The default database name for this class
@@ -44,22 +44,22 @@ class LocationTableMap extends TableMap
     /**
      * The table name for this class
      */
-    const TABLE_NAME = 'location';
+    const TABLE_NAME = 'geolocation';
 
     /**
      * The related Propel class for this table
      */
-    const OM_CLASS = '\\JobScooper\\DataAccess\\Location';
+    const OM_CLASS = '\\JobScooper\\DataAccess\\GeoLocation';
 
     /**
      * A class that can be returned by this tableMap
      */
-    const CLASS_DEFAULT = 'JobScooper.DataAccess.Location';
+    const CLASS_DEFAULT = 'JobScooper.DataAccess.GeoLocation';
 
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 16;
+    const NUM_COLUMNS = 14;
 
     /**
      * The number of lazy-loaded columns
@@ -69,87 +69,77 @@ class LocationTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 16;
+    const NUM_HYDRATE_COLUMNS = 14;
 
     /**
-     * the column name for the location_id field
+     * the column name for the geolocation_id field
      */
-    const COL_LOCATION_ID = 'location.location_id';
+    const COL_GEOLOCATION_ID = 'geolocation.geolocation_id';
 
     /**
-     * the column name for the latitude field
+     * the column name for the display_name field
      */
-    const COL_LATITUDE = 'location.latitude';
+    const COL_DISPLAY_NAME = 'geolocation.display_name';
 
     /**
-     * the column name for the longitude field
+     * the column name for the geolocation_key field
      */
-    const COL_LONGITUDE = 'location.longitude';
-
-    /**
-     * the column name for the full_display_name field
-     */
-    const COL_FULL_DISPLAY_NAME = 'location.full_display_name';
-
-    /**
-     * the column name for the location_key field
-     */
-    const COL_LOCATION_KEY = 'location.location_key';
-
-    /**
-     * the column name for the primary_name field
-     */
-    const COL_PRIMARY_NAME = 'location.primary_name';
+    const COL_GEOLOCATION_KEY = 'geolocation.geolocation_key';
 
     /**
      * the column name for the place field
      */
-    const COL_PLACE = 'location.place';
+    const COL_PLACE = 'geolocation.place';
 
     /**
      * the column name for the county field
      */
-    const COL_COUNTY = 'location.county';
+    const COL_COUNTY = 'geolocation.county';
 
     /**
      * the column name for the state field
      */
-    const COL_STATE = 'location.state';
+    const COL_STATE = 'geolocation.state';
 
     /**
      * the column name for the statecode field
      */
-    const COL_STATECODE = 'location.statecode';
+    const COL_STATECODE = 'geolocation.statecode';
 
     /**
      * the column name for the country field
      */
-    const COL_COUNTRY = 'location.country';
+    const COL_COUNTRY = 'geolocation.country';
 
     /**
      * the column name for the countrycode field
      */
-    const COL_COUNTRYCODE = 'location.countrycode';
-
-    /**
-     * the column name for the alternate_names field
-     */
-    const COL_ALTERNATE_NAMES = 'location.alternate_names';
-
-    /**
-     * the column name for the openstreetmap_id field
-     */
-    const COL_OPENSTREETMAP_ID = 'location.openstreetmap_id';
+    const COL_COUNTRYCODE = 'geolocation.countrycode';
 
     /**
      * the column name for the full_osm_data field
      */
-    const COL_FULL_OSM_DATA = 'location.full_osm_data';
+    const COL_FULL_OSM_DATA = 'geolocation.full_osm_data';
 
     /**
-     * the column name for the extra_details_data field
+     * the column name for the openstreetmap_id field
      */
-    const COL_EXTRA_DETAILS_DATA = 'location.extra_details_data';
+    const COL_OPENSTREETMAP_ID = 'geolocation.openstreetmap_id';
+
+    /**
+     * the column name for the latitude field
+     */
+    const COL_LATITUDE = 'geolocation.latitude';
+
+    /**
+     * the column name for the longitude field
+     */
+    const COL_LONGITUDE = 'geolocation.longitude';
+
+    /**
+     * the column name for the alternate_names field
+     */
+    const COL_ALTERNATE_NAMES = 'geolocation.alternate_names';
 
     /**
      * The default string format for model objects of the related table
@@ -180,11 +170,11 @@ class LocationTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('LocationId', 'Latitude', 'Longitude', 'DisplayName', 'LocationKey', 'PrimaryName', 'Place', 'County', 'State', 'StateCode', 'Country', 'CountryCode', 'AlternateNames', 'OpenStreetMapId', 'FullOsmData', 'ExtraDetailsData', ),
-        self::TYPE_CAMELNAME     => array('locationId', 'latitude', 'longitude', 'displayName', 'locationKey', 'primaryName', 'place', 'county', 'state', 'stateCode', 'country', 'countryCode', 'alternateNames', 'openStreetMapId', 'fullOsmData', 'extraDetailsData', ),
-        self::TYPE_COLNAME       => array(LocationTableMap::COL_LOCATION_ID, LocationTableMap::COL_LATITUDE, LocationTableMap::COL_LONGITUDE, LocationTableMap::COL_FULL_DISPLAY_NAME, LocationTableMap::COL_LOCATION_KEY, LocationTableMap::COL_PRIMARY_NAME, LocationTableMap::COL_PLACE, LocationTableMap::COL_COUNTY, LocationTableMap::COL_STATE, LocationTableMap::COL_STATECODE, LocationTableMap::COL_COUNTRY, LocationTableMap::COL_COUNTRYCODE, LocationTableMap::COL_ALTERNATE_NAMES, LocationTableMap::COL_OPENSTREETMAP_ID, LocationTableMap::COL_FULL_OSM_DATA, LocationTableMap::COL_EXTRA_DETAILS_DATA, ),
-        self::TYPE_FIELDNAME     => array('location_id', 'latitude', 'longitude', 'full_display_name', 'location_key', 'primary_name', 'place', 'county', 'state', 'statecode', 'country', 'countrycode', 'alternate_names', 'openstreetmap_id', 'full_osm_data', 'extra_details_data', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, )
+        self::TYPE_PHPNAME       => array('GeoLocationId', 'DisplayName', 'GeoLocationKey', 'Place', 'County', 'State', 'StateCode', 'Country', 'CountryCode', 'FullOsmData', 'OpenStreetMapId', 'Latitude', 'Longitude', 'AlternateNames', ),
+        self::TYPE_CAMELNAME     => array('geoLocationId', 'displayName', 'geoLocationKey', 'place', 'county', 'state', 'stateCode', 'country', 'countryCode', 'fullOsmData', 'openStreetMapId', 'latitude', 'longitude', 'alternateNames', ),
+        self::TYPE_COLNAME       => array(GeoLocationTableMap::COL_GEOLOCATION_ID, GeoLocationTableMap::COL_DISPLAY_NAME, GeoLocationTableMap::COL_GEOLOCATION_KEY, GeoLocationTableMap::COL_PLACE, GeoLocationTableMap::COL_COUNTY, GeoLocationTableMap::COL_STATE, GeoLocationTableMap::COL_STATECODE, GeoLocationTableMap::COL_COUNTRY, GeoLocationTableMap::COL_COUNTRYCODE, GeoLocationTableMap::COL_FULL_OSM_DATA, GeoLocationTableMap::COL_OPENSTREETMAP_ID, GeoLocationTableMap::COL_LATITUDE, GeoLocationTableMap::COL_LONGITUDE, GeoLocationTableMap::COL_ALTERNATE_NAMES, ),
+        self::TYPE_FIELDNAME     => array('geolocation_id', 'display_name', 'geolocation_key', 'place', 'county', 'state', 'statecode', 'country', 'countrycode', 'full_osm_data', 'openstreetmap_id', 'latitude', 'longitude', 'alternate_names', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, )
     );
 
     /**
@@ -194,11 +184,11 @@ class LocationTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('LocationId' => 0, 'Latitude' => 1, 'Longitude' => 2, 'DisplayName' => 3, 'LocationKey' => 4, 'PrimaryName' => 5, 'Place' => 6, 'County' => 7, 'State' => 8, 'StateCode' => 9, 'Country' => 10, 'CountryCode' => 11, 'AlternateNames' => 12, 'OpenStreetMapId' => 13, 'FullOsmData' => 14, 'ExtraDetailsData' => 15, ),
-        self::TYPE_CAMELNAME     => array('locationId' => 0, 'latitude' => 1, 'longitude' => 2, 'displayName' => 3, 'locationKey' => 4, 'primaryName' => 5, 'place' => 6, 'county' => 7, 'state' => 8, 'stateCode' => 9, 'country' => 10, 'countryCode' => 11, 'alternateNames' => 12, 'openStreetMapId' => 13, 'fullOsmData' => 14, 'extraDetailsData' => 15, ),
-        self::TYPE_COLNAME       => array(LocationTableMap::COL_LOCATION_ID => 0, LocationTableMap::COL_LATITUDE => 1, LocationTableMap::COL_LONGITUDE => 2, LocationTableMap::COL_FULL_DISPLAY_NAME => 3, LocationTableMap::COL_LOCATION_KEY => 4, LocationTableMap::COL_PRIMARY_NAME => 5, LocationTableMap::COL_PLACE => 6, LocationTableMap::COL_COUNTY => 7, LocationTableMap::COL_STATE => 8, LocationTableMap::COL_STATECODE => 9, LocationTableMap::COL_COUNTRY => 10, LocationTableMap::COL_COUNTRYCODE => 11, LocationTableMap::COL_ALTERNATE_NAMES => 12, LocationTableMap::COL_OPENSTREETMAP_ID => 13, LocationTableMap::COL_FULL_OSM_DATA => 14, LocationTableMap::COL_EXTRA_DETAILS_DATA => 15, ),
-        self::TYPE_FIELDNAME     => array('location_id' => 0, 'latitude' => 1, 'longitude' => 2, 'full_display_name' => 3, 'location_key' => 4, 'primary_name' => 5, 'place' => 6, 'county' => 7, 'state' => 8, 'statecode' => 9, 'country' => 10, 'countrycode' => 11, 'alternate_names' => 12, 'openstreetmap_id' => 13, 'full_osm_data' => 14, 'extra_details_data' => 15, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, )
+        self::TYPE_PHPNAME       => array('GeoLocationId' => 0, 'DisplayName' => 1, 'GeoLocationKey' => 2, 'Place' => 3, 'County' => 4, 'State' => 5, 'StateCode' => 6, 'Country' => 7, 'CountryCode' => 8, 'FullOsmData' => 9, 'OpenStreetMapId' => 10, 'Latitude' => 11, 'Longitude' => 12, 'AlternateNames' => 13, ),
+        self::TYPE_CAMELNAME     => array('geoLocationId' => 0, 'displayName' => 1, 'geoLocationKey' => 2, 'place' => 3, 'county' => 4, 'state' => 5, 'stateCode' => 6, 'country' => 7, 'countryCode' => 8, 'fullOsmData' => 9, 'openStreetMapId' => 10, 'latitude' => 11, 'longitude' => 12, 'alternateNames' => 13, ),
+        self::TYPE_COLNAME       => array(GeoLocationTableMap::COL_GEOLOCATION_ID => 0, GeoLocationTableMap::COL_DISPLAY_NAME => 1, GeoLocationTableMap::COL_GEOLOCATION_KEY => 2, GeoLocationTableMap::COL_PLACE => 3, GeoLocationTableMap::COL_COUNTY => 4, GeoLocationTableMap::COL_STATE => 5, GeoLocationTableMap::COL_STATECODE => 6, GeoLocationTableMap::COL_COUNTRY => 7, GeoLocationTableMap::COL_COUNTRYCODE => 8, GeoLocationTableMap::COL_FULL_OSM_DATA => 9, GeoLocationTableMap::COL_OPENSTREETMAP_ID => 10, GeoLocationTableMap::COL_LATITUDE => 11, GeoLocationTableMap::COL_LONGITUDE => 12, GeoLocationTableMap::COL_ALTERNATE_NAMES => 13, ),
+        self::TYPE_FIELDNAME     => array('geolocation_id' => 0, 'display_name' => 1, 'geolocation_key' => 2, 'place' => 3, 'county' => 4, 'state' => 5, 'statecode' => 6, 'country' => 7, 'countrycode' => 8, 'full_osm_data' => 9, 'openstreetmap_id' => 10, 'latitude' => 11, 'longitude' => 12, 'alternate_names' => 13, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, )
     );
 
     /**
@@ -211,30 +201,28 @@ class LocationTableMap extends TableMap
     public function initialize()
     {
         // attributes
-        $this->setName('location');
-        $this->setPhpName('Location');
+        $this->setName('geolocation');
+        $this->setPhpName('GeoLocation');
         $this->setIdentifierQuoting(false);
-        $this->setClassName('\\JobScooper\\DataAccess\\Location');
+        $this->setClassName('\\JobScooper\\DataAccess\\GeoLocation');
         $this->setPackage('JobScooper.DataAccess');
         $this->setUseIdGenerator(true);
         // columns
-        $this->addPrimaryKey('location_id', 'LocationId', 'INTEGER', true, null, null);
-        $this->addColumn('latitude', 'Latitude', 'FLOAT', false, null, null);
-        $this->addColumn('longitude', 'Longitude', 'FLOAT', false, null, null);
-        $this->addColumn('full_display_name', 'DisplayName', 'VARCHAR', false, 100, null);
-        $this->getColumn('full_display_name')->setPrimaryString(true);
-        $this->addColumn('location_key', 'LocationKey', 'VARCHAR', true, 100, null);
-        $this->addColumn('primary_name', 'PrimaryName', 'VARCHAR', false, 100, null);
+        $this->addPrimaryKey('geolocation_id', 'GeoLocationId', 'INTEGER', true, null, null);
+        $this->addColumn('display_name', 'DisplayName', 'VARCHAR', true, 100, null);
+        $this->getColumn('display_name')->setPrimaryString(true);
+        $this->addColumn('geolocation_key', 'GeoLocationKey', 'VARCHAR', true, 100, null);
         $this->addColumn('place', 'Place', 'VARCHAR', false, 100, null);
         $this->addColumn('county', 'County', 'VARCHAR', false, 100, null);
         $this->addColumn('state', 'State', 'VARCHAR', false, 100, null);
         $this->addColumn('statecode', 'StateCode', 'VARCHAR', false, 2, null);
         $this->addColumn('country', 'Country', 'VARCHAR', false, 100, null);
         $this->addColumn('countrycode', 'CountryCode', 'VARCHAR', false, 2, null);
-        $this->addColumn('alternate_names', 'AlternateNames', 'ARRAY', false, null, null);
-        $this->addColumn('openstreetmap_id', 'OpenStreetMapId', 'INTEGER', false, null, null);
         $this->addColumn('full_osm_data', 'FullOsmData', 'LONGVARCHAR', false, null, null);
-        $this->addColumn('extra_details_data', 'ExtraDetailsData', 'LONGVARCHAR', false, null, null);
+        $this->addColumn('openstreetmap_id', 'OpenStreetMapId', 'INTEGER', false, null, null);
+        $this->addColumn('latitude', 'Latitude', 'FLOAT', false, null, null);
+        $this->addColumn('longitude', 'Longitude', 'FLOAT', false, null, null);
+        $this->addColumn('alternate_names', 'AlternateNames', 'ARRAY', false, null, null);
     } // initialize()
 
     /**
@@ -245,22 +233,15 @@ class LocationTableMap extends TableMap
         $this->addRelation('JobPosting', '\\JobScooper\\DataAccess\\JobPosting', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
-    0 => ':location_id',
-    1 => ':location_id',
+    0 => ':geolocation_id',
+    1 => ':geolocation_id',
   ),
 ), null, null, 'JobPostings', false);
-        $this->addRelation('LocationNames', '\\JobScooper\\DataAccess\\LocationNames', RelationMap::ONE_TO_MANY, array (
-  0 =>
-  array (
-    0 => ':location_id',
-    1 => ':location_id',
-  ),
-), null, null, 'LocationNamess', false);
         $this->addRelation('UserSearchRun', '\\JobScooper\\DataAccess\\UserSearchRun', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
-    0 => ':location_id',
-    1 => ':location_id',
+    0 => ':geolocation_id',
+    1 => ':geolocation_id',
   ),
 ), null, null, 'UserSearchRuns', false);
     } // buildRelations()
@@ -274,8 +255,8 @@ class LocationTableMap extends TableMap
     public function getBehaviors()
     {
         return array(
+            'sluggable' => array('slug_column' => 'geolocation_key', 'slug_pattern' => '{DisplayName}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '-', 'permanent' => 'false', 'scope_column' => '', 'unique_constraint' => 'true', ),
             'geocodable' => array('auto_update' => 'false', 'latitude_column' => 'latitude', 'longitude_column' => 'longitude', 'type' => 'DOUBLE', 'size' => '11', 'scale' => '8', 'geocode_ip' => 'false', 'ip_column' => 'ip_address', 'geocode_address' => 'false', 'address_columns' => 'street,locality,region,postal_code,country', 'geocoder_provider' => '\Geocoder\Provider\OpenStreetMapProvider', 'geocoder_adapter' => '\Geocoder\HttpAdapter\CurlHttpAdapter', 'geocoder_api_key' => 'false', 'geocoder_api_key_provider' => 'false', ),
-            'sluggable' => array('slug_column' => 'location_key', 'slug_pattern' => '{DisplayName}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '-', 'permanent' => 'true', 'scope_column' => '', 'unique_constraint' => 'true', ),
         );
     } // getBehaviors()
 
@@ -295,11 +276,11 @@ class LocationTableMap extends TableMap
     public static function getPrimaryKeyHashFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
         // If the PK cannot be derived from the row, return NULL.
-        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
+        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
             return null;
         }
 
-        return null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)];
+        return null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)];
     }
 
     /**
@@ -319,7 +300,7 @@ class LocationTableMap extends TableMap
         return (int) $row[
             $indexType == TableMap::TYPE_NUM
                 ? 0 + $offset
-                : self::translateFieldName('LocationId', TableMap::TYPE_PHPNAME, $indexType)
+                : self::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)
         ];
     }
 
@@ -336,7 +317,7 @@ class LocationTableMap extends TableMap
      */
     public static function getOMClass($withPrefix = true)
     {
-        return $withPrefix ? LocationTableMap::CLASS_DEFAULT : LocationTableMap::OM_CLASS;
+        return $withPrefix ? GeoLocationTableMap::CLASS_DEFAULT : GeoLocationTableMap::OM_CLASS;
     }
 
     /**
@@ -350,22 +331,22 @@ class LocationTableMap extends TableMap
      *
      * @throws PropelException Any exceptions caught during processing will be
      *                         rethrown wrapped into a PropelException.
-     * @return array           (Location object, last column rank)
+     * @return array           (GeoLocation object, last column rank)
      */
     public static function populateObject($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-        $key = LocationTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
-        if (null !== ($obj = LocationTableMap::getInstanceFromPool($key))) {
+        $key = GeoLocationTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
+        if (null !== ($obj = GeoLocationTableMap::getInstanceFromPool($key))) {
             // We no longer rehydrate the object, since this can cause data loss.
             // See http://www.propelorm.org/ticket/509
             // $obj->hydrate($row, $offset, true); // rehydrate
-            $col = $offset + LocationTableMap::NUM_HYDRATE_COLUMNS;
+            $col = $offset + GeoLocationTableMap::NUM_HYDRATE_COLUMNS;
         } else {
-            $cls = LocationTableMap::OM_CLASS;
-            /** @var Location $obj */
+            $cls = GeoLocationTableMap::OM_CLASS;
+            /** @var GeoLocation $obj */
             $obj = new $cls();
             $col = $obj->hydrate($row, $offset, false, $indexType);
-            LocationTableMap::addInstanceToPool($obj, $key);
+            GeoLocationTableMap::addInstanceToPool($obj, $key);
         }
 
         return array($obj, $col);
@@ -388,18 +369,18 @@ class LocationTableMap extends TableMap
         $cls = static::getOMClass(false);
         // populate the object(s)
         while ($row = $dataFetcher->fetch()) {
-            $key = LocationTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
-            if (null !== ($obj = LocationTableMap::getInstanceFromPool($key))) {
+            $key = GeoLocationTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
+            if (null !== ($obj = GeoLocationTableMap::getInstanceFromPool($key))) {
                 // We no longer rehydrate the object, since this can cause data loss.
                 // See http://www.propelorm.org/ticket/509
                 // $obj->hydrate($row, 0, true); // rehydrate
                 $results[] = $obj;
             } else {
-                /** @var Location $obj */
+                /** @var GeoLocation $obj */
                 $obj = new $cls();
                 $obj->hydrate($row);
                 $results[] = $obj;
-                LocationTableMap::addInstanceToPool($obj, $key);
+                GeoLocationTableMap::addInstanceToPool($obj, $key);
             } // if key exists
         }
 
@@ -420,39 +401,35 @@ class LocationTableMap extends TableMap
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
-            $criteria->addSelectColumn(LocationTableMap::COL_LOCATION_ID);
-            $criteria->addSelectColumn(LocationTableMap::COL_LATITUDE);
-            $criteria->addSelectColumn(LocationTableMap::COL_LONGITUDE);
-            $criteria->addSelectColumn(LocationTableMap::COL_FULL_DISPLAY_NAME);
-            $criteria->addSelectColumn(LocationTableMap::COL_LOCATION_KEY);
-            $criteria->addSelectColumn(LocationTableMap::COL_PRIMARY_NAME);
-            $criteria->addSelectColumn(LocationTableMap::COL_PLACE);
-            $criteria->addSelectColumn(LocationTableMap::COL_COUNTY);
-            $criteria->addSelectColumn(LocationTableMap::COL_STATE);
-            $criteria->addSelectColumn(LocationTableMap::COL_STATECODE);
-            $criteria->addSelectColumn(LocationTableMap::COL_COUNTRY);
-            $criteria->addSelectColumn(LocationTableMap::COL_COUNTRYCODE);
-            $criteria->addSelectColumn(LocationTableMap::COL_ALTERNATE_NAMES);
-            $criteria->addSelectColumn(LocationTableMap::COL_OPENSTREETMAP_ID);
-            $criteria->addSelectColumn(LocationTableMap::COL_FULL_OSM_DATA);
-            $criteria->addSelectColumn(LocationTableMap::COL_EXTRA_DETAILS_DATA);
+            $criteria->addSelectColumn(GeoLocationTableMap::COL_GEOLOCATION_ID);
+            $criteria->addSelectColumn(GeoLocationTableMap::COL_DISPLAY_NAME);
+            $criteria->addSelectColumn(GeoLocationTableMap::COL_GEOLOCATION_KEY);
+            $criteria->addSelectColumn(GeoLocationTableMap::COL_PLACE);
+            $criteria->addSelectColumn(GeoLocationTableMap::COL_COUNTY);
+            $criteria->addSelectColumn(GeoLocationTableMap::COL_STATE);
+            $criteria->addSelectColumn(GeoLocationTableMap::COL_STATECODE);
+            $criteria->addSelectColumn(GeoLocationTableMap::COL_COUNTRY);
+            $criteria->addSelectColumn(GeoLocationTableMap::COL_COUNTRYCODE);
+            $criteria->addSelectColumn(GeoLocationTableMap::COL_FULL_OSM_DATA);
+            $criteria->addSelectColumn(GeoLocationTableMap::COL_OPENSTREETMAP_ID);
+            $criteria->addSelectColumn(GeoLocationTableMap::COL_LATITUDE);
+            $criteria->addSelectColumn(GeoLocationTableMap::COL_LONGITUDE);
+            $criteria->addSelectColumn(GeoLocationTableMap::COL_ALTERNATE_NAMES);
         } else {
-            $criteria->addSelectColumn($alias . '.location_id');
-            $criteria->addSelectColumn($alias . '.latitude');
-            $criteria->addSelectColumn($alias . '.longitude');
-            $criteria->addSelectColumn($alias . '.full_display_name');
-            $criteria->addSelectColumn($alias . '.location_key');
-            $criteria->addSelectColumn($alias . '.primary_name');
+            $criteria->addSelectColumn($alias . '.geolocation_id');
+            $criteria->addSelectColumn($alias . '.display_name');
+            $criteria->addSelectColumn($alias . '.geolocation_key');
             $criteria->addSelectColumn($alias . '.place');
             $criteria->addSelectColumn($alias . '.county');
             $criteria->addSelectColumn($alias . '.state');
             $criteria->addSelectColumn($alias . '.statecode');
             $criteria->addSelectColumn($alias . '.country');
             $criteria->addSelectColumn($alias . '.countrycode');
-            $criteria->addSelectColumn($alias . '.alternate_names');
-            $criteria->addSelectColumn($alias . '.openstreetmap_id');
             $criteria->addSelectColumn($alias . '.full_osm_data');
-            $criteria->addSelectColumn($alias . '.extra_details_data');
+            $criteria->addSelectColumn($alias . '.openstreetmap_id');
+            $criteria->addSelectColumn($alias . '.latitude');
+            $criteria->addSelectColumn($alias . '.longitude');
+            $criteria->addSelectColumn($alias . '.alternate_names');
         }
     }
 
@@ -465,7 +442,7 @@ class LocationTableMap extends TableMap
      */
     public static function getTableMap()
     {
-        return Propel::getServiceContainer()->getDatabaseMap(LocationTableMap::DATABASE_NAME)->getTable(LocationTableMap::TABLE_NAME);
+        return Propel::getServiceContainer()->getDatabaseMap(GeoLocationTableMap::DATABASE_NAME)->getTable(GeoLocationTableMap::TABLE_NAME);
     }
 
     /**
@@ -473,16 +450,16 @@ class LocationTableMap extends TableMap
      */
     public static function buildTableMap()
     {
-        $dbMap = Propel::getServiceContainer()->getDatabaseMap(LocationTableMap::DATABASE_NAME);
-        if (!$dbMap->hasTable(LocationTableMap::TABLE_NAME)) {
-            $dbMap->addTableObject(new LocationTableMap());
+        $dbMap = Propel::getServiceContainer()->getDatabaseMap(GeoLocationTableMap::DATABASE_NAME);
+        if (!$dbMap->hasTable(GeoLocationTableMap::TABLE_NAME)) {
+            $dbMap->addTableObject(new GeoLocationTableMap());
         }
     }
 
     /**
-     * Performs a DELETE on the database, given a Location or Criteria object OR a primary key value.
+     * Performs a DELETE on the database, given a GeoLocation or Criteria object OR a primary key value.
      *
-     * @param mixed               $values Criteria or Location object or primary key or array of primary keys
+     * @param mixed               $values Criteria or GeoLocation object or primary key or array of primary keys
      *              which is used to create the DELETE statement
      * @param  ConnectionInterface $con the connection to use
      * @return int             The number of affected rows (if supported by underlying database driver).  This includes CASCADE-related rows
@@ -493,27 +470,27 @@ class LocationTableMap extends TableMap
      public static function doDelete($values, ConnectionInterface $con = null)
      {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(LocationTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(GeoLocationTableMap::DATABASE_NAME);
         }
 
         if ($values instanceof Criteria) {
             // rename for clarity
             $criteria = $values;
-        } elseif ($values instanceof \JobScooper\DataAccess\Location) { // it's a model object
+        } elseif ($values instanceof \JobScooper\DataAccess\GeoLocation) { // it's a model object
             // create criteria based on pk values
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
-            $criteria = new Criteria(LocationTableMap::DATABASE_NAME);
-            $criteria->add(LocationTableMap::COL_LOCATION_ID, (array) $values, Criteria::IN);
+            $criteria = new Criteria(GeoLocationTableMap::DATABASE_NAME);
+            $criteria->add(GeoLocationTableMap::COL_GEOLOCATION_ID, (array) $values, Criteria::IN);
         }
 
-        $query = LocationQuery::create()->mergeWith($criteria);
+        $query = GeoLocationQuery::create()->mergeWith($criteria);
 
         if ($values instanceof Criteria) {
-            LocationTableMap::clearInstancePool();
+            GeoLocationTableMap::clearInstancePool();
         } elseif (!is_object($values)) { // it's a primary key, or an array of pks
             foreach ((array) $values as $singleval) {
-                LocationTableMap::removeInstanceFromPool($singleval);
+                GeoLocationTableMap::removeInstanceFromPool($singleval);
             }
         }
 
@@ -521,20 +498,20 @@ class LocationTableMap extends TableMap
     }
 
     /**
-     * Deletes all rows from the location table.
+     * Deletes all rows from the geolocation table.
      *
      * @param ConnectionInterface $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).
      */
     public static function doDeleteAll(ConnectionInterface $con = null)
     {
-        return LocationQuery::create()->doDeleteAll($con);
+        return GeoLocationQuery::create()->doDeleteAll($con);
     }
 
     /**
-     * Performs an INSERT on the database, given a Location or Criteria object.
+     * Performs an INSERT on the database, given a GeoLocation or Criteria object.
      *
-     * @param mixed               $criteria Criteria or Location object containing data that is used to create the INSERT statement.
+     * @param mixed               $criteria Criteria or GeoLocation object containing data that is used to create the INSERT statement.
      * @param ConnectionInterface $con the ConnectionInterface connection to use
      * @return mixed           The new primary key.
      * @throws PropelException Any exceptions caught during processing will be
@@ -543,22 +520,22 @@ class LocationTableMap extends TableMap
     public static function doInsert($criteria, ConnectionInterface $con = null)
     {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(LocationTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(GeoLocationTableMap::DATABASE_NAME);
         }
 
         if ($criteria instanceof Criteria) {
             $criteria = clone $criteria; // rename for clarity
         } else {
-            $criteria = $criteria->buildCriteria(); // build Criteria from Location object
+            $criteria = $criteria->buildCriteria(); // build Criteria from GeoLocation object
         }
 
-        if ($criteria->containsKey(LocationTableMap::COL_LOCATION_ID) && $criteria->keyContainsValue(LocationTableMap::COL_LOCATION_ID) ) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key ('.LocationTableMap::COL_LOCATION_ID.')');
+        if ($criteria->containsKey(GeoLocationTableMap::COL_GEOLOCATION_ID) && $criteria->keyContainsValue(GeoLocationTableMap::COL_GEOLOCATION_ID) ) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key ('.GeoLocationTableMap::COL_GEOLOCATION_ID.')');
         }
 
 
         // Set the correct dbName
-        $query = LocationQuery::create()->mergeWith($criteria);
+        $query = GeoLocationQuery::create()->mergeWith($criteria);
 
         // use transaction because $criteria could contain info
         // for more than one table (I guess, conceivably)
@@ -567,7 +544,7 @@ class LocationTableMap extends TableMap
         });
     }
 
-} // LocationTableMap
+} // GeoLocationTableMap
 // This is the static code needed to register the TableMap for this table with the main Propel class.
 //
-LocationTableMap::buildTableMap();
+GeoLocationTableMap::buildTableMap();

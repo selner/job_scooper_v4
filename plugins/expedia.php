@@ -85,7 +85,7 @@ class PluginExpedia extends \JobScooper\Plugins\lib\AjaxHtmlPlugin
             $item['JobSitePostId'] = str_replace(array("(", ")"), "", $node->find("h3 small")[0]->plaintext);
 
             $item['Url'] = $this->siteBaseURL . $node->find("a")[0]->href;
-            $item['LocationFromSource'] = preg_replace("/(\s{2,})/", " ", $node->find("p[class='search-result-item-company-name']")[0]->plaintext, -1);
+            $item['Location'] = preg_replace("/(\s{2,})/", " ", $node->find("p[class='search-result-item-company-name']")[0]->plaintext, -1);
 //            $item['brief'] = $node->find("p[class='search-result-item-description']")[0]->plaintext;
 //           $item['brief'] = str_ireplace(array("Position Description ", "position overview", "PositionSummary"), "", $item['brief']);
 

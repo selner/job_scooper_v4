@@ -74,7 +74,7 @@ class PluginGoogle extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 
             $subNode = $node->find("span[class='location secondary-text']");
             if(isset($subNode))
-                $item['LocationFromSource'] = $subNode[0]->attr['Title'];
+                $item['Location'] = $subNode[0]->attr['Title'];
 
             $subNode = $node->find("span[class='secondary-text']");
             if(isset($subNode))

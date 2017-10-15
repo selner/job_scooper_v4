@@ -133,7 +133,7 @@ class PluginMonster extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
                     }
 
                     if(array_key_exists("eVar31", $vars) === true)
-                        $item['LocationFromSource'] = str_replace("_", " ", $vars['eVar31']);
+                        $item['Location'] = str_replace("_", " ", $vars['eVar31']);
 
                     if(array_key_exists("prop24", $vars) === true)
                     {
@@ -155,9 +155,9 @@ class PluginMonster extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
             $subNode = $node->find("span[itemprop='address'] span[itemprop='addressLocality']");
             if(isset($subNode) && isset($subNode[0]))
             {
-                $item['LocationFromSource'] = $subNode[0]->plaintext;
+                $item['Location'] = $subNode[0]->plaintext;
                 $stateNode = $subNode[0]->nextSibling();
-                $item['LocationFromSource'] = $item['LocationFromSource'] . ", " . $stateNode->plaintext;
+                $item['Location'] = $item['Location'] . ", " . $stateNode->plaintext;
             }
 
             $ret[] = $item;

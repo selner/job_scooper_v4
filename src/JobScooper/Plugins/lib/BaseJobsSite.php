@@ -314,7 +314,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     protected $countryCodes = array("US");
 
-    function getLocationSettingType()
+    function getGeoLocationSettingType()
     {
         return $this->typeLocationSearchNeeded;
     }
@@ -358,7 +358,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         throw new \BadMethodCallException(sprintf("Not implemented method  " . __METHOD__ . " called on class \"%s \".", __CLASS__));
     }
 
-    protected function getLocationURLValue($searchDetails)
+    protected function getGeoLocationURLValue($searchDetails)
     {
         $strReturnLocation = VALUE_NOT_SUPPORTED;
 
@@ -377,7 +377,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         else
         {
             // No override, so let's see if the search settings have defined one for us
-            $locTypeNeeded = $this->getLocationSettingType();
+            $locTypeNeeded = $this->getGeoLocationSettingType();
             if ($locTypeNeeded == null || $locTypeNeeded == "") {
                 LogLine("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchRunKey() . ".", \C__DISPLAY_ITEM_DETAIL__);
                 return $strReturnLocation;
@@ -413,12 +413,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
         if (!$this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) && $nSubtermMatches > 0) {
             $strLocationValue = $searchDetails->getSearchParameter('location_search_value');
             if ($strLocationValue == VALUE_NOT_SUPPORTED) {
-                LogLine("Failed to run search:  search is missing the required location type of " . $this->getLocationSettingType() . " set.  Skipping search '" . $searchDetails->getUserSearchRunKey() . ".", \C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Failed to run search:  search is missing the required location type of " . $this->getGeoLocationSettingType() . " set.  Skipping search '" . $searchDetails->getUserSearchRunKey() . ".", \C__DISPLAY_ITEM_DETAIL__);
                 $strURL = VALUE_NOT_SUPPORTED;
             }
             else
             {
-                $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $this->getLocationURLValue($searchDetails), $strURL);
+                $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $this->getGeoLocationURLValue($searchDetails), $strURL);
             }
         }
 
@@ -1010,7 +1010,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 if (strlen(trim($item['Title'])) == 0 || strlen(trim($item['JobSitePostId'])) == 0) {
                     continue;
                 }
-                $item['LocationFromSource'] = $job->location;
+                $item['Location'] = $job->location;
                 $item['Company'] = $job->company;
                 if ($job->datePosted != null)
                     $item['PostedAt'] = $job->datePosted->format('Y-m-d');
@@ -1051,10 +1051,16 @@ abstract class BaseJobsSite implements IJobSitePlugin
     
     function cleanupJobItemFields($arrItem)
     {
-        if(is_null($arrItem['JobSite']) || strlen($arrItem['JobSite']) == 0)
-            $arrItem['JobSite'] = $this->siteName;
+        $keys = array_keys($arrItem);
+        foreach($keys as $key)
+        {
+            $arrItem[$key] = cleanupTextValue($arrItem[$key]);
+        }
 
-        $arrItem['JobSite'] = cleanupSlugPart($arrItem['JobSite']);
+        if(is_null($arrItem['JobSiteKey']) || strlen($arrItem['JobSiteKey']) == 0)
+            $arrItem['JobSiteKey'] = $this->siteName;
+
+        $arrItem['JobSiteKey'] = cleanupSlugPart($arrItem['JobSiteKey']);
 
         $arrItem ['Url'] = trim($arrItem['Url']); // DO NOT LOWER, BREAKS URLS
 

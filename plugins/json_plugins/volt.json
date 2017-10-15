@@ -37,7 +37,7 @@
           "Type": "CSS"
         },
         {
-          "Name": "LocationFromSource",
+          "Name": "Location",
           "Selector": "td.loc",
           "Extract": "TEXT",
           "Index": 1,

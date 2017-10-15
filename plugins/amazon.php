@@ -79,7 +79,7 @@ class PluginAmazon extends AjaxHtmlPlugin
 
             $item['Company'] = 'Amazon';
             $subNode = $node->find("div[class=location-and-id] span]");
-            $item['LocationFromSource'] = explode("|", $subNode[0]->plaintext)[0];
+            $item['Location'] = explode("|", $subNode[0]->plaintext)[0];
 
             $subNode = $node->find("h2[class=posting-date]");
             $item['PostedAt'] = trim(str_ireplace(array("Posted ", "on"), "", $subNode[0]->plaintext));

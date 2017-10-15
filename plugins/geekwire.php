@@ -29,7 +29,7 @@ class PluginGeekwire extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         'Title' => array('tag' => 'h3'),
         'Url' => array('tag' => 'a.job_listing-clickbox', 'index' => 0, 'return_attribute' => 'href'),
         'Company' => array('selector' => 'div.job_listing-company strong', 'return_attribute' => 'plaintext'),
-        'LocationFromSource' => array('selector' => 'div.job_listing-location a', 'return_attribute' => 'plaintext'),
+        'Location' => array('selector' => 'div.job_listing-location a', 'return_attribute' => 'plaintext'),
         'PostedAt' => array('selector' => 'date', 'index' => 0),
         'Category' => array('selector' => 'ul.meta li', 'index' => 0),
         'company_logo' => array('selector' => 'img.company_logo'),

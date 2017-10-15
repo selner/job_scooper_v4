@@ -41,7 +41,7 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
     {
         if(is_null($this->currentSearchAlternateURL)) {
             $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
-            $location = $searchDetails->getLocation();
+            $location = $searchDetails->getGeoLocation();
             $ccode = "";
             if(!is_null($location))
                 $ccode = $location->getCountryCode();
@@ -73,16 +73,16 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
         'Title'                 => array('selector' => 'h3 a.js-clickable-area-link span[itemprop="title"]', 'return_attribute' => 'plaintext'),
         'Url'                  => array('selector' => 'h3 a.js-clickable-area-link ', 'return_attribute' => 'href'),
         'Company'               => array('selector' => 'li[itemprop="hiringOrganization"]', 'return_attribute' => 'plaintext'),
-        'LocationFromSource'              => array('selector' => 'li[itemprop="location"]', 'return_attribute' => 'plaintext'),
+        'Location'              => array('selector' => 'li[itemprop="location"]', 'return_attribute' => 'plaintext'),
         'JobSitePostId'                =>  array('selector' => 'li.lister__item', 'return_attribute' => 'id', 'return_value_regex' =>  '/item\-(\d+)/i'),
         'job_posted_date'       => array('selector' => 'li.job-actions__action pipe', 'index=0'),
         'company_logo'          => array('selector' => 'img.lister__logo', 'return_attribute' => 'src'),
         'NextButton'           => array('selector' => 'li.paginator__item a[rel="next"]')
     );
 
-    protected function getLocationURLValue($searchDetails)
+    protected function getGeoLocationURLValue($searchDetails)
     {
-        $ret = parent::getLocationURLValue($searchDetails);
+        $ret = parent::getGeoLocationURLValue($searchDetails);
         if (stristr($ret, "%2C+washington") !== false)
             $ret .= "+state";
         return $ret;
