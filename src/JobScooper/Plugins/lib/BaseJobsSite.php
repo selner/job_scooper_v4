@@ -86,6 +86,11 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
         if(!is_null($this->selectorMoreListings) && strlen($this->selectorMoreListings) > 0)
             $this->selectorMoreListings = preg_replace("/\\\?[\"']/", "'", $this->selectorMoreListings);
+
+        if(substr($this->siteBaseURL, strlen($this->siteBaseURL)-1, strlen($this->siteBaseURL)) === "/")
+            $this->siteBaseURL = substr($this->siteBaseURL, 0, strlen($this->siteBaseURL) - 1);
+        print $this->siteBaseURL;
+
     }
 
     private function getJobSiteObject()
