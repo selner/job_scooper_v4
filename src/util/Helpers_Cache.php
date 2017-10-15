@@ -68,13 +68,23 @@ function getLocationByOsmId($osmId)
 function reloadLocationNamesCache()
 {
     LogLine("....reloading Location Names Lookup table cache....", \C__DISPLAY_ITEM_DETAIL__);
-    $allLocs = \JobScooper\DataAccess\LocationNamesQuery::create()
-        ->find();
 
     if (!array_key_exists('CACHE', $GLOBALS))
         $GLOBALS['CACHE'] = array();
 
-    $GLOBALS['CACHE']['LocationAlternateNames'] = array();
+    $arrNoLocations = array();
+    if (array_key_exists('LocationAlternateNames', $GLOBALS['CACHE']))
+    {
+        $arrNoLocations = array_filter($GLOBALS['CACHE']['LocationAlternateNames'], function ($v) {
+            return (is_null($v));
+        });
+        $GLOBALS['CACHE']['LocationAlternateNames'] = $arrNoLocations;
+    }
+    else
+        $GLOBALS['CACHE']['LocationAlternateNames'] = array();
+
+    $allLocs = \JobScooper\DataAccess\LocationNamesQuery::create()
+        ->find();
 
     foreach ($allLocs as $loc) {
         $GLOBALS['CACHE']['LocationAlternateNames'][$loc->getSlug()] = $loc;
