@@ -917,7 +917,7 @@ function getPlaceFromOpenStreetMap($query)
             return (array_key_exists('class', $osmloc) && !is_null($osmloc['class']) && strcasecmp('place', $osmloc['class']) == 0);
         });
     }
-    if(count($retMatches) > 1)
+    if(count($retMatches) >= 1)
         $retMatches = $retMatches[0];
 
     return $retMatches;
