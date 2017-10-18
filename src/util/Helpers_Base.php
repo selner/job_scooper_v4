@@ -46,7 +46,7 @@ function getDebugContext()
     //Debug backtrace called. Find next occurence of class after Logger, or return calling script:
     $dbg = debug_backtrace();
     $i = 0;
-    $jobsite = null;
+    $jobsiteKey = null;
     $usersearch = null;
 
     $class = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
@@ -63,9 +63,9 @@ function getDebugContext()
                     $class = "{$objclass} -> {$class}";
                     try{
                         if( is_object($dbg[$i]['object']) && method_exists($dbg[$i]['object'], "getName"))
-                            $jobsite = $dbg[$i]['object']->getName();
+                            $jobsiteKey = $dbg[$i]['object']->getName();
                         } catch (Exception $ex) {
-                            $jobsite = "";
+                            $jobsiteKey = "";
                         }
                     try{
                         if(array_key_exists('args', $dbg[$i]) & is_array($dbg[$i]['args']))
@@ -81,9 +81,9 @@ function getDebugContext()
         $i++;
     }
 
-    $context['channel'] = is_null($jobsite) ? "default" : "plugins";
+    $context['channel'] = is_null($jobsiteKey) ? "default" : "plugins";
     $context['class_call'] = $class;
-    $context['plugin_jobsite'] = $jobsite;
+    $context['plugin_jobsite'] = $jobsiteKey;
     $context['user_search_run_key'] = $usersearch;
     $context['memory_usage'] = memory_get_usage() / 1024 / 1024;
 

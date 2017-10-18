@@ -52,13 +52,6 @@
           "Type": "CSS"
         },
         {
-          "Name": "company_logo",
-          "Selector": "img",
-          "Extract": "ATTR",
-          "Attribute": "href",
-          "Type": "CSS"
-        },
-        {
           "Name": "Url",
           "Selector": "a[class*='link-job']",
           "Extract": "ATTR",

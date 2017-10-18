@@ -65,7 +65,7 @@
                 autoIncrement="true"/>
 
         <!--
-            Alternate unique key for every job post is jobsite + jobsite post id
+            Alternate unique key for every job post is jobsite_key + jobsite post id
         -->
         <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" required="true"/>
 

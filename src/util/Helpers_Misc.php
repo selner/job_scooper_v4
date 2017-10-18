@@ -520,8 +520,8 @@ function getSearchesByRunResult($resultCode)
     if(is_null($GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN']))
         return array();
 
-    foreach ($GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'] as $jobsite) {
-        foreach($jobsite as $search)
+    foreach ($GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'] as $jobsiteKey) {
+        foreach($jobsiteKey as $search)
         {
             if($search->getRunResultCode() == "failed") {
                 if (!array_key_exists($search->getJobSiteKey(), $arrSearchReportByPlugin))

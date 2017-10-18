@@ -109,7 +109,7 @@ function updateOrCreateJobPosting($arrJobItem)
         }
         else {
             if(is_null($arrJobItem['JobSiteKey']) || strlen($arrJobItem['JobSiteKey']) == 0)
-                throw new InvalidArgumentException("Attempted to create a new job posting record without a valid jobsite value set.");
+                throw new InvalidArgumentException("Attempted to create a new job posting record without a valid JobSiteKey value set.");
 
             $jobRecord = \JobScooper\DataAccess\JobPostingQuery::create()
                 ->filterByJobSiteKey($arrJobItem['JobSiteKey'])
@@ -300,12 +300,12 @@ function findOrCreateUser($value)
     return $user;
 }
 
-function getJobSitePluginClassName($jobsite)
+function getJobSitePluginClassName($jobsiteKey)
 {
     $plugin_classname = null;
 
     if (!is_null($jobsite)) {
-        $slug = cleanupSlugPart($jobsite);
+        $slug = cleanupSlugPart($jobsiteKey);
         if (!array_key_exists($slug, $GLOBALS['JOBSITE_PLUGINS']) &&
             !is_null($GLOBALS['JOBSITE_PLUGINS'][$slug]['class_name'])) {
             return $GLOBALS['JOBSITE_PLUGINS'][$slug]['class_name'];
@@ -324,15 +324,15 @@ function getJobSitePluginClassName($jobsite)
 }
 
 
-function findOrCreateJobSitePlugin($jobsite)
+function findOrCreateJobSitePlugin($jobsiteKey)
 {
-    $slug = cleanupSlugPart($jobsite);
+    $slug = cleanupSlugPart($jobsiteKey);
 
     if(!is_array($GLOBALS['JOBSITE_PLUGINS']))
         $GLOBALS['JOBSITE_PLUGINS'] = array();
 
     if (!array_key_exists($slug, $GLOBALS['JOBSITE_PLUGINS'])) {
-        $GLOBALS['JOBSITE_PLUGINS'][$slug] = array('name' => $jobsite, 'class_name' => getJobSitePluginClassName($slug), 'jobsite_db_object' => null, 'include_in_run' => false, 'other_settings' => []);
+        $GLOBALS['JOBSITE_PLUGINS'][$slug] = array('name' => $jobsiteKey, 'class_name' => getJobSitePluginClassName($slug), 'jobsite_db_object' => null, 'include_in_run' => false, 'other_settings' => []);
     }
 
     if (is_null($GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object']))
@@ -407,7 +407,7 @@ function findOrCreateUserSearchRun($searchKey, $jobsiteKey, $locationKey="any-lo
     else
     {
         if(isDebug())
-            LogLine("Found matching UserSearchRun ID # " . $search->getUserSearchRunId() ." for {$userSlug} / jobsite {$jobsiteKey} / search {$searchKey} / location {$locationKey}...", \C__DISPLAY_NORMAL__);
+            LogLine("Found matching UserSearchRun ID # " . $search->getUserSearchRunId() ." for {$userSlug} / jobsitekey {$jobsiteKey} / search {$searchKey} / location {$locationKey}...", \C__DISPLAY_NORMAL__);
     }
 
 

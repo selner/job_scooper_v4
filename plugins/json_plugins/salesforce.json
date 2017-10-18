@@ -57,11 +57,6 @@
           "Type": "STATIC"
         },
         {
-          "Name": "JobSite",
-          "Value": "Salesforce",
-          "Type": "STATIC"
-        },
-        {
           "Name": "Location",
           "Selector": "p.search-result-item-company-name a",
           "Extract": "ATTR",
@@ -70,7 +65,7 @@
           "Callback": "combineTextAllNodes"
         },
         {
-          "Name": "department",
+          "Name": "Department",
           "Selector": "table.searchResAdd tr td a",
           "Index" : 1,
           "Extract": "TEXT",

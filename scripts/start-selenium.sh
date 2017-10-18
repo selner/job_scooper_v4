@@ -1,4 +1,4 @@
-cd#!/usr/bin/env bash
+#!/usr/bin/env bash
 
 docker rm -f selenium
 
