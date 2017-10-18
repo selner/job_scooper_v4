@@ -135,11 +135,11 @@ class SimplePlugin extends BaseJobsSite
             {
                 $noResultsVal = $this->_getTagValueFromPage_($objSimpHTML, 'NoPostsFound');
                 if (!is_null($noResultsVal)) {
-                    $GLOBALS['logger']->logLine("Search returned " . $noResultsVal . " and matched expected 'No results' tag for " . $this->siteName, \C__DISPLAY_ITEM_DETAIL__);
+                    LogLine("Search returned " . $noResultsVal . " and matched expected 'No results' tag for " . $this->siteName, \C__DISPLAY_ITEM_DETAIL__);
                     return $noResultsVal;
                 }
             } catch (\Exception $ex) {
-                $GLOBALS['logger']->logLine("Warning: Did not find matched expected 'No results' tag for " . $this->siteName . ".  Error:" . $ex->getMessage(), \C__DISPLAY_WARNING__);
+                LogLine("Warning: Did not find matched expected 'No results' tag for " . $this->siteName . ".  Error:" . $ex->getMessage(), \C__DISPLAY_WARNING__);
             }
         }
 
@@ -332,14 +332,14 @@ class SimplePlugin extends BaseJobsSite
                 $index = $arrTag['index'];
                 if (count($nodeMatches) <= $index) {
                     $strError = sprintf("%s plugin failed to find index #%d in the %d nodes matching '%s'. ", $this->siteName, $index, count($nodeMatches), $strMatch);
-                    $GLOBALS['logger']->logLine($strError, \C__DISPLAY_ERROR__);
+                    LogLine($strError, \C__DISPLAY_ERROR__);
                     throw new \Exception($strError);
                 }
                 $ret = $nodeMatches[$index];
             } elseif (!is_null($ret) && is_array($ret)) {
                 if (count($ret) > 1) {
                     $strError = sprintf("Warning:  %s plugin matched %d nodes to selector '%s' but did not specify an index.  Assuming first node.", $this->siteName, count($ret), $strMatch);
-                    $GLOBALS['logger']->logLine($strError, \C__DISPLAY_WARNING__);
+                    LogLine($strError, \C__DISPLAY_WARNING__);
                 }
                 $ret = $ret[0];
             }
@@ -367,7 +367,7 @@ class SimplePlugin extends BaseJobsSite
             $callback = get_class($this) . "::" . $arrTag['return_value_callback'];
             if (!method_exists($this, $arrTag['return_value_callback'])) {
                 $strError = sprintf("%s plugin failed could not call the tag callback method '%s' for attribute name '%s'.", $this->siteName, $callback, $returnAttribute);
-                $GLOBALS['logger']->logLine($strError, \C__DISPLAY_ERROR__);
+                LogLine($strError, \C__DISPLAY_ERROR__);
                 throw new \Exception($strError);
             }
 
@@ -397,10 +397,10 @@ class SimplePlugin extends BaseJobsSite
         // first looked for the detail view layout and parse that
         $strNodeMatch = $this->getTagSelector($tagSetup['JobPostItem']);
 
-        $GLOBALS['logger']->logLine($this->siteName . " finding nodes matching: " . $strNodeMatch, \C__DISPLAY_ITEM_DETAIL__);
+        LogLine($this->siteName . " finding nodes matching: " . $strNodeMatch, \C__DISPLAY_ITEM_DETAIL__);
         $nodesJobRows = $this->_getTagValueFromPage_($objSimpHTML, 'JobPostItem', 'collection');
 
-        if ($nodesJobRows !== false && !is_null($nodesJobRows) && !empty($nodesJobRows) && count($nodesJobRows) > 0) {
+        if ($nodesJobRows !== false && !is_null($nodesJobRows) && is_array($nodesJobRows) && count($nodesJobRows) > 0) {
             foreach ($nodesJobRows as $node) {
                 //
                 // get a new record with all columns set to null
@@ -430,7 +430,7 @@ class SimplePlugin extends BaseJobsSite
             handleException(new \Exception("Could not find matching job elements in HTML for " . $strNodeMatch . " in plugin " . $this->siteName), null, true);
         }
 
-        $GLOBALS['logger']->logLine($this->siteName . " returned " . countJobRecords($ret) . " jobs from page.", \C__DISPLAY_ITEM_DETAIL__);
+        LogLine($this->siteName . " returned " . countJobRecords($ret) . " jobs from page.", \C__DISPLAY_ITEM_DETAIL__);
 
         return $ret;
     }
