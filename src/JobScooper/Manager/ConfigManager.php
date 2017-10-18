@@ -462,26 +462,32 @@ class ConfigManager
         LogDebug("Loading Selenium settings from config file...", \C__DISPLAY_ITEM_START__);
         if (isset($config['selenium']) && is_array($config['selenium'])) {
             foreach (array_keys($config['selenium']) as $k)
-                $GLOBALS['USERDATA']['selenium'][$k] = trim($config['selenium'][$k]);
+                $GLOBALS['USERDATA']['configuration_settings']['selenium'][$k] = trim($config['selenium'][$k]);
         }
 
-//        if (!((array_key_exists('autostart', $GLOBALS['USERDATA']['selenium']) === true && array_key_exists('port', $GLOBALS['USERDATA']['selenium']) === true ) || array_key_exists('start_command', $GLOBALS['USERDATA']['selenium']) === true ))
+//        if (!((array_key_exists('autostart', $GLOBALS['USERDATA']['configuration_settings']['selenium']) === true && array_key_exists('port', $GLOBALS['USERDATA']['configuration_settings']['selenium']) === true ) || array_key_exists('start_command', $GLOBALS['USERDATA']['configuration_settings']['selenium']) === true ))
 //            throw new \Exception("Required parameters for Selenium are missing; app cannot start.  You must set either 'autostart' and 'port' or 'start_command' in your configuration files.");
+        $settings = getConfigurationSettings('selenium');
 
-        $GLOBALS['USERDATA']['selenium']['autostart'] = intceil($GLOBALS['USERDATA']['selenium']['autostart']);
+        $GLOBALS['USERDATA']['configuration_settings']['selenium']['autostart'] = filter_var($settings['autostart'], FILTER_VALIDATE_BOOLEAN);
 //
-//        if(! array_key_exists('start_command', $GLOBALS['USERDATA']['selenium']) === true ) {
-//            if ($GLOBALS['USERDATA']['selenium']['autostart'] == 1 && !(array_key_exists('jar', $GLOBALS['USERDATA']['selenium']) === true && array_key_exists('postfix_switches', $GLOBALS['USERDATA']['selenium']) === true))
+//        if(! array_key_exists('start_command', $GLOBALS['USERDATA']['configuration_settings']['selenium']) === true ) {
+//            if ($GLOBALS['USERDATA']['configuration_settings']['selenium']['autostart'] == 1 && !(array_key_exists('jar', $GLOBALS['USERDATA']['configuration_settings']['selenium']) === true && array_key_exists('postfix_switches', $GLOBALS['USERDATA']['configuration_settings']['selenium']) === true))
 //                throw new \Exception("Required parameters to autostart Selenium are missing; you must set both 'jar' and 'postfix_switches' in your configuration files.");
 //        }
 
-        if (!(array_key_exists('server', $GLOBALS['USERDATA']['selenium']) === true))
-            $GLOBALS['USERDATA']['selenium']['server'] = "localhost";
+        if (!(array_key_exists('server', $GLOBALS['USERDATA']['configuration_settings']['selenium']) === true)) {
+            throw new \ErrorException("Configuration missing for [selenium] [server] in the config INI files.");
+        }
+        elseif (strcasecmp("localhost", $GLOBALS['USERDATA']['configuration_settings']['selenium']['server']) === 0)
+        {
+            throw new \ErrorException("Invalid server value for [selenium] [server] in the config INI files. You must use named hosts, not localhost.");
+        }
 
-        if (!(array_key_exists('port', $GLOBALS['USERDATA']['selenium']) === true))
-            $GLOBALS['USERDATA']['selenium']['port'] = "80";
+        if (!(array_key_exists('port', $GLOBALS['USERDATA']['configuration_settings']['selenium']) === true))
+            $GLOBALS['USERDATA']['configuration_settings']['selenium']['port'] = "80";
 
-        $GLOBALS['USERDATA']['selenium']['host_location'] = 'http://' . $GLOBALS['USERDATA']['selenium']['server'] . ":" . $GLOBALS['USERDATA']['selenium']['port'];
+        $GLOBALS['USERDATA']['configuration_settings']['selenium']['host_location'] = 'http://' . $GLOBALS['USERDATA']['configuration_settings']['selenium']['server'] . ":" . $GLOBALS['USERDATA']['configuration_settings']['selenium']['port'];
 
     }
     private function _configureSearchLocation_($location_string)

@@ -33,7 +33,7 @@ class SeleniumManager extends \PropertyObject
     {
         $this->additionalLoadDelaySeconds = $additionalLoadDelaySeconds;
 
-        if ($GLOBALS['USERDATA']['selenium']['autostart'] == True) {
+        if ($GLOBALS['USERDATA']['configuration_settings']['selenium']['autostart'] == True) {
             SeleniumManager::startSeleniumServer();
         }
     }
@@ -42,13 +42,13 @@ class SeleniumManager extends \PropertyObject
     {
         $this->doneWithRemoteWebDriver();
 
-        if ($GLOBALS['USERDATA']['selenium']['autostart'] == True) {
+        if ($GLOBALS['USERDATA']['configuration_settings']['selenium']['autostart'] == True) {
             SeleniumManager::shutdownSelenium();
         }
         $this->_seleniumIsRunning = false;
     }
 
-    function getPageHTML($url, $recursed=false)
+    function getPageHTML($url, $recursed = false)
     {
         try {
             $driver = $this->get_driver();
@@ -69,7 +69,7 @@ class SeleniumManager extends \PropertyObject
             // BUGBUG:  Firefox has started to return "This tab has crashed" responses often as of late February 2017.
             //          Adding check for that case and a session kill/reload when it happens
             if (stristr($src, "tab has crashed") != false) {
-                $GLOBALS['logger']->logLine("Error in Firefox WebDriver:  tab has crashed retrieving page at " . $url . ".  Killing WebDriver and trying one more time...", \C__DISPLAY_WARNING__);
+                LogLine("Error in Firefox WebDriver:  tab has crashed retrieving page at " . $url . ".  Killing WebDriver and trying one more time...", \C__DISPLAY_WARNING__);
                 // We found "tab has crashed" in the response, so we can't use it.
                 if ($recursed != true) {
                     $this->killAllAndRestartSelenium();
@@ -91,12 +91,11 @@ class SeleniumManager extends \PropertyObject
 
     function loadPage($url)
     {
-        try
-        {
+        try {
             $driver = $this->get_driver();
-            if(strncmp($driver->getCurrentURL(), $url, strlen($url)) != 0) {
+            if (strncmp($driver->getCurrentURL(), $url, strlen($url)) != 0) {
                 $driver->get($url);
-                sleep(2+$this->additionalLoadDelaySeconds);
+                sleep(2 + $this->additionalLoadDelaySeconds);
             }
         } catch (\WebDriverCurlException $ex) {
             handleException($ex, "Error retrieving Selenium page at {$url}: %s ", false);
@@ -117,10 +116,8 @@ class SeleniumManager extends \PropertyObject
     {
         try {
             $this->doneWithRemoteWebDriver();
-        }
-        catch (Exception $ex)
-        {
-            $GLOBALS['logger']->logLine("Error stopping active Selenium sessions: " . $ex, \C__DISPLAY_ERROR__);
+        } catch (Exception $ex) {
+            LogLine("Error stopping active Selenium sessions: " . $ex, \C__DISPLAY_ERROR__);
         }
 
         $webdriver = $this->getWebDriverKind();
@@ -134,17 +131,18 @@ class SeleniumManager extends \PropertyObject
 
     static function shutdownSelenium()
     {
-        if((array_key_exists('selenium_started', $GLOBALS) && $GLOBALS['selenium_started'] === true) &&
-                $GLOBALS['USERDATA']['selenium']['autostart'] == True) {
+        $canStop = false;
+        $settings = getConfigurationSettings('selenium');
+        if(array_key_exists('autostart', $settings))
+            $canStop = ($settings['autostart'] === True);
 
-            if(array_key_exists('stop_command', $GLOBALS['USERDATA']['selenium']) && !is_null($GLOBALS['USERDATA']['selenium']['stop_command']))
+        if($canStop)
+        {
+            if(array_key_exists('stop_command', $settings) && !is_null($settings['stop_command']) && !empty($settings['stop_command']))
             {
-                $GLOBALS['logger']->logLine("Attempting to stop Selenium server with command \"" . $GLOBALS['USERDATA']['selenium']['stop_command'] . "\"", \C__DISPLAY_NORMAL__);
-                $res = doExec($GLOBALS['USERDATA']['selenium']['stop_command']);
-                $GLOBALS['logger']->logLine("Stopping Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
-
-                $GLOBALS['selenium_started'] = false;
-
+                LogLine("Attempting to stop Selenium server with command \"" . $settings['selenium']['stop_command'] . "\"", \C__DISPLAY_ITEM_DETAIL__);
+                $res = doExec($settings['stop_command']);
+                LogLine("Stopping Selenium server result: "  . $res, \C__DISPLAY_ITEM_RESULT__);
             }
             else {
 
@@ -154,26 +152,21 @@ class SeleniumManager extends \PropertyObject
                     //
                     $cmd = 'pid=`ps -eo pid,args | grep selenium-server | grep -v grep | cut -c1-6`; if [ "$pid" ]; then kill -9 $pid; echo "Killed Selenium process #"$pid; else echo "Selenium server is not running."; fi';
                     if (isset($GLOBALS['logger'])) {
-                        $GLOBALS['logger']->logLine("Killing Selenium server process with command \"" . $cmd . "\"", \C__DISPLAY_NORMAL__);
+                        LogLine("Killing Selenium server process with command \"" . $cmd . "\"", \C__DISPLAY_ITEM_DETAIL__);
                     }
                     $res = doExec($cmd);
-                    $GLOBALS['logger']->logLine("Killing Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
-                    $GLOBALS['selenium_started'] = false;
+                    LogLine("Killing Selenium server result: " . $res, \C__DISPLAY_ITEM_RESULT__);
                 } catch (Exception $ex) {
                     $pscmd = doExec("pkill -i selenium");
                     if (isset($GLOBALS['logger'])) {
-                        $GLOBALS['logger']->logLine("Failed to send shutdown to Selenium server.  Attempted to kill process, however you may need to manually shut it down.", \C__DISPLAY_ERROR__);
+                        LogLine("Failed to send shutdown to Selenium server.  Attempted to kill process, however you may need to manually shut it down.", \C__DISPLAY_ERROR__);
                     }
-                } finally {
-                    $GLOBALS['selenium_started'] = false;
                 }
             }
         }
         else
         {
-            if (isset($GLOBALS['logger'])) {
-                $GLOBALS['logger']->logLine("Skipping Selenium server shutdown since we did not start it.", \C__DISPLAY_WARNING__);
-            }
+            LogLine("Skipping Selenium server shutdown we can't autostart it.", \C__DISPLAY_WARNING__);
         }
 
     }
@@ -208,38 +201,41 @@ class SeleniumManager extends \PropertyObject
     }
     static function startSeleniumServer()
     {
+        $settings = getConfigurationSettings('selenium');
 
         $seleniumStarted = SeleniumManager::isServerUp();
         if($seleniumStarted == false)
         {
-            if(array_key_exists('start_command', $GLOBALS['USERDATA']['selenium']) && !is_null($GLOBALS['USERDATA']['selenium']['start_command']))
+            $canStop = false;
+            if(array_key_exists('autostart', $settings))
+                $canStop = ($settings['autostart'] === True);
+
+            if($canStop === True && array_key_exists('start_command', $settings) && !is_null($settings['start_command']))
             {
-                $GLOBALS['logger']->logLine("Attempting to start Selenium server with command \"" . $GLOBALS['USERDATA']['selenium']['start_command'] . "\"", \C__DISPLAY_NORMAL__);
-                $res = doExec($GLOBALS['USERDATA']['selenium']['start_command']);
-                $GLOBALS['logger']->logLine("Starting Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
+                LogLine("Attempting to start Selenium server with command \"" . $settings['start_command'] . "\"", \C__DISPLAY_NORMAL__);
+                $res = doExec($settings['start_command']);
+                LogLine("Starting Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
 
                 sleep(10);
                 $seleniumStarted = true;
-                $GLOBALS['selenium_started'] = $seleniumStarted;
             }
-            else if(stripos($GLOBALS['USERDATA']['selenium']['host_location'], "localhost") != false || (stripos($GLOBALS['USERDATA']['selenium']['host_location'], "127.0.0.1") != false)) {
+            else if($canStop && stripos($settings['host_location'], "localhost") != false || (stripos($settings['host_location'], "127.0.0.1") != false)) {
 
                 $strCmdToRun = "java ";
-                if (array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
-                    $strCmdToRun .= $GLOBALS['USERDATA']['selenium']['prefix_switches'];
+                if (array_key_exists('prefix_switches', $settings))
+                    $strCmdToRun .= $settings['prefix_switches'];
 
-                $strCmdToRun .= " -jar \"" . $GLOBALS['USERDATA']['selenium']['jar'] . "\" -port " . $GLOBALS['USERDATA']['selenium']['port'] . " ";
-                if (array_key_exists('prefix_switches', $GLOBALS['USERDATA']['selenium']))
-                    $strCmdToRun .= $GLOBALS['USERDATA']['selenium']['postfix_switches'];
+                $strCmdToRun .= " -jar \"" . $settings['jar'] . "\" -port " . $settings['port'] . " ";
+                if (array_key_exists('prefix_switches', $settings))
+                    $strCmdToRun .= $settings['postfix_switches'];
 
                 $strCmdToRun .= " >/dev/null &";
 
-                $GLOBALS['logger']->logLine("Starting Selenium with command: '" . $strCmdToRun . "'", \C__DISPLAY_ITEM_RESULT__);
+                LogLine("Starting Selenium with command: '" . $strCmdToRun . "'", \C__DISPLAY_ITEM_RESULT__);
                 $res = doExec($strCmdToRun);
                 sleep(10);
-                $GLOBALS['logger']->logLine("Starting Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
+                LogLine("Starting Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
                 $seleniumStarted = true;
-                $GLOBALS['selenium_started'] = true;
             }
             else {
                 $seleniumStarted = false;
@@ -248,14 +244,14 @@ class SeleniumManager extends \PropertyObject
         }
         else {
             $seleniumStarted = true;
-            $GLOBALS['logger']->logLine("Selenium is already running on port " . $GLOBALS['USERDATA']['selenium']['port'] . ".  Skipping startup of server.", \C__DISPLAY_WARNING__);
+            LogLine("Selenium is already running on port " . $settings['port'] . ".  Skipping startup of server.", \C__DISPLAY_WARNING__);
         }
         return $seleniumStarted;
     }
 
     static function isServerUp()
     {
-        $hostHubPageURL = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
+        $hostHubPageURL = $GLOBALS['USERDATA']['configuration_settings']['selenium']['host_location'] . '/wd/hub';
         $msg = "Checking Selenium server up.... ";
 
         $ret = false;
@@ -304,14 +300,30 @@ class SeleniumManager extends \PropertyObject
 
     function get_driver()
     {
-        try
-        {
-            if (is_null($this->remoteWebDriver))
-                $this->create_remote_webdriver();
-            return $this->remoteWebDriver;
-        }
-        catch (Exception $ex)
-        {
+        try {
+
+                try {
+                    if (is_null($this->remoteWebDriver))
+                        $this->create_remote_webdriver();
+                    return $this->remoteWebDriver;
+
+                } catch (\WebDriverCurlException $ex) {
+                    $this->killAllAndRestartSelenium();
+                    $this->create_remote_webdriver();
+                    return $this->remoteWebDriver;
+
+                } catch (\WebDriverException $ex) {
+                    $this->killAllAndRestartSelenium();
+                    $this->create_remote_webdriver();
+                    return $this->remoteWebDriver;
+
+                } catch (Exception $ex) {
+                    $this->killAllAndRestartSelenium();
+                    $this->create_remote_webdriver();
+                    return $this->remoteWebDriver;
+
+                }
+        } catch (\WebDriverCurlException $ex) {
             handleException($ex, "Failed to get Selenium remote webdriver: ", true);
         }
 
@@ -320,7 +332,7 @@ class SeleniumManager extends \PropertyObject
 
     function getWebDriverKind()
     {
-        $webdriver = (array_key_exists('webdriver', $GLOBALS['USERDATA']['selenium'])) ? $GLOBALS['USERDATA']['selenium']['webdriver'] : null;
+        $webdriver = (array_key_exists('webdriver', $GLOBALS['USERDATA']['configuration_settings']['selenium'])) ? $GLOBALS['USERDATA']['configuration_settings']['selenium']['webdriver'] : null;
         if(is_null($webdriver)) {
             $webdriver = "phantomjs";
             if (PHP_OS == "Darwin")
@@ -332,12 +344,13 @@ class SeleniumManager extends \PropertyObject
 
     private function create_remote_webdriver()
     {
-        $host = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
-        logLine("Creating Selenium remote web driver to host {$host}...");
+        $hubUrl = $GLOBALS['USERDATA']['configuration_settings']['selenium']['host_location'] . '/wd/hub';
+        logLine("Creating Selenium remote web driver to host {$hubUrl}...");
 
         try {
+
             $webdriver = $this->getWebDriverKind();
-            $host = $GLOBALS['USERDATA']['selenium']['host_location'] . '/wd/hub';
+            $hubUrl = $GLOBALS['USERDATA']['configuration_settings']['selenium']['host_location'] . '/wd/hub';
             $driver = null;
 
             $capabilities = \DesiredCapabilities::$webdriver();
@@ -351,7 +364,7 @@ class SeleniumManager extends \PropertyObject
             $capabilities->setCapability("unexpectedAlertBehaviour", "dismiss");
 
             $this->remoteWebDriver = \RemoteWebDriver::create(
-                $host,
+                $hubUrl,
                 $desired_capabilities = $capabilities,
                 $connection_timeout_in_ms = 60000,
                 $request_timeout_in_ms = 60000
@@ -361,11 +374,11 @@ class SeleniumManager extends \PropertyObject
 
             return $this->remoteWebDriver;
         } catch (\WebDriverCurlException $ex) {
-            handleException($ex, "Failed to get webdriver from {$host}: ", true);
+            handleException($ex, "Failed to get webdriver from {$hubUrl}: ", true);
         } catch (\WebDriverException $ex) {
-            handleException($ex, "Failed to get webdriver from {$host}: ", true);
+            handleException($ex, "Failed to get webdriver from {$hubUrl}: ", true);
         } catch (Exception $ex) {
-            handleException($ex, "Failed to get webdriver from {$host}: ", true);
+            handleException($ex, "Failed to get webdriver from {$hubUrl}: ", true);
         }
         return null;
     }
