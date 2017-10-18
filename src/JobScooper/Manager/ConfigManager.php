@@ -478,6 +478,8 @@ class ConfigManager
         if (!(array_key_exists('server', $GLOBALS['USERDATA']['selenium']) === true))
             $GLOBALS['USERDATA']['selenium']['server'] = "localhost";
 
+        if (!(array_key_exists('port', $GLOBALS['USERDATA']['selenium']) === true))
+            $GLOBALS['USERDATA']['selenium']['port'] = "80";
 
         $GLOBALS['USERDATA']['selenium']['host_location'] = 'http://' . $GLOBALS['USERDATA']['selenium']['server'] . ":" . $GLOBALS['USERDATA']['selenium']['port'];
 
