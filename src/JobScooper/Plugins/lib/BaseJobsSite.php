@@ -91,6 +91,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
             $this->siteBaseURL = substr($this->siteBaseURL, 0, strlen($this->siteBaseURL) - 1);
         print $this->siteBaseURL;
 
+        if (is_null($this->getSupportedCountryCodes()) || (is_array($this->getSupportedCountryCodes()) && count($this->getSupportedCountryCodes()) ==0))
+            $this->countryCodes = array("US");
+
     }
 
     private function getJobSiteObject()
