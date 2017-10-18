@@ -21,9 +21,14 @@ echo "Generating Propel runtime configuration from $CONFIGDIR"
 $PROPEL config:convert -vvv
 
 echo "Building Propel files starting from $PROJDIR"
-$PROPEL build -vvv
-$PROPEL sql:build --overwrite -vvv
-$PROPEL sql:insert -vvv
+CMD="$PROPEL build -vvv"
+echo $CMD; $CMD
+
+CMD="$PROPEL sql:build --overwrite -vvv"
+echo $CMD; $CMD
+
+CMD="$PROPEL sql:insert -vvv"
+echo $CMD; $CMD
 
 cp -f "$OUTDIR/job_scooper_db.sq3" "$CURDIR/examples/job_scooper_db.sq3"
 
