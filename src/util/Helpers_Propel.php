@@ -304,7 +304,7 @@ function getJobSitePluginClassName($jobsiteKey)
 {
     $plugin_classname = null;
 
-    if (!is_null($jobsite)) {
+    if (!is_null($jobsiteKey)) {
         $slug = cleanupSlugPart($jobsiteKey);
         if (!array_key_exists($slug, $GLOBALS['JOBSITE_PLUGINS']) &&
             !is_null($GLOBALS['JOBSITE_PLUGINS'][$slug]['class_name'])) {
