@@ -140,7 +140,7 @@ class SeleniumManager extends \PropertyObject
         {
             if(array_key_exists('stop_command', $settings) && !is_null($settings['stop_command']) && !empty($settings['stop_command']))
             {
-                LogLine("Attempting to stop Selenium server with command \"" . $settings['selenium']['stop_command'] . "\"", \C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Attempting to stop Selenium server with command \"" . $settings['stop_command'] . "\"", \C__DISPLAY_ITEM_DETAIL__);
                 $res = doExec($settings['stop_command']);
                 LogLine("Stopping Selenium server result: "  . $res, \C__DISPLAY_ITEM_RESULT__);
             }
@@ -158,9 +158,8 @@ class SeleniumManager extends \PropertyObject
                     LogLine("Killing Selenium server result: " . $res, \C__DISPLAY_ITEM_RESULT__);
                 } catch (Exception $ex) {
                     $pscmd = doExec("pkill -i selenium");
-                    if (isset($GLOBALS['logger'])) {
-                        LogLine("Failed to send shutdown to Selenium server.  Attempted to kill process, however you may need to manually shut it down.", \C__DISPLAY_ERROR__);
-                    }
+                    LogLine("Killing Selenium server result: " . $res, \C__DISPLAY_ITEM_RESULT__);
+                    LogLine("Failed to send shutdown to Selenium server.  Attempted to kill process, however you may need to manually shut it down.", \C__DISPLAY_ERROR__);
                 }
             }
         }
