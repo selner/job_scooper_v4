@@ -265,7 +265,7 @@ class UserSearchRunTableMap extends TableMap
     1 => ':geolocation_id',
   ),
 ), null, null, null, false);
-        $this->addRelation('JobSitePluginRelatedByJobSiteKey', '\\JobScooper\\DataAccess\\JobSitePlugin', RelationMap::MANY_TO_ONE, array (
+        $this->addRelation('JobSitePlugin', '\\JobScooper\\DataAccess\\JobSitePlugin', RelationMap::MANY_TO_ONE, array (
   0 =>
   array (
     0 => ':jobsite_key',
@@ -279,13 +279,6 @@ class UserSearchRunTableMap extends TableMap
     1 => ':user_slug',
   ),
 ), null, null, null, false);
-        $this->addRelation('JobSitePluginRelatedByLastUserSearchRunId', '\\JobScooper\\DataAccess\\JobSitePlugin', RelationMap::ONE_TO_MANY, array (
-  0 =>
-  array (
-    0 => ':last_user_search_run_id',
-    1 => ':user_search_run_id',
-  ),
-), null, null, 'JobSitePluginsRelatedByLastUserSearchRunId', false);
     } // buildRelations()
 
     /**

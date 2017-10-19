@@ -214,7 +214,7 @@ class JobSitePluginTableMap extends TableMap
         $this->addColumn('was_successful', 'LastRunWasSuccessful', 'BOOLEAN', false, null, null);
         $this->addColumn('date_next_run', 'StartNextRunAfter', 'TIMESTAMP', false, null, null);
         $this->addColumn('date_last_failed', 'LastFailedAt', 'TIMESTAMP', false, null, null);
-        $this->addForeignKey('last_user_search_run_id', 'LastUserSearchRunId', 'INTEGER', 'user_search_run', 'user_search_run_id', false, null, null);
+        $this->addColumn('last_user_search_run_id', 'LastUserSearchRunId', 'INTEGER', false, null, null);
         $this->addColumn('supported_country_codes', 'SupportedCountryCodes', 'ARRAY', false, null, null);
         $this->addColumn('results_filter_type', 'ResultsFilterType', 'ENUM', false, null, null);
         $this->getColumn('results_filter_type')->setValueSet(array (
@@ -229,20 +229,13 @@ class JobSitePluginTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('UserSearchRunRelatedByLastUserSearchRunId', '\\JobScooper\\DataAccess\\UserSearchRun', RelationMap::MANY_TO_ONE, array (
-  0 =>
-  array (
-    0 => ':last_user_search_run_id',
-    1 => ':user_search_run_id',
-  ),
-), null, null, null, false);
-        $this->addRelation('UserSearchRunRelatedByJobSiteKey', '\\JobScooper\\DataAccess\\UserSearchRun', RelationMap::ONE_TO_MANY, array (
+        $this->addRelation('UserSearchRun', '\\JobScooper\\DataAccess\\UserSearchRun', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
     0 => ':jobsite_key',
     1 => ':jobsite_key',
   ),
-), null, null, 'UserSearchRunsRelatedByJobSiteKey', false);
+), null, null, 'UserSearchRuns', false);
     } // buildRelations()
 
     /**

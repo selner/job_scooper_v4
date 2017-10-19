@@ -180,9 +180,11 @@
         <column name="date_last_failed" phpName="LastFailedAt" type="timestamp"/>
 
         <column name="last_user_search_run_id" phpName="LastUserSearchRunId" type="integer" lazyLoad="true"/>
+<!--
         <foreign-key foreignTable="user_search_run" onUpdate="none" onDelete="none">
             <reference local="last_user_search_run_id" foreign="user_search_run_id"/>
         </foreign-key>
+-->
 
         <column name="supported_country_codes" phpName="SupportedCountryCodes" type="array"/>
         <column name="results_filter_type" phpName="ResultsFilterType" type="enum"

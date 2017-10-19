@@ -1747,10 +1747,10 @@ abstract class User implements ActiveRecordInterface
      * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
      * @return ObjectCollection|ChildUserSearchRun[] List of ChildUserSearchRun objects
      */
-    public function getUserSearchRunsJoinJobSitePluginRelatedByJobSiteKey(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    public function getUserSearchRunsJoinJobSitePlugin(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
     {
         $query = ChildUserSearchRunQuery::create(null, $criteria);
-        $query->joinWith('JobSitePluginRelatedByJobSiteKey', $joinBehavior);
+        $query->joinWith('JobSitePlugin', $joinBehavior);
 
         return $this->getUserSearchRuns($query, $con);
     }
