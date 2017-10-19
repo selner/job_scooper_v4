@@ -244,6 +244,9 @@ class ConfigManager
     {
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading INI file: " . $fileConfigToLoad, \C__DISPLAY_SECTION_START__);
 
+        $GLOBALS['USERDATA']['configuration_settings']['config_files'] = array();
+        $GLOBALS['USERDATA']['configuration_settings']['config_files'][] = $fileConfigToLoad;
+
         $iniParser = new \IniParser($fileConfigToLoad);
         $iniParser->use_array_object = false;
         $tempConfigSettings = $iniParser->parse();
@@ -776,8 +779,15 @@ class ConfigManager
         $emails = $this->getEmailRecords("results", "to");
         foreach($emails as $email)
         {
-            $userDetails['Name'] = $email['name'];
-            $userDetails['EmailAddress'] = $email['address'];
+            if (array_key_exists('address', $email)) {
+                $userDetails['Name'] = $email['name'];
+                $userDetails['EmailAddress'] = $email['address'];
+                break;
+            }
+        }
+
+        if (!array_key_exists('EmailAddress', $userDetails)) {
+            throw new \ErrorException("No email address or user has been set in the configuration files for this run.  Aborting.");
         }
 
         $retUserData = updateOrCreateUser($userDetails);
