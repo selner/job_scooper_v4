@@ -60,7 +60,8 @@ class ErrorEmailHandler extends MailHandler
     {
         $renderer = loadTemplate(__ROOT__.'/assets/templates/partials/html_email_body_search_config_details.tmpl');
 
-        return $renderer($GLOBALS['USERDATA']['configuration_settings']);
+        $data = getConfigurationSettings();
+        return $renderer($data);
 
     }
 }

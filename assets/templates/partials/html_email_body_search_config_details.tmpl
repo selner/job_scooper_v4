@@ -1,33 +1,40 @@
-{{#if searches}}
-        <h2>Search Details</h2>
-            Here are the search details set for the plugins that generated the errors found in the next section:
-            <br/>
+<h2>Search Details</h2>
+Here are the search details set for the plugins that generated the errors found in the next section:
+<br/>
 
+<ul>
+    {{#if config_files}}
+        <li><strong>Search Locations:</strong>
+            {{#each config_files}}
+                {{.}}
+            {{/each}}
+        </li>
+    {{/if}}
+    {{#if searches}}
+        {{#if keyword_sets}}
+            <li><strong>Search Keywords:</strong>
+
+                {{#each keyword_sets}}
+                    {{key}}
+                {{/each}}
+            </li>
+        {{/if}}
+    {{/if}}
+    {{#if email}}
+    <li><strong>Emails:</strong>
         <ul>
-            {{#if keyword_sets}}
-                <li><strong>Search Keywords:</strong>
-
-                    {{#each keyword_sets}}
-                        {{key}}
-                    {{/each}}
+            {{#each email.email_addresses}}
+                <li>
+                    {{type}}: {{address}}
                 </li>
-            {{/if}}
-            {{#if email}}
-            <li><strong>Emails:</strong>
-                <ul>
-                    {{#each email.email_addresses}}
-                        <li>
-                            {{type}}: {{address}}
-                        </li>
-                    {{/each}}
-                </ul>
-            {{/if}}
-            {{#if location_sets}}
-                <li><strong>Search Locations:</strong>
-                    {{#each location_sets}}
-                        {{@key}}
-                    {{/each}}
-                </li>
-            {{/if}}
-            </ul>
-{{/if}}
+            {{/each}}
+        </ul>
+    {{/if}}
+    {{#if location_sets}}
+        <li><strong>Search Locations:</strong>
+            {{#each location_sets}}
+                {{@key}}
+            {{/each}}
+        </li>
+    {{/if}}
+</ul>
