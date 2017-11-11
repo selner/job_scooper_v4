@@ -895,7 +895,7 @@ function writeJobsListDataToFile($filepath, $fileKey = null, $dataJobs, $listTyp
 
 function writeJSON($data, $filepath)
 {
-    $jsonData = json_encode($data, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+    $jsonData = json_encode($data, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP | JSON_UNESCAPED_SLASHES);
     if ($jsonData === false) {
         $err = json_last_error_msg();
         $errMsg = "Error:  Unable to convert jobs list data to json due to error   " . $err;
@@ -916,13 +916,13 @@ function writeJSON($data, $filepath)
     return $filepath;
 }
 
-function loadJSON($file, $options=JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP)
+function loadJSON($file, $options=JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP | JSON_UNESCAPED_SLASHES)
 {
     if(is_file($file)) {
         if(!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Reading json data from file " . $file, \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         $jsonText = file_get_contents($file, FILE_TEXT);
-        $jsonText = str_replace('\\', '\\\\', $jsonText);
+//        $jsonText = str_replace('\\', '\\\\', $jsonText);
         $data = json_decode($jsonText, $assoc = true, $depth=512, $options);
         return $data;
     }
