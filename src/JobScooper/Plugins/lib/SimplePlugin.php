@@ -163,32 +163,28 @@ class SimplePlugin extends BaseJobsSite
 
     }
 
-    protected function getTagSelector($arrTags)
+    protected function getTagSelector($arrTag)
     {
-        if ($arrTags == null) return null;
+        if ($arrTag == null) return null;
 
-        $arrKeys = array_keys($arrTags);
-        if ($arrKeys[0] != "0") {
-            $arrTags = array($arrTags);
+        $arrKeys = array_keys($arrTag);
+        if (!(in_array("selector", $arrKeys) || in_array("tag", $arrKeys))) {
+            throw (new Exception("Invalid tag configuration " . getArrayValuesAsString($arrTag)));
         }
         $strMatch = "";
 
-        foreach ($arrTags as $arrTag) {
-            if (!is_array($arrTag))
-                continue;
-            if (array_key_exists("selector", $arrTag)) {
-                $strMatch = $strMatch . $arrTag['selector'];
-            } elseif(array_key_exists("tag", $arrTag)) {
-                if (strlen($strMatch) > 0) $strMatch = $strMatch . ' ';
-                {
-                    $strMatch = $strMatch . $arrTag['tag'];
-                    if (array_key_exists('attribute', $arrTag) && strlen($arrTag['attribute']) > 0) {
-                        $strMatch = $strMatch . '[' . $arrTag['attribute'];
-                        if (array_key_exists('attribute_value', $arrTag) && strlen($arrTag['attribute_value']) > 0) {
-                            $strMatch = $strMatch . '="' . $arrTag['attribute_value'] . '"';
-                        }
-                        $strMatch = $strMatch . ']';
+        if (array_key_exists("selector", $arrTag)) {
+            $strMatch = $strMatch . $arrTag['selector'];
+        } elseif(array_key_exists("tag", $arrTag)) {
+            if (strlen($strMatch) > 0) $strMatch = $strMatch . ' ';
+            {
+                $strMatch = $strMatch . $arrTag['tag'];
+                if (array_key_exists('attribute', $arrTag) && strlen($arrTag['attribute']) > 0) {
+                    $strMatch = $strMatch . '[' . $arrTag['attribute'];
+                    if (array_key_exists('attribute_value', $arrTag) && strlen($arrTag['attribute_value']) > 0) {
+                        $strMatch = $strMatch . '="' . $arrTag['attribute_value'] . '"';
                     }
+                    $strMatch = $strMatch . ']';
                 }
             }
         }
@@ -327,7 +323,7 @@ class SimplePlugin extends BaseJobsSite
             }
 
             if ($fReturnNodeObject === true) {
-                // do nothing.  We already have the ndoe set correctly
+                // do nothing.  We already have the node set correctly
             } elseif (!is_null($ret) && isset($arrTag['index']) && is_array($ret) && intval($arrTag['index']) < count($ret)) {
                 $index = $arrTag['index'];
                 if (count($nodeMatches) <= $index) {
@@ -392,10 +388,17 @@ class SimplePlugin extends BaseJobsSite
     {
         $ret = null;
         $item = null;
-        $tagSetup = $this->arrListingTagSetup;
+
+        assert(array_key_exists('JobPostItem', $this->arrListingTagSetup));
+
+        if(array_key_exists('return_attribute', $this->arrListingTagSetup['JobPostItem']) === false)
+        {
+            $this->arrListingTagSetup['JobPostItem']['return_attribute'] = 'collection';
+        }
+
 
         // first looked for the detail view layout and parse that
-        $strNodeMatch = $this->getTagSelector($tagSetup['JobPostItem']);
+        $strNodeMatch = $this->getTagSelector($this->arrListingTagSetup['JobPostItem']);
 
         LogLine($this->siteName . " finding nodes matching: " . $strNodeMatch, \C__DISPLAY_ITEM_DETAIL__);
         $nodesJobRows = $this->_getTagValueFromPage_($objSimpHTML, 'JobPostItem', 'collection');
@@ -418,8 +421,8 @@ class SimplePlugin extends BaseJobsSite
                 if(empty($item['JobSiteKey']))
                     $item['JobSiteKey'] = $this->siteName;
 
-                if (array_key_exists('regex_link_job_id', $tagSetup) && count($tagSetup['regex_link_job_id']) >= 1)
-                    $this->regex_link_job_id = $tagSetup['regex_link_job_id'];
+                if (array_key_exists('regex_link_job_id', $this->arrListingTagSetup) && count($this->arrListingTagSetup['regex_link_job_id']) >= 1)
+                    $this->regex_link_job_id = $this->arrListingTagSetup['regex_link_job_id'];
 
                 $ret[] = $item;
 
