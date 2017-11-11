@@ -34,13 +34,13 @@ class PluginCraigslist extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $arrListingTagSetup = array(
         'NoPostsFound' => array('selector' => 'div.noresults', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
         'TotalPostCount' => array('selector' => 'span.totalcount', 'index'=> 0, 'return_attribute' => 'plaintext'),
-        'JobPostItem' => array('selector' => '#sortable-results ul li'),
-        'Url' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'index'=> 0, 'return_attribute' => 'href'),
-        'Title' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'index'=> 0, 'return_attribute' => 'plaintext'),
-        'JobSitePostId' => array('tag' => '*', 'attribute' => 'class', 'attribute_value' => 'hdrlnk', 'index'=> 0, 'return_attribute' => 'data-id'),
+        'JobPostItem' => array('selector' => 'ul.rows li.result-row'),
+        'Url' => array('selector' => 'a.result-title', 'index'=> 0, 'return_attribute' => 'href'),
+        'Title' => array('selector' => 'a.result-title', 'index'=> 0, 'return_attribute' => 'plaintext'),
+        'JobSitePostId' => array('selector' => 'a.result-title', 'index'=> 0, 'return_attribute' => 'data-id'),
         'Department' => array('selector' => 'td.listing-department', 'index'=> 0),
         'Location' => array('selector' => 'span.result-hood', 'index'=> 0),
-        'PostedAt' => array('selector' => 'time.result-date', 'index'=> 0)
+        'PostedAt' => array('selector' => 'time.result-date', 'index'=> 0, 'return_attribute' => 'datetime')
     );
 
     static function isNoJobResults($var)
