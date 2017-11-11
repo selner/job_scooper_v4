@@ -283,12 +283,14 @@ class NotifierJobAlerts extends JobsMailManager
     }
 
 
-    public function writeRunsJobsToFile($strFileOut, $arrJobsToOutput, $strExt = "CSV")
+    public function writeRunsJobsToFile($strFileOut, $arrJobsToOutput)
     {
-        if($strExt == "HTML")
+        $fileDetails = parseFilePath($strFileOut);
+
+        if($fileDetails['file_extension'] == "HTML")
             $keysToOutput = $this->getKeysForHTMLOutput();
         else
-            $keysToOutput = $this->getKeysForUserCSVOutput();
+            $keysToOutput = $this->getKeysForUserCSVOutput(!isDebug());
 
         if(is_null($keysToOutput))
             $keysToOutput = array();
@@ -348,7 +350,7 @@ class NotifierJobAlerts extends JobsMailManager
             }
         }
 
-        if($strExt == 'HTML')
+        if($fileDetails['file_extension'] == 'HTML')
         {
             $classCombined->writeArrayToHTMLFile($arrRecordsToOutput, $keysToOutput, null);
 
@@ -376,12 +378,12 @@ class NotifierJobAlerts extends JobsMailManager
 
     private function _filterAndWriteListToFile_($arrJobsList, $strFileNameBase, $strExt = "CSV")
     {
-        $filePath = getDefaultJobsOutputFileName($strFileNameBase, $strExt, "_", 'notifications');
+        $filePath = getDefaultJobsOutputFileName("", $strFileNameBase, $strExt, "_", 'notifications');
 
 
         if(countJobRecords($arrJobsList) == 0) return $arrJobsList;
 
-        $this->writeRunsJobsToFile($filePath, $arrJobsList, $strExt);
+        $this->writeRunsJobsToFile($filePath, $arrJobsList);
 
         LogLine("Wrote " . count($arrJobsList). " job listings output to  " . $filePath, \C__DISPLAY_ITEM_RESULT__);
 
