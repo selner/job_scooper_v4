@@ -70,7 +70,7 @@ function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strEx
 
 function encodeJSON($data)
 {
-    $jsonData = json_encode($data, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
+    $jsonData = json_encode($data, JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP |  JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK);
     if ($jsonData === false) {
         $err = json_last_error_msg();
         $errMsg = "Error:  Unable to data to JSON.  Error: " . $err;
@@ -99,7 +99,7 @@ function writeJSON($data, $filepath)
 function decodeJSON($strJsonText, $options=null, $boolEscapeBackSlashes=false)
 {
     if(is_null($options))
-        $options = JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP;
+        $options = JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP |  JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK;
 
 
     if($boolEscapeBackSlashes === true)
