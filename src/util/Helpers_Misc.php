@@ -966,9 +966,9 @@ function getOpenStreetMapFacts($query)
                 return $osmPlaces;
             }
     }
-    catch (Exception $ex)
+    catch (ErrorException $ex)
     {
-        handleException($ex);
+        handleException($ex, "Unable to download Open Street Map facts for the location query " . $query .": %s", true);
     }
 
     return $ret;
