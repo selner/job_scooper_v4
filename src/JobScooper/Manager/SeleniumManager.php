@@ -98,11 +98,11 @@ class SeleniumManager extends \PropertyObject
                 sleep(2 + $this->additionalLoadDelaySeconds);
             }
         } catch (\WebDriverCurlException $ex) {
-            handleException($ex, "Error retrieving Selenium page at {$url}: %s ", false);
+            handleException($ex, "Error retrieving Selenium page at {$url}", false);
         } catch (\WebDriverException $ex) {
-            handleException($ex, "Error retrieving Selenium page at {$url}: %s ", false);
+            handleException($ex, "Error retrieving Selenium page at {$url} ", false);
         } catch (Exception $ex) {
-            handleException($ex, "Error retrieving Selenium page at {$url}: %s ", false);
+            handleException($ex, "Error retrieving Selenium page at {$url}", false);
         }
     }
 
