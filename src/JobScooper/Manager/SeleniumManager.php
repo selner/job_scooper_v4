@@ -354,13 +354,16 @@ class SeleniumManager extends \PropertyObject
 
             $capabilities = \DesiredCapabilities::$webdriver();
 
-            $capabilities->setCapability("nativeEvents", true);
             $capabilities->setCapability("setThrowExceptionOnScriptError", false);
-            $capabilities->setCapability("webStorageEnabled", true);
-            $capabilities->setCapability("databaseEnabled", true);
-            $capabilities->setCapability("applicationCacheEnabled", true);
-            $capabilities->setCapability("locationContextEnabled", true);
             $capabilities->setCapability("unexpectedAlertBehaviour", "dismiss");
+            $capabilities->setCapability(\WebDriverCapabilityType::ACCEPT_SSL_CERTS, true);
+            $capabilities->setCapability(\WebDriverCapabilityType::APPLICATION_CACHE_ENABLED, true);
+            $capabilities->setCapability(\WebDriverCapabilityType::CSS_SELECTORS_ENABLED, true);
+            $capabilities->setCapability(\WebDriverCapabilityType::WEB_STORAGE_ENABLED, true);
+            $capabilities->setCapability(\WebDriverCapabilityType::NATIVE_EVENTS, true);
+            $capabilities->setCapability(\WebDriverCapabilityType::HANDLES_ALERTS, true);
+            $capabilities->setCapability(\WebDriverCapabilityType::DATABASE_ENABLED, true);
+            $capabilities->setCapability(\WebDriverCapabilityType::LOCATION_CONTEXT_ENABLED, true);
 
             $this->remoteWebDriver = \RemoteWebDriver::create(
                 $hubUrl,
