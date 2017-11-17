@@ -173,8 +173,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
             {
                 if($search->shouldRunNow())
                 {
-                    $this->currentSearchBeingRun = $search;
-
+                    $GLOBALS['USERDATA']['configuration_settings']['current_user_search_details'] = $search;
                     $search->setLastRunAt(time());
                     $search->save();
 
@@ -198,7 +197,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                         $this->_setSearchResult_($search, false, new Exception("Unable to download jobs: " .strval($ex)));
                         throw $ex;
                     } finally {
-                        $this->currentSearchBeingRun = null;
+                        $GLOBALS['USERDATA']['configuration_settings']['current_user_search_details'] = null;
                     }
                 }
                 else
@@ -268,7 +267,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 $this->selenium = null;
             }
 
-            $this->currentSearchBeingRun = null;
+            $GLOBALS['USERDATA']['configuration_settings']['current_user_search_details'] = null;
         }
 
 
@@ -302,7 +301,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
     protected $nextPageScript = null;
     protected $selectorMoreListings = null;
     protected $nMaxJobsToReturn = C_JOB_MAX_RESULTS_PER_SEARCH;
-    protected $currentSearchBeingRun = null;
     protected $arrSearchReturnedJobs = array();
 
     protected $detailsMyFileOut= "";
@@ -902,7 +900,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     private function _setSearchResult_($searchDetails, $success = null, $except = null, $runWasSkipped=false)
     {
         if(!($searchDetails instanceof UserSearchRun))
-            $searchDetails = $this->currentSearchBeingRun;
+            $searchDetails = getConfigurationSettings('current_user_search_details');
 
         if (!is_null($runWasSkipped) && is_bool($runWasSkipped) && $runWasSkipped === true)
         {
