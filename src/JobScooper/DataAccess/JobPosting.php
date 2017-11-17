@@ -156,8 +156,8 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 
 
 
-//        $v = preg_replace('#(^\s*\(+|\)+\s*$)#', "", $v); // strip leading & ending () chars
         $v = $this->_cleanupTextValue($v);
+        $v = preg_replace('#(^\s*\(+|\)+\s*$)#', "", $v); // strip leading & ending () chars
 
         //
         // Restructure locations like "US-VA-Richmond" to be "Richmond, VA"
