@@ -670,7 +670,7 @@ class ConfigManager
             return $search;
         }
 
-        LogDebug("Initializing new search for " . $search->getSearchKey() . " with location " . $arrSearchLocation['location_name_key'] . "...", \C__DISPLAY_NORMAL__);
+        LogDebug("Initializing new " . $search->getJobSiteKey() . " search for " . $search->getSearchKey() . " with location " . $arrSearchLocation['location_name_key'] . "...", \C__DISPLAY_NORMAL__);
 
 
         $plugin = getPluginObjectForJobSite($search->getJobSiteKey());
