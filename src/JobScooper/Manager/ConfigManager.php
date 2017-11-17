@@ -83,7 +83,7 @@ class ConfigManager
         $retEmails = array_filter($this->allConfigFileSettings['emails'], function ($var) use ($strEmailKind, $addressType) {
             return (strcasecmp($var['emailkind'], $strEmailKind) == 0 && strcasecmp($var['type'], $addressType) == 0);
         });
-        return $retEmails;
+        return array_unique_multidimensional($retEmails);
     }
 
 
