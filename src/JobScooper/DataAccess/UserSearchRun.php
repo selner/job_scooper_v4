@@ -227,6 +227,23 @@ class UserSearchRun extends BaseUserSearchRun
 
     }
 
+    private $_targetting_defaults = null;
+
+    public function getSearchLocationTargeting()
+    {
+        if(!is_null($this->_targetting_defaults))
+            return $this->_targetting_defaults;
+
+        $loc = $this->getGeoLocation();
+        if(!is_null($loc))
+        {
+            $this->_targetting_defaults = array();
+            $state = $loc->getState();
+            if(!is_null($state))
+                $this->_targetting_defaults['state'] = $state;
+        }
+        return $this->_targetting_defaults;
+    }
 
     public function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
     {

@@ -951,20 +951,49 @@ function getOpenStreetMapDataForId($osmid)
 
 function getOpenStreetMapFacts($query)
 {
+    $queryFilter = "";
+    $country_codes = getConfigurationSettings('country_codes');
+    if (!is_null($country_codes) && is_array($country_codes)) {
+        $queryFilter = "&countrycodes=" . join(",", $country_codes);
+    }
+
+
     $ret = null;
     $data = null;
-    $osmquery = "http://nominatim.openstreetmap.org/search?q=%s&format=json&addressdetails=1&extradetails=1&namedetails=1&dedupe=1";
+    $osmquery = "http://nominatim.openstreetmap.org/search?q=%s&format=json&addressdetails=1&extradetails=1&namedetails=1&dedupe=1" . $queryFilter;
     $apiCall = sprintf($osmquery, urlencode($query));
 
     $curl = new \CurlWrapper();
     try {
         $data = $curl->curl($full_url = $apiCall, $json = null, $action = 'GET', $content_type = "application/json; charset=UTF-8", $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = null, $referrer = "http://github.com/selner/job_scooper_v4");
-        if (array_key_exists('output', $data))
+        if (array_key_exists('output', $data)) {
             if (!is_null($data['output'])) {
                 $objData = json_decode($data['output']);
                 $osmPlaces = object_to_array($objData);
+
+                $targetting_defaults = null;
+                $searchDetails = getConfigurationSettings('current_user_search_details');
+                if (!is_null($searchDetails)) {
+                    $targeting = $searchDetails->getSearchLocationTargeting();
+                    if (!is_null($targeting)) {
+                        $filteredOSMData = array_filter($osmPlaces, function ($var) use ($targeting) {
+                            if(!array_key_exists('address', $var))
+                                return false;
+
+                            if (array_key_exists('state', $targeting) && !is_null($targeting['state'])) {
+                                if (strcasecmp($var['address']['state'], $targeting['state']) == 0)
+                                    return true;
+                            }
+                        });
+                        if (!is_null($filteredOSMData))
+                            return $filteredOSMData;
+
+                        }
+                    }
+
                 return $osmPlaces;
             }
+        }
     }
     catch (ErrorException $ex)
     {
