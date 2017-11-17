@@ -1102,9 +1102,17 @@ abstract class BaseJobsSite implements IJobSitePlugin
     function saveJob($arrItem)
     {
         $arrJob = $this->cleanupJobItemFields($arrItem);
-        $job = updateOrCreateJobPosting($arrJob);
+        try
+        {
+            $job = updateOrCreateJobPosting($arrJob);
+            return $job;
+        }
+        catch (Exception $ex)
+        {
+            handleException($ex, "Unable to save job to database due to error. Continuing to next job.  Error details: %S", false);
+        }
 
-        return $job;
+
     }
 
     function saveSearchReturnedJobs($arrJobList, $searchDetails)
