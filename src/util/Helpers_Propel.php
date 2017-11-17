@@ -40,7 +40,11 @@ function loadSqlite3MathExtensions()
 {
     $con = \Propel\Runtime\Propel::getConnection();
     try {
-        $expath = '/opt/sqlite/extensions/libsqlitefunctions.so';
+        $expath = '/opt/sqlite/extensions/libsqlitefunctions';
+        if(PHP_OS == "Darwin")
+            $expath .= ".dylib";
+        else
+            $expath .= ".so";
 
         $sql2 = "SELECT load_extension('{$expath}');";
         $stmt = $con->prepare($sql2);
