@@ -171,7 +171,7 @@ class JobsAutoMarker
                 $location = $this->_locmgr->getLocationById($locId);
                 if(!is_null($location))
                 {
-                    $arrIncludeCounties[] = array("county" => $location->getCounty(), "state" => $location->getState());
+                    $arrIncludeCounties[] = $location->getCounty() . "~" .$location->getState();
                 }
             }
         }
@@ -181,13 +181,16 @@ class JobsAutoMarker
             $posting = $v->getJobPosting();
             $locId = $posting->getGeoLocationId();
             if(is_null($locId))
-                return true;  // if we don't have a location, assume nearby
+                return false;  // if we don't have a location, assume nearby
 
             $location = $posting->getGeoLocation();
             $county = $location->getCounty();
             $state = $location->getState();
-            if(!is_null($county) && in_array($county, array_column($arrIncludeCounties, "county")) && in_array($state, array_column($arrIncludeCounties, "state")))
-                return true;
+            if(!is_null($county) && !is_null($state)) {
+                $match = $county . "~" . $state;
+                if (!in_array($match, $arrIncludeCounties))
+                    return true;
+            }
             return false;
         });
 
