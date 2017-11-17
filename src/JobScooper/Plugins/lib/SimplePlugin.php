@@ -20,6 +20,8 @@ namespace JobScooper\Plugins\lib;
 
 
 
+use PHPMailer\PHPMailer\Exception;
+
 class SimplePlugin extends BaseJobsSite
 {
     protected $siteName = '';
@@ -169,7 +171,7 @@ class SimplePlugin extends BaseJobsSite
 
         $arrKeys = array_keys($arrTag);
         if (!(in_array("selector", $arrKeys) || in_array("tag", $arrKeys))) {
-            throw (new Exception("Invalid tag configuration " . getArrayValuesAsString($arrTag)));
+            throw (new \Exception("Invalid tag configuration " . getArrayValuesAsString($arrTag)));
         }
         $strMatch = "";
 
