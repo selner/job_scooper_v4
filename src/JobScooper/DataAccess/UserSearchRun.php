@@ -252,12 +252,12 @@ class UserSearchRun extends BaseUserSearchRun
         // Update the jobsite_plugin object to match the latest search run details
         // We need this for caching detection reasons
         //
-        $jobsite = $this->getJobSiteObject();
+        $jobsite = findOrCreateJobSitePlugin($this->getJobSiteKey());
         $jobsite->setLastRunAt($this->getLastRunAt());
         $jobsite->setLastRunWasSuccessful($this->getRunResultCode() === "successful");
         $jobsite->setLastUserSearchRunId($this->getUserSearchRunId());
-        $jobsite->getLastFailedAt($this->getLastFailedAt());
-        $jobsite->getStartNextRunAfter($this->getStartNextRunAfter());
+        $jobsite->setLastFailedAt($this->getLastFailedAt());
+        $jobsite->setStartNextRunAfter($this->getStartNextRunAfter());
         $jobsite->save();
 
     }
