@@ -230,13 +230,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
                         ->select("JobPostingId")
                         ->filterByUserSlug($this->userObject->getUserSlug())
                         ->useJobPostingQuery()
-                            ->filterByJobSite($objJobSite->getJobSiteKey())
+                            ->filterByJobSiteKey($objJobSite->getJobSiteKey())
                         ->endUse()
                         ->find()
                         ->getData();
 
                     $queryAllJobsFromJobSite = \JobScooper\DataAccess\JobPostingQuery::create()
-                        ->filterByJobSite($objJobSite->getJobSiteKey())
+                        ->filterByJobSiteKey($objJobSite->getJobSiteKey())
                         ->select("JobPostingId")
                         ->find()
                         ->getData();
