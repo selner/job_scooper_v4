@@ -96,6 +96,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     }
 
+    public function doesSiteReturnAllJobs($fIgnoreLocation=false)
+    {
+        return ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)
+            && ($fIgnoreLocation || $this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)));
+    }
+
     private function getJobSiteObject()
     {
         return $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->siteName)]['jobsite_db_object'];

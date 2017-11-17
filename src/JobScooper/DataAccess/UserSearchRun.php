@@ -138,7 +138,17 @@ class UserSearchRun extends BaseUserSearchRun
 
     public function shouldRunNow()
     {
-        $nextTime = $this->getStartNextRunAfter();
+        $jobsite = $this->getJobSitePluginObject();
+        $jobsiteplugin = $this->getJobSiteObject();
+        $isAllJobsSite = $jobsite->doesSiteReturnAllJobs(true);
+        if($isAllJobsSite === true)
+        {
+            $nextTime = $jobsiteplugin->getStartNextRunAfter();
+        }
+        else {
+            $nextTime = $this->getStartNextRunAfter();
+        }
+
         if (!is_null($nextTime))
             return (time() > $nextTime->getTimestamp());
 
@@ -224,6 +234,31 @@ class UserSearchRun extends BaseUserSearchRun
             return parent::preSave($con);
         }
         return true;
+
+    }
+
+    /**
+     * Code to be run before inserting to database
+     * @param  ConnectionInterface $con
+     * @return boolean
+     */
+    public function postSave(ConnectionInterface $con = null)
+    {
+
+        if (is_callable('parent::postSave')) {
+            parent::postSave($con);
+        }
+
+        // Update the jobsite_plugin object to match the latest search run details
+        // We need this for caching detection reasons
+        //
+        $jobsite = $this->getJobSiteObject();
+        $jobsite->setLastRunAt($this->getLastRunAt());
+        $jobsite->setLastRunWasSuccessful($this->getRunResultCode() === "successful");
+        $jobsite->setLastUserSearchRunId($this->getUserSearchRunId());
+        $jobsite->getLastFailedAt($this->getLastFailedAt());
+        $jobsite->getStartNextRunAfter($this->getStartNextRunAfter());
+        $jobsite->save();
 
     }
 

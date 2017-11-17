@@ -403,44 +403,32 @@ function findOrCreateUserSearchRun($searchKey, $jobsiteKey, $locationKey="any-lo
         ->endUse()
         ->findOne();
 
-    if (!$search) {
-        if(isDebug())
-            LogLine("Search Not Found -- Creating New User Search Run for user '{$userSlug} / plugin {$jobsiteKey} / search '{$searchKey} / location '{$locationKey}'...", \C__DISPLAY_WARNING__);
-        $search = new \JobScooper\DataAccess\UserSearchRun();
-    }
-    else
-    {
+    if ($search) {
         if(isDebug())
             LogLine("Found matching UserSearchRun ID # " . $search->getUserSearchRunId() ." for {$userSlug} / jobsitekey {$jobsiteKey} / search {$searchKey} / location {$locationKey}...", \C__DISPLAY_NORMAL__);
+    }
+    else {
+        if (isDebug())
+            LogLine("Search Not Found -- Creating New User Search Run for user '{$userSlug} / plugin {$jobsiteKey} / search '{$searchKey} / location '{$locationKey}'...", \C__DISPLAY_WARNING__);
+        $search = new \JobScooper\DataAccess\UserSearchRun();
+
+        $search->setSearchKey($searchKey);
+        $search->setJobSiteKey($jobsiteKey);
+        $search->setUserSlug($userSlug);
+        $locId = $search->getGeoLocationId();
+        if (is_null($locId)) {
+            $loc = \JobScooper\DataAccess\GeoLocationQuery::create()
+                ->findOneByGeoLocationKey($locationKey);
+            $search->setGeoLocation($loc);
+        }
     }
 
 
     if (!is_null($copyFrom))
     {
-        $allFields = \JobScooper\DataAccess\Map\UserSearchRunTableMap::getTableMap(\Propel\Runtime\Map\TableMap::TYPE_PHPNAME);
-        foreach($allFields->getColumns() as $v) {
-            $field = $v->getPhpName();
-            if (!in_array($field, array('UserSearchRunId', 'UserSlug', 'RunResult', 'RunErrorDetails')))
-            {
-                $getCall = "get" . $field;
-                $setCall = "set" . $field;
-                $curval = call_user_func(array($copyFrom, $getCall));
-                call_user_func(array($search, $setCall), $curval);
-            }
-        }
+        $search->setSearchParameters($copyFrom->getSearchParameters());
     }
-
-    $search->setSearchKey($searchKey);
-    $search->setJobSiteKey($jobsiteKey);
-    $search->setUserSlug($userSlug);
-    $locId = $search->getGeoLocationId();
-    if(is_null($locId))
-    {
-        $loc = \JobScooper\DataAccess\GeoLocationQuery::create()
-            ->findOneByGeoLocationKey($locationKey);
-        $search->setGeoLocation($loc);
-    }
-
+    $search->setAppRunId($GLOBALS['USERDATA']['configuration_settings']['app_run_id']);
     $search->save();
     return $search;
 }
