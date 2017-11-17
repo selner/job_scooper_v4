@@ -136,8 +136,8 @@ class GeoLocation extends BaseGeoLocation
     {
         if(!is_null($osmPlace) && is_array($osmPlace) && count($osmPlace) > 0)
         {
-            if(array_key_exists(0, $osmPlace))
-                $osmPlace = $osmPlace[0];
+            if(!array_key_exists('osm_id', $osmPlace))
+                $osmPlace = array_shift($osmPlace);
 
 
             $locMgr = new GeoLocationManager();
