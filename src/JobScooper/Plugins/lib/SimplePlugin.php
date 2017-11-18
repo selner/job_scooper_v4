@@ -417,7 +417,7 @@ class SimplePlugin extends BaseJobsSite
                     $item[$itemKey] = $this->_getTagValueFromPage_($node, $itemKey, $item);
                 }
 
-                if (strlen($item['Title']) == 0)
+                if (strlen($item['Title']) == 0 || strcasecmp($item['Title'], "title" == 0))
                     continue;
 
                 if(empty($item['JobSiteKey']))
