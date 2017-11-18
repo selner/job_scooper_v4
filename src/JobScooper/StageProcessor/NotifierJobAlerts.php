@@ -190,11 +190,11 @@ class NotifierJobAlerts extends JobsMailManager
 
         logLine(PHP_EOL . "Writing final list of " . count($arrJobsToNotify) . " jobs to output files." . PHP_EOL, \C__DISPLAY_NORMAL__);
 
-        $arrMatchedAndExcludedJobs = array_filter($arrMatchedJobs, "isUserJobMatchButExcluded");
+        $arrExcludedJobs = array_filter($arrJobsToNotify, "isExcluded");
         $arrMatchedAndNotExcludedJobs = array_filter($arrMatchedJobs, "isUserJobMatchAndNotExcluded");
 
         $detailsMatchOnlyCSV = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedAndNotExcludedJobs, "Matches", "CSV"));
-        $detailsMatchExcludedCSV = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedAndExcludedJobs, "ExcludedMatches", "CSV"));
+        $detailsMatchExcludedCSV = parseFilePath($this->_filterAndWriteListToFile_($arrExcludedJobs, "ExcludedMatches", "CSV"));
         $detailsHTMLFile = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedAndNotExcludedJobs, "Matches", "HTML"));
 
         $arrResultFilesToCombine[] = $detailsMatchOnlyCSV;

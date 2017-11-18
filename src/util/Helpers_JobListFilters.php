@@ -32,17 +32,26 @@ function isNotUserJobMatch($var)
     return !isUserJobMatch($var);
 }
 
+function isExcluded($var)
+{
+    assert(method_exists($var, "getIsExcluded") === true);
+
+    return ($var->getIsExcluded());
+
+}
+
+
 function isUserJobMatchButExcluded($var)
 {
     assert(method_exists($var, "getIsExcluded") === true);
 
-    return ($var->getIsExcluded() && isUserJobMatch($var));
+    return (isExcluded($var) && isUserJobMatch($var));
 
 }
 
 function isUserJobMatchAndNotExcluded($var)
 {
-    return (!$var->getIsExcluded()) && isUserJobMatch($var);
+    return (!isExcluded($var) && isUserJobMatch($var));
 
 }
 
