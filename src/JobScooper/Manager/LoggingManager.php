@@ -18,6 +18,7 @@ namespace JobScooper\Manager;
 
 use Monolog\ErrorHandler;
 use Monolog\Handler\BufferHandler;
+use Monolog\Handler\DeduplicationHandler;
 use Psr\Log\LogLevel as LogLevel;
 use \Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -54,6 +55,7 @@ Class LoggingManager extends \Monolog\Logger
     private $_loggerName = "default";
     private $_loggers = array();
     private $_csvHandle = null;
+    private $_dedupeHandle = null;
     private $_doLogContext = false;
 
     public function __construct($name, array $handlers = array(), array $processors = array())
@@ -65,9 +67,9 @@ Class LoggingManager extends \Monolog\Logger
         JobsErrorHandler::register($this, array(), LogLevel::ERROR);
 
         $this->_handlersByType = array(
-            'stderr' => new StreamHandler('php://stderr', isDebug() ? Logger::DEBUG : Logger::INFO),
-            'bufferedmail' => new BufferHandler(new ErrorEmailHandler(Logger::ERROR, true), $bufferLimit = 100, $level = Logger::ERROR, $bubble = false, $flushOnOverflow = true)
+            'stderr' => new StreamHandler('php://stderr', isDebug() ? Logger::DEBUG : Logger::INFO)
         );
+
         parent::__construct($name, $handlers = $this->_handlersByType);
 
         $this->_loggers[$this->_loggerName] = $this;
@@ -113,6 +115,15 @@ Class LoggingManager extends \Monolog\Logger
         $this->pushHandler($this->_handlersByType['csverrors'] );
         $this->logLine("Error logging started to CSV file at {$csvlog}", C__DISPLAY_ITEM_DETAIL__);
 
+        $now = getNowAsString("-");
+        $dedupeLog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}-dedupe_log_errors.csv";
+        $this->_dedupeHandle = fopen($dedupeLog, "w");
+        $this->_handlersByType['dedupe_email'] = new DeduplicationHandler(new ErrorEmailHandler(Logger::ERROR, true),  $deduplicationStore = $dedupeLog, $deduplicationLevel = Logger::ERROR, $time = 60, $bubble = true);
+        $this->pushHandler($this->_handlersByType['dedupe_email']);
+        $this->logLine("Error logging started for deduped email log file at {$dedupeLog}", C__DISPLAY_ITEM_DETAIL__);
+
+
+
     }
 
     function __destruct()
@@ -125,13 +136,19 @@ Class LoggingManager extends \Monolog\Logger
             $this->_csvHandle = null;
         }
 
+        if(!is_null($this->_dedupeHandle))
+        {
+            fclose($this->_dedupeHandle);
+            $this->_dedupeHandle = null;
+        }
+
         $now = new DateTime('NOW');
         $this->logLine("Logging ended for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'),C__DISPLAY_NORMAL__);
     }
 
     function flushErrorNotifications()
     {
-        $this->_handlersByType['bufferedmail']->flush();
+//        $this->_handlersByType['bufferedmail']->flush();
 
     }
 
