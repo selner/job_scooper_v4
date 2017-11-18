@@ -51,10 +51,21 @@ class PluginBoeing extends AbstractTalentBrew
     protected $siteBaseURL = 'https://jobs.boeing.com';
     protected $nJobListingsPerPage = 20;
     protected $strBaseURLFormat = "/search-jobs";
+    protected $arrListingTagSetup = array(
+        'TotalPostCount' => array('selector' => 'h1[role="status"]'),
+        'JobPostItem' => array('selector' => 'section#search-results-list ul li'),
+//        'Title' =>  array('selector' => 'a h2', 'return_value_regex' =>  '/([^–]*)/i'),
+        'Title' =>  array('selector' => 'a h2'),
+        'Url' =>  array('selector' => 'a', 'return_attribute' => 'href'),
+        'JobSitePostId' =>  array('selector' => 'a', 'return_attribute' => 'data-job-id'),
+//        'Location' =>  array('selector' => 'a h2', 'return_value_regex' =>  '/[^–]*\s?–\s(.*)/i'),
+        'PostedAt' =>  array('selector' => 'span.job-date-posted'),
+        'NextButton' => array('selector' => '#pagination-bottom a.next')
+    );
 
     function __construct()
     {
-        unset($this->arrListingTagSetup['TotalPostCount']);
+        $this->arrListingTagSetup['TotalPostCount'] = array('selector' => 'h1[role="status"]');
         parent::__construct();
     }
 }
