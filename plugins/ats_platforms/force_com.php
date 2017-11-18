@@ -62,8 +62,7 @@ abstract class BaseForceComClass extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
         'JobSitePostId' =>  array('selector' => 'td a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' => '/.*?jobId=(\w+)&.*?/'),
         'Department' =>  array('selector' => 'td span', 'index' => 0, 'return_attribute' => 'plaintext'),
         'Location' =>  array('selector' => 'td span', 'index' => 1, 'return_attribute' => 'plaintext'),
-        'PostedAt' =>  array('selector' => 'td span', 'index' => 2, 'return_attribute' => 'plaintext'),
-        'Company' =>  array('return_value_callback' => 'setCompanyToSiteName')
+        'PostedAt' =>  array('selector' => 'td span', 'index' => 2, 'return_attribute' => 'plaintext')
     );
 
 }

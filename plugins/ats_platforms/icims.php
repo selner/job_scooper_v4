@@ -59,7 +59,6 @@ class AbstractIcims extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
         'Url' =>  array(array('tag' => 'td', 'index' =>null), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' => '/(.*?)\?.*/'),
         'JobSitePostId' =>  array('tag' => 'td', 'index' =>null, 'return_attribute' => 'href', 'return_value_regex' => '/.*?([\d\-]+).*?$/'),
         'Location' =>  array('tag' => 'td', 'index' =>null, 'return_attribute' => 'plaintext',  'return_value_regex' => '/.*?Loc[\w]+:&nbsp;\s*([\w\s[:punct:]]+)?$/'),
-        'Company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
 //        'Title' =>  array(array('tag' => 'td', 'index' =>1), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
 //        'Url' =>  array(array('tag' => 'td', 'index' =>1), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' => '/(.*?)\?.*/'),
 //        'JobSitePostId' =>  array('tag' => 'td', 'index' =>1), 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+\-\d+).*?/'),

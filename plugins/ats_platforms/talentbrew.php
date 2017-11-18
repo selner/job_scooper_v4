@@ -98,7 +98,6 @@ class AbstractTalentBrew extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         'Title' =>  array('selector' => 'a h2'),
         'Url' =>  array('tag' => 'a', 'return_attribute' => 'href'),
         'JobSitePostId' =>  array('tag' => 'a', 'return_attribute' => 'data-job-id'),
-        'Company' =>  array('return_value_callback' => 'setCompanyToSiteName'),
         'Location' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'job-location'),
         'PostedAt' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'job-date-posted'),
         'NextButton' => array('selector' => '#pagination-bottom a.next')

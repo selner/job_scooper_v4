@@ -810,11 +810,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    function setCompanyToSiteName($var)
-    {
-        return $this->siteName;
-    }
-
     function combineTextAllNodes($var)
     {
         return combineTextAllNodes($var);
