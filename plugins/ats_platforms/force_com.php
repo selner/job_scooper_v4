@@ -69,15 +69,6 @@ abstract class BaseForceComClass extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
 }
 
 
-class PluginAltasource extends BaseForceComClass
-{
-    protected $siteName = 'Altasource';
-    protected $siteBaseURL = "http://altasourcegroup.force.com";
-    protected $strBaseURLFormat = "http://altasourcegroup.force.com/careers";
-
-
-}
-
 
 abstract class BaseNoDeptForceComClass extends BaseForceComClass
 {

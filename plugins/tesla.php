@@ -23,7 +23,7 @@ class PluginTesla extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $siteBaseURL = 'http://www.tesla.com/careers';
     // BUGBUG:  Hard coded to region = North America (#4)
     protected $strBaseURLFormat = 'https://www.tesla.com/careers/search#/filter/?region=4';
-    protected $countryCodes = array("US", "UK");
+    protected $countryCodes = array("US", "GB");
 
     protected $paginationType = C__PAGINATION_NONE;
     protected $nMaxJobsToReturn = C_JOB_MAX_RESULTS_PER_SEARCH;

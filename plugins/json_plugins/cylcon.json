@@ -3,7 +3,7 @@
   "BaseURL" : "http://www.cylcon.com/",
   "SourceURL" : "http://www.cylcon.com/jobs.php?q=***KEYWORDS***&l=***LOCATION***&sort=date&radius=50&start=***ITEM_NUMBER***",
   "LocationType" : "location-city-comma-statecode",
-  "CountryCodes" : ["US", "UK"],
+  "CountryCodes" : ["US", "GB"],
   "AdditionalFlags" : ["C__JOB_ITEMCOUNT_STARTSATZERO__"],
   "Collections": [
     {

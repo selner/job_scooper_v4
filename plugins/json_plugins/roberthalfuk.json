@@ -3,7 +3,7 @@
   "BaseURL": "https://www.roberthalf.co.uk/",
   "SourceURL": "https://www.roberthalf.co.uk/jobs/all-jobs/***LOCATION***?pageSize=1500",
   "LocationType": "location-city",
-  "CountryCodes" : ["UK"],
+  "CountryCodes" : ["GB"],
   "AdditionalFlags" : ["JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES"],
   "Collections": [
     {

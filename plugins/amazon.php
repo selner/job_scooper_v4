@@ -43,7 +43,7 @@ class PluginAmazon extends AjaxHtmlPlugin
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode-comma-country';
     protected $nMaxJobsToReturn = 2000; // Amazon maxes out at 2000 jobs in the list
     protected $additionalLoadDelaySeconds = 1;
-    protected $countryCodes = array("US", "UK");
+    protected $countryCodes = array("US", "GB");
 
     protected $selectorMoreListings = ".load-more";
 
