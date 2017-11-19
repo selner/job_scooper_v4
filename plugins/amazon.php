@@ -31,9 +31,8 @@
  * is the value you should set in the INI file to get the right filtered results.
  *
  */
-use JobScooper\Plugins\lib\AjaxHtmlPlugin;
 
-class PluginAmazon extends AjaxHtmlPlugin
+class PluginAmazon extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'Amazon';
     protected $nJobListingsPerPage = 100;
@@ -47,50 +46,28 @@ class PluginAmazon extends AjaxHtmlPlugin
 
     protected $selectorMoreListings = ".load-more";
 
-    function parseTotalResultsCount($objSimpHTML)
+
+
+    protected $arrListingTagSetup = array(
+        'TotalPostCount' =>  array('selector' => 'div.job-count-info', 'return_value_regex' => '/.*?of\s(\d+)/'),
+        'JobPostItem' => array('selector' => 'div.job-tile'),
+        'Title' =>  array('selector' => 'h2.job-title'),
+        'Url' =>  array('selector' => 'a.job-link', 'return_attribute' => 'href'),
+        'JobSitePostId' =>  array('selector' => 'div.job', 'return_attribute' => 'data-job-id'),
+        'Location' =>  array('selector' => 'div.location-and-id', 'return_value_regex' => '/(.*?)\|/', 'return_value_callback' => "cleanupLocationValue"),
+        'PostedAt' =>  array('selector' => 'div.posting-date', 'return_value_regex' => '/Posted at (.*)/')
+    );
+
+
+    static function cleanupLocationValue($var)
     {
-        $subnode = $objSimpHTML->find("div[id=search-paging] div[class=container] div[class=row] div");
-        if(isset($subnode) && is_array($subnode) && count($subnode) >= 1)
-        {
-            $resultsText = $subnode[count($subnode)-1]->plaintext;
-            $countParts = explode(" of ", trim($resultsText));
-            $countTotalParts = explode(" ", $countParts[1]);
-            return $countTotalParts[0];
-        }
-        return 0;
-
-    }
-
-
-    function parseJobsListForPage($objSimpHTML)
-    {
-        $ret = array();
-        $nodesjobs= $objSimpHTML->find('div[class=jobs col-xs-12] a');
-
-        foreach($nodesjobs as $node)
-        {
-            $item = getEmptyJobListingRecord();
-
-            $item['JobSitePostId'] = str_ireplace("/en/jobs/", "", $node->href);
-            $item['Url'] = $this->siteBaseURL . $node->href;
-
-            $subNode = $node->find("h2[class=job-title]");
-            $item['Title'] = $subNode[0]->plaintext;
-
-            $item['Company'] = 'Amazon';
-            $subNode = $node->find("div[class=location-and-id] span]");
-            $item['Location'] = explode("|", $subNode[0]->plaintext)[0];
-
-            $subNode = $node->find("h2[class=posting-date]");
-            $item['PostedAt'] = trim(str_ireplace(array("Posted ", "on"), "", $subNode[0]->plaintext));
-            $dateVal = date_create_from_format("F d, Y", $item['PostedAt']);
-            if(isset($dateVal))
-                $item['PostedAt'] = $dateVal->format('m/d/y');
-
-            $ret[] = $item;
-        }
+        $ret = "";
+        $parts = preg_split("/,\s?/", $var);
+        $revparts = array_reverse($parts);
+        $ret = join(", ", $revparts);
         return $ret;
     }
 
+
+
 }
-?>
