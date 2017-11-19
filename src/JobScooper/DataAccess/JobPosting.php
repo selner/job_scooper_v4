@@ -189,11 +189,17 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
             return;
         }
 
-        $locmgr = new \JobScooper\Manager\GeoLocationManager();
-        $location = $locmgr->findOrCreateGeoLocationByName($loc_str);
-        if(!is_null($location)) {
-            $this->setGeoLocation($location);
-            $this->_setDenormalizedLocationDisplayValue_();
+        try
+        {
+            $locmgr = new \JobScooper\Manager\GeoLocationManager();
+            $location = $locmgr->findOrCreateGeoLocationByName($loc_str);
+            if(!is_null($location)) {
+                $this->setGeoLocation($location);
+                $this->_setDenormalizedLocationDisplayValue_();
+            }
+        } catch (Exception $ex)
+        {
+            LogLine("Failed to lookup and set a geolocation for job posting " . $this->getKeySiteAndPostID() .".  Error:  " . $ex->getMessage(), C__DISPLAY_WARNING__);
         }
     }
 
