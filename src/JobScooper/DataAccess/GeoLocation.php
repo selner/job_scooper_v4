@@ -141,7 +141,7 @@ class GeoLocation extends BaseGeoLocation
 
 
             $locMgr = new GeoLocationManager();
-            $otherLocationId = $locMgr->getGeoLocationIdByOsmId($osmPlace['osm_id']);
+            $otherLocationId = $locMgr->lookupGeoLocationIdByOsmId($osmPlace['osm_id']);
             if(!is_null($otherLocationId) && $otherLocationId !== false) {
                 $otherLocation = $locMgr->getLocationById($otherLocationId);
                 $otherLocation->copyInto($this, false, false);
@@ -149,7 +149,7 @@ class GeoLocation extends BaseGeoLocation
             else {
                 $this->_setFactFromOSM('OpenStreetMapId', $osmPlace, 'osm_id', $overwriteValues);
                 $this->_setFactFromOSM('Latitude', $osmPlace, 'lat', $overwriteValues);
-                $this->_setFactFromOSM('Longitude', $osmPlace, 'long', $overwriteValues);
+                $this->_setFactFromOSM('Longitude', $osmPlace, 'lon', $overwriteValues);
                 $this->_setFactFromOSM('Place', $osmPlace, 'place_name', $overwriteValues);
                 $this->setFullOsmDataFromArray($osmPlace);
                 if (array_key_exists('address', $osmPlace)) {
@@ -170,7 +170,12 @@ class GeoLocation extends BaseGeoLocation
                 $dispName .= !is_null($this->getStateCode()) ? ", " . $this->getStateCode() : "";
                 $this->setDisplayName($dispName);
 
+                // Add "City, StateCode, CountryCode" as an alternate name
                 $addAltName = $dispName . ", " . $this->getCountryCode();
+                $this->addAlternateName($addAltName);
+
+                // Add "City, Country" as an alternate name
+                $addAltName = $this->getPlace() . ", " . $this->getCountry();
                 $this->addAlternateName($addAltName);
 
             }

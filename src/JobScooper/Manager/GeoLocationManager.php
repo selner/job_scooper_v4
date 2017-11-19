@@ -17,6 +17,7 @@
 namespace JobScooper\Manager;
 
 use JobScooper\DataAccess\GeoLocation;
+use PHPMailer\PHPMailer\Exception;
 use Propel\Runtime\ActiveQuery\Criteria;
 
 class GeoLocationManager
@@ -27,6 +28,7 @@ class GeoLocationManager
         // all the caches if one is not yet loaded
         $this->_getCache("LocationIdsByName");
 
+
     }
 
     function reloadCache()
@@ -36,8 +38,13 @@ class GeoLocationManager
             ->select(array("GeoLocationId", "OpenStreetMapId", "DisplayName", "GeoLocationKey", "AlternateNames"))
             ->find();
 
-        if (!array_key_exists('CACHE', $GLOBALS))
+        if (!array_key_exists('CACHES', $GLOBALS))
             $GLOBALS['CACHES'] = array();
+        if (!array_key_exists('numFailedOSMQueries', $GLOBALS['CACHES']))
+            $GLOBALS['CACHES']['numFailedOSMQueries'] = 0;
+
+        if (!array_key_exists('allowOSMQueries', $GLOBALS['CACHES']))
+            $GLOBALS['CACHES']['allowOSMQueries'] = true;
 
         $GLOBALS['CACHES']['LocationIdsByName'] = array();
         $GLOBALS['CACHES']['LocationIdByOsmId'] = array();
@@ -71,7 +78,7 @@ class GeoLocationManager
             ->findOne();
     }
 
-    function getGeoLocationIdByOsmId($osmId)
+    function lookupGeoLocationIdByOsmId($osmId)
     {
         $cache = $this->_getCache('LocationIdByOsmId');
         if(array_key_exists($osmId, $cache))
@@ -85,7 +92,7 @@ class GeoLocationManager
         }
     }
 
-    function getGeoLocationIdByName($strlocname)
+    function lookupGeoLocationIdByName($strlocname)
     {
         $cache = $this->_getCache('LocationIdsByName');
         $slug = cleanupSlugPart($strlocname);
@@ -97,20 +104,43 @@ class GeoLocationManager
 
     public function findOrCreateGeoLocationByName($strlocname)
     {
-        $locId = $this->getGeoLocationIdByName($strlocname);
+        $locId = $this->lookupGeoLocationIdByName($strlocname);
         if (!is_null($locId)) {
             return $this->getLocationById($locId);
         }
 
-        $osmPlace = getPlaceFromOpenStreetMap($strlocname);
-        if (!is_null($osmPlace) && is_array($osmPlace)) {
-            if (array_key_exists(0, $osmPlace))
-                $osmPlace = $osmPlace[0];
+        try {
 
-            $locId = $this->getGeoLocationIdByOsmId($osmPlace['osm_id']);
-            if (!is_null($locId)) {
-                return $this->getLocationById($locId);
+            if ($GLOBALS['CACHES']['allowOSMQueries'] === true)
+            {
+                if($GLOBALS['CACHES']['numFailedOSMQueries'] > 5)
+                {
+                    LogError("Exceeded max error threshold for Open Street Map queries.  Marking OSM as unusable.");
+                    $GLOBALS['CACHES']['allowOSMQueries'] = false;
+                    return null;
+                }
+
+                $osmPlace = getPlaceFromOpenStreetMap($strlocname);
+                if (!is_null($osmPlace) && is_array($osmPlace)) {
+                    if (array_key_exists(0, $osmPlace))
+                        $osmPlace = $osmPlace[0];
+
+                    $locId = $this->lookupGeoLocationIdByOsmId($osmPlace['osm_id']);
+                    if (!is_null($locId)) {
+                        return $this->getLocationById($locId);
+                    }
+                }
             }
+            else
+            {
+                LogLine("Open Street Map querying has been disabled. Not adding location for " . $strlocname, C__DISPLAY_WARNING__);
+                return null;
+            }
+        }
+        catch (\Exception $ex)
+        {
+            $GLOBALS['CACHES']['numFailedOSMQueries'] = $GLOBALS['CACHES']['numFailedOSMQueries'] + 1;
+            handleException($ex);
         }
 
         $loc = \JobScooper\DataAccess\GeoLocationQuery::create()
@@ -124,35 +154,5 @@ class GeoLocationManager
         return $loc;
     }
 
-    public function findOrCreateLocationFromOSMQuery($query)
-    {
-        $location = null;
-        $place = getPlaceFromOpenStreetMap($query);
-        if(!is_null($place))
-        {
-            if(is_array_multidimensional($place))
-                $place = $place[0];
-
-            $locId = $this->getGeoLocationIdByOsmId($place['osm_id']);
-            if(!is_null($locId))
-            {
-                $location = $this->getLocationById($locId);
-            }
-            else
-            {
-                $location = new GeoLocation();
-                $location->fromOSMData($place);
-            }
-        }
-        else
-        {
-            $location = $this->findOrCreateGeoLocationByName($query);
-        }
-
-        if(!is_null($location))
-            $location->save();
-
-        return $location;
-    }
 }
 
