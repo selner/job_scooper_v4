@@ -132,7 +132,7 @@ class SimplePlugin extends BaseJobsSite
      */
     function parseTotalResultsCount($objSimpHTML)
     {
-        if (array_key_exists('NoPostsFound', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['NoPostsFound'])) {
+        if (array_key_exists('NoPostsFound', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['NoPostsFound']) && count($this->arrListingTagSetup['NoPostsFound']) > 0) {
             try
             {
                 $noResultsVal = $this->_getTagValueFromPage_($objSimpHTML, 'NoPostsFound');
