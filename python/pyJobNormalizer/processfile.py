@@ -119,22 +119,17 @@ filepath = os.path.dirname(os.path.abspath(__file__)) # /a/b/c/d/e
 abbrevfile = os.path.join(filepath, "static", "job-title-abbreviations.csv")
 expandWords = loadCSV(abbrevfile, "abbreviation")['dict']
 
-def tokenizeStrings(listStrings, fieldTokenized = "tokenized"):
-    retData = {}
-    keys = listStrings.keys()
-    while len(keys) > 0:
-        k = keys.pop()
-        v = listStrings.pop(k)
+def tokenizeStrings(listData, field, fieldTokenized = "tokenized"):
 
-        retData[k] = { "Title" : v, fieldTokenized : []}
+    for k in listData.keys():
         if len(k) == 0:
             print "String value for key was empty.  Skipping..."
-            continue;
+            continue
 
-        tokens = getScrubbedStringTokens(v)
-        retData[k][fieldTokenized] = "|".join(tokens)
+        tokens = getScrubbedStringTokens(listData[k][field])
+        listData[k][fieldTokenized] = "|".join(tokens)
 
-    return retData
+    return listData
 
 import nltk
 import string
@@ -179,6 +174,8 @@ def getExpandedWords(strWords):
     return retWords
 
 def getScrubbedStringTokens(inputstring):
+    if not inputstring:
+        return ""
     strNoAbbrev = getExpandedWords(inputstring)
     lTokensNoStop = removeStopWords(strNoAbbrev)
     lStemmedTokens = getStemmedWords(lTokensNoStop)
@@ -198,14 +195,10 @@ def tokenizeJSONFile(inputFile, outputFile, dataKey=None, indexKey=None):
     inputData = json.load(inf)
     if inputData:
         print "Processing file " + inputFile
-        dictStrings = {}
         if(isinstance(inputData, dict)):
             if('jobslist' in inputData and isinstance(inputData['jobslist'], dict) and len(inputData['jobslist']) > 0):
-                for k, v in inputData['jobslist'].items():
-                    dictStrings[k] = v[dataKey]
-                outData = tokenizeStrings(dictStrings, "TitleTokens")
-                combined = combine_dicts(inputData['jobslist'], outData)
-                inputData[u'jobslist'] = combined
+                outData = tokenizeStrings(inputData['jobslist'], dataKey, str(dataKey) + "Tokens")
+                inputData[u'jobslist'] = outData
                 outf = open(outputFile, "w")
                 json.dump(inputData, outf, indent=4, encoding='utf-8')
                 outf.close()
