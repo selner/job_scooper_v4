@@ -6,7 +6,7 @@ sys.setdefaultencoding('utf-8')
 
 cli_usage = """
 Usage:
-  normalizeStrings.py -i <file> -o <file> -k <string> [--index <string>]
+  normalizeStrings.py -i <file> -o <file> -c <string> [--index <string>]
   normalizeStrings.py --version
 
 Options:
@@ -15,7 +15,7 @@ Options:
   -v --verbose  print status messages
   -o <file>, --output <file> output file [default: ./tokenized.csv]
   -i <file>, --input <file> input text file of strings
-  -k <string>, --columnkey=<string> csv key name for column to tokenize
+  -c <string>, --columnkey=<string> csv key name for column to tokenize
   --index <string> csv key name for index column in input csv
 """
 

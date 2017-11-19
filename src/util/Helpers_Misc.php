@@ -225,7 +225,7 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
     if (!$outputFile)
         $outputFile = getOutputDirectory('debug') . "/tempCallTokenizer.csv";
     $PYTHONPATH = realpath(__ROOT__ . "/python/pyJobNormalizer/");
-    $cmd = "python " . $PYTHONPATH . "/normalizeStrings.py -i " . $inputfile . " -o " . $outputFile . " -k " . $keyname;
+    $cmd = "python " . $PYTHONPATH . "/normalizeStrings.py -i " . $inputfile . " -o " . $outputFile . " -c " . $keyname;
     if ($indexKeyName != null)
         $cmd .= " --index " . $indexKeyName;
     LogLine("Running command: " . $cmd, \C__DISPLAY_ITEM_DETAIL__);

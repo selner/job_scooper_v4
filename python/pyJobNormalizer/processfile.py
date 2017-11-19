@@ -218,19 +218,18 @@ def tokenizeFile(inputFile, outputFile, dataKey=None, indexKey=None):
     fields = data['fieldnames']
     dictData = data['dict']
     dictStrings = {}
-    if (isinstance(dictData, dict) and len(dictData) > 0):
-        for k, v in dictData.items():
-            dictStrings[k] = v[dataKey]
+    # if (isinstance(dictData, dict) and len(dictData) > 0):
+    #     for k, v in dictData.items():
+    #         dictStrings[k] = v[dataKey]
         # print k, v, "\n"
         # print v[dataKey], "\n", "\n"
 #    listStrings = [k, v[dataKey] for k, v in dictData.items()]
+    tokenkey = str(dataKey) + "tokenized"
+    outData = tokenizeStrings(dictData, dataKey, tokenkey)
+    fields.append(tokenkey)
+    writedicttocsv(outputFile, outData, fields)
 
-    outData = tokenizeStrings(dictStrings, "tokenized")
-    results = combine_dicts(dictData, outData)
-    fields.append("tokenized")
-    writedicttocsv(outputFile, results, fields)
-
-    return results
+    return outData
 
 #
 # def addMatchesToList(source, new_links, itemlist, out_folder, kind):
