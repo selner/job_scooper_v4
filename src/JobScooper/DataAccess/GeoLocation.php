@@ -169,6 +169,10 @@ class GeoLocation extends BaseGeoLocation
                 $dispName = $this->getPlace();
                 $dispName .= !is_null($this->getStateCode()) ? ", " . $this->getStateCode() : "";
                 $this->setDisplayName($dispName);
+
+                $addAltName = $dispName . ", " . $this->getCountryCode();
+                $this->addAlternateName($addAltName);
+
             }
         }
     }
