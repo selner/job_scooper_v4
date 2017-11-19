@@ -165,7 +165,7 @@ class SeleniumManager extends \PropertyObject
         }
         else
         {
-            LogLine("Skipping Selenium server shutdown we can't autostart it.", \C__DISPLAY_WARNING__);
+            LogLine("Did not attempt Selenium server shutdown since we didn't and can't autostart it.", \C__DISPLAY_ITEM_DETAIL__);
         }
 
     }
