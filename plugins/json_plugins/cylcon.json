@@ -10,6 +10,16 @@
       "Name": "PageFields",
       "Fields": [
         {
+          "Name": "NoPostsFound",
+          "Selector": "div.panel-v2 div.row div.col-lg-9 div b",
+          "Extract": "TEXT",
+          "Index" : 0,
+          "Callback" : "matchesNoResultsPattern",
+          "CallbackParameter": "No matching job",
+          "Attribute": null,
+          "Type": "CSS"
+        },
+        {
           "Name": "TotalPostCount",
           "Selector": "div#searchCount",
           "Extract": "REGEX",
