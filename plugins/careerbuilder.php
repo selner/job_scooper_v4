@@ -69,12 +69,12 @@ class PluginCareerBuilderUK extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         'JobPostItem' => array('selector' => 'article.job-list'),
         'Url' => array('selector' => 'a.job-title', 'return_attribute' => 'href'),
         'Title' => array('selector' => 'a.job-title', 'return_attribute' => 'plaintext'),
-        'Location' => array('selector' => 'ul.inline-list li', 'index' => 0, 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Location\s*(\w+)\s*/'),
-        'payrange' => array('selector' => 'ul.inline-list li', 'index' => 1, 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Type\s*(\w+)\s*/'),
-        'Category' => array('selector' => 'ul.inline-list li', 'index' => 2, 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Posted\s*Posted\s*(\w+)\s*/'),
-        'PostedAt' => array('selector' => 'ul.inline-list li span', 'index' => 4, 'return_attribute' => 'plaintext'),
+        'Location' => array('selector' => 'ul.inline-list li', 'index' => 0, 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Location\s*(.*)/'),
+        'PayRange' => array('selector' => 'ul.inline-list li', 'index' => 1, 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Pay\s*(.*)/'),
+        'Category' => array('selector' => 'ul.inline-list li', 'index' => 2, 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Type\s*(\w+)\s*/'),
+        'PostedAt' => array('selector' => 'ul.inline-list li span', 'index' => 4, 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Posted\s*(.*)/'),
         'Company' => array('selector' => 'a.show-for-large-up', 'index' => 0, 'return_attribute' => 'plaintext'),
-        'JobSitePostId' => array('selector' => 'a.job-title', 'return_attribute' => 'href', 'return_value_regex' => '/.*?\/(.*?)\/\?.*/'),
+        'JobSitePostId' => array('selector' => 'a.job-title', 'return_attribute' => 'href', 'return_value_regex' => '/\/([^\/]*)\/\?.*/'),
     );
 
     static function isNoJobResults($var)
