@@ -208,7 +208,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
         $v = $this->_cleanupTextValue($v);
 
         if (is_null($v) || strlen($v) == 0) {
-            $v = '[Listed on ' . $this->getJobSiteKey() .']';
+            $v = $this->getJobSiteKey();
         } else {
             $v = strip_punctuation($v);
 
