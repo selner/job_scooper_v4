@@ -27,6 +27,7 @@ class PluginGoogle extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $prevURL = 'https://careers.google.com/jobs';
     protected $additionalFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
     protected $strBaseURLFormat = "https://careers.google.com/jobs#t=sq&q=j&so=dt_pd&li=20&l=false&jlo=en-US&";
+    protected $countryCodes = ["US", "GB"];
 
     protected $additionalLoadDelaySeconds = 6;
     protected $nextPageScript = "var elem = document.getElementById('gjsrpn');  if (elem != null) { console.log('attempting next button click on element ID gjsrpn'); elem.click(); };";
@@ -67,14 +68,14 @@ class PluginGoogle extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
             if(isset($subNode) && count($subNode) >= 1)
             {
                 $item['Url'] = $subNode[0]->attr['href'];
-                $item['Title'] = $subNode[0]->attr['Title'];
+                $item['Title'] = $subNode[0]->attr['title'];
             }
 
             if($item['JobSitePostId'] == '') continue;
 
             $subNode = $node->find("span[class='location secondary-text']");
             if(isset($subNode))
-                $item['Location'] = $subNode[0]->attr['Title'];
+                $item['Location'] = $subNode[0]->attr['title'];
 
             $subNode = $node->find("span[class='secondary-text']");
             if(isset($subNode))
