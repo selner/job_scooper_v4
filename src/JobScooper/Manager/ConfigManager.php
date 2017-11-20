@@ -633,27 +633,8 @@ class ConfigManager
                             continue;
                         }
 
-                        $locmgr = new GeoLocationManager();
                         foreach ( $arrLocations as $searchlocation)
                         {
-
-                            $loc = $locmgr->getLocationById($searchlocation['location_id']);
-
-                            if (!is_null($loc->getCountryCode() ))
-                                $GLOBALS['USERDATA']['configuration_settings']['country_codes'][$loc->getCountryCode()] = $loc->getCountryCode();
-
-                            $plugin = getPluginObjectForJobSite($search->getJobSiteKey());
-                            $pluginCountries = $plugin->getSupportedCountryCodes();
-                            if (!is_null($pluginCountries))
-                            {
-                                $matchedCountries = array_intersect($pluginCountries, $GLOBALS['USERDATA']['configuration_settings']['country_codes']);
-                                if ($matchedCountries === false || count($matchedCountries) == 0)
-                                {
-                                    LogDebug("Skipping search " . $search->getUserSearchRunKey() . " because it does not support any of the country codes required (" . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['country_codes']));
-                                    continue;
-                                }
-                            }
-
                             $searchForLoc = $this->_getSearchForSpecificLocationName_($search, $searchlocation);
 
                             if(!is_null($searchForLoc))
