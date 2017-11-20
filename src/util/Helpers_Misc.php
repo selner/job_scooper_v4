@@ -311,7 +311,7 @@ function tokenizeKeywords($arrKeywords)
     $arrKeywordTokens = tokenizeSingleDimensionArray($arrKeywords, "srchkwd", "keywords", "keywords");
     $arrReturnKeywordTokens = array_fill_keys(array_keys($arrKeywordTokens), null);
     foreach (array_keys($arrReturnKeywordTokens) as $key) {
-        $arrReturnKeywordTokens[$key] = str_replace("|", " ", $arrKeywordTokens[$key]['tokenized']);
+        $arrReturnKeywordTokens[$key] = str_replace("|", " ", $arrKeywordTokens[$key]['keywordstokenized']);
     }
     unset($key);
 
