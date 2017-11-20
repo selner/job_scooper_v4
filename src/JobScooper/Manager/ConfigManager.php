@@ -936,7 +936,7 @@ class ConfigManager
             //
             foreach($arrTitlesTemp as $titleRecord)
             {
-                $tokens = explode("|", $titleRecord['tokenized']);
+                $tokens = explode("|", $titleRecord['negative_keywordstokenized']);
                 $GLOBALS['USERDATA']['title_negative_keyword_tokens'][] = $tokens;
             }
             
