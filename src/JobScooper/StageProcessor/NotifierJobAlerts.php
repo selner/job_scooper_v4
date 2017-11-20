@@ -369,7 +369,7 @@ class NotifierJobAlerts extends JobsMailManager
         }
         LogLine("Jobs list had  ". count($arrRecordsToOutput) . " jobs and was written to " . $strFileOut , \C__DISPLAY_ITEM_START__);
 
-        if($strExt == "HTML")
+        if($fileDetails['file_extension'] == "HTML")
             $this->addMailCssToHTMLFile($strFileOut);
 
         return $arrJobsToOutput;
