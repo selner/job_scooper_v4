@@ -30,14 +30,18 @@
  * resulting page (e.g. "http://www.amazon.jobs/results?jobCategoryIds[]=83&jobCategoryIds[]=68&locationIds[]=226")
  * is the value you should set in the INI file to get the right filtered results.
  *
+ * Note:  backend is powered by https://en-amazon.icims.com/jobs
+ *
  */
 
 class PluginAmazon extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
+
     protected $siteName = 'Amazon';
     protected $nJobListingsPerPage = 100;
     protected $siteBaseURL = 'http://www.amazon.jobs';
     protected $strBaseURLFormat = "https://www.amazon.jobs/en/search?base_query=***KEYWORDS***&loc_query=***LOCATION***&result_limit=100&sort=recent&cache";
+//    protected $strBaseURLFormat = "https://www.amazon.jobs/en/search?offset=0&result_limit=10&sort=recent&cities[]=London&distanceType=Mi&radius=24km&latitude=&longitude=&loc_group_id=&loc_query=***LOCATION***&base_query=director&city=&country=&region=&county=&query_options=&"
     protected $paginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode-comma-country';
     protected $nMaxJobsToReturn = 2000; // Amazon maxes out at 2000 jobs in the list
