@@ -960,7 +960,10 @@ function getOpenStreetMapFacts($query)
 
     $ret = null;
     $data = null;
-    $osmquery = "http://nominatim.openstreetmap.org/search?q=%s&format=json&addressdetails=1&extradetails=1&namedetails=1&dedupe=1" . $queryFilter;
+    $nominatim_host = getConfigurationSettings('nominatim_server');
+    if(is_null($nominatim_host) || strlen($nominatim_host) == 0)
+        $nominatim_host = "http://nominatim.openstreetmap.org";
+    $osmquery = $nominatim_host . "/search?q=%s&format=json&addressdetails=1&extradetails=1&namedetails=1&dedupe=1" . $queryFilter;
     $apiCall = sprintf($osmquery, urlencode($query));
 
     $curl = new \CurlWrapper();
