@@ -314,6 +314,14 @@ class ConfigManager
         //
         $this->_parsePluginSettingsFromConfig_($config);
 
+        $this->_filterSearchesByCountry();
+
+        if(count($GLOBALS['USERDATA']['configuration_settings']['included_sites']) == 0)
+        {
+            LogError("No plugins could be found for the user's searches.  Aborting.");
+            return;
+        }
+
         $this->_parseKeywordSetsFromConfig_($config);
 
 
@@ -507,6 +515,9 @@ class ConfigManager
                 'location_raw_source_value' => $location_string,
                 'location_name_key' => $location->getSlug(),
                 'location_id' => $location->getGeoLocationId());
+
+            if (!is_null($location->getCountryCode()))
+                $GLOBALS['USERDATA']['configuration_settings']['country_codes'][$location->getCountryCode()] = $location->getCountryCode();
         }
 
     }
@@ -657,6 +668,25 @@ class ConfigManager
 
         }
     }
+
+    private function _filterSearchesByCountry()
+    {
+        if (isset($GLOBALS['USERDATA']['configuration_settings']['included_sites']) && count($GLOBALS['USERDATA']['configuration_settings']['included_sites']) > 0) {
+            foreach ($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $siteToSearch) {
+                $plugin = getPluginObjectForJobSite($siteToSearch);
+                $pluginCountries = $plugin->getSupportedCountryCodes();
+                if (!is_null($pluginCountries)) {
+                    $matchedCountries = array_intersect($pluginCountries, $GLOBALS['USERDATA']['configuration_settings']['country_codes']);
+                    if ($matchedCountries === false || count($matchedCountries) == 0) {
+                        LogDebug("Excluding " . $siteToSearch . " because it does not support any of the country codes required for the user's searches (" . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['country_codes']));
+                        setSiteAsExcluded($siteToSearch);
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+
     private function _getSearchForSpecificLocationName_($search, $arrSearchLocation)
     {
         $locNameLookup = $arrSearchLocation['location_id'];
