@@ -167,7 +167,7 @@ class ConfigManager
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output folders configured: " . $strOutfileArrString, \C__DISPLAY_ITEM_DETAIL__);
 
         if ($GLOBALS['USERDATA']['OPTS']['use_config_ini_given']) {
-            if (!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new \LoggingManager($this->arrFileDetails['config_ini']['directory']);
+            if (!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new LoggingManager($this->arrFileDetails['config_ini']['directory']);
             LogLine("Log file for run being written to: " . $this->arrFileDetails['config_ini']['directory'], \C__DISPLAY_ITEM_DETAIL__);
 
             LogLine("Loading configuration file details from " . $this->arrFileDetails['config_ini']['full_file_path'], \C__DISPLAY_ITEM_DETAIL__);

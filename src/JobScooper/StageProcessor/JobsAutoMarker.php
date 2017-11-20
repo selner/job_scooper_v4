@@ -19,7 +19,6 @@ namespace JobScooper\StageProcessor;
 
 use JobScooper\DataAccess\GeoLocationQuery;
 use JobScooper\DataAccess\Map\GeoLocationTableMap;
-use JobScooper\DataAccess\Map\LocationTableMap;
 
 use Exception;
 use JobScooper\Manager\GeoLocationManager;

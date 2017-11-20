@@ -17,7 +17,6 @@
 namespace JobScooper\Manager;
 
 use JobScooper\StageProcessor\JobsAutoMarker;
-use JobScooper\StageProcessor\NotifierErrors;
 use JobScooper\StageProcessor\NotifierJobAlerts;
 
 
