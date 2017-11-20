@@ -13,10 +13,10 @@
           "Name": "TotalPostCount",
           "Selector": "div.job-search-result-counter",
           "Extract": "REGEX",
-          "Pattern": "/.*?(\\d+)\\s*/",
+          "Pattern": "/.*?of\\s(\\d+)\\s*/",
           "Callback": "combineTextAllNodes",
           "Index": 0,
-          "Attribute": null,
+          "Attribute": "collection",
           "Type": "CSS"
         },
         {
