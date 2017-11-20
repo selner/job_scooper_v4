@@ -344,16 +344,6 @@ class SimplePlugin extends BaseJobsSite
 
             if ($fReturnNodeObject === false && !is_null($ret)) {
                 $ret = $ret->$returnAttribute;
-
-                if (!is_null($propertyRegEx) && is_string($ret) && strlen($ret) > 0) {
-                    $match = array();
-                    $propertyRegEx = str_replace("\\\\", "\\", $propertyRegEx);
-                    if (preg_match($propertyRegEx, $ret, $match) !== false && count($match) >= 1)
-                        $ret = $match[1];
-                    else {
-                        handleException(new \Exception(sprintf("%s plugin failed to find match for regex '%s' for tag '%s' with value '%s' as expected.", $this->siteName, $propertyRegEx, getArrayValuesAsString($arrTag), $ret)), "", true);
-                    }
-                }
             }
         }
         else
@@ -374,6 +364,18 @@ class SimplePlugin extends BaseJobsSite
             else
                 $ret = call_user_func($callback, $ret);
         }
+
+
+        if (!is_null($propertyRegEx) && is_string($ret) && strlen($ret) > 0) {
+            $match = array();
+            $propertyRegEx = str_replace("\\\\", "\\", $propertyRegEx);
+            if (preg_match($propertyRegEx, $ret, $match) !== false && count($match) >= 1)
+                $ret = $match[1];
+            else {
+                handleException(new \Exception(sprintf("%s plugin failed to find match for regex '%s' for tag '%s' with value '%s' as expected.", $this->siteName, $propertyRegEx, getArrayValuesAsString($arrTag), $ret)), "", true);
+            }
+        }
+
 
         return $ret;
     }
