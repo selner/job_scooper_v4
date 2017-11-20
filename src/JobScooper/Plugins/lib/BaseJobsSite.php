@@ -950,7 +950,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 $fp = fopen($filePath, 'r');
                 if (!$fp) return $objSimpleHTML;
 
-                $strHTML = fread($fp, JOBS_SCOOPER_MAX_FILE_SIZE);
+                $strHTML = fread($fp, MAX_FILE_SIZE);
                 $objSimpleHTML = \SimpleHTMLHelper::str_get_html($strHTML);
                 fclose($fp);
             }
@@ -1118,7 +1118,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
         foreach (array_keys($arrJobsBySitePostId) as $JobSitePostId) {
             $job = $this->saveJob($arrJobsBySitePostId[$JobSitePostId]);
-            $this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()][$job->getJobPostingId()] = $job;
+            if(!is_null($job))
+                $this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()][$job->getJobPostingId()] = $job;
         }
     }
 
@@ -1174,7 +1175,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
         $addedJobIds = array();
         foreach ($arrJobs as $job) {
             $savedJob = $this->saveJob($job);
-            $addedJobIds[] = $savedJob->getJobPostingId();
+            if(!is_null($savedJob))
+                $addedJobIds[] = $savedJob->getJobPostingId();
         }
 
         return $addedJobIds;
@@ -1185,7 +1187,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         $arrIds = array_column($arrJobs, 'JobSitePostId', 'JobSitePostId');
         $queryData = \JobScooper\DataAccess\JobPostingQuery::create()
             ->select(array("JobPostingId", "JobSitePostId", "JobSiteKey", "KeySiteAndPostID"))
-            ->filterByJobSite($this->siteName)
+            ->filterByJobSiteKey($this->siteName)
             ->filterByJobSitePostId(array_values($arrIds))
             ->find();
         $jobResults = $queryData->toArray();
