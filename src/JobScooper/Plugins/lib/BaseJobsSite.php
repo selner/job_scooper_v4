@@ -364,7 +364,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         throw new \BadMethodCallException(sprintf("Not implemented method  " . __METHOD__ . " called on class \"%s \".", __CLASS__));
     }
 
-    protected function getGeoLocationURLValue($searchDetails)
+    protected function getGeoLocationURLValue(UserSearchRun  $searchDetails)
     {
         $strReturnLocation = VALUE_NOT_SUPPORTED;
 
@@ -403,7 +403,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    protected function getPageURLfromBaseFmt($searchDetails, $nPage = null, $nItem = null)
+    protected function getPageURLfromBaseFmt(UserSearchRun $searchDetails, $nPage = null, $nItem = null)
     {
         $strURL = $this->_getBaseURLFormat_($searchDetails, $nPage, $nItem);
 
@@ -456,7 +456,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    protected function _getBaseURLFormat_($searchDetails = null, $nPage = null, $nItem = null)
+    protected function _getBaseURLFormat_(UserSearchRun  $searchDetails = null, $nPage = null, $nItem = null)
     {
         $strBaseURL = VALUE_NOT_SUPPORTED;
 
@@ -513,7 +513,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    protected function getKeywordURLValue($searchDetails)
+    protected function getKeywordURLValue(UserSearchRun $searchDetails)
     {
         if (!$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
             assert($searchDetails->getSearchParameter('keywords_string_for_url') != VALUE_NOT_SUPPORTED);
@@ -710,7 +710,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     //************************************************************************
 
 
-    private function _addSearch_($searchDetails)
+    private function _addSearch_(UserSearchRun $searchDetails)
     {
         assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || ($searchDetails->getSearchParameter('location_search_value') !== VALUE_NOT_SUPPORTED && strlen($searchDetails->getSearchParameter('location_search_value')) > 0));
 
@@ -796,7 +796,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         return $strRetCombinedKeywords;
     }
 
-    private function _setStartingUrlForSearch_($searchDetails)
+    private function _setStartingUrlForSearch_(UserSearchRun $searchDetails)
     {
 
         $searchStartURL = $this->getPageURLfromBaseFmt($searchDetails, 1, 1);
@@ -825,7 +825,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     //
     //************************************************************************
 
-    private function _updateJobsDataForSearch_($searchDetails)
+    private function _updateJobsDataForSearch_(UserSearchRun $searchDetails)
     {
         $ex = null;
 
@@ -891,13 +891,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     }
 
-    private function _checkInvalidURL_($details, $strURL)
+    private function _checkInvalidURL_(UserSearchRun $details, $strURL)
     {
         if ($strURL == null) throw new \ErrorException("Skipping " . $this->siteName . " search '" . $details->getUserSearchKey() . "' because a valid URL could not be set.");
         return $strURL;
     }
 
-    private function _setSearchResult_($searchDetails, $success = null, $except = null, $runWasSkipped=false)
+    private function _setSearchResult_(UserSearchRun $searchDetails, $success = null, $except = null, $runWasSkipped=false)
     {
         if(!($searchDetails instanceof UserSearchRun))
             $searchDetails = getConfigurationSettings('current_user_search_details');
@@ -985,7 +985,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    protected function _getMyJobsForSearchFromJobsAPI_($searchDetails)
+    protected function _getMyJobsForSearchFromJobsAPI_(UserSearchRun $searchDetails)
     {
         $nItemCount = 0;
 
@@ -1109,7 +1109,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     }
 
-    function saveSearchReturnedJobs($arrJobList, $searchDetails)
+    function saveSearchReturnedJobs($arrJobList, UserSearchRun $searchDetails)
     {
         $arrJobsBySitePostId = array_column($arrJobList, null, 'JobSitePostId');
         if (!array_key_exists($searchDetails->getUserSearchRunKey(), $this->arrSearchReturnedJobs))
