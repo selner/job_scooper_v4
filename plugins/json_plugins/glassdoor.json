@@ -51,6 +51,7 @@
           "Selector": "div.empLoc span.subtle",
           "Extract": "TEXT",
           "Attribute": null,
+          "Index" : 0,
           "Type": "CSS"
         },
         {
@@ -58,6 +59,7 @@
           "Selector": "div.empLoc div",
           "Extract": "TEXT",
           "Attribute": null,
+          "Index" : 0,
           "Type": "CSS"
         },
         {
