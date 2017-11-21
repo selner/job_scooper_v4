@@ -432,6 +432,11 @@ class ConfigManager
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading global search settings from config file...", \C__DISPLAY_ITEM_START__);
 
         if (array_key_exists('global_search_options', $config)) {
+
+            // This must happen first so that the search locations can be geocoded
+            if(array_key_exists('google_maps_api_key', $config['global_search_options']))
+                $GLOBALS['USERDATA']['configuration_settings']['google_maps_api_key'] = $config['global_search_options']['google_maps_api_key'];
+
             foreach (array_keys($config['global_search_options']) as $gso)
             {
                 if(!is_null($config['global_search_options'][$gso]) && isset($config['global_search_options'][$gso]))
@@ -460,7 +465,7 @@ class ConfigManager
                         break;
 
                         default:
-                        $GLOBALS['USERDATA']['configuration_settings'][$gso] = $config['global_search_options'][$gso];
+                            $GLOBALS['USERDATA']['configuration_settings'][$gso] = $config['global_search_options'][$gso];
                             break;
                     }
                }

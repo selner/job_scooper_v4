@@ -141,16 +141,10 @@
 
         <column name="place" phpName="Place" type="varchar" size="100"/>
         <column name="county" phpName="County" type="varchar" size="100"/>
-        <column name="state" phpName="State" type="varchar" size="100"/>
-        <column name="statecode" phpName="StateCode" type="varchar" size="2"/>
+        <column name="region" phpName="Region" type="varchar" size="100"/>
+        <column name="regioncode" phpName="RegionCode" type="varchar" size="2"/>
         <column name="country" phpName="Country" type="varchar" size="100"/>
         <column name="countrycode" phpName="CountryCode" type="varchar" size="2"/>
-
-        <column name="full_osm_data" phpName="FullOsmData" type="LONGVARCHAR"/>
-        <column name="openstreetmap_id" phpName="OpenStreetMapId" type="integer"/>
-        <unique name="uniq_openstreetmap_id/">
-            <unique-column name="openstreetmap_id"/>
-        </unique>
 
         <column name="latitude" phpName="Latitude" type="float"/>
         <column name="longitude" phpName="Longitude" type="float"/>

@@ -25,12 +25,10 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildGeoLocationQuery orderByGeoLocationKey($order = Criteria::ASC) Order by the geolocation_key column
  * @method     ChildGeoLocationQuery orderByPlace($order = Criteria::ASC) Order by the place column
  * @method     ChildGeoLocationQuery orderByCounty($order = Criteria::ASC) Order by the county column
- * @method     ChildGeoLocationQuery orderByState($order = Criteria::ASC) Order by the state column
- * @method     ChildGeoLocationQuery orderByStateCode($order = Criteria::ASC) Order by the statecode column
+ * @method     ChildGeoLocationQuery orderByRegion($order = Criteria::ASC) Order by the region column
+ * @method     ChildGeoLocationQuery orderByRegionCode($order = Criteria::ASC) Order by the regioncode column
  * @method     ChildGeoLocationQuery orderByCountry($order = Criteria::ASC) Order by the country column
  * @method     ChildGeoLocationQuery orderByCountryCode($order = Criteria::ASC) Order by the countrycode column
- * @method     ChildGeoLocationQuery orderByFullOsmData($order = Criteria::ASC) Order by the full_osm_data column
- * @method     ChildGeoLocationQuery orderByOpenStreetMapId($order = Criteria::ASC) Order by the openstreetmap_id column
  * @method     ChildGeoLocationQuery orderByLatitude($order = Criteria::ASC) Order by the latitude column
  * @method     ChildGeoLocationQuery orderByLongitude($order = Criteria::ASC) Order by the longitude column
  * @method     ChildGeoLocationQuery orderByAlternateNames($order = Criteria::ASC) Order by the alternate_names column
@@ -40,12 +38,10 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildGeoLocationQuery groupByGeoLocationKey() Group by the geolocation_key column
  * @method     ChildGeoLocationQuery groupByPlace() Group by the place column
  * @method     ChildGeoLocationQuery groupByCounty() Group by the county column
- * @method     ChildGeoLocationQuery groupByState() Group by the state column
- * @method     ChildGeoLocationQuery groupByStateCode() Group by the statecode column
+ * @method     ChildGeoLocationQuery groupByRegion() Group by the region column
+ * @method     ChildGeoLocationQuery groupByRegionCode() Group by the regioncode column
  * @method     ChildGeoLocationQuery groupByCountry() Group by the country column
  * @method     ChildGeoLocationQuery groupByCountryCode() Group by the countrycode column
- * @method     ChildGeoLocationQuery groupByFullOsmData() Group by the full_osm_data column
- * @method     ChildGeoLocationQuery groupByOpenStreetMapId() Group by the openstreetmap_id column
  * @method     ChildGeoLocationQuery groupByLatitude() Group by the latitude column
  * @method     ChildGeoLocationQuery groupByLongitude() Group by the longitude column
  * @method     ChildGeoLocationQuery groupByAlternateNames() Group by the alternate_names column
@@ -88,12 +84,10 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildGeoLocation findOneByGeoLocationKey(string $geolocation_key) Return the first ChildGeoLocation filtered by the geolocation_key column
  * @method     ChildGeoLocation findOneByPlace(string $place) Return the first ChildGeoLocation filtered by the place column
  * @method     ChildGeoLocation findOneByCounty(string $county) Return the first ChildGeoLocation filtered by the county column
- * @method     ChildGeoLocation findOneByState(string $state) Return the first ChildGeoLocation filtered by the state column
- * @method     ChildGeoLocation findOneByStateCode(string $statecode) Return the first ChildGeoLocation filtered by the statecode column
+ * @method     ChildGeoLocation findOneByRegion(string $region) Return the first ChildGeoLocation filtered by the region column
+ * @method     ChildGeoLocation findOneByRegionCode(string $regioncode) Return the first ChildGeoLocation filtered by the regioncode column
  * @method     ChildGeoLocation findOneByCountry(string $country) Return the first ChildGeoLocation filtered by the country column
  * @method     ChildGeoLocation findOneByCountryCode(string $countrycode) Return the first ChildGeoLocation filtered by the countrycode column
- * @method     ChildGeoLocation findOneByFullOsmData(string $full_osm_data) Return the first ChildGeoLocation filtered by the full_osm_data column
- * @method     ChildGeoLocation findOneByOpenStreetMapId(int $openstreetmap_id) Return the first ChildGeoLocation filtered by the openstreetmap_id column
  * @method     ChildGeoLocation findOneByLatitude(double $latitude) Return the first ChildGeoLocation filtered by the latitude column
  * @method     ChildGeoLocation findOneByLongitude(double $longitude) Return the first ChildGeoLocation filtered by the longitude column
  * @method     ChildGeoLocation findOneByAlternateNames(array $alternate_names) Return the first ChildGeoLocation filtered by the alternate_names column *
@@ -106,12 +100,10 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildGeoLocation requireOneByGeoLocationKey(string $geolocation_key) Return the first ChildGeoLocation filtered by the geolocation_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildGeoLocation requireOneByPlace(string $place) Return the first ChildGeoLocation filtered by the place column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildGeoLocation requireOneByCounty(string $county) Return the first ChildGeoLocation filtered by the county column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildGeoLocation requireOneByState(string $state) Return the first ChildGeoLocation filtered by the state column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildGeoLocation requireOneByStateCode(string $statecode) Return the first ChildGeoLocation filtered by the statecode column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildGeoLocation requireOneByRegion(string $region) Return the first ChildGeoLocation filtered by the region column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildGeoLocation requireOneByRegionCode(string $regioncode) Return the first ChildGeoLocation filtered by the regioncode column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildGeoLocation requireOneByCountry(string $country) Return the first ChildGeoLocation filtered by the country column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildGeoLocation requireOneByCountryCode(string $countrycode) Return the first ChildGeoLocation filtered by the countrycode column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildGeoLocation requireOneByFullOsmData(string $full_osm_data) Return the first ChildGeoLocation filtered by the full_osm_data column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildGeoLocation requireOneByOpenStreetMapId(int $openstreetmap_id) Return the first ChildGeoLocation filtered by the openstreetmap_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildGeoLocation requireOneByLatitude(double $latitude) Return the first ChildGeoLocation filtered by the latitude column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildGeoLocation requireOneByLongitude(double $longitude) Return the first ChildGeoLocation filtered by the longitude column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildGeoLocation requireOneByAlternateNames(array $alternate_names) Return the first ChildGeoLocation filtered by the alternate_names column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -122,12 +114,10 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildGeoLocation[]|ObjectCollection findByGeoLocationKey(string $geolocation_key) Return ChildGeoLocation objects filtered by the geolocation_key column
  * @method     ChildGeoLocation[]|ObjectCollection findByPlace(string $place) Return ChildGeoLocation objects filtered by the place column
  * @method     ChildGeoLocation[]|ObjectCollection findByCounty(string $county) Return ChildGeoLocation objects filtered by the county column
- * @method     ChildGeoLocation[]|ObjectCollection findByState(string $state) Return ChildGeoLocation objects filtered by the state column
- * @method     ChildGeoLocation[]|ObjectCollection findByStateCode(string $statecode) Return ChildGeoLocation objects filtered by the statecode column
+ * @method     ChildGeoLocation[]|ObjectCollection findByRegion(string $region) Return ChildGeoLocation objects filtered by the region column
+ * @method     ChildGeoLocation[]|ObjectCollection findByRegionCode(string $regioncode) Return ChildGeoLocation objects filtered by the regioncode column
  * @method     ChildGeoLocation[]|ObjectCollection findByCountry(string $country) Return ChildGeoLocation objects filtered by the country column
  * @method     ChildGeoLocation[]|ObjectCollection findByCountryCode(string $countrycode) Return ChildGeoLocation objects filtered by the countrycode column
- * @method     ChildGeoLocation[]|ObjectCollection findByFullOsmData(string $full_osm_data) Return ChildGeoLocation objects filtered by the full_osm_data column
- * @method     ChildGeoLocation[]|ObjectCollection findByOpenStreetMapId(int $openstreetmap_id) Return ChildGeoLocation objects filtered by the openstreetmap_id column
  * @method     ChildGeoLocation[]|ObjectCollection findByLatitude(double $latitude) Return ChildGeoLocation objects filtered by the latitude column
  * @method     ChildGeoLocation[]|ObjectCollection findByLongitude(double $longitude) Return ChildGeoLocation objects filtered by the longitude column
  * @method     ChildGeoLocation[]|ObjectCollection findByAlternateNames(array $alternate_names) Return ChildGeoLocation objects filtered by the alternate_names column
@@ -229,7 +219,7 @@ abstract class GeoLocationQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT geolocation_id, display_name, geolocation_key, place, county, state, statecode, country, countrycode, full_osm_data, openstreetmap_id, latitude, longitude, alternate_names FROM geolocation WHERE geolocation_id = :p0';
+        $sql = 'SELECT geolocation_id, display_name, geolocation_key, place, county, region, regioncode, country, countrycode, latitude, longitude, alternate_names FROM geolocation WHERE geolocation_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -461,53 +451,53 @@ abstract class GeoLocationQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the state column
+     * Filter the query on the region column
      *
      * Example usage:
      * <code>
-     * $query->filterByState('fooValue');   // WHERE state = 'fooValue'
-     * $query->filterByState('%fooValue%', Criteria::LIKE); // WHERE state LIKE '%fooValue%'
+     * $query->filterByRegion('fooValue');   // WHERE region = 'fooValue'
+     * $query->filterByRegion('%fooValue%', Criteria::LIKE); // WHERE region LIKE '%fooValue%'
      * </code>
      *
-     * @param     string $state The value to use as filter.
+     * @param     string $region The value to use as filter.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildGeoLocationQuery The current query, for fluid interface
      */
-    public function filterByState($state = null, $comparison = null)
+    public function filterByRegion($region = null, $comparison = null)
     {
         if (null === $comparison) {
-            if (is_array($state)) {
+            if (is_array($region)) {
                 $comparison = Criteria::IN;
             }
         }
 
-        return $this->addUsingAlias(GeoLocationTableMap::COL_STATE, $state, $comparison);
+        return $this->addUsingAlias(GeoLocationTableMap::COL_REGION, $region, $comparison);
     }
 
     /**
-     * Filter the query on the statecode column
+     * Filter the query on the regioncode column
      *
      * Example usage:
      * <code>
-     * $query->filterByStateCode('fooValue');   // WHERE statecode = 'fooValue'
-     * $query->filterByStateCode('%fooValue%', Criteria::LIKE); // WHERE statecode LIKE '%fooValue%'
+     * $query->filterByRegionCode('fooValue');   // WHERE regioncode = 'fooValue'
+     * $query->filterByRegionCode('%fooValue%', Criteria::LIKE); // WHERE regioncode LIKE '%fooValue%'
      * </code>
      *
-     * @param     string $stateCode The value to use as filter.
+     * @param     string $regionCode The value to use as filter.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildGeoLocationQuery The current query, for fluid interface
      */
-    public function filterByStateCode($stateCode = null, $comparison = null)
+    public function filterByRegionCode($regionCode = null, $comparison = null)
     {
         if (null === $comparison) {
-            if (is_array($stateCode)) {
+            if (is_array($regionCode)) {
                 $comparison = Criteria::IN;
             }
         }
 
-        return $this->addUsingAlias(GeoLocationTableMap::COL_STATECODE, $stateCode, $comparison);
+        return $this->addUsingAlias(GeoLocationTableMap::COL_REGIONCODE, $regionCode, $comparison);
     }
 
     /**
@@ -558,72 +548,6 @@ abstract class GeoLocationQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(GeoLocationTableMap::COL_COUNTRYCODE, $countryCode, $comparison);
-    }
-
-    /**
-     * Filter the query on the full_osm_data column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByFullOsmData('fooValue');   // WHERE full_osm_data = 'fooValue'
-     * $query->filterByFullOsmData('%fooValue%', Criteria::LIKE); // WHERE full_osm_data LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $fullOsmData The value to use as filter.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildGeoLocationQuery The current query, for fluid interface
-     */
-    public function filterByFullOsmData($fullOsmData = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($fullOsmData)) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(GeoLocationTableMap::COL_FULL_OSM_DATA, $fullOsmData, $comparison);
-    }
-
-    /**
-     * Filter the query on the openstreetmap_id column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByOpenStreetMapId(1234); // WHERE openstreetmap_id = 1234
-     * $query->filterByOpenStreetMapId(array(12, 34)); // WHERE openstreetmap_id IN (12, 34)
-     * $query->filterByOpenStreetMapId(array('min' => 12)); // WHERE openstreetmap_id > 12
-     * </code>
-     *
-     * @param     mixed $openStreetMapId The value to use as filter.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildGeoLocationQuery The current query, for fluid interface
-     */
-    public function filterByOpenStreetMapId($openStreetMapId = null, $comparison = null)
-    {
-        if (is_array($openStreetMapId)) {
-            $useMinMax = false;
-            if (isset($openStreetMapId['min'])) {
-                $this->addUsingAlias(GeoLocationTableMap::COL_OPENSTREETMAP_ID, $openStreetMapId['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($openStreetMapId['max'])) {
-                $this->addUsingAlias(GeoLocationTableMap::COL_OPENSTREETMAP_ID, $openStreetMapId['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(GeoLocationTableMap::COL_OPENSTREETMAP_ID, $openStreetMapId, $comparison);
     }
 
     /**

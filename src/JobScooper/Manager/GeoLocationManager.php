@@ -17,17 +17,32 @@
 namespace JobScooper\Manager;
 
 use JobScooper\DataAccess\GeoLocation;
-use PHPMailer\PHPMailer\Exception;
 use Propel\Runtime\ActiveQuery\Criteria;
 
 class GeoLocationManager
 {
+    protected $geocoder = null;
+
     function __construct()
     {
         // make sure any cache is loaded.  this get will reload
         // all the caches if one is not yet loaded
         $this->_getCache("LocationIdsByName");
 
+        $this->geocoder = new GeocodeManager();
+
+    }
+
+    function addGeolocationToCache(GeoLocation $geoloc)
+    {
+        $loc = $geoloc->toArray();
+        $names = $loc['AlternateNames'];
+        if(!empty($loc['DisplayName']))
+            $names[] = $loc['DisplayName'];
+        $names = array_unique($names);
+        foreach ($names as $name) {
+            $GLOBALS['CACHES']['LocationIdsByName'][cleanupSlugPart($name)] = $loc['GeoLocationId'];;
+        }
 
     }
 
@@ -35,30 +50,19 @@ class GeoLocationManager
     {
         LogLine("....reloading GeoLocation table cache....", \C__DISPLAY_ITEM_DETAIL__);
         $allLocs = \JobScooper\DataAccess\GeoLocationQuery::create()
-            ->select(array("GeoLocationId", "OpenStreetMapId", "DisplayName", "GeoLocationKey", "AlternateNames"))
             ->find();
 
         if (!array_key_exists('CACHES', $GLOBALS))
             $GLOBALS['CACHES'] = array();
-        if (!array_key_exists('numFailedOSMQueries', $GLOBALS['CACHES']))
-            $GLOBALS['CACHES']['numFailedOSMQueries'] = 0;
+        if (!array_key_exists('numFailedGoogleQueries', $GLOBALS['CACHES']))
+            $GLOBALS['CACHES']['numFailedGoogleQueries'] = 0;
 
-        if (!array_key_exists('allowOSMQueries', $GLOBALS['CACHES']))
-            $GLOBALS['CACHES']['allowOSMQueries'] = true;
+        if (!array_key_exists('allowGoogleQueries', $GLOBALS['CACHES']))
+            $GLOBALS['CACHES']['allowGoogleQueries'] = true;
 
         $GLOBALS['CACHES']['LocationIdsByName'] = array();
-        $GLOBALS['CACHES']['LocationIdByOsmId'] = array();
         foreach ($allLocs as $loc) {
-
-            $GLOBALS['CACHES']['LocationIdByOsmId'][$loc['OpenStreetMapId']] = $loc['GeoLocationId'];
-
-            $names = preg_split("/\s*\|\s*/", $loc['AlternateNames'], $limit=-1, PREG_SPLIT_NO_EMPTY);
-            if(!empty($loc['DisplayName']))
-                $names[] = $loc['DisplayName'];
-            $names = array_unique($names);
-            foreach ($names as $name) {
-                $GLOBALS['CACHES']['LocationIdsByName'][cleanupSlugPart($name)] = $loc['GeoLocationId'];;
-            }
+            $this->addGeolocationToCache($loc);
         }
     }
 
@@ -78,20 +82,6 @@ class GeoLocationManager
             ->findOne();
     }
 
-    function lookupGeoLocationIdByOsmId($osmId)
-    {
-        $cache = $this->_getCache('LocationIdByOsmId');
-        if(array_key_exists($osmId, $cache))
-            return $cache[$osmId];
-        else
-        {
-            return \JobScooper\DataAccess\GeoLocationQuery::create()
-                ->select("GeoLocationId")
-                ->filterByOpenStreetMapId($osmId)
-                ->findOne();
-        }
-    }
-
     function lookupGeoLocationIdByName($strlocname)
     {
         $cache = $this->_getCache('LocationIdsByName');
@@ -104,53 +94,59 @@ class GeoLocationManager
 
     public function findOrCreateGeoLocationByName($strlocname)
     {
+        $loc = null;
         $locId = $this->lookupGeoLocationIdByName($strlocname);
         if (!is_null($locId)) {
-            return $this->getLocationById($locId);
-        }
+            $loc = $this->getLocationById($locId);
+        } else {
+            $loc = \JobScooper\DataAccess\GeoLocationQuery::create()
+                ->filterByAlternateNames(array($strlocname), Criteria::CONTAINS_ALL)
+                ->findOneOrCreate();
+            if (is_null($loc))
+                return null;
 
-        try {
+            try {
 
-            if ($GLOBALS['CACHES']['allowOSMQueries'] === true)
-            {
-                if($GLOBALS['CACHES']['numFailedOSMQueries'] > 5)
-                {
-                    LogError("Exceeded max error threshold for Open Street Map queries.  Marking OSM as unusable.");
-                    $GLOBALS['CACHES']['allowOSMQueries'] = false;
+                if ($GLOBALS['CACHES']['allowGoogleQueries'] === true) {
+                    if ($GLOBALS['CACHES']['numFailedGoogleQueries'] > 5) {
+                        LogError("Exceeded max error threshold for Google queries.  Marking Google as unusable.");
+                        $GLOBALS['CACHES']['allowGoogleQueries'] = false;
+                    }
+                    else {
+
+                        $geocode = $this->geocoder->getPlaceForLocationString($strlocname);
+                        $locId = $this->lookupGeoLocationIdByName($geocode['primary_name']);
+                        if (!is_null($locId)) {
+                            $loc = $this->getLocationById($locId);
+                            $loc->addAlternateName($strlocname);
+                        }
+                        else
+                        {
+                            $loc->fromGeocode($geocode);
+                            $loc->addAlternateName($strlocname);
+                        }
+                    }
+                } else {
+                    LogLine("Google geocode querying has been disabled. Not adding location for " . $strlocname, C__DISPLAY_WARNING__);
                     return null;
                 }
-
-                $osmPlace = getPlaceFromOpenStreetMap($strlocname);
-                if (!is_null($osmPlace) && is_array($osmPlace)) {
-                    if (array_key_exists(0, $osmPlace))
-                        $osmPlace = $osmPlace[0];
-
-                    $locId = $this->lookupGeoLocationIdByOsmId($osmPlace['osm_id']);
-                    if (!is_null($locId)) {
-                        return $this->getLocationById($locId);
-                    }
-                }
-            }
-            else
-            {
-                LogLine("Open Street Map querying has been disabled. Not adding location for " . $strlocname, C__DISPLAY_WARNING__);
+            } catch (\Exception $ex) {
+                $GLOBALS['CACHES']['numFailedGoogleQueries'] = $GLOBALS['CACHES']['numFailedGoogleQueries'] + 1;
+                handleException($ex);
                 return null;
             }
+
         }
-        catch (\Exception $ex)
+
+        if($loc->isNew())
         {
-            $GLOBALS['CACHES']['numFailedOSMQueries'] = $GLOBALS['CACHES']['numFailedOSMQueries'] + 1;
-            handleException($ex);
+            $loc->save();
+            $this->addGeolocationToCache($loc);
         }
-
-        $loc = \JobScooper\DataAccess\GeoLocationQuery::create()
-            ->filterByAlternateNames(array($strlocname), Criteria::CONTAINS_ALL)
-            ->findOneOrCreate();
-        if (is_null($loc))
-            return null;
-
-        $loc->fromDisplayString($strlocname);
-        $loc->save();
+        elseif($loc->isModified())
+        {
+            $loc->save();
+        }
         return $loc;
     }
 

@@ -18,6 +18,7 @@
 namespace JobScooper\DataAccess;
 
 use JobScooper\DataAccess\Base\GeoLocation as BaseGeoLocation;
+use JobScooper\DataAccess\Map\GeoLocationTableMap;
 use JobScooper\Manager\GeoLocationManager;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
@@ -35,27 +36,6 @@ class GeoLocation extends BaseGeoLocation
         }
     }
 
-    public function preSave(\Propel\Runtime\Connection\ConnectionInterface $con = null)
-    {
-        $this->_normalizeGeoLocationRecord();
-
-        if (is_callable('parent::preSave')) {
-            return parent::preSave($con);
-        }
-        return true;
-    }
-
-    private function _normalizeGeoLocationRecord()
-    {
-        if(is_null($this->getOpenStreetMapId()))
-        {
-            $facts = getOpenStreetMapFacts($this->getDisplayName());
-            $this->fromOSMData($facts);
-        }
-
-    }
-
-
     public function postSave(ConnectionInterface $con = null)
     {
         parent::postSave($con);
@@ -64,30 +44,29 @@ class GeoLocation extends BaseGeoLocation
         $caches->reloadCache();
     }
 
-    public function setState($v)
+    public function setRegion($v)
     {
-        parent::setState($v);
+        parent::setRegion($v);
 
-        $newCode = getStateCodeFromState($v);
+        $newCode = $this->getRegionCodeFromRegion($v);
 
-        if (is_null($this->getStateCode()))
-            parent::setStateCode($newCode);
+        if (is_null($this->getRegionCode()))
+            parent::setRegionCode($newCode);
     }
 
-    public function setStateCode($v)
+    public function setRegionCode($v)
     {
         if (!is_null($v) && strlen($v) > 0)
             $v = strtoupper($v);
 
-        parent::setStateCode($v);
+        parent::setRegionCode($v);
 
-        $newState = getStateFromStateCode($v);
+        $newState = $this->getRegionFromRegionCode($v);
 
-        if (is_null($this->getState()))
-            $this->setState($newState);
+        if (is_null($this->getRegion()))
+            $this->setRegion($newState);
 
     }
-
 
     public function setCountryCode($v)
     {
@@ -96,90 +75,6 @@ class GeoLocation extends BaseGeoLocation
 
         parent::setCountryCode($v);
 
-    }
-
-    public function setFullOsmDataFromArray($v)
-    {
-        $osmJson = encodeJSON($v);
-        parent::setFullOsmData($osmJson);
-    }
-
-    public function getFullOsmDataAsArray()
-    {
-        $osmJsonText = parent::getFullOsmData();
-        if (!is_null($osmJsonText) && strlen($osmJsonText) > 0)
-            return decodeJSON($osmJsonText);
-        return null;
-    }
-
-    private function _setFactFromOSM($key, $osmData, $osmKey, $overwrite)
-    {
-        $getfunc = "get" . $key;
-        $setfunc = "set" . $key;
-        $curval = $this->$getfunc();
-        if(is_null($curval) || $overwrite)
-        {
-            $this->$setfunc($osmData[$osmKey]);
-        }
-    }
-
-    public function fromDisplayString($strloc)
-    {
-        $this->addAlternateName($strloc);
-        if(is_null($this->getDisplayName()))
-            $this->setDisplayName($strloc);
-        $this->_normalizeGeoLocationRecord();
-        $this->save();
-    }
-
-    public function fromOSMData($osmPlace, $overwriteValues = false)
-    {
-        if(!is_null($osmPlace) && is_array($osmPlace) && count($osmPlace) > 0)
-        {
-            if(!array_key_exists('osm_id', $osmPlace))
-                $osmPlace = array_shift($osmPlace);
-
-
-            $locMgr = new GeoLocationManager();
-            $otherLocationId = $locMgr->lookupGeoLocationIdByOsmId($osmPlace['osm_id']);
-            if(!is_null($otherLocationId) && $otherLocationId !== false) {
-                $otherLocation = $locMgr->getLocationById($otherLocationId);
-                $otherLocation->copyInto($this, false, false);
-            }
-            else {
-                $this->_setFactFromOSM('OpenStreetMapId', $osmPlace, 'osm_id', $overwriteValues);
-                $this->_setFactFromOSM('Latitude', $osmPlace, 'lat', $overwriteValues);
-                $this->_setFactFromOSM('Longitude', $osmPlace, 'lon', $overwriteValues);
-                $this->_setFactFromOSM('Place', $osmPlace, 'place_name', $overwriteValues);
-                $this->setFullOsmDataFromArray($osmPlace);
-                if (array_key_exists('address', $osmPlace)) {
-                    $this->_setFactFromOSM('Place', $osmPlace['address'], 'city', $overwriteValues);
-                    $this->_setFactFromOSM('State', $osmPlace['address'], 'state', $overwriteValues);
-                    $this->_setFactFromOSM('County', $osmPlace['address'], 'county', $overwriteValues);
-                    $this->_setFactFromOSM('Country', $osmPlace['address'], 'country', $overwriteValues);
-                    $this->_setFactFromOSM('CountryCode', $osmPlace['address'], 'country_code', $overwriteValues);
-                    $this->_setFactFromOSM('DisplayName', $osmPlace, 'display_name', true);
-                }
-
-                if (array_key_exists('namedetails', $osmPlace))
-                    $this->addAlternateNames($osmPlace['namedetails']);
-            }
-
-            if(!is_null($this->getPlace())) {
-                $dispName = $this->getPlace();
-                $dispName .= !is_null($this->getStateCode()) ? ", " . $this->getStateCode() : "";
-                $this->setDisplayName($dispName);
-
-                // Add "City, StateCode, CountryCode" as an alternate name
-                $addAltName = $dispName . ", " . $this->getCountryCode();
-                $this->addAlternateName($addAltName);
-
-                // Add "City, Country" as an alternate name
-                $addAltName = $this->getPlace() . ", " . $this->getCountry();
-                $this->addAlternateName($addAltName);
-
-            }
-        }
     }
 
     public function setDisplayName($v)
@@ -223,47 +118,47 @@ class GeoLocation extends BaseGeoLocation
                 break;
 
             case 'location-city-comma-statecode':
-                $locFormatString = "{PLACE}, {STATECODE}";
+                $locFormatString = "{PLACE}, {REGIONCODE}";
                 break;
 
             case 'location-city-space-statecode':
-                $locFormatString = "{PLACE} {STATECODE}";
+                $locFormatString = "{PLACE} {REGIONCODE}";
                 break;
 
             case 'location-city-dash-statecode':
-                $locFormatString = "{PLACE}-{STATECODE}";
+                $locFormatString = "{PLACE}-{REGIONCODE}";
                 break;
 
             case 'location-city-comma-nospace-statecode':
-                $locFormatString = "{PLACE},{STATECODE}";
+                $locFormatString = "{PLACE},{REGIONCODE}";
                 break;
 
             case 'location-city-comma-statecode-underscores-and-dashes':
-                $locFormatString = "{PLACE}__2c-{STATECODE}";
+                $locFormatString = "{PLACE}__2c-{REGIONCODE}";
                 break;
 
             case 'location-city-comma-state':
-                $locFormatString = "{PLACE}, {STATE}";
+                $locFormatString = "{PLACE}, {REGION}";
                 break;
 
             case 'location-city-comma-state-country':
-                $locFormatString = "{PLACE}, {STATE}, {COUNTRY}";
+                $locFormatString = "{PLACE}, {REGION}, {COUNTRY}";
                 break;
 
             case 'location-city-comma-state-country-no-commas':
-                $locFormatString = "{PLACE} {STATE} {COUNTRY}";
+                $locFormatString = "{PLACE} {REGION} {COUNTRY}";
                 break;
 
             case 'location-city-comma-state-comma-country':
-                $locFormatString = "{PLACE}, {STATE}, {COUNTRY}";
+                $locFormatString = "{PLACE}, {REGION}, {COUNTRY}";
                 break;
 
             case 'location-city-comma-statecode-comma-country':
-                $locFormatString = "{PLACE}, {STATECODE}, {COUNTRY}";
+                $locFormatString = "{PLACE}, {REGIONCODE}, {COUNTRY}";
                 break;
 
             case 'location-city-comma-state-comma-countrycode':
-                $locFormatString = "{PLACE}, {STATE}, {COUNTRYCODE}";
+                $locFormatString = "{PLACE}, {REGION}, {COUNTRYCODE}";
                 break;
 
             case 'location-city-comma-country':
@@ -275,7 +170,7 @@ class GeoLocation extends BaseGeoLocation
                 break;
 
             case 'location-city-comma-statecode-comma-countrycode':
-                $locFormatString = "{PLACE}, {STATECODE}, {COUNTRYCODE}";
+                $locFormatString = "{PLACE}, {REGIONCODE}, {COUNTRYCODE}";
                 break;
 
             case 'location-countrycode':
@@ -287,11 +182,11 @@ class GeoLocation extends BaseGeoLocation
                 break;
 
             case 'location-state':
-                $locFormatString = "{STATE}";
+                $locFormatString = "{REGION}";
                 break;
 
             case 'location-statecode':
-                $locFormatString = "{STATECODE}";
+                $locFormatString = "{REGIONCODE}";
                 break;
 
             default:
@@ -302,4 +197,186 @@ class GeoLocation extends BaseGeoLocation
         return $this->formatLocation($locFormatString);
     }
 
+    function fromGeocode($geocode)
+    {
+        $arrVals = array();
+        foreach(array_keys($geocode) as $field) {
+            switch ($field) {
+                case 'latitude':
+                case 'longitude':
+                case 'place':
+                case 'country':
+                case 'countrycode':
+                case 'region':
+                case 'regioncode':
+                case 'county':
+                    $arrVals[$field] = $geocode[$field];
+                    break;
+
+                case 'primary_name':
+                    $arrVals['display_name'] = $geocode['primary_name'];
+                    break;
+
+                case 'alternate_names':
+                    $names = $this->getAlternateNames();
+                    $arrVals['alternate_names'] = $geocode['alternate_names'];
+                    if (is_null($names) || count($names) == 0) {
+                        $mergednames = array_merge($arrVals['alternate_names'], $names);
+                        $arrVals['alternate_names'] = array_unique($mergednames);
+                    }
+                    break;
+
+                default:
+            }
+        }
+        $this->fromArray($arrVals, GeoLocationTableMap::TYPE_FIELDNAME);
+    }
+
+
+
+    function getRegionCodeFromRegion($code)
+    {
+
+        $STATE_CODES = array(
+            "AL" => "ALABAMA",
+            "AK" => "ALASKA",
+            "AS" => "AMERICAN-SAMOA",
+            "AZ" => "ARIZONA",
+            "AR" => "ARKANSAS",
+            "CA" => "CALIFORNIA",
+            "CO" => "COLORADO",
+            "CT" => "CONNECTICUT",
+            "DE" => "DELAWARE",
+            "DC" => "DISTRICT-OF-COLUMBIA",
+            "FM" => "FEDERATED-STATES-OF-MICRONESIA",
+            "FL" => "FLORIDA",
+            "GA" => "GEORGIA",
+            "GU" => "GUAM",
+            "HI" => "HAWAII",
+            "ID" => "IDAHO",
+            "IL" => "ILLINOIS",
+            "IN" => "INDIANA",
+            "IA" => "IOWA",
+            "KS" => "KANSAS",
+            "KY" => "KENTUCKY",
+            "LA" => "LOUISIANA",
+            "ME" => "MAINE",
+            "MH" => "MARSHALL-ISLANDS",
+            "MD" => "MARYLAND",
+            "MA" => "MASSACHUSETTS",
+            "MI" => "MICHIGAN",
+            "MN" => "MINNESOTA",
+            "MS" => "MISSISSIPPI",
+            "MO" => "MISSOURI",
+            "MT" => "MONTANA",
+            "NE" => "NEBRASKA",
+            "NV" => "NEVADA",
+            "NH" => "NEW-HAMPSHIRE",
+            "NJ" => "NEW-JERSEY",
+            "NM" => "NEW-MEXICO",
+            "NY" => "NEW-YORK",
+            "NC" => "NORTH-CAROLINA",
+            "ND" => "NORTH-DAKOTA",
+            "MP" => "NORTHERN-MARIANA-ISLANDS",
+            "OH" => "OHIO",
+            "OK" => "OKLAHOMA",
+            "OR" => "OREGON",
+            "PW" => "PALAU",
+            "PA" => "PENNSYLVANIA",
+            "PR" => "PUERTO-RICO",
+            "RI" => "RHODE-ISLAND",
+            "SC" => "SOUTH-CAROLINA",
+            "SD" => "SOUTH-DAKOTA",
+            "TN" => "TENNESSEE",
+            "TX" => "TEXAS",
+            "UT" => "UTAH",
+            "VT" => "VERMONT",
+            "VI" => "VIRGIN-ISLANDS",
+            "VA" => "VIRGINIA",
+            "WA" => "WASHINGTON",
+            "WV" => "WEST-VIRGINIA",
+            "WI" => "WISCONSIN",
+            "WY" => "WYOMING"
+        );
+
+        $slug= strtoupper(cleanupSlugPart($code));
+        if(array_key_exists($slug, $STATE_CODES))
+            return $STATE_CODES[$slug];
+        return null;
+    }
+
+    function getRegionFromRegionCode($state)
+    {
+
+        $STATE_CODES = array(
+            "ALABAMA" => "AL",
+            "ALASKA" => "AK",
+            "AMERICAN-SAMOA" => "AS",
+            "ARIZONA" => "AZ",
+            "ARKANSAS" => "AR",
+            "CALIFORNIA" => "CA",
+            "COLORADO" => "CO",
+            "CONNECTICUT" => "CT",
+            "DELAWARE" => "DE",
+            "DISTRICT-OF-COLUMBIA" => "DC",
+            "FEDERATED-STATES-OF-MICRONESIA" => "FM",
+            "FLORIDA" => "FL",
+            "GEORGIA" => "GA",
+            "GUAM" => "GU",
+            "HAWAII" => "HI",
+            "IDAHO" => "ID",
+            "ILLINOIS" => "IL",
+            "INDIANA" => "IN",
+            "IOWA" => "IA",
+            "KANSAS" => "KS",
+            "KENTUCKY" => "KY",
+            "LOUISIANA" => "LA",
+            "MAINE" => "ME",
+            "MARSHALL-ISLANDS" => "MH",
+            "MARYLAND" => "MD",
+            "MASSACHUSETTS" => "MA",
+            "MICHIGAN" => "MI",
+            "MINNESOTA" => "MN",
+            "MISSISSIPPI" => "MS",
+            "MISSOURI" => "MO",
+            "MONTANA" => "MT",
+            "NEBRASKA" => "NE",
+            "NEVADA" => "NV",
+            "NEW-HAMPSHIRE" => "NH",
+            "NEW-JERSEY" => "NJ",
+            "NEW-MEXICO" => "NM",
+            "NEW-YORK" => "NY",
+            "NORTH-CAROLINA" => "NC",
+            "NORTH-DAKOTA" => "ND",
+            "NORTHERN-MARIANA-ISLANDS" => "MP",
+            "OHIO" => "OH",
+            "OKLAHOMA" => "OK",
+            "OREGON" => "OR",
+            "PALAU" => "PW",
+            "PENNSYLVANIA" => "PA",
+            "PUERTO-RICO" => "PR",
+            "RHODE-ISLAND" => "RI",
+            "SOUTH-CAROLINA" => "SC",
+            "SOUTH-DAKOTA" => "SD",
+            "TENNESSEE" => "TN",
+            "TEXAS" => "TX",
+            "UTAH" => "UT",
+            "VERMONT" => "VT",
+            "VIRGIN-ISLANDS" => "VI",
+            "VIRGINIA" => "VA",
+            "WASHINGTON" => "WA",
+            "WEST-VIRGINIA" => "WV",
+            "WISCONSIN" => "WI",
+            "WYOMING" => "WY"
+        );
+
+        $slug= strtoupper(cleanupSlugPart($state));
+        if(array_key_exists($slug, $STATE_CODES))
+            return $STATE_CODES[$slug];
+        return null;
+    }
+
+
+
 }
+

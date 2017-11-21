@@ -103,18 +103,18 @@ abstract class GeoLocation implements ActiveRecordInterface
     protected $county;
 
     /**
-     * The value for the state field.
+     * The value for the region field.
      *
      * @var        string
      */
-    protected $state;
+    protected $region;
 
     /**
-     * The value for the statecode field.
+     * The value for the regioncode field.
      *
      * @var        string
      */
-    protected $statecode;
+    protected $regioncode;
 
     /**
      * The value for the country field.
@@ -129,20 +129,6 @@ abstract class GeoLocation implements ActiveRecordInterface
      * @var        string
      */
     protected $countrycode;
-
-    /**
-     * The value for the full_osm_data field.
-     *
-     * @var        string
-     */
-    protected $full_osm_data;
-
-    /**
-     * The value for the openstreetmap_id field.
-     *
-     * @var        int
-     */
-    protected $openstreetmap_id;
 
     /**
      * The value for the latitude field.
@@ -480,23 +466,23 @@ abstract class GeoLocation implements ActiveRecordInterface
     }
 
     /**
-     * Get the [state] column value.
+     * Get the [region] column value.
      *
      * @return string
      */
-    public function getState()
+    public function getRegion()
     {
-        return $this->state;
+        return $this->region;
     }
 
     /**
-     * Get the [statecode] column value.
+     * Get the [regioncode] column value.
      *
      * @return string
      */
-    public function getStateCode()
+    public function getRegionCode()
     {
-        return $this->statecode;
+        return $this->regioncode;
     }
 
     /**
@@ -517,26 +503,6 @@ abstract class GeoLocation implements ActiveRecordInterface
     public function getCountryCode()
     {
         return $this->countrycode;
-    }
-
-    /**
-     * Get the [full_osm_data] column value.
-     *
-     * @return string
-     */
-    public function getFullOsmData()
-    {
-        return $this->full_osm_data;
-    }
-
-    /**
-     * Get the [openstreetmap_id] column value.
-     *
-     * @return int
-     */
-    public function getOpenStreetMapId()
-    {
-        return $this->openstreetmap_id;
     }
 
     /**
@@ -689,44 +655,44 @@ abstract class GeoLocation implements ActiveRecordInterface
     } // setCounty()
 
     /**
-     * Set the value of [state] column.
+     * Set the value of [region] column.
      *
      * @param string $v new value
      * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
-    public function setState($v)
+    public function setRegion($v)
     {
         if ($v !== null) {
             $v = (string) $v;
         }
 
-        if ($this->state !== $v) {
-            $this->state = $v;
-            $this->modifiedColumns[GeoLocationTableMap::COL_STATE] = true;
+        if ($this->region !== $v) {
+            $this->region = $v;
+            $this->modifiedColumns[GeoLocationTableMap::COL_REGION] = true;
         }
 
         return $this;
-    } // setState()
+    } // setRegion()
 
     /**
-     * Set the value of [statecode] column.
+     * Set the value of [regioncode] column.
      *
      * @param string $v new value
      * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
-    public function setStateCode($v)
+    public function setRegionCode($v)
     {
         if ($v !== null) {
             $v = (string) $v;
         }
 
-        if ($this->statecode !== $v) {
-            $this->statecode = $v;
-            $this->modifiedColumns[GeoLocationTableMap::COL_STATECODE] = true;
+        if ($this->regioncode !== $v) {
+            $this->regioncode = $v;
+            $this->modifiedColumns[GeoLocationTableMap::COL_REGIONCODE] = true;
         }
 
         return $this;
-    } // setStateCode()
+    } // setRegionCode()
 
     /**
      * Set the value of [country] column.
@@ -767,46 +733,6 @@ abstract class GeoLocation implements ActiveRecordInterface
 
         return $this;
     } // setCountryCode()
-
-    /**
-     * Set the value of [full_osm_data] column.
-     *
-     * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
-     */
-    public function setFullOsmData($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->full_osm_data !== $v) {
-            $this->full_osm_data = $v;
-            $this->modifiedColumns[GeoLocationTableMap::COL_FULL_OSM_DATA] = true;
-        }
-
-        return $this;
-    } // setFullOsmData()
-
-    /**
-     * Set the value of [openstreetmap_id] column.
-     *
-     * @param int $v new value
-     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
-     */
-    public function setOpenStreetMapId($v)
-    {
-        if ($v !== null) {
-            $v = (int) $v;
-        }
-
-        if ($this->openstreetmap_id !== $v) {
-            $this->openstreetmap_id = $v;
-            $this->modifiedColumns[GeoLocationTableMap::COL_OPENSTREETMAP_ID] = true;
-        }
-
-        return $this;
-    } // setOpenStreetMapId()
 
     /**
      * Set the value of [latitude] column.
@@ -950,11 +876,11 @@ abstract class GeoLocation implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : GeoLocationTableMap::translateFieldName('County', TableMap::TYPE_PHPNAME, $indexType)];
             $this->county = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : GeoLocationTableMap::translateFieldName('State', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->state = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : GeoLocationTableMap::translateFieldName('Region', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->region = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : GeoLocationTableMap::translateFieldName('StateCode', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->statecode = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : GeoLocationTableMap::translateFieldName('RegionCode', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->regioncode = (null !== $col) ? (string) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : GeoLocationTableMap::translateFieldName('Country', TableMap::TYPE_PHPNAME, $indexType)];
             $this->country = (null !== $col) ? (string) $col : null;
@@ -962,19 +888,13 @@ abstract class GeoLocation implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : GeoLocationTableMap::translateFieldName('CountryCode', TableMap::TYPE_PHPNAME, $indexType)];
             $this->countrycode = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : GeoLocationTableMap::translateFieldName('FullOsmData', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->full_osm_data = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : GeoLocationTableMap::translateFieldName('OpenStreetMapId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->openstreetmap_id = (null !== $col) ? (int) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : GeoLocationTableMap::translateFieldName('Latitude', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : GeoLocationTableMap::translateFieldName('Latitude', TableMap::TYPE_PHPNAME, $indexType)];
             $this->latitude = (null !== $col) ? (double) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : GeoLocationTableMap::translateFieldName('Longitude', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : GeoLocationTableMap::translateFieldName('Longitude', TableMap::TYPE_PHPNAME, $indexType)];
             $this->longitude = (null !== $col) ? (double) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 13 + $startcol : GeoLocationTableMap::translateFieldName('AlternateNames', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : GeoLocationTableMap::translateFieldName('AlternateNames', TableMap::TYPE_PHPNAME, $indexType)];
             $this->alternate_names = $col;
             $this->alternate_names_unserialized = null;
             $this->resetModified();
@@ -985,7 +905,7 @@ abstract class GeoLocation implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 14; // 14 = GeoLocationTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 12; // 12 = GeoLocationTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\GeoLocation'), 0, $e);
@@ -1270,23 +1190,17 @@ abstract class GeoLocation implements ActiveRecordInterface
         if ($this->isColumnModified(GeoLocationTableMap::COL_COUNTY)) {
             $modifiedColumns[':p' . $index++]  = 'county';
         }
-        if ($this->isColumnModified(GeoLocationTableMap::COL_STATE)) {
-            $modifiedColumns[':p' . $index++]  = 'state';
+        if ($this->isColumnModified(GeoLocationTableMap::COL_REGION)) {
+            $modifiedColumns[':p' . $index++]  = 'region';
         }
-        if ($this->isColumnModified(GeoLocationTableMap::COL_STATECODE)) {
-            $modifiedColumns[':p' . $index++]  = 'statecode';
+        if ($this->isColumnModified(GeoLocationTableMap::COL_REGIONCODE)) {
+            $modifiedColumns[':p' . $index++]  = 'regioncode';
         }
         if ($this->isColumnModified(GeoLocationTableMap::COL_COUNTRY)) {
             $modifiedColumns[':p' . $index++]  = 'country';
         }
         if ($this->isColumnModified(GeoLocationTableMap::COL_COUNTRYCODE)) {
             $modifiedColumns[':p' . $index++]  = 'countrycode';
-        }
-        if ($this->isColumnModified(GeoLocationTableMap::COL_FULL_OSM_DATA)) {
-            $modifiedColumns[':p' . $index++]  = 'full_osm_data';
-        }
-        if ($this->isColumnModified(GeoLocationTableMap::COL_OPENSTREETMAP_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'openstreetmap_id';
         }
         if ($this->isColumnModified(GeoLocationTableMap::COL_LATITUDE)) {
             $modifiedColumns[':p' . $index++]  = 'latitude';
@@ -1323,23 +1237,17 @@ abstract class GeoLocation implements ActiveRecordInterface
                     case 'county':
                         $stmt->bindValue($identifier, $this->county, PDO::PARAM_STR);
                         break;
-                    case 'state':
-                        $stmt->bindValue($identifier, $this->state, PDO::PARAM_STR);
+                    case 'region':
+                        $stmt->bindValue($identifier, $this->region, PDO::PARAM_STR);
                         break;
-                    case 'statecode':
-                        $stmt->bindValue($identifier, $this->statecode, PDO::PARAM_STR);
+                    case 'regioncode':
+                        $stmt->bindValue($identifier, $this->regioncode, PDO::PARAM_STR);
                         break;
                     case 'country':
                         $stmt->bindValue($identifier, $this->country, PDO::PARAM_STR);
                         break;
                     case 'countrycode':
                         $stmt->bindValue($identifier, $this->countrycode, PDO::PARAM_STR);
-                        break;
-                    case 'full_osm_data':
-                        $stmt->bindValue($identifier, $this->full_osm_data, PDO::PARAM_STR);
-                        break;
-                    case 'openstreetmap_id':
-                        $stmt->bindValue($identifier, $this->openstreetmap_id, PDO::PARAM_INT);
                         break;
                     case 'latitude':
                         $stmt->bindValue($identifier, $this->latitude, PDO::PARAM_STR);
@@ -1428,10 +1336,10 @@ abstract class GeoLocation implements ActiveRecordInterface
                 return $this->getCounty();
                 break;
             case 5:
-                return $this->getState();
+                return $this->getRegion();
                 break;
             case 6:
-                return $this->getStateCode();
+                return $this->getRegionCode();
                 break;
             case 7:
                 return $this->getCountry();
@@ -1440,18 +1348,12 @@ abstract class GeoLocation implements ActiveRecordInterface
                 return $this->getCountryCode();
                 break;
             case 9:
-                return $this->getFullOsmData();
-                break;
-            case 10:
-                return $this->getOpenStreetMapId();
-                break;
-            case 11:
                 return $this->getLatitude();
                 break;
-            case 12:
+            case 10:
                 return $this->getLongitude();
                 break;
-            case 13:
+            case 11:
                 return $this->getAlternateNames();
                 break;
             default:
@@ -1489,15 +1391,13 @@ abstract class GeoLocation implements ActiveRecordInterface
             $keys[2] => $this->getGeoLocationKey(),
             $keys[3] => $this->getPlace(),
             $keys[4] => $this->getCounty(),
-            $keys[5] => $this->getState(),
-            $keys[6] => $this->getStateCode(),
+            $keys[5] => $this->getRegion(),
+            $keys[6] => $this->getRegionCode(),
             $keys[7] => $this->getCountry(),
             $keys[8] => $this->getCountryCode(),
-            $keys[9] => $this->getFullOsmData(),
-            $keys[10] => $this->getOpenStreetMapId(),
-            $keys[11] => $this->getLatitude(),
-            $keys[12] => $this->getLongitude(),
-            $keys[13] => $this->getAlternateNames(),
+            $keys[9] => $this->getLatitude(),
+            $keys[10] => $this->getLongitude(),
+            $keys[11] => $this->getAlternateNames(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1585,10 +1485,10 @@ abstract class GeoLocation implements ActiveRecordInterface
                 $this->setCounty($value);
                 break;
             case 5:
-                $this->setState($value);
+                $this->setRegion($value);
                 break;
             case 6:
-                $this->setStateCode($value);
+                $this->setRegionCode($value);
                 break;
             case 7:
                 $this->setCountry($value);
@@ -1597,18 +1497,12 @@ abstract class GeoLocation implements ActiveRecordInterface
                 $this->setCountryCode($value);
                 break;
             case 9:
-                $this->setFullOsmData($value);
-                break;
-            case 10:
-                $this->setOpenStreetMapId($value);
-                break;
-            case 11:
                 $this->setLatitude($value);
                 break;
-            case 12:
+            case 10:
                 $this->setLongitude($value);
                 break;
-            case 13:
+            case 11:
                 if (!is_array($value)) {
                     $v = trim(substr($value, 2, -2));
                     $value = $v ? explode(' | ', $v) : array();
@@ -1657,10 +1551,10 @@ abstract class GeoLocation implements ActiveRecordInterface
             $this->setCounty($arr[$keys[4]]);
         }
         if (array_key_exists($keys[5], $arr)) {
-            $this->setState($arr[$keys[5]]);
+            $this->setRegion($arr[$keys[5]]);
         }
         if (array_key_exists($keys[6], $arr)) {
-            $this->setStateCode($arr[$keys[6]]);
+            $this->setRegionCode($arr[$keys[6]]);
         }
         if (array_key_exists($keys[7], $arr)) {
             $this->setCountry($arr[$keys[7]]);
@@ -1669,19 +1563,13 @@ abstract class GeoLocation implements ActiveRecordInterface
             $this->setCountryCode($arr[$keys[8]]);
         }
         if (array_key_exists($keys[9], $arr)) {
-            $this->setFullOsmData($arr[$keys[9]]);
+            $this->setLatitude($arr[$keys[9]]);
         }
         if (array_key_exists($keys[10], $arr)) {
-            $this->setOpenStreetMapId($arr[$keys[10]]);
+            $this->setLongitude($arr[$keys[10]]);
         }
         if (array_key_exists($keys[11], $arr)) {
-            $this->setLatitude($arr[$keys[11]]);
-        }
-        if (array_key_exists($keys[12], $arr)) {
-            $this->setLongitude($arr[$keys[12]]);
-        }
-        if (array_key_exists($keys[13], $arr)) {
-            $this->setAlternateNames($arr[$keys[13]]);
+            $this->setAlternateNames($arr[$keys[11]]);
         }
     }
 
@@ -1739,23 +1627,17 @@ abstract class GeoLocation implements ActiveRecordInterface
         if ($this->isColumnModified(GeoLocationTableMap::COL_COUNTY)) {
             $criteria->add(GeoLocationTableMap::COL_COUNTY, $this->county);
         }
-        if ($this->isColumnModified(GeoLocationTableMap::COL_STATE)) {
-            $criteria->add(GeoLocationTableMap::COL_STATE, $this->state);
+        if ($this->isColumnModified(GeoLocationTableMap::COL_REGION)) {
+            $criteria->add(GeoLocationTableMap::COL_REGION, $this->region);
         }
-        if ($this->isColumnModified(GeoLocationTableMap::COL_STATECODE)) {
-            $criteria->add(GeoLocationTableMap::COL_STATECODE, $this->statecode);
+        if ($this->isColumnModified(GeoLocationTableMap::COL_REGIONCODE)) {
+            $criteria->add(GeoLocationTableMap::COL_REGIONCODE, $this->regioncode);
         }
         if ($this->isColumnModified(GeoLocationTableMap::COL_COUNTRY)) {
             $criteria->add(GeoLocationTableMap::COL_COUNTRY, $this->country);
         }
         if ($this->isColumnModified(GeoLocationTableMap::COL_COUNTRYCODE)) {
             $criteria->add(GeoLocationTableMap::COL_COUNTRYCODE, $this->countrycode);
-        }
-        if ($this->isColumnModified(GeoLocationTableMap::COL_FULL_OSM_DATA)) {
-            $criteria->add(GeoLocationTableMap::COL_FULL_OSM_DATA, $this->full_osm_data);
-        }
-        if ($this->isColumnModified(GeoLocationTableMap::COL_OPENSTREETMAP_ID)) {
-            $criteria->add(GeoLocationTableMap::COL_OPENSTREETMAP_ID, $this->openstreetmap_id);
         }
         if ($this->isColumnModified(GeoLocationTableMap::COL_LATITUDE)) {
             $criteria->add(GeoLocationTableMap::COL_LATITUDE, $this->latitude);
@@ -1856,12 +1738,10 @@ abstract class GeoLocation implements ActiveRecordInterface
         $copyObj->setGeoLocationKey($this->getGeoLocationKey());
         $copyObj->setPlace($this->getPlace());
         $copyObj->setCounty($this->getCounty());
-        $copyObj->setState($this->getState());
-        $copyObj->setStateCode($this->getStateCode());
+        $copyObj->setRegion($this->getRegion());
+        $copyObj->setRegionCode($this->getRegionCode());
         $copyObj->setCountry($this->getCountry());
         $copyObj->setCountryCode($this->getCountryCode());
-        $copyObj->setFullOsmData($this->getFullOsmData());
-        $copyObj->setOpenStreetMapId($this->getOpenStreetMapId());
         $copyObj->setLatitude($this->getLatitude());
         $copyObj->setLongitude($this->getLongitude());
         $copyObj->setAlternateNames($this->getAlternateNames());
@@ -2471,12 +2351,10 @@ abstract class GeoLocation implements ActiveRecordInterface
         $this->geolocation_key = null;
         $this->place = null;
         $this->county = null;
-        $this->state = null;
-        $this->statecode = null;
+        $this->region = null;
+        $this->regioncode = null;
         $this->country = null;
         $this->countrycode = null;
-        $this->full_osm_data = null;
-        $this->openstreetmap_id = null;
         $this->latitude = null;
         $this->longitude = null;
         $this->alternate_names = null;
