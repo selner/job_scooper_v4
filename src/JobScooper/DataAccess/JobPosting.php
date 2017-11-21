@@ -281,13 +281,29 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 
     public function setPostedAt($v)
     {
+        $v = str_ireplace("posted", "", $v);
         $v = strtolower($this->_cleanupTextValue($v));
+        $newV = null;
+
         $dateVal = strtotime($v, $now = time());
         if (!($dateVal === false)) {
-            $v = date('Y-m-d', $dateVal);
+            $newV = date('Y-m-d', $dateVal);
         }
-        else
-        {
+
+        if(is_null($newV) && preg_match('/^\d+$/', $v)) {
+            $vstr = strval($v);
+            if(strlen($vstr) == strlen("20170101"))
+            {
+                $datestr = substr($vstr, 4, 2) . "/" . substr($vstr, 6, 2) ."/" . substr($vstr, 0, 4);
+                $dateVal = strtotime($v, $now = time());
+                if (!($dateVal === false)) {
+                    $v = date('Y-m-d', $dateVal);
+                }
+                $newV = date('Y-m-d', $dateVal);
+            }
+        }
+
+        if(is_null($newV)) {
             $info = date_parse($v);
             $date = "";
             foreach(array("month", "day", "year") as $dateval)
@@ -301,10 +317,14 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
                     $date .= strval(getdate()[$dateval]);
                 }
             }
-            $v = $date;
+            $newV = $date;
         }
 
-        parent::setPostedAt($v);
+        if(is_null($newV)) {
+            $newV = $v;
+        }
+
+        parent::setPostedAt($newV);
     }
 
     function __construct($arrJobFacts = null)
