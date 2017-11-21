@@ -38,18 +38,68 @@ class PluginAmazon extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
 
     protected $siteName = 'Amazon';
-    protected $nJobListingsPerPage = 100;
+    protected $nJobListingsPerPage = 10;
     protected $siteBaseURL = 'http://www.amazon.jobs';
-    protected $strBaseURLFormat = "https://www.amazon.jobs/en/search?base_query=***KEYWORDS***&loc_query=***LOCATION***&result_limit=100&sort=recent&cache";
+    protected $strBaseURLFormat = "https://www.amazon.jobs/en/search?base_query=***KEYWORDS***&loc_query=***LOCATION***&sort=recent&cache";
 //    protected $strBaseURLFormat = "https://www.amazon.jobs/en/search?offset=0&result_limit=10&sort=recent&cities[]=London&distanceType=Mi&radius=24km&latitude=&longitude=&loc_group_id=&loc_query=***LOCATION***&base_query=director&city=&country=&region=&county=&query_options=&"
-    protected $paginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
+    protected $paginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode-comma-country';
     protected $nMaxJobsToReturn = 2000; // Amazon maxes out at 2000 jobs in the list
     protected $additionalLoadDelaySeconds = 1;
     protected $countryCodes = array("US", "GB");
 
-    protected $selectorMoreListings = ".load-more";
+    protected $selectorMoreListings = "button[data-label='right']";
 
+    function getGeoLocationSettingType(\JobScooper\DataAccess\GeoLocation $location=null)
+    {
+        if(!is_null($location))
+        {
+            switch($location->getCountryCode())
+            {
+                case "US":
+                    return 'location-city-comma-statecode-comma-country';
+                    break;
+
+                default:
+                    return 'location-city-comma-state-comma-country';
+                    break;
+            }
+        }
+        return $this->typeLocationSearchNeeded;
+    }
+
+    function doFirstPageLoad($searchDetails)
+    {
+        $js = "
+            setTimeout(clickSearchButton, " . strval($this->additionalLoadDelaySeconds) .");
+
+            function clickSearchButton() 
+            {
+                var btnSearch = document.querySelectorAll(\"button.search-button\");
+                if(btnSearch != null && !typeof(btnSearch.click) !== \"function\" && btnSearch.length >= 1) {
+                    btnSearch = btnSearch[0];
+                } 
+                
+                if(btnSearch != null && btnSearch.style.display === \"\") 
+                { 
+                    btnSearch.click();  
+                    console.log(\"Clicked search button control...\");
+                }
+                else
+                {
+                    console.log('Search button was not active.');
+                }
+            }  
+        ";
+
+        $this->selenium->getPageHTML($searchDetails->getSearchParameter('search_start_url'));
+
+        $this->runJavaScriptSnippet($js, false);
+        sleep($this->additionalLoadDelaySeconds + 2);
+
+        $html = $this->getActiveWebdriver()->getPageSource();
+        return $html;
+    }
 
 
     protected $arrListingTagSetup = array(
