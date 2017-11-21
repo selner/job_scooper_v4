@@ -19,6 +19,7 @@ namespace JobScooper\Plugins\lib;
 
 
 
+use JobScooper\DataAccess\GeoLocation;
 use JobScooper\DataAccess\UserSearchRun;
 use JobScooper\Plugins\Interfaces\IJobSitePlugin;
 use JobScooper\Manager\SeleniumManager;
@@ -320,7 +321,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     protected $countryCodes = array("US");
 
-    function getGeoLocationSettingType()
+    function getGeoLocationSettingType(GeoLocation $location=null)
     {
         return $this->typeLocationSearchNeeded;
     }

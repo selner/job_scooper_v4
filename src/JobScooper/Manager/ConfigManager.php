@@ -691,9 +691,7 @@ class ConfigManager
 
 
         $plugin = getPluginObjectForJobSite($search->getJobSiteKey());
-
-        $locmgr = new GeoLocationManager();
-        $locTypeNeeded = $plugin->getGeoLocationSettingType();
+        $locTypeNeeded = $plugin->getGeoLocationSettingType($arrSearchLocation['location']);
         if (!is_null($locTypeNeeded)) {
 
             $newSearch = findOrCreateUserSearchRun($search->getSearchKey(), $search->getJobSiteKey(), $arrSearchLocation['location_name_key'], $search);
