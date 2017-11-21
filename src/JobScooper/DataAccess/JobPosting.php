@@ -195,7 +195,8 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 
         try
         {
-            $locmgr = new \JobScooper\Manager\GeoLocationManager();
+            $locmgr = $GLOBALS['CACHES']['geolocation_manager'];
+
             $location = $locmgr->findOrCreateGeoLocationByName($loc_str);
             if(!is_null($location)) {
                 $this->setGeoLocation($location);

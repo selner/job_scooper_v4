@@ -37,7 +37,7 @@ class JobsAutoMarker
         if (!is_null($arrJobObjsToMark) && count($arrJobObjsToMark) > 0)
             $this->arrMasterJobList = $arrJobObjsToMark;
 
-        $this->_locmgr= new GeoLocationManager();
+        $this->_locmgr = $GLOBALS['CACHES']['geolocation_manager'];
 
     }
 

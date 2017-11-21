@@ -39,9 +39,6 @@ class GeoLocation extends BaseGeoLocation
     public function postSave(ConnectionInterface $con = null)
     {
         parent::postSave($con);
-
-        $caches = new GeoLocationManager();
-        $caches->reloadCache();
     }
 
     public function setRegion($v)

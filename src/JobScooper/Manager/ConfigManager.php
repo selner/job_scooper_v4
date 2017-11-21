@@ -434,8 +434,10 @@ class ConfigManager
         if (array_key_exists('global_search_options', $config)) {
 
             // This must happen first so that the search locations can be geocoded
-            if(array_key_exists('google_maps_api_key', $config['global_search_options']))
+            if (array_key_exists('google_maps_api_key', $config['global_search_options'])) {
                 $GLOBALS['USERDATA']['configuration_settings']['google_maps_api_key'] = $config['global_search_options']['google_maps_api_key'];
+                $GLOBALS['CACHES']['geolocation_manager'] = new GeoLocationManager();
+            }
 
             foreach (array_keys($config['global_search_options']) as $gso)
             {
@@ -512,13 +514,13 @@ class ConfigManager
         if (!array_key_exists('search_location', $GLOBALS['USERDATA']['configuration_settings']))
             $GLOBALS['USERDATA']['configuration_settings']['search_locations'] = array();
 
-        $locmgr = new GeoLocationManager();
-        $location = $locmgr->findOrCreateGeoLocationByName($location_string);
+        $location = $GLOBALS['CACHES']['geolocation_manager']->findOrCreateGeoLocationByName($location_string);
         if(!is_null($location))
         {
             $GLOBALS['USERDATA']['configuration_settings']['search_location'][$location->getGeoLocationId()] = array(
                 'location_raw_source_value' => $location_string,
                 'location_name_key' => $location->getSlug(),
+                'location' => $location,
                 'location_id' => $location->getGeoLocationId());
 
             if (!is_null($location->getCountryCode()))
@@ -675,7 +677,6 @@ class ConfigManager
 
     private function _getSearchForSpecificLocationName_($search, $arrSearchLocation)
     {
-        $locNameLookup = $arrSearchLocation['location_id'];
         if ($search->isSearchIncludedInRun() !== true) {
             // this site was excluded for this run, so continue.
             return $search;
@@ -716,7 +717,6 @@ class ConfigManager
 
             $newSearch->save();
 
-            // BUGBUG:  2nd search returns Seattle as search string value when it should be blank
             return $newSearch;
         }
 

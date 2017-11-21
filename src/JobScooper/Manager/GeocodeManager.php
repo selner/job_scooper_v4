@@ -76,7 +76,14 @@ class GeocodeManager
      */
     function getPlaceForLocationString($strLocation)
     {
-        $addr = $this->geocoder->geocode($strLocation);
+        try {
+            $addr = $this->geocoder->geocode($strLocation);
+        } catch (\Geocoder\Exception\NoResultException $ex) {
+            LogDebug("No geocode result was found for " . $strLocation .".  Details: " .$ex->getMessage());
+            return null;
+        } catch (Exception $ex) {
+            handleException($ex);
+        }
 
         if (count($addr) > 0) {
             $arrAddr = $addr->toArray();
