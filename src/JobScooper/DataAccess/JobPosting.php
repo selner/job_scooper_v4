@@ -146,6 +146,10 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
         $v = str_ireplace("- new", "", $v);
         $v = str_ireplace("- easy apply", "", $v);
         $v = $this->_cleanupTextValue($v);
+
+        if(strlen($v) == 0)
+            throw new \Exception($this->getJobSiteKey() . " posting's title string is empty.");
+
         parent::setTitle($v);
     }
 
