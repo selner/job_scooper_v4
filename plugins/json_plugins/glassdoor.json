@@ -1,0 +1,78 @@
+{
+  "AgentName": "Glassdoor",
+  "BaseURL": "http://www.glassdoor.com/",
+  "SourceURL": "https://www.glassdoor.com/Job/jobs.htm?suggestCount=0&suggestChosen=false&clickSource=searchBtn&typedKeyword=***KEYWORDS***&sc.keyword=***KEYWORDS***&locT=&locId=&jobType=",
+  "PluginExtendsClassName" : "AbstractGlassdoor",
+  "LocationType": "location-city-comma-statecode",
+  "CountryCodes" : ["US"],
+  "Collections": [
+    {
+      "Name": "PageFields",
+      "Fields": [
+        {
+          "Name": "TotalPostCount",
+          "Selector": "p.jobsCount",
+          "Extract": "TEXT",
+          "Type": "CSS"
+        },
+        {
+          "Name": "JobPostItem",
+          "Selector": "li.jl",
+          "Extract": "CSS",
+          "Attribute": "collection",
+          "Type": "CSS"
+        }
+      ]
+    },
+    {
+      "Name": "ItemFields",
+      "Fields": [
+        {
+          "Name": "Title",
+          "Selector": "div.flexbox a.jobLink",
+          "Extract": "TEXT",
+          "Type": "CSS"
+        },
+        {
+          "Name": "Url",
+          "Selector": "div.flexbox a.jobLink",
+          "Extract": "ATTR",
+          "Attribute": "href",
+          "Type": "CSS"
+        },
+        {
+          "Name": "JobSitePostId",
+          "Selector": "span.save-job-button",
+          "Extract": "ATTR",
+          "Attribute": "data-job-id"
+        },
+        {
+          "Name": "Location",
+          "Selector": "div.empLoc span.subtle",
+          "Extract": "TEXT",
+          "Attribute": null,
+          "Type": "CSS"
+        },
+        {
+          "Name": "Company",
+          "Selector": "div.empLoc div",
+          "Extract": "TEXT",
+          "Attribute": null,
+          "Type": "CSS"
+        },
+        {
+          "Name": "PostedAt",
+          "Selector": "span.hideHH",
+          "Extract": "TEXT",
+          "Attribute": null,
+          "Type": "CSS"
+        }
+      ]
+    }
+  ],
+  "Pagination": {
+    "PageLimit": 30,
+    "Type": "next-button",
+    "Selector": "li.next a"
+  }
+}
