@@ -49,6 +49,11 @@ class GoogleGeocoderHttpAdapter extends CurlWrapper  implements \Geocoder\HttpAd
                         throw new \Geocoder\Exception\QuotaExceededException($errMsg);
                         break;
 
+                    case "ZERO_RESULTS":
+                        LogLine("No results were found for the query " . $url, C__DISPLAY_WARNING__);
+                        return $curl_output['body'];
+                        break;
+
                     default:
                         throw new InvalidServerResponse($errMsg);
                         break;
