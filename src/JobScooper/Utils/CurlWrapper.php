@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Copyright 2014-17 Bryan Selner
  *
@@ -15,6 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+namespace JobScooper\Utils;
 
 const C__API_RETURN_TYPE_OBJECT__ = 33;
 const C__API_RETURN_TYPE_ARRAY__ = 44;

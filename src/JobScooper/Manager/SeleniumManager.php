@@ -16,13 +16,12 @@
  * under the License.
  */
 namespace JobScooper\Manager;
-use ErrorException;
 use Exception;
-use GuzzleHttp\Client;
+use JobScooper\Utils\PropertyObject;
+use JobScooper\Utils\SimpleHTMLHelper;
 
 
-
-class SeleniumManager extends \PropertyObject
+class SeleniumManager extends PropertyObject
 {
     private $remoteWebDriver = null;
     private $additionalLoadDelaySeconds = null;
@@ -267,7 +266,7 @@ class SeleniumManager extends \PropertyObject
             }
             $strHtml = $res->getBody();
 
-            $objSimplHtml = \SimpleHTMLHelper::str_get_html($strHtml);
+            $objSimplHtml = SimpleHTMLHelper::str_get_html($strHtml);
             if ($objSimplHtml === false)
             {
                 $ret = false;

@@ -14,6 +14,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+namespace JobScooper\Utils;
+
+use Exception;
+use ErrorException;
+use Sunra\PhpSimple\HtmlDomParser;
 
 
 const C__SIMPLEHTML_THROWEXCEPTION = 0x1;
@@ -24,10 +29,9 @@ const C__SIMPLEHTML_FOUND_RETURN_PROPERTY = 0x10;
 const C__SIMPLEHTML_FOUND_RETURN_ATTRIB = 0x20;
 const C__SIMPLEHTML_FOUND_RETURN_NODE = 0x40;
 const C__SIMPLEHTML_FOUND_RETURN_ALLCHILDREN = 0x80;
-use Sunra\PhpSimple\HtmlDomParser;
 
 
-class SimpleHTMLHelper extends Sunra\PhpSimple\HtmlDomParser
+class SimpleHTMLHelper extends HtmlDomParser
 {
     private $nodeObj = null;
 

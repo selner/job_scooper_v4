@@ -21,7 +21,6 @@ use JobScooper\DataAccess\GeoLocationQuery;
 use JobScooper\DataAccess\Map\GeoLocationTableMap;
 
 use Exception;
-use JobScooper\Manager\GeoLocationManager;
 use Propel\Runtime\ActiveQuery\Criteria;
 
 

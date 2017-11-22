@@ -1,5 +1,6 @@
 <?php
 
+namespace JobScooper\Utils;
 /**
  * This is the main option parser class
  */

@@ -17,11 +17,6 @@
 
 namespace JobScooper\Plugins\lib;
 
-
-
-
-use PHPMailer\PHPMailer\Exception;
-
 class SimplePlugin extends BaseJobsSite
 {
     protected $siteName = '';

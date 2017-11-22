@@ -19,10 +19,12 @@ namespace JobScooper\Manager;
 
 
 use const JobScooper\Plugins\lib\VALUE_NOT_SUPPORTED;
+use JobScooper\Utils\SimpleCSV;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use JobScooper\DataAccess\UserSearchRun;
 use  \Propel\Runtime\Propel;
+use \JobScooper\Utils\Pharse;
 
 
 class ConfigManager
@@ -100,7 +102,7 @@ class ConfigManager
 
         __initializeArgs__($rootdir);
 
-        $cmdLineOpts = \Pharse::options($GLOBALS['OPTS_SETTINGS']);
+        $cmdLineOpts = Pharse::options($GLOBALS['OPTS_SETTINGS']);
 
         LogLine("Initializing application using the passed command line switches: " . getArrayValuesAsString($cmdLineOpts));
 
@@ -1002,7 +1004,7 @@ class ConfigManager
                     if(file_exists($fileDetail ['full_file_path'] ) && is_file($fileDetail ['full_file_path'] ))
                     {
                         LogDebug("Loading job Company regexes to filter from ".$fileDetail ['full_file_path']."." , \C__DISPLAY_ITEM_DETAIL__);
-                        $classCSVFile = new \SimpleCSV($fileDetail ['full_file_path'] , 'r');
+                        $classCSVFile = new SimpleCSV($fileDetail ['full_file_path'] , 'r');
                         $arrCompaniesTemp = $classCSVFile->readAllRecords(true,array('match_regex'));
                         $arrCompaniesTemp = $arrCompaniesTemp['data_rows'];
                         LogDebug(count($arrCompaniesTemp) . " companies found in the source file that will be automatically filtered from job listings." , \C__DISPLAY_ITEM_DETAIL__);

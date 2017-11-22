@@ -9,8 +9,6 @@
 namespace JobScooper\Manager;
 
 use Geocoder\Formatter\FormatterInterface;
-use Geocoder\Provider\GoogleMapsProvider;
-use Geocoder\HttpAdapter\CurlHttpAdapter;
 use \Exception;
 use Geocoder\Result\ResultInterface;
 use JobScooper\Utils\GoogleGeocoderHttpAdapter;

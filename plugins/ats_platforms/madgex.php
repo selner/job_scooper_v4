@@ -114,7 +114,7 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
 
                         $this->selenium->loadPage($url);
                         $html = $this->selenium->getPageHTML($url);
-                        $objSimpHTML = new \SimpleHTMLHelper($html);
+                        $objSimpHTML = new \JobScooper\Utils\SimpleHTMLHelper($html);
                     } catch (Exception $ex) {
                         handleException(new Exception("Failed to parseAndRedirectToLocation", $ex->getCode(), $ex), null, true);
                     }

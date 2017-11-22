@@ -18,12 +18,136 @@
 // If installed as part of the package, uses Klogger v0.1 version (http://codefury.net/projects/klogger/)
 //
 
+use JobScooper\Utils\Pharse as Pharse;
 
 $GLOBALS['USERDATA']['OPTS']['VERBOSE'] = false;
 $GLOBALS['USERDATA']['OPTS']['VERBOSE_API_CALLS'] = false;
 const C__STR_USER_AGENT__ = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36";
 
 date_default_timezone_set("America/Los_Angeles");
+
+
+function get_PharseOptionValue($strOptName)
+{
+    $retvalue = null;
+    $strOptGiven = $strOptName."_given";
+    if(isset($GLOBALS['USERDATA']['OPTS']) && isset($GLOBALS['USERDATA']['OPTS'][$strOptGiven]) && $GLOBALS['USERDATA']['OPTS'][$strOptGiven] == true)
+    {
+        if(isset($GLOBALS['logger']) && isset($GLOBALS['VERBOSE'])) $GLOBALS['logger']->logLine("'".$strOptName ."'"."=[".$GLOBALS['USERDATA']['OPTS'][$strOptName] ."]", C__DISPLAY_ITEM_DETAIL__);
+        $retvalue = $GLOBALS['USERDATA']['OPTS'][$strOptName];
+    }
+    else
+    {
+        $retvalue = null;
+    }
+
+    return $retvalue;
+}
+
+
+function setGlobalFileDetails($key, $fRequireFile = false, $fullpath = null)
+{
+    $ret = null;
+    $ret = parseFilePath($fullpath, $fRequireFile);
+
+    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("". $key ." set to [" . var_export($ret, true) . "]", C__DISPLAY_ITEM_DETAIL__);
+
+    $GLOBALS['USERDATA']['OPTS'][$key] = $ret;
+
+    return $ret;
+}
+
+function set_FileDetails_fromPharseSetting($optUserKeyName, $optDetailsKeyName, $fFileRequired)
+{
+    $valOpt = get_PharseOptionValue($optUserKeyName);
+    return setGlobalFileDetails($optDetailsKeyName, $fFileRequired, $valOpt);
+}
+
+
+function get_FileDetails_fromPharseOption($optUserKeyName, $fFileRequired)
+{
+    $ret = null;
+    $valOpt = get_PharseOptionValue($optUserKeyName);
+
+//    $fMatched = preg_match("/^['|\"]([^'\"]{1,})['|\"]$/", $valOpt, $arrMatches);
+//    if($fMatched) $valOpt = $arrMatches[1];
+
+    if($valOpt) $ret = parseFilePath($valOpt, $fFileRequired);
+
+    return $ret;
+
+}
+
+function getConfigurationSettings($strSubkey = null)
+{
+    $ret = null;
+    if(array_key_exists('USERDATA', $GLOBALS) && array_key_exists('configuration_settings', $GLOBALS['USERDATA']) && !is_null($GLOBALS['USERDATA']['configuration_settings']) && is_array($GLOBALS['USERDATA']['configuration_settings'])) {
+        if (isset($strSubkey) && (isset($GLOBALS['USERDATA']['configuration_settings'][$strSubkey]) || $GLOBALS['USERDATA']['configuration_settings'][$strSubkey] == null))
+            $ret = $GLOBALS['USERDATA']['configuration_settings'][$strSubkey];
+        else
+            $ret = $GLOBALS['USERDATA']['configuration_settings'];
+    }
+
+    return $ret;
+}
+
+
+function isVerbose() {
+    if(isset($GLOBALS['USERDATA']['OPTS']) && isset($GLOBALS['USERDATA']['OPTS']['VERBOSE']))
+        return filter_var($GLOBALS['USERDATA']['OPTS']['VERBOSE'], FILTER_VALIDATE_BOOLEAN);
+
+    return filter_var(getConfigurationSettings('verbose'), FILTER_VALIDATE_BOOLEAN);
+}
+
+function getGlobalConfigOptionBoolean($key)
+{
+    return filter_var(getConfigurationSettings($key), FILTER_VALIDATE_BOOLEAN);
+}
+
+function isDebug() {
+    $cmdline = get_PharseOptionValue('debug');
+    $dbgCmdLine = filter_var(getConfigurationSettings($cmdline), FILTER_VALIDATE_BOOLEAN);
+
+    return getGlobalConfigOptionBoolean('debug') || $dbgCmdLine;
+}
+
+function isTestRun() {
+    return getGlobalConfigOptionBoolean('test_run');
+}
+
+function getOutputDirectory($key)
+{
+    $ret =  sys_get_temp_dir();
+    if(array_key_exists('USERDATA', $GLOBALS) && array_key_exists('directories', $GLOBALS['USERDATA']) && !is_null($GLOBALS['USERDATA']['directories']) && is_array($GLOBALS['USERDATA']['directories'])) {
+        if (array_key_exists($key, $GLOBALS['USERDATA']['directories']))
+            $ret = $GLOBALS['USERDATA']['directories'][$key];
+    }
+
+    return $ret;
+}
+
+function getCurrentUserDetails()
+{
+    return getConfigurationSettings('user_details');
+}
+
+
+function generateOutputFileName($baseFileName="NONAME", $ext="UNK", $isUserSpecific=true, $dirKey="debug")
+{
+    $outDir = getOutputDirectory($dirKey);
+    $today = "_" . getNowAsString("");
+    $user = "";
+    if($isUserSpecific === true) {
+        $objUser = getCurrentUserDetails();
+        if(!is_null($objUser))
+        {
+            $user = "_" . $objUser->getUserSlug();
+        }
+    }
+
+    $ret = "{$outDir}/{$baseFileName}{$user}{$today}.{$ext}";
+    return $ret;
+}
 
 function __initializeArgs__($rootdir)
 {

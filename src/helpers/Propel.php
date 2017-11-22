@@ -21,7 +21,7 @@
  *
  *
  *
- *  New, Propel-Related util
+ *  New, Propel-Related Utils
  *
  *
  *
@@ -442,6 +442,9 @@ function cleanupTextValue($v)
     $v = preg_replace(array('/\s{2,}/', '/[\t\n]/'), ' ', $v);
     $v = clean_utf8($v);
     $v = trim($v);
+
+    if(strlen($v) == 0)
+        $v = null;
 
     return $v;
 }

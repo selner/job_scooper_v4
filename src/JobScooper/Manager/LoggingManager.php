@@ -17,7 +17,6 @@
 namespace JobScooper\Manager;
 
 use Monolog\ErrorHandler;
-use Monolog\Handler\BufferHandler;
 use Monolog\Handler\DeduplicationHandler;
 use Psr\Log\LogLevel as LogLevel;
 use \Monolog\Handler\StreamHandler;

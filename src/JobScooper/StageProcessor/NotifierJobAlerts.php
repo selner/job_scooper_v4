@@ -21,8 +21,7 @@ namespace JobScooper\StageProcessor;
 
 //Import PHPMailer classes into the global namespace
 use JobScooper\Manager\JobsMailManager;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+use JobScooper\Utils\SimpleCSV;
 use JobScooper\DataAccess\JobPosting as JobPosting;
 use PHPExcel;
 use PHPExcel_IOFactory;
@@ -30,7 +29,7 @@ use PHPExcel_Worksheet;
 use PHPExcel_Style_Alignment;
 use PHPExcel_Style_Fill;
 use ErrorException;
-use InvalidArgumentException;
+use Exception;
 
 class NotifierJobAlerts extends JobsMailManager
 {
@@ -308,7 +307,7 @@ class NotifierJobAlerts extends JobsMailManager
 
         $arrRecordsToOutput = $this->_convertToJobsArrays($arrJobsToOutput);
 
-        $classCombined = new \SimpleCSV($strFileOut , "w");
+        $classCombined = new SimpleCSV($strFileOut , "w");
         if (!is_array($arrRecordsToOutput))
         {
             $arrRecordsToOutput = array();

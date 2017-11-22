@@ -8,6 +8,8 @@
  *
  * Usage:   See example page: linkify.html
  */
+namespace JobScooper\Utils;
+
 function linkify($text) {
     $url_pattern = '/# Rev:20100913_0900 github.com\/jmrware\/LinkifyURL
     # Match http & ftp URL that is not already linkified.
@@ -77,4 +79,3 @@ function _linkify_html_callback($matches) {
 preg_match('/^(.*?<body[^>]*>)(.*)$/si', $text, $matches);
 $text = $matches[2];
 echo($matches[1] . linkify_html($text));*/
-?>

@@ -19,7 +19,6 @@ namespace JobScooper\DataAccess;
 
 use JobScooper\DataAccess\Base\GeoLocation as BaseGeoLocation;
 use JobScooper\DataAccess\Map\GeoLocationTableMap;
-use JobScooper\Manager\GeoLocationManager;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
 

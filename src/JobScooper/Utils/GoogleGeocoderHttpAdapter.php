@@ -24,7 +24,7 @@ class InvalidServerResponse extends \RuntimeException implements \Geocoder\Excep
 {
 }
 
-class GoogleGeocoderHttpAdapter extends \CurlWrapper  implements \Geocoder\HttpAdapter\HttpAdapterInterface
+class GoogleGeocoderHttpAdapter extends CurlWrapper  implements \Geocoder\HttpAdapter\HttpAdapterInterface
 {
 
     function getName()

@@ -35,7 +35,9 @@
         "psr-4": {
             "JobScooper\\": "src/JobScooper"
         },
-        "files": ["src/util/autoload.php"]
+        "files": [
+          "src/helpers/autoload.php"
+        ]
 
     }
 

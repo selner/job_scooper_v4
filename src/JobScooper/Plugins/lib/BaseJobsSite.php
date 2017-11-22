@@ -28,7 +28,8 @@ const VALUE_NOT_SUPPORTED = -1;
 const BASE_URL_TAG_LOCATION = "***LOCATION***";
 const BASE_URL_TAG_KEYWORDS = "***KEYWORDS***";
 use Exception;
-use Psr\Log\LogLevel;
+use JobScooper\Utils\CurlWrapper;
+use JobScooper\Utils\SimpleHTMLHelper;
 
 abstract class BaseJobsSite implements IJobSitePlugin
 {
@@ -922,7 +923,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
         $strHTML = strval($htmlNode);
 
-        $htmlTmp = \SimpleHTMLHelper::str_get_html($strHTML);
+        $htmlTmp = SimpleHTMLHelper::str_get_html($strHTML);
         $htmlTmp->save($filepath);
 
         return $strHTML;
@@ -951,24 +952,24 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 if (!$fp) return $objSimpleHTML;
 
                 $strHTML = fread($fp, MAX_FILE_SIZE);
-                $objSimpleHTML = \SimpleHTMLHelper::str_get_html($strHTML);
+                $objSimpleHTML = SimpleHTMLHelper::str_get_html($strHTML);
                 fclose($fp);
             }
 
 
             if (!$objSimpleHTML && $strURL && strlen($strURL) > 0) {
-                $class = new \CurlWrapper();
+                $class = new CurlWrapper();
                 if (isVerbose()) $class->setVerbose(true);
 
                 $retObj = $class->cURL($strURL, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = $optTimeout, $cookies = $cookies, $referrer = $referrer);
                 if (!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0) {
-                    $objSimpleHTML = \SimpleHTMLHelper::str_get_html($retObj['output']);
+                    $objSimpleHTML = SimpleHTMLHelper::str_get_html($retObj['output']);
                     $this->prevCookies = $retObj['cookies'];
                     $this->prevURL = $strURL;
                 } else {
                     $options = array('http' => array('timeout' => 30, 'user_agent' => C__STR_USER_AGENT__));
                     $context = stream_context_create($options);
-                    $objSimpleHTML = \SimpleHTMLHelper::file_get_html($strURL, false, $context);
+                    $objSimpleHTML = SimpleHTMLHelper::file_get_html($strURL, false, $context);
                 }
             }
             if(!$objSimpleHTML)
@@ -1201,7 +1202,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         $objSimpleHTML = null;
         try {
             $html = $this->getActiveWebdriver()->getPageSource();
-            $objSimpleHTML = \SimpleHTMLHelper::str_get_html($html);
+            $objSimpleHTML = SimpleHTMLHelper::str_get_html($html);
         } catch (Exception $ex) {
             $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
             handleException(new Exception($strError), null, true);
@@ -1229,7 +1230,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                         $html = $this->doFirstPageLoad($searchDetails);
                     else
                         $html = $this->selenium->getPageHTML($searchDetails->getSearchParameter('search_start_url'));
-                    $objSimpleHTML = \SimpleHTMLHelper::str_get_html($html);
+                    $objSimpleHTML = SimpleHTMLHelper::str_get_html($html);
                 } catch (Exception $ex) {
                     $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
                     handleException(new Exception($strError), null, true);
@@ -1376,7 +1377,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
                             $strURL = $this->selenium->driver->getCurrentURL();
                             $html = $this->selenium->driver->getPageSource();
-                            $objSimpleHTML = \SimpleHTMLHelper::str_get_html($html);
+                            $objSimpleHTML = SimpleHTMLHelper::str_get_html($html);
 
                         } catch (Exception $ex) {
                             handleException($ex, "Failed to get dynamic HTML via Selenium due to error:  %s", true);

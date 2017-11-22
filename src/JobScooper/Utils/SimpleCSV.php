@@ -14,6 +14,10 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+namespace JobScooper\Utils;
+
+use Exception;
+use ErrorException;
 
 class SimpleCSV
 {
@@ -378,7 +382,7 @@ class SimpleCSV
 
             if(is_file($curFilePath))
             {
-                $classCurrentInput = new \SimpleCSV($curFilePath, 'r');
+                $classCurrentInput = new SimpleCSV($curFilePath, 'r');
 
                 $arrCSVInput = $classCurrentInput->__readAllRecords_CSV__(true, $keysToUse);
                 $arrCSVInput = $arrCSVInput ['data_rows'];

@@ -165,7 +165,7 @@ function isBitFlagSet($flagSettings, $flagToCheck)
 
 /*
 
-    File Path util
+    File Path Utils
 
 
 */
@@ -345,6 +345,32 @@ function getFilePathDetailsFromString($strFilePath, $flags = C__FILEPATH_NO_FLAG
 
 }
 
+function isValueURLEncoded($str)
+{
+    if (strlen($str) <= 0) return 0;
+    return (substr_count_array($str, array("%22", "&", "=", "+", "-", "%7C", "%3C")) > 0);
+}
+
+
+function getPhpMemoryUsage()
+{
+    $size = memory_get_usage(true);
+
+    $unit = array(' bytes', 'KB', 'MB', 'GB', 'TB', 'PN');
+
+    return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
+}
+function getTodayAsString($delim = "-")
+{
+    $fmt = "Y" . $delim . "m" . $delim . "d";
+    return date($fmt);
+}
+
+function getNowAsString($delim = "-")
+{
+    $fmt = join($delim, array("%Y", "%m", "%d", "%H", "%M", "%S"));
+    return strftime($fmt, time());
+}
 
 function exportToDebugJSON($obj, $strBaseFileName)
 {
@@ -451,14 +477,273 @@ function strip_punctuation( $text )
         $text );
 }
 
-
-function array_subset(array $haystack, array $needle)
+function getFailedSearchesByPlugin()
 {
-    return array_intersect_key($haystack, array_flip($needle));
+    return getSearchesByRunResult("failed");
 }
 
-function array_from_orm_object_list_by_array_keys(array $list, array $keysToReturn)
+function getSearchesByRunResult($resultCode)
 {
-    return array_map(function ($v) use ($keysToReturn) {return array_subset($v->toArray(), $keysToReturn);} , $list);
+    $arrSearchReportByPlugin = array();
+    if(is_null($GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN']))
+        return array();
+
+    foreach ($GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'] as $jobsiteKey) {
+        foreach($jobsiteKey as $search)
+        {
+            if($search->getRunResultCode() == "failed") {
+                if (!array_key_exists($search->getJobSiteKey(), $arrSearchReportByPlugin))
+                    $arrSearchReportByPlugin[$search->getJobSiteKey()] = array();
+
+                $arrSearchReportByPlugin[$search->getJobSiteKey()][$search->getUserSearchRunKey()] = cloneArray($search->toArray(), array(
+                    'keywords_string_for_url',
+                    'base_url_format',
+                    'keywords_array_tokenized',
+                    'search_start_url',
+                    'location_user_specified_override',
+                    'location_search_value',
+                    'keyword_search_override',
+                    'keywords_array'));
+            }
+        }
+    }
+
+    return $arrSearchReportByPlugin;
+}
+
+function setSiteAsExcluded($excludedSite)
+{
+    $excludedSite = cleanupSlugPart($excludedSite);
+    if(!array_key_exists('JOBSITES_AND_SEARCHES_TO_RUN', $GLOBALS))
+        $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'] = array();
+
+    $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$excludedSite] = $excludedSite;
+    if(array_key_exists($excludedSite, $GLOBALS['USERDATA']['configuration_settings']['included_sites']))
+    {
+        unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite]);
+    }
+
+    if(isset($GLOBALS['logger']) && isDebug()) $GLOBALS['logger']->logLine("Setting " . $excludedSite . " as excluded for this run.", \C__DISPLAY_ITEM_DETAIL__);
+
+    if(array_key_exists($excludedSite, $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'])) {
+        foreach($GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'][$excludedSite] as $search)
+        {
+            $search->setRunResultCode("excluded");
+            $search->save();
+        }
+    }
+}
+
+function noJobStringMatch($var, $matchString)
+{
+    if(is_null($matchString) || strlen($matchString) == 0)
+        throw new Exception("Invalid match string passed to helper noJobStringMatch.");
+
+    if(stristr(strtoupper($var), strtoupper($matchString)) !== false)
+        return 0;
+
+    return null;
+}
+
+
+function getRunDateRange()
+{
+    $configNumDays = getConfigurationSettings('number_days');
+    $num_days = filter_var($configNumDays, FILTER_VALIDATE_INT);
+    if($num_days === false)
+        $num_days = 1;
+
+    $strDateRange = null;
+    $startDate = new DateTime();
+    $strMod = "-" . $num_days . " days";
+    $startDate = $startDate->modify($strMod);
+    $today = new DateTime();
+    if ($startDate->format('Y-m-d') != $today->format('Y-m-d')) {
+        $strDateRange = $startDate->format('D, M d') . " - " . $today->format('D, M d');
+    } else {
+        $strDateRange = $today->format('D, M d');
+    }
+    return $strDateRange;
+}
+
+
+define('REMOVE_PUNCT', 0x001);
+define('LOWERCASE', 0x002);
+define('HTML_DECODE', 0x004);
+define('URL_ENCODE', 0x008);
+define('REPLACE_SPACES_WITH_HYPHENS', 0x010);
+define('REMOVE_EXTRA_WHITESPACE', 0x020);
+define('REMOVE_ALL_SPACES', 0x040);
+define('SIMPLE_TEXT_CLEANUP', HTML_DECODE | REMOVE_EXTRA_WHITESPACE );
+define('ADVANCED_TEXT_CLEANUP', HTML_DECODE | REMOVE_EXTRA_WHITESPACE | REMOVE_PUNCT );
+define('FOR_LOOKUP_VALUE_MATCHING', REMOVE_PUNCT | LOWERCASE | HTML_DECODE | REMOVE_EXTRA_WHITESPACE | REMOVE_ALL_SPACES );
+define('DEFAULT_SCRUB', REMOVE_PUNCT | HTML_DECODE | LOWERCASE | REMOVE_EXTRA_WHITESPACE );
+
+//And so on, 0x8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800 etc..
+
+
+function strScrub($str, $flags = null)
+{
+    if($flags == null)  $flags = REMOVE_EXTRA_WHITESPACE;
+
+    if(strlen($str) == 0) return $str;
+
+    // If this isn't a valid string we can process,
+    // log a warning and return the value back to the caller untouched.
+    //
+    if($str == null || !isset($str) || !is_string($str))
+    {
+        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("strScrub was called with an invalid value to scrub (not a string, null, or similar.  Cannot scrub the passed value: " . var_export($str, true), C__DISPLAY_WARNING__);
+        return $str;
+    }
+
+    $ret = $str;
+
+
+    if ($flags & HTML_DECODE)
+    {
+        $ret = html_entity_decode($ret);
+    }
+
+    if ($flags & REMOVE_PUNCT)  // has to come after HTML_DECODE
+    {
+        $ret = strip_punctuation($ret);
+    }
+
+    if ($flags & REMOVE_ALL_SPACES)
+    {
+        $ret = trim($ret);
+        if($ret != null)
+        {
+            $ret  = str_replace(" ", "", $ret);
+        }
+    }
+
+    if ($flags & REMOVE_EXTRA_WHITESPACE)
+    {
+        $ret = trim($ret);
+        if($ret != null)
+        {
+            $ret  = str_replace(array("   ", "  ", "    "), " ", $ret);
+            $ret  = str_replace(array("   ", "  ", "    "), " ", $ret);
+        }
+        $ret = trim($ret);
+    }
+
+
+    if ($flags & REPLACE_SPACES_WITH_HYPHENS) // has to come after REMOVE_EXTRA_WHITESPACE
+    {
+        $ret  = str_replace(" ", "-", $ret); // do it twice to catch the multiples
+    }
+
+
+    if ($flags & LOWERCASE)
+    {
+        $ret = strtolower($ret);
+    }
+
+    if ($flags & URL_ENCODE)
+    {
+        $ret  = urlencode($ret);
+    }
+
+    return $ret;
+}
+
+function intceil($number)
+{
+    if(is_string($number)) $number = floatval($number);
+
+    $ret = ( is_numeric($number) ) ? ceil($number) : false;
+    if ($ret != false) $ret = intval($ret);
+
+    return $ret;
+}
+
+
+function clean_utf8($string, $control = true)
+{
+    $string = iconv('UTF-8', 'UTF-8//IGNORE', $string);
+
+    if ($control === true) {
+        return preg_replace('~\p{C}+~u', '', $string);
+    }
+
+    return preg_replace(array('~\r\n?~', '~[^\P{C}\t\n]+~u'), array("\n", ''), $string);
+}
+
+
+function replaceTokensInString($formatString, $arrVariables)
+{
+//    $variables = array("first_name"=>"John","last_name"=>"Smith","status"=>"won");
+//    $string = 'Dear {FIRST_NAME} {LAST_NAME}, we wanted to tell you that you {STATUS} the competition.';
+    $ret = $formatString;
+    foreach($arrVariables as $key => $value){
+        $ret = str_replace('{'.strtoupper($key).'}', $value, $ret);
+//        $ret = str_replace('***'.strtoupper($key).'***', $value, $ret);
+    }
+
+    return $ret;
+}
+
+function combineTextAllChildren($node, $fRecursed = false)
+{
+
+    $retStr = "";
+    if ($node->hasChildNodes()) {
+        $retStr = strScrub($node->plaintext . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
+        foreach ($node->childNodes() as $child) {
+            $retStr = $retStr . " " . combineTextAllChildren($child, true);
+        }
+        unset($child);
+
+    } elseif (isset($node->plaintext) && $fRecursed == false) {
+        $retStr = strScrub($node->plaintext . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
+    }
+
+    return $retStr;
+
+}
+
+function combineTextAllNodes($nodes)
+{
+
+    $retStr = "";
+    if ($nodes) {
+        foreach ($nodes as $node) {
+            if($retStr != "")
+                $retStr = $retStr . ", ";
+
+            $retStr = $retStr . strScrub($node->plaintext . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
+            if(!is_null($node->childNodes())) {
+                foreach ($node->childNodes() as $child) {
+                    $retStr = $retStr . " " . combineTextAllChildren($child, true);
+                }
+            }
+        }
+    }
+    return $retStr;
+
+}
+
+
+function doExec($cmd)
+{
+    $cmdOutput = array();
+    $cmdRet = "";
+
+    exec($cmd, $cmdOutput, $cmdRet);
+    foreach ($cmdOutput as $resultLine)
+        if (!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine($resultLine, \C__DISPLAY_ITEM_DETAIL__);
+    unset($resultLine);
+
+    if (is_array($cmdOutput))
+    {
+        if (count($cmdOutput) >= 1)
+            return $cmdOutput[0];
+        else
+            return "";
+    }
+    return $cmdOutput;
 }
 

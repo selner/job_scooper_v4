@@ -73,7 +73,7 @@ function encodeJSON($data)
     $jsonData = json_encode($data, JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP |  JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK);
     if ($jsonData === false) {
         $err = json_last_error_msg();
-        $errMsg = "Error:  Unable to data to JSON.  Error: " . $err;
+        $errMsg = "Error:  Unable to encode data to JSON.  Error: " . $err;
         LogLine($errMsg, \C__DISPLAY_ERROR__);
         throw new Exception($errMsg);
     }
