@@ -768,11 +768,18 @@ class ConfigManager
 
         if(isset($config['emails'] ))
         {
-            foreach($config['emails'] as $emailItem)
+            foreach(array_keys($config['emails']) as $emailKey)
             {
+                $emailItem = $config['emails'][$emailKey];
+
                 $tempEmail = $this->__getEmptyEmailRecord__();
-                if (isset($emailItem['emailkind'])) {
-                    $tempEmail['emailkind'] = $emailItem['emailkind'];
+                $tempEmail['key'] = $emailKey;
+
+                foreach(array_keys($emailItem) as $key)
+                {
+                    if (isset($emailItem[$key])) {
+                        $tempEmail[$key] = $emailItem[$key];
+                    }
                 }
                 if (isset($emailItem['name'])) {
                     $tempEmail['name'] = $emailItem['name'];
@@ -784,7 +791,7 @@ class ConfigManager
                     $tempEmail['type'] = $emailItem['type'];
                 }
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added email from config.ini: '" . getArrayValuesAsString($tempEmail), \C__DISPLAY_ITEM_DETAIL__);
-                $settingsEmail['email_addresses'][] = $tempEmail;
+                $settingsEmail['email_addresses'][$emailKey] = $tempEmail;
             }
         }
 
