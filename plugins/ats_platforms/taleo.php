@@ -16,6 +16,7 @@
  * under the License.
  */
 
+use \JobScooper\Utils\SimpleHTMLHelper;
 
 class PluginEntercom extends AbstractTaleo
 {
