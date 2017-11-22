@@ -18,7 +18,7 @@ namespace JobScooper\Manager;
 
 use JobScooper\StageProcessor\JobsAutoMarker;
 use JobScooper\StageProcessor\NotifierJobAlerts;
-
+use JobScooper\StageProcessor\SearchBuilder;
 
 
 const JOBLIST_TYPE_UNFILTERED = "unfiltered";
@@ -103,6 +103,9 @@ class StageManager
     {
 
         LogLine("Stage 1: Downloading Latest Matching Jobs ", \C__DISPLAY_ITEM_RESULT__);
+
+        $srchmgr = new SearchBuilder();
+        $srchmgr->initializeSearches();
 
         //
         // let's start with the searches specified with the details in the the config.ini
