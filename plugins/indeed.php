@@ -65,12 +65,12 @@ class PluginIndeed extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         foreach($nodesJobs as $node)
         {
 
-            if(!array_key_exists('itemtype', $node->attr))
-            {
-                $GLOBALS['logger']->logLine("Skipping job node without itemtype attribute; likely a sponsored and therefore not an organic search result.", \C__DISPLAY_MOMENTARY_INTERUPPT__);
-                continue;
-            }
-            assert($node->attr['itemtype'] == "http://schema.org/JobPosting");
+//            if(!array_key_exists('itemtype', $node->attr))
+//            {
+//                $GLOBALS['logger']->logLine("Skipping job node without itemtype attribute; likely a sponsored and therefore not an organic search result.", \C__DISPLAY_MOMENTARY_INTERUPPT__);
+//                continue;
+//            }
+//            assert($node->attr['itemtype'] == "http://schema.org/JobPosting");
 
             $item = getEmptyJobListingRecord();
 
@@ -78,23 +78,23 @@ class PluginIndeed extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
                 $item['JobSitePostId'] = $node->attr['data-jk'];
 
             $subNodes = $node->find("a[data-tn-element='jobTitle']");
-            if(isset($subNodes) && array_key_exists('Title', $subNodes[0]->attr)) {
-                $item['Title'] = $subNodes[0]->attr['Title'];
+            if(isset($subNodes) && array_key_exists('title', $subNodes[0]->attr)) {
+                $item['Title'] = $subNodes[0]->attr['title'];
                 $item['Url'] = $subNodes[0]->attr['href'];
             }
 
-            $coNode = $node->find("span[itemprop='hiringOrganization']");
+            $coNode= $node->find("span.company a");
             if(isset($coNode) && count($coNode) >= 1)
             {
-                $item['Company'] = combineTextAllChildren($coNode[0]);
+                $item['Company'] = $coNode[0]->plaintext;
             }
 
-            $locNode= $node->find("span[itemprop='addressLocality']");
+            $locNode= $node->find("span.location");
             if(isset($locNode) && count($locNode) >= 1)
             {
                 $item['Location'] = $locNode[0]->plaintext;
             }
-            $dateNode = $node->find("span[class='date']");
+            $dateNode = $node->find("span.date");
             if(isset($dateNode ) && count($dateNode ) >= 1)
             {
                 $item['PostedAt'] = $dateNode[0]->plaintext;
