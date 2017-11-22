@@ -9,6 +9,8 @@
 namespace JobScooper\Manager;
 
 use Geocoder\Formatter\FormatterInterface;
+use Geocoder\Provider\GoogleMapsProvider;
+use Geocoder\HttpAdapter\CurlHttpAdapter;
 use \Exception;
 use Geocoder\Result\ResultInterface;
 use JobScooper\Utils\GoogleGeocoderHttpAdapter;
@@ -118,7 +120,27 @@ class GeocodeManager
             $arrAddr['alternate_names'] = $this->getAlternateNames($addr);
 
             $arrAddr['key'] = cleanupSlugPart($this->formatAddress($addr, "%C-%R-%L"));
-            $arrAddr['primary_name'] = $this->formatAddress($addr, "%L, %R, %C");
+
+            $fmt = array();
+            if(!is_null($arrAddr['place']))
+                $fmt[] = "%L";
+
+            if(strcasecmp($arrAddr['countrycode'], 'US') == 0)
+            {
+                if(!is_null($arrAddr['regioncode']))
+                    $fmt[] = "%r %c";
+                else
+                    $fmt[] = "%c";
+            }
+            else
+            {
+                if(!is_null($arrAddr['region']))
+                    $fmt[] = "%R %c";
+                else
+                    $fmt[] = "%c";
+            }
+
+            $arrAddr['primary_name'] = $this->formatAddress($addr, join(", ", $fmt));
 
             return $arrAddr;
         }
