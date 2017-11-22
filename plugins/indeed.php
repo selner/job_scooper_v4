@@ -29,21 +29,38 @@ class PluginIndeed extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $additionalFlags = [C__JOB_IGNORE_MISMATCHED_JOB_COUNTS];
     protected $paginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
 
-
-
-
     protected $arrListingTagSetup = array(
-        'TotalPostCount' =>  array('selector' => '#searchCount', 'return_value_regex' => '/.*?of\s*(\d+).*?/'),
-        'NoPostsFound' =>  array('selector' => 'div.bad_query h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
-        'NextButton' => array('selector' => 'span.np')
-    );
+        'TotalPostCount' =>  array('selector' => 'div#searchCount', 'return_value_regex' => '/.*?of\s*(\d+).*?/'),
+        'NoPostsFound' =>  array('selector' => 'body', 'index' => 0, 'return_attribute' => 'node', 'return_value_callback' => "checkNoJobResults"),
+        'NextButton' => array('selector' => 'span.np'),
+        'JobPostItem' => array('selector' => 'td#resultsCol div[data-tn-component=\'organicJob\']'),
+        'Url' => array('selector' => 'a[data-tn-element=\'jobTitle\']', 'index'=> 0, 'return_attribute' => 'href'),
+        'Title' => array('selector' => 'a[data-tn-element=\'jobTitle\']', 'index'=> 0, 'return_attribute' => 'plaintext'),
+        'JobSitePostId' => array('selector' => 'span.tt_set a', 'index'=> 0, 'return_attribute' => 'id', 'return_value_regex' => '/[sj_]{0,3}(.*)/'),
+        'Company' => array('selector' => 'span.company', 'index'=> 0),
+        'Location' => array('selector' => 'span.location', 'index'=> 0),
+        'PostedAt' => array('selector' => 'span.date', 'index'=> 0)
+        );
 
-
-    static function isNoJobResults($var)
+    static function checkNoJobResults($var)
     {
-        return noJobStringMatch($var, "did not match any jobs");
+        $ret = null;
+        if(is_array($var))
+            $var = $var[0];
+        $node1 = $var->find("p.message");
+        if(!is_null($node1) && count($node1) > 0) {
+            $text = $node1[0]->plaintext;
+            $ret = noJobStringMatch($text, "No jobs match your search");
+        }
+        else {
+            $node2 = $var->find("div.bad_query h2");
+            if (!is_null($node2) && count($node2) > 0) {
+                $text = $node2[0]->plaintext;
+                $ret = noJobStringMatch($text, "did not match");
+            }
+        }
+        return $ret;
     }
-
 
     function getItemURLValue($nItem)
     {
@@ -51,65 +68,7 @@ class PluginIndeed extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 
         return "&start=" . $nItem;
     }
-
-    public function parseJobsListForPage($objSimpleHTML)
-    {
-        $ret = null;
-        $cntNode = $objSimpleHTML->find("div[id='searchCount']");
-        if(isset($cntNode) && count($cntNode) >= 1)
-        {
-            $GLOBALS['logger']->logLine("Processing records: " . $cntNode[0]->plaintext);
-        }
-
-        $nodesJobs = $objSimpleHTML->find('td[id=\'resultsCol\'] div[data-tn-component=\'organicJob\']');
-        foreach($nodesJobs as $node)
-        {
-
-//            if(!array_key_exists('itemtype', $node->attr))
-//            {
-//                $GLOBALS['logger']->logLine("Skipping job node without itemtype attribute; likely a sponsored and therefore not an organic search result.", \C__DISPLAY_MOMENTARY_INTERUPPT__);
-//                continue;
-//            }
-//            assert($node->attr['itemtype'] == "http://schema.org/JobPosting");
-
-            $item = getEmptyJobListingRecord();
-
-            if(isset($node) && isset($node->attr['data-jk']))
-                $item['JobSitePostId'] = $node->attr['data-jk'];
-
-            $subNodes = $node->find("a[data-tn-element='jobTitle']");
-            if(isset($subNodes) && array_key_exists('title', $subNodes[0]->attr)) {
-                $item['Title'] = $subNodes[0]->attr['title'];
-                $item['Url'] = $subNodes[0]->attr['href'];
-            }
-
-            $coNode= $node->find("span.company a");
-            if(isset($coNode) && count($coNode) >= 1)
-            {
-                $item['Company'] = $coNode[0]->plaintext;
-            }
-
-            $locNode= $node->find("span.location");
-            if(isset($locNode) && count($locNode) >= 1)
-            {
-                $item['Location'] = $locNode[0]->plaintext;
-            }
-            $dateNode = $node->find("span.date");
-            if(isset($dateNode ) && count($dateNode ) >= 1)
-            {
-                $item['PostedAt'] = $dateNode[0]->plaintext;
-                if(strcasecmp(trim($item['PostedAt']), "Just posted") == 0)
-                    $item['PostedAt'] = getTodayAsString();
-            }
-
-            if($item['Title'] == '') continue;
-            $ret[] = $item;
-
-        }
-
-        return $ret;
-    }
-
+//
 }
 
 
