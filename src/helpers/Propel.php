@@ -439,7 +439,7 @@ function cleanupTextValue($v)
         return $v;
 
     $v = html_entity_decode($v);
-    $v = preg_replace(array('/\s{2,}/', '/[\t\n]/'), ' ', $v);
+    $v = preg_replace(array('/\s{2,}/', '/[\t]/', '/[\n]/', '/\s{1,}/'), ' ', $v);
     $v = clean_utf8($v);
     $v = trim($v);
 
