@@ -27,7 +27,7 @@ class PluginAuthenticJobs extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $nJobListingsPerPage = 50;
 
     protected $arrListingTagSetup = array(
-        'NoPostsFound'    => array('selector' => 'ul#listings li#no-results', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
+        'NoPostsFound'    => array('selector' => 'ul#listings li#no-results', 'return_attribute' => 'plaintext', 'return_value_callback' => "checkNoJobResults"),
         'JobPostItem'      => array('selector' => 'ul#listings li'),
         'Title'                 =>  array('selector' => 'a div h3', 'return_attribute' => 'plaintext'),
         'Url'                  =>  array('selector' => 'a', 'return_attribute' => 'href'),
@@ -38,7 +38,7 @@ class PluginAuthenticJobs extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         'LoadMoreControl'             =>  array('selector' => 'a.ladda-button')
     );
 
-    function isNoJobResults($var)
+    function checkNoJobResults($var)
     {
         return noJobStringMatch($var, "No jobs");
     }

@@ -61,13 +61,13 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
 
     }
 
-    static function isNoJobResults($var)
+    static function checkNoJobResults($var)
     {
         return noJobStringMatch($var, "Found 0 jobs");
     }
 
     protected $arrListingTagSetup = array(
-        'NoPostsFound'    => array('selector' => 'h1#searching', 'return_attribute' => 'plaintext', 'return_value_callback' => 'isNoJobResults'),
+        'NoPostsFound'    => array('selector' => 'h1#searching', 'return_attribute' => 'plaintext', 'return_value_callback' => 'checkNoJobResults'),
         'TotalPostCount'        => array('selector' => 'h1#searching', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/\b(\d+)\b/i'),
         'JobPostItem'      => array('selector' => 'li.lister__item'),
         'Title'                 => array('selector' => 'h3 a.js-clickable-area-link span[itemprop="title"]', 'return_attribute' => 'plaintext'),

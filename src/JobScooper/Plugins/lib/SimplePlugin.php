@@ -108,7 +108,7 @@ class SimplePlugin extends BaseJobsSite
         $match_value = $var[1];
 
         if(is_null($match_value))
-            throw new \Exception("Plugin " . $this->siteName  . " definition missing pattern match value for isNoJobResults callback.");
+            throw new \Exception("Plugin " . $this->siteName  . " definition missing pattern match value for matchesNoResultsPattern callback.");
         return noJobStringMatch($val, $match_value);
     }
 

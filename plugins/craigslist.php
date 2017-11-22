@@ -32,7 +32,7 @@ class PluginCraigslist extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $paginationType = C__PAGINATION_PAGE_VIA_URL;
 
     protected $arrListingTagSetup = array(
-        'NoPostsFound' => array('selector' => 'div.noresults', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
+        'NoPostsFound' => array('selector' => 'div.noresults', 'return_attribute' => 'plaintext', 'return_value_callback' => "checkNoJobResults"),
         'TotalPostCount' => array('selector' => 'span.totalcount', 'index'=> 0, 'return_attribute' => 'plaintext'),
         'JobPostItem' => array('selector' => 'ul.rows li.result-row'),
         'Url' => array('selector' => 'a.result-title', 'index'=> 0, 'return_attribute' => 'href'),
@@ -43,7 +43,7 @@ class PluginCraigslist extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         'PostedAt' => array('selector' => 'time.result-date', 'index'=> 0, 'return_attribute' => 'datetime')
     );
 
-    static function isNoJobResults($var)
+    static function checkNoJobResults($var)
     {
         return noJobStringMatch($var, "Nothing found");
     }

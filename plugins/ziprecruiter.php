@@ -28,7 +28,7 @@ class PluginZipRecruiter extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
 
     protected $arrListingTagSetup = array(
-        'NoPostsFound'    => array('selector' => 'section.no-results h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
+        'NoPostsFound'    => array('selector' => 'section.no-results h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "checkNoJobResults"),
         'TotalPostCount'        => array('selector' => '#h1.headline', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/\b(\d+)\b/i'),
         'JobPostItem'      => array('selector' => '#job_list div article'),
         'Title'                 => array('selector' => 'span.just_job_title', 'return_attribute' => 'plaintext'),
@@ -38,7 +38,7 @@ class PluginZipRecruiter extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         'JobSitePostId'                => array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'just_job_title', 'return_attribute' => 'data-job-id'),
     );
 
-    function isNoJobResults($var)
+    function checkNoJobResults($var)
     {
         return noJobStringMatch($var, "No jobs");
     }

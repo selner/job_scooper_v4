@@ -64,7 +64,7 @@ class PluginCareerBuilderUK extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $countryCodes = array("GB");
 
     protected $arrListingTagSetup = array(
-        'NoPostsFound' => array('selector' => 'h1', 'return_attribute' => 'plaintext', 'return_value_callback' => "isNoJobResults"),
+        'NoPostsFound' => array('selector' => 'h1', 'return_attribute' => 'plaintext', 'return_value_callback' => "checkNoJobResults"),
         'TotalPostCount' => array('selector' => 'h1', 'index'=> 0, 'return_attribute' => 'plaintext', 'return_value_regex' => '/(\d+).*?/'),
         'JobPostItem' => array('selector' => 'article.job-list'),
         'Url' => array('selector' => 'a.job-title', 'return_attribute' => 'href'),
@@ -77,7 +77,7 @@ class PluginCareerBuilderUK extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         'JobSitePostId' => array('selector' => 'a.job-title', 'return_attribute' => 'href', 'return_value_regex' => '/\/([^\/]*)\/\?.*/'),
     );
 
-    static function isNoJobResults($var)
+    static function checkNoJobResults($var)
     {
         return noJobStringMatch($var, "Nothing found");
     }
