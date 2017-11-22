@@ -296,6 +296,11 @@ class SeleniumManager extends PropertyObject
         return $ret;
     }
 
+    /**
+     * Get the current webdriver or create a new one if needed.
+     *
+     * @return \RemoteWebDriver
+     */
     function get_driver()
     {
         try {
