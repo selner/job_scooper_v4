@@ -20,7 +20,8 @@ const C__API_RETURN_TYPE_OBJECT__ = 33;
 const C__API_RETURN_TYPE_ARRAY__ = 44;
 
 
-class CurlWrapper {
+class CurlWrapper
+{
 
     /****************************************************************************************************************/
     /****                                                                                                        ****/
@@ -226,7 +227,9 @@ class CurlWrapper {
         $curl_object['input_url'] = $full_url;
         $last_url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
 
-        $curl_object['actual_site_url'] = strtolower($last_url);
+        $curl_object['actual_site_url'] = $last_url;
+        $curl_object['body'] = $body;
+        $curl_object = array_merge($curl_object, $curl_info);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         /* If the document has loaded successfully without any redirection or error */
         if ($httpCode < 200 || $httpCode >= 400)
