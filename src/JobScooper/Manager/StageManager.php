@@ -33,7 +33,7 @@ class StageManager
     function __construct()
     {
         try {
-            $this->classConfig = new ConfigManager();
+            $this->classConfig = new ConfigBuilder();
 
             $this->classConfig->initialize();
 

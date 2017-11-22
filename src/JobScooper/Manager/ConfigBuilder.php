@@ -27,7 +27,7 @@ use  \Propel\Runtime\Propel;
 use \JobScooper\Utils\Pharse;
 
 
-class ConfigManager
+class ConfigBuilder
 {
     protected $nNumDaysToSearch = -1;
     public $arrFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null, 'user_input_files_details' => null);
@@ -204,6 +204,10 @@ class ConfigManager
 
 //        $this->_setPreviouslyReviewedJobsInputFiles__setPreviouslyReviewedJobsInputFiles_();
 
+//        $GLOBALS['SETTINGS_CACHE_FILE'] = generateOutputFileName( "settings-cache", "json", true, 'debug');
+//        $cfgmgr = new ConfigManager($configFile=$GLOBALS['SETTINGS_CACHE_FILE'], $configData = $configFile=$GLOBALS['USERDATA']);
+//        $cfgmgr->saveConfig();
+//
         LogLine("Completed configuration load.", \C__DISPLAY_SUMMARY__);
 
     }
@@ -340,12 +344,6 @@ class ConfigManager
         //
         $this->_createSearchInstancesForRun();
 
-        //
-        // Load the exclusion filter and other user data from files
-        //
-        $this->_loadTitlesTokensToFilter_();
-
-        $this->_loadCompanyRegexesToFilter_();
     }
 
     private function __getEmptyEmailRecord__()
@@ -579,6 +577,7 @@ class ConfigManager
                 {
                     foreach ($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $siteToSearch)
                     {
+                        LogLine("... configuring searches for " . $siteToSearch, \C__DISPLAY_ITEM_DETAIL__);
                         $plugin = getPluginObjectForJobSite($siteToSearch);
                         $searchKey = cleanupSlugPart($keywordSet['key']);
                         if ($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
@@ -677,7 +676,7 @@ class ConfigManager
         }
     }
 
-    private function _getSearchForSpecificLocationName_($search, $arrSearchLocation)
+    private function _getSearchForSpecificLocationName_(UserSearchRun $search, $arrSearchLocation)
     {
         if ($search->isSearchIncludedInRun() !== true) {
             // this site was excluded for this run, so continue.
@@ -853,226 +852,6 @@ class ConfigManager
     }
 
 
-//    private function _setPreviouslyReviewedJobsInputFiles_()
-//    {
-//        $arrFileInput = $this->getInputFilesByType("previously_reviewed_file");
-//        if(is_array($arrFileInput) && $arrFileInput != null)
-//        {
-//            foreach($arrFileInput as $fileDetails)
-//            {
-//                if($fileDetails)
-//                {
-//                    $GLOBALS['userdata']['previous_files_details'][$fileDetails['file_name_base']] = array_copy($fileDetails);
-//                }
-//            }
-//        }
-//    }
-
-
-    private function _scrubRegexSearchString($pattern)
-    {
-        $delim = '~';
-        if(strpos($pattern, $delim) != false)
-        {
-            $delim = '|';
-        }
-
-        $rx = $delim.preg_quote(trim($pattern), $delim).$delim.'i';
-        try
-        {
-            $testMatch = preg_match($rx, "empty");
-        }
-        catch (\Exception $ex)
-        {
-            $GLOBALS['logger']->logLine($ex->getMessage(), \C__DISPLAY_ERROR__);
-            if(isDebug() == true) { throw $ex; }
-        }
-        return $rx;
-    }
-
-
-
-
-    private function _loadTitlesTokensToFilter_()
-    {
-        $arrFileInput = $this->getInputFilesByType("negative_title_keywords");
-
-        $GLOBALS['USERDATA']['title_negative_keyword_tokens'] = array();
-
-        if(isset($GLOBALS['USERDATA']['title_negative_keyword_tokens']) && count($GLOBALS['USERDATA']['title_negative_keyword_tokens']) > 0)
-        {
-            // We've already loaded the titles; go ahead and return right away
-            LogDebug("Using previously loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokenized title strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
-            return;
-        }
-
-        if(!is_array($arrFileInput))
-        {
-            // No files were found, so bail
-            LogDebug("No input files were found with title token strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
-            return;
-        }
-
-        $arrNegKwds = array();
-
-        foreach($arrFileInput as $fileItem)
-        {
-            $fileDetail = $fileItem['details'];
-            if(isset($fileDetail) && $fileDetail ['full_file_path'] != '')
-            {
-                if(file_exists($fileDetail ['full_file_path'] ) && is_file($fileDetail['full_file_path'] ))
-                {
-                    $arrRecs = loadCSV($fileDetail ['full_file_path']);
-                    foreach($arrRecs as $arrRec)
-                    {
-                        if(array_key_exists('negative_keywords', $arrRec)) {
-                            $kwd = strtolower($arrRec['negative_keywords']);
-                            $arrNegKwds[$kwd] = $kwd;
-                        }
-                    }
-//                    $file = fopen($fileDetail ['full_file_path'],"r");
-//                    $headers = fgetcsv($file);
-//                    while (($rowData = fgetcsv($file, null, ",", "\"")) !== false) {
-//                        $arrRec = array_combine($headers, $rowData);
-//                        $arrRec['negative_keywords'] = strtolower($arrRec['negative_keywords']);
-//                        $arrNegKwds[$arrRec["negative_keywords"]] = $arrRec;
-//                    }
-//
-//                    fclose($file);
-
-                }
-            }
-        }
-        $GLOBALS['USERDATA']['title_negative_keywords'] = array_unique($arrNegKwds, SORT_REGULAR);
-
-        $arrTitlesTemp = tokenizeSingleDimensionArray($GLOBALS['USERDATA']['title_negative_keywords'], 'userNegKwds', 'negative_keywords', 'negative_keywords');
-
-        if(count($arrTitlesTemp) <= 0)
-        {
-            LogLine("Warning: No title negative keywords were found in the input source files " . getArrayValuesAsString($arrFileInput) . " to be filtered from job listings." , \C__DISPLAY_WARNING__);
-        }
-        else
-        {
-            //
-            // Add each title we found in the file to our list in this class, setting the key for
-            // each record to be equal to the job title so we can do a fast lookup later
-            //
-            foreach($arrTitlesTemp as $titleRecord)
-            {
-                $tokens = explode("|", $titleRecord['negative_keywordstokenized']);
-                $GLOBALS['USERDATA']['title_negative_keyword_tokens'][] = $tokens;
-            }
-            
-            $inputfiles = array_column($this->getInputFilesByType("negative_title_keywords"), 'full_file_path');
-            LogLine("Loaded " . countAssociativeArrayValues($GLOBALS['USERDATA']['title_negative_keyword_tokens']) . " tokens to use for filtering titles from '" . getArrayValuesAsString($inputfiles) . "'." , \C__DISPLAY_ITEM_RESULT__);
-
-        }
-
-
-    }
-
-
-
-    /**
-     * Initializes the global list of titles we will automatically mark
-     * as "not interested" in the final results set.
-     */
-    function _loadCompanyRegexesToFilter_()
-    {
-        if(isset($GLOBALS['USERDATA']['companies_regex_to_filter']) && count($GLOBALS['USERDATA']['companies_regex_to_filter']) > 0)
-        {
-            // We've already loaded the companies; go ahead and return right away
-            LogDebug("Using previously loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']) . " regexed company strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
-            return;
-        }
-        $arrFileInput = $this->getInputFilesByType("regex_filter_companies");
-
-        $GLOBALS['USERDATA']['companies_regex_to_filter'] = array();
-
-        if(isset($GLOBALS['USERDATA']['companies_regex_to_filter']) && count($GLOBALS['USERDATA']['companies_regex_to_filter']) > 0)
-        {
-            // We've already loaded the titles; go ahead and return right away
-            LogDebug("Using previously loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']) . " regexed title strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
-            return;
-        }
-        $fCompaniesLoaded = false;
-
-        if(!isset($arrFileInput) ||  !is_array($arrFileInput)) { return; }
-
-
-        foreach($arrFileInput as $fileItem)
-        {
-            if(isset($fileItem['details']))
-            {
-                $fileDetail = $fileItem['details'];
-
-                if(isset($fileDetail ['full_file_path'])&& $fileDetail ['full_file_path'] != '')
-                {
-                    if(file_exists($fileDetail ['full_file_path'] ) && is_file($fileDetail ['full_file_path'] ))
-                    {
-                        LogDebug("Loading job Company regexes to filter from ".$fileDetail ['full_file_path']."." , \C__DISPLAY_ITEM_DETAIL__);
-                        $classCSVFile = new SimpleCSV($fileDetail ['full_file_path'] , 'r');
-                        $arrCompaniesTemp = $classCSVFile->readAllRecords(true,array('match_regex'));
-                        $arrCompaniesTemp = $arrCompaniesTemp['data_rows'];
-                        LogDebug(count($arrCompaniesTemp) . " companies found in the source file that will be automatically filtered from job listings." , \C__DISPLAY_ITEM_DETAIL__);
-
-                        //
-                        // Add each Company we found in the file to our list in this class, setting the key for
-                        // each record to be equal to the job Company so we can do a fast lookup later
-                        //
-                        if(count($arrCompaniesTemp) > 0)
-                        {
-                            foreach($arrCompaniesTemp as $CompanyRecord)
-                            {
-                                $arrRXInput = explode("|", strtolower($CompanyRecord['match_regex']));
-
-                                foreach($arrRXInput as $rxItem)
-                                {
-                                    try
-                                    {
-                                        $rx = $this->_scrubRegexSearchString($rxItem);
-                                        $GLOBALS['USERDATA']['companies_regex_to_filter'][] = $rx;
-
-                                    }
-                                    catch (\Exception $ex)
-                                    {
-                                        $strError = "Regex test failed on company regex pattern " . $rxItem .".  Skipping.  Error: '".$ex->getMessage();
-                                        LogError($strError, \C__DISPLAY_ERROR__);
-                                        if(isDebug() == true) { throw new \ErrorException( $strError); }
-                                    }
-                                }
-                            }
-                            $fCompaniesLoaded = true;
-                        }
-                    }
-                }
-            }
-        }
-
-        $inputfiles = array_column($arrFileInput, 'full_file_path');
-
-        if($fCompaniesLoaded == false)
-        {
-            if(count($arrFileInput) == 0)
-                LogDebug("No file specified for companies regexes to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." , \C__DISPLAY_WARNING__);
-            else
-                LogDebug("Could not load regex list for companies to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." , \C__DISPLAY_WARNING__);
-        }
-        else
-        {
-            LogLine("Loaded " . count($GLOBALS['USERDATA']['companies_regex_to_filter']). " regexes to use for filtering companies from " . getArrayValuesAsString($inputfiles)  , \C__DISPLAY_NORMAL__);
-
-        }
-    }
-//
-//    function parseJobsListForPage($objSimpHTML)
-//    {
-//        throw new \ErrorException("parseJobsListForPage not supported for class" . get_class($this));
-//    }
-//    function parseTotalResultsCount($objSimpHTML)
-//    {
-//        throw new \ErrorException("parseTotalResultsCount not supported for class " . get_class($this));
-//    }
 
 
 } 
