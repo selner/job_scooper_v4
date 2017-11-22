@@ -286,9 +286,14 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
         $v = strtolower($this->_cleanupTextValue($v));
         $newV = null;
 
-        $dateVal = strtotime($v, $now = time());
-        if (!($dateVal === false)) {
-            $newV = date('Y-m-d', $dateVal);
+        if (strcasecmp($v, "Just posted") == 0)
+            $newV = getTodayAsString();
+
+        if (is_null($newV)) {
+            $dateVal = strtotime($v, $now = time());
+            if (!($dateVal === false)) {
+                $newV = date('Y-m-d', $dateVal);
+            }
         }
 
         if(is_null($newV) && preg_match('/^\d+$/', $v)) {
