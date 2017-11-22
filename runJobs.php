@@ -18,6 +18,7 @@ define('__ROOT__', dirname(__FILE__));
 ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
 define('MAX_FILE_SIZE', 5000000);
 const C__APPNAME__ = "jobs_scooper";
+const C__SRC_LOCATION = "https://github.com/selner/job_scooper_v4";
 define('__APP_VERSION__', "v4.1.0-use-propel-orm");
 $lineEnding = ini_get('auto_detect_line_endings');
 ini_set('auto_detect_line_endings', true);

@@ -13,6 +13,7 @@ use Geocoder\Provider\GoogleMapsProvider;
 use Geocoder\HttpAdapter\CurlHttpAdapter;
 use \Exception;
 use Geocoder\Result\ResultInterface;
+use JobScooper\Utils\GoogleGeocoderHttpAdapter;
 
 
 class StringFormatter
@@ -59,12 +60,14 @@ class GeocodeManager
             $regionBias = $country_codes[0];
         }
 
-        $curl = new CurlHttpAdapter();
+        $curl = new GoogleGeocoderHttpAdapter();
         $this->geocoder = new \Geocoder\Geocoder();
         $this->geocoder->registerProviders(array(
             new \Geocoder\Provider\GoogleMapsProvider(
-                $curl,
+                $adapter=$curl,
+                $locale=null,
                 $region=$regionBias,
+                $useSsl = true,
                 $apiKey=$googleApiKey
             )
         ));
@@ -76,6 +79,7 @@ class GeocodeManager
      */
     function getPlaceForLocationString($strLocation)
     {
+        $addr = array();
         try {
             $addr = $this->geocoder->geocode($strLocation);
         } catch (\Geocoder\Exception\NoResultException $ex) {
@@ -83,6 +87,10 @@ class GeocodeManager
             return null;
         } catch (Exception $ex) {
             handleException($ex);
+        }
+        finally
+        {
+            $GLOBALS['CACHES']['totalGoogleQueriesThisRun'] = $GLOBALS['CACHES']['totalGoogleQueriesThisRun'] + 1;
         }
 
         if (count($addr) > 0) {
