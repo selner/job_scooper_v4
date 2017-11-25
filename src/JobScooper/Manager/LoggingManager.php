@@ -18,6 +18,7 @@ namespace JobScooper\Manager;
 
 use Monolog\ErrorHandler;
 use Monolog\Handler\DeduplicationHandler;
+use Propel\Runtime\Propel;
 use Psr\Log\LogLevel as LogLevel;
 use \Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -99,18 +100,32 @@ Class LoggingManager extends \Monolog\Logger
         exit(255);
     }
 
+    public function updatePropelLogging()
+    {
+        $this->_loggers['database'] = $this->withName('database');
+        Propel::getServiceContainer()->setLogger('defaultLogger', $this->_loggers['database']);
+        if(isDebug()) {
+            $con = Propel::getWriteConnection(\JobScooper\DataAccess\Map\JobPostingTableMap::DATABASE_NAME);
+            $con->useDebug(true);
+            LogLine("Enabled debug logging for Propel.", C__DISPLAY_ITEM_DETAIL__);
+        }
+    }
+
     public function addFileHandlers($logPath)
     {
+        $logLevelInfo = isDebug() ? Logger::DEBUG : Logger::INFO;
+        $logLevelWarn = isDebug() ? Logger::DEBUG : Logger::WARNING;
+
         $today = getTodayAsString("-");
         $mainLog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$today}.log";
-        $this->_handlersByType['logfile'] = new StreamHandler($mainLog, isDebug() ? Logger::DEBUG : Logger::INFO);
+        $this->_handlersByType['logfile'] = new StreamHandler($mainLog, $logLevelInfo);
         $this->pushHandler($this->_handlersByType['logfile']);
         $this->logLine("Logging started to logfile at {$mainLog}", C__DISPLAY_ITEM_DETAIL__);
 
         $now = getNowAsString("-");
         $csvlog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}-run_errors.csv";
         $fpcsv = fopen($csvlog, "w");
-        $this->_handlersByType['csverrors'] = new CSVLogHandler($fpcsv, Logger::WARNING);
+        $this->_handlersByType['csverrors'] = new CSVLogHandler($fpcsv, $logLevelWarn);
         $this->pushHandler($this->_handlersByType['csverrors'] );
         $this->logLine("Error logging started to CSV file at {$csvlog}", C__DISPLAY_ITEM_DETAIL__);
 
@@ -121,8 +136,7 @@ Class LoggingManager extends \Monolog\Logger
         $this->pushHandler($this->_handlersByType['dedupe_email']);
         $this->logLine("Error logging started for deduped email log file at {$dedupeLog}", C__DISPLAY_ITEM_DETAIL__);
 
-
-
+        $this->updatePropelLogging();
     }
 
     function __destruct()
@@ -132,17 +146,7 @@ Class LoggingManager extends \Monolog\Logger
         if(!is_null($this->_csvHandle))
         {
             fclose($this->_csvHandle);
-            $this->_csvHandle = null;
         }
-
-        if(!is_null($this->_dedupeHandle))
-        {
-            fclose($this->_dedupeHandle);
-            $this->_dedupeHandle = null;
-        }
-
-        $now = new DateTime('NOW');
-        $this->logLine("Logging ended for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'),C__DISPLAY_NORMAL__);
     }
 
     function flushErrorNotifications()

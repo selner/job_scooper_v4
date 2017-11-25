@@ -49,8 +49,6 @@ class CSVLogHandler extends StreamHandler
     function close()
     {
 
-        LogLine("CSVLogHandler close called on {$this->_streamUri}.  Trace: " . join("\n", debug_backtrace()), C__DISPLAY_WARNING__);
-
         parent::close();
 
         if($this->_streamUri !== false) {
