@@ -18,32 +18,44 @@
 
 use \JobScooper\Utils\SimpleHTMLHelper;
 
-class PluginEntercom extends AbstractTaleo
+class PluginEntercom extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
     protected $use1ToTDForCount = True;
     protected $taleoOrgID = "ENTERCOM";
     protected $nJobListingsPerPage = 100;
-    protected $server = 'http://chk.tbe.taleo.net/chk05/ats/careers/searchResults.jsp';
+//    protected $server = 'http://chk.tbe.taleo.net/chk05/ats/careers/searchResults.jsp';
+    protected $strBaseURLFormat = "https://chk.tbe.taleo.net/chk05/ats/careers/v2/searchResults?org=ENTERCOM&cws=37";
+
+    protected $arrListingTagSetup = array(
+        'JobPostCount' => array('selector'=>'span.oracletaleocwsv2-panel-number'),
+        'JobPostItem' => array('selector'=>'div.oracletaleocwsv2-accordion-head-info'),
+        'Title' => array('selector' => 'h4 a'),
+        'Url' => array('selector' => 'h4 a', 'index' => 0, 'return_attribute' => 'href'),
+        'Location' => array('selector' => 'div', 'index' => 1),
+        'Category' => array('selector' => 'div', 'index' => 0),
+        'JobSitePostId' => array('selector' => 'h4 a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' =>  '/rid=(.*)/i')
+    );
+
 
 }
 
-
-class PluginSeattleGenetics extends AbstractTaleo
-{
-    protected $server = "http://chp.tbe.taleo.net/chp04/ats/careers/searchResults.jsp";
-    protected $taleoOrgID = "SEAGEN";
-
-    function parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, $divTagType, $divTagValue, $trIndex)
-    {
-        $nodeHelper = new SimpleHTMLHelper($objSimpHTML);
-        $node = $nodeHelper->get("div.inner table tbody tr[2] td b", 0, true);
-        $totalItemsText = $node->innertext();
-
-        return $totalItemsText;
-    }
-
-    protected $arrResultsCountTag = array('type' =>'class', 'value'=>'inner', 'index'=>0);
-}
+//
+//class PluginSeattleGenetics extends AbstractTaleo
+//{
+//    protected $server = "http://chp.tbe.taleo.net/chp04/ats/careers/searchResults.jsp";
+//    protected $taleoOrgID = "SEAGEN";
+//
+//    function parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, $divTagType, $divTagValue, $trIndex)
+//    {
+//        $nodeHelper = new SimpleHTMLHelper($objSimpHTML);
+//        $node = $nodeHelper->get("div.inner table tbody tr[2] td b", 0, true);
+//        $totalItemsText = $node->innertext();
+//
+//        return $totalItemsText;
+//    }
+//
+//    protected $arrResultsCountTag = array('type' =>'class', 'value'=>'inner', 'index'=>0);
+//}
 
 class PluginInternetBrands extends AbstractTaleo
 {
@@ -85,7 +97,7 @@ abstract class AbstractTaleo extends \JobScooper\Plugins\lib\ServerHtmlPlugin
             $this->server = "https://ch.tbe.taleo.net/CH11/ats/careers/searchResults.jsp";
         }
 
-        if(isset($this->taleoOrgID) and strlen($this->taleoOrgID) > 0)
+        if(empty($this->strBaseURLFormat) && isset($this->taleoOrgID) and strlen($this->taleoOrgID) > 0)
         {
             $this->strBaseURLFormat = $this->server.'?org=' . $this->taleoOrgID . '&cws=1***ITEM_NUMBER***';
         }
