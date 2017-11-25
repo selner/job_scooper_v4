@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
+use JobScooper\DataAccess\UserSearchRun;
 
 abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
@@ -37,7 +37,7 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
 
     protected $typeLocationSearchNeeded = 'location-city-comma-state';
 
-    protected function getPageURLfromBaseFmt($searchDetails, $nPage = null, $nItem = null)
+    protected function getPageURLfromBaseFmt(UserSearchRun $searchDetails, $nPage = null, $nItem = null)
     {
         if(is_null($this->currentSearchAlternateURL)) {
             $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
@@ -80,7 +80,7 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
         'NextButton'           => array('selector' => 'li.paginator__item a[rel="next"]')
     );
 
-    protected function getGeoLocationURLValue($searchDetails)
+    protected function getGeoLocationURLValue(UserSearchRun $searchDetails)
     {
         $ret = parent::getGeoLocationURLValue($searchDetails);
         if (stristr($ret, "%2C+washington") !== false)

@@ -44,7 +44,7 @@ class PluginCareerBuilder extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         'NextButton' =>  array('selector' => '#next-button'),
     );
 
-    protected function getKeywordURLValue($searchDetails) {
+    protected function getKeywordURLValue(\JobScooper\DataAccess\UserSearchRun $searchDetails) {
         $keywordval = parent::getKeywordURLValue($searchDetails);
         return strtolower($keywordval);
     }
@@ -56,8 +56,8 @@ class PluginCareerBuilderUK extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $siteName = 'CareerBuilderUk';
     protected $nJobListingsPerPage = 20;
     protected $siteBaseURL = 'http://https://www.careerbuilder.co.uk';
-    protected $strBaseURLFormat = "https://www.careerbuilder.co.uk/search?q=***KEYWORDS***&sc=1&loc=***LOCATION***&pg=***PAGE_NUMBER***";
-    protected $additionalFlags = [];
+    protected $strBaseURLFormat = "https://www.careerbuilder.co.uk/search?q=***KEYWORDS***&sc=1&loc=***LOCATION***&pg=***PAGE_NUMBER***&sc=1";
+    protected $additionalFlags = [C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
     protected $typeLocationSearchNeeded = 'location-city';
     protected $strKeywordDelimiter = "|";
     protected $paginationType = C__PAGINATION_PAGE_VIA_URL;
@@ -82,7 +82,7 @@ class PluginCareerBuilderUK extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         return noJobStringMatch($var, "Nothing found");
     }
 
-    protected function getKeywordURLValue($searchDetails) {
+    protected function getKeywordURLValue(\JobScooper\DataAccess\UserSearchRun $searchDetails) {
         $keywordval = parent::getKeywordURLValue($searchDetails);
         return strtolower($keywordval);
     }

@@ -86,7 +86,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\lib\ServerHtmlPlugin
         return $ret;
     }
 
-    protected function getPageURLfromBaseFmt($searchDetails, $nPage = null, $nItem = null)
+    protected function getPageURLfromBaseFmt(\JobScooper\DataAccess\UserSearchRun $searchDetails, $nPage = null, $nItem = null)
     {
         $searchDetailsBackup = $searchDetails->copy();
         
