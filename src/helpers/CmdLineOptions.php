@@ -106,7 +106,7 @@ function getGlobalConfigOptionBoolean($key)
 
 function isDebug() {
     $cmdline = get_PharseOptionValue('debug');
-    $dbgCmdLine = filter_var(getConfigurationSettings($cmdline), FILTER_VALIDATE_BOOLEAN);
+    $dbgCmdLine = filter_var($cmdline, FILTER_VALIDATE_BOOLEAN);
 
     return getGlobalConfigOptionBoolean('debug') || $dbgCmdLine;
 }
