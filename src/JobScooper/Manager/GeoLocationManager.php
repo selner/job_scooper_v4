@@ -19,8 +19,11 @@ namespace JobScooper\Manager;
 use JobScooper\DataAccess\GeoLocation;
 use Propel\Runtime\ActiveQuery\Criteria;
 
+const GEOLOCATION_DOES_NOT_EXIST = -1;
+
 class GeoLocationManager
 {
+
     protected $geocoder = null;
 
     function __construct()
@@ -33,12 +36,15 @@ class GeoLocationManager
 
     }
 
-    function addGeolocationToCache(GeoLocation $geoloc)
+    function addGeolocationToCache(GeoLocation $geoloc, $origLocValue=null)
     {
         $loc = $geoloc->toArray();
         $names = $loc['AlternateNames'];
-        if(!empty($loc['DisplayName']))
+        if(!is_null($loc['DisplayName']) && strlen($loc['DisplayName']) > 0)
             $names[] = $loc['DisplayName'];
+        if(!is_null($origLocValue) && strlen($origLocValue) > 0)
+            $names[] = $origLocValue;
+
         $names = array_unique($names);
         foreach ($names as $name) {
             $GLOBALS['CACHES']['LocationIdsByName'][cleanupSlugPart($name)] = $loc['GeoLocationId'];;
@@ -49,7 +55,14 @@ class GeoLocationManager
     function reloadCache()
     {
         LogLine("....reloading GeoLocation table cache....", \C__DISPLAY_ITEM_DETAIL__);
-        $allLocs = \JobScooper\DataAccess\GeoLocationQuery::create()
+        $allGeoLocs = \JobScooper\DataAccess\GeoLocationQuery::create()
+            ->find();
+
+        $allLocsWithoutGeoLocs = \JobScooper\DataAccess\JobPostingQuery::create()
+//            ->select(array("jobposting_id", "location_display_value"))
+            ->select(array("location_display_value"))
+            ->filterByGeoLocationId(null,Criteria::ISNULL)
+            ->filterByLocationDisplayValue(null,Criteria::ISNOTNULL)
             ->find();
 
         if (!array_key_exists('CACHES', $GLOBALS))
@@ -61,9 +74,15 @@ class GeoLocationManager
             $GLOBALS['CACHES']['allowGoogleQueries'] = true;
 
         $GLOBALS['CACHES']['LocationIdsByName'] = array();
-        foreach ($allLocs as $loc) {
+        foreach ($allGeoLocs as $loc) {
             $this->addGeolocationToCache($loc);
         }
+
+        foreach ($allLocsWithoutGeoLocs as $name) {
+            $GLOBALS['CACHES']['LocationIdsByName'][cleanupSlugPart($name)] = GEOLOCATION_DOES_NOT_EXIST;
+        }
+
+
     }
 
     private function _getCache($cacheKey)
@@ -95,8 +114,10 @@ class GeoLocationManager
     public function findOrCreateGeoLocationByName($strlocname)
     {
         $loc = null;
+        $replaceNoLocInCache = false;
+
         $locId = $this->lookupGeoLocationIdByName($strlocname);
-        if (!is_null($locId)) {
+        if (!is_null($locId) || $locId == GEOLOCATION_DOES_NOT_EXIST) {
             $loc = $this->getLocationById($locId);
         } else {
             $loc = \JobScooper\DataAccess\GeoLocationQuery::create()
@@ -115,15 +136,22 @@ class GeoLocationManager
                     else {
 
                         $geocode = $this->geocoder->getPlaceForLocationString($strlocname);
-                        $locId = $this->lookupGeoLocationIdByName($geocode['primary_name']);
-                        if (!is_null($locId)) {
-                            $loc = $this->getLocationById($locId);
-                            $loc->addAlternateName($strlocname);
+                        if(is_null($geocode)) {
+                            $loc->delete();
+                            $loc = null;
                         }
                         else
                         {
-                            $loc->fromGeocode($geocode);
-                            $loc->addAlternateName($strlocname);
+                            $locId = $this->lookupGeoLocationIdByName($geocode['primary_name']);
+                            if (!is_null($locId) && $locId != GEOLOCATION_DOES_NOT_EXIST) {
+                                $loc = $this->getLocationById($locId);
+                                $loc->addAlternateName($strlocname);
+                            } else {
+                                if ($locId == GEOLOCATION_DOES_NOT_EXIST)
+                                    $replaceNoLocInCache = true;
+                                $loc->fromGeocode($geocode);
+                                $loc->addAlternateName($strlocname);
+                            }
                         }
                     }
                 } else {
@@ -138,14 +166,16 @@ class GeoLocationManager
 
         }
 
-        if($loc->isNew())
-        {
-            $loc->save();
-            $this->addGeolocationToCache($loc);
-        }
-        elseif($loc->isModified())
-        {
-            $loc->save();
+        if(!is_null($loc)) {
+            if ($loc->isNew()) {
+                $loc->save();
+                if ($replaceNoLocInCache === true)
+
+                    $this->addGeolocationToCache($loc, $origLocValue = $strlocname);
+            } elseif ($loc->isModified()) {
+                $loc->save();
+                $GLOBALS['CACHES']['LocationIdsByName'][cleanupSlugPart($strlocname)] = $loc->getGeoLocationId();
+            }
         }
         return $loc;
     }
