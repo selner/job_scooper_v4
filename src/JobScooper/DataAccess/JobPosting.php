@@ -172,6 +172,8 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
             $v = $arrMatches[3] . ", " . $arrMatches[2];
         }
 
+        $v = $this->_cleanupTextValue($v);
+
         parent::setLocation(trim($v));
 
         // clear any previous job location ID when we set a new location string
@@ -282,9 +284,12 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 
     public function setPostedAt($v)
     {
-        $v = str_ireplace("posted", "", $v);
-        $v = strtolower($this->_cleanupTextValue($v));
+        $v = strtolower(str_ireplace("posted", "", $v));
+        $v = $this->_cleanupTextValue($v);
         $newV = null;
+
+        if(empty($v))
+            return null;
 
         if (strcasecmp($v, "Just posted") == 0)
             $newV = getTodayAsString();
@@ -301,7 +306,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
             if(strlen($vstr) == strlen("20170101"))
             {
                 $datestr = substr($vstr, 4, 2) . "/" . substr($vstr, 6, 2) ."/" . substr($vstr, 0, 4);
-                $dateVal = strtotime($v, $now = time());
+                $dateVal = strtotime($datestr, $now = time());
                 if (!($dateVal === false)) {
                     $v = date('Y-m-d', $dateVal);
                 }
@@ -309,7 +314,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
             }
         }
 
-        if(is_null($newV)) {
+        if(is_null($newV) && !empty($v)) {
             $info = date_parse($v);
             $date = "";
             foreach(array("month", "day", "year") as $dateval)
