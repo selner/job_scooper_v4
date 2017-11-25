@@ -1,6 +1,7 @@
 {
   "AgentName": "Startwire",
   "SourceURL": "https://www.startwire.com/search",
+  "AdditionalFlags" : [ "C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER"],
   "Collections": [
     {
       "Name": "PageFields",
