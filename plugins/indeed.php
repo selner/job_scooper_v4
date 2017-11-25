@@ -26,7 +26,7 @@ class PluginIndeed extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 
     // Note:  C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS intentioanlly not set although Indeed supports it.  However, their support is too explicit of a search a will weed out
     //        too many potential hits to be worth it.
-    protected $additionalFlags = [C__JOB_IGNORE_MISMATCHED_JOB_COUNTS];
+    protected $additionalFlags = [C__JOB_IGNORE_MISMATCHED_JOB_COUNTS, C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
     protected $paginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
 
     protected $arrListingTagSetup = array(

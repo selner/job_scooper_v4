@@ -1,9 +1,10 @@
 {
   "AgentName": "DotJobs",
   "BaseURL": "http://www.my.jobs",
-  "SourceURL": "http://www.my.jobs/jobs/?location=***LOCATION***&q=***KEYWORDS***",
+  "SourceURL": "http://www.my.jobs/jobs/?location=***LOCATION***&q=***KEYWORDS***&sort=date",
   "LocationType": "location-city-comma-state",
   "CountryCodes" : ["US"],
+  "AdditionalFlags" : [ "C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER"],
   "PluginExtendsClassName" : "AbstractDotJobs",
   "nMaxJobsToReturn" : 3000,
   "Collections": [

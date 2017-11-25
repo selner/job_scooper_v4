@@ -4,7 +4,7 @@
   "SourceURL" : "http://www.cylcon.com/jobs.php?q=***KEYWORDS***&l=***LOCATION***&sort=date&radius=50&start=***ITEM_NUMBER***",
   "LocationType" : "location-city-comma-statecode",
   "CountryCodes" : ["US", "GB"],
-  "AdditionalFlags" : ["C__JOB_ITEMCOUNT_STARTSATZERO__"],
+  "AdditionalFlags" : ["C__JOB_ITEMCOUNT_STARTSATZERO__", "C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER"],
   "Collections": [
     {
       "Name": "PageFields",

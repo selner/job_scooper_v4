@@ -47,6 +47,7 @@ class PluginAmazon extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $nMaxJobsToReturn = 2000; // Amazon maxes out at 2000 jobs in the list
     protected $additionalLoadDelaySeconds = 1;
     protected $countryCodes = array("US", "GB");
+    protected $additionalFlags = [C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
 
     protected $selectorMoreListings = "button[data-label='right']";
 

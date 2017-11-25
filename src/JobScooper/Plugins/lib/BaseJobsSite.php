@@ -103,7 +103,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
             && ($fIgnoreLocation || $this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)));
     }
 
-    private function getJobSiteObject()
+    public function getJobSiteObject()
     {
         return $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->siteName)]['jobsite_db_object'];
     }
@@ -1111,8 +1111,14 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     }
 
-    function saveSearchReturnedJobs($arrJobList, UserSearchRun $searchDetails)
+    /**
+     * @param $arrJobList
+     * @param UserSearchRun $searchDetails
+     * $param $CountNewJobs Returns number of jobs that were new database records.
+     */
+    function saveSearchReturnedJobs($arrJobList, UserSearchRun $searchDetails, &$nCountNewJobs=0)
     {
+        $nCountNewJobs = 0;
         $arrJobsBySitePostId = array_column($arrJobList, null, 'JobSitePostId');
         if (!array_key_exists($searchDetails->getUserSearchRunKey(), $this->arrSearchReturnedJobs))
             $this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()] = array();
@@ -1120,7 +1126,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
         foreach (array_keys($arrJobsBySitePostId) as $JobSitePostId) {
             $job = $this->saveJob($arrJobsBySitePostId[$JobSitePostId]);
             if(!is_null($job))
-                $this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()][$job->getJobPostingId()] = $job;
+                $this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()][$job->getJobPostingId()] = $job->getJobPostingId();
+
+            // if this posting was saved within the last hour , then assume it's a new post
+            $hoursSince = date_diff($job->getFirstSeenAt(), new \DateTime());
+            if($hoursSince->h < 1)
+                $nCountNewJobs += 1;
         }
     }
 
@@ -1409,7 +1420,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
                         }
 
                         if (is_array($arrPageJobsList)) {
-                            $this->saveSearchReturnedJobs($arrPageJobsList, $searchDetails);
+                            $nCountNewJobsInDb = 0;
+                            $this->saveSearchReturnedJobs($arrPageJobsList, $searchDetails, $nCountNewJobsInDb);
                             $nJobsFound = count($this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()]);
 
                             if ($nItemCount == 1) {
@@ -1427,6 +1439,24 @@ abstract class BaseJobsSite implements IJobSitePlugin
                             }
 
                             LogLine("Loaded " . countAssociativeArrayValues($this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()]) . " of " . $nTotalListings . " job listings from " . $this->siteName, \C__DISPLAY_NORMAL__);
+
+
+                            //
+                            // PERFORMANCE OPTIMIZATION
+                            //
+                            // If we returned a page where all jobs were the jobs were seen before in the database
+                            // and the site always returns jobs in date descending order, then we can assume we will
+                            // only download more jobs we already know about and can skip the rest of them.
+                            //
+                            if($nCountNewJobsInDb === 0 &&
+                                $this->isBitFlagSet(C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER) &&
+                                $nJobsFound < $nTotalListings)
+                            {
+                                LogLine("All " . count($arrPageJobsList) . " job listings downloaded for this page have been seen before.  Skipping remaining job downloads since they are likely to be repeats.", \C__DISPLAY_NORMAL__);
+                                return;
+
+                            }
+
                         }
                     } catch (Exception $ex) {
                         handleException($ex, ($this->siteName . " error: %s"), true);

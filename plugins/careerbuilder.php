@@ -25,8 +25,8 @@ class PluginCareerBuilder extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
     protected $siteName = 'CareerBuilder';
     protected $siteBaseURL = 'http://www.careerbuilder.com';
-    protected $strBaseURLFormat = "http://www.careerbuilder.com/jobs-***KEYWORDS***-in-***LOCATION***?keywords=***KEYWORDS***&location=***LOCATION***&radius=50&page_number=***PAGE_NUMBER***&posted=***NUMBER_DAYS***";
-    protected $additionalFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES];
+    protected $strBaseURLFormat = "http://www.careerbuilder.com/jobs-***KEYWORDS***-in-***LOCATION***?keywords=***KEYWORDS***&location=***LOCATION***&radius=50&page_number=***PAGE_NUMBER***&posted=***NUMBER_DAYS***&sc=date_desc";
+    protected $additionalFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
     protected $typeLocationSearchNeeded = 'location-city-dash-statecode';
     protected $additionalLoadDelaySeconds = 5;
     protected $nJobListingsPerPage = 25;
