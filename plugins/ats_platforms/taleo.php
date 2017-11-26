@@ -22,9 +22,9 @@ class PluginEntercom extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
     protected $use1ToTDForCount = True;
     protected $taleoOrgID = "ENTERCOM";
-    protected $nJobListingsPerPage = 100;
+    protected $JobListingsPerPage = 100;
 //    protected $server = 'http://chk.tbe.taleo.net/chk05/ats/careers/searchResults.jsp';
-    protected $strBaseURLFormat = "https://chk.tbe.taleo.net/chk05/ats/careers/v2/searchResults?org=ENTERCOM&cws=37";
+    protected $SearchUrlFormat = "https://chk.tbe.taleo.net/chk05/ats/careers/v2/searchResults?org=ENTERCOM&cws=37";
 
     protected $arrListingTagSetup = array(
         'JobPostCount' => array('selector'=>'span.oracletaleocwsv2-panel-number'),
@@ -59,7 +59,7 @@ class PluginEntercom extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 
 class PluginInternetBrands extends AbstractTaleo
 {
-    protected $siteBaseURL = 'http://www.internetbrands.com/work-with-us/';
+    protected $JobPostingBaseUrl = 'http://www.internetbrands.com/work-with-us/';
     protected $taleoOrgID = "CARSDIRECT";
     protected $arrResultsCountTag = array('type' =>'class', 'value'=>'avada-row', 'index'=>1);
 }
@@ -67,14 +67,14 @@ class PluginInternetBrands extends AbstractTaleo
 class PluginTraderJoes extends AbstractTaleo
 {
     protected $use1ToTDForCount = True;
-    protected $siteBaseURL = 'http://www.traderjoes.com/careers/index.asp';
+    protected $JobPostingBaseUrl = 'http://www.traderjoes.com/careers/index.asp';
     protected $taleoOrgID = "TRADERJOES";
     protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleoContent', 'index'=>1);
 }
 class PluginPorch extends AbstractTaleo
 {
     protected $use1ToTDForCount = True;
-    protected $siteBaseURL = 'http://about.porch.com/careers';
+    protected $JobPostingBaseUrl = 'http://about.porch.com/careers';
     protected $taleoOrgID = "PORCH";
     protected $arrResultsCountTag = array('type' =>'id', 'value'=>'summary', 'index'=>1);
 }
@@ -84,29 +84,29 @@ abstract class AbstractTaleo extends \JobScooper\Plugins\lib\ServerHtmlPlugin
 {
     protected $use1ToTDForCount = False;
     protected $taleoOrgID = null;
-    protected $nJobListingsPerPage = 50;
+    protected $JobListingsPerPage = 50;
     protected $arrResultsCountTag = array('type' =>null, 'value'=>null, 'index'=>null);
-    protected $siteName = null;
+    protected $JobSiteName = null;
     protected $server = null;
 
     function __construct()
     {
-        $this->paginationType = C__PAGINATION_PAGE_VIA_URL;
+        $this->PaginationType = C__PAGINATION_PAGE_VIA_URL;
         
         if(!isset($this->server) or strlen($this->server) <= 0) {
             $this->server = "https://ch.tbe.taleo.net/CH11/ats/careers/searchResults.jsp";
         }
 
-        if(empty($this->strBaseURLFormat) && isset($this->taleoOrgID) and strlen($this->taleoOrgID) > 0)
+        if(empty($this->SearchUrlFormat) && isset($this->taleoOrgID) and strlen($this->taleoOrgID) > 0)
         {
-            $this->strBaseURLFormat = $this->server.'?org=' . $this->taleoOrgID . '&cws=1***ITEM_NUMBER***';
+            $this->SearchUrlFormat = $this->server.'?org=' . $this->taleoOrgID . '&cws=1***ITEM_NUMBER***';
         }
 
-        if(!isset($this->siteName) && strlen($this->siteName) <= 0)
+        if(!isset($this->JobSiteName) && strlen($this->JobSiteName) <= 0)
         {
             $strPluginSite = get_class($this);
             $strPluginSite = str_replace("Plugin", "", $strPluginSite);
-            $this->siteName = $strPluginSite;
+            $this->JobSiteName = $strPluginSite;
         }
 
         return parent::__construct();
@@ -122,16 +122,16 @@ abstract class AbstractTaleo extends \JobScooper\Plugins\lib\ServerHtmlPlugin
 
 
 
-    protected $strBaseURLFormat = null;
+    protected $SearchUrlFormat = null;
 
     function getItemURLValue($nItem)
     {
-        $strFirst = "&act=first&rowFrom=" . $this->nJobListingsPerPage;
+        $strFirst = "&act=first&rowFrom=" . $this->JobListingsPerPage;
         $strNext = "&act=next&rowFrom=";
 
         if($nItem == null || $nItem == 1) { return $strFirst; }
 
-        $ret = $nItem - $this->nJobListingsPerPage;
+        $ret = $nItem - $this->JobListingsPerPage;
         if($ret < 0) return $strFirst;
 
         return $strNext . $ret;
@@ -156,7 +156,7 @@ abstract class AbstractTaleo extends \JobScooper\Plugins\lib\ServerHtmlPlugin
             $counter++;
 
             $item = getEmptyJobListingRecord();
-            $item['Company'] = $this->siteName;
+            $item['Company'] = $this->JobSiteName;
             $item['Url'] = $node->find("td a")[0]->href;
             $item['Title'] = $node->find("td a")[0]->plaintext;
             $item['JobSitePostId'] = explode("rid=", $item['Url'])[1];

@@ -266,7 +266,7 @@ class SeleniumManager extends PropertyObject
             }
             $strHtml = $res->getBody();
 
-            $objSimplHtml = SimpleHTMLHelper::str_get_html($strHtml);
+            $objSimplHtml = new SimpleHtmlHelper($strHtml);
             if ($objSimplHtml === false)
             {
                 $ret = false;

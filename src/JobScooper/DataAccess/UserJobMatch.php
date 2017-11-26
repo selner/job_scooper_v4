@@ -19,6 +19,8 @@ namespace JobScooper\DataAccess;
 
 
 use JobScooper\DataAccess\Base\UserJobMatch as BaseUserJobMatch;
+use JobScooper\DataAccess\Map\JobPostingTableMap;
+use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Map\TableMap;
 
@@ -79,17 +81,19 @@ class UserJobMatch extends BaseUserJobMatch
         return true;
     }
 
-    public function toFlatArray()
+    public function toFlatArrayForCSV()
     {
-        $arrUserJobMatch = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
-        $arrItem = array_merge_recursive_distinct($arrUserJobMatch, $this->getJobPosting()->toFlatArray());
+        $jobPost = $this->getJobPosting();
+        if(empty($jobPost) && $this->isNew())
+            $jobPost = new JobPosting();
+        $arrJobPost = $jobPost->toFlatArrayForCSV();
 
-        foreach(array_keys($arrItem) as $key)
-            if(is_array($arrItem[$key]))
-                $arrItem[$key] = join("|", flattenWithKeys(array($key => $arrItem[$key])));
+        $arrUserJobMatch = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
+        updateColumnsForCSVFlatArray($arrUserJobMatch, new UserJobMatchTableMap());
+
+        $arrItem = array_merge_recursive_distinct($arrJobPost, $arrUserJobMatch);
 
         return $arrItem;
-
     }
 
 

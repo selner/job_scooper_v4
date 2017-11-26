@@ -242,8 +242,26 @@ function array_merge_recursive_distinct ( array &$array1, array &$array2 )
     return $merged;
 }
 
+function updateColumnsForCSVFlatArray(&$arr, $tablemap)
+{
+    foreach(array_keys($arr) as $key)
+    {
+        $col = $tablemap->getColumnByPhpName($key);
+        if($col->getType() == "ARRAY" && !empty($arr[$key]))
+        {
+            $arr[$key] = join("|", flattenWithKeys(array($key => $arr[$key])));
+        }
+        elseif($col->getType() == "TIMESTAMP" && !empty($arr[$key]))
+        {
+            $date = DateTime::createFromFormat("Y-m-d\TH:i:sT", $arr[$key]);
+            if(!empty($date))
+            {
+                $arr[$key] = $date->format("Y-m-d");
+            }
+        }
+    }
 
-
+}
 
 function array_subset(array $haystack, array $needle)
 {

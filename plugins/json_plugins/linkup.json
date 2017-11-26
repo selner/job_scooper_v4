@@ -1,5 +1,5 @@
 {
-  "AgentName": "LinkUp",
+  "JobSiteName": "LinkUp",
   "SourceURL": "https://linkup.com/search/results?keyword=***KEYWORDS***&location=***LOCATION***&distance=25&posted=1d&sort=d&pageNum=***PAGE_NUMBER***",
   "LocationType": "location-city-comma-state",
   "Collections": [

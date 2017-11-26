@@ -16,188 +16,74 @@
  */
 namespace JobScooper\Utils;
 
-use Exception;
-use ErrorException;
-use Sunra\PhpSimple\HtmlDomParser;
+use DiDom\Document;
+use DiDom\Query;
+use DiDom\Element;
+use DOMElement;
 
-
-const C__SIMPLEHTML_THROWEXCEPTION = 0x1;
-const C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR = 0x2;
-const C__SIMPLEHTML_NOTFOUND_RETURN_NULL = 0x4;
-const C__SIMPLEHTML_FOUND_RETURN_PLAINTEXT = 0x8;
-const C__SIMPLEHTML_FOUND_RETURN_PROPERTY = 0x10;
-const C__SIMPLEHTML_FOUND_RETURN_ATTRIB = 0x20;
-const C__SIMPLEHTML_FOUND_RETURN_NODE = 0x40;
-const C__SIMPLEHTML_FOUND_RETURN_ALLCHILDREN = 0x80;
-
-
-class SimpleHTMLHelper extends HtmlDomParser
+class ExtendedDiDomElement extends Element
 {
-    private $nodeObj = null;
-
-    function __construct($nodeObject)
-    {
-        if(!$nodeObject) throw new ErrorException("Required simple_html_dom_node or simple_html_dom object was not set.");
-        $this->nodeObj = $nodeObject;
-    }
-
-    function get($strNodePath, $retIndex = null, $fRequired = true)
-    {
-        $flags = C__SIMPLEHTML_FOUND_RETURN_NODE;
-        if($fRequired == true)  $flags = $flags | C__SIMPLEHTML_THROWEXCEPTION ;
-        return $this->getNodeValue($strNodePath, $retIndex, $flags);
-    }
-
-    function getText($strNodePath, $retIndex, $fRequired = false, $optPropOrAttrName = null)
-    {
-        $flags = C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR | C__SIMPLEHTML_FOUND_RETURN_PLAINTEXT;
-        if($fRequired == true)  $flags = $flags | C__SIMPLEHTML_THROWEXCEPTION ;
-
-        return $this->getNodeValue($strNodePath, $retIndex, $flags, "plaintext");
-    }
-
-    function getAllChildrenText($strNodePath, $retIndex, $fRequired = false)
-    {
-        $flags = C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR | C__SIMPLEHTML_FOUND_RETURN_ALLCHILDREN;
-        if($fRequired == true)  $flags = $flags | C__SIMPLEHTML_THROWEXCEPTION ;
-
-        return $this->getNodeValue($strNodePath, $retIndex, $flags);
-    }
-
-
-    // dump html dom tree
-    static function dump_html_tree($node, $show_attr=true, $deep=0)
-    {
-        $node->dump($node);
-    }
-
-
-    function getProperty($strNodePath, $retIndex, $optPropOrAttrName, $fRequired = false)
-    {
-        $flags = C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR | C__SIMPLEHTML_FOUND_RETURN_PROPERTY;
-        if($fRequired == true)  $flags = $flags | C__SIMPLEHTML_THROWEXCEPTION ;
-
-        return $this->getNodeValue($strNodePath, $retIndex, $flags, $optPropOrAttrName);
-    }
-
-    function getAttribute($strNodePath, $retIndex, $optPropOrAttrName, $fRequired = false)
-    {
-        $flags = C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR | C__SIMPLEHTML_FOUND_RETURN_ATTRIB;
-        if($fRequired == true)  $flags = $flags | C__SIMPLEHTML_THROWEXCEPTION ;
-
-        return $this->getNodeValue($strNodePath, $retIndex, $flags, $optPropOrAttrName);
-    }
-
-    function getNodeValue($strNodePath, $retIndex, $flags, $optPropOrAttrName = null)
-    {
-        $ret = null;
-        if(isBitFlagSet($flags,C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR ))
-        {
-            $ret = "";
+    function __get($name) {
+        switch ($name) {
+            case 'plaintext':
+                return $this->text();
+                break;
+            default:
+                return parent::__get($name);
         }
+    }
+}
 
-        try
+class SimpleHTMLHelper extends Document
+{
+    function __construct($data)
+    {
+        $isFile = false;
+        $string = $data;
+
+        if(is_string($data))
         {
-            if(isset($strNodePath) && strlen($strNodePath) > 0)
+            if(strncasecmp($data, "http", strlen("http")) === 0)
             {
-                $subNode = $this->nodeObj->find($strNodePath);
+                $isFile = true;
+                $string = $data;
+            }
+            elseif(is_file($data) === true)
+            {
+                $isFile = true;
+                $string = $data;
             }
             else
             {
-                $subNode = $this->nodeObj;
-            }
-
-            if(!isset($subNode))
-            {
-                throw new ErrorException("Failed to find expected node path: " . $strNodePath);
-            }
-
-
-
-            if(isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_NODE ))
-            {
-                $ret = $subNode;
-                if(isset($retIndex) && isset($subNode[$retIndex]))
-                {
-                    $ret = $subNode[$retIndex];
-                }
-            }
-            else
-            {
-                if(isset($retIndex) && isset($subNode[$retIndex]))
-                {
-                    $subNodeElement = $subNode[$retIndex];
-                }
-                elseif(isset($retIndex) && !isset($subNode[$retIndex]))
-                {
-                    throw new ErrorException("Node element (" . $strNodePath .")[" . $retIndex . "] was not found.");
-                }
-                else
-                {
-                    $subNodeElement = $subNode;
-                }
-                if(isVerbose())
-                {
-                    print ("Node path(" . (isset($strNodePath)?$strNodePath :"null").")[index=".(isset($retIndex)?$retIndex:"null")."] => " .PHP_EOL);
-                    $this->dump_html_tree($subNodeElement);
-                    print ("<= end " .PHP_EOL);
-                }
-
-                if(isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_PROPERTY ))
-                {
-                    if(!isset($optPropOrAttrName) || !isset($subNodeElement->$optPropOrAttrName))
-                    {
-                        throw new ErrorException("Property '" . $optPropOrAttrName . "' for node (" . $strNodePath .")[" . $retIndex . "] was not found.");
-                    }
-                    else
-                    {
-                        $ret = $subNodeElement->$optPropOrAttrName;
-                    }
-                }
-                elseif(isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_ATTRIB ))
-                {
-                    if(!isset($optPropOrAttrName) || !isset($subNodeElement->attr[$optPropOrAttrName]))
-                    {
-                        throw new ErrorException("Attribute '" . $optPropOrAttrName . "' for node (" . $strNodePath .")[" . $retIndex . "] was not found.");
-                    }
-                    else
-                    {
-                        $ret = $subNodeElement->attr[$optPropOrAttrName];
-                    }
-                }
-                elseif(isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_ALLCHILDREN))
-                {
-                    $ret = combineTextAllChildren($subNodeElement, false);
-                    if(!isset($ret) && isBitFlagSet($flags, C__SIMPLEHTML_NOTFOUND_RETURN_EMPTYSTR ))
-                    {
-                        $ret = "";
-                    }
-                }
-                elseif(isBitFlagSet($flags, C__SIMPLEHTML_FOUND_RETURN_PLAINTEXT ))
-                {
-                    if(!isset($subNodeElement->plaintext))
-                    {
-                        throw new ErrorException("Plaintext value for node (" . $strNodePath .")[" . $retIndex . "] was not found.");
-                    }
-                    else
-                    {
-                        $ret = $subNodeElement->plaintext;
-                    }
-                }
-            }
-        } catch (Exception $ex) {
-            $strErr = $ex->getMessage();
-            if(isBitFlagSet($flags, C__SIMPLEHTML_THROWEXCEPTION ))
-            {
-                $GLOBALS['logger']->logLine("Error getting SimpleObjectHTML node:  " . $strErr, \C__DISPLAY_ERROR__);
-                throw $ex;
-            }
-            else
-            {
-                if(isDebug()) $GLOBALS['logger']->logLine("" . $strErr, \C__DISPLAY_ITEM_DETAIL__);
+                $string = $data;
+                $isFile = false;
             }
         }
+        elseif(is_object($data) === true) {
+            $string = strval($data);
+            $isFile = false;
+        }
 
-        return $ret;
+        parent::__construct($string, $isFile);
+    }
+
+    function findByXpath($xpath)
+    {
+        return $this->find($xpath, Query::TYPE_XPATH);
+    }
+
+    function find($expression, $type = Query::TYPE_CSS, $wrapNode = true, $contextNode = null)
+    {
+        $ret = parent::find($expression, $type, $wrapNode, $contextNode); // TODO: Change the autogenerated stub
+        if (is_array($ret)) {
+            $retExt = array();
+            foreach ($ret as $elem) {
+                $retExt[] = new ExtendedDiDomElement($elem->getNode());
+            }
+            return $retExt;
+        } elseif (is_a($ret, "Element", true)) {
+            return new ExtendedDiDomElement($ret->getNode());
+        }
+        throw new \Exception("Invalid return type from DiDom->Find");
     }
 }

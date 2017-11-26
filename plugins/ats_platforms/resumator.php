@@ -33,7 +33,7 @@ abstract class AbstractResumator extends \JobScooper\Plugins\lib\ServerHtmlSimpl
 
 class PluginAtlanticMedia extends AbstractResumator
 {
-    protected $siteName = 'AtlanticMedia';
+    protected $JobSiteName = 'AtlanticMedia';
     protected $childSiteURLBase = 'http://atlanticmedia.theresumator.com/';
     protected $childSiteListingPage = 'http://atlanticmedia.theresumator.com/';
 }
@@ -41,7 +41,7 @@ class PluginAtlanticMedia extends AbstractResumator
 
 class PluginMashableCorporate extends AbstractResumator
 {
-    protected $siteName = 'MashableCorporate';
+    protected $JobSiteName = 'MashableCorporate';
     protected $childSiteURLBase = 'http://mashable.theresumator.com/';
     protected $childSiteListingPage = 'http://mashable.theresumator.com/';
 

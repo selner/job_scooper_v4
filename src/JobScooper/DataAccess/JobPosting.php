@@ -17,6 +17,8 @@
 
 namespace JobScooper\DataAccess;
 
+use JobScooper\DataAccess\Map\GeoLocationTableMap;
+use JobScooper\DataAccess\Map\JobPostingTableMap;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Map\TableMap;
 use Exception;
@@ -38,22 +40,25 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
         }
     }
 
-    public function toFlatArray()
+    public function toFlatArrayForCSV($includeGeolocation=false)
     {
         $location = array();
         $arrJobPosting = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
-        $jobloc = $this->getGeoLocation();
-        if(!is_null($jobloc))
-            $location = $jobloc->toArray();
-        $arrItem = array_merge_recursive_distinct($arrJobPosting, $location);
+        updateColumnsForCSVFlatArray($arrJobPosting, new JobPostingTableMap());
+        if($includeGeolocation === true) {
+            $jobloc = $this->getGeoLocation();
+            if (!is_null($jobloc))
+                $location = $jobloc->toFlatArrayForCSV();
 
-        foreach(array_keys($arrItem) as $key)
-            if(is_array($arrItem[$key]))
-                $arrItem[$key] = join("|", flattenWithKeys(array($key => $arrItem[$key])));
+            $arrItem = array_merge_recursive_distinct($arrJobPosting, $location);
+
+        }
+        else
+            $arrItem = $arrJobPosting;
 
         return $arrItem;
-
     }
+
     public function checkAndMarkDuplicatePosting()
     {
         if(is_null($this->getDuplicatesJobPostingId())) {

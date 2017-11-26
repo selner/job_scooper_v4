@@ -1,78 +1,78 @@
 {
   "jobsite_plugins": [
     {
-      "AgentName": "Vulcan",
+      "JobSiteName": "Vulcan",
       "SourceURL": "http://jobs.jobvite.com/vulcan-inc/?nl=1",
       "PluginExtendsClassName" : "AbstractJobviteATS",
       "additionalLoadDelaySeconds" : 5
     },
     {
-      "AgentName": "RealNetworks",
+      "JobSiteName": "RealNetworks",
       "SourceURL": "http://jobs.jobvite.com/realnetworks/?nl=1",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
-      "AgentName": "AnotherSource",
+      "JobSiteName": "AnotherSource",
       "SourceURL": "https://anothersource.com/jobs",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
-      "AgentName": "HTC",
+      "JobSiteName": "HTC",
       "SourceURL": "http://www.htc.com/us/working/careers",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
-      "AgentName": "panopto",
+      "JobSiteName": "Panopto",
       "SourceURL": "https://www.panopto.com/careers/job-openings/",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
-      "AgentName": "OpenTable",
+      "JobSiteName": "OpenTable",
       "SourceURL": "https://www.opentable.com/careers/jobs",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
-      "AgentName": "ExtraHop",
+      "JobSiteName": "ExtraHop",
       "SourceURL": "https://www.extrahop.com/company/careers/#all-open",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
-      "AgentName": "CrossoverHealth",
+      "JobSiteName": "CrossoverHealth",
       "SourceURL": "http://crossoverhealth.com/careers/",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
-      "AgentName": "Discovia",
+      "JobSiteName": "Discovia",
       "SourceURL": "https://www.discovia.com/about-us/careers/",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
-      "AgentName": "Doubledown",
+      "JobSiteName": "Doubledown",
       "SourceURL": "http://doubledowninteractive.com/careers.php",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
-      "AgentName": "NewRelic",
+      "JobSiteName": "NewRelic",
       "SourceURL": "https://newrelic.com/about/careers",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
-      "AgentName": "Zillow",
+      "JobSiteName": "Zillow",
       "SourceURL": "https://www.zillow.com/careers/apply/?p=search&p=0",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
-      "AgentName": "JunoTherapeutics",
+      "JobSiteName": "JunoTherapeutics",
       "SourceURL": "https://www.junotherapeutics.com/work-at-juno/open-positions/",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
-      "AgentName": "Pandora",
+      "JobSiteName": "Pandora",
       "SourceURL": "http://www.pandora.com/static/companypages/current_openings.html",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
-      "AgentName": "InsightRecruitment",
+      "JobSiteName": "InsightRecruitment",
       "SourceURL": "http://www.growwithinsight.net/open-positions/",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     }

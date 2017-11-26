@@ -23,19 +23,19 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
     function __construct()
     {
         $this->prevURL = $this->childSiteURLBase;
-        $this->paginationType = C__PAGINATION_PAGE_VIA_URL;
+        $this->PaginationType = C__PAGINATION_PAGE_VIA_URL;
 
-        $this->siteBaseURL = $this->childSiteURLBase;
-        $this->strBaseURLFormat = $this->childSiteURLBase . $this->strBaseURLFormat;
+        $this->JobPostingBaseUrl = $this->childSiteURLBase;
+        $this->SearchUrlFormat = $this->childSiteURLBase . $this->SearchUrlFormat;
         parent::__construct();
     }
 
-    protected $siteName = 'madgexats';
-    protected $strBaseURLFormat = '?Keywords=***KEYWORDS***&radialtown=***LOCATION***&LocationId=&RadialLocation=50&NearFacetsShown=true&countrycode=***COUNTRYCODE***&Page=***PAGE_NUMBER***';
+    protected $JobSiteName = 'madgexats';
+    protected $SearchUrlFormat = '?Keywords=***KEYWORDS***&radialtown=***LOCATION***&LocationId=&RadialLocation=50&NearFacetsShown=true&countrycode=***COUNTRYCODE***&Page=***PAGE_NUMBER***';
     protected $locationid = null;
     protected $currentSearchAlternateURL = null;
 
-    protected $typeLocationSearchNeeded = 'location-city-comma-state';
+    protected $LocationType = 'location-city-comma-state';
 
     protected function getPageURLfromBaseFmt(UserSearchRun $searchDetails, $nPage = null, $nItem = null)
     {
@@ -56,7 +56,7 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
             $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
         }
         $searchDetails->setSearchParameter('base_url_format', preg_replace('/[Ppage]{4}=\d+/', 'Page=***PAGE_NUMBER***', $strURL));
-        $this->strBaseURLFormat = $searchDetails->getSearchParameter('base_url_format');
+        $this->SearchUrlFormat = $searchDetails->getSearchParameter('base_url_format');
         return $strURL;
 
     }
@@ -134,49 +134,49 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
 
 class PluginTheGuardian extends AbstractMadgexATS
 {
-    protected $siteName = 'theguardian';
+    protected $JobSiteName = 'theguardian';
     protected $childSiteURLBase = 'https://jobs.theguardian.com/searchjobs';
 }
 
 class PluginMediaBistro extends AbstractMadgexATS
 {
-    protected $siteName = 'mediabistro';
+    protected $JobSiteName = 'mediabistro';
     protected $childSiteURLBase = 'https://www.mediabistro.com/jobs/search';
 }
 class PluginWashingtonPost extends AbstractMadgexATS
 {
-    protected $siteName = 'washingtonpost';
+    protected $JobSiteName = 'washingtonpost';
     protected $childSiteURLBase = 'https://jobs.washingtonpost.com/searchjobs';
 }
 
 class PluginJobfinderUSA extends AbstractMadgexATS
 {
-    protected $siteName = 'jobfinderusa';
+    protected $JobSiteName = 'jobfinderusa';
     protected $childSiteURLBase = "https://www.jobfinderusa.com/searchjobs/";
 }
 
 class PluginGreatJobSpot extends AbstractMadgexATS
 {
-    protected $siteName = 'greatjobspot';
+    protected $JobSiteName = 'greatjobspot';
     protected $childSiteURLBase = "https://www.greatjobspot.com/searchjobs/";
 }
 
 
 class PluginExecAppointments extends AbstractMadgexATS
 {
-    protected $siteName = 'execappointments';
+    protected $JobSiteName = 'execappointments';
     protected $childSiteURLBase = "https://www.exec-appointments.com/searchjobs/";
 }
 
 class PluginEconomist extends AbstractMadgexATS
 {
-    protected $siteName = 'economist';
+    protected $JobSiteName = 'economist';
     protected $childSiteURLBase = "http://jobs.economist.com/searchjobs";
 }
 
 class PluginStarTribune extends AbstractMadgexATS
 {
-    protected $siteName = 'startribune';
+    protected $JobSiteName = 'startribune';
     protected $childSiteURLBase = "http://jobs.startribune.com/searchjobs/";
 }
 

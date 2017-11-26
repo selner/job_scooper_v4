@@ -30,10 +30,13 @@ use PHPExcel_Style_Alignment;
 use PHPExcel_Style_Fill;
 use ErrorException;
 use Exception;
+use Propel\Runtime\Collection\ArrayCollection;
+use Propel\Runtime\Collection\Collection;
+use Propel\Runtime\Parser\AbstractParser;
 
 class NotifierJobAlerts extends JobsMailManager
 {
-    protected $siteName = "NotifierJobAlerts";
+    protected $JobSiteName = "NotifierJobAlerts";
     protected $arrAllUnnotifiedJobs = array();
     private $_arrJobSitesForRun = null;
 
@@ -44,7 +47,7 @@ class NotifierJobAlerts extends JobsMailManager
 
     function __destruct()
     {
-        if(isset($GLOBALS['logger'])) { logLine("Closing ".$this->siteName." instance of class " . get_class($this), \C__DISPLAY_ITEM_START__); }
+        if(isset($GLOBALS['logger'])) { logLine("Closing ".$this->JobSiteName." instance of class " . get_class($this), \C__DISPLAY_ITEM_START__); }
     }
 
     private function _combineCSVsToExcel($outfileDetails, $arrCSVFiles)
@@ -289,7 +292,7 @@ class NotifierJobAlerts extends JobsMailManager
         if($fileDetails['file_extension'] == "HTML")
             $keysToOutput = $this->getKeysForHTMLOutput();
         else
-            $keysToOutput = $this->getKeysForUserCSVOutput(!isDebug());
+            $keysToOutput = $this->getKeysForUserCSVOutput();
 
         if(is_null($keysToOutput))
             $keysToOutput = array();
@@ -317,7 +320,7 @@ class NotifierJobAlerts extends JobsMailManager
             $this->sortJobsCSVArrayByCompanyRole($arrRecordsToOutput);
         }
 
-        if ($keysToOutput == null && count($arrRecordsToOutput) > 0)
+        if (empty($keysToOutput))
         {
             $exampleRec = $arrRecordsToOutput[array_keys($arrRecordsToOutput)[0]];
 
@@ -333,19 +336,17 @@ class NotifierJobAlerts extends JobsMailManager
         }
         elseif($keysToOutput == null)
         {
-            $keysToOutput = getEmptyJobListingRecord();
+            $keysToOutput = $this->getKeysForUserCSVOutput();
         }
 
-        if($arrRecordsToOutput != null && count($arrRecordsToOutput) > 0)
+        if(!empty($arrRecordsToOutput))
         {
             foreach($arrRecordsToOutput as $reckey => $rec)
             {
-                $out = array();
-                foreach($keysToOutput as $k)
-                {
-                    $out[$k] = $rec[$k];
-                }
-                $arrRecordsToOutput[$reckey] = array_copy($out);
+                $arrRecordsToOutput[$reckey] = array_intersect_key(
+                    $rec,
+                    array_flip($keysToOutput)
+                );
             }
         }
 
@@ -360,19 +361,13 @@ class NotifierJobAlerts extends JobsMailManager
             $objPHPExcel = new PHPExcel();
             $objPHPExcel->getActiveSheet()->fromArray($arrRecordsToOutput, null, 'A1');
             $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, "CSV");
-
-//            $spreadsheet->removeSheetByIndex(0);
             $objWriter->save($strFileOut);
 
-//            $classCombined->writeArrayToCSVFile($arrJobsRecordsToUse, $keysToOutput, $this->arrKeysForDeduping);
         }
         LogLine("Jobs list had  ". count($arrRecordsToOutput) . " jobs and was written to " . $strFileOut , \C__DISPLAY_ITEM_START__);
 
         if($fileDetails['file_extension'] == "HTML")
             $this->addMailCssToHTMLFile($strFileOut);
-
-        return $arrJobsToOutput;
-
     }
 
     private function _filterAndWriteListToFile_($arrJobsList, $strFileNameBase, $strExt = "CSV")
@@ -666,19 +661,17 @@ class NotifierJobAlerts extends JobsMailManager
         );
     }
 
-    private function getKeysForUserCSVOutput($optimizedView=true)
+    private function getKeysForUserCSVOutput()
     {
         $match = new \JobScooper\DataAccess\UserJobMatch();
-        $jobPost = new JobPosting();
-        $allKeys = array_merge(array_keys($jobPost->toArray()), array_keys($match->toArray()));
+        $allKeys = array_keys($match->toFlatArrayForCSV());
 
 
-        if($optimizedView) {
-            $retKeys = array_diff($allKeys, array('AppRunId', 'UserJobMatchId', 'UserNotificationState', 'TitleTokens', 'JobTitleLinked', "FirstSeenAt", "RemovedAt", "UpdatedAt", "KeySiteAndPostID", "KeyCompanyAndTitle"));
-        }
-        else {
-            $retKeys = $allKeys;
-        }
+        $retKeys = array_diff($allKeys, array('AppRunId', 'UserJobMatchId', 'UserNotificationState', 'TitleTokens', 'JobTitleLinked', "FirstSeenAt", "RemovedAt", "UpdatedAt", "KeySiteAndPostID", "KeyCompanyAndTitle", "AlternateNames", "Location"));
+
+//        if(isDebug()) {
+//            $retKeys = $allKeys;
+//        }
         return array_unique($retKeys);
     }
 
@@ -687,7 +680,7 @@ class NotifierJobAlerts extends JobsMailManager
         $arrRet = array();
         foreach($arrJobObjects as $jobMatch)
         {
-            $item = $jobMatch->toFlatArray();
+            $item = $jobMatch->toFlatArrayForCSV();
             $arrRet[$item['KeySiteAndPostID']] = $item;
         }
 

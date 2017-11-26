@@ -22,12 +22,12 @@
 
 class PluginExpedia extends \JobScooper\Plugins\lib\AjaxHtmlPlugin
 {
-    protected $siteName = 'Expedia';
-    protected $siteBaseURL = 'https://expedia.wd5.myworkdayjobs.com/search/jobs/';
-    protected $strBaseURLFormat = 'https://expedia.wd5.myworkdayjobs.com/search/jobs/';
-    protected $nJobListingsPerPage = 100;
-    protected $additionalFlags = [C__JOB_SETTINGS_URL_VALUE_REQUIRED];
-    protected $paginationType = C__PAGINATION_INFSCROLLPAGE_NOCONTROL;
+    protected $JobSiteName = 'Expedia';
+    protected $JobPostingBaseUrl = 'https://expedia.wd5.myworkdayjobs.com/search/jobs/';
+    protected $SearchUrlFormat = 'https://expedia.wd5.myworkdayjobs.com/search/jobs/';
+    protected $JobListingsPerPage = 100;
+    protected $additionalBitFlags = [C__JOB_SETTINGS_URL_VALUE_REQUIRED];
+    protected $PaginationType = C__PAGINATION_INFSCROLLPAGE_NOCONTROL;
 
     function getDaysURLValue($days = null) {
         $ret = 1;
@@ -84,7 +84,7 @@ class PluginExpedia extends \JobScooper\Plugins\lib\AjaxHtmlPlugin
 
             $item['JobSitePostId'] = str_replace(array("(", ")"), "", $node->find("h3 small")[0]->plaintext);
 
-            $item['Url'] = $this->siteBaseURL . $node->find("a")[0]->href;
+            $item['Url'] = $this->JobPostingBaseUrl . $node->find("a")[0]->href;
             $item['Location'] = preg_replace("/(\s{2,})/", " ", $node->find("p[class='search-result-item-company-name']")[0]->plaintext, -1);
 //            $item['brief'] = $node->find("p[class='search-result-item-description']")[0]->plaintext;
 //           $item['brief'] = str_ireplace(array("Position Description ", "position overview", "PositionSummary"), "", $item['brief']);

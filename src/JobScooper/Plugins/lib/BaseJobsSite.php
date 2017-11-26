@@ -33,24 +33,17 @@ use JobScooper\Utils\SimpleHTMLHelper;
 
 abstract class BaseJobsSite implements IJobSitePlugin
 {
-    protected $arrSearchesToReturn = null;
-    protected $strBaseURLFormat = null;
-    protected $siteBaseURL = null;
-    protected $typeLocationSearchNeeded = null;
-    protected $siteName = null;
-    private $userObject = null;
-
     function __construct()
     {
-        if(is_null($this->siteName) || strlen($this->siteName) == 0) {
+        if(is_null($this->JobSiteName) || strlen($this->JobSiteName) == 0) {
             $classname = get_class($this);
             if (preg_match('/^Plugin(\w+)/', $classname, $matches) > 0) {
-                $this->siteName = $matches[1];
+                $this->JobSiteName = $matches[1];
             }
         }
 
-       if (array_key_exists("JOBSITE_PLUGINS", $GLOBALS) && (array_key_exists(strtolower($this->siteName), $GLOBALS['JOBSITE_PLUGINS']))) {
-            $plugin = $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->siteName)];
+       if (array_key_exists("JOBSITE_PLUGINS", $GLOBALS) && (array_key_exists(strtolower($this->JobSiteName), $GLOBALS['JOBSITE_PLUGINS']))) {
+            $plugin = $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->JobSiteName)];
             if (array_key_exists("other_settings", $plugin) && is_array($plugin['other_settings'])) {
                 $keys = array_keys($plugin['other_settings']);
                 foreach ($keys as $attrib_name) {
@@ -62,17 +55,17 @@ abstract class BaseJobsSite implements IJobSitePlugin
         $this->userObject = $GLOBALS['USERDATA']['configuration_settings']['user_details'];
 
 
-        if (stristr($this->strBaseURLFormat, "***KEYWORDS***") == false)
-            $this->additionalFlags[] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
+        if (stristr($this->SearchUrlFormat, "***KEYWORDS***") == false)
+            $this->additionalBitFlags[] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
 
-        if (stristr($this->strBaseURLFormat, "***LOCATION***") == false)
-            $this->additionalFlags[] = C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
+        if (stristr($this->SearchUrlFormat, "***LOCATION***") == false)
+            $this->additionalBitFlags[] = C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
 
-        if (stristr($this->strBaseURLFormat, "***NUMBER_DAYS***") == false)
-            $this->additionalFlags[] = C__JOB_DAYS_VALUE_NOTAPPLICABLE__;
+        if (stristr($this->SearchUrlFormat, "***NUMBER_DAYS***") == false)
+            $this->additionalBitFlags[] = C__JOB_DAYS_VALUE_NOTAPPLICABLE__;
 
-        if (is_array($this->additionalFlags)) {
-            foreach ($this->additionalFlags as $flag) {
+        if (is_array($this->additionalBitFlags)) {
+            foreach ($this->additionalBitFlags as $flag) {
                 // If the flag is already set, don't try to set it again or it will
                 // actually unset that flag incorrectly
                 if (!$this->isBitFlagSet($flag)) {
@@ -89,11 +82,11 @@ abstract class BaseJobsSite implements IJobSitePlugin
         if(!is_null($this->selectorMoreListings) && strlen($this->selectorMoreListings) > 0)
             $this->selectorMoreListings = preg_replace("/\\\?[\"']/", "'", $this->selectorMoreListings);
 
-        if(substr($this->siteBaseURL, strlen($this->siteBaseURL)-1, strlen($this->siteBaseURL)) === "/")
-            $this->siteBaseURL = substr($this->siteBaseURL, 0, strlen($this->siteBaseURL) - 1);
+        if(substr($this->JobPostingBaseUrl, strlen($this->JobPostingBaseUrl)-1, strlen($this->JobPostingBaseUrl)) === "/")
+            $this->JobPostingBaseUrl = substr($this->JobPostingBaseUrl, 0, strlen($this->JobPostingBaseUrl) - 1);
 
         if (is_null($this->getSupportedCountryCodes()) || (is_array($this->getSupportedCountryCodes()) && count($this->getSupportedCountryCodes()) ==0))
-            $this->countryCodes = array("US");
+            $this->CountryCodes = array("US");
 
     }
 
@@ -105,7 +98,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     public function getJobSiteObject()
     {
-        return $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->siteName)]['jobsite_db_object'];
+        return $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->JobSiteName)]['jobsite_db_object'];
     }
 
     //************************************************************************
@@ -152,22 +145,22 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     public function getMyJobsList()
     {
-        return getAllUserMatchesNotNotified($GLOBALS['USERDATA']['configuration_settings']['app_run_id'], $this->siteName);
+        return getAllUserMatchesNotNotified($GLOBALS['USERDATA']['configuration_settings']['app_run_id'], $this->JobSiteName);
     }
 
     public function getUpdatedJobsForAllSearches()
     {
-        $strIncludeKey = 'include_' . strtolower($this->siteName);
+        $strIncludeKey = 'include_' . strtolower($this->JobSiteName);
         $boolSearchSuccess = null;
 
 
         if (isset($GLOBALS['USERDATA']['OPTS'][$strIncludeKey]) && $GLOBALS['USERDATA']['OPTS'][$strIncludeKey] == 0) {
-            LogLine($this->siteName . ": excluded for run. Skipping '" . count($this->arrSearchesToReturn) . "' site search(es).", \C__DISPLAY_ITEM_DETAIL__);
+            LogLine($this->JobSiteName . ": excluded for run. Skipping '" . count($this->arrSearchesToReturn) . "' site search(es).", \C__DISPLAY_ITEM_DETAIL__);
             return array();
         }
 
         if (count($this->arrSearchesToReturn) == 0) {
-            LogLine($this->siteName . ": no searches set. Skipping...", \C__DISPLAY_ITEM_DETAIL__);
+            LogLine($this->JobSiteName . ": no searches set. Skipping...", \C__DISPLAY_ITEM_DETAIL__);
             return array();
         }
 
@@ -186,14 +179,14 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
                     try {
                         // assert this search is actually for the job site supported by this plugin
-                        assert(strcasecmp($search->getJobSiteKey(), cleanupSlugPart($this->siteName)) == 0);
+                        assert(strcasecmp($search->getJobSiteKey(), cleanupSlugPart($this->JobSiteName)) == 0);
 
                         if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && is_null($this->selenium)) {
                             try
                             {
                                 $this->selenium = new SeleniumManager();
                             } catch (Exception $ex) {
-                                handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->siteName . "'", true);
+                                handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
                             }
                         }
 
@@ -267,7 +260,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                     $this->selenium->done();
                 }
             } catch (Exception $ex) {
-                LogLine("Unable to shutdown Selenium server successfully while closing down downloads for {$this->siteName}: " . $ex->getMessage(), C__DISPLAY_WARNING__);
+                LogLine("Unable to shutdown Selenium server successfully while closing down downloads for {$this->JobSiteName}: " . $ex->getMessage(), C__DISPLAY_WARNING__);
             }
             finally
             {
@@ -283,7 +276,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     function getName()
     {
-        $name = strtolower($this->siteName);
+        $name = strtolower($this->JobSiteName);
         if (is_null($name) || strlen($name) == 0) {
             $name = str_replace("plugin", "", get_class($this));
         }
@@ -300,15 +293,22 @@ abstract class BaseJobsSite implements IJobSitePlugin
     //
     //************************************************************************
 
-    protected $nJobListingsPerPage = 20;
-    protected $additionalFlags = array();
-    protected $paginationType = null;
+    protected $JobListingsPerPage = 20;
+    protected $additionalBitFlags = array();
+    protected $PaginationType = null;
     protected $secsPageTimeout = null;
     protected $selenium = null;
     protected $nextPageScript = null;
     protected $selectorMoreListings = null;
     protected $nMaxJobsToReturn = C_JOB_MAX_RESULTS_PER_SEARCH;
     protected $arrSearchReturnedJobs = array();
+    protected $arrSearchesToReturn = null;
+    protected $SearchUrlFormat = null;
+    protected $JobPostingBaseUrl = null;
+    protected $LocationType = null;
+    protected $JobSiteName = null;
+    private $userObject = null;
+
 
     protected $detailsMyFileOut= "";
     protected $regex_link_job_id = null;
@@ -320,16 +320,16 @@ abstract class BaseJobsSite implements IJobSitePlugin
     protected $_flags_ = null;
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
 
-    protected $countryCodes = array("US");
+    protected $CountryCodes = array("US");
 
     function getGeoLocationSettingType(GeoLocation $location=null)
     {
-        return $this->typeLocationSearchNeeded;
+        return $this->LocationType;
     }
 
     function getSupportedCountryCodes()
     {
-        return $this->countryCodes;
+        return $this->CountryCodes;
     }
 
     protected function getActiveWebdriver()
@@ -371,14 +371,14 @@ abstract class BaseJobsSite implements IJobSitePlugin
         $strReturnLocation = VALUE_NOT_SUPPORTED;
 
         if ($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)) {
-            throw new \ErrorException($this->siteName . " does not support the ***LOCATION*** replacement value in a base URL.  Please review and change your base URL format to remove the location value.  Aborting all searches for " . $this->siteName, \C__DISPLAY_ERROR__);
+            throw new \ErrorException($this->JobSiteName . " does not support the ***LOCATION*** replacement value in a base URL.  Please review and change your base URL format to remove the location value.  Aborting all searches for " . $this->JobSiteName, \C__DISPLAY_ERROR__);
         }
 
         // Did the user specify an override at the search level in the INI?
         if ($searchDetails != null && !is_null($searchDetails->getSearchParameter('location_user_specified_override')) && strlen($searchDetails->getSearchParameter('location_user_specified_override')) > 0) {
             $strReturnLocation = $searchDetails->getSearchParameter('location_user_specified_override');
         }
-        elseif ($searchDetails != null && !is_null($searchDetails->getSearchParameter('location_search_value')) && strlen($searchDetails->getSearchParameter('location_search_value')) > 0)
+        elseif (!empty($searchDetails) && !empty($searchDetails->getSearchParameter('location_search_value')))
         {
             $strReturnLocation = $searchDetails->getSearchParameter('location_search_value');
         }
@@ -386,7 +386,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         {
             // No override, so let's see if the search settings have defined one for us
             $locTypeNeeded = $this->getGeoLocationSettingType();
-            if ($locTypeNeeded == null || $locTypeNeeded == "") {
+            if (!empty($locTypeNeeded)) {
                 LogLine("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchRunKey() . ".", \C__DISPLAY_ITEM_DETAIL__);
                 return $strReturnLocation;
             }
@@ -407,7 +407,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     protected function getPageURLfromBaseFmt(UserSearchRun $searchDetails, $nPage = null, $nItem = null)
     {
-        $strURL = $this->_getBaseURLFormat_($searchDetails, $nPage, $nItem);
+        $strURL = $this->_getSearchUrlFormat_($searchDetails, $nPage, $nItem);
 
 
         $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($GLOBALS['USERDATA']['configuration_settings']['number_days']), $strURL);
@@ -431,7 +431,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         }
 
         if ($strURL == null) {
-            throw new \ErrorException("Location value is required for " . $this->siteName . ", but was not set for the search '" . $searchDetails->getUserSearchRunKey() . "'." . " Aborting all searches for " . $this->siteName, \C__DISPLAY_ERROR__);
+            throw new \ErrorException("Location value is required for " . $this->JobSiteName . ", but was not set for the search '" . $searchDetails->getUserSearchRunKey() . "'." . " Aborting all searches for " . $this->JobSiteName, \C__DISPLAY_ERROR__);
         }
 
         return $strURL;
@@ -458,20 +458,20 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    protected function _getBaseURLFormat_(UserSearchRun  $searchDetails = null, $nPage = null, $nItem = null)
+    protected function _getSearchUrlFormat_(UserSearchRun  $searchDetails = null, $nPage = null, $nItem = null)
     {
         $strBaseURL = VALUE_NOT_SUPPORTED;
 
         if (!is_null($searchDetails->getSearchParameter('base_url_format'))) {
             $strBaseURL = $searchDetails->getSearchParameter('base_url_format');
-        } elseif (!is_null($this->strBaseURLFormat) && strlen($this->strBaseURLFormat) > 0) {
-            $strBaseURL = $this->strBaseURLFormat;
+        } elseif (!is_null($this->SearchUrlFormat) && strlen($this->SearchUrlFormat) > 0) {
+            $strBaseURL = $this->SearchUrlFormat;
             $searchDetails->setSearchParameter('base_url_format', $strBaseURL);
-        } elseif (!is_null($this->siteBaseURL) && strlen($this->siteBaseURL) > 0) {
-            $strBaseURL = $this->siteBaseURL;
+        } elseif (!is_null($this->JobPostingBaseUrl) && strlen($this->JobPostingBaseUrl) > 0) {
+            $strBaseURL = $this->JobPostingBaseUrl;
             $searchDetails->setSearchParameter('base_url_format', $strBaseURL);
         } else {
-            throw new \ErrorException("Could not find base URL format for " . $this->siteName . ".  Aborting all searches for " . $this->siteName, \C__DISPLAY_ERROR__);
+            throw new \ErrorException("Could not find base URL format for " . $this->JobSiteName . ".  Aborting all searches for " . $this->JobSiteName, \C__DISPLAY_ERROR__);
         }
         return $strBaseURL;
     }
@@ -573,7 +573,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         if ($nTotalItems == C__TOTAL_ITEMS_UNKNOWN__) {
             $nSleepTimeToLoad = 30 + $this->additionalLoadDelaySeconds;
         } else {
-            $nSleepTimeToLoad = ($nTotalItems / $this->nJobListingsPerPage) * $this->additionalLoadDelaySeconds;
+            $nSleepTimeToLoad = ($nTotalItems / $this->JobListingsPerPage) * $this->additionalLoadDelaySeconds;
         }
 
         LogLine("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results", \C__DISPLAY_ITEM_DETAIL__);
@@ -654,7 +654,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         if ($nTotalItems == C__TOTAL_ITEMS_UNKNOWN__) {
             $nSleepTimeToLoad = 30 + $this->additionalLoadDelaySeconds;
         } else {
-            $nSleepTimeToLoad = ($nTotalItems / $this->nJobListingsPerPage) * $this->additionalLoadDelaySeconds;
+            $nSleepTimeToLoad = ($nTotalItems / $this->JobListingsPerPage) * $this->additionalLoadDelaySeconds;
         }
 
         LogLine("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results", \C__DISPLAY_ITEM_DETAIL__);
@@ -714,7 +714,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     private function _addSearch_(UserSearchRun $searchDetails)
     {
-        assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || ($searchDetails->getSearchParameter('location_search_value') !== VALUE_NOT_SUPPORTED && strlen($searchDetails->getSearchParameter('location_search_value')) > 0));
+        assert($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) || empty($searchDetails->getSearchParameter('location_search_value')) || ($searchDetails->getSearchParameter('location_search_value') !== VALUE_NOT_SUPPORTED && strlen($searchDetails->getSearchParameter('location_search_value')) > 0));
 
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
             // null out any generalized keyword set values we previously had
@@ -733,7 +733,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         // Add the search to the list of ones to run
         //
         $this->arrSearchesToReturn[$searchDetails->getUserSearchRunKey()] = $searchDetails;
-        LogLine($this->siteName . ": added search (" . $searchDetails->getUserSearchRunKey() . ")", \C__DISPLAY_ITEM_DETAIL__);
+        LogLine($this->JobSiteName . ": added search (" . $searchDetails->getUserSearchRunKey() . ")", \C__DISPLAY_ITEM_DETAIL__);
 
     }
 
@@ -803,10 +803,10 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
         $searchStartURL = $this->getPageURLfromBaseFmt($searchDetails, 1, 1);
         if (is_null($searchStartURL) || strlen($searchStartURL) == 0)
-            $searchStartURL = $this->siteBaseURL;
+            $searchStartURL = $this->JobPostingBaseUrl;
 
         $searchDetails->setSearchParameter('search_start_url', $searchStartURL);
-        LogLine("Setting start URL for " . $this->siteName . "[" . $searchDetails->getUserSearchRunKey() . "] to: " . PHP_EOL . $searchDetails->getSearchParameter('search_start_url'), \C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Setting start URL for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchRunKey() . "] to: " . PHP_EOL . $searchDetails->getSearchParameter('search_start_url'), \C__DISPLAY_ITEM_DETAIL__);
 
     }
 
@@ -836,7 +836,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
             // get the url for the first page/items in the results
             if ($this->_checkInvalidURL_($searchDetails, $searchDetails->getSearchParameter('search_start_url')) == VALUE_NOT_SUPPORTED) return;
 
-            LogLine(("Starting data pull for " . $this->siteName . "[" . $searchDetails->getUserSearchRunKey() . "]"), \C__DISPLAY_ITEM_RESULT__);
+            LogLine(("Starting data pull for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchRunKey() . "]"), \C__DISPLAY_ITEM_RESULT__);
 
             if ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__) {
                 $this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
@@ -853,7 +853,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
             // then we are likely broken somehow unexpectedly.   Make sure to error so that we note
             // it in the results & error notifications so that a developer can take a look.
             if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$this->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED) && countJobRecords($this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()]) == 0) {
-                $strError = "The search " . $searchDetails->getUserSearchRunKey() . " on " . $this->siteName . " downloaded 0 jobs yet we did not have any keyword filter is use.  Logging as a potential error since we should have had something returned. [URL=" . $searchDetails->getSearchParameter('search_start_url') . "].  ";
+                $strError = "The search " . $searchDetails->getUserSearchRunKey() . " on " . $this->JobSiteName . " downloaded 0 jobs yet we did not have any keyword filter is use.  Logging as a potential error since we should have had something returned. [URL=" . $searchDetails->getSearchParameter('search_start_url') . "].  ";
                 handleException(new Exception($strError), null, true);
             }
 
@@ -869,7 +869,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
             if (in_array($jobsitekey, array('employmentguide', 'careerbuilder', 'ziprecruiter')) &&
                 (substr_count($ex->getMessage(), "HTTP error #404") > 0)
             ) {
-                $strError = $this->siteName . " plugin returned a 404 page for the search.  This is not an error; it means zero results found.";
+                $strError = $this->JobSiteName . " plugin returned a 404 page for the search.  This is not an error; it means zero results found.";
                 LogLine($strError, \C__DISPLAY_ITEM_DETAIL__);
 
                 $this->_setSearchResult_($searchDetails, $success = true);
@@ -879,12 +879,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 // Not the known issue case, so log the error and re-throw the exception
                 // if we should have thrown one
                 //
-                $strError = "Failed to download jobs from " . $this->siteName . " jobs for search '" . $searchDetails->getUserSearchRunKey() . "[URL=" . $searchDetails->getSearchParameter('search_start_url') . "]. Exception Details: ";
+                $strError = "Failed to download jobs from " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchRunKey() . "[URL=" . $searchDetails->getSearchParameter('search_start_url') . "]. Exception Details: ";
                 $this->_setSearchResult_($searchDetails, false, new Exception($strError . strval($ex)));
                 handleException($ex, $strError, false);
             }
         } finally {
-            $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->siteName . "[" . $searchDetails->getUserSearchRunKey() . "]"), \C__NAPPTOPLEVEL__, \C__SECTION_END__);
+            $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchRunKey() . "]"), \C__NAPPTOPLEVEL__, \C__SECTION_END__);
         }
 
         if (!is_null($ex)) {
@@ -895,7 +895,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     private function _checkInvalidURL_(UserSearchRun $details, $strURL)
     {
-        if ($strURL == null) throw new \ErrorException("Skipping " . $this->siteName . " search '" . $details->getUserSearchKey() . "' because a valid URL could not be set.");
+        if ($strURL == null) throw new \ErrorException("Skipping " . $this->JobSiteName . " search '" . $details->getUserSearchKey() . "' because a valid URL could not be set.");
         return $strURL;
     }
 
@@ -923,7 +923,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
         $strHTML = strval($htmlNode);
 
-        $htmlTmp = SimpleHTMLHelper::str_get_html($strHTML);
+        $htmlTmp = new SimpleHTMLHelper($strHTML);
         $htmlTmp->save($filepath);
 
         return $strHTML;
@@ -952,7 +952,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 if (!$fp) return $objSimpleHTML;
 
                 $strHTML = fread($fp, MAX_FILE_SIZE);
-                $objSimpleHTML = SimpleHTMLHelper::str_get_html($strHTML);
+                $objSimpleHTML = new SimpleHtmlHelper($strHTML);
                 fclose($fp);
             }
 
@@ -963,13 +963,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
                 $retObj = $class->cURL($strURL, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = $optTimeout, $cookies = $cookies, $referrer = $referrer);
                 if (!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0) {
-                    $objSimpleHTML = SimpleHTMLHelper::str_get_html($retObj['output']);
+                    $objSimpleHTML = new SimpleHtmlHelper($retObj['output']);
                     $this->prevCookies = $retObj['cookies'];
                     $this->prevURL = $strURL;
                 } else {
                     $options = array('http' => array('timeout' => 30, 'user_agent' => C__STR_USER_AGENT__));
                     $context = stream_context_create($options);
-                    $objSimpleHTML = SimpleHTMLHelper::file_get_html($strURL, false, $context);
+                    $objSimpleHTML = new SimpleHTMLHelper($strURL, $context=$context);
                 }
             }
             if(!$objSimpleHTML)
@@ -991,7 +991,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     {
         $nItemCount = 0;
 
-        LogLine("Downloading count of " . $this->siteName . " jobs for search '" . $searchDetails->getUserSearchRunKey() . "'", \C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Downloading count of " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchRunKey() . "'", \C__DISPLAY_ITEM_DETAIL__);
 
         $pageNumber = 1;
         $noMoreJobs = false;
@@ -999,7 +999,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
             $arrPageJobsList = [];
             $apiJobs = $this->getSearchJobsFromAPI($searchDetails);
             if (is_null($apiJobs)) {
-                LogLine("Warning: " . $this->siteName . "[" . $searchDetails->getUserSearchRunKey() . "] returned zero jobs from the API." . PHP_EOL, \C__DISPLAY_WARNING__);
+                LogLine("Warning: " . $this->JobSiteName . "[" . $searchDetails->getUserSearchRunKey() . "] returned zero jobs from the API." . PHP_EOL, \C__DISPLAY_WARNING__);
                 return null;
             }
 
@@ -1019,18 +1019,18 @@ abstract class BaseJobsSite implements IJobSitePlugin
                     $item['PostedAt'] = $job->datePosted->format('Y-m-d');
                 $item['Url'] = $job->url;
 
-                $strCurrentJobIndex = cleanupSlugPart($this->siteName) . cleanupSlugPart($item['JobSitePostId']);
+                $strCurrentJobIndex = cleanupSlugPart($this->JobSiteName) . cleanupSlugPart($item['JobSitePostId']);
                 $arrPageJobsList[$strCurrentJobIndex] = $item;
                 $nItemCount += 1;
             }
             $this->saveSearchReturnedJobs($arrPageJobsList, $searchDetails);
-            if (count($arrPageJobsList) < $this->nJobListingsPerPage) {
+            if (count($arrPageJobsList) < $this->JobListingsPerPage) {
                 $noMoreJobs = true;
             }
             $pageNumber++;
         }
 
-        LogLine($this->siteName . "[" . $searchDetails->getUserSearchRunKey() . "]" . ": " . $nItemCount . " jobs found." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
+        LogLine($this->JobSiteName . "[" . $searchDetails->getUserSearchRunKey() . "]" . ": " . $nItemCount . " jobs found." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
 
     }
 
@@ -1061,7 +1061,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         }
 
         if(is_null($arrItem['JobSiteKey']) || strlen($arrItem['JobSiteKey']) == 0)
-            $arrItem['JobSiteKey'] = $this->siteName;
+            $arrItem['JobSiteKey'] = $this->JobSiteName;
 
         $arrItem['JobSiteKey'] = cleanupSlugPart($arrItem['JobSiteKey']);
 
@@ -1074,7 +1074,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 $sep = "";
                 if (substr($arrItem['Url'], 0, 1) != "/")
                     $sep = "/";
-                $arrItem['Url'] = $this->siteBaseURL . $sep . $arrItem['Url'];
+                $arrItem['Url'] = $this->JobPostingBaseUrl . $sep . $arrItem['Url'];
             }
         } else {
             $arrItem['Url'] = "[UNKNOWN]";
@@ -1199,7 +1199,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         $arrIds = array_column($arrJobs, 'JobSitePostId', 'JobSitePostId');
         $queryData = \JobScooper\DataAccess\JobPostingQuery::create()
             ->select(array("JobPostingId", "JobSitePostId", "JobSiteKey", "KeySiteAndPostID"))
-            ->filterByJobSiteKey($this->siteName)
+            ->filterByJobSiteKey($this->JobSiteName)
             ->filterByJobSitePostId(array_values($arrIds))
             ->find();
         $jobResults = $queryData->toArray();
@@ -1215,7 +1215,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
             if(!empty($url))
                 $this->getActiveWebdriver()->get($url);
             $html = $this->getActiveWebdriver()->getPageSource();
-            $objSimpleHTML = SimpleHTMLHelper::str_get_html($html);
+            $objSimpleHTML = new SimpleHtmlHelper($html);
         } catch (Exception $ex) {
             $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
             handleException(new Exception($strError), null, true);
@@ -1226,12 +1226,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     private function _getMyJobsForSearchFromWebpage_($searchDetails)
     {
+        meminfo_dump(fopen('/tmp/memdump_getjobsfrompage_start.json', 'w'));
         try {
             $nItemCount = 1;
             $nPageCount = 1;
             $objSimpleHTML = null;
 
-            LogLine("Getting count of " . $this->siteName . " jobs for search '" . $searchDetails->getUserSearchRunKey() . "': " . $searchDetails->getSearchParameter('search_start_url'), \C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Getting count of " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchRunKey() . "': " . $searchDetails->getSearchParameter('search_start_url'), \C__DISPLAY_ITEM_DETAIL__);
 
             if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
                 try {
@@ -1243,7 +1244,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                         $html = $this->doFirstPageLoad($searchDetails);
                     else
                         $html = $this->selenium->getPageHTML($searchDetails->getSearchParameter('search_start_url'));
-                    $objSimpleHTML = SimpleHTMLHelper::str_get_html($html);
+                    $objSimpleHTML = new SimpleHTMLHelper($html);
                 } catch (Exception $ex) {
                     $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
                     handleException(new Exception($strError), null, true);
@@ -1258,7 +1259,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
             $totalPagesCount = C__TOTAL_ITEMS_UNKNOWN__;
             $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__; // placeholder because we don't know how many are on the page
             if ($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) && $this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__)) {
-                switch ($this->paginationType) {
+                switch ($this->PaginationType) {
 
                     case C__PAGINATION_INFSCROLLPAGE_NOCONTROL:
                     case C__PAGINATION_INFSCROLLPAGE_PAGEDOWN:
@@ -1274,7 +1275,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                         // if we can't get a number of pages AND we can't get a number of items,
                         // we must assume there is, at most, only one page of results.
                         $totalPagesCount = 1;
-                        $nTotalListings = $this->nJobListingsPerPage;
+                        $nTotalListings = $this->JobListingsPerPage;
                         break;
                 }
             }
@@ -1289,7 +1290,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                         LogLine("Search '" . $searchDetails->getUserSearchRunKey() . "' returned more results than allowed.  Only retrieving the first " . $this->nMaxJobsToReturn . " of  " . $nTotalListings . " job listings.", \C__DISPLAY_WARNING__);
                         $nTotalListings = $this->nMaxJobsToReturn;
                     }
-                    $totalPagesCount = intceil($nTotalListings / $this->nJobListingsPerPage); // round up always
+                    $totalPagesCount = intceil($nTotalListings / $this->JobListingsPerPage); // round up always
                     if ($totalPagesCount < 1) $totalPagesCount = 1;
                 }
             }
@@ -1301,7 +1302,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
             // back hundreds of results to test things are running successfully.
             //
             if (isTestRun()) {
-                $maxListings = $this->nJobListingsPerPage * 2;
+                $maxListings = $this->JobListingsPerPage * 2;
                 if ($nTotalListings > $maxListings) {
                     $nTotalListings = $maxListings;
                     $totalPagesCount = 2;
@@ -1310,12 +1311,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 
             if ($nTotalListings <= 0) {
-                LogLine("No new job listings were found on " . $this->siteName . " for search '" . $searchDetails->getUserSearchRunKey() . "'.", \C__DISPLAY_ITEM_START__);
+                LogLine("No new job listings were found on " . $this->JobSiteName . " for search '" . $searchDetails->getUserSearchRunKey() . "'.", \C__DISPLAY_ITEM_START__);
                 return array();
             } else {
                 $nJobsFound = 0;
 
-                LogLine("Querying " . $this->siteName . " for " . $totalPagesCount . " pages with " . ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ ? "an unknown number of" : $nTotalListings) . " jobs:  " . $searchDetails->getSearchParameter('search_start_url'), \C__DISPLAY_ITEM_START__);
+                LogLine("Querying " . $this->JobSiteName . " for " . $totalPagesCount . " pages with " . ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ ? "an unknown number of" : $nTotalListings) . " jobs:  " . $searchDetails->getSearchParameter('search_start_url'), \C__DISPLAY_ITEM_START__);
 
                 $strURL = $searchDetails->getSearchParameter('search_start_url');
                 while ($nPageCount <= $totalPagesCount) {
@@ -1329,7 +1330,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                     //
                     if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
                         try {
-                            switch (strtoupper($this->paginationType)) {
+                            switch (strtoupper($this->PaginationType)) {
 
                                 case C__PAGINATION_NONE:
                                     $totalPagesCount = 1;
@@ -1376,7 +1377,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
                                 case C__PAGINATION_INFSCROLLPAGE_VIA_JS:
                                     if (is_null($this->nextPageScript)) {
-                                        handleException(new Exception("Plugin " . $this->siteName . " is missing nextPageScript settings for the defined pagination type."), "", true);
+                                        handleException(new Exception("Plugin " . $this->JobSiteName . " is missing nextPageScript settings for the defined pagination type."), "", true);
 
                                     }
                                     $this->selenium->loadPage($strURL);
@@ -1390,7 +1391,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
                             $strURL = $this->selenium->driver->getCurrentURL();
                             $html = $this->selenium->driver->getPageSource();
-                            $objSimpleHTML = SimpleHTMLHelper::str_get_html($html);
+                            $objSimpleHTML = new SimpleHtmlHelper($html);
 
                         } catch (Exception $ex) {
                             handleException($ex, "Failed to get dynamic HTML via Selenium due to error:  %s", true);
@@ -1413,7 +1414,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                         if (!is_array($arrPageJobsList)) {
                             // we likely hit a page where jobs started to be hidden.
                             // Go ahead and bail on the loop here
-                            $strWarnHiddenListings = "Could not get all job results back from " . $this->siteName . " for this search starting on page " . $nPageCount . ".";
+                            $strWarnHiddenListings = "Could not get all job results back from " . $this->JobSiteName . " for this search starting on page " . $nPageCount . ".";
                             if ($nPageCount < $totalPagesCount)
                                 $strWarnHiddenListings .= "  They likely have hidden the remaining " . ($totalPagesCount - $nPageCount) . " pages worth. ";
 
@@ -1429,18 +1430,18 @@ abstract class BaseJobsSite implements IJobSitePlugin
                             if ($nItemCount == 1) {
                                 $nItemCount = 0;
                             }
-                            $nItemCount += ($nJobsFound < $this->nJobListingsPerPage) ? $nJobsFound : $this->nJobListingsPerPage;
+                            $nItemCount += ($nJobsFound < $this->JobListingsPerPage) ? $nJobsFound : $this->JobListingsPerPage;
 
                             // If we don't know the total number of listings we will get, we can guess that we've got them all
                             // if we did not get the max number of job listings from the last page.  Basically, if we couldn't
                             // fill up a page with our search, then they must not be that many listings avaialble.
                             //
-                            if ($totalPagesCount > 1 && $nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ && countAssociativeArrayValues($arrPageJobsList) < $this->nJobListingsPerPage) {
+                            if ($totalPagesCount > 1 && $nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ && countAssociativeArrayValues($arrPageJobsList) < $this->JobListingsPerPage) {
                                 $totalPagesCount = $nPageCount;
                                 $nTotalListings = countAssociativeArrayValues($this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()]);
                             }
 
-                            LogLine("Loaded " . countAssociativeArrayValues($this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()]) . " of " . $nTotalListings . " job listings from " . $this->siteName, \C__DISPLAY_NORMAL__);
+                            LogLine("Loaded " . countAssociativeArrayValues($this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()]) . " of " . $nTotalListings . " job listings from " . $this->JobSiteName, \C__DISPLAY_NORMAL__);
 
 
                             //
@@ -1461,7 +1462,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
                         }
                     } catch (Exception $ex) {
-                        handleException($ex, ($this->siteName . " error: %s"), true);
+                        handleException($ex, ($this->JobSiteName . " error: %s"), true);
                     }
 
                     //
@@ -1475,13 +1476,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
                     $err = null;
                     $marginOfErrorAllowed = .05;
                     if ($nTotalListings > 0 && $nItemCount == 0) // We got zero listings but should have found some
-                        $err = "Retrieved 0 of the expected " . $nTotalListings . " listings for " . $this->siteName . " (search = " . $searchDetails->getUserSearchRunKey() . ")";
-                    elseif ($nItemCount < $this->nJobListingsPerPage && $nPageCount < $totalPagesCount)
-                        $err = "Retrieved only " . $nItemCount . " of the " . $this->nJobListingsPerPage . " job listings on page " . $nPageCount . " for " . $this->siteName . " (search = " . $searchDetails->getUserSearchRunKey() . ")";
+                        $err = "Retrieved 0 of the expected " . $nTotalListings . " listings for " . $this->JobSiteName . " (search = " . $searchDetails->getUserSearchRunKey() . ")";
+                    elseif ($nItemCount < $this->JobListingsPerPage && $nPageCount < $totalPagesCount)
+                        $err = "Retrieved only " . $nItemCount . " of the " . $this->JobListingsPerPage . " job listings on page " . $nPageCount . " for " . $this->JobSiteName . " (search = " . $searchDetails->getUserSearchRunKey() . ")";
                     elseif ($nJobsFound < $nTotalListings * (1 - $marginOfErrorAllowed) && $nPageCount == $totalPagesCount && !$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__))
-                        $err = "Retrieved only " . $nJobsFound . " of the " . $nTotalListings . " listings that we expected for " . $this->siteName . " (search = " . $searchDetails->getUserSearchRunKey() . ")";
+                        $err = "Retrieved only " . $nJobsFound . " of the " . $nTotalListings . " listings that we expected for " . $this->JobSiteName . " (search = " . $searchDetails->getUserSearchRunKey() . ")";
                     elseif ($nJobsFound > $nTotalListings * (1 + $marginOfErrorAllowed) && $nPageCount == $totalPagesCount && !$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__)) {
-                        $warnMsg = "Warning:  Downloaded " . ($nJobsFound - $nTotalListings) . " jobs more than the " . $nTotalListings . " expected for " . $this->siteName . " (search = " . $searchDetails->getUserSearchRunKey() . ")";
+                        $warnMsg = "Warning:  Downloaded " . ($nJobsFound - $nTotalListings) . " jobs more than the " . $nTotalListings . " expected for " . $this->JobSiteName . " (search = " . $searchDetails->getUserSearchRunKey() . ")";
                         LogLine($warnMsg, \C__DISPLAY_WARNING__);
                     }
 
@@ -1504,7 +1505,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                     //
                     if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
                         try {
-                            switch (strtoupper($this->paginationType)) {
+                            switch (strtoupper($this->PaginationType)) {
                                 case C__PAGINATION_PAGE_VIA_URL:
                                     $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
                                     if ($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
@@ -1514,7 +1515,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
                                 case C__PAGINATION_PAGE_VIA_NEXTBUTTON:
                                     if (is_null($this->selectorMoreListings)) {
-                                        throw(new Exception("Plugin " . $this->siteName . " is missing selectorMoreListings setting for the defined pagination type."));
+                                        throw(new Exception("Plugin " . $this->JobSiteName . " is missing selectorMoreListings setting for the defined pagination type."));
 
                                     }
                                     $this->selenium->loadPage($strURL);
@@ -1528,7 +1529,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
                                 case C__PAGINATION_PAGE_VIA_CALLBACK:
                                     if (!method_exists($this, 'takeNextPageAction')) {
-                                        handleException(new Exception("Plugin " . $this->siteName . " is missing takeNextPageAction method definiton required for its pagination type."), "", true);
+                                        handleException(new Exception("Plugin " . $this->JobSiteName . " is missing takeNextPageAction method definiton required for its pagination type."), "", true);
                                     }
 
                                     if ($nPageCount > 1 && $nPageCount <= $totalPagesCount) {
@@ -1555,17 +1556,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
             }
 
-            LogLine($this->siteName . "[" . $searchDetails->getUserSearchRunKey() . "]" . ": " . $nJobsFound . " jobs found." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
+            LogLine($this->JobSiteName . "[" . $searchDetails->getUserSearchRunKey() . "]" . ": " . $nJobsFound . " jobs found." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
 
         } catch (Exception $ex) {
             $this->_setSearchResult_($searchDetails, false, $ex);
             handleException($ex, null, true);
         } finally {
-            // clean up memory
-            if (!is_null($objSimpleHTML) && is_object($objSimpleHTML)) {
-                $objSimpleHTML->clear();
-                unset($objSimpleHTML);
-            }
+            meminfo_dump(fopen('/tmp/memdump_getjobsfrompage_end.json', 'w'));
         }
 
         return null;

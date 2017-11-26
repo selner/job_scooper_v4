@@ -95,7 +95,7 @@ You can define the full configuration for a job site plugin in a single JSON fil
 
 ```javascript
 {
-  "AgentName": "Startjobs",
+  "JobSiteName": "Startjobs",
   "SourceURL": "https://start.jobs/search",
   "Collections": [
     {
@@ -157,12 +157,12 @@ Using the new Simple Job Site base plugin classes, developers can now add an ent
  ```php
 class PluginCyberJobs extends AjaxHtmlSimplePlugin
 {
-    protected $siteName = 'CyberJobs';
-    protected $siteBaseURL = "https://cyber.jobs";
-    protected $strBaseURLFormat = "https://cyber.jobs/search/?page=***PAGE_NUMBER***&searchterms=***KEYWORDS***&searchlocation=***LOCATION***&newsearch=true&originalsearch=true&sorttype=date";
+    protected $JobSiteName = 'CyberJobs';
+    protected $JobPostingBaseUrl = "https://cyber.jobs";
+    protected $SearchUrlFormat = "https://cyber.jobs/search/?page=***PAGE_NUMBER***&searchterms=***KEYWORDS***&searchlocation=***LOCATION***&newsearch=true&originalsearch=true&sorttype=date";
 
-    protected $paginationType = C__PAGINATION_PAGE_VIA_URL;
-    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
+    protected $PaginationType = C__PAGINATION_PAGE_VIA_URL;
+    protected $LocationType = 'location-city-comma-statecode';
 
     protected $arrListingTagSetup = array(
         'TotalPostCount' =>  array('tag' => 'span', 'attribute' => 'id', 'attribute_value' =>'total-result-count', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),

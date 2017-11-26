@@ -21,6 +21,7 @@ use JobScooper\DataAccess\Base\GeoLocation as BaseGeoLocation;
 use JobScooper\DataAccess\Map\GeoLocationTableMap;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
+use Propel\Runtime\Map\TableMap;
 
 class GeoLocation extends BaseGeoLocation
 {
@@ -372,6 +373,13 @@ class GeoLocation extends BaseGeoLocation
         return null;
     }
 
+    public function toFlatArrayForCSV()
+    {
+        $arrItem = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
+        updateColumnsForCSVFlatArray($arrItem, new GeoLocationTableMap());
+
+        return $arrItem;
+    }
 
 
 }

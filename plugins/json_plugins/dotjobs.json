@@ -1,5 +1,5 @@
 {
-  "AgentName": "DotJobs",
+  "JobSiteName": "DotJobs",
   "BaseURL": "http://www.my.jobs",
   "SourceURL": "http://www.my.jobs/jobs/?location=***LOCATION***&q=***KEYWORDS***&sort=date",
   "LocationType": "location-city-comma-state",

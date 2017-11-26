@@ -58,12 +58,12 @@ class JobSitePluginBuilder
         foreach(array('Abstract', 'Plugin') as $type)
         {
             $plugins = array_filter($this->_jsonPluginSetups, function ($val) use ($type) {
-                $matched = preg_match("/^" . $type . "/", $val['phpClassName']);
+                $matched = preg_match("/^" . $type . "/", $val['PhpClassName']);
                 return ($matched > 0);
             });
 
             foreach (array_keys($plugins) as $agentkey) {
-                LogLine("Running eval statement for class " . $plugins[$agentkey]['phpClassName'], C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Running eval statement for class " . $plugins[$agentkey]['PhpClassName'], C__DISPLAY_ITEM_DETAIL__);
                 try {
                     $evalStmt = $this->_getClassInstantiationCode($plugins[$agentkey]);
                     $success = eval($evalStmt);
@@ -116,7 +116,7 @@ class JobSitePluginBuilder
                 $jsonPlugin = $this->_parsePluginConfig_($config);
                 // replace non letter or digits with separator
 
-                $this->_jsonPluginSetups[$jsonPlugin['phpClassName']] = $jsonPlugin;
+                $this->_jsonPluginSetups[$jsonPlugin['PhpClassName']] = $jsonPlugin;
             }
         }
 
@@ -127,23 +127,22 @@ class JobSitePluginBuilder
 
         $pluginData = array();
 
-        setArrayItem($pluginData,'phpClassName', $arrConfigData, 'PhpClassName');
-        setArrayItem($pluginData,'siteName', $arrConfigData, 'AgentName');
-        if(empty($pluginData['phpClassName']))
-            $pluginData['phpClassName'] = "Plugin". $pluginData['siteName'];
+        setArrayItem($pluginData,'PhpClassName', $arrConfigData, 'PhpClassName');
+        if(empty($pluginData['PhpClassName']))
+            $pluginData['PhpClassName'] = "Plugin". $arrConfigData['JobSiteName'];
 
-        setArrayItem($pluginData,'siteBaseURL', $arrConfigData, 'BaseURL');
-        setArrayItem($pluginData,'strBaseURLFormat', $arrConfigData, 'SourceURL');
-        setArrayItem($pluginData,'countryCodes', $arrConfigData, 'CountryCodes');
+        setArrayItem($pluginData,'JobPostingBaseUrl', $arrConfigData, 'BaseURL');
+        setArrayItem($pluginData,'SearchUrlFormat', $arrConfigData, 'SourceURL');
+//        setArrayItem($pluginData,'CountryCodes', $arrConfigData, 'CountryCodes');
 
         if(array_key_exists("Pagination", $arrConfigData)) {
-            setArrayItem($pluginData,'nJobListingsPerPage', $arrConfigData['Pagination'], 'PageLimit');
+            setArrayItem($pluginData,'JobListingsPerPage', $arrConfigData['Pagination'], 'PageLimit');
             setArrayItem($pluginData,'additionalLoadDelaySeconds', $arrConfigData['Pagination'], 'PageDelaySeconds');
 
 
             if (array_key_exists("Type", $arrConfigData['Pagination'])) {
 
-                $pluginData['paginationType'] = strtoupper($arrConfigData['Pagination']['Type']);
+                $pluginData['PaginationType'] = strtoupper($arrConfigData['Pagination']['Type']);
                 switch (strtoupper($arrConfigData['Pagination']['Type'])) {
                     case 'NEXT-BUTTON':
                         $pluginData['arrListingTagSetup']['NextButton'] = array(
@@ -218,7 +217,7 @@ class JobSitePluginBuilder
         }
 
         if(isset($GLOBALS['logger']))
-            $GLOBALS['logger']->logLine("Loaded JSON config for new plugin: " . $pluginData['siteName'], \C__DISPLAY_ITEM_DETAIL__);
+            $GLOBALS['logger']->logLine("Loaded JSON config for new plugin: " . $pluginData['JobSiteName'], \C__DISPLAY_ITEM_DETAIL__);
 
         return $pluginData;
 
@@ -250,18 +249,61 @@ class JobSitePluginBuilder
     private function _getClassInstantiationCode($pluginConfig)
     {
 
-        $pluginConfig['extendsClass'] = "JobScooper\Plugins\lib\AjaxHtmlSimplePlugin";
-        if(array_key_exists("PluginExtendsClassName", $pluginConfig) && !is_null($pluginConfig['PluginExtendsClassName']) && strlen($pluginConfig['PluginExtendsClassName']))
+        $PluginExtendsClassName = "JobScooper\Plugins\lib\AjaxHtmlSimplePlugin";
+        $evalConfig = array();
+        $PhpClassName = "Plugin" . $pluginConfig['JobSiteName'];
+
+        $arrayProps = array();
+        $stringProps = array();
+        $numericProps = array();
+        $otherProps = array();
+
+        foreach(array_keys($pluginConfig) as $key)
         {
-            $pluginConfig['extendsClass']  = $pluginConfig['PluginExtendsClassName'];
+            switch($key)
+            {
+                case 'AdditionalFlags':
+                    $arrayProps['additionalBitFlags'] = $this->_getArrayItemForEval($pluginConfig, 'AdditionalFlags', $quoteItems = false);
+                    break;
+
+                case 'PluginExtendsClassName':
+                    $PluginExtendsClassName = $pluginConfig[$key];
+                    unset($pluginConfig[$key]);
+                    break;
+
+                case 'PhpClassName':
+                    $PhpClassName = $pluginConfig[$key];
+                    unset($pluginConfig[$key]);
+                    break;
+
+                case is_numeric($pluginConfig[$key]):
+                    $numericProps[$key] = $pluginConfig[$key];
+                    break;
+
+                case is_string($pluginConfig[$key]):
+                    $stringProps[$key] = $pluginConfig[$key];
+                    break;
+
+                case is_array($pluginConfig[$key]):
+                    if(!empty($pluginConfig[$key]))
+                        $arrayProps[$key] = var_export($pluginConfig[$key], true);
+                    break;
+
+                default:
+                    $otherProps = $pluginConfig[$key];
+                    break;
+            }
         }
+        $data = array(
+            'PhpClassName' => $PhpClassName,
+            'PluginExtendsClassName' => $PluginExtendsClassName,
+            'string_properties' => $stringProps,
+            'numeric_properties' => $numericProps,
+            'array_properties' => $arrayProps,
+            'other_properties' => $otherProps,
+        );
 
-        $pluginConfig['additionalFlags'] = $this->_getArrayItemForEval($pluginConfig, 'AdditionalFlags', $quoteItems = false);
-        $pluginConfig['countryCodes'] = $this->_getArrayItemForEval($pluginConfig, 'CountryCodes', $quoteItems = true);
-
-        if(count($pluginConfig['arrListingTagSetup']) > 0)
-            $pluginConfig['tagSetup'] = var_export($pluginConfig['arrListingTagSetup'], true);
-        $evalStmt = call_user_func_array($this->_renderer, array($pluginConfig));
+        $evalStmt = call_user_func($this->_renderer, $data);
 
         return $evalStmt;
     }

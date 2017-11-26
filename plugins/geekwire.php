@@ -18,11 +18,11 @@
 
 class PluginGeekwire extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
-    protected $siteName = 'Geekwire';
-    protected $siteBaseURL = 'http://www.geekwire.com/';
-    protected $strBaseURLFormat = "http://www.geekwire.com/jobs/";
+    protected $JobSiteName = 'Geekwire';
+    protected $JobPostingBaseUrl = 'http://www.geekwire.com/';
+    protected $SearchUrlFormat = "http://www.geekwire.com/jobs/";
     protected $additionalLoadDelaySeconds = 20;
-    protected $paginationType = C__PAGINATION_NONE;
+    protected $PaginationType = C__PAGINATION_NONE;
 
     protected $arrListingTagSetup = array(
         'JobPostItem' => array('selector' => 'ul.job_listings li.type-job_listing'),

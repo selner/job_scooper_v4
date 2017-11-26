@@ -1,5 +1,5 @@
 {
-  "AgentName": "Dice",
+  "JobSiteName": "Dice",
   "BaseURL": "http://www.dice.com/",
   "SourceURL": "https://www.dice.com/jobs/advancedResult.html?for_one=&for_all=***KEYWORDS***&for_exact=&for_none=&for_jt=&for_com=&for_loc=***LOCATION***&sort=date&limit=100&radius=50",
   "LocationType": "location-city-comma-statecode",

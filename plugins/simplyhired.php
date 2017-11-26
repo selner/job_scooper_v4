@@ -23,13 +23,13 @@ use const \JobScooper\Plugins\lib\BASE_URL_TAG_LOCATION;
 
 class PluginSimplyHired extends \JobScooper\Plugins\lib\ServerHtmlPlugin
 {
-    protected $siteBaseURL = 'http://www.simplyhired.com';
-    protected $siteName = 'SimplyHired';
-    protected $nJobListingsPerPage = 10;
-    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
+    protected $JobPostingBaseUrl = 'http://www.simplyhired.com';
+    protected $JobSiteName = 'SimplyHired';
+    protected $JobListingsPerPage = 10;
+    protected $LocationType = 'location-city-comma-statecode';
     protected $strKeywordDelimiter = "or";
-    protected $strBaseURLFormat = "http://www.simplyhired.com/search?q=***KEYWORDS***&l=***LOCATION***&fdb=***NUMBER_DAYS***&&ws=25&mi=50&sb=dd&pn=***PAGE_NUMBER***";
-    protected $paginationType = C__PAGINATION_PAGE_VIA_URL;
+    protected $SearchUrlFormat = "http://www.simplyhired.com/search?q=***KEYWORDS***&l=***LOCATION***&fdb=***NUMBER_DAYS***&&ws=25&mi=50&sb=dd&pn=***PAGE_NUMBER***";
+    protected $PaginationType = C__PAGINATION_PAGE_VIA_URL;
     
     function getItemURLValue($nItem)
     {
@@ -90,7 +90,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\lib\ServerHtmlPlugin
     {
         $searchDetailsBackup = $searchDetails->copy();
         
-        $strURL = $this->_getBaseURLFormat_($searchDetails);
+        $strURL = $this->_getSearchUrlFormat_($searchDetails);
 
         $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($GLOBALS['USERDATA']['OPTS']['number_days']), $strURL );
         $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL );
@@ -121,7 +121,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\lib\ServerHtmlPlugin
         }
 
         if($strURL == null) {
-            throw new ErrorException("Location value is required for " . $this->siteName . ", but was not set for the search '" . $searchDetails->getUserSearchRunKey() ."'.". " Aborting all searches for ". $this->siteName, \C__DISPLAY_ERROR__);
+            throw new ErrorException("Location value is required for " . $this->JobSiteName . ", but was not set for the search '" . $searchDetails->getUserSearchRunKey() ."'.". " Aborting all searches for ". $this->JobSiteName, \C__DISPLAY_ERROR__);
         }
 
         $searchDetails = $searchDetailsBackup->copy();
@@ -156,7 +156,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\lib\ServerHtmlPlugin
 
             $titlelink = $node->find('a[class="card-link js-job-link"]');
             $item['Title'] = combineTextAllChildren($titlelink[0]);;
-            $item['Url'] = $this->siteBaseURL . $titlelink[0]->href;
+            $item['Url'] = $this->JobPostingBaseUrl . $titlelink[0]->href;
 
             if($item['Title'] == '') continue;
 

@@ -19,13 +19,13 @@
 
 class PluginZipRecruiter extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
-    protected $siteName = 'ziprecruiter';
-    protected $siteBaseURL = 'www.ziprecruiter.com';
-    protected $nJobListingsPerPage = C__TOTAL_ITEMS_UNKNOWN__; // we use this to make sure we only have 1 single results page
+    protected $JobSiteName = 'ziprecruiter';
+    protected $JobPostingBaseUrl = 'www.ziprecruiter.com';
+    protected $JobListingsPerPage = C__TOTAL_ITEMS_UNKNOWN__; // we use this to make sure we only have 1 single results page
 
-    protected $strBaseURLFormat = "https://www.ziprecruiter.com/candidate/search?search=***KEYWORDS***&include_near_duplicates=1&location=***LOCATION***&radius=25&days=***NUMBER_DAYS***";
-    protected $paginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
-    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
+    protected $SearchUrlFormat = "https://www.ziprecruiter.com/candidate/search?search=***KEYWORDS***&include_near_duplicates=1&location=***LOCATION***&radius=25&days=***NUMBER_DAYS***";
+    protected $PaginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
+    protected $LocationType = 'location-city-comma-statecode';
 
     protected $arrListingTagSetup = array(
         'NoPostsFound'    => array('selector' => 'section.no-results h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "checkNoJobResults"),

@@ -19,13 +19,13 @@
 
 class PluginPersonForce extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
-    protected $siteName = 'PersonForce';
-    protected $siteBaseURL = 'http://www.personforce.com';
-    protected $strBaseURLFormat = 'https://www.personforce.com/jobs/tags/***KEYWORDS***/in/***LOCATION***/p/***PAGE_NUMBER***';
-    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
-    protected $nJobListingsPerPage = 20;
+    protected $JobSiteName = 'PersonForce';
+    protected $JobPostingBaseUrl = 'http://www.personforce.com';
+    protected $SearchUrlFormat = 'https://www.personforce.com/jobs/tags/***KEYWORDS***/in/***LOCATION***/p/***PAGE_NUMBER***';
+    protected $LocationType = 'location-city-comma-statecode';
+    protected $JobListingsPerPage = 20;
     protected $additionalLoadDelaySeconds = 5;
-    protected $paginationType = C__PAGINATION_PAGE_VIA_URL;
+    protected $PaginationType = C__PAGINATION_PAGE_VIA_URL;
 
 
     protected $arrListingTagSetup = array(

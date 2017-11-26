@@ -19,10 +19,10 @@
 
 class PluginSmashingMagazine extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
-    protected $siteName = 'SmashingMagazine';
+    protected $JobSiteName = 'SmashingMagazine';
     protected $childSiteURLBase = 'http://jobs.smashingmagazine.com';
     protected $childSiteListingPage = 'http://jobs.smashingmagazine.com';
-    protected $paginationType = C__PAGINATION_NONE;
+    protected $PaginationType = C__PAGINATION_NONE;
 
     protected $arrListingTagSetup = array(
         'JobPostItem' => array(array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' =>'entry-list compact'), array('tag' => 'li')),

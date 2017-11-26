@@ -19,13 +19,13 @@
 
 class PluginMonster extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
 {
-    protected $siteName = 'Monster';
-    protected $siteBaseURL = 'http://www.monster.com';
-    protected $strBaseURLFormat = "https://www.monster.com/jobs/search/?q=***KEYWORDS***&sort=dt.rv.di&where=***LOCATION***&tm=***NUMBER_DAYS***&pg=***PAGE_NUMBER***";
-    protected $nJobListingsPerPage = 25;
-    protected $additionalFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
-    protected $paginationType = C__PAGINATION_PAGE_VIA_URL;
-    protected $typeLocationSearchNeeded = 'location-city-comma-statecode-underscores-and-dashes';
+    protected $JobSiteName = 'Monster';
+    protected $JobPostingBaseUrl = 'http://www.monster.com';
+    protected $SearchUrlFormat = "https://www.monster.com/jobs/search/?q=***KEYWORDS***&sort=dt.rv.di&where=***LOCATION***&tm=***NUMBER_DAYS***&pg=***PAGE_NUMBER***";
+    protected $JobListingsPerPage = 25;
+    protected $additionalBitFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
+    protected $PaginationType = C__PAGINATION_PAGE_VIA_URL;
+    protected $LocationType = 'location-city-comma-statecode-underscores-and-dashes';
     protected $regex_link_job_id = '/\.com\/([^\/]+\/)?([^\.]+)/i';
     protected $strKeywordDelimiter = ",";
 
@@ -79,7 +79,7 @@ class PluginMonster extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
         {
             if(strncasecmp('Sorry,', trim($noResults[0]->plaintext), 6) == 0)
             {
-                $GLOBALS['logger']->logLine("Search returned no jobs found and matched expected 'No results' tag for " . $this->siteName, \C__DISPLAY_ITEM_DETAIL__);
+                $GLOBALS['logger']->logLine("Search returned no jobs found and matched expected 'No results' tag for " . $this->JobSiteName, \C__DISPLAY_ITEM_DETAIL__);
                 return null;
             }
         }

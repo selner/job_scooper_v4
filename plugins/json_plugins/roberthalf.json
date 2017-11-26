@@ -1,5 +1,5 @@
 {
-  "AgentName": "RobertHalf",
+  "JobSiteName": "RobertHalf",
   "BaseURL": "https://www.roberthalf.com/",
   "SourceURL": "https://www.roberthalf.com/technology/jobs/all-jobs/***LOCATION***?pageSize=1500",
   "LocationType": "location-city-dash-statecode",

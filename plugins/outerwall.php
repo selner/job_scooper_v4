@@ -19,10 +19,10 @@
 
 class PluginOuterwall extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
 {
-    protected $siteName = 'Outerwall';
-    protected $siteBaseURL = 'http://outerwall.jobs';
-    protected $strBaseURLFormat = "http://outerwall.jobs/***LOCATION***/usa/jobs/";
-    protected $typeLocationSearchNeeded = 'location-state';
+    protected $JobSiteName = 'Outerwall';
+    protected $JobPostingBaseUrl = 'http://outerwall.jobs';
+    protected $SearchUrlFormat = "http://outerwall.jobs/***LOCATION***/usa/jobs/";
+    protected $LocationType = 'location-state';
 
     protected $arrListingTagSetup = array(
 

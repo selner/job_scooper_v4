@@ -27,7 +27,7 @@ use Propel\Runtime\ActiveQuery\Criteria;
 
 class JobsAutoMarker
 {
-    protected $siteName = "JobsAutoMarker";
+    protected $JobSiteName = "JobsAutoMarker";
     protected $arrLatestJobs_UnfilteredByUserInput = array();
     protected $arrMasterJobList = array();
     protected $_locmgr = null;
@@ -43,7 +43,7 @@ class JobsAutoMarker
 
     function __destruct()
     {
-        LogLine("Closing ".$this->siteName." instance of class " . get_class($this), \C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Closing ".$this->JobSiteName." instance of class " . get_class($this), \C__DISPLAY_ITEM_DETAIL__);
 
     }
 

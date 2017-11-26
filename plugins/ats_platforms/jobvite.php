@@ -21,7 +21,7 @@ abstract class AbstractJobviteATS extends \JobScooper\Plugins\lib\AjaxHtmlSimple
 {
     function __construct()
     {
-        $this->additionalFlags[] = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
+        $this->additionalBitFlags[] = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
         parent::__construct();
     }
     static function checkNoJobResults($var)

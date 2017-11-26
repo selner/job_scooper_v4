@@ -23,13 +23,13 @@
 
 class PluginCareerBuilder extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
-    protected $siteName = 'CareerBuilder';
-    protected $siteBaseURL = 'http://www.careerbuilder.com';
-    protected $strBaseURLFormat = "http://www.careerbuilder.com/jobs-***KEYWORDS***-in-***LOCATION***?keywords=***KEYWORDS***&location=***LOCATION***&radius=50&page_number=***PAGE_NUMBER***&posted=***NUMBER_DAYS***&sc=date_desc";
-    protected $additionalFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
-    protected $typeLocationSearchNeeded = 'location-city-dash-statecode';
+    protected $JobSiteName = 'CareerBuilder';
+    protected $JobPostingBaseUrl = 'http://www.careerbuilder.com';
+    protected $SearchUrlFormat = "http://www.careerbuilder.com/jobs-***KEYWORDS***-in-***LOCATION***?keywords=***KEYWORDS***&location=***LOCATION***&radius=50&page_number=***PAGE_NUMBER***&posted=***NUMBER_DAYS***&sc=date_desc";
+    protected $additionalBitFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
+    protected $LocationType = 'location-city-dash-statecode';
     protected $additionalLoadDelaySeconds = 5;
-    protected $nJobListingsPerPage = 25;
+    protected $JobListingsPerPage = 25;
 
     protected $arrListingTagSetup = array(
         'TotalPostCount' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => "count"), 'return_attribute' => 'plaintext', 'return_value_regex' => '/[^\d]+(\d+).*?/'),
@@ -53,15 +53,15 @@ class PluginCareerBuilder extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 
 class PluginCareerBuilderUK extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
-    protected $siteName = 'CareerBuilderUk';
-    protected $nJobListingsPerPage = 20;
-    protected $siteBaseURL = 'http://https://www.careerbuilder.co.uk';
-    protected $strBaseURLFormat = "https://www.careerbuilder.co.uk/search?q=***KEYWORDS***&sc=1&loc=***LOCATION***&pg=***PAGE_NUMBER***&sc=1";
-    protected $additionalFlags = [C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
-    protected $typeLocationSearchNeeded = 'location-city';
+    protected $JobSiteName = 'CareerBuilderUk';
+    protected $JobListingsPerPage = 20;
+    protected $JobPostingBaseUrl = 'http://https://www.careerbuilder.co.uk';
+    protected $SearchUrlFormat = "https://www.careerbuilder.co.uk/search?q=***KEYWORDS***&sc=1&loc=***LOCATION***&pg=***PAGE_NUMBER***&sc=1";
+    protected $additionalBitFlags = [C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
+    protected $LocationType = 'location-city';
     protected $strKeywordDelimiter = "|";
-    protected $paginationType = C__PAGINATION_PAGE_VIA_URL;
-    protected $countryCodes = array("GB");
+    protected $PaginationType = C__PAGINATION_PAGE_VIA_URL;
+    protected $CountryCodes = array("GB");
 
     protected $arrListingTagSetup = array(
         'NoPostsFound' => array('selector' => 'h1', 'return_attribute' => 'plaintext', 'return_value_callback' => "checkNoJobResults"),

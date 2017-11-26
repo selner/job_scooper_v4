@@ -18,16 +18,16 @@
 
 class PluginIndeed extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
-    protected $siteName = 'Indeed';
-    protected $nJobListingsPerPage = 50;
-    protected $siteBaseURL = 'http://www.Indeed.com';
-    protected $strBaseURLFormat = "https://www.indeed.com/jobs?as_and=***KEYWORDS***&as_phr=&as_any=&as_not=&as_ttl=&as_cmp=&jt=all&st=&salary=&radius=50&l=***LOCATION***&fromage=1&limit=50&sort=date***ITEM_NUMBER***&filter=0&psf=advsrch";
-    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
+    protected $JobSiteName = 'Indeed';
+    protected $JobListingsPerPage = 50;
+    protected $JobPostingBaseUrl = 'http://www.Indeed.com';
+    protected $SearchUrlFormat = "https://www.indeed.com/jobs?as_and=***KEYWORDS***&as_phr=&as_any=&as_not=&as_ttl=&as_cmp=&jt=all&st=&salary=&radius=50&l=***LOCATION***&fromage=1&limit=50&sort=date***ITEM_NUMBER***&filter=0&psf=advsrch";
+    protected $LocationType = 'location-city-comma-statecode';
 
     // Note:  C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS intentioanlly not set although Indeed supports it.  However, their support is too explicit of a search a will weed out
     //        too many potential hits to be worth it.
-    protected $additionalFlags = [C__JOB_IGNORE_MISMATCHED_JOB_COUNTS, C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
-    protected $paginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
+    protected $additionalBitFlags = [C__JOB_IGNORE_MISMATCHED_JOB_COUNTS, C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
+    protected $PaginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
 
     protected $arrListingTagSetup = array(
         'TotalPostCount' =>  array('selector' => 'div#searchCount', 'return_value_regex' => '/.*?of\s*(\d+).*?/'),
@@ -45,18 +45,18 @@ class PluginIndeed extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     static function checkNoJobResults($var)
     {
         $ret = null;
-        if(is_array($var))
+        if(!empty($var) && is_array($var)) {
             $var = $var[0];
-        $node1 = $var->find("p.message");
-        if(!is_null($node1) && count($node1) > 0) {
-            $text = $node1[0]->plaintext;
-            $ret = noJobStringMatch($text, "No jobs match your search");
-        }
-        else {
-            $node2 = $var->find("div.bad_query h2");
-            if (!is_null($node2) && count($node2) > 0) {
-                $text = $node2[0]->plaintext;
-                $ret = noJobStringMatch($text, "did not match");
+            $node1 = $var->find("p.message");
+            if (!is_null($node1) && count($node1) > 0) {
+                $text = $node1[0]->plaintext;
+                $ret = noJobStringMatch($text, "No jobs match your search");
+            } else {
+                $node2 = $var->find("div.bad_query h2");
+                if (!is_null($node2) && count($node2) > 0) {
+                    $text = $node2[0]->plaintext;
+                    $ret = noJobStringMatch($text, "did not match");
+                }
             }
         }
         return $ret;
@@ -74,10 +74,10 @@ class PluginIndeed extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 
 class PluginIndeedUK extends PluginIndeed
 {
-    protected $siteName = 'IndeedUK';
-    protected $nJobListingsPerPage = 50;
-    protected $siteBaseURL = 'http://www.Indeed.co.uk';
-    protected $strBaseURLFormat = "https://www.indeed.co.uk/jobs?as_and=***KEYWORDS***&as_phr=&as_any=&as_not=&as_ttl=&as_cmp=&jt=all&st=&salary=&radius=50&l=***LOCATION***&fromage=1&limit=50&sort=date***ITEM_NUMBER***&filter=0&psf=advsrch";
-    protected $typeLocationSearchNeeded = 'location-city';
-    protected $countryCodes = array("GB");
+    protected $JobSiteName = 'IndeedUK';
+    protected $JobListingsPerPage = 50;
+    protected $JobPostingBaseUrl = 'http://www.Indeed.co.uk';
+    protected $SearchUrlFormat = "https://www.indeed.co.uk/jobs?as_and=***KEYWORDS***&as_phr=&as_any=&as_not=&as_ttl=&as_cmp=&jt=all&st=&salary=&radius=50&l=***LOCATION***&fromage=1&limit=50&sort=date***ITEM_NUMBER***&filter=0&psf=advsrch";
+    protected $LocationType = 'location-city';
+    protected $CountryCodes = array("GB");
 }

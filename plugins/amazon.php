@@ -37,17 +37,17 @@
 class PluginAmazon extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
 
-    protected $siteName = 'Amazon';
-    protected $nJobListingsPerPage = 10;
-    protected $siteBaseURL = 'http://www.amazon.jobs';
-    protected $strBaseURLFormat = "https://www.amazon.jobs/en/search?base_query=***KEYWORDS***&loc_query=***LOCATION***&sort=recent&cache";
-//    protected $strBaseURLFormat = "https://www.amazon.jobs/en/search?offset=0&result_limit=10&sort=recent&cities[]=London&distanceType=Mi&radius=24km&latitude=&longitude=&loc_group_id=&loc_query=***LOCATION***&base_query=director&city=&country=&region=&county=&query_options=&"
-    protected $paginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
-    protected $typeLocationSearchNeeded = 'location-city-comma-statecode-comma-country';
+    protected $JobSiteName = 'Amazon';
+    protected $JobListingsPerPage = 10;
+    protected $JobPostingBaseUrl = 'http://www.amazon.jobs';
+    protected $SearchUrlFormat = "https://www.amazon.jobs/en/search?base_query=***KEYWORDS***&loc_query=***LOCATION***&sort=recent&cache";
+//    protected $SearchUrlFormat = "https://www.amazon.jobs/en/search?offset=0&result_limit=10&sort=recent&cities[]=London&distanceType=Mi&radius=24km&latitude=&longitude=&loc_group_id=&loc_query=***LOCATION***&base_query=director&city=&country=&region=&county=&query_options=&"
+    protected $PaginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
+    protected $LocationType = 'location-city-comma-statecode-comma-country';
     protected $nMaxJobsToReturn = 2000; // Amazon maxes out at 2000 jobs in the list
     protected $additionalLoadDelaySeconds = 1;
-    protected $countryCodes = array("US", "GB");
-    protected $additionalFlags = [C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
+    protected $CountryCodes = array("US", "GB");
+    protected $additionalBitFlags = [C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
 
     protected $selectorMoreListings = "button[data-label='right']";
 
@@ -66,7 +66,7 @@ class PluginAmazon extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
                     break;
             }
         }
-        return $this->typeLocationSearchNeeded;
+        return $this->LocationType;
     }
 
     function doFirstPageLoad($searchDetails)

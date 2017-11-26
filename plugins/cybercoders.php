@@ -19,13 +19,13 @@
 
 class PluginCyberCoders extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
-    protected $siteName = 'CyberCoders';
-    protected $siteBaseURL = "https://www.cybercoders.com";
-    protected $strBaseURLFormat = "https://www.cybercoders.com/search/?page=***PAGE_NUMBER***&searchterms=***KEYWORDS***&searchlocation=***LOCATION***&newsearch=true&originalsearch=true&sorttype=date";
+    protected $JobSiteName = 'CyberCoders';
+    protected $JobPostingBaseUrl = "https://www.cybercoders.com";
+    protected $SearchUrlFormat = "https://www.cybercoders.com/search/?page=***PAGE_NUMBER***&searchterms=***KEYWORDS***&searchlocation=***LOCATION***&newsearch=true&originalsearch=true&sorttype=date";
 
-    protected $paginationType = C__PAGINATION_PAGE_VIA_URL;
-//    protected $nJobListingsPerPage = 40;
-    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
+    protected $PaginationType = C__PAGINATION_PAGE_VIA_URL;
+//    protected $JobListingsPerPage = 40;
+    protected $LocationType = 'location-city-comma-statecode';
 
 
     protected $arrListingTagSetup = array(

@@ -27,7 +27,7 @@ const JSON_FILENAME = "-alljobsites.json";
 
 class StageManager
 {
-    protected $siteName = "StageManager";
+    protected $JobSiteName = "StageManager";
     protected $classConfig = null;
 
     function __construct()

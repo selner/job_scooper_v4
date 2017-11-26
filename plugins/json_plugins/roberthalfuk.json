@@ -1,5 +1,5 @@
 {
-  "AgentName": "RobertHalfUK",
+  "JobSiteName": "RobertHalfUK",
   "BaseURL": "https://www.roberthalf.co.uk/",
   "SourceURL": "https://www.roberthalf.co.uk/jobs/all-jobs/***LOCATION***?pageSize=1500",
   "LocationType": "location-city",

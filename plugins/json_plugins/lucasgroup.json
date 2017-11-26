@@ -1,5 +1,5 @@
 {
-  "AgentName": "LucasGroup",
+  "JobSiteName": "LucasGroup",
   "SourceURL": "https://www.lucasgroup.com/executive-jobs/job-search/job-search-results",
   "BaseURL": "https://www.lucasgroup.com",
   "AdditionalFlags" : [ "C__JOB_PAGECOUNT_NOTAPPLICABLE__", "C__JOB_ITEMCOUNT_NOTAPPLICABLE__", "C__JOB_USE_SELENIUM__"],

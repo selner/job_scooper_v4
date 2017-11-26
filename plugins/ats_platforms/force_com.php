@@ -20,16 +20,16 @@
 abstract class BaseForceComClass extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
     protected $additionalLoadDelaySeconds = 3;
-    protected $nJobListingsPerPage = 25;
-    protected $paginationType = C__PAGINATION_PAGE_VIA_CALLBACK;
+    protected $JobListingsPerPage = 25;
+    protected $PaginationType = C__PAGINATION_PAGE_VIA_CALLBACK;
 
     function __construct()
     {
         parent::__construct();
 
-        if(is_null($this->strBaseURLFormat) || strlen($this->strBaseURLFormat) == 0) {
-            $this->siteBaseURL = "http://" . strtolower($this->siteName) . ".force.com/careers";
-            $this->strBaseURLFormat = "http://" . strtolower($this->siteName) . ".force.com/careers";
+        if(is_null($this->SearchUrlFormat) || strlen($this->SearchUrlFormat) == 0) {
+            $this->JobPostingBaseUrl = "http://" . strtolower($this->JobSiteName) . ".force.com/careers";
+            $this->SearchUrlFormat = "http://" . strtolower($this->JobSiteName) . ".force.com/careers";
         }
     }
 
@@ -82,14 +82,14 @@ abstract class BaseNoDeptForceComClass extends BaseForceComClass
 
 class PluginSlalom extends BaseNoDeptForceComClass
 {
-    protected $siteName = "Slalom";
+    protected $JobSiteName = "Slalom";
 }
 class PluginRobertHalfExec extends BaseForceComClass
 {
-    protected $siteName= "RobertHalfExec";
-    protected $siteBaseURL = "http://roberthalf.force.com";
-    protected $strBaseURLFormat = "http://roberthalf.force.com/careers";
-    protected $additionalFlags = [ C__JOB_USE_SELENIUM ];
+    protected $JobSiteName= "RobertHalfExec";
+    protected $JobPostingBaseUrl = "http://roberthalf.force.com";
+    protected $SearchUrlFormat = "http://roberthalf.force.com/careers";
+    protected $additionalBitFlags = [ C__JOB_USE_SELENIUM ];
     function __construct()
     {
         parent::__construct();

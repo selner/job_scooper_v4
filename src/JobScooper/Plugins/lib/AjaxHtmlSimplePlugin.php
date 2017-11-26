@@ -25,7 +25,7 @@ abstract class AjaxHtmlSimplePlugin extends SimplePlugin
 
     function __construct()
     {
-        $this->additionalFlags[] = C__JOB_USE_SELENIUM;
+        $this->additionalBitFlags[] = C__JOB_USE_SELENIUM;
         parent::__construct();
 
     }

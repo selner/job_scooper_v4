@@ -19,12 +19,12 @@
 
 class PluginGroupon extends \JobScooper\Plugins\lib\AjaxHtmlPlugin
 {
-    protected $siteName = 'Groupon';
-    protected $siteBaseURL = 'https://jobs.groupon.com';
-    protected $strBaseURLFormat = "https://jobs.groupon.com/locations/***LOCATION***";
-    protected $additionalFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
-    protected $paginationType = C__PAGINATION_NONE;
-    protected $typeLocationSearchNeeded = 'location-city';
+    protected $JobSiteName = 'Groupon';
+    protected $JobPostingBaseUrl = 'https://jobs.groupon.com';
+    protected $SearchUrlFormat = "https://jobs.groupon.com/locations/***LOCATION***";
+    protected $additionalBitFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
+    protected $PaginationType = C__PAGINATION_NONE;
+    protected $LocationType = 'location-city';
 
 
     function parseJobsListForPage($objSimpHTML)
@@ -48,7 +48,7 @@ class PluginGroupon extends \JobScooper\Plugins\lib\AjaxHtmlPlugin
 
             $item['Title'] = $node->plaintext;
             $item['Url'] = $node->href;
-            $item['Company'] = $this->siteName;
+            $item['Company'] = $this->JobSiteName;
             $item['JobSitePostId'] = $this->getIDFromLink('/\/jobs\/([^\/]+)/i', $item['Url']);
             if($item['Title'] == '') continue;
             $ret[] = $item;

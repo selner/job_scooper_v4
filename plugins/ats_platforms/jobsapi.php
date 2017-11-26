@@ -22,11 +22,11 @@ use \JobScooper\Plugins\lib\JobsApiPlugin;
 
 class PluginUSAJobs extends JobsApiPlugin
 {
-    protected $siteBaseURL = 'http://search.digitalgov.gov/developer/jobs.html';
-    protected $strBaseURLFormat = 'https://api.usa.gov/jobs/search.json?query=in+***LOCATION***';
-    protected $siteName = 'USAJobs';
-    protected $nJobListingsPerPage = 25;
-    protected $typeLocationSearchNeeded = 'location-city-comma-state';
+    protected $JobPostingBaseUrl = 'http://search.digitalgov.gov/developer/jobs.html';
+    protected $SearchUrlFormat = 'https://api.usa.gov/jobs/search.json?query=in+***LOCATION***';
+    protected $JobSiteName = 'USAJobs';
+    protected $JobListingsPerPage = 25;
+    protected $LocationType = 'location-city-comma-state';
     protected $authorization_key = null;
 
     function getSearchJobsFromAPI($searchDetails, $pageNumber = 1)

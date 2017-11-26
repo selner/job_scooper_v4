@@ -22,12 +22,12 @@ class PluginGoogle extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     // BUGBUG: currently does not handle pagination of job listings
 
 
-    protected $siteName = 'Google';
-    protected $siteBaseURL = 'https://careers.google.com/jobs';
+    protected $JobSiteName = 'Google';
+    protected $JobPostingBaseUrl = 'https://careers.google.com/jobs';
     protected $prevURL = 'https://careers.google.com/jobs';
-    protected $additionalFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
-    protected $strBaseURLFormat = "https://careers.google.com/jobs#t=sq&q=j&so=dt_pd&li=20&l=false&jlo=en-US&";
-    protected $countryCodes = ["US", "GB"];
+    protected $additionalBitFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
+    protected $SearchUrlFormat = "https://careers.google.com/jobs#t=sq&q=j&so=dt_pd&li=20&l=false&jlo=en-US&";
+    protected $CountryCodes = ["US", "GB"];
 
     protected $additionalLoadDelaySeconds = 6;
     protected $nextPageScript = "var elem = document.getElementById('gjsrpn');  if (elem != null) { console.log('attempting next button click on element ID gjsrpn'); elem.click(); };";
@@ -81,7 +81,7 @@ class PluginGoogle extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
             if(isset($subNode))
                 $item['Company'] = $subNode[0]->plaintext;
             else
-                $item['Company'] = $this->siteName;
+                $item['Company'] = $this->JobSiteName;
 
             $ret[] = $item;
 

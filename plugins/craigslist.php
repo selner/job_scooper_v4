@@ -19,17 +19,17 @@
 
 class PluginCraigslist extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
-    protected $siteName = 'Craigslist';
-    protected $nJobListingsPerPage = 120;
-    protected $siteBaseURL = 'http://seattle.craigslist.org';
-    protected $strBaseURLFormat = "http://***LOCATION***.craigslist.org/search/jjj?sort=date&query=***KEYWORDS***&srchType=T&searchNearby=1&s=***ITEM_NUMBER***";
-//    protected $strBaseURLFormat = "http://***LOCATION***.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=***KEYWORDS***&srchType=T&bundleDuplicates=1";
+    protected $JobSiteName = 'Craigslist';
+    protected $JobListingsPerPage = 120;
+    protected $JobPostingBaseUrl = 'http://seattle.craigslist.org';
+    protected $SearchUrlFormat = "http://***LOCATION***.craigslist.org/search/jjj?sort=date&query=***KEYWORDS***&srchType=T&searchNearby=1&s=***ITEM_NUMBER***";
+//    protected $SearchUrlFormat = "http://***LOCATION***.craigslist.org/search/jjj?s=***ITEM_NUMBER***&catAbb=jjj&query=***KEYWORDS***&srchType=T&bundleDuplicates=1";
     // BUGBUG: craigslist treats sub-rows differently for counting results in different cases.  When a single page of results is returned, they are included in the overall count
     //         But when a multi-page result set is returned, they are not! Setting C__JOB_IGNORE_MISMATCHED_JOB_COUNTS to work around this.
-    protected $additionalFlags = [C__JOB_LOCATION_REQUIRES_LOWERCASE, C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS, C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
-    protected $typeLocationSearchNeeded = 'location-city';
+    protected $additionalBitFlags = [C__JOB_LOCATION_REQUIRES_LOWERCASE, C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS, C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
+    protected $LocationType = 'location-city';
     protected $strKeywordDelimiter = "|";
-    protected $paginationType = C__PAGINATION_PAGE_VIA_URL;
+    protected $PaginationType = C__PAGINATION_PAGE_VIA_URL;
 
     protected $arrListingTagSetup = array(
         'NoPostsFound' => array('selector' => 'div.noresults', 'return_attribute' => 'plaintext', 'return_value_callback' => "checkNoJobResults"),

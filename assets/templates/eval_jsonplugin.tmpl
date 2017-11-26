@@ -1,38 +1,31 @@
 
-class {{phpClassName}} {{#if extendsClass}} extends {{extendsClass}} {{/if}}
+class {{PhpClassName}} {{#if PluginExtendsClassName}} extends {{PluginExtendsClassName}} {{/if}}
 {
-        protected $siteName = "{{siteName}}";
-    {{#if siteBaseURL}}
-        protected $siteBaseURL = "{{siteBaseURL}}";
-    {{/if}}
+    {{#each string_properties}}
+        protected ${{@key}} = "{{{.}}}";
+    {{/each}}
 
-    {{#if strBaseURLFormat}}
-        protected $strBaseURLFormat = "{{strBaseURLFormat}}";
-    {{/if}}
+    {{#each numeric_properties}}
+        protected ${{@key}} = {{.}};
+    {{/each}}
 
-    {{#if additionalFlags}}
-        protected $additionalFlags = {{{additionalFlags}}};
-    {{/if}}
+    {{#each array_properties}}
+        protected ${{@key}} = {{{.}}};
+    {{/each}}
 
-    {{#if countryCodes}}
-        protected $countryCodes = {{{countryCodes}}};
-    {{/if}}
-
-    {{#if nJobListingsPerPage}}
-        protected $nJobListingsPerPage = {{nJobListingsPerPage}};
-    {{/if}}
-
-    {{#if additionalLoadDelaySeconds}}
-        protected $additionalLoadDelaySeconds = {{additionalLoadDelaySeconds}};
-    {{/if}}
-
-    {{#if paginationType}}
-        protected $paginationType = "{{paginationType}}";
-    {{/if}}
-
-    {{#if tagSetup}}
-            protected $arrListingTagSetup = {{{tagSetup}}};
-    {{/if}}
-
+    {{#each other_properties}}
+        protected ${{@key}} = {{{.}}};
+    {{/each}}
 }
 
+
+try
+{
+    $ob = new {{PhpClassName}}();
+    return (is_a($ob, "{{PhpClassName}}") === true);
+}
+catch (Exception $ex)
+{
+    print("Failed to instantiate ${{PhpCLassName}}");
+    return false;
+}

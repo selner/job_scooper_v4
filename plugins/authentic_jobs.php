@@ -19,12 +19,12 @@
 
 class PluginAuthenticJobs extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
-    protected $siteName = 'AuthenticJobs';
-    protected $siteBaseURL = "https://authenticjobs.com";
-    protected $strBaseURLFormat = 'https://authenticjobs.com/#location=***LOCATION***';
-#    protected $strBaseURLFormat = 'https://authenticjobs.com/#location=***LOCATION***&query=***KEYWORDS***';
-    protected $typeLocationSearchNeeded = 'location-city';
-    protected $nJobListingsPerPage = 50;
+    protected $JobSiteName = 'AuthenticJobs';
+    protected $JobPostingBaseUrl = "https://authenticjobs.com";
+    protected $SearchUrlFormat = 'https://authenticjobs.com/#location=***LOCATION***';
+#    protected $SearchUrlFormat = 'https://authenticjobs.com/#location=***LOCATION***&query=***KEYWORDS***';
+    protected $LocationType = 'location-city';
+    protected $JobListingsPerPage = 50;
 
     protected $arrListingTagSetup = array(
         'NoPostsFound'    => array('selector' => 'ul#listings li#no-results', 'return_attribute' => 'plaintext', 'return_value_callback' => "checkNoJobResults"),

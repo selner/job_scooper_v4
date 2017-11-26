@@ -20,13 +20,13 @@
 
 class PluginFacebook extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
-    protected $siteName = 'Facebook';
-    protected $siteBaseURL = 'https://www.facebook.com/careers/';
-    protected $strBaseURLFormat = "https://www.facebook.com/careers/search/?q=&location=***LOCATION***";
-    protected $typeLocationSearchNeeded = 'location-city';
-    protected $additionalFlags = [C__JOB_LOCATION_REQUIRES_LOWERCASE];
-    protected $nJobListingsPerPage = C__TOTAL_ITEMS_UNKNOWN__;
-    protected $paginationType = C__PAGINATION_NONE;
+    protected $JobSiteName = 'Facebook';
+    protected $JobPostingBaseUrl = 'https://www.facebook.com/careers/';
+    protected $SearchUrlFormat = "https://www.facebook.com/careers/search/?q=&location=***LOCATION***";
+    protected $LocationType = 'location-city';
+    protected $additionalBitFlags = [C__JOB_LOCATION_REQUIRES_LOWERCASE];
+    protected $JobListingsPerPage = C__TOTAL_ITEMS_UNKNOWN__;
+    protected $PaginationType = C__PAGINATION_NONE;
     
     protected $arrListingTagSetup = array(
         'TotalPostCount' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'_1dc4', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),

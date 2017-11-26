@@ -35,7 +35,7 @@ abstract class AbstractDotJobs extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlu
         ";
 
         $this->runJavaScriptSnippet($js, false);
-        $this->nJobListingsPerPage = 50;
+        $this->JobListingsPerPage = 50;
 
         parent::goToEndOfResultsSetViaLoadMore($nTotalListings);
     }

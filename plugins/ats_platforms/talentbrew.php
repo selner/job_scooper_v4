@@ -19,11 +19,11 @@
 
 /*class PluginHP extends AbstractTalentBrew
 {
-    protected $siteName = "HP";
-    protected $siteBaseURL = 'https://h30631.www3.hp.com';
-    protected $nJobListingsPerPage = 15;
-    protected $strBaseURLFormat = "/search-jobs";  // HP's keyword search is a little squirrelly so more successful if we don't filter up front and get the mismatches removed later
-    protected $additionalFlags = [ C__PAGINATION_INFSCROLLPAGE_NOCONTROL];
+    protected $JobSiteName = "HP";
+    protected $JobPostingBaseUrl = 'https://h30631.www3.hp.com';
+    protected $JobListingsPerPage = 15;
+    protected $SearchUrlFormat = "/search-jobs";  // HP's keyword search is a little squirrelly so more successful if we don't filter up front and get the mismatches removed later
+    protected $additionalBitFlags = [ C__PAGINATION_INFSCROLLPAGE_NOCONTROL];
 
     function __construct($strBaseDir = null)
     {
@@ -37,7 +37,7 @@
         $this->runJavaScriptSnippet("document.getElementsByClassName(\"next\")[0].setAttribute(\"class\", \"pagination-show-all\"); document.getElementsByClassName(\"pagination-show-all\")[0].click();", false, $this->additionalLoadDelaySeconds + 10);
         sleep($this->additionalLoadDelaySeconds+1 );
         $this->nMaxJobsToReturn = C_JOB_MAX_RESULTS_PER_SEARCH * 3;
-        $this->nJobListingsPerPage = $this->nMaxJobsToReturn;
+        $this->JobListingsPerPage = $this->nMaxJobsToReturn;
 
         $this->moveDownOnePageInBrowser();
         
@@ -47,10 +47,10 @@
 
 class PluginBoeing extends AbstractTalentBrew
 {
-    protected $siteName = 'Boeing';
-    protected $siteBaseURL = 'https://jobs.boeing.com';
-    protected $nJobListingsPerPage = 20;
-    protected $strBaseURLFormat = "/search-jobs";
+    protected $JobSiteName = 'Boeing';
+    protected $JobPostingBaseUrl = 'https://jobs.boeing.com';
+    protected $JobListingsPerPage = 20;
+    protected $SearchUrlFormat = "/search-jobs";
     protected $arrListingTagSetup = array(
         'TotalPostCount' => array('selector' => 'h1[role="status"]'),
         'JobPostItem' => array('selector' => 'section#search-results-list ul li'),
@@ -72,10 +72,10 @@ class PluginBoeing extends AbstractTalentBrew
 
 class PluginDisney extends AbstractTalentBrew
 {
-    protected $siteName = 'Disney';
-    protected $siteBaseURL = 'https://jobs.disneycareers.com';
-    protected $additionalFlags = [ C__JOB_ITEMCOUNT_NOTAPPLICABLE__ ];
-    protected $nJobListingsPerPage = 15;
+    protected $JobSiteName = 'Disney';
+    protected $JobPostingBaseUrl = 'https://jobs.disneycareers.com';
+    protected $additionalBitFlags = [ C__JOB_ITEMCOUNT_NOTAPPLICABLE__ ];
+    protected $JobListingsPerPage = 15;
 
     function __construct()
     {
@@ -85,22 +85,22 @@ class PluginDisney extends AbstractTalentBrew
         $this->arrListingTagSetup['NextButton'] = array(array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'next', 'index' => 0));
 
 
-        $this->strBaseURLFormat = $this->siteBaseURL . "/search-jobs?k=&alp=6252001-5815135&alt=3";
+        $this->SearchUrlFormat = $this->JobPostingBaseUrl . "/search-jobs?k=&alp=6252001-5815135&alt=3";
     }
 
 }
 
 class AbstractTalentBrew extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 {
-    protected $strBaseURLFormat = "/search-jobs/***KEYWORDS***/***LOCATION***";
+    protected $SearchUrlFormat = "/search-jobs/***KEYWORDS***/***LOCATION***";
     //
     // BUGBUG:  Disney & Boeing are both hit or miss around returning the full set of listings correctly.
     //          Setting to ignore_mismatched to avoid the error results that will happen when they do.
     //
-    protected $typeLocationSearchNeeded = 'location-city-comma-statecode';
+    protected $LocationType = 'location-city-comma-statecode';
     protected $additionalLoadDelaySeconds = 5;
 
-    protected $nJobListingsPerPage = 50;
+    protected $JobListingsPerPage = 50;
 
     protected $arrListingTagSetup = array(
         'TotalPostCount' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results'), array('tag' => 'h1'), 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/(.*?) .*/'),
@@ -117,7 +117,7 @@ class AbstractTalentBrew extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     {
 
         parent::__construct();
-        $this->strBaseURLFormat = $this->siteBaseURL . $this->strBaseURLFormat;
+        $this->SearchUrlFormat = $this->JobPostingBaseUrl . $this->SearchUrlFormat;
     }
 
 }
