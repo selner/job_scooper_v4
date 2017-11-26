@@ -954,6 +954,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
                 $strHTML = fread($fp, MAX_FILE_SIZE);
                 $objSimpleHTML = new SimpleHtmlHelper($strHTML);
+                $objSimpleHTML->setSource($filePath);
                 fclose($fp);
             }
 
@@ -965,12 +966,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 $retObj = $class->cURL($strURL, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = $optTimeout, $cookies = $cookies, $referrer = $referrer);
                 if (!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0) {
                     $objSimpleHTML = new SimpleHtmlHelper($retObj['output']);
+                    $objSimpleHTML->setSource($strURL);
                     $this->prevCookies = $retObj['cookies'];
                     $this->prevURL = $strURL;
                 } else {
-                    $options = array('http' => array('timeout' => 30, 'user_agent' => C__STR_USER_AGENT__));
-                    $context = stream_context_create($options);
-                    $objSimpleHTML = new SimpleHTMLHelper($strURL, $context=$context);
+                    $objSimpleHTML = new SimpleHTMLHelper($strURL);
+                    $objSimpleHTML->setSource($strURL);
                 }
             }
             if(!$objSimpleHTML)
@@ -1217,6 +1218,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 $this->getActiveWebdriver()->get($url);
             $html = $this->getActiveWebdriver()->getPageSource();
             $objSimpleHTML = new SimpleHtmlHelper($html);
+            $objSimpleHTML->setSource($this->getActiveWebdriver()->getCurrentUrl());
         } catch (Exception $ex) {
             $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
             handleException(new Exception($strError), null, true);
@@ -1225,7 +1227,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    private function _getMyJobsForSearchFromWebpage_($searchDetails)
+    private function _getMyJobsForSearchFromWebpage_(UserSearchRun $searchDetails)
     {
         try {
             $nItemCount = 1;
@@ -1244,7 +1246,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                         $html = $this->doFirstPageLoad($searchDetails);
                     else
                         $html = $this->selenium->getPageHTML($searchDetails->getSearchParameter('search_start_url'));
-                    $objSimpleHTML = new SimpleHTMLHelper($html);
+                    $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage();
                 } catch (Exception $ex) {
                     $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
                     handleException(new Exception($strError), null, true);
@@ -1389,9 +1391,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                                     break;
                             }
 
-                            $strURL = $this->selenium->driver->getCurrentURL();
-                            $html = $this->selenium->driver->getPageSource();
-                            $objSimpleHTML = new SimpleHtmlHelper($html);
+                            $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage();
 
                         } catch (Exception $ex) {
                             handleException($ex, "Failed to get dynamic HTML via Selenium due to error:  %s", true);

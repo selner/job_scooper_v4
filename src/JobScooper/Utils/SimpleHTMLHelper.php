@@ -28,11 +28,22 @@ class ExtendedDiDomElement extends Element
             case 'text':
                 return $this->text();
                 break;
+            case 'sourceUrl':
+                return $this->getDocument()->getSource();
+                break;
             default:
                 return parent::__get($name);
         }
     }
 
+    function getDocument()
+    {
+        if ($this->node->ownerDocument === null) {
+            return null;
+        }
+
+        return new ExtendedDiDomDocument($this->node->ownerDocument);
+    }
 
     /**
      * Get the DOM document with the current element.
@@ -64,10 +75,13 @@ class ExtendedDiDomElement extends Element
         }
         throw new \Exception("Invalid return type from DiDom->Find");
     }
+
 }
 
 class ExtendedDiDomDocument extends Document
 {
+    protected $_sourceUrl;
+
     function __get($name) {
         switch ($name) {
             case 'text':
@@ -78,6 +92,16 @@ class ExtendedDiDomDocument extends Document
         }
     }
 
+    function setSource($strUrl)
+    {
+        $this->_sourceUrl = $strUrl;
+    }
+
+    function getSource()
+    {
+        return $this->_sourceUrl;
+    }
+
     function findByXpath($xpath)
     {
         return $this->find($xpath, Query::TYPE_XPATH);
@@ -85,17 +109,37 @@ class ExtendedDiDomDocument extends Document
 
     function find($expression, $type = Query::TYPE_CSS, $wrapNode = true, $contextNode = null)
     {
-        $ret = parent::find($expression, $type, $wrapNode, $contextNode);
-        if (is_array($ret)) {
-            $retExt = array();
-            foreach ($ret as $elem) {
-                $retExt[] = new ExtendedDiDomElement($elem->getNode());
+        try {
+            $ret = parent::find($expression, $type, $wrapNode, $contextNode);
+            if (is_array($ret)) {
+                $retExt = array();
+                foreach ($ret as $elem) {
+                    $retExt[] = new ExtendedDiDomElement($elem->getNode());
+                }
+                return $retExt;
+            } elseif (is_a($ret, "Element", true)) {
+                return new ExtendedDiDomElement($ret->getNode());
             }
-            return $retExt;
-        } elseif (is_a($ret, "Element", true)) {
-            return new ExtendedDiDomElement($ret->getNode());
+            throw new \Exception("Invalid return type from ExtendedDiDomDocument->Find");
         }
-        throw new \Exception("Invalid return type from ExtendedDiDomDocument->Find");
+        catch (\Exception $ex)
+        {
+            $this->debug_dump_to_file();
+            throw $ex;
+        }
+    }
+
+    function debug_dump_to_file()
+    {
+        $src = $this->getSource();
+        if(empty($src))
+            $basefile = "debug_dump_" . uniqid();
+        else {
+            $parsed_url = parse_url($src);
+            $basefile = preg_replace('/[^\w]/', '_', $parsed_url['host'] . $parsed_url['path']);
+        }
+        $outfile = generateOutputFileName($basefile, "html", true, 'debug');
+        file_put_contents($outfile, $this->html());
     }
 }
 
@@ -131,6 +175,8 @@ class SimpleHTMLHelper extends ExtendedDiDomDocument
         }
 
         parent::__construct($string, $isFile);
+        if($isFile)
+            $this->setSource($string);
     }
 
 }
