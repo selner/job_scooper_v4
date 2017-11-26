@@ -211,7 +211,7 @@ function __initializeArgs__($rootdir)
 //    # You may specify a program banner thusly:
 //    $banner = "Find and export basic website, Moz.com, Crunchbase and Quantcast data for any company name or URL.";
 //    Pharse::setBanner($banner);
-    LogDebug('Options available: '.var_export($GLOBALS['OPTS_SETTINGS'], true).PHP_EOL);
+    // LogDebug('Options available: '.var_export($GLOBALS['OPTS_SETTINGS'], true).PHP_EOL);
 }
 
 function addUserOptionForSitePlugins()
