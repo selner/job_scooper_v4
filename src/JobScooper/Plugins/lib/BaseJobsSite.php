@@ -1209,9 +1209,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 
     protected function getSimpleHtmlDomFromSeleniumPage()
+    protected function getSimpleHtmlDomFromSeleniumPage($url=null)
     {
         $objSimpleHTML = null;
         try {
+            if(!empty($url))
+                $this->getActiveWebdriver()->get($url);
             $html = $this->getActiveWebdriver()->getPageSource();
             $objSimpleHTML = SimpleHTMLHelper::str_get_html($html);
         } catch (Exception $ex) {
