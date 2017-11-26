@@ -173,6 +173,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
             {
                 if($search->shouldRunNow())
                 {
+                    LogLine("Updating last run date for " . $search->getUserSearchRunKey());
                     $GLOBALS['USERDATA']['configuration_settings']['current_user_search_details'] = $search;
                     $search->setLastRunAt(time());
                     $search->save();
