@@ -61,36 +61,40 @@ class SimplePlugin extends BaseJobsSite
 
         foreach(array_keys($this->arrListingTagSetup) as $k)
         {
-            if (array_key_exists('type', $this->arrListingTagSetup[$k])) {
-                switch ($this->arrListingTagSetup[$k]['type']) {
-                    case "CSS":
-                        if(array_key_exists('return_attribute', $this->arrListingTagSetup[$k]) &&
-                            in_array(strtoupper($this->arrListingTagSetup[$k]['return_attribute']), array("NODE", "COLLECTION")) === true)
-                            $rank = 10;
-                        else
-                            $rank = 50;
-                        break;
+            if(is_array($this->arrListingTagSetup[$k])) {
+                if (array_key_exists('type', $this->arrListingTagSetup[$k])) {
+                    switch ($this->arrListingTagSetup[$k]['type']) {
+                        case "CSS":
+                            if (array_key_exists('return_attribute', $this->arrListingTagSetup[$k]) &&
+                                in_array(strtoupper($this->arrListingTagSetup[$k]['return_attribute']), array("NODE", "COLLECTION")) === true)
+                                $rank = 10;
+                            else
+                                $rank = 50;
+                            break;
 
-                    case "STATIC":
-                        $rank = 100;
-                        break;
+                        case "STATIC":
+                            $rank = 100;
+                            break;
 
 
-                    case "REGEX":
-                        $rank = 1000;
-                        break;
+                        case "REGEX":
+                            $rank = 1000;
+                            break;
 
-                    default:
-                        $rank = 999999;
-                        break;
-                }
+                        default:
+                            $rank = 999999;
+                            break;
+                    }
+                } else
+                    $rank = 999999;
+                $this->arrListingTagSetup[$k]['rank'] = $rank;
             }
-            else
-                $rank = 999999;
-            $this->arrListingTagSetup[$k]['rank'] = $rank;
         }
 
         uasort($this->arrListingTagSetup, function($a, $b) {
+            if(!is_array($a) || !is_array($b))
+                return 0;
+
             if ($a['rank'] == $b['rank']) {
                 return 0;
             }
