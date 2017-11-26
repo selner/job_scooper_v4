@@ -152,7 +152,7 @@ function generateOutputFileName($baseFileName="NONAME", $ext="UNK", $isUserSpeci
 function __initializeArgs__($rootdir)
 {
     $pluginsDir = realpath($rootdir. DIRECTORY_SEPARATOR . "plugins");
-    $mgrPlugins = new \JobScooper\Manager\JobSitePluginManager($pluginsDir);
+    $mgrPlugins = new \JobScooper\Manager\JobSitePluginBuilder($pluginsDir);
 
 
     $GLOBALS['OPTS_SETTINGS']  = array(

@@ -31,7 +31,7 @@ function loadTemplate($path)
     LogDebug("Compiling Mustache template ({$tmplFile}...");
     $tmpl = LightnCandy::compile($template,
         Array(
-            'flags' => LightnCandy::FLAG_RENDER_DEBUG | LightnCandy::FLAG_ERROR_LOG | LightnCandy::FLAG_ERROR_EXCEPTION | LightnCandy::FLAG_HANDLEBARSJS_FULL | LightnCandy::FLAG_THIS | LightnCandy::FLAG_PROPERTY | LightnCandy::FLAG_JSOBJECT,
+            'flags' => LightnCandy::FLAG_RENDER_DEBUG | LightnCandy::FLAG_ERROR_LOG | LightnCandy::FLAG_ERROR_EXCEPTION | LightnCandy::FLAG_HANDLEBARSJS_FULL | LightnCandy::FLAG_THIS | LightnCandy::FLAG_PROPERTY | LightnCandy::FLAG_JSOBJECT| LightnCandy::FLAG_ELSE,
             'partialresolver' => function ($cx, $name) use ($partialsDir) {
                 $partialpath = "$partialsDir/$name.tmpl";
                 if (file_exists($partialpath)) {

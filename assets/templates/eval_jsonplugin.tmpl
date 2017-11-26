@@ -1,0 +1,38 @@
+
+class {{phpClassName}} {{#if extendsClass}} extends {{extendsClass}} {{/if}}
+{
+        protected $siteName = "{{siteName}}";
+    {{#if siteBaseURL}}
+        protected $siteBaseURL = "{{siteBaseURL}}";
+    {{/if}}
+
+    {{#if strBaseURLFormat}}
+        protected $strBaseURLFormat = "{{strBaseURLFormat}}";
+    {{/if}}
+
+    {{#if additionalFlags}}
+        protected $additionalFlags = {{{additionalFlags}}};
+    {{/if}}
+
+    {{#if countryCodes}}
+        protected $countryCodes = {{{countryCodes}}};
+    {{/if}}
+
+    {{#if nJobListingsPerPage}}
+        protected $nJobListingsPerPage = {{nJobListingsPerPage}};
+    {{/if}}
+
+    {{#if additionalLoadDelaySeconds}}
+        protected $additionalLoadDelaySeconds = {{additionalLoadDelaySeconds}};
+    {{/if}}
+
+    {{#if paginationType}}
+        protected $paginationType = "{{paginationType}}";
+    {{/if}}
+
+    {{#if tagSetup}}
+            protected $arrListingTagSetup = {{{tagSetup}}};
+    {{/if}}
+
+}
+
