@@ -2,78 +2,78 @@
   "jobsite_plugins": [
     {
       "JobSiteName": "Vulcan",
-      "SourceURL": "http://jobs.jobvite.com/vulcan-inc/?nl=1",
+      "SourceURL": "https://jobs.jobvite.com/vulcan-inc/?nl=1",
       "PluginExtendsClassName" : "AbstractJobviteATS",
       "additionalLoadDelaySeconds" : 5
     },
     {
       "JobSiteName": "RealNetworks",
-      "SourceURL": "http://jobs.jobvite.com/realnetworks/?nl=1",
+      "SourceURL": "https://jobs.jobvite.com/realnetworks/?nl=1",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
       "JobSiteName": "AnotherSource",
-      "SourceURL": "https://anothersource.com/jobs",
+      "SourceURL": "https://jobs.jobvite.com/anothersource/?nl=1",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
       "JobSiteName": "HTC",
-      "SourceURL": "http://www.htc.com/us/working/careers",
+      "SourceURL": "https://jobs.jobvite.com/htc/?nl=1",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
       "JobSiteName": "Panopto",
-      "SourceURL": "https://www.panopto.com/careers/job-openings/",
+      "SourceURL": "https://jobs.jobvite.com/panopto/?nl=1",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
       "JobSiteName": "OpenTable",
-      "SourceURL": "https://www.opentable.com/careers/jobs",
+      "SourceURL": "https://jobs.jobvite.com/opentable/?nl=1",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
       "JobSiteName": "ExtraHop",
-      "SourceURL": "https://www.extrahop.com/company/careers/#all-open",
+      "SourceURL": "https://jobs.jobvite.com/extrahop-networks-inc/?nl=1",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
       "JobSiteName": "CrossoverHealth",
-      "SourceURL": "http://crossoverhealth.com/careers/",
+      "SourceURL": "https://jobs.jobvite.com/crossover-health/?nl=1",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
       "JobSiteName": "Discovia",
-      "SourceURL": "https://www.discovia.com/about-us/careers/",
+      "SourceURL": "https://jobs.jobvite.com/discovia/?nl=1",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
       "JobSiteName": "Doubledown",
-      "SourceURL": "http://doubledowninteractive.com/careers.php",
+      "SourceURL": "https://jobs.jobvite.com/doubledown/?nl=1",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
       "JobSiteName": "NewRelic",
-      "SourceURL": "https://newrelic.com/about/careers",
+      "SourceURL": "https://jobs.jobvite.com/newrelic/?nl=1",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
       "JobSiteName": "Zillow",
-      "SourceURL": "https://www.zillow.com/careers/apply/?p=search&p=0",
+      "SourceURL": "https://jobs.jobvite.com/zillow/?nl=1",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
       "JobSiteName": "JunoTherapeutics",
-      "SourceURL": "https://www.junotherapeutics.com/work-at-juno/open-positions/",
+      "SourceURL": "https://jobs.jobvite.com/junotherapeutics/?nl=1",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
       "JobSiteName": "Pandora",
-      "SourceURL": "http://www.pandora.com/static/companypages/current_openings.html",
+      "SourceURL": "https://jobs.jobvite.com/pandora/?nl=1",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     },
     {
       "JobSiteName": "InsightRecruitment",
-      "SourceURL": "http://www.growwithinsight.net/open-positions/",
+      "SourceURL": "https://jobs.jobvite.com/insight-recruitment/?nl=1",
       "PluginExtendsClassName" : "AbstractJobviteATS"
     }
   ]
