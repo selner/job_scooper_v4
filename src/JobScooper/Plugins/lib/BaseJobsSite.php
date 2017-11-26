@@ -1226,7 +1226,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     private function _getMyJobsForSearchFromWebpage_($searchDetails)
     {
-        meminfo_dump(fopen('/tmp/memdump_getjobsfrompage_start.json', 'w'));
         try {
             $nItemCount = 1;
             $nPageCount = 1;
@@ -1561,8 +1560,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
         } catch (Exception $ex) {
             $this->_setSearchResult_($searchDetails, false, $ex);
             handleException($ex, null, true);
-        } finally {
-            meminfo_dump(fopen('/tmp/memdump_getjobsfrompage_end.json', 'w'));
         }
 
         return null;
