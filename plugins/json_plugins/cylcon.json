@@ -60,7 +60,7 @@
           "Pattern": "/.*?[Rr]edirect[Ww][Ee][Bb]\\.php\\?q=(.*)/",
           "Extract": "REGEX",
           "Type": "REGEX",
-          "Field": "job_post_url"
+          "Field": "Url"
         },
 
         {

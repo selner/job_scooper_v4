@@ -79,7 +79,7 @@
           "Pattern": "/.*?([0-9]+).*/",
           "Extract": "REGEX",
           "Type": "REGEX",
-          "Field": "job_post_url"
+          "Field": "Url"
         },
         {
           "Name": "PostedAt",

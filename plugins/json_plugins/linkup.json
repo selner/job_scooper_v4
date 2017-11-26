@@ -57,7 +57,7 @@
           "Pattern": "/.*?\/(.*?)/",
           "Extract": "REGEX",
           "Type": "REGEX",
-          "Field": "job_post_url"
+          "Field": "Url"
         },
         {
           "Name": "Location",

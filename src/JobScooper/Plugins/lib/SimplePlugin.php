@@ -448,8 +448,11 @@ class SimplePlugin extends BaseJobsSite
                 //
                 $item = getEmptyJobListingRecord();
 
-                foreach($this->getJobItemKeys() as $itemKey)
+                foreach(array_keys($this->arrListingTagSetup) as $itemKey)
                 {
+                    if($itemKey == "JobPostItem")
+                        continue;
+
                     $item[$itemKey] = $this->_getTagValueFromPage_($node, $itemKey, $item);
                 }
 
