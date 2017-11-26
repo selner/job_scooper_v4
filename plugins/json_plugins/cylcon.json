@@ -43,7 +43,7 @@
           "Name": "Title",
           "Selector": "a",
           "Extract": "TEXT",
-          "Attribute": "plaintext",
+          "Attribute": "text",
           "Index": 0,
           "Type": "CSS"
         },

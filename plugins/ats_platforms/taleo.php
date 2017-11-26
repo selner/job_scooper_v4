@@ -158,13 +158,13 @@ abstract class AbstractTaleo extends \JobScooper\Plugins\lib\ServerHtmlPlugin
             $item = getEmptyJobListingRecord();
             $item['Company'] = $this->JobSiteName;
             $item['Url'] = $node->find("td a")[0]->href;
-            $item['Title'] = $node->find("td a")[0]->plaintext;
+            $item['Title'] = $node->find("td a")[0]->text();
             $item['JobSitePostId'] = explode("rid=", $item['Url'])[1];
             if($item['Title'] == '') continue;
 
             $tds = $node->find("td");
-            if(isset($tds) && isset($tds[1])) $item['Location'] = $node->find("td")[1]->plaintext;
-            if(isset($tds) && isset($tds[2]))$item['job_site_category'] = $tds[2]->plaintext;
+            if(isset($tds) && isset($tds[1])) $item['Location'] = $node->find("td")[1]->text();
+            if(isset($tds) && isset($tds[2]))$item['job_site_category'] = $tds[2]->text();
 
             $ret[] = $item;
         }
@@ -176,7 +176,7 @@ abstract class AbstractTaleo extends \JobScooper\Plugins\lib\ServerHtmlPlugin
         $nodes = $objSimpHTML->find('td[class="nowrapRegular"] b');
         if($nodes && count($nodes)>=2)
         {
-            return $nodes[1]->plaintext;
+            return $nodes[1]->text();
         }
 
         return null;

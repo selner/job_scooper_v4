@@ -31,7 +31,7 @@ class PluginTesla extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 
     protected $arrListingTagSetup = array(
         'JobPostItem' => array('selector' => "table tr.table-row" ),
-        'Title' => array('selector' => 'th.listing-title a', 'return_attribute' => 'plaintext'),
+        'Title' => array('selector' => 'th.listing-title a', 'return_attribute' => 'text'),
         'Url' => array('selector' => 'th.listing-title a', 'return_attribute' => 'href'),
         'JobSitePostId' => array('selector' => 'th.listing-title a', 'return_attribute' => 'href', 'return_value_regex' =>  '/.*?-(\d+)/i'),
         'Department' => array('selector' => 'td.listing-department'),

@@ -34,7 +34,7 @@ abstract class AbstractJobviteATS extends \JobScooper\Plugins\lib\AjaxHtmlSimple
         'JobPostItem'      => array('selector' => 'table.jv-job-list tr'),
         'Title'                 => array('selector' => 'td.jv-job-list-name a'),
         'Url'                 => array('selector' => 'td.jv-job-list-name a', 'return_attribute' => 'href'),
-        'Location'              => array('selector' => 'td.jv-job-list-location', 'return_attribute' => 'plaintext'),
+        'Location'              => array('selector' => 'td.jv-job-list-location', 'return_attribute' => 'text'),
         'JobSitePostId'                 => array('selector' => 'td.jv-job-list-name a', 'return_attribute' => 'href', 'return_value_regex' =>  '/job\/(.*)/i'),
     );
 

@@ -103,8 +103,8 @@ class AbstractTalentBrew extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $JobListingsPerPage = 50;
 
     protected $arrListingTagSetup = array(
-        'TotalPostCount' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results'), array('tag' => 'h1'), 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/(.*?) .*/'),
-        'TotalResultPageCount' => array(array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'pagination-total-pages'), 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/of (.*)/'),
+        'TotalPostCount' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results'), array('tag' => 'h1'), 'return_attribute' => 'text', 'return_value_regex' =>  '/(.*?) .*/'),
+        'TotalResultPageCount' => array(array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'pagination-total-pages'), 'return_attribute' => 'text', 'return_value_regex' =>  '/of (.*)/'),
         'JobPostItem' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results-list'), array('tag' => 'ul'),array('tag' => 'li')),
         'Title' =>  array('selector' => 'a h2'),
         'Url' =>  array('tag' => 'a', 'return_attribute' => 'href'),

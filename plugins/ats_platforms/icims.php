@@ -52,17 +52,17 @@ class AbstractIcims extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
     }
 
     protected $arrListingTagSetup = array(
-#        'NoPostsFound' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'iCIMS_ListingsPage', 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Job Listings\s*(Sorry)/'),
-        'TotalResultPageCount' => array('selector' => '#iCIMS_Paginator', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?\s+(\d+)\s*$/'),
+#        'NoPostsFound' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'iCIMS_ListingsPage', 'return_attribute' => 'text', 'return_value_regex' => '/\s*Job Listings\s*(Sorry)/'),
+        'TotalResultPageCount' => array('selector' => '#iCIMS_Paginator', 'return_attribute' => 'text', 'return_value_regex' => '/.*?\s+(\d+)\s*$/'),
         'JobPostItem' => array(array('tag' => 'table', 'attribute'=>'class', 'attribute_value' => 'iCIMS_JobsTable iCIMS_Table'), array('tag' => 'tr')),
-        'Title' =>  array(array('tag' => 'td', 'index' =>null), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+        'Title' =>  array(array('tag' => 'td', 'index' =>null), array('tag' => 'a'), 'return_attribute' => 'text'),
         'Url' =>  array(array('tag' => 'td', 'index' =>null), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' => '/(.*?)\?.*/'),
         'JobSitePostId' =>  array('tag' => 'td', 'index' =>null, 'return_attribute' => 'href', 'return_value_regex' => '/.*?([\d\-]+).*?$/'),
-        'Location' =>  array('tag' => 'td', 'index' =>null, 'return_attribute' => 'plaintext',  'return_value_regex' => '/.*?Loc[\w]+:&nbsp;\s*([\w\s[:punct:]]+)?$/'),
-//        'Title' =>  array(array('tag' => 'td', 'index' =>1), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+        'Location' =>  array('tag' => 'td', 'index' =>null, 'return_attribute' => 'text',  'return_value_regex' => '/.*?Loc[\w]+:&nbsp;\s*([\w\s[:punct:]]+)?$/'),
+//        'Title' =>  array(array('tag' => 'td', 'index' =>1), array('tag' => 'a'), 'return_attribute' => 'text'),
 //        'Url' =>  array(array('tag' => 'td', 'index' =>1), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' => '/(.*?)\?.*/'),
-//        'JobSitePostId' =>  array('tag' => 'td', 'index' =>1), 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+\-\d+).*?/'),
-//        'Location' =>  array('tag' => 'td', 'index' =>2, 'return_attribute' => 'plaintext',  'return_value_regex' => '/.*?Loc[\w]+:&nbsp;\s*([\w\s\-]+)?$/')
+//        'JobSitePostId' =>  array('tag' => 'td', 'index' =>1), 'return_attribute' => 'text', 'return_value_regex' => '/.*?(\d+\-\d+).*?/'),
+//        'Location' =>  array('tag' => 'td', 'index' =>2, 'return_attribute' => 'text',  'return_value_regex' => '/.*?Loc[\w]+:&nbsp;\s*([\w\s\-]+)?$/')
     );
     protected function getPageURLValue($nPage) { return ($nPage - 1); }
 
@@ -78,7 +78,7 @@ class PluginHibbettSports extends AbstractIcims
     protected $arrResultsRowTDIndex = array('Title' => 0, 'Url' => 0, 'JobSitePostId' => null, 'Department' => 1, 'Location' => 2, 'PostedAt' => null  );
     function __construct($strBaseDir = null)
     {
-        $this->arrListingTagSetup['TotalResultPageCount'] = array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'iCIMS_Paginator_Bottom'), array('tag' => 'div') , array('tag' => 'div') , array('tag' => 'div'), 'index' => 1, 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?of\s+(\d+).*/');
+        $this->arrListingTagSetup['TotalResultPageCount'] = array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'iCIMS_Paginator_Bottom'), array('tag' => 'div') , array('tag' => 'div') , array('tag' => 'div'), 'index' => 1, 'return_attribute' => 'text', 'return_value_regex' => '/.*?of\s+(\d+).*/');
         parent::__construct();
         $this->SearchUrlFormat = $this->JobPostingBaseUrl . "/jobs/search?pr=***PAGE_NUMBER***&in_iframe=1";
     }

@@ -79,7 +79,7 @@ class PluginGoogle extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 
             $subNode = $node->find("span[class='secondary-text']");
             if(isset($subNode))
-                $item['Company'] = $subNode[0]->plaintext;
+                $item['Company'] = $subNode[0]->text();
             else
                 $item['Company'] = $this->JobSiteName;
 

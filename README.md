@@ -165,9 +165,9 @@ class PluginCyberJobs extends AjaxHtmlSimplePlugin
     protected $LocationType = 'location-city-comma-statecode';
 
     protected $arrListingTagSetup = array(
-        'TotalPostCount' =>  array('tag' => 'span', 'attribute' => 'id', 'attribute_value' =>'total-result-count', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
+        'TotalPostCount' =>  array('tag' => 'span', 'attribute' => 'id', 'attribute_value' =>'total-result-count', 'return_attribute' => 'text', 'return_value_regex' => '/.*?(\d+).*?/'),
         'JobPostItem' => array('selector' => '.job-details-container'),
-        'title' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+        'title' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'text'),
         'link' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
         'job_id' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>'/.*?(\d+)$/'),
         'employment_type' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'wage'), array('tag' => 'span')),

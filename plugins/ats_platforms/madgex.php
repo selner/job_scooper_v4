@@ -67,13 +67,13 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
     }
 
     protected $arrListingTagSetup = array(
-        'NoPostsFound'    => array('selector' => 'h1#searching', 'return_attribute' => 'plaintext', 'return_value_callback' => 'checkNoJobResults'),
-        'TotalPostCount'        => array('selector' => 'h1#searching', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/\b(\d+)\b/i'),
+        'NoPostsFound'    => array('selector' => 'h1#searching', 'return_attribute' => 'text', 'return_value_callback' => 'checkNoJobResults'),
+        'TotalPostCount'        => array('selector' => 'h1#searching', 'return_attribute' => 'text', 'return_value_regex' =>  '/\b(\d+)\b/i'),
         'JobPostItem'      => array('selector' => 'li.lister__item'),
-        'Title'                 => array('selector' => 'h3 a.js-clickable-area-link span[itemprop="title"]', 'return_attribute' => 'plaintext'),
+        'Title'                 => array('selector' => 'h3 a.js-clickable-area-link span[itemprop="title"]', 'return_attribute' => 'text'),
         'Url'                  => array('selector' => 'h3 a.js-clickable-area-link ', 'return_attribute' => 'href'),
-        'Company'               => array('selector' => 'li[itemprop="hiringOrganization"]', 'return_attribute' => 'plaintext'),
-        'Location'              => array('selector' => 'li[itemprop="location"]', 'return_attribute' => 'plaintext'),
+        'Company'               => array('selector' => 'li[itemprop="hiringOrganization"]', 'return_attribute' => 'text'),
+        'Location'              => array('selector' => 'li[itemprop="location"]', 'return_attribute' => 'text'),
         'JobSitePostId'                =>  array('selector' => 'li.lister__item', 'return_attribute' => 'id', 'return_value_regex' =>  '/item\-(\d+)/i'),
         'job_posted_date'       => array('selector' => 'li.job-actions__action pipe', 'index=0'),
         'company_logo'          => array('selector' => 'img.lister__logo', 'return_attribute' => 'src'),
@@ -93,7 +93,7 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimpleP
         $locationSelectNode = $objSimpHTML->find("h2");
         if (!is_null($locationSelectNode) && count($locationSelectNode) == 1)
         {
-            if(stristr($locationSelectNode[0]->plaintext, "select a location") !== false)
+            if(stristr($locationSelectNode[0]->text(), "select a location") !== false)
             {
                 $nodeLocs = $objSimpHTML->find("li.lap-larger__item a");
                 if (!is_null($nodeLocs) && count($nodeLocs) > 1)

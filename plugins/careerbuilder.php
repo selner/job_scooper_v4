@@ -32,15 +32,15 @@ class PluginCareerBuilder extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $JobListingsPerPage = 25;
 
     protected $arrListingTagSetup = array(
-        'TotalPostCount' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => "count"), 'return_attribute' => 'plaintext', 'return_value_regex' => '/[^\d]+(\d+).*?/'),
+        'TotalPostCount' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => "count"), 'return_attribute' => 'text', 'return_value_regex' => '/[^\d]+(\d+).*?/'),
         'JobPostItem' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'jobs'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'job-row')),
-        'Title' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row', 'index' =>1), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'column small-10'), array('tag' => 'h2'), array('tag' => 'a'), 'index'=> 0, 'return_attribute' => 'plaintext'),
+        'Title' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row', 'index' =>1), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'column small-10'), array('tag' => 'h2'), array('tag' => 'a'), 'index'=> 0, 'return_attribute' => 'text'),
         'Url' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row', 'index' =>1), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'column small-10'), array('tag' => 'h2'), array('tag' => 'a'), 'index'=> 0, 'return_attribute' => 'href'),
         'JobSitePostId' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row', 'index' =>1), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'column small-10'), array('tag' => 'h2'), array('tag' => 'a'), 'index'=> 0, 'return_attribute' => 'data-job-did'),
-        'Company' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row job-information'), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'columns large-2 medium-3 small-12'), array('tag' => 'h4', 'attribute'=>'class', 'attribute_value'=>'job-text'),  array('tag' => 'a'), 'return_attribute' => 'plaintext'),
-        'Location' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row job-information'), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'columns end large-2 medium-3 small-12'), array('tag' => 'h4', 'attribute'=>'class', 'attribute_value'=>'job-text'), 'return_attribute' => 'plaintext'),
-        'PostedAt' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'column small-2 time-posted'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'show-for-medium-up'), 'return_attribute' => 'plaintext'),
-        'EmploymentType' =>  array('selector' => 'div.job-row div.row.job-information div.columns.medium-6.large-8 h4.job-text.employment-info', 'return_attribute' => 'plaintext'),
+        'Company' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row job-information'), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'columns large-2 medium-3 small-12'), array('tag' => 'h4', 'attribute'=>'class', 'attribute_value'=>'job-text'),  array('tag' => 'a'), 'return_attribute' => 'text'),
+        'Location' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row job-information'), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'columns end large-2 medium-3 small-12'), array('tag' => 'h4', 'attribute'=>'class', 'attribute_value'=>'job-text'), 'return_attribute' => 'text'),
+        'PostedAt' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'column small-2 time-posted'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'show-for-medium-up'), 'return_attribute' => 'text'),
+        'EmploymentType' =>  array('selector' => 'div.job-row div.row.job-information div.columns.medium-6.large-8 h4.job-text.employment-info', 'return_attribute' => 'text'),
         'NextButton' =>  array('selector' => '#next-button'),
     );
 
@@ -64,16 +64,16 @@ class PluginCareerBuilderUK extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $CountryCodes = array("GB");
 
     protected $arrListingTagSetup = array(
-        'NoPostsFound' => array('selector' => 'h1', 'return_attribute' => 'plaintext', 'return_value_callback' => "checkNoJobResults"),
-        'TotalPostCount' => array('selector' => 'h1', 'index'=> 0, 'return_attribute' => 'plaintext', 'return_value_regex' => '/(\d+).*?/'),
+        'NoPostsFound' => array('selector' => 'h1', 'return_attribute' => 'text', 'return_value_callback' => "checkNoJobResults"),
+        'TotalPostCount' => array('selector' => 'h1', 'index'=> 0, 'return_attribute' => 'text', 'return_value_regex' => '/(\d+).*?/'),
         'JobPostItem' => array('selector' => 'article.job-list'),
         'Url' => array('selector' => 'a.job-title', 'return_attribute' => 'href'),
-        'Title' => array('selector' => 'a.job-title', 'return_attribute' => 'plaintext'),
-        'Location' => array('selector' => 'ul.inline-list li', 'index' => 0, 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Location\s*(.*)/'),
-        'PayRange' => array('selector' => 'ul.inline-list li', 'index' => 1, 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Pay\s*(.*)/'),
-        'Category' => array('selector' => 'ul.inline-list li', 'index' => 2, 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Type\s*(\w+)\s*/'),
-        'PostedAt' => array('selector' => 'ul.inline-list li span', 'index' => 4, 'return_attribute' => 'plaintext', 'return_value_regex' => '/\s*Posted\s*(.*)/'),
-        'Company' => array('selector' => 'a.show-for-large-up', 'index' => 0, 'return_attribute' => 'plaintext'),
+        'Title' => array('selector' => 'a.job-title', 'return_attribute' => 'text'),
+        'Location' => array('selector' => 'ul.inline-list li', 'index' => 0, 'return_attribute' => 'text', 'return_value_regex' => '/\s*Location\s*(.*)/'),
+        'PayRange' => array('selector' => 'ul.inline-list li', 'index' => 1, 'return_attribute' => 'text', 'return_value_regex' => '/\s*Pay\s*(.*)/'),
+        'Category' => array('selector' => 'ul.inline-list li', 'index' => 2, 'return_attribute' => 'text', 'return_value_regex' => '/\s*Type\s*(\w+)\s*/'),
+        'PostedAt' => array('selector' => 'ul.inline-list li span', 'index' => 4, 'return_attribute' => 'text', 'return_value_regex' => '/\s*Posted\s*(.*)/'),
+        'Company' => array('selector' => 'a.show-for-large-up', 'index' => 0, 'return_attribute' => 'text'),
         'JobSitePostId' => array('selector' => 'a.job-title', 'return_attribute' => 'href', 'return_value_regex' => '/\/([^\/]*)\/\?.*/'),
     );
 

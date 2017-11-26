@@ -186,7 +186,7 @@ class JobSitePluginBuilder
                         $field['Type'] = 'CSS';
                     } elseif (strcasecmp($field['Extract'], "TEXT") == 0) {
                         $field['Type'] = 'CSS';
-                        $field['Attribute'] = 'plaintext';
+                        $field['Attribute'] = 'text';
                     }
 
 

@@ -47,7 +47,7 @@ class PluginBetalist extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         $nodeCounts = $objSimpHTML->find("span.ais-refinement-list--count");
         if ($nodeCounts != null && is_array($nodeCounts) && isset($nodeCounts[0])) {
             foreach ($nodeCounts as $spanCount) {
-                $strVal = $spanCount->plaintext;
+                $strVal = $spanCount->text();
                 $nVal = intval(str_replace(",", "", $strVal));
                 if ($nTotalResults == C__TOTAL_ITEMS_UNKNOWN__)
                     $nTotalResults = $nVal;

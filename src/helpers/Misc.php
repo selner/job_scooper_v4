@@ -691,14 +691,14 @@ function combineTextAllChildren($node, $fRecursed = false)
 
     $retStr = "";
     if ($node->hasChildNodes()) {
-        $retStr = strScrub($node->plaintext . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
+        $retStr = strScrub($node->text() . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
         foreach ($node->childNodes() as $child) {
             $retStr = $retStr . " " . combineTextAllChildren($child, true);
         }
         unset($child);
 
-    } elseif (isset($node->plaintext) && $fRecursed == false) {
-        $retStr = strScrub($node->plaintext . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
+    } elseif (empty($node->text()) && $fRecursed == false) {
+        $retStr = strScrub($node->text() . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
     }
 
     return $retStr;
@@ -707,14 +707,13 @@ function combineTextAllChildren($node, $fRecursed = false)
 
 function combineTextAllNodes($nodes)
 {
-
     $retStr = "";
     if ($nodes) {
         foreach ($nodes as $node) {
             if($retStr != "")
                 $retStr = $retStr . ", ";
 
-            $retStr = $retStr . strScrub($node->plaintext . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
+            $retStr = $retStr . strScrub($node->text() . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
             if(!is_null($node->childNodes())) {
                 foreach ($node->childNodes() as $child) {
                     $retStr = $retStr . " " . combineTextAllChildren($child, true);

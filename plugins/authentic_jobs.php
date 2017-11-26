@@ -27,13 +27,13 @@ class PluginAuthenticJobs extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $JobListingsPerPage = 50;
 
     protected $arrListingTagSetup = array(
-        'NoPostsFound'    => array('selector' => 'ul#listings li#no-results', 'return_attribute' => 'plaintext', 'return_value_callback' => "checkNoJobResults"),
+        'NoPostsFound'    => array('selector' => 'ul#listings li#no-results', 'return_attribute' => 'text', 'return_value_callback' => "checkNoJobResults"),
         'JobPostItem'      => array('selector' => 'ul#listings li'),
-        'Title'                 =>  array('selector' => 'a div h3', 'return_attribute' => 'plaintext'),
+        'Title'                 =>  array('selector' => 'a div h3', 'return_attribute' => 'text'),
         'Url'                  =>  array('selector' => 'a', 'return_attribute' => 'href'),
-        'Company'               =>  array('selector' => 'a div h4', 'return_attribute' => 'plaintext'),
-        'Location'              =>  array('selector' => 'a ul li.location', 'return_attribute' => 'plaintext'),
-        'EmploymentType'       =>  array('selector' => 'a ul li', 'index' => 0, 'return_attribute' => 'plaintext'),
+        'Company'               =>  array('selector' => 'a div h4', 'return_attribute' => 'text'),
+        'Location'              =>  array('selector' => 'a ul li.location', 'return_attribute' => 'text'),
+        'EmploymentType'       =>  array('selector' => 'a ul li', 'index' => 0, 'return_attribute' => 'text'),
         'JobSitePostId'                =>  array('selector' => 'a', 'return_attribute' => 'href', 'return_value_regex' =>  '/\/jobs\/([^?]+)/i'),
         'LoadMoreControl'             =>  array('selector' => 'a.ladda-button')
     );

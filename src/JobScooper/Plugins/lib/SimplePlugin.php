@@ -333,11 +333,10 @@ class SimplePlugin extends BaseJobsSite
         $fReturnNodeObject = false;
         $propertyRegEx = null;
 
-        if (array_key_exists("return_attribute", $arrTag) && !is_null($arrTag['return_attribute'])) {
+        if (!empty($arrTag['return_attribute']))
             $returnAttribute = $arrTag['return_attribute'];
-        }
         else
-            $returnAttribute = 'plaintext';
+            $returnAttribute = 'text';
 
         if(strtolower($returnAttribute) == 'collection' || strtolower($returnAttribute) == 'node')
         {
@@ -356,13 +355,11 @@ class SimplePlugin extends BaseJobsSite
         elseif(strlen($strMatch) > 0)
         {
             $nodeMatches = $node->find($strMatch);
-            if (isset($nodeMatches) && !is_null($nodeMatches) && count($nodeMatches) >=1) {
-                $ret = $nodeMatches;
-            }
 
             if ($fReturnNodeObject === true) {
+                $ret = $nodeMatches;
                 // do nothing.  We already have the node set correctly
-            } elseif (!is_null($ret) && isset($arrTag['index']) && is_array($ret) && intval($arrTag['index']) < count($ret)) {
+            } elseif (!empty($nodeMatches) && isset($arrTag['index']) && is_array($nodeMatches) && intval($arrTag['index']) < count($nodeMatches)) {
                 $index = $arrTag['index'];
                 if (count($nodeMatches) <= $index) {
                     $strError = sprintf("%s plugin failed to find index #%d in the %d nodes matching '%s'. ", $this->JobSiteName, $index, count($nodeMatches), $strMatch);
@@ -370,15 +367,15 @@ class SimplePlugin extends BaseJobsSite
                     throw new \Exception($strError);
                 }
                 $ret = $nodeMatches[$index];
-            } elseif (!is_null($ret) && is_array($ret)) {
-                if (count($ret) > 1) {
+            } elseif (!empty($nodeMatches) && is_array($nodeMatches)) {
+                if (count($nodeMatches) > 1) {
                     $strError = sprintf("Warning:  %s plugin matched %d nodes to selector '%s' but did not specify an index.  Assuming first node.", $this->JobSiteName, count($ret), $strMatch);
                     LogLine($strError, \C__DISPLAY_WARNING__);
                 }
-                $ret = $ret[0];
+                $ret = $nodeMatches[0];
             }
 
-            if ($fReturnNodeObject === false && !is_null($ret)) {
+            if ($fReturnNodeObject === false && !empty($ret)) {
                 $ret = $ret->$returnAttribute;
 
                 if (!is_null($propertyRegEx) && is_string($ret) && strlen($ret) > 0) {

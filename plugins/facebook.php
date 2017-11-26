@@ -29,9 +29,9 @@ class PluginFacebook extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $PaginationType = C__PAGINATION_NONE;
     
     protected $arrListingTagSetup = array(
-        'TotalPostCount' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'_1dc4', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
+        'TotalPostCount' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'_1dc4', 'return_attribute' => 'text', 'return_value_regex' => '/.*?(\d+).*?/'),
         'JobPostItem' => array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => '_3k6i')),
-        'Title' => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => '_5144', 'return_attribute' => 'plaintext'),
+        'Title' => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => '_5144', 'return_attribute' => 'text'),
         'Url' => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => '_5144', 'return_attribute' => 'href'),
         'JobSitePostId' => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => '_5144', 'return_attribute' => 'href', 'return_value_regex' => '/\/careers\/jobs\/([^\/]+)/'),
         'Location' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'_3k6m')

@@ -15,7 +15,7 @@
           "Index" : 1,
           "Extract": "REGEX",
           "Pattern": "/of\\s*(\\d+)/",
-          "Attribute": "plaintext",
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
@@ -34,7 +34,7 @@
           "Name": "Title",
           "Selector": "a.rh-job-result-table__job-title",
           "Extract": "TEXT",
-          "Attribute": "plaintext",
+          "Attribute": "text",
           "Type": "CSS"
         },
         {

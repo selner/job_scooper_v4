@@ -28,13 +28,13 @@ class PluginZipRecruiter extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $LocationType = 'location-city-comma-statecode';
 
     protected $arrListingTagSetup = array(
-        'NoPostsFound'    => array('selector' => 'section.no-results h2', 'return_attribute' => 'plaintext', 'return_value_callback' => "checkNoJobResults"),
-        'TotalPostCount'        => array('selector' => '#h1.headline', 'return_attribute' => 'plaintext', 'return_value_regex' =>  '/\b(\d+)\b/i'),
+        'NoPostsFound'    => array('selector' => 'section.no-results h2', 'return_attribute' => 'text', 'return_value_callback' => "checkNoJobResults"),
+        'TotalPostCount'        => array('selector' => '#h1.headline', 'return_attribute' => 'text', 'return_value_regex' =>  '/\b(\d+)\b/i'),
         'JobPostItem'      => array('selector' => '#job_list div article'),
-        'Title'                 => array('selector' => 'span.just_job_title', 'return_attribute' => 'plaintext'),
+        'Title'                 => array('selector' => 'span.just_job_title', 'return_attribute' => 'text'),
         'Url'                  => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => 'job_link', 'return_attribute' => 'href'),
-        'Company'               => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => 't_org_link name', 'return_attribute' => 'plaintext'),
-        'Location'              => array('tag' => '*', 'attribute'=>'class', 'attribute_value' => 'Location', 'return_attribute' => 'plaintext'),
+        'Company'               => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => 't_org_link name', 'return_attribute' => 'text'),
+        'Location'              => array('tag' => '*', 'attribute'=>'class', 'attribute_value' => 'Location', 'return_attribute' => 'text'),
         'JobSitePostId'                => array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'just_job_title', 'return_attribute' => 'data-job-id'),
     );
 

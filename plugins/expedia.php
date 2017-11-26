@@ -57,7 +57,7 @@ class PluginExpedia extends \JobScooper\Plugins\lib\AjaxHtmlPlugin
     function parseTotalResultsCount($objSimpHTML)
     {
         $resultsSection= $objSimpHTML->find("span[class='GF34SVYCIUH'] span");
-        $totalItemsText = $resultsSection[0]->plaintext;
+        $totalItemsText = $resultsSection[0]->text();
         $arrItemItems = explode(" ", trim($totalItemsText));
         $strTotalItemsCount = $arrItemItems[0];
 
@@ -78,18 +78,18 @@ class PluginExpedia extends \JobScooper\Plugins\lib\AjaxHtmlPlugin
             $item['Company'] = 'Expedia';
 
             $titleLink = $node->find("h3 a")[0];
-            $item['Title'] = $titleLink->plaintext;
+            $item['Title'] = $titleLink->text();
             $item['Url'] = $titleLink->href;
             if($item['Title'] == '') continue;
 
-            $item['JobSitePostId'] = str_replace(array("(", ")"), "", $node->find("h3 small")[0]->plaintext);
+            $item['JobSitePostId'] = str_replace(array("(", ")"), "", $node->find("h3 small")[0]->text());
 
             $item['Url'] = $this->JobPostingBaseUrl . $node->find("a")[0]->href;
-            $item['Location'] = preg_replace("/(\s{2,})/", " ", $node->find("p[class='search-result-item-company-name']")[0]->plaintext, -1);
-//            $item['brief'] = $node->find("p[class='search-result-item-description']")[0]->plaintext;
+            $item['Location'] = preg_replace("/(\s{2,})/", " ", $node->find("p[class='search-result-item-company-name']")[0]->text(), -1);
+//            $item['brief'] = $node->find("p[class='search-result-item-description']")[0]->text();
 //           $item['brief'] = str_ireplace(array("Position Description ", "position overview", "PositionSummary"), "", $item['brief']);
 
-            $item['PostedAt'] = str_ireplace("date posted: ","", $node->find("span[class='search-result-item-post-date']")[0]->plaintext);
+            $item['PostedAt'] = str_ireplace("date posted: ","", $node->find("span[class='search-result-item-post-date']")[0]->text());
 
             $ret[] = $item;
         }

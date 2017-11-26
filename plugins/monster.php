@@ -77,7 +77,7 @@ class PluginMonster extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
         $noResults = $objSimpHTML->find("div[class='jsresultsheader'] h1");
         if (!is_null($noResults) && is_array($noResults) && count($noResults) > 0)
         {
-            if(strncasecmp('Sorry,', trim($noResults[0]->plaintext), 6) == 0)
+            if(strncasecmp('Sorry,', trim($noResults[0]->text()), 6) == 0)
             {
                 $GLOBALS['logger']->logLine("Search returned no jobs found and matched expected 'No results' tag for " . $this->JobSiteName, \C__DISPLAY_ITEM_DETAIL__);
                 return null;
@@ -85,7 +85,7 @@ class PluginMonster extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
         }
 
         $resultsSection= $objSimpHTML->find("h2[class='page-title']");
-        $totalItemsText = $resultsSection[0]->plaintext;
+        $totalItemsText = $resultsSection[0]->text();
         $arrItemItems = explode(" ", trim($totalItemsText));
         $strTotalItemsCount = $arrItemItems[0];
 
@@ -150,14 +150,14 @@ class PluginMonster extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
 
             $subNode = $node->find("div[class='Company'] a span");
             if(isset($subNode) && isset($subNode[0]))
-                $item['Company'] = $subNode[0]->plaintext;
+                $item['Company'] = $subNode[0]->text();
 
             $subNode = $node->find("span[itemprop='address'] span[itemprop='addressLocality']");
             if(isset($subNode) && isset($subNode[0]))
             {
-                $item['Location'] = $subNode[0]->plaintext;
+                $item['Location'] = $subNode[0]->text();
                 $stateNode = $subNode[0]->nextSibling();
-                $item['Location'] = $item['Location'] . ", " . $stateNode->plaintext;
+                $item['Location'] = $item['Location'] . ", " . $stateNode->text();
             }
 
             $ret[] = $item;

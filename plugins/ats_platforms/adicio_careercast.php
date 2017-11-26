@@ -41,7 +41,7 @@ abstract class AbstractAdicioCareerCast extends \JobScooper\Plugins\lib\AjaxHtml
     protected $LocationType = 'location-city-comma-statecode-comma-countrycode';
 
     protected $arrListingTagSetup = array(
-        'NoPostsFound' => array(array('tag' => 'div', 'attribute'=>'id', 'attribute_value' => 'aiAppWrapperBox'), array('tag' => 'form'), array('tag' => 'h2'), 'return_attribute' => 'plaintext'),
+        'NoPostsFound' => array(array('tag' => 'div', 'attribute'=>'id', 'attribute_value' => 'aiAppWrapperBox'), array('tag' => 'form'), array('tag' => 'h2'), 'return_attribute' => 'text'),
         'TotalPostCount' => array()  # BUGBUG:  need this empty array so that the parent class doesn't auto-set to C__JOB_ITEMCOUNT_NOTAPPLICABLE__
     );
 
@@ -128,7 +128,7 @@ abstract class AbstractAdicioCareerCast extends \JobScooper\Plugins\lib\AjaxHtml
         if($resultsSection && count($resultsSection) > 1 && isset($resultsSection[1]))
         {
             // get the text value of that node
-            $noResultsText = $resultsSection[1]->plaintext;
+            $noResultsText = $resultsSection[1]->text();
         }
         else
         {
@@ -139,7 +139,7 @@ abstract class AbstractAdicioCareerCast extends \JobScooper\Plugins\lib\AjaxHtml
             if($resultsSection && isset($resultsSection[0]))
             {
                 // get the text value of that node
-                $noResultsText = $resultsSection[0]->plaintext;
+                $noResultsText = $resultsSection[0]->text();
             }
 
         }
@@ -161,7 +161,7 @@ abstract class AbstractAdicioCareerCast extends \JobScooper\Plugins\lib\AjaxHtml
 
             if ($resultsSection && isset($resultsSection[0])) {
                 // get the text value of that node
-                $totalItemsText = $resultsSection[0]->plaintext;
+                $totalItemsText = $resultsSection[0]->text();
             }
         }
 
@@ -202,7 +202,7 @@ abstract class AbstractAdicioCareerCast extends \JobScooper\Plugins\lib\AjaxHtml
                 }
 
                 $titleLink = $node->find("a")[0];
-                $item['Title'] = $titleLink->plaintext;
+                $item['Title'] = $titleLink->text();
 
                 // If we couldn't parse the job title, it's not really a job
                 // listing so just continue to the next one
@@ -214,10 +214,10 @@ abstract class AbstractAdicioCareerCast extends \JobScooper\Plugins\lib\AjaxHtml
 
 
                 $detailLIs = $node->find("ul li");
-                $item['Company'] = $detailLIs[0]->plaintext;
-                $item['Location'] = $detailLIs[1]->plaintext;
-                $item['PostedAt'] = $detailLIs[2]->plaintext;
-                $item['job_site_category'] = $detailLIs[3]->plaintext;
+                $item['Company'] = $detailLIs[0]->text();
+                $item['Location'] = $detailLIs[1]->text();
+                $item['PostedAt'] = $detailLIs[2]->text();
+                $item['job_site_category'] = $detailLIs[3]->text();
 
                 $ret[] = $item;
             }
@@ -239,7 +239,7 @@ abstract class AbstractAdicioCareerCast extends \JobScooper\Plugins\lib\AjaxHtml
                     $item = getEmptyJobListingRecord();
 
                     $titleLink = $node->find("a")[0];
-                    $item['Title'] = $titleLink->plaintext;
+                    $item['Title'] = $titleLink->text();
 
 
                     $item['Url'] = $titleLink->href;
@@ -253,10 +253,10 @@ abstract class AbstractAdicioCareerCast extends \JobScooper\Plugins\lib\AjaxHtml
                     if($item['Title'] == '') continue;
 
                     $locNode = $node->find("td[class='aiResultsLocation']");
-                    $item['Location'] = $locNode[0]->plaintext;
+                    $item['Location'] = $locNode[0]->text();
 
                     $companyNode = $node->find("td[class='aiResultsCompany']");
-                    $item['Company'] = $companyNode[0]->plaintext;
+                    $item['Company'] = $companyNode[0]->text();
 
                     $ret[] = $item;
                 }

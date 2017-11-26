@@ -34,7 +34,7 @@
           "Name": "Title",
           "Selector": "h4 a span",
           "Extract": "TEXT",
-          "Attribute": "plaintext",
+          "Attribute": "text",
           "Type": "CSS"
         },
         {

@@ -35,7 +35,7 @@
           "Name": "Title",
           "Selector": "td.JobTitle a",
           "Extract": "TEXT",
-          "Attribute": "plaintext",
+          "Attribute": "text",
           "Type": "CSS"
         },
         {

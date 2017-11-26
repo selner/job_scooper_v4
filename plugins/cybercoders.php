@@ -29,9 +29,9 @@ class PluginCyberCoders extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 
 
     protected $arrListingTagSetup = array(
-        'TotalPostCount' =>  array('tag' => 'span', 'attribute' => 'id', 'attribute_value' =>'total-result-count', 'return_attribute' => 'plaintext', 'return_value_regex' => '/.*?(\d+).*?/'),
+        'TotalPostCount' =>  array('tag' => 'span', 'attribute' => 'id', 'attribute_value' =>'total-result-count', 'return_attribute' => 'text', 'return_value_regex' => '/.*?(\d+).*?/'),
         'JobPostItem' => array('selector' => '.job-details-container'),
-        'Title' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'plaintext'),
+        'Title' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'text'),
         'Url' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
         'JobSitePostId' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>'/.*?(\d+)$/'),
         'EmploymentType' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'wage'), array('tag' => 'span')),

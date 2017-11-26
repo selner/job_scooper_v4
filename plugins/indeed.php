@@ -35,7 +35,7 @@ class PluginIndeed extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         'NextButton' => array('selector' => 'span.np'),
         'JobPostItem' => array('selector' => 'td#resultsCol div[data-tn-component=\'organicJob\']'),
         'Url' => array('selector' => 'a[data-tn-element=\'jobTitle\']', 'index'=> 0, 'return_attribute' => 'href'),
-        'Title' => array('selector' => 'a[data-tn-element=\'jobTitle\']', 'index'=> 0, 'return_attribute' => 'plaintext'),
+        'Title' => array('selector' => 'a[data-tn-element=\'jobTitle\']', 'index'=> 0, 'return_attribute' => 'text'),
         'JobSitePostId' => array('selector' => 'span.tt_set a', 'index'=> 0, 'return_attribute' => 'id', 'return_value_regex' => '/[sj_]{0,3}(.*)/'),
         'Company' => array('selector' => 'span.company', 'index'=> 0),
         'Location' => array('selector' => 'span.location', 'index'=> 0),
@@ -48,13 +48,13 @@ class PluginIndeed extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         if(!empty($var) && is_array($var)) {
             $var = $var[0];
             $node1 = $var->find("p.message");
-            if (!is_null($node1) && count($node1) > 0) {
-                $text = $node1[0]->plaintext;
+            if (!empty($node1)) {
+                $text = $node1[0]->text();
                 $ret = noJobStringMatch($text, "No jobs match your search");
             } else {
                 $node2 = $var->find("div.bad_query h2");
                 if (!is_null($node2) && count($node2) > 0) {
-                    $text = $node2[0]->plaintext;
+                    $text = $node2[0]->text();
                     $ret = noJobStringMatch($text, "did not match");
                 }
             }

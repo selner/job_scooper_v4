@@ -135,7 +135,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\lib\ServerHtmlPlugin
         $node = $objSimpHTML->find("div[class='result-headline'] div[class='hidden-sm-down'] div");
         if($node && isset($node) && is_array($node))
         {
-            $arrParts = explode(" ", $node[0]->plaintext);
+            $arrParts = explode(" ", $node[0]->text());
             return $arrParts[3];
         }
 
@@ -163,7 +163,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\lib\ServerHtmlPlugin
             $datenode = $node->find('span[class="serp-timestamp"]');
             if(isset($datenode) && is_array($datenode))
             {
-                $item['PostedAt'] = $datenode[0]->plaintext;
+                $item['PostedAt'] = $datenode[0]->text();
             }
 
             $companynode = $node->find('span[class="serp-company"]');
