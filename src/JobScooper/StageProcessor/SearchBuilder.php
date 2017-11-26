@@ -72,7 +72,7 @@ class SearchBuilder
                 {
                     foreach ($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $siteToSearch)
                     {
-                        LogLine("... configuring searches for  " . $keywordSet['key'] . " keyword set on " . $siteToSearch, \C__DISPLAY_ITEM_DETAIL__);
+                        LogLine("... configuring searches for " . $keywordSet['key'] . " keyword set on " . $siteToSearch, \C__DISPLAY_ITEM_DETAIL__);
                         $plugin = getPluginObjectForJobSite($siteToSearch);
                         $searchKey = cleanupSlugPart($keywordSet['key']);
                         if ($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
@@ -165,7 +165,7 @@ class SearchBuilder
                     unset($searches[$searchKey]);
                 }
             }
-            LogLine("..." . count($searches) . " now remain to be run after filtering out recent search runs.", C__DISPLAY_ITEM_DETAIL__);
+            LogLine("... " . count($searches) . " now remain to be run after filtering out recent search runs.", C__DISPLAY_ITEM_DETAIL__);
             $GLOBALS['USERDATA']['configuration_settings']['searches'] = $searches;
         }
 
