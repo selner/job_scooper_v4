@@ -45,6 +45,7 @@ class SearchBuilder
         //
         $this->_addSearchesForKeywordSets_();
 
+        $this->filterSearchesThatShouldNotRunYet();
         //
         // Finally create the instances of user search runs
         // that we will use during the run
@@ -71,7 +72,7 @@ class SearchBuilder
                 {
                     foreach ($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $siteToSearch)
                     {
-                        LogLine("... configuring searches for " . $siteToSearch, \C__DISPLAY_ITEM_DETAIL__);
+                        LogLine("... configuring searches for  " . $keywordSet['key'] . " keyword set on " . $siteToSearch, \C__DISPLAY_ITEM_DETAIL__);
                         $plugin = getPluginObjectForJobSite($siteToSearch);
                         $searchKey = cleanupSlugPart($keywordSet['key']);
                         if ($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
@@ -148,8 +149,26 @@ class SearchBuilder
             }
             else
                 $GLOBALS['USERDATA']['configuration_settings']['searches'] = $arrSearchesPreLocation;
-
         }
+    }
+
+    private function filterSearchesThatShouldNotRunYet()
+    {
+        $searches = getConfigurationSettings('searches');
+        if(!empty($searches) && is_array($searches))
+        {
+            foreach(array_keys($searches) as $searchKey)
+            {
+
+                if(!$searches[$searchKey]->shouldRunNow()) {
+                    LogLine("... skipping search " . $searchKey . ". It has run too recently. (Next run = " . $searches[$searchKey]->getStartNextRunAfter("Y-m-d H:i") . ")", C__DISPLAY_ITEM_DETAIL__);
+                    unset($searches[$searchKey]);
+                }
+            }
+            LogLine("..." . count($searches) . " now remain to be run after filtering out recent search runs.", C__DISPLAY_ITEM_DETAIL__);
+            $GLOBALS['USERDATA']['configuration_settings']['searches'] = $searches;
+        }
+
     }
 
     private function _filterSearchesByCountry()
@@ -235,9 +254,8 @@ class SearchBuilder
                 $curSearchSettings = $arrSearchConfigSettings[$z];
                 $jobsitekey = cleanupSlugPart($curSearchSettings->getJobSiteKey());
 
-                if($curSearchSettings->getJobSiteObject()->isSearchIncludedInRun())
-                {
-                    if(!array_key_exists($jobsitekey, $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN']))
+                if ($curSearchSettings->getJobSiteObject()->isSearchIncludedInRun()) {
+                    if (!array_key_exists($jobsitekey, $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN']))
                         $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'][$jobsitekey] = array();
 
                     $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'][$jobsitekey][$curSearchSettings->getUserSearchRunKey()] = $curSearchSettings;
