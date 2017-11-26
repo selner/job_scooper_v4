@@ -27,13 +27,14 @@ class SeleniumManager extends PropertyObject
     private $additionalLoadDelaySeconds = null;
     private $lastCookies = array();
     private $_seleniumIsRunning = false;
-
+    private $_settings = null;
     function __construct($additionalLoadDelaySeconds = 0)
     {
         $this->additionalLoadDelaySeconds = $additionalLoadDelaySeconds;
+        $this->_settings = getConfigurationSettings('selenium');
 
-        if ($GLOBALS['USERDATA']['configuration_settings']['selenium']['autostart'] == True) {
-            SeleniumManager::startSeleniumServer();
+        if ($this->_settings['autostart'] == True) {
+            $this->startSeleniumServer();
         }
     }
 
@@ -42,7 +43,7 @@ class SeleniumManager extends PropertyObject
         $this->doneWithRemoteWebDriver();
 
         if ($GLOBALS['USERDATA']['configuration_settings']['selenium']['autostart'] == True) {
-            SeleniumManager::shutdownSelenium();
+            $this->shutdownSelenium();
         }
         $this->_seleniumIsRunning = false;
     }
@@ -122,16 +123,16 @@ class SeleniumManager extends PropertyObject
         $webdriver = $this->getWebDriverKind();
         $pscmd = doExec("pkill -i " . $webdriver);
 
-        SeleniumManager::shutdownSelenium();
+        $this->shutdownSelenium();
 
-        SeleniumManager::startSeleniumServer();
+        $this->startSeleniumServer();
 
     }
 
-    static function shutdownSelenium()
+    function shutdownSelenium()
     {
         $canStop = false;
-        $settings = getConfigurationSettings('selenium');
+        $settings = $this->_settings;
         if(array_key_exists('autostart', $settings))
             $canStop = ($settings['autostart'] === True);
 
@@ -191,82 +192,83 @@ class SeleniumManager extends PropertyObject
         }
     }
 
-    function startSelenium()
+    function startSeleniumServer()
     {
-        $this->_seleniumIsRunning = SeleniumManager::startSeleniumServer();
 
+        $settings = $this->_settings;
 
-    }
-    static function startSeleniumServer()
-    {
-        $settings = getConfigurationSettings('selenium');
-
-        $seleniumStarted = SeleniumManager::isServerUp();
-        if($seleniumStarted == false)
+        $autostart = false;
+        if(array_key_exists('autostart', $settings))
         {
-            $canStop = false;
-            if(array_key_exists('autostart', $settings))
-                $canStop = ($settings['autostart'] === True);
-
-            if($canStop === True && array_key_exists('start_command', $settings) && !is_null($settings['start_command']))
-            {
-                LogLine("Attempting to start Selenium server with command \"" . $settings['start_command'] . "\"", \C__DISPLAY_NORMAL__);
-                $res = doExec($settings['start_command']);
-                LogLine("Starting Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
-
-                sleep(10);
-                $seleniumStarted = true;
-            }
-            else if($canStop && stripos($settings['host_location'], "localhost") != false || (stripos($settings['host_location'], "127.0.0.1") != false)) {
-
-                $strCmdToRun = "java ";
-                if (array_key_exists('prefix_switches', $settings))
-                    $strCmdToRun .= $settings['prefix_switches'];
-
-                $strCmdToRun .= " -jar \"" . $settings['jar'] . "\" -port " . $settings['port'] . " ";
-                if (array_key_exists('prefix_switches', $settings))
-                    $strCmdToRun .= $settings['postfix_switches'];
-
-                $strCmdToRun .= " >/dev/null &";
-
-                LogLine("Starting Selenium with command: '" . $strCmdToRun . "'", \C__DISPLAY_ITEM_RESULT__);
-                $res = doExec($strCmdToRun);
-                sleep(10);
-                LogLine("Starting Selenium server result: "  . $res, \C__DISPLAY_NORMAL__);
-                $seleniumStarted = true;
-            }
-            else {
-                $seleniumStarted = false;
-                throw new Exception("Selenium is not running and was not set to autostart. Cannot continue without an instance of Selenium running.");
-            }
+            $autostart = ($settings['autostart'] === True);
         }
-        else {
-            $seleniumStarted = true;
-            LogLine("Selenium is already running on port " . $settings['port'] . ".  Skipping startup of server.", \C__DISPLAY_WARNING__);
+        $canStop = $autostart;
+
+        if($autostart) {
+            $seleniumStarted = $this->isServerUp();
+            if ($seleniumStarted == false) {
+                if ($canStop === True && array_key_exists('start_command', $settings) && !is_null($settings['start_command'])) {
+                    LogLine("Attempting to start Selenium server with command \"" . $settings['start_command'] . "\"", \C__DISPLAY_NORMAL__);
+                    $res = doExec($settings['start_command']);
+                    LogLine("Starting Selenium server result: " . $res, \C__DISPLAY_NORMAL__);
+
+                    sleep(10);
+                    $seleniumStarted = true;
+                } else if ($canStop && stripos($settings['host_location'], "localhost") != false || (stripos($settings['host_location'], "127.0.0.1") != false)) {
+
+                    $strCmdToRun = "java ";
+                    if (array_key_exists('prefix_switches', $settings))
+                        $strCmdToRun .= $settings['prefix_switches'];
+
+                    $strCmdToRun .= " -jar \"" . $settings['jar'] . "\" -port " . $settings['port'] . " ";
+                    if (array_key_exists('prefix_switches', $settings))
+                        $strCmdToRun .= $settings['postfix_switches'];
+
+                    $strCmdToRun .= " >/dev/null &";
+
+                    LogLine("Starting Selenium with command: '" . $strCmdToRun . "'", \C__DISPLAY_ITEM_RESULT__);
+                    $res = doExec($strCmdToRun);
+                    sleep(10);
+                    LogLine("Starting Selenium server result: " . $res, \C__DISPLAY_NORMAL__);
+                    $seleniumStarted = true;
+                } else {
+                    $seleniumStarted = false;
+                    throw new Exception("Selenium is not running and was not set to autostart. Cannot continue without an instance of Selenium running.");
+                }
+            } else {
+                $seleniumStarted = true;
+                LogLine("Selenium is already running; skipping startup of server.", \C__DISPLAY_WARNING__);
+            }
+            return $seleniumStarted;
         }
-        return $seleniumStarted;
+
+        return $this->isServerUp();
     }
 
-    static function isServerUp()
+    function isServerUp()
     {
-        $hostHubPageURL = $GLOBALS['USERDATA']['configuration_settings']['selenium']['host_location'] . '/wd/hub';
+
+        $hostHubPageURL = $this->_settings['host_location'] . '/wd/hub';
         $msg = "Checking Selenium server up.... ";
+        LogLine("Checking if Selenium is running at " . $hostHubPageURL, \C__DISPLAY_ITEM_DETAIL__);
 
         $ret = false;
 
         try{
 
-            $client = new \GuzzleHttp\Client();
-
-            $res = $client->request('GET', $hostHubPageURL);
-            $rescode = $res->getStatusCode();
-            if($rescode > 200)
-            {
-                return false;
-            }
-            $strHtml = $res->getBody();
-
-            $objSimplHtml = new SimpleHtmlHelper($strHtml);
+//
+//            $client = new \GuzzleHttp\Client();
+//            LogDebug("Getting HTML from server page" . $hostHubPageURL, \C__DISPLAY_ITEM_DETAIL__);
+//
+//            $res = $client->request('GET', $hostHubPageURL);
+//            $rescode = $res->getStatusCode();
+//            if($rescode > 200)
+//            {
+//                return false;
+//            }
+//            $strHtml = $res->getBody();
+//
+            $objSimplHtml = new SimpleHtmlHelper($$hostHubPageURL);
             if ($objSimplHtml === false)
             {
                 $ret = false;
@@ -276,21 +278,21 @@ class SeleniumManager extends PropertyObject
             $tag = $objSimplHtml->find("title");
             if (is_null($tag) != true && count($tag) >= 1)
             {
-                $title = $tag[0]->plaintext;
+                $title = $tag[0]->text();
                 $msg = $msg . " Found hub server page '" . $title . "' as expected.  Selenium server is up.'";
                 $ret = true;
             }
 
         } catch (\WebDriverCurlException $ex) {
-            $msg = $msg . " Selenium not yet running (failed to access the hub page.)";
+            $msg = "Selenium not yet running (failed to access the hub page.)";
         } catch (\WebDriverException $ex) {
-            $msg = $msg . " Selenium not yet running (failed to access the hub page.)";
+            $msg = " Selenium not yet running (failed to access the hub page.)";
         } catch (Exception $ex) {
-            $msg = $msg . " Selenium not yet running (failed to access the hub page.)";
+            $msg = " Selenium not yet running (failed to access the hub page.)";
         }
         finally
         {
-            LogLine($msg, \C__DISPLAY_NORMAL__);
+            LogLine($msg, \C__DISPLAY_ITEM_DETAIL__);
         }
 
         return $ret;
