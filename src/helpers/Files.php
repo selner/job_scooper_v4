@@ -68,9 +68,44 @@ function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strEx
     return $strFilename;
 }
 
+/**
+ * json encode that can handle invalid UTF-8 chars
+ *
+ * Source:  http://php.net/manual/en/function.json-last-error.php#121233
+ * @param $value
+ * @param int $options
+ * @param int $depth
+ * @return string
+ */
+function safe_json_encode($value, $options = 0, $depth = 512) {
+    $encoded = json_encode($value, $options, $depth);
+    if ($encoded === false && $value && json_last_error() == JSON_ERROR_UTF8) {
+        $encoded = json_encode(utf8ize($value), $options, $depth);
+    }
+    return $encoded;
+}
+
+/**
+ * use this code with mb_convert_encoding, you can json_encode some corrupt UTF-8 chars
+ *
+ * Source:  http://php.net/manual/en/function.json-last-error.php#121233
+ * @param $mixed
+ * @return array|mixed|string
+ */
+function utf8ize($mixed) {
+    if (is_array($mixed)) {
+        foreach ($mixed as $key => $value) {
+            $mixed[$key] = utf8ize($value);
+        }
+    } elseif (is_string($mixed)) {
+        return mb_convert_encoding($mixed, "UTF-8", "UTF-8");
+    }
+    return $mixed;
+}
+
 function encodeJSON($data)
 {
-    $jsonData = json_encode($data, JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP |  JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK);
+    $jsonData = safe_json_encode($data, JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP |  JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK);
     if ($jsonData === false) {
         $err = json_last_error_msg();
         $errMsg = "Error:  Unable to encode data to JSON.  Error: " . $err;
