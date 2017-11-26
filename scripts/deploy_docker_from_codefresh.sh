@@ -50,7 +50,20 @@ ECHO ""
 ECHO "Starting docker container $CONTAINER_NAME from image $DOCKER_IMAGE"
 ECHO ""
 ECHO "***************************************************************"
-DOCKER_RUN="docker run --volume /private/var/local/jobs_scooper:/var/local/jobs_scooper --name $CONTAINER_NAME $DOCKER_REPO_IMAGE"
+
+VARLOCAL=/var/local
+if [ "$(uname)" == "Darwin" ]; then
+    # Do something under Mac OS X platform
+    VARLOCAL=/private/var/local
+# elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    # Do something under GNU/Linux platform
+# elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
+    # Do something under 32 bits Windows NT platform
+# elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]; then
+    # Do something under 64 bits Windows NT platform
+fi
+
+DOCKER_RUN="docker run --volume $VARLOCAL/jobs_scooper:/var/local/jobs_scooper --volume /var/run/docker.sock:/var/run/docker.sock --name $CONTAINER_NAME $DOCKER_REPO_IMAGE"
 echo $DOCKER_RUN
 $DOCKER_RUN
 
