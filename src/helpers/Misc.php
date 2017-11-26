@@ -690,9 +690,9 @@ function combineTextAllChildren($node, $fRecursed = false)
 {
 
     $retStr = "";
-    if ($node->hasChildNodes()) {
+    if ($node->hasChildren()) {
         $retStr = strScrub($node->text() . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
-        foreach ($node->childNodes() as $child) {
+        foreach ($node->children() as $child) {
             $retStr = $retStr . " " . combineTextAllChildren($child, true);
         }
         unset($child);
@@ -714,8 +714,8 @@ function combineTextAllNodes($nodes)
                 $retStr = $retStr . ", ";
 
             $retStr = $retStr . strScrub($node->text() . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
-            if(!is_null($node->childNodes())) {
-                foreach ($node->childNodes() as $child) {
+            if(!is_null($node->children())) {
+                foreach ($node->children() as $child) {
                     $retStr = $retStr . " " . combineTextAllChildren($child, true);
                 }
             }
