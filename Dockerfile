@@ -115,6 +115,25 @@ RUN mkdir /opt/jobs_scooper
 
 ########################################################
 ###
+### Add the PHP composer configuration file into image
+### and install the dependencies
+###
+########################################################
+WORKDIR /opt/jobs_scooper
+ADD ./composer.json /opt/jobs_scooper/
+RUN composer install --no-interaction -vv
+
+########################################################
+###
+### Install python dependencies
+###
+########################################################
+ADD ./python/pyJobNormalizer/requirements.txt /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
+RUN pip install --no-cache-dir -v -r /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
+
+
+########################################################
+###
 ### Add the full, remaining source code from the repo
 ### to the image
 ###
@@ -124,22 +143,6 @@ ADD ./ /opt/jobs_scooper/
 
 RUN echo "Verifying correct source installed..."
 RUN ls -al /opt/jobs_scooper
-
-########################################################
-###
-### Add the PHP composer configuration file into image
-### and install the dependencies
-###
-########################################################
-WORKDIR /opt/jobs_scooper
-RUN composer install --no-interaction -vv
-
-########################################################
-###
-### Install python dependencies
-###
-########################################################
-RUN pip install --no-cache-dir -v -r /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
 
 ########################################################
 ###
