@@ -300,12 +300,23 @@ function substr_count_multi($subject = "", array $patterns = array(), &$findings
 function getArrayItem($key, $arr)
 {
     $ret = null;
-    if(array_key_exists($key, $arr))
-    {
-        $ret = $arr[$key];
+    if(array_key_exists($key, $arr)) {
+        if (is_numeric($arr[$key]))
+            $ret = $arr[$key];
+        else if (!empty($arr[$key]))
+            $ret = $arr[$key];
     }
-
     return $ret;
+}
+
+function setArrayItem(&$destArray, $destKey, $sourceArray, $sourceKey)
+{
+    $ret = null;
+    $val = getArrayItem($sourceKey, $sourceArray);
+    if(is_numeric($val) || !empty($val))
+    {
+        $destArray[$destKey] = $val;
+    }
 }
 
 
