@@ -1208,7 +1208,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    protected function getSimpleHtmlDomFromSeleniumPage()
     protected function getSimpleHtmlDomFromSeleniumPage($url=null)
     {
         $objSimpleHTML = null;
