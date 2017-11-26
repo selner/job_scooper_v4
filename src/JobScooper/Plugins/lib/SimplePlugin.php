@@ -58,6 +58,47 @@ class SimplePlugin extends BaseJobsSite
         }
 
         parent::__construct();
+
+        foreach(array_keys($this->arrListingTagSetup) as $k)
+        {
+            if (array_key_exists('type', $this->arrListingTagSetup[$k])) {
+                switch ($this->arrListingTagSetup[$k]['type']) {
+                    case "CSS":
+                        if(array_key_exists('return_attribute', $this->arrListingTagSetup[$k]) &&
+                            in_array(strtoupper($this->arrListingTagSetup[$k]['return_attribute']), array("NODE", "COLLECTION")) === true)
+                            $rank = 10;
+                        else
+                            $rank = 50;
+                        break;
+
+                    case "STATIC":
+                        $rank = 100;
+                        break;
+
+
+                    case "REGEX":
+                        $rank = 1000;
+                        break;
+
+                    default:
+                        $rank = 999999;
+                        break;
+                }
+            }
+            else
+                $rank = 999999;
+            $this->arrListingTagSetup[$k]['rank'] = $rank;
+        }
+
+        uasort($this->arrListingTagSetup, function($a, $b) {
+            if ($a['rank'] == $b['rank']) {
+                return 0;
+            }
+            return ($a['rank'] < $b['rank']) ? -1 : 1;
+
+        });
+
+
     }
 
     static function getJobItemKeys()
@@ -412,7 +453,7 @@ class SimplePlugin extends BaseJobsSite
                     $item[$itemKey] = $this->_getTagValueFromPage_($node, $itemKey, $item);
                 }
 
-                if (strlen($item['Title']) == 0 || strcasecmp($item['Title'], "title") == 0)
+                if (empty($item['Title']) || strcasecmp($item['Title'], "title") == 0)
                     continue;
 
                 if(empty($item['JobSiteKey']))
