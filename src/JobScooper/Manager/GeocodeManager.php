@@ -116,7 +116,7 @@ class GeocodeManager
         $this->geocoder->registerProviders(array(
             new GoogleMapsLoggedProvider(
                 $adapter=$curl,
-                $locale=null,
+                $locale="en",
                 $region=$regionBias,
                 $useSsl = true,
                 $apiKey=$googleApiKey,
