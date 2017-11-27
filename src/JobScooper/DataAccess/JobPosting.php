@@ -289,37 +289,54 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 
     public function setPostedAt($v)
     {
-        $v = strtolower(str_ireplace("posted", "", $v));
-        $v = $this->_cleanupTextValue($v);
-        $newV = null;
-
         if(empty($v))
             return null;
+
+        $newV = null;
 
         if (strcasecmp($v, "Just posted") == 0)
             $newV = getTodayAsString();
 
-        if (is_null($newV)) {
+        $v = strtolower(str_ireplace(array("Posted Date", "posted", "posted at"), "", $v));
+        $v = $this->_cleanupTextValue($v);
+
+        if (empty($newV)) {
             $dateVal = strtotime($v, $now = time());
             if (!($dateVal === false)) {
-                $newV = date('Y-m-d', $dateVal);
+                $newV = $dateVal;
             }
         }
 
-        if(is_null($newV) && preg_match('/^\d+$/', $v)) {
+        if(empty($newV) && preg_match('/^\d+$/', $v)) {
             $vstr = strval($v);
             if(strlen($vstr) == strlen("20170101"))
             {
-                $datestr = substr($vstr, 4, 2) . "/" . substr($vstr, 6, 2) ."/" . substr($vstr, 0, 4);
-                $dateVal = strtotime($datestr, $now = time());
-                if (!($dateVal === false)) {
-                    $v = date('Y-m-d', $dateVal);
+                try {
+                    $datestr = substr($vstr, 4, 2) . "/" . substr($vstr, 6, 2) . "/" . substr($vstr, 0, 4);
+                    $dateVal = strtotime($datestr, $now = time());
+                    if (!($dateVal === false)) {
+                        $newV = $dateVal;
+                    }
                 }
-                $newV = date('Y-m-d', $dateVal);
+                catch (Exception $ex)
+                {
+                    try {
+                        $datestr = substr($vstr, 2, 2) . "/" . substr($vstr, 0, 2) . "/" . substr($vstr, 4, 4);
+                        $dateVal = strtotime($datestr, $now = time());
+                        if (!($dateVal === false)) {
+                            $newV = $dateVal;
+                        }
+                    }
+                    catch (Exception $ex)
+                    {
+
+                    }
+
+                }
             }
         }
 
-        if(is_null($newV) && !empty($v)) {
+        if(empty($newV) && !empty($v)) {
             $info = date_parse($v);
             $date = "";
             foreach(array("month", "day", "year") as $dateval)
@@ -336,7 +353,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
             $newV = $date;
         }
 
-        if(is_null($newV)) {
+        if(empty($newV)) {
             $newV = $v;
         }
 
