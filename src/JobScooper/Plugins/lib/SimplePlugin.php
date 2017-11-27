@@ -27,11 +27,15 @@ class SimplePlugin extends BaseJobsSite
     protected $additionalLoadDelaySeconds = 2;
     protected $nextPageScript = null;
     protected $arrListingTagSetup = array();
+    protected $arrBaseListingTagSetup = array();
 
     function __construct()
     {
-        if (is_null($this->arrListingTagSetup))
+        if (empty($this->arrListingTagSetup))
             $this->arrListingTagSetup = SimplePlugin::getEmptyListingTagSetup();
+
+        if(!empty($this->arrBaseListingTagSetup))
+            $this->arrListingTagSetup = array_replace_recursive($this->arrBaseListingTagSetup, $this->arrListingTagSetup);
 
         if (strlen($this->JobPostingBaseUrl) == 0)
             $this->JobPostingBaseUrl = $this->childSiteURLBase;
