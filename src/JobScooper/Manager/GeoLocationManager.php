@@ -128,35 +128,36 @@ class GeoLocationManager
 
             try {
 
-                if ($GLOBALS['CACHES']['allowGoogleQueries'] === true) {
-                    if ($GLOBALS['CACHES']['numFailedGoogleQueries'] > 5) {
-                        LogError("Exceeded max error threshold for Google queries.  Marking Google as unusable.");
-                        $GLOBALS['CACHES']['allowGoogleQueries'] = false;
-                    }
-                    else {
-
-                        $geocode = $this->geocoder->getPlaceForLocationString($strlocname);
-                        if(is_null($geocode)) {
-                            $loc->delete();
-                            $loc = null;
-                        }
-                        else
-                        {
-                            $locId = $this->lookupGeoLocationIdByName($geocode['primary_name']);
-                            if (!is_null($locId) && $locId != GEOLOCATION_DOES_NOT_EXIST) {
-                                $loc = $this->getLocationById($locId);
-                                $loc->addAlternateName($strlocname);
-                            } else {
-                                if ($locId == GEOLOCATION_DOES_NOT_EXIST)
-                                    $replaceNoLocInCache = true;
-                                $loc->fromGeocode($geocode);
-                                $loc->addAlternateName($strlocname);
-                            }
-                        }
-                    }
-                } else {
+                if($GLOBALS['CACHES']['allowGoogleQueries'] === false) {
                     LogLine("Google geocode querying has been disabled. Not adding location for " . $strlocname, C__DISPLAY_WARNING__);
                     return null;
+                }
+                elseif($GLOBALS['CACHES']['numFailedGoogleQueries'] > 5)
+                {
+                    LogError("Exceeded max error threshold for Google queries.  Marking Google as unusable.");
+                    $GLOBALS['CACHES']['allowGoogleQueries'] = false;
+                    $loc->delete();
+                    $loc = null;
+                    return null;
+                }
+
+                $geocode = $this->geocoder->getPlaceForLocationString($strlocname);
+                if(is_null($geocode)) {
+                    $loc->delete();
+                    $loc = null;
+                }
+                else
+                {
+                    $locId = $this->lookupGeoLocationIdByName($geocode['primary_name']);
+                    if (!is_null($locId) && $locId != GEOLOCATION_DOES_NOT_EXIST) {
+                        $loc = $this->getLocationById($locId);
+                        $loc->addAlternateName($strlocname);
+                    } else {
+                        if ($locId == GEOLOCATION_DOES_NOT_EXIST)
+                            $replaceNoLocInCache = true;
+                        $loc->fromGeocode($geocode);
+                        $loc->addAlternateName($strlocname);
+                    }
                 }
             } catch (\Exception $ex) {
                 $GLOBALS['CACHES']['numFailedGoogleQueries'] = $GLOBALS['CACHES']['numFailedGoogleQueries'] + 1;
