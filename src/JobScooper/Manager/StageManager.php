@@ -92,7 +92,7 @@ class StageManager
             $newJob = new \JobScooper\DataAccess\JobPosting();
             $newJob->fromArray($job);
             $newJob->save();
-            LogLine("Saved " . $job['job_post_id'] . " to database.");
+            LogLine("Saved " . $job->getJobPostingId() . " to database.");
         }
 
         LogLine("Stored " . countJobRecords($jobs) . " to database from file '".$path."''.");
