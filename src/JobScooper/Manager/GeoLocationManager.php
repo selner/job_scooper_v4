@@ -40,14 +40,15 @@ class GeoLocationManager
     {
         $loc = $geoloc->toArray();
         $names = $loc['AlternateNames'];
-        if(!is_null($loc['DisplayName']) && strlen($loc['DisplayName']) > 0)
+        if (!is_null($loc['DisplayName']) && strlen($loc['DisplayName']) > 0)
             $names[] = $loc['DisplayName'];
-        if(!is_null($origLocValue) && strlen($origLocValue) > 0)
+        if (!is_null($origLocValue) && strlen($origLocValue) > 0) {
             $names[] = $origLocValue;
-
+        }
         $names = array_unique($names);
         foreach ($names as $name) {
-            $GLOBALS['CACHES']['LocationIdsByName'][cleanupSlugPart($name)] = $loc['GeoLocationId'];;
+
+            $GLOBALS['CACHES']['LocationIdsByName'][$this->getNameKeyForName($name)] = $loc['GeoLocationId'];;
         }
 
     }
@@ -101,12 +102,21 @@ class GeoLocationManager
             ->findOne();
     }
 
+    function getNameKeyForName($name)
+    {
+        $scrubbedVal = preg_replace('/[^\w\/]+/u', " ", $name);
+        $scrubbedVal = preg_replace('/\bUSA/', "US", $scrubbedVal);
+        $scrubbedVal = cleanupTextValue($scrubbedVal);
+        // replace non letter or digits with separator
+
+        return strtolower($scrubbedVal);
+
+    }
     function lookupGeoLocationIdByName($strlocname)
     {
         $cache = $this->_getCache('LocationIdsByName');
-        $slug = cleanupSlugPart($strlocname);
-        if(array_key_exists($slug, $cache))
-            return $cache[$slug];
+        if(array_key_exists($this->getNameKeyForName($strlocname), $cache))
+            return $cache[$this->getNameKeyForName($strlocname)];
 
         return null;
     }
@@ -121,19 +131,17 @@ class GeoLocationManager
             $loc = $this->getLocationById($locId);
         } else {
             $loc = \JobScooper\DataAccess\GeoLocationQuery::create()
-                ->filterByAlternateNames(array($strlocname), Criteria::CONTAINS_ALL)
+                ->filterByAlternateNames(array($strlocname), Criteria::CONTAINS_SOME)
                 ->findOneOrCreate();
             if (is_null($loc))
                 return null;
 
             try {
 
-                if($GLOBALS['CACHES']['allowGoogleQueries'] === false) {
+                if ($GLOBALS['CACHES']['allowGoogleQueries'] === false) {
                     LogLine("Google geocode querying has been disabled. Not adding location for " . $strlocname, C__DISPLAY_WARNING__);
                     return null;
-                }
-                elseif($GLOBALS['CACHES']['numFailedGoogleQueries'] > 5)
-                {
+                } elseif ($GLOBALS['CACHES']['numFailedGoogleQueries'] > 5) {
                     LogError("Exceeded max error threshold for Google queries.  Marking Google as unusable.");
                     $GLOBALS['CACHES']['allowGoogleQueries'] = false;
                     $loc->delete();
@@ -142,21 +150,17 @@ class GeoLocationManager
                 }
 
                 $geocode = $this->geocoder->getPlaceForLocationString($strlocname);
-                if(is_null($geocode)) {
+                if (is_null($geocode)) {
                     $loc->delete();
                     $loc = null;
-                }
-                else
-                {
+                } else {
                     $locId = $this->lookupGeoLocationIdByName($geocode['primary_name']);
                     if (!is_null($locId) && $locId != GEOLOCATION_DOES_NOT_EXIST) {
                         $loc = $this->getLocationById($locId);
-                        $loc->addAlternateName($strlocname);
                     } else {
                         if ($locId == GEOLOCATION_DOES_NOT_EXIST)
                             $replaceNoLocInCache = true;
                         $loc->fromGeocode($geocode);
-                        $loc->addAlternateName($strlocname);
                     }
                 }
             } catch (\Exception $ex) {
@@ -165,17 +169,17 @@ class GeoLocationManager
                 return null;
             }
 
-        }
 
-        if(!is_null($loc)) {
-            if ($loc->isNew()) {
-                $loc->save();
-                if ($replaceNoLocInCache === true)
-
+            if (!is_null($loc)) {
+                if ($loc->isNew()) {
+                    $loc->save();
                     $this->addGeolocationToCache($loc, $origLocValue = $strlocname);
-            } elseif ($loc->isModified()) {
-                $loc->save();
-                $GLOBALS['CACHES']['LocationIdsByName'][cleanupSlugPart($strlocname)] = $loc->getGeoLocationId();
+                } elseif ($loc->isModified()) {
+                    if ($replaceNoLocInCache === true)
+                        $this->addGeolocationToCache($loc, $origLocValue = $strlocname);
+                    $loc->save();
+                    $GLOBALS['CACHES']['LocationIdsByName'][cleanupSlugPart($strlocname)] = $loc->getGeoLocationId();
+                }
             }
         }
         return $loc;
