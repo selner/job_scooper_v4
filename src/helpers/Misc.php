@@ -41,7 +41,7 @@ const C__DISPLAY_FUNCTION__= 700;
 const C__DISPLAY_SUMMARY__ = 750;
 
 
-function getDebugContext()
+function getDebugContext($context=array())
 {
     //Debug backtrace called. Find next occurence of class after Logger, or return calling script:
     $dbg = debug_backtrace();
