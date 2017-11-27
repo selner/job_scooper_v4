@@ -62,7 +62,8 @@ class GoogleMapsLoggedProvider extends GoogleMapsProvider
     }
     protected function executeQuery($query)
     {
-        $error = null;
+        $ret = array();
+        $ex = null;
         try {
             $this->callCounter += 1;
             $ret = parent::executeQuery($query);
@@ -70,15 +71,18 @@ class GoogleMapsLoggedProvider extends GoogleMapsProvider
         }
         catch (Exception $ex)
         {
-            $error = $ex->getMessage();
+
         }
-        $context = array("query" => $query, "result"=>empty($error) ? "SUCCESS" : "ERROR", "error"=>$error);
-        if(!empty($this->logger))
+        finally
         {
-            $this->logger->addInfo("Google Geocoder Called (" . $this->callCounter . " times)", getDebugContext($context));
+            $context = array("query" => $query, "result"=>empty($ex) ? "SUCCESS" : "ERROR", "error"=>empty($ex) ? "" : $ex->getMessage());
+            if(!empty($this->logger))
+            {
+                $this->logger->addInfo("Google Geocoder Called (" . $this->callCounter . " times)", getDebugContext($context));
+            }
+            return $ret;
         }
 
-        return $ret;
     }
 }
 
