@@ -1216,6 +1216,10 @@ abstract class BaseJobsSite implements IJobSitePlugin
         try {
             if(!empty($url))
                 $this->getActiveWebdriver()->get($url);
+
+            LogLine("... sleeping " . $this->additionalLoadDelaySeconds . " seconds while the page results load for " . $this->JobSiteName, C__DISPLAY_ITEM_DETAIL__);
+            sleep($this>$this->additionalLoadDelaySeconds);
+
             $html = $this->getActiveWebdriver()->getPageSource();
             $objSimpleHTML = new SimpleHtmlHelper($html);
             $objSimpleHTML->setSource($this->getActiveWebdriver()->getCurrentUrl());
