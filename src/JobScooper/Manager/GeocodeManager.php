@@ -9,12 +9,16 @@
 namespace JobScooper\Manager;
 
 use Geocoder\Formatter\FormatterInterface;
+use Geocoder\HttpAdapter\HttpAdapterInterface;
 use Geocoder\Provider\GoogleMapsProvider;
 use Geocoder\HttpAdapter\CurlHttpAdapter;
 use \Exception;
 use Geocoder\Result\ResultInterface;
+use JBZoo\Utils\Http;
 use JobScooper\Utils\GoogleGeocoderHttpAdapter;
 
+use Monolog\Logger;
+use Psr\Log\LogLevel as LogLevel;
 
 class StringFormatter
 {
@@ -41,10 +45,49 @@ class StringFormatter
     }
 }
 
+class GoogleMapsLoggedProvider extends GoogleMapsProvider
+{
+    protected $callCounter = 0;
+
+    public function __construct(HttpAdapterInterface $adapter, $locale = null, $region = null, $useSsl = false, $apiKey = null, $logger=null)
+    {
+        $this->setLogger($logger);
+        parent::__construct($adapter, $locale, $region, $useSsl, $apiKey);
+    }
+    protected $logger = null;
+
+    function setLogger($logger)
+    {
+        $this->logger = $logger;
+    }
+    protected function executeQuery($query)
+    {
+        $error = null;
+        try {
+            $this->callCounter += 1;
+            $ret = parent::executeQuery($query);
+
+        }
+        catch (Exception $ex)
+        {
+            $error = $ex->getMessage();
+        }
+        $context = array("query" => $query, "result"=>empty($error) ? "SUCCESS" : "ERROR", "error"=>$error);
+        if(!empty($this->logger))
+        {
+            $this->logger->addInfo("Google Geocoder Called (" . $this->callCounter . " times)", getDebugContext($context));
+        }
+
+        return $ret;
+    }
+}
 
 class GeocodeManager
 {
     protected $geocoder = null;
+    protected $logger = null;
+    protected $loggerName = null;
+
 
 
     function __construct()
@@ -60,19 +103,31 @@ class GeocodeManager
             $regionBias = $country_codes[0];
         }
 
+        $this->loggerName = "geocode_calls";
+        $this->logger = new \Monolog\Logger($this->loggerName);
+        $now = getNowAsString("-");
+        $csvlog = getOutputDirectory('logs'). DIRECTORY_SEPARATOR . "{$this->loggerName}-{$now}-geocode_api_calls.csv";
+        $fpcsv = fopen($csvlog, "w");
+        $handler = new CSVLogHandler($fpcsv, Logger::INFO);
+        $this->logger->pushHandler($handler);
+
         $curl = new GoogleGeocoderHttpAdapter();
         $this->geocoder = new \Geocoder\Geocoder();
         $this->geocoder->registerProviders(array(
-            new \Geocoder\Provider\GoogleMapsProvider(
+            new GoogleMapsLoggedProvider(
                 $adapter=$curl,
                 $locale=null,
                 $region=$regionBias,
                 $useSsl = true,
-                $apiKey=$googleApiKey
+                $apiKey=$googleApiKey,
+                $logger=$this->logger
             )
         ));
-    }
 
+
+        LogLine("Geocode API logging started to CSV file at {$csvlog}", C__DISPLAY_ITEM_DETAIL__);
+
+    }
 
     /**
      * @param $strLocation
