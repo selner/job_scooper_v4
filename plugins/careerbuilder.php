@@ -33,7 +33,7 @@ class PluginCareerBuilder extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
 
     protected $arrListingTagSetup = array(
         'NoPostsFound' => array('selector' => 'div.noresults h3', 'return_attribute' => 'text', 'return_value_callback' => "matchesNoResultsPattern", 'callback_parameter' => 'no results were found'),
-        'TotalPostCount' => array('selector' => 'div.count', 'return_value_regex' => '/.*?(\d+).?Jobs/'),
+        'TotalPostCount' => array('selector' => 'div.count', 'return_value_regex' => '/.*?(\d+).?Job/'),
         'JobPostItem' => array('selector' => 'div.job-row'),
         'Title' =>  array('selector' => 'h2 a', 'return_attribute' => 'text', 'index' => 0),
         'Url' =>  array('selector' => 'h2 a', 'return_attribute' => 'href', 'index' => 0),
