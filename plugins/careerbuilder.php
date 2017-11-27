@@ -40,7 +40,7 @@ class PluginCareerBuilder extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
         'JobSitePostId' =>  array('selector' => 'h2 a', 'index' => 0, 'return_attribute' => 'data-job-did'),
         'Company' =>  array('selector' => 'div.job-information div h4 a'),
         'EmploymentType' =>  array('selector' => 'div.job-information div h4.job-text', 'index'=> 0),
-        'Location' =>  array('selector' => 'div.job-information div h4.job-text', 'index'=> 1),
+        'Location' =>  array('selector' => 'div.job-information div h4.job-text', 'index'=> 2),
         'PostedAt' =>  array('selector' => 'div.time-posted div.show-for-medium-up', 'return_attribute' => 'text'),
         'NextButton' =>  array('selector' => 'a#next-button'),
     );
