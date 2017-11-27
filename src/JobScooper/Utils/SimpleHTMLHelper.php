@@ -36,6 +36,48 @@ class ExtendedDiDomElement extends Element
         }
     }
 
+    function isVisible()
+    {
+        $elemVisible = true;
+        $style = $this->style;
+        if(!empty($style))
+        {
+            $parts = explode(";", $style);
+            foreach($parts as $part)
+            {
+                $kvPair = explode(":", $part);
+                if(!empty($kvPair) && count($kvPair) >1) {
+                    $key = strtolower($kvPair[0]);
+                    $val = strtolower($kvPair[1]);
+                    switch ($key) {
+                        case "display":
+                            if (substr_count_multi($val, array("collapse", "none")))
+                                return false;
+                            break;
+
+                        case "visibility":
+                            if (substr_count_multi($val, array("collapse", "hidden")))
+                                return false;
+                            break;
+                    }
+                }}
+        }
+
+        if($elemVisible !== false) {
+            if (method_exists($this, "parent") && !empty($this->parent()))
+            {
+                if(method_exists($this->parent(), "getNode"))
+                {
+                    $parent = new ExtendedDiDomElement($this->parent()->getNode());
+                    $elemVisible = $parent->isVisible();
+                }
+            }
+
+        }
+
+        return $elemVisible;
+    }
+
     function getDocument()
     {
         if ($this->node->ownerDocument === null) {
@@ -114,11 +156,20 @@ class ExtendedDiDomDocument extends Document
             if (is_array($ret)) {
                 $retExt = array();
                 foreach ($ret as $elem) {
-                    $retExt[] = new ExtendedDiDomElement($elem->getNode());
+                    $foundNode = new ExtendedDiDomElement($elem->getNode());
+                    if($foundNode->isVisible())
+                    {
+                        $retExt[] = $foundNode;
+                    }
                 }
                 return $retExt;
             } elseif (is_a($ret, "Element", true)) {
-                return new ExtendedDiDomElement($ret->getNode());
+                $foundNode = new ExtendedDiDomElement($ret->getNode());
+                if($foundNode->isVisible())
+                {
+                    return $foundNode;
+                }
+
             }
             throw new \Exception("Invalid return type from ExtendedDiDomDocument->Find");
         }
