@@ -199,17 +199,30 @@ abstract class AbstractTaleo extends \JobScooper\Plugins\lib\ServerHtmlPlugin
     }
 
 
-    function parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, $divTagType, $divTagValue, $trIndex)
+    function parseTotalResultsCountFromTaleoCommonDivTable(SimpleHTMLHelper $objSimpHTML, $divTagType, $divTagValue, $trIndex)
     {
-        $nodeHelper = new SimpleHTMLHelper($objSimpHTML);
+        $strTotalItemsCount = null;
+        $node = $objSimpHTML->find("#wrapper div.avada-row table tbody tr td b");
+        if(!empty($node)) {
+            $text = $node[0];
+            $strTotalItemsCount = $node[0]->text();
+        } else {
 
+            $nodeHelper = new SimpleHTMLHelper($objSimpHTML);
+            $node = $nodeHelper->find("div[" . $divTagType . "='" . $divTagValue . "'] table tbody tr");
+            if (!empty($node) && !empty($trIndex) && count($node) > $trIndex + 1)
+                $node = $node[$trIndex];
+            else
+                return null;
 
-        $node = $nodeHelper->get("div[". $divTagType . "='".$divTagValue."'] table tbody tr", $trIndex, true);
-
-        $trSecond = new SimpleHTMLHelper($node);
-        $totalItemsText = $trSecond->getText("td", 0, true);
-        $arrItemsFirstSplit = explode("found ", trim($totalItemsText));
-        $strTotalItemsCount = explode(" matching", trim($arrItemsFirstSplit[1]));
+            $nodeSecond = new SimpleHTMLHelper($node);
+            $nodeThird = $nodeSecond->find("td");
+            if (!empty($nodeThird) && count($nodeThird) >= 1) {
+                $totalItemsText = $nodeThird[0]->text();
+                $arrItemsFirstSplit = explode("found ", trim($totalItemsText));
+                $strTotalItemsCount = explode(" matching", trim($arrItemsFirstSplit[1]));
+            }
+        }
 
         return $strTotalItemsCount;
     }

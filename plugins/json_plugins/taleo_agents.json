@@ -5,6 +5,7 @@
       "PhpClassName" : "INPROGRESSMarriott",
       "SourceURL": "https://jobs.marriott.com/jobs?page=1&sortBy=posted_date&descending=true",
       "PluginExtendsClassName" : "AbstractTaleoATS",
+      "AdditionalFlags" : ["C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER"],
       "additionalLoadDelaySeconds" : 5,
       "Collections": [
         {
