@@ -18,17 +18,33 @@
 
 use \JobScooper\Utils\SimpleHTMLHelper;
 
-class PluginEntercom extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
+class PluginEntercom extends AbstractTaleoATS
 {
-    protected $use1ToTDForCount = True;
-    protected $taleoOrgID = "ENTERCOM";
+    protected $JobSiteName = "Entercom";
     protected $JobListingsPerPage = 100;
-//    protected $server = 'http://chk.tbe.taleo.net/chk05/ats/careers/searchResults.jsp';
     protected $SearchUrlFormat = "https://chk.tbe.taleo.net/chk05/ats/careers/v2/searchResults?org=ENTERCOM&cws=37";
 
     protected $arrListingTagSetup = array(
         'JobPostCount' => array('selector'=>'span.oracletaleocwsv2-panel-number'),
         'JobPostItem' => array('selector'=>'div.oracletaleocwsv2-accordion-head-info'),
+        'Title' => array('selector' => 'h4 a'),
+        'Url' => array('selector' => 'h4 a', 'index' => 0, 'return_attribute' => 'href'),
+        'Location' => array('selector' => 'div', 'index' => 1),
+        'Category' => array('selector' => 'div', 'index' => 0),
+        'JobSitePostId' => array('selector' => 'h4 a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' =>  '/rid=(.*)/i')
+    );
+}
+
+class AbstractTaleoATS extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
+{
+    protected $use1ToTDForCount = True;
+    protected $JobListingsPerPage = 100;
+    protected $PaginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
+
+    protected $arrBaseListingTagSetup = array(
+        'JobPostCount' => array('selector'=>'span.oracletaleocwsv2-panel-number'),
+        'JobPostItem' => array('selector'=>'div.oracletaleocwsv2-accordion-head-info'),
+        'NextButton' => array('selector' => 'a.next'),
         'Title' => array('selector' => 'h4 a'),
         'Url' => array('selector' => 'h4 a', 'index' => 0, 'return_attribute' => 'href'),
         'Location' => array('selector' => 'div', 'index' => 1),
