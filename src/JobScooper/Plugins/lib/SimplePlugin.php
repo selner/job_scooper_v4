@@ -259,6 +259,10 @@ class SimplePlugin extends BaseJobsSite
                     return $this->_getTagMatchValueRegex_($node, $arrTag, $item);
                     break;
 
+                case 'MICRODATA':
+                    // Do nothing; we've already parsed the microdata
+                    break;
+
                 default:
                     throw new \Exception("Unknown field definition type of " . $arrTag['type']);
             }
@@ -423,6 +427,78 @@ class SimplePlugin extends BaseJobsSite
      * page's HTML it was passed.
      * *
      */
+    function getJobFactsFromMicrodata($objSimpHTML, $item=array())
+    {
+
+        if(empty($objSimpHTML) || !method_exists($objSimpHTML, "find"))
+            return $item;
+
+        $itempropNodes = $objSimpHTML->find("*[itemprop]");
+        if(!empty($itempropNodes) && is_array($itempropNodes)) {
+            foreach ($itempropNodes as $node) {
+                $attribs = $node->attributes();
+
+                if (!empty($attribs)) {
+                    $itemPropKind = strtolower($attribs['itemprop']);
+
+                    switch ($itemPropKind) {
+                        case "itemlistelement":
+                            if (array_key_exists("id", $attribs))
+                                $item['JobSitePostId'] = $attribs['id'];
+                            if (array_key_exists("data-index", $attribs))
+                                $item['JobSitePostId'] = empty($item['JobSitePostId']) ? $attribs['data-index'] : $item['JobSitePostId'] . "-" . $attribs['data-index'];
+                            break;
+                        case "title":
+                            $item['Title'] = combineTextAllChildren($node);
+                            break;
+
+                        case "identifier":
+                            $item['Title'] = combineTextAllChildren($node);
+                            break;
+
+                        case "url":
+                            $item['Url'] = $attribs['href'];
+                            break;
+
+                        case "joblocation":
+                        case "postaladdress":
+                            $item['Location'] = combineTextAllChildren($node);
+                            break;
+
+                        case "employmenttype":
+                            $item['EmploymentType'] = combineTextAllChildren($node);
+                            break;
+
+                        case "dateposted":
+                            $item['PostedAt'] = combineTextAllChildren($node);
+                            break;
+
+                        case "industry":
+                        case "occupationalcategory":
+                            $item['Category'] = combineTextAllChildren($node);
+                            break;
+
+                        case "hiringorganization":
+                            $item['Company'] = combineTextAllChildren($node);
+                            break;
+
+
+                    }
+                }
+            }
+        }
+        return $item;
+    }
+
+
+    /**
+     * /**
+     * parseJobsListForPage
+     *
+     * This does the heavy lifting of parsing each job record from the
+     * page's HTML it was passed.
+     * *
+     */
     function parseJobsListForPage($objSimpHTML)
     {
         $ret = null;
@@ -449,12 +525,16 @@ class SimplePlugin extends BaseJobsSite
                 //
                 $item = getEmptyJobListingRecord();
 
+                $item = $this->getJobFactsFromMicrodata($node, $item);
+
                 foreach(array_keys($this->arrListingTagSetup) as $itemKey)
                 {
                     if($itemKey == "JobPostItem")
                         continue;
 
-                    $item[$itemKey] = $this->_getTagValueFromPage_($node, $itemKey, $item);
+                    $newVal = $this->_getTagValueFromPage_($node, $itemKey, $item);
+                    if(!empty($newVal))
+                        $item[$itemKey] = $newVal;
                 }
 
                 if (empty($item['Title']) || strcasecmp($item['Title'], "title") == 0)
