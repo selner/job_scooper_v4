@@ -332,7 +332,7 @@ function findOrCreateJobSitePlugin($jobsiteKey)
 {
     $slug = cleanupSlugPart($jobsiteKey);
 
-    if(!is_array($GLOBALS['JOBSITE_PLUGINS']))
+    if(empty($GLOBALS['JOBSITE_PLUGINS']))
         $GLOBALS['JOBSITE_PLUGINS'] = array();
 
     if (!array_key_exists($slug, $GLOBALS['JOBSITE_PLUGINS'])) {
