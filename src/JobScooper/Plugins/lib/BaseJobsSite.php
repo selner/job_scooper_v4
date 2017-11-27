@@ -1127,13 +1127,14 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
         foreach (array_keys($arrJobsBySitePostId) as $JobSitePostId) {
             $job = $this->saveJob($arrJobsBySitePostId[$JobSitePostId]);
-            if(!is_null($job))
+            if(!is_null($job)) {
                 $this->arrSearchReturnedJobs[$searchDetails->getUserSearchRunKey()][$job->getJobPostingId()] = $job->getJobPostingId();
 
-            // if this posting was saved within the last hour , then assume it's a new post
-            $hoursSince = date_diff($job->getFirstSeenAt(), new \DateTime());
-            if($hoursSince->h < 1)
-                $nCountNewJobs += 1;
+                // if this posting was saved within the last hour , then assume it's a new post
+                $hoursSince = date_diff($job->getFirstSeenAt(), new \DateTime());
+                if ($hoursSince->h < 1)
+                    $nCountNewJobs += 1;
+            }
         }
     }
 
