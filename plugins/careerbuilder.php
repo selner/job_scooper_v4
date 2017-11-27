@@ -32,16 +32,17 @@ class PluginCareerBuilder extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
     protected $JobListingsPerPage = 25;
 
     protected $arrListingTagSetup = array(
-        'TotalPostCount' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => "count"), 'return_attribute' => 'text', 'return_value_regex' => '/[^\d]+(\d+).*?/'),
-        'JobPostItem' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'jobs'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'job-row')),
-        'Title' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row', 'index' =>1), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'column small-10'), array('tag' => 'h2'), array('tag' => 'a'), 'index'=> 0, 'return_attribute' => 'text'),
-        'Url' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row', 'index' =>1), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'column small-10'), array('tag' => 'h2'), array('tag' => 'a'), 'index'=> 0, 'return_attribute' => 'href'),
-        'JobSitePostId' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row', 'index' =>1), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'column small-10'), array('tag' => 'h2'), array('tag' => 'a'), 'index'=> 0, 'return_attribute' => 'data-job-did'),
-        'Company' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row job-information'), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'columns large-2 medium-3 small-12'), array('tag' => 'h4', 'attribute'=>'class', 'attribute_value'=>'job-text'),  array('tag' => 'a'), 'return_attribute' => 'text'),
-        'Location' =>  array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'row job-information'), array('tag' => 'div', 'attribute'=>'class', 'attribute_value'=>'columns end large-2 medium-3 small-12'), array('tag' => 'h4', 'attribute'=>'class', 'attribute_value'=>'job-text'), 'return_attribute' => 'text'),
-        'PostedAt' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'column small-2 time-posted'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'show-for-medium-up'), 'return_attribute' => 'text'),
-        'EmploymentType' =>  array('selector' => 'div.job-row div.row.job-information div.columns.medium-6.large-8 h4.job-text.employment-info', 'return_attribute' => 'text'),
-        'NextButton' =>  array('selector' => '#next-button'),
+        'NoPostsFound' => array('selector' => 'div.noresults h3', 'return_attribute' => 'text', 'return_value_callback' => "matchesNoResultsPattern", 'callback_parameter' => 'no results were found'),
+        'TotalPostCount' => array('selector' => 'div.count', 'return_value_regex' => '/.*?(\d+).?Jobs/'),
+        'JobPostItem' => array('selector' => 'div.job-row'),
+        'Title' =>  array('selector' => 'h2 a', 'return_attribute' => 'text', 'index' => 0),
+        'Url' =>  array('selector' => 'h2 a', 'return_attribute' => 'href', 'index' => 0),
+        'JobSitePostId' =>  array('selector' => 'h2 a', 'index' => 0, 'return_attribute' => 'data-job-did'),
+        'Company' =>  array('selector' => 'div.job-information div h4 a'),
+        'EmploymentType' =>  array('selector' => 'div.job-information div h4.job-text', 'index'=> 0),
+        'Location' =>  array('selector' => 'div.job-information div h4.job-text', 'index'=> 1),
+        'PostedAt' =>  array('selector' => 'div.time-posted div.show-for-medium-up', 'return_attribute' => 'text'),
+        'NextButton' =>  array('selector' => 'a#next-button'),
     );
 
     protected function getKeywordURLValue(\JobScooper\DataAccess\UserSearchRun $searchDetails) {
