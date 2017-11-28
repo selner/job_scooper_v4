@@ -138,20 +138,21 @@ class UserSearchRun extends BaseUserSearchRun
 
     public function shouldRunNow()
     {
-        $jobsite = $this->getJobSitePluginObject();
-        $jobsiteplugin = $this->getJobSiteObject();
-        $isAllJobsSite = $jobsite->doesSiteReturnAllJobs(true);
-        if($isAllJobsSite === true)
+        $jobsiteplugin = $this->getJobSitePlugin();
+        if(!empty($jobsiteplugin))
         {
-            $nextTime = $jobsiteplugin->getStartNextRunAfter();
-        }
-        else {
-            $nextTime = $this->getStartNextRunAfter();
-        }
+            $isAllJobsSite = $jobsiteplugin->doesSiteReturnAllJobs(false);
+            if($isAllJobsSite === true)
+            {
+                $nextTime = $jobsiteplugin->getStartNextRunAfter();
+            }
+            else {
+                $nextTime = $this->getStartNextRunAfter();
+            }
 
-        if (!is_null($nextTime))
-            return (time() > $nextTime->getTimestamp());
-
+            if (!is_null($nextTime))
+                return (time() > $nextTime->getTimestamp());
+        }
         return true;
     }
 
@@ -237,6 +238,36 @@ class UserSearchRun extends BaseUserSearchRun
 
     }
 
+    function save(ConnectionInterface $con = null, $skipReload = false)
+    {
+        $jobsite = $this->getJobSitePlugin();
+
+        // Update the jobsite_plugin object to match the latest search run details
+        // We need this for caching detection reasons
+        //
+        if ($this->isColumnModified(UserSearchRunTableMap::COL_DATE_LAST_RUN))
+            $jobsite->setLastRunAt($this->getLastRunAt());
+
+        if ($this->isColumnModified(UserSearchRunTableMap::COL_RUN_RESULT))
+            $jobsite->setLastRunWasSuccessful($this->getRunResultCode() === "successful");
+
+        if ($this->isColumnModified(UserSearchRunTableMap::COL_DATE_LAST_FAILED))
+            $jobsite->setLastFailedAt($this->getLastFailedAt());
+
+        if ($this->isColumnModified(UserSearchRunTableMap::COL_DATE_NEXT_RUN))
+            $jobsite->setStartNextRunAfter($this->getStartNextRunAfter());
+
+        if ($jobsite->isModified())
+            $jobsite->setLastUserSearchRunId($this->getUserSearchRunId());
+
+        $ret = parent::save($con, $skipReload);
+
+
+        $jobsite->save();
+
+        return $ret;
+    }
+
     /**
      * Code to be run before inserting to database
      * @param  ConnectionInterface $con
@@ -249,16 +280,6 @@ class UserSearchRun extends BaseUserSearchRun
             parent::postSave($con);
         }
 
-        // Update the jobsite_plugin object to match the latest search run details
-        // We need this for caching detection reasons
-        //
-        $jobsite = findOrCreateJobSitePlugin($this->getJobSiteKey());
-        $jobsite->setLastRunAt($this->getLastRunAt());
-        $jobsite->setLastRunWasSuccessful($this->getRunResultCode() === "successful");
-        $jobsite->setLastUserSearchRunId($this->getUserSearchRunId());
-        $jobsite->setLastFailedAt($this->getLastFailedAt());
-        $jobsite->setStartNextRunAfter($this->getStartNextRunAfter());
-        $jobsite->save();
 
     }
 

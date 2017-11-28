@@ -90,12 +90,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     }
 
-    public function doesSiteReturnAllJobs($fIgnoreLocation=false)
-    {
-        return ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)
-            && ($fIgnoreLocation || $this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)));
-    }
-
     public function getJobSiteObject()
     {
         return $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->JobSiteName)]['jobsite_db_object'];
@@ -125,17 +119,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
             $firstKey = array_keys($arrSearches)[0];
             $arrSearches = array($firstKey => $arrSearches[$firstKey]);
-
-            $objJobSite = $this->getJobSiteObject();
-            if(!is_null($objJobSite))
-            {
-                if ($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
-                    $objJobSite->setResultsFilterType("all-by-location");
-                else
-                    $objJobSite->setResultsFilterType("all-only");
-                $objJobSite->save();
-            }
-
         }
 
         foreach ($arrSearches as $searchDetails) {

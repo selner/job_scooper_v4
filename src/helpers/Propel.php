@@ -304,36 +304,50 @@ function findOrCreateUser($value)
     return $user;
 }
 
+function getAllPluginClasses()
+{
+    $classList = get_declared_classes();
+    sort($classList);
+    $pluginClasses = array_filter($classList, function ($class) {
+        return (stripos($class, "Plugin") !== false) && stripos($class, "\\Classes\\") === false && in_array("JobScooper\Plugins\Interfaces\IJobSitePlugin", class_implements($class));
+    });
+
+    $classListBySite = array();
+    foreach($pluginClasses as $class)
+    {
+        $jobsitekey= cleanupSlugPart(str_replace("Plugin", "", $class));
+        $classListBySite[$jobsitekey] = $class;
+    }
+
+    return $classListBySite;
+}
 function getJobSitePluginClassName($jobsiteKey)
 {
     $plugin_classname = null;
 
     if (!is_null($jobsiteKey)) {
-        $slug = cleanupSlugPart($jobsiteKey);
-        if (!array_key_exists($slug, $GLOBALS['JOBSITE_PLUGINS']) &&
-            !is_null($GLOBALS['JOBSITE_PLUGINS'][$slug]['class_name'])) {
-            return $GLOBALS['JOBSITE_PLUGINS'][$slug]['class_name'];
-        } else {
-            $classnamematch = "plugin" . $slug;
-            $classList = get_declared_classes();
-            foreach ($classList as $class) {
-                if (strcasecmp($class, $classnamematch) == 0) {
-                    return $class;
-                }
-            }
+        if (!array_key_exists($jobsiteKey, $GLOBALS['JOBSITE_PLUGINS']) &&
+            !is_null($GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['class_name']))
+        {
+            $plugin_classname = $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['class_name'];
         }
     }
 
-    return null;
+    if(empty($plugin_classname))
+    {
+        $classes = getAllPluginClasses();
+        if(array_key_exists($jobsiteKey, $classes))
+            $plugin_classname = $classes[$jobsiteKey];
+    }
+
+    return $plugin_classname;
 }
+
 
 
 function findOrCreateJobSitePlugin($jobsiteKey)
 {
     $slug = cleanupSlugPart($jobsiteKey);
-
-    if(empty($GLOBALS['JOBSITE_PLUGINS']))
-        $GLOBALS['JOBSITE_PLUGINS'] = array();
 
     if (!array_key_exists($slug, $GLOBALS['JOBSITE_PLUGINS']))
     {
@@ -346,16 +360,13 @@ function findOrCreateJobSitePlugin($jobsiteKey)
         );
     }
 
-    if (is_null($GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object']))
+    if (empty($GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object']))
     {
-        $GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object'] = \JobScooper\DataAccess\JobSitePluginQuery::create()
+        $dbPlugin = \JobScooper\DataAccess\JobSitePluginQuery::create()
             ->filterByPrimaryKey($slug)
             ->findOneOrCreate();
 
-        if($GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object']->isNew()) {
-            $GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object']->setJobSiteKey($slug);
-            $GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object']->save();
-        }
+        $GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object'] = $dbPlugin;
     }
 
     return $GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object'];

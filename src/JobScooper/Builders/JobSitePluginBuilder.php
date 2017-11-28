@@ -40,9 +40,12 @@ class JobSitePluginBuilder
 
         $this->_renderer = loadTemplate(__ROOT__.'/assets/templates/eval_jsonplugin.tmpl');
 
+        if(empty($GLOBALS['JOBSITE_PLUGINS']))
+            $GLOBALS['JOBSITE_PLUGINS'] = array();
 
         $this->_loadJsonPluginConfigFiles_();
         $this->_initializeAllPlugins();
+
 
 
     }
@@ -52,6 +55,25 @@ class JobSitePluginBuilder
     {
         $arrAddedPlugins = null;
         LogLine('Initializing all job site plugins...', C__DISPLAY_ITEM_START__);
+
+        LogLine('Loading jobsite plugin database records...', C__DISPLAY_ITEM_START__);
+
+        $dbPluginList = \JobScooper\DataAccess\JobSitePluginQuery::create()
+            ->find()
+            ->getData();
+
+        foreach ($dbPluginList as $dbPlugin)
+        {
+            $GLOBALS['JOBSITE_PLUGINS'][$dbPlugin->getJobSiteKey()] = array(
+                'name' => $dbPlugin->getJobSiteKey(),
+                'class_name' => $dbPlugin->get,
+                'jobsite_db_object' => $dbPlugin,
+                'include_in_run' => false,
+                'other_settings' => []
+            );
+
+
+        }
 
         LogLine('Generating classes for ' . count($this->_jsonPluginSetups) .' JSON-loaded plugins...', C__DISPLAY_ITEM_DETAIL__);
 
@@ -76,17 +98,10 @@ class JobSitePluginBuilder
             }
         }
 
-        LogLine('Instantiating objects for all job site plugins...', C__DISPLAY_ITEM_DETAIL__);
-        $classList = get_declared_classes();
-        sort($classList);
-        $pluginClasses = array_filter($classList, function ($class) {
-            return (stripos($class, "Plugin") !== false) && stripos($class, "\\Classes\\") === false && in_array("JobScooper\Plugins\Interfaces\IJobSitePlugin", class_implements($class));
-        });
-
-        foreach($pluginClasses as $class)
+        $classListBySite = getAllPluginClasses();
+        foreach(array_keys($classListBySite) as $nameKey)
         {
-            $namekey = strtolower(str_replace("Plugin", "", $class));
-            findOrCreateJobSitePlugin($namekey);
+            findOrCreateJobSitePlugin($nameKey);
         }
 
 

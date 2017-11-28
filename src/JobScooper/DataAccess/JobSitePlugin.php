@@ -17,9 +17,7 @@
 
 namespace JobScooper\DataAccess;
 
-
-namespace JobScooper\DataAccess;
-
+use \Exception;
 use JobScooper\DataAccess\Base\JobSitePlugin as BaseJobSitePlugin;
 
 /**
@@ -39,18 +37,55 @@ class JobSitePlugin extends BaseJobSitePlugin
 
 
 
+    function doesSiteReturnAllJobs($ignoreLocation=false)
+    {
+        switch($this->getResultsFilterType())
+        {
+            case "all-only":
+                return true;
+                break;
+
+            case "all-by-location":
+                if($ignoreLocation)
+                    return true;
+                return false;
+                break;
+
+            default:
+                return false;
+        }
+
+        return false;
+    }
 
     function getJobSitePluginObject()
     {
-        if(is_null($this->_pluginObject))
-            $this->_instantiateJobSiteClass();
+        if (is_null($this->_pluginObject))
+        {
+            try
+            {
+                $this->_instantiateJobSiteClass();
+            }
+            catch (Exception $ex)
+            {
+                handleException($ex, "Unable to instantiate expected Job Site plugin class for " . $this->getJobSiteKey() . ":  %s", false);
+                setSiteAsExcluded($this->getJobSiteKey());
+                $this->setLastFailedAt(time());
+                $this->setLastRunWasSuccessful(false);
+                return null;
+            }
+        }
 
         return $this->_pluginObject;
     }
 
     function getPluginClassName()
     {
-        return getJobSitePluginClassName($this->getJobSiteKey());
+        $class = parent::getPluginClassName();
+        if(empty($class))
+            $class = getJobSitePluginClassName($this->getJobSiteKey());
+
+        return $class;
     }
 
     function isSearchIncludedInRun()
@@ -78,15 +113,14 @@ class JobSitePlugin extends BaseJobSitePlugin
     private function _instantiateJobSiteClass()
     {
         if (is_null($this->getPluginClassName()))
-            throw new \Exception("Missing jobsite plugin class name.");
+            throw new \Exception("Missing jobsite plugin class name for " . $this->getJobSiteKey());
 
         try {
             $class = $this->getPluginClassName();
-            $this->save();
             $this->_pluginObject = new $class();
 
             $this->setSupportedCountryCodes($this->_pluginObject->getSupportedCountryCodes());
-
+            $this->save();
         }
         catch (\Exception $ex)
         {
@@ -99,10 +133,25 @@ class JobSitePlugin extends BaseJobSitePlugin
         $classname = $this->getPluginClassName();
         $this->setPluginClassName($classname);
 
+        if($this->isModified())
+        {
+            $objJobSite = $this->getJobSitePluginObject();
+            if(!empty($objJobSite))
+            {
+                if ($objJobSite->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
+                    if ($objJobSite->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
+                        $this->setResultsFilterType("all-by-location");
+                    else
+                        $this->setResultsFilterType("all-only");
+                }
+            }
+        }
+
     }
 
     public function preSave(\Propel\Runtime\Connection\ConnectionInterface $con = null)
     {
+
         $this->_updateAutoColumns();
         return parent::preSave($con);
     }
