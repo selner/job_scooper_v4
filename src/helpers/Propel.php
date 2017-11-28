@@ -87,7 +87,7 @@ function cleanupSlugPart($slug, $replacement = '-')
     $slug = trim($slug, $replacement);
 
     if (empty($slug)) {
-        return 'n-a';
+        return 'UNKNOWN';
     }
 
     return $slug;
