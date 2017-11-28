@@ -74,7 +74,7 @@
   ],
   "Pagination": {
     "PageLimit": 30,
-    "Type": "next-button",
+    "Type": "NEXT-BUTTON",
     "Selector": "li.next a"
   }
 }

@@ -81,7 +81,7 @@
     }
   ],
   "Pagination": {
-    "Type": "next-button",
+    "Type": "NEXT-BUTTON",
     "Selector": "a.rh-pager__link--arrow",
     "PageLimit": 1500
   }
