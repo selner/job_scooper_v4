@@ -14,7 +14,7 @@
           "Selector": "div.job-search-result-counter",
           "Extract": "REGEX",
           "Pattern": "/.*?of\\s(\\d+)\\s*/",
-          "Callback": "combineTextAllNodes",
+          "Callback": "combineTextAllChildren",
           "Index": 0,
           "Attribute": "collection",
           "Type": "CSS"
