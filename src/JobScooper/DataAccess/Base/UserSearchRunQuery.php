@@ -31,6 +31,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRunQuery orderByRunResultCode($order = Criteria::ASC) Order by the run_result column
  * @method     ChildUserSearchRunQuery orderByRunErrorDetails($order = Criteria::ASC) Order by the run_error_details column
  * @method     ChildUserSearchRunQuery orderByCreatedAt($order = Criteria::ASC) Order by the date_created column
+ * @method     ChildUserSearchRunQuery orderByUpdatedAt($order = Criteria::ASC) Order by the date_updated column
  * @method     ChildUserSearchRunQuery orderByLastRunAt($order = Criteria::ASC) Order by the date_last_run column
  * @method     ChildUserSearchRunQuery orderByStartNextRunAfter($order = Criteria::ASC) Order by the date_next_run column
  * @method     ChildUserSearchRunQuery orderByLastFailedAt($order = Criteria::ASC) Order by the date_last_failed column
@@ -46,6 +47,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRunQuery groupByRunResultCode() Group by the run_result column
  * @method     ChildUserSearchRunQuery groupByRunErrorDetails() Group by the run_error_details column
  * @method     ChildUserSearchRunQuery groupByCreatedAt() Group by the date_created column
+ * @method     ChildUserSearchRunQuery groupByUpdatedAt() Group by the date_updated column
  * @method     ChildUserSearchRunQuery groupByLastRunAt() Group by the date_last_run column
  * @method     ChildUserSearchRunQuery groupByStartNextRunAfter() Group by the date_next_run column
  * @method     ChildUserSearchRunQuery groupByLastFailedAt() Group by the date_last_failed column
@@ -104,6 +106,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRun findOneByRunResultCode(int $run_result) Return the first ChildUserSearchRun filtered by the run_result column
  * @method     ChildUserSearchRun findOneByRunErrorDetails(array $run_error_details) Return the first ChildUserSearchRun filtered by the run_error_details column
  * @method     ChildUserSearchRun findOneByCreatedAt(string $date_created) Return the first ChildUserSearchRun filtered by the date_created column
+ * @method     ChildUserSearchRun findOneByUpdatedAt(string $date_updated) Return the first ChildUserSearchRun filtered by the date_updated column
  * @method     ChildUserSearchRun findOneByLastRunAt(string $date_last_run) Return the first ChildUserSearchRun filtered by the date_last_run column
  * @method     ChildUserSearchRun findOneByStartNextRunAfter(string $date_next_run) Return the first ChildUserSearchRun filtered by the date_next_run column
  * @method     ChildUserSearchRun findOneByLastFailedAt(string $date_last_failed) Return the first ChildUserSearchRun filtered by the date_last_failed column *
@@ -122,6 +125,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRun requireOneByRunResultCode(int $run_result) Return the first ChildUserSearchRun filtered by the run_result column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByRunErrorDetails(array $run_error_details) Return the first ChildUserSearchRun filtered by the run_error_details column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByCreatedAt(string $date_created) Return the first ChildUserSearchRun filtered by the date_created column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchRun requireOneByUpdatedAt(string $date_updated) Return the first ChildUserSearchRun filtered by the date_updated column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByLastRunAt(string $date_last_run) Return the first ChildUserSearchRun filtered by the date_last_run column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByStartNextRunAfter(string $date_next_run) Return the first ChildUserSearchRun filtered by the date_next_run column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchRun requireOneByLastFailedAt(string $date_last_failed) Return the first ChildUserSearchRun filtered by the date_last_failed column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -138,6 +142,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchRun[]|ObjectCollection findByRunResultCode(int $run_result) Return ChildUserSearchRun objects filtered by the run_result column
  * @method     ChildUserSearchRun[]|ObjectCollection findByRunErrorDetails(array $run_error_details) Return ChildUserSearchRun objects filtered by the run_error_details column
  * @method     ChildUserSearchRun[]|ObjectCollection findByCreatedAt(string $date_created) Return ChildUserSearchRun objects filtered by the date_created column
+ * @method     ChildUserSearchRun[]|ObjectCollection findByUpdatedAt(string $date_updated) Return ChildUserSearchRun objects filtered by the date_updated column
  * @method     ChildUserSearchRun[]|ObjectCollection findByLastRunAt(string $date_last_run) Return ChildUserSearchRun objects filtered by the date_last_run column
  * @method     ChildUserSearchRun[]|ObjectCollection findByStartNextRunAfter(string $date_next_run) Return ChildUserSearchRun objects filtered by the date_next_run column
  * @method     ChildUserSearchRun[]|ObjectCollection findByLastFailedAt(string $date_last_failed) Return ChildUserSearchRun objects filtered by the date_last_failed column
@@ -239,7 +244,7 @@ abstract class UserSearchRunQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_search_run_id, search_key, user_slug, geolocation_id, jobsite_key, user_search_run_key, search_parameters_data, last_app_run_id, run_result, run_error_details, date_created, date_last_run, date_next_run, date_last_failed FROM user_search_run WHERE user_search_run_id = :p0';
+        $sql = 'SELECT user_search_run_id, search_key, user_slug, geolocation_id, jobsite_key, user_search_run_key, search_parameters_data, last_app_run_id, run_result, run_error_details, date_created, date_updated, date_last_run, date_next_run, date_last_failed FROM user_search_run WHERE user_search_run_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -721,6 +726,49 @@ abstract class UserSearchRunQuery extends ModelCriteria
     }
 
     /**
+     * Filter the query on the date_updated column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByUpdatedAt('2011-03-14'); // WHERE date_updated = '2011-03-14'
+     * $query->filterByUpdatedAt('now'); // WHERE date_updated = '2011-03-14'
+     * $query->filterByUpdatedAt(array('max' => 'yesterday')); // WHERE date_updated > '2011-03-13'
+     * </code>
+     *
+     * @param     mixed $updatedAt The value to use as filter.
+     *              Values can be integers (unix timestamps), DateTime objects, or strings.
+     *              Empty strings are treated as NULL.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserSearchRunQuery The current query, for fluid interface
+     */
+    public function filterByUpdatedAt($updatedAt = null, $comparison = null)
+    {
+        if (is_array($updatedAt)) {
+            $useMinMax = false;
+            if (isset($updatedAt['min'])) {
+                $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_UPDATED, $updatedAt['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($updatedAt['max'])) {
+                $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_UPDATED, $updatedAt['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_UPDATED, $updatedAt, $comparison);
+    }
+
+    /**
      * Filter the query on the date_last_run column
      *
      * Example usage:
@@ -1195,7 +1243,7 @@ abstract class UserSearchRunQuery extends ModelCriteria
      */
     public function recentlyUpdated($nbDays = 7)
     {
-        return $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_LAST_RUN, time() - $nbDays * 24 * 60 * 60, Criteria::GREATER_EQUAL);
+        return $this->addUsingAlias(UserSearchRunTableMap::COL_DATE_UPDATED, time() - $nbDays * 24 * 60 * 60, Criteria::GREATER_EQUAL);
     }
 
     /**
@@ -1205,7 +1253,7 @@ abstract class UserSearchRunQuery extends ModelCriteria
      */
     public function lastUpdatedFirst()
     {
-        return $this->addDescendingOrderByColumn(UserSearchRunTableMap::COL_DATE_LAST_RUN);
+        return $this->addDescendingOrderByColumn(UserSearchRunTableMap::COL_DATE_UPDATED);
     }
 
     /**
@@ -1215,7 +1263,7 @@ abstract class UserSearchRunQuery extends ModelCriteria
      */
     public function firstUpdatedFirst()
     {
-        return $this->addAscendingOrderByColumn(UserSearchRunTableMap::COL_DATE_LAST_RUN);
+        return $this->addAscendingOrderByColumn(UserSearchRunTableMap::COL_DATE_UPDATED);
     }
 
     /**

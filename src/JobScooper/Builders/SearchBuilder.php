@@ -45,6 +45,9 @@ class SearchBuilder
         $this->_addSearchesForKeywordSets_();
 
         $this->filterSearchesThatShouldNotRunYet();
+
+        $this->orderSearchesByLastRunDate();
+
         //
         // Finally create the instances of user search runs
         // that we will use during the run
@@ -53,9 +56,21 @@ class SearchBuilder
 
     }
 
-    private function getCurrentJobSitePluginsConfig()
+    private function orderSearchesByLastRunDate()
     {
+        if(empty($GLOBALS['USERDATA']['configuration_settings']['searches'])) 
+            return;
+        
+        $arrUserSearches = $GLOBALS['USERDATA']['configuration_settings']['searches'];
+        uasort($arrUserSearches, function($a, $b) {
 
+            if ($a->getLastRunAt() == $b->getLastRunAt()) {
+                return 0;
+            }
+            return ($a->getLastRunAt() < $b->getLastRunAt()) ? -1 : 1;
+        });
+
+        $GLOBALS['USERDATA']['configuration_settings']['searches'] = $arrUserSearches;
     }
 
     private function _addSearchesForKeywordSets_()
@@ -172,7 +187,6 @@ class SearchBuilder
             LogLine("... " . count($searches) . " now remain to be run after filtering out recent search runs.", C__DISPLAY_ITEM_DETAIL__);
             $GLOBALS['USERDATA']['configuration_settings']['searches'] = $searches;
         }
-
     }
 
     private function _filterSearchesByCountry()

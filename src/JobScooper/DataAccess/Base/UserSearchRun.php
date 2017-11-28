@@ -154,6 +154,13 @@ abstract class UserSearchRun implements ActiveRecordInterface
     protected $date_created;
 
     /**
+     * The value for the date_updated field.
+     *
+     * @var        DateTime
+     */
+    protected $date_updated;
+
+    /**
      * The value for the date_last_run field.
      *
      * @var        DateTime
@@ -584,6 +591,26 @@ abstract class UserSearchRun implements ActiveRecordInterface
     }
 
     /**
+     * Get the [optionally formatted] temporal [date_updated] column value.
+     *
+     *
+     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     *                            If format is NULL, then the raw DateTime object will be returned.
+     *
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL
+     *
+     * @throws PropelException - if unable to parse/validate the date/time value.
+     */
+    public function getUpdatedAt($format = NULL)
+    {
+        if ($format === null) {
+            return $this->date_updated;
+        } else {
+            return $this->date_updated instanceof \DateTimeInterface ? $this->date_updated->format($format) : null;
+        }
+    }
+
+    /**
      * Get the [optionally formatted] temporal [date_last_run] column value.
      *
      *
@@ -912,6 +939,26 @@ abstract class UserSearchRun implements ActiveRecordInterface
     } // setCreatedAt()
 
     /**
+     * Sets the value of [date_updated] column to a normalized version of the date/time value specified.
+     *
+     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
+     *               Empty strings are treated as NULL.
+     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
+     */
+    public function setUpdatedAt($v)
+    {
+        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
+        if ($this->date_updated !== null || $dt !== null) {
+            if ($this->date_updated === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->date_updated->format("Y-m-d H:i:s.u")) {
+                $this->date_updated = $dt === null ? null : clone $dt;
+                $this->modifiedColumns[UserSearchRunTableMap::COL_DATE_UPDATED] = true;
+            }
+        } // if either are not null
+
+        return $this;
+    } // setUpdatedAt()
+
+    /**
      * Sets the value of [date_last_run] column to a normalized version of the date/time value specified.
      *
      * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
@@ -1045,13 +1092,16 @@ abstract class UserSearchRun implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : UserSearchRunTableMap::translateFieldName('CreatedAt', TableMap::TYPE_PHPNAME, $indexType)];
             $this->date_created = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : UserSearchRunTableMap::translateFieldName('LastRunAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : UserSearchRunTableMap::translateFieldName('UpdatedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->date_updated = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : UserSearchRunTableMap::translateFieldName('LastRunAt', TableMap::TYPE_PHPNAME, $indexType)];
             $this->date_last_run = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : UserSearchRunTableMap::translateFieldName('StartNextRunAfter', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 13 + $startcol : UserSearchRunTableMap::translateFieldName('StartNextRunAfter', TableMap::TYPE_PHPNAME, $indexType)];
             $this->date_next_run = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 13 + $startcol : UserSearchRunTableMap::translateFieldName('LastFailedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 14 + $startcol : UserSearchRunTableMap::translateFieldName('LastFailedAt', TableMap::TYPE_PHPNAME, $indexType)];
             $this->date_last_failed = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
             $this->resetModified();
 
@@ -1061,7 +1111,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 14; // 14 = UserSearchRunTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 15; // 15 = UserSearchRunTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\UserSearchRun'), 0, $e);
@@ -1221,14 +1271,14 @@ abstract class UserSearchRun implements ActiveRecordInterface
                 if (!$this->isColumnModified(UserSearchRunTableMap::COL_DATE_CREATED)) {
                     $this->setCreatedAt(\Propel\Runtime\Util\PropelDateTime::createHighPrecision());
                 }
-                if (!$this->isColumnModified(UserSearchRunTableMap::COL_DATE_LAST_RUN)) {
-                    $this->setLastRunAt(\Propel\Runtime\Util\PropelDateTime::createHighPrecision());
+                if (!$this->isColumnModified(UserSearchRunTableMap::COL_DATE_UPDATED)) {
+                    $this->setUpdatedAt(\Propel\Runtime\Util\PropelDateTime::createHighPrecision());
                 }
             } else {
                 $ret = $ret && $this->preUpdate($con);
                 // timestampable behavior
-                if ($this->isModified() && !$this->isColumnModified(UserSearchRunTableMap::COL_DATE_LAST_RUN)) {
-                    $this->setLastRunAt(\Propel\Runtime\Util\PropelDateTime::createHighPrecision());
+                if ($this->isModified() && !$this->isColumnModified(UserSearchRunTableMap::COL_DATE_UPDATED)) {
+                    $this->setUpdatedAt(\Propel\Runtime\Util\PropelDateTime::createHighPrecision());
                 }
             }
             if ($ret) {
@@ -1374,6 +1424,9 @@ abstract class UserSearchRun implements ActiveRecordInterface
         if ($this->isColumnModified(UserSearchRunTableMap::COL_DATE_CREATED)) {
             $modifiedColumns[':p' . $index++]  = 'date_created';
         }
+        if ($this->isColumnModified(UserSearchRunTableMap::COL_DATE_UPDATED)) {
+            $modifiedColumns[':p' . $index++]  = 'date_updated';
+        }
         if ($this->isColumnModified(UserSearchRunTableMap::COL_DATE_LAST_RUN)) {
             $modifiedColumns[':p' . $index++]  = 'date_last_run';
         }
@@ -1426,6 +1479,9 @@ abstract class UserSearchRun implements ActiveRecordInterface
                         break;
                     case 'date_created':
                         $stmt->bindValue($identifier, $this->date_created ? $this->date_created->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
+                        break;
+                    case 'date_updated':
+                        $stmt->bindValue($identifier, $this->date_updated ? $this->date_updated->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
                         break;
                     case 'date_last_run':
                         $stmt->bindValue($identifier, $this->date_last_run ? $this->date_last_run->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
@@ -1532,12 +1588,15 @@ abstract class UserSearchRun implements ActiveRecordInterface
                 return $this->getCreatedAt();
                 break;
             case 11:
-                return $this->getLastRunAt();
+                return $this->getUpdatedAt();
                 break;
             case 12:
-                return $this->getStartNextRunAfter();
+                return $this->getLastRunAt();
                 break;
             case 13:
+                return $this->getStartNextRunAfter();
+                break;
+            case 14:
                 return $this->getLastFailedAt();
                 break;
             default:
@@ -1581,9 +1640,10 @@ abstract class UserSearchRun implements ActiveRecordInterface
             $keys[8] => $this->getRunResultCode(),
             $keys[9] => $this->getRunErrorDetails(),
             $keys[10] => $this->getCreatedAt(),
-            $keys[11] => $this->getLastRunAt(),
-            $keys[12] => $this->getStartNextRunAfter(),
-            $keys[13] => $this->getLastFailedAt(),
+            $keys[11] => $this->getUpdatedAt(),
+            $keys[12] => $this->getLastRunAt(),
+            $keys[13] => $this->getStartNextRunAfter(),
+            $keys[14] => $this->getLastFailedAt(),
         );
         if ($result[$keys[10]] instanceof \DateTimeInterface) {
             $result[$keys[10]] = $result[$keys[10]]->format('c');
@@ -1599,6 +1659,10 @@ abstract class UserSearchRun implements ActiveRecordInterface
 
         if ($result[$keys[13]] instanceof \DateTimeInterface) {
             $result[$keys[13]] = $result[$keys[13]]->format('c');
+        }
+
+        if ($result[$keys[14]] instanceof \DateTimeInterface) {
+            $result[$keys[14]] = $result[$keys[14]]->format('c');
         }
 
         $virtualColumns = $this->virtualColumns;
@@ -1728,12 +1792,15 @@ abstract class UserSearchRun implements ActiveRecordInterface
                 $this->setCreatedAt($value);
                 break;
             case 11:
-                $this->setLastRunAt($value);
+                $this->setUpdatedAt($value);
                 break;
             case 12:
-                $this->setStartNextRunAfter($value);
+                $this->setLastRunAt($value);
                 break;
             case 13:
+                $this->setStartNextRunAfter($value);
+                break;
+            case 14:
                 $this->setLastFailedAt($value);
                 break;
         } // switch()
@@ -1796,13 +1863,16 @@ abstract class UserSearchRun implements ActiveRecordInterface
             $this->setCreatedAt($arr[$keys[10]]);
         }
         if (array_key_exists($keys[11], $arr)) {
-            $this->setLastRunAt($arr[$keys[11]]);
+            $this->setUpdatedAt($arr[$keys[11]]);
         }
         if (array_key_exists($keys[12], $arr)) {
-            $this->setStartNextRunAfter($arr[$keys[12]]);
+            $this->setLastRunAt($arr[$keys[12]]);
         }
         if (array_key_exists($keys[13], $arr)) {
-            $this->setLastFailedAt($arr[$keys[13]]);
+            $this->setStartNextRunAfter($arr[$keys[13]]);
+        }
+        if (array_key_exists($keys[14], $arr)) {
+            $this->setLastFailedAt($arr[$keys[14]]);
         }
     }
 
@@ -1877,6 +1947,9 @@ abstract class UserSearchRun implements ActiveRecordInterface
         }
         if ($this->isColumnModified(UserSearchRunTableMap::COL_DATE_CREATED)) {
             $criteria->add(UserSearchRunTableMap::COL_DATE_CREATED, $this->date_created);
+        }
+        if ($this->isColumnModified(UserSearchRunTableMap::COL_DATE_UPDATED)) {
+            $criteria->add(UserSearchRunTableMap::COL_DATE_UPDATED, $this->date_updated);
         }
         if ($this->isColumnModified(UserSearchRunTableMap::COL_DATE_LAST_RUN)) {
             $criteria->add(UserSearchRunTableMap::COL_DATE_LAST_RUN, $this->date_last_run);
@@ -1983,6 +2056,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
         $copyObj->setRunResultCode($this->getRunResultCode());
         $copyObj->setRunErrorDetails($this->getRunErrorDetails());
         $copyObj->setCreatedAt($this->getCreatedAt());
+        $copyObj->setUpdatedAt($this->getUpdatedAt());
         $copyObj->setLastRunAt($this->getLastRunAt());
         $copyObj->setStartNextRunAfter($this->getStartNextRunAfter());
         $copyObj->setLastFailedAt($this->getLastFailedAt());
@@ -2195,6 +2269,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
         $this->run_error_details = null;
         $this->run_error_details_unserialized = null;
         $this->date_created = null;
+        $this->date_updated = null;
         $this->date_last_run = null;
         $this->date_next_run = null;
         $this->date_last_failed = null;
@@ -2401,7 +2476,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
      */
     public function keepUpdateDateUnchanged()
     {
-        $this->modifiedColumns[UserSearchRunTableMap::COL_DATE_LAST_RUN] = true;
+        $this->modifiedColumns[UserSearchRunTableMap::COL_DATE_UPDATED] = true;
 
         return $this;
     }

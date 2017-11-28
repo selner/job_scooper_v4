@@ -711,6 +711,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
         $this->_setStartingUrlForSearch_($searchDetails);
 
+        $searchDetails->setLastRunAt(time());
         $searchDetails->save();
 
         //

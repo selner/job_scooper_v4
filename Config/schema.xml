@@ -257,11 +257,12 @@
         </foreign-key>
 
         <column name="date_created" phpName="CreatedAt" type="timestamp"/>
-        <column name="date_last_run" phpName="LastRunAt" type="timestamp"/>
+        <column name="date_updated" phpName="UpdatedAt" type="timestamp"/>
         <behavior name="timestampable">
             <parameter name="create_column" value="date_created"/>
-            <parameter name="update_column" value="date_last_run"/>
+            <parameter name="update_column" value="date_updated"/>
         </behavior>
+        <column name="date_last_run" phpName="LastRunAt" type="timestamp"/>
         <column name="date_next_run" phpName="StartNextRunAfter" type="timestamp"/>
         <column name="date_last_failed" phpName="LastFailedAt" type="timestamp"/>
     </table>
