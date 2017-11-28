@@ -15,7 +15,7 @@
  * under the License.
  */
 
-namespace JobScooper\StageProcessor;
+namespace JobScooper\Builders;
 
 
 use JobScooper\DataAccess\UserSearchRun;
@@ -39,7 +39,6 @@ class SearchBuilder
             return;
         }
 
-
         //
         // Create searches needed to run all the keyword sets
         //
@@ -51,6 +50,11 @@ class SearchBuilder
         // that we will use during the run
         //
         $this->_createSearchInstancesForRun();
+
+    }
+
+    private function getCurrentJobSitePluginsConfig()
+    {
 
     }
 

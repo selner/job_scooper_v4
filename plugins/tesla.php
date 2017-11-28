@@ -17,7 +17,7 @@
  */
 
 
-class PluginTesla extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
+class PluginTesla extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
 {
     protected $JobSiteName = 'Tesla';
     protected $JobPostingBaseUrl = 'http://www.tesla.com/careers';

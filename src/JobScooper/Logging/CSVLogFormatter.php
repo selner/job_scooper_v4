@@ -6,7 +6,7 @@
  * Time: 11:01 AM
  */
 
-namespace JobScooper\Manager;
+namespace JobScooper\Logging;
 
 /**
  * Formats incoming records into a one-line string optimized for CSV file usage

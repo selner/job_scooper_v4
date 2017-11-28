@@ -20,7 +20,7 @@ namespace JobScooper\StageProcessor;
 
 
 //Import PHPMailer classes into the global namespace
-use JobScooper\Manager\JobsMailManager;
+use JobScooper\Utils\JobsMailSender;
 use JobScooper\Utils\SimpleCSV;
 use JobScooper\DataAccess\JobPosting as JobPosting;
 use PHPExcel;
@@ -34,7 +34,7 @@ use Propel\Runtime\Collection\ArrayCollection;
 use Propel\Runtime\Collection\Collection;
 use Propel\Runtime\Parser\AbstractParser;
 
-class NotifierJobAlerts extends JobsMailManager
+class NotifierJobAlerts extends JobsMailSender
 {
     protected $JobSiteName = "NotifierJobAlerts";
     protected $arrAllUnnotifiedJobs = array();
@@ -566,13 +566,13 @@ class NotifierJobAlerts extends JobsMailManager
             $strOut .= PHP_EOL;
         }
 
-        if($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] != null && count($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']) > 0)
-        {
-            sort($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']);
-            $strExcluded = getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'], ", ", "Sites excluded by user or settings: ", false);
-            $strOut .= $strExcluded;
-        }
-
+//        if($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] != null && count($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']) > 0)
+//        {
+//            sort($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']);
+//            $strExcluded = getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'], ", ", "Sites excluded by user or settings: ", false);
+//            $strOut .= $strExcluded;
+//        }
+//
 
         return $strOut;
     }

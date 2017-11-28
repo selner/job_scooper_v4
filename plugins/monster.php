@@ -17,7 +17,7 @@
      */
 
 
-class PluginMonster extends \JobScooper\Plugins\lib\ServerHtmlSimplePlugin
+class PluginMonster extends \JobScooper\Plugins\Classes\ServerHtmlSimplePlugin
 {
     protected $JobSiteName = 'Monster';
     protected $JobPostingBaseUrl = 'http://www.monster.com';

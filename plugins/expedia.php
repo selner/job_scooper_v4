@@ -20,7 +20,7 @@
 //.// http://expediajobs.findly.com/candidate/job_search/advanced/results?job_type=5517&state=2336&country=5492&sort=date
 
 
-class PluginExpedia extends \JobScooper\Plugins\lib\AjaxHtmlPlugin
+class PluginExpedia extends \JobScooper\Plugins\Classes\AjaxHtmlPlugin
 {
     protected $JobSiteName = 'Expedia';
     protected $JobPostingBaseUrl = 'https://expedia.wd5.myworkdayjobs.com/search/jobs/';

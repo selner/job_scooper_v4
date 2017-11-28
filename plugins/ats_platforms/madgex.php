@@ -17,7 +17,7 @@
  */
 use JobScooper\DataAccess\UserSearchRun;
 
-abstract class AbstractMadgexATS extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
+abstract class AbstractMadgexATS extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
 {
 
     function __construct()

@@ -15,6 +15,7 @@ use Geocoder\HttpAdapter\CurlHttpAdapter;
 use \Exception;
 use Geocoder\Result\ResultInterface;
 use JBZoo\Utils\Http;
+use JobScooper\Logging\CSVLogHandler;
 use JobScooper\Utils\GoogleGeocoderHttpAdapter;
 
 use Monolog\Logger;

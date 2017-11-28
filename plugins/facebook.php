@@ -18,7 +18,7 @@
 
 
 
-class PluginFacebook extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
+class PluginFacebook extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
 {
     protected $JobSiteName = 'Facebook';
     protected $JobPostingBaseUrl = 'https://www.facebook.com/careers/';

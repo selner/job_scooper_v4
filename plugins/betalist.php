@@ -18,7 +18,7 @@
 
 
 
-class PluginBetalist extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
+class PluginBetalist extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
 {
     protected $JobSiteName = 'Betalist';
     protected $JobPostingBaseUrl = "https://betalist.com";

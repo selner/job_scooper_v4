@@ -35,7 +35,7 @@ class PluginEntercom extends AbstractTaleoATS
     );
 }
 
-class AbstractTaleoATS extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
+class AbstractTaleoATS extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
 {
     protected $use1ToTDForCount = True;
     protected $JobListingsPerPage = 100;
@@ -96,7 +96,7 @@ class PluginPorch extends AbstractTaleo
 }
 
 
-abstract class AbstractTaleo extends \JobScooper\Plugins\lib\ServerHtmlPlugin
+abstract class AbstractTaleo extends \JobScooper\Plugins\Classes\ServerHtmlPlugin
 {
     protected $use1ToTDForCount = False;
     protected $taleoOrgID = null;

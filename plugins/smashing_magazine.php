@@ -17,7 +17,7 @@
  */
 
 
-class PluginSmashingMagazine extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
+class PluginSmashingMagazine extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
 {
     protected $JobSiteName = 'SmashingMagazine';
     protected $childSiteURLBase = 'http://jobs.smashingmagazine.com';

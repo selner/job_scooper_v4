@@ -14,13 +14,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-namespace JobScooper\Manager;
+namespace JobScooper\Logging;
 
 
+use JobScooper\Utils\JobsMailSender;
 use Monolog\Formatter\HtmlFormatter;
 use Monolog\Handler\MailHandler;
 
-class ErrorEmailHandler extends MailHandler
+class ErrorEmailLogHandler extends MailHandler
 {
     /**
      * {@inheritdoc}
@@ -43,7 +44,7 @@ class ErrorEmailHandler extends MailHandler
 
         $htmlBody = $renderer($data);
 
-        $mailer = new JobsMailManager(true);
+        $mailer = new JobsMailSender(true);
         return $mailer->sendEmail("", $htmlBody, null, $subject, "error");
 
     }

@@ -17,11 +17,11 @@
 */
 
 
-use const JobScooper\Plugins\lib\VALUE_NOT_SUPPORTED;
-use const \JobScooper\Plugins\lib\BASE_URL_TAG_KEYWORDS;
-use const \JobScooper\Plugins\lib\BASE_URL_TAG_LOCATION;
+use const JobScooper\Plugins\Classes\VALUE_NOT_SUPPORTED;
+use const \JobScooper\Plugins\Classes\BASE_URL_TAG_KEYWORDS;
+use const \JobScooper\Plugins\Classes\BASE_URL_TAG_LOCATION;
 
-class PluginSimplyHired extends \JobScooper\Plugins\lib\ServerHtmlPlugin
+class PluginSimplyHired extends \JobScooper\Plugins\Classes\ServerHtmlPlugin
 {
     protected $JobPostingBaseUrl = 'http://www.simplyhired.com';
     protected $JobSiteName = 'SimplyHired';

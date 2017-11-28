@@ -17,7 +17,7 @@
 
 
 
-class PluginCraigslist extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
+class PluginCraigslist extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
 {
     protected $JobSiteName = 'Craigslist';
     protected $JobListingsPerPage = 120;

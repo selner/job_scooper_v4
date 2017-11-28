@@ -14,14 +14,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-namespace JobScooper\Manager;
+namespace JobScooper\Utils;
 
 //Import PHPMailer classes into the global namespace
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use InvalidArgumentException;
 
-class JobsMailManager
+class JobsMailSender
 {
     private $alwaysNotify = false;
 

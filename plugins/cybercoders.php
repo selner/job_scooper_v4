@@ -17,7 +17,7 @@
  */
 
 
-class PluginCyberCoders extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
+class PluginCyberCoders extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
 {
     protected $JobSiteName = 'CyberCoders';
     protected $JobPostingBaseUrl = "https://www.cybercoders.com";

@@ -15,7 +15,7 @@
  * under the License.
  */
 
-namespace JobScooper\Plugins\lib;
+namespace JobScooper\Plugins\Classes;
 
 class SimplePlugin extends BaseJobsSite
 {

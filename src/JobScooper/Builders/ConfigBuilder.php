@@ -14,11 +14,13 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-namespace JobScooper\Manager;
+namespace JobScooper\Builders;
 
 
 
-use const JobScooper\Plugins\lib\VALUE_NOT_SUPPORTED;
+use JobScooper\Manager\GeoLocationManager;
+use JobScooper\Manager\LoggingManager;
+use const JobScooper\Plugins\Classes\VALUE_NOT_SUPPORTED;
 use JobScooper\Utils\SimpleCSV;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
@@ -169,7 +171,7 @@ class ConfigBuilder
 
         if ($GLOBALS['USERDATA']['OPTS']['use_config_ini_given']) {
             if (!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new LoggingManager($this->arrFileDetails['config_ini']['directory']);
-            LogLine("Log file for run being written to: " . $this->arrFileDetails['config_ini']['directory'], \C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Logging file for run being written to: " . $this->arrFileDetails['config_ini']['directory'], \C__DISPLAY_ITEM_DETAIL__);
 
             LogLine("Loading configuration file details from " . $this->arrFileDetails['config_ini']['full_file_path'], \C__DISPLAY_ITEM_DETAIL__);
 

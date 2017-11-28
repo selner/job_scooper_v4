@@ -18,7 +18,8 @@ namespace JobScooper\Manager;
 
 use JobScooper\StageProcessor\JobsAutoMarker;
 use JobScooper\StageProcessor\NotifierJobAlerts;
-use JobScooper\StageProcessor\SearchBuilder;
+use JobScooper\Builders\ConfigBuilder;
+use JobScooper\Builders\SearchBuilder;
 
 
 const JOBLIST_TYPE_UNFILTERED = "unfiltered";

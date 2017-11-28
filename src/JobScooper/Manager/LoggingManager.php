@@ -16,6 +16,8 @@
  */
 namespace JobScooper\Manager;
 
+use JobScooper\Logging\CSVLogHandler;
+use JobScooper\Logging\ErrorEmailLogHandler;
 use Monolog\ErrorHandler;
 use Monolog\Handler\DeduplicationHandler;
 use Propel\Runtime\Propel;
@@ -132,7 +134,7 @@ Class LoggingManager extends \Monolog\Logger
         $now = getNowAsString("-");
         $dedupeLog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}-dedupe_log_errors.csv";
         $this->_dedupeHandle = fopen($dedupeLog, "w");
-        $this->_handlersByType['dedupe_email'] = new DeduplicationHandler(new ErrorEmailHandler(Logger::ERROR, true),  $deduplicationStore = $dedupeLog, $deduplicationLevel = Logger::ERROR, $time = 60, $bubble = true);
+        $this->_handlersByType['dedupe_email'] = new DeduplicationHandler(new ErrorEmailLogHandler(Logger::ERROR, true),  $deduplicationStore = $dedupeLog, $deduplicationLevel = Logger::ERROR, $time = 60, $bubble = true);
         $this->pushHandler($this->_handlersByType['dedupe_email']);
         $this->logLine("Error logging started for deduped email log file at {$dedupeLog}", C__DISPLAY_ITEM_DETAIL__);
 

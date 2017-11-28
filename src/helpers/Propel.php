@@ -335,8 +335,15 @@ function findOrCreateJobSitePlugin($jobsiteKey)
     if(empty($GLOBALS['JOBSITE_PLUGINS']))
         $GLOBALS['JOBSITE_PLUGINS'] = array();
 
-    if (!array_key_exists($slug, $GLOBALS['JOBSITE_PLUGINS'])) {
-        $GLOBALS['JOBSITE_PLUGINS'][$slug] = array('name' => $jobsiteKey, 'class_name' => getJobSitePluginClassName($slug), 'jobsite_db_object' => null, 'include_in_run' => false, 'other_settings' => []);
+    if (!array_key_exists($slug, $GLOBALS['JOBSITE_PLUGINS']))
+    {
+        $GLOBALS['JOBSITE_PLUGINS'][$slug] = array(
+            'name' => $jobsiteKey,
+            'class_name' => getJobSitePluginClassName($slug),
+            'jobsite_db_object' => null,
+            'include_in_run' => false,
+            'other_settings' => []
+        );
     }
 
     if (is_null($GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object']))

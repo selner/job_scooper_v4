@@ -22,7 +22,7 @@ abstract class AbstractAlternateAdicioCareerCast extends AbstractAdicioCareerCas
     protected $JobListingsPerPage = 20;
 }
 
-abstract class AbstractAdicioCareerCast extends \JobScooper\Plugins\lib\AjaxHtmlSimplePlugin
+abstract class AbstractAdicioCareerCast extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
 {
     protected $JobSiteName = '';
     protected $JobPostingBaseUrl = '';

@@ -15,18 +15,19 @@
  * under the License.
  */
 
-namespace JobScooper\Plugins\lib;
+namespace JobScooper\Plugins\Classes;
 
 
 
-abstract class AjaxHtmlSimplePlugin extends SimplePlugin
+abstract class ServerHtmlPlugin extends BaseJobsSite
 {
-    protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__;
-
-    function __construct()
+    function __construct($strBaseDir = null)
     {
-        $this->additionalBitFlags[] = C__JOB_USE_SELENIUM;
+        $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
+
         parent::__construct();
 
     }
+
 }
+
