@@ -220,7 +220,7 @@ function addUserOptionForSitePlugins()
 
     foreach($GLOBALS['JOBSITE_PLUGINS'] as $site)
     {
-        $sitename = strtolower($site['name']);
+        $sitename = strtolower($site['jobsitekey']);
         $strIncludeKey = 'include_'.$sitename;
 
         $GLOBALS['OPTS_SETTINGS'][$strIncludeKey ] = array(

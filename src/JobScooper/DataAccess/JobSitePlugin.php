@@ -19,6 +19,7 @@ namespace JobScooper\DataAccess;
 
 use \Exception;
 use JobScooper\DataAccess\Base\JobSitePlugin as BaseJobSitePlugin;
+use JobScooper\DataAccess\Map\JobSitePluginTableMap;
 
 /**
  * Skeleton subclass for representing a row from the 'jobsite_plugin' table.
@@ -117,6 +118,16 @@ class JobSitePlugin extends BaseJobSitePlugin
 
         try {
             $class = $this->getPluginClassName();
+            if (!in_array($class, get_declared_classes()))
+            {
+                LogError("Error instantiating jobsite plugin object" . $this->getJobSiteKey() . " with class name [" . $this->getPluginClassName() ."]:  Class not found.");
+                $this->setLastRunWasSuccessful(false);
+                $this->setLastFailedAt(time());
+                $this->setLastRunAt(time());
+                $this->_updateAutoColumns();
+                return null;
+            }
+
             $this->_pluginObject = new $class();
 
             $this->setSupportedCountryCodes($this->_pluginObject->getSupportedCountryCodes());
@@ -124,16 +135,30 @@ class JobSitePlugin extends BaseJobSitePlugin
         }
         catch (\Exception $ex)
         {
-            handleException($ex, "Error instantiating jobsite plugin object" . $this->getJobSiteKey() . " with class name [" . $this->getPluginClassName() ."]:  %s");
+            handleException($ex, "Error instantiating jobsite plugin object" . $this->getJobSiteKey() . " with class name [" . $this->getPluginClassName() ."]:  %s", false);
         }
+    }
+
+    function setPluginClassName($v)
+    {
+        if(empty($this->getDisplayName()))
+        {
+            $class = $v;
+            $name = str_replace("Plugin", "", $v);
+            $this->setDisplayName($name);
+        }
+        return parent::setPluginClassName($v);
     }
 
     private function _updateAutoColumns()
     {
-        $classname = $this->getPluginClassName();
-        $this->setPluginClassName($classname);
+        if (empty(parent::getPluginClassName())) {
+            $classname = $this->getPluginClassName();
+            $this->setPluginClassName($classname);
+        }
 
-        if($this->isModified())
+        if($this->isModified() && $this->isColumnModified(JobSitePluginTableMap::COL_WAS_SUCCESSFUL) &&
+            $this->isLastRunWasSuccessful() == true)
         {
             $objJobSite = $this->getJobSitePluginObject();
             if(!empty($objJobSite))

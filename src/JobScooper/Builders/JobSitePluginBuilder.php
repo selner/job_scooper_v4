@@ -65,14 +65,13 @@ class JobSitePluginBuilder
         foreach ($dbPluginList as $dbPlugin)
         {
             $GLOBALS['JOBSITE_PLUGINS'][$dbPlugin->getJobSiteKey()] = array(
-                'name' => $dbPlugin->getJobSiteKey(),
-                'class_name' => $dbPlugin->get,
+                'display_name' => $dbPlugin->getDisplayName(),
+                'jobsitekey' => $dbPlugin->getJobSiteKey(),
+                'class_name' => $dbPlugin->getPluginClassName(),
                 'jobsite_db_object' => $dbPlugin,
                 'include_in_run' => false,
                 'other_settings' => []
             );
-
-
         }
 
         LogLine('Generating classes for ' . count($this->_jsonPluginSetups) .' JSON-loaded plugins...', C__DISPLAY_ITEM_DETAIL__);
@@ -98,14 +97,14 @@ class JobSitePluginBuilder
             }
         }
 
-        $classListBySite = getAllPluginClasses();
-        foreach(array_keys($classListBySite) as $nameKey)
+        $classListBySite = getAllPluginClassesByJobSiteKey();
+        foreach(array_keys($classListBySite) as $jobsiteKey)
         {
-            findOrCreateJobSitePlugin($nameKey);
+            findOrCreateJobSitePlugin($jobsiteKey);
         }
 
 
-        LogLine("Added " . count($GLOBALS['JOBSITE_PLUGINS']) ." plugins: " . getArrayValuesAsString(array_column($GLOBALS['JOBSITE_PLUGINS'], "name"), ", ", null, false). ".", C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Added " . count($GLOBALS['JOBSITE_PLUGINS']) ." plugins: " . getArrayValuesAsString(array_column($GLOBALS['JOBSITE_PLUGINS'], "jobsitekey"), ", ", null, false). ".", C__DISPLAY_ITEM_DETAIL__);
     }
 
     

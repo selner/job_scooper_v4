@@ -151,8 +151,8 @@ class ConfigBuilder
         // Now go see what we got back for each of the sites
         //
         foreach ($GLOBALS['JOBSITE_PLUGINS'] as $site) {
-            assert(isset($site['name']));
-            $GLOBALS['JOBSITE_PLUGINS'][$site['name']]['include_in_run'] = is_OptionIncludedSite($site['name']);
+            assert(isset($site['jobsitekey']));
+            $GLOBALS['JOBSITE_PLUGINS'][$site['jobsitekey']]['include_in_run'] = is_OptionIncludedSite($site['jobsitekey']);
         }
         $includedsites = array_filter($GLOBALS['JOBSITE_PLUGINS'], function ($k) {
             return $k['include_in_run'];
@@ -165,12 +165,12 @@ class ConfigBuilder
         foreach (array_keys($includedsites) as $k)
             $keys[] = strtolower($k);
 
-        $GLOBALS['USERDATA']['configuration_settings']['included_sites'] = array_combine($keys, array_column($includedsites, 'name'));
+        $GLOBALS['USERDATA']['configuration_settings']['included_sites'] = array_combine($keys, array_column($includedsites, 'jobsitekey'));
         $keys = array();
         foreach (array_keys($excludedsites) as $k)
             $keys[] = strtolower($k);
 
-        $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] = array_combine($keys, array_column($excludedsites, 'name'));
+        $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] = array_combine($keys, array_column($excludedsites, 'jobsitekey'));
         $GLOBALS['USERDATA']['configuration_settings']['country_codes'] = array();
 
         

@@ -304,7 +304,7 @@ function findOrCreateUser($value)
     return $user;
 }
 
-function getAllPluginClasses()
+function getAllPluginClassesByJobSiteKey()
 {
     $classList = get_declared_classes();
     sort($classList);
@@ -335,7 +335,7 @@ function getJobSitePluginClassName($jobsiteKey)
 
     if(empty($plugin_classname))
     {
-        $classes = getAllPluginClasses();
+        $classes = getAllPluginClassesByJobSiteKey();
         if(array_key_exists($jobsiteKey, $classes))
             $plugin_classname = $classes[$jobsiteKey];
     }
@@ -347,29 +347,62 @@ function getJobSitePluginClassName($jobsiteKey)
 
 function findOrCreateJobSitePlugin($jobsiteKey)
 {
-    $slug = cleanupSlugPart($jobsiteKey);
-
-    if (!array_key_exists($slug, $GLOBALS['JOBSITE_PLUGINS']))
+    if (!array_key_exists($jobsiteKey, $GLOBALS['JOBSITE_PLUGINS']))
     {
-        $GLOBALS['JOBSITE_PLUGINS'][$slug] = array(
-            'name' => $jobsiteKey,
-            'class_name' => getJobSitePluginClassName($slug),
+        $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey] = array(
+            'display_name' => null,
+            'jobsitekey' => $jobsiteKey,
+            'class_name' => getJobSitePluginClassName($jobsiteKey),
             'jobsite_db_object' => null,
             'include_in_run' => false,
             'other_settings' => []
         );
     }
 
-    if (empty($GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object']))
+
+    if (empty($GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['jobsite_db_object']))
     {
         $dbPlugin = \JobScooper\DataAccess\JobSitePluginQuery::create()
-            ->filterByPrimaryKey($slug)
+            ->filterByPrimaryKey($jobsiteKey)
             ->findOneOrCreate();
 
-        $GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object'] = $dbPlugin;
+        $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['jobsite_db_object'] = $dbPlugin;
+        $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['display_name'] = $dbPlugin->getDisplayName();
+
     }
 
-    return $GLOBALS['JOBSITE_PLUGINS'][$slug]['jobsite_db_object'];
+
+    // make sure we can instantiate the class object for the plugin
+    $class = $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['class_name'];
+    try
+    {
+        if(empty($class))
+            throw new Exception("No class found for " . $jobsiteKey);
+
+        $dbrec = $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['jobsite_db_object'];
+        if(!empty($dbrec))
+            $dbrec->setPluginClassName($class);
+
+        $obj = new $class();
+    }
+    catch (Exception $ex)
+    {
+        handleException($ex, "Unable to instantiate expected Job Site plugin class for " . $jobsiteKey . ":  %s", false);
+        setSiteAsExcluded($jobsiteKey);
+        $dbrec = $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['jobsite_db_object'];
+        if(!empty($dbrec))
+        {
+            $dbrec->setLastFailedAt(time());
+            $dbrec->setLastRunWasSuccessful(false);
+        }
+        return null;
+    }
+    finally {
+        if(!empty($dbrec))
+            $dbrec->save();
+
+    }
+    return $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['jobsite_db_object'];
 }
 
 function getPluginObjectForJobSite($jobsite)

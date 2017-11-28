@@ -93,6 +93,9 @@ class SearchBuilder
                     {
                         LogLine("... configuring searches for " . $keywordSet['key'] . " keyword set on " . $siteToSearch, \C__DISPLAY_ITEM_DETAIL__);
                         $plugin = getPluginObjectForJobSite($siteToSearch);
+                        if(empty($plugin))
+                            throw new \Exception("Unable to get plugin object for " . $siteToSearch);
+
                         $searchKey = cleanupSlugPart($keywordSet['key']);
                         if ($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
                             $searchKey = "alljobs";
@@ -194,13 +197,16 @@ class SearchBuilder
         if (isset($GLOBALS['USERDATA']['configuration_settings']['included_sites']) && count($GLOBALS['USERDATA']['configuration_settings']['included_sites']) > 0) {
             foreach ($GLOBALS['USERDATA']['configuration_settings']['included_sites'] as $siteToSearch) {
                 $plugin = getPluginObjectForJobSite($siteToSearch);
-                $pluginCountries = $plugin->getSupportedCountryCodes();
-                if (!is_null($pluginCountries)) {
-                    $matchedCountries = array_intersect($pluginCountries, $GLOBALS['USERDATA']['configuration_settings']['country_codes']);
-                    if ($matchedCountries === false || count($matchedCountries) == 0) {
-                        LogDebug("Excluding " . $siteToSearch . " because it does not support any of the country codes required for the user's searches (" . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['country_codes']));
-                        setSiteAsExcluded($siteToSearch);
-                        continue;
+                if(!empty($plugin))
+                {
+                    $pluginCountries = $plugin->getSupportedCountryCodes();
+                    if (!is_null($pluginCountries)) {
+                        $matchedCountries = array_intersect($pluginCountries, $GLOBALS['USERDATA']['configuration_settings']['country_codes']);
+                        if ($matchedCountries === false || count($matchedCountries) == 0) {
+                            LogDebug("Excluding " . $siteToSearch . " because it does not support any of the country codes required for the user's searches (" . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['country_codes']));
+                            setSiteAsExcluded($siteToSearch);
+                            continue;
+                        }
                     }
                 }
             }
@@ -223,6 +229,8 @@ class SearchBuilder
 
 
         $plugin = getPluginObjectForJobSite($search->getJobSiteKey());
+        if(empty($plugin))
+            throw new \Exception("Unable to get plugin object for " . $search->getUserSearchRunKey());
         $locTypeNeeded = $plugin->getGeoLocationSettingType($arrSearchLocation['location']);
         if (!is_null($locTypeNeeded)) {
 

@@ -39,15 +39,17 @@ abstract class BaseJobsSite implements IJobSitePlugin
             $classname = get_class($this);
             if (preg_match('/^Plugin(\w+)/', $classname, $matches) > 0) {
                 $this->JobSiteName = $matches[1];
+
             }
         }
 
-       if (array_key_exists("JOBSITE_PLUGINS", $GLOBALS) && (array_key_exists(strtolower($this->JobSiteName), $GLOBALS['JOBSITE_PLUGINS']))) {
-            $plugin = $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->JobSiteName)];
-            if (array_key_exists("other_settings", $plugin) && is_array($plugin['other_settings'])) {
-                $keys = array_keys($plugin['other_settings']);
+        $jobsitekey = cleanupSlugPart($this->JobSiteName);
+        if (array_key_exists("JOBSITE_PLUGINS", $GLOBALS) && (array_key_exists($jobsitekey, $GLOBALS['JOBSITE_PLUGINS']))) {
+            $pluginData = $GLOBALS['JOBSITE_PLUGINS'][$jobsitekey];
+            if (array_key_exists("other_settings", $pluginData) && is_array($pluginData['other_settings'])) {
+                $keys = array_keys($pluginData['other_settings']);
                 foreach ($keys as $attrib_name) {
-                    $this->$attrib_name = $plugin['other_settings'][$attrib_name];
+                    $this->$attrib_name = $pluginData['other_settings'][$attrib_name];
                 }
             }
         }
@@ -92,7 +94,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     public function getJobSiteObject()
     {
-        return $GLOBALS['JOBSITE_PLUGINS'][strtolower($this->JobSiteName)]['jobsite_db_object'];
+        return $GLOBALS['JOBSITE_PLUGINS'][cleanupSlugPart($this->JobSiteName)]['jobsite_db_object'];
     }
 
     //************************************************************************

@@ -132,15 +132,19 @@ class StageManager
                 foreach(array_keys($arrSearchesToRunBySite) as $sitename)
                 {
                     $searches = $arrSearchesToRunBySite[$sitename];
+                    $plugin = null;
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     //
                     // Add the user's searches to the plugin
                     //
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     LogLine("Setting up " . count($searches) . " search(es) for ". $sitename . "...", \C__DISPLAY_SECTION_START__);
-                    $plugin = getPluginObjectForJobSite($sitename);
                     try
                     {
+                        $plugin = getPluginObjectForJobSite($sitename);
+                        if(empty($plugin))
+                            throw new \Exception("Unable to get plugin object for " . $sitename);
+
                         $plugin->addSearches($searches);
                     }
                     catch (\Exception $classError)
