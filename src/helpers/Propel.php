@@ -381,13 +381,13 @@ function findOrCreateJobSitePlugin($jobsiteKey)
 
         $dbrec = $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['jobsite_db_object'];
         if(!empty($dbrec))
-            $dbrec->setPluginClassName($class);
-
-        $obj = new $class();
+        {
+            $dbrec->instantiateJobSiteClass();
+        }
     }
     catch (Exception $ex)
     {
-        handleException($ex, "Unable to instantiate expected Job Site plugin class for " . $jobsiteKey . ":  %s", false);
+        LogError("Unable to instantiate expected Job Site plugin class for " . $jobsiteKey . ":  " . $ex->getMessage());
         setSiteAsExcluded($jobsiteKey);
         $dbrec = $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['jobsite_db_object'];
         if(!empty($dbrec))
@@ -398,6 +398,7 @@ function findOrCreateJobSitePlugin($jobsiteKey)
         return null;
     }
     finally {
+        $dbrec = $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['jobsite_db_object'];
         if(!empty($dbrec))
             $dbrec->save();
 

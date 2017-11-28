@@ -65,7 +65,7 @@ class JobSitePlugin extends BaseJobSitePlugin
         {
             try
             {
-                $this->_instantiateJobSiteClass();
+                $this->instantiateJobSiteClass();
             }
             catch (Exception $ex)
             {
@@ -111,7 +111,7 @@ class JobSitePlugin extends BaseJobSitePlugin
     }
 
 
-    private function _instantiateJobSiteClass()
+    function instantiateJobSiteClass()
     {
         if (is_null($this->getPluginClassName()))
             throw new \Exception("Missing jobsite plugin class name for " . $this->getJobSiteKey());
@@ -120,12 +120,12 @@ class JobSitePlugin extends BaseJobSitePlugin
             $class = $this->getPluginClassName();
             if (!in_array($class, get_declared_classes()))
             {
-                LogError("Error instantiating jobsite plugin object" . $this->getJobSiteKey() . " with class name [" . $this->getPluginClassName() ."]:  Class not found.");
+                LogError("Unable to find declared class " . $this->getPluginClassName() ."] for plugin " . $this->getJobSiteKey());
                 $this->setLastRunWasSuccessful(false);
                 $this->setLastFailedAt(time());
                 $this->setLastRunAt(time());
                 $this->_updateAutoColumns();
-                return null;
+                $this->_pluginObject = null;
             }
 
             $this->_pluginObject = new $class();
@@ -135,7 +135,8 @@ class JobSitePlugin extends BaseJobSitePlugin
         }
         catch (\Exception $ex)
         {
-            handleException($ex, "Error instantiating jobsite plugin object" . $this->getJobSiteKey() . " with class name [" . $this->getPluginClassName() ."]:  %s", false);
+            LogError("Error instantiating jobsite plugin object" . $this->getJobSiteKey() . " with class name [" . $this->getPluginClassName() ."]:  ". $ex->getMessage());
+            $this->_pluginObject = null;
         }
     }
 

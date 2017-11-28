@@ -101,6 +101,8 @@ class ConfigBuilder
     {
         $GLOBALS['USERDATA'] = array();
         $GLOBALS['USERDATA']['configuration_settings'] = array();
+        $GLOBALS['USERDATA']['configuration_settings']['included_sites'] = array();
+        $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] = array();
 
         // Do a quick & dirty arg parse so that we can pull out the debug fact right away
         //
@@ -165,7 +167,8 @@ class ConfigBuilder
         foreach (array_keys($includedsites) as $k)
             $keys[] = strtolower($k);
 
-        $GLOBALS['USERDATA']['configuration_settings']['included_sites'] = array_combine($keys, array_column($includedsites, 'jobsitekey'));
+        if(!empty($includedsites))
+            $GLOBALS['USERDATA']['configuration_settings']['included_sites'] = array_combine($keys, array_column($includedsites, 'jobsitekey'));
         $keys = array();
         foreach (array_keys($excludedsites) as $k)
             $keys[] = strtolower($k);
