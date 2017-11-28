@@ -71,8 +71,8 @@ class LocationManager
         }
 
         $curl = new GoogleGeocoderHttpAdapter();
-        $this->geocoder = new Geocoder();
-        $this->geocoder->registerProviders(array(
+        $this->_geocoder = new Geocoder();
+        $this->_geocoder->registerProviders(array(
             new GoogleMapsLoggedProvider(
                 $adapter=$curl,
                 $locale="en",
