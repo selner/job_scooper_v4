@@ -99,13 +99,36 @@ class ConfigBuilder
 
     function initialize()
     {
+        $GLOBALS['USERDATA'] = array();
+        $GLOBALS['USERDATA']['configuration_settings'] = array();
+
+        // Do a quick & dirty arg parse so that we can pull out the debug fact right away
+        //
+        global $argv;
+
+        # now do the actual option parsing
+        # cheaply parse the args into $key => $val
+        $arg_string = trim(implode($argv, ' '));
+        $arg_string = preg_replace(array('/\s--/', '/\s-/'), ' ||||', $arg_string);
+        $args       = explode('||||', $arg_string);
+        unset($args[0]);
+        $argPairs = array();
+        foreach($args as $arg)
+        {
+            $pair = preg_split("/[\s=]/", $arg);
+            $argPairs[strtolower($pair[0])] = (empty($pair[1]) ? 1 : $pair[1]);
+        }
+
+        if(array_key_exists("debug", $argPairs))
+            $GLOBALS['USERDATA']['configuration_settings']["debug"] = filter_var($argPairs['debug'], FILTER_VALIDATE_BOOLEAN);
+
+
 
         $envDirOut = getenv('JOBSCOOPER_OUTPUT');
         if(is_null($envDirOut) || strlen($envDirOut) == 0)
             $envDirOut = sys_get_temp_dir();
         $outputDirectoryDetails = getFilePathDetailsFromString($envDirOut, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
 
-        $GLOBALS['USERDATA'] = array();
         $rootdir = realpath(dirname(dirname(dirname(dirname(__FILE__)))));
 
         __initializeArgs__($rootdir);
@@ -119,7 +142,6 @@ class ConfigBuilder
         LogDebug("Setting up application... ", \C__DISPLAY_SECTION_START__);
 
         $GLOBALS['USERDATA']['companies_regex_to_filter'] = null;
-        $GLOBALS['USERDATA']['configuration_settings'] = array();
 
         $now = new \DateTime();
         $GLOBALS['USERDATA']['configuration_settings']['app_run_id'] = __APP_VERSION__ . "-".$now->format('YmdHi');

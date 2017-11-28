@@ -84,7 +84,7 @@ Class LoggingManager extends \Monolog\Logger
 
         $now = new DateTime('NOW');
 
-        $this->_handlersByType['stderr'] = new StreamHandler("php://stderr", Logger::DEBUG);
+        $this->_handlersByType['stderr'] = new StreamHandler("php://stderr", isDebug() ? Logger::DEBUG : Logger::INFO);
         $this->pushHandler($this->_handlersByType['stderr']);
         $this->logLine("Logging started from STDIN", C__DISPLAY_ITEM_DETAIL__);
 
