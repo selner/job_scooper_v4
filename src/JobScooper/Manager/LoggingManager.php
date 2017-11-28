@@ -69,19 +69,29 @@ Class LoggingManager extends \Monolog\Logger
         JobsErrorHandler::register($this, array(), LogLevel::ERROR);
 
         $this->_handlersByType = array(
-            'stderr' => new StreamHandler('php://stderr', isDebug() ? Logger::DEBUG : Logger::INFO)
+//            'stderr' => new StreamHandler('php://stderr', isDebug() ? Logger::DEBUG : Logger::INFO)
         );
 
         parent::__construct($name, $handlers = $this->_handlersByType);
 
         $this->_loggers[$this->_loggerName] = $this;
         $this->_loggers['plugins'] = $this->withName('plugins');
+        $this->_loggers['database'] = $this->withName('database');
 
         $logOptions = getConfigurationSettings('logging');
         $this->_doLogContext = filter_var($logOptions['always_log_context'], FILTER_VALIDATE_BOOLEAN);
 
 
         $now = new DateTime('NOW');
+
+        $this->_handlersByType['stderr'] = new StreamHandler("php://stderr", Logger::DEBUG);
+        $this->pushHandler($this->_handlersByType['stderr']);
+        $this->logLine("Logging started from STDIN", C__DISPLAY_ITEM_DETAIL__);
+
+//        $serviceContainer->setLogger('defaultLogger', $defaultLogger);
+        $propelContainer = Propel::getServiceContainer();
+        $propelContainer->setLogger('defaultLogger', $this->_loggers['database']);
+
         $this->logLine("Logging started for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'), C__DISPLAY_NORMAL__);
     }
 
@@ -115,30 +125,30 @@ Class LoggingManager extends \Monolog\Logger
 
     public function addFileHandlers($logPath)
     {
-        $logLevelInfo = isDebug() ? Logger::DEBUG : Logger::INFO;
-        $logLevelWarn = isDebug() ? Logger::DEBUG : Logger::WARNING;
+        $logLevel = (isDebug() ? Logger::DEBUG : Logger::INFO);
 
         $today = getTodayAsString("-");
         $mainLog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$today}.log";
-        $this->_handlersByType['logfile'] = new StreamHandler($mainLog, $logLevelInfo);
+        $this->_handlersByType['logfile'] = new StreamHandler($mainLog, $logLevel);
         $this->pushHandler($this->_handlersByType['logfile']);
         $this->logLine("Logging started to logfile at {$mainLog}", C__DISPLAY_ITEM_DETAIL__);
 
         $now = getNowAsString("-");
         $csvlog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}-run_errors.csv";
         $fpcsv = fopen($csvlog, "w");
-        $this->_handlersByType['csverrors'] = new CSVLogHandler($fpcsv, $logLevelWarn);
+        $this->_handlersByType['csverrors'] = new CSVLogHandler($fpcsv, Logger::WARNING);
         $this->pushHandler($this->_handlersByType['csverrors'] );
-        $this->logLine("Error logging started to CSV file at {$csvlog}", C__DISPLAY_ITEM_DETAIL__);
+        $this->logLine("Logging started to CSV file at {$csvlog}", C__DISPLAY_ITEM_DETAIL__);
 
         $now = getNowAsString("-");
         $dedupeLog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}-dedupe_log_errors.csv";
         $this->_dedupeHandle = fopen($dedupeLog, "w");
-        $this->_handlersByType['dedupe_email'] = new DeduplicationHandler(new ErrorEmailLogHandler(Logger::ERROR, true),  $deduplicationStore = $dedupeLog, $deduplicationLevel = Logger::ERROR, $time = 60, $bubble = true);
+        $this->_handlersByType['dedupe_email'] = new DeduplicationHandler(new ErrorEmailLogHandler(Logger::WARNING, true),  $deduplicationStore = $dedupeLog, $deduplicationLevel = Logger::WARNING, $time = 60, $bubble = true);
         $this->pushHandler($this->_handlersByType['dedupe_email']);
-        $this->logLine("Error logging started for deduped email log file at {$dedupeLog}", C__DISPLAY_ITEM_DETAIL__);
+        $this->logLine("Logging started for deduped email log file at {$dedupeLog}", C__DISPLAY_ITEM_DETAIL__);
 
         $this->updatePropelLogging();
+
     }
 
     function __destruct()
