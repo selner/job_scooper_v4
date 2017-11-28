@@ -690,15 +690,24 @@ function combineTextAllChildren($node, $fRecursed = false)
 {
 
     $retStr = "";
+    if (is_array($node) && count($node) > 1) {
+        $strError = sprintf("Warning:  " . count($node) . " DOM nodes were sent to combineTextAllChildren instead of a single starting node.  Using first node only.");
+        LogLine($strError, \C__DISPLAY_WARNING__);
+    }
+
+    if(is_array($node) && count($node) >= 1)
+        $node = $node[0];
+
     if ($node->hasChildren()) {
-        $retStr = strScrub($node->text() . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
         foreach ($node->children() as $child) {
             $retStr = $retStr . " " . combineTextAllChildren($child, true);
         }
         unset($child);
+    }
 
-    } elseif (empty($node->text()) && $fRecursed == false) {
-        $retStr = strScrub($node->text() . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
+    if($fRecursed == false)
+    {
+        $retStr = strScrub($node->text() . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE) . $retStr;
     }
 
     return $retStr;

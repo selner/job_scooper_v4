@@ -52,7 +52,7 @@
           "Extract": "CSS",
           "Attribute": "collection",
           "Type": "CSS",
-          "Callback": "combineTextAllNodes"
+          "Callback": "combineTextAllChildren"
         },
         {
           "Name": "Company",

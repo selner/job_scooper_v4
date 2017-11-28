@@ -817,6 +817,11 @@ abstract class BaseJobsSite implements IJobSitePlugin
         return combineTextAllNodes($var);
     }
 
+    protected function combineTextAllChildren($var)
+    {
+        return combineTextAllChildren($var);
+    }
+
 
     //************************************************************************
     //

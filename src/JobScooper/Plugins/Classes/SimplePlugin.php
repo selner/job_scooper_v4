@@ -465,6 +465,7 @@ class SimplePlugin extends BaseJobsSite
                             break;
 
                         case "joblocation":
+                        case "address":
                         case "postaladdress":
                             $item['Location'] = combineTextAllChildren($node);
                             break;
