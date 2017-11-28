@@ -17,13 +17,17 @@
 
 namespace JobScooper\Manager;
 
-use Geocoder\Exception\QuotaExceededException;
+use Geocoder\Geocoder;
 use Geocoder\Result\ResultInterface;
 
 use Cache\Adapter\PHPArray\ArrayCachePool;
 use \InvalidArgumentException;
 use \Exception;
 use JobScooper\DataAccess\GeoLocation;
+use JobScooper\Logging\CSVLogHandler;
+use JobScooper\Utils\GoogleGeocoderHttpAdapter;
+use JobScooper\Utils\GoogleMapsLoggedProvider;
+use Monolog\Logger;
 use Propel\Runtime\ActiveQuery\Criteria;
 
 
@@ -41,13 +45,11 @@ class LocationManager
     }
 
 
-
-
-
     function __construct()
     {
         $this->_pool = new ArrayCachePool();
-        $this->_geocoder = new GeocodeManager();
+
+        $this->__initializeLogger__();
 
         $this->__initialize__();
     }
@@ -56,18 +58,50 @@ class LocationManager
     {
         LogLine("Loading Geolocation cache ...", \C__DISPLAY_ITEM_DETAIL__);
 
+
+        $googleApiKey = getConfigurationSettings('google_maps_api_key');
+        if (is_null($googleApiKey) || !is_string($googleApiKey)) {
+            throw new Exception("No Google Geocode API key found in configuration.  Instructions for getting an API key are at https://developers.google.com/maps/documentation/geocoding/get-api-key.");
+        }
+
+        $regionBias = null;
+        $country_codes = getConfigurationSettings('country_codes');
+        if (!is_null($country_codes) && is_array($country_codes)) {
+            $regionBias = $country_codes[0];
+        }
+
+        $curl = new GoogleGeocoderHttpAdapter();
+        $this->geocoder = new Geocoder();
+        $this->geocoder->registerProviders(array(
+            new GoogleMapsLoggedProvider(
+                $adapter=$curl,
+                $locale="en",
+                $region=$regionBias,
+                $useSsl = true,
+                $apiKey=$googleApiKey,
+                $logger=$this->logger
+            )
+        ));
+
+        LogDebug("... adding missing locations from JobPosting table ...", \C__DISPLAY_ITEM_DETAIL__);
         $allLocsWithoutGeoLocs = \JobScooper\DataAccess\JobPostingQuery::create()
-            ->select(array("location_display_value"))
             ->filterByGeoLocationId($geoLocationId = null, Criteria::ISNULL)
-            ->filterByLocationDisplayValue(null, Criteria::ISNOTNULL)
+            ->filterByLocation(null, Criteria::ISNOTNULL)
+            ->addGroupByColumn("Location")
+            ->select(array("jobposting.location"))
             ->find()
             ->getData();
 
+        LogDebug("... " . count($allLocsWithoutGeoLocs) . " missing locations found and being added to cache...", \C__DISPLAY_ITEM_DETAIL__);
+
         foreach ($allLocsWithoutGeoLocs as $name) {
-            $key = $this->getCacheKeyForAddress($name);
-            $this->setCacheItem($key, LocationManager::UNABLE_TO_GEOCODE_ADDRESS);
+            if(!empty($name)) {
+                $key = $this->getCacheKeyForAddress($name);
+                $this->setCacheItem($key, LocationManager::UNABLE_TO_GEOCODE_ADDRESS);
+            }
         }
 
+        LogDebug("... adding Geolocations to cache ...", \C__DISPLAY_ITEM_DETAIL__);
         $allGeoLocs = \JobScooper\DataAccess\GeoLocationQuery::create()
             ->find();
 
@@ -75,8 +109,6 @@ class LocationManager
             $this->setCachedGeoLocation($loc);
         }
 
-
-        LogLine("... adding missing locations from JobPosting table ...", \C__DISPLAY_ITEM_DETAIL__);
 
     }
 
@@ -127,6 +159,26 @@ class LocationManager
     private $countGeocodeCalls = 0;
     private $_pool = null;
     private $_geocoder = null;
+
+    protected $geocoder = null;
+    protected $logger = null;
+    protected $loggerName = null;
+
+
+
+    function __initializeLogger__()
+    {
+        $this->loggerName = "geocode_calls";
+        $this->logger = new Logger($this->loggerName);
+        $now = getNowAsString("-");
+        $csvlog = getOutputDirectory('logs'). DIRECTORY_SEPARATOR . "{$this->loggerName}-{$now}-geocode_api_calls.csv";
+        $fpcsv = fopen($csvlog, "w");
+        $handler = new CSVLogHandler($fpcsv, Logger::INFO);
+        $this->logger->pushHandler($handler);
+
+       LogLine("Geocode API logging started to CSV file at {$csvlog}", C__DISPLAY_ITEM_DETAIL__);
+
+    }
 
     private function getCacheKeyForAddress($strAddress)
     {
