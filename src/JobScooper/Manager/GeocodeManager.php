@@ -63,27 +63,13 @@ class GoogleMapsLoggedProvider extends GoogleMapsProvider
     }
     protected function executeQuery($query)
     {
-        $ret = array();
-        $ex = null;
-        try {
-            $this->callCounter += 1;
-            $ret = parent::executeQuery($query);
-
-        }
-        catch (Exception $ex)
+        $this->callCounter += 1;
+        $context = array("msg"=> "geocoder called (" . $this->callCounter ." call on this run.", "query" => $query, "call_count_for_run" => $this->callCounter);
+        if(!empty($this->logger))
         {
-
+            $this->logger->addInfo("Google Geocoder Called (" . $this->callCounter . " times)", getDebugContext($context));
         }
-        finally
-        {
-            $context = array("query" => $query, "result"=>empty($ex) ? "SUCCESS" : "ERROR", "error"=>empty($ex) ? "" : $ex->getMessage());
-            if(!empty($this->logger))
-            {
-                $this->logger->addInfo("Google Geocoder Called (" . $this->callCounter . " times)", getDebugContext($context));
-            }
-            return $ret;
-        }
-
+        return parent::executeQuery($query);
     }
 }
 
@@ -134,6 +120,11 @@ class GeocodeManager
 
     }
 
+    function geocode($strLocation)
+    {
+        return $this->geocoder->geocode($strLocation);
+
+    }
     /**
      * @param $strLocation
      */
@@ -141,7 +132,7 @@ class GeocodeManager
     {
         $addr = array();
         try {
-            $addr = $this->geocoder->geocode($strLocation);
+            $geocodeResult = $this->geocoder->geocode($strLocation);
         } catch (\Geocoder\Exception\NoResultException $ex) {
             LogDebug("No geocode result was found for " . $strLocation .".  Details: " .$ex->getMessage());
             return null;
@@ -154,55 +145,48 @@ class GeocodeManager
         }
 
         if (count($addr) > 0) {
-            $arrAddr = $addr->toArray();
+            $arrGeoResult = $geocodeResult->toArray();
 
-            if (array_key_exists('city', $arrAddr))
-                $arrAddr['place'] = $arrAddr['city'];
+            if (array_key_exists('city', $arrGeoResult))
+                $arrGeoResult['place'] = $arrGeoResult['city'];
             else
-                $arrAddr['place'] = null;
+                $arrGeoResult['place'] = null;
 
-            if (array_key_exists('countryCode', $arrAddr))
-                $arrAddr['countrycode'] = $arrAddr['countryCode'];
-
-            if (array_key_exists('regionCode', $arrAddr))
-                $arrAddr['regioncode'] = $arrAddr['regionCode'];
-
-//            if (array_key_exists('adminLevels', $arrAddr) && is_array($arrAddr) && count($arrAddr) > 0) {
-//                if (count($arrAddr['adminLevels']) >= 1) {
-//                    $arrAddr['region'] = $arrAddr['adminLevels'][1]['name'];
-//                    $arrAddr['regioncode'] = $arrAddr['adminLevels'][1]['code'];
+//            if (array_key_exists('adminLevels', $arrGeoResult) && is_array($arrGeoResult) && count($arrGeoResult) > 0) {
+//                if (count($arrGeoResult['adminLevels']) >= 1) {
+//                    $arrGeoResult['region'] = $arrGeoResult['adminLevels'][1]['name'];
+//                    $arrGeoResult['regioncode'] = $arrGeoResult['adminLevels'][1]['code'];
 //                }
-//                if (count($arrAddr['adminLevels']) >= 2) {
-//                    $arrAddr['county'] = $arrAddr['adminLevels'][2]['name'];
+//                if (count($arrGeoResult['adminLevels']) >= 2) {
+//                    $arrGeoResult['county'] = $arrGeoResult['adminLevels'][2]['name'];
 //                }
 //            }
 //
-            $arrAddr['alternate_names'] = $this->getAlternateNames($addr);
 
-            $arrAddr['key'] = cleanupSlugPart($this->formatAddress($addr, "%C-%R-%L"));
+            $arrGeoResult['key'] = cleanupSlugPart($this->formatAddress($addr, "%C-%R-%L"));
 
             $fmt = array();
-            if(!is_null($arrAddr['place']))
+            if(!is_null($arrGeoResult['place']))
                 $fmt[] = "%L";
 
-            if(strcasecmp($arrAddr['countrycode'], 'US') == 0)
+            if(strcasecmp($arrGeoResult['countrycode'], 'US') == 0)
             {
-                if(!is_null($arrAddr['regioncode']))
+                if(!is_null($arrGeoResult['regioncode']))
                     $fmt[] = "%r %c";
                 else
                     $fmt[] = "%c";
             }
             else
             {
-                if(!is_null($arrAddr['region']))
+                if(!is_null($arrGeoResult['region']))
                     $fmt[] = "%R %c";
                 else
                     $fmt[] = "%c";
             }
 
-            $arrAddr['primary_name'] = $this->formatAddress($addr, join(", ", $fmt));
+            $arrGeoResult['primary_name'] = $this->formatAddress($addr, join(", ", $fmt));
 
-            return $arrAddr;
+            return $arrGeoResult;
         }
 
         return null;
@@ -247,7 +231,7 @@ class GeocodeManager
             'location-place-statecode-country' => '%L %r %C',
             'location-place-statecode-countrycode' => '%L %r %c',
             'location-place-country' => '%L %C',
-            'location-place--countrycode' => '%L %c',
+            'location-place-countrycode' => '%L %c',
         );
 
         $retNames = array();

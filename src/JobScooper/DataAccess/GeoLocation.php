@@ -19,12 +19,52 @@ namespace JobScooper\DataAccess;
 
 use JobScooper\DataAccess\Base\GeoLocation as BaseGeoLocation;
 use JobScooper\DataAccess\Map\GeoLocationTableMap;
+use JobScooper\Utils\GeoLocationFormatter;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 
 class GeoLocation extends BaseGeoLocation
 {
+
+    function updateDisplayName()
+    {
+        $dispVal = "";
+
+        if(!empty($this->getPlace()))
+            $dispVal = "%L";
+
+        if($this->getCountryCode() == "US")
+        {
+            if(!empty($this->getRegionCode()))
+                $dispVal .= " %r %c";
+            else
+                $dispVal .= " %c";
+        }
+        else {
+            if (!empty($this->getRegion()))
+                $dispVal .= " %R %c";
+            else
+                $dispVal .= " %c";
+        }
+
+        $this->setDisplayName($this->format($dispVal));
+
+    }
+    function preSave(ConnectionInterface $con = null)
+    {
+        $this->updateDisplayName();
+
+        $this->setGeoLocationKey(strtolower($this->format("%c_%r_%L")));
+
+        if($this->isNew())
+        {
+            $this->setAlternateNames($this->getVariants());
+        }
+
+        return parent::preSave($con);
+    }
+
     public function save(ConnectionInterface $con = null, $skipReload = false)
     {
         try {
@@ -100,99 +140,6 @@ class GeoLocation extends BaseGeoLocation
         parent::setAlternateNames($value);
     }
 
-    public function formatLocation($formatString)
-    {
-        return replaceTokensInString($formatString, $this->toArray());
-    }
-
-    public function formatLocationByLocationType($locFormatNeeded)
-    {
-        switch ($locFormatNeeded)
-        {
-
-            case 'location-city':
-                $locFormatString = "{PLACE}";
-                break;
-
-            case 'location-city-comma-statecode':
-                $locFormatString = "{PLACE}, {REGIONCODE}";
-                break;
-
-            case 'location-city-space-statecode':
-                $locFormatString = "{PLACE} {REGIONCODE}";
-                break;
-
-            case 'location-city-dash-statecode':
-                $locFormatString = "{PLACE}-{REGIONCODE}";
-                break;
-
-            case 'location-city-comma-nospace-statecode':
-                $locFormatString = "{PLACE},{REGIONCODE}";
-                break;
-
-            case 'location-city-comma-statecode-underscores-and-dashes':
-                $locFormatString = "{PLACE}__2c-{REGIONCODE}";
-                break;
-
-            case 'location-city-comma-state':
-                $locFormatString = "{PLACE}, {REGION}";
-                break;
-
-            case 'location-city-comma-state-country':
-                $locFormatString = "{PLACE}, {REGION}, {COUNTRY}";
-                break;
-
-            case 'location-city-comma-state-country-no-commas':
-                $locFormatString = "{PLACE} {REGION} {COUNTRY}";
-                break;
-
-            case 'location-city-comma-state-comma-country':
-                $locFormatString = "{PLACE}, {REGION}, {COUNTRY}";
-                break;
-
-            case 'location-city-comma-statecode-comma-country':
-                $locFormatString = "{PLACE}, {REGIONCODE}, {COUNTRY}";
-                break;
-
-            case 'location-city-comma-state-comma-countrycode':
-                $locFormatString = "{PLACE}, {REGION}, {COUNTRYCODE}";
-                break;
-
-            case 'location-city-comma-country':
-                $locFormatString = "{PLACE}, {COUNTRY}";
-                break;
-
-            case 'location-city--comma-countrycode':
-                $locFormatString = "{PLACE}, {COUNTRYCODE}";
-                break;
-
-            case 'location-city-comma-statecode-comma-countrycode':
-                $locFormatString = "{PLACE}, {REGIONCODE}, {COUNTRYCODE}";
-                break;
-
-            case 'location-countrycode':
-                $locFormatString = "{COUNTRYCODE}";
-                break;
-
-            case 'location-city-country-no-commas':
-                $locFormatString = "{PLACE} {COUNTRY}";
-                break;
-
-            case 'location-state':
-                $locFormatString = "{REGION}";
-                break;
-
-            case 'location-statecode':
-                $locFormatString = "{REGIONCODE}";
-                break;
-
-            default:
-                $locFormatString = "{DISPLAYNAME}";
-                break;
-        }
-
-        return $this->formatLocation($locFormatString);
-    }
 
     function fromGeocode($geocode)
     {
@@ -229,7 +176,13 @@ class GeoLocation extends BaseGeoLocation
         $this->fromArray($arrVals, GeoLocationTableMap::TYPE_FIELDNAME);
     }
 
+    public function toFlatArrayForCSV()
+    {
+        $arrItem = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
+        updateColumnsForCSVFlatArray($arrItem, new GeoLocationTableMap());
 
+        return $arrItem;
+    }
 
     function getRegionCodeFromRegion($code)
     {
@@ -373,14 +326,128 @@ class GeoLocation extends BaseGeoLocation
         return null;
     }
 
-    public function toFlatArrayForCSV()
+    public function format($fmt)
     {
-        $arrItem = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
-        updateColumnsForCSVFlatArray($arrItem, new GeoLocationTableMap());
-
-        return $arrItem;
+        $formatter = new GeoLocationFormatter();
+        return $formatter->format($this, $fmt);
     }
 
 
+
+    public function getVariants()
+    {
+        $altFormats = array(
+            'location-place' => '%L',
+            'location-place-state' => '%L %R',
+            'location-place-state-country' => '%L %R %C',
+            'location-place-state-countrycode' => '%L %R %c',
+            'location-place-statecode' => '%L %r',
+            'location-place-statecode-country' => '%L %r %C',
+            'location-place-statecode-countrycode' => '%L %r %c',
+            'location-place-country' => '%L %C',
+            'location-place-countrycode' => '%L %c',
+        );
+
+        $retNames = array();
+
+        foreach(array_keys($altFormats) as $k)
+        {
+            $retNames[$k] = $this->format($altFormats[$k]);
+        }
+
+        return $retNames;
+    }
+
+
+    public function formatLocationByLocationType($locFormatNeeded)
+    {
+        switch ($locFormatNeeded)
+        {
+
+            case 'location-city':
+                $locFormatString = "%L";
+                break;
+
+            case 'location-city-comma-statecode':
+                $locFormatString = "%L, %r";
+                break;
+
+            case 'location-city-space-statecode':
+                $locFormatString = "%L %r";
+                break;
+
+            case 'location-city-dash-statecode':
+                $locFormatString = "%L-%r";
+                break;
+
+            case 'location-city-comma-nospace-statecode':
+                $locFormatString = "%L,%r";
+                break;
+
+            case 'location-city-comma-statecode-underscores-and-dashes':
+                $locFormatString = "%L__2c-%r";
+                break;
+
+            case 'location-city-comma-state':
+                $locFormatString = "%L, %R";
+                break;
+
+            case 'location-city-comma-state-country':
+                $locFormatString = "%L, %R, %C";
+                break;
+
+            case 'location-city-comma-state-country-no-commas':
+                $locFormatString = "%L %R %C";
+                break;
+
+            case 'location-city-comma-state-comma-country':
+                $locFormatString = "%L, %R, %C";
+                break;
+
+            case 'location-city-comma-statecode-comma-country':
+                $locFormatString = "%L, %r, %C";
+                break;
+
+            case 'location-city-comma-state-comma-countrycode':
+                $locFormatString = "%L, %R, %c";
+                break;
+
+            case 'location-city-comma-country':
+                $locFormatString = "%L, %C";
+                break;
+
+            case 'location-city--comma-countrycode':
+                $locFormatString = "%L, %c";
+                break;
+
+            case 'location-city-comma-statecode-comma-countrycode':
+                $locFormatString = "%L, %r, %c";
+                break;
+
+            case 'location-countrycode':
+                $locFormatString = "%c";
+                break;
+
+            case 'location-city-country-no-commas':
+                $locFormatString = "%L %C";
+                break;
+
+            case 'location-state':
+                $locFormatString = "%R";
+                break;
+
+            case 'location-statecode':
+                $locFormatString = "%r";
+                break;
+
+            default:
+                return $this->getDisplayName();
+                break;
+        }
+
+        return $this->format($locFormatString);
+    }
+
 }
+
 

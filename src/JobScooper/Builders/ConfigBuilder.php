@@ -18,7 +18,7 @@ namespace JobScooper\Builders;
 
 
 
-use JobScooper\Manager\GeoLocationManager;
+use JobScooper\Manager\LocationManager;
 use JobScooper\Manager\LoggingManager;
 use const JobScooper\Plugins\Classes\VALUE_NOT_SUPPORTED;
 use JobScooper\Utils\SimpleCSV;
@@ -27,6 +27,12 @@ use Monolog\Handler\StreamHandler;
 use JobScooper\DataAccess\UserSearchRun;
 use  \Propel\Runtime\Propel;
 use \JobScooper\Utils\Pharse;
+
+
+$GLOBALS['CACHES'] = array();
+$GLOBALS['CACHES']['LOCATION_MANAGER'] = null;
+$GLOBALS['CACHES']['GEOCODER_ENABLED'] = true;
+
 
 
 class ConfigBuilder
@@ -300,6 +306,7 @@ class ConfigBuilder
         // and configure all searches
         //
         $this->_parseGlobalSearchParametersFromConfig_($config);
+        $this->_instantiateLocationManager();
 
         LogLine("Loaded all configuration settings" . isDebug() ? ": " . PHP_EOL . var_export($this->allConfigFileSettings, true) : "", \C__DISPLAY_SUMMARY__);
 
@@ -338,6 +345,19 @@ class ConfigBuilder
 //        $this->_createSearchInstancesForRun();
 
     }
+
+    private function _instantiateLocationManager()
+    {
+        $cache = LocationManager::getLocationManager();
+        if(empty($cache)) {
+            LocationManager::create();
+            $cache = LocationManager::getLocationManager();
+        }
+
+        return $cache;
+    }
+
+
 
     private function __getEmptyEmailRecord__()
     {
@@ -429,7 +449,6 @@ class ConfigBuilder
             // This must happen first so that the search locations can be geocoded
             if (array_key_exists('google_maps_api_key', $config['global_search_options'])) {
                 $GLOBALS['USERDATA']['configuration_settings']['google_maps_api_key'] = $config['global_search_options']['google_maps_api_key'];
-                $GLOBALS['CACHES']['geolocation_manager'] = new GeoLocationManager();
             }
 
             foreach (array_keys($config['global_search_options']) as $gso)
@@ -507,8 +526,9 @@ class ConfigBuilder
         if (!array_key_exists('search_location', $GLOBALS['USERDATA']['configuration_settings']))
             $GLOBALS['USERDATA']['configuration_settings']['search_locations'] = array();
 
-        $location = $GLOBALS['CACHES']['geolocation_manager']->findOrCreateGeoLocationByName($location_string);
-        if(!is_null($location))
+        $locmgr = $this->_instantiateLocationManager();
+        $location = $locmgr->getAddress($location_string);
+        if(!empty($location))
         {
             $GLOBALS['USERDATA']['configuration_settings']['search_location'][$location->getGeoLocationId()] = array(
                 'location_raw_source_value' => $location_string,

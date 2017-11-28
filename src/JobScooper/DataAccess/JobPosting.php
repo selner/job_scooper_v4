@@ -19,6 +19,7 @@ namespace JobScooper\DataAccess;
 
 use JobScooper\DataAccess\Map\GeoLocationTableMap;
 use JobScooper\DataAccess\Map\JobPostingTableMap;
+use JobScooper\Manager\LocationManager;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Map\TableMap;
 use Exception;
@@ -202,9 +203,9 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 
         try
         {
-            $locmgr = $GLOBALS['CACHES']['geolocation_manager'];
+            $locmgr = LocationManager::getLocationManager();
 
-            $location = $locmgr->findOrCreateGeoLocationByName($loc_str);
+            $location = $locmgr->getAddress($loc_str);
             if(!is_null($location)) {
                 $this->setGeoLocation($location);
                 $this->_setDenormalizedLocationDisplayValue_();

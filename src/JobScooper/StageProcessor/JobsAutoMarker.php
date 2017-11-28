@@ -21,6 +21,7 @@ use JobScooper\DataAccess\GeoLocationQuery;
 use JobScooper\DataAccess\Map\GeoLocationTableMap;
 
 use Exception;
+use JobScooper\Manager\LocationManager;
 use JobScooper\Utils\SimpleCSV;
 use Propel\Runtime\ActiveQuery\Criteria;
 
@@ -37,7 +38,7 @@ class JobsAutoMarker
         if (!is_null($arrJobObjsToMark) && count($arrJobObjsToMark) > 0)
             $this->arrMasterJobList = $arrJobObjsToMark;
 
-        $this->_locmgr = $GLOBALS['CACHES']['geolocation_manager'];
+        $this->_locmgr = LocationManager::getLocationManager();
 
     }
 
@@ -167,7 +168,7 @@ class JobsAutoMarker
             $locId = $searchLocation['location_id'];
             if(!is_null($locId))
             {
-                $location = $this->_locmgr->getLocationById($locId);
+                $location = $this->_locmgr->getId($locId);
                 if(!is_null($location))
                 {
                     $arrIncludeCounties[] = $location->getCounty() . "~" .$location->getRegion();
