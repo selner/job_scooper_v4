@@ -145,7 +145,7 @@ class GeoLocation extends BaseGeoLocation
     {
         $arrVals = array();
         foreach(array_keys($geocode) as $field) {
-            switch ($field) {
+            switch (strtolower($field)) {
                 case 'latitude':
                 case 'longitude':
                 case 'place':
@@ -154,11 +154,15 @@ class GeoLocation extends BaseGeoLocation
                 case 'region':
                 case 'regioncode':
                 case 'county':
-                    $arrVals[$field] = $geocode[$field];
+                    $arrVals[strtolower($field)] = $geocode[$field];
                     break;
 
                 case 'primary_name':
                     $arrVals['display_name'] = $geocode['primary_name'];
+                    break;
+
+                case 'city':
+                    $arrVals['place'] = $geocode['city'];
                     break;
 
                 case 'alternate_names':

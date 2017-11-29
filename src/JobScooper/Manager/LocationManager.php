@@ -264,12 +264,12 @@ class LocationManager
             // Update the geolocation with the facts from the
             // geocode result
             //
-            $geolocation->fromArray($arrGeocode);
+            $geolocation->fromGeocode($arrGeocode);
             $isNewRecord = $geolocation->isNew();
+            $geolocation->addAlternateName($strAddress);
             $geolocation->save();
 
             if ($isNewRecord) {
-                $geolocation->addAlternateName($strAddress);
                 $this->setCachedGeoLocation($geolocation);
             }
             return $geolocation;
