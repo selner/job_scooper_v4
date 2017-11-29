@@ -438,7 +438,7 @@ function updateOrCreateUser($arrUserDetails)
 
 
 
-function findOrCreateUserSearchRun($searchKey, $jobsiteKey, $locationKey="any-location", $copyFrom=null)
+function findOrCreateUserSearchRun($searchKey, $jobsiteKey, $locationKey=null, $copyFrom=null)
 {
     $userObject = $GLOBALS['USERDATA']['configuration_settings']['user_details'];
     $userSlug = $userObject->getUserSlug();
@@ -446,35 +446,59 @@ function findOrCreateUserSearchRun($searchKey, $jobsiteKey, $locationKey="any-lo
     if(isDebug())
         LogLine("Searching for user '{$userSlug} / jobsite {$jobsiteKey} / search '{$searchKey} / location '{$locationKey}'...", \C__DISPLAY_NORMAL__);
 
-    $search = \JobScooper\DataAccess\UserSearchRunQuery::create()
+    $locId = null;
+    if(empty($locationKey))
+    {
+        $arrLocations = getConfigurationSettings('search_location');
+        if(!empty($arrLocations) && count($arrLocations)>=1) {
+            $locdata = array_pop($arrLocations);
+            $locId = $locdata['location_id'];
+            $locationKey = $locdata['location_name_key'];
+        }
+
+    }
+
+    if(empty($locationKey))
+        $locationKey = 'all-locations';
+
+    $query = \JobScooper\DataAccess\UserSearchRunQuery::create()
         ->filterByUserSlug($userSlug)
         ->filterByJobSiteKey($jobsiteKey)
-        ->filterBySearchKey($searchKey)
-        ->useGeoLocationQuery()
-            ->filterByGeoLocationKey($locationKey)
-        ->endUse()
-        ->findOne();
+        ->filterBySearchKey($searchKey);
 
-    if ($search) {
+    if(!empty($locId)) {
+        $query->filterByGeoLocationId($locId);
+    }
+    elseif(!empty($locationKey))
+    {
+        $geoloc = \JobScooper\DataAccess\GeoLocationQuery::create()
+            ->findOneByGeoLocationKey($locationKey);
+        if(!empty($geoloc))
+            $query->filterByGeoLocation($geoloc);
+    }
+
+    $search = $query->findOneOrCreate();
+
+    if ($search->isNew()) {
         if(isDebug())
             LogLine("Found matching UserSearchRun ID # " . $search->getUserSearchRunId() ." for {$userSlug} / jobsitekey {$jobsiteKey} / search {$searchKey} / location {$locationKey}...", \C__DISPLAY_NORMAL__);
+        $search->setSearchKey($searchKey);
+        $search->setJobSiteKey($jobsiteKey);
+        $search->setUserSlug($userSlug);
     }
     else {
         if (isDebug())
             LogLine("Search Not Found -- Creating New User Search Run for user '{$userSlug} / plugin {$jobsiteKey} / search '{$searchKey} / location '{$locationKey}'...", \C__DISPLAY_WARNING__);
-        $search = new \JobScooper\DataAccess\UserSearchRun();
-
-        $search->setSearchKey($searchKey);
-        $search->setJobSiteKey($jobsiteKey);
-        $search->setUserSlug($userSlug);
-        $locId = $search->getGeoLocationId();
-        if (is_null($locId)) {
-            $loc = \JobScooper\DataAccess\GeoLocationQuery::create()
-                ->findOneByGeoLocationKey($locationKey);
-            $search->setGeoLocation($loc);
-        }
     }
 
+    if (is_null($locId))
+    {
+        $loc = \JobScooper\DataAccess\GeoLocationQuery::create()
+            ->findOneByGeoLocationKey($locationKey);
+        $search->setGeoLocation($loc);
+    }
+    else
+        $search->setGeoLocationId($locId);
 
     if (!is_null($copyFrom))
     {
