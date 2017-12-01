@@ -84,8 +84,7 @@ class PluginCareerBuilderUK extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePl
     }
 
     protected function getKeywordURLValue(\JobScooper\DataAccess\UserSearchRun $searchDetails) {
-        $keywordval = parent::getKeywordURLValue($searchDetails);
-        return strtolower($keywordval);
+        return strtolower(parent::getKeywordURLValue($searchDetails));
     }
 
 }

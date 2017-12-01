@@ -129,6 +129,7 @@ class StageManager
             //
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             try {
+                $jobsites = getConfigurationSettings("included_sites");
                 foreach(array_keys($arrSearchesToRunBySite) as $sitename)
                 {
                     $searches = $arrSearchesToRunBySite[$sitename];
@@ -141,7 +142,8 @@ class StageManager
                     LogLine("Setting up " . count($searches) . " search(es) for ". $sitename . "...", \C__DISPLAY_SECTION_START__);
                     try
                     {
-                        $plugin = getPluginObjectForJobSite($sitename);
+                        $site = $jobsites[$sitename];
+                        $plugin = $site->getPluginObject();
                         if(empty($plugin))
                             throw new \Exception("Unable to get plugin object for " . $sitename);
 
@@ -149,7 +151,7 @@ class StageManager
                     }
                     catch (\Exception $classError)
                     {
-                        handleException($classError, "Unable to add searches to {$GLOBALS['JOBSITE_PLUGINS'][$sitename]['class_name']} plugin: %s", $raise = false);
+                        handleException($classError, "Unable to add searches to {$sitename} plugin: %s", $raise = false);
                     }
                     finally
                     {
@@ -168,7 +170,7 @@ class StageManager
                     }
                     catch (\Exception $classError)
                     {
-                        handleException($classError, $GLOBALS['JOBSITE_PLUGINS'][$sitename]['class_name'] . " failed to download job postings: %s", $raise = false);
+                        handleException($classError, $sitename . " failed to download job postings: %s", $raise = false);
                     }
                     finally
                     {

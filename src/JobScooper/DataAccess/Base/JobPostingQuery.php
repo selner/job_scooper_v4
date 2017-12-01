@@ -74,6 +74,16 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPostingQuery rightJoinWith($relation) Adds a RIGHT JOIN clause and with to the query
  * @method     ChildJobPostingQuery innerJoinWith($relation) Adds a INNER JOIN clause and with to the query
  *
+ * @method     ChildJobPostingQuery leftJoinJobSiteRecord($relationAlias = null) Adds a LEFT JOIN clause to the query using the JobSiteRecord relation
+ * @method     ChildJobPostingQuery rightJoinJobSiteRecord($relationAlias = null) Adds a RIGHT JOIN clause to the query using the JobSiteRecord relation
+ * @method     ChildJobPostingQuery innerJoinJobSiteRecord($relationAlias = null) Adds a INNER JOIN clause to the query using the JobSiteRecord relation
+ *
+ * @method     ChildJobPostingQuery joinWithJobSiteRecord($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the JobSiteRecord relation
+ *
+ * @method     ChildJobPostingQuery leftJoinWithJobSiteRecord() Adds a LEFT JOIN clause and with to the query using the JobSiteRecord relation
+ * @method     ChildJobPostingQuery rightJoinWithJobSiteRecord() Adds a RIGHT JOIN clause and with to the query using the JobSiteRecord relation
+ * @method     ChildJobPostingQuery innerJoinWithJobSiteRecord() Adds a INNER JOIN clause and with to the query using the JobSiteRecord relation
+ *
  * @method     ChildJobPostingQuery leftJoinGeoLocation($relationAlias = null) Adds a LEFT JOIN clause to the query using the GeoLocation relation
  * @method     ChildJobPostingQuery rightJoinGeoLocation($relationAlias = null) Adds a RIGHT JOIN clause to the query using the GeoLocation relation
  * @method     ChildJobPostingQuery innerJoinGeoLocation($relationAlias = null) Adds a INNER JOIN clause to the query using the GeoLocation relation
@@ -114,7 +124,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPostingQuery rightJoinWithUserJobMatch() Adds a RIGHT JOIN clause and with to the query using the UserJobMatch relation
  * @method     ChildJobPostingQuery innerJoinWithUserJobMatch() Adds a INNER JOIN clause and with to the query using the UserJobMatch relation
  *
- * @method     \JobScooper\DataAccess\GeoLocationQuery|\JobScooper\DataAccess\JobPostingQuery|\JobScooper\DataAccess\UserJobMatchQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
+ * @method     \JobScooper\DataAccess\JobSiteRecordQuery|\JobScooper\DataAccess\GeoLocationQuery|\JobScooper\DataAccess\JobPostingQuery|\JobScooper\DataAccess\UserJobMatchQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildJobPosting findOne(ConnectionInterface $con = null) Return the first ChildJobPosting matching the query
  * @method     ChildJobPosting findOneOrCreate(ConnectionInterface $con = null) Return the first ChildJobPosting matching the query, or a new ChildJobPosting object populated from the query conditions when no match is found
@@ -1051,6 +1061,83 @@ abstract class JobPostingQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(JobPostingTableMap::COL_DUPLICATES_POSTING_ID, $duplicatesJobPostingId, $comparison);
+    }
+
+    /**
+     * Filter the query by a related \JobScooper\DataAccess\JobSiteRecord object
+     *
+     * @param \JobScooper\DataAccess\JobSiteRecord|ObjectCollection $jobSiteRecord The related object(s) to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return ChildJobPostingQuery The current query, for fluid interface
+     */
+    public function filterByJobSiteRecord($jobSiteRecord, $comparison = null)
+    {
+        if ($jobSiteRecord instanceof \JobScooper\DataAccess\JobSiteRecord) {
+            return $this
+                ->addUsingAlias(JobPostingTableMap::COL_JOBSITE_KEY, $jobSiteRecord->getJobSiteKey(), $comparison);
+        } elseif ($jobSiteRecord instanceof ObjectCollection) {
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+
+            return $this
+                ->addUsingAlias(JobPostingTableMap::COL_JOBSITE_KEY, $jobSiteRecord->toKeyValue('PrimaryKey', 'JobSiteKey'), $comparison);
+        } else {
+            throw new PropelException('filterByJobSiteRecord() only accepts arguments of type \JobScooper\DataAccess\JobSiteRecord or Collection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the JobSiteRecord relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this|ChildJobPostingQuery The current query, for fluid interface
+     */
+    public function joinJobSiteRecord($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('JobSiteRecord');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'JobSiteRecord');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the JobSiteRecord relation JobSiteRecord object
+     *
+     * @see useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return \JobScooper\DataAccess\JobSiteRecordQuery A secondary query class using the current class as primary query
+     */
+    public function useJobSiteRecordQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        return $this
+            ->joinJobSiteRecord($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'JobSiteRecord', '\JobScooper\DataAccess\JobSiteRecordQuery');
     }
 
     /**

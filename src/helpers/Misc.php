@@ -345,13 +345,6 @@ function getFilePathDetailsFromString($strFilePath, $flags = C__FILEPATH_NO_FLAG
 
 }
 
-function isValueURLEncoded($str)
-{
-    if (strlen($str) <= 0) return 0;
-    return (substr_count_array($str, array("%22", "&", "=", "+", "-", "%7C", "%3C")) > 0);
-}
-
-
 function getPhpMemoryUsage()
 {
     $size = memory_get_usage(true);
@@ -359,17 +352,6 @@ function getPhpMemoryUsage()
     $unit = array(' bytes', 'KB', 'MB', 'GB', 'TB', 'PN');
 
     return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
-}
-function getTodayAsString($delim = "-")
-{
-    $fmt = "Y" . $delim . "m" . $delim . "d";
-    return date($fmt);
-}
-
-function getNowAsString($delim = "-")
-{
-    $fmt = join($delim, array("%Y", "%m", "%d", "%H", "%M", "%S"));
-    return strftime($fmt, time());
 }
 
 function exportToDebugJSON($obj, $strBaseFileName)
@@ -425,115 +407,6 @@ function handleException($ex, $fmtLogMsg = null, $raise = true)
     }
 }
 
-
-/**
- * Strip punctuation from text.
- * http://nadeausoftware.com/articles/2007/9/php_tip_how_strip_punctuation_characters_web_page
- * @param $text
- * @return mixed
- */
-function strip_punctuation( $text )
-{
-    $urlbrackets    = '\[\]\(\)';
-    $urlspacebefore = ':;\'_\*%@&?!' . $urlbrackets;
-    $urlspaceafter  = '\.,:;\'\-_\*@&\/\\\\\?!#' . $urlbrackets;
-    $urlall         = '\.,:;\'\-_\*%@&\/\\\\\?!#' . $urlbrackets;
-
-    $specialquotes  = '\'"\*<>';
-
-    $fullstop       = '\x{002E}\x{FE52}\x{FF0E}';
-    $comma          = '\x{002C}\x{FE50}\x{FF0C}';
-    $arabsep        = '\x{066B}\x{066C}';
-    $numseparators  = $fullstop . $comma . $arabsep;
-
-    $numbersign     = '\x{0023}\x{FE5F}\x{FF03}';
-    $percent        = '\x{066A}\x{0025}\x{066A}\x{FE6A}\x{FF05}\x{2030}\x{2031}';
-    $prime          = '\x{2032}\x{2033}\x{2034}\x{2057}';
-    $nummodifiers   = $numbersign . $percent . $prime;
-
-    return preg_replace(
-        array(
-            // Remove separator, control, formatting, surrogate,
-            // open/close quotes.
-            '/[\p{Z}\p{Cc}\p{Cf}\p{Cs}\p{Pi}\p{Pf}]/u',
-            // Remove other punctuation except special cases
-            '/\p{Po}(?<![' . $specialquotes .
-            $numseparators . $urlall . $nummodifiers . '])/u',
-            // Remove non-URL open/close brackets, except URL brackets.
-            '/[\p{Ps}\p{Pe}](?<![' . $urlbrackets . '])/u',
-            // Remove special quotes, dashes, connectors, number
-            // separators, and URL characters followed by a space
-            '/[' . $specialquotes . $numseparators . $urlspaceafter .
-            '\p{Pd}\p{Pc}]+((?= )|$)/u',
-            // Remove special quotes, connectors, and URL characters
-            // preceded by a space
-            '/((?<= )|^)[' . $specialquotes . $urlspacebefore . '\p{Pc}]+/u',
-            // Remove dashes preceded by a space, but not followed by a number
-            '/((?<= )|^)\p{Pd}+(?![\p{N}\p{Sc}])/u',
-            // Remove consecutive spaces
-            '/ +/',
-        ),
-        ' ',
-        $text );
-}
-
-function getFailedSearchesByPlugin()
-{
-    return getSearchesByRunResult("failed");
-}
-
-function getSearchesByRunResult($resultCode)
-{
-    $arrSearchReportByPlugin = array();
-    if(is_null($GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN']))
-        return array();
-
-    foreach ($GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'] as $jobsiteKey) {
-        foreach($jobsiteKey as $search)
-        {
-            if($search->getRunResultCode() == "failed") {
-                if (!array_key_exists($search->getJobSiteKey(), $arrSearchReportByPlugin))
-                    $arrSearchReportByPlugin[$search->getJobSiteKey()] = array();
-
-                $arrSearchReportByPlugin[$search->getJobSiteKey()][$search->getUserSearchRunKey()] = cloneArray($search->toArray(), array(
-                    'keywords_string_for_url',
-                    'base_url_format',
-                    'keywords_array_tokenized',
-                    'search_start_url',
-                    'location_user_specified_override',
-                    'location_search_value',
-                    'keyword_search_override',
-                    'keywords_array'));
-            }
-        }
-    }
-
-    return $arrSearchReportByPlugin;
-}
-
-function setSiteAsExcluded($excludedSite)
-{
-    $excludedSite = cleanupSlugPart($excludedSite);
-    if(!array_key_exists('JOBSITES_AND_SEARCHES_TO_RUN', $GLOBALS))
-        $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'] = array();
-
-    $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$excludedSite] = $excludedSite;
-    if(array_key_exists($excludedSite, $GLOBALS['USERDATA']['configuration_settings']['included_sites']))
-    {
-        unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite]);
-    }
-
-    if(isset($GLOBALS['logger']) && isDebug()) $GLOBALS['logger']->logLine("Setting " . $excludedSite . " as excluded for this run.", \C__DISPLAY_ITEM_DETAIL__);
-
-    if(array_key_exists($excludedSite, $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'])) {
-        foreach($GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'][$excludedSite] as $search)
-        {
-            $search->setRunResultCode("excluded");
-            $search->save();
-        }
-    }
-}
-
 function noJobStringMatch($var, $matchString)
 {
     if(is_null($matchString) || strlen($matchString) == 0)
@@ -566,125 +439,6 @@ function getRunDateRange()
     return $strDateRange;
 }
 
-
-define('REMOVE_PUNCT', 0x001);
-define('LOWERCASE', 0x002);
-define('HTML_DECODE', 0x004);
-define('URL_ENCODE', 0x008);
-define('REPLACE_SPACES_WITH_HYPHENS', 0x010);
-define('REMOVE_EXTRA_WHITESPACE', 0x020);
-define('REMOVE_ALL_SPACES', 0x040);
-define('SIMPLE_TEXT_CLEANUP', HTML_DECODE | REMOVE_EXTRA_WHITESPACE );
-define('ADVANCED_TEXT_CLEANUP', HTML_DECODE | REMOVE_EXTRA_WHITESPACE | REMOVE_PUNCT );
-define('FOR_LOOKUP_VALUE_MATCHING', REMOVE_PUNCT | LOWERCASE | HTML_DECODE | REMOVE_EXTRA_WHITESPACE | REMOVE_ALL_SPACES );
-define('DEFAULT_SCRUB', REMOVE_PUNCT | HTML_DECODE | LOWERCASE | REMOVE_EXTRA_WHITESPACE );
-
-//And so on, 0x8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800 etc..
-
-
-function strScrub($str, $flags = null)
-{
-    if($flags == null)  $flags = REMOVE_EXTRA_WHITESPACE;
-
-    if(strlen($str) == 0) return $str;
-
-    // If this isn't a valid string we can process,
-    // log a warning and return the value back to the caller untouched.
-    //
-    if($str == null || !isset($str) || !is_string($str))
-    {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("strScrub was called with an invalid value to scrub (not a string, null, or similar.  Cannot scrub the passed value: " . var_export($str, true), C__DISPLAY_WARNING__);
-        return $str;
-    }
-
-    $ret = $str;
-
-
-    if ($flags & HTML_DECODE)
-    {
-        $ret = html_entity_decode($ret);
-    }
-
-    if ($flags & REMOVE_PUNCT)  // has to come after HTML_DECODE
-    {
-        $ret = strip_punctuation($ret);
-    }
-
-    if ($flags & REMOVE_ALL_SPACES)
-    {
-        $ret = trim($ret);
-        if($ret != null)
-        {
-            $ret  = str_replace(" ", "", $ret);
-        }
-    }
-
-    if ($flags & REMOVE_EXTRA_WHITESPACE)
-    {
-        $ret = trim($ret);
-        if($ret != null)
-        {
-            $ret  = str_replace(array("   ", "  ", "    "), " ", $ret);
-            $ret  = str_replace(array("   ", "  ", "    "), " ", $ret);
-        }
-        $ret = trim($ret);
-    }
-
-
-    if ($flags & REPLACE_SPACES_WITH_HYPHENS) // has to come after REMOVE_EXTRA_WHITESPACE
-    {
-        $ret  = str_replace(" ", "-", $ret); // do it twice to catch the multiples
-    }
-
-
-    if ($flags & LOWERCASE)
-    {
-        $ret = strtolower($ret);
-    }
-
-    if ($flags & URL_ENCODE)
-    {
-        $ret  = urlencode($ret);
-    }
-
-    return $ret;
-}
-
-function intceil($number)
-{
-    if(is_string($number)) $number = floatval($number);
-
-    $ret = ( is_numeric($number) ) ? ceil($number) : false;
-    if ($ret != false) $ret = intval($ret);
-
-    return $ret;
-}
-
-
-function clean_utf8($string, $control = true)
-{
-    $string = iconv('UTF-8', 'UTF-8//IGNORE', $string);
-
-    if ($control === true) {
-        return preg_replace('~\p{C}+~u', '', $string);
-    }
-
-    return preg_replace(array('~\r\n?~', '~[^\P{C}\t\n]+~u'), array("\n", ''), $string);
-}
-
-
-function replaceTokensInString($formatString, $arrVariables)
-{
-//    $variables = array("first_name"=>"John","last_name"=>"Smith","status"=>"won");
-//    $string = 'Dear {FIRST_NAME} {LAST_NAME}, we wanted to tell you that you {STATUS} the competition.';
-    $ret = $formatString;
-    foreach($arrVariables as $key => $value){
-        $ret = str_replace('{'.strtoupper($key).'}', $value, $ret);
-//        $ret = str_replace('***'.strtoupper($key).'***', $value, $ret);
-    }
-
-    return $ret;
-}
 
 function combineTextAllChildren($node, $fRecursed = false)
 {

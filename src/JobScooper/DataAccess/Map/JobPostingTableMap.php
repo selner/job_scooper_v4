@@ -232,7 +232,7 @@ class JobPostingTableMap extends TableMap
         $this->setUseIdGenerator(true);
         // columns
         $this->addPrimaryKey('jobposting_id', 'JobPostingId', 'INTEGER', true, null, null);
-        $this->addColumn('jobsite_key', 'JobSiteKey', 'VARCHAR', true, 100, null);
+        $this->addForeignKey('jobsite_key', 'JobSiteKey', 'VARCHAR', 'job_site', 'jobsite_key', true, 100, null);
         $this->addColumn('jobsite_post_id', 'JobSitePostId', 'VARCHAR', true, 255, null);
         $this->addColumn('title', 'Title', 'VARCHAR', true, 255, null);
         $this->addColumn('title_tokens', 'TitleTokens', 'VARCHAR', false, 255, null);
@@ -261,6 +261,13 @@ class JobPostingTableMap extends TableMap
      */
     public function buildRelations()
     {
+        $this->addRelation('JobSiteRecord', '\\JobScooper\\DataAccess\\JobSiteRecord', RelationMap::MANY_TO_ONE, array (
+  0 =>
+  array (
+    0 => ':jobsite_key',
+    1 => ':jobsite_key',
+  ),
+), null, null, null, false);
         $this->addRelation('GeoLocation', '\\JobScooper\\DataAccess\\GeoLocation', RelationMap::MANY_TO_ONE, array (
   0 =>
   array (

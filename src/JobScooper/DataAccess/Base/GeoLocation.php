@@ -8,11 +8,11 @@ use JobScooper\DataAccess\GeoLocation as ChildGeoLocation;
 use JobScooper\DataAccess\GeoLocationQuery as ChildGeoLocationQuery;
 use JobScooper\DataAccess\JobPosting as ChildJobPosting;
 use JobScooper\DataAccess\JobPostingQuery as ChildJobPostingQuery;
-use JobScooper\DataAccess\UserSearchRun as ChildUserSearchRun;
-use JobScooper\DataAccess\UserSearchRunQuery as ChildUserSearchRunQuery;
+use JobScooper\DataAccess\UserSearch as ChildUserSearch;
+use JobScooper\DataAccess\UserSearchQuery as ChildUserSearchQuery;
 use JobScooper\DataAccess\Map\GeoLocationTableMap;
 use JobScooper\DataAccess\Map\JobPostingTableMap;
-use JobScooper\DataAccess\Map\UserSearchRunTableMap;
+use JobScooper\DataAccess\Map\UserSearchTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -165,10 +165,10 @@ abstract class GeoLocation implements ActiveRecordInterface
     protected $collJobPostingsPartial;
 
     /**
-     * @var        ObjectCollection|ChildUserSearchRun[] Collection to store aggregation of ChildUserSearchRun objects.
+     * @var        ObjectCollection|ChildUserSearch[] Collection to store aggregation of ChildUserSearch objects.
      */
-    protected $collUserSearchRuns;
-    protected $collUserSearchRunsPartial;
+    protected $collUserSearches;
+    protected $collUserSearchesPartial;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -186,9 +186,9 @@ abstract class GeoLocation implements ActiveRecordInterface
 
     /**
      * An array of objects scheduled for deletion.
-     * @var ObjectCollection|ChildUserSearchRun[]
+     * @var ObjectCollection|ChildUserSearch[]
      */
-    protected $userSearchRunsScheduledForDeletion = null;
+    protected $userSearchesScheduledForDeletion = null;
 
     /**
      * Initializes internal state of JobScooper\DataAccess\Base\GeoLocation object.
@@ -968,7 +968,7 @@ abstract class GeoLocation implements ActiveRecordInterface
 
             $this->collJobPostings = null;
 
-            $this->collUserSearchRuns = null;
+            $this->collUserSearches = null;
 
         } // if (deep)
     }
@@ -1043,13 +1043,6 @@ abstract class GeoLocation implements ActiveRecordInterface
         return $con->transaction(function () use ($con, $skipReload) {
             $ret = $this->preSave($con);
             $isInsert = $this->isNew();
-            // sluggable behavior
-
-            if ($this->isColumnModified(GeoLocationTableMap::COL_GEOLOCATION_KEY) && $this->getGeoLocationKey()) {
-                $this->setGeoLocationKey($this->makeSlugUnique($this->getGeoLocationKey()));
-            } else {
-                $this->setGeoLocationKey($this->createSlug());
-            }
             if ($isInsert) {
                 $ret = $ret && $this->preInsert($con);
             } else {
@@ -1127,18 +1120,18 @@ abstract class GeoLocation implements ActiveRecordInterface
                 }
             }
 
-            if ($this->userSearchRunsScheduledForDeletion !== null) {
-                if (!$this->userSearchRunsScheduledForDeletion->isEmpty()) {
-                    foreach ($this->userSearchRunsScheduledForDeletion as $userSearchRun) {
+            if ($this->userSearchesScheduledForDeletion !== null) {
+                if (!$this->userSearchesScheduledForDeletion->isEmpty()) {
+                    foreach ($this->userSearchesScheduledForDeletion as $userSearch) {
                         // need to save related object because we set the relation to null
-                        $userSearchRun->save($con);
+                        $userSearch->save($con);
                     }
-                    $this->userSearchRunsScheduledForDeletion = null;
+                    $this->userSearchesScheduledForDeletion = null;
                 }
             }
 
-            if ($this->collUserSearchRuns !== null) {
-                foreach ($this->collUserSearchRuns as $referrerFK) {
+            if ($this->collUserSearches !== null) {
+                foreach ($this->collUserSearches as $referrerFK) {
                     if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
                         $affectedRows += $referrerFK->save($con);
                     }
@@ -1420,20 +1413,20 @@ abstract class GeoLocation implements ActiveRecordInterface
 
                 $result[$key] = $this->collJobPostings->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
-            if (null !== $this->collUserSearchRuns) {
+            if (null !== $this->collUserSearches) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
-                        $key = 'userSearchRuns';
+                        $key = 'userSearches';
                         break;
                     case TableMap::TYPE_FIELDNAME:
-                        $key = 'user_search_runs';
+                        $key = 'user_searches';
                         break;
                     default:
-                        $key = 'UserSearchRuns';
+                        $key = 'UserSearches';
                 }
 
-                $result[$key] = $this->collUserSearchRuns->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
+                $result[$key] = $this->collUserSearches->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
         }
 
@@ -1757,9 +1750,9 @@ abstract class GeoLocation implements ActiveRecordInterface
                 }
             }
 
-            foreach ($this->getUserSearchRuns() as $relObj) {
+            foreach ($this->getUserSearches() as $relObj) {
                 if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
-                    $copyObj->addUserSearchRun($relObj->copy($deepCopy));
+                    $copyObj->addUserSearch($relObj->copy($deepCopy));
                 }
             }
 
@@ -1808,8 +1801,8 @@ abstract class GeoLocation implements ActiveRecordInterface
             $this->initJobPostings();
             return;
         }
-        if ('UserSearchRun' == $relationName) {
-            $this->initUserSearchRuns();
+        if ('UserSearch' == $relationName) {
+            $this->initUserSearches();
             return;
         }
     }
@@ -2056,6 +2049,31 @@ abstract class GeoLocation implements ActiveRecordInterface
      * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
      * @return ObjectCollection|ChildJobPosting[] List of ChildJobPosting objects
      */
+    public function getJobPostingsJoinJobSiteRecord(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    {
+        $query = ChildJobPostingQuery::create(null, $criteria);
+        $query->joinWith('JobSiteRecord', $joinBehavior);
+
+        return $this->getJobPostings($query, $con);
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this GeoLocation is new, it will return
+     * an empty collection; or if this GeoLocation has previously
+     * been saved, it will retrieve related JobPostings from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in GeoLocation.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return ObjectCollection|ChildJobPosting[] List of ChildJobPosting objects
+     */
     public function getJobPostingsJoinJobPostingRelatedByDuplicatesJobPostingId(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
     {
         $query = ChildJobPostingQuery::create(null, $criteria);
@@ -2065,31 +2083,31 @@ abstract class GeoLocation implements ActiveRecordInterface
     }
 
     /**
-     * Clears out the collUserSearchRuns collection
+     * Clears out the collUserSearches collection
      *
      * This does not modify the database; however, it will remove any associated objects, causing
      * them to be refetched by subsequent calls to accessor method.
      *
      * @return void
-     * @see        addUserSearchRuns()
+     * @see        addUserSearches()
      */
-    public function clearUserSearchRuns()
+    public function clearUserSearches()
     {
-        $this->collUserSearchRuns = null; // important to set this to NULL since that means it is uninitialized
+        $this->collUserSearches = null; // important to set this to NULL since that means it is uninitialized
     }
 
     /**
-     * Reset is the collUserSearchRuns collection loaded partially.
+     * Reset is the collUserSearches collection loaded partially.
      */
-    public function resetPartialUserSearchRuns($v = true)
+    public function resetPartialUserSearches($v = true)
     {
-        $this->collUserSearchRunsPartial = $v;
+        $this->collUserSearchesPartial = $v;
     }
 
     /**
-     * Initializes the collUserSearchRuns collection.
+     * Initializes the collUserSearches collection.
      *
-     * By default this just sets the collUserSearchRuns collection to an empty array (like clearcollUserSearchRuns());
+     * By default this just sets the collUserSearches collection to an empty array (like clearcollUserSearches());
      * however, you may wish to override this method in your stub class to provide setting appropriate
      * to your application -- for example, setting the initial array to the values stored in database.
      *
@@ -2098,20 +2116,20 @@ abstract class GeoLocation implements ActiveRecordInterface
      *
      * @return void
      */
-    public function initUserSearchRuns($overrideExisting = true)
+    public function initUserSearches($overrideExisting = true)
     {
-        if (null !== $this->collUserSearchRuns && !$overrideExisting) {
+        if (null !== $this->collUserSearches && !$overrideExisting) {
             return;
         }
 
-        $collectionClassName = UserSearchRunTableMap::getTableMap()->getCollectionClassName();
+        $collectionClassName = UserSearchTableMap::getTableMap()->getCollectionClassName();
 
-        $this->collUserSearchRuns = new $collectionClassName;
-        $this->collUserSearchRuns->setModel('\JobScooper\DataAccess\UserSearchRun');
+        $this->collUserSearches = new $collectionClassName;
+        $this->collUserSearches->setModel('\JobScooper\DataAccess\UserSearch');
     }
 
     /**
-     * Gets an array of ChildUserSearchRun objects which contain a foreign key that references this object.
+     * Gets an array of ChildUserSearch objects which contain a foreign key that references this object.
      *
      * If the $criteria is not null, it is used to always fetch the results from the database.
      * Otherwise the results are fetched from the database the first time, then cached.
@@ -2121,108 +2139,108 @@ abstract class GeoLocation implements ActiveRecordInterface
      *
      * @param      Criteria $criteria optional Criteria object to narrow the query
      * @param      ConnectionInterface $con optional connection object
-     * @return ObjectCollection|ChildUserSearchRun[] List of ChildUserSearchRun objects
+     * @return ObjectCollection|ChildUserSearch[] List of ChildUserSearch objects
      * @throws PropelException
      */
-    public function getUserSearchRuns(Criteria $criteria = null, ConnectionInterface $con = null)
+    public function getUserSearches(Criteria $criteria = null, ConnectionInterface $con = null)
     {
-        $partial = $this->collUserSearchRunsPartial && !$this->isNew();
-        if (null === $this->collUserSearchRuns || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collUserSearchRuns) {
+        $partial = $this->collUserSearchesPartial && !$this->isNew();
+        if (null === $this->collUserSearches || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collUserSearches) {
                 // return empty collection
-                $this->initUserSearchRuns();
+                $this->initUserSearches();
             } else {
-                $collUserSearchRuns = ChildUserSearchRunQuery::create(null, $criteria)
+                $collUserSearches = ChildUserSearchQuery::create(null, $criteria)
                     ->filterByGeoLocation($this)
                     ->find($con);
 
                 if (null !== $criteria) {
-                    if (false !== $this->collUserSearchRunsPartial && count($collUserSearchRuns)) {
-                        $this->initUserSearchRuns(false);
+                    if (false !== $this->collUserSearchesPartial && count($collUserSearches)) {
+                        $this->initUserSearches(false);
 
-                        foreach ($collUserSearchRuns as $obj) {
-                            if (false == $this->collUserSearchRuns->contains($obj)) {
-                                $this->collUserSearchRuns->append($obj);
+                        foreach ($collUserSearches as $obj) {
+                            if (false == $this->collUserSearches->contains($obj)) {
+                                $this->collUserSearches->append($obj);
                             }
                         }
 
-                        $this->collUserSearchRunsPartial = true;
+                        $this->collUserSearchesPartial = true;
                     }
 
-                    return $collUserSearchRuns;
+                    return $collUserSearches;
                 }
 
-                if ($partial && $this->collUserSearchRuns) {
-                    foreach ($this->collUserSearchRuns as $obj) {
+                if ($partial && $this->collUserSearches) {
+                    foreach ($this->collUserSearches as $obj) {
                         if ($obj->isNew()) {
-                            $collUserSearchRuns[] = $obj;
+                            $collUserSearches[] = $obj;
                         }
                     }
                 }
 
-                $this->collUserSearchRuns = $collUserSearchRuns;
-                $this->collUserSearchRunsPartial = false;
+                $this->collUserSearches = $collUserSearches;
+                $this->collUserSearchesPartial = false;
             }
         }
 
-        return $this->collUserSearchRuns;
+        return $this->collUserSearches;
     }
 
     /**
-     * Sets a collection of ChildUserSearchRun objects related by a one-to-many relationship
+     * Sets a collection of ChildUserSearch objects related by a one-to-many relationship
      * to the current object.
      * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
      * and new objects from the given Propel collection.
      *
-     * @param      Collection $userSearchRuns A Propel collection.
+     * @param      Collection $userSearches A Propel collection.
      * @param      ConnectionInterface $con Optional connection object
      * @return $this|ChildGeoLocation The current object (for fluent API support)
      */
-    public function setUserSearchRuns(Collection $userSearchRuns, ConnectionInterface $con = null)
+    public function setUserSearches(Collection $userSearches, ConnectionInterface $con = null)
     {
-        /** @var ChildUserSearchRun[] $userSearchRunsToDelete */
-        $userSearchRunsToDelete = $this->getUserSearchRuns(new Criteria(), $con)->diff($userSearchRuns);
+        /** @var ChildUserSearch[] $userSearchesToDelete */
+        $userSearchesToDelete = $this->getUserSearches(new Criteria(), $con)->diff($userSearches);
 
 
-        $this->userSearchRunsScheduledForDeletion = $userSearchRunsToDelete;
+        $this->userSearchesScheduledForDeletion = $userSearchesToDelete;
 
-        foreach ($userSearchRunsToDelete as $userSearchRunRemoved) {
-            $userSearchRunRemoved->setGeoLocation(null);
+        foreach ($userSearchesToDelete as $userSearchRemoved) {
+            $userSearchRemoved->setGeoLocation(null);
         }
 
-        $this->collUserSearchRuns = null;
-        foreach ($userSearchRuns as $userSearchRun) {
-            $this->addUserSearchRun($userSearchRun);
+        $this->collUserSearches = null;
+        foreach ($userSearches as $userSearch) {
+            $this->addUserSearch($userSearch);
         }
 
-        $this->collUserSearchRuns = $userSearchRuns;
-        $this->collUserSearchRunsPartial = false;
+        $this->collUserSearches = $userSearches;
+        $this->collUserSearchesPartial = false;
 
         return $this;
     }
 
     /**
-     * Returns the number of related UserSearchRun objects.
+     * Returns the number of related UserSearch objects.
      *
      * @param      Criteria $criteria
      * @param      boolean $distinct
      * @param      ConnectionInterface $con
-     * @return int             Count of related UserSearchRun objects.
+     * @return int             Count of related UserSearch objects.
      * @throws PropelException
      */
-    public function countUserSearchRuns(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    public function countUserSearches(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
     {
-        $partial = $this->collUserSearchRunsPartial && !$this->isNew();
-        if (null === $this->collUserSearchRuns || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->collUserSearchRuns) {
+        $partial = $this->collUserSearchesPartial && !$this->isNew();
+        if (null === $this->collUserSearches || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collUserSearches) {
                 return 0;
             }
 
             if ($partial && !$criteria) {
-                return count($this->getUserSearchRuns());
+                return count($this->getUserSearches());
             }
 
-            $query = ChildUserSearchRunQuery::create(null, $criteria);
+            $query = ChildUserSearchQuery::create(null, $criteria);
             if ($distinct) {
                 $query->distinct();
             }
@@ -2232,28 +2250,28 @@ abstract class GeoLocation implements ActiveRecordInterface
                 ->count($con);
         }
 
-        return count($this->collUserSearchRuns);
+        return count($this->collUserSearches);
     }
 
     /**
-     * Method called to associate a ChildUserSearchRun object to this object
-     * through the ChildUserSearchRun foreign key attribute.
+     * Method called to associate a ChildUserSearch object to this object
+     * through the ChildUserSearch foreign key attribute.
      *
-     * @param  ChildUserSearchRun $l ChildUserSearchRun
+     * @param  ChildUserSearch $l ChildUserSearch
      * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
-    public function addUserSearchRun(ChildUserSearchRun $l)
+    public function addUserSearch(ChildUserSearch $l)
     {
-        if ($this->collUserSearchRuns === null) {
-            $this->initUserSearchRuns();
-            $this->collUserSearchRunsPartial = true;
+        if ($this->collUserSearches === null) {
+            $this->initUserSearches();
+            $this->collUserSearchesPartial = true;
         }
 
-        if (!$this->collUserSearchRuns->contains($l)) {
-            $this->doAddUserSearchRun($l);
+        if (!$this->collUserSearches->contains($l)) {
+            $this->doAddUserSearch($l);
 
-            if ($this->userSearchRunsScheduledForDeletion and $this->userSearchRunsScheduledForDeletion->contains($l)) {
-                $this->userSearchRunsScheduledForDeletion->remove($this->userSearchRunsScheduledForDeletion->search($l));
+            if ($this->userSearchesScheduledForDeletion and $this->userSearchesScheduledForDeletion->contains($l)) {
+                $this->userSearchesScheduledForDeletion->remove($this->userSearchesScheduledForDeletion->search($l));
             }
         }
 
@@ -2261,29 +2279,29 @@ abstract class GeoLocation implements ActiveRecordInterface
     }
 
     /**
-     * @param ChildUserSearchRun $userSearchRun The ChildUserSearchRun object to add.
+     * @param ChildUserSearch $userSearch The ChildUserSearch object to add.
      */
-    protected function doAddUserSearchRun(ChildUserSearchRun $userSearchRun)
+    protected function doAddUserSearch(ChildUserSearch $userSearch)
     {
-        $this->collUserSearchRuns[]= $userSearchRun;
-        $userSearchRun->setGeoLocation($this);
+        $this->collUserSearches[]= $userSearch;
+        $userSearch->setGeoLocation($this);
     }
 
     /**
-     * @param  ChildUserSearchRun $userSearchRun The ChildUserSearchRun object to remove.
+     * @param  ChildUserSearch $userSearch The ChildUserSearch object to remove.
      * @return $this|ChildGeoLocation The current object (for fluent API support)
      */
-    public function removeUserSearchRun(ChildUserSearchRun $userSearchRun)
+    public function removeUserSearch(ChildUserSearch $userSearch)
     {
-        if ($this->getUserSearchRuns()->contains($userSearchRun)) {
-            $pos = $this->collUserSearchRuns->search($userSearchRun);
-            $this->collUserSearchRuns->remove($pos);
-            if (null === $this->userSearchRunsScheduledForDeletion) {
-                $this->userSearchRunsScheduledForDeletion = clone $this->collUserSearchRuns;
-                $this->userSearchRunsScheduledForDeletion->clear();
+        if ($this->getUserSearches()->contains($userSearch)) {
+            $pos = $this->collUserSearches->search($userSearch);
+            $this->collUserSearches->remove($pos);
+            if (null === $this->userSearchesScheduledForDeletion) {
+                $this->userSearchesScheduledForDeletion = clone $this->collUserSearches;
+                $this->userSearchesScheduledForDeletion->clear();
             }
-            $this->userSearchRunsScheduledForDeletion[]= $userSearchRun;
-            $userSearchRun->setGeoLocation(null);
+            $this->userSearchesScheduledForDeletion[]= $userSearch;
+            $userSearch->setGeoLocation(null);
         }
 
         return $this;
@@ -2295,7 +2313,7 @@ abstract class GeoLocation implements ActiveRecordInterface
      * an identical criteria, it returns the collection.
      * Otherwise if this GeoLocation is new, it will return
      * an empty collection; or if this GeoLocation has previously
-     * been saved, it will retrieve related UserSearchRuns from storage.
+     * been saved, it will retrieve related UserSearches from storage.
      *
      * This method is protected by default in order to keep the public
      * api reasonable.  You can provide public methods for those you
@@ -2304,39 +2322,14 @@ abstract class GeoLocation implements ActiveRecordInterface
      * @param      Criteria $criteria optional Criteria object to narrow the query
      * @param      ConnectionInterface $con optional connection object
      * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
-     * @return ObjectCollection|ChildUserSearchRun[] List of ChildUserSearchRun objects
+     * @return ObjectCollection|ChildUserSearch[] List of ChildUserSearch objects
      */
-    public function getUserSearchRunsJoinJobSitePlugin(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    public function getUserSearchesJoinUser(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
     {
-        $query = ChildUserSearchRunQuery::create(null, $criteria);
-        $query->joinWith('JobSitePlugin', $joinBehavior);
-
-        return $this->getUserSearchRuns($query, $con);
-    }
-
-
-    /**
-     * If this collection has already been initialized with
-     * an identical criteria, it returns the collection.
-     * Otherwise if this GeoLocation is new, it will return
-     * an empty collection; or if this GeoLocation has previously
-     * been saved, it will retrieve related UserSearchRuns from storage.
-     *
-     * This method is protected by default in order to keep the public
-     * api reasonable.  You can provide public methods for those you
-     * actually need in GeoLocation.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
-     * @return ObjectCollection|ChildUserSearchRun[] List of ChildUserSearchRun objects
-     */
-    public function getUserSearchRunsJoinUser(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
-    {
-        $query = ChildUserSearchRunQuery::create(null, $criteria);
+        $query = ChildUserSearchQuery::create(null, $criteria);
         $query->joinWith('User', $joinBehavior);
 
-        return $this->getUserSearchRuns($query, $con);
+        return $this->getUserSearches($query, $con);
     }
 
     /**
@@ -2382,15 +2375,15 @@ abstract class GeoLocation implements ActiveRecordInterface
                     $o->clearAllReferences($deep);
                 }
             }
-            if ($this->collUserSearchRuns) {
-                foreach ($this->collUserSearchRuns as $o) {
+            if ($this->collUserSearches) {
+                foreach ($this->collUserSearches as $o) {
                     $o->clearAllReferences($deep);
                 }
             }
         } // if ($deep)
 
         $this->collJobPostings = null;
-        $this->collUserSearchRuns = null;
+        $this->collUserSearches = null;
     }
 
     /**
@@ -2401,164 +2394,6 @@ abstract class GeoLocation implements ActiveRecordInterface
     public function __toString()
     {
         return (string) $this->getDisplayName();
-    }
-
-    // sluggable behavior
-
-    /**
-     * Wrap the setter for slug value
-     *
-     * @param   string
-     * @return  $this|GeoLocation
-     */
-    public function setSlug($v)
-    {
-        return $this->setGeoLocationKey($v);
-    }
-
-    /**
-     * Wrap the getter for slug value
-     *
-     * @return  string
-     */
-    public function getSlug()
-    {
-        return $this->getGeoLocationKey();
-    }
-
-    /**
-     * Create a unique slug based on the object
-     *
-     * @return string The object slug
-     */
-    protected function createSlug()
-    {
-        $slug = $this->createRawSlug();
-        $slug = $this->limitSlugSize($slug);
-        $slug = $this->makeSlugUnique($slug);
-
-        return $slug;
-    }
-
-    /**
-     * Create the slug from the appropriate columns
-     *
-     * @return string
-     */
-    protected function createRawSlug()
-    {
-        return '' . $this->cleanupSlugPart($this->getDisplayName()) . '';
-    }
-
-    /**
-     * Cleanup a string to make a slug of it
-     * Removes special characters, replaces blanks with a separator, and trim it
-     *
-     * @param     string $slug        the text to slugify
-     * @param     string $replacement the separator used by slug
-     * @return    string               the slugified text
-     */
-    protected static function cleanupSlugPart($slug, $replacement = '')
-    {
-        // transliterate
-        if (function_exists('iconv')) {
-            $slug = iconv('utf-8', 'us-ascii//TRANSLIT', $slug);
-        }
-
-        // lowercase
-        if (function_exists('mb_strtolower')) {
-            $slug = mb_strtolower($slug);
-        } else {
-            $slug = strtolower($slug);
-        }
-
-        // remove accents resulting from OSX's iconv
-        $slug = str_replace(array('\'', '`', '^'), '', $slug);
-
-        // replace non letter or digits with separator
-        $slug = preg_replace('/[^\w\/]+/u', $replacement, $slug);
-
-        // trim
-        $slug = trim($slug, $replacement);
-
-        if (empty($slug)) {
-            return 'n-a';
-        }
-
-        return $slug;
-    }
-
-
-    /**
-     * Make sure the slug is short enough to accommodate the column size
-     *
-     * @param    string $slug            the slug to check
-     *
-     * @return string                        the truncated slug
-     */
-    protected static function limitSlugSize($slug, $incrementReservedSpace = 3)
-    {
-        // check length, as suffix could put it over maximum
-        if (strlen($slug) > (100 - $incrementReservedSpace)) {
-            $slug = substr($slug, 0, 100 - $incrementReservedSpace);
-        }
-
-        return $slug;
-    }
-
-
-    /**
-     * Get the slug, ensuring its uniqueness
-     *
-     * @param    string $slug            the slug to check
-     * @param    string $separator       the separator used by slug
-     * @param    int    $alreadyExists   false for the first try, true for the second, and take the high count + 1
-     * @return   string                   the unique slug
-     */
-    protected function makeSlugUnique($slug, $separator = '-', $alreadyExists = false)
-    {
-        if (!$alreadyExists) {
-            $slug2 = $slug;
-        } else {
-            $slug2 = $slug . $separator;
-        }
-
-        $adapter = \Propel\Runtime\Propel::getServiceContainer()->getAdapter('default');
-        $col = 'q.GeoLocationKey';
-        $compare = $alreadyExists ? $adapter->compareRegex($col, '?') : sprintf('%s = ?', $col);
-
-        $query = \JobScooper\DataAccess\GeoLocationQuery::create('q')
-            ->where($compare, $alreadyExists ? '^' . $slug2 . '[0-9]+$' : $slug2)
-            ->prune($this)
-        ;
-
-        if (!$alreadyExists) {
-            $count = $query->count();
-            if ($count > 0) {
-                return $this->makeSlugUnique($slug, $separator, true);
-            }
-
-            return $slug2;
-        }
-
-        $adapter = \Propel\Runtime\Propel::getServiceContainer()->getAdapter('default');
-        // Already exists
-        $object = $query
-            ->addDescendingOrderByColumn($adapter->strLength('geolocation_key'))
-            ->addDescendingOrderByColumn('geolocation_key')
-        ->findOne();
-
-        // First duplicate slug
-        if (null == $object) {
-            return $slug2 . '1';
-        }
-
-        $slugNum = substr($object->getGeoLocationKey(), strlen($slug) + 1);
-        if (0 == $slugNum[0]) {
-            $slugNum[0] = 1;
-        }
-
-        return $slug2 . ($slugNum + 1);
     }
 
     // geocodable behavior

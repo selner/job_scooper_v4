@@ -8,10 +8,10 @@ use JobScooper\DataAccess\User as ChildUser;
 use JobScooper\DataAccess\UserJobMatch as ChildUserJobMatch;
 use JobScooper\DataAccess\UserJobMatchQuery as ChildUserJobMatchQuery;
 use JobScooper\DataAccess\UserQuery as ChildUserQuery;
-use JobScooper\DataAccess\UserSearchRun as ChildUserSearchRun;
-use JobScooper\DataAccess\UserSearchRunQuery as ChildUserSearchRunQuery;
+use JobScooper\DataAccess\UserSearch as ChildUserSearch;
+use JobScooper\DataAccess\UserSearchQuery as ChildUserSearchQuery;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
-use JobScooper\DataAccess\Map\UserSearchRunTableMap;
+use JobScooper\DataAccess\Map\UserSearchTableMap;
 use JobScooper\DataAccess\Map\UserTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
@@ -68,6 +68,13 @@ abstract class User implements ActiveRecordInterface
     protected $virtualColumns = array();
 
     /**
+     * The value for the user_id field.
+     *
+     * @var        int
+     */
+    protected $user_id;
+
+    /**
      * The value for the user_slug field.
      *
      * @var        string
@@ -102,10 +109,10 @@ abstract class User implements ActiveRecordInterface
     protected $collUserJobMatchesPartial;
 
     /**
-     * @var        ObjectCollection|ChildUserSearchRun[] Collection to store aggregation of ChildUserSearchRun objects.
+     * @var        ObjectCollection|ChildUserSearch[] Collection to store aggregation of ChildUserSearch objects.
      */
-    protected $collUserSearchRuns;
-    protected $collUserSearchRunsPartial;
+    protected $collUserSearches;
+    protected $collUserSearchesPartial;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -123,9 +130,9 @@ abstract class User implements ActiveRecordInterface
 
     /**
      * An array of objects scheduled for deletion.
-     * @var ObjectCollection|ChildUserSearchRun[]
+     * @var ObjectCollection|ChildUserSearch[]
      */
-    protected $userSearchRunsScheduledForDeletion = null;
+    protected $userSearchesScheduledForDeletion = null;
 
     /**
      * Initializes internal state of JobScooper\DataAccess\Base\User object.
@@ -353,6 +360,16 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
+     * Get the [user_id] column value.
+     *
+     * @return int
+     */
+    public function getUserId()
+    {
+        return $this->user_id;
+    }
+
+    /**
      * Get the [user_slug] column value.
      *
      * @return string
@@ -391,6 +408,26 @@ abstract class User implements ActiveRecordInterface
     {
         return $this->configuration_file_path;
     }
+
+    /**
+     * Set the value of [user_id] column.
+     *
+     * @param int $v new value
+     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
+     */
+    public function setUserId($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->user_id !== $v) {
+            $this->user_id = $v;
+            $this->modifiedColumns[UserTableMap::COL_USER_ID] = true;
+        }
+
+        return $this;
+    } // setUserId()
 
     /**
      * Set the value of [user_slug] column.
@@ -508,16 +545,19 @@ abstract class User implements ActiveRecordInterface
     {
         try {
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : UserTableMap::translateFieldName('UserSlug', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : UserTableMap::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->user_id = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : UserTableMap::translateFieldName('UserSlug', TableMap::TYPE_PHPNAME, $indexType)];
             $this->user_slug = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : UserTableMap::translateFieldName('Name', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : UserTableMap::translateFieldName('Name', TableMap::TYPE_PHPNAME, $indexType)];
             $this->name = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : UserTableMap::translateFieldName('EmailAddress', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : UserTableMap::translateFieldName('EmailAddress', TableMap::TYPE_PHPNAME, $indexType)];
             $this->email_address = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : UserTableMap::translateFieldName('ConfigFilePath', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserTableMap::translateFieldName('ConfigFilePath', TableMap::TYPE_PHPNAME, $indexType)];
             $this->configuration_file_path = (null !== $col) ? (string) $col : null;
             $this->resetModified();
 
@@ -527,7 +567,7 @@ abstract class User implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 4; // 4 = UserTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 5; // 5 = UserTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\User'), 0, $e);
@@ -590,7 +630,7 @@ abstract class User implements ActiveRecordInterface
 
             $this->collUserJobMatches = null;
 
-            $this->collUserSearchRuns = null;
+            $this->collUserSearches = null;
 
         } // if (deep)
     }
@@ -656,6 +696,13 @@ abstract class User implements ActiveRecordInterface
         return $con->transaction(function () use ($con) {
             $ret = $this->preSave($con);
             $isInsert = $this->isNew();
+            // sluggable behavior
+
+            if ($this->isColumnModified(UserTableMap::COL_USER_SLUG) && $this->getUserSlug()) {
+                $this->setUserSlug($this->makeSlugUnique($this->getUserSlug()));
+            } else {
+                $this->setUserSlug($this->createSlug());
+            }
             if ($isInsert) {
                 $ret = $ret && $this->preInsert($con);
             } else {
@@ -723,17 +770,17 @@ abstract class User implements ActiveRecordInterface
                 }
             }
 
-            if ($this->userSearchRunsScheduledForDeletion !== null) {
-                if (!$this->userSearchRunsScheduledForDeletion->isEmpty()) {
-                    \JobScooper\DataAccess\UserSearchRunQuery::create()
-                        ->filterByPrimaryKeys($this->userSearchRunsScheduledForDeletion->getPrimaryKeys(false))
+            if ($this->userSearchesScheduledForDeletion !== null) {
+                if (!$this->userSearchesScheduledForDeletion->isEmpty()) {
+                    \JobScooper\DataAccess\UserSearchQuery::create()
+                        ->filterByPrimaryKeys($this->userSearchesScheduledForDeletion->getPrimaryKeys(false))
                         ->delete($con);
-                    $this->userSearchRunsScheduledForDeletion = null;
+                    $this->userSearchesScheduledForDeletion = null;
                 }
             }
 
-            if ($this->collUserSearchRuns !== null) {
-                foreach ($this->collUserSearchRuns as $referrerFK) {
+            if ($this->collUserSearches !== null) {
+                foreach ($this->collUserSearches as $referrerFK) {
                     if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
                         $affectedRows += $referrerFK->save($con);
                     }
@@ -760,8 +807,12 @@ abstract class User implements ActiveRecordInterface
         $modifiedColumns = array();
         $index = 0;
 
+        $this->modifiedColumns[UserTableMap::COL_USER_ID] = true;
 
          // check the columns in natural order for more readable SQL queries
+        if ($this->isColumnModified(UserTableMap::COL_USER_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'user_id';
+        }
         if ($this->isColumnModified(UserTableMap::COL_USER_SLUG)) {
             $modifiedColumns[':p' . $index++]  = 'user_slug';
         }
@@ -785,6 +836,9 @@ abstract class User implements ActiveRecordInterface
             $stmt = $con->prepare($sql);
             foreach ($modifiedColumns as $identifier => $columnName) {
                 switch ($columnName) {
+                    case 'user_id':
+                        $stmt->bindValue($identifier, $this->user_id, PDO::PARAM_INT);
+                        break;
                     case 'user_slug':
                         $stmt->bindValue($identifier, $this->user_slug, PDO::PARAM_STR);
                         break;
@@ -803,6 +857,15 @@ abstract class User implements ActiveRecordInterface
         } catch (Exception $e) {
             Propel::log($e->getMessage(), Propel::LOG_ERR);
             throw new PropelException(sprintf('Unable to execute INSERT statement [%s]', $sql), 0, $e);
+        }
+
+        try {
+            $pk = $con->lastInsertId();
+        } catch (Exception $e) {
+            throw new PropelException('Unable to get autoincrement id.', 0, $e);
+        }
+        if ($pk !== null) {
+            $this->setUserId($pk);
         }
 
         $this->setNew(false);
@@ -853,15 +916,18 @@ abstract class User implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                return $this->getUserSlug();
+                return $this->getUserId();
                 break;
             case 1:
-                return $this->getName();
+                return $this->getUserSlug();
                 break;
             case 2:
-                return $this->getEmailAddress();
+                return $this->getName();
                 break;
             case 3:
+                return $this->getEmailAddress();
+                break;
+            case 4:
                 return $this->getConfigFilePath();
                 break;
             default:
@@ -894,10 +960,11 @@ abstract class User implements ActiveRecordInterface
         $alreadyDumpedObjects['User'][$this->hashCode()] = true;
         $keys = UserTableMap::getFieldNames($keyType);
         $result = array(
-            $keys[0] => $this->getUserSlug(),
-            $keys[1] => $this->getName(),
-            $keys[2] => $this->getEmailAddress(),
-            $keys[3] => $this->getConfigFilePath(),
+            $keys[0] => $this->getUserId(),
+            $keys[1] => $this->getUserSlug(),
+            $keys[2] => $this->getName(),
+            $keys[3] => $this->getEmailAddress(),
+            $keys[4] => $this->getConfigFilePath(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -920,20 +987,20 @@ abstract class User implements ActiveRecordInterface
 
                 $result[$key] = $this->collUserJobMatches->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
-            if (null !== $this->collUserSearchRuns) {
+            if (null !== $this->collUserSearches) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
-                        $key = 'userSearchRuns';
+                        $key = 'userSearches';
                         break;
                     case TableMap::TYPE_FIELDNAME:
-                        $key = 'user_search_runs';
+                        $key = 'user_searches';
                         break;
                     default:
-                        $key = 'UserSearchRuns';
+                        $key = 'UserSearches';
                 }
 
-                $result[$key] = $this->collUserSearchRuns->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
+                $result[$key] = $this->collUserSearches->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
         }
 
@@ -970,15 +1037,18 @@ abstract class User implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                $this->setUserSlug($value);
+                $this->setUserId($value);
                 break;
             case 1:
-                $this->setName($value);
+                $this->setUserSlug($value);
                 break;
             case 2:
-                $this->setEmailAddress($value);
+                $this->setName($value);
                 break;
             case 3:
+                $this->setEmailAddress($value);
+                break;
+            case 4:
                 $this->setConfigFilePath($value);
                 break;
         } // switch()
@@ -1008,16 +1078,19 @@ abstract class User implements ActiveRecordInterface
         $keys = UserTableMap::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) {
-            $this->setUserSlug($arr[$keys[0]]);
+            $this->setUserId($arr[$keys[0]]);
         }
         if (array_key_exists($keys[1], $arr)) {
-            $this->setName($arr[$keys[1]]);
+            $this->setUserSlug($arr[$keys[1]]);
         }
         if (array_key_exists($keys[2], $arr)) {
-            $this->setEmailAddress($arr[$keys[2]]);
+            $this->setName($arr[$keys[2]]);
         }
         if (array_key_exists($keys[3], $arr)) {
-            $this->setConfigFilePath($arr[$keys[3]]);
+            $this->setEmailAddress($arr[$keys[3]]);
+        }
+        if (array_key_exists($keys[4], $arr)) {
+            $this->setConfigFilePath($arr[$keys[4]]);
         }
     }
 
@@ -1060,6 +1133,9 @@ abstract class User implements ActiveRecordInterface
     {
         $criteria = new Criteria(UserTableMap::DATABASE_NAME);
 
+        if ($this->isColumnModified(UserTableMap::COL_USER_ID)) {
+            $criteria->add(UserTableMap::COL_USER_ID, $this->user_id);
+        }
         if ($this->isColumnModified(UserTableMap::COL_USER_SLUG)) {
             $criteria->add(UserTableMap::COL_USER_SLUG, $this->user_slug);
         }
@@ -1089,7 +1165,7 @@ abstract class User implements ActiveRecordInterface
     public function buildPkeyCriteria()
     {
         $criteria = ChildUserQuery::create();
-        $criteria->add(UserTableMap::COL_USER_SLUG, $this->user_slug);
+        $criteria->add(UserTableMap::COL_USER_ID, $this->user_id);
 
         return $criteria;
     }
@@ -1102,7 +1178,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function hashCode()
     {
-        $validPk = null !== $this->getUserSlug();
+        $validPk = null !== $this->getUserId();
 
         $validPrimaryKeyFKs = 0;
         $primaryKeyFKs = [];
@@ -1118,22 +1194,22 @@ abstract class User implements ActiveRecordInterface
 
     /**
      * Returns the primary key for this object (row).
-     * @return string
+     * @return int
      */
     public function getPrimaryKey()
     {
-        return $this->getUserSlug();
+        return $this->getUserId();
     }
 
     /**
-     * Generic method to set the primary key (user_slug column).
+     * Generic method to set the primary key (user_id column).
      *
-     * @param       string $key Primary key.
+     * @param       int $key Primary key.
      * @return void
      */
     public function setPrimaryKey($key)
     {
-        $this->setUserSlug($key);
+        $this->setUserId($key);
     }
 
     /**
@@ -1142,7 +1218,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function isPrimaryKeyNull()
     {
-        return null === $this->getUserSlug();
+        return null === $this->getUserId();
     }
 
     /**
@@ -1174,9 +1250,9 @@ abstract class User implements ActiveRecordInterface
                 }
             }
 
-            foreach ($this->getUserSearchRuns() as $relObj) {
+            foreach ($this->getUserSearches() as $relObj) {
                 if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
-                    $copyObj->addUserSearchRun($relObj->copy($deepCopy));
+                    $copyObj->addUserSearch($relObj->copy($deepCopy));
                 }
             }
 
@@ -1184,6 +1260,7 @@ abstract class User implements ActiveRecordInterface
 
         if ($makeNew) {
             $copyObj->setNew(true);
+            $copyObj->setUserId(NULL); // this is a auto-increment column, so set to default value
         }
     }
 
@@ -1224,8 +1301,8 @@ abstract class User implements ActiveRecordInterface
             $this->initUserJobMatches();
             return;
         }
-        if ('UserSearchRun' == $relationName) {
-            $this->initUserSearchRuns();
+        if ('UserSearch' == $relationName) {
+            $this->initUserSearches();
             return;
         }
     }
@@ -1481,31 +1558,31 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Clears out the collUserSearchRuns collection
+     * Clears out the collUserSearches collection
      *
      * This does not modify the database; however, it will remove any associated objects, causing
      * them to be refetched by subsequent calls to accessor method.
      *
      * @return void
-     * @see        addUserSearchRuns()
+     * @see        addUserSearches()
      */
-    public function clearUserSearchRuns()
+    public function clearUserSearches()
     {
-        $this->collUserSearchRuns = null; // important to set this to NULL since that means it is uninitialized
+        $this->collUserSearches = null; // important to set this to NULL since that means it is uninitialized
     }
 
     /**
-     * Reset is the collUserSearchRuns collection loaded partially.
+     * Reset is the collUserSearches collection loaded partially.
      */
-    public function resetPartialUserSearchRuns($v = true)
+    public function resetPartialUserSearches($v = true)
     {
-        $this->collUserSearchRunsPartial = $v;
+        $this->collUserSearchesPartial = $v;
     }
 
     /**
-     * Initializes the collUserSearchRuns collection.
+     * Initializes the collUserSearches collection.
      *
-     * By default this just sets the collUserSearchRuns collection to an empty array (like clearcollUserSearchRuns());
+     * By default this just sets the collUserSearches collection to an empty array (like clearcollUserSearches());
      * however, you may wish to override this method in your stub class to provide setting appropriate
      * to your application -- for example, setting the initial array to the values stored in database.
      *
@@ -1514,20 +1591,20 @@ abstract class User implements ActiveRecordInterface
      *
      * @return void
      */
-    public function initUserSearchRuns($overrideExisting = true)
+    public function initUserSearches($overrideExisting = true)
     {
-        if (null !== $this->collUserSearchRuns && !$overrideExisting) {
+        if (null !== $this->collUserSearches && !$overrideExisting) {
             return;
         }
 
-        $collectionClassName = UserSearchRunTableMap::getTableMap()->getCollectionClassName();
+        $collectionClassName = UserSearchTableMap::getTableMap()->getCollectionClassName();
 
-        $this->collUserSearchRuns = new $collectionClassName;
-        $this->collUserSearchRuns->setModel('\JobScooper\DataAccess\UserSearchRun');
+        $this->collUserSearches = new $collectionClassName;
+        $this->collUserSearches->setModel('\JobScooper\DataAccess\UserSearch');
     }
 
     /**
-     * Gets an array of ChildUserSearchRun objects which contain a foreign key that references this object.
+     * Gets an array of ChildUserSearch objects which contain a foreign key that references this object.
      *
      * If the $criteria is not null, it is used to always fetch the results from the database.
      * Otherwise the results are fetched from the database the first time, then cached.
@@ -1537,108 +1614,108 @@ abstract class User implements ActiveRecordInterface
      *
      * @param      Criteria $criteria optional Criteria object to narrow the query
      * @param      ConnectionInterface $con optional connection object
-     * @return ObjectCollection|ChildUserSearchRun[] List of ChildUserSearchRun objects
+     * @return ObjectCollection|ChildUserSearch[] List of ChildUserSearch objects
      * @throws PropelException
      */
-    public function getUserSearchRuns(Criteria $criteria = null, ConnectionInterface $con = null)
+    public function getUserSearches(Criteria $criteria = null, ConnectionInterface $con = null)
     {
-        $partial = $this->collUserSearchRunsPartial && !$this->isNew();
-        if (null === $this->collUserSearchRuns || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collUserSearchRuns) {
+        $partial = $this->collUserSearchesPartial && !$this->isNew();
+        if (null === $this->collUserSearches || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collUserSearches) {
                 // return empty collection
-                $this->initUserSearchRuns();
+                $this->initUserSearches();
             } else {
-                $collUserSearchRuns = ChildUserSearchRunQuery::create(null, $criteria)
+                $collUserSearches = ChildUserSearchQuery::create(null, $criteria)
                     ->filterByUser($this)
                     ->find($con);
 
                 if (null !== $criteria) {
-                    if (false !== $this->collUserSearchRunsPartial && count($collUserSearchRuns)) {
-                        $this->initUserSearchRuns(false);
+                    if (false !== $this->collUserSearchesPartial && count($collUserSearches)) {
+                        $this->initUserSearches(false);
 
-                        foreach ($collUserSearchRuns as $obj) {
-                            if (false == $this->collUserSearchRuns->contains($obj)) {
-                                $this->collUserSearchRuns->append($obj);
+                        foreach ($collUserSearches as $obj) {
+                            if (false == $this->collUserSearches->contains($obj)) {
+                                $this->collUserSearches->append($obj);
                             }
                         }
 
-                        $this->collUserSearchRunsPartial = true;
+                        $this->collUserSearchesPartial = true;
                     }
 
-                    return $collUserSearchRuns;
+                    return $collUserSearches;
                 }
 
-                if ($partial && $this->collUserSearchRuns) {
-                    foreach ($this->collUserSearchRuns as $obj) {
+                if ($partial && $this->collUserSearches) {
+                    foreach ($this->collUserSearches as $obj) {
                         if ($obj->isNew()) {
-                            $collUserSearchRuns[] = $obj;
+                            $collUserSearches[] = $obj;
                         }
                     }
                 }
 
-                $this->collUserSearchRuns = $collUserSearchRuns;
-                $this->collUserSearchRunsPartial = false;
+                $this->collUserSearches = $collUserSearches;
+                $this->collUserSearchesPartial = false;
             }
         }
 
-        return $this->collUserSearchRuns;
+        return $this->collUserSearches;
     }
 
     /**
-     * Sets a collection of ChildUserSearchRun objects related by a one-to-many relationship
+     * Sets a collection of ChildUserSearch objects related by a one-to-many relationship
      * to the current object.
      * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
      * and new objects from the given Propel collection.
      *
-     * @param      Collection $userSearchRuns A Propel collection.
+     * @param      Collection $userSearches A Propel collection.
      * @param      ConnectionInterface $con Optional connection object
      * @return $this|ChildUser The current object (for fluent API support)
      */
-    public function setUserSearchRuns(Collection $userSearchRuns, ConnectionInterface $con = null)
+    public function setUserSearches(Collection $userSearches, ConnectionInterface $con = null)
     {
-        /** @var ChildUserSearchRun[] $userSearchRunsToDelete */
-        $userSearchRunsToDelete = $this->getUserSearchRuns(new Criteria(), $con)->diff($userSearchRuns);
+        /** @var ChildUserSearch[] $userSearchesToDelete */
+        $userSearchesToDelete = $this->getUserSearches(new Criteria(), $con)->diff($userSearches);
 
 
-        $this->userSearchRunsScheduledForDeletion = $userSearchRunsToDelete;
+        $this->userSearchesScheduledForDeletion = $userSearchesToDelete;
 
-        foreach ($userSearchRunsToDelete as $userSearchRunRemoved) {
-            $userSearchRunRemoved->setUser(null);
+        foreach ($userSearchesToDelete as $userSearchRemoved) {
+            $userSearchRemoved->setUser(null);
         }
 
-        $this->collUserSearchRuns = null;
-        foreach ($userSearchRuns as $userSearchRun) {
-            $this->addUserSearchRun($userSearchRun);
+        $this->collUserSearches = null;
+        foreach ($userSearches as $userSearch) {
+            $this->addUserSearch($userSearch);
         }
 
-        $this->collUserSearchRuns = $userSearchRuns;
-        $this->collUserSearchRunsPartial = false;
+        $this->collUserSearches = $userSearches;
+        $this->collUserSearchesPartial = false;
 
         return $this;
     }
 
     /**
-     * Returns the number of related UserSearchRun objects.
+     * Returns the number of related UserSearch objects.
      *
      * @param      Criteria $criteria
      * @param      boolean $distinct
      * @param      ConnectionInterface $con
-     * @return int             Count of related UserSearchRun objects.
+     * @return int             Count of related UserSearch objects.
      * @throws PropelException
      */
-    public function countUserSearchRuns(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    public function countUserSearches(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
     {
-        $partial = $this->collUserSearchRunsPartial && !$this->isNew();
-        if (null === $this->collUserSearchRuns || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->collUserSearchRuns) {
+        $partial = $this->collUserSearchesPartial && !$this->isNew();
+        if (null === $this->collUserSearches || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collUserSearches) {
                 return 0;
             }
 
             if ($partial && !$criteria) {
-                return count($this->getUserSearchRuns());
+                return count($this->getUserSearches());
             }
 
-            $query = ChildUserSearchRunQuery::create(null, $criteria);
+            $query = ChildUserSearchQuery::create(null, $criteria);
             if ($distinct) {
                 $query->distinct();
             }
@@ -1648,28 +1725,28 @@ abstract class User implements ActiveRecordInterface
                 ->count($con);
         }
 
-        return count($this->collUserSearchRuns);
+        return count($this->collUserSearches);
     }
 
     /**
-     * Method called to associate a ChildUserSearchRun object to this object
-     * through the ChildUserSearchRun foreign key attribute.
+     * Method called to associate a ChildUserSearch object to this object
+     * through the ChildUserSearch foreign key attribute.
      *
-     * @param  ChildUserSearchRun $l ChildUserSearchRun
+     * @param  ChildUserSearch $l ChildUserSearch
      * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
      */
-    public function addUserSearchRun(ChildUserSearchRun $l)
+    public function addUserSearch(ChildUserSearch $l)
     {
-        if ($this->collUserSearchRuns === null) {
-            $this->initUserSearchRuns();
-            $this->collUserSearchRunsPartial = true;
+        if ($this->collUserSearches === null) {
+            $this->initUserSearches();
+            $this->collUserSearchesPartial = true;
         }
 
-        if (!$this->collUserSearchRuns->contains($l)) {
-            $this->doAddUserSearchRun($l);
+        if (!$this->collUserSearches->contains($l)) {
+            $this->doAddUserSearch($l);
 
-            if ($this->userSearchRunsScheduledForDeletion and $this->userSearchRunsScheduledForDeletion->contains($l)) {
-                $this->userSearchRunsScheduledForDeletion->remove($this->userSearchRunsScheduledForDeletion->search($l));
+            if ($this->userSearchesScheduledForDeletion and $this->userSearchesScheduledForDeletion->contains($l)) {
+                $this->userSearchesScheduledForDeletion->remove($this->userSearchesScheduledForDeletion->search($l));
             }
         }
 
@@ -1677,29 +1754,29 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * @param ChildUserSearchRun $userSearchRun The ChildUserSearchRun object to add.
+     * @param ChildUserSearch $userSearch The ChildUserSearch object to add.
      */
-    protected function doAddUserSearchRun(ChildUserSearchRun $userSearchRun)
+    protected function doAddUserSearch(ChildUserSearch $userSearch)
     {
-        $this->collUserSearchRuns[]= $userSearchRun;
-        $userSearchRun->setUser($this);
+        $this->collUserSearches[]= $userSearch;
+        $userSearch->setUser($this);
     }
 
     /**
-     * @param  ChildUserSearchRun $userSearchRun The ChildUserSearchRun object to remove.
+     * @param  ChildUserSearch $userSearch The ChildUserSearch object to remove.
      * @return $this|ChildUser The current object (for fluent API support)
      */
-    public function removeUserSearchRun(ChildUserSearchRun $userSearchRun)
+    public function removeUserSearch(ChildUserSearch $userSearch)
     {
-        if ($this->getUserSearchRuns()->contains($userSearchRun)) {
-            $pos = $this->collUserSearchRuns->search($userSearchRun);
-            $this->collUserSearchRuns->remove($pos);
-            if (null === $this->userSearchRunsScheduledForDeletion) {
-                $this->userSearchRunsScheduledForDeletion = clone $this->collUserSearchRuns;
-                $this->userSearchRunsScheduledForDeletion->clear();
+        if ($this->getUserSearches()->contains($userSearch)) {
+            $pos = $this->collUserSearches->search($userSearch);
+            $this->collUserSearches->remove($pos);
+            if (null === $this->userSearchesScheduledForDeletion) {
+                $this->userSearchesScheduledForDeletion = clone $this->collUserSearches;
+                $this->userSearchesScheduledForDeletion->clear();
             }
-            $this->userSearchRunsScheduledForDeletion[]= clone $userSearchRun;
-            $userSearchRun->setUser(null);
+            $this->userSearchesScheduledForDeletion[]= clone $userSearch;
+            $userSearch->setUser(null);
         }
 
         return $this;
@@ -1711,7 +1788,7 @@ abstract class User implements ActiveRecordInterface
      * an identical criteria, it returns the collection.
      * Otherwise if this User is new, it will return
      * an empty collection; or if this User has previously
-     * been saved, it will retrieve related UserSearchRuns from storage.
+     * been saved, it will retrieve related UserSearches from storage.
      *
      * This method is protected by default in order to keep the public
      * api reasonable.  You can provide public methods for those you
@@ -1720,39 +1797,14 @@ abstract class User implements ActiveRecordInterface
      * @param      Criteria $criteria optional Criteria object to narrow the query
      * @param      ConnectionInterface $con optional connection object
      * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
-     * @return ObjectCollection|ChildUserSearchRun[] List of ChildUserSearchRun objects
+     * @return ObjectCollection|ChildUserSearch[] List of ChildUserSearch objects
      */
-    public function getUserSearchRunsJoinGeoLocation(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    public function getUserSearchesJoinGeoLocation(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
     {
-        $query = ChildUserSearchRunQuery::create(null, $criteria);
+        $query = ChildUserSearchQuery::create(null, $criteria);
         $query->joinWith('GeoLocation', $joinBehavior);
 
-        return $this->getUserSearchRuns($query, $con);
-    }
-
-
-    /**
-     * If this collection has already been initialized with
-     * an identical criteria, it returns the collection.
-     * Otherwise if this User is new, it will return
-     * an empty collection; or if this User has previously
-     * been saved, it will retrieve related UserSearchRuns from storage.
-     *
-     * This method is protected by default in order to keep the public
-     * api reasonable.  You can provide public methods for those you
-     * actually need in User.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
-     * @return ObjectCollection|ChildUserSearchRun[] List of ChildUserSearchRun objects
-     */
-    public function getUserSearchRunsJoinJobSitePlugin(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
-    {
-        $query = ChildUserSearchRunQuery::create(null, $criteria);
-        $query->joinWith('JobSitePlugin', $joinBehavior);
-
-        return $this->getUserSearchRuns($query, $con);
+        return $this->getUserSearches($query, $con);
     }
 
     /**
@@ -1762,6 +1814,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function clear()
     {
+        $this->user_id = null;
         $this->user_slug = null;
         $this->name = null;
         $this->email_address = null;
@@ -1789,15 +1842,15 @@ abstract class User implements ActiveRecordInterface
                     $o->clearAllReferences($deep);
                 }
             }
-            if ($this->collUserSearchRuns) {
-                foreach ($this->collUserSearchRuns as $o) {
+            if ($this->collUserSearches) {
+                foreach ($this->collUserSearches as $o) {
                     $o->clearAllReferences($deep);
                 }
             }
         } // if ($deep)
 
         $this->collUserJobMatches = null;
-        $this->collUserSearchRuns = null;
+        $this->collUserSearches = null;
     }
 
     /**
@@ -1808,6 +1861,164 @@ abstract class User implements ActiveRecordInterface
     public function __toString()
     {
         return (string) $this->getUserSlug();
+    }
+
+    // sluggable behavior
+
+    /**
+     * Wrap the setter for slug value
+     *
+     * @param   string
+     * @return  $this|User
+     */
+    public function setSlug($v)
+    {
+        return $this->setUserSlug($v);
+    }
+
+    /**
+     * Wrap the getter for slug value
+     *
+     * @return  string
+     */
+    public function getSlug()
+    {
+        return $this->getUserSlug();
+    }
+
+    /**
+     * Create a unique slug based on the object
+     *
+     * @return string The object slug
+     */
+    protected function createSlug()
+    {
+        $slug = $this->createRawSlug();
+        $slug = $this->limitSlugSize($slug);
+        $slug = $this->makeSlugUnique($slug);
+
+        return $slug;
+    }
+
+    /**
+     * Create the slug from the appropriate columns
+     *
+     * @return string
+     */
+    protected function createRawSlug()
+    {
+        return '' . $this->cleanupSlugPart($this->getEmailAddress()) . '';
+    }
+
+    /**
+     * Cleanup a string to make a slug of it
+     * Removes special characters, replaces blanks with a separator, and trim it
+     *
+     * @param     string $slug        the text to slugify
+     * @param     string $replacement the separator used by slug
+     * @return    string               the slugified text
+     */
+    protected static function cleanupSlugPart($slug, $replacement = '')
+    {
+        // transliterate
+        if (function_exists('iconv')) {
+            $slug = iconv('utf-8', 'us-ascii//TRANSLIT', $slug);
+        }
+
+        // lowercase
+        if (function_exists('mb_strtolower')) {
+            $slug = mb_strtolower($slug);
+        } else {
+            $slug = strtolower($slug);
+        }
+
+        // remove accents resulting from OSX's iconv
+        $slug = str_replace(array('\'', '`', '^'), '', $slug);
+
+        // replace non letter or digits with separator
+        $slug = preg_replace('/[^\w\/]+/u', $replacement, $slug);
+
+        // trim
+        $slug = trim($slug, $replacement);
+
+        if (empty($slug)) {
+            return 'n-a';
+        }
+
+        return $slug;
+    }
+
+
+    /**
+     * Make sure the slug is short enough to accommodate the column size
+     *
+     * @param    string $slug            the slug to check
+     *
+     * @return string                        the truncated slug
+     */
+    protected static function limitSlugSize($slug, $incrementReservedSpace = 3)
+    {
+        // check length, as suffix could put it over maximum
+        if (strlen($slug) > (128 - $incrementReservedSpace)) {
+            $slug = substr($slug, 0, 128 - $incrementReservedSpace);
+        }
+
+        return $slug;
+    }
+
+
+    /**
+     * Get the slug, ensuring its uniqueness
+     *
+     * @param    string $slug            the slug to check
+     * @param    string $separator       the separator used by slug
+     * @param    int    $alreadyExists   false for the first try, true for the second, and take the high count + 1
+     * @return   string                   the unique slug
+     */
+    protected function makeSlugUnique($slug, $separator = '-', $alreadyExists = false)
+    {
+        if (!$alreadyExists) {
+            $slug2 = $slug;
+        } else {
+            $slug2 = $slug . $separator;
+        }
+
+        $adapter = \Propel\Runtime\Propel::getServiceContainer()->getAdapter('default');
+        $col = 'q.UserSlug';
+        $compare = $alreadyExists ? $adapter->compareRegex($col, '?') : sprintf('%s = ?', $col);
+
+        $query = \JobScooper\DataAccess\UserQuery::create('q')
+            ->where($compare, $alreadyExists ? '^' . $slug2 . '[0-9]+$' : $slug2)
+            ->prune($this)
+        ;
+
+        if (!$alreadyExists) {
+            $count = $query->count();
+            if ($count > 0) {
+                return $this->makeSlugUnique($slug, $separator, true);
+            }
+
+            return $slug2;
+        }
+
+        $adapter = \Propel\Runtime\Propel::getServiceContainer()->getAdapter('default');
+        // Already exists
+        $object = $query
+            ->addDescendingOrderByColumn($adapter->strLength('user_slug'))
+            ->addDescendingOrderByColumn('user_slug')
+        ->findOne();
+
+        // First duplicate slug
+        if (null == $object) {
+            return $slug2 . '1';
+        }
+
+        $slugNum = substr($object->getUserSlug(), strlen($slug) + 1);
+        if (0 == $slugNum[0]) {
+            $slugNum[0] = 1;
+        }
+
+        return $slug2 . ($slugNum + 1);
     }
 
     /**

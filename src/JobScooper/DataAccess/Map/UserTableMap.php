@@ -59,7 +59,7 @@ class UserTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 4;
+    const NUM_COLUMNS = 5;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,12 @@ class UserTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 4;
+    const NUM_HYDRATE_COLUMNS = 5;
+
+    /**
+     * the column name for the user_id field
+     */
+    const COL_USER_ID = 'user.user_id';
 
     /**
      * the column name for the user_slug field
@@ -103,11 +108,11 @@ class UserTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('UserSlug', 'Name', 'EmailAddress', 'ConfigFilePath', ),
-        self::TYPE_CAMELNAME     => array('userSlug', 'name', 'emailAddress', 'configFilePath', ),
-        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_SLUG, UserTableMap::COL_NAME, UserTableMap::COL_EMAIL_ADDRESS, UserTableMap::COL_CONFIGURATION_FILE_PATH, ),
-        self::TYPE_FIELDNAME     => array('user_slug', 'name', 'email_address', 'configuration_file_path', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, )
+        self::TYPE_PHPNAME       => array('UserId', 'UserSlug', 'Name', 'EmailAddress', 'ConfigFilePath', ),
+        self::TYPE_CAMELNAME     => array('userId', 'userSlug', 'name', 'emailAddress', 'configFilePath', ),
+        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_ID, UserTableMap::COL_USER_SLUG, UserTableMap::COL_NAME, UserTableMap::COL_EMAIL_ADDRESS, UserTableMap::COL_CONFIGURATION_FILE_PATH, ),
+        self::TYPE_FIELDNAME     => array('user_id', 'user_slug', 'name', 'email_address', 'configuration_file_path', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
 
     /**
@@ -117,11 +122,11 @@ class UserTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('UserSlug' => 0, 'Name' => 1, 'EmailAddress' => 2, 'ConfigFilePath' => 3, ),
-        self::TYPE_CAMELNAME     => array('userSlug' => 0, 'name' => 1, 'emailAddress' => 2, 'configFilePath' => 3, ),
-        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_SLUG => 0, UserTableMap::COL_NAME => 1, UserTableMap::COL_EMAIL_ADDRESS => 2, UserTableMap::COL_CONFIGURATION_FILE_PATH => 3, ),
-        self::TYPE_FIELDNAME     => array('user_slug' => 0, 'name' => 1, 'email_address' => 2, 'configuration_file_path' => 3, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, )
+        self::TYPE_PHPNAME       => array('UserId' => 0, 'UserSlug' => 1, 'Name' => 2, 'EmailAddress' => 3, 'ConfigFilePath' => 4, ),
+        self::TYPE_CAMELNAME     => array('userId' => 0, 'userSlug' => 1, 'name' => 2, 'emailAddress' => 3, 'configFilePath' => 4, ),
+        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_ID => 0, UserTableMap::COL_USER_SLUG => 1, UserTableMap::COL_NAME => 2, UserTableMap::COL_EMAIL_ADDRESS => 3, UserTableMap::COL_CONFIGURATION_FILE_PATH => 4, ),
+        self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_slug' => 1, 'name' => 2, 'email_address' => 3, 'configuration_file_path' => 4, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
 
     /**
@@ -139,9 +144,10 @@ class UserTableMap extends TableMap
         $this->setIdentifierQuoting(false);
         $this->setClassName('\\JobScooper\\DataAccess\\User');
         $this->setPackage('JobScooper.DataAccess');
-        $this->setUseIdGenerator(false);
+        $this->setUseIdGenerator(true);
         // columns
-        $this->addPrimaryKey('user_slug', 'UserSlug', 'VARCHAR', true, 128, null);
+        $this->addPrimaryKey('user_id', 'UserId', 'INTEGER', true, null, null);
+        $this->addColumn('user_slug', 'UserSlug', 'VARCHAR', true, 128, null);
         $this->getColumn('user_slug')->setPrimaryString(true);
         $this->addColumn('name', 'Name', 'VARCHAR', true, 128, null);
         $this->addColumn('email_address', 'EmailAddress', 'VARCHAR', false, 128, null);
@@ -156,18 +162,31 @@ class UserTableMap extends TableMap
         $this->addRelation('UserJobMatch', '\\JobScooper\\DataAccess\\UserJobMatch', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
-    0 => ':user_slug',
-    1 => ':user_slug',
+    0 => ':user_id',
+    1 => ':user_id',
   ),
 ), null, null, 'UserJobMatches', false);
-        $this->addRelation('UserSearchRun', '\\JobScooper\\DataAccess\\UserSearchRun', RelationMap::ONE_TO_MANY, array (
+        $this->addRelation('UserSearch', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
-    0 => ':user_slug',
-    1 => ':user_slug',
+    0 => ':user_id',
+    1 => ':user_id',
   ),
-), null, null, 'UserSearchRuns', false);
+), null, null, 'UserSearches', false);
     } // buildRelations()
+
+    /**
+     *
+     * Gets the list of behaviors registered for this table
+     *
+     * @return array Associative array (name => parameters) of behaviors
+     */
+    public function getBehaviors()
+    {
+        return array(
+            'sluggable' => array('slug_column' => 'user_slug', 'slug_pattern' => '{EmailAddress}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '-', 'permanent' => 'false', 'scope_column' => '', 'unique_constraint' => 'true', ),
+        );
+    } // getBehaviors()
 
     /**
      * Retrieves a string version of the primary key from the DB resultset row that can be used to uniquely identify a row in this table.
@@ -185,11 +204,11 @@ class UserTableMap extends TableMap
     public static function getPrimaryKeyHashFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
         // If the PK cannot be derived from the row, return NULL.
-        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSlug', TableMap::TYPE_PHPNAME, $indexType)] === null) {
+        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
             return null;
         }
 
-        return null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSlug', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSlug', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSlug', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSlug', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSlug', TableMap::TYPE_PHPNAME, $indexType)];
+        return null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)];
     }
 
     /**
@@ -206,10 +225,10 @@ class UserTableMap extends TableMap
      */
     public static function getPrimaryKeyFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-        return (string) $row[
+        return (int) $row[
             $indexType == TableMap::TYPE_NUM
                 ? 0 + $offset
-                : self::translateFieldName('UserSlug', TableMap::TYPE_PHPNAME, $indexType)
+                : self::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)
         ];
     }
 
@@ -310,11 +329,13 @@ class UserTableMap extends TableMap
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
+            $criteria->addSelectColumn(UserTableMap::COL_USER_ID);
             $criteria->addSelectColumn(UserTableMap::COL_USER_SLUG);
             $criteria->addSelectColumn(UserTableMap::COL_NAME);
             $criteria->addSelectColumn(UserTableMap::COL_EMAIL_ADDRESS);
             $criteria->addSelectColumn(UserTableMap::COL_CONFIGURATION_FILE_PATH);
         } else {
+            $criteria->addSelectColumn($alias . '.user_id');
             $criteria->addSelectColumn($alias . '.user_slug');
             $criteria->addSelectColumn($alias . '.name');
             $criteria->addSelectColumn($alias . '.email_address');
@@ -370,7 +391,7 @@ class UserTableMap extends TableMap
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
             $criteria = new Criteria(UserTableMap::DATABASE_NAME);
-            $criteria->add(UserTableMap::COL_USER_SLUG, (array) $values, Criteria::IN);
+            $criteria->add(UserTableMap::COL_USER_ID, (array) $values, Criteria::IN);
         }
 
         $query = UserQuery::create()->mergeWith($criteria);

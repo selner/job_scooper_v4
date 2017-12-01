@@ -2,10 +2,10 @@
 
 namespace JobScooper\DataAccess;
 
-use JobScooper\DataAccess\Base\JobSitePluginQuery as BaseJobSitePluginQuery;
+use JobScooper\DataAccess\Base\UserSearchRunVersion as BaseUserSearchRunVersion;
 
 /**
- * Skeleton subclass for performing query and update operations on the 'jobsite_plugin' table.
+ * Skeleton subclass for representing a row from the 'user_search_run_version' table.
  *
  *
  *
@@ -14,7 +14,7 @@ use JobScooper\DataAccess\Base\JobSitePluginQuery as BaseJobSitePluginQuery;
  * long as it does not already exist in the output directory.
  *
  */
-class JobSitePluginQuery extends BaseJobSitePluginQuery
+class UserSearchRunVersion extends BaseUserSearchRunVersion
 {
 
 }

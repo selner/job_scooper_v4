@@ -56,8 +56,8 @@ abstract class AbstractAdicioCareerCast extends \JobScooper\Plugins\Classes\Ajax
     }
 
     protected function getKeywordURLValue(\JobScooper\DataAccess\UserSearchRun $searchDetails) {
-        $searchDetails->setSearchParameter('keywords_string_for_url', strtolower($searchDetails->getSearchParameter('keywords_string_for_url')));
-        return parent::getKeywordURLValue($searchDetails);
+
+        return strtolower(parent::getKeywordURLValue($searchDetails));
     }
 
     /**

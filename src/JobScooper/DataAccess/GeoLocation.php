@@ -49,9 +49,9 @@ class GeoLocation extends BaseGeoLocation
         }
 
         $this->setDisplayName($this->format($dispVal));
-
     }
-    function preSave(ConnectionInterface $con = null)
+
+    function setAutoPopulatedFields()
     {
         $this->updateDisplayName();
 
@@ -62,6 +62,9 @@ class GeoLocation extends BaseGeoLocation
             $this->setAlternateNames($this->getVariants());
         }
 
+    }
+    function preSave(ConnectionInterface $con = null)
+    {
         return parent::preSave($con);
     }
 
@@ -112,12 +115,6 @@ class GeoLocation extends BaseGeoLocation
 
         parent::setCountryCode($v);
 
-    }
-
-    public function setDisplayName($v)
-    {
-        parent::setDisplayName($v);
-        $this->addAlternateName($v);
     }
 
     public function addAlternateNames($value)
@@ -178,6 +175,7 @@ class GeoLocation extends BaseGeoLocation
             }
         }
         $this->fromArray($arrVals, GeoLocationTableMap::TYPE_FIELDNAME);
+        $this->setAutoPopulatedFields();
     }
 
     public function toFlatArrayForCSV()

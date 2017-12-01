@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+
+echo "*****************************************************************
+
+    Database Update Started
+
+*****************************************************************"
+
+
 SCRIPTSDIR=`pwd`
 cd ..
 PROJDIR=`pwd`
@@ -17,7 +25,14 @@ rm -Rf $CODEDIR/src/DataAccess/Map
 cp -R $CODEDIR/src/DataAccess "$CODEDIR/generated-classes.backup-"$NOW
 
 cd $PROJDIR
-echo "Generating Propel runtime configuration from $CONFIGDIR"
+
+
+echo "*****************************************************************
+
+    Generating Propel runtime configuration from $CONFIGDIR
+
+*****************************************************************"
+
 $PROPEL config:convert -vvv
 
 echo "Building Propel files starting from $PROJDIR"

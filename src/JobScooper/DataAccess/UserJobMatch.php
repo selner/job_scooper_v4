@@ -19,7 +19,6 @@ namespace JobScooper\DataAccess;
 
 
 use JobScooper\DataAccess\Base\UserJobMatch as BaseUserJobMatch;
-use JobScooper\DataAccess\Map\JobPostingTableMap;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Map\TableMap;

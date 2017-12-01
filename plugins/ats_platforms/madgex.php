@@ -33,30 +33,22 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\Classes\AjaxHtmlSim
     protected $JobSiteName = 'madgexats';
     protected $SearchUrlFormat = '?Keywords=***KEYWORDS***&radialtown=***LOCATION***&LocationId=&RadialLocation=50&NearFacetsShown=true&countrycode=***COUNTRYCODE***&Page=***PAGE_NUMBER***';
     protected $locationid = null;
-    protected $currentSearchAlternateURL = null;
 
     protected $LocationType = 'location-city-comma-state';
 
     protected function getPageURLfromBaseFmt(UserSearchRun $searchDetails, $nPage = null, $nItem = null)
     {
-        if(is_null($this->currentSearchAlternateURL)) {
-            $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
-            $location = $searchDetails->getGeoLocation();
-            $ccode = "";
-            if(!is_null($location))
-                $ccode = $location->getCountryCode();
-            $strURL = str_ireplace("***COUNTRYCODE***", $ccode, $strURL);
+        $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
+        $location = $searchDetails->getGeoLocation();
+        $ccode = "";
+        if(!is_null($location))
+            $ccode = $location->getCountryCode();
+        $strURL = str_ireplace("***COUNTRYCODE***", $ccode, $strURL);
 
-            if (!is_null($this->locationid))
-                $strURL = $strURL . "&LocationID=" . $this->locationid;
-        }
-        else
-        {
-            $searchDetails->setSearchParameter('base_url_format', $this->currentSearchAlternateURL);
-            $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
-        }
-        $searchDetails->setSearchParameter('base_url_format', preg_replace('/[Ppage]{4}=\d+/', 'Page=***PAGE_NUMBER***', $strURL));
-        $this->SearchUrlFormat = $searchDetails->getSearchParameter('base_url_format');
+        if (!empty($this->locationid))
+            $strURL = $strURL . "&LocationID=" . $this->locationid;
+
+        $strURL = preg_replace('/[Ppage]{4}=\d+/', 'Page=***PAGE_NUMBER***', $strURL);
         return $strURL;
 
     }
@@ -109,8 +101,8 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\Classes\AjaxHtmlSim
                             $this->locationid = $arrMatches[1];
                         }
                         $url = parse_url($this->childSiteURLBase, PHP_URL_SCHEME) . "://" . parse_url($this->childSiteURLBase, PHP_URL_HOST) . $newUrlPath . "&RadialLocation=50";
-                        $GLOBALS['USERDATA']['configuration_settings']['current_user_search_details']->setSearchParameter('search_start_url', $url);
-                        $this->currentSearchAlternateURL = preg_replace('/[Ppage]{4}=\d+/', 'Page=***PAGE_NUMBER***', $url);
+                        $GLOBALS['USERDATA']['configuration_settings']['current_user_search_details']->setSearchStartUrl($url);
+//                        $this->currentSearchAlternateURL = preg_replace('/[Ppage]{4}=\d+/', 'Page=***PAGE_NUMBER***', $url);
 
                         $this->selenium->loadPage($url);
                         $html = $this->selenium->getPageHTML($url);

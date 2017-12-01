@@ -68,6 +68,10 @@
             Alternate unique key for every job post is jobsite_key + jobsite post id
         -->
         <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" required="true"/>
+        <foreign-key foreignTable="job_site" onUpdate="none" onDelete="none">
+            <reference local="jobsite_key" foreign="jobsite_key"/>
+        </foreign-key>
+
 
         <column name="jobsite_post_id" phpName="JobSitePostId" type="varchar" size="255" required="true"/>
         <unique name="index_jobsite_and_post_id/">
@@ -130,14 +134,14 @@
                 autoIncrement="true"/>
         <column name="display_name" phpName="DisplayName" type="varchar" size="100" required="true" primaryString="true"/>
         <column name="geolocation_key" phpName="GeoLocationKey" type="varchar" size="100" required="true"/>
-        <behavior name="sluggable">
-            <parameter name="slug_column" value="geolocation_key"/>
-            <parameter name="slug_pattern" value="{DisplayName}"/>
-            <parameter name="replace_pattern" value="/[^\w\/]+/u"/>
-            <parameter name="replacement" value=""/>
-            <parameter name="separator" value="-"/>
-            <parameter name="permanent" value="false"/>
-        </behavior>
+        <!--<behavior name="sluggable">-->
+            <!--<parameter name="slug_column" value="geolocation_key"/>-->
+            <!--<parameter name="slug_pattern" value="{CountryCode}_{RegionCode}_{Place}"/>-->
+            <!--<parameter name="replace_pattern" value="/[^\w\/]+/u"/>-->
+            <!--<parameter name="replacement" value=""/>-->
+            <!--<parameter name="separator" value="-"/>-->
+            <!--<parameter name="permanent" value="false"/>-->
+        <!--</behavior>-->
 
         <column name="place" phpName="Place" type="varchar" size="100"/>
         <column name="county" phpName="County" type="varchar" size="100"/>
@@ -161,19 +165,58 @@
 
     </table>
 
-    <table name="jobsite_plugin" phpName="JobSitePlugin" reloadOnUpdate="true" reloadOnInsert="true">
+    <table name="job_site" phpName="JobSiteRecord" reloadOnUpdate="true" reloadOnInsert="true">
         <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" primaryString="true"
                 primaryKey="true"/>
         <column name="plugin_class_name" phpName="PluginClassName" type="varchar" size="100" primaryString="false"
                 primaryKey="false"/>
         <column name="display_name" phpName="DisplayName" type="varchar" size="255" primaryString="false"
                 primaryKey="false"/>
+
+
+        <column name="is_disabled" phpName="isDisabled" type="boolean" defaultValue="false"/>
+
+        <column name="date_last_pulled" phpName="LastPulledAt" type="timestamp"/>
+        <behavior name="aggregate_column" id="date_last_pulled">
+            <parameter name="name" value="date_last_pulled" />
+            <parameter name="foreign_table" value="user_search_run" />
+            <parameter name="expression" value="MAX(date_ended)" />
+            <parameter name="condition" value="run_result_code = 4" />
+        </behavior>
+
+
         <column name="date_last_run" phpName="LastRunAt" type="timestamp"/>
-        <column name="was_successful" phpName="LastRunWasSuccessful" type="boolean"/>
-        <column name="date_next_run" phpName="StartNextRunAfter" type="timestamp"/>
+        <behavior name="aggregate_column" id="date_last_run">
+            <parameter name="name" value="date_last_run" />
+            <parameter name="foreign_table" value="user_search_run" />
+            <parameter name="expression" value="MAX(date_started)" />
+        </behavior>
+
+        <column name="date_last_completed" phpName="LastCompletedAt" type="timestamp"/>
+        <behavior name="aggregate_column" id="date_last_completed">
+            <parameter name="name" value="date_last_completed" />
+            <parameter name="foreign_table" value="user_search_run" />
+            <parameter name="expression" value="MAX(date_ended)" />
+            <parameter name="condition" value="run_result_code = 4" />
+        </behavior>
+
         <column name="date_last_failed" phpName="LastFailedAt" type="timestamp"/>
+        <behavior name="aggregate_column" id="date_last_failed">
+            <parameter name="name" value="date_last_failed" />
+            <parameter name="foreign_table" value="user_search_run" />
+            <parameter name="expression" value="MAX(date_ended)" />
+            <parameter name="condition" value="run_result_code = 1" />
+        </behavior>
 
         <column name="last_user_search_run_id" phpName="LastUserSearchRunId" type="integer" lazyLoad="true"/>
+        <foreign-key foreignTable="user_search_run">
+            <reference local="last_user_search_run_id" foreign="user_search_run_id"/>
+        </foreign-key>
+        <behavior name="aggregate_column">
+            <parameter name="name" value="last_user_search_run_id" />
+            <parameter name="foreign_table" value="user_search_run" />
+            <parameter name="expression" value="MAX(user_search_run_id)" />
+        </behavior>
 <!--
         <foreign-key foreignTable="user_search_run" onUpdate="none" onDelete="none">
             <reference local="last_user_search_run_id" foreign="user_search_run_id"/>
@@ -183,14 +226,31 @@
         <column name="supported_country_codes" phpName="SupportedCountryCodes" type="array"/>
         <column name="results_filter_type" phpName="ResultsFilterType" type="enum"
                 valueSet="all-only, all-by-location, user-filtered"/>
+        <behavior name="versionable" />
     </table>
 
 
     <table name="user" phpName="User" allowPkInsert="true">
-        <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true" primaryKey="true"
+        <column name="user_id" phpName="UserId" type="integer" required="true" autoIncrement="true"
+                primaryKey="true"/>
+
+        <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true" primaryKey="false"
                 primaryString="true"/>
+        <behavior name="sluggable">
+            <parameter name="slug_column" value="user_slug"/>
+            <parameter name="slug_pattern" value="{EmailAddress}"/>
+            <parameter name="replace_pattern" value="/[^\w\/]+/u"/>
+            <parameter name="replacement" value=""/>
+            <parameter name="separator" value="-"/>
+            <parameter name="permanent" value="false"/>
+        </behavior>
+
         <column name="name" phpName="Name" type="varchar" size="128" required="true"/>
         <column name="email_address" phpName="EmailAddress" type="varchar" size="128" required="false"/>
+        <unique name="uniq_user_email/">
+            <unique-column name="email_address"/>
+        </unique>
+
         <column name="configuration_file_path" phpName="ConfigFilePath" type="varchar" size="128" required="false"/>
     </table>
 
@@ -198,7 +258,7 @@
     <table name="user_job_match" phpName="UserJobMatch">
         <column name="user_job_match_id" phpName="UserJobMatchId" type="integer" required="true" primaryKey="true"
                 autoIncrement="true"/>
-        <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true"/>
+        <column name="user_id" phpName="UserId" type="varchar" size="128" required="true"/>
         <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true"/>
         <column name="user_notification_state" phpName="UserNotificationState" type="enum"
                 valueSet="not-ready,ready,sent" defaultValue="not-ready"/>
@@ -211,60 +271,124 @@
         <column name="out_of_user_area" phpName="OutOfUserArea" type="boolean"/>
         <column name="app_run_id" phpName="AppRunId" type="varchar" size="75"/>
         <foreign-key foreignTable="user">
-            <reference local="user_slug" foreign="user_slug"/>
+            <reference local="user_id" foreign="user_id"/>
         </foreign-key>
         <foreign-key foreignTable="jobposting">
             <reference local="jobposting_id" foreign="jobposting_id"/>
         </foreign-key>
     </table>
 
-    <table name="user_search_run" phpName="UserSearchRun" reloadOnInsert="true" reloadOnUpdate="true">
-        <column name="user_search_run_id" phpName="UserSearchRunId" type="integer" required="true" autoIncrement="true"
+    <table name="user_search" phpName="UserSearch" reloadOnInsert="true" reloadOnUpdate="true">
+        <column name="user_search_id" phpName="UserSearchId" type="integer" required="true" autoIncrement="true"
                 primaryKey="true"/>
-        <column name="search_key" phpName="SearchKey" type="varchar" size="128" required="true"/>
-        <column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true"/>
+
+        <column name="user_id" phpName="UserId" type="integer" required="true"/>
+        <foreign-key foreignTable="user" onUpdate="none" onDelete="none">
+            <reference local="user_id" foreign="user_id"/>
+        </foreign-key>
+
         <column name="geolocation_id" phpName="GeoLocationId" type="integer"/>
         <foreign-key foreignTable="geolocation" onUpdate="none" onDelete="none">
             <reference local="geolocation_id" foreign="geolocation_id"/>
         </foreign-key>
 
-        <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" required="true"/>
-        <foreign-key foreignTable="jobsite_plugin" onUpdate="none" onDelete="none">
-            <reference local="jobsite_key" foreign="jobsite_key"/>
-        </foreign-key>
-
-        <column name="user_search_run_key" type="varchar" size="100" required="true"/>
+        <column name="user_search_key" phpName="UserSearchKey" type="varchar" size="128" required="true" primaryString="true"/>
         <behavior name="sluggable">
-            <parameter name="slug_column" value="user_search_run_key"/>
-            <parameter name="slug_pattern" value="{JobSiteKey}-{UserSlug}-{SearchKey}-{GeoLocationId}"/>
+            <parameter name="slug_column" value="user_search_key"/>
+            <parameter name="slug_pattern" value="{UserId}_{SearchKeyFromConfig}_{GeoLocationId}"/>
             <parameter name="replace_pattern" value="/[^\w\/]+/u"/>
             <parameter name="replacement" value=""/>
-            <parameter name="separator" value="-"/>
+            <parameter name="separator" value="_"/>
             <parameter name="permanent" value="false"/>
         </behavior>
 
-        <!--<column name="search_settings" phpName="SearchSettings" type="object"/>-->
+        <column name="keywords" phpName="Keywords" type="array"/>
+        <column name="keyword_tokens" phpName="KeywordTokens" type="array"/>
 
-        <column name="search_parameters_data" phpName="SearchParametersData" type="LONGVARCHAR"/>
+        <column name="search_key_from_config" phpName="SearchKeyFromConfig" type="varchar" size="50"/>
 
-        <column name="last_app_run_id" phpName="AppRunId" type="varchar" size="75"/>
-
-        <column name="run_result" field="run_result_code" phpName="RunResultCode" type="enum"
-                valueSet="not-run,failed,excluded,skipped,successful" defaultValue="not-run"/>-->
-        <column name="run_error_details" phpName="RunErrorDetails" type="array"/>
-        <foreign-key foreignTable="user">
-            <reference local="user_slug" foreign="user_slug"/>
-        </foreign-key>
-
+        <!--<behavior name="versionable" />-->
         <column name="date_created" phpName="CreatedAt" type="timestamp"/>
         <column name="date_updated" phpName="UpdatedAt" type="timestamp"/>
         <behavior name="timestampable">
             <parameter name="create_column" value="date_created"/>
             <parameter name="update_column" value="date_updated"/>
         </behavior>
-        <column name="date_last_run" phpName="LastRunAt" type="timestamp"/>
-        <column name="date_next_run" phpName="StartNextRunAfter" type="timestamp"/>
-        <column name="date_last_failed" phpName="LastFailedAt" type="timestamp"/>
+
+        <!--<column name="date_last_run" phpName="LastRunAt" type="timestamp"/>-->
+        <!--<behavior name="aggregate_column" id="us_date_last_run">-->
+            <!--<parameter name="name" value="date_last_run" />-->
+            <!--<parameter name="foreign_table" value="user_search_run" />-->
+            <!--<parameter name="expression" value="MAX(date_started)" />-->
+        <!--</behavior>-->
+
+        <column name="date_last_completed" phpName="LastCompletedAt" type="timestamp"/>
+        <behavior name="aggregate_column" id="us_date_last_completed">
+            <parameter name="name" value="date_last_completed" />
+            <parameter name="foreign_table" value="user_search_run" />
+            <parameter name="expression" value="MAX(date_ended)" />
+            <parameter name="condition" value="run_result_code = 4" />
+        </behavior>
+
+        <!--<column name="date_last_failed" phpName="LastFailedAt" type="timestamp"/>-->
+        <!--<behavior name="aggregate_column" id="us_date_last_failed">-->
+            <!--<parameter name="name" value="date_last_failed" />-->
+            <!--<parameter name="foreign_table" value="user_search_run" />-->
+            <!--<parameter name="expression" value="MAX(date_ended)" />-->
+            <!--<parameter name="condition" value="run_result_code = failed" />-->
+        <!--</behavior>-->
+
+        <behavior name="versionable" />
+
+    </table>
+
+
+    <table name="user_search_run" phpName="UserSearchRun" reloadOnInsert="true" reloadOnUpdate="true">
+        <column name="user_search_run_id" phpName="UserSearchRunId" type="integer" required="true" autoIncrement="true"
+                primaryKey="true"/>
+
+        <!--<column name="search_key" phpName="SearchKey" type="varchar" size="128" required="true"/>-->
+        <!--<column name="user_slug" phpName="UserSlug" type="varchar" size="128" required="true"/>-->
+        <!--<column name="geolocation_id" phpName="GeoLocationId" type="integer"/>-->
+        <!--<foreign-key foreignTable="geolocation" onUpdate="none" onDelete="none">-->
+            <!--<reference local="geolocation_id" foreign="geolocation_id"/>-->
+        <!--</foreign-key>-->
+
+        <column name="user_search_id" phpName="UserSearchId" type="integer" required="true"/>
+        <foreign-key foreignTable="user_search" onUpdate="none" onDelete="none">
+            <reference local="user_search_id" foreign="user_search_id"/>
+        </foreign-key>
+
+        <column name="app_run_id" phpName="AppRunId" type="varchar" size="75"/>
+
+        <column name="user_search_run_key" type="varchar" size="100" required="true"/>
+        <behavior name="sluggable">
+            <parameter name="slug_column" value="user_search_run_key"/>
+            <parameter name="slug_pattern" value="{UserSearchKey}_{JobSiteKey}_{AppRunId}"/>
+            <parameter name="replace_pattern" value="/[^\w\/]+/u"/>
+            <parameter name="replacement" value=""/>
+            <parameter name="separator" value="-"/>
+            <parameter name="permanent" value="false"/>
+        </behavior>
+
+        <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" required="true"/>
+        <foreign-key foreignTable="job_site">
+            <reference local="jobsite_key" foreign="jobsite_key"/>
+        </foreign-key>
+
+        <column name="search_start_url" phpName="SearchStartUrl" type="varchar" size="1024"/>
+        <column name="run_result_code" phpName="RunResultCode" type="enum"
+                valueSet="not-run,failed,excluded,skipped,successful" defaultValue="not-run"/>-->
+        <column name="run_error_details" phpName="RunErrorDetails" type="array"/>
+
+
+
+        <column name="date_started" phpName="StartedAt" type="timestamp"/>
+        <column name="date_ended" phpName="EndedAt" type="timestamp"/>
+
+        <behavior name="delegate">
+            <parameter name="to" value="user_search" />
+        </behavior>
     </table>
 
 

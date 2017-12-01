@@ -90,7 +90,6 @@ Class LoggingManager extends \Monolog\Logger
 
 //        $serviceContainer->setLogger('defaultLogger', $defaultLogger);
         $propelContainer = Propel::getServiceContainer();
-        $propelContainer->setLogger('defaultLogger', $this->_loggers['database']);
 
         $this->logLine("Logging started for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'), C__DISPLAY_NORMAL__);
     }
@@ -114,8 +113,7 @@ Class LoggingManager extends \Monolog\Logger
 
     public function updatePropelLogging()
     {
-        $this->_loggers['database'] = $this->withName('database');
-        Propel::getServiceContainer()->setLogger('defaultLogger', $this->_loggers['database']);
+        Propel::getServiceContainer()->setLogger('defaultLogger', $this);
         if(isDebug()) {
             $con = Propel::getWriteConnection(\JobScooper\DataAccess\Map\JobPostingTableMap::DATABASE_NAME);
             $con->useDebug(true);

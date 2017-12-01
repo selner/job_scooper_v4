@@ -225,13 +225,13 @@ class GeoLocationTableMap extends TableMap
     1 => ':geolocation_id',
   ),
 ), null, null, 'JobPostings', false);
-        $this->addRelation('UserSearchRun', '\\JobScooper\\DataAccess\\UserSearchRun', RelationMap::ONE_TO_MANY, array (
+        $this->addRelation('UserSearch', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
     0 => ':geolocation_id',
     1 => ':geolocation_id',
   ),
-), null, null, 'UserSearchRuns', false);
+), null, null, 'UserSearches', false);
     } // buildRelations()
 
     /**
@@ -243,7 +243,6 @@ class GeoLocationTableMap extends TableMap
     public function getBehaviors()
     {
         return array(
-            'sluggable' => array('slug_column' => 'geolocation_key', 'slug_pattern' => '{DisplayName}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '-', 'permanent' => 'false', 'scope_column' => '', 'unique_constraint' => 'true', ),
             'geocodable' => array('auto_update' => 'false', 'latitude_column' => 'latitude', 'longitude_column' => 'longitude', 'type' => 'DOUBLE', 'size' => '11', 'scale' => '8', 'geocode_ip' => 'false', 'ip_column' => 'ip_address', 'geocode_address' => 'false', 'address_columns' => 'street,locality,region,postal_code,country', 'geocoder_provider' => '\Geocoder\Provider\OpenStreetMapProvider', 'geocoder_adapter' => '\Geocoder\HttpAdapter\CurlHttpAdapter', 'geocoder_api_key' => 'false', 'geocoder_api_key_provider' => 'false', ),
         );
     } // getBehaviors()

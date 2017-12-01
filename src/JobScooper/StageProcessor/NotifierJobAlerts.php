@@ -16,13 +16,8 @@
  */
 namespace JobScooper\StageProcessor;
 
-
-
-
-//Import PHPMailer classes into the global namespace
 use JobScooper\Utils\JobsMailSender;
 use JobScooper\Utils\SimpleCSV;
-use JobScooper\DataAccess\JobPosting as JobPosting;
 use PHPExcel;
 use PHPExcel_IOFactory;
 use PHPExcel_Worksheet;
@@ -30,9 +25,6 @@ use PHPExcel_Style_Alignment;
 use PHPExcel_Style_Fill;
 use ErrorException;
 use Exception;
-use Propel\Runtime\Collection\ArrayCollection;
-use Propel\Runtime\Collection\Collection;
-use Propel\Runtime\Parser\AbstractParser;
 
 class NotifierJobAlerts extends JobsMailSender
 {
@@ -415,7 +407,7 @@ class NotifierJobAlerts extends JobsMailSender
     private function _getJobSitesRunRecently()
     {
         if(is_null($this->_arrJobSitesForRun)) {
-            $this->_arrJobSitesForRun = getAllJobSitesThatWereLastRun();
+            $this->_arrJobSitesForRun = getConfigurationSettings('included_sites');
 
             $sites = array_map(function ($var) {
                 return $var->getJobPosting()->getJobSiteKey();
@@ -437,38 +429,48 @@ class NotifierJobAlerts extends JobsMailSender
         $strOut = "                ";
         $arrHeaders = array("New Matches to Review", "Matches Auto-Excluded", "Total Jobs");
 
-        $arrFailedPluginsReport = getFailedSearchesByPlugin();
+        //
+        // if the plugin also errored, then add an asterisk to the name
+        // for reference in the email
+        //
+        $arrFailedJobsites = \JobScooper\DataAccess\UserSearchRunQuery::create()
+            ->select("JobSiteKey")
+            ->filterByRunResultCode("failed")
+            ->find()
+            ->getData();
 
 
-        foreach($this->_getJobSitesRunRecently() as $plugin) {
+        //
+        // if the plugin also errored, then add an asterisk to the name
+        // for reference in the email
+        //
+        $arrJobsitesRecentlyUpdated = \JobScooper\DataAccess\UserSearchRunQuery::create()
+            ->select("JobSiteKey")
+            ->filterByStartedAt(date_sub(new \DateTime(), date_interval_create_from_date_string('40hours')))
+            ->find()
+            ->getData();
 
+        foreach($arrJobsitesRecentlyUpdated as $plugin) {
+            $jobsiteKey = $plugin->getJobSiteKey();
             $arrPluginJobMatches  = array();
             if ($arrMatchedJobs != null && is_array($arrMatchedJobs) && countJobRecords($arrMatchedJobs) > 0) {
-                $arrPluginJobMatches = array_filter($arrMatchedJobs, function ($var) use ($plugin) { return (strcasecmp($var->getJobPosting()->getJobSiteKey(), $plugin) == 0); } );
+                $arrPluginJobMatches = array_filter($arrMatchedJobs, function ($var) use ($jobsiteKey) { return (strcasecmp($var->getJobPosting()->getJobSiteKey(), $jobsiteKey) == 0); } );
             }
 
             $arrPluginExcludesJobs  = array();
             if ($arrExcludedJobs != null && is_array($arrExcludedJobs) && countJobRecords($arrExcludedJobs) > 0) {
-                $arrPluginExcludesJobs = array_filter($arrExcludedJobs, function ($var) use ($plugin) { return (strcasecmp($var->getJobPosting()->getJobSiteKey(), $plugin) == 0); } );
+                $arrPluginExcludesJobs = array_filter($arrExcludedJobs, function ($var) use ($jobsiteKey) { return (strcasecmp($var->getJobPosting()->getJobSiteKey(), $jobsiteKey) == 0); } );
             }
 
             $arrPluginJobs = $arrPluginJobMatches + $arrPluginExcludesJobs;
 
-            $arrCounts[$plugin]['name'] = $plugin;
-            $arrCounts[$plugin]['matches_to_review'] = count(array_filter($arrPluginJobs, "isUserJobMatchAndNotExcluded"));
-            $arrCounts[$plugin]['matches_excluded'] = count(array_filter($arrPluginJobs, "isUserJobMatchButExcluded"));
-            $arrCounts[$plugin]['total_listings'] = count($arrPluginJobs);
-            $arrCounts[$plugin]['had_error'] = false;
-
-            //
-            // if the plugin also errored, then add an asterisk to the name
-            // for reference in the email
-            //
-            if(!is_null($arrFailedPluginsReport) && in_array($plugin, array_keys($arrFailedPluginsReport)) === true)
-            {
-                $arrCounts[$plugin]['name'] = "**" . $plugin;
-                $arrCounts[$plugin]['had_error'] = true;
-            }
+            $arrCounts[$jobsiteKey]['had_error'] = in_array($jobsiteKey, $arrFailedJobsites);
+            $arrCounts[$jobsiteKey]['name'] = $plugin->getDisplayName();
+            if($arrCounts[$jobsiteKey]['had_error'] === true)
+                $arrCounts[$jobsiteKey]['name'] .= "**";
+            $arrCounts[$jobsiteKey]['matches_to_review'] = count(array_filter($arrPluginJobs, "isUserJobMatchAndNotExcluded"));
+            $arrCounts[$jobsiteKey]['matches_excluded'] = count(array_filter($arrPluginJobs, "isUserJobMatchButExcluded"));
+            $arrCounts[$jobsiteKey]['total_listings'] = count($arrPluginJobs);
         }
 
         usort($arrCounts, "sortByErrorThenCount");

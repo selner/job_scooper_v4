@@ -17,4 +17,14 @@ use JobScooper\DataAccess\Base\User as BaseUser;
 class User extends BaseUser
 {
 
+    static function getCurrentUser()
+    {
+        return $GLOBALS['USERDATA']['configuration_settings']['current_user'];
+    }
+
+    static function setCurrentUser(User $user)
+    {
+        $GLOBALS['USERDATA']['configuration_settings']['current_user'] = $user;
+    }
+
 }

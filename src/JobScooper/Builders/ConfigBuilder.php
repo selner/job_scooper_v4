@@ -18,6 +18,7 @@ namespace JobScooper\Builders;
 
 
 
+use JobScooper\DataAccess\UserQuery;
 use JobScooper\Manager\LocationManager;
 use JobScooper\Manager\LoggingManager;
 use const JobScooper\Plugins\Classes\VALUE_NOT_SUPPORTED;
@@ -152,28 +153,8 @@ class ConfigBuilder
         // that we'd seen previously
         // Now go see what we got back for each of the sites
         //
-        foreach ($GLOBALS['JOBSITE_PLUGINS'] as $site) {
-            assert(isset($site['jobsitekey']));
-            $GLOBALS['JOBSITE_PLUGINS'][$site['jobsitekey']]['include_in_run'] = is_OptionIncludedSite($site['jobsitekey']);
-        }
-        $includedsites = array_filter($GLOBALS['JOBSITE_PLUGINS'], function ($k) {
-            return $k['include_in_run'];
-        });
-        $excludedsites = array_filter($GLOBALS['JOBSITE_PLUGINS'], function ($k) {
-            return !($k['include_in_run']);
-        });
-
-        $keys = array();
-        foreach (array_keys($includedsites) as $k)
-            $keys[] = strtolower($k);
-
-        if(!empty($includedsites))
-            $GLOBALS['USERDATA']['configuration_settings']['included_sites'] = array_combine($keys, array_column($includedsites, 'jobsitekey'));
-        $keys = array();
-        foreach (array_keys($excludedsites) as $k)
-            $keys[] = strtolower($k);
-
-        $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] = array_combine($keys, array_column($excludedsites, 'jobsitekey'));
+        $GLOBALS['USERDATA']['configuration_settings']['included_sites'] = JobSitePluginBuilder::getJobSitesCmdLineIncludedInRun();
+        $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] = array_diff_key(JobSitePluginBuilder::getAllJobSites(), getConfigurationSettings('included_sites'));
         $GLOBALS['USERDATA']['configuration_settings']['country_codes'] = array();
 
         
@@ -384,10 +365,6 @@ class ConfigBuilder
 
 
 
-    private function __getEmptyEmailRecord__()
-    {
-        return array('emailkind' => null, 'type' => null, 'name' => null, 'address' => null);
-    }
 
     private function __addInputFile__($iniInputFileItem)
     {
@@ -449,18 +426,16 @@ class ConfigBuilder
     {
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading plugin setup information from config file...", \C__DISPLAY_ITEM_START__);
 
+        if(!array_key_exists('plugin_specific_settings', $GLOBALS['USERDATA']['configuration_settings']))
+            $GLOBALS['USERDATA']['configuration_settings']['plugin_specific_settings'] = array();
+
         if (array_key_exists('plugin_settings', $config) == true && is_array($config['plugin_settings']) && count($config['plugin_settings']) > 0) {
             //
             // plugin setting config items are structured like this:
             //      [plugin_settings.usajobs]
             //      authorization_key="XxXxXxXxXxXxXxXxXxXx="
             foreach (array_keys($config['plugin_settings']) as $pluginname) {
-                if (array_key_exists($pluginname, $GLOBALS['JOBSITE_PLUGINS'])) {
-                    foreach (array_keys($config['plugin_settings'][$pluginname]) as $settingkey) {
-                        $GLOBALS['JOBSITE_PLUGINS'][$pluginname]['other_settings'][$settingkey] = $config['plugin_settings'][$pluginname][$settingkey];
-                        $GLOBALS['USERDATA']['configuration_settings']['plugin_settings'][$pluginname][$settingkey] = $config['plugin_settings'][$pluginname][$settingkey];
-                    }
-                }
+                $GLOBALS['USERDATA']['configuration_settings']['plugin_specific_settings'][$pluginname] = $config['plugin_settings'][$pluginname];
             }
         }
     }
@@ -476,6 +451,7 @@ class ConfigBuilder
                 $GLOBALS['USERDATA']['configuration_settings']['google_maps_api_key'] = $config['global_search_options']['google_maps_api_key'];
             }
 
+            $includedsites = getConfigurationSettings('included_sites');
             foreach (array_keys($config['global_search_options']) as $gso)
             {
                 if(!is_null($config['global_search_options'][$gso]) && isset($config['global_search_options'][$gso]))
@@ -489,8 +465,10 @@ class ConfigBuilder
                             if (!is_array($config['global_search_options']['excluded_jobsites'])) {
                                 $config['global_search_options']['excluded_jobsites'] = array($config['global_search_options']['excluded_jobsites']);
                             }
+
                             foreach ($config['global_search_options']['excluded_jobsites'] as $excludedSite) {
-                                setSiteAsExcluded($excludedSite);
+                                if(array_key_exists($excludedSite, $includedsites))
+                                    unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite]);
                             }
                             break;
 
@@ -548,18 +526,14 @@ class ConfigBuilder
     private function _configureSearchLocation_($location_string)
     {
         if (!$location_string) throw new \ErrorException("Invalid configuration: search location value was empty.");
-        if (!array_key_exists('search_location', $GLOBALS['USERDATA']['configuration_settings']))
+        if (!array_key_exists('search_locations', $GLOBALS['USERDATA']['configuration_settings']))
             $GLOBALS['USERDATA']['configuration_settings']['search_locations'] = array();
 
         $locmgr = $this->_instantiateLocationManager();
         $location = $locmgr->getAddress($location_string);
         if(!empty($location))
         {
-            $GLOBALS['USERDATA']['configuration_settings']['search_location'][$location->getGeoLocationId()] = array(
-                'location_raw_source_value' => $location_string,
-                'location_name_key' => $location->getSlug(),
-                'location' => $location,
-                'location_id' => $location->getGeoLocationId());
+            $GLOBALS['USERDATA']['configuration_settings']['search_locations'][$location->getGeoLocationId()] = $location;
 
             if (!is_null($location->getCountryCode()))
                 $GLOBALS['USERDATA']['configuration_settings']['country_codes'][$location->getCountryCode()] = $location->getCountryCode();
@@ -611,58 +585,55 @@ class ConfigBuilder
             }
         }
 
-        if(isset($config['emails'] ))
+        if(isset($config['emails']))
         {
+
+            $configUsers = array_unique_multidimensional(array_map(function ($v){ return array('name'=>$v['name'], 'email'=>$v['address']); }, $config['emails']));
+
+            $usersByEmail = array();
+            foreach($configUsers as $cfgusr)
+            {
+                $user = UserQuery::create()
+                    ->filterByEmailAddress($cfgusr['email'])
+                    ->findOneOrCreate();
+
+                $user->setName($cfgusr['name']);
+                $user->setEmailAddress($cfgusr['email']);
+                $user->save();
+                $usersByEmail[$cfgusr['email']] = $user;
+            }
+
+            $arrEmailSendTypes = array_unique(array_column($config['emails'], "type"));
+
+            $emailsByType = array_fill_keys($arrEmailSendTypes, array());
+
             foreach(array_keys($config['emails']) as $emailKey)
             {
                 $emailItem = $config['emails'][$emailKey];
+                $type = $emailItem['type'];
 
-                $tempEmail = $this->__getEmptyEmailRecord__();
-                $tempEmail['key'] = $emailKey;
-
-                foreach(array_keys($emailItem) as $key)
-                {
-                    if (isset($emailItem[$key])) {
-                        $tempEmail[$key] = $emailItem[$key];
-                    }
-                }
-                if (isset($emailItem['name'])) {
-                    $tempEmail['name'] = $emailItem['name'];
-                }
-                if (isset($emailItem['address'])) {
-                    $tempEmail['address'] = $emailItem['address'];
-                }
-                if (isset($emailItem['type'])) {
-                    $tempEmail['type'] = $emailItem['type'];
-                }
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added email from config.ini: '" . getArrayValuesAsString($tempEmail), \C__DISPLAY_ITEM_DETAIL__);
-                $settingsEmail['email_addresses'][$emailKey] = $tempEmail;
+                $emailsByType[$type][$emailKey] = $usersByEmail[$emailItem['address']]->toArray();
+                $emailsByType[$type][$emailKey]['type'] = $type;
+                $emailsByType[$type][$emailKey]['emailkind'] = $emailItem['emailkind'];
             }
+            LogLine("Added users and emails: " . var_export($emailsByType, true));
+
+            $currentUser = array_filter($emailsByType["to"], function ($v) { return $v['emailkind'] === 'results'; });
+            if(!empty($currentUser)) {
+                if (is_array_multidimensional($currentUser))
+                    $currentUser = array_pop($currentUser);
+
+                $currentUserId = $currentUser['UserId'];
+                $user = UserQuery::create()->findOneByUserId($currentUserId);
+                $user->setCurrentUser($user);
+            }
+
+            $GLOBALS['USERDATA']['configuration_settings']['emails_to_send'] = $emailsByType;
         }
 
-        $GLOBALS['USERDATA']['configuration_settings']['email'] = array_copy($settingsEmail);
 
-        $userDetails = array();
-        $userDetails['ConfigFilePath'] = $this->arrFileDetails['config_ini']['full_file_path'];
-        $emails = $this->getEmailRecords("results", "to");
-        foreach($emails as $email)
-        {
-            if (array_key_exists('address', $email)) {
-                $userDetails['Name'] = $email['name'];
-                $userDetails['EmailAddress'] = $email['address'];
-                break;
-            }
-        }
-
-        if (!array_key_exists('EmailAddress', $userDetails)) {
+        if (empty($currentUser))
             throw new \ErrorException("No email address or user has been set in the configuration files for this run.  Aborting.");
-        }
-
-        $retUserData = updateOrCreateUser($userDetails);
-        $GLOBALS['USERDATA']['configuration_settings']['user_details'] = $retUserData->copy();
-
-
-
     }
 
     private $_arrConfigFileSettings_ = [];

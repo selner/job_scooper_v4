@@ -20,11 +20,13 @@ use Propel\Runtime\Exception\PropelException;
  *
  *
  *
+ * @method     ChildUserQuery orderByUserId($order = Criteria::ASC) Order by the user_id column
  * @method     ChildUserQuery orderByUserSlug($order = Criteria::ASC) Order by the user_slug column
  * @method     ChildUserQuery orderByName($order = Criteria::ASC) Order by the name column
  * @method     ChildUserQuery orderByEmailAddress($order = Criteria::ASC) Order by the email_address column
  * @method     ChildUserQuery orderByConfigFilePath($order = Criteria::ASC) Order by the configuration_file_path column
  *
+ * @method     ChildUserQuery groupByUserId() Group by the user_id column
  * @method     ChildUserQuery groupByUserSlug() Group by the user_slug column
  * @method     ChildUserQuery groupByName() Group by the name column
  * @method     ChildUserQuery groupByEmailAddress() Group by the email_address column
@@ -48,21 +50,22 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserQuery rightJoinWithUserJobMatch() Adds a RIGHT JOIN clause and with to the query using the UserJobMatch relation
  * @method     ChildUserQuery innerJoinWithUserJobMatch() Adds a INNER JOIN clause and with to the query using the UserJobMatch relation
  *
- * @method     ChildUserQuery leftJoinUserSearchRun($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSearchRun relation
- * @method     ChildUserQuery rightJoinUserSearchRun($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSearchRun relation
- * @method     ChildUserQuery innerJoinUserSearchRun($relationAlias = null) Adds a INNER JOIN clause to the query using the UserSearchRun relation
+ * @method     ChildUserQuery leftJoinUserSearch($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSearch relation
+ * @method     ChildUserQuery rightJoinUserSearch($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSearch relation
+ * @method     ChildUserQuery innerJoinUserSearch($relationAlias = null) Adds a INNER JOIN clause to the query using the UserSearch relation
  *
- * @method     ChildUserQuery joinWithUserSearchRun($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserSearchRun relation
+ * @method     ChildUserQuery joinWithUserSearch($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserSearch relation
  *
- * @method     ChildUserQuery leftJoinWithUserSearchRun() Adds a LEFT JOIN clause and with to the query using the UserSearchRun relation
- * @method     ChildUserQuery rightJoinWithUserSearchRun() Adds a RIGHT JOIN clause and with to the query using the UserSearchRun relation
- * @method     ChildUserQuery innerJoinWithUserSearchRun() Adds a INNER JOIN clause and with to the query using the UserSearchRun relation
+ * @method     ChildUserQuery leftJoinWithUserSearch() Adds a LEFT JOIN clause and with to the query using the UserSearch relation
+ * @method     ChildUserQuery rightJoinWithUserSearch() Adds a RIGHT JOIN clause and with to the query using the UserSearch relation
+ * @method     ChildUserQuery innerJoinWithUserSearch() Adds a INNER JOIN clause and with to the query using the UserSearch relation
  *
- * @method     \JobScooper\DataAccess\UserJobMatchQuery|\JobScooper\DataAccess\UserSearchRunQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
+ * @method     \JobScooper\DataAccess\UserJobMatchQuery|\JobScooper\DataAccess\UserSearchQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildUser findOne(ConnectionInterface $con = null) Return the first ChildUser matching the query
  * @method     ChildUser findOneOrCreate(ConnectionInterface $con = null) Return the first ChildUser matching the query, or a new ChildUser object populated from the query conditions when no match is found
  *
+ * @method     ChildUser findOneByUserId(int $user_id) Return the first ChildUser filtered by the user_id column
  * @method     ChildUser findOneByUserSlug(string $user_slug) Return the first ChildUser filtered by the user_slug column
  * @method     ChildUser findOneByName(string $name) Return the first ChildUser filtered by the name column
  * @method     ChildUser findOneByEmailAddress(string $email_address) Return the first ChildUser filtered by the email_address column
@@ -71,12 +74,14 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUser requirePk($key, ConnectionInterface $con = null) Return the ChildUser by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUser requireOne(ConnectionInterface $con = null) Return the first ChildUser matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
+ * @method     ChildUser requireOneByUserId(int $user_id) Return the first ChildUser filtered by the user_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUser requireOneByUserSlug(string $user_slug) Return the first ChildUser filtered by the user_slug column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUser requireOneByName(string $name) Return the first ChildUser filtered by the name column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUser requireOneByEmailAddress(string $email_address) Return the first ChildUser filtered by the email_address column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUser requireOneByConfigFilePath(string $configuration_file_path) Return the first ChildUser filtered by the configuration_file_path column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildUser[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildUser objects based on current ModelCriteria
+ * @method     ChildUser[]|ObjectCollection findByUserId(int $user_id) Return ChildUser objects filtered by the user_id column
  * @method     ChildUser[]|ObjectCollection findByUserSlug(string $user_slug) Return ChildUser objects filtered by the user_slug column
  * @method     ChildUser[]|ObjectCollection findByName(string $name) Return ChildUser objects filtered by the name column
  * @method     ChildUser[]|ObjectCollection findByEmailAddress(string $email_address) Return ChildUser objects filtered by the email_address column
@@ -179,10 +184,10 @@ abstract class UserQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_slug, name, email_address, configuration_file_path FROM user WHERE user_slug = :p0';
+        $sql = 'SELECT user_id, user_slug, name, email_address, configuration_file_path FROM user WHERE user_id = :p0';
         try {
             $stmt = $con->prepare($sql);
-            $stmt->bindValue(':p0', $key, PDO::PARAM_STR);
+            $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
             $stmt->execute();
         } catch (Exception $e) {
             Propel::log($e->getMessage(), Propel::LOG_ERR);
@@ -253,7 +258,7 @@ abstract class UserQuery extends ModelCriteria
     public function filterByPrimaryKey($key)
     {
 
-        return $this->addUsingAlias(UserTableMap::COL_USER_SLUG, $key, Criteria::EQUAL);
+        return $this->addUsingAlias(UserTableMap::COL_USER_ID, $key, Criteria::EQUAL);
     }
 
     /**
@@ -266,7 +271,48 @@ abstract class UserQuery extends ModelCriteria
     public function filterByPrimaryKeys($keys)
     {
 
-        return $this->addUsingAlias(UserTableMap::COL_USER_SLUG, $keys, Criteria::IN);
+        return $this->addUsingAlias(UserTableMap::COL_USER_ID, $keys, Criteria::IN);
+    }
+
+    /**
+     * Filter the query on the user_id column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByUserId(1234); // WHERE user_id = 1234
+     * $query->filterByUserId(array(12, 34)); // WHERE user_id IN (12, 34)
+     * $query->filterByUserId(array('min' => 12)); // WHERE user_id > 12
+     * </code>
+     *
+     * @param     mixed $userId The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserQuery The current query, for fluid interface
+     */
+    public function filterByUserId($userId = null, $comparison = null)
+    {
+        if (is_array($userId)) {
+            $useMinMax = false;
+            if (isset($userId['min'])) {
+                $this->addUsingAlias(UserTableMap::COL_USER_ID, $userId['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($userId['max'])) {
+                $this->addUsingAlias(UserTableMap::COL_USER_ID, $userId['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserTableMap::COL_USER_ID, $userId, $comparison);
     }
 
     /**
@@ -381,7 +427,7 @@ abstract class UserQuery extends ModelCriteria
     {
         if ($userJobMatch instanceof \JobScooper\DataAccess\UserJobMatch) {
             return $this
-                ->addUsingAlias(UserTableMap::COL_USER_SLUG, $userJobMatch->getUserSlug(), $comparison);
+                ->addUsingAlias(UserTableMap::COL_USER_ID, $userJobMatch->getUserId(), $comparison);
         } elseif ($userJobMatch instanceof ObjectCollection) {
             return $this
                 ->useUserJobMatchQuery()
@@ -443,40 +489,40 @@ abstract class UserQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query by a related \JobScooper\DataAccess\UserSearchRun object
+     * Filter the query by a related \JobScooper\DataAccess\UserSearch object
      *
-     * @param \JobScooper\DataAccess\UserSearchRun|ObjectCollection $userSearchRun the related object to use as filter
+     * @param \JobScooper\DataAccess\UserSearch|ObjectCollection $userSearch the related object to use as filter
      * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return ChildUserQuery The current query, for fluid interface
      */
-    public function filterByUserSearchRun($userSearchRun, $comparison = null)
+    public function filterByUserSearch($userSearch, $comparison = null)
     {
-        if ($userSearchRun instanceof \JobScooper\DataAccess\UserSearchRun) {
+        if ($userSearch instanceof \JobScooper\DataAccess\UserSearch) {
             return $this
-                ->addUsingAlias(UserTableMap::COL_USER_SLUG, $userSearchRun->getUserSlug(), $comparison);
-        } elseif ($userSearchRun instanceof ObjectCollection) {
+                ->addUsingAlias(UserTableMap::COL_USER_ID, $userSearch->getUserId(), $comparison);
+        } elseif ($userSearch instanceof ObjectCollection) {
             return $this
-                ->useUserSearchRunQuery()
-                ->filterByPrimaryKeys($userSearchRun->getPrimaryKeys())
+                ->useUserSearchQuery()
+                ->filterByPrimaryKeys($userSearch->getPrimaryKeys())
                 ->endUse();
         } else {
-            throw new PropelException('filterByUserSearchRun() only accepts arguments of type \JobScooper\DataAccess\UserSearchRun or Collection');
+            throw new PropelException('filterByUserSearch() only accepts arguments of type \JobScooper\DataAccess\UserSearch or Collection');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the UserSearchRun relation
+     * Adds a JOIN clause to the query using the UserSearch relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return $this|ChildUserQuery The current query, for fluid interface
      */
-    public function joinUserSearchRun($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function joinUserSearch($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('UserSearchRun');
+        $relationMap = $tableMap->getRelation('UserSearch');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -491,14 +537,14 @@ abstract class UserQuery extends ModelCriteria
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'UserSearchRun');
+            $this->addJoinObject($join, 'UserSearch');
         }
 
         return $this;
     }
 
     /**
-     * Use the UserSearchRun relation UserSearchRun object
+     * Use the UserSearch relation UserSearch object
      *
      * @see useQuery()
      *
@@ -506,13 +552,13 @@ abstract class UserQuery extends ModelCriteria
      *                                   to be used as main alias in the secondary query
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
-     * @return \JobScooper\DataAccess\UserSearchRunQuery A secondary query class using the current class as primary query
+     * @return \JobScooper\DataAccess\UserSearchQuery A secondary query class using the current class as primary query
      */
-    public function useUserSearchRunQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function useUserSearchQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
-            ->joinUserSearchRun($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'UserSearchRun', '\JobScooper\DataAccess\UserSearchRunQuery');
+            ->joinUserSearch($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'UserSearch', '\JobScooper\DataAccess\UserSearchQuery');
     }
 
     /**
@@ -525,7 +571,7 @@ abstract class UserQuery extends ModelCriteria
     public function prune($user = null)
     {
         if ($user) {
-            $this->addUsingAlias(UserTableMap::COL_USER_SLUG, $user->getUserSlug(), Criteria::NOT_EQUAL);
+            $this->addUsingAlias(UserTableMap::COL_USER_ID, $user->getUserId(), Criteria::NOT_EQUAL);
         }
 
         return $this;
@@ -590,6 +636,33 @@ abstract class UserQuery extends ModelCriteria
 
             return $affectedRows;
         });
+    }
+
+    // sluggable behavior
+
+    /**
+     * Filter the query on the slug column
+     *
+     * @param     string $slug The value to use as filter.
+     *
+     * @return    $this|ChildUserQuery The current query, for fluid interface
+     */
+    public function filterBySlug($slug)
+    {
+        return $this->addUsingAlias(UserTableMap::COL_USER_SLUG, $slug, Criteria::EQUAL);
+    }
+
+    /**
+     * Find one object based on its slug
+     *
+     * @param     string $slug The value to use as filter.
+     * @param     ConnectionInterface $con The optional connection object
+     *
+     * @return    ChildUser the result, formatted by the current formatter
+     */
+    public function findOneBySlug($slug, $con = null)
+    {
+        return $this->filterBySlug($slug)->findOne($con);
     }
 
 } // UserQuery

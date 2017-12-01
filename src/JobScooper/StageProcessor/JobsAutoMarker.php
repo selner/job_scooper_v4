@@ -156,23 +156,18 @@ class JobsAutoMarker
 
     private function _markJobsList_OutOfArea_CountyFiltered(&$arrJobsList)
     {
-        $searchLocations = getConfigurationSettings('search_location');
+        $searchLocations = getConfigurationSettings('search_locations');
 
         $arrIncludeCounties = array();
 
         /* Find all locations that are within 50 miles of any of our search locations */
 
         LogLine("Auto-marking postings not in same counties as the search locations...", \C__DISPLAY_ITEM_DETAIL__);
-        foreach($searchLocations as $searchLocation)
+        foreach($searchLocations as $searchloc)
         {
-            $locId = $searchLocation['location_id'];
-            if(!is_null($locId))
+            if(!empty($searchloc))
             {
-                $location = $this->_locmgr->getId($locId);
-                if(!is_null($location))
-                {
-                    $arrIncludeCounties[] = $location->getCounty() . "~" .$location->getRegion();
-                }
+                    $arrIncludeCounties[] = $searchloc->getCounty() . "~" .$searchloc->getRegion();
             }
         }
 
@@ -211,30 +206,25 @@ class JobsAutoMarker
 
     private function _markJobsList_OutOfArea_Geospatial(&$arrJobsList)
     {
-        $searchLocations = getConfigurationSettings('search_location');
+        $searchLocations = getConfigurationSettings('search_locations');
 
         $arrNearbyIds = array();
 
         /* Find all locations that are within 50 miles of any of our search locations */
 
         LogLine("Getting locationIDs within 50 miles of search locations...", \C__DISPLAY_ITEM_DETAIL__);
-        foreach($searchLocations as $searchLocation)
+        foreach($searchLocations as $searchloc)
         {
-            $locId = $searchLocation['location_id'];
-            if(!is_null($locId))
+            if(!empty($searchloc))
             {
-                $location = $this->_locmgr->getLocationById($locId);
-                if(!is_null($location))
-                {
-                    $nearbyLocations = GeoLocationQuery::create()
-                        ->filterByDistanceFrom($location->getLatitude(), $location->getLongitude(), 50, GeoLocationTableMap::MILES_UNIT, Criteria::LESS_THAN)
-                        ->find();
+                $nearbyLocations = GeoLocationQuery::create()
+                    ->filterByDistanceFrom($searchloc->getLatitude(), $searchloc->getLongitude(), 50, GeoLocationTableMap::MILES_UNIT, Criteria::LESS_THAN)
+                    ->find();
 
-                    if(!is_null($nearbyLocations))
-                    {
-                        foreach($nearbyLocations as $near)
-                            $arrNearbyIds[] = $near->getGeoLocationId();
-                    }
+                if(!empty($nearbyLocations))
+                {
+                    foreach($nearbyLocations as $near)
+                        $arrNearbyIds[] = $near->getGeoLocationId();
                 }
             }
         }
@@ -361,13 +351,13 @@ class JobsAutoMarker
     private function _getUserSearchTitleKeywords()
     {
         $keywordsToMatch = array();
-        $runSearches = getAllSearchesThatWereIncluded();
+        $runSearches = getConfigurationSettings('SEARCHES_TO_RUN');
 
         $arrKwdSet = array();
 
         foreach ($runSearches as $searchDetails)
         {
-            $kwd_tokenized = $searchDetails->getSearchParameter('keywords_array_tokenized');
+            $kwd_tokenized = $searchDetails->getKeywordTokens();
             if (!is_null($kwd_tokenized))
             {
                 if(is_array($kwd_tokenized)) {

@@ -9,6 +9,8 @@ use JobScooper\DataAccess\GeoLocation as ChildGeoLocation;
 use JobScooper\DataAccess\GeoLocationQuery as ChildGeoLocationQuery;
 use JobScooper\DataAccess\JobPosting as ChildJobPosting;
 use JobScooper\DataAccess\JobPostingQuery as ChildJobPostingQuery;
+use JobScooper\DataAccess\JobSiteRecord as ChildJobSiteRecord;
+use JobScooper\DataAccess\JobSiteRecordQuery as ChildJobSiteRecordQuery;
 use JobScooper\DataAccess\UserJobMatch as ChildUserJobMatch;
 use JobScooper\DataAccess\UserJobMatchQuery as ChildUserJobMatchQuery;
 use JobScooper\DataAccess\Map\JobPostingTableMap;
@@ -221,6 +223,11 @@ abstract class JobPosting implements ActiveRecordInterface
      * @var        int
      */
     protected $duplicates_posting_id;
+
+    /**
+     * @var        ChildJobSiteRecord
+     */
+    protected $aJobSiteRecord;
 
     /**
      * @var        ChildGeoLocation
@@ -786,6 +793,10 @@ abstract class JobPosting implements ActiveRecordInterface
             $this->modifiedColumns[JobPostingTableMap::COL_JOBSITE_KEY] = true;
         }
 
+        if ($this->aJobSiteRecord !== null && $this->aJobSiteRecord->getJobSiteKey() !== $v) {
+            $this->aJobSiteRecord = null;
+        }
+
         return $this;
     } // setJobSiteKey()
 
@@ -1328,6 +1339,9 @@ abstract class JobPosting implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
+        if ($this->aJobSiteRecord !== null && $this->jobsite_key !== $this->aJobSiteRecord->getJobSiteKey()) {
+            $this->aJobSiteRecord = null;
+        }
         if ($this->aGeoLocation !== null && $this->geolocation_id !== $this->aGeoLocation->getGeoLocationId()) {
             $this->aGeoLocation = null;
         }
@@ -1373,6 +1387,7 @@ abstract class JobPosting implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
+            $this->aJobSiteRecord = null;
             $this->aGeoLocation = null;
             $this->aJobPostingRelatedByDuplicatesJobPostingId = null;
             $this->collJobPostingsRelatedByJobPostingId = null;
@@ -1498,6 +1513,13 @@ abstract class JobPosting implements ActiveRecordInterface
             // were passed to this object by their corresponding set
             // method.  This object relates to these object(s) by a
             // foreign key reference.
+
+            if ($this->aJobSiteRecord !== null) {
+                if ($this->aJobSiteRecord->isModified() || $this->aJobSiteRecord->isNew()) {
+                    $affectedRows += $this->aJobSiteRecord->save($con);
+                }
+                $this->setJobSiteRecord($this->aJobSiteRecord);
+            }
 
             if ($this->aGeoLocation !== null) {
                 if ($this->aGeoLocation->isModified() || $this->aGeoLocation->isNew()) {
@@ -1931,6 +1953,21 @@ abstract class JobPosting implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
+            if (null !== $this->aJobSiteRecord) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'jobSiteRecord';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'job_site';
+                        break;
+                    default:
+                        $key = 'JobSiteRecord';
+                }
+
+                $result[$key] = $this->aJobSiteRecord->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
             if (null !== $this->aGeoLocation) {
 
                 switch ($keyType) {
@@ -2446,6 +2483,57 @@ abstract class JobPosting implements ActiveRecordInterface
     }
 
     /**
+     * Declares an association between this object and a ChildJobSiteRecord object.
+     *
+     * @param  ChildJobSiteRecord $v
+     * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
+     * @throws PropelException
+     */
+    public function setJobSiteRecord(ChildJobSiteRecord $v = null)
+    {
+        if ($v === null) {
+            $this->setJobSiteKey(NULL);
+        } else {
+            $this->setJobSiteKey($v->getJobSiteKey());
+        }
+
+        $this->aJobSiteRecord = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildJobSiteRecord object, it will not be re-added.
+        if ($v !== null) {
+            $v->addJobPosting($this);
+        }
+
+
+        return $this;
+    }
+
+
+    /**
+     * Get the associated ChildJobSiteRecord object
+     *
+     * @param  ConnectionInterface $con Optional Connection object.
+     * @return ChildJobSiteRecord The associated ChildJobSiteRecord object.
+     * @throws PropelException
+     */
+    public function getJobSiteRecord(ConnectionInterface $con = null)
+    {
+        if ($this->aJobSiteRecord === null && (($this->jobsite_key !== "" && $this->jobsite_key !== null))) {
+            $this->aJobSiteRecord = ChildJobSiteRecordQuery::create()->findPk($this->jobsite_key, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aJobSiteRecord->addJobPostings($this);
+             */
+        }
+
+        return $this->aJobSiteRecord;
+    }
+
+    /**
      * Declares an association between this object and a ChildGeoLocation object.
      *
      * @param  ChildGeoLocation $v
@@ -2810,6 +2898,31 @@ abstract class JobPosting implements ActiveRecordInterface
      * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
      * @return ObjectCollection|ChildJobPosting[] List of ChildJobPosting objects
      */
+    public function getJobPostingsRelatedByJobPostingIdJoinJobSiteRecord(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    {
+        $query = ChildJobPostingQuery::create(null, $criteria);
+        $query->joinWith('JobSiteRecord', $joinBehavior);
+
+        return $this->getJobPostingsRelatedByJobPostingId($query, $con);
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this JobPosting is new, it will return
+     * an empty collection; or if this JobPosting has previously
+     * been saved, it will retrieve related JobPostingsRelatedByJobPostingId from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in JobPosting.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return ObjectCollection|ChildJobPosting[] List of ChildJobPosting objects
+     */
     public function getJobPostingsRelatedByJobPostingIdJoinGeoLocation(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
     {
         $query = ChildJobPostingQuery::create(null, $criteria);
@@ -3075,6 +3188,9 @@ abstract class JobPosting implements ActiveRecordInterface
      */
     public function clear()
     {
+        if (null !== $this->aJobSiteRecord) {
+            $this->aJobSiteRecord->removeJobPosting($this);
+        }
         if (null !== $this->aGeoLocation) {
             $this->aGeoLocation->removeJobPosting($this);
         }
@@ -3135,6 +3251,7 @@ abstract class JobPosting implements ActiveRecordInterface
 
         $this->collJobPostingsRelatedByJobPostingId = null;
         $this->collUserJobMatches = null;
+        $this->aJobSiteRecord = null;
         $this->aGeoLocation = null;
         $this->aJobPostingRelatedByDuplicatesJobPostingId = null;
     }

@@ -64,17 +64,17 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildGeoLocationQuery rightJoinWithJobPosting() Adds a RIGHT JOIN clause and with to the query using the JobPosting relation
  * @method     ChildGeoLocationQuery innerJoinWithJobPosting() Adds a INNER JOIN clause and with to the query using the JobPosting relation
  *
- * @method     ChildGeoLocationQuery leftJoinUserSearchRun($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSearchRun relation
- * @method     ChildGeoLocationQuery rightJoinUserSearchRun($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSearchRun relation
- * @method     ChildGeoLocationQuery innerJoinUserSearchRun($relationAlias = null) Adds a INNER JOIN clause to the query using the UserSearchRun relation
+ * @method     ChildGeoLocationQuery leftJoinUserSearch($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSearch relation
+ * @method     ChildGeoLocationQuery rightJoinUserSearch($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSearch relation
+ * @method     ChildGeoLocationQuery innerJoinUserSearch($relationAlias = null) Adds a INNER JOIN clause to the query using the UserSearch relation
  *
- * @method     ChildGeoLocationQuery joinWithUserSearchRun($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserSearchRun relation
+ * @method     ChildGeoLocationQuery joinWithUserSearch($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserSearch relation
  *
- * @method     ChildGeoLocationQuery leftJoinWithUserSearchRun() Adds a LEFT JOIN clause and with to the query using the UserSearchRun relation
- * @method     ChildGeoLocationQuery rightJoinWithUserSearchRun() Adds a RIGHT JOIN clause and with to the query using the UserSearchRun relation
- * @method     ChildGeoLocationQuery innerJoinWithUserSearchRun() Adds a INNER JOIN clause and with to the query using the UserSearchRun relation
+ * @method     ChildGeoLocationQuery leftJoinWithUserSearch() Adds a LEFT JOIN clause and with to the query using the UserSearch relation
+ * @method     ChildGeoLocationQuery rightJoinWithUserSearch() Adds a RIGHT JOIN clause and with to the query using the UserSearch relation
+ * @method     ChildGeoLocationQuery innerJoinWithUserSearch() Adds a INNER JOIN clause and with to the query using the UserSearch relation
  *
- * @method     \JobScooper\DataAccess\JobPostingQuery|\JobScooper\DataAccess\UserSearchRunQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
+ * @method     \JobScooper\DataAccess\JobPostingQuery|\JobScooper\DataAccess\UserSearchQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildGeoLocation findOne(ConnectionInterface $con = null) Return the first ChildGeoLocation matching the query
  * @method     ChildGeoLocation findOneOrCreate(ConnectionInterface $con = null) Return the first ChildGeoLocation matching the query, or a new ChildGeoLocation object populated from the query conditions when no match is found
@@ -787,40 +787,40 @@ abstract class GeoLocationQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query by a related \JobScooper\DataAccess\UserSearchRun object
+     * Filter the query by a related \JobScooper\DataAccess\UserSearch object
      *
-     * @param \JobScooper\DataAccess\UserSearchRun|ObjectCollection $userSearchRun the related object to use as filter
+     * @param \JobScooper\DataAccess\UserSearch|ObjectCollection $userSearch the related object to use as filter
      * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return ChildGeoLocationQuery The current query, for fluid interface
      */
-    public function filterByUserSearchRun($userSearchRun, $comparison = null)
+    public function filterByUserSearch($userSearch, $comparison = null)
     {
-        if ($userSearchRun instanceof \JobScooper\DataAccess\UserSearchRun) {
+        if ($userSearch instanceof \JobScooper\DataAccess\UserSearch) {
             return $this
-                ->addUsingAlias(GeoLocationTableMap::COL_GEOLOCATION_ID, $userSearchRun->getGeoLocationId(), $comparison);
-        } elseif ($userSearchRun instanceof ObjectCollection) {
+                ->addUsingAlias(GeoLocationTableMap::COL_GEOLOCATION_ID, $userSearch->getGeoLocationId(), $comparison);
+        } elseif ($userSearch instanceof ObjectCollection) {
             return $this
-                ->useUserSearchRunQuery()
-                ->filterByPrimaryKeys($userSearchRun->getPrimaryKeys())
+                ->useUserSearchQuery()
+                ->filterByPrimaryKeys($userSearch->getPrimaryKeys())
                 ->endUse();
         } else {
-            throw new PropelException('filterByUserSearchRun() only accepts arguments of type \JobScooper\DataAccess\UserSearchRun or Collection');
+            throw new PropelException('filterByUserSearch() only accepts arguments of type \JobScooper\DataAccess\UserSearch or Collection');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the UserSearchRun relation
+     * Adds a JOIN clause to the query using the UserSearch relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return $this|ChildGeoLocationQuery The current query, for fluid interface
      */
-    public function joinUserSearchRun($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function joinUserSearch($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('UserSearchRun');
+        $relationMap = $tableMap->getRelation('UserSearch');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -835,14 +835,14 @@ abstract class GeoLocationQuery extends ModelCriteria
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'UserSearchRun');
+            $this->addJoinObject($join, 'UserSearch');
         }
 
         return $this;
     }
 
     /**
-     * Use the UserSearchRun relation UserSearchRun object
+     * Use the UserSearch relation UserSearch object
      *
      * @see useQuery()
      *
@@ -850,13 +850,13 @@ abstract class GeoLocationQuery extends ModelCriteria
      *                                   to be used as main alias in the secondary query
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
-     * @return \JobScooper\DataAccess\UserSearchRunQuery A secondary query class using the current class as primary query
+     * @return \JobScooper\DataAccess\UserSearchQuery A secondary query class using the current class as primary query
      */
-    public function useUserSearchRunQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function useUserSearchQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
     {
         return $this
-            ->joinUserSearchRun($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'UserSearchRun', '\JobScooper\DataAccess\UserSearchRunQuery');
+            ->joinUserSearch($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'UserSearch', '\JobScooper\DataAccess\UserSearchQuery');
     }
 
     /**
@@ -934,33 +934,6 @@ abstract class GeoLocationQuery extends ModelCriteria
 
             return $affectedRows;
         });
-    }
-
-    // sluggable behavior
-
-    /**
-     * Filter the query on the slug column
-     *
-     * @param     string $slug The value to use as filter.
-     *
-     * @return    $this|ChildGeoLocationQuery The current query, for fluid interface
-     */
-    public function filterBySlug($slug)
-    {
-        return $this->addUsingAlias(GeoLocationTableMap::COL_GEOLOCATION_KEY, $slug, Criteria::EQUAL);
-    }
-
-    /**
-     * Find one object based on its slug
-     *
-     * @param     string $slug The value to use as filter.
-     * @param     ConnectionInterface $con The optional connection object
-     *
-     * @return    ChildGeoLocation the result, formatted by the current formatter
-     */
-    public function findOneBySlug($slug, $con = null)
-    {
-        return $this->filterBySlug($slug)->findOne($con);
     }
 
     // geocodable behavior

@@ -24,6 +24,7 @@ use Cache\Adapter\PHPArray\ArrayCachePool;
 use \InvalidArgumentException;
 use \Exception;
 use JobScooper\DataAccess\GeoLocation;
+use JobScooper\DataAccess\GeoLocationQuery;
 use JobScooper\Logging\CSVLogHandler;
 use JobScooper\Utils\GoogleGeocoderHttpAdapter;
 use JobScooper\Utils\GoogleMapsLoggedProvider;
@@ -121,17 +122,43 @@ class LocationManager
 
     function getAddress($strAddress)
     {
+        $lookupAddress = $strAddress;
+//        if(substr($strAddress, 1, 1) == "(" && substr($v, len($v)-1, 1) == ")")
+//            $strAddress = preg_replace('#(^(\(?).*(\)?)$)#', "", $v); // strip leading & ending () chars
+//
+        // Strip out any zip code (aka a 5 digit set) from the string
+        //
+        // Most of the time when we see a zip, it is placed in one of these three cases:
+        //      Case 1  =  "Seattle WA 98102 (Cap Hill Area)"
+        //      Case 2  =  "Seattle WA 98102"
+        //      Case 3  =  "98102"
+        //
+        $zipSplits = preg_split("/\b\d{5}\b/", $lookupAddress);
+        if(count($zipSplits) == 1 && !empty(trim($zipSplits[0])))
+            $lookupAddress = $zipSplits[0];  // "Dallas Tx 55555" => "Dallas Tx"
+        elseif(count($zipSplits) == 2) {
+            $lookupAddress = str_ireplace(" area", "",$zipSplits[1]) . " " . $zipSplits[0];
+        }
+        elseif(count($zipSplits) > 2)
+            $lookupAddress = join(" ", $zipSplits);
+
+
+//        $lookupAddress = preg_replace("/\w+.*(\s?\d{5})[\s\w]+/", "", $lookupAddress);
+
+        $lookupAddress = strip_punctuation($lookupAddress);
+        $lookupAddress = cleanupTextValue($lookupAddress);
+
         //
         // Generate the cache key and do a lookup for that item
         //
-        $itemKey = $this->getCacheKeyForAddress($strAddress);
+        $itemKey = $this->getCacheKeyForAddress($lookupAddress);
 
         //
         // return the item if we found it
         //
         if ($this->_pool->has($itemKey)) {
             $itemVal = $this->_pool->get($itemKey);
-            LogDebug("... Geolocation cache hit for " . $strAddress);
+            LogDebug("... Geolocation cache hit for " . $lookupAddress);
             if (!empty($itemVal)) {
                 return $this->returnGeoLocationFromCacheItem($itemKey, $itemVal);
             }
@@ -139,7 +166,7 @@ class LocationManager
 
         // Cache miss
         //
-        LogLine("... Geolocation cache miss for " . $strAddress . ".  Calling Geocoder...");
+        LogLine("... Geolocation cache miss for " . $lookupAddress . ".  Calling Geocoder...");
 
         if ($GLOBALS['CACHES']['GEOCODER_ENABLED'] !== true) {
             LogLine("Geocoder current disabled as a result of too many error results.");
@@ -147,7 +174,7 @@ class LocationManager
         }
         else
         {
-            return $this->geocode($strAddress);
+            return $this->geocode($lookupAddress);
         }
 
     }
@@ -265,13 +292,22 @@ class LocationManager
             // geocode result
             //
             $geolocation->fromGeocode($arrGeocode);
-            $isNewRecord = $geolocation->isNew();
             $geolocation->addAlternateName($strAddress);
+
+            $locKey = $geolocation->getGeoLocationKey();
+            $existingGeo = GeoLocationQuery::create()
+                ->findOneByGeoLocationKey($locKey);
+            if(!empty($existingGeo))
+            {
+                $geolocation->delete();
+                $existingGeo->addAlternateName($strAddress);
+                $geolocation = $existingGeo;
+            }
+
+            $isNewRecord = $geolocation->isNew();
             $geolocation->save();
 
-            if ($isNewRecord) {
-                $this->setCachedGeoLocation($geolocation);
-            }
+            $this->setCachedGeoLocation($geolocation);
             return $geolocation;
         } else {
             $key = $this->getCacheKeyForAddress($strAddress);
@@ -279,56 +315,56 @@ class LocationManager
             return null;
         }
     }
-
-
-    /**
-     * @param $strLocation
-     */
-    private function extendGeocodeDataResult(ResultInterface $geocode)
-    {
-        if (!empty($geocode)) {
-            $arrGeoResult = $geocode->toArray();
-
-            $arrGeoResult['display_value'] = $arrGeoResult['formatted_address'];
-
-            if (array_key_exists('city', $arrGeoResult))
-                $arrGeoResult['place'] = $arrGeoResult['city'];
-            else
-                $arrGeoResult['place'] = null;
-
-//            if (array_key_exists('adminLevels', $arrGeoResult) && is_array($arrGeoResult) && count($arrGeoResult) > 0) {
-//                if (count($arrGeoResult['adminLevels']) >= 1) {
-//                    $arrGeoResult['region'] = $arrGeoResult['adminLevels'][1]['name'];
-//                    $arrGeoResult['regioncode'] = $arrGeoResult['adminLevels'][1]['code'];
-//                }
-//                if (count($arrGeoResult['adminLevels']) >= 2) {
-//                    $arrGeoResult['county'] = $arrGeoResult['adminLevels'][2]['name'];
-//                }
+//
+//
+//    /**
+//     * @param $strLocation
+//     */
+//    private function extendGeocodeDataResult(ResultInterface $geocode)
+//    {
+//        if (!empty($geocode)) {
+//            $arrGeoResult = $geocode->toArray();
+//
+//            $arrGeoResult['display_value'] = $arrGeoResult['formatted_address'];
+//
+//            if (array_key_exists('city', $arrGeoResult))
+//                $arrGeoResult['place'] = $arrGeoResult['city'];
+//            else
+//                $arrGeoResult['place'] = null;
+//
+////            if (array_key_exists('adminLevels', $arrGeoResult) && is_array($arrGeoResult) && count($arrGeoResult) > 0) {
+////                if (count($arrGeoResult['adminLevels']) >= 1) {
+////                    $arrGeoResult['region'] = $arrGeoResult['adminLevels'][1]['name'];
+////                    $arrGeoResult['regioncode'] = $arrGeoResult['adminLevels'][1]['code'];
+////                }
+////                if (count($arrGeoResult['adminLevels']) >= 2) {
+////                    $arrGeoResult['county'] = $arrGeoResult['adminLevels'][2]['name'];
+////                }
+////            }
+////
+//
+////            $arrGeoResult['key'] = cleanupSlugPart($this->formatAddress($geocode, "%C-%R-%L"));
+////            $arrGeoResult['key'] = cleanupSlugPart($this->formatAddress($geocode, "%C-%R-%L"));
+//
+//            $fmt = array();
+//            if (!is_null($arrGeoResult['place']))
+//                $fmt[] = "%L";
+//
+//            if (strcasecmp($arrGeoResult['countrycode'], 'US') == 0) {
+//                if (!is_null($arrGeoResult['regioncode']))
+//                    $fmt[] = "%r %c";
+//                else
+//                    $fmt[] = "%c";
+//            } else {
+//                if (!is_null($arrGeoResult['region']))
+//                    $fmt[] = "%R %c";
+//                else
+//                    $fmt[] = "%c";
 //            }
 //
-
-//            $arrGeoResult['key'] = cleanupSlugPart($this->formatAddress($geocode, "%C-%R-%L"));
-//            $arrGeoResult['key'] = cleanupSlugPart($this->formatAddress($geocode, "%C-%R-%L"));
-
-            $fmt = array();
-            if (!is_null($arrGeoResult['place']))
-                $fmt[] = "%L";
-
-            if (strcasecmp($arrGeoResult['countrycode'], 'US') == 0) {
-                if (!is_null($arrGeoResult['regioncode']))
-                    $fmt[] = "%r %c";
-                else
-                    $fmt[] = "%c";
-            } else {
-                if (!is_null($arrGeoResult['region']))
-                    $fmt[] = "%R %c";
-                else
-                    $fmt[] = "%c";
-            }
-
-//            $arrGeoResult['primary_name'] = $this->formatAddress($geocode, join(", ", $fmt));
-//
-            return $geocode->fromArray($arrGeoResult);
-        }
-    }
+////            $arrGeoResult['primary_name'] = $this->formatAddress($geocode, join(", ", $fmt));
+////
+//            return $geocode->fromArray($arrGeoResult);
+//        }
+//    }
 }

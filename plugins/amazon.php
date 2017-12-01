@@ -93,7 +93,7 @@ class PluginAmazon extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
             }  
         ";
 
-        $this->selenium->getPageHTML($searchDetails->getSearchParameter('search_start_url'));
+        $this->selenium->getPageHTML($searchDetails->getSearchStartUrl());
 
         $this->runJavaScriptSnippet($js, false);
         sleep($this->additionalLoadDelaySeconds + 2);

@@ -55,45 +55,6 @@ function loadSqlite3MathExtensions()
 }
 
 
-/**
- * Cleanup a string to make a slug of it
- * Removes special characters, replaces blanks with a separator, and trim it
- *
- * @param     string $slug        the text to slugify
- * @param     string $replacement the separator used by slug
- * @return    string               the slugified text
- */
-function cleanupSlugPart($slug, $replacement = '-')
-{
-    // transliterate
-    if (function_exists('iconv')) {
-        $slug = iconv('utf-8', 'us-ascii//TRANSLIT', $slug);
-    }
-
-    // lowercase
-    if (function_exists('mb_strtolower')) {
-        $slug = mb_strtolower($slug);
-    } else {
-        $slug = strtolower($slug);
-    }
-
-    // remove accents resulting from OSX's iconv
-    $slug = str_replace(array('\'', '`', '^'), '', $slug);
-
-    // replace non letter or digits with separator
-    $slug = preg_replace('/\W+/', $replacement, $slug);
-
-    // trim
-    $slug = trim($slug, $replacement);
-
-    if (empty($slug)) {
-        return 'UNKNOWN';
-    }
-
-    return $slug;
-}
-
-
 /******************************************************************************
  *
  *  JobPosting Helper Functions
@@ -136,15 +97,16 @@ function updateOrCreateJobPosting($arrJobItem)
 }
 
 
-function getAllUserMatchesNotNotified($appRunId=null, $jobsiteKey=null)
+function getAllUserMatchesNotNotified($jobsiteKey=null)
 {
-    $userObject = $GLOBALS['USERDATA']['configuration_settings']['user_details'];
+    $userObject = \JobScooper\DataAccess\User::getCurrentUser();
 
     $query = \JobScooper\DataAccess\UserJobMatchQuery::create()
         ->filterByUserNotificationState(array("not-ready", "ready"))
-        ->filterByUserSlug($userObject->getUserSlug())
+        ->filterByUserId($userObject->getUserId())
         ->joinWithJobPosting();
 
+    $appRunId = getConfigurationSettings('app_run_id');
     if(!is_null($appRunId))
     {
         $query->filterBy("AppRunId",$appRunId);
@@ -161,51 +123,6 @@ function getAllUserMatchesNotNotified($appRunId=null, $jobsiteKey=null)
     return $results->getData();
 }
 
-function getAllSearchesThatWereIncluded()
-{
-    $arrSearchesRun = array();
-
-    foreach($GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'] as $siteSearches)
-    {
-        if(is_array($siteSearches))
-            foreach($siteSearches as $search)
-            {
-                $arrSearchesRun[$search->getUserSearchRunKey()] = $search;
-            }
-    }
-
-    return $arrSearchesRun;
-}
-
-function getAllJobSitesThatWereLastRun()
-{
-    $sites = array();
-    $runSearches = getAllSearchesThatWereLastRun();
-    foreach($runSearches as $search)
-        if(!in_array($search->getRunResultCode(), array("excluded", "not-run")))
-            $sites[] = $search->getJobSiteKey();
-    $ret = array_unique($sites);
-    if(!is_array($ret))
-        $ret = array();
-
-    return $ret;
-}
-
-function getAllSearchesThatWereLastRun()
-{
-    $lastSearches = getAllSearchesThatWereIncluded();
-    return $lastSearches;
-
-//    $valSet = UserSearchRunTableMap::getValueSet(UserSearchRunTableMap::COL_RUN_RESULT);
-//    $didRunVals = array(array_search("successful", $valSet),array_search("failed", $valSet));
-//
-//    $runSearches = array_filter($lastSearches, function ($var) use ($didRunVals) {
-//        return in_array($var->getRunResultCode(), $didRunVals);
-//    });
-//
-//    return $runSearches;
-
-}
 
 /******************************************************************************
  *
@@ -281,29 +198,6 @@ function updateJobRecordsFromJson($filepath)
  ******************************************************************************/
 
 
-
-function getUserBySlug($slug)
-{
-    LogLine("Searching for database user '" . $slug ."'", \C__DISPLAY_NORMAL__);
-    $user = \JobScooper\DataAccess\UserQuery::create()
-        ->filterByPrimaryKey($slug)
-        ->findOne();
-
-    return $user;
-}
-
-function findOrCreateUser($value)
-{
-    $slug = cleanupSlugPart($value);
-
-    LogLine("Searching for database user '" . $slug ."'", \C__DISPLAY_NORMAL__);
-    $user = \JobScooper\DataAccess\UserQuery::create()
-        ->filterByPrimaryKey($slug)
-        ->findOneOrCreate();
-
-    return $user;
-}
-
 function getAllPluginClassesByJobSiteKey()
 {
     $classList = get_declared_classes();
@@ -321,103 +215,19 @@ function getAllPluginClassesByJobSiteKey()
 
     return $classListBySite;
 }
-function getJobSitePluginClassName($jobsiteKey)
+
+function getJobSiteKeyFromPluginClass($className)
 {
-    $plugin_classname = null;
+    $arrClassList = getAllPluginClassesByJobSiteKey();
+    $arrSiteList = array_flip($arrClassList);
+    if(array_key_exists($className, $arrSiteList) === true)
+        return $arrSiteList[$className];
 
-    if (!is_null($jobsiteKey)) {
-        if (!array_key_exists($jobsiteKey, $GLOBALS['JOBSITE_PLUGINS']) &&
-            !is_null($GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['class_name']))
-        {
-            $plugin_classname = $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['class_name'];
-        }
-    }
+    return null;
 
-    if(empty($plugin_classname))
-    {
-        $classes = getAllPluginClassesByJobSiteKey();
-        if(array_key_exists($jobsiteKey, $classes))
-            $plugin_classname = $classes[$jobsiteKey];
-    }
-
-    return $plugin_classname;
 }
 
 
-
-function findOrCreateJobSitePlugin($jobsiteKey)
-{
-    if (!array_key_exists($jobsiteKey, $GLOBALS['JOBSITE_PLUGINS']))
-    {
-        $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey] = array(
-            'display_name' => null,
-            'jobsitekey' => $jobsiteKey,
-            'class_name' => getJobSitePluginClassName($jobsiteKey),
-            'jobsite_db_object' => null,
-            'include_in_run' => false,
-            'other_settings' => []
-        );
-    }
-
-
-    if (empty($GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['jobsite_db_object']))
-    {
-        $dbPlugin = \JobScooper\DataAccess\JobSitePluginQuery::create()
-            ->filterByPrimaryKey($jobsiteKey)
-            ->findOneOrCreate();
-
-        $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['jobsite_db_object'] = $dbPlugin;
-        $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['display_name'] = $dbPlugin->getDisplayName();
-
-    }
-
-
-    // make sure we can instantiate the class object for the plugin
-    $class = $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['class_name'];
-    try
-    {
-        if(empty($class))
-            throw new Exception("No class found for " . $jobsiteKey);
-
-        $dbrec = $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['jobsite_db_object'];
-        if(!empty($dbrec))
-        {
-            $dbrec->instantiateJobSiteClass();
-        }
-    }
-    catch (Exception $ex)
-    {
-        LogError("Unable to instantiate expected Job Site plugin class for " . $jobsiteKey . ":  " . $ex->getMessage());
-        setSiteAsExcluded($jobsiteKey);
-        $dbrec = $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['jobsite_db_object'];
-        if(!empty($dbrec))
-        {
-            $dbrec->setLastFailedAt(time());
-            $dbrec->setLastRunWasSuccessful(false);
-        }
-        return null;
-    }
-    finally {
-        $dbrec = $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['jobsite_db_object'];
-        if(!empty($dbrec))
-            $dbrec->save();
-
-    }
-    return $GLOBALS['JOBSITE_PLUGINS'][$jobsiteKey]['jobsite_db_object'];
-}
-
-function getPluginObjectForJobSite($jobsite)
-{
-    $objJobSite = findOrCreateJobSitePlugin($jobsite);
-    return $objJobSite->getJobSitePluginObject();
-}
-
-function getUserByName($username)
-{
-    $slug = cleanupSlugPart($username);
-    return getUserBySlug($slug);
-
-}
 function updateOrCreateUser($arrUserDetails)
 {
     if(is_null($arrUserDetails) || !is_array($arrUserDetails))
@@ -436,91 +246,3 @@ function updateOrCreateUser($arrUserDetails)
     return $userrec;
 }
 
-
-
-function findOrCreateUserSearchRun($searchKey, $jobsiteKey, $locationKey=null, $copyFrom=null)
-{
-    $userObject = $GLOBALS['USERDATA']['configuration_settings']['user_details'];
-    $userSlug = $userObject->getUserSlug();
-
-    if(isDebug())
-        LogLine("Searching for user '{$userSlug} / jobsite {$jobsiteKey} / search '{$searchKey} / location '{$locationKey}'...", \C__DISPLAY_NORMAL__);
-
-    $locId = null;
-    if(empty($locationKey))
-    {
-        $arrLocations = getConfigurationSettings('search_location');
-        if(!empty($arrLocations) && count($arrLocations)>=1) {
-            $locdata = array_pop($arrLocations);
-            $locId = $locdata['location_id'];
-            $locationKey = $locdata['location_name_key'];
-        }
-
-    }
-
-    if(empty($locationKey))
-        $locationKey = 'all-locations';
-
-    $query = \JobScooper\DataAccess\UserSearchRunQuery::create()
-        ->filterByUserSlug($userSlug)
-        ->filterByJobSiteKey($jobsiteKey)
-        ->filterBySearchKey($searchKey);
-
-    if(!empty($locId)) {
-        $query->filterByGeoLocationId($locId);
-    }
-    elseif(!empty($locationKey))
-    {
-        $geoloc = \JobScooper\DataAccess\GeoLocationQuery::create()
-            ->findOneByGeoLocationKey($locationKey);
-        if(!empty($geoloc))
-            $query->filterByGeoLocation($geoloc);
-    }
-
-    $search = $query->findOneOrCreate();
-
-    if ($search->isNew()) {
-        if(isDebug())
-            LogLine("Found matching UserSearchRun ID # " . $search->getUserSearchRunId() ." for {$userSlug} / jobsitekey {$jobsiteKey} / search {$searchKey} / location {$locationKey}...", \C__DISPLAY_NORMAL__);
-        $search->setSearchKey($searchKey);
-        $search->setJobSiteKey($jobsiteKey);
-        $search->setUserSlug($userSlug);
-    }
-    else {
-        if (isDebug())
-            LogLine("Search Not Found -- Creating New User Search Run for user '{$userSlug} / plugin {$jobsiteKey} / search '{$searchKey} / location '{$locationKey}'...", \C__DISPLAY_WARNING__);
-    }
-
-    if (is_null($locId))
-    {
-        $loc = \JobScooper\DataAccess\GeoLocationQuery::create()
-            ->findOneByGeoLocationKey($locationKey);
-        $search->setGeoLocation($loc);
-    }
-    else
-        $search->setGeoLocationId($locId);
-
-    if (!is_null($copyFrom))
-    {
-        $search->setSearchParameters($copyFrom->getSearchParameters());
-    }
-    $search->setAppRunId($GLOBALS['USERDATA']['configuration_settings']['app_run_id']);
-    $search->save();
-    return $search;
-}
-
-function cleanupTextValue($v)
-{
-    if(empty($v)|| !is_string($v))
-        return null;
-
-    $v = html_entity_decode($v);
-    $v = preg_replace(array('/\s{2,}/', '/[\t]/', '/[\n]/', '/\s{1,}/'), ' ', $v);
-    $v = clean_utf8($v);
-    $v = trim($v);
-
-    if(empty($v))
-        $v = null;
-
-    return $v;
-}

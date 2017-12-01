@@ -86,29 +86,36 @@ class PluginSimplyHired extends \JobScooper\Plugins\Classes\ServerHtmlPlugin
         return $ret;
     }
 
+
+
     protected function getPageURLfromBaseFmt(\JobScooper\DataAccess\UserSearchRun $searchDetails, $nPage = null, $nItem = null)
     {
         $searchDetailsBackup = $searchDetails->copy();
-        
-        $strURL = $this->_getSearchUrlFormat_($searchDetails);
+        $strURL = $this->_getSearchUrlFormat_($searchDetails, $nPage, $nItem);
 
-        $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($GLOBALS['USERDATA']['OPTS']['number_days']), $strURL );
-        $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL );
-        $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
-        if(!$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
-        {
-            assert($searchDetails->getSearchParameter('keywords_string_for_url') != VALUE_NOT_SUPPORTED);
-            $strURL = str_ireplace(BASE_URL_TAG_KEYWORDS, $searchDetails->getSearchParameter('keywords_string_for_url', $strURL ));
+
+        $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($GLOBALS['USERDATA']['configuration_settings']['number_days']), $strURL);
+        $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL);
+        $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL);
+        $strURL = str_ireplace(BASE_URL_TAG_KEYWORDS, $this->getKeywordURLValue($searchDetails), $strURL);
+
+
+        $nSubtermMatches = substr_count($strURL, BASE_URL_TAG_LOCATION);
+
+        if (!$this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) && $nSubtermMatches > 0) {
+            $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $this->getGeoLocationURLValue($searchDetails), $strURL);
+            if ($strURL == null) {
+                throw new \ErrorException("Location value is required for " . $this->JobSiteName . ", but was not set for the search '" . $searchDetails->getUserSearchRunKey() . "'." . " Aborting all searches for " . $this->JobSiteName, \C__DISPLAY_ERROR__);
+            }
         }
-
-
-        $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL );
 
         $nSubtermMatches = substr_count($strURL, BASE_URL_TAG_LOCATION);
 
         if(!$this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) && $nSubtermMatches > 0)
         {
-            if($searchDetails->getSearchParameter('location_search_value') == VALUE_NOT_SUPPORTED)
+            $loc = $searchDetails->getGeoLocation();
+            $locTypeNeeded = $this->getGeoLocationSettingType();
+            if(empty($locTypeNeeded) || $locTypeNeeded == VALUE_NOT_SUPPORTED)
             {
                 $msg = "Failed to run search:  search is missing the required location type of " . $this->getGeoLocationSettingType() ." set.  Skipping search '". $searchDetails->getUserSearchRunKey() .".";
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($msg, \C__DISPLAY_ERROR__);
@@ -116,7 +123,12 @@ class PluginSimplyHired extends \JobScooper\Plugins\Classes\ServerHtmlPlugin
             }
             else
             {
-                $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $searchDetails->getSearchParameter('location_search_value'), $strURL);
+                $strLocationValue = $loc->formatLocationByLocationType($locTypeNeeded);
+                if (empty($strLocationValue) || $strLocationValue == VALUE_NOT_SUPPORTED) {
+                    LogLine("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchRunKey() . ".", \C__DISPLAY_ITEM_DETAIL__);
+                    return "";
+                }
+                $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $strLocationValue, $strURL);
             }
         }
 

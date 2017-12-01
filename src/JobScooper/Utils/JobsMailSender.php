@@ -109,7 +109,7 @@ class JobsMailSender
             }
         }
 
-        $settings = getConfigurationSettings('email');
+        $settings = getConfigurationSettings('emails_to_send');
 
         $mail = new PHPMailer();
 
@@ -134,20 +134,31 @@ class JobsMailSender
         //
         // Add initial email address header values
         //
-        $emailAddrs = $this->_getEmailAddressesByEmailType_($emailKind);
+        $emailAddrs = getConfigurationSettings('emails_to_send');
         $strToAddys = "";
         $strBCCAddys = "";
         foreach($emailAddrs["to"] as $to)
         {
-            $mail->addAddress($to['address'], is_null($to['name']) ? $to['address'] : $to['name']);
-            $strToAddys .= (strlen($strToAddys) <= 0 ? "" : ", ") . $to['address'];
+            if($to['emailkind'] == $emailKind)
+            {
+                $mail->addAddress($to['EmailAddress'], is_null($to['Name']) ? $to['EmailAddress'] : $to['Name']);
+                $strToAddys .= (strlen($strToAddys) <= 0 ? "" : ", ") . $to['EmailAddress'];
+            }
         }
         foreach($emailAddrs['bcc'] as $bcc)
         {
-            $mail->addBCC($bcc['address'], $bcc['name']);
-            $strBCCAddys .= ", " . $bcc['address'];
+            if($to['emailkind'] == $emailKind) {
+                $mail->addBCC($bcc['EmailAddress'], $bcc['Name']);
+                $strBCCAddys .= ", " . $bcc['EmailAddress'];
+            }
         }
-        $mail->setFrom($emailAddrs['from']['address'], $emailAddrs['from']['name']);
+        foreach($emailAddrs['from'] as $from)
+        {
+            if($from['emailkind'] == $emailKind) {
+                $mail->setFrom($from['EmailAddress'], $from['Name']);
+                break;
+            }
+        }
 
         $mail->addReplyTo("dev@bryanselner.com", "dev@bryanselner.com" );
         $mail->SMTPOptions = array(
@@ -158,7 +169,7 @@ class JobsMailSender
             )
         );
         LogLine("Email to:\t" . $strToAddys , \C__DISPLAY_NORMAL__);
-        LogLine("Email from:\t" . $emailAddrs['from']['address'], \C__DISPLAY_NORMAL__);
+        LogLine("Email from:\t" . $emailAddrs['from']['EmailAddress'], \C__DISPLAY_NORMAL__);
         LogLine("Email bcc:\t" . $strBCCAddys, \C__DISPLAY_NORMAL__);
 
 
@@ -204,7 +215,7 @@ class JobsMailSender
         }
         else
         {
-            LogLine("Email notification sent to '" . $strToAddys . "' from '" . $emailAddrs['from']['address'] . "' with BCCs to '" . $strBCCAddys ."'", \C__DISPLAY_ITEM_RESULT__);
+            LogLine("Email notification sent to '" . $strToAddys . "' from '" . $emailAddrs['from']['EmailAddress'] . "' with BCCs to '" . $strBCCAddys ."'", \C__DISPLAY_ITEM_RESULT__);
         }
         return $ret;
 

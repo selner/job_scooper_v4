@@ -30,7 +30,9 @@ date_default_timezone_set("America/Los_Angeles");
 function get_PharseOptionValue($strOptName)
 {
     $retvalue = null;
-    $strOptGiven = $strOptName."_given";
+    $strOptGiven = $strOptName;
+    if(substr_count($strOptName, "_given") == false)
+        $strOptGiven = $strOptName."_given";
     if(isset($GLOBALS['USERDATA']['OPTS']) && isset($GLOBALS['USERDATA']['OPTS'][$strOptGiven]) && $GLOBALS['USERDATA']['OPTS'][$strOptGiven] == true)
     {
         if(isset($GLOBALS['logger']) && isset($GLOBALS['VERBOSE'])) $GLOBALS['logger']->logLine("'".$strOptName ."'"."=[".$GLOBALS['USERDATA']['OPTS'][$strOptName] ."]", C__DISPLAY_ITEM_DETAIL__);
@@ -44,6 +46,11 @@ function get_PharseOptionValue($strOptName)
     return $retvalue;
 }
 
+function isCmdLineOptionEqualsTrue($strOptName)
+{
+    $cmdline = get_PharseOptionValue($strOptName);
+    return filter_var($cmdline, FILTER_VALIDATE_BOOLEAN);
+}
 
 function setGlobalFileDetails($key, $fRequireFile = false, $fullpath = null)
 {
@@ -218,52 +225,51 @@ function __initializeArgs__($rootdir)
 function addUserOptionForSitePlugins()
 {
 
-    foreach($GLOBALS['JOBSITE_PLUGINS'] as $site)
+    $jobsites = \JobScooper\Builders\JobSitePluginBuilder::getAllJobSites(true);
+    foreach($jobsites as $site)
     {
-        $sitename = strtolower($site['jobsitekey']);
-        $strIncludeKey = 'include_'.$sitename;
+        $siteKey = strtolower($site->getJobSiteKey());
+        $strIncludeKey = 'include_'.$siteKey ;
 
         $GLOBALS['OPTS_SETTINGS'][$strIncludeKey ] = array(
-            'description'   => 'Include ' .$sitename . ' in the results list.' ,
+            'description'   => 'Include ' . $site->getDisplayName() . ' in the results list.' ,
             'default'       => -1,
             'type'          => Pharse::PHARSE_INTEGER,
             'required'      => false,
-            'short'         => $sitename
+            'short'         => $siteKey
         );
     }
 }
 
 function is_OptionIncludedSite($strName)
 {
-    $strIncludeSiteKey = "include_" . strtolower($strName);
-    $strGivenKey = $strIncludeSiteKey."_given";
-    $ret = false;
+    $strIncludeSiteKey = "include_" . strtolower($strName) . "_given";
 
-    if (isset($GLOBALS['USERDATA']['OPTS'][$strGivenKey]) && $GLOBALS['USERDATA']['OPTS'][$strGivenKey] == true)
-    {
-        switch($GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey])
-        {
-            case 0:
-                $GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey] = false;
-                break;
-
-            case -1:
-            case 1:
-            default:
-                $GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey] = true;
-                break;
-
-        }
-        $ret = $GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey];
-    }
-    elseif(isset($GLOBALS['USERDATA']['OPTS']['include_all_given']) && $GLOBALS['USERDATA']['OPTS']['include_all_given'] == true)
-    {
-        $GLOBALS['USERDATA']['OPTS'][$strGivenKey] = true;
-        $GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey] = true;
-        $ret = $GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey];
-    }
-
-
-
-    return $ret;
+    return isCmdLineOptionEqualsTrue($strIncludeSiteKey);
+////
+////    if (isset($GLOBALS['USERDATA']['OPTS'][$strGivenKey]) && $GLOBALS['USERDATA']['OPTS'][$strGivenKey] == true)
+////    {
+////        switch($GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey])
+////        {
+////            case 0:
+////                $GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey] = false;
+////                break;
+////
+////            case -1:
+////            case 1:
+////            default:
+////                $GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey] = true;
+////                break;
+////
+////        }
+////        $ret = $GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey];
+////    }
+////    elseif(isset($GLOBALS['USERDATA']['OPTS']['include_all_given']) && $GLOBALS['USERDATA']['OPTS']['include_all_given'] == true)
+////    {
+////        $GLOBALS['USERDATA']['OPTS'][$strGivenKey] = true;
+////        $GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey] = true;
+////        $ret = $GLOBALS['USERDATA']['OPTS'][$strIncludeSiteKey];
+////    }
+//
+//    return $ret;
 }

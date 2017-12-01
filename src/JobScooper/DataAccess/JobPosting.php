@@ -164,19 +164,19 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
     {
         $oldVal = $this->getLocation();
 
-
-
-        $v = $this->_cleanupTextValue($v);
-        $v = preg_replace('#(^\s*\(+|\)+\s*$)#', "", $v); // strip leading & ending () chars
-
         //
         // Restructure locations like "US-VA-Richmond" to be "Richmond, VA"
         //
-        $arrMatches = array();
-        $matched = preg_match('/.*(\w{2})\s*[\-,]\s*.*(\w{2})\s*[\-,]s*([\w]+)/', $v, $arrMatches);
-        if ($matched !== false && count($arrMatches) == 4) {
-            $v = $arrMatches[3] . ", " . $arrMatches[2];
+        $arrMatches = preg_split("/[\-]/", $v);
+        if(strlen($v) == 3)
+        {
+            $v = sprintf("%s %s %s", $arrMatches[2], $arrMatches[1], $arrMatches[0]);
         }
+//        $arrMatches = array();
+//        $matched = preg_match('/.*(\w{2})\s*[\-,]\s*.*(\w{2})\s*[\-,]s*([\w]+)/', $v, $arrMatches);
+//        if ($matched !== false && count($arrMatches) == 4) {
+//            $v = $arrMatches[3] . ", " . $arrMatches[2];
+//        }
 
         $v = $this->_cleanupTextValue($v);
 

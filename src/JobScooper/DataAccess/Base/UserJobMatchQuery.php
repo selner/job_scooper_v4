@@ -21,7 +21,7 @@ use Propel\Runtime\Exception\PropelException;
  *
  *
  * @method     ChildUserJobMatchQuery orderByUserJobMatchId($order = Criteria::ASC) Order by the user_job_match_id column
- * @method     ChildUserJobMatchQuery orderByUserSlug($order = Criteria::ASC) Order by the user_slug column
+ * @method     ChildUserJobMatchQuery orderByUserId($order = Criteria::ASC) Order by the user_id column
  * @method     ChildUserJobMatchQuery orderByJobPostingId($order = Criteria::ASC) Order by the jobposting_id column
  * @method     ChildUserJobMatchQuery orderByUserNotificationState($order = Criteria::ASC) Order by the user_notification_state column
  * @method     ChildUserJobMatchQuery orderByIsJobMatch($order = Criteria::ASC) Order by the is_job_match column
@@ -34,7 +34,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatchQuery orderByAppRunId($order = Criteria::ASC) Order by the app_run_id column
  *
  * @method     ChildUserJobMatchQuery groupByUserJobMatchId() Group by the user_job_match_id column
- * @method     ChildUserJobMatchQuery groupByUserSlug() Group by the user_slug column
+ * @method     ChildUserJobMatchQuery groupByUserId() Group by the user_id column
  * @method     ChildUserJobMatchQuery groupByJobPostingId() Group by the jobposting_id column
  * @method     ChildUserJobMatchQuery groupByUserNotificationState() Group by the user_notification_state column
  * @method     ChildUserJobMatchQuery groupByIsJobMatch() Group by the is_job_match column
@@ -80,7 +80,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatch findOneOrCreate(ConnectionInterface $con = null) Return the first ChildUserJobMatch matching the query, or a new ChildUserJobMatch object populated from the query conditions when no match is found
  *
  * @method     ChildUserJobMatch findOneByUserJobMatchId(int $user_job_match_id) Return the first ChildUserJobMatch filtered by the user_job_match_id column
- * @method     ChildUserJobMatch findOneByUserSlug(string $user_slug) Return the first ChildUserJobMatch filtered by the user_slug column
+ * @method     ChildUserJobMatch findOneByUserId(string $user_id) Return the first ChildUserJobMatch filtered by the user_id column
  * @method     ChildUserJobMatch findOneByJobPostingId(int $jobposting_id) Return the first ChildUserJobMatch filtered by the jobposting_id column
  * @method     ChildUserJobMatch findOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column
  * @method     ChildUserJobMatch findOneByIsJobMatch(boolean $is_job_match) Return the first ChildUserJobMatch filtered by the is_job_match column
@@ -96,7 +96,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatch requireOne(ConnectionInterface $con = null) Return the first ChildUserJobMatch matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildUserJobMatch requireOneByUserJobMatchId(int $user_job_match_id) Return the first ChildUserJobMatch filtered by the user_job_match_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserJobMatch requireOneByUserSlug(string $user_slug) Return the first ChildUserJobMatch filtered by the user_slug column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneByUserId(string $user_id) Return the first ChildUserJobMatch filtered by the user_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByJobPostingId(int $jobposting_id) Return the first ChildUserJobMatch filtered by the jobposting_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByIsJobMatch(boolean $is_job_match) Return the first ChildUserJobMatch filtered by the is_job_match column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -110,7 +110,7 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     ChildUserJobMatch[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildUserJobMatch objects based on current ModelCriteria
  * @method     ChildUserJobMatch[]|ObjectCollection findByUserJobMatchId(int $user_job_match_id) Return ChildUserJobMatch objects filtered by the user_job_match_id column
- * @method     ChildUserJobMatch[]|ObjectCollection findByUserSlug(string $user_slug) Return ChildUserJobMatch objects filtered by the user_slug column
+ * @method     ChildUserJobMatch[]|ObjectCollection findByUserId(string $user_id) Return ChildUserJobMatch objects filtered by the user_id column
  * @method     ChildUserJobMatch[]|ObjectCollection findByJobPostingId(int $jobposting_id) Return ChildUserJobMatch objects filtered by the jobposting_id column
  * @method     ChildUserJobMatch[]|ObjectCollection findByUserNotificationState(int $user_notification_state) Return ChildUserJobMatch objects filtered by the user_notification_state column
  * @method     ChildUserJobMatch[]|ObjectCollection findByIsJobMatch(boolean $is_job_match) Return ChildUserJobMatch objects filtered by the is_job_match column
@@ -219,7 +219,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_job_match_id, user_slug, jobposting_id, user_notification_state, is_job_match, is_excluded, is_include_in_notifications, matched_user_keywords, matched_negative_title_keywords, matched_negative_company_keywords, out_of_user_area, app_run_id FROM user_job_match WHERE user_job_match_id = :p0';
+        $sql = 'SELECT user_job_match_id, user_id, jobposting_id, user_notification_state, is_job_match, is_excluded, is_include_in_notifications, matched_user_keywords, matched_negative_title_keywords, matched_negative_company_keywords, out_of_user_area, app_run_id FROM user_job_match WHERE user_job_match_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -351,28 +351,28 @@ abstract class UserJobMatchQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the user_slug column
+     * Filter the query on the user_id column
      *
      * Example usage:
      * <code>
-     * $query->filterByUserSlug('fooValue');   // WHERE user_slug = 'fooValue'
-     * $query->filterByUserSlug('%fooValue%', Criteria::LIKE); // WHERE user_slug LIKE '%fooValue%'
+     * $query->filterByUserId('fooValue');   // WHERE user_id = 'fooValue'
+     * $query->filterByUserId('%fooValue%', Criteria::LIKE); // WHERE user_id LIKE '%fooValue%'
      * </code>
      *
-     * @param     string $userSlug The value to use as filter.
+     * @param     string $userId The value to use as filter.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
      */
-    public function filterByUserSlug($userSlug = null, $comparison = null)
+    public function filterByUserId($userId = null, $comparison = null)
     {
         if (null === $comparison) {
-            if (is_array($userSlug)) {
+            if (is_array($userId)) {
                 $comparison = Criteria::IN;
             }
         }
 
-        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_SLUG, $userSlug, $comparison);
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_ID, $userId, $comparison);
     }
 
     /**
@@ -841,14 +841,14 @@ abstract class UserJobMatchQuery extends ModelCriteria
     {
         if ($user instanceof \JobScooper\DataAccess\User) {
             return $this
-                ->addUsingAlias(UserJobMatchTableMap::COL_USER_SLUG, $user->getUserSlug(), $comparison);
+                ->addUsingAlias(UserJobMatchTableMap::COL_USER_ID, $user->getUserId(), $comparison);
         } elseif ($user instanceof ObjectCollection) {
             if (null === $comparison) {
                 $comparison = Criteria::IN;
             }
 
             return $this
-                ->addUsingAlias(UserJobMatchTableMap::COL_USER_SLUG, $user->toKeyValue('PrimaryKey', 'UserSlug'), $comparison);
+                ->addUsingAlias(UserJobMatchTableMap::COL_USER_ID, $user->toKeyValue('PrimaryKey', 'UserId'), $comparison);
         } else {
             throw new PropelException('filterByUser() only accepts arguments of type \JobScooper\DataAccess\User or Collection');
         }

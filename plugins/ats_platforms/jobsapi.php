@@ -27,15 +27,13 @@ class PluginUSAJobs extends JobsApiPlugin
     protected $JobSiteName = 'USAJobs';
     protected $JobListingsPerPage = 25;
     protected $LocationType = 'location-city-comma-state';
-    protected $authorization_key = null;
 
     function getSearchJobsFromAPI($searchDetails, $pageNumber = 1)
     {
         // Add parameters to the query via the constructor
         $options = [
-            'AuthorizationKey' => $this->authorization_key,
-
-            'LocationName' => $searchDetails->getSearchParameter('location_search_value'),
+            'AuthorizationKey' => $this->_otherPluginSettings['authorization_key'],
+            'LocationName' => $this->getGeoLocationURLValue($searchDetails),
             'Page' => $pageNumber
         ];
         $query = new UsajobsQuery($options);
