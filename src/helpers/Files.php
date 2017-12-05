@@ -63,8 +63,9 @@ function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strEx
     if (strlen($strBase) > 0) $strFilename .= "-" . $strBase;
     if (strlen($strExt) > 0) $strFilename .= "." . $strExt;
 
-    if(!is_null($directoryKey) && array_key_exists($directoryKey, $GLOBALS['USERDATA']['directories']))
-        $strFilename = $GLOBALS['USERDATA']['directories'][$directoryKey] . "/" . $strFilename;
+	$directory = getOutputDirectory($directoryKey);
+    if(!empty($directory))
+        $strFilename = $directory . DIRECTORY_SEPARATOR . $strFilename;
     return $strFilename;
 }
 

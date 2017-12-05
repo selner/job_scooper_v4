@@ -2,10 +2,10 @@
 
 namespace JobScooper\DataAccess;
 
-use JobScooper\DataAccess\Base\UserSearchVersionQuery as BaseUserSearchVersionQuery;
+use JobScooper\DataAccess\Base\UserKeywordSetQuery as BaseUserKeywordSetQuery;
 
 /**
- * Skeleton subclass for performing query and update operations on the 'user_search_version' table.
+ * Skeleton subclass for performing query and update operations on the 'user_keyword_set' table.
  *
  *
  *
@@ -14,7 +14,7 @@ use JobScooper\DataAccess\Base\UserSearchVersionQuery as BaseUserSearchVersionQu
  * long as it does not already exist in the output directory.
  *
  */
-class UserSearchVersionQuery extends BaseUserSearchVersionQuery
+class UserKeywordSetQuery extends BaseUserKeywordSetQuery
 {
 
 }

@@ -98,7 +98,7 @@ function remove_prefix($text, $prefix) {
 
 function remove_postfix($text, $postfix) {
     if(substr($text, strlen($text) - strlen($postfix)) === $postfix)
-        $text = substr($text, (strlen($text)-strlen($postfix)));
+        $text = substr($text, 0, (strlen($text)-strlen($postfix)));
     return $text;
 }
 

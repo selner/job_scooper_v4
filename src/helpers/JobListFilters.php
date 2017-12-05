@@ -62,7 +62,7 @@ function isUserJobMatchAndNotExcluded($var)
 
 function isIncludedJobSite($var)
 {
-    return (in_array(strtolower($var->getJobPosting()->getJobSiteKey()), $GLOBALS['USERDATA']['configuration_settings']['included_sites']) === true);
+    return (in_array(strtolower($var->getJobPosting()->getJobSiteKey()), $GLOBALS['JOBSCOOPER']['included_sites']) === true);
 }
 
 

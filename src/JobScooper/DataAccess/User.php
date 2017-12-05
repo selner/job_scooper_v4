@@ -17,14 +17,17 @@ use JobScooper\DataAccess\Base\User as BaseUser;
 class User extends BaseUser
 {
 
-    static function getCurrentUser()
+	/**
+	 * @return \JobScooper\DataAccess\User
+	 */
+	static function getCurrentUser()
     {
-        return $GLOBALS['USERDATA']['configuration_settings']['current_user'];
+        return getConfigurationSetting('current_user');
     }
 
     static function setCurrentUser(User $user)
     {
-        $GLOBALS['USERDATA']['configuration_settings']['current_user'] = $user;
+        setConfigurationSetting('current_user', $user);
     }
 
 }

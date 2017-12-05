@@ -28,7 +28,7 @@ class ErrorEmailLogHandler extends MailHandler
      */
     protected function send($content, array $records)
     {
-        $searchParams = $this->_getUserSearchRunContent();
+        $searchParams = $this->_getUserSearchSiteRunContent();
 
         $subject = "JobScooper Error: [" . gethostname() . "] for " . getRunDateRange();
 
@@ -37,7 +37,7 @@ class ErrorEmailLogHandler extends MailHandler
             'monolog_error_content' => $content,
             'search_parameters_content' => $searchParams,
             'app_version' => __APP_VERSION__,
-            'app_run_id' => $GLOBALS['USERDATA']['configuration_settings']['app_run_id'],
+            'app_run_id' => $GLOBALS['JOBSCOOPER']['app_run_id'],
             "server" => gethostname()
         );
         $renderer = loadTemplate(__ROOT__.'/assets/templates/html_email_error_alerts.tmpl');
@@ -45,7 +45,7 @@ class ErrorEmailLogHandler extends MailHandler
         $htmlBody = $renderer($data);
 
         $mailer = new JobsMailSender(true);
-        return $mailer->sendEmail("", $htmlBody, null, $subject, "error");
+        return $mailer->sendEmail("", $htmlBody, null, $subject, "errors");
 
     }
 
@@ -57,7 +57,7 @@ class ErrorEmailLogHandler extends MailHandler
         return new HtmlFormatter();
     }
 
-    private function _getUserSearchRunContent()
+    private function _getUserSearchSiteRunContent()
     {
         $renderer = loadTemplate(__ROOT__.'/assets/templates/partials/html_email_body_search_config_details.tmpl');
 

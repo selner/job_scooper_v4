@@ -20,14 +20,22 @@ namespace JobScooper\Builders;
 
 
 use Exception;
+use JobApis\Jobs\Client\Job;
 use JobScooper\DataAccess\JobSiteRecord;
 use JobScooper\DataAccess\JobSiteRecordQuery;
+use JobScooper\Utils\DocOptions;
 use Propel\Runtime\ActiveQuery\Criteria;
 
 class JobSitePluginBuilder
 {
     static function getAllJobSites($requireEnabled=true)
     {
+	    $sitesBySiteKey = getCacheAsArray("all_jobsites_and_plugins");
+		if(!empty($sitesBySiteKey))
+			return $sitesBySiteKey;
+
+		$plugins = new JobSitePluginBuilder();
+
         $query = JobSiteRecordQuery::create();
 
         if($requireEnabled === true)
@@ -35,44 +43,110 @@ class JobSitePluginBuilder
             $query->filterByisDisabled(false);
         }
 
-        $sites = $query->find()->getData();
+        $sites = $query
+	        ->find()
+	        ->toKeyIndex('JobSiteKey');
 
-        $sitesBySiteKey = array();
-        foreach($sites as $site)
-        {
-            $sitesBySiteKey[$site->getJobSiteKey()] = $site;
-        }
+        setAsCacheData("all_jobsites_and_plugins", $sites);
 
-        return $sitesBySiteKey;
+	    if(is_null($sitesBySiteKey))
+		    return array();
+	    return $sitesBySiteKey;
     }
 
-    static function getJobSitesCmdLineIncludedInRun()
+    static function getIncludedJobSites()
     {
-        $sites = self::getAllJobSites(true);
-        if(isCmdLineOptionEqualsTrue("include_all"))
-            return $sites;
+	    $sites = getCacheAsArray("included_jobsites");
+	    if (is_null($sites))
+	    {
+	    	$sites = JobSitePluginBuilder::getJobSitesCmdLineIncludedInRun();
+		    JobSitePluginBuilder::setIncludedJobSites($sites);
+	    }
 
-        $includedSites = array_filter($sites, function ($v) {
-            return (is_OptionIncludedSite($v->getJobSiteKey()));
-        });
-
-        return $includedSites;
-
+	    return $sites;
     }
 
+	static function setIncludedJobSites($sitesInclude)
+	{
+		setAsCacheData("included_jobsites", $sitesInclude);
+	}
 
+	static function getExcludedJobSites()
+	{
+		$allSites = JobSitePluginBuilder::getAllJobSites();
+		$inclSites = JobSitePluginBuilder::getIncludedJobSites();
 
-    protected $_renderer = null;
+		return array_diff_key($allSites, $inclSites);
+	}
+
+	static function getJobSitesCmdLineIncludedInRun()
+	{
+		$cmdLineSites = getConfigurationSetting("command_line_args.jobsite");
+		$sites = self::getAllJobSites(true);
+		if(in_array("all", $cmdLineSites))
+			return $sites;
+
+		$includedSites = array_filter($cmdLineSites, function ($v) use ($sites){
+			return array_key_exists(strtolower($v), $sites);
+		});
+
+		return array_intersect_key($sites, array_combine($includedSites, $includedSites));
+	}
+
+	static function setSitesAsExcluded($setExcluded=array())
+	{
+		if(empty($setExcluded))
+			return;
+
+		$inputIncludedSites = self::getIncludedJobSites();
+		$toRemoveFromInc = array_intersect_key($inputIncludedSites, $setExcluded);
+		foreach(array_keys($toRemoveFromInc) as $remove)
+			unset($inputIncludedSites[$remove]);
+		JobSitePluginBuilder::setIncludedJobSites($inputIncludedSites);
+	}
+
+	static function filterJobSitesByCountryCodes($countryCodes)
+	{
+		$ccRun = join(", ", $countryCodes);
+		$includedSites = JobSitePluginBuilder::getIncludedJobSites();
+		$sitesOutOfSearchArea = array();
+
+		foreach ($includedSites as $jobsiteKey => $site) {
+			$ccSite = $site->getSupportedCountryCodes();
+			if (empty($ccSite))
+				$sitesOutOfSearchArea[$jobsiteKey] = $includedSites[$jobsiteKey];
+			else {
+				$matches = null;
+				$fResult = substr_count_multi($ccRun, $ccSite, $matches);
+				if (empty($matches) || (count($matches) == 1 && empty($matches[0]))) {
+					$sitesOutOfSearchArea[$jobsiteKey] = $site;
+				}
+			}
+		}
+		JobSitePluginBuilder::setSitesAsExcluded($sitesOutOfSearchArea);
+		LogLine("Setting " . getArrayValuesAsString(array_keys($sitesOutOfSearchArea)) . " as excluded because they do not supoprt any of the countries required for the user's searches (" . $ccRun . ").");
+
+	}
+
+		protected $_renderer = null;
     protected $_dirPluginsRoot = null;
     protected $_dirJsonConfigs = null;
     protected $_configJsonFiles = array();
     protected $_jsonPluginSetups = array();
 
 
-    function __construct($pathPluginDirectory)
+	function __construct()
     {
+	    $sitesBySiteKey = getCacheAsArray("all_jobsites_and_plugins");
+		if(!empty($sitesBySiteKey))
+			return;
+
+	    $pathPluginDirectory = __ROOT__.DIRECTORY_SEPARATOR."plugins";
         if (is_null($pathPluginDirectory) || strlen($pathPluginDirectory) == 0)
             throw new Exception("Path to plugins source directory was not set.");
+
+        if(!is_dir($pathPluginDirectory))
+	        throw new Exception(sprintf("Unable to access the plugin directory '%s'", $pathPluginDirectory));
 
         $this->_dirPluginsRoot = realpath($pathPluginDirectory . DIRECTORY_SEPARATOR);
 
@@ -94,38 +168,42 @@ class JobSitePluginBuilder
 
         $classListBySite = getAllPluginClassesByJobSiteKey();
 
-        $dbJobSiteList = \JobScooper\DataAccess\JobSiteRecordQuery::create()
-            ->select("JobSiteKey")
+	    $all_jobsites_by_key = \JobScooper\DataAccess\JobSiteRecordQuery::create()
             ->filterByIsDisabled(false)
             ->find()
-            ->getData();
+            ->toKeyIndex("JobSiteKey");
 
-        $jobsitesToAdd = array_diff_assoc(array_keys($classListBySite), $dbJobSiteList);
+        $jobsitesToAdd = array_diff_key($classListBySite, $all_jobsites_by_key);
         if (!empty($jobsitesToAdd)) {
 
             LogLine('Adding ' . getArrayValuesAsString($jobsitesToAdd), C__DISPLAY_ITEM_DETAIL__);
 
-            foreach ($jobsitesToAdd as $jobSiteKey) {
+            foreach ($jobsitesToAdd as $jobSiteKey => $pluginClass) {
                 $dbrec = JobSiteRecordQuery::create()
                     ->filterByJobSiteKey($jobSiteKey)
                     ->findOneOrCreate();
 
                 $dbrec->setJobSiteKey($jobSiteKey);
-                $dbrec->setPluginClassName($classListBySite[$jobSiteKey]);
-                $dbrec->setDisplayName(str_replace("Plugin", "", $classListBySite[$jobSiteKey]));
+                $dbrec->setPluginClassName($pluginClass);
+                $dbrec->setDisplayName(str_replace("Plugin", "", $pluginClass));
                 $dbrec->save();
             }
         }
-        $jobsitesToDisable = array_diff_assoc($dbJobSiteList, array_keys($classListBySite));
+
+        $jobsitesToDisable = array_diff_key($all_jobsites_by_key, $classListBySite);
         if (!empty($jobsitesToDisable))
         {
-            foreach ($jobsitesToDisable as $jobSiteKey) {
-                LogLine('Disabling ' . getArrayValuesAsString($jobsitesToDisable), C__DISPLAY_ITEM_DETAIL__);
-                $dbQuery = JobSiteRecordQuery::create()
-                    ->filterByJobSiteKey($jobsitesToDisable,Criteria::IN)
-                    ->update(array("IsDisabled" => false));
-            }
+	        LogLine('Disabling ' . getArrayValuesAsString($jobsitesToDisable), C__DISPLAY_ITEM_DETAIL__);
+        	foreach($jobsitesToDisable as $jobSiteKey =>$jobsite)
+	        {
+		        $all_jobsites_by_key[$jobSiteKey]->setIsDisabled(true);
+		        $all_jobsites_by_key[$jobSiteKey]->save();
+	        }
         }
+
+        LogLine("Loaded " . count($all_jobsites_by_key)-count($jobsitesToDisable) . " enabled jobsite plugins.");
+	    setAsCacheData("all_jobsites_and_plugins", $all_jobsites_by_key);
+
     }
 
     private function _initializeAllJsonPlugins()

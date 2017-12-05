@@ -17,117 +17,115 @@
 
 namespace JobScooper\Builders;
 
-
 use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserSearchQuery;
-use JobScooper\DataAccess\UserSearchRun;
-use JobScooper\DataAccess\UserSearchRunQuery;
+use JobScooper\DataAccess\UserSearchSiteRunQuery;
+use JobScooper\DataAccess\UserSearchSiteRun;
 
 class SearchBuilder
 {
 
     function __construct()
     {
-        $GLOBALS['USERDATA']['configuration_settings']['searches'] = array();
+        $GLOBALS['JOBSCOOPER']['searches'] = array();
 
     }
 
     public function initializeSearches()
     {
 
-        if(count($GLOBALS['USERDATA']['configuration_settings']['included_sites']) == 0)
-        {
-            LogError("No plugins could be found for the user's searches.  Aborting.");
-            return;
-        }
-
         //
         // Create searches needed to run all the keyword sets
         //
-        $this->_addSearchesToUser_();
+	    JobSitePluginBuilder::filterJobSitesByCountryCodes(getConfigurationSetting("country_codes"));
 
-        $this->_createSearchRunInstances();
+        $this->_setUserSearches();
 
-        $this->filterSearchesThatShouldNotRunYet();
+	    $this->_generateUserSearchSiteRuns();
 
-        $this->_filterSearchesByCountry();
+	    $this->filterSearchRunsThatShouldNotRunYet();
 
-        $this->setSearchesByJobSiteOrderedByLastComplete();
+	    $this->_optimizeSearchRunOrder();
     }
 
-    private function setSearchesByJobSiteOrderedByLastComplete()
+    private function _optimizeSearchRunOrder()
     {
-        $searches = getConfigurationSettings('SEARCHES_TO_RUN');
+        $searches = getConfigurationSetting('user_search_site_runs');
         if(empty($searches))
             return;
 
-        foreach(getConfigurationSettings('included_sites') as $site) {
-            $sitekey = $site->getJobSiteKey();
-            $sitesearches = array_filter(array_map(function($n) use ($sitekey) { if($n->getJobSiteKey() === $sitekey) return $n; }, $searches));
+        foreach(JobSitePluginBuilder::getIncludedJobSites() as $sitekey => $site) {
+            $sitesearches = $searches[$sitekey];
             uasort($sitesearches, function ($a, $b) {
 
-                if ($a->getJobSiteKey() == $b->getJobSiteKey()) {
-                    if ($a->getLastCompletedAt() == $b->getLastCompletedAt()) {
-                        return 0;
-                    }
-                    return ($a->getLastCompletedAt() < $b->getLastCompletedAt()) ? -1 : 1;
-                } else
+//                if ($a->getJobSiteKey() == $b->getJobSiteKey()) {
+//                    if ($a->getLastCompletedAt() == $b->getLastCompletedAt()) {
+//                        return 0;
+//                    }
+//                    return ($a->getLastCompletedAt() < $b->getLastCompletedAt()) ? -1 : 1;
+//                } else
                     return ($a->getJobSiteKey() < $b->getJobSiteKey()) ? -1 : 1;
             });
-            $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'][$sitekey] = $sitesearches;
+            $searches[$sitekey] = $sitesearches;
         }
+
+        setConfigurationSetting("user_search_site_runs", $searches);
     }
 
 
-    private function _addSearchesToUser_()
+    private function _setUserSearches()
     {
 
-        $arrLocations = getConfigurationSettings('search_locations');
-        if(empty($arrLocations)) {
-            LogLine("No search locations have been set.  Cannot create searches.", C__DISPLAY_WARNING__);
-            return null;
-        }
+	    $arrLocations = getConfigurationSetting('search_locations');
+	    if (empty($arrLocations)) {
+		    LogLine("No search locations have been set. Unable to setup a user search run.", C__DISPLAY_WARNING__);
 
-        foreach($arrLocations as $searchLoc) {
+		    return null;
+	    }
 
-            // If the keyword settings scope is all sites, then create a search for every possible site
-            // so that it runs with the keywords settings if it was included_<site> = true
-            //
-            if (isset($GLOBALS['USERDATA']['configuration_settings']['keyword_sets']) && count($GLOBALS['USERDATA']['configuration_settings']['keyword_sets']) > 0) {
-                LogLine("Adding user searches in " . $searchLoc->getDisplayName() . " for user's keywords sets", \C__DISPLAY_ITEM_START__);
+	    $keywordSets = getConfigurationSetting('user_keyword_sets');
+	    if (empty($keywordSets)) {
+		    LogLine("No user keyword sets have been configured. Unable to setup a user search run.", C__DISPLAY_WARNING__);
 
-                foreach ($GLOBALS['USERDATA']['configuration_settings']['keyword_sets'] as $keywordSet) {
-                    $arrKeys = array_keys($keywordSet['keywords_array']);
-                    foreach ($arrKeys as $kwdkey) {
-                        $search_kwds = $keywordSet['keywords_array'][$kwdkey];
-                        if(!is_array($search_kwds))
-                            $search_kwds = preg_split("/\s+/", $search_kwds);
-                        $user_search = UserSearchQuery::create()
-                            ->filterByKeywords($search_kwds)
-                            ->filterByUser(User::getCurrentUser())
-                            ->filterByGeoLocation($searchLoc)
-                            ->findOneOrCreate();
+		    return null;
+	    }
 
+	    $userSearches = array();
+	    foreach ($arrLocations as $lockey => $searchLoc) {
+		    LogLine("Adding user searches in " . $searchLoc->getDisplayName() . " for user's keywords sets", \C__DISPLAY_ITEM_START__);
 
-                        $user_search->setUser(User::getCurrentUser());
-                        $user_search->setSearchKeyFromConfig($keywordSet['key'] . "_" . cleanupSlugPart($kwdkey));
-                        $user_search->setKeywords($search_kwds);
-                        $user_search->setGeoLocation($searchLoc);
-                        $user_search->save();
+		    foreach ($keywordSets as $setKey => $keywordSet) {
 
-                        $GLOBALS['USERDATA']['configuration_settings']['user_searches'][$user_search->getUserSearchKey()] = $user_search;
-                    }
-                }
-            }
-        }
+			    $user_search = UserSearchQuery::create()
+				    ->filterByUserKeywordSetFromUS($keywordSet)
+				    ->filterByUserFromUS(User::getCurrentUser())
+				    ->filterByGeoLocationId($searchLoc->getGeoLocationId())
+				    ->findOneOrCreate();
 
-        LogLine("Added or updated " . $GLOBALS['USERDATA']['configuration_settings']['user_searches'] . " user searches for this run...");
+			    $user_search->setUserKeywordSetFromUS($keywordSet);
+			    $user_search->setUserFromUS(User::getCurrentUser());
+			    $user_search->setGeoLocationFromUS($searchLoc);
+			    $user_search->save();
+
+			    $userSearches[$user_search->getUserSearchKey()] = $user_search;
+		    }
+	    }
+
+	    if (empty($userSearches)) {
+		    LogLine("Could not create user searches for the given user keyword sets and geolocations.  Cannot continue.");
+
+		    return null;
+	    }
+	    setConfigurationSetting("user_searches", $userSearches);
+	    LogLine("Generated " . count($userSearches) . " user searches.");
+
     }
 
-    private function filterSearchesThatShouldNotRunYet()
+    private function filterSearchRunsThatShouldNotRunYet()
     {
-        $searches = getConfigurationSettings('SEARCHES_TO_RUN');
-        if (!empty($searches) && is_array($searches)) {
+        $searches = getConfigurationSetting("SEARCHES_TO_RUN");
+
+	    if (!empty($searches) && is_array($searches)) {
             foreach (array_keys($searches) as $searchKey) {
                 $search = $searches[$searchKey];
                 $lastCompleted = $search->getLastCompletedAt();
@@ -138,65 +136,53 @@ class SearchBuilder
                 }
             }
             LogLine("... " . count($searches) . " now remain to be run after filtering out recent search runs.", C__DISPLAY_ITEM_DETAIL__);
-            $GLOBALS['USERDATA']['configuration_settings']['SEARCHES_TO_RUN'] = $searches;
-        }
-    }
-
-    private function _filterSearchesByCountry()
-    {
-        $jobsites = getConfigurationSettings('included_sites');
-        $searches = getConfigurationSettings('SEARCHES_TO_RUN');
-        if(!empty($searches))
-        {
-            foreach($searches as $search)
-            {
-                $jobsiteKey = $search->getJobSiteKey();
-                $site = $jobsites[$jobsiteKey];
-                $plugin = $site->getPluginObject();
-                if(!empty($plugin))
-                {
-                    $pluginCountries = $plugin->getSupportedCountryCodes();
-                    if (!is_null($pluginCountries)) {
-                        $matchedCountries = array_intersect($pluginCountries, $GLOBALS['USERDATA']['configuration_settings']['country_codes']);
-                        if ($matchedCountries === false || count($matchedCountries) == 0) {
-                            LogDebug("Excluding " . $jobsiteKey . " because it does not support any of the country codes required for the user's searches (" . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['country_codes']));
-                            unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$jobsiteKey]);
-                            continue;
-                        }
-                    }
-                }
-            }
+            setConfigurationSetting("SEARCHES_TO_RUN", $searches);
         }
     }
 
 
-    private function _createSearchRunInstances()
+    private function _generateUserSearchSiteRuns()
     {
         //
         // let's start with the searches specified with the details in the the config.ini
         //
-        $userSearches = getConfigurationSettings('user_searches');
-        $includedSites = getConfigurationSettings("included_sites");
-        LogLine(" Creating search instances for this run from " . strval(count($userSearches)) . " user searches.", \C__DISPLAY_ITEM_DETAIL__);
-        $GLOBALS['USERDATA']['configuration_settings']['SEARCHES_TO_RUN'] = array();
+        $userSearches = getConfigurationSetting('user_searches');
+        $includedSites = JobSitePluginBuilder::getIncludedJobSites();
+	    if (empty($userSearches) || empty($includedSites))
+		    return;
 
-        if (empty($userSearches) || empty($includedSites))
-            return;
+        LogLine(" Creating search runs for " . strval(count($userSearches)) . " user searches across " . count($includedSites) . " jobsites.", \C__DISPLAY_ITEM_DETAIL__);
 
-        foreach($includedSites as $site)
+        $user = User::getCurrentUser();
+        $searchRuns = array();
+
+        foreach($includedSites as $jobsiteKey => $site)
         {
-            foreach($userSearches as $search) {
-                $searchrun = new UserSearchRun();
-                $searchrun->setUserSearch($search);
+        	$searchRuns[$jobsiteKey] = array();
+
+            foreach($userSearches as $search)
+            {
+//            	$searchRun = UserSearchSiteRunQuery::create()
+//		            ->filterByUser($user)
+//		            ->filterByUserSearch($search)
+//		            ->filterByJobSiteKey()
+//		            ->filterByAppRunId($apprun)
+//
+
+                $searchrun = new UserSearchSiteRun();
+	            $searchrun->setUserFromUSSR(User::getCurrentUser());
+	            $searchrun->setUserSearchFromUSSR($search);
                 $searchrun->setJobSiteKey($site);
-                $searchrun->setAppRunId(getConfigurationSettings('app_run_id'));
+                $searchrun->setAppRunId(getConfigurationSetting('app_run_id'));
                 $searchrun->setStartedAt(time());
                 $searchrun->save();
 
-                $GLOBALS['USERDATA']['configuration_settings']['SEARCHES_TO_RUN'][$searchrun->getUserSearchRunKey()] = $searchrun;
+                $searchRuns[$jobsiteKey][$searchrun->getUserSearchSiteRunKey()] = $searchrun;
 
             }
         }
+
+	    setConfigurationSetting("user_search_site_runs", $searchRuns);
     }
 
 

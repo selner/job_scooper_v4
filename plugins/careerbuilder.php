@@ -45,7 +45,7 @@ class PluginCareerBuilder extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlug
         'NextButton' =>  array('selector' => 'a#next-button'),
     );
 
-    protected function getKeywordURLValue(\JobScooper\DataAccess\UserSearchRun $searchDetails) {
+    protected function getKeywordURLValue(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails) {
         $keywordval = parent::getKeywordURLValue($searchDetails);
         return strtolower($keywordval);
     }
@@ -83,7 +83,7 @@ class PluginCareerBuilderUK extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePl
         return noJobStringMatch($var, "Nothing found");
     }
 
-    protected function getKeywordURLValue(\JobScooper\DataAccess\UserSearchRun $searchDetails) {
+    protected function getKeywordURLValue(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails) {
         return strtolower(parent::getKeywordURLValue($searchDetails));
     }
 

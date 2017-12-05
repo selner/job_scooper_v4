@@ -18,7 +18,7 @@
 namespace JobScooper\Tools;
 
 
-use JobScooper\DataAccess\UserSearchRunQuery;
+use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use Propel\Runtime\Map\TableMap;
 
 define('__ROOT__', dirname(__FILE__));

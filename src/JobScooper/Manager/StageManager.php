@@ -16,10 +16,12 @@
  */
 namespace JobScooper\Manager;
 
+use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\StageProcessor\JobsAutoMarker;
 use JobScooper\StageProcessor\NotifierJobAlerts;
 use JobScooper\Builders\ConfigBuilder;
 use JobScooper\Builders\SearchBuilder;
+use JobScooper\Utils\DocOptions;
 
 
 const JOBLIST_TYPE_UNFILTERED = "unfiltered";
@@ -58,9 +60,10 @@ class StageManager
     public function runAll()
     {
         try {
-            $arrRunStages = explode(",", get_PharseOptionValue("stages"));
-            if (is_array($arrRunStages) && count($arrRunStages) >= 1 && strlen($arrRunStages[0]) > 0) {
-                foreach ($arrRunStages as $stage) {
+	        $arrRunStages = getConfigurationSetting("command_line_args.stages");
+            if (!empty($arrRunStages)) {
+
+	            foreach ($arrRunStages as $stage) {
                     LogLine("StageManager starting stage " . $stage, \C__DISPLAY_SECTION_START__);
                     $stageFunc = "doStage" . $stage;
                     try {
@@ -74,6 +77,7 @@ class StageManager
                     }
                 }
             } else {
+
                 $this->doStage1();
                 $this->doStage2();
                 $this->doStage3();
@@ -105,13 +109,10 @@ class StageManager
 
         LogLine("Stage 1: Downloading Latest Matching Jobs ", \C__DISPLAY_ITEM_RESULT__);
 
-        $srchmgr = new SearchBuilder();
-        $srchmgr->initializeSearches();
-
         //
         // let's start with the searches specified with the details in the the config.ini
         //
-        $arrSearchesToRunBySite = $GLOBALS['JOBSITES_AND_SEARCHES_TO_RUN'];
+        $arrSearchesToRunBySite = getConfigurationSetting("user_search_site_runs");
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //
@@ -129,33 +130,28 @@ class StageManager
             //
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             try {
-                $jobsites = getConfigurationSettings("included_sites");
-                foreach(array_keys($arrSearchesToRunBySite) as $sitename)
+                $jobsites = JobSitePluginBuilder::getIncludedJobSites();
+                foreach($arrSearchesToRunBySite as $jobsiteKey => $searches)
                 {
-                    $searches = $arrSearchesToRunBySite[$sitename];
                     $plugin = null;
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     //
                     // Add the user's searches to the plugin
                     //
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    LogLine("Setting up " . count($searches) . " search(es) for ". $sitename . "...", \C__DISPLAY_SECTION_START__);
+                    LogLine("Setting up " . count($searches) . " search(es) for ". $jobsiteKey . "...", \C__DISPLAY_SECTION_START__);
                     try
                     {
-                        $site = $jobsites[$sitename];
-                        $plugin = $site->getPluginObject();
-                        if(empty($plugin))
-                            throw new \Exception("Unable to get plugin object for " . $sitename);
-
-                        $plugin->addSearches($searches);
+                        $site = $jobsites[$jobsiteKey];
+                        $site->addSearches($searches);
                     }
                     catch (\Exception $classError)
                     {
-                        handleException($classError, "Unable to add searches to {$sitename} plugin: %s", $raise = false);
+                        handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", $raise = false);
                     }
                     finally
                     {
-                        LogLine("Search(es) added ". $sitename . ".", \C__DISPLAY_SECTION_END__);
+                        LogLine("Search(es) added ". $jobsiteKey . ".", \C__DISPLAY_SECTION_END__);
                     }
 
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,16 +161,16 @@ class StageManager
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     try
                     {
-                        LogLine("Downloading updated jobs on " . count($searches) . " search(es) for ". $sitename . "...", \C__DISPLAY_SECTION_START__);
-                        $plugin->getUpdatedJobsForAllSearches();
+                        LogLine("Downloading updated jobs on " . count($searches) . " search(es) for ". $jobsiteKey . "...", \C__DISPLAY_SECTION_START__);
+                        $site->getUpdatedJobsForAllSearches();
                     }
                     catch (\Exception $classError)
                     {
-                        handleException($classError, $sitename . " failed to download job postings: %s", $raise = false);
+                        handleException($classError, $jobsiteKey . " failed to download job postings: %s", $raise = false);
                     }
                     finally
                     {
-                        LogLine("Job downloads have ended for ". $sitename . ".", \C__DISPLAY_SECTION_END__);
+                        LogLine("Job downloads have ended for ". $jobsiteKey . ".", \C__DISPLAY_SECTION_END__);
                     }
                 }
             } catch (\Exception $ex) {

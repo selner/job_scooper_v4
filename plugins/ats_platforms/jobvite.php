@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-use JobScooper\DataAccess\UserSearchRun;
+use JobScooper\DataAccess\UserSearchSiteRun;
 
 abstract class AbstractJobviteATS extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
 {

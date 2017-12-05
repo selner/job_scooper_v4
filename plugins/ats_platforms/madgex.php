@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-use JobScooper\DataAccess\UserSearchRun;
+use JobScooper\DataAccess\UserSearchSiteRun;
 
 abstract class AbstractMadgexATS extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
 {
@@ -36,7 +36,7 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\Classes\AjaxHtmlSim
 
     protected $LocationType = 'location-city-comma-state';
 
-    protected function getPageURLfromBaseFmt(UserSearchRun $searchDetails, $nPage = null, $nItem = null)
+    protected function getPageURLfromBaseFmt(UserSearchSiteRun $searchDetails, $nPage = null, $nItem = null)
     {
         $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
         $location = $searchDetails->getGeoLocation();
@@ -72,7 +72,7 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\Classes\AjaxHtmlSim
         'NextButton'           => array('selector' => 'li.paginator__item a[rel="next"]')
     );
 
-    protected function getGeoLocationURLValue(UserSearchRun $searchDetails)
+    protected function getGeoLocationURLValue(UserSearchSiteRun $searchDetails)
     {
         $ret = parent::getGeoLocationURLValue($searchDetails);
         if (stristr($ret, "%2C+washington") !== false)
@@ -101,7 +101,7 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\Classes\AjaxHtmlSim
                             $this->locationid = $arrMatches[1];
                         }
                         $url = parse_url($this->childSiteURLBase, PHP_URL_SCHEME) . "://" . parse_url($this->childSiteURLBase, PHP_URL_HOST) . $newUrlPath . "&RadialLocation=50";
-                        $GLOBALS['USERDATA']['configuration_settings']['current_user_search_details']->setSearchStartUrl($url);
+                        $GLOBALS['JOBSCOOPER']['current_user_search_details']->setSearchStartUrl($url);
 //                        $this->currentSearchAlternateURL = preg_replace('/[Ppage]{4}=\d+/', 'Page=***PAGE_NUMBER***', $url);
 
                         $this->selenium->loadPage($url);

@@ -99,18 +99,18 @@ function updateOrCreateJobPosting($arrJobItem)
 
 function getAllUserMatchesNotNotified($jobsiteKey=null)
 {
-    $userObject = \JobScooper\DataAccess\User::getCurrentUser();
+    $user= \JobScooper\DataAccess\User::getCurrentUser();
 
     $query = \JobScooper\DataAccess\UserJobMatchQuery::create()
         ->filterByUserNotificationState(array("not-ready", "ready"))
-        ->filterByUserId($userObject->getUserId())
+        ->filterByUser($user)
         ->joinWithJobPosting();
 
-    $appRunId = getConfigurationSettings('app_run_id');
-    if(!is_null($appRunId))
-    {
-        $query->filterBy("AppRunId",$appRunId);
-    }
+//    $appRunId = getConfigurationSettings('app_run_id');
+//    if(!is_null($appRunId))
+//    {
+//        $query->filterBy("AppRunId",$appRunId);
+//    }
 
     if(!is_null($jobsiteKey))
     {

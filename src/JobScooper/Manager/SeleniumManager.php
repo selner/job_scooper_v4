@@ -42,7 +42,7 @@ class SeleniumManager extends PropertyObject
     {
         $this->doneWithRemoteWebDriver();
 
-        if ($GLOBALS['USERDATA']['configuration_settings']['selenium']['autostart'] == True) {
+        if ($GLOBALS['JOBSCOOPER']['selenium']['autostart'] == True) {
             $this->shutdownSelenium();
         }
         $this->_seleniumIsRunning = false;
@@ -337,7 +337,7 @@ class SeleniumManager extends PropertyObject
 
     function getWebDriverKind()
     {
-        $webdriver = (array_key_exists('webdriver', $GLOBALS['USERDATA']['configuration_settings']['selenium'])) ? $GLOBALS['USERDATA']['configuration_settings']['selenium']['webdriver'] : null;
+        $webdriver = (array_key_exists('webdriver', $GLOBALS['JOBSCOOPER']['selenium'])) ? $GLOBALS['JOBSCOOPER']['selenium']['webdriver'] : null;
         if(is_null($webdriver)) {
             $webdriver = "phantomjs";
             if (PHP_OS == "Darwin")
@@ -349,13 +349,13 @@ class SeleniumManager extends PropertyObject
 
     private function create_remote_webdriver()
     {
-        $hubUrl = $GLOBALS['USERDATA']['configuration_settings']['selenium']['host_location'] . '/wd/hub';
+        $hubUrl = $GLOBALS['JOBSCOOPER']['selenium']['host_location'] . '/wd/hub';
         logLine("Creating Selenium remote web driver to host {$hubUrl}...");
 
         try {
 
             $webdriver = $this->getWebDriverKind();
-            $hubUrl = $GLOBALS['USERDATA']['configuration_settings']['selenium']['host_location'] . '/wd/hub';
+            $hubUrl = $GLOBALS['JOBSCOOPER']['selenium']['host_location'] . '/wd/hub';
             $driver = null;
 
             $capabilities = \DesiredCapabilities::$webdriver();

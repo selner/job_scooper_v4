@@ -5,12 +5,8 @@ namespace JobScooper\DataAccess\Base;
 use \Exception;
 use \PDO;
 use JobScooper\DataAccess\GeoLocation as ChildGeoLocation;
-use JobScooper\DataAccess\JobPosting as ChildJobPosting;
-use JobScooper\DataAccess\JobPostingQuery as ChildJobPostingQuery;
 use JobScooper\DataAccess\JobSiteRecord as ChildJobSiteRecord;
 use JobScooper\DataAccess\User as ChildUser;
-use JobScooper\DataAccess\UserJobMatch as ChildUserJobMatch;
-use JobScooper\DataAccess\UserJobMatchQuery as ChildUserJobMatchQuery;
 use JobScooper\DataAccess\UserKeywordSet as ChildUserKeywordSet;
 use JobScooper\DataAccess\UserKeywordSetQuery as ChildUserKeywordSetQuery;
 use JobScooper\DataAccess\UserQuery as ChildUserQuery;
@@ -18,11 +14,9 @@ use JobScooper\DataAccess\UserSearch as ChildUserSearch;
 use JobScooper\DataAccess\UserSearchQuery as ChildUserSearchQuery;
 use JobScooper\DataAccess\UserSearchSiteRun as ChildUserSearchSiteRun;
 use JobScooper\DataAccess\UserSearchSiteRunQuery as ChildUserSearchSiteRunQuery;
-use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\Map\UserKeywordSetTableMap;
 use JobScooper\DataAccess\Map\UserSearchSiteRunTableMap;
 use JobScooper\DataAccess\Map\UserSearchTableMap;
-use JobScooper\DataAccess\Map\UserTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -38,18 +32,18 @@ use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
 
 /**
- * Base class that represents a row from the 'user' table.
+ * Base class that represents a row from the 'user_keyword_set' table.
  *
  *
  *
  * @package    propel.generator.JobScooper.DataAccess.Base
  */
-abstract class User implements ActiveRecordInterface
+abstract class UserKeywordSet implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      */
-    const TABLE_MAP = '\\JobScooper\\DataAccess\\Map\\UserTableMap';
+    const TABLE_MAP = '\\JobScooper\\DataAccess\\Map\\UserKeywordSetTableMap';
 
 
     /**
@@ -86,32 +80,58 @@ abstract class User implements ActiveRecordInterface
     protected $user_id;
 
     /**
-     * The value for the user_slug field.
+     * The value for the user_keyword_set_id field.
+     *
+     * @var        int
+     */
+    protected $user_keyword_set_id;
+
+    /**
+     * The value for the keywords field.
+     *
+     * @var        array
+     */
+    protected $keywords;
+
+    /**
+     * The unserialized $keywords value - i.e. the persisted object.
+     * This is necessary to avoid repeated calls to unserialize() at runtime.
+     * @var object
+     */
+    protected $keywords_unserialized;
+
+    /**
+     * The value for the search_key_from_config field.
      *
      * @var        string
      */
-    protected $user_slug;
+    protected $search_key_from_config;
 
     /**
-     * The value for the email_address field.
+     * The value for the keyword_tokens field.
+     *
+     * @var        array
+     */
+    protected $keyword_tokens;
+
+    /**
+     * The unserialized $keyword_tokens value - i.e. the persisted object.
+     * This is necessary to avoid repeated calls to unserialize() at runtime.
+     * @var object
+     */
+    protected $keyword_tokens_unserialized;
+
+    /**
+     * The value for the user_keyword_set_key field.
      *
      * @var        string
      */
-    protected $email_address;
+    protected $user_keyword_set_key;
 
     /**
-     * The value for the name field.
-     *
-     * Note: this column has a database default value of: 'email_address'
-     * @var        string
+     * @var        ChildUser
      */
-    protected $name;
-
-    /**
-     * @var        ObjectCollection|ChildUserKeywordSet[] Collection to store aggregation of ChildUserKeywordSet objects.
-     */
-    protected $collUserKeywordSets;
-    protected $collUserKeywordSetsPartial;
+    protected $aUserFromUKS;
 
     /**
      * @var        ObjectCollection|ChildUserSearch[] Collection to store aggregation of ChildUserSearch objects.
@@ -126,30 +146,14 @@ abstract class User implements ActiveRecordInterface
     protected $collUserSearchSiteRunsPartial;
 
     /**
-     * @var        ObjectCollection|ChildUserJobMatch[] Collection to store aggregation of ChildUserJobMatch objects.
+     * @var ObjectCombinationCollection Cross CombinationCollection to store aggregation of ChildGeoLocation, ChildUser combination combinations.
      */
-    protected $collUserJobMatches;
-    protected $collUserJobMatchesPartial;
-
-    /**
-     * @var ObjectCombinationCollection Cross CombinationCollection to store aggregation of ChildUserKeywordSet, ChildGeoLocation combination combinations.
-     */
-    protected $combinationCollUserKeywordSetFromUSGeoLocationFromuses;
+    protected $combinationCollGeoLocationFromUSUserFromuses;
 
     /**
      * @var bool
      */
-    protected $combinationCollUserKeywordSetFromUSGeoLocationFromusesPartial;
-
-    /**
-     * @var        ObjectCollection|ChildUserKeywordSet[] Cross Collection to store aggregation of ChildUserKeywordSet objects.
-     */
-    protected $collUserKeywordSetFromuses;
-
-    /**
-     * @var bool
-     */
-    protected $collUserKeywordSetFromusesPartial;
+    protected $combinationCollGeoLocationFromUSUserFromusesPartial;
 
     /**
      * @var        ObjectCollection|ChildGeoLocation[] Cross Collection to store aggregation of ChildGeoLocation objects.
@@ -160,6 +164,16 @@ abstract class User implements ActiveRecordInterface
      * @var bool
      */
     protected $collGeoLocationFromusesPartial;
+
+    /**
+     * @var        ObjectCollection|ChildUser[] Cross Collection to store aggregation of ChildUser objects.
+     */
+    protected $collUserFromuses;
+
+    /**
+     * @var bool
+     */
+    protected $collUserFromusesPartial;
 
     /**
      * @var ObjectCombinationCollection Cross CombinationCollection to store aggregation of ChildUserSearch, ChildJobSiteRecord combination combinations.
@@ -192,16 +206,6 @@ abstract class User implements ActiveRecordInterface
     protected $collJobSiteFromUSSRsPartial;
 
     /**
-     * @var        ObjectCollection|ChildJobPosting[] Cross Collection to store aggregation of ChildJobPosting objects.
-     */
-    protected $collJobPostingFromUJMs;
-
-    /**
-     * @var bool
-     */
-    protected $collJobPostingFromUJMsPartial;
-
-    /**
      * Flag to prevent endless save loop, if this object is referenced
      * by another object which falls in this transaction.
      *
@@ -210,26 +214,14 @@ abstract class User implements ActiveRecordInterface
     protected $alreadyInSave = false;
 
     /**
-     * @var ObjectCombinationCollection Cross CombinationCollection to store aggregation of ChildUserKeywordSet, ChildGeoLocation combination combinations.
+     * @var ObjectCombinationCollection Cross CombinationCollection to store aggregation of ChildGeoLocation, ChildUser combination combinations.
      */
-    protected $combinationCollUserKeywordSetFromUSGeoLocationFromusesScheduledForDeletion = null;
+    protected $combinationCollGeoLocationFromUSUserFromusesScheduledForDeletion = null;
 
     /**
      * @var ObjectCombinationCollection Cross CombinationCollection to store aggregation of ChildUserSearch, ChildJobSiteRecord combination combinations.
      */
     protected $combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsScheduledForDeletion = null;
-
-    /**
-     * An array of objects scheduled for deletion.
-     * @var ObjectCollection|ChildJobPosting[]
-     */
-    protected $jobPostingFromUJMsScheduledForDeletion = null;
-
-    /**
-     * An array of objects scheduled for deletion.
-     * @var ObjectCollection|ChildUserKeywordSet[]
-     */
-    protected $userKeywordSetsScheduledForDeletion = null;
 
     /**
      * An array of objects scheduled for deletion.
@@ -244,29 +236,10 @@ abstract class User implements ActiveRecordInterface
     protected $userSearchSiteRunsScheduledForDeletion = null;
 
     /**
-     * An array of objects scheduled for deletion.
-     * @var ObjectCollection|ChildUserJobMatch[]
-     */
-    protected $userJobMatchesScheduledForDeletion = null;
-
-    /**
-     * Applies default values to this object.
-     * This method should be called from the object's constructor (or
-     * equivalent initialization method).
-     * @see __construct()
-     */
-    public function applyDefaultValues()
-    {
-        $this->name = 'email_address';
-    }
-
-    /**
-     * Initializes internal state of JobScooper\DataAccess\Base\User object.
-     * @see applyDefaults()
+     * Initializes internal state of JobScooper\DataAccess\Base\UserKeywordSet object.
      */
     public function __construct()
     {
-        $this->applyDefaultValues();
     }
 
     /**
@@ -358,9 +331,9 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Compares this with another <code>User</code> instance.  If
-     * <code>obj</code> is an instance of <code>User</code>, delegates to
-     * <code>equals(User)</code>.  Otherwise, returns <code>false</code>.
+     * Compares this with another <code>UserKeywordSet</code> instance.  If
+     * <code>obj</code> is an instance of <code>UserKeywordSet</code>, delegates to
+     * <code>equals(UserKeywordSet)</code>.  Otherwise, returns <code>false</code>.
      *
      * @param  mixed   $obj The object to compare to.
      * @return boolean Whether equal to the object specified.
@@ -426,7 +399,7 @@ abstract class User implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return $this|User The current object, for fluid interface
+     * @return $this|UserKeywordSet The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -498,40 +471,98 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Get the [user_slug] column value.
+     * Get the [user_keyword_set_id] column value.
      *
-     * @return string
+     * @return int
      */
-    public function getUserSlug()
+    public function getUserKeywordSetId()
     {
-        return $this->user_slug;
+        return $this->user_keyword_set_id;
     }
 
     /**
-     * Get the [email_address] column value.
+     * Get the [keywords] column value.
      *
-     * @return string
+     * @return array
      */
-    public function getEmailAddress()
+    public function getKeywords()
     {
-        return $this->email_address;
+        if (null === $this->keywords_unserialized) {
+            $this->keywords_unserialized = array();
+        }
+        if (!$this->keywords_unserialized && null !== $this->keywords) {
+            $keywords_unserialized = substr($this->keywords, 2, -2);
+            $this->keywords_unserialized = '' !== $keywords_unserialized ? explode(' | ', $keywords_unserialized) : array();
+        }
+
+        return $this->keywords_unserialized;
     }
 
     /**
-     * Get the [name] column value.
+     * Test the presence of a value in the [keywords] array column value.
+     * @param      mixed $value
+     *
+     * @return boolean
+     */
+    public function hasKeyword($value)
+    {
+        return in_array($value, $this->getKeywords());
+    } // hasKeyword()
+
+    /**
+     * Get the [search_key_from_config] column value.
      *
      * @return string
      */
-    public function getName()
+    public function getSearchKeyFromConfig()
     {
-        return $this->name;
+        return $this->search_key_from_config;
+    }
+
+    /**
+     * Get the [keyword_tokens] column value.
+     *
+     * @return array
+     */
+    public function getKeywordTokens()
+    {
+        if (null === $this->keyword_tokens_unserialized) {
+            $this->keyword_tokens_unserialized = array();
+        }
+        if (!$this->keyword_tokens_unserialized && null !== $this->keyword_tokens) {
+            $keyword_tokens_unserialized = substr($this->keyword_tokens, 2, -2);
+            $this->keyword_tokens_unserialized = '' !== $keyword_tokens_unserialized ? explode(' | ', $keyword_tokens_unserialized) : array();
+        }
+
+        return $this->keyword_tokens_unserialized;
+    }
+
+    /**
+     * Test the presence of a value in the [keyword_tokens] array column value.
+     * @param      mixed $value
+     *
+     * @return boolean
+     */
+    public function hasKeywordToken($value)
+    {
+        return in_array($value, $this->getKeywordTokens());
+    } // hasKeywordToken()
+
+    /**
+     * Get the [user_keyword_set_key] column value.
+     *
+     * @return string
+     */
+    public function getUserKeywordSetKey()
+    {
+        return $this->user_keyword_set_key;
     }
 
     /**
      * Set the value of [user_id] column.
      *
      * @param int $v new value
-     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserKeywordSet The current object (for fluent API support)
      */
     public function setUserId($v)
     {
@@ -541,71 +572,177 @@ abstract class User implements ActiveRecordInterface
 
         if ($this->user_id !== $v) {
             $this->user_id = $v;
-            $this->modifiedColumns[UserTableMap::COL_USER_ID] = true;
+            $this->modifiedColumns[UserKeywordSetTableMap::COL_USER_ID] = true;
+        }
+
+        if ($this->aUserFromUKS !== null && $this->aUserFromUKS->getUserId() !== $v) {
+            $this->aUserFromUKS = null;
         }
 
         return $this;
     } // setUserId()
 
     /**
-     * Set the value of [user_slug] column.
+     * Set the value of [user_keyword_set_id] column.
      *
-     * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
+     * @param int $v new value
+     * @return $this|\JobScooper\DataAccess\UserKeywordSet The current object (for fluent API support)
      */
-    public function setUserSlug($v)
+    public function setUserKeywordSetId($v)
     {
         if ($v !== null) {
-            $v = (string) $v;
+            $v = (int) $v;
         }
 
-        if ($this->user_slug !== $v) {
-            $this->user_slug = $v;
-            $this->modifiedColumns[UserTableMap::COL_USER_SLUG] = true;
+        if ($this->user_keyword_set_id !== $v) {
+            $this->user_keyword_set_id = $v;
+            $this->modifiedColumns[UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID] = true;
         }
 
         return $this;
-    } // setUserSlug()
+    } // setUserKeywordSetId()
 
     /**
-     * Set the value of [email_address] column.
+     * Set the value of [keywords] column.
      *
-     * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
+     * @param array $v new value
+     * @return $this|\JobScooper\DataAccess\UserKeywordSet The current object (for fluent API support)
      */
-    public function setEmailAddress($v)
+    public function setKeywords($v)
     {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->email_address !== $v) {
-            $this->email_address = $v;
-            $this->modifiedColumns[UserTableMap::COL_EMAIL_ADDRESS] = true;
+        if ($this->keywords_unserialized !== $v) {
+            $this->keywords_unserialized = $v;
+            $this->keywords = '| ' . implode(' | ', $v) . ' |';
+            $this->modifiedColumns[UserKeywordSetTableMap::COL_KEYWORDS] = true;
         }
 
         return $this;
-    } // setEmailAddress()
+    } // setKeywords()
 
     /**
-     * Set the value of [name] column.
+     * Adds a value to the [keywords] array column value.
+     * @param  mixed $value
+     *
+     * @return $this|\JobScooper\DataAccess\UserKeywordSet The current object (for fluent API support)
+     */
+    public function addKeyword($value)
+    {
+        $currentArray = $this->getKeywords();
+        $currentArray []= $value;
+        $this->setKeywords($currentArray);
+
+        return $this;
+    } // addKeyword()
+
+    /**
+     * Removes a value from the [keywords] array column value.
+     * @param  mixed $value
+     *
+     * @return $this|\JobScooper\DataAccess\UserKeywordSet The current object (for fluent API support)
+     */
+    public function removeKeyword($value)
+    {
+        $targetArray = array();
+        foreach ($this->getKeywords() as $element) {
+            if ($element != $value) {
+                $targetArray []= $element;
+            }
+        }
+        $this->setKeywords($targetArray);
+
+        return $this;
+    } // removeKeyword()
+
+    /**
+     * Set the value of [search_key_from_config] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserKeywordSet The current object (for fluent API support)
      */
-    public function setName($v)
+    public function setSearchKeyFromConfig($v)
     {
         if ($v !== null) {
             $v = (string) $v;
         }
 
-        if ($this->name !== $v) {
-            $this->name = $v;
-            $this->modifiedColumns[UserTableMap::COL_NAME] = true;
+        if ($this->search_key_from_config !== $v) {
+            $this->search_key_from_config = $v;
+            $this->modifiedColumns[UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG] = true;
         }
 
         return $this;
-    } // setName()
+    } // setSearchKeyFromConfig()
+
+    /**
+     * Set the value of [keyword_tokens] column.
+     *
+     * @param array $v new value
+     * @return $this|\JobScooper\DataAccess\UserKeywordSet The current object (for fluent API support)
+     */
+    public function setKeywordTokens($v)
+    {
+        if ($this->keyword_tokens_unserialized !== $v) {
+            $this->keyword_tokens_unserialized = $v;
+            $this->keyword_tokens = '| ' . implode(' | ', $v) . ' |';
+            $this->modifiedColumns[UserKeywordSetTableMap::COL_KEYWORD_TOKENS] = true;
+        }
+
+        return $this;
+    } // setKeywordTokens()
+
+    /**
+     * Adds a value to the [keyword_tokens] array column value.
+     * @param  mixed $value
+     *
+     * @return $this|\JobScooper\DataAccess\UserKeywordSet The current object (for fluent API support)
+     */
+    public function addKeywordToken($value)
+    {
+        $currentArray = $this->getKeywordTokens();
+        $currentArray []= $value;
+        $this->setKeywordTokens($currentArray);
+
+        return $this;
+    } // addKeywordToken()
+
+    /**
+     * Removes a value from the [keyword_tokens] array column value.
+     * @param  mixed $value
+     *
+     * @return $this|\JobScooper\DataAccess\UserKeywordSet The current object (for fluent API support)
+     */
+    public function removeKeywordToken($value)
+    {
+        $targetArray = array();
+        foreach ($this->getKeywordTokens() as $element) {
+            if ($element != $value) {
+                $targetArray []= $element;
+            }
+        }
+        $this->setKeywordTokens($targetArray);
+
+        return $this;
+    } // removeKeywordToken()
+
+    /**
+     * Set the value of [user_keyword_set_key] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\DataAccess\UserKeywordSet The current object (for fluent API support)
+     */
+    public function setUserKeywordSetKey($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->user_keyword_set_key !== $v) {
+            $this->user_keyword_set_key = $v;
+            $this->modifiedColumns[UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY] = true;
+        }
+
+        return $this;
+    } // setUserKeywordSetKey()
 
     /**
      * Indicates whether the columns in this object are only set to default values.
@@ -617,10 +754,6 @@ abstract class User implements ActiveRecordInterface
      */
     public function hasOnlyDefaultValues()
     {
-            if ($this->name !== 'email_address') {
-                return false;
-            }
-
         // otherwise, everything was equal, so return TRUE
         return true;
     } // hasOnlyDefaultValues()
@@ -647,17 +780,25 @@ abstract class User implements ActiveRecordInterface
     {
         try {
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : UserTableMap::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : UserKeywordSetTableMap::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->user_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : UserTableMap::translateFieldName('UserSlug', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->user_slug = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : UserKeywordSetTableMap::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->user_keyword_set_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : UserTableMap::translateFieldName('EmailAddress', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->email_address = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : UserKeywordSetTableMap::translateFieldName('Keywords', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->keywords = $col;
+            $this->keywords_unserialized = null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : UserTableMap::translateFieldName('Name', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->name = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : UserKeywordSetTableMap::translateFieldName('SearchKeyFromConfig', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->search_key_from_config = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserKeywordSetTableMap::translateFieldName('KeywordTokens', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->keyword_tokens = $col;
+            $this->keyword_tokens_unserialized = null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserKeywordSetTableMap::translateFieldName('UserKeywordSetKey', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->user_keyword_set_key = (null !== $col) ? (string) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -666,10 +807,10 @@ abstract class User implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 4; // 4 = UserTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 6; // 6 = UserKeywordSetTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\User'), 0, $e);
+            throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\UserKeywordSet'), 0, $e);
         }
     }
 
@@ -688,6 +829,9 @@ abstract class User implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
+        if ($this->aUserFromUKS !== null && $this->user_id !== $this->aUserFromUKS->getUserId()) {
+            $this->aUserFromUKS = null;
+        }
     } // ensureConsistency
 
     /**
@@ -711,13 +855,13 @@ abstract class User implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(UserTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getReadConnection(UserKeywordSetTableMap::DATABASE_NAME);
         }
 
         // We don't need to alter the object instance pool; we're just modifying this instance
         // already in the pool.
 
-        $dataFetcher = ChildUserQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
+        $dataFetcher = ChildUserKeywordSetQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
         $row = $dataFetcher->fetch();
         $dataFetcher->close();
         if (!$row) {
@@ -727,17 +871,13 @@ abstract class User implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->collUserKeywordSets = null;
-
+            $this->aUserFromUKS = null;
             $this->collUserSearches = null;
 
             $this->collUserSearchSiteRuns = null;
 
-            $this->collUserJobMatches = null;
-
-            $this->collUserKeywordSetFromUSGeoLocationFromuses = null;
+            $this->collGeoLocationFromUSUserFromuses = null;
             $this->collUserSearchFromUSSRJobSiteFromUSSRAppRunIds = null;
-            $this->collJobPostingFromUJMs = null;
         } // if (deep)
     }
 
@@ -747,8 +887,8 @@ abstract class User implements ActiveRecordInterface
      * @param      ConnectionInterface $con
      * @return void
      * @throws PropelException
-     * @see User::setDeleted()
-     * @see User::isDeleted()
+     * @see UserKeywordSet::setDeleted()
+     * @see UserKeywordSet::isDeleted()
      */
     public function delete(ConnectionInterface $con = null)
     {
@@ -757,11 +897,11 @@ abstract class User implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(UserTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(UserKeywordSetTableMap::DATABASE_NAME);
         }
 
         $con->transaction(function () use ($con) {
-            $deleteQuery = ChildUserQuery::create()
+            $deleteQuery = ChildUserKeywordSetQuery::create()
                 ->filterByPrimaryKey($this->getPrimaryKey());
             $ret = $this->preDelete($con);
             if ($ret) {
@@ -780,12 +920,17 @@ abstract class User implements ActiveRecordInterface
      * method.  This method wraps all precipitate database operations in a
      * single transaction.
      *
+     * Since this table was configured to reload rows on update, the object will
+     * be reloaded from the database if an UPDATE operation is performed (unless
+     * the $skipReload parameter is TRUE).
+     *
      * @param      ConnectionInterface $con
+     * @param      boolean $skipReload Whether to skip the reload for this object from database.
      * @return int             The number of rows affected by this insert/update and any referring fk objects' save() operations.
      * @throws PropelException
      * @see doSave()
      */
-    public function save(ConnectionInterface $con = null)
+    public function save(ConnectionInterface $con = null, $skipReload = false)
     {
         if ($this->isDeleted()) {
             throw new PropelException("You cannot save an object that has been deleted.");
@@ -796,18 +941,18 @@ abstract class User implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(UserTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(UserKeywordSetTableMap::DATABASE_NAME);
         }
 
-        return $con->transaction(function () use ($con) {
+        return $con->transaction(function () use ($con, $skipReload) {
             $ret = $this->preSave($con);
             $isInsert = $this->isNew();
             // sluggable behavior
 
-            if ($this->isColumnModified(UserTableMap::COL_USER_SLUG) && $this->getUserSlug()) {
-                $this->setUserSlug($this->makeSlugUnique($this->getUserSlug()));
+            if ($this->isColumnModified(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY) && $this->getUserKeywordSetKey()) {
+                $this->setUserKeywordSetKey($this->makeSlugUnique($this->getUserKeywordSetKey()));
             } else {
-                $this->setUserSlug($this->createSlug());
+                $this->setUserKeywordSetKey($this->createSlug());
             }
             if ($isInsert) {
                 $ret = $ret && $this->preInsert($con);
@@ -815,14 +960,14 @@ abstract class User implements ActiveRecordInterface
                 $ret = $ret && $this->preUpdate($con);
             }
             if ($ret) {
-                $affectedRows = $this->doSave($con);
+                $affectedRows = $this->doSave($con, $skipReload);
                 if ($isInsert) {
                     $this->postInsert($con);
                 } else {
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                UserTableMap::addInstanceToPool($this);
+                UserKeywordSetTableMap::addInstanceToPool($this);
             } else {
                 $affectedRows = 0;
             }
@@ -838,15 +983,30 @@ abstract class User implements ActiveRecordInterface
      * All related objects are also updated in this method.
      *
      * @param      ConnectionInterface $con
+     * @param      boolean $skipReload Whether to skip the reload for this object from database.
      * @return int             The number of rows affected by this insert/update and any referring fk objects' save() operations.
      * @throws PropelException
      * @see save()
      */
-    protected function doSave(ConnectionInterface $con)
+    protected function doSave(ConnectionInterface $con, $skipReload = false)
     {
         $affectedRows = 0; // initialize var to track total num of affected rows
         if (!$this->alreadyInSave) {
             $this->alreadyInSave = true;
+
+            $reloadObject = false;
+
+            // We call the save method on the following object(s) if they
+            // were passed to this object by their corresponding set
+            // method.  This object relates to these object(s) by a
+            // foreign key reference.
+
+            if ($this->aUserFromUKS !== null) {
+                if ($this->aUserFromUKS->isModified() || $this->aUserFromUKS->isNew()) {
+                    $affectedRows += $this->aUserFromUKS->save($con);
+                }
+                $this->setUserFromUKS($this->aUserFromUKS);
+            }
 
             if ($this->isNew() || $this->isModified()) {
                 // persist changes
@@ -855,20 +1015,23 @@ abstract class User implements ActiveRecordInterface
                     $affectedRows += 1;
                 } else {
                     $affectedRows += $this->doUpdate($con);
+                    if (!$skipReload) {
+                        $reloadObject = true;
+                    }
                 }
                 $this->resetModified();
             }
 
-            if ($this->combinationCollUserKeywordSetFromUSGeoLocationFromusesScheduledForDeletion !== null) {
-                if (!$this->combinationCollUserKeywordSetFromUSGeoLocationFromusesScheduledForDeletion->isEmpty()) {
+            if ($this->combinationCollGeoLocationFromUSUserFromusesScheduledForDeletion !== null) {
+                if (!$this->combinationCollGeoLocationFromUSUserFromusesScheduledForDeletion->isEmpty()) {
                     $pks = array();
-                    foreach ($this->combinationCollUserKeywordSetFromUSGeoLocationFromusesScheduledForDeletion as $combination) {
+                    foreach ($this->combinationCollGeoLocationFromUSUserFromusesScheduledForDeletion as $combination) {
                         $entryPk = [];
 
+                        $entryPk[1] = $this->getUserKeywordSetId();
                         $entryPk[0] = $this->getUserId();
-                        $entryPk[1] = $combination[0]->getUserKeywordSetId();
-                        $entryPk[0] = $combination[0]->getUserId();
-                        $entryPk[2] = $combination[1]->getGeoLocationId();
+                        $entryPk[2] = $combination[0]->getGeoLocationId();
+                        $entryPk[0] = $combination[1]->getUserId();
 
                         $pks[] = $entryPk;
                     }
@@ -877,20 +1040,20 @@ abstract class User implements ActiveRecordInterface
                         ->filterByPrimaryKeys($pks)
                         ->delete($con);
 
-                    $this->combinationCollUserKeywordSetFromUSGeoLocationFromusesScheduledForDeletion = null;
+                    $this->combinationCollGeoLocationFromUSUserFromusesScheduledForDeletion = null;
                 }
 
             }
 
-            if (null !== $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses) {
-                foreach ($this->combinationCollUserKeywordSetFromUSGeoLocationFromuses as $combination) {
+            if (null !== $this->combinationCollGeoLocationFromUSUserFromuses) {
+                foreach ($this->combinationCollGeoLocationFromUSUserFromuses as $combination) {
 
-                    //$combination[0] = UserKeywordSet (user_search_fk_b9a4d0)
+                    //$combination[0] = GeoLocation (user_search_fk_38c4c7)
                     if (!$combination[0]->isDeleted() && ($combination[0]->isNew() || $combination[0]->isModified())) {
                         $combination[0]->save($con);
                     }
 
-                    //$combination[1] = GeoLocation (user_search_fk_38c4c7)
+                    //$combination[1] = User (user_search_fk_38da1e)
                     if (!$combination[1]->isDeleted() && ($combination[1]->isNew() || $combination[1]->isModified())) {
                         $combination[1]->save($con);
                     }
@@ -906,6 +1069,7 @@ abstract class User implements ActiveRecordInterface
                         $entryPk = [];
 
                         $entryPk[0] = $this->getUserId();
+                        $entryPk[1] = $this->getUserKeywordSetId();
                         $entryPk[0] = $combination[0]->getUserId();
                         $entryPk[1] = $combination[0]->getUserKeywordSetId();
                         $entryPk[2] = $combination[0]->getGeoLocationId();
@@ -944,52 +1108,6 @@ abstract class User implements ActiveRecordInterface
             }
 
 
-            if ($this->jobPostingFromUJMsScheduledForDeletion !== null) {
-                if (!$this->jobPostingFromUJMsScheduledForDeletion->isEmpty()) {
-                    $pks = array();
-                    foreach ($this->jobPostingFromUJMsScheduledForDeletion as $entry) {
-                        $entryPk = [];
-
-                        $entryPk[0] = $this->getUserId();
-                        $entryPk[1] = $entry->getJobPostingId();
-                        $pks[] = $entryPk;
-                    }
-
-                    \JobScooper\DataAccess\UserJobMatchQuery::create()
-                        ->filterByPrimaryKeys($pks)
-                        ->delete($con);
-
-                    $this->jobPostingFromUJMsScheduledForDeletion = null;
-                }
-
-            }
-
-            if ($this->collJobPostingFromUJMs) {
-                foreach ($this->collJobPostingFromUJMs as $jobPostingFromUJM) {
-                    if (!$jobPostingFromUJM->isDeleted() && ($jobPostingFromUJM->isNew() || $jobPostingFromUJM->isModified())) {
-                        $jobPostingFromUJM->save($con);
-                    }
-                }
-            }
-
-
-            if ($this->userKeywordSetsScheduledForDeletion !== null) {
-                if (!$this->userKeywordSetsScheduledForDeletion->isEmpty()) {
-                    \JobScooper\DataAccess\UserKeywordSetQuery::create()
-                        ->filterByPrimaryKeys($this->userKeywordSetsScheduledForDeletion->getPrimaryKeys(false))
-                        ->delete($con);
-                    $this->userKeywordSetsScheduledForDeletion = null;
-                }
-            }
-
-            if ($this->collUserKeywordSets !== null) {
-                foreach ($this->collUserKeywordSets as $referrerFK) {
-                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
-                        $affectedRows += $referrerFK->save($con);
-                    }
-                }
-            }
-
             if ($this->userSearchesScheduledForDeletion !== null) {
                 if (!$this->userSearchesScheduledForDeletion->isEmpty()) {
                     \JobScooper\DataAccess\UserSearchQuery::create()
@@ -1024,24 +1142,11 @@ abstract class User implements ActiveRecordInterface
                 }
             }
 
-            if ($this->userJobMatchesScheduledForDeletion !== null) {
-                if (!$this->userJobMatchesScheduledForDeletion->isEmpty()) {
-                    \JobScooper\DataAccess\UserJobMatchQuery::create()
-                        ->filterByPrimaryKeys($this->userJobMatchesScheduledForDeletion->getPrimaryKeys(false))
-                        ->delete($con);
-                    $this->userJobMatchesScheduledForDeletion = null;
-                }
-            }
-
-            if ($this->collUserJobMatches !== null) {
-                foreach ($this->collUserJobMatches as $referrerFK) {
-                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
-                        $affectedRows += $referrerFK->save($con);
-                    }
-                }
-            }
-
             $this->alreadyInSave = false;
+
+            if ($reloadObject) {
+                $this->reload($con);
+            }
 
         }
 
@@ -1061,24 +1166,30 @@ abstract class User implements ActiveRecordInterface
         $modifiedColumns = array();
         $index = 0;
 
-        $this->modifiedColumns[UserTableMap::COL_USER_ID] = true;
+        $this->modifiedColumns[UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID] = true;
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(UserTableMap::COL_USER_ID)) {
+        if ($this->isColumnModified(UserKeywordSetTableMap::COL_USER_ID)) {
             $modifiedColumns[':p' . $index++]  = 'user_id';
         }
-        if ($this->isColumnModified(UserTableMap::COL_USER_SLUG)) {
-            $modifiedColumns[':p' . $index++]  = 'user_slug';
+        if ($this->isColumnModified(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'user_keyword_set_id';
         }
-        if ($this->isColumnModified(UserTableMap::COL_EMAIL_ADDRESS)) {
-            $modifiedColumns[':p' . $index++]  = 'email_address';
+        if ($this->isColumnModified(UserKeywordSetTableMap::COL_KEYWORDS)) {
+            $modifiedColumns[':p' . $index++]  = 'keywords';
         }
-        if ($this->isColumnModified(UserTableMap::COL_NAME)) {
-            $modifiedColumns[':p' . $index++]  = 'name';
+        if ($this->isColumnModified(UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG)) {
+            $modifiedColumns[':p' . $index++]  = 'search_key_from_config';
+        }
+        if ($this->isColumnModified(UserKeywordSetTableMap::COL_KEYWORD_TOKENS)) {
+            $modifiedColumns[':p' . $index++]  = 'keyword_tokens';
+        }
+        if ($this->isColumnModified(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY)) {
+            $modifiedColumns[':p' . $index++]  = 'user_keyword_set_key';
         }
 
         $sql = sprintf(
-            'INSERT INTO user (%s) VALUES (%s)',
+            'INSERT INTO user_keyword_set (%s) VALUES (%s)',
             implode(', ', $modifiedColumns),
             implode(', ', array_keys($modifiedColumns))
         );
@@ -1090,14 +1201,20 @@ abstract class User implements ActiveRecordInterface
                     case 'user_id':
                         $stmt->bindValue($identifier, $this->user_id, PDO::PARAM_INT);
                         break;
-                    case 'user_slug':
-                        $stmt->bindValue($identifier, $this->user_slug, PDO::PARAM_STR);
+                    case 'user_keyword_set_id':
+                        $stmt->bindValue($identifier, $this->user_keyword_set_id, PDO::PARAM_INT);
                         break;
-                    case 'email_address':
-                        $stmt->bindValue($identifier, $this->email_address, PDO::PARAM_STR);
+                    case 'keywords':
+                        $stmt->bindValue($identifier, $this->keywords, PDO::PARAM_STR);
                         break;
-                    case 'name':
-                        $stmt->bindValue($identifier, $this->name, PDO::PARAM_STR);
+                    case 'search_key_from_config':
+                        $stmt->bindValue($identifier, $this->search_key_from_config, PDO::PARAM_STR);
+                        break;
+                    case 'keyword_tokens':
+                        $stmt->bindValue($identifier, $this->keyword_tokens, PDO::PARAM_STR);
+                        break;
+                    case 'user_keyword_set_key':
+                        $stmt->bindValue($identifier, $this->user_keyword_set_key, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -1147,7 +1264,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function getByName($name, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = UserTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = UserKeywordSetTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
         $field = $this->getByPosition($pos);
 
         return $field;
@@ -1167,13 +1284,19 @@ abstract class User implements ActiveRecordInterface
                 return $this->getUserId();
                 break;
             case 1:
-                return $this->getUserSlug();
+                return $this->getUserKeywordSetId();
                 break;
             case 2:
-                return $this->getEmailAddress();
+                return $this->getKeywords();
                 break;
             case 3:
-                return $this->getName();
+                return $this->getSearchKeyFromConfig();
+                break;
+            case 4:
+                return $this->getKeywordTokens();
+                break;
+            case 5:
+                return $this->getUserKeywordSetKey();
                 break;
             default:
                 return null;
@@ -1199,16 +1322,18 @@ abstract class User implements ActiveRecordInterface
     public function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
     {
 
-        if (isset($alreadyDumpedObjects['User'][$this->hashCode()])) {
+        if (isset($alreadyDumpedObjects['UserKeywordSet'][$this->hashCode()])) {
             return '*RECURSION*';
         }
-        $alreadyDumpedObjects['User'][$this->hashCode()] = true;
-        $keys = UserTableMap::getFieldNames($keyType);
+        $alreadyDumpedObjects['UserKeywordSet'][$this->hashCode()] = true;
+        $keys = UserKeywordSetTableMap::getFieldNames($keyType);
         $result = array(
             $keys[0] => $this->getUserId(),
-            $keys[1] => $this->getUserSlug(),
-            $keys[2] => $this->getEmailAddress(),
-            $keys[3] => $this->getName(),
+            $keys[1] => $this->getUserKeywordSetId(),
+            $keys[2] => $this->getKeywords(),
+            $keys[3] => $this->getSearchKeyFromConfig(),
+            $keys[4] => $this->getKeywordTokens(),
+            $keys[5] => $this->getUserKeywordSetKey(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1216,20 +1341,20 @@ abstract class User implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->collUserKeywordSets) {
+            if (null !== $this->aUserFromUKS) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
-                        $key = 'userKeywordSets';
+                        $key = 'user';
                         break;
                     case TableMap::TYPE_FIELDNAME:
-                        $key = 'user_keyword_sets';
+                        $key = 'user';
                         break;
                     default:
-                        $key = 'UserKeywordSets';
+                        $key = 'UserFromUKS';
                 }
 
-                $result[$key] = $this->collUserKeywordSets->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
+                $result[$key] = $this->aUserFromUKS->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
             if (null !== $this->collUserSearches) {
 
@@ -1261,21 +1386,6 @@ abstract class User implements ActiveRecordInterface
 
                 $result[$key] = $this->collUserSearchSiteRuns->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
-            if (null !== $this->collUserJobMatches) {
-
-                switch ($keyType) {
-                    case TableMap::TYPE_CAMELNAME:
-                        $key = 'userJobMatches';
-                        break;
-                    case TableMap::TYPE_FIELDNAME:
-                        $key = 'user_job_matches';
-                        break;
-                    default:
-                        $key = 'UserJobMatches';
-                }
-
-                $result[$key] = $this->collUserJobMatches->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
-            }
         }
 
         return $result;
@@ -1290,11 +1400,11 @@ abstract class User implements ActiveRecordInterface
      *                one of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
      *                TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM.
      *                Defaults to TableMap::TYPE_PHPNAME.
-     * @return $this|\JobScooper\DataAccess\User
+     * @return $this|\JobScooper\DataAccess\UserKeywordSet
      */
     public function setByName($name, $value, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = UserTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = UserKeywordSetTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
 
         return $this->setByPosition($pos, $value);
     }
@@ -1305,7 +1415,7 @@ abstract class User implements ActiveRecordInterface
      *
      * @param  int $pos position in xml schema
      * @param  mixed $value field value
-     * @return $this|\JobScooper\DataAccess\User
+     * @return $this|\JobScooper\DataAccess\UserKeywordSet
      */
     public function setByPosition($pos, $value)
     {
@@ -1314,13 +1424,27 @@ abstract class User implements ActiveRecordInterface
                 $this->setUserId($value);
                 break;
             case 1:
-                $this->setUserSlug($value);
+                $this->setUserKeywordSetId($value);
                 break;
             case 2:
-                $this->setEmailAddress($value);
+                if (!is_array($value)) {
+                    $v = trim(substr($value, 2, -2));
+                    $value = $v ? explode(' | ', $v) : array();
+                }
+                $this->setKeywords($value);
                 break;
             case 3:
-                $this->setName($value);
+                $this->setSearchKeyFromConfig($value);
+                break;
+            case 4:
+                if (!is_array($value)) {
+                    $v = trim(substr($value, 2, -2));
+                    $value = $v ? explode(' | ', $v) : array();
+                }
+                $this->setKeywordTokens($value);
+                break;
+            case 5:
+                $this->setUserKeywordSetKey($value);
                 break;
         } // switch()
 
@@ -1346,19 +1470,25 @@ abstract class User implements ActiveRecordInterface
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
-        $keys = UserTableMap::getFieldNames($keyType);
+        $keys = UserKeywordSetTableMap::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) {
             $this->setUserId($arr[$keys[0]]);
         }
         if (array_key_exists($keys[1], $arr)) {
-            $this->setUserSlug($arr[$keys[1]]);
+            $this->setUserKeywordSetId($arr[$keys[1]]);
         }
         if (array_key_exists($keys[2], $arr)) {
-            $this->setEmailAddress($arr[$keys[2]]);
+            $this->setKeywords($arr[$keys[2]]);
         }
         if (array_key_exists($keys[3], $arr)) {
-            $this->setName($arr[$keys[3]]);
+            $this->setSearchKeyFromConfig($arr[$keys[3]]);
+        }
+        if (array_key_exists($keys[4], $arr)) {
+            $this->setKeywordTokens($arr[$keys[4]]);
+        }
+        if (array_key_exists($keys[5], $arr)) {
+            $this->setUserKeywordSetKey($arr[$keys[5]]);
         }
     }
 
@@ -1379,7 +1509,7 @@ abstract class User implements ActiveRecordInterface
      * @param string $data The source data to import from
      * @param string $keyType The type of keys the array uses.
      *
-     * @return $this|\JobScooper\DataAccess\User The current object, for fluid interface
+     * @return $this|\JobScooper\DataAccess\UserKeywordSet The current object, for fluid interface
      */
     public function importFrom($parser, $data, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -1399,19 +1529,25 @@ abstract class User implements ActiveRecordInterface
      */
     public function buildCriteria()
     {
-        $criteria = new Criteria(UserTableMap::DATABASE_NAME);
+        $criteria = new Criteria(UserKeywordSetTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(UserTableMap::COL_USER_ID)) {
-            $criteria->add(UserTableMap::COL_USER_ID, $this->user_id);
+        if ($this->isColumnModified(UserKeywordSetTableMap::COL_USER_ID)) {
+            $criteria->add(UserKeywordSetTableMap::COL_USER_ID, $this->user_id);
         }
-        if ($this->isColumnModified(UserTableMap::COL_USER_SLUG)) {
-            $criteria->add(UserTableMap::COL_USER_SLUG, $this->user_slug);
+        if ($this->isColumnModified(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID)) {
+            $criteria->add(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID, $this->user_keyword_set_id);
         }
-        if ($this->isColumnModified(UserTableMap::COL_EMAIL_ADDRESS)) {
-            $criteria->add(UserTableMap::COL_EMAIL_ADDRESS, $this->email_address);
+        if ($this->isColumnModified(UserKeywordSetTableMap::COL_KEYWORDS)) {
+            $criteria->add(UserKeywordSetTableMap::COL_KEYWORDS, $this->keywords);
         }
-        if ($this->isColumnModified(UserTableMap::COL_NAME)) {
-            $criteria->add(UserTableMap::COL_NAME, $this->name);
+        if ($this->isColumnModified(UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG)) {
+            $criteria->add(UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG, $this->search_key_from_config);
+        }
+        if ($this->isColumnModified(UserKeywordSetTableMap::COL_KEYWORD_TOKENS)) {
+            $criteria->add(UserKeywordSetTableMap::COL_KEYWORD_TOKENS, $this->keyword_tokens);
+        }
+        if ($this->isColumnModified(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY)) {
+            $criteria->add(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY, $this->user_keyword_set_key);
         }
 
         return $criteria;
@@ -1429,8 +1565,9 @@ abstract class User implements ActiveRecordInterface
      */
     public function buildPkeyCriteria()
     {
-        $criteria = ChildUserQuery::create();
-        $criteria->add(UserTableMap::COL_USER_ID, $this->user_id);
+        $criteria = ChildUserKeywordSetQuery::create();
+        $criteria->add(UserKeywordSetTableMap::COL_USER_ID, $this->user_id);
+        $criteria->add(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID, $this->user_keyword_set_id);
 
         return $criteria;
     }
@@ -1443,10 +1580,18 @@ abstract class User implements ActiveRecordInterface
      */
     public function hashCode()
     {
-        $validPk = null !== $this->getUserId();
+        $validPk = null !== $this->getUserId() &&
+            null !== $this->getUserKeywordSetId();
 
-        $validPrimaryKeyFKs = 0;
+        $validPrimaryKeyFKs = 1;
         $primaryKeyFKs = [];
+
+        //relation user_keyword_set_fk_38da1e to table user
+        if ($this->aUserFromUKS && $hash = spl_object_hash($this->aUserFromUKS)) {
+            $primaryKeyFKs[] = $hash;
+        } else {
+            $validPrimaryKeyFKs = false;
+        }
 
         if ($validPk) {
             return crc32(json_encode($this->getPrimaryKey(), JSON_UNESCAPED_UNICODE));
@@ -1458,23 +1603,29 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Returns the primary key for this object (row).
-     * @return int
+     * Returns the composite primary key for this object.
+     * The array elements will be in same order as specified in XML.
+     * @return array
      */
     public function getPrimaryKey()
     {
-        return $this->getUserId();
+        $pks = array();
+        $pks[0] = $this->getUserId();
+        $pks[1] = $this->getUserKeywordSetId();
+
+        return $pks;
     }
 
     /**
-     * Generic method to set the primary key (user_id column).
+     * Set the [composite] primary key.
      *
-     * @param       int $key Primary key.
+     * @param      array $keys The elements of the composite key (order must match the order in XML file).
      * @return void
      */
-    public function setPrimaryKey($key)
+    public function setPrimaryKey($keys)
     {
-        $this->setUserId($key);
+        $this->setUserId($keys[0]);
+        $this->setUserKeywordSetId($keys[1]);
     }
 
     /**
@@ -1483,7 +1634,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function isPrimaryKeyNull()
     {
-        return null === $this->getUserId();
+        return (null === $this->getUserId()) && (null === $this->getUserKeywordSetId());
     }
 
     /**
@@ -1492,27 +1643,23 @@ abstract class User implements ActiveRecordInterface
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param      object $copyObj An object of \JobScooper\DataAccess\User (or compatible) type.
+     * @param      object $copyObj An object of \JobScooper\DataAccess\UserKeywordSet (or compatible) type.
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param      boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
      */
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
-        $copyObj->setUserSlug($this->getUserSlug());
-        $copyObj->setEmailAddress($this->getEmailAddress());
-        $copyObj->setName($this->getName());
+        $copyObj->setUserId($this->getUserId());
+        $copyObj->setKeywords($this->getKeywords());
+        $copyObj->setSearchKeyFromConfig($this->getSearchKeyFromConfig());
+        $copyObj->setKeywordTokens($this->getKeywordTokens());
+        $copyObj->setUserKeywordSetKey($this->getUserKeywordSetKey());
 
         if ($deepCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
             // the getter/setter methods for fkey referrer objects.
             $copyObj->setNew(false);
-
-            foreach ($this->getUserKeywordSets() as $relObj) {
-                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
-                    $copyObj->addUserKeywordSet($relObj->copy($deepCopy));
-                }
-            }
 
             foreach ($this->getUserSearches() as $relObj) {
                 if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
@@ -1526,17 +1673,11 @@ abstract class User implements ActiveRecordInterface
                 }
             }
 
-            foreach ($this->getUserJobMatches() as $relObj) {
-                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
-                    $copyObj->addUserJobMatch($relObj->copy($deepCopy));
-                }
-            }
-
         } // if ($deepCopy)
 
         if ($makeNew) {
             $copyObj->setNew(true);
-            $copyObj->setUserId(NULL); // this is a auto-increment column, so set to default value
+            $copyObj->setUserKeywordSetId(NULL); // this is a auto-increment column, so set to default value
         }
     }
 
@@ -1549,7 +1690,7 @@ abstract class User implements ActiveRecordInterface
      * objects.
      *
      * @param  boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return \JobScooper\DataAccess\User Clone of current object.
+     * @return \JobScooper\DataAccess\UserKeywordSet Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -1560,6 +1701,57 @@ abstract class User implements ActiveRecordInterface
         $this->copyInto($copyObj, $deepCopy);
 
         return $copyObj;
+    }
+
+    /**
+     * Declares an association between this object and a ChildUser object.
+     *
+     * @param  ChildUser $v
+     * @return $this|\JobScooper\DataAccess\UserKeywordSet The current object (for fluent API support)
+     * @throws PropelException
+     */
+    public function setUserFromUKS(ChildUser $v = null)
+    {
+        if ($v === null) {
+            $this->setUserId(NULL);
+        } else {
+            $this->setUserId($v->getUserId());
+        }
+
+        $this->aUserFromUKS = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildUser object, it will not be re-added.
+        if ($v !== null) {
+            $v->addUserKeywordSet($this);
+        }
+
+
+        return $this;
+    }
+
+
+    /**
+     * Get the associated ChildUser object
+     *
+     * @param  ConnectionInterface $con Optional Connection object.
+     * @return ChildUser The associated ChildUser object.
+     * @throws PropelException
+     */
+    public function getUserFromUKS(ConnectionInterface $con = null)
+    {
+        if ($this->aUserFromUKS === null && ($this->user_id != 0)) {
+            $this->aUserFromUKS = ChildUserQuery::create()->findPk($this->user_id, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aUserFromUKS->addUserKeywordSets($this);
+             */
+        }
+
+        return $this->aUserFromUKS;
     }
 
 
@@ -1573,10 +1765,6 @@ abstract class User implements ActiveRecordInterface
      */
     public function initRelation($relationName)
     {
-        if ('UserKeywordSet' == $relationName) {
-            $this->initUserKeywordSets();
-            return;
-        }
         if ('UserSearch' == $relationName) {
             $this->initUserSearches();
             return;
@@ -1585,238 +1773,6 @@ abstract class User implements ActiveRecordInterface
             $this->initUserSearchSiteRuns();
             return;
         }
-        if ('UserJobMatch' == $relationName) {
-            $this->initUserJobMatches();
-            return;
-        }
-    }
-
-    /**
-     * Clears out the collUserKeywordSets collection
-     *
-     * This does not modify the database; however, it will remove any associated objects, causing
-     * them to be refetched by subsequent calls to accessor method.
-     *
-     * @return void
-     * @see        addUserKeywordSets()
-     */
-    public function clearUserKeywordSets()
-    {
-        $this->collUserKeywordSets = null; // important to set this to NULL since that means it is uninitialized
-    }
-
-    /**
-     * Reset is the collUserKeywordSets collection loaded partially.
-     */
-    public function resetPartialUserKeywordSets($v = true)
-    {
-        $this->collUserKeywordSetsPartial = $v;
-    }
-
-    /**
-     * Initializes the collUserKeywordSets collection.
-     *
-     * By default this just sets the collUserKeywordSets collection to an empty array (like clearcollUserKeywordSets());
-     * however, you may wish to override this method in your stub class to provide setting appropriate
-     * to your application -- for example, setting the initial array to the values stored in database.
-     *
-     * @param      boolean $overrideExisting If set to true, the method call initializes
-     *                                        the collection even if it is not empty
-     *
-     * @return void
-     */
-    public function initUserKeywordSets($overrideExisting = true)
-    {
-        if (null !== $this->collUserKeywordSets && !$overrideExisting) {
-            return;
-        }
-
-        $collectionClassName = UserKeywordSetTableMap::getTableMap()->getCollectionClassName();
-
-        $this->collUserKeywordSets = new $collectionClassName;
-        $this->collUserKeywordSets->setModel('\JobScooper\DataAccess\UserKeywordSet');
-    }
-
-    /**
-     * Gets an array of ChildUserKeywordSet objects which contain a foreign key that references this object.
-     *
-     * If the $criteria is not null, it is used to always fetch the results from the database.
-     * Otherwise the results are fetched from the database the first time, then cached.
-     * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildUser is new, it will return
-     * an empty collection or the current collection; the criteria is ignored on a new object.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @return ObjectCollection|ChildUserKeywordSet[] List of ChildUserKeywordSet objects
-     * @throws PropelException
-     */
-    public function getUserKeywordSets(Criteria $criteria = null, ConnectionInterface $con = null)
-    {
-        $partial = $this->collUserKeywordSetsPartial && !$this->isNew();
-        if (null === $this->collUserKeywordSets || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collUserKeywordSets) {
-                // return empty collection
-                $this->initUserKeywordSets();
-            } else {
-                $collUserKeywordSets = ChildUserKeywordSetQuery::create(null, $criteria)
-                    ->filterByUserFromUKS($this)
-                    ->find($con);
-
-                if (null !== $criteria) {
-                    if (false !== $this->collUserKeywordSetsPartial && count($collUserKeywordSets)) {
-                        $this->initUserKeywordSets(false);
-
-                        foreach ($collUserKeywordSets as $obj) {
-                            if (false == $this->collUserKeywordSets->contains($obj)) {
-                                $this->collUserKeywordSets->append($obj);
-                            }
-                        }
-
-                        $this->collUserKeywordSetsPartial = true;
-                    }
-
-                    return $collUserKeywordSets;
-                }
-
-                if ($partial && $this->collUserKeywordSets) {
-                    foreach ($this->collUserKeywordSets as $obj) {
-                        if ($obj->isNew()) {
-                            $collUserKeywordSets[] = $obj;
-                        }
-                    }
-                }
-
-                $this->collUserKeywordSets = $collUserKeywordSets;
-                $this->collUserKeywordSetsPartial = false;
-            }
-        }
-
-        return $this->collUserKeywordSets;
-    }
-
-    /**
-     * Sets a collection of ChildUserKeywordSet objects related by a one-to-many relationship
-     * to the current object.
-     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
-     * and new objects from the given Propel collection.
-     *
-     * @param      Collection $userKeywordSets A Propel collection.
-     * @param      ConnectionInterface $con Optional connection object
-     * @return $this|ChildUser The current object (for fluent API support)
-     */
-    public function setUserKeywordSets(Collection $userKeywordSets, ConnectionInterface $con = null)
-    {
-        /** @var ChildUserKeywordSet[] $userKeywordSetsToDelete */
-        $userKeywordSetsToDelete = $this->getUserKeywordSets(new Criteria(), $con)->diff($userKeywordSets);
-
-
-        //since at least one column in the foreign key is at the same time a PK
-        //we can not just set a PK to NULL in the lines below. We have to store
-        //a backup of all values, so we are able to manipulate these items based on the onDelete value later.
-        $this->userKeywordSetsScheduledForDeletion = clone $userKeywordSetsToDelete;
-
-        foreach ($userKeywordSetsToDelete as $userKeywordSetRemoved) {
-            $userKeywordSetRemoved->setUserFromUKS(null);
-        }
-
-        $this->collUserKeywordSets = null;
-        foreach ($userKeywordSets as $userKeywordSet) {
-            $this->addUserKeywordSet($userKeywordSet);
-        }
-
-        $this->collUserKeywordSets = $userKeywordSets;
-        $this->collUserKeywordSetsPartial = false;
-
-        return $this;
-    }
-
-    /**
-     * Returns the number of related UserKeywordSet objects.
-     *
-     * @param      Criteria $criteria
-     * @param      boolean $distinct
-     * @param      ConnectionInterface $con
-     * @return int             Count of related UserKeywordSet objects.
-     * @throws PropelException
-     */
-    public function countUserKeywordSets(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
-    {
-        $partial = $this->collUserKeywordSetsPartial && !$this->isNew();
-        if (null === $this->collUserKeywordSets || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->collUserKeywordSets) {
-                return 0;
-            }
-
-            if ($partial && !$criteria) {
-                return count($this->getUserKeywordSets());
-            }
-
-            $query = ChildUserKeywordSetQuery::create(null, $criteria);
-            if ($distinct) {
-                $query->distinct();
-            }
-
-            return $query
-                ->filterByUserFromUKS($this)
-                ->count($con);
-        }
-
-        return count($this->collUserKeywordSets);
-    }
-
-    /**
-     * Method called to associate a ChildUserKeywordSet object to this object
-     * through the ChildUserKeywordSet foreign key attribute.
-     *
-     * @param  ChildUserKeywordSet $l ChildUserKeywordSet
-     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
-     */
-    public function addUserKeywordSet(ChildUserKeywordSet $l)
-    {
-        if ($this->collUserKeywordSets === null) {
-            $this->initUserKeywordSets();
-            $this->collUserKeywordSetsPartial = true;
-        }
-
-        if (!$this->collUserKeywordSets->contains($l)) {
-            $this->doAddUserKeywordSet($l);
-
-            if ($this->userKeywordSetsScheduledForDeletion and $this->userKeywordSetsScheduledForDeletion->contains($l)) {
-                $this->userKeywordSetsScheduledForDeletion->remove($this->userKeywordSetsScheduledForDeletion->search($l));
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param ChildUserKeywordSet $userKeywordSet The ChildUserKeywordSet object to add.
-     */
-    protected function doAddUserKeywordSet(ChildUserKeywordSet $userKeywordSet)
-    {
-        $this->collUserKeywordSets[]= $userKeywordSet;
-        $userKeywordSet->setUserFromUKS($this);
-    }
-
-    /**
-     * @param  ChildUserKeywordSet $userKeywordSet The ChildUserKeywordSet object to remove.
-     * @return $this|ChildUser The current object (for fluent API support)
-     */
-    public function removeUserKeywordSet(ChildUserKeywordSet $userKeywordSet)
-    {
-        if ($this->getUserKeywordSets()->contains($userKeywordSet)) {
-            $pos = $this->collUserKeywordSets->search($userKeywordSet);
-            $this->collUserKeywordSets->remove($pos);
-            if (null === $this->userKeywordSetsScheduledForDeletion) {
-                $this->userKeywordSetsScheduledForDeletion = clone $this->collUserKeywordSets;
-                $this->userKeywordSetsScheduledForDeletion->clear();
-            }
-            $this->userKeywordSetsScheduledForDeletion[]= clone $userKeywordSet;
-            $userKeywordSet->setUserFromUKS(null);
-        }
-
-        return $this;
     }
 
     /**
@@ -1871,7 +1827,7 @@ abstract class User implements ActiveRecordInterface
      * If the $criteria is not null, it is used to always fetch the results from the database.
      * Otherwise the results are fetched from the database the first time, then cached.
      * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildUser is new, it will return
+     * If this ChildUserKeywordSet is new, it will return
      * an empty collection or the current collection; the criteria is ignored on a new object.
      *
      * @param      Criteria $criteria optional Criteria object to narrow the query
@@ -1888,7 +1844,7 @@ abstract class User implements ActiveRecordInterface
                 $this->initUserSearches();
             } else {
                 $collUserSearches = ChildUserSearchQuery::create(null, $criteria)
-                    ->filterByUserFromUS($this)
+                    ->filterByUserKeywordSetFromUS($this)
                     ->find($con);
 
                 if (null !== $criteria) {
@@ -1931,7 +1887,7 @@ abstract class User implements ActiveRecordInterface
      *
      * @param      Collection $userSearches A Propel collection.
      * @param      ConnectionInterface $con Optional connection object
-     * @return $this|ChildUser The current object (for fluent API support)
+     * @return $this|ChildUserKeywordSet The current object (for fluent API support)
      */
     public function setUserSearches(Collection $userSearches, ConnectionInterface $con = null)
     {
@@ -1945,7 +1901,7 @@ abstract class User implements ActiveRecordInterface
         $this->userSearchesScheduledForDeletion = clone $userSearchesToDelete;
 
         foreach ($userSearchesToDelete as $userSearchRemoved) {
-            $userSearchRemoved->setUserFromUS(null);
+            $userSearchRemoved->setUserKeywordSetFromUS(null);
         }
 
         $this->collUserSearches = null;
@@ -1986,7 +1942,7 @@ abstract class User implements ActiveRecordInterface
             }
 
             return $query
-                ->filterByUserFromUS($this)
+                ->filterByUserKeywordSetFromUS($this)
                 ->count($con);
         }
 
@@ -1998,7 +1954,7 @@ abstract class User implements ActiveRecordInterface
      * through the ChildUserSearch foreign key attribute.
      *
      * @param  ChildUserSearch $l ChildUserSearch
-     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserKeywordSet The current object (for fluent API support)
      */
     public function addUserSearch(ChildUserSearch $l)
     {
@@ -2024,12 +1980,12 @@ abstract class User implements ActiveRecordInterface
     protected function doAddUserSearch(ChildUserSearch $userSearch)
     {
         $this->collUserSearches[]= $userSearch;
-        $userSearch->setUserFromUS($this);
+        $userSearch->setUserKeywordSetFromUS($this);
     }
 
     /**
      * @param  ChildUserSearch $userSearch The ChildUserSearch object to remove.
-     * @return $this|ChildUser The current object (for fluent API support)
+     * @return $this|ChildUserKeywordSet The current object (for fluent API support)
      */
     public function removeUserSearch(ChildUserSearch $userSearch)
     {
@@ -2041,7 +1997,7 @@ abstract class User implements ActiveRecordInterface
                 $this->userSearchesScheduledForDeletion->clear();
             }
             $this->userSearchesScheduledForDeletion[]= clone $userSearch;
-            $userSearch->setUserFromUS(null);
+            $userSearch->setUserKeywordSetFromUS(null);
         }
 
         return $this;
@@ -2051,38 +2007,13 @@ abstract class User implements ActiveRecordInterface
     /**
      * If this collection has already been initialized with
      * an identical criteria, it returns the collection.
-     * Otherwise if this User is new, it will return
-     * an empty collection; or if this User has previously
+     * Otherwise if this UserKeywordSet is new, it will return
+     * an empty collection; or if this UserKeywordSet has previously
      * been saved, it will retrieve related UserSearches from storage.
      *
      * This method is protected by default in order to keep the public
      * api reasonable.  You can provide public methods for those you
-     * actually need in User.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
-     * @return ObjectCollection|ChildUserSearch[] List of ChildUserSearch objects
-     */
-    public function getUserSearchesJoinUserKeywordSetFromUS(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
-    {
-        $query = ChildUserSearchQuery::create(null, $criteria);
-        $query->joinWith('UserKeywordSetFromUS', $joinBehavior);
-
-        return $this->getUserSearches($query, $con);
-    }
-
-
-    /**
-     * If this collection has already been initialized with
-     * an identical criteria, it returns the collection.
-     * Otherwise if this User is new, it will return
-     * an empty collection; or if this User has previously
-     * been saved, it will retrieve related UserSearches from storage.
-     *
-     * This method is protected by default in order to keep the public
-     * api reasonable.  You can provide public methods for those you
-     * actually need in User.
+     * actually need in UserKeywordSet.
      *
      * @param      Criteria $criteria optional Criteria object to narrow the query
      * @param      ConnectionInterface $con optional connection object
@@ -2093,6 +2024,31 @@ abstract class User implements ActiveRecordInterface
     {
         $query = ChildUserSearchQuery::create(null, $criteria);
         $query->joinWith('GeoLocationFromUS', $joinBehavior);
+
+        return $this->getUserSearches($query, $con);
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this UserKeywordSet is new, it will return
+     * an empty collection; or if this UserKeywordSet has previously
+     * been saved, it will retrieve related UserSearches from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in UserKeywordSet.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return ObjectCollection|ChildUserSearch[] List of ChildUserSearch objects
+     */
+    public function getUserSearchesJoinUserFromUS(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    {
+        $query = ChildUserSearchQuery::create(null, $criteria);
+        $query->joinWith('UserFromUS', $joinBehavior);
 
         return $this->getUserSearches($query, $con);
     }
@@ -2149,7 +2105,7 @@ abstract class User implements ActiveRecordInterface
      * If the $criteria is not null, it is used to always fetch the results from the database.
      * Otherwise the results are fetched from the database the first time, then cached.
      * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildUser is new, it will return
+     * If this ChildUserKeywordSet is new, it will return
      * an empty collection or the current collection; the criteria is ignored on a new object.
      *
      * @param      Criteria $criteria optional Criteria object to narrow the query
@@ -2166,7 +2122,7 @@ abstract class User implements ActiveRecordInterface
                 $this->initUserSearchSiteRuns();
             } else {
                 $collUserSearchSiteRuns = ChildUserSearchSiteRunQuery::create(null, $criteria)
-                    ->filterByUserFromUSSR($this)
+                    ->filterByUserKeywordSetFromUSSR($this)
                     ->find($con);
 
                 if (null !== $criteria) {
@@ -2209,7 +2165,7 @@ abstract class User implements ActiveRecordInterface
      *
      * @param      Collection $userSearchSiteRuns A Propel collection.
      * @param      ConnectionInterface $con Optional connection object
-     * @return $this|ChildUser The current object (for fluent API support)
+     * @return $this|ChildUserKeywordSet The current object (for fluent API support)
      */
     public function setUserSearchSiteRuns(Collection $userSearchSiteRuns, ConnectionInterface $con = null)
     {
@@ -2223,7 +2179,7 @@ abstract class User implements ActiveRecordInterface
         $this->userSearchSiteRunsScheduledForDeletion = clone $userSearchSiteRunsToDelete;
 
         foreach ($userSearchSiteRunsToDelete as $userSearchSiteRunRemoved) {
-            $userSearchSiteRunRemoved->setUserFromUSSR(null);
+            $userSearchSiteRunRemoved->setUserKeywordSetFromUSSR(null);
         }
 
         $this->collUserSearchSiteRuns = null;
@@ -2264,7 +2220,7 @@ abstract class User implements ActiveRecordInterface
             }
 
             return $query
-                ->filterByUserFromUSSR($this)
+                ->filterByUserKeywordSetFromUSSR($this)
                 ->count($con);
         }
 
@@ -2276,7 +2232,7 @@ abstract class User implements ActiveRecordInterface
      * through the ChildUserSearchSiteRun foreign key attribute.
      *
      * @param  ChildUserSearchSiteRun $l ChildUserSearchSiteRun
-     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserKeywordSet The current object (for fluent API support)
      */
     public function addUserSearchSiteRun(ChildUserSearchSiteRun $l)
     {
@@ -2302,12 +2258,12 @@ abstract class User implements ActiveRecordInterface
     protected function doAddUserSearchSiteRun(ChildUserSearchSiteRun $userSearchSiteRun)
     {
         $this->collUserSearchSiteRuns[]= $userSearchSiteRun;
-        $userSearchSiteRun->setUserFromUSSR($this);
+        $userSearchSiteRun->setUserKeywordSetFromUSSR($this);
     }
 
     /**
      * @param  ChildUserSearchSiteRun $userSearchSiteRun The ChildUserSearchSiteRun object to remove.
-     * @return $this|ChildUser The current object (for fluent API support)
+     * @return $this|ChildUserKeywordSet The current object (for fluent API support)
      */
     public function removeUserSearchSiteRun(ChildUserSearchSiteRun $userSearchSiteRun)
     {
@@ -2319,7 +2275,7 @@ abstract class User implements ActiveRecordInterface
                 $this->userSearchSiteRunsScheduledForDeletion->clear();
             }
             $this->userSearchSiteRunsScheduledForDeletion[]= clone $userSearchSiteRun;
-            $userSearchSiteRun->setUserFromUSSR(null);
+            $userSearchSiteRun->setUserKeywordSetFromUSSR(null);
         }
 
         return $this;
@@ -2329,13 +2285,13 @@ abstract class User implements ActiveRecordInterface
     /**
      * If this collection has already been initialized with
      * an identical criteria, it returns the collection.
-     * Otherwise if this User is new, it will return
-     * an empty collection; or if this User has previously
+     * Otherwise if this UserKeywordSet is new, it will return
+     * an empty collection; or if this UserKeywordSet has previously
      * been saved, it will retrieve related UserSearchSiteRuns from storage.
      *
      * This method is protected by default in order to keep the public
      * api reasonable.  You can provide public methods for those you
-     * actually need in User.
+     * actually need in UserKeywordSet.
      *
      * @param      Criteria $criteria optional Criteria object to narrow the query
      * @param      ConnectionInterface $con optional connection object
@@ -2354,13 +2310,13 @@ abstract class User implements ActiveRecordInterface
     /**
      * If this collection has already been initialized with
      * an identical criteria, it returns the collection.
-     * Otherwise if this User is new, it will return
-     * an empty collection; or if this User has previously
+     * Otherwise if this UserKeywordSet is new, it will return
+     * an empty collection; or if this UserKeywordSet has previously
      * been saved, it will retrieve related UserSearchSiteRuns from storage.
      *
      * This method is protected by default in order to keep the public
      * api reasonable.  You can provide public methods for those you
-     * actually need in User.
+     * actually need in UserKeywordSet.
      *
      * @param      Criteria $criteria optional Criteria object to narrow the query
      * @param      ConnectionInterface $con optional connection object
@@ -2379,23 +2335,23 @@ abstract class User implements ActiveRecordInterface
     /**
      * If this collection has already been initialized with
      * an identical criteria, it returns the collection.
-     * Otherwise if this User is new, it will return
-     * an empty collection; or if this User has previously
+     * Otherwise if this UserKeywordSet is new, it will return
+     * an empty collection; or if this UserKeywordSet has previously
      * been saved, it will retrieve related UserSearchSiteRuns from storage.
      *
      * This method is protected by default in order to keep the public
      * api reasonable.  You can provide public methods for those you
-     * actually need in User.
+     * actually need in UserKeywordSet.
      *
      * @param      Criteria $criteria optional Criteria object to narrow the query
      * @param      ConnectionInterface $con optional connection object
      * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
      * @return ObjectCollection|ChildUserSearchSiteRun[] List of ChildUserSearchSiteRun objects
      */
-    public function getUserSearchSiteRunsJoinUserKeywordSetFromUSSR(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    public function getUserSearchSiteRunsJoinUserFromUSSR(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
     {
         $query = ChildUserSearchSiteRunQuery::create(null, $criteria);
-        $query->joinWith('UserKeywordSetFromUSSR', $joinBehavior);
+        $query->joinWith('UserFromUSSR', $joinBehavior);
 
         return $this->getUserSearchSiteRuns($query, $con);
     }
@@ -2404,13 +2360,13 @@ abstract class User implements ActiveRecordInterface
     /**
      * If this collection has already been initialized with
      * an identical criteria, it returns the collection.
-     * Otherwise if this User is new, it will return
-     * an empty collection; or if this User has previously
+     * Otherwise if this UserKeywordSet is new, it will return
+     * an empty collection; or if this UserKeywordSet has previously
      * been saved, it will retrieve related UserSearchSiteRuns from storage.
      *
      * This method is protected by default in order to keep the public
      * api reasonable.  You can provide public methods for those you
-     * actually need in User.
+     * actually need in UserKeywordSet.
      *
      * @param      Criteria $criteria optional Criteria object to narrow the query
      * @param      ConnectionInterface $con optional connection object
@@ -2426,429 +2382,176 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Clears out the collUserJobMatches collection
+     * Clears out the collGeoLocationFromUSUserFromuses collection
      *
      * This does not modify the database; however, it will remove any associated objects, causing
      * them to be refetched by subsequent calls to accessor method.
      *
      * @return void
-     * @see        addUserJobMatches()
+     * @see        addGeoLocationFromUSUserFromuses()
      */
-    public function clearUserJobMatches()
+    public function clearGeoLocationFromUSUserFromuses()
     {
-        $this->collUserJobMatches = null; // important to set this to NULL since that means it is uninitialized
+        $this->collGeoLocationFromUSUserFromuses = null; // important to set this to NULL since that means it is uninitialized
     }
 
     /**
-     * Reset is the collUserJobMatches collection loaded partially.
-     */
-    public function resetPartialUserJobMatches($v = true)
-    {
-        $this->collUserJobMatchesPartial = $v;
-    }
-
-    /**
-     * Initializes the collUserJobMatches collection.
+     * Initializes the combinationCollGeoLocationFromUSUserFromuses crossRef collection.
      *
-     * By default this just sets the collUserJobMatches collection to an empty array (like clearcollUserJobMatches());
-     * however, you may wish to override this method in your stub class to provide setting appropriate
-     * to your application -- for example, setting the initial array to the values stored in database.
-     *
-     * @param      boolean $overrideExisting If set to true, the method call initializes
-     *                                        the collection even if it is not empty
-     *
-     * @return void
-     */
-    public function initUserJobMatches($overrideExisting = true)
-    {
-        if (null !== $this->collUserJobMatches && !$overrideExisting) {
-            return;
-        }
-
-        $collectionClassName = UserJobMatchTableMap::getTableMap()->getCollectionClassName();
-
-        $this->collUserJobMatches = new $collectionClassName;
-        $this->collUserJobMatches->setModel('\JobScooper\DataAccess\UserJobMatch');
-    }
-
-    /**
-     * Gets an array of ChildUserJobMatch objects which contain a foreign key that references this object.
-     *
-     * If the $criteria is not null, it is used to always fetch the results from the database.
-     * Otherwise the results are fetched from the database the first time, then cached.
-     * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildUser is new, it will return
-     * an empty collection or the current collection; the criteria is ignored on a new object.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @return ObjectCollection|ChildUserJobMatch[] List of ChildUserJobMatch objects
-     * @throws PropelException
-     */
-    public function getUserJobMatches(Criteria $criteria = null, ConnectionInterface $con = null)
-    {
-        $partial = $this->collUserJobMatchesPartial && !$this->isNew();
-        if (null === $this->collUserJobMatches || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collUserJobMatches) {
-                // return empty collection
-                $this->initUserJobMatches();
-            } else {
-                $collUserJobMatches = ChildUserJobMatchQuery::create(null, $criteria)
-                    ->filterByUserFromUJM($this)
-                    ->find($con);
-
-                if (null !== $criteria) {
-                    if (false !== $this->collUserJobMatchesPartial && count($collUserJobMatches)) {
-                        $this->initUserJobMatches(false);
-
-                        foreach ($collUserJobMatches as $obj) {
-                            if (false == $this->collUserJobMatches->contains($obj)) {
-                                $this->collUserJobMatches->append($obj);
-                            }
-                        }
-
-                        $this->collUserJobMatchesPartial = true;
-                    }
-
-                    return $collUserJobMatches;
-                }
-
-                if ($partial && $this->collUserJobMatches) {
-                    foreach ($this->collUserJobMatches as $obj) {
-                        if ($obj->isNew()) {
-                            $collUserJobMatches[] = $obj;
-                        }
-                    }
-                }
-
-                $this->collUserJobMatches = $collUserJobMatches;
-                $this->collUserJobMatchesPartial = false;
-            }
-        }
-
-        return $this->collUserJobMatches;
-    }
-
-    /**
-     * Sets a collection of ChildUserJobMatch objects related by a one-to-many relationship
-     * to the current object.
-     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
-     * and new objects from the given Propel collection.
-     *
-     * @param      Collection $userJobMatches A Propel collection.
-     * @param      ConnectionInterface $con Optional connection object
-     * @return $this|ChildUser The current object (for fluent API support)
-     */
-    public function setUserJobMatches(Collection $userJobMatches, ConnectionInterface $con = null)
-    {
-        /** @var ChildUserJobMatch[] $userJobMatchesToDelete */
-        $userJobMatchesToDelete = $this->getUserJobMatches(new Criteria(), $con)->diff($userJobMatches);
-
-
-        //since at least one column in the foreign key is at the same time a PK
-        //we can not just set a PK to NULL in the lines below. We have to store
-        //a backup of all values, so we are able to manipulate these items based on the onDelete value later.
-        $this->userJobMatchesScheduledForDeletion = clone $userJobMatchesToDelete;
-
-        foreach ($userJobMatchesToDelete as $userJobMatchRemoved) {
-            $userJobMatchRemoved->setUserFromUJM(null);
-        }
-
-        $this->collUserJobMatches = null;
-        foreach ($userJobMatches as $userJobMatch) {
-            $this->addUserJobMatch($userJobMatch);
-        }
-
-        $this->collUserJobMatches = $userJobMatches;
-        $this->collUserJobMatchesPartial = false;
-
-        return $this;
-    }
-
-    /**
-     * Returns the number of related UserJobMatch objects.
-     *
-     * @param      Criteria $criteria
-     * @param      boolean $distinct
-     * @param      ConnectionInterface $con
-     * @return int             Count of related UserJobMatch objects.
-     * @throws PropelException
-     */
-    public function countUserJobMatches(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
-    {
-        $partial = $this->collUserJobMatchesPartial && !$this->isNew();
-        if (null === $this->collUserJobMatches || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->collUserJobMatches) {
-                return 0;
-            }
-
-            if ($partial && !$criteria) {
-                return count($this->getUserJobMatches());
-            }
-
-            $query = ChildUserJobMatchQuery::create(null, $criteria);
-            if ($distinct) {
-                $query->distinct();
-            }
-
-            return $query
-                ->filterByUserFromUJM($this)
-                ->count($con);
-        }
-
-        return count($this->collUserJobMatches);
-    }
-
-    /**
-     * Method called to associate a ChildUserJobMatch object to this object
-     * through the ChildUserJobMatch foreign key attribute.
-     *
-     * @param  ChildUserJobMatch $l ChildUserJobMatch
-     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
-     */
-    public function addUserJobMatch(ChildUserJobMatch $l)
-    {
-        if ($this->collUserJobMatches === null) {
-            $this->initUserJobMatches();
-            $this->collUserJobMatchesPartial = true;
-        }
-
-        if (!$this->collUserJobMatches->contains($l)) {
-            $this->doAddUserJobMatch($l);
-
-            if ($this->userJobMatchesScheduledForDeletion and $this->userJobMatchesScheduledForDeletion->contains($l)) {
-                $this->userJobMatchesScheduledForDeletion->remove($this->userJobMatchesScheduledForDeletion->search($l));
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param ChildUserJobMatch $userJobMatch The ChildUserJobMatch object to add.
-     */
-    protected function doAddUserJobMatch(ChildUserJobMatch $userJobMatch)
-    {
-        $this->collUserJobMatches[]= $userJobMatch;
-        $userJobMatch->setUserFromUJM($this);
-    }
-
-    /**
-     * @param  ChildUserJobMatch $userJobMatch The ChildUserJobMatch object to remove.
-     * @return $this|ChildUser The current object (for fluent API support)
-     */
-    public function removeUserJobMatch(ChildUserJobMatch $userJobMatch)
-    {
-        if ($this->getUserJobMatches()->contains($userJobMatch)) {
-            $pos = $this->collUserJobMatches->search($userJobMatch);
-            $this->collUserJobMatches->remove($pos);
-            if (null === $this->userJobMatchesScheduledForDeletion) {
-                $this->userJobMatchesScheduledForDeletion = clone $this->collUserJobMatches;
-                $this->userJobMatchesScheduledForDeletion->clear();
-            }
-            $this->userJobMatchesScheduledForDeletion[]= clone $userJobMatch;
-            $userJobMatch->setUserFromUJM(null);
-        }
-
-        return $this;
-    }
-
-
-    /**
-     * If this collection has already been initialized with
-     * an identical criteria, it returns the collection.
-     * Otherwise if this User is new, it will return
-     * an empty collection; or if this User has previously
-     * been saved, it will retrieve related UserJobMatches from storage.
-     *
-     * This method is protected by default in order to keep the public
-     * api reasonable.  You can provide public methods for those you
-     * actually need in User.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
-     * @return ObjectCollection|ChildUserJobMatch[] List of ChildUserJobMatch objects
-     */
-    public function getUserJobMatchesJoinJobPostingFromUJM(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
-    {
-        $query = ChildUserJobMatchQuery::create(null, $criteria);
-        $query->joinWith('JobPostingFromUJM', $joinBehavior);
-
-        return $this->getUserJobMatches($query, $con);
-    }
-
-    /**
-     * Clears out the collUserKeywordSetFromUSGeoLocationFromuses collection
-     *
-     * This does not modify the database; however, it will remove any associated objects, causing
-     * them to be refetched by subsequent calls to accessor method.
-     *
-     * @return void
-     * @see        addUserKeywordSetFromUSGeoLocationFromuses()
-     */
-    public function clearUserKeywordSetFromUSGeoLocationFromuses()
-    {
-        $this->collUserKeywordSetFromUSGeoLocationFromuses = null; // important to set this to NULL since that means it is uninitialized
-    }
-
-    /**
-     * Initializes the combinationCollUserKeywordSetFromUSGeoLocationFromuses crossRef collection.
-     *
-     * By default this just sets the combinationCollUserKeywordSetFromUSGeoLocationFromuses collection to an empty collection (like clearUserKeywordSetFromUSGeoLocationFromuses());
+     * By default this just sets the combinationCollGeoLocationFromUSUserFromuses collection to an empty collection (like clearGeoLocationFromUSUserFromuses());
      * however, you may wish to override this method in your stub class to provide setting appropriate
      * to your application -- for example, setting the initial array to the values stored in database.
      *
      * @return void
      */
-    public function initUserKeywordSetFromUSGeoLocationFromuses()
+    public function initGeoLocationFromUSUserFromuses()
     {
-        $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses = new ObjectCombinationCollection;
-        $this->combinationCollUserKeywordSetFromUSGeoLocationFromusesPartial = true;
+        $this->combinationCollGeoLocationFromUSUserFromuses = new ObjectCombinationCollection;
+        $this->combinationCollGeoLocationFromUSUserFromusesPartial = true;
     }
 
     /**
-     * Checks if the combinationCollUserKeywordSetFromUSGeoLocationFromuses collection is loaded.
+     * Checks if the combinationCollGeoLocationFromUSUserFromuses collection is loaded.
      *
      * @return bool
      */
-    public function isUserKeywordSetFromUSGeoLocationFromusesLoaded()
+    public function isGeoLocationFromUSUserFromusesLoaded()
     {
-        return null !== $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses;
+        return null !== $this->combinationCollGeoLocationFromUSUserFromuses;
     }
 
     /**
-     * Gets a combined collection of ChildUserKeywordSet, ChildGeoLocation objects related by a many-to-many relationship
+     * Gets a combined collection of ChildGeoLocation, ChildUser objects related by a many-to-many relationship
      * to the current object by way of the user_search cross-reference table.
      *
      * If the $criteria is not null, it is used to always fetch the results from the database.
      * Otherwise the results are fetched from the database the first time, then cached.
      * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildUser is new, it will return
+     * If this ChildUserKeywordSet is new, it will return
      * an empty collection or the current collection; the criteria is ignored on a new object.
      *
      * @param      Criteria $criteria Optional query object to filter the query
      * @param      ConnectionInterface $con Optional connection object
      *
-     * @return ObjectCombinationCollection Combination list of ChildUserKeywordSet, ChildGeoLocation objects
+     * @return ObjectCombinationCollection Combination list of ChildGeoLocation, ChildUser objects
      */
-    public function getUserKeywordSetFromUSGeoLocationFromuses($criteria = null, ConnectionInterface $con = null)
+    public function getGeoLocationFromUSUserFromuses($criteria = null, ConnectionInterface $con = null)
     {
-        $partial = $this->combinationCollUserKeywordSetFromUSGeoLocationFromusesPartial && !$this->isNew();
-        if (null === $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses || null !== $criteria || $partial) {
+        $partial = $this->combinationCollGeoLocationFromUSUserFromusesPartial && !$this->isNew();
+        if (null === $this->combinationCollGeoLocationFromUSUserFromuses || null !== $criteria || $partial) {
             if ($this->isNew()) {
                 // return empty collection
-                if (null === $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses) {
-                    $this->initUserKeywordSetFromUSGeoLocationFromuses();
+                if (null === $this->combinationCollGeoLocationFromUSUserFromuses) {
+                    $this->initGeoLocationFromUSUserFromuses();
                 }
             } else {
 
                 $query = ChildUserSearchQuery::create(null, $criteria)
-                    ->filterByUserFromUS($this)
-                    ->joinUserKeywordSetFromUS()
+                    ->filterByUserKeywordSetFromUS($this)
                     ->joinGeoLocationFromUS()
+                    ->joinUserFromUS()
                 ;
 
                 $items = $query->find($con);
-                $combinationCollUserKeywordSetFromUSGeoLocationFromuses = new ObjectCombinationCollection();
+                $combinationCollGeoLocationFromUSUserFromuses = new ObjectCombinationCollection();
                 foreach ($items as $item) {
                     $combination = [];
 
-                    $combination[] = $item->getUserKeywordSetFromUS();
                     $combination[] = $item->getGeoLocationFromUS();
-                    $combinationCollUserKeywordSetFromUSGeoLocationFromuses[] = $combination;
+                    $combination[] = $item->getUserFromUS();
+                    $combinationCollGeoLocationFromUSUserFromuses[] = $combination;
                 }
 
                 if (null !== $criteria) {
-                    return $combinationCollUserKeywordSetFromUSGeoLocationFromuses;
+                    return $combinationCollGeoLocationFromUSUserFromuses;
                 }
 
-                if ($partial && $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses) {
+                if ($partial && $this->combinationCollGeoLocationFromUSUserFromuses) {
                     //make sure that already added objects gets added to the list of the database.
-                    foreach ($this->combinationCollUserKeywordSetFromUSGeoLocationFromuses as $obj) {
-                        if (!call_user_func_array([$combinationCollUserKeywordSetFromUSGeoLocationFromuses, 'contains'], $obj)) {
-                            $combinationCollUserKeywordSetFromUSGeoLocationFromuses[] = $obj;
+                    foreach ($this->combinationCollGeoLocationFromUSUserFromuses as $obj) {
+                        if (!call_user_func_array([$combinationCollGeoLocationFromUSUserFromuses, 'contains'], $obj)) {
+                            $combinationCollGeoLocationFromUSUserFromuses[] = $obj;
                         }
                     }
                 }
 
-                $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses = $combinationCollUserKeywordSetFromUSGeoLocationFromuses;
-                $this->combinationCollUserKeywordSetFromUSGeoLocationFromusesPartial = false;
+                $this->combinationCollGeoLocationFromUSUserFromuses = $combinationCollGeoLocationFromUSUserFromuses;
+                $this->combinationCollGeoLocationFromUSUserFromusesPartial = false;
             }
         }
 
-        return $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses;
+        return $this->combinationCollGeoLocationFromUSUserFromuses;
     }
 
     /**
-     * Returns a not cached ObjectCollection of ChildUserKeywordSet objects. This will hit always the databases.
-     * If you have attached new ChildUserKeywordSet object to this object you need to call `save` first to get
-     * the correct return value. Use getUserKeywordSetFromUSGeoLocationFromuses() to get the current internal state.
+     * Returns a not cached ObjectCollection of ChildGeoLocation objects. This will hit always the databases.
+     * If you have attached new ChildGeoLocation object to this object you need to call `save` first to get
+     * the correct return value. Use getGeoLocationFromUSUserFromuses() to get the current internal state.
      *
-     * @param ChildGeoLocation $geoLocationFromUS
+     * @param ChildUser $userFromUS
      * @param Criteria $criteria
      * @param ConnectionInterface $con
      *
-     * @return ChildUserKeywordSet[]|ObjectCollection
+     * @return ChildGeoLocation[]|ObjectCollection
      */
-    public function getUserKeywordSetFromuses(ChildGeoLocation $geoLocationFromUS = null, Criteria $criteria = null, ConnectionInterface $con = null)
+    public function getGeoLocationFromuses(ChildUser $userFromUS = null, Criteria $criteria = null, ConnectionInterface $con = null)
     {
-        return $this->createUserKeywordSetFromusesQuery($geoLocationFromUS, $criteria)->find($con);
+        return $this->createGeoLocationFromusesQuery($userFromUS, $criteria)->find($con);
     }
 
     /**
-     * Sets a collection of ChildUserKeywordSet, ChildGeoLocation combination objects related by a many-to-many relationship
+     * Sets a collection of ChildGeoLocation, ChildUser combination objects related by a many-to-many relationship
      * to the current object by way of the user_search cross-reference table.
      * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
      * and new objects from the given Propel collection.
      *
-     * @param  Collection $userKeywordSetFromUSGeoLocationFromuses A Propel collection.
+     * @param  Collection $geoLocationFromUSUserFromuses A Propel collection.
      * @param  ConnectionInterface $con Optional connection object
-     * @return $this|ChildUser The current object (for fluent API support)
+     * @return $this|ChildUserKeywordSet The current object (for fluent API support)
      */
-    public function setUserKeywordSetFromUSGeoLocationFromuses(Collection $userKeywordSetFromUSGeoLocationFromuses, ConnectionInterface $con = null)
+    public function setGeoLocationFromUSUserFromuses(Collection $geoLocationFromUSUserFromuses, ConnectionInterface $con = null)
     {
-        $this->clearUserKeywordSetFromUSGeoLocationFromuses();
-        $currentUserKeywordSetFromUSGeoLocationFromuses = $this->getUserKeywordSetFromUSGeoLocationFromuses();
+        $this->clearGeoLocationFromUSUserFromuses();
+        $currentGeoLocationFromUSUserFromuses = $this->getGeoLocationFromUSUserFromuses();
 
-        $combinationCollUserKeywordSetFromUSGeoLocationFromusesScheduledForDeletion = $currentUserKeywordSetFromUSGeoLocationFromuses->diff($userKeywordSetFromUSGeoLocationFromuses);
+        $combinationCollGeoLocationFromUSUserFromusesScheduledForDeletion = $currentGeoLocationFromUSUserFromuses->diff($geoLocationFromUSUserFromuses);
 
-        foreach ($combinationCollUserKeywordSetFromUSGeoLocationFromusesScheduledForDeletion as $toDelete) {
-            call_user_func_array([$this, 'removeUserKeywordSetFromUSGeoLocationFromUS'], $toDelete);
+        foreach ($combinationCollGeoLocationFromUSUserFromusesScheduledForDeletion as $toDelete) {
+            call_user_func_array([$this, 'removeGeoLocationFromUSUserFromUS'], $toDelete);
         }
 
-        foreach ($userKeywordSetFromUSGeoLocationFromuses as $userKeywordSetFromUSGeoLocationFromUS) {
-            if (!call_user_func_array([$currentUserKeywordSetFromUSGeoLocationFromuses, 'contains'], $userKeywordSetFromUSGeoLocationFromUS)) {
-                call_user_func_array([$this, 'doAddUserKeywordSetFromUSGeoLocationFromUS'], $userKeywordSetFromUSGeoLocationFromUS);
+        foreach ($geoLocationFromUSUserFromuses as $geoLocationFromUSUserFromUS) {
+            if (!call_user_func_array([$currentGeoLocationFromUSUserFromuses, 'contains'], $geoLocationFromUSUserFromUS)) {
+                call_user_func_array([$this, 'doAddGeoLocationFromUSUserFromUS'], $geoLocationFromUSUserFromUS);
             }
         }
 
-        $this->combinationCollUserKeywordSetFromUSGeoLocationFromusesPartial = false;
-        $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses = $userKeywordSetFromUSGeoLocationFromuses;
+        $this->combinationCollGeoLocationFromUSUserFromusesPartial = false;
+        $this->combinationCollGeoLocationFromUSUserFromuses = $geoLocationFromUSUserFromuses;
 
         return $this;
     }
 
     /**
-     * Gets the number of ChildUserKeywordSet, ChildGeoLocation combination objects related by a many-to-many relationship
+     * Gets the number of ChildGeoLocation, ChildUser combination objects related by a many-to-many relationship
      * to the current object by way of the user_search cross-reference table.
      *
      * @param      Criteria $criteria Optional query object to filter the query
      * @param      boolean $distinct Set to true to force count distinct
      * @param      ConnectionInterface $con Optional connection object
      *
-     * @return int the number of related ChildUserKeywordSet, ChildGeoLocation combination objects
+     * @return int the number of related ChildGeoLocation, ChildUser combination objects
      */
-    public function countUserKeywordSetFromUSGeoLocationFromuses(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    public function countGeoLocationFromUSUserFromuses(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
     {
-        $partial = $this->combinationCollUserKeywordSetFromUSGeoLocationFromusesPartial && !$this->isNew();
-        if (null === $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses) {
+        $partial = $this->combinationCollGeoLocationFromUSUserFromusesPartial && !$this->isNew();
+        if (null === $this->combinationCollGeoLocationFromUSUserFromuses || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->combinationCollGeoLocationFromUSUserFromuses) {
                 return 0;
             } else {
 
                 if ($partial && !$criteria) {
-                    return count($this->getUserKeywordSetFromUSGeoLocationFromuses());
+                    return count($this->getGeoLocationFromUSUserFromuses());
                 }
 
                 $query = ChildUserSearchQuery::create(null, $criteria);
@@ -2857,51 +2560,28 @@ abstract class User implements ActiveRecordInterface
                 }
 
                 return $query
-                    ->filterByUserFromUS($this)
+                    ->filterByUserKeywordSetFromUS($this)
                     ->count($con);
             }
         } else {
-            return count($this->combinationCollUserKeywordSetFromUSGeoLocationFromuses);
+            return count($this->combinationCollGeoLocationFromUSUserFromuses);
         }
     }
 
     /**
-     * Returns the not cached count of ChildUserKeywordSet objects. This will hit always the databases.
-     * If you have attached new ChildUserKeywordSet object to this object you need to call `save` first to get
-     * the correct return value. Use getUserKeywordSetFromUSGeoLocationFromuses() to get the current internal state.
+     * Returns the not cached count of ChildGeoLocation objects. This will hit always the databases.
+     * If you have attached new ChildGeoLocation object to this object you need to call `save` first to get
+     * the correct return value. Use getGeoLocationFromUSUserFromuses() to get the current internal state.
      *
-     * @param ChildGeoLocation $geoLocationFromUS
+     * @param ChildUser $userFromUS
      * @param Criteria $criteria
      * @param ConnectionInterface $con
      *
      * @return integer
      */
-    public function countUserKeywordSetFromuses(ChildGeoLocation $geoLocationFromUS = null, Criteria $criteria = null, ConnectionInterface $con = null)
+    public function countGeoLocationFromuses(ChildUser $userFromUS = null, Criteria $criteria = null, ConnectionInterface $con = null)
     {
-        return $this->createUserKeywordSetFromusesQuery($geoLocationFromUS, $criteria)->count($con);
-    }
-
-    /**
-     * Associate a ChildUserKeywordSet to this object
-     * through the user_search cross reference table.
-     *
-     * @param ChildUserKeywordSet $userKeywordSetFromUS,
-     * @param ChildGeoLocation $geoLocationFromUS
-     * @return ChildUser The current object (for fluent API support)
-     */
-    public function addUserKeywordSetFromUS(ChildUserKeywordSet $userKeywordSetFromUS, ChildGeoLocation $geoLocationFromUS)
-    {
-        if ($this->combinationCollUserKeywordSetFromUSGeoLocationFromuses === null) {
-            $this->initUserKeywordSetFromUSGeoLocationFromuses();
-        }
-
-        if (!$this->getUserKeywordSetFromUSGeoLocationFromuses()->contains($userKeywordSetFromUS, $geoLocationFromUS)) {
-            // only add it if the **same** object is not already associated
-            $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses->push($userKeywordSetFromUS, $geoLocationFromUS);
-            $this->doAddUserKeywordSetFromUSGeoLocationFromUS($userKeywordSetFromUS, $geoLocationFromUS);
-        }
-
-        return $this;
+        return $this->createGeoLocationFromusesQuery($userFromUS, $criteria)->count($con);
     }
 
     /**
@@ -2909,19 +2589,42 @@ abstract class User implements ActiveRecordInterface
      * through the user_search cross reference table.
      *
      * @param ChildGeoLocation $geoLocationFromUS,
-     * @param ChildUserKeywordSet $userKeywordSetFromUS
-     * @return ChildUser The current object (for fluent API support)
+     * @param ChildUser $userFromUS
+     * @return ChildUserKeywordSet The current object (for fluent API support)
      */
-    public function addGeoLocationFromUS(ChildGeoLocation $geoLocationFromUS, ChildUserKeywordSet $userKeywordSetFromUS)
+    public function addGeoLocationFromUS(ChildGeoLocation $geoLocationFromUS, ChildUser $userFromUS)
     {
-        if ($this->combinationCollUserKeywordSetFromUSGeoLocationFromuses === null) {
-            $this->initUserKeywordSetFromUSGeoLocationFromuses();
+        if ($this->combinationCollGeoLocationFromUSUserFromuses === null) {
+            $this->initGeoLocationFromUSUserFromuses();
         }
 
-        if (!$this->getUserKeywordSetFromUSGeoLocationFromuses()->contains($geoLocationFromUS, $userKeywordSetFromUS)) {
+        if (!$this->getGeoLocationFromUSUserFromuses()->contains($geoLocationFromUS, $userFromUS)) {
             // only add it if the **same** object is not already associated
-            $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses->push($geoLocationFromUS, $userKeywordSetFromUS);
-            $this->doAddUserKeywordSetFromUSGeoLocationFromUS($geoLocationFromUS, $userKeywordSetFromUS);
+            $this->combinationCollGeoLocationFromUSUserFromuses->push($geoLocationFromUS, $userFromUS);
+            $this->doAddGeoLocationFromUSUserFromUS($geoLocationFromUS, $userFromUS);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Associate a ChildUser to this object
+     * through the user_search cross reference table.
+     *
+     * @param ChildUser $userFromUS,
+     * @param ChildGeoLocation $geoLocationFromUS
+     * @return ChildUserKeywordSet The current object (for fluent API support)
+     */
+    public function addUserFromUS(ChildUser $userFromUS, ChildGeoLocation $geoLocationFromUS)
+    {
+        if ($this->combinationCollGeoLocationFromUSUserFromuses === null) {
+            $this->initGeoLocationFromUSUserFromuses();
+        }
+
+        if (!$this->getGeoLocationFromUSUserFromuses()->contains($userFromUS, $geoLocationFromUS)) {
+            // only add it if the **same** object is not already associated
+            $this->combinationCollGeoLocationFromUSUserFromuses->push($userFromUS, $geoLocationFromUS);
+            $this->doAddGeoLocationFromUSUserFromUS($userFromUS, $geoLocationFromUS);
         }
 
         return $this;
@@ -2929,76 +2632,76 @@ abstract class User implements ActiveRecordInterface
 
     /**
      *
-     * @param ChildUserKeywordSet $userKeywordSetFromUS,
-     * @param ChildGeoLocation $geoLocationFromUS
+     * @param ChildGeoLocation $geoLocationFromUS,
+     * @param ChildUser $userFromUS
      */
-    protected function doAddUserKeywordSetFromUSGeoLocationFromUS(ChildUserKeywordSet $userKeywordSetFromUS, ChildGeoLocation $geoLocationFromUS)
+    protected function doAddGeoLocationFromUSUserFromUS(ChildGeoLocation $geoLocationFromUS, ChildUser $userFromUS)
     {
         $userSearch = new ChildUserSearch();
 
-        $userSearch->setUserKeywordSetFromUS($userKeywordSetFromUS);
         $userSearch->setGeoLocationFromUS($geoLocationFromUS);
+        $userSearch->setUserFromUS($userFromUS);
 
-        $userSearch->setUserFromUS($this);
+        $userSearch->setUserKeywordSetFromUS($this);
 
         $this->addUserSearch($userSearch);
 
         // set the back reference to this object directly as using provided method either results
         // in endless loop or in multiple relations
-        if ($userKeywordSetFromUS->isGeoLocationFromUSUserFromusesLoaded()) {
-            $userKeywordSetFromUS->initGeoLocationFromUSUserFromuses();
-            $userKeywordSetFromUS->getGeoLocationFromUSUserFromuses()->push($geoLocationFromUS, $this);
-        } elseif (!$userKeywordSetFromUS->getGeoLocationFromUSUserFromuses()->contains($geoLocationFromUS, $this)) {
-            $userKeywordSetFromUS->getGeoLocationFromUSUserFromuses()->push($geoLocationFromUS, $this);
+        if ($geoLocationFromUS->isUserKeywordSetFromUSUserFromusesLoaded()) {
+            $geoLocationFromUS->initUserKeywordSetFromUSUserFromuses();
+            $geoLocationFromUS->getUserKeywordSetFromUSUserFromuses()->push($this, $userFromUS);
+        } elseif (!$geoLocationFromUS->getUserKeywordSetFromUSUserFromuses()->contains($this, $userFromUS)) {
+            $geoLocationFromUS->getUserKeywordSetFromUSUserFromuses()->push($this, $userFromUS);
         }
 
         // set the back reference to this object directly as using provided method either results
         // in endless loop or in multiple relations
-        if ($geoLocationFromUS->isUserKeywordSetFromUSUserFromusesLoaded()) {
-            $geoLocationFromUS->initUserKeywordSetFromUSUserFromuses();
-            $geoLocationFromUS->getUserKeywordSetFromUSUserFromuses()->push($userKeywordSetFromUS, $this);
-        } elseif (!$geoLocationFromUS->getUserKeywordSetFromUSUserFromuses()->contains($userKeywordSetFromUS, $this)) {
-            $geoLocationFromUS->getUserKeywordSetFromUSUserFromuses()->push($userKeywordSetFromUS, $this);
+        if ($userFromUS->isUserKeywordSetFromUSGeoLocationFromusesLoaded()) {
+            $userFromUS->initUserKeywordSetFromUSGeoLocationFromuses();
+            $userFromUS->getUserKeywordSetFromUSGeoLocationFromuses()->push($this, $geoLocationFromUS);
+        } elseif (!$userFromUS->getUserKeywordSetFromUSGeoLocationFromuses()->contains($this, $geoLocationFromUS)) {
+            $userFromUS->getUserKeywordSetFromUSGeoLocationFromuses()->push($this, $geoLocationFromUS);
         }
 
     }
 
     /**
-     * Remove userKeywordSetFromUS, geoLocationFromUS of this object
+     * Remove geoLocationFromUS, userFromUS of this object
      * through the user_search cross reference table.
      *
-     * @param ChildUserKeywordSet $userKeywordSetFromUS,
-     * @param ChildGeoLocation $geoLocationFromUS
-     * @return ChildUser The current object (for fluent API support)
+     * @param ChildGeoLocation $geoLocationFromUS,
+     * @param ChildUser $userFromUS
+     * @return ChildUserKeywordSet The current object (for fluent API support)
      */
-    public function removeUserKeywordSetFromUSGeoLocationFromUS(ChildUserKeywordSet $userKeywordSetFromUS, ChildGeoLocation $geoLocationFromUS)
+    public function removeGeoLocationFromUSUserFromUS(ChildGeoLocation $geoLocationFromUS, ChildUser $userFromUS)
     {
-        if ($this->getUserKeywordSetFromUSGeoLocationFromuses()->contains($userKeywordSetFromUS, $geoLocationFromUS)) {
+        if ($this->getGeoLocationFromUSUserFromuses()->contains($geoLocationFromUS, $userFromUS)) {
             $userSearch = new ChildUserSearch();
-            $userSearch->setUserKeywordSetFromUS($userKeywordSetFromUS);
-            if ($userKeywordSetFromUS->isGeoLocationFromUSUserFromusesLoaded()) {
-                //remove the back reference if available
-                $userKeywordSetFromUS->getGeoLocationFromUSUserFromuses()->removeObject($geoLocationFromUS, $this);
-            }
-
             $userSearch->setGeoLocationFromUS($geoLocationFromUS);
             if ($geoLocationFromUS->isUserKeywordSetFromUSUserFromusesLoaded()) {
                 //remove the back reference if available
-                $geoLocationFromUS->getUserKeywordSetFromUSUserFromuses()->removeObject($userKeywordSetFromUS, $this);
+                $geoLocationFromUS->getUserKeywordSetFromUSUserFromuses()->removeObject($this, $userFromUS);
             }
 
-            $userSearch->setUserFromUS($this);
+            $userSearch->setUserFromUS($userFromUS);
+            if ($userFromUS->isUserKeywordSetFromUSGeoLocationFromusesLoaded()) {
+                //remove the back reference if available
+                $userFromUS->getUserKeywordSetFromUSGeoLocationFromuses()->removeObject($this, $geoLocationFromUS);
+            }
+
+            $userSearch->setUserKeywordSetFromUS($this);
             $this->removeUserSearch(clone $userSearch);
             $userSearch->clear();
 
-            $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses->remove($this->combinationCollUserKeywordSetFromUSGeoLocationFromuses->search($userKeywordSetFromUS, $geoLocationFromUS));
+            $this->combinationCollGeoLocationFromUSUserFromuses->remove($this->combinationCollGeoLocationFromUSUserFromuses->search($geoLocationFromUS, $userFromUS));
 
-            if (null === $this->combinationCollUserKeywordSetFromUSGeoLocationFromusesScheduledForDeletion) {
-                $this->combinationCollUserKeywordSetFromUSGeoLocationFromusesScheduledForDeletion = clone $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses;
-                $this->combinationCollUserKeywordSetFromUSGeoLocationFromusesScheduledForDeletion->clear();
+            if (null === $this->combinationCollGeoLocationFromUSUserFromusesScheduledForDeletion) {
+                $this->combinationCollGeoLocationFromUSUserFromusesScheduledForDeletion = clone $this->combinationCollGeoLocationFromUSUserFromuses;
+                $this->combinationCollGeoLocationFromUSUserFromusesScheduledForDeletion->clear();
             }
 
-            $this->combinationCollUserKeywordSetFromUSGeoLocationFromusesScheduledForDeletion->push($userKeywordSetFromUS, $geoLocationFromUS);
+            $this->combinationCollGeoLocationFromUSUserFromusesScheduledForDeletion->push($geoLocationFromUS, $userFromUS);
         }
 
 
@@ -3056,7 +2759,7 @@ abstract class User implements ActiveRecordInterface
     public function createUserSearchFromUSSRsQuery(ChildJobSiteRecord $jobSiteFromUSSR = null, $appRunId = null, Criteria $criteria = null)
     {
         $criteria = ChildUserSearchQuery::create($criteria)
-            ->filterByUserFromUSSR($this);
+            ->filterByUserKeywordSetFromUSSR($this);
 
         $userSearchSiteRunQuery = $criteria->useUserSearchSiteRunQuery();
 
@@ -3080,7 +2783,7 @@ abstract class User implements ActiveRecordInterface
      * If the $criteria is not null, it is used to always fetch the results from the database.
      * Otherwise the results are fetched from the database the first time, then cached.
      * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildUser is new, it will return
+     * If this ChildUserKeywordSet is new, it will return
      * an empty collection or the current collection; the criteria is ignored on a new object.
      *
      * @param      Criteria $criteria Optional query object to filter the query
@@ -3100,7 +2803,7 @@ abstract class User implements ActiveRecordInterface
             } else {
 
                 $query = ChildUserSearchSiteRunQuery::create(null, $criteria)
-                    ->filterByUserFromUSSR($this)
+                    ->filterByUserKeywordSetFromUSSR($this)
                     ->joinUserSearchFromUSSR()
                     ->joinJobSiteFromUSSR()
                 ;
@@ -3162,7 +2865,7 @@ abstract class User implements ActiveRecordInterface
      *
      * @param  Collection $userSearchFromUSSRJobSiteFromUSSRAppRunIds A Propel collection.
      * @param  ConnectionInterface $con Optional connection object
-     * @return $this|ChildUser The current object (for fluent API support)
+     * @return $this|ChildUserKeywordSet The current object (for fluent API support)
      */
     public function setUserSearchFromUSSRJobSiteFromUSSRAppRunIds(Collection $userSearchFromUSSRJobSiteFromUSSRAppRunIds, ConnectionInterface $con = null)
     {
@@ -3215,7 +2918,7 @@ abstract class User implements ActiveRecordInterface
                 }
 
                 return $query
-                    ->filterByUserFromUSSR($this)
+                    ->filterByUserKeywordSetFromUSSR($this)
                     ->count($con);
             }
         } else {
@@ -3247,7 +2950,7 @@ abstract class User implements ActiveRecordInterface
      * @param ChildUserSearch $userSearchFromUSSR,
      * @param ChildJobSiteRecord $jobSiteFromUSSR,
      * @param string $appRunId
-     * @return ChildUser The current object (for fluent API support)
+     * @return ChildUserKeywordSet The current object (for fluent API support)
      */
     public function addUserSearchFromUSSR(ChildUserSearch $userSearchFromUSSR, ChildJobSiteRecord $jobSiteFromUSSR, $appRunId)
     {
@@ -3271,7 +2974,7 @@ abstract class User implements ActiveRecordInterface
      * @param ChildJobSiteRecord $jobSiteFromUSSR,
      * @param ChildUserSearch $userSearchFromUSSR,
      * @param string $appRunId
-     * @return ChildUser The current object (for fluent API support)
+     * @return ChildUserKeywordSet The current object (for fluent API support)
      */
     public function addJobSiteFromUSSR(ChildJobSiteRecord $jobSiteFromUSSR, ChildUserSearch $userSearchFromUSSR, $appRunId)
     {
@@ -3303,26 +3006,26 @@ abstract class User implements ActiveRecordInterface
         $userSearchSiteRun->setAppRunId($appRunId);
 
 
-        $userSearchSiteRun->setUserFromUSSR($this);
+        $userSearchSiteRun->setUserKeywordSetFromUSSR($this);
 
         $this->addUserSearchSiteRun($userSearchSiteRun);
 
         // set the back reference to this object directly as using provided method either results
         // in endless loop or in multiple relations
-        if ($userSearchFromUSSR->isJobSiteFromUSSRUserFromUSSRAppRunIdsLoaded()) {
-            $userSearchFromUSSR->initJobSiteFromUSSRUserFromUSSRAppRunIds();
-            $userSearchFromUSSR->getJobSiteFromUSSRUserFromUSSRAppRunIds()->push($jobSiteFromUSSR, $this, $appRunId);
-        } elseif (!$userSearchFromUSSR->getJobSiteFromUSSRUserFromUSSRAppRunIds()->contains($jobSiteFromUSSR, $this, $appRunId)) {
-            $userSearchFromUSSR->getJobSiteFromUSSRUserFromUSSRAppRunIds()->push($jobSiteFromUSSR, $this, $appRunId);
+        if ($userSearchFromUSSR->isJobSiteFromUSSRUserKeywordSetFromUSSRAppRunIdsLoaded()) {
+            $userSearchFromUSSR->initJobSiteFromUSSRUserKeywordSetFromUSSRAppRunIds();
+            $userSearchFromUSSR->getJobSiteFromUSSRUserKeywordSetFromUSSRAppRunIds()->push($jobSiteFromUSSR, $this, $appRunId);
+        } elseif (!$userSearchFromUSSR->getJobSiteFromUSSRUserKeywordSetFromUSSRAppRunIds()->contains($jobSiteFromUSSR, $this, $appRunId)) {
+            $userSearchFromUSSR->getJobSiteFromUSSRUserKeywordSetFromUSSRAppRunIds()->push($jobSiteFromUSSR, $this, $appRunId);
         }
 
         // set the back reference to this object directly as using provided method either results
         // in endless loop or in multiple relations
-        if ($jobSiteFromUSSR->isUserSearchFromUSSRUserFromUSSRAppRunIdsLoaded()) {
-            $jobSiteFromUSSR->initUserSearchFromUSSRUserFromUSSRAppRunIds();
-            $jobSiteFromUSSR->getUserSearchFromUSSRUserFromUSSRAppRunIds()->push($userSearchFromUSSR, $this, $appRunId);
-        } elseif (!$jobSiteFromUSSR->getUserSearchFromUSSRUserFromUSSRAppRunIds()->contains($userSearchFromUSSR, $this, $appRunId)) {
-            $jobSiteFromUSSR->getUserSearchFromUSSRUserFromUSSRAppRunIds()->push($userSearchFromUSSR, $this, $appRunId);
+        if ($jobSiteFromUSSR->isUserSearchFromUSSRUserKeywordSetFromUSSRAppRunIdsLoaded()) {
+            $jobSiteFromUSSR->initUserSearchFromUSSRUserKeywordSetFromUSSRAppRunIds();
+            $jobSiteFromUSSR->getUserSearchFromUSSRUserKeywordSetFromUSSRAppRunIds()->push($userSearchFromUSSR, $this, $appRunId);
+        } elseif (!$jobSiteFromUSSR->getUserSearchFromUSSRUserKeywordSetFromUSSRAppRunIds()->contains($userSearchFromUSSR, $this, $appRunId)) {
+            $jobSiteFromUSSR->getUserSearchFromUSSRUserKeywordSetFromUSSRAppRunIds()->push($userSearchFromUSSR, $this, $appRunId);
         }
 
     }
@@ -3334,26 +3037,26 @@ abstract class User implements ActiveRecordInterface
      * @param ChildUserSearch $userSearchFromUSSR,
      * @param ChildJobSiteRecord $jobSiteFromUSSR,
      * @param string $appRunId
-     * @return ChildUser The current object (for fluent API support)
+     * @return ChildUserKeywordSet The current object (for fluent API support)
      */
     public function removeUserSearchFromUSSRJobSiteFromUSSRAppRunId(ChildUserSearch $userSearchFromUSSR, ChildJobSiteRecord $jobSiteFromUSSR, $appRunId)
     {
         if ($this->getUserSearchFromUSSRJobSiteFromUSSRAppRunIds()->contains($userSearchFromUSSR, $jobSiteFromUSSR, $appRunId)) {
             $userSearchSiteRun = new ChildUserSearchSiteRun();
             $userSearchSiteRun->setUserSearchFromUSSR($userSearchFromUSSR);
-            if ($userSearchFromUSSR->isJobSiteFromUSSRUserFromUSSRAppRunIdsLoaded()) {
+            if ($userSearchFromUSSR->isJobSiteFromUSSRUserKeywordSetFromUSSRAppRunIdsLoaded()) {
                 //remove the back reference if available
-                $userSearchFromUSSR->getJobSiteFromUSSRUserFromUSSRAppRunIds()->removeObject($jobSiteFromUSSR, $this, $appRunId);
+                $userSearchFromUSSR->getJobSiteFromUSSRUserKeywordSetFromUSSRAppRunIds()->removeObject($jobSiteFromUSSR, $this, $appRunId);
             }
 
             $userSearchSiteRun->setJobSiteFromUSSR($jobSiteFromUSSR);
-            if ($jobSiteFromUSSR->isUserSearchFromUSSRUserFromUSSRAppRunIdsLoaded()) {
+            if ($jobSiteFromUSSR->isUserSearchFromUSSRUserKeywordSetFromUSSRAppRunIdsLoaded()) {
                 //remove the back reference if available
-                $jobSiteFromUSSR->getUserSearchFromUSSRUserFromUSSRAppRunIds()->removeObject($userSearchFromUSSR, $this, $appRunId);
+                $jobSiteFromUSSR->getUserSearchFromUSSRUserKeywordSetFromUSSRAppRunIds()->removeObject($userSearchFromUSSR, $this, $appRunId);
             }
 
             $userSearchSiteRun->setAppRunId($appRunId);
-            $userSearchSiteRun->setUserFromUSSR($this);
+            $userSearchSiteRun->setUserKeywordSetFromUSSR($this);
             $this->removeUserSearchSiteRun(clone $userSearchSiteRun);
             $userSearchSiteRun->clear();
 
@@ -3372,262 +3075,25 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Clears out the collJobPostingFromUJMs collection
-     *
-     * This does not modify the database; however, it will remove any associated objects, causing
-     * them to be refetched by subsequent calls to accessor method.
-     *
-     * @return void
-     * @see        addJobPostingFromUJMs()
-     */
-    public function clearJobPostingFromUJMs()
-    {
-        $this->collJobPostingFromUJMs = null; // important to set this to NULL since that means it is uninitialized
-    }
-
-    /**
-     * Initializes the collJobPostingFromUJMs crossRef collection.
-     *
-     * By default this just sets the collJobPostingFromUJMs collection to an empty collection (like clearJobPostingFromUJMs());
-     * however, you may wish to override this method in your stub class to provide setting appropriate
-     * to your application -- for example, setting the initial array to the values stored in database.
-     *
-     * @return void
-     */
-    public function initJobPostingFromUJMs()
-    {
-        $collectionClassName = UserJobMatchTableMap::getTableMap()->getCollectionClassName();
-
-        $this->collJobPostingFromUJMs = new $collectionClassName;
-        $this->collJobPostingFromUJMsPartial = true;
-        $this->collJobPostingFromUJMs->setModel('\JobScooper\DataAccess\JobPosting');
-    }
-
-    /**
-     * Checks if the collJobPostingFromUJMs collection is loaded.
-     *
-     * @return bool
-     */
-    public function isJobPostingFromUJMsLoaded()
-    {
-        return null !== $this->collJobPostingFromUJMs;
-    }
-
-    /**
-     * Gets a collection of ChildJobPosting objects related by a many-to-many relationship
-     * to the current object by way of the user_job_match cross-reference table.
-     *
-     * If the $criteria is not null, it is used to always fetch the results from the database.
-     * Otherwise the results are fetched from the database the first time, then cached.
-     * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildUser is new, it will return
-     * an empty collection or the current collection; the criteria is ignored on a new object.
-     *
-     * @param      Criteria $criteria Optional query object to filter the query
-     * @param      ConnectionInterface $con Optional connection object
-     *
-     * @return ObjectCollection|ChildJobPosting[] List of ChildJobPosting objects
-     */
-    public function getJobPostingFromUJMs(Criteria $criteria = null, ConnectionInterface $con = null)
-    {
-        $partial = $this->collJobPostingFromUJMsPartial && !$this->isNew();
-        if (null === $this->collJobPostingFromUJMs || null !== $criteria || $partial) {
-            if ($this->isNew()) {
-                // return empty collection
-                if (null === $this->collJobPostingFromUJMs) {
-                    $this->initJobPostingFromUJMs();
-                }
-            } else {
-
-                $query = ChildJobPostingQuery::create(null, $criteria)
-                    ->filterByUserFromUJM($this);
-                $collJobPostingFromUJMs = $query->find($con);
-                if (null !== $criteria) {
-                    return $collJobPostingFromUJMs;
-                }
-
-                if ($partial && $this->collJobPostingFromUJMs) {
-                    //make sure that already added objects gets added to the list of the database.
-                    foreach ($this->collJobPostingFromUJMs as $obj) {
-                        if (!$collJobPostingFromUJMs->contains($obj)) {
-                            $collJobPostingFromUJMs[] = $obj;
-                        }
-                    }
-                }
-
-                $this->collJobPostingFromUJMs = $collJobPostingFromUJMs;
-                $this->collJobPostingFromUJMsPartial = false;
-            }
-        }
-
-        return $this->collJobPostingFromUJMs;
-    }
-
-    /**
-     * Sets a collection of JobPosting objects related by a many-to-many relationship
-     * to the current object by way of the user_job_match cross-reference table.
-     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
-     * and new objects from the given Propel collection.
-     *
-     * @param  Collection $jobPostingFromUJMs A Propel collection.
-     * @param  ConnectionInterface $con Optional connection object
-     * @return $this|ChildUser The current object (for fluent API support)
-     */
-    public function setJobPostingFromUJMs(Collection $jobPostingFromUJMs, ConnectionInterface $con = null)
-    {
-        $this->clearJobPostingFromUJMs();
-        $currentJobPostingFromUJMs = $this->getJobPostingFromUJMs();
-
-        $jobPostingFromUJMsScheduledForDeletion = $currentJobPostingFromUJMs->diff($jobPostingFromUJMs);
-
-        foreach ($jobPostingFromUJMsScheduledForDeletion as $toDelete) {
-            $this->removeJobPostingFromUJM($toDelete);
-        }
-
-        foreach ($jobPostingFromUJMs as $jobPostingFromUJM) {
-            if (!$currentJobPostingFromUJMs->contains($jobPostingFromUJM)) {
-                $this->doAddJobPostingFromUJM($jobPostingFromUJM);
-            }
-        }
-
-        $this->collJobPostingFromUJMsPartial = false;
-        $this->collJobPostingFromUJMs = $jobPostingFromUJMs;
-
-        return $this;
-    }
-
-    /**
-     * Gets the number of JobPosting objects related by a many-to-many relationship
-     * to the current object by way of the user_job_match cross-reference table.
-     *
-     * @param      Criteria $criteria Optional query object to filter the query
-     * @param      boolean $distinct Set to true to force count distinct
-     * @param      ConnectionInterface $con Optional connection object
-     *
-     * @return int the number of related JobPosting objects
-     */
-    public function countJobPostingFromUJMs(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
-    {
-        $partial = $this->collJobPostingFromUJMsPartial && !$this->isNew();
-        if (null === $this->collJobPostingFromUJMs || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->collJobPostingFromUJMs) {
-                return 0;
-            } else {
-
-                if ($partial && !$criteria) {
-                    return count($this->getJobPostingFromUJMs());
-                }
-
-                $query = ChildJobPostingQuery::create(null, $criteria);
-                if ($distinct) {
-                    $query->distinct();
-                }
-
-                return $query
-                    ->filterByUserFromUJM($this)
-                    ->count($con);
-            }
-        } else {
-            return count($this->collJobPostingFromUJMs);
-        }
-    }
-
-    /**
-     * Associate a ChildJobPosting to this object
-     * through the user_job_match cross reference table.
-     *
-     * @param ChildJobPosting $jobPostingFromUJM
-     * @return ChildUser The current object (for fluent API support)
-     */
-    public function addJobPostingFromUJM(ChildJobPosting $jobPostingFromUJM)
-    {
-        if ($this->collJobPostingFromUJMs === null) {
-            $this->initJobPostingFromUJMs();
-        }
-
-        if (!$this->getJobPostingFromUJMs()->contains($jobPostingFromUJM)) {
-            // only add it if the **same** object is not already associated
-            $this->collJobPostingFromUJMs->push($jobPostingFromUJM);
-            $this->doAddJobPostingFromUJM($jobPostingFromUJM);
-        }
-
-        return $this;
-    }
-
-    /**
-     *
-     * @param ChildJobPosting $jobPostingFromUJM
-     */
-    protected function doAddJobPostingFromUJM(ChildJobPosting $jobPostingFromUJM)
-    {
-        $userJobMatch = new ChildUserJobMatch();
-
-        $userJobMatch->setJobPostingFromUJM($jobPostingFromUJM);
-
-        $userJobMatch->setUserFromUJM($this);
-
-        $this->addUserJobMatch($userJobMatch);
-
-        // set the back reference to this object directly as using provided method either results
-        // in endless loop or in multiple relations
-        if (!$jobPostingFromUJM->isUserFromUJMsLoaded()) {
-            $jobPostingFromUJM->initUserFromUJMs();
-            $jobPostingFromUJM->getUserFromUJMs()->push($this);
-        } elseif (!$jobPostingFromUJM->getUserFromUJMs()->contains($this)) {
-            $jobPostingFromUJM->getUserFromUJMs()->push($this);
-        }
-
-    }
-
-    /**
-     * Remove jobPostingFromUJM of this object
-     * through the user_job_match cross reference table.
-     *
-     * @param ChildJobPosting $jobPostingFromUJM
-     * @return ChildUser The current object (for fluent API support)
-     */
-    public function removeJobPostingFromUJM(ChildJobPosting $jobPostingFromUJM)
-    {
-        if ($this->getJobPostingFromUJMs()->contains($jobPostingFromUJM)) {
-            $userJobMatch = new ChildUserJobMatch();
-            $userJobMatch->setJobPostingFromUJM($jobPostingFromUJM);
-            if ($jobPostingFromUJM->isUserFromUJMsLoaded()) {
-                //remove the back reference if available
-                $jobPostingFromUJM->getUserFromUJMs()->removeObject($this);
-            }
-
-            $userJobMatch->setUserFromUJM($this);
-            $this->removeUserJobMatch(clone $userJobMatch);
-            $userJobMatch->clear();
-
-            $this->collJobPostingFromUJMs->remove($this->collJobPostingFromUJMs->search($jobPostingFromUJM));
-
-            if (null === $this->jobPostingFromUJMsScheduledForDeletion) {
-                $this->jobPostingFromUJMsScheduledForDeletion = clone $this->collJobPostingFromUJMs;
-                $this->jobPostingFromUJMsScheduledForDeletion->clear();
-            }
-
-            $this->jobPostingFromUJMsScheduledForDeletion->push($jobPostingFromUJM);
-        }
-
-
-        return $this;
-    }
-
-    /**
      * Clears the current object, sets all attributes to their default values and removes
      * outgoing references as well as back-references (from other objects to this one. Results probably in a database
      * change of those foreign objects when you call `save` there).
      */
     public function clear()
     {
+        if (null !== $this->aUserFromUKS) {
+            $this->aUserFromUKS->removeUserKeywordSet($this);
+        }
         $this->user_id = null;
-        $this->user_slug = null;
-        $this->email_address = null;
-        $this->name = null;
+        $this->user_keyword_set_id = null;
+        $this->keywords = null;
+        $this->keywords_unserialized = null;
+        $this->search_key_from_config = null;
+        $this->keyword_tokens = null;
+        $this->keyword_tokens_unserialized = null;
+        $this->user_keyword_set_key = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
-        $this->applyDefaultValues();
         $this->resetModified();
         $this->setNew(true);
         $this->setDeleted(false);
@@ -3644,11 +3110,6 @@ abstract class User implements ActiveRecordInterface
     public function clearAllReferences($deep = false)
     {
         if ($deep) {
-            if ($this->collUserKeywordSets) {
-                foreach ($this->collUserKeywordSets as $o) {
-                    $o->clearAllReferences($deep);
-                }
-            }
             if ($this->collUserSearches) {
                 foreach ($this->collUserSearches as $o) {
                     $o->clearAllReferences($deep);
@@ -3659,13 +3120,8 @@ abstract class User implements ActiveRecordInterface
                     $o->clearAllReferences($deep);
                 }
             }
-            if ($this->collUserJobMatches) {
-                foreach ($this->collUserJobMatches as $o) {
-                    $o->clearAllReferences($deep);
-                }
-            }
-            if ($this->combinationCollUserKeywordSetFromUSGeoLocationFromuses) {
-                foreach ($this->combinationCollUserKeywordSetFromUSGeoLocationFromuses as $o) {
+            if ($this->combinationCollGeoLocationFromUSUserFromuses) {
+                foreach ($this->combinationCollGeoLocationFromUSUserFromuses as $o) {
                     $o->clearAllReferences($deep);
                 }
             }
@@ -3674,30 +3130,23 @@ abstract class User implements ActiveRecordInterface
                     $o->clearAllReferences($deep);
                 }
             }
-            if ($this->collJobPostingFromUJMs) {
-                foreach ($this->collJobPostingFromUJMs as $o) {
-                    $o->clearAllReferences($deep);
-                }
-            }
         } // if ($deep)
 
-        $this->collUserKeywordSets = null;
         $this->collUserSearches = null;
         $this->collUserSearchSiteRuns = null;
-        $this->collUserJobMatches = null;
-        $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses = null;
+        $this->combinationCollGeoLocationFromUSUserFromuses = null;
         $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds = null;
-        $this->collJobPostingFromUJMs = null;
+        $this->aUserFromUKS = null;
     }
 
     /**
      * Return the string representation of this object
      *
-     * @return string The value of the 'user_slug' column
+     * @return string The value of the 'user_keyword_set_key' column
      */
     public function __toString()
     {
-        return (string) $this->getUserSlug();
+        return (string) $this->getUserKeywordSetKey();
     }
 
     // sluggable behavior
@@ -3706,11 +3155,11 @@ abstract class User implements ActiveRecordInterface
      * Wrap the setter for slug value
      *
      * @param   string
-     * @return  $this|User
+     * @return  $this|UserKeywordSet
      */
     public function setSlug($v)
     {
-        return $this->setUserSlug($v);
+        return $this->setUserKeywordSetKey($v);
     }
 
     /**
@@ -3720,7 +3169,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function getSlug()
     {
-        return $this->getUserSlug();
+        return $this->getUserKeywordSetKey();
     }
 
     /**
@@ -3744,7 +3193,7 @@ abstract class User implements ActiveRecordInterface
      */
     protected function createRawSlug()
     {
-        return '' . $this->cleanupSlugPart($this->getEmailAddress()) . '';
+        return 'user' . $this->cleanupSlugPart($this->getUserId()) . '_kwd' . $this->cleanupSlugPart($this->getUserKeywordSetId()) . '_search' . $this->cleanupSlugPart($this->getSearchKeyFromConfig()) . '';
     }
 
     /**
@@ -3812,7 +3261,7 @@ abstract class User implements ActiveRecordInterface
      * @param    int    $alreadyExists   false for the first try, true for the second, and take the high count + 1
      * @return   string                   the unique slug
      */
-    protected function makeSlugUnique($slug, $separator = '-', $alreadyExists = false)
+    protected function makeSlugUnique($slug, $separator = '_', $alreadyExists = false)
     {
         if (!$alreadyExists) {
             $slug2 = $slug;
@@ -3821,10 +3270,10 @@ abstract class User implements ActiveRecordInterface
         }
 
         $adapter = \Propel\Runtime\Propel::getServiceContainer()->getAdapter('default');
-        $col = 'q.UserSlug';
+        $col = 'q.UserKeywordSetKey';
         $compare = $alreadyExists ? $adapter->compareRegex($col, '?') : sprintf('%s = ?', $col);
 
-        $query = \JobScooper\DataAccess\UserQuery::create('q')
+        $query = \JobScooper\DataAccess\UserKeywordSetQuery::create('q')
             ->where($compare, $alreadyExists ? '^' . $slug2 . '[0-9]+$' : $slug2)
             ->prune($this)
         ;
@@ -3841,8 +3290,8 @@ abstract class User implements ActiveRecordInterface
         $adapter = \Propel\Runtime\Propel::getServiceContainer()->getAdapter('default');
         // Already exists
         $object = $query
-            ->addDescendingOrderByColumn($adapter->strLength('user_slug'))
-            ->addDescendingOrderByColumn('user_slug')
+            ->addDescendingOrderByColumn($adapter->strLength('user_keyword_set_key'))
+            ->addDescendingOrderByColumn('user_keyword_set_key')
         ->findOne();
 
         // First duplicate slug
@@ -3850,7 +3299,7 @@ abstract class User implements ActiveRecordInterface
             return $slug2 . '1';
         }
 
-        $slugNum = substr($object->getUserSlug(), strlen($slug) + 1);
+        $slugNum = substr($object->getUserKeywordSetKey(), strlen($slug) + 1);
         if (0 == $slugNum[0]) {
             $slugNum[0] = 1;
         }

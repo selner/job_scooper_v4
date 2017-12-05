@@ -36,7 +36,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPostingQuery orderByPostedAt($order = Criteria::ASC) Order by the job_posted_date column
  * @method     ChildJobPostingQuery orderByFirstSeenAt($order = Criteria::ASC) Order by the first_seen_at column
  * @method     ChildJobPostingQuery orderByRemovedAt($order = Criteria::ASC) Order by the post_removed_at column
- * @method     ChildJobPostingQuery orderByKeySiteAndPostID($order = Criteria::ASC) Order by the key_site_and_post_id column
+ * @method     ChildJobPostingQuery orderByKeySiteAndPostId($order = Criteria::ASC) Order by the key_site_and_post_id column
  * @method     ChildJobPostingQuery orderByKeyCompanyAndTitle($order = Criteria::ASC) Order by the key_company_and_title column
  * @method     ChildJobPostingQuery orderByJobTitleLinked($order = Criteria::ASC) Order by the title_linked column
  * @method     ChildJobPostingQuery orderByLocationDisplayValue($order = Criteria::ASC) Order by the location_display_value column
@@ -59,7 +59,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPostingQuery groupByPostedAt() Group by the job_posted_date column
  * @method     ChildJobPostingQuery groupByFirstSeenAt() Group by the first_seen_at column
  * @method     ChildJobPostingQuery groupByRemovedAt() Group by the post_removed_at column
- * @method     ChildJobPostingQuery groupByKeySiteAndPostID() Group by the key_site_and_post_id column
+ * @method     ChildJobPostingQuery groupByKeySiteAndPostId() Group by the key_site_and_post_id column
  * @method     ChildJobPostingQuery groupByKeyCompanyAndTitle() Group by the key_company_and_title column
  * @method     ChildJobPostingQuery groupByJobTitleLinked() Group by the title_linked column
  * @method     ChildJobPostingQuery groupByLocationDisplayValue() Group by the location_display_value column
@@ -74,35 +74,35 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPostingQuery rightJoinWith($relation) Adds a RIGHT JOIN clause and with to the query
  * @method     ChildJobPostingQuery innerJoinWith($relation) Adds a INNER JOIN clause and with to the query
  *
- * @method     ChildJobPostingQuery leftJoinJobSiteRecord($relationAlias = null) Adds a LEFT JOIN clause to the query using the JobSiteRecord relation
- * @method     ChildJobPostingQuery rightJoinJobSiteRecord($relationAlias = null) Adds a RIGHT JOIN clause to the query using the JobSiteRecord relation
- * @method     ChildJobPostingQuery innerJoinJobSiteRecord($relationAlias = null) Adds a INNER JOIN clause to the query using the JobSiteRecord relation
+ * @method     ChildJobPostingQuery leftJoinJobSiteFromJP($relationAlias = null) Adds a LEFT JOIN clause to the query using the JobSiteFromJP relation
+ * @method     ChildJobPostingQuery rightJoinJobSiteFromJP($relationAlias = null) Adds a RIGHT JOIN clause to the query using the JobSiteFromJP relation
+ * @method     ChildJobPostingQuery innerJoinJobSiteFromJP($relationAlias = null) Adds a INNER JOIN clause to the query using the JobSiteFromJP relation
  *
- * @method     ChildJobPostingQuery joinWithJobSiteRecord($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the JobSiteRecord relation
+ * @method     ChildJobPostingQuery joinWithJobSiteFromJP($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the JobSiteFromJP relation
  *
- * @method     ChildJobPostingQuery leftJoinWithJobSiteRecord() Adds a LEFT JOIN clause and with to the query using the JobSiteRecord relation
- * @method     ChildJobPostingQuery rightJoinWithJobSiteRecord() Adds a RIGHT JOIN clause and with to the query using the JobSiteRecord relation
- * @method     ChildJobPostingQuery innerJoinWithJobSiteRecord() Adds a INNER JOIN clause and with to the query using the JobSiteRecord relation
+ * @method     ChildJobPostingQuery leftJoinWithJobSiteFromJP() Adds a LEFT JOIN clause and with to the query using the JobSiteFromJP relation
+ * @method     ChildJobPostingQuery rightJoinWithJobSiteFromJP() Adds a RIGHT JOIN clause and with to the query using the JobSiteFromJP relation
+ * @method     ChildJobPostingQuery innerJoinWithJobSiteFromJP() Adds a INNER JOIN clause and with to the query using the JobSiteFromJP relation
  *
- * @method     ChildJobPostingQuery leftJoinGeoLocation($relationAlias = null) Adds a LEFT JOIN clause to the query using the GeoLocation relation
- * @method     ChildJobPostingQuery rightJoinGeoLocation($relationAlias = null) Adds a RIGHT JOIN clause to the query using the GeoLocation relation
- * @method     ChildJobPostingQuery innerJoinGeoLocation($relationAlias = null) Adds a INNER JOIN clause to the query using the GeoLocation relation
+ * @method     ChildJobPostingQuery leftJoinGeoLocationFromJP($relationAlias = null) Adds a LEFT JOIN clause to the query using the GeoLocationFromJP relation
+ * @method     ChildJobPostingQuery rightJoinGeoLocationFromJP($relationAlias = null) Adds a RIGHT JOIN clause to the query using the GeoLocationFromJP relation
+ * @method     ChildJobPostingQuery innerJoinGeoLocationFromJP($relationAlias = null) Adds a INNER JOIN clause to the query using the GeoLocationFromJP relation
  *
- * @method     ChildJobPostingQuery joinWithGeoLocation($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the GeoLocation relation
+ * @method     ChildJobPostingQuery joinWithGeoLocationFromJP($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the GeoLocationFromJP relation
  *
- * @method     ChildJobPostingQuery leftJoinWithGeoLocation() Adds a LEFT JOIN clause and with to the query using the GeoLocation relation
- * @method     ChildJobPostingQuery rightJoinWithGeoLocation() Adds a RIGHT JOIN clause and with to the query using the GeoLocation relation
- * @method     ChildJobPostingQuery innerJoinWithGeoLocation() Adds a INNER JOIN clause and with to the query using the GeoLocation relation
+ * @method     ChildJobPostingQuery leftJoinWithGeoLocationFromJP() Adds a LEFT JOIN clause and with to the query using the GeoLocationFromJP relation
+ * @method     ChildJobPostingQuery rightJoinWithGeoLocationFromJP() Adds a RIGHT JOIN clause and with to the query using the GeoLocationFromJP relation
+ * @method     ChildJobPostingQuery innerJoinWithGeoLocationFromJP() Adds a INNER JOIN clause and with to the query using the GeoLocationFromJP relation
  *
- * @method     ChildJobPostingQuery leftJoinJobPostingRelatedByDuplicatesJobPostingId($relationAlias = null) Adds a LEFT JOIN clause to the query using the JobPostingRelatedByDuplicatesJobPostingId relation
- * @method     ChildJobPostingQuery rightJoinJobPostingRelatedByDuplicatesJobPostingId($relationAlias = null) Adds a RIGHT JOIN clause to the query using the JobPostingRelatedByDuplicatesJobPostingId relation
- * @method     ChildJobPostingQuery innerJoinJobPostingRelatedByDuplicatesJobPostingId($relationAlias = null) Adds a INNER JOIN clause to the query using the JobPostingRelatedByDuplicatesJobPostingId relation
+ * @method     ChildJobPostingQuery leftJoinDuplicateJobPosting($relationAlias = null) Adds a LEFT JOIN clause to the query using the DuplicateJobPosting relation
+ * @method     ChildJobPostingQuery rightJoinDuplicateJobPosting($relationAlias = null) Adds a RIGHT JOIN clause to the query using the DuplicateJobPosting relation
+ * @method     ChildJobPostingQuery innerJoinDuplicateJobPosting($relationAlias = null) Adds a INNER JOIN clause to the query using the DuplicateJobPosting relation
  *
- * @method     ChildJobPostingQuery joinWithJobPostingRelatedByDuplicatesJobPostingId($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the JobPostingRelatedByDuplicatesJobPostingId relation
+ * @method     ChildJobPostingQuery joinWithDuplicateJobPosting($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the DuplicateJobPosting relation
  *
- * @method     ChildJobPostingQuery leftJoinWithJobPostingRelatedByDuplicatesJobPostingId() Adds a LEFT JOIN clause and with to the query using the JobPostingRelatedByDuplicatesJobPostingId relation
- * @method     ChildJobPostingQuery rightJoinWithJobPostingRelatedByDuplicatesJobPostingId() Adds a RIGHT JOIN clause and with to the query using the JobPostingRelatedByDuplicatesJobPostingId relation
- * @method     ChildJobPostingQuery innerJoinWithJobPostingRelatedByDuplicatesJobPostingId() Adds a INNER JOIN clause and with to the query using the JobPostingRelatedByDuplicatesJobPostingId relation
+ * @method     ChildJobPostingQuery leftJoinWithDuplicateJobPosting() Adds a LEFT JOIN clause and with to the query using the DuplicateJobPosting relation
+ * @method     ChildJobPostingQuery rightJoinWithDuplicateJobPosting() Adds a RIGHT JOIN clause and with to the query using the DuplicateJobPosting relation
+ * @method     ChildJobPostingQuery innerJoinWithDuplicateJobPosting() Adds a INNER JOIN clause and with to the query using the DuplicateJobPosting relation
  *
  * @method     ChildJobPostingQuery leftJoinJobPostingRelatedByJobPostingId($relationAlias = null) Adds a LEFT JOIN clause to the query using the JobPostingRelatedByJobPostingId relation
  * @method     ChildJobPostingQuery rightJoinJobPostingRelatedByJobPostingId($relationAlias = null) Adds a RIGHT JOIN clause to the query using the JobPostingRelatedByJobPostingId relation
@@ -145,7 +145,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting findOneByPostedAt(string $job_posted_date) Return the first ChildJobPosting filtered by the job_posted_date column
  * @method     ChildJobPosting findOneByFirstSeenAt(string $first_seen_at) Return the first ChildJobPosting filtered by the first_seen_at column
  * @method     ChildJobPosting findOneByRemovedAt(string $post_removed_at) Return the first ChildJobPosting filtered by the post_removed_at column
- * @method     ChildJobPosting findOneByKeySiteAndPostID(string $key_site_and_post_id) Return the first ChildJobPosting filtered by the key_site_and_post_id column
+ * @method     ChildJobPosting findOneByKeySiteAndPostId(string $key_site_and_post_id) Return the first ChildJobPosting filtered by the key_site_and_post_id column
  * @method     ChildJobPosting findOneByKeyCompanyAndTitle(string $key_company_and_title) Return the first ChildJobPosting filtered by the key_company_and_title column
  * @method     ChildJobPosting findOneByJobTitleLinked(string $title_linked) Return the first ChildJobPosting filtered by the title_linked column
  * @method     ChildJobPosting findOneByLocationDisplayValue(string $location_display_value) Return the first ChildJobPosting filtered by the location_display_value column
@@ -171,7 +171,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting requireOneByPostedAt(string $job_posted_date) Return the first ChildJobPosting filtered by the job_posted_date column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByFirstSeenAt(string $first_seen_at) Return the first ChildJobPosting filtered by the first_seen_at column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByRemovedAt(string $post_removed_at) Return the first ChildJobPosting filtered by the post_removed_at column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildJobPosting requireOneByKeySiteAndPostID(string $key_site_and_post_id) Return the first ChildJobPosting filtered by the key_site_and_post_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildJobPosting requireOneByKeySiteAndPostId(string $key_site_and_post_id) Return the first ChildJobPosting filtered by the key_site_and_post_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByKeyCompanyAndTitle(string $key_company_and_title) Return the first ChildJobPosting filtered by the key_company_and_title column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByJobTitleLinked(string $title_linked) Return the first ChildJobPosting filtered by the title_linked column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByLocationDisplayValue(string $location_display_value) Return the first ChildJobPosting filtered by the location_display_value column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -195,7 +195,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting[]|ObjectCollection findByPostedAt(string $job_posted_date) Return ChildJobPosting objects filtered by the job_posted_date column
  * @method     ChildJobPosting[]|ObjectCollection findByFirstSeenAt(string $first_seen_at) Return ChildJobPosting objects filtered by the first_seen_at column
  * @method     ChildJobPosting[]|ObjectCollection findByRemovedAt(string $post_removed_at) Return ChildJobPosting objects filtered by the post_removed_at column
- * @method     ChildJobPosting[]|ObjectCollection findByKeySiteAndPostID(string $key_site_and_post_id) Return ChildJobPosting objects filtered by the key_site_and_post_id column
+ * @method     ChildJobPosting[]|ObjectCollection findByKeySiteAndPostId(string $key_site_and_post_id) Return ChildJobPosting objects filtered by the key_site_and_post_id column
  * @method     ChildJobPosting[]|ObjectCollection findByKeyCompanyAndTitle(string $key_company_and_title) Return ChildJobPosting objects filtered by the key_company_and_title column
  * @method     ChildJobPosting[]|ObjectCollection findByJobTitleLinked(string $title_linked) Return ChildJobPosting objects filtered by the title_linked column
  * @method     ChildJobPosting[]|ObjectCollection findByLocationDisplayValue(string $location_display_value) Return ChildJobPosting objects filtered by the location_display_value column
@@ -882,24 +882,24 @@ abstract class JobPostingQuery extends ModelCriteria
      *
      * Example usage:
      * <code>
-     * $query->filterByKeySiteAndPostID('fooValue');   // WHERE key_site_and_post_id = 'fooValue'
-     * $query->filterByKeySiteAndPostID('%fooValue%', Criteria::LIKE); // WHERE key_site_and_post_id LIKE '%fooValue%'
+     * $query->filterByKeySiteAndPostId('fooValue');   // WHERE key_site_and_post_id = 'fooValue'
+     * $query->filterByKeySiteAndPostId('%fooValue%', Criteria::LIKE); // WHERE key_site_and_post_id LIKE '%fooValue%'
      * </code>
      *
-     * @param     string $keySiteAndPostID The value to use as filter.
+     * @param     string $keySiteAndPostId The value to use as filter.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildJobPostingQuery The current query, for fluid interface
      */
-    public function filterByKeySiteAndPostID($keySiteAndPostID = null, $comparison = null)
+    public function filterByKeySiteAndPostId($keySiteAndPostId = null, $comparison = null)
     {
         if (null === $comparison) {
-            if (is_array($keySiteAndPostID)) {
+            if (is_array($keySiteAndPostId)) {
                 $comparison = Criteria::IN;
             }
         }
 
-        return $this->addUsingAlias(JobPostingTableMap::COL_KEY_SITE_AND_POST_ID, $keySiteAndPostID, $comparison);
+        return $this->addUsingAlias(JobPostingTableMap::COL_KEY_SITE_AND_POST_ID, $keySiteAndPostId, $comparison);
     }
 
     /**
@@ -987,7 +987,7 @@ abstract class JobPostingQuery extends ModelCriteria
      * $query->filterByGeoLocationId(array('min' => 12)); // WHERE geolocation_id > 12
      * </code>
      *
-     * @see       filterByGeoLocation()
+     * @see       filterByGeoLocationFromJP()
      *
      * @param     mixed $geoLocationId The value to use as filter.
      *              Use scalar values for equality.
@@ -1030,7 +1030,7 @@ abstract class JobPostingQuery extends ModelCriteria
      * $query->filterByDuplicatesJobPostingId(array('min' => 12)); // WHERE duplicates_posting_id > 12
      * </code>
      *
-     * @see       filterByJobPostingRelatedByDuplicatesJobPostingId()
+     * @see       filterByDuplicateJobPosting()
      *
      * @param     mixed $duplicatesJobPostingId The value to use as filter.
      *              Use scalar values for equality.
@@ -1073,7 +1073,7 @@ abstract class JobPostingQuery extends ModelCriteria
      *
      * @return ChildJobPostingQuery The current query, for fluid interface
      */
-    public function filterByJobSiteRecord($jobSiteRecord, $comparison = null)
+    public function filterByJobSiteFromJP($jobSiteRecord, $comparison = null)
     {
         if ($jobSiteRecord instanceof \JobScooper\DataAccess\JobSiteRecord) {
             return $this
@@ -1086,22 +1086,22 @@ abstract class JobPostingQuery extends ModelCriteria
             return $this
                 ->addUsingAlias(JobPostingTableMap::COL_JOBSITE_KEY, $jobSiteRecord->toKeyValue('PrimaryKey', 'JobSiteKey'), $comparison);
         } else {
-            throw new PropelException('filterByJobSiteRecord() only accepts arguments of type \JobScooper\DataAccess\JobSiteRecord or Collection');
+            throw new PropelException('filterByJobSiteFromJP() only accepts arguments of type \JobScooper\DataAccess\JobSiteRecord or Collection');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the JobSiteRecord relation
+     * Adds a JOIN clause to the query using the JobSiteFromJP relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return $this|ChildJobPostingQuery The current query, for fluid interface
      */
-    public function joinJobSiteRecord($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function joinJobSiteFromJP($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('JobSiteRecord');
+        $relationMap = $tableMap->getRelation('JobSiteFromJP');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -1116,14 +1116,14 @@ abstract class JobPostingQuery extends ModelCriteria
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'JobSiteRecord');
+            $this->addJoinObject($join, 'JobSiteFromJP');
         }
 
         return $this;
     }
 
     /**
-     * Use the JobSiteRecord relation JobSiteRecord object
+     * Use the JobSiteFromJP relation JobSiteRecord object
      *
      * @see useQuery()
      *
@@ -1133,11 +1133,11 @@ abstract class JobPostingQuery extends ModelCriteria
      *
      * @return \JobScooper\DataAccess\JobSiteRecordQuery A secondary query class using the current class as primary query
      */
-    public function useJobSiteRecordQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function useJobSiteFromJPQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
-            ->joinJobSiteRecord($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'JobSiteRecord', '\JobScooper\DataAccess\JobSiteRecordQuery');
+            ->joinJobSiteFromJP($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'JobSiteFromJP', '\JobScooper\DataAccess\JobSiteRecordQuery');
     }
 
     /**
@@ -1150,7 +1150,7 @@ abstract class JobPostingQuery extends ModelCriteria
      *
      * @return ChildJobPostingQuery The current query, for fluid interface
      */
-    public function filterByGeoLocation($geoLocation, $comparison = null)
+    public function filterByGeoLocationFromJP($geoLocation, $comparison = null)
     {
         if ($geoLocation instanceof \JobScooper\DataAccess\GeoLocation) {
             return $this
@@ -1163,22 +1163,22 @@ abstract class JobPostingQuery extends ModelCriteria
             return $this
                 ->addUsingAlias(JobPostingTableMap::COL_GEOLOCATION_ID, $geoLocation->toKeyValue('PrimaryKey', 'GeoLocationId'), $comparison);
         } else {
-            throw new PropelException('filterByGeoLocation() only accepts arguments of type \JobScooper\DataAccess\GeoLocation or Collection');
+            throw new PropelException('filterByGeoLocationFromJP() only accepts arguments of type \JobScooper\DataAccess\GeoLocation or Collection');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the GeoLocation relation
+     * Adds a JOIN clause to the query using the GeoLocationFromJP relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return $this|ChildJobPostingQuery The current query, for fluid interface
      */
-    public function joinGeoLocation($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function joinGeoLocationFromJP($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('GeoLocation');
+        $relationMap = $tableMap->getRelation('GeoLocationFromJP');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -1193,14 +1193,14 @@ abstract class JobPostingQuery extends ModelCriteria
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'GeoLocation');
+            $this->addJoinObject($join, 'GeoLocationFromJP');
         }
 
         return $this;
     }
 
     /**
-     * Use the GeoLocation relation GeoLocation object
+     * Use the GeoLocationFromJP relation GeoLocation object
      *
      * @see useQuery()
      *
@@ -1210,11 +1210,11 @@ abstract class JobPostingQuery extends ModelCriteria
      *
      * @return \JobScooper\DataAccess\GeoLocationQuery A secondary query class using the current class as primary query
      */
-    public function useGeoLocationQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function useGeoLocationFromJPQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
     {
         return $this
-            ->joinGeoLocation($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'GeoLocation', '\JobScooper\DataAccess\GeoLocationQuery');
+            ->joinGeoLocationFromJP($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'GeoLocationFromJP', '\JobScooper\DataAccess\GeoLocationQuery');
     }
 
     /**
@@ -1227,7 +1227,7 @@ abstract class JobPostingQuery extends ModelCriteria
      *
      * @return ChildJobPostingQuery The current query, for fluid interface
      */
-    public function filterByJobPostingRelatedByDuplicatesJobPostingId($jobPosting, $comparison = null)
+    public function filterByDuplicateJobPosting($jobPosting, $comparison = null)
     {
         if ($jobPosting instanceof \JobScooper\DataAccess\JobPosting) {
             return $this
@@ -1240,22 +1240,22 @@ abstract class JobPostingQuery extends ModelCriteria
             return $this
                 ->addUsingAlias(JobPostingTableMap::COL_DUPLICATES_POSTING_ID, $jobPosting->toKeyValue('PrimaryKey', 'JobPostingId'), $comparison);
         } else {
-            throw new PropelException('filterByJobPostingRelatedByDuplicatesJobPostingId() only accepts arguments of type \JobScooper\DataAccess\JobPosting or Collection');
+            throw new PropelException('filterByDuplicateJobPosting() only accepts arguments of type \JobScooper\DataAccess\JobPosting or Collection');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the JobPostingRelatedByDuplicatesJobPostingId relation
+     * Adds a JOIN clause to the query using the DuplicateJobPosting relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return $this|ChildJobPostingQuery The current query, for fluid interface
      */
-    public function joinJobPostingRelatedByDuplicatesJobPostingId($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function joinDuplicateJobPosting($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('JobPostingRelatedByDuplicatesJobPostingId');
+        $relationMap = $tableMap->getRelation('DuplicateJobPosting');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -1270,14 +1270,14 @@ abstract class JobPostingQuery extends ModelCriteria
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'JobPostingRelatedByDuplicatesJobPostingId');
+            $this->addJoinObject($join, 'DuplicateJobPosting');
         }
 
         return $this;
     }
 
     /**
-     * Use the JobPostingRelatedByDuplicatesJobPostingId relation JobPosting object
+     * Use the DuplicateJobPosting relation JobPosting object
      *
      * @see useQuery()
      *
@@ -1287,11 +1287,11 @@ abstract class JobPostingQuery extends ModelCriteria
      *
      * @return \JobScooper\DataAccess\JobPostingQuery A secondary query class using the current class as primary query
      */
-    public function useJobPostingRelatedByDuplicatesJobPostingIdQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function useDuplicateJobPostingQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
     {
         return $this
-            ->joinJobPostingRelatedByDuplicatesJobPostingId($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'JobPostingRelatedByDuplicatesJobPostingId', '\JobScooper\DataAccess\JobPostingQuery');
+            ->joinDuplicateJobPosting($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'DuplicateJobPosting', '\JobScooper\DataAccess\JobPostingQuery');
     }
 
     /**
@@ -1438,6 +1438,23 @@ abstract class JobPostingQuery extends ModelCriteria
         return $this
             ->joinUserJobMatch($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'UserJobMatch', '\JobScooper\DataAccess\UserJobMatchQuery');
+    }
+
+    /**
+     * Filter the query by a related User object
+     * using the user_job_match table as cross reference
+     *
+     * @param User $user the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildJobPostingQuery The current query, for fluid interface
+     */
+    public function filterByUserFromUJM($user, $comparison = Criteria::EQUAL)
+    {
+        return $this
+            ->useUserJobMatchQuery()
+            ->filterByUserFromUJM($user, $comparison)
+            ->endUse();
     }
 
     /**

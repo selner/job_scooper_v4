@@ -69,8 +69,8 @@ function getDebugContext($context=array())
                         }
                     try{
                         if(array_key_exists('args', $dbg[$i]) & is_array($dbg[$i]['args']))
-                            if(is_object($dbg[$i]['args'][0]) && method_exists(get_class($dbg[$i]['args'][0]), "getUserSearchRunKey"))
-                                $usersearch = $dbg[$i]['args'][0]->getUserSearchRunKey();
+                            if(is_object($dbg[$i]['args'][0]) && method_exists(get_class($dbg[$i]['args'][0]), "getUserSearchSiteRunKey"))
+                                $usersearch = $dbg[$i]['args'][0]->getUserSearchSiteRunKey();
                             else
                                 $usersearch = "";
                     } catch (Exception $ex) { $usersearch = ""; }
@@ -191,17 +191,32 @@ function parseFilePath($strFilePath, $fFileMustExist = false)
     return getFilePathDetailsFromString($strFilePath, ($fFileMustExist ? C__FILEPATH_FILE_MUST_EXIST : C__FILEPATH_NO_FLAGS));
 }
 
+/**
+ * @param     $strFilePath
+ * @param int $flags
+ *
+ * @return array
+ * @throws \ErrorException
+ */
 function getFilePathDetailsFromString($strFilePath, $flags = C__FILEPATH_NO_FLAGS)
 {
-    $fileDetailsReturn = array ('directory' => '', 'has_directory' => false, 'file_name' => '', 'has_file' => false, 'file_name_base' => '', 'file_extension' => '', 'full_file_path' => '' );
+
+	$fileDetailsReturn = array (
+		'directory' => null,
+		'has_directory' => false,
+		'file_name' =>  null,
+		'has_file' => false,
+		'file_name_base' =>  null,
+		'file_extension' =>  null,
+		'full_file_path' =>  null);
+
+	if(empty($strFilePath))
+	{
+		return $fileDetailsReturn;
+	}
 
 
-    if($strFilePath == null || strlen($strFilePath) <= 0)
-    {
-        return $fileDetailsReturn;
-    }
-
-    // if the path doesn't start with a '/', it's a relative path
+	// if the path doesn't start with a '/', it's a relative path
     //
     $fPathIsRelative = !(substr($strFilePath, 0, 1) == '/');
 
@@ -529,3 +544,4 @@ function glue_url($parsed) {
 
     return $uri;
 }
+

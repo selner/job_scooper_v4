@@ -409,3 +409,173 @@ function my_merge_add_new_keys( $arr1, $arr2 )
     return $arrMerged;
 }
 
+
+/**
+ * Returns an array of all the keys of all values at every level
+ * of a multi-dimensional array
+ *
+ * @param array $array
+ *
+ * @return array the set of all keys used for values at all levels in the array
+ */
+function array_keys_multi(array $array)
+{
+    $keys = array();
+
+    foreach ($array as $key => $value) {
+        $keys[] = $key;
+
+        if (is_array($value)) {
+            $keys = array_merge($keys, array_keys_multi($value));
+        }
+    }
+
+    return $keys;
+}
+
+/**
+ * If you need, for some reason, to create variable Multi-Dimensional Arrays, here's a quick
+ * function that will allow you to have any number of sub elements without knowing how many
+ * elements there will be ahead of time. Note that this will overwrite an existing array
+ * value of the same path.
+ *
+ * @author brian at blueeye dot us
+ * @Link http://php.net/manual/en/function.array.php#52138
+ *
+ * @param $path
+ * @param $data
+ *
+ * @return mixed
+ */
+function array_set_element(&$path, $data) {
+	if(is_string($path))
+		$path = preg_split("/\s*[\.:]\s*/", $path);
+	return ($key = array_pop($path)) ? array_set_element($path, array($key=>$data)) : $data;
+}
+
+function array_add_element(&$arr, $path, $value)
+{
+	$newArrVal = array_set_element($path, $value);
+	$arr = array_merge_recursive_distinct($arr, $newArrVal);
+}
+
+function array_get_element(&$path, $arr) {
+	if(is_string($path))
+		$path = array_reverse(preg_split("/\s*[\.:]\s*/", $path));
+	$key = array_pop($path);
+	return (!empty($path)) ? array_get_element($path, $arr[$key]) : $arr[$key];
+}
+
+/**
+ *
+ * Some INI files use dot or colon notation to define section and subkeys.  Convert
+ * any keys with dot notion to be subarray elements of the overall config array.
+ *
+ * Example:
+ *      database.connector.mysql.host = dbserver01.myserver.net
+ *  becomes
+ *      config['database']['connector']['mysql']['myhost']
+ *
+ * @param $config array storing the loaded configuration data
+ *
+ */
+function convertDotNotation(&$config)
+{
+	$allKeys = array_keys_multi($config);
+	$sectionedKeys = array_filter($allKeys, function ($v) {
+		$keyLevels = preg_split("/\s*[\.:]\s*/", $v);
+		if (count($keyLevels) > 1)
+			return true;
+
+		return false;
+	});
+
+	foreach ($sectionedKeys as $treeKey) {
+		$keyPath = preg_split("/\s*[\.:]\s*/", $treeKey);
+		$newValues = array_set_element($keyPath, $config[$treeKey]);
+		$config = array_merge_recursive_distinct($config, $newValues);
+		unset($config[$treeKey]);
+	}
+}
+
+
+function setGlobalSetting($root, $keyPath, $value)
+{
+	doGlobalSettingExists($root);
+
+	array_add_element($GLOBALS[$root], $keyPath, $value);
+	ksort($GLOBALS[$root]);
+}
+
+function getGlobalSetting($root, $keyPath)
+{
+	doGlobalSettingExists($root);
+	return array_get_element($keyPath, $GLOBALS[$root]);
+}
+
+function doGlobalSettingExists($root)
+{
+	if(!array_key_exists($root, $GLOBALS))
+		$GLOBALS[$root] = array();
+}
+
+// TODO:  convert any uses of this to the new function
+// and remove it
+
+/**
+ * @deprecated
+ *
+ * @param string $strSubkey
+ *
+ * @return mixed|null
+ */
+function getConfigurationSettings($strSubkey = null)
+{
+	$ret = null;
+	if(empty($strSubkey))
+		return $GLOBALS['JOBSCOOPER'];
+
+	if(array_key_exists($strSubkey, $GLOBALS['JOBSCOOPER']) && !empty($GLOBALS['JOBSCOOPER'][$strSubkey]))
+		return $GLOBALS['JOBSCOOPER'][$strSubkey];
+
+
+	return null;
+}
+
+
+function setConfigurationSetting($keyPath, $value)
+{
+	setGlobalSetting($root="JOBSCOOPER", $keyPath, $value);
+}
+function getConfigurationSetting($keyPath)
+{
+	return getGlobalSetting('JOBSCOOPER', $keyPath);
+}
+
+
+
+function setCacheItem($cacheName, $keyPath, $value)
+{
+	setGlobalSetting($root='JSCOOP_CACHES', $cacheName.".".$keyPath, $value);
+}
+
+function getCacheItem($cacheName, $keyPath)
+{
+	return getGlobalSetting('JSCOOP_CACHES', $cacheName.".".$keyPath);
+}
+
+
+
+function getCacheAsArray($cacheName)
+{
+	doGlobalSettingExists('JSCOOP_CACHES');
+
+	return getGlobalSetting('JSCOOP_CACHES', $cacheName);
+}
+
+function setAsCacheData($cacheName, $value)
+{
+	setGlobalSetting($root="JSCOOP_CACHES", $cacheName, $value);
+}
+
+

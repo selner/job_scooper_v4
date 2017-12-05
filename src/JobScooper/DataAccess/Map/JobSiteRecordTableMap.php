@@ -59,17 +59,17 @@ class JobSiteRecordTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 12;
+    const NUM_COLUMNS = 5;
 
     /**
      * The number of lazy-loaded columns
      */
-    const NUM_LAZY_LOAD_COLUMNS = 1;
+    const NUM_LAZY_LOAD_COLUMNS = 0;
 
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 11;
+    const NUM_HYDRATE_COLUMNS = 5;
 
     /**
      * the column name for the jobsite_key field
@@ -92,44 +92,9 @@ class JobSiteRecordTableMap extends TableMap
     const COL_IS_DISABLED = 'job_site.is_disabled';
 
     /**
-     * the column name for the date_last_pulled field
-     */
-    const COL_DATE_LAST_PULLED = 'job_site.date_last_pulled';
-
-    /**
-     * the column name for the date_last_run field
-     */
-    const COL_DATE_LAST_RUN = 'job_site.date_last_run';
-
-    /**
-     * the column name for the date_last_completed field
-     */
-    const COL_DATE_LAST_COMPLETED = 'job_site.date_last_completed';
-
-    /**
-     * the column name for the date_last_failed field
-     */
-    const COL_DATE_LAST_FAILED = 'job_site.date_last_failed';
-
-    /**
-     * the column name for the last_user_search_run_id field
-     */
-    const COL_LAST_USER_SEARCH_RUN_ID = 'job_site.last_user_search_run_id';
-
-    /**
-     * the column name for the supported_country_codes field
-     */
-    const COL_SUPPORTED_COUNTRY_CODES = 'job_site.supported_country_codes';
-
-    /**
      * the column name for the results_filter_type field
      */
     const COL_RESULTS_FILTER_TYPE = 'job_site.results_filter_type';
-
-    /**
-     * the column name for the version field
-     */
-    const COL_VERSION = 'job_site.version';
 
     /**
      * The default string format for model objects of the related table
@@ -137,6 +102,7 @@ class JobSiteRecordTableMap extends TableMap
     const DEFAULT_STRING_FORMAT = 'YAML';
 
     /** The enumerated values for the results_filter_type field */
+    const COL_RESULTS_FILTER_TYPE_UNKNOWN = 'unknown';
     const COL_RESULTS_FILTER_TYPE_ALL_ONLY = 'all-only';
     const COL_RESULTS_FILTER_TYPE_ALL_BY_LOCATION = 'all-by-location';
     const COL_RESULTS_FILTER_TYPE_USER_FILTERED = 'user-filtered';
@@ -148,11 +114,11 @@ class JobSiteRecordTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('JobSiteKey', 'PluginClassName', 'DisplayName', 'isDisabled', 'LastPulledAt', 'LastRunAt', 'LastCompletedAt', 'LastFailedAt', 'LastUserSearchRunId', 'SupportedCountryCodes', 'ResultsFilterType', 'Version', ),
-        self::TYPE_CAMELNAME     => array('jobSiteKey', 'pluginClassName', 'displayName', 'isDisabled', 'lastPulledAt', 'lastRunAt', 'lastCompletedAt', 'lastFailedAt', 'lastUserSearchRunId', 'supportedCountryCodes', 'resultsFilterType', 'version', ),
-        self::TYPE_COLNAME       => array(JobSiteRecordTableMap::COL_JOBSITE_KEY, JobSiteRecordTableMap::COL_PLUGIN_CLASS_NAME, JobSiteRecordTableMap::COL_DISPLAY_NAME, JobSiteRecordTableMap::COL_IS_DISABLED, JobSiteRecordTableMap::COL_DATE_LAST_PULLED, JobSiteRecordTableMap::COL_DATE_LAST_RUN, JobSiteRecordTableMap::COL_DATE_LAST_COMPLETED, JobSiteRecordTableMap::COL_DATE_LAST_FAILED, JobSiteRecordTableMap::COL_LAST_USER_SEARCH_RUN_ID, JobSiteRecordTableMap::COL_SUPPORTED_COUNTRY_CODES, JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE, JobSiteRecordTableMap::COL_VERSION, ),
-        self::TYPE_FIELDNAME     => array('jobsite_key', 'plugin_class_name', 'display_name', 'is_disabled', 'date_last_pulled', 'date_last_run', 'date_last_completed', 'date_last_failed', 'last_user_search_run_id', 'supported_country_codes', 'results_filter_type', 'version', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, )
+        self::TYPE_PHPNAME       => array('JobSiteKey', 'PluginClassName', 'DisplayName', 'isDisabled', 'ResultsFilterType', ),
+        self::TYPE_CAMELNAME     => array('jobSiteKey', 'pluginClassName', 'displayName', 'isDisabled', 'resultsFilterType', ),
+        self::TYPE_COLNAME       => array(JobSiteRecordTableMap::COL_JOBSITE_KEY, JobSiteRecordTableMap::COL_PLUGIN_CLASS_NAME, JobSiteRecordTableMap::COL_DISPLAY_NAME, JobSiteRecordTableMap::COL_IS_DISABLED, JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE, ),
+        self::TYPE_FIELDNAME     => array('jobsite_key', 'plugin_class_name', 'display_name', 'is_disabled', 'results_filter_type', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
 
     /**
@@ -162,17 +128,18 @@ class JobSiteRecordTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('JobSiteKey' => 0, 'PluginClassName' => 1, 'DisplayName' => 2, 'isDisabled' => 3, 'LastPulledAt' => 4, 'LastRunAt' => 5, 'LastCompletedAt' => 6, 'LastFailedAt' => 7, 'LastUserSearchRunId' => 8, 'SupportedCountryCodes' => 9, 'ResultsFilterType' => 10, 'Version' => 11, ),
-        self::TYPE_CAMELNAME     => array('jobSiteKey' => 0, 'pluginClassName' => 1, 'displayName' => 2, 'isDisabled' => 3, 'lastPulledAt' => 4, 'lastRunAt' => 5, 'lastCompletedAt' => 6, 'lastFailedAt' => 7, 'lastUserSearchRunId' => 8, 'supportedCountryCodes' => 9, 'resultsFilterType' => 10, 'version' => 11, ),
-        self::TYPE_COLNAME       => array(JobSiteRecordTableMap::COL_JOBSITE_KEY => 0, JobSiteRecordTableMap::COL_PLUGIN_CLASS_NAME => 1, JobSiteRecordTableMap::COL_DISPLAY_NAME => 2, JobSiteRecordTableMap::COL_IS_DISABLED => 3, JobSiteRecordTableMap::COL_DATE_LAST_PULLED => 4, JobSiteRecordTableMap::COL_DATE_LAST_RUN => 5, JobSiteRecordTableMap::COL_DATE_LAST_COMPLETED => 6, JobSiteRecordTableMap::COL_DATE_LAST_FAILED => 7, JobSiteRecordTableMap::COL_LAST_USER_SEARCH_RUN_ID => 8, JobSiteRecordTableMap::COL_SUPPORTED_COUNTRY_CODES => 9, JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE => 10, JobSiteRecordTableMap::COL_VERSION => 11, ),
-        self::TYPE_FIELDNAME     => array('jobsite_key' => 0, 'plugin_class_name' => 1, 'display_name' => 2, 'is_disabled' => 3, 'date_last_pulled' => 4, 'date_last_run' => 5, 'date_last_completed' => 6, 'date_last_failed' => 7, 'last_user_search_run_id' => 8, 'supported_country_codes' => 9, 'results_filter_type' => 10, 'version' => 11, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, )
+        self::TYPE_PHPNAME       => array('JobSiteKey' => 0, 'PluginClassName' => 1, 'DisplayName' => 2, 'isDisabled' => 3, 'ResultsFilterType' => 4, ),
+        self::TYPE_CAMELNAME     => array('jobSiteKey' => 0, 'pluginClassName' => 1, 'displayName' => 2, 'isDisabled' => 3, 'resultsFilterType' => 4, ),
+        self::TYPE_COLNAME       => array(JobSiteRecordTableMap::COL_JOBSITE_KEY => 0, JobSiteRecordTableMap::COL_PLUGIN_CLASS_NAME => 1, JobSiteRecordTableMap::COL_DISPLAY_NAME => 2, JobSiteRecordTableMap::COL_IS_DISABLED => 3, JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE => 4, ),
+        self::TYPE_FIELDNAME     => array('jobsite_key' => 0, 'plugin_class_name' => 1, 'display_name' => 2, 'is_disabled' => 3, 'results_filter_type' => 4, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
 
     /** The enumerated values for this table */
     protected static $enumValueSets = array(
                 JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE => array(
-                            self::COL_RESULTS_FILTER_TYPE_ALL_ONLY,
+                            self::COL_RESULTS_FILTER_TYPE_UNKNOWN,
+            self::COL_RESULTS_FILTER_TYPE_ALL_ONLY,
             self::COL_RESULTS_FILTER_TYPE_ALL_BY_LOCATION,
             self::COL_RESULTS_FILTER_TYPE_USER_FILTERED,
         ),
@@ -220,20 +187,14 @@ class JobSiteRecordTableMap extends TableMap
         $this->getColumn('jobsite_key')->setPrimaryString(true);
         $this->addColumn('plugin_class_name', 'PluginClassName', 'VARCHAR', false, 100, null);
         $this->addColumn('display_name', 'DisplayName', 'VARCHAR', false, 255, null);
-        $this->addColumn('is_disabled', 'isDisabled', 'BOOLEAN', false, null, false);
-        $this->addColumn('date_last_pulled', 'LastPulledAt', 'TIMESTAMP', false, null, null);
-        $this->addColumn('date_last_run', 'LastRunAt', 'TIMESTAMP', false, null, null);
-        $this->addColumn('date_last_completed', 'LastCompletedAt', 'TIMESTAMP', false, null, null);
-        $this->addColumn('date_last_failed', 'LastFailedAt', 'TIMESTAMP', false, null, null);
-        $this->addForeignKey('last_user_search_run_id', 'LastUserSearchRunId', 'INTEGER', 'user_search_run', 'user_search_run_id', false, null, null);
-        $this->addColumn('supported_country_codes', 'SupportedCountryCodes', 'ARRAY', false, null, null);
-        $this->addColumn('results_filter_type', 'ResultsFilterType', 'ENUM', false, null, null);
+        $this->addColumn('is_disabled', 'isDisabled', 'BOOLEAN', false, 1, false);
+        $this->addColumn('results_filter_type', 'ResultsFilterType', 'ENUM', false, null, 'unknown');
         $this->getColumn('results_filter_type')->setValueSet(array (
-  0 => 'all-only',
-  1 => 'all-by-location',
-  2 => 'user-filtered',
+  0 => 'unknown',
+  1 => 'all-only',
+  2 => 'all-by-location',
+  3 => 'user-filtered',
 ));
-        $this->addColumn('version', 'Version', 'INTEGER', false, null, 0);
     } // initialize()
 
     /**
@@ -241,13 +202,6 @@ class JobSiteRecordTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('UserSearchRunRelatedByLastUserSearchRunId', '\\JobScooper\\DataAccess\\UserSearchRun', RelationMap::MANY_TO_ONE, array (
-  0 =>
-  array (
-    0 => ':last_user_search_run_id',
-    1 => ':user_search_run_id',
-  ),
-), null, null, null, false);
         $this->addRelation('JobPosting', '\\JobScooper\\DataAccess\\JobPosting', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
@@ -255,39 +209,15 @@ class JobSiteRecordTableMap extends TableMap
     1 => ':jobsite_key',
   ),
 ), null, null, 'JobPostings', false);
-        $this->addRelation('UserSearchRunRelatedByJobSiteKey', '\\JobScooper\\DataAccess\\UserSearchRun', RelationMap::ONE_TO_MANY, array (
+        $this->addRelation('UserSearchSiteRun', '\\JobScooper\\DataAccess\\UserSearchSiteRun', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
     0 => ':jobsite_key',
     1 => ':jobsite_key',
   ),
-), null, null, 'UserSearchRunsRelatedByJobSiteKey', false);
-        $this->addRelation('JobSiteRecordVersion', '\\JobScooper\\DataAccess\\JobSiteRecordVersion', RelationMap::ONE_TO_MANY, array (
-  0 =>
-  array (
-    0 => ':jobsite_key',
-    1 => ':jobsite_key',
-  ),
-), 'CASCADE', null, 'JobSiteRecordVersions', false);
+), 'CASCADE', null, 'UserSearchSiteRuns', false);
+        $this->addRelation('UserSearchFromUSSR', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserSearchFromUSSRs');
     } // buildRelations()
-
-    /**
-     *
-     * Gets the list of behaviors registered for this table
-     *
-     * @return array Associative array (name => parameters) of behaviors
-     */
-    public function getBehaviors()
-    {
-        return array(
-            'date_last_pulled' => array('name' => 'date_last_pulled', 'expression' => 'MAX(date_ended)', 'condition' => 'run_result_code = 4', 'foreign_table' => 'user_search_run', 'foreign_schema' => '', ),
-            'date_last_run' => array('name' => 'date_last_run', 'expression' => 'MAX(date_started)', 'condition' => '', 'foreign_table' => 'user_search_run', 'foreign_schema' => '', ),
-            'date_last_completed' => array('name' => 'date_last_completed', 'expression' => 'MAX(date_ended)', 'condition' => 'run_result_code = 4', 'foreign_table' => 'user_search_run', 'foreign_schema' => '', ),
-            'date_last_failed' => array('name' => 'date_last_failed', 'expression' => 'MAX(date_ended)', 'condition' => 'run_result_code = 1', 'foreign_table' => 'user_search_run', 'foreign_schema' => '', ),
-            'aggregate_column' => array('name' => 'last_user_search_run_id', 'expression' => 'MAX(user_search_run_id)', 'condition' => '', 'foreign_table' => 'user_search_run', 'foreign_schema' => '', ),
-            'versionable' => array('version_column' => 'version', 'version_table' => '', 'log_created_at' => 'false', 'log_created_by' => 'false', 'log_comment' => 'false', 'version_created_at_column' => 'version_created_at', 'version_created_by_column' => 'version_created_by', 'version_comment_column' => 'version_comment', 'indices' => 'false', ),
-        );
-    } // getBehaviors()
     /**
      * Method to invalidate the instance pool of all tables related to job_site     * by a foreign key with ON DELETE CASCADE
      */
@@ -295,7 +225,7 @@ class JobSiteRecordTableMap extends TableMap
     {
         // Invalidate objects in related instance pools,
         // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
-        JobSiteRecordVersionTableMap::clearInstancePool();
+        UserSearchSiteRunTableMap::clearInstancePool();
     }
 
     /**
@@ -443,25 +373,13 @@ class JobSiteRecordTableMap extends TableMap
             $criteria->addSelectColumn(JobSiteRecordTableMap::COL_PLUGIN_CLASS_NAME);
             $criteria->addSelectColumn(JobSiteRecordTableMap::COL_DISPLAY_NAME);
             $criteria->addSelectColumn(JobSiteRecordTableMap::COL_IS_DISABLED);
-            $criteria->addSelectColumn(JobSiteRecordTableMap::COL_DATE_LAST_PULLED);
-            $criteria->addSelectColumn(JobSiteRecordTableMap::COL_DATE_LAST_RUN);
-            $criteria->addSelectColumn(JobSiteRecordTableMap::COL_DATE_LAST_COMPLETED);
-            $criteria->addSelectColumn(JobSiteRecordTableMap::COL_DATE_LAST_FAILED);
-            $criteria->addSelectColumn(JobSiteRecordTableMap::COL_SUPPORTED_COUNTRY_CODES);
             $criteria->addSelectColumn(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE);
-            $criteria->addSelectColumn(JobSiteRecordTableMap::COL_VERSION);
         } else {
             $criteria->addSelectColumn($alias . '.jobsite_key');
             $criteria->addSelectColumn($alias . '.plugin_class_name');
             $criteria->addSelectColumn($alias . '.display_name');
             $criteria->addSelectColumn($alias . '.is_disabled');
-            $criteria->addSelectColumn($alias . '.date_last_pulled');
-            $criteria->addSelectColumn($alias . '.date_last_run');
-            $criteria->addSelectColumn($alias . '.date_last_completed');
-            $criteria->addSelectColumn($alias . '.date_last_failed');
-            $criteria->addSelectColumn($alias . '.supported_country_codes');
             $criteria->addSelectColumn($alias . '.results_filter_type');
-            $criteria->addSelectColumn($alias . '.version');
         }
     }
 

@@ -24,27 +24,13 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobSiteRecordQuery orderByPluginClassName($order = Criteria::ASC) Order by the plugin_class_name column
  * @method     ChildJobSiteRecordQuery orderByDisplayName($order = Criteria::ASC) Order by the display_name column
  * @method     ChildJobSiteRecordQuery orderByisDisabled($order = Criteria::ASC) Order by the is_disabled column
- * @method     ChildJobSiteRecordQuery orderByLastPulledAt($order = Criteria::ASC) Order by the date_last_pulled column
- * @method     ChildJobSiteRecordQuery orderByLastRunAt($order = Criteria::ASC) Order by the date_last_run column
- * @method     ChildJobSiteRecordQuery orderByLastCompletedAt($order = Criteria::ASC) Order by the date_last_completed column
- * @method     ChildJobSiteRecordQuery orderByLastFailedAt($order = Criteria::ASC) Order by the date_last_failed column
- * @method     ChildJobSiteRecordQuery orderByLastUserSearchRunId($order = Criteria::ASC) Order by the last_user_search_run_id column
- * @method     ChildJobSiteRecordQuery orderBySupportedCountryCodes($order = Criteria::ASC) Order by the supported_country_codes column
  * @method     ChildJobSiteRecordQuery orderByResultsFilterType($order = Criteria::ASC) Order by the results_filter_type column
- * @method     ChildJobSiteRecordQuery orderByVersion($order = Criteria::ASC) Order by the version column
  *
  * @method     ChildJobSiteRecordQuery groupByJobSiteKey() Group by the jobsite_key column
  * @method     ChildJobSiteRecordQuery groupByPluginClassName() Group by the plugin_class_name column
  * @method     ChildJobSiteRecordQuery groupByDisplayName() Group by the display_name column
  * @method     ChildJobSiteRecordQuery groupByisDisabled() Group by the is_disabled column
- * @method     ChildJobSiteRecordQuery groupByLastPulledAt() Group by the date_last_pulled column
- * @method     ChildJobSiteRecordQuery groupByLastRunAt() Group by the date_last_run column
- * @method     ChildJobSiteRecordQuery groupByLastCompletedAt() Group by the date_last_completed column
- * @method     ChildJobSiteRecordQuery groupByLastFailedAt() Group by the date_last_failed column
- * @method     ChildJobSiteRecordQuery groupByLastUserSearchRunId() Group by the last_user_search_run_id column
- * @method     ChildJobSiteRecordQuery groupBySupportedCountryCodes() Group by the supported_country_codes column
  * @method     ChildJobSiteRecordQuery groupByResultsFilterType() Group by the results_filter_type column
- * @method     ChildJobSiteRecordQuery groupByVersion() Group by the version column
  *
  * @method     ChildJobSiteRecordQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildJobSiteRecordQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -53,16 +39,6 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobSiteRecordQuery leftJoinWith($relation) Adds a LEFT JOIN clause and with to the query
  * @method     ChildJobSiteRecordQuery rightJoinWith($relation) Adds a RIGHT JOIN clause and with to the query
  * @method     ChildJobSiteRecordQuery innerJoinWith($relation) Adds a INNER JOIN clause and with to the query
- *
- * @method     ChildJobSiteRecordQuery leftJoinUserSearchRunRelatedByLastUserSearchRunId($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSearchRunRelatedByLastUserSearchRunId relation
- * @method     ChildJobSiteRecordQuery rightJoinUserSearchRunRelatedByLastUserSearchRunId($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSearchRunRelatedByLastUserSearchRunId relation
- * @method     ChildJobSiteRecordQuery innerJoinUserSearchRunRelatedByLastUserSearchRunId($relationAlias = null) Adds a INNER JOIN clause to the query using the UserSearchRunRelatedByLastUserSearchRunId relation
- *
- * @method     ChildJobSiteRecordQuery joinWithUserSearchRunRelatedByLastUserSearchRunId($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserSearchRunRelatedByLastUserSearchRunId relation
- *
- * @method     ChildJobSiteRecordQuery leftJoinWithUserSearchRunRelatedByLastUserSearchRunId() Adds a LEFT JOIN clause and with to the query using the UserSearchRunRelatedByLastUserSearchRunId relation
- * @method     ChildJobSiteRecordQuery rightJoinWithUserSearchRunRelatedByLastUserSearchRunId() Adds a RIGHT JOIN clause and with to the query using the UserSearchRunRelatedByLastUserSearchRunId relation
- * @method     ChildJobSiteRecordQuery innerJoinWithUserSearchRunRelatedByLastUserSearchRunId() Adds a INNER JOIN clause and with to the query using the UserSearchRunRelatedByLastUserSearchRunId relation
  *
  * @method     ChildJobSiteRecordQuery leftJoinJobPosting($relationAlias = null) Adds a LEFT JOIN clause to the query using the JobPosting relation
  * @method     ChildJobSiteRecordQuery rightJoinJobPosting($relationAlias = null) Adds a RIGHT JOIN clause to the query using the JobPosting relation
@@ -74,27 +50,17 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobSiteRecordQuery rightJoinWithJobPosting() Adds a RIGHT JOIN clause and with to the query using the JobPosting relation
  * @method     ChildJobSiteRecordQuery innerJoinWithJobPosting() Adds a INNER JOIN clause and with to the query using the JobPosting relation
  *
- * @method     ChildJobSiteRecordQuery leftJoinUserSearchRunRelatedByJobSiteKey($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSearchRunRelatedByJobSiteKey relation
- * @method     ChildJobSiteRecordQuery rightJoinUserSearchRunRelatedByJobSiteKey($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSearchRunRelatedByJobSiteKey relation
- * @method     ChildJobSiteRecordQuery innerJoinUserSearchRunRelatedByJobSiteKey($relationAlias = null) Adds a INNER JOIN clause to the query using the UserSearchRunRelatedByJobSiteKey relation
+ * @method     ChildJobSiteRecordQuery leftJoinUserSearchSiteRun($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSearchSiteRun relation
+ * @method     ChildJobSiteRecordQuery rightJoinUserSearchSiteRun($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSearchSiteRun relation
+ * @method     ChildJobSiteRecordQuery innerJoinUserSearchSiteRun($relationAlias = null) Adds a INNER JOIN clause to the query using the UserSearchSiteRun relation
  *
- * @method     ChildJobSiteRecordQuery joinWithUserSearchRunRelatedByJobSiteKey($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserSearchRunRelatedByJobSiteKey relation
+ * @method     ChildJobSiteRecordQuery joinWithUserSearchSiteRun($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserSearchSiteRun relation
  *
- * @method     ChildJobSiteRecordQuery leftJoinWithUserSearchRunRelatedByJobSiteKey() Adds a LEFT JOIN clause and with to the query using the UserSearchRunRelatedByJobSiteKey relation
- * @method     ChildJobSiteRecordQuery rightJoinWithUserSearchRunRelatedByJobSiteKey() Adds a RIGHT JOIN clause and with to the query using the UserSearchRunRelatedByJobSiteKey relation
- * @method     ChildJobSiteRecordQuery innerJoinWithUserSearchRunRelatedByJobSiteKey() Adds a INNER JOIN clause and with to the query using the UserSearchRunRelatedByJobSiteKey relation
+ * @method     ChildJobSiteRecordQuery leftJoinWithUserSearchSiteRun() Adds a LEFT JOIN clause and with to the query using the UserSearchSiteRun relation
+ * @method     ChildJobSiteRecordQuery rightJoinWithUserSearchSiteRun() Adds a RIGHT JOIN clause and with to the query using the UserSearchSiteRun relation
+ * @method     ChildJobSiteRecordQuery innerJoinWithUserSearchSiteRun() Adds a INNER JOIN clause and with to the query using the UserSearchSiteRun relation
  *
- * @method     ChildJobSiteRecordQuery leftJoinJobSiteRecordVersion($relationAlias = null) Adds a LEFT JOIN clause to the query using the JobSiteRecordVersion relation
- * @method     ChildJobSiteRecordQuery rightJoinJobSiteRecordVersion($relationAlias = null) Adds a RIGHT JOIN clause to the query using the JobSiteRecordVersion relation
- * @method     ChildJobSiteRecordQuery innerJoinJobSiteRecordVersion($relationAlias = null) Adds a INNER JOIN clause to the query using the JobSiteRecordVersion relation
- *
- * @method     ChildJobSiteRecordQuery joinWithJobSiteRecordVersion($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the JobSiteRecordVersion relation
- *
- * @method     ChildJobSiteRecordQuery leftJoinWithJobSiteRecordVersion() Adds a LEFT JOIN clause and with to the query using the JobSiteRecordVersion relation
- * @method     ChildJobSiteRecordQuery rightJoinWithJobSiteRecordVersion() Adds a RIGHT JOIN clause and with to the query using the JobSiteRecordVersion relation
- * @method     ChildJobSiteRecordQuery innerJoinWithJobSiteRecordVersion() Adds a INNER JOIN clause and with to the query using the JobSiteRecordVersion relation
- *
- * @method     \JobScooper\DataAccess\UserSearchRunQuery|\JobScooper\DataAccess\JobPostingQuery|\JobScooper\DataAccess\JobSiteRecordVersionQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
+ * @method     \JobScooper\DataAccess\JobPostingQuery|\JobScooper\DataAccess\UserSearchSiteRunQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildJobSiteRecord findOne(ConnectionInterface $con = null) Return the first ChildJobSiteRecord matching the query
  * @method     ChildJobSiteRecord findOneOrCreate(ConnectionInterface $con = null) Return the first ChildJobSiteRecord matching the query, or a new ChildJobSiteRecord object populated from the query conditions when no match is found
@@ -103,14 +69,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobSiteRecord findOneByPluginClassName(string $plugin_class_name) Return the first ChildJobSiteRecord filtered by the plugin_class_name column
  * @method     ChildJobSiteRecord findOneByDisplayName(string $display_name) Return the first ChildJobSiteRecord filtered by the display_name column
  * @method     ChildJobSiteRecord findOneByisDisabled(boolean $is_disabled) Return the first ChildJobSiteRecord filtered by the is_disabled column
- * @method     ChildJobSiteRecord findOneByLastPulledAt(string $date_last_pulled) Return the first ChildJobSiteRecord filtered by the date_last_pulled column
- * @method     ChildJobSiteRecord findOneByLastRunAt(string $date_last_run) Return the first ChildJobSiteRecord filtered by the date_last_run column
- * @method     ChildJobSiteRecord findOneByLastCompletedAt(string $date_last_completed) Return the first ChildJobSiteRecord filtered by the date_last_completed column
- * @method     ChildJobSiteRecord findOneByLastFailedAt(string $date_last_failed) Return the first ChildJobSiteRecord filtered by the date_last_failed column
- * @method     ChildJobSiteRecord findOneByLastUserSearchRunId(int $last_user_search_run_id) Return the first ChildJobSiteRecord filtered by the last_user_search_run_id column
- * @method     ChildJobSiteRecord findOneBySupportedCountryCodes(array $supported_country_codes) Return the first ChildJobSiteRecord filtered by the supported_country_codes column
- * @method     ChildJobSiteRecord findOneByResultsFilterType(int $results_filter_type) Return the first ChildJobSiteRecord filtered by the results_filter_type column
- * @method     ChildJobSiteRecord findOneByVersion(int $version) Return the first ChildJobSiteRecord filtered by the version column *
+ * @method     ChildJobSiteRecord findOneByResultsFilterType(int $results_filter_type) Return the first ChildJobSiteRecord filtered by the results_filter_type column *
 
  * @method     ChildJobSiteRecord requirePk($key, ConnectionInterface $con = null) Return the ChildJobSiteRecord by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobSiteRecord requireOne(ConnectionInterface $con = null) Return the first ChildJobSiteRecord matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -119,41 +78,20 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobSiteRecord requireOneByPluginClassName(string $plugin_class_name) Return the first ChildJobSiteRecord filtered by the plugin_class_name column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobSiteRecord requireOneByDisplayName(string $display_name) Return the first ChildJobSiteRecord filtered by the display_name column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobSiteRecord requireOneByisDisabled(boolean $is_disabled) Return the first ChildJobSiteRecord filtered by the is_disabled column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildJobSiteRecord requireOneByLastPulledAt(string $date_last_pulled) Return the first ChildJobSiteRecord filtered by the date_last_pulled column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildJobSiteRecord requireOneByLastRunAt(string $date_last_run) Return the first ChildJobSiteRecord filtered by the date_last_run column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildJobSiteRecord requireOneByLastCompletedAt(string $date_last_completed) Return the first ChildJobSiteRecord filtered by the date_last_completed column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildJobSiteRecord requireOneByLastFailedAt(string $date_last_failed) Return the first ChildJobSiteRecord filtered by the date_last_failed column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildJobSiteRecord requireOneByLastUserSearchRunId(int $last_user_search_run_id) Return the first ChildJobSiteRecord filtered by the last_user_search_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildJobSiteRecord requireOneBySupportedCountryCodes(array $supported_country_codes) Return the first ChildJobSiteRecord filtered by the supported_country_codes column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobSiteRecord requireOneByResultsFilterType(int $results_filter_type) Return the first ChildJobSiteRecord filtered by the results_filter_type column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildJobSiteRecord requireOneByVersion(int $version) Return the first ChildJobSiteRecord filtered by the version column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildJobSiteRecord[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildJobSiteRecord objects based on current ModelCriteria
  * @method     ChildJobSiteRecord[]|ObjectCollection findByJobSiteKey(string $jobsite_key) Return ChildJobSiteRecord objects filtered by the jobsite_key column
  * @method     ChildJobSiteRecord[]|ObjectCollection findByPluginClassName(string $plugin_class_name) Return ChildJobSiteRecord objects filtered by the plugin_class_name column
  * @method     ChildJobSiteRecord[]|ObjectCollection findByDisplayName(string $display_name) Return ChildJobSiteRecord objects filtered by the display_name column
  * @method     ChildJobSiteRecord[]|ObjectCollection findByisDisabled(boolean $is_disabled) Return ChildJobSiteRecord objects filtered by the is_disabled column
- * @method     ChildJobSiteRecord[]|ObjectCollection findByLastPulledAt(string $date_last_pulled) Return ChildJobSiteRecord objects filtered by the date_last_pulled column
- * @method     ChildJobSiteRecord[]|ObjectCollection findByLastRunAt(string $date_last_run) Return ChildJobSiteRecord objects filtered by the date_last_run column
- * @method     ChildJobSiteRecord[]|ObjectCollection findByLastCompletedAt(string $date_last_completed) Return ChildJobSiteRecord objects filtered by the date_last_completed column
- * @method     ChildJobSiteRecord[]|ObjectCollection findByLastFailedAt(string $date_last_failed) Return ChildJobSiteRecord objects filtered by the date_last_failed column
- * @method     ChildJobSiteRecord[]|ObjectCollection findByLastUserSearchRunId(int $last_user_search_run_id) Return ChildJobSiteRecord objects filtered by the last_user_search_run_id column
- * @method     ChildJobSiteRecord[]|ObjectCollection findBySupportedCountryCodes(array $supported_country_codes) Return ChildJobSiteRecord objects filtered by the supported_country_codes column
  * @method     ChildJobSiteRecord[]|ObjectCollection findByResultsFilterType(int $results_filter_type) Return ChildJobSiteRecord objects filtered by the results_filter_type column
- * @method     ChildJobSiteRecord[]|ObjectCollection findByVersion(int $version) Return ChildJobSiteRecord objects filtered by the version column
  * @method     ChildJobSiteRecord[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  */
 abstract class JobSiteRecordQuery extends ModelCriteria
 {
-
-    // versionable behavior
-
-    /**
-     * Whether the versioning is enabled
-     */
-    static $isVersioningEnabled = true;
-protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityNotFoundException';
+    protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityNotFoundException';
 
     /**
      * Initializes internal state of \JobScooper\DataAccess\Base\JobSiteRecordQuery object.
@@ -246,7 +184,7 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT jobsite_key, plugin_class_name, display_name, is_disabled, date_last_pulled, date_last_run, date_last_completed, date_last_failed, supported_country_codes, results_filter_type, version FROM job_site WHERE jobsite_key = :p0';
+        $sql = 'SELECT jobsite_key, plugin_class_name, display_name, is_disabled, results_filter_type FROM job_site WHERE jobsite_key = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_STR);
@@ -439,302 +377,6 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
     }
 
     /**
-     * Filter the query on the date_last_pulled column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByLastPulledAt('2011-03-14'); // WHERE date_last_pulled = '2011-03-14'
-     * $query->filterByLastPulledAt('now'); // WHERE date_last_pulled = '2011-03-14'
-     * $query->filterByLastPulledAt(array('max' => 'yesterday')); // WHERE date_last_pulled > '2011-03-13'
-     * </code>
-     *
-     * @param     mixed $lastPulledAt The value to use as filter.
-     *              Values can be integers (unix timestamps), DateTime objects, or strings.
-     *              Empty strings are treated as NULL.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildJobSiteRecordQuery The current query, for fluid interface
-     */
-    public function filterByLastPulledAt($lastPulledAt = null, $comparison = null)
-    {
-        if (is_array($lastPulledAt)) {
-            $useMinMax = false;
-            if (isset($lastPulledAt['min'])) {
-                $this->addUsingAlias(JobSiteRecordTableMap::COL_DATE_LAST_PULLED, $lastPulledAt['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($lastPulledAt['max'])) {
-                $this->addUsingAlias(JobSiteRecordTableMap::COL_DATE_LAST_PULLED, $lastPulledAt['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(JobSiteRecordTableMap::COL_DATE_LAST_PULLED, $lastPulledAt, $comparison);
-    }
-
-    /**
-     * Filter the query on the date_last_run column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByLastRunAt('2011-03-14'); // WHERE date_last_run = '2011-03-14'
-     * $query->filterByLastRunAt('now'); // WHERE date_last_run = '2011-03-14'
-     * $query->filterByLastRunAt(array('max' => 'yesterday')); // WHERE date_last_run > '2011-03-13'
-     * </code>
-     *
-     * @param     mixed $lastRunAt The value to use as filter.
-     *              Values can be integers (unix timestamps), DateTime objects, or strings.
-     *              Empty strings are treated as NULL.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildJobSiteRecordQuery The current query, for fluid interface
-     */
-    public function filterByLastRunAt($lastRunAt = null, $comparison = null)
-    {
-        if (is_array($lastRunAt)) {
-            $useMinMax = false;
-            if (isset($lastRunAt['min'])) {
-                $this->addUsingAlias(JobSiteRecordTableMap::COL_DATE_LAST_RUN, $lastRunAt['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($lastRunAt['max'])) {
-                $this->addUsingAlias(JobSiteRecordTableMap::COL_DATE_LAST_RUN, $lastRunAt['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(JobSiteRecordTableMap::COL_DATE_LAST_RUN, $lastRunAt, $comparison);
-    }
-
-    /**
-     * Filter the query on the date_last_completed column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByLastCompletedAt('2011-03-14'); // WHERE date_last_completed = '2011-03-14'
-     * $query->filterByLastCompletedAt('now'); // WHERE date_last_completed = '2011-03-14'
-     * $query->filterByLastCompletedAt(array('max' => 'yesterday')); // WHERE date_last_completed > '2011-03-13'
-     * </code>
-     *
-     * @param     mixed $lastCompletedAt The value to use as filter.
-     *              Values can be integers (unix timestamps), DateTime objects, or strings.
-     *              Empty strings are treated as NULL.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildJobSiteRecordQuery The current query, for fluid interface
-     */
-    public function filterByLastCompletedAt($lastCompletedAt = null, $comparison = null)
-    {
-        if (is_array($lastCompletedAt)) {
-            $useMinMax = false;
-            if (isset($lastCompletedAt['min'])) {
-                $this->addUsingAlias(JobSiteRecordTableMap::COL_DATE_LAST_COMPLETED, $lastCompletedAt['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($lastCompletedAt['max'])) {
-                $this->addUsingAlias(JobSiteRecordTableMap::COL_DATE_LAST_COMPLETED, $lastCompletedAt['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(JobSiteRecordTableMap::COL_DATE_LAST_COMPLETED, $lastCompletedAt, $comparison);
-    }
-
-    /**
-     * Filter the query on the date_last_failed column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByLastFailedAt('2011-03-14'); // WHERE date_last_failed = '2011-03-14'
-     * $query->filterByLastFailedAt('now'); // WHERE date_last_failed = '2011-03-14'
-     * $query->filterByLastFailedAt(array('max' => 'yesterday')); // WHERE date_last_failed > '2011-03-13'
-     * </code>
-     *
-     * @param     mixed $lastFailedAt The value to use as filter.
-     *              Values can be integers (unix timestamps), DateTime objects, or strings.
-     *              Empty strings are treated as NULL.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildJobSiteRecordQuery The current query, for fluid interface
-     */
-    public function filterByLastFailedAt($lastFailedAt = null, $comparison = null)
-    {
-        if (is_array($lastFailedAt)) {
-            $useMinMax = false;
-            if (isset($lastFailedAt['min'])) {
-                $this->addUsingAlias(JobSiteRecordTableMap::COL_DATE_LAST_FAILED, $lastFailedAt['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($lastFailedAt['max'])) {
-                $this->addUsingAlias(JobSiteRecordTableMap::COL_DATE_LAST_FAILED, $lastFailedAt['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(JobSiteRecordTableMap::COL_DATE_LAST_FAILED, $lastFailedAt, $comparison);
-    }
-
-    /**
-     * Filter the query on the last_user_search_run_id column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByLastUserSearchRunId(1234); // WHERE last_user_search_run_id = 1234
-     * $query->filterByLastUserSearchRunId(array(12, 34)); // WHERE last_user_search_run_id IN (12, 34)
-     * $query->filterByLastUserSearchRunId(array('min' => 12)); // WHERE last_user_search_run_id > 12
-     * </code>
-     *
-     * @see       filterByUserSearchRunRelatedByLastUserSearchRunId()
-     *
-     * @param     mixed $lastUserSearchRunId The value to use as filter.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildJobSiteRecordQuery The current query, for fluid interface
-     */
-    public function filterByLastUserSearchRunId($lastUserSearchRunId = null, $comparison = null)
-    {
-        if (is_array($lastUserSearchRunId)) {
-            $useMinMax = false;
-            if (isset($lastUserSearchRunId['min'])) {
-                $this->addUsingAlias(JobSiteRecordTableMap::COL_LAST_USER_SEARCH_RUN_ID, $lastUserSearchRunId['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($lastUserSearchRunId['max'])) {
-                $this->addUsingAlias(JobSiteRecordTableMap::COL_LAST_USER_SEARCH_RUN_ID, $lastUserSearchRunId['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(JobSiteRecordTableMap::COL_LAST_USER_SEARCH_RUN_ID, $lastUserSearchRunId, $comparison);
-    }
-
-    /**
-     * Filter the query on the supported_country_codes column
-     *
-     * @param     array $supportedCountryCodes The values to use as filter.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildJobSiteRecordQuery The current query, for fluid interface
-     */
-    public function filterBySupportedCountryCodes($supportedCountryCodes = null, $comparison = null)
-    {
-        $key = $this->getAliasedColName(JobSiteRecordTableMap::COL_SUPPORTED_COUNTRY_CODES);
-        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
-            foreach ($supportedCountryCodes as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addAnd($key, $value, Criteria::LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::LIKE);
-                }
-            }
-
-            return $this;
-        } elseif ($comparison == Criteria::CONTAINS_SOME) {
-            foreach ($supportedCountryCodes as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addOr($key, $value, Criteria::LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::LIKE);
-                }
-            }
-
-            return $this;
-        } elseif ($comparison == Criteria::CONTAINS_NONE) {
-            foreach ($supportedCountryCodes as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addAnd($key, $value, Criteria::NOT_LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::NOT_LIKE);
-                }
-            }
-            $this->addOr($key, null, Criteria::ISNULL);
-
-            return $this;
-        }
-
-        return $this->addUsingAlias(JobSiteRecordTableMap::COL_SUPPORTED_COUNTRY_CODES, $supportedCountryCodes, $comparison);
-    }
-
-    /**
-     * Filter the query on the supported_country_codes column
-     * @param     mixed $supportedCountryCodes The value to use as filter
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::CONTAINS_ALL
-     *
-     * @return $this|ChildJobSiteRecordQuery The current query, for fluid interface
-     */
-    public function filterBySupportedCountryCode($supportedCountryCodes = null, $comparison = null)
-    {
-        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
-            if (is_scalar($supportedCountryCodes)) {
-                $supportedCountryCodes = '%| ' . $supportedCountryCodes . ' |%';
-                $comparison = Criteria::LIKE;
-            }
-        } elseif ($comparison == Criteria::CONTAINS_NONE) {
-            $supportedCountryCodes = '%| ' . $supportedCountryCodes . ' |%';
-            $comparison = Criteria::NOT_LIKE;
-            $key = $this->getAliasedColName(JobSiteRecordTableMap::COL_SUPPORTED_COUNTRY_CODES);
-            if ($this->containsKey($key)) {
-                $this->addAnd($key, $supportedCountryCodes, $comparison);
-            } else {
-                $this->addAnd($key, $supportedCountryCodes, $comparison);
-            }
-            $this->addOr($key, null, Criteria::ISNULL);
-
-            return $this;
-        }
-
-        return $this->addUsingAlias(JobSiteRecordTableMap::COL_SUPPORTED_COUNTRY_CODES, $supportedCountryCodes, $comparison);
-    }
-
-    /**
      * Filter the query on the results_filter_type column
      *
      * @param     mixed $resultsFilterType The value to use as filter
@@ -765,124 +407,6 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
         }
 
         return $this->addUsingAlias(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE, $resultsFilterType, $comparison);
-    }
-
-    /**
-     * Filter the query on the version column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByVersion(1234); // WHERE version = 1234
-     * $query->filterByVersion(array(12, 34)); // WHERE version IN (12, 34)
-     * $query->filterByVersion(array('min' => 12)); // WHERE version > 12
-     * </code>
-     *
-     * @param     mixed $version The value to use as filter.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildJobSiteRecordQuery The current query, for fluid interface
-     */
-    public function filterByVersion($version = null, $comparison = null)
-    {
-        if (is_array($version)) {
-            $useMinMax = false;
-            if (isset($version['min'])) {
-                $this->addUsingAlias(JobSiteRecordTableMap::COL_VERSION, $version['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($version['max'])) {
-                $this->addUsingAlias(JobSiteRecordTableMap::COL_VERSION, $version['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(JobSiteRecordTableMap::COL_VERSION, $version, $comparison);
-    }
-
-    /**
-     * Filter the query by a related \JobScooper\DataAccess\UserSearchRun object
-     *
-     * @param \JobScooper\DataAccess\UserSearchRun|ObjectCollection $userSearchRun The related object(s) to use as filter
-     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @throws \Propel\Runtime\Exception\PropelException
-     *
-     * @return ChildJobSiteRecordQuery The current query, for fluid interface
-     */
-    public function filterByUserSearchRunRelatedByLastUserSearchRunId($userSearchRun, $comparison = null)
-    {
-        if ($userSearchRun instanceof \JobScooper\DataAccess\UserSearchRun) {
-            return $this
-                ->addUsingAlias(JobSiteRecordTableMap::COL_LAST_USER_SEARCH_RUN_ID, $userSearchRun->getUserSearchRunId(), $comparison);
-        } elseif ($userSearchRun instanceof ObjectCollection) {
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-
-            return $this
-                ->addUsingAlias(JobSiteRecordTableMap::COL_LAST_USER_SEARCH_RUN_ID, $userSearchRun->toKeyValue('PrimaryKey', 'UserSearchRunId'), $comparison);
-        } else {
-            throw new PropelException('filterByUserSearchRunRelatedByLastUserSearchRunId() only accepts arguments of type \JobScooper\DataAccess\UserSearchRun or Collection');
-        }
-    }
-
-    /**
-     * Adds a JOIN clause to the query using the UserSearchRunRelatedByLastUserSearchRunId relation
-     *
-     * @param     string $relationAlias optional alias for the relation
-     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
-     *
-     * @return $this|ChildJobSiteRecordQuery The current query, for fluid interface
-     */
-    public function joinUserSearchRunRelatedByLastUserSearchRunId($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
-    {
-        $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('UserSearchRunRelatedByLastUserSearchRunId');
-
-        // create a ModelJoin object for this join
-        $join = new ModelJoin();
-        $join->setJoinType($joinType);
-        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
-        if ($previousJoin = $this->getPreviousJoin()) {
-            $join->setPreviousJoin($previousJoin);
-        }
-
-        // add the ModelJoin to the current object
-        if ($relationAlias) {
-            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
-            $this->addJoinObject($join, $relationAlias);
-        } else {
-            $this->addJoinObject($join, 'UserSearchRunRelatedByLastUserSearchRunId');
-        }
-
-        return $this;
-    }
-
-    /**
-     * Use the UserSearchRunRelatedByLastUserSearchRunId relation UserSearchRun object
-     *
-     * @see useQuery()
-     *
-     * @param     string $relationAlias optional alias for the relation,
-     *                                   to be used as main alias in the secondary query
-     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
-     *
-     * @return \JobScooper\DataAccess\UserSearchRunQuery A secondary query class using the current class as primary query
-     */
-    public function useUserSearchRunRelatedByLastUserSearchRunIdQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
-    {
-        return $this
-            ->joinUserSearchRunRelatedByLastUserSearchRunId($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'UserSearchRunRelatedByLastUserSearchRunId', '\JobScooper\DataAccess\UserSearchRunQuery');
     }
 
     /**
@@ -959,40 +483,40 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
     }
 
     /**
-     * Filter the query by a related \JobScooper\DataAccess\UserSearchRun object
+     * Filter the query by a related \JobScooper\DataAccess\UserSearchSiteRun object
      *
-     * @param \JobScooper\DataAccess\UserSearchRun|ObjectCollection $userSearchRun the related object to use as filter
+     * @param \JobScooper\DataAccess\UserSearchSiteRun|ObjectCollection $userSearchSiteRun the related object to use as filter
      * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return ChildJobSiteRecordQuery The current query, for fluid interface
      */
-    public function filterByUserSearchRunRelatedByJobSiteKey($userSearchRun, $comparison = null)
+    public function filterByUserSearchSiteRun($userSearchSiteRun, $comparison = null)
     {
-        if ($userSearchRun instanceof \JobScooper\DataAccess\UserSearchRun) {
+        if ($userSearchSiteRun instanceof \JobScooper\DataAccess\UserSearchSiteRun) {
             return $this
-                ->addUsingAlias(JobSiteRecordTableMap::COL_JOBSITE_KEY, $userSearchRun->getJobSiteKey(), $comparison);
-        } elseif ($userSearchRun instanceof ObjectCollection) {
+                ->addUsingAlias(JobSiteRecordTableMap::COL_JOBSITE_KEY, $userSearchSiteRun->getJobSiteKey(), $comparison);
+        } elseif ($userSearchSiteRun instanceof ObjectCollection) {
             return $this
-                ->useUserSearchRunRelatedByJobSiteKeyQuery()
-                ->filterByPrimaryKeys($userSearchRun->getPrimaryKeys())
+                ->useUserSearchSiteRunQuery()
+                ->filterByPrimaryKeys($userSearchSiteRun->getPrimaryKeys())
                 ->endUse();
         } else {
-            throw new PropelException('filterByUserSearchRunRelatedByJobSiteKey() only accepts arguments of type \JobScooper\DataAccess\UserSearchRun or Collection');
+            throw new PropelException('filterByUserSearchSiteRun() only accepts arguments of type \JobScooper\DataAccess\UserSearchSiteRun or Collection');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the UserSearchRunRelatedByJobSiteKey relation
+     * Adds a JOIN clause to the query using the UserSearchSiteRun relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return $this|ChildJobSiteRecordQuery The current query, for fluid interface
      */
-    public function joinUserSearchRunRelatedByJobSiteKey($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function joinUserSearchSiteRun($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('UserSearchRunRelatedByJobSiteKey');
+        $relationMap = $tableMap->getRelation('UserSearchSiteRun');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -1007,14 +531,14 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'UserSearchRunRelatedByJobSiteKey');
+            $this->addJoinObject($join, 'UserSearchSiteRun');
         }
 
         return $this;
     }
 
     /**
-     * Use the UserSearchRunRelatedByJobSiteKey relation UserSearchRun object
+     * Use the UserSearchSiteRun relation UserSearchSiteRun object
      *
      * @see useQuery()
      *
@@ -1022,86 +546,30 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
      *                                   to be used as main alias in the secondary query
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
-     * @return \JobScooper\DataAccess\UserSearchRunQuery A secondary query class using the current class as primary query
+     * @return \JobScooper\DataAccess\UserSearchSiteRunQuery A secondary query class using the current class as primary query
      */
-    public function useUserSearchRunRelatedByJobSiteKeyQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function useUserSearchSiteRunQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
-            ->joinUserSearchRunRelatedByJobSiteKey($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'UserSearchRunRelatedByJobSiteKey', '\JobScooper\DataAccess\UserSearchRunQuery');
+            ->joinUserSearchSiteRun($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'UserSearchSiteRun', '\JobScooper\DataAccess\UserSearchSiteRunQuery');
     }
 
     /**
-     * Filter the query by a related \JobScooper\DataAccess\JobSiteRecordVersion object
+     * Filter the query by a related UserSearch object
+     * using the user_search_site_run table as cross reference
      *
-     * @param \JobScooper\DataAccess\JobSiteRecordVersion|ObjectCollection $jobSiteRecordVersion the related object to use as filter
+     * @param UserSearch $userSearch the related object to use as filter
      * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return ChildJobSiteRecordQuery The current query, for fluid interface
      */
-    public function filterByJobSiteRecordVersion($jobSiteRecordVersion, $comparison = null)
-    {
-        if ($jobSiteRecordVersion instanceof \JobScooper\DataAccess\JobSiteRecordVersion) {
-            return $this
-                ->addUsingAlias(JobSiteRecordTableMap::COL_JOBSITE_KEY, $jobSiteRecordVersion->getJobSiteKey(), $comparison);
-        } elseif ($jobSiteRecordVersion instanceof ObjectCollection) {
-            return $this
-                ->useJobSiteRecordVersionQuery()
-                ->filterByPrimaryKeys($jobSiteRecordVersion->getPrimaryKeys())
-                ->endUse();
-        } else {
-            throw new PropelException('filterByJobSiteRecordVersion() only accepts arguments of type \JobScooper\DataAccess\JobSiteRecordVersion or Collection');
-        }
-    }
-
-    /**
-     * Adds a JOIN clause to the query using the JobSiteRecordVersion relation
-     *
-     * @param     string $relationAlias optional alias for the relation
-     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
-     *
-     * @return $this|ChildJobSiteRecordQuery The current query, for fluid interface
-     */
-    public function joinJobSiteRecordVersion($relationAlias = null, $joinType = Criteria::INNER_JOIN)
-    {
-        $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('JobSiteRecordVersion');
-
-        // create a ModelJoin object for this join
-        $join = new ModelJoin();
-        $join->setJoinType($joinType);
-        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
-        if ($previousJoin = $this->getPreviousJoin()) {
-            $join->setPreviousJoin($previousJoin);
-        }
-
-        // add the ModelJoin to the current object
-        if ($relationAlias) {
-            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
-            $this->addJoinObject($join, $relationAlias);
-        } else {
-            $this->addJoinObject($join, 'JobSiteRecordVersion');
-        }
-
-        return $this;
-    }
-
-    /**
-     * Use the JobSiteRecordVersion relation JobSiteRecordVersion object
-     *
-     * @see useQuery()
-     *
-     * @param     string $relationAlias optional alias for the relation,
-     *                                   to be used as main alias in the secondary query
-     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
-     *
-     * @return \JobScooper\DataAccess\JobSiteRecordVersionQuery A secondary query class using the current class as primary query
-     */
-    public function useJobSiteRecordVersionQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function filterByUserSearchFromUSSR($userSearch, $comparison = Criteria::EQUAL)
     {
         return $this
-            ->joinJobSiteRecordVersion($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'JobSiteRecordVersion', '\JobScooper\DataAccess\JobSiteRecordVersionQuery');
+            ->useUserSearchSiteRunQuery()
+            ->filterByUserSearchFromUSSR($userSearch, $comparison)
+            ->endUse();
     }
 
     /**
@@ -1179,34 +647,6 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
 
             return $affectedRows;
         });
-    }
-
-    // versionable behavior
-
-    /**
-     * Checks whether versioning is enabled
-     *
-     * @return boolean
-     */
-    static public function isVersioningEnabled()
-    {
-        return self::$isVersioningEnabled;
-    }
-
-    /**
-     * Enables versioning
-     */
-    static public function enableVersioning()
-    {
-        self::$isVersioningEnabled = true;
-    }
-
-    /**
-     * Disables versioning
-     */
-    static public function disableVersioning()
-    {
-        self::$isVersioningEnabled = false;
     }
 
 } // JobSiteRecordQuery

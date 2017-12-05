@@ -20,9 +20,9 @@ use Propel\Runtime\Exception\PropelException;
  *
  *
  *
- * @method     ChildUserJobMatchQuery orderByUserJobMatchId($order = Criteria::ASC) Order by the user_job_match_id column
  * @method     ChildUserJobMatchQuery orderByUserId($order = Criteria::ASC) Order by the user_id column
  * @method     ChildUserJobMatchQuery orderByJobPostingId($order = Criteria::ASC) Order by the jobposting_id column
+ * @method     ChildUserJobMatchQuery orderByUserJobMatchId($order = Criteria::ASC) Order by the user_job_match_id column
  * @method     ChildUserJobMatchQuery orderByUserNotificationState($order = Criteria::ASC) Order by the user_notification_state column
  * @method     ChildUserJobMatchQuery orderByIsJobMatch($order = Criteria::ASC) Order by the is_job_match column
  * @method     ChildUserJobMatchQuery orderByIsExcluded($order = Criteria::ASC) Order by the is_excluded column
@@ -33,9 +33,9 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatchQuery orderByOutOfUserArea($order = Criteria::ASC) Order by the out_of_user_area column
  * @method     ChildUserJobMatchQuery orderByAppRunId($order = Criteria::ASC) Order by the app_run_id column
  *
- * @method     ChildUserJobMatchQuery groupByUserJobMatchId() Group by the user_job_match_id column
  * @method     ChildUserJobMatchQuery groupByUserId() Group by the user_id column
  * @method     ChildUserJobMatchQuery groupByJobPostingId() Group by the jobposting_id column
+ * @method     ChildUserJobMatchQuery groupByUserJobMatchId() Group by the user_job_match_id column
  * @method     ChildUserJobMatchQuery groupByUserNotificationState() Group by the user_notification_state column
  * @method     ChildUserJobMatchQuery groupByIsJobMatch() Group by the is_job_match column
  * @method     ChildUserJobMatchQuery groupByIsExcluded() Group by the is_excluded column
@@ -54,34 +54,34 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatchQuery rightJoinWith($relation) Adds a RIGHT JOIN clause and with to the query
  * @method     ChildUserJobMatchQuery innerJoinWith($relation) Adds a INNER JOIN clause and with to the query
  *
- * @method     ChildUserJobMatchQuery leftJoinUser($relationAlias = null) Adds a LEFT JOIN clause to the query using the User relation
- * @method     ChildUserJobMatchQuery rightJoinUser($relationAlias = null) Adds a RIGHT JOIN clause to the query using the User relation
- * @method     ChildUserJobMatchQuery innerJoinUser($relationAlias = null) Adds a INNER JOIN clause to the query using the User relation
+ * @method     ChildUserJobMatchQuery leftJoinUserFromUJM($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserFromUJM relation
+ * @method     ChildUserJobMatchQuery rightJoinUserFromUJM($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserFromUJM relation
+ * @method     ChildUserJobMatchQuery innerJoinUserFromUJM($relationAlias = null) Adds a INNER JOIN clause to the query using the UserFromUJM relation
  *
- * @method     ChildUserJobMatchQuery joinWithUser($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the User relation
+ * @method     ChildUserJobMatchQuery joinWithUserFromUJM($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserFromUJM relation
  *
- * @method     ChildUserJobMatchQuery leftJoinWithUser() Adds a LEFT JOIN clause and with to the query using the User relation
- * @method     ChildUserJobMatchQuery rightJoinWithUser() Adds a RIGHT JOIN clause and with to the query using the User relation
- * @method     ChildUserJobMatchQuery innerJoinWithUser() Adds a INNER JOIN clause and with to the query using the User relation
+ * @method     ChildUserJobMatchQuery leftJoinWithUserFromUJM() Adds a LEFT JOIN clause and with to the query using the UserFromUJM relation
+ * @method     ChildUserJobMatchQuery rightJoinWithUserFromUJM() Adds a RIGHT JOIN clause and with to the query using the UserFromUJM relation
+ * @method     ChildUserJobMatchQuery innerJoinWithUserFromUJM() Adds a INNER JOIN clause and with to the query using the UserFromUJM relation
  *
- * @method     ChildUserJobMatchQuery leftJoinJobPosting($relationAlias = null) Adds a LEFT JOIN clause to the query using the JobPosting relation
- * @method     ChildUserJobMatchQuery rightJoinJobPosting($relationAlias = null) Adds a RIGHT JOIN clause to the query using the JobPosting relation
- * @method     ChildUserJobMatchQuery innerJoinJobPosting($relationAlias = null) Adds a INNER JOIN clause to the query using the JobPosting relation
+ * @method     ChildUserJobMatchQuery leftJoinJobPostingFromUJM($relationAlias = null) Adds a LEFT JOIN clause to the query using the JobPostingFromUJM relation
+ * @method     ChildUserJobMatchQuery rightJoinJobPostingFromUJM($relationAlias = null) Adds a RIGHT JOIN clause to the query using the JobPostingFromUJM relation
+ * @method     ChildUserJobMatchQuery innerJoinJobPostingFromUJM($relationAlias = null) Adds a INNER JOIN clause to the query using the JobPostingFromUJM relation
  *
- * @method     ChildUserJobMatchQuery joinWithJobPosting($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the JobPosting relation
+ * @method     ChildUserJobMatchQuery joinWithJobPostingFromUJM($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the JobPostingFromUJM relation
  *
- * @method     ChildUserJobMatchQuery leftJoinWithJobPosting() Adds a LEFT JOIN clause and with to the query using the JobPosting relation
- * @method     ChildUserJobMatchQuery rightJoinWithJobPosting() Adds a RIGHT JOIN clause and with to the query using the JobPosting relation
- * @method     ChildUserJobMatchQuery innerJoinWithJobPosting() Adds a INNER JOIN clause and with to the query using the JobPosting relation
+ * @method     ChildUserJobMatchQuery leftJoinWithJobPostingFromUJM() Adds a LEFT JOIN clause and with to the query using the JobPostingFromUJM relation
+ * @method     ChildUserJobMatchQuery rightJoinWithJobPostingFromUJM() Adds a RIGHT JOIN clause and with to the query using the JobPostingFromUJM relation
+ * @method     ChildUserJobMatchQuery innerJoinWithJobPostingFromUJM() Adds a INNER JOIN clause and with to the query using the JobPostingFromUJM relation
  *
  * @method     \JobScooper\DataAccess\UserQuery|\JobScooper\DataAccess\JobPostingQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildUserJobMatch findOne(ConnectionInterface $con = null) Return the first ChildUserJobMatch matching the query
  * @method     ChildUserJobMatch findOneOrCreate(ConnectionInterface $con = null) Return the first ChildUserJobMatch matching the query, or a new ChildUserJobMatch object populated from the query conditions when no match is found
  *
- * @method     ChildUserJobMatch findOneByUserJobMatchId(int $user_job_match_id) Return the first ChildUserJobMatch filtered by the user_job_match_id column
- * @method     ChildUserJobMatch findOneByUserId(string $user_id) Return the first ChildUserJobMatch filtered by the user_id column
+ * @method     ChildUserJobMatch findOneByUserId(int $user_id) Return the first ChildUserJobMatch filtered by the user_id column
  * @method     ChildUserJobMatch findOneByJobPostingId(int $jobposting_id) Return the first ChildUserJobMatch filtered by the jobposting_id column
+ * @method     ChildUserJobMatch findOneByUserJobMatchId(int $user_job_match_id) Return the first ChildUserJobMatch filtered by the user_job_match_id column
  * @method     ChildUserJobMatch findOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column
  * @method     ChildUserJobMatch findOneByIsJobMatch(boolean $is_job_match) Return the first ChildUserJobMatch filtered by the is_job_match column
  * @method     ChildUserJobMatch findOneByIsExcluded(boolean $is_excluded) Return the first ChildUserJobMatch filtered by the is_excluded column
@@ -95,9 +95,9 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatch requirePk($key, ConnectionInterface $con = null) Return the ChildUserJobMatch by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOne(ConnectionInterface $con = null) Return the first ChildUserJobMatch matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
- * @method     ChildUserJobMatch requireOneByUserJobMatchId(int $user_job_match_id) Return the first ChildUserJobMatch filtered by the user_job_match_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserJobMatch requireOneByUserId(string $user_id) Return the first ChildUserJobMatch filtered by the user_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneByUserId(int $user_id) Return the first ChildUserJobMatch filtered by the user_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByJobPostingId(int $jobposting_id) Return the first ChildUserJobMatch filtered by the jobposting_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneByUserJobMatchId(int $user_job_match_id) Return the first ChildUserJobMatch filtered by the user_job_match_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByIsJobMatch(boolean $is_job_match) Return the first ChildUserJobMatch filtered by the is_job_match column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByIsExcluded(boolean $is_excluded) Return the first ChildUserJobMatch filtered by the is_excluded column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -109,9 +109,9 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatch requireOneByAppRunId(string $app_run_id) Return the first ChildUserJobMatch filtered by the app_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildUserJobMatch[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildUserJobMatch objects based on current ModelCriteria
- * @method     ChildUserJobMatch[]|ObjectCollection findByUserJobMatchId(int $user_job_match_id) Return ChildUserJobMatch objects filtered by the user_job_match_id column
- * @method     ChildUserJobMatch[]|ObjectCollection findByUserId(string $user_id) Return ChildUserJobMatch objects filtered by the user_id column
+ * @method     ChildUserJobMatch[]|ObjectCollection findByUserId(int $user_id) Return ChildUserJobMatch objects filtered by the user_id column
  * @method     ChildUserJobMatch[]|ObjectCollection findByJobPostingId(int $jobposting_id) Return ChildUserJobMatch objects filtered by the jobposting_id column
+ * @method     ChildUserJobMatch[]|ObjectCollection findByUserJobMatchId(int $user_job_match_id) Return ChildUserJobMatch objects filtered by the user_job_match_id column
  * @method     ChildUserJobMatch[]|ObjectCollection findByUserNotificationState(int $user_notification_state) Return ChildUserJobMatch objects filtered by the user_notification_state column
  * @method     ChildUserJobMatch[]|ObjectCollection findByIsJobMatch(boolean $is_job_match) Return ChildUserJobMatch objects filtered by the is_job_match column
  * @method     ChildUserJobMatch[]|ObjectCollection findByIsExcluded(boolean $is_excluded) Return ChildUserJobMatch objects filtered by the is_excluded column
@@ -170,10 +170,10 @@ abstract class UserJobMatchQuery extends ModelCriteria
      * Go fast if the query is untouched.
      *
      * <code>
-     * $obj  = $c->findPk(12, $con);
+     * $obj = $c->findPk(array(12, 34), $con);
      * </code>
      *
-     * @param mixed $key Primary key to use for the query
+     * @param array[$user_id, $jobposting_id] $key Primary key to use for the query
      * @param ConnectionInterface $con an optional connection object
      *
      * @return ChildUserJobMatch|array|mixed the result, formatted by the current formatter
@@ -198,7 +198,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
             return $this->findPkComplex($key, $con);
         }
 
-        if ((null !== ($obj = UserJobMatchTableMap::getInstanceFromPool(null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key)))) {
+        if ((null !== ($obj = UserJobMatchTableMap::getInstanceFromPool(serialize([(null === $key[0] || is_scalar($key[0]) || is_callable([$key[0], '__toString']) ? (string) $key[0] : $key[0]), (null === $key[1] || is_scalar($key[1]) || is_callable([$key[1], '__toString']) ? (string) $key[1] : $key[1])]))))) {
             // the object is already in the instance pool
             return $obj;
         }
@@ -219,10 +219,11 @@ abstract class UserJobMatchQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_job_match_id, user_id, jobposting_id, user_notification_state, is_job_match, is_excluded, is_include_in_notifications, matched_user_keywords, matched_negative_title_keywords, matched_negative_company_keywords, out_of_user_area, app_run_id FROM user_job_match WHERE user_job_match_id = :p0';
+        $sql = 'SELECT user_id, jobposting_id, user_job_match_id, user_notification_state, is_job_match, is_excluded, is_include_in_notifications, matched_user_keywords, matched_negative_title_keywords, matched_negative_company_keywords, out_of_user_area, app_run_id FROM user_job_match WHERE user_id = :p0 AND jobposting_id = :p1';
         try {
             $stmt = $con->prepare($sql);
-            $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
+            $stmt->bindValue(':p0', $key[0], PDO::PARAM_INT);
+            $stmt->bindValue(':p1', $key[1], PDO::PARAM_INT);
             $stmt->execute();
         } catch (Exception $e) {
             Propel::log($e->getMessage(), Propel::LOG_ERR);
@@ -233,7 +234,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
             /** @var ChildUserJobMatch $obj */
             $obj = new ChildUserJobMatch();
             $obj->hydrate($row);
-            UserJobMatchTableMap::addInstanceToPool($obj, null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key);
+            UserJobMatchTableMap::addInstanceToPool($obj, serialize([(null === $key[0] || is_scalar($key[0]) || is_callable([$key[0], '__toString']) ? (string) $key[0] : $key[0]), (null === $key[1] || is_scalar($key[1]) || is_callable([$key[1], '__toString']) ? (string) $key[1] : $key[1])]));
         }
         $stmt->closeCursor();
 
@@ -262,7 +263,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
     /**
      * Find objects by primary key
      * <code>
-     * $objs = $c->findPks(array(12, 56, 832), $con);
+     * $objs = $c->findPks(array(array(12, 56), array(832, 123), array(123, 456)), $con);
      * </code>
      * @param     array $keys Primary keys to use for the query
      * @param     ConnectionInterface $con an optional connection object
@@ -292,8 +293,10 @@ abstract class UserJobMatchQuery extends ModelCriteria
      */
     public function filterByPrimaryKey($key)
     {
+        $this->addUsingAlias(UserJobMatchTableMap::COL_USER_ID, $key[0], Criteria::EQUAL);
+        $this->addUsingAlias(UserJobMatchTableMap::COL_JOBPOSTING_ID, $key[1], Criteria::EQUAL);
 
-        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, $key, Criteria::EQUAL);
+        return $this;
     }
 
     /**
@@ -305,8 +308,103 @@ abstract class UserJobMatchQuery extends ModelCriteria
      */
     public function filterByPrimaryKeys($keys)
     {
+        if (empty($keys)) {
+            return $this->add(null, '1<>1', Criteria::CUSTOM);
+        }
+        foreach ($keys as $key) {
+            $cton0 = $this->getNewCriterion(UserJobMatchTableMap::COL_USER_ID, $key[0], Criteria::EQUAL);
+            $cton1 = $this->getNewCriterion(UserJobMatchTableMap::COL_JOBPOSTING_ID, $key[1], Criteria::EQUAL);
+            $cton0->addAnd($cton1);
+            $this->addOr($cton0);
+        }
 
-        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, $keys, Criteria::IN);
+        return $this;
+    }
+
+    /**
+     * Filter the query on the user_id column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByUserId(1234); // WHERE user_id = 1234
+     * $query->filterByUserId(array(12, 34)); // WHERE user_id IN (12, 34)
+     * $query->filterByUserId(array('min' => 12)); // WHERE user_id > 12
+     * </code>
+     *
+     * @see       filterByUserFromUJM()
+     *
+     * @param     mixed $userId The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function filterByUserId($userId = null, $comparison = null)
+    {
+        if (is_array($userId)) {
+            $useMinMax = false;
+            if (isset($userId['min'])) {
+                $this->addUsingAlias(UserJobMatchTableMap::COL_USER_ID, $userId['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($userId['max'])) {
+                $this->addUsingAlias(UserJobMatchTableMap::COL_USER_ID, $userId['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_ID, $userId, $comparison);
+    }
+
+    /**
+     * Filter the query on the jobposting_id column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByJobPostingId(1234); // WHERE jobposting_id = 1234
+     * $query->filterByJobPostingId(array(12, 34)); // WHERE jobposting_id IN (12, 34)
+     * $query->filterByJobPostingId(array('min' => 12)); // WHERE jobposting_id > 12
+     * </code>
+     *
+     * @see       filterByJobPostingFromUJM()
+     *
+     * @param     mixed $jobPostingId The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function filterByJobPostingId($jobPostingId = null, $comparison = null)
+    {
+        if (is_array($jobPostingId)) {
+            $useMinMax = false;
+            if (isset($jobPostingId['min'])) {
+                $this->addUsingAlias(UserJobMatchTableMap::COL_JOBPOSTING_ID, $jobPostingId['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($jobPostingId['max'])) {
+                $this->addUsingAlias(UserJobMatchTableMap::COL_JOBPOSTING_ID, $jobPostingId['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_JOBPOSTING_ID, $jobPostingId, $comparison);
     }
 
     /**
@@ -348,74 +446,6 @@ abstract class UserJobMatchQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, $userJobMatchId, $comparison);
-    }
-
-    /**
-     * Filter the query on the user_id column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByUserId('fooValue');   // WHERE user_id = 'fooValue'
-     * $query->filterByUserId('%fooValue%', Criteria::LIKE); // WHERE user_id LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $userId The value to use as filter.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
-     */
-    public function filterByUserId($userId = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($userId)) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_ID, $userId, $comparison);
-    }
-
-    /**
-     * Filter the query on the jobposting_id column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByJobPostingId(1234); // WHERE jobposting_id = 1234
-     * $query->filterByJobPostingId(array(12, 34)); // WHERE jobposting_id IN (12, 34)
-     * $query->filterByJobPostingId(array('min' => 12)); // WHERE jobposting_id > 12
-     * </code>
-     *
-     * @see       filterByJobPosting()
-     *
-     * @param     mixed $jobPostingId The value to use as filter.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
-     */
-    public function filterByJobPostingId($jobPostingId = null, $comparison = null)
-    {
-        if (is_array($jobPostingId)) {
-            $useMinMax = false;
-            if (isset($jobPostingId['min'])) {
-                $this->addUsingAlias(UserJobMatchTableMap::COL_JOBPOSTING_ID, $jobPostingId['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($jobPostingId['max'])) {
-                $this->addUsingAlias(UserJobMatchTableMap::COL_JOBPOSTING_ID, $jobPostingId['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(UserJobMatchTableMap::COL_JOBPOSTING_ID, $jobPostingId, $comparison);
     }
 
     /**
@@ -837,7 +867,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
      *
      * @return ChildUserJobMatchQuery The current query, for fluid interface
      */
-    public function filterByUser($user, $comparison = null)
+    public function filterByUserFromUJM($user, $comparison = null)
     {
         if ($user instanceof \JobScooper\DataAccess\User) {
             return $this
@@ -850,22 +880,22 @@ abstract class UserJobMatchQuery extends ModelCriteria
             return $this
                 ->addUsingAlias(UserJobMatchTableMap::COL_USER_ID, $user->toKeyValue('PrimaryKey', 'UserId'), $comparison);
         } else {
-            throw new PropelException('filterByUser() only accepts arguments of type \JobScooper\DataAccess\User or Collection');
+            throw new PropelException('filterByUserFromUJM() only accepts arguments of type \JobScooper\DataAccess\User or Collection');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the User relation
+     * Adds a JOIN clause to the query using the UserFromUJM relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
      */
-    public function joinUser($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function joinUserFromUJM($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('User');
+        $relationMap = $tableMap->getRelation('UserFromUJM');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -880,14 +910,14 @@ abstract class UserJobMatchQuery extends ModelCriteria
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'User');
+            $this->addJoinObject($join, 'UserFromUJM');
         }
 
         return $this;
     }
 
     /**
-     * Use the User relation User object
+     * Use the UserFromUJM relation User object
      *
      * @see useQuery()
      *
@@ -897,11 +927,11 @@ abstract class UserJobMatchQuery extends ModelCriteria
      *
      * @return \JobScooper\DataAccess\UserQuery A secondary query class using the current class as primary query
      */
-    public function useUserQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function useUserFromUJMQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
-            ->joinUser($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'User', '\JobScooper\DataAccess\UserQuery');
+            ->joinUserFromUJM($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'UserFromUJM', '\JobScooper\DataAccess\UserQuery');
     }
 
     /**
@@ -914,7 +944,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
      *
      * @return ChildUserJobMatchQuery The current query, for fluid interface
      */
-    public function filterByJobPosting($jobPosting, $comparison = null)
+    public function filterByJobPostingFromUJM($jobPosting, $comparison = null)
     {
         if ($jobPosting instanceof \JobScooper\DataAccess\JobPosting) {
             return $this
@@ -927,22 +957,22 @@ abstract class UserJobMatchQuery extends ModelCriteria
             return $this
                 ->addUsingAlias(UserJobMatchTableMap::COL_JOBPOSTING_ID, $jobPosting->toKeyValue('PrimaryKey', 'JobPostingId'), $comparison);
         } else {
-            throw new PropelException('filterByJobPosting() only accepts arguments of type \JobScooper\DataAccess\JobPosting or Collection');
+            throw new PropelException('filterByJobPostingFromUJM() only accepts arguments of type \JobScooper\DataAccess\JobPosting or Collection');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the JobPosting relation
+     * Adds a JOIN clause to the query using the JobPostingFromUJM relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
      */
-    public function joinJobPosting($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function joinJobPostingFromUJM($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('JobPosting');
+        $relationMap = $tableMap->getRelation('JobPostingFromUJM');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -957,14 +987,14 @@ abstract class UserJobMatchQuery extends ModelCriteria
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'JobPosting');
+            $this->addJoinObject($join, 'JobPostingFromUJM');
         }
 
         return $this;
     }
 
     /**
-     * Use the JobPosting relation JobPosting object
+     * Use the JobPostingFromUJM relation JobPosting object
      *
      * @see useQuery()
      *
@@ -974,11 +1004,11 @@ abstract class UserJobMatchQuery extends ModelCriteria
      *
      * @return \JobScooper\DataAccess\JobPostingQuery A secondary query class using the current class as primary query
      */
-    public function useJobPostingQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function useJobPostingFromUJMQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
-            ->joinJobPosting($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'JobPosting', '\JobScooper\DataAccess\JobPostingQuery');
+            ->joinJobPostingFromUJM($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'JobPostingFromUJM', '\JobScooper\DataAccess\JobPostingQuery');
     }
 
     /**
@@ -991,7 +1021,9 @@ abstract class UserJobMatchQuery extends ModelCriteria
     public function prune($userJobMatch = null)
     {
         if ($userJobMatch) {
-            $this->addUsingAlias(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, $userJobMatch->getUserJobMatchId(), Criteria::NOT_EQUAL);
+            $this->addCond('pruneCond0', $this->getAliasedColName(UserJobMatchTableMap::COL_USER_ID), $userJobMatch->getUserId(), Criteria::NOT_EQUAL);
+            $this->addCond('pruneCond1', $this->getAliasedColName(UserJobMatchTableMap::COL_JOBPOSTING_ID), $userJobMatch->getJobPostingId(), Criteria::NOT_EQUAL);
+            $this->combine(array('pruneCond0', 'pruneCond1'), Criteria::LOGICAL_OR);
         }
 
         return $this;

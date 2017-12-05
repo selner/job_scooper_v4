@@ -17,20 +17,28 @@
  */
 namespace JobScooper\Utils;
 
-abstract class PropertyObject
+abstract class PropertyObject extends \ArrayObject implements \ArrayAccess
 {
-    public function __get($name)
+	public function __get($name)
     {
-        if (method_exists($this, ($method = 'get_'.$name)))
-        {
-            return $this->$method();
-        }
-        else return false;
+	    if(method_exists($this, $name)){
+		    return $this->$name();
+	    }
+	    elseif (method_exists($this, ($method = 'get'.$name)))
+	    {
+		    return $this->$method();
+	    }
+	    elseif(property_exists($this,$name)){
+		    // Getter/Setter not defined so return property if it exists
+		    return $this->$name;
+	    }
+
+        return false;
     }
 
     public function __isset($name)
     {
-        if (method_exists($this, ($method = 'isset_'.$name)))
+        if (method_exists($this, ($method = 'isset'.$name)))
         {
             return $this->$method();
         }
@@ -39,18 +47,29 @@ abstract class PropertyObject
 
     public function __set($name, $value)
     {
-        if (method_exists($this, ($method = 'set_'.$name)))
-        {
-            $this->$method($value);
-        }
+	    if(method_exists($this, $name)){
+		    $this->$name($value);
+	    }
+	    elseif (method_exists($this, ($method = 'set'.$name)))
+	    {
+		    $this->$method($value);
+	    }
+	    elseif(property_exists($this,$name)){
+		    // Getter/Setter not defined so return property if it exists
+		    $this->$name;
+	    }
+	    else {
+		    return false;
+	    }
     }
 
     public function __unset($name)
     {
-        if (method_exists($this, ($method = 'unset_'.$name)))
+        if (method_exists($this, ($method = 'unset'.$name)))
         {
             $this->$method();
         }
     }
+
 }
 

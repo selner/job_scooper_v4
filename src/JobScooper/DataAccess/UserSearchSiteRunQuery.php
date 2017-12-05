@@ -2,10 +2,10 @@
 
 namespace JobScooper\DataAccess;
 
-use JobScooper\DataAccess\Base\UserSearchRunVersion as BaseUserSearchRunVersion;
+use JobScooper\DataAccess\Base\UserSearchSiteRunQuery as BaseUserSearchSiteRunQuery;
 
 /**
- * Skeleton subclass for representing a row from the 'user_search_run_version' table.
+ * Skeleton subclass for performing query and update operations on the 'user_search_site_run' table.
  *
  *
  *
@@ -14,7 +14,7 @@ use JobScooper\DataAccess\Base\UserSearchRunVersion as BaseUserSearchRunVersion;
  * long as it does not already exist in the output directory.
  *
  */
-class UserSearchRunVersion extends BaseUserSearchRunVersion
+class UserSearchSiteRunQuery extends BaseUserSearchSiteRunQuery
 {
 
 }

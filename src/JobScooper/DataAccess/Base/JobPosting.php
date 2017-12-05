@@ -11,8 +11,10 @@ use JobScooper\DataAccess\JobPosting as ChildJobPosting;
 use JobScooper\DataAccess\JobPostingQuery as ChildJobPostingQuery;
 use JobScooper\DataAccess\JobSiteRecord as ChildJobSiteRecord;
 use JobScooper\DataAccess\JobSiteRecordQuery as ChildJobSiteRecordQuery;
+use JobScooper\DataAccess\User as ChildUser;
 use JobScooper\DataAccess\UserJobMatch as ChildUserJobMatch;
 use JobScooper\DataAccess\UserJobMatchQuery as ChildUserJobMatchQuery;
+use JobScooper\DataAccess\UserQuery as ChildUserQuery;
 use JobScooper\DataAccess\Map\JobPostingTableMap;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use Propel\Runtime\Propel;
@@ -227,17 +229,17 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * @var        ChildJobSiteRecord
      */
-    protected $aJobSiteRecord;
+    protected $aJobSiteFromJP;
 
     /**
      * @var        ChildGeoLocation
      */
-    protected $aGeoLocation;
+    protected $aGeoLocationFromJP;
 
     /**
      * @var        ChildJobPosting
      */
-    protected $aJobPostingRelatedByDuplicatesJobPostingId;
+    protected $aDuplicateJobPosting;
 
     /**
      * @var        ObjectCollection|ChildJobPosting[] Collection to store aggregation of ChildJobPosting objects.
@@ -252,12 +254,28 @@ abstract class JobPosting implements ActiveRecordInterface
     protected $collUserJobMatchesPartial;
 
     /**
+     * @var        ObjectCollection|ChildUser[] Cross Collection to store aggregation of ChildUser objects.
+     */
+    protected $collUserFromUJMs;
+
+    /**
+     * @var bool
+     */
+    protected $collUserFromUJMsPartial;
+
+    /**
      * Flag to prevent endless save loop, if this object is referenced
      * by another object which falls in this transaction.
      *
      * @var boolean
      */
     protected $alreadyInSave = false;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var ObjectCollection|ChildUser[]
+     */
+    protected $userFromUJMsScheduledForDeletion = null;
 
     /**
      * An array of objects scheduled for deletion.
@@ -623,7 +641,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * @param      string $format The date/time format string (either date()-style or strftime()-style).
      *                            If format is NULL, then the raw DateTime object will be returned.
      *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
      */
@@ -643,7 +661,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * @param      string $format The date/time format string (either date()-style or strftime()-style).
      *                            If format is NULL, then the raw DateTime object will be returned.
      *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
      */
@@ -663,7 +681,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * @param      string $format The date/time format string (either date()-style or strftime()-style).
      *                            If format is NULL, then the raw DateTime object will be returned.
      *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
      */
@@ -683,7 +701,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * @param      string $format The date/time format string (either date()-style or strftime()-style).
      *                            If format is NULL, then the raw DateTime object will be returned.
      *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
      */
@@ -701,7 +719,7 @@ abstract class JobPosting implements ActiveRecordInterface
      *
      * @return string
      */
-    public function getKeySiteAndPostID()
+    public function getKeySiteAndPostId()
     {
         return $this->key_site_and_post_id;
     }
@@ -793,8 +811,8 @@ abstract class JobPosting implements ActiveRecordInterface
             $this->modifiedColumns[JobPostingTableMap::COL_JOBSITE_KEY] = true;
         }
 
-        if ($this->aJobSiteRecord !== null && $this->aJobSiteRecord->getJobSiteKey() !== $v) {
-            $this->aJobSiteRecord = null;
+        if ($this->aJobSiteFromJP !== null && $this->aJobSiteFromJP->getJobSiteKey() !== $v) {
+            $this->aJobSiteFromJP = null;
         }
 
         return $this;
@@ -1086,7 +1104,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * @param string $v new value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
-    public function setKeySiteAndPostID($v)
+    public function setKeySiteAndPostId($v)
     {
         if ($v !== null) {
             $v = (string) $v;
@@ -1098,7 +1116,7 @@ abstract class JobPosting implements ActiveRecordInterface
         }
 
         return $this;
-    } // setKeySiteAndPostID()
+    } // setKeySiteAndPostId()
 
     /**
      * Set the value of [key_company_and_title] column.
@@ -1177,8 +1195,8 @@ abstract class JobPosting implements ActiveRecordInterface
             $this->modifiedColumns[JobPostingTableMap::COL_GEOLOCATION_ID] = true;
         }
 
-        if ($this->aGeoLocation !== null && $this->aGeoLocation->getGeoLocationId() !== $v) {
-            $this->aGeoLocation = null;
+        if ($this->aGeoLocationFromJP !== null && $this->aGeoLocationFromJP->getGeoLocationId() !== $v) {
+            $this->aGeoLocationFromJP = null;
         }
 
         return $this;
@@ -1201,8 +1219,8 @@ abstract class JobPosting implements ActiveRecordInterface
             $this->modifiedColumns[JobPostingTableMap::COL_DUPLICATES_POSTING_ID] = true;
         }
 
-        if ($this->aJobPostingRelatedByDuplicatesJobPostingId !== null && $this->aJobPostingRelatedByDuplicatesJobPostingId->getJobPostingId() !== $v) {
-            $this->aJobPostingRelatedByDuplicatesJobPostingId = null;
+        if ($this->aDuplicateJobPosting !== null && $this->aDuplicateJobPosting->getJobPostingId() !== $v) {
+            $this->aDuplicateJobPosting = null;
         }
 
         return $this;
@@ -1281,18 +1299,30 @@ abstract class JobPosting implements ActiveRecordInterface
             $this->category = (null !== $col) ? (string) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : JobPostingTableMap::translateFieldName('UpdatedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00 00:00:00') {
+                $col = null;
+            }
             $this->last_updated_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 13 + $startcol : JobPostingTableMap::translateFieldName('PostedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00 00:00:00') {
+                $col = null;
+            }
             $this->job_posted_date = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 14 + $startcol : JobPostingTableMap::translateFieldName('FirstSeenAt', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00 00:00:00') {
+                $col = null;
+            }
             $this->first_seen_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 15 + $startcol : JobPostingTableMap::translateFieldName('RemovedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00 00:00:00') {
+                $col = null;
+            }
             $this->post_removed_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 16 + $startcol : JobPostingTableMap::translateFieldName('KeySiteAndPostID', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 16 + $startcol : JobPostingTableMap::translateFieldName('KeySiteAndPostId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->key_site_and_post_id = (null !== $col) ? (string) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 17 + $startcol : JobPostingTableMap::translateFieldName('KeyCompanyAndTitle', TableMap::TYPE_PHPNAME, $indexType)];
@@ -1339,14 +1369,14 @@ abstract class JobPosting implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
-        if ($this->aJobSiteRecord !== null && $this->jobsite_key !== $this->aJobSiteRecord->getJobSiteKey()) {
-            $this->aJobSiteRecord = null;
+        if ($this->aJobSiteFromJP !== null && $this->jobsite_key !== $this->aJobSiteFromJP->getJobSiteKey()) {
+            $this->aJobSiteFromJP = null;
         }
-        if ($this->aGeoLocation !== null && $this->geolocation_id !== $this->aGeoLocation->getGeoLocationId()) {
-            $this->aGeoLocation = null;
+        if ($this->aGeoLocationFromJP !== null && $this->geolocation_id !== $this->aGeoLocationFromJP->getGeoLocationId()) {
+            $this->aGeoLocationFromJP = null;
         }
-        if ($this->aJobPostingRelatedByDuplicatesJobPostingId !== null && $this->duplicates_posting_id !== $this->aJobPostingRelatedByDuplicatesJobPostingId->getJobPostingId()) {
-            $this->aJobPostingRelatedByDuplicatesJobPostingId = null;
+        if ($this->aDuplicateJobPosting !== null && $this->duplicates_posting_id !== $this->aDuplicateJobPosting->getJobPostingId()) {
+            $this->aDuplicateJobPosting = null;
         }
     } // ensureConsistency
 
@@ -1387,13 +1417,14 @@ abstract class JobPosting implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->aJobSiteRecord = null;
-            $this->aGeoLocation = null;
-            $this->aJobPostingRelatedByDuplicatesJobPostingId = null;
+            $this->aJobSiteFromJP = null;
+            $this->aGeoLocationFromJP = null;
+            $this->aDuplicateJobPosting = null;
             $this->collJobPostingsRelatedByJobPostingId = null;
 
             $this->collUserJobMatches = null;
 
+            $this->collUserFromUJMs = null;
         } // if (deep)
     }
 
@@ -1514,25 +1545,25 @@ abstract class JobPosting implements ActiveRecordInterface
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
-            if ($this->aJobSiteRecord !== null) {
-                if ($this->aJobSiteRecord->isModified() || $this->aJobSiteRecord->isNew()) {
-                    $affectedRows += $this->aJobSiteRecord->save($con);
+            if ($this->aJobSiteFromJP !== null) {
+                if ($this->aJobSiteFromJP->isModified() || $this->aJobSiteFromJP->isNew()) {
+                    $affectedRows += $this->aJobSiteFromJP->save($con);
                 }
-                $this->setJobSiteRecord($this->aJobSiteRecord);
+                $this->setJobSiteFromJP($this->aJobSiteFromJP);
             }
 
-            if ($this->aGeoLocation !== null) {
-                if ($this->aGeoLocation->isModified() || $this->aGeoLocation->isNew()) {
-                    $affectedRows += $this->aGeoLocation->save($con);
+            if ($this->aGeoLocationFromJP !== null) {
+                if ($this->aGeoLocationFromJP->isModified() || $this->aGeoLocationFromJP->isNew()) {
+                    $affectedRows += $this->aGeoLocationFromJP->save($con);
                 }
-                $this->setGeoLocation($this->aGeoLocation);
+                $this->setGeoLocationFromJP($this->aGeoLocationFromJP);
             }
 
-            if ($this->aJobPostingRelatedByDuplicatesJobPostingId !== null) {
-                if ($this->aJobPostingRelatedByDuplicatesJobPostingId->isModified() || $this->aJobPostingRelatedByDuplicatesJobPostingId->isNew()) {
-                    $affectedRows += $this->aJobPostingRelatedByDuplicatesJobPostingId->save($con);
+            if ($this->aDuplicateJobPosting !== null) {
+                if ($this->aDuplicateJobPosting->isModified() || $this->aDuplicateJobPosting->isNew()) {
+                    $affectedRows += $this->aDuplicateJobPosting->save($con);
                 }
-                $this->setJobPostingRelatedByDuplicatesJobPostingId($this->aJobPostingRelatedByDuplicatesJobPostingId);
+                $this->setDuplicateJobPosting($this->aDuplicateJobPosting);
             }
 
             if ($this->isNew() || $this->isModified()) {
@@ -1545,6 +1576,35 @@ abstract class JobPosting implements ActiveRecordInterface
                 }
                 $this->resetModified();
             }
+
+            if ($this->userFromUJMsScheduledForDeletion !== null) {
+                if (!$this->userFromUJMsScheduledForDeletion->isEmpty()) {
+                    $pks = array();
+                    foreach ($this->userFromUJMsScheduledForDeletion as $entry) {
+                        $entryPk = [];
+
+                        $entryPk[1] = $this->getJobPostingId();
+                        $entryPk[0] = $entry->getUserId();
+                        $pks[] = $entryPk;
+                    }
+
+                    \JobScooper\DataAccess\UserJobMatchQuery::create()
+                        ->filterByPrimaryKeys($pks)
+                        ->delete($con);
+
+                    $this->userFromUJMsScheduledForDeletion = null;
+                }
+
+            }
+
+            if ($this->collUserFromUJMs) {
+                foreach ($this->collUserFromUJMs as $userFromUJM) {
+                    if (!$userFromUJM->isDeleted() && ($userFromUJM->isNew() || $userFromUJM->isModified())) {
+                        $userFromUJM->save($con);
+                    }
+                }
+            }
+
 
             if ($this->jobPostingsRelatedByJobPostingIdScheduledForDeletion !== null) {
                 if (!$this->jobPostingsRelatedByJobPostingIdScheduledForDeletion->isEmpty()) {
@@ -1602,9 +1662,6 @@ abstract class JobPosting implements ActiveRecordInterface
         $index = 0;
 
         $this->modifiedColumns[JobPostingTableMap::COL_JOBPOSTING_ID] = true;
-        if (null !== $this->jobposting_id) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key (' . JobPostingTableMap::COL_JOBPOSTING_ID . ')');
-        }
 
          // check the columns in natural order for more readable SQL queries
         if ($this->isColumnModified(JobPostingTableMap::COL_JOBPOSTING_ID)) {
@@ -1763,7 +1820,9 @@ abstract class JobPosting implements ActiveRecordInterface
         } catch (Exception $e) {
             throw new PropelException('Unable to get autoincrement id.', 0, $e);
         }
-        $this->setJobPostingId($pk);
+        if ($pk !== null) {
+            $this->setJobPostingId($pk);
+        }
 
         $this->setNew(false);
     }
@@ -1861,7 +1920,7 @@ abstract class JobPosting implements ActiveRecordInterface
                 return $this->getRemovedAt();
                 break;
             case 16:
-                return $this->getKeySiteAndPostID();
+                return $this->getKeySiteAndPostId();
                 break;
             case 17:
                 return $this->getKeyCompanyAndTitle();
@@ -1924,7 +1983,7 @@ abstract class JobPosting implements ActiveRecordInterface
             $keys[13] => $this->getPostedAt(),
             $keys[14] => $this->getFirstSeenAt(),
             $keys[15] => $this->getRemovedAt(),
-            $keys[16] => $this->getKeySiteAndPostID(),
+            $keys[16] => $this->getKeySiteAndPostId(),
             $keys[17] => $this->getKeyCompanyAndTitle(),
             $keys[18] => $this->getJobTitleLinked(),
             $keys[19] => $this->getLocationDisplayValue(),
@@ -1953,7 +2012,7 @@ abstract class JobPosting implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->aJobSiteRecord) {
+            if (null !== $this->aJobSiteFromJP) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
@@ -1963,12 +2022,12 @@ abstract class JobPosting implements ActiveRecordInterface
                         $key = 'job_site';
                         break;
                     default:
-                        $key = 'JobSiteRecord';
+                        $key = 'JobSiteFromJP';
                 }
 
-                $result[$key] = $this->aJobSiteRecord->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+                $result[$key] = $this->aJobSiteFromJP->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
-            if (null !== $this->aGeoLocation) {
+            if (null !== $this->aGeoLocationFromJP) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
@@ -1978,12 +2037,12 @@ abstract class JobPosting implements ActiveRecordInterface
                         $key = 'geolocation';
                         break;
                     default:
-                        $key = 'GeoLocation';
+                        $key = 'GeoLocationFromJP';
                 }
 
-                $result[$key] = $this->aGeoLocation->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+                $result[$key] = $this->aGeoLocationFromJP->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
-            if (null !== $this->aJobPostingRelatedByDuplicatesJobPostingId) {
+            if (null !== $this->aDuplicateJobPosting) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
@@ -1993,10 +2052,10 @@ abstract class JobPosting implements ActiveRecordInterface
                         $key = 'jobposting';
                         break;
                     default:
-                        $key = 'JobPosting';
+                        $key = 'DuplicateJobPosting';
                 }
 
-                $result[$key] = $this->aJobPostingRelatedByDuplicatesJobPostingId->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+                $result[$key] = $this->aDuplicateJobPosting->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
             if (null !== $this->collJobPostingsRelatedByJobPostingId) {
 
@@ -2111,7 +2170,7 @@ abstract class JobPosting implements ActiveRecordInterface
                 $this->setRemovedAt($value);
                 break;
             case 16:
-                $this->setKeySiteAndPostID($value);
+                $this->setKeySiteAndPostId($value);
                 break;
             case 17:
                 $this->setKeyCompanyAndTitle($value);
@@ -2203,7 +2262,7 @@ abstract class JobPosting implements ActiveRecordInterface
             $this->setRemovedAt($arr[$keys[15]]);
         }
         if (array_key_exists($keys[16], $arr)) {
-            $this->setKeySiteAndPostID($arr[$keys[16]]);
+            $this->setKeySiteAndPostId($arr[$keys[16]]);
         }
         if (array_key_exists($keys[17], $arr)) {
             $this->setKeyCompanyAndTitle($arr[$keys[17]]);
@@ -2428,7 +2487,7 @@ abstract class JobPosting implements ActiveRecordInterface
         $copyObj->setPostedAt($this->getPostedAt());
         $copyObj->setFirstSeenAt($this->getFirstSeenAt());
         $copyObj->setRemovedAt($this->getRemovedAt());
-        $copyObj->setKeySiteAndPostID($this->getKeySiteAndPostID());
+        $copyObj->setKeySiteAndPostId($this->getKeySiteAndPostId());
         $copyObj->setKeyCompanyAndTitle($this->getKeyCompanyAndTitle());
         $copyObj->setJobTitleLinked($this->getJobTitleLinked());
         $copyObj->setLocationDisplayValue($this->getLocationDisplayValue());
@@ -2489,7 +2548,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setJobSiteRecord(ChildJobSiteRecord $v = null)
+    public function setJobSiteFromJP(ChildJobSiteRecord $v = null)
     {
         if ($v === null) {
             $this->setJobSiteKey(NULL);
@@ -2497,7 +2556,7 @@ abstract class JobPosting implements ActiveRecordInterface
             $this->setJobSiteKey($v->getJobSiteKey());
         }
 
-        $this->aJobSiteRecord = $v;
+        $this->aJobSiteFromJP = $v;
 
         // Add binding for other direction of this n:n relationship.
         // If this object has already been added to the ChildJobSiteRecord object, it will not be re-added.
@@ -2517,20 +2576,20 @@ abstract class JobPosting implements ActiveRecordInterface
      * @return ChildJobSiteRecord The associated ChildJobSiteRecord object.
      * @throws PropelException
      */
-    public function getJobSiteRecord(ConnectionInterface $con = null)
+    public function getJobSiteFromJP(ConnectionInterface $con = null)
     {
-        if ($this->aJobSiteRecord === null && (($this->jobsite_key !== "" && $this->jobsite_key !== null))) {
-            $this->aJobSiteRecord = ChildJobSiteRecordQuery::create()->findPk($this->jobsite_key, $con);
+        if ($this->aJobSiteFromJP === null && (($this->jobsite_key !== "" && $this->jobsite_key !== null))) {
+            $this->aJobSiteFromJP = ChildJobSiteRecordQuery::create()->findPk($this->jobsite_key, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aJobSiteRecord->addJobPostings($this);
+                $this->aJobSiteFromJP->addJobPostings($this);
              */
         }
 
-        return $this->aJobSiteRecord;
+        return $this->aJobSiteFromJP;
     }
 
     /**
@@ -2540,7 +2599,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setGeoLocation(ChildGeoLocation $v = null)
+    public function setGeoLocationFromJP(ChildGeoLocation $v = null)
     {
         if ($v === null) {
             $this->setGeoLocationId(NULL);
@@ -2548,7 +2607,7 @@ abstract class JobPosting implements ActiveRecordInterface
             $this->setGeoLocationId($v->getGeoLocationId());
         }
 
-        $this->aGeoLocation = $v;
+        $this->aGeoLocationFromJP = $v;
 
         // Add binding for other direction of this n:n relationship.
         // If this object has already been added to the ChildGeoLocation object, it will not be re-added.
@@ -2568,20 +2627,20 @@ abstract class JobPosting implements ActiveRecordInterface
      * @return ChildGeoLocation The associated ChildGeoLocation object.
      * @throws PropelException
      */
-    public function getGeoLocation(ConnectionInterface $con = null)
+    public function getGeoLocationFromJP(ConnectionInterface $con = null)
     {
-        if ($this->aGeoLocation === null && ($this->geolocation_id != 0)) {
-            $this->aGeoLocation = ChildGeoLocationQuery::create()->findPk($this->geolocation_id, $con);
+        if ($this->aGeoLocationFromJP === null && ($this->geolocation_id != 0)) {
+            $this->aGeoLocationFromJP = ChildGeoLocationQuery::create()->findPk($this->geolocation_id, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aGeoLocation->addJobPostings($this);
+                $this->aGeoLocationFromJP->addJobPostings($this);
              */
         }
 
-        return $this->aGeoLocation;
+        return $this->aGeoLocationFromJP;
     }
 
     /**
@@ -2591,7 +2650,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setJobPostingRelatedByDuplicatesJobPostingId(ChildJobPosting $v = null)
+    public function setDuplicateJobPosting(ChildJobPosting $v = null)
     {
         if ($v === null) {
             $this->setDuplicatesJobPostingId(NULL);
@@ -2599,7 +2658,7 @@ abstract class JobPosting implements ActiveRecordInterface
             $this->setDuplicatesJobPostingId($v->getJobPostingId());
         }
 
-        $this->aJobPostingRelatedByDuplicatesJobPostingId = $v;
+        $this->aDuplicateJobPosting = $v;
 
         // Add binding for other direction of this n:n relationship.
         // If this object has already been added to the ChildJobPosting object, it will not be re-added.
@@ -2619,20 +2678,20 @@ abstract class JobPosting implements ActiveRecordInterface
      * @return ChildJobPosting The associated ChildJobPosting object.
      * @throws PropelException
      */
-    public function getJobPostingRelatedByDuplicatesJobPostingId(ConnectionInterface $con = null)
+    public function getDuplicateJobPosting(ConnectionInterface $con = null)
     {
-        if ($this->aJobPostingRelatedByDuplicatesJobPostingId === null && ($this->duplicates_posting_id != 0)) {
-            $this->aJobPostingRelatedByDuplicatesJobPostingId = ChildJobPostingQuery::create()->findPk($this->duplicates_posting_id, $con);
+        if ($this->aDuplicateJobPosting === null && ($this->duplicates_posting_id != 0)) {
+            $this->aDuplicateJobPosting = ChildJobPostingQuery::create()->findPk($this->duplicates_posting_id, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aJobPostingRelatedByDuplicatesJobPostingId->addJobPostingsRelatedByJobPostingId($this);
+                $this->aDuplicateJobPosting->addJobPostingsRelatedByJobPostingId($this);
              */
         }
 
-        return $this->aJobPostingRelatedByDuplicatesJobPostingId;
+        return $this->aDuplicateJobPosting;
     }
 
 
@@ -2725,7 +2784,7 @@ abstract class JobPosting implements ActiveRecordInterface
                 $this->initJobPostingsRelatedByJobPostingId();
             } else {
                 $collJobPostingsRelatedByJobPostingId = ChildJobPostingQuery::create(null, $criteria)
-                    ->filterByJobPostingRelatedByDuplicatesJobPostingId($this)
+                    ->filterByDuplicateJobPosting($this)
                     ->find($con);
 
                 if (null !== $criteria) {
@@ -2779,7 +2838,7 @@ abstract class JobPosting implements ActiveRecordInterface
         $this->jobPostingsRelatedByJobPostingIdScheduledForDeletion = $jobPostingsRelatedByJobPostingIdToDelete;
 
         foreach ($jobPostingsRelatedByJobPostingIdToDelete as $jobPostingRelatedByJobPostingIdRemoved) {
-            $jobPostingRelatedByJobPostingIdRemoved->setJobPostingRelatedByDuplicatesJobPostingId(null);
+            $jobPostingRelatedByJobPostingIdRemoved->setDuplicateJobPosting(null);
         }
 
         $this->collJobPostingsRelatedByJobPostingId = null;
@@ -2820,7 +2879,7 @@ abstract class JobPosting implements ActiveRecordInterface
             }
 
             return $query
-                ->filterByJobPostingRelatedByDuplicatesJobPostingId($this)
+                ->filterByDuplicateJobPosting($this)
                 ->count($con);
         }
 
@@ -2858,7 +2917,7 @@ abstract class JobPosting implements ActiveRecordInterface
     protected function doAddJobPostingRelatedByJobPostingId(ChildJobPosting $jobPostingRelatedByJobPostingId)
     {
         $this->collJobPostingsRelatedByJobPostingId[]= $jobPostingRelatedByJobPostingId;
-        $jobPostingRelatedByJobPostingId->setJobPostingRelatedByDuplicatesJobPostingId($this);
+        $jobPostingRelatedByJobPostingId->setDuplicateJobPosting($this);
     }
 
     /**
@@ -2875,7 +2934,7 @@ abstract class JobPosting implements ActiveRecordInterface
                 $this->jobPostingsRelatedByJobPostingIdScheduledForDeletion->clear();
             }
             $this->jobPostingsRelatedByJobPostingIdScheduledForDeletion[]= $jobPostingRelatedByJobPostingId;
-            $jobPostingRelatedByJobPostingId->setJobPostingRelatedByDuplicatesJobPostingId(null);
+            $jobPostingRelatedByJobPostingId->setDuplicateJobPosting(null);
         }
 
         return $this;
@@ -2898,10 +2957,10 @@ abstract class JobPosting implements ActiveRecordInterface
      * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
      * @return ObjectCollection|ChildJobPosting[] List of ChildJobPosting objects
      */
-    public function getJobPostingsRelatedByJobPostingIdJoinJobSiteRecord(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    public function getJobPostingsRelatedByJobPostingIdJoinJobSiteFromJP(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
     {
         $query = ChildJobPostingQuery::create(null, $criteria);
-        $query->joinWith('JobSiteRecord', $joinBehavior);
+        $query->joinWith('JobSiteFromJP', $joinBehavior);
 
         return $this->getJobPostingsRelatedByJobPostingId($query, $con);
     }
@@ -2923,10 +2982,10 @@ abstract class JobPosting implements ActiveRecordInterface
      * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
      * @return ObjectCollection|ChildJobPosting[] List of ChildJobPosting objects
      */
-    public function getJobPostingsRelatedByJobPostingIdJoinGeoLocation(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    public function getJobPostingsRelatedByJobPostingIdJoinGeoLocationFromJP(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
     {
         $query = ChildJobPostingQuery::create(null, $criteria);
-        $query->joinWith('GeoLocation', $joinBehavior);
+        $query->joinWith('GeoLocationFromJP', $joinBehavior);
 
         return $this->getJobPostingsRelatedByJobPostingId($query, $con);
     }
@@ -3000,7 +3059,7 @@ abstract class JobPosting implements ActiveRecordInterface
                 $this->initUserJobMatches();
             } else {
                 $collUserJobMatches = ChildUserJobMatchQuery::create(null, $criteria)
-                    ->filterByJobPosting($this)
+                    ->filterByJobPostingFromUJM($this)
                     ->find($con);
 
                 if (null !== $criteria) {
@@ -3051,10 +3110,13 @@ abstract class JobPosting implements ActiveRecordInterface
         $userJobMatchesToDelete = $this->getUserJobMatches(new Criteria(), $con)->diff($userJobMatches);
 
 
-        $this->userJobMatchesScheduledForDeletion = $userJobMatchesToDelete;
+        //since at least one column in the foreign key is at the same time a PK
+        //we can not just set a PK to NULL in the lines below. We have to store
+        //a backup of all values, so we are able to manipulate these items based on the onDelete value later.
+        $this->userJobMatchesScheduledForDeletion = clone $userJobMatchesToDelete;
 
         foreach ($userJobMatchesToDelete as $userJobMatchRemoved) {
-            $userJobMatchRemoved->setJobPosting(null);
+            $userJobMatchRemoved->setJobPostingFromUJM(null);
         }
 
         $this->collUserJobMatches = null;
@@ -3095,7 +3157,7 @@ abstract class JobPosting implements ActiveRecordInterface
             }
 
             return $query
-                ->filterByJobPosting($this)
+                ->filterByJobPostingFromUJM($this)
                 ->count($con);
         }
 
@@ -3133,7 +3195,7 @@ abstract class JobPosting implements ActiveRecordInterface
     protected function doAddUserJobMatch(ChildUserJobMatch $userJobMatch)
     {
         $this->collUserJobMatches[]= $userJobMatch;
-        $userJobMatch->setJobPosting($this);
+        $userJobMatch->setJobPostingFromUJM($this);
     }
 
     /**
@@ -3150,7 +3212,7 @@ abstract class JobPosting implements ActiveRecordInterface
                 $this->userJobMatchesScheduledForDeletion->clear();
             }
             $this->userJobMatchesScheduledForDeletion[]= clone $userJobMatch;
-            $userJobMatch->setJobPosting(null);
+            $userJobMatch->setJobPostingFromUJM(null);
         }
 
         return $this;
@@ -3173,12 +3235,255 @@ abstract class JobPosting implements ActiveRecordInterface
      * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
      * @return ObjectCollection|ChildUserJobMatch[] List of ChildUserJobMatch objects
      */
-    public function getUserJobMatchesJoinUser(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    public function getUserJobMatchesJoinUserFromUJM(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
     {
         $query = ChildUserJobMatchQuery::create(null, $criteria);
-        $query->joinWith('User', $joinBehavior);
+        $query->joinWith('UserFromUJM', $joinBehavior);
 
         return $this->getUserJobMatches($query, $con);
+    }
+
+    /**
+     * Clears out the collUserFromUJMs collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return void
+     * @see        addUserFromUJMs()
+     */
+    public function clearUserFromUJMs()
+    {
+        $this->collUserFromUJMs = null; // important to set this to NULL since that means it is uninitialized
+    }
+
+    /**
+     * Initializes the collUserFromUJMs crossRef collection.
+     *
+     * By default this just sets the collUserFromUJMs collection to an empty collection (like clearUserFromUJMs());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @return void
+     */
+    public function initUserFromUJMs()
+    {
+        $collectionClassName = UserJobMatchTableMap::getTableMap()->getCollectionClassName();
+
+        $this->collUserFromUJMs = new $collectionClassName;
+        $this->collUserFromUJMsPartial = true;
+        $this->collUserFromUJMs->setModel('\JobScooper\DataAccess\User');
+    }
+
+    /**
+     * Checks if the collUserFromUJMs collection is loaded.
+     *
+     * @return bool
+     */
+    public function isUserFromUJMsLoaded()
+    {
+        return null !== $this->collUserFromUJMs;
+    }
+
+    /**
+     * Gets a collection of ChildUser objects related by a many-to-many relationship
+     * to the current object by way of the user_job_match cross-reference table.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this ChildJobPosting is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param      Criteria $criteria Optional query object to filter the query
+     * @param      ConnectionInterface $con Optional connection object
+     *
+     * @return ObjectCollection|ChildUser[] List of ChildUser objects
+     */
+    public function getUserFromUJMs(Criteria $criteria = null, ConnectionInterface $con = null)
+    {
+        $partial = $this->collUserFromUJMsPartial && !$this->isNew();
+        if (null === $this->collUserFromUJMs || null !== $criteria || $partial) {
+            if ($this->isNew()) {
+                // return empty collection
+                if (null === $this->collUserFromUJMs) {
+                    $this->initUserFromUJMs();
+                }
+            } else {
+
+                $query = ChildUserQuery::create(null, $criteria)
+                    ->filterByJobPostingFromUJM($this);
+                $collUserFromUJMs = $query->find($con);
+                if (null !== $criteria) {
+                    return $collUserFromUJMs;
+                }
+
+                if ($partial && $this->collUserFromUJMs) {
+                    //make sure that already added objects gets added to the list of the database.
+                    foreach ($this->collUserFromUJMs as $obj) {
+                        if (!$collUserFromUJMs->contains($obj)) {
+                            $collUserFromUJMs[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collUserFromUJMs = $collUserFromUJMs;
+                $this->collUserFromUJMsPartial = false;
+            }
+        }
+
+        return $this->collUserFromUJMs;
+    }
+
+    /**
+     * Sets a collection of User objects related by a many-to-many relationship
+     * to the current object by way of the user_job_match cross-reference table.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param  Collection $userFromUJMs A Propel collection.
+     * @param  ConnectionInterface $con Optional connection object
+     * @return $this|ChildJobPosting The current object (for fluent API support)
+     */
+    public function setUserFromUJMs(Collection $userFromUJMs, ConnectionInterface $con = null)
+    {
+        $this->clearUserFromUJMs();
+        $currentUserFromUJMs = $this->getUserFromUJMs();
+
+        $userFromUJMsScheduledForDeletion = $currentUserFromUJMs->diff($userFromUJMs);
+
+        foreach ($userFromUJMsScheduledForDeletion as $toDelete) {
+            $this->removeUserFromUJM($toDelete);
+        }
+
+        foreach ($userFromUJMs as $userFromUJM) {
+            if (!$currentUserFromUJMs->contains($userFromUJM)) {
+                $this->doAddUserFromUJM($userFromUJM);
+            }
+        }
+
+        $this->collUserFromUJMsPartial = false;
+        $this->collUserFromUJMs = $userFromUJMs;
+
+        return $this;
+    }
+
+    /**
+     * Gets the number of User objects related by a many-to-many relationship
+     * to the current object by way of the user_job_match cross-reference table.
+     *
+     * @param      Criteria $criteria Optional query object to filter the query
+     * @param      boolean $distinct Set to true to force count distinct
+     * @param      ConnectionInterface $con Optional connection object
+     *
+     * @return int the number of related User objects
+     */
+    public function countUserFromUJMs(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    {
+        $partial = $this->collUserFromUJMsPartial && !$this->isNew();
+        if (null === $this->collUserFromUJMs || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collUserFromUJMs) {
+                return 0;
+            } else {
+
+                if ($partial && !$criteria) {
+                    return count($this->getUserFromUJMs());
+                }
+
+                $query = ChildUserQuery::create(null, $criteria);
+                if ($distinct) {
+                    $query->distinct();
+                }
+
+                return $query
+                    ->filterByJobPostingFromUJM($this)
+                    ->count($con);
+            }
+        } else {
+            return count($this->collUserFromUJMs);
+        }
+    }
+
+    /**
+     * Associate a ChildUser to this object
+     * through the user_job_match cross reference table.
+     *
+     * @param ChildUser $userFromUJM
+     * @return ChildJobPosting The current object (for fluent API support)
+     */
+    public function addUserFromUJM(ChildUser $userFromUJM)
+    {
+        if ($this->collUserFromUJMs === null) {
+            $this->initUserFromUJMs();
+        }
+
+        if (!$this->getUserFromUJMs()->contains($userFromUJM)) {
+            // only add it if the **same** object is not already associated
+            $this->collUserFromUJMs->push($userFromUJM);
+            $this->doAddUserFromUJM($userFromUJM);
+        }
+
+        return $this;
+    }
+
+    /**
+     *
+     * @param ChildUser $userFromUJM
+     */
+    protected function doAddUserFromUJM(ChildUser $userFromUJM)
+    {
+        $userJobMatch = new ChildUserJobMatch();
+
+        $userJobMatch->setUserFromUJM($userFromUJM);
+
+        $userJobMatch->setJobPostingFromUJM($this);
+
+        $this->addUserJobMatch($userJobMatch);
+
+        // set the back reference to this object directly as using provided method either results
+        // in endless loop or in multiple relations
+        if (!$userFromUJM->isJobPostingFromUJMsLoaded()) {
+            $userFromUJM->initJobPostingFromUJMs();
+            $userFromUJM->getJobPostingFromUJMs()->push($this);
+        } elseif (!$userFromUJM->getJobPostingFromUJMs()->contains($this)) {
+            $userFromUJM->getJobPostingFromUJMs()->push($this);
+        }
+
+    }
+
+    /**
+     * Remove userFromUJM of this object
+     * through the user_job_match cross reference table.
+     *
+     * @param ChildUser $userFromUJM
+     * @return ChildJobPosting The current object (for fluent API support)
+     */
+    public function removeUserFromUJM(ChildUser $userFromUJM)
+    {
+        if ($this->getUserFromUJMs()->contains($userFromUJM)) {
+            $userJobMatch = new ChildUserJobMatch();
+            $userJobMatch->setUserFromUJM($userFromUJM);
+            if ($userFromUJM->isJobPostingFromUJMsLoaded()) {
+                //remove the back reference if available
+                $userFromUJM->getJobPostingFromUJMs()->removeObject($this);
+            }
+
+            $userJobMatch->setJobPostingFromUJM($this);
+            $this->removeUserJobMatch(clone $userJobMatch);
+            $userJobMatch->clear();
+
+            $this->collUserFromUJMs->remove($this->collUserFromUJMs->search($userFromUJM));
+
+            if (null === $this->userFromUJMsScheduledForDeletion) {
+                $this->userFromUJMsScheduledForDeletion = clone $this->collUserFromUJMs;
+                $this->userFromUJMsScheduledForDeletion->clear();
+            }
+
+            $this->userFromUJMsScheduledForDeletion->push($userFromUJM);
+        }
+
+
+        return $this;
     }
 
     /**
@@ -3188,14 +3493,14 @@ abstract class JobPosting implements ActiveRecordInterface
      */
     public function clear()
     {
-        if (null !== $this->aJobSiteRecord) {
-            $this->aJobSiteRecord->removeJobPosting($this);
+        if (null !== $this->aJobSiteFromJP) {
+            $this->aJobSiteFromJP->removeJobPosting($this);
         }
-        if (null !== $this->aGeoLocation) {
-            $this->aGeoLocation->removeJobPosting($this);
+        if (null !== $this->aGeoLocationFromJP) {
+            $this->aGeoLocationFromJP->removeJobPosting($this);
         }
-        if (null !== $this->aJobPostingRelatedByDuplicatesJobPostingId) {
-            $this->aJobPostingRelatedByDuplicatesJobPostingId->removeJobPostingRelatedByJobPostingId($this);
+        if (null !== $this->aDuplicateJobPosting) {
+            $this->aDuplicateJobPosting->removeJobPostingRelatedByJobPostingId($this);
         }
         $this->jobposting_id = null;
         $this->jobsite_key = null;
@@ -3247,23 +3552,29 @@ abstract class JobPosting implements ActiveRecordInterface
                     $o->clearAllReferences($deep);
                 }
             }
+            if ($this->collUserFromUJMs) {
+                foreach ($this->collUserFromUJMs as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
         } // if ($deep)
 
         $this->collJobPostingsRelatedByJobPostingId = null;
         $this->collUserJobMatches = null;
-        $this->aJobSiteRecord = null;
-        $this->aGeoLocation = null;
-        $this->aJobPostingRelatedByDuplicatesJobPostingId = null;
+        $this->collUserFromUJMs = null;
+        $this->aJobSiteFromJP = null;
+        $this->aGeoLocationFromJP = null;
+        $this->aDuplicateJobPosting = null;
     }
 
     /**
      * Return the string representation of this object
      *
-     * @return string The value of the 'key_site_and_post_id' column
+     * @return string
      */
     public function __toString()
     {
-        return (string) $this->getKeySiteAndPostID();
+        return (string) $this->exportTo(JobPostingTableMap::DEFAULT_STRING_FORMAT);
     }
 
     // timestampable behavior

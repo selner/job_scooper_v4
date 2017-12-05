@@ -2,8 +2,8 @@
 
 namespace JobScooper\DataAccess\Map;
 
-use JobScooper\DataAccess\UserSearchRunVersion;
-use JobScooper\DataAccess\UserSearchRunVersionQuery;
+use JobScooper\DataAccess\UserKeywordSet;
+use JobScooper\DataAccess\UserKeywordSetQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\InstancePoolTrait;
@@ -16,7 +16,7 @@ use Propel\Runtime\Map\TableMapTrait;
 
 
 /**
- * This class defines the structure of the 'user_search_run_version' table.
+ * This class defines the structure of the 'user_keyword_set' table.
  *
  *
  *
@@ -26,7 +26,7 @@ use Propel\Runtime\Map\TableMapTrait;
  * (i.e. if it's a text column type).
  *
  */
-class UserSearchRunVersionTableMap extends TableMap
+class UserKeywordSetTableMap extends TableMap
 {
     use InstancePoolTrait;
     use TableMapTrait;
@@ -34,7 +34,7 @@ class UserSearchRunVersionTableMap extends TableMap
     /**
      * The (dot-path) name of this class
      */
-    const CLASS_NAME = 'JobScooper.DataAccess.Map.UserSearchRunVersionTableMap';
+    const CLASS_NAME = 'JobScooper.DataAccess.Map.UserKeywordSetTableMap';
 
     /**
      * The default database name for this class
@@ -44,17 +44,17 @@ class UserSearchRunVersionTableMap extends TableMap
     /**
      * The table name for this class
      */
-    const TABLE_NAME = 'user_search_run_version';
+    const TABLE_NAME = 'user_keyword_set';
 
     /**
      * The related Propel class for this table
      */
-    const OM_CLASS = '\\JobScooper\\DataAccess\\UserSearchRunVersion';
+    const OM_CLASS = '\\JobScooper\\DataAccess\\UserKeywordSet';
 
     /**
      * A class that can be returned by this tableMap
      */
-    const CLASS_DEFAULT = 'JobScooper.DataAccess.UserSearchRunVersion';
+    const CLASS_DEFAULT = 'JobScooper.DataAccess.UserKeywordSet';
 
     /**
      * The total number of columns
@@ -72,46 +72,39 @@ class UserSearchRunVersionTableMap extends TableMap
     const NUM_HYDRATE_COLUMNS = 6;
 
     /**
-     * the column name for the user_search_run_id field
+     * the column name for the user_id field
      */
-    const COL_USER_SEARCH_RUN_ID = 'user_search_run_version.user_search_run_id';
+    const COL_USER_ID = 'user_keyword_set.user_id';
 
     /**
-     * the column name for the search_parameters_data field
+     * the column name for the user_keyword_set_id field
      */
-    const COL_SEARCH_PARAMETERS_DATA = 'user_search_run_version.search_parameters_data';
+    const COL_USER_KEYWORD_SET_ID = 'user_keyword_set.user_keyword_set_id';
 
     /**
-     * the column name for the last_app_run_id field
+     * the column name for the keywords field
      */
-    const COL_LAST_APP_RUN_ID = 'user_search_run_version.last_app_run_id';
+    const COL_KEYWORDS = 'user_keyword_set.keywords';
 
     /**
-     * the column name for the run_result field
+     * the column name for the search_key_from_config field
      */
-    const COL_RUN_RESULT = 'user_search_run_version.run_result';
+    const COL_SEARCH_KEY_FROM_CONFIG = 'user_keyword_set.search_key_from_config';
 
     /**
-     * the column name for the run_error_details field
+     * the column name for the keyword_tokens field
      */
-    const COL_RUN_ERROR_DETAILS = 'user_search_run_version.run_error_details';
+    const COL_KEYWORD_TOKENS = 'user_keyword_set.keyword_tokens';
 
     /**
-     * the column name for the version field
+     * the column name for the user_keyword_set_key field
      */
-    const COL_VERSION = 'user_search_run_version.version';
+    const COL_USER_KEYWORD_SET_KEY = 'user_keyword_set.user_keyword_set_key';
 
     /**
      * The default string format for model objects of the related table
      */
     const DEFAULT_STRING_FORMAT = 'YAML';
-
-    /** The enumerated values for the run_result field */
-    const COL_RUN_RESULT_NOT_RUN = 'not-run';
-    const COL_RUN_RESULT_FAILED = 'failed';
-    const COL_RUN_RESULT_EXCLUDED = 'excluded';
-    const COL_RUN_RESULT_SKIPPED = 'skipped';
-    const COL_RUN_RESULT_SUCCESSFUL = 'successful';
 
     /**
      * holds an array of fieldnames
@@ -120,10 +113,10 @@ class UserSearchRunVersionTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('UserSearchRunId', 'SearchParametersData', 'AppRunId', 'RunResultCode', 'RunErrorDetails', 'Version', ),
-        self::TYPE_CAMELNAME     => array('userSearchRunId', 'searchParametersData', 'appRunId', 'runResultCode', 'runErrorDetails', 'version', ),
-        self::TYPE_COLNAME       => array(UserSearchRunVersionTableMap::COL_USER_SEARCH_RUN_ID, UserSearchRunVersionTableMap::COL_SEARCH_PARAMETERS_DATA, UserSearchRunVersionTableMap::COL_LAST_APP_RUN_ID, UserSearchRunVersionTableMap::COL_RUN_RESULT, UserSearchRunVersionTableMap::COL_RUN_ERROR_DETAILS, UserSearchRunVersionTableMap::COL_VERSION, ),
-        self::TYPE_FIELDNAME     => array('user_search_run_id', 'search_parameters_data', 'last_app_run_id', 'run_result', 'run_error_details', 'version', ),
+        self::TYPE_PHPNAME       => array('UserId', 'UserKeywordSetId', 'Keywords', 'SearchKeyFromConfig', 'KeywordTokens', 'UserKeywordSetKey', ),
+        self::TYPE_CAMELNAME     => array('userId', 'userKeywordSetId', 'keywords', 'searchKeyFromConfig', 'keywordTokens', 'userKeywordSetKey', ),
+        self::TYPE_COLNAME       => array(UserKeywordSetTableMap::COL_USER_ID, UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID, UserKeywordSetTableMap::COL_KEYWORDS, UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG, UserKeywordSetTableMap::COL_KEYWORD_TOKENS, UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY, ),
+        self::TYPE_FIELDNAME     => array('user_id', 'user_keyword_set_id', 'keywords', 'search_key_from_config', 'keyword_tokens', 'user_keyword_set_key', ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
     );
 
@@ -134,44 +127,12 @@ class UserSearchRunVersionTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('UserSearchRunId' => 0, 'SearchParametersData' => 1, 'AppRunId' => 2, 'RunResultCode' => 3, 'RunErrorDetails' => 4, 'Version' => 5, ),
-        self::TYPE_CAMELNAME     => array('userSearchRunId' => 0, 'searchParametersData' => 1, 'appRunId' => 2, 'runResultCode' => 3, 'runErrorDetails' => 4, 'version' => 5, ),
-        self::TYPE_COLNAME       => array(UserSearchRunVersionTableMap::COL_USER_SEARCH_RUN_ID => 0, UserSearchRunVersionTableMap::COL_SEARCH_PARAMETERS_DATA => 1, UserSearchRunVersionTableMap::COL_LAST_APP_RUN_ID => 2, UserSearchRunVersionTableMap::COL_RUN_RESULT => 3, UserSearchRunVersionTableMap::COL_RUN_ERROR_DETAILS => 4, UserSearchRunVersionTableMap::COL_VERSION => 5, ),
-        self::TYPE_FIELDNAME     => array('user_search_run_id' => 0, 'search_parameters_data' => 1, 'last_app_run_id' => 2, 'run_result' => 3, 'run_error_details' => 4, 'version' => 5, ),
+        self::TYPE_PHPNAME       => array('UserId' => 0, 'UserKeywordSetId' => 1, 'Keywords' => 2, 'SearchKeyFromConfig' => 3, 'KeywordTokens' => 4, 'UserKeywordSetKey' => 5, ),
+        self::TYPE_CAMELNAME     => array('userId' => 0, 'userKeywordSetId' => 1, 'keywords' => 2, 'searchKeyFromConfig' => 3, 'keywordTokens' => 4, 'userKeywordSetKey' => 5, ),
+        self::TYPE_COLNAME       => array(UserKeywordSetTableMap::COL_USER_ID => 0, UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID => 1, UserKeywordSetTableMap::COL_KEYWORDS => 2, UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG => 3, UserKeywordSetTableMap::COL_KEYWORD_TOKENS => 4, UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY => 5, ),
+        self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_keyword_set_id' => 1, 'keywords' => 2, 'search_key_from_config' => 3, 'keyword_tokens' => 4, 'user_keyword_set_key' => 5, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
     );
-
-    /** The enumerated values for this table */
-    protected static $enumValueSets = array(
-                UserSearchRunVersionTableMap::COL_RUN_RESULT => array(
-                            self::COL_RUN_RESULT_NOT_RUN,
-            self::COL_RUN_RESULT_FAILED,
-            self::COL_RUN_RESULT_EXCLUDED,
-            self::COL_RUN_RESULT_SKIPPED,
-            self::COL_RUN_RESULT_SUCCESSFUL,
-        ),
-    );
-
-    /**
-     * Gets the list of values for all ENUM and SET columns
-     * @return array
-     */
-    public static function getValueSets()
-    {
-      return static::$enumValueSets;
-    }
-
-    /**
-     * Gets the list of values for an ENUM or SET column
-     * @param string $colname
-     * @return array list of possible values for the column
-     */
-    public static function getValueSet($colname)
-    {
-        $valueSets = self::getValueSets();
-
-        return $valueSets[$colname];
-    }
 
     /**
      * Initialize the table attributes and columns
@@ -183,26 +144,21 @@ class UserSearchRunVersionTableMap extends TableMap
     public function initialize()
     {
         // attributes
-        $this->setName('user_search_run_version');
-        $this->setPhpName('UserSearchRunVersion');
+        $this->setName('user_keyword_set');
+        $this->setPhpName('UserKeywordSet');
         $this->setIdentifierQuoting(false);
-        $this->setClassName('\\JobScooper\\DataAccess\\UserSearchRunVersion');
+        $this->setClassName('\\JobScooper\\DataAccess\\UserKeywordSet');
         $this->setPackage('JobScooper.DataAccess');
-        $this->setUseIdGenerator(false);
+        $this->setUseIdGenerator(true);
+        $this->setIsCrossRef(true);
         // columns
-        $this->addForeignPrimaryKey('user_search_run_id', 'UserSearchRunId', 'INTEGER' , 'user_search_run', 'user_search_run_id', true, null, null);
-        $this->addColumn('search_parameters_data', 'SearchParametersData', 'LONGVARCHAR', false, null, null);
-        $this->addColumn('last_app_run_id', 'AppRunId', 'VARCHAR', false, 75, null);
-        $this->addColumn('run_result', 'RunResultCode', 'ENUM', false, null, 'not-run');
-        $this->getColumn('run_result')->setValueSet(array (
-  0 => 'not-run',
-  1 => 'failed',
-  2 => 'excluded',
-  3 => 'skipped',
-  4 => 'successful',
-));
-        $this->addColumn('run_error_details', 'RunErrorDetails', 'ARRAY', false, null, null);
-        $this->addPrimaryKey('version', 'Version', 'INTEGER', true, null, 0);
+        $this->addForeignPrimaryKey('user_id', 'UserId', 'INTEGER' , 'user', 'user_id', true, null, null);
+        $this->addPrimaryKey('user_keyword_set_id', 'UserKeywordSetId', 'INTEGER', true, null, null);
+        $this->addColumn('keywords', 'Keywords', 'ARRAY', true, null, null);
+        $this->addColumn('search_key_from_config', 'SearchKeyFromConfig', 'VARCHAR', true, 50, null);
+        $this->addColumn('keyword_tokens', 'KeywordTokens', 'ARRAY', false, null, null);
+        $this->addColumn('user_keyword_set_key', 'UserKeywordSetKey', 'VARCHAR', true, 128, null);
+        $this->getColumn('user_keyword_set_key')->setPrimaryString(true);
     } // initialize()
 
     /**
@@ -210,14 +166,55 @@ class UserSearchRunVersionTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('UserSearchRun', '\\JobScooper\\DataAccess\\UserSearchRun', RelationMap::MANY_TO_ONE, array (
+        $this->addRelation('UserFromUKS', '\\JobScooper\\DataAccess\\User', RelationMap::MANY_TO_ONE, array (
   0 =>
   array (
-    0 => ':user_search_run_id',
-    1 => ':user_search_run_id',
+    0 => ':user_id',
+    1 => ':user_id',
   ),
 ), 'CASCADE', null, null, false);
+        $this->addRelation('UserSearch', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::ONE_TO_MANY, array (
+  0 =>
+  array (
+    0 => ':user_keyword_set_id',
+    1 => ':user_keyword_set_id',
+  ),
+  1 =>
+  array (
+    0 => ':user_id',
+    1 => ':user_id',
+  ),
+), null, null, 'UserSearches', false);
+        $this->addRelation('UserSearchSiteRun', '\\JobScooper\\DataAccess\\UserSearchSiteRun', RelationMap::ONE_TO_MANY, array (
+  0 =>
+  array (
+    0 => ':user_id',
+    1 => ':user_id',
+  ),
+  1 =>
+  array (
+    0 => ':user_keyword_set_id',
+    1 => ':user_keyword_set_id',
+  ),
+), 'CASCADE', null, 'UserSearchSiteRuns', false);
+        $this->addRelation('GeoLocationFromUS', '\\JobScooper\\DataAccess\\GeoLocation', RelationMap::MANY_TO_MANY, array(), null, null, 'GeoLocationFromuses');
+        $this->addRelation('UserFromUS', '\\JobScooper\\DataAccess\\User', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserFromuses');
+        $this->addRelation('UserSearchFromUSSR', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserSearchFromUSSRs');
+        $this->addRelation('JobSiteFromUSSR', '\\JobScooper\\DataAccess\\JobSiteRecord', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'JobSiteFromUSSRs');
     } // buildRelations()
+
+    /**
+     *
+     * Gets the list of behaviors registered for this table
+     *
+     * @return array Associative array (name => parameters) of behaviors
+     */
+    public function getBehaviors()
+    {
+        return array(
+            'sluggable' => array('slug_column' => 'user_keyword_set_key', 'slug_pattern' => 'user{UserId}_kwd{UserKeywordSetId}_search{SearchKeyFromConfig}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '_', 'permanent' => 'false', 'scope_column' => '', 'unique_constraint' => 'true', ),
+        );
+    } // getBehaviors()
 
     /**
      * Adds an object to the instance pool.
@@ -227,14 +224,14 @@ class UserSearchRunVersionTableMap extends TableMap
      * to the cache in order to ensure that the same objects are always returned by find*()
      * and findPk*() calls.
      *
-     * @param \JobScooper\DataAccess\UserSearchRunVersion $obj A \JobScooper\DataAccess\UserSearchRunVersion object.
+     * @param \JobScooper\DataAccess\UserKeywordSet $obj A \JobScooper\DataAccess\UserKeywordSet object.
      * @param string $key             (optional) key to use for instance map (for performance boost if key was already calculated externally).
      */
     public static function addInstanceToPool($obj, $key = null)
     {
         if (Propel::isInstancePoolingEnabled()) {
             if (null === $key) {
-                $key = serialize([(null === $obj->getUserSearchRunId() || is_scalar($obj->getUserSearchRunId()) || is_callable([$obj->getUserSearchRunId(), '__toString']) ? (string) $obj->getUserSearchRunId() : $obj->getUserSearchRunId()), (null === $obj->getVersion() || is_scalar($obj->getVersion()) || is_callable([$obj->getVersion(), '__toString']) ? (string) $obj->getVersion() : $obj->getVersion())]);
+                $key = serialize([(null === $obj->getUserId() || is_scalar($obj->getUserId()) || is_callable([$obj->getUserId(), '__toString']) ? (string) $obj->getUserId() : $obj->getUserId()), (null === $obj->getUserKeywordSetId() || is_scalar($obj->getUserKeywordSetId()) || is_callable([$obj->getUserKeywordSetId(), '__toString']) ? (string) $obj->getUserKeywordSetId() : $obj->getUserKeywordSetId())]);
             } // if key === null
             self::$instances[$key] = $obj;
         }
@@ -248,13 +245,13 @@ class UserSearchRunVersionTableMap extends TableMap
      * methods in your stub classes -- you may need to explicitly remove objects
      * from the cache in order to prevent returning objects that no longer exist.
      *
-     * @param mixed $value A \JobScooper\DataAccess\UserSearchRunVersion object or a primary key value.
+     * @param mixed $value A \JobScooper\DataAccess\UserKeywordSet object or a primary key value.
      */
     public static function removeInstanceFromPool($value)
     {
         if (Propel::isInstancePoolingEnabled() && null !== $value) {
-            if (is_object($value) && $value instanceof \JobScooper\DataAccess\UserSearchRunVersion) {
-                $key = serialize([(null === $value->getUserSearchRunId() || is_scalar($value->getUserSearchRunId()) || is_callable([$value->getUserSearchRunId(), '__toString']) ? (string) $value->getUserSearchRunId() : $value->getUserSearchRunId()), (null === $value->getVersion() || is_scalar($value->getVersion()) || is_callable([$value->getVersion(), '__toString']) ? (string) $value->getVersion() : $value->getVersion())]);
+            if (is_object($value) && $value instanceof \JobScooper\DataAccess\UserKeywordSet) {
+                $key = serialize([(null === $value->getUserId() || is_scalar($value->getUserId()) || is_callable([$value->getUserId(), '__toString']) ? (string) $value->getUserId() : $value->getUserId()), (null === $value->getUserKeywordSetId() || is_scalar($value->getUserKeywordSetId()) || is_callable([$value->getUserKeywordSetId(), '__toString']) ? (string) $value->getUserKeywordSetId() : $value->getUserKeywordSetId())]);
 
             } elseif (is_array($value) && count($value) === 2) {
                 // assume we've been passed a primary key";
@@ -264,12 +261,21 @@ class UserSearchRunVersionTableMap extends TableMap
 
                 return;
             } else {
-                $e = new PropelException("Invalid value passed to removeInstanceFromPool().  Expected primary key or \JobScooper\DataAccess\UserSearchRunVersion object; got " . (is_object($value) ? get_class($value) . ' object.' : var_export($value, true)));
+                $e = new PropelException("Invalid value passed to removeInstanceFromPool().  Expected primary key or \JobScooper\DataAccess\UserKeywordSet object; got " . (is_object($value) ? get_class($value) . ' object.' : var_export($value, true)));
                 throw $e;
             }
 
             unset(self::$instances[$key]);
         }
+    }
+    /**
+     * Method to invalidate the instance pool of all tables related to user_keyword_set     * by a foreign key with ON DELETE CASCADE
+     */
+    public static function clearRelatedInstancePool()
+    {
+        // Invalidate objects in related instance pools,
+        // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
+        UserSearchSiteRunTableMap::clearInstancePool();
     }
 
     /**
@@ -288,11 +294,11 @@ class UserSearchRunVersionTableMap extends TableMap
     public static function getPrimaryKeyHashFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
         // If the PK cannot be derived from the row, return NULL.
-        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchRunId', TableMap::TYPE_PHPNAME, $indexType)] === null && $row[TableMap::TYPE_NUM == $indexType ? 5 + $offset : static::translateFieldName('Version', TableMap::TYPE_PHPNAME, $indexType)] === null) {
+        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] === null && $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
             return null;
         }
 
-        return serialize([(null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchRunId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchRunId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchRunId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchRunId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchRunId', TableMap::TYPE_PHPNAME, $indexType)]), (null === $row[TableMap::TYPE_NUM == $indexType ? 5 + $offset : static::translateFieldName('Version', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 5 + $offset : static::translateFieldName('Version', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 5 + $offset : static::translateFieldName('Version', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 5 + $offset : static::translateFieldName('Version', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 5 + $offset : static::translateFieldName('Version', TableMap::TYPE_PHPNAME, $indexType)])]);
+        return serialize([(null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)]), (null === $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)])]);
     }
 
     /**
@@ -314,12 +320,12 @@ class UserSearchRunVersionTableMap extends TableMap
         $pks[] = (int) $row[
             $indexType == TableMap::TYPE_NUM
                 ? 0 + $offset
-                : self::translateFieldName('UserSearchRunId', TableMap::TYPE_PHPNAME, $indexType)
+                : self::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)
         ];
         $pks[] = (int) $row[
             $indexType == TableMap::TYPE_NUM
-                ? 5 + $offset
-                : self::translateFieldName('Version', TableMap::TYPE_PHPNAME, $indexType)
+                ? 1 + $offset
+                : self::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)
         ];
 
         return $pks;
@@ -338,7 +344,7 @@ class UserSearchRunVersionTableMap extends TableMap
      */
     public static function getOMClass($withPrefix = true)
     {
-        return $withPrefix ? UserSearchRunVersionTableMap::CLASS_DEFAULT : UserSearchRunVersionTableMap::OM_CLASS;
+        return $withPrefix ? UserKeywordSetTableMap::CLASS_DEFAULT : UserKeywordSetTableMap::OM_CLASS;
     }
 
     /**
@@ -352,22 +358,22 @@ class UserSearchRunVersionTableMap extends TableMap
      *
      * @throws PropelException Any exceptions caught during processing will be
      *                         rethrown wrapped into a PropelException.
-     * @return array           (UserSearchRunVersion object, last column rank)
+     * @return array           (UserKeywordSet object, last column rank)
      */
     public static function populateObject($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-        $key = UserSearchRunVersionTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
-        if (null !== ($obj = UserSearchRunVersionTableMap::getInstanceFromPool($key))) {
+        $key = UserKeywordSetTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
+        if (null !== ($obj = UserKeywordSetTableMap::getInstanceFromPool($key))) {
             // We no longer rehydrate the object, since this can cause data loss.
             // See http://www.propelorm.org/ticket/509
             // $obj->hydrate($row, $offset, true); // rehydrate
-            $col = $offset + UserSearchRunVersionTableMap::NUM_HYDRATE_COLUMNS;
+            $col = $offset + UserKeywordSetTableMap::NUM_HYDRATE_COLUMNS;
         } else {
-            $cls = UserSearchRunVersionTableMap::OM_CLASS;
-            /** @var UserSearchRunVersion $obj */
+            $cls = UserKeywordSetTableMap::OM_CLASS;
+            /** @var UserKeywordSet $obj */
             $obj = new $cls();
             $col = $obj->hydrate($row, $offset, false, $indexType);
-            UserSearchRunVersionTableMap::addInstanceToPool($obj, $key);
+            UserKeywordSetTableMap::addInstanceToPool($obj, $key);
         }
 
         return array($obj, $col);
@@ -390,18 +396,18 @@ class UserSearchRunVersionTableMap extends TableMap
         $cls = static::getOMClass(false);
         // populate the object(s)
         while ($row = $dataFetcher->fetch()) {
-            $key = UserSearchRunVersionTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
-            if (null !== ($obj = UserSearchRunVersionTableMap::getInstanceFromPool($key))) {
+            $key = UserKeywordSetTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
+            if (null !== ($obj = UserKeywordSetTableMap::getInstanceFromPool($key))) {
                 // We no longer rehydrate the object, since this can cause data loss.
                 // See http://www.propelorm.org/ticket/509
                 // $obj->hydrate($row, 0, true); // rehydrate
                 $results[] = $obj;
             } else {
-                /** @var UserSearchRunVersion $obj */
+                /** @var UserKeywordSet $obj */
                 $obj = new $cls();
                 $obj->hydrate($row);
                 $results[] = $obj;
-                UserSearchRunVersionTableMap::addInstanceToPool($obj, $key);
+                UserKeywordSetTableMap::addInstanceToPool($obj, $key);
             } // if key exists
         }
 
@@ -422,19 +428,19 @@ class UserSearchRunVersionTableMap extends TableMap
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
-            $criteria->addSelectColumn(UserSearchRunVersionTableMap::COL_USER_SEARCH_RUN_ID);
-            $criteria->addSelectColumn(UserSearchRunVersionTableMap::COL_SEARCH_PARAMETERS_DATA);
-            $criteria->addSelectColumn(UserSearchRunVersionTableMap::COL_LAST_APP_RUN_ID);
-            $criteria->addSelectColumn(UserSearchRunVersionTableMap::COL_RUN_RESULT);
-            $criteria->addSelectColumn(UserSearchRunVersionTableMap::COL_RUN_ERROR_DETAILS);
-            $criteria->addSelectColumn(UserSearchRunVersionTableMap::COL_VERSION);
+            $criteria->addSelectColumn(UserKeywordSetTableMap::COL_USER_ID);
+            $criteria->addSelectColumn(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID);
+            $criteria->addSelectColumn(UserKeywordSetTableMap::COL_KEYWORDS);
+            $criteria->addSelectColumn(UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG);
+            $criteria->addSelectColumn(UserKeywordSetTableMap::COL_KEYWORD_TOKENS);
+            $criteria->addSelectColumn(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY);
         } else {
-            $criteria->addSelectColumn($alias . '.user_search_run_id');
-            $criteria->addSelectColumn($alias . '.search_parameters_data');
-            $criteria->addSelectColumn($alias . '.last_app_run_id');
-            $criteria->addSelectColumn($alias . '.run_result');
-            $criteria->addSelectColumn($alias . '.run_error_details');
-            $criteria->addSelectColumn($alias . '.version');
+            $criteria->addSelectColumn($alias . '.user_id');
+            $criteria->addSelectColumn($alias . '.user_keyword_set_id');
+            $criteria->addSelectColumn($alias . '.keywords');
+            $criteria->addSelectColumn($alias . '.search_key_from_config');
+            $criteria->addSelectColumn($alias . '.keyword_tokens');
+            $criteria->addSelectColumn($alias . '.user_keyword_set_key');
         }
     }
 
@@ -447,7 +453,7 @@ class UserSearchRunVersionTableMap extends TableMap
      */
     public static function getTableMap()
     {
-        return Propel::getServiceContainer()->getDatabaseMap(UserSearchRunVersionTableMap::DATABASE_NAME)->getTable(UserSearchRunVersionTableMap::TABLE_NAME);
+        return Propel::getServiceContainer()->getDatabaseMap(UserKeywordSetTableMap::DATABASE_NAME)->getTable(UserKeywordSetTableMap::TABLE_NAME);
     }
 
     /**
@@ -455,16 +461,16 @@ class UserSearchRunVersionTableMap extends TableMap
      */
     public static function buildTableMap()
     {
-        $dbMap = Propel::getServiceContainer()->getDatabaseMap(UserSearchRunVersionTableMap::DATABASE_NAME);
-        if (!$dbMap->hasTable(UserSearchRunVersionTableMap::TABLE_NAME)) {
-            $dbMap->addTableObject(new UserSearchRunVersionTableMap());
+        $dbMap = Propel::getServiceContainer()->getDatabaseMap(UserKeywordSetTableMap::DATABASE_NAME);
+        if (!$dbMap->hasTable(UserKeywordSetTableMap::TABLE_NAME)) {
+            $dbMap->addTableObject(new UserKeywordSetTableMap());
         }
     }
 
     /**
-     * Performs a DELETE on the database, given a UserSearchRunVersion or Criteria object OR a primary key value.
+     * Performs a DELETE on the database, given a UserKeywordSet or Criteria object OR a primary key value.
      *
-     * @param mixed               $values Criteria or UserSearchRunVersion object or primary key or array of primary keys
+     * @param mixed               $values Criteria or UserKeywordSet object or primary key or array of primary keys
      *              which is used to create the DELETE statement
      * @param  ConnectionInterface $con the connection to use
      * @return int             The number of affected rows (if supported by underlying database driver).  This includes CASCADE-related rows
@@ -475,17 +481,17 @@ class UserSearchRunVersionTableMap extends TableMap
      public static function doDelete($values, ConnectionInterface $con = null)
      {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(UserSearchRunVersionTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(UserKeywordSetTableMap::DATABASE_NAME);
         }
 
         if ($values instanceof Criteria) {
             // rename for clarity
             $criteria = $values;
-        } elseif ($values instanceof \JobScooper\DataAccess\UserSearchRunVersion) { // it's a model object
+        } elseif ($values instanceof \JobScooper\DataAccess\UserKeywordSet) { // it's a model object
             // create criteria based on pk values
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
-            $criteria = new Criteria(UserSearchRunVersionTableMap::DATABASE_NAME);
+            $criteria = new Criteria(UserKeywordSetTableMap::DATABASE_NAME);
             // primary key is composite; we therefore, expect
             // the primary key passed to be an array of pkey values
             if (count($values) == count($values, COUNT_RECURSIVE)) {
@@ -493,19 +499,19 @@ class UserSearchRunVersionTableMap extends TableMap
                 $values = array($values);
             }
             foreach ($values as $value) {
-                $criterion = $criteria->getNewCriterion(UserSearchRunVersionTableMap::COL_USER_SEARCH_RUN_ID, $value[0]);
-                $criterion->addAnd($criteria->getNewCriterion(UserSearchRunVersionTableMap::COL_VERSION, $value[1]));
+                $criterion = $criteria->getNewCriterion(UserKeywordSetTableMap::COL_USER_ID, $value[0]);
+                $criterion->addAnd($criteria->getNewCriterion(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID, $value[1]));
                 $criteria->addOr($criterion);
             }
         }
 
-        $query = UserSearchRunVersionQuery::create()->mergeWith($criteria);
+        $query = UserKeywordSetQuery::create()->mergeWith($criteria);
 
         if ($values instanceof Criteria) {
-            UserSearchRunVersionTableMap::clearInstancePool();
+            UserKeywordSetTableMap::clearInstancePool();
         } elseif (!is_object($values)) { // it's a primary key, or an array of pks
             foreach ((array) $values as $singleval) {
-                UserSearchRunVersionTableMap::removeInstanceFromPool($singleval);
+                UserKeywordSetTableMap::removeInstanceFromPool($singleval);
             }
         }
 
@@ -513,20 +519,20 @@ class UserSearchRunVersionTableMap extends TableMap
     }
 
     /**
-     * Deletes all rows from the user_search_run_version table.
+     * Deletes all rows from the user_keyword_set table.
      *
      * @param ConnectionInterface $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).
      */
     public static function doDeleteAll(ConnectionInterface $con = null)
     {
-        return UserSearchRunVersionQuery::create()->doDeleteAll($con);
+        return UserKeywordSetQuery::create()->doDeleteAll($con);
     }
 
     /**
-     * Performs an INSERT on the database, given a UserSearchRunVersion or Criteria object.
+     * Performs an INSERT on the database, given a UserKeywordSet or Criteria object.
      *
-     * @param mixed               $criteria Criteria or UserSearchRunVersion object containing data that is used to create the INSERT statement.
+     * @param mixed               $criteria Criteria or UserKeywordSet object containing data that is used to create the INSERT statement.
      * @param ConnectionInterface $con the ConnectionInterface connection to use
      * @return mixed           The new primary key.
      * @throws PropelException Any exceptions caught during processing will be
@@ -535,18 +541,18 @@ class UserSearchRunVersionTableMap extends TableMap
     public static function doInsert($criteria, ConnectionInterface $con = null)
     {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(UserSearchRunVersionTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(UserKeywordSetTableMap::DATABASE_NAME);
         }
 
         if ($criteria instanceof Criteria) {
             $criteria = clone $criteria; // rename for clarity
         } else {
-            $criteria = $criteria->buildCriteria(); // build Criteria from UserSearchRunVersion object
+            $criteria = $criteria->buildCriteria(); // build Criteria from UserKeywordSet object
         }
 
 
         // Set the correct dbName
-        $query = UserSearchRunVersionQuery::create()->mergeWith($criteria);
+        $query = UserKeywordSetQuery::create()->mergeWith($criteria);
 
         // use transaction because $criteria could contain info
         // for more than one table (I guess, conceivably)
@@ -555,7 +561,7 @@ class UserSearchRunVersionTableMap extends TableMap
         });
     }
 
-} // UserSearchRunVersionTableMap
+} // UserKeywordSetTableMap
 // This is the static code needed to register the TableMap for this table with the main Propel class.
 //
-UserSearchRunVersionTableMap::buildTableMap();
+UserKeywordSetTableMap::buildTableMap();

@@ -38,7 +38,7 @@ class UserJobMatch extends BaseUserJobMatch
 {
     public function __construct()
     {
-        $this->setAppRunId($GLOBALS['USERDATA']['configuration_settings']['app_run_id']);
+        $this->setAppRunId($GLOBALS['JOBSCOOPER']['app_run_id']);
         parent::__construct();
     }
 

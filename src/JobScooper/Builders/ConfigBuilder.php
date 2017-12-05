@@ -18,214 +18,84 @@ namespace JobScooper\Builders;
 
 
 
+use JobScooper\DataAccess\UserKeywordSet;
+use JobScooper\DataAccess\UserKeywordSetQuery;
 use JobScooper\DataAccess\UserQuery;
+use JobScooper\DataAccess\User;
 use JobScooper\Manager\LocationManager;
 use JobScooper\Manager\LoggingManager;
 use const JobScooper\Plugins\Classes\VALUE_NOT_SUPPORTED;
-use JobScooper\Utils\SimpleCSV;
+use \SplFileInfo;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
-use JobScooper\DataAccess\UserSearchRun;
+use PHLAK\Config\Config;
 use  \Propel\Runtime\Propel;
-use \JobScooper\Utils\Pharse;
 
 
-$GLOBALS['CACHES'] = array();
-$GLOBALS['CACHES']['LOCATION_MANAGER'] = null;
-$GLOBALS['CACHES']['GEOCODER_ENABLED'] = true;
-
+$GLOBALS['CACHES'] = array('LOCATION_MANAGER' =>null, 'GEOCODER_ENABLED' => true);
 
 
 class ConfigBuilder
 {
+	private $_rootOutputDirInfo = null;
+
+    public function __construct($iniFile = null)
+    {
+	    $envDirOut = getenv('JOBSCOOPER_OUTPUT');
+	    if(is_null($envDirOut) || strlen($envDirOut) == 0)
+		    $envDirOut = sys_get_temp_dir();
+	    if(!empty($envDirOut))
+	        $this->_rootOutputDirInfo = parseFilePath($envDirOut);
+
+	    $Config = new Config($iniFile,true,"imports");
+	    setConfigurationSetting("config_file_settings", $Config->getAll());
+    }
+
     protected $nNumDaysToSearch = -1;
     public $arrFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null, 'user_input_files_details' => null);
-    protected $arrEmailAddresses = null;
-    protected $configSettings = array('searches' => null, 'keyword_sets' => null, 'number_days' => VALUE_NOT_SUPPORTED, 'included_sites' => array(), 'excluded_sites' => array());
-    protected $arrEmail_PHPMailer_SMTPSetup = null;
     protected $allConfigFileSettings = null;
-
-    function getSMTPSettings()
-    {
-        if (isset($this->arrEmail_PHPMailer_SMTPSetup)) {
-            return $this->arrEmail_PHPMailer_SMTPSetup;
-        } else return null;
-    }
-
-    function getInputFilesByType($strInputDataType)
-    {
-        $ret = $this->__getInputFilesByValue__('data_type', $strInputDataType);
-
-        return $ret;
-    }
-
-    function getFileDetails($file_key_name, $strSubDataType = null)
-    {
-        if ($file_key_name == 'user_input_files_details') {
-            return $this->getInputFilesByType($strSubDataType);
-        } else {
-            return $this->arrFileDetails[$file_key_name];
-        }
-    }
-
-    /*
-     * returns a record if it found a match; null otherwise.
-     */
-    function getEmailsByType($strType)
-    {
-        $retArr = null;
-
-        if ($this->arrEmailAddresses) {
-            foreach ($this->arrEmailAddresses as $email) {
-                if (strcasecmp($email['type'], $strType) == 0) {
-                    $emailRecord = $email;
-                    $retArr[$email['address']] = $emailRecord;
-                }
-
-            }
-        }
-        return $retArr;
-    }
-
-    function getEmailRecords($strEmailKind, $addressType)
-    {
-        $retArr = null;
-
-        $retEmails = array_filter($this->allConfigFileSettings['emails'], function ($var) use ($strEmailKind, $addressType) {
-            return (strcasecmp($var['emailkind'], $strEmailKind) == 0 && strcasecmp($var['type'], $addressType) == 0);
-        });
-        return array_unique($retEmails);
-    }
-
 
     function initialize()
     {
-        $GLOBALS['USERDATA'] = array();
-        $GLOBALS['USERDATA']['configuration_settings'] = array();
-        $GLOBALS['USERDATA']['configuration_settings']['included_sites'] = array();
-        $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] = array();
+	    $debug = getConfigurationSetting("command_line_args.debug");
+	    setConfigurationSetting("debug", $debug);
 
-        // Do a quick & dirty arg parse so that we can pull out the debug fact right away
-        //
-        global $argv;
-
-        # now do the actual option parsing
-        # cheaply parse the args into $key => $val
-        $arg_string = trim(implode($argv, ' '));
-        $arg_string = preg_replace(array('/\s--/', '/\s-/'), ' ||||', $arg_string);
-        $args       = explode('||||', $arg_string);
-        unset($args[0]);
-        $argPairs = array();
-        foreach($args as $arg)
-        {
-            $pair = preg_split("/[\s=]/", $arg);
-            $argPairs[strtolower($pair[0])] = (empty($pair[1]) ? 1 : $pair[1]);
-        }
-
-        if(array_key_exists("debug", $argPairs))
-            $GLOBALS['USERDATA']['configuration_settings']["debug"] = filter_var($argPairs['debug'], FILTER_VALIDATE_BOOLEAN);
-
-
-
-        $envDirOut = getenv('JOBSCOOPER_OUTPUT');
-        if(is_null($envDirOut) || strlen($envDirOut) == 0)
-            $envDirOut = sys_get_temp_dir();
-        $outputDirectoryDetails = getFilePathDetailsFromString($envDirOut, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-
-        $rootdir = realpath(dirname(dirname(dirname(dirname(__FILE__)))));
-
-        __initializeArgs__($rootdir);
-
-        $cmdLineOpts = Pharse::options($GLOBALS['OPTS_SETTINGS']);
-
-        LogLine("Initializing application using the passed command line switches: " . getArrayValuesAsString($cmdLineOpts));
-
-        # After you've configured Pharse, run it like so:
-        $GLOBALS['USERDATA']['OPTS'] = $cmdLineOpts;
         LogDebug("Setting up application... ", \C__DISPLAY_SECTION_START__);
 
-        $GLOBALS['USERDATA']['companies_regex_to_filter'] = null;
-
         $now = new \DateTime();
-        $GLOBALS['USERDATA']['configuration_settings']['app_run_id'] = __APP_VERSION__ . "-".$now->format('YmdHi');
+        $GLOBALS['JOBSCOOPER']['app_run_id'] = __APP_VERSION__ . "-".$now->format('YmdHi');
 
-        // and to make sure our notes get updated on active jobs
-        // that we'd seen previously
-        // Now go see what we got back for each of the sites
-        //
-        $GLOBALS['USERDATA']['configuration_settings']['included_sites'] = JobSitePluginBuilder::getJobSitesCmdLineIncludedInRun();
-        $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] = array_diff_key(JobSitePluginBuilder::getAllJobSites(), getConfigurationSettings('included_sites'));
-        $GLOBALS['USERDATA']['configuration_settings']['country_codes'] = array();
 
-        
-        
-        // Override any INI file setting with the command line output file path & name
-        // the user specificed (if they did)
-        $cmdlineOutDir = get_FileDetails_fromPharseOption("output", false);
-        if ($cmdlineOutDir['has_directory']) {
-            $outputDirectoryDetails = $cmdlineOutDir;
-        }
+        $configpath = getConfigurationSetting("command_line_args.configfile");
+	    $this->arrFileDetails['config_ini'] = parseFilePath($configpath, true);
+	    if($this->_rootOutputDirInfo['hasDirectory'] !== true)
+		    $this->_rootOutputDirInfo = parseFilePath($this->arrFileDetails['config_ini']['directory'].DIRECTORY_SEPARATOR."output");
 
-        if ($GLOBALS['USERDATA']['OPTS']['use_config_ini_given']) {
-            $this->arrFileDetails['config_ini'] = set_FileDetails_fromPharseSetting("use_config_ini", 'config_file_details', true);
-            $name = str_replace(DIRECTORY_SEPARATOR, "", $this->arrFileDetails['config_ini']['directory']);
-            $name = substr($name, max([strlen($name) - 31 - strlen(".ini"), 0]), 31);
-            $GLOBALS['USERDATA']['user_unique_key'] = md5($name);
-        } else {
-            $GLOBALS['USERDATA']['user_unique_key'] = uniqid("unknown");
-        }
+        $name = str_replace(DIRECTORY_SEPARATOR, "", $this->arrFileDetails['config_ini']['directory']);
+        $name = substr($name, max([strlen($name) - 31 - strlen(".ini"), 0]), 31);
 
         // Now setup all the output folders
-        $this->__setupOutputFolders__($outputDirectoryDetails['directory']);
+        $this->__setupOutputFolders__($this->_rootOutputDirInfo['directory']);
 
-        $strOutfileArrString = getArrayValuesAsString($GLOBALS['USERDATA']['directories']);
+        $strOutfileArrString = getArrayValuesAsString(getConfigurationSetting("directories"));
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output folders configured: " . $strOutfileArrString, \C__DISPLAY_ITEM_DETAIL__);
 
-        if ($GLOBALS['USERDATA']['OPTS']['use_config_ini_given']) {
-            if (!isset($GLOBALS['logger'])) $GLOBALS['logger'] = new LoggingManager($this->arrFileDetails['config_ini']['directory']);
-            LogLine("Logging file for run being written to: " . $this->arrFileDetails['config_ini']['directory'], \C__DISPLAY_ITEM_DETAIL__);
 
-            LogLine("Loading configuration file details from " . $this->arrFileDetails['config_ini']['full_file_path'], \C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Loaded configuration details from " . $this->arrFileDetails['config_ini']['full_file_path'], \C__DISPLAY_ITEM_DETAIL__);
 
-            $this->_LoadAndMergeAllConfigFilesRecursive($this->arrFileDetails['config_ini']['full_file_path']);
+	    LogDebug("Configuring specific settings for this run... ", \C__DISPLAY_SECTION_START__);
+        $this->_setupRunFromConfig_();
 
-            if (isset($this->arrFileDetails['config_ini'])) {
-                if (!is_file($this->arrFileDetails['config_ini']['full_file_path'])) {
-                    $altFileDetails = null;
-                    $altFileDetails = parseFilePath($this->arrFileDetails['config_ini']['full_file_path']);
-                    if (!is_dir($altFileDetails['config_ini']['directory'])) {
-                        if (is_dir(is_file($altFileDetails['config_ini']['full_file_path']))) {
-                            parseFilePath($this->arrFileDetails['config_ini']['directory'] . "/" . $altFileDetails['config_ini']['filename']);
-                        }
-                    }
-
-                }
-            }
-
-            $this->_setupRunFromConfig_($this->allConfigFileSettings);
-
-        }
-
-
-        LogDebug("Configuring specific settings for this run... ", \C__DISPLAY_SECTION_START__);
-
-        $GLOBALS['USERDATA']['configuration_settings']['number_days'] = get_PharseOptionValue('number_days');
-        if ($GLOBALS['USERDATA']['configuration_settings']['number_days'] === false) {
-            $GLOBALS['USERDATA']['configuration_settings']['number_days'] = 1;
-        }
-        LogDebug($GLOBALS['USERDATA']['configuration_settings']['number_days'] . " days configured for run. ", \C__DISPLAY_ITEM_DETAIL__);
+        setConfigurationSetting('number_days', 1);
 
         LogLine("Completed configuration load.", \C__DISPLAY_SUMMARY__);
 
     }
 
-    function getLogger()
-    {
-        return $GLOBALS['logger'];
-    }
-
     private function __setupOutputFolders__($outputDirectory)
     {
+    	$arrOututDirs = array();
+
         if (!$outputDirectory) {
             throw new \ErrorException("Required value for the output folder was not specified. Exiting.");
         }
@@ -234,121 +104,110 @@ class ConfigBuilder
         foreach ($globalDirs as $d) {
             $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), $d));
             $details = getFilePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-            $GLOBALS['USERDATA']['directories'][$d] = realpath($details['directory']);
+	        $arrOututDirs[$d] = realpath($details['directory']);
         }
 
         $userWorkingDirs = ["notifications"];
         foreach ($userWorkingDirs as $d) {
-            $prefix = $GLOBALS['USERDATA']['user_unique_key'];
+            $prefix = $GLOBALS['user_unique_key'];
             $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), $d, $prefix));
             $details = getFilePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-            $GLOBALS['USERDATA']['directories'][$d] = realpath($details['directory']);
+	        $arrOututDirs[$d] = realpath($details['directory']);
         }
 
         $path = $outputDirectory;
         $details = getFilePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-        $GLOBALS['USERDATA']['directories']['root'] = realpath($details['directory']);
+	    $arrOututDirs['root'] = realpath($details['directory']);
 
+		setConfigurationSetting('directories', $arrOututDirs);
+
+	    if (!isset($GLOBALS['logger']))
+		    $GLOBALS['logger'] = new LoggingManager(getOutputDirectory('logs'));
         $GLOBALS['logger']->addFileHandlers(getOutputDirectory('logs'));
     }
 
-
-    private function _LoadAndMergeAllConfigFilesRecursive($fileConfigToLoad)
+    private function _setupRunFromConfig_()
     {
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading INI file: " . $fileConfigToLoad, \C__DISPLAY_SECTION_START__);
+	    $srchmgr = new SearchBuilder();
 
-        $GLOBALS['USERDATA']['configuration_settings']['config_files'] = array();
-        $GLOBALS['USERDATA']['configuration_settings']['config_files'][] = $fileConfigToLoad;
-
-        $iniParser = new \IniParser($fileConfigToLoad);
-        $iniParser->use_array_object = false;
-        $tempConfigSettings = $iniParser->parse();
-        $iniParser = null;
-        if (!array_key_exists($fileConfigToLoad, $this->_arrConfigFileSettings_)) {
-
-            $this->_arrConfigFileSettings_[$fileConfigToLoad] = array_copy($tempConfigSettings);
-
-            if (isset($tempConfigSettings['settings_files'])) {
-                foreach ($tempConfigSettings['settings_files'] as $nextConfigFile) {
-                    if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Recursing into child settings file " . $nextConfigFile, \C__DISPLAY_ITEM_DETAIL__);
-                    $this->_LoadAndMergeAllConfigFilesRecursive($nextConfigFile);
-                    if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added child settings file " . $nextConfigFile, \C__DISPLAY_ITEM_RESULT__);
-                }
-            }
-
-            $allConfigfileSettings = [];
-            foreach ($this->_arrConfigFileSettings_ as $tempConfig) {
-                $allConfigfileSettings = array_merge_recursive($allConfigfileSettings, $tempConfig);
-            }
-
-            $this->allConfigFileSettings = $allConfigfileSettings;
-        }
-
-    }
+	    $config = getConfigurationSetting("config_file_settings");
+	    $inputFolderPath = array_get_element(strval("input.folder"), $config);
+	    if (!empty($inputFolderPath))
+		    $this->arrFileDetails['input_folder'] = parseFilePath($inputFolderPath);
+	    else
+		    $this->arrFileDetails['input_folder'] = parseFilePath(getConfigurationSetting("configfile"));
 
 
-    private function _setupRunFromConfig_($config)
-    {
+	    //
+	    // First load the user email information.  We set this first because it is used
+	    // to send error email if something goes wrong anywhere further along our run
+	    //
+	    $this->_parseUsers();
 
 
-        if (isset($config['input']) && isset($config['input']['folder'])) {
-            $this->arrFileDetails['input_folder'] = parseFilePath($config['input']['folder']);
-        }
+	    //
+	    // Validate each of the inputfiles that the user passed
+	    // and configure all searches
+	    //
+	    $verifiedInputs = array();
+	    $inputfiles = array_get_element(strval("inputfiles"), $config);
+	    if (!empty($inputfiles) && is_array($inputfiles)) {
+		    foreach ($inputfiles as $key => $iniInputFileItem)
+		    {
+			    $tempFileDetails = null;
+			    $filepath = !empty($iniInputFileItem['path']) ? $iniInputFileItem['path'] : $iniInputFileItem['filename'];
+			    $fileinfo = new \SplFileInfo($filepath);
+		        if($fileinfo->getRealPath() !== false)
+			        $tempFileDetails = parseFilePath($fileinfo->getRealPath(), true);
 
-        if (isset($config['inputfiles'])) {
-            foreach ($config['inputfiles'] as $iniInputFile) {
-                $strFileName = "ERROR-UNKNOWN";
-                if (isset($iniInputFile['path']) && strlen($iniInputFile['path']) > 0) {
-                    $strFileName = $iniInputFile['path'];
-                } elseif (isset($iniInputFile['filename']) && strlen($iniInputFile['filename']) > 0)
-                    $strFileName = $iniInputFile['filename'];
+		        if(empty($tempFileDetails) || $tempFileDetails['has_file'] !== true) {
+				    $filesearch = glob(dirname($this->arrFileDetails['input_folder']['directory']) . DIRECTORY_SEPARATOR . "*" . DIRECTORY_SEPARATOR . $fileinfo->getFilename());
+				    if (!empty($filesearch)) {
+				    	$firstmatch = array_shift($filesearch);
+					    $tempFileDetails = parseFilePath($firstmatch, false);
+				    }
+			    }
 
-                if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Processing input file '" . $strFileName . "' with type of '" . $iniInputFile['type'] . "'...", \C__DISPLAY_NORMAL__);
-                $this->__addInputFile__($iniInputFile);
-            }
-        }
-        //
-        // Load the global search data that will be used to create
-        // and configure all searches
-        //
-        $this->_parseGlobalSearchParametersFromConfig_($config);
-        $this->_instantiateLocationManager();
+			    if(empty($tempFileDetails) || $tempFileDetails['has_file'] !== true || !is_file($tempFileDetails['full_file_path'])) {
+				    throw new \Exception("Specified input file '" . $filepath . "' was not found.  Aborting.");
+			    }
 
-        LogLine("Loaded all configuration settings" . isDebug() ? ": " . PHP_EOL . var_export($this->allConfigFileSettings, true) : "", \C__DISPLAY_SUMMARY__);
+			    setConfigurationSetting("user_data_files.".$iniInputFileItem['type'].".".$key, $tempFileDetails['full_file_path']);
 
+		    }
+	    }
 
-        $this->_setupPropelForRun();
+        LogLine("Loaded all configuration settings from " . $this->arrFileDetails['config_ini']['full_file_path'], \C__DISPLAY_SUMMARY__);
 
-        $this->_parseEmailSetupFromINI_($config);
+	    //
+	    // Load the global search data that will be used to create
+	    // and configure all searches
+	    //
+	    $this->_parseGlobalSearchParameters();
 
-        $this->_parseSeleniumParametersFromConfig_($config);
+	    $this->_instantiateLocationManager();
+	    $this->_parseSeleniumParameters();
+	    $this->_setupPropelForRun();
 
         //
         // Load Plugin Specific settings from the config
         //
-        $this->_parsePluginSettingsFromConfig_($config);
+        $this->_parsePluginSettings();
 
-        if(count($GLOBALS['USERDATA']['configuration_settings']['included_sites']) == 0)
+        $this->_parseSearchLocations();
+
+	    if(count(JobSitePluginBuilder::getIncludedJobSites()) == 0)
         {
-            LogError("No plugins could be found for the user's searches.  Aborting.");
+            LogError("No job site plugins could be loaded for the given search geographic locations.  Aborting.");
             return;
         }
 
-        $this->_parseKeywordSetsFromConfig_($config);
+        $this->_parseKeywordSetsFromConfig_();
 
+
+	    $srchmgr->initializeSearches();
 
         LogDebug("All INI files loaded. Finalizing configuration for run...", \C__DISPLAY_SECTION_START__);
-//
-//        //
-//        // Create searches needed to run all the keyword sets
-//        //
-//        $this->_addSearchesForKeywordSets_();
-//
-//        //
-//        // Finally create the instances of user search runs
-//        // that we will use during the run
-//        //
-//        $this->_createSearchInstancesForRun();
 
     }
 
@@ -366,32 +225,10 @@ class ConfigBuilder
 
 
 
-    private function __addInputFile__($iniInputFileItem)
-    {
-
-        $tempFileDetails = null;
-        if (isset($iniInputFileItem['path'])) {
-            $tempFileDetails = parseFilePath($iniInputFileItem['path'], true);
-
-        } elseif (isset($iniInputFileItem['filename'])) {
-            $tempFileDetails = parseFilePath($this->arrFileDetails['input_folder']['directory'] . $iniInputFileItem['filename'], true);
-        }
-
-        if (!is_file($tempFileDetails['full_file_path'])) {
-            throw new \Exception("Specified input file '" . $tempFileDetails['full_file_path'] . "' was not found.  Aborting.");
-        }
-
-
-        if (isset($tempFileDetails)) {
-
-            $GLOBALS['USERDATA']['user_input_files_details'][] = array('details' => $tempFileDetails, 'data_type' => $iniInputFileItem['type']);
-        }
-    }
-
     private function _setupPropelForRun()
     {
         LogDebug("Configuring Propel global options and logging...", C__DISPLAY_ITEM_DETAIL__);
-        $defaultLogger = $this->getLogger();
+        $defaultLogger = $GLOBALS['logger'];
         if(is_null($defaultLogger)) {
             $pathLog = getOutputDirectory('logs') . '/propel-' .getTodayAsString("-").'.log';
             LogLine("Could not find global logger object so configuring propel logging separately at {$pathLog}", C__DISPLAY_WARNING__);
@@ -409,80 +246,61 @@ class ConfigBuilder
         }
     }
 
-    private function __getInputFilesByValue__($valKey, $val)
-    {
-        $ret = null;
-        if (isset($GLOBALS['USERDATA']['user_input_files_details']) && (is_array($GLOBALS['USERDATA']['user_input_files_details']) || is_array($GLOBALS['USERDATA']['user_input_files_details']))) {
-            foreach ($GLOBALS['USERDATA']['user_input_files_details'] as $fileItem) {
-                if (strcasecmp($fileItem[$valKey], $val) == 0) {
-                    $ret[] = $fileItem;
-                }
-            }
-        }
-        return $ret;
-    }
+	private function _getSetting($keyPath)
+	{
+		if(is_array($keyPath))
+		{
+			$ret = array();
+			foreach ($keyPath as $key) {
+				$ret[$key] = $this->_getSetting($key);
+			}
+			return $ret;
+		}
 
-    private function _parsePluginSettingsFromConfig_($config)
+		return getConfigurationSetting("config_file_settings." . $keyPath);
+	}
+
+    private function _parsePluginSettings()
     {
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading plugin setup information from config file...", \C__DISPLAY_ITEM_START__);
 
-        if(!array_key_exists('plugin_specific_settings', $GLOBALS['USERDATA']['configuration_settings']))
-            $GLOBALS['USERDATA']['configuration_settings']['plugin_specific_settings'] = array();
-
-        if (array_key_exists('plugin_settings', $config) == true && is_array($config['plugin_settings']) && count($config['plugin_settings']) > 0) {
-            //
-            // plugin setting config items are structured like this:
-            //      [plugin_settings.usajobs]
-            //      authorization_key="XxXxXxXxXxXxXxXxXxXx="
-            foreach (array_keys($config['plugin_settings']) as $pluginname) {
-                $GLOBALS['USERDATA']['configuration_settings']['plugin_specific_settings'][$pluginname] = $config['plugin_settings'][$pluginname];
-            }
-        }
+        setConfigurationSetting("plugin_specific_settings", $this->_getSetting("plugin_specific_settings"));
     }
 
-    private function _parseGlobalSearchParametersFromConfig_($config)
+    private function _parseGlobalSearchParameters()
     {
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading global search settings from config file...", \C__DISPLAY_ITEM_START__);
 
-        if (array_key_exists('global_search_options', $config)) {
-
+	    $gsoset = $this->_getSetting('global_search_options');
+		if(!empty($gsoset))
+		{
             // This must happen first so that the search locations can be geocoded
-            if (array_key_exists('google_maps_api_key', $config['global_search_options'])) {
-                $GLOBALS['USERDATA']['configuration_settings']['google_maps_api_key'] = $config['global_search_options']['google_maps_api_key'];
+            if (array_key_exists('google_maps_api_key', $gsoset)) {
+                setConfigurationSetting('google_maps_api_key', $gsoset['google_maps_api_key']);
             }
 
-            $includedsites = getConfigurationSettings('included_sites');
-            foreach (array_keys($config['global_search_options']) as $gso)
+            $allJobSitesByKey = JobSitePluginBuilder::getAllJobSites(false);
+            foreach ($gsoset as $gsoKey => $gso)
             {
-                if(!is_null($config['global_search_options'][$gso]) && isset($config['global_search_options'][$gso]))
+                if(!empty($gso))
                 {
-                    switch (strtoupper($gso))
+                    switch (strtoupper($gsoKey))
                     {
                         case 'EXCLUDED_JOBSITES':
-                            if (is_string($config['global_search_options']['excluded_jobsites'])) {
-                                $config['global_search_options']['excluded_jobsites'] = explode(",", $config['global_search_options']['excluded_jobsites']);
+                            if (is_string($gso)) {
+                                $gso = preg_split("/\s*,\s*/", $gso);
+	                            $gso = array_combine(array_values($gso), $gso);
                             }
-                            if (!is_array($config['global_search_options']['excluded_jobsites'])) {
-                                $config['global_search_options']['excluded_jobsites'] = array($config['global_search_options']['excluded_jobsites']);
+                            if (!is_array($gso)) {
+                                $gso = array($gso => $gso);
                             }
 
-                            foreach ($config['global_search_options']['excluded_jobsites'] as $excludedSite) {
-                                if(array_key_exists($excludedSite, $includedsites))
-                                    unset($GLOBALS['USERDATA']['configuration_settings']['included_sites'][$excludedSite]);
-                            }
+                            $excludedSiteList = array_intersect_key($allJobSitesByKey, $gso);
+                            JobSitePluginBuilder::setSitesAsExcluded($setExcluded=$excludedSiteList);
                             break;
 
-                        case 'SEARCH_LOCATION':
-                            if (!is_array($config['global_search_options'][$gso]))
-                                $config['global_search_options'][$gso] = array($config['global_search_options'][$gso]);
-                            foreach ($config['global_search_options'][$gso] as $search_location)
-                            {
-                                $this->_configureSearchLocation_($search_location);
-                            }
-                        break;
-
                         default:
-                            $GLOBALS['USERDATA']['configuration_settings'][$gso] = $config['global_search_options'][$gso];
+                            setConfigurationSetting($gsoKey, $gso);
                             break;
                     }
                }
@@ -490,182 +308,156 @@ class ConfigBuilder
         }
     }
 
-    private function _parseSeleniumParametersFromConfig_($config)
+    private function _parseSeleniumParameters()
     {
         LogDebug("Loading Selenium settings from config file...", \C__DISPLAY_ITEM_START__);
-        if (isset($config['selenium']) && is_array($config['selenium'])) {
-            foreach (array_keys($config['selenium']) as $k)
-                $GLOBALS['USERDATA']['configuration_settings']['selenium'][$k] = trim($config['selenium'][$k]);
-        }
+        $settings = $this->_getSetting("selenium");
 
-//        if (!((array_key_exists('autostart', $GLOBALS['USERDATA']['configuration_settings']['selenium']) === true && array_key_exists('port', $GLOBALS['USERDATA']['configuration_settings']['selenium']) === true ) || array_key_exists('start_command', $GLOBALS['USERDATA']['configuration_settings']['selenium']) === true ))
-//            throw new \Exception("Required parameters for Selenium are missing; app cannot start.  You must set either 'autostart' and 'port' or 'start_command' in your configuration files.");
-        $settings = getConfigurationSettings('selenium');
 
-        $GLOBALS['USERDATA']['configuration_settings']['selenium']['autostart'] = filter_var($settings['autostart'], FILTER_VALIDATE_BOOLEAN);
+	    $settings['autostart'] = filter_var($settings['autostart'], FILTER_VALIDATE_BOOLEAN);
 //
-//        if(! array_key_exists('start_command', $GLOBALS['USERDATA']['configuration_settings']['selenium']) === true ) {
-//            if ($GLOBALS['USERDATA']['configuration_settings']['selenium']['autostart'] == 1 && !(array_key_exists('jar', $GLOBALS['USERDATA']['configuration_settings']['selenium']) === true && array_key_exists('postfix_switches', $GLOBALS['USERDATA']['configuration_settings']['selenium']) === true))
+//        if(! array_key_exists('start_command', $GLOBALS['JOBSCOOPER']['selenium']) === true ) {
+//            if ($GLOBALS['JOBSCOOPER']['selenium']['autostart'] == 1 && !(array_key_exists('jar', $GLOBALS['JOBSCOOPER']['selenium']) === true && array_key_exists('postfix_switches', $GLOBALS['JOBSCOOPER']['selenium']) === true))
 //                throw new \Exception("Required parameters to autostart Selenium are missing; you must set both 'jar' and 'postfix_switches' in your configuration files.");
 //        }
 
-        if (!(array_key_exists('server', $GLOBALS['USERDATA']['configuration_settings']['selenium']) === true)) {
+        if (!array_key_exists('server', $settings)) {
             throw new \ErrorException("Configuration missing for [selenium] [server] in the config INI files.");
         }
-        elseif (strcasecmp("localhost", $GLOBALS['USERDATA']['configuration_settings']['selenium']['server']) === 0)
+        elseif (strcasecmp("localhost", $settings['server']) === 0)
         {
             throw new \ErrorException("Invalid server value for [selenium] [server] in the config INI files. You must use named hosts, not localhost.");
         }
 
-        if (!(array_key_exists('port', $GLOBALS['USERDATA']['configuration_settings']['selenium']) === true))
-            $GLOBALS['USERDATA']['configuration_settings']['selenium']['port'] = "80";
+        if (!array_key_exists('port', $settings))
+	        $settings['port'] = "80";
 
-        $GLOBALS['USERDATA']['configuration_settings']['selenium']['host_location'] = 'http://' . $GLOBALS['USERDATA']['configuration_settings']['selenium']['server'] . ":" . $GLOBALS['USERDATA']['configuration_settings']['selenium']['port'];
+	    $settings['host_location'] = 'http://' . $settings['server'] . ":" . $settings['port'];
+
+	    setConfigurationSetting("selenium", $settings);
 
     }
-    private function _configureSearchLocation_($location_string)
+
+    private function _parseSearchLocations()
     {
-        if (!$location_string) throw new \ErrorException("Invalid configuration: search location value was empty.");
-        if (!array_key_exists('search_locations', $GLOBALS['USERDATA']['configuration_settings']))
-            $GLOBALS['USERDATA']['configuration_settings']['search_locations'] = array();
 
-        $locmgr = $this->_instantiateLocationManager();
-        $location = $locmgr->getAddress($location_string);
-        if(!empty($location))
-        {
-            $GLOBALS['USERDATA']['configuration_settings']['search_locations'][$location->getGeoLocationId()] = $location;
+    	$searchLocs = $this->_getSetting("search_locations.location");
 
-            if (!is_null($location->getCountryCode()))
-                $GLOBALS['USERDATA']['configuration_settings']['country_codes'][$location->getCountryCode()] = $location->getCountryCode();
-        }
+    	if(!empty($searchLocs) && is_array($searchLocs)) {
+		    foreach ($searchLocs as $location_string) {
 
+			    if (!$location_string) throw new \ErrorException("Invalid configuration: search location value was empty.");
+
+			    $locmgr = $this->_instantiateLocationManager();
+			    $location = $locmgr->getAddress($location_string);
+			    if (!empty($location)) {
+				    setConfigurationSetting('search_locations.' . $location->getGeoLocationId(), $location);
+				    if (!empty($location->getCountryCode()))
+					    setConfigurationSetting('country_codes.' . $location->getCountryCode(), $location->getCountryCode());
+			    }
+		    }
+	    }
     }
 
-    private function _parseKeywordSetsFromConfig_($config)
+    private function _parseKeywordSetsFromConfig_()
     {
         LogLine("Loading search keywords from config...", \C__DISPLAY_ITEM_START__);
-        if (!array_key_exists('keyword_sets', $GLOBALS['USERDATA']['configuration_settings'])) {
-            $GLOBALS['USERDATA']['configuration_settings']['keyword_sets'] = array();
-        }
-        if (isset($config['search_keyword_set'])) {
-            foreach (array_keys($config['search_keyword_set']) as $key) {
-                $ini_keyword_set = $config['search_keyword_set'][$key];
-                $ini_keyword_set['key'] = $key;
 
-                $strSetKey = 'ks' . (count($GLOBALS['USERDATA']['configuration_settings']['keyword_sets']) + 1);
-                if (isset($ini_keyword_set['name']) && strlen($ini_keyword_set['name']) > 0) {
-                    $strSetKey = $ini_keyword_set['name'];
-                } elseif (isset($ini_keyword_set['key']) && strlen($ini_keyword_set['key']) > 0) {
-                    $strSetKey = $ini_keyword_set['key'];
-                }
-
-                $GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey] = $this->_getNewKeywordSettingsSet_(strtolower($strSetKey), $ini_keyword_set);
-
-                LogDebug("Added keyword set '" . $GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey]['name'] . "' with keywords = " . getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['keyword_sets'][$strSetKey]['keywords_array']) , \C__DISPLAY_ITEM_DETAIL__);
-
+        $verifiedSets = array();
+        $iniSets = $this->_getSetting("search_keyword_set");
+        if (!empty($iniSets)) {
+            foreach ($iniSets as $key => $ini_keyword_set) {
+	            $setKey = 'ks' . (count($verifiedSets['keyword_sets']) + 1) . "_" . $key;
+	            $ini_keyword_set['key'] = $setKey;
+	            $kwdset = $this->_getUserKeywordSet_($ini_keyword_set);
+	            if(!empty($kwdset))
+		            $verifiedSets[$kwdset->getUserKeywordSetKey()] = $kwdset;
+	            else
+	            	throw new \Exception("Unable to create a user keyword set for the values defined in the config file (" . var_dump($ini_keyword_set, true));
             }
-
+	        LogDebug("Added keyword sets: " . join(", ", array_keys($verifiedSets)) , \C__DISPLAY_ITEM_DETAIL__);
+			setConfigurationSetting('user_keyword_sets', $verifiedSets);
         }
     }
 
 
-
-
-
-
-    private function _parseEmailSetupFromINI_($config)
+    private function _parseUsers()
     {
-        $settingsEmail = array();
+    	LogLine("Configuring users and alerts...");
 
-        if(isset($config['email'] ))
+        setConfigurationSetting('alerts.configuration.smtp', $this->_getSetting("alerts.configuration.smtp"));
+
+        $alertsUsers = $this->_getSetting(array("alerts.errors.to", "alerts.errors.from", "alerts.results.from", "alerts.results.to"));
+        if(empty($alertsUsers))
+        	return;
+
+	    $configUsers = array_unique_multidimensional($alertsUsers);
+
+        foreach($configUsers as $alertkind => $cfgusr)
         {
-            if($config['email']['smtp'])
-            {
-                $settingsEmail['PHPMailer_SMTPSetup'] = $config['email']['smtp'];
-            }
+        	if(empty($cfgusr))
+		        throw new \ErrorException("Missing user settings for " . $alertkind .  ". Aborting.");
+
+	        $user = UserQuery::create()
+                ->filterByEmailAddress($cfgusr['email'])
+                ->findOneOrCreate();
+
+            $user->setEmailAddress($cfgusr['email']);
+	        if(!empty($cfgusr['display_name']))
+                $user->setName($cfgusr['display_name']);
+	        else
+		        $user->setName(preg_replace("/(@.*)/", "", $cfgusr['email']));
+
+            $user->save();
+
+            setConfigurationSetting($alertkind, $user);
+            if(strcasecmp($alertkind, "alerts.results.to") == 0)
+	            $user->setCurrentUser($user);
+
         }
 
-        if(isset($config['emails']))
-        {
-
-            $configUsers = array_unique_multidimensional(array_map(function ($v){ return array('name'=>$v['name'], 'email'=>$v['address']); }, $config['emails']));
-
-            $usersByEmail = array();
-            foreach($configUsers as $cfgusr)
-            {
-                $user = UserQuery::create()
-                    ->filterByEmailAddress($cfgusr['email'])
-                    ->findOneOrCreate();
-
-                $user->setName($cfgusr['name']);
-                $user->setEmailAddress($cfgusr['email']);
-                $user->save();
-                $usersByEmail[$cfgusr['email']] = $user;
-            }
-
-            $arrEmailSendTypes = array_unique(array_column($config['emails'], "type"));
-
-            $emailsByType = array_fill_keys($arrEmailSendTypes, array());
-
-            foreach(array_keys($config['emails']) as $emailKey)
-            {
-                $emailItem = $config['emails'][$emailKey];
-                $type = $emailItem['type'];
-
-                $emailsByType[$type][$emailKey] = $usersByEmail[$emailItem['address']]->toArray();
-                $emailsByType[$type][$emailKey]['type'] = $type;
-                $emailsByType[$type][$emailKey]['emailkind'] = $emailItem['emailkind'];
-            }
-            LogLine("Added users and emails: " . var_export($emailsByType, true));
-
-            $currentUser = array_filter($emailsByType["to"], function ($v) { return $v['emailkind'] === 'results'; });
-            if(!empty($currentUser)) {
-                if (is_array_multidimensional($currentUser))
-                    $currentUser = array_pop($currentUser);
-
-                $currentUserId = $currentUser['UserId'];
-                $user = UserQuery::create()->findOneByUserId($currentUserId);
-                $user->setCurrentUser($user);
-            }
-
-            $GLOBALS['USERDATA']['configuration_settings']['emails_to_send'] = $emailsByType;
-        }
-
-
-        if (empty($currentUser))
+	    $curuser = User::getCurrentUser();
+        if (empty($curuser))
             throw new \ErrorException("No email address or user has been set in the configuration files for this run.  Aborting.");
     }
 
-    private $_arrConfigFileSettings_ = [];
 
-    private function _getNewKeywordSettingsSet_($setkey=null, $iniKeywordSetup)
+	/**
+	 * @param array $iniKeywordSetup
+	 *
+	 * @return \JobScooper\DataAccess\UserKeywordSet|null
+	 */
+	private function _getUserKeywordSet_($iniKeywordSetup)
     {
-         $set =  array(
-            'key' => $setkey,
-            'name' =>  $setkey,
-            'source_config_file_settings' => array_copy($iniKeywordSetup),
-            'keywords_array' => null
-        );
+	    // If keywords are in a string, split them out into an array instead before continuing
+	    if(!empty($iniKeywordSetup) && array_key_exists("keywords", $iniKeywordSetup))
+	    {
+	    	$user = User::getCurrentUser();
 
-        // If keywords are in a string, split them out into an array instead before continuing
-        if(isset($iniKeywordSetup['keywords']) && is_string($iniKeywordSetup['keywords']))
-        {
-            $tmpKeywordArray = explode(",", $iniKeywordSetup['keywords']);
-            $arrKeywords = array();
-            foreach($tmpKeywordArray as $kwd)
-            {
-                $scrubbedKwd = strScrub($kwd, ADVANCED_TEXT_CLEANUP);
-                $arrKeywords[$scrubbedKwd] = $scrubbedKwd;
-            }
-            $set['keywords_array'] = $arrKeywords;
+	    	$keyword_list = $iniKeywordSetup['keywords'];
+		    if(is_string($keyword_list))
+			    $keyword_list = preg_split("/\s*,\s*/", $keyword_list);
 
-            if(isset($set['keywords_array']) && is_array($set['keywords_array']) && count($set['keywords_array']) > 0)
-            {
-                $set['keywords_array_tokenized']  = tokenizeKeywords($set['keywords_array']);
-            }
+		    $final_keywd_list = array();
+		    foreach($keyword_list as $kwd)
+		    {
+			    $scrubbedKwd = strScrub($kwd, ADVANCED_TEXT_CLEANUP);
+			    $final_keywd_list[$scrubbedKwd] = $scrubbedKwd;
+		    }
+
+		    $kwdset = UserKeywordSetQuery::create()
+		        ->filterByUserFromUKS($user)
+		        ->filterByKeywords($final_keywd_list)
+			    ->findOneOrCreate();
+
+		    $kwdset->setSearchKeyFromConfig(!empty($iniKeywordSetup['key'] ? $iniKeywordSetup['key'] : cleanupSlugPart(join(" ", $final_keywd_list))));
+		    $kwdset->setKeywords($final_keywd_list);
+		    $kwdset->setUserFromUKS($user);
+		    $kwdset->save();
+			return $kwdset;
         }
 
-        return $set;
+        return null;
     }
 
 

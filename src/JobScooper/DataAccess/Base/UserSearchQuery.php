@@ -20,29 +20,21 @@ use Propel\Runtime\Exception\PropelException;
  *
  *
  *
- * @method     ChildUserSearchQuery orderByUserSearchId($order = Criteria::ASC) Order by the user_search_id column
  * @method     ChildUserSearchQuery orderByUserId($order = Criteria::ASC) Order by the user_id column
+ * @method     ChildUserSearchQuery orderByUserKeywordSetId($order = Criteria::ASC) Order by the user_keyword_set_id column
  * @method     ChildUserSearchQuery orderByGeoLocationId($order = Criteria::ASC) Order by the geolocation_id column
- * @method     ChildUserSearchQuery orderByUserSearchKey($order = Criteria::ASC) Order by the user_search_key column
- * @method     ChildUserSearchQuery orderByKeywords($order = Criteria::ASC) Order by the keywords column
- * @method     ChildUserSearchQuery orderByKeywordTokens($order = Criteria::ASC) Order by the keyword_tokens column
- * @method     ChildUserSearchQuery orderBySearchKeyFromConfig($order = Criteria::ASC) Order by the search_key_from_config column
+ * @method     ChildUserSearchQuery orderByUserSearchId($order = Criteria::ASC) Order by the user_search_id column
  * @method     ChildUserSearchQuery orderByCreatedAt($order = Criteria::ASC) Order by the date_created column
  * @method     ChildUserSearchQuery orderByUpdatedAt($order = Criteria::ASC) Order by the date_updated column
- * @method     ChildUserSearchQuery orderByLastCompletedAt($order = Criteria::ASC) Order by the date_last_completed column
- * @method     ChildUserSearchQuery orderByVersion($order = Criteria::ASC) Order by the version column
+ * @method     ChildUserSearchQuery orderByUserSearchKey($order = Criteria::ASC) Order by the user_search_key column
  *
- * @method     ChildUserSearchQuery groupByUserSearchId() Group by the user_search_id column
  * @method     ChildUserSearchQuery groupByUserId() Group by the user_id column
+ * @method     ChildUserSearchQuery groupByUserKeywordSetId() Group by the user_keyword_set_id column
  * @method     ChildUserSearchQuery groupByGeoLocationId() Group by the geolocation_id column
- * @method     ChildUserSearchQuery groupByUserSearchKey() Group by the user_search_key column
- * @method     ChildUserSearchQuery groupByKeywords() Group by the keywords column
- * @method     ChildUserSearchQuery groupByKeywordTokens() Group by the keyword_tokens column
- * @method     ChildUserSearchQuery groupBySearchKeyFromConfig() Group by the search_key_from_config column
+ * @method     ChildUserSearchQuery groupByUserSearchId() Group by the user_search_id column
  * @method     ChildUserSearchQuery groupByCreatedAt() Group by the date_created column
  * @method     ChildUserSearchQuery groupByUpdatedAt() Group by the date_updated column
- * @method     ChildUserSearchQuery groupByLastCompletedAt() Group by the date_last_completed column
- * @method     ChildUserSearchQuery groupByVersion() Group by the version column
+ * @method     ChildUserSearchQuery groupByUserSearchKey() Group by the user_search_key column
  *
  * @method     ChildUserSearchQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildUserSearchQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -52,103 +44,84 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchQuery rightJoinWith($relation) Adds a RIGHT JOIN clause and with to the query
  * @method     ChildUserSearchQuery innerJoinWith($relation) Adds a INNER JOIN clause and with to the query
  *
- * @method     ChildUserSearchQuery leftJoinUser($relationAlias = null) Adds a LEFT JOIN clause to the query using the User relation
- * @method     ChildUserSearchQuery rightJoinUser($relationAlias = null) Adds a RIGHT JOIN clause to the query using the User relation
- * @method     ChildUserSearchQuery innerJoinUser($relationAlias = null) Adds a INNER JOIN clause to the query using the User relation
+ * @method     ChildUserSearchQuery leftJoinUserKeywordSetFromUS($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserKeywordSetFromUS relation
+ * @method     ChildUserSearchQuery rightJoinUserKeywordSetFromUS($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserKeywordSetFromUS relation
+ * @method     ChildUserSearchQuery innerJoinUserKeywordSetFromUS($relationAlias = null) Adds a INNER JOIN clause to the query using the UserKeywordSetFromUS relation
  *
- * @method     ChildUserSearchQuery joinWithUser($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the User relation
+ * @method     ChildUserSearchQuery joinWithUserKeywordSetFromUS($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserKeywordSetFromUS relation
  *
- * @method     ChildUserSearchQuery leftJoinWithUser() Adds a LEFT JOIN clause and with to the query using the User relation
- * @method     ChildUserSearchQuery rightJoinWithUser() Adds a RIGHT JOIN clause and with to the query using the User relation
- * @method     ChildUserSearchQuery innerJoinWithUser() Adds a INNER JOIN clause and with to the query using the User relation
+ * @method     ChildUserSearchQuery leftJoinWithUserKeywordSetFromUS() Adds a LEFT JOIN clause and with to the query using the UserKeywordSetFromUS relation
+ * @method     ChildUserSearchQuery rightJoinWithUserKeywordSetFromUS() Adds a RIGHT JOIN clause and with to the query using the UserKeywordSetFromUS relation
+ * @method     ChildUserSearchQuery innerJoinWithUserKeywordSetFromUS() Adds a INNER JOIN clause and with to the query using the UserKeywordSetFromUS relation
  *
- * @method     ChildUserSearchQuery leftJoinGeoLocation($relationAlias = null) Adds a LEFT JOIN clause to the query using the GeoLocation relation
- * @method     ChildUserSearchQuery rightJoinGeoLocation($relationAlias = null) Adds a RIGHT JOIN clause to the query using the GeoLocation relation
- * @method     ChildUserSearchQuery innerJoinGeoLocation($relationAlias = null) Adds a INNER JOIN clause to the query using the GeoLocation relation
+ * @method     ChildUserSearchQuery leftJoinGeoLocationFromUS($relationAlias = null) Adds a LEFT JOIN clause to the query using the GeoLocationFromUS relation
+ * @method     ChildUserSearchQuery rightJoinGeoLocationFromUS($relationAlias = null) Adds a RIGHT JOIN clause to the query using the GeoLocationFromUS relation
+ * @method     ChildUserSearchQuery innerJoinGeoLocationFromUS($relationAlias = null) Adds a INNER JOIN clause to the query using the GeoLocationFromUS relation
  *
- * @method     ChildUserSearchQuery joinWithGeoLocation($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the GeoLocation relation
+ * @method     ChildUserSearchQuery joinWithGeoLocationFromUS($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the GeoLocationFromUS relation
  *
- * @method     ChildUserSearchQuery leftJoinWithGeoLocation() Adds a LEFT JOIN clause and with to the query using the GeoLocation relation
- * @method     ChildUserSearchQuery rightJoinWithGeoLocation() Adds a RIGHT JOIN clause and with to the query using the GeoLocation relation
- * @method     ChildUserSearchQuery innerJoinWithGeoLocation() Adds a INNER JOIN clause and with to the query using the GeoLocation relation
+ * @method     ChildUserSearchQuery leftJoinWithGeoLocationFromUS() Adds a LEFT JOIN clause and with to the query using the GeoLocationFromUS relation
+ * @method     ChildUserSearchQuery rightJoinWithGeoLocationFromUS() Adds a RIGHT JOIN clause and with to the query using the GeoLocationFromUS relation
+ * @method     ChildUserSearchQuery innerJoinWithGeoLocationFromUS() Adds a INNER JOIN clause and with to the query using the GeoLocationFromUS relation
  *
- * @method     ChildUserSearchQuery leftJoinUserSearchRun($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSearchRun relation
- * @method     ChildUserSearchQuery rightJoinUserSearchRun($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSearchRun relation
- * @method     ChildUserSearchQuery innerJoinUserSearchRun($relationAlias = null) Adds a INNER JOIN clause to the query using the UserSearchRun relation
+ * @method     ChildUserSearchQuery leftJoinUserFromUS($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserFromUS relation
+ * @method     ChildUserSearchQuery rightJoinUserFromUS($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserFromUS relation
+ * @method     ChildUserSearchQuery innerJoinUserFromUS($relationAlias = null) Adds a INNER JOIN clause to the query using the UserFromUS relation
  *
- * @method     ChildUserSearchQuery joinWithUserSearchRun($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserSearchRun relation
+ * @method     ChildUserSearchQuery joinWithUserFromUS($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserFromUS relation
  *
- * @method     ChildUserSearchQuery leftJoinWithUserSearchRun() Adds a LEFT JOIN clause and with to the query using the UserSearchRun relation
- * @method     ChildUserSearchQuery rightJoinWithUserSearchRun() Adds a RIGHT JOIN clause and with to the query using the UserSearchRun relation
- * @method     ChildUserSearchQuery innerJoinWithUserSearchRun() Adds a INNER JOIN clause and with to the query using the UserSearchRun relation
+ * @method     ChildUserSearchQuery leftJoinWithUserFromUS() Adds a LEFT JOIN clause and with to the query using the UserFromUS relation
+ * @method     ChildUserSearchQuery rightJoinWithUserFromUS() Adds a RIGHT JOIN clause and with to the query using the UserFromUS relation
+ * @method     ChildUserSearchQuery innerJoinWithUserFromUS() Adds a INNER JOIN clause and with to the query using the UserFromUS relation
  *
- * @method     ChildUserSearchQuery leftJoinUserSearchVersion($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSearchVersion relation
- * @method     ChildUserSearchQuery rightJoinUserSearchVersion($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSearchVersion relation
- * @method     ChildUserSearchQuery innerJoinUserSearchVersion($relationAlias = null) Adds a INNER JOIN clause to the query using the UserSearchVersion relation
+ * @method     ChildUserSearchQuery leftJoinUserSearchSiteRun($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSearchSiteRun relation
+ * @method     ChildUserSearchQuery rightJoinUserSearchSiteRun($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSearchSiteRun relation
+ * @method     ChildUserSearchQuery innerJoinUserSearchSiteRun($relationAlias = null) Adds a INNER JOIN clause to the query using the UserSearchSiteRun relation
  *
- * @method     ChildUserSearchQuery joinWithUserSearchVersion($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserSearchVersion relation
+ * @method     ChildUserSearchQuery joinWithUserSearchSiteRun($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserSearchSiteRun relation
  *
- * @method     ChildUserSearchQuery leftJoinWithUserSearchVersion() Adds a LEFT JOIN clause and with to the query using the UserSearchVersion relation
- * @method     ChildUserSearchQuery rightJoinWithUserSearchVersion() Adds a RIGHT JOIN clause and with to the query using the UserSearchVersion relation
- * @method     ChildUserSearchQuery innerJoinWithUserSearchVersion() Adds a INNER JOIN clause and with to the query using the UserSearchVersion relation
+ * @method     ChildUserSearchQuery leftJoinWithUserSearchSiteRun() Adds a LEFT JOIN clause and with to the query using the UserSearchSiteRun relation
+ * @method     ChildUserSearchQuery rightJoinWithUserSearchSiteRun() Adds a RIGHT JOIN clause and with to the query using the UserSearchSiteRun relation
+ * @method     ChildUserSearchQuery innerJoinWithUserSearchSiteRun() Adds a INNER JOIN clause and with to the query using the UserSearchSiteRun relation
  *
- * @method     \JobScooper\DataAccess\UserQuery|\JobScooper\DataAccess\GeoLocationQuery|\JobScooper\DataAccess\UserSearchRunQuery|\JobScooper\DataAccess\UserSearchVersionQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
+ * @method     \JobScooper\DataAccess\UserKeywordSetQuery|\JobScooper\DataAccess\GeoLocationQuery|\JobScooper\DataAccess\UserQuery|\JobScooper\DataAccess\UserSearchSiteRunQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildUserSearch findOne(ConnectionInterface $con = null) Return the first ChildUserSearch matching the query
  * @method     ChildUserSearch findOneOrCreate(ConnectionInterface $con = null) Return the first ChildUserSearch matching the query, or a new ChildUserSearch object populated from the query conditions when no match is found
  *
- * @method     ChildUserSearch findOneByUserSearchId(int $user_search_id) Return the first ChildUserSearch filtered by the user_search_id column
  * @method     ChildUserSearch findOneByUserId(int $user_id) Return the first ChildUserSearch filtered by the user_id column
+ * @method     ChildUserSearch findOneByUserKeywordSetId(int $user_keyword_set_id) Return the first ChildUserSearch filtered by the user_keyword_set_id column
  * @method     ChildUserSearch findOneByGeoLocationId(int $geolocation_id) Return the first ChildUserSearch filtered by the geolocation_id column
- * @method     ChildUserSearch findOneByUserSearchKey(string $user_search_key) Return the first ChildUserSearch filtered by the user_search_key column
- * @method     ChildUserSearch findOneByKeywords(array $keywords) Return the first ChildUserSearch filtered by the keywords column
- * @method     ChildUserSearch findOneByKeywordTokens(array $keyword_tokens) Return the first ChildUserSearch filtered by the keyword_tokens column
- * @method     ChildUserSearch findOneBySearchKeyFromConfig(string $search_key_from_config) Return the first ChildUserSearch filtered by the search_key_from_config column
+ * @method     ChildUserSearch findOneByUserSearchId(int $user_search_id) Return the first ChildUserSearch filtered by the user_search_id column
  * @method     ChildUserSearch findOneByCreatedAt(string $date_created) Return the first ChildUserSearch filtered by the date_created column
  * @method     ChildUserSearch findOneByUpdatedAt(string $date_updated) Return the first ChildUserSearch filtered by the date_updated column
- * @method     ChildUserSearch findOneByLastCompletedAt(string $date_last_completed) Return the first ChildUserSearch filtered by the date_last_completed column
- * @method     ChildUserSearch findOneByVersion(int $version) Return the first ChildUserSearch filtered by the version column *
+ * @method     ChildUserSearch findOneByUserSearchKey(string $user_search_key) Return the first ChildUserSearch filtered by the user_search_key column *
 
  * @method     ChildUserSearch requirePk($key, ConnectionInterface $con = null) Return the ChildUserSearch by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearch requireOne(ConnectionInterface $con = null) Return the first ChildUserSearch matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
- * @method     ChildUserSearch requireOneByUserSearchId(int $user_search_id) Return the first ChildUserSearch filtered by the user_search_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearch requireOneByUserId(int $user_id) Return the first ChildUserSearch filtered by the user_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearch requireOneByUserKeywordSetId(int $user_keyword_set_id) Return the first ChildUserSearch filtered by the user_keyword_set_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearch requireOneByGeoLocationId(int $geolocation_id) Return the first ChildUserSearch filtered by the geolocation_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserSearch requireOneByUserSearchKey(string $user_search_key) Return the first ChildUserSearch filtered by the user_search_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserSearch requireOneByKeywords(array $keywords) Return the first ChildUserSearch filtered by the keywords column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserSearch requireOneByKeywordTokens(array $keyword_tokens) Return the first ChildUserSearch filtered by the keyword_tokens column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserSearch requireOneBySearchKeyFromConfig(string $search_key_from_config) Return the first ChildUserSearch filtered by the search_key_from_config column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearch requireOneByUserSearchId(int $user_search_id) Return the first ChildUserSearch filtered by the user_search_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearch requireOneByCreatedAt(string $date_created) Return the first ChildUserSearch filtered by the date_created column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearch requireOneByUpdatedAt(string $date_updated) Return the first ChildUserSearch filtered by the date_updated column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserSearch requireOneByLastCompletedAt(string $date_last_completed) Return the first ChildUserSearch filtered by the date_last_completed column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserSearch requireOneByVersion(int $version) Return the first ChildUserSearch filtered by the version column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearch requireOneByUserSearchKey(string $user_search_key) Return the first ChildUserSearch filtered by the user_search_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildUserSearch[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildUserSearch objects based on current ModelCriteria
- * @method     ChildUserSearch[]|ObjectCollection findByUserSearchId(int $user_search_id) Return ChildUserSearch objects filtered by the user_search_id column
  * @method     ChildUserSearch[]|ObjectCollection findByUserId(int $user_id) Return ChildUserSearch objects filtered by the user_id column
+ * @method     ChildUserSearch[]|ObjectCollection findByUserKeywordSetId(int $user_keyword_set_id) Return ChildUserSearch objects filtered by the user_keyword_set_id column
  * @method     ChildUserSearch[]|ObjectCollection findByGeoLocationId(int $geolocation_id) Return ChildUserSearch objects filtered by the geolocation_id column
- * @method     ChildUserSearch[]|ObjectCollection findByUserSearchKey(string $user_search_key) Return ChildUserSearch objects filtered by the user_search_key column
- * @method     ChildUserSearch[]|ObjectCollection findByKeywords(array $keywords) Return ChildUserSearch objects filtered by the keywords column
- * @method     ChildUserSearch[]|ObjectCollection findByKeywordTokens(array $keyword_tokens) Return ChildUserSearch objects filtered by the keyword_tokens column
- * @method     ChildUserSearch[]|ObjectCollection findBySearchKeyFromConfig(string $search_key_from_config) Return ChildUserSearch objects filtered by the search_key_from_config column
+ * @method     ChildUserSearch[]|ObjectCollection findByUserSearchId(int $user_search_id) Return ChildUserSearch objects filtered by the user_search_id column
  * @method     ChildUserSearch[]|ObjectCollection findByCreatedAt(string $date_created) Return ChildUserSearch objects filtered by the date_created column
  * @method     ChildUserSearch[]|ObjectCollection findByUpdatedAt(string $date_updated) Return ChildUserSearch objects filtered by the date_updated column
- * @method     ChildUserSearch[]|ObjectCollection findByLastCompletedAt(string $date_last_completed) Return ChildUserSearch objects filtered by the date_last_completed column
- * @method     ChildUserSearch[]|ObjectCollection findByVersion(int $version) Return ChildUserSearch objects filtered by the version column
+ * @method     ChildUserSearch[]|ObjectCollection findByUserSearchKey(string $user_search_key) Return ChildUserSearch objects filtered by the user_search_key column
  * @method     ChildUserSearch[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  */
 abstract class UserSearchQuery extends ModelCriteria
 {
-
-    // versionable behavior
-
-    /**
-     * Whether the versioning is enabled
-     */
-    static $isVersioningEnabled = true;
-protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityNotFoundException';
+    protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityNotFoundException';
 
     /**
      * Initializes internal state of \JobScooper\DataAccess\Base\UserSearchQuery object.
@@ -192,10 +165,10 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
      * Go fast if the query is untouched.
      *
      * <code>
-     * $obj  = $c->findPk(12, $con);
+     * $obj = $c->findPk(array(12, 34, 56), $con);
      * </code>
      *
-     * @param mixed $key Primary key to use for the query
+     * @param array[$user_id, $user_keyword_set_id, $geolocation_id] $key Primary key to use for the query
      * @param ConnectionInterface $con an optional connection object
      *
      * @return ChildUserSearch|array|mixed the result, formatted by the current formatter
@@ -220,7 +193,7 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
             return $this->findPkComplex($key, $con);
         }
 
-        if ((null !== ($obj = UserSearchTableMap::getInstanceFromPool(null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key)))) {
+        if ((null !== ($obj = UserSearchTableMap::getInstanceFromPool(serialize([(null === $key[0] || is_scalar($key[0]) || is_callable([$key[0], '__toString']) ? (string) $key[0] : $key[0]), (null === $key[1] || is_scalar($key[1]) || is_callable([$key[1], '__toString']) ? (string) $key[1] : $key[1]), (null === $key[2] || is_scalar($key[2]) || is_callable([$key[2], '__toString']) ? (string) $key[2] : $key[2])]))))) {
             // the object is already in the instance pool
             return $obj;
         }
@@ -241,10 +214,12 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_search_id, user_id, geolocation_id, user_search_key, keywords, keyword_tokens, search_key_from_config, date_created, date_updated, date_last_completed, version FROM user_search WHERE user_search_id = :p0';
+        $sql = 'SELECT user_id, user_keyword_set_id, geolocation_id, user_search_id, date_created, date_updated, user_search_key FROM user_search WHERE user_id = :p0 AND user_keyword_set_id = :p1 AND geolocation_id = :p2';
         try {
             $stmt = $con->prepare($sql);
-            $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
+            $stmt->bindValue(':p0', $key[0], PDO::PARAM_INT);
+            $stmt->bindValue(':p1', $key[1], PDO::PARAM_INT);
+            $stmt->bindValue(':p2', $key[2], PDO::PARAM_INT);
             $stmt->execute();
         } catch (Exception $e) {
             Propel::log($e->getMessage(), Propel::LOG_ERR);
@@ -255,7 +230,7 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
             /** @var ChildUserSearch $obj */
             $obj = new ChildUserSearch();
             $obj->hydrate($row);
-            UserSearchTableMap::addInstanceToPool($obj, null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key);
+            UserSearchTableMap::addInstanceToPool($obj, serialize([(null === $key[0] || is_scalar($key[0]) || is_callable([$key[0], '__toString']) ? (string) $key[0] : $key[0]), (null === $key[1] || is_scalar($key[1]) || is_callable([$key[1], '__toString']) ? (string) $key[1] : $key[1]), (null === $key[2] || is_scalar($key[2]) || is_callable([$key[2], '__toString']) ? (string) $key[2] : $key[2])]));
         }
         $stmt->closeCursor();
 
@@ -284,7 +259,7 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
     /**
      * Find objects by primary key
      * <code>
-     * $objs = $c->findPks(array(12, 56, 832), $con);
+     * $objs = $c->findPks(array(array(12, 56), array(832, 123), array(123, 456)), $con);
      * </code>
      * @param     array $keys Primary keys to use for the query
      * @param     ConnectionInterface $con an optional connection object
@@ -314,8 +289,11 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
      */
     public function filterByPrimaryKey($key)
     {
+        $this->addUsingAlias(UserSearchTableMap::COL_USER_ID, $key[0], Criteria::EQUAL);
+        $this->addUsingAlias(UserSearchTableMap::COL_USER_KEYWORD_SET_ID, $key[1], Criteria::EQUAL);
+        $this->addUsingAlias(UserSearchTableMap::COL_GEOLOCATION_ID, $key[2], Criteria::EQUAL);
 
-        return $this->addUsingAlias(UserSearchTableMap::COL_USER_SEARCH_ID, $key, Criteria::EQUAL);
+        return $this;
     }
 
     /**
@@ -327,8 +305,150 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
      */
     public function filterByPrimaryKeys($keys)
     {
+        if (empty($keys)) {
+            return $this->add(null, '1<>1', Criteria::CUSTOM);
+        }
+        foreach ($keys as $key) {
+            $cton0 = $this->getNewCriterion(UserSearchTableMap::COL_USER_ID, $key[0], Criteria::EQUAL);
+            $cton1 = $this->getNewCriterion(UserSearchTableMap::COL_USER_KEYWORD_SET_ID, $key[1], Criteria::EQUAL);
+            $cton0->addAnd($cton1);
+            $cton2 = $this->getNewCriterion(UserSearchTableMap::COL_GEOLOCATION_ID, $key[2], Criteria::EQUAL);
+            $cton0->addAnd($cton2);
+            $this->addOr($cton0);
+        }
 
-        return $this->addUsingAlias(UserSearchTableMap::COL_USER_SEARCH_ID, $keys, Criteria::IN);
+        return $this;
+    }
+
+    /**
+     * Filter the query on the user_id column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByUserId(1234); // WHERE user_id = 1234
+     * $query->filterByUserId(array(12, 34)); // WHERE user_id IN (12, 34)
+     * $query->filterByUserId(array('min' => 12)); // WHERE user_id > 12
+     * </code>
+     *
+     * @see       filterByUserKeywordSetFromUS()
+     *
+     * @see       filterByUserFromUS()
+     *
+     * @param     mixed $userId The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserSearchQuery The current query, for fluid interface
+     */
+    public function filterByUserId($userId = null, $comparison = null)
+    {
+        if (is_array($userId)) {
+            $useMinMax = false;
+            if (isset($userId['min'])) {
+                $this->addUsingAlias(UserSearchTableMap::COL_USER_ID, $userId['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($userId['max'])) {
+                $this->addUsingAlias(UserSearchTableMap::COL_USER_ID, $userId['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserSearchTableMap::COL_USER_ID, $userId, $comparison);
+    }
+
+    /**
+     * Filter the query on the user_keyword_set_id column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByUserKeywordSetId(1234); // WHERE user_keyword_set_id = 1234
+     * $query->filterByUserKeywordSetId(array(12, 34)); // WHERE user_keyword_set_id IN (12, 34)
+     * $query->filterByUserKeywordSetId(array('min' => 12)); // WHERE user_keyword_set_id > 12
+     * </code>
+     *
+     * @see       filterByUserKeywordSetFromUS()
+     *
+     * @param     mixed $userKeywordSetId The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserSearchQuery The current query, for fluid interface
+     */
+    public function filterByUserKeywordSetId($userKeywordSetId = null, $comparison = null)
+    {
+        if (is_array($userKeywordSetId)) {
+            $useMinMax = false;
+            if (isset($userKeywordSetId['min'])) {
+                $this->addUsingAlias(UserSearchTableMap::COL_USER_KEYWORD_SET_ID, $userKeywordSetId['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($userKeywordSetId['max'])) {
+                $this->addUsingAlias(UserSearchTableMap::COL_USER_KEYWORD_SET_ID, $userKeywordSetId['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserSearchTableMap::COL_USER_KEYWORD_SET_ID, $userKeywordSetId, $comparison);
+    }
+
+    /**
+     * Filter the query on the geolocation_id column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByGeoLocationId(1234); // WHERE geolocation_id = 1234
+     * $query->filterByGeoLocationId(array(12, 34)); // WHERE geolocation_id IN (12, 34)
+     * $query->filterByGeoLocationId(array('min' => 12)); // WHERE geolocation_id > 12
+     * </code>
+     *
+     * @see       filterByGeoLocationFromUS()
+     *
+     * @param     mixed $geoLocationId The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserSearchQuery The current query, for fluid interface
+     */
+    public function filterByGeoLocationId($geoLocationId = null, $comparison = null)
+    {
+        if (is_array($geoLocationId)) {
+            $useMinMax = false;
+            if (isset($geoLocationId['min'])) {
+                $this->addUsingAlias(UserSearchTableMap::COL_GEOLOCATION_ID, $geoLocationId['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($geoLocationId['max'])) {
+                $this->addUsingAlias(UserSearchTableMap::COL_GEOLOCATION_ID, $geoLocationId['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserSearchTableMap::COL_GEOLOCATION_ID, $geoLocationId, $comparison);
     }
 
     /**
@@ -370,304 +490,6 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
         }
 
         return $this->addUsingAlias(UserSearchTableMap::COL_USER_SEARCH_ID, $userSearchId, $comparison);
-    }
-
-    /**
-     * Filter the query on the user_id column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByUserId(1234); // WHERE user_id = 1234
-     * $query->filterByUserId(array(12, 34)); // WHERE user_id IN (12, 34)
-     * $query->filterByUserId(array('min' => 12)); // WHERE user_id > 12
-     * </code>
-     *
-     * @see       filterByUser()
-     *
-     * @param     mixed $userId The value to use as filter.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserSearchQuery The current query, for fluid interface
-     */
-    public function filterByUserId($userId = null, $comparison = null)
-    {
-        if (is_array($userId)) {
-            $useMinMax = false;
-            if (isset($userId['min'])) {
-                $this->addUsingAlias(UserSearchTableMap::COL_USER_ID, $userId['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($userId['max'])) {
-                $this->addUsingAlias(UserSearchTableMap::COL_USER_ID, $userId['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(UserSearchTableMap::COL_USER_ID, $userId, $comparison);
-    }
-
-    /**
-     * Filter the query on the geolocation_id column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByGeoLocationId(1234); // WHERE geolocation_id = 1234
-     * $query->filterByGeoLocationId(array(12, 34)); // WHERE geolocation_id IN (12, 34)
-     * $query->filterByGeoLocationId(array('min' => 12)); // WHERE geolocation_id > 12
-     * </code>
-     *
-     * @see       filterByGeoLocation()
-     *
-     * @param     mixed $geoLocationId The value to use as filter.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserSearchQuery The current query, for fluid interface
-     */
-    public function filterByGeoLocationId($geoLocationId = null, $comparison = null)
-    {
-        if (is_array($geoLocationId)) {
-            $useMinMax = false;
-            if (isset($geoLocationId['min'])) {
-                $this->addUsingAlias(UserSearchTableMap::COL_GEOLOCATION_ID, $geoLocationId['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($geoLocationId['max'])) {
-                $this->addUsingAlias(UserSearchTableMap::COL_GEOLOCATION_ID, $geoLocationId['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(UserSearchTableMap::COL_GEOLOCATION_ID, $geoLocationId, $comparison);
-    }
-
-    /**
-     * Filter the query on the user_search_key column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByUserSearchKey('fooValue');   // WHERE user_search_key = 'fooValue'
-     * $query->filterByUserSearchKey('%fooValue%', Criteria::LIKE); // WHERE user_search_key LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $userSearchKey The value to use as filter.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserSearchQuery The current query, for fluid interface
-     */
-    public function filterByUserSearchKey($userSearchKey = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($userSearchKey)) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(UserSearchTableMap::COL_USER_SEARCH_KEY, $userSearchKey, $comparison);
-    }
-
-    /**
-     * Filter the query on the keywords column
-     *
-     * @param     array $keywords The values to use as filter.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserSearchQuery The current query, for fluid interface
-     */
-    public function filterByKeywords($keywords = null, $comparison = null)
-    {
-        $key = $this->getAliasedColName(UserSearchTableMap::COL_KEYWORDS);
-        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
-            foreach ($keywords as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addAnd($key, $value, Criteria::LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::LIKE);
-                }
-            }
-
-            return $this;
-        } elseif ($comparison == Criteria::CONTAINS_SOME) {
-            foreach ($keywords as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addOr($key, $value, Criteria::LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::LIKE);
-                }
-            }
-
-            return $this;
-        } elseif ($comparison == Criteria::CONTAINS_NONE) {
-            foreach ($keywords as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addAnd($key, $value, Criteria::NOT_LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::NOT_LIKE);
-                }
-            }
-            $this->addOr($key, null, Criteria::ISNULL);
-
-            return $this;
-        }
-
-        return $this->addUsingAlias(UserSearchTableMap::COL_KEYWORDS, $keywords, $comparison);
-    }
-
-    /**
-     * Filter the query on the keywords column
-     * @param     mixed $keywords The value to use as filter
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::CONTAINS_ALL
-     *
-     * @return $this|ChildUserSearchQuery The current query, for fluid interface
-     */
-    public function filterByKeyword($keywords = null, $comparison = null)
-    {
-        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
-            if (is_scalar($keywords)) {
-                $keywords = '%| ' . $keywords . ' |%';
-                $comparison = Criteria::LIKE;
-            }
-        } elseif ($comparison == Criteria::CONTAINS_NONE) {
-            $keywords = '%| ' . $keywords . ' |%';
-            $comparison = Criteria::NOT_LIKE;
-            $key = $this->getAliasedColName(UserSearchTableMap::COL_KEYWORDS);
-            if ($this->containsKey($key)) {
-                $this->addAnd($key, $keywords, $comparison);
-            } else {
-                $this->addAnd($key, $keywords, $comparison);
-            }
-            $this->addOr($key, null, Criteria::ISNULL);
-
-            return $this;
-        }
-
-        return $this->addUsingAlias(UserSearchTableMap::COL_KEYWORDS, $keywords, $comparison);
-    }
-
-    /**
-     * Filter the query on the keyword_tokens column
-     *
-     * @param     array $keywordTokens The values to use as filter.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserSearchQuery The current query, for fluid interface
-     */
-    public function filterByKeywordTokens($keywordTokens = null, $comparison = null)
-    {
-        $key = $this->getAliasedColName(UserSearchTableMap::COL_KEYWORD_TOKENS);
-        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
-            foreach ($keywordTokens as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addAnd($key, $value, Criteria::LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::LIKE);
-                }
-            }
-
-            return $this;
-        } elseif ($comparison == Criteria::CONTAINS_SOME) {
-            foreach ($keywordTokens as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addOr($key, $value, Criteria::LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::LIKE);
-                }
-            }
-
-            return $this;
-        } elseif ($comparison == Criteria::CONTAINS_NONE) {
-            foreach ($keywordTokens as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addAnd($key, $value, Criteria::NOT_LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::NOT_LIKE);
-                }
-            }
-            $this->addOr($key, null, Criteria::ISNULL);
-
-            return $this;
-        }
-
-        return $this->addUsingAlias(UserSearchTableMap::COL_KEYWORD_TOKENS, $keywordTokens, $comparison);
-    }
-
-    /**
-     * Filter the query on the keyword_tokens column
-     * @param     mixed $keywordTokens The value to use as filter
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::CONTAINS_ALL
-     *
-     * @return $this|ChildUserSearchQuery The current query, for fluid interface
-     */
-    public function filterByKeywordToken($keywordTokens = null, $comparison = null)
-    {
-        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
-            if (is_scalar($keywordTokens)) {
-                $keywordTokens = '%| ' . $keywordTokens . ' |%';
-                $comparison = Criteria::LIKE;
-            }
-        } elseif ($comparison == Criteria::CONTAINS_NONE) {
-            $keywordTokens = '%| ' . $keywordTokens . ' |%';
-            $comparison = Criteria::NOT_LIKE;
-            $key = $this->getAliasedColName(UserSearchTableMap::COL_KEYWORD_TOKENS);
-            if ($this->containsKey($key)) {
-                $this->addAnd($key, $keywordTokens, $comparison);
-            } else {
-                $this->addAnd($key, $keywordTokens, $comparison);
-            }
-            $this->addOr($key, null, Criteria::ISNULL);
-
-            return $this;
-        }
-
-        return $this->addUsingAlias(UserSearchTableMap::COL_KEYWORD_TOKENS, $keywordTokens, $comparison);
-    }
-
-    /**
-     * Filter the query on the search_key_from_config column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterBySearchKeyFromConfig('fooValue');   // WHERE search_key_from_config = 'fooValue'
-     * $query->filterBySearchKeyFromConfig('%fooValue%', Criteria::LIKE); // WHERE search_key_from_config LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $searchKeyFromConfig The value to use as filter.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserSearchQuery The current query, for fluid interface
-     */
-    public function filterBySearchKeyFromConfig($searchKeyFromConfig = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($searchKeyFromConfig)) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(UserSearchTableMap::COL_SEARCH_KEY_FROM_CONFIG, $searchKeyFromConfig, $comparison);
     }
 
     /**
@@ -757,128 +579,63 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
     }
 
     /**
-     * Filter the query on the date_last_completed column
+     * Filter the query on the user_search_key column
      *
      * Example usage:
      * <code>
-     * $query->filterByLastCompletedAt('2011-03-14'); // WHERE date_last_completed = '2011-03-14'
-     * $query->filterByLastCompletedAt('now'); // WHERE date_last_completed = '2011-03-14'
-     * $query->filterByLastCompletedAt(array('max' => 'yesterday')); // WHERE date_last_completed > '2011-03-13'
+     * $query->filterByUserSearchKey('fooValue');   // WHERE user_search_key = 'fooValue'
+     * $query->filterByUserSearchKey('%fooValue%', Criteria::LIKE); // WHERE user_search_key LIKE '%fooValue%'
      * </code>
      *
-     * @param     mixed $lastCompletedAt The value to use as filter.
-     *              Values can be integers (unix timestamps), DateTime objects, or strings.
-     *              Empty strings are treated as NULL.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $userSearchKey The value to use as filter.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildUserSearchQuery The current query, for fluid interface
      */
-    public function filterByLastCompletedAt($lastCompletedAt = null, $comparison = null)
+    public function filterByUserSearchKey($userSearchKey = null, $comparison = null)
     {
-        if (is_array($lastCompletedAt)) {
-            $useMinMax = false;
-            if (isset($lastCompletedAt['min'])) {
-                $this->addUsingAlias(UserSearchTableMap::COL_DATE_LAST_COMPLETED, $lastCompletedAt['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($lastCompletedAt['max'])) {
-                $this->addUsingAlias(UserSearchTableMap::COL_DATE_LAST_COMPLETED, $lastCompletedAt['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
+        if (null === $comparison) {
+            if (is_array($userSearchKey)) {
                 $comparison = Criteria::IN;
             }
         }
 
-        return $this->addUsingAlias(UserSearchTableMap::COL_DATE_LAST_COMPLETED, $lastCompletedAt, $comparison);
+        return $this->addUsingAlias(UserSearchTableMap::COL_USER_SEARCH_KEY, $userSearchKey, $comparison);
     }
 
     /**
-     * Filter the query on the version column
+     * Filter the query by a related \JobScooper\DataAccess\UserKeywordSet object
      *
-     * Example usage:
-     * <code>
-     * $query->filterByVersion(1234); // WHERE version = 1234
-     * $query->filterByVersion(array(12, 34)); // WHERE version IN (12, 34)
-     * $query->filterByVersion(array('min' => 12)); // WHERE version > 12
-     * </code>
-     *
-     * @param     mixed $version The value to use as filter.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserSearchQuery The current query, for fluid interface
-     */
-    public function filterByVersion($version = null, $comparison = null)
-    {
-        if (is_array($version)) {
-            $useMinMax = false;
-            if (isset($version['min'])) {
-                $this->addUsingAlias(UserSearchTableMap::COL_VERSION, $version['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($version['max'])) {
-                $this->addUsingAlias(UserSearchTableMap::COL_VERSION, $version['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(UserSearchTableMap::COL_VERSION, $version, $comparison);
-    }
-
-    /**
-     * Filter the query by a related \JobScooper\DataAccess\User object
-     *
-     * @param \JobScooper\DataAccess\User|ObjectCollection $user The related object(s) to use as filter
+     * @param \JobScooper\DataAccess\UserKeywordSet $userKeywordSet The related object to use as filter
      * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @throws \Propel\Runtime\Exception\PropelException
      *
      * @return ChildUserSearchQuery The current query, for fluid interface
      */
-    public function filterByUser($user, $comparison = null)
+    public function filterByUserKeywordSetFromUS($userKeywordSet, $comparison = null)
     {
-        if ($user instanceof \JobScooper\DataAccess\User) {
+        if ($userKeywordSet instanceof \JobScooper\DataAccess\UserKeywordSet) {
             return $this
-                ->addUsingAlias(UserSearchTableMap::COL_USER_ID, $user->getUserId(), $comparison);
-        } elseif ($user instanceof ObjectCollection) {
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-
-            return $this
-                ->addUsingAlias(UserSearchTableMap::COL_USER_ID, $user->toKeyValue('PrimaryKey', 'UserId'), $comparison);
+                ->addUsingAlias(UserSearchTableMap::COL_USER_KEYWORD_SET_ID, $userKeywordSet->getUserKeywordSetId(), $comparison)
+                ->addUsingAlias(UserSearchTableMap::COL_USER_ID, $userKeywordSet->getUserId(), $comparison);
         } else {
-            throw new PropelException('filterByUser() only accepts arguments of type \JobScooper\DataAccess\User or Collection');
+            throw new PropelException('filterByUserKeywordSetFromUS() only accepts arguments of type \JobScooper\DataAccess\UserKeywordSet');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the User relation
+     * Adds a JOIN clause to the query using the UserKeywordSetFromUS relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return $this|ChildUserSearchQuery The current query, for fluid interface
      */
-    public function joinUser($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function joinUserKeywordSetFromUS($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('User');
+        $relationMap = $tableMap->getRelation('UserKeywordSetFromUS');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -893,14 +650,14 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'User');
+            $this->addJoinObject($join, 'UserKeywordSetFromUS');
         }
 
         return $this;
     }
 
     /**
-     * Use the User relation User object
+     * Use the UserKeywordSetFromUS relation UserKeywordSet object
      *
      * @see useQuery()
      *
@@ -908,13 +665,13 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
      *                                   to be used as main alias in the secondary query
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
-     * @return \JobScooper\DataAccess\UserQuery A secondary query class using the current class as primary query
+     * @return \JobScooper\DataAccess\UserKeywordSetQuery A secondary query class using the current class as primary query
      */
-    public function useUserQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function useUserKeywordSetFromUSQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
-            ->joinUser($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'User', '\JobScooper\DataAccess\UserQuery');
+            ->joinUserKeywordSetFromUS($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'UserKeywordSetFromUS', '\JobScooper\DataAccess\UserKeywordSetQuery');
     }
 
     /**
@@ -927,7 +684,7 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
      *
      * @return ChildUserSearchQuery The current query, for fluid interface
      */
-    public function filterByGeoLocation($geoLocation, $comparison = null)
+    public function filterByGeoLocationFromUS($geoLocation, $comparison = null)
     {
         if ($geoLocation instanceof \JobScooper\DataAccess\GeoLocation) {
             return $this
@@ -940,22 +697,22 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
             return $this
                 ->addUsingAlias(UserSearchTableMap::COL_GEOLOCATION_ID, $geoLocation->toKeyValue('PrimaryKey', 'GeoLocationId'), $comparison);
         } else {
-            throw new PropelException('filterByGeoLocation() only accepts arguments of type \JobScooper\DataAccess\GeoLocation or Collection');
+            throw new PropelException('filterByGeoLocationFromUS() only accepts arguments of type \JobScooper\DataAccess\GeoLocation or Collection');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the GeoLocation relation
+     * Adds a JOIN clause to the query using the GeoLocationFromUS relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return $this|ChildUserSearchQuery The current query, for fluid interface
      */
-    public function joinGeoLocation($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function joinGeoLocationFromUS($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('GeoLocation');
+        $relationMap = $tableMap->getRelation('GeoLocationFromUS');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -970,14 +727,14 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'GeoLocation');
+            $this->addJoinObject($join, 'GeoLocationFromUS');
         }
 
         return $this;
     }
 
     /**
-     * Use the GeoLocation relation GeoLocation object
+     * Use the GeoLocationFromUS relation GeoLocation object
      *
      * @see useQuery()
      *
@@ -987,48 +744,52 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
      *
      * @return \JobScooper\DataAccess\GeoLocationQuery A secondary query class using the current class as primary query
      */
-    public function useGeoLocationQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function useGeoLocationFromUSQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
-            ->joinGeoLocation($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'GeoLocation', '\JobScooper\DataAccess\GeoLocationQuery');
+            ->joinGeoLocationFromUS($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'GeoLocationFromUS', '\JobScooper\DataAccess\GeoLocationQuery');
     }
 
     /**
-     * Filter the query by a related \JobScooper\DataAccess\UserSearchRun object
+     * Filter the query by a related \JobScooper\DataAccess\User object
      *
-     * @param \JobScooper\DataAccess\UserSearchRun|ObjectCollection $userSearchRun the related object to use as filter
+     * @param \JobScooper\DataAccess\User|ObjectCollection $user The related object(s) to use as filter
      * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
      *
      * @return ChildUserSearchQuery The current query, for fluid interface
      */
-    public function filterByUserSearchRun($userSearchRun, $comparison = null)
+    public function filterByUserFromUS($user, $comparison = null)
     {
-        if ($userSearchRun instanceof \JobScooper\DataAccess\UserSearchRun) {
+        if ($user instanceof \JobScooper\DataAccess\User) {
             return $this
-                ->addUsingAlias(UserSearchTableMap::COL_USER_SEARCH_ID, $userSearchRun->getUserSearchId(), $comparison);
-        } elseif ($userSearchRun instanceof ObjectCollection) {
+                ->addUsingAlias(UserSearchTableMap::COL_USER_ID, $user->getUserId(), $comparison);
+        } elseif ($user instanceof ObjectCollection) {
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+
             return $this
-                ->useUserSearchRunQuery()
-                ->filterByPrimaryKeys($userSearchRun->getPrimaryKeys())
-                ->endUse();
+                ->addUsingAlias(UserSearchTableMap::COL_USER_ID, $user->toKeyValue('PrimaryKey', 'UserId'), $comparison);
         } else {
-            throw new PropelException('filterByUserSearchRun() only accepts arguments of type \JobScooper\DataAccess\UserSearchRun or Collection');
+            throw new PropelException('filterByUserFromUS() only accepts arguments of type \JobScooper\DataAccess\User or Collection');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the UserSearchRun relation
+     * Adds a JOIN clause to the query using the UserFromUS relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return $this|ChildUserSearchQuery The current query, for fluid interface
      */
-    public function joinUserSearchRun($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function joinUserFromUS($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('UserSearchRun');
+        $relationMap = $tableMap->getRelation('UserFromUS');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -1043,14 +804,14 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'UserSearchRun');
+            $this->addJoinObject($join, 'UserFromUS');
         }
 
         return $this;
     }
 
     /**
-     * Use the UserSearchRun relation UserSearchRun object
+     * Use the UserFromUS relation User object
      *
      * @see useQuery()
      *
@@ -1058,50 +819,48 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
      *                                   to be used as main alias in the secondary query
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
-     * @return \JobScooper\DataAccess\UserSearchRunQuery A secondary query class using the current class as primary query
+     * @return \JobScooper\DataAccess\UserQuery A secondary query class using the current class as primary query
      */
-    public function useUserSearchRunQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function useUserFromUSQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
-            ->joinUserSearchRun($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'UserSearchRun', '\JobScooper\DataAccess\UserSearchRunQuery');
+            ->joinUserFromUS($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'UserFromUS', '\JobScooper\DataAccess\UserQuery');
     }
 
     /**
-     * Filter the query by a related \JobScooper\DataAccess\UserSearchVersion object
+     * Filter the query by a related \JobScooper\DataAccess\UserSearchSiteRun object
      *
-     * @param \JobScooper\DataAccess\UserSearchVersion|ObjectCollection $userSearchVersion the related object to use as filter
+     * @param \JobScooper\DataAccess\UserSearchSiteRun|ObjectCollection $userSearchSiteRun the related object to use as filter
      * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return ChildUserSearchQuery The current query, for fluid interface
      */
-    public function filterByUserSearchVersion($userSearchVersion, $comparison = null)
+    public function filterByUserSearchSiteRun($userSearchSiteRun, $comparison = null)
     {
-        if ($userSearchVersion instanceof \JobScooper\DataAccess\UserSearchVersion) {
+        if ($userSearchSiteRun instanceof \JobScooper\DataAccess\UserSearchSiteRun) {
             return $this
-                ->addUsingAlias(UserSearchTableMap::COL_USER_SEARCH_ID, $userSearchVersion->getUserSearchId(), $comparison);
-        } elseif ($userSearchVersion instanceof ObjectCollection) {
-            return $this
-                ->useUserSearchVersionQuery()
-                ->filterByPrimaryKeys($userSearchVersion->getPrimaryKeys())
-                ->endUse();
+                ->addUsingAlias(UserSearchTableMap::COL_USER_ID, $userSearchSiteRun->getUserId(), $comparison)
+                ->addUsingAlias(UserSearchTableMap::COL_USER_KEYWORD_SET_ID, $userSearchSiteRun->getUserKeywordSetId(), $comparison)
+                ->addUsingAlias(UserSearchTableMap::COL_GEOLOCATION_ID, $userSearchSiteRun->getGeoLocationId(), $comparison)
+                ->addUsingAlias(UserSearchTableMap::COL_USER_SEARCH_ID, $userSearchSiteRun->getUserSearchId(), $comparison);
         } else {
-            throw new PropelException('filterByUserSearchVersion() only accepts arguments of type \JobScooper\DataAccess\UserSearchVersion or Collection');
+            throw new PropelException('filterByUserSearchSiteRun() only accepts arguments of type \JobScooper\DataAccess\UserSearchSiteRun');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the UserSearchVersion relation
+     * Adds a JOIN clause to the query using the UserSearchSiteRun relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return $this|ChildUserSearchQuery The current query, for fluid interface
      */
-    public function joinUserSearchVersion($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function joinUserSearchSiteRun($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('UserSearchVersion');
+        $relationMap = $tableMap->getRelation('UserSearchSiteRun');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -1116,14 +875,14 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'UserSearchVersion');
+            $this->addJoinObject($join, 'UserSearchSiteRun');
         }
 
         return $this;
     }
 
     /**
-     * Use the UserSearchVersion relation UserSearchVersion object
+     * Use the UserSearchSiteRun relation UserSearchSiteRun object
      *
      * @see useQuery()
      *
@@ -1131,13 +890,81 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
      *                                   to be used as main alias in the secondary query
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
-     * @return \JobScooper\DataAccess\UserSearchVersionQuery A secondary query class using the current class as primary query
+     * @return \JobScooper\DataAccess\UserSearchSiteRunQuery A secondary query class using the current class as primary query
      */
-    public function useUserSearchVersionQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function useUserSearchSiteRunQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
-            ->joinUserSearchVersion($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'UserSearchVersion', '\JobScooper\DataAccess\UserSearchVersionQuery');
+            ->joinUserSearchSiteRun($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'UserSearchSiteRun', '\JobScooper\DataAccess\UserSearchSiteRunQuery');
+    }
+
+    /**
+     * Filter the query by a related JobSiteRecord object
+     * using the user_search_site_run table as cross reference
+     *
+     * @param JobSiteRecord $jobSiteRecord the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildUserSearchQuery The current query, for fluid interface
+     */
+    public function filterByJobSiteFromUSSR($jobSiteRecord, $comparison = Criteria::EQUAL)
+    {
+        return $this
+            ->useUserSearchSiteRunQuery()
+            ->filterByJobSiteFromUSSR($jobSiteRecord, $comparison)
+            ->endUse();
+    }
+
+    /**
+     * Filter the query by a related User object
+     * using the user_search_site_run table as cross reference
+     *
+     * @param User $user the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildUserSearchQuery The current query, for fluid interface
+     */
+    public function filterByUserFromUSSR($user, $comparison = Criteria::EQUAL)
+    {
+        return $this
+            ->useUserSearchSiteRunQuery()
+            ->filterByUserFromUSSR($user, $comparison)
+            ->endUse();
+    }
+
+    /**
+     * Filter the query by a related UserKeywordSet object
+     * using the user_search_site_run table as cross reference
+     *
+     * @param UserKeywordSet $userKeywordSet the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildUserSearchQuery The current query, for fluid interface
+     */
+    public function filterByUserKeywordSetFromUSSR($userKeywordSet, $comparison = Criteria::EQUAL)
+    {
+        return $this
+            ->useUserSearchSiteRunQuery()
+            ->filterByUserKeywordSetFromUSSR($userKeywordSet, $comparison)
+            ->endUse();
+    }
+
+    /**
+     * Filter the query by a related GeoLocation object
+     * using the user_search_site_run table as cross reference
+     *
+     * @param GeoLocation $geoLocation the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildUserSearchQuery The current query, for fluid interface
+     */
+    public function filterByGeoLocationFromUSSR($geoLocation, $comparison = Criteria::EQUAL)
+    {
+        return $this
+            ->useUserSearchSiteRunQuery()
+            ->filterByGeoLocationFromUSSR($geoLocation, $comparison)
+            ->endUse();
     }
 
     /**
@@ -1150,7 +977,10 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
     public function prune($userSearch = null)
     {
         if ($userSearch) {
-            $this->addUsingAlias(UserSearchTableMap::COL_USER_SEARCH_ID, $userSearch->getUserSearchId(), Criteria::NOT_EQUAL);
+            $this->addCond('pruneCond0', $this->getAliasedColName(UserSearchTableMap::COL_USER_ID), $userSearch->getUserId(), Criteria::NOT_EQUAL);
+            $this->addCond('pruneCond1', $this->getAliasedColName(UserSearchTableMap::COL_USER_KEYWORD_SET_ID), $userSearch->getUserKeywordSetId(), Criteria::NOT_EQUAL);
+            $this->addCond('pruneCond2', $this->getAliasedColName(UserSearchTableMap::COL_GEOLOCATION_ID), $userSearch->getGeoLocationId(), Criteria::NOT_EQUAL);
+            $this->combine(array('pruneCond0', 'pruneCond1', 'pruneCond2'), Criteria::LOGICAL_OR);
         }
 
         return $this;
@@ -1215,33 +1045,6 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
 
             return $affectedRows;
         });
-    }
-
-    // sluggable behavior
-
-    /**
-     * Filter the query on the slug column
-     *
-     * @param     string $slug The value to use as filter.
-     *
-     * @return    $this|ChildUserSearchQuery The current query, for fluid interface
-     */
-    public function filterBySlug($slug)
-    {
-        return $this->addUsingAlias(UserSearchTableMap::COL_USER_SEARCH_KEY, $slug, Criteria::EQUAL);
-    }
-
-    /**
-     * Find one object based on its slug
-     *
-     * @param     string $slug The value to use as filter.
-     * @param     ConnectionInterface $con The optional connection object
-     *
-     * @return    ChildUserSearch the result, formatted by the current formatter
-     */
-    public function findOneBySlug($slug, $con = null)
-    {
-        return $this->filterBySlug($slug)->findOne($con);
     }
 
     // timestampable behavior
@@ -1310,32 +1113,31 @@ protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityN
         return $this->addAscendingOrderByColumn(UserSearchTableMap::COL_DATE_CREATED);
     }
 
-    // versionable behavior
+    // sluggable behavior
 
     /**
-     * Checks whether versioning is enabled
+     * Filter the query on the slug column
      *
-     * @return boolean
+     * @param     string $slug The value to use as filter.
+     *
+     * @return    $this|ChildUserSearchQuery The current query, for fluid interface
      */
-    static public function isVersioningEnabled()
+    public function filterBySlug($slug)
     {
-        return self::$isVersioningEnabled;
+        return $this->addUsingAlias(UserSearchTableMap::COL_USER_SEARCH_KEY, $slug, Criteria::EQUAL);
     }
 
     /**
-     * Enables versioning
+     * Find one object based on its slug
+     *
+     * @param     string $slug The value to use as filter.
+     * @param     ConnectionInterface $con The optional connection object
+     *
+     * @return    ChildUserSearch the result, formatted by the current formatter
      */
-    static public function enableVersioning()
+    public function findOneBySlug($slug, $con = null)
     {
-        self::$isVersioningEnabled = true;
-    }
-
-    /**
-     * Disables versioning
-     */
-    static public function disableVersioning()
-    {
-        self::$isVersioningEnabled = false;
+        return $this->filterBySlug($slug)->findOne($con);
     }
 
 } // UserSearchQuery

@@ -7,23 +7,25 @@ use \Exception;
 use \PDO;
 use JobScooper\DataAccess\GeoLocation as ChildGeoLocation;
 use JobScooper\DataAccess\GeoLocationQuery as ChildGeoLocationQuery;
+use JobScooper\DataAccess\JobSiteRecord as ChildJobSiteRecord;
+use JobScooper\DataAccess\JobSiteRecordQuery as ChildJobSiteRecordQuery;
 use JobScooper\DataAccess\User as ChildUser;
+use JobScooper\DataAccess\UserKeywordSet as ChildUserKeywordSet;
+use JobScooper\DataAccess\UserKeywordSetQuery as ChildUserKeywordSetQuery;
 use JobScooper\DataAccess\UserQuery as ChildUserQuery;
 use JobScooper\DataAccess\UserSearch as ChildUserSearch;
 use JobScooper\DataAccess\UserSearchQuery as ChildUserSearchQuery;
-use JobScooper\DataAccess\UserSearchRun as ChildUserSearchRun;
-use JobScooper\DataAccess\UserSearchRunQuery as ChildUserSearchRunQuery;
-use JobScooper\DataAccess\UserSearchVersion as ChildUserSearchVersion;
-use JobScooper\DataAccess\UserSearchVersionQuery as ChildUserSearchVersionQuery;
-use JobScooper\DataAccess\Map\UserSearchRunTableMap;
+use JobScooper\DataAccess\UserSearchSiteRun as ChildUserSearchSiteRun;
+use JobScooper\DataAccess\UserSearchSiteRunQuery as ChildUserSearchSiteRunQuery;
+use JobScooper\DataAccess\Map\UserSearchSiteRunTableMap;
 use JobScooper\DataAccess\Map\UserSearchTableMap;
-use JobScooper\DataAccess\Map\UserSearchVersionTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Collection\Collection;
 use Propel\Runtime\Collection\ObjectCollection;
+use Propel\Runtime\Collection\ObjectCombinationCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\BadMethodCallException;
 use Propel\Runtime\Exception\LogicException;
@@ -74,18 +76,18 @@ abstract class UserSearch implements ActiveRecordInterface
     protected $virtualColumns = array();
 
     /**
-     * The value for the user_search_id field.
-     *
-     * @var        int
-     */
-    protected $user_search_id;
-
-    /**
      * The value for the user_id field.
      *
      * @var        int
      */
     protected $user_id;
+
+    /**
+     * The value for the user_keyword_set_id field.
+     *
+     * @var        int
+     */
+    protected $user_keyword_set_id;
 
     /**
      * The value for the geolocation_id field.
@@ -95,46 +97,11 @@ abstract class UserSearch implements ActiveRecordInterface
     protected $geolocation_id;
 
     /**
-     * The value for the user_search_key field.
+     * The value for the user_search_id field.
      *
-     * @var        string
+     * @var        int
      */
-    protected $user_search_key;
-
-    /**
-     * The value for the keywords field.
-     *
-     * @var        array
-     */
-    protected $keywords;
-
-    /**
-     * The unserialized $keywords value - i.e. the persisted object.
-     * This is necessary to avoid repeated calls to unserialize() at runtime.
-     * @var object
-     */
-    protected $keywords_unserialized;
-
-    /**
-     * The value for the keyword_tokens field.
-     *
-     * @var        array
-     */
-    protected $keyword_tokens;
-
-    /**
-     * The unserialized $keyword_tokens value - i.e. the persisted object.
-     * This is necessary to avoid repeated calls to unserialize() at runtime.
-     * @var object
-     */
-    protected $keyword_tokens_unserialized;
-
-    /**
-     * The value for the search_key_from_config field.
-     *
-     * @var        string
-     */
-    protected $search_key_from_config;
+    protected $user_search_id;
 
     /**
      * The value for the date_created field.
@@ -151,41 +118,82 @@ abstract class UserSearch implements ActiveRecordInterface
     protected $date_updated;
 
     /**
-     * The value for the date_last_completed field.
+     * The value for the user_search_key field.
      *
-     * @var        DateTime
+     * @var        string
      */
-    protected $date_last_completed;
+    protected $user_search_key;
 
     /**
-     * The value for the version field.
-     *
-     * Note: this column has a database default value of: 0
-     * @var        int
+     * @var        ChildUserKeywordSet
      */
-    protected $version;
-
-    /**
-     * @var        ChildUser
-     */
-    protected $aUser;
+    protected $aUserKeywordSetFromUS;
 
     /**
      * @var        ChildGeoLocation
      */
-    protected $aGeoLocation;
+    protected $aGeoLocationFromUS;
 
     /**
-     * @var        ObjectCollection|ChildUserSearchRun[] Collection to store aggregation of ChildUserSearchRun objects.
+     * @var        ChildUser
      */
-    protected $collUserSearchRuns;
-    protected $collUserSearchRunsPartial;
+    protected $aUserFromUS;
 
     /**
-     * @var        ObjectCollection|ChildUserSearchVersion[] Collection to store aggregation of ChildUserSearchVersion objects.
+     * @var        ObjectCollection|ChildUserSearchSiteRun[] Collection to store aggregation of ChildUserSearchSiteRun objects.
      */
-    protected $collUserSearchVersions;
-    protected $collUserSearchVersionsPartial;
+    protected $collUserSearchSiteRuns;
+    protected $collUserSearchSiteRunsPartial;
+
+    /**
+     * @var ObjectCombinationCollection Cross CombinationCollection to store aggregation of ChildJobSiteRecord, ChildUser, ChildUserKeywordSet, ChildGeoLocation combination combinations.
+     */
+    protected $combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds;
+
+    /**
+     * @var bool
+     */
+    protected $combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsPartial;
+
+    /**
+     * @var        ObjectCollection|ChildJobSiteRecord[] Cross Collection to store aggregation of ChildJobSiteRecord objects.
+     */
+    protected $collJobSiteFromUSSRs;
+
+    /**
+     * @var bool
+     */
+    protected $collJobSiteFromUSSRsPartial;
+
+    /**
+     * @var        ObjectCollection|ChildUser[] Cross Collection to store aggregation of ChildUser objects.
+     */
+    protected $collUserFromUSSRs;
+
+    /**
+     * @var bool
+     */
+    protected $collUserFromUSSRsPartial;
+
+    /**
+     * @var        ObjectCollection|ChildUserKeywordSet[] Cross Collection to store aggregation of ChildUserKeywordSet objects.
+     */
+    protected $collUserKeywordSetFromUSSRs;
+
+    /**
+     * @var bool
+     */
+    protected $collUserKeywordSetFromUSSRsPartial;
+
+    /**
+     * @var        ObjectCollection|ChildGeoLocation[] Cross Collection to store aggregation of ChildGeoLocation objects.
+     */
+    protected $collGeoLocationFromUSSRs;
+
+    /**
+     * @var bool
+     */
+    protected $collGeoLocationFromUSSRsPartial;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -195,44 +203,22 @@ abstract class UserSearch implements ActiveRecordInterface
      */
     protected $alreadyInSave = false;
 
-    // versionable behavior
-
-
     /**
-     * @var bool
+     * @var ObjectCombinationCollection Cross CombinationCollection to store aggregation of ChildJobSiteRecord, ChildUser, ChildUserKeywordSet, ChildGeoLocation combination combinations.
      */
-    protected $enforceVersion = false;
+    protected $combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsScheduledForDeletion = null;
 
     /**
      * An array of objects scheduled for deletion.
-     * @var ObjectCollection|ChildUserSearchRun[]
+     * @var ObjectCollection|ChildUserSearchSiteRun[]
      */
-    protected $userSearchRunsScheduledForDeletion = null;
-
-    /**
-     * An array of objects scheduled for deletion.
-     * @var ObjectCollection|ChildUserSearchVersion[]
-     */
-    protected $userSearchVersionsScheduledForDeletion = null;
-
-    /**
-     * Applies default values to this object.
-     * This method should be called from the object's constructor (or
-     * equivalent initialization method).
-     * @see __construct()
-     */
-    public function applyDefaultValues()
-    {
-        $this->version = 0;
-    }
+    protected $userSearchSiteRunsScheduledForDeletion = null;
 
     /**
      * Initializes internal state of JobScooper\DataAccess\Base\UserSearch object.
-     * @see applyDefaults()
      */
     public function __construct()
     {
-        $this->applyDefaultValues();
     }
 
     /**
@@ -454,16 +440,6 @@ abstract class UserSearch implements ActiveRecordInterface
     }
 
     /**
-     * Get the [user_search_id] column value.
-     *
-     * @return int
-     */
-    public function getUserSearchId()
-    {
-        return $this->user_search_id;
-    }
-
-    /**
      * Get the [user_id] column value.
      *
      * @return int
@@ -471,6 +447,16 @@ abstract class UserSearch implements ActiveRecordInterface
     public function getUserId()
     {
         return $this->user_id;
+    }
+
+    /**
+     * Get the [user_keyword_set_id] column value.
+     *
+     * @return int
+     */
+    public function getUserKeywordSetId()
+    {
+        return $this->user_keyword_set_id;
     }
 
     /**
@@ -484,81 +470,13 @@ abstract class UserSearch implements ActiveRecordInterface
     }
 
     /**
-     * Get the [user_search_key] column value.
+     * Get the [user_search_id] column value.
      *
-     * @return string
+     * @return int
      */
-    public function getUserSearchKey()
+    public function getUserSearchId()
     {
-        return $this->user_search_key;
-    }
-
-    /**
-     * Get the [keywords] column value.
-     *
-     * @return array
-     */
-    public function getKeywords()
-    {
-        if (null === $this->keywords_unserialized) {
-            $this->keywords_unserialized = array();
-        }
-        if (!$this->keywords_unserialized && null !== $this->keywords) {
-            $keywords_unserialized = substr($this->keywords, 2, -2);
-            $this->keywords_unserialized = '' !== $keywords_unserialized ? explode(' | ', $keywords_unserialized) : array();
-        }
-
-        return $this->keywords_unserialized;
-    }
-
-    /**
-     * Test the presence of a value in the [keywords] array column value.
-     * @param      mixed $value
-     *
-     * @return boolean
-     */
-    public function hasKeyword($value)
-    {
-        return in_array($value, $this->getKeywords());
-    } // hasKeyword()
-
-    /**
-     * Get the [keyword_tokens] column value.
-     *
-     * @return array
-     */
-    public function getKeywordTokens()
-    {
-        if (null === $this->keyword_tokens_unserialized) {
-            $this->keyword_tokens_unserialized = array();
-        }
-        if (!$this->keyword_tokens_unserialized && null !== $this->keyword_tokens) {
-            $keyword_tokens_unserialized = substr($this->keyword_tokens, 2, -2);
-            $this->keyword_tokens_unserialized = '' !== $keyword_tokens_unserialized ? explode(' | ', $keyword_tokens_unserialized) : array();
-        }
-
-        return $this->keyword_tokens_unserialized;
-    }
-
-    /**
-     * Test the presence of a value in the [keyword_tokens] array column value.
-     * @param      mixed $value
-     *
-     * @return boolean
-     */
-    public function hasKeywordToken($value)
-    {
-        return in_array($value, $this->getKeywordTokens());
-    } // hasKeywordToken()
-
-    /**
-     * Get the [search_key_from_config] column value.
-     *
-     * @return string
-     */
-    public function getSearchKeyFromConfig()
-    {
-        return $this->search_key_from_config;
+        return $this->user_search_id;
     }
 
     /**
@@ -568,7 +486,7 @@ abstract class UserSearch implements ActiveRecordInterface
      * @param      string $format The date/time format string (either date()-style or strftime()-style).
      *                            If format is NULL, then the raw DateTime object will be returned.
      *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
      */
@@ -588,7 +506,7 @@ abstract class UserSearch implements ActiveRecordInterface
      * @param      string $format The date/time format string (either date()-style or strftime()-style).
      *                            If format is NULL, then the raw DateTime object will be returned.
      *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
      */
@@ -602,34 +520,90 @@ abstract class UserSearch implements ActiveRecordInterface
     }
 
     /**
-     * Get the [optionally formatted] temporal [date_last_completed] column value.
+     * Get the [user_search_key] column value.
      *
-     *
-     * @param      string $format The date/time format string (either date()-style or strftime()-style).
-     *                            If format is NULL, then the raw DateTime object will be returned.
-     *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL
-     *
-     * @throws PropelException - if unable to parse/validate the date/time value.
+     * @return string
      */
-    public function getLastCompletedAt($format = NULL)
+    public function getUserSearchKey()
     {
-        if ($format === null) {
-            return $this->date_last_completed;
-        } else {
-            return $this->date_last_completed instanceof \DateTimeInterface ? $this->date_last_completed->format($format) : null;
-        }
+        return $this->user_search_key;
     }
 
     /**
-     * Get the [version] column value.
+     * Set the value of [user_id] column.
      *
-     * @return int
+     * @param int $v new value
+     * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
      */
-    public function getVersion()
+    public function setUserId($v)
     {
-        return $this->version;
-    }
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->user_id !== $v) {
+            $this->user_id = $v;
+            $this->modifiedColumns[UserSearchTableMap::COL_USER_ID] = true;
+        }
+
+        if ($this->aUserKeywordSetFromUS !== null && $this->aUserKeywordSetFromUS->getUserId() !== $v) {
+            $this->aUserKeywordSetFromUS = null;
+        }
+
+        if ($this->aUserFromUS !== null && $this->aUserFromUS->getUserId() !== $v) {
+            $this->aUserFromUS = null;
+        }
+
+        return $this;
+    } // setUserId()
+
+    /**
+     * Set the value of [user_keyword_set_id] column.
+     *
+     * @param int $v new value
+     * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
+     */
+    public function setUserKeywordSetId($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->user_keyword_set_id !== $v) {
+            $this->user_keyword_set_id = $v;
+            $this->modifiedColumns[UserSearchTableMap::COL_USER_KEYWORD_SET_ID] = true;
+        }
+
+        if ($this->aUserKeywordSetFromUS !== null && $this->aUserKeywordSetFromUS->getUserKeywordSetId() !== $v) {
+            $this->aUserKeywordSetFromUS = null;
+        }
+
+        return $this;
+    } // setUserKeywordSetId()
+
+    /**
+     * Set the value of [geolocation_id] column.
+     *
+     * @param int $v new value
+     * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
+     */
+    public function setGeoLocationId($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->geolocation_id !== $v) {
+            $this->geolocation_id = $v;
+            $this->modifiedColumns[UserSearchTableMap::COL_GEOLOCATION_ID] = true;
+        }
+
+        if ($this->aGeoLocationFromUS !== null && $this->aGeoLocationFromUS->getGeoLocationId() !== $v) {
+            $this->aGeoLocationFromUS = null;
+        }
+
+        return $this;
+    } // setGeoLocationId()
 
     /**
      * Set the value of [user_search_id] column.
@@ -650,196 +624,6 @@ abstract class UserSearch implements ActiveRecordInterface
 
         return $this;
     } // setUserSearchId()
-
-    /**
-     * Set the value of [user_id] column.
-     *
-     * @param int $v new value
-     * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
-     */
-    public function setUserId($v)
-    {
-        if ($v !== null) {
-            $v = (int) $v;
-        }
-
-        if ($this->user_id !== $v) {
-            $this->user_id = $v;
-            $this->modifiedColumns[UserSearchTableMap::COL_USER_ID] = true;
-        }
-
-        if ($this->aUser !== null && $this->aUser->getUserId() !== $v) {
-            $this->aUser = null;
-        }
-
-        return $this;
-    } // setUserId()
-
-    /**
-     * Set the value of [geolocation_id] column.
-     *
-     * @param int $v new value
-     * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
-     */
-    public function setGeoLocationId($v)
-    {
-        if ($v !== null) {
-            $v = (int) $v;
-        }
-
-        if ($this->geolocation_id !== $v) {
-            $this->geolocation_id = $v;
-            $this->modifiedColumns[UserSearchTableMap::COL_GEOLOCATION_ID] = true;
-        }
-
-        if ($this->aGeoLocation !== null && $this->aGeoLocation->getGeoLocationId() !== $v) {
-            $this->aGeoLocation = null;
-        }
-
-        return $this;
-    } // setGeoLocationId()
-
-    /**
-     * Set the value of [user_search_key] column.
-     *
-     * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
-     */
-    public function setUserSearchKey($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->user_search_key !== $v) {
-            $this->user_search_key = $v;
-            $this->modifiedColumns[UserSearchTableMap::COL_USER_SEARCH_KEY] = true;
-        }
-
-        return $this;
-    } // setUserSearchKey()
-
-    /**
-     * Set the value of [keywords] column.
-     *
-     * @param array $v new value
-     * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
-     */
-    public function setKeywords($v)
-    {
-        if ($this->keywords_unserialized !== $v) {
-            $this->keywords_unserialized = $v;
-            $this->keywords = '| ' . implode(' | ', $v) . ' |';
-            $this->modifiedColumns[UserSearchTableMap::COL_KEYWORDS] = true;
-        }
-
-        return $this;
-    } // setKeywords()
-
-    /**
-     * Adds a value to the [keywords] array column value.
-     * @param  mixed $value
-     *
-     * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
-     */
-    public function addKeyword($value)
-    {
-        $currentArray = $this->getKeywords();
-        $currentArray []= $value;
-        $this->setKeywords($currentArray);
-
-        return $this;
-    } // addKeyword()
-
-    /**
-     * Removes a value from the [keywords] array column value.
-     * @param  mixed $value
-     *
-     * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
-     */
-    public function removeKeyword($value)
-    {
-        $targetArray = array();
-        foreach ($this->getKeywords() as $element) {
-            if ($element != $value) {
-                $targetArray []= $element;
-            }
-        }
-        $this->setKeywords($targetArray);
-
-        return $this;
-    } // removeKeyword()
-
-    /**
-     * Set the value of [keyword_tokens] column.
-     *
-     * @param array $v new value
-     * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
-     */
-    public function setKeywordTokens($v)
-    {
-        if ($this->keyword_tokens_unserialized !== $v) {
-            $this->keyword_tokens_unserialized = $v;
-            $this->keyword_tokens = '| ' . implode(' | ', $v) . ' |';
-            $this->modifiedColumns[UserSearchTableMap::COL_KEYWORD_TOKENS] = true;
-        }
-
-        return $this;
-    } // setKeywordTokens()
-
-    /**
-     * Adds a value to the [keyword_tokens] array column value.
-     * @param  mixed $value
-     *
-     * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
-     */
-    public function addKeywordToken($value)
-    {
-        $currentArray = $this->getKeywordTokens();
-        $currentArray []= $value;
-        $this->setKeywordTokens($currentArray);
-
-        return $this;
-    } // addKeywordToken()
-
-    /**
-     * Removes a value from the [keyword_tokens] array column value.
-     * @param  mixed $value
-     *
-     * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
-     */
-    public function removeKeywordToken($value)
-    {
-        $targetArray = array();
-        foreach ($this->getKeywordTokens() as $element) {
-            if ($element != $value) {
-                $targetArray []= $element;
-            }
-        }
-        $this->setKeywordTokens($targetArray);
-
-        return $this;
-    } // removeKeywordToken()
-
-    /**
-     * Set the value of [search_key_from_config] column.
-     *
-     * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
-     */
-    public function setSearchKeyFromConfig($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->search_key_from_config !== $v) {
-            $this->search_key_from_config = $v;
-            $this->modifiedColumns[UserSearchTableMap::COL_SEARCH_KEY_FROM_CONFIG] = true;
-        }
-
-        return $this;
-    } // setSearchKeyFromConfig()
 
     /**
      * Sets the value of [date_created] column to a normalized version of the date/time value specified.
@@ -882,44 +666,24 @@ abstract class UserSearch implements ActiveRecordInterface
     } // setUpdatedAt()
 
     /**
-     * Sets the value of [date_last_completed] column to a normalized version of the date/time value specified.
+     * Set the value of [user_search_key] column.
      *
-     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
-     *               Empty strings are treated as NULL.
+     * @param string $v new value
      * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
      */
-    public function setLastCompletedAt($v)
-    {
-        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
-        if ($this->date_last_completed !== null || $dt !== null) {
-            if ($this->date_last_completed === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->date_last_completed->format("Y-m-d H:i:s.u")) {
-                $this->date_last_completed = $dt === null ? null : clone $dt;
-                $this->modifiedColumns[UserSearchTableMap::COL_DATE_LAST_COMPLETED] = true;
-            }
-        } // if either are not null
-
-        return $this;
-    } // setLastCompletedAt()
-
-    /**
-     * Set the value of [version] column.
-     *
-     * @param int $v new value
-     * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
-     */
-    public function setVersion($v)
+    public function setUserSearchKey($v)
     {
         if ($v !== null) {
-            $v = (int) $v;
+            $v = (string) $v;
         }
 
-        if ($this->version !== $v) {
-            $this->version = $v;
-            $this->modifiedColumns[UserSearchTableMap::COL_VERSION] = true;
+        if ($this->user_search_key !== $v) {
+            $this->user_search_key = $v;
+            $this->modifiedColumns[UserSearchTableMap::COL_USER_SEARCH_KEY] = true;
         }
 
         return $this;
-    } // setVersion()
+    } // setUserSearchKey()
 
     /**
      * Indicates whether the columns in this object are only set to default values.
@@ -931,10 +695,6 @@ abstract class UserSearch implements ActiveRecordInterface
      */
     public function hasOnlyDefaultValues()
     {
-            if ($this->version !== 0) {
-                return false;
-            }
-
         // otherwise, everything was equal, so return TRUE
         return true;
     } // hasOnlyDefaultValues()
@@ -961,40 +721,32 @@ abstract class UserSearch implements ActiveRecordInterface
     {
         try {
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : UserSearchTableMap::translateFieldName('UserSearchId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->user_search_id = (null !== $col) ? (int) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : UserSearchTableMap::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : UserSearchTableMap::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->user_id = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : UserSearchTableMap::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->user_keyword_set_id = (null !== $col) ? (int) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : UserSearchTableMap::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->geolocation_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : UserSearchTableMap::translateFieldName('UserSearchKey', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->user_search_key = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : UserSearchTableMap::translateFieldName('UserSearchId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->user_search_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserSearchTableMap::translateFieldName('Keywords', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->keywords = $col;
-            $this->keywords_unserialized = null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserSearchTableMap::translateFieldName('KeywordTokens', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->keyword_tokens = $col;
-            $this->keyword_tokens_unserialized = null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserSearchTableMap::translateFieldName('SearchKeyFromConfig', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->search_key_from_config = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : UserSearchTableMap::translateFieldName('CreatedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserSearchTableMap::translateFieldName('CreatedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00 00:00:00') {
+                $col = null;
+            }
             $this->date_created = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : UserSearchTableMap::translateFieldName('UpdatedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserSearchTableMap::translateFieldName('UpdatedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00 00:00:00') {
+                $col = null;
+            }
             $this->date_updated = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : UserSearchTableMap::translateFieldName('LastCompletedAt', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->date_last_completed = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : UserSearchTableMap::translateFieldName('Version', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->version = (null !== $col) ? (int) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserSearchTableMap::translateFieldName('UserSearchKey', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->user_search_key = (null !== $col) ? (string) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -1003,7 +755,7 @@ abstract class UserSearch implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 11; // 11 = UserSearchTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 7; // 7 = UserSearchTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\UserSearch'), 0, $e);
@@ -1025,11 +777,17 @@ abstract class UserSearch implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
-        if ($this->aUser !== null && $this->user_id !== $this->aUser->getUserId()) {
-            $this->aUser = null;
+        if ($this->aUserKeywordSetFromUS !== null && $this->user_id !== $this->aUserKeywordSetFromUS->getUserId()) {
+            $this->aUserKeywordSetFromUS = null;
         }
-        if ($this->aGeoLocation !== null && $this->geolocation_id !== $this->aGeoLocation->getGeoLocationId()) {
-            $this->aGeoLocation = null;
+        if ($this->aUserFromUS !== null && $this->user_id !== $this->aUserFromUS->getUserId()) {
+            $this->aUserFromUS = null;
+        }
+        if ($this->aUserKeywordSetFromUS !== null && $this->user_keyword_set_id !== $this->aUserKeywordSetFromUS->getUserKeywordSetId()) {
+            $this->aUserKeywordSetFromUS = null;
+        }
+        if ($this->aGeoLocationFromUS !== null && $this->geolocation_id !== $this->aGeoLocationFromUS->getGeoLocationId()) {
+            $this->aGeoLocationFromUS = null;
         }
     } // ensureConsistency
 
@@ -1070,12 +828,12 @@ abstract class UserSearch implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->aUser = null;
-            $this->aGeoLocation = null;
-            $this->collUserSearchRuns = null;
+            $this->aUserKeywordSetFromUS = null;
+            $this->aGeoLocationFromUS = null;
+            $this->aUserFromUS = null;
+            $this->collUserSearchSiteRuns = null;
 
-            $this->collUserSearchVersions = null;
-
+            $this->collJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds = null;
         } // if (deep)
     }
 
@@ -1122,10 +880,6 @@ abstract class UserSearch implements ActiveRecordInterface
      * be reloaded from the database if an UPDATE operation is performed (unless
      * the $skipReload parameter is TRUE).
      *
-     * Since this table was configured to reload rows on insert, the object will
-     * be reloaded from the database if an INSERT operation is performed (unless
-     * the $skipReload parameter is TRUE).
-     *
      * @param      ConnectionInterface $con
      * @param      boolean $skipReload Whether to skip the reload for this object from database.
      * @return int             The number of rows affected by this insert/update and any referring fk objects' save() operations.
@@ -1156,11 +910,6 @@ abstract class UserSearch implements ActiveRecordInterface
             } else {
                 $this->setUserSearchKey($this->createSlug());
             }
-            // versionable behavior
-            if ($this->isVersioningNecessary()) {
-                $this->setVersion($this->isNew() ? 1 : $this->getLastVersionNumber($con) + 1);
-                $createVersion = true; // for postSave hook
-            }
             if ($isInsert) {
                 $ret = $ret && $this->preInsert($con);
                 // timestampable behavior
@@ -1186,10 +935,6 @@ abstract class UserSearch implements ActiveRecordInterface
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                // versionable behavior
-                if (isset($createVersion)) {
-                    $this->addVersion($con);
-                }
                 UserSearchTableMap::addInstanceToPool($this);
             } else {
                 $affectedRows = 0;
@@ -1224,18 +969,25 @@ abstract class UserSearch implements ActiveRecordInterface
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
-            if ($this->aUser !== null) {
-                if ($this->aUser->isModified() || $this->aUser->isNew()) {
-                    $affectedRows += $this->aUser->save($con);
+            if ($this->aUserKeywordSetFromUS !== null) {
+                if ($this->aUserKeywordSetFromUS->isModified() || $this->aUserKeywordSetFromUS->isNew()) {
+                    $affectedRows += $this->aUserKeywordSetFromUS->save($con);
                 }
-                $this->setUser($this->aUser);
+                $this->setUserKeywordSetFromUS($this->aUserKeywordSetFromUS);
             }
 
-            if ($this->aGeoLocation !== null) {
-                if ($this->aGeoLocation->isModified() || $this->aGeoLocation->isNew()) {
-                    $affectedRows += $this->aGeoLocation->save($con);
+            if ($this->aGeoLocationFromUS !== null) {
+                if ($this->aGeoLocationFromUS->isModified() || $this->aGeoLocationFromUS->isNew()) {
+                    $affectedRows += $this->aGeoLocationFromUS->save($con);
                 }
-                $this->setGeoLocation($this->aGeoLocation);
+                $this->setGeoLocationFromUS($this->aGeoLocationFromUS);
+            }
+
+            if ($this->aUserFromUS !== null) {
+                if ($this->aUserFromUS->isModified() || $this->aUserFromUS->isNew()) {
+                    $affectedRows += $this->aUserFromUS->save($con);
+                }
+                $this->setUserFromUS($this->aUserFromUS);
             }
 
             if ($this->isNew() || $this->isModified()) {
@@ -1243,9 +995,6 @@ abstract class UserSearch implements ActiveRecordInterface
                 if ($this->isNew()) {
                     $this->doInsert($con);
                     $affectedRows += 1;
-                    if (!$skipReload) {
-                        $reloadObject = true;
-                    }
                 } else {
                     $affectedRows += $this->doUpdate($con);
                     if (!$skipReload) {
@@ -1255,34 +1004,75 @@ abstract class UserSearch implements ActiveRecordInterface
                 $this->resetModified();
             }
 
-            if ($this->userSearchRunsScheduledForDeletion !== null) {
-                if (!$this->userSearchRunsScheduledForDeletion->isEmpty()) {
-                    \JobScooper\DataAccess\UserSearchRunQuery::create()
-                        ->filterByPrimaryKeys($this->userSearchRunsScheduledForDeletion->getPrimaryKeys(false))
-                        ->delete($con);
-                    $this->userSearchRunsScheduledForDeletion = null;
-                }
-            }
+            if ($this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsScheduledForDeletion !== null) {
+                if (!$this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsScheduledForDeletion->isEmpty()) {
+                    $pks = array();
+                    foreach ($this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsScheduledForDeletion as $combination) {
+                        $entryPk = [];
 
-            if ($this->collUserSearchRuns !== null) {
-                foreach ($this->collUserSearchRuns as $referrerFK) {
-                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
-                        $affectedRows += $referrerFK->save($con);
+                        $entryPk[0] = $this->getUserId();
+                        $entryPk[1] = $this->getUserKeywordSetId();
+                        $entryPk[2] = $this->getGeoLocationId();
+                        $entryPk[3] = $this->getUserSearchId();
+                        $entryPk[4] = $combination[0]->getJobSiteKey();
+                        $entryPk[0] = $combination[1]->getUserId();
+                        $entryPk[0] = $combination[2]->getUserId();
+                        $entryPk[1] = $combination[2]->getUserKeywordSetId();
+                        $entryPk[2] = $combination[3]->getGeoLocationId();
+                        //$combination[4] = AppRunId;
+                        $entryPk[5] = $combination[4];
+
+                        $pks[] = $entryPk;
                     }
-                }
-            }
 
-            if ($this->userSearchVersionsScheduledForDeletion !== null) {
-                if (!$this->userSearchVersionsScheduledForDeletion->isEmpty()) {
-                    \JobScooper\DataAccess\UserSearchVersionQuery::create()
-                        ->filterByPrimaryKeys($this->userSearchVersionsScheduledForDeletion->getPrimaryKeys(false))
+                    \JobScooper\DataAccess\UserSearchSiteRunQuery::create()
+                        ->filterByPrimaryKeys($pks)
                         ->delete($con);
-                    $this->userSearchVersionsScheduledForDeletion = null;
+
+                    $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsScheduledForDeletion = null;
+                }
+
+            }
+
+            if (null !== $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds) {
+                foreach ($this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds as $combination) {
+
+                    //$combination[0] = JobSiteRecord (user_search_site_run_fk_168d10)
+                    if (!$combination[0]->isDeleted() && ($combination[0]->isNew() || $combination[0]->isModified())) {
+                        $combination[0]->save($con);
+                    }
+
+                    //$combination[1] = User (user_search_site_run_fk_38da1e)
+                    if (!$combination[1]->isDeleted() && ($combination[1]->isNew() || $combination[1]->isModified())) {
+                        $combination[1]->save($con);
+                    }
+
+                    //$combination[2] = UserKeywordSet (user_search_site_run_fk_09a66b)
+                    if (!$combination[2]->isDeleted() && ($combination[2]->isNew() || $combination[2]->isModified())) {
+                        $combination[2]->save($con);
+                    }
+
+                    //$combination[3] = GeoLocation (user_search_site_run_fk_38c4c7)
+                    if (!$combination[3]->isDeleted() && ($combination[3]->isNew() || $combination[3]->isModified())) {
+                        $combination[3]->save($con);
+                    }
+
+                    //$combination[4] = AppRunId; Nothing to save.
                 }
             }
 
-            if ($this->collUserSearchVersions !== null) {
-                foreach ($this->collUserSearchVersions as $referrerFK) {
+
+            if ($this->userSearchSiteRunsScheduledForDeletion !== null) {
+                if (!$this->userSearchSiteRunsScheduledForDeletion->isEmpty()) {
+                    \JobScooper\DataAccess\UserSearchSiteRunQuery::create()
+                        ->filterByPrimaryKeys($this->userSearchSiteRunsScheduledForDeletion->getPrimaryKeys(false))
+                        ->delete($con);
+                    $this->userSearchSiteRunsScheduledForDeletion = null;
+                }
+            }
+
+            if ($this->collUserSearchSiteRuns !== null) {
+                foreach ($this->collUserSearchSiteRuns as $referrerFK) {
                     if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
                         $affectedRows += $referrerFK->save($con);
                     }
@@ -1313,32 +1103,19 @@ abstract class UserSearch implements ActiveRecordInterface
         $modifiedColumns = array();
         $index = 0;
 
-        $this->modifiedColumns[UserSearchTableMap::COL_USER_SEARCH_ID] = true;
-        if (null !== $this->user_search_id) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key (' . UserSearchTableMap::COL_USER_SEARCH_ID . ')');
-        }
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(UserSearchTableMap::COL_USER_SEARCH_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'user_search_id';
-        }
         if ($this->isColumnModified(UserSearchTableMap::COL_USER_ID)) {
             $modifiedColumns[':p' . $index++]  = 'user_id';
+        }
+        if ($this->isColumnModified(UserSearchTableMap::COL_USER_KEYWORD_SET_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'user_keyword_set_id';
         }
         if ($this->isColumnModified(UserSearchTableMap::COL_GEOLOCATION_ID)) {
             $modifiedColumns[':p' . $index++]  = 'geolocation_id';
         }
-        if ($this->isColumnModified(UserSearchTableMap::COL_USER_SEARCH_KEY)) {
-            $modifiedColumns[':p' . $index++]  = 'user_search_key';
-        }
-        if ($this->isColumnModified(UserSearchTableMap::COL_KEYWORDS)) {
-            $modifiedColumns[':p' . $index++]  = 'keywords';
-        }
-        if ($this->isColumnModified(UserSearchTableMap::COL_KEYWORD_TOKENS)) {
-            $modifiedColumns[':p' . $index++]  = 'keyword_tokens';
-        }
-        if ($this->isColumnModified(UserSearchTableMap::COL_SEARCH_KEY_FROM_CONFIG)) {
-            $modifiedColumns[':p' . $index++]  = 'search_key_from_config';
+        if ($this->isColumnModified(UserSearchTableMap::COL_USER_SEARCH_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'user_search_id';
         }
         if ($this->isColumnModified(UserSearchTableMap::COL_DATE_CREATED)) {
             $modifiedColumns[':p' . $index++]  = 'date_created';
@@ -1346,11 +1123,8 @@ abstract class UserSearch implements ActiveRecordInterface
         if ($this->isColumnModified(UserSearchTableMap::COL_DATE_UPDATED)) {
             $modifiedColumns[':p' . $index++]  = 'date_updated';
         }
-        if ($this->isColumnModified(UserSearchTableMap::COL_DATE_LAST_COMPLETED)) {
-            $modifiedColumns[':p' . $index++]  = 'date_last_completed';
-        }
-        if ($this->isColumnModified(UserSearchTableMap::COL_VERSION)) {
-            $modifiedColumns[':p' . $index++]  = 'version';
+        if ($this->isColumnModified(UserSearchTableMap::COL_USER_SEARCH_KEY)) {
+            $modifiedColumns[':p' . $index++]  = 'user_search_key';
         }
 
         $sql = sprintf(
@@ -1363,26 +1137,17 @@ abstract class UserSearch implements ActiveRecordInterface
             $stmt = $con->prepare($sql);
             foreach ($modifiedColumns as $identifier => $columnName) {
                 switch ($columnName) {
-                    case 'user_search_id':
-                        $stmt->bindValue($identifier, $this->user_search_id, PDO::PARAM_INT);
-                        break;
                     case 'user_id':
                         $stmt->bindValue($identifier, $this->user_id, PDO::PARAM_INT);
+                        break;
+                    case 'user_keyword_set_id':
+                        $stmt->bindValue($identifier, $this->user_keyword_set_id, PDO::PARAM_INT);
                         break;
                     case 'geolocation_id':
                         $stmt->bindValue($identifier, $this->geolocation_id, PDO::PARAM_INT);
                         break;
-                    case 'user_search_key':
-                        $stmt->bindValue($identifier, $this->user_search_key, PDO::PARAM_STR);
-                        break;
-                    case 'keywords':
-                        $stmt->bindValue($identifier, $this->keywords, PDO::PARAM_STR);
-                        break;
-                    case 'keyword_tokens':
-                        $stmt->bindValue($identifier, $this->keyword_tokens, PDO::PARAM_STR);
-                        break;
-                    case 'search_key_from_config':
-                        $stmt->bindValue($identifier, $this->search_key_from_config, PDO::PARAM_STR);
+                    case 'user_search_id':
+                        $stmt->bindValue($identifier, $this->user_search_id, PDO::PARAM_INT);
                         break;
                     case 'date_created':
                         $stmt->bindValue($identifier, $this->date_created ? $this->date_created->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
@@ -1390,11 +1155,8 @@ abstract class UserSearch implements ActiveRecordInterface
                     case 'date_updated':
                         $stmt->bindValue($identifier, $this->date_updated ? $this->date_updated->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
                         break;
-                    case 'date_last_completed':
-                        $stmt->bindValue($identifier, $this->date_last_completed ? $this->date_last_completed->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
-                        break;
-                    case 'version':
-                        $stmt->bindValue($identifier, $this->version, PDO::PARAM_INT);
+                    case 'user_search_key':
+                        $stmt->bindValue($identifier, $this->user_search_key, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -1409,7 +1171,7 @@ abstract class UserSearch implements ActiveRecordInterface
         } catch (Exception $e) {
             throw new PropelException('Unable to get autoincrement id.', 0, $e);
         }
-        $this->setUserSearchId($pk);
+        $this->setUserId($pk);
 
         $this->setNew(false);
     }
@@ -1459,37 +1221,25 @@ abstract class UserSearch implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                return $this->getUserSearchId();
+                return $this->getUserId();
                 break;
             case 1:
-                return $this->getUserId();
+                return $this->getUserKeywordSetId();
                 break;
             case 2:
                 return $this->getGeoLocationId();
                 break;
             case 3:
-                return $this->getUserSearchKey();
+                return $this->getUserSearchId();
                 break;
             case 4:
-                return $this->getKeywords();
-                break;
-            case 5:
-                return $this->getKeywordTokens();
-                break;
-            case 6:
-                return $this->getSearchKeyFromConfig();
-                break;
-            case 7:
                 return $this->getCreatedAt();
                 break;
-            case 8:
+            case 5:
                 return $this->getUpdatedAt();
                 break;
-            case 9:
-                return $this->getLastCompletedAt();
-                break;
-            case 10:
-                return $this->getVersion();
+            case 6:
+                return $this->getUserSearchKey();
                 break;
             default:
                 return null;
@@ -1521,28 +1271,20 @@ abstract class UserSearch implements ActiveRecordInterface
         $alreadyDumpedObjects['UserSearch'][$this->hashCode()] = true;
         $keys = UserSearchTableMap::getFieldNames($keyType);
         $result = array(
-            $keys[0] => $this->getUserSearchId(),
-            $keys[1] => $this->getUserId(),
+            $keys[0] => $this->getUserId(),
+            $keys[1] => $this->getUserKeywordSetId(),
             $keys[2] => $this->getGeoLocationId(),
-            $keys[3] => $this->getUserSearchKey(),
-            $keys[4] => $this->getKeywords(),
-            $keys[5] => $this->getKeywordTokens(),
-            $keys[6] => $this->getSearchKeyFromConfig(),
-            $keys[7] => $this->getCreatedAt(),
-            $keys[8] => $this->getUpdatedAt(),
-            $keys[9] => $this->getLastCompletedAt(),
-            $keys[10] => $this->getVersion(),
+            $keys[3] => $this->getUserSearchId(),
+            $keys[4] => $this->getCreatedAt(),
+            $keys[5] => $this->getUpdatedAt(),
+            $keys[6] => $this->getUserSearchKey(),
         );
-        if ($result[$keys[7]] instanceof \DateTimeInterface) {
-            $result[$keys[7]] = $result[$keys[7]]->format('c');
+        if ($result[$keys[4]] instanceof \DateTimeInterface) {
+            $result[$keys[4]] = $result[$keys[4]]->format('c');
         }
 
-        if ($result[$keys[8]] instanceof \DateTimeInterface) {
-            $result[$keys[8]] = $result[$keys[8]]->format('c');
-        }
-
-        if ($result[$keys[9]] instanceof \DateTimeInterface) {
-            $result[$keys[9]] = $result[$keys[9]]->format('c');
+        if ($result[$keys[5]] instanceof \DateTimeInterface) {
+            $result[$keys[5]] = $result[$keys[5]]->format('c');
         }
 
         $virtualColumns = $this->virtualColumns;
@@ -1551,22 +1293,22 @@ abstract class UserSearch implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->aUser) {
+            if (null !== $this->aUserKeywordSetFromUS) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
-                        $key = 'user';
+                        $key = 'userKeywordSet';
                         break;
                     case TableMap::TYPE_FIELDNAME:
-                        $key = 'user';
+                        $key = 'user_keyword_set';
                         break;
                     default:
-                        $key = 'User';
+                        $key = 'UserKeywordSetFromUS';
                 }
 
-                $result[$key] = $this->aUser->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+                $result[$key] = $this->aUserKeywordSetFromUS->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
-            if (null !== $this->aGeoLocation) {
+            if (null !== $this->aGeoLocationFromUS) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
@@ -1576,40 +1318,40 @@ abstract class UserSearch implements ActiveRecordInterface
                         $key = 'geolocation';
                         break;
                     default:
-                        $key = 'GeoLocation';
+                        $key = 'GeoLocationFromUS';
                 }
 
-                $result[$key] = $this->aGeoLocation->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+                $result[$key] = $this->aGeoLocationFromUS->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
-            if (null !== $this->collUserSearchRuns) {
+            if (null !== $this->aUserFromUS) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
-                        $key = 'userSearchRuns';
+                        $key = 'user';
                         break;
                     case TableMap::TYPE_FIELDNAME:
-                        $key = 'user_search_runs';
+                        $key = 'user';
                         break;
                     default:
-                        $key = 'UserSearchRuns';
+                        $key = 'UserFromUS';
                 }
 
-                $result[$key] = $this->collUserSearchRuns->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
+                $result[$key] = $this->aUserFromUS->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
-            if (null !== $this->collUserSearchVersions) {
+            if (null !== $this->collUserSearchSiteRuns) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
-                        $key = 'userSearchVersions';
+                        $key = 'userSearchSiteRuns';
                         break;
                     case TableMap::TYPE_FIELDNAME:
-                        $key = 'user_search_versions';
+                        $key = 'user_search_site_runs';
                         break;
                     default:
-                        $key = 'UserSearchVersions';
+                        $key = 'UserSearchSiteRuns';
                 }
 
-                $result[$key] = $this->collUserSearchVersions->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
+                $result[$key] = $this->collUserSearchSiteRuns->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
         }
 
@@ -1646,45 +1388,25 @@ abstract class UserSearch implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                $this->setUserSearchId($value);
+                $this->setUserId($value);
                 break;
             case 1:
-                $this->setUserId($value);
+                $this->setUserKeywordSetId($value);
                 break;
             case 2:
                 $this->setGeoLocationId($value);
                 break;
             case 3:
-                $this->setUserSearchKey($value);
+                $this->setUserSearchId($value);
                 break;
             case 4:
-                if (!is_array($value)) {
-                    $v = trim(substr($value, 2, -2));
-                    $value = $v ? explode(' | ', $v) : array();
-                }
-                $this->setKeywords($value);
-                break;
-            case 5:
-                if (!is_array($value)) {
-                    $v = trim(substr($value, 2, -2));
-                    $value = $v ? explode(' | ', $v) : array();
-                }
-                $this->setKeywordTokens($value);
-                break;
-            case 6:
-                $this->setSearchKeyFromConfig($value);
-                break;
-            case 7:
                 $this->setCreatedAt($value);
                 break;
-            case 8:
+            case 5:
                 $this->setUpdatedAt($value);
                 break;
-            case 9:
-                $this->setLastCompletedAt($value);
-                break;
-            case 10:
-                $this->setVersion($value);
+            case 6:
+                $this->setUserSearchKey($value);
                 break;
         } // switch()
 
@@ -1713,37 +1435,25 @@ abstract class UserSearch implements ActiveRecordInterface
         $keys = UserSearchTableMap::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) {
-            $this->setUserSearchId($arr[$keys[0]]);
+            $this->setUserId($arr[$keys[0]]);
         }
         if (array_key_exists($keys[1], $arr)) {
-            $this->setUserId($arr[$keys[1]]);
+            $this->setUserKeywordSetId($arr[$keys[1]]);
         }
         if (array_key_exists($keys[2], $arr)) {
             $this->setGeoLocationId($arr[$keys[2]]);
         }
         if (array_key_exists($keys[3], $arr)) {
-            $this->setUserSearchKey($arr[$keys[3]]);
+            $this->setUserSearchId($arr[$keys[3]]);
         }
         if (array_key_exists($keys[4], $arr)) {
-            $this->setKeywords($arr[$keys[4]]);
+            $this->setCreatedAt($arr[$keys[4]]);
         }
         if (array_key_exists($keys[5], $arr)) {
-            $this->setKeywordTokens($arr[$keys[5]]);
+            $this->setUpdatedAt($arr[$keys[5]]);
         }
         if (array_key_exists($keys[6], $arr)) {
-            $this->setSearchKeyFromConfig($arr[$keys[6]]);
-        }
-        if (array_key_exists($keys[7], $arr)) {
-            $this->setCreatedAt($arr[$keys[7]]);
-        }
-        if (array_key_exists($keys[8], $arr)) {
-            $this->setUpdatedAt($arr[$keys[8]]);
-        }
-        if (array_key_exists($keys[9], $arr)) {
-            $this->setLastCompletedAt($arr[$keys[9]]);
-        }
-        if (array_key_exists($keys[10], $arr)) {
-            $this->setVersion($arr[$keys[10]]);
+            $this->setUserSearchKey($arr[$keys[6]]);
         }
     }
 
@@ -1786,26 +1496,17 @@ abstract class UserSearch implements ActiveRecordInterface
     {
         $criteria = new Criteria(UserSearchTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(UserSearchTableMap::COL_USER_SEARCH_ID)) {
-            $criteria->add(UserSearchTableMap::COL_USER_SEARCH_ID, $this->user_search_id);
-        }
         if ($this->isColumnModified(UserSearchTableMap::COL_USER_ID)) {
             $criteria->add(UserSearchTableMap::COL_USER_ID, $this->user_id);
+        }
+        if ($this->isColumnModified(UserSearchTableMap::COL_USER_KEYWORD_SET_ID)) {
+            $criteria->add(UserSearchTableMap::COL_USER_KEYWORD_SET_ID, $this->user_keyword_set_id);
         }
         if ($this->isColumnModified(UserSearchTableMap::COL_GEOLOCATION_ID)) {
             $criteria->add(UserSearchTableMap::COL_GEOLOCATION_ID, $this->geolocation_id);
         }
-        if ($this->isColumnModified(UserSearchTableMap::COL_USER_SEARCH_KEY)) {
-            $criteria->add(UserSearchTableMap::COL_USER_SEARCH_KEY, $this->user_search_key);
-        }
-        if ($this->isColumnModified(UserSearchTableMap::COL_KEYWORDS)) {
-            $criteria->add(UserSearchTableMap::COL_KEYWORDS, $this->keywords);
-        }
-        if ($this->isColumnModified(UserSearchTableMap::COL_KEYWORD_TOKENS)) {
-            $criteria->add(UserSearchTableMap::COL_KEYWORD_TOKENS, $this->keyword_tokens);
-        }
-        if ($this->isColumnModified(UserSearchTableMap::COL_SEARCH_KEY_FROM_CONFIG)) {
-            $criteria->add(UserSearchTableMap::COL_SEARCH_KEY_FROM_CONFIG, $this->search_key_from_config);
+        if ($this->isColumnModified(UserSearchTableMap::COL_USER_SEARCH_ID)) {
+            $criteria->add(UserSearchTableMap::COL_USER_SEARCH_ID, $this->user_search_id);
         }
         if ($this->isColumnModified(UserSearchTableMap::COL_DATE_CREATED)) {
             $criteria->add(UserSearchTableMap::COL_DATE_CREATED, $this->date_created);
@@ -1813,11 +1514,8 @@ abstract class UserSearch implements ActiveRecordInterface
         if ($this->isColumnModified(UserSearchTableMap::COL_DATE_UPDATED)) {
             $criteria->add(UserSearchTableMap::COL_DATE_UPDATED, $this->date_updated);
         }
-        if ($this->isColumnModified(UserSearchTableMap::COL_DATE_LAST_COMPLETED)) {
-            $criteria->add(UserSearchTableMap::COL_DATE_LAST_COMPLETED, $this->date_last_completed);
-        }
-        if ($this->isColumnModified(UserSearchTableMap::COL_VERSION)) {
-            $criteria->add(UserSearchTableMap::COL_VERSION, $this->version);
+        if ($this->isColumnModified(UserSearchTableMap::COL_USER_SEARCH_KEY)) {
+            $criteria->add(UserSearchTableMap::COL_USER_SEARCH_KEY, $this->user_search_key);
         }
 
         return $criteria;
@@ -1836,7 +1534,9 @@ abstract class UserSearch implements ActiveRecordInterface
     public function buildPkeyCriteria()
     {
         $criteria = ChildUserSearchQuery::create();
-        $criteria->add(UserSearchTableMap::COL_USER_SEARCH_ID, $this->user_search_id);
+        $criteria->add(UserSearchTableMap::COL_USER_ID, $this->user_id);
+        $criteria->add(UserSearchTableMap::COL_USER_KEYWORD_SET_ID, $this->user_keyword_set_id);
+        $criteria->add(UserSearchTableMap::COL_GEOLOCATION_ID, $this->geolocation_id);
 
         return $criteria;
     }
@@ -1849,10 +1549,33 @@ abstract class UserSearch implements ActiveRecordInterface
      */
     public function hashCode()
     {
-        $validPk = null !== $this->getUserSearchId();
+        $validPk = null !== $this->getUserId() &&
+            null !== $this->getUserKeywordSetId() &&
+            null !== $this->getGeoLocationId();
 
-        $validPrimaryKeyFKs = 0;
+        $validPrimaryKeyFKs = 4;
         $primaryKeyFKs = [];
+
+        //relation user_search_fk_b9a4d0 to table user_keyword_set
+        if ($this->aUserKeywordSetFromUS && $hash = spl_object_hash($this->aUserKeywordSetFromUS)) {
+            $primaryKeyFKs[] = $hash;
+        } else {
+            $validPrimaryKeyFKs = false;
+        }
+
+        //relation user_search_fk_38c4c7 to table geolocation
+        if ($this->aGeoLocationFromUS && $hash = spl_object_hash($this->aGeoLocationFromUS)) {
+            $primaryKeyFKs[] = $hash;
+        } else {
+            $validPrimaryKeyFKs = false;
+        }
+
+        //relation user_search_fk_38da1e to table user
+        if ($this->aUserFromUS && $hash = spl_object_hash($this->aUserFromUS)) {
+            $primaryKeyFKs[] = $hash;
+        } else {
+            $validPrimaryKeyFKs = false;
+        }
 
         if ($validPk) {
             return crc32(json_encode($this->getPrimaryKey(), JSON_UNESCAPED_UNICODE));
@@ -1864,23 +1587,31 @@ abstract class UserSearch implements ActiveRecordInterface
     }
 
     /**
-     * Returns the primary key for this object (row).
-     * @return int
+     * Returns the composite primary key for this object.
+     * The array elements will be in same order as specified in XML.
+     * @return array
      */
     public function getPrimaryKey()
     {
-        return $this->getUserSearchId();
+        $pks = array();
+        $pks[0] = $this->getUserId();
+        $pks[1] = $this->getUserKeywordSetId();
+        $pks[2] = $this->getGeoLocationId();
+
+        return $pks;
     }
 
     /**
-     * Generic method to set the primary key (user_search_id column).
+     * Set the [composite] primary key.
      *
-     * @param       int $key Primary key.
+     * @param      array $keys The elements of the composite key (order must match the order in XML file).
      * @return void
      */
-    public function setPrimaryKey($key)
+    public function setPrimaryKey($keys)
     {
-        $this->setUserSearchId($key);
+        $this->setUserId($keys[0]);
+        $this->setUserKeywordSetId($keys[1]);
+        $this->setGeoLocationId($keys[2]);
     }
 
     /**
@@ -1889,7 +1620,7 @@ abstract class UserSearch implements ActiveRecordInterface
      */
     public function isPrimaryKeyNull()
     {
-        return null === $this->getUserSearchId();
+        return (null === $this->getUserId()) && (null === $this->getUserKeywordSetId()) && (null === $this->getGeoLocationId());
     }
 
     /**
@@ -1906,30 +1637,20 @@ abstract class UserSearch implements ActiveRecordInterface
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
         $copyObj->setUserId($this->getUserId());
+        $copyObj->setUserKeywordSetId($this->getUserKeywordSetId());
         $copyObj->setGeoLocationId($this->getGeoLocationId());
-        $copyObj->setUserSearchKey($this->getUserSearchKey());
-        $copyObj->setKeywords($this->getKeywords());
-        $copyObj->setKeywordTokens($this->getKeywordTokens());
-        $copyObj->setSearchKeyFromConfig($this->getSearchKeyFromConfig());
         $copyObj->setCreatedAt($this->getCreatedAt());
         $copyObj->setUpdatedAt($this->getUpdatedAt());
-        $copyObj->setLastCompletedAt($this->getLastCompletedAt());
-        $copyObj->setVersion($this->getVersion());
+        $copyObj->setUserSearchKey($this->getUserSearchKey());
 
         if ($deepCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
             // the getter/setter methods for fkey referrer objects.
             $copyObj->setNew(false);
 
-            foreach ($this->getUserSearchRuns() as $relObj) {
+            foreach ($this->getUserSearchSiteRuns() as $relObj) {
                 if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
-                    $copyObj->addUserSearchRun($relObj->copy($deepCopy));
-                }
-            }
-
-            foreach ($this->getUserSearchVersions() as $relObj) {
-                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
-                    $copyObj->addUserSearchVersion($relObj->copy($deepCopy));
+                    $copyObj->addUserSearchSiteRun($relObj->copy($deepCopy));
                 }
             }
 
@@ -1964,24 +1685,30 @@ abstract class UserSearch implements ActiveRecordInterface
     }
 
     /**
-     * Declares an association between this object and a ChildUser object.
+     * Declares an association between this object and a ChildUserKeywordSet object.
      *
-     * @param  ChildUser $v
+     * @param  ChildUserKeywordSet $v
      * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setUser(ChildUser $v = null)
+    public function setUserKeywordSetFromUS(ChildUserKeywordSet $v = null)
     {
+        if ($v === null) {
+            $this->setUserKeywordSetId(NULL);
+        } else {
+            $this->setUserKeywordSetId($v->getUserKeywordSetId());
+        }
+
         if ($v === null) {
             $this->setUserId(NULL);
         } else {
             $this->setUserId($v->getUserId());
         }
 
-        $this->aUser = $v;
+        $this->aUserKeywordSetFromUS = $v;
 
         // Add binding for other direction of this n:n relationship.
-        // If this object has already been added to the ChildUser object, it will not be re-added.
+        // If this object has already been added to the ChildUserKeywordSet object, it will not be re-added.
         if ($v !== null) {
             $v->addUserSearch($this);
         }
@@ -1992,26 +1719,26 @@ abstract class UserSearch implements ActiveRecordInterface
 
 
     /**
-     * Get the associated ChildUser object
+     * Get the associated ChildUserKeywordSet object
      *
      * @param  ConnectionInterface $con Optional Connection object.
-     * @return ChildUser The associated ChildUser object.
+     * @return ChildUserKeywordSet The associated ChildUserKeywordSet object.
      * @throws PropelException
      */
-    public function getUser(ConnectionInterface $con = null)
+    public function getUserKeywordSetFromUS(ConnectionInterface $con = null)
     {
-        if ($this->aUser === null && ($this->user_id != 0)) {
-            $this->aUser = ChildUserQuery::create()->findPk($this->user_id, $con);
+        if ($this->aUserKeywordSetFromUS === null && ($this->user_keyword_set_id != 0 && $this->user_id != 0)) {
+            $this->aUserKeywordSetFromUS = ChildUserKeywordSetQuery::create()->findPk(array($this->user_id, $this->user_keyword_set_id), $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aUser->addUserSearches($this);
+                $this->aUserKeywordSetFromUS->addUserSearches($this);
              */
         }
 
-        return $this->aUser;
+        return $this->aUserKeywordSetFromUS;
     }
 
     /**
@@ -2021,7 +1748,7 @@ abstract class UserSearch implements ActiveRecordInterface
      * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setGeoLocation(ChildGeoLocation $v = null)
+    public function setGeoLocationFromUS(ChildGeoLocation $v = null)
     {
         if ($v === null) {
             $this->setGeoLocationId(NULL);
@@ -2029,7 +1756,7 @@ abstract class UserSearch implements ActiveRecordInterface
             $this->setGeoLocationId($v->getGeoLocationId());
         }
 
-        $this->aGeoLocation = $v;
+        $this->aGeoLocationFromUS = $v;
 
         // Add binding for other direction of this n:n relationship.
         // If this object has already been added to the ChildGeoLocation object, it will not be re-added.
@@ -2049,20 +1776,71 @@ abstract class UserSearch implements ActiveRecordInterface
      * @return ChildGeoLocation The associated ChildGeoLocation object.
      * @throws PropelException
      */
-    public function getGeoLocation(ConnectionInterface $con = null)
+    public function getGeoLocationFromUS(ConnectionInterface $con = null)
     {
-        if ($this->aGeoLocation === null && ($this->geolocation_id != 0)) {
-            $this->aGeoLocation = ChildGeoLocationQuery::create()->findPk($this->geolocation_id, $con);
+        if ($this->aGeoLocationFromUS === null && ($this->geolocation_id != 0)) {
+            $this->aGeoLocationFromUS = ChildGeoLocationQuery::create()->findPk($this->geolocation_id, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aGeoLocation->addUserSearches($this);
+                $this->aGeoLocationFromUS->addUserSearches($this);
              */
         }
 
-        return $this->aGeoLocation;
+        return $this->aGeoLocationFromUS;
+    }
+
+    /**
+     * Declares an association between this object and a ChildUser object.
+     *
+     * @param  ChildUser $v
+     * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
+     * @throws PropelException
+     */
+    public function setUserFromUS(ChildUser $v = null)
+    {
+        if ($v === null) {
+            $this->setUserId(NULL);
+        } else {
+            $this->setUserId($v->getUserId());
+        }
+
+        $this->aUserFromUS = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildUser object, it will not be re-added.
+        if ($v !== null) {
+            $v->addUserSearch($this);
+        }
+
+
+        return $this;
+    }
+
+
+    /**
+     * Get the associated ChildUser object
+     *
+     * @param  ConnectionInterface $con Optional Connection object.
+     * @return ChildUser The associated ChildUser object.
+     * @throws PropelException
+     */
+    public function getUserFromUS(ConnectionInterface $con = null)
+    {
+        if ($this->aUserFromUS === null && ($this->user_id != 0)) {
+            $this->aUserFromUS = ChildUserQuery::create()->findPk($this->user_id, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aUserFromUS->addUserSearches($this);
+             */
+        }
+
+        return $this->aUserFromUS;
     }
 
 
@@ -2076,42 +1854,38 @@ abstract class UserSearch implements ActiveRecordInterface
      */
     public function initRelation($relationName)
     {
-        if ('UserSearchRun' == $relationName) {
-            $this->initUserSearchRuns();
-            return;
-        }
-        if ('UserSearchVersion' == $relationName) {
-            $this->initUserSearchVersions();
+        if ('UserSearchSiteRun' == $relationName) {
+            $this->initUserSearchSiteRuns();
             return;
         }
     }
 
     /**
-     * Clears out the collUserSearchRuns collection
+     * Clears out the collUserSearchSiteRuns collection
      *
      * This does not modify the database; however, it will remove any associated objects, causing
      * them to be refetched by subsequent calls to accessor method.
      *
      * @return void
-     * @see        addUserSearchRuns()
+     * @see        addUserSearchSiteRuns()
      */
-    public function clearUserSearchRuns()
+    public function clearUserSearchSiteRuns()
     {
-        $this->collUserSearchRuns = null; // important to set this to NULL since that means it is uninitialized
+        $this->collUserSearchSiteRuns = null; // important to set this to NULL since that means it is uninitialized
     }
 
     /**
-     * Reset is the collUserSearchRuns collection loaded partially.
+     * Reset is the collUserSearchSiteRuns collection loaded partially.
      */
-    public function resetPartialUserSearchRuns($v = true)
+    public function resetPartialUserSearchSiteRuns($v = true)
     {
-        $this->collUserSearchRunsPartial = $v;
+        $this->collUserSearchSiteRunsPartial = $v;
     }
 
     /**
-     * Initializes the collUserSearchRuns collection.
+     * Initializes the collUserSearchSiteRuns collection.
      *
-     * By default this just sets the collUserSearchRuns collection to an empty array (like clearcollUserSearchRuns());
+     * By default this just sets the collUserSearchSiteRuns collection to an empty array (like clearcollUserSearchSiteRuns());
      * however, you may wish to override this method in your stub class to provide setting appropriate
      * to your application -- for example, setting the initial array to the values stored in database.
      *
@@ -2120,20 +1894,20 @@ abstract class UserSearch implements ActiveRecordInterface
      *
      * @return void
      */
-    public function initUserSearchRuns($overrideExisting = true)
+    public function initUserSearchSiteRuns($overrideExisting = true)
     {
-        if (null !== $this->collUserSearchRuns && !$overrideExisting) {
+        if (null !== $this->collUserSearchSiteRuns && !$overrideExisting) {
             return;
         }
 
-        $collectionClassName = UserSearchRunTableMap::getTableMap()->getCollectionClassName();
+        $collectionClassName = UserSearchSiteRunTableMap::getTableMap()->getCollectionClassName();
 
-        $this->collUserSearchRuns = new $collectionClassName;
-        $this->collUserSearchRuns->setModel('\JobScooper\DataAccess\UserSearchRun');
+        $this->collUserSearchSiteRuns = new $collectionClassName;
+        $this->collUserSearchSiteRuns->setModel('\JobScooper\DataAccess\UserSearchSiteRun');
     }
 
     /**
-     * Gets an array of ChildUserSearchRun objects which contain a foreign key that references this object.
+     * Gets an array of ChildUserSearchSiteRun objects which contain a foreign key that references this object.
      *
      * If the $criteria is not null, it is used to always fetch the results from the database.
      * Otherwise the results are fetched from the database the first time, then cached.
@@ -2143,139 +1917,142 @@ abstract class UserSearch implements ActiveRecordInterface
      *
      * @param      Criteria $criteria optional Criteria object to narrow the query
      * @param      ConnectionInterface $con optional connection object
-     * @return ObjectCollection|ChildUserSearchRun[] List of ChildUserSearchRun objects
+     * @return ObjectCollection|ChildUserSearchSiteRun[] List of ChildUserSearchSiteRun objects
      * @throws PropelException
      */
-    public function getUserSearchRuns(Criteria $criteria = null, ConnectionInterface $con = null)
+    public function getUserSearchSiteRuns(Criteria $criteria = null, ConnectionInterface $con = null)
     {
-        $partial = $this->collUserSearchRunsPartial && !$this->isNew();
-        if (null === $this->collUserSearchRuns || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collUserSearchRuns) {
+        $partial = $this->collUserSearchSiteRunsPartial && !$this->isNew();
+        if (null === $this->collUserSearchSiteRuns || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collUserSearchSiteRuns) {
                 // return empty collection
-                $this->initUserSearchRuns();
+                $this->initUserSearchSiteRuns();
             } else {
-                $collUserSearchRuns = ChildUserSearchRunQuery::create(null, $criteria)
-                    ->filterByUserSearch($this)
+                $collUserSearchSiteRuns = ChildUserSearchSiteRunQuery::create(null, $criteria)
+                    ->filterByUserSearchFromUSSR($this)
                     ->find($con);
 
                 if (null !== $criteria) {
-                    if (false !== $this->collUserSearchRunsPartial && count($collUserSearchRuns)) {
-                        $this->initUserSearchRuns(false);
+                    if (false !== $this->collUserSearchSiteRunsPartial && count($collUserSearchSiteRuns)) {
+                        $this->initUserSearchSiteRuns(false);
 
-                        foreach ($collUserSearchRuns as $obj) {
-                            if (false == $this->collUserSearchRuns->contains($obj)) {
-                                $this->collUserSearchRuns->append($obj);
+                        foreach ($collUserSearchSiteRuns as $obj) {
+                            if (false == $this->collUserSearchSiteRuns->contains($obj)) {
+                                $this->collUserSearchSiteRuns->append($obj);
                             }
                         }
 
-                        $this->collUserSearchRunsPartial = true;
+                        $this->collUserSearchSiteRunsPartial = true;
                     }
 
-                    return $collUserSearchRuns;
+                    return $collUserSearchSiteRuns;
                 }
 
-                if ($partial && $this->collUserSearchRuns) {
-                    foreach ($this->collUserSearchRuns as $obj) {
+                if ($partial && $this->collUserSearchSiteRuns) {
+                    foreach ($this->collUserSearchSiteRuns as $obj) {
                         if ($obj->isNew()) {
-                            $collUserSearchRuns[] = $obj;
+                            $collUserSearchSiteRuns[] = $obj;
                         }
                     }
                 }
 
-                $this->collUserSearchRuns = $collUserSearchRuns;
-                $this->collUserSearchRunsPartial = false;
+                $this->collUserSearchSiteRuns = $collUserSearchSiteRuns;
+                $this->collUserSearchSiteRunsPartial = false;
             }
         }
 
-        return $this->collUserSearchRuns;
+        return $this->collUserSearchSiteRuns;
     }
 
     /**
-     * Sets a collection of ChildUserSearchRun objects related by a one-to-many relationship
+     * Sets a collection of ChildUserSearchSiteRun objects related by a one-to-many relationship
      * to the current object.
      * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
      * and new objects from the given Propel collection.
      *
-     * @param      Collection $userSearchRuns A Propel collection.
+     * @param      Collection $userSearchSiteRuns A Propel collection.
      * @param      ConnectionInterface $con Optional connection object
      * @return $this|ChildUserSearch The current object (for fluent API support)
      */
-    public function setUserSearchRuns(Collection $userSearchRuns, ConnectionInterface $con = null)
+    public function setUserSearchSiteRuns(Collection $userSearchSiteRuns, ConnectionInterface $con = null)
     {
-        /** @var ChildUserSearchRun[] $userSearchRunsToDelete */
-        $userSearchRunsToDelete = $this->getUserSearchRuns(new Criteria(), $con)->diff($userSearchRuns);
+        /** @var ChildUserSearchSiteRun[] $userSearchSiteRunsToDelete */
+        $userSearchSiteRunsToDelete = $this->getUserSearchSiteRuns(new Criteria(), $con)->diff($userSearchSiteRuns);
 
 
-        $this->userSearchRunsScheduledForDeletion = $userSearchRunsToDelete;
+        //since at least one column in the foreign key is at the same time a PK
+        //we can not just set a PK to NULL in the lines below. We have to store
+        //a backup of all values, so we are able to manipulate these items based on the onDelete value later.
+        $this->userSearchSiteRunsScheduledForDeletion = clone $userSearchSiteRunsToDelete;
 
-        foreach ($userSearchRunsToDelete as $userSearchRunRemoved) {
-            $userSearchRunRemoved->setUserSearch(null);
+        foreach ($userSearchSiteRunsToDelete as $userSearchSiteRunRemoved) {
+            $userSearchSiteRunRemoved->setUserSearchFromUSSR(null);
         }
 
-        $this->collUserSearchRuns = null;
-        foreach ($userSearchRuns as $userSearchRun) {
-            $this->addUserSearchRun($userSearchRun);
+        $this->collUserSearchSiteRuns = null;
+        foreach ($userSearchSiteRuns as $userSearchSiteRun) {
+            $this->addUserSearchSiteRun($userSearchSiteRun);
         }
 
-        $this->collUserSearchRuns = $userSearchRuns;
-        $this->collUserSearchRunsPartial = false;
+        $this->collUserSearchSiteRuns = $userSearchSiteRuns;
+        $this->collUserSearchSiteRunsPartial = false;
 
         return $this;
     }
 
     /**
-     * Returns the number of related UserSearchRun objects.
+     * Returns the number of related UserSearchSiteRun objects.
      *
      * @param      Criteria $criteria
      * @param      boolean $distinct
      * @param      ConnectionInterface $con
-     * @return int             Count of related UserSearchRun objects.
+     * @return int             Count of related UserSearchSiteRun objects.
      * @throws PropelException
      */
-    public function countUserSearchRuns(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    public function countUserSearchSiteRuns(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
     {
-        $partial = $this->collUserSearchRunsPartial && !$this->isNew();
-        if (null === $this->collUserSearchRuns || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->collUserSearchRuns) {
+        $partial = $this->collUserSearchSiteRunsPartial && !$this->isNew();
+        if (null === $this->collUserSearchSiteRuns || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collUserSearchSiteRuns) {
                 return 0;
             }
 
             if ($partial && !$criteria) {
-                return count($this->getUserSearchRuns());
+                return count($this->getUserSearchSiteRuns());
             }
 
-            $query = ChildUserSearchRunQuery::create(null, $criteria);
+            $query = ChildUserSearchSiteRunQuery::create(null, $criteria);
             if ($distinct) {
                 $query->distinct();
             }
 
             return $query
-                ->filterByUserSearch($this)
+                ->filterByUserSearchFromUSSR($this)
                 ->count($con);
         }
 
-        return count($this->collUserSearchRuns);
+        return count($this->collUserSearchSiteRuns);
     }
 
     /**
-     * Method called to associate a ChildUserSearchRun object to this object
-     * through the ChildUserSearchRun foreign key attribute.
+     * Method called to associate a ChildUserSearchSiteRun object to this object
+     * through the ChildUserSearchSiteRun foreign key attribute.
      *
-     * @param  ChildUserSearchRun $l ChildUserSearchRun
+     * @param  ChildUserSearchSiteRun $l ChildUserSearchSiteRun
      * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
      */
-    public function addUserSearchRun(ChildUserSearchRun $l)
+    public function addUserSearchSiteRun(ChildUserSearchSiteRun $l)
     {
-        if ($this->collUserSearchRuns === null) {
-            $this->initUserSearchRuns();
-            $this->collUserSearchRunsPartial = true;
+        if ($this->collUserSearchSiteRuns === null) {
+            $this->initUserSearchSiteRuns();
+            $this->collUserSearchSiteRunsPartial = true;
         }
 
-        if (!$this->collUserSearchRuns->contains($l)) {
-            $this->doAddUserSearchRun($l);
+        if (!$this->collUserSearchSiteRuns->contains($l)) {
+            $this->doAddUserSearchSiteRun($l);
 
-            if ($this->userSearchRunsScheduledForDeletion and $this->userSearchRunsScheduledForDeletion->contains($l)) {
-                $this->userSearchRunsScheduledForDeletion->remove($this->userSearchRunsScheduledForDeletion->search($l));
+            if ($this->userSearchSiteRunsScheduledForDeletion and $this->userSearchSiteRunsScheduledForDeletion->contains($l)) {
+                $this->userSearchSiteRunsScheduledForDeletion->remove($this->userSearchSiteRunsScheduledForDeletion->search($l));
             }
         }
 
@@ -2283,29 +2060,29 @@ abstract class UserSearch implements ActiveRecordInterface
     }
 
     /**
-     * @param ChildUserSearchRun $userSearchRun The ChildUserSearchRun object to add.
+     * @param ChildUserSearchSiteRun $userSearchSiteRun The ChildUserSearchSiteRun object to add.
      */
-    protected function doAddUserSearchRun(ChildUserSearchRun $userSearchRun)
+    protected function doAddUserSearchSiteRun(ChildUserSearchSiteRun $userSearchSiteRun)
     {
-        $this->collUserSearchRuns[]= $userSearchRun;
-        $userSearchRun->setUserSearch($this);
+        $this->collUserSearchSiteRuns[]= $userSearchSiteRun;
+        $userSearchSiteRun->setUserSearchFromUSSR($this);
     }
 
     /**
-     * @param  ChildUserSearchRun $userSearchRun The ChildUserSearchRun object to remove.
+     * @param  ChildUserSearchSiteRun $userSearchSiteRun The ChildUserSearchSiteRun object to remove.
      * @return $this|ChildUserSearch The current object (for fluent API support)
      */
-    public function removeUserSearchRun(ChildUserSearchRun $userSearchRun)
+    public function removeUserSearchSiteRun(ChildUserSearchSiteRun $userSearchSiteRun)
     {
-        if ($this->getUserSearchRuns()->contains($userSearchRun)) {
-            $pos = $this->collUserSearchRuns->search($userSearchRun);
-            $this->collUserSearchRuns->remove($pos);
-            if (null === $this->userSearchRunsScheduledForDeletion) {
-                $this->userSearchRunsScheduledForDeletion = clone $this->collUserSearchRuns;
-                $this->userSearchRunsScheduledForDeletion->clear();
+        if ($this->getUserSearchSiteRuns()->contains($userSearchSiteRun)) {
+            $pos = $this->collUserSearchSiteRuns->search($userSearchSiteRun);
+            $this->collUserSearchSiteRuns->remove($pos);
+            if (null === $this->userSearchSiteRunsScheduledForDeletion) {
+                $this->userSearchSiteRunsScheduledForDeletion = clone $this->collUserSearchSiteRuns;
+                $this->userSearchSiteRunsScheduledForDeletion->clear();
             }
-            $this->userSearchRunsScheduledForDeletion[]= clone $userSearchRun;
-            $userSearchRun->setUserSearch(null);
+            $this->userSearchSiteRunsScheduledForDeletion[]= clone $userSearchSiteRun;
+            $userSearchSiteRun->setUserSearchFromUSSR(null);
         }
 
         return $this;
@@ -2317,7 +2094,7 @@ abstract class UserSearch implements ActiveRecordInterface
      * an identical criteria, it returns the collection.
      * Otherwise if this UserSearch is new, it will return
      * an empty collection; or if this UserSearch has previously
-     * been saved, it will retrieve related UserSearchRuns from storage.
+     * been saved, it will retrieve related UserSearchSiteRuns from storage.
      *
      * This method is protected by default in order to keep the public
      * api reasonable.  You can provide public methods for those you
@@ -2326,64 +2103,172 @@ abstract class UserSearch implements ActiveRecordInterface
      * @param      Criteria $criteria optional Criteria object to narrow the query
      * @param      ConnectionInterface $con optional connection object
      * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
-     * @return ObjectCollection|ChildUserSearchRun[] List of ChildUserSearchRun objects
+     * @return ObjectCollection|ChildUserSearchSiteRun[] List of ChildUserSearchSiteRun objects
      */
-    public function getUserSearchRunsJoinJobSiteRecordRelatedByJobSiteKey(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    public function getUserSearchSiteRunsJoinJobSiteFromUSSR(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
     {
-        $query = ChildUserSearchRunQuery::create(null, $criteria);
-        $query->joinWith('JobSiteRecordRelatedByJobSiteKey', $joinBehavior);
+        $query = ChildUserSearchSiteRunQuery::create(null, $criteria);
+        $query->joinWith('JobSiteFromUSSR', $joinBehavior);
 
-        return $this->getUserSearchRuns($query, $con);
+        return $this->getUserSearchSiteRuns($query, $con);
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this UserSearch is new, it will return
+     * an empty collection; or if this UserSearch has previously
+     * been saved, it will retrieve related UserSearchSiteRuns from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in UserSearch.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return ObjectCollection|ChildUserSearchSiteRun[] List of ChildUserSearchSiteRun objects
+     */
+    public function getUserSearchSiteRunsJoinUserFromUSSR(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    {
+        $query = ChildUserSearchSiteRunQuery::create(null, $criteria);
+        $query->joinWith('UserFromUSSR', $joinBehavior);
+
+        return $this->getUserSearchSiteRuns($query, $con);
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this UserSearch is new, it will return
+     * an empty collection; or if this UserSearch has previously
+     * been saved, it will retrieve related UserSearchSiteRuns from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in UserSearch.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return ObjectCollection|ChildUserSearchSiteRun[] List of ChildUserSearchSiteRun objects
+     */
+    public function getUserSearchSiteRunsJoinUserKeywordSetFromUSSR(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    {
+        $query = ChildUserSearchSiteRunQuery::create(null, $criteria);
+        $query->joinWith('UserKeywordSetFromUSSR', $joinBehavior);
+
+        return $this->getUserSearchSiteRuns($query, $con);
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this UserSearch is new, it will return
+     * an empty collection; or if this UserSearch has previously
+     * been saved, it will retrieve related UserSearchSiteRuns from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in UserSearch.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return ObjectCollection|ChildUserSearchSiteRun[] List of ChildUserSearchSiteRun objects
+     */
+    public function getUserSearchSiteRunsJoinGeoLocationFromUSSR(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    {
+        $query = ChildUserSearchSiteRunQuery::create(null, $criteria);
+        $query->joinWith('GeoLocationFromUSSR', $joinBehavior);
+
+        return $this->getUserSearchSiteRuns($query, $con);
     }
 
     /**
-     * Clears out the collUserSearchVersions collection
+     * Clears out the collJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds collection
      *
      * This does not modify the database; however, it will remove any associated objects, causing
      * them to be refetched by subsequent calls to accessor method.
      *
      * @return void
-     * @see        addUserSearchVersions()
+     * @see        addJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds()
      */
-    public function clearUserSearchVersions()
+    public function clearJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds()
     {
-        $this->collUserSearchVersions = null; // important to set this to NULL since that means it is uninitialized
+        $this->collJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds = null; // important to set this to NULL since that means it is uninitialized
     }
 
     /**
-     * Reset is the collUserSearchVersions collection loaded partially.
-     */
-    public function resetPartialUserSearchVersions($v = true)
-    {
-        $this->collUserSearchVersionsPartial = $v;
-    }
-
-    /**
-     * Initializes the collUserSearchVersions collection.
+     * Initializes the combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds crossRef collection.
      *
-     * By default this just sets the collUserSearchVersions collection to an empty array (like clearcollUserSearchVersions());
+     * By default this just sets the combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds collection to an empty collection (like clearJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds());
      * however, you may wish to override this method in your stub class to provide setting appropriate
      * to your application -- for example, setting the initial array to the values stored in database.
      *
-     * @param      boolean $overrideExisting If set to true, the method call initializes
-     *                                        the collection even if it is not empty
-     *
      * @return void
      */
-    public function initUserSearchVersions($overrideExisting = true)
+    public function initJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds()
     {
-        if (null !== $this->collUserSearchVersions && !$overrideExisting) {
-            return;
-        }
-
-        $collectionClassName = UserSearchVersionTableMap::getTableMap()->getCollectionClassName();
-
-        $this->collUserSearchVersions = new $collectionClassName;
-        $this->collUserSearchVersions->setModel('\JobScooper\DataAccess\UserSearchVersion');
+        $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds = new ObjectCombinationCollection;
+        $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsPartial = true;
     }
 
     /**
-     * Gets an array of ChildUserSearchVersion objects which contain a foreign key that references this object.
+     * Checks if the combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds collection is loaded.
+     *
+     * @return bool
+     */
+    public function isJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsLoaded()
+    {
+        return null !== $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds;
+    }
+
+    /**
+     * Returns a new query object pre configured with filters from current object and given arguments to query the database.
+     *
+     * @param ChildUser $userFromUSSR,
+     * @param ChildUserKeywordSet $userKeywordSetFromUSSR,
+     * @param ChildGeoLocation $geoLocationFromUSSR,
+     * @param string $appRunId
+     * @param Criteria $criteria
+     *
+     * @return ChildJobSiteRecordQuery
+     */
+    public function createJobSiteFromUSSRsQuery(ChildUser $userFromUSSR = null, ChildUserKeywordSet $userKeywordSetFromUSSR = null, ChildGeoLocation $geoLocationFromUSSR = null, $appRunId = null, Criteria $criteria = null)
+    {
+        $criteria = ChildJobSiteRecordQuery::create($criteria)
+            ->filterByUserSearchFromUSSR($this);
+
+        $userSearchSiteRunQuery = $criteria->useUserSearchSiteRunQuery();
+
+        if (null !== $userFromUSSR) {
+            $userSearchSiteRunQuery->filterByUserFromUSSR($userFromUSSR);
+        }
+
+        if (null !== $userKeywordSetFromUSSR) {
+            $userSearchSiteRunQuery->filterByUserKeywordSetFromUSSR($userKeywordSetFromUSSR);
+        }
+
+        if (null !== $geoLocationFromUSSR) {
+            $userSearchSiteRunQuery->filterByGeoLocationFromUSSR($geoLocationFromUSSR);
+        }
+
+        if (null !== $appRunId) {
+            $userSearchSiteRunQuery->filterByAppRunId($appRunId);
+        }
+
+        $userSearchSiteRunQuery->endUse();
+
+        return $criteria;
+    }
+
+    /**
+     * Gets a combined collection of ChildJobSiteRecord, ChildUser, ChildUserKeywordSet, ChildGeoLocation objects related by a many-to-many relationship
+     * to the current object by way of the user_search_site_run cross-reference table.
      *
      * If the $criteria is not null, it is used to always fetch the results from the database.
      * Otherwise the results are fetched from the database the first time, then cached.
@@ -2391,175 +2276,390 @@ abstract class UserSearch implements ActiveRecordInterface
      * If this ChildUserSearch is new, it will return
      * an empty collection or the current collection; the criteria is ignored on a new object.
      *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @return ObjectCollection|ChildUserSearchVersion[] List of ChildUserSearchVersion objects
-     * @throws PropelException
+     * @param      Criteria $criteria Optional query object to filter the query
+     * @param      ConnectionInterface $con Optional connection object
+     *
+     * @return ObjectCombinationCollection Combination list of ChildJobSiteRecord, ChildUser, ChildUserKeywordSet, ChildGeoLocation objects
      */
-    public function getUserSearchVersions(Criteria $criteria = null, ConnectionInterface $con = null)
+    public function getJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds($criteria = null, ConnectionInterface $con = null)
     {
-        $partial = $this->collUserSearchVersionsPartial && !$this->isNew();
-        if (null === $this->collUserSearchVersions || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collUserSearchVersions) {
+        $partial = $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsPartial && !$this->isNew();
+        if (null === $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds || null !== $criteria || $partial) {
+            if ($this->isNew()) {
                 // return empty collection
-                $this->initUserSearchVersions();
+                if (null === $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds) {
+                    $this->initJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds();
+                }
             } else {
-                $collUserSearchVersions = ChildUserSearchVersionQuery::create(null, $criteria)
-                    ->filterByUserSearch($this)
-                    ->find($con);
+
+                $query = ChildUserSearchSiteRunQuery::create(null, $criteria)
+                    ->filterByUserSearchFromUSSR($this)
+                    ->joinJobSiteFromUSSR()
+                    ->joinUserFromUSSR()
+                    ->joinUserKeywordSetFromUSSR()
+                    ->joinGeoLocationFromUSSR()
+                ;
+
+                $items = $query->find($con);
+                $combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds = new ObjectCombinationCollection();
+                foreach ($items as $item) {
+                    $combination = [];
+
+                    $combination[] = $item->getJobSiteFromUSSR();
+                    $combination[] = $item->getUserFromUSSR();
+                    $combination[] = $item->getUserKeywordSetFromUSSR();
+                    $combination[] = $item->getGeoLocationFromUSSR();
+                    $combination[] = $item->getAppRunId();
+                    $combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds[] = $combination;
+                }
 
                 if (null !== $criteria) {
-                    if (false !== $this->collUserSearchVersionsPartial && count($collUserSearchVersions)) {
-                        $this->initUserSearchVersions(false);
-
-                        foreach ($collUserSearchVersions as $obj) {
-                            if (false == $this->collUserSearchVersions->contains($obj)) {
-                                $this->collUserSearchVersions->append($obj);
-                            }
-                        }
-
-                        $this->collUserSearchVersionsPartial = true;
-                    }
-
-                    return $collUserSearchVersions;
+                    return $combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds;
                 }
 
-                if ($partial && $this->collUserSearchVersions) {
-                    foreach ($this->collUserSearchVersions as $obj) {
-                        if ($obj->isNew()) {
-                            $collUserSearchVersions[] = $obj;
+                if ($partial && $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds) {
+                    //make sure that already added objects gets added to the list of the database.
+                    foreach ($this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds as $obj) {
+                        if (!call_user_func_array([$combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds, 'contains'], $obj)) {
+                            $combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds[] = $obj;
                         }
                     }
                 }
 
-                $this->collUserSearchVersions = $collUserSearchVersions;
-                $this->collUserSearchVersionsPartial = false;
+                $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds = $combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds;
+                $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsPartial = false;
             }
         }
 
-        return $this->collUserSearchVersions;
+        return $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds;
     }
 
     /**
-     * Sets a collection of ChildUserSearchVersion objects related by a one-to-many relationship
-     * to the current object.
+     * Returns a not cached ObjectCollection of ChildJobSiteRecord objects. This will hit always the databases.
+     * If you have attached new ChildJobSiteRecord object to this object you need to call `save` first to get
+     * the correct return value. Use getJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds() to get the current internal state.
+     *
+     * @param ChildUser $userFromUSSR,
+     * @param ChildUserKeywordSet $userKeywordSetFromUSSR,
+     * @param ChildGeoLocation $geoLocationFromUSSR,
+     * @param string $appRunId
+     * @param Criteria $criteria
+     * @param ConnectionInterface $con
+     *
+     * @return ChildJobSiteRecord[]|ObjectCollection
+     */
+    public function getJobSiteFromUSSRs(ChildUser $userFromUSSR = null, ChildUserKeywordSet $userKeywordSetFromUSSR = null, ChildGeoLocation $geoLocationFromUSSR = null, $appRunId = null, Criteria $criteria = null, ConnectionInterface $con = null)
+    {
+        return $this->createJobSiteFromUSSRsQuery($userFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId, $criteria)->find($con);
+    }
+
+    /**
+     * Sets a collection of ChildJobSiteRecord, ChildUser, ChildUserKeywordSet, ChildGeoLocation combination objects related by a many-to-many relationship
+     * to the current object by way of the user_search_site_run cross-reference table.
      * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
      * and new objects from the given Propel collection.
      *
-     * @param      Collection $userSearchVersions A Propel collection.
+     * @param  Collection $jobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds A Propel collection.
+     * @param  ConnectionInterface $con Optional connection object
+     * @return $this|ChildUserSearch The current object (for fluent API support)
+     */
+    public function setJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds(Collection $jobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds, ConnectionInterface $con = null)
+    {
+        $this->clearJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds();
+        $currentJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds = $this->getJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds();
+
+        $combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsScheduledForDeletion = $currentJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds->diff($jobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds);
+
+        foreach ($combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsScheduledForDeletion as $toDelete) {
+            call_user_func_array([$this, 'removeJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunId'], $toDelete);
+        }
+
+        foreach ($jobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds as $jobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunId) {
+            if (!call_user_func_array([$currentJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds, 'contains'], $jobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunId)) {
+                call_user_func_array([$this, 'doAddJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunId'], $jobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunId);
+            }
+        }
+
+        $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsPartial = false;
+        $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds = $jobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds;
+
+        return $this;
+    }
+
+    /**
+     * Gets the number of ChildJobSiteRecord, ChildUser, ChildUserKeywordSet, ChildGeoLocation combination objects related by a many-to-many relationship
+     * to the current object by way of the user_search_site_run cross-reference table.
+     *
+     * @param      Criteria $criteria Optional query object to filter the query
+     * @param      boolean $distinct Set to true to force count distinct
      * @param      ConnectionInterface $con Optional connection object
-     * @return $this|ChildUserSearch The current object (for fluent API support)
-     */
-    public function setUserSearchVersions(Collection $userSearchVersions, ConnectionInterface $con = null)
-    {
-        /** @var ChildUserSearchVersion[] $userSearchVersionsToDelete */
-        $userSearchVersionsToDelete = $this->getUserSearchVersions(new Criteria(), $con)->diff($userSearchVersions);
-
-
-        //since at least one column in the foreign key is at the same time a PK
-        //we can not just set a PK to NULL in the lines below. We have to store
-        //a backup of all values, so we are able to manipulate these items based on the onDelete value later.
-        $this->userSearchVersionsScheduledForDeletion = clone $userSearchVersionsToDelete;
-
-        foreach ($userSearchVersionsToDelete as $userSearchVersionRemoved) {
-            $userSearchVersionRemoved->setUserSearch(null);
-        }
-
-        $this->collUserSearchVersions = null;
-        foreach ($userSearchVersions as $userSearchVersion) {
-            $this->addUserSearchVersion($userSearchVersion);
-        }
-
-        $this->collUserSearchVersions = $userSearchVersions;
-        $this->collUserSearchVersionsPartial = false;
-
-        return $this;
-    }
-
-    /**
-     * Returns the number of related UserSearchVersion objects.
      *
-     * @param      Criteria $criteria
-     * @param      boolean $distinct
-     * @param      ConnectionInterface $con
-     * @return int             Count of related UserSearchVersion objects.
-     * @throws PropelException
+     * @return int the number of related ChildJobSiteRecord, ChildUser, ChildUserKeywordSet, ChildGeoLocation combination objects
      */
-    public function countUserSearchVersions(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    public function countJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
     {
-        $partial = $this->collUserSearchVersionsPartial && !$this->isNew();
-        if (null === $this->collUserSearchVersions || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->collUserSearchVersions) {
+        $partial = $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsPartial && !$this->isNew();
+        if (null === $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds) {
                 return 0;
-            }
+            } else {
 
-            if ($partial && !$criteria) {
-                return count($this->getUserSearchVersions());
-            }
+                if ($partial && !$criteria) {
+                    return count($this->getJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds());
+                }
 
-            $query = ChildUserSearchVersionQuery::create(null, $criteria);
-            if ($distinct) {
-                $query->distinct();
-            }
+                $query = ChildUserSearchSiteRunQuery::create(null, $criteria);
+                if ($distinct) {
+                    $query->distinct();
+                }
 
-            return $query
-                ->filterByUserSearch($this)
-                ->count($con);
+                return $query
+                    ->filterByUserSearchFromUSSR($this)
+                    ->count($con);
+            }
+        } else {
+            return count($this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds);
         }
-
-        return count($this->collUserSearchVersions);
     }
 
     /**
-     * Method called to associate a ChildUserSearchVersion object to this object
-     * through the ChildUserSearchVersion foreign key attribute.
+     * Returns the not cached count of ChildJobSiteRecord objects. This will hit always the databases.
+     * If you have attached new ChildJobSiteRecord object to this object you need to call `save` first to get
+     * the correct return value. Use getJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds() to get the current internal state.
      *
-     * @param  ChildUserSearchVersion $l ChildUserSearchVersion
-     * @return $this|\JobScooper\DataAccess\UserSearch The current object (for fluent API support)
+     * @param ChildUser $userFromUSSR,
+     * @param ChildUserKeywordSet $userKeywordSetFromUSSR,
+     * @param ChildGeoLocation $geoLocationFromUSSR,
+     * @param string $appRunId
+     * @param Criteria $criteria
+     * @param ConnectionInterface $con
+     *
+     * @return integer
      */
-    public function addUserSearchVersion(ChildUserSearchVersion $l)
+    public function countJobSiteFromUSSRs(ChildUser $userFromUSSR = null, ChildUserKeywordSet $userKeywordSetFromUSSR = null, ChildGeoLocation $geoLocationFromUSSR = null, $appRunId = null, Criteria $criteria = null, ConnectionInterface $con = null)
     {
-        if ($this->collUserSearchVersions === null) {
-            $this->initUserSearchVersions();
-            $this->collUserSearchVersionsPartial = true;
+        return $this->createJobSiteFromUSSRsQuery($userFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId, $criteria)->count($con);
+    }
+
+    /**
+     * Associate a ChildJobSiteRecord to this object
+     * through the user_search_site_run cross reference table.
+     *
+     * @param ChildJobSiteRecord $jobSiteFromUSSR,
+     * @param ChildUser $userFromUSSR,
+     * @param ChildUserKeywordSet $userKeywordSetFromUSSR,
+     * @param ChildGeoLocation $geoLocationFromUSSR,
+     * @param string $appRunId
+     * @return ChildUserSearch The current object (for fluent API support)
+     */
+    public function addJobSiteFromUSSR(ChildJobSiteRecord $jobSiteFromUSSR, ChildUser $userFromUSSR, ChildUserKeywordSet $userKeywordSetFromUSSR, ChildGeoLocation $geoLocationFromUSSR, $appRunId)
+    {
+        if ($this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds === null) {
+            $this->initJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds();
         }
 
-        if (!$this->collUserSearchVersions->contains($l)) {
-            $this->doAddUserSearchVersion($l);
-
-            if ($this->userSearchVersionsScheduledForDeletion and $this->userSearchVersionsScheduledForDeletion->contains($l)) {
-                $this->userSearchVersionsScheduledForDeletion->remove($this->userSearchVersionsScheduledForDeletion->search($l));
-            }
+        if (!$this->getJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds()->contains($jobSiteFromUSSR, $userFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId)) {
+            // only add it if the **same** object is not already associated
+            $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds->push($jobSiteFromUSSR, $userFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId);
+            $this->doAddJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunId($jobSiteFromUSSR, $userFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId);
         }
 
         return $this;
     }
 
     /**
-     * @param ChildUserSearchVersion $userSearchVersion The ChildUserSearchVersion object to add.
+     * Associate a ChildUser to this object
+     * through the user_search_site_run cross reference table.
+     *
+     * @param ChildUser $userFromUSSR,
+     * @param ChildJobSiteRecord $jobSiteFromUSSR,
+     * @param ChildUserKeywordSet $userKeywordSetFromUSSR,
+     * @param ChildGeoLocation $geoLocationFromUSSR,
+     * @param string $appRunId
+     * @return ChildUserSearch The current object (for fluent API support)
      */
-    protected function doAddUserSearchVersion(ChildUserSearchVersion $userSearchVersion)
+    public function addUserFromUSSR(ChildUser $userFromUSSR, ChildJobSiteRecord $jobSiteFromUSSR, ChildUserKeywordSet $userKeywordSetFromUSSR, ChildGeoLocation $geoLocationFromUSSR, $appRunId)
     {
-        $this->collUserSearchVersions[]= $userSearchVersion;
-        $userSearchVersion->setUserSearch($this);
+        if ($this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds === null) {
+            $this->initJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds();
+        }
+
+        if (!$this->getJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds()->contains($userFromUSSR, $jobSiteFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId)) {
+            // only add it if the **same** object is not already associated
+            $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds->push($userFromUSSR, $jobSiteFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId);
+            $this->doAddJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunId($userFromUSSR, $jobSiteFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId);
+        }
+
+        return $this;
     }
 
     /**
-     * @param  ChildUserSearchVersion $userSearchVersion The ChildUserSearchVersion object to remove.
-     * @return $this|ChildUserSearch The current object (for fluent API support)
+     * Associate a ChildUserKeywordSet to this object
+     * through the user_search_site_run cross reference table.
+     *
+     * @param ChildUserKeywordSet $userKeywordSetFromUSSR,
+     * @param ChildJobSiteRecord $jobSiteFromUSSR,
+     * @param ChildUser $userFromUSSR,
+     * @param ChildGeoLocation $geoLocationFromUSSR,
+     * @param string $appRunId
+     * @return ChildUserSearch The current object (for fluent API support)
      */
-    public function removeUserSearchVersion(ChildUserSearchVersion $userSearchVersion)
+    public function addUserKeywordSetFromUSSR(ChildUserKeywordSet $userKeywordSetFromUSSR, ChildJobSiteRecord $jobSiteFromUSSR, ChildUser $userFromUSSR, ChildGeoLocation $geoLocationFromUSSR, $appRunId)
     {
-        if ($this->getUserSearchVersions()->contains($userSearchVersion)) {
-            $pos = $this->collUserSearchVersions->search($userSearchVersion);
-            $this->collUserSearchVersions->remove($pos);
-            if (null === $this->userSearchVersionsScheduledForDeletion) {
-                $this->userSearchVersionsScheduledForDeletion = clone $this->collUserSearchVersions;
-                $this->userSearchVersionsScheduledForDeletion->clear();
-            }
-            $this->userSearchVersionsScheduledForDeletion[]= clone $userSearchVersion;
-            $userSearchVersion->setUserSearch(null);
+        if ($this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds === null) {
+            $this->initJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds();
         }
+
+        if (!$this->getJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds()->contains($userKeywordSetFromUSSR, $jobSiteFromUSSR, $userFromUSSR, $geoLocationFromUSSR, $appRunId)) {
+            // only add it if the **same** object is not already associated
+            $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds->push($userKeywordSetFromUSSR, $jobSiteFromUSSR, $userFromUSSR, $geoLocationFromUSSR, $appRunId);
+            $this->doAddJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunId($userKeywordSetFromUSSR, $jobSiteFromUSSR, $userFromUSSR, $geoLocationFromUSSR, $appRunId);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Associate a ChildGeoLocation to this object
+     * through the user_search_site_run cross reference table.
+     *
+     * @param ChildGeoLocation $geoLocationFromUSSR,
+     * @param ChildJobSiteRecord $jobSiteFromUSSR,
+     * @param ChildUser $userFromUSSR,
+     * @param ChildUserKeywordSet $userKeywordSetFromUSSR,
+     * @param string $appRunId
+     * @return ChildUserSearch The current object (for fluent API support)
+     */
+    public function addGeoLocationFromUSSR(ChildGeoLocation $geoLocationFromUSSR, ChildJobSiteRecord $jobSiteFromUSSR, ChildUser $userFromUSSR, ChildUserKeywordSet $userKeywordSetFromUSSR, $appRunId)
+    {
+        if ($this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds === null) {
+            $this->initJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds();
+        }
+
+        if (!$this->getJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds()->contains($geoLocationFromUSSR, $jobSiteFromUSSR, $userFromUSSR, $userKeywordSetFromUSSR, $appRunId)) {
+            // only add it if the **same** object is not already associated
+            $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds->push($geoLocationFromUSSR, $jobSiteFromUSSR, $userFromUSSR, $userKeywordSetFromUSSR, $appRunId);
+            $this->doAddJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunId($geoLocationFromUSSR, $jobSiteFromUSSR, $userFromUSSR, $userKeywordSetFromUSSR, $appRunId);
+        }
+
+        return $this;
+    }
+
+    /**
+     *
+     * @param ChildJobSiteRecord $jobSiteFromUSSR,
+     * @param ChildUser $userFromUSSR,
+     * @param ChildUserKeywordSet $userKeywordSetFromUSSR,
+     * @param ChildGeoLocation $geoLocationFromUSSR,
+     * @param string $appRunId
+     */
+    protected function doAddJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunId(ChildJobSiteRecord $jobSiteFromUSSR, ChildUser $userFromUSSR, ChildUserKeywordSet $userKeywordSetFromUSSR, ChildGeoLocation $geoLocationFromUSSR, $appRunId)
+    {
+        $userSearchSiteRun = new ChildUserSearchSiteRun();
+
+        $userSearchSiteRun->setJobSiteFromUSSR($jobSiteFromUSSR);
+        $userSearchSiteRun->setUserFromUSSR($userFromUSSR);
+        $userSearchSiteRun->setUserKeywordSetFromUSSR($userKeywordSetFromUSSR);
+        $userSearchSiteRun->setGeoLocationFromUSSR($geoLocationFromUSSR);
+        $userSearchSiteRun->setAppRunId($appRunId);
+
+
+        $userSearchSiteRun->setUserSearchFromUSSR($this);
+
+        $this->addUserSearchSiteRun($userSearchSiteRun);
+
+        // set the back reference to this object directly as using provided method either results
+        // in endless loop or in multiple relations
+        if ($jobSiteFromUSSR->isUserSearchFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsLoaded()) {
+            $jobSiteFromUSSR->initUserSearchFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds();
+            $jobSiteFromUSSR->getUserSearchFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds()->push($this, $userFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId);
+        } elseif (!$jobSiteFromUSSR->getUserSearchFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds()->contains($this, $userFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId)) {
+            $jobSiteFromUSSR->getUserSearchFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds()->push($this, $userFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId);
+        }
+
+        // set the back reference to this object directly as using provided method either results
+        // in endless loop or in multiple relations
+        if ($userFromUSSR->isUserSearchFromUSSRJobSiteFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsLoaded()) {
+            $userFromUSSR->initUserSearchFromUSSRJobSiteFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds();
+            $userFromUSSR->getUserSearchFromUSSRJobSiteFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds()->push($this, $jobSiteFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId);
+        } elseif (!$userFromUSSR->getUserSearchFromUSSRJobSiteFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds()->contains($this, $jobSiteFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId)) {
+            $userFromUSSR->getUserSearchFromUSSRJobSiteFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds()->push($this, $jobSiteFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId);
+        }
+
+        // set the back reference to this object directly as using provided method either results
+        // in endless loop or in multiple relations
+        if ($userKeywordSetFromUSSR->isUserSearchFromUSSRJobSiteFromUSSRUserFromUSSRGeoLocationFromUSSRAppRunIdsLoaded()) {
+            $userKeywordSetFromUSSR->initUserSearchFromUSSRJobSiteFromUSSRUserFromUSSRGeoLocationFromUSSRAppRunIds();
+            $userKeywordSetFromUSSR->getUserSearchFromUSSRJobSiteFromUSSRUserFromUSSRGeoLocationFromUSSRAppRunIds()->push($this, $jobSiteFromUSSR, $userFromUSSR, $geoLocationFromUSSR, $appRunId);
+        } elseif (!$userKeywordSetFromUSSR->getUserSearchFromUSSRJobSiteFromUSSRUserFromUSSRGeoLocationFromUSSRAppRunIds()->contains($this, $jobSiteFromUSSR, $userFromUSSR, $geoLocationFromUSSR, $appRunId)) {
+            $userKeywordSetFromUSSR->getUserSearchFromUSSRJobSiteFromUSSRUserFromUSSRGeoLocationFromUSSRAppRunIds()->push($this, $jobSiteFromUSSR, $userFromUSSR, $geoLocationFromUSSR, $appRunId);
+        }
+
+        // set the back reference to this object directly as using provided method either results
+        // in endless loop or in multiple relations
+        if ($geoLocationFromUSSR->isUserSearchFromUSSRJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRAppRunIdsLoaded()) {
+            $geoLocationFromUSSR->initUserSearchFromUSSRJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRAppRunIds();
+            $geoLocationFromUSSR->getUserSearchFromUSSRJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRAppRunIds()->push($this, $jobSiteFromUSSR, $userFromUSSR, $userKeywordSetFromUSSR, $appRunId);
+        } elseif (!$geoLocationFromUSSR->getUserSearchFromUSSRJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRAppRunIds()->contains($this, $jobSiteFromUSSR, $userFromUSSR, $userKeywordSetFromUSSR, $appRunId)) {
+            $geoLocationFromUSSR->getUserSearchFromUSSRJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRAppRunIds()->push($this, $jobSiteFromUSSR, $userFromUSSR, $userKeywordSetFromUSSR, $appRunId);
+        }
+
+    }
+
+    /**
+     * Remove jobSiteFromUSSR, userFromUSSR, userKeywordSetFromUSSR, geoLocationFromUSSR, appRunId of this object
+     * through the user_search_site_run cross reference table.
+     *
+     * @param ChildJobSiteRecord $jobSiteFromUSSR,
+     * @param ChildUser $userFromUSSR,
+     * @param ChildUserKeywordSet $userKeywordSetFromUSSR,
+     * @param ChildGeoLocation $geoLocationFromUSSR,
+     * @param string $appRunId
+     * @return ChildUserSearch The current object (for fluent API support)
+     */
+    public function removeJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunId(ChildJobSiteRecord $jobSiteFromUSSR, ChildUser $userFromUSSR, ChildUserKeywordSet $userKeywordSetFromUSSR, ChildGeoLocation $geoLocationFromUSSR, $appRunId)
+    {
+        if ($this->getJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds()->contains($jobSiteFromUSSR, $userFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId)) {
+            $userSearchSiteRun = new ChildUserSearchSiteRun();
+            $userSearchSiteRun->setJobSiteFromUSSR($jobSiteFromUSSR);
+            if ($jobSiteFromUSSR->isUserSearchFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsLoaded()) {
+                //remove the back reference if available
+                $jobSiteFromUSSR->getUserSearchFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds()->removeObject($this, $userFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId);
+            }
+
+            $userSearchSiteRun->setUserFromUSSR($userFromUSSR);
+            if ($userFromUSSR->isUserSearchFromUSSRJobSiteFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsLoaded()) {
+                //remove the back reference if available
+                $userFromUSSR->getUserSearchFromUSSRJobSiteFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds()->removeObject($this, $jobSiteFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId);
+            }
+
+            $userSearchSiteRun->setUserKeywordSetFromUSSR($userKeywordSetFromUSSR);
+            if ($userKeywordSetFromUSSR->isUserSearchFromUSSRJobSiteFromUSSRUserFromUSSRGeoLocationFromUSSRAppRunIdsLoaded()) {
+                //remove the back reference if available
+                $userKeywordSetFromUSSR->getUserSearchFromUSSRJobSiteFromUSSRUserFromUSSRGeoLocationFromUSSRAppRunIds()->removeObject($this, $jobSiteFromUSSR, $userFromUSSR, $geoLocationFromUSSR, $appRunId);
+            }
+
+            $userSearchSiteRun->setGeoLocationFromUSSR($geoLocationFromUSSR);
+            if ($geoLocationFromUSSR->isUserSearchFromUSSRJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRAppRunIdsLoaded()) {
+                //remove the back reference if available
+                $geoLocationFromUSSR->getUserSearchFromUSSRJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRAppRunIds()->removeObject($this, $jobSiteFromUSSR, $userFromUSSR, $userKeywordSetFromUSSR, $appRunId);
+            }
+
+            $userSearchSiteRun->setAppRunId($appRunId);
+            $userSearchSiteRun->setUserSearchFromUSSR($this);
+            $this->removeUserSearchSiteRun(clone $userSearchSiteRun);
+            $userSearchSiteRun->clear();
+
+            $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds->remove($this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds->search($jobSiteFromUSSR, $userFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId));
+
+            if (null === $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsScheduledForDeletion) {
+                $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsScheduledForDeletion = clone $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds;
+                $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsScheduledForDeletion->clear();
+            }
+
+            $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIdsScheduledForDeletion->push($jobSiteFromUSSR, $userFromUSSR, $userKeywordSetFromUSSR, $geoLocationFromUSSR, $appRunId);
+        }
+
 
         return $this;
     }
@@ -2571,28 +2671,24 @@ abstract class UserSearch implements ActiveRecordInterface
      */
     public function clear()
     {
-        if (null !== $this->aUser) {
-            $this->aUser->removeUserSearch($this);
+        if (null !== $this->aUserKeywordSetFromUS) {
+            $this->aUserKeywordSetFromUS->removeUserSearch($this);
         }
-        if (null !== $this->aGeoLocation) {
-            $this->aGeoLocation->removeUserSearch($this);
+        if (null !== $this->aGeoLocationFromUS) {
+            $this->aGeoLocationFromUS->removeUserSearch($this);
         }
-        $this->user_search_id = null;
+        if (null !== $this->aUserFromUS) {
+            $this->aUserFromUS->removeUserSearch($this);
+        }
         $this->user_id = null;
+        $this->user_keyword_set_id = null;
         $this->geolocation_id = null;
-        $this->user_search_key = null;
-        $this->keywords = null;
-        $this->keywords_unserialized = null;
-        $this->keyword_tokens = null;
-        $this->keyword_tokens_unserialized = null;
-        $this->search_key_from_config = null;
+        $this->user_search_id = null;
         $this->date_created = null;
         $this->date_updated = null;
-        $this->date_last_completed = null;
-        $this->version = null;
+        $this->user_search_key = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
-        $this->applyDefaultValues();
         $this->resetModified();
         $this->setNew(true);
         $this->setDeleted(false);
@@ -2609,22 +2705,23 @@ abstract class UserSearch implements ActiveRecordInterface
     public function clearAllReferences($deep = false)
     {
         if ($deep) {
-            if ($this->collUserSearchRuns) {
-                foreach ($this->collUserSearchRuns as $o) {
+            if ($this->collUserSearchSiteRuns) {
+                foreach ($this->collUserSearchSiteRuns as $o) {
                     $o->clearAllReferences($deep);
                 }
             }
-            if ($this->collUserSearchVersions) {
-                foreach ($this->collUserSearchVersions as $o) {
+            if ($this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds) {
+                foreach ($this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds as $o) {
                     $o->clearAllReferences($deep);
                 }
             }
         } // if ($deep)
 
-        $this->collUserSearchRuns = null;
-        $this->collUserSearchVersions = null;
-        $this->aUser = null;
-        $this->aGeoLocation = null;
+        $this->collUserSearchSiteRuns = null;
+        $this->combinationCollJobSiteFromUSSRUserFromUSSRUserKeywordSetFromUSSRGeoLocationFromUSSRAppRunIds = null;
+        $this->aUserKeywordSetFromUS = null;
+        $this->aGeoLocationFromUS = null;
+        $this->aUserFromUS = null;
     }
 
     /**
@@ -2635,6 +2732,20 @@ abstract class UserSearch implements ActiveRecordInterface
     public function __toString()
     {
         return (string) $this->getUserSearchKey();
+    }
+
+    // timestampable behavior
+
+    /**
+     * Mark the current object so that the update date doesn't get updated during next save
+     *
+     * @return     $this|ChildUserSearch The current object (for fluent API support)
+     */
+    public function keepUpdateDateUnchanged()
+    {
+        $this->modifiedColumns[UserSearchTableMap::COL_DATE_UPDATED] = true;
+
+        return $this;
     }
 
     // sluggable behavior
@@ -2681,7 +2792,7 @@ abstract class UserSearch implements ActiveRecordInterface
      */
     protected function createRawSlug()
     {
-        return '' . $this->cleanupSlugPart($this->getUserId()) . '_' . $this->cleanupSlugPart($this->getSearchKeyFromConfig()) . '_' . $this->cleanupSlugPart($this->getGeoLocationId()) . '';
+        return 'user' . $this->cleanupSlugPart($this->getUserId()) . '_ukwd' . $this->cleanupSlugPart($this->getUserKeywordSetId()) . '_geo' . $this->cleanupSlugPart($this->getGeoLocationId()) . '';
     }
 
     /**
@@ -2733,8 +2844,8 @@ abstract class UserSearch implements ActiveRecordInterface
     protected static function limitSlugSize($slug, $incrementReservedSpace = 3)
     {
         // check length, as suffix could put it over maximum
-        if (strlen($slug) > (128 - $incrementReservedSpace)) {
-            $slug = substr($slug, 0, 128 - $incrementReservedSpace);
+        if (strlen($slug) > (100 - $incrementReservedSpace)) {
+            $slug = substr($slug, 0, 100 - $incrementReservedSpace);
         }
 
         return $slug;
@@ -2749,7 +2860,7 @@ abstract class UserSearch implements ActiveRecordInterface
      * @param    int    $alreadyExists   false for the first try, true for the second, and take the high count + 1
      * @return   string                   the unique slug
      */
-    protected function makeSlugUnique($slug, $separator = '_', $alreadyExists = false)
+    protected function makeSlugUnique($slug, $separator = '-', $alreadyExists = false)
     {
         if (!$alreadyExists) {
             $slug2 = $slug;
@@ -2795,337 +2906,6 @@ abstract class UserSearch implements ActiveRecordInterface
         return $slug2 . ($slugNum + 1);
     }
 
-    // timestampable behavior
-
-    /**
-     * Mark the current object so that the update date doesn't get updated during next save
-     *
-     * @return     $this|ChildUserSearch The current object (for fluent API support)
-     */
-    public function keepUpdateDateUnchanged()
-    {
-        $this->modifiedColumns[UserSearchTableMap::COL_DATE_UPDATED] = true;
-
-        return $this;
-    }
-
-    // us_date_last_completed behavior
-
-    /**
-     * Computes the value of the aggregate column date_last_completed *
-     * @param ConnectionInterface $con A connection object
-     *
-     * @return mixed The scalar result from the aggregate query
-     */
-    public function computeLastCompletedAt(ConnectionInterface $con)
-    {
-        $stmt = $con->prepare('SELECT MAX(date_ended) FROM user_search_run WHERE run_result_code = 4 AND user_search_run.USER_SEARCH_ID = :p1');
-        $stmt->bindValue(':p1', $this->getUserSearchId());
-        $stmt->execute();
-
-        return $stmt->fetchColumn();
-    }
-
-    /**
-     * Updates the aggregate column date_last_completed *
-     * @param ConnectionInterface $con A connection object
-     */
-    public function updateLastCompletedAt(ConnectionInterface $con)
-    {
-        $this->setLastCompletedAt($this->computeLastCompletedAt($con));
-        $this->save($con);
-    }
-
-    // versionable behavior
-
-    /**
-     * Enforce a new Version of this object upon next save.
-     *
-     * @return $this|\JobScooper\DataAccess\UserSearch
-     */
-    public function enforceVersioning()
-    {
-        $this->enforceVersion = true;
-
-        return $this;
-    }
-
-    /**
-     * Checks whether the current state must be recorded as a version
-     *
-     * @param   ConnectionInterface $con The ConnectionInterface connection to use.
-     * @return  boolean
-     */
-    public function isVersioningNecessary(ConnectionInterface $con = null)
-    {
-        if ($this->alreadyInSave) {
-            return false;
-        }
-
-        if ($this->enforceVersion) {
-            return true;
-        }
-
-        if (ChildUserSearchQuery::isVersioningEnabled() && ($this->isNew() || $this->isModified()) || $this->isDeleted()) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Creates a version of the current object and saves it.
-     *
-     * @param   ConnectionInterface $con The ConnectionInterface connection to use.
-     *
-     * @return  ChildUserSearchVersion A version object
-     */
-    public function addVersion(ConnectionInterface $con = null)
-    {
-        $this->enforceVersion = false;
-
-        $version = new ChildUserSearchVersion();
-        $version->setUserSearchId($this->getUserSearchId());
-        $version->setUserId($this->getUserId());
-        $version->setGeoLocationId($this->getGeoLocationId());
-        $version->setUserSearchKey($this->getUserSearchKey());
-        $version->setKeywords($this->getKeywords());
-        $version->setKeywordTokens($this->getKeywordTokens());
-        $version->setSearchKeyFromConfig($this->getSearchKeyFromConfig());
-        $version->setCreatedAt($this->getCreatedAt());
-        $version->setUpdatedAt($this->getUpdatedAt());
-        $version->setLastCompletedAt($this->getLastCompletedAt());
-        $version->setVersion($this->getVersion());
-        $version->setUserSearch($this);
-        $version->save($con);
-
-        return $version;
-    }
-
-    /**
-     * Sets the properties of the current object to the value they had at a specific version
-     *
-     * @param   integer $versionNumber The version number to read
-     * @param   ConnectionInterface $con The ConnectionInterface connection to use.
-     *
-     * @return  $this|ChildUserSearch The current object (for fluent API support)
-     */
-    public function toVersion($versionNumber, ConnectionInterface $con = null)
-    {
-        $version = $this->getOneVersion($versionNumber, $con);
-        if (!$version) {
-            throw new PropelException(sprintf('No ChildUserSearch object found with version %d', $version));
-        }
-        $this->populateFromVersion($version, $con);
-
-        return $this;
-    }
-
-    /**
-     * Sets the properties of the current object to the value they had at a specific version
-     *
-     * @param ChildUserSearchVersion $version The version object to use
-     * @param ConnectionInterface   $con the connection to use
-     * @param array                 $loadedObjects objects that been loaded in a chain of populateFromVersion calls on referrer or fk objects.
-     *
-     * @return $this|ChildUserSearch The current object (for fluent API support)
-     */
-    public function populateFromVersion($version, $con = null, &$loadedObjects = array())
-    {
-        $loadedObjects['ChildUserSearch'][$version->getUserSearchId()][$version->getVersion()] = $this;
-        $this->setUserSearchId($version->getUserSearchId());
-        $this->setUserId($version->getUserId());
-        $this->setGeoLocationId($version->getGeoLocationId());
-        $this->setUserSearchKey($version->getUserSearchKey());
-        $this->setKeywords($version->getKeywords());
-        $this->setKeywordTokens($version->getKeywordTokens());
-        $this->setSearchKeyFromConfig($version->getSearchKeyFromConfig());
-        $this->setCreatedAt($version->getCreatedAt());
-        $this->setUpdatedAt($version->getUpdatedAt());
-        $this->setLastCompletedAt($version->getLastCompletedAt());
-        $this->setVersion($version->getVersion());
-
-        return $this;
-    }
-
-    /**
-     * Gets the latest persisted version number for the current object
-     *
-     * @param   ConnectionInterface $con The ConnectionInterface connection to use.
-     *
-     * @return  integer
-     */
-    public function getLastVersionNumber(ConnectionInterface $con = null)
-    {
-        $v = ChildUserSearchVersionQuery::create()
-            ->filterByUserSearch($this)
-            ->orderByVersion('desc')
-            ->findOne($con);
-        if (!$v) {
-            return 0;
-        }
-
-        return $v->getVersion();
-    }
-
-    /**
-     * Checks whether the current object is the latest one
-     *
-     * @param   ConnectionInterface $con The ConnectionInterface connection to use.
-     *
-     * @return  Boolean
-     */
-    public function isLastVersion(ConnectionInterface $con = null)
-    {
-        return $this->getLastVersionNumber($con) == $this->getVersion();
-    }
-
-    /**
-     * Retrieves a version object for this entity and a version number
-     *
-     * @param   integer $versionNumber The version number to read
-     * @param   ConnectionInterface $con The ConnectionInterface connection to use.
-     *
-     * @return  ChildUserSearchVersion A version object
-     */
-    public function getOneVersion($versionNumber, ConnectionInterface $con = null)
-    {
-        return ChildUserSearchVersionQuery::create()
-            ->filterByUserSearch($this)
-            ->filterByVersion($versionNumber)
-            ->findOne($con);
-    }
-
-    /**
-     * Gets all the versions of this object, in incremental order
-     *
-     * @param   ConnectionInterface $con The ConnectionInterface connection to use.
-     *
-     * @return  ObjectCollection|ChildUserSearchVersion[] A list of ChildUserSearchVersion objects
-     */
-    public function getAllVersions(ConnectionInterface $con = null)
-    {
-        $criteria = new Criteria();
-        $criteria->addAscendingOrderByColumn(UserSearchVersionTableMap::COL_VERSION);
-
-        return $this->getUserSearchVersions($criteria, $con);
-    }
-
-    /**
-     * Compares the current object with another of its version.
-     * <code>
-     * print_r($book->compareVersion(1));
-     * => array(
-     *   '1' => array('Title' => 'Book title at version 1'),
-     *   '2' => array('Title' => 'Book title at version 2')
-     * );
-     * </code>
-     *
-     * @param   integer             $versionNumber
-     * @param   string              $keys Main key used for the result diff (versions|columns)
-     * @param   ConnectionInterface $con The ConnectionInterface connection to use.
-     * @param   array               $ignoredColumns  The columns to exclude from the diff.
-     *
-     * @return  array A list of differences
-     */
-    public function compareVersion($versionNumber, $keys = 'columns', ConnectionInterface $con = null, $ignoredColumns = array())
-    {
-        $fromVersion = $this->toArray();
-        $toVersion = $this->getOneVersion($versionNumber, $con)->toArray();
-
-        return $this->computeDiff($fromVersion, $toVersion, $keys, $ignoredColumns);
-    }
-
-    /**
-     * Compares two versions of the current object.
-     * <code>
-     * print_r($book->compareVersions(1, 2));
-     * => array(
-     *   '1' => array('Title' => 'Book title at version 1'),
-     *   '2' => array('Title' => 'Book title at version 2')
-     * );
-     * </code>
-     *
-     * @param   integer             $fromVersionNumber
-     * @param   integer             $toVersionNumber
-     * @param   string              $keys Main key used for the result diff (versions|columns)
-     * @param   ConnectionInterface $con The ConnectionInterface connection to use.
-     * @param   array               $ignoredColumns  The columns to exclude from the diff.
-     *
-     * @return  array A list of differences
-     */
-    public function compareVersions($fromVersionNumber, $toVersionNumber, $keys = 'columns', ConnectionInterface $con = null, $ignoredColumns = array())
-    {
-        $fromVersion = $this->getOneVersion($fromVersionNumber, $con)->toArray();
-        $toVersion = $this->getOneVersion($toVersionNumber, $con)->toArray();
-
-        return $this->computeDiff($fromVersion, $toVersion, $keys, $ignoredColumns);
-    }
-
-    /**
-     * Computes the diff between two versions.
-     * <code>
-     * print_r($book->computeDiff(1, 2));
-     * => array(
-     *   '1' => array('Title' => 'Book title at version 1'),
-     *   '2' => array('Title' => 'Book title at version 2')
-     * );
-     * </code>
-     *
-     * @param   array     $fromVersion     An array representing the original version.
-     * @param   array     $toVersion       An array representing the destination version.
-     * @param   string    $keys            Main key used for the result diff (versions|columns).
-     * @param   array     $ignoredColumns  The columns to exclude from the diff.
-     *
-     * @return  array A list of differences
-     */
-    protected function computeDiff($fromVersion, $toVersion, $keys = 'columns', $ignoredColumns = array())
-    {
-        $fromVersionNumber = $fromVersion['Version'];
-        $toVersionNumber = $toVersion['Version'];
-        $ignoredColumns = array_merge(array(
-            'Version',
-        ), $ignoredColumns);
-        $diff = array();
-        foreach ($fromVersion as $key => $value) {
-            if (in_array($key, $ignoredColumns)) {
-                continue;
-            }
-            if ($toVersion[$key] != $value) {
-                switch ($keys) {
-                    case 'versions':
-                        $diff[$fromVersionNumber][$key] = $value;
-                        $diff[$toVersionNumber][$key] = $toVersion[$key];
-                        break;
-                    default:
-                        $diff[$key] = array(
-                            $fromVersionNumber => $value,
-                            $toVersionNumber => $toVersion[$key],
-                        );
-                        break;
-                }
-            }
-        }
-
-        return $diff;
-    }
-    /**
-     * retrieve the last $number versions.
-     *
-     * @param  Integer             $number The number of record to return.
-     * @param  Criteria            $criteria The Criteria object containing modified values.
-     * @param  ConnectionInterface $con The ConnectionInterface connection to use.
-     *
-     * @return PropelCollection|\JobScooper\DataAccess\UserSearchVersion[] List of \JobScooper\DataAccess\UserSearchVersion objects
-     */
-    public function getLastVersions($number = 10, $criteria = null, ConnectionInterface $con = null)
-    {
-        $criteria = ChildUserSearchVersionQuery::create(null, $criteria);
-        $criteria->addDescendingOrderByColumn(UserSearchVersionTableMap::COL_VERSION);
-        $criteria->limit($number);
-
-        return $this->getUserSearchVersions($criteria, $con);
-    }
     /**
      * Code to be run before persisting the object
      * @param  ConnectionInterface $con

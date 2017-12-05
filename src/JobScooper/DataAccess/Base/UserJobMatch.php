@@ -64,16 +64,9 @@ abstract class UserJobMatch implements ActiveRecordInterface
     protected $virtualColumns = array();
 
     /**
-     * The value for the user_job_match_id field.
-     *
-     * @var        int
-     */
-    protected $user_job_match_id;
-
-    /**
      * The value for the user_id field.
      *
-     * @var        string
+     * @var        int
      */
     protected $user_id;
 
@@ -83,6 +76,13 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * @var        int
      */
     protected $jobposting_id;
+
+    /**
+     * The value for the user_job_match_id field.
+     *
+     * @var        int
+     */
+    protected $user_job_match_id;
 
     /**
      * The value for the user_notification_state field.
@@ -172,12 +172,12 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * @var        ChildUser
      */
-    protected $aUser;
+    protected $aUserFromUJM;
 
     /**
      * @var        ChildJobPosting
      */
-    protected $aJobPosting;
+    protected $aJobPostingFromUJM;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -426,19 +426,9 @@ abstract class UserJobMatch implements ActiveRecordInterface
     }
 
     /**
-     * Get the [user_job_match_id] column value.
-     *
-     * @return int
-     */
-    public function getUserJobMatchId()
-    {
-        return $this->user_job_match_id;
-    }
-
-    /**
      * Get the [user_id] column value.
      *
-     * @return string
+     * @return int
      */
     public function getUserId()
     {
@@ -453,6 +443,16 @@ abstract class UserJobMatch implements ActiveRecordInterface
     public function getJobPostingId()
     {
         return $this->jobposting_id;
+    }
+
+    /**
+     * Get the [user_job_match_id] column value.
+     *
+     * @return int
+     */
+    public function getUserJobMatchId()
+    {
+        return $this->user_job_match_id;
     }
 
     /**
@@ -652,35 +652,15 @@ abstract class UserJobMatch implements ActiveRecordInterface
     }
 
     /**
-     * Set the value of [user_job_match_id] column.
-     *
-     * @param int $v new value
-     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
-     */
-    public function setUserJobMatchId($v)
-    {
-        if ($v !== null) {
-            $v = (int) $v;
-        }
-
-        if ($this->user_job_match_id !== $v) {
-            $this->user_job_match_id = $v;
-            $this->modifiedColumns[UserJobMatchTableMap::COL_USER_JOB_MATCH_ID] = true;
-        }
-
-        return $this;
-    } // setUserJobMatchId()
-
-    /**
      * Set the value of [user_id] column.
      *
-     * @param string $v new value
+     * @param int $v new value
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setUserId($v)
     {
         if ($v !== null) {
-            $v = (string) $v;
+            $v = (int) $v;
         }
 
         if ($this->user_id !== $v) {
@@ -688,8 +668,8 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $this->modifiedColumns[UserJobMatchTableMap::COL_USER_ID] = true;
         }
 
-        if ($this->aUser !== null && $this->aUser->getUserId() !== $v) {
-            $this->aUser = null;
+        if ($this->aUserFromUJM !== null && $this->aUserFromUJM->getUserId() !== $v) {
+            $this->aUserFromUJM = null;
         }
 
         return $this;
@@ -712,12 +692,32 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $this->modifiedColumns[UserJobMatchTableMap::COL_JOBPOSTING_ID] = true;
         }
 
-        if ($this->aJobPosting !== null && $this->aJobPosting->getJobPostingId() !== $v) {
-            $this->aJobPosting = null;
+        if ($this->aJobPostingFromUJM !== null && $this->aJobPostingFromUJM->getJobPostingId() !== $v) {
+            $this->aJobPostingFromUJM = null;
         }
 
         return $this;
     } // setJobPostingId()
+
+    /**
+     * Set the value of [user_job_match_id] column.
+     *
+     * @param int $v new value
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     */
+    public function setUserJobMatchId($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->user_job_match_id !== $v) {
+            $this->user_job_match_id = $v;
+            $this->modifiedColumns[UserJobMatchTableMap::COL_USER_JOB_MATCH_ID] = true;
+        }
+
+        return $this;
+    } // setUserJobMatchId()
 
     /**
      * Set the value of [user_notification_state] column.
@@ -1069,14 +1069,14 @@ abstract class UserJobMatch implements ActiveRecordInterface
     {
         try {
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : UserJobMatchTableMap::translateFieldName('UserJobMatchId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->user_job_match_id = (null !== $col) ? (int) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : UserJobMatchTableMap::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->user_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : UserJobMatchTableMap::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->user_id = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : UserJobMatchTableMap::translateFieldName('JobPostingId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : UserJobMatchTableMap::translateFieldName('JobPostingId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->jobposting_id = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : UserJobMatchTableMap::translateFieldName('UserJobMatchId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->user_job_match_id = (null !== $col) ? (int) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : UserJobMatchTableMap::translateFieldName('UserNotificationState', TableMap::TYPE_PHPNAME, $indexType)];
             $this->user_notification_state = (null !== $col) ? (int) $col : null;
@@ -1137,11 +1137,11 @@ abstract class UserJobMatch implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
-        if ($this->aUser !== null && $this->user_id !== $this->aUser->getUserId()) {
-            $this->aUser = null;
+        if ($this->aUserFromUJM !== null && $this->user_id !== $this->aUserFromUJM->getUserId()) {
+            $this->aUserFromUJM = null;
         }
-        if ($this->aJobPosting !== null && $this->jobposting_id !== $this->aJobPosting->getJobPostingId()) {
-            $this->aJobPosting = null;
+        if ($this->aJobPostingFromUJM !== null && $this->jobposting_id !== $this->aJobPostingFromUJM->getJobPostingId()) {
+            $this->aJobPostingFromUJM = null;
         }
     } // ensureConsistency
 
@@ -1182,8 +1182,8 @@ abstract class UserJobMatch implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->aUser = null;
-            $this->aJobPosting = null;
+            $this->aUserFromUJM = null;
+            $this->aJobPostingFromUJM = null;
         } // if (deep)
     }
 
@@ -1292,18 +1292,18 @@ abstract class UserJobMatch implements ActiveRecordInterface
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
-            if ($this->aUser !== null) {
-                if ($this->aUser->isModified() || $this->aUser->isNew()) {
-                    $affectedRows += $this->aUser->save($con);
+            if ($this->aUserFromUJM !== null) {
+                if ($this->aUserFromUJM->isModified() || $this->aUserFromUJM->isNew()) {
+                    $affectedRows += $this->aUserFromUJM->save($con);
                 }
-                $this->setUser($this->aUser);
+                $this->setUserFromUJM($this->aUserFromUJM);
             }
 
-            if ($this->aJobPosting !== null) {
-                if ($this->aJobPosting->isModified() || $this->aJobPosting->isNew()) {
-                    $affectedRows += $this->aJobPosting->save($con);
+            if ($this->aJobPostingFromUJM !== null) {
+                if ($this->aJobPostingFromUJM->isModified() || $this->aJobPostingFromUJM->isNew()) {
+                    $affectedRows += $this->aJobPostingFromUJM->save($con);
                 }
-                $this->setJobPosting($this->aJobPosting);
+                $this->setJobPostingFromUJM($this->aJobPostingFromUJM);
             }
 
             if ($this->isNew() || $this->isModified()) {
@@ -1337,20 +1337,16 @@ abstract class UserJobMatch implements ActiveRecordInterface
         $modifiedColumns = array();
         $index = 0;
 
-        $this->modifiedColumns[UserJobMatchTableMap::COL_USER_JOB_MATCH_ID] = true;
-        if (null !== $this->user_job_match_id) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key (' . UserJobMatchTableMap::COL_USER_JOB_MATCH_ID . ')');
-        }
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'user_job_match_id';
-        }
         if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_ID)) {
             $modifiedColumns[':p' . $index++]  = 'user_id';
         }
         if ($this->isColumnModified(UserJobMatchTableMap::COL_JOBPOSTING_ID)) {
             $modifiedColumns[':p' . $index++]  = 'jobposting_id';
+        }
+        if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'user_job_match_id';
         }
         if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE)) {
             $modifiedColumns[':p' . $index++]  = 'user_notification_state';
@@ -1390,26 +1386,26 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $stmt = $con->prepare($sql);
             foreach ($modifiedColumns as $identifier => $columnName) {
                 switch ($columnName) {
-                    case 'user_job_match_id':
-                        $stmt->bindValue($identifier, $this->user_job_match_id, PDO::PARAM_INT);
-                        break;
                     case 'user_id':
-                        $stmt->bindValue($identifier, $this->user_id, PDO::PARAM_STR);
+                        $stmt->bindValue($identifier, $this->user_id, PDO::PARAM_INT);
                         break;
                     case 'jobposting_id':
                         $stmt->bindValue($identifier, $this->jobposting_id, PDO::PARAM_INT);
+                        break;
+                    case 'user_job_match_id':
+                        $stmt->bindValue($identifier, $this->user_job_match_id, PDO::PARAM_INT);
                         break;
                     case 'user_notification_state':
                         $stmt->bindValue($identifier, $this->user_notification_state, PDO::PARAM_INT);
                         break;
                     case 'is_job_match':
-                        $stmt->bindValue($identifier, $this->is_job_match, PDO::PARAM_BOOL);
+                        $stmt->bindValue($identifier, (int) $this->is_job_match, PDO::PARAM_INT);
                         break;
                     case 'is_excluded':
-                        $stmt->bindValue($identifier, $this->is_excluded, PDO::PARAM_BOOL);
+                        $stmt->bindValue($identifier, (int) $this->is_excluded, PDO::PARAM_INT);
                         break;
                     case 'is_include_in_notifications':
-                        $stmt->bindValue($identifier, $this->is_include_in_notifications, PDO::PARAM_BOOL);
+                        $stmt->bindValue($identifier, (int) $this->is_include_in_notifications, PDO::PARAM_INT);
                         break;
                     case 'matched_user_keywords':
                         $stmt->bindValue($identifier, $this->matched_user_keywords, PDO::PARAM_STR);
@@ -1421,7 +1417,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
                         $stmt->bindValue($identifier, $this->matched_negative_company_keywords, PDO::PARAM_STR);
                         break;
                     case 'out_of_user_area':
-                        $stmt->bindValue($identifier, $this->out_of_user_area, PDO::PARAM_BOOL);
+                        $stmt->bindValue($identifier, (int) $this->out_of_user_area, PDO::PARAM_INT);
                         break;
                     case 'app_run_id':
                         $stmt->bindValue($identifier, $this->app_run_id, PDO::PARAM_STR);
@@ -1439,7 +1435,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
         } catch (Exception $e) {
             throw new PropelException('Unable to get autoincrement id.', 0, $e);
         }
-        $this->setUserJobMatchId($pk);
+        $this->setUserId($pk);
 
         $this->setNew(false);
     }
@@ -1489,13 +1485,13 @@ abstract class UserJobMatch implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                return $this->getUserJobMatchId();
-                break;
-            case 1:
                 return $this->getUserId();
                 break;
-            case 2:
+            case 1:
                 return $this->getJobPostingId();
+                break;
+            case 2:
+                return $this->getUserJobMatchId();
                 break;
             case 3:
                 return $this->getUserNotificationState();
@@ -1554,9 +1550,9 @@ abstract class UserJobMatch implements ActiveRecordInterface
         $alreadyDumpedObjects['UserJobMatch'][$this->hashCode()] = true;
         $keys = UserJobMatchTableMap::getFieldNames($keyType);
         $result = array(
-            $keys[0] => $this->getUserJobMatchId(),
-            $keys[1] => $this->getUserId(),
-            $keys[2] => $this->getJobPostingId(),
+            $keys[0] => $this->getUserId(),
+            $keys[1] => $this->getJobPostingId(),
+            $keys[2] => $this->getUserJobMatchId(),
             $keys[3] => $this->getUserNotificationState(),
             $keys[4] => $this->getIsJobMatch(),
             $keys[5] => $this->getIsExcluded(),
@@ -1573,7 +1569,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->aUser) {
+            if (null !== $this->aUserFromUJM) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
@@ -1583,12 +1579,12 @@ abstract class UserJobMatch implements ActiveRecordInterface
                         $key = 'user';
                         break;
                     default:
-                        $key = 'User';
+                        $key = 'UserFromUJM';
                 }
 
-                $result[$key] = $this->aUser->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+                $result[$key] = $this->aUserFromUJM->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
-            if (null !== $this->aJobPosting) {
+            if (null !== $this->aJobPostingFromUJM) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
@@ -1598,10 +1594,10 @@ abstract class UserJobMatch implements ActiveRecordInterface
                         $key = 'jobposting';
                         break;
                     default:
-                        $key = 'JobPosting';
+                        $key = 'JobPostingFromUJM';
                 }
 
-                $result[$key] = $this->aJobPosting->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+                $result[$key] = $this->aJobPostingFromUJM->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
         }
 
@@ -1638,13 +1634,13 @@ abstract class UserJobMatch implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                $this->setUserJobMatchId($value);
-                break;
-            case 1:
                 $this->setUserId($value);
                 break;
-            case 2:
+            case 1:
                 $this->setJobPostingId($value);
+                break;
+            case 2:
+                $this->setUserJobMatchId($value);
                 break;
             case 3:
                 $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
@@ -1716,13 +1712,13 @@ abstract class UserJobMatch implements ActiveRecordInterface
         $keys = UserJobMatchTableMap::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) {
-            $this->setUserJobMatchId($arr[$keys[0]]);
+            $this->setUserId($arr[$keys[0]]);
         }
         if (array_key_exists($keys[1], $arr)) {
-            $this->setUserId($arr[$keys[1]]);
+            $this->setJobPostingId($arr[$keys[1]]);
         }
         if (array_key_exists($keys[2], $arr)) {
-            $this->setJobPostingId($arr[$keys[2]]);
+            $this->setUserJobMatchId($arr[$keys[2]]);
         }
         if (array_key_exists($keys[3], $arr)) {
             $this->setUserNotificationState($arr[$keys[3]]);
@@ -1792,14 +1788,14 @@ abstract class UserJobMatch implements ActiveRecordInterface
     {
         $criteria = new Criteria(UserJobMatchTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID)) {
-            $criteria->add(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, $this->user_job_match_id);
-        }
         if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_ID)) {
             $criteria->add(UserJobMatchTableMap::COL_USER_ID, $this->user_id);
         }
         if ($this->isColumnModified(UserJobMatchTableMap::COL_JOBPOSTING_ID)) {
             $criteria->add(UserJobMatchTableMap::COL_JOBPOSTING_ID, $this->jobposting_id);
+        }
+        if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID)) {
+            $criteria->add(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, $this->user_job_match_id);
         }
         if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE)) {
             $criteria->add(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE, $this->user_notification_state);
@@ -1845,7 +1841,8 @@ abstract class UserJobMatch implements ActiveRecordInterface
     public function buildPkeyCriteria()
     {
         $criteria = ChildUserJobMatchQuery::create();
-        $criteria->add(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, $this->user_job_match_id);
+        $criteria->add(UserJobMatchTableMap::COL_USER_ID, $this->user_id);
+        $criteria->add(UserJobMatchTableMap::COL_JOBPOSTING_ID, $this->jobposting_id);
 
         return $criteria;
     }
@@ -1858,10 +1855,25 @@ abstract class UserJobMatch implements ActiveRecordInterface
      */
     public function hashCode()
     {
-        $validPk = null !== $this->getUserJobMatchId();
+        $validPk = null !== $this->getUserId() &&
+            null !== $this->getJobPostingId();
 
-        $validPrimaryKeyFKs = 0;
+        $validPrimaryKeyFKs = 2;
         $primaryKeyFKs = [];
+
+        //relation user_job_match_fk_38da1e to table user
+        if ($this->aUserFromUJM && $hash = spl_object_hash($this->aUserFromUJM)) {
+            $primaryKeyFKs[] = $hash;
+        } else {
+            $validPrimaryKeyFKs = false;
+        }
+
+        //relation user_job_match_fk_dd5799 to table jobposting
+        if ($this->aJobPostingFromUJM && $hash = spl_object_hash($this->aJobPostingFromUJM)) {
+            $primaryKeyFKs[] = $hash;
+        } else {
+            $validPrimaryKeyFKs = false;
+        }
 
         if ($validPk) {
             return crc32(json_encode($this->getPrimaryKey(), JSON_UNESCAPED_UNICODE));
@@ -1873,23 +1885,29 @@ abstract class UserJobMatch implements ActiveRecordInterface
     }
 
     /**
-     * Returns the primary key for this object (row).
-     * @return int
+     * Returns the composite primary key for this object.
+     * The array elements will be in same order as specified in XML.
+     * @return array
      */
     public function getPrimaryKey()
     {
-        return $this->getUserJobMatchId();
+        $pks = array();
+        $pks[0] = $this->getUserId();
+        $pks[1] = $this->getJobPostingId();
+
+        return $pks;
     }
 
     /**
-     * Generic method to set the primary key (user_job_match_id column).
+     * Set the [composite] primary key.
      *
-     * @param       int $key Primary key.
+     * @param      array $keys The elements of the composite key (order must match the order in XML file).
      * @return void
      */
-    public function setPrimaryKey($key)
+    public function setPrimaryKey($keys)
     {
-        $this->setUserJobMatchId($key);
+        $this->setUserId($keys[0]);
+        $this->setJobPostingId($keys[1]);
     }
 
     /**
@@ -1898,7 +1916,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      */
     public function isPrimaryKeyNull()
     {
-        return null === $this->getUserJobMatchId();
+        return (null === $this->getUserId()) && (null === $this->getJobPostingId());
     }
 
     /**
@@ -1960,7 +1978,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setUser(ChildUser $v = null)
+    public function setUserFromUJM(ChildUser $v = null)
     {
         if ($v === null) {
             $this->setUserId(NULL);
@@ -1968,7 +1986,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $this->setUserId($v->getUserId());
         }
 
-        $this->aUser = $v;
+        $this->aUserFromUJM = $v;
 
         // Add binding for other direction of this n:n relationship.
         // If this object has already been added to the ChildUser object, it will not be re-added.
@@ -1988,20 +2006,20 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * @return ChildUser The associated ChildUser object.
      * @throws PropelException
      */
-    public function getUser(ConnectionInterface $con = null)
+    public function getUserFromUJM(ConnectionInterface $con = null)
     {
-        if ($this->aUser === null && (($this->user_id !== "" && $this->user_id !== null))) {
-            $this->aUser = ChildUserQuery::create()->findPk($this->user_id, $con);
+        if ($this->aUserFromUJM === null && ($this->user_id != 0)) {
+            $this->aUserFromUJM = ChildUserQuery::create()->findPk($this->user_id, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aUser->addUserJobMatches($this);
+                $this->aUserFromUJM->addUserJobMatches($this);
              */
         }
 
-        return $this->aUser;
+        return $this->aUserFromUJM;
     }
 
     /**
@@ -2011,7 +2029,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setJobPosting(ChildJobPosting $v = null)
+    public function setJobPostingFromUJM(ChildJobPosting $v = null)
     {
         if ($v === null) {
             $this->setJobPostingId(NULL);
@@ -2019,7 +2037,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $this->setJobPostingId($v->getJobPostingId());
         }
 
-        $this->aJobPosting = $v;
+        $this->aJobPostingFromUJM = $v;
 
         // Add binding for other direction of this n:n relationship.
         // If this object has already been added to the ChildJobPosting object, it will not be re-added.
@@ -2039,20 +2057,20 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * @return ChildJobPosting The associated ChildJobPosting object.
      * @throws PropelException
      */
-    public function getJobPosting(ConnectionInterface $con = null)
+    public function getJobPostingFromUJM(ConnectionInterface $con = null)
     {
-        if ($this->aJobPosting === null && ($this->jobposting_id != 0)) {
-            $this->aJobPosting = ChildJobPostingQuery::create()->findPk($this->jobposting_id, $con);
+        if ($this->aJobPostingFromUJM === null && ($this->jobposting_id != 0)) {
+            $this->aJobPostingFromUJM = ChildJobPostingQuery::create()->findPk($this->jobposting_id, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aJobPosting->addUserJobMatches($this);
+                $this->aJobPostingFromUJM->addUserJobMatches($this);
              */
         }
 
-        return $this->aJobPosting;
+        return $this->aJobPostingFromUJM;
     }
 
     /**
@@ -2062,15 +2080,15 @@ abstract class UserJobMatch implements ActiveRecordInterface
      */
     public function clear()
     {
-        if (null !== $this->aUser) {
-            $this->aUser->removeUserJobMatch($this);
+        if (null !== $this->aUserFromUJM) {
+            $this->aUserFromUJM->removeUserJobMatch($this);
         }
-        if (null !== $this->aJobPosting) {
-            $this->aJobPosting->removeUserJobMatch($this);
+        if (null !== $this->aJobPostingFromUJM) {
+            $this->aJobPostingFromUJM->removeUserJobMatch($this);
         }
-        $this->user_job_match_id = null;
         $this->user_id = null;
         $this->jobposting_id = null;
+        $this->user_job_match_id = null;
         $this->user_notification_state = null;
         $this->is_job_match = null;
         $this->is_excluded = null;
@@ -2104,8 +2122,8 @@ abstract class UserJobMatch implements ActiveRecordInterface
         if ($deep) {
         } // if ($deep)
 
-        $this->aUser = null;
-        $this->aJobPosting = null;
+        $this->aUserFromUJM = null;
+        $this->aJobPostingFromUJM = null;
     }
 
     /**

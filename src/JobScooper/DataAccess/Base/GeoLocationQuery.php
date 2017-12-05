@@ -74,7 +74,17 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildGeoLocationQuery rightJoinWithUserSearch() Adds a RIGHT JOIN clause and with to the query using the UserSearch relation
  * @method     ChildGeoLocationQuery innerJoinWithUserSearch() Adds a INNER JOIN clause and with to the query using the UserSearch relation
  *
- * @method     \JobScooper\DataAccess\JobPostingQuery|\JobScooper\DataAccess\UserSearchQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
+ * @method     ChildGeoLocationQuery leftJoinUserSearchSiteRun($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSearchSiteRun relation
+ * @method     ChildGeoLocationQuery rightJoinUserSearchSiteRun($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSearchSiteRun relation
+ * @method     ChildGeoLocationQuery innerJoinUserSearchSiteRun($relationAlias = null) Adds a INNER JOIN clause to the query using the UserSearchSiteRun relation
+ *
+ * @method     ChildGeoLocationQuery joinWithUserSearchSiteRun($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserSearchSiteRun relation
+ *
+ * @method     ChildGeoLocationQuery leftJoinWithUserSearchSiteRun() Adds a LEFT JOIN clause and with to the query using the UserSearchSiteRun relation
+ * @method     ChildGeoLocationQuery rightJoinWithUserSearchSiteRun() Adds a RIGHT JOIN clause and with to the query using the UserSearchSiteRun relation
+ * @method     ChildGeoLocationQuery innerJoinWithUserSearchSiteRun() Adds a INNER JOIN clause and with to the query using the UserSearchSiteRun relation
+ *
+ * @method     \JobScooper\DataAccess\JobPostingQuery|\JobScooper\DataAccess\UserSearchQuery|\JobScooper\DataAccess\UserSearchSiteRunQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildGeoLocation findOne(ConnectionInterface $con = null) Return the first ChildGeoLocation matching the query
  * @method     ChildGeoLocation findOneOrCreate(ConnectionInterface $con = null) Return the first ChildGeoLocation matching the query, or a new ChildGeoLocation object populated from the query conditions when no match is found
@@ -817,7 +827,7 @@ abstract class GeoLocationQuery extends ModelCriteria
      *
      * @return $this|ChildGeoLocationQuery The current query, for fluid interface
      */
-    public function joinUserSearch($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function joinUserSearch($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
         $relationMap = $tableMap->getRelation('UserSearch');
@@ -852,11 +862,135 @@ abstract class GeoLocationQuery extends ModelCriteria
      *
      * @return \JobScooper\DataAccess\UserSearchQuery A secondary query class using the current class as primary query
      */
-    public function useUserSearchQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function useUserSearchQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
             ->joinUserSearch($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'UserSearch', '\JobScooper\DataAccess\UserSearchQuery');
+    }
+
+    /**
+     * Filter the query by a related \JobScooper\DataAccess\UserSearchSiteRun object
+     *
+     * @param \JobScooper\DataAccess\UserSearchSiteRun|ObjectCollection $userSearchSiteRun the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildGeoLocationQuery The current query, for fluid interface
+     */
+    public function filterByUserSearchSiteRun($userSearchSiteRun, $comparison = null)
+    {
+        if ($userSearchSiteRun instanceof \JobScooper\DataAccess\UserSearchSiteRun) {
+            return $this
+                ->addUsingAlias(GeoLocationTableMap::COL_GEOLOCATION_ID, $userSearchSiteRun->getGeoLocationId(), $comparison);
+        } elseif ($userSearchSiteRun instanceof ObjectCollection) {
+            return $this
+                ->useUserSearchSiteRunQuery()
+                ->filterByPrimaryKeys($userSearchSiteRun->getPrimaryKeys())
+                ->endUse();
+        } else {
+            throw new PropelException('filterByUserSearchSiteRun() only accepts arguments of type \JobScooper\DataAccess\UserSearchSiteRun or Collection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the UserSearchSiteRun relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this|ChildGeoLocationQuery The current query, for fluid interface
+     */
+    public function joinUserSearchSiteRun($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('UserSearchSiteRun');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'UserSearchSiteRun');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the UserSearchSiteRun relation UserSearchSiteRun object
+     *
+     * @see useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return \JobScooper\DataAccess\UserSearchSiteRunQuery A secondary query class using the current class as primary query
+     */
+    public function useUserSearchSiteRunQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        return $this
+            ->joinUserSearchSiteRun($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'UserSearchSiteRun', '\JobScooper\DataAccess\UserSearchSiteRunQuery');
+    }
+
+    /**
+     * Filter the query by a related UserKeywordSet object
+     * using the user_search table as cross reference
+     *
+     * @param UserKeywordSet $userKeywordSet the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildGeoLocationQuery The current query, for fluid interface
+     */
+    public function filterByUserKeywordSetFromUS($userKeywordSet, $comparison = Criteria::EQUAL)
+    {
+        return $this
+            ->useUserSearchQuery()
+            ->filterByUserKeywordSetFromUS($userKeywordSet, $comparison)
+            ->endUse();
+    }
+
+    /**
+     * Filter the query by a related UserSearch object
+     * using the user_search_site_run table as cross reference
+     *
+     * @param UserSearch $userSearch the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildGeoLocationQuery The current query, for fluid interface
+     */
+    public function filterByUserSearchFromUSSR($userSearch, $comparison = Criteria::EQUAL)
+    {
+        return $this
+            ->useUserSearchSiteRunQuery()
+            ->filterByUserSearchFromUSSR($userSearch, $comparison)
+            ->endUse();
+    }
+
+    /**
+     * Filter the query by a related JobSiteRecord object
+     * using the user_search_site_run table as cross reference
+     *
+     * @param JobSiteRecord $jobSiteRecord the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildGeoLocationQuery The current query, for fluid interface
+     */
+    public function filterByJobSiteFromUSSR($jobSiteRecord, $comparison = Criteria::EQUAL)
+    {
+        return $this
+            ->useUserSearchSiteRunQuery()
+            ->filterByJobSiteFromUSSR($jobSiteRecord, $comparison)
+            ->endUse();
     }
 
     /**

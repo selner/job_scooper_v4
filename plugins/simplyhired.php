@@ -88,13 +88,13 @@ class PluginSimplyHired extends \JobScooper\Plugins\Classes\ServerHtmlPlugin
 
 
 
-    protected function getPageURLfromBaseFmt(\JobScooper\DataAccess\UserSearchRun $searchDetails, $nPage = null, $nItem = null)
+    protected function getPageURLfromBaseFmt(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails, $nPage = null, $nItem = null)
     {
         $searchDetailsBackup = $searchDetails->copy();
         $strURL = $this->_getSearchUrlFormat_($searchDetails, $nPage, $nItem);
 
 
-        $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($GLOBALS['USERDATA']['configuration_settings']['number_days']), $strURL);
+        $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($GLOBALS['JOBSCOOPER']['number_days']), $strURL);
         $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL);
         $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL);
         $strURL = str_ireplace(BASE_URL_TAG_KEYWORDS, $this->getKeywordURLValue($searchDetails), $strURL);
@@ -105,7 +105,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\Classes\ServerHtmlPlugin
         if (!$this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) && $nSubtermMatches > 0) {
             $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $this->getGeoLocationURLValue($searchDetails), $strURL);
             if ($strURL == null) {
-                throw new \ErrorException("Location value is required for " . $this->JobSiteName . ", but was not set for the search '" . $searchDetails->getUserSearchRunKey() . "'." . " Aborting all searches for " . $this->JobSiteName, \C__DISPLAY_ERROR__);
+                throw new \ErrorException("Location value is required for " . $this->JobSiteName . ", but was not set for the search '" . $searchDetails->getUserSearchSiteRunKey() . "'." . " Aborting all searches for " . $this->JobSiteName, \C__DISPLAY_ERROR__);
             }
         }
 
@@ -117,7 +117,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\Classes\ServerHtmlPlugin
             $locTypeNeeded = $this->getGeoLocationSettingType();
             if(empty($locTypeNeeded) || $locTypeNeeded == VALUE_NOT_SUPPORTED)
             {
-                $msg = "Failed to run search:  search is missing the required location type of " . $this->getGeoLocationSettingType() ." set.  Skipping search '". $searchDetails->getUserSearchRunKey() .".";
+                $msg = "Failed to run search:  search is missing the required location type of " . $this->getGeoLocationSettingType() ." set.  Skipping search '". $searchDetails->getUserSearchSiteRunKey() .".";
                 if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($msg, \C__DISPLAY_ERROR__);
                 throw new IndexOutOfBoundsException($msg);
             }
@@ -125,7 +125,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\Classes\ServerHtmlPlugin
             {
                 $strLocationValue = $loc->formatLocationByLocationType($locTypeNeeded);
                 if (empty($strLocationValue) || $strLocationValue == VALUE_NOT_SUPPORTED) {
-                    LogLine("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchRunKey() . ".", \C__DISPLAY_ITEM_DETAIL__);
+                    LogLine("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".", \C__DISPLAY_ITEM_DETAIL__);
                     return "";
                 }
                 $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $strLocationValue, $strURL);
@@ -133,7 +133,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\Classes\ServerHtmlPlugin
         }
 
         if($strURL == null) {
-            throw new ErrorException("Location value is required for " . $this->JobSiteName . ", but was not set for the search '" . $searchDetails->getUserSearchRunKey() ."'.". " Aborting all searches for ". $this->JobSiteName, \C__DISPLAY_ERROR__);
+            throw new ErrorException("Location value is required for " . $this->JobSiteName . ", but was not set for the search '" . $searchDetails->getUserSearchSiteRunKey() ."'.". " Aborting all searches for ". $this->JobSiteName, \C__DISPLAY_ERROR__);
         }
 
         $searchDetails = $searchDetailsBackup->copy();

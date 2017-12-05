@@ -205,9 +205,9 @@ class GeoLocationTableMap extends TableMap
         $this->addColumn('place', 'Place', 'VARCHAR', false, 100, null);
         $this->addColumn('county', 'County', 'VARCHAR', false, 100, null);
         $this->addColumn('region', 'Region', 'VARCHAR', false, 100, null);
-        $this->addColumn('regioncode', 'RegionCode', 'VARCHAR', false, 2, null);
+        $this->addColumn('regioncode', 'RegionCode', 'VARCHAR', false, 50, null);
         $this->addColumn('country', 'Country', 'VARCHAR', false, 100, null);
-        $this->addColumn('countrycode', 'CountryCode', 'VARCHAR', false, 2, null);
+        $this->addColumn('countrycode', 'CountryCode', 'VARCHAR', false, 5, null);
         $this->addColumn('latitude', 'Latitude', 'FLOAT', false, null, null);
         $this->addColumn('longitude', 'Longitude', 'FLOAT', false, null, null);
         $this->addColumn('alternate_names', 'AlternateNames', 'ARRAY', false, null, null);
@@ -232,6 +232,16 @@ class GeoLocationTableMap extends TableMap
     1 => ':geolocation_id',
   ),
 ), null, null, 'UserSearches', false);
+        $this->addRelation('UserSearchSiteRun', '\\JobScooper\\DataAccess\\UserSearchSiteRun', RelationMap::ONE_TO_MANY, array (
+  0 =>
+  array (
+    0 => ':geolocation_id',
+    1 => ':geolocation_id',
+  ),
+), 'CASCADE', null, 'UserSearchSiteRuns', false);
+        $this->addRelation('UserKeywordSetFromUS', '\\JobScooper\\DataAccess\\UserKeywordSet', RelationMap::MANY_TO_MANY, array(), null, null, 'UserKeywordSetFromuses');
+        $this->addRelation('UserSearchFromUSSR', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserSearchFromUSSRs');
+        $this->addRelation('JobSiteFromUSSR', '\\JobScooper\\DataAccess\\JobSiteRecord', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'JobSiteFromUSSRs');
     } // buildRelations()
 
     /**
@@ -246,6 +256,15 @@ class GeoLocationTableMap extends TableMap
             'geocodable' => array('auto_update' => 'false', 'latitude_column' => 'latitude', 'longitude_column' => 'longitude', 'type' => 'DOUBLE', 'size' => '11', 'scale' => '8', 'geocode_ip' => 'false', 'ip_column' => 'ip_address', 'geocode_address' => 'false', 'address_columns' => 'street,locality,region,postal_code,country', 'geocoder_provider' => '\Geocoder\Provider\OpenStreetMapProvider', 'geocoder_adapter' => '\Geocoder\HttpAdapter\CurlHttpAdapter', 'geocoder_api_key' => 'false', 'geocoder_api_key_provider' => 'false', ),
         );
     } // getBehaviors()
+    /**
+     * Method to invalidate the instance pool of all tables related to geolocation     * by a foreign key with ON DELETE CASCADE
+     */
+    public static function clearRelatedInstancePool()
+    {
+        // Invalidate objects in related instance pools,
+        // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
+        UserSearchSiteRunTableMap::clearInstancePool();
+    }
 
     /**
      * Retrieves a string version of the primary key from the DB resultset row that can be used to uniquely identify a row in this table.
@@ -510,10 +529,6 @@ class GeoLocationTableMap extends TableMap
             $criteria = clone $criteria; // rename for clarity
         } else {
             $criteria = $criteria->buildCriteria(); // build Criteria from GeoLocation object
-        }
-
-        if ($criteria->containsKey(GeoLocationTableMap::COL_GEOLOCATION_ID) && $criteria->keyContainsValue(GeoLocationTableMap::COL_GEOLOCATION_ID) ) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key ('.GeoLocationTableMap::COL_GEOLOCATION_ID.')');
         }
 
 

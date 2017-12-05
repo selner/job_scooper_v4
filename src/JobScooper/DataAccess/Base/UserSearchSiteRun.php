@@ -5,20 +5,23 @@ namespace JobScooper\DataAccess\Base;
 use \DateTime;
 use \Exception;
 use \PDO;
+use JobScooper\DataAccess\GeoLocation as ChildGeoLocation;
+use JobScooper\DataAccess\GeoLocationQuery as ChildGeoLocationQuery;
 use JobScooper\DataAccess\JobSiteRecord as ChildJobSiteRecord;
 use JobScooper\DataAccess\JobSiteRecordQuery as ChildJobSiteRecordQuery;
+use JobScooper\DataAccess\User as ChildUser;
+use JobScooper\DataAccess\UserKeywordSet as ChildUserKeywordSet;
+use JobScooper\DataAccess\UserKeywordSetQuery as ChildUserKeywordSetQuery;
+use JobScooper\DataAccess\UserQuery as ChildUserQuery;
 use JobScooper\DataAccess\UserSearch as ChildUserSearch;
 use JobScooper\DataAccess\UserSearchQuery as ChildUserSearchQuery;
-use JobScooper\DataAccess\UserSearchRun as ChildUserSearchRun;
-use JobScooper\DataAccess\UserSearchRunQuery as ChildUserSearchRunQuery;
-use JobScooper\DataAccess\Map\JobSiteRecordTableMap;
-use JobScooper\DataAccess\Map\UserSearchRunTableMap;
+use JobScooper\DataAccess\UserSearchSiteRunQuery as ChildUserSearchSiteRunQuery;
+use JobScooper\DataAccess\Map\UserSearchSiteRunTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Collection\Collection;
-use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\BadMethodCallException;
 use Propel\Runtime\Exception\LogicException;
@@ -28,18 +31,18 @@ use Propel\Runtime\Parser\AbstractParser;
 use Propel\Runtime\Util\PropelDateTime;
 
 /**
- * Base class that represents a row from the 'user_search_run' table.
+ * Base class that represents a row from the 'user_search_site_run' table.
  *
  *
  *
  * @package    propel.generator.JobScooper.DataAccess.Base
  */
-abstract class UserSearchRun implements ActiveRecordInterface
+abstract class UserSearchSiteRun implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      */
-    const TABLE_MAP = '\\JobScooper\\DataAccess\\Map\\UserSearchRunTableMap';
+    const TABLE_MAP = '\\JobScooper\\DataAccess\\Map\\UserSearchSiteRunTableMap';
 
 
     /**
@@ -69,11 +72,25 @@ abstract class UserSearchRun implements ActiveRecordInterface
     protected $virtualColumns = array();
 
     /**
-     * The value for the user_search_run_id field.
+     * The value for the user_id field.
      *
      * @var        int
      */
-    protected $user_search_run_id;
+    protected $user_id;
+
+    /**
+     * The value for the user_keyword_set_id field.
+     *
+     * @var        int
+     */
+    protected $user_keyword_set_id;
+
+    /**
+     * The value for the geolocation_id field.
+     *
+     * @var        int
+     */
+    protected $geolocation_id;
 
     /**
      * The value for the user_search_id field.
@@ -83,6 +100,13 @@ abstract class UserSearchRun implements ActiveRecordInterface
     protected $user_search_id;
 
     /**
+     * The value for the jobsite_key field.
+     *
+     * @var        string
+     */
+    protected $jobsite_key;
+
+    /**
      * The value for the app_run_id field.
      *
      * @var        string
@@ -90,18 +114,18 @@ abstract class UserSearchRun implements ActiveRecordInterface
     protected $app_run_id;
 
     /**
-     * The value for the user_search_run_key field.
+     * The value for the user_search_site_run_id field.
      *
-     * @var        string
+     * @var        int
      */
-    protected $user_search_run_key;
+    protected $user_search_site_run_id;
 
     /**
-     * The value for the jobsite_key field.
+     * The value for the user_search_site_run_key field.
      *
      * @var        string
      */
-    protected $jobsite_key;
+    protected $user_search_site_run_key;
 
     /**
      * The value for the search_start_url field.
@@ -149,18 +173,27 @@ abstract class UserSearchRun implements ActiveRecordInterface
     /**
      * @var        ChildUserSearch
      */
-    protected $aUserSearch;
+    protected $aUserSearchFromUSSR;
 
     /**
      * @var        ChildJobSiteRecord
      */
-    protected $aJobSiteRecordRelatedByJobSiteKey;
+    protected $aJobSiteFromUSSR;
 
     /**
-     * @var        ObjectCollection|ChildJobSiteRecord[] Collection to store aggregation of ChildJobSiteRecord objects.
+     * @var        ChildUser
      */
-    protected $collJobSiteRecordsRelatedByLastUserSearchRunId;
-    protected $collJobSiteRecordsRelatedByLastUserSearchRunIdPartial;
+    protected $aUserFromUSSR;
+
+    /**
+     * @var        ChildUserKeywordSet
+     */
+    protected $aUserKeywordSetFromUSSR;
+
+    /**
+     * @var        ChildGeoLocation
+     */
+    protected $aGeoLocationFromUSSR;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -169,48 +202,6 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * @var boolean
      */
     protected $alreadyInSave = false;
-
-    // aggregate_column_relation_date_last_pulled behavior
-    /**
-     * @var ChildJobSiteRecord
-     */
-    protected $oldJobSiteRecordRelatedByJobSiteKeyLastPulledAt;
-
-    // aggregate_column_relation_date_last_run behavior
-    /**
-     * @var ChildJobSiteRecord
-     */
-    protected $oldJobSiteRecordRelatedByJobSiteKeyLastRunAt;
-
-    // aggregate_column_relation_date_last_completed behavior
-    /**
-     * @var ChildJobSiteRecord
-     */
-    protected $oldJobSiteRecordRelatedByJobSiteKeyLastCompletedAt;
-
-    // aggregate_column_relation_date_last_failed behavior
-    /**
-     * @var ChildJobSiteRecord
-     */
-    protected $oldJobSiteRecordRelatedByJobSiteKeyLastFailedAt;
-
-    // aggregate_column_relation_aggregate_column behavior
-    /**
-     * @var ChildJobSiteRecord
-     */
-    protected $oldJobSiteRecordRelatedByJobSiteKeyLastUserSearchRunId;
-
-    // aggregate_column_relation_us_date_last_completed behavior
-    /**
-     * @var ChildUserSearch
-     */
-    protected $oldUserSearchLastCompletedAt;
-
-    /**
-     * An array of objects scheduled for deletion.
-     * @var ObjectCollection|ChildJobSiteRecord[]
-     */
-    protected $jobSiteRecordsRelatedByLastUserSearchRunIdScheduledForDeletion = null;
 
     /**
      * Applies default values to this object.
@@ -224,7 +215,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
     }
 
     /**
-     * Initializes internal state of JobScooper\DataAccess\Base\UserSearchRun object.
+     * Initializes internal state of JobScooper\DataAccess\Base\UserSearchSiteRun object.
      * @see applyDefaults()
      */
     public function __construct()
@@ -321,9 +312,9 @@ abstract class UserSearchRun implements ActiveRecordInterface
     }
 
     /**
-     * Compares this with another <code>UserSearchRun</code> instance.  If
-     * <code>obj</code> is an instance of <code>UserSearchRun</code>, delegates to
-     * <code>equals(UserSearchRun)</code>.  Otherwise, returns <code>false</code>.
+     * Compares this with another <code>UserSearchSiteRun</code> instance.  If
+     * <code>obj</code> is an instance of <code>UserSearchSiteRun</code>, delegates to
+     * <code>equals(UserSearchSiteRun)</code>.  Otherwise, returns <code>false</code>.
      *
      * @param  mixed   $obj The object to compare to.
      * @return boolean Whether equal to the object specified.
@@ -389,7 +380,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return $this|UserSearchRun The current object, for fluid interface
+     * @return $this|UserSearchSiteRun The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -451,13 +442,33 @@ abstract class UserSearchRun implements ActiveRecordInterface
     }
 
     /**
-     * Get the [user_search_run_id] column value.
+     * Get the [user_id] column value.
      *
      * @return int
      */
-    public function getUserSearchRunId()
+    public function getUserId()
     {
-        return $this->user_search_run_id;
+        return $this->user_id;
+    }
+
+    /**
+     * Get the [user_keyword_set_id] column value.
+     *
+     * @return int
+     */
+    public function getUserKeywordSetId()
+    {
+        return $this->user_keyword_set_id;
+    }
+
+    /**
+     * Get the [geolocation_id] column value.
+     *
+     * @return int
+     */
+    public function getGeoLocationId()
+    {
+        return $this->geolocation_id;
     }
 
     /**
@@ -471,6 +482,16 @@ abstract class UserSearchRun implements ActiveRecordInterface
     }
 
     /**
+     * Get the [jobsite_key] column value.
+     *
+     * @return string
+     */
+    public function getJobSiteKey()
+    {
+        return $this->jobsite_key;
+    }
+
+    /**
      * Get the [app_run_id] column value.
      *
      * @return string
@@ -481,23 +502,23 @@ abstract class UserSearchRun implements ActiveRecordInterface
     }
 
     /**
-     * Get the [user_search_run_key] column value.
+     * Get the [user_search_site_run_id] column value.
      *
-     * @return string
+     * @return int
      */
-    public function getUserSearchRunKey()
+    public function getUserSearchSiteRunId()
     {
-        return $this->user_search_run_key;
+        return $this->user_search_site_run_id;
     }
 
     /**
-     * Get the [jobsite_key] column value.
+     * Get the [user_search_site_run_key] column value.
      *
      * @return string
      */
-    public function getJobSiteKey()
+    public function getUserSearchSiteRunKey()
     {
-        return $this->jobsite_key;
+        return $this->user_search_site_run_key;
     }
 
     /**
@@ -521,7 +542,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
         if (null === $this->run_result_code) {
             return null;
         }
-        $valueSet = UserSearchRunTableMap::getValueSet(UserSearchRunTableMap::COL_RUN_RESULT_CODE);
+        $valueSet = UserSearchSiteRunTableMap::getValueSet(UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE);
         if (!isset($valueSet[$this->run_result_code])) {
             throw new PropelException('Unknown stored enum key: ' . $this->run_result_code);
         }
@@ -565,7 +586,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * @param      string $format The date/time format string (either date()-style or strftime()-style).
      *                            If format is NULL, then the raw DateTime object will be returned.
      *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
      */
@@ -585,7 +606,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * @param      string $format The date/time format string (either date()-style or strftime()-style).
      *                            If format is NULL, then the raw DateTime object will be returned.
      *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
      */
@@ -599,30 +620,98 @@ abstract class UserSearchRun implements ActiveRecordInterface
     }
 
     /**
-     * Set the value of [user_search_run_id] column.
+     * Set the value of [user_id] column.
      *
      * @param int $v new value
-     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
      */
-    public function setUserSearchRunId($v)
+    public function setUserId($v)
     {
         if ($v !== null) {
             $v = (int) $v;
         }
 
-        if ($this->user_search_run_id !== $v) {
-            $this->user_search_run_id = $v;
-            $this->modifiedColumns[UserSearchRunTableMap::COL_USER_SEARCH_RUN_ID] = true;
+        if ($this->user_id !== $v) {
+            $this->user_id = $v;
+            $this->modifiedColumns[UserSearchSiteRunTableMap::COL_USER_ID] = true;
+        }
+
+        if ($this->aUserSearchFromUSSR !== null && $this->aUserSearchFromUSSR->getUserId() !== $v) {
+            $this->aUserSearchFromUSSR = null;
+        }
+
+        if ($this->aUserFromUSSR !== null && $this->aUserFromUSSR->getUserId() !== $v) {
+            $this->aUserFromUSSR = null;
+        }
+
+        if ($this->aUserKeywordSetFromUSSR !== null && $this->aUserKeywordSetFromUSSR->getUserId() !== $v) {
+            $this->aUserKeywordSetFromUSSR = null;
         }
 
         return $this;
-    } // setUserSearchRunId()
+    } // setUserId()
+
+    /**
+     * Set the value of [user_keyword_set_id] column.
+     *
+     * @param int $v new value
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
+     */
+    public function setUserKeywordSetId($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->user_keyword_set_id !== $v) {
+            $this->user_keyword_set_id = $v;
+            $this->modifiedColumns[UserSearchSiteRunTableMap::COL_USER_KEYWORD_SET_ID] = true;
+        }
+
+        if ($this->aUserSearchFromUSSR !== null && $this->aUserSearchFromUSSR->getUserKeywordSetId() !== $v) {
+            $this->aUserSearchFromUSSR = null;
+        }
+
+        if ($this->aUserKeywordSetFromUSSR !== null && $this->aUserKeywordSetFromUSSR->getUserKeywordSetId() !== $v) {
+            $this->aUserKeywordSetFromUSSR = null;
+        }
+
+        return $this;
+    } // setUserKeywordSetId()
+
+    /**
+     * Set the value of [geolocation_id] column.
+     *
+     * @param int $v new value
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
+     */
+    public function setGeoLocationId($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->geolocation_id !== $v) {
+            $this->geolocation_id = $v;
+            $this->modifiedColumns[UserSearchSiteRunTableMap::COL_GEOLOCATION_ID] = true;
+        }
+
+        if ($this->aUserSearchFromUSSR !== null && $this->aUserSearchFromUSSR->getGeoLocationId() !== $v) {
+            $this->aUserSearchFromUSSR = null;
+        }
+
+        if ($this->aGeoLocationFromUSSR !== null && $this->aGeoLocationFromUSSR->getGeoLocationId() !== $v) {
+            $this->aGeoLocationFromUSSR = null;
+        }
+
+        return $this;
+    } // setGeoLocationId()
 
     /**
      * Set the value of [user_search_id] column.
      *
      * @param int $v new value
-     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
      */
     public function setUserSearchId($v)
     {
@@ -632,61 +721,21 @@ abstract class UserSearchRun implements ActiveRecordInterface
 
         if ($this->user_search_id !== $v) {
             $this->user_search_id = $v;
-            $this->modifiedColumns[UserSearchRunTableMap::COL_USER_SEARCH_ID] = true;
+            $this->modifiedColumns[UserSearchSiteRunTableMap::COL_USER_SEARCH_ID] = true;
         }
 
-        if ($this->aUserSearch !== null && $this->aUserSearch->getUserSearchId() !== $v) {
-            $this->aUserSearch = null;
+        if ($this->aUserSearchFromUSSR !== null && $this->aUserSearchFromUSSR->getUserSearchId() !== $v) {
+            $this->aUserSearchFromUSSR = null;
         }
 
         return $this;
     } // setUserSearchId()
 
     /**
-     * Set the value of [app_run_id] column.
-     *
-     * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
-     */
-    public function setAppRunId($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->app_run_id !== $v) {
-            $this->app_run_id = $v;
-            $this->modifiedColumns[UserSearchRunTableMap::COL_APP_RUN_ID] = true;
-        }
-
-        return $this;
-    } // setAppRunId()
-
-    /**
-     * Set the value of [user_search_run_key] column.
-     *
-     * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
-     */
-    public function setUserSearchRunKey($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->user_search_run_key !== $v) {
-            $this->user_search_run_key = $v;
-            $this->modifiedColumns[UserSearchRunTableMap::COL_USER_SEARCH_RUN_KEY] = true;
-        }
-
-        return $this;
-    } // setUserSearchRunKey()
-
-    /**
      * Set the value of [jobsite_key] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
      */
     public function setJobSiteKey($v)
     {
@@ -696,21 +745,81 @@ abstract class UserSearchRun implements ActiveRecordInterface
 
         if ($this->jobsite_key !== $v) {
             $this->jobsite_key = $v;
-            $this->modifiedColumns[UserSearchRunTableMap::COL_JOBSITE_KEY] = true;
+            $this->modifiedColumns[UserSearchSiteRunTableMap::COL_JOBSITE_KEY] = true;
         }
 
-        if ($this->aJobSiteRecordRelatedByJobSiteKey !== null && $this->aJobSiteRecordRelatedByJobSiteKey->getJobSiteKey() !== $v) {
-            $this->aJobSiteRecordRelatedByJobSiteKey = null;
+        if ($this->aJobSiteFromUSSR !== null && $this->aJobSiteFromUSSR->getJobSiteKey() !== $v) {
+            $this->aJobSiteFromUSSR = null;
         }
 
         return $this;
     } // setJobSiteKey()
 
     /**
+     * Set the value of [app_run_id] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
+     */
+    public function setAppRunId($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->app_run_id !== $v) {
+            $this->app_run_id = $v;
+            $this->modifiedColumns[UserSearchSiteRunTableMap::COL_APP_RUN_ID] = true;
+        }
+
+        return $this;
+    } // setAppRunId()
+
+    /**
+     * Set the value of [user_search_site_run_id] column.
+     *
+     * @param int $v new value
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
+     */
+    public function setUserSearchSiteRunId($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->user_search_site_run_id !== $v) {
+            $this->user_search_site_run_id = $v;
+            $this->modifiedColumns[UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID] = true;
+        }
+
+        return $this;
+    } // setUserSearchSiteRunId()
+
+    /**
+     * Set the value of [user_search_site_run_key] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
+     */
+    public function setUserSearchSiteRunKey($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->user_search_site_run_key !== $v) {
+            $this->user_search_site_run_key = $v;
+            $this->modifiedColumns[UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_KEY] = true;
+        }
+
+        return $this;
+    } // setUserSearchSiteRunKey()
+
+    /**
      * Set the value of [search_start_url] column.
      *
      * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
      */
     public function setSearchStartUrl($v)
     {
@@ -720,7 +829,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
 
         if ($this->search_start_url !== $v) {
             $this->search_start_url = $v;
-            $this->modifiedColumns[UserSearchRunTableMap::COL_SEARCH_START_URL] = true;
+            $this->modifiedColumns[UserSearchSiteRunTableMap::COL_SEARCH_START_URL] = true;
         }
 
         return $this;
@@ -730,13 +839,13 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * Set the value of [run_result_code] column.
      *
      * @param  string $v new value
-     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
      * @throws \Propel\Runtime\Exception\PropelException
      */
     public function setRunResultCode($v)
     {
         if ($v !== null) {
-            $valueSet = UserSearchRunTableMap::getValueSet(UserSearchRunTableMap::COL_RUN_RESULT_CODE);
+            $valueSet = UserSearchSiteRunTableMap::getValueSet(UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE);
             if (!in_array($v, $valueSet)) {
                 throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $v));
             }
@@ -745,7 +854,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
 
         if ($this->run_result_code !== $v) {
             $this->run_result_code = $v;
-            $this->modifiedColumns[UserSearchRunTableMap::COL_RUN_RESULT_CODE] = true;
+            $this->modifiedColumns[UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE] = true;
         }
 
         return $this;
@@ -755,14 +864,14 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * Set the value of [run_error_details] column.
      *
      * @param array $v new value
-     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
      */
     public function setRunErrorDetails($v)
     {
         if ($this->run_error_details_unserialized !== $v) {
             $this->run_error_details_unserialized = $v;
             $this->run_error_details = '| ' . implode(' | ', $v) . ' |';
-            $this->modifiedColumns[UserSearchRunTableMap::COL_RUN_ERROR_DETAILS] = true;
+            $this->modifiedColumns[UserSearchSiteRunTableMap::COL_RUN_ERROR_DETAILS] = true;
         }
 
         return $this;
@@ -772,7 +881,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * Adds a value to the [run_error_details] array column value.
      * @param  mixed $value
      *
-     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
      */
     public function addRunErrorDetail($value)
     {
@@ -787,7 +896,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * Removes a value from the [run_error_details] array column value.
      * @param  mixed $value
      *
-     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
      */
     public function removeRunErrorDetail($value)
     {
@@ -807,7 +916,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
      *
      * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
      *               Empty strings are treated as NULL.
-     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
      */
     public function setStartedAt($v)
     {
@@ -815,7 +924,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
         if ($this->date_started !== null || $dt !== null) {
             if ($this->date_started === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->date_started->format("Y-m-d H:i:s.u")) {
                 $this->date_started = $dt === null ? null : clone $dt;
-                $this->modifiedColumns[UserSearchRunTableMap::COL_DATE_STARTED] = true;
+                $this->modifiedColumns[UserSearchSiteRunTableMap::COL_DATE_STARTED] = true;
             }
         } // if either are not null
 
@@ -827,7 +936,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
      *
      * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
      *               Empty strings are treated as NULL.
-     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
      */
     public function setEndedAt($v)
     {
@@ -835,7 +944,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
         if ($this->date_ended !== null || $dt !== null) {
             if ($this->date_ended === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->date_ended->format("Y-m-d H:i:s.u")) {
                 $this->date_ended = $dt === null ? null : clone $dt;
-                $this->modifiedColumns[UserSearchRunTableMap::COL_DATE_ENDED] = true;
+                $this->modifiedColumns[UserSearchSiteRunTableMap::COL_DATE_ENDED] = true;
             }
         } // if either are not null
 
@@ -882,35 +991,50 @@ abstract class UserSearchRun implements ActiveRecordInterface
     {
         try {
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : UserSearchRunTableMap::translateFieldName('UserSearchRunId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->user_search_run_id = (null !== $col) ? (int) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : UserSearchSiteRunTableMap::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->user_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : UserSearchRunTableMap::translateFieldName('UserSearchId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : UserSearchSiteRunTableMap::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->user_keyword_set_id = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : UserSearchSiteRunTableMap::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->geolocation_id = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : UserSearchSiteRunTableMap::translateFieldName('UserSearchId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->user_search_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : UserSearchRunTableMap::translateFieldName('AppRunId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->app_run_id = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : UserSearchRunTableMap::translateFieldName('UserSearchRunKey', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->user_search_run_key = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserSearchRunTableMap::translateFieldName('JobSiteKey', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserSearchSiteRunTableMap::translateFieldName('JobSiteKey', TableMap::TYPE_PHPNAME, $indexType)];
             $this->jobsite_key = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserSearchRunTableMap::translateFieldName('SearchStartUrl', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserSearchSiteRunTableMap::translateFieldName('AppRunId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->app_run_id = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserSearchSiteRunTableMap::translateFieldName('UserSearchSiteRunId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->user_search_site_run_id = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : UserSearchSiteRunTableMap::translateFieldName('UserSearchSiteRunKey', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->user_search_site_run_key = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : UserSearchSiteRunTableMap::translateFieldName('SearchStartUrl', TableMap::TYPE_PHPNAME, $indexType)];
             $this->search_start_url = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserSearchRunTableMap::translateFieldName('RunResultCode', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : UserSearchSiteRunTableMap::translateFieldName('RunResultCode', TableMap::TYPE_PHPNAME, $indexType)];
             $this->run_result_code = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : UserSearchRunTableMap::translateFieldName('RunErrorDetails', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : UserSearchSiteRunTableMap::translateFieldName('RunErrorDetails', TableMap::TYPE_PHPNAME, $indexType)];
             $this->run_error_details = $col;
             $this->run_error_details_unserialized = null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : UserSearchRunTableMap::translateFieldName('StartedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : UserSearchSiteRunTableMap::translateFieldName('StartedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00 00:00:00') {
+                $col = null;
+            }
             $this->date_started = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : UserSearchRunTableMap::translateFieldName('EndedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : UserSearchSiteRunTableMap::translateFieldName('EndedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00 00:00:00') {
+                $col = null;
+            }
             $this->date_ended = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
             $this->resetModified();
 
@@ -920,10 +1044,10 @@ abstract class UserSearchRun implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 10; // 10 = UserSearchRunTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 13; // 13 = UserSearchSiteRunTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\UserSearchRun'), 0, $e);
+            throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\UserSearchSiteRun'), 0, $e);
         }
     }
 
@@ -942,11 +1066,32 @@ abstract class UserSearchRun implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
-        if ($this->aUserSearch !== null && $this->user_search_id !== $this->aUserSearch->getUserSearchId()) {
-            $this->aUserSearch = null;
+        if ($this->aUserSearchFromUSSR !== null && $this->user_id !== $this->aUserSearchFromUSSR->getUserId()) {
+            $this->aUserSearchFromUSSR = null;
         }
-        if ($this->aJobSiteRecordRelatedByJobSiteKey !== null && $this->jobsite_key !== $this->aJobSiteRecordRelatedByJobSiteKey->getJobSiteKey()) {
-            $this->aJobSiteRecordRelatedByJobSiteKey = null;
+        if ($this->aUserFromUSSR !== null && $this->user_id !== $this->aUserFromUSSR->getUserId()) {
+            $this->aUserFromUSSR = null;
+        }
+        if ($this->aUserKeywordSetFromUSSR !== null && $this->user_id !== $this->aUserKeywordSetFromUSSR->getUserId()) {
+            $this->aUserKeywordSetFromUSSR = null;
+        }
+        if ($this->aUserSearchFromUSSR !== null && $this->user_keyword_set_id !== $this->aUserSearchFromUSSR->getUserKeywordSetId()) {
+            $this->aUserSearchFromUSSR = null;
+        }
+        if ($this->aUserKeywordSetFromUSSR !== null && $this->user_keyword_set_id !== $this->aUserKeywordSetFromUSSR->getUserKeywordSetId()) {
+            $this->aUserKeywordSetFromUSSR = null;
+        }
+        if ($this->aUserSearchFromUSSR !== null && $this->geolocation_id !== $this->aUserSearchFromUSSR->getGeoLocationId()) {
+            $this->aUserSearchFromUSSR = null;
+        }
+        if ($this->aGeoLocationFromUSSR !== null && $this->geolocation_id !== $this->aGeoLocationFromUSSR->getGeoLocationId()) {
+            $this->aGeoLocationFromUSSR = null;
+        }
+        if ($this->aUserSearchFromUSSR !== null && $this->user_search_id !== $this->aUserSearchFromUSSR->getUserSearchId()) {
+            $this->aUserSearchFromUSSR = null;
+        }
+        if ($this->aJobSiteFromUSSR !== null && $this->jobsite_key !== $this->aJobSiteFromUSSR->getJobSiteKey()) {
+            $this->aJobSiteFromUSSR = null;
         }
     } // ensureConsistency
 
@@ -971,13 +1116,13 @@ abstract class UserSearchRun implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(UserSearchRunTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getReadConnection(UserSearchSiteRunTableMap::DATABASE_NAME);
         }
 
         // We don't need to alter the object instance pool; we're just modifying this instance
         // already in the pool.
 
-        $dataFetcher = ChildUserSearchRunQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
+        $dataFetcher = ChildUserSearchSiteRunQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
         $row = $dataFetcher->fetch();
         $dataFetcher->close();
         if (!$row) {
@@ -987,10 +1132,11 @@ abstract class UserSearchRun implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->aUserSearch = null;
-            $this->aJobSiteRecordRelatedByJobSiteKey = null;
-            $this->collJobSiteRecordsRelatedByLastUserSearchRunId = null;
-
+            $this->aUserSearchFromUSSR = null;
+            $this->aJobSiteFromUSSR = null;
+            $this->aUserFromUSSR = null;
+            $this->aUserKeywordSetFromUSSR = null;
+            $this->aGeoLocationFromUSSR = null;
         } // if (deep)
     }
 
@@ -1000,8 +1146,8 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * @param      ConnectionInterface $con
      * @return void
      * @throws PropelException
-     * @see UserSearchRun::setDeleted()
-     * @see UserSearchRun::isDeleted()
+     * @see UserSearchSiteRun::setDeleted()
+     * @see UserSearchSiteRun::isDeleted()
      */
     public function delete(ConnectionInterface $con = null)
     {
@@ -1010,11 +1156,11 @@ abstract class UserSearchRun implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(UserSearchRunTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(UserSearchSiteRunTableMap::DATABASE_NAME);
         }
 
         $con->transaction(function () use ($con) {
-            $deleteQuery = ChildUserSearchRunQuery::create()
+            $deleteQuery = ChildUserSearchSiteRunQuery::create()
                 ->filterByPrimaryKey($this->getPrimaryKey());
             $ret = $this->preDelete($con);
             if ($ret) {
@@ -1037,10 +1183,6 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * be reloaded from the database if an UPDATE operation is performed (unless
      * the $skipReload parameter is TRUE).
      *
-     * Since this table was configured to reload rows on insert, the object will
-     * be reloaded from the database if an INSERT operation is performed (unless
-     * the $skipReload parameter is TRUE).
-     *
      * @param      ConnectionInterface $con
      * @param      boolean $skipReload Whether to skip the reload for this object from database.
      * @return int             The number of rows affected by this insert/update and any referring fk objects' save() operations.
@@ -1058,7 +1200,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(UserSearchRunTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(UserSearchSiteRunTableMap::DATABASE_NAME);
         }
 
         return $con->transaction(function () use ($con, $skipReload) {
@@ -1066,10 +1208,10 @@ abstract class UserSearchRun implements ActiveRecordInterface
             $isInsert = $this->isNew();
             // sluggable behavior
 
-            if ($this->isColumnModified(UserSearchRunTableMap::COL_USER_SEARCH_RUN_KEY) && $this->getUserSearchRunKey()) {
-                $this->setUserSearchRunKey($this->makeSlugUnique($this->getUserSearchRunKey()));
-            } else {
-                $this->setUserSearchRunKey($this->createSlug());
+            if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_KEY) && $this->getUserSearchSiteRunKey()) {
+                $this->setUserSearchSiteRunKey($this->makeSlugUnique($this->getUserSearchSiteRunKey()));
+            } elseif (!$this->getUserSearchSiteRunKey()) {
+                $this->setUserSearchSiteRunKey($this->createSlug());
             }
             if ($isInsert) {
                 $ret = $ret && $this->preInsert($con);
@@ -1084,19 +1226,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                // aggregate_column_relation_date_last_pulled behavior
-                $this->updateRelatedJobSiteRecordRelatedByJobSiteKeyLastPulledAt($con);
-                // aggregate_column_relation_date_last_run behavior
-                $this->updateRelatedJobSiteRecordRelatedByJobSiteKeyLastRunAt($con);
-                // aggregate_column_relation_date_last_completed behavior
-                $this->updateRelatedJobSiteRecordRelatedByJobSiteKeyLastCompletedAt($con);
-                // aggregate_column_relation_date_last_failed behavior
-                $this->updateRelatedJobSiteRecordRelatedByJobSiteKeyLastFailedAt($con);
-                // aggregate_column_relation_aggregate_column behavior
-                $this->updateRelatedJobSiteRecordRelatedByJobSiteKeyLastUserSearchRunId($con);
-                // aggregate_column_relation_us_date_last_completed behavior
-                $this->updateRelatedUserSearchLastCompletedAt($con);
-                UserSearchRunTableMap::addInstanceToPool($this);
+                UserSearchSiteRunTableMap::addInstanceToPool($this);
             } else {
                 $affectedRows = 0;
             }
@@ -1130,18 +1260,39 @@ abstract class UserSearchRun implements ActiveRecordInterface
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
-            if ($this->aUserSearch !== null) {
-                if ($this->aUserSearch->isModified() || $this->aUserSearch->isNew()) {
-                    $affectedRows += $this->aUserSearch->save($con);
+            if ($this->aUserSearchFromUSSR !== null) {
+                if ($this->aUserSearchFromUSSR->isModified() || $this->aUserSearchFromUSSR->isNew()) {
+                    $affectedRows += $this->aUserSearchFromUSSR->save($con);
                 }
-                $this->setUserSearch($this->aUserSearch);
+                $this->setUserSearchFromUSSR($this->aUserSearchFromUSSR);
             }
 
-            if ($this->aJobSiteRecordRelatedByJobSiteKey !== null) {
-                if ($this->aJobSiteRecordRelatedByJobSiteKey->isModified() || $this->aJobSiteRecordRelatedByJobSiteKey->isNew()) {
-                    $affectedRows += $this->aJobSiteRecordRelatedByJobSiteKey->save($con);
+            if ($this->aJobSiteFromUSSR !== null) {
+                if ($this->aJobSiteFromUSSR->isModified() || $this->aJobSiteFromUSSR->isNew()) {
+                    $affectedRows += $this->aJobSiteFromUSSR->save($con);
                 }
-                $this->setJobSiteRecordRelatedByJobSiteKey($this->aJobSiteRecordRelatedByJobSiteKey);
+                $this->setJobSiteFromUSSR($this->aJobSiteFromUSSR);
+            }
+
+            if ($this->aUserFromUSSR !== null) {
+                if ($this->aUserFromUSSR->isModified() || $this->aUserFromUSSR->isNew()) {
+                    $affectedRows += $this->aUserFromUSSR->save($con);
+                }
+                $this->setUserFromUSSR($this->aUserFromUSSR);
+            }
+
+            if ($this->aUserKeywordSetFromUSSR !== null) {
+                if ($this->aUserKeywordSetFromUSSR->isModified() || $this->aUserKeywordSetFromUSSR->isNew()) {
+                    $affectedRows += $this->aUserKeywordSetFromUSSR->save($con);
+                }
+                $this->setUserKeywordSetFromUSSR($this->aUserKeywordSetFromUSSR);
+            }
+
+            if ($this->aGeoLocationFromUSSR !== null) {
+                if ($this->aGeoLocationFromUSSR->isModified() || $this->aGeoLocationFromUSSR->isNew()) {
+                    $affectedRows += $this->aGeoLocationFromUSSR->save($con);
+                }
+                $this->setGeoLocationFromUSSR($this->aGeoLocationFromUSSR);
             }
 
             if ($this->isNew() || $this->isModified()) {
@@ -1149,9 +1300,6 @@ abstract class UserSearchRun implements ActiveRecordInterface
                 if ($this->isNew()) {
                     $this->doInsert($con);
                     $affectedRows += 1;
-                    if (!$skipReload) {
-                        $reloadObject = true;
-                    }
                 } else {
                     $affectedRows += $this->doUpdate($con);
                     if (!$skipReload) {
@@ -1159,24 +1307,6 @@ abstract class UserSearchRun implements ActiveRecordInterface
                     }
                 }
                 $this->resetModified();
-            }
-
-            if ($this->jobSiteRecordsRelatedByLastUserSearchRunIdScheduledForDeletion !== null) {
-                if (!$this->jobSiteRecordsRelatedByLastUserSearchRunIdScheduledForDeletion->isEmpty()) {
-                    foreach ($this->jobSiteRecordsRelatedByLastUserSearchRunIdScheduledForDeletion as $jobSiteRecordRelatedByLastUserSearchRunId) {
-                        // need to save related object because we set the relation to null
-                        $jobSiteRecordRelatedByLastUserSearchRunId->save($con);
-                    }
-                    $this->jobSiteRecordsRelatedByLastUserSearchRunIdScheduledForDeletion = null;
-                }
-            }
-
-            if ($this->collJobSiteRecordsRelatedByLastUserSearchRunId !== null) {
-                foreach ($this->collJobSiteRecordsRelatedByLastUserSearchRunId as $referrerFK) {
-                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
-                        $affectedRows += $referrerFK->save($con);
-                    }
-                }
             }
 
             $this->alreadyInSave = false;
@@ -1203,45 +1333,50 @@ abstract class UserSearchRun implements ActiveRecordInterface
         $modifiedColumns = array();
         $index = 0;
 
-        $this->modifiedColumns[UserSearchRunTableMap::COL_USER_SEARCH_RUN_ID] = true;
-        if (null !== $this->user_search_run_id) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key (' . UserSearchRunTableMap::COL_USER_SEARCH_RUN_ID . ')');
-        }
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_USER_SEARCH_RUN_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'user_search_run_id';
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'user_id';
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_USER_SEARCH_ID)) {
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_KEYWORD_SET_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'user_keyword_set_id';
+        }
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_GEOLOCATION_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'geolocation_id';
+        }
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_SEARCH_ID)) {
             $modifiedColumns[':p' . $index++]  = 'user_search_id';
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_APP_RUN_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'app_run_id';
-        }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_USER_SEARCH_RUN_KEY)) {
-            $modifiedColumns[':p' . $index++]  = 'user_search_run_key';
-        }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_JOBSITE_KEY)) {
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_JOBSITE_KEY)) {
             $modifiedColumns[':p' . $index++]  = 'jobsite_key';
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_SEARCH_START_URL)) {
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_APP_RUN_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'app_run_id';
+        }
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'user_search_site_run_id';
+        }
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_KEY)) {
+            $modifiedColumns[':p' . $index++]  = 'user_search_site_run_key';
+        }
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_SEARCH_START_URL)) {
             $modifiedColumns[':p' . $index++]  = 'search_start_url';
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_RUN_RESULT_CODE)) {
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE)) {
             $modifiedColumns[':p' . $index++]  = 'run_result_code';
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_RUN_ERROR_DETAILS)) {
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_RUN_ERROR_DETAILS)) {
             $modifiedColumns[':p' . $index++]  = 'run_error_details';
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_DATE_STARTED)) {
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_DATE_STARTED)) {
             $modifiedColumns[':p' . $index++]  = 'date_started';
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_DATE_ENDED)) {
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_DATE_ENDED)) {
             $modifiedColumns[':p' . $index++]  = 'date_ended';
         }
 
         $sql = sprintf(
-            'INSERT INTO user_search_run (%s) VALUES (%s)',
+            'INSERT INTO user_search_site_run (%s) VALUES (%s)',
             implode(', ', $modifiedColumns),
             implode(', ', array_keys($modifiedColumns))
         );
@@ -1250,20 +1385,29 @@ abstract class UserSearchRun implements ActiveRecordInterface
             $stmt = $con->prepare($sql);
             foreach ($modifiedColumns as $identifier => $columnName) {
                 switch ($columnName) {
-                    case 'user_search_run_id':
-                        $stmt->bindValue($identifier, $this->user_search_run_id, PDO::PARAM_INT);
+                    case 'user_id':
+                        $stmt->bindValue($identifier, $this->user_id, PDO::PARAM_INT);
+                        break;
+                    case 'user_keyword_set_id':
+                        $stmt->bindValue($identifier, $this->user_keyword_set_id, PDO::PARAM_INT);
+                        break;
+                    case 'geolocation_id':
+                        $stmt->bindValue($identifier, $this->geolocation_id, PDO::PARAM_INT);
                         break;
                     case 'user_search_id':
                         $stmt->bindValue($identifier, $this->user_search_id, PDO::PARAM_INT);
                         break;
+                    case 'jobsite_key':
+                        $stmt->bindValue($identifier, $this->jobsite_key, PDO::PARAM_STR);
+                        break;
                     case 'app_run_id':
                         $stmt->bindValue($identifier, $this->app_run_id, PDO::PARAM_STR);
                         break;
-                    case 'user_search_run_key':
-                        $stmt->bindValue($identifier, $this->user_search_run_key, PDO::PARAM_STR);
+                    case 'user_search_site_run_id':
+                        $stmt->bindValue($identifier, $this->user_search_site_run_id, PDO::PARAM_INT);
                         break;
-                    case 'jobsite_key':
-                        $stmt->bindValue($identifier, $this->jobsite_key, PDO::PARAM_STR);
+                    case 'user_search_site_run_key':
+                        $stmt->bindValue($identifier, $this->user_search_site_run_key, PDO::PARAM_STR);
                         break;
                     case 'search_start_url':
                         $stmt->bindValue($identifier, $this->search_start_url, PDO::PARAM_STR);
@@ -1293,7 +1437,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
         } catch (Exception $e) {
             throw new PropelException('Unable to get autoincrement id.', 0, $e);
         }
-        $this->setUserSearchRunId($pk);
+        $this->setUserId($pk);
 
         $this->setNew(false);
     }
@@ -1326,7 +1470,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
      */
     public function getByName($name, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = UserSearchRunTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = UserSearchSiteRunTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
         $field = $this->getByPosition($pos);
 
         return $field;
@@ -1343,33 +1487,42 @@ abstract class UserSearchRun implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                return $this->getUserSearchRunId();
+                return $this->getUserId();
                 break;
             case 1:
-                return $this->getUserSearchId();
+                return $this->getUserKeywordSetId();
                 break;
             case 2:
-                return $this->getAppRunId();
+                return $this->getGeoLocationId();
                 break;
             case 3:
-                return $this->getUserSearchRunKey();
+                return $this->getUserSearchId();
                 break;
             case 4:
                 return $this->getJobSiteKey();
                 break;
             case 5:
-                return $this->getSearchStartUrl();
+                return $this->getAppRunId();
                 break;
             case 6:
-                return $this->getRunResultCode();
+                return $this->getUserSearchSiteRunId();
                 break;
             case 7:
-                return $this->getRunErrorDetails();
+                return $this->getUserSearchSiteRunKey();
                 break;
             case 8:
-                return $this->getStartedAt();
+                return $this->getSearchStartUrl();
                 break;
             case 9:
+                return $this->getRunResultCode();
+                break;
+            case 10:
+                return $this->getRunErrorDetails();
+                break;
+            case 11:
+                return $this->getStartedAt();
+                break;
+            case 12:
                 return $this->getEndedAt();
                 break;
             default:
@@ -1396,41 +1549,32 @@ abstract class UserSearchRun implements ActiveRecordInterface
     public function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
     {
 
-        if (isset($alreadyDumpedObjects['UserSearchRun'][$this->hashCode()])) {
+        if (isset($alreadyDumpedObjects['UserSearchSiteRun'][$this->hashCode()])) {
             return '*RECURSION*';
         }
-        $alreadyDumpedObjects['UserSearchRun'][$this->hashCode()] = true;
-        $keys = UserSearchRunTableMap::getFieldNames($keyType);
-        $keys_user_search = \JobScooper\DataAccess\Map\UserSearchTableMap::getFieldNames($keyType);
+        $alreadyDumpedObjects['UserSearchSiteRun'][$this->hashCode()] = true;
+        $keys = UserSearchSiteRunTableMap::getFieldNames($keyType);
         $result = array(
-            $keys[0] => $this->getUserSearchRunId(),
-            $keys[1] => $this->getUserSearchId(),
-            $keys[2] => $this->getAppRunId(),
-            $keys[3] => $this->getUserSearchRunKey(),
+            $keys[0] => $this->getUserId(),
+            $keys[1] => $this->getUserKeywordSetId(),
+            $keys[2] => $this->getGeoLocationId(),
+            $keys[3] => $this->getUserSearchId(),
             $keys[4] => $this->getJobSiteKey(),
-            $keys[5] => $this->getSearchStartUrl(),
-            $keys[6] => $this->getRunResultCode(),
-            $keys[7] => $this->getRunErrorDetails(),
-            $keys[8] => $this->getStartedAt(),
-            $keys[9] => $this->getEndedAt(),
-            $keys_user_search[1] => $this->getUserId(),
-            $keys_user_search[2] => $this->getGeoLocationId(),
-            $keys_user_search[3] => $this->getUserSearchKey(),
-            $keys_user_search[4] => $this->getKeywords(),
-            $keys_user_search[5] => $this->getKeywordTokens(),
-            $keys_user_search[6] => $this->getSearchKeyFromConfig(),
-            $keys_user_search[7] => $this->getCreatedAt(),
-            $keys_user_search[8] => $this->getUpdatedAt(),
-            $keys_user_search[9] => $this->getLastCompletedAt(),
-            $keys_user_search[10] => $this->getVersion(),
-
+            $keys[5] => $this->getAppRunId(),
+            $keys[6] => $this->getUserSearchSiteRunId(),
+            $keys[7] => $this->getUserSearchSiteRunKey(),
+            $keys[8] => $this->getSearchStartUrl(),
+            $keys[9] => $this->getRunResultCode(),
+            $keys[10] => $this->getRunErrorDetails(),
+            $keys[11] => $this->getStartedAt(),
+            $keys[12] => $this->getEndedAt(),
         );
-        if ($result[$keys[8]] instanceof \DateTimeInterface) {
-            $result[$keys[8]] = $result[$keys[8]]->format('c');
+        if ($result[$keys[11]] instanceof \DateTimeInterface) {
+            $result[$keys[11]] = $result[$keys[11]]->format('c');
         }
 
-        if ($result[$keys[9]] instanceof \DateTimeInterface) {
-            $result[$keys[9]] = $result[$keys[9]]->format('c');
+        if ($result[$keys[12]] instanceof \DateTimeInterface) {
+            $result[$keys[12]] = $result[$keys[12]]->format('c');
         }
 
         $virtualColumns = $this->virtualColumns;
@@ -1439,7 +1583,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->aUserSearch) {
+            if (null !== $this->aUserSearchFromUSSR) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
@@ -1449,12 +1593,12 @@ abstract class UserSearchRun implements ActiveRecordInterface
                         $key = 'user_search';
                         break;
                     default:
-                        $key = 'UserSearch';
+                        $key = 'UserSearchFromUSSR';
                 }
 
-                $result[$key] = $this->aUserSearch->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+                $result[$key] = $this->aUserSearchFromUSSR->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
-            if (null !== $this->aJobSiteRecordRelatedByJobSiteKey) {
+            if (null !== $this->aJobSiteFromUSSR) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
@@ -1464,25 +1608,55 @@ abstract class UserSearchRun implements ActiveRecordInterface
                         $key = 'job_site';
                         break;
                     default:
-                        $key = 'JobSiteRecord';
+                        $key = 'JobSiteFromUSSR';
                 }
 
-                $result[$key] = $this->aJobSiteRecordRelatedByJobSiteKey->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+                $result[$key] = $this->aJobSiteFromUSSR->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
-            if (null !== $this->collJobSiteRecordsRelatedByLastUserSearchRunId) {
+            if (null !== $this->aUserFromUSSR) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
-                        $key = 'jobSiteRecords';
+                        $key = 'user';
                         break;
                     case TableMap::TYPE_FIELDNAME:
-                        $key = 'job_sites';
+                        $key = 'user';
                         break;
                     default:
-                        $key = 'JobSiteRecords';
+                        $key = 'UserFromUSSR';
                 }
 
-                $result[$key] = $this->collJobSiteRecordsRelatedByLastUserSearchRunId->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
+                $result[$key] = $this->aUserFromUSSR->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->aUserKeywordSetFromUSSR) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'userKeywordSet';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'user_keyword_set';
+                        break;
+                    default:
+                        $key = 'UserKeywordSetFromUSSR';
+                }
+
+                $result[$key] = $this->aUserKeywordSetFromUSSR->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->aGeoLocationFromUSSR) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'geoLocation';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'geolocation';
+                        break;
+                    default:
+                        $key = 'GeoLocationFromUSSR';
+                }
+
+                $result[$key] = $this->aGeoLocationFromUSSR->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
         }
 
@@ -1498,11 +1672,11 @@ abstract class UserSearchRun implements ActiveRecordInterface
      *                one of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
      *                TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM.
      *                Defaults to TableMap::TYPE_PHPNAME.
-     * @return $this|\JobScooper\DataAccess\UserSearchRun
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun
      */
     public function setByName($name, $value, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = UserSearchRunTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = UserSearchSiteRunTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
 
         return $this->setByPosition($pos, $value);
     }
@@ -1513,47 +1687,56 @@ abstract class UserSearchRun implements ActiveRecordInterface
      *
      * @param  int $pos position in xml schema
      * @param  mixed $value field value
-     * @return $this|\JobScooper\DataAccess\UserSearchRun
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun
      */
     public function setByPosition($pos, $value)
     {
         switch ($pos) {
             case 0:
-                $this->setUserSearchRunId($value);
+                $this->setUserId($value);
                 break;
             case 1:
-                $this->setUserSearchId($value);
+                $this->setUserKeywordSetId($value);
                 break;
             case 2:
-                $this->setAppRunId($value);
+                $this->setGeoLocationId($value);
                 break;
             case 3:
-                $this->setUserSearchRunKey($value);
+                $this->setUserSearchId($value);
                 break;
             case 4:
                 $this->setJobSiteKey($value);
                 break;
             case 5:
-                $this->setSearchStartUrl($value);
+                $this->setAppRunId($value);
                 break;
             case 6:
-                $valueSet = UserSearchRunTableMap::getValueSet(UserSearchRunTableMap::COL_RUN_RESULT_CODE);
+                $this->setUserSearchSiteRunId($value);
+                break;
+            case 7:
+                $this->setUserSearchSiteRunKey($value);
+                break;
+            case 8:
+                $this->setSearchStartUrl($value);
+                break;
+            case 9:
+                $valueSet = UserSearchSiteRunTableMap::getValueSet(UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE);
                 if (isset($valueSet[$value])) {
                     $value = $valueSet[$value];
                 }
                 $this->setRunResultCode($value);
                 break;
-            case 7:
+            case 10:
                 if (!is_array($value)) {
                     $v = trim(substr($value, 2, -2));
                     $value = $v ? explode(' | ', $v) : array();
                 }
                 $this->setRunErrorDetails($value);
                 break;
-            case 8:
+            case 11:
                 $this->setStartedAt($value);
                 break;
-            case 9:
+            case 12:
                 $this->setEndedAt($value);
                 break;
         } // switch()
@@ -1580,37 +1763,46 @@ abstract class UserSearchRun implements ActiveRecordInterface
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
-        $keys = UserSearchRunTableMap::getFieldNames($keyType);
+        $keys = UserSearchSiteRunTableMap::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) {
-            $this->setUserSearchRunId($arr[$keys[0]]);
+            $this->setUserId($arr[$keys[0]]);
         }
         if (array_key_exists($keys[1], $arr)) {
-            $this->setUserSearchId($arr[$keys[1]]);
+            $this->setUserKeywordSetId($arr[$keys[1]]);
         }
         if (array_key_exists($keys[2], $arr)) {
-            $this->setAppRunId($arr[$keys[2]]);
+            $this->setGeoLocationId($arr[$keys[2]]);
         }
         if (array_key_exists($keys[3], $arr)) {
-            $this->setUserSearchRunKey($arr[$keys[3]]);
+            $this->setUserSearchId($arr[$keys[3]]);
         }
         if (array_key_exists($keys[4], $arr)) {
             $this->setJobSiteKey($arr[$keys[4]]);
         }
         if (array_key_exists($keys[5], $arr)) {
-            $this->setSearchStartUrl($arr[$keys[5]]);
+            $this->setAppRunId($arr[$keys[5]]);
         }
         if (array_key_exists($keys[6], $arr)) {
-            $this->setRunResultCode($arr[$keys[6]]);
+            $this->setUserSearchSiteRunId($arr[$keys[6]]);
         }
         if (array_key_exists($keys[7], $arr)) {
-            $this->setRunErrorDetails($arr[$keys[7]]);
+            $this->setUserSearchSiteRunKey($arr[$keys[7]]);
         }
         if (array_key_exists($keys[8], $arr)) {
-            $this->setStartedAt($arr[$keys[8]]);
+            $this->setSearchStartUrl($arr[$keys[8]]);
         }
         if (array_key_exists($keys[9], $arr)) {
-            $this->setEndedAt($arr[$keys[9]]);
+            $this->setRunResultCode($arr[$keys[9]]);
+        }
+        if (array_key_exists($keys[10], $arr)) {
+            $this->setRunErrorDetails($arr[$keys[10]]);
+        }
+        if (array_key_exists($keys[11], $arr)) {
+            $this->setStartedAt($arr[$keys[11]]);
+        }
+        if (array_key_exists($keys[12], $arr)) {
+            $this->setEndedAt($arr[$keys[12]]);
         }
     }
 
@@ -1631,7 +1823,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * @param string $data The source data to import from
      * @param string $keyType The type of keys the array uses.
      *
-     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object, for fluid interface
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object, for fluid interface
      */
     public function importFrom($parser, $data, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -1651,37 +1843,46 @@ abstract class UserSearchRun implements ActiveRecordInterface
      */
     public function buildCriteria()
     {
-        $criteria = new Criteria(UserSearchRunTableMap::DATABASE_NAME);
+        $criteria = new Criteria(UserSearchSiteRunTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_USER_SEARCH_RUN_ID)) {
-            $criteria->add(UserSearchRunTableMap::COL_USER_SEARCH_RUN_ID, $this->user_search_run_id);
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_ID)) {
+            $criteria->add(UserSearchSiteRunTableMap::COL_USER_ID, $this->user_id);
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_USER_SEARCH_ID)) {
-            $criteria->add(UserSearchRunTableMap::COL_USER_SEARCH_ID, $this->user_search_id);
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_KEYWORD_SET_ID)) {
+            $criteria->add(UserSearchSiteRunTableMap::COL_USER_KEYWORD_SET_ID, $this->user_keyword_set_id);
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_APP_RUN_ID)) {
-            $criteria->add(UserSearchRunTableMap::COL_APP_RUN_ID, $this->app_run_id);
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_GEOLOCATION_ID)) {
+            $criteria->add(UserSearchSiteRunTableMap::COL_GEOLOCATION_ID, $this->geolocation_id);
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_USER_SEARCH_RUN_KEY)) {
-            $criteria->add(UserSearchRunTableMap::COL_USER_SEARCH_RUN_KEY, $this->user_search_run_key);
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_SEARCH_ID)) {
+            $criteria->add(UserSearchSiteRunTableMap::COL_USER_SEARCH_ID, $this->user_search_id);
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_JOBSITE_KEY)) {
-            $criteria->add(UserSearchRunTableMap::COL_JOBSITE_KEY, $this->jobsite_key);
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_JOBSITE_KEY)) {
+            $criteria->add(UserSearchSiteRunTableMap::COL_JOBSITE_KEY, $this->jobsite_key);
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_SEARCH_START_URL)) {
-            $criteria->add(UserSearchRunTableMap::COL_SEARCH_START_URL, $this->search_start_url);
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_APP_RUN_ID)) {
+            $criteria->add(UserSearchSiteRunTableMap::COL_APP_RUN_ID, $this->app_run_id);
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_RUN_RESULT_CODE)) {
-            $criteria->add(UserSearchRunTableMap::COL_RUN_RESULT_CODE, $this->run_result_code);
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID)) {
+            $criteria->add(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID, $this->user_search_site_run_id);
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_RUN_ERROR_DETAILS)) {
-            $criteria->add(UserSearchRunTableMap::COL_RUN_ERROR_DETAILS, $this->run_error_details);
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_KEY)) {
+            $criteria->add(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_KEY, $this->user_search_site_run_key);
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_DATE_STARTED)) {
-            $criteria->add(UserSearchRunTableMap::COL_DATE_STARTED, $this->date_started);
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_SEARCH_START_URL)) {
+            $criteria->add(UserSearchSiteRunTableMap::COL_SEARCH_START_URL, $this->search_start_url);
         }
-        if ($this->isColumnModified(UserSearchRunTableMap::COL_DATE_ENDED)) {
-            $criteria->add(UserSearchRunTableMap::COL_DATE_ENDED, $this->date_ended);
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE)) {
+            $criteria->add(UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE, $this->run_result_code);
+        }
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_RUN_ERROR_DETAILS)) {
+            $criteria->add(UserSearchSiteRunTableMap::COL_RUN_ERROR_DETAILS, $this->run_error_details);
+        }
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_DATE_STARTED)) {
+            $criteria->add(UserSearchSiteRunTableMap::COL_DATE_STARTED, $this->date_started);
+        }
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_DATE_ENDED)) {
+            $criteria->add(UserSearchSiteRunTableMap::COL_DATE_ENDED, $this->date_ended);
         }
 
         return $criteria;
@@ -1699,8 +1900,13 @@ abstract class UserSearchRun implements ActiveRecordInterface
      */
     public function buildPkeyCriteria()
     {
-        $criteria = ChildUserSearchRunQuery::create();
-        $criteria->add(UserSearchRunTableMap::COL_USER_SEARCH_RUN_ID, $this->user_search_run_id);
+        $criteria = ChildUserSearchSiteRunQuery::create();
+        $criteria->add(UserSearchSiteRunTableMap::COL_USER_ID, $this->user_id);
+        $criteria->add(UserSearchSiteRunTableMap::COL_USER_KEYWORD_SET_ID, $this->user_keyword_set_id);
+        $criteria->add(UserSearchSiteRunTableMap::COL_GEOLOCATION_ID, $this->geolocation_id);
+        $criteria->add(UserSearchSiteRunTableMap::COL_USER_SEARCH_ID, $this->user_search_id);
+        $criteria->add(UserSearchSiteRunTableMap::COL_JOBSITE_KEY, $this->jobsite_key);
+        $criteria->add(UserSearchSiteRunTableMap::COL_APP_RUN_ID, $this->app_run_id);
 
         return $criteria;
     }
@@ -1713,10 +1919,50 @@ abstract class UserSearchRun implements ActiveRecordInterface
      */
     public function hashCode()
     {
-        $validPk = null !== $this->getUserSearchRunId();
+        $validPk = null !== $this->getUserId() &&
+            null !== $this->getUserKeywordSetId() &&
+            null !== $this->getGeoLocationId() &&
+            null !== $this->getUserSearchId() &&
+            null !== $this->getJobSiteKey() &&
+            null !== $this->getAppRunId();
 
-        $validPrimaryKeyFKs = 0;
+        $validPrimaryKeyFKs = 9;
         $primaryKeyFKs = [];
+
+        //relation user_search_site_run_fk_4d3978 to table user_search
+        if ($this->aUserSearchFromUSSR && $hash = spl_object_hash($this->aUserSearchFromUSSR)) {
+            $primaryKeyFKs[] = $hash;
+        } else {
+            $validPrimaryKeyFKs = false;
+        }
+
+        //relation user_search_site_run_fk_168d10 to table job_site
+        if ($this->aJobSiteFromUSSR && $hash = spl_object_hash($this->aJobSiteFromUSSR)) {
+            $primaryKeyFKs[] = $hash;
+        } else {
+            $validPrimaryKeyFKs = false;
+        }
+
+        //relation user_search_site_run_fk_38da1e to table user
+        if ($this->aUserFromUSSR && $hash = spl_object_hash($this->aUserFromUSSR)) {
+            $primaryKeyFKs[] = $hash;
+        } else {
+            $validPrimaryKeyFKs = false;
+        }
+
+        //relation user_search_site_run_fk_09a66b to table user_keyword_set
+        if ($this->aUserKeywordSetFromUSSR && $hash = spl_object_hash($this->aUserKeywordSetFromUSSR)) {
+            $primaryKeyFKs[] = $hash;
+        } else {
+            $validPrimaryKeyFKs = false;
+        }
+
+        //relation user_search_site_run_fk_38c4c7 to table geolocation
+        if ($this->aGeoLocationFromUSSR && $hash = spl_object_hash($this->aGeoLocationFromUSSR)) {
+            $primaryKeyFKs[] = $hash;
+        } else {
+            $validPrimaryKeyFKs = false;
+        }
 
         if ($validPk) {
             return crc32(json_encode($this->getPrimaryKey(), JSON_UNESCAPED_UNICODE));
@@ -1728,23 +1974,37 @@ abstract class UserSearchRun implements ActiveRecordInterface
     }
 
     /**
-     * Returns the primary key for this object (row).
-     * @return int
+     * Returns the composite primary key for this object.
+     * The array elements will be in same order as specified in XML.
+     * @return array
      */
     public function getPrimaryKey()
     {
-        return $this->getUserSearchRunId();
+        $pks = array();
+        $pks[0] = $this->getUserId();
+        $pks[1] = $this->getUserKeywordSetId();
+        $pks[2] = $this->getGeoLocationId();
+        $pks[3] = $this->getUserSearchId();
+        $pks[4] = $this->getJobSiteKey();
+        $pks[5] = $this->getAppRunId();
+
+        return $pks;
     }
 
     /**
-     * Generic method to set the primary key (user_search_run_id column).
+     * Set the [composite] primary key.
      *
-     * @param       int $key Primary key.
+     * @param      array $keys The elements of the composite key (order must match the order in XML file).
      * @return void
      */
-    public function setPrimaryKey($key)
+    public function setPrimaryKey($keys)
     {
-        $this->setUserSearchRunId($key);
+        $this->setUserId($keys[0]);
+        $this->setUserKeywordSetId($keys[1]);
+        $this->setGeoLocationId($keys[2]);
+        $this->setUserSearchId($keys[3]);
+        $this->setJobSiteKey($keys[4]);
+        $this->setAppRunId($keys[5]);
     }
 
     /**
@@ -1753,7 +2013,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
      */
     public function isPrimaryKeyNull()
     {
-        return null === $this->getUserSearchRunId();
+        return (null === $this->getUserId()) && (null === $this->getUserKeywordSetId()) && (null === $this->getGeoLocationId()) && (null === $this->getUserSearchId()) && (null === $this->getJobSiteKey()) && (null === $this->getAppRunId());
     }
 
     /**
@@ -1762,39 +2022,28 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param      object $copyObj An object of \JobScooper\DataAccess\UserSearchRun (or compatible) type.
+     * @param      object $copyObj An object of \JobScooper\DataAccess\UserSearchSiteRun (or compatible) type.
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param      boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
      */
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
+        $copyObj->setUserId($this->getUserId());
+        $copyObj->setUserKeywordSetId($this->getUserKeywordSetId());
+        $copyObj->setGeoLocationId($this->getGeoLocationId());
         $copyObj->setUserSearchId($this->getUserSearchId());
-        $copyObj->setAppRunId($this->getAppRunId());
-        $copyObj->setUserSearchRunKey($this->getUserSearchRunKey());
         $copyObj->setJobSiteKey($this->getJobSiteKey());
+        $copyObj->setAppRunId($this->getAppRunId());
+        $copyObj->setUserSearchSiteRunKey($this->getUserSearchSiteRunKey());
         $copyObj->setSearchStartUrl($this->getSearchStartUrl());
         $copyObj->setRunResultCode($this->getRunResultCode());
         $copyObj->setRunErrorDetails($this->getRunErrorDetails());
         $copyObj->setStartedAt($this->getStartedAt());
         $copyObj->setEndedAt($this->getEndedAt());
-
-        if ($deepCopy) {
-            // important: temporarily setNew(false) because this affects the behavior of
-            // the getter/setter methods for fkey referrer objects.
-            $copyObj->setNew(false);
-
-            foreach ($this->getJobSiteRecordsRelatedByLastUserSearchRunId() as $relObj) {
-                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
-                    $copyObj->addJobSiteRecordRelatedByLastUserSearchRunId($relObj->copy($deepCopy));
-                }
-            }
-
-        } // if ($deepCopy)
-
         if ($makeNew) {
             $copyObj->setNew(true);
-            $copyObj->setUserSearchRunId(NULL); // this is a auto-increment column, so set to default value
+            $copyObj->setUserSearchSiteRunId(NULL); // this is a auto-increment column, so set to default value
         }
     }
 
@@ -1807,7 +2056,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * objects.
      *
      * @param  boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return \JobScooper\DataAccess\UserSearchRun Clone of current object.
+     * @return \JobScooper\DataAccess\UserSearchSiteRun Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -1824,27 +2073,41 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * Declares an association between this object and a ChildUserSearch object.
      *
      * @param  ChildUserSearch $v
-     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setUserSearch(ChildUserSearch $v = null)
+    public function setUserSearchFromUSSR(ChildUserSearch $v = null)
     {
-        // aggregate_column_relation behavior
-        if (null !== $this->aUserSearch && $v !== $this->aUserSearch) {
-            $this->oldUserSearchLastCompletedAt = $this->aUserSearch;
+        if ($v === null) {
+            $this->setUserId(NULL);
+        } else {
+            $this->setUserId($v->getUserId());
         }
+
+        if ($v === null) {
+            $this->setUserKeywordSetId(NULL);
+        } else {
+            $this->setUserKeywordSetId($v->getUserKeywordSetId());
+        }
+
+        if ($v === null) {
+            $this->setGeoLocationId(NULL);
+        } else {
+            $this->setGeoLocationId($v->getGeoLocationId());
+        }
+
         if ($v === null) {
             $this->setUserSearchId(NULL);
         } else {
             $this->setUserSearchId($v->getUserSearchId());
         }
 
-        $this->aUserSearch = $v;
+        $this->aUserSearchFromUSSR = $v;
 
         // Add binding for other direction of this n:n relationship.
         // If this object has already been added to the ChildUserSearch object, it will not be re-added.
         if ($v !== null) {
-            $v->addUserSearchRun($this);
+            $v->addUserSearchSiteRun($this);
         }
 
 
@@ -1859,63 +2122,45 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * @return ChildUserSearch The associated ChildUserSearch object.
      * @throws PropelException
      */
-    public function getUserSearch(ConnectionInterface $con = null)
+    public function getUserSearchFromUSSR(ConnectionInterface $con = null)
     {
-        if ($this->aUserSearch === null && ($this->user_search_id != 0)) {
-            $this->aUserSearch = ChildUserSearchQuery::create()->findPk($this->user_search_id, $con);
+        if ($this->aUserSearchFromUSSR === null && ($this->user_id != 0 && $this->user_keyword_set_id != 0 && $this->geolocation_id != 0 && $this->user_search_id != 0)) {
+            $this->aUserSearchFromUSSR = ChildUserSearchQuery::create()
+                ->filterByUserSearchSiteRun($this) // here
+                ->findOne($con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aUserSearch->addUserSearchRuns($this);
+                $this->aUserSearchFromUSSR->addUserSearchSiteRuns($this);
              */
         }
 
-        return $this->aUserSearch;
+        return $this->aUserSearchFromUSSR;
     }
 
     /**
      * Declares an association between this object and a ChildJobSiteRecord object.
      *
      * @param  ChildJobSiteRecord $v
-     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setJobSiteRecordRelatedByJobSiteKey(ChildJobSiteRecord $v = null)
+    public function setJobSiteFromUSSR(ChildJobSiteRecord $v = null)
     {
-        // aggregate_column_relation behavior
-        if (null !== $this->aJobSiteRecordRelatedByJobSiteKey && $v !== $this->aJobSiteRecordRelatedByJobSiteKey) {
-            $this->oldJobSiteRecordRelatedByJobSiteKeyLastUserSearchRunId = $this->aJobSiteRecordRelatedByJobSiteKey;
-        }
-        // aggregate_column_relation behavior
-        if (null !== $this->aJobSiteRecordRelatedByJobSiteKey && $v !== $this->aJobSiteRecordRelatedByJobSiteKey) {
-            $this->oldJobSiteRecordRelatedByJobSiteKeyLastFailedAt = $this->aJobSiteRecordRelatedByJobSiteKey;
-        }
-        // aggregate_column_relation behavior
-        if (null !== $this->aJobSiteRecordRelatedByJobSiteKey && $v !== $this->aJobSiteRecordRelatedByJobSiteKey) {
-            $this->oldJobSiteRecordRelatedByJobSiteKeyLastCompletedAt = $this->aJobSiteRecordRelatedByJobSiteKey;
-        }
-        // aggregate_column_relation behavior
-        if (null !== $this->aJobSiteRecordRelatedByJobSiteKey && $v !== $this->aJobSiteRecordRelatedByJobSiteKey) {
-            $this->oldJobSiteRecordRelatedByJobSiteKeyLastRunAt = $this->aJobSiteRecordRelatedByJobSiteKey;
-        }
-        // aggregate_column_relation behavior
-        if (null !== $this->aJobSiteRecordRelatedByJobSiteKey && $v !== $this->aJobSiteRecordRelatedByJobSiteKey) {
-            $this->oldJobSiteRecordRelatedByJobSiteKeyLastPulledAt = $this->aJobSiteRecordRelatedByJobSiteKey;
-        }
         if ($v === null) {
             $this->setJobSiteKey(NULL);
         } else {
             $this->setJobSiteKey($v->getJobSiteKey());
         }
 
-        $this->aJobSiteRecordRelatedByJobSiteKey = $v;
+        $this->aJobSiteFromUSSR = $v;
 
         // Add binding for other direction of this n:n relationship.
         // If this object has already been added to the ChildJobSiteRecord object, it will not be re-added.
         if ($v !== null) {
-            $v->addUserSearchRunRelatedByJobSiteKey($this);
+            $v->addUserSearchSiteRun($this);
         }
 
 
@@ -1930,262 +2175,179 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * @return ChildJobSiteRecord The associated ChildJobSiteRecord object.
      * @throws PropelException
      */
-    public function getJobSiteRecordRelatedByJobSiteKey(ConnectionInterface $con = null)
+    public function getJobSiteFromUSSR(ConnectionInterface $con = null)
     {
-        if ($this->aJobSiteRecordRelatedByJobSiteKey === null && (($this->jobsite_key !== "" && $this->jobsite_key !== null))) {
-            $this->aJobSiteRecordRelatedByJobSiteKey = ChildJobSiteRecordQuery::create()->findPk($this->jobsite_key, $con);
+        if ($this->aJobSiteFromUSSR === null && (($this->jobsite_key !== "" && $this->jobsite_key !== null))) {
+            $this->aJobSiteFromUSSR = ChildJobSiteRecordQuery::create()->findPk($this->jobsite_key, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aJobSiteRecordRelatedByJobSiteKey->addUserSearchRunsRelatedByJobSiteKey($this);
+                $this->aJobSiteFromUSSR->addUserSearchSiteRuns($this);
              */
         }
 
-        return $this->aJobSiteRecordRelatedByJobSiteKey;
-    }
-
-
-    /**
-     * Initializes a collection based on the name of a relation.
-     * Avoids crafting an 'init[$relationName]s' method name
-     * that wouldn't work when StandardEnglishPluralizer is used.
-     *
-     * @param      string $relationName The name of the relation to initialize
-     * @return void
-     */
-    public function initRelation($relationName)
-    {
-        if ('JobSiteRecordRelatedByLastUserSearchRunId' == $relationName) {
-            $this->initJobSiteRecordsRelatedByLastUserSearchRunId();
-            return;
-        }
+        return $this->aJobSiteFromUSSR;
     }
 
     /**
-     * Clears out the collJobSiteRecordsRelatedByLastUserSearchRunId collection
+     * Declares an association between this object and a ChildUser object.
      *
-     * This does not modify the database; however, it will remove any associated objects, causing
-     * them to be refetched by subsequent calls to accessor method.
-     *
-     * @return void
-     * @see        addJobSiteRecordsRelatedByLastUserSearchRunId()
-     */
-    public function clearJobSiteRecordsRelatedByLastUserSearchRunId()
-    {
-        $this->collJobSiteRecordsRelatedByLastUserSearchRunId = null; // important to set this to NULL since that means it is uninitialized
-    }
-
-    /**
-     * Reset is the collJobSiteRecordsRelatedByLastUserSearchRunId collection loaded partially.
-     */
-    public function resetPartialJobSiteRecordsRelatedByLastUserSearchRunId($v = true)
-    {
-        $this->collJobSiteRecordsRelatedByLastUserSearchRunIdPartial = $v;
-    }
-
-    /**
-     * Initializes the collJobSiteRecordsRelatedByLastUserSearchRunId collection.
-     *
-     * By default this just sets the collJobSiteRecordsRelatedByLastUserSearchRunId collection to an empty array (like clearcollJobSiteRecordsRelatedByLastUserSearchRunId());
-     * however, you may wish to override this method in your stub class to provide setting appropriate
-     * to your application -- for example, setting the initial array to the values stored in database.
-     *
-     * @param      boolean $overrideExisting If set to true, the method call initializes
-     *                                        the collection even if it is not empty
-     *
-     * @return void
-     */
-    public function initJobSiteRecordsRelatedByLastUserSearchRunId($overrideExisting = true)
-    {
-        if (null !== $this->collJobSiteRecordsRelatedByLastUserSearchRunId && !$overrideExisting) {
-            return;
-        }
-
-        $collectionClassName = JobSiteRecordTableMap::getTableMap()->getCollectionClassName();
-
-        $this->collJobSiteRecordsRelatedByLastUserSearchRunId = new $collectionClassName;
-        $this->collJobSiteRecordsRelatedByLastUserSearchRunId->setModel('\JobScooper\DataAccess\JobSiteRecord');
-    }
-
-    /**
-     * Gets an array of ChildJobSiteRecord objects which contain a foreign key that references this object.
-     *
-     * If the $criteria is not null, it is used to always fetch the results from the database.
-     * Otherwise the results are fetched from the database the first time, then cached.
-     * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildUserSearchRun is new, it will return
-     * an empty collection or the current collection; the criteria is ignored on a new object.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @return ObjectCollection|ChildJobSiteRecord[] List of ChildJobSiteRecord objects
+     * @param  ChildUser $v
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
      * @throws PropelException
      */
-    public function getJobSiteRecordsRelatedByLastUserSearchRunId(Criteria $criteria = null, ConnectionInterface $con = null)
+    public function setUserFromUSSR(ChildUser $v = null)
     {
-        $partial = $this->collJobSiteRecordsRelatedByLastUserSearchRunIdPartial && !$this->isNew();
-        if (null === $this->collJobSiteRecordsRelatedByLastUserSearchRunId || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collJobSiteRecordsRelatedByLastUserSearchRunId) {
-                // return empty collection
-                $this->initJobSiteRecordsRelatedByLastUserSearchRunId();
-            } else {
-                $collJobSiteRecordsRelatedByLastUserSearchRunId = ChildJobSiteRecordQuery::create(null, $criteria)
-                    ->filterByUserSearchRunRelatedByLastUserSearchRunId($this)
-                    ->find($con);
-
-                if (null !== $criteria) {
-                    if (false !== $this->collJobSiteRecordsRelatedByLastUserSearchRunIdPartial && count($collJobSiteRecordsRelatedByLastUserSearchRunId)) {
-                        $this->initJobSiteRecordsRelatedByLastUserSearchRunId(false);
-
-                        foreach ($collJobSiteRecordsRelatedByLastUserSearchRunId as $obj) {
-                            if (false == $this->collJobSiteRecordsRelatedByLastUserSearchRunId->contains($obj)) {
-                                $this->collJobSiteRecordsRelatedByLastUserSearchRunId->append($obj);
-                            }
-                        }
-
-                        $this->collJobSiteRecordsRelatedByLastUserSearchRunIdPartial = true;
-                    }
-
-                    return $collJobSiteRecordsRelatedByLastUserSearchRunId;
-                }
-
-                if ($partial && $this->collJobSiteRecordsRelatedByLastUserSearchRunId) {
-                    foreach ($this->collJobSiteRecordsRelatedByLastUserSearchRunId as $obj) {
-                        if ($obj->isNew()) {
-                            $collJobSiteRecordsRelatedByLastUserSearchRunId[] = $obj;
-                        }
-                    }
-                }
-
-                $this->collJobSiteRecordsRelatedByLastUserSearchRunId = $collJobSiteRecordsRelatedByLastUserSearchRunId;
-                $this->collJobSiteRecordsRelatedByLastUserSearchRunIdPartial = false;
-            }
+        if ($v === null) {
+            $this->setUserId(NULL);
+        } else {
+            $this->setUserId($v->getUserId());
         }
 
-        return $this->collJobSiteRecordsRelatedByLastUserSearchRunId;
-    }
+        $this->aUserFromUSSR = $v;
 
-    /**
-     * Sets a collection of ChildJobSiteRecord objects related by a one-to-many relationship
-     * to the current object.
-     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
-     * and new objects from the given Propel collection.
-     *
-     * @param      Collection $jobSiteRecordsRelatedByLastUserSearchRunId A Propel collection.
-     * @param      ConnectionInterface $con Optional connection object
-     * @return $this|ChildUserSearchRun The current object (for fluent API support)
-     */
-    public function setJobSiteRecordsRelatedByLastUserSearchRunId(Collection $jobSiteRecordsRelatedByLastUserSearchRunId, ConnectionInterface $con = null)
-    {
-        /** @var ChildJobSiteRecord[] $jobSiteRecordsRelatedByLastUserSearchRunIdToDelete */
-        $jobSiteRecordsRelatedByLastUserSearchRunIdToDelete = $this->getJobSiteRecordsRelatedByLastUserSearchRunId(new Criteria(), $con)->diff($jobSiteRecordsRelatedByLastUserSearchRunId);
-
-
-        $this->jobSiteRecordsRelatedByLastUserSearchRunIdScheduledForDeletion = $jobSiteRecordsRelatedByLastUserSearchRunIdToDelete;
-
-        foreach ($jobSiteRecordsRelatedByLastUserSearchRunIdToDelete as $jobSiteRecordRelatedByLastUserSearchRunIdRemoved) {
-            $jobSiteRecordRelatedByLastUserSearchRunIdRemoved->setUserSearchRunRelatedByLastUserSearchRunId(null);
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildUser object, it will not be re-added.
+        if ($v !== null) {
+            $v->addUserSearchSiteRun($this);
         }
 
-        $this->collJobSiteRecordsRelatedByLastUserSearchRunId = null;
-        foreach ($jobSiteRecordsRelatedByLastUserSearchRunId as $jobSiteRecordRelatedByLastUserSearchRunId) {
-            $this->addJobSiteRecordRelatedByLastUserSearchRunId($jobSiteRecordRelatedByLastUserSearchRunId);
-        }
-
-        $this->collJobSiteRecordsRelatedByLastUserSearchRunId = $jobSiteRecordsRelatedByLastUserSearchRunId;
-        $this->collJobSiteRecordsRelatedByLastUserSearchRunIdPartial = false;
 
         return $this;
     }
 
+
     /**
-     * Returns the number of related JobSiteRecord objects.
+     * Get the associated ChildUser object
      *
-     * @param      Criteria $criteria
-     * @param      boolean $distinct
-     * @param      ConnectionInterface $con
-     * @return int             Count of related JobSiteRecord objects.
+     * @param  ConnectionInterface $con Optional Connection object.
+     * @return ChildUser The associated ChildUser object.
      * @throws PropelException
      */
-    public function countJobSiteRecordsRelatedByLastUserSearchRunId(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    public function getUserFromUSSR(ConnectionInterface $con = null)
     {
-        $partial = $this->collJobSiteRecordsRelatedByLastUserSearchRunIdPartial && !$this->isNew();
-        if (null === $this->collJobSiteRecordsRelatedByLastUserSearchRunId || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->collJobSiteRecordsRelatedByLastUserSearchRunId) {
-                return 0;
-            }
-
-            if ($partial && !$criteria) {
-                return count($this->getJobSiteRecordsRelatedByLastUserSearchRunId());
-            }
-
-            $query = ChildJobSiteRecordQuery::create(null, $criteria);
-            if ($distinct) {
-                $query->distinct();
-            }
-
-            return $query
-                ->filterByUserSearchRunRelatedByLastUserSearchRunId($this)
-                ->count($con);
+        if ($this->aUserFromUSSR === null && ($this->user_id != 0)) {
+            $this->aUserFromUSSR = ChildUserQuery::create()->findPk($this->user_id, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aUserFromUSSR->addUserSearchSiteRuns($this);
+             */
         }
 
-        return count($this->collJobSiteRecordsRelatedByLastUserSearchRunId);
+        return $this->aUserFromUSSR;
     }
 
     /**
-     * Method called to associate a ChildJobSiteRecord object to this object
-     * through the ChildJobSiteRecord foreign key attribute.
+     * Declares an association between this object and a ChildUserKeywordSet object.
      *
-     * @param  ChildJobSiteRecord $l ChildJobSiteRecord
-     * @return $this|\JobScooper\DataAccess\UserSearchRun The current object (for fluent API support)
+     * @param  ChildUserKeywordSet $v
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
+     * @throws PropelException
      */
-    public function addJobSiteRecordRelatedByLastUserSearchRunId(ChildJobSiteRecord $l)
+    public function setUserKeywordSetFromUSSR(ChildUserKeywordSet $v = null)
     {
-        if ($this->collJobSiteRecordsRelatedByLastUserSearchRunId === null) {
-            $this->initJobSiteRecordsRelatedByLastUserSearchRunId();
-            $this->collJobSiteRecordsRelatedByLastUserSearchRunIdPartial = true;
+        if ($v === null) {
+            $this->setUserId(NULL);
+        } else {
+            $this->setUserId($v->getUserId());
         }
 
-        if (!$this->collJobSiteRecordsRelatedByLastUserSearchRunId->contains($l)) {
-            $this->doAddJobSiteRecordRelatedByLastUserSearchRunId($l);
-
-            if ($this->jobSiteRecordsRelatedByLastUserSearchRunIdScheduledForDeletion and $this->jobSiteRecordsRelatedByLastUserSearchRunIdScheduledForDeletion->contains($l)) {
-                $this->jobSiteRecordsRelatedByLastUserSearchRunIdScheduledForDeletion->remove($this->jobSiteRecordsRelatedByLastUserSearchRunIdScheduledForDeletion->search($l));
-            }
+        if ($v === null) {
+            $this->setUserKeywordSetId(NULL);
+        } else {
+            $this->setUserKeywordSetId($v->getUserKeywordSetId());
         }
+
+        $this->aUserKeywordSetFromUSSR = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildUserKeywordSet object, it will not be re-added.
+        if ($v !== null) {
+            $v->addUserSearchSiteRun($this);
+        }
+
 
         return $this;
     }
 
+
     /**
-     * @param ChildJobSiteRecord $jobSiteRecordRelatedByLastUserSearchRunId The ChildJobSiteRecord object to add.
+     * Get the associated ChildUserKeywordSet object
+     *
+     * @param  ConnectionInterface $con Optional Connection object.
+     * @return ChildUserKeywordSet The associated ChildUserKeywordSet object.
+     * @throws PropelException
      */
-    protected function doAddJobSiteRecordRelatedByLastUserSearchRunId(ChildJobSiteRecord $jobSiteRecordRelatedByLastUserSearchRunId)
+    public function getUserKeywordSetFromUSSR(ConnectionInterface $con = null)
     {
-        $this->collJobSiteRecordsRelatedByLastUserSearchRunId[]= $jobSiteRecordRelatedByLastUserSearchRunId;
-        $jobSiteRecordRelatedByLastUserSearchRunId->setUserSearchRunRelatedByLastUserSearchRunId($this);
+        if ($this->aUserKeywordSetFromUSSR === null && ($this->user_id != 0 && $this->user_keyword_set_id != 0)) {
+            $this->aUserKeywordSetFromUSSR = ChildUserKeywordSetQuery::create()->findPk(array($this->user_id, $this->user_keyword_set_id), $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aUserKeywordSetFromUSSR->addUserSearchSiteRuns($this);
+             */
+        }
+
+        return $this->aUserKeywordSetFromUSSR;
     }
 
     /**
-     * @param  ChildJobSiteRecord $jobSiteRecordRelatedByLastUserSearchRunId The ChildJobSiteRecord object to remove.
-     * @return $this|ChildUserSearchRun The current object (for fluent API support)
+     * Declares an association between this object and a ChildGeoLocation object.
+     *
+     * @param  ChildGeoLocation $v
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
+     * @throws PropelException
      */
-    public function removeJobSiteRecordRelatedByLastUserSearchRunId(ChildJobSiteRecord $jobSiteRecordRelatedByLastUserSearchRunId)
+    public function setGeoLocationFromUSSR(ChildGeoLocation $v = null)
     {
-        if ($this->getJobSiteRecordsRelatedByLastUserSearchRunId()->contains($jobSiteRecordRelatedByLastUserSearchRunId)) {
-            $pos = $this->collJobSiteRecordsRelatedByLastUserSearchRunId->search($jobSiteRecordRelatedByLastUserSearchRunId);
-            $this->collJobSiteRecordsRelatedByLastUserSearchRunId->remove($pos);
-            if (null === $this->jobSiteRecordsRelatedByLastUserSearchRunIdScheduledForDeletion) {
-                $this->jobSiteRecordsRelatedByLastUserSearchRunIdScheduledForDeletion = clone $this->collJobSiteRecordsRelatedByLastUserSearchRunId;
-                $this->jobSiteRecordsRelatedByLastUserSearchRunIdScheduledForDeletion->clear();
-            }
-            $this->jobSiteRecordsRelatedByLastUserSearchRunIdScheduledForDeletion[]= $jobSiteRecordRelatedByLastUserSearchRunId;
-            $jobSiteRecordRelatedByLastUserSearchRunId->setUserSearchRunRelatedByLastUserSearchRunId(null);
+        if ($v === null) {
+            $this->setGeoLocationId(NULL);
+        } else {
+            $this->setGeoLocationId($v->getGeoLocationId());
         }
 
+        $this->aGeoLocationFromUSSR = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildGeoLocation object, it will not be re-added.
+        if ($v !== null) {
+            $v->addUserSearchSiteRun($this);
+        }
+
+
         return $this;
+    }
+
+
+    /**
+     * Get the associated ChildGeoLocation object
+     *
+     * @param  ConnectionInterface $con Optional Connection object.
+     * @return ChildGeoLocation The associated ChildGeoLocation object.
+     * @throws PropelException
+     */
+    public function getGeoLocationFromUSSR(ConnectionInterface $con = null)
+    {
+        if ($this->aGeoLocationFromUSSR === null && ($this->geolocation_id != 0)) {
+            $this->aGeoLocationFromUSSR = ChildGeoLocationQuery::create()->findPk($this->geolocation_id, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aGeoLocationFromUSSR->addUserSearchSiteRuns($this);
+             */
+        }
+
+        return $this->aGeoLocationFromUSSR;
     }
 
     /**
@@ -2195,17 +2357,29 @@ abstract class UserSearchRun implements ActiveRecordInterface
      */
     public function clear()
     {
-        if (null !== $this->aUserSearch) {
-            $this->aUserSearch->removeUserSearchRun($this);
+        if (null !== $this->aUserSearchFromUSSR) {
+            $this->aUserSearchFromUSSR->removeUserSearchSiteRun($this);
         }
-        if (null !== $this->aJobSiteRecordRelatedByJobSiteKey) {
-            $this->aJobSiteRecordRelatedByJobSiteKey->removeUserSearchRunRelatedByJobSiteKey($this);
+        if (null !== $this->aJobSiteFromUSSR) {
+            $this->aJobSiteFromUSSR->removeUserSearchSiteRun($this);
         }
-        $this->user_search_run_id = null;
+        if (null !== $this->aUserFromUSSR) {
+            $this->aUserFromUSSR->removeUserSearchSiteRun($this);
+        }
+        if (null !== $this->aUserKeywordSetFromUSSR) {
+            $this->aUserKeywordSetFromUSSR->removeUserSearchSiteRun($this);
+        }
+        if (null !== $this->aGeoLocationFromUSSR) {
+            $this->aGeoLocationFromUSSR->removeUserSearchSiteRun($this);
+        }
+        $this->user_id = null;
+        $this->user_keyword_set_id = null;
+        $this->geolocation_id = null;
         $this->user_search_id = null;
-        $this->app_run_id = null;
-        $this->user_search_run_key = null;
         $this->jobsite_key = null;
+        $this->app_run_id = null;
+        $this->user_search_site_run_id = null;
+        $this->user_search_site_run_key = null;
         $this->search_start_url = null;
         $this->run_result_code = null;
         $this->run_error_details = null;
@@ -2231,26 +2405,23 @@ abstract class UserSearchRun implements ActiveRecordInterface
     public function clearAllReferences($deep = false)
     {
         if ($deep) {
-            if ($this->collJobSiteRecordsRelatedByLastUserSearchRunId) {
-                foreach ($this->collJobSiteRecordsRelatedByLastUserSearchRunId as $o) {
-                    $o->clearAllReferences($deep);
-                }
-            }
         } // if ($deep)
 
-        $this->collJobSiteRecordsRelatedByLastUserSearchRunId = null;
-        $this->aUserSearch = null;
-        $this->aJobSiteRecordRelatedByJobSiteKey = null;
+        $this->aUserSearchFromUSSR = null;
+        $this->aJobSiteFromUSSR = null;
+        $this->aUserFromUSSR = null;
+        $this->aUserKeywordSetFromUSSR = null;
+        $this->aGeoLocationFromUSSR = null;
     }
 
     /**
      * Return the string representation of this object
      *
-     * @return string
+     * @return string The value of the 'user_search_site_run_key' column
      */
     public function __toString()
     {
-        return (string) $this->exportTo(UserSearchRunTableMap::DEFAULT_STRING_FORMAT);
+        return (string) $this->getUserSearchSiteRunKey();
     }
 
     // sluggable behavior
@@ -2259,11 +2430,11 @@ abstract class UserSearchRun implements ActiveRecordInterface
      * Wrap the setter for slug value
      *
      * @param   string
-     * @return  $this|UserSearchRun
+     * @return  $this|UserSearchSiteRun
      */
     public function setSlug($v)
     {
-        return $this->setUserSearchRunKey($v);
+        return $this->setUserSearchSiteRunKey($v);
     }
 
     /**
@@ -2273,7 +2444,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
      */
     public function getSlug()
     {
-        return $this->getUserSearchRunKey();
+        return $this->getUserSearchSiteRunKey();
     }
 
     /**
@@ -2297,7 +2468,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
      */
     protected function createRawSlug()
     {
-        return '' . $this->cleanupSlugPart($this->getUserSearchKey()) . '_' . $this->cleanupSlugPart($this->getJobSiteKey()) . '_' . $this->cleanupSlugPart($this->getAppRunId()) . '';
+        return 'user_' . $this->cleanupSlugPart($this->getUserId()) . '_search' . $this->cleanupSlugPart($this->getUserSearchId()) . '_' . $this->cleanupSlugPart($this->getJobSiteKey()) . '_' . $this->cleanupSlugPart($this->getAppRunId()) . '';
     }
 
     /**
@@ -2374,10 +2545,10 @@ abstract class UserSearchRun implements ActiveRecordInterface
         }
 
         $adapter = \Propel\Runtime\Propel::getServiceContainer()->getAdapter('default');
-        $col = 'q.UserSearchRunKey';
+        $col = 'q.UserSearchSiteRunKey';
         $compare = $alreadyExists ? $adapter->compareRegex($col, '?') : sprintf('%s = ?', $col);
 
-        $query = \JobScooper\DataAccess\UserSearchRunQuery::create('q')
+        $query = \JobScooper\DataAccess\UserSearchSiteRunQuery::create('q')
             ->where($compare, $alreadyExists ? '^' . $slug2 . '[0-9]+$' : $slug2)
             ->prune($this)
         ;
@@ -2394,8 +2565,8 @@ abstract class UserSearchRun implements ActiveRecordInterface
         $adapter = \Propel\Runtime\Propel::getServiceContainer()->getAdapter('default');
         // Already exists
         $object = $query
-            ->addDescendingOrderByColumn($adapter->strLength('user_search_run_key'))
-            ->addDescendingOrderByColumn('user_search_run_key')
+            ->addDescendingOrderByColumn($adapter->strLength('user_search_site_run_key'))
+            ->addDescendingOrderByColumn('user_search_site_run_key')
         ->findOne();
 
         // First duplicate slug
@@ -2403,120 +2574,12 @@ abstract class UserSearchRun implements ActiveRecordInterface
             return $slug2 . '1';
         }
 
-        $slugNum = substr($object->getUserSearchRunKey(), strlen($slug) + 1);
+        $slugNum = substr($object->getUserSearchSiteRunKey(), strlen($slug) + 1);
         if (0 == $slugNum[0]) {
             $slugNum[0] = 1;
         }
 
         return $slug2 . ($slugNum + 1);
-    }
-
-    // aggregate_column_relation_date_last_pulled behavior
-
-    /**
-     * Update the aggregate column in the related JobSiteRecordRelatedByJobSiteKey object
-     *
-     * @param ConnectionInterface $con A connection object
-     */
-    protected function updateRelatedJobSiteRecordRelatedByJobSiteKeyLastPulledAt(ConnectionInterface $con)
-    {
-        if ($jobSiteRecordRelatedByJobSiteKey = $this->getJobSiteRecordRelatedByJobSiteKey()) {
-            $jobSiteRecordRelatedByJobSiteKey->updateLastPulledAt($con);
-        }
-        if ($this->oldJobSiteRecordRelatedByJobSiteKeyLastPulledAt) {
-            $this->oldJobSiteRecordRelatedByJobSiteKeyLastPulledAt->updateLastPulledAt($con);
-            $this->oldJobSiteRecordRelatedByJobSiteKeyLastPulledAt = null;
-        }
-    }
-
-    // aggregate_column_relation_date_last_run behavior
-
-    /**
-     * Update the aggregate column in the related JobSiteRecordRelatedByJobSiteKey object
-     *
-     * @param ConnectionInterface $con A connection object
-     */
-    protected function updateRelatedJobSiteRecordRelatedByJobSiteKeyLastRunAt(ConnectionInterface $con)
-    {
-        if ($jobSiteRecordRelatedByJobSiteKey = $this->getJobSiteRecordRelatedByJobSiteKey()) {
-            $jobSiteRecordRelatedByJobSiteKey->updateLastRunAt($con);
-        }
-        if ($this->oldJobSiteRecordRelatedByJobSiteKeyLastRunAt) {
-            $this->oldJobSiteRecordRelatedByJobSiteKeyLastRunAt->updateLastRunAt($con);
-            $this->oldJobSiteRecordRelatedByJobSiteKeyLastRunAt = null;
-        }
-    }
-
-    // aggregate_column_relation_date_last_completed behavior
-
-    /**
-     * Update the aggregate column in the related JobSiteRecordRelatedByJobSiteKey object
-     *
-     * @param ConnectionInterface $con A connection object
-     */
-    protected function updateRelatedJobSiteRecordRelatedByJobSiteKeyLastCompletedAt(ConnectionInterface $con)
-    {
-        if ($jobSiteRecordRelatedByJobSiteKey = $this->getJobSiteRecordRelatedByJobSiteKey()) {
-            $jobSiteRecordRelatedByJobSiteKey->updateLastCompletedAt($con);
-        }
-        if ($this->oldJobSiteRecordRelatedByJobSiteKeyLastCompletedAt) {
-            $this->oldJobSiteRecordRelatedByJobSiteKeyLastCompletedAt->updateLastCompletedAt($con);
-            $this->oldJobSiteRecordRelatedByJobSiteKeyLastCompletedAt = null;
-        }
-    }
-
-    // aggregate_column_relation_date_last_failed behavior
-
-    /**
-     * Update the aggregate column in the related JobSiteRecordRelatedByJobSiteKey object
-     *
-     * @param ConnectionInterface $con A connection object
-     */
-    protected function updateRelatedJobSiteRecordRelatedByJobSiteKeyLastFailedAt(ConnectionInterface $con)
-    {
-        if ($jobSiteRecordRelatedByJobSiteKey = $this->getJobSiteRecordRelatedByJobSiteKey()) {
-            $jobSiteRecordRelatedByJobSiteKey->updateLastFailedAt($con);
-        }
-        if ($this->oldJobSiteRecordRelatedByJobSiteKeyLastFailedAt) {
-            $this->oldJobSiteRecordRelatedByJobSiteKeyLastFailedAt->updateLastFailedAt($con);
-            $this->oldJobSiteRecordRelatedByJobSiteKeyLastFailedAt = null;
-        }
-    }
-
-    // aggregate_column_relation_aggregate_column behavior
-
-    /**
-     * Update the aggregate column in the related JobSiteRecordRelatedByJobSiteKey object
-     *
-     * @param ConnectionInterface $con A connection object
-     */
-    protected function updateRelatedJobSiteRecordRelatedByJobSiteKeyLastUserSearchRunId(ConnectionInterface $con)
-    {
-        if ($jobSiteRecordRelatedByJobSiteKey = $this->getJobSiteRecordRelatedByJobSiteKey()) {
-            $jobSiteRecordRelatedByJobSiteKey->updateLastUserSearchRunId($con);
-        }
-        if ($this->oldJobSiteRecordRelatedByJobSiteKeyLastUserSearchRunId) {
-            $this->oldJobSiteRecordRelatedByJobSiteKeyLastUserSearchRunId->updateLastUserSearchRunId($con);
-            $this->oldJobSiteRecordRelatedByJobSiteKeyLastUserSearchRunId = null;
-        }
-    }
-
-    // aggregate_column_relation_us_date_last_completed behavior
-
-    /**
-     * Update the aggregate column in the related UserSearch object
-     *
-     * @param ConnectionInterface $con A connection object
-     */
-    protected function updateRelatedUserSearchLastCompletedAt(ConnectionInterface $con)
-    {
-        if ($userSearch = $this->getUserSearch()) {
-            $userSearch->updateLastCompletedAt($con);
-        }
-        if ($this->oldUserSearchLastCompletedAt) {
-            $this->oldUserSearchLastCompletedAt->updateLastCompletedAt($con);
-            $this->oldUserSearchLastCompletedAt = null;
-        }
     }
 
     /**
@@ -2617,34 +2680,6 @@ abstract class UserSearchRun implements ActiveRecordInterface
 
 
     /**
-     * Catches calls to undefined methods.
-     *
-     * Provides magic import/export method support (fromXML()/toXML(), fromYAML()/toYAML(), etc.).
-     * Allows to define default __call() behavior if you overwrite __call()
-     *
-     * @param string $name
-     * @param mixed  $params
-     *
-     * @return array|string
-     */
-    public function __call($name, $params)
-    {
-
-    // delegate behavior
-
-    if (is_callable(array('\JobScooper\DataAccess\UserSearch', $name))) {
-        $delegate = $this->getUserSearch();
-        if (!$delegate) {
-            $delegate = new ChildUserSearch();
-            $this->setUserSearch($delegate);
-        }
-
-        return call_user_func_array(array($delegate, $name), $params);
-    }
-        return $this->__parentCall($name, $params);
-    }
-
-    /**
      * Derived method to catches calls to undefined methods.
      *
      * Provides magic import/export method support (fromXML()/toXML(), fromYAML()/toYAML(), etc.).
@@ -2655,7 +2690,7 @@ abstract class UserSearchRun implements ActiveRecordInterface
      *
      * @return array|string
      */
-    public function __parentCall($name, $params)
+    public function __call($name, $params)
     {
         if (0 === strpos($name, 'get')) {
             $virtualColumn = substr($name, 3);

@@ -4,7 +4,7 @@ namespace JobScooper\DataAccess;
 
 use \Exception;
 use JobScooper\DataAccess\Base\JobSiteRecord as BaseJobSiteRecord;
-use Propel\Runtime\Connection\ConnectionInterface;
+use JobScooper\Plugins\Classes\BaseJobsSite;
 
 /**
  * Skeleton subclass for representing a row from the 'job_site' table.
@@ -18,47 +18,75 @@ use Propel\Runtime\Connection\ConnectionInterface;
  */
 class JobSiteRecord extends BaseJobSiteRecord
 {
-    private $_pluginObject = null;
+	/**
+	 * @var \JobScooper\Plugins\Classes\BaseJobsSite
+	 */
+	private $_pluginObject = null;
 
-    function getPluginObject()
+
+	/**
+	 * @return \JobScooper\Plugins\Classes\BaseJobsSite|null
+	 * @throws \Exception
+	 */
+	function getPlugin()
     {
-        if (is_null($this->_pluginObject))
-        {
-            try
-            {
-                $this->instantiateJobSiteClass();
-            }
-            catch (Exception $ex)
-            {
-                handleException($ex, "Unable to instantiate expected Job Site plugin class for " . $this->getJobSiteKey() . ":  %s", false);
-                return null;
-            }
-        }
+	    if (is_null($this->getPluginClassName()))
+		    throw new \Exception("Missing jobsite plugin class name for " . $this->getJobSiteKey());
 
-        return $this->_pluginObject;
+	    if (is_null($this->_pluginObject)) {
+		    try {
+			    $class = $this->getPluginClassName();
+			    if (!in_array($class, get_declared_classes())) {
+				    LogError("Unable to find declared class " . $this->getPluginClassName() . "] for plugin " . $this->getJobSiteKey());
+				    $this->_pluginObject = null;
+			    }
+
+			    $this->_pluginObject = new $class();
+
+			    setCacheItem("all_jobsites_and_plugins", $this->getJobSiteKey(), $this);
+
+			    return $this->_pluginObject;
+
+		    } catch (\Exception $ex) {
+			    LogError("Error instantiating jobsite plugin object" . $this->getJobSiteKey() . " with class name [" . $this->getPluginClassName() . "]:  " . $ex->getMessage());
+			    $this->_pluginObject = null;
+		    }
+	    }
+
+
     }
 
 
-    function instantiateJobSiteClass()
-    {
-        if (is_null($this->getPluginClassName()))
-            throw new \Exception("Missing jobsite plugin class name for " . $this->getJobSiteKey());
-
-        try {
-            $class = $this->getPluginClassName();
-            if (!in_array($class, get_declared_classes()))
-            {
-                LogError("Unable to find declared class " . $this->getPluginClassName() ."] for plugin " . $this->getJobSiteKey());
-                $this->_pluginObject = null;
-            }
-
-            $this->_pluginObject = new $class();
-        }
-        catch (\Exception $ex)
-        {
-            LogError("Error instantiating jobsite plugin object" . $this->getJobSiteKey() . " with class name [" . $this->getPluginClassName() ."]:  ". $ex->getMessage());
-            $this->_pluginObject = null;
-        }
-    }
+	/**
+	 * Derived method to catches calls to undefined methods.
+	 *
+	 *
+	 * @param string $name
+	 * @param mixed  $params
+	 *
+	 * @return array|string
+	 */
+	public function __call($method, $params)
+	{
+		if (method_exists($this, $method)) {
+			return call_user_func(
+				array($this, $method),
+					$params
+			);
+		}
+		else {
+			$plugin = $this->getPlugin();
+			if (!empty($plugin) &&
+				is_a($plugin, "\JobScooper\Plugins\Classes\BaseJobsSite") &&
+				method_exists($plugin, $method))
+			{
+				return call_user_func_array(
+					array($plugin, $method),
+					$params
+				);
+			}
+		}
+		return false;
+	}
 
 }

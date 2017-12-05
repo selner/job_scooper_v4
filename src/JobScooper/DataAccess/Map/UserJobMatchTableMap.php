@@ -72,11 +72,6 @@ class UserJobMatchTableMap extends TableMap
     const NUM_HYDRATE_COLUMNS = 12;
 
     /**
-     * the column name for the user_job_match_id field
-     */
-    const COL_USER_JOB_MATCH_ID = 'user_job_match.user_job_match_id';
-
-    /**
      * the column name for the user_id field
      */
     const COL_USER_ID = 'user_job_match.user_id';
@@ -85,6 +80,11 @@ class UserJobMatchTableMap extends TableMap
      * the column name for the jobposting_id field
      */
     const COL_JOBPOSTING_ID = 'user_job_match.jobposting_id';
+
+    /**
+     * the column name for the user_job_match_id field
+     */
+    const COL_USER_JOB_MATCH_ID = 'user_job_match.user_job_match_id';
 
     /**
      * the column name for the user_notification_state field
@@ -148,10 +148,10 @@ class UserJobMatchTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('UserJobMatchId', 'UserId', 'JobPostingId', 'UserNotificationState', 'IsJobMatch', 'IsExcluded', 'IsIncludeInNotifications', 'MatchedUserKeywords', 'MatchedNegativeTitleKeywords', 'MatchedNegativeCompanyKeywords', 'OutOfUserArea', 'AppRunId', ),
-        self::TYPE_CAMELNAME     => array('userJobMatchId', 'userId', 'jobPostingId', 'userNotificationState', 'isJobMatch', 'isExcluded', 'isIncludeInNotifications', 'matchedUserKeywords', 'matchedNegativeTitleKeywords', 'matchedNegativeCompanyKeywords', 'outOfUserArea', 'appRunId', ),
-        self::TYPE_COLNAME       => array(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, UserJobMatchTableMap::COL_USER_ID, UserJobMatchTableMap::COL_JOBPOSTING_ID, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE, UserJobMatchTableMap::COL_IS_JOB_MATCH, UserJobMatchTableMap::COL_IS_EXCLUDED, UserJobMatchTableMap::COL_IS_INCLUDE_IN_NOTIFICATIONS, UserJobMatchTableMap::COL_MATCHED_USER_KEYWORDS, UserJobMatchTableMap::COL_MATCHED_NEGATIVE_TITLE_KEYWORDS, UserJobMatchTableMap::COL_MATCHED_NEGATIVE_COMPANY_KEYWORDS, UserJobMatchTableMap::COL_OUT_OF_USER_AREA, UserJobMatchTableMap::COL_APP_RUN_ID, ),
-        self::TYPE_FIELDNAME     => array('user_job_match_id', 'user_id', 'jobposting_id', 'user_notification_state', 'is_job_match', 'is_excluded', 'is_include_in_notifications', 'matched_user_keywords', 'matched_negative_title_keywords', 'matched_negative_company_keywords', 'out_of_user_area', 'app_run_id', ),
+        self::TYPE_PHPNAME       => array('UserId', 'JobPostingId', 'UserJobMatchId', 'UserNotificationState', 'IsJobMatch', 'IsExcluded', 'IsIncludeInNotifications', 'MatchedUserKeywords', 'MatchedNegativeTitleKeywords', 'MatchedNegativeCompanyKeywords', 'OutOfUserArea', 'AppRunId', ),
+        self::TYPE_CAMELNAME     => array('userId', 'jobPostingId', 'userJobMatchId', 'userNotificationState', 'isJobMatch', 'isExcluded', 'isIncludeInNotifications', 'matchedUserKeywords', 'matchedNegativeTitleKeywords', 'matchedNegativeCompanyKeywords', 'outOfUserArea', 'appRunId', ),
+        self::TYPE_COLNAME       => array(UserJobMatchTableMap::COL_USER_ID, UserJobMatchTableMap::COL_JOBPOSTING_ID, UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE, UserJobMatchTableMap::COL_IS_JOB_MATCH, UserJobMatchTableMap::COL_IS_EXCLUDED, UserJobMatchTableMap::COL_IS_INCLUDE_IN_NOTIFICATIONS, UserJobMatchTableMap::COL_MATCHED_USER_KEYWORDS, UserJobMatchTableMap::COL_MATCHED_NEGATIVE_TITLE_KEYWORDS, UserJobMatchTableMap::COL_MATCHED_NEGATIVE_COMPANY_KEYWORDS, UserJobMatchTableMap::COL_OUT_OF_USER_AREA, UserJobMatchTableMap::COL_APP_RUN_ID, ),
+        self::TYPE_FIELDNAME     => array('user_id', 'jobposting_id', 'user_job_match_id', 'user_notification_state', 'is_job_match', 'is_excluded', 'is_include_in_notifications', 'matched_user_keywords', 'matched_negative_title_keywords', 'matched_negative_company_keywords', 'out_of_user_area', 'app_run_id', ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, )
     );
 
@@ -162,10 +162,10 @@ class UserJobMatchTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('UserJobMatchId' => 0, 'UserId' => 1, 'JobPostingId' => 2, 'UserNotificationState' => 3, 'IsJobMatch' => 4, 'IsExcluded' => 5, 'IsIncludeInNotifications' => 6, 'MatchedUserKeywords' => 7, 'MatchedNegativeTitleKeywords' => 8, 'MatchedNegativeCompanyKeywords' => 9, 'OutOfUserArea' => 10, 'AppRunId' => 11, ),
-        self::TYPE_CAMELNAME     => array('userJobMatchId' => 0, 'userId' => 1, 'jobPostingId' => 2, 'userNotificationState' => 3, 'isJobMatch' => 4, 'isExcluded' => 5, 'isIncludeInNotifications' => 6, 'matchedUserKeywords' => 7, 'matchedNegativeTitleKeywords' => 8, 'matchedNegativeCompanyKeywords' => 9, 'outOfUserArea' => 10, 'appRunId' => 11, ),
-        self::TYPE_COLNAME       => array(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID => 0, UserJobMatchTableMap::COL_USER_ID => 1, UserJobMatchTableMap::COL_JOBPOSTING_ID => 2, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE => 3, UserJobMatchTableMap::COL_IS_JOB_MATCH => 4, UserJobMatchTableMap::COL_IS_EXCLUDED => 5, UserJobMatchTableMap::COL_IS_INCLUDE_IN_NOTIFICATIONS => 6, UserJobMatchTableMap::COL_MATCHED_USER_KEYWORDS => 7, UserJobMatchTableMap::COL_MATCHED_NEGATIVE_TITLE_KEYWORDS => 8, UserJobMatchTableMap::COL_MATCHED_NEGATIVE_COMPANY_KEYWORDS => 9, UserJobMatchTableMap::COL_OUT_OF_USER_AREA => 10, UserJobMatchTableMap::COL_APP_RUN_ID => 11, ),
-        self::TYPE_FIELDNAME     => array('user_job_match_id' => 0, 'user_id' => 1, 'jobposting_id' => 2, 'user_notification_state' => 3, 'is_job_match' => 4, 'is_excluded' => 5, 'is_include_in_notifications' => 6, 'matched_user_keywords' => 7, 'matched_negative_title_keywords' => 8, 'matched_negative_company_keywords' => 9, 'out_of_user_area' => 10, 'app_run_id' => 11, ),
+        self::TYPE_PHPNAME       => array('UserId' => 0, 'JobPostingId' => 1, 'UserJobMatchId' => 2, 'UserNotificationState' => 3, 'IsJobMatch' => 4, 'IsExcluded' => 5, 'IsIncludeInNotifications' => 6, 'MatchedUserKeywords' => 7, 'MatchedNegativeTitleKeywords' => 8, 'MatchedNegativeCompanyKeywords' => 9, 'OutOfUserArea' => 10, 'AppRunId' => 11, ),
+        self::TYPE_CAMELNAME     => array('userId' => 0, 'jobPostingId' => 1, 'userJobMatchId' => 2, 'userNotificationState' => 3, 'isJobMatch' => 4, 'isExcluded' => 5, 'isIncludeInNotifications' => 6, 'matchedUserKeywords' => 7, 'matchedNegativeTitleKeywords' => 8, 'matchedNegativeCompanyKeywords' => 9, 'outOfUserArea' => 10, 'appRunId' => 11, ),
+        self::TYPE_COLNAME       => array(UserJobMatchTableMap::COL_USER_ID => 0, UserJobMatchTableMap::COL_JOBPOSTING_ID => 1, UserJobMatchTableMap::COL_USER_JOB_MATCH_ID => 2, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE => 3, UserJobMatchTableMap::COL_IS_JOB_MATCH => 4, UserJobMatchTableMap::COL_IS_EXCLUDED => 5, UserJobMatchTableMap::COL_IS_INCLUDE_IN_NOTIFICATIONS => 6, UserJobMatchTableMap::COL_MATCHED_USER_KEYWORDS => 7, UserJobMatchTableMap::COL_MATCHED_NEGATIVE_TITLE_KEYWORDS => 8, UserJobMatchTableMap::COL_MATCHED_NEGATIVE_COMPANY_KEYWORDS => 9, UserJobMatchTableMap::COL_OUT_OF_USER_AREA => 10, UserJobMatchTableMap::COL_APP_RUN_ID => 11, ),
+        self::TYPE_FIELDNAME     => array('user_id' => 0, 'jobposting_id' => 1, 'user_job_match_id' => 2, 'user_notification_state' => 3, 'is_job_match' => 4, 'is_excluded' => 5, 'is_include_in_notifications' => 6, 'matched_user_keywords' => 7, 'matched_negative_title_keywords' => 8, 'matched_negative_company_keywords' => 9, 'out_of_user_area' => 10, 'app_run_id' => 11, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, )
     );
 
@@ -215,23 +215,24 @@ class UserJobMatchTableMap extends TableMap
         $this->setClassName('\\JobScooper\\DataAccess\\UserJobMatch');
         $this->setPackage('JobScooper.DataAccess');
         $this->setUseIdGenerator(true);
+        $this->setIsCrossRef(true);
         // columns
-        $this->addPrimaryKey('user_job_match_id', 'UserJobMatchId', 'INTEGER', true, null, null);
-        $this->addForeignKey('user_id', 'UserId', 'VARCHAR', 'user', 'user_id', true, 128, null);
-        $this->addForeignKey('jobposting_id', 'JobPostingId', 'INTEGER', 'jobposting', 'jobposting_id', true, null, null);
+        $this->addForeignPrimaryKey('user_id', 'UserId', 'INTEGER' , 'user', 'user_id', true, null, null);
+        $this->addForeignPrimaryKey('jobposting_id', 'JobPostingId', 'INTEGER' , 'jobposting', 'jobposting_id', true, null, null);
+        $this->addColumn('user_job_match_id', 'UserJobMatchId', 'INTEGER', true, null, null);
         $this->addColumn('user_notification_state', 'UserNotificationState', 'ENUM', false, null, 'not-ready');
         $this->getColumn('user_notification_state')->setValueSet(array (
   0 => 'not-ready',
   1 => 'ready',
   2 => 'sent',
 ));
-        $this->addColumn('is_job_match', 'IsJobMatch', 'BOOLEAN', false, null, null);
-        $this->addColumn('is_excluded', 'IsExcluded', 'BOOLEAN', false, null, null);
-        $this->addColumn('is_include_in_notifications', 'IsIncludeInNotifications', 'BOOLEAN', false, null, null);
+        $this->addColumn('is_job_match', 'IsJobMatch', 'BOOLEAN', false, 1, null);
+        $this->addColumn('is_excluded', 'IsExcluded', 'BOOLEAN', false, 1, null);
+        $this->addColumn('is_include_in_notifications', 'IsIncludeInNotifications', 'BOOLEAN', false, 1, null);
         $this->addColumn('matched_user_keywords', 'MatchedUserKeywords', 'ARRAY', false, null, null);
         $this->addColumn('matched_negative_title_keywords', 'MatchedNegativeTitleKeywords', 'ARRAY', false, null, null);
         $this->addColumn('matched_negative_company_keywords', 'MatchedNegativeCompanyKeywords', 'ARRAY', false, null, null);
-        $this->addColumn('out_of_user_area', 'OutOfUserArea', 'BOOLEAN', false, null, null);
+        $this->addColumn('out_of_user_area', 'OutOfUserArea', 'BOOLEAN', false, 1, null);
         $this->addColumn('app_run_id', 'AppRunId', 'VARCHAR', false, 75, null);
     } // initialize()
 
@@ -240,21 +241,74 @@ class UserJobMatchTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('User', '\\JobScooper\\DataAccess\\User', RelationMap::MANY_TO_ONE, array (
+        $this->addRelation('UserFromUJM', '\\JobScooper\\DataAccess\\User', RelationMap::MANY_TO_ONE, array (
   0 =>
   array (
     0 => ':user_id',
     1 => ':user_id',
   ),
-), null, null, null, false);
-        $this->addRelation('JobPosting', '\\JobScooper\\DataAccess\\JobPosting', RelationMap::MANY_TO_ONE, array (
+), 'CASCADE', null, null, false);
+        $this->addRelation('JobPostingFromUJM', '\\JobScooper\\DataAccess\\JobPosting', RelationMap::MANY_TO_ONE, array (
   0 =>
   array (
     0 => ':jobposting_id',
     1 => ':jobposting_id',
   ),
-), null, null, null, false);
+), 'CASCADE', null, null, false);
     } // buildRelations()
+
+    /**
+     * Adds an object to the instance pool.
+     *
+     * Propel keeps cached copies of objects in an instance pool when they are retrieved
+     * from the database. In some cases you may need to explicitly add objects
+     * to the cache in order to ensure that the same objects are always returned by find*()
+     * and findPk*() calls.
+     *
+     * @param \JobScooper\DataAccess\UserJobMatch $obj A \JobScooper\DataAccess\UserJobMatch object.
+     * @param string $key             (optional) key to use for instance map (for performance boost if key was already calculated externally).
+     */
+    public static function addInstanceToPool($obj, $key = null)
+    {
+        if (Propel::isInstancePoolingEnabled()) {
+            if (null === $key) {
+                $key = serialize([(null === $obj->getUserId() || is_scalar($obj->getUserId()) || is_callable([$obj->getUserId(), '__toString']) ? (string) $obj->getUserId() : $obj->getUserId()), (null === $obj->getJobPostingId() || is_scalar($obj->getJobPostingId()) || is_callable([$obj->getJobPostingId(), '__toString']) ? (string) $obj->getJobPostingId() : $obj->getJobPostingId())]);
+            } // if key === null
+            self::$instances[$key] = $obj;
+        }
+    }
+
+    /**
+     * Removes an object from the instance pool.
+     *
+     * Propel keeps cached copies of objects in an instance pool when they are retrieved
+     * from the database.  In some cases -- especially when you override doDelete
+     * methods in your stub classes -- you may need to explicitly remove objects
+     * from the cache in order to prevent returning objects that no longer exist.
+     *
+     * @param mixed $value A \JobScooper\DataAccess\UserJobMatch object or a primary key value.
+     */
+    public static function removeInstanceFromPool($value)
+    {
+        if (Propel::isInstancePoolingEnabled() && null !== $value) {
+            if (is_object($value) && $value instanceof \JobScooper\DataAccess\UserJobMatch) {
+                $key = serialize([(null === $value->getUserId() || is_scalar($value->getUserId()) || is_callable([$value->getUserId(), '__toString']) ? (string) $value->getUserId() : $value->getUserId()), (null === $value->getJobPostingId() || is_scalar($value->getJobPostingId()) || is_callable([$value->getJobPostingId(), '__toString']) ? (string) $value->getJobPostingId() : $value->getJobPostingId())]);
+
+            } elseif (is_array($value) && count($value) === 2) {
+                // assume we've been passed a primary key";
+                $key = serialize([(null === $value[0] || is_scalar($value[0]) || is_callable([$value[0], '__toString']) ? (string) $value[0] : $value[0]), (null === $value[1] || is_scalar($value[1]) || is_callable([$value[1], '__toString']) ? (string) $value[1] : $value[1])]);
+            } elseif ($value instanceof Criteria) {
+                self::$instances = [];
+
+                return;
+            } else {
+                $e = new PropelException("Invalid value passed to removeInstanceFromPool().  Expected primary key or \JobScooper\DataAccess\UserJobMatch object; got " . (is_object($value) ? get_class($value) . ' object.' : var_export($value, true)));
+                throw $e;
+            }
+
+            unset(self::$instances[$key]);
+        }
+    }
 
     /**
      * Retrieves a string version of the primary key from the DB resultset row that can be used to uniquely identify a row in this table.
@@ -272,11 +326,11 @@ class UserJobMatchTableMap extends TableMap
     public static function getPrimaryKeyHashFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
         // If the PK cannot be derived from the row, return NULL.
-        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserJobMatchId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
+        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] === null && $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('JobPostingId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
             return null;
         }
 
-        return null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserJobMatchId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserJobMatchId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserJobMatchId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserJobMatchId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserJobMatchId', TableMap::TYPE_PHPNAME, $indexType)];
+        return serialize([(null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)]), (null === $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('JobPostingId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('JobPostingId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('JobPostingId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('JobPostingId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('JobPostingId', TableMap::TYPE_PHPNAME, $indexType)])]);
     }
 
     /**
@@ -293,11 +347,20 @@ class UserJobMatchTableMap extends TableMap
      */
     public static function getPrimaryKeyFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-        return (int) $row[
+            $pks = [];
+
+        $pks[] = (int) $row[
             $indexType == TableMap::TYPE_NUM
                 ? 0 + $offset
-                : self::translateFieldName('UserJobMatchId', TableMap::TYPE_PHPNAME, $indexType)
+                : self::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)
         ];
+        $pks[] = (int) $row[
+            $indexType == TableMap::TYPE_NUM
+                ? 1 + $offset
+                : self::translateFieldName('JobPostingId', TableMap::TYPE_PHPNAME, $indexType)
+        ];
+
+        return $pks;
     }
 
     /**
@@ -397,9 +460,9 @@ class UserJobMatchTableMap extends TableMap
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
-            $criteria->addSelectColumn(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID);
             $criteria->addSelectColumn(UserJobMatchTableMap::COL_USER_ID);
             $criteria->addSelectColumn(UserJobMatchTableMap::COL_JOBPOSTING_ID);
+            $criteria->addSelectColumn(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID);
             $criteria->addSelectColumn(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
             $criteria->addSelectColumn(UserJobMatchTableMap::COL_IS_JOB_MATCH);
             $criteria->addSelectColumn(UserJobMatchTableMap::COL_IS_EXCLUDED);
@@ -410,9 +473,9 @@ class UserJobMatchTableMap extends TableMap
             $criteria->addSelectColumn(UserJobMatchTableMap::COL_OUT_OF_USER_AREA);
             $criteria->addSelectColumn(UserJobMatchTableMap::COL_APP_RUN_ID);
         } else {
-            $criteria->addSelectColumn($alias . '.user_job_match_id');
             $criteria->addSelectColumn($alias . '.user_id');
             $criteria->addSelectColumn($alias . '.jobposting_id');
+            $criteria->addSelectColumn($alias . '.user_job_match_id');
             $criteria->addSelectColumn($alias . '.user_notification_state');
             $criteria->addSelectColumn($alias . '.is_job_match');
             $criteria->addSelectColumn($alias . '.is_excluded');
@@ -473,7 +536,17 @@ class UserJobMatchTableMap extends TableMap
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
             $criteria = new Criteria(UserJobMatchTableMap::DATABASE_NAME);
-            $criteria->add(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, (array) $values, Criteria::IN);
+            // primary key is composite; we therefore, expect
+            // the primary key passed to be an array of pkey values
+            if (count($values) == count($values, COUNT_RECURSIVE)) {
+                // array is not multi-dimensional
+                $values = array($values);
+            }
+            foreach ($values as $value) {
+                $criterion = $criteria->getNewCriterion(UserJobMatchTableMap::COL_USER_ID, $value[0]);
+                $criterion->addAnd($criteria->getNewCriterion(UserJobMatchTableMap::COL_JOBPOSTING_ID, $value[1]));
+                $criteria->addOr($criterion);
+            }
         }
 
         $query = UserJobMatchQuery::create()->mergeWith($criteria);
@@ -519,10 +592,6 @@ class UserJobMatchTableMap extends TableMap
             $criteria = clone $criteria; // rename for clarity
         } else {
             $criteria = $criteria->buildCriteria(); // build Criteria from UserJobMatch object
-        }
-
-        if ($criteria->containsKey(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID) && $criteria->keyContainsValue(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID) ) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key ('.UserJobMatchTableMap::COL_USER_JOB_MATCH_ID.')');
         }
 
 

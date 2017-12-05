@@ -433,7 +433,7 @@ class NotifierJobAlerts extends JobsMailSender
         // if the plugin also errored, then add an asterisk to the name
         // for reference in the email
         //
-        $arrFailedJobsites = \JobScooper\DataAccess\UserSearchRunQuery::create()
+        $arrFailedJobsites = \JobScooper\DataAccess\UserSearchSiteRunQuery::create()
             ->select("JobSiteKey")
             ->filterByRunResultCode("failed")
             ->find()
@@ -444,7 +444,7 @@ class NotifierJobAlerts extends JobsMailSender
         // if the plugin also errored, then add an asterisk to the name
         // for reference in the email
         //
-        $arrJobsitesRecentlyUpdated = \JobScooper\DataAccess\UserSearchRunQuery::create()
+        $arrJobsitesRecentlyUpdated = \JobScooper\DataAccess\UserSearchSiteRunQuery::create()
             ->select("JobSiteKey")
             ->filterByStartedAt(date_sub(new \DateTime(), date_interval_create_from_date_string('40hours')))
             ->find()
@@ -568,10 +568,10 @@ class NotifierJobAlerts extends JobsMailSender
             $strOut .= PHP_EOL;
         }
 
-//        if($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] != null && count($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']) > 0)
+//        if($GLOBALS['JOBSCOOPER']['excluded_sites'] != null && count($GLOBALS['JOBSCOOPER']['excluded_sites']) > 0)
 //        {
-//            sort($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']);
-//            $strExcluded = getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'], ", ", "Sites excluded by user or settings: ", false);
+//            sort($GLOBALS['JOBSCOOPER']['excluded_sites']);
+//            $strExcluded = getArrayValuesAsString($GLOBALS['JOBSCOOPER']['excluded_sites'], ", ", "Sites excluded by user or settings: ", false);
 //            $strOut .= $strExcluded;
 //        }
 //
@@ -634,12 +634,12 @@ class NotifierJobAlerts extends JobsMailSender
         }
 
 //
-//        if($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'] != null && count($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']) > 0)
+//        if($GLOBALS['JOBSCOOPER']['excluded_sites'] != null && count($GLOBALS['JOBSCOOPER']['excluded_sites']) > 0)
 //        {
 //            $strOut .=  PHP_EOL . "<div class=\"job_scooper section\">". PHP_EOL;
-//            sort($GLOBALS['USERDATA']['configuration_settings']['excluded_sites']);
+//            sort($GLOBALS['JOBSCOOPER']['excluded_sites']);
 //
-//            $strExcluded = getArrayValuesAsString($GLOBALS['USERDATA']['configuration_settings']['excluded_sites'], ", ", "", false);
+//            $strExcluded = getArrayValuesAsString($GLOBALS['JOBSCOOPER']['excluded_sites'], ", ", "", false);
 //            $strOut  .= "<H2>Excluded Job Sites</H2>".PHP_EOL. PHP_EOL;
 //
 //            $strOut .=  PHP_EOL .  "<span style=\"font-size: xx-small; \">Excluded sites for this run:" . $strExcluded . "</span>" . PHP_EOL;

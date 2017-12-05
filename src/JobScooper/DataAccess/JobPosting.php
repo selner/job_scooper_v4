@@ -383,13 +383,13 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 //        }
 //
 //        try {
-//            return $this->getByName($name, \JobScooper\DataAccess\Map\UserSearchRunTableMap::TYPE_FIELDNAME);
+//            return $this->getByName($name, \JobScooper\DataAccess\Map\UserSearchSiteRunTableMap::TYPE_FIELDNAME);
 //        } catch (Exception $ex) {
 //            $throwEx = $ex;
 //        }
 //
 //        try {
-//            return $this->getByName($name, \JobScooper\DataAccess\Map\UserSearchRunTableMap::TYPE_COLNAME);
+//            return $this->getByName($name, \JobScooper\DataAccess\Map\UserSearchSiteRunTableMap::TYPE_COLNAME);
 //        } catch (Exception $ex) {
 //            $throwEx = $ex;
 //        }
@@ -468,21 +468,21 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 //                }
 //
 //                try {
-//                    $this->setByName($name, \JobScooper\DataAccess\Map\UserSearchRunTableMap::TYPE_FIELDNAME, $value);
+//                    $this->setByName($name, \JobScooper\DataAccess\Map\UserSearchSiteRunTableMap::TYPE_FIELDNAME, $value);
 //                    $throwEx = null;
 //                } catch (\Exception $ex) {
 //                    $throwEx = $ex;
 //                }
 //
 //                try {
-//                    $this->setByName($name, \JobScooper\DataAccess\Map\UserSearchRunTableMap::TYPE_COLNAME, $value);
+//                    $this->setByName($name, \JobScooper\DataAccess\Map\UserSearchSiteRunTableMap::TYPE_COLNAME, $value);
 //                    $throwEx = null;
 //                } catch (\Exception $ex) {
 //                    $throwEx = $ex;
 //                }
 //
 //                try {
-//                    $this->setByName($name, \JobScooper\DataAccess\Map\UserSearchRunTableMap::TYPE_CAMELNAME, $value);
+//                    $this->setByName($name, \JobScooper\DataAccess\Map\UserSearchSiteRunTableMap::TYPE_CAMELNAME, $value);
 //                    $throwEx = null;
 //                } catch (\Exception $ex) {
 //                    $throwEx = $ex;

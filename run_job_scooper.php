@@ -14,14 +14,20 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-define('__ROOT__', dirname(__FILE__));
+
+
 ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
-define('MAX_FILE_SIZE', 5000000);
-const C__APPNAME__ = "jobs_scooper";
-const C__SRC_LOCATION = "https://github.com/selner/job_scooper_v4";
-define('__APP_VERSION__', "v4.1.0-update-user-search-model");
 $lineEnding = ini_get('auto_detect_line_endings');
 ini_set('auto_detect_line_endings', true);
+date_default_timezone_set("America/Los_Angeles");
+
+const C__APPNAME__ = "jobs_scooper";
+const __APP_VERSION__ = "v4.1.0-update-user-search-model";
+const C__SRC_LOCATION = "https://github.com/selner/job_scooper_v4";
+const C__STR_USER_AGENT__ = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36";
+
+define('MAX_FILE_SIZE', 5000000);
+define('__ROOT__', dirname(__FILE__));
 
 $autoload = join(DIRECTORY_SEPARATOR, array(__ROOT__, 'vendor', 'autoload.php'));
 if (file_exists($autoload)) {
@@ -30,16 +36,26 @@ if (file_exists($autoload)) {
     trigger_error("Composer required to run this app.");
 }
 
+$cmdline = new \JobScooper\Utils\DocOptions(__file__);
+$arguments = $cmdline->getAll();
+
+setConfigurationSetting('command_line_args', $arguments);
+//$GLOBALS['JOBSCOOPER']['command_line_args'] = $arguments;
+//
+//$GLOBALS['JOBSCOOPER']['command_line_args'] = $arguments;
+//array_add_element($GLOBALS, "JOBSCOOPER.command_line_args", $arguments);
+
+$config = new \JobScooper\Builders\ConfigBuilder($arguments["configfile"]);
+
+// Import files - multiple formats in the same way
 $GLOBALS['logger'] = new \JobScooper\Manager\LoggingManager(C__APPNAME__);
 
 $propelConfig = join(DIRECTORY_SEPARATOR, array(__ROOT__, 'Config', 'config.php'));
 if (file_exists($propelConfig)) {
-    require_once($propelConfig);
+ require_once($propelConfig);
 } else {
-    trigger_error("Missing runtime configuration file at {$propelConfig} for your setup. ");
+ trigger_error("Missing runtime configuration file at {$propelConfig} for your setup. ");
 }
 
 $classRunJobs = new \JobScooper\Manager\StageManager();
 $classRunJobs->runAll();
-
-

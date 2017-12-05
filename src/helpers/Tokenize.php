@@ -86,13 +86,8 @@ function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "ke
     fclose($file);
 
     $tmpTokenizedWords = callTokenizer($inputFile, $outputFile, $dataKeyName, $indexKeyName);
-    $valInterimFiles = get_PharseOptionValue('output_interim_files');
-
-    if (isset($valInterimFiles) && $valInterimFiles != true) {
-        unlink($inputFile);
-        unlink($outputFile);
-    }
-
+    unlink($inputFile);
+    unlink($outputFile);
 
     return $tmpTokenizedWords;
 }
