@@ -90,12 +90,15 @@ RUN python -m nltk.downloader -d /root/nltk_data all
 ## that we need for geospatial queries
 ##
 #######################################################
-RUN mkdir /opt/sqlite
-RUN mkdir /opt/sqlite/extensions
-RUN echo "Downloading and compiling SQLite3 math extensions..."
-RUN wget https://www.sqlite.org/contrib/download/extension-functions.c?get=25 -O /opt/sqlite/extensions/extension-functions.c
-RUN gcc -fPIC -lm -shared /opt/sqlite/extensions/extension-functions.c -o /opt/sqlite/extensions/libsqlitefunctions.so
-ADD ./Config/etc/30-pdo_sqlite_ext.ini /etc/php5/cli/conf.d/30-pdo_sqlite_ext.ini
+##
+### Uncomment these lines if you are using SQLite
+##
+# RUN mkdir /opt/sqlite
+# RUN mkdir /opt/sqlite/extensions
+# RUN echo "Downloading and compiling SQLite3 math extensions..."
+# RUN wget https://www.sqlite.org/contrib/download/extension-functions.c?get=25 -O /opt/sqlite/extensions/extension-functions.c
+# RUN gcc -fPIC -lm -shared /opt/sqlite/extensions/extension-functions.c -o /opt/sqlite/extensions/libsqlitefunctions.so
+# ADD ./Config/etc/30-pdo_sqlite_ext.ini /etc/php5/cli/conf.d/30-pdo_sqlite_ext.ini
 
 ########################################################
 ###
