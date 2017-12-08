@@ -35,11 +35,17 @@ use Propel\Runtime\ActiveQuery\Criteria;
 class LocationManager
 {
 
-    static function getLocationManager()
+	/**
+	 * @return LocationManager
+	 */
+	static function getLocationManager()
     {
         return $GLOBALS['CACHES']['LOCATION_MANAGER'];
     }
 
+	/**
+	 * @return LocationManager
+	 */
     static function create()
     {
         $GLOBALS['CACHES']['LOCATION_MANAGER'] = new LocationManager();
@@ -113,14 +119,10 @@ class LocationManager
 
     }
 
-    function getId($strId)
-    {
-        return \JobScooper\DataAccess\GeoLocationQuery::create()
-            ->filterByGeoLocationId($strId)
-            ->findOne();
-    }
-
-    function getAddress($strAddress)
+	/**
+	 * @return GeoLocation|null
+	 */
+	function getAddress($strAddress)
     {
         $lookupAddress = $strAddress;
 //        if(substr($strAddress, 1, 1) == "(" && substr($v, len($v)-1, 1) == ")")
@@ -212,7 +214,10 @@ class LocationManager
         return cleanupSlugPart($strAddress, $replacement = "_");
     }
 
-    private function returnGeoLocationFromCacheItem($itemKey, $itemVal)
+	/**
+	 * @return GeoLocation|null
+	 */
+	private function returnGeoLocationFromCacheItem($itemKey, $itemVal)
     {
         // make sure we've just got an ID like we thought
         if (is_numeric($itemVal) && $itemVal != LocationManager::UNABLE_TO_GEOCODE_ADDRESS) {
