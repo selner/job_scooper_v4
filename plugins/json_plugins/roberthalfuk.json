@@ -16,7 +16,7 @@
           "Pattern": "/.*?of\\s(\\d+)\\s*/",
           "Callback": "combineTextAllChildren",
           "Index": 0,
-          "Attribute": "collection",
+          "Attribute": "node",
           "Type": "CSS"
         },
         {
