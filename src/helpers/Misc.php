@@ -458,6 +458,9 @@ function getRunDateRange()
 function combineTextAllChildren($node, $fRecursed = false)
 {
 
+	if(empty($node))
+		return null;
+
     $retStr = "";
     if (is_array($node) && count($node) > 1) {
         $strError = sprintf("Warning:  " . count($node) . " DOM nodes were sent to combineTextAllChildren instead of a single starting node.  Using first node only.");
@@ -486,7 +489,8 @@ function combineTextAllChildren($node, $fRecursed = false)
 function combineTextAllNodes($nodes)
 {
     $retStr = "";
-    if ($nodes) {
+	if(!empty($nodes))
+	{
         foreach ($nodes as $node) {
             if($retStr != "")
                 $retStr = $retStr . ", ";
