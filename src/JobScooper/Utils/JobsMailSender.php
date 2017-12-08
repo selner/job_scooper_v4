@@ -40,7 +40,8 @@ class JobsMailSender extends PHPMailer
     function sendEmail($strBodyText = null, $strBodyHTML = null, $arrDetailsAttachFiles = array(), $subject="No subject", $emailKind='results')
     {
         if($this->alwaysNotify === false) {
-            if (!isset($GLOBALS['OPTS']['send_notifications']) || $GLOBALS['OPTS']['send_notifications'] != 1) {
+        	$skipNotify = getGlobalConfigOptionBoolean("command_line_args.disable-notifications");
+            if ($skipNotify === true) {
                 LogLine(PHP_EOL . "User set -send_notifications = false so skipping email notification.)" . PHP_EOL, \C__DISPLAY_NORMAL__);
                 LogLine("Mail contents would have been:" . PHP_EOL . $strBodyText, \C__DISPLAY_NORMAL__);
                 return null;
