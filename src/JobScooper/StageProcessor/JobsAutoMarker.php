@@ -390,20 +390,30 @@ class JobsAutoMarker
             LogLine("Checking " . count($arrJobsList) . " roles against " . count($usrSearchKeywords) . " keyword phrases in titles...", \C__DISPLAY_ITEM_DETAIL__);
 
             try {
-                foreach ($arrJobsList as $jobMatch) {
-                    $strJobTitleTokens = $jobMatch->getJobPostingFromUJM()->getTitleTokens();
-                    $jobId = $jobMatch->getJobPostingId();
-                    if(is_null($strJobTitleTokens) || strlen($strJobTitleTokens) == 0 )
-                        throw new Exception("Cannot match user search keywords against job title token.  JobTitleTokens column for job_posting id#{$jobId} is null.");
-                    $foundAllUserKeywords = in_string_array($strJobTitleTokens, $usrSearchKeywords);
-                    if ($foundAllUserKeywords !== false) {
-                        $jobMatch->setMatchedUserKeywords($usrSearchKeywords);
-                        $jobMatch->save();
-                        $nJobsMarkedInclude += 1;
-                    }
-                    if($foundAllUserKeywords !== true)
-                        $nJobsNotMarked += 1;
-                }
+	            foreach ($arrJobsList as $jobMatch) {
+		            $foundAllUserKeywords = false;
+		            $strJobTitleTokens = $jobMatch->getJobPostingFromUJM()->getTitleTokens();
+		            $jobId = $jobMatch->getJobPostingId();
+		            if (is_null($strJobTitleTokens) || strlen($strJobTitleTokens) == 0)
+			            throw new Exception("Cannot match user search keywords against job title token.  JobTitleTokens column for job_posting id#{$jobId} is null.");
+		            foreach ($usrSearchKeywords as $kwd_subset) {
+			            $arrKwdSubset = preg_split("/\s/", $kwd_subset);
+			            $foundAllUserKeywords = in_string_array($strJobTitleTokens, $arrKwdSubset);
+			            if ($foundAllUserKeywords !== false) {
+				            $jobMatch->setMatchedUserKeywords($usrSearchKeywords);
+				            $jobMatch->save();
+				            $nJobsMarkedInclude += 1;
+				            break;
+			            }
+		            }
+
+		            if ($foundAllUserKeywords !== true)
+		            {
+			            $jobMatch->setIsJobMatch(false);
+			            $jobMatch->save();
+			            $nJobsNotMarked += 1;
+		            }
+	            }
             } catch (Exception $ex) {
                 handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s', isDebug());
             }
