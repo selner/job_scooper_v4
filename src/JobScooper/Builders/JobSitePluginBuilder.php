@@ -68,7 +68,7 @@ class JobSitePluginBuilder
 
 	static function setIncludedJobSites($sitesInclude)
 	{
-		setAsCacheData("included_jobsites", $sitesInclude);
+		$GLOBALS[JOBSCOOPER_CACHES_ROOT]["included_jobsites"] = $sitesInclude;
 	}
 
 	static function getExcludedJobSites()
