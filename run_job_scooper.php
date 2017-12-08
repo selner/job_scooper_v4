@@ -40,10 +40,6 @@ $cmdline = new \JobScooper\Utils\DocOptions(__FILE__);
 $arguments = $cmdline->getAll();
 
 setConfigurationSetting('command_line_args', $arguments);
-//$GLOBALS['JOBSCOOPER']['command_line_args'] = $arguments;
-//
-//$GLOBALS['JOBSCOOPER']['command_line_args'] = $arguments;
-//array_add_element($GLOBALS, "JOBSCOOPER.command_line_args", $arguments);
 
 $config = new \JobScooper\Builders\ConfigBuilder($arguments["configfile"]);
 
