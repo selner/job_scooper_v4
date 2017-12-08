@@ -837,13 +837,13 @@ abstract class JobSiteRecord implements ActiveRecordInterface
                     foreach ($this->combinationCollUserSearchFromUSSRAppRunIdsScheduledForDeletion as $combination) {
                         $entryPk = [];
 
-                        $entryPk[4] = $this->getJobSiteKey();
-                        $entryPk[0] = $combination[0]->getUserId();
-                        $entryPk[1] = $combination[0]->getUserKeywordSetId();
-                        $entryPk[2] = $combination[0]->getGeoLocationId();
-                        $entryPk[3] = $combination[0]->getUserSearchId();
+                        $entryPk[2] = $this->getJobSiteKey();
+                        $entryPk[] = $combination[0]->getUserId();
+                        $entryPk[0] = $combination[0]->getUserKeywordSetKey();
+                        $entryPk[1] = $combination[0]->getGeoLocationId();
+                        $entryPk[] = $combination[0]->getUserSearchKey();
                         //$combination[1] = AppRunId;
-                        $entryPk[5] = $combination[1];
+                        $entryPk[3] = $combination[1];
 
                         $pks[] = $entryPk;
                     }
@@ -860,7 +860,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
             if (null !== $this->combinationCollUserSearchFromUSSRAppRunIds) {
                 foreach ($this->combinationCollUserSearchFromUSSRAppRunIds as $combination) {
 
-                    //$combination[0] = UserSearch (user_search_site_run_fk_4d3978)
+                    //$combination[0] = UserSearch (user_search_site_run_fk_03b478)
                     if (!$combination[0]->isDeleted() && ($combination[0]->isNew() || $combination[0]->isModified())) {
                         $combination[0]->save($con);
                     }
@@ -1967,31 +1967,6 @@ abstract class JobSiteRecord implements ActiveRecordInterface
     {
         $query = ChildUserSearchSiteRunQuery::create(null, $criteria);
         $query->joinWith('UserFromUSSR', $joinBehavior);
-
-        return $this->getUserSearchSiteRuns($query, $con);
-    }
-
-
-    /**
-     * If this collection has already been initialized with
-     * an identical criteria, it returns the collection.
-     * Otherwise if this JobSiteRecord is new, it will return
-     * an empty collection; or if this JobSiteRecord has previously
-     * been saved, it will retrieve related UserSearchSiteRuns from storage.
-     *
-     * This method is protected by default in order to keep the public
-     * api reasonable.  You can provide public methods for those you
-     * actually need in JobSiteRecord.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
-     * @return ObjectCollection|ChildUserSearchSiteRun[] List of ChildUserSearchSiteRun objects
-     */
-    public function getUserSearchSiteRunsJoinUserKeywordSetFromUSSR(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
-    {
-        $query = ChildUserSearchSiteRunQuery::create(null, $criteria);
-        $query->joinWith('UserKeywordSetFromUSSR', $joinBehavior);
 
         return $this->getUserSearchSiteRuns($query, $con);
     }

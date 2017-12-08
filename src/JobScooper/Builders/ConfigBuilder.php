@@ -63,7 +63,7 @@ class ConfigBuilder
         LogDebug("Setting up application... ", \C__DISPLAY_SECTION_START__);
 
         $now = new \DateTime();
-        $GLOBALS['JOBSCOOPER']['app_run_id'] = __APP_VERSION__ . "-".$now->format('YmdHi');
+        setConfigurationSetting('app_run_id', $now->format('Ymd_Hi_') .__APP_VERSION__);
 
 
         $configpath = getConfigurationSetting("command_line_args.configfile");

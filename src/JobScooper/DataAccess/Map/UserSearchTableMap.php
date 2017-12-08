@@ -59,7 +59,7 @@ class UserSearchTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 7;
+    const NUM_COLUMNS = 6;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class UserSearchTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 7;
+    const NUM_HYDRATE_COLUMNS = 6;
 
     /**
      * the column name for the user_id field
@@ -77,9 +77,9 @@ class UserSearchTableMap extends TableMap
     const COL_USER_ID = 'user_search.user_id';
 
     /**
-     * the column name for the user_keyword_set_id field
+     * the column name for the user_keyword_set_key field
      */
-    const COL_USER_KEYWORD_SET_ID = 'user_search.user_keyword_set_id';
+    const COL_USER_KEYWORD_SET_KEY = 'user_search.user_keyword_set_key';
 
     /**
      * the column name for the geolocation_id field
@@ -87,9 +87,9 @@ class UserSearchTableMap extends TableMap
     const COL_GEOLOCATION_ID = 'user_search.geolocation_id';
 
     /**
-     * the column name for the user_search_id field
+     * the column name for the user_search_key field
      */
-    const COL_USER_SEARCH_ID = 'user_search.user_search_id';
+    const COL_USER_SEARCH_KEY = 'user_search.user_search_key';
 
     /**
      * the column name for the date_created field
@@ -100,11 +100,6 @@ class UserSearchTableMap extends TableMap
      * the column name for the date_updated field
      */
     const COL_DATE_UPDATED = 'user_search.date_updated';
-
-    /**
-     * the column name for the user_search_key field
-     */
-    const COL_USER_SEARCH_KEY = 'user_search.user_search_key';
 
     /**
      * The default string format for model objects of the related table
@@ -118,11 +113,11 @@ class UserSearchTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('UserId', 'UserKeywordSetId', 'GeoLocationId', 'UserSearchId', 'CreatedAt', 'UpdatedAt', 'UserSearchKey', ),
-        self::TYPE_CAMELNAME     => array('userId', 'userKeywordSetId', 'geoLocationId', 'userSearchId', 'createdAt', 'updatedAt', 'userSearchKey', ),
-        self::TYPE_COLNAME       => array(UserSearchTableMap::COL_USER_ID, UserSearchTableMap::COL_USER_KEYWORD_SET_ID, UserSearchTableMap::COL_GEOLOCATION_ID, UserSearchTableMap::COL_USER_SEARCH_ID, UserSearchTableMap::COL_DATE_CREATED, UserSearchTableMap::COL_DATE_UPDATED, UserSearchTableMap::COL_USER_SEARCH_KEY, ),
-        self::TYPE_FIELDNAME     => array('user_id', 'user_keyword_set_id', 'geolocation_id', 'user_search_id', 'date_created', 'date_updated', 'user_search_key', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, )
+        self::TYPE_PHPNAME       => array('UserId', 'UserKeywordSetKey', 'GeoLocationId', 'UserSearchKey', 'CreatedAt', 'UpdatedAt', ),
+        self::TYPE_CAMELNAME     => array('userId', 'userKeywordSetKey', 'geoLocationId', 'userSearchKey', 'createdAt', 'updatedAt', ),
+        self::TYPE_COLNAME       => array(UserSearchTableMap::COL_USER_ID, UserSearchTableMap::COL_USER_KEYWORD_SET_KEY, UserSearchTableMap::COL_GEOLOCATION_ID, UserSearchTableMap::COL_USER_SEARCH_KEY, UserSearchTableMap::COL_DATE_CREATED, UserSearchTableMap::COL_DATE_UPDATED, ),
+        self::TYPE_FIELDNAME     => array('user_id', 'user_keyword_set_key', 'geolocation_id', 'user_search_key', 'date_created', 'date_updated', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
     );
 
     /**
@@ -132,11 +127,11 @@ class UserSearchTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('UserId' => 0, 'UserKeywordSetId' => 1, 'GeoLocationId' => 2, 'UserSearchId' => 3, 'CreatedAt' => 4, 'UpdatedAt' => 5, 'UserSearchKey' => 6, ),
-        self::TYPE_CAMELNAME     => array('userId' => 0, 'userKeywordSetId' => 1, 'geoLocationId' => 2, 'userSearchId' => 3, 'createdAt' => 4, 'updatedAt' => 5, 'userSearchKey' => 6, ),
-        self::TYPE_COLNAME       => array(UserSearchTableMap::COL_USER_ID => 0, UserSearchTableMap::COL_USER_KEYWORD_SET_ID => 1, UserSearchTableMap::COL_GEOLOCATION_ID => 2, UserSearchTableMap::COL_USER_SEARCH_ID => 3, UserSearchTableMap::COL_DATE_CREATED => 4, UserSearchTableMap::COL_DATE_UPDATED => 5, UserSearchTableMap::COL_USER_SEARCH_KEY => 6, ),
-        self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_keyword_set_id' => 1, 'geolocation_id' => 2, 'user_search_id' => 3, 'date_created' => 4, 'date_updated' => 5, 'user_search_key' => 6, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, )
+        self::TYPE_PHPNAME       => array('UserId' => 0, 'UserKeywordSetKey' => 1, 'GeoLocationId' => 2, 'UserSearchKey' => 3, 'CreatedAt' => 4, 'UpdatedAt' => 5, ),
+        self::TYPE_CAMELNAME     => array('userId' => 0, 'userKeywordSetKey' => 1, 'geoLocationId' => 2, 'userSearchKey' => 3, 'createdAt' => 4, 'updatedAt' => 5, ),
+        self::TYPE_COLNAME       => array(UserSearchTableMap::COL_USER_ID => 0, UserSearchTableMap::COL_USER_KEYWORD_SET_KEY => 1, UserSearchTableMap::COL_GEOLOCATION_ID => 2, UserSearchTableMap::COL_USER_SEARCH_KEY => 3, UserSearchTableMap::COL_DATE_CREATED => 4, UserSearchTableMap::COL_DATE_UPDATED => 5, ),
+        self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_keyword_set_key' => 1, 'geolocation_id' => 2, 'user_search_key' => 3, 'date_created' => 4, 'date_updated' => 5, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
     );
 
     /**
@@ -154,18 +149,17 @@ class UserSearchTableMap extends TableMap
         $this->setIdentifierQuoting(false);
         $this->setClassName('\\JobScooper\\DataAccess\\UserSearch');
         $this->setPackage('JobScooper.DataAccess');
-        $this->setUseIdGenerator(true);
+        $this->setUseIdGenerator(false);
         $this->setIsCrossRef(true);
         // columns
-        $this->addForeignPrimaryKey('user_id', 'UserId', 'INTEGER' , 'user_keyword_set', 'user_id', true, null, null);
         $this->addForeignPrimaryKey('user_id', 'UserId', 'INTEGER' , 'user', 'user_id', true, null, null);
-        $this->addForeignPrimaryKey('user_keyword_set_id', 'UserKeywordSetId', 'INTEGER' , 'user_keyword_set', 'user_keyword_set_id', true, null, null);
+        $this->addForeignPrimaryKey('user_id', 'UserId', 'INTEGER' , 'user_keyword_set', 'user_id', true, null, null);
+        $this->addForeignPrimaryKey('user_keyword_set_key', 'UserKeywordSetKey', 'VARCHAR' , 'user_keyword_set', 'user_keyword_set_key', true, 100, null);
         $this->addForeignPrimaryKey('geolocation_id', 'GeoLocationId', 'INTEGER' , 'geolocation', 'geolocation_id', true, null, null);
-        $this->addColumn('user_search_id', 'UserSearchId', 'INTEGER', true, null, null);
-        $this->addColumn('date_created', 'CreatedAt', 'TIMESTAMP', false, null, null);
-        $this->addColumn('date_updated', 'UpdatedAt', 'TIMESTAMP', false, null, null);
         $this->addColumn('user_search_key', 'UserSearchKey', 'VARCHAR', true, 100, null);
         $this->getColumn('user_search_key')->setPrimaryString(true);
+        $this->addColumn('date_created', 'CreatedAt', 'TIMESTAMP', false, null, null);
+        $this->addColumn('date_updated', 'UpdatedAt', 'TIMESTAMP', false, null, null);
     } // initialize()
 
     /**
@@ -173,11 +167,18 @@ class UserSearchTableMap extends TableMap
      */
     public function buildRelations()
     {
+        $this->addRelation('UserFromUS', '\\JobScooper\\DataAccess\\User', RelationMap::MANY_TO_ONE, array (
+  0 =>
+  array (
+    0 => ':user_id',
+    1 => ':user_id',
+  ),
+), 'CASCADE', null, null, false);
         $this->addRelation('UserKeywordSetFromUS', '\\JobScooper\\DataAccess\\UserKeywordSet', RelationMap::MANY_TO_ONE, array (
   0 =>
   array (
-    0 => ':user_keyword_set_id',
-    1 => ':user_keyword_set_id',
+    0 => ':user_keyword_set_key',
+    1 => ':user_keyword_set_key',
   ),
   1 =>
   array (
@@ -192,13 +193,6 @@ class UserSearchTableMap extends TableMap
     1 => ':geolocation_id',
   ),
 ), null, null, null, false);
-        $this->addRelation('UserFromUS', '\\JobScooper\\DataAccess\\User', RelationMap::MANY_TO_ONE, array (
-  0 =>
-  array (
-    0 => ':user_id',
-    1 => ':user_id',
-  ),
-), 'CASCADE', null, null, false);
         $this->addRelation('UserSearchSiteRun', '\\JobScooper\\DataAccess\\UserSearchSiteRun', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
@@ -207,8 +201,8 @@ class UserSearchTableMap extends TableMap
   ),
   1 =>
   array (
-    0 => ':user_keyword_set_id',
-    1 => ':user_keyword_set_id',
+    0 => ':user_keyword_set_key',
+    1 => ':user_keyword_set_key',
   ),
   2 =>
   array (
@@ -217,13 +211,11 @@ class UserSearchTableMap extends TableMap
   ),
   3 =>
   array (
-    0 => ':user_search_id',
-    1 => ':user_search_id',
+    0 => ':user_search_key',
+    1 => ':user_search_key',
   ),
 ), 'CASCADE', null, 'UserSearchSiteRuns', false);
         $this->addRelation('JobSiteFromUSSR', '\\JobScooper\\DataAccess\\JobSiteRecord', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'JobSiteFromUSSRs');
-        $this->addRelation('UserFromUSSR', '\\JobScooper\\DataAccess\\User', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserFromUSSRs');
-        $this->addRelation('UserKeywordSetFromUSSR', '\\JobScooper\\DataAccess\\UserKeywordSet', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserKeywordSetFromUSSRs');
         $this->addRelation('GeoLocationFromUSSR', '\\JobScooper\\DataAccess\\GeoLocation', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'GeoLocationFromUSSRs');
     } // buildRelations()
 
@@ -236,8 +228,8 @@ class UserSearchTableMap extends TableMap
     public function getBehaviors()
     {
         return array(
+            'sluggable' => array('slug_column' => 'user_search_key', 'slug_pattern' => '{UserKeywordSetKey}_geo{GeoLocationId}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '-', 'permanent' => 'true', 'scope_column' => '', 'unique_constraint' => 'true', ),
             'timestampable' => array('create_column' => 'date_created', 'update_column' => 'date_updated', 'disable_created_at' => 'false', 'disable_updated_at' => 'false', ),
-            'sluggable' => array('slug_column' => 'user_search_key', 'slug_pattern' => 'user{UserId}_ukwd{UserKeywordSetId}_geo{GeoLocationId}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '-', 'permanent' => 'false', 'scope_column' => '', 'unique_constraint' => 'true', ),
         );
     } // getBehaviors()
 
@@ -256,7 +248,7 @@ class UserSearchTableMap extends TableMap
     {
         if (Propel::isInstancePoolingEnabled()) {
             if (null === $key) {
-                $key = serialize([(null === $obj->getUserId() || is_scalar($obj->getUserId()) || is_callable([$obj->getUserId(), '__toString']) ? (string) $obj->getUserId() : $obj->getUserId()), (null === $obj->getUserKeywordSetId() || is_scalar($obj->getUserKeywordSetId()) || is_callable([$obj->getUserKeywordSetId(), '__toString']) ? (string) $obj->getUserKeywordSetId() : $obj->getUserKeywordSetId()), (null === $obj->getGeoLocationId() || is_scalar($obj->getGeoLocationId()) || is_callable([$obj->getGeoLocationId(), '__toString']) ? (string) $obj->getGeoLocationId() : $obj->getGeoLocationId())]);
+                $key = serialize([(null === $obj->getUserId() || is_scalar($obj->getUserId()) || is_callable([$obj->getUserId(), '__toString']) ? (string) $obj->getUserId() : $obj->getUserId()), (null === $obj->getUserKeywordSetKey() || is_scalar($obj->getUserKeywordSetKey()) || is_callable([$obj->getUserKeywordSetKey(), '__toString']) ? (string) $obj->getUserKeywordSetKey() : $obj->getUserKeywordSetKey()), (null === $obj->getGeoLocationId() || is_scalar($obj->getGeoLocationId()) || is_callable([$obj->getGeoLocationId(), '__toString']) ? (string) $obj->getGeoLocationId() : $obj->getGeoLocationId())]);
             } // if key === null
             self::$instances[$key] = $obj;
         }
@@ -276,7 +268,7 @@ class UserSearchTableMap extends TableMap
     {
         if (Propel::isInstancePoolingEnabled() && null !== $value) {
             if (is_object($value) && $value instanceof \JobScooper\DataAccess\UserSearch) {
-                $key = serialize([(null === $value->getUserId() || is_scalar($value->getUserId()) || is_callable([$value->getUserId(), '__toString']) ? (string) $value->getUserId() : $value->getUserId()), (null === $value->getUserKeywordSetId() || is_scalar($value->getUserKeywordSetId()) || is_callable([$value->getUserKeywordSetId(), '__toString']) ? (string) $value->getUserKeywordSetId() : $value->getUserKeywordSetId()), (null === $value->getGeoLocationId() || is_scalar($value->getGeoLocationId()) || is_callable([$value->getGeoLocationId(), '__toString']) ? (string) $value->getGeoLocationId() : $value->getGeoLocationId())]);
+                $key = serialize([(null === $value->getUserId() || is_scalar($value->getUserId()) || is_callable([$value->getUserId(), '__toString']) ? (string) $value->getUserId() : $value->getUserId()), (null === $value->getUserKeywordSetKey() || is_scalar($value->getUserKeywordSetKey()) || is_callable([$value->getUserKeywordSetKey(), '__toString']) ? (string) $value->getUserKeywordSetKey() : $value->getUserKeywordSetKey()), (null === $value->getGeoLocationId() || is_scalar($value->getGeoLocationId()) || is_callable([$value->getGeoLocationId(), '__toString']) ? (string) $value->getGeoLocationId() : $value->getGeoLocationId())]);
 
             } elseif (is_array($value) && count($value) === 3) {
                 // assume we've been passed a primary key";
@@ -319,11 +311,11 @@ class UserSearchTableMap extends TableMap
     public static function getPrimaryKeyHashFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
         // If the PK cannot be derived from the row, return NULL.
-        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] === null && $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)] === null && $row[TableMap::TYPE_NUM == $indexType ? 2 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
+        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] === null && $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetKey', TableMap::TYPE_PHPNAME, $indexType)] === null && $row[TableMap::TYPE_NUM == $indexType ? 2 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
             return null;
         }
 
-        return serialize([(null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)]), (null === $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)]), (null === $row[TableMap::TYPE_NUM == $indexType ? 2 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 2 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 2 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 2 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 2 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)])]);
+        return serialize([(null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)]), (null === $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetKey', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetKey', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetKey', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetKey', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetKey', TableMap::TYPE_PHPNAME, $indexType)]), (null === $row[TableMap::TYPE_NUM == $indexType ? 2 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 2 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 2 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 2 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 2 + $offset : static::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)])]);
     }
 
     /**
@@ -347,10 +339,10 @@ class UserSearchTableMap extends TableMap
                 ? 0 + $offset
                 : self::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)
         ];
-        $pks[] = (int) $row[
+        $pks[] = (string) $row[
             $indexType == TableMap::TYPE_NUM
                 ? 1 + $offset
-                : self::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)
+                : self::translateFieldName('UserKeywordSetKey', TableMap::TYPE_PHPNAME, $indexType)
         ];
         $pks[] = (int) $row[
             $indexType == TableMap::TYPE_NUM
@@ -459,20 +451,18 @@ class UserSearchTableMap extends TableMap
     {
         if (null === $alias) {
             $criteria->addSelectColumn(UserSearchTableMap::COL_USER_ID);
-            $criteria->addSelectColumn(UserSearchTableMap::COL_USER_KEYWORD_SET_ID);
+            $criteria->addSelectColumn(UserSearchTableMap::COL_USER_KEYWORD_SET_KEY);
             $criteria->addSelectColumn(UserSearchTableMap::COL_GEOLOCATION_ID);
-            $criteria->addSelectColumn(UserSearchTableMap::COL_USER_SEARCH_ID);
+            $criteria->addSelectColumn(UserSearchTableMap::COL_USER_SEARCH_KEY);
             $criteria->addSelectColumn(UserSearchTableMap::COL_DATE_CREATED);
             $criteria->addSelectColumn(UserSearchTableMap::COL_DATE_UPDATED);
-            $criteria->addSelectColumn(UserSearchTableMap::COL_USER_SEARCH_KEY);
         } else {
             $criteria->addSelectColumn($alias . '.user_id');
-            $criteria->addSelectColumn($alias . '.user_keyword_set_id');
+            $criteria->addSelectColumn($alias . '.user_keyword_set_key');
             $criteria->addSelectColumn($alias . '.geolocation_id');
-            $criteria->addSelectColumn($alias . '.user_search_id');
+            $criteria->addSelectColumn($alias . '.user_search_key');
             $criteria->addSelectColumn($alias . '.date_created');
             $criteria->addSelectColumn($alias . '.date_updated');
-            $criteria->addSelectColumn($alias . '.user_search_key');
         }
     }
 
@@ -532,7 +522,7 @@ class UserSearchTableMap extends TableMap
             }
             foreach ($values as $value) {
                 $criterion = $criteria->getNewCriterion(UserSearchTableMap::COL_USER_ID, $value[0]);
-                $criterion->addAnd($criteria->getNewCriterion(UserSearchTableMap::COL_USER_KEYWORD_SET_ID, $value[1]));
+                $criterion->addAnd($criteria->getNewCriterion(UserSearchTableMap::COL_USER_KEYWORD_SET_KEY, $value[1]));
                 $criterion->addAnd($criteria->getNewCriterion(UserSearchTableMap::COL_GEOLOCATION_ID, $value[2]));
                 $criteria->addOr($criterion);
             }

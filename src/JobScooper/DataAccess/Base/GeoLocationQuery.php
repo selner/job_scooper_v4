@@ -943,6 +943,23 @@ abstract class GeoLocationQuery extends ModelCriteria
     }
 
     /**
+     * Filter the query by a related User object
+     * using the user_search table as cross reference
+     *
+     * @param User $user the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildGeoLocationQuery The current query, for fluid interface
+     */
+    public function filterByUserFromUS($user, $comparison = Criteria::EQUAL)
+    {
+        return $this
+            ->useUserSearchQuery()
+            ->filterByUserFromUS($user, $comparison)
+            ->endUse();
+    }
+
+    /**
      * Filter the query by a related UserKeywordSet object
      * using the user_search table as cross reference
      *
@@ -960,23 +977,6 @@ abstract class GeoLocationQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query by a related UserSearch object
-     * using the user_search_site_run table as cross reference
-     *
-     * @param UserSearch $userSearch the related object to use as filter
-     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return ChildGeoLocationQuery The current query, for fluid interface
-     */
-    public function filterByUserSearchFromUSSR($userSearch, $comparison = Criteria::EQUAL)
-    {
-        return $this
-            ->useUserSearchSiteRunQuery()
-            ->filterByUserSearchFromUSSR($userSearch, $comparison)
-            ->endUse();
-    }
-
-    /**
      * Filter the query by a related JobSiteRecord object
      * using the user_search_site_run table as cross reference
      *
@@ -990,6 +990,23 @@ abstract class GeoLocationQuery extends ModelCriteria
         return $this
             ->useUserSearchSiteRunQuery()
             ->filterByJobSiteFromUSSR($jobSiteRecord, $comparison)
+            ->endUse();
+    }
+
+    /**
+     * Filter the query by a related UserSearch object
+     * using the user_search_site_run table as cross reference
+     *
+     * @param UserSearch $userSearch the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildGeoLocationQuery The current query, for fluid interface
+     */
+    public function filterByUserSearchFromUSSR($userSearch, $comparison = Criteria::EQUAL)
+    {
+        return $this
+            ->useUserSearchSiteRunQuery()
+            ->filterByUserSearchFromUSSR($userSearch, $comparison)
             ->endUse();
     }
 

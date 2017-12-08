@@ -21,18 +21,16 @@ use Propel\Runtime\Exception\PropelException;
  *
  *
  * @method     ChildUserKeywordSetQuery orderByUserId($order = Criteria::ASC) Order by the user_id column
- * @method     ChildUserKeywordSetQuery orderByUserKeywordSetId($order = Criteria::ASC) Order by the user_keyword_set_id column
- * @method     ChildUserKeywordSetQuery orderByKeywords($order = Criteria::ASC) Order by the keywords column
- * @method     ChildUserKeywordSetQuery orderBySearchKeyFromConfig($order = Criteria::ASC) Order by the search_key_from_config column
- * @method     ChildUserKeywordSetQuery orderByKeywordTokens($order = Criteria::ASC) Order by the keyword_tokens column
  * @method     ChildUserKeywordSetQuery orderByUserKeywordSetKey($order = Criteria::ASC) Order by the user_keyword_set_key column
+ * @method     ChildUserKeywordSetQuery orderBySearchKeyFromConfig($order = Criteria::ASC) Order by the search_key_from_config column
+ * @method     ChildUserKeywordSetQuery orderByKeywords($order = Criteria::ASC) Order by the keywords column
+ * @method     ChildUserKeywordSetQuery orderByKeywordTokens($order = Criteria::ASC) Order by the keyword_tokens column
  *
  * @method     ChildUserKeywordSetQuery groupByUserId() Group by the user_id column
- * @method     ChildUserKeywordSetQuery groupByUserKeywordSetId() Group by the user_keyword_set_id column
- * @method     ChildUserKeywordSetQuery groupByKeywords() Group by the keywords column
- * @method     ChildUserKeywordSetQuery groupBySearchKeyFromConfig() Group by the search_key_from_config column
- * @method     ChildUserKeywordSetQuery groupByKeywordTokens() Group by the keyword_tokens column
  * @method     ChildUserKeywordSetQuery groupByUserKeywordSetKey() Group by the user_keyword_set_key column
+ * @method     ChildUserKeywordSetQuery groupBySearchKeyFromConfig() Group by the search_key_from_config column
+ * @method     ChildUserKeywordSetQuery groupByKeywords() Group by the keywords column
+ * @method     ChildUserKeywordSetQuery groupByKeywordTokens() Group by the keyword_tokens column
  *
  * @method     ChildUserKeywordSetQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildUserKeywordSetQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -62,45 +60,32 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserKeywordSetQuery rightJoinWithUserSearch() Adds a RIGHT JOIN clause and with to the query using the UserSearch relation
  * @method     ChildUserKeywordSetQuery innerJoinWithUserSearch() Adds a INNER JOIN clause and with to the query using the UserSearch relation
  *
- * @method     ChildUserKeywordSetQuery leftJoinUserSearchSiteRun($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSearchSiteRun relation
- * @method     ChildUserKeywordSetQuery rightJoinUserSearchSiteRun($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSearchSiteRun relation
- * @method     ChildUserKeywordSetQuery innerJoinUserSearchSiteRun($relationAlias = null) Adds a INNER JOIN clause to the query using the UserSearchSiteRun relation
- *
- * @method     ChildUserKeywordSetQuery joinWithUserSearchSiteRun($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserSearchSiteRun relation
- *
- * @method     ChildUserKeywordSetQuery leftJoinWithUserSearchSiteRun() Adds a LEFT JOIN clause and with to the query using the UserSearchSiteRun relation
- * @method     ChildUserKeywordSetQuery rightJoinWithUserSearchSiteRun() Adds a RIGHT JOIN clause and with to the query using the UserSearchSiteRun relation
- * @method     ChildUserKeywordSetQuery innerJoinWithUserSearchSiteRun() Adds a INNER JOIN clause and with to the query using the UserSearchSiteRun relation
- *
- * @method     \JobScooper\DataAccess\UserQuery|\JobScooper\DataAccess\UserSearchQuery|\JobScooper\DataAccess\UserSearchSiteRunQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
+ * @method     \JobScooper\DataAccess\UserQuery|\JobScooper\DataAccess\UserSearchQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildUserKeywordSet findOne(ConnectionInterface $con = null) Return the first ChildUserKeywordSet matching the query
  * @method     ChildUserKeywordSet findOneOrCreate(ConnectionInterface $con = null) Return the first ChildUserKeywordSet matching the query, or a new ChildUserKeywordSet object populated from the query conditions when no match is found
  *
  * @method     ChildUserKeywordSet findOneByUserId(int $user_id) Return the first ChildUserKeywordSet filtered by the user_id column
- * @method     ChildUserKeywordSet findOneByUserKeywordSetId(int $user_keyword_set_id) Return the first ChildUserKeywordSet filtered by the user_keyword_set_id column
- * @method     ChildUserKeywordSet findOneByKeywords(array $keywords) Return the first ChildUserKeywordSet filtered by the keywords column
+ * @method     ChildUserKeywordSet findOneByUserKeywordSetKey(string $user_keyword_set_key) Return the first ChildUserKeywordSet filtered by the user_keyword_set_key column
  * @method     ChildUserKeywordSet findOneBySearchKeyFromConfig(string $search_key_from_config) Return the first ChildUserKeywordSet filtered by the search_key_from_config column
- * @method     ChildUserKeywordSet findOneByKeywordTokens(array $keyword_tokens) Return the first ChildUserKeywordSet filtered by the keyword_tokens column
- * @method     ChildUserKeywordSet findOneByUserKeywordSetKey(string $user_keyword_set_key) Return the first ChildUserKeywordSet filtered by the user_keyword_set_key column *
+ * @method     ChildUserKeywordSet findOneByKeywords(array $keywords) Return the first ChildUserKeywordSet filtered by the keywords column
+ * @method     ChildUserKeywordSet findOneByKeywordTokens(array $keyword_tokens) Return the first ChildUserKeywordSet filtered by the keyword_tokens column *
 
  * @method     ChildUserKeywordSet requirePk($key, ConnectionInterface $con = null) Return the ChildUserKeywordSet by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserKeywordSet requireOne(ConnectionInterface $con = null) Return the first ChildUserKeywordSet matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildUserKeywordSet requireOneByUserId(int $user_id) Return the first ChildUserKeywordSet filtered by the user_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserKeywordSet requireOneByUserKeywordSetId(int $user_keyword_set_id) Return the first ChildUserKeywordSet filtered by the user_keyword_set_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserKeywordSet requireOneByKeywords(array $keywords) Return the first ChildUserKeywordSet filtered by the keywords column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserKeywordSet requireOneBySearchKeyFromConfig(string $search_key_from_config) Return the first ChildUserKeywordSet filtered by the search_key_from_config column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserKeywordSet requireOneByKeywordTokens(array $keyword_tokens) Return the first ChildUserKeywordSet filtered by the keyword_tokens column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserKeywordSet requireOneByUserKeywordSetKey(string $user_keyword_set_key) Return the first ChildUserKeywordSet filtered by the user_keyword_set_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserKeywordSet requireOneBySearchKeyFromConfig(string $search_key_from_config) Return the first ChildUserKeywordSet filtered by the search_key_from_config column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserKeywordSet requireOneByKeywords(array $keywords) Return the first ChildUserKeywordSet filtered by the keywords column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserKeywordSet requireOneByKeywordTokens(array $keyword_tokens) Return the first ChildUserKeywordSet filtered by the keyword_tokens column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildUserKeywordSet[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildUserKeywordSet objects based on current ModelCriteria
  * @method     ChildUserKeywordSet[]|ObjectCollection findByUserId(int $user_id) Return ChildUserKeywordSet objects filtered by the user_id column
- * @method     ChildUserKeywordSet[]|ObjectCollection findByUserKeywordSetId(int $user_keyword_set_id) Return ChildUserKeywordSet objects filtered by the user_keyword_set_id column
- * @method     ChildUserKeywordSet[]|ObjectCollection findByKeywords(array $keywords) Return ChildUserKeywordSet objects filtered by the keywords column
- * @method     ChildUserKeywordSet[]|ObjectCollection findBySearchKeyFromConfig(string $search_key_from_config) Return ChildUserKeywordSet objects filtered by the search_key_from_config column
- * @method     ChildUserKeywordSet[]|ObjectCollection findByKeywordTokens(array $keyword_tokens) Return ChildUserKeywordSet objects filtered by the keyword_tokens column
  * @method     ChildUserKeywordSet[]|ObjectCollection findByUserKeywordSetKey(string $user_keyword_set_key) Return ChildUserKeywordSet objects filtered by the user_keyword_set_key column
+ * @method     ChildUserKeywordSet[]|ObjectCollection findBySearchKeyFromConfig(string $search_key_from_config) Return ChildUserKeywordSet objects filtered by the search_key_from_config column
+ * @method     ChildUserKeywordSet[]|ObjectCollection findByKeywords(array $keywords) Return ChildUserKeywordSet objects filtered by the keywords column
+ * @method     ChildUserKeywordSet[]|ObjectCollection findByKeywordTokens(array $keyword_tokens) Return ChildUserKeywordSet objects filtered by the keyword_tokens column
  * @method     ChildUserKeywordSet[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  */
@@ -153,7 +138,7 @@ abstract class UserKeywordSetQuery extends ModelCriteria
      * $obj = $c->findPk(array(12, 34), $con);
      * </code>
      *
-     * @param array[$user_id, $user_keyword_set_id] $key Primary key to use for the query
+     * @param array[$user_id, $user_keyword_set_key] $key Primary key to use for the query
      * @param ConnectionInterface $con an optional connection object
      *
      * @return ChildUserKeywordSet|array|mixed the result, formatted by the current formatter
@@ -199,11 +184,11 @@ abstract class UserKeywordSetQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_id, user_keyword_set_id, keywords, search_key_from_config, keyword_tokens, user_keyword_set_key FROM user_keyword_set WHERE user_id = :p0 AND user_keyword_set_id = :p1';
+        $sql = 'SELECT user_id, user_keyword_set_key, search_key_from_config, keywords, keyword_tokens FROM user_keyword_set WHERE user_id = :p0 AND user_keyword_set_key = :p1';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key[0], PDO::PARAM_INT);
-            $stmt->bindValue(':p1', $key[1], PDO::PARAM_INT);
+            $stmt->bindValue(':p1', $key[1], PDO::PARAM_STR);
             $stmt->execute();
         } catch (Exception $e) {
             Propel::log($e->getMessage(), Propel::LOG_ERR);
@@ -274,7 +259,7 @@ abstract class UserKeywordSetQuery extends ModelCriteria
     public function filterByPrimaryKey($key)
     {
         $this->addUsingAlias(UserKeywordSetTableMap::COL_USER_ID, $key[0], Criteria::EQUAL);
-        $this->addUsingAlias(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID, $key[1], Criteria::EQUAL);
+        $this->addUsingAlias(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY, $key[1], Criteria::EQUAL);
 
         return $this;
     }
@@ -293,7 +278,7 @@ abstract class UserKeywordSetQuery extends ModelCriteria
         }
         foreach ($keys as $key) {
             $cton0 = $this->getNewCriterion(UserKeywordSetTableMap::COL_USER_ID, $key[0], Criteria::EQUAL);
-            $cton1 = $this->getNewCriterion(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID, $key[1], Criteria::EQUAL);
+            $cton1 = $this->getNewCriterion(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY, $key[1], Criteria::EQUAL);
             $cton0->addAnd($cton1);
             $this->addOr($cton0);
         }
@@ -345,44 +330,53 @@ abstract class UserKeywordSetQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the user_keyword_set_id column
+     * Filter the query on the user_keyword_set_key column
      *
      * Example usage:
      * <code>
-     * $query->filterByUserKeywordSetId(1234); // WHERE user_keyword_set_id = 1234
-     * $query->filterByUserKeywordSetId(array(12, 34)); // WHERE user_keyword_set_id IN (12, 34)
-     * $query->filterByUserKeywordSetId(array('min' => 12)); // WHERE user_keyword_set_id > 12
+     * $query->filterByUserKeywordSetKey('fooValue');   // WHERE user_keyword_set_key = 'fooValue'
+     * $query->filterByUserKeywordSetKey('%fooValue%', Criteria::LIKE); // WHERE user_keyword_set_key LIKE '%fooValue%'
      * </code>
      *
-     * @param     mixed $userKeywordSetId The value to use as filter.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $userKeywordSetKey The value to use as filter.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildUserKeywordSetQuery The current query, for fluid interface
      */
-    public function filterByUserKeywordSetId($userKeywordSetId = null, $comparison = null)
+    public function filterByUserKeywordSetKey($userKeywordSetKey = null, $comparison = null)
     {
-        if (is_array($userKeywordSetId)) {
-            $useMinMax = false;
-            if (isset($userKeywordSetId['min'])) {
-                $this->addUsingAlias(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID, $userKeywordSetId['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($userKeywordSetId['max'])) {
-                $this->addUsingAlias(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID, $userKeywordSetId['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
+        if (null === $comparison) {
+            if (is_array($userKeywordSetKey)) {
                 $comparison = Criteria::IN;
             }
         }
 
-        return $this->addUsingAlias(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID, $userKeywordSetId, $comparison);
+        return $this->addUsingAlias(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY, $userKeywordSetKey, $comparison);
+    }
+
+    /**
+     * Filter the query on the search_key_from_config column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterBySearchKeyFromConfig('fooValue');   // WHERE search_key_from_config = 'fooValue'
+     * $query->filterBySearchKeyFromConfig('%fooValue%', Criteria::LIKE); // WHERE search_key_from_config LIKE '%fooValue%'
+     * </code>
+     *
+     * @param     string $searchKeyFromConfig The value to use as filter.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserKeywordSetQuery The current query, for fluid interface
+     */
+    public function filterBySearchKeyFromConfig($searchKeyFromConfig = null, $comparison = null)
+    {
+        if (null === $comparison) {
+            if (is_array($searchKeyFromConfig)) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG, $searchKeyFromConfig, $comparison);
     }
 
     /**
@@ -467,31 +461,6 @@ abstract class UserKeywordSetQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the search_key_from_config column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterBySearchKeyFromConfig('fooValue');   // WHERE search_key_from_config = 'fooValue'
-     * $query->filterBySearchKeyFromConfig('%fooValue%', Criteria::LIKE); // WHERE search_key_from_config LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $searchKeyFromConfig The value to use as filter.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserKeywordSetQuery The current query, for fluid interface
-     */
-    public function filterBySearchKeyFromConfig($searchKeyFromConfig = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($searchKeyFromConfig)) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG, $searchKeyFromConfig, $comparison);
-    }
-
-    /**
      * Filter the query on the keyword_tokens column
      *
      * @param     array $keywordTokens The values to use as filter.
@@ -570,31 +539,6 @@ abstract class UserKeywordSetQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(UserKeywordSetTableMap::COL_KEYWORD_TOKENS, $keywordTokens, $comparison);
-    }
-
-    /**
-     * Filter the query on the user_keyword_set_key column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByUserKeywordSetKey('fooValue');   // WHERE user_keyword_set_key = 'fooValue'
-     * $query->filterByUserKeywordSetKey('%fooValue%', Criteria::LIKE); // WHERE user_keyword_set_key LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $userKeywordSetKey The value to use as filter.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserKeywordSetQuery The current query, for fluid interface
-     */
-    public function filterByUserKeywordSetKey($userKeywordSetKey = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($userKeywordSetKey)) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY, $userKeywordSetKey, $comparison);
     }
 
     /**
@@ -686,7 +630,7 @@ abstract class UserKeywordSetQuery extends ModelCriteria
     {
         if ($userSearch instanceof \JobScooper\DataAccess\UserSearch) {
             return $this
-                ->addUsingAlias(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID, $userSearch->getUserKeywordSetId(), $comparison)
+                ->addUsingAlias(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY, $userSearch->getUserKeywordSetKey(), $comparison)
                 ->addUsingAlias(UserKeywordSetTableMap::COL_USER_ID, $userSearch->getUserId(), $comparison);
         } else {
             throw new PropelException('filterByUserSearch() only accepts arguments of type \JobScooper\DataAccess\UserSearch');
@@ -744,72 +688,20 @@ abstract class UserKeywordSetQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query by a related \JobScooper\DataAccess\UserSearchSiteRun object
+     * Filter the query by a related User object
+     * using the user_search table as cross reference
      *
-     * @param \JobScooper\DataAccess\UserSearchSiteRun|ObjectCollection $userSearchSiteRun the related object to use as filter
+     * @param User $user the related object to use as filter
      * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return ChildUserKeywordSetQuery The current query, for fluid interface
      */
-    public function filterByUserSearchSiteRun($userSearchSiteRun, $comparison = null)
-    {
-        if ($userSearchSiteRun instanceof \JobScooper\DataAccess\UserSearchSiteRun) {
-            return $this
-                ->addUsingAlias(UserKeywordSetTableMap::COL_USER_ID, $userSearchSiteRun->getUserId(), $comparison)
-                ->addUsingAlias(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID, $userSearchSiteRun->getUserKeywordSetId(), $comparison);
-        } else {
-            throw new PropelException('filterByUserSearchSiteRun() only accepts arguments of type \JobScooper\DataAccess\UserSearchSiteRun');
-        }
-    }
-
-    /**
-     * Adds a JOIN clause to the query using the UserSearchSiteRun relation
-     *
-     * @param     string $relationAlias optional alias for the relation
-     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
-     *
-     * @return $this|ChildUserKeywordSetQuery The current query, for fluid interface
-     */
-    public function joinUserSearchSiteRun($relationAlias = null, $joinType = Criteria::INNER_JOIN)
-    {
-        $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('UserSearchSiteRun');
-
-        // create a ModelJoin object for this join
-        $join = new ModelJoin();
-        $join->setJoinType($joinType);
-        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
-        if ($previousJoin = $this->getPreviousJoin()) {
-            $join->setPreviousJoin($previousJoin);
-        }
-
-        // add the ModelJoin to the current object
-        if ($relationAlias) {
-            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
-            $this->addJoinObject($join, $relationAlias);
-        } else {
-            $this->addJoinObject($join, 'UserSearchSiteRun');
-        }
-
-        return $this;
-    }
-
-    /**
-     * Use the UserSearchSiteRun relation UserSearchSiteRun object
-     *
-     * @see useQuery()
-     *
-     * @param     string $relationAlias optional alias for the relation,
-     *                                   to be used as main alias in the secondary query
-     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
-     *
-     * @return \JobScooper\DataAccess\UserSearchSiteRunQuery A secondary query class using the current class as primary query
-     */
-    public function useUserSearchSiteRunQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function filterByUserFromUS($user, $comparison = Criteria::EQUAL)
     {
         return $this
-            ->joinUserSearchSiteRun($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'UserSearchSiteRun', '\JobScooper\DataAccess\UserSearchSiteRunQuery');
+            ->useUserSearchQuery()
+            ->filterByUserFromUS($user, $comparison)
+            ->endUse();
     }
 
     /**
@@ -830,57 +722,6 @@ abstract class UserKeywordSetQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query by a related User object
-     * using the user_search table as cross reference
-     *
-     * @param User $user the related object to use as filter
-     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return ChildUserKeywordSetQuery The current query, for fluid interface
-     */
-    public function filterByUserFromUS($user, $comparison = Criteria::EQUAL)
-    {
-        return $this
-            ->useUserSearchQuery()
-            ->filterByUserFromUS($user, $comparison)
-            ->endUse();
-    }
-
-    /**
-     * Filter the query by a related UserSearch object
-     * using the user_search_site_run table as cross reference
-     *
-     * @param UserSearch $userSearch the related object to use as filter
-     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return ChildUserKeywordSetQuery The current query, for fluid interface
-     */
-    public function filterByUserSearchFromUSSR($userSearch, $comparison = Criteria::EQUAL)
-    {
-        return $this
-            ->useUserSearchSiteRunQuery()
-            ->filterByUserSearchFromUSSR($userSearch, $comparison)
-            ->endUse();
-    }
-
-    /**
-     * Filter the query by a related JobSiteRecord object
-     * using the user_search_site_run table as cross reference
-     *
-     * @param JobSiteRecord $jobSiteRecord the related object to use as filter
-     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return ChildUserKeywordSetQuery The current query, for fluid interface
-     */
-    public function filterByJobSiteFromUSSR($jobSiteRecord, $comparison = Criteria::EQUAL)
-    {
-        return $this
-            ->useUserSearchSiteRunQuery()
-            ->filterByJobSiteFromUSSR($jobSiteRecord, $comparison)
-            ->endUse();
-    }
-
-    /**
      * Exclude object from result
      *
      * @param   ChildUserKeywordSet $userKeywordSet Object to remove from the list of results
@@ -891,7 +732,7 @@ abstract class UserKeywordSetQuery extends ModelCriteria
     {
         if ($userKeywordSet) {
             $this->addCond('pruneCond0', $this->getAliasedColName(UserKeywordSetTableMap::COL_USER_ID), $userKeywordSet->getUserId(), Criteria::NOT_EQUAL);
-            $this->addCond('pruneCond1', $this->getAliasedColName(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID), $userKeywordSet->getUserKeywordSetId(), Criteria::NOT_EQUAL);
+            $this->addCond('pruneCond1', $this->getAliasedColName(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY), $userKeywordSet->getUserKeywordSetKey(), Criteria::NOT_EQUAL);
             $this->combine(array('pruneCond0', 'pruneCond1'), Criteria::LOGICAL_OR);
         }
 

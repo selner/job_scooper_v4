@@ -183,8 +183,8 @@ class UserTableMap extends TableMap
 ), 'CASCADE', null, 'UserJobMatches', false);
         $this->addRelation('UserKeywordSetFromUS', '\\JobScooper\\DataAccess\\UserKeywordSet', RelationMap::MANY_TO_MANY, array(), null, null, 'UserKeywordSetFromuses');
         $this->addRelation('GeoLocationFromUS', '\\JobScooper\\DataAccess\\GeoLocation', RelationMap::MANY_TO_MANY, array(), null, null, 'GeoLocationFromuses');
-        $this->addRelation('UserSearchFromUSSR', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserSearchFromUSSRs');
         $this->addRelation('JobSiteFromUSSR', '\\JobScooper\\DataAccess\\JobSiteRecord', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'JobSiteFromUSSRs');
+        $this->addRelation('UserSearchFromUSSR', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserSearchFromUSSRs');
         $this->addRelation('JobPostingFromUJM', '\\JobScooper\\DataAccess\\JobPosting', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'JobPostingFromUJMs');
     } // buildRelations()
 

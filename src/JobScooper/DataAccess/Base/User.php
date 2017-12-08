@@ -8,6 +8,7 @@ use JobScooper\DataAccess\GeoLocation as ChildGeoLocation;
 use JobScooper\DataAccess\JobPosting as ChildJobPosting;
 use JobScooper\DataAccess\JobPostingQuery as ChildJobPostingQuery;
 use JobScooper\DataAccess\JobSiteRecord as ChildJobSiteRecord;
+use JobScooper\DataAccess\JobSiteRecordQuery as ChildJobSiteRecordQuery;
 use JobScooper\DataAccess\User as ChildUser;
 use JobScooper\DataAccess\UserJobMatch as ChildUserJobMatch;
 use JobScooper\DataAccess\UserJobMatchQuery as ChildUserJobMatchQuery;
@@ -162,24 +163,14 @@ abstract class User implements ActiveRecordInterface
     protected $collGeoLocationFromusesPartial;
 
     /**
-     * @var ObjectCombinationCollection Cross CombinationCollection to store aggregation of ChildUserSearch, ChildJobSiteRecord combination combinations.
+     * @var ObjectCombinationCollection Cross CombinationCollection to store aggregation of ChildJobSiteRecord, ChildUserSearch combination combinations.
      */
-    protected $combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds;
+    protected $combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds;
 
     /**
      * @var bool
      */
-    protected $combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsPartial;
-
-    /**
-     * @var        ObjectCollection|ChildUserSearch[] Cross Collection to store aggregation of ChildUserSearch objects.
-     */
-    protected $collUserSearchFromUSSRs;
-
-    /**
-     * @var bool
-     */
-    protected $collUserSearchFromUSSRsPartial;
+    protected $combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIdsPartial;
 
     /**
      * @var        ObjectCollection|ChildJobSiteRecord[] Cross Collection to store aggregation of ChildJobSiteRecord objects.
@@ -190,6 +181,16 @@ abstract class User implements ActiveRecordInterface
      * @var bool
      */
     protected $collJobSiteFromUSSRsPartial;
+
+    /**
+     * @var        ObjectCollection|ChildUserSearch[] Cross Collection to store aggregation of ChildUserSearch objects.
+     */
+    protected $collUserSearchFromUSSRs;
+
+    /**
+     * @var bool
+     */
+    protected $collUserSearchFromUSSRsPartial;
 
     /**
      * @var        ObjectCollection|ChildJobPosting[] Cross Collection to store aggregation of ChildJobPosting objects.
@@ -215,9 +216,9 @@ abstract class User implements ActiveRecordInterface
     protected $combinationCollUserKeywordSetFromUSGeoLocationFromusesScheduledForDeletion = null;
 
     /**
-     * @var ObjectCombinationCollection Cross CombinationCollection to store aggregation of ChildUserSearch, ChildJobSiteRecord combination combinations.
+     * @var ObjectCombinationCollection Cross CombinationCollection to store aggregation of ChildJobSiteRecord, ChildUserSearch combination combinations.
      */
-    protected $combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsScheduledForDeletion = null;
+    protected $combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIdsScheduledForDeletion = null;
 
     /**
      * An array of objects scheduled for deletion.
@@ -736,7 +737,7 @@ abstract class User implements ActiveRecordInterface
             $this->collUserJobMatches = null;
 
             $this->collUserKeywordSetFromUSGeoLocationFromuses = null;
-            $this->collUserSearchFromUSSRJobSiteFromUSSRAppRunIds = null;
+            $this->collJobSiteFromUSSRUserSearchFromUSSRAppRunIds = null;
             $this->collJobPostingFromUJMs = null;
         } // if (deep)
     }
@@ -866,7 +867,7 @@ abstract class User implements ActiveRecordInterface
                         $entryPk = [];
 
                         $entryPk[0] = $this->getUserId();
-                        $entryPk[1] = $combination[0]->getUserKeywordSetId();
+                        $entryPk[1] = $combination[0]->getUserKeywordSetKey();
                         $entryPk[0] = $combination[0]->getUserId();
                         $entryPk[2] = $combination[1]->getGeoLocationId();
 
@@ -885,7 +886,7 @@ abstract class User implements ActiveRecordInterface
             if (null !== $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses) {
                 foreach ($this->combinationCollUserKeywordSetFromUSGeoLocationFromuses as $combination) {
 
-                    //$combination[0] = UserKeywordSet (user_search_fk_b9a4d0)
+                    //$combination[0] = UserKeywordSet (user_search_fk_ca577f)
                     if (!$combination[0]->isDeleted() && ($combination[0]->isNew() || $combination[0]->isModified())) {
                         $combination[0]->save($con);
                     }
@@ -899,20 +900,20 @@ abstract class User implements ActiveRecordInterface
             }
 
 
-            if ($this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsScheduledForDeletion !== null) {
-                if (!$this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsScheduledForDeletion->isEmpty()) {
+            if ($this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIdsScheduledForDeletion !== null) {
+                if (!$this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIdsScheduledForDeletion->isEmpty()) {
                     $pks = array();
-                    foreach ($this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsScheduledForDeletion as $combination) {
+                    foreach ($this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIdsScheduledForDeletion as $combination) {
                         $entryPk = [];
 
-                        $entryPk[0] = $this->getUserId();
-                        $entryPk[0] = $combination[0]->getUserId();
-                        $entryPk[1] = $combination[0]->getUserKeywordSetId();
-                        $entryPk[2] = $combination[0]->getGeoLocationId();
-                        $entryPk[3] = $combination[0]->getUserSearchId();
-                        $entryPk[4] = $combination[1]->getJobSiteKey();
+                        $entryPk[] = $this->getUserId();
+                        $entryPk[2] = $combination[0]->getJobSiteKey();
+                        $entryPk[] = $combination[1]->getUserId();
+                        $entryPk[0] = $combination[1]->getUserKeywordSetKey();
+                        $entryPk[1] = $combination[1]->getGeoLocationId();
+                        $entryPk[] = $combination[1]->getUserSearchKey();
                         //$combination[2] = AppRunId;
-                        $entryPk[5] = $combination[2];
+                        $entryPk[3] = $combination[2];
 
                         $pks[] = $entryPk;
                     }
@@ -921,20 +922,20 @@ abstract class User implements ActiveRecordInterface
                         ->filterByPrimaryKeys($pks)
                         ->delete($con);
 
-                    $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsScheduledForDeletion = null;
+                    $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIdsScheduledForDeletion = null;
                 }
 
             }
 
-            if (null !== $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds) {
-                foreach ($this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds as $combination) {
+            if (null !== $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds) {
+                foreach ($this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds as $combination) {
 
-                    //$combination[0] = UserSearch (user_search_site_run_fk_4d3978)
+                    //$combination[0] = JobSiteRecord (user_search_site_run_fk_168d10)
                     if (!$combination[0]->isDeleted() && ($combination[0]->isNew() || $combination[0]->isModified())) {
                         $combination[0]->save($con);
                     }
 
-                    //$combination[1] = JobSiteRecord (user_search_site_run_fk_168d10)
+                    //$combination[1] = UserSearch (user_search_site_run_fk_03b478)
                     if (!$combination[1]->isDeleted() && ($combination[1]->isNew() || $combination[1]->isModified())) {
                         $combination[1]->save($con);
                     }
@@ -2217,10 +2218,7 @@ abstract class User implements ActiveRecordInterface
         $userSearchSiteRunsToDelete = $this->getUserSearchSiteRuns(new Criteria(), $con)->diff($userSearchSiteRuns);
 
 
-        //since at least one column in the foreign key is at the same time a PK
-        //we can not just set a PK to NULL in the lines below. We have to store
-        //a backup of all values, so we are able to manipulate these items based on the onDelete value later.
-        $this->userSearchSiteRunsScheduledForDeletion = clone $userSearchSiteRunsToDelete;
+        $this->userSearchSiteRunsScheduledForDeletion = $userSearchSiteRunsToDelete;
 
         foreach ($userSearchSiteRunsToDelete as $userSearchSiteRunRemoved) {
             $userSearchSiteRunRemoved->setUserFromUSSR(null);
@@ -2342,31 +2340,6 @@ abstract class User implements ActiveRecordInterface
      * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
      * @return ObjectCollection|ChildUserSearchSiteRun[] List of ChildUserSearchSiteRun objects
      */
-    public function getUserSearchSiteRunsJoinUserSearchFromUSSR(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
-    {
-        $query = ChildUserSearchSiteRunQuery::create(null, $criteria);
-        $query->joinWith('UserSearchFromUSSR', $joinBehavior);
-
-        return $this->getUserSearchSiteRuns($query, $con);
-    }
-
-
-    /**
-     * If this collection has already been initialized with
-     * an identical criteria, it returns the collection.
-     * Otherwise if this User is new, it will return
-     * an empty collection; or if this User has previously
-     * been saved, it will retrieve related UserSearchSiteRuns from storage.
-     *
-     * This method is protected by default in order to keep the public
-     * api reasonable.  You can provide public methods for those you
-     * actually need in User.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
-     * @return ObjectCollection|ChildUserSearchSiteRun[] List of ChildUserSearchSiteRun objects
-     */
     public function getUserSearchSiteRunsJoinJobSiteFromUSSR(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
     {
         $query = ChildUserSearchSiteRunQuery::create(null, $criteria);
@@ -2392,10 +2365,10 @@ abstract class User implements ActiveRecordInterface
      * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
      * @return ObjectCollection|ChildUserSearchSiteRun[] List of ChildUserSearchSiteRun objects
      */
-    public function getUserSearchSiteRunsJoinUserKeywordSetFromUSSR(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    public function getUserSearchSiteRunsJoinUserSearchFromUSSR(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
     {
         $query = ChildUserSearchSiteRunQuery::create(null, $criteria);
-        $query->joinWith('UserKeywordSetFromUSSR', $joinBehavior);
+        $query->joinWith('UserSearchFromUSSR', $joinBehavior);
 
         return $this->getUserSearchSiteRuns($query, $con);
     }
@@ -2945,20 +2918,20 @@ abstract class User implements ActiveRecordInterface
 
         // set the back reference to this object directly as using provided method either results
         // in endless loop or in multiple relations
-        if ($userKeywordSetFromUS->isGeoLocationFromUSUserFromusesLoaded()) {
-            $userKeywordSetFromUS->initGeoLocationFromUSUserFromuses();
-            $userKeywordSetFromUS->getGeoLocationFromUSUserFromuses()->push($geoLocationFromUS, $this);
-        } elseif (!$userKeywordSetFromUS->getGeoLocationFromUSUserFromuses()->contains($geoLocationFromUS, $this)) {
-            $userKeywordSetFromUS->getGeoLocationFromUSUserFromuses()->push($geoLocationFromUS, $this);
+        if ($userKeywordSetFromUS->isUserFromUSGeoLocationFromusesLoaded()) {
+            $userKeywordSetFromUS->initUserFromUSGeoLocationFromuses();
+            $userKeywordSetFromUS->getUserFromUSGeoLocationFromuses()->push($this, $geoLocationFromUS);
+        } elseif (!$userKeywordSetFromUS->getUserFromUSGeoLocationFromuses()->contains($this, $geoLocationFromUS)) {
+            $userKeywordSetFromUS->getUserFromUSGeoLocationFromuses()->push($this, $geoLocationFromUS);
         }
 
         // set the back reference to this object directly as using provided method either results
         // in endless loop or in multiple relations
-        if ($geoLocationFromUS->isUserKeywordSetFromUSUserFromusesLoaded()) {
-            $geoLocationFromUS->initUserKeywordSetFromUSUserFromuses();
-            $geoLocationFromUS->getUserKeywordSetFromUSUserFromuses()->push($userKeywordSetFromUS, $this);
-        } elseif (!$geoLocationFromUS->getUserKeywordSetFromUSUserFromuses()->contains($userKeywordSetFromUS, $this)) {
-            $geoLocationFromUS->getUserKeywordSetFromUSUserFromuses()->push($userKeywordSetFromUS, $this);
+        if ($geoLocationFromUS->isUserFromUSUserKeywordSetFromusesLoaded()) {
+            $geoLocationFromUS->initUserFromUSUserKeywordSetFromuses();
+            $geoLocationFromUS->getUserFromUSUserKeywordSetFromuses()->push($this, $userKeywordSetFromUS);
+        } elseif (!$geoLocationFromUS->getUserFromUSUserKeywordSetFromuses()->contains($this, $userKeywordSetFromUS)) {
+            $geoLocationFromUS->getUserFromUSUserKeywordSetFromuses()->push($this, $userKeywordSetFromUS);
         }
 
     }
@@ -2976,15 +2949,15 @@ abstract class User implements ActiveRecordInterface
         if ($this->getUserKeywordSetFromUSGeoLocationFromuses()->contains($userKeywordSetFromUS, $geoLocationFromUS)) {
             $userSearch = new ChildUserSearch();
             $userSearch->setUserKeywordSetFromUS($userKeywordSetFromUS);
-            if ($userKeywordSetFromUS->isGeoLocationFromUSUserFromusesLoaded()) {
+            if ($userKeywordSetFromUS->isUserFromUSGeoLocationFromusesLoaded()) {
                 //remove the back reference if available
-                $userKeywordSetFromUS->getGeoLocationFromUSUserFromuses()->removeObject($geoLocationFromUS, $this);
+                $userKeywordSetFromUS->getUserFromUSGeoLocationFromuses()->removeObject($this, $geoLocationFromUS);
             }
 
             $userSearch->setGeoLocationFromUS($geoLocationFromUS);
-            if ($geoLocationFromUS->isUserKeywordSetFromUSUserFromusesLoaded()) {
+            if ($geoLocationFromUS->isUserFromUSUserKeywordSetFromusesLoaded()) {
                 //remove the back reference if available
-                $geoLocationFromUS->getUserKeywordSetFromUSUserFromuses()->removeObject($userKeywordSetFromUS, $this);
+                $geoLocationFromUS->getUserFromUSUserKeywordSetFromuses()->removeObject($this, $userKeywordSetFromUS);
             }
 
             $userSearch->setUserFromUS($this);
@@ -3006,62 +2979,62 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Clears out the collUserSearchFromUSSRJobSiteFromUSSRAppRunIds collection
+     * Clears out the collJobSiteFromUSSRUserSearchFromUSSRAppRunIds collection
      *
      * This does not modify the database; however, it will remove any associated objects, causing
      * them to be refetched by subsequent calls to accessor method.
      *
      * @return void
-     * @see        addUserSearchFromUSSRJobSiteFromUSSRAppRunIds()
+     * @see        addJobSiteFromUSSRUserSearchFromUSSRAppRunIds()
      */
-    public function clearUserSearchFromUSSRJobSiteFromUSSRAppRunIds()
+    public function clearJobSiteFromUSSRUserSearchFromUSSRAppRunIds()
     {
-        $this->collUserSearchFromUSSRJobSiteFromUSSRAppRunIds = null; // important to set this to NULL since that means it is uninitialized
+        $this->collJobSiteFromUSSRUserSearchFromUSSRAppRunIds = null; // important to set this to NULL since that means it is uninitialized
     }
 
     /**
-     * Initializes the combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds crossRef collection.
+     * Initializes the combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds crossRef collection.
      *
-     * By default this just sets the combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds collection to an empty collection (like clearUserSearchFromUSSRJobSiteFromUSSRAppRunIds());
+     * By default this just sets the combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds collection to an empty collection (like clearJobSiteFromUSSRUserSearchFromUSSRAppRunIds());
      * however, you may wish to override this method in your stub class to provide setting appropriate
      * to your application -- for example, setting the initial array to the values stored in database.
      *
      * @return void
      */
-    public function initUserSearchFromUSSRJobSiteFromUSSRAppRunIds()
+    public function initJobSiteFromUSSRUserSearchFromUSSRAppRunIds()
     {
-        $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds = new ObjectCombinationCollection;
-        $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsPartial = true;
+        $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds = new ObjectCombinationCollection;
+        $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIdsPartial = true;
     }
 
     /**
-     * Checks if the combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds collection is loaded.
+     * Checks if the combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds collection is loaded.
      *
      * @return bool
      */
-    public function isUserSearchFromUSSRJobSiteFromUSSRAppRunIdsLoaded()
+    public function isJobSiteFromUSSRUserSearchFromUSSRAppRunIdsLoaded()
     {
-        return null !== $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds;
+        return null !== $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds;
     }
 
     /**
      * Returns a new query object pre configured with filters from current object and given arguments to query the database.
      *
-     * @param ChildJobSiteRecord $jobSiteFromUSSR,
+     * @param ChildUserSearch $userSearchFromUSSR,
      * @param string $appRunId
      * @param Criteria $criteria
      *
-     * @return ChildUserSearchQuery
+     * @return ChildJobSiteRecordQuery
      */
-    public function createUserSearchFromUSSRsQuery(ChildJobSiteRecord $jobSiteFromUSSR = null, $appRunId = null, Criteria $criteria = null)
+    public function createJobSiteFromUSSRsQuery(ChildUserSearch $userSearchFromUSSR = null, $appRunId = null, Criteria $criteria = null)
     {
-        $criteria = ChildUserSearchQuery::create($criteria)
+        $criteria = ChildJobSiteRecordQuery::create($criteria)
             ->filterByUserFromUSSR($this);
 
         $userSearchSiteRunQuery = $criteria->useUserSearchSiteRunQuery();
 
-        if (null !== $jobSiteFromUSSR) {
-            $userSearchSiteRunQuery->filterByJobSiteFromUSSR($jobSiteFromUSSR);
+        if (null !== $userSearchFromUSSR) {
+            $userSearchSiteRunQuery->filterByUserSearchFromUSSR($userSearchFromUSSR);
         }
 
         if (null !== $appRunId) {
@@ -3074,7 +3047,7 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Gets a combined collection of ChildUserSearch, ChildJobSiteRecord objects related by a many-to-many relationship
+     * Gets a combined collection of ChildJobSiteRecord, ChildUserSearch objects related by a many-to-many relationship
      * to the current object by way of the user_search_site_run cross-reference table.
      *
      * If the $criteria is not null, it is used to always fetch the results from the database.
@@ -3086,127 +3059,127 @@ abstract class User implements ActiveRecordInterface
      * @param      Criteria $criteria Optional query object to filter the query
      * @param      ConnectionInterface $con Optional connection object
      *
-     * @return ObjectCombinationCollection Combination list of ChildUserSearch, ChildJobSiteRecord objects
+     * @return ObjectCombinationCollection Combination list of ChildJobSiteRecord, ChildUserSearch objects
      */
-    public function getUserSearchFromUSSRJobSiteFromUSSRAppRunIds($criteria = null, ConnectionInterface $con = null)
+    public function getJobSiteFromUSSRUserSearchFromUSSRAppRunIds($criteria = null, ConnectionInterface $con = null)
     {
-        $partial = $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsPartial && !$this->isNew();
-        if (null === $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds || null !== $criteria || $partial) {
+        $partial = $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIdsPartial && !$this->isNew();
+        if (null === $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds || null !== $criteria || $partial) {
             if ($this->isNew()) {
                 // return empty collection
-                if (null === $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds) {
-                    $this->initUserSearchFromUSSRJobSiteFromUSSRAppRunIds();
+                if (null === $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds) {
+                    $this->initJobSiteFromUSSRUserSearchFromUSSRAppRunIds();
                 }
             } else {
 
                 $query = ChildUserSearchSiteRunQuery::create(null, $criteria)
                     ->filterByUserFromUSSR($this)
-                    ->joinUserSearchFromUSSR()
                     ->joinJobSiteFromUSSR()
+                    ->joinUserSearchFromUSSR()
                 ;
 
                 $items = $query->find($con);
-                $combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds = new ObjectCombinationCollection();
+                $combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds = new ObjectCombinationCollection();
                 foreach ($items as $item) {
                     $combination = [];
 
-                    $combination[] = $item->getUserSearchFromUSSR();
                     $combination[] = $item->getJobSiteFromUSSR();
+                    $combination[] = $item->getUserSearchFromUSSR();
                     $combination[] = $item->getAppRunId();
-                    $combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds[] = $combination;
+                    $combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds[] = $combination;
                 }
 
                 if (null !== $criteria) {
-                    return $combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds;
+                    return $combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds;
                 }
 
-                if ($partial && $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds) {
+                if ($partial && $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds) {
                     //make sure that already added objects gets added to the list of the database.
-                    foreach ($this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds as $obj) {
-                        if (!call_user_func_array([$combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds, 'contains'], $obj)) {
-                            $combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds[] = $obj;
+                    foreach ($this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds as $obj) {
+                        if (!call_user_func_array([$combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds, 'contains'], $obj)) {
+                            $combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds[] = $obj;
                         }
                     }
                 }
 
-                $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds = $combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds;
-                $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsPartial = false;
+                $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds = $combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds;
+                $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIdsPartial = false;
             }
         }
 
-        return $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds;
+        return $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds;
     }
 
     /**
-     * Returns a not cached ObjectCollection of ChildUserSearch objects. This will hit always the databases.
-     * If you have attached new ChildUserSearch object to this object you need to call `save` first to get
-     * the correct return value. Use getUserSearchFromUSSRJobSiteFromUSSRAppRunIds() to get the current internal state.
+     * Returns a not cached ObjectCollection of ChildJobSiteRecord objects. This will hit always the databases.
+     * If you have attached new ChildJobSiteRecord object to this object you need to call `save` first to get
+     * the correct return value. Use getJobSiteFromUSSRUserSearchFromUSSRAppRunIds() to get the current internal state.
      *
-     * @param ChildJobSiteRecord $jobSiteFromUSSR,
+     * @param ChildUserSearch $userSearchFromUSSR,
      * @param string $appRunId
      * @param Criteria $criteria
      * @param ConnectionInterface $con
      *
-     * @return ChildUserSearch[]|ObjectCollection
+     * @return ChildJobSiteRecord[]|ObjectCollection
      */
-    public function getUserSearchFromUSSRs(ChildJobSiteRecord $jobSiteFromUSSR = null, $appRunId = null, Criteria $criteria = null, ConnectionInterface $con = null)
+    public function getJobSiteFromUSSRs(ChildUserSearch $userSearchFromUSSR = null, $appRunId = null, Criteria $criteria = null, ConnectionInterface $con = null)
     {
-        return $this->createUserSearchFromUSSRsQuery($jobSiteFromUSSR, $appRunId, $criteria)->find($con);
+        return $this->createJobSiteFromUSSRsQuery($userSearchFromUSSR, $appRunId, $criteria)->find($con);
     }
 
     /**
-     * Sets a collection of ChildUserSearch, ChildJobSiteRecord combination objects related by a many-to-many relationship
+     * Sets a collection of ChildJobSiteRecord, ChildUserSearch combination objects related by a many-to-many relationship
      * to the current object by way of the user_search_site_run cross-reference table.
      * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
      * and new objects from the given Propel collection.
      *
-     * @param  Collection $userSearchFromUSSRJobSiteFromUSSRAppRunIds A Propel collection.
+     * @param  Collection $jobSiteFromUSSRUserSearchFromUSSRAppRunIds A Propel collection.
      * @param  ConnectionInterface $con Optional connection object
      * @return $this|ChildUser The current object (for fluent API support)
      */
-    public function setUserSearchFromUSSRJobSiteFromUSSRAppRunIds(Collection $userSearchFromUSSRJobSiteFromUSSRAppRunIds, ConnectionInterface $con = null)
+    public function setJobSiteFromUSSRUserSearchFromUSSRAppRunIds(Collection $jobSiteFromUSSRUserSearchFromUSSRAppRunIds, ConnectionInterface $con = null)
     {
-        $this->clearUserSearchFromUSSRJobSiteFromUSSRAppRunIds();
-        $currentUserSearchFromUSSRJobSiteFromUSSRAppRunIds = $this->getUserSearchFromUSSRJobSiteFromUSSRAppRunIds();
+        $this->clearJobSiteFromUSSRUserSearchFromUSSRAppRunIds();
+        $currentJobSiteFromUSSRUserSearchFromUSSRAppRunIds = $this->getJobSiteFromUSSRUserSearchFromUSSRAppRunIds();
 
-        $combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsScheduledForDeletion = $currentUserSearchFromUSSRJobSiteFromUSSRAppRunIds->diff($userSearchFromUSSRJobSiteFromUSSRAppRunIds);
+        $combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIdsScheduledForDeletion = $currentJobSiteFromUSSRUserSearchFromUSSRAppRunIds->diff($jobSiteFromUSSRUserSearchFromUSSRAppRunIds);
 
-        foreach ($combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsScheduledForDeletion as $toDelete) {
-            call_user_func_array([$this, 'removeUserSearchFromUSSRJobSiteFromUSSRAppRunId'], $toDelete);
+        foreach ($combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIdsScheduledForDeletion as $toDelete) {
+            call_user_func_array([$this, 'removeJobSiteFromUSSRUserSearchFromUSSRAppRunId'], $toDelete);
         }
 
-        foreach ($userSearchFromUSSRJobSiteFromUSSRAppRunIds as $userSearchFromUSSRJobSiteFromUSSRAppRunId) {
-            if (!call_user_func_array([$currentUserSearchFromUSSRJobSiteFromUSSRAppRunIds, 'contains'], $userSearchFromUSSRJobSiteFromUSSRAppRunId)) {
-                call_user_func_array([$this, 'doAddUserSearchFromUSSRJobSiteFromUSSRAppRunId'], $userSearchFromUSSRJobSiteFromUSSRAppRunId);
+        foreach ($jobSiteFromUSSRUserSearchFromUSSRAppRunIds as $jobSiteFromUSSRUserSearchFromUSSRAppRunId) {
+            if (!call_user_func_array([$currentJobSiteFromUSSRUserSearchFromUSSRAppRunIds, 'contains'], $jobSiteFromUSSRUserSearchFromUSSRAppRunId)) {
+                call_user_func_array([$this, 'doAddJobSiteFromUSSRUserSearchFromUSSRAppRunId'], $jobSiteFromUSSRUserSearchFromUSSRAppRunId);
             }
         }
 
-        $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsPartial = false;
-        $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds = $userSearchFromUSSRJobSiteFromUSSRAppRunIds;
+        $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIdsPartial = false;
+        $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds = $jobSiteFromUSSRUserSearchFromUSSRAppRunIds;
 
         return $this;
     }
 
     /**
-     * Gets the number of ChildUserSearch, ChildJobSiteRecord combination objects related by a many-to-many relationship
+     * Gets the number of ChildJobSiteRecord, ChildUserSearch combination objects related by a many-to-many relationship
      * to the current object by way of the user_search_site_run cross-reference table.
      *
      * @param      Criteria $criteria Optional query object to filter the query
      * @param      boolean $distinct Set to true to force count distinct
      * @param      ConnectionInterface $con Optional connection object
      *
-     * @return int the number of related ChildUserSearch, ChildJobSiteRecord combination objects
+     * @return int the number of related ChildJobSiteRecord, ChildUserSearch combination objects
      */
-    public function countUserSearchFromUSSRJobSiteFromUSSRAppRunIds(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    public function countJobSiteFromUSSRUserSearchFromUSSRAppRunIds(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
     {
-        $partial = $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsPartial && !$this->isNew();
-        if (null === $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds) {
+        $partial = $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIdsPartial && !$this->isNew();
+        if (null === $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds) {
                 return 0;
             } else {
 
                 if ($partial && !$criteria) {
-                    return count($this->getUserSearchFromUSSRJobSiteFromUSSRAppRunIds());
+                    return count($this->getJobSiteFromUSSRUserSearchFromUSSRAppRunIds());
                 }
 
                 $query = ChildUserSearchSiteRunQuery::create(null, $criteria);
@@ -3219,49 +3192,25 @@ abstract class User implements ActiveRecordInterface
                     ->count($con);
             }
         } else {
-            return count($this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds);
+            return count($this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds);
         }
     }
 
     /**
-     * Returns the not cached count of ChildUserSearch objects. This will hit always the databases.
-     * If you have attached new ChildUserSearch object to this object you need to call `save` first to get
-     * the correct return value. Use getUserSearchFromUSSRJobSiteFromUSSRAppRunIds() to get the current internal state.
+     * Returns the not cached count of ChildJobSiteRecord objects. This will hit always the databases.
+     * If you have attached new ChildJobSiteRecord object to this object you need to call `save` first to get
+     * the correct return value. Use getJobSiteFromUSSRUserSearchFromUSSRAppRunIds() to get the current internal state.
      *
-     * @param ChildJobSiteRecord $jobSiteFromUSSR,
+     * @param ChildUserSearch $userSearchFromUSSR,
      * @param string $appRunId
      * @param Criteria $criteria
      * @param ConnectionInterface $con
      *
      * @return integer
      */
-    public function countUserSearchFromUSSRs(ChildJobSiteRecord $jobSiteFromUSSR = null, $appRunId = null, Criteria $criteria = null, ConnectionInterface $con = null)
+    public function countJobSiteFromUSSRs(ChildUserSearch $userSearchFromUSSR = null, $appRunId = null, Criteria $criteria = null, ConnectionInterface $con = null)
     {
-        return $this->createUserSearchFromUSSRsQuery($jobSiteFromUSSR, $appRunId, $criteria)->count($con);
-    }
-
-    /**
-     * Associate a ChildUserSearch to this object
-     * through the user_search_site_run cross reference table.
-     *
-     * @param ChildUserSearch $userSearchFromUSSR,
-     * @param ChildJobSiteRecord $jobSiteFromUSSR,
-     * @param string $appRunId
-     * @return ChildUser The current object (for fluent API support)
-     */
-    public function addUserSearchFromUSSR(ChildUserSearch $userSearchFromUSSR, ChildJobSiteRecord $jobSiteFromUSSR, $appRunId)
-    {
-        if ($this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds === null) {
-            $this->initUserSearchFromUSSRJobSiteFromUSSRAppRunIds();
-        }
-
-        if (!$this->getUserSearchFromUSSRJobSiteFromUSSRAppRunIds()->contains($userSearchFromUSSR, $jobSiteFromUSSR, $appRunId)) {
-            // only add it if the **same** object is not already associated
-            $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds->push($userSearchFromUSSR, $jobSiteFromUSSR, $appRunId);
-            $this->doAddUserSearchFromUSSRJobSiteFromUSSRAppRunId($userSearchFromUSSR, $jobSiteFromUSSR, $appRunId);
-        }
-
-        return $this;
+        return $this->createJobSiteFromUSSRsQuery($userSearchFromUSSR, $appRunId, $criteria)->count($con);
     }
 
     /**
@@ -3275,14 +3224,38 @@ abstract class User implements ActiveRecordInterface
      */
     public function addJobSiteFromUSSR(ChildJobSiteRecord $jobSiteFromUSSR, ChildUserSearch $userSearchFromUSSR, $appRunId)
     {
-        if ($this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds === null) {
-            $this->initUserSearchFromUSSRJobSiteFromUSSRAppRunIds();
+        if ($this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds === null) {
+            $this->initJobSiteFromUSSRUserSearchFromUSSRAppRunIds();
         }
 
-        if (!$this->getUserSearchFromUSSRJobSiteFromUSSRAppRunIds()->contains($jobSiteFromUSSR, $userSearchFromUSSR, $appRunId)) {
+        if (!$this->getJobSiteFromUSSRUserSearchFromUSSRAppRunIds()->contains($jobSiteFromUSSR, $userSearchFromUSSR, $appRunId)) {
             // only add it if the **same** object is not already associated
-            $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds->push($jobSiteFromUSSR, $userSearchFromUSSR, $appRunId);
-            $this->doAddUserSearchFromUSSRJobSiteFromUSSRAppRunId($jobSiteFromUSSR, $userSearchFromUSSR, $appRunId);
+            $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds->push($jobSiteFromUSSR, $userSearchFromUSSR, $appRunId);
+            $this->doAddJobSiteFromUSSRUserSearchFromUSSRAppRunId($jobSiteFromUSSR, $userSearchFromUSSR, $appRunId);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Associate a ChildUserSearch to this object
+     * through the user_search_site_run cross reference table.
+     *
+     * @param ChildUserSearch $userSearchFromUSSR,
+     * @param ChildJobSiteRecord $jobSiteFromUSSR,
+     * @param string $appRunId
+     * @return ChildUser The current object (for fluent API support)
+     */
+    public function addUserSearchFromUSSR(ChildUserSearch $userSearchFromUSSR, ChildJobSiteRecord $jobSiteFromUSSR, $appRunId)
+    {
+        if ($this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds === null) {
+            $this->initJobSiteFromUSSRUserSearchFromUSSRAppRunIds();
+        }
+
+        if (!$this->getJobSiteFromUSSRUserSearchFromUSSRAppRunIds()->contains($userSearchFromUSSR, $jobSiteFromUSSR, $appRunId)) {
+            // only add it if the **same** object is not already associated
+            $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds->push($userSearchFromUSSR, $jobSiteFromUSSR, $appRunId);
+            $this->doAddJobSiteFromUSSRUserSearchFromUSSRAppRunId($userSearchFromUSSR, $jobSiteFromUSSR, $appRunId);
         }
 
         return $this;
@@ -3290,31 +3263,22 @@ abstract class User implements ActiveRecordInterface
 
     /**
      *
-     * @param ChildUserSearch $userSearchFromUSSR,
      * @param ChildJobSiteRecord $jobSiteFromUSSR,
+     * @param ChildUserSearch $userSearchFromUSSR,
      * @param string $appRunId
      */
-    protected function doAddUserSearchFromUSSRJobSiteFromUSSRAppRunId(ChildUserSearch $userSearchFromUSSR, ChildJobSiteRecord $jobSiteFromUSSR, $appRunId)
+    protected function doAddJobSiteFromUSSRUserSearchFromUSSRAppRunId(ChildJobSiteRecord $jobSiteFromUSSR, ChildUserSearch $userSearchFromUSSR, $appRunId)
     {
         $userSearchSiteRun = new ChildUserSearchSiteRun();
 
-        $userSearchSiteRun->setUserSearchFromUSSR($userSearchFromUSSR);
         $userSearchSiteRun->setJobSiteFromUSSR($jobSiteFromUSSR);
+        $userSearchSiteRun->setUserSearchFromUSSR($userSearchFromUSSR);
         $userSearchSiteRun->setAppRunId($appRunId);
 
 
         $userSearchSiteRun->setUserFromUSSR($this);
 
         $this->addUserSearchSiteRun($userSearchSiteRun);
-
-        // set the back reference to this object directly as using provided method either results
-        // in endless loop or in multiple relations
-        if ($userSearchFromUSSR->isJobSiteFromUSSRUserFromUSSRAppRunIdsLoaded()) {
-            $userSearchFromUSSR->initJobSiteFromUSSRUserFromUSSRAppRunIds();
-            $userSearchFromUSSR->getJobSiteFromUSSRUserFromUSSRAppRunIds()->push($jobSiteFromUSSR, $this, $appRunId);
-        } elseif (!$userSearchFromUSSR->getJobSiteFromUSSRUserFromUSSRAppRunIds()->contains($jobSiteFromUSSR, $this, $appRunId)) {
-            $userSearchFromUSSR->getJobSiteFromUSSRUserFromUSSRAppRunIds()->push($jobSiteFromUSSR, $this, $appRunId);
-        }
 
         // set the back reference to this object directly as using provided method either results
         // in endless loop or in multiple relations
@@ -3325,31 +3289,40 @@ abstract class User implements ActiveRecordInterface
             $jobSiteFromUSSR->getUserSearchFromUSSRUserFromUSSRAppRunIds()->push($userSearchFromUSSR, $this, $appRunId);
         }
 
+        // set the back reference to this object directly as using provided method either results
+        // in endless loop or in multiple relations
+        if ($userSearchFromUSSR->isJobSiteFromUSSRUserFromUSSRAppRunIdsLoaded()) {
+            $userSearchFromUSSR->initJobSiteFromUSSRUserFromUSSRAppRunIds();
+            $userSearchFromUSSR->getJobSiteFromUSSRUserFromUSSRAppRunIds()->push($jobSiteFromUSSR, $this, $appRunId);
+        } elseif (!$userSearchFromUSSR->getJobSiteFromUSSRUserFromUSSRAppRunIds()->contains($jobSiteFromUSSR, $this, $appRunId)) {
+            $userSearchFromUSSR->getJobSiteFromUSSRUserFromUSSRAppRunIds()->push($jobSiteFromUSSR, $this, $appRunId);
+        }
+
     }
 
     /**
-     * Remove userSearchFromUSSR, jobSiteFromUSSR, appRunId of this object
+     * Remove jobSiteFromUSSR, userSearchFromUSSR, appRunId of this object
      * through the user_search_site_run cross reference table.
      *
-     * @param ChildUserSearch $userSearchFromUSSR,
      * @param ChildJobSiteRecord $jobSiteFromUSSR,
+     * @param ChildUserSearch $userSearchFromUSSR,
      * @param string $appRunId
      * @return ChildUser The current object (for fluent API support)
      */
-    public function removeUserSearchFromUSSRJobSiteFromUSSRAppRunId(ChildUserSearch $userSearchFromUSSR, ChildJobSiteRecord $jobSiteFromUSSR, $appRunId)
+    public function removeJobSiteFromUSSRUserSearchFromUSSRAppRunId(ChildJobSiteRecord $jobSiteFromUSSR, ChildUserSearch $userSearchFromUSSR, $appRunId)
     {
-        if ($this->getUserSearchFromUSSRJobSiteFromUSSRAppRunIds()->contains($userSearchFromUSSR, $jobSiteFromUSSR, $appRunId)) {
+        if ($this->getJobSiteFromUSSRUserSearchFromUSSRAppRunIds()->contains($jobSiteFromUSSR, $userSearchFromUSSR, $appRunId)) {
             $userSearchSiteRun = new ChildUserSearchSiteRun();
-            $userSearchSiteRun->setUserSearchFromUSSR($userSearchFromUSSR);
-            if ($userSearchFromUSSR->isJobSiteFromUSSRUserFromUSSRAppRunIdsLoaded()) {
-                //remove the back reference if available
-                $userSearchFromUSSR->getJobSiteFromUSSRUserFromUSSRAppRunIds()->removeObject($jobSiteFromUSSR, $this, $appRunId);
-            }
-
             $userSearchSiteRun->setJobSiteFromUSSR($jobSiteFromUSSR);
             if ($jobSiteFromUSSR->isUserSearchFromUSSRUserFromUSSRAppRunIdsLoaded()) {
                 //remove the back reference if available
                 $jobSiteFromUSSR->getUserSearchFromUSSRUserFromUSSRAppRunIds()->removeObject($userSearchFromUSSR, $this, $appRunId);
+            }
+
+            $userSearchSiteRun->setUserSearchFromUSSR($userSearchFromUSSR);
+            if ($userSearchFromUSSR->isJobSiteFromUSSRUserFromUSSRAppRunIdsLoaded()) {
+                //remove the back reference if available
+                $userSearchFromUSSR->getJobSiteFromUSSRUserFromUSSRAppRunIds()->removeObject($jobSiteFromUSSR, $this, $appRunId);
             }
 
             $userSearchSiteRun->setAppRunId($appRunId);
@@ -3357,14 +3330,14 @@ abstract class User implements ActiveRecordInterface
             $this->removeUserSearchSiteRun(clone $userSearchSiteRun);
             $userSearchSiteRun->clear();
 
-            $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds->remove($this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds->search($userSearchFromUSSR, $jobSiteFromUSSR, $appRunId));
+            $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds->remove($this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds->search($jobSiteFromUSSR, $userSearchFromUSSR, $appRunId));
 
-            if (null === $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsScheduledForDeletion) {
-                $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsScheduledForDeletion = clone $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds;
-                $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsScheduledForDeletion->clear();
+            if (null === $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIdsScheduledForDeletion) {
+                $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIdsScheduledForDeletion = clone $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds;
+                $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIdsScheduledForDeletion->clear();
             }
 
-            $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIdsScheduledForDeletion->push($userSearchFromUSSR, $jobSiteFromUSSR, $appRunId);
+            $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIdsScheduledForDeletion->push($jobSiteFromUSSR, $userSearchFromUSSR, $appRunId);
         }
 
 
@@ -3669,8 +3642,8 @@ abstract class User implements ActiveRecordInterface
                     $o->clearAllReferences($deep);
                 }
             }
-            if ($this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds) {
-                foreach ($this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds as $o) {
+            if ($this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds) {
+                foreach ($this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds as $o) {
                     $o->clearAllReferences($deep);
                 }
             }
@@ -3686,7 +3659,7 @@ abstract class User implements ActiveRecordInterface
         $this->collUserSearchSiteRuns = null;
         $this->collUserJobMatches = null;
         $this->combinationCollUserKeywordSetFromUSGeoLocationFromuses = null;
-        $this->combinationCollUserSearchFromUSSRJobSiteFromUSSRAppRunIds = null;
+        $this->combinationCollJobSiteFromUSSRUserSearchFromUSSRAppRunIds = null;
         $this->collJobPostingFromUJMs = null;
     }
 

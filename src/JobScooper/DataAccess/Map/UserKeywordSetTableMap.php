@@ -59,7 +59,7 @@ class UserKeywordSetTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 6;
+    const NUM_COLUMNS = 5;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class UserKeywordSetTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 6;
+    const NUM_HYDRATE_COLUMNS = 5;
 
     /**
      * the column name for the user_id field
@@ -77,14 +77,9 @@ class UserKeywordSetTableMap extends TableMap
     const COL_USER_ID = 'user_keyword_set.user_id';
 
     /**
-     * the column name for the user_keyword_set_id field
+     * the column name for the user_keyword_set_key field
      */
-    const COL_USER_KEYWORD_SET_ID = 'user_keyword_set.user_keyword_set_id';
-
-    /**
-     * the column name for the keywords field
-     */
-    const COL_KEYWORDS = 'user_keyword_set.keywords';
+    const COL_USER_KEYWORD_SET_KEY = 'user_keyword_set.user_keyword_set_key';
 
     /**
      * the column name for the search_key_from_config field
@@ -92,14 +87,14 @@ class UserKeywordSetTableMap extends TableMap
     const COL_SEARCH_KEY_FROM_CONFIG = 'user_keyword_set.search_key_from_config';
 
     /**
+     * the column name for the keywords field
+     */
+    const COL_KEYWORDS = 'user_keyword_set.keywords';
+
+    /**
      * the column name for the keyword_tokens field
      */
     const COL_KEYWORD_TOKENS = 'user_keyword_set.keyword_tokens';
-
-    /**
-     * the column name for the user_keyword_set_key field
-     */
-    const COL_USER_KEYWORD_SET_KEY = 'user_keyword_set.user_keyword_set_key';
 
     /**
      * The default string format for model objects of the related table
@@ -113,11 +108,11 @@ class UserKeywordSetTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('UserId', 'UserKeywordSetId', 'Keywords', 'SearchKeyFromConfig', 'KeywordTokens', 'UserKeywordSetKey', ),
-        self::TYPE_CAMELNAME     => array('userId', 'userKeywordSetId', 'keywords', 'searchKeyFromConfig', 'keywordTokens', 'userKeywordSetKey', ),
-        self::TYPE_COLNAME       => array(UserKeywordSetTableMap::COL_USER_ID, UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID, UserKeywordSetTableMap::COL_KEYWORDS, UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG, UserKeywordSetTableMap::COL_KEYWORD_TOKENS, UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY, ),
-        self::TYPE_FIELDNAME     => array('user_id', 'user_keyword_set_id', 'keywords', 'search_key_from_config', 'keyword_tokens', 'user_keyword_set_key', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
+        self::TYPE_PHPNAME       => array('UserId', 'UserKeywordSetKey', 'SearchKeyFromConfig', 'Keywords', 'KeywordTokens', ),
+        self::TYPE_CAMELNAME     => array('userId', 'userKeywordSetKey', 'searchKeyFromConfig', 'keywords', 'keywordTokens', ),
+        self::TYPE_COLNAME       => array(UserKeywordSetTableMap::COL_USER_ID, UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY, UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG, UserKeywordSetTableMap::COL_KEYWORDS, UserKeywordSetTableMap::COL_KEYWORD_TOKENS, ),
+        self::TYPE_FIELDNAME     => array('user_id', 'user_keyword_set_key', 'search_key_from_config', 'keywords', 'keyword_tokens', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
 
     /**
@@ -127,11 +122,11 @@ class UserKeywordSetTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('UserId' => 0, 'UserKeywordSetId' => 1, 'Keywords' => 2, 'SearchKeyFromConfig' => 3, 'KeywordTokens' => 4, 'UserKeywordSetKey' => 5, ),
-        self::TYPE_CAMELNAME     => array('userId' => 0, 'userKeywordSetId' => 1, 'keywords' => 2, 'searchKeyFromConfig' => 3, 'keywordTokens' => 4, 'userKeywordSetKey' => 5, ),
-        self::TYPE_COLNAME       => array(UserKeywordSetTableMap::COL_USER_ID => 0, UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID => 1, UserKeywordSetTableMap::COL_KEYWORDS => 2, UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG => 3, UserKeywordSetTableMap::COL_KEYWORD_TOKENS => 4, UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY => 5, ),
-        self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_keyword_set_id' => 1, 'keywords' => 2, 'search_key_from_config' => 3, 'keyword_tokens' => 4, 'user_keyword_set_key' => 5, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
+        self::TYPE_PHPNAME       => array('UserId' => 0, 'UserKeywordSetKey' => 1, 'SearchKeyFromConfig' => 2, 'Keywords' => 3, 'KeywordTokens' => 4, ),
+        self::TYPE_CAMELNAME     => array('userId' => 0, 'userKeywordSetKey' => 1, 'searchKeyFromConfig' => 2, 'keywords' => 3, 'keywordTokens' => 4, ),
+        self::TYPE_COLNAME       => array(UserKeywordSetTableMap::COL_USER_ID => 0, UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY => 1, UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG => 2, UserKeywordSetTableMap::COL_KEYWORDS => 3, UserKeywordSetTableMap::COL_KEYWORD_TOKENS => 4, ),
+        self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_keyword_set_key' => 1, 'search_key_from_config' => 2, 'keywords' => 3, 'keyword_tokens' => 4, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
 
     /**
@@ -149,16 +144,14 @@ class UserKeywordSetTableMap extends TableMap
         $this->setIdentifierQuoting(false);
         $this->setClassName('\\JobScooper\\DataAccess\\UserKeywordSet');
         $this->setPackage('JobScooper.DataAccess');
-        $this->setUseIdGenerator(true);
+        $this->setUseIdGenerator(false);
         $this->setIsCrossRef(true);
         // columns
         $this->addForeignPrimaryKey('user_id', 'UserId', 'INTEGER' , 'user', 'user_id', true, null, null);
-        $this->addPrimaryKey('user_keyword_set_id', 'UserKeywordSetId', 'INTEGER', true, null, null);
-        $this->addColumn('keywords', 'Keywords', 'ARRAY', true, null, null);
+        $this->addPrimaryKey('user_keyword_set_key', 'UserKeywordSetKey', 'VARCHAR', true, 100, null);
         $this->addColumn('search_key_from_config', 'SearchKeyFromConfig', 'VARCHAR', true, 50, null);
+        $this->addColumn('keywords', 'Keywords', 'ARRAY', true, null, null);
         $this->addColumn('keyword_tokens', 'KeywordTokens', 'ARRAY', false, null, null);
-        $this->addColumn('user_keyword_set_key', 'UserKeywordSetKey', 'VARCHAR', true, 128, null);
-        $this->getColumn('user_keyword_set_key')->setPrimaryString(true);
     } // initialize()
 
     /**
@@ -176,8 +169,8 @@ class UserKeywordSetTableMap extends TableMap
         $this->addRelation('UserSearch', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
-    0 => ':user_keyword_set_id',
-    1 => ':user_keyword_set_id',
+    0 => ':user_keyword_set_key',
+    1 => ':user_keyword_set_key',
   ),
   1 =>
   array (
@@ -185,22 +178,8 @@ class UserKeywordSetTableMap extends TableMap
     1 => ':user_id',
   ),
 ), null, null, 'UserSearches', false);
-        $this->addRelation('UserSearchSiteRun', '\\JobScooper\\DataAccess\\UserSearchSiteRun', RelationMap::ONE_TO_MANY, array (
-  0 =>
-  array (
-    0 => ':user_id',
-    1 => ':user_id',
-  ),
-  1 =>
-  array (
-    0 => ':user_keyword_set_id',
-    1 => ':user_keyword_set_id',
-  ),
-), 'CASCADE', null, 'UserSearchSiteRuns', false);
-        $this->addRelation('GeoLocationFromUS', '\\JobScooper\\DataAccess\\GeoLocation', RelationMap::MANY_TO_MANY, array(), null, null, 'GeoLocationFromuses');
         $this->addRelation('UserFromUS', '\\JobScooper\\DataAccess\\User', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserFromuses');
-        $this->addRelation('UserSearchFromUSSR', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserSearchFromUSSRs');
-        $this->addRelation('JobSiteFromUSSR', '\\JobScooper\\DataAccess\\JobSiteRecord', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'JobSiteFromUSSRs');
+        $this->addRelation('GeoLocationFromUS', '\\JobScooper\\DataAccess\\GeoLocation', RelationMap::MANY_TO_MANY, array(), null, null, 'GeoLocationFromuses');
     } // buildRelations()
 
     /**
@@ -212,7 +191,7 @@ class UserKeywordSetTableMap extends TableMap
     public function getBehaviors()
     {
         return array(
-            'sluggable' => array('slug_column' => 'user_keyword_set_key', 'slug_pattern' => 'user{UserId}_kwd{UserKeywordSetId}_search{SearchKeyFromConfig}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '_', 'permanent' => 'false', 'scope_column' => '', 'unique_constraint' => 'true', ),
+            'sluggable' => array('slug_column' => 'user_keyword_set_key', 'slug_pattern' => 'user{UserId}_search{SearchKeyFromConfig}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '_', 'permanent' => 'false', 'scope_column' => '', 'unique_constraint' => 'true', ),
         );
     } // getBehaviors()
 
@@ -231,7 +210,7 @@ class UserKeywordSetTableMap extends TableMap
     {
         if (Propel::isInstancePoolingEnabled()) {
             if (null === $key) {
-                $key = serialize([(null === $obj->getUserId() || is_scalar($obj->getUserId()) || is_callable([$obj->getUserId(), '__toString']) ? (string) $obj->getUserId() : $obj->getUserId()), (null === $obj->getUserKeywordSetId() || is_scalar($obj->getUserKeywordSetId()) || is_callable([$obj->getUserKeywordSetId(), '__toString']) ? (string) $obj->getUserKeywordSetId() : $obj->getUserKeywordSetId())]);
+                $key = serialize([(null === $obj->getUserId() || is_scalar($obj->getUserId()) || is_callable([$obj->getUserId(), '__toString']) ? (string) $obj->getUserId() : $obj->getUserId()), (null === $obj->getUserKeywordSetKey() || is_scalar($obj->getUserKeywordSetKey()) || is_callable([$obj->getUserKeywordSetKey(), '__toString']) ? (string) $obj->getUserKeywordSetKey() : $obj->getUserKeywordSetKey())]);
             } // if key === null
             self::$instances[$key] = $obj;
         }
@@ -251,7 +230,7 @@ class UserKeywordSetTableMap extends TableMap
     {
         if (Propel::isInstancePoolingEnabled() && null !== $value) {
             if (is_object($value) && $value instanceof \JobScooper\DataAccess\UserKeywordSet) {
-                $key = serialize([(null === $value->getUserId() || is_scalar($value->getUserId()) || is_callable([$value->getUserId(), '__toString']) ? (string) $value->getUserId() : $value->getUserId()), (null === $value->getUserKeywordSetId() || is_scalar($value->getUserKeywordSetId()) || is_callable([$value->getUserKeywordSetId(), '__toString']) ? (string) $value->getUserKeywordSetId() : $value->getUserKeywordSetId())]);
+                $key = serialize([(null === $value->getUserId() || is_scalar($value->getUserId()) || is_callable([$value->getUserId(), '__toString']) ? (string) $value->getUserId() : $value->getUserId()), (null === $value->getUserKeywordSetKey() || is_scalar($value->getUserKeywordSetKey()) || is_callable([$value->getUserKeywordSetKey(), '__toString']) ? (string) $value->getUserKeywordSetKey() : $value->getUserKeywordSetKey())]);
 
             } elseif (is_array($value) && count($value) === 2) {
                 // assume we've been passed a primary key";
@@ -267,15 +246,6 @@ class UserKeywordSetTableMap extends TableMap
 
             unset(self::$instances[$key]);
         }
-    }
-    /**
-     * Method to invalidate the instance pool of all tables related to user_keyword_set     * by a foreign key with ON DELETE CASCADE
-     */
-    public static function clearRelatedInstancePool()
-    {
-        // Invalidate objects in related instance pools,
-        // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
-        UserSearchSiteRunTableMap::clearInstancePool();
     }
 
     /**
@@ -294,11 +264,11 @@ class UserKeywordSetTableMap extends TableMap
     public static function getPrimaryKeyHashFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
         // If the PK cannot be derived from the row, return NULL.
-        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] === null && $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
+        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] === null && $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetKey', TableMap::TYPE_PHPNAME, $indexType)] === null) {
             return null;
         }
 
-        return serialize([(null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)]), (null === $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)])]);
+        return serialize([(null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)]), (null === $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetKey', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetKey', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetKey', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetKey', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('UserKeywordSetKey', TableMap::TYPE_PHPNAME, $indexType)])]);
     }
 
     /**
@@ -322,10 +292,10 @@ class UserKeywordSetTableMap extends TableMap
                 ? 0 + $offset
                 : self::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)
         ];
-        $pks[] = (int) $row[
+        $pks[] = (string) $row[
             $indexType == TableMap::TYPE_NUM
                 ? 1 + $offset
-                : self::translateFieldName('UserKeywordSetId', TableMap::TYPE_PHPNAME, $indexType)
+                : self::translateFieldName('UserKeywordSetKey', TableMap::TYPE_PHPNAME, $indexType)
         ];
 
         return $pks;
@@ -429,18 +399,16 @@ class UserKeywordSetTableMap extends TableMap
     {
         if (null === $alias) {
             $criteria->addSelectColumn(UserKeywordSetTableMap::COL_USER_ID);
-            $criteria->addSelectColumn(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID);
-            $criteria->addSelectColumn(UserKeywordSetTableMap::COL_KEYWORDS);
-            $criteria->addSelectColumn(UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG);
-            $criteria->addSelectColumn(UserKeywordSetTableMap::COL_KEYWORD_TOKENS);
             $criteria->addSelectColumn(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY);
+            $criteria->addSelectColumn(UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG);
+            $criteria->addSelectColumn(UserKeywordSetTableMap::COL_KEYWORDS);
+            $criteria->addSelectColumn(UserKeywordSetTableMap::COL_KEYWORD_TOKENS);
         } else {
             $criteria->addSelectColumn($alias . '.user_id');
-            $criteria->addSelectColumn($alias . '.user_keyword_set_id');
-            $criteria->addSelectColumn($alias . '.keywords');
-            $criteria->addSelectColumn($alias . '.search_key_from_config');
-            $criteria->addSelectColumn($alias . '.keyword_tokens');
             $criteria->addSelectColumn($alias . '.user_keyword_set_key');
+            $criteria->addSelectColumn($alias . '.search_key_from_config');
+            $criteria->addSelectColumn($alias . '.keywords');
+            $criteria->addSelectColumn($alias . '.keyword_tokens');
         }
     }
 
@@ -500,7 +468,7 @@ class UserKeywordSetTableMap extends TableMap
             }
             foreach ($values as $value) {
                 $criterion = $criteria->getNewCriterion(UserKeywordSetTableMap::COL_USER_ID, $value[0]);
-                $criterion->addAnd($criteria->getNewCriterion(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_ID, $value[1]));
+                $criterion->addAnd($criteria->getNewCriterion(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY, $value[1]));
                 $criteria->addOr($criterion);
             }
         }

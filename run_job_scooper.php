@@ -36,7 +36,7 @@ if (file_exists($autoload)) {
     trigger_error("Composer required to run this app.");
 }
 
-$cmdline = new \JobScooper\Utils\DocOptions(__file__);
+$cmdline = new \JobScooper\Utils\DocOptions(__FILE__);
 $arguments = $cmdline->getAll();
 
 setConfigurationSetting('command_line_args', $arguments);

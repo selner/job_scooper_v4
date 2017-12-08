@@ -239,9 +239,10 @@ class GeoLocationTableMap extends TableMap
     1 => ':geolocation_id',
   ),
 ), 'CASCADE', null, 'UserSearchSiteRuns', false);
+        $this->addRelation('UserFromUS', '\\JobScooper\\DataAccess\\User', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserFromuses');
         $this->addRelation('UserKeywordSetFromUS', '\\JobScooper\\DataAccess\\UserKeywordSet', RelationMap::MANY_TO_MANY, array(), null, null, 'UserKeywordSetFromuses');
-        $this->addRelation('UserSearchFromUSSR', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserSearchFromUSSRs');
         $this->addRelation('JobSiteFromUSSR', '\\JobScooper\\DataAccess\\JobSiteRecord', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'JobSiteFromUSSRs');
+        $this->addRelation('UserSearchFromUSSR', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserSearchFromUSSRs');
     } // buildRelations()
 
     /**
