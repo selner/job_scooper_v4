@@ -173,7 +173,7 @@ class JobsAutoMarker
             }
         }
 
-        LogLine("Gathering job postings not in the following counties & states ...", \C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Finding job postings not in the following counties & states: " . getArrayValuesAsString($arrIncludeCounties) . " ...", \C__DISPLAY_ITEM_DETAIL__);
         $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrIncludeCounties) {
             $posting = $v->getJobPostingFromUJM();
             $locId = $posting->getGeoLocationId();
