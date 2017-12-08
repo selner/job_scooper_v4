@@ -221,12 +221,14 @@ class JobSitePluginBuilder
             foreach (array_keys($plugins) as $agentkey) {
                 LogLine("Running eval statement for class " . $plugins[$agentkey]['PhpClassName'], C__DISPLAY_ITEM_DETAIL__);
                 try {
-                    $evalStmt = $this->_getClassInstantiationCode($plugins[$agentkey]);
+                	if(!in_array($plugins[$agentkey]['PhpClassName'], get_declared_classes()))
+	                {
+	                    $evalStmt = $this->_getClassInstantiationCode($plugins[$agentkey]);
 
-                    $success = eval($evalStmt);
-                    if ($success === false)
-                        throw new \Exception("Failed to initialize the plugin eval code for " . $agentkey . ": " . error_get_last()['message']);
-
+	                    $success = eval($evalStmt);
+	                    if ($success === false)
+	                        throw new \Exception("Failed to initialize the plugin eval code for " . $agentkey . ": " . error_get_last()['message']);
+	                }
                 } catch (\Exception $ex) {
                     handleException($ex);
                 }
@@ -393,6 +395,7 @@ class JobSitePluginBuilder
         $stringProps = array();
         $numericProps = array();
         $otherProps = array();
+	    $stringProps["JobSiteKey"] = cleanupSlugPart($pluginConfig['JobSiteName']);
 
         foreach (array_keys($pluginConfig) as $key) {
             switch ($key) {

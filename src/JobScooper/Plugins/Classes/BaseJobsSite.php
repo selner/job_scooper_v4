@@ -36,7 +36,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 {
     function __construct()
     {
-        $this->jobSiteKey = getJobSiteKeyFromPluginClass(get_class($this));
+        $this->JobSiteKey = $this->getJobSiteKey();
 
         if(is_null($this->JobSiteName) || strlen($this->JobSiteName) == 0) {
             $classname = get_class($this);
@@ -45,9 +45,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
             }
         }
 
-        if (!empty($GLOBALS['JOBSCOOPER']['plugin_specific_settings'][$this->jobSiteKey]))
+        if (!empty($GLOBALS['JOBSCOOPER']['plugin_specific_settings'][$this->JobSiteKey]))
         {
-            $this->_otherPluginSettings = $GLOBALS['JOBSCOOPER']['plugin_specific_settings'][$this->jobSiteKey];
+            $this->_otherPluginSettings = $GLOBALS['JOBSCOOPER']['plugin_specific_settings'][$this->JobSiteKey];
         }
 
 
@@ -92,12 +92,23 @@ abstract class BaseJobsSite implements IJobSitePlugin
         if (empty($this->JobSiteName)) {
             $this->JobSiteName = str_replace("Plugin", "", get_class($this));
         }
-
-
-
     }
 
-    //************************************************************************
+
+	function getJobSiteKey()
+	{
+		if(empty($this->JobSiteKey)) {
+			$arrSiteList = \JobScooper\Builders\JobSitePluginBuilder::getAllJobSites();
+			$className = get_class($this);
+			$siteKey = strtolower(str_ireplace("Plugin", "", $className));
+			if (array_key_exists($siteKey, $arrSiteList) === true)
+				$this->JobSiteKey = $siteKey;
+			return $this->JobSiteKey;
+		}
+	}
+
+
+	//************************************************************************
     //
     //
     //
@@ -160,7 +171,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     public function getMyJobsList()
     {
-        return getAllUserMatchesNotNotified($this->jobSiteKey);
+        return getAllUserMatchesNotNotified($this->JobSiteKey);
     }
 
     public function getUpdatedJobsForAllSearches()
@@ -211,18 +222,18 @@ abstract class BaseJobsSite implements IJobSitePlugin
             {
                 try
                 {
-                    LogLine("Checking for missing " . $this->jobSiteKey . " jobs for user " . $user->getUserId() . ".", \C__DISPLAY_ITEM_DETAIL__);
+                    LogLine("Checking for missing " . $this->JobSiteKey . " jobs for user " . $user->getUserId() . ".", \C__DISPLAY_ITEM_DETAIL__);
                     $dataExistingUserJobMatchIds = \JobScooper\DataAccess\UserJobMatchQuery::create()
                         ->select("JobPostingId")
                         ->filterByUserId($user->getUserId())
                         ->useJobPostingQuery()
-                            ->filterByJobSiteKey($this->jobSiteKey)
+                            ->filterByJobSiteKey($this->JobSiteKey)
                         ->endUse()
                         ->find()
                         ->getData();
 
                     $queryAllJobsFromJobSite = \JobScooper\DataAccess\JobPostingQuery::create()
-                        ->filterByJobSiteKey($this->jobSiteKey)
+                        ->filterByJobSiteKey($this->JobSiteKey)
                         ->select("JobPostingId")
                         ->find()
                         ->getData();
@@ -230,13 +241,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
                     $jobIdsToAddToUser = array_diff($queryAllJobsFromJobSite, $dataExistingUserJobMatchIds);
 
                     if(!is_null($jobIdsToAddToUser) && count($jobIdsToAddToUser) > 0) {
-                        LogLine("Found " . count($jobIdsToAddToUser) . " " . $this->jobSiteKey . " jobs not yet assigned to user " . $user->getUserSlug() . ".", \C__DISPLAY_ITEM_DETAIL__);
+                        LogLine("Found " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs not yet assigned to user " . $user->getUserSlug() . ".", \C__DISPLAY_ITEM_DETAIL__);
                         $this->_addJobMatchIdsToUser($jobIdsToAddToUser);
-                        LogLine("Successfully added " . count($jobIdsToAddToUser) . " " . $this->jobSiteKey . " jobs to user " . $user->getUserSlug() . ".", \C__DISPLAY_ITEM_DETAIL__);
+                        LogLine("Successfully added " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs to user " . $user->getUserSlug() . ".", \C__DISPLAY_ITEM_DETAIL__);
                     }
                     else
                     {
-                        LogLine("User " . $user->getUserSlug() . " had no missing previously loaded listings from ". $this->jobSiteKey . ".", \C__DISPLAY_ITEM_DETAIL__);
+                        LogLine("User " . $user->getUserSlug() . " had no missing previously loaded listings from ". $this->JobSiteKey . ".", \C__DISPLAY_ITEM_DETAIL__);
                     }
                 } catch (Exception $ex) {
                     handleException($ex);
@@ -290,7 +301,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     protected $JobPostingBaseUrl = null;
     protected $LocationType = null;
     protected $JobSiteName = null;
-    protected $jobSiteKey = null;
+    protected $JobSiteKey = null;
     protected $_otherPluginSettings = null;
 
 
@@ -368,7 +379,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
             return null;
         }
 
-        $loc = $searchDetails->getGeoLocation();
+        $loc = $searchDetails->getGeoLocationFromUSSR();
         $strLocationValue = $loc->formatLocationByLocationType($locTypeNeeded);
         if (empty($strLocationValue) || $strLocationValue == VALUE_NOT_SUPPORTED) {
             LogLine("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".", \C__DISPLAY_ITEM_DETAIL__);
@@ -675,8 +686,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
         {
             // null out any generalized keyword set values we previously had
-            $searchDetails->setKeywords(array());
-            $searchDetails->setKeywordTokens(array());
+            $searchDetails->setKeywords("");
+            $searchDetails->setKeywordTokens("");
         }
 
         $this->_setStartingUrlForSearch_($searchDetails);
@@ -691,14 +702,14 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     }
 
-    private function _getKeywordStringsForUrl_($searchDetails)
+    private function _getKeywordStringsForUrl_(UserSearchSiteRun $searchDetails)
     {
         $ret = "";
 
         // if we don't support keywords in the URL at all for this
         // plugin or we don't have any keywords, return empty string
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) ||
-            empty($searchDetails->getKeywords())) {
+            empty($searchDetails->getUserKeywordSet())) {
             $ret = "";
         }
         else
