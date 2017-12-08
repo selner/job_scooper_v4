@@ -103,8 +103,8 @@ function getAllUserMatchesNotNotified($jobsiteKey=null)
 
     $query = \JobScooper\DataAccess\UserJobMatchQuery::create()
         ->filterByUserNotificationState(array("not-ready", "ready"))
-        ->filterByUser($user)
-        ->joinWithJobPosting();
+        ->filterByUserFromUJM($user)
+        ->joinWithJobPostingFromUJM();
 
 //    $appRunId = getConfigurationSettings('app_run_id');
 //    if(!is_null($appRunId))
@@ -114,7 +114,7 @@ function getAllUserMatchesNotNotified($jobsiteKey=null)
 
     if(!is_null($jobsiteKey))
     {
-        $query->useJobPostingQuery()
+        $query->useJobPostingFromUJMQuery()
             ->filterByJobSiteKey($jobsiteKey)
             ->endUse();
     }
@@ -191,13 +191,6 @@ function updateJobRecordsFromJson($filepath)
 }
 
 
-/******************************************************************************
- *
- *  User Object Helper Functions
- *
- ******************************************************************************/
-
-
 function getAllPluginClassesByJobSiteKey()
 {
     $classList = get_declared_classes();
@@ -214,35 +207,5 @@ function getAllPluginClassesByJobSiteKey()
     }
 
     return $classListBySite;
-}
-
-function getJobSiteKeyFromPluginClass($className)
-{
-    $arrClassList = getAllPluginClassesByJobSiteKey();
-    $arrSiteList = array_flip($arrClassList);
-    if(array_key_exists($className, $arrSiteList) === true)
-        return $arrSiteList[$className];
-
-    return null;
-
-}
-
-
-function updateOrCreateUser($arrUserDetails)
-{
-    if(is_null($arrUserDetails) || !is_array($arrUserDetails))
-        return null;
-
-    try {
-        $userrec = findOrCreateUser($arrUserDetails['Name']);
-    }
-    catch (Exception $ex)
-    {
-        $userrec = new \JobScooper\DataAccess\User();
-    }
-
-    $userrec->fromArray($arrUserDetails);
-    $userrec->save();
-    return $userrec;
 }
 
