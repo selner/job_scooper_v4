@@ -52,6 +52,8 @@ class JobSiteRecord extends BaseJobSiteRecord
 			    $this->_pluginObject = null;
 		    }
 	    }
+	    else
+	    	return $this->_pluginObject;
 
 
     }
