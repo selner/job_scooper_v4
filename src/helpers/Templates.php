@@ -19,6 +19,12 @@
 use LightnCandy\LightnCandy;
 
 
+/**
+ * @param $path
+ *
+ * @return false|\LightnCandy\Closure
+ * @throws \Exception
+ */
 function loadTemplate($path)
 {
     LogDebug("Loading Mustache template file {$path}...");

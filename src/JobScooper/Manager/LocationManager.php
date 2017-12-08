@@ -66,13 +66,13 @@ class LocationManager
         LogLine("Loading Geolocation cache ...", \C__DISPLAY_ITEM_DETAIL__);
 
 
-        $googleApiKey = getConfigurationSettings('google_maps_api_key');
+        $googleApiKey = getConfigurationSetting('google_maps_api_key');
         if (is_null($googleApiKey) || !is_string($googleApiKey)) {
             throw new Exception("No Google Geocode API key found in configuration.  Instructions for getting an API key are at https://developers.google.com/maps/documentation/geocoding/get-api-key.");
         }
 
         $regionBias = null;
-        $country_codes = getConfigurationSettings('country_codes');
+        $country_codes = getConfigurationSetting('country_codes');
         if (!is_null($country_codes) && is_array($country_codes)) {
             $regionBias = $country_codes[0];
         }

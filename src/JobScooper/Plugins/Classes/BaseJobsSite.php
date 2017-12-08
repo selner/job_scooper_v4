@@ -45,11 +45,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
             }
         }
 
-        if (!empty($GLOBALS['JOBSCOOPER']['plugin_specific_settings'][$this->JobSiteKey]))
-        {
-            $this->_otherPluginSettings = $GLOBALS['JOBSCOOPER']['plugin_specific_settings'][$this->JobSiteKey];
-        }
-
+        $this->_otherPluginSettings = getConfigurationSetting('plugin_specific_settings.'.$this->JobSiteKey);
 
         if (stristr($this->SearchUrlFormat, "***KEYWORDS***") == false)
             $this->additionalBitFlags[] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
@@ -188,7 +184,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                     throw $ex;
                 } finally {
                     $search->save();
-                    $GLOBALS['JOBSCOOPER']['current_user_search_details'] = null;
+                    setConfigurationSetting('current_user_search_details', null);
                 }
             }
 
@@ -250,7 +246,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 $this->selenium = null;
             }
 
-            $GLOBALS['JOBSCOOPER']['current_user_search_details'] = null;
+	        setConfigurationSetting('current_user_search_details', null);
         }
 
 
@@ -381,8 +377,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
     {
         $strURL = $this->_getSearchUrlFormat_($searchDetails, $nPage, $nItem);
 
-
-        $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($GLOBALS['JOBSCOOPER']['number_days']), $strURL);
         $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL);
         $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL);
         $strURL = str_ireplace(BASE_URL_TAG_KEYWORDS, $this->getKeywordURLValue($searchDetails), $strURL);
@@ -623,7 +617,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         if ($secs <= 0)
             $secs = 1000;
 
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Clicking button [" . $this->selectorMoreListings . "] to go to the next page of results...", \C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Clicking button [" . $this->selectorMoreListings . "] to go to the next page of results...", \C__DISPLAY_ITEM_DETAIL__);
 
         $js = "
             scroll = setTimeout(doNextPage, " . $secs . ");
@@ -819,7 +813,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 handleException($ex, $strError, false);
             }
         } finally {
-            $GLOBALS['logger']->logSectionHeader(("Finished data pull for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]"), \C__NAPPTOPLEVEL__, \C__SECTION_END__);
+            LogSectionHeader(("Finished data pull for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]"), \C__NAPPTOPLEVEL__, \C__SECTION_END__);
         }
 
         if (!is_null($ex)) {
@@ -837,7 +831,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     private function _setSearchResult_(UserSearchSiteRun $searchDetails, $success = null, $except = null, $runWasSkipped=false)
     {
         if(!($searchDetails instanceof UserSearchSiteRun))
-            $searchDetails = getConfigurationSettings('current_user_search_details');
+            $searchDetails = getConfigurationSetting('current_user_search_details');
 
         if (!is_null($runWasSkipped) && is_bool($runWasSkipped) && $runWasSkipped === true)
         {
@@ -872,15 +866,15 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
             if (isDebug() == true) {
 
-                $GLOBALS['logger']->logLine("URL        = " . $strURL, \C__DISPLAY_NORMAL__);
-                $GLOBALS['logger']->logLine("Referrer   = " . $referrer, \C__DISPLAY_NORMAL__);
-                $GLOBALS['logger']->logLine("Cookies    = " . $cookies, \C__DISPLAY_NORMAL__);
+                LogLine("URL        = " . $strURL, \C__DISPLAY_NORMAL__);
+                LogLine("Referrer   = " . $referrer, \C__DISPLAY_NORMAL__);
+                LogLine("Cookies    = " . $cookies, \C__DISPLAY_NORMAL__);
             }
 
             if (!$objSimpleHTML && ($filePath && strlen($filePath) > 0)) {
-                $GLOBALS['logger']->logLine("Loading ALTERNATE results from " . $filePath, \C__DISPLAY_ITEM_START__);
+                LogLine("Loading ALTERNATE results from " . $filePath, \C__DISPLAY_ITEM_START__);
                 $objSimpleHTML = null;
-                $GLOBALS['logger']->logLine("Loading HTML from " . $filePath, \C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Loading HTML from " . $filePath, \C__DISPLAY_ITEM_DETAIL__);
 
                 if (!file_exists($filePath) && !is_file($filePath)) return $objSimpleHTML;
                 $fp = fopen($filePath, 'r');
@@ -895,7 +889,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
             if (!$objSimpleHTML && $strURL && strlen($strURL) > 0) {
                 $class = new CurlWrapper();
-                if (isVerbose()) $class->setVerbose(true);
+                if (isDebug()) $class->setDebug(true);
 
                 $retObj = $class->cURL($strURL, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = $optTimeout, $cookies = $cookies, $referrer = $referrer);
                 if (!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0) {
@@ -1082,7 +1076,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 ->findOneOrCreate();
 
             $newMatch->setUserId($user->getUserId());
-            $newMatch->setAppRunId($GLOBALS['JOBSCOOPER']['app_run_id']);
+            $newMatch->setAppRunId(getConfigurationSetting('app_run_id'));
             $newMatch->save();
         }
     }

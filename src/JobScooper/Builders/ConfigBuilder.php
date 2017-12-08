@@ -78,7 +78,7 @@ class ConfigBuilder
         $this->__setupOutputFolders__($this->_rootOutputDirInfo['directory']);
 
         $strOutfileArrString = getArrayValuesAsString(getConfigurationSetting("directories"));
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Output folders configured: " . $strOutfileArrString, \C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Output folders configured: " . $strOutfileArrString, \C__DISPLAY_ITEM_DETAIL__);
 
 
         LogLine("Loaded configuration details from " . $this->arrFileDetails['config_ini']['full_file_path'], \C__DISPLAY_ITEM_DETAIL__);
@@ -262,14 +262,14 @@ class ConfigBuilder
 
     private function _parsePluginSettings()
     {
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading plugin setup information from config file...", \C__DISPLAY_ITEM_START__);
+        LogLine("Loading plugin setup information from config file...", \C__DISPLAY_ITEM_START__);
 
         setConfigurationSetting("plugin_specific_settings", $this->_getSetting("plugin_specific_settings"));
     }
 
     private function _parseGlobalSearchParameters()
     {
-        if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading global search settings from config file...", \C__DISPLAY_ITEM_START__);
+        LogLine("Loading global search settings from config file...", \C__DISPLAY_ITEM_START__);
 
 	    $gsoset = $this->_getSetting('global_search_options');
 		if(!empty($gsoset))
@@ -315,11 +315,6 @@ class ConfigBuilder
 
 
 	    $settings['autostart'] = filter_var($settings['autostart'], FILTER_VALIDATE_BOOLEAN);
-//
-//        if(! array_key_exists('start_command', $GLOBALS['JOBSCOOPER']['selenium']) === true ) {
-//            if ($GLOBALS['JOBSCOOPER']['selenium']['autostart'] == 1 && !(array_key_exists('jar', $GLOBALS['JOBSCOOPER']['selenium']) === true && array_key_exists('postfix_switches', $GLOBALS['JOBSCOOPER']['selenium']) === true))
-//                throw new \Exception("Required parameters to autostart Selenium are missing; you must set both 'jar' and 'postfix_switches' in your configuration files.");
-//        }
 
         if (!array_key_exists('server', $settings)) {
             throw new \ErrorException("Configuration missing for [selenium] [server] in the config INI files.");

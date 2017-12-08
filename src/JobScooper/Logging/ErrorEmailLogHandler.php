@@ -37,7 +37,7 @@ class ErrorEmailLogHandler extends MailHandler
             'monolog_error_content' => $content,
             'search_parameters_content' => $searchParams,
             'app_version' => __APP_VERSION__,
-            'app_run_id' => $GLOBALS['JOBSCOOPER']['app_run_id'],
+            'app_run_id' => getConfigurationSetting('app_run_id'),
             "server" => gethostname()
         );
         $renderer = loadTemplate(__ROOT__.'/assets/templates/html_email_error_alerts.tmpl');
@@ -61,7 +61,7 @@ class ErrorEmailLogHandler extends MailHandler
     {
         $renderer = loadTemplate(__ROOT__.'/assets/templates/partials/html_email_body_search_config_details.tmpl');
 
-        $data = getConfigurationSettings();
+        $data = getAllConfigurationSettings();
         return $renderer($data);
 
     }

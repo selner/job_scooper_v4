@@ -31,9 +31,11 @@ class SeleniumManager extends PropertyObject
     function __construct($additionalLoadDelaySeconds = 0)
     {
         $this->additionalLoadDelaySeconds = $additionalLoadDelaySeconds;
-        $this->_settings = getConfigurationSettings('selenium');
-
-        if ($this->_settings['autostart'] == True) {
+        $this->_settings = getConfigurationSetting('selenium');
+		if(empty($this->_settings))
+			$this->_settings = array();
+		
+        if ($this->_settings['autostart'] == true) {
             $this->startSeleniumServer();
         }
     }
@@ -42,7 +44,7 @@ class SeleniumManager extends PropertyObject
     {
         $this->doneWithRemoteWebDriver();
 
-        if ($GLOBALS['JOBSCOOPER']['selenium']['autostart'] == True) {
+        if ($this->_settings['autostart'] == true) {
             $this->shutdownSelenium();
         }
         $this->_seleniumIsRunning = false;
@@ -337,7 +339,7 @@ class SeleniumManager extends PropertyObject
 
     function getWebDriverKind()
     {
-        $webdriver = (array_key_exists('webdriver', $GLOBALS['JOBSCOOPER']['selenium'])) ? $GLOBALS['JOBSCOOPER']['selenium']['webdriver'] : null;
+        $webdriver = (array_key_exists('webdriver', $this->_settings)) ? $this->_settings['webdriver'] : null;
         if(is_null($webdriver)) {
             $webdriver = "phantomjs";
             if (PHP_OS == "Darwin")
@@ -349,13 +351,13 @@ class SeleniumManager extends PropertyObject
 
     private function create_remote_webdriver()
     {
-        $hubUrl = $GLOBALS['JOBSCOOPER']['selenium']['host_location'] . '/wd/hub';
-        logLine("Creating Selenium remote web driver to host {$hubUrl}...");
+        $hubUrl = $this->_settings['host_location'] . '/wd/hub';
+        LogLine("Creating Selenium remote web driver to host {$hubUrl}...");
 
         try {
 
             $webdriver = $this->getWebDriverKind();
-            $hubUrl = $GLOBALS['JOBSCOOPER']['selenium']['host_location'] . '/wd/hub';
+            $hubUrl = $this->_settings['host_location'] . '/wd/hub';
             $driver = null;
 
             $capabilities = \DesiredCapabilities::$webdriver();

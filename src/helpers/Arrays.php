@@ -507,9 +507,14 @@ function setGlobalSetting($root, $keyPath, $value)
 	ksort($GLOBALS[$root]);
 }
 
-function getGlobalSetting($root, $keyPath)
+function getGlobalSetting($root, $keyPath=null)
 {
 	doGlobalSettingExists($root);
+
+	// return the whole array if no keypath was given
+	if(empty($keyPath))
+		return $GLOBALS[$root];
+
 	return array_get_element($keyPath, $GLOBALS[$root]);
 }
 
@@ -519,63 +524,46 @@ function doGlobalSettingExists($root)
 		$GLOBALS[$root] = array();
 }
 
-// TODO:  convert any uses of this to the new function
-// and remove it
-
-/**
- * @deprecated
- *
- * @param string $strSubkey
- *
- * @return mixed|null
- */
-function getConfigurationSettings($strSubkey = null)
-{
-	$ret = null;
-	if(empty($strSubkey))
-		return $GLOBALS['JOBSCOOPER'];
-
-	if(array_key_exists($strSubkey, $GLOBALS['JOBSCOOPER']) && !empty($GLOBALS['JOBSCOOPER'][$strSubkey]))
-		return $GLOBALS['JOBSCOOPER'][$strSubkey];
-
-
-	return null;
-}
-
+const JOBSCOOPER_CONFIGSETTING_ROOT = "JSCOOP";
+const JOBSCOOPER_CACHES_ROOT = "JSCOOP_CACHES";
 
 function setConfigurationSetting($keyPath, $value)
 {
-	setGlobalSetting($root="JOBSCOOPER", $keyPath, $value);
+	setGlobalSetting($root=JOBSCOOPER_CONFIGSETTING_ROOT, $keyPath, $value);
 }
+
 function getConfigurationSetting($keyPath)
 {
-	return getGlobalSetting('JOBSCOOPER', $keyPath);
+	return getGlobalSetting(JOBSCOOPER_CONFIGSETTING_ROOT, $keyPath);
 }
 
+function getAllConfigurationSettings()
+{
+	doGlobalSettingExists(JOBSCOOPER_CONFIGSETTING_ROOT);
 
+	return getGlobalSetting(JOBSCOOPER_CONFIGSETTING_ROOT);
+}
 
 function setCacheItem($cacheName, $keyPath, $value)
 {
-	setGlobalSetting($root='JSCOOP_CACHES', $cacheName.".".$keyPath, $value);
+	setGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName.".".$keyPath, $value);
 }
 
 function getCacheItem($cacheName, $keyPath)
 {
-	return getGlobalSetting('JSCOOP_CACHES', $cacheName.".".$keyPath);
+	return getGlobalSetting(JOBSCOOPER_CACHES_ROOT, $cacheName.".".$keyPath);
 }
-
-
 
 function getCacheAsArray($cacheName)
 {
-	doGlobalSettingExists('JSCOOP_CACHES');
+	doGlobalSettingExists(JOBSCOOPER_CACHES_ROOT);
 
-	return getGlobalSetting('JSCOOP_CACHES', $cacheName);
+	return getGlobalSetting(JOBSCOOPER_CACHES_ROOT, $cacheName);
 }
 
 function setAsCacheData($cacheName, $value)
 {
-	setGlobalSetting($root="JSCOOP_CACHES", $cacheName, $value);
+	setGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName, $value);
 }
 
 

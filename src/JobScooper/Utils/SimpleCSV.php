@@ -128,7 +128,7 @@ class SimpleCSV
 
     function readAllRecords($fHasHeaderRow, $arrKeysToUse = null, $sheetName = null)
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Reading all records for file type =".$this->__getFileType__()."; File=".$this->detailsFile['full_file_path'], C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Reading all records for file type =".$this->__getFileType__()."; File=".$this->detailsFile['full_file_path'], C__DISPLAY_ITEM_DETAIL__);
 
         $ret = null;
 
@@ -142,7 +142,7 @@ class SimpleCSV
             //             $ret =   $this->__readAllRecords_Excel__($fHasHeaderRow, $arrKeysToUse, $sheetName);
             //               break;
             default:
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Unsupported file type.  Extension=".$this->detailsFile['file_extension']."; File=".$this->detailsFile['full_file_path'], C__DISPLAY_ERROR__);
+                LogLine("Unsupported file type.  Extension=".$this->detailsFile['file_extension']."; File=".$this->detailsFile['full_file_path'], C__DISPLAY_ERROR__);
                 break;
         }
 
@@ -152,7 +152,7 @@ class SimpleCSV
 
     private function __readAllRecords_CSV__($fHasHeaderRow, $arrKeysToUse = null)
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Reading CSV records from: ".$this->detailsFile['full_file_path'], C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Reading CSV records from: ".$this->detailsFile['full_file_path'], C__DISPLAY_ITEM_DETAIL__);
 
         $arrDataLoaded = array();
         $nInputRow = 0;
@@ -191,7 +191,7 @@ class SimpleCSV
 
         if(!isset($records) || !is_array($records))
         {
-            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Warning:  No records found to be written to HTML file.  File will be empty.", C__DISPLAY_WARNING__);
+            LogLine("Warning:  No records found to be written to HTML file.  File will be empty.", C__DISPLAY_WARNING__);
             return;
         }
 
@@ -216,7 +216,7 @@ class SimpleCSV
     {
         if(!isset($records) || !is_array($records))
         {
-            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Warning:  No records found to be written to CSV file.  File will be empty.", C__DISPLAY_WARNING__);
+            LogLine("Warning:  No records found to be written to CSV file.  File will be empty.", C__DISPLAY_WARNING__);
             return;
         }
 
@@ -371,14 +371,14 @@ class SimpleCSV
 
     function readMultipleCSVsAndCombine($arrFullPaths, $keysToUse = null, $arrKeysToUseForDedupe = null)
     {
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("readMultipleCSVsAndCombine . " . getArrayValuesAsString($arrFullPaths), C__DISPLAY_ITEM_DETAIL__);
+        LogLine("readMultipleCSVsAndCombine . " . getArrayValuesAsString($arrFullPaths), C__DISPLAY_ITEM_DETAIL__);
 
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading and combining CSV records from " . count($arrFullPaths)." files.", C__DISPLAY_ITEM_START__);
+        LogLine("Loading and combining CSV records from " . count($arrFullPaths)." files.", C__DISPLAY_ITEM_START__);
 
         $arrRecordsCombined = null;
         foreach($arrFullPaths as $curFilePath)
         {
-            if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loading ". $curFilePath." for combining into CSV records...", C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Loading ". $curFilePath." for combining into CSV records...", C__DISPLAY_ITEM_DETAIL__);
 
             if(is_file($curFilePath))
             {
@@ -387,7 +387,7 @@ class SimpleCSV
                 $arrCSVInput = $classCurrentInput->__readAllRecords_CSV__(true, $keysToUse);
                 $arrCSVInput = $arrCSVInput ['data_rows'];
 
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("readAllRecords returned " . count($arrCSVInput) . " for ".$curFilePath, C__DISPLAY_ITEM_DETAIL__);
+                LogLine("readAllRecords returned " . count($arrCSVInput) . " for ".$curFilePath, C__DISPLAY_ITEM_DETAIL__);
 
                 if(count($arrCSVInput) > 0)
                 {
@@ -400,25 +400,25 @@ class SimpleCSV
                         $arrRecordsCombined = array_merge($arrRecordsCombined, $arrCSVInput);
 
                     }
-                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Added  ". count($arrCSVInput) . " records from " . $curFilePath . ". Total record counts is now ". count($arrRecordsCombined) .".", C__DISPLAY_ITEM_DETAIL__);
+                    LogLine("Added  ". count($arrCSVInput) . " records from " . $curFilePath . ". Total record counts is now ". count($arrRecordsCombined) .".", C__DISPLAY_ITEM_DETAIL__);
 
                 }
                 else
                 {
-                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Warning: No rows were loaded from " . $curFilePath, C__DISPLAY_ERROR__);
+                    LogLine("Warning: No rows were loaded from " . $curFilePath, C__DISPLAY_ERROR__);
 
                 }
 
             }
         }
 
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Total records before de-dupe= ". count($arrRecordsCombined) . "...", C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Total records before de-dupe= ". count($arrRecordsCombined) . "...", C__DISPLAY_ITEM_DETAIL__);
 
         // sort the list and get to only the uniq records we haven't seen before
         $arrUniq = $this->getSortedDeDupedCSVArray($arrRecordsCombined, $arrKeysToUseForDedupe );
 
 
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Loaded " . count($arrUniq). " unique records from " . count($arrFullPaths)." files.", C__DISPLAY_ITEM_RESULT__);
+        LogLine("Loaded " . count($arrUniq). " unique records from " . count($arrFullPaths)." files.", C__DISPLAY_ITEM_RESULT__);
 
         return $arrUniq;
 
@@ -436,12 +436,12 @@ class SimpleCSV
             case 'Excel2007':
                 if($keysToUseForOutputCSV != null || $arrKeysToUseForDedupe != null)
                 {
-                    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Data is not deduped when writing to Excel. Keys also cannot be set. File=".$this->detailsFile['full_file_path'], C__DISPLAY_WARNING__);
+                    LogLine("Data is not deduped when writing to Excel. Keys also cannot be set. File=".$this->detailsFile['full_file_path'], C__DISPLAY_WARNING__);
                 }
                 $this->combineMultipleCSVsToExcel($arrFullFilePaths);
                 break;
             default:
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Unsupported file type.  Extension=".$this->detailsFile['file_extension']."; File=".$this->detailsFile['full_file_path'], C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Unsupported file type.  Extension=".$this->detailsFile['file_extension']."; File=".$this->detailsFile['full_file_path'], C__DISPLAY_ITEM_DETAIL__);
                 break;
         }
     }
@@ -454,7 +454,7 @@ class SimpleCSV
         // sort the list and get to only the uniq records we haven't seen before
         $arrUniq = $this->getSortedDeDupedCSVArray($arrRecordsCombinedOutput, $arrKeysToUseForDedupe );
 
-        if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Total of " . count($arrUniq) ." unique records out of " . count($arrRecordsCombinedOutput)." records will be written to  ".$this->detailsFile['full_file_path'].".", C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Total of " . count($arrUniq) ." unique records out of " . count($arrRecordsCombinedOutput)." records will be written to  ".$this->detailsFile['full_file_path'].".", C__DISPLAY_ITEM_DETAIL__);
 
         // write the uniq values out to the results file
         $this->writeArrayToCSVFile($arrUniq, $keysToUseForOutputCSV );

@@ -18,35 +18,21 @@
 // If installed as part of the package, uses Klogger v0.1 version (http://codefury.net/projects/klogger/)
 //
 
-
-$GLOBALS['OPTS']['VERBOSE'] = false;
-$GLOBALS['OPTS']['VERBOSE_API_CALLS'] = false;
-
-
-
-
 function setGlobalFileDetails($key, $fRequireFile = false, $fullpath = null)
 {
     $ret = null;
     $ret = parseFilePath($fullpath, $fRequireFile);
 
-    if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("". $key ." set to [" . var_export($ret, true) . "]", C__DISPLAY_ITEM_DETAIL__);
+    LogLine("". $key ." set to [" . var_export($ret, true) . "]", C__DISPLAY_ITEM_DETAIL__);
 
     $GLOBALS['OPTS'][$key] = $ret;
 
     return $ret;
 }
 
-function isVerbose() {
-    if(isset($GLOBALS['OPTS']) && isset($GLOBALS['OPTS']['VERBOSE']))
-        return filter_var($GLOBALS['OPTS']['VERBOSE'], FILTER_VALIDATE_BOOLEAN);
-
-    return filter_var(getConfigurationSettings('verbose'), FILTER_VALIDATE_BOOLEAN);
-}
-
 function getGlobalConfigOptionBoolean($key)
 {
-    return filter_var(getConfigurationSettings($key), FILTER_VALIDATE_BOOLEAN);
+    return filter_var(getConfigurationSetting($key), FILTER_VALIDATE_BOOLEAN);
 }
 
 function isDebug() {

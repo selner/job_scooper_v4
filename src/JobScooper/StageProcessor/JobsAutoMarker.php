@@ -142,7 +142,10 @@ class JobsAutoMarker
         return false;
     }
 
-    private function _markJobsList_SetOutOfArea_(&$arrJobsList)
+	/**
+	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
+	 */
+	private function _markJobsList_SetOutOfArea_(&$arrJobsList)
     {
         if (count($arrJobsList) == 0) return;
 
@@ -156,9 +159,12 @@ class JobsAutoMarker
         }
     }
 
+	/**
+	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
+	 */
     private function _markJobsList_OutOfArea_CountyFiltered(&$arrJobsList)
     {
-        $searchLocations = getConfigurationSettings('search_locations');
+        $searchLocations = getConfigurationSetting('search_locations');
 
         $arrIncludeCounties = array();
 
@@ -206,9 +212,12 @@ class JobsAutoMarker
         LogLine("Jobs excluded as out of area: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ." marked; " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).", not marked " , \C__DISPLAY_ITEM_RESULT__);
     }
 
-    private function _markJobsList_OutOfArea_Geospatial(&$arrJobsList)
+	/**
+	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
+	 */
+	private function _markJobsList_OutOfArea_Geospatial(&$arrJobsList)
     {
-        $searchLocations = getConfigurationSettings('search_locations');
+        $searchLocations = getConfigurationSetting('search_locations');
 
         $arrNearbyIds = array();
 
@@ -256,12 +265,15 @@ class JobsAutoMarker
        LogLine("Jobs excluded as out of area: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ." marked; " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).", not marked " , \C__DISPLAY_ITEM_RESULT__);
     }
 
-    private function _markJobsList_SetAutoExcludedCompaniesFromRegex_(&$arrJobsList)
+	/**
+	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
+	 */
+	private function _markJobsList_SetAutoExcludedCompaniesFromRegex_(&$arrJobsList)
     {
         //
         // Load the exclusion filter and other user data from files
         //
-        $this->_loadCompanyRegexesToFilter_();
+        $this->_loadCompanyRegexesToFilter();
 
         $nJobsSkipped = 0;
         $nJobsMarkedAutoExcluded = 0;
@@ -301,13 +313,15 @@ class JobsAutoMarker
     }
 
 
-
+	/**
+	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
+	 */
     private function _markJobsList_UserExcludedKeywords_(&$arrJobsList)
     {
         //
         // Load the exclusion filter and other user data from files
         //
-        $this->_loadTitlesTokensToFilter_();
+        $this->_loadTitlesTokensToFilter();
 
         $nJobsSkipped = 0;
         $nJobsMarkedAutoExcluded = 0;
@@ -361,6 +375,9 @@ class JobsAutoMarker
         return $keywordTokens;
     }
 
+	/**
+	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
+	 */
     private function _markJobsList_SearchKeywordsFound_(&$arrJobsList)
     {
         $nJobsMarkedInclude = 0;
@@ -401,7 +418,7 @@ class JobsAutoMarker
 
 
 
-    private function _loadTitlesTokensToFilter_()
+    private function _loadTitlesTokensToFilter()
     {
 	    $inputfiles = getConfigurationSetting("user_data_files.negative_title_keywords");
 
@@ -478,7 +495,7 @@ class JobsAutoMarker
         }
         catch (\Exception $ex)
         {
-            $GLOBALS['logger']->logLine($ex->getMessage(), \C__DISPLAY_ERROR__);
+            LogLine($ex->getMessage(), \C__DISPLAY_ERROR__);
             if(isDebug() == true) { throw $ex; }
         }
         return $rx;
@@ -490,7 +507,7 @@ class JobsAutoMarker
      * Initializes the global list of titles we will automatically mark
      * as "not interested" in the final results set.
      */
-    function _loadCompanyRegexesToFilter_()
+    function _loadCompanyRegexesToFilter()
     {
         if(isset($this->companies_regex_to_filter) && count($this->companies_regex_to_filter) > 0)
         {

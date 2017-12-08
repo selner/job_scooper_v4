@@ -91,43 +91,50 @@ function getDebugContext($context=array())
     return $context;
 }
 
+
 function LogLine($msg, $scooper_level=\C__DISPLAY_NORMAL__, $context=array())
 {
-    if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
-    {
-        print($msg . "\r\n");
-    }
-    else
-    {
-        $GLOBALS['logger']->logLine($msg, $scooper_level, null, $context);
-    }
+	if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
+	{
+		print($msg . "\r\n");
+	}
+	else
+	{
+		$GLOBALS['logger']->logLine($msg, $scooper_level, null, $context);
+	}
 }
 
-function LogError($msg, $scooper_level=\C__DISPLAY_ERROR__)
+function LogSectionHeader($headerText, $nSectionLevel, $nType)
 {
-    if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
-    {
-        print($msg . "\r\n");
-    }
-    else
-    {
-        $context = getDebugContext();
+	if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
+	{
+		print($headerText. "\r\n");
+	}
+	else
+	{
+		$GLOBALS['logger']->logSectionHeader($headerText, $nSectionLevel, $nType);
+	}
+}
 
-        $GLOBALS['logger']->logLine($msg, $scooper_level, \Psr\Log\LogLevel::ERROR, $context);
-    }
+function LogError($msg)
+{
+    $context = getDebugContext();
+    LogLine($msg, \C__DISPLAY_ERROR__, $context);
 }
 
 function LogDebug($msg, $scooper_level=C__DISPLAY_NORMAL__)
 {
-    if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
-    {
-        print($msg . "\r\n");
-    }
-    else
-    {
+	if(isDebug())
+	{
         $context = getDebugContext();
-
-        $GLOBALS['logger']->logLine($msg, $scooper_level, \Psr\Log\LogLevel::DEBUG, $context);
+		if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
+		{
+			print($msg. "\r\n");
+		}
+		else
+		{
+			$GLOBALS['logger']->debug($msg, $context);
+		}
     }
 }
 
@@ -436,7 +443,7 @@ function noJobStringMatch($var, $matchString)
 
 function getRunDateRange()
 {
-    $configNumDays = getConfigurationSettings('number_days');
+    $configNumDays = getConfigurationSetting('number_days');
     $num_days = filter_var($configNumDays, FILTER_VALIDATE_INT);
     if($num_days === false)
         $num_days = 1;
@@ -515,7 +522,7 @@ function doExec($cmd)
 
     exec($cmd, $cmdOutput, $cmdRet);
     foreach ($cmdOutput as $resultLine)
-        if (!is_null($GLOBALS['logger'])) $GLOBALS['logger']->logLine($resultLine, \C__DISPLAY_ITEM_DETAIL__);
+        if (!is_null($GLOBALS['logger'])) LogLine($resultLine, \C__DISPLAY_ITEM_DETAIL__);
     unset($resultLine);
 
     if (is_array($cmdOutput))

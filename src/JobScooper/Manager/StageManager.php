@@ -40,7 +40,7 @@ class StageManager
 
             $this->classConfig->initialize();
 
-            if (!$GLOBALS['logger'])
+            if (empty($GLOBALS['logger']))
                 $GLOBALS['logger'] = new LoggingManager(C__APPNAME__);
 
 

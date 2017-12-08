@@ -29,16 +29,16 @@ class CurlWrapper
     /****                                                                                                        ****/
     /****************************************************************************************************************/
 
-    private $fVerboseLogging = false;
+    private $fDebugLogging = false;
 
     function __construct()
     {
-        $this->fVerboseLogging = isVerbose();
+        $this->fDebugLogging = isDebug();
     }
 
-    function setVerbose($fVerbose = true)
+    function setDebug($fDebug = true)
     {
-        $this->fVerboseLogging = $fVerbose;
+        $this->fDebugLogging = $fDebug;
     }
 
     private function __handleCallback__($callback, &$val, $fReturnType = C__API_RETURN_TYPE_OBJECT__ )
@@ -92,7 +92,7 @@ class CurlWrapper
                 //
                 if(isset($srcdata->next_page))
                 {
-                    if($this->fVerboseLogging == true) { if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine('Multipage results detected. Getting results for ' . $srcdata->next_page . '...' . PHP_EOL, C__DISPLAY_ITEM_DETAIL__); }
+                    if($this->fDebugLogging == true) { LogLine('Multipage results detected. Getting results for ' . $srcdata->next_page . '...' . PHP_EOL, C__DISPLAY_ITEM_DETAIL__); }
 
                     // $patternPage = "/.*page=([0-9]{1,})/";
                     $patternPagePrefix = "/.*page=/";
@@ -161,7 +161,7 @@ class CurlWrapper
         curl_setopt($ch, CURLOPT_USERAGENT, \C__STR_USER_AGENT__);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, $secsTimeout);
-        curl_setopt($ch, CURLOPT_VERBOSE, $this->fVerboseLogging);
+        curl_setopt($ch, CURLOPT_VERBOSE, $this->fDebugLogging);
         curl_setopt($ch, CURLOPT_FAILONERROR, false);
 
         // curlWrapNew = only?

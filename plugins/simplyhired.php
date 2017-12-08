@@ -94,7 +94,8 @@ class PluginSimplyHired extends \JobScooper\Plugins\Classes\ServerHtmlPlugin
         $strURL = $this->_getSearchUrlFormat_($searchDetails, $nPage, $nItem);
 
 
-        $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($GLOBALS['JOBSCOOPER']['number_days']), $strURL);
+	    $numDays = getConfigurationSetting('number_days');
+        $strURL = str_ireplace("***NUMBER_DAYS***", $this->getDaysURLValue($numDays), $strURL);
         $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL);
         $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL);
         $strURL = str_ireplace(BASE_URL_TAG_KEYWORDS, $this->getKeywordURLValue($searchDetails), $strURL);
@@ -118,7 +119,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\Classes\ServerHtmlPlugin
             if(empty($locTypeNeeded) || $locTypeNeeded == VALUE_NOT_SUPPORTED)
             {
                 $msg = "Failed to run search:  search is missing the required location type of " . $this->getGeoLocationSettingType() ." set.  Skipping search '". $searchDetails->getUserSearchSiteRunKey() .".";
-                if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine($msg, \C__DISPLAY_ERROR__);
+                LogLine($msg, \C__DISPLAY_ERROR__);
                 throw new IndexOutOfBoundsException($msg);
             }
             else

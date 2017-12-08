@@ -101,7 +101,9 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\Classes\AjaxHtmlSim
                             $this->locationid = $arrMatches[1];
                         }
                         $url = parse_url($this->childSiteURLBase, PHP_URL_SCHEME) . "://" . parse_url($this->childSiteURLBase, PHP_URL_HOST) . $newUrlPath . "&RadialLocation=50";
-                        $GLOBALS['JOBSCOOPER']['current_user_search_details']->setSearchStartUrl($url);
+	                    $curSearch = getConfigurationSetting('current_user_search_details');
+	                    if(!empty($curSearch))
+		                    $curSearch->setSearchStartUrl($url);
 //                        $this->currentSearchAlternateURL = preg_replace('/[Ppage]{4}=\d+/', 'Page=***PAGE_NUMBER***', $url);
 
                         $this->selenium->loadPage($url);

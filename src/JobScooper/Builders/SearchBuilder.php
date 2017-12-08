@@ -24,13 +24,6 @@ use JobScooper\DataAccess\UserSearchSiteRun;
 
 class SearchBuilder
 {
-
-    function __construct()
-    {
-        $GLOBALS['JOBSCOOPER']['searches'] = array();
-
-    }
-
     public function initializeSearches()
     {
 

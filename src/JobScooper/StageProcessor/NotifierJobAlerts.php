@@ -40,14 +40,14 @@ class NotifierJobAlerts extends JobsMailSender
 
     function __destruct()
     {
-        if(isset($GLOBALS['logger'])) { logLine("Closing ".$this->JobSiteName." instance of class " . get_class($this), \C__DISPLAY_ITEM_START__); }
+        LogLine("Closing ".$this->JobSiteName." instance of class " . get_class($this), \C__DISPLAY_ITEM_START__);
     }
 
     private function _combineCSVsToExcel($outfileDetails, $arrCSVFiles)
     {
         $spreadsheet = new PHPExcel();
         $objWriter = PHPExcel_IOFactory::createWriter($spreadsheet, "Excel2007");
-        logLine("Creating output XLS file '" . $outfileDetails['full_file_path'] . "'." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
+        LogLine("Creating output XLS file '" . $outfileDetails['full_file_path'] . "'." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
         $style_all = array(
             'alignment' => array(
                 'vertical' => PHPExcel_Style_Alignment::VERTICAL_TOP,
@@ -124,7 +124,7 @@ class NotifierJobAlerts extends JobsMailSender
                 }
 
 
-                logLine("Added data from CSV '" . $csvFile['full_file_path'] . "' to output XLS file." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
+                LogLine("Added data from CSV '" . $csvFile['full_file_path'] . "' to output XLS file." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
             }
         }
 
@@ -152,8 +152,8 @@ class NotifierJobAlerts extends JobsMailSender
         // Output the full jobs list into a file and into files for different cuts at the jobs list data
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        $GLOBALS['logger']->logSectionHeader("Writing Results Files", \C__DISPLAY_SECTION_START__, \C__NAPPFIRSTLEVEL__);
-        $GLOBALS['logger']->logSectionHeader("Files Sent To User", \C__DISPLAY_SECTION_START__, \C__NAPPSECONDLEVEL__);
+        LogSectionHeader("Writing Results Files", \C__DISPLAY_SECTION_START__, \C__NAPPFIRSTLEVEL__);
+        LogSectionHeader("Files Sent To User", \C__DISPLAY_SECTION_START__, \C__NAPPSECONDLEVEL__);
         $class = null;
 
 
@@ -181,9 +181,8 @@ class NotifierJobAlerts extends JobsMailSender
         // Create a copy of the jobs list that is sorted by that value.
         //
         $arrMatchedJobs = array_filter($arrJobsToNotify, "isUserJobMatch");
-        $arrExcludedJobs = array_filter($arrJobsToNotify, "isNotUserJobMatch");
 
-        logLine(PHP_EOL . "Writing final list of " . count($arrJobsToNotify) . " jobs to output files." . PHP_EOL, \C__DISPLAY_NORMAL__);
+        LogLine(PHP_EOL . "Writing final list of " . count($arrJobsToNotify) . " jobs to output files." . PHP_EOL, \C__DISPLAY_NORMAL__);
 
         $arrExcludedJobs = array_filter($arrJobsToNotify, "isExcluded");
         $arrMatchedAndNotExcludedJobs = array_filter($arrMatchedJobs, "isUserJobMatchAndNotExcluded");
@@ -205,18 +204,18 @@ class NotifierJobAlerts extends JobsMailSender
             $arrFilesToAttach[] = $detailsExcludedCSVFile;
         }
 
-        $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \C__SECTION_END__, \C__NAPPSECONDLEVEL__);
+        LogSectionHeader("" . PHP_EOL, \C__SECTION_END__, \C__NAPPSECONDLEVEL__);
 
         $xlsOutputFile = $this->_combineCSVsToExcel($detailsMainResultsXLSFile, $arrResultFilesToCombine);
         array_push($arrFilesToAttach, $xlsOutputFile);
 
 
-        $GLOBALS['logger']->logSectionHeader("Generating text email content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
+        LogSectionHeader("Generating text email content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
 
         $strResultCountsText = $this->getListingCountsByPlugin("text", $arrJobsToNotify, $arrExcludedJobs);
         $strResultText = "Job Scooper Results for ". getRunDateRange() . PHP_EOL . $strResultCountsText . PHP_EOL;
 
-        $GLOBALS['logger']->logSectionHeader("Generating html email content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
+        LogSectionHeader("Generating html email content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
 
 
         $messageHtml = $this->getListingCountsByPlugin("html", $arrMatchedJobs, $arrExcludedJobs, $detailsHTMLFile);
@@ -224,14 +223,14 @@ class NotifierJobAlerts extends JobsMailSender
         $messageHtml = $this->addMailCssToHTML($messageHtml);
         $subject = "New Job Postings: " . getRunDateRange();
 
-        $GLOBALS['logger']->logSectionHeader("Generating text html content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
+        LogSectionHeader("Generating text html content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
 
         LogPlainText($strResultText, \C__DISPLAY_SUMMARY__);
 
         //
         // Send the email notification out for the completed job
         //
-        $GLOBALS['logger']->logSectionHeader("Sending email to user..." . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
+        LogSectionHeader("Sending email to user..." . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
 
         try {
             $ret = $this->sendEmail($strResultText, $messageHtml, $arrFilesToAttach, $subject, "results");
@@ -270,7 +269,7 @@ class NotifierJobAlerts extends JobsMailSender
                 }
             }
         }
-        $GLOBALS['logger']->logSectionHeader("" . PHP_EOL, \C__SECTION_END__, \C__NAPPSECONDLEVEL__);
+        LogSectionHeader("" . PHP_EOL, \C__SECTION_END__, \C__NAPPSECONDLEVEL__);
 
         LogLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, \C__DISPLAY_NORMAL__);
 
@@ -569,14 +568,6 @@ class NotifierJobAlerts extends JobsMailSender
             $strOut .= PHP_EOL;
         }
 
-//        if($GLOBALS['JOBSCOOPER']['excluded_sites'] != null && count($GLOBALS['JOBSCOOPER']['excluded_sites']) > 0)
-//        {
-//            sort($GLOBALS['JOBSCOOPER']['excluded_sites']);
-//            $strExcluded = getArrayValuesAsString($GLOBALS['JOBSCOOPER']['excluded_sites'], ", ", "Sites excluded by user or settings: ", false);
-//            $strOut .= $strExcluded;
-//        }
-//
-
         return $strOut;
     }
 
@@ -633,20 +624,6 @@ class NotifierJobAlerts extends JobsMailSender
 
             $strOut .=  PHP_EOL . "</table>". PHP_EOL. PHP_EOL;
         }
-
-//
-//        if($GLOBALS['JOBSCOOPER']['excluded_sites'] != null && count($GLOBALS['JOBSCOOPER']['excluded_sites']) > 0)
-//        {
-//            $strOut .=  PHP_EOL . "<div class=\"job_scooper section\">". PHP_EOL;
-//            sort($GLOBALS['JOBSCOOPER']['excluded_sites']);
-//
-//            $strExcluded = getArrayValuesAsString($GLOBALS['JOBSCOOPER']['excluded_sites'], ", ", "", false);
-//            $strOut  .= "<H2>Excluded Job Sites</H2>".PHP_EOL. PHP_EOL;
-//
-//            $strOut .=  PHP_EOL .  "<span style=\"font-size: xx-small; \">Excluded sites for this run:" . $strExcluded . "</span>" . PHP_EOL;
-//            $strOut .= "</div>";
-//            $strOut .= "<br>" . PHP_EOL . "<br>" . PHP_EOL;
-//        }
 
         $strOut  .= "<br><hr width='100%'>";
         $strOut  .= "<div style=\"width: 100%; margin:  5px; text-align: center;\"><span style=\"font-size: xx-small; color: #49332D;\">Generated by " . gethostname() . " running " . __APP_VERSION__. " on " . getTodayAsString() . ".</span></div>" . PHP_EOL;

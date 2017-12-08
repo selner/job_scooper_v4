@@ -78,7 +78,7 @@ Class LoggingManager extends \Monolog\Logger
         $this->_loggers['plugins'] = $this->withName('plugins');
         $this->_loggers['database'] = $this->withName('database');
 
-        $logOptions = getConfigurationSettings('logging');
+        $logOptions = getConfigurationSetting('logging');
         $this->_doLogContext = filter_var($logOptions['always_log_context'], FILTER_VALIDATE_BOOLEAN);
 
 

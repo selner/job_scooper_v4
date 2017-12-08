@@ -355,7 +355,7 @@ class JobSitePluginBuilder
         }
 
         if (isset($GLOBALS['logger']))
-            $GLOBALS['logger']->logLine("Loaded JSON config for new plugin: " . $pluginData['JobSiteName'], \C__DISPLAY_ITEM_DETAIL__);
+            LogLine("Loaded JSON config for new plugin: " . $pluginData['JobSiteName'], \C__DISPLAY_ITEM_DETAIL__);
 
         return $pluginData;
 
