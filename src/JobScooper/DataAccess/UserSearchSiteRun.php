@@ -68,4 +68,47 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	}
 
 
+	/**
+	 * Derived method to catches calls to undefined methods.
+	 *
+	 *
+	 * @param string $name
+	 * @param mixed  $params
+	 *
+	 * @return array|string
+	 */
+	public function __call($method, $params)
+	{
+		$user_kwd_set = null;
+		$user = null;
+		$user_search = $this->getUserSearchFromUSSR();
+		if(!empty($user_search))
+			$user_kwd_set  = $user_search->getUserKeywordSetFromUS();
+
+		if(!empty($user_kwd_set))
+			$user  = $user_kwd_set->getUserFromUKS();
+
+
+
+		if(method_exists($this, $method)) {
+			return call_user_func(
+				array($this, $method),
+				$params
+			);
+		}
+		else {
+			foreach(array($user_search, $user_kwd_set, $user) as $relObject)
+			{
+				if(method_exists($relObject, $method)) {
+					return call_user_func(
+						array($relObject, $method),
+						$params
+					);
+				}
+			}
+		}
+
+		return false;
+	}
+
 }
