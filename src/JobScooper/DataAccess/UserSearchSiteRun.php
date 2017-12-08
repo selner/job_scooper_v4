@@ -3,6 +3,7 @@
 namespace JobScooper\DataAccess;
 
 use JobScooper\DataAccess\Base\UserSearchSiteRun as BaseUserSearchSiteRun;
+use Propel\Runtime\Connection\ConnectionInterface;
 
 /**
  * Skeleton subclass for representing a row from the 'user_search_site_run' table.
@@ -67,6 +68,20 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
 	}
 
+	function getUserKeywordSet(ConnectionInterface $con = null)
+	{
+		$user_search = $this->getUserSearch($con);
+		if (!empty($user_search))
+			return $user_search->getUserKeywordSetFromUS($con);
+
+	}
+
+
+	function getUserSearch(ConnectionInterface $con = null)
+	{
+		return $this->getUserSearchFromUSSR($con);
+	}
+
 
 	/**
 	 * Derived method to catches calls to undefined methods.
@@ -81,14 +96,8 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	{
 		$user_kwd_set = null;
 		$user = null;
-		$user_search = $this->getUserSearchFromUSSR();
-		if(!empty($user_search))
-			$user_kwd_set  = $user_search->getUserKeywordSetFromUS();
-
-		if(!empty($user_kwd_set))
-			$user  = $user_kwd_set->getUserFromUKS();
-
-
+		$user_search = $this->getUserSearch();
+		$user_kwd_set = $this->getUserKeywordSet();
 
 		if(method_exists($this, $method)) {
 			return call_user_func(
