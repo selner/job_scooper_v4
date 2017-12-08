@@ -180,7 +180,7 @@ class JobsAutoMarker
             if(is_null($locId))
                 return false;  // if we don't have a location, assume nearby
 
-            $location = $posting->GeoLocationFromJP();
+            $location = $posting->getGeoLocationFromJP();
             $county = $location->getCounty();
             $state = $location->getRegion();
             if(!is_null($county) && !is_null($state)) {
