@@ -377,7 +377,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
     {
         $strURL = $this->_getSearchUrlFormat_($searchDetails, $nPage, $nItem);
 
-        $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL);
+	    $numDays = getConfigurationSetting('number_days');
+	    $strURL = str_ireplace("***NUMBER_DAYS***", $this->getPageURLValue($numDays), $strURL);
+	    $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL);
         $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL);
         $strURL = str_ireplace(BASE_URL_TAG_KEYWORDS, $this->getKeywordURLValue($searchDetails), $strURL);
 
