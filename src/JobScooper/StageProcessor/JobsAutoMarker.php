@@ -175,12 +175,12 @@ class JobsAutoMarker
 
         LogLine("Gathering job postings not in the following counties & states ...", \C__DISPLAY_ITEM_DETAIL__);
         $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrIncludeCounties) {
-            $posting = $v->getJobPostingFromUJM;
+            $posting = $v->getJobPostingFromUJM();
             $locId = $posting->getGeoLocationId();
             if(is_null($locId))
                 return false;  // if we don't have a location, assume nearby
 
-            $location = $posting->getGeoLocation();
+            $location = $posting->GeoLocationFromJP();
             $county = $location->getCounty();
             $state = $location->getRegion();
             if(!is_null($county) && !is_null($state)) {
@@ -278,7 +278,7 @@ class JobsAutoMarker
                 $matched_exclusion = false;
                 foreach($this->companies_regex_to_filter as $rxInput )
                 {
-                    if(preg_match($rxInput, strScrub($jobMatch->getJobPostingFromUJM->getCompany(), DEFAULT_SCRUB)))
+                    if(preg_match($rxInput, strScrub($jobMatch->getJobPostingFromUJM()->getCompany(), DEFAULT_SCRUB)))
                     {
                         $jobMatch->setMatchedNegativeCompanyKeywords(array($rxInput));
                         $jobMatch->save();
@@ -324,7 +324,7 @@ class JobsAutoMarker
 
             try {
                 foreach ($arrJobsList as $jobMatch) {
-                    $strJobTitleTokens = $jobMatch->getJobPostingFromUJM->getTitleTokens();
+                    $strJobTitleTokens = $jobMatch->getJobPostingFromUJM()->getTitleTokens();
                     $arrTitleTokens = preg_split("/[\s|\|]/", $strJobTitleTokens);
 	                $matchedNegTokens = array_intersect($arrTitleTokens, $negKeywords);
                     if (!empty($matchedNegTokens)) {
@@ -349,9 +349,15 @@ class JobsAutoMarker
 
     private function _getUserSearchTitleKeywords()
     {
-        $keywordSets = getConfigurationSetting("keyword_sets");
-	    $keywordTokenSets = flattenWithKeys(array_column($keywordSets, "keywords_array_tokenized"));
-        $keywordTokens = preg_split("/ /", join(" ", array_values($keywordTokenSets)));
+	    $keywordTokens = array();
+        $keywordSets = getConfigurationSetting("user_keyword_sets");
+	    foreach($keywordSets as $kwdset)
+	    {
+	    	$setKwdTokens = $kwdset->getKeywordTokens();
+		    $keywordTokens = array_merge($keywordTokens, $setKwdTokens);
+	    }
+//        $keywordTokenSets = flattenWithKeys(array_column($keywordSets, "keywords_array_tokenized"));
+//        $keywordTokens = preg_split("/ /", join(" ", array_values($keywordTokenSets)));
         return $keywordTokens;
     }
 
@@ -368,7 +374,7 @@ class JobsAutoMarker
 
             try {
                 foreach ($arrJobsList as $jobMatch) {
-                    $strJobTitleTokens = $jobMatch->getJobPostingFromUJM->getTitleTokens();
+                    $strJobTitleTokens = $jobMatch->getJobPostingFromUJM()->getTitleTokens();
                     $jobId = $jobMatch->getJobPostingId();
                     if(is_null($strJobTitleTokens) || strlen($strJobTitleTokens) == 0 )
                         throw new Exception("Cannot match user search keywords against job title token.  JobTitleTokens column for job_posting id#{$jobId} is null.");
