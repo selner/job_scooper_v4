@@ -47,7 +47,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
         $arrJobPosting = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
         updateColumnsForCSVFlatArray($arrJobPosting, new JobPostingTableMap());
         if($includeGeolocation === true) {
-            $jobloc = $this->getGeoLocation();
+            $jobloc = $this->getGeoLocationFromJP();
             if (!is_null($jobloc))
                 $location = $jobloc->toFlatArrayForCSV();
 
@@ -89,7 +89,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
     protected function updateAutoColumns()
     {
         $this->setKeyCompanyAndTitle(cleanupSlugPart($this->getCompany() . $this->getTitle()));
-        $this->setKeySiteAndPostID(cleanupSlugPart($this->getJobSiteKey() . $this->getJobSitePostId()));
+        $this->setKeySiteAndPostId(cleanupSlugPart($this->getJobSiteKey() . $this->getJobSitePostId()));
     }
 
     public function setAutoColumnRelatedProperty($method, $v)
@@ -104,7 +104,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
     private function _setDenormalizedLocationDisplayValue_()
     {
         $val = "";
-        $location = $this->getGeoLocation();
+        $location = $this->getGeoLocationFromJP();
         if(!is_null($location))
         {
             $val = $location->getDisplayName();
@@ -212,7 +212,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
             }
         } catch (Exception $ex)
         {
-            LogLine("Failed to lookup and set a geolocation for job posting " . $this->getKeySiteAndPostID() .".  Error:  " . $ex->getMessage(), C__DISPLAY_WARNING__);
+            LogLine("Failed to lookup and set a geolocation for job posting " . $this->getKeySiteAndPostId() .".  Error:  " . $ex->getMessage(), C__DISPLAY_WARNING__);
         }
     }
 

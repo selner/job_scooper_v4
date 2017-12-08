@@ -71,7 +71,7 @@ if (!$allJobsPager->isEmpty()) {
             $arrJob = $job->toArray(TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, array(), true);
             if (array_key_exists('Location', $arrJob) && array_key_exists('JobPostings', $arrJob['Location']))
                 unset($arrJob['Location']['JobPostings']);
-            $arrOutputList[$job->getKeySiteAndPostID()] = $arrJob;
+            $arrOutputList[$job->getKeySiteAndPostId()] = $arrJob;
         }
         $pageJsonData = encodeJSON($arrOutputList);
         file_put_contents($outFile, $pageJsonData);

@@ -16,6 +16,7 @@
  */
 namespace JobScooper\StageProcessor;
 
+use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\Utils\JobsMailSender;
 use JobScooper\Utils\SimpleCSV;
 use PHPExcel;
@@ -407,10 +408,10 @@ class NotifierJobAlerts extends JobsMailSender
     private function _getJobSitesRunRecently()
     {
         if(is_null($this->_arrJobSitesForRun)) {
-            $this->_arrJobSitesForRun = getConfigurationSettings('included_sites');
+            $this->_arrJobSitesForRun = JobSitePluginBuilder::getIncludedJobSites();
 
             $sites = array_map(function ($var) {
-                return $var->getJobPosting()->getJobSiteKey();
+                return $var->getJobPostingFromUJM()->getJobSiteKey();
             }, $this->arrAllUnnotifiedJobs);
             $uniqSites = array_unique($sites);
 
@@ -669,7 +670,7 @@ class NotifierJobAlerts extends JobsMailSender
         $allKeys = array_keys($match->toFlatArrayForCSV());
 
 
-        $retKeys = array_diff($allKeys, array('AppRunId', 'UserJobMatchId', 'UserNotificationState', 'TitleTokens', 'JobTitleLinked', "FirstSeenAt", "RemovedAt", "UpdatedAt", "KeySiteAndPostID", "KeyCompanyAndTitle", "AlternateNames", "Location"));
+        $retKeys = array_diff($allKeys, array('AppRunId', 'UserJobMatchId', 'UserNotificationState', 'TitleTokens', 'JobTitleLinked', "FirstSeenAt", "RemovedAt", "UpdatedAt", "KeySiteAndPostId", "KeyCompanyAndTitle", "AlternateNames", "Location"));
 
 //        if(isDebug()) {
 //            $retKeys = $allKeys;
@@ -683,7 +684,7 @@ class NotifierJobAlerts extends JobsMailSender
         foreach($arrJobObjects as $jobMatch)
         {
             $item = $jobMatch->toFlatArrayForCSV();
-            $arrRet[$item['KeySiteAndPostID']] = $item;
+            $arrRet[$item['KeySiteAndPostId']] = $item;
         }
 
         return $arrRet;
@@ -697,7 +698,7 @@ class NotifierJobAlerts extends JobsMailSender
 
         if (countJobRecords($arrJobList) > 0) {
             $arrFinalJobIDs_SortedByCompanyRole = array();
-            $finalJobIDs_CompanyRole = array_column($arrJobList, 'KeyCompanyAndTitle', 'KeySiteAndPostID');
+            $finalJobIDs_CompanyRole = array_column($arrJobList, 'KeyCompanyAndTitle', 'KeySiteAndPostId');
             foreach (array_keys($finalJobIDs_CompanyRole) as $key) {
                 // Need to add uniq key of job site id to the end or it will collapse duplicate job titles that
                 // are actually multiple open posts
