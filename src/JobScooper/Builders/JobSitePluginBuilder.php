@@ -316,7 +316,8 @@ class JobSitePluginBuilder
 
 
 //            $pluginData['arrListingTagSetup'] = \JobScooper\Plugins\Classes\SimplePlugin::getEmptyListingTagSetup();
-            $pluginData['arrListingTagSetup'] = array();
+            if(!is_array($pluginData['arrListingTagSetup']))
+                    $pluginData['arrListingTagSetup'] = array();
             foreach ($arrConfigData['Collections'] as $coll) {
                 foreach ($coll['Fields'] as $field) {
 
