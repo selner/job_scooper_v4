@@ -195,7 +195,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
         if(is_null($loc_str) || strlen($loc_str) == 0)
         {
             // clear any previous job location ID when we set a new location string
-            $this->setGeoLocation(null);
+            $this->setGeoLocationFromJP(null);
             $this->setGeoLocationId(null);
             $this->setLocationDisplayValue(null);
             return;
@@ -207,7 +207,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 
             $location = $locmgr->getAddress($loc_str);
             if(!is_null($location)) {
-                $this->setGeoLocation($location);
+                $this->setGeoLocationFromJP($location);
                 $this->_setDenormalizedLocationDisplayValue_();
             }
         } catch (Exception $ex)
