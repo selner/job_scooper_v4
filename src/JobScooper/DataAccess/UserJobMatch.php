@@ -82,7 +82,7 @@ class UserJobMatch extends BaseUserJobMatch
 
     public function toFlatArrayForCSV()
     {
-        $jobPost = $this->getJobPosting();
+        $jobPost = $this->getJobPostingFromUJM();
         if(empty($jobPost) && $this->isNew())
             $jobPost = new JobPosting();
         $arrJobPost = $jobPost->toFlatArrayForCSV();

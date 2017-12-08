@@ -98,7 +98,7 @@ class JobsAutoMarker
 
             LogLine("Gathering job postings that are already marked as duplicate...", \C__DISPLAY_ITEM_DETAIL__);
             $arrDupeMatches = array_filter($arrJobsList, function($v) {
-                $posting = $v->getJobPosting();
+                $posting = $v->getJobPostingFromUJM();
                 return (!is_null($posting->getDuplicatesJobPostingId()));
             });
 
@@ -108,7 +108,7 @@ class JobsAutoMarker
             LogLine("Finding and Marking Duplicate Job Roles" , \C__DISPLAY_ITEM_START__);
             foreach($arrRemainingJobs as $jobMatch)
             {
-                $posting = $jobMatch->getJobPosting();
+                $posting = $jobMatch->getJobPostingFromUJM();
                 $dupeId = $posting->checkAndMarkDuplicatePosting();
                 if(!is_null($dupeId) && $dupeId !== false)
                 {
@@ -175,7 +175,7 @@ class JobsAutoMarker
 
         LogLine("Gathering job postings not in the following counties & states ...", \C__DISPLAY_ITEM_DETAIL__);
         $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrIncludeCounties) {
-            $posting = $v->getJobPosting();
+            $posting = $v->getJobPostingFromUJM;
             $locId = $posting->getGeoLocationId();
             if(is_null($locId))
                 return false;  // if we don't have a location, assume nearby
@@ -233,7 +233,7 @@ class JobsAutoMarker
 
         LogLine("Gathering job postings not in those areas...", \C__DISPLAY_ITEM_DETAIL__);
         $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrNearbyIds) {
-            $posting = $v->getJobPosting();
+            $posting = $v->getJobPostingFromUJM;
             $locId = $posting->getGeoLocationId();
             if(is_null($locId))
                 return true;  // if we don't have a location, assume nearby
@@ -278,7 +278,7 @@ class JobsAutoMarker
                 $matched_exclusion = false;
                 foreach($this->companies_regex_to_filter as $rxInput )
                 {
-                    if(preg_match($rxInput, strScrub($jobMatch->getJobPosting()->getCompany(), DEFAULT_SCRUB)))
+                    if(preg_match($rxInput, strScrub($jobMatch->getJobPostingFromUJM->getCompany(), DEFAULT_SCRUB)))
                     {
                         $jobMatch->setMatchedNegativeCompanyKeywords(array($rxInput));
                         $jobMatch->save();
@@ -324,7 +324,7 @@ class JobsAutoMarker
 
             try {
                 foreach ($arrJobsList as $jobMatch) {
-                    $strJobTitleTokens = $jobMatch->getJobPosting()->getTitleTokens();
+                    $strJobTitleTokens = $jobMatch->getJobPostingFromUJM->getTitleTokens();
                     $arrTitleTokens = preg_split("/[\s|\|]/", $strJobTitleTokens);
 	                $matchedNegTokens = array_intersect($arrTitleTokens, $negKeywords);
                     if (!empty($matchedNegTokens)) {
@@ -368,7 +368,7 @@ class JobsAutoMarker
 
             try {
                 foreach ($arrJobsList as $jobMatch) {
-                    $strJobTitleTokens = $jobMatch->getJobPosting()->getTitleTokens();
+                    $strJobTitleTokens = $jobMatch->getJobPostingFromUJM->getTitleTokens();
                     $jobId = $jobMatch->getJobPostingId();
                     if(is_null($strJobTitleTokens) || strlen($strJobTitleTokens) == 0 )
                         throw new Exception("Cannot match user search keywords against job title token.  JobTitleTokens column for job_posting id#{$jobId} is null.");

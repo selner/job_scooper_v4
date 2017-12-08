@@ -148,7 +148,7 @@ function writeJobRecordsToJson($filepath, $arrJobRecords)
     $arrOfJobs = array();
     foreach($arrJobRecords as $jobRecord)
     {
-        $arrOfJobs[$jobRecord->getJobPostingId()] = $jobRecord->getJobPosting()->toArray();
+        $arrOfJobs[$jobRecord->getJobPostingId()] = $jobRecord->getJobPostingFromUJM()->toArray();
     }
 
     $data = array('jobs_count' => count($arrJobRecords), 'jobslist' => $arrOfJobs);
