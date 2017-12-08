@@ -129,26 +129,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     public function addSearches($arrSearches)
     {
-        $inc_sites = getConfigurationSettings('included_sites');
-        if (array_key_exists($this->jobSiteKey, $inc_sites))
-            $this->_jobSiteDbRecord = $inc_sites[$this->jobSiteKey];
-
-        if(empty($this->_jobSiteDbRecord)) {
-            $this->_jobSiteDbRecord = \JobScooper\DataAccess\JobSiteRecordQuery::create()
-                ->filterByPrimaryKey($this->jobSiteKey)
-                ->findOne();
-        }
-
-        if(!empty($this->_jobSiteDbRecord))
-        {
-            $this->_jobSiteDbRecord->setResultsFilterType($this->resultsFilterType);
-            $this->_jobSiteDbRecord->setPluginClassName(get_class($this));
-
-            $this->_jobSiteDbRecord->setDisplayName($this->JobSiteName);
-            $this->_jobSiteDbRecord->setSupportedCountryCodes($this->getSupportedCountryCodes());
-            $this->_jobSiteDbRecord->save();
-        }
-
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
             $searchToKeep = null;
             foreach (array_keys($arrSearches) as $searchkey)
@@ -161,7 +141,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                     unset($arrSearches[$searchkey]);
                 }
             }
-
+            $arrSearches = array($searchToKeep);
         }
 
         foreach ($arrSearches as $searchDetails) {
