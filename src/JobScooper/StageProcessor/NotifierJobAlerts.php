@@ -166,7 +166,7 @@ class NotifierJobAlerts extends JobsMailSender
         $arrFilesToAttach = array();
         $arrResultFilesToCombine = array();
 
-        $this->arrAllUnnotifiedJobs = getAllUserMatchesNotNotified();
+        $this->arrAllUnnotifiedJobs = getAllMatchesForUserNotification();
         if(is_null($this->arrAllUnnotifiedJobs) || count($this->arrAllUnnotifiedJobs) <= 0)
         {
             LogLine("No new jobs found to notify user about.", C__DISPLAY_WARNING__);

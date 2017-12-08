@@ -151,7 +151,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     public function getMyJobsList()
     {
-        return getAllUserMatchesNotNotified($this->JobSiteKey);
+        return getAllMatchesForUserNotification($this->JobSiteKey);
     }
 
     public function getUpdatedJobsForAllSearches()

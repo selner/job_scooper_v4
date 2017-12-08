@@ -97,9 +97,10 @@ function updateOrCreateJobPosting($arrJobItem)
 }
 
 
-function getAllUserMatchesNotNotified($jobsiteKey=null)
+function getAllMatchesForUserNotification($jobsiteKey=null)
 {
     $user= \JobScooper\DataAccess\User::getCurrentUser();
+
 
     $query = \JobScooper\DataAccess\UserJobMatchQuery::create()
         ->filterByUserNotificationState(array("not-ready", "ready"))
@@ -112,11 +113,18 @@ function getAllUserMatchesNotNotified($jobsiteKey=null)
 //        $query->filterBy("AppRunId",$appRunId);
 //    }
 
-    if(!is_null($jobsiteKey))
+    if(!empty($jobsiteKey))
     {
         $query->useJobPostingFromUJMQuery()
             ->filterByJobSiteKey($jobsiteKey)
             ->endUse();
+    }
+    else
+    {
+	    $includedSites = \JobScooper\Builders\JobSitePluginBuilder::getIncludedJobSites();
+	    $query->useJobPostingFromUJMQuery()
+		    ->filterByJobSiteKey(array_keys($includedSites), \Propel\Runtime\ActiveQuery\Criteria::IN)
+		    ->endUse();
     }
 
     $results =  $query->find();

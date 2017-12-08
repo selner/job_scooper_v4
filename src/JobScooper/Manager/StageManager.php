@@ -188,7 +188,7 @@ class StageManager
     {
         try {
             LogLine("Stage 2:  Tokenizing Job Titles... ", \C__DISPLAY_SECTION_START__);
-            $arrJobsList = getAllUserMatchesNotNotified();
+            $arrJobsList = getAllMatchesForUserNotification();
 
             if(is_null($arrJobsList) || count($arrJobsList) <= 0) {
                 LogLine("No new jobs found to tokenize", C__DISPLAY_WARNING__);

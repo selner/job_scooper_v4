@@ -53,7 +53,7 @@ class JobsAutoMarker
     public function markJobs()
     {
         if (is_null($this->arrMasterJobList) || count($this->arrMasterJobList) <= 0)
-            $this->arrMasterJobList = getAllUserMatchesNotNotified();
+            $this->arrMasterJobList = getAllMatchesForUserNotification();
 
         if(is_null($this->arrMasterJobList) || count($this->arrMasterJobList) <= 0)
         {
