@@ -227,7 +227,30 @@ class ConfigBuilder
 
     private function _setupPropelForRun()
     {
-        LogDebug("Configuring Propel global options and logging...", C__DISPLAY_ITEM_DETAIL__);
+	    $cfgDatabase = $this->_getSetting("propel.database.connections");
+	    foreach ($cfgDatabase as $key => $setting)
+	    {
+		    $serviceContainer = \Propel\Runtime\Propel::getServiceContainer();
+		    $serviceContainer->setAdapterClass($key, $setting['adapter']);
+		    $manager = new \Propel\Runtime\Connection\ConnectionManagerSingle();
+		    $manager->setConfiguration(array (
+			    'dsn' => $setting['dsn'],
+			    'user' => $setting['user'],
+			    'password' => $setting['password'],
+			    'classname' => '\\Propel\\Runtime\\Connection\\ConnectionWrapper',
+			    'model_paths' =>
+				    array (
+					    0 => 'src',
+					    1 => 'vendor',
+				    ),
+		    ));
+		    $manager->setName($key);
+		    $serviceContainer->setConnectionManager($key, $manager);
+		    $serviceContainer->setDefaultDatasource($key);
+	    }
+
+
+	    LogDebug("Configuring Propel global options and logging...", C__DISPLAY_ITEM_DETAIL__);
         $defaultLogger = $GLOBALS['logger'];
         if(is_null($defaultLogger)) {
             $pathLog = getOutputDirectory('logs') . '/propel-' .getTodayAsString("-").'.log';
