@@ -163,7 +163,7 @@ function object_to_array($obj)
 }
 
 
-function isBitFlagSet($flagSettings, $flagToCheck)
+function isBitFlagSet($flagSettings = null, $flagToCheck= null)
 {
     $ret = ($flagSettings & $flagToCheck);
     if($ret == $flagToCheck) { return true; }
