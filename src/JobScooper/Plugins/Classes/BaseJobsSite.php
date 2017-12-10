@@ -1206,21 +1206,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 }
             }
 
-
-            //
-            // If this is just a test run to verify everything is functioning and all plugins are returning data,
-            // then only bring back the first page and/or first 10 or so results to verify.  We don't need to bring
-            // back hundreds of results to test things are running successfully.
-            //
-            if (isTestRun()) {
-                $maxListings = $this->JobListingsPerPage * 2;
-                if ($nTotalListings > $maxListings) {
-                    $nTotalListings = $maxListings;
-                    $totalPagesCount = 2;
-                }
-            }
-
-
             if ($nTotalListings <= 0) {
                 LogLine("No new job listings were found on " . $this->JobSiteName . " for search '" . $searchDetails->getUserSearchSiteRunKey() . "'.", \C__DISPLAY_ITEM_START__);
                 return array();

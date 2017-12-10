@@ -14,21 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-//
-// If installed as part of the package, uses Klogger v0.1 version (http://codefury.net/projects/klogger/)
-//
 
-function setGlobalFileDetails($key, $fRequireFile = false, $fullpath = null)
-{
-    $ret = null;
-    $ret = parseFilePath($fullpath, $fRequireFile);
-
-    LogLine("". $key ." set to [" . var_export($ret, true) . "]", C__DISPLAY_ITEM_DETAIL__);
-
-    $GLOBALS['OPTS'][$key] = $ret;
-
-    return $ret;
-}
 
 function getGlobalConfigOptionBoolean($key)
 {
@@ -40,38 +26,6 @@ function isDebug() {
     $dbgSettings = getGlobalConfigOptionBoolean('debug');
     if(empty($dbgSettings)) $dbgSettings = false;
     return $dbgSettings || $cmdDebugEnabled;
-}
-
-function isTestRun() {
-    return getGlobalConfigOptionBoolean('test_run');
-}
-
-function getOutputDirectory($key)
-{
-    $ret =  sys_get_temp_dir();
-    if(array_key_exists('directories', $GLOBALS) && !is_null($GLOBALS['directories']) && is_array($GLOBALS['directories'])) {
-        if (array_key_exists($key, $GLOBALS['directories']))
-            $ret = $GLOBALS['directories'][$key];
-    }
-
-    return $ret;
-}
-
-function generateOutputFileName($baseFileName="NONAME", $ext="UNK", $isUserSpecific=true, $dirKey="debug")
-{
-    $outDir = getOutputDirectory($dirKey);
-    $today = "_" . getNowAsString("");
-    $user = "";
-    if($isUserSpecific === true) {
-        $objUser = \JobScooper\DataAccess\User::getCurrentUser();
-        if(!is_null($objUser))
-        {
-            $user = "_" . $objUser->getUserSlug();
-        }
-    }
-
-    $ret = "{$outDir}/{$baseFileName}{$user}{$today}.{$ext}";
-    return $ret;
 }
 
 function is_OptionIncludedSite($JobSiteKey)

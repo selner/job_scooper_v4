@@ -43,11 +43,11 @@ class NotifierJobAlerts extends JobsMailSender
         LogLine("Closing ".$this->JobSiteName." instance of class " . get_class($this), \C__DISPLAY_ITEM_START__);
     }
 
-    private function _combineCSVsToExcel($outfileDetails, $arrCSVFiles)
+    private function _combineCSVsToExcel($outfile, $arrCSVFiles)
     {
         $spreadsheet = new PHPExcel();
         $objWriter = PHPExcel_IOFactory::createWriter($spreadsheet, "Excel2007");
-        LogLine("Creating output XLS file '" . $outfileDetails['full_file_path'] . "'." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
+        LogLine("Creating output XLS file '" . $outfile . "'." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
         $style_all = array(
             'alignment' => array(
                 'vertical' => PHPExcel_Style_Alignment::VERTICAL_TOP,
@@ -74,12 +74,13 @@ class NotifierJobAlerts extends JobsMailSender
         ));
         $spreadsheet->getDefaultStyle()->applyFromArray($style_all);
 
-        foreach($arrCSVFiles as $csvFile)
+        foreach($arrCSVFiles as $attachFile)
         {
-            if(strcasecmp($csvFile['file_extension'], "csv") == 0)
+        	$csvFile = new \SplFileInfo($attachFile);
+            if(strcasecmp($csvFile->getExtension(), "csv") == 0)
             {
-                $objPHPExcelFromCSV = PHPExcel_IOFactory::createReaderForFile($csvFile['full_file_path']);
-                $srcFile = $objPHPExcelFromCSV->load($csvFile['full_file_path']);
+                $objPHPExcelFromCSV = PHPExcel_IOFactory::createReaderForFile($attachFile);
+                $srcFile = $objPHPExcelFromCSV->load($attachFile);
                 $colCount = count($this->getKeysForUserCSVOutput());
                 $lastCol = ord("A") + $colCount - 1;
                 $lastColLetter = chr($lastCol);
@@ -92,7 +93,7 @@ class NotifierJobAlerts extends JobsMailSender
                     $sheet->getColumnDimension($col->getColumnIndex())->setWidth(40);
                 }
 
-                $nameParts = explode("-", $csvFile['file_name_base']);
+                $nameParts = explode("-", $csvFile->getBasename());
                 $name = "unknown";
                 foreach($nameParts as $part) {
                     $int = intval($part);
@@ -124,15 +125,15 @@ class NotifierJobAlerts extends JobsMailSender
                 }
 
 
-                LogLine("Added data from CSV '" . $csvFile['full_file_path'] . "' to output XLS file." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
+                LogLine("Added data from CSV '" . $attachFile . "' to output XLS file." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
             }
         }
 
         $spreadsheet->removeSheetByIndex(0);
-        $objWriter->save($outfileDetails['full_file_path']);
+        $objWriter->save($outfile);
 
 
-        return $outfileDetails;
+        return $outfile;
 
     }
 
@@ -162,7 +163,7 @@ class NotifierJobAlerts extends JobsMailSender
         //
 
         // Output all records that match the user's interest and are still active
-        $detailsMainResultsXLSFile = getFilePathDetailsFromString(generateOutputFileName("results", "xls", true, 'notifications'), \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);;
+        $detailsMainResultsXLSFile = generateOutputFileName("results", "xls", true, 'notifications');
         $arrFilesToAttach = array();
         $arrResultFilesToCombine = array();
 
@@ -187,27 +188,21 @@ class NotifierJobAlerts extends JobsMailSender
         $arrExcludedJobs = array_filter($arrJobsToNotify, "isExcluded");
         $arrMatchedAndNotExcludedJobs = array_filter($arrMatchedJobs, "isUserJobMatchAndNotExcluded");
 
-        $detailsMatchOnlyCSV = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedAndNotExcludedJobs, "Matches", "CSV"));
-        $detailsMatchExcludedCSV = parseFilePath($this->_filterAndWriteListToFile_($arrExcludedJobs, "ExcludedMatches", "CSV"));
-        $detailsHTMLFile = parseFilePath($this->_filterAndWriteListToFile_($arrMatchedAndNotExcludedJobs, "Matches", "HTML"));
+        $detailsMatchOnlyCSV = $this->_filterAndWriteListToFile_($arrMatchedAndNotExcludedJobs, "Matches", "CSV");
+        $detailsMatchExcludedCSV = $this->_filterAndWriteListToFile_($arrExcludedJobs, "ExcludedMatches", "CSV");
+        $detailsHTMLFile = $this->_filterAndWriteListToFile_($arrMatchedAndNotExcludedJobs, "Matches", "HTML");
 
         $arrResultFilesToCombine[] = $detailsMatchOnlyCSV;
-        $arrFilesToAttach[] = $detailsMatchOnlyCSV;
-        $arrResultFilesToCombine[] = $detailsMatchExcludedCSV;
-        $arrFilesToAttach[] = $detailsMatchExcludedCSV;
-        $arrFilesToAttach[] =  $detailsHTMLFile;
 
-
-        $detailsExcludedCSVFile = parseFilePath($this->_filterAndWriteListToFile_($arrExcludedJobs, "-finalexcludedjobs", "CSV"));
-
-        if ((filesize($detailsExcludedCSVFile['full_file_path']) < 10 * 1024 * 1024) || isDebug()) {
-            $arrFilesToAttach[] = $detailsExcludedCSVFile;
+        $detailsExcludedCSVFile = $this->_filterAndWriteListToFile_($arrExcludedJobs, "-finalexcludedjobs", "CSV");
+        if ((filesize($detailsExcludedCSVFile) < 10 * 1024 * 1024) || isDebug()) {
+	        $arrResultFilesToCombine[] = $detailsMatchExcludedCSV;
         }
 
         LogSectionHeader("" . PHP_EOL, \C__SECTION_END__, \C__NAPPSECONDLEVEL__);
 
         $xlsOutputFile = $this->_combineCSVsToExcel($detailsMainResultsXLSFile, $arrResultFilesToCombine);
-        array_push($arrFilesToAttach, $xlsOutputFile);
+        array_unshift($arrFilesToAttach, $xlsOutputFile);
 
 
         LogSectionHeader("Generating text email content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
@@ -248,7 +243,7 @@ class NotifierJobAlerts extends JobsMailSender
                         $rowsAffected .= count($results);
                     }
                     if ($rowsAffected != count($arrToMarkNotified))
-                        LogLine("Warning:  marked only {count($rowsAffected)} of {count($arrToMarkNotified)} UserJobMatch records as notified.");
+                        LogLine("Warning:  marked only " . $rowsAffected ." of " . count($arrToMarkNotified) ." UserJobMatch records as notified.");
                 }
             }
 
@@ -262,10 +257,10 @@ class NotifierJobAlerts extends JobsMailSender
         // after we're done processing, delete the interim HTML file
         //
         if (isDebug() !== true) {
-            foreach ($arrFilesToAttach as $fileDetail) {
-                if (file_exists($fileDetail['full_file_path']) && is_file($fileDetail ['full_file_path'])) {
-                    LogLine("Deleting local attachment file " . $fileDetail['full_file_path'] . PHP_EOL, \C__DISPLAY_NORMAL__);
-                    unlink($fileDetail['full_file_path']);
+            foreach ($arrFilesToAttach as $filepath) {
+                if (file_exists($filepath) && is_file($filepath)) {
+                    LogLine("Deleting local attachment file " . $filepath . PHP_EOL, \C__DISPLAY_NORMAL__);
+                    unlink($filepath);
                 }
             }
         }
@@ -279,9 +274,14 @@ class NotifierJobAlerts extends JobsMailSender
 
     public function writeRunsJobsToFile($strFileOut, $arrJobsToOutput)
     {
-        $fileDetails = parseFilePath($strFileOut);
+	    if(empty($strFileOut))
+	    {
+		    throw new ErrorException("Error: writeJobsListToFile called without an output file path to use.");
+	    }
 
-        if($fileDetails['file_extension'] == "HTML")
+	    $fileDetails = parsePathDetailsFromString($strFileOut);
+
+        if($fileDetails->getExtension() == "HTML")
             $keysToOutput = $this->getKeysForHTMLOutput();
         else
             $keysToOutput = $this->getKeysForUserCSVOutput();
@@ -289,12 +289,7 @@ class NotifierJobAlerts extends JobsMailSender
         if(is_null($keysToOutput))
             $keysToOutput = array();
 
-        if(!$strFileOut || strlen($strFileOut) <= 0)
-        {
-            throw new ErrorException("Error: writeJobsListToFile called without an output file path to use.");
-        }
-
-        if(count($strFileOut) == 0)
+        if(count($arrJobsToOutput) == 0)
         {
             LogLine("Warning: writeJobsListToFile had no records to write to  " . $strFileOut, \C__DISPLAY_ITEM_DETAIL__);
 
@@ -342,7 +337,7 @@ class NotifierJobAlerts extends JobsMailSender
             }
         }
 
-        if($fileDetails['file_extension'] == 'HTML')
+        if($fileDetails->getExtension() == 'HTML')
         {
             $classCombined->writeArrayToHTMLFile($arrRecordsToOutput, $keysToOutput, null);
 
@@ -358,7 +353,7 @@ class NotifierJobAlerts extends JobsMailSender
         }
         LogLine("Jobs list had  ". count($arrRecordsToOutput) . " jobs and was written to " . $strFileOut , \C__DISPLAY_ITEM_START__);
 
-        if($fileDetails['file_extension'] == "HTML")
+        if($fileDetails->getExtension() == "HTML")
             $this->addMailCssToHTMLFile($strFileOut);
     }
 
@@ -377,14 +372,13 @@ class NotifierJobAlerts extends JobsMailSender
 
     }
 
-    private function _getFullFileContents_($detailsFile)
+    private function _getFullFileContents_($filePath)
     {
         $content = null;
-        $filePath = $detailsFile['full_file_path'];
 
-        if(strlen($filePath) < 0)
+        if(empty($filePath))
         {
-            LogLine("Unable to get contents from '". var_export($detailsFile, true) ."' to assets in email.  Failing notification.", \C__DISPLAY_ERROR__);
+            LogLine("Unable to get file contents to include in email.  Failing notification.", \C__DISPLAY_ERROR__);
             return null;
         }
 
@@ -583,7 +577,7 @@ class NotifierJobAlerts extends JobsMailSender
         //
         // Include the contents of the HTML file if passed
         //
-        if(!is_null($detailsHTMLBodyInclude) && array_key_exists('has_file', $detailsHTMLBodyInclude) && $detailsHTMLBodyInclude['has_file'] == true ) {
+        if(!is_null($detailsHTMLBodyInclude) && is_file($detailsHTMLBodyInclude)) {
             $strOut .= PHP_EOL . "<div class=\"job_scooper section\">" . PHP_EOL;
             $strOut .= $this->_getFullFileContents_($detailsHTMLBodyInclude);
             $strOut .= PHP_EOL . PHP_EOL;

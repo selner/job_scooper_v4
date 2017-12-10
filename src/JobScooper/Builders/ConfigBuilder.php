@@ -42,10 +42,8 @@ class ConfigBuilder
     public function __construct($iniFile = null)
     {
 	    $envDirOut = getenv('JOBSCOOPER_OUTPUT');
-	    if(is_null($envDirOut) || strlen($envDirOut) == 0)
-		    $envDirOut = sys_get_temp_dir();
-	    if(!empty($envDirOut))
-	        $this->_rootOutputDirInfo = parseFilePath($envDirOut);
+	    if(!empty($envDirOut) && is_Dir($envDirOut))
+		    setConfigurationSetting("output_directories.root", $envDirOut);
 
 	    $Config = new Config($iniFile,true,"imports");
 	    setConfigurationSetting("config_file_settings", $Config->getAll());
@@ -66,22 +64,30 @@ class ConfigBuilder
         setConfigurationSetting('app_run_id', $now->format('Ymd_His_') .__APP_VERSION__);
 
 
-        $configpath = getConfigurationSetting("command_line_args.configfile");
-	    $this->arrFileDetails['config_ini'] = parseFilePath($configpath, true);
-	    if($this->_rootOutputDirInfo['hasDirectory'] !== true)
-		    $this->_rootOutputDirInfo = parseFilePath($this->arrFileDetails['config_ini']['directory'].DIRECTORY_SEPARATOR."output");
+	    $file_name = getConfigurationSetting("command_line_args.configfile");
+        $this->arrFileDetails['config_ini'] = new SplFileInfo($file_name);
 
-        $name = str_replace(DIRECTORY_SEPARATOR, "", $this->arrFileDetails['config_ini']['directory']);
-        $name = substr($name, max([strlen($name) - 31 - strlen(".ini"), 0]), 31);
+	    $rootOutputPath = getConfigurationSetting("output_directories.root");
+	    $rootOutputDir = parsePathDetailsFromString($rootOutputPath);
+	    if($rootOutputDir->isDir() !== true)
+	    {
+		    $outputpath = sprintf("%s%s%s", $this->arrFileDetails['config_ini']->getPathname(), DIRECTORY_SEPARATOR, "output");
+		    $rootOutputDir = parsePathDetailsFromString($outputpath, C__FILEPATH_FILE_MUST_EXIST);
+		    setConfigurationSetting("output_directories.root", $rootOutputDir->getPathname());
+	    }
+
+
+	    //        $name = str_replace(DIRECTORY_SEPARATOR, "", $this->arrFileDetails['config_ini']->getPathname());
+//        $name = substr($name, max([strlen($name) - 31 - strlen(".ini"), 0]), 31);
 
         // Now setup all the output folders
-        $this->__setupOutputFolders__($this->_rootOutputDirInfo['directory']);
+        $this->__setupOutputFolders__();
 
-        $strOutfileArrString = getArrayValuesAsString(getConfigurationSetting("directories"));
+        $strOutfileArrString = getArrayValuesAsString(getConfigurationSetting("output_directories"));
         LogLine("Output folders configured: " . $strOutfileArrString, \C__DISPLAY_ITEM_DETAIL__);
 
 
-        LogLine("Loaded configuration details from " . $this->arrFileDetails['config_ini']['full_file_path'], \C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Loaded configuration details from " . $this->arrFileDetails['config_ini']->getPathname(), \C__DISPLAY_ITEM_DETAIL__);
 
 	    LogDebug("Configuring specific settings for this run... ", \C__DISPLAY_SECTION_START__);
         $this->_setupRunFromConfig_();
@@ -92,34 +98,31 @@ class ConfigBuilder
 
     }
 
-    private function __setupOutputFolders__($outputDirectory)
+    private function __setupOutputFolders__()
     {
     	$arrOututDirs = array();
 
-        if (!$outputDirectory) {
-            throw new \ErrorException("Required value for the output folder was not specified. Exiting.");
-        }
+	    $outputDirectory = getConfigurationSetting("output_directories.root");
+	    if (empty($outputDirectory)) {
+		    throw new \ErrorException("Required value for the output folder {$outputDirectory} was not specified. Exiting.");
+	    }
 
         $globalDirs = ["debug", "logs"];
         foreach ($globalDirs as $d) {
             $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), $d));
-            $details = getFilePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-	        $arrOututDirs[$d] = realpath($details['directory']);
+            $details = parsePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+	        $arrOututDirs[$d] = realpath($details->getPathname());
         }
 
         $userWorkingDirs = ["notifications"];
         foreach ($userWorkingDirs as $d) {
             $prefix = $GLOBALS['user_unique_key'];
             $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), $d, $prefix));
-            $details = getFilePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-	        $arrOututDirs[$d] = realpath($details['directory']);
+            $details = parsePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+	        $arrOututDirs[$d] = realpath($details->getPathname());
         }
 
-        $path = $outputDirectory;
-        $details = getFilePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-	    $arrOututDirs['root'] = realpath($details['directory']);
-
-		setConfigurationSetting('directories', $arrOututDirs);
+		setConfigurationSetting('output_directories', $arrOututDirs);
 
 	    if (!isset($GLOBALS['logger']))
 		    $GLOBALS['logger'] = new LoggingManager(getOutputDirectory('logs'));
@@ -133,9 +136,9 @@ class ConfigBuilder
 	    $config = getConfigurationSetting("config_file_settings");
 	    $inputFolderPath = array_get_element(strval("input.folder"), $config);
 	    if (!empty($inputFolderPath))
-		    $this->arrFileDetails['input_folder'] = parseFilePath($inputFolderPath);
+		    $this->arrFileDetails['input_folder'] = parsePathDetailsFromString($inputFolderPath, C__FILEPATH_DIRECTORY_MUST_EXIST);
 	    else
-		    $this->arrFileDetails['input_folder'] = parseFilePath(getConfigurationSetting("configfile"));
+		    $this->arrFileDetails['input_folder'] = parsePathDetailsFromString(getConfigurationSetting("configfile"));
 
 
 	    //
@@ -158,26 +161,26 @@ class ConfigBuilder
 			    $filepath = !empty($iniInputFileItem['path']) ? $iniInputFileItem['path'] : $iniInputFileItem['filename'];
 			    $fileinfo = new \SplFileInfo($filepath);
 		        if($fileinfo->getRealPath() !== false)
-			        $tempFileDetails = parseFilePath($fileinfo->getRealPath(), true);
+			        $tempFileDetails = parsePathDetailsFromString($fileinfo->getRealPath(), C__FILEPATH_FILE_MUST_EXIST);
 
-		        if(empty($tempFileDetails) || $tempFileDetails['has_file'] !== true) {
-				    $filesearch = glob(dirname($this->arrFileDetails['input_folder']['directory']) . DIRECTORY_SEPARATOR . "*" . DIRECTORY_SEPARATOR . $fileinfo->getFilename());
+		        if(empty($tempFileDetails) || $tempFileDetails->isFile() !== true) {
+				    $filesearch = glob($this->arrFileDetails['input_folder']->getPath() . DIRECTORY_SEPARATOR . "*" . DIRECTORY_SEPARATOR . $fileinfo->getFilename());
 				    if (!empty($filesearch)) {
 				    	$firstmatch = array_shift($filesearch);
-					    $tempFileDetails = parseFilePath($firstmatch, false);
+					    $tempFileDetails = parsePathDetailsFromString($firstmatch, C__FILEPATH_FILE_MUST_EXIST);
 				    }
 			    }
 
-			    if(empty($tempFileDetails) || $tempFileDetails['has_file'] !== true || !is_file($tempFileDetails['full_file_path'])) {
+			    if(empty($tempFileDetails) || $tempFileDetails->isFile() !== true) {
 				    throw new \Exception("Specified input file '" . $filepath . "' was not found.  Aborting.");
 			    }
 
-			    setConfigurationSetting("user_data_files.".$iniInputFileItem['type'].".".$key, $tempFileDetails['full_file_path']);
+			    setConfigurationSetting("user_data_files.".$iniInputFileItem['type'].".".$key, $tempFileDetails->getPathname());
 
 		    }
 	    }
 
-        LogLine("Loaded all configuration settings from " . $this->arrFileDetails['config_ini']['full_file_path'], \C__DISPLAY_SUMMARY__);
+        LogLine("Loaded all configuration settings from " . $this->arrFileDetails['config_ini']->getPathname(), \C__DISPLAY_SUMMARY__);
 
 	    //
 	    // Load the global search data that will be used to create

@@ -43,7 +43,7 @@ class SimpleCSV
     {
         $extensionType = null;
 
-        $strExt = strtolower($this->detailsFile['file_extension']);
+        $strExt = strtolower($this->detailsFile->getExtension());
         switch ($strExt )
         {
             case 'xlsx':			//	Excel (OfficeOpenXML) Spreadsheet
@@ -90,7 +90,7 @@ class SimpleCSV
         {
             throw new Exception("File path including the file name is required to instantiate a SimpleScooperCSVClass. ");
         }
-        $this->detailsFile = parseFilePath($fileFullPath, false);
+        $this->detailsFile = parsePathDetailsFromString($fileFullPath);
 
         $this->_openFile_($strAccessMode);
     }
@@ -104,7 +104,7 @@ class SimpleCSV
     {
         if($this->_fp_ && get_resource_type($this->_fp_) === 'file')
         {
-            fclose($this->_fp_) or die("can't close file ".$this->detailsFile['full_file_path']);
+            fclose($this->_fp_) or die("can't close file ".$this->detailsFile->getPathname());
         }
     }
 
@@ -112,11 +112,11 @@ class SimpleCSV
     {
         $this->_strAccessMode_ = $strAccessMode;
 
-        $fp = fopen($this->detailsFile['full_file_path'], $strAccessMode);
+        $fp = fopen($this->detailsFile->getPathname(), $strAccessMode);
         if($fp)
             $this->_fp_ = $fp;
         else
-            throw new ErrorException("Unable to open file '". $this->detailsFile['full_file_path'] . "' with access mode of '".$strAccessMode."'.".PHP_EOL .error_get_last()['message']) ;
+            throw new ErrorException("Unable to open file '". $this->detailsFile->getPathname() . "' with access mode of '".$strAccessMode."'.".PHP_EOL .error_get_last()['message']) ;
     }
 
     private function _resetFile()
@@ -128,7 +128,7 @@ class SimpleCSV
 
     function readAllRecords($fHasHeaderRow, $arrKeysToUse = null, $sheetName = null)
     {
-        LogLine("Reading all records for file type =".$this->__getFileType__()."; File=".$this->detailsFile['full_file_path'], C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Reading all records for file type =".$this->__getFileType__()."; File=".$this->detailsFile->getPathname(), C__DISPLAY_ITEM_DETAIL__);
 
         $ret = null;
 
@@ -142,7 +142,7 @@ class SimpleCSV
             //             $ret =   $this->__readAllRecords_Excel__($fHasHeaderRow, $arrKeysToUse, $sheetName);
             //               break;
             default:
-                LogLine("Unsupported file type.  Extension=".$this->detailsFile['file_extension']."; File=".$this->detailsFile['full_file_path'], C__DISPLAY_ERROR__);
+                LogLine("Unsupported file type.  Extension=".$this->detailsFile->getExtension()."; File=".$this->detailsFile->getPathname(), C__DISPLAY_ERROR__);
                 break;
         }
 
@@ -152,7 +152,7 @@ class SimpleCSV
 
     private function __readAllRecords_CSV__($fHasHeaderRow, $arrKeysToUse = null)
     {
-        LogLine("Reading CSV records from: ".$this->detailsFile['full_file_path'], C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Reading CSV records from: ".$this->detailsFile->getPathname(), C__DISPLAY_ITEM_DETAIL__);
 
         $arrDataLoaded = array();
         $nInputRow = 0;
@@ -436,12 +436,12 @@ class SimpleCSV
             case 'Excel2007':
                 if($keysToUseForOutputCSV != null || $arrKeysToUseForDedupe != null)
                 {
-                    LogLine("Data is not deduped when writing to Excel. Keys also cannot be set. File=".$this->detailsFile['full_file_path'], C__DISPLAY_WARNING__);
+                    LogLine("Data is not deduped when writing to Excel. Keys also cannot be set. File=".$this->detailsFile->getPathname(), C__DISPLAY_WARNING__);
                 }
                 $this->combineMultipleCSVsToExcel($arrFullFilePaths);
                 break;
             default:
-                LogLine("Unsupported file type.  Extension=".$this->detailsFile['file_extension']."; File=".$this->detailsFile['full_file_path'], C__DISPLAY_ITEM_DETAIL__);
+                LogLine("Unsupported file type.  Extension=".$this->detailsFile->getExtension()."; File=".$this->detailsFile->getPathname(), C__DISPLAY_ITEM_DETAIL__);
                 break;
         }
     }
@@ -454,7 +454,7 @@ class SimpleCSV
         // sort the list and get to only the uniq records we haven't seen before
         $arrUniq = $this->getSortedDeDupedCSVArray($arrRecordsCombinedOutput, $arrKeysToUseForDedupe );
 
-        LogLine("Total of " . count($arrUniq) ." unique records out of " . count($arrRecordsCombinedOutput)." records will be written to  ".$this->detailsFile['full_file_path'].".", C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Total of " . count($arrUniq) ." unique records out of " . count($arrRecordsCombinedOutput)." records will be written to  ".$this->detailsFile->getPathname().".", C__DISPLAY_ITEM_DETAIL__);
 
         // write the uniq values out to the results file
         $this->writeArrayToCSVFile($arrUniq, $keysToUseForOutputCSV );

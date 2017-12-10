@@ -96,18 +96,17 @@ class JobsMailSender extends PHPMailer
             )
         );
 
+	    // Set word wrap to 120 characters
+	    $this->WordWrap = 120;
 
-	    $this->WordWrap = 120;                                          // Set word wrap to 120 characters
-        if(!is_null($arrDetailsAttachFiles) && is_array($arrDetailsAttachFiles))
+	    // Add attachments
+	    if(!empty($arrDetailsAttachFiles) && is_array($arrDetailsAttachFiles))
         {
             foreach($arrDetailsAttachFiles as $detailsAttach)
             {
-                if(isset($detailsAttach) && isset($detailsAttach['full_file_path']))
-                {
-	                $this->addAttachment($detailsAttach['full_file_path']);
-                }
+                $this->addAttachment($detailsAttach);
             }
-        }        // Add attachments
+        }
 
 	    $this->isHTML(true);                                            // Set email format to HTML
 

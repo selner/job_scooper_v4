@@ -18,6 +18,92 @@
 
 
 
+CONST C__FILEPATH_NO_FLAGS = 0x0;
+CONST C__FILEPATH_FILE_MUST_EXIST = 0x1;
+CONST C__FILEPATH_DIRECTORY_MUST_EXIST = 0x2;
+CONST C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED= 0x4;
+
+/**
+ * @param     $strFilePath
+ * @param int $flags
+ *
+ * @return SplFileInfo
+ * @throws \ErrorException
+ */
+function parsePathDetailsFromString($strFilePath, $flags = C__FILEPATH_NO_FLAGS)
+{
+
+	// if the path doesn't start with a '/', it's a relative path
+	//
+	$fPathIsRelative = !(substr($strFilePath, 0, 1) == '/');
+
+	//************************************************************************
+	//
+	// Now let's figure out what each part really maps to and setup the array with names for returning
+	// to the caller.
+	//
+	// If AllParts only has one item, then there were no "/" characters in the path string.
+	// So assume the path was either a filename only OR a relative directory path with no trailing '/'
+	//
+
+	if(!empty($strFilePath)) {
+		$f = new SplFileInfo($strFilePath);
+
+		//
+		// At this point, we've set the values for the return array completely
+		//
+
+
+		if(isBitFlagSet($flags, C__FILEPATH_DIRECTORY_MUST_EXIST) && !$f->isDir())
+		{
+			throw new \ErrorException("Directory '" . $f->getPathname() . "' does not exist.");
+		}
+
+		if(isBitFlagSet($flags, C__FILEPATH_FILE_MUST_EXIST) && !$f->isFile())
+		{
+			throw new \ErrorException("File '" . $f->getPathname() . "' does not exist.");
+		}
+
+		if(isBitFlagSet($flags, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED) && !$f->isDir())
+		{
+			mkdir($f->getPathname(), 0777, true);
+		}
+
+
+		return $f;
+	}
+
+
+}
+
+
+function getOutputDirectory($key)
+{
+	$ret = getConfigurationSetting("output_directories.".$key);
+	if(empty($ret))
+		$ret =  sys_get_temp_dir();
+
+	return $ret;
+}
+
+function generateOutputFileName($baseFileName="NONAME", $ext="UNK", $isUserSpecific=true, $dirKey="debug")
+{
+	$outDir = getOutputDirectory($dirKey);
+	$today = "_" . getNowAsString("");
+	$user = "";
+	if($isUserSpecific === true) {
+		$objUser = \JobScooper\DataAccess\User::getCurrentUser();
+		if(!is_null($objUser))
+		{
+			$user = "_" . $objUser->getUserSlug();
+		}
+	}
+
+	$ret = "{$outDir}/{$baseFileName}{$user}{$today}.{$ext}";
+	return $ret;
+}
+
+
 function loadCSV($filename, $indexKeyName = null)
 {
     if (!is_file($filename)) {
