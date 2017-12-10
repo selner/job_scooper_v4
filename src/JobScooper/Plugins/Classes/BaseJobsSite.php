@@ -336,9 +336,17 @@ abstract class BaseJobsSite implements IJobSitePlugin
         return $strRetCombinedKeywords;
     }
 
-    function parseJobsListForPage($objSimpHTML)
+	/**
+	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+	 *
+	 * @return array|null
+	 * @throws \Exception
+	 */
+	function parseJobsListForPage(SimpleHTMLHelper $objSimpHTML)
     {
         throw new \BadMethodCallException(sprintf("Not implemented method  " . __METHOD__ . " called on class \"%s \".", __CLASS__));
+
+        return null;
     }
 
     protected function getGeoLocationURLValue(UserSearchSiteRun $searchDetails)

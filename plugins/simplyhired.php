@@ -156,7 +156,13 @@ class PluginSimplyHired extends \JobScooper\Plugins\Classes\ServerHtmlPlugin
     }
 
 
-    function parseJobsListForPage($objSimpHTML)
+	/**
+	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+	 *
+	 * @return array|null|void
+	 * @throws \Exception
+	 */
+	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
 
         $ret = null;

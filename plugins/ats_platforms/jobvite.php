@@ -38,7 +38,13 @@ abstract class AbstractJobviteATS extends \JobScooper\Plugins\Classes\AjaxHtmlSi
         'JobSitePostId'                 => array('selector' => 'td.jv-job-list-name a', 'return_attribute' => 'href', 'return_value_regex' =>  '/job\/(.*)/i'),
     );
 
-    function parseJobsListForPage($objSimpHTML)
+	/**
+	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+	 *
+	 * @return array|null|void
+	 * @throws \Exception
+	 */
+	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
 
         $frame = $objSimpHTML->find("*[name='jobvite_careersite_iframe']");

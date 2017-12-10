@@ -103,7 +103,15 @@ class ExtendedDiDomElement extends Element
         return $document;
     }
 
-    function find($expression, $type = Query::TYPE_CSS, $wrapElement = true)
+	/**
+	 * @param        $expression
+	 * @param string $type
+	 * @param bool   $wrapElement
+	 *
+	 * @return array|\DiDom\Element[]|\DOMElement[]|\JobScooper\Utils\ExtendedDiDomElement
+	 * @throws \Exception
+	 */
+	function find($expression, $type = Query::TYPE_CSS, $wrapElement = true)
     {
         $ret = parent::find($expression, $type, $wrapElement);
         if (is_array($ret)) {

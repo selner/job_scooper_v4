@@ -17,6 +17,9 @@
 
 namespace JobScooper\Plugins\Classes;
 
+use JobScooper\DataAccess\UserSearchSiteRun;
+use JobScooper\Utils\SimpleHTMLHelper;
+
 class SimplePlugin extends BaseJobsSite
 {
     protected $JobSiteName = '';
@@ -127,7 +130,7 @@ class SimplePlugin extends BaseJobsSite
         );
     }
 
-        static function getEmptyListingTagSetup()
+    static function getEmptyListingTagSetup()
     {
         $arrListingTagSetup = array(
             'TotalResultPageCount' => array(),
@@ -510,9 +513,13 @@ class SimplePlugin extends BaseJobsSite
      *
      * This does the heavy lifting of parsing each job record from the
      * page's HTML it was passed.
-     * *
+     *
+     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     *
+     * @return array|null|void
+     * @throws \Exception
      */
-    function parseJobsListForPage($objSimpHTML)
+    function parseJobsListForPage(SimpleHTMLHelper $objSimpHTML)
     {
         $ret = null;
         $item = null;

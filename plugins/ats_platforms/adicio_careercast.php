@@ -168,16 +168,13 @@ abstract class AbstractAdicioCareerCast extends \JobScooper\Plugins\Classes\Ajax
         return $totalItemsText;
     }
 
-    /**
-     * parseJobsListForPage
-     *
-     * This does the heavy lifting of parsing each job record from the
-     * page's HTML it was passed.
-     * *
-     * @param $objSimpHTML
-     * @return array|null
-     */
-    function parseJobsListForPage($objSimpHTML)
+	/**
+	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+	 *
+	 * @return array|null|void
+	 * @throws \Exception
+	 */
+	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
         $ret = null;
         $item = null;

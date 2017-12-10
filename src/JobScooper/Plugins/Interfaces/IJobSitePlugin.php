@@ -18,6 +18,8 @@
 namespace JobScooper\Plugins\Interfaces;
 
 // Declare the interface 'iJobSitePlugin'
+use JobScooper\Utils\SimpleHTMLHelper;
+
 interface IJobSitePlugin
 {
     /**
@@ -42,8 +44,12 @@ interface IJobSitePlugin
      * This does the heavy lifting of parsing each job record from the
      * page's HTML it was passed.
      * *
+     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     *
+     * @return array|null|void
+     * @throws \Exception
      */
-    function parseJobsListForPage($objSimpHTML);
+    function parseJobsListForPage(SimpleHTMLHelper $objSimpHTML);
 
 
 }

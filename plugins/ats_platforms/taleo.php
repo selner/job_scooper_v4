@@ -154,7 +154,13 @@ abstract class AbstractTaleo extends \JobScooper\Plugins\Classes\ServerHtmlPlugi
     }
 
 
-    function parseJobsListForPage($objSimpHTML)
+	/**
+	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+	 *
+	 * @return array|null|void
+	 * @throws \Exception
+	 */
+	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
         $ret = null;
 
