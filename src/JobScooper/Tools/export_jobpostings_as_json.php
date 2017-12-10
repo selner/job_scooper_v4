@@ -50,7 +50,7 @@ LogLine("Getting all jobs from the database...", C__DISPLAY_ITEM_START__);
 const RESULTS_PER_PAGE = 1000;
 
 $allJobsPager = \JobScooper\DataAccess\JobPostingQuery::create()
-    ->leftJoinWithLocation()
+    ->leftJoinWithGeoLocationFromJP()
     ->paginate($page = 1, $maxPerPage = RESULTS_PER_PAGE);
 
 if (!$allJobsPager->isEmpty()) {
