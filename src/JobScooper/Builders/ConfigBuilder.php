@@ -43,7 +43,7 @@ class ConfigBuilder
     public function __construct($iniFile = null)
     {
 	    $envDirOut = getenv('JOBSCOOPER_OUTPUT');
-	    if(!empty($envDirOut) && is_Dir($envDirOut))
+	    if(!empty($envDirOut))
 		    setConfigurationSetting("output_directories.root", $envDirOut);
 
 	    $Config = new Config($iniFile,true,"imports");
@@ -69,11 +69,11 @@ class ConfigBuilder
         $this->arrFileDetails['config_ini'] = new SplFileInfo($file_name);
 
 	    $rootOutputPath = getConfigurationSetting("output_directories.root");
-	    $rootOutputDir = parsePathDetailsFromString($rootOutputPath);
+	    $rootOutputDir = parsePathDetailsFromString($rootOutputPath, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
 	    if($rootOutputDir->isDir() !== true)
 	    {
 		    $outputpath = sprintf("%s%s%s", $this->arrFileDetails['config_ini']->getPathname(), DIRECTORY_SEPARATOR, "output");
-		    $rootOutputDir = parsePathDetailsFromString($outputpath, C__FILEPATH_FILE_MUST_EXIST);
+		    $rootOutputDir = parsePathDetailsFromString($outputpath, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
 		    setConfigurationSetting("output_directories.root", $rootOutputDir->getPathname());
 	    }
 
