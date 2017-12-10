@@ -25,6 +25,7 @@ use JobScooper\DataAccess\User;
 use JobScooper\Manager\LocationManager;
 use JobScooper\Manager\LoggingManager;
 use const JobScooper\Plugins\Classes\VALUE_NOT_SUPPORTED;
+use Propel\Runtime\Exception\InvalidArgumentException;
 use \SplFileInfo;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
@@ -131,6 +132,8 @@ class ConfigBuilder
 
     private function _setupRunFromConfig_()
     {
+	    $this->_setupPropelForRun();
+
 	    $srchmgr = new SearchBuilder();
 
 	    $config = getConfigurationSetting("config_file_settings");
@@ -190,7 +193,6 @@ class ConfigBuilder
 
 	    $this->_instantiateLocationManager();
 	    $this->_parseSeleniumParameters();
-	    $this->_setupPropelForRun();
 
         //
         // Load Plugin Specific settings from the config
@@ -231,9 +233,12 @@ class ConfigBuilder
     private function _setupPropelForRun()
     {
 	    $cfgDatabase = $this->_getSetting("propel.database.connections");
+	    if(empty($cfgDatabase))
+	    	throw new InvalidArgumentException("No Propel database connection definitions were found in the config files.  You must define at least one connection's settings under propel.database.connections.");
 	    foreach ($cfgDatabase as $key => $setting)
 	    {
 		    $serviceContainer = \Propel\Runtime\Propel::getServiceContainer();
+		    $serviceContainer->checkVersion('2.0.0-dev');
 		    $serviceContainer->setAdapterClass($key, $setting['adapter']);
 		    $manager = new \Propel\Runtime\Connection\ConnectionManagerSingle();
 		    $manager->setConfiguration(array (

@@ -46,12 +46,5 @@ $config = new \JobScooper\Builders\ConfigBuilder($arguments["configfile"]);
 // Import files - multiple formats in the same way
 $GLOBALS['logger'] = new \JobScooper\Manager\LoggingManager(C__APPNAME__);
 
-$propelConfig = join(DIRECTORY_SEPARATOR, array(__ROOT__, 'Config', 'config.php'));
-if (file_exists($propelConfig)) {
- require_once($propelConfig);
-} else {
- trigger_error("Missing runtime configuration file at {$propelConfig} for your setup. ");
-}
-
 $classRunJobs = new \JobScooper\Manager\StageManager();
 $classRunJobs->runAll();
