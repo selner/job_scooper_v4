@@ -394,10 +394,13 @@ class SimplePlugin extends BaseJobsSite
                     $match = array();
                     $propertyRegEx = str_replace("\\\\", "\\", $propertyRegEx);
                     if (preg_match($propertyRegEx, $ret, $match) !== false && count($match) >= 1)
+                    {
                         $ret = $match[1];
-                    else {
-                        handleException(new \Exception(sprintf("%s plugin failed to find match for regex '%s' for tag '%s' with value '%s' as expected.", $this->JobSiteName, $propertyRegEx, getArrayValuesAsString($arrTag), $ret)), "", true);
+//                  } else {
+//                        handleException(new \Exception(sprintf("%s plugin failed to find match for regex '%s' for tag '%s' with value '%s' as expected.", $this->JobSiteName, $propertyRegEx, getArrayValuesAsString($arrTag), $ret)), "", true);
                     }
+                    else
+                    	LogLine(sprintf("%s plugin failed to find match for regex '%s' for tag '%s' with value '%s' as expected.", $this->JobSiteName, $propertyRegEx, getArrayValuesAsString($arrTag), $ret), C__DISPLAY_WARNING__);
                 }
             }
         }
