@@ -57,6 +57,19 @@ function countJobRecords($arrJobs)
     return countAssociativeArrayValues($arrJobs);
 }
 
+function getArrayDebugOutput($arr)
+{
+	try
+	{
+		$dbg = encodeJSON($arr);
+	}
+	catch( \Exception $ex)
+	{
+		$dbg = var_dump($arr, true);
+	}
+	return $dbg;
+}
+
 function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strDelimiter = "", $strIntro = "", $fIncludeKey = true)
 {
     $strReturn = "";
