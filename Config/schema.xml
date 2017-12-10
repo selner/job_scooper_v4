@@ -158,10 +158,6 @@
 
 
         <column name="jobsite_post_id" phpName="JobSitePostId" type="varchar" size="1024" required="true"/>
-        <unique>
-            <unique-column name="jobsite_key"/>
-            <unique-column name="jobsite_post_id"/>
-        </unique>
 
         <!--
             Job posting facts
