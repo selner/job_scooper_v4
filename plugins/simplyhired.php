@@ -91,7 +91,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\Classes\ServerHtmlPlugin
     protected function getPageURLfromBaseFmt(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails, $nPage = null, $nItem = null)
     {
         $searchDetailsBackup = $searchDetails->copy();
-        $strURL = $this->_getSearchUrlFormat_($searchDetails, $nPage, $nItem);
+        $strURL = $this->SearchUrlFormat;
 
 
 	    $numDays = getConfigurationSetting('number_days');

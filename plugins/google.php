@@ -26,8 +26,9 @@ class PluginGoogle extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
     protected $JobPostingBaseUrl = 'https://careers.google.com/jobs';
     protected $prevURL = 'https://careers.google.com/jobs';
     protected $additionalBitFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
-    protected $SearchUrlFormat = "https://careers.google.com/jobs#t=sq&q=j&so=dt_pd&li=20&l=false&jlo=en-US&";
-    protected $CountryCodes = ["US", "GB"];
+	protected $SearchUrlFormat = "https://careers.google.com/jobs#j=***KEYWORDS***&t=sq&q=j&so=dt_pd&li=20&l=false&jlo=en-US&***LOCATION:&jl={Latitude}%3A{Longitude}%3A{Place}%2C+{CountryCode}%3A%3ALOCALITY&jld=10***";
+
+    protected $CountryCodes = ["US", "UK"];
 
     protected $additionalLoadDelaySeconds = 6;
     protected $nextPageScript = "var elem = document.getElementById('gjsrpn');  if (elem != null) { console.log('attempting next button click on element ID gjsrpn'); elem.click(); };";
@@ -35,26 +36,19 @@ class PluginGoogle extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
     protected $arrListingTagSetup = array(
         'NextButton' => array('selector' => 'button[aria-label=\'Next page\']')
     );
-    
-//    function getItemURLValue($nItem)
-//    {
-//        if($nItem == null || $nItem <= 10 ) { return "li=0"; }
-//        return "li=".$nItem."&st=".($nItem+10);
-//    }
-
-    function __construct()
-    {
-        $this->regex_link_job_id = '/' . REXPR_PARTIAL_MATCH_URL_DOMAIN . '/.*?jid=([^&]*)/i';
-        parent::__construct();
-    }
 
 
-
-    function parseJobsListForPage($objSimpHTML)
+	/**
+	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+	 *
+	 * @return array|null
+	 * @throws \Exception
+	 */
+	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
         $ret = null;
 
-        $nodesJobs= $objSimpHTML->find(".GXRRIBB-vb-g");
+        $nodesJobs= $objSimpHTML->find("*[role='listitem']");
 
         if(!$nodesJobs) return null;
 
@@ -64,25 +58,22 @@ class PluginGoogle extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
 
 	        $item = $this->getJobFactsFromMicrodata($node, $item);
 
-
-	        $item['JobSitePostId'] = $node->attr['id'];
+	        $item['JobSitePostId'] = $node->getAttribute("data-job-id");
 
             $subNode = $node->find("h2 a");
-            if(isset($subNode) && count($subNode) >= 1)
+            if(!empty($subNode))
             {
-                $item['Url'] = empty($item['Url']) ? $subNode[0]->attr['href'] : $item['Url'];
-                $item['Title'] = empty($item['Title']) ? $subNode[0]->attr['title'] : $item['Title'];
+                $item['Url'] = empty($item['Url']) ? $subNode[0]->getAttribute("href") : $item['Url'];
+                $item['Title'] = empty($item['Title']) ? $subNode[0]->getAttribute("title") : $item['Title'];
             }
 
-            $subNode = $node->find("span[class='location secondary-text']");
-            if(isset($subNode))
-                $item['Location'] = empty($item['Location']) ? $subNode[0]->attr['title'] : $item['Location'];
+            $subNode = $node->find("div.summary span.location");
+	        if(!empty($subNode) && !empty($locval = $subNode[0]->text()))
+                $item['Location'] = $locval;
 
-            $subNode = $node->find("span[class='secondary-text']");
-            if(isset($subNode))
-                $item['Company'] = empty($item['Company']) ? $subNode[0]->text() : $item['Company'];
-            else
-                $item['Company'] = empty($item['Company']) ? $this->JobSiteName : $item['Company'];
+            $subNode = $node->find("div.summary span[class='secondary-text']");
+            if(!empty($subNode) && !empty($coval = $subNode[0]->text()))
+                 $item['Company'] = $coval;
 
             $ret[] = $item;
 

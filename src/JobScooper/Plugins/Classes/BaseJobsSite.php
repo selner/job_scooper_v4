@@ -388,23 +388,49 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     protected function getPageURLfromBaseFmt(UserSearchSiteRun $searchDetails, $nPage = null, $nItem = null)
     {
-        $strURL = $this->_getSearchUrlFormat_($searchDetails, $nPage, $nItem);
+        $strURL = $this->SearchUrlFormat;
 
-	    $numDays = getConfigurationSetting('number_days');
-	    $strURL = str_ireplace("***NUMBER_DAYS***", $this->getPageURLValue($numDays), $strURL);
-	    $strURL = str_ireplace("***PAGE_NUMBER***", $this->getPageURLValue($nPage), $strURL);
-        $strURL = str_ireplace("***ITEM_NUMBER***", $this->getItemURLValue($nItem), $strURL);
-        $strURL = str_ireplace(BASE_URL_TAG_KEYWORDS, $this->getKeywordURLValue($searchDetails), $strURL);
+	    $count = preg_match_all("/\*{3}(\w+):?(.*?)\*{3}/", $strURL, $tokenlist);
+	    if(!empty($tokenlist) && is_array($tokenlist) && count($tokenlist) >= 3)
+	    {
+		    $tokenFmtStrings = array_combine($tokenlist[1], $tokenlist[2]);
+	    	foreach($tokenFmtStrings as $tok => $fmt)
+		    {
+			    $replaceVal = "";
+				$replaceStr = "***" . $tok . (empty($fmt) ? "" : ":{$fmt}") . "***";
+		    	switch($tok)
+			    {
+				    case "LOCATION":
+					    $location = $searchDetails->getGeoLocationFromUSSR();
+					    if(!empty($location)) {
+						    if (empty($fmt))
+							    $replaceVal = $this->getGeoLocationURLValue($searchDetails);
+					        else
+							    $replaceVal = replaceTokensInString($fmt, $location->toArray());
+					    }
+					    else  // if there was no location, return the empty string for the formatted string
+					        $replaceVal = "";
+					    break;
 
+				    case "KEYWORDS":
+					    $replaceVal =  $this->getKeywordURLValue($searchDetails);
 
-        $nSubtermMatches = substr_count($strURL, BASE_URL_TAG_LOCATION);
+				    break;
 
-        if (!$this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) && $nSubtermMatches > 0) {
-            $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $this->getGeoLocationURLValue($searchDetails), $strURL);
-            if ($strURL == null) {
-                throw new \ErrorException("Location value is required for " . $this->JobSiteName . ", but was not set for the search '" . $searchDetails->getUserSearchSiteRunKey() . "'." . " Aborting all searches for " . $this->JobSiteName, \C__DISPLAY_ERROR__);
-            }
-        }
+				    case "PAGE_NUMBER":
+					    $replaceVal =  $this->getPageURLValue($nPage);
+						break;
+
+				    case "ITEM_NUMBER":
+					    $replaceVal =  $this->getItemURLValue($nItem);
+					    break;
+			    }
+
+			    $strURL = str_ireplace($replaceStr, $replaceVal, $strURL);
+
+		    }
+
+	    }
 
         return $strURL;
     }
