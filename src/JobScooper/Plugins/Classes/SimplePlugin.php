@@ -446,51 +446,56 @@ class SimplePlugin extends BaseJobsSite
                 $attribs = $node->attributes();
 
                 if (!empty($attribs)) {
-                    $itemPropKind = strtolower($attribs['itemprop']);
+	                $itemPropKind = strtolower($attribs['itemprop']);
+	                $eachProp = preg_split("/\s+/", $itemPropKind);
+	                foreach ($eachProp as $propKind)
+	                {
+		                switch ($propKind) {
+			                case "itemlistelement":
+				                if (array_key_exists("id", $attribs))
+					                $item['JobSitePostId'] = $attribs['id'];
+				                if (array_key_exists("data-index", $attribs))
+					                $item['JobSitePostId'] = empty($item['JobSitePostId']) ? $attribs['data-index'] : $item['JobSitePostId'] . "-" . $attribs['data-index'];
+				                break;
 
-                    switch ($itemPropKind) {
-                        case "itemlistelement":
-                            if (array_key_exists("id", $attribs))
-                                $item['JobSitePostId'] = $attribs['id'];
-                            if (array_key_exists("data-index", $attribs))
-                                $item['JobSitePostId'] = empty($item['JobSitePostId']) ? $attribs['data-index'] : $item['JobSitePostId'] . "-" . $attribs['data-index'];
-                            break;
-                        case "title":
-                            $item['Title'] = combineTextAllChildren($node);
-                            break;
+			                case "name":
+			                case "title":
+				                $item['Title'] = combineTextAllChildren($node);
+				                break;
 
-                        case "identifier":
-                            $item['Title'] = combineTextAllChildren($node);
-                            break;
+			                case "identifier":
+				                $item['Title'] = combineTextAllChildren($node);
+				                break;
 
-                        case "url":
-                            $item['Url'] = $attribs['href'];
-                            break;
+			                case "url":
+				                $item['Url'] = $attribs['href'];
+				                break;
 
-                        case "joblocation":
-                        case "address":
-                        case "postaladdress":
-                            $item['Location'] = combineTextAllChildren($node);
-                            break;
+			                case "joblocation":
+			                case "address":
+			                case "postaladdress":
+				                $item['Location'] = combineTextAllChildren($node);
+				                break;
 
-                        case "employmenttype":
-                            $item['EmploymentType'] = combineTextAllChildren($node);
-                            break;
+			                case "employmenttype":
+				                $item['EmploymentType'] = combineTextAllChildren($node);
+				                break;
 
-                        case "dateposted":
-                            $item['PostedAt'] = combineTextAllChildren($node);
-                            break;
+			                case "dateposted":
+				                $item['PostedAt'] = combineTextAllChildren($node);
+				                break;
 
-                        case "industry":
-                        case "occupationalcategory":
-                            $item['Category'] = combineTextAllChildren($node);
-                            break;
+			                case "industry":
+			                case "occupationalcategory":
+				                $item['Category'] = combineTextAllChildren($node);
+				                break;
 
-                        case "hiringorganization":
-                            $item['Company'] = combineTextAllChildren($node);
-                            break;
+			                case "hiringorganization":
+				                $item['Company'] = combineTextAllChildren($node);
+				                break;
 
 
+		                }
                     }
                 }
             }
