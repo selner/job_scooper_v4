@@ -349,13 +349,18 @@ abstract class BaseJobsSite implements IJobSitePlugin
             throw new \ErrorException($this->JobSiteName . " does not support the ***LOCATION*** replacement value in a base URL.  Please review and change your base URL format to remove the location value.  Aborting all searches for " . $this->JobSiteName, \C__DISPLAY_ERROR__);
         }
 
-        $locTypeNeeded = $this->getGeoLocationSettingType();
+	    $loc = $searchDetails->getGeoLocationFromUSSR();
+        $locTypeNeeded = $this->getGeoLocationSettingType($loc);
         if (empty($locTypeNeeded)) {
             LogLine("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".", \C__DISPLAY_ITEM_DETAIL__);
             return null;
         }
+	    if(empty($loc))
+	    {
+		    LogLine("Plugin for '" . $searchDetails->getJobSiteKey() . "' is missing the search location.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".", \C__DISPLAY_ITEM_DETAIL__);
+		    return null;
+	    }
 
-        $loc = $searchDetails->getGeoLocationFromUSSR();
         $strLocationValue = $loc->formatLocationByLocationType($locTypeNeeded);
         if (empty($strLocationValue) || $strLocationValue == VALUE_NOT_SUPPORTED) {
             LogLine("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".", \C__DISPLAY_ITEM_DETAIL__);
