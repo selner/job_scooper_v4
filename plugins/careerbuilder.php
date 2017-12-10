@@ -62,7 +62,7 @@ class PluginCareerBuilderUK extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePl
     protected $LocationType = 'location-city';
     protected $strKeywordDelimiter = "|";
     protected $PaginationType = C__PAGINATION_PAGE_VIA_URL;
-    protected $CountryCodes = array("GB");
+    protected $CountryCodes = array("UK");
 
     protected $arrListingTagSetup = array(
         'NoPostsFound' => array('selector' => 'h1', 'return_attribute' => 'text', 'return_value_callback' => "checkNoJobResults"),

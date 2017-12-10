@@ -79,5 +79,5 @@ class PluginIndeedUK extends PluginIndeed
     protected $JobPostingBaseUrl = 'http://www.Indeed.co.uk';
     protected $SearchUrlFormat = "https://www.indeed.co.uk/jobs?as_and=***KEYWORDS***&as_phr=&as_any=&as_not=&as_ttl=&as_cmp=&jt=all&st=&salary=&radius=50&l=***LOCATION***&fromage=1&limit=50&sort=date***ITEM_NUMBER***&filter=0&psf=advsrch";
     protected $LocationType = 'location-city';
-    protected $CountryCodes = array("GB");
+    protected $CountryCodes = array("UK");
 }
