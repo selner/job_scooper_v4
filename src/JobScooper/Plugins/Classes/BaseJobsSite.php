@@ -202,7 +202,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                     $dataExistingUserJobMatchIds = \JobScooper\DataAccess\UserJobMatchQuery::create()
                         ->select("JobPostingId")
                         ->filterByUserId($user->getUserId())
-                        ->useJobPostingQuery()
+                        ->useJobPostingFromUJMQuery()
                             ->filterByJobSiteKey($this->JobSiteKey)
                         ->endUse()
                         ->find()
