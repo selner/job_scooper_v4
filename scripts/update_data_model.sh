@@ -1,22 +1,23 @@
 #!/usr/bin/env bash
 
-ROOT=`pwd`
 args=$#           # Number of args passed.
 ORIGDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+SCRIPTSDIR=`pwd`
+cd ..
 PROJDIR=`pwd`
 
 lastarg=${!args}
 if [ -z ${1} ]; then
-    CONFIGDIR="$ROOT/Config"
+    CONFIGDIR="$PROJDIR"
 else
     CONFIGDIR=$1
 fi
-
-cd ..
-PROPEL="$ROOT/vendor/bin/propel"
-CODEDIR="$ROOT/src"
-OUTDIR=`echo ${JOBSCOOPER_OUTPUT}`
+CODEDIR="$PROJDIR/src"
+PROPEL="$PROJDIR/vendor/bin/propel"
+OUTDIR=`echo $JOBSCOOPER_OUTPUT`
 NOW=$(date "+%F-%H-%M-%S")
+echo "current dir is `pwd`"
 
 echo "Copying current db to backup ($OUTDIR/job_scooper_db.sq3.backup-$NOW)..."
 cp "$OUTDIR/job_scooper_db.sq3" "$OUTDIR/job_scooper_db.sq3.backup-"$NOW
@@ -27,27 +28,30 @@ cd $CONFIGDIR
 
 
 echo "Removing past migration and SQL migration scripts"
-rm -Rf "$ROOT/Config/Data/generated-migrations"
-rm -Rf "$ROOT/Config/Data/generated-sql"
+rm -Rf "$PROJDIR/Config/Data/generated-migrations"
+rm -Rf "$PROJDIR/Config/Data/generated-sql"
 
+echo "Building Propel config file starting from $PROJDIR"
+CMD="$PROPEL config:convert -vvv --config-dir=$CONFIGDIR"
+echo $CMD; $CMD
 
-cd $CONFIGDIR
-$PROPEL config:convert -vvv
+echo "Building Propel model files..."
+CMD="$PROPEL build -vvv --config-dir=$CONFIGDIR"
+echo $CMD; $CMD
 
+echo "Building Propel SQL files..."
+CMD="$PROPEL sql:build --overwrite -vvv --config-dir=$CONFIGDIR"
+echo $CMD; $CMD
 
-cd $ROOT
-$PROPEL build -vvv
-$PROPEL sql:build --overwrite -vvv
-$PROPEL migration:diff -vvv
-$PROPEL migration:migrate -vvv
+echo "Generating SQL migration for database..."
+CMD="$PROPEL migration:diff -vvv --config-dir=$CONFIGDIR"
+echo $CMD; $CMD
 
-mv -f "$OUTDIR/job_scooper_db.sq3" "$OUTDIR/job_scooper_db-migrated.sq3"
+echo "Running SQL migration against database..."
+CMD="$PROPEL migration:migrate -vvv --config-dir=$CONFIGDIR"
+echo $CMD; $CMD
 
-$PROPEL sql:build --overwrite -vvv
-$PROPEL sql:insert -vvv
-cp -f "$OUTDIR/job_scooper_db.sq3" "$CODEDIR/examples/job_scooper_db.sq3"
-mv -f "$OUTDIR/job_scooper_db-migrated.sq3" "$OUTDIR/job_scooper_db.sq3"
-
-cd $ROOT
+cd $PROJDIR
 composer dump
+
 cd scripts
