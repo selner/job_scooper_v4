@@ -290,8 +290,9 @@ function replaceTokensInString($formatString, $arrVariables)
 //    $string = 'Dear {FIRST_NAME} {LAST_NAME}, we wanted to tell you that you {STATUS} the competition.';
     $ret = $formatString;
     foreach($arrVariables as $key => $value){
-        $ret = str_replace('{'.strtoupper($key).'}', $value, $ret);
-//        $ret = str_replace('***'.strtoupper($key).'***', $value, $ret);
+	    $ret = str_replace('{'.$key.'}', $value, $ret);
+	    $ret = str_replace('{'.strtoupper($key).'}', $value, $ret);
+	    $ret = str_replace('{'.strtolower($key).'}', $value, $ret);
     }
 
     return $ret;
