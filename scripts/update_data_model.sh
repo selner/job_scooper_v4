@@ -1,9 +1,20 @@
 #!/usr/bin/env bash
-cd ..
+
 ROOT=`pwd`
+args=$#           # Number of args passed.
+ORIGDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJDIR=`pwd`
+
+lastarg=${!args}
+if [ -z ${1} ]; then
+    CONFIGDIR="$ROOT/Config"
+else
+    CONFIGDIR=$1
+fi
+
+cd ..
 PROPEL="$ROOT/vendor/bin/propel"
 CODEDIR="$ROOT/src"
-CONFIGDIR="$ROOT/Config"
 OUTDIR=`echo ${JOBSCOOPER_OUTPUT}`
 NOW=$(date "+%F-%H-%M-%S")
 
