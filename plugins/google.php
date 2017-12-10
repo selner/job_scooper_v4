@@ -62,26 +62,27 @@ class PluginGoogle extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
         {
             $item = getEmptyJobListingRecord();
 
-            $item['JobSitePostId'] = $node->attr['id'];
+	        $item = $this->getJobFactsFromMicrodata($node, $item);
+
+
+	        $item['JobSitePostId'] = $node->attr['id'];
 
             $subNode = $node->find("h2 a");
             if(isset($subNode) && count($subNode) >= 1)
             {
-                $item['Url'] = $subNode[0]->attr['href'];
-                $item['Title'] = $subNode[0]->attr['title'];
+                $item['Url'] = empty($item['Url']) ? $subNode[0]->attr['href'] : $item['Url'];
+                $item['Title'] = empty($item['Title']) ? $subNode[0]->attr['title'] : $item['Title'];
             }
-
-            if($item['JobSitePostId'] == '') continue;
 
             $subNode = $node->find("span[class='location secondary-text']");
             if(isset($subNode))
-                $item['Location'] = $subNode[0]->attr['title'];
+                $item['Location'] = empty($item['Location']) ? $subNode[0]->attr['title'] : $item['Location'];
 
             $subNode = $node->find("span[class='secondary-text']");
             if(isset($subNode))
-                $item['Company'] = $subNode[0]->text();
+                $item['Company'] = empty($item['Company']) ? $subNode[0]->text() : $item['Company'];
             else
-                $item['Company'] = $this->JobSiteName;
+                $item['Company'] = empty($item['Company']) ? $this->JobSiteName : $item['Company'];
 
             $ret[] = $item;
 
