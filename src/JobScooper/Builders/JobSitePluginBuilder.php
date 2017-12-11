@@ -242,11 +242,16 @@ class JobSitePluginBuilder
     }
 
 
-    private function _loadJsonPluginConfigFiles_()
+	/**
+	 * @throws \Exception
+	 */
+	private function _loadJsonPluginConfigFiles_()
     {
         $this->_configJsonFiles = glob($this->_dirJsonConfigs . DIRECTORY_SEPARATOR . "*.json");
         foreach ($this->_configJsonFiles as $f) {
             $dataPlugins = loadJSON($f, null, true);
+			if(empty($dataPlugins))
+				throw new \Exception("Unable to load JSON plugin data file from " . $f . ": " . json_last_error_msg());
             $plugsToInit = array();
             if (array_key_exists('jobsite_plugins', $dataPlugins)) {
                 $plugsToInit = array_values($dataPlugins['jobsite_plugins']);
