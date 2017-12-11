@@ -79,6 +79,7 @@ class ConfigBuilder
 		    setConfigurationSetting("output_directories.root", $rootOutputDir->getPathname());
 	    }
 
+	    $this->_setupPropelForRun();
 
 	    //        $name = str_replace(DIRECTORY_SEPARATOR, "", $this->arrFileDetails['config_ini']->getPathname());
 //        $name = substr($name, max([strlen($name) - 31 - strlen(".ini"), 0]), 31);
@@ -130,11 +131,11 @@ class ConfigBuilder
 	    if (!isset($GLOBALS['logger']))
 		    $GLOBALS['logger'] = new LoggingManager(getOutputDirectory('logs'));
         $GLOBALS['logger']->addFileHandlers(getOutputDirectory('logs'));
+	    $this->_setupPropelLogging();
     }
 
     private function _setupRunFromConfig_()
     {
-	    $this->_setupPropelForRun();
 
 	    $srchmgr = new SearchBuilder();
 
@@ -236,31 +237,32 @@ class ConfigBuilder
     {
 	    $cfgDatabase = null;
 	    $cfgSettingsFile = $this->_getSetting("propel.configuration_file");
-	    if(is_file($cfgSettingsFile)) {
-		    $propelCfg = new ConfigurationManager($cfgSettingsFile);
-		    $cfgDatabase = $propelCfg->getConfigProperty('database.connections');
+	    LogLine("Loading Propel configuration file: " . $cfgSettingsFile);
+	    $propelCfg = new ConfigurationManager($cfgSettingsFile);
+	    $cfgDatabase = $propelCfg->getConfigProperty('database.connections');
+	    if(!empty($cfgDatabase)) {
+		    LogLine("Using Propel Connection Settings from Propel config: " . getArrayDebugOutput($cfgDatabase));
 	    }
-
-	    if(empty($cfgDatabase)) {
+	    else {
 		    $cfgDatabase = $this->_getSetting("propel.database.connections");
+		    LogLine("Using Propel Connection Settings from Jobscooper Config: " . getArrayDebugOutput($cfgDatabase));
 	    }
 
 	    if (empty($cfgDatabase))
 		    throw new InvalidArgumentException("No Propel database connection definitions were found in the config files.  You must define at least one connection's settings under propel.database.connections.");
 
-	    foreach ($cfgDatabase as $key => $setting)
-	    {
+	    foreach ($cfgDatabase as $key => $setting) {
 		    $serviceContainer = \Propel\Runtime\Propel::getServiceContainer();
 		    $serviceContainer->checkVersion('2.0.0-dev');
 		    $serviceContainer->setAdapterClass($key, $setting['adapter']);
 		    $manager = new \Propel\Runtime\Connection\ConnectionManagerSingle();
-		    $manager->setConfiguration(array (
-			    'dsn' => $setting['dsn'],
-			    'user' => $setting['user'],
-			    'password' => $setting['password'],
-			    'classname' => '\\Propel\\Runtime\\Connection\\ConnectionWrapper',
+		    $manager->setConfiguration(array(
+			    'dsn'         => $setting['dsn'],
+			    'user'        => $setting['user'],
+			    'password'    => $setting['password'],
+			    'classname'   => '\\Propel\\Runtime\\Connection\\ConnectionWrapper',
 			    'model_paths' =>
-				    array (
+				    array(
 					    0 => 'src',
 					    1 => 'vendor',
 				    ),
@@ -270,7 +272,11 @@ class ConfigBuilder
 		    $serviceContainer->setDefaultDatasource($key);
 	    }
 
-	    LogDebug("Configuring Propel global options and logging...", C__DISPLAY_ITEM_DETAIL__);
+    }
+
+    private function _setupPropelLogging()
+    {
+    LogDebug("Configuring Propel logging...", C__DISPLAY_ITEM_DETAIL__);
         $defaultLogger = $GLOBALS['logger'];
         if(is_null($defaultLogger)) {
             $pathLog = getOutputDirectory('logs') . '/propel-' .getTodayAsString("-").'.log';
