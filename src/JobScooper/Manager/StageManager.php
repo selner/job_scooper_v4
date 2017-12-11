@@ -33,30 +33,14 @@ class StageManager
     protected $JobSiteName = "StageManager";
     protected $classConfig = null;
 
-    function __construct()
-    {
-        try {
-            $this->classConfig = new ConfigBuilder();
-
-            $this->classConfig->initialize();
-
-
-        } catch (\Exception $ex) {
-            LogLine("Unable to start Stage Manager: " . $ex->getMessage());
-            throw $ex;
-        }
-
-    }
-
-    function __destruct()
-    {
-        LogLine("Closing StageManager instance.", \C__DISPLAY_ITEM_START__);
-    }
-
-
     public function runAll()
     {
         try {
+	        $this->classConfig = new ConfigBuilder();
+
+	        $this->classConfig->initialize();
+
+
 	        $arrRunStages = getConfigurationSetting("command_line_args.stages");
             if (!empty($arrRunStages)) {
 
@@ -97,7 +81,7 @@ class StageManager
             LogLine("Saved " . $job->getJobPostingId() . " to database.");
         }
 
-        LogLine("Stored " . countJobRecords($jobs) . " to database from file '".$path."''.");
+        LogLine("Stored " . countAssociativeArrayValues($jobs) . " to database from file '".$path."''.");
     }
 
 
