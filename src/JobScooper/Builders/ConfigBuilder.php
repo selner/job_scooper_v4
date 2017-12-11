@@ -25,6 +25,8 @@ use JobScooper\DataAccess\User;
 use JobScooper\Manager\LocationManager;
 use JobScooper\Manager\LoggingManager;
 use const JobScooper\Plugins\Classes\VALUE_NOT_SUPPORTED;
+use Propel\Common\Config\ConfigurationManager;
+use Propel\Generator\Config\GeneratorConfig;
 use Propel\Runtime\Exception\InvalidArgumentException;
 use \SplFileInfo;
 use Monolog\Logger;
@@ -232,9 +234,20 @@ class ConfigBuilder
 
     private function _setupPropelForRun()
     {
-	    $cfgDatabase = $this->_getSetting("propel.database.connections");
-	    if(empty($cfgDatabase))
-	    	throw new InvalidArgumentException("No Propel database connection definitions were found in the config files.  You must define at least one connection's settings under propel.database.connections.");
+	    $cfgDatabase = null;
+	    $cfgSettingsFile = $this->_getSetting("propel.configuration_file");
+	    if(is_file($cfgSettingsFile)) {
+		    $propelCfg = new ConfigurationManager($cfgSettingsFile);
+		    $cfgDatabase = $propelCfg->getConfigProperty('database.connections');
+	    }
+
+	    if(empty($cfgDatabase)) {
+		    $cfgDatabase = $this->_getSetting("propel.database.connections");
+	    }
+
+	    if (empty($cfgDatabase))
+		    throw new InvalidArgumentException("No Propel database connection definitions were found in the config files.  You must define at least one connection's settings under propel.database.connections.");
+
 	    foreach ($cfgDatabase as $key => $setting)
 	    {
 		    $serviceContainer = \Propel\Runtime\Propel::getServiceContainer();
@@ -256,7 +269,6 @@ class ConfigBuilder
 		    $serviceContainer->setConnectionManager($key, $manager);
 		    $serviceContainer->setDefaultDatasource($key);
 	    }
-
 
 	    LogDebug("Configuring Propel global options and logging...", C__DISPLAY_ITEM_DETAIL__);
         $defaultLogger = $GLOBALS['logger'];
