@@ -1,6 +1,6 @@
 {
   "JobSiteName": "JobsiteCoUk",
-  "SourceURL": "http://www.jobsite.co.uk/vacancies?search_type=quick&engine=stepmatch&search_referer=internal&query=***KEYWORDS***&logic=&title_query=&title_logic=***LOCATION:&location={Place}***&radius=20&p=1&daysback=&sort_by=date&search_currency_code=GBP&salary_type_unit=A&salary_min=&salary_max=",
+  "SourceURL": "http://www.jobsite.co.uk/vacancies?search_type=quick&engine=stepmatch&search_referer=internal&query=***KEYWORDS***&logic=&title_query=&title_logic=***LOCATION:&location={Place}***&radius=20&p=***PAGE_NUMBER***&daysback=&sort_by=date&search_currency_code=GBP&salary_type_unit=A&salary_min=&salary_max=",
   "BaseURL": "http://www.jobsite.co.uk",
   "CountryCodes" : ["UK"],
   "Collections": [
@@ -33,16 +33,6 @@
           "Index": 0,
           "Extract": "TEXT",
           "Attribute": null,
-          "Pattern": "/(.*)\\s*-?\\s*.*/",
-          "Type": "CSS"
-        },
-        {
-          "Name": "Company",
-          "Selector": "ul li h3 a",
-          "Index": 0,
-          "Extract": "TEXT",
-          "Attribute": null,
-          "Pattern": "/\\s*-\\s*(.*)/",
           "Type": "CSS"
         },
         {
@@ -52,6 +42,15 @@
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
+        },
+        {
+          "Name": "JobSitePostId",
+          "Selector": "ul li h3 a",
+          "Extract": "ATTR",
+          "Attribute": "href",
+          "Index": 0,
+          "Type": "CSS",
+          "Pattern": "/-(\\w+)\\?/"
         },
         {
           "Name": "Location",
@@ -75,23 +74,13 @@
           "Index": 0,
           "Attribute": null,
           "Type": "CSS"
-        },
-        {
-          "Name": "JobSitePostId",
-          "Selector": "div div.saved-job",
-          "Extract": "ATTR",
-          "Attribute" : "data-id",
-          "Index": 0,
-          "Type": "CSS"
         }
       ]
     }
   ],
   "Pagination": {
     "PageDelaySeconds" : 4,
-    "Type": "NEXT-BUTTON",
-    "Index" : 0,
-    "Selector" : "div.resultsPagination a.next",
+    "Type": "PAGE-VIA-URL",
     "PageLimit": 25
   }
 }
