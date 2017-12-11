@@ -399,11 +399,9 @@ class SimplePlugin extends BaseJobsSite
                     if (preg_match($propertyRegEx, $ret, $match) !== false && count($match) >= 1)
                     {
                         $ret = $match[1];
-//                  } else {
-//                        handleException(new \Exception(sprintf("%s plugin failed to find match for regex '%s' for tag '%s' with value '%s' as expected.", $this->JobSiteName, $propertyRegEx, getArrayValuesAsString($arrTag), $ret)), "", true);
                     }
                     else
-                    	LogLine(sprintf("%s plugin failed to find match for regex '%s' for tag '%s' with value '%s' as expected.", $this->JobSiteName, $propertyRegEx, getArrayValuesAsString($arrTag), $ret), C__DISPLAY_WARNING__);
+                    	LogDebug(sprintf("%s plugin failed to find match for regex '%s' for tag '%s' with value '%s' as expected.", $this->JobSiteName, $propertyRegEx, getArrayDebugOutput($arrTag), $ret));
                 }
             }
         }
@@ -516,7 +514,7 @@ class SimplePlugin extends BaseJobsSite
      *
      * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
      *
-     * @return array|null|void
+     * @return array|null
      * @throws \Exception
      */
     function parseJobsListForPage(SimpleHTMLHelper $objSimpHTML)
