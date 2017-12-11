@@ -88,7 +88,7 @@ const C__JOB_ITEMCOUNT_STARTSATZERO__ = 0x8000;
 //************************************************************************
 
 const C__TOTAL_ITEMS_UNKNOWN__ = 1111;
-const C_JOB_MAX_RESULTS_PER_SEARCH = C__TOTAL_ITEMS_UNKNOWN__;
+const C_JOB_MAX_RESULTS_PER_SEARCH = 1000;
 
 define('TITLE_NEG_KWD_MATCH', 'No (Title Excluded Via Negative Keyword)');
 define('NO_TITLE_MATCHES', 'No (Title Did Not Match Search Keywords))');
