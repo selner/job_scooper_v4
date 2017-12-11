@@ -43,7 +43,7 @@ services:
     volumes:
       - $JOBSCOOPER_VOLDIR:/var/local/jobs_scooper
       - $JOBSCOOPER_VOLDIR:/private/var/local/jobs_scooper
-      - $JOBSCOOPER_VOLDIR:/configs/propel/macbook/propel.ini:/private/var/local/jobs_scooper/configs/propel.ini
+      - JOBSCOOPER_PROPEL_INI:/private/var/local/jobs_scooper/configs/propel.ini
     container_name: js4-$CONTAINER_TAG
     links:
       - "mysql_server"
