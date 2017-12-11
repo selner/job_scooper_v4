@@ -22,7 +22,10 @@ RUN apt-get install -y \
     sqlite3 \
     mysql-client \
     vim \
-    sendmail 
+    sendmail \
+    tzdata \
+    openntpd
+
 
 #######################################################
 ##
@@ -48,6 +51,15 @@ RUN apt-get update && apt-get install -y \
     php5-xsl \
     php5-mysql \
     php5-sqlite
+
+
+#######################################################
+##
+## Set the timezone on the image
+##
+#######################################################
+ENV TZ=America/Los_Angeles
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 #######################################################
 ##
