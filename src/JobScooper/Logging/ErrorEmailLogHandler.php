@@ -57,12 +57,24 @@ class ErrorEmailLogHandler extends MailHandler
         return new HtmlFormatter();
     }
 
-    private function _getUserSearchSiteRunContent()
+	/**
+	 * @return mixed
+	 * @throws \Exception
+	 */
+	private function _getUserSearchSiteRunContent()
     {
         $renderer = loadTemplate(__ROOT__.'/assets/templates/partials/html_email_body_search_config_details.tmpl');
 
         $data = getAllConfigurationSettings();
-        return $renderer($data);
+        $arrData = objectToArray($data);
+        $flatData = array();
+        foreach($arrData as $key => $value)
+        	if(is_array($value))
+	        	$flatData[$key] = flattenWithKeys($value);
+            else
+	            $flatData[$key] = $value;
+
+        return $renderer($flatData);
 
     }
 }

@@ -476,6 +476,32 @@ function array_get_element(&$path, $arr) {
 }
 
 /**
+ * @param $d
+ *
+ * @return array
+ */
+function objectToArray($d) {
+	if (is_object($d)) {
+		// Gets the properties of the given object
+		// with get_object_vars function
+		$d = get_object_vars($d);
+	}
+
+	if (is_array($d)) {
+		/*
+		* Return array converted to object
+		* Using __FUNCTION__ (Magic constant)
+		* for recursive call
+		*/
+		return array_map(__FUNCTION__, $d);
+	}
+	else {
+		// Return array
+		return $d;
+	}
+}
+
+/**
  *
  * Some INI files use dot or colon notation to define section and subkeys.  Convert
  * any keys with dot notion to be subarray elements of the overall config array.
