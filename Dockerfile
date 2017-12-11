@@ -20,8 +20,9 @@ RUN apt-get install -y \
     apt-transport-https \
     apt-utils \
     sqlite3 \
+    mysql-client \
     vim \
-    sendmail
+    sendmail 
 
 #######################################################
 ##
@@ -45,6 +46,7 @@ RUN apt-get update && apt-get install -y \
     php5-intl \
     php5-mcrypt \
     php5-xsl \
+    php5-mysql \
     php5-sqlite
 
 #######################################################
