@@ -25,15 +25,15 @@ services:
     image: mysql
     container_name: js4-mysql_server.$CONTAINER_TAG
     volumes:
-      - /private/var/local/jobs_scooper/docker_mysql:/var/lib/mysql
+      - $JOBSCOOPER_VOLDIR/docker_mysql:/var/lib/mysql
 #           - C:\var\local\jobs_scooper\docker_mysql:/var/lib/mysql
     ports:
       - 3901:3306
 
   js4:
-    build:
-        context: ./
-        dockerfile: Dockerfile
+#    build:
+#        context: ./
+#        dockerfile: Dockerfile
     environment:
       - BRANCH
       - JOBSCOOPER_OUTPUT
@@ -41,12 +41,9 @@ services:
       - CONTAINER_TAG
     image: "${REPONAME}selner/js4-${BRANCH}:latest"
     volumes:
-      - /private/var/local/jobs_scooper:/var/local/jobs_scooper
-      - /private/var/local/jobs_scooper:/private/var/local/jobs_scooper
-      - /private/var/local/jobs_scooper/configs/propel/macbook/propel.ini:/private/var/local/jobs_scooper/configs/propel.ini
-##            - C:\var\local\jobs_scooper_branch:/var/local/jobs_scooper
-##            - C:\var\local\jobs_scooper_branch:/private/var/local/jobs_scooper
-##            - C:\var\local\jobs_scooper_branch\configs\propel\devwin10\propel.ini:/private/var/local/jobs_scooper/configs/propel.ini
+      - $JOBSCOOPER_VOLDIR:/var/local/jobs_scooper
+      - $JOBSCOOPER_VOLDIR:/private/var/local/jobs_scooper
+      - $JOBSCOOPER_VOLDIR:/configs/propel/macbook/propel.ini:/private/var/local/jobs_scooper/configs/propel.ini
     container_name: js4-$CONTAINER_TAG
     links:
       - "mysql_server"
