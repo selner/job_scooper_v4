@@ -1,0 +1,62 @@
+version: '2.1'
+
+services:
+  selenium:
+    container_name: js4-selenium.$CONTAINER_TAG
+    image: selenium/standalone-firefox:latest
+    ports:
+      - 4448:4448
+      - 5901:5900
+    shm_size: 2g
+    environment:
+      - "SE_OPTS=-port 4448"
+      - "JAVA_OPTS=-Xmx512m"
+      - BRANCH
+      - JOBSCOOPER_OUTPUT
+      - REPONAME
+      - CONTAINER_TAG
+
+  mysql_server:
+    environment:
+      - BRANCH
+      - JOBSCOOPER_OUTPUT
+      - REPONAME
+      - CONTAINER_TAG
+    image: mysql
+    container_name: js4-mysql_server.$CONTAINER_TAG
+    volumes:
+      - /private/var/local/jobs_scooper/docker_mysql:/var/lib/mysql
+#           - C:\var\local\jobs_scooper\docker_mysql:/var/lib/mysql
+    ports:
+      - 3901:3306
+
+  js4:
+    build:
+        context: ./
+        dockerfile: Dockerfile
+    environment:
+      - BRANCH
+      - JOBSCOOPER_OUTPUT
+      - REPONAME
+      - CONTAINER_TAG
+    image: "${REPONAME}selner/js4-${BRANCH}:latest"
+    volumes:
+      - /private/var/local/jobs_scooper:/var/local/jobs_scooper
+      - /private/var/local/jobs_scooper:/private/var/local/jobs_scooper
+      - /private/var/local/jobs_scooper/configs/propel/macbook/propel.ini:/private/var/local/jobs_scooper/configs/propel.ini
+##            - C:\var\local\jobs_scooper_branch:/var/local/jobs_scooper
+##            - C:\var\local\jobs_scooper_branch:/private/var/local/jobs_scooper
+##            - C:\var\local\jobs_scooper_branch\configs\propel\devwin10\propel.ini:/private/var/local/jobs_scooper/configs/propel.ini
+    container_name: js4-$CONTAINER_TAG
+    links:
+      - "mysql_server"
+      - "selenium"
+    depends_on:
+      - "mysql_server"
+      - "selenium"
+
+volumes:
+  mysql_server:
+      driver: "local"
+#  js4:
+#      driver: "local"
