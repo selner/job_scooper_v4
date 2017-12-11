@@ -477,6 +477,10 @@ class ConfigBuilder
 	    	$user = User::getCurrentUser();
 
 	    	$keyword_list = $iniKeywordSetup['keywords'];
+		    if(!array_key_exists('key', $iniKeywordSetup) ||
+			    empty($iniKeywordSetup['key']))
+			    $iniKeywordSetup['key'] = cleanupSlugPart($keyword_list);
+
 		    if(is_string($keyword_list))
 			    $keyword_list = preg_split("/\s*,\s*/", $keyword_list);
 
@@ -492,7 +496,7 @@ class ConfigBuilder
 		        ->filterByKeywords($final_keywd_list)
 			    ->findOneOrCreate();
 
-		    $kwdset->setSearchKeyFromConfig(!empty($iniKeywordSetup['key'] ? $iniKeywordSetup['key'] : cleanupSlugPart(join(" ", $final_keywd_list))));
+		    $kwdset->setSearchKeyFromConfig($iniKeywordSetup['key']);
 		    $kwdset->setKeywords($final_keywd_list);
 		    $kwdset->setUserFromUKS($user);
 		    $kwdset->save();
