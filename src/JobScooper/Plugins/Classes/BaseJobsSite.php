@@ -111,8 +111,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
 			$siteKey = strtolower(str_ireplace("Plugin", "", $className));
 			if (array_key_exists($siteKey, $arrSiteList) === true)
 				$this->JobSiteKey = $siteKey;
-			return $this->JobSiteKey;
 		}
+		return $this->JobSiteKey;
 	}
 
 
