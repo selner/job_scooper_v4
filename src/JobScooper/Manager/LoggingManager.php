@@ -43,8 +43,11 @@ Class JobsErrorHandler extends ErrorHandler
 {
     public function handleException($e)
     {
-        handleException($e, "Uncaught Exception: %s");
-        exit(255);
+        if(empty($GLOBALS['logger']))
+	        $GLOBALS['logger'] = getChannelLogger("default");
+        LogError(sprintf("Uncaught Exception: %s", $e->getMessage()));
+//        exit(255);
+	    handleException($e, "Uncaught Exception: %s");
     }
 
 }
@@ -98,6 +101,9 @@ Class LoggingManager extends \Monolog\Logger
     {
         if( is_null($channel) || !in_array($channel, array_keys($this->_loggers)))
             $channel = 'default';
+
+        if(empty($this->_loggers[$channel]))
+	        $this->_loggers[$channel] = new LoggingManager($channel);
 
         return $this->_loggers[$channel];
     }
