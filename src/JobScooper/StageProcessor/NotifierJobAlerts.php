@@ -362,7 +362,7 @@ class NotifierJobAlerts extends JobsMailSender
         $filePath = getDefaultJobsOutputFileName("", $strFileNameBase, $strExt, "_", 'notifications');
 
 
-        if(countJobRecords($arrJobsList) == 0) return $arrJobsList;
+        if(countAssociativeArrayValues($arrJobsList) == 0) return $arrJobsList;
 
         $this->writeRunsJobsToFile($filePath, $arrJobsList);
 
@@ -447,12 +447,12 @@ class NotifierJobAlerts extends JobsMailSender
         foreach($arrJobsitesRecentlyUpdated as $plugin) {
             $jobsiteKey = $plugin->getJobSiteKey();
             $arrPluginJobMatches  = array();
-            if ($arrMatchedJobs != null && is_array($arrMatchedJobs) && countJobRecords($arrMatchedJobs) > 0) {
+            if ($arrMatchedJobs != null && is_array($arrMatchedJobs) && countAssociativeArrayValues($arrMatchedJobs) > 0) {
                 $arrPluginJobMatches = array_filter($arrMatchedJobs, function ($var) use ($jobsiteKey) { return (strcasecmp($var->getJobPostingFromUJM()->getJobSiteKey(), $jobsiteKey) == 0); } );
             }
 
             $arrPluginExcludesJobs  = array();
-            if ($arrExcludedJobs != null && is_array($arrExcludedJobs) && countJobRecords($arrExcludedJobs) > 0) {
+            if ($arrExcludedJobs != null && is_array($arrExcludedJobs) && countAssociativeArrayValues($arrExcludedJobs) > 0) {
                 $arrPluginExcludesJobs = array_filter($arrExcludedJobs, function ($var) use ($jobsiteKey) { return (strcasecmp($var->getJobPostingFromUJM()->getJobSiteKey(), $jobsiteKey) == 0); } );
             }
 
@@ -667,7 +667,7 @@ class NotifierJobAlerts extends JobsMailSender
     function sortJobsCSVArrayByCompanyRole(&$arrJobList)
     {
 
-        if (countJobRecords($arrJobList) > 0) {
+        if (countAssociativeArrayValues($arrJobList) > 0) {
             $arrFinalJobIDs_SortedByCompanyRole = array();
             $finalJobIDs_CompanyRole = array_column($arrJobList, 'KeyCompanyAndTitle', 'KeySiteAndPostId');
             foreach (array_keys($finalJobIDs_CompanyRole) as $key) {

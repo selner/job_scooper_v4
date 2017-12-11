@@ -16,24 +16,6 @@
  */
 
 
-
-function array_find_closest_key_match($search, $arr) {
-    $closest = null;
-    $closestScore = null;
-    $percent = 0;
-    foreach (array_keys($arr) as $item) {
-        similar_text($search, $item, $percent);
-        if($percent > $closestScore) {
-            $closestScore = $percent;
-            $closest = $item;
-        }
-//        if ($closest === null || abs($search - $closest) > abs($item - $search)) {
-//            $closest = $item;
-//        }
-    }
-    return $closest;
-}
-
 function countAssociativeArrayValues($arrToCount)
 {
     if ($arrToCount == null || !is_array($arrToCount)) {
@@ -52,11 +34,11 @@ function countAssociativeArrayValues($arrToCount)
     return max($nValues, $count);
 }
 
-function countJobRecords($arrJobs)
-{
-    return countAssociativeArrayValues($arrJobs);
-}
-
+/**
+ * @param $arr
+ *
+ * @return string|void
+ */
 function getArrayDebugOutput($arr)
 {
 	try
@@ -70,6 +52,16 @@ function getArrayDebugOutput($arr)
 	return $dbg;
 }
 
+/**
+ * @param        $arrItem
+ * @param        $key
+ * @param bool   $fIsFirstItem
+ * @param string $strDelimiter
+ * @param string $strIntro
+ * @param bool   $fIncludeKey
+ *
+ * @return string
+ */
 function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strDelimiter = "", $strIntro = "", $fIncludeKey = true)
 {
     $strReturn = "";
@@ -101,18 +93,12 @@ function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strD
     return $strReturn;
 }
 
-function cloneArray($source, $arrDontCopyTheseKeys = array())
-{
-    $retDetails = array_copy($source);
-
-    foreach ($arrDontCopyTheseKeys as $key) {
-        unset($retDetails[$key]);
-    }
-
-    return $retDetails;
-}
-
-
+/**
+ * @param $callback
+ * @param $array
+ *
+ * @return array
+ */
 function array_mapk($callback, $array)
 {
     $newArray = array();
@@ -124,6 +110,11 @@ function array_mapk($callback, $array)
     return $newArray;
 }
 
+/**
+ * @param $input
+ *
+ * @return array
+ */
 function array_unique_multidimensional($input)
 {
     $serialized = array_map('serialize', $input);
@@ -131,6 +122,14 @@ function array_unique_multidimensional($input)
     return array_intersect_key($input, $unique);
 }
 
+/**
+ * @param        $arrDetails
+ * @param string $strDelimiter
+ * @param string $strIntro
+ * @param bool   $fIncludeKey
+ *
+ * @return string
+ */
 function getArrayValuesAsString($arrDetails, $strDelimiter = ", ", $strIntro = "", $fIncludeKey = true)
 {
     $strReturn = "";
@@ -199,6 +198,14 @@ function in_string_array($haystack, $needle)
 }
 
 
+/**
+ * @param array  $array
+ * @param string $childPrefix
+ * @param string $root
+ * @param array  $result
+ *
+ * @return array
+ */
 function flattenWithKeys(array $array, $childPrefix = '.', $root = '', $result = array()) {
     //if(!is_array($array)) return $result;
 
@@ -255,6 +262,10 @@ function array_merge_recursive_distinct ( array &$array1, array &$array2 )
     return $merged;
 }
 
+/**
+ * @param                              $arr
+ * @param \Propel\Runtime\Map\TableMap $tablemap
+ */
 function updateColumnsForCSVFlatArray(&$arr, \Propel\Runtime\Map\TableMap $tablemap)
 {
     foreach(array_keys($arr) as $key) {
@@ -272,11 +283,23 @@ function updateColumnsForCSVFlatArray(&$arr, \Propel\Runtime\Map\TableMap $table
     }
 }
 
+/**
+ * @param array $haystack
+ * @param array $needle
+ *
+ * @return array
+ */
 function array_subset(array $haystack, array $needle)
 {
     return array_intersect_key($haystack, array_flip($needle));
 }
 
+/**
+ * @param array $list
+ * @param array $keysToReturn
+ *
+ * @return array
+ */
 function array_from_orm_object_list_by_array_keys(array $list, array $keysToReturn)
 {
     return array_map(function ($v) use ($keysToReturn) {return array_subset($v->toArray(), $keysToReturn);} , $list);
@@ -324,6 +347,12 @@ function substr_count_multi($subject = "", array $patterns = array(), &$findings
     return !(0 === sizeof($findings));
 }
 
+/**
+ * @param $key
+ * @param $arr
+ *
+ * @return null
+ */
 function getArrayItem($key, $arr)
 {
     $ret = null;
@@ -336,6 +365,12 @@ function getArrayItem($key, $arr)
     return $ret;
 }
 
+/**
+ * @param $destArray
+ * @param $destKey
+ * @param $sourceArray
+ * @param $sourceKey
+ */
 function setArrayItem(&$destArray, $destKey, $sourceArray, $sourceKey)
 {
     $ret = null;
@@ -347,8 +382,9 @@ function setArrayItem(&$destArray, $destKey, $sourceArray, $sourceKey)
 }
 
 
-
-
+/**
+ * @return array
+ */
 function getEmptyJobListingRecord()
 {
     return array(
@@ -365,7 +401,12 @@ function getEmptyJobListingRecord()
 }
 
 
-function array_copy( array $array ) {
+/**
+ * @param array $array
+ *
+ * @return array
+ */
+function array_copy(array $array ) {
     $result = array();
     foreach( $array as $key => $val ) {
         if( is_array( $val ) ) {
@@ -379,7 +420,13 @@ function array_copy( array $array ) {
     return $result;
 }
 
-function substr_count_array( $haystack, $needle ) {
+/**
+ * @param $haystack
+ * @param $needle
+ *
+ * @return int
+ */
+function substr_count_array($haystack, $needle ) {
     $count = 0;
     if(!is_array($needle))
     {
@@ -392,7 +439,11 @@ function substr_count_array( $haystack, $needle ) {
 }
 
 
-
+/**
+ * @param $a
+ *
+ * @return bool
+ */
 function is_array_multidimensional($a)
 {
     if(!is_array($a)) return false;
@@ -400,7 +451,14 @@ function is_array_multidimensional($a)
     return FALSE;
 }
 
-function my_merge_add_new_keys( $arr1, $arr2 )
+/**
+ * @param $arr1
+ * @param $arr2
+ *
+ * @return array
+ * @throws \Exception
+ */
+function my_merge_add_new_keys($arr1, $arr2 )
 {
     // check if inputs are really arrays
     if (!is_array($arr1) || !is_array($arr2)) {
@@ -462,12 +520,23 @@ function array_set_element(&$path, $data) {
 	return ($key = array_pop($path)) ? array_set_element($path, array($key=>$data)) : $data;
 }
 
+/**
+ * @param $arr
+ * @param $path
+ * @param $value
+ */
 function array_add_element(&$arr, $path, $value)
 {
 	$newArrVal = array_set_element($path, $value);
 	$arr = array_merge_recursive_distinct($arr, $newArrVal);
 }
 
+/**
+ * @param $path
+ * @param $arr
+ *
+ * @return mixed
+ */
 function array_get_element(&$path, $arr) {
 	if(is_string($path))
 		$path = array_reverse(preg_split("/\s*[\.:]\s*/", $path));
@@ -534,6 +603,11 @@ function convertDotNotation(&$config)
 }
 
 
+/**
+ * @param $root
+ * @param $keyPath
+ * @param $value
+ */
 function setGlobalSetting($root, $keyPath, $value)
 {
 	doGlobalSettingExists($root);
@@ -542,6 +616,12 @@ function setGlobalSetting($root, $keyPath, $value)
 	ksort($GLOBALS[$root]);
 }
 
+/**
+ * @param      $root
+ * @param null $keyPath
+ *
+ * @return mixed
+ */
 function getGlobalSetting($root, $keyPath=null)
 {
 	doGlobalSettingExists($root);
@@ -553,6 +633,9 @@ function getGlobalSetting($root, $keyPath=null)
 	return array_get_element($keyPath, $GLOBALS[$root]);
 }
 
+/**
+ * @param $root
+ */
 function doGlobalSettingExists($root)
 {
 	if(!array_key_exists($root, $GLOBALS))
@@ -562,16 +645,28 @@ function doGlobalSettingExists($root)
 const JOBSCOOPER_CONFIGSETTING_ROOT = "JSCOOP";
 const JOBSCOOPER_CACHES_ROOT = "JSCOOP_CACHES";
 
+/**
+ * @param $keyPath
+ * @param $value
+ */
 function setConfigurationSetting($keyPath, $value)
 {
 	setGlobalSetting($root=JOBSCOOPER_CONFIGSETTING_ROOT, $keyPath, $value);
 }
 
+/**
+ * @param $keyPath
+ *
+ * @return mixed
+ */
 function getConfigurationSetting($keyPath)
 {
 	return getGlobalSetting(JOBSCOOPER_CONFIGSETTING_ROOT, $keyPath);
 }
 
+/**
+ * @return mixed
+ */
 function getAllConfigurationSettings()
 {
 	doGlobalSettingExists(JOBSCOOPER_CONFIGSETTING_ROOT);
@@ -579,16 +674,32 @@ function getAllConfigurationSettings()
 	return getGlobalSetting(JOBSCOOPER_CONFIGSETTING_ROOT);
 }
 
+/**
+ * @param $cacheName
+ * @param $keyPath
+ * @param $value
+ */
 function setCacheItem($cacheName, $keyPath, $value)
 {
 	setGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName.".".$keyPath, $value);
 }
 
+/**
+ * @param $cacheName
+ * @param $keyPath
+ *
+ * @return mixed
+ */
 function getCacheItem($cacheName, $keyPath)
 {
 	return getGlobalSetting(JOBSCOOPER_CACHES_ROOT, $cacheName.".".$keyPath);
 }
 
+/**
+ * @param $cacheName
+ *
+ * @return mixed
+ */
 function getCacheAsArray($cacheName)
 {
 	doGlobalSettingExists(JOBSCOOPER_CACHES_ROOT);
@@ -596,6 +707,10 @@ function getCacheAsArray($cacheName)
 	return getGlobalSetting(JOBSCOOPER_CACHES_ROOT, $cacheName);
 }
 
+/**
+ * @param $cacheName
+ * @param $value
+ */
 function setAsCacheData($cacheName, $value)
 {
 	setGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName, $value);

@@ -575,7 +575,7 @@ class SimplePlugin extends BaseJobsSite
             handleException(new \Exception("Could not find matching job elements in HTML for " . $strNodeMatch . " in plugin " . $this->JobSiteName), null, true);
         }
 
-        LogLine($this->JobSiteName . " returned " . countJobRecords($ret) . " jobs from page.", \C__DISPLAY_ITEM_DETAIL__);
+        LogLine($this->JobSiteName . " returned " . countAssociativeArrayValues($ret) . " jobs from page.", \C__DISPLAY_ITEM_DETAIL__);
 
         return $ret;
     }
