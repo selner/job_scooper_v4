@@ -43,8 +43,11 @@ Class JobsErrorHandler extends ErrorHandler
 {
     public function handleException($e)
     {
-        handleException($e, "Uncaught Exception: %s");
-        exit(255);
+	    if(empty($GLOBALS['logger']))
+		    $GLOBALS['logger'] = getChannelLogger("default");
+	    LogError(sprintf("Uncaught Exception: %s", $e->getMessage()));
+	    handleException($e, "Uncaught Exception: %s");
+//        exit(255);
     }
 
 }
