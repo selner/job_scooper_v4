@@ -18,6 +18,7 @@ services:
 
   mysql_server:
     environment:
+      - MYSQL_ROOT_PASSWORD
       - BRANCH
       - JOBSCOOPER_OUTPUT
       - REPONAME
