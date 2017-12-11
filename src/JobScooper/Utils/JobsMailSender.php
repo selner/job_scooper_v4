@@ -71,19 +71,28 @@ class JobsMailSender extends PHPMailer
         // Add initial email address header values
         //
 	    $alerts_users = getConfigurationSetting("alerts." . $emailKind);
-        $strToAddys = "";
-        $strBCCAddys = "";
-        foreach($alerts_users as $kind => $user) {
-        	switch($kind)
-	        {
-		        case "from":
-			        $this->setFrom($user->getEmailAddress(), $user->getName());
+        if(empty($alerts_users))
+        {
+        	//
+        	// hardcoded in the case where we were unable to load the email addresses for some reason
+	        //
+	        $this->addAnAddress("to", "dev@bryanselner.com", "JobScooper Deveopers");
+	        $this->setFrom("dev@bryanselner.com", "JobScooper Deveopers");
+	        $this->addReplyTo("dev@bryanselner.com", "JobScooper Deveopers" );
 
-		        	break;
+        }
+        else {
+	        foreach ($alerts_users as $kind => $user) {
+		        switch ($kind) {
+			        case "from":
+				        $this->setFrom($user->getEmailAddress(), $user->getName());
 
-		        default:
-			        $this->addAnAddress($kind, $user->getEmailAddress(), $user->getName());
+				        break;
 
+			        default:
+				        $this->addAnAddress($kind, $user->getEmailAddress(), $user->getName());
+
+		        }
 	        }
         }
 
