@@ -40,9 +40,6 @@ class StageManager
 
             $this->classConfig->initialize();
 
-            if (empty($GLOBALS['logger']))
-                $GLOBALS['logger'] = new LoggingManager(C__APPNAME__);
-
 
         } catch (\Exception $ex) {
             LogLine("Unable to start Stage Manager: " . $ex->getMessage());

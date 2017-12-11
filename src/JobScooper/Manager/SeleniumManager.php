@@ -153,9 +153,8 @@ class SeleniumManager extends PropertyObject
                     // Details: https://github.com/SeleniumHQ/selenium/issues/2852
                     //
                     $cmd = 'pid=`ps -eo pid,args | grep selenium-server | grep -v grep | cut -c1-6`; if [ "$pid" ]; then kill -9 $pid; echo "Killed Selenium process #"$pid; else echo "Selenium server is not running."; fi';
-                    if (isset($GLOBALS['logger'])) {
-                        LogLine("Killing Selenium server process with command \"" . $cmd . "\"", \C__DISPLAY_ITEM_DETAIL__);
-                    }
+                    LogLine("Killing Selenium server process with command \"" . $cmd . "\"", \C__DISPLAY_ITEM_DETAIL__);
+
                     $res = doExec($cmd);
                     LogLine("Killing Selenium server result: " . $res, \C__DISPLAY_ITEM_RESULT__);
                 } catch (Exception $ex) {

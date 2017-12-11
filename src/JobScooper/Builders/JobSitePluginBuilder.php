@@ -123,12 +123,14 @@ class JobSitePluginBuilder
 				}
 			}
 		}
-		JobSitePluginBuilder::setSitesAsExcluded($sitesOutOfSearchArea);
-		LogLine("Setting " . getArrayValuesAsString(array_keys($sitesOutOfSearchArea)) . " as excluded because they do not supoprt any of the countries required for the user's searches (" . $ccRun . ").");
 
+		if(!empty($sitesOutOfSearchArea)) {
+			JobSitePluginBuilder::setSitesAsExcluded($sitesOutOfSearchArea);
+			LogLine("Skipping searches for " . getArrayDebugOutput(array_keys($sitesOutOfSearchArea)) . " because they do not cover country codes = (" . $ccRun . ").");
+			}
 	}
 
-		protected $_renderer = null;
+	protected $_renderer = null;
     protected $_dirPluginsRoot = null;
     protected $_dirJsonConfigs = null;
     protected $_configJsonFiles = array();
@@ -355,8 +357,7 @@ class JobSitePluginBuilder
             }
         }
 
-        if (isset($GLOBALS['logger']))
-            LogLine("Loaded JSON config for new plugin: " . $pluginData['JobSiteName'], \C__DISPLAY_ITEM_DETAIL__);
+        LogLine("Loaded JSON config for new plugin: " . $pluginData['JobSiteName'], \C__DISPLAY_ITEM_DETAIL__);
 
         return $pluginData;
 

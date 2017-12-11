@@ -343,9 +343,7 @@ class ConfigBuilder
                             if (!is_array($gso)) {
                                 $gso = array($gso => $gso);
                             }
-
-                            $excludedSiteList = array_intersect_key($allJobSitesByKey, $gso);
-                            JobSitePluginBuilder::setSitesAsExcluded($setExcluded=$excludedSiteList);
+							setConfigurationSetting("config_excluded_sites", $gso);
                             break;
 
                         default:
