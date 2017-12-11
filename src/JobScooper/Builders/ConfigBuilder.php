@@ -237,15 +237,20 @@ class ConfigBuilder
     {
 	    $cfgDatabase = null;
 	    $cfgSettingsFile = $this->_getSetting("propel.configuration_file");
-	    LogLine("Loading Propel configuration file: " . $cfgSettingsFile);
-	    $propelCfg = new ConfigurationManager($cfgSettingsFile);
-	    $cfgDatabase = $propelCfg->getConfigProperty('database.connections');
-	    if(!empty($cfgDatabase)) {
-		    LogLine("Using Propel Connection Settings from Propel config: " . getArrayDebugOutput($cfgDatabase));
+	    if(!empty($cfgSettingsFile)) {
+		    LogLine("Loading Propel configuration file: " . $cfgSettingsFile);
+		    $propelCfg = new ConfigurationManager($cfgSettingsFile);
+		    $cfgDatabase = $propelCfg->getConfigProperty('database.connections');
+		    if (!empty($cfgDatabase)) {
+			    LogLine("Using Propel Connection Settings from Propel config: " . getArrayDebugOutput($cfgDatabase));
+		    }
 	    }
-	    else {
+
+	    if (empty($cfgDatabase))
+	    {
 		    $cfgDatabase = $this->_getSetting("propel.database.connections");
-		    LogLine("Using Propel Connection Settings from Jobscooper Config: " . getArrayDebugOutput($cfgDatabase));
+		    if(!empty($cfgDatabase))
+			    LogLine("Using Propel Connection Settings from Jobscooper Config: " . getArrayDebugOutput($cfgDatabase));
 	    }
 
 	    if (empty($cfgDatabase))
