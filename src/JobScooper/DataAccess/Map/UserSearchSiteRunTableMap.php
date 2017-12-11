@@ -278,7 +278,7 @@ class UserSearchSiteRunTableMap extends TableMap
     0 => ':user_search_key',
     1 => ':user_search_key',
   ),
-), 'CASCADE', null, null, false);
+), 'CASCADE', 'CASCADE', null, false);
         $this->addRelation('UserFromUSSR', '\\JobScooper\\DataAccess\\User', RelationMap::MANY_TO_ONE, array (
   0 =>
   array (
@@ -292,7 +292,7 @@ class UserSearchSiteRunTableMap extends TableMap
     0 => ':geolocation_id',
     1 => ':geolocation_id',
   ),
-), 'CASCADE', null, null, false);
+), 'CASCADE', 'CASCADE', null, false);
     } // buildRelations()
 
     /**

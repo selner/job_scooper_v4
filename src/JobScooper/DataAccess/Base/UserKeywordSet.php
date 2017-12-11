@@ -826,17 +826,12 @@ abstract class UserKeywordSet implements ActiveRecordInterface
      * method.  This method wraps all precipitate database operations in a
      * single transaction.
      *
-     * Since this table was configured to reload rows on update, the object will
-     * be reloaded from the database if an UPDATE operation is performed (unless
-     * the $skipReload parameter is TRUE).
-     *
      * @param      ConnectionInterface $con
-     * @param      boolean $skipReload Whether to skip the reload for this object from database.
      * @return int             The number of rows affected by this insert/update and any referring fk objects' save() operations.
      * @throws PropelException
      * @see doSave()
      */
-    public function save(ConnectionInterface $con = null, $skipReload = false)
+    public function save(ConnectionInterface $con = null)
     {
         if ($this->isDeleted()) {
             throw new PropelException("You cannot save an object that has been deleted.");
@@ -850,14 +845,14 @@ abstract class UserKeywordSet implements ActiveRecordInterface
             $con = Propel::getServiceContainer()->getWriteConnection(UserKeywordSetTableMap::DATABASE_NAME);
         }
 
-        return $con->transaction(function () use ($con, $skipReload) {
+        return $con->transaction(function () use ($con) {
             $ret = $this->preSave($con);
             $isInsert = $this->isNew();
             // sluggable behavior
 
             if ($this->isColumnModified(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY) && $this->getUserKeywordSetKey()) {
                 $this->setUserKeywordSetKey($this->makeSlugUnique($this->getUserKeywordSetKey()));
-            } else {
+            } elseif (!$this->getUserKeywordSetKey()) {
                 $this->setUserKeywordSetKey($this->createSlug());
             }
             if ($isInsert) {
@@ -866,7 +861,7 @@ abstract class UserKeywordSet implements ActiveRecordInterface
                 $ret = $ret && $this->preUpdate($con);
             }
             if ($ret) {
-                $affectedRows = $this->doSave($con, $skipReload);
+                $affectedRows = $this->doSave($con);
                 if ($isInsert) {
                     $this->postInsert($con);
                 } else {
@@ -889,18 +884,15 @@ abstract class UserKeywordSet implements ActiveRecordInterface
      * All related objects are also updated in this method.
      *
      * @param      ConnectionInterface $con
-     * @param      boolean $skipReload Whether to skip the reload for this object from database.
      * @return int             The number of rows affected by this insert/update and any referring fk objects' save() operations.
      * @throws PropelException
      * @see save()
      */
-    protected function doSave(ConnectionInterface $con, $skipReload = false)
+    protected function doSave(ConnectionInterface $con)
     {
         $affectedRows = 0; // initialize var to track total num of affected rows
         if (!$this->alreadyInSave) {
             $this->alreadyInSave = true;
-
-            $reloadObject = false;
 
             // We call the save method on the following object(s) if they
             // were passed to this object by their corresponding set
@@ -921,9 +913,6 @@ abstract class UserKeywordSet implements ActiveRecordInterface
                     $affectedRows += 1;
                 } else {
                     $affectedRows += $this->doUpdate($con);
-                    if (!$skipReload) {
-                        $reloadObject = true;
-                    }
                 }
                 $this->resetModified();
             }
@@ -986,10 +975,6 @@ abstract class UserKeywordSet implements ActiveRecordInterface
             }
 
             $this->alreadyInSave = false;
-
-            if ($reloadObject) {
-                $this->reload($con);
-            }
 
         }
 

@@ -238,11 +238,11 @@ class GeoLocationTableMap extends TableMap
     0 => ':geolocation_id',
     1 => ':geolocation_id',
   ),
-), 'CASCADE', null, 'UserSearchSiteRuns', false);
-        $this->addRelation('UserFromUS', '\\JobScooper\\DataAccess\\User', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserFromuses');
-        $this->addRelation('UserKeywordSetFromUS', '\\JobScooper\\DataAccess\\UserKeywordSet', RelationMap::MANY_TO_MANY, array(), null, null, 'UserKeywordSetFromuses');
+), 'CASCADE', 'CASCADE', 'UserSearchSiteRuns', false);
+        $this->addRelation('UserFromUS', '\\JobScooper\\DataAccess\\User', RelationMap::MANY_TO_MANY, array(), 'CASCADE', 'CASCADE', 'UserFromuses');
+        $this->addRelation('UserKeywordSetFromUS', '\\JobScooper\\DataAccess\\UserKeywordSet', RelationMap::MANY_TO_MANY, array(), null, 'CASCADE', 'UserKeywordSetFromuses');
         $this->addRelation('JobSiteFromUSSR', '\\JobScooper\\DataAccess\\JobSiteRecord', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'JobSiteFromUSSRs');
-        $this->addRelation('UserSearchFromUSSR', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserSearchFromUSSRs');
+        $this->addRelation('UserSearchFromUSSR', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::MANY_TO_MANY, array(), 'CASCADE', 'CASCADE', 'UserSearchFromUSSRs');
     } // buildRelations()
 
     /**

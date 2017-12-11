@@ -165,7 +165,7 @@ class UserKeywordSetTableMap extends TableMap
     0 => ':user_id',
     1 => ':user_id',
   ),
-), 'CASCADE', null, null, false);
+), 'CASCADE', 'CASCADE', null, false);
         $this->addRelation('UserSearch', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
@@ -177,8 +177,8 @@ class UserKeywordSetTableMap extends TableMap
     0 => ':user_id',
     1 => ':user_id',
   ),
-), null, null, 'UserSearches', false);
-        $this->addRelation('UserFromUS', '\\JobScooper\\DataAccess\\User', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserFromuses');
+), null, 'CASCADE', 'UserSearches', false);
+        $this->addRelation('UserFromUS', '\\JobScooper\\DataAccess\\User', RelationMap::MANY_TO_MANY, array(), 'CASCADE', 'CASCADE', 'UserFromuses');
         $this->addRelation('GeoLocationFromUS', '\\JobScooper\\DataAccess\\GeoLocation', RelationMap::MANY_TO_MANY, array(), null, null, 'GeoLocationFromuses');
     } // buildRelations()
 
@@ -191,7 +191,7 @@ class UserKeywordSetTableMap extends TableMap
     public function getBehaviors()
     {
         return array(
-            'sluggable' => array('slug_column' => 'user_keyword_set_key', 'slug_pattern' => 'user{UserId}_search{SearchKeyFromConfig}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '_', 'permanent' => 'false', 'scope_column' => '', 'unique_constraint' => 'true', ),
+            'sluggable' => array('slug_column' => 'user_keyword_set_key', 'slug_pattern' => 'user{UserId}_search{SearchKeyFromConfig}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '_', 'permanent' => 'true', 'scope_column' => '', 'unique_constraint' => 'true', ),
         );
     } // getBehaviors()
 

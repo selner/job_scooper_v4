@@ -216,7 +216,7 @@ class JobSiteRecordTableMap extends TableMap
     1 => ':jobsite_key',
   ),
 ), 'CASCADE', null, 'UserSearchSiteRuns', false);
-        $this->addRelation('UserSearchFromUSSR', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserSearchFromUSSRs');
+        $this->addRelation('UserSearchFromUSSR', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::MANY_TO_MANY, array(), 'CASCADE', 'CASCADE', 'UserSearchFromUSSRs');
     } // buildRelations()
     /**
      * Method to invalidate the instance pool of all tables related to job_site     * by a foreign key with ON DELETE CASCADE
