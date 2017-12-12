@@ -36,12 +36,6 @@ use Propel\Runtime\Map\TableMap;
  */
 class UserJobMatch extends BaseUserJobMatch
 {
-    public function __construct()
-    {
-        $this->setAppRunId(getConfigurationSetting('app_run_id'));
-        parent::__construct();
-    }
-
     private $delim = ' | ';
 
     private function _setMatchStatus()
@@ -60,9 +54,6 @@ class UserJobMatch extends BaseUserJobMatch
 
         if($this->isOutOfUserArea() === true)
             $this->setIsExcluded(true);
-
-//        if($this->getIsJobMatch() === true)
-            $this->setIsIncludeInNotifications(true);
     }
 
     /**

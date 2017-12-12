@@ -20,31 +20,29 @@ use Propel\Runtime\Exception\PropelException;
  *
  *
  *
+ * @method     ChildUserJobMatchQuery orderByUserJobMatchId($order = Criteria::ASC) Order by the user_job_match_id column
  * @method     ChildUserJobMatchQuery orderByUserId($order = Criteria::ASC) Order by the user_id column
  * @method     ChildUserJobMatchQuery orderByJobPostingId($order = Criteria::ASC) Order by the jobposting_id column
- * @method     ChildUserJobMatchQuery orderByUserJobMatchId($order = Criteria::ASC) Order by the user_job_match_id column
- * @method     ChildUserJobMatchQuery orderByUserNotificationState($order = Criteria::ASC) Order by the user_notification_state column
  * @method     ChildUserJobMatchQuery orderByIsJobMatch($order = Criteria::ASC) Order by the is_job_match column
  * @method     ChildUserJobMatchQuery orderByIsExcluded($order = Criteria::ASC) Order by the is_excluded column
- * @method     ChildUserJobMatchQuery orderByIsIncludeInNotifications($order = Criteria::ASC) Order by the is_include_in_notifications column
+ * @method     ChildUserJobMatchQuery orderByOutOfUserArea($order = Criteria::ASC) Order by the out_of_user_area column
  * @method     ChildUserJobMatchQuery orderByMatchedUserKeywords($order = Criteria::ASC) Order by the matched_user_keywords column
  * @method     ChildUserJobMatchQuery orderByMatchedNegativeTitleKeywords($order = Criteria::ASC) Order by the matched_negative_title_keywords column
  * @method     ChildUserJobMatchQuery orderByMatchedNegativeCompanyKeywords($order = Criteria::ASC) Order by the matched_negative_company_keywords column
- * @method     ChildUserJobMatchQuery orderByOutOfUserArea($order = Criteria::ASC) Order by the out_of_user_area column
- * @method     ChildUserJobMatchQuery orderByAppRunId($order = Criteria::ASC) Order by the app_run_id column
+ * @method     ChildUserJobMatchQuery orderByUserNotificationState($order = Criteria::ASC) Order by the user_notification_state column
+ * @method     ChildUserJobMatchQuery orderBySetByUserSearchSiteRunKey($order = Criteria::ASC) Order by the set_by_user_search_site_run_key column
  *
+ * @method     ChildUserJobMatchQuery groupByUserJobMatchId() Group by the user_job_match_id column
  * @method     ChildUserJobMatchQuery groupByUserId() Group by the user_id column
  * @method     ChildUserJobMatchQuery groupByJobPostingId() Group by the jobposting_id column
- * @method     ChildUserJobMatchQuery groupByUserJobMatchId() Group by the user_job_match_id column
- * @method     ChildUserJobMatchQuery groupByUserNotificationState() Group by the user_notification_state column
  * @method     ChildUserJobMatchQuery groupByIsJobMatch() Group by the is_job_match column
  * @method     ChildUserJobMatchQuery groupByIsExcluded() Group by the is_excluded column
- * @method     ChildUserJobMatchQuery groupByIsIncludeInNotifications() Group by the is_include_in_notifications column
+ * @method     ChildUserJobMatchQuery groupByOutOfUserArea() Group by the out_of_user_area column
  * @method     ChildUserJobMatchQuery groupByMatchedUserKeywords() Group by the matched_user_keywords column
  * @method     ChildUserJobMatchQuery groupByMatchedNegativeTitleKeywords() Group by the matched_negative_title_keywords column
  * @method     ChildUserJobMatchQuery groupByMatchedNegativeCompanyKeywords() Group by the matched_negative_company_keywords column
- * @method     ChildUserJobMatchQuery groupByOutOfUserArea() Group by the out_of_user_area column
- * @method     ChildUserJobMatchQuery groupByAppRunId() Group by the app_run_id column
+ * @method     ChildUserJobMatchQuery groupByUserNotificationState() Group by the user_notification_state column
+ * @method     ChildUserJobMatchQuery groupBySetByUserSearchSiteRunKey() Group by the set_by_user_search_site_run_key column
  *
  * @method     ChildUserJobMatchQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildUserJobMatchQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -79,48 +77,45 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatch findOne(ConnectionInterface $con = null) Return the first ChildUserJobMatch matching the query
  * @method     ChildUserJobMatch findOneOrCreate(ConnectionInterface $con = null) Return the first ChildUserJobMatch matching the query, or a new ChildUserJobMatch object populated from the query conditions when no match is found
  *
+ * @method     ChildUserJobMatch findOneByUserJobMatchId(int $user_job_match_id) Return the first ChildUserJobMatch filtered by the user_job_match_id column
  * @method     ChildUserJobMatch findOneByUserId(int $user_id) Return the first ChildUserJobMatch filtered by the user_id column
  * @method     ChildUserJobMatch findOneByJobPostingId(int $jobposting_id) Return the first ChildUserJobMatch filtered by the jobposting_id column
- * @method     ChildUserJobMatch findOneByUserJobMatchId(int $user_job_match_id) Return the first ChildUserJobMatch filtered by the user_job_match_id column
- * @method     ChildUserJobMatch findOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column
  * @method     ChildUserJobMatch findOneByIsJobMatch(boolean $is_job_match) Return the first ChildUserJobMatch filtered by the is_job_match column
  * @method     ChildUserJobMatch findOneByIsExcluded(boolean $is_excluded) Return the first ChildUserJobMatch filtered by the is_excluded column
- * @method     ChildUserJobMatch findOneByIsIncludeInNotifications(boolean $is_include_in_notifications) Return the first ChildUserJobMatch filtered by the is_include_in_notifications column
+ * @method     ChildUserJobMatch findOneByOutOfUserArea(boolean $out_of_user_area) Return the first ChildUserJobMatch filtered by the out_of_user_area column
  * @method     ChildUserJobMatch findOneByMatchedUserKeywords(array $matched_user_keywords) Return the first ChildUserJobMatch filtered by the matched_user_keywords column
  * @method     ChildUserJobMatch findOneByMatchedNegativeTitleKeywords(array $matched_negative_title_keywords) Return the first ChildUserJobMatch filtered by the matched_negative_title_keywords column
  * @method     ChildUserJobMatch findOneByMatchedNegativeCompanyKeywords(array $matched_negative_company_keywords) Return the first ChildUserJobMatch filtered by the matched_negative_company_keywords column
- * @method     ChildUserJobMatch findOneByOutOfUserArea(boolean $out_of_user_area) Return the first ChildUserJobMatch filtered by the out_of_user_area column
- * @method     ChildUserJobMatch findOneByAppRunId(string $app_run_id) Return the first ChildUserJobMatch filtered by the app_run_id column *
+ * @method     ChildUserJobMatch findOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column
+ * @method     ChildUserJobMatch findOneBySetByUserSearchSiteRunKey(string $set_by_user_search_site_run_key) Return the first ChildUserJobMatch filtered by the set_by_user_search_site_run_key column *
 
  * @method     ChildUserJobMatch requirePk($key, ConnectionInterface $con = null) Return the ChildUserJobMatch by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOne(ConnectionInterface $con = null) Return the first ChildUserJobMatch matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
+ * @method     ChildUserJobMatch requireOneByUserJobMatchId(int $user_job_match_id) Return the first ChildUserJobMatch filtered by the user_job_match_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByUserId(int $user_id) Return the first ChildUserJobMatch filtered by the user_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByJobPostingId(int $jobposting_id) Return the first ChildUserJobMatch filtered by the jobposting_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserJobMatch requireOneByUserJobMatchId(int $user_job_match_id) Return the first ChildUserJobMatch filtered by the user_job_match_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserJobMatch requireOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByIsJobMatch(boolean $is_job_match) Return the first ChildUserJobMatch filtered by the is_job_match column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByIsExcluded(boolean $is_excluded) Return the first ChildUserJobMatch filtered by the is_excluded column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserJobMatch requireOneByIsIncludeInNotifications(boolean $is_include_in_notifications) Return the first ChildUserJobMatch filtered by the is_include_in_notifications column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneByOutOfUserArea(boolean $out_of_user_area) Return the first ChildUserJobMatch filtered by the out_of_user_area column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByMatchedUserKeywords(array $matched_user_keywords) Return the first ChildUserJobMatch filtered by the matched_user_keywords column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByMatchedNegativeTitleKeywords(array $matched_negative_title_keywords) Return the first ChildUserJobMatch filtered by the matched_negative_title_keywords column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByMatchedNegativeCompanyKeywords(array $matched_negative_company_keywords) Return the first ChildUserJobMatch filtered by the matched_negative_company_keywords column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserJobMatch requireOneByOutOfUserArea(boolean $out_of_user_area) Return the first ChildUserJobMatch filtered by the out_of_user_area column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserJobMatch requireOneByAppRunId(string $app_run_id) Return the first ChildUserJobMatch filtered by the app_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneBySetByUserSearchSiteRunKey(string $set_by_user_search_site_run_key) Return the first ChildUserJobMatch filtered by the set_by_user_search_site_run_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildUserJobMatch[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildUserJobMatch objects based on current ModelCriteria
+ * @method     ChildUserJobMatch[]|ObjectCollection findByUserJobMatchId(int $user_job_match_id) Return ChildUserJobMatch objects filtered by the user_job_match_id column
  * @method     ChildUserJobMatch[]|ObjectCollection findByUserId(int $user_id) Return ChildUserJobMatch objects filtered by the user_id column
  * @method     ChildUserJobMatch[]|ObjectCollection findByJobPostingId(int $jobposting_id) Return ChildUserJobMatch objects filtered by the jobposting_id column
- * @method     ChildUserJobMatch[]|ObjectCollection findByUserJobMatchId(int $user_job_match_id) Return ChildUserJobMatch objects filtered by the user_job_match_id column
- * @method     ChildUserJobMatch[]|ObjectCollection findByUserNotificationState(int $user_notification_state) Return ChildUserJobMatch objects filtered by the user_notification_state column
  * @method     ChildUserJobMatch[]|ObjectCollection findByIsJobMatch(boolean $is_job_match) Return ChildUserJobMatch objects filtered by the is_job_match column
  * @method     ChildUserJobMatch[]|ObjectCollection findByIsExcluded(boolean $is_excluded) Return ChildUserJobMatch objects filtered by the is_excluded column
- * @method     ChildUserJobMatch[]|ObjectCollection findByIsIncludeInNotifications(boolean $is_include_in_notifications) Return ChildUserJobMatch objects filtered by the is_include_in_notifications column
+ * @method     ChildUserJobMatch[]|ObjectCollection findByOutOfUserArea(boolean $out_of_user_area) Return ChildUserJobMatch objects filtered by the out_of_user_area column
  * @method     ChildUserJobMatch[]|ObjectCollection findByMatchedUserKeywords(array $matched_user_keywords) Return ChildUserJobMatch objects filtered by the matched_user_keywords column
  * @method     ChildUserJobMatch[]|ObjectCollection findByMatchedNegativeTitleKeywords(array $matched_negative_title_keywords) Return ChildUserJobMatch objects filtered by the matched_negative_title_keywords column
  * @method     ChildUserJobMatch[]|ObjectCollection findByMatchedNegativeCompanyKeywords(array $matched_negative_company_keywords) Return ChildUserJobMatch objects filtered by the matched_negative_company_keywords column
- * @method     ChildUserJobMatch[]|ObjectCollection findByOutOfUserArea(boolean $out_of_user_area) Return ChildUserJobMatch objects filtered by the out_of_user_area column
- * @method     ChildUserJobMatch[]|ObjectCollection findByAppRunId(string $app_run_id) Return ChildUserJobMatch objects filtered by the app_run_id column
+ * @method     ChildUserJobMatch[]|ObjectCollection findByUserNotificationState(int $user_notification_state) Return ChildUserJobMatch objects filtered by the user_notification_state column
+ * @method     ChildUserJobMatch[]|ObjectCollection findBySetByUserSearchSiteRunKey(string $set_by_user_search_site_run_key) Return ChildUserJobMatch objects filtered by the set_by_user_search_site_run_key column
  * @method     ChildUserJobMatch[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  */
@@ -219,7 +214,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_id, jobposting_id, user_job_match_id, user_notification_state, is_job_match, is_excluded, is_include_in_notifications, matched_user_keywords, matched_negative_title_keywords, matched_negative_company_keywords, out_of_user_area, app_run_id FROM user_job_match WHERE user_id = :p0 AND jobposting_id = :p1';
+        $sql = 'SELECT user_job_match_id, user_id, jobposting_id, is_job_match, is_excluded, out_of_user_area, matched_user_keywords, matched_negative_title_keywords, matched_negative_company_keywords, user_notification_state, set_by_user_search_site_run_key FROM user_job_match WHERE user_id = :p0 AND jobposting_id = :p1';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key[0], PDO::PARAM_INT);
@@ -322,6 +317,47 @@ abstract class UserJobMatchQuery extends ModelCriteria
     }
 
     /**
+     * Filter the query on the user_job_match_id column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByUserJobMatchId(1234); // WHERE user_job_match_id = 1234
+     * $query->filterByUserJobMatchId(array(12, 34)); // WHERE user_job_match_id IN (12, 34)
+     * $query->filterByUserJobMatchId(array('min' => 12)); // WHERE user_job_match_id > 12
+     * </code>
+     *
+     * @param     mixed $userJobMatchId The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function filterByUserJobMatchId($userJobMatchId = null, $comparison = null)
+    {
+        if (is_array($userJobMatchId)) {
+            $useMinMax = false;
+            if (isset($userJobMatchId['min'])) {
+                $this->addUsingAlias(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, $userJobMatchId['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($userJobMatchId['max'])) {
+                $this->addUsingAlias(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, $userJobMatchId['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, $userJobMatchId, $comparison);
+    }
+
+    /**
      * Filter the query on the user_id column
      *
      * Example usage:
@@ -408,80 +444,6 @@ abstract class UserJobMatchQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the user_job_match_id column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByUserJobMatchId(1234); // WHERE user_job_match_id = 1234
-     * $query->filterByUserJobMatchId(array(12, 34)); // WHERE user_job_match_id IN (12, 34)
-     * $query->filterByUserJobMatchId(array('min' => 12)); // WHERE user_job_match_id > 12
-     * </code>
-     *
-     * @param     mixed $userJobMatchId The value to use as filter.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
-     */
-    public function filterByUserJobMatchId($userJobMatchId = null, $comparison = null)
-    {
-        if (is_array($userJobMatchId)) {
-            $useMinMax = false;
-            if (isset($userJobMatchId['min'])) {
-                $this->addUsingAlias(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, $userJobMatchId['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($userJobMatchId['max'])) {
-                $this->addUsingAlias(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, $userJobMatchId['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, $userJobMatchId, $comparison);
-    }
-
-    /**
-     * Filter the query on the user_notification_state column
-     *
-     * @param     mixed $userNotificationState The value to use as filter
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
-     */
-    public function filterByUserNotificationState($userNotificationState = null, $comparison = null)
-    {
-        $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
-        if (is_scalar($userNotificationState)) {
-            if (!in_array($userNotificationState, $valueSet)) {
-                throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $userNotificationState));
-            }
-            $userNotificationState = array_search($userNotificationState, $valueSet);
-        } elseif (is_array($userNotificationState)) {
-            $convertedValues = array();
-            foreach ($userNotificationState as $value) {
-                if (!in_array($value, $valueSet)) {
-                    throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $value));
-                }
-                $convertedValues []= array_search($value, $valueSet);
-            }
-            $userNotificationState = $convertedValues;
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE, $userNotificationState, $comparison);
-    }
-
-    /**
      * Filter the query on the is_job_match column
      *
      * Example usage:
@@ -536,15 +498,15 @@ abstract class UserJobMatchQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the is_include_in_notifications column
+     * Filter the query on the out_of_user_area column
      *
      * Example usage:
      * <code>
-     * $query->filterByIsIncludeInNotifications(true); // WHERE is_include_in_notifications = true
-     * $query->filterByIsIncludeInNotifications('yes'); // WHERE is_include_in_notifications = true
+     * $query->filterByOutOfUserArea(true); // WHERE out_of_user_area = true
+     * $query->filterByOutOfUserArea('yes'); // WHERE out_of_user_area = true
      * </code>
      *
-     * @param     boolean|string $isIncludeInNotifications The value to use as filter.
+     * @param     boolean|string $outOfUserArea The value to use as filter.
      *              Non-boolean arguments are converted using the following rules:
      *                * 1, '1', 'true',  'on',  and 'yes' are converted to boolean true
      *                * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
@@ -553,13 +515,13 @@ abstract class UserJobMatchQuery extends ModelCriteria
      *
      * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
      */
-    public function filterByIsIncludeInNotifications($isIncludeInNotifications = null, $comparison = null)
+    public function filterByOutOfUserArea($outOfUserArea = null, $comparison = null)
     {
-        if (is_string($isIncludeInNotifications)) {
-            $isIncludeInNotifications = in_array(strtolower($isIncludeInNotifications), array('false', 'off', '-', 'no', 'n', '0', '')) ? false : true;
+        if (is_string($outOfUserArea)) {
+            $outOfUserArea = in_array(strtolower($outOfUserArea), array('false', 'off', '-', 'no', 'n', '0', '')) ? false : true;
         }
 
-        return $this->addUsingAlias(UserJobMatchTableMap::COL_IS_INCLUDE_IN_NOTIFICATIONS, $isIncludeInNotifications, $comparison);
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_OUT_OF_USER_AREA, $outOfUserArea, $comparison);
     }
 
     /**
@@ -806,55 +768,61 @@ abstract class UserJobMatchQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the out_of_user_area column
+     * Filter the query on the user_notification_state column
      *
-     * Example usage:
-     * <code>
-     * $query->filterByOutOfUserArea(true); // WHERE out_of_user_area = true
-     * $query->filterByOutOfUserArea('yes'); // WHERE out_of_user_area = true
-     * </code>
-     *
-     * @param     boolean|string $outOfUserArea The value to use as filter.
-     *              Non-boolean arguments are converted using the following rules:
-     *                * 1, '1', 'true',  'on',  and 'yes' are converted to boolean true
-     *                * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
-     *              Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
+     * @param     mixed $userNotificationState The value to use as filter
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
      */
-    public function filterByOutOfUserArea($outOfUserArea = null, $comparison = null)
+    public function filterByUserNotificationState($userNotificationState = null, $comparison = null)
     {
-        if (is_string($outOfUserArea)) {
-            $outOfUserArea = in_array(strtolower($outOfUserArea), array('false', 'off', '-', 'no', 'n', '0', '')) ? false : true;
-        }
-
-        return $this->addUsingAlias(UserJobMatchTableMap::COL_OUT_OF_USER_AREA, $outOfUserArea, $comparison);
-    }
-
-    /**
-     * Filter the query on the app_run_id column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByAppRunId('fooValue');   // WHERE app_run_id = 'fooValue'
-     * $query->filterByAppRunId('%fooValue%', Criteria::LIKE); // WHERE app_run_id LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $appRunId The value to use as filter.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
-     */
-    public function filterByAppRunId($appRunId = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($appRunId)) {
+        $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
+        if (is_scalar($userNotificationState)) {
+            if (!in_array($userNotificationState, $valueSet)) {
+                throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $userNotificationState));
+            }
+            $userNotificationState = array_search($userNotificationState, $valueSet);
+        } elseif (is_array($userNotificationState)) {
+            $convertedValues = array();
+            foreach ($userNotificationState as $value) {
+                if (!in_array($value, $valueSet)) {
+                    throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $value));
+                }
+                $convertedValues []= array_search($value, $valueSet);
+            }
+            $userNotificationState = $convertedValues;
+            if (null === $comparison) {
                 $comparison = Criteria::IN;
             }
         }
 
-        return $this->addUsingAlias(UserJobMatchTableMap::COL_APP_RUN_ID, $appRunId, $comparison);
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE, $userNotificationState, $comparison);
+    }
+
+    /**
+     * Filter the query on the set_by_user_search_site_run_key column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterBySetByUserSearchSiteRunKey('fooValue');   // WHERE set_by_user_search_site_run_key = 'fooValue'
+     * $query->filterBySetByUserSearchSiteRunKey('%fooValue%', Criteria::LIKE); // WHERE set_by_user_search_site_run_key LIKE '%fooValue%'
+     * </code>
+     *
+     * @param     string $setByUserSearchSiteRunKey The value to use as filter.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function filterBySetByUserSearchSiteRunKey($setByUserSearchSiteRunKey = null, $comparison = null)
+    {
+        if (null === $comparison) {
+            if (is_array($setByUserSearchSiteRunKey)) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_SET_BY_USER_SEARCH_SITE_RUN_KEY, $setByUserSearchSiteRunKey, $comparison);
     }
 
     /**

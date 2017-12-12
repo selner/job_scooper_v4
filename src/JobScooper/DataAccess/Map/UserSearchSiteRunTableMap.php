@@ -59,7 +59,7 @@ class UserSearchSiteRunTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 12;
+    const NUM_COLUMNS = 13;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class UserSearchSiteRunTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 12;
+    const NUM_HYDRATE_COLUMNS = 13;
 
     /**
      * the column name for the user_id field
@@ -107,6 +107,16 @@ class UserSearchSiteRunTableMap extends TableMap
     const COL_USER_SEARCH_SITE_RUN_KEY = 'user_search_site_run.user_search_site_run_key';
 
     /**
+     * the column name for the date_started field
+     */
+    const COL_DATE_STARTED = 'user_search_site_run.date_started';
+
+    /**
+     * the column name for the date_ended field
+     */
+    const COL_DATE_ENDED = 'user_search_site_run.date_ended';
+
+    /**
      * the column name for the search_start_url field
      */
     const COL_SEARCH_START_URL = 'user_search_site_run.search_start_url';
@@ -122,14 +132,9 @@ class UserSearchSiteRunTableMap extends TableMap
     const COL_RUN_ERROR_DETAILS = 'user_search_site_run.run_error_details';
 
     /**
-     * the column name for the date_started field
+     * the column name for the run_error_page_html field
      */
-    const COL_DATE_STARTED = 'user_search_site_run.date_started';
-
-    /**
-     * the column name for the date_ended field
-     */
-    const COL_DATE_ENDED = 'user_search_site_run.date_ended';
+    const COL_RUN_ERROR_PAGE_HTML = 'user_search_site_run.run_error_page_html';
 
     /**
      * The default string format for model objects of the related table
@@ -150,11 +155,11 @@ class UserSearchSiteRunTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('UserId', 'UserKeywordSetKey', 'GeoLocationId', 'JobSiteKey', 'AppRunId', 'UserSearchKey', 'UserSearchSiteRunKey', 'SearchStartUrl', 'RunResultCode', 'RunErrorDetails', 'StartedAt', 'EndedAt', ),
-        self::TYPE_CAMELNAME     => array('userId', 'userKeywordSetKey', 'geoLocationId', 'jobSiteKey', 'appRunId', 'userSearchKey', 'userSearchSiteRunKey', 'searchStartUrl', 'runResultCode', 'runErrorDetails', 'startedAt', 'endedAt', ),
-        self::TYPE_COLNAME       => array(UserSearchSiteRunTableMap::COL_USER_ID, UserSearchSiteRunTableMap::COL_USER_KEYWORD_SET_KEY, UserSearchSiteRunTableMap::COL_GEOLOCATION_ID, UserSearchSiteRunTableMap::COL_JOBSITE_KEY, UserSearchSiteRunTableMap::COL_APP_RUN_ID, UserSearchSiteRunTableMap::COL_USER_SEARCH_KEY, UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_KEY, UserSearchSiteRunTableMap::COL_SEARCH_START_URL, UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE, UserSearchSiteRunTableMap::COL_RUN_ERROR_DETAILS, UserSearchSiteRunTableMap::COL_DATE_STARTED, UserSearchSiteRunTableMap::COL_DATE_ENDED, ),
-        self::TYPE_FIELDNAME     => array('user_id', 'user_keyword_set_key', 'geolocation_id', 'jobsite_key', 'app_run_id', 'user_search_key', 'user_search_site_run_key', 'search_start_url', 'run_result_code', 'run_error_details', 'date_started', 'date_ended', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, )
+        self::TYPE_PHPNAME       => array('UserId', 'UserKeywordSetKey', 'GeoLocationId', 'JobSiteKey', 'AppRunId', 'UserSearchKey', 'UserSearchSiteRunKey', 'StartedAt', 'EndedAt', 'SearchStartUrl', 'RunResultCode', 'RunErrorDetails', 'RunErrorPageHtml', ),
+        self::TYPE_CAMELNAME     => array('userId', 'userKeywordSetKey', 'geoLocationId', 'jobSiteKey', 'appRunId', 'userSearchKey', 'userSearchSiteRunKey', 'startedAt', 'endedAt', 'searchStartUrl', 'runResultCode', 'runErrorDetails', 'runErrorPageHtml', ),
+        self::TYPE_COLNAME       => array(UserSearchSiteRunTableMap::COL_USER_ID, UserSearchSiteRunTableMap::COL_USER_KEYWORD_SET_KEY, UserSearchSiteRunTableMap::COL_GEOLOCATION_ID, UserSearchSiteRunTableMap::COL_JOBSITE_KEY, UserSearchSiteRunTableMap::COL_APP_RUN_ID, UserSearchSiteRunTableMap::COL_USER_SEARCH_KEY, UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_KEY, UserSearchSiteRunTableMap::COL_DATE_STARTED, UserSearchSiteRunTableMap::COL_DATE_ENDED, UserSearchSiteRunTableMap::COL_SEARCH_START_URL, UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE, UserSearchSiteRunTableMap::COL_RUN_ERROR_DETAILS, UserSearchSiteRunTableMap::COL_RUN_ERROR_PAGE_HTML, ),
+        self::TYPE_FIELDNAME     => array('user_id', 'user_keyword_set_key', 'geolocation_id', 'jobsite_key', 'app_run_id', 'user_search_key', 'user_search_site_run_key', 'date_started', 'date_ended', 'search_start_url', 'run_result_code', 'run_error_details', 'run_error_page_html', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, )
     );
 
     /**
@@ -164,11 +169,11 @@ class UserSearchSiteRunTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('UserId' => 0, 'UserKeywordSetKey' => 1, 'GeoLocationId' => 2, 'JobSiteKey' => 3, 'AppRunId' => 4, 'UserSearchKey' => 5, 'UserSearchSiteRunKey' => 6, 'SearchStartUrl' => 7, 'RunResultCode' => 8, 'RunErrorDetails' => 9, 'StartedAt' => 10, 'EndedAt' => 11, ),
-        self::TYPE_CAMELNAME     => array('userId' => 0, 'userKeywordSetKey' => 1, 'geoLocationId' => 2, 'jobSiteKey' => 3, 'appRunId' => 4, 'userSearchKey' => 5, 'userSearchSiteRunKey' => 6, 'searchStartUrl' => 7, 'runResultCode' => 8, 'runErrorDetails' => 9, 'startedAt' => 10, 'endedAt' => 11, ),
-        self::TYPE_COLNAME       => array(UserSearchSiteRunTableMap::COL_USER_ID => 0, UserSearchSiteRunTableMap::COL_USER_KEYWORD_SET_KEY => 1, UserSearchSiteRunTableMap::COL_GEOLOCATION_ID => 2, UserSearchSiteRunTableMap::COL_JOBSITE_KEY => 3, UserSearchSiteRunTableMap::COL_APP_RUN_ID => 4, UserSearchSiteRunTableMap::COL_USER_SEARCH_KEY => 5, UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_KEY => 6, UserSearchSiteRunTableMap::COL_SEARCH_START_URL => 7, UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE => 8, UserSearchSiteRunTableMap::COL_RUN_ERROR_DETAILS => 9, UserSearchSiteRunTableMap::COL_DATE_STARTED => 10, UserSearchSiteRunTableMap::COL_DATE_ENDED => 11, ),
-        self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_keyword_set_key' => 1, 'geolocation_id' => 2, 'jobsite_key' => 3, 'app_run_id' => 4, 'user_search_key' => 5, 'user_search_site_run_key' => 6, 'search_start_url' => 7, 'run_result_code' => 8, 'run_error_details' => 9, 'date_started' => 10, 'date_ended' => 11, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, )
+        self::TYPE_PHPNAME       => array('UserId' => 0, 'UserKeywordSetKey' => 1, 'GeoLocationId' => 2, 'JobSiteKey' => 3, 'AppRunId' => 4, 'UserSearchKey' => 5, 'UserSearchSiteRunKey' => 6, 'StartedAt' => 7, 'EndedAt' => 8, 'SearchStartUrl' => 9, 'RunResultCode' => 10, 'RunErrorDetails' => 11, 'RunErrorPageHtml' => 12, ),
+        self::TYPE_CAMELNAME     => array('userId' => 0, 'userKeywordSetKey' => 1, 'geoLocationId' => 2, 'jobSiteKey' => 3, 'appRunId' => 4, 'userSearchKey' => 5, 'userSearchSiteRunKey' => 6, 'startedAt' => 7, 'endedAt' => 8, 'searchStartUrl' => 9, 'runResultCode' => 10, 'runErrorDetails' => 11, 'runErrorPageHtml' => 12, ),
+        self::TYPE_COLNAME       => array(UserSearchSiteRunTableMap::COL_USER_ID => 0, UserSearchSiteRunTableMap::COL_USER_KEYWORD_SET_KEY => 1, UserSearchSiteRunTableMap::COL_GEOLOCATION_ID => 2, UserSearchSiteRunTableMap::COL_JOBSITE_KEY => 3, UserSearchSiteRunTableMap::COL_APP_RUN_ID => 4, UserSearchSiteRunTableMap::COL_USER_SEARCH_KEY => 5, UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_KEY => 6, UserSearchSiteRunTableMap::COL_DATE_STARTED => 7, UserSearchSiteRunTableMap::COL_DATE_ENDED => 8, UserSearchSiteRunTableMap::COL_SEARCH_START_URL => 9, UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE => 10, UserSearchSiteRunTableMap::COL_RUN_ERROR_DETAILS => 11, UserSearchSiteRunTableMap::COL_RUN_ERROR_PAGE_HTML => 12, ),
+        self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_keyword_set_key' => 1, 'geolocation_id' => 2, 'jobsite_key' => 3, 'app_run_id' => 4, 'user_search_key' => 5, 'user_search_site_run_key' => 6, 'date_started' => 7, 'date_ended' => 8, 'search_start_url' => 9, 'run_result_code' => 10, 'run_error_details' => 11, 'run_error_page_html' => 12, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, )
     );
 
     /** The enumerated values for this table */
@@ -231,6 +236,8 @@ class UserSearchSiteRunTableMap extends TableMap
         $this->addForeignKey('user_search_key', 'UserSearchKey', 'VARCHAR', 'user_search', 'user_search_key', true, 100, null);
         $this->addColumn('user_search_site_run_key', 'UserSearchSiteRunKey', 'VARCHAR', true, 100, null);
         $this->getColumn('user_search_site_run_key')->setPrimaryString(true);
+        $this->addColumn('date_started', 'StartedAt', 'TIMESTAMP', false, null, null);
+        $this->addColumn('date_ended', 'EndedAt', 'TIMESTAMP', false, null, null);
         $this->addColumn('search_start_url', 'SearchStartUrl', 'VARCHAR', false, 1024, null);
         $this->addColumn('run_result_code', 'RunResultCode', 'ENUM', false, null, 'not-run');
         $this->getColumn('run_result_code')->setValueSet(array (
@@ -241,8 +248,7 @@ class UserSearchSiteRunTableMap extends TableMap
   4 => 'successful',
 ));
         $this->addColumn('run_error_details', 'RunErrorDetails', 'ARRAY', false, null, null);
-        $this->addColumn('date_started', 'StartedAt', 'TIMESTAMP', false, null, null);
-        $this->addColumn('date_ended', 'EndedAt', 'TIMESTAMP', false, null, null);
+        $this->addColumn('run_error_page_html', 'RunErrorPageHtml', 'LONGVARCHAR', false, null, null);
     } // initialize()
 
     /**
@@ -528,11 +534,12 @@ class UserSearchSiteRunTableMap extends TableMap
             $criteria->addSelectColumn(UserSearchSiteRunTableMap::COL_APP_RUN_ID);
             $criteria->addSelectColumn(UserSearchSiteRunTableMap::COL_USER_SEARCH_KEY);
             $criteria->addSelectColumn(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_KEY);
+            $criteria->addSelectColumn(UserSearchSiteRunTableMap::COL_DATE_STARTED);
+            $criteria->addSelectColumn(UserSearchSiteRunTableMap::COL_DATE_ENDED);
             $criteria->addSelectColumn(UserSearchSiteRunTableMap::COL_SEARCH_START_URL);
             $criteria->addSelectColumn(UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE);
             $criteria->addSelectColumn(UserSearchSiteRunTableMap::COL_RUN_ERROR_DETAILS);
-            $criteria->addSelectColumn(UserSearchSiteRunTableMap::COL_DATE_STARTED);
-            $criteria->addSelectColumn(UserSearchSiteRunTableMap::COL_DATE_ENDED);
+            $criteria->addSelectColumn(UserSearchSiteRunTableMap::COL_RUN_ERROR_PAGE_HTML);
         } else {
             $criteria->addSelectColumn($alias . '.user_id');
             $criteria->addSelectColumn($alias . '.user_keyword_set_key');
@@ -541,11 +548,12 @@ class UserSearchSiteRunTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.app_run_id');
             $criteria->addSelectColumn($alias . '.user_search_key');
             $criteria->addSelectColumn($alias . '.user_search_site_run_key');
+            $criteria->addSelectColumn($alias . '.date_started');
+            $criteria->addSelectColumn($alias . '.date_ended');
             $criteria->addSelectColumn($alias . '.search_start_url');
             $criteria->addSelectColumn($alias . '.run_result_code');
             $criteria->addSelectColumn($alias . '.run_error_details');
-            $criteria->addSelectColumn($alias . '.date_started');
-            $criteria->addSelectColumn($alias . '.date_ended');
+            $criteria->addSelectColumn($alias . '.run_error_page_html');
         }
     }
 

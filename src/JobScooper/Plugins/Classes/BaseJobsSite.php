@@ -232,7 +232,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
                     if(!is_null($jobIdsToAddToUser) && count($jobIdsToAddToUser) > 0) {
                         LogLine("Found " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs not yet assigned to user " . $user->getUserSlug() . ".", \C__DISPLAY_ITEM_DETAIL__);
-                        $this->_addJobMatchIdsToUser($jobIdsToAddToUser);
+                        $this->_addJobMatchIdsToUser($jobIdsToAddToUser, $search);
                         LogLine("Successfully added " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs to user " . $user->getUserSlug() . ".", \C__DISPLAY_ITEM_DETAIL__);
                     }
                     else
@@ -1121,7 +1121,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         }
     }
 
-    private function _addJobMatchIdsToUser($arrJobIds)
+    private function _addJobMatchIdsToUser($arrJobIds, UserSearchSiteRun $searchDetails)
     {
         $user = User::getCurrentUser();
         foreach ($arrJobIds as $jobId) {
@@ -1131,7 +1131,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 ->findOneOrCreate();
 
             $newMatch->setUserId($user->getUserId());
-            $newMatch->setAppRunId(getConfigurationSetting('app_run_id'));
+            if(!empty($searchDetails))
+	            $newMatch->setSetByUserSearchSiteRunKey($searchDetails->getUserSearchSiteRunKey());
             $newMatch->save();
         }
     }
@@ -1139,7 +1140,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     private function _addJobMatchesToUser($searchDetails)
     {
         if(array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs) && !is_null($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]) && is_array($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]))
-        $this->_addJobMatchIdsToUser(array_keys($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]));
+        $this->_addJobMatchIdsToUser(array_keys($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]), $searchDetails);
     }
 
     function saveJobList($arrJobs)

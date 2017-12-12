@@ -119,6 +119,20 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
     protected $user_search_site_run_key;
 
     /**
+     * The value for the date_started field.
+     *
+     * @var        DateTime
+     */
+    protected $date_started;
+
+    /**
+     * The value for the date_ended field.
+     *
+     * @var        DateTime
+     */
+    protected $date_ended;
+
+    /**
      * The value for the search_start_url field.
      *
      * @var        string
@@ -148,18 +162,11 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
     protected $run_error_details_unserialized;
 
     /**
-     * The value for the date_started field.
+     * The value for the run_error_page_html field.
      *
-     * @var        DateTime
+     * @var        string
      */
-    protected $date_started;
-
-    /**
-     * The value for the date_ended field.
-     *
-     * @var        DateTime
-     */
-    protected $date_ended;
+    protected $run_error_page_html;
 
     /**
      * @var        ChildJobSiteRecord
@@ -498,6 +505,46 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
     }
 
     /**
+     * Get the [optionally formatted] temporal [date_started] column value.
+     *
+     *
+     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     *                            If format is NULL, then the raw DateTime object will be returned.
+     *
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
+     *
+     * @throws PropelException - if unable to parse/validate the date/time value.
+     */
+    public function getStartedAt($format = NULL)
+    {
+        if ($format === null) {
+            return $this->date_started;
+        } else {
+            return $this->date_started instanceof \DateTimeInterface ? $this->date_started->format($format) : null;
+        }
+    }
+
+    /**
+     * Get the [optionally formatted] temporal [date_ended] column value.
+     *
+     *
+     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     *                            If format is NULL, then the raw DateTime object will be returned.
+     *
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
+     *
+     * @throws PropelException - if unable to parse/validate the date/time value.
+     */
+    public function getEndedAt($format = NULL)
+    {
+        if ($format === null) {
+            return $this->date_ended;
+        } else {
+            return $this->date_ended instanceof \DateTimeInterface ? $this->date_ended->format($format) : null;
+        }
+    }
+
+    /**
      * Get the [search_start_url] column value.
      *
      * @return string
@@ -556,43 +603,13 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
     } // hasRunErrorDetail()
 
     /**
-     * Get the [optionally formatted] temporal [date_started] column value.
+     * Get the [run_error_page_html] column value.
      *
-     *
-     * @param      string $format The date/time format string (either date()-style or strftime()-style).
-     *                            If format is NULL, then the raw DateTime object will be returned.
-     *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
-     *
-     * @throws PropelException - if unable to parse/validate the date/time value.
+     * @return string
      */
-    public function getStartedAt($format = NULL)
+    public function getRunErrorPageHtml()
     {
-        if ($format === null) {
-            return $this->date_started;
-        } else {
-            return $this->date_started instanceof \DateTimeInterface ? $this->date_started->format($format) : null;
-        }
-    }
-
-    /**
-     * Get the [optionally formatted] temporal [date_ended] column value.
-     *
-     *
-     * @param      string $format The date/time format string (either date()-style or strftime()-style).
-     *                            If format is NULL, then the raw DateTime object will be returned.
-     *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
-     *
-     * @throws PropelException - if unable to parse/validate the date/time value.
-     */
-    public function getEndedAt($format = NULL)
-    {
-        if ($format === null) {
-            return $this->date_ended;
-        } else {
-            return $this->date_ended instanceof \DateTimeInterface ? $this->date_ended->format($format) : null;
-        }
+        return $this->run_error_page_html;
     }
 
     /**
@@ -764,6 +781,46 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
     } // setUserSearchSiteRunKey()
 
     /**
+     * Sets the value of [date_started] column to a normalized version of the date/time value specified.
+     *
+     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
+     *               Empty strings are treated as NULL.
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
+     */
+    public function setStartedAt($v)
+    {
+        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
+        if ($this->date_started !== null || $dt !== null) {
+            if ($this->date_started === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->date_started->format("Y-m-d H:i:s.u")) {
+                $this->date_started = $dt === null ? null : clone $dt;
+                $this->modifiedColumns[UserSearchSiteRunTableMap::COL_DATE_STARTED] = true;
+            }
+        } // if either are not null
+
+        return $this;
+    } // setStartedAt()
+
+    /**
+     * Sets the value of [date_ended] column to a normalized version of the date/time value specified.
+     *
+     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
+     *               Empty strings are treated as NULL.
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
+     */
+    public function setEndedAt($v)
+    {
+        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
+        if ($this->date_ended !== null || $dt !== null) {
+            if ($this->date_ended === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->date_ended->format("Y-m-d H:i:s.u")) {
+                $this->date_ended = $dt === null ? null : clone $dt;
+                $this->modifiedColumns[UserSearchSiteRunTableMap::COL_DATE_ENDED] = true;
+            }
+        } // if either are not null
+
+        return $this;
+    } // setEndedAt()
+
+    /**
      * Set the value of [search_start_url] column.
      *
      * @param string $v new value
@@ -860,44 +917,24 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
     } // removeRunErrorDetail()
 
     /**
-     * Sets the value of [date_started] column to a normalized version of the date/time value specified.
+     * Set the value of [run_error_page_html] column.
      *
-     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
-     *               Empty strings are treated as NULL.
+     * @param string $v new value
      * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
      */
-    public function setStartedAt($v)
+    public function setRunErrorPageHtml($v)
     {
-        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
-        if ($this->date_started !== null || $dt !== null) {
-            if ($this->date_started === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->date_started->format("Y-m-d H:i:s.u")) {
-                $this->date_started = $dt === null ? null : clone $dt;
-                $this->modifiedColumns[UserSearchSiteRunTableMap::COL_DATE_STARTED] = true;
-            }
-        } // if either are not null
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->run_error_page_html !== $v) {
+            $this->run_error_page_html = $v;
+            $this->modifiedColumns[UserSearchSiteRunTableMap::COL_RUN_ERROR_PAGE_HTML] = true;
+        }
 
         return $this;
-    } // setStartedAt()
-
-    /**
-     * Sets the value of [date_ended] column to a normalized version of the date/time value specified.
-     *
-     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
-     *               Empty strings are treated as NULL.
-     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
-     */
-    public function setEndedAt($v)
-    {
-        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
-        if ($this->date_ended !== null || $dt !== null) {
-            if ($this->date_ended === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->date_ended->format("Y-m-d H:i:s.u")) {
-                $this->date_ended = $dt === null ? null : clone $dt;
-                $this->modifiedColumns[UserSearchSiteRunTableMap::COL_DATE_ENDED] = true;
-            }
-        } // if either are not null
-
-        return $this;
-    } // setEndedAt()
+    } // setRunErrorPageHtml()
 
     /**
      * Indicates whether the columns in this object are only set to default values.
@@ -960,27 +997,30 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserSearchSiteRunTableMap::translateFieldName('UserSearchSiteRunKey', TableMap::TYPE_PHPNAME, $indexType)];
             $this->user_search_site_run_key = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : UserSearchSiteRunTableMap::translateFieldName('SearchStartUrl', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->search_start_url = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : UserSearchSiteRunTableMap::translateFieldName('RunResultCode', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->run_result_code = (null !== $col) ? (int) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : UserSearchSiteRunTableMap::translateFieldName('RunErrorDetails', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->run_error_details = $col;
-            $this->run_error_details_unserialized = null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : UserSearchSiteRunTableMap::translateFieldName('StartedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : UserSearchSiteRunTableMap::translateFieldName('StartedAt', TableMap::TYPE_PHPNAME, $indexType)];
             if ($col === '0000-00-00 00:00:00') {
                 $col = null;
             }
             $this->date_started = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : UserSearchSiteRunTableMap::translateFieldName('EndedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : UserSearchSiteRunTableMap::translateFieldName('EndedAt', TableMap::TYPE_PHPNAME, $indexType)];
             if ($col === '0000-00-00 00:00:00') {
                 $col = null;
             }
             $this->date_ended = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : UserSearchSiteRunTableMap::translateFieldName('SearchStartUrl', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->search_start_url = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : UserSearchSiteRunTableMap::translateFieldName('RunResultCode', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->run_result_code = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : UserSearchSiteRunTableMap::translateFieldName('RunErrorDetails', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->run_error_details = $col;
+            $this->run_error_details_unserialized = null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : UserSearchSiteRunTableMap::translateFieldName('RunErrorPageHtml', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->run_error_page_html = (null !== $col) ? (string) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -989,7 +1029,7 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 12; // 12 = UserSearchSiteRunTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 13; // 13 = UserSearchSiteRunTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\UserSearchSiteRun'), 0, $e);
@@ -1287,6 +1327,12 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
         if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_KEY)) {
             $modifiedColumns[':p' . $index++]  = 'user_search_site_run_key';
         }
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_DATE_STARTED)) {
+            $modifiedColumns[':p' . $index++]  = 'date_started';
+        }
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_DATE_ENDED)) {
+            $modifiedColumns[':p' . $index++]  = 'date_ended';
+        }
         if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_SEARCH_START_URL)) {
             $modifiedColumns[':p' . $index++]  = 'search_start_url';
         }
@@ -1296,11 +1342,8 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
         if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_RUN_ERROR_DETAILS)) {
             $modifiedColumns[':p' . $index++]  = 'run_error_details';
         }
-        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_DATE_STARTED)) {
-            $modifiedColumns[':p' . $index++]  = 'date_started';
-        }
-        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_DATE_ENDED)) {
-            $modifiedColumns[':p' . $index++]  = 'date_ended';
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_RUN_ERROR_PAGE_HTML)) {
+            $modifiedColumns[':p' . $index++]  = 'run_error_page_html';
         }
 
         $sql = sprintf(
@@ -1334,6 +1377,12 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
                     case 'user_search_site_run_key':
                         $stmt->bindValue($identifier, $this->user_search_site_run_key, PDO::PARAM_STR);
                         break;
+                    case 'date_started':
+                        $stmt->bindValue($identifier, $this->date_started ? $this->date_started->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
+                        break;
+                    case 'date_ended':
+                        $stmt->bindValue($identifier, $this->date_ended ? $this->date_ended->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
+                        break;
                     case 'search_start_url':
                         $stmt->bindValue($identifier, $this->search_start_url, PDO::PARAM_STR);
                         break;
@@ -1343,11 +1392,8 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
                     case 'run_error_details':
                         $stmt->bindValue($identifier, $this->run_error_details, PDO::PARAM_STR);
                         break;
-                    case 'date_started':
-                        $stmt->bindValue($identifier, $this->date_started ? $this->date_started->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
-                        break;
-                    case 'date_ended':
-                        $stmt->bindValue($identifier, $this->date_ended ? $this->date_ended->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
+                    case 'run_error_page_html':
+                        $stmt->bindValue($identifier, $this->run_error_page_html, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -1426,19 +1472,22 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
                 return $this->getUserSearchSiteRunKey();
                 break;
             case 7:
-                return $this->getSearchStartUrl();
-                break;
-            case 8:
-                return $this->getRunResultCode();
-                break;
-            case 9:
-                return $this->getRunErrorDetails();
-                break;
-            case 10:
                 return $this->getStartedAt();
                 break;
-            case 11:
+            case 8:
                 return $this->getEndedAt();
+                break;
+            case 9:
+                return $this->getSearchStartUrl();
+                break;
+            case 10:
+                return $this->getRunResultCode();
+                break;
+            case 11:
+                return $this->getRunErrorDetails();
+                break;
+            case 12:
+                return $this->getRunErrorPageHtml();
                 break;
             default:
                 return null;
@@ -1477,18 +1526,19 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
             $keys[4] => $this->getAppRunId(),
             $keys[5] => $this->getUserSearchKey(),
             $keys[6] => $this->getUserSearchSiteRunKey(),
-            $keys[7] => $this->getSearchStartUrl(),
-            $keys[8] => $this->getRunResultCode(),
-            $keys[9] => $this->getRunErrorDetails(),
-            $keys[10] => $this->getStartedAt(),
-            $keys[11] => $this->getEndedAt(),
+            $keys[7] => $this->getStartedAt(),
+            $keys[8] => $this->getEndedAt(),
+            $keys[9] => $this->getSearchStartUrl(),
+            $keys[10] => $this->getRunResultCode(),
+            $keys[11] => $this->getRunErrorDetails(),
+            $keys[12] => $this->getRunErrorPageHtml(),
         );
-        if ($result[$keys[10]] instanceof \DateTimeInterface) {
-            $result[$keys[10]] = $result[$keys[10]]->format('c');
+        if ($result[$keys[7]] instanceof \DateTimeInterface) {
+            $result[$keys[7]] = $result[$keys[7]]->format('c');
         }
 
-        if ($result[$keys[11]] instanceof \DateTimeInterface) {
-            $result[$keys[11]] = $result[$keys[11]]->format('c');
+        if ($result[$keys[8]] instanceof \DateTimeInterface) {
+            $result[$keys[8]] = $result[$keys[8]]->format('c');
         }
 
         $virtualColumns = $this->virtualColumns;
@@ -1613,27 +1663,30 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
                 $this->setUserSearchSiteRunKey($value);
                 break;
             case 7:
-                $this->setSearchStartUrl($value);
+                $this->setStartedAt($value);
                 break;
             case 8:
+                $this->setEndedAt($value);
+                break;
+            case 9:
+                $this->setSearchStartUrl($value);
+                break;
+            case 10:
                 $valueSet = UserSearchSiteRunTableMap::getValueSet(UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE);
                 if (isset($valueSet[$value])) {
                     $value = $valueSet[$value];
                 }
                 $this->setRunResultCode($value);
                 break;
-            case 9:
+            case 11:
                 if (!is_array($value)) {
                     $v = trim(substr($value, 2, -2));
                     $value = $v ? explode(' | ', $v) : array();
                 }
                 $this->setRunErrorDetails($value);
                 break;
-            case 10:
-                $this->setStartedAt($value);
-                break;
-            case 11:
-                $this->setEndedAt($value);
+            case 12:
+                $this->setRunErrorPageHtml($value);
                 break;
         } // switch()
 
@@ -1683,19 +1736,22 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
             $this->setUserSearchSiteRunKey($arr[$keys[6]]);
         }
         if (array_key_exists($keys[7], $arr)) {
-            $this->setSearchStartUrl($arr[$keys[7]]);
+            $this->setStartedAt($arr[$keys[7]]);
         }
         if (array_key_exists($keys[8], $arr)) {
-            $this->setRunResultCode($arr[$keys[8]]);
+            $this->setEndedAt($arr[$keys[8]]);
         }
         if (array_key_exists($keys[9], $arr)) {
-            $this->setRunErrorDetails($arr[$keys[9]]);
+            $this->setSearchStartUrl($arr[$keys[9]]);
         }
         if (array_key_exists($keys[10], $arr)) {
-            $this->setStartedAt($arr[$keys[10]]);
+            $this->setRunResultCode($arr[$keys[10]]);
         }
         if (array_key_exists($keys[11], $arr)) {
-            $this->setEndedAt($arr[$keys[11]]);
+            $this->setRunErrorDetails($arr[$keys[11]]);
+        }
+        if (array_key_exists($keys[12], $arr)) {
+            $this->setRunErrorPageHtml($arr[$keys[12]]);
         }
     }
 
@@ -1759,6 +1815,12 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
         if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_KEY)) {
             $criteria->add(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_KEY, $this->user_search_site_run_key);
         }
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_DATE_STARTED)) {
+            $criteria->add(UserSearchSiteRunTableMap::COL_DATE_STARTED, $this->date_started);
+        }
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_DATE_ENDED)) {
+            $criteria->add(UserSearchSiteRunTableMap::COL_DATE_ENDED, $this->date_ended);
+        }
         if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_SEARCH_START_URL)) {
             $criteria->add(UserSearchSiteRunTableMap::COL_SEARCH_START_URL, $this->search_start_url);
         }
@@ -1768,11 +1830,8 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
         if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_RUN_ERROR_DETAILS)) {
             $criteria->add(UserSearchSiteRunTableMap::COL_RUN_ERROR_DETAILS, $this->run_error_details);
         }
-        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_DATE_STARTED)) {
-            $criteria->add(UserSearchSiteRunTableMap::COL_DATE_STARTED, $this->date_started);
-        }
-        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_DATE_ENDED)) {
-            $criteria->add(UserSearchSiteRunTableMap::COL_DATE_ENDED, $this->date_ended);
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_RUN_ERROR_PAGE_HTML)) {
+            $criteria->add(UserSearchSiteRunTableMap::COL_RUN_ERROR_PAGE_HTML, $this->run_error_page_html);
         }
 
         return $criteria;
@@ -1904,11 +1963,12 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
         $copyObj->setAppRunId($this->getAppRunId());
         $copyObj->setUserSearchKey($this->getUserSearchKey());
         $copyObj->setUserSearchSiteRunKey($this->getUserSearchSiteRunKey());
+        $copyObj->setStartedAt($this->getStartedAt());
+        $copyObj->setEndedAt($this->getEndedAt());
         $copyObj->setSearchStartUrl($this->getSearchStartUrl());
         $copyObj->setRunResultCode($this->getRunResultCode());
         $copyObj->setRunErrorDetails($this->getRunErrorDetails());
-        $copyObj->setStartedAt($this->getStartedAt());
-        $copyObj->setEndedAt($this->getEndedAt());
+        $copyObj->setRunErrorPageHtml($this->getRunErrorPageHtml());
         if ($makeNew) {
             $copyObj->setNew(true);
         }
@@ -2186,12 +2246,13 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
         $this->app_run_id = null;
         $this->user_search_key = null;
         $this->user_search_site_run_key = null;
+        $this->date_started = null;
+        $this->date_ended = null;
         $this->search_start_url = null;
         $this->run_result_code = null;
         $this->run_error_details = null;
         $this->run_error_details_unserialized = null;
-        $this->date_started = null;
-        $this->date_ended = null;
+        $this->run_error_page_html = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->applyDefaultValues();

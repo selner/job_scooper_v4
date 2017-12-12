@@ -27,11 +27,12 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchSiteRunQuery orderByAppRunId($order = Criteria::ASC) Order by the app_run_id column
  * @method     ChildUserSearchSiteRunQuery orderByUserSearchKey($order = Criteria::ASC) Order by the user_search_key column
  * @method     ChildUserSearchSiteRunQuery orderByUserSearchSiteRunKey($order = Criteria::ASC) Order by the user_search_site_run_key column
+ * @method     ChildUserSearchSiteRunQuery orderByStartedAt($order = Criteria::ASC) Order by the date_started column
+ * @method     ChildUserSearchSiteRunQuery orderByEndedAt($order = Criteria::ASC) Order by the date_ended column
  * @method     ChildUserSearchSiteRunQuery orderBySearchStartUrl($order = Criteria::ASC) Order by the search_start_url column
  * @method     ChildUserSearchSiteRunQuery orderByRunResultCode($order = Criteria::ASC) Order by the run_result_code column
  * @method     ChildUserSearchSiteRunQuery orderByRunErrorDetails($order = Criteria::ASC) Order by the run_error_details column
- * @method     ChildUserSearchSiteRunQuery orderByStartedAt($order = Criteria::ASC) Order by the date_started column
- * @method     ChildUserSearchSiteRunQuery orderByEndedAt($order = Criteria::ASC) Order by the date_ended column
+ * @method     ChildUserSearchSiteRunQuery orderByRunErrorPageHtml($order = Criteria::ASC) Order by the run_error_page_html column
  *
  * @method     ChildUserSearchSiteRunQuery groupByUserId() Group by the user_id column
  * @method     ChildUserSearchSiteRunQuery groupByUserKeywordSetKey() Group by the user_keyword_set_key column
@@ -40,11 +41,12 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchSiteRunQuery groupByAppRunId() Group by the app_run_id column
  * @method     ChildUserSearchSiteRunQuery groupByUserSearchKey() Group by the user_search_key column
  * @method     ChildUserSearchSiteRunQuery groupByUserSearchSiteRunKey() Group by the user_search_site_run_key column
+ * @method     ChildUserSearchSiteRunQuery groupByStartedAt() Group by the date_started column
+ * @method     ChildUserSearchSiteRunQuery groupByEndedAt() Group by the date_ended column
  * @method     ChildUserSearchSiteRunQuery groupBySearchStartUrl() Group by the search_start_url column
  * @method     ChildUserSearchSiteRunQuery groupByRunResultCode() Group by the run_result_code column
  * @method     ChildUserSearchSiteRunQuery groupByRunErrorDetails() Group by the run_error_details column
- * @method     ChildUserSearchSiteRunQuery groupByStartedAt() Group by the date_started column
- * @method     ChildUserSearchSiteRunQuery groupByEndedAt() Group by the date_ended column
+ * @method     ChildUserSearchSiteRunQuery groupByRunErrorPageHtml() Group by the run_error_page_html column
  *
  * @method     ChildUserSearchSiteRunQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildUserSearchSiteRunQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -106,11 +108,12 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchSiteRun findOneByAppRunId(string $app_run_id) Return the first ChildUserSearchSiteRun filtered by the app_run_id column
  * @method     ChildUserSearchSiteRun findOneByUserSearchKey(string $user_search_key) Return the first ChildUserSearchSiteRun filtered by the user_search_key column
  * @method     ChildUserSearchSiteRun findOneByUserSearchSiteRunKey(string $user_search_site_run_key) Return the first ChildUserSearchSiteRun filtered by the user_search_site_run_key column
+ * @method     ChildUserSearchSiteRun findOneByStartedAt(string $date_started) Return the first ChildUserSearchSiteRun filtered by the date_started column
+ * @method     ChildUserSearchSiteRun findOneByEndedAt(string $date_ended) Return the first ChildUserSearchSiteRun filtered by the date_ended column
  * @method     ChildUserSearchSiteRun findOneBySearchStartUrl(string $search_start_url) Return the first ChildUserSearchSiteRun filtered by the search_start_url column
  * @method     ChildUserSearchSiteRun findOneByRunResultCode(int $run_result_code) Return the first ChildUserSearchSiteRun filtered by the run_result_code column
  * @method     ChildUserSearchSiteRun findOneByRunErrorDetails(array $run_error_details) Return the first ChildUserSearchSiteRun filtered by the run_error_details column
- * @method     ChildUserSearchSiteRun findOneByStartedAt(string $date_started) Return the first ChildUserSearchSiteRun filtered by the date_started column
- * @method     ChildUserSearchSiteRun findOneByEndedAt(string $date_ended) Return the first ChildUserSearchSiteRun filtered by the date_ended column *
+ * @method     ChildUserSearchSiteRun findOneByRunErrorPageHtml(string $run_error_page_html) Return the first ChildUserSearchSiteRun filtered by the run_error_page_html column *
 
  * @method     ChildUserSearchSiteRun requirePk($key, ConnectionInterface $con = null) Return the ChildUserSearchSiteRun by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchSiteRun requireOne(ConnectionInterface $con = null) Return the first ChildUserSearchSiteRun matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -122,11 +125,12 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchSiteRun requireOneByAppRunId(string $app_run_id) Return the first ChildUserSearchSiteRun filtered by the app_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchSiteRun requireOneByUserSearchKey(string $user_search_key) Return the first ChildUserSearchSiteRun filtered by the user_search_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchSiteRun requireOneByUserSearchSiteRunKey(string $user_search_site_run_key) Return the first ChildUserSearchSiteRun filtered by the user_search_site_run_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchSiteRun requireOneByStartedAt(string $date_started) Return the first ChildUserSearchSiteRun filtered by the date_started column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchSiteRun requireOneByEndedAt(string $date_ended) Return the first ChildUserSearchSiteRun filtered by the date_ended column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchSiteRun requireOneBySearchStartUrl(string $search_start_url) Return the first ChildUserSearchSiteRun filtered by the search_start_url column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchSiteRun requireOneByRunResultCode(int $run_result_code) Return the first ChildUserSearchSiteRun filtered by the run_result_code column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchSiteRun requireOneByRunErrorDetails(array $run_error_details) Return the first ChildUserSearchSiteRun filtered by the run_error_details column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserSearchSiteRun requireOneByStartedAt(string $date_started) Return the first ChildUserSearchSiteRun filtered by the date_started column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserSearchSiteRun requireOneByEndedAt(string $date_ended) Return the first ChildUserSearchSiteRun filtered by the date_ended column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchSiteRun requireOneByRunErrorPageHtml(string $run_error_page_html) Return the first ChildUserSearchSiteRun filtered by the run_error_page_html column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildUserSearchSiteRun[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildUserSearchSiteRun objects based on current ModelCriteria
  * @method     ChildUserSearchSiteRun[]|ObjectCollection findByUserId(int $user_id) Return ChildUserSearchSiteRun objects filtered by the user_id column
@@ -136,11 +140,12 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchSiteRun[]|ObjectCollection findByAppRunId(string $app_run_id) Return ChildUserSearchSiteRun objects filtered by the app_run_id column
  * @method     ChildUserSearchSiteRun[]|ObjectCollection findByUserSearchKey(string $user_search_key) Return ChildUserSearchSiteRun objects filtered by the user_search_key column
  * @method     ChildUserSearchSiteRun[]|ObjectCollection findByUserSearchSiteRunKey(string $user_search_site_run_key) Return ChildUserSearchSiteRun objects filtered by the user_search_site_run_key column
+ * @method     ChildUserSearchSiteRun[]|ObjectCollection findByStartedAt(string $date_started) Return ChildUserSearchSiteRun objects filtered by the date_started column
+ * @method     ChildUserSearchSiteRun[]|ObjectCollection findByEndedAt(string $date_ended) Return ChildUserSearchSiteRun objects filtered by the date_ended column
  * @method     ChildUserSearchSiteRun[]|ObjectCollection findBySearchStartUrl(string $search_start_url) Return ChildUserSearchSiteRun objects filtered by the search_start_url column
  * @method     ChildUserSearchSiteRun[]|ObjectCollection findByRunResultCode(int $run_result_code) Return ChildUserSearchSiteRun objects filtered by the run_result_code column
  * @method     ChildUserSearchSiteRun[]|ObjectCollection findByRunErrorDetails(array $run_error_details) Return ChildUserSearchSiteRun objects filtered by the run_error_details column
- * @method     ChildUserSearchSiteRun[]|ObjectCollection findByStartedAt(string $date_started) Return ChildUserSearchSiteRun objects filtered by the date_started column
- * @method     ChildUserSearchSiteRun[]|ObjectCollection findByEndedAt(string $date_ended) Return ChildUserSearchSiteRun objects filtered by the date_ended column
+ * @method     ChildUserSearchSiteRun[]|ObjectCollection findByRunErrorPageHtml(string $run_error_page_html) Return ChildUserSearchSiteRun objects filtered by the run_error_page_html column
  * @method     ChildUserSearchSiteRun[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  */
@@ -239,7 +244,7 @@ abstract class UserSearchSiteRunQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_id, user_keyword_set_key, geolocation_id, jobsite_key, app_run_id, user_search_key, user_search_site_run_key, search_start_url, run_result_code, run_error_details, date_started, date_ended FROM user_search_site_run WHERE user_keyword_set_key = :p0 AND geolocation_id = :p1 AND jobsite_key = :p2 AND app_run_id = :p3';
+        $sql = 'SELECT user_id, user_keyword_set_key, geolocation_id, jobsite_key, app_run_id, user_search_key, user_search_site_run_key, date_started, date_ended, search_start_url, run_result_code, run_error_details, run_error_page_html FROM user_search_site_run WHERE user_keyword_set_key = :p0 AND geolocation_id = :p1 AND jobsite_key = :p2 AND app_run_id = :p3';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key[0], PDO::PARAM_STR);
@@ -565,6 +570,92 @@ abstract class UserSearchSiteRunQuery extends ModelCriteria
     }
 
     /**
+     * Filter the query on the date_started column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByStartedAt('2011-03-14'); // WHERE date_started = '2011-03-14'
+     * $query->filterByStartedAt('now'); // WHERE date_started = '2011-03-14'
+     * $query->filterByStartedAt(array('max' => 'yesterday')); // WHERE date_started > '2011-03-13'
+     * </code>
+     *
+     * @param     mixed $startedAt The value to use as filter.
+     *              Values can be integers (unix timestamps), DateTime objects, or strings.
+     *              Empty strings are treated as NULL.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserSearchSiteRunQuery The current query, for fluid interface
+     */
+    public function filterByStartedAt($startedAt = null, $comparison = null)
+    {
+        if (is_array($startedAt)) {
+            $useMinMax = false;
+            if (isset($startedAt['min'])) {
+                $this->addUsingAlias(UserSearchSiteRunTableMap::COL_DATE_STARTED, $startedAt['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($startedAt['max'])) {
+                $this->addUsingAlias(UserSearchSiteRunTableMap::COL_DATE_STARTED, $startedAt['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserSearchSiteRunTableMap::COL_DATE_STARTED, $startedAt, $comparison);
+    }
+
+    /**
+     * Filter the query on the date_ended column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByEndedAt('2011-03-14'); // WHERE date_ended = '2011-03-14'
+     * $query->filterByEndedAt('now'); // WHERE date_ended = '2011-03-14'
+     * $query->filterByEndedAt(array('max' => 'yesterday')); // WHERE date_ended > '2011-03-13'
+     * </code>
+     *
+     * @param     mixed $endedAt The value to use as filter.
+     *              Values can be integers (unix timestamps), DateTime objects, or strings.
+     *              Empty strings are treated as NULL.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserSearchSiteRunQuery The current query, for fluid interface
+     */
+    public function filterByEndedAt($endedAt = null, $comparison = null)
+    {
+        if (is_array($endedAt)) {
+            $useMinMax = false;
+            if (isset($endedAt['min'])) {
+                $this->addUsingAlias(UserSearchSiteRunTableMap::COL_DATE_ENDED, $endedAt['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($endedAt['max'])) {
+                $this->addUsingAlias(UserSearchSiteRunTableMap::COL_DATE_ENDED, $endedAt['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserSearchSiteRunTableMap::COL_DATE_ENDED, $endedAt, $comparison);
+    }
+
+    /**
      * Filter the query on the search_start_url column
      *
      * Example usage:
@@ -704,89 +795,28 @@ abstract class UserSearchSiteRunQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the date_started column
+     * Filter the query on the run_error_page_html column
      *
      * Example usage:
      * <code>
-     * $query->filterByStartedAt('2011-03-14'); // WHERE date_started = '2011-03-14'
-     * $query->filterByStartedAt('now'); // WHERE date_started = '2011-03-14'
-     * $query->filterByStartedAt(array('max' => 'yesterday')); // WHERE date_started > '2011-03-13'
+     * $query->filterByRunErrorPageHtml('fooValue');   // WHERE run_error_page_html = 'fooValue'
+     * $query->filterByRunErrorPageHtml('%fooValue%', Criteria::LIKE); // WHERE run_error_page_html LIKE '%fooValue%'
      * </code>
      *
-     * @param     mixed $startedAt The value to use as filter.
-     *              Values can be integers (unix timestamps), DateTime objects, or strings.
-     *              Empty strings are treated as NULL.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $runErrorPageHtml The value to use as filter.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildUserSearchSiteRunQuery The current query, for fluid interface
      */
-    public function filterByStartedAt($startedAt = null, $comparison = null)
+    public function filterByRunErrorPageHtml($runErrorPageHtml = null, $comparison = null)
     {
-        if (is_array($startedAt)) {
-            $useMinMax = false;
-            if (isset($startedAt['min'])) {
-                $this->addUsingAlias(UserSearchSiteRunTableMap::COL_DATE_STARTED, $startedAt['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($startedAt['max'])) {
-                $this->addUsingAlias(UserSearchSiteRunTableMap::COL_DATE_STARTED, $startedAt['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
+        if (null === $comparison) {
+            if (is_array($runErrorPageHtml)) {
                 $comparison = Criteria::IN;
             }
         }
 
-        return $this->addUsingAlias(UserSearchSiteRunTableMap::COL_DATE_STARTED, $startedAt, $comparison);
-    }
-
-    /**
-     * Filter the query on the date_ended column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByEndedAt('2011-03-14'); // WHERE date_ended = '2011-03-14'
-     * $query->filterByEndedAt('now'); // WHERE date_ended = '2011-03-14'
-     * $query->filterByEndedAt(array('max' => 'yesterday')); // WHERE date_ended > '2011-03-13'
-     * </code>
-     *
-     * @param     mixed $endedAt The value to use as filter.
-     *              Values can be integers (unix timestamps), DateTime objects, or strings.
-     *              Empty strings are treated as NULL.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserSearchSiteRunQuery The current query, for fluid interface
-     */
-    public function filterByEndedAt($endedAt = null, $comparison = null)
-    {
-        if (is_array($endedAt)) {
-            $useMinMax = false;
-            if (isset($endedAt['min'])) {
-                $this->addUsingAlias(UserSearchSiteRunTableMap::COL_DATE_ENDED, $endedAt['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($endedAt['max'])) {
-                $this->addUsingAlias(UserSearchSiteRunTableMap::COL_DATE_ENDED, $endedAt['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(UserSearchSiteRunTableMap::COL_DATE_ENDED, $endedAt, $comparison);
+        return $this->addUsingAlias(UserSearchSiteRunTableMap::COL_RUN_ERROR_PAGE_HTML, $runErrorPageHtml, $comparison);
     }
 
     /**

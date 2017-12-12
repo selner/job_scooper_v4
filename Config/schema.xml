@@ -330,29 +330,6 @@
             <reference local="geolocation_id" foreign="geolocation_id"/>
         </foreign-key>
 
-        <!--<column name="date_last_run" phpName="LastRunAt" type="timestamp"/>-->
-        <!--<behavior name="aggregate_column" id="us_date_last_run">-->
-        <!--<parameter name="name" value="date_last_run" />-->
-        <!--<parameter name="foreign_table" value="user_search_jobsite_run" />-->
-        <!--<parameter name="expression" value="MAX(date_started)" />-->
-        <!--</behavior>-->
-
-        <!--<column name="date_last_completed" phpName="LastCompletedAt" type="timestamp"/>-->
-        <!--<behavior name="aggregate_column" id="us_date_last_completed">-->
-        <!--<parameter name="name" value="date_last_completed"/>-->
-        <!--<parameter name="foreign_table" value="user_search_jobsite_run"/>-->
-        <!--<parameter name="expression" value="MAX(date_ended)"/>-->
-        <!--<parameter name="condition" value="run_result_code = 4"/>-->
-        <!--</behavior>-->
-
-        <!--<column name="date_last_failed" phpName="LastFailedAt" type="timestamp"/>-->
-        <!--<behavior name="aggregate_column" id="us_date_last_failed">-->
-        <!--<parameter name="name" value="date_last_failed" />-->
-        <!--<parameter name="foreign_table" value="user_search_jobsite_run" />-->
-        <!--<parameter name="expression" value="MAX(date_ended)" />-->
-        <!--<parameter name="condition" value="run_result_code = failed" />-->
-        <!--</behavior>-->
-
     </table>
 
     <!--
@@ -381,25 +358,6 @@
         <!-- ~~~~~~~~~  OTHER COLUMNS  ~~~~~~~~~~~~~~~~  -->
         <column name="user_search_key" phpName="UserSearchKey" type="varchar" size="100" required="true"/>
 
-        <!--<foreign-key foreignTable="user_keyword_set" onDelete="cascade" phpName="UserKeywordSetFromUSSR">-->
-        <!--<reference local="user_id" foreign="user_id"/>-->
-        <!--<reference local="user_keyword_set_id" foreign="user_keyword_set_id"/>-->
-        <!--</foreign-key>-->
-
-        <!--<unique>-->
-        <!--<unique-column name="user_id"/>-->
-        <!--<unique-column name="geolocation_id"/>-->
-        <!--<unique-column name="user_keyword_set_key"/>-->
-        <!--<unique-column name="jobsite_key" size="20"/>-->
-        <!--<unique-column name="app_run_id" size="15"/>-->
-        <!--</unique>-->
-
-        <!--<column name="user_search_site_run_id" phpName="UserSearchSiteRunId" type="integer" required="true"-->
-                <!--autoIncrement="true"/>-->
-        <!--<unique>-->
-            <!--<unique-column name="user_search_site_run_id"/>-->
-        <!--</unique>-->
-
         <column name="user_search_site_run_key" phpName="UserSearchSiteRunKey" type="varchar" size="100" required="true"
                 primaryString="true"/>
         <behavior name="sluggable">
@@ -411,6 +369,10 @@
             <parameter name="permanent" value="true"/>
         </behavior>
 
+        <column name="date_started" phpName="StartedAt" type="timestamp"/>
+
+        <column name="date_ended" phpName="EndedAt" type="timestamp"/>
+
         <column name="search_start_url" phpName="SearchStartUrl" type="varchar" size="1024"/>
 
         <column name="run_result_code" phpName="RunResultCode" type="enum"
@@ -418,9 +380,7 @@
 
         <column name="run_error_details" phpName="RunErrorDetails" type="array"/>
 
-
-        <column name="date_started" phpName="StartedAt" type="timestamp"/>
-        <column name="date_ended" phpName="EndedAt" type="timestamp"/>
+        <column name="run_error_page_html" phpName="RunErrorPageHtml" type="longvarchar"/>
 
         <!-- ~~~~~~~~~  FOREIGN KEYS ~~~~~~~~~~~~~~~~  -->
 
@@ -459,15 +419,8 @@
 
 
     <table name="user_job_match" phpName="UserJobMatch" isCrossRef="true">
-        <column name="user_id" phpName="UserId" type="integer" required="true" primaryKey="true"/>
-        <foreign-key foreignTable="user" onDelete="cascade" phpName="UserFromUJM">
-            <reference local="user_id" foreign="user_id"/>
-        </foreign-key>
 
-        <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true" primaryKey="true"/>
-        <foreign-key foreignTable="jobposting" onDelete="cascade" phpName="JobPostingFromUJM">
-            <reference local="jobposting_id" foreign="jobposting_id"/>
-        </foreign-key>
+        <!-- ~~~~~~~~~  ALTERNATE KEY ~~~~~~~~~~~~~~~~  -->
 
         <column name="user_job_match_id" phpName="UserJobMatchId" type="integer" required="true"
                 autoIncrement="true"/>
@@ -475,16 +428,49 @@
             <unique-column name="user_job_match_id"/>
         </unique>
 
+        <!-- ~~~~~~~~~  PRIMARY KEY ~~~~~~~~~~~~~~~~  -->
+
+        <column name="user_id" phpName="UserId" type="integer" required="true" primaryKey="true"/>
+
+        <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true" primaryKey="true"/>
+
+        <!-- ~~~~~~~~~  OTHER COLUMNS  ~~~~~~~~~~~~~~~~  -->
+
+        <column name="is_job_match" phpName="IsJobMatch" type="boolean"/>
+
+        <column name="is_excluded" phpName="IsExcluded" type="boolean"/>
+
+        <column name="out_of_user_area" phpName="OutOfUserArea" type="boolean"/>
+
+        <column name="matched_user_keywords" phpName="MatchedUserKeywords" type="array"/>
+
+        <column name="matched_negative_title_keywords" phpName="MatchedNegativeTitleKeywords" type="array"/>
+
+        <column name="matched_negative_company_keywords" phpName="MatchedNegativeCompanyKeywords" type="array"/>
+
         <column name="user_notification_state" phpName="UserNotificationState" type="enum"
                 valueSet="not-ready,ready,sent" defaultValue="not-ready"/>
-        <column name="is_job_match" phpName="IsJobMatch" type="boolean"/>
-        <column name="is_excluded" phpName="IsExcluded" type="boolean"/>
-        <column name="is_include_in_notifications" phpName="IsIncludeInNotifications" type="boolean"/>
-        <column name="matched_user_keywords" phpName="MatchedUserKeywords" type="array"/>
-        <column name="matched_negative_title_keywords" phpName="MatchedNegativeTitleKeywords" type="array"/>
-        <column name="matched_negative_company_keywords" phpName="MatchedNegativeCompanyKeywords" type="array"/>
-        <column name="out_of_user_area" phpName="OutOfUserArea" type="boolean"/>
-        <column name="app_run_id" phpName="AppRunId" type="varchar" size="75"/>
+
+        <column name="set_by_user_search_site_run_key" phpName="SetByUserSearchSiteRunKey" type="varchar" size="100"/>
+        <!--<unique>-->
+            <!--<unique-column name="user_job_match_id"/>-->
+            <!--<unique-column name="set_by_user_search_site_run_key" size="100"/>-->
+        <!--</unique>-->
+
+        <!-- ~~~~~~~~~  FOREIGN KEYS ~~~~~~~~~~~~~~~~  -->
+
+        <foreign-key foreignTable="user" onDelete="cascade" phpName="UserFromUJM">
+            <reference local="user_id" foreign="user_id"/>
+        </foreign-key>
+
+        <foreign-key foreignTable="jobposting" onDelete="cascade" phpName="JobPostingFromUJM">
+            <reference local="jobposting_id" foreign="jobposting_id"/>
+        </foreign-key>
+
+        <!--<foreign-key foreignTable="user_search_site_runs" onDelete="cascade" phpName="UserSearchSiteRunFromUJM">-->
+            <!--<reference local="set_by_user_search_site_run_key" foreign="user_search_site_run_key"/>-->
+        <!--</foreign-key>-->
+
     </table>
 
 </database>
