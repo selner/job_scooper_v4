@@ -229,7 +229,7 @@ class SearchBuilder
         // let's start with the searches specified with the details in the the config.ini
         //
         $userSearches = getConfigurationSetting('user_searches');
-        $includedSites = JobSitePluginBuilder::getIncludedJobSites();
+        $includedSites = JobSitePluginBuilder::getIncludedJobSites($fOptimizeBySiteRunOrder=true);
 	    if (empty($userSearches) || empty($includedSites))
 		    return;
 

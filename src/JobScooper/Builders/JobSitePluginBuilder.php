@@ -54,7 +54,7 @@ class JobSitePluginBuilder
 	    return $sitesBySiteKey;
     }
 
-    static function getIncludedJobSites()
+    static function getIncludedJobSites($fOptimizeBySiteRunOrder=false)
     {
 	    $sites = getCacheAsArray("included_jobsites");
 	    if (is_null($sites))
@@ -63,6 +63,21 @@ class JobSitePluginBuilder
 		    JobSitePluginBuilder::setIncludedJobSites($sites);
 	    }
 
+	    if($fOptimizeBySiteRunOrder === true)
+	    {
+	    	$sitesToSort = array();
+	    	foreach($sites as $k => $v)
+	    		$sitesToSort[$k] = $v->toArray();
+		    $tmpArrSorted = array_orderby($sitesToSort, "isDisabled", SORT_DESC, "ResultsFilterType", SORT_ASC);
+
+		    // now use the temp sorted array's keys and replace the
+		    // values with the actual JobSite objects instead of the
+		    // array version we used for sorting
+		    //
+		    $sorted = array_replace($tmpArrSorted, $sites);
+
+		    return $sorted;
+	    }
 	    return $sites;
     }
 

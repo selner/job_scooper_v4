@@ -16,6 +16,43 @@
  */
 
 
+/**
+ *
+ * Pass the array, followed by the column names and sort flags
+ * $sorted = array_orderby($data, 'volume', SORT_DESC, 'edition', SORT_ASC);
+ *
+ * The sorted array is now in the return value of the function instead of being passed by reference.
+ *
+ * @link http://php.net/manual/en/function.array-multisort.php#100534
+ * @author jimpoz at jimpoz dot com ¶
+ *
+ * @param mixed
+ *
+ * @return int|mixed
+ */
+function array_orderby()
+{
+	$args = func_get_args();
+	$data = array_shift($args);
+	foreach ($args as $n => $field) {
+		if (is_string($field)) {
+			$tmp = array();
+			foreach ($data as $key => $row)
+				$tmp[$key] = $row[$field];
+			$args[$n] = $tmp;
+		}
+	}
+	$args[] = &$data;
+	call_user_func_array('array_multisort', $args);
+	return array_pop($args);
+}
+
+
+/**
+ * @param $arrToCount
+ *
+ * @return int|mixed
+ */
 function countAssociativeArrayValues($arrToCount)
 {
     if ($arrToCount == null || !is_array($arrToCount)) {
