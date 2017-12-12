@@ -189,21 +189,18 @@ class NotifierJobAlerts extends JobsMailSender
         $arrMatchedAndNotExcludedJobs = array_filter($arrMatchedJobs, "isUserJobMatchAndNotExcluded");
 
         $detailsMatchOnlyCSV = $this->_filterAndWriteListToFile_($arrMatchedAndNotExcludedJobs, "Matches", "CSV");
-        $detailsMatchExcludedCSV = $this->_filterAndWriteListToFile_($arrExcludedJobs, "ExcludedMatches", "CSV");
+	    if(!empty($detailsMatchOnlyCSV))
+		    $arrResultFilesToCombine[] = $detailsMatchOnlyCSV;
+	    $detailsExcludedCSVFile = $this->_filterAndWriteListToFile_($arrExcludedJobs, "ExcludedJobs", "CSV");
+	    if(!empty($detailsExcludedCSVFile) && (filesize($detailsExcludedCSVFile) < 10 * 1024 * 1024) || isDebug()) {
+			    $arrResultFilesToCombine[] = $detailsExcludedCSVFile;
+	    }
         $detailsHTMLFile = $this->_filterAndWriteListToFile_($arrMatchedAndNotExcludedJobs, "Matches", "HTML");
-
-        $arrResultFilesToCombine[] = $detailsMatchOnlyCSV;
-
-        $detailsExcludedCSVFile = $this->_filterAndWriteListToFile_($arrExcludedJobs, "-finalexcludedjobs", "CSV");
-        if ((filesize($detailsExcludedCSVFile) < 10 * 1024 * 1024) || isDebug()) {
-	        $arrResultFilesToCombine[] = $detailsMatchExcludedCSV;
-        }
 
         LogSectionHeader("" . PHP_EOL, \C__SECTION_END__, \C__NAPPSECONDLEVEL__);
 
         $xlsOutputFile = $this->_combineCSVsToExcel($detailsMainResultsXLSFile, $arrResultFilesToCombine);
         array_unshift($arrFilesToAttach, $xlsOutputFile);
-
 
         LogSectionHeader("Generating text email content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
 
@@ -359,10 +356,10 @@ class NotifierJobAlerts extends JobsMailSender
 
     private function _filterAndWriteListToFile_($arrJobsList, $strFileNameBase, $strExt = "CSV")
     {
-        $filePath = getDefaultJobsOutputFileName("", $strFileNameBase, $strExt, "_", 'notifications');
+	    if(countAssociativeArrayValues($arrJobsList) == 0) return null;
 
+	    $filePath = getDefaultJobsOutputFileName("", $strFileNameBase, $strExt, "_", 'notifications');
 
-        if(countAssociativeArrayValues($arrJobsList) == 0) return $arrJobsList;
 
         $this->writeRunsJobsToFile($filePath, $arrJobsList);
 
