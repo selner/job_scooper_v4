@@ -130,21 +130,21 @@ Class LoggingManager extends \Monolog\Logger
 
         $today = getTodayAsString("-");
         $mainLog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$today}.log";
-        $this->_handlersByType['logfile'] = new StreamHandler($mainLog, $logLevel);
+        $this->_handlersByType['logfile'] = new StreamHandler($mainLog, $logLevel, $bubble = true);
         $this->pushHandler($this->_handlersByType['logfile']);
         $this->logLine("Logging started to logfile at {$mainLog}", C__DISPLAY_ITEM_DETAIL__);
 
         $now = getNowAsString("-");
         $csvlog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}-run_errors.csv";
         $fpcsv = fopen($csvlog, "w");
-        $this->_handlersByType['csverrors'] = new CSVLogHandler($fpcsv, Logger::WARNING);
+        $this->_handlersByType['csverrors'] = new CSVLogHandler($fpcsv, Logger::WARNING, $bubble = true);
         $this->pushHandler($this->_handlersByType['csverrors'] );
         $this->logLine("Logging started to CSV file at {$csvlog}", C__DISPLAY_ITEM_DETAIL__);
 
         $now = getNowAsString("-");
         $dedupeLog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}-dedupe_log_errors.csv";
         $this->_dedupeHandle = fopen($dedupeLog, "w");
-        $this->_handlersByType['dedupe_email'] = new DeduplicationHandler(new ErrorEmailLogHandler(Logger::WARNING, true),  $deduplicationStore = $dedupeLog, $deduplicationLevel = Logger::WARNING, $time = 60, $bubble = true);
+        $this->_handlersByType['dedupe_email'] = new DeduplicationHandler(new ErrorEmailLogHandler(Logger::ERROR, true),  $deduplicationStore = $dedupeLog, $deduplicationLevel = Logger::ERROR, $time = 60, $bubble = true);
         $this->pushHandler($this->_handlersByType['dedupe_email']);
         $this->logLine("Logging started for deduped email log file at {$dedupeLog}", C__DISPLAY_ITEM_DETAIL__);
 

@@ -42,6 +42,11 @@ const C__DISPLAY_FUNCTION__= 700;
 const C__DISPLAY_SUMMARY__ = 750;
 
 
+/**
+ * @param array $context
+ *
+ * @return array
+ */
 function getDebugContext($context=array())
 {
 	//Debug backtrace called. Find next occurence of class after Logger, or return calling script:
@@ -93,6 +98,11 @@ function getDebugContext($context=array())
 }
 
 
+/**
+ * @param       $msg
+ * @param int   $scooper_level
+ * @param array $context
+ */
 function LogLine($msg, $scooper_level=\C__DISPLAY_NORMAL__, $context=array())
 {
 	if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
@@ -105,6 +115,11 @@ function LogLine($msg, $scooper_level=\C__DISPLAY_NORMAL__, $context=array())
 	}
 }
 
+/**
+ * @param $headerText
+ * @param $nSectionLevel
+ * @param $nType
+ */
 function LogSectionHeader($headerText, $nSectionLevel, $nType)
 {
 	if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
@@ -117,12 +132,19 @@ function LogSectionHeader($headerText, $nSectionLevel, $nType)
 	}
 }
 
+/**
+ * @param $msg
+ */
 function LogError($msg)
 {
 	$context = getDebugContext();
 	LogLine($msg, \C__DISPLAY_ERROR__, $context);
 }
 
+/**
+ * @param     $msg
+ * @param int $scooper_level
+ */
 function LogDebug($msg, $scooper_level=C__DISPLAY_NORMAL__)
 {
 	if(isDebug())
@@ -139,6 +161,10 @@ function LogDebug($msg, $scooper_level=C__DISPLAY_NORMAL__)
 	}
 }
 
+/**
+ * @param       $msg
+ * @param array $context
+ */
 function LogPlainText($msg, $context = array())
 {
 	$textParts = preg_split("/[\\r\\n|" . PHP_EOL . "]/", $msg);
@@ -148,5 +174,50 @@ function LogPlainText($msg, $context = array())
 		foreach ($textParts as $part) {
 			LogLine($part);
 		}
+	}
+}
+/**
+ * @param      $ex
+ * @param null $fmtLogMsg
+ * @param bool $raise
+ *
+ * @throws \Exception
+ */
+
+function handleException(Exception $ex, $fmtLogMsg= null, $raise=true)
+{
+	$context = getDebugContext();
+	$toThrow = $ex;
+	if (empty($toThrow))
+		$toThrow = new Exception($fmtLogMsg);
+
+
+	$msg = $fmtLogMsg;
+	if (!is_null($toThrow) && !is_null($fmtLogMsg) && !is_null($ex) && strlen($fmtLogMsg) > 0)
+	{
+		if(stristr($fmtLogMsg, "%s") !== false)
+		{
+			$msg = sprintf($fmtLogMsg, $toThrow->getMessage());
+			$toThrow = new Exception($msg, null, $ex);
+		}
+		else
+		{
+			$msg = $fmtLogMsg . PHP_EOL . " ~ " . $toThrow->getMessage();
+		}
+	}
+	elseif(!is_null($ex))
+	{
+		$msg = $toThrow->getMessage();
+	}
+
+	LogLine(PHP_EOL . PHP_EOL . PHP_EOL);
+	LogLine($msg, \C__DISPLAY_ERROR__, $context);
+
+	LogBacktrace(null);
+
+	LogLine(PHP_EOL . PHP_EOL . PHP_EOL);
+
+	if ($raise == true) {
+		throw $toThrow;
 	}
 }

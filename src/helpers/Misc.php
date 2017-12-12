@@ -62,41 +62,6 @@ function exportToDebugJSON($obj, $strBaseFileName)
 
 }
 
-function handleException($ex, $fmtLogMsg = null, $raise = true)
-{
-    $context = getDebugContext();
-    $toThrow = $ex;
-    if (is_null($toThrow))
-        $toThrow = new Exception($fmtLogMsg);
-
-
-    $msg = $fmtLogMsg;
-    if (!is_null($toThrow) && !is_null($fmtLogMsg) && !is_null($ex) && strlen($fmtLogMsg) > 0)
-    {
-        if(stristr($fmtLogMsg, "%s") !== false)
-        {
-            $msg = sprintf($fmtLogMsg, $toThrow->getMessage());
-            $toThrow = new Exception($msg, null, $ex);
-        }
-        else
-        {
-            $msg = $fmtLogMsg . PHP_EOL . " ~ " . $toThrow->getMessage();
-        }
-    }
-    elseif(!is_null($ex))
-    {
-        $msg = $toThrow->getMessage();
-    }
-
-    LogLine(PHP_EOL . PHP_EOL . PHP_EOL);
-    LogLine($msg, \C__DISPLAY_ERROR__, $context);
-    LogLine(PHP_EOL . PHP_EOL . PHP_EOL);
-
-    if ($raise == true) {
-        throw $toThrow;
-    }
-}
-
 function noJobStringMatch($var, $matchString)
 {
     if(is_null($matchString) || strlen($matchString) == 0)
