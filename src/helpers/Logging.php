@@ -213,8 +213,8 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true)
 	LogLine(PHP_EOL . PHP_EOL . PHP_EOL);
 	LogLine($msg, \C__DISPLAY_ERROR__, $context);
 
-	LogBacktrace(null);
-
+//	LogBacktrace(null);
+//
 	LogLine(PHP_EOL . PHP_EOL . PHP_EOL);
 
 	if ($raise == true) {
