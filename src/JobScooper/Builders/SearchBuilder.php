@@ -34,20 +34,23 @@ class SearchBuilder
 
 	public function initializeSearches()
     {
-        //
-        // Create searches needed to run all the keyword sets
-        //
+
+	    $this->_setUserSearches();
+
+	    //
+	    // Create searches needed to run all the keyword sets
+	    //
+	    $this->_generateUserSearchSiteRuns();
+
+	    JobSitePluginBuilder::setSitesAsExcluded(getConfigurationSetting("config_excluded_sites"));
+
 	    JobSitePluginBuilder::filterJobSitesByCountryCodes(getConfigurationSetting("country_codes"));
+
+	    $this->_filterJobSitesThatAreExcluded();
 
 	    //
 	    // Filter out sites excluded in the user's config file
 	    //
-	    JobSitePluginBuilder::setSitesAsExcluded(getConfigurationSetting("config_excluded_sites"));
-
-	    $this->_setUserSearches();
-
-	    $this->_generateUserSearchSiteRuns();
-
 	    $this->_filterJobSitesThatShouldNotRunYet();
 
 	    $this->_filterUserSearchesThatShouldNotRunYet();
@@ -101,71 +104,108 @@ class SearchBuilder
 
     }
 
-    private function _filterJobSitesThatShouldNotRunYet()
-    {
+	private function _filterJobSitesThatShouldNotRunYet()
+	{
 
-	    $sitesToSkip = array();
+		$sitesToSkip = array();
 
-	    $completedSitesAllOnly = UserSearchSiteRunQuery::create()
-		    ->useJobSiteFromUSSRQuery()
-		    ->filterByResultsFilterType("all-only")
-		    ->withColumn("JobSiteFromUSSR.ResultsFilterType", "ResultsFilterType")
-		    ->endUse()
-		    ->addAsColumn('LastCompleted', 'MAX(user_search_site_run.date_ended)')
-		    ->select(array('JobSiteKey', 'ResultsFilterType', 'LastCompleted'))
-		    ->filterByRunResultCode("successful")
-		    ->groupBy(array("JobSiteKey", "ResultsFilterType"))
-		    ->find()
-		    ->getData();
+		$completedSitesAllOnly = UserSearchSiteRunQuery::create()
+			->useJobSiteFromUSSRQuery()
+			->filterByResultsFilterType("all-only")
+			->withColumn("JobSiteFromUSSR.ResultsFilterType", "ResultsFilterType")
+			->endUse()
+			->addAsColumn('LastCompleted', 'MAX(user_search_site_run.date_ended)')
+			->select(array('JobSiteKey', 'ResultsFilterType', 'LastCompleted'))
+			->filterByRunResultCode("successful")
+			->groupBy(array("JobSiteKey", "ResultsFilterType"))
+			->find()
+			->getData();
 
-	    if (!empty($completedSitesAllOnly)) {
-		    $sitesToSkip = array_merge($sitesToSkip, $completedSitesAllOnly);
-	    }
+		if (!empty($completedSitesAllOnly)) {
+			$sitesToSkip = array_merge($sitesToSkip, $completedSitesAllOnly);
+		}
 
-	    $searchLocations = getConfigurationSetting('search_locations');
-	    foreach ($searchLocations as $location) {
-		    $sitesAllLocationOnly = UserSearchSiteRunQuery::create()
-			    ->useJobSiteFromUSSRQuery()
-			    ->filterByResultsFilterType("all-by-location")
-			    ->withColumn("JobSiteFromUSSR.ResultsFilterType", "ResultsFilterType")
-			    ->endUse()
-			    ->addAsColumn('LastCompleted', 'MAX(user_search_site_run.date_ended)')
-			    ->select(array('JobSiteKey', 'ResultsFilterType', 'LastCompleted'))
-			    ->filterByRunResultCode("successful")
-			    ->filterByGeoLocationFromUSSR($location)
-			    ->groupBy(array("JobSiteKey", "ResultsFilterType"))
-			    ->find()
-			    ->getData();
+		$searchLocations = getConfigurationSetting('search_locations');
+		foreach ($searchLocations as $location) {
+			$sitesAllLocationOnly = UserSearchSiteRunQuery::create()
+				->useJobSiteFromUSSRQuery()
+				->filterByResultsFilterType("all-by-location")
+				->withColumn("JobSiteFromUSSR.ResultsFilterType", "ResultsFilterType")
+				->endUse()
+				->addAsColumn('LastCompleted', 'MAX(user_search_site_run.date_ended)')
+				->select(array('JobSiteKey', 'ResultsFilterType', 'LastCompleted'))
+				->filterByRunResultCode("successful")
+				->filterByGeoLocationFromUSSR($location)
+				->groupBy(array("JobSiteKey", "ResultsFilterType"))
+				->find()
+				->getData();
 
-		    if (!empty($sitesAllLocationOnly)) {
-			    $sitesToSkip = array_merge($sitesToSkip, $sitesAllLocationOnly);
-		    }
-	    }
-	    $sitesToSkip = array_column($sitesToSkip, "LastCompleted", "JobSiteKey");
+			if (!empty($sitesAllLocationOnly)) {
+				$sitesToSkip = array_merge($sitesToSkip, $sitesAllLocationOnly);
+			}
+		}
+		$sitesToSkip = array_column($sitesToSkip, "LastCompleted", "JobSiteKey");
 
-	    // Filter sites that can be skipped by date.
-	    //
-	    // Remove any that ran before the cache cut off time, not since that time.
-	    // We are left with only those we should skip, aka the ones that
-	    // ran after our cutoff time
-	    //
-	    foreach ($sitesToSkip as $key => $result) {
-		    if (new \DateTime($result) <= $this->_cacheCutOffTime)
-			    unset($sitesToSkip[$key]);
-	    }
+		// Filter sites that can be skipped by date.
+		//
+		// Remove any that ran before the cache cut off time, not since that time.
+		// We are left with only those we should skip, aka the ones that
+		// ran after our cutoff time
+		//
+		foreach ($sitesToSkip as $key => $result) {
+			if (new \DateTime($result) <= $this->_cacheCutOffTime)
+				unset($sitesToSkip[$key]);
+		}
 
-	    $searchesByJobsite = getConfigurationSetting("user_search_site_runs");
-	    if (empty($searchesByJobsite))
-		    return;
-	    $keepThese = array_diff_key($searchesByJobsite, $sitesToSkip);
-	    unset($GLOBALS[JOBSCOOPER_CONFIGSETTING_ROOT]["user_search_site_runs"]);
-	    setConfigurationSetting("user_search_site_runs", $keepThese);
+		$searchesByJobsite = getConfigurationSetting("user_search_site_runs");
+		if (empty($searchesByJobsite))
+			return;
+		$keepThese = array_diff_key($searchesByJobsite, $sitesToSkip);
 
-	    $skipThese = array_intersect_key($searchesByJobsite, $sitesToSkip);
-	    LogLine("Skipping the following sites & searches because they have run since " . $this->_cacheCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipThese));
-    }
+		$skipTheseSearches = array_intersect_key($searchesByJobsite, $sitesToSkip);
+		foreach($skipTheseSearches as $siteKey => $siteSearches)
+		{
+			if(!empty($siteSearches))
+				foreach($siteSearches as $search)
+				{
+					$search->setRunResultCode("skipped");
+					$search->save();
+				}
+		}
+		unset($GLOBALS[JOBSCOOPER_CONFIGSETTING_ROOT]["user_search_site_runs"]);
+		setConfigurationSetting("user_search_site_runs", $keepThese);
 
-    private function _filterUserSearchesThatShouldNotRunYet()
+		LogLine("Skipping the following sites & searches because they have run since " . $this->_cacheCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipTheseSearches));
+	}
+
+	private function _filterJobSitesThatAreExcluded()
+	{
+		$allSites = JobSitePluginBuilder::getAllJobSites();
+		$includedSites = JobSitePluginBuilder::getIncludedJobSites();
+
+		$keysExcludedSites = array_diff_key($allSites, $includedSites);
+		$searchesByJobsite = getConfigurationSetting("user_search_site_runs");
+		if (empty($searchesByJobsite))
+			return;
+
+		foreach($searchesByJobsite as $k => $siteSearches)
+		{
+			if(!empty($siteSearches))
+				foreach($siteSearches as $search)
+				{
+					if(in_array($search->getJobSiteKey(), $keysExcludedSites))
+					{
+						$search->setRunResultCode("excluded");
+						$search->save();
+						unset($searchesByJobsite[$k]);
+					}
+				}
+		}
+		unset($GLOBALS[JOBSCOOPER_CONFIGSETTING_ROOT]["user_search_site_runs"]);
+		setConfigurationSetting("user_search_site_runs", $searchesByJobsite);
+	}
+
+	private function _filterUserSearchesThatShouldNotRunYet()
     {
 
 	    $completedSearchesUserRecent = UserSearchSiteRunQuery::create()
@@ -213,13 +253,16 @@ class SearchBuilder
 					    $searchesToRunBySiteNewOrder[$jobSiteKey] = array();
 				    $searchesToRunBySiteNewOrder[$jobSiteKey][$ussrKey] = $searchRun;
 			    }
+			    else
+			    {
+				    $searchRun->setRunResultCode("skipped");
+				    $searchRun->save();
+			    }
 		    }
 	    }
 
 	    unset($GLOBALS[JOBSCOOPER_CONFIGSETTING_ROOT]["user_search_site_runs"]);
 	    setConfigurationSetting("user_search_site_runs", $searchesToRunBySiteNewOrder);
-
-
     }
 
 
