@@ -107,12 +107,6 @@ function getAllMatchesForUserNotification($jobsiteKey=null)
         ->filterByUserFromUJM($user)
         ->joinWithJobPostingFromUJM();
 
-//    $appRunId = getConfigurationSetting('app_run_id');
-//    if(!is_null($appRunId))
-//    {
-//        $query->filterBy("AppRunId",$appRunId);
-//    }
-
     if(!empty($jobsiteKey))
     {
         $query->useJobPostingFromUJMQuery()
