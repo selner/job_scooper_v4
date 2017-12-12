@@ -150,7 +150,7 @@ class SearchBuilder
 	    // ran after our cutoff time
 	    //
 	    foreach ($sitesToSkip as $key => $result) {
-		    if (new \DateTime($result) <= $this->_cacheCutOffTimecacheCutOffTime)
+		    if (new \DateTime($result) <= $this->_cacheCutOffTime)
 			    unset($sitesToSkip[$key]);
 	    }
 
