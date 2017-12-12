@@ -41,7 +41,7 @@ abstract class AbstractMadgexATS extends \JobScooper\Plugins\Classes\AjaxHtmlSim
         $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
         $location = $searchDetails->getGeoLocation();
         $ccode = "";
-        if(!is_null($location))
+        if(!empty($location))
             $ccode = $location->getCountryCode();
         $strURL = str_ireplace("***COUNTRYCODE***", $ccode, $strURL);
 
