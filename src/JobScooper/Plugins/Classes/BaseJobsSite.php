@@ -195,7 +195,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                     $this->_setSearchResult_($search, true);
                 } catch (Exception $ex) {
                     $this->_setSearchResult_($search, false, new Exception("Unable to download jobs: " .strval($ex)));
-                    throw $ex;
+                    handleException($ex);
                 } finally {
                     $search->save();
                     setConfigurationSetting('current_user_search_details', null);
