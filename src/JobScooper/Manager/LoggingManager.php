@@ -172,7 +172,7 @@ Class LoggingManager extends \Monolog\Logger
     {
         if($this->_doLogContext && count($context) == 0)
             $context = getDebugContext();
-        else
+        elseif(is_array($context))
             $context = array_merge_recursive_distinct($context, getDebugContext());
 
         $strLineBeginning = '';
@@ -180,79 +180,27 @@ Class LoggingManager extends \Monolog\Logger
         $logLevel = null;
         switch ($varDisplayStyle)
         {
-            case  C__DISPLAY_FUNCTION__:
-//                $strLineBeginning = '<<<<<<<< function "';
-//                $strLineEnd = '" called >>>>>>> ';
-                $logLevel = "debug";
-                break;
-
             case C__DISPLAY_WARNING__:
-//                $strLineBeginning = "\r\n"."\r\n".'^^^^^^^^^^ "';
-//                $strLineEnd = '" ^^^^^^^^^^ '."\r\n";
                 $logLevel = "warning";
                 break;
 
+	        case C__DISPLAY_NORMAL__:
             case C__DISPLAY_SUMMARY__:
-
-//                $strLineBeginning = "\r\n"."************************************************************************************"."\r\n". "\r\n";
-//                $strLineEnd = "\r\n"."\r\n"."************************************************************************************"."\r\n";
-
                 $logLevel = "info";
                 break;
-
-
-            case C__DISPLAY_SECTION_START__:
-                $strLineBeginning = "\r\n"."####################################################################################"."\r\n". "\r\n";
-                $strLineEnd = "\r\n"."\r\n"."####################################################################################"."\r\n";
-
-                $logLevel = "info";
-                break;
-
-            case C__DISPLAY_SECTION_END__:
-                $strLineBeginning = "\r\n"."~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"."\r\n". "\r\n";
-                $strLineEnd = "\r\n"."\r\n"."~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"."\r\n";
-
-                $logLevel = "info";
-                break;
-
 
             case C__DISPLAY_RESULT__:
                 $strLineBeginning = '==> ';
-
                 $logLevel = "info";
                 break;
 
             case C__DISPLAY_ERROR__:
-//                $strLineBeginning = '!!!!! ';
                 $logLevel = "error";
                 break;
 
             case C__DISPLAY_ITEM_START__:
-//                $strLineBeginning = '     ---> ';
-
-                $logLevel = "info";
-                break;
-
             case C__DISPLAY_ITEM_DETAIL__:
-//                $strLineBeginning = '     ';
-
-                $logLevel = "info";
-                break;
-
             case C__DISPLAY_ITEM_RESULT__:
-//                $strLineBeginning = '======> ';
-
-                $logLevel = "info";
-                break;
-
-            case C__DISPLAY_MOMENTARY_INTERUPPT__:
-//                $strLineBeginning = '......';
-                $logLevel = "warning";
-                break;
-
-            case C__DISPLAY_NORMAL__:
-//                $strLineBeginning = '';
-
                 $logLevel = "info";
                 break;
 
@@ -285,85 +233,55 @@ Class LoggingManager extends \Monolog\Logger
     {
 
         if(parent::log($level, $message, $context) === false)
-            print($message ."\r\n");
-
-
+            print($message .PHP_EOL . PHP_EOL );
     }
 
-    function logSectionHeader($headerText, $nSectionLevel, $nType)
-    {
+    private $_openSections = 0;
 
-        $strPaddingBefore = "";
-        $strPaddingAfter = "";
+	function startLogSection($headerText)
+	{
+		return $this->_logSectionHeader($headerText, C__SECTION_BEGIN__);
+	}
 
-        //
-        // Set the section header box style and intro/outro padding based on it's level
-        // and whether its a section beginning header or an section ending.
-        //
-        switch ($nSectionLevel)
-        {
-
-            case(C__NAPPTOPLEVEL__):
-                if($nType == C__SECTION_BEGIN__) { $strPaddingBefore = "\r\n"."\r\n"; }
-                $strSeparatorChars = "#";
-                if($nType == C__SECTION_END__) { $strPaddingAfter = "\r\n"."\r\n"; }
-                break;
-
-            case(C__NAPPFIRSTLEVEL__):
-                if($nType == C__SECTION_BEGIN__) { $strPaddingBefore = ''; }
-                $strSeparatorChars = "=";
-                if($nType == C__SECTION_END__) { $strPaddingAfter = ''; }
-                break;
-
-            case(C__NAPPSECONDLEVEL__):
-                if($nType == C__SECTION_BEGIN__)  { $strPaddingBefore = ''; }
-                $strSeparatorChars = "-";
-                if($nType == C__SECTION_END__) { $strPaddingAfter = ''; }
-                break;
-
-            default:
-                $strSeparatorChars = ".";
-                break;
-        }
-
-        //
-        // Compute how wide the header box needs to be and then create a string of that length
-        // filled in with just the separator characters.
-        //
-        $nHeaderWidth = 80;
-        $fmtSeparatorString = "%'".$strSeparatorChars.($nHeaderWidth+3)."s\n";
-        $strSectionIntroSeparatorLine = sprintf($fmtSeparatorString, $strSeparatorChars);
+	function endLogSection($headerText)
+	{
+		return $this->_logSectionHeader($headerText, C__SECTION_END__);
+	}
 
 
+	private function _logSectionHeader($headerText, $nType)
+	{
 
-        if($nType == C__SECTION_BEGIN__)
-        {
-            $strSectionType = "  BEGIN:  ".$headerText;
-        } else
-        {
-            $strSectionType = "  END:    ".$headerText;
-        }
+		if ($nType == C__SECTION_BEGIN__)
+		{
+			$indentCount = $this->_openSections * 2;
+			$lineChar = strval($this->_openSections + 1);
+			$intro = "BEGIN: ";
+			$this->_openSections += 1;
+		}
+		else {
+			$this->_openSections -= 1;
+			$lineChar = strval($this->_openSections + 1);
+			$indentCount = $this->_openSections * 2;
+			$intro = "END: ";
+		}
 
+        $indent = sprintf("%-{$indentCount}s", "");
+		$numCharsSecLines = max((strlen($headerText) + 15), 80);
+		$sepLineFmt = "[%'{$lineChar}{$numCharsSecLines}s]";
 
-        //
-        // Output the section header
-        //
-        if($nType == C__SECTION_BEGIN__ || $nSectionLevel == C__NAPPTOPLEVEL__ )
-        {
-            logLine("{$strPaddingBefore}{$strSectionIntroSeparatorLine}{$strSectionType}");
-            $strLinesToPrint = $strSectionIntroSeparatorLine;
-            if($nSectionLevel == C__NAPPTOPLEVEL__ )
-            {
-                $strLinesToPrint .= $strPaddingAfter;
-            }
-            logLine($strLinesToPrint);
-        }
-        else // C__SECTION_END__ $strSectionType = "      Done.  ";}
-        {
-            logLine("");
-            logLine($strSectionType);
-            logLine($strSectionIntroSeparatorLine);
-        }
+		$sepLine = sprintf($sepLineFmt, "") . PHP_EOL;
+
+		$fmt = PHP_EOL . PHP_EOL .
+			"{$indent}{$sepLine}" . PHP_EOL .
+			"{$indent}%-5s%s%s " . PHP_EOL . PHP_EOL .
+			"{$indent}{$sepLine}" .
+			PHP_EOL;
+
+		$lineContent = sprintf($fmt, "", $intro, $headerText );
+
+		$this->log(LogLevel::INFO, $lineContent);
+
     }
 
 }

@@ -819,8 +819,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
             // get the url for the first page/items in the results
             if ($this->_checkInvalidURL_($searchDetails, $searchDetails->getSearchStartUrl()) == VALUE_NOT_SUPPORTED) return;
-
-            LogLine(("Starting data pull for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]"), \C__DISPLAY_ITEM_RESULT__);
+	        startLogSection("Starting data pull for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]");
 
             if ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__) {
                 $this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
@@ -868,7 +867,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 handleException($ex, $strError, false);
             }
         } finally {
-            LogSectionHeader(("Finished data pull for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]"), \C__NAPPTOPLEVEL__, \C__SECTION_END__);
+            endLogSection("Finished data pull for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]");
         }
 
         if (!is_null($ex)) {

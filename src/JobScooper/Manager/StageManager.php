@@ -45,16 +45,11 @@ class StageManager
             if (!empty($arrRunStages)) {
 
 	            foreach ($arrRunStages as $stage) {
-                    LogLine("StageManager starting stage " . $stage, \C__DISPLAY_SECTION_START__);
                     $stageFunc = "doStage" . $stage;
                     try {
                         call_user_func(array($this, $stageFunc));
                     } catch (\Exception $ex) {
                         throw new \Exception("Error:  failed to call method \$this->" . $stageFunc . "() for " . $stage . " from option --StageProcessor " . join(",", $arrRunStages) . ".  Error: " . $ex);
-                    }
-                    finally
-                    {
-                        LogLine("StageManager ended stage " . $stage, \C__DISPLAY_SECTION_END__);
                     }
                 }
             } else {
@@ -88,7 +83,7 @@ class StageManager
     public function doStage1()
     {
 
-        LogLine("Stage 1: Downloading Latest Matching Jobs ", \C__DISPLAY_ITEM_RESULT__);
+        startLogSection("Stage 1: Downloading Latest Matching Jobs ");
 
         //
         // let's start with the searches specified with the details in the the config.ini
@@ -120,7 +115,7 @@ class StageManager
                     // Add the user's searches to the plugin
                     //
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    LogLine("Setting up " . count($searches) . " search(es) for ". $jobsiteKey . "...", \C__DISPLAY_SECTION_START__);
+                    startLogSection("Setting up " . count($searches) . " search(es) for ". $jobsiteKey . "...");
                     try
                     {
                         $site = $jobsites[$jobsiteKey];
@@ -132,7 +127,7 @@ class StageManager
                     }
                     finally
                     {
-                        LogLine("Search(es) added ". $jobsiteKey . ".", \C__DISPLAY_SECTION_END__);
+                        endLogSection(" added ". $jobsiteKey . " searches.");
                     }
 
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -142,7 +137,7 @@ class StageManager
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     try
                     {
-                        LogLine("Downloading updated jobs on " . count($searches) . " search(es) for ". $jobsiteKey . "...", \C__DISPLAY_SECTION_START__);
+                        startLogSection("Downloading updated jobs on " . count($searches) . " search(es) for ". $jobsiteKey . "...");
                         $site->getUpdatedJobsForAllSearches();
                     }
                     catch (\Exception $classError)
@@ -151,7 +146,7 @@ class StageManager
                     }
                     finally
                     {
-                        LogLine("Job downloads have ended for ". $jobsiteKey . ".", \C__DISPLAY_SECTION_END__);
+                        endLogSection("Job downloads have ended for ". $jobsiteKey . ".");
                     }
                 }
             } catch (\Exception $ex) {
@@ -162,13 +157,14 @@ class StageManager
             LogLine("No searches have been set to be run.", C__DISPLAY_WARNING__);
         }
 
+        endLogSection("Stage 1");
     }
 
 
     public function doStage2()
     {
         try {
-            LogLine("Stage 2:  Tokenizing Job Titles... ", \C__DISPLAY_SECTION_START__);
+            startLogSection("Stage 2:  Tokenizing Job Titles... ");
             $arrJobsList = getAllMatchesForUserNotification();
 
             if(is_null($arrJobsList) || count($arrJobsList) <= 0) {
@@ -204,7 +200,7 @@ class StageManager
         }
         finally
         {
-            LogLine("End of stage 2 (tokenizing titles).", \C__DISPLAY_NORMAL__);
+	        endLogSection("End of stage 2 (tokenizing titles)");
         }
 
     }
@@ -213,7 +209,7 @@ class StageManager
     {
         
         try {
-            LogLine("Stage 3:  Auto-marking all user job matches...", \C__DISPLAY_SECTION_START__);
+	        startLogSection("Stage 3:  Auto-marking all user job matches...");
             $marker = new JobsAutoMarker();
             $marker->markJobs();
         } catch (\Exception $ex) {
@@ -221,7 +217,7 @@ class StageManager
         }
         finally
         {
-            LogLine("End of stage 3 (auto-marking).", \C__DISPLAY_NORMAL__);
+            endLogSection("End of stage 3 (auto-marking)");
         }
     }
 
@@ -229,12 +225,16 @@ class StageManager
     {
         try {
 
-            LogLine("Stage 4: Notifying User", \C__DISPLAY_SECTION_START__);
+            startLogSection("Stage 4: Notifying User");
 
             $notifier = new NotifierJobAlerts();
             $notifier->processNotifications();
         } catch (\Exception $ex) {
             handleException($ex, null, true);
+        }
+        finally
+        {
+        	endLogSection("End of stage 4 (notifying user)");
         }
     }
 }

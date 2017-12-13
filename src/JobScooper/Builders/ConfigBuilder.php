@@ -61,7 +61,7 @@ class ConfigBuilder
 	    $debug = getConfigurationSetting("command_line_args.debug");
 	    setConfigurationSetting("debug", $debug);
 
-        LogDebug("Setting up application... ", \C__DISPLAY_SECTION_START__);
+        startLogSection("Setting up configuration... ");
 
         $now = new \DateTime();
         setConfigurationSetting('app_run_id', $now->format('Ymd_His_') .__APP_VERSION__);
@@ -91,14 +91,14 @@ class ConfigBuilder
         LogLine("Output folders configured: " . $strOutfileArrString, \C__DISPLAY_ITEM_DETAIL__);
 
 
-        LogLine("Loaded configuration details from " . $this->arrFileDetails['config_ini']->getPathname(), \C__DISPLAY_ITEM_DETAIL__);
+        endLogSection("Loaded configuration details from " . $this->arrFileDetails['config_ini']->getPathname());
 
-	    LogDebug("Configuring specific settings for this run... ", \C__DISPLAY_SECTION_START__);
+	    startLogSection("Configuring specific settings for this run... ");
         $this->_setupRunFromConfig_();
 
         setConfigurationSetting('number_days', 1);
 
-        LogLine("Completed configuration load.", \C__DISPLAY_SUMMARY__);
+        endLogSection("Finished setting up run.");
 
     }
 
@@ -212,10 +212,10 @@ class ConfigBuilder
 
         $this->_parseKeywordSetsFromConfig_();
 
-
+		startLogSection("Initializing user searches for this run");
 	    $srchmgr->initializeSearches();
+	    endLogSection(" User search initialization.");
 
-        LogDebug("All INI files loaded. Finalizing configuration for run...", \C__DISPLAY_SECTION_START__);
 
     }
 

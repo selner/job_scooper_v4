@@ -148,13 +148,15 @@ class NotifierJobAlerts extends JobsMailSender
 
     function processNotifications()
     {
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	    startLogSection("Processing user notification alerts");
+
+
+	    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //
         // Output the full jobs list into a file and into files for different cuts at the jobs list data
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        LogSectionHeader("Writing Results Files", \C__DISPLAY_SECTION_START__, \C__NAPPFIRSTLEVEL__);
-        LogSectionHeader("Files Sent To User", \C__DISPLAY_SECTION_START__, \C__NAPPSECONDLEVEL__);
         $class = null;
 
 
@@ -171,6 +173,7 @@ class NotifierJobAlerts extends JobsMailSender
         if(is_null($this->arrAllUnnotifiedJobs) || count($this->arrAllUnnotifiedJobs) <= 0)
         {
             LogLine("No new jobs found to notify user about.", C__DISPLAY_WARNING__);
+	        endLogSection(" User results notification.");
             return false;
         }
 
@@ -182,6 +185,8 @@ class NotifierJobAlerts extends JobsMailSender
         // Create a copy of the jobs list that is sorted by that value.
         //
         $arrMatchedJobs = array_filter($arrJobsToNotify, "isUserJobMatch");
+
+	    startLogSection("Writing Results Files to Send User");
 
         LogLine(PHP_EOL . "Writing final list of " . count($arrJobsToNotify) . " jobs to output files." . PHP_EOL, \C__DISPLAY_NORMAL__);
 
@@ -197,32 +202,35 @@ class NotifierJobAlerts extends JobsMailSender
 	    }
         $detailsHTMLFile = $this->_filterAndWriteListToFile_($arrMatchedAndNotExcludedJobs, "Matches", "HTML");
 
-        LogSectionHeader("" . PHP_EOL, \C__SECTION_END__, \C__NAPPSECONDLEVEL__);
-
         $xlsOutputFile = $this->_combineCSVsToExcel($detailsMainResultsXLSFile, $arrResultFilesToCombine);
         array_unshift($arrFilesToAttach, $xlsOutputFile);
 
-        LogSectionHeader("Generating text email content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
+	    endLogSection(" Results file generation.");
+
+
+
+
+	    startLogSection("Generating notification email contents...");
+
+        LogLine("Generating text email content for user");
 
         $strResultCountsText = $this->getListingCountsByPlugin("text", $arrJobsToNotify, $arrExcludedJobs);
         $strResultText = "Job Scooper Results for ". getRunDateRange() . PHP_EOL . $strResultCountsText . PHP_EOL;
+	    LogPlainText($strResultText, \C__DISPLAY_SUMMARY__);
 
-        LogSectionHeader("Generating html email content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
-
+        LogLine("Generating html email content for user" . PHP_EOL);
 
         $messageHtml = $this->getListingCountsByPlugin("html", $arrMatchedJobs, $arrExcludedJobs, $detailsHTMLFile);
 
         $messageHtml = $this->addMailCssToHTML($messageHtml);
         $subject = "New Job Postings: " . getRunDateRange();
 
-        LogSectionHeader("Generating text html content for user" . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
-
-        LogPlainText($strResultText, \C__DISPLAY_SUMMARY__);
+	    endLogSection("Email content ready to send.");
 
         //
         // Send the email notification out for the completed job
         //
-        LogSectionHeader("Sending email to user..." . PHP_EOL, \C__SECTION_BEGIN__, \C__NAPPSECONDLEVEL__);
+        startLogSection("Sending email to user...");
 
         try {
             $ret = $this->sendEmail($strResultText, $messageHtml, $arrFilesToAttach, $subject, "results");
@@ -243,10 +251,12 @@ class NotifierJobAlerts extends JobsMailSender
                         LogLine("Warning:  marked only " . $rowsAffected ." of " . count($arrToMarkNotified) ." UserJobMatch records as notified.");
                 }
             }
+	        endLogSection(" Email send completed...");
 
         } catch (Exception $ex)
         {
-            throw $ex;
+	        endLogSection(" Email send failed.");
+            handleException($ex);
         }
 
         //
@@ -261,9 +271,9 @@ class NotifierJobAlerts extends JobsMailSender
                 }
             }
         }
-        LogSectionHeader("" . PHP_EOL, \C__SECTION_END__, \C__NAPPSECONDLEVEL__);
 
-        LogLine(PHP_EOL."**************  DONE.  Cleaning up.  **************  ".PHP_EOL, \C__DISPLAY_NORMAL__);
+
+	    endLogSection(" User Results Notification.");
 
         return $ret;
     }
