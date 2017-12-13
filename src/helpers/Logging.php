@@ -40,19 +40,33 @@ const C__DISPLAY_SUMMARY__ = 750;
  *
  * @return array
  */
-function getDebugContext($context=array())
+function getDebugContext($context=array(), \Exception $thrownExc = null)
 {
+	$baseContext = [
+		'class_call' => "",
+		'exception_message' => "",
+		'exception_file' => "",
+		'exception_line' => "",
+//		'exception_trace' => "",
+		'channel' => "",
+		'jobsite' => ""
+	];
+	$context = array_merge($baseContext, $context);
+
 	//Debug backtrace called. Find next occurence of class after Logger, or return calling script:
 	$dbg = debug_backtrace();
 	$i = 0;
 	$jobsiteKey = null;
 	$usersearch = null;
+	$loggedBacktrace = array();
 
 	$class = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
 	while ($i < count($dbg) - 1 ) {
 		if (!empty($dbg[$i]['class']) && stripos($dbg[$i]['class'], 'LoggingManager') === false &&
 			(empty($dbg[$i]['function']) || !in_array($dbg[$i]['function'], array("getDebugContent", "handleException"))))
 		{
+			$loggedBacktrace = $dbg[$i];
+
 			$class = $dbg[$i]['class'] . "->" . $dbg[$i]['function'] ."()";
 			if(!empty($dbg[$i]['object']))
 			{
@@ -80,12 +94,21 @@ function getDebugContext($context=array())
 		$i++;
 	}
 
-	$context['channel'] = is_null($jobsiteKey) ? "default" : "plugins";
-	$context['class_call'] = $class;
-	$context['plugin_jobsite'] = $jobsiteKey;
-	$context['user_search_run_key'] = $usersearch;
-	$context['memory_usage'] = memory_get_usage() / 1024 / 1024;
 
+	$context['class_call'] = $class;
+	$context['channel'] = is_null($jobsiteKey) ? "default" : "plugins";
+	$context['jobsite'] = $jobsiteKey;
+//	$context['user_search_run_key'] = $usersearch,
+//	$context['memory_usage'] = memory_get_usage() / 1024 / 1024;
+
+
+	if(!empty($thrownExc))
+	{
+		$context['exception_message'] = $thrownExc->getMessage();
+		$context['exception_file'] = $thrownExc->getFile();
+		$context['exception_line'] = $thrownExc->getLine();
+//		$context['exception_trace'] = join("|", preg_split("/$/", encodeJSON($thrownExc->getTrace())));
+	}
 
 	return $context;
 }
@@ -147,10 +170,18 @@ function endLogSection($headerText)
 /**
  * @param $msg
  */
-function LogError($msg)
+function LogError($msg, $context=array())
 {
-	$context = getDebugContext();
-	LogLine($msg, \C__DISPLAY_ERROR__, $context);
+	$ctxt = getDebugContext($context);
+
+	if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
+	{
+		print($msg . "\r\n");
+	}
+	else
+	{
+		$GLOBALS['logger']->log(\Monolog\Logger::ERROR, $msg, $context);
+	}
 }
 
 /**
@@ -198,7 +229,7 @@ function LogPlainText($msg, $context = array())
 
 function handleException(Exception $ex, $fmtLogMsg= null, $raise=true)
 {
-	$context = getDebugContext();
+	$context = getDebugContext(array(), $ex);
 	$toThrow = $ex;
 	if (empty($toThrow))
 		$toThrow = new Exception($fmtLogMsg);
@@ -222,12 +253,7 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true)
 		$msg = $toThrow->getMessage();
 	}
 
-	LogLine(PHP_EOL . PHP_EOL . PHP_EOL);
-	LogLine($msg, \C__DISPLAY_ERROR__, $context);
-
-//	LogBacktrace(null);
-//
-	LogLine(PHP_EOL . PHP_EOL . PHP_EOL);
+	LogError($msg, $context);
 
 	if ($raise == true) {
 		throw $toThrow;

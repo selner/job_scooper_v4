@@ -19,6 +19,7 @@ namespace JobScooper\Manager;
 use JobScooper\Logging\CSVLogHandler;
 use JobScooper\Logging\ErrorEmailLogHandler;
 use Monolog\ErrorHandler;
+use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\DeduplicationHandler;
 use Propel\Runtime\Propel;
 use Psr\Log\LogLevel as LogLevel;
@@ -45,6 +46,7 @@ Class JobsErrorHandler extends ErrorHandler
     {
 	    if(empty($GLOBALS['logger']))
 		    $GLOBALS['logger'] = getChannelLogger("default");
+
 	    LogError(sprintf("Uncaught Exception: %s", $e->getMessage()));
 	    handleException($e, "Uncaught Exception: %s");
 //        exit(255);
@@ -88,6 +90,11 @@ Class LoggingManager extends \Monolog\Logger
         $now = new DateTime('NOW');
 
         $this->_handlersByType['stderr'] = new StreamHandler("php://stderr", Logger::DEBUG );
+	    $fmter = $this->_handlersByType['stderr']->getFormatter();
+	    $fmter->allowInlineLineBreaks(true);
+	    $fmter->includeStacktraces(true);
+	    $fmter->ignoreEmptyContextAndExtra(true);
+	    $this->_handlersByType['stderr']->setFormatter($fmter);
         $this->pushHandler($this->_handlersByType['stderr']);
         $this->logLine("Logging started from STDIN", C__DISPLAY_ITEM_DETAIL__);
 
@@ -131,7 +138,12 @@ Class LoggingManager extends \Monolog\Logger
         $today = getTodayAsString("-");
         $mainLog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$today}.log";
         $this->_handlersByType['logfile'] = new StreamHandler($mainLog, $logLevel, $bubble = true);
-        $this->pushHandler($this->_handlersByType['logfile']);
+	    $fmter = $this->_handlersByType['logfile']->getFormatter();
+	    $fmter->allowInlineLineBreaks(true);
+	    $fmter->includeStacktraces(true);
+	    $fmter->ignoreEmptyContextAndExtra(true);
+	    $this->_handlersByType['logfile']->getFormatter($fmter);
+	    $this->pushHandler($this->_handlersByType['logfile']);
         $this->logLine("Logging started to logfile at {$mainLog}", C__DISPLAY_ITEM_DETAIL__);
 
         $now = getNowAsString("-");
@@ -222,10 +234,11 @@ Class LoggingManager extends \Monolog\Logger
         if(!is_null($origLogLevel))
             $logLevel = $origLogLevel;
 
-        if($logLevel >= LogLevel::WARNING and empty($context))
-            $context = getDebugContext();
+        if($logLevel == LogLevel::WARNING || $logLevel == LogLevel::ERROR ||
+	        $logLevel == LogLevel::EMERGENCY || $logLevel == LogLevel::CRITICAL)
+            $context = getDebugContext($context);
 
-        $logger->log($logLevel, $strLineBeginning . $strToPrint . $strLineEnd, $context);
+        $logger->log($logLevel, ($strLineBeginning . $strToPrint . $strLineEnd), $context);
 
     }
 
