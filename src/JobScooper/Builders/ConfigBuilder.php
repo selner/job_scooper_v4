@@ -139,12 +139,6 @@ class ConfigBuilder
 
 	    $srchmgr = new SearchBuilder();
 
-	    $config = getConfigurationSetting("config_file_settings");
-	    $inputFolderPath = array_get_element(strval("input.folder"), $config);
-	    if (!empty($inputFolderPath))
-		    $this->arrFileDetails['input_folder'] = parsePathDetailsFromString($inputFolderPath, C__FILEPATH_DIRECTORY_MUST_EXIST);
-	    else
-		    $this->arrFileDetails['input_folder'] = parsePathDetailsFromString(getConfigurationSetting("configfile"));
 
 
 	    //
@@ -159,7 +153,7 @@ class ConfigBuilder
 	    // and configure all searches
 	    //
 	    $verifiedInputs = array();
-	    $inputfiles = array_get_element(strval("inputfiles"), $config);
+	    $inputfiles = getConfigurationSetting("config_file_settings.inputfiles");
 	    if (!empty($inputfiles) && is_array($inputfiles)) {
 		    foreach ($inputfiles as $key => $iniInputFileItem)
 		    {
@@ -169,20 +163,11 @@ class ConfigBuilder
 		        if($fileinfo->getRealPath() !== false)
 			        $tempFileDetails = parsePathDetailsFromString($fileinfo->getRealPath(), C__FILEPATH_FILE_MUST_EXIST);
 
-		        if(empty($tempFileDetails) || $tempFileDetails->isFile() !== true) {
-				    $filesearch = glob($this->arrFileDetails['input_folder']->getPath() . DIRECTORY_SEPARATOR . "*" . DIRECTORY_SEPARATOR . $fileinfo->getFilename());
-				    if (!empty($filesearch)) {
-				    	$firstmatch = array_shift($filesearch);
-					    $tempFileDetails = parsePathDetailsFromString($firstmatch, C__FILEPATH_FILE_MUST_EXIST);
-				    }
-			    }
-
 			    if(empty($tempFileDetails) || $tempFileDetails->isFile() !== true) {
 				    throw new \Exception("Specified input file '" . $filepath . "' was not found.  Aborting.");
 			    }
 
 			    setConfigurationSetting("user_data_files.".$iniInputFileItem['type'].".".$key, $tempFileDetails->getPathname());
-
 		    }
 	    }
 
