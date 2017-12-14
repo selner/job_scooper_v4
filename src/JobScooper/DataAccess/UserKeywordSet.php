@@ -2,6 +2,7 @@
 
 namespace JobScooper\DataAccess;
 
+use \Exception;
 use JobScooper\DataAccess\Base\UserKeywordSet as BaseUserKeywordSet;
 use JobScooper\DataAccess\Map\UserKeywordSetTableMap;
 use Propel\Runtime\Connection\ConnectionInterface;
