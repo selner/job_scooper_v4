@@ -184,11 +184,11 @@ class SimplePlugin extends BaseJobsSite
             {
                 $noResultsVal = $this->_getTagValueFromPage_($objSimpHTML, 'NoPostsFound');
                 if (!is_null($noResultsVal)) {
-                    LogLine("Search returned " . $noResultsVal . " and matched expected 'No results' tag for " . $this->JobSiteName, \C__DISPLAY_ITEM_DETAIL__);
+                    LogMessage("Search returned " . $noResultsVal . " and matched expected 'No results' tag for " . $this->JobSiteName);
                     return $noResultsVal;
                 }
             } catch (\Exception $ex) {
-                LogLine("Warning: Did not find matched expected 'No results' tag for " . $this->JobSiteName . ".  Error:" . $ex->getMessage(), \C__DISPLAY_WARNING__);
+                LogWarning("Warning: Did not find matched expected 'No results' tag for " . $this->JobSiteName . ".  Error:" . $ex->getMessage());
             }
         }
 
@@ -378,14 +378,14 @@ class SimplePlugin extends BaseJobsSite
                 $index = $arrTag['index'];
                 if (count($nodeMatches) <= $index) {
                     $strError = sprintf("%s plugin failed to find index #%d in the %d nodes matching '%s'. ", $this->JobSiteName, $index, count($nodeMatches), $strMatch);
-                    LogLine($strError, \C__DISPLAY_ERROR__);
+                    LogError($strError);
                     throw new \Exception($strError);
                 }
                 $ret = $nodeMatches[$index];
             } elseif (!empty($nodeMatches) && is_array($nodeMatches)) {
                 if (count($nodeMatches) > 1) {
                     $strError = sprintf("Warning:  %s plugin matched %d nodes to selector '%s' but did not specify an index.  Assuming first node.", $this->JobSiteName, count($ret), $strMatch);
-                    LogLine($strError, \C__DISPLAY_WARNING__);
+                    LogWarning($strError);
                 }
                 $ret = $nodeMatches[0];
             }
@@ -414,7 +414,7 @@ class SimplePlugin extends BaseJobsSite
             $callback = get_class($this) . "::" . $arrTag['return_value_callback'];
             if (!method_exists($this, $arrTag['return_value_callback'])) {
                 $strError = sprintf("%s plugin failed could not call the tag callback method '%s' for attribute name '%s'.", $this->JobSiteName, $callback, $returnAttribute);
-                LogLine($strError, \C__DISPLAY_ERROR__);
+                LogError($strError);
                 throw new \Exception($strError);
             }
 
@@ -533,7 +533,7 @@ class SimplePlugin extends BaseJobsSite
         // first looked for the detail view layout and parse that
         $strNodeMatch = $this->getTagSelector($this->arrListingTagSetup['JobPostItem']);
 
-        LogLine($this->JobSiteName . " finding nodes matching: " . $strNodeMatch, \C__DISPLAY_ITEM_DETAIL__);
+        LogMessage($this->JobSiteName . " finding nodes matching: " . $strNodeMatch);
         $nodesJobRows = $this->_getTagValueFromPage_($objSimpHTML, 'JobPostItem', 'collection');
 
         if ($nodesJobRows !== false && !is_null($nodesJobRows) && is_array($nodesJobRows) && count($nodesJobRows) > 0) {
@@ -575,7 +575,7 @@ class SimplePlugin extends BaseJobsSite
             handleException(new \Exception("Could not find matching job elements in HTML for " . $strNodeMatch . " in plugin " . $this->JobSiteName), null, true);
         }
 
-        LogLine($this->JobSiteName . " returned " . countAssociativeArrayValues($ret) . " jobs from page.", \C__DISPLAY_ITEM_DETAIL__);
+        LogMessage($this->JobSiteName . " returned " . countAssociativeArrayValues($ret) . " jobs from page.");
 
         return $ret;
     }

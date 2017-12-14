@@ -45,7 +45,7 @@ if (file_exists($propelConfig)) {
 }
 
 
-LogLine("Getting all jobs from the database...", C__DISPLAY_ITEM_START__);
+LogMessage("Getting all jobs from the database...");
 
 const RESULTS_PER_PAGE = 1000;
 
@@ -54,19 +54,19 @@ $allJobsPager = \JobScooper\DataAccess\JobPostingQuery::create()
     ->paginate($page = 1, $maxPerPage = RESULTS_PER_PAGE);
 
 if (!$allJobsPager->isEmpty()) {
-    LogLine("Exporting " . $allJobsPager->getNbResults() . " job postings to JSON");
+    LogMessage("Exporting " . $allJobsPager->getNbResults() . " job postings to JSON");
 
     $nJobsExported = 0;
     $outFile = generateOutputFileName("all_job_postings", "json", false);
     $outdir = dirname($outFile);
-    LogLine("... exporting to files at {$outdir}...", C__DISPLAY_ITEM_DETAIL__);
+    LogMessage("... exporting to files at {$outdir}...");
 
     while ($allJobsPager->getPage() <= $allJobsPager->getLastPage())
     {
         $arrOutputList = array();
         $nJobsExportPageEnd = $nJobsExported + RESULTS_PER_PAGE;
         $outFile = generateOutputFileName("job_postings-{$nJobsExported}-{$nJobsExportPageEnd}", "json", false);
-        LogLine("... exporting job postings {$nJobsExported} - {$nJobsExportPageEnd}...", C__DISPLAY_ITEM_START__);
+        LogMessage("... exporting job postings {$nJobsExported} - {$nJobsExportPageEnd}...");
         foreach ($allJobsPager as $job) {
             $arrJob = $job->toArray(TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, array(), true);
             if (array_key_exists('Location', $arrJob) && array_key_exists('JobPostings', $arrJob['Location']))

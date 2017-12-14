@@ -202,7 +202,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 				$this->_setDenormalizedLocationDisplayValue_();
 			}
 		} catch (Exception $ex) {
-			LogLine("Failed to lookup and set a geolocation for job posting " . $this->getKeySiteAndPostId() . ".  Error:  " . $ex->getMessage(), C__DISPLAY_WARNING__);
+			LogWarning("Failed to lookup and set a geolocation for job posting " . $this->getKeySiteAndPostId() . ".  Error:  " . $ex->getMessage());
 		}
 	}
 

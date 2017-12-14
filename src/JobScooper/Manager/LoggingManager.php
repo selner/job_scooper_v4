@@ -96,12 +96,12 @@ Class LoggingManager extends \Monolog\Logger
 	    $fmter->ignoreEmptyContextAndExtra(true);
 	    $this->_handlersByType['stderr']->setFormatter($fmter);
         $this->pushHandler($this->_handlersByType['stderr']);
-        $this->logLine("Logging started from STDIN", C__DISPLAY_ITEM_DETAIL__);
+        $this->LogRecord(\Psr\Log\LogLevel::INFO,"Logging started from STDIN");
 
 //        $serviceContainer->setLogger('defaultLogger', $defaultLogger);
         $propelContainer = Propel::getServiceContainer();
 
-        $this->logLine("Logging started for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'), C__DISPLAY_NORMAL__);
+        $this->logRecord(LogLevel::INFO,"Logging started for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'));
     }
 
     public function getChannelLogger($channel)
@@ -127,7 +127,7 @@ Class LoggingManager extends \Monolog\Logger
         if(isDebug()) {
             $con = Propel::getWriteConnection(\JobScooper\DataAccess\Map\JobPostingTableMap::DATABASE_NAME);
             $con->useDebug(true);
-            LogLine("Enabled debug logging for Propel.", C__DISPLAY_ITEM_DETAIL__);
+            LogMessage("Enabled debug logging for Propel.");
         }
     }
 
@@ -144,21 +144,21 @@ Class LoggingManager extends \Monolog\Logger
 	    $fmter->ignoreEmptyContextAndExtra(true);
 	    $this->_handlersByType['logfile']->getFormatter($fmter);
 	    $this->pushHandler($this->_handlersByType['logfile']);
-        $this->logLine("Logging started to logfile at {$mainLog}", C__DISPLAY_ITEM_DETAIL__);
+        $this->logRecord(\Psr\Log\LogLevel::INFO,"Logging started to logfile at {$mainLog}");
 
         $now = getNowAsString("-");
         $csvlog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}-run_errors.csv";
         $fpcsv = fopen($csvlog, "w");
         $this->_handlersByType['csverrors'] = new CSVLogHandler($fpcsv, Logger::WARNING, $bubble = true);
         $this->pushHandler($this->_handlersByType['csverrors'] );
-        $this->logLine("Logging started to CSV file at {$csvlog}", C__DISPLAY_ITEM_DETAIL__);
+        $this->LogRecord(\Psr\Log\LogLevel::INFO, "Logging started to CSV file at {$csvlog}");
 
         $now = getNowAsString("-");
         $dedupeLog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}-dedupe_log_errors.csv";
         $this->_dedupeHandle = fopen($dedupeLog, "w");
         $this->_handlersByType['dedupe_email'] = new DeduplicationHandler(new ErrorEmailLogHandler(Logger::ERROR, true),  $deduplicationStore = $dedupeLog, $deduplicationLevel = Logger::ERROR, $time = 60, $bubble = true);
         $this->pushHandler($this->_handlersByType['dedupe_email']);
-        $this->logLine("Logging started for deduped email log file at {$dedupeLog}", C__DISPLAY_ITEM_DETAIL__);
+        $this->LogRecord(\Psr\Log\LogLevel::INFO, "Logging started for deduped email log file at {$dedupeLog}");
 
         $this->updatePropelLogging();
 
@@ -180,92 +180,45 @@ Class LoggingManager extends \Monolog\Logger
 
     }
 
-    function logLine($strToPrint, $varDisplayStyle = C__DISPLAY_NORMAL__, $origLogLevel = LogLevel::INFO, $context = array())
-    {
-        if($this->_doLogContext && count($context) == 0)
-            $context = getDebugContext();
-        elseif(is_array($context))
-            $context = array_merge_recursive_distinct($context, getDebugContext());
+	public function logRecord($level, $message, $extras=array())
+	{
+		$context = array();
+		$monologLevel = \Monolog\Logger::toMonologLevel($level);
+		if(in_array($level, array(
+			\Monolog\Logger::WARNING, \Monolog\Logger::EMERGENCY, \Monolog\Logger::ERROR, \Monolog\Logger::DEBUG, \Monolog\Logger::CRITICAL)))
+			$context = $this->getDebugContext();
 
-        $strLineBeginning = '';
-        $strLineEnd = '';
-        $logLevel = null;
-        switch ($varDisplayStyle)
-        {
-            case C__DISPLAY_WARNING__:
-                $logLevel = "warning";
-                break;
+		if(!empty($extras) && is_array($extras))
+		{
+			foreach($extras as $k => $v)
+				$context[$k] = $v;
+		}
 
-	        case C__DISPLAY_NORMAL__:
-            case C__DISPLAY_SUMMARY__:
-                $logLevel = "info";
-                break;
-
-            case C__DISPLAY_RESULT__:
-                $strLineBeginning = '==> ';
-                $logLevel = "info";
-                break;
-
-            case C__DISPLAY_ERROR__:
-                $logLevel = "error";
-                break;
-
-            case C__DISPLAY_ITEM_START__:
-            case C__DISPLAY_ITEM_DETAIL__:
-            case C__DISPLAY_ITEM_RESULT__:
-                $logLevel = "info";
-                break;
-
-            default:
-                throw new \ErrorException('Invalid type value passed to __debug__printLine.  Value = '.$varDisplayStyle. ".");
-                break;
-        }
-
-        if(count($context) > 0)
-        {
-            $channel = array_shift($context);
-            $logger = $this->getChannelLogger($channel);
-        }
-        else
-        {
-            $logger = $this->getChannelLogger('default');
-        }
-
-        if(!is_null($origLogLevel))
-            $logLevel = $origLogLevel;
-
-        if($logLevel == LogLevel::WARNING || $logLevel == LogLevel::ERROR ||
-	        $logLevel == LogLevel::EMERGENCY || $logLevel == LogLevel::CRITICAL)
-            $context = getDebugContext($context);
-
-        $logger->log($logLevel, ($strLineBeginning . $strToPrint . $strLineEnd), $context);
-
-    }
-
-    public function log($level, $message, array $context = array())
-    {
-
-        if(parent::log($level, $message, $context) === false)
-            print($message .PHP_EOL . PHP_EOL );
-    }
+		if(parent::log($monologLevel, $message, $context) === false)
+			print($message .PHP_EOL . PHP_EOL );
+	}
 
     private $_openSections = 0;
 
+
+	const C__LOG_SECTION_BEGIN = 1;
+	const C__LOG_SECTION_END = 2;
+
 	function startLogSection($headerText)
 	{
-		return $this->_logSectionHeader($headerText, C__SECTION_BEGIN__);
+		return $this->_logSectionHeader($headerText, LoggingManager::C__LOG_SECTION_BEGIN);
 	}
 
 	function endLogSection($headerText)
 	{
-		return $this->_logSectionHeader($headerText, C__SECTION_END__);
+		return $this->_logSectionHeader($headerText, LoggingManager::C__LOG_SECTION_END);
 	}
 
 
 	private function _logSectionHeader($headerText, $nType)
 	{
 
-		if ($nType == C__SECTION_BEGIN__)
+		if ($nType == LoggingManager::C__LOG_SECTION_BEGIN)
 		{
 			$indentCount = $this->_openSections * 2;
 			$lineChar = strval($this->_openSections + 1);
@@ -296,5 +249,84 @@ Class LoggingManager extends \Monolog\Logger
 		$this->log(LogLevel::INFO, $lineContent);
 
     }
+
+
+	/**
+	 * @param array $context
+	 *
+	 * @return array
+	 */
+	function getDebugContext($context=array(), \Exception $thrownExc = null)
+	{
+		$baseContext = [
+			'class_call' => "",
+			'exception_message' => "",
+			'exception_file' => "",
+			'exception_line' => "",
+//		'exception_trace' => "",
+			'channel' => "",
+			'jobsite' => ""
+		];
+		$context = array_merge($baseContext, $context);
+
+		//Debug backtrace called. Find next occurence of class after Logger, or return calling script:
+		$dbg = debug_backtrace();
+		$i = 0;
+		$jobsiteKey = null;
+		$usersearch = null;
+		$loggedBacktrace = array();
+
+		$class = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
+		while ($i < count($dbg) - 1 ) {
+			if (!empty($dbg[$i]['class']) && stripos($dbg[$i]['class'], 'LoggingManager') === false &&
+				(empty($dbg[$i]['function']) || !in_array($dbg[$i]['function'], array("getDebugContent", "handleException"))))
+			{
+				$loggedBacktrace = $dbg[$i];
+
+				$class = $dbg[$i]['class'] . "->" . $dbg[$i]['function'] ."()";
+				if(!empty($dbg[$i]['object']))
+				{
+					$objclass = get_class($dbg[$i]['object']);
+					if(strcasecmp($objclass, $dbg[$i]['class']) != 0)
+					{
+						$class = "{$objclass} -> {$class}";
+						try{
+							if( is_object($dbg[$i]['object']) && method_exists($dbg[$i]['object'], "getName"))
+								$jobsiteKey = $dbg[$i]['object']->getName();
+						} catch (Exception $ex) {
+							$jobsiteKey = "";
+						}
+						try{
+							if(array_key_exists('args', $dbg[$i]) & is_array($dbg[$i]['args']))
+								if(is_object($dbg[$i]['args'][0]) && method_exists(get_class($dbg[$i]['args'][0]), "getUserSearchSiteRunKey"))
+									$usersearch = $dbg[$i]['args'][0]->getUserSearchSiteRunKey();
+								else
+									$usersearch = "";
+						} catch (Exception $ex) { $usersearch = ""; }
+					}
+					break;
+				}
+			}
+			$i++;
+		}
+
+
+		$context['class_call'] = $class;
+		$context['channel'] = is_null($jobsiteKey) ? "default" : "plugins";
+		$context['jobsite'] = $jobsiteKey;
+//	$context['user_search_run_key'] = $usersearch,
+//	$context['memory_usage'] = memory_get_usage() / 1024 / 1024;
+
+
+		if(!empty($thrownExc))
+		{
+			$context['exception_message'] = $thrownExc->getMessage();
+			$context['exception_file'] = $thrownExc->getFile();
+			$context['exception_line'] = $thrownExc->getLine();
+//		$context['exception_trace'] = join("|", preg_split("/$/", encodeJSON($thrownExc->getTrace())));
+		}
+
+		return $context;
+	}
 
 }

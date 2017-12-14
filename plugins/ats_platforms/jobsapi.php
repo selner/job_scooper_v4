@@ -38,7 +38,7 @@ class PluginUSAJobs extends JobsApiPlugin
         ];
         $query = new UsajobsQuery($options);
         $client = new UsajobsProvider($query);
-        LogLine("Getting jobs from " . $query->getUrl() . "[". $searchDetails->getUserSearchSiteRunKey() , \C__DISPLAY_ITEM_DETAIL__);
+        LogMessage("Getting jobs from " . $query->getUrl() . "[". $searchDetails->getUserSearchSiteRunKey() );
         $apiJobs = $client->getJobs();
         return $apiJobs->all();
 

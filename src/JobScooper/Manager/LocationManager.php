@@ -63,7 +63,7 @@ class LocationManager
 
     private function __initialize__()
     {
-        LogLine("Loading Geolocation cache ...", \C__DISPLAY_ITEM_DETAIL__);
+        LogMessage("Loading Geolocation cache ...");
 
 
         $googleApiKey = getConfigurationSetting('google_maps_api_key');
@@ -90,7 +90,7 @@ class LocationManager
             )
         ));
 
-        LogDebug("... adding missing locations from JobPosting table ...", \C__DISPLAY_ITEM_DETAIL__);
+        LogDebug("... adding missing locations from JobPosting table ...");
         $allLocsWithoutGeoLocs = \JobScooper\DataAccess\JobPostingQuery::create()
             ->filterByGeoLocationId($geoLocationId = null, Criteria::ISNULL)
             ->filterByLocation(null, Criteria::ISNOTNULL)
@@ -99,7 +99,7 @@ class LocationManager
             ->find()
             ->getData();
 
-        LogDebug("... " . count($allLocsWithoutGeoLocs) . " missing locations found and being added to cache...", \C__DISPLAY_ITEM_DETAIL__);
+        LogDebug("... " . count($allLocsWithoutGeoLocs) . " missing locations found and being added to cache...");
 
         foreach ($allLocsWithoutGeoLocs as $name) {
             if(!empty($name)) {
@@ -108,7 +108,7 @@ class LocationManager
             }
         }
 
-        LogDebug("... adding Geolocations to cache ...", \C__DISPLAY_ITEM_DETAIL__);
+        LogDebug("... adding Geolocations to cache ...");
         $allGeoLocs = \JobScooper\DataAccess\GeoLocationQuery::create()
             ->find();
 
@@ -168,10 +168,10 @@ class LocationManager
 
         // Cache miss
         //
-        LogLine("... Geolocation cache miss for " . $lookupAddress . ".  Calling Geocoder...");
+        LogMessage("... Geolocation cache miss for " . $lookupAddress . ".  Calling Geocoder...");
 
         if ($GLOBALS['CACHES']['GEOCODER_ENABLED'] !== true) {
-            LogLine("Geocoder current disabled as a result of too many error results.");
+            LogMessage("Geocoder current disabled as a result of too many error results.");
             return null;
         }
         else
@@ -205,7 +205,7 @@ class LocationManager
         $handler = new CSVLogHandler($fpcsv, Logger::INFO);
         $this->logger->pushHandler($handler);
 
-       LogLine("Geocode API logging started to CSV file at {$csvlog}", C__DISPLAY_ITEM_DETAIL__);
+       LogMessage("Geocode API logging started to CSV file at {$csvlog}");
 
     }
 
@@ -237,7 +237,7 @@ class LocationManager
     private function setCacheItem($key, $value)
     {
         if (!$this->_pool->set($key, $value, $ttl = 60 * 60 * 24 * 7)) {
-            LogLine("Failed to save Geolocation to the cache under key " . $key);
+            LogMessage("Failed to save Geolocation to the cache under key " . $key);
         }
     }
 
@@ -262,7 +262,7 @@ class LocationManager
     private function geocode($strAddress)
     {
         if ($this->countGeocodeErrors >= 5) {
-            LogLine("Google Geocoding is disabled because of too many error results during this run.");
+            LogMessage("Google Geocoding is disabled because of too many error results during this run.");
             $GLOBALS['CACHES']['GEOCODER_ENABLED'] = false;
             return null;
         }

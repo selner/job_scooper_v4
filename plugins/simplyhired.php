@@ -106,7 +106,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\Classes\ServerHtmlPlugin
         if (!$this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED) && $nSubtermMatches > 0) {
             $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $this->getGeoLocationURLValue($searchDetails), $strURL);
             if ($strURL == null) {
-                throw new \ErrorException("Location value is required for " . $this->JobSiteName . ", but was not set for the search '" . $searchDetails->getUserSearchSiteRunKey() . "'." . " Aborting all searches for " . $this->JobSiteName, \C__DISPLAY_ERROR__);
+                throw new \ErrorException("Location value is required for " . $this->JobSiteName . ", but was not set for the search '" . $searchDetails->getUserSearchSiteRunKey() . "'." . " Aborting all searches for " . $this->JobSiteName);
             }
         }
 
@@ -119,14 +119,14 @@ class PluginSimplyHired extends \JobScooper\Plugins\Classes\ServerHtmlPlugin
             if(empty($locTypeNeeded) || $locTypeNeeded == VALUE_NOT_SUPPORTED)
             {
                 $msg = "Failed to run search:  search is missing the required location type of " . $this->getGeoLocationSettingType() ." set.  Skipping search '". $searchDetails->getUserSearchSiteRunKey() .".";
-                LogLine($msg, \C__DISPLAY_ERROR__);
+                LogError($msg);
                 throw new IndexOutOfBoundsException($msg);
             }
             else
             {
                 $strLocationValue = $loc->formatLocationByLocationType($locTypeNeeded);
                 if (empty($strLocationValue) || $strLocationValue == VALUE_NOT_SUPPORTED) {
-                    LogLine("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".", \C__DISPLAY_ITEM_DETAIL__);
+                    LogMessage("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".");
                     return "";
                 }
                 $strURL = str_ireplace(BASE_URL_TAG_LOCATION, $strLocationValue, $strURL);
@@ -134,7 +134,7 @@ class PluginSimplyHired extends \JobScooper\Plugins\Classes\ServerHtmlPlugin
         }
 
         if($strURL == null) {
-            throw new ErrorException("Location value is required for " . $this->JobSiteName . ", but was not set for the search '" . $searchDetails->getUserSearchSiteRunKey() ."'.". " Aborting all searches for ". $this->JobSiteName, \C__DISPLAY_ERROR__);
+            throw new ErrorException("Location value is required for " . $this->JobSiteName . ", but was not set for the search '" . $searchDetails->getUserSearchSiteRunKey() ."'.". " Aborting all searches for ". $this->JobSiteName);
         }
 
         $searchDetails = $searchDetailsBackup->copy();

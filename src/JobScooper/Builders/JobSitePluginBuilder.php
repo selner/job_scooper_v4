@@ -141,7 +141,7 @@ class JobSitePluginBuilder
 
 		if(!empty($sitesOutOfSearchArea)) {
 			JobSitePluginBuilder::setSitesAsExcluded($sitesOutOfSearchArea);
-			LogLine("Skipping searches for " . getArrayDebugOutput(array_keys($sitesOutOfSearchArea)) . " because they do not cover country codes = (" . $ccRun . ").");
+		 LogMessage("Skipping searches for " . getArrayDebugOutput(array_keys($sitesOutOfSearchArea)) . " because they do not cover country codes = (" . $ccRun . ").");
 			}
 	}
 
@@ -181,7 +181,7 @@ class JobSitePluginBuilder
 
     private function _syncDatabaseJobSitePluginClassList()
     {
-        LogLine('Adding any missing declared jobsite plugins and jobsite records in database...', C__DISPLAY_ITEM_START__);
+        LogMessage('Adding any missing declared jobsite plugins and jobsite records in database...');
 
         $classListBySite = getAllPluginClassesByJobSiteKey();
 
@@ -193,7 +193,7 @@ class JobSitePluginBuilder
         $jobsitesToAdd = array_diff_key($classListBySite, $all_jobsites_by_key);
         if (!empty($jobsitesToAdd)) {
 
-            LogLine('Adding ' . getArrayValuesAsString($jobsitesToAdd), C__DISPLAY_ITEM_DETAIL__);
+            LogMessage('Adding ' . getArrayValuesAsString($jobsitesToAdd));
 
             foreach ($jobsitesToAdd as $jobSiteKey => $pluginClass) {
                 $dbrec = JobSiteRecordQuery::create()
@@ -210,7 +210,7 @@ class JobSitePluginBuilder
         $jobsitesToDisable = array_diff_key($all_jobsites_by_key, $classListBySite);
         if (!empty($jobsitesToDisable))
         {
-	        LogLine('Disabling ' . getArrayValuesAsString($jobsitesToDisable), C__DISPLAY_ITEM_DETAIL__);
+	        LogMessage('Disabling ' . getArrayValuesAsString($jobsitesToDisable));
         	foreach($jobsitesToDisable as $jobSiteKey =>$jobsite)
 	        {
 		        $all_jobsites_by_key[$jobSiteKey]->setIsDisabled(true);
@@ -219,7 +219,7 @@ class JobSitePluginBuilder
         }
 
         $nEnabledSites = count($all_jobsites_by_key)-count($jobsitesToDisable);
-        LogLine("Loaded {$nEnabledSites} enabled jobsite plugins.");
+        LogMessage("Loaded {$nEnabledSites} enabled jobsite plugins.");
 	    setAsCacheData("all_jobsites_and_plugins", $all_jobsites_by_key);
 
     }
@@ -227,9 +227,9 @@ class JobSitePluginBuilder
     private function _initializeAllJsonPlugins()
     {
         $arrAddedPlugins = null;
-        LogLine('Initializing all job site plugins...', C__DISPLAY_ITEM_START__);
+        LogMessage('Initializing all job site plugins...');
 
-        LogLine('Generating classes for ' . count($this->_jsonPluginSetups) . ' JSON-loaded plugins...', C__DISPLAY_ITEM_DETAIL__);
+        LogMessage('Generating classes for ' . count($this->_jsonPluginSetups) . ' JSON-loaded plugins...');
         foreach (array('Abstract', 'Plugin') as $type) {
             $plugins = array_filter($this->_jsonPluginSetups, function ($val) use ($type) {
                 $matched = preg_match("/^" . $type . "/", $val['PhpClassName']);
@@ -237,7 +237,7 @@ class JobSitePluginBuilder
             });
 
             foreach (array_keys($plugins) as $agentkey) {
-                LogLine("Running eval statement for class " . $plugins[$agentkey]['PhpClassName'], C__DISPLAY_ITEM_DETAIL__);
+                LogMessage("Running eval statement for class " . $plugins[$agentkey]['PhpClassName']);
                 try {
                 	if(!in_array($plugins[$agentkey]['PhpClassName'], get_declared_classes()))
 	                {
@@ -252,7 +252,7 @@ class JobSitePluginBuilder
                 }
             }
 
-            LogLine("Added " . count($plugins) . " " . ($type === "Abstract" ? $type : "json") . " plugins: ", C__DISPLAY_ITEM_DETAIL__);
+            LogMessage("Added " . count($plugins) . " " . ($type === "Abstract" ? $type : "json") . " plugins: ");
         }
 
     }
@@ -378,7 +378,7 @@ class JobSitePluginBuilder
             }
         }
 
-        LogLine("Loaded JSON config for new plugin: " . $pluginData['JobSiteName'], \C__DISPLAY_ITEM_DETAIL__);
+        LogMessage("Loaded JSON config for new plugin: " . $pluginData['JobSiteName']);
 
         return $pluginData;
 

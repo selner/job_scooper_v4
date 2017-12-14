@@ -21,16 +21,29 @@ class UserKeywordSet extends BaseUserKeywordSet
 
 	public function preSave(ConnectionInterface $con = null)
 	{
-
 		if ($this->isColumnModified(UserKeywordSetTableMap::COL_KEYWORDS) &&
 			!empty($this->getKeywords()))
 		{
-			$token_keywords = tokenizeKeywords($this->getKeywords());
+			$token_keywords = $this->_tokenizeKeywords($this->getKeywords());
 			$this->setKeywordTokens($token_keywords);
 		}
 
 		return parent::preSave($con);
 	}
 
+	private function _tokenizeKeywords($arrKeywords)
+	{
+		if (!is_array($arrKeywords)) {
+			throw new Exception("Invalid keywords object type.");
+		}
 
+		$arrKeywordTokens = tokenizeSingleDimensionArray($arrKeywords, "srchkwd", "keywords", "keywords");
+		$arrReturnKeywordTokens = array_fill_keys(array_keys($arrKeywordTokens), null);
+		foreach (array_keys($arrReturnKeywordTokens) as $key) {
+			$arrReturnKeywordTokens[$key] = str_replace("|", " ", $arrKeywordTokens[$key]['keywordstokenized']);
+		}
+		unset($key);
+
+		return $arrReturnKeywordTokens;
+	}
 }

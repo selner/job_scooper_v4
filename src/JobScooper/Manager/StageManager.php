@@ -73,10 +73,10 @@ class StageManager
             $newJob = new \JobScooper\DataAccess\JobPosting();
             $newJob->fromArray($job);
             $newJob->save();
-            LogLine("Saved " . $job->getJobPostingId() . " to database.");
+            LogMessage("Saved " . $job->getJobPostingId() . " to database.");
         }
 
-        LogLine("Stored " . countAssociativeArrayValues($jobs) . " to database from file '".$path."''.");
+        LogMessage("Stored " . countAssociativeArrayValues($jobs) . " to database from file '".$path."''.");
     }
 
 
@@ -98,7 +98,7 @@ class StageManager
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         if ($arrSearchesToRunBySite != null)
         {
-            LogLine(PHP_EOL . "**************  Starting Run of Searches for " . count($arrSearchesToRunBySite) . " Job Sites **************  " . PHP_EOL, \C__DISPLAY_NORMAL__);
+            LogMessage(PHP_EOL . "**************  Starting Run of Searches for " . count($arrSearchesToRunBySite) . " Job Sites **************  " . PHP_EOL);
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             //
@@ -154,7 +154,7 @@ class StageManager
             }
 
         } else {
-            LogLine("No searches have been set to be run.", C__DISPLAY_WARNING__);
+            LogWarning("No searches have been set to be run.");
         }
 
         endLogSection("Stage 1");
@@ -168,7 +168,7 @@ class StageManager
             $arrJobsList = getAllMatchesForUserNotification();
 
             if(is_null($arrJobsList) || count($arrJobsList) <= 0) {
-                LogLine("No new jobs found to tokenize", C__DISPLAY_WARNING__);
+                LogWarning("No new jobs found to tokenize");
             }
             else
             {
@@ -176,7 +176,7 @@ class StageManager
                 $outjfilefullpath = generateOutputFileName("alljobmatches_tokenized", "json");
                 writeJobRecordsToJson($jfilefullpath, $arrJobsList);
 
-                LogLine(PHP_EOL . "Processing " . $jfilefullpath, \C__DISPLAY_NORMAL__);
+                LogMessage(PHP_EOL . "Processing " . $jfilefullpath);
 
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //
@@ -184,11 +184,11 @@ class StageManager
                 //
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-                LogLine(PHP_EOL . "    ~~~~~~ Tokenizing job titles ~~~~~~~" . PHP_EOL, \C__DISPLAY_NORMAL__);
+                LogMessage(PHP_EOL . "    ~~~~~~ Tokenizing job titles ~~~~~~~" . PHP_EOL);
                 $PYTHONPATH = realpath(__ROOT__. "/python/pyJobNormalizer/normalizeJobListingFile.py");
 
                 $cmd = "python " . $PYTHONPATH . " --infile " . escapeshellarg($jfilefullpath) . " --outfile " . escapeshellarg($outjfilefullpath) ." --column Title --index KeySiteAndPostId";
-                LogLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd ."  ~~~~~~~" . PHP_EOL, \C__DISPLAY_NORMAL__);
+                LogMessage(PHP_EOL . "    ~~~~~~ Running command: " . $cmd ."  ~~~~~~~" . PHP_EOL);
 
                 doExec($cmd);
 

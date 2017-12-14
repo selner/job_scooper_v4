@@ -46,7 +46,7 @@ class JobsAutoMarker
 
     function __destruct()
     {
-        LogLine("Closing ".$this->JobSiteName." instance of class " . get_class($this), \C__DISPLAY_ITEM_DETAIL__);
+        LogMessage("Closing ".$this->JobSiteName." instance of class " . get_class($this));
 
     }
 
@@ -57,7 +57,7 @@ class JobsAutoMarker
 
         if(is_null($this->arrMasterJobList) || count($this->arrMasterJobList) <= 0)
         {
-            LogLine("No new jobs found to auto-mark.", C__DISPLAY_WARNING__);
+            LogWarning("No new jobs found to auto-mark.");
         }
         else
         {
@@ -67,7 +67,7 @@ class JobsAutoMarker
             // Filter the full jobs list looking for duplicates, etc.
             //
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            LogLine(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL, \C__DISPLAY_NORMAL__);
+            LogMessage(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL);
 
             $arrJobs_AutoUpdatable = $this->arrMasterJobList;
             $this->_markJobsList_SearchKeywordsFound_($arrJobs_AutoUpdatable);
@@ -96,7 +96,7 @@ class JobsAutoMarker
             $nJobDupes= 0;
             $nNonDupes = 0;
 
-            LogLine("Gathering job postings that are already marked as duplicate...", \C__DISPLAY_ITEM_DETAIL__);
+            LogMessage("Gathering job postings that are already marked as duplicate...");
             $arrDupeMatches = array_filter($arrJobsList, function($v) {
                 $posting = $v->getJobPostingFromUJM();
                 return (!is_null($posting->getDuplicatesJobPostingId()));
@@ -105,7 +105,7 @@ class JobsAutoMarker
             $nJobDupes = count($arrDupeMatches);
             $arrRemainingJobs = array_diff_assoc($arrJobsList, $arrDupeMatches);
 
-            LogLine("Finding and Marking Duplicate Job Roles" , \C__DISPLAY_ITEM_START__);
+            LogMessage("Finding and Marking Duplicate Job Roles" );
             foreach($arrRemainingJobs as $jobMatch)
             {
                 $posting = $jobMatch->getJobPostingFromUJM();
@@ -120,7 +120,7 @@ class JobsAutoMarker
 
             }
 
-            LogLine($nJobDupes. "/" . countAssociativeArrayValues($arrJobsList) . " jobs have been marked as duplicate based on company/role pairing. " , \C__DISPLAY_ITEM_RESULT__);
+            LogMessage($nJobDupes. "/" . countAssociativeArrayValues($arrJobsList) . " jobs have been marked as duplicate based on company/role pairing. " );
         }
         catch (Exception $ex)
         {
@@ -132,11 +132,11 @@ class JobsAutoMarker
     {
         try {
             loadSqlite3MathExtensions();
-            LogLine("Successfully loaded the necessary math functions for SQLite to do geospatial filtering.", C__DISPLAY_NORMAL__);
+            LogMessage("Successfully loaded the necessary math functions for SQLite to do geospatial filtering.");
             return true;
 
         } catch (\Exception $ex) {
-            LogLine("Failed to load the necessary math functions for SQLite to do geospatial filtering.  Falling back to county-level instead.", C__DISPLAY_WARNING__);
+            LogWarning("Failed to load the necessary math functions for SQLite to do geospatial filtering.  Falling back to county-level instead.");
         }
 
         return false;
@@ -149,7 +149,7 @@ class JobsAutoMarker
     {
         if (count($arrJobsList) == 0) return;
 
-        LogLine("Marking Out of Area Jobs", \C__DISPLAY_ITEM_START__);
+        LogMessage("Marking Out of Area Jobs");
 
         if ($this->_isGeoSpatialWorking()) {
             $this->_markJobsList_OutOfArea_Geospatial($arrJobsList);
@@ -170,7 +170,7 @@ class JobsAutoMarker
 
         /* Find all locations that are within 50 miles of any of our search locations */
 
-        LogLine("Auto-marking postings not in same counties as the search locations...", \C__DISPLAY_ITEM_DETAIL__);
+        LogMessage("Auto-marking postings not in same counties as the search locations...");
         foreach($searchLocations as $searchloc)
         {
             if(!empty($searchloc))
@@ -179,7 +179,7 @@ class JobsAutoMarker
             }
         }
 
-        LogLine("Finding job postings not in the following counties & states: " . getArrayValuesAsString($arrIncludeCounties) . " ...", \C__DISPLAY_ITEM_DETAIL__);
+        LogMessage("Finding job postings not in the following counties & states: " . getArrayValuesAsString($arrIncludeCounties) . " ...");
         $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrIncludeCounties) {
             $posting = $v->getJobPostingFromUJM();
             $locId = $posting->getGeoLocationId();
@@ -197,7 +197,7 @@ class JobsAutoMarker
             return false;
         });
 
-        LogLine("Marking user job matches as out of area for " . count($arrJobsOutOfArea) . " matches ...", \C__DISPLAY_ITEM_DETAIL__);
+        LogMessage("Marking user job matches as out of area for " . count($arrJobsOutOfArea) . " matches ...");
 
         foreach ($arrJobsOutOfArea as $jobOutofArea) {
             $jobOutofArea->setOutOfUserArea(true);
@@ -209,7 +209,7 @@ class JobsAutoMarker
         $nJobsNotMarked = count($arrJobsList) - $nJobsMarkedAutoExcluded;
 
 
-        LogLine("Jobs excluded as out of area: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ." marked; " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).", not marked " , \C__DISPLAY_ITEM_RESULT__);
+        LogMessage("Jobs excluded as out of area: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ." marked; " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).", not marked " );
     }
 
 	/**
@@ -223,7 +223,7 @@ class JobsAutoMarker
 
         /* Find all locations that are within 50 miles of any of our search locations */
 
-        LogLine("Getting locationIDs within 50 miles of search locations...", \C__DISPLAY_ITEM_DETAIL__);
+        LogMessage("Getting locationIDs within 50 miles of search locations...");
         foreach($searchLocations as $searchloc)
         {
             if(!empty($searchloc))
@@ -240,7 +240,7 @@ class JobsAutoMarker
             }
         }
 
-        LogLine("Gathering job postings not in those areas...", \C__DISPLAY_ITEM_DETAIL__);
+        LogMessage("Gathering job postings not in those areas...");
         $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrNearbyIds) {
             $posting = $v->getJobPostingFromUJM;
             $locId = $posting->getGeoLocationId();
@@ -250,7 +250,7 @@ class JobsAutoMarker
             return in_array($locId, $arrNearbyIds);
         });
 
-        LogLine("Marking user job matches as out of area for " . count($arrJobsOutOfArea) . " matches ...", \C__DISPLAY_ITEM_DETAIL__);
+        LogMessage("Marking user job matches as out of area for " . count($arrJobsOutOfArea) . " matches ...");
 
         foreach ($arrJobsOutOfArea as $jobOutofArea) {
             $jobOutofArea->setOutOfUserArea(true);
@@ -262,7 +262,7 @@ class JobsAutoMarker
         $nJobsNotMarked = count($arrJobsList) - $nJobsMarkedAutoExcluded;
 
 
-       LogLine("Jobs excluded as out of area: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ." marked; " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).", not marked " , \C__DISPLAY_ITEM_RESULT__);
+       LogMessage("Jobs excluded as out of area: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ." marked; " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).", not marked " );
     }
 
 	/**
@@ -283,8 +283,8 @@ class JobsAutoMarker
         {
             if(count($arrJobsList) == 0 || is_null($this->companies_regex_to_filter) || count($this->companies_regex_to_filter) == 0) return;
 
-            LogLine("Excluding Jobs by Companies Regex Matches", \C__DISPLAY_ITEM_START__);
-            LogLine("Checking ".count($arrJobsList) ." roles against ". count($this->companies_regex_to_filter) ." excluded companies.", \C__DISPLAY_ITEM_DETAIL__);
+            LogMessage("Excluding Jobs by Companies Regex Matches");
+            LogMessage("Checking ".count($arrJobsList) ." roles against ". count($this->companies_regex_to_filter) ." excluded companies.");
 
             foreach ($arrJobsList as $jobMatch) {
                 $matched_exclusion = false;
@@ -304,7 +304,7 @@ class JobsAutoMarker
                     $nJobsNotMarked += 1;
             }
 
-            LogLine("Jobs marked with excluded companies: ".$nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ." marked as excluded; not marked ". $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList) , \C__DISPLAY_ITEM_RESULT__);
+            LogMessage("Jobs marked with excluded companies: ".$nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ." marked as excluded; not marked ". $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList) );
         }
         catch (Exception $ex)
         {
@@ -333,8 +333,8 @@ class JobsAutoMarker
 
             $usrSearchKeywords = $this->_getUserSearchTitleKeywords();
             $negKeywords = array_diff_assoc($this->title_negative_keyword_tokens, array_values($usrSearchKeywords) );
-            LogLine("Excluding Jobs by Negative Title Keyword Token Matches", \C__DISPLAY_ITEM_START__);
-            LogLine("Checking ".count($arrJobsList) ." roles against ". count($negKeywords) ." negative title keywords to be excluded.", \C__DISPLAY_ITEM_DETAIL__);
+            LogMessage("Excluding Jobs by Negative Title Keyword Token Matches");
+            LogMessage("Checking ".count($arrJobsList) ." roles against ". count($negKeywords) ." negative title keywords to be excluded.");
 
             try {
                 foreach ($arrJobsList as $jobMatch) {
@@ -352,7 +352,7 @@ class JobsAutoMarker
             } catch (Exception $ex) {
                 handleException($ex, 'ERROR:  Failed to verify titles against negative keywords due to error: %s', isDebug());
             }
-            LogLine("Processed " . countAssociativeArrayValues($arrJobsList) . " titles for auto-marking against negative title keywords: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) . " marked excluded; " . $nJobsNotMarked. "/" . countAssociativeArrayValues($arrJobsList) . " not marked.", \C__DISPLAY_ITEM_RESULT__);
+            LogMessage("Processed " . countAssociativeArrayValues($arrJobsList) . " titles for auto-marking against negative title keywords: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) . " marked excluded; " . $nJobsNotMarked. "/" . countAssociativeArrayValues($arrJobsList) . " not marked.");
         }
         catch (Exception $ex)
         {
@@ -387,7 +387,7 @@ class JobsAutoMarker
             $usrSearchKeywords = $this->_getUserSearchTitleKeywords();
             if (count($arrJobsList) == 0 || is_null($usrSearchKeywords)) return null;
 
-            LogLine("Checking " . count($arrJobsList) . " roles against " . count($usrSearchKeywords) . " keyword phrases in titles...", \C__DISPLAY_ITEM_DETAIL__);
+            LogMessage("Checking " . count($arrJobsList) . " roles against " . count($usrSearchKeywords) . " keyword phrases in titles...");
 
             try {
 	            foreach ($arrJobsList as $jobMatch) {
@@ -417,7 +417,7 @@ class JobsAutoMarker
             } catch (Exception $ex) {
                 handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s', isDebug());
             }
-            LogLine("Processed " . countAssociativeArrayValues($arrJobsList) . " titles for auto-marking against search title keywords: " . $nJobsMarkedInclude . "/" . count($arrJobsList) . " marked as matches; " . $nJobsNotMarked . "/" . count($arrJobsList) . " not marked.", \C__DISPLAY_ITEM_RESULT__);
+            LogMessage("Processed " . countAssociativeArrayValues($arrJobsList) . " titles for auto-marking against search title keywords: " . $nJobsMarkedInclude . "/" . count($arrJobsList) . " marked as matches; " . $nJobsNotMarked . "/" . count($arrJobsList) . " not marked.");
         }
         catch (Exception $ex)
         {
@@ -437,14 +437,14 @@ class JobsAutoMarker
         if(isset($this->title_negative_keyword_tokens) && count($this->title_negative_keyword_tokens) > 0)
         {
             // We've already loaded the titles; go ahead and return right away
-            LogDebug("Using previously loaded " . countAssociativeArrayValues($this->title_negative_keyword_tokens) . " tokenized title strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
+            LogDebug("Using previously loaded " . countAssociativeArrayValues($this->title_negative_keyword_tokens) . " tokenized title strings to exclude." );
             return;
         }
 
         if(!is_array($inputfiles))
         {
             // No files were found, so bail
-            LogDebug("No input files were found with title token strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
+            LogDebug("No input files were found with title token strings to exclude." );
             return;
         }
 
@@ -468,7 +468,7 @@ class JobsAutoMarker
 
         if(count($arrTitlesTemp) <= 0)
         {
-            LogLine("Warning: No title negative keywords were found in the input source files " . getArrayValuesAsString($inputfiles) . " to be filtered from job listings." , \C__DISPLAY_WARNING__);
+            LogWarning("Warning: No title negative keywords were found in the input source files " . getArrayValuesAsString($inputfiles) . " to be filtered from job listings." );
         }
         else
         {
@@ -482,7 +482,7 @@ class JobsAutoMarker
                 $this->title_negative_keyword_tokens[] = $tokens;
             }
 	
-            LogLine("Loaded " . countAssociativeArrayValues($this->title_negative_keyword_tokens) . " tokens to use for filtering titles from '" . getArrayValuesAsString($inputfiles) . "'." , \C__DISPLAY_ITEM_RESULT__);
+            LogMessage("Loaded " . countAssociativeArrayValues($this->title_negative_keyword_tokens) . " tokens to use for filtering titles from '" . getArrayValuesAsString($inputfiles) . "'." );
 
         }
 
@@ -505,7 +505,7 @@ class JobsAutoMarker
         }
         catch (\Exception $ex)
         {
-            LogLine($ex->getMessage(), \C__DISPLAY_ERROR__);
+            LogError($ex->getMessage());
             if(isDebug() == true) { throw $ex; }
         }
         return $rx;
@@ -522,7 +522,7 @@ class JobsAutoMarker
         if(isset($this->companies_regex_to_filter) && count($this->companies_regex_to_filter) > 0)
         {
             // We've already loaded the companies; go ahead and return right away
-            LogDebug("Using previously loaded " . count($this->companies_regex_to_filter) . " regexed company strings to exclude." , \C__DISPLAY_ITEM_DETAIL__);
+            LogDebug("Using previously loaded " . count($this->companies_regex_to_filter) . " regexed company strings to exclude." );
             return;
         }
 	    $inputfiles = getConfigurationSetting("user_data_files.regex_filter_companies");
@@ -531,11 +531,11 @@ class JobsAutoMarker
 
 	    $regexList = array();
         foreach($inputfiles as $fileItem) {
-	        LogDebug("Loading job Company regexes to filter from " . $inputfiles . ".", \C__DISPLAY_ITEM_DETAIL__);
+	        LogDebug("Loading job Company regexes to filter from " . $inputfiles . ".");
 	        $classCSVFile = new SimpleCSV($fileItem, 'r');
 	        $loadedCompaniesRegex= $classCSVFile->readAllRecords(true, array('match_regex'));
 	        $regexList = array_merge($regexList, array_column($loadedCompaniesRegex['data_rows'], "match_regex"));
-	        LogDebug(count($loadedCompaniesRegex) . " companies found in the source file that will be automatically filtered from job listings.", \C__DISPLAY_ITEM_DETAIL__);
+	        LogDebug(count($loadedCompaniesRegex) . " companies found in the source file that will be automatically filtered from job listings.");
         }
 	    $regexList = array_unique($regexList);
 
@@ -556,17 +556,17 @@ class JobsAutoMarker
                 catch (\Exception $ex)
                 {
                     $strError = "Regex test failed on company regex pattern " . $rxItem .".  Skipping.  Error: '".$ex->getMessage();
-                    LogError($strError, \C__DISPLAY_ERROR__);
+                    LogError($strError);
                     if(isDebug() == true) { throw new \ErrorException( $strError); }
                 }
             }
         }
 
         if(count($inputfiles) == 0)
-            LogDebug("No file specified for companies regexes to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." , \C__DISPLAY_WARNING__);
+            LogDebug("No file specified for companies regexes to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." );
         elseif(empty($this->companies_regex_to_filter))
-            LogDebug("Could not load regex list for companies to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." , \C__DISPLAY_WARNING__);
+            LogDebug("Could not load regex list for companies to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered." );
 
-        LogLine("Loaded " . count($this->companies_regex_to_filter). " regexes to use for filtering companies from " . getArrayValuesAsString($inputfiles)  , \C__DISPLAY_NORMAL__);
+        LogMessage("Loaded " . count($this->companies_regex_to_filter). " regexes to use for filtering companies from " . getArrayValuesAsString($inputfiles)  );
     }
 }

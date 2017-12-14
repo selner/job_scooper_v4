@@ -196,7 +196,7 @@ function encodeJSON($data)
     if ($jsonData === false) {
         $err = json_last_error_msg();
         $errMsg = "Error:  Unable to encode data to JSON.  Error: " . $err;
-        LogLine($errMsg, \C__DISPLAY_ERROR__);
+        LogError($errMsg);
         throw new Exception($errMsg);
     }
     return $jsonData;
@@ -206,11 +206,11 @@ function writeJSON($data, $filepath)
 {
     $jsonData = encodeJSON($data);
 
-    LogLine("Writing data to json file " . $filepath);
+    LogMessage("Writing data to json file " . $filepath);
     if (file_put_contents($filepath, $jsonData, FILE_TEXT) === false) {
         $err = error_get_last();
         $errMsg = "Error:  Unable to save JSON results to file " . $filepath . " due to error   " . $err;
-        LogLine($errMsg, \C__DISPLAY_ERROR__);
+        LogError($errMsg);
         throw new Exception($errMsg);
 
     }
@@ -234,14 +234,14 @@ function decodeJSON($strJsonText, $options=null, $boolEscapeBackSlashes=false)
 function loadJSON($file, $options=null, $boolEscapeBackSlashes=false)
 {
     if(is_file($file)) {
-#        LogLine("Reading json data from file " . $file, \C__DISPLAY_ITEM_DETAIL__);
-        LogLine("Reading json data from file " . $file);
+#        LogMessage("Reading json data from file " . $file);
+        LogMessage("Reading json data from file " . $file);
         $jsonText = file_get_contents($file, FILE_TEXT);
         return decodeJSON($jsonText, $options, $boolEscapeBackSlashes);
     }
     else
     {
-        LogLine("Unable to load json data from file " . $file, \C__DISPLAY_ERROR__);
+        LogError("Unable to load json data from file " . $file);
         return null;
     }
 

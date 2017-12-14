@@ -88,7 +88,7 @@ class ConfigBuilder
         $this->__setupOutputFolders__();
 
         $strOutfileArrString = getArrayValuesAsString(getConfigurationSetting("output_directories"));
-        LogLine("Output folders configured: " . $strOutfileArrString, \C__DISPLAY_ITEM_DETAIL__);
+        LogMessage("Output folders configured: " . $strOutfileArrString);
 
 
         endLogSection("Loaded configuration details from " . $this->arrFileDetails['config_ini']->getPathname());
@@ -171,7 +171,7 @@ class ConfigBuilder
 		    }
 	    }
 
-        LogLine("Loaded all configuration settings from " . $this->arrFileDetails['config_ini']->getPathname(), \C__DISPLAY_SUMMARY__);
+        LogMessage("Loaded all configuration settings from " . $this->arrFileDetails['config_ini']->getPathname());
 
 	    //
 	    // Load the global search data that will be used to create
@@ -223,11 +223,11 @@ class ConfigBuilder
 	    $cfgDatabase = null;
 	    $cfgSettingsFile = $this->_getSetting("propel.configuration_file");
 	    if(!empty($cfgSettingsFile)) {
-		    LogLine("Loading Propel configuration file: " . $cfgSettingsFile);
+		    LogMessage("Loading Propel configuration file: " . $cfgSettingsFile);
 		    $propelCfg = new ConfigurationManager($cfgSettingsFile);
 		    $cfgDatabase = $propelCfg->getConfigProperty('database.connections');
 		    if (!empty($cfgDatabase)) {
-			    LogLine("Using Propel Connection Settings from Propel config: " . getArrayDebugOutput($cfgDatabase));
+			    LogMessage("Using Propel Connection Settings from Propel config: " . getArrayDebugOutput($cfgDatabase));
 		    }
 	    }
 
@@ -235,7 +235,7 @@ class ConfigBuilder
 	    {
 		    $cfgDatabase = $this->_getSetting("propel.database.connections");
 		    if(!empty($cfgDatabase))
-			    LogLine("Using Propel Connection Settings from Jobscooper Config: " . getArrayDebugOutput($cfgDatabase));
+			    LogMessage("Using Propel Connection Settings from Jobscooper Config: " . getArrayDebugOutput($cfgDatabase));
 	    }
 
 	    if (empty($cfgDatabase))
@@ -266,11 +266,11 @@ class ConfigBuilder
 
     private function _setupPropelLogging()
     {
-    LogDebug("Configuring Propel logging...", C__DISPLAY_ITEM_DETAIL__);
+    LogDebug("Configuring Propel logging...");
         $defaultLogger = $GLOBALS['logger'];
         if(is_null($defaultLogger)) {
             $pathLog = getOutputDirectory('logs') . '/propel-' .getTodayAsString("-").'.log';
-            LogLine("Could not find global logger object so configuring propel logging separately at {$pathLog}", C__DISPLAY_WARNING__);
+            LogWarning("Could not find global logger object so configuring propel logging separately at {$pathLog}");
             $defaultLogger = new Logger('defaultLogger');
             $defaultLogger->pushHandler(new StreamHandler($pathLog, Logger::DEBUG));
             $defaultLogger->pushHandler(new StreamHandler('php://stderr', Logger::DEBUG));
@@ -281,7 +281,7 @@ class ConfigBuilder
         if(isDebug()) {
             $con = Propel::getWriteConnection(\JobScooper\DataAccess\Map\JobPostingTableMap::DATABASE_NAME);
             $con->useDebug(true);
-            LogLine("Enabled debug logging for Propel.", C__DISPLAY_ITEM_DETAIL__);
+            LogMessage("Enabled debug logging for Propel.");
         }
     }
 
@@ -301,14 +301,14 @@ class ConfigBuilder
 
     private function _parsePluginSettings()
     {
-        LogLine("Loading plugin setup information from config file...", \C__DISPLAY_ITEM_START__);
+        LogMessage("Loading plugin setup information from config file...");
 
         setConfigurationSetting("plugin_specific_settings", $this->_getSetting("plugin_specific_settings"));
     }
 
     private function _parseGlobalSearchParameters()
     {
-        LogLine("Loading global search settings from config file...", \C__DISPLAY_ITEM_START__);
+        LogMessage("Loading global search settings from config file...");
 
 	    $gsoset = $this->_getSetting('global_search_options');
 		if(!empty($gsoset))
@@ -347,7 +347,7 @@ class ConfigBuilder
 
     private function _parseSeleniumParameters()
     {
-        LogDebug("Loading Selenium settings from config file...", \C__DISPLAY_ITEM_START__);
+        LogDebug("Loading Selenium settings from config file...");
         $settings = $this->_getSetting("selenium");
 
 
@@ -393,7 +393,7 @@ class ConfigBuilder
 
     private function _parseKeywordSetsFromConfig_()
     {
-        LogLine("Loading search keywords from config...", \C__DISPLAY_ITEM_START__);
+        LogMessage("Loading search keywords from config...");
 
         $verifiedSets = array();
         $iniSets = $this->_getSetting("search_keyword_set");
@@ -407,7 +407,7 @@ class ConfigBuilder
 	            else
 	            	throw new \Exception("Unable to create a user keyword set for the values defined in the config file (" . var_dump($ini_keyword_set, true));
             }
-	        LogDebug("Added keyword sets: " . join(", ", array_keys($verifiedSets)) , \C__DISPLAY_ITEM_DETAIL__);
+	        LogDebug("Added keyword sets: " . join(", ", array_keys($verifiedSets)) );
 			setConfigurationSetting('user_keyword_sets', $verifiedSets);
         }
     }
@@ -415,7 +415,7 @@ class ConfigBuilder
 
     private function _parseUsers()
     {
-    	LogLine("Configuring users and alerts...");
+     LogMessage("Configuring users and alerts...");
 
         setConfigurationSetting('alerts.configuration.smtp', $this->_getSetting("alerts.configuration.smtp"));
 

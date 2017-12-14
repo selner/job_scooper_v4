@@ -50,7 +50,7 @@ class GoogleGeocoderHttpAdapter extends CurlWrapper  implements \Geocoder\HttpAd
                         break;
 
                     case "ZERO_RESULTS":
-                        LogLine("No results were found for the query " . $url, C__DISPLAY_WARNING__);
+                        LogWarning("No results were found for the query " . $url);
                         return $curl_output['body'];
                         break;
 

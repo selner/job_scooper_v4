@@ -92,7 +92,7 @@ class CurlWrapper
                 //
                 if(isset($srcdata->next_page))
                 {
-                    if($this->fDebugLogging == true) { LogLine('Multipage results detected. Getting results for ' . $srcdata->next_page . '...' . PHP_EOL, C__DISPLAY_ITEM_DETAIL__); }
+                    if($this->fDebugLogging == true) { LogMessage('Multipage results detected. Getting results for ' . $srcdata->next_page . '...' . PHP_EOL); }
 
                     // $patternPage = "/.*page=([0-9]{1,})/";
                     $patternPagePrefix = "/.*page=/";

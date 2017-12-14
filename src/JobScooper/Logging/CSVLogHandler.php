@@ -52,7 +52,7 @@ class CSVLogHandler extends StreamHandler
         parent::close();
 
         if($this->_streamUri !== false) {
-            LogLine("Writing final CSV error log to {$this->_streamUri}... ");
+            LogMessage("Writing final CSV error log to {$this->_streamUri}... ");
             $this->_rewriteStreamWithHeader($this->_streamUri);
         }
 

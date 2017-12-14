@@ -104,7 +104,7 @@ function combineTextAllChildren($node, $fRecursed = false)
     $retStr = "";
     if (is_array($node) && count($node) > 1) {
         $strError = sprintf("Warning:  " . count($node) . " DOM nodes were sent to combineTextAllChildren instead of a single starting node.  Using first node only.");
-        LogLine($strError, \C__DISPLAY_WARNING__);
+        LogWarning($strError);
     }
 
     if(is_array($node) && count($node) >= 1)
@@ -155,7 +155,7 @@ function doExec($cmd)
 
     exec($cmd, $cmdOutput, $cmdRet);
     foreach ($cmdOutput as $resultLine)
-        if (!is_null($GLOBALS['logger'])) LogLine($resultLine, \C__DISPLAY_ITEM_DETAIL__);
+        if (!is_null($GLOBALS['logger'])) LogMessage($resultLine);
     unset($resultLine);
 
     if (is_array($cmdOutput))

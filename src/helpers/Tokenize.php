@@ -19,18 +19,18 @@
 
 function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 {
-    LogLine("Tokenizing title exclusion matches from " . $inputfile . ".", \C__DISPLAY_ITEM_DETAIL__);
+    LogMessage("Tokenizing title exclusion matches from " . $inputfile . ".");
     if (!$outputFile)
         $outputFile = getOutputDirectory('debug') . "/tempCallTokenizer.csv";
     $PYTHONPATH = realpath(__ROOT__ . "/python/pyJobNormalizer/");
     $cmd = "python " . $PYTHONPATH . "/normalizeStrings.py -i " . $inputfile . " -o " . $outputFile . " -c " . $keyname;
     if ($indexKeyName != null)
         $cmd .= " --index " . $indexKeyName;
-    LogLine("Running command: " . $cmd, \C__DISPLAY_ITEM_DETAIL__);
+    LogMessage("Running command: " . $cmd);
 
     doExec($cmd);
 
-    LogLine("Loading tokens for " . $inputfile . ".", \C__DISPLAY_ITEM_DETAIL__);
+    LogMessage("Loading tokens for " . $inputfile . ".");
     $file = fopen($outputFile, "r");
     if (is_bool($file)) {
         throw new Exception("Specified input file '" . $outputFile . "' could not be opened.  Aborting.");
@@ -95,18 +95,3 @@ function tokenizeSingleDimensionArray($arrData, $tempFileKey, $dataKeyName = "ke
 
 
 
-function tokenizeKeywords($arrKeywords)
-{
-    if (!is_array($arrKeywords)) {
-        throw new Exception("Invalid keywords object type.");
-    }
-
-    $arrKeywordTokens = tokenizeSingleDimensionArray($arrKeywords, "srchkwd", "keywords", "keywords");
-    $arrReturnKeywordTokens = array_fill_keys(array_keys($arrKeywordTokens), null);
-    foreach (array_keys($arrReturnKeywordTokens) as $key) {
-        $arrReturnKeywordTokens[$key] = str_replace("|", " ", $arrKeywordTokens[$key]['keywordstokenized']);
-    }
-    unset($key);
-
-    return $arrReturnKeywordTokens;
-}

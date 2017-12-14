@@ -22,115 +22,6 @@
 /****                                                                                                        ****/
 /****************************************************************************************************************/
 
-const C__SECTION_BEGIN__ = 1;
-const C__SECTION_END__ = 2;
-const C__DISPLAY_NORMAL__ = 100;
-const C__DISPLAY_ITEM_START__ = 200;
-const C__DISPLAY_ITEM_DETAIL__ = 300;
-const C__DISPLAY_ITEM_RESULT__ = 350;
-
-const C__DISPLAY_WARNING__ = 405;
-const C__DISPLAY_ERROR__ = 500;
-const C__DISPLAY_RESULT__ = 600;
-const C__DISPLAY_SUMMARY__ = 750;
-
-
-/**
- * @param array $context
- *
- * @return array
- */
-function getDebugContext($context=array(), \Exception $thrownExc = null)
-{
-	$baseContext = [
-		'class_call' => "",
-		'exception_message' => "",
-		'exception_file' => "",
-		'exception_line' => "",
-//		'exception_trace' => "",
-		'channel' => "",
-		'jobsite' => ""
-	];
-	$context = array_merge($baseContext, $context);
-
-	//Debug backtrace called. Find next occurence of class after Logger, or return calling script:
-	$dbg = debug_backtrace();
-	$i = 0;
-	$jobsiteKey = null;
-	$usersearch = null;
-	$loggedBacktrace = array();
-
-	$class = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
-	while ($i < count($dbg) - 1 ) {
-		if (!empty($dbg[$i]['class']) && stripos($dbg[$i]['class'], 'LoggingManager') === false &&
-			(empty($dbg[$i]['function']) || !in_array($dbg[$i]['function'], array("getDebugContent", "handleException"))))
-		{
-			$loggedBacktrace = $dbg[$i];
-
-			$class = $dbg[$i]['class'] . "->" . $dbg[$i]['function'] ."()";
-			if(!empty($dbg[$i]['object']))
-			{
-				$objclass = get_class($dbg[$i]['object']);
-				if(strcasecmp($objclass, $dbg[$i]['class']) != 0)
-				{
-					$class = "{$objclass} -> {$class}";
-					try{
-						if( is_object($dbg[$i]['object']) && method_exists($dbg[$i]['object'], "getName"))
-							$jobsiteKey = $dbg[$i]['object']->getName();
-					} catch (Exception $ex) {
-						$jobsiteKey = "";
-					}
-					try{
-						if(array_key_exists('args', $dbg[$i]) & is_array($dbg[$i]['args']))
-							if(is_object($dbg[$i]['args'][0]) && method_exists(get_class($dbg[$i]['args'][0]), "getUserSearchSiteRunKey"))
-								$usersearch = $dbg[$i]['args'][0]->getUserSearchSiteRunKey();
-							else
-								$usersearch = "";
-					} catch (Exception $ex) { $usersearch = ""; }
-				}
-				break;
-			}
-		}
-		$i++;
-	}
-
-
-	$context['class_call'] = $class;
-	$context['channel'] = is_null($jobsiteKey) ? "default" : "plugins";
-	$context['jobsite'] = $jobsiteKey;
-//	$context['user_search_run_key'] = $usersearch,
-//	$context['memory_usage'] = memory_get_usage() / 1024 / 1024;
-
-
-	if(!empty($thrownExc))
-	{
-		$context['exception_message'] = $thrownExc->getMessage();
-		$context['exception_file'] = $thrownExc->getFile();
-		$context['exception_line'] = $thrownExc->getLine();
-//		$context['exception_trace'] = join("|", preg_split("/$/", encodeJSON($thrownExc->getTrace())));
-	}
-
-	return $context;
-}
-
-
-/**
- * @param       $msg
- * @param int   $scooper_level
- * @param array $context
- */
-function LogLine($msg, $scooper_level=\C__DISPLAY_NORMAL__, $context=array())
-{
-	if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
-	{
-		print($msg . "\r\n");
-	}
-	else
-	{
-		$GLOBALS['logger']->logLine($msg, $scooper_level, null, $context);
-	}
-}
-
 /**
  * @param $headerText
  * @param $nSectionLevel
@@ -166,41 +57,50 @@ function endLogSection($headerText)
 }
 
 
-
 /**
  * @param $msg
+ * @param \Psr\Log\LogLevel $level
+ * @param array $context
  */
-function LogError($msg, $context=array())
+function LogMessage($msg, $logLevel=\Monolog\Logger::INFO, $extras=array())
 {
-	$ctxt = getDebugContext($context);
-
-	if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
+	if(empty($GLOBALS['logger']) || !isset($GLOBALS['logger']))
 	{
 		print($msg . "\r\n");
 	}
 	else
 	{
-		$GLOBALS['logger']->log(\Monolog\Logger::ERROR, $msg, $context);
+		$GLOBALS['logger']->logRecord($logLevel, $msg, $extras);
 	}
+}
+
+
+/**
+ * @param $msg
+ */
+function LogError($msg, $extras=array())
+{
+	LogMessage($msg,\Monolog\Logger::ERROR, $extras);
+}
+
+
+/**
+ * @param $msg
+ */
+function LogWarning($msg, $extras=array())
+{
+	LogMessage($msg,\Monolog\Logger::WARNING, $extras);
 }
 
 /**
  * @param     $msg
  * @param int $scooper_level
  */
-function LogDebug($msg, $scooper_level=C__DISPLAY_NORMAL__)
+function LogDebug($msg, $extras=array())
 {
 	if(isDebug())
 	{
-		$context = getDebugContext();
-		if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
-		{
-			print($msg. "\r\n");
-		}
-		else
-		{
-			$GLOBALS['logger']->debug($msg, $context);
-		}
+		LogMessage($msg,\Monolog\Logger::DEBUG, $extras);
 	}
 }
 
@@ -212,10 +112,10 @@ function LogPlainText($msg, $context = array())
 {
 	$textParts = preg_split("/[\\r\\n|" . PHP_EOL . "]/", $msg);
 	if(($textParts === false) || is_null($textParts))
-		logLine($msg);
+		LogMessage($msg);
 	else {
 		foreach ($textParts as $part) {
-			LogLine($part);
+			LogMessage($part);
 		}
 	}
 }
@@ -229,7 +129,6 @@ function LogPlainText($msg, $context = array())
 
 function handleException(Exception $ex, $fmtLogMsg= null, $raise=true)
 {
-	$context = getDebugContext(array(), $ex);
 	$toThrow = $ex;
 	if (empty($toThrow))
 		$toThrow = new Exception($fmtLogMsg);
@@ -253,7 +152,7 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true)
 		$msg = $toThrow->getMessage();
 	}
 
-	LogError($msg, $context);
+	LogError($msg);
 
 	if ($raise == true) {
 		throw $toThrow;

@@ -40,14 +40,14 @@ class NotifierJobAlerts extends JobsMailSender
 
     function __destruct()
     {
-        LogLine("Closing ".$this->JobSiteName." instance of class " . get_class($this), \C__DISPLAY_ITEM_START__);
+        LogMessage("Closing ".$this->JobSiteName." instance of class " . get_class($this));
     }
 
     private function _combineCSVsToExcel($outfile, $arrCSVFiles)
     {
         $spreadsheet = new PHPExcel();
         $objWriter = PHPExcel_IOFactory::createWriter($spreadsheet, "Excel2007");
-        LogLine("Creating output XLS file '" . $outfile . "'." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
+        LogMessage("Creating output XLS file '" . $outfile . "'." . PHP_EOL);
         $style_all = array(
             'alignment' => array(
                 'vertical' => PHPExcel_Style_Alignment::VERTICAL_TOP,
@@ -125,7 +125,7 @@ class NotifierJobAlerts extends JobsMailSender
                 }
 
 
-                LogLine("Added data from CSV '" . $attachFile . "' to output XLS file." . PHP_EOL, \C__DISPLAY_ITEM_RESULT__);
+                LogMessage("Added data from CSV '" . $attachFile . "' to output XLS file." . PHP_EOL);
             }
         }
 
@@ -172,7 +172,7 @@ class NotifierJobAlerts extends JobsMailSender
         $this->arrAllUnnotifiedJobs = getAllMatchesForUserNotification();
         if(is_null($this->arrAllUnnotifiedJobs) || count($this->arrAllUnnotifiedJobs) <= 0)
         {
-            LogLine("No new jobs found to notify user about.", C__DISPLAY_WARNING__);
+            LogWarning("No new jobs found to notify user about.");
 	        endLogSection(" User results notification.");
             return false;
         }
@@ -188,7 +188,7 @@ class NotifierJobAlerts extends JobsMailSender
 
 	    startLogSection("Writing Results Files to Send User");
 
-        LogLine(PHP_EOL . "Writing final list of " . count($arrJobsToNotify) . " jobs to output files." . PHP_EOL, \C__DISPLAY_NORMAL__);
+        LogMessage(PHP_EOL . "Writing final list of " . count($arrJobsToNotify) . " jobs to output files." . PHP_EOL);
 
         $arrExcludedJobs = array_filter($arrJobsToNotify, "isExcluded");
         $arrMatchedAndNotExcludedJobs = array_filter($arrMatchedJobs, "isUserJobMatchAndNotExcluded");
@@ -212,13 +212,13 @@ class NotifierJobAlerts extends JobsMailSender
 
 	    startLogSection("Generating notification email contents...");
 
-        LogLine("Generating text email content for user");
+        LogMessage("Generating text email content for user");
 
         $strResultCountsText = $this->getListingCountsByPlugin("text", $arrJobsToNotify, $arrExcludedJobs);
         $strResultText = "Job Scooper Results for ". getRunDateRange() . PHP_EOL . $strResultCountsText . PHP_EOL;
-	    LogPlainText($strResultText, \C__DISPLAY_SUMMARY__);
+	    LogPlainText($strResultText);
 
-        LogLine("Generating html email content for user" . PHP_EOL);
+        LogMessage("Generating html email content for user" . PHP_EOL);
 
         $messageHtml = $this->getListingCountsByPlugin("html", $arrMatchedJobs, $arrExcludedJobs, $detailsHTMLFile);
 
@@ -248,7 +248,7 @@ class NotifierJobAlerts extends JobsMailSender
                         $rowsAffected .= count($results);
                     }
                     if ($rowsAffected != count($arrToMarkNotified))
-                        LogLine("Warning:  marked only " . $rowsAffected ." of " . count($arrToMarkNotified) ." UserJobMatch records as notified.");
+                        LogMessage("Warning:  marked only " . $rowsAffected ." of " . count($arrToMarkNotified) ." UserJobMatch records as notified.");
                 }
             }
 	        endLogSection(" Email send completed...");
@@ -266,7 +266,7 @@ class NotifierJobAlerts extends JobsMailSender
         if (isDebug() !== true) {
             foreach ($arrFilesToAttach as $filepath) {
                 if (file_exists($filepath) && is_file($filepath)) {
-                    LogLine("Deleting local attachment file " . $filepath . PHP_EOL, \C__DISPLAY_NORMAL__);
+                    LogMessage("Deleting local attachment file " . $filepath . PHP_EOL);
                     unlink($filepath);
                 }
             }
@@ -298,7 +298,7 @@ class NotifierJobAlerts extends JobsMailSender
 
         if(count($arrJobsToOutput) == 0)
         {
-            LogLine("Warning: writeJobsListToFile had no records to write to  " . $strFileOut, \C__DISPLAY_ITEM_DETAIL__);
+            LogMessage("Warning: writeJobsListToFile had no records to write to  " . $strFileOut);
 
         }
 
@@ -358,7 +358,7 @@ class NotifierJobAlerts extends JobsMailSender
             $objWriter->save($strFileOut);
 
         }
-        LogLine("Jobs list had  ". count($arrRecordsToOutput) . " jobs and was written to " . $strFileOut , \C__DISPLAY_ITEM_START__);
+        LogMessage("Jobs list had  ". count($arrRecordsToOutput) . " jobs and was written to " . $strFileOut );
 
         if($fileDetails->getExtension() == "HTML")
             $this->addMailCssToHTMLFile($strFileOut);
@@ -373,7 +373,7 @@ class NotifierJobAlerts extends JobsMailSender
 
         $this->writeRunsJobsToFile($filePath, $arrJobsList);
 
-        LogLine("Wrote " . count($arrJobsList). " job listings output to  " . $filePath, \C__DISPLAY_ITEM_RESULT__);
+        LogMessage("Wrote " . count($arrJobsList). " job listings output to  " . $filePath);
 
         return $filePath;
 
@@ -385,7 +385,7 @@ class NotifierJobAlerts extends JobsMailSender
 
         if(empty($filePath))
         {
-            LogLine("Unable to get file contents to include in email.  Failing notification.", \C__DISPLAY_ERROR__);
+            LogError("Unable to get file contents to include in email.  Failing notification.");
             return null;
         }
 
@@ -393,7 +393,7 @@ class NotifierJobAlerts extends JobsMailSender
         $file = fopen( $filePath, "r" );
         if( $file == false )
         {
-            LogLine("Unable to open file '". $filePath ."' for to get contents for notification mail.  Failing notification.", \C__DISPLAY_ERROR__);
+            LogError("Unable to open file '". $filePath ."' for to get contents for notification mail.  Failing notification.");
             return null;
         }
 

@@ -71,7 +71,7 @@ class SeleniumManager extends PropertyObject
             // BUGBUG:  Firefox has started to return "This tab has crashed" responses often as of late February 2017.
             //          Adding check for that case and a session kill/reload when it happens
             if (stristr($src, "tab has crashed") != false) {
-                LogLine("Error in Firefox WebDriver:  tab has crashed retrieving page at " . $url . ".  Killing WebDriver and trying one more time...", \C__DISPLAY_WARNING__);
+                LogWarning("Error in Firefox WebDriver:  tab has crashed retrieving page at " . $url . ".  Killing WebDriver and trying one more time...");
                 // We found "tab has crashed" in the response, so we can't use it.
                 if ($recursed != true) {
                     $this->killAllAndRestartSelenium();
@@ -119,7 +119,7 @@ class SeleniumManager extends PropertyObject
         try {
             $this->doneWithRemoteWebDriver();
         } catch (Exception $ex) {
-            LogLine("Error stopping active Selenium sessions: " . $ex, \C__DISPLAY_ERROR__);
+            LogError("Error stopping active Selenium sessions: " . $ex);
         }
 
         $webdriver = $this->getWebDriverKind();
@@ -142,9 +142,9 @@ class SeleniumManager extends PropertyObject
         {
             if(array_key_exists('stop_command', $settings) && !is_null($settings['stop_command']) && !empty($settings['stop_command']))
             {
-                LogLine("Attempting to stop Selenium server with command \"" . $settings['stop_command'] . "\"", \C__DISPLAY_ITEM_DETAIL__);
+                LogMessage("Attempting to stop Selenium server with command \"" . $settings['stop_command'] . "\"");
                 $res = doExec($settings['stop_command']);
-                LogLine("Stopping Selenium server result: "  . $res, \C__DISPLAY_ITEM_RESULT__);
+                LogMessage("Stopping Selenium server result: "  . $res);
             }
             else {
 
@@ -153,20 +153,20 @@ class SeleniumManager extends PropertyObject
                     // Details: https://github.com/SeleniumHQ/selenium/issues/2852
                     //
                     $cmd = 'pid=`ps -eo pid,args | grep selenium-server | grep -v grep | cut -c1-6`; if [ "$pid" ]; then kill -9 $pid; echo "Killed Selenium process #"$pid; else echo "Selenium server is not running."; fi';
-                    LogLine("Killing Selenium server process with command \"" . $cmd . "\"", \C__DISPLAY_ITEM_DETAIL__);
+                    LogMessage("Killing Selenium server process with command \"" . $cmd . "\"");
 
                     $res = doExec($cmd);
-                    LogLine("Killing Selenium server result: " . $res, \C__DISPLAY_ITEM_RESULT__);
+                    LogMessage("Killing Selenium server result: " . $res);
                 } catch (Exception $ex) {
                     $pscmd = doExec("pkill -i selenium");
-                    LogLine("Killing Selenium server result: " . $res, \C__DISPLAY_ITEM_RESULT__);
-                    LogLine("Failed to send shutdown to Selenium server.  Attempted to kill process, however you may need to manually shut it down.", \C__DISPLAY_ERROR__);
+                    LogMessage("Killing Selenium server result: " . $res);
+                    LogError("Failed to send shutdown to Selenium server.  Attempted to kill process, however you may need to manually shut it down.");
                 }
             }
         }
         else
         {
-            LogLine("Did not attempt Selenium server shutdown since we didn't and can't autostart it.", \C__DISPLAY_ITEM_DETAIL__);
+            LogMessage("Did not attempt Selenium server shutdown since we didn't and can't autostart it.");
         }
 
     }
@@ -209,9 +209,9 @@ class SeleniumManager extends PropertyObject
             $seleniumStarted = $this->isServerUp();
             if ($seleniumStarted == false) {
                 if ($canStop === True && array_key_exists('start_command', $settings) && !is_null($settings['start_command'])) {
-                    LogLine("Attempting to start Selenium server with command \"" . $settings['start_command'] . "\"", \C__DISPLAY_NORMAL__);
+                    LogMessage("Attempting to start Selenium server with command \"" . $settings['start_command'] . "\"");
                     $res = doExec($settings['start_command']);
-                    LogLine("Starting Selenium server result: " . $res, \C__DISPLAY_NORMAL__);
+                    LogMessage("Starting Selenium server result: " . $res);
 
                     sleep(10);
                     $seleniumStarted = true;
@@ -227,10 +227,10 @@ class SeleniumManager extends PropertyObject
 
                     $strCmdToRun .= " >/dev/null &";
 
-                    LogLine("Starting Selenium with command: '" . $strCmdToRun . "'", \C__DISPLAY_ITEM_RESULT__);
+                    LogMessage("Starting Selenium with command: '" . $strCmdToRun . "'");
                     $res = doExec($strCmdToRun);
                     sleep(10);
-                    LogLine("Starting Selenium server result: " . $res, \C__DISPLAY_NORMAL__);
+                    LogMessage("Starting Selenium server result: " . $res);
                     $seleniumStarted = true;
                 } else {
                     $seleniumStarted = false;
@@ -238,7 +238,7 @@ class SeleniumManager extends PropertyObject
                 }
             } else {
                 $seleniumStarted = true;
-                LogLine("Selenium is already running; skipping startup of server.", \C__DISPLAY_WARNING__);
+                LogWarning("Selenium is already running; skipping startup of server.");
             }
             return $seleniumStarted;
         }
@@ -251,7 +251,7 @@ class SeleniumManager extends PropertyObject
 
         $hostHubPageURL = $this->_settings['host_location'] . '/wd/hub';
         $msg = "Checking Selenium server up.... ";
-        LogLine("Checking if Selenium is running at " . $hostHubPageURL, \C__DISPLAY_ITEM_DETAIL__);
+        LogMessage("Checking if Selenium is running at " . $hostHubPageURL);
 
         $ret = false;
 
@@ -259,7 +259,7 @@ class SeleniumManager extends PropertyObject
 
 //
 //            $client = new \GuzzleHttp\Client();
-//            LogDebug("Getting HTML from server page" . $hostHubPageURL, \C__DISPLAY_ITEM_DETAIL__);
+//            LogDebug("Getting HTML from server page" . $hostHubPageURL);
 //
 //            $res = $client->request('GET', $hostHubPageURL);
 //            $rescode = $res->getStatusCode();
@@ -293,7 +293,7 @@ class SeleniumManager extends PropertyObject
         }
         finally
         {
-            LogLine($msg, \C__DISPLAY_ITEM_DETAIL__);
+            LogMessage($msg);
         }
 
         return $ret;
@@ -351,7 +351,7 @@ class SeleniumManager extends PropertyObject
     private function create_remote_webdriver()
     {
         $hubUrl = $this->_settings['host_location'] . '/wd/hub';
-        LogLine("Creating Selenium remote web driver to host {$hubUrl}...");
+        LogMessage("Creating Selenium remote web driver to host {$hubUrl}...");
 
         try {
 
@@ -379,7 +379,7 @@ class SeleniumManager extends PropertyObject
                 $request_timeout_in_ms = 60000
             );
 
-            LogLine("Remote web driver instantiated.");
+            LogMessage("Remote web driver instantiated.");
 
             return $this->remoteWebDriver;
         } catch (\WebDriverCurlException $ex) {

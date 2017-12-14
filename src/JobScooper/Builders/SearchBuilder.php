@@ -61,21 +61,21 @@ class SearchBuilder
 
 	    $arrLocations = getConfigurationSetting('search_locations');
 	    if (empty($arrLocations)) {
-		    LogLine("No search locations have been set. Unable to setup a user search run.", C__DISPLAY_WARNING__);
+		    LogWarning("No search locations have been set. Unable to setup a user search run.");
 
 		    return null;
 	    }
 
 	    $keywordSets = getConfigurationSetting('user_keyword_sets');
 	    if (empty($keywordSets)) {
-		    LogLine("No user keyword sets have been configured. Unable to setup a user search run.", C__DISPLAY_WARNING__);
+		    LogWarning("No user keyword sets have been configured. Unable to setup a user search run.");
 
 		    return null;
 	    }
 
 	    $userSearches = array();
 	    foreach ($arrLocations as $lockey => $searchLoc) {
-		    LogLine("Adding user searches in " . $searchLoc->getDisplayName() . " for user's keywords sets", \C__DISPLAY_ITEM_START__);
+		    LogMessage("Adding user searches in " . $searchLoc->getDisplayName() . " for user's keywords sets");
 
 		    foreach ($keywordSets as $setKey => $keywordSet) {
 
@@ -95,12 +95,12 @@ class SearchBuilder
 	    }
 
 	    if (empty($userSearches)) {
-		    LogLine("Could not create user searches for the given user keyword sets and geolocations.  Cannot continue.");
+		    LogMessage("Could not create user searches for the given user keyword sets and geolocations.  Cannot continue.");
 
 		    return null;
 	    }
 	    setConfigurationSetting("user_searches", $userSearches);
-	    LogLine("Generated " . count($userSearches) . " user searches.");
+	    LogMessage("Generated " . count($userSearches) . " user searches.");
 
     }
 
@@ -175,7 +175,7 @@ class SearchBuilder
 		unset($GLOBALS[JOBSCOOPER_CONFIGSETTING_ROOT]["user_search_site_runs"]);
 		setConfigurationSetting("user_search_site_runs", $keepThese);
 
-		LogLine("Skipping the following sites & searches because they have run since " . $this->_cacheCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipTheseSearches));
+	 LogMessage("Skipping the following sites & searches because they have run since " . $this->_cacheCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipTheseSearches));
 	}
 
 	private function _filterJobSitesThatAreExcluded()
@@ -244,7 +244,7 @@ class SearchBuilder
 				    if (new \DateTime($completedSearchesUserRecent[$partialUSSRKey]) >= $this->_cacheCutOffTime)
 				    {
 					    $fKeepSearch = false;
-					    LogLine("Skipping search {$ussrKey} because it has run since " .  $this->_cacheCutOffTime->format("Y-m-d H:i"));
+					    LogMessage("Skipping search {$ussrKey} because it has run since " .  $this->_cacheCutOffTime->format("Y-m-d H:i"));
 				    }
 			    }
 
@@ -276,7 +276,7 @@ class SearchBuilder
 	    if (empty($userSearches) || empty($includedSites))
 		    return;
 
-        LogLine(" Creating search runs for " . strval(count($userSearches)) . " user searches across " . count($includedSites) . " jobsites.", \C__DISPLAY_ITEM_DETAIL__);
+        LogMessage(" Creating search runs for " . strval(count($userSearches)) . " user searches across " . count($includedSites) . " jobsites.");
 
         $user = User::getCurrentUser();
         $searchRuns = array();

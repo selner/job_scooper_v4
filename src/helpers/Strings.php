@@ -204,7 +204,7 @@ function strScrub($str, $flags = null)
     //
     if($str == null || !isset($str) || !is_string($str))
     {
-        LogLine("strScrub was called with an invalid value to scrub (not a string, null, or similar.  Cannot scrub the passed value: " . var_export($str, true), C__DISPLAY_WARNING__);
+        LogWarning("strScrub was called with an invalid value to scrub (not a string, null, or similar.  Cannot scrub the passed value: " . var_export($str, true));
         return $str;
     }
 

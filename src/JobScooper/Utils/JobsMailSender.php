@@ -42,8 +42,8 @@ class JobsMailSender extends PHPMailer
         if($this->alwaysNotify === false) {
         	$skipNotify = getGlobalConfigOptionBoolean("command_line_args.disable-notifications");
             if ($skipNotify === true) {
-                LogLine(PHP_EOL . "User set -send_notifications = false so skipping email notification.)" . PHP_EOL, \C__DISPLAY_NORMAL__);
-                LogLine("Mail contents would have been:" . PHP_EOL . $strBodyText, \C__DISPLAY_NORMAL__);
+                LogMessage(PHP_EOL . "User set -send_notifications = false so skipping email notification.)" . PHP_EOL);
+                LogMessage("Mail contents would have been:" . PHP_EOL . $strBodyText);
                 return null;
             }
         }
@@ -136,19 +136,19 @@ class JobsMailSender extends PHPMailer
             // If we don't do this, we just get "failed" without any useful details.
             //
             $msg = "Failed to send notification email with error = ".$this->ErrorInfo . PHP_EOL . "Retrying email send with debug enabled to log error details...";
-            LogLine($msg, \C__DISPLAY_ERROR__);
+            LogError($msg);
 	        $this->SMTPDebug = 1;
             $ret = $this->send();
             if($ret === true) return $ret;
 
             $msg = "Failed second attempt to send notification email.  Debug error details should be logged above.  Error: " . PHP_EOL .$this->ErrorInfo;
-            LogLine($msg, \C__DISPLAY_ERROR__);
+            LogError($msg);
             throw new Exception($msg);
 
         }
         else
         {
-            LogLine("Email sent to " . getArrayValuesAsString($this->getAllRecipientAddresses()) . " from " . $this->From, \C__DISPLAY_ITEM_RESULT__);
+            LogMessage("Email sent to " . getArrayValuesAsString($this->getAllRecipientAddresses()) . " from " . $this->From);
         }
         return $ret;
 
