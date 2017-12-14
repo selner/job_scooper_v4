@@ -153,7 +153,7 @@ class ConfigBuilder
 	    // and configure all searches
 	    //
 	    $verifiedInputs = array();
-	    $inputfiles = getConfigurationSetting("config_file_settings.inputfiles");
+	    $inputfiles = $this->_getSetting("inputfiles");
 	    if (!empty($inputfiles) && is_array($inputfiles)) {
 		    foreach ($inputfiles as $key => $iniInputFileItem)
 		    {
