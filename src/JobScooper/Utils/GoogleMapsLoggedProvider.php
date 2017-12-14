@@ -39,11 +39,8 @@ class GoogleMapsLoggedProvider extends GoogleMapsProvider
     protected function executeQuery($query)
     {
         $this->callCounter += 1;
-        $context = array("msg"=> "geocoder called (" . $this->callCounter ." call on this run.", "query" => $query, "call_count_for_run" => $this->callCounter);
-        if(!empty($this->logger))
-        {
-            $this->logger->addInfo("Google Geocoder Called (" . $this->callCounter . " times)", getDebugContext($context));
-        }
-        return parent::executeQuery($query);
+	    $context = array("channel" => "geocoder", "numberGeoApiCalls" => $this->callCounter, "query" => $query, "call_count_for_run" => $this->callCounter);
+	    $this->logger->log(\Monolog\Logger::INFO, "Google Geocoder Called (" . $this->callCounter . " times)", $context);
+	    return parent::executeQuery($query);
     }
 }
