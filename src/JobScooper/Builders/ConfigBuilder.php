@@ -460,50 +460,49 @@ class ConfigBuilder
 	 * @return \JobScooper\DataAccess\UserKeywordSet|null
 	 */
 	private function _getUserKeywordSet_($iniKeywordSetup)
-    {
-	    // If keywords are in a string, split them out into an array instead before continuing
-	    if(!empty($iniKeywordSetup) && array_key_exists("keywords", $iniKeywordSetup))
-	    {
-	    	$user = User::getCurrentUser();
+	{
+		$kwdset = null;
 
-	    	$keyword_list = $iniKeywordSetup['keywords'];
-		    if(!array_key_exists('key', $iniKeywordSetup) ||
-			    empty($iniKeywordSetup['key']))
-			    $iniKeywordSetup['key'] = cleanupSlugPart($keyword_list);
+		// If keywords are in a string, split them out into an array instead before continuing
+		if (!empty($iniKeywordSetup) && array_key_exists("keywords", $iniKeywordSetup)) {
+			$keyword_list = $iniKeywordSetup['keywords'];
+			if (!array_key_exists('key', $iniKeywordSetup) ||
+				empty($iniKeywordSetup['key']))
+				$iniKeywordSetup['key'] = cleanupSlugPart($keyword_list);
 
-		    if(is_string($keyword_list))
-			    $keyword_list = preg_split("/\s*,\s*/", $keyword_list);
+			if (is_string($keyword_list))
+				$keyword_list = preg_split("/\s*,\s*/", $keyword_list);
 
-		    $final_keywd_list = array();
-		    foreach($keyword_list as $kwd)
-		    {
-			    $scrubbedKwd = strScrub($kwd, ADVANCED_TEXT_CLEANUP);
-			    $final_keywd_list[$scrubbedKwd] = $scrubbedKwd;
-		    }
+			$final_keywd_list = array();
+			foreach ($keyword_list as $kwd) {
+				$scrubbedKwd = strScrub($kwd, ADVANCED_TEXT_CLEANUP);
+				$final_keywd_list[$scrubbedKwd] = $scrubbedKwd;
+			}
 
-		    $kwdset = UserKeywordSetQuery::create()
-		        ->filterByUserFromUKS($user)
-		        ->filterByKeywords($final_keywd_list)
-			    ->findOneOrCreate();
+			$user = User::getCurrentUser();
+			$kwdset = UserKeywordSetQuery::create()
+				->filterByUserId($user->getUserId())
+				->filterBySearchKeyFromConfig($iniKeywordSetup['key'])
+				->findOne();
 
-		    if(!empty(array_diff($kwdset->getKeywords(), $final_keywd_list)))
-			    $kwdset->setKeywords($final_keywd_list);
 
-		    if(empty($kwdset->getUserFromUKS()))
-			    $kwdset->setUserFromUKS($user);
+			if (empty($kwdset)) {
+				$kwdset = new UserKeywordSet();
 
-		    if(strcasecmp($iniKeywordSetup['key'], $kwdset->setSearchKeyFromConfig) !== 0)
-			    $kwdset->setSearchKeyFromConfig($iniKeywordSetup['key']);
+				$kwdset->setUserFromUKS($user);
 
-	        if($kwdset->isModified())
-			    $kwdset->save();
+				$kwdset->setSearchKeyFromConfig($iniKeywordSetup['key']);
+
+				$kwdset->setKeywords($final_keywd_list);
+
+				$kwdset->save();
+
+				return $kwdset;
+			}
+
 			return $kwdset;
-        }
-
-        return null;
-    }
+		}
 
 
-
-
-} 
+	}
+}

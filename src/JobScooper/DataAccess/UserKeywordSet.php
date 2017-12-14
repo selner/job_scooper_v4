@@ -19,17 +19,16 @@ use Propel\Runtime\Connection\ConnectionInterface;
  */
 class UserKeywordSet extends BaseUserKeywordSet
 {
-
-	public function preSave(ConnectionInterface $con = null)
+	public function setKeywords($v)
 	{
-		if ($this->isColumnModified(UserKeywordSetTableMap::COL_KEYWORDS) &&
-			!empty($this->getKeywords()))
+		$ret = parent::setKeywords($v);
+		if(!empty($this->getKeywords()))
 		{
 			$token_keywords = $this->_tokenizeKeywords($this->getKeywords());
 			$this->setKeywordTokens($token_keywords);
 		}
 
-		return parent::preSave($con);
+		return $ret;
 	}
 
 	private function _tokenizeKeywords($arrKeywords)
