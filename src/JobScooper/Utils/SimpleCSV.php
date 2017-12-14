@@ -334,7 +334,6 @@ class SimpleCSV
 
         if(!isset($arrFieldsToUseInKey) || !is_array($arrFieldsToUseInKey))
         {
-//            __debug__printLine("Not deduping output data; primary keys to use were not set.", C__DISPLAY_MOMENTARY_INTERUPPT__);
             return $arrCSVRows;
         }
 //        print 'input array rows = ' . count($arrCSVRows).PHP_EOL;

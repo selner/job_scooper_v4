@@ -452,10 +452,6 @@
                 valueSet="not-ready,ready,sent" defaultValue="not-ready"/>
 
         <column name="set_by_user_search_site_run_key" phpName="SetByUserSearchSiteRunKey" type="varchar" size="100"/>
-        <!--<unique>-->
-            <!--<unique-column name="user_job_match_id"/>-->
-            <!--<unique-column name="set_by_user_search_site_run_key" size="100"/>-->
-        <!--</unique>-->
 
         <!-- ~~~~~~~~~  FOREIGN KEYS ~~~~~~~~~~~~~~~~  -->
 
