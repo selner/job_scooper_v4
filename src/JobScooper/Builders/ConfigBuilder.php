@@ -486,10 +486,17 @@ class ConfigBuilder
 		        ->filterByKeywords($final_keywd_list)
 			    ->findOneOrCreate();
 
-		    $kwdset->setSearchKeyFromConfig($iniKeywordSetup['key']);
-		    $kwdset->setKeywords($final_keywd_list);
-		    $kwdset->setUserFromUKS($user);
-		    $kwdset->save();
+		    if(!empty(array_diff($kwdset->getKeywords(), $final_keywd_list)))
+			    $kwdset->setKeywords($final_keywd_list);
+
+		    if(empty($kwdset->getUserFromUKS()))
+			    $kwdset->setUserFromUKS($user);
+
+		    if(strcasecmp($iniKeywordSetup['key'], $kwdset->setSearchKeyFromConfig) !== 0)
+			    $kwdset->setSearchKeyFromConfig($iniKeywordSetup['key']);
+
+	        if($kwdset->isModified())
+			    $kwdset->save();
 			return $kwdset;
         }
 

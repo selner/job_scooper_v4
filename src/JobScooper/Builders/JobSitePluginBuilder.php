@@ -218,7 +218,8 @@ class JobSitePluginBuilder
 	        }
         }
 
-        LogLine("Loaded " . count($all_jobsites_by_key)-count($jobsitesToDisable) . " enabled jobsite plugins.");
+        $nEnabledSites = count($all_jobsites_by_key)-count($jobsitesToDisable);
+        LogLine("Loaded {$nEnabledSites} enabled jobsite plugins.");
 	    setAsCacheData("all_jobsites_and_plugins", $all_jobsites_by_key);
 
     }
