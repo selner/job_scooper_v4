@@ -1,23 +1,21 @@
 {
-  "JobSiteName": "Glassdoor",
-  "BaseURL": "http://www.glassdoor.com/",
-  "SourceURL": "https://www.glassdoor.com/Job/jobs.htm?suggestCount=0&suggestChosen=false&clickSource=searchBtn&typedKeyword=***KEYWORDS***&sc.keyword=***KEYWORDS***&locT=&locId=&jobType=",
-  "PluginExtendsClassName" : "AbstractGlassdoor",
-  "LocationType": "location-city-comma-statecode",
-  "CountryCodes" : ["US"],
+  "JobSiteName": "TotalJobs",
+  "SourceURL": "https://www.totaljobs.com/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2&page=***PAGE_NUMBER***",
+  "CountryCodes" : ["UK"],
+  "AdditionalFlags" : ["C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES"],
   "Collections": [
     {
       "Name": "PageFields",
       "Fields": [
         {
           "Name": "TotalPostCount",
-          "Selector": "p.jobsCount",
+          "Selector": "div.page-title span",
           "Extract": "TEXT",
           "Type": "CSS"
         },
         {
           "Name": "JobPostItem",
-          "Selector": "li.jl",
+          "Selector": "div.job",
           "Extract": "CSS",
           "Attribute": "collection",
           "Type": "CSS"
@@ -29,26 +27,26 @@
       "Fields": [
         {
           "Name": "Title",
-          "Selector": "div.flexbox a.jobLink",
+          "Selector": "div.job-title a h2",
           "Extract": "TEXT",
           "Type": "CSS"
         },
         {
           "Name": "Url",
-          "Selector": "div.flexbox a.jobLink",
+          "Selector": "div.job-title a",
           "Extract": "ATTR",
           "Attribute": "href",
           "Type": "CSS"
         },
         {
           "Name": "JobSitePostId",
-          "Selector": "span.save-job-button",
+          "Selector": "button[data-job-id]",
           "Extract": "ATTR",
           "Attribute": "data-job-id"
         },
         {
           "Name": "Location",
-          "Selector": "div.empLoc span.subtle",
+          "Selector": "li.location",
           "Extract": "TEXT",
           "Attribute": null,
           "Index" : 0,
@@ -56,7 +54,15 @@
         },
         {
           "Name": "Company",
-          "Selector": "div.empLoc div",
+          "Selector": "li.company h3 a",
+          "Extract": "TEXT",
+          "Attribute": null,
+          "Index" : 0,
+          "Type": "CSS"
+        },
+        {
+          "Name": "EmploymentType",
+          "Selector": "li.job-type span",
           "Extract": "TEXT",
           "Attribute": null,
           "Index" : 0,
@@ -64,7 +70,7 @@
         },
         {
           "Name": "PostedAt",
-          "Selector": "span.hideHH",
+          "Selector": "li.date-posted span",
           "Extract": "TEXT",
           "Attribute": null,
           "Type": "CSS"
@@ -73,8 +79,7 @@
     }
   ],
   "Pagination": {
-    "PageLimit": 30,
-    "Type": "NEXT-BUTTON",
-    "Selector": "li.next a"
+    "PageLimit": 20,
+    "Type": "PAGE-VIA-URL"
   }
 }
