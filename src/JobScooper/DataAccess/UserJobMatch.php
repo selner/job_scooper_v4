@@ -71,7 +71,7 @@ class UserJobMatch extends BaseUserJobMatch
         return true;
     }
 
-    public function toFlatArrayForCSV()
+    public function toFlatArrayForCSV($limitToKeys=null)
     {
         $jobPost = $this->getJobPostingFromUJM();
         if(empty($jobPost) && $this->isNew())
@@ -82,6 +82,12 @@ class UserJobMatch extends BaseUserJobMatch
         updateColumnsForCSVFlatArray($arrUserJobMatch, new UserJobMatchTableMap());
 
         $arrItem = array_merge_recursive_distinct($arrJobPost, $arrUserJobMatch);
+
+        if(!empty($limitToKeys) && is_array($limitToKeys))
+        {
+	        $limitToKeys = array_combine($limitToKeys, $limitToKeys);
+        	return array_intersect_key($arrItem, $limitToKeys);
+        }
 
         return $arrItem;
     }

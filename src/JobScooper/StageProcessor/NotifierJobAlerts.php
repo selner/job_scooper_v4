@@ -19,16 +19,85 @@ namespace JobScooper\StageProcessor;
 use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\Utils\JobsMailSender;
 use JobScooper\Utils\SimpleCSV;
-use PHPExcel;
-use PHPExcel_IOFactory;
-use PHPExcel_Worksheet;
-use PHPExcel_Style_Alignment;
-use PHPExcel_Style_Fill;
 use ErrorException;
 use Exception;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Font;
 
 class NotifierJobAlerts extends JobsMailSender
 {
+	const SHEET_MATCHES = "new matches";
+//	const KEYS_MATCHES = array(
+//		"JobSiteKey" => "JobSite",
+//		"JobPostingId" => "ID",
+//		"PostedAt" => "PostedAt",
+//		"Company" => "Company",
+//		"Title" => "Title",
+//		"Url" => "Url",
+//		"LocationDisplayValue" => "Location",
+//		"EmploymentType" => "EmploymentType",
+//		"Category" => "Category");
+
+	const KEYS_MATCHES = array(
+		"JobSiteKey",
+		"JobPostingId",
+		"PostedAt",
+		"Company",
+		"Title",
+		"LocationDisplayValue",
+		"EmploymentType",
+		"Category",
+		"Url");
+
+	const SHEET_EXCLUDED_MATCHES = "excluded job matches";
+	const SHEET_EXCLUDED_ALL = "all excluded jobs";
+	const KEYS_EXCLUDED = array(
+		"JobSiteKey",
+		"JobPostingId",
+		"PostedAt",
+		"Company",
+		"Title",
+		"LocationDisplayValue",
+		"IsJobMatch",
+		"IsExcluded",
+		"OutOfUserArea",
+		"MatchedUserKeywords",
+		"MatchedNegativeTitleKeywords",
+		"MatchedNegativeCompanyKeywords",
+		"Url"
+	);
+
+	static $styleHyperlink = array(
+		'font' => array(
+			'underline' => Font::UNDERLINE_SINGLE,
+            'color'     => array(
+                  'rgb' => '0645AD'
+			)
+		),
+		'alignment' => array(
+			'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+			'wrapText' => false
+		)
+//		'borders' => array(
+//			'top' => array(
+//				'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+//			),
+//		),
+//		'fill' => array(
+//			'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
+//			'rotation' => 90,
+//			'startColor' => array(
+//				'argb' => 'FFA0A0A0',
+//			),
+//			'endColor' => array(
+//				'argb' => 'FFFFFFFF',
+//			),
+//		),
+	);
+
+	const SHEET_RUN_STATS = "search run stats";
+
     protected $JobSiteName = "NotifierJobAlerts";
     protected $arrAllUnnotifiedJobs = array();
     private $_arrJobSitesForRun = null;
@@ -43,99 +112,58 @@ class NotifierJobAlerts extends JobsMailSender
         LogMessage("Closing ".$this->JobSiteName." instance of class " . get_class($this));
     }
 
-    private function _combineCSVsToExcel($outfile, $arrCSVFiles)
+    function _writeJobMatchesToSheet(Spreadsheet &$spreadsheet, $sheetName, $arrResults, $keys)
     {
-        $spreadsheet = new PHPExcel();
-        $objWriter = PHPExcel_IOFactory::createWriter($spreadsheet, "Excel2007");
-        LogMessage("Creating output XLS file '" . $outfile . "'." . PHP_EOL);
-        $style_all = array(
-            'alignment' => array(
-                'vertical' => PHPExcel_Style_Alignment::VERTICAL_TOP,
-                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
-                'wrap' => true
-            ),
-            'font' => array(
-                'size' => 10.0,
-            )
-        );
 
-        $style_header = array_replace_recursive($style_all, array(
-            'alignment' => array(
-                'vertical' => PHPExcel_Style_Alignment::VERTICAL_BOTTOM,
-                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
-            ),
-            'fill' => array(
-                'type' => PHPExcel_Style_Fill::FILL_SOLID,
-                'color' => array('rgb'=>'E1E0F7'),
-            ),
-            'font' => array(
-                'bold' => true,
-            )
-        ));
-        $spreadsheet->getDefaultStyle()->applyFromArray($style_all);
+	    foreach($arrResults as $k => $v)
+	    {
+	    	$rowData = $v->toFlatArrayForCSV($keys);
+	    	$rowOrder = array_fill_keys($keys, null);
+	    	$arrResults[$k] = array_replace($rowOrder, $rowData);;
 
-        foreach($arrCSVFiles as $attachFile)
-        {
-        	$csvFile = new \SplFileInfo($attachFile);
-            if(strcasecmp($csvFile->getExtension(), "csv") == 0)
-            {
-                $objPHPExcelFromCSV = PHPExcel_IOFactory::createReaderForFile($attachFile);
-                $srcFile = $objPHPExcelFromCSV->load($attachFile);
-                $colCount = count($this->getKeysForUserCSVOutput());
-                $lastCol = ord("A") + $colCount - 1;
-                $lastColLetter = chr($lastCol);
-                $headerRange = "A" . 1 . ":" . $lastColLetter . "1";
+	    }
 
-                $sheet = $srcFile->getSheet(0);
-                $sheet->getDefaultColumnDimension()->setWidth(50);
-                foreach($sheet->getColumnIterator("a", $lastColLetter) as $col)
-                {
-                    $sheet->getColumnDimension($col->getColumnIndex())->setWidth(40);
-                }
+    	$spreadsheet->setActiveSheetIndexByName($sheetName);
 
-                $nameParts = explode("-", $csvFile->getBasename());
-                $name = "unknown";
-                foreach($nameParts as $part) {
-                    $int = intval($part);
-//                    print $name . " | " . $part . " | " . $int . " | " . (is_integer($int) && $int != 0) . PHP_EOL;
-                    if(!(is_integer($int) && $int != 0))
-                    {
-                        if($name == "unknown")
-                            $name = $part;
-                        else
-                            $name = $name . "-" . $part;
-                    }
-                }
-                $name = substr($name, max([strlen($name)-31, 0]), 31);
+	    $dataSheet = $spreadsheet->getActiveSheet();
 
-//                $name = $nameParts[count($nameParts)-1];
-                $n = 1;
-                while($spreadsheet->getSheetByName($name) != null)
-                {
-                    $n++;
-                    $name = $name . $n;
-                }
-                $sheet->setTitle($name);
-                $sheet->getStyle($headerRange)->applyFromArray( $style_header );
+	    $nFirstDataRow = 3;
+	    $startCell = "A" . strval($nFirstDataRow);
 
-                $newSheet = $spreadsheet->addExternalSheet($sheet);
-                if($spreadsheet->getSheetCount() > 3)
-                {
-                    $newSheet->setSheetState(PHPExcel_Worksheet::SHEETSTATE_HIDDEN);
-                }
+	    $dataSheet->fromArray(
+			    $arrResults,    // The data to set
+			    NULL,  // Array values with this value will not be set
+			    $startCell      // Top left coordinate of the worksheet range where
+		    //    we want to set these values (default is A1)
+		    );
 
+	    //
+	    // If we had a Url or Title array key, then we need to iterate over
+	    // all the rows in that column and set the hyperlink
+	    //
+	    $nUrlColIndex = array_search("Url", $keys);
+	    $nTitleColIndex = array_search("Title", $keys);
+	    if($nUrlColIndex >= 0 && $nUrlColIndex !== false) {
+		    $nNumRows = count($arrResults);
+		    for ($rc = 0; $rc < $nNumRows; $rc++) {
+			    $cellUrl = $dataSheet->getCellByColumnAndRow(1 + $nUrlColIndex, $rc + $nFirstDataRow);
+			    $urlVal = $cellUrl->getValue();
+			    $scheme = parse_url($urlVal, PHP_URL_SCHEME);
+			    if ($scheme !== false && strncasecmp($scheme, "http", 4) == 0) {
+				    $cellUrl->getHyperlink()->setUrl($urlVal);
+				    $cellUrl->getStyle()->applyFromArray(NotifierJobAlerts::$styleHyperlink);
+				    if($nTitleColIndex >= 0 && $nTitleColIndex !== false) {
+					    $cellTitle = $dataSheet->getCellByColumnAndRow(1 + $nTitleColIndex, $rc + $nFirstDataRow);
+					    $cellTitle->getHyperlink()->setUrl($urlVal);
+					    $cellTitle->getStyle()->applyFromArray(NotifierJobAlerts::$styleHyperlink);
+				    }
+			    }
+		    }
+	    }
 
-                LogMessage("Added data from CSV '" . $attachFile . "' to output XLS file." . PHP_EOL);
-            }
-        }
-
-        $spreadsheet->removeSheetByIndex(0);
-        $objWriter->save($outfile);
-
-
-        return $outfile;
 
     }
+
 
 
     protected function _isIncludedJobSite($var)
@@ -144,6 +172,33 @@ class NotifierJobAlerts extends JobsMailSender
 
         return in_array(cleanupSlugPart($var->getJobPostingFromUJM()->getJobSiteKey()), $sites);
 
+    }
+
+    private function _generateMatchResultsExcelFile($arrJobsToNotify)
+    {
+
+	    $spreadsheet = IOFactory::load(__ROOT__ . '/assets/templates/results.xlsx');
+
+	    $sheetFilters = array (
+		    [NotifierJobAlerts::SHEET_MATCHES, "isUserJobMatch", NotifierJobAlerts::KEYS_MATCHES],
+		    [NotifierJobAlerts::SHEET_EXCLUDED_MATCHES, "isUserJobMatchAndNotExcluded", NotifierJobAlerts::KEYS_EXCLUDED],
+		    [NotifierJobAlerts::SHEET_EXCLUDED_ALL, "isExcluded", NotifierJobAlerts::KEYS_EXCLUDED]
+	    );
+
+	    foreach($sheetFilters as $sheetParams)
+	    {
+		    if($spreadsheet->sheetNameExists($sheetParams[0]))
+		    {
+			    $spreadsheet->getActiveSheet()->getCell("F1")->setValue(getRunDateRange());
+			    $arrFilteredJobs = array_filter($arrJobsToNotify, $sheetParams[1]);
+			    if(!empty($arrFilteredJobs))
+				    $this->_writeJobMatchesToSheet($spreadsheet, $sheetParams[0], $arrFilteredJobs, $sheetParams[2]);
+			    $arrFilteredJobs = null;
+		    }
+	    }
+	    $spreadsheet->setActiveSheetIndexByName($sheetFilters[0][0]);
+
+		return $spreadsheet;
     }
 
     function processNotifications()
@@ -164,11 +219,6 @@ class NotifierJobAlerts extends JobsMailSender
         // Output the final files we'll send to the user
         //
 
-        // Output all records that match the user's interest and are still active
-        $detailsMainResultsXLSFile = generateOutputFileName("results", "xls", true, 'notifications');
-        $arrFilesToAttach = array();
-        $arrResultFilesToCombine = array();
-
         $this->arrAllUnnotifiedJobs = getAllMatchesForUserNotification();
         if(is_null($this->arrAllUnnotifiedJobs) || count($this->arrAllUnnotifiedJobs) <= 0)
         {
@@ -178,43 +228,43 @@ class NotifierJobAlerts extends JobsMailSender
         }
 
         $arrJobsToNotify = array_filter($this->arrAllUnnotifiedJobs, array($this, '_isIncludedJobSite') );
-        $detailsHTMLFile = null;
+	    $detailsHTMLFile = null;
+	    $pathExcelResults = null;
+	    $arrFilesToAttach = array();
 
-        //
+	    startLogSection("Generating Excel file for user's job match results...");
+
+	    try {
+	        $spreadsheet = $this->_generateMatchResultsExcelFile($arrJobsToNotify);
+
+	        $writer = IOFactory::createWriter($spreadsheet, "Xlsx");
+
+		    $pathExcelResults = getDefaultJobsOutputFileName("", "JobMatches", "XLSX", "_", 'notifications');
+	        $writer->save($pathExcelResults);
+		    $arrFilesToAttach[] = $pathExcelResults;
+        }
+        catch (\Exception $ex)
+        {
+            handleException($ex);
+        }
+		finally
+		{
+			endLogSection("Generating Excel file.");
+		}
+
+	    //
         // For our final output, we want the jobs to be sorted by company and then role name.
         // Create a copy of the jobs list that is sorted by that value.
         //
-        $arrMatchedJobs = array_filter($arrJobsToNotify, "isUserJobMatch");
+	    startLogSection("Generating HTML & text email content for user ");
+        $arrMatchedJobs = array_filter($arrJobsToNotify, "isUserJobMatchAndNotExcluded");
+	    $arrExcludedJobs = array_filter($arrJobsToNotify, "isExcluded");
 
-	    startLogSection("Writing Results Files to Send User");
-
-        LogMessage(PHP_EOL . "Writing final list of " . count($arrJobsToNotify) . " jobs to output files." . PHP_EOL);
-
-        $arrExcludedJobs = array_filter($arrJobsToNotify, "isExcluded");
-        $arrMatchedAndNotExcludedJobs = array_filter($arrMatchedJobs, "isUserJobMatchAndNotExcluded");
-
-        $detailsMatchOnlyCSV = $this->_filterAndWriteListToFile_($arrMatchedAndNotExcludedJobs, "Matches", "CSV");
-	    if(!empty($detailsMatchOnlyCSV))
-		    $arrResultFilesToCombine[] = $detailsMatchOnlyCSV;
-	    $detailsExcludedCSVFile = $this->_filterAndWriteListToFile_($arrExcludedJobs, "ExcludedJobs", "CSV");
-	    if(!empty($detailsExcludedCSVFile) && (filesize($detailsExcludedCSVFile) < 10 * 1024 * 1024) || isDebug()) {
-			    $arrResultFilesToCombine[] = $detailsExcludedCSVFile;
-	    }
-        $detailsHTMLFile = $this->_filterAndWriteListToFile_($arrMatchedAndNotExcludedJobs, "Matches", "HTML");
-
-        $xlsOutputFile = $this->_combineCSVsToExcel($detailsMainResultsXLSFile, $arrResultFilesToCombine);
-        array_unshift($arrFilesToAttach, $xlsOutputFile);
-
-	    endLogSection(" Results file generation.");
-
-
-
-
-	    startLogSection("Generating notification email contents...");
+        $detailsHTMLFile = $this->_filterAndWriteListToFile_($arrMatchedJobs, "Matches", "HTML");
 
         LogMessage("Generating text email content for user");
 
-        $strResultCountsText = $this->getListingCountsByPlugin("text", $arrJobsToNotify, $arrExcludedJobs);
+        $strResultCountsText = $this->getListingCountsByPlugin("text", $arrJobsToNotify);
         $strResultText = "Job Scooper Results for ". getRunDateRange() . PHP_EOL . $strResultCountsText . PHP_EOL;
 	    LogPlainText($strResultText);
 
@@ -278,8 +328,16 @@ class NotifierJobAlerts extends JobsMailSender
         return $ret;
     }
 
-
-    public function writeRunsJobsToFile($strFileOut, $arrJobsToOutput)
+	/**
+	 * @deprecated
+	 *
+	 * @param $strFileOut
+	 * @param $arrJobsToOutput
+	 *
+	 * @throws \ErrorException
+	 * @throws \Exception
+	 */
+	public function writeRunsJobsToFile($strFileOut, $arrJobsToOutput)
     {
 	    if(empty($strFileOut))
 	    {
@@ -352,10 +410,10 @@ class NotifierJobAlerts extends JobsMailSender
         else
         {
             array_unshift($arrRecordsToOutput, $keysToOutput);
-            $objPHPExcel = new PHPExcel();
-            $objPHPExcel->getActiveSheet()->fromArray($arrRecordsToOutput, null, 'A1');
-            $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, "CSV");
-            $objWriter->save($strFileOut);
+	        $spreadsheet = new Spreadsheet();
+	        $spreadsheet->getActiveSheet()->fromArray($arrRecordsToOutput, null, 'A1');
+	        $writer = IOFactory::createWriter($spreadsheet, "Csv");
+	        $writer->save($strFileOut);
 
         }
         LogMessage("Jobs list had  ". count($arrRecordsToOutput) . " jobs and was written to " . $strFileOut );
