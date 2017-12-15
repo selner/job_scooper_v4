@@ -55,6 +55,7 @@ class NotifierJobAlerts extends JobsMailSender
 		"IsJobMatch",
 		"IsExcluded",
 		"OutOfUserArea",
+		"DuplicatesJobPostingId",
 		"MatchedUserKeywords",
 		"MatchedNegativeTitleKeywords",
 		"MatchedNegativeCompanyKeywords",

@@ -31,53 +31,6 @@
 
         <column name="is_disabled" phpName="isDisabled" type="boolean" defaultValue="false"/>
 
-        <!--<column name="date_last_pulled" phpName="LastPulledAt" type="timestamp" skipSql="true" lazyLoad="true"/>-->
-        <!--<behavior name="aggregate_column" id="date_last_pulled">-->
-        <!--<parameter name="name" value="date_last_pulled"/>-->
-        <!--<parameter name="foreign_table" value="user_search_jobsite_run"/>-->
-        <!--<parameter name="expression" value="MAX(date_ended)"/>-->
-        <!--<parameter name="condition" value="run_result_code = 4"/>-->
-        <!--</behavior>-->
-
-
-        <!--<column name="date_last_run" phpName="LastRunAt" type="timestamp" skipSql="true" lazyLoad="true"/>-->
-        <!--<behavior name="aggregate_column" id="date_last_run">-->
-        <!--<parameter name="name" value="date_last_run"/>-->
-        <!--<parameter name="foreign_table" value="user_search_jobsite_run"/>-->
-        <!--<parameter name="expression" value="MAX(date_started)"/>-->
-        <!--</behavior>-->
-
-        <!--<column name="date_last_completed" phpName="LastCompletedAt" type="timestamp" lazyLoad="true" skipSql="true"/>-->
-        <!--<behavior name="aggregate_column" id="date_last_completed">-->
-        <!--<parameter name="name" value="date_last_completed"/>-->
-        <!--<parameter name="foreign_table" value="user_search_jobsite_run"/>-->
-        <!--<parameter name="expression" value="MAX(date_ended)"/>-->
-        <!--<parameter name="condition" value="run_result_code = 4"/>-->
-        <!--</behavior>-->
-
-        <!--<column name="date_last_failed" phpName="LastFailedAt" type="timestamp"/>-->
-        <!--<behavior name="aggregate_column" id="date_last_failed">-->
-        <!--<parameter name="name" value="date_last_failed"/>-->
-        <!--<parameter name="foreign_table" value="user_search_jobsite_run"/>-->
-        <!--<parameter name="expression" value="MAX(date_ended)"/>-->
-        <!--<parameter name="condition" value="run_result_code = 1"/>-->
-        <!--</behavior>-->
-
-        <!--<column name="last_user_search_jobsite_run_id" phpName="LastUserSearchRunId" type="integer" lazyLoad="true"-->
-        <!--skipSql="true"/>-->
-        <!--<foreign-key foreignTable="user_search_jobsite_run">-->
-        <!--<reference local="last_user_search_jobsite_run_id" foreign="user_search_jobsite_run_id"/>-->
-        <!--</foreign-key>-->
-        <!--<behavior name="aggregate_column">-->
-        <!--<parameter name="name" value="last_user_search_jobsite_run_id"/>-->
-        <!--<parameter name="foreign_table" value="user_search_jobsite_run"/>-->
-        <!--<parameter name="expression" value="MAX(user_search_jobsite_run_id)"/>-->
-        <!--</behavior>-->
-        <!--
-                <foreign-key foreignTable="user_search_jobsite_run" >
-                    <reference local="last_user_search_jobsite_run_id" foreign="user_search_jobsite_run_id"/>
-                </foreign-key>
-        -->
         <column name="results_filter_type" phpName="ResultsFilterType" type="enum"
                 valueSet="unknown, all-only, all-by-location, user-filtered" defaultValue="unknown"/>
     </table>
