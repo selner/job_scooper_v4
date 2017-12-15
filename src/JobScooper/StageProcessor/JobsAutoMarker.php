@@ -532,10 +532,13 @@ class JobsAutoMarker
 	    $regexList = array();
         foreach($inputfiles as $fileItem) {
 	        LogDebug("Loading job Company regexes to filter from " . $inputfiles . ".");
-	        $classCSVFile = new SimpleCSV($fileItem, 'r');
-	        $loadedCompaniesRegex= $classCSVFile->readAllRecords(true, array('match_regex'));
-	        $regexList = array_merge($regexList, array_column($loadedCompaniesRegex['data_rows'], "match_regex"));
-	        LogDebug(count($loadedCompaniesRegex) . " companies found in the source file that will be automatically filtered from job listings.");
+	        $loadedCompaniesRegex = loadCSV($fileItem, "match_regex");
+	        if (!empty($loadedCompaniesRegex)) {
+		        //	        $classCSVFile = new SimpleCSV($fileItem, 'r');
+		        //	        $loadedCompaniesRegex= $classCSVFile->readAllRecords(true, array('match_regex'));
+		        $regexList = array_merge($regexList, array_column($loadedCompaniesRegex, "match_regex"));
+		        LogDebug(count($loadedCompaniesRegex) . " companies found in the file {$fileItem} that will be automatically filtered from job listings.");
+	        }
         }
 	    $regexList = array_unique($regexList);
 
