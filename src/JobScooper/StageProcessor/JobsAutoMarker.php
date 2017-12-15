@@ -21,11 +21,16 @@ use JobScooper\DataAccess\GeoLocationQuery;
 use JobScooper\DataAccess\Map\GeoLocationTableMap;
 
 use Exception;
+use JobScooper\DataAccess\UserJobMatch;
 use JobScooper\Manager\LocationManager;
 use JobScooper\Utils\SimpleCSV;
 use Propel\Runtime\ActiveQuery\Criteria;
 
 
+/**
+ * Class JobsAutoMarker
+ * @package JobScooper\StageProcessor
+ */
 class JobsAutoMarker
 {
     protected $JobSiteName = "JobsAutoMarker";
@@ -35,7 +40,13 @@ class JobsAutoMarker
 	protected $title_negative_keyword_tokens = null;
 	protected $companies_regex_to_filter = null;
 
-    function __construct($arrJobObjsToMark = array(), $strOutputDirectory = null)
+	/**
+	 * JobsAutoMarker constructor.
+	 *
+	 * @param array $arrJobObjsToMark
+	 * @param null  $strOutputDirectory
+	 */
+	function __construct($arrJobObjsToMark = array(), $strOutputDirectory = null)
     {
         if (!is_null($arrJobObjsToMark) && count($arrJobObjsToMark) > 0)
             $this->arrMasterJobList = $arrJobObjsToMark;
@@ -44,13 +55,19 @@ class JobsAutoMarker
 
     }
 
-    function __destruct()
+	/**
+	 *
+	 */
+	function __destruct()
     {
         LogMessage("Closing ".$this->JobSiteName." instance of class " . get_class($this));
 
     }
 
-    public function markJobs()
+	/**
+	 *
+	 */
+	public function markJobs()
     {
         if (is_null($this->arrMasterJobList) || count($this->arrMasterJobList) <= 0)
             $this->arrMasterJobList = getAllMatchesForUserNotification();
@@ -83,12 +100,20 @@ class JobsAutoMarker
         }
     }
 
-    public function getMarkedJobs()
+	/**
+	 * @return array of UserJobMatch
+	 */
+	public function getMarkedJobs()
     {
         return $this->arrMasterJobList;
     }
 
-    function _markJobsList_SetLikelyDuplicatePosts_(&$arrJobsList)
+	/**
+	 * @param $arrJobsList
+	 *
+	 * @throws \Exception
+	 */
+	function _markJobsList_SetLikelyDuplicatePosts_(&$arrJobsList)
     {
         try
         {
@@ -128,7 +153,10 @@ class JobsAutoMarker
         }
     }
 
-    private function _isGeoSpatialWorking()
+	/**
+	 * @return bool
+	 */
+	private function _isGeoSpatialWorking()
     {
         try {
             loadSqlite3MathExtensions();
@@ -361,7 +389,10 @@ class JobsAutoMarker
 
     }
 
-    private function _getUserSearchTitleKeywords()
+	/**
+	 * @return array
+	 */
+	private function _getUserSearchTitleKeywords()
     {
 	    $keywordTokens = array();
         $keywordSets = getConfigurationSetting("user_keyword_sets");
@@ -427,8 +458,10 @@ class JobsAutoMarker
     }
 
 
-
-    private function _loadTitlesTokensToFilter()
+	/**
+	 * @throws \Exception
+	 */
+	private function _loadTitlesTokensToFilter()
     {
 	    $inputfiles = getConfigurationSetting("user_data_files.negative_title_keywords");
 
@@ -490,7 +523,13 @@ class JobsAutoMarker
     }
 
 
-    private function _scrubRegexSearchString($pattern)
+	/**
+	 * @param $pattern
+	 *
+	 * @return string
+	 * @throws \Exception
+	 */
+	private function _scrubRegexSearchString($pattern)
     {
         $delim = '~';
         if(strpos($pattern, $delim) != false)
