@@ -158,6 +158,8 @@ def combine_dicts(a, b):
     return z
 
 def getExpandedWords(strWords):
+    if not isinstance(strWords, basestring):
+        strWords = str(strWords)
     assert(len(strWords) > 0)
     s = ''.join(ch for ch in strWords if ch not in exclude)
 
