@@ -2,14 +2,14 @@
 /**
  * Copyright 2014-18 Bryan Selner
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * Licensed under the Apache License, Version 2.0 (the 'License'); you may
  * not use this file except in compliance with the License. You may obtain
  * a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * distributed under the License is distributed on an 'AS IS' BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations
  * under the License.
@@ -26,10 +26,10 @@
 //
 //
 //************************************************************************
-const C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__  = "SERVER_HTML";
-const C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__  = "CLIENT_HTML";
-const C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__ = "JOBAPI";
-const C__JOB_SEARCH_RESULTS_TYPE_UNKNOWN__ = "ERROR_UNKNOWN_TYPE";
+const C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__  = 'SERVER_HTML';
+const C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__  = 'CLIENT_HTML';
+const C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__ = 'JOBAPI';
+const C__JOB_SEARCH_RESULTS_TYPE_UNKNOWN__ = 'ERROR_UNKNOWN_TYPE';
 
 //************************************************************************
 //
@@ -40,14 +40,14 @@ const C__JOB_SEARCH_RESULTS_TYPE_UNKNOWN__ = "ERROR_UNKNOWN_TYPE";
 //
 //
 //************************************************************************
-const C__PAGINATION_INFSCROLLPAGE_VIALOADMORE = "LOAD-MORE";
-const C__PAGINATION_INFSCROLLPAGE_NOCONTROL= "INFINITE-SCROLL-NO-CONTROL";
-const C__PAGINATION_INFSCROLLPAGE_PAGEDOWN= "INFINITE-SCROLL-PAGE-DOWN";
-const C__PAGINATION_INFSCROLLPAGE_VIA_JS = "INFINITE-SCROLL-VIA-JAVASCRIPT";
-const C__PAGINATION_PAGE_VIA_CALLBACK = "PAGE-CALLBACK";
-const C__PAGINATION_PAGE_VIA_NEXTBUTTON = "NEXT-BUTTON";
-const C__PAGINATION_PAGE_VIA_URL = "PAGE-VIA-URL";
-const C__PAGINATION_NONE = "NONE";
+const C__PAGINATION_INFSCROLLPAGE_VIALOADMORE = 'LOAD-MORE';
+const C__PAGINATION_INFSCROLLPAGE_NOCONTROL= 'INFINITE-SCROLL-NO-CONTROL';
+const C__PAGINATION_INFSCROLLPAGE_PAGEDOWN= 'INFINITE-SCROLL-PAGE-DOWN';
+const C__PAGINATION_INFSCROLLPAGE_VIA_JS = 'INFINITE-SCROLL-VIA-JAVASCRIPT';
+const C__PAGINATION_PAGE_VIA_CALLBACK = 'PAGE-CALLBACK';
+const C__PAGINATION_PAGE_VIA_NEXTBUTTON = 'NEXT-BUTTON';
+const C__PAGINATION_PAGE_VIA_URL = 'PAGE-VIA-URL';
+const C__PAGINATION_NONE = 'NONE';
 
 //************************************************************************
 //
@@ -81,7 +81,7 @@ const C__JOB_ITEMCOUNT_STARTSATZERO__ = 0x8000;
 
 const C__JOB_KEYWORD_REQUIRES_LOWERCASE = 0x10000;
 
-//define("f24", 0x10000000); // 2^24
+//define('f24', 0x10000000); // 2^24
 
 //************************************************************************
 //

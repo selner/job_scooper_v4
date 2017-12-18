@@ -17,17 +17,18 @@
 namespace JobScooper\Builders;
 
 use JobScooper\DataAccess\UserQuery;
-use JobScooper\DataAccess\User;
 use JobScooper\Manager\LocationManager;
-use JobScooper\Manager\LoggingManager;
+use JobScooper\Utils\Settings;
+use Noodlehaus\Exception\EmptyDirectoryException;
 use Propel\Common\Config\ConfigurationManager;
 use Propel\Runtime\Exception\InvalidArgumentException;
 use \SplFileInfo;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
-use PHLAK\Config\Config;
+use M1\Vars\Vars;
 use \Propel\Runtime\Propel;
 
+use Noodlehaus\Config;
 
 $GLOBALS['CACHES'] = array('LOCATION_MANAGER' =>null, 'GEOCODER_ENABLED' => true);
 
@@ -45,22 +46,26 @@ class ConfigBuilder
 	 *
 	 * @param null $iniFile
 	 *
-	 * @throws \PHLAK\Config\Exceptions\InvalidContextException
 	 */
 	public function __construct($iniFile = null)
     {
 	    if(empty($iniFile))
-		    $iniFile = getConfigurationSetting("command_line_args.config");
+		    $iniFile = Settings::getValue("command_line_args.config");
 
 	    if(empty($iniFile))
 		    throw new \InvalidArgumentException("Missing user configuration settings file definition.  You must specify the configuration file on the command line.  Aborting.");
 
 	    $envDirOut = getenv('JOBSCOOPER_OUTPUT');
 	    if(!empty($envDirOut))
-		    setConfigurationSetting("output_directories.root", $envDirOut);
+	    {
+		    Settings::setValue("output_directories.root", $envDirOut);
+		}
 
-	    $Config = new Config($iniFile,true,"imports");
-	    setConfigurationSetting("config_file_settings", $Config->getAll());
+	    $configData = Settings::loadConfig($iniFile);
+	    Settings::setValue('config_file_settings', $configData);
+	    $outdir = Settings::getValue("config_file_settings.output_directory");
+	    if (empty(Settings::getValue("output_directories.root")) && !empty($outdir))
+		    Settings::setValue("output_directories.root", $outdir);
     }
 
     protected $nNumDaysToSearch = -1;
@@ -73,19 +78,17 @@ class ConfigBuilder
 	 */
 	function initialize()
     {
-	    $debug = getConfigurationSetting("command_line_args.debug");
-	    setConfigurationSetting("debug", $debug);
-
+    	Settings::moveValue("command_line_args.debug", "debug");
+    	
         startLogSection("Setting up configuration... ");
 
         $now = new \DateTime();
-        setConfigurationSetting('app_run_id', $now->format('Ymd_His_') .__APP_VERSION__);
-
-
-	    $file_name = getConfigurationSetting("command_line_args.configfile");
+	    Settings::setValue("app_run_id", $now->format('Ymd_His_') .__APP_VERSION__);
+		
+	    $file_name = Settings::getValue("command_line_args.configfile");
         $this->arrConfigFileDetails = new SplFileInfo($file_name);
 
-	    $rootOutputPath = getConfigurationSetting("output_directories.root");
+	    $rootOutputPath = Settings::getValue("output_directories.root");
 	    if(empty($rootOutputPath))
 	    	throw new \Exception("Missing JOBSCOOPER_OUPUT environment variable value.");
 	    $rootOutputDir = parsePathDetailsFromString($rootOutputPath, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
@@ -93,24 +96,24 @@ class ConfigBuilder
 	    {
 		    $outputpath = sprintf("%s%s%s", $this->arrConfigFileDetails->getPathname(), DIRECTORY_SEPARATOR, "output");
 		    $rootOutputDir = parsePathDetailsFromString($outputpath, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-		    setConfigurationSetting("output_directories.root", $rootOutputDir->getPathname());
+		    Settings::setValue("output_directories.root", $rootOutputDir->getPathname());
 	    }
 
-	    $this->_setupPropelForRun();
+	    $this->setupPropelForRun();
 
         // Now setup all the output folders
-        $this->__setupOutputFolders__();
+        $this->setupOutputFolders();
 
-        $strOutfileArrString = getArrayValuesAsString(getConfigurationSetting("output_directories"));
+        $strOutfileArrString = getArrayValuesAsString(Settings::getValue("output_directories"));
         LogMessage("Output folders configured: " . $strOutfileArrString);
 
 
         endLogSection("Loaded configuration details from " . $this->arrConfigFileDetails->getPathname());
 
 	    startLogSection("Configuring specific settings for this run... ");
-        $this->_setupRunFromConfig_();
+        $this->setupRunFromConfig();
 
-        setConfigurationSetting('number_days', 1);
+        Settings::setValue('number_days', 1);
 
         endLogSection("Finished setting up run.");
 
@@ -120,9 +123,9 @@ class ConfigBuilder
 	 * @throws \ErrorException
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function __setupOutputFolders__()
+	private function setupOutputFolders()
     {
-	    $arrOututDirs = getConfigurationSetting("output_directories");
+	    $arrOututDirs = Settings::getValue("output_directories");
 	    $outputDirectory = $arrOututDirs['root'];
 	    if (empty($outputDirectory)) {
 		    throw new \ErrorException("Required value for the output folder {$outputDirectory} was not specified. Exiting.");
@@ -135,15 +138,15 @@ class ConfigBuilder
 	        $arrOututDirs[$d] = realpath($details->getPathname());
         }
 
-		setConfigurationSetting('output_directories', $arrOututDirs);
+		Settings::setValue('output_directories', $arrOututDirs);
 
-	    setConfigurationSetting("logging", $this->_getSetting("logging"));
+	    Settings::setValue("logging", $this->getSetting("logging"));
 
 	    if (!isset($GLOBALS['logger']))
 		    $GLOBALS['logger'] = new \JobScooper\Manager\LoggingManager(C__APPNAME__);
 
         $GLOBALS['logger']->addFileHandlers(getOutputDirectory('logs'));
-	    $this->_setupPropelLogging();
+	    $this->setupPropelLogging();
     }
 
 	/**
@@ -151,33 +154,33 @@ class ConfigBuilder
 	 * @throws \Exception
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function _setupRunFromConfig_()
+	private function setupRunFromConfig()
     {
 
 	    //
 	    // Load the global search data that will be used to create
 	    // and configure all searches
 	    //
-	    $this->_parseGlobalSearchParameters();
+	    $this->parseGlobalSearchParameters();
 
 	    //
 	    // First load the user email information.  We set this first because it is used
 	    // to send error email if something goes wrong anywhere further along our run
 	    //
-	    $this->_parseUserConfigs();
-		$this->_parseAlertReceipients();
+	    $this->parseUserConfigs();
+		$this->parseAlertReceipients();
 
         LogMessage("Loaded all configuration settings from " . $this->arrConfigFileDetails->getPathname());
 
 	    // Note:  this must happen before any of the job site plugins are instantiated
-	    $this->_parsePluginSettings();
+	    $this->parsePluginSettings();
 
 	    // initialize the plugin bulder class so that all the plugins get loaded
 	    //
 	    new JobSitePluginBuilder();
 
-	    $this->_instantiateLocationManager();
-	    $this->_parseSeleniumParameters();
+	    $this->instantiateLocationManager();
+	    $this->parseSeleniumParameters();
 
 	    if(count(JobSitePluginBuilder::getIncludedJobSites()) == 0)
         {
@@ -191,7 +194,7 @@ class ConfigBuilder
 	 * @return \JobScooper\Manager\LocationManager
 	 * @throws \Exception
 	 */
-	private function _instantiateLocationManager()
+	private function instantiateLocationManager()
     {
         $cache = LocationManager::getLocationManager();
         if(empty($cache)) {
@@ -207,10 +210,10 @@ class ConfigBuilder
 	 *
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function _setupPropelForRun()
+	private function setupPropelForRun()
     {
 	    $cfgDBConns = null;
-	    $cfgSettingsFile = $this->_getSetting("propel.configuration_file");
+	    $cfgSettingsFile = $this->getSetting("propel.configuration_file");
 	    if(!empty($cfgSettingsFile)) {
 		    LogMessage("Loading Propel configuration file: " . $cfgSettingsFile);
 		    $propelCfg = new ConfigurationManager($cfgSettingsFile);
@@ -222,7 +225,7 @@ class ConfigBuilder
 
 	    if (empty($cfgDBConns))
 	    {
-		    $cfgDBConns = $this->_getSetting("propel.database.connections");
+		    $cfgDBConns = $this->getSetting("propel.database.connections");
 		    if(!empty($cfgDBConns))
 			    LogMessage("Using Propel Connection Settings from Jobscooper Config: " . getArrayDebugOutput($cfgDBConns));
 	    }
@@ -278,7 +281,7 @@ class ConfigBuilder
 	/**
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function _setupPropelLogging()
+	private function setupPropelLogging()
     {
     LogDebug("Configuring Propel logging...");
         $defaultLogger = $GLOBALS['logger'];
@@ -304,44 +307,44 @@ class ConfigBuilder
 	 *
 	 * @return array|mixed
 	 */
-	private function _getSetting($keyPath)
+	private function getSetting($keyPath)
 	{
 		if(is_array($keyPath))
 		{
 			$ret = array();
 			foreach ($keyPath as $key) {
-				$ret[$key] = $this->_getSetting($key);
+				$ret[$key] = $this->getSetting($key);
 			}
 			return $ret;
 		}
 
-		return getConfigurationSetting("config_file_settings." . $keyPath);
+		return Settings::getValue("config_file_settings." . $keyPath);
 	}
 
 	/**
 	 *
 	 */
-	private function _parsePluginSettings()
+	private function parsePluginSettings()
     {
         LogMessage("Loading plugin setup information from config file...");
 
-        setConfigurationSetting("plugin_settings", $this->_getSetting("plugin_settings"));
+        Settings::setValue("plugin_settings", $this->getSetting("plugin_settings"));
     }
 
 	/**
 	 *
 	 * @throws \Exception
 	 */
-	private function _parseGlobalSearchParameters()
+	private function parseGlobalSearchParameters()
     {
         LogMessage("Loading global search settings from config file...");
 
-	    $gsoset = $this->_getSetting('global_search_options');
+	    $gsoset = $this->getSetting('global_search_options');
 		if(!empty($gsoset))
 		{
             // This must happen first so that the search locations can be geocoded
             if (array_key_exists('google_maps_api_key', $gsoset)) {
-                setConfigurationSetting('google_maps_api_key', $gsoset['google_maps_api_key']);
+                Settings::setValue('google_maps_api_key', $gsoset['google_maps_api_key']);
             }
 
             $allJobSitesByKey = JobSitePluginBuilder::getAllJobSites();
@@ -359,11 +362,11 @@ class ConfigBuilder
                             if (!is_array($gso)) {
                                 $gso = array($gso => $gso);
                             }
-							setConfigurationSetting("config_excluded_sites", $gso);
+							Settings::setValue("config_excluded_sites", $gso);
                             break;
 
                         default:
-                            setConfigurationSetting($gsoKey, $gso);
+                            Settings::setValue($gsoKey, $gso);
                             break;
                     }
                }
@@ -372,7 +375,7 @@ class ConfigBuilder
 			//
 			// Filter out sites excluded in the config file
 			//
-			JobSitePluginBuilder::setSitesAsExcluded(getConfigurationSetting("config_excluded_sites"));
+			JobSitePluginBuilder::setSitesAsExcluded(Settings::getValue("config_excluded_sites"));
 
         }
     }
@@ -380,10 +383,10 @@ class ConfigBuilder
 	/**
 	 * @throws \ErrorException
 	 */
-	private function _parseSeleniumParameters()
+	private function parseSeleniumParameters()
     {
         LogDebug("Loading Selenium settings from config file...");
-        $settings = $this->_getSetting("selenium");
+        $settings = $this->getSetting("selenium");
 
         if (!array_key_exists('server', $settings)) {
             throw new \ErrorException("Configuration missing for [selenium] [server] in the config INI files.");
@@ -398,25 +401,25 @@ class ConfigBuilder
 
 	    $settings['host_location'] = 'http://' . $settings['server'] . ":" . $settings['port'];
 
-	    setConfigurationSetting("selenium", $settings);
+	    Settings::setValue("selenium", $settings);
     }
 
 	/**
 	 * @throws \Exception
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function _parseUserConfigs()
+	private function parseUserConfigs()
 	{
 		LogMessage("Creating or updating users based on config file settings...");
 
-		setConfigurationSetting('alerts.configuration.smtp', $this->_getSetting("alerts.configuration.smtp"));
+		Settings::setValue('alerts.configuration.smtp', $this->getSetting("alerts.configuration.smtp"));
 
 		$userList = array();
 
 		//
 		// Configure the primary user for the config file and set it
 		//
-		$config_users = $this->_getSetting("users");
+		$config_users = $this->getSetting("users");
 		$user_recs = array();
 		if (empty($config_users))
 			throw new \Exception("No users found in configuration settings.  Aborting.");
@@ -429,10 +432,10 @@ class ConfigBuilder
 			}
 		}
 
-		setConfigurationSetting("users_for_run", $user_recs);
+		Settings::setValue("users_for_run", $user_recs);
 
 		$currentUser = null;
-		$cmd_line_user_to_run = getConfigurationSetting('command_line_args.user');
+		$cmd_line_user_to_run = Settings::getValue('command_line_args.user');
 
 		// First try to pull the user from the database by that userslug value.  Use that user
 		// if we find one.  This allows a dev to override the local config file data if needed
@@ -448,7 +451,7 @@ class ConfigBuilder
 		// if we specified a single user to run, reduce the set of users for run to just that single instance
 		if(!empty($currentUser)) {
 			$user_recs = array($cmd_line_user_to_run => $currentUser);
-			setConfigurationSetting("users_for_run", $user_recs);
+			Settings::setValue("users_for_run", $user_recs);
 
 			LogMessage("Limiting users run to single, specified user: {$cmd_line_user_to_run}");
 		}
@@ -465,16 +468,16 @@ class ConfigBuilder
 	/**
 	 * @throws \Exception
 	 */
-	private function _parseAlertReceipients()
+	private function parseAlertReceipients()
 	{
 		LogMessage("Configuring contacts for alerts...");
 
-		setConfigurationSetting('alerts.configuration.smtp', $this->_getSetting("alerts.configuration.smtp"));
+		Settings::setValue('alerts.configuration.smtp', $this->getSetting("alerts.configuration.smtp"));
 
 
 		$keysAlertsTypes = array("alerts.errors.to", "alerts.errors.from", "alerts.results.from");
 		foreach($keysAlertsTypes as $alertKey) {
-			$arrOtherUserFacts = $this->_getSetting($alertKey);
+			$arrOtherUserFacts = $this->getSetting($alertKey);
 			if (empty($arrOtherUserFacts))
 				continue;
 
@@ -490,7 +493,7 @@ class ConfigBuilder
 				$nextUser = $arrOtherUserFacts;
 				$nextUser['User'] = null;
 			}
-			setConfigurationSetting($alertKey, $nextUser);
+			Settings::setValue($alertKey, $nextUser);
 		}
 	}
 

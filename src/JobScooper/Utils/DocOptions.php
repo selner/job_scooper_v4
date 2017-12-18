@@ -1,4 +1,6 @@
-<?php
+<?php /** @noinspection SpellCheckingInspection */
+/** @noinspection SpellCheckingInspection */
+
 /**
  * Copyright 2014-18 Bryan Selner
  *
@@ -43,10 +45,12 @@ Options:
   --disable-notifications   Do not send email alerts for new jobs. [default: false]
 ";
 
-    public function __construct($commandFile)
+    public function __construct($commandfile, $input = array())
     {
-        $file = new \SplFileInfo($commandFile);
-        $opts = str_ireplace("{APP_RUN_COMMAND}", $file->getFilename(), $this->doc);
+    	PropertyObject::__construct($input);
+
+        $file = new \SplFileInfo($commandfile);
+        $opts = str_ireplace('{APP_RUN_COMMAND}', $file->getFilename(), $this->doc);
 
         $args = \Docopt::handle($opts, array('version'=>__APP_VERSION__));
         foreach($args->args as $k => $v) {
@@ -104,8 +108,8 @@ Options:
 
     static function equalsTrue($argKey)
     {
-        $cmdline = DocOptions::get($argKey);
-        if(is_null($cmdline))
+        $cmdline = self::get($argKey);
+        if(empty($cmdline))
             return false;
 
         return filter_var($cmdline, FILTER_VALIDATE_BOOLEAN);
