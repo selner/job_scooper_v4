@@ -22,7 +22,7 @@ ini_set('auto_detect_line_endings', true);
 date_default_timezone_set("America/Los_Angeles");
 
 const C__APPNAME__ = "jobs_scooper";
-const __APP_VERSION__ = "v4.1.0-update-user-search-model";
+const __APP_VERSION__ = "v4.1.0-use-propel-orm";
 const C__SRC_LOCATION = "https://github.com/selner/job_scooper_v4";
 const C__STR_USER_AGENT__ = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36";
 
