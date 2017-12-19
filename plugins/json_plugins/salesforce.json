@@ -9,25 +9,22 @@
         {
           "Name": "NoPostsFound",
           "Selector": "div.main p b",
-          "Extract": "TEXT",
           "Index" : 0,
           "Callback" : "matchesNoResultsPattern",
           "CallbackParameter": "no jobs found",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "TotalPostCount",
           "Selector": "td.td-result",
-          "Extract": "REGEX",
           "Pattern": "/.*? of (\\d+).*/",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "JobPostItem",
           "Selector": ".s-res",
-          "Extract": "CSS",
           "Attribute": "collection",
           "Type": "CSS"
         }
@@ -39,14 +36,12 @@
         {
           "Name": "Title",
           "Selector": "h3 a",
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Url",
           "Selector": "h3 a",
-          "Extract": "ATTR",
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
@@ -59,7 +54,6 @@
         {
           "Name": "Location",
           "Selector": "p.search-result-item-company-name a",
-          "Extract": "ATTR",
           "Attribute": "collection",
           "Type": "CSS",
           "Callback": "combineTextAllNodes"
@@ -68,8 +62,7 @@
           "Name": "Department",
           "Selector": "table.searchResAdd tr td a",
           "Index" : 1,
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS",
           "JoinResult": true
         },
@@ -77,14 +70,12 @@
         {
           "Name": "JobSitePostId",
           "Pattern": "/.*?([0-9]+).*/",
-          "Extract": "REGEX",
-          "Type": "REGEX",
+          "Type": "SOURCEFIELD",
           "Field": "Url"
         },
         {
           "Name": "PostedAt",
           "Selector": "span.search-result-item-post-date",
-          "Extract": "REGEX",
           "Pattern": "/Date posted:\\s*([\\d\\/]+)/",
           "Type": "CSS"
         }

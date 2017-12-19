@@ -9,20 +9,17 @@
       {
           "Name": "JobPostItem",
           "Selector": ".js-job",
-          "Extract": "HTML",
-          "Attribute": "node",
+          "Attribute": "collection",
           "Type": "CSS"
         },
         {
           "Name": "TotalPostCount",
           "Selector": "div.count-jobs div.number",
-          "Extract": "TEXT",
           "Type": "CSS"
         },
         {
           "Name": "pages_count",
           "Selector": "div.js-infinite-scroll",
-          "Extract": "ATTR",
           "Attribute": "data-total-pages",
           "Type": "CSS"
         }
@@ -34,28 +31,24 @@
         {
           "Name": "Title",
           "Selector": ".title",
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Location",
           "Selector": "span.location",
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Company",
           "Selector": ".company-name",
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Url",
           "Selector": "a[class*='link-job']",
-          "Extract": "ATTR",
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
@@ -63,15 +56,13 @@
         {
           "Name": "JobSitePostId",
           "Selector": "div.js-job",
-          "Extract": "ATTR",
           "Attribute": "data-hash-uniq",
           "Index": 0
         },
         {
           "Name": "PostedAt",
           "Selector": "div.posted-date span",
-          "Extract": "HTML",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         }
       ]

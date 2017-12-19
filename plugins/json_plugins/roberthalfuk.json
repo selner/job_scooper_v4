@@ -12,7 +12,6 @@
         {
           "Name": "TotalPostCount",
           "Selector": "div.job-search-result-counter",
-          "Extract": "REGEX",
           "Pattern": "/.*?of\\s(\\d+)\\s*/",
           "Callback": "combineTextAllChildren",
           "Index": 0,
@@ -22,7 +21,6 @@
         {
           "Name": "JobPostItem",
           "Selector": "table.job-search-results tr",
-          "Extract": "CSS",
           "Attribute": "collection",
           "Type": "CSS"
         }
@@ -34,14 +32,12 @@
         {
           "Name": "Title",
           "Selector": "td.JobTitle a",
-          "Extract": "TEXT",
           "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Url",
           "Selector": "td.JobTitle a",
-          "Extract": "ATTR",
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
@@ -50,31 +46,27 @@
           "Name": "Location",
           "Selector": "span.midRight",
           "Index" : 0,
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Category",
           "Selector": "span.midLeft",
           "Index" : 0,
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "JobSitePostId",
           "Pattern": "/\/job\/([^?]+)/i",
-          "Extract": "REGEX",
-          "Type": "REGEX",
+          "Type": "SOURCEFIELD",
           "Field": "Url"
         },
         {
           "Name": "PostedAt",
           "Selector": "span.topRight",
           "Index" : 0,
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         }
       ]

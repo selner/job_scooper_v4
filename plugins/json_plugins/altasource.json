@@ -11,8 +11,7 @@
         {
           "Name": "JobPostItem",
           "Selector": "div.homeContentArea table tbody tr",
-          "Extract": "HTML",
-          "Attribute": "node",
+          "Attribute": "collection",
           "Type": "CSS"
         }
       ]
@@ -24,28 +23,24 @@
           "Name": "Title",
           "Selector": "td a",
           "Index": 0,
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Location",
           "Selector": "td",
-          "Extract": "CSS",
           "Index": 1,
           "Type": "CSS"
         },
         {
           "Name": "JobSitePostId",
           "Selector": "td",
-          "Extract": "TEXT",
           "Index": 3,
           "Type": "CSS"
         },
         {
           "Name": "Url",
           "Selector": "td a",
-          "Extract": "ATTR",
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"

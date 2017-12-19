@@ -10,13 +10,11 @@
         {
           "Name": "TotalPostCount",
           "Selector": "div.page-title span",
-          "Extract": "TEXT",
           "Type": "CSS"
         },
         {
           "Name": "JobPostItem",
           "Selector": "div.job",
-          "Extract": "CSS",
           "Attribute": "collection",
           "Type": "CSS"
         }
@@ -28,51 +26,44 @@
         {
           "Name": "Title",
           "Selector": "div.job-title a h2",
-          "Extract": "TEXT",
           "Type": "CSS"
         },
         {
           "Name": "Url",
           "Selector": "div.job-title a",
-          "Extract": "ATTR",
           "Attribute": "href",
           "Type": "CSS"
         },
         {
           "Name": "JobSitePostId",
           "Selector": "button[data-job-id]",
-          "Extract": "ATTR",
           "Attribute": "data-job-id"
         },
         {
           "Name": "Location",
           "Selector": "li.location",
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Index" : 0,
           "Type": "CSS"
         },
         {
           "Name": "Company",
           "Selector": "li.company h3 a",
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Index" : 0,
           "Type": "CSS"
         },
         {
           "Name": "EmploymentType",
           "Selector": "li.job-type span",
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Index" : 0,
           "Type": "CSS"
         },
         {
           "Name": "PostedAt",
           "Selector": "li.date-posted span",
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         }
       ]

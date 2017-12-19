@@ -14,16 +14,14 @@
           "Name": "NoPostsFound",
           "Selector": "div.content_container div font",
           "Index" : 0,
-          "Extract": "TEXT",
           "Callback" : "matchesNoResultsPattern",
           "CallbackParameter": "Oops! No jobs currently match this criteria.",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "TotalPostCount",
           "Selector": "div#pager_container font",
-          "Extract": "TEXT",
           "Index" : 1,
           "Pattern": "/.*?([0-9,]+)\\s*result\\(s\\)/",
           "Type": "CSS"
@@ -31,7 +29,6 @@
         {
           "Name": "JobPostItem",
           "Selector": "table#resulttable tr",
-          "Extract": "CSS",
           "Attribute": "collection",
           "Type": "CSS"
         }
@@ -43,22 +40,19 @@
         {
           "Name": "Title",
           "Selector": "a.joblink",
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Location",
           "Selector": "td",
-          "Extract": "TEXT",
           "Index": 3,
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Url",
           "Selector": "a.joblink",
-          "Extract": "ATTR",
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
@@ -66,17 +60,14 @@
         {
           "Name": "JobSitePostId",
           "Selector": "td",
-          "Extract": "TEXT",
           "Index": 2,
           "Type": "CSS"
         },
-
         {
           "Name": "PostedAt",
           "Selector": "td",
-          "Extract": "TEXT",
           "Index": 0,
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         }
       ]

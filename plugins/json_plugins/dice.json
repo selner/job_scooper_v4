@@ -19,23 +19,20 @@
                         {
                             "Name": "NoPostsFound",
                             "Selector": "h1.h1",
-                            "Extract": "TEXT",
                             "Index": 0,
                             "Callback": "matchesNoResultsPattern",
                             "CallbackParameter": "No jobs found",
-                            "Attribute": null,
+                            "Attribute": "text",
                             "Type": "CSS"
                         },
                         {
                             "Name": "TotalPostCount",
                             "Selector": "span#posiCountId",
-                            "Extract": "TEXT",
                             "Type": "CSS"
                         },
                         {
                             "Name": "JobPostItem",
                             "Selector": "div.complete-serp-result-div",
-                            "Extract": "CSS",
                             "Attribute": "collection",
                             "Type": "CSS"
                         }
@@ -47,14 +44,13 @@
                         {
                             "Name": "Title",
                             "Selector": "h3 a.dice-btn-link",
-                            "Extract": "ATTR",
                             "Attribute": "title",
                             "Type": "CSS"
                         },
                         {
                             "Name": "Url",
                             "Selector": "h3 a.dice-btn-link",
-                            "Extract": "ATTR",
+
                             "Attribute": "href",
                             "Index": 0,
                             "Type": "CSS"
@@ -62,31 +58,27 @@
                         {
                             "Name": "JobSitePostId",
                             "Selector": "h3 a.dice-btn-link",
-                            "Extract": "ATTR",
                             "Attribute": "value"
                         },
                         {
                             "Name": "Location",
                             "Selector": "span.jobLoc",
                             "Index": 0,
-                            "Extract": "TEXT",
-                            "Attribute": null,
+                            "Attribute": "text",
                             "Type": "CSS"
                         },
                         {
                             "Name": "Company",
                             "Selector": "span.compName",
                             "Index": 0,
-                            "Extract": "TEXT",
-                            "Attribute": null,
+                            "Attribute": "text",
                             "Type": "CSS"
                         },
                         {
                             "Name": "PostedAt",
                             "Selector": "span[itemprop=datePosted]",
                             "Index": 0,
-                            "Extract": "TEXT",
-                            "Attribute": null,
+                            "Attribute": "text",
                             "Type": "CSS"
                         }
                     ]

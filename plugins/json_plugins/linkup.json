@@ -9,26 +9,23 @@
         {
           "Name": "NoPostsFound",
           "Selector": "div.search-details p span",
-          "Extract": "TEXT",
           "Index" : 0,
           "Callback" : "matchesNoResultsPattern",
           "CallbackParameter": "0 of 0",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "TotalPostCount",
           "Selector": "div.search-details div span.vertical-bar",
           "Index" : 0,
-          "Extract": "REGEX",
           "Pattern": "/.*?\\s([0-9,]+)\\sJobs/",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "JobPostItem",
           "Selector": "div.row .job-listing",
-          "Extract": "CSS",
           "Attribute": "collection",
           "Type": "CSS"
         }
@@ -40,14 +37,12 @@
         {
           "Name": "Title",
           "Selector": "a.search-result-link",
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Url",
           "Selector": "a.search-result-link",
-          "Extract": "ATTR",
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
@@ -55,24 +50,21 @@
         {
           "Name": "JobSitePostId",
           "Pattern": "/.*?\/(.*?)/",
-          "Extract": "REGEX",
-          "Type": "REGEX",
+          "Type": "SOURCEFIELD",
           "Field": "Url"
         },
         {
           "Name": "Location",
           "Selector": "div.show-on-large .hide-on-med-and-down p span",
           "Index" : 0,
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Company",
           "Selector": "div.show-on-large .hide-on-med-and-down p span",
           "Index" : 1,
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
 
@@ -80,8 +72,7 @@
           "Name": "PostedAt",
           "Selector": "div.show-on-large .hide-on-med-and-down p span",
           "Index" : 2,
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         }
       ]

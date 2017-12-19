@@ -1,86 +1,81 @@
 {
-  "JobSiteName": "JobsiteCoUk",
-  "SourceURL": "http://www.jobsite.co.uk/vacancies?search_type=quick&engine=stepmatch&search_referer=internal&query=***KEYWORDS***&logic=&title_query=&title_logic=***LOCATION:&location={Place}***&radius=20&p=***PAGE_NUMBER***&daysback=&sort_by=date&search_currency_code=GBP&salary_type_unit=A&salary_min=&salary_max=",
-  "BaseURL": "http://www.jobsite.co.uk",
-  "CountryCodes" : ["UK"],
-  "Collections": [
-    {
-      "Name": "PageFields",
-      "Fields": [
+    "JobSiteName": "JobsiteCoUk",
+    "SourceURL": "http://www.jobsite.co.uk/vacancies?search_type=quick&engine=stepmatch&search_referer=internal&query=***KEYWORDS***&logic=&title_query=&title_logic=***LOCATION:&location={Place}***&radius=20&p=***PAGE_NUMBER***&daysback=&sort_by=date&search_currency_code=GBP&salary_type_unit=A&salary_min=&salary_max=",
+    "BaseURL": "http://www.jobsite.co.uk",
+    "CountryCodes": [
+        "UK"
+    ],
+    "Collections": [
         {
-          "Name": "TotalPostCount",
-          "Selector": "h1.search_result_title",
-          "Extract": "TEXT",
-          "Index" : 0,
-          "Pattern": "/([0-9,]+).*/",
-          "Type": "CSS"
+            "Name": "PageFields",
+            "Fields": [
+                {
+                    "Name": "TotalPostCount",
+                    "Selector": "h1.search_result_title",
+                    "Index": 0,
+                    "Pattern": "/([0-9,]+).*/",
+                    "Type": "CSS"
+                },
+                {
+                    "Name": "JobPostItem",
+                    "Selector": "div.vacancy_search_result",
+                    "Attribute": "collection",
+                    "Type": "CSS"
+                }
+            ]
         },
         {
-          "Name": "JobPostItem",
-          "Selector": "div.vacancy_search_result",
-          "Extract": "HTML",
-          "Attribute": "node",
-          "Type": "CSS"
+            "Name": "ItemFields",
+            "Fields": [
+                {
+                    "Name": "Title",
+                    "Selector": "ul li h3 a",
+                    "Index": 0,
+                    "Attribute": "text",
+                    "Type": "CSS"
+                },
+                {
+                    "Name": "Url",
+                    "Selector": "ul li h3 a",
+                    "Attribute": "href",
+                    "Index": 0,
+                    "Type": "CSS"
+                },
+                {
+                    "Name": "JobSitePostId",
+                    "Selector": "ul li h3 a",
+                    "Attribute": "href",
+                    "Index": 0,
+                    "Type": "CSS",
+                    "Pattern": "/-(\\w+)\\?/"
+                },
+                {
+                    "Name": "Location",
+                    "Selector": "ul li.location",
+
+                    "Index": 0,
+                    "Type": "CSS"
+                },
+                {
+                    "Name": "EmploymentType",
+                    "Selector": "ul li.position_type span",
+                    "Index": 0,
+                    "Attribute": "text",
+                    "Type": "CSS"
+                },
+                {
+                    "Name": "PostedAt",
+                    "Selector": "ul li.date",
+                    "Index": 0,
+                    "Attribute": "text",
+                    "Type": "CSS"
+                }
+            ]
         }
-      ]
-    },
-    {
-      "Name": "ItemFields",
-      "Fields": [
-        {
-          "Name": "Title",
-          "Selector": "ul li h3 a",
-          "Index": 0,
-          "Extract": "TEXT",
-          "Attribute": null,
-          "Type": "CSS"
-        },
-        {
-          "Name": "Url",
-          "Selector": "ul li h3 a",
-          "Extract": "ATTR",
-          "Attribute": "href",
-          "Index": 0,
-          "Type": "CSS"
-        },
-        {
-          "Name": "JobSitePostId",
-          "Selector": "ul li h3 a",
-          "Extract": "ATTR",
-          "Attribute": "href",
-          "Index": 0,
-          "Type": "CSS",
-          "Pattern": "/-(\\w+)\\?/"
-        },
-        {
-          "Name": "Location",
-          "Selector": "ul li.location",
-          "Extract": "CSS",
-          "Index": 0,
-          "Type": "CSS"
-        },
-        {
-          "Name": "EmploymentType",
-          "Selector": "ul li.position_type span",
-          "Index" : 0,
-          "Extract": "TEXT",
-          "Attribute": null,
-          "Type": "CSS"
-        },
-        {
-          "Name": "PostedAt",
-          "Selector": "ul li.date",
-          "Extract": "TEXT",
-          "Index": 0,
-          "Attribute": null,
-          "Type": "CSS"
-        }
-      ]
+    ],
+    "Pagination": {
+        "PageDelaySeconds": 4,
+        "Type": "PAGE-VIA-URL",
+        "PageLimit": 25
     }
-  ],
-  "Pagination": {
-    "PageDelaySeconds" : 4,
-    "Type": "PAGE-VIA-URL",
-    "PageLimit": 25
-  }
 }

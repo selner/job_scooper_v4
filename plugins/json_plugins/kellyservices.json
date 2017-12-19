@@ -14,25 +14,22 @@
           "Name": "NoPostsFound",
           "Selector": "div.jobcount",
           "Index" : 0,
-          "Extract": "TEXT",
           "Callback" : "matchesNoResultsPattern",
           "CallbackParameter": "0 Results",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "TotalPostCount",
           "Selector": "div.jobcount",
           "Index" : 0,
-          "Extract": "REGEX",
           "Pattern": "/([0-9,]+)\\s*Results/",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "JobPostItem",
           "Selector": "span div.row div.rowheader",
-          "Extract": "CSS",
           "Attribute": "collection",
           "Type": "CSS"
         }
@@ -44,30 +41,26 @@
         {
           "Name": "Title",
           "Selector": "div.job",
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Location",
           "Selector": "div.loc",
-          "Extract": "TEXT",
           "Index": 0,
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Category",
           "Selector": "div.type",
-          "Extract": "TEXT",
           "Index": 0,
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Url",
           "Selector": "div.view a",
-          "Extract": "ATTR",
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
@@ -75,7 +68,6 @@
         {
           "Name": "JobSitePostId",
           "Selector": "div.share",
-          "Extract": "ATTR",
           "Attribute" : "id",
           "Index": 0,
           "Type": "CSS"
@@ -84,9 +76,8 @@
         {
           "Name": "PostedAt",
           "Selector": "div.date",
-          "Extract": "TEXT",
           "Index": 0,
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         }
       ]

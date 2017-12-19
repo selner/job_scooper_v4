@@ -10,8 +10,7 @@
       {
           "Name": "JobPostItem",
           "Selector": "div.jobsearch-results div.grid",
-          "Extract": "HTML",
-          "Attribute": "node",
+          "Attribute": "collection",
           "Type": "CSS"
         }
       ]
@@ -22,30 +21,26 @@
         {
           "Name": "Title",
           "Selector": "h3",
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Location",
           "Selector": "div.jsr-pg",
-          "Extract": "TEXT",
           "Index": 1,
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Category",
           "Selector": "div.jsr-pg",
-          "Extract": "TEXT",
           "Index": 0,
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Url",
           "Selector": "a",
-          "Extract": "ATTR",
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
@@ -53,7 +48,6 @@
         {
           "Name": "JobSitePostId",
           "Selector": "a",
-          "Extract": "REGEX",
           "Type": "CSS",
           "Attribute": "href",
           "Pattern" : "/[Jj]ob[Ii][dD]=(\\w+)/"

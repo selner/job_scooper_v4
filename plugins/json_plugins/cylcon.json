@@ -13,25 +13,22 @@
         {
           "Name": "NoPostsFound",
           "Selector": "div.panel-v2 div.row div.col-lg-9 div b",
-          "Extract": "TEXT",
           "Index" : 0,
           "Callback" : "matchesNoResultsPattern",
           "CallbackParameter": "No matching job",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "TotalPostCount",
           "Selector": "div#searchCount",
-          "Extract": "REGEX",
           "Pattern": "/.*?of\\s+(\\d+)/",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "JobPostItem",
           "Selector": "div.joblists div.col-lg-10",
-          "Extract": "CSS",
           "Attribute": "collection",
           "Type": "CSS"
         }
@@ -43,7 +40,6 @@
         {
           "Name": "Title",
           "Selector": "a",
-          "Extract": "TEXT",
           "Attribute": "text",
           "Index": 0,
           "Type": "CSS"
@@ -51,7 +47,7 @@
         {
           "Name": "Url",
           "Selector": "a",
-          "Extract": "ATTR",
+
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
@@ -59,15 +55,13 @@
         {
           "Name": "JobSitePostId",
           "Pattern": "/.*?[Rr]edirect[Ww][Ee][Bb]\\.php\\?q=(.*)/",
-          "Extract": "REGEX",
-          "Type": "REGEX",
+          "Type": "SOURCEFIELD",
           "Field": "Url"
         },
 
         {
           "Name": "Company",
           "Selector": "p strong",
-          "Extract": "TEXT",
           "Pattern": "/(.*?)[\\-]{1}.*/",
           "Index": 0,
           "Type": "CSS"
@@ -76,14 +70,13 @@
           "Name": "Location",
           "Selector": "p strong span.location",
           "Pattern": "/.*?[\\-]{1}(.*)/",
-          "Extract": "TEXT",
           "Type": "CSS"
         },
         {
           "Name": "PostedAt",
           "Selector": "span.date",
           "Index" : 0,
-          "Extract": "TEXT",
+
           "Type": "CSS"
         }
       ]

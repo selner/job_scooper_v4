@@ -12,16 +12,14 @@
     {
       "Name": "TotalPostCount",
       "Selector": "h2.status",
-      "Extract": "REGEX",
-      "Pattern": "/There are (\\d+).*/",
-      "Attribute": null,
+            "Pattern": "/There are (\\d+).*/",
+      "Attribute": "text",
       "Type": "CSS"
     },
     {
           "Name": "JobPostItem",
           "Selector": "table#results_table tr",
-          "Extract": "HTML",
-          "Attribute": "node",
+          "Attribute": "collection",
           "Type": "CSS"
         }
       ]
@@ -32,30 +30,26 @@
         {
           "Name": "Title",
           "Selector": "td.title a",
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Location",
           "Selector": "td.loc",
-          "Extract": "TEXT",
           "Index": 1,
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Category",
           "Selector": "div.jsr-pg",
-          "Extract": "TEXT",
           "Index": 0,
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Url",
           "Selector": "td.title a",
-          "Extract": "ATTR",
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
@@ -64,17 +58,14 @@
           "Name": "JobSitePostId",
           "Pattern" : "/.*?\/(\\w+)\/*$/",
           "Selector": "td.title a",
-          "Extract": "REGEX",
           "Attribute": "href",
           "Index": 0
         },
-
         {
           "Name": "PostedAt",
           "Selector": "td.date",
-          "Extract": "TEXT",
           "Index": 0,
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         }
       ]

@@ -104,14 +104,12 @@ You can define the full configuration for a job site plugin in a single JSON fil
       {
           "Name": "JobPostItem",
           "Selector": ".js-job",
-          "Extract": "HTML",
           "Attribute": "node",
           "Type": "CSS"
         },
         {
           "Name": "pages_count",
           "Selector": "div.js-infinite-scroll",
-          "Extract": "ATTR",
           "Attribute": "data-total-pages",
           "Type": "CSS"
         }
@@ -123,15 +121,13 @@ You can define the full configuration for a job site plugin in a single JSON fil
         {
           "Name": "Title",
           "Selector": ".title",
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Location",
           "Selector": "span.location",
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         }
       }

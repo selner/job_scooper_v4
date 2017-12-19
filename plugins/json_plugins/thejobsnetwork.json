@@ -22,7 +22,6 @@
               "Name": "NoPostsFound",
               "Selector": "div#search-results-title div span",
               "Index": 0,
-              "Extract": "TEXT",
               "Callback": "matchesNoResultsPattern",
               "CallbackParameter": "No jobs"
             },
@@ -36,7 +35,6 @@
             {
               "Name": "JobPostItem",
               "Selector": "div.Job-container",
-              "Extract": "CSS",
               "Attribute": "collection",
               "Type": "CSS"
             }
@@ -48,7 +46,6 @@
             {
               "Name": "Title",
               "Selector": "span.Pos-title",
-              "Extract": "TEXT",
               "Index" : 0,
               "Attribute": "text",
               "Type": "CSS"
@@ -56,15 +53,13 @@
             {
               "Name": "Url",
               "Selector": "a",
-              "Extract": "ATTR",
               "Attribute": "href",
               "Index": 0,
               "Type": "CSS"
             },
             {
               "Name": "JobSitePostId",
-              "Extract": "REGEX",
-              "Type": "REGEX",
+              "Type": "SOURCEFIELD",
               "Field": "Url",
               "Pattern": "/\\/job\\/(\\d+)\\//"
             },
@@ -72,21 +67,18 @@
               "Name": "Company",
               "Selector": "span.Company-name",
               "Index": 0,
-              "Extract": "TEXT",
               "Type": "CSS"
             },
             {
               "Name": "Location",
               "Selector": "span.Location",
               "Index": 0,
-              "Extract": "TEXT",
               "Type": "CSS"
             },
             {
               "Name": "EmploymentType",
               "Selector": "span.Engage-type",
               "Index": 0,
-              "Extract": "TEXT",
               "Type": "CSS"
             },
             {

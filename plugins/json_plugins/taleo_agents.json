@@ -15,23 +15,20 @@
               "Name": "NoPostsFound",
               "Selector": "div#no-search-results h3",
               "Index": 0,
-              "Extract": "TEXT",
               "Callback": "matchesNoResultsPattern",
               "CallbackParameter": "No Search Results",
-              "Attribute": null,
+              "Attribute": "text",
               "Type": "CSS"
             },
             {
               "Name": "TotalPostCount",
               "Selector": "h5#search-results-indicator span.ext-search-summary",
-              "Extract": "TEXT",
               "Type": "CSS",
               "Pattern": "/([0-9,]+)/"
             },
             {
               "Name": "JobPostItem",
               "Selector": "div.search-results-list ul li",
-              "Extract": "CSS",
               "Attribute": "collection",
               "Type": "CSS"
             }
@@ -60,16 +57,14 @@
               "Name": "JobSitePostId",
               "Selector" : "p.req-id-lg",
               "Pattern": "/Req ID:\\s*(.*)/i",
-              "Extract": "REGEX",
-              "Attribute": null,
+              "Attribute": "text",
               "Type": "CSS"
             },
             {
               "Name": "PostedAt",
               "Selector": "div.job-result__date",
               "Index" : 0,
-              "Extract": "TEXT",
-              "Attribute": null,
+              "Attribute": "text",
               "Type": "CSS"
             }
           ]

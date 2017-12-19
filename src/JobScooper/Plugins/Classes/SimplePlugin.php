@@ -17,7 +17,10 @@
 
 namespace JobScooper\Plugins\Classes;
 
+use DiDom\Query;
 use JobScooper\DataAccess\UserSearchSiteRun;
+use JobScooper\Utils\ExtendedDiDomDocument;
+use JobScooper\Utils\ExtendedDiDomElement;
 use JobScooper\Utils\SimpleHTMLHelper;
 
 class SimplePlugin extends BaseJobsSite
@@ -32,7 +35,11 @@ class SimplePlugin extends BaseJobsSite
     protected $arrListingTagSetup = array();
     protected $arrBaseListingTagSetup = array();
 
-    function __construct()
+	/**
+	 * SimplePlugin constructor.
+	 * @throws \Exception
+	 */
+	function __construct()
     {
         if (empty($this->arrListingTagSetup))
             $this->arrListingTagSetup = array();
@@ -112,7 +119,13 @@ class SimplePlugin extends BaseJobsSite
 
     }
 
-    function matchesNoResultsPattern($var)
+	/**
+	 * @param $var
+	 *
+	 * @return int|null
+	 * @throws \Exception
+	 */
+	function matchesNoResultsPattern($var)
     {
         $val = $var[0];
         $match_value = $var[1];
@@ -170,7 +183,13 @@ class SimplePlugin extends BaseJobsSite
 
     }
 
-    protected function getTagSelector($arrTag)
+	/**
+	 * @param $arrTag
+	 *
+	 * @return null|string
+	 * @throws \Exception
+	 */
+	protected function getTagSelector($arrTag)
     {
         if ($arrTag == null) return null;
 
@@ -199,7 +218,15 @@ class SimplePlugin extends BaseJobsSite
         return $strMatch;
     }
 
-    protected function _getTagValueFromPage_($node, $tagKey, $item = null)
+	/**
+	 * @param      $node
+	 * @param      $tagKey
+	 * @param null $item
+	 *
+	 * @return mixed|null|string
+	 * @throws \Exception
+	 */
+	protected function _getTagValueFromPage_($node, $tagKey, $item = null)
     {
         if (!(array_key_exists($tagKey, $this->arrListingTagSetup) && count($this->arrListingTagSetup[$tagKey]) >= 1))
             return null;
@@ -209,38 +236,44 @@ class SimplePlugin extends BaseJobsSite
         if(!is_array($arrTag) || count($arrTag) == 0 )
             return null;
 
-        if (array_key_exists("type", $arrTag) && !is_null($arrTag['type'])) {
-            switch(strtoupper($arrTag['type']))
-            {
-                case 'CSS':
-                    return $this->_getTagMatchValueCSS_($node, $arrTag);
-                    break;
-
-                case 'STATIC':
-                    return $this->_getTagMatchValueStatic_($arrTag);
-                    break;
-
-                case 'REGEX':
-                    return $this->_getTagMatchValueRegex_($node, $arrTag, $item);
-                    break;
-
-                case 'MICRODATA':
-                    // Do nothing; we've already parsed the microdata
-                    break;
-
-                default:
-                    throw new \Exception("Unknown field definition type of " . $arrTag['type']);
-            }
+        if (!array_key_exists("type", $arrTag) || empty($arrTag['type'])) {
+            $arrTag['type'] = "CSS";
         }
-        else
-        {
-            return $this->_getTagMatchValueCSS_($node, $arrTag);
 
+        switch(strtoupper($arrTag['type']))
+        {
+            case 'CSS':
+                return $this->_getTagMatchValueViaFind_($node, $arrTag, Query::TYPE_CSS);
+                break;
+
+	        case 'XPATH':
+		        return $this->_getTagMatchValueViaFind_($node, $arrTag, Query::TYPE_XPATH);
+		        break;
+
+	        case 'STATIC':
+		        return $this->_getTagMatchValueStatic_($arrTag);
+		        break;
+
+	        case 'SOURCEFIELD':
+                return $this->_getTagMatchValueSourceField_($arrTag, $item);
+                break;
+
+            case 'MICRODATA':
+                // Do nothing; we've already parsed the microdata
+                break;
+
+            default:
+                throw new \Exception("Unknown field definition type of " . $arrTag['type']);
         }
 
     }
 
-    protected function _getTagMatchValueStatic_($arrTag)
+	/**
+	 * @param $arrTag
+	 *
+	 * @return null
+	 */
+	protected function _getTagMatchValueStatic_($arrTag)
     {
         $ret = null;
         if (array_key_exists("value", $arrTag) && !is_null($arrTag['value'])) {
@@ -255,44 +288,37 @@ class SimplePlugin extends BaseJobsSite
         return $ret;
     }
 
-    protected function _getTagMatchValueRegex_($node, $arrTag, $item)
+	/**
+	 * @param $arrTag
+	 * @param $item
+	 *
+	 * @return null
+	 */
+	protected function _getTagMatchValueSourceField_($arrTag, $item)
     {
         $ret = null;
-        if (array_key_exists("return_value_regex", $arrTag) && !is_null($arrTag['return_value_regex']))
+        if (array_key_exists("return_value_regex", $arrTag) && !empty($arrTag['return_value_regex']))
             $arrTag['pattern'] = $arrTag['return_value_regex'];
-        if (array_key_exists("pattern", $arrTag) && !is_null($arrTag['pattern'])) {
+
+        if (array_key_exists("pattern", $arrTag) && !empty($arrTag['pattern'])) {
             $pattern = $arrTag['pattern'];
             $value = "";
-            if (array_key_exists("selector", $arrTag) && !is_null($arrTag['selector'])) {
-                $value = $this->_getTagMatchValueCSS_($node, $arrTag);
-            }
-            elseif (array_key_exists("field", $arrTag) && !is_null($arrTag['field'])) {
-                if (in_array($arrTag['field'], array_keys($item))) {
+
+            if (array_key_exists("field", $arrTag) && !empty($arrTag['field'])) {
+                if (array_key_exists($arrTag['field'], $item)) {
                     $value = $item[$arrTag['field']];
                 }
             }
 
-            if(is_null($value) || strlen($value) == 0)
+            if(empty($value))
                 $ret = null;
             else
             {
                 $newPattern = str_replace("\\\\", "\\", $pattern);
 
                 if (preg_match($newPattern, $value, $matches) > 0) {
-                    switch($arrTag['index'])
-                    {
-                        case null:
-                            $ret = $matches[1];
-                            break;
-
-                        case "LAST":
-                            $ret = $matches[count($matches) - 1];
-                            break;
-
-                        default:
-                            $ret = $matches[$arrTag['index']];
-                            break;
-                    }
+                	array_shift($matches);
+	                $ret = $this->_getReturnValueByIndex($matches, $arrTag['index']);
                 }
             }
         }
@@ -300,10 +326,70 @@ class SimplePlugin extends BaseJobsSite
         return $ret;
     }
 
-    protected function _getTagMatchValueCSS_($node, $arrTag)
+	/**
+	 * @param $arr
+	 * @param $indexValue
+	 *
+	 * @return null
+	 */
+	private function _getReturnValueByIndex($arr, $indexValue)
+	{
+		$index = $this->translateTagIndexValue($arr, $indexValue);
+		if(is_null($index))
+			return null;
+
+		return $arr[$index];
+	}
+
+	/**
+	 * @param $arr
+	 * @param $indexValue
+	 *
+	 * @return null
+	 */
+	function translateTagIndexValue($arr, $indexValue)
+	{
+		switch($indexValue)
+		{
+			case null:
+				$ret = 0;
+				break;
+
+			case "LAST":
+				$ret = count($arr) - 1;
+				break;
+
+			case $indexValue < 0:
+				$ret = count($arr) - 1 - abs($indexValue);
+				break;
+
+			case $indexValue > count($arr):
+				$strError = sprintf("%s plugin failed to find index #%d in the %d matching nodes. ", $this->JobSiteName, $indexValue, count($arr));
+				LogWarning($strError);
+				$ret = null;
+				break;
+
+			default:
+				$ret = $indexValue;
+				break;
+		}
+
+		return $ret;
+
+	}
+
+
+	/**
+	 * @param        $node
+	 * @param        $arrTag
+	 * @param string $searchType
+	 *
+	 * @return mixed|null|string
+	 * @throws \Exception
+	 */
+	protected function _getTagMatchValueViaFind_($node, $arrTag, $searchType=Query::TYPE_CSS)
     {
         $ret = null;
-        $fReturnNodeObject = false;
         $propertyRegEx = null;
 
         if (!empty($arrTag['return_attribute']))
@@ -311,35 +397,27 @@ class SimplePlugin extends BaseJobsSite
         else
             $returnAttribute = 'text';
 
-        if(strtolower($returnAttribute) == 'collection' || strtolower($returnAttribute) == 'node')
-        {
-            $returnAttribute = null;
-            $fReturnNodeObject = true;
-        }
+	    if (array_key_exists("return_value_regex", $arrTag)) {
+		    $propertyRegEx = $arrTag['return_value_regex'];
+	    }
+	    elseif (array_key_exists("pattern", $arrTag)) {
+		    $propertyRegEx = $arrTag['pattern'];
+	    }
 
-        if (array_key_exists("return_value_regex", $arrTag)) {
-            $propertyRegEx = $arrTag['return_value_regex'];
-        }
-
-        $strMatch = $this->getTagSelector($arrTag);
+	    $strMatch = $this->getTagSelector($arrTag);
         if (is_null($strMatch)) {
             return $ret;
         }
         elseif(strlen($strMatch) > 0)
         {
-            $nodeMatches = $node->find($strMatch);
+            $nodeMatches = $node->find($strMatch, $searchType);
 
-            if ($fReturnNodeObject === true) {
+            if ($returnAttribute === "collection") {
                 $ret = $nodeMatches;
                 // do nothing.  We already have the node set correctly
             } elseif (!empty($nodeMatches) && isset($arrTag['index']) && is_array($nodeMatches) && intval($arrTag['index']) < count($nodeMatches)) {
                 $index = $arrTag['index'];
-                if (count($nodeMatches) <= $index) {
-                    $strError = sprintf("%s plugin failed to find index #%d in the %d nodes matching '%s'. ", $this->JobSiteName, $index, count($nodeMatches), $strMatch);
-                    LogError($strError);
-                    throw new \Exception($strError);
-                }
-                $ret = $nodeMatches[$index];
+                $ret = $this->_getReturnValueByIndex($nodeMatches, $index);
             } elseif (!empty($nodeMatches) && is_array($nodeMatches)) {
                 if (count($nodeMatches) > 1) {
                     $strError = sprintf("Warning:  %s plugin matched %d nodes to selector '%s' but did not specify an index.  Assuming first node.", $this->JobSiteName, count($ret), $strMatch);
@@ -348,7 +426,7 @@ class SimplePlugin extends BaseJobsSite
                 $ret = $nodeMatches[0];
             }
 
-            if ($fReturnNodeObject === false && !empty($ret)) {
+            if (!empty($ret) && !in_array($returnAttribute, ['collection', 'node'])) {
                 $ret = $ret->$returnAttribute;
 
                 if (!is_null($propertyRegEx) && is_string($ret) && strlen($ret) > 0) {
@@ -505,7 +583,7 @@ class SimplePlugin extends BaseJobsSite
 
                 foreach(array_keys($this->arrListingTagSetup) as $itemKey)
                 {
-                    if($itemKey == "JobPostItem")
+                    if(in_array($itemKey, ["JobPostItem", "NextButton", "TotalPostCount", "NoPostsFound"]))
                         continue;
 
                     $newVal = $this->_getTagValueFromPage_($node, $itemKey, $item);

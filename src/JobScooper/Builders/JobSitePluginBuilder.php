@@ -344,14 +344,6 @@ class JobSitePluginBuilder
             foreach ($arrConfigData['Collections'] as $coll) {
                 foreach ($coll['Fields'] as $field) {
 
-                    if ((strcasecmp($field['Extract'], "HTML") == 0) || (strcasecmp($field['Extract'], "ATTR") == 0)) {
-                        $field['Type'] = 'CSS';
-                    } elseif (strcasecmp($field['Extract'], "TEXT") == 0) {
-                        $field['Type'] = 'CSS';
-                        $field['Attribute'] = 'text';
-                    }
-
-
                     $name = getArrayItem('Name', $field);
 
                     $pluginData['arrListingTagSetup'][$name] = array();

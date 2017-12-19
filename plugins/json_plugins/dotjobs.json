@@ -14,14 +14,12 @@
         {
           "Name": "TotalPostCount",
           "Selector": "h3.direct_highlightedText",
-          "Extract": "REGEX",
           "Pattern": "/.*?([,\\d]+)\\s*[Jj]obs/",
           "Type": "CSS"
         },
         {
           "Name": "JobPostItem",
           "Selector": "ul.default_jobListing li",
-          "Extract": "CSS",
           "Attribute": "collection",
           "Type": "CSS"
         }
@@ -33,14 +31,12 @@
         {
           "Name": "Title",
           "Selector": "h4 a span",
-          "Extract": "TEXT",
           "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Url",
           "Selector": "h4 a ",
-          "Extract": "ATTR",
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
@@ -49,7 +45,6 @@
           "Name": "Location",
           "Selector": "div span[itemprop='address']",
           "Index" : 0,
-          "Extract": "CSS",
           "Attribute": "collection",
           "Type": "CSS",
           "Callback": "combineTextAllChildren"
@@ -58,15 +53,13 @@
           "Name": "Company",
           "Selector": "div span b",
           "Index" : 0,
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "JobSitePostId",
           "Pattern": "/\\/([\\w\\d]+)\\/job/",
-          "Extract": "REGEX",
-          "Type": "REGEX",
+          "Type": "SOURCEFIELD",
           "Field": "Url"
         }
       ]

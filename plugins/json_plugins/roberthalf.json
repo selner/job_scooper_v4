@@ -13,7 +13,6 @@
           "Name": "TotalPostCount",
           "Selector": "div.rh-job-result-table__counter label",
           "Index" : 1,
-          "Extract": "REGEX",
           "Pattern": "/of\\s*(\\d+)/",
           "Attribute": "text",
           "Type": "CSS"
@@ -21,7 +20,6 @@
         {
           "Name": "JobPostItem",
           "Selector": "div.row .rh-job-result-table__row",
-          "Extract": "CSS",
           "Attribute": "collection",
           "Type": "CSS"
         }
@@ -33,14 +31,12 @@
         {
           "Name": "Title",
           "Selector": "a.rh-job-result-table__job-title",
-          "Extract": "TEXT",
           "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Url",
           "Selector": "a.rh-job-result-table__job-title",
-          "Extract": "ATTR",
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
@@ -49,31 +45,27 @@
           "Name": "Location",
           "Selector": "span.rh-job-result-table__location",
           "Index" : 1,
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Category",
           "Selector": "span.rh-job-result-table__emptype",
           "Index" : 1,
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "JobSitePostId",
           "Pattern": "/\\/job\\/([^?]+)/i",
-          "Extract": "REGEX",
-          "Type": "REGEX",
+          "Type": "SOURCEFIELD",
           "Field": "Url"
         },
         {
           "Name": "PostedAt",
           "Selector": "span.rh-job-result-table__postdate",
           "Index" : 1,
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         }
       ]

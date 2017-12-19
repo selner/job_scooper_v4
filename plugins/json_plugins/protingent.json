@@ -11,8 +11,7 @@
     {
           "Name": "JobPostItem",
           "Selector": "div.job-post-row",
-          "Extract": "HTML",
-          "Attribute": "node",
+          "Attribute": "collection",
           "Type": "CSS"
         }
       ]
@@ -23,30 +22,26 @@
         {
           "Name": "Title",
           "Selector": "span.POST_TITLE",
-          "Extract": "TEXT",
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Location",
           "Selector": "span.job-post-location",
-          "Extract": "TEXT",
           "Index": 0,
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Category",
           "Selector": "span.job-post-emp-type",
-          "Extract": "TEXT",
           "Index": 0,
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Url",
           "Selector": "a.job-post-href",
-          "Extract": "ATTR",
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
@@ -54,7 +49,6 @@
         {
           "Name": "JobSitePostId",
           "Selector": "span.POST_JOB_NUMBER",
-          "Extract": "TEXT",
           "Index": 0,
           "Type": "CSS"
         },
@@ -62,9 +56,8 @@
         {
           "Name": "PostedAt",
           "Selector": "span.POST_DATE_F",
-          "Extract": "TEXT",
           "Index": 0,
-          "Attribute": null,
+          "Attribute": "text",
           "Type": "CSS"
         }
       ]

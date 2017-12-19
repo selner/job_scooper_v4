@@ -20,7 +20,6 @@
               "Name": "NoPostsFound",
               "Selector": "div.jsresultsheader h1",
               "Index": 0,
-              "Extract": "TEXT",
               "Callback": "matchesNoResultsPattern",
               "CallbackParameter": "Sorry"
             },
@@ -28,7 +27,6 @@
               "Name": "TotalPostCount",
               "Selector": "h2.page-title",
               "Index": 0,
-              "Extract": "REGEX",
               "Pattern": "/(\\d+).*/",
               "Attribute": "text",
               "Type": "CSS"
@@ -36,7 +34,6 @@
             {
               "Name": "JobPostItem",
               "Selector": "article.js_result_row",
-              "Extract": "CSS",
               "Attribute": "collection",
               "Type": "CSS"
             }
@@ -48,14 +45,12 @@
             {
               "Name": "Title",
               "Selector": "div.jobTitle h2 a span",
-              "Extract": "TEXT",
               "Attribute": "text",
               "Type": "CSS"
             },
             {
               "Name": "Url",
               "Selector": "div.jobTitle h2 a",
-              "Extract": "ATTR",
               "Attribute": "href",
               "Index": 0,
               "Type": "CSS"
@@ -63,7 +58,6 @@
             {
               "Name": "JobSitePostId",
               "Selector": "div.jobTitle h2 a",
-              "Extract": "ATTR",
               "Attribute": "data-m_impr_j_postingid",
               "Index": 0,
               "Type": "CSS"
@@ -72,7 +66,6 @@
               "Name": "Company",
               "Selector": "div.company a",
               "Index": 0,
-              "Extract": "TEXT",
               "Attribute": "title",
               "Type": "CSS"
             },
@@ -80,7 +73,6 @@
               "Name": "Location",
               "Selector": "div.job-specs-location p a",
               "Index": 0,
-              "Extract": "TEXT",
               "Attribute": "title",
               "Type": "CSS"
             },
@@ -88,7 +80,6 @@
               "Name": "PostedAt",
               "Selector": "div.job-specs-date p time",
               "Index": 1,
-              "Extract": "TEXT",
               "Attribute": "datetime",
               "Type": "CSS"
             }

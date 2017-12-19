@@ -33,9 +33,9 @@ abstract class BaseForceComClass extends \JobScooper\Plugins\Classes\AjaxHtmlSim
         }
     }
 
-    function takeNextPageAction($nItem=null, $nPage=null)
-    {
-        $nextPageJS = "function contains(selector, text) {
+	function takeNextPageAction($nItem=null, $nPage=null)
+	{
+		$nextPageJS = "function contains(selector, text) {
                 var elements = document.querySelectorAll(selector);
                 return Array.prototype.filter.call(elements, function(element){
                 return RegExp(text).test(element.textContent);
@@ -49,12 +49,12 @@ abstract class BaseForceComClass extends \JobScooper\Plugins\Classes\AjaxHtmlSim
             }
         ";
 
-        $this->runJavaScriptSnippet($nextPageJS, false);
-    }
+		$this->runJavaScriptSnippet($nextPageJS, false);
+	}
 
 
 
-    protected $arrListingTagSetup = array(
+	protected $arrListingTagSetup = array(
         'TotalPostCount' => array('selector' => 'div#atsSearchResultsText', 'return_value_regex' => '/(\d+).*?/'),
         'JobPostItem' => array('selector' => "table.atsSearchResultsTable tbody tr"),
         'Title' =>  array('selector' => 'td a', 'index' => 0, 'return_attribute' => 'text'),
