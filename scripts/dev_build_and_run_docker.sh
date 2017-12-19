@@ -39,7 +39,7 @@ if [ "$(uname)" == "Darwin" ]; then
     # Do something under 64 bits Windows NT platform
 fi
 
-CMD="docker run --volume $VARLOCAL/jobs_scooper/:/var/local/jobs_scooper/ --volume /var/run/docker.sock:/var/run/docker.sock --name $JOBSNAME -d $IMAGETAG"
+CMD="docker run --volume $VARLOCAL/jobs_scooper/:/var/local/jobs_scooper/ --volume /var/run/docker.sock:/var/run/docker.sock --volume $JOBSCOOPER_PROPEL_INI:/private/var/local/jobs_scooper/configs/propel.ini -e \"NLTK_DATA=/private/var/local/jobs_scooper/nltk_data\" -e \"JOBSCOOPER_OUTPUT=/private/var/local/jobs_scooper/output\" --name $JOBSNAME -d $IMAGETAG"
 echo $CMD
 $CMD
 

@@ -40,6 +40,8 @@ services:
       - JOBSCOOPER_OUTPUT
       - REPONAME
       - CONTAINER_TAG
+      - NLTK_DATA
+
     image: "${REPONAME}selner/js4-${BRANCH}:latest"
     volumes:
       - $JOBSCOOPER_VOLDIR:/var/local/jobs_scooper

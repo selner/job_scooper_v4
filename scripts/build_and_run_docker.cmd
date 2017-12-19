@@ -105,9 +105,7 @@ ECHO ""
 echo Starting docker $jobsname%
 ECHO ""
 ECHO "***************************************************************"
-docker run --volume C:\var\local\jobs_scooper:/var/local/jobs_scooper --volume c:\dev\nltk_data:/root/nltk_data --hostname %COMPUTERNAME%_docker --name %jobsname% -d %imagetag%
-
-docker run --volume /private/var/local/jobs_scooper:/var/local/jobs_scooper --name jobs-use-propel-orm -d selner/js4-use-propel-orm
+docker run --volume C:\var\local\jobs_scooper:/var/local/jobs_scooper --volume C:\var\local\jobs_scooper:/private/var/local/jobs_scooper --volume %JOBSCOOPER_PROPEL_INI%:/private/var/local/jobs_scooper/configs/propel.ini  -e "NLTK_DATA=/private/var/local/jobs_scooper/nltk_data" -e "JOBSCOOPER_OUTPUT=/private/var/local/jobs_scooper/output" --hostname %COMPUTERNAME%_docker --name %jobsname% -d %imagetag%
 
 POPD
 docker logs -f %jobsname%

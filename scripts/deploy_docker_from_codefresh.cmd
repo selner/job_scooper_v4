@@ -47,7 +47,7 @@ ECHO ""
 ECHO "Starting docker container %CONTAINER_NAME%"
 ECHO ""
 ECHO "***************************************************************"
-docker run --volume C:\var\local\jobs_scooper:/var/local/jobs_scooper --hostname %COMPUTERNAME%_docker --name %CONTAINER_NAME% -d %DOCKER_REPO_IMAGE%
+docker run --volume C:\var\local\jobs_scooper:/var/local/jobs_scooper --volume C:\var\local\jobs_scooper:/private/var/local/jobs_scooper --volume %JOBSCOOPER_PROPEL_INI%:/private/var/local/jobs_scooper/configs/propel.ini -e "NLTK_DATA=/private/var/local/jobs_scooper/nltk_data" -e "JOBSCOOPER_OUTPUT=/private/var/local/jobs_scooper/output" --hostname %COMPUTERNAME%_docker --name %CONTAINER_NAME% -d %DOCKER_REPO_IMAGE%
 
 POPD
 docker logs -f %CONTAINER_NAME%
