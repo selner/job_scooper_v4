@@ -91,8 +91,17 @@ RUN composer --version
 ### Download the full nltk data set needed for python
 ###
 ########################################################
-RUN pip install --no-cache-dir -v nltk
-RUN python -m nltk.downloader -d /root/nltk_data all
+# You can uncomment the following two lines to have the
+# data autoinstalled during the Docker build stage.
+#
+# Or if you need to install the files in a specific
+# location or want to build faster by skipping this
+# step, install the data files manually and set the
+# NLTK_DATA variable in .env to point to the data folder.
+#
+# Install instructions at http://www.nltk.org/data.html
+# RUN pip install --no-cache-dir -v nltk
+# RUN python -m nltk.downloader -d /root/nltk_data all
 
 #RUN curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-17.03.1-ce.tgz33 && \
 #tar --strip-components=1 -xvzf docker-17.03.1-ce.tgz -C /usr/local/bin
