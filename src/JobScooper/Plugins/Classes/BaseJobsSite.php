@@ -1110,7 +1110,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         foreach (array_keys($arrJobsBySitePostId) as $JobSitePostId) {
             $job = $this->saveJob($arrJobsBySitePostId[$JobSitePostId]);
             if(!is_null($job)) {
-                $this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()][$job->getJobPostingId()] = $job->getJobPostingId();
+                $this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()][$job->getJobPostingId()] = array('JobPostingId' => $job->getJobPostingId(), 'JobSitePostId' => $job->getJobSitePostId());
 
                 // if this posting was saved within the last hour , then assume it's a new post
                 $hoursSince = date_diff($job->getFirstSeenAt(), new \DateTime());
@@ -1370,6 +1370,17 @@ abstract class BaseJobsSite implements IJobSitePlugin
                         }
 
                         if (is_array($arrPageJobsList)) {
+
+	                        $arrPreviouslyLoadedJobs = $this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()];
+	                        if(!empty($arrPreviouslyLoadedJobs)) {
+		                        $arrPreviouslyLoadedJobSiteIds = array_column($arrPreviouslyLoadedJobs, 'JobSitePostId');
+		                        $newJobThisPage = array_diff(array_column($arrPageJobsList, 'JobSitePostId'), $arrPreviouslyLoadedJobSiteIds);
+		                        if (empty($newJobThisPage)) {
+			                        $site = $this->getJobSiteKey();
+			                        throw new Exception("{$site} returned the same jobs for page {$nPageCount}.  We likely aren't paginating successfully to new results; aborting to prevent infinite results parsing.");
+		                        }
+	                        }
+
                             $nCountNewJobsInDb = 0;
                             $this->saveSearchReturnedJobs($arrPageJobsList, $searchDetails, $nCountNewJobsInDb);
                             $nJobsFound = count($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]);
@@ -1379,14 +1390,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
                             }
                             $nItemCount += ($nJobsFound < $this->JobListingsPerPage) ? $nJobsFound : $this->JobListingsPerPage;
 
-                            $newJobThisPage = array_diff_key($arrPreviouslyLoadedJobIds, $arrPageJobsList);
-                            if(empty($newJobThisPage) && !empty($arrPreviouslyLoadedJobIds))
-                            {
-                            	$site = $this->getJobSiteKey();
-	                            throw new Exception("{$site} returned the same jobs for page {$nPageCount}.  We likely aren't paginating successfully to new results; aborting to prevent infinite results parsing.");
-                            }
-                            else
-		                        $arrPreviouslyLoadedJobIds = $arrPageJobsList;
 
 
                             // If we don't know the total number of listings we will get, we can guess that we've got them all
