@@ -274,7 +274,7 @@ class NotifierJobAlerts extends JobsMailSender
 		foreach (getConfigurationSetting("search_locations") as $loc)
 			$data['Search']['Locations'][] = $loc->getDisplayName();
 
-		$data['Search']['Keywords'][] = join(", ", $data['Search']['Locations']);
+		$data['Search']['Locations'][] = join(", ", $data['Search']['Locations']);
 
 		$html = $renderer($data);
 
