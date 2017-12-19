@@ -1195,6 +1195,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
             $nItemCount = 1;
             $nPageCount = 1;
             $objSimpleHTML = null;
+            $arrPreviouslyLoadedJobIds = array();
 
             LogMessage("Getting count of " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchSiteRunKey() . "': " . $searchDetails->getSearchStartUrl());
 
@@ -1377,6 +1378,16 @@ abstract class BaseJobsSite implements IJobSitePlugin
                                 $nItemCount = 0;
                             }
                             $nItemCount += ($nJobsFound < $this->JobListingsPerPage) ? $nJobsFound : $this->JobListingsPerPage;
+
+                            $newJobThisPage = array_diff_key($arrPreviouslyLoadedJobIds, $arrPageJobsList);
+                            if(empty($newJobThisPage) && !empty($arrPreviouslyLoadedJobIds))
+                            {
+                            	$site = $this->getJobSiteKey();
+	                            throw new Exception("{$site} returned the same jobs for page {$nPageCount}.  We likely aren't paginating successfully to new results; aborting to prevent infinite results parsing.");
+                            }
+                            else
+		                        $arrPreviouslyLoadedJobIds = $arrPageJobsList;
+
 
                             // If we don't know the total number of listings we will get, we can guess that we've got them all
                             // if we did not get the max number of job listings from the last page.  Basically, if we couldn't
