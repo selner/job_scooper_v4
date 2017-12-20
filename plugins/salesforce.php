@@ -19,19 +19,14 @@
 
 
 /**
- * Class AbstractDice
+ * Class AbstractSalesforce
  *
- *       Used by dice.json plugin configuration to override single method
+ *       Used by salesforce.json plugin configuration to override single method
  */
-abstract class AbstractDice extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractSalesforce extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
 {
-    function takeNextPageAction($nItem=null, $nPage=null)
-    {
-
-        $js = "
-            nextPagingData(" . $nPage . ");
-        ";
-
-        $this->runJavaScriptSnippet($js, false);
-   }
+	protected function getPageURLValue($nPage)
+	{
+		return (empty($nPage) || $nPage === 0) ? "" : $nPage - 1;
+	}
 }
