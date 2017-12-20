@@ -39,21 +39,22 @@ class JobSiteRecord extends BaseJobSiteRecord
 			    if (!in_array($class, get_declared_classes())) {
 				    LogError("Unable to find declared class " . $this->getPluginClassName() . "] for plugin " . $this->getJobSiteKey());
 				    $this->_pluginObject = null;
+				    $this->setisDisabled(true);
 			    }
+			    else
+			    {
+				    $this->_pluginObject = new $class();
 
-			    $this->_pluginObject = new $class();
-
-			    setCacheItem("all_jobsites_and_plugins", $this->getJobSiteKey(), $this);
-
-			    return $this->_pluginObject;
+				    setCacheItem("all_jobsites_and_plugins", $this->getJobSiteKey(), $this);
+			    }
 
 		    } catch (\Exception $ex) {
 			    LogError("Error instantiating jobsite plugin object" . $this->getJobSiteKey() . " with class name [" . $this->getPluginClassName() . "]:  " . $ex->getMessage());
 			    $this->_pluginObject = null;
 		    }
 	    }
-	    else
-	    	return $this->_pluginObject;
+
+        return $this->_pluginObject;
 
 
     }
