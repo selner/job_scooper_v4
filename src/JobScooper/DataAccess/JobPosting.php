@@ -29,6 +29,12 @@ Use Propel\Runtime\Connection\ConnectionInterface;
 class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \ArrayAccess
 {
 
+	/**
+	 * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+	 *
+	 * @return int
+	 * @throws \Exception
+	 */
 	public function save(ConnectionInterface $con = null)
 	{
 		try {
@@ -38,6 +44,12 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		}
 	}
 
+	/**
+	 * @param bool $includeGeolocation
+	 *
+	 * @return array
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
 	public function toFlatArrayForCSV($includeGeolocation = false)
 	{
 		$location = array();
@@ -56,6 +68,9 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		return $arrItem;
 	}
 
+	/**
+	 * @return int
+	 */
 	public function checkAndMarkDuplicatePosting()
 	{
 		if (is_null($this->getDuplicatesJobPostingId())) {
@@ -78,16 +93,28 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		}
 	}
 
+	/**
+	 * @param $jobPosting
+	 */
 	public function setPostingAsDuplicateOf($jobPosting)
 	{
 
 	}
 
+	/**
+	 *
+	 */
 	protected function updateAutoColumns()
 	{
 		$this->setKeyCompanyAndTitle(cleanupSlugPart($this->getCompany() . $this->getTitle()));
 	}
 
+	/**
+	 * @param $method
+	 * @param $v
+	 *
+	 * @return mixed
+	 */
 	public function setAutoColumnRelatedProperty($method, $v)
 	{
 		if (is_null($v) || strlen($v) <= 0)
@@ -98,6 +125,9 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		return $ret;
 	}
 
+	/**
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
 	private function _setDenormalizedLocationDisplayValue_()
 	{
 		$val = "";
@@ -115,12 +145,20 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		$this->setLocationDisplayValue($val);
 	}
 
+	/**
+	 *
+	 */
 	public function normalizeJobRecord()
 	{
 		$this->updateAutoColumns();
 		$this->setJobSiteKey(cleanupSlugPart($this->getJobSiteKey()));
 	}
 
+	/**
+	 * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+	 *
+	 * @return bool
+	 */
 	public function preSave(\Propel\Runtime\Connection\ConnectionInterface $con = null)
 	{
 		$this->normalizeJobRecord();
@@ -132,11 +170,27 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		return true;
 	}
 
-	private function _cleanupTextValue($v)
+	/**
+	 * @param     $v
+	 * @param int $maxLength
+	 *
+	 * @return bool|null|string|string[]
+	 */
+	private function _cleanupTextValue($v, $maxLength=255)
 	{
-		return cleanupTextValue($v);
+		$ret = cleanupTextValue($v);
+		if(!empty($ret) && is_string($ret))
+			$ret = substr($ret, 0, min($maxLength-1, strlen($ret)));
+
+		return $ret;
 	}
 
+	/**
+	 * @param string $v
+	 *
+	 * @return $this|\JobScooper\DataAccess\JobPosting|void
+	 * @throws \Exception
+	 */
 	public function setTitle($v)
 	{
 		// Removes " NEW!", etc from the job title.  ZipRecruiter tends to occasionally
@@ -153,6 +207,11 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 	}
 
 
+	/**
+	 * @param string $v
+	 *
+	 * @return $this|\JobScooper\DataAccess\JobPosting|void
+	 */
 	public function setLocation($v)
 	{
 		$oldVal = $this->getLocation();
@@ -181,6 +240,9 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 //        }
 	}
 
+	/**
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
 	private function _updateAutoLocationColumns()
 	{
 		$loc_str = $this->getLocation();
@@ -206,9 +268,14 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		}
 	}
 
+	/**
+	 * @param string $v
+	 *
+	 * @return $this|\JobScooper\DataAccess\JobPosting|void
+	 */
 	public function setCompany($v)
 	{
-		$v = $this->_cleanupTextValue($v);
+		$v = $this->_cleanupTextValue($v, $maxLength=100);
 
 		if (is_null($v) || strlen($v) == 0) {
 			$v = $this->getJobSiteKey();
@@ -260,24 +327,55 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 
 	}
 
+	/**
+	 * @param string $v
+	 *
+	 * @return $this|\JobScooper\DataAccess\JobPosting|void
+	 */
 	public function setDepartment($v)
 	{
 		$v = $this->_cleanupTextValue($v);
 		parent::setDepartment($v);
 	}
 
+	/**
+	 * @param string $v
+	 *
+	 * @return $this|\JobScooper\DataAccess\JobPosting|void
+	 */
+	public function setPayRange($v)
+	{
+		$v = $this->_cleanupTextValue($v, $maxLength=100);
+		parent::setPayRange($v);
+	}
+
+	/**
+	 * @param string $v
+	 *
+	 * @return $this|\JobScooper\DataAccess\JobPosting|void
+	 */
 	public function setEmploymentType($v)
 	{
-		$v = $this->_cleanupTextValue($v);
+		$v = $this->_cleanupTextValue($v, $maxLength=100);
 		parent::setEmploymentType($v);
 	}
 
+	/**
+	 * @param string $v
+	 *
+	 * @return $this|\JobScooper\DataAccess\JobPosting|void
+	 */
 	public function setCategory($v)
 	{
 		$v = $this->_cleanupTextValue($v);
 		parent::setCategory($v);
 	}
 
+	/**
+	 * @param mixed $v
+	 *
+	 * @return $this|\JobScooper\DataAccess\JobPosting|null
+	 */
 	public function setPostedAt($v)
 	{
 		if (empty($v))
@@ -343,6 +441,9 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 	}
 
 
+	/**
+	 * @return null|string
+	 */
 	public function getJobTitleLinked()
 	{
 		if(!empty($this->getTitle()) && !empty($this->getUrl()))
@@ -352,6 +453,9 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 	}
 
 
+	/**
+	 * @return null|string
+	 */
 	public function getKeySiteAndPostId()
 	{
 		if(!empty($this->getJobSiteKey()) && !empty($this->getJobSitePostId()))
@@ -361,6 +465,13 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 	}
 
 
+	/**
+	 * JobPosting constructor.
+	 *
+	 * @param null $arrJobFacts
+	 *
+	 * @throws \Exception
+	 */
 	function __construct($arrJobFacts = null)
 	{
 		parent::__construct();
@@ -371,6 +482,14 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		}
 	}
 
+	/**
+	 * @param string $keyType
+	 * @param bool   $includeLazyLoadColumns
+	 * @param array  $alreadyDumpedObjects
+	 * @param bool   $includeForeignObjects
+	 *
+	 * @return array
+	 */
 	function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
 	{
 		$ret = parent::toArray($keyType, $includeLazyLoadColumns, $alreadyDumpedObjects, $includeForeignObjects);
@@ -383,12 +502,21 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		return $ret;
 	}
 
+	/**
+	 * @param mixed $offset
+	 *
+	 * @return mixed
+	 */
 	public function offsetGet($offset)
     {
         return $this->get($offset);
     }
 
-    public function offsetSet($offset, $value)
+	/**
+	 * @param mixed $offset
+	 * @param mixed $value
+	 */
+	public function offsetSet($offset, $value)
     {
         $this->set($offset, $value);
     }
