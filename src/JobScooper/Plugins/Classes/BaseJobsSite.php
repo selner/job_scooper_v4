@@ -195,7 +195,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                     $this->_setSearchResult_($search, true);
                 } catch (Exception $ex) {
                     $this->_setSearchResult_($search, false, new Exception("Unable to download jobs: " .strval($ex)));
-                    handleException($ex);
+                    handleException($ex, null, true, $extraData=$search->toArray());
                 } finally {
                     $search->save();
                     setConfigurationSetting('current_user_search_details', null);
@@ -1212,7 +1212,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                     $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage();
                 } catch (Exception $ex) {
                     $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
-                    handleException(new Exception($strError), null, true);
+                    handleException(new Exception($strError), null, true, $extraData=$searchDetails->toArray());
                 }
             } else {
                 $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $searchDetails->getSearchStartUrl(), $this->secsPageTimeout, $referrer = $this->prevURL, $cookies = $this->prevCookies);
@@ -1327,7 +1327,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
                                 case C__PAGINATION_INFSCROLLPAGE_VIA_JS:
                                     if (is_null($this->nextPageScript)) {
-                                        handleException(new Exception("Plugin " . $this->JobSiteName . " is missing nextPageScript settings for the defined pagination type."), "", true);
+                                        throw new Exception("Plugin " . $this->JobSiteName . " is missing nextPageScript settings for the defined pagination type.");
 
                                     }
                                     $this->selenium->loadPage($strURL);
@@ -1342,7 +1342,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                             $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage();
 
                         } catch (Exception $ex) {
-                            handleException($ex, "Failed to get dynamic HTML via Selenium due to error:  %s", true);
+                            handleException($ex, "Failed to get dynamic HTML via Selenium due to error:  %s", true, $extraData=$searchDetails->toArray());
                         }
                     } else {
                         $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
@@ -1422,7 +1422,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
                         }
                     } catch (Exception $ex) {
-                        handleException($ex, ($this->JobSiteName . " error: %s"), true);
+                        handleException($ex, ($this->JobSiteName . " error: %s"), true, $extraData=$searchDetails->toArray());
                     }
 
                     //
@@ -1452,7 +1452,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                         } else {
                             $err = "Error: " . $err . "  Aborting job site plugin to prevent further errors.";
                             LogError($err);
-                            handleException(new Exception($err), null, true);
+                            handleException(new Exception($err), null, true, $extraData=$searchDetails->toArray());
                         }
                     }
 
@@ -1489,7 +1489,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
                                 case C__PAGINATION_PAGE_VIA_CALLBACK:
                                     if (!method_exists($this, 'takeNextPageAction')) {
-                                        handleException(new Exception("Plugin " . $this->JobSiteName . " is missing takeNextPageAction method definiton required for its pagination type."), "", true);
+                                        throw new Exception("Plugin " . $this->JobSiteName . " is missing takeNextPageAction method definiton required for its pagination type.");
                                     }
 
                                     if ($nPageCount > 1 && $nPageCount <= $totalPagesCount) {
@@ -1501,7 +1501,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                                             $this->takeNextPageAction($this->getItemURLValue($nItemCount), $this->getPageURLValue($nPageCount));
                                             sleep($this->additionalLoadDelaySeconds + 2);
                                         } catch (Exception $ex) {
-                                            handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true);
+                                            handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true, $extraData=$searchDetails->toArray());
                                         }
                                     }
                                     break;
@@ -1509,7 +1509,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                             }
 
                         } catch (Exception $ex) {
-                            handleException($ex, "Failed to get dynamic HTML via Selenium due to error:  %s", true);
+                            handleException($ex, "Failed to get dynamic HTML via Selenium due to error:  %s", true, $extraData=$searchDetails->toArray());
                         }
                     }
                 }
@@ -1520,7 +1520,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
         } catch (Exception $ex) {
             $this->_setSearchResult_($searchDetails, false, $ex);
-            handleException($ex, null, true);
+            handleException($ex, null, true, $extraData=$searchDetails->toArray());
         }
 
         return null;

@@ -185,8 +185,9 @@ Class LoggingManager extends \Monolog\Logger
 		$context = array();
 		$monologLevel = \Monolog\Logger::toMonologLevel($level);
 		if(in_array($level, array(
-			\Monolog\Logger::WARNING, \Monolog\Logger::EMERGENCY, \Monolog\Logger::ERROR, \Monolog\Logger::DEBUG, \Monolog\Logger::CRITICAL)))
+			\Monolog\Logger::WARNING, \Monolog\Logger::EMERGENCY, \Monolog\Logger::ERROR, \Monolog\Logger::DEBUG, \Monolog\Logger::CRITICAL))) {
 			$context = $this->getDebugContext($extras, $ex);
+		}
 
 		if(parent::log($monologLevel, $message, $context) === false)
 			print($message .PHP_EOL . PHP_EOL );
@@ -252,6 +253,9 @@ Class LoggingManager extends \Monolog\Logger
 	 */
 	function getDebugContext($context=array(), \Exception $thrownExc = null)
 	{
+		$user = \JobScooper\DataAccess\User::getCurrentUser();
+		$userSlug = empty($user) ? "" : $user->getSlug();
+
 		$baseContext = [
 			'class_call' => "",
 			'exception_message' => "",
@@ -260,7 +264,7 @@ Class LoggingManager extends \Monolog\Logger
 //		'exception_trace' => "",
 			'channel' => "",
 			'jobsite' => "",
-			'user' => \JobScooper\DataAccess\User::getCurrentUser()
+			'user' => $userSlug
 		];
 
 		if(is_array($context))

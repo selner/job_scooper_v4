@@ -127,7 +127,7 @@ function LogPlainText($msg, $context = array())
  * @throws \Exception
  */
 
-function handleException(Exception $ex, $fmtLogMsg= null, $raise=true)
+function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraData=null)
 {
 	$toThrow = $ex;
 	if (empty($toThrow))
@@ -152,7 +152,7 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true)
 		$msg = $toThrow->getMessage();
 	}
 
-	LogError($msg, null, $toThrow);
+	LogError($msg, $extraData, $toThrow);
 
 	if ($raise == true) {
 		throw $toThrow;
