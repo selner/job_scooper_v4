@@ -1102,22 +1102,29 @@ abstract class BaseJobsSite implements IJobSitePlugin
      */
     function saveSearchReturnedJobs($arrJobList, UserSearchSiteRun $searchDetails, &$nCountNewJobs=0)
     {
-        $nCountNewJobs = 0;
-        $arrJobsBySitePostId = array_column($arrJobList, null, 'JobSitePostId');
-        if (!array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs))
-            $this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()] = array();
+    	try {
+		    $nCountNewJobs = 0;
+		    if (!array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs))
+			    $this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()] = array();
 
-        foreach (array_keys($arrJobsBySitePostId) as $JobSitePostId) {
-            $job = $this->saveJob($arrJobsBySitePostId[$JobSitePostId]);
-            if(!is_null($job)) {
-                $this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()][$job->getJobPostingId()] = array('JobPostingId' => $job->getJobPostingId(), 'JobSitePostId' => $job->getJobSitePostId());
+		    foreach ($arrJobList as $jobitem) {
+			    $job = $this->saveJob($jobitem);
+			    if (!empty($job)) {
+				    $this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()][$job->getJobPostingId()] = array('JobPostingId' => $job->getJobPostingId(), 'JobSitePostId' => $job->getJobSitePostId());
 
-                // if this posting was saved within the last hour , then assume it's a new post
-                $hoursSince = date_diff($job->getFirstSeenAt(), new \DateTime());
-                if ($hoursSince->h < 1)
-                    $nCountNewJobs += 1;
-            }
-        }
+				    // if this posting was saved within the last hour , then assume it's a new post
+				    $hoursSince = date_diff($job->getFirstSeenAt(), new \DateTime());
+				    if ($hoursSince->h < 1)
+					    $nCountNewJobs += 1;
+			    }
+			    else
+			    	LogWarning("Failed to save job to database.  Job details = " . getArrayDebugOutput($jobitem));
+		    }
+	    }
+	    catch (Exception $ex)
+	    {
+	    	handleException($ex, "Unable to save job search results to database.", true);
+	    }
     }
 
     private function _addJobMatchIdsToUser($arrJobIds, UserSearchSiteRun $searchDetails)
