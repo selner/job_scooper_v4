@@ -62,7 +62,7 @@ function endLogSection($headerText)
  * @param \Psr\Log\LogLevel $level
  * @param array $context
  */
-function LogMessage($msg, $logLevel=\Monolog\Logger::INFO, $extras=array())
+function LogMessage($msg, $logLevel=\Monolog\Logger::INFO, $extras=array(), $ex=null)
 {
 	if(empty($GLOBALS['logger']) || !isset($GLOBALS['logger']))
 	{
@@ -70,7 +70,7 @@ function LogMessage($msg, $logLevel=\Monolog\Logger::INFO, $extras=array())
 	}
 	else
 	{
-		$GLOBALS['logger']->logRecord($logLevel, $msg, $extras);
+		$GLOBALS['logger']->logRecord($logLevel, $msg, $extras, $ex);
 	}
 }
 
@@ -78,9 +78,9 @@ function LogMessage($msg, $logLevel=\Monolog\Logger::INFO, $extras=array())
 /**
  * @param $msg
  */
-function LogError($msg, $extras=array())
+function LogError($msg, $extras=array(), $ex=null)
 {
-	LogMessage($msg,\Monolog\Logger::ERROR, $extras);
+	LogMessage($msg,\Monolog\Logger::ERROR, $extras, $ex);
 }
 
 
@@ -152,7 +152,7 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true)
 		$msg = $toThrow->getMessage();
 	}
 
-	LogError($msg);
+	LogError($msg, null, $toThrow);
 
 	if ($raise == true) {
 		throw $toThrow;

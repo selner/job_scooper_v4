@@ -26,7 +26,7 @@ use Psr\Log\LogLevel as LogLevel;
 use \Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use DateTime;
-
+use Exception;
 
 /****************************************************************************************************************/
 /****                                                                                                        ****/
@@ -180,19 +180,13 @@ Class LoggingManager extends \Monolog\Logger
 
     }
 
-	public function logRecord($level, $message, $extras=array())
+	public function logRecord($level, $message, $extras=array(), $ex=null)
 	{
 		$context = array();
 		$monologLevel = \Monolog\Logger::toMonologLevel($level);
 		if(in_array($level, array(
 			\Monolog\Logger::WARNING, \Monolog\Logger::EMERGENCY, \Monolog\Logger::ERROR, \Monolog\Logger::DEBUG, \Monolog\Logger::CRITICAL)))
-			$context = $this->getDebugContext();
-
-		if(!empty($extras) && is_array($extras))
-		{
-			foreach($extras as $k => $v)
-				$context[$k] = $v;
-		}
+			$context = $this->getDebugContext($extras, $ex);
 
 		if(parent::log($monologLevel, $message, $context) === false)
 			print($message .PHP_EOL . PHP_EOL );
@@ -265,9 +259,14 @@ Class LoggingManager extends \Monolog\Logger
 			'exception_line' => "",
 //		'exception_trace' => "",
 			'channel' => "",
-			'jobsite' => ""
+			'jobsite' => "",
+			'user' => \JobScooper\DataAccess\User::getCurrentUser()
 		];
-		$context = array_merge($baseContext, $context);
+
+		if(is_array($context))
+			$context = array_merge($baseContext, $context);
+		else
+			$context = $baseContext;
 
 		//Debug backtrace called. Find next occurence of class after Logger, or return calling script:
 		$dbg = debug_backtrace();
