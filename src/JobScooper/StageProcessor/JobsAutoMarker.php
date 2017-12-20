@@ -420,13 +420,18 @@ class JobsAutoMarker
 
             LogMessage("Checking " . count($arrJobsList) . " roles against " . count($usrSearchKeywords) . " keyword phrases in titles...");
 
+            $nCountJobErrors = 0;
             try {
 	            foreach ($arrJobsList as $jobMatch) {
 		            $foundAllUserKeywords = false;
 		            $strJobTitleTokens = $jobMatch->getJobPostingFromUJM()->getTitleTokens();
 		            $jobId = $jobMatch->getJobPostingId();
-		            if (is_null($strJobTitleTokens) || strlen($strJobTitleTokens) == 0)
-			            throw new Exception("Cannot match user search keywords against job title token.  JobTitleTokens column for job_posting id#{$jobId} is null.");
+		            if (empty($strJobTitleTokens)) {
+			            LogError("Cannot match user search keywords against job title token.  JobTitleTokens column for job_posting id#{$jobId} is null.");
+			            $nCountJobErrors = $nCountJobErrors + 1;
+			            continue;
+		            }
+
 		            foreach ($usrSearchKeywords as $kwd_subset) {
 			            $arrKwdSubset = preg_split("/\s/", $kwd_subset);
 			            $foundAllUserKeywords = in_string_array($strJobTitleTokens, $arrKwdSubset);
@@ -444,6 +449,9 @@ class JobsAutoMarker
 			            $jobMatch->save();
 			            $nJobsNotMarked += 1;
 		            }
+
+		            if($nCountJobErrors > countAssociativeArrayValues($arrJobsList) * .1)
+		            	throw new Exception("Exceeded error threshold:  {$nCountJobErrors} were unable to be matched against keywords due to unexpected errors.");
 	            }
             } catch (Exception $ex) {
                 handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s', isDebug());
