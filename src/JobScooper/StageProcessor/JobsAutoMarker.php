@@ -158,14 +158,29 @@ class JobsAutoMarker
 	 */
 	private function _isGeoSpatialWorking()
     {
-        try {
-            loadSqlite3MathExtensions();
-            LogMessage("Successfully loaded the necessary math functions for SQLite to do geospatial filtering.");
-            return true;
+	    $sqlType = \Propel\Runtime\Propel::getServiceContainer()->getAdapterClass();
+	    switch($sqlType)
+	    {
+		    case "mysql":
+			    return true;
+				break;
 
-        } catch (\Exception $ex) {
-            LogWarning("Failed to load the necessary math functions for SQLite to do geospatial filtering.  Falling back to county-level instead.");
-        }
+		    default:
+		    return false;
+			    break;
+
+		    case "sqlite":
+			    try {
+				    $ret = loadSqlite3MathExtensions();
+				    if($ret)
+					    LogMessage("Successfully loaded the necessary math functions for SQLite to do geospatial filtering.");
+				    return $ret;
+
+			    } catch (\Exception $ex) {
+				    LogWarning("Failed to load the necessary math functions for SQLite to do geospatial filtering.  Falling back to county-level instead.");
+			    }
+			    break;
+	    }
 
         return false;
     }

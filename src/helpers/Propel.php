@@ -38,8 +38,8 @@
  ******************************************************************************/
 function loadSqlite3MathExtensions()
 {
-    $con = \Propel\Runtime\Propel::getConnection();
-    try {
+	try {
+	    $con = \Propel\Runtime\Propel::getConnection();
         $expath = '/opt/sqlite/extensions/libsqlitefunctions';
         if(PHP_OS == "Darwin")
             $expath .= ".dylib";
@@ -49,9 +49,13 @@ function loadSqlite3MathExtensions()
         $sql2 = "SELECT load_extension('{$expath}');";
         $stmt = $con->prepare($sql2);
         $stmt->execute();
-    } catch (Exception $ex) {
-        handleException($ex,"FAILED to load math functions extension for SQLite with call: " . $sql2 . "   ERROR DETAILS: %s", true);
-    }
+        return true;
+
+	} catch (Exception $ex) {
+		handleException($ex,"FAILED to load math functions extension for SQLite with call: " . $sql2 . "   ERROR DETAILS: %s", true);
+	}
+
+	return false;
 }
 
 
