@@ -175,7 +175,8 @@ class SearchBuilder
 		unset($GLOBALS[JOBSCOOPER_CONFIGSETTING_ROOT]["user_search_site_runs"]);
 		setConfigurationSetting("user_search_site_runs", $keepThese);
 
-	 LogMessage("Skipping the following sites & searches because they have run since " . $this->_cacheCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipTheseSearches));
+		if(!empty($skipTheseSearches))
+			LogMessage("Skipping the following sites & searches because they have run since " . $this->_cacheCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipTheseSearches));
 	}
 
 	private function _filterJobSitesThatAreExcluded()
