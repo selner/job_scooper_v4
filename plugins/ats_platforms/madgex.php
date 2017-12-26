@@ -132,6 +132,17 @@ class PluginTheGuardian extends AbstractMadgexATS
     protected $childSiteURLBase = 'https://jobs.theguardian.com/searchjobs';
 }
 
+/**
+ * Class PluginLocalworkCA
+ */
+class PluginLocalworkCA extends AbstractMadgexATS
+{
+	protected $JobSiteName = 'LocalworkCA';
+	protected $childSiteURLBase = 'https://www.localwork.ca/searchjobs';
+	protected $CountryCodes = ["CA"];
+}
+
+
 class PluginMediaBistro extends AbstractMadgexATS
 {
     protected $JobSiteName = 'mediabistro';
