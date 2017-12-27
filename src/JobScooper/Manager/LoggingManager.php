@@ -358,7 +358,7 @@ Class LoggingManager extends \Monolog\Logger
 			'hostname' => gethostname(),
 			'channel' => "",
 			'jobsite' => "",
-			'user' => $userSlug
+			'username' => $userSlug
 		];
 
 		if(is_array($context))
@@ -435,7 +435,7 @@ Class LoggingManager extends \Monolog\Logger
 			if (!empty($context))
 			{
 				$sentryContext = array_copy($context);
-				unset($sentryContext['user']);
+				$sentryContext['exception'] = $ex;
 				$this->_sentryClient->context = $sentryContext;
 			}
 		}
