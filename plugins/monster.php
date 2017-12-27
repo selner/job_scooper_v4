@@ -1,6 +1,6 @@
 <?php
 
-    /**
+/**
      * Copyright 2014-17 Bryan Selner
      *
      * Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -17,7 +17,8 @@
      */
 
 
-class AbstractMonster extends \JobScooper\Plugins\Classes\ServerHtmlSimplePlugin
+
+class AbstractMonster extends \JobScooper\BasePlugin\Classes\ServerHtmlSimplePlugin
 {
     function getDaysURLValue($days = null) {
         $ret = "1";

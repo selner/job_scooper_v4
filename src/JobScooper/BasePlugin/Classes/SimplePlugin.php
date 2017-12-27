@@ -15,7 +15,7 @@
  * under the License.
  */
 
-namespace JobScooper\Plugins\Classes;
+namespace JobScooper\BasePlugin\Classes;
 
 use DiDom\Query;
 use JobScooper\DataAccess\UserSearchSiteRun;
@@ -23,6 +23,10 @@ use JobScooper\Utils\ExtendedDiDomDocument;
 use JobScooper\Utils\ExtendedDiDomElement;
 use JobScooper\Utils\SimpleHTMLHelper;
 
+/**
+ * Class SimplePlugin
+ * @package JobScooper\BasePlugin\Classes
+ */
 class SimplePlugin extends BaseJobsSite
 {
     protected $JobSiteName = '';
@@ -140,7 +144,7 @@ class SimplePlugin extends BaseJobsSite
      *
      * If the site does not show the total number of results
      * then set the plugin flag to C__JOB_PAGECOUNT_NOTAPPLICABLE__
-     * in the LoadPlugins.php file and just comment out this function.
+     * in the Constants.php file and just comment out this function.
      *
      * parseTotalResultsCount returns the total number of listings that
      * the search returned by parsing the value from the returned HTML

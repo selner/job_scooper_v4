@@ -17,13 +17,16 @@
  */
 
 
-abstract class BaseForceComClass extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
+abstract class BaseForceComClass extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
     protected $additionalLoadDelaySeconds = 3;
     protected $JobListingsPerPage = 25;
     protected $PaginationType = C__PAGINATION_PAGE_VIA_CALLBACK;
 
-    function __construct()
+	/**
+	 * BaseForceComClass constructor.
+	 */
+	function __construct()
     {
         parent::__construct();
 
@@ -33,6 +36,10 @@ abstract class BaseForceComClass extends \JobScooper\Plugins\Classes\AjaxHtmlSim
         }
     }
 
+	/**
+	 * @param null $nItem
+	 * @param null $nPage
+	 */
 	function takeNextPageAction($nItem=null, $nPage=null)
 	{
 		$nextPageJS = "function contains(selector, text) {
@@ -71,7 +78,10 @@ abstract class BaseForceComClass extends \JobScooper\Plugins\Classes\AjaxHtmlSim
 
 abstract class BaseNoDeptForceComClass extends BaseForceComClass
 {
-    function __construct()
+	/**
+	 * BaseNoDeptForceComClass constructor.
+	 */
+	function __construct()
     {
         parent::__construct();
         $this->arrListingTagSetup['Department'] = null;
@@ -90,7 +100,11 @@ class PluginRobertHalfExec extends BaseForceComClass
     protected $JobPostingBaseUrl = "http://roberthalf.force.com";
     protected $SearchUrlFormat = "http://roberthalf.force.com/careers";
     protected $additionalBitFlags = [ C__JOB_USE_SELENIUM ];
-    function __construct()
+
+	/**
+	 * PluginRobertHalfExec constructor.
+	 */
+	function __construct()
     {
         parent::__construct();
         $this->arrListingTagSetup['Department']['index'] = 1;
@@ -98,7 +112,13 @@ class PluginRobertHalfExec extends BaseForceComClass
         $this->arrListingTagSetup['PostedAt'] = null;
     }
 
-    function doFirstPageLoad($searchDetails)
+	/**
+	 * @param $searchDetails
+	 *
+	 * @return mixed
+	 * @throws \Exception
+	 */
+	function doFirstPageLoad($searchDetails)
     {
         $js = "
             setTimeout(clickSearchButton, " . strval($this->additionalLoadDelaySeconds) .");

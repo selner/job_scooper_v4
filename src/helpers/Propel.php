@@ -202,7 +202,7 @@ function getAllPluginClassesByJobSiteKey()
     $classList = get_declared_classes();
     sort($classList);
     $pluginClasses = array_filter($classList, function ($class) {
-        return (stripos($class, "Plugin") !== false) && stripos($class, "\\Classes\\") === false && in_array("JobScooper\Plugins\Interfaces\IJobSitePlugin", class_implements($class));
+        return (stripos($class, "Plugin") !== false) && stripos($class, "\\Classes\\") === false && in_array("JobScooper\BasePlugin\Interfaces\IJobSitePlugin", class_implements($class));
     });
 
     $classListBySite = array();

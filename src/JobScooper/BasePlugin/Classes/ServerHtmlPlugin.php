@@ -15,12 +15,27 @@
  * under the License.
  */
 
-namespace JobScooper\Plugins\Classes;
+namespace JobScooper\BasePlugin\Classes;
 
 
-
-abstract class ServerHtmlSimplePlugin extends SimplePlugin
+/**
+ * Class ServerHtmlPlugin
+ * @package JobScooper\BasePlugin\Classes
+ */
+abstract class ServerHtmlPlugin extends BaseJobsSite
 {
-    protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
+	/**
+	 * ServerHtmlPlugin constructor.
+	 *
+	 * @param null $strBaseDir
+	 */
+	function __construct($strBaseDir = null)
+    {
+        $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
+
+        parent::__construct();
+
+    }
+
 }
 

@@ -17,7 +17,7 @@
  */
 
 
-abstract class AbstractResumator extends \JobScooper\Plugins\Classes\ServerHtmlSimplePlugin
+abstract class AbstractResumator extends \JobScooper\BasePlugin\Classes\ServerHtmlSimplePlugin
 {
     protected $arrListingTagSetup = array(
         'JobPostItem' => array(array('tag' => 'div', 'attribute' => 'id', 'attribute_value' =>'resumator-content-left-wrapper'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'resumator-job')),

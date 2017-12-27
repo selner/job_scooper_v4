@@ -16,16 +16,11 @@
  */
 namespace JobScooper\StageProcessor;
 
-
 use JobScooper\DataAccess\GeoLocationQuery;
 use JobScooper\DataAccess\Map\GeoLocationTableMap;
-
 use Exception;
-use JobScooper\DataAccess\UserJobMatch;
 use JobScooper\Manager\LocationManager;
-use JobScooper\Utils\SimpleCSV;
 use Propel\Runtime\ActiveQuery\Criteria;
-
 
 /**
  * Class JobsAutoMarker

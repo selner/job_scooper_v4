@@ -16,7 +16,7 @@
  */
 
 
-class PluginGeekwire extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
+class PluginGeekwire extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
     protected $JobSiteName = 'Geekwire';
     protected $JobPostingBaseUrl = 'http://www.geekwire.com/';

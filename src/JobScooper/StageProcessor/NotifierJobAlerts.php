@@ -210,7 +210,7 @@ class NotifierJobAlerts extends JobsMailSender
 	private function _generateMatchResultsExcelFile($arrJobsToNotify)
 	{
 
-		$spreadsheet = IOFactory::load(__ROOT__ . '/assets/templates/results.xlsx');
+		$spreadsheet = IOFactory::load(__ROOT__ . '/src/assets/templates/results.xlsx');
 
 		$sheetFilters = array(
 			[NotifierJobAlerts::SHEET_MATCHES, "isUserJobMatch", NotifierJobAlerts::KEYS_MATCHES],

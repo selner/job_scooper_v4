@@ -17,7 +17,12 @@
  */
 
 
-class PluginZipRecruiter extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
+
+/**
+ * Class PluginZipRecruiter
+ * @package JobScooper\Plugins
+ */
+class PluginZipRecruiter extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
     protected $JobSiteName = 'ziprecruiter';
     protected $JobPostingBaseUrl = 'www.ziprecruiter.com';
@@ -38,12 +43,24 @@ class PluginZipRecruiter extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugi
         'JobSitePostId'                => array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'just_job_title', 'return_attribute' => 'data-job-id'),
     );
 
-    function checkNoJobResults($var)
+	/**
+	 * @param $var
+	 *
+	 * @return int|null
+	 * @throws \Exception
+	 */
+	function checkNoJobResults($var)
     {
         return noJobStringMatch($var, "No jobs");
     }
-    
-    function parseTotalResultsCount($objSimpl)
+
+	/**
+	 * @param $objSimpl
+	 *
+	 * @return null|string
+	 * @throws \Exception
+	 */
+	function parseTotalResultsCount($objSimpl)
     {
         sleep($this->additionalLoadDelaySeconds + 1);
 
@@ -68,7 +85,12 @@ class PluginZipRecruiter extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugi
         return parent::parseTotalResultsCount($objSimpl);
     }
 
-    protected function goToEndOfResultsSetViaLoadMore($nTotalItems = null)
+	/**
+	 * @param null $nTotalItems
+	 *
+	 * @throws \Exception
+	 */
+	protected function goToEndOfResultsSetViaLoadMore($nTotalItems = null)
     {
         $this->selectorMoreListings = ".load_more_jobs";
         parent::goToEndOfResultsSetViaLoadMore($nTotalItems);

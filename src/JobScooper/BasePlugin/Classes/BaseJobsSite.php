@@ -15,7 +15,7 @@
  * under the License.
  */
 
-namespace JobScooper\Plugins\Classes;
+namespace JobScooper\BasePlugin\Classes;
 
 
 
@@ -23,7 +23,7 @@ use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\DataAccess\GeoLocation;
 use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserSearchSiteRun;
-use JobScooper\Plugins\Interfaces\IJobSitePlugin;
+use JobScooper\BasePlugin\Interfaces\IJobSitePlugin;
 use JobScooper\Manager\SeleniumManager;
 
 const VALUE_NOT_SUPPORTED = -1;
@@ -33,9 +33,16 @@ use Exception;
 use JobScooper\Utils\CurlWrapper;
 use JobScooper\Utils\SimpleHTMLHelper;
 
+/**
+ * Class BaseJobsSite
+ * @package JobScooper\BasePlugin\Classes
+ */
 abstract class BaseJobsSite implements IJobSitePlugin
 {
-    function __construct()
+	/**
+	 * BaseJobsSite constructor.
+	 */
+	function __construct()
     {
         $this->JobSiteKey = $this->getJobSiteKey();
 
@@ -82,6 +89,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
         }
     }
 
+	/**
+	 * @return string
+	 */
 	function setResultsFilterType()
 	{
 		if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
@@ -103,6 +113,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		return $this->resultsFilterType;
 	}
 
+	/**
+	 * @return mixed|null|string
+	 */
 	function getJobSiteKey()
 	{
 		if(empty($this->JobSiteKey)) {
@@ -126,7 +139,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
     //
     //************************************************************************
 
-    public function isBitFlagSet($flagToCheck)
+	/**
+	 * @param $flagToCheck
+	 *
+	 * @return bool
+	 */
+	public function isBitFlagSet($flagToCheck)
     {
         $ret = isBitFlagSet($this->_flags_, $flagToCheck);
         if ($ret == $flagToCheck) {
@@ -135,7 +153,10 @@ abstract class BaseJobsSite implements IJobSitePlugin
         return false;
     }
 
-    public function addSearches($arrSearches)
+	/**
+	 * @param $arrSearches
+	 */
+	public function addSearches($arrSearches)
     {
 	    $this->setResultsFilterType();
 
@@ -159,12 +180,19 @@ abstract class BaseJobsSite implements IJobSitePlugin
         }
     }
 
-    public function getMyJobsList()
+	/**
+	 * @return array
+	 */
+	public function getMyJobsList()
     {
         return getAllMatchesForUserNotification($this->JobSiteKey);
     }
 
-    public function getUpdatedJobsForAllSearches()
+	/**
+	 * @return array
+	 * @throws \Exception
+	 */
+	public function getUpdatedJobsForAllSearches()
     {
         $boolSearchSuccess = null;
 
@@ -310,18 +338,29 @@ abstract class BaseJobsSite implements IJobSitePlugin
     private $_jobSiteDbRecord = null;
 
 
-
-    function getGeoLocationSettingType(GeoLocation $location=null)
+	/**
+	 * @param \JobScooper\DataAccess\GeoLocation|null $location
+	 *
+	 * @return null
+	 */
+	function getGeoLocationSettingType(GeoLocation $location=null)
     {
         return $this->LocationType;
     }
 
-    function getSupportedCountryCodes()
+	/**
+	 * @return array
+	 */
+	function getSupportedCountryCodes()
     {
         return $this->CountryCodes;
     }
 
-    protected function getActiveWebdriver()
+	/**
+	 * @return mixed
+	 * @throws \Exception
+	 */
+	protected function getActiveWebdriver()
     {
         if (!is_null($this->selenium)) {
             return $this->selenium->get_driver();
@@ -329,7 +368,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
             throw new Exception("Error:  active webdriver for Selenium not found as expected.");
     }
 
-    protected function getCombinedKeywordString($arrKeywordSet)
+	/**
+	 * @param $arrKeywordSet
+	 *
+	 * @return mixed
+	 */
+	protected function getCombinedKeywordString($arrKeywordSet)
     {
         $arrKeywords = array();
 
@@ -363,7 +407,14 @@ abstract class BaseJobsSite implements IJobSitePlugin
         return null;
     }
 
-    protected function getGeoLocationURLValue(UserSearchSiteRun $searchDetails)
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+	 *
+	 * @return null|string
+	 * @throws \ErrorException
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	protected function getGeoLocationURLValue(UserSearchSiteRun $searchDetails)
     {
         $strReturnLocation = VALUE_NOT_SUPPORTED;
 
@@ -400,7 +451,16 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    protected function getPageURLfromBaseFmt(UserSearchSiteRun $searchDetails, $nPage = null, $nItem = null)
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+	 * @param null                                     $nPage
+	 * @param null                                     $nItem
+	 *
+	 * @return mixed|null
+	 * @throws \ErrorException
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	protected function getPageURLfromBaseFmt(UserSearchSiteRun $searchDetails, $nPage = null, $nItem = null)
     {
         $strURL = $this->SearchUrlFormat;
 
@@ -458,7 +518,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
     //
     //
     //************************************************************************
-    function getIDFromLink($regex_link_job_id, $url)
+	/**
+	 * @param $regex_link_job_id
+	 * @param $url
+	 *
+	 * @return string
+	 */
+	function getIDFromLink($regex_link_job_id, $url)
     {
         if (isset($regex_link_job_id)) {
             $fMatchedID = preg_match($regex_link_job_id, $url, $idMatches);
@@ -470,22 +536,44 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    protected function _getSearchUrlFormat_(UserSearchSiteRun  $searchDetails = null, $nPage = null, $nItem = null)
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun|null $searchDetails
+	 * @param null                                          $nPage
+	 * @param null                                          $nItem
+	 *
+	 * @return null
+	 */
+	protected function _getSearchUrlFormat_(UserSearchSiteRun  $searchDetails = null, $nPage = null, $nItem = null)
     {
         return $this->SearchUrlFormat;
     }
 
-    protected function getDaysURLValue($nDays = null)
+	/**
+	 * @param null $nDays
+	 *
+	 * @return int|null
+	 */
+	protected function getDaysURLValue($nDays = null)
     {
         return ($nDays == null || $nDays == "") ? 1 : $nDays;
     }
 
-    protected function getPageURLValue($nPage)
+	/**
+	 * @param $nPage
+	 *
+	 * @return string
+	 */
+	protected function getPageURLValue($nPage)
     {
         return ($nPage == null || $nPage == "") ? "" : $nPage;
     }
 
-    protected function getItemURLValue($nItem) {
+	/**
+	 * @param $nItem
+	 *
+	 * @return int
+	 */
+	protected function getItemURLValue($nItem) {
 
         if($this->isBitFlagSet(C__JOB_ITEMCOUNT_STARTSATZERO__) && $nItem > 0)
         {
@@ -495,13 +583,21 @@ abstract class BaseJobsSite implements IJobSitePlugin
         return ($nItem == null || $nItem == "") ? 0 : $nItem;
     }
 
-    function parseTotalResultsCount($objSimpHTML)
+	/**
+	 * @param $objSimpHTML
+	 *
+	 * @return null|string|void
+	 */
+	function parseTotalResultsCount($objSimpHTML)
     {
         throw new \BadMethodCallException(sprintf("Not implemented method " . __METHOD__ . " called on class \"%s \".", __CLASS__));
     }
 
 
-    protected function moveDownOnePageInBrowser()
+	/**
+	 * @throws \Exception
+	 */
+	protected function moveDownOnePageInBrowser()
     {
 
         // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
@@ -514,7 +610,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    protected function getKeywordURLValue(UserSearchSiteRun $searchDetails)
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+	 *
+	 * @return mixed|string
+	 */
+	protected function getKeywordURLValue(UserSearchSiteRun $searchDetails)
     {
         if (!$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
             return $this->_getKeywordStringsForUrl_($searchDetails);
@@ -522,7 +623,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
         return "";
     }
 
-    protected function goToEndOfResultsSetViaPageDown($nTotalItems = null)
+	/**
+	 * @param null $nTotalItems
+	 *
+	 * @throws \Exception
+	 */
+	protected function goToEndOfResultsSetViaPageDown($nTotalItems = null)
     {
         $this->moveDownOnePageInBrowser();
         $secs = $this->additionalLoadDelaySeconds * 1000;
@@ -584,7 +690,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     }
 
-    protected function goToEndOfResultsSetViaLoadMore($nTotalItems)
+	/**
+	 * @param $nTotalItems
+	 *
+	 * @throws \Exception
+	 */
+	protected function goToEndOfResultsSetViaLoadMore($nTotalItems)
     {
         $this->moveDownOnePageInBrowser();
         $secs = $this->additionalLoadDelaySeconds * 1000;
@@ -666,7 +777,10 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    protected function goToNextPageOfResultsViaNextButton()
+	/**
+	 * @return bool
+	 */
+	protected function goToNextPageOfResultsViaNextButton()
     {
         $secs = $this->additionalLoadDelaySeconds * 1000;
         if ($secs <= 0)
@@ -710,7 +824,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
     //************************************************************************
 
 
-    private function _addSearch_(UserSearchSiteRun $searchDetails)
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+	 *
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function _addSearch_(UserSearchSiteRun $searchDetails)
     {
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
         {
@@ -731,7 +850,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     }
 
-    private function _getKeywordStringsForUrl_(UserSearchSiteRun $searchDetails)
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+	 *
+	 * @return mixed|string
+	 */
+	private function _getKeywordStringsForUrl_(UserSearchSiteRun $searchDetails)
     {
         $ret = "";
 
@@ -749,7 +873,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
         return $ret;
     }
 
-    private function _getCombinedKeywordStringForURL_($arrKeywordSet)
+	/**
+	 * @param $arrKeywordSet
+	 *
+	 * @return mixed|string
+	 */
+	private function _getCombinedKeywordStringForURL_($arrKeywordSet)
     {
         $arrKeywords = array();
 
@@ -777,7 +906,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
         return $strRetCombinedKeywords;
     }
 
-    private function _setStartingUrlForSearch_(UserSearchSiteRun $searchDetails)
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+	 *
+	 * @throws \ErrorException
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function _setStartingUrlForSearch_(UserSearchSiteRun $searchDetails)
     {
 
         $searchStartURL = $this->getPageURLfromBaseFmt($searchDetails, 1, 1);
@@ -790,12 +925,22 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    function combineTextAllNodes($var)
+	/**
+	 * @param $var
+	 *
+	 * @return string
+	 */
+	function combineTextAllNodes($var)
     {
         return combineTextAllNodes($var);
     }
 
-    protected function combineTextAllChildren($var)
+	/**
+	 * @param $var
+	 *
+	 * @return string
+	 */
+	protected function combineTextAllChildren($var)
     {
         return combineTextAllChildren($var);
     }
@@ -811,7 +956,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
     //
     //************************************************************************
 
-    private function _updateJobsDataForSearch_(UserSearchSiteRun $searchDetails)
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+	 *
+	 * @throws \Exception
+	 */
+	private function _updateJobsDataForSearch_(UserSearchSiteRun $searchDetails)
     {
         $ex = null;
 
@@ -876,13 +1026,28 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     }
 
-    private function _checkInvalidURL_(UserSearchSiteRun $details, $strURL)
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $details
+	 * @param                                          $strURL
+	 *
+	 * @return mixed
+	 * @throws \ErrorException
+	 */
+	private function _checkInvalidURL_(UserSearchSiteRun $details, $strURL)
     {
         if ($strURL == null) throw new \ErrorException("Skipping " . $this->JobSiteName . " search '" . $details->getUserSearchKey() . "' because a valid URL could not be set.");
         return $strURL;
     }
 
-    private function _setSearchResult_(UserSearchSiteRun $searchDetails, $success = null, $except = null, $runWasSkipped=false)
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+	 * @param null                                     $success
+	 * @param null                                     $except
+	 * @param bool                                     $runWasSkipped
+	 *
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function _setSearchResult_(UserSearchSiteRun $searchDetails, $success = null, $except = null, $runWasSkipped=false)
     {
         if(!($searchDetails instanceof UserSearchSiteRun))
             $searchDetails = getConfigurationSetting('current_user_search_details');
@@ -901,7 +1066,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
         $searchDetails->save();
     }
 
-    function saveDomToFile($htmlNode, $filepath)
+	/**
+	 * @param $htmlNode
+	 * @param $filepath
+	 *
+	 * @return string
+	 */
+	function saveDomToFile($htmlNode, $filepath)
     {
 
         $strHTML = strval($htmlNode);
@@ -913,7 +1084,17 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     }
 
-    function getSimpleObjFromPathOrURL($filePath = "", $strURL = "", $optTimeout = null, $referrer = null, $cookies = null)
+	/**
+	 * @param string $filePath
+	 * @param string $strURL
+	 * @param null   $optTimeout
+	 * @param null   $referrer
+	 * @param null   $cookies
+	 *
+	 * @return \JobScooper\Utils\SimpleHTMLHelper|null
+	 * @throws \Exception
+	 */
+	function getSimpleObjFromPathOrURL($filePath = "", $strURL = "", $optTimeout = null, $referrer = null, $cookies = null)
     {
         try {
             $objSimpleHTML = null;
@@ -971,7 +1152,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    protected function _getMyJobsForSearchFromJobsAPI_(UserSearchSiteRun $searchDetails)
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+	 *
+	 * @return null
+	 */
+	protected function _getMyJobsForSearchFromJobsAPI_(UserSearchSiteRun $searchDetails)
     {
         $nItemCount = 0;
 
@@ -1019,7 +1205,14 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    protected function runJavaScriptSnippet($jscript = "", $wrap_in_func = true)
+	/**
+	 * @param string $jscript
+	 * @param bool   $wrap_in_func
+	 *
+	 * @return mixed
+	 * @throws \Exception
+	 */
+	protected function runJavaScriptSnippet($jscript = "", $wrap_in_func = true)
     {
         $driver = $this->getActiveWebdriver();
 
@@ -1035,8 +1228,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
         return $ret;
     }
-    
-    function cleanupJobItemFields($arrItem)
+
+	/**
+	 * @param $arrItem
+	 *
+	 * @return mixed
+	 */
+	function cleanupJobItemFields($arrItem)
     {
         $keys = array_keys($arrItem);
         foreach($keys as $key)
@@ -1079,7 +1277,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     }
 
-    function saveJob($arrItem)
+	/**
+	 * @param $arrItem
+	 *
+	 * @return \JobScooper\DataAccess\JobPosting|null
+	 * @throws \Exception
+	 */
+	function saveJob($arrItem)
     {
         $arrJob = $this->cleanupJobItemFields($arrItem);
         try
@@ -1127,7 +1331,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	    }
     }
 
-    private function _addJobMatchIdsToUser($arrJobIds, UserSearchSiteRun $searchDetails)
+	/**
+	 * @param                                          $arrJobIds
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+	 *
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function _addJobMatchIdsToUser($arrJobIds, UserSearchSiteRun $searchDetails)
     {
         $user = User::getCurrentUser();
         foreach ($arrJobIds as $jobId) {
@@ -1143,13 +1353,24 @@ abstract class BaseJobsSite implements IJobSitePlugin
         }
     }
 
-    private function _addJobMatchesToUser($searchDetails)
+	/**
+	 * @param $searchDetails
+	 *
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function _addJobMatchesToUser($searchDetails)
     {
         if(array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs) && !is_null($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]) && is_array($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]))
         $this->_addJobMatchIdsToUser(array_keys($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]), $searchDetails);
     }
 
-    function saveJobList($arrJobs)
+	/**
+	 * @param $arrJobs
+	 *
+	 * @return array
+	 * @throws \Exception
+	 */
+	function saveJobList($arrJobs)
     {
         $addedJobIds = array();
         foreach ($arrJobs as $job) {
@@ -1161,7 +1382,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
         return $addedJobIds;
     }
 
-    protected function getJobsDbIds($arrJobs)
+	/**
+	 * @param $arrJobs
+	 *
+	 * @return array
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	protected function getJobsDbIds($arrJobs)
     {
         $arrIds = array_column($arrJobs, 'JobSitePostId', 'JobSitePostId');
         $queryData = \JobScooper\DataAccess\JobPostingQuery::create()
@@ -1175,7 +1402,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    protected function getSimpleHtmlDomFromSeleniumPage($url=null)
+	/**
+	 * @param null $url
+	 *
+	 * @return \JobScooper\Utils\SimpleHTMLHelper|null
+	 * @throws \Exception
+	 */
+	protected function getSimpleHtmlDomFromSeleniumPage($url=null)
     {
         $objSimpleHTML = null;
         try {
@@ -1196,7 +1429,14 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 
-    private function _getMyJobsForSearchFromWebpage_(UserSearchSiteRun $searchDetails)
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+	 *
+	 * @return null
+	 * @throws \Exception
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function _getMyJobsForSearchFromWebpage_(UserSearchSiteRun $searchDetails)
     {
         try {
             $nItemCount = 1;
@@ -1533,7 +1773,10 @@ abstract class BaseJobsSite implements IJobSitePlugin
         return null;
     }
 
-    protected function getSearchJobsFromAPI($searchDetails)
+	/**
+	 * @param $searchDetails
+	 */
+	protected function getSearchJobsFromAPI($searchDetails)
     {
         throw new \BadMethodCallException(sprintf("Not implemented method " . __METHOD__ . " called on class \"%s \".", __CLASS__));
     }

@@ -23,7 +23,7 @@
  *
  *       Used by dice.json plugin configuration to override single method
  */
-abstract class AbstractGlassdoor extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractGlassdoor extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
     function __construct()
     {

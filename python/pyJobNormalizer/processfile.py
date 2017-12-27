@@ -68,6 +68,16 @@ states = {
 
 
 def writedicttocsv(csvFileName, data, keys=None):
+    """
+
+    Args:
+        csvFileName:
+        data:
+        keys:
+
+    Returns:
+
+    """
     print "Writing " + str(len(data)) + " rows to file " + csvFileName +"..."
     if keys is None:
         item = data.itervalues().next()
@@ -89,6 +99,15 @@ def writedicttocsv(csvFileName, data, keys=None):
     return csvFileName
 
 def loadCSV(csvFileName, rowKeyName = None):
+    """
+
+    Args:
+        csvFileName:
+        rowKeyName:
+
+    Returns:
+
+    """
 
     print "Loading " + csvFileName
     csv_fp = open(csvFileName, "rbU")
@@ -120,6 +139,16 @@ abbrevfile = os.path.join(filepath, "static", "job-title-abbreviations.csv")
 expandWords = loadCSV(abbrevfile, "abbreviation")['dict']
 
 def tokenizeStrings(listData, field, fieldTokenized = "tokenized"):
+    """
+
+    Args:
+        listData:
+        field:
+        fieldTokenized:
+
+    Returns:
+
+    """
 
     for k in listData.keys():
         if len(k) == 0:
@@ -137,11 +166,27 @@ import string
 # nltk.download()
 
 def removeStopWords(listwords):
+    """
+
+    Args:
+        listwords:
+
+    Returns:
+
+    """
     retwords = [i for i in listwords if i not in stopwrds]
     return retwords
 
 
 def getStemmedWords(listwords):
+    """
+
+    Args:
+        listwords:
+
+    Returns:
+
+    """
     retwords = [snowstemmer.stem(i) for i in listwords]
     return retwords
 
@@ -151,6 +196,15 @@ exclude = set(codecs.encode(string.punctuation, "utf-8"))
 
 import operator
 def combine_dicts(a, b):
+    """
+
+    Args:
+        a:
+        b:
+
+    Returns:
+
+    """
     z = a.copy()
     for k in a.keys():
         for kb in b[k]:
@@ -158,6 +212,14 @@ def combine_dicts(a, b):
     return z
 
 def getExpandedWords(strWords):
+    """
+
+    Args:
+        strWords:
+
+    Returns:
+
+    """
     if not isinstance(strWords, basestring):
         strWords = str(strWords)
     assert(len(strWords) > 0)
@@ -176,6 +238,14 @@ def getExpandedWords(strWords):
     return retWords
 
 def getScrubbedStringTokens(inputstring):
+    """
+
+    Args:
+        inputstring:
+
+    Returns:
+
+    """
     if not inputstring:
         return ""
     strNoAbbrev = getExpandedWords(inputstring)
@@ -187,6 +257,17 @@ def getScrubbedStringTokens(inputstring):
 
 
 def tokenizeJSONFile(inputFile, outputFile, dataKey=None, indexKey=None):
+    """
+
+    Args:
+        inputFile:
+        outputFile:
+        dataKey:
+        indexKey:
+
+    Returns:
+
+    """
     if indexKey is None:
         indexKey = 0
     if dataKey is None:
@@ -211,6 +292,17 @@ def tokenizeJSONFile(inputFile, outputFile, dataKey=None, indexKey=None):
     return None
 
 def tokenizeFile(inputFile, outputFile, dataKey=None, indexKey=None):
+    """
+
+    Args:
+        inputFile:
+        outputFile:
+        dataKey:
+        indexKey:
+
+    Returns:
+
+    """
     if indexKey is None:
         indexKey = 0
     if dataKey is None:

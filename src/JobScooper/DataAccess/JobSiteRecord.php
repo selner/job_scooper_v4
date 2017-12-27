@@ -4,7 +4,7 @@ namespace JobScooper\DataAccess;
 
 use \Exception;
 use JobScooper\DataAccess\Base\JobSiteRecord as BaseJobSiteRecord;
-use JobScooper\Plugins\Classes\BaseJobsSite;
+use JobScooper\BasePlugin\Classes\BaseJobsSite;
 
 /**
  * Skeleton subclass for representing a row from the 'job_site' table.
@@ -19,13 +19,13 @@ use JobScooper\Plugins\Classes\BaseJobsSite;
 class JobSiteRecord extends BaseJobSiteRecord
 {
 	/**
-	 * @var \JobScooper\Plugins\Classes\BaseJobsSite
+	 * @var \JobScooper\BasePlugin\Classes\BaseJobsSite
 	 */
 	private $_pluginObject = null;
 
 
 	/**
-	 * @return \JobScooper\Plugins\Classes\BaseJobsSite|null
+	 * @return \JobScooper\BasePlugin\Classes\BaseJobsSite|null
 	 * @throws \Exception
 	 */
 	function getPlugin()
@@ -80,7 +80,7 @@ class JobSiteRecord extends BaseJobSiteRecord
 		else {
 			$plugin = $this->getPlugin();
 			if (!empty($plugin) &&
-				is_a($plugin, "\JobScooper\Plugins\Classes\BaseJobsSite") &&
+				is_a($plugin, "\JobScooper\BasePlugin\Classes\BaseJobsSite") &&
 				method_exists($plugin, $method))
 			{
 				return call_user_func_array(

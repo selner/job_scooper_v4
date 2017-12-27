@@ -23,7 +23,7 @@
  *
  *       Used by dice.json plugin configuration to override single method
  */
-abstract class AbstractDice extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractDice extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
     function takeNextPageAction($nItem=null, $nPage=null)
     {

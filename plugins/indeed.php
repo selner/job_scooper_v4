@@ -16,7 +16,7 @@
  */
 
 
-class PluginIndeed extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
+class PluginIndeed extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
     protected $JobSiteName = 'Indeed';
     protected $JobListingsPerPage = 50;

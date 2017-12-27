@@ -40,7 +40,7 @@ class ErrorEmailLogHandler extends MailHandler
             'app_run_id' => getConfigurationSetting('app_run_id'),
             "server" => gethostname()
         );
-        $renderer = loadTemplate(__ROOT__.'/assets/templates/html_email_error_alerts.tmpl');
+        $renderer = loadTemplate(__ROOT__ . '/src/assets/templates/html_email_error_alerts.tmpl');
 
         $htmlBody = $renderer($data);
 
@@ -63,7 +63,7 @@ class ErrorEmailLogHandler extends MailHandler
 	 */
 	private function _getUserSearchSiteRunContent()
     {
-        $renderer = loadTemplate(__ROOT__.'/assets/templates/partials/html_email_body_search_config_details.tmpl');
+        $renderer = loadTemplate(__ROOT__ . '/src/assets/templates/partials/html_email_body_search_config_details.tmpl');
 
         $data = getAllConfigurationSettings();
         $arrData = objectToArray($data);

@@ -32,6 +32,11 @@ import codecs
 
 
 def getPluginFiles():
+    """
+
+    Returns:
+
+    """
     plugins = {}
     plugindir = os.path.realpath("../../plugins")
     for root, dirs, files in os.walk(plugindir):
@@ -46,6 +51,14 @@ def getPluginFiles():
     return plugins
 
 def runPluginForUser(plug, configini, outpath, stages):
+        """
+
+        Args:
+            plug:
+            configini:
+            outpath:
+            stages:
+        """
         RUNARGS = ["php", "/opt/jobs_scooper/runJobs.php", "-days 3", "--use_config_ini " + configini, "-o " + outpath, "-" + plugin]
         if stages:
             RUNARGS.append("--stages {}".format(stages))

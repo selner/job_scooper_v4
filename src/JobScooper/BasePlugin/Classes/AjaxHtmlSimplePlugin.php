@@ -15,15 +15,22 @@
  * under the License.
  */
 
-namespace JobScooper\Plugins\Classes;
+namespace JobScooper\BasePlugin\Classes;
 
 
-
+/**
+ * Class AjaxHtmlSimplePlugin
+ * @package JobScooper\BasePlugin\Classes
+ */
 abstract class AjaxHtmlSimplePlugin extends SimplePlugin
 {
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__;
 
-    function __construct()
+	/**
+	 * AjaxHtmlSimplePlugin constructor.
+	 * @throws \Exception
+	 */
+	function __construct()
     {
         $this->additionalBitFlags[] = C__JOB_USE_SELENIUM;
         parent::__construct();

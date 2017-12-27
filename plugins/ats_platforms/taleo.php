@@ -18,85 +18,11 @@
 
 use \JobScooper\Utils\SimpleHTMLHelper;
 
-class PluginEntercom extends AbstractTaleoATS
-{
-    protected $JobSiteName = "Entercom";
-    protected $JobListingsPerPage = 100;
-    protected $SearchUrlFormat = "https://chk.tbe.taleo.net/chk05/ats/careers/v2/searchResults?org=ENTERCOM&cws=37";
 
-    protected $arrListingTagSetup = array(
-        'JobPostCount' => array('selector'=>'span.oracletaleocwsv2-panel-number'),
-        'JobPostItem' => array('selector'=>'div.oracletaleocwsv2-accordion-head-info'),
-        'Title' => array('selector' => 'h4 a'),
-        'Url' => array('selector' => 'h4 a', 'index' => 0, 'return_attribute' => 'href'),
-        'Location' => array('selector' => 'div', 'index' => 1),
-        'Category' => array('selector' => 'div', 'index' => 0),
-        'JobSitePostId' => array('selector' => 'h4 a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' =>  '/rid=(.*)/i')
-    );
-}
-
-class AbstractTaleoATS extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
-{
-    protected $use1ToTDForCount = True;
-    protected $JobListingsPerPage = 100;
-    protected $PaginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
-
-    protected $arrBaseListingTagSetup = array(
-        'JobPostCount' => array('selector'=>'span.oracletaleocwsv2-panel-number'),
-        'JobPostItem' => array('selector'=>'div.oracletaleocwsv2-accordion-head-info'),
-        'NextButton' => array('selector' => 'a.next'),
-        'Title' => array('selector' => 'h4 a'),
-        'Url' => array('selector' => 'h4 a', 'index' => 0, 'return_attribute' => 'href'),
-        'Location' => array('selector' => 'div', 'index' => 1),
-        'Category' => array('selector' => 'div', 'index' => 0),
-        'JobSitePostId' => array('selector' => 'h4 a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' =>  '/rid=(.*)/i')
-    );
-
-
-}
-
-//
-//class PluginSeattleGenetics extends AbstractTaleo
-//{
-//    protected $server = "http://chp.tbe.taleo.net/chp04/ats/careers/searchResults.jsp";
-//    protected $taleoOrgID = "SEAGEN";
-//
-//    function parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, $divTagType, $divTagValue, $trIndex)
-//    {
-//        $nodeHelper = new SimpleHTMLHelper($objSimpHTML);
-//        $node = $nodeHelper->get("div.inner table tbody tr[2] td b", 0, true);
-//        $totalItemsText = $node->innertext();
-//
-//        return $totalItemsText;
-//    }
-//
-//    protected $arrResultsCountTag = array('type' =>'class', 'value'=>'inner', 'index'=>0);
-//}
-
-class PluginInternetBrands extends AbstractTaleo
-{
-    protected $JobPostingBaseUrl = 'http://www.internetbrands.com/work-with-us/';
-    protected $taleoOrgID = "CARSDIRECT";
-    protected $arrResultsCountTag = array('type' =>'class', 'value'=>'avada-row', 'index'=>1);
-}
-
-class PluginTraderJoes extends AbstractTaleo
-{
-    protected $use1ToTDForCount = True;
-    protected $JobPostingBaseUrl = 'http://www.traderjoes.com/careers/index.asp';
-    protected $taleoOrgID = "TRADERJOES";
-    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleoContent', 'index'=>1);
-}
-class PluginPorch extends AbstractTaleo
-{
-    protected $use1ToTDForCount = True;
-    protected $JobPostingBaseUrl = 'http://about.porch.com/careers';
-    protected $taleoOrgID = "PORCH";
-    protected $arrResultsCountTag = array('type' =>'id', 'value'=>'summary', 'index'=>1);
-}
-
-
-abstract class AbstractTaleo extends \JobScooper\Plugins\Classes\ServerHtmlPlugin
+/**
+ * Class AbstractTaleo
+ */
+abstract class AbstractTaleo extends \JobScooper\BasePlugin\Classes\ServerHtmlPlugin
 {
     protected $use1ToTDForCount = False;
     protected $taleoOrgID = null;
@@ -105,7 +31,10 @@ abstract class AbstractTaleo extends \JobScooper\Plugins\Classes\ServerHtmlPlugi
     protected $JobSiteName = null;
     protected $server = null;
 
-    function __construct()
+	/**
+	 * AbstractTaleo constructor.
+	 */
+	function __construct()
     {
         $this->PaginationType = C__PAGINATION_PAGE_VIA_URL;
         
@@ -128,7 +57,12 @@ abstract class AbstractTaleo extends \JobScooper\Plugins\Classes\ServerHtmlPlugi
         return parent::__construct();
     }
 
-    function parseTotalResultsCount($objSimpHTML)
+	/**
+	 * @param $objSimpHTML
+	 *
+	 * @return array|null|string|void
+	 */
+	function parseTotalResultsCount($objSimpHTML)
     {
         if($this->use1ToTDForCount)
             return $this->parseTotalResultsCountFrom1ToTD($objSimpHTML);
@@ -140,7 +74,12 @@ abstract class AbstractTaleo extends \JobScooper\Plugins\Classes\ServerHtmlPlugi
 
     protected $SearchUrlFormat = null;
 
-    function getItemURLValue($nItem)
+	/**
+	 * @param $nItem
+	 *
+	 * @return int|string
+	 */
+	function getItemURLValue($nItem)
     {
         $strFirst = "&act=first&rowFrom=" . $this->JobListingsPerPage;
         $strNext = "&act=next&rowFrom=";
@@ -194,7 +133,12 @@ abstract class AbstractTaleo extends \JobScooper\Plugins\Classes\ServerHtmlPlugi
         return $ret;
     }
 
-    function parseTotalResultsCountFrom1ToTD($objSimpHTML) {
+	/**
+	 * @param $objSimpHTML
+	 *
+	 * @return null
+	 */
+	function parseTotalResultsCountFrom1ToTD($objSimpHTML) {
         $nodes = $objSimpHTML->find('td[class="nowrapRegular"] b');
         if($nodes && count($nodes)>=2)
         {
@@ -205,7 +149,16 @@ abstract class AbstractTaleo extends \JobScooper\Plugins\Classes\ServerHtmlPlugi
     }
 
 
-    function parseTotalResultsCountFromTaleoCommonDivTable(SimpleHTMLHelper $objSimpHTML, $divTagType, $divTagValue, $trIndex)
+	/**
+	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+	 * @param                                    $divTagType
+	 * @param                                    $divTagValue
+	 * @param                                    $trIndex
+	 *
+	 * @return array|null
+	 * @throws \Exception
+	 */
+	function parseTotalResultsCountFromTaleoCommonDivTable(SimpleHTMLHelper $objSimpHTML, $divTagType, $divTagValue, $trIndex)
     {
         $strTotalItemsCount = null;
         $node = $objSimpHTML->find("#wrapper div.avada-row table tbody tr td b");
@@ -233,4 +186,98 @@ abstract class AbstractTaleo extends \JobScooper\Plugins\Classes\ServerHtmlPlugi
         return $strTotalItemsCount;
     }
 
+}
+
+
+/**
+ * Class PluginEntercom
+ */
+class PluginEntercom extends AbstractTaleoATS
+{
+	protected $JobSiteName = "Entercom";
+	protected $JobListingsPerPage = 100;
+	protected $SearchUrlFormat = "https://chk.tbe.taleo.net/chk05/ats/careers/v2/searchResults?org=ENTERCOM&cws=37";
+
+	protected $arrListingTagSetup = array(
+		'JobPostCount' => array('selector'=>'span.oracletaleocwsv2-panel-number'),
+		'JobPostItem' => array('selector'=>'div.oracletaleocwsv2-accordion-head-info'),
+		'Title' => array('selector' => 'h4 a'),
+		'Url' => array('selector' => 'h4 a', 'index' => 0, 'return_attribute' => 'href'),
+		'Location' => array('selector' => 'div', 'index' => 1),
+		'Category' => array('selector' => 'div', 'index' => 0),
+		'JobSitePostId' => array('selector' => 'h4 a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' =>  '/rid=(.*)/i')
+	);
+}
+
+/**
+ * Class AbstractTaleoATS
+ */
+class AbstractTaleoATS extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+{
+	protected $use1ToTDForCount = True;
+	protected $JobListingsPerPage = 100;
+	protected $PaginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
+
+	protected $arrBaseListingTagSetup = array(
+		'JobPostCount' => array('selector'=>'span.oracletaleocwsv2-panel-number'),
+		'JobPostItem' => array('selector'=>'div.oracletaleocwsv2-accordion-head-info'),
+		'NextButton' => array('selector' => 'a.next'),
+		'Title' => array('selector' => 'h4 a'),
+		'Url' => array('selector' => 'h4 a', 'index' => 0, 'return_attribute' => 'href'),
+		'Location' => array('selector' => 'div', 'index' => 1),
+		'Category' => array('selector' => 'div', 'index' => 0),
+		'JobSitePostId' => array('selector' => 'h4 a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' =>  '/rid=(.*)/i')
+	);
+
+
+}
+
+//
+//class PluginSeattleGenetics extends AbstractTaleo
+//{
+//    protected $server = "http://chp.tbe.taleo.net/chp04/ats/careers/searchResults.jsp";
+//    protected $taleoOrgID = "SEAGEN";
+//
+//    function parseTotalResultsCountFromTaleoCommonDivTable($objSimpHTML, $divTagType, $divTagValue, $trIndex)
+//    {
+//        $nodeHelper = new SimpleHTMLHelper($objSimpHTML);
+//        $node = $nodeHelper->get("div.inner table tbody tr[2] td b", 0, true);
+//        $totalItemsText = $node->innertext();
+//
+//        return $totalItemsText;
+//    }
+//
+//    protected $arrResultsCountTag = array('type' =>'class', 'value'=>'inner', 'index'=>0);
+//}
+
+/**
+ * Class PluginInternetBrands
+ */
+class PluginInternetBrands extends AbstractTaleo
+{
+	protected $JobPostingBaseUrl = 'http://www.internetbrands.com/work-with-us/';
+	protected $taleoOrgID = "CARSDIRECT";
+	protected $arrResultsCountTag = array('type' =>'class', 'value'=>'avada-row', 'index'=>1);
+}
+
+/**
+ * Class PluginTraderJoes
+ */
+class PluginTraderJoes extends AbstractTaleo
+{
+	protected $use1ToTDForCount = True;
+	protected $JobPostingBaseUrl = 'http://www.traderjoes.com/careers/index.asp';
+	protected $taleoOrgID = "TRADERJOES";
+	protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleoContent', 'index'=>1);
+}
+
+/**
+ * Class PluginPorch
+ */
+class PluginPorch extends AbstractTaleo
+{
+	protected $use1ToTDForCount = True;
+	protected $JobPostingBaseUrl = 'http://about.porch.com/careers';
+	protected $taleoOrgID = "PORCH";
+	protected $arrResultsCountTag = array('type' =>'id', 'value'=>'summary', 'index'=>1);
 }

@@ -17,7 +17,7 @@
  */
 
 
-class PluginAuthenticJobs extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
+class PluginAuthenticJobs extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
     protected $JobSiteName = 'AuthenticJobs';
     protected $JobPostingBaseUrl = "https://authenticjobs.com";

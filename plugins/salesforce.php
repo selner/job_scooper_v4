@@ -18,12 +18,13 @@
 
 
 
+
 /**
  * Class AbstractSalesforce
  *
  *       Used by salesforce.json plugin configuration to override single method
  */
-abstract class AbstractSalesforce extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractSalesforce extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
 	protected function getPageURLValue($nPage)
 	{

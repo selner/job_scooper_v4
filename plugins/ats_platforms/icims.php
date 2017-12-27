@@ -18,7 +18,7 @@
 
 
 
-class AbstractIcims extends \JobScooper\Plugins\Classes\ServerHtmlSimplePlugin
+class AbstractIcims extends \JobScooper\BasePlugin\Classes\ServerHtmlSimplePlugin
 {
     protected $additionalBitFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED];
     protected $JobListingsPerPage = 20;

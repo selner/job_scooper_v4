@@ -24,7 +24,7 @@ use JobScooper\DataAccess\UserQuery;
 use JobScooper\DataAccess\User;
 use JobScooper\Manager\LocationManager;
 use JobScooper\Manager\LoggingManager;
-use const JobScooper\Plugins\Classes\VALUE_NOT_SUPPORTED;
+use const JobScooper\BasePlugin\Classes\VALUE_NOT_SUPPORTED;
 use Propel\Common\Config\ConfigurationManager;
 use Propel\Generator\Config\GeneratorConfig;
 use Propel\Runtime\Exception\InvalidArgumentException;

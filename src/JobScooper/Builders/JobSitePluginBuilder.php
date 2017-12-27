@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Copyright 2014-17 Bryan Selner
  *
@@ -19,16 +18,26 @@
 namespace JobScooper\Builders;
 
 
+use Composer\Autoload\AutoloadGenerator;
+use Composer\Autoload\ClassLoader;
+use Composer\Composer;
 use Exception;
-use JobApis\Jobs\Client\Job;
-use JobScooper\DataAccess\JobSiteRecord;
+use Gnugat\NomoSpaco\File\FileRepository;
 use JobScooper\DataAccess\JobSiteRecordQuery;
-use JobScooper\Utils\DocOptions;
-use Propel\Runtime\ActiveQuery\Criteria;
+use JobScooper\Utils\ClassFinder;
 
+/**
+ * Class JobSitePluginBuilder
+ * @package JobScooper\Builders
+ */
 class JobSitePluginBuilder
 {
-    static function getAllJobSites($requireEnabled=true)
+	/**
+	 * @param bool $requireEnabled
+	 *
+	 * @return array|mixed
+	 */
+	static function getAllJobSites($requireEnabled=true)
     {
 	    $sitesBySiteKey = getCacheAsArray("all_jobsites_and_plugins");
 		if(!empty($sitesBySiteKey))
@@ -54,7 +63,12 @@ class JobSitePluginBuilder
 	    return $sitesBySiteKey;
     }
 
-    static function getIncludedJobSites($fOptimizeBySiteRunOrder=false)
+	/**
+	 * @param bool $fOptimizeBySiteRunOrder
+	 *
+	 * @return array|mixed
+	 */
+	static function getIncludedJobSites($fOptimizeBySiteRunOrder=false)
     {
 	    $sites = getCacheAsArray("included_jobsites");
 	    if (is_null($sites))
@@ -81,11 +95,17 @@ class JobSitePluginBuilder
 	    return $sites;
     }
 
+	/**
+	 * @param $sitesInclude
+	 */
 	static function setIncludedJobSites($sitesInclude)
 	{
 		$GLOBALS[JOBSCOOPER_CACHES_ROOT]["included_jobsites"] = $sitesInclude;
 	}
 
+	/**
+	 * @return array
+	 */
 	static function getExcludedJobSites()
 	{
 		$allSites = JobSitePluginBuilder::getAllJobSites();
@@ -94,6 +114,9 @@ class JobSitePluginBuilder
 		return array_diff_key($allSites, $inclSites);
 	}
 
+	/**
+	 * @return array|mixed
+	 */
 	static function getJobSitesCmdLineIncludedInRun()
 	{
 		$cmdLineSites = getConfigurationSetting("command_line_args.jobsite");
@@ -108,6 +131,9 @@ class JobSitePluginBuilder
 		return array_intersect_key($sites, array_combine($includedSites, $includedSites));
 	}
 
+	/**
+	 * @param array $setExcluded
+	 */
 	static function setSitesAsExcluded($setExcluded=array())
 	{
 		if(empty($setExcluded))
@@ -120,6 +146,9 @@ class JobSitePluginBuilder
 		JobSitePluginBuilder::setIncludedJobSites($inputIncludedSites);
 	}
 
+	/**
+	 * @param $countryCodes
+	 */
 	static function filterJobSitesByCountryCodes($countryCodes)
 	{
 		$ccRun = join(", ", $countryCodes);
@@ -145,20 +174,27 @@ class JobSitePluginBuilder
 			}
 	}
 
+	/**
+	 * @var false|\LightnCandy\Closure|null
+	 */
 	protected $_renderer = null;
-    protected $_dirPluginsRoot = null;
-    protected $_dirJsonConfigs = null;
-    protected $_configJsonFiles = array();
-    protected $_jsonPluginSetups = array();
+	protected $_dirPluginsRoot = null;
+	protected $_dirJsonConfigs = null;
+	protected $_configJsonFiles = array();
+	protected $_jsonPluginSetups = array();
 
 
+	/**
+	 * JobSitePluginBuilder constructor.
+	 * @throws \Exception
+	 */
 	function __construct()
     {
 	    $sitesBySiteKey = getCacheAsArray("all_jobsites_and_plugins");
 		if(!empty($sitesBySiteKey))
 			return;
 
-	    $pathPluginDirectory = __ROOT__.DIRECTORY_SEPARATOR."plugins";
+	    $pathPluginDirectory = join(DIRECTORY_SEPARATOR, array(__ROOT__, "Plugins"));
         if (is_null($pathPluginDirectory) || strlen($pathPluginDirectory) == 0)
             throw new Exception("Path to plugins source directory was not set.");
 
@@ -167,19 +203,23 @@ class JobSitePluginBuilder
 
         $this->_dirPluginsRoot = realpath($pathPluginDirectory . DIRECTORY_SEPARATOR);
 
-        $this->_dirJsonConfigs = realpath($this->_dirPluginsRoot . DIRECTORY_SEPARATOR . "json_plugins" . DIRECTORY_SEPARATOR);
+        $this->_dirJsonConfigs = join(DIRECTORY_SEPARATOR, array($pathPluginDirectory, "JsonBased"));
 
-        $this->_renderer = loadTemplate(__ROOT__ . '/assets/templates/eval_jsonplugin.tmpl');
+        $this->_renderer = loadTemplate(__ROOT__ . '/src/assets/templates/eval_jsonplugin.tmpl');
 
 
-        $this->_loadJsonPluginConfigFiles_();
+	    $this->_loadPHPPluginFiles_();
+	    $this->_loadJsonPluginConfigFiles_();
         $this->_initializeAllJsonPlugins();
 
         $this->_syncDatabaseJobSitePluginClassList();
 
     }
 
-    private function _syncDatabaseJobSitePluginClassList()
+	/**
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function _syncDatabaseJobSitePluginClassList()
     {
         LogMessage('Adding any missing declared jobsite plugins and jobsite records in database...');
 
@@ -210,7 +250,7 @@ class JobSitePluginBuilder
         $jobsitesToDisable = array_diff_key($all_jobsites_by_key, $classListBySite);
         if (!empty($jobsitesToDisable))
         {
-	        LogMessage('Disabling ' . getArrayValuesAsString($jobsitesToDisable));
+	        LogMessage('Disabling ' . array_keys($jobsitesToDisable));
         	foreach($jobsitesToDisable as $jobSiteKey =>$jobsite)
 	        {
 		        $all_jobsites_by_key[$jobSiteKey]->setIsDisabled(true);
@@ -224,7 +264,10 @@ class JobSitePluginBuilder
 
     }
 
-    private function _initializeAllJsonPlugins()
+	/**
+	 * @throws \Exception
+	 */
+	private function _initializeAllJsonPlugins()
     {
         $arrAddedPlugins = null;
         LogMessage('Initializing all job site plugins...');
@@ -262,31 +305,49 @@ class JobSitePluginBuilder
 	 * @throws \Exception
 	 */
 	private function _loadJsonPluginConfigFiles_()
-    {
-        $this->_configJsonFiles = glob($this->_dirJsonConfigs . DIRECTORY_SEPARATOR . "*.json");
-        foreach ($this->_configJsonFiles as $f) {
-            $dataPlugins = loadJSON($f, null, true);
+	{
+		$this->_configJsonFiles = glob($this->_dirJsonConfigs . DIRECTORY_SEPARATOR . "*.json");
+		foreach ($this->_configJsonFiles as $f) {
+			$dataPlugins = loadJSON($f, null, true);
 			if(empty($dataPlugins))
 				throw new \Exception("Unable to load JSON plugin data file from " . $f . ": " . json_last_error_msg());
-            $plugsToInit = array();
-            if (array_key_exists('jobsite_plugins', $dataPlugins)) {
-                $plugsToInit = array_values($dataPlugins['jobsite_plugins']);
-            } else {
-                $plugsToInit[] = $dataPlugins;
+			$plugsToInit = array();
+			if (array_key_exists('jobsite_plugins', $dataPlugins)) {
+				$plugsToInit = array_values($dataPlugins['jobsite_plugins']);
+			} else {
+				$plugsToInit[] = $dataPlugins;
 
-            }
+			}
 
-            foreach ($plugsToInit as $config) {
-                $jsonPlugin = $this->_parsePluginConfig_($config);
-                // replace non letter or digits with separator
+			foreach ($plugsToInit as $config) {
+				$jsonPlugin = $this->_parsePluginConfig_($config);
+				// replace non letter or digits with separator
 
-                $this->_jsonPluginSetups[$jsonPlugin['PhpClassName']] = $jsonPlugin;
-            }
-        }
+				$this->_jsonPluginSetups[$jsonPlugin['PhpClassName']] = $jsonPlugin;
+			}
+		}
 
-    }
+	}
 
-    private function _parsePluginConfig_($arrConfigData)
+
+
+	/**
+	 * @throws \Exception
+	 */
+	private function _loadPhpPluginFiles_()
+	{
+		$files = glob_recursive($this->_dirPluginsRoot . DIRECTORY_SEPARATOR . '*.php');
+		foreach ($files as $file) {
+			require_once($file);
+		}
+	}
+
+	/**
+	 * @param $arrConfigData
+	 *
+	 * @return array
+	 */
+	private function _parsePluginConfig_($arrConfigData)
     {
 
         $pluginData = array();
@@ -337,9 +398,7 @@ class JobSitePluginBuilder
 
         if (array_key_exists("Collections", $arrConfigData) && !is_null($arrConfigData['Collections']) && is_array($arrConfigData['Collections']) && count($arrConfigData['Collections']) > 0 && array_key_exists("Fields", $arrConfigData['Collections'][0])) {
 
-
-//            $pluginData['arrListingTagSetup'] = \JobScooper\Plugins\Classes\SimplePlugin::getEmptyListingTagSetup();
-            if(!is_array($pluginData['arrListingTagSetup']))
+        	if(!is_array($pluginData['arrListingTagSetup']))
                     $pluginData['arrListingTagSetup'] = array();
             foreach ($arrConfigData['Collections'] as $coll) {
                 foreach ($coll['Fields'] as $field) {
@@ -377,7 +436,14 @@ class JobSitePluginBuilder
     }
 
 
-    private function _getArrayItemForEval($pluginConfig, $key, $quoteItems = true)
+	/**
+	 * @param      $pluginConfig
+	 * @param      $key
+	 * @param bool $quoteItems
+	 *
+	 * @return null|string
+	 */
+	private function _getArrayItemForEval($pluginConfig, $key, $quoteItems = true)
     {
         $flags = null;
         if (array_key_exists($key, $pluginConfig) && !is_null($pluginConfig[$key]) && is_array($pluginConfig[$key]) && count($pluginConfig[$key]) >= 1) {
@@ -399,10 +465,15 @@ class JobSitePluginBuilder
 
     }
 
-    private function _getClassInstantiationCode($pluginConfig)
+	/**
+	 * @param $pluginConfig
+	 *
+	 * @return mixed
+	 */
+	private function _getClassInstantiationCode($pluginConfig)
     {
 
-        $PluginExtendsClassName = "JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin";
+        $PluginExtendsClassName = "JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin";
         $evalConfig = array();
         $PhpClassName = "Plugin" . $pluginConfig['JobSiteName'];
 

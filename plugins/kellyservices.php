@@ -17,12 +17,13 @@
  */
 
 
+
 /**
  * Class AbstractDice
  *
  *       Used by dice.json plugin configuration to override single method
  */
-abstract class AbstractKellyServices extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractKellyServices extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
     function takeNextPageAction($nItem=null, $nPage=null)
     {

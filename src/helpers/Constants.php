@@ -96,32 +96,3 @@ define('NO_TITLE_MATCHES', 'No (Title Did Not Match Search Keywords))');
 define('REXPR_PARTIAL_MATCH_URL_DOMAIN', '^https*.{3}[^\/]*');
 define('REXPR_MATCH_URL_DOMAIN', '/^https*.{3}[^\/]*/');
 
-
-//***********************************************************************
-//
-//
-//
-//  Plugin Instance Setup
-//
-//
-//
-//************************************************************************
-
-//
-// Load all plugins files found in /plugins/
-//
-$pluginsDir = realpath(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "plugins". DIRECTORY_SEPARATOR ;
-
-$files = glob($pluginsDir . '*.php');
-foreach ($files as $file) {
-    require_once($file);
-}
-
-//
-// Load all ATS system plugins files found in /plugins/ats_platforms/
-//
-$files = glob(join(DIRECTORY_SEPARATOR, array($pluginsDir, "ats_platforms",'*.php')));
-foreach ($files as $file) {
-    require_once($file);
-}
-

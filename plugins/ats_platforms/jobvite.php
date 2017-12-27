@@ -17,7 +17,7 @@
  */
 use JobScooper\DataAccess\UserSearchSiteRun;
 
-abstract class AbstractJobviteATS extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractJobviteATS extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
     function __construct()
     {

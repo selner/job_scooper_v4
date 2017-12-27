@@ -88,10 +88,10 @@ Once you've tagged the fields that are available, export the Agenty data scrapin
 
 The currently list of pagination types supported by Job Scooper can be found in SitePlugins.php. 
 
-Save your updated Agenty JSON config file to the plugins/json_plugins directory and kick off a job scooper run.  Your new Agenty-authored plugin will run exactly like any other plugin built for Job Scooper. 
+Save your updated Agenty JSON config file to the plugins/JsonBased directory and kick off a job scooper run.  Your new Agenty-authored plugin will run exactly like any other plugin built for Job Scooper. 
 
 ### Don't Know PHP?  Add a plugin solely via JSON instead!  ✏️ 
-You can define the full configuration for a job site plugin in a single JSON file.  Just drop the new file into the plugins/json_plugins folder and let it rip.  
+You can define the full configuration for a job site plugin in a single JSON file.  Just drop the new file into the plugins/JsonBased folder and let it rip.  
 
 ```javascript
 {

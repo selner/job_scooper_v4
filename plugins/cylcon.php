@@ -19,11 +19,11 @@
 
 
 /**
- * Class AbstractDice
+ * Class AbstractCylcon
  *
- *       Used by dice.json plugin configuration to override single method
+ *       Used by cyclcon.json plugin configuration to override single method
  */
-abstract class AbstractCylcon extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractCylcon extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
 	/**
 	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML

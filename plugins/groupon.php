@@ -17,7 +17,7 @@
  */
 
 
-class PluginGroupon extends \JobScooper\Plugins\Classes\AjaxHtmlPlugin
+class PluginGroupon extends \JobScooper\BasePlugin\Classes\AjaxHtmlPlugin
 {
     protected $JobSiteName = 'Groupon';
     protected $JobPostingBaseUrl = 'https://jobs.groupon.com';

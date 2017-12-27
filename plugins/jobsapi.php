@@ -18,7 +18,7 @@
 
 use JobApis\Jobs\Client\Queries\UsajobsQuery;
 use JobApis\Jobs\Client\Providers\UsajobsProvider;
-use \JobScooper\Plugins\Classes\JobsApiPlugin;
+use \JobScooper\BasePlugin\Classes\JobsApiPlugin;
 
 class PluginUSAJobs extends JobsApiPlugin
 {

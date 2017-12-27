@@ -17,7 +17,8 @@
  */
 
 
-class PluginOuterwall extends \JobScooper\Plugins\Classes\ServerHtmlSimplePlugin
+
+class PluginOuterwall extends \JobScooper\BasePlugin\Classes\ServerHtmlSimplePlugin
 {
     protected $JobSiteName = 'Outerwall';
     protected $JobPostingBaseUrl = 'http://outerwall.jobs';

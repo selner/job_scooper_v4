@@ -17,7 +17,7 @@
  */
 
 
-class PluginGoogle extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
+class PluginGoogle extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
     // BUGBUG: currently does not handle pagination of job listings
 

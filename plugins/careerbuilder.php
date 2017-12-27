@@ -21,7 +21,7 @@
 // TODO:  Make abstract class to power sites like http://www.careerbuilder.com/jobs/greenbay,wisconsin/category/engineering/?channel=en&siteid=gagbp037&sc_cmp1=JS_Sub_Loc_EN&lr=cbga_gbp
 // just have to add the following terms per site &siteid=gagbp037&lr=cbga_gbp
 
-class PluginCareerBuilder extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
+class PluginCareerBuilder extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
     protected $JobSiteName = 'CareerBuilder';
     protected $JobPostingBaseUrl = 'http://www.careerbuilder.com';
@@ -52,7 +52,7 @@ class PluginCareerBuilder extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlug
 }
 
 
-class PluginCareerBuilderUK extends \JobScooper\Plugins\Classes\AjaxHtmlSimplePlugin
+class PluginCareerBuilderUK extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
     protected $JobSiteName = 'CareerBuilderUk';
     protected $JobListingsPerPage = 20;
