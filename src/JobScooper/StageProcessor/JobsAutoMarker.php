@@ -52,15 +52,7 @@ class JobsAutoMarker
 
 	/**
 	 *
-	 */
-	function __destruct()
-    {
-        LogMessage("Closing ".$this->JobSiteName." instance of class " . get_class($this));
-
-    }
-
-	/**
-	 *
+	 * @throws \Exception
 	 */
 	public function markJobs()
     {
@@ -69,7 +61,7 @@ class JobsAutoMarker
 
         if(is_null($this->arrMasterJobList) || count($this->arrMasterJobList) <= 0)
         {
-            LogWarning("No new jobs found to auto-mark.");
+            LogMessage("No new jobs found to auto-mark.");
         }
         else
         {
@@ -247,7 +239,7 @@ class JobsAutoMarker
         $nJobsNotMarked = count($arrJobsList) - $nJobsMarkedAutoExcluded;
 
 
-        LogMessage("Jobs excluded as out of area: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ." marked; " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).", not marked " );
+        LogMessage("Jobs excluded as out of area: marked ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) .";  not marked " . $nJobsNotMarked . " / " . countAssociativeArrayValues($arrJobsList) );
     }
 
 	/**
@@ -280,12 +272,14 @@ class JobsAutoMarker
 
         LogMessage("Gathering job postings not in those areas...");
         $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrNearbyIds) {
-            $posting = $v->getJobPostingFromUJM;
-            $locId = $posting->getGeoLocationId();
-            if(is_null($locId))
-                return true;  // if we don't have a location, assume nearby
+	        $posting = $v->getJobPostingFromUJM;
+	        if (!empty($posting)) {
+		        $locId = $posting->getGeoLocationId();
+		        if (is_null($locId))
+			        return true;  // if we don't have a location, assume nearby
 
-            return in_array($locId, $arrNearbyIds);
+		        return in_array($locId, $arrNearbyIds);
+	        }
         });
 
         LogMessage("Marking user job matches as out of area for " . count($arrJobsOutOfArea) . " matches ...");
@@ -300,7 +294,7 @@ class JobsAutoMarker
         $nJobsNotMarked = count($arrJobsList) - $nJobsMarkedAutoExcluded;
 
 
-       LogMessage("Jobs excluded as out of area: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ." marked; " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList).", not marked " );
+       LogMessage("Jobs excluded as out of area:  marked ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ."; not marked = " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList) );
     }
 
 	/**
