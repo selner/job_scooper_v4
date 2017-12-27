@@ -153,7 +153,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	 */
 	public function toLoggedContext()
 	{
-		return array_subset($this->toFlatArray(), array("UserSearchSiteRunKey", "GeoLocationId", "AppRunId", "SearchStartUrl"));
+		return array_subset($this->toFlatArray(), array("UserSearchSiteRunKey", "GeoLocationId", "SearchStartUrl"));
 	}
 
 
