@@ -79,11 +79,14 @@ class SearchBuilder
 
 		    foreach ($keywordSets as $setKey => $keywordSet) {
 
-			    $user_search = UserSearchQuery::create()
+			    $query = UserSearchQuery::create()
 				    ->filterByUserKeywordSetFromUS($keywordSet)
-				    ->filterByUserFromUS(User::getCurrentUser())
-				    ->filterByGeoLocationId($searchLoc->getGeoLocationId())
-				    ->findOneOrCreate();
+				    ->filterByUserFromUS(User::getCurrentUser());
+
+				if(!empty($searchLoc))
+					$query->filterByGeoLocationId($searchLoc->getGeoLocationId());
+
+				    $user_search = $query->findOneOrCreate();
 
 			    $user_search->setUserKeywordSetFromUS($keywordSet);
 			    $user_search->setUserFromUS(User::getCurrentUser());
