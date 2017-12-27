@@ -43,7 +43,6 @@ setConfigurationSetting('command_line_args', $arguments);
 
 $config = new \JobScooper\Builders\ConfigBuilder($arguments["configfile"]);
 
-// Import files - multiple formats in the same way
 $GLOBALS['logger'] = new \JobScooper\Manager\LoggingManager(C__APPNAME__);
 
 $classRunJobs = new \JobScooper\Manager\StageManager();

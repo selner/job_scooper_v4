@@ -38,11 +38,20 @@ use  \Propel\Runtime\Propel;
 $GLOBALS['CACHES'] = array('LOCATION_MANAGER' =>null, 'GEOCODER_ENABLED' => true);
 
 
+/**
+ * Class ConfigBuilder
+ * @package JobScooper\Builders
+ */
 class ConfigBuilder
 {
 	private $_rootOutputDirInfo = null;
 
-    public function __construct($iniFile = null)
+	/**
+	 * ConfigBuilder constructor.
+	 *
+	 * @param null $iniFile
+	 */
+	public function __construct($iniFile = null)
     {
 	    $envDirOut = getenv('JOBSCOOPER_OUTPUT');
 	    if(!empty($envDirOut))
@@ -56,7 +65,11 @@ class ConfigBuilder
     public $arrFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null, 'user_input_files_details' => null);
     protected $allConfigFileSettings = null;
 
-    function initialize()
+	/**
+	 * @throws \ErrorException
+	 * @throws \Exception
+	 */
+	function initialize()
     {
 	    $debug = getConfigurationSetting("command_line_args.debug");
 	    setConfigurationSetting("debug", $debug);
@@ -102,7 +115,11 @@ class ConfigBuilder
 
     }
 
-    private function __setupOutputFolders__()
+	/**
+	 * @throws \ErrorException
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function __setupOutputFolders__()
     {
     	$arrOututDirs = array();
 
@@ -134,7 +151,12 @@ class ConfigBuilder
 	    $this->_setupPropelLogging();
     }
 
-    private function _setupRunFromConfig_()
+	/**
+	 * @throws \ErrorException
+	 * @throws \Exception
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function _setupRunFromConfig_()
     {
 
 	    $srchmgr = new SearchBuilder();
@@ -204,7 +226,10 @@ class ConfigBuilder
 
     }
 
-    private function _instantiateLocationManager()
+	/**
+	 * @return \JobScooper\Manager\LocationManager
+	 */
+	private function _instantiateLocationManager()
     {
         $cache = LocationManager::getLocationManager();
         if(empty($cache)) {
@@ -216,9 +241,10 @@ class ConfigBuilder
     }
 
 
-
-
-    private function _setupPropelForRun()
+	/**
+	 *
+	 */
+	private function _setupPropelForRun()
     {
 	    $cfgDatabase = null;
 	    $cfgSettingsFile = $this->_getSetting("propel.configuration_file");
@@ -264,7 +290,10 @@ class ConfigBuilder
 
     }
 
-    private function _setupPropelLogging()
+	/**
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function _setupPropelLogging()
     {
     LogDebug("Configuring Propel logging...");
         $defaultLogger = $GLOBALS['logger'];
@@ -285,6 +314,11 @@ class ConfigBuilder
         }
     }
 
+	/**
+	 * @param $keyPath
+	 *
+	 * @return array|mixed
+	 */
 	private function _getSetting($keyPath)
 	{
 		if(is_array($keyPath))
@@ -299,14 +333,20 @@ class ConfigBuilder
 		return getConfigurationSetting("config_file_settings." . $keyPath);
 	}
 
-    private function _parsePluginSettings()
+	/**
+	 *
+	 */
+	private function _parsePluginSettings()
     {
         LogMessage("Loading plugin setup information from config file...");
 
         setConfigurationSetting("plugin_specific_settings", $this->_getSetting("plugin_specific_settings"));
     }
 
-    private function _parseGlobalSearchParameters()
+	/**
+	 *
+	 */
+	private function _parseGlobalSearchParameters()
     {
         LogMessage("Loading global search settings from config file...");
 
@@ -345,7 +385,10 @@ class ConfigBuilder
         }
     }
 
-    private function _parseSeleniumParameters()
+	/**
+	 * @throws \ErrorException
+	 */
+	private function _parseSeleniumParameters()
     {
         LogDebug("Loading Selenium settings from config file...");
         $settings = $this->_getSetting("selenium");
@@ -370,7 +413,10 @@ class ConfigBuilder
 
     }
 
-    private function _parseSearchLocations()
+	/**
+	 * @throws \ErrorException
+	 */
+	private function _parseSearchLocations()
     {
 
     	$searchLocs = $this->_getSetting("search_locations.location");
@@ -391,7 +437,10 @@ class ConfigBuilder
 	    }
     }
 
-    private function _parseKeywordSetsFromConfig_()
+	/**
+	 * @throws \Exception
+	 */
+	private function _parseKeywordSetsFromConfig_()
     {
         LogMessage("Loading search keywords from config...");
 
@@ -413,7 +462,11 @@ class ConfigBuilder
     }
 
 
-    private function _parseUsers()
+	/**
+	 * @throws \ErrorException
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function _parseUsers()
     {
      LogMessage("Configuring users and alerts...");
 
