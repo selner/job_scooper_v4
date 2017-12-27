@@ -574,11 +574,21 @@ function array_add_element(&$arr, $path, $value)
  *
  * @return mixed
  */
-function array_get_element(&$path, $arr) {
-	if(is_string($path))
+function array_get_element(&$path, $arr)
+{
+	if (is_string($path))
 		$path = array_reverse(preg_split("/\s*[\.:]\s*/", $path));
 	$key = array_pop($path);
-	return (!empty($path)) ? array_get_element($path, $arr[$key]) : $arr[$key];
+	if (!empty($path)) {
+		if(!empty($key))
+			return array_get_element($path, $arr[$key]);
+		else
+			return null;
+	}
+	else
+	{
+		return $arr[$key];
+	}
 }
 
 /**
