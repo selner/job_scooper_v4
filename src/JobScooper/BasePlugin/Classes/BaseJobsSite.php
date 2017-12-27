@@ -81,9 +81,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
         if(substr($this->JobPostingBaseUrl, strlen($this->JobPostingBaseUrl)-1, strlen($this->JobPostingBaseUrl)) === "/")
             $this->JobPostingBaseUrl = substr($this->JobPostingBaseUrl, 0, strlen($this->JobPostingBaseUrl) - 1);
 
-        if (is_null($this->getSupportedCountryCodes()) || (is_array($this->getSupportedCountryCodes()) && count($this->getSupportedCountryCodes()) ==0))
-            $this->CountryCodes = array("US");
-
         if (empty($this->JobSiteName)) {
             $this->JobSiteName = str_replace("Plugin", "", get_class($this));
         }
@@ -355,7 +352,18 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	function getSupportedCountryCodes()
     {
-        return $this->CountryCodes;
+	    if (empty($this->CountryCodes)) {
+		    $this->CountryCodes = array("US");
+	    }
+	    else
+	    {
+		    foreach($this->CountryCodes as $k => $code) {
+			    if (!empty($code) && array_key_exists(strtoupper($code), GeoLocation::$COUNTRY_CODE_REMAPPINGS))
+				    $this->CountryCodes[$k] = GeoLocation::$COUNTRY_CODE_REMAPPINGS[$code];
+		    }
+	    }
+
+	    return $this->CountryCodes;
     }
 
 	/**
