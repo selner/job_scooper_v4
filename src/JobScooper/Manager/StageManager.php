@@ -168,7 +168,7 @@ class StageManager
             $arrJobsList = getAllMatchesForUserNotification();
 
             if(is_null($arrJobsList) || count($arrJobsList) <= 0) {
-                LogWarning("No new jobs found to tokenize");
+                LogMessage("No new jobs found to tokenize");
             }
             else
             {

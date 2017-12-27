@@ -111,7 +111,7 @@ class NotifierJobAlerts extends JobsMailSender
 
 		$this->arrAllUnnotifiedJobs = getAllMatchesForUserNotification();
 		if (is_null($this->arrAllUnnotifiedJobs) || count($this->arrAllUnnotifiedJobs) <= 0) {
-			LogWarning("No new jobs found to notify user about.");
+			LogMessage("No new jobs found to notify user about.");
 			endLogSection(" User results notification.");
 
 			return false;
