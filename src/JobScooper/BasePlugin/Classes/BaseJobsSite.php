@@ -1469,7 +1469,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                     $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage();
                 } catch (Exception $ex) {
                     $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
-                    handleException(new Exception($strError), null, true, $extraData=$searchDetails->toArray());
+                    handleException(new Exception($strError), null, true, $extraData=$searchDetails->toLoggedContext());
                 }
             } else {
                 $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $searchDetails->getSearchStartUrl(), $this->secsPageTimeout, $referrer = $this->prevURL, $cookies = $this->prevCookies);
@@ -1599,7 +1599,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                             $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage();
 
                         } catch (Exception $ex) {
-                            handleException($ex, "Failed to get dynamic HTML via Selenium due to error:  %s", true, $extraData=$searchDetails->toArray());
+                            handleException($ex, "Failed to get dynamic HTML via Selenium due to error:  %s", true, $extraData=$searchDetails->toLoggedContext());
                         }
                     } else {
                         $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
@@ -1679,7 +1679,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
                         }
                     } catch (Exception $ex) {
-                        handleException($ex, ($this->JobSiteName . " error: %s"), true, $extraData=$searchDetails->toArray());
+                        handleException($ex, ($this->JobSiteName . " error: %s"), true, $extraData=$searchDetails->toLoggedContext());
                     }
 
                     //
@@ -1709,7 +1709,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                         } else {
                             $err = "Error: " . $err . "  Aborting job site plugin to prevent further errors.";
                             LogError($err);
-                            handleException(new Exception($err), null, true, $extraData=$searchDetails->toArray());
+                            handleException(new Exception($err), null, true, $extraData=$searchDetails->toLoggedContext());
                         }
                     }
 
@@ -1758,7 +1758,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                                             $this->takeNextPageAction($this->getItemURLValue($nItemCount), $this->getPageURLValue($nPageCount));
                                             sleep($this->additionalLoadDelaySeconds + 2);
                                         } catch (Exception $ex) {
-                                            handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true, $extraData=$searchDetails->toArray());
+                                            handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true, $extraData=$searchDetails->toLoggedContext());
                                         }
                                     }
                                     break;
@@ -1766,7 +1766,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                             }
 
                         } catch (Exception $ex) {
-                            handleException($ex, "Failed to get dynamic HTML via Selenium due to error:  %s", true, $extraData=$searchDetails->toArray());
+                            handleException($ex, "Failed to get dynamic HTML via Selenium due to error:  %s", true, $extraData=$searchDetails->toLoggedContext());
                         }
                     }
                 }
@@ -1777,7 +1777,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
         } catch (Exception $ex) {
             $this->_setSearchResult_($searchDetails, false, $ex);
-            handleException($ex, null, true, $extraData=$searchDetails->toArray());
+            handleException($ex, null, true, $extraData=$searchDetails->toLoggedContext());
         }
 
         return null;

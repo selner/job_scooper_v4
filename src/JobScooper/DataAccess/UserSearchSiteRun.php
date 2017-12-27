@@ -3,7 +3,9 @@
 namespace JobScooper\DataAccess;
 
 use JobScooper\DataAccess\Base\UserSearchSiteRun as BaseUserSearchSiteRun;
+use JobScooper\DataAccess\Map\UserSearchSiteRunTableMap;
 use Propel\Runtime\Connection\ConnectionInterface;
+use Propel\Runtime\Map\TableMap;
 
 /**
  * Skeleton subclass for representing a row from the 'user_search_site_run' table.
@@ -119,5 +121,40 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
 		return false;
 	}
+
+
+	/**
+	 * @param bool $includeGeolocation
+	 *
+	 * @return array
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	public function toFlatArray($includeGeolocation = false)
+	{
+		$location = array();
+		$arrJobPosting = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
+		updateColumnsForCSVFlatArray($arrJobPosting, new UserSearchSiteRunTableMap());
+		if ($includeGeolocation === true) {
+			$jobloc = $this->getGeoLocationFromUSSR();
+			if (!is_null($jobloc))
+				$location = $jobloc->toFlatArrayForCSV();
+
+			$arrItem = array_merge_recursive_distinct($arrJobPosting, $location);
+
+		} else
+			$arrItem = $arrJobPosting;
+
+		return $arrItem;
+	}
+
+	/**
+	 * @return array
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	public function toLoggedContext()
+	{
+		return array_subset($this->toFlatArray(), array("UserSearchSiteRunKey", "GeoLocationId", "AppRunId", "SearchStartUrl"));
+	}
+
 
 }
