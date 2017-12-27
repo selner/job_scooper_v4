@@ -23,15 +23,25 @@ use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use JobScooper\DataAccess\UserSearchSiteRun;
 use Propel\Runtime\ActiveQuery\Criteria;
 
+/**
+ * Class SearchBuilder
+ * @package JobScooper\Builders
+ */
 class SearchBuilder
 {
 	private $_cacheCutOffTime = null;
 
+	/**
+	 * SearchBuilder constructor.
+	 */
 	function __construct()
 	{
 		$this->_cacheCutOffTime = date_sub(new \DateTime(), date_interval_create_from_date_string('18 hours'));
 	}
 
+	/**
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
 	public function initializeSearches()
     {
 
@@ -56,7 +66,11 @@ class SearchBuilder
 	    $this->_filterUserSearchesThatShouldNotRunYet();
     }
 
-    private function _setUserSearches()
+	/**
+	 * @return null
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function _setUserSearches()
     {
 
 	    $arrLocations = getConfigurationSetting('search_locations');
@@ -107,6 +121,9 @@ class SearchBuilder
 
     }
 
+	/**
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
 	private function _filterJobSitesThatShouldNotRunYet()
 	{
 
@@ -182,6 +199,9 @@ class SearchBuilder
 			LogMessage("Skipping the following sites & searches because they have run since " . $this->_cacheCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipTheseSearches));
 	}
 
+	/**
+	 *
+	 */
 	private function _filterJobSitesThatAreExcluded()
 	{
 		$allSites = JobSitePluginBuilder::getAllJobSites();
@@ -209,6 +229,9 @@ class SearchBuilder
 		setConfigurationSetting("user_search_site_runs", $searchesByJobsite);
 	}
 
+	/**
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
 	private function _filterUserSearchesThatShouldNotRunYet()
     {
 
@@ -270,7 +293,10 @@ class SearchBuilder
     }
 
 
-    private function _generateUserSearchSiteRuns()
+	/**
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function _generateUserSearchSiteRuns()
     {
         //
         // let's start with the searches specified with the details in the the config.ini
@@ -282,7 +308,6 @@ class SearchBuilder
 
         LogMessage(" Creating search runs for " . strval(count($userSearches)) . " user searches across " . count($includedSites) . " jobsites.");
 
-        $user = User::getCurrentUser();
         $searchRuns = array();
 
         foreach($includedSites as $jobsiteKey => $site)
@@ -291,13 +316,6 @@ class SearchBuilder
 
             foreach($userSearches as $search)
             {
-//            	$searchRun = UserSearchSiteRunQuery::create()
-//		            ->filterByUser($user)
-//		            ->filterByUserSearch($search)
-//		            ->filterByJobSiteKey()
-//		            ->filterByAppRunId($apprun)
-//
-
                 $searchrun = new UserSearchSiteRun();
 	            $searchrun->setUserFromUSSR(User::getCurrentUser());
 	            $searchrun->setUserSearchFromUSSR($search);

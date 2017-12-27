@@ -280,7 +280,7 @@ class JobSitePluginBuilder
             });
 
             foreach (array_keys($plugins) as $agentkey) {
-                LogMessage("Running eval statement for class " . $plugins[$agentkey]['PhpClassName']);
+                LogDebug("Running eval statement for class " . $plugins[$agentkey]['PhpClassName']);
                 try {
                 	if(!in_array($plugins[$agentkey]['PhpClassName'], get_declared_classes()))
 	                {
@@ -307,6 +307,7 @@ class JobSitePluginBuilder
 	private function _loadJsonPluginConfigFiles_()
 	{
 		$this->_configJsonFiles = glob($this->_dirJsonConfigs . DIRECTORY_SEPARATOR . "*.json");
+		LogMessage("Loading JSON-based, jobsite plugin configurations from " . count($this->_configJsonFiles) . " files under {$this->_dirJsonConfigs}...");
 		foreach ($this->_configJsonFiles as $f) {
 			$dataPlugins = loadJSON($f, null, true);
 			if(empty($dataPlugins))
@@ -429,7 +430,7 @@ class JobSitePluginBuilder
             }
         }
 
-        LogMessage("Loaded JSON config for new plugin: " . $pluginData['JobSiteName']);
+        LogDebug("Loaded JSON config for new plugin: " . $pluginData['JobSiteName']);
 
         return $pluginData;
 

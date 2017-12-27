@@ -234,8 +234,7 @@ function decodeJSON($strJsonText, $options=null, $boolEscapeBackSlashes=false)
 function loadJSON($file, $options=null, $boolEscapeBackSlashes=false)
 {
     if(is_file($file)) {
-#        LogMessage("Reading json data from file " . $file);
-        LogMessage("Reading json data from file " . $file);
+        LogDebug("Reading json data from file " . $file);
         $jsonText = file_get_contents($file, FILE_TEXT);
         return decodeJSON($jsonText, $options, $boolEscapeBackSlashes);
     }

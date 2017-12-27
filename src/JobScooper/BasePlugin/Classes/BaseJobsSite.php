@@ -155,6 +155,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 	/**
 	 * @param $arrSearches
+	 *
+	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	public function addSearches($arrSearches)
     {

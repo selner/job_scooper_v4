@@ -19,7 +19,6 @@ namespace JobScooper\Manager;
 use JobScooper\Logging\CSVLogHandler;
 use JobScooper\Logging\ErrorEmailLogHandler;
 use Monolog\ErrorHandler;
-use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\DeduplicationHandler;
 use Propel\Runtime\Propel;
 use Psr\Log\LogLevel as LogLevel;
@@ -34,15 +33,29 @@ use Exception;
 /****                                                                                                        ****/
 /****************************************************************************************************************/
 
+/**
+ * @param $channel
+ *
+ * @return mixed
+ */
 function getChannelLogger($channel)
 {
     if(!is_null($GLOBALS['logger']))
         return $GLOBALS['logger']->getChannelLogger($channel);
 }
 
+/**
+ * Class JobsErrorHandler
+ * @package JobScooper\Manager
+ */
 Class JobsErrorHandler extends ErrorHandler
 {
-    public function handleException($e)
+	/**
+	 * @param $e
+	 *
+	 * @throws \Exception
+	 */
+	public function handleException($e)
     {
 	    if(empty($GLOBALS['logger']))
 		    $GLOBALS['logger'] = getChannelLogger("default");
@@ -54,6 +67,10 @@ Class JobsErrorHandler extends ErrorHandler
 
 }
 
+/**
+ * Class LoggingManager
+ * @package JobScooper\Manager
+ */
 Class LoggingManager extends \Monolog\Logger
 {
     protected $arrCumulativeErrors = array();
@@ -65,7 +82,14 @@ Class LoggingManager extends \Monolog\Logger
     private $_dedupeHandle = null;
     private $_doLogContext = false;
 
-    public function __construct($name, array $handlers = array(), array $processors = array())
+	/**
+	 * LoggingManager constructor.
+	 *
+	 * @param       $name
+	 * @param array $handlers
+	 * @param array $processors
+	 */
+	public function __construct($name, array $handlers = array(), array $processors = array())
     {
         $GLOBALS['logger'] = null;
         $GLOBALS['logger'] = $this;
@@ -104,7 +128,12 @@ Class LoggingManager extends \Monolog\Logger
         $this->logRecord(LogLevel::INFO,"Logging started for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'));
     }
 
-    public function getChannelLogger($channel)
+	/**
+	 * @param $channel
+	 *
+	 * @return mixed
+	 */
+	public function getChannelLogger($channel)
     {
         if( is_null($channel) || !in_array($channel, array_keys($this->_loggers)))
             $channel = 'default';
@@ -121,7 +150,10 @@ Class LoggingManager extends \Monolog\Logger
         exit(255);
     }
 
-    public function updatePropelLogging()
+	/**
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	public function updatePropelLogging()
     {
         Propel::getServiceContainer()->setLogger('defaultLogger', $this);
         if(isDebug()) {
@@ -131,7 +163,12 @@ Class LoggingManager extends \Monolog\Logger
         }
     }
 
-    public function addFileHandlers($logPath)
+	/**
+	 * @param $logPath
+	 *
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	public function addFileHandlers($logPath)
     {
         $logLevel = (isDebug() ? Logger::DEBUG : Logger::INFO);
 
@@ -164,7 +201,10 @@ Class LoggingManager extends \Monolog\Logger
 
     }
 
-    function __destruct()
+	/**
+	 *
+	 */
+	function __destruct()
     {
         $this->flushErrorNotifications();
 
@@ -174,12 +214,21 @@ Class LoggingManager extends \Monolog\Logger
         }
     }
 
-    function flushErrorNotifications()
+	/**
+	 *
+	 */
+	function flushErrorNotifications()
     {
 //        $this->_handlersByType['bufferedmail']->flush();
 
     }
 
+	/**
+	 * @param       $level
+	 * @param       $message
+	 * @param array $extras
+	 * @param null  $ex
+	 */
 	public function logRecord($level, $message, $extras=array(), $ex=null)
 	{
 		$context = array();
@@ -199,17 +248,27 @@ Class LoggingManager extends \Monolog\Logger
 	const C__LOG_SECTION_BEGIN = 1;
 	const C__LOG_SECTION_END = 2;
 
+	/**
+	 * @param $headerText
+	 */
 	function startLogSection($headerText)
 	{
 		return $this->_logSectionHeader($headerText, LoggingManager::C__LOG_SECTION_BEGIN);
 	}
 
+	/**
+	 * @param $headerText
+	 */
 	function endLogSection($headerText)
 	{
 		return $this->_logSectionHeader($headerText, LoggingManager::C__LOG_SECTION_END);
 	}
 
 
+	/**
+	 * @param $headerText
+	 * @param $nType
+	 */
 	private function _logSectionHeader($headerText, $nType)
 	{
 
@@ -262,6 +321,7 @@ Class LoggingManager extends \Monolog\Logger
 			'exception_file' => "",
 			'exception_line' => "",
 //		'exception_trace' => "",
+			'hostname' => gethostname(),
 			'channel' => "",
 			'jobsite' => "",
 			'user' => $userSlug
@@ -277,15 +337,12 @@ Class LoggingManager extends \Monolog\Logger
 		$i = 0;
 		$jobsiteKey = null;
 		$usersearch = null;
-		$loggedBacktrace = array();
 
 		$class = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
 		while ($i < count($dbg) - 1 ) {
 			if (!empty($dbg[$i]['class']) && stripos($dbg[$i]['class'], 'LoggingManager') === false &&
 				(empty($dbg[$i]['function']) || !in_array($dbg[$i]['function'], array("getDebugContent", "handleException"))))
 			{
-				$loggedBacktrace = $dbg[$i];
-
 				$class = $dbg[$i]['class'] . "->" . $dbg[$i]['function'] ."()";
 				if(!empty($dbg[$i]['object']))
 				{
@@ -317,8 +374,6 @@ Class LoggingManager extends \Monolog\Logger
 		$context['class_call'] = $class;
 		$context['channel'] = is_null($jobsiteKey) ? "default" : "plugins";
 		$context['jobsite'] = $jobsiteKey;
-//	$context['user_search_run_key'] = $usersearch,
-//	$context['memory_usage'] = memory_get_usage() / 1024 / 1024;
 
 
 		if(!empty($thrownExc))
