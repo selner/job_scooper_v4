@@ -1,5 +1,5 @@
 #!/bin/bash
-BRANCH="propel-use-didom"
+BRANCH=`git symbolic-ref --short HEAD`
 JOBSNAME="jobs-"$BRANCH
 IMAGETAG="selner/js4-"$BRANCH
 DOCKERHOSTNAME=$(hostname)"_docker"

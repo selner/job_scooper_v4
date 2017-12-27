@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ -z ${1} ]; then
-	BRANCH="use-propel-orm"
+	BRANCH=`git symbolic-ref --short HEAD`
 else
 	BRANCH="${1}"
 fi

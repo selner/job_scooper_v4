@@ -9,6 +9,7 @@ curl https://raw.githubusercontent.com/selner/job_scooper_v4/update_user_search_
 
 echo "Docker .env variables are set to: "
 cat .env
+SET BRANCH=`git symbolic-ref --short HEAD`
 
 ECHO "***************************************************************"
 ECHO ""

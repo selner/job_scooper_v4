@@ -1,5 +1,5 @@
 @Echo off
-IF %~1.==. SET BRANCH=use-propel-orm
+IF %~1.==. SET BRANCH=`git symbolic-ref --short HEAD`
 IF NOT %~1.==. SET BRANCH=%1
 
 IF %CODEFRESH_API_KEY%.==. (
