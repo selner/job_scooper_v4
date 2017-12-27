@@ -429,7 +429,7 @@ Class LoggingManager extends \Monolog\Logger
 					"email"    => $user->getEmailAddress(),
 					"id"       => $user->getUserId(),
 					"username" => $user->getSlug()
-				));
+				), false);
 			}
 
 			if (!empty($context))
