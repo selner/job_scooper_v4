@@ -2,7 +2,7 @@ version: '2'
 
 services:
   selenium:
-    container_name: js4-selenium.$CONTAINER_TAG
+    container_name: js4-selenium.${CONTAINER_TAG}
     image: selenium/standalone-firefox:latest
     ports:
       - 4448:4448
@@ -24,9 +24,9 @@ services:
       - REPONAME
       - CONTAINER_TAG
     image: mysql
-    container_name: js4-mysql_server.$CONTAINER_TAG
+    container_name: js4-mysql_server.${CONTAINER_TAG}
     volumes:
-      - $JOBSCOOPER_VOLDIR/docker_mysql:/var/lib/mysql
+      - ${JOBSCOOPER_VOLDIR}/docker_mysql:/var/lib/mysql
 #           - C:\var\local\jobs_scooper\docker_mysql:/var/lib/mysql
     ports:
       - 3901:3306
@@ -44,10 +44,10 @@ services:
 
     image: "${REPONAME}selner/js4-${BRANCH}:latest"
     volumes:
-      - $JOBSCOOPER_VOLDIR:/var/local/jobs_scooper
-      - $JOBSCOOPER_VOLDIR:/private/var/local/jobs_scooper
-      - $JOBSCOOPER_PROPEL_INI:/private/var/local/jobs_scooper/configs/propel.ini
-    container_name: js4-$CONTAINER_TAG
+      - ${JOBSCOOPER_VOLDIR}:/var/local/jobs_scooper
+      - ${JOBSCOOPER_VOLDIR}:/private/var/local/jobs_scooper
+      - ${JOBSCOOPER_PROPEL_INI}:/private/var/local/jobs_scooper/configs/propel.ini
+    container_name: js4-${CONTAINER_TAG}
     links:
       - "mysql_server"
       - "selenium"
