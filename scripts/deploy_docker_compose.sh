@@ -7,12 +7,12 @@ if [ -z $CODEFRESH_API_KEY ]; then
 	goto s_error
 fi
 
+cd ..
+
 echo "Docker .env variables are set to: "
 cat .env
 BRANCH=`git symbolic-ref --short HEAD`
 echo "Branch is $BRANCH"
-
-curl https://raw.githubusercontent.com/selner/job_scooper_v4/$BRANCH/docker-compose.yml > docker-compose.yml
 
 echo "***************************************************************"
 echo ""
