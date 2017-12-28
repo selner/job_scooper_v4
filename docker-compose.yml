@@ -26,7 +26,7 @@ services:
     image: mysql
     container_name: js4-mysql_server.$CONTAINER_TAG
     volumes:
-      - $JOBSCOOPER_VOLDIR/docker_mysql:/var/lib/mysql
+      - $JOBSCOOPER_VOLDIR_MYSQL:/var/lib/mysql
 #           - C:\var\local\jobs_scooper\docker_mysql:/var/lib/mysql
     ports:
       - 3901:3306
