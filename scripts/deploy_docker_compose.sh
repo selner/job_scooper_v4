@@ -12,7 +12,9 @@ cd ..
 echo "Docker .env variables are set to: "
 cat .env
 BRANCH=`git symbolic-ref --short HEAD`
-echo "Branch is $BRANCH"
+echo "BRANCH = $BRANCH"
+echo "CONTAINER_TAG = $CONTAINER_TAG"
+
 
 echo "***************************************************************"
 echo ""

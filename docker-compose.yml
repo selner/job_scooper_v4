@@ -1,4 +1,4 @@
-version: '2'
+version: "3.2"
 
 services:
   selenium:
@@ -26,8 +26,11 @@ services:
     image: mysql
     container_name: js4-mysql_server.$CONTAINER_TAG
     volumes:
-      - $JOBSCOOPER_VOLDIR_MYSQL:/var/lib/mysql
-#           - C:\var\local\jobs_scooper\docker_mysql:/var/lib/mysql
+      - type: bind
+        source: $JOBSCOOPER_HOST_VOLDIR/docker_mysql"
+        target: /var/lib/mysql
+        volume:
+          nocopy: true
     ports:
       - 3901:3306
 
@@ -41,12 +44,24 @@ services:
       - REPONAME
       - CONTAINER_TAG
       - NLTK_DATA
-
+      - JOBSCOOPER_PROPEL_INI
     image: "${REPONAME}selner/js4-${BRANCH}:latest"
     volumes:
-      - $JOBSCOOPER_VOLDIR:/var/local/jobs_scooper
-      - $JOBSCOOPER_VOLDIR:/private/var/local/jobs_scooper
-      - $JOBSCOOPER_PROPEL_INI:/private/var/local/jobs_scooper/configs/propel.ini
+      - type: bind
+        source: "$JOBSCOOPER_HOST_VOLDIR"
+        target: /var/local/jobs_scooper
+        volume:
+          nocopy: true
+      - type: bind
+        source: "$JOBSCOOPER_HOST_VOLDIR"
+        target: /private/var/local/jobs_scooper
+        volume:
+          nocopy: true
+      - type: bind
+        source: "$JOBSCOOPER_HOST_VOLDIR/configs/propel.ini"
+        target: /private/var/local/jobs_scooper/configs/propel.ini
+        volume:
+          nocopy: true
     container_name: js4-$CONTAINER_TAG
     links:
       - "mysql_server"
@@ -55,8 +70,3 @@ services:
       - "mysql_server"
       - "selenium"
 
-volumes:
-  mysql_server:
-      driver: "local"
-#  js4:
-#      driver: "local"
