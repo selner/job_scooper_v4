@@ -25,7 +25,7 @@ class PluginGeekwire extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
     protected $PaginationType = C__PAGINATION_NONE;
 
     protected $arrListingTagSetup = array(
-        'JobPostItem' => array('selector' => 'ul.job_listings li.type-job_listing'),
+        'JobPostItem' => array('selector' => 'ul.job_listings li.job_listing'),
         'Title' => array('tag' => 'h3'),
         'Url' => array('tag' => 'a.job_listing-clickbox', 'index' => 0, 'return_attribute' => 'href'),
         'Company' => array('selector' => 'div.job_listing-company strong', 'return_attribute' => 'text'),
