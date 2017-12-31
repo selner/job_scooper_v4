@@ -135,10 +135,10 @@ function cleanupTextValue($v, $prefixRemove=null, $postfixRemove=null)
  */
 function cleanupSlugPart($slug, $replacement = '-')
 {
+	$slug = clean_utf8($slug);
+
     // transliterate
-    if (function_exists('iconv')) {
-        $slug = iconv('utf-8', 'us-ascii//TRANSLIT', $slug);
-    }
+    $slug = mb_convert_encoding($slug, "ASCII", "auto");
 
     // lowercase
     if (function_exists('mb_strtolower')) {
