@@ -61,6 +61,10 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 
 	protected $_layout = null;
 
+	/**
+	 * AbstractAdicio constructor.
+	 * @throws \Exception
+	 */
 	function __construct()
 	{
 		$this->additionalBitFlags[] = C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES;
@@ -68,6 +72,15 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 		$this->JobPostingBaseUrl = $this->childSiteURLBase;
 		$this->SearchUrlFormat = $this->childSiteURLBase . $this->strBaseURLPathSection . $this->strBaseURLPathSuffix;
 
+		parent::__construct();
+	}
+
+	/**
+	 * @return array
+	 * @throws \Exception
+	 */
+	function getUpdatedJobsForAllSearches()
+	{
 		if(!empty($this->LastKnownSiteLayout))
 		{
 			$this->setAdicioPageLayout($this->LastKnownSiteLayout);
@@ -79,9 +92,13 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 			LogDebug("Adicio Template for " . get_class($this) . " with url '{$url}: " . PHP_EOL . "$template = {$template}," . PHP_EOL . "layout = {$this->_layout},  " . PHP_EOL . "template = {$template},  " . PHP_EOL . "id = {$id}, " . PHP_EOL . "matches = " . getArrayDebugOutput($matches));
 
 		}
-		parent::__construct();
+
+		return parent::getUpdatedJobsForAllSearches();
 	}
 
+	/**
+	 * @throws \Exception
+	 */
 	private function _determinePageLayout()
 	{
 		$urlParts = parse_url($this->SearchUrlFormat);
@@ -133,6 +150,9 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 		}
 	}
 
+	/**
+	 * @param $layout
+	 */
 	protected function setAdicioPageLayout($layout)
 	{
 
