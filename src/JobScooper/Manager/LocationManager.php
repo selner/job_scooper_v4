@@ -249,14 +249,19 @@ class LocationManager
         $this->setCacheItem($key, $geoLocId);
 
         $altVars = $geolocation->getVariants();
+        if(empty($altVars)) $altVars = array();
         $altNames = $geolocation->getAlternateNames();
+	    if(empty($altNames)) $altNames = array();
 
-        $otherNamesToKey = array_unique(array_merge($altNames, $altVars));
+	    $otherNamesToKey = array_unique(array_merge($altNames, $altVars));
 
-        foreach ($otherNamesToKey as $strVar) {
-            $key = $this->getCacheKeyForAddress($strVar);
-            $this->setCacheItem($key, $geoLocId);
-        }
+	    if(!empty($otherNamesTo))
+	    {
+	    	foreach ($otherNamesToKey as $strVar) {
+			    $key = $this->getCacheKeyForAddress($strVar);
+			    $this->setCacheItem($key, $geoLocId);
+		    }
+	    }
     }
 
     private function geocode($strAddress)
@@ -283,9 +288,7 @@ class LocationManager
         if (!empty($geocodeResult)) {
             $arrGeocode = $geocodeResult->toArray();
 
-            $geolocation = \JobScooper\DataAccess\GeoLocationQuery::create()
-                ->filterByDisplayName($arrGeocode['primary_name'])
-                ->findOneOrCreate();
+            $geolocation = new GeoLocation();
 
             if (empty($geolocation))
                 throw new \Exception("Could not find or create a new geolocation in the database.");
@@ -297,19 +300,18 @@ class LocationManager
             // geocode result
             //
             $geolocation->fromGeocode($arrGeocode);
-            $geolocation->addAlternateName($strAddress);
 
             $locKey = $geolocation->getGeoLocationKey();
             $existingGeo = GeoLocationQuery::create()
                 ->findOneByGeoLocationKey($locKey);
             if(!empty($existingGeo))
             {
-                $geolocation->delete();
+	            $geolocation->addAlternateName($strAddress);
+                $geolocation = null;
                 $existingGeo->addAlternateName($strAddress);
                 $geolocation = $existingGeo;
             }
 
-            $isNewRecord = $geolocation->isNew();
             $geolocation->save();
 
             $this->setCachedGeoLocation($geolocation);
