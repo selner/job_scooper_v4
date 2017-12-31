@@ -435,7 +435,7 @@ Class LoggingManager extends \Monolog\Logger
 			if (!empty($context))
 			{
 				$sentryContext = array_copy($context);
-				$sentryContext['exception'] = $ex;
+				$sentryContext['exception'] = $thrownExc;
 				$this->_sentryClient->context = $sentryContext;
 			}
 		}
