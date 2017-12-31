@@ -537,62 +537,6 @@ function array_keys_multi(array $array)
     return $keys;
 }
 
-/**
- * If you need, for some reason, to create variable Multi-Dimensional Arrays, here's a quick
- * function that will allow you to have any number of sub elements without knowing how many
- * elements there will be ahead of time. Note that this will overwrite an existing array
- * value of the same path.
- *
- * @author brian at blueeye dot us
- * @Link http://php.net/manual/en/function.array.php#52138
- *
- * @param $path
- * @param $data
- *
- * @return mixed
- */
-function array_set_element(&$path, $data) {
-	if(is_string($path))
-		$path = preg_split("/\s*[\.:]\s*/", $path);
-	return ($key = array_pop($path)) ? array_set_element($path, array($key=>$data)) : $data;
-}
-
-/**
- * @param $arr
- * @param $path
- * @param $value
- */
-function array_add_element(&$arr, $path, $value)
-{
-	$newArrVal = array_set_element($path, $value);
-	$arr = array_merge_recursive_distinct($arr, $newArrVal);
-}
-
-/**
- * @param $path
- * @param $arr
- *
- * @return mixed
- */
-function array_get_element(&$path, $arr)
-{
-	if (is_string($path))
-		$path = array_reverse(preg_split("/\s*[\.:]\s*/", $path));
-	$key = array_pop($path);
-	if (!empty($path)) {
-		if(!empty($key) && array_key_exists($key, $arr))
-			return array_get_element($path, $arr[$key]);
-		else
-			return null;
-	}
-	else
-	{
-		if(!empty($key) && array_key_exists($key, $arr))
-			return $arr[$key];
-		else
-			return null;
-	}
-}
 
 /**
  * @param $d
@@ -620,37 +564,6 @@ function objectToArray($d) {
 	}
 }
 
-/**
- *
- * Some INI files use dot or colon notation to define section and subkeys.  Convert
- * any keys with dot notion to be subarray elements of the overall config array.
- *
- * Example:
- *      database.connector.mysql.host = dbserver01.myserver.net
- *  becomes
- *      config['database']['connector']['mysql']['myhost']
- *
- * @param $config array storing the loaded configuration data
- *
- */
-function convertDotNotation(&$config)
-{
-	$allKeys = array_keys_multi($config);
-	$sectionedKeys = array_filter($allKeys, function ($v) {
-		$keyLevels = preg_split("/\s*[\.:]\s*/", $v);
-		if (count($keyLevels) > 1)
-			return true;
-
-		return false;
-	});
-
-	foreach ($sectionedKeys as $treeKey) {
-		$keyPath = preg_split("/\s*[\.:]\s*/", $treeKey);
-		$newValues = array_set_element($keyPath, $config[$treeKey]);
-		$config = array_merge_recursive_distinct($config, $newValues);
-		unset($config[$treeKey]);
-	}
-}
 
 
 /**
@@ -662,7 +575,11 @@ function setGlobalSetting($root, $keyPath, $value)
 {
 	doGlobalSettingExists($root);
 
-	array_add_element($GLOBALS[$root], $keyPath, $value);
+	$dot = new \Adbar\Dot($GLOBALS[$root]);
+	$dot->add($keyPath, $value);
+	$GLOBALS[$root] = $dot->all();
+
+//	array_add_element($GLOBALS[$root], $keyPath, $value);
 	ksort($GLOBALS[$root]);
 }
 
@@ -680,7 +597,9 @@ function getGlobalSetting($root, $keyPath=null)
 	if(empty($keyPath))
 		return $GLOBALS[$root];
 
-	return array_get_element($keyPath, $GLOBALS[$root]);
+	$dot = new \Adbar\Dot($GLOBALS[$root]);
+	return $dot->get($keyPath);
+//	return array_get_element($keyPath, $GLOBALS[$root]);
 }
 
 /**

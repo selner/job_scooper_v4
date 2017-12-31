@@ -32,7 +32,8 @@
         "PHLAK/config": "dev-allow-imports",
         "docopt/docopt": "~1.0",
         "phpoffice/phpspreadsheet": "dev-master",
-        "sentry/sentry": "^1.9@dev"
+        "sentry/sentry": "^1.9@dev",
+        "adbario/php-dot-notation": "2.x-dev"
     },
     "autoload": {
         "psr-4": {
