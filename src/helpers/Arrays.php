@@ -580,14 +580,17 @@ function array_get_element(&$path, $arr)
 		$path = array_reverse(preg_split("/\s*[\.:]\s*/", $path));
 	$key = array_pop($path);
 	if (!empty($path)) {
-		if(!empty($key))
+		if(!empty($key) && array_key_exists($key, $arr))
 			return array_get_element($path, $arr[$key]);
 		else
 			return null;
 	}
 	else
 	{
-		return $arr[$key];
+		if(!empty($key) && array_key_exists($key, $arr))
+			return $arr[$key];
+		else
+			return null;
 	}
 }
 
