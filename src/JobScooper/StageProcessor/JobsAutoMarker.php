@@ -56,7 +56,7 @@ class JobsAutoMarker
 	 */
 	public function markJobs()
     {
-        if (is_null($this->arrMasterJobList) || count($this->arrMasterJobList) <= 0)
+        if (empty($this->arrMasterJobList))
             $this->arrMasterJobList = getAllMatchesForUserNotification();
 
         if(is_null($this->arrMasterJobList) || count($this->arrMasterJobList) <= 0)
@@ -244,6 +244,7 @@ class JobsAutoMarker
 
 	/**
 	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
+	 * @throws \Exception
 	 */
 	private function _markJobsList_OutOfArea_Geospatial(&$arrJobsList)
     {
@@ -272,7 +273,7 @@ class JobsAutoMarker
 
         LogMessage("Gathering job postings not in those areas...");
         $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrNearbyIds) {
-	        $posting = $v->getJobPostingFromUJM;
+	        $posting = $v->getJobPostingFromUJM();
 	        if (!empty($posting)) {
 		        $locId = $posting->getGeoLocationId();
 		        if (is_null($locId))
