@@ -60,8 +60,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	    //
 	    $this->additionalBitFlags["LOCATION"] = C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
 	    $this->additionalBitFlags["KEYWORDS"] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
-	    $this->additionalBitFlags["ITEM_NUMBER"] = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
-	    $this->additionalBitFlags["PAGE_NUMBER"] = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
 	    $this->additionalBitFlags["NUMBER_DAYS"] = C__JOB_DAYS_VALUE_NOTAPPLICABLE__;
 
 	    //
@@ -77,8 +75,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 			    {
 				    case "LOCATION":
 				    case "KEYWORDS":
-				    case "PAGE_NUMBER":
-				    case "ITEM_NUMBER":
 				    case "NUMBER_DAYS":
 					    unset($this->additionalBitFlags[strtoupper($tok)]);
 					    break;
