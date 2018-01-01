@@ -175,18 +175,44 @@ function getAllMatchesForUserNotification($jobsiteKey=null, $usrTitleKeywordSets
  */
 function writeJobRecordsToJson($filepath, $arrJobRecords)
 {
-    if (is_null($arrJobRecords))
-        $arrJobRecords = array();
+	if (is_null($arrJobRecords))
+		$arrJobRecords = array();
 
 
-    $arrOfJobs = array();
-    foreach($arrJobRecords as $jobRecord)
-    {
-        $arrOfJobs[$jobRecord->getJobPostingId()] = $jobRecord->getJobPostingFromUJM()->toArray();
-    }
+	$arrOfJobs = array();
+	foreach($arrJobRecords as $jobRecord)
+	{
+		$arrOfJobs[$jobRecord->getJobPostingId()] = $jobRecord->getJobPostingFromUJM()->toArray();
+	}
 
-    $data = array('jobs_count' => count($arrJobRecords), 'jobslist' => $arrOfJobs);
-    return writeJSON($data, $filepath);
+	$data = array('jobs_count' => count($arrJobRecords), 'jobslist' => $arrOfJobs);
+	return writeJSON($data, $filepath);
+}
+
+/**
+ * Writes JSON encoded file of an array of JobPosting records named "jobslist"
+ *
+ * @param String $filepath The output json file to save to
+ * @param array $arrJobRecords The array of JobPosting objects to export
+ *
+ * @returns String Returns filepath of exported file if successful
+ */
+function writeJobRecordsToJsonForTokenizing($filepath, $arrJobRecords)
+{
+	if (is_null($arrJobRecords))
+		$arrJobRecords = array();
+
+	$arrOfJobs = array();
+	foreach($arrJobRecords as $jobRecord)
+	{
+		$arrOfJobs[$jobRecord->getJobPostingId()] = $jobRecord->getJobPostingFromUJM()->toArray();
+	}
+	$keysToExport = array("JobPostingId" , "Title" , "TitleTokens");
+	$arrJobsToTokenize = array_map(function ($v) use ($keysToExport) {return array_subset($v, $keysToExport);} , $arrOfJobs);
+
+
+	$data = array('jobs_count' => count($arrJobsToTokenize), 'jobslist' => $arrJobsToTokenize);
+	return writeJSON($data, $filepath);
 }
 
 /**

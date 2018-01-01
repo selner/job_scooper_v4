@@ -174,7 +174,7 @@ class StageManager
             {
                 $jfilefullpath = generateOutputFileName("alljobmatches", "json");
                 $outjfilefullpath = generateOutputFileName("alljobmatches_tokenized", "json");
-                writeJobRecordsToJson($jfilefullpath, $arrJobsList);
+	            writeJobRecordsToJsonForTokenizing($jfilefullpath, $arrJobsList);
 
                 LogMessage(PHP_EOL . "Processing " . $jfilefullpath);
 
