@@ -80,7 +80,7 @@ class JobsAutoMarker
 
             $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
 
-            $this->_markJobsList_UserExcludedKwdsViaQuery_($arrJobs_AutoUpdatable);
+            $this->_markJobsList_UserExcludedKeywords_($arrJobs_AutoUpdatable);
 
             $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($arrJobs_AutoUpdatable);
 
