@@ -151,6 +151,7 @@ class SimplePlugin extends BaseJobsSite
      * *
      * @param $objSimpHTML
      * @return string|null
+     * @throws \Exception
      */
     function parseTotalResultsCount($objSimpHTML)
     {
