@@ -55,15 +55,39 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
         $this->_otherPluginSettings = getConfigurationSetting('plugin_specific_settings.'.$this->JobSiteKey);
 
-        if (stristr($this->SearchUrlFormat, "***KEYWORDS***") == false)
-            $this->additionalBitFlags[] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
+        //
+        // Set all the flag defaults to be not supported
+	    //
+	    $this->additionalBitFlags["LOCATION"] = C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
+	    $this->additionalBitFlags["KEYWORDS"] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
+	    $this->additionalBitFlags["ITEM_NUMBER"] = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
+	    $this->additionalBitFlags["PAGE_NUMBER"] = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
+	    $this->additionalBitFlags["NUMBER_DAYS"] = C__JOB_DAYS_VALUE_NOTAPPLICABLE__;
 
-        if (stristr($this->SearchUrlFormat, "***LOCATION***") == false)
-            $this->additionalBitFlags[] = C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
+	    //
+	    // Now based on what we find in the Search Format URL, unset the default
+	    // unsupported value (making them supported for this site)
+	    //
+        $tokenFmtStrings = $this->_getUrlTokenList($this->SearchUrlFormat);
+	    if(!empty($tokenFmtStrings))
+	    {
+		    foreach($tokenFmtStrings as $tok => $fmt)
+		    {
+			    switch(strtoupper($tok))
+			    {
+				    case "LOCATION":
+				    case "KEYWORDS":
+				    case "PAGE_NUMBER":
+				    case "ITEM_NUMBER":
+				    case "NUMBER_DAYS":
+					    unset($this->additionalBitFlags[strtoupper($tok)]);
+					    break;
 
-
-        if (stristr($this->SearchUrlFormat, "***NUMBER_DAYS***") == false)
-            $this->additionalBitFlags[] = C__JOB_DAYS_VALUE_NOTAPPLICABLE__;
+				    default:
+				    	break;
+			    }
+		    }
+	    }
 
         if (is_array($this->additionalBitFlags)) {
             foreach ($this->additionalBitFlags as $flag) {
