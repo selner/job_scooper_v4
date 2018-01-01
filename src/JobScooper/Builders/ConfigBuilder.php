@@ -127,9 +127,8 @@ class ConfigBuilder
 	 */
 	private function __setupOutputFolders__()
     {
-    	$arrOututDirs = array();
-
-	    $outputDirectory = getConfigurationSetting("output_directories.root");
+	    $arrOututDirs = getConfigurationSetting("output_directories");
+	    $outputDirectory = $arrOututDirs['root'];
 	    if (empty($outputDirectory)) {
 		    throw new \ErrorException("Required value for the output folder {$outputDirectory} was not specified. Exiting.");
 	    }
