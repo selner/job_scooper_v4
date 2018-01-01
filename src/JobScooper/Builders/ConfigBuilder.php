@@ -53,6 +53,12 @@ class ConfigBuilder
 	 */
 	public function __construct($iniFile = null)
     {
+	    if(empty($iniFile))
+		    $iniFile = getConfigurationSetting("command_line_args.configfile");
+
+	    if(empty($iniFile))
+		    throw new \InvalidArgumentException("Missing user configuration settings file definition.  You must specify the configuration file on the command line.  Aborting.");
+
 	    $envDirOut = getenv('JOBSCOOPER_OUTPUT');
 	    if(!empty($envDirOut))
 		    setConfigurationSetting("output_directories.root", $envDirOut);
