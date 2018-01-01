@@ -424,7 +424,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \ErrorException
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	protected function getGeoLocationURLValue(UserSearchSiteRun $searchDetails)
+	protected function getGeoLocationURLValue(UserSearchSiteRun $searchDetails, $fmt=null)
     {
         $strReturnLocation = VALUE_NOT_SUPPORTED;
 
@@ -433,22 +433,30 @@ abstract class BaseJobsSite implements IJobSitePlugin
         }
 
 	    $loc = $searchDetails->getGeoLocationFromUSSR();
-        $locTypeNeeded = $this->getGeoLocationSettingType($loc);
-        if (empty($locTypeNeeded)) {
-            LogMessage("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".");
-            return null;
-        }
 	    if(empty($loc))
 	    {
 		    LogMessage("Plugin for '" . $searchDetails->getJobSiteKey() . "' is missing the search location.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".");
 		    return null;
 	    }
 
-        $strLocationValue = $loc->formatLocationByLocationType($locTypeNeeded);
-        if (empty($strLocationValue) || $strLocationValue == VALUE_NOT_SUPPORTED) {
-            LogMessage("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".");
-            return "";
-        }
+	    if(!empty($fmt)) {
+		    $strLocationValue = replaceTokensInString($fmt, $loc->toArray());
+	    }
+	    else {
+		    $locTypeNeeded = $this->getGeoLocationSettingType($loc);
+		    if (empty($locTypeNeeded)) {
+			    LogMessage("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".");
+
+			    return null;
+		    }
+
+		    $strLocationValue = $loc->formatLocationByLocationType($locTypeNeeded);
+		    if (empty($strLocationValue) || $strLocationValue == VALUE_NOT_SUPPORTED) {
+			    LogMessage("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".");
+
+			    return "";
+		    }
+	    }
 
         if($this->isBitFlagSet(C__JOB_LOCATION_REQUIRES_LOWERCASE))
             $strLocationValue = strtolower($strLocationValue);
@@ -460,6 +468,18 @@ abstract class BaseJobsSite implements IJobSitePlugin
         return $strLocationValue;
     }
 
+    private function _getUrlTokenList($strUrl)
+    {
+    	$tokenList = array();
+	    $tokenFmtStrings = array();
+
+	    $count = preg_match_all("/\*{3}(\w+):?(.*?)\*{3}/", $strUrl, $tokenlist);
+	    if(!empty($tokenlist) && is_array($tokenlist) && count($tokenlist) >= 3) {
+		    $tokenFmtStrings = array_combine($tokenlist[1], $tokenlist[2]);
+	    }
+	    return $tokenFmtStrings;
+
+    }
 
 	/**
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
@@ -474,10 +494,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
     {
         $strURL = $this->SearchUrlFormat;
 
-	    $count = preg_match_all("/\*{3}(\w+):?(.*?)\*{3}/", $strURL, $tokenlist);
-	    if(!empty($tokenlist) && is_array($tokenlist) && count($tokenlist) >= 3)
-	    {
-		    $tokenFmtStrings = array_combine($tokenlist[1], $tokenlist[2]);
+        $tokenFmtStrings = $this->_getUrlTokenList($strURL);
+//	    $count = preg_match_all("/\*{3}(\w+):?(.*?)\*{3}/", $strURL, $tokenlist);
+//	    if(!empty($tokenlist) && is_array($tokenlist) && count($tokenlist) >= 3)
+//	    {
+//		    $tokenFmtStrings = array_combine($tokenlist[1], $tokenlist[2]);
+		if(!empty($tokenFmtStrings))
+		{
 	    	foreach($tokenFmtStrings as $tok => $fmt)
 		    {
 			    $replaceVal = "";
@@ -485,15 +508,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		    	switch($tok)
 			    {
 				    case "LOCATION":
-					    $location = $searchDetails->getGeoLocationFromUSSR();
-					    if(!empty($location)) {
-						    if (empty($fmt))
-							    $replaceVal = $this->getGeoLocationURLValue($searchDetails);
-					        else
-							    $replaceVal = replaceTokensInString($fmt, $location->toArray());
-					    }
-					    else  // if there was no location, return the empty string for the formatted string
-					        $replaceVal = "";
+					    $replaceVal = $this->getGeoLocationURLValue($searchDetails, $fmt);
 					    break;
 
 				    case "KEYWORDS":
