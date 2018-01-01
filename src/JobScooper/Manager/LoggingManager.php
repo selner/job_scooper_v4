@@ -182,14 +182,13 @@ Class LoggingManager extends \Monolog\Logger
 			    );
 			    $this->_sentryClient = new \Raven_Client($settings['dsn'], $sentryOptions);
 
-			    $sentyLogLevel = isDebug() ? Logger::DEBUG : Logger::WARNING;
-			    $handler = new RavenHandler($this->_sentryClient, $sentyLogLevel);
+			    $handler = new RavenHandler($this->_sentryClient, Logger::ERROR);
 			    $handler->setFormatter(new LineFormatter("%message% %context% %extra%\n"));
 
 			    $this->_handlersByType['sentry'] = $handler;
 			    $this->pushHandler($handler);
 
-			    $handler = new \Raven_Breadcrumbs_MonologHandler($this->_sentryClient, $sentyLogLevel);
+			    $handler = new \Raven_Breadcrumbs_MonologHandler($this->_sentryClient, Logger::ERROR);
 			    $this->_handlersByType['sentry_breadcrumbs'] = $handler;
 			    $this->pushHandler($handler);
 
