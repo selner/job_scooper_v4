@@ -148,9 +148,18 @@ class LocationManager
 //        $lookupAddress = preg_replace("/\w+.*(\s?\d{5})[\s\w]+/", "", $lookupAddress);
 
         $lookupAddress = strip_punctuation($lookupAddress);
-        $lookupAddress = cleanupTextValue($lookupAddress);
+
 
         //
+		// if name is something like "Greater London" or
+		// "Greater Seattle Area", strip it down to just the
+		// place name
+		//
+		$lookupAddress = preg_replace("/greater\s(\w+\s)area/i", "\\1", $lookupAddress, -1);
+		$lookupAddress = preg_replace("/greater\s(\w+\s)/i", "\\1", $lookupAddress);
+		$lookupAddress = cleanupTextValue($lookupAddress);
+
+		//
         // Generate the cache key and do a lookup for that item
         //
         $itemKey = $this->getCacheKeyForAddress($lookupAddress);
@@ -255,7 +264,7 @@ class LocationManager
 
 	    $otherNamesToKey = array_unique(array_merge($altNames, $altVars));
 
-	    if(!empty($otherNamesTo))
+	    if(!empty($otherNamesToKey))
 	    {
 	    	foreach ($otherNamesToKey as $strVar) {
 			    $key = $this->getCacheKeyForAddress($strVar);
@@ -306,9 +315,9 @@ class LocationManager
                 ->findOneByGeoLocationKey($locKey);
             if(!empty($existingGeo))
             {
-	            $geolocation->addAlternateName($strAddress);
                 $geolocation = null;
                 $existingGeo->addAlternateName($strAddress);
+                $existingGeo->save();
                 $geolocation = $existingGeo;
             }
 
