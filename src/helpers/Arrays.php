@@ -576,7 +576,10 @@ function setGlobalSetting($root, $keyPath, $value)
 	doGlobalSettingExists($root);
 
 	$dot = new \Adbar\Dot($GLOBALS[$root]);
-	$dot->add($keyPath, $value);
+	if($dot->has($keyPath))
+		$dot->set($keyPath, $value);
+	else
+		$dot->add($keyPath, $value);
 	$GLOBALS[$root] = $dot->all();
 
 //	array_add_element($GLOBALS[$root], $keyPath, $value);
@@ -589,7 +592,7 @@ function setGlobalSetting($root, $keyPath, $value)
  *
  * @return mixed
  */
-function getGlobalSetting($root, $keyPath=null)
+function getGlobalSetting($root, $keyPath=null, $default=null)
 {
 	doGlobalSettingExists($root);
 
@@ -598,7 +601,7 @@ function getGlobalSetting($root, $keyPath=null)
 		return $GLOBALS[$root];
 
 	$dot = new \Adbar\Dot($GLOBALS[$root]);
-	return $dot->get($keyPath);
+	return $dot->get($keyPath, $default);
 //	return array_get_element($keyPath, $GLOBALS[$root]);
 }
 
@@ -628,9 +631,9 @@ function setConfigurationSetting($keyPath, $value)
  *
  * @return mixed
  */
-function getConfigurationSetting($keyPath)
+function getConfigurationSetting($keyPath, $default=null)
 {
-	return getGlobalSetting(JOBSCOOPER_CONFIGSETTING_ROOT, $keyPath);
+	return getGlobalSetting(JOBSCOOPER_CONFIGSETTING_ROOT, $keyPath, $default);
 }
 
 /**
