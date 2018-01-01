@@ -177,7 +177,7 @@ class JobsMailSender extends PHPMailer
         );
 
 
-        $renderer = loadTemplate(__ROOT__."/assets/templates/html_notification_email_css.tmpl");
+        $renderer = loadTemplate(__ROOT__."/src/assets/templates/html_notification_email_css.tmpl");
 
         $css = renderTemplate($renderer, $cssData);
 

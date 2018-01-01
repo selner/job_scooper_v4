@@ -244,7 +244,7 @@ class NotifierJobAlerts extends JobsMailSender
 	 */
 	private function _generateHTMLEmailContent($subject, $searches, $arrMatchedJobs)
 	{
-		$renderer = loadTemplate(join(DIRECTORY_SEPARATOR, array(__ROOT__, "assets", "templates", "html_email_results_responsive.tmpl")));
+		$renderer = loadTemplate(join(DIRECTORY_SEPARATOR, array(__ROOT__, "src", "assets", "templates", "html_email_results_responsive.tmpl")));
 
 		$data = array(
 			"Email"      => array(
