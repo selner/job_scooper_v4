@@ -365,7 +365,7 @@ class JobsAutoMarker
             if(count($arrJobsList) == 0 || is_null($this->title_negative_keyword_tokens) || count($this->title_negative_keyword_tokens) == 0) return;
 
             $usrSearchKeywords = $this->_getUserSearchTitleKeywords();
-            $negKeywords = array_diff_assoc($this->title_negative_keyword_tokens, array_values($usrSearchKeywords) );
+            $negKeywords = array_diff(array_values($this->title_negative_keyword_tokens), array_values($usrSearchKeywords) );
             LogMessage("Excluding Jobs by Negative Title Keyword Token Matches");
             LogMessage("Checking ".count($arrJobsList) ." roles against ". count($negKeywords) ." negative title keywords to be excluded.");
 
@@ -508,9 +508,9 @@ class JobsAutoMarker
                 }
             }
         }
-	    $this->title_negative_keyword_tokens = array_unique($arrNegKwds, SORT_REGULAR);
+	    $negKwdForTokens = array_unique($arrNegKwds, SORT_REGULAR);
 
-        $arrTitlesTemp = tokenizeSingleDimensionArray($this->title_negative_keyword_tokens, 'userNegKwds', 'negative_keywords', 'negative_keywords');
+        $arrTitlesTemp = tokenizeSingleDimensionArray($negKwdForTokens, 'userNegKwds', 'negative_keywords', 'negative_keywords');
 
         if(count($arrTitlesTemp) <= 0)
         {
