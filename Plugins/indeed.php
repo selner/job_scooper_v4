@@ -31,7 +31,7 @@ class PluginIndeed extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 
     protected $arrListingTagSetup = array(
         'TotalPostCount' =>  array('selector' => 'div#searchCount', 'return_value_regex' => '/.*?of\s*(\d+).*?/'),
-        'NoPostsFound' =>  array('selector' => 'body', 'index' => 0, 'return_attribute' => 'node', 'return_value_callback' => "checkNoJobResults"),
+        'NoPostsFound' =>  array('selector' => 'body', 'index' => 0, 'return_attribute' => 'collection', 'return_value_callback' => "checkNoJobResults"),
         'NextButton' => array('selector' => 'span.np'),
         'JobPostItem' => array('selector' => 'td#resultsCol div[data-tn-component=\'organicJob\']'),
         'Url' => array('selector' => 'a[data-tn-element=\'jobTitle\']', 'index'=> 0, 'return_attribute' => 'href'),
