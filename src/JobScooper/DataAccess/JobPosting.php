@@ -106,6 +106,11 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 	 */
 	protected function updateAutoColumns()
 	{
+		if ($this->isColumnModified(JobPostingTableMap::COL_TITLE_TOKENS)) {
+			$tokens = $this->getTitleTokens();
+			$this->updateTitleTokenList($tokens);
+		}
+
 		$this->setKeyCompanyAndTitle(cleanupSlugPart($this->getCompany() . $this->getTitle()));
 	}
 
@@ -464,6 +469,15 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		return null;
 	}
 
+
+	public function updateTitleTokenList($v)
+	{
+		$arrTokens = preg_split("/[\s|\|]/", $v, null, PREG_SPLIT_NO_EMPTY);
+		if($arrTokens !== false)
+			$this->setTitleTokenList($arrTokens);
+		else
+			$this->setTitleTokenList(null);
+	}
 
 	/**
 	 * JobPosting constructor.

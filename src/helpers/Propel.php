@@ -101,7 +101,14 @@ function updateOrCreateJobPosting($arrJobItem)
 }
 
 
-function getAllMatchesForUserNotification($jobsiteKey=null)
+/**
+ * @param null $jobsiteKey
+ * @param null $usrTitleKeywordSets
+ *
+ * @return array
+ * @throws \Propel\Runtime\Exception\PropelException
+ */
+function getAllMatchesForUserNotification($jobsiteKey=null, $usrTitleKeywordSets=null)
 {
     $user= \JobScooper\DataAccess\User::getCurrentUser();
 
@@ -123,6 +130,23 @@ function getAllMatchesForUserNotification($jobsiteKey=null)
 	    $query->useJobPostingFromUJMQuery()
 		    ->filterByJobSiteKey(array_keys($includedSites), \Propel\Runtime\ActiveQuery\Criteria::IN)
 		    ->endUse();
+    }
+
+
+    if(!empty($usrTitleKeywordSets)) {
+//	    $jpquery = \JobScooper\DataAccess\Base\JobPostingQuery::create("JobPostingFromUJM");
+	    $first = true;
+
+	    foreach ($usrTitleKeywordSets as $kwd_set) {
+		    $arrKwdSetTokens = preg_split("/[\s|\|]/", $kwd_set);
+		    $jpquery  = $query->useJobPostingFromUJMQuery();
+		    $jpquery->filterByTitleTokenList($arrKwdSetTokens, \Propel\Runtime\ActiveQuery\Criteria::CONTAINS_ALL);
+		    $jpquery->endUse();
+		    if($first == false)
+			    $query->_or();
+		    else
+			    $first = false;
+	    }
     }
 
     $results =  $query->find();
@@ -197,6 +221,9 @@ function updateJobRecordsFromJson($filepath)
 }
 
 
+/**
+ * @return array
+ */
 function getAllPluginClassesByJobSiteKey()
 {
     $classList = get_declared_classes();

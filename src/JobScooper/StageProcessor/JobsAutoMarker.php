@@ -425,39 +425,22 @@ class JobsAutoMarker
 
             LogMessage("Checking " . count($arrJobsList) . " roles against " . count($usrSearchKeywords) . " keyword phrases in titles...");
 
-            $nCountJobErrors = 0;
             try {
-	            foreach ($arrJobsList as $jobMatch) {
-		            $foundAllUserKeywords = false;
-		            $strJobTitleTokens = $jobMatch->getJobPostingFromUJM()->getTitleTokens();
-		            $jobId = $jobMatch->getJobPostingId();
-		            if (empty($strJobTitleTokens)) {
-			            LogError("Cannot match user search keywords against job title token.  JobTitleTokens column for job_posting id#{$jobId} is null.");
-			            $nCountJobErrors = $nCountJobErrors + 1;
-			            continue;
-		            }
-
-		            foreach ($usrSearchKeywords as $kwd_subset) {
-			            $arrKwdSubset = preg_split("/\s/", $kwd_subset);
-			            $foundAllUserKeywords = in_string_array($strJobTitleTokens, $arrKwdSubset);
-			            if ($foundAllUserKeywords !== false) {
-				            $jobMatch->setMatchedUserKeywords($usrSearchKeywords);
-				            $jobMatch->save();
-				            $nJobsMarkedInclude += 1;
-				            break;
-			            }
-		            }
-
-		            if ($foundAllUserKeywords !== true)
-		            {
-			            $jobMatch->setIsJobMatch(false);
-			            $jobMatch->save();
-			            $nJobsNotMarked += 1;
-		            }
-
-		            if($nCountJobErrors > countAssociativeArrayValues($arrJobsList) * .1)
-		            	throw new Exception("Exceeded error threshold:  {$nCountJobErrors} were unable to be matched against keywords due to unexpected errors.");
-	            }
+	            $arrJobsWithTokenMatches = getAllMatchesForUserNotification(null, $usrSearchKeywords);
+				foreach($arrJobsWithTokenMatches as $jobMatch)
+				{
+					$jobMatch->setIsJobMatch(true);
+					$jobMatch->setMatchedUserKeywords($usrSearchKeywords);
+					$jobMatch->save();
+				}
+				$arrNotMatchedJobs = array_diff_key($arrJobsList,$arrJobsWithTokenMatches);
+				foreach($arrNotMatchedJobs as $notMatchedJob)
+				{
+					$notMatchedJob->setIsJobMatch(false);
+					$notMatchedJob->save();
+				}
+	            $nJobsMarkedInclude = countAssociativeArrayValues($arrJobsWithTokenMatches);
+	            $nJobsNotMarked = countAssociativeArrayValues($arrNotMatchedJobs);
             } catch (Exception $ex) {
                 handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s', isDebug());
             }
@@ -467,6 +450,7 @@ class JobsAutoMarker
         {
             handleException($ex, "Error in SearchKeywordsNotFound: %s", true);
         }
+
 
     }
 

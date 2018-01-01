@@ -117,6 +117,7 @@
         -->
         <column name="title" phpName="Title" type="varchar" size="255" required="true"/>
         <column name="title_tokens" phpName="TitleTokens" type="varchar" size="255"/>
+        <column name="title_token_list" phpName="TitleTokenList" type="array"/>
         <column name="url" phpName="Url" type="varchar" size="2500" required="true"/>
         <column name="employment_type" phpName="EmploymentType" type="varchar" size="100"/>
         <column name="pay_range" phpName="PayRange" type="varchar" size="100"/>
