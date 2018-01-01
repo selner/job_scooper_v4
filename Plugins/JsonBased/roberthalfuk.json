@@ -11,16 +11,15 @@
       "Fields": [
         {
           "Name": "TotalPostCount",
-          "Selector": "div.job-search-result-counter",
+          "Selector": "div.rh-job-result-table__counter label",
           "Pattern": "/.*?of\\s(\\d+)\\s*/",
-          "Callback": "combineTextAllChildren",
-          "Index": 0,
-          "Attribute": "node",
+          "Index": 1,
+          "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "JobPostItem",
-          "Selector": "table.job-search-results tr",
+          "Selector": "div.rh-job-result-table__row",
           "Attribute": "collection",
           "Type": "CSS"
         }
@@ -31,27 +30,34 @@
       "Fields": [
         {
           "Name": "Title",
-          "Selector": "td.JobTitle a",
+          "Selector": "a.rh-job-result-table__job-title",
           "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Url",
-          "Selector": "td.JobTitle a",
+          "Selector": "a.rh-job-result-table__job-title",
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
         },
         {
           "Name": "Location",
-          "Selector": "span.midRight",
+          "Selector": "span.rh-job-result-table__location",
           "Index" : 0,
           "Attribute": "text",
           "Type": "CSS"
         },
         {
-          "Name": "Category",
-          "Selector": "span.midLeft",
+          "Name": "EmploymentType",
+          "Selector": "span.rh-job-result-table__emptype",
+          "Index" : 0,
+          "Attribute": "text",
+          "Type": "CSS"
+        },
+        {
+          "Name": "PayRange",
+          "Selector": "span.rh-job-result-table__salary",
           "Index" : 0,
           "Attribute": "text",
           "Type": "CSS"
@@ -62,9 +68,10 @@
           "Type": "SOURCEFIELD",
           "Field": "Url"
         },
+
         {
           "Name": "PostedAt",
-          "Selector": "span.topRight",
+          "Selector": "span.rh-job-result-table__postdate",
           "Index" : 0,
           "Attribute": "text",
           "Type": "CSS"
