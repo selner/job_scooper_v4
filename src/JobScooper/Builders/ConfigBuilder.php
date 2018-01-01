@@ -448,7 +448,7 @@ class ConfigBuilder
         $iniSets = $this->_getSetting("search_keyword_set");
         if (!empty($iniSets)) {
             foreach ($iniSets as $key => $ini_keyword_set) {
-	            $setKey = 'ks' . (count($verifiedSets['keyword_sets']) + 1) . "_" . $key;
+	            $setKey = 'ks' . (count($verifiedSets) + 1) . "_" . $key;
 	            $ini_keyword_set['key'] = $setKey;
 	            $kwdset = $this->_getUserKeywordSet_($ini_keyword_set);
 	            if(!empty($kwdset))
