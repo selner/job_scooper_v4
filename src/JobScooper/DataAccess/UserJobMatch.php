@@ -92,5 +92,17 @@ class UserJobMatch extends BaseUserJobMatch
         return $arrItem;
     }
 
+    public function setMatchedNegativeTitleKeywords($v)
+    {
+    	if(is_array($v) && !empty($v))
+	    {
+	    	foreach($v as &$item)
+		    {
+		    	if(is_array($item))
+		    		$item = implode(" ", $item);
+		    }
+	    }
+	    return parent::setMatchedNegativeTitleKeywords($v);
+    }
 
 }

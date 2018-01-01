@@ -135,17 +135,21 @@ function getAllMatchesForUserNotification($jobsiteKey=null, $usrTitleKeywordSets
 
     if(!empty($usrTitleKeywordSets)) {
 //	    $jpquery = \JobScooper\DataAccess\Base\JobPostingQuery::create("JobPostingFromUJM");
-	    $first = true;
+	    $nCount = 0;
+
 
 	    foreach ($usrTitleKeywordSets as $kwd_set) {
-		    $arrKwdSetTokens = preg_split("/[\s|\|]/", $kwd_set);
+
+	    	if(is_string($kwd_set))
+	    		$arrKwdSetTokens = preg_split("/[\s|\|]/", $kwd_set, null, PREG_SPLIT_NO_EMPTY);
+	    	else
+	    		$arrKwdSetTokens = $kwd_set;
 		    $jpquery  = $query->useJobPostingFromUJMQuery();
 		    $jpquery->filterByTitleTokenList($arrKwdSetTokens, \Propel\Runtime\ActiveQuery\Criteria::CONTAINS_ALL);
 		    $jpquery->endUse();
-		    if($first == false)
+		    if($nCount < (count($usrTitleKeywordSets)-1))
 			    $query->_or();
-		    else
-			    $first = false;
+		    $nCount += 1;
 	    }
     }
 
