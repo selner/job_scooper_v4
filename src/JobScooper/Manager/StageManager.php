@@ -18,22 +18,28 @@ namespace JobScooper\Manager;
 
 use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\StageProcessor\JobsAutoMarker;
+use JobScooper\StageProcessor\NotifierDevAlerts;
 use JobScooper\StageProcessor\NotifierJobAlerts;
 use JobScooper\Builders\ConfigBuilder;
-use JobScooper\Builders\SearchBuilder;
-use JobScooper\Utils\DocOptions;
 
 
 const JOBLIST_TYPE_UNFILTERED = "unfiltered";
 const JOBLIST_TYPE_MARKED = "marked";
 const JSON_FILENAME = "-alljobsites.json";
 
+/**
+ * Class StageManager
+ * @package JobScooper\Manager
+ */
 class StageManager
 {
     protected $JobSiteName = "StageManager";
     protected $classConfig = null;
 
-    public function runAll()
+	/**
+	 * @throws \Exception
+	 */
+	public function runAll()
     {
         try {
 	        $this->classConfig = new ConfigBuilder();
@@ -62,9 +68,23 @@ class StageManager
         } catch (\Exception $ex) {
             handleException($ex, null, true);
         }
+        finally
+        {
+        	try
+	        {
+	        	$this->doFinalStage();
+	        } catch (\Exception $ex) {
+			    handleException($ex, null, true);
+		    }
+        }
     }
 
-    public function insertJobsFromJSON($path)
+	/**
+	 * @param $path
+	 *
+	 * @throws \Exception
+	 */
+	public function insertJobsFromJSON($path)
     {
         $data = loadJSON($path);
         $jobs = $data['jobslist'];
@@ -80,7 +100,10 @@ class StageManager
     }
 
 
-    public function doStage1()
+	/**
+	 * @throws \Exception
+	 */
+	public function doStage1()
     {
 
         startLogSection("Stage 1: Downloading Latest Matching Jobs ");
@@ -161,7 +184,10 @@ class StageManager
     }
 
 
-    public function doStage2()
+	/**
+	 * @throws \Exception
+	 */
+	public function doStage2()
     {
         try {
             startLogSection("Stage 2:  Tokenizing Job Titles... ");
@@ -205,7 +231,10 @@ class StageManager
 
     }
 
-    public function doStage3()
+	/**
+	 * @throws \Exception
+	 */
+	public function doStage3()
     {
         
         try {
@@ -221,12 +250,14 @@ class StageManager
         }
     }
 
-    public function doStage4()
+	/**
+	 * @throws \Exception
+	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
+	 */
+	public function doStage4()
     {
         try {
-
             startLogSection("Stage 4: Notifying User");
-
             $notifier = new NotifierJobAlerts();
             $notifier->processNotifications();
         } catch (\Exception $ex) {
@@ -236,5 +267,24 @@ class StageManager
         {
         	endLogSection("End of stage 4 (notifying user)");
         }
+    }
+
+	/**
+	 * @throws \Exception
+	 */
+	public function doFinalStage()
+    {
+	    try {
+		    startLogSection("Final Stage: Developer Alerts + Cleanup");
+		    $devNotifier = new NotifierDevAlerts();
+		    $devNotifier->processPluginErrors();
+	    } catch (\Exception $ex) {
+		    handleException($ex, null, true);
+	    }
+	    finally
+	    {
+		    endLogSection("End of final stage (dev alerts + cleanup)");
+	    }
+
     }
 }

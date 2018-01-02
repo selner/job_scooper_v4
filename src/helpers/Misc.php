@@ -74,9 +74,11 @@ function noJobStringMatch($var, $matchString)
 }
 
 
-function getRunDateRange()
+function getRunDateRange($configNumDays=null)
 {
-    $configNumDays = getConfigurationSetting('number_days');
+	if(empty($configNumDays))
+	    $configNumDays = getConfigurationSetting('number_days');
+	
     $num_days = filter_var($configNumDays, FILTER_VALIDATE_INT);
     if($num_days === false)
         $num_days = 1;
