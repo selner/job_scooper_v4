@@ -19,7 +19,7 @@
 
 function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
 {
-    LogMessage("Tokenizing title exclusion matches from " . $inputfile . ".");
+    LogMessage("Tokenizing titles from " . $inputfile . ".");
     if (!$outputFile)
         $outputFile = getOutputDirectory('debug') . "/tempCallTokenizer.csv";
     $PYTHONPATH = realpath(__ROOT__ . "/python/pyJobNormalizer/");
