@@ -1031,42 +1031,10 @@ abstract class BaseJobsSite implements IJobSitePlugin
             } else {
                 throw new \ErrorException("Class " . get_class($this) . " does not have a valid setting for parser.  Cannot continue.");
             }
-
-            // Let's do another check to make sure we got any listings at all for those that weren't
-            // filtered by keyword.  If we returned zero jobs for any given city and no keyword filter
-            // then we are likely broken somehow unexpectedly.   Make sure to error so that we note
-            // it in the results & error notifications so that a developer can take a look.
-            if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$this->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED) && countAssociativeArrayValues($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]) == 0) {
-                $strError = "The search " . $searchDetails->getUserSearchSiteRunKey() . " on " . $this->JobSiteName . " downloaded 0 jobs yet we did not have any keyword filter is use.  Logging as a potential error since we should have had something returned. [URL=" . $searchDetails->getSearchStartUrl() . "].  ";
-                handleException(new Exception($strError), null, true);
-            }
-
         } catch (Exception $ex) {
-
-            //
-            // BUGBUG:  This is a workaround to prevent errors from showing up
-            // when no results are returned for a particular search for EmploymentGuide plugin only
-            // See https://github.com/selner/jobs_scooper/issues/23 for more details on
-            // this particular underlying problem
-            //
-            $jobsitekey = $searchDetails->getJobSiteKey();
-            if (in_array($jobsitekey, array('employmentguide', 'careerbuilder', 'ziprecruiter')) &&
-                (substr_count($ex->getMessage(), "HTTP error #404") > 0)
-            ) {
-                $strError = $this->JobSiteName . " plugin returned a 404 page for the search.  This is not an error; it means zero results found.";
-                LogMessage($strError);
-
-                $this->_setSearchResult_($searchDetails, $success = true);
-
-            } else {
-                //
-                // Not the known issue case, so log the error and re-throw the exception
-                // if we should have thrown one
-                //
-                $strError = "Failed to download jobs from " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchSiteRunKey() . "[URL=" . $searchDetails->getSearchStartUrl() . "]. Exception Details: ";
-                $this->_setSearchResult_($searchDetails, false, new Exception($strError . strval($ex)));
-                handleException($ex, $strError, false);
-            }
+            $strError = "Failed to download jobs from " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchSiteRunKey() . "[URL=" . $searchDetails->getSearchStartUrl() . "]. Exception Details: ";
+            $this->_setSearchResult_($searchDetails, false, new Exception($strError . strval($ex)));
+            handleException($ex, $strError, false);
         } finally {
             endLogSection("Finished data pull for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]");
         }
@@ -1708,7 +1676,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
                         }
                     } catch (Exception $ex) {
-                        handleException($ex, ($this->JobSiteName . " error: %s"), true, $extraData=$searchDetails->toLoggedContext());
+                        throw $ex;
                     }
 
                     //
@@ -1807,6 +1775,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
         } catch (Exception $ex) {
             $this->_setSearchResult_($searchDetails, false, $ex, false, $objSimpleHTML);
             handleException($ex, null, true, $extraData=$searchDetails->toLoggedContext());
+	        LogWarning("Failed to download new job postings for search run " . $searchDetails->getUserSearchSiteRunKey() . ".  Continuing to next search.   Error details: " . $ex->getMessage());
         }
 
         return null;

@@ -613,7 +613,7 @@ class SimplePlugin extends BaseJobsSite
         {
             $objSimpHTML->debug_dump_to_file();
 
-            handleException(new \Exception("Could not find matching job elements in HTML for " . $strNodeMatch . " in plugin " . $this->JobSiteName), null, true);
+            throw new \Exception("Could not find matching job elements in HTML for " . $strNodeMatch . " in plugin " . $this->JobSiteName);
         }
 
         LogMessage($this->JobSiteName . " returned " . countAssociativeArrayValues($ret) . " jobs from page.");
