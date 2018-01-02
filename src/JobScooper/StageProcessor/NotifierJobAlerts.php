@@ -268,7 +268,7 @@ class NotifierJobAlerts extends JobsMailSender
 			if (!is_array($search->getKeywords()))
 				$kwds = preg_split("/\s?,\s?/", $kwds);
 
-			$data['Search']['Keywords'][] = join(", ", $kwds);
+			$data['Search']['Keywords'] = join(", ", $kwds);
 		}
 
 		foreach (getConfigurationSetting("search_locations") as $loc)
