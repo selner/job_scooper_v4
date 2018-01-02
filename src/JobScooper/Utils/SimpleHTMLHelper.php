@@ -199,6 +199,7 @@ class ExtendedDiDomDocument extends Document
         }
         $outfile = generateOutputFileName($basefile, "html", true, 'debug');
         file_put_contents($outfile, $this->html());
+        return $outfile;
     }
 }
 

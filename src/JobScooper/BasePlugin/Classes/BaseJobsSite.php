@@ -1098,7 +1098,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 *
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function _setSearchResult_(UserSearchSiteRun $searchDetails, $success = null, $except = null, $runWasSkipped=false)
+	private function _setSearchResult_(UserSearchSiteRun $searchDetails, $success = null, $except = null, $runWasSkipped=false, $objPageHtml=null)
     {
         if(!($searchDetails instanceof UserSearchSiteRun))
             $searchDetails = getConfigurationSetting('current_user_search_details');
@@ -1111,29 +1111,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
             if($success === true)
                 $searchDetails->setRunSucceeded();
             else {
-                $searchDetails->failRunWithErrorMessage($except);
+                $searchDetails->failRunWithErrorMessage($except, $objPageHtml);
             }
         }
         $searchDetails->save();
     }
 
-	/**
-	 * @param $htmlNode
-	 * @param $filepath
-	 *
-	 * @return string
-	 */
-	function saveDomToFile($htmlNode, $filepath)
-    {
-
-        $strHTML = strval($htmlNode);
-
-        $htmlTmp = new SimpleHTMLHelper($strHTML);
-        $htmlTmp->save($filepath);
-
-        return $strHTML;
-
-    }
 
 	/**
 	 * @param string $filePath
@@ -1494,10 +1477,10 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	private function _getMyJobsForSearchFromWebpage_(UserSearchSiteRun $searchDetails)
     {
+	    $objSimpleHTML = null;
         try {
             $nItemCount = 1;
             $nPageCount = 1;
-            $objSimpleHTML = null;
             $arrPreviouslyLoadedJobIds = array();
 
             LogMessage("Getting count of " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchSiteRunKey() . "': " . $searchDetails->getSearchStartUrl());
@@ -1822,7 +1805,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
             LogMessage($this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]" . ": " . $nJobsFound . " jobs found." . PHP_EOL);
 
         } catch (Exception $ex) {
-            $this->_setSearchResult_($searchDetails, false, $ex);
+            $this->_setSearchResult_($searchDetails, false, $ex, false, $objSimpleHTML);
             handleException($ex, null, true, $extraData=$searchDetails->toLoggedContext());
         }
 

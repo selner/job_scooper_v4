@@ -4,6 +4,7 @@ namespace JobScooper\DataAccess;
 
 use JobScooper\DataAccess\Base\UserSearchSiteRun as BaseUserSearchSiteRun;
 use JobScooper\DataAccess\Map\UserSearchSiteRunTableMap;
+use JobScooper\Utils\SimpleHTMLHelper;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Map\TableMap;
 
@@ -19,7 +20,7 @@ use Propel\Runtime\Map\TableMap;
  */
 class UserSearchSiteRun extends BaseUserSearchSiteRun
 {
-	function failRunWithErrorMessage($err)
+	function failRunWithErrorMessage($err, SimpleHTMLHelper $objPageHtml=null)
 	{
 		$arrV = "";
 		if(is_a($err, "\Exception") || is_subclass_of($err, "\Exception"))
@@ -35,7 +36,18 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 			$arrV = array($err);
 
 		$this->setRunResultCode("failed");
-		parent::setRunErrorDetails($arrV);
+		if(!empty($objPageHtml))
+		{
+			try
+			{
+				$filepath = $objPageHtml->debug_dump_to_file();
+				$this->setRunErrorPageHtml($filepath);
+			} catch (\Exception $ex)
+			{
+				LogWarning("Failed to save HTML for page that generated the error.");
+			}
+		}
+		$this->setRunErrorDetails($arrV);
 	}
 
 	function setRunSucceeded()
@@ -50,7 +62,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 				break;
 
 			case 'successful':
-				$this->setRunErrorDetails(array());
+				$this->setRunErrorDetails(null);
 				break;
 
 			case "skipped":
