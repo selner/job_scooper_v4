@@ -31,9 +31,6 @@ use Propel\Runtime\Propel;
  */
 class JobsAutoMarker
 {
-    protected $JobSiteName = "JobsAutoMarker";
-    protected $arrLatestJobs_UnfilteredByUserInput = array();
-    protected $arrMasterJobList = array();
     protected $_locmgr = null;
 	protected $title_negative_keyword_tokens = null;
 	protected $companies_regex_to_filter = null;
@@ -41,16 +38,10 @@ class JobsAutoMarker
 	/**
 	 * JobsAutoMarker constructor.
 	 *
-	 * @param array $arrJobObjsToMark
-	 * @param null  $strOutputDirectory
 	 */
-	function __construct($arrJobObjsToMark = array(), $strOutputDirectory = null)
+	function __construct()
     {
-        if (!is_null($arrJobObjsToMark) && count($arrJobObjsToMark) > 0)
-            $this->arrMasterJobList = $arrJobObjsToMark;
-
         $this->_locmgr = LocationManager::getLocationManager();
-
     }
 
 	/**
@@ -71,7 +62,7 @@ class JobsAutoMarker
         $this->_markJobsList_SearchKeywordsFound_($arrJobs_AutoUpdatable);
 
 	    $arrJobs_AutoUpdatable = getAllMatchesForUserNotification(null, null, true);
-	    if (empty($this->arrMasterJobList)) {
+	    if (empty($arrJobs_AutoUpdatable)) {
 		    LogMessage("No new jobs found to auto-mark.");
 		    return;
 	    }
@@ -84,14 +75,6 @@ class JobsAutoMarker
 
         $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($arrJobs_AutoUpdatable);
 
-    }
-
-	/**
-	 * @return array of UserJobMatch
-	 */
-	public function getMarkedJobs()
-    {
-        return $this->arrMasterJobList;
     }
 
 	/**
@@ -270,31 +253,31 @@ class JobsAutoMarker
             }
         }
 
-        LogMessage("Gathering job postings not in those areas...");
-        $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrNearbyIds) {
-	        $posting = $v->getJobPostingFromUJM();
-	        if (!empty($posting)) {
-		        $locId = $posting->getGeoLocationId();
-		        if (is_null($locId))
-			        return true;  // if we don't have a location, assume nearby
+        LogMessage("Marking job postings in the " . count($arrNearbyIds) . " matching areas ...");
+	    $arrJobsInArea = getAllMatchesForUserNotification(null, null, null, $arrNearbyIds);
+	    $arrJobListIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsList, array("UserJobMatchId")));
+	    $arrInAreaIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsInArea, array("UserJobMatchId")));
+	    foreach(array_chunk($arrInAreaIds, 50) as $chunk) {
+		    $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
+		    UserJobMatchQuery::create()
+			    ->filterByUserJobMatchId($chunk)
+			    ->update(array("OutOfUserArea" => false), $con);
+	    }
 
-		        return in_array($locId, $arrNearbyIds);
-	        }
-        });
+	    LogMessage("Marking job postings outside " . count($arrNearbyIds) . " matching areas ...");
+	    $arrOutOfAreaIds = array_diff($arrJobListIds, $arrInAreaIds);
+	    if(!empty($arrOutOfAreaIds))
+		    foreach(array_chunk($arrOutOfAreaIds, 50) as $chunk) {
+			    $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
+			    UserJobMatchQuery::create()
+				    ->filterByUserJobMatchId($chunk)
+				    ->update(array("OutOfUserArea" => true, "isExcluded" => true), $con);
+		    }
 
-        LogMessage("Marking user job matches as out of area for " . count($arrJobsOutOfArea) . " matches ...");
+        $nJobsMarkedAutoExcluded = count($arrOutOfAreaIds);
+        $nJobsNotMarked = count($arrJobsInArea);
 
-        foreach ($arrJobsOutOfArea as $jobOutofArea) {
-            $jobOutofArea->setOutOfUserArea(true);
-            $jobOutofArea->save();
-        }
-
-
-        $nJobsMarkedAutoExcluded = count($arrJobsOutOfArea);
-        $nJobsNotMarked = count($arrJobsList) - $nJobsMarkedAutoExcluded;
-
-
-       LogMessage("Jobs excluded as out of area:  marked ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ."; not marked = " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList) );
+       LogMessage("Jobs excluded as out of area:  marked out of area ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ."; marked in area = " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList) );
     }
 
 	/**
@@ -436,13 +419,6 @@ class JobsAutoMarker
 			            ->update(array("IsJobMatch" => true, "MatchedUserKeywords" => $usrSearchKeywords), $con);
 	            }
 
-//	            foreach($arrJobsWithTokenMatches as $jobMatch)
-//				{
-//
-//					$jobMatch->setIsJobMatch(true);
-//					$jobMatch->setMatchedUserKeywords($usrSearchKeywords);
-//					$jobMatch->save();
-//				}
 				$arrNotMatchedJobs = array_diff_key($arrJobsList,$arrJobsWithTokenMatches);
 				$arrNotMatchedIds = array_from_orm_object_list_by_array_keys($arrNotMatchedJobs, array("UserJobMatchId"));
 				foreach(array_chunk($arrNotMatchedIds, 50) as $chunk)
@@ -452,6 +428,7 @@ class JobsAutoMarker
 						->filterByUserJobMatchId($chunk)
 						->update(array("IsJobMatch" => false), $con);
 				}
+
 	            $nJobsMarkedInclude = countAssociativeArrayValues($arrJobsWithTokenMatches);
 	            $nJobsNotMarked = countAssociativeArrayValues($arrNotMatchedJobs);
             } catch (Exception $ex) {
