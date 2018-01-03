@@ -21,48 +21,36 @@
 
 
 
-function isUserJobMatch($var)
+function isUserJobMatch(\JobScooper\DataAccess\UserJobMatch $var)
 {
     assert(method_exists($var, "getIsJobMatch") === true);
-    return $var->getIsJobMatch();
+	return (!empty($var->getIsJobMatch()) && $var->getIsJobMatch() === true);
 }
 
-function isNotUserJobMatch($var)
+function isNotUserJobMatch(\JobScooper\DataAccess\UserJobMatch $var)
 {
-    return !isUserJobMatch($var);
+	assert(method_exists($var, "getIsJobMatch") === true);
+    return (empty($var->getIsJobMatch()) || $var->getIsJobMatch() !== true);
 }
 
-function isExcluded($var)
-{
-    assert(method_exists($var, "getIsExcluded") === true);
-
-    return ($var->getIsExcluded());
-
-}
-
-
-function isUserJobMatchButExcluded($var)
+function isExcluded(\JobScooper\DataAccess\UserJobMatch $var)
 {
     assert(method_exists($var, "getIsExcluded") === true);
 
-    return (isExcluded($var) && isUserJobMatch($var));
+	return (!empty($var->getIsExcluded()) && $var->getIsExcluded() === true);
 
 }
 
-function isUserJobMatchAndNotExcluded($var)
+function isUserJobMatchButExcluded(\JobScooper\DataAccess\UserJobMatch $var)
 {
-    return (!isExcluded($var) && isUserJobMatch($var));
+    assert(method_exists($var, "getIsExcluded") === true);
 
+	return ((!empty($var->getIsExcluded()) && $var->getIsExcluded() === true) && (!empty($var->getIsJobMatch()) && $var->getIsJobMatch() === true));
 }
 
-
-//
-// Jobs Site Filter Functions
-//
-
-function isIncludedJobSite($var)
+function isUserJobMatchAndNotExcluded(\JobScooper\DataAccess\UserJobMatch $var)
 {
-    return (in_array(strtolower($var->getJobPostingFromUJM()->getJobSiteKey()), \JobScooper\Builders\JobSitePluginBuilder::getIncludedJobSites()) === true);
+	return ((empty($var->getIsExcluded()) || $var->getIsExcluded() !== true) && (!empty($var->isJobMatch()) && $var->getIsJobMatch() === true));
 }
 
 
