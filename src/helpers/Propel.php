@@ -108,7 +108,7 @@ function updateOrCreateJobPosting($arrJobItem)
  * @return array
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function getAllMatchesForUserNotification($jobsiteKey=null, $usrTitleKeywordSets=null)
+function getAllMatchesForUserNotification($jobsiteKey=null, $usrTitleKeywordSets=null, $excludeNonJobMatches=true)
 {
     $user= \JobScooper\DataAccess\User::getCurrentUser();
 
@@ -117,6 +117,11 @@ function getAllMatchesForUserNotification($jobsiteKey=null, $usrTitleKeywordSets
         ->filterByUserNotificationState(array("not-ready", "ready"))
         ->filterByUserFromUJM($user)
         ->joinWithJobPostingFromUJM();
+
+    if($excludeNonJobMatches === true)
+    {
+    	$query->filterByIsJobMatch(true);
+    }
 
     if(!empty($jobsiteKey))
     {
