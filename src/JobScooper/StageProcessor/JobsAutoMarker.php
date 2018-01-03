@@ -19,8 +19,11 @@ namespace JobScooper\StageProcessor;
 use JobScooper\DataAccess\GeoLocationQuery;
 use JobScooper\DataAccess\Map\GeoLocationTableMap;
 use Exception;
+use JobScooper\DataAccess\Map\UserJobMatchTableMap;
+use JobScooper\DataAccess\UserJobMatchQuery;
 use JobScooper\Manager\LocationManager;
 use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\Propel;
 
 /**
  * Class JobsAutoMarker
@@ -56,35 +59,31 @@ class JobsAutoMarker
 	 */
 	public function markJobs()
     {
-        if (empty($this->arrMasterJobList))
-            $this->arrMasterJobList = getAllMatchesForUserNotification();
 
-        if(is_null($this->arrMasterJobList) || count($this->arrMasterJobList) <= 0)
-        {
-            LogMessage("No new jobs found to auto-mark.");
-        }
-        else
-        {
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //
+        // Filter the full jobs list looking for duplicates, etc.
+        //
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        LogMessage(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL);
+	    $arrJobs_AutoUpdatable = getAllMatchesForUserNotification(null, null, false);
 
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //
-            // Filter the full jobs list looking for duplicates, etc.
-            //
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            LogMessage(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL);
+        $this->_markJobsList_SearchKeywordsFound_($arrJobs_AutoUpdatable);
 
-            $arrJobs_AutoUpdatable = $this->arrMasterJobList;
-            $this->_markJobsList_SearchKeywordsFound_($arrJobs_AutoUpdatable);
+	    $arrJobs_AutoUpdatable = getAllMatchesForUserNotification(null, null, true);
+	    if (empty($this->arrMasterJobList)) {
+		    LogMessage("No new jobs found to auto-mark.");
+		    return;
+	    }
 
-            $this->_markJobsList_SetLikelyDuplicatePosts_($arrJobs_AutoUpdatable);
+	    $this->_markJobsList_SetLikelyDuplicatePosts_($arrJobs_AutoUpdatable);
 
-            $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
+        $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
 
-            $this->_markJobsList_UserExcludedKeywords_($arrJobs_AutoUpdatable);
+        $this->_markJobsList_UserExcludedKeywords_($arrJobs_AutoUpdatable);
 
-            $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($arrJobs_AutoUpdatable);
+        $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($arrJobs_AutoUpdatable);
 
-        }
     }
 
 	/**
@@ -356,7 +355,6 @@ class JobsAutoMarker
 		//
 		$this->_loadTitlesTokensToFilter();
 
-		$nJobsSkipped = 0;
 		$nJobsMarkedAutoExcluded = 0;
 		$nJobsNotMarked = 0;
 
@@ -430,17 +428,29 @@ class JobsAutoMarker
 
             try {
 	            $arrJobsWithTokenMatches = getAllMatchesForUserNotification(null, $usrSearchKeywords);
-				foreach($arrJobsWithTokenMatches as $jobMatch)
-				{
-					$jobMatch->setIsJobMatch(true);
-					$jobMatch->setMatchedUserKeywords($usrSearchKeywords);
-					$jobMatch->save();
-				}
+	            $arrMatchedIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsWithTokenMatches, array("UserJobMatchId")));
+	            foreach(array_chunk($arrMatchedIds, 50) as $chunk) {
+		            $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
+		            UserJobMatchQuery::create()
+			            ->filterByUserJobMatchId($chunk)
+			            ->update(array("IsJobMatch" => true, "MatchedUserKeywords" => $usrSearchKeywords), $con);
+	            }
+
+//	            foreach($arrJobsWithTokenMatches as $jobMatch)
+//				{
+//
+//					$jobMatch->setIsJobMatch(true);
+//					$jobMatch->setMatchedUserKeywords($usrSearchKeywords);
+//					$jobMatch->save();
+//				}
 				$arrNotMatchedJobs = array_diff_key($arrJobsList,$arrJobsWithTokenMatches);
-				foreach($arrNotMatchedJobs as $notMatchedJob)
+				$arrNotMatchedIds = array_from_orm_object_list_by_array_keys($arrNotMatchedJobs, array("UserJobMatchId"));
+				foreach(array_chunk($arrNotMatchedIds, 50) as $chunk)
 				{
-					$notMatchedJob->setIsJobMatch(false);
-					$notMatchedJob->save();
+					$con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
+					UserJobMatchQuery::create()
+						->filterByUserJobMatchId($chunk)
+						->update(array("IsJobMatch" => false), $con);
 				}
 	            $nJobsMarkedInclude = countAssociativeArrayValues($arrJobsWithTokenMatches);
 	            $nJobsNotMarked = countAssociativeArrayValues($arrNotMatchedJobs);
