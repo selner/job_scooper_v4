@@ -339,7 +339,12 @@ function array_subset(array $haystack, array $needle)
  */
 function array_from_orm_object_list_by_array_keys(array $list, array $keysToReturn)
 {
-    return array_map(function ($v) use ($keysToReturn) {return array_subset($v->toArray(), $keysToReturn);} , $list);
+    $ret = array_map(function ($v) use ($keysToReturn) {
+    	return array_subset($v->toArray(), $keysToReturn);}
+    , $list);
+    if(count($keysToReturn) == 1)
+        $ret = array_column($ret, $keysToReturn[0], $keysToReturn[0]);
+    return $ret;
 }
 
 /**
