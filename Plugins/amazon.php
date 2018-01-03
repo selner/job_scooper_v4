@@ -53,6 +53,7 @@ class PluginAmazon extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 	protected $searchStartActualURL = null;
 	protected $searchJsonUrlFmt = null;
 	protected $lastResponseData = null;
+	private $nTotalJobs = null;
 
 	/**
 	 * @param \JobScooper\DataAccess\GeoLocation|null $location
@@ -144,9 +145,10 @@ class PluginAmazon extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 	function parseTotalResultsCount($objSimpHTML)
 	{
 		try {
-			$this->lastResponseData = $this->getJsonResultsPage(0);
+			$retData = $this->getJsonResultsPage(0);
 			$this->JobListingsPerPage = 1000;
-			return $this->lastResponseData['count'];
+			$this->nTotalJobs = $retData['count'];
+			return $this->nTotalJobs;
 		}
 		catch (Exception $ex)
 		{
@@ -191,15 +193,15 @@ class PluginAmazon extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 		try {
 			$ret = array();
 			$nOffset = 0;
-			if (!empty($this->lastResponseData['count']) && $this->lastResponseData['count'] > 0) {
-				$jobs = $this->lastResponseData['jobs'];
+			if (!empty($this->lastResponseData) && !empty($this->lastResponseData->jobs) && count($this->lastResponseData->jobs) > 0) {
+				$jobs = $this->lastResponseData->jobs;
 				while (!empty($jobs)) {
-					$lastRet = $this->_parseJsonJobs($jobs);
-					$ret = array_merge($ret, $lastRet);
-					$nOffset = $nOffset . count($jobs);
-					if ($nOffset < $this->lastResponseData['count']) {
-						$lastResp = $this->getJsonResultsPage($nOffset);
-						$jobs = $lastResp['jobs'];
+					$curPageJobs = $this->_parseJsonJobs($jobs);
+					$ret = array_merge($ret, $curPageJobs);
+					$nOffset = $nOffset + count($jobs);
+					if ($nOffset < $this->nTotalJobs) {
+						$retData = $this->getJsonResultsPage($nOffset);
+						$jobs = $retData['jobs'];
 					} else
 						$jobs = null;
 				}
@@ -220,13 +222,13 @@ class PluginAmazon extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 	 * @throws \Exception
 	 * @return array
 	 */
-	private function getJsonResultsPage($offset)
+	private function getJsonResultsPage($offset=0)
 	{
 		$curl = new \JobScooper\Utils\CurlWrapper();
 		if (isDebug()) $curl->setDebug(true);
 
 		$ret = array("count" => null, "jobs" => null);
-		$url = $this->searchJsonUrlFmt . "&offset=0";
+		$url = $this->searchJsonUrlFmt . "&offset={$offset}";
 		$lastCookies = $this->getActiveWebdriver()->manage()->getCookies();
 
 		$retObj = $curl->cURL($url, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = $lastCookies);
