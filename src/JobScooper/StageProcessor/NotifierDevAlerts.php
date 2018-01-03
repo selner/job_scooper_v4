@@ -74,12 +74,13 @@ class NotifierDevAlerts extends JobsMailSender
 			->toArray("JobSiteKey");
 
 		$failedJobSites = array();
-		foreach($returnedJobSites as $key => $jobsite) {
-			if (!(array_key_exists($key, $lastJobsiteSuccess) && $jobsite['LastCompletedAt'] <= $lastJobsiteSuccess['LastCompletedAt']))
+		foreach($returnedJobSites as $jobsite) {
+			$jskey = $jobsite['JobSiteKey'];
+			if (!(array_key_exists($jskey, $lastJobsiteSuccess) && $jobsite['LastCompletedAt'] < $lastJobsiteSuccess[$jskey]['LastCompletedAt']))
 			{
 				$jobsite['RunErrorDetails'] = nl2br(htmlentities($jobsite['RunErrorDetails']));
 				if ($jobsite['CountFailedRuns'] >= 3) {
-					$failedJobSites[$key] = $jobsite;
+					$failedJobSites[$jskey] = $jobsite;
 				}
 			}
 		}
