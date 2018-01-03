@@ -50,8 +50,16 @@ class PluginAmazon extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
     protected $additionalBitFlags = [C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
 
     protected $selectorMoreListings = "button[data-label='right']";
+	protected $searchStartActualURL = null;
+	protected $searchJsonUrlFmt = null;
+	protected $lastResponseData = null;
 
-    function getGeoLocationSettingType(\JobScooper\DataAccess\GeoLocation $location=null)
+	/**
+	 * @param \JobScooper\DataAccess\GeoLocation|null $location
+	 *
+	 * @return null|string
+	 */
+	function getGeoLocationSettingType(\JobScooper\DataAccess\GeoLocation $location=null)
     {
         if(!is_null($location))
         {
@@ -69,7 +77,13 @@ class PluginAmazon extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
         return $this->LocationType;
     }
 
-    function doFirstPageLoad($searchDetails)
+	/**
+	 * @param $searchDetails
+	 *
+	 * @return mixed
+	 * @throws \Exception
+	 */
+	function doFirstPageLoad($searchDetails)
     {
         $js = "
             setTimeout(clickSearchButton, " . strval($this->additionalLoadDelaySeconds) .");
@@ -91,6 +105,12 @@ class PluginAmazon extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
                     console.log('Search button was not active.');
                 }
             }  
+            
+          document.addEventListener(\"DOMContentLoaded\", function(event) {
+			 var elem = document.createElement(\"<span id='pageurl'></span>\" );
+			 document.body.appendChild(elem);
+			 elem.textContent = window.location;
+		  });
         ";
 
         $this->selenium->getPageHTML($searchDetails->getSearchStartUrl());
@@ -99,9 +119,137 @@ class PluginAmazon extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
         sleep($this->additionalLoadDelaySeconds + 2);
 
         $html = $this->getActiveWebdriver()->getPageSource();
+
+        $this->searchStartActualURL = $this->getActiveWebdriver()->getCurrentURL();
+        $this->searchJsonUrlFmt = str_ireplace("/search?", "/search.json?", $this->searchStartActualURL) . "&result_limit=1000";
+
         return $html;
     }
 
+
+	/**
+	 * parseTotalResultsCount
+	 *
+	 * If the site does not show the total number of results
+	 * then set the plugin flag to C__JOB_PAGECOUNT_NOTAPPLICABLE__
+	 * in the Constants.php file and just comment out this function.
+	 *
+	 * parseTotalResultsCount returns the total number of listings that
+	 * the search returned by parsing the value from the returned HTML
+	 * *
+	 * @param $objSimpHTML
+	 * @return string|null
+	 * @throws \Exception
+	 */
+	function parseTotalResultsCount($objSimpHTML)
+	{
+		try {
+			$this->lastResponseData = $this->getJsonResultsPage(0);
+			$this->JobListingsPerPage = 1000;
+			return $this->lastResponseData['count'];
+		}
+		catch (Exception $ex)
+		{
+			$this->JobListingsPerPage = 10;
+			return parent::parseTotalResultsCount($objSimpHTML);
+		}
+	}
+
+	/**
+	 * @param $jobs
+	 *
+	 * @return array
+	 */
+	private function _parseJsonJobs($jobs)
+	{
+		$ret = array();
+		foreach($jobs as $job)
+		{
+			$ret[$job->id] = array(
+				'JobSiteKey' => "amazon",
+				'JobSitePostId' => $job->id_icims,
+				'Company' => $job->company_name,
+				'Title' =>  $job->title,
+				'Url' => $job->url_next_step,
+				'Location' => "{$job->city} {$job->state} {$job->country_code}",
+				'Category' => "{$job->job_category} - {$job->business_category}",
+				'PostedAt' => $job->posted_date,
+				'Department' => $job->team->label
+			);
+		}
+		return $ret;
+	}
+
+	/**
+	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+	 *
+	 * @return array|null
+	 * @throws \Exception
+	 */
+	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+	{
+		try {
+			$ret = array();
+			$nOffset = 0;
+			if (!empty($this->lastResponseData['count']) && $this->lastResponseData['count'] > 0) {
+				$jobs = $this->lastResponseData['jobs'];
+				while (!empty($jobs)) {
+					$lastRet = $this->_parseJsonJobs($jobs);
+					$ret = array_merge($ret, $lastRet);
+					$nOffset = $nOffset . count($jobs);
+					if ($nOffset < $this->lastResponseData['count']) {
+						$lastResp = $this->getJsonResultsPage($nOffset);
+						$jobs = $lastResp['jobs'];
+					} else
+						$jobs = null;
+				}
+			}
+
+			return $ret;
+		} catch (Exception $ex) {
+			LogWarning("Failed to download Amazon listings via JSON.  Reverting to HTML.  " . $ex->getMessage());
+			$this->JobListingsPerPage = 10;
+			return parent::parseJobsListForPage($objSimpHTML);
+		}
+	}
+
+	/**
+	 * @param $offset
+	 *
+	 * @throws \ErrorException
+	 * @throws \Exception
+	 * @return array
+	 */
+	private function getJsonResultsPage($offset)
+	{
+		$curl = new \JobScooper\Utils\CurlWrapper();
+		if (isDebug()) $curl->setDebug(true);
+
+		$ret = array("count" => null, "jobs" => null);
+		$url = $this->searchJsonUrlFmt . "&offset=0";
+		$lastCookies = $this->getActiveWebdriver()->manage()->getCookies();
+
+		$retObj = $curl->cURL($url, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = $lastCookies);
+		if (!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0) {
+			$respdata = json_decode($retObj['output']);
+			if(!empty($respdata))
+			{
+				$this->lastResponseData = $respdata;
+				try
+				{
+					$ret['count'] = $respdata->hits;
+					$ret['jobs'] = $respdata->jobs;
+
+				}
+				catch(Exception $ex)
+				{
+					throw new Exception($respdata->error);
+				}
+			}
+
+		}
+		return $ret;
+	}
 
     protected $arrListingTagSetup = array(
         'TotalPostCount' =>  array('selector' => 'div.job-count-info', 'return_value_regex' => '/.*?of\s(\d+)/'),
@@ -114,7 +262,12 @@ class PluginAmazon extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
     );
 
 
-    static function cleanupLocationValue($var)
+	/**
+	 * @param $var
+	 *
+	 * @return string
+	 */
+	static function cleanupLocationValue($var)
     {
         $ret = "";
         $parts = preg_split("/,\s?/", $var);
