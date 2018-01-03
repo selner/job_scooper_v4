@@ -18,12 +18,15 @@
 namespace JobScooper\StageProcessor;
 
 use JobScooper\Builders\JobSitePluginBuilder;
+use JobScooper\DataAccess\Map\UserJobMatchTableMap;
+use JobScooper\DataAccess\UserJobMatchQuery;
 use JobScooper\Utils\JobsMailSender;
 use Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Font;
+use Propel\Runtime\Propel;
 
 /**
  * Class NotifierJobAlerts
@@ -45,6 +48,8 @@ class NotifierJobAlerts extends JobsMailSender
 
 	const SHEET_EXCLUDED_MATCHES = "excluded job matches";
 	const SHEET_EXCLUDED_ALL = "all excluded jobs";
+	const SHEET_ALL_JOBS = "all possible matches";
+
 	const KEYS_EXCLUDED = array(
 		"JobSiteKey",
 		"JobPostingId",
@@ -110,14 +115,16 @@ class NotifierJobAlerts extends JobsMailSender
 		//
 
 		$this->arrAllUnnotifiedJobs = getAllMatchesForUserNotification();
-		if (is_null($this->arrAllUnnotifiedJobs) || count($this->arrAllUnnotifiedJobs) <= 0) {
-			LogMessage("No new jobs found to notify user about.");
-			endLogSection(" User results notification.");
+		if(empty($this->arrAllUnnotifiedJobs))
+			$this->arrAllUnnotifiedJobs = array();
+//		if (is_null($this->arrAllUnnotifiedJobs) || count($this->arrAllUnnotifiedJobs) <= 0) {
+//			LogMessage("No new jobs found to notify user about.");
+//			endLogSection(" User results notification.");
+//
+//			return false;
+//		}
 
-			return false;
-		}
-
-		$arrJobsToNotify = array_filter($this->arrAllUnnotifiedJobs, array($this, '_isIncludedJobSite'));
+		$arrJobsToNotify = $this->arrAllUnnotifiedJobs;
 		$detailsHTMLFile = null;
 		$pathExcelResults = null;
 		$arrFilesToAttach = array();
@@ -161,17 +168,15 @@ class NotifierJobAlerts extends JobsMailSender
 			$ret = $this->sendEmail(NotifierJobAlerts::PLAINTEXT_EMAIL_DIRECTIONS, $messageHtml, $arrFilesToAttach, $subject, "results");
 			if ($ret !== false || $ret !== null) {
 				if (!isDebug()) {
-					$arrToMarkNotified = array_from_orm_object_list_by_array_keys($arrJobsToNotify, array("JobPostingId"));
-					$ids = array_column($arrToMarkNotified, "JobPostingId");
-					$rowsAffected = 0;
-					foreach (array_chunk($ids, 100) as $arrChunkIds) {
-						$results = \JobScooper\DataAccess\UserJobMatchQuery::create()
-							->filterByJobPostingId($arrChunkIds)
-							->update(array('UserNotificationState' => 'sent'), null, true);
-						$rowsAffected .= count($results);
+					$con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
+					$ids = array_from_orm_object_list_by_array_keys($arrJobsToNotify, array("UserJobMatchId"));
+					$valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
+					$statusInt = array_search(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_SENT, $valueSet);
+					foreach (array_chunk($ids, 50) as $chunk) {
+						UserJobMatchQuery::create()
+							->filterByUserJobMatchId($chunk)
+							->update(array("UserNotificationState" => $statusInt), $con);
 					}
-					if ($rowsAffected != count($arrToMarkNotified))
-						LogMessage("Warning:  marked only " . $rowsAffected . " of " . count($arrToMarkNotified) . " UserJobMatch records as notified.");
 				}
 			}
 			endLogSection(" Email send completed...");
@@ -215,19 +220,24 @@ class NotifierJobAlerts extends JobsMailSender
 		$sheetFilters = array(
 			[NotifierJobAlerts::SHEET_MATCHES, "isUserJobMatch", NotifierJobAlerts::KEYS_MATCHES],
 			[NotifierJobAlerts::SHEET_EXCLUDED_MATCHES, "isUserJobMatchAndNotExcluded", NotifierJobAlerts::KEYS_EXCLUDED],
-			[NotifierJobAlerts::SHEET_EXCLUDED_ALL, "isExcluded", NotifierJobAlerts::KEYS_EXCLUDED]
+			[NotifierJobAlerts::SHEET_ALL_JOBS, null, NotifierJobAlerts::KEYS_EXCLUDED]
 		);
 
 		foreach ($sheetFilters as $sheetParams) {
-			if ($spreadsheet->sheetNameExists($sheetParams[0]))
-			{
-				$spreadsheet->setActiveSheetIndexByName($sheetParams[0]);
-				$spreadsheet->getActiveSheet()->getCell("F1")->setValue(getRunDateRange());
-				$arrFilteredJobs = array_filter($arrJobsToNotify, $sheetParams[1]);
-				if (!empty($arrFilteredJobs))
-					$this->_writeJobMatchesToSheet($spreadsheet, $sheetParams[0], $arrFilteredJobs, $sheetParams[2]);
-				$arrFilteredJobs = null;
+			if (!$spreadsheet->sheetNameExists($sheetParams[0])) {
+				LogWarning("No template sheet exists named {$sheetParams[0]} so creating it from blank sheet.");
+				$newSheet = $spreadsheet->createSheet();
+				$newSheet->setTitle($sheetParams[0]);
 			}
+			$spreadsheet->setActiveSheetIndexByName($sheetParams[0]);
+			$spreadsheet->getActiveSheet()->getCell("F1")->setValue(getRunDateRange());
+			if(empty($sheetParams[1]))
+				$arrFilteredJobs = $arrJobsToNotify;
+			else
+				$arrFilteredJobs = array_filter($arrJobsToNotify, $sheetParams[1]);
+			if (!empty($arrFilteredJobs))
+				$this->_writeJobMatchesToSheet($spreadsheet, $sheetParams[0], $arrFilteredJobs, $sheetParams[2]);
+			$arrFilteredJobs = null;
 		}
 		$spreadsheet->setActiveSheetIndexByName($sheetFilters[0][0]);
 
@@ -366,39 +376,6 @@ class NotifierJobAlerts extends JobsMailSender
 		}
 
 		return $arrRet;
-
-	}
-
-	/**
-	 * @param $var
-	 *
-	 * @return bool
-	 */
-	protected function _isIncludedJobSite($var)
-	{
-		$sites = $this->_getJobSitesRunRecently();
-
-		return in_array(cleanupSlugPart($var->getJobPostingFromUJM()->getJobSiteKey()), $sites);
-
-	}
-
-	/**
-	 * @return array|null
-	 */
-	private function _getJobSitesRunRecently()
-	{
-		if (is_null($this->_arrJobSitesForRun)) {
-			$this->_arrJobSitesForRun = JobSitePluginBuilder::getIncludedJobSites();
-
-			$sites = array_map(function ($var) {
-				return $var->getJobPostingFromUJM()->getJobSiteKey();
-			}, $this->arrAllUnnotifiedJobs);
-			$uniqSites = array_unique($sites);
-
-			$this->_arrJobSitesForRun = array_merge($this->_arrJobSitesForRun, $uniqSites);
-		}
-
-		return $this->_arrJobSitesForRun;
 
 	}
 
