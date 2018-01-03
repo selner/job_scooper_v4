@@ -108,7 +108,7 @@ function updateOrCreateJobPosting($arrJobItem)
  * @return array
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function getAllMatchesForUserNotification($jobsiteKey=null, $usrTitleKeywordSets=null, $excludeNonJobMatches=true)
+function getAllMatchesForUserNotification($jobsiteKey=null, $usrTitleKeywordSets=null, $excludeNonJobMatches=false)
 {
     $user= \JobScooper\DataAccess\User::getCurrentUser();
 
