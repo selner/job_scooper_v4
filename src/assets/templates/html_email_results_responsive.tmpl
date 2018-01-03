@@ -183,6 +183,20 @@
                                     {{#if Email.TotalJobMatchCount}}{{Email.TotalJobMatchCount}}{{/if}}
                                 </td>
                             </tr>
+                            {{#if Email.TotalJobsReviewedCount}}
+                            <tr>
+                                <td width="66%" align="left"
+                                    style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 800; line-height: 24px; padding: 10px; border-top: 3px solid #eeeeee; border-bottom: 3px solid #eeeeee;">
+                                    Total Jobs Downloaded & Reviewed
+                                </td>
+                                <td width="33%" align="left"
+                                    style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 800; line-height: 24px; padding: 10px; border-top: 3px solid #eeeeee; border-bottom: 3px solid #eeeeee;">
+                                    {{Email.TotalJobsReviewedCount}}
+                                </td>
+                            </tr>
+                            {{/if}}
+
+
                         </table>
                     </td>
                 </tr>
