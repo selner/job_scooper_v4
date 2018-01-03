@@ -63,7 +63,7 @@ class JobsAutoMarker
 
 	    $arrJobs_AutoUpdatable = getAllMatchesForUserNotification(null, null, true);
 	    if (empty($arrJobs_AutoUpdatable)) {
-		    LogMessage("No new jobs found to auto-mark.");
+		    LogMessage("No job matches remain to auto-mark.");
 		    return;
 	    }
 
@@ -434,7 +434,7 @@ class JobsAutoMarker
             } catch (Exception $ex) {
                 handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s', isDebug());
             }
-            LogMessage("Processed " . countAssociativeArrayValues($arrJobsList) . " titles for auto-marking against search title keywords: " . $nJobsMarkedInclude . "/" . count($arrJobsList) . " marked as matches; " . $nJobsNotMarked . "/" . count($arrJobsList) . " not marked.");
+            LogMessage("Processed " . countAssociativeArrayValues($arrJobsList) . " jobs: " . $nJobsMarkedInclude . "/" . count($arrJobsList) . " marked as user job title matches; " . $nJobsNotMarked . "/" . count($arrJobsList) . " marked as not matches to user search keywords.");
         }
         catch (Exception $ex)
         {
