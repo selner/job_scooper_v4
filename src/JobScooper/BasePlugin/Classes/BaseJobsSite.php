@@ -1244,19 +1244,22 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		$arrItem ['Url'] = trim($arrItem['Url']); // DO NOT LOWER, BREAKS URLS
 
 		try {
-			$urlParts = parse_url($arrItem['Url']);
-			if($urlParts == false || stristr($urlParts['scheme'], "http") == false)
+			if(empty($arrItem['Url']))
 			{
-//			if (!is_null($arrItem['Url']) || strlen($arrItem['Url']) > 0) {
-//				$arrMatches = array();
-//				$matchedHTTP = preg_match(REXPR_MATCH_URL_DOMAIN, $arrItem['Url'], $arrMatches);
-//				if (!$matchedHTTP) {
-//					$sep = "";
-				if (substr($arrItem['Url'], 0, 1) != "/")
-					$sep = "/";
-				$arrItem['Url'] = $this->JobPostingBaseUrl . $sep . $arrItem['Url'];
-			} else {
 				$arrItem['Url'] = "[UNKNOWN]";
+			} else {
+				$urlParts = parse_url($arrItem['Url']);
+				if($urlParts == false || stristr($urlParts['scheme'], "http") == false)
+				{
+	//			if (!is_null($arrItem['Url']) || strlen($arrItem['Url']) > 0) {
+	//				$arrMatches = array();
+	//				$matchedHTTP = preg_match(REXPR_MATCH_URL_DOMAIN, $arrItem['Url'], $arrMatches);
+	//				if (!$matchedHTTP) {
+	//					$sep = "";
+					if (substr($arrItem['Url'], 0, 1) != "/")
+						$sep = "/";
+					$arrItem['Url'] = $this->JobPostingBaseUrl . $sep . $arrItem['Url'];
+				}
 			}
 		} catch (\Exception $ex)
 		{
