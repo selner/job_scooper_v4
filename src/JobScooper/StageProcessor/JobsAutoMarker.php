@@ -416,7 +416,7 @@ class JobsAutoMarker
 		            $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
 		            UserJobMatchQuery::create()
 			            ->filterByUserJobMatchId($chunk)
-			            ->update(array("IsJobMatch" => true, "MatchedUserKeywords" => $usrSearchKeywords), $con);
+			            ->update(array("IsJobMatch" => true, "MatchedUserKeywords" => $usrSearchKeywords), $con, true);
 	            }
 
 				$arrNotMatchedJobs = array_diff_key($arrJobsList,$arrJobsWithTokenMatches);
