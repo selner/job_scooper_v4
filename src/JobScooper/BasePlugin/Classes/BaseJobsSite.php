@@ -882,13 +882,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	private function _addSearch_(UserSearchSiteRun $searchDetails)
     {
-        if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
-        {
-            // null out any generalized keyword set values we previously had
-            $searchDetails->setKeywords("");
-            $searchDetails->setKeywordTokens("");
-        }
-
         $this->_setStartingUrlForSearch_($searchDetails);
 
         $searchDetails->save();
