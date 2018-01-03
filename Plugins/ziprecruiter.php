@@ -27,6 +27,7 @@ class PluginZipRecruiter extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePl
     protected $JobSiteName = 'ziprecruiter';
     protected $JobPostingBaseUrl = 'www.ziprecruiter.com';
     protected $JobListingsPerPage = C__TOTAL_ITEMS_UNKNOWN__; // we use this to make sure we only have 1 single results page
+	protected $CountryCodes = array("US");
 
     protected $SearchUrlFormat = "https://www.ziprecruiter.com/candidate/search?search=***KEYWORDS***&include_near_duplicates=1&location=***LOCATION***&radius=25&days=***NUMBER_DAYS***";
     protected $PaginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
@@ -34,7 +35,7 @@ class PluginZipRecruiter extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePl
 
     protected $arrListingTagSetup = array(
         'NoPostsFound'    => array('selector' => 'section.no-results h2', 'return_attribute' => 'text', 'return_value_callback' => "checkNoJobResults"),
-        'TotalPostCount'        => array('selector' => '#h1.headline', 'return_attribute' => 'text', 'return_value_regex' =>  '/\b(\d+)\b/i'),
+        'TotalPostCount'        => array('selector' => 'h1.headline', 'return_attribute' => 'text', 'return_value_regex' =>  '/\b(\d+)\b/i'),
         'JobPostItem'      => array('selector' => '#job_list div article'),
         'Title'                 => array('selector' => 'span.just_job_title', 'return_attribute' => 'text'),
         'Url'                  => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => 'job_link', 'return_attribute' => 'href'),
@@ -99,4 +100,13 @@ class PluginZipRecruiter extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePl
 
     }
 
+}
+
+
+class PluginZipRecruiterUK extends PluginZipRecruiter
+{
+	protected $JobSiteName = 'ZipRecruiterUK';
+	protected $JobPostingBaseUrl = 'http://www.ziprecruiter.co.uk';
+	protected $SearchUrlFormat = "https://www.ziprecruiter.co.uk/candidate/search?search=***KEYWORDS***&include_near_duplicates=1&location=***LOCATION***&radius=25&days=***NUMBER_DAYS***";
+	protected $CountryCodes = array("UK");
 }
