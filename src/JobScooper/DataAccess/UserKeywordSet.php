@@ -21,6 +21,22 @@ class UserKeywordSet extends BaseUserKeywordSet
 {
 	public function setKeywords($v)
 	{
+		if(is_string($v))
+		{
+			$v = cleanupTextValue($v);
+		}
+		else if(is_array($v))
+		{
+			foreach($v as $k => $item)
+			{
+				$newItem = cleanupTextValue($item);
+				if(empty($newItem))
+					unset($v[$k]);
+				else
+					$v[$k] = $newItem;
+			}
+		}
+
 		$ret = parent::setKeywords($v);
 		if(!empty($this->getKeywords()))
 		{
@@ -36,6 +52,9 @@ class UserKeywordSet extends BaseUserKeywordSet
 		if (!is_array($arrKeywords)) {
 			throw new Exception("Invalid keywords object type.");
 		}
+
+		if(empty($arrKeywords))
+			return null;
 
 		$arrKeywordTokens = tokenizeSingleDimensionArray($arrKeywords, "srchkwd", "keywords", "keywords");
 		$arrReturnKeywordTokens = array_fill_keys(array_keys($arrKeywordTokens), null);
