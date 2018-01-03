@@ -108,7 +108,7 @@ function updateOrCreateJobPosting($arrJobItem)
  * @return array
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function getAllMatchesForUserNotification($jobsiteKey=null, $usrTitleKeywordSets=null, $excludeNonJobMatches=false)
+function getAllMatchesForUserNotification($jobsiteKey=null, $usrTitleKeywordSets=null, $excludeNonJobMatches=false, $arrGeoLocIds=null)
 {
     $user= \JobScooper\DataAccess\User::getCurrentUser();
 
@@ -137,12 +137,15 @@ function getAllMatchesForUserNotification($jobsiteKey=null, $usrTitleKeywordSets
 		    ->endUse();
     }
 
+    if(!empty($arrGeoLocIds) && is_array($arrGeoLocIds))
+    {
+	    $query->useJobPostingFromUJMQuery()
+		    ->filterByGeoLocationId($arrGeoLocIds)
+		    ->endUse();
+    }
 
     if(!empty($usrTitleKeywordSets)) {
-//	    $jpquery = \JobScooper\DataAccess\Base\JobPostingQuery::create("JobPostingFromUJM");
 	    $nCount = 0;
-
-
 	    foreach ($usrTitleKeywordSets as $kwd_set) {
 
 	    	if(is_string($kwd_set))
