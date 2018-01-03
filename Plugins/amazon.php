@@ -167,13 +167,14 @@ class PluginAmazon extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 		{
 			$ret[$job->id] = array(
 				'JobSiteKey' => "amazon",
-				'JobSitePostId' => $job->id,
+				'JobSitePostId' => $job->id_icims,
 				'Company' => $job->company_name,
 				'Title' =>  $job->title,
 				'Url' => $job->url_next_step,
 				'Location' => "{$job->city} {$job->state} {$job->country_code}",
 				'Category' => "{$job->job_category} - {$job->business_category}",
-				'PostedAt' => $job->posted_date
+				'PostedAt' => $job->posted_date,
+				'Department' => $job->team->label
 			);
 		}
 		return $ret;
