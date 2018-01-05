@@ -161,7 +161,7 @@ class StageManager
                     try
                     {
                         startLogSection("Downloading updated jobs on " . count($searches) . " search(es) for ". $jobsiteKey . "...");
-                        $site->getUpdatedJobsForAllSearches();
+                        $site->downloadLatestJobsForAllSearches();
                     }
                     catch (\Exception $classError)
                     {

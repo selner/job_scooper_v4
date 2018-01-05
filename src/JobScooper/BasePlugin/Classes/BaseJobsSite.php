@@ -207,17 +207,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 	/**
 	 * @return array
-	 */
-	public function getMyJobsList()
-    {
-        return getAllMatchesForUserNotification($this->JobSiteKey);
-    }
-
-	/**
-	 * @return array
 	 * @throws \Exception
 	 */
-	public function getUpdatedJobsForAllSearches()
+	public function downloadLatestJobsForAllSearches()
     {
         $boolSearchSuccess = null;
 
@@ -316,8 +308,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	        setConfigurationSetting('current_user_search_details', null);
         }
 
-
-        return $this->getMyJobsList();
     }
 
     //************************************************************************

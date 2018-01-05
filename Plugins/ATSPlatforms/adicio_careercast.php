@@ -79,7 +79,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 	 * @return array
 	 * @throws \Exception
 	 */
-	function getUpdatedJobsForAllSearches()
+	function downloadLatestJobsForAllSearches()
 	{
 		if(!empty($this->LastKnownSiteLayout))
 		{
@@ -93,7 +93,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 
 		}
 
-		return parent::getUpdatedJobsForAllSearches();
+		return parent::downloadLatestJobsForAllSearches();
 	}
 
 	/**
