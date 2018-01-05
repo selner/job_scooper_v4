@@ -21,14 +21,29 @@ use JobScooper\Utils\PropertyObject;
 use JobScooper\Utils\SimpleHTMLHelper;
 
 
+/**
+ * Class SeleniumManager
+ * @package JobScooper\Manager
+ */
 class SeleniumManager extends PropertyObject
 {
-    private $remoteWebDriver = null;
+	/**
+	 * @var \RemoteWebDriver|null
+	 */
+	private $remoteWebDriver = null;
     private $additionalLoadDelaySeconds = null;
     private $lastCookies = array();
     private $_seleniumIsRunning = false;
     private $_settings = null;
-    function __construct($additionalLoadDelaySeconds = 0)
+
+	/**
+	 * SeleniumManager constructor.
+	 *
+	 * @param int $additionalLoadDelaySeconds
+	 *
+	 * @throws \Exception
+	 */
+	function __construct($additionalLoadDelaySeconds = 0)
     {
         $this->additionalLoadDelaySeconds = $additionalLoadDelaySeconds;
         $this->_settings = getConfigurationSetting('selenium');
@@ -40,7 +55,11 @@ class SeleniumManager extends PropertyObject
         }
     }
 
-    function __destruct()
+	/**
+	 *
+	 * @throws \Exception
+	 */
+	function __destruct()
     {
         $this->doneWithRemoteWebDriver();
 
@@ -50,7 +69,14 @@ class SeleniumManager extends PropertyObject
         $this->_seleniumIsRunning = false;
     }
 
-    function getPageHTML($url, $recursed = false)
+	/**
+	 * @param      $url
+	 * @param bool $recursed
+	 *
+	 * @return string
+	 * @throws \Exception
+	 */
+	function getPageHTML($url, $recursed = false)
     {
         try {
             $driver = $this->get_driver();
@@ -91,7 +117,12 @@ class SeleniumManager extends PropertyObject
         }
     }
 
-    function loadPage($url)
+	/**
+	 * @param $url
+	 *
+	 * @throws \Exception
+	 */
+	function loadPage($url)
     {
         try {
             $driver = $this->get_driver();
@@ -108,13 +139,20 @@ class SeleniumManager extends PropertyObject
         }
     }
 
-    function done()
+	/**
+	 *
+	 * @throws \Exception
+	 */
+	function done()
     {
         $this->doneWithRemoteWebDriver();
         $this->shutdownSelenium();
     }
 
-    function killAllAndRestartSelenium()
+	/**
+	 * @throws \Exception
+	 */
+	function killAllAndRestartSelenium()
     {
         try {
             $this->doneWithRemoteWebDriver();
@@ -131,7 +169,10 @@ class SeleniumManager extends PropertyObject
 
     }
 
-    function shutdownSelenium()
+	/**
+	 *
+	 */
+	function shutdownSelenium()
     {
         $canStop = false;
         $settings = $this->_settings;
@@ -171,7 +212,10 @@ class SeleniumManager extends PropertyObject
 
     }
 
-     protected function doneWithRemoteWebDriver()
+	/**
+	 * @throws \Exception
+	 */
+	protected function doneWithRemoteWebDriver()
     {
         try {
 
@@ -193,7 +237,11 @@ class SeleniumManager extends PropertyObject
         }
     }
 
-    function startSeleniumServer()
+	/**
+	 * @return bool
+	 * @throws \Exception
+	 */
+	function startSeleniumServer()
     {
 
         $settings = $this->_settings;
@@ -246,7 +294,10 @@ class SeleniumManager extends PropertyObject
         return $this->isServerUp();
     }
 
-    function isServerUp()
+	/**
+	 * @return bool
+	 */
+	function isServerUp()
     {
 
         $hostHubPageURL = $this->_settings['host_location'] . '/wd/hub';
@@ -256,19 +307,6 @@ class SeleniumManager extends PropertyObject
         $ret = false;
 
         try{
-
-//
-//            $client = new \GuzzleHttp\Client();
-//            LogDebug("Getting HTML from server page" . $hostHubPageURL);
-//
-//            $res = $client->request('GET', $hostHubPageURL);
-//            $rescode = $res->getStatusCode();
-//            if($rescode > 200)
-//            {
-//                return false;
-//            }
-//            $strHtml = $res->getBody();
-//
             $objSimplHtml = new SimpleHtmlHelper($$hostHubPageURL);
             if ($objSimplHtml === false)
             {
@@ -302,7 +340,9 @@ class SeleniumManager extends PropertyObject
     /**
      * Get the current webdriver or create a new one if needed.
      *
+     * @throws \Exception
      * @return \RemoteWebDriver
+     *
      */
     function get_driver()
     {
@@ -336,7 +376,10 @@ class SeleniumManager extends PropertyObject
         return null;
     }
 
-    function getWebDriverKind()
+	/**
+	 * @return mixed|null|string
+	 */
+	function getWebDriverKind()
     {
         $webdriver = (array_key_exists('webdriver', $this->_settings)) ? $this->_settings['webdriver'] : null;
         if(is_null($webdriver)) {
@@ -348,7 +391,11 @@ class SeleniumManager extends PropertyObject
         return $webdriver;
     }
 
-    private function create_remote_webdriver()
+	/**
+	 * @return null|\RemoteWebDriver
+	 * @throws \Exception
+	 */
+	private function create_remote_webdriver()
     {
         $hubUrl = $this->_settings['host_location'] . '/wd/hub';
         LogMessage("Creating Selenium remote web driver to host {$hubUrl}...");

@@ -35,7 +35,7 @@ class JobSitePluginBuilder
 	/**
 	 * @param bool $requireEnabled
 	 *
-	 * @return array|mixed
+	 * @return \JobScooper\DataAccess\JobSiteRecord[]|null
 	 */
 	static function getAllJobSites($requireEnabled=true)
     {

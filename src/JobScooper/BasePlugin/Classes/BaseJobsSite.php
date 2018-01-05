@@ -22,6 +22,7 @@ namespace JobScooper\BasePlugin\Classes;
 use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\DataAccess\GeoLocation;
 use JobScooper\DataAccess\JobPostingQuery;
+use JobScooper\DataAccess\Map\UserSearchSiteRunTableMap;
 use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserJobMatchQuery;
 use JobScooper\DataAccess\UserSearchSiteRun;
@@ -43,6 +44,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
 {
 	/**
 	 * BaseJobsSite constructor.
+	 *
+	 * @throws \Exception
 	 */
 	function __construct()
     {
@@ -116,6 +119,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 	/**
 	 * @return string
+	 * @throws \Exception
 	 */
 	function setResultsFilterType()
 	{
@@ -144,7 +148,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	function getJobSiteKey()
 	{
 		if(empty($this->JobSiteKey)) {
-			$arrSiteList = \JobScooper\Builders\JobSitePluginBuilder::getAllJobSites();
+			$arrSiteList = JobSitePluginBuilder::getAllJobSites();
 			$className = get_class($this);
 			$siteKey = strtolower(str_ireplace("Plugin", "", $className));
 			if (array_key_exists($siteKey, $arrSiteList) === true)
@@ -179,11 +183,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 	/**
-	 * @param $arrSearches
+	 * @param UserSearchSiteRun[] $arrSearches
 	 *
+	 * @throws \Exception
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	public function addSearches($arrSearches)
+	public function addSearches( $arrSearches)
     {
 	    $this->setResultsFilterType();
 
@@ -212,6 +217,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	public function downloadLatestJobsForAllSearches()
     {
+    	$search = null;
         $boolSearchSuccess = null;
 
         if (count($this->arrSearchesToReturn) == 0) {
@@ -268,7 +274,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                         ->find()
                         ->getData();
 
-                    $queryAllJobsFromJobSite = \JobScooper\DataAccess\JobPostingQuery::create()
+                    $queryAllJobsFromJobSite = JobPostingQuery::create()
                         ->filterByJobSiteKey($this->JobSiteKey)
                         ->select("JobPostingId")
                         ->find()
@@ -321,16 +327,24 @@ abstract class BaseJobsSite implements IJobSitePlugin
     //
     //************************************************************************
 
+	/**
+	 * @var SeleniumManager|null
+	 */
+	protected $selenium = null;
+
+	/**
+	 * @var UserSearchSiteRun[]|null
+	 */
+	protected $arrSearchesToReturn = null;
+
     protected $JobListingsPerPage = 20;
     protected $additionalBitFlags = array();
     protected $PaginationType = null;
     protected $secsPageTimeout = null;
-    protected $selenium = null;
     protected $nextPageScript = null;
     protected $selectorMoreListings = null;
     protected $nMaxJobsToReturn = C_JOB_MAX_RESULTS_PER_SEARCH;
     protected $arrSearchReturnedJobs = array();
-    protected $arrSearchesToReturn = null;
     protected $SearchUrlFormat = null;
     protected $JobPostingBaseUrl = null;
     protected $LocationType = null;
@@ -351,7 +365,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
 
     protected $CountryCodes = array("US");
-    private $_jobSiteDbRecord = null;
 
 
 	/**
@@ -436,6 +449,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 	/**
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+	 * @param string $fmt
 	 *
 	 * @return null|string
 	 * @throws \ErrorException
@@ -443,7 +457,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	protected function getGeoLocationURLValue(UserSearchSiteRun $searchDetails, $fmt=null)
     {
-        $strReturnLocation = VALUE_NOT_SUPPORTED;
 
         if ($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)) {
             throw new \ErrorException($this->JobSiteName . " does not support the ***LOCATION*** replacement value in a base URL.  Please review and change your base URL format to remove the location value.  Aborting all searches for " . $this->JobSiteName);
@@ -494,10 +507,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 	private function _getUrlTokenList($strUrl)
     {
-    	$tokenList = array();
 	    $tokenFmtStrings = array();
 
-	    $count = preg_match_all("/\*{3}(\w+):?(.*?)\*{3}/", $strUrl, $tokenlist);
+	    preg_match_all("/\*{3}(\w+):?(.*?)\*{3}/", $strUrl, $tokenlist);
 	    if(!empty($tokenlist) && is_array($tokenlist) && count($tokenlist) >= 3) {
 		    $tokenFmtStrings = array_combine($tokenlist[1], $tokenlist[2]);
 	    }
@@ -902,8 +914,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	private function _getKeywordStringsForUrl_(UserSearchSiteRun $searchDetails)
     {
-        $ret = "";
-
         // if we don't support keywords in the URL at all for this
         // plugin or we don't have any keywords, return empty string
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) ||
@@ -1057,6 +1067,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @param null                                     $success
 	 * @param null                                     $except
 	 * @param bool                                     $runWasSkipped
+	 * @param SimpleHTMLHelper                         $objPageHtml
 	 *
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
@@ -1152,6 +1163,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
 	 *
 	 * @return null
+	 * @throws \Exception
 	 */
 	protected function _getMyJobsForSearchFromJobsAPI_(UserSearchSiteRun $searchDetails)
     {
@@ -1252,11 +1264,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 				$urlParts = parse_url($arrItem['Url']);
 				if($urlParts == false || stristr($urlParts['scheme'], "http") == false)
 				{
-	//			if (!is_null($arrItem['Url']) || strlen($arrItem['Url']) > 0) {
-	//				$arrMatches = array();
-	//				$matchedHTTP = preg_match(REXPR_MATCH_URL_DOMAIN, $arrItem['Url'], $arrMatches);
-	//				if (!$matchedHTTP) {
-	//					$sep = "";
+					$sep = "";
 					if (substr($arrItem['Url'], 0, 1) != "/")
 						$sep = "/";
 					$arrItem['Url'] = $this->JobPostingBaseUrl . $sep . $arrItem['Url'];
@@ -1306,7 +1314,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	/**
 	 * @param                   $arrJobList
 	 * @param UserSearchSiteRun $searchDetails
-	 * $param $CountNewJobs Returns number of jobs that were new database records.
+	 * @param int               $nCountNewJobs Returns number of jobs that were new database records.
 	 *
 	 * @throws \Exception
 	 */
@@ -1448,7 +1456,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
         try {
             $nItemCount = 1;
             $nPageCount = 1;
-            $arrPreviouslyLoadedJobIds = array();
 
             LogMessage("Getting count of " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchSiteRunKey() . "': " . $searchDetails->getSearchStartUrl());
 
