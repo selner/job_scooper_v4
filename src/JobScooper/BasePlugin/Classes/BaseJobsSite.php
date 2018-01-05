@@ -21,7 +21,9 @@ namespace JobScooper\BasePlugin\Classes;
 
 use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\DataAccess\GeoLocation;
+use JobScooper\DataAccess\JobPostingQuery;
 use JobScooper\DataAccess\User;
+use JobScooper\DataAccess\UserJobMatchQuery;
 use JobScooper\DataAccess\UserSearchSiteRun;
 use JobScooper\BasePlugin\Interfaces\IJobSitePlugin;
 use JobScooper\Manager\SeleniumManager;
@@ -137,7 +139,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	}
 
 	/**
-	 * @return mixed|null|string
+	 * @return null|string
 	 */
 	function getJobSiteKey()
 	{
@@ -206,7 +208,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 	/**
-	 * @return array
 	 * @throws \Exception
 	 */
 	public function downloadLatestJobsForAllSearches()
@@ -258,7 +259,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 try
                 {
                     LogMessage("Checking for missing " . $this->JobSiteKey . " jobs for user " . $user->getUserId() . ".");
-                    $dataExistingUserJobMatchIds = \JobScooper\DataAccess\UserJobMatchQuery::create()
+                    $dataExistingUserJobMatchIds = UserJobMatchQuery::create()
                         ->select("JobPostingId")
                         ->filterByUserId($user->getUserId())
                         ->useJobPostingFromUJMQuery()
@@ -356,7 +357,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	/**
 	 * @param \JobScooper\DataAccess\GeoLocation|null $location
 	 *
-	 * @return null
+	 * @return null|string
 	 */
 	function getGeoLocationSettingType(GeoLocation $location=null)
     {
@@ -364,7 +365,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 	/**
-	 * @return array
+	 * @return string[]
 	 */
 	function getSupportedCountryCodes()
     {
@@ -383,7 +384,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 	/**
-	 * @return mixed
+	 * @return \RemoteWebDriver
 	 * @throws \Exception
 	 */
 	protected function getActiveWebdriver()
@@ -397,7 +398,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	/**
 	 * @param $arrKeywordSet
 	 *
-	 * @return mixed
+	 * @return string[]
 	 */
 	protected function getCombinedKeywordString($arrKeywordSet)
     {
@@ -484,7 +485,14 @@ abstract class BaseJobsSite implements IJobSitePlugin
         return $strLocationValue;
     }
 
-    private function _getUrlTokenList($strUrl)
+	/**
+	 * @param string $strUrl
+	 *
+	 * @return string[]
+	 * @throws \Exception
+	 */
+
+	private function _getUrlTokenList($strUrl)
     {
     	$tokenList = array();
 	    $tokenFmtStrings = array();
@@ -502,8 +510,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @param null                                     $nPage
 	 * @param null                                     $nItem
 	 *
-	 * @return mixed|null
-	 * @throws \ErrorException
+	 * @return string|null
+	 * @throws \Exception
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	protected function getPageURLfromBaseFmt(UserSearchSiteRun $searchDetails, $nPage = null, $nItem = null)
@@ -582,7 +590,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @param null                                          $nPage
 	 * @param null                                          $nItem
 	 *
-	 * @return null
+	 * @return string
 	 */
 	protected function _getSearchUrlFormat_(UserSearchSiteRun  $searchDetails = null, $nPage = null, $nItem = null)
     {
@@ -592,7 +600,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	/**
 	 * @param null $nDays
 	 *
-	 * @return int|null
+	 * @return int
 	 */
 	protected function getDaysURLValue($nDays = null)
     {
@@ -627,8 +635,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	/**
 	 * @param $objSimpHTML
 	 *
-	 * @return null|string|void
-	 */
+	 * @return int|string|null
+	 *
+	*/
 	function parseTotalResultsCount($objSimpHTML)
     {
         throw new \BadMethodCallException(sprintf("Not implemented method " . __METHOD__ . " called on class \"%s \".", __CLASS__));
@@ -654,7 +663,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	/**
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
 	 *
-	 * @return mixed|string
+	 * @return string
 	 */
 	protected function getKeywordURLValue(UserSearchSiteRun $searchDetails)
     {
@@ -820,6 +829,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 	/**
 	 * @return bool
+	 * @throws \Exception
 	 */
 	protected function goToNextPageOfResultsViaNextButton()
     {
@@ -868,6 +878,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	/**
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
 	 *
+	 * @throws \Exception
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	private function _addSearch_(UserSearchSiteRun $searchDetails)
@@ -887,7 +898,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	/**
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
 	 *
-	 * @return mixed|string
+	 * @return string
 	 */
 	private function _getKeywordStringsForUrl_(UserSearchSiteRun $searchDetails)
     {
@@ -910,7 +921,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	/**
 	 * @param $arrKeywordSet
 	 *
-	 * @return mixed|string
+	 * @return string
 	 */
 	private function _getCombinedKeywordStringForURL_($arrKeywordSet)
     {
@@ -943,7 +954,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	/**
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
 	 *
-	 * @throws \ErrorException
+	 * @throws \Exception
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	private function _setStartingUrlForSearch_(UserSearchSiteRun $searchDetails)
@@ -1032,8 +1043,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $details
 	 * @param                                          $strURL
 	 *
-	 * @return mixed
-	 * @throws \ErrorException
+	 * @return string
+	 * @throws \Exception
 	 */
 	private function _checkInvalidURL_(UserSearchSiteRun $details, $strURL)
     {
@@ -1155,7 +1166,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
             $apiJobs = $this->getSearchJobsFromAPI($searchDetails);
             if (is_null($apiJobs)) {
                 LogWarning("Warning: " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "] returned zero jobs from the API." . PHP_EOL);
-                return null;
+                return;
             }
 
             foreach ($apiJobs as $job) {
@@ -1217,7 +1228,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	/**
 	 * @param $arrItem
 	 *
-	 * @return mixed
+	 * @return array
 	 */
 	function cleanupJobItemFields($arrItem)
 	{
@@ -1292,11 +1303,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     }
 
-    /**
-     * @param $arrJobList
-     * @param UserSearchSiteRun $searchDetails
-     * $param $CountNewJobs Returns number of jobs that were new database records.
-     */
+	/**
+	 * @param                   $arrJobList
+	 * @param UserSearchSiteRun $searchDetails
+	 * $param $CountNewJobs Returns number of jobs that were new database records.
+	 *
+	 * @throws \Exception
+	 */
     function saveSearchReturnedJobs($arrJobList, UserSearchSiteRun $searchDetails, &$nCountNewJobs=0)
     {
     	try {
@@ -1334,7 +1347,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     {
         $user = User::getCurrentUser();
         foreach ($arrJobIds as $jobId) {
-            $newMatch = \JobScooper\DataAccess\UserJobMatchQuery::create()
+            $newMatch = UserJobMatchQuery::create()
                 ->filterByUserId($user->getUserId())
                 ->filterByJobPostingId($jobId)
                 ->findOneOrCreate();
@@ -1351,16 +1364,16 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 *
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function _addJobMatchesToUser($searchDetails)
+	private function _addJobMatchesToUser(UserSearchSiteRun $searchDetails)
     {
         if(array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs) && !is_null($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]) && is_array($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]))
         $this->_addJobMatchIdsToUser(array_keys($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]), $searchDetails);
     }
 
 	/**
-	 * @param $arrJobs
+	 * @param \JobScooper\DataAccess\JobPosting[] $arrJobs
 	 *
-	 * @return array
+	 * @return int[]
 	 * @throws \Exception
 	 */
 	function saveJobList($arrJobs)
@@ -1376,7 +1389,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 	/**
-	 * @param $arrJobs
+	 * @param \JobScooper\DataAccess\JobPosting[] $arrJobs
 	 *
 	 * @return array
 	 * @throws \Propel\Runtime\Exception\PropelException
@@ -1384,7 +1397,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	protected function getJobsDbIds($arrJobs)
     {
         $arrIds = array_column($arrJobs, 'JobSitePostId', 'JobSitePostId');
-        $queryData = \JobScooper\DataAccess\JobPostingQuery::create()
+        $queryData = JobPostingQuery::create()
             ->select(array("JobPostingId", "JobSitePostId", "JobSiteKey", "KeySiteAndPostId"))
             ->filterByJobSiteKey($this->JobSiteName)
             ->filterByJobSitePostId(array_values($arrIds))

@@ -180,6 +180,7 @@ function getAllMatchesForUserNotification($jobsiteKey=null, $usrTitleKeywordSets
  * @param array $arrJobRecords The array of JobPosting objects to export
  *
  * @returns String Returns filepath of exported file if successful
+ * @throws \Exception
  */
 function writeJobRecordsToJson($filepath, $arrJobRecords)
 {
