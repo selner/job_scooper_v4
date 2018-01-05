@@ -17,21 +17,32 @@
  */
 
 
-abstract class AbstractResumator extends \JobScooper\BasePlugin\Classes\ServerHtmlSimplePlugin
+//abstract class AbstractResumator extends \JobScooper\BasePlugin\Classes\ServerHtmlSimplePlugin
+//{
+//    protected $arrListingTagSetup = array(
+//        'JobPostItem' => array('selector' => 'div#resumator-content-left-wrapper div.resumator-job'),
+//        'Title' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'resumator-job-title-link'),
+//        'Url' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'resumator-job-title-link', 'return_attribute' => 'href'),
+//        'Department' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'resumator-job-info'),
+//        'Location' => null,
+//        'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
+//    );
+//}
+//
+
+abstract class AbstractResumatorFall2017  extends \JobScooper\BasePlugin\Classes\ServerHtmlSimplePlugin
 {
-    protected $arrListingTagSetup = array(
-        'JobPostItem' => array(array('tag' => 'div', 'attribute' => 'id', 'attribute_value' =>'resumator-content-left-wrapper'), array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'resumator-job')),
-        'Title' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'resumator-job-title-link'),
-        'Url' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'resumator-job-title-link'),
-        'Department' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'resumator-job-info'),
-        'Location' => null,
-        'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
-    );
+	protected $arrListingTagSetup = array(
+		'JobPostItem' => array('selector' => 'ul.list-group li.list-group-item'),
+		'Title' => array('selector' => 'h4.list-group-item-heading a'),
+		'Url' => array('selector' => 'h4.list-group-item-heading a', 'return_attribute' => 'href'),
+		'Location' => array('selector' => 'ul li', 'index' => 0),
+		'Department' => array('selector' => 'ul li', 'index' => 1),
+		'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
+	);
 }
 
-
-
-class PluginAtlanticMedia extends AbstractResumator
+class PluginAtlanticMedia extends AbstractResumatorFall2017
 {
     protected $JobSiteName = 'AtlanticMedia';
     protected $childSiteURLBase = 'http://atlanticmedia.theresumator.com/';
@@ -39,20 +50,14 @@ class PluginAtlanticMedia extends AbstractResumator
 }
 
 
-class PluginMashableCorporate extends AbstractResumator
+
+
+class PluginMashableCorporate extends AbstractResumatorFall2017
 {
     protected $JobSiteName = 'MashableCorporate';
     protected $childSiteURLBase = 'http://mashable.theresumator.com/';
     protected $childSiteListingPage = 'http://mashable.theresumator.com/';
 
-    protected $arrListingTagSetup = array(
-        'JobPostItem' => array(array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' =>'list-group'), array('tag' => 'li', 'attribute' => 'class', 'attribute_value' => 'list-group-item')),
-        'Title' => array(array('tag' => 'h4', 'attribute' => 'class', 'attribute_value' =>'list-group-item-heading'), array('tag' => 'a')),
-        'Url' => array(array('tag' => 'h4', 'attribute' => 'class', 'attribute_value' =>'list-group-item-heading'), array('tag' => 'a')),
-        'Department' => array(array('tag' => 'ul' ), array('tag' => 'li', 'index' => 0)),
-        'Location' => array(array('tag' => 'ul' ), array('tag' => 'li', 'index' => 1)),
-        'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
-    );
 }
 
 
