@@ -38,7 +38,7 @@ echo ""
 echo "Removing any previous Docker containers"
 echo ""
 echo "***************************************************************"
-docker-compose down --remove-orphans
+# docker-compose down --remove-orphans
 
 docker-compose pull
 
