@@ -1,12 +1,15 @@
 #!/bin/bash
 
 echo off
+NOW=$(date "+%F-%H-%M-%S")
 
 DOCKER_RUN_CMD=""
 if [ -n ${1} ]; then
 	DOCKER_RUN_CMD="bash -C '${1}'"
 	echo "Docker run command:  "$DOCKER_RUN_CMD
 	export DOCKER_RUN_CMD=$DOCKER_RUN_CMD
+	CONTAINER_TAG="$CONTAINER_TAG_$NOW"
+	export CONTAINER_TAG=$CONTAINER_TAG
 fi
 
 if [ -z $CODEFRESH_API_KEY ]; then
