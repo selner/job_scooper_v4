@@ -52,8 +52,13 @@ DOC;
             $argkey = cleanupTextValue($argkey, "--", "");
 
             $argval = $v;
+
+            if(is_array($argval) && in_array($argkey, array("jobsite", "stages")))
+	            $argval = strtolower(join(",", $argval));
             if (is_string($argval)) {
                 $argval = cleanupTextValue($argval, "\"", "\"");
+	            if(in_array($argkey, array("jobsite", "stages")) && is_string($argval))
+	                $argval = strtolower($argval);
                 $arrVals = preg_split("/\s*,\s*/", $argval);
                 if (count($arrVals) > 1)
                     $argval = $arrVals;
@@ -63,6 +68,7 @@ DOC;
             }
 
             $this->arguments[$argkey] = $argval;
+
         }
     }
 
