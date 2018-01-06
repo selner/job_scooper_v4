@@ -4,8 +4,10 @@ echo off
 NOW=$(date "+%F-%H-%M-%S")
 
 DOCKER_RUN_CMD=""
-if [ -n ${1} ]; then
-	DOCKER_RUN_CMD="bash -C '${1}'"
+if [ -z ${1} ]; then
+	echo "no command set."
+else
+	DOCKER_RUN_CMD="env bash -C '${1}'"
 	echo "Docker run command:  "$DOCKER_RUN_CMD
 	export DOCKER_RUN_CMD=$DOCKER_RUN_CMD
 	CONTAINER_TAG="$CONTAINER_TAG_$NOW"
