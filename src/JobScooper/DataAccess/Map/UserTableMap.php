@@ -59,7 +59,7 @@ class UserTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 4;
+    const NUM_COLUMNS = 5;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class UserTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 4;
+    const NUM_HYDRATE_COLUMNS = 5;
 
     /**
      * the column name for the user_id field
@@ -92,6 +92,11 @@ class UserTableMap extends TableMap
     const COL_NAME = 'user.name';
 
     /**
+     * the column name for the config_file_path field
+     */
+    const COL_CONFIG_FILE_PATH = 'user.config_file_path';
+
+    /**
      * The default string format for model objects of the related table
      */
     const DEFAULT_STRING_FORMAT = 'YAML';
@@ -103,11 +108,11 @@ class UserTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('UserId', 'UserSlug', 'EmailAddress', 'Name', ),
-        self::TYPE_CAMELNAME     => array('userId', 'userSlug', 'emailAddress', 'name', ),
-        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_ID, UserTableMap::COL_USER_SLUG, UserTableMap::COL_EMAIL_ADDRESS, UserTableMap::COL_NAME, ),
-        self::TYPE_FIELDNAME     => array('user_id', 'user_slug', 'email_address', 'name', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, )
+        self::TYPE_PHPNAME       => array('UserId', 'UserSlug', 'EmailAddress', 'Name', 'ConfigFilePath', ),
+        self::TYPE_CAMELNAME     => array('userId', 'userSlug', 'emailAddress', 'name', 'configFilePath', ),
+        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_ID, UserTableMap::COL_USER_SLUG, UserTableMap::COL_EMAIL_ADDRESS, UserTableMap::COL_NAME, UserTableMap::COL_CONFIG_FILE_PATH, ),
+        self::TYPE_FIELDNAME     => array('user_id', 'user_slug', 'email_address', 'name', 'config_file_path', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
 
     /**
@@ -117,11 +122,11 @@ class UserTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('UserId' => 0, 'UserSlug' => 1, 'EmailAddress' => 2, 'Name' => 3, ),
-        self::TYPE_CAMELNAME     => array('userId' => 0, 'userSlug' => 1, 'emailAddress' => 2, 'name' => 3, ),
-        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_ID => 0, UserTableMap::COL_USER_SLUG => 1, UserTableMap::COL_EMAIL_ADDRESS => 2, UserTableMap::COL_NAME => 3, ),
-        self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_slug' => 1, 'email_address' => 2, 'name' => 3, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, )
+        self::TYPE_PHPNAME       => array('UserId' => 0, 'UserSlug' => 1, 'EmailAddress' => 2, 'Name' => 3, 'ConfigFilePath' => 4, ),
+        self::TYPE_CAMELNAME     => array('userId' => 0, 'userSlug' => 1, 'emailAddress' => 2, 'name' => 3, 'configFilePath' => 4, ),
+        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_ID => 0, UserTableMap::COL_USER_SLUG => 1, UserTableMap::COL_EMAIL_ADDRESS => 2, UserTableMap::COL_NAME => 3, UserTableMap::COL_CONFIG_FILE_PATH => 4, ),
+        self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_slug' => 1, 'email_address' => 2, 'name' => 3, 'config_file_path' => 4, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
 
     /**
@@ -146,6 +151,7 @@ class UserTableMap extends TableMap
         $this->getColumn('user_slug')->setPrimaryString(true);
         $this->addColumn('email_address', 'EmailAddress', 'VARCHAR', true, 128, null);
         $this->addColumn('name', 'Name', 'VARCHAR', true, 128, 'email_address');
+        $this->addColumn('config_file_path', 'ConfigFilePath', 'VARCHAR', true, 1024, null);
     } // initialize()
 
     /**
@@ -358,11 +364,13 @@ class UserTableMap extends TableMap
             $criteria->addSelectColumn(UserTableMap::COL_USER_SLUG);
             $criteria->addSelectColumn(UserTableMap::COL_EMAIL_ADDRESS);
             $criteria->addSelectColumn(UserTableMap::COL_NAME);
+            $criteria->addSelectColumn(UserTableMap::COL_CONFIG_FILE_PATH);
         } else {
             $criteria->addSelectColumn($alias . '.user_id');
             $criteria->addSelectColumn($alias . '.user_slug');
             $criteria->addSelectColumn($alias . '.email_address');
             $criteria->addSelectColumn($alias . '.name');
+            $criteria->addSelectColumn($alias . '.config_file_path');
         }
     }
 

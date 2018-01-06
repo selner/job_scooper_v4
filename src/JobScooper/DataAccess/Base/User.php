@@ -109,6 +109,13 @@ abstract class User implements ActiveRecordInterface
     protected $name;
 
     /**
+     * The value for the config_file_path field.
+     *
+     * @var        string
+     */
+    protected $config_file_path;
+
+    /**
      * @var        ObjectCollection|ChildUserKeywordSet[] Collection to store aggregation of ChildUserKeywordSet objects.
      */
     protected $collUserKeywordSets;
@@ -529,6 +536,16 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
+     * Get the [config_file_path] column value.
+     *
+     * @return string
+     */
+    public function getConfigFilePath()
+    {
+        return $this->config_file_path;
+    }
+
+    /**
      * Set the value of [user_id] column.
      *
      * @param int $v new value
@@ -609,6 +626,26 @@ abstract class User implements ActiveRecordInterface
     } // setName()
 
     /**
+     * Set the value of [config_file_path] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
+     */
+    public function setConfigFilePath($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->config_file_path !== $v) {
+            $this->config_file_path = $v;
+            $this->modifiedColumns[UserTableMap::COL_CONFIG_FILE_PATH] = true;
+        }
+
+        return $this;
+    } // setConfigFilePath()
+
+    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -659,6 +696,9 @@ abstract class User implements ActiveRecordInterface
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : UserTableMap::translateFieldName('Name', TableMap::TYPE_PHPNAME, $indexType)];
             $this->name = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserTableMap::translateFieldName('ConfigFilePath', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->config_file_path = (null !== $col) ? (string) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -667,7 +707,7 @@ abstract class User implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 4; // 4 = UserTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 5; // 5 = UserTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\User'), 0, $e);
@@ -1077,6 +1117,9 @@ abstract class User implements ActiveRecordInterface
         if ($this->isColumnModified(UserTableMap::COL_NAME)) {
             $modifiedColumns[':p' . $index++]  = 'name';
         }
+        if ($this->isColumnModified(UserTableMap::COL_CONFIG_FILE_PATH)) {
+            $modifiedColumns[':p' . $index++]  = 'config_file_path';
+        }
 
         $sql = sprintf(
             'INSERT INTO user (%s) VALUES (%s)',
@@ -1099,6 +1142,9 @@ abstract class User implements ActiveRecordInterface
                         break;
                     case 'name':
                         $stmt->bindValue($identifier, $this->name, PDO::PARAM_STR);
+                        break;
+                    case 'config_file_path':
+                        $stmt->bindValue($identifier, $this->config_file_path, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -1176,6 +1222,9 @@ abstract class User implements ActiveRecordInterface
             case 3:
                 return $this->getName();
                 break;
+            case 4:
+                return $this->getConfigFilePath();
+                break;
             default:
                 return null;
                 break;
@@ -1210,6 +1259,7 @@ abstract class User implements ActiveRecordInterface
             $keys[1] => $this->getUserSlug(),
             $keys[2] => $this->getEmailAddress(),
             $keys[3] => $this->getName(),
+            $keys[4] => $this->getConfigFilePath(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1323,6 +1373,9 @@ abstract class User implements ActiveRecordInterface
             case 3:
                 $this->setName($value);
                 break;
+            case 4:
+                $this->setConfigFilePath($value);
+                break;
         } // switch()
 
         return $this;
@@ -1360,6 +1413,9 @@ abstract class User implements ActiveRecordInterface
         }
         if (array_key_exists($keys[3], $arr)) {
             $this->setName($arr[$keys[3]]);
+        }
+        if (array_key_exists($keys[4], $arr)) {
+            $this->setConfigFilePath($arr[$keys[4]]);
         }
     }
 
@@ -1413,6 +1469,9 @@ abstract class User implements ActiveRecordInterface
         }
         if ($this->isColumnModified(UserTableMap::COL_NAME)) {
             $criteria->add(UserTableMap::COL_NAME, $this->name);
+        }
+        if ($this->isColumnModified(UserTableMap::COL_CONFIG_FILE_PATH)) {
+            $criteria->add(UserTableMap::COL_CONFIG_FILE_PATH, $this->config_file_path);
         }
 
         return $criteria;
@@ -1503,6 +1562,7 @@ abstract class User implements ActiveRecordInterface
         $copyObj->setUserSlug($this->getUserSlug());
         $copyObj->setEmailAddress($this->getEmailAddress());
         $copyObj->setName($this->getName());
+        $copyObj->setConfigFilePath($this->getConfigFilePath());
 
         if ($deepCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
@@ -3598,6 +3658,7 @@ abstract class User implements ActiveRecordInterface
         $this->user_slug = null;
         $this->email_address = null;
         $this->name = null;
+        $this->config_file_path = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->applyDefaultValues();

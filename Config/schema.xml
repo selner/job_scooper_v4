@@ -190,6 +190,7 @@
             <unique-column name="email_address"/>
         </unique>
         <column name="name" phpName="Name" type="varchar" size="128" required="true" defaultValue="email_address"/>
+        <column name="config_file_path" phpName="ConfigFilePath" type="varchar" size="1024" required="true"/>
     </table>
 
     <!--

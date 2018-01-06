@@ -487,17 +487,19 @@ class ConfigBuilder
         {
         	if(empty($cfgusr))
 		        throw new \ErrorException("Missing user settings for " . $alertkind .  ". Aborting.");
+			$cfgpath = getConfigurationSetting('command_line_args.configfile');
 
 	        $user = UserQuery::create()
-                ->filterByEmailAddress($cfgusr['email'])
+                ->filterByConfigFilePath($cfgpath)
                 ->findOneOrCreate();
 
             $user->setEmailAddress($cfgusr['email']);
-	        if(!empty($cfgusr['display_name']))
-                $user->setName($cfgusr['display_name']);
+	        if(!empty($cfgusr['name']))
+                $user->setName($cfgusr['name']);
 	        else
 		        $user->setName(preg_replace("/(@.*)/", "", $cfgusr['email']));
 
+	        $user->setConfigFilePath($cfgpath);
             $user->save();
 
             setConfigurationSetting($alertkind, $user);
