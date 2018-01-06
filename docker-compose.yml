@@ -16,6 +16,7 @@ services:
       - REPONAME
       - CONTAINER_TAG
 
+
   mysql_server:
     environment:
       - MYSQL_ROOT_PASSWORD
@@ -27,12 +28,13 @@ services:
     container_name: js4-mysql_server.$CONTAINER_TAG
     volumes:
       - type: bind
-        source: $JOBSCOOPER_HOST_VOLDIR/docker_mysql"
+        source: $JOBSCOOPER_HOST_VOLDIR/docker_mysql
         target: /var/lib/mysql
-        volume:
-          nocopy: true
+#        volume:
+#          nocopy: true
     ports:
       - 3901:3306
+
 
   js4:
 #    build:
@@ -50,19 +52,20 @@ services:
       - type: bind
         source: "$JOBSCOOPER_HOST_VOLDIR"
         target: /var/local/jobs_scooper
-        volume:
-          nocopy: true
+#        volume:
+#          nocopy: true
       - type: bind
         source: "$JOBSCOOPER_HOST_VOLDIR"
         target: /private/var/local/jobs_scooper
-        volume:
-          nocopy: true
+#        volume:
+#          nocopy: true
       - type: bind
         source: "$JOBSCOOPER_HOST_VOLDIR/configs/propel.ini"
         target: /private/var/local/jobs_scooper/configs/propel.ini
-        volume:
-          nocopy: true
+#        volume:
+#          nocopy: true
     container_name: js4-$CONTAINER_TAG
+    command: "${DOCKER_RUN_CMD:-bash -C '/var/local/jobs_scooper/start_jobscooper.sh'}"
     links:
       - "mysql_server"
       - "selenium"

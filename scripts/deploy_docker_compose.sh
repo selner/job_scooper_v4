@@ -2,6 +2,13 @@
 
 echo off
 
+DOCKER_RUN_CMD=""
+if [ -n ${1} ]; then
+	DOCKER_RUN_CMD="bash -C '${1}'"
+	echo "Docker run command:  "$DOCKER_RUN_CMD
+	export DOCKER_RUN_CMD=$DOCKER_RUN_CMD
+fi
+
 if [ -z $CODEFRESH_API_KEY ]; then
 	echo "Missing required environment variable CODEFRESH_API_KEY."
 	goto s_error
@@ -31,6 +38,8 @@ echo "***************************************************************"
 docker-compose down --remove-orphans
 
 docker-compose pull
+
+docker-compose config
 
 docker-compose up -d
 
