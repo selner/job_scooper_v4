@@ -1,7 +1,6 @@
 #!/bin/bash
 
 echo off
-NOW=$(date "+%F-%H-%M-%S")
 
 DOCKER_RUN_CMD=""
 if [ -z ${1} ]; then
@@ -10,8 +9,6 @@ else
 	DOCKER_RUN_CMD="env bash -C '${1}'"
 	echo "Docker run command:  "$DOCKER_RUN_CMD
 	export DOCKER_RUN_CMD=$DOCKER_RUN_CMD
-	CONTAINER_TAG="$CONTAINER_TAG_$NOW"
-	export CONTAINER_TAG=$CONTAINER_TAG
 fi
 
 if [ -z $CODEFRESH_API_KEY ]; then
@@ -40,7 +37,7 @@ echo ""
 echo "Removing any previous Docker containers"
 echo ""
 echo "***************************************************************"
-# docker-compose down --remove-orphans
+docker-compose down --remove-orphans
 
 docker-compose pull
 
@@ -48,6 +45,6 @@ docker-compose config
 
 docker-compose up -d
 
-# docker-compose logs -f
+docker-compose logs -f
 
 
