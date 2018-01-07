@@ -269,6 +269,19 @@ class PluginTraderJoes extends AbstractTaleo
 	protected $JobPostingBaseUrl = 'http://www.traderjoes.com/careers/index.asp';
 	protected $taleoOrgID = "TRADERJOES";
 	protected $arrResultsCountTag = array('type' =>'id', 'value'=>'taleoContent', 'index'=>1);
+
+
+	/**
+	 * @param $arrItem
+	 *
+	 * @return array
+	 */
+	function cleanupJobItemFields($arrItem)
+	{
+		if(array_key_exists('Location', $arrItem) && !empty($arrItem['Location']))
+			$arrItem['Location'] = preg_replace("/Store #\d+ - /", "", $arrItem['Location']);
+		return parent::cleanupJobItemFields($arrItem);
+	}
 }
 
 /**
