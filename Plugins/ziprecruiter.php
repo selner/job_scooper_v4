@@ -35,7 +35,7 @@ class PluginZipRecruiter extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePl
 
     protected $arrListingTagSetup = array(
         'NoPostsFound'    => array('selector' => 'section.no-results h2', 'return_attribute' => 'text', 'return_value_callback' => "checkNoJobResults"),
-        'TotalPostCount'        => array('selector' => 'h1.headline', 'return_attribute' => 'text', 'return_value_regex' =>  '/\b(\d+)\b/i'),
+        'TotalPostCount'        => array('selector' => 'h1.headline', 'return_attribute' => 'text', 'return_value_regex' =>  '/\b([\d,]+)\+?\b/i'),
         'JobPostItem'      => array('selector' => '#job_list div article'),
         'Title'                 => array('selector' => 'span.just_job_title', 'return_attribute' => 'text'),
         'Url'                  => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => 'job_link', 'return_attribute' => 'href'),
