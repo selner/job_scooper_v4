@@ -14,7 +14,7 @@
         *************************************************
     -->
 
-    <table name="job_site" phpName="JobSiteRecord" allowPkInsert="true">
+    <table name="job_site" phpName="JobSiteRecord" allowPkInsert="true" heavyIndexing="true">
 
         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         PRIMARY KEY
@@ -45,7 +45,7 @@
     -->
 
 
-    <table name="geolocation" phpName="GeoLocation" allowPkInsert="true">
+    <table name="geolocation" phpName="GeoLocation" allowPkInsert="true" heavyIndexing="true">
         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         PRIMARY KEY
              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  -->
@@ -92,7 +92,7 @@
     -->
 
 
-    <table name="jobposting" phpName="JobPosting" allowPkInsert="true">
+    <table name="jobposting" phpName="JobPosting" allowPkInsert="true" heavyIndexing="true">
 
         <!-- ~~~~~~~~~  PRIMARY KEY  ~~~~~~~~~~~~~~~~~~  -->
         <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true" primaryKey="true"
@@ -148,6 +148,20 @@
             <reference local="geolocation_id" foreign="geolocation_id"/>
         </foreign-key>
 
+        <!--<column name="latitude" phpName="Latitude" type="float"/>-->
+        <!--<column name="longitude" phpName="Longitude" type="float"/>-->
+        <!--<behavior name="geocodable">-->
+            <!--<parameter name="auto_update" value="false"/>-->
+            <!--<parameter name="latitude_column" value="latitude"/>-->
+            <!--<parameter name="longitude_column" value="longitude"/>-->
+            <!--<parameter name="type" value="DOUBLE"/>-->
+            <!--<parameter name="size" value="11"/>-->
+            <!--<parameter name="scale" value="8"/>-->
+        <!--</behavior>-->
+
+        <!--
+            Listing Duplication Tracking
+        -->
         <column name="duplicates_posting_id" phpName="DuplicatesJobPostingId" type="integer"/>
         <foreign-key foreignTable="jobposting" phpName="DuplicateJobPosting">
             <reference local="duplicates_posting_id" foreign="jobposting_id"/>
@@ -186,11 +200,11 @@
         </behavior>
 
         <column name="email_address" phpName="EmailAddress" type="varchar" size="128" required="true"/>
-        <unique>
-            <unique-column name="email_address"/>
-        </unique>
         <column name="name" phpName="Name" type="varchar" size="128" required="true" defaultValue="email_address"/>
         <column name="config_file_path" phpName="ConfigFilePath" type="varchar" size="1024" required="true"/>
+        <unique>
+            <unique-column name="config_file_path"/>
+        </unique>
     </table>
 
     <!--
@@ -296,7 +310,7 @@
     -->
 
 
-    <table name="user_search_site_run" phpName="UserSearchSiteRun" isCrossRef="true" reloadOnUpdate="true">
+    <table name="user_search_site_run" phpName="UserSearchSiteRun" isCrossRef="true" reloadOnUpdate="true" heavyIndexing="true">
 
         <!--  Primary Key -->
         <column name="user_id" phpName="UserId" type="integer" required="true"/>
@@ -373,7 +387,7 @@
     -->
 
 
-    <table name="user_job_match" phpName="UserJobMatch" isCrossRef="true">
+    <table name="user_job_match" phpName="UserJobMatch" isCrossRef="true" heavyIndexing="true">
 
         <!-- ~~~~~~~~~  ALTERNATE KEY ~~~~~~~~~~~~~~~~  -->
 
