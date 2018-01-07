@@ -387,6 +387,9 @@ class JobsAutoMarker
     {
 	    $keywordTokens = array();
         $keywordSets = getConfigurationSetting("user_keyword_sets");
+        if(empty($keywordSets))
+        	return null;
+
 	    foreach($keywordSets as $kwdset)
 	    {
 	    	$setKwdTokens = $kwdset->getKeywordTokens();
