@@ -232,7 +232,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
             */
             foreach ($this->arrSearchesToReturn as $search)
             {
-                try {
+	            $this->_curlWrapper = new CurlWrapper();
+
+	            try {
                     if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && is_null($this->selenium)) {
                         try
                         {
@@ -365,6 +367,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
 
     protected $CountryCodes = array("US");
+    private $_curlWrapper = null;
 
 
 	/**
@@ -1130,10 +1133,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 
             if (!$objSimpleHTML && $strURL && strlen($strURL) > 0) {
-                $class = new CurlWrapper();
-                if (isDebug()) $class->setDebug(true);
+                if (isDebug()) $this->_curlWrapper->setDebug(true);
 
-                $retObj = $class->cURL($strURL, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = $optTimeout, $cookies = $cookies, $referrer = $referrer);
+                $retObj = $this->_curlWrapper->cURL($strURL, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = $optTimeout, $cookies = $cookies, $referrer = $referrer);
                 if (!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0) {
                     $objSimpleHTML = new SimpleHtmlHelper($retObj['output']);
                     $objSimpleHTML->setSource($strURL);
