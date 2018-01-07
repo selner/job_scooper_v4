@@ -30,14 +30,17 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 
 	// BUGBUG: setting "search job title only" seems to not find jobs with just one word in the title.  "Pharmacy Intern" does not come back for "intern" like it should.  Therefore not setting the kwsJobTitleOnly=true flag.
 	//
-	protected $strBaseURLPathSection = "/jobs/results/keyword/***KEYWORDS***?view=List_Detail&SearchNetworks=US&networkView=national&location=***LOCATION***&radius=50&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50";
+	protected $strBaseURLPathSection = "/jobs/results/keyword/***KEYWORDS***?view=List_Detail&SearchNetworks=US&networkView=national&location=***LOCATION***&radius=50&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***";
 	protected $additionalLoadDelaySeconds = 2;
 	protected $strBaseURLPathSuffix = "";
 	protected $SearchUrlFormat = null;
 	protected $LocationType = 'location-city-comma-statecode';
+	protected $nTotalJobs = null;
+	protected $lastResponseData = null;
 
 	protected $arrBaseListingTagSetupNationalSearch = array(
-		'TotalPostCount' => array('selector' => 'span#retUSCountNumber'),  # BUGBUG:  need this empty array so that the parent class doesn't auto-set to C__JOB_ITEMCOUNT_NOTAPPLICABLE__
+		'TotalPostCount' => array('selector' => 'span#retCount span'),  # BUGBUG:  need this empty array so that the parent class doesn't auto-set to C__JOB_ITEMCOUNT_NOTAPPLICABLE__
+		'NoPostsFound' => array('selector' => 'div#aiSearchResultsSuccess h2', 'return_attribute' => 'text', 'return_value_callback' => "matchesNoResultsPattern", 'callback_parameter' => 'Oops'),
 		'JobPostItem' => array('selector' => 'div.aiResultsWrapper'),
 		'Title' => array('selector' => 'div.aiResultTitle h3 a'),
 		'Url' => array('selector' => 'div.aiResultTitle h3 a', 'return_attribute' => 'href'),
@@ -67,33 +70,183 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 	 */
 	function __construct()
 	{
-		$this->additionalBitFlags[] = C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES;
+		$fDoNotRemoveSetup = false;
+		if(!empty($this->arrListingTagSetup))
+			$fDoNotRemoveSetup = true;
+		else
+			$this->arrListingTagSetup = $this->arrBaseListingTagSetupNationalSearch;
 
 		$this->JobPostingBaseUrl = $this->childSiteURLBase;
 		$this->SearchUrlFormat = $this->childSiteURLBase . $this->strBaseURLPathSection . $this->strBaseURLPathSuffix;
 
 		parent::__construct();
+
+		if($fDoNotRemoveSetup !== true)
+			$this->arrListingTagSetup = array();
 	}
 
 	/**
+	 * @param $offset
+	 *
+	 * @throws \ErrorException
+	 * @throws \Exception
 	 * @return array
+	 */
+	private function getJsonResultsPage($url)
+	{
+		$curl = new \JobScooper\Utils\CurlWrapper();
+		if (isDebug()) $curl->setDebug(true);
+
+		$lastCookies = $this->getActiveWebdriver()->manage()->getCookies();
+
+		$retObj = $curl->cURL($url, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = $lastCookies);
+		if (!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0) {
+//			$respdata = json_decode($retObj['output'], JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP |  JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK;);
+//			$respdata = json_decode($retObj['output'], JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP |  JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK;);
+			$respdata = json_decode($retObj['output']);
+			if(!empty($respdata))
+			{
+				$this->lastResponseData = $respdata;
+				try
+				{
+					$ret['count'] = $respdata->Total;
+					$ret['jobs'] = $respdata->Jobs;
+
+				}
+				catch(Exception $ex)
+				{
+					throw new Exception($respdata->error);
+				}
+			}
+
+		}
+		return $ret;
+	}
+
+
+	/**
+	 * @param $jobs
+	 *
+	 * @return array
+	 */
+	private function _parseJsonJobs($jobs)
+	{
+		$jobsite = $this->getJobSiteKey();
+		$ret = array();
+		foreach($jobs as $job)
+		{
+			$ret[$job->Id] = array(
+				'JobSiteKey' => $jobsite,
+				'JobSitePostId' => $job->Id,
+				'Company' => $job->Company,
+				'Title' =>  $job->JobTitle,
+				'Url' => $job->Url,
+				'Location' => $job->FormattedCityStateCountry,
+				'Category' => is_array($job->CategoryDisplay) ? join(" | ", $job->CategoryDisplay) : null,
+				'PostedAt' => $job->PostDate
+			);
+		}
+		return $ret;
+	}
+
+	private function _getJsonSearchUrl(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails, $nOffset=null)
+	{
+		$jsonUrl = $searchDetails->getSearchStartUrl() . "&format=json";
+		if(!empty($nOffset))
+			$jsonUrl = $jsonUrl. "";
+		return $jsonUrl;
+	}
+	/**
+	 * @param $searchDetails
+	 *
+	 * @return mixed
 	 * @throws \Exception
 	 */
-	function downloadLatestJobsForAllSearches()
+	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
 	{
-		if(!empty($this->LastKnownSiteLayout))
+		$jsonUrl = $this->_getJsonSearchUrl($searchDetails);
+		$retData = null;
+		try {
+			$retData = $this->getJsonResultsPage($jsonUrl);
+			$this->nTotalJobs = $retData['count'];
+		}
+		catch (Exception $ex) {
+			//
+		}
+
+		if(is_null($this->nTotalJobs))
 		{
-			$this->setAdicioPageLayout($this->LastKnownSiteLayout);
+			if (!empty($this->LastKnownSiteLayout)) {
+				$this->setAdicioPageLayout($this->LastKnownSiteLayout);
+			} else {
+				$template = $this->_determinePageLayout();
+
+				$this->setAdicioPageLayout($template);
+				LogDebug("Adicio Template for " . get_class($this) . " with url '{$this->SearchUrlFormat}: " . PHP_EOL . "$template = {$template}," . PHP_EOL . "layout = {$this->_layout},  " . PHP_EOL . "template = {$template},  " . PHP_EOL . "id = {$id}, " . PHP_EOL . "matches = " . getArrayDebugOutput($matches));
+			}
 		}
-		else {
-			$template = $this->_determinePageLayout();
+	}
 
-			$this->setAdicioPageLayout($template);
-			LogDebug("Adicio Template for " . get_class($this) . " with url '{$url}: " . PHP_EOL . "$template = {$template}," . PHP_EOL . "layout = {$this->_layout},  " . PHP_EOL . "template = {$template},  " . PHP_EOL . "id = {$id}, " . PHP_EOL . "matches = " . getArrayDebugOutput($matches));
+	/**
+	 * parseTotalResultsCount
+	 *
+	 * If the site does not show the total number of results
+	 * then set the plugin flag to C__JOB_PAGECOUNT_NOTAPPLICABLE__
+	 * in the Constants.php file and just comment out this function.
+	 *
+	 * parseTotalResultsCount returns the total number of listings that
+	 * the search returned by parsing the value from the returned HTML
+	 * *
+	 * @param $objSimpHTML
+	 * @return string|null
+	 * @throws \Exception
+	 */
+	function parseTotalResultsCount($objSimpHTML)
+	{
+		if(!is_null($this->nTotalJobs))
+			return $this->nTotalJobs;
 
+		return parent::parseTotalResultsCount($objSimpHTML);
+	}
+
+	/**
+	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+	 *
+	 * @return array|null
+	 * @throws \Exception
+	 */
+	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+	{
+		if (!empty($this->lastResponseData))
+		{
+			try {
+				$ret = array();
+				$nOffset = 0;
+				if (!empty($this->lastResponseData) && !empty($this->lastResponseData->Jobs) && count($this->lastResponseData->Jobs) > 0) {
+					$jobs = $this->lastResponseData->Jobs;
+					while (!empty($jobs)) {
+						$curPageJobs = $this->_parseJsonJobs($jobs);
+						$ret = array_merge($ret, $curPageJobs);
+						$nOffset = $nOffset + count($jobs);
+						if ($nOffset < $this->nTotalJobs) {
+							$searchDetails = getConfigurationSetting('current_user_search_details');
+							$jsonUrl = $this->_getJsonSearchUrl($searchDetails, $nOffset);
+							$retData = $this->getJsonResultsPage($jsonUrl);
+							$jobs = $retData['jobs'];
+						} else
+							$jobs = null;
+					}
+				}
+
+				return $ret;
+			} catch (Exception $ex) {
+				LogWarning("Failed to download " . $this->getJobSiteKey() . " listings via JSON.  Reverting to HTML.  " . $ex->getMessage());
+
+				return parent::parseJobsListForPage($objSimpHTML);
+			}
+		} else {
+			return parent::parseJobsListForPage($objSimpHTML);
 		}
-
-		return parent::downloadLatestJobsForAllSearches();
 	}
 
 	/**
@@ -155,29 +308,31 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 	 */
 	protected function setAdicioPageLayout($layout)
 	{
-
+		$tags = array();
 		$switchVal = cleanupSlugPart($layout, "");
 		$this->_layout = $switchVal;
 		switch($switchVal) {
 			case 'jobsresponsivedefault':
-				$this->arrBaseListingTagSetup = $this->arrBaseListingTagSetupJobsResponsive;
+				$tags = $this->arrBaseListingTagSetupJobsResponsive;
 				break;
 
 			case "careersdefault":
-				$this->arrBaseListingTagSetup = $this->arrBaseListingTagSetupNationalSearch;
+				$tags = $this->arrBaseListingTagSetupNationalSearch;
 				break;
 
 			case "jobsearchresults":
-				$this->arrBaseListingTagSetup = $this->arrBaseListingTagSetupNationalSearch;
-				$this->arrBaseListingTagSetup['TotalPostCount']['selector'] = "span#retCountNumber";
+				$tags = $this->arrBaseListingTagSetupNationalSearch;
+				$this->arrListingTagSetup['TotalPostCount']['selector'] = "span#retCountNumber";
 				break;
 
 			default:
 				LogWarning("UNKNOWN ADICIO LAYOUT");
 				$this->_layout = "default";
-				$this->arrBaseListingTagSetup = $this->arrBaseListingTagSetupNationalSearch;
+				$tags = $this->arrBaseListingTagSetupNationalSearch;
 				break;
 		}
+		$this->arrListingTagSetup = array_merge_recursive_distinct($tags, $this->arrListingTagSetup);
+
 	}
 }
 
@@ -315,7 +470,7 @@ class PluginHealthJobs extends AbstractAdicio
 {
 	protected $JobSiteName = 'HealthJobs';
 	protected $childSiteURLBase = 'http://healthjobs.careers.adicio.com';
-protected $LastKnownSiteLayout = "careersdefault";
+	protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
