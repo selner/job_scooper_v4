@@ -1,7 +1,8 @@
 {
     "JobSiteName": "JobsiteCoUk",
-    "SourceURL": "http://www.jobsite.co.uk/vacancies?search_type=quick&engine=stepmatch&search_referer=internal&query=***KEYWORDS***&logic=&title_query=&title_logic=***LOCATION:&location={Place}***&radius=20&p=***PAGE_NUMBER***&daysback=&sort_by=date&search_currency_code=GBP&salary_type_unit=A&salary_min=&salary_max=",
+    "SourceURL": "http://www.jobsite.co.uk/vacancies?search_type=advanced&engine=stepmatch&search_referer=internal&query=***KEYWORDS***&logic=any&title_query=&title_logic=any=***LOCATION:&location={Place}***&radius=20&p=***PAGE_NUMBER***&daysback=1d&sort_by=date&search_currency_code=GBP&salary_type_unit=A&salary_min=&salary_max=",
     "BaseURL": "http://www.jobsite.co.uk",
+    "AdditionalFlags" : ["C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER"],
     "CountryCodes": [
         "UK"
     ],
