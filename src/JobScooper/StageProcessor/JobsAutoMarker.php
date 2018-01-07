@@ -271,7 +271,7 @@ class JobsAutoMarker
 			    $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
 			    UserJobMatchQuery::create()
 				    ->filterByUserJobMatchId($chunk)
-				    ->update(array("OutOfUserArea" => true, "isExcluded" => true), $con);
+				    ->update(array("OutOfUserArea" => true, "IsExcluded" => true), $con);
 		    }
 
         $nJobsMarkedAutoExcluded = count($arrOutOfAreaIds);
