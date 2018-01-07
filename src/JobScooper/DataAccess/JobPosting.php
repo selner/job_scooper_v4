@@ -372,7 +372,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 	 */
 	public function setCategory($v)
 	{
-		$v = $this->_cleanupTextValue($v);
+		$v = $this->_cleanupTextValue($v, $maxLength=100);
 		parent::setCategory($v);
 	}
 
