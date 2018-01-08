@@ -400,7 +400,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
     }
 
 	/**
-	 * @return \RemoteWebDriver
+	 * @return \Facebook\WebDriver\Remote\RemoteWebDriver
 	 * @throws \Exception
 	 */
 	protected function getActiveWebdriver()
