@@ -426,6 +426,24 @@ class SeleniumManager extends PropertyObject
 	        /** @var DesiredCapabilities $capabilities */
 	        $capabilities = call_user_func(array("Facebook\WebDriver\Remote\DesiredCapabilities", $webdriver));
 
+//
+//	        $capabilities->setCapability(
+//		        'moz:firefoxOptions',
+//		        ['args' => ['-headless']]
+//	        );
+//	        $capabilities->setCapability(
+//		        'moz:webdriverClick',
+//		        false
+//	        );
+
+//	        $prof = $capabilities->getCapability(FirefoxDriver::PROFILE);
+//
+//	        $fflog = getOutputDirectory('debug') . "/firefox_webdriver_log.csv";
+//	        $prof->setPreference("setEnableNativeEvents", true);
+//	        $prof->setPreference("webdriver.log.file", $fflog);
+//	        $prof->setPreference("webdriver.log.driver", "INFO");
+//
+//	        $capabilities->setCapability(FirefoxDriver::PROFILE, $prof);
 
 
 	        $capabilities->setCapability("setThrowExceptionOnScriptError", false);
@@ -445,6 +463,10 @@ class SeleniumManager extends PropertyObject
                 $connection_timeout_in_ms = 60000,
                 $request_timeout_in_ms = 60000
             );
+
+//
+//	        $window = new WebDriverDimension(1024, 768);
+//	        $this->remoteWebDriver->manage()->window()->setSize($window);
 
 	        LogMessage("Remote web driver instantiated.");
 
