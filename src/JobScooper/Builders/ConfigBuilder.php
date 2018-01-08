@@ -545,7 +545,6 @@ class ConfigBuilder
 				->filterBySearchKeyFromConfig($iniKeywordSetup['key'])
 				->findOne();
 
-
 			if (empty($kwdset)) {
 				$kwdset = new UserKeywordSet();
 
@@ -559,7 +558,14 @@ class ConfigBuilder
 
 				return $kwdset;
 			}
+			else
+			{
+				$kwdset->setSearchKeyFromConfig($iniKeywordSetup['key']);
 
+				$kwdset->setKeywords($final_keywd_list);
+
+				$kwdset->save();
+			}
 			return $kwdset;
 		}
 
