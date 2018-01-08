@@ -42,7 +42,13 @@ class PluginIndeed extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
         'PostedAt' => array('selector' => 'span.date', 'index'=> 0)
         );
 
-    static function checkNoJobResults($var)
+	/**
+	 * @param $var
+	 *
+	 * @return int|null
+	 * @throws \Exception
+	 */
+	static function checkNoJobResults($var)
     {
         $ret = null;
         if(!empty($var) && is_array($var)) {
@@ -62,7 +68,12 @@ class PluginIndeed extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
         return $ret;
     }
 
-    function getItemURLValue($nItem)
+	/**
+	 * @param $nItem
+	 *
+	 * @return int|string
+	 */
+	function getItemURLValue($nItem)
     {
         if($nItem == null || $nItem == 1) { return ""; }
 
@@ -72,12 +83,15 @@ class PluginIndeed extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 }
 
 
+/**
+ * Class PluginIndeedUK
+ */
 class PluginIndeedUK extends PluginIndeed
 {
     protected $JobSiteName = 'IndeedUK';
     protected $JobListingsPerPage = 50;
     protected $JobPostingBaseUrl = 'http://www.Indeed.co.uk';
-    protected $SearchUrlFormat = "https://www.indeed.co.uk/jobs?as_and=***KEYWORDS***&as_phr=&as_any=&as_not=&as_ttl=&as_cmp=&jt=all&st=&salary=&radius=50&l=***LOCATION***&fromage=1&limit=50&sort=date***ITEM_NUMBER***&filter=0&psf=advsrch";
+    protected $SearchUrlFormat = "https://www.indeed.co.uk/jobs?as_and=***KEYWORDS***&as_phr=&as_any=&as_not=&as_ttl=&as_cmp=&jt=all&st=&salary=&radius=50&l=***LOCATION***&fromage=1&limit=50&sort=date&filter=0&psf=advsrch";
     protected $LocationType = 'location-city';
     protected $CountryCodes = array("UK");
 }
