@@ -10,7 +10,7 @@ services:
     shm_size: 2g
     environment:
       - SE_OPTS=-port 4448
-      - JAVA_OPTS=-Xmx512m
+      - JAVA_OPTS=-Xmx512m -Dwebdriver.enable.native.events=1
       - BRANCH
       - JOBSCOOPER_OUTPUT
       - REPONAME
