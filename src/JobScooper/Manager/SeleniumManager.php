@@ -17,9 +17,20 @@
  */
 namespace JobScooper\Manager;
 use Exception;
+use Facebook\WebDriver\Exception\WebDriverCurlException;
+use Facebook\WebDriver\Exception\WebDriverException;
+use Facebook\WebDriver\Firefox\FirefoxDriver;
+use Facebook\WebDriver\Firefox\FirefoxProfile;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\Remote\WebDriverCapabilityType;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverCapabilities;
+use Facebook\WebDriver\WebDriverDimension;
+use Facebook\WebDriver\WebDriverKeys;
 use JobScooper\Utils\PropertyObject;
 use JobScooper\Utils\SimpleHTMLHelper;
 
+use Facebook\WebDriver\Remote\DesiredCapabilities;
 
 /**
  * Class SeleniumManager
@@ -28,7 +39,7 @@ use JobScooper\Utils\SimpleHTMLHelper;
 class SeleniumManager extends PropertyObject
 {
 	/**
-	 * @var \RemoteWebDriver|null
+	 * @var RemoteWebDriver|null
 	 */
 	private $remoteWebDriver = null;
     private $additionalLoadDelaySeconds = null;
@@ -108,9 +119,9 @@ class SeleniumManager extends PropertyObject
             }
 
             return $src;
-        } catch (\WebDriverCurlException $ex) {
+        } catch (WebDriverCurlException $ex) {
             handleException($ex, null, true);
-        } catch (\WebDriverException $ex) {
+        } catch (WebDriverException $ex) {
             handleException($ex, null, true);
         } catch (\Exception $ex) {
             handleException($ex, null, true);
@@ -130,9 +141,9 @@ class SeleniumManager extends PropertyObject
                 $driver->get($url);
                 sleep(2 + $this->additionalLoadDelaySeconds);
             }
-        } catch (\WebDriverCurlException $ex) {
+        } catch (WebDriverCurlException $ex) {
             handleException($ex, "Error retrieving Selenium page at {$url}", false);
-        } catch (\WebDriverException $ex) {
+        } catch (WebDriverException $ex) {
             handleException($ex, "Error retrieving Selenium page at {$url} ", false);
         } catch (Exception $ex) {
             handleException($ex, "Error retrieving Selenium page at {$url}", false);
@@ -217,15 +228,21 @@ class SeleniumManager extends PropertyObject
 	 */
 	protected function doneWithRemoteWebDriver()
     {
-        try {
+//	    $logs_browse = $this->remoteWebDriver->manage()->getLog("browser");
+//	    $logs_client = $this->remoteWebDriver->manage()->getLog("client");
+//
+//	    LogMessage("Selenium browser log:  " . getArrayDebugOutput($logs_browse));
+//	    LogMessage("Selenium client log:  " . getArrayDebugOutput($logs_client));
+
+	    try {
 
             if(!is_null($this->remoteWebDriver))
             {
                 $this->remoteWebDriver->quit();
             }
-        } catch (\WebDriverCurlException $ex) {
+        } catch (WebDriverCurlException $ex) {
             handleException($ex, "Failed to quit Webdriver: ", false);
-        } catch (\WebDriverException $ex) {
+        } catch (WebDriverException $ex) {
             handleException($ex, "Failed to quit Webdriver: ", false);
         } catch (Exception $ex) {
             handleException($ex, "Failed to quit Webdriver: ", false);
@@ -322,9 +339,9 @@ class SeleniumManager extends PropertyObject
                 $ret = true;
             }
 
-        } catch (\WebDriverCurlException $ex) {
+        } catch (WebDriverCurlException $ex) {
             $msg = "Selenium not yet running (failed to access the hub page.)";
-        } catch (\WebDriverException $ex) {
+        } catch (WebDriverException $ex) {
             $msg = " Selenium not yet running (failed to access the hub page.)";
         } catch (Exception $ex) {
             $msg = " Selenium not yet running (failed to access the hub page.)";
@@ -341,7 +358,7 @@ class SeleniumManager extends PropertyObject
      * Get the current webdriver or create a new one if needed.
      *
      * @throws \Exception
-     * @return \RemoteWebDriver
+     * @return \Facebook\WebDriver\Remote\RemoteWebDriver
      *
      */
     function get_driver()
@@ -353,12 +370,12 @@ class SeleniumManager extends PropertyObject
                         $this->create_remote_webdriver();
                     return $this->remoteWebDriver;
 
-                } catch (\WebDriverCurlException $ex) {
+                } catch (WebDriverCurlException $ex) {
                     $this->killAllAndRestartSelenium();
                     $this->create_remote_webdriver();
                     return $this->remoteWebDriver;
 
-                } catch (\WebDriverException $ex) {
+                } catch (WebDriverException $ex) {
                     $this->killAllAndRestartSelenium();
                     $this->create_remote_webdriver();
                     return $this->remoteWebDriver;
@@ -369,7 +386,7 @@ class SeleniumManager extends PropertyObject
                     return $this->remoteWebDriver;
 
                 }
-        } catch (\WebDriverCurlException $ex) {
+        } catch (WebDriverCurlException $ex) {
             handleException($ex, "Failed to get Selenium remote webdriver: ", true);
         }
 
@@ -392,7 +409,7 @@ class SeleniumManager extends PropertyObject
     }
 
 	/**
-	 * @return null|\RemoteWebDriver
+	 * @return null|\Facebook\WebDriver\Remote\RemoteWebDriver
 	 * @throws \Exception
 	 */
 	private function create_remote_webdriver()
@@ -406,32 +423,35 @@ class SeleniumManager extends PropertyObject
             $hubUrl = $this->_settings['host_location'] . '/wd/hub';
             $driver = null;
 
-            $capabilities = \DesiredCapabilities::$webdriver();
+	        /** @var DesiredCapabilities $capabilities */
+	        $capabilities = call_user_func(array("Facebook\WebDriver\Remote\DesiredCapabilities", $webdriver));
 
-            $capabilities->setCapability("setThrowExceptionOnScriptError", false);
+
+
+	        $capabilities->setCapability("setThrowExceptionOnScriptError", false);
             $capabilities->setCapability("unexpectedAlertBehaviour", "dismiss");
-            $capabilities->setCapability(\WebDriverCapabilityType::ACCEPT_SSL_CERTS, true);
-            $capabilities->setCapability(\WebDriverCapabilityType::APPLICATION_CACHE_ENABLED, true);
-            $capabilities->setCapability(\WebDriverCapabilityType::CSS_SELECTORS_ENABLED, true);
-            $capabilities->setCapability(\WebDriverCapabilityType::WEB_STORAGE_ENABLED, true);
-            $capabilities->setCapability(\WebDriverCapabilityType::NATIVE_EVENTS, true);
-            $capabilities->setCapability(\WebDriverCapabilityType::HANDLES_ALERTS, true);
-            $capabilities->setCapability(\WebDriverCapabilityType::DATABASE_ENABLED, true);
-            $capabilities->setCapability(\WebDriverCapabilityType::LOCATION_CONTEXT_ENABLED, true);
+            $capabilities->setCapability(WebDriverCapabilityType::ACCEPT_SSL_CERTS, true);
+            $capabilities->setCapability(WebDriverCapabilityType::APPLICATION_CACHE_ENABLED, true);
+            $capabilities->setCapability(WebDriverCapabilityType::CSS_SELECTORS_ENABLED, true);
+            $capabilities->setCapability(WebDriverCapabilityType::WEB_STORAGE_ENABLED, true);
+            $capabilities->setCapability(WebDriverCapabilityType::NATIVE_EVENTS, true);
+            $capabilities->setCapability(WebDriverCapabilityType::HANDLES_ALERTS, true);
+            $capabilities->setCapability(WebDriverCapabilityType::DATABASE_ENABLED, true);
+            $capabilities->setCapability(WebDriverCapabilityType::LOCATION_CONTEXT_ENABLED, true);
 
-            $this->remoteWebDriver = \RemoteWebDriver::create(
+            $this->remoteWebDriver = RemoteWebDriver::create(
                 $hubUrl,
                 $desired_capabilities = $capabilities,
                 $connection_timeout_in_ms = 60000,
                 $request_timeout_in_ms = 60000
             );
 
-            LogMessage("Remote web driver instantiated.");
+	        LogMessage("Remote web driver instantiated.");
 
             return $this->remoteWebDriver;
-        } catch (\WebDriverCurlException $ex) {
+        } catch (WebDriverCurlException $ex) {
             handleException($ex, "Failed to get webdriver from {$hubUrl}: ", true);
-        } catch (\WebDriverException $ex) {
+        } catch (WebDriverException $ex) {
             handleException($ex, "Failed to get webdriver from {$hubUrl}: ", true);
         } catch (Exception $ex) {
             handleException($ex, "Failed to get webdriver from {$hubUrl}: ", true);
