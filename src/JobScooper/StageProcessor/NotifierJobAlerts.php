@@ -172,8 +172,10 @@ class NotifierJobAlerts extends JobsMailSender
 			$ret = $this->sendEmail(NotifierJobAlerts::PLAINTEXT_EMAIL_DIRECTIONS, $messageHtml, $arrFilesToAttach, $subject, "results");
 			if ($ret !== false || $ret !== null) {
 				if (!isDebug()) {
-					$ids = array_keys($matches['all']);
-					updateUserJobMatchesStatus($ids, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_SENT);
+					if (!empty($matches['all'])) {
+						$ids = array_keys($matches['all']);
+						updateUserJobMatchesStatus($ids, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_SENT);
+					}
 				}
 			}
 			endLogSection(" Email send completed...");
