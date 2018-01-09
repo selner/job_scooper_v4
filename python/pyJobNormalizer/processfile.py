@@ -138,7 +138,7 @@ filepath = os.path.dirname(os.path.abspath(__file__)) # /a/b/c/d/e
 abbrevfile = os.path.join(filepath, "static", "job-title-abbreviations.csv")
 expandWords = loadCSV(abbrevfile, "abbreviation")['dict']
 
-def tokenizeStrings(listData, field, fieldTokenized = "tokenized"):
+def tokenizeStrings(listData, field, fieldTokenized = "tokenized", retType="string"):
     """
 
     Args:
@@ -156,7 +156,15 @@ def tokenizeStrings(listData, field, fieldTokenized = "tokenized"):
             continue
 
         tokens = getScrubbedStringTokens(listData[k][field])
-        listData[k][fieldTokenized] = "|".join(tokens)
+
+        if retType == "list":
+            listData[k][fieldTokenized] = tokens
+
+        elif retType == "set":
+                listData[k][fieldTokenized] = set(tokens)
+        else:
+            # if retType == "string" or retType is None:
+            listData[k][fieldTokenized] = "|{}|".format("|".join(tokens))
 
     return listData
 
