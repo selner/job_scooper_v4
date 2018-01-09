@@ -105,7 +105,7 @@ function updateOrCreateJobPosting($arrJobItem)
  * @param null $jobsiteKey
  * @param null $usrTitleKeywordSets
  *
- * @return array
+ * @return \JobScooper\DataAccess\UserJobMatch[]
  * @throws \Propel\Runtime\Exception\PropelException
  */
 function getAllMatchesForUserNotification($jobsiteKey=null, $usrTitleKeywordSets=null, $excludeNonJobMatches=false, $arrGeoLocIds=null)
@@ -114,7 +114,7 @@ function getAllMatchesForUserNotification($jobsiteKey=null, $usrTitleKeywordSets
 
 
     $query = \JobScooper\DataAccess\UserJobMatchQuery::create()
-        ->filterByUserNotificationState(array("not-ready", "ready"))
+        ->filterByUserNotificationState(\JobScooper\DataAccess\Map\UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_SENT, \Propel\Runtime\ActiveQuery\Criteria::NOT_EQUAL)
         ->filterByUserFromUJM($user)
         ->joinWithJobPostingFromUJM();
 
@@ -240,7 +240,7 @@ function updateJobRecordsFromJson($filepath)
         $filepath = $filepath . "-" . strtolower(getTodayAsString("")) . ".json";
 
     if (is_file($filepath)) {
-        LogMessage("Loading and updating JobPostings from from json file '" . $filepath ."'");
+        LogMessage("Loading and updating JobPostings from json file '" . $filepath ."'");
         $data = loadJSON($filepath);
 
         $arrJobsArray = $data['jobslist'];
