@@ -160,7 +160,7 @@ function updateUserJobMatchesStatus($arrUserJobMatchIds, $strNewStatus)
 		\JobScooper\DataAccess\UserJobMatchQuery::create()
 			->filterByUserJobMatchId($chunk)
 			->update(array("UserNotificationState" => $statusInt), $con);
-		$nChunkCounter += 1;
+		$nChunkCounter += 50;
 	}
 
 }
