@@ -20,6 +20,8 @@ use JobScooper\DataAccess\GeoLocationQuery;
 use JobScooper\DataAccess\Map\GeoLocationTableMap;
 use Exception;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
+use JobScooper\DataAccess\User;
+use JobScooper\DataAccess\UserJobMatch;
 use JobScooper\DataAccess\UserJobMatchQuery;
 use JobScooper\Manager\LocationManager;
 use Propel\Runtime\ActiveQuery\Criteria;
@@ -59,48 +61,51 @@ class JobsAutoMarker
         LogMessage(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL);
 	    $arrJobs_AutoUpdatable = getAllMatchesForUserNotification(null, null, false);
 
-        $this->_markJobsList_SearchKeywordsFound_($arrJobs_AutoUpdatable);
-
-	    $arrJobs_AutoUpdatable = getAllMatchesForUserNotification(null, null, true);
-	    if (empty($arrJobs_AutoUpdatable)) {
-		    LogMessage("No job matches remain to auto-mark.");
-		    return;
+	    if(empty($arrJobs_AutoUpdatable))
+	    {
+	    	LogMessage("No jobs were found for auto-marking.");
+	    	return;
 	    }
+
+	    foreach($arrJobs_AutoUpdatable as $jobmatch)
+	        $jobmatch->clearUserMatchState();
+
+        $this->_markJobsList_KeywordMatches_($arrJobs_AutoUpdatable);
 
 	    $this->_markJobsList_SetLikelyDuplicatePosts_($arrJobs_AutoUpdatable);
 
         $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
 
-        $this->_markJobsList_UserExcludedKeywords_($arrJobs_AutoUpdatable);
+//        $this->_markJobsList_UserExcludedKeywords_($arrJobs_AutoUpdatable);
 
         $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($arrJobs_AutoUpdatable);
-
     }
 
 	/**
-	 * @param $arrJobsList
+	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
 	 *
 	 * @throws \Exception
 	 */
 	function _markJobsList_SetLikelyDuplicatePosts_(&$arrJobsList)
     {
+	    if(count($arrJobsList) == 0) return;
+	    startLogSection("Automarker: marking duplicate jobs by company/role pairs...");
         try
         {
-            if(count($arrJobsList) == 0) return;
+
             $nJobDupes= 0;
             $nNonDupes = 0;
 
             LogMessage("Gathering job postings that are already marked as duplicate...");
-            $arrDupeMatches = array_filter($arrJobsList, function($v) {
+            $arrDupeMatches = array_filter($arrJobsList, function(UserJobMatch $v) {
                 $posting = $v->getJobPostingFromUJM();
                 return (!is_null($posting->getDuplicatesJobPostingId()));
             });
 
             $nJobDupes = count($arrDupeMatches);
             $arrRemainingJobs = array_diff_assoc($arrJobsList, $arrDupeMatches);
-
             LogMessage("Finding and Marking Duplicate Job Roles" );
-            foreach($arrRemainingJobs as $jobMatch)
+            foreach($arrRemainingJobs as &$jobMatch)
             {
                 $posting = $jobMatch->getJobPostingFromUJM();
                 $dupeId = $posting->checkAndMarkDuplicatePosting();
@@ -111,7 +116,6 @@ class JobsAutoMarker
                 }
                 else
                     $nNonDupes += 1;
-
             }
 
             LogMessage($nJobDupes. "/" . countAssociativeArrayValues($arrJobsList) . " jobs have been marked as duplicate based on company/role pairing. " );
@@ -119,6 +123,10 @@ class JobsAutoMarker
         catch (Exception $ex)
         {
             handleException($ex, "Error in SetLikelyDuplicatePosts: %s", true);
+        }
+        finally
+        {
+        	endLogSection("Marking job postings as duplicate finished.");
         }
     }
 
@@ -156,6 +164,7 @@ class JobsAutoMarker
 
 	/**
 	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
+	 * @throws \Exception
 	 */
 	private function _markJobsList_SetOutOfArea_(&$arrJobsList)
     {
@@ -173,55 +182,66 @@ class JobsAutoMarker
 
 	/**
 	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
+	 * @throws \Exception
 	 */
     private function _markJobsList_OutOfArea_CountyFiltered(&$arrJobsList)
     {
-        $searchLocations = getConfigurationSetting('search_locations');
+	    try
+	    {
+		    startLogSection("Automarker: marking jobs as out of area using counties...");
+	        $searchLocations = getConfigurationSetting('search_locations');
 
-        $arrIncludeCounties = array();
+	        $arrIncludeCounties = array();
 
-        /* Find all locations that are within 50 miles of any of our search locations */
+	        /* Find all locations that are within 50 miles of any of our search locations */
 
-        LogMessage("Auto-marking postings not in same counties as the search locations...");
-        foreach($searchLocations as $searchloc)
-        {
-            if(!empty($searchloc))
-            {
-                    $arrIncludeCounties[] = $searchloc->getCounty() . "~" .$searchloc->getRegion();
-            }
-        }
+	        LogMessage("Auto-marking postings not in same counties as the search locations...");
+	        foreach($searchLocations as $searchloc)
+	        {
+	            if(!empty($searchloc))
+	            {
+	                $arrIncludeCounties[] = $searchloc->getCounty() . "~" .$searchloc->getRegion();
+	            }
+	        }
 
-        LogMessage("Finding job postings not in the following counties & states: " . getArrayValuesAsString($arrIncludeCounties) . " ...");
-        $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrIncludeCounties) {
-            $posting = $v->getJobPostingFromUJM();
-            $locId = $posting->getGeoLocationId();
-            if(is_null($locId))
-                return false;  // if we don't have a location, assume nearby
+	        LogMessage("Finding job postings not in the following counties & states: " . getArrayValuesAsString($arrIncludeCounties) . " ...");
+	        $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrIncludeCounties) {
+	            $posting = $v->getJobPostingFromUJM();
+	            $locId = $posting->getGeoLocationId();
+	            if(is_null($locId))
+	                return false;  // if we don't have a location, assume nearby
 
-            $location = $posting->getGeoLocationFromJP();
-            $county = $location->getCounty();
-            $state = $location->getRegion();
-            if(!is_null($county) && !is_null($state)) {
-                $match = $county . "~" . $state;
-                if (!in_array($match, $arrIncludeCounties))
-                    return true;
-            }
-            return false;
-        });
+	            $location = $posting->getGeoLocationFromJP();
+	            $county = $location->getCounty();
+	            $state = $location->getRegion();
+	            if(!is_null($county) && !is_null($state)) {
+	                $match = $county . "~" . $state;
+	                if (!in_array($match, $arrIncludeCounties))
+	                    return true;
+	            }
+	            return false;
+	        });
 
-        LogMessage("Marking user job matches as out of area for " . count($arrJobsOutOfArea) . " matches ...");
+	        LogMessage("Marking user job matches as out of area for " . count($arrJobsOutOfArea) . " matches ...");
 
-        foreach ($arrJobsOutOfArea as $jobOutofArea) {
-            $jobOutofArea->setOutOfUserArea(true);
-            $jobOutofArea->save();
-        }
-
-
+	        foreach ($arrJobsOutOfArea as &$jobOutofArea) {
+	            $jobOutofArea->setOutOfUserArea(true);
+	            $jobOutofArea->save();
+	        }
         $nJobsMarkedAutoExcluded = count($arrJobsOutOfArea);
-        $nJobsNotMarked = count($arrJobsList) - $nJobsMarkedAutoExcluded;
+	        $nJobsNotMarked = count($arrJobsList) - $nJobsMarkedAutoExcluded;
 
 
-        LogMessage("Jobs excluded as out of area: marked ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) .";  not marked " . $nJobsNotMarked . " / " . countAssociativeArrayValues($arrJobsList) );
+	        LogMessage("Jobs excluded as out of area: marked ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) .";  not marked " . $nJobsNotMarked . " / " . countAssociativeArrayValues($arrJobsList) );
+	    }
+	    catch (Exception $ex)
+	    {
+		    handleException($ex, "Error in _markJobsList_OutOfArea_CountyFiltered: %s", true);
+	    }
+	    finally
+	    {
+		    endLogSection("Out of area job marking by county finished.");
+	    }
     }
 
 	/**
@@ -230,78 +250,93 @@ class JobsAutoMarker
 	 */
 	private function _markJobsList_OutOfArea_Geospatial(&$arrJobsList)
     {
-        $searchLocations = getConfigurationSetting('search_locations');
+    	try
+	    {
+	    	startLogSection("Automarker: marking jobs as out of area using geospatial data...");
+	        $searchLocations = getConfigurationSetting('search_locations');
 
-        $arrNearbyIds = array();
+	        $arrNearbyIds = array();
 
-        /* Find all locations that are within 50 miles of any of our search locations */
+	        /* Find all locations that are within 50 miles of any of our search locations */
 
-        LogMessage("Getting locationIDs within 50 miles of search locations...");
-        foreach($searchLocations as $searchloc)
-        {
-            if(!empty($searchloc))
-            {
-                $nearbyLocations = GeoLocationQuery::create()
-                    ->filterByDistanceFrom($searchloc->getLatitude(), $searchloc->getLongitude(), 50, GeoLocationTableMap::MILES_UNIT, Criteria::LESS_THAN)
-                    ->find();
+	        LogMessage("Getting locationIDs within 50 miles of search locations...");
+	        foreach($searchLocations as $searchloc)
+	        {
+	            if(!empty($searchloc))
+	            {
+	                $nearbyLocations = GeoLocationQuery::create()
+	                    ->filterByDistanceFrom($searchloc->getLatitude(), $searchloc->getLongitude(), 50, GeoLocationTableMap::MILES_UNIT, Criteria::LESS_THAN)
+	                    ->find();
 
-                if(!empty($nearbyLocations))
-                {
-                    foreach($nearbyLocations as $near)
-                        $arrNearbyIds[] = $near->getGeoLocationId();
-                }
-            }
-        }
+	                if(!empty($nearbyLocations))
+	                {
+	                    foreach($nearbyLocations as $near)
+	                        $arrNearbyIds[] = $near->getGeoLocationId();
+	                }
+	            }
+	        }
 
-        LogMessage("Marking job postings in the " . count($arrNearbyIds) . " matching areas ...");
-	    $arrJobsInArea = getAllMatchesForUserNotification(null, null, null, $arrNearbyIds);
-	    $arrJobListIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsList, array("UserJobMatchId")));
-	    $arrInAreaIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsInArea, array("UserJobMatchId")));
-	    foreach(array_chunk($arrInAreaIds, 50) as $chunk) {
-		    $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
-		    UserJobMatchQuery::create()
-			    ->filterByUserJobMatchId($chunk)
-			    ->update(array("OutOfUserArea" => false), $con);
-	    }
-
-	    LogMessage("Marking job postings outside " . count($arrNearbyIds) . " matching areas ...");
-	    $arrOutOfAreaIds = array_diff($arrJobListIds, $arrInAreaIds);
-	    if(!empty($arrOutOfAreaIds))
-		    foreach(array_chunk($arrOutOfAreaIds, 50) as $chunk) {
+	        LogMessage("Marking job postings in the " . count($arrNearbyIds) . " matching areas ...");
+		    $arrJobsInArea = getAllMatchesForUserNotification(null, null, null, $arrNearbyIds);
+		    $arrJobListIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsList, array("UserJobMatchId")));
+		    $arrInAreaIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsInArea, array("UserJobMatchId")));
+		    foreach(array_chunk($arrInAreaIds, 50) as $chunk) {
 			    $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
 			    UserJobMatchQuery::create()
 				    ->filterByUserJobMatchId($chunk)
-				    ->update(array("OutOfUserArea" => true, "IsExcluded" => true), $con);
+				    ->update(array("OutOfUserArea" => false), $con);
 		    }
 
-        $nJobsMarkedAutoExcluded = count($arrOutOfAreaIds);
-        $nJobsNotMarked = count($arrJobsInArea);
+		    LogMessage("Marking job postings outside " . count($arrNearbyIds) . " matching areas ...");
+		    $arrOutOfAreaIds = array_diff($arrJobListIds, $arrInAreaIds);
+		    if(!empty($arrOutOfAreaIds))
+			    foreach(array_chunk($arrOutOfAreaIds, 50) as $chunk) {
+				    $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
+				    UserJobMatchQuery::create()
+					    ->filterByUserJobMatchId($chunk)
+					    ->update(array("OutOfUserArea" => true, "IsExcluded" => true), $con);
+			    }
 
-       LogMessage("Jobs excluded as out of area:  marked out of area ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ."; marked in area = " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList) );
+
+	        $nJobsMarkedAutoExcluded = count($arrOutOfAreaIds);
+	        $nJobsNotMarked = count($arrJobsInArea);
+
+	       LogMessage("Jobs excluded as out of area:  marked out of area ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ."; marked in area = " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList) );
+	    }
+		catch (Exception $ex)
+		{
+			handleException($ex, "Error in _markJobsList_OutOfArea_Geospatial: %s", true);
+		}
+		finally
+		{
+			endLogSection("Out of area job marking geospatially finished.");
+		}
     }
 
 	/**
 	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
+	 * @throws \Exception
 	 */
 	private function _markJobsList_SetAutoExcludedCompaniesFromRegex_(&$arrJobsList)
     {
-        //
-        // Load the exclusion filter and other user data from files
-        //
-        $this->_loadCompanyRegexesToFilter();
+	    try {
+		    startLogSection("Automarker: marking company names as excluded based on user input files...");
 
-        $nJobsSkipped = 0;
-        $nJobsMarkedAutoExcluded = 0;
-        $nJobsNotMarked = 0;
+		    //
+	        // Load the exclusion filter and other user data from files
+	        //
+	        $this->_loadCompanyRegexesToFilter();
 
-        try
-        {
+	        $nJobsSkipped = 0;
+	        $nJobsMarkedAutoExcluded = 0;
+	        $nJobsNotMarked = 0;
+
             if(count($arrJobsList) == 0 || is_null($this->companies_regex_to_filter) || count($this->companies_regex_to_filter) == 0) return;
 
             LogMessage("Excluding Jobs by Companies Regex Matches");
             LogMessage("Checking ".count($arrJobsList) ." roles against ". count($this->companies_regex_to_filter) ." excluded companies.");
 
-            foreach ($arrJobsList as $jobMatch) {
+            foreach ($arrJobsList as &$jobMatch) {
                 $matched_exclusion = false;
                 foreach($this->companies_regex_to_filter as $rxInput )
                 {
@@ -325,200 +360,370 @@ class JobsAutoMarker
         {
             handleException($ex, "Error in SetAutoExcludedCompaniesFromRegex: %s", true);
         }
+        finally
+        {
+        	endLogSection("Company exclusion by name finished.");
+        }
     }
 
+//
+//	/**
+//	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
+//	 * @throws \Exception
+//	 */
+//	private function _markJobsList_UserExcludedKeywords_(&$arrJobsList)
+//	{
+//		//
+//		// Load the exclusion filter and other user data from files
+//		//
+//		$negkwds = $this->_loadUserNegativeTitleKeywords();
+//		$this->_tokenizeNegativeTitles($negkwds);
+//
+//		$nJobsMarkedAutoExcluded = 0;
+//		$nJobsNotMarked = 0;
+//
+//		try
+//		{
+//			if(count($arrJobsList) == 0 || is_null($this->title_negative_keyword_tokens) || count($this->title_negative_keyword_tokens) == 0) return;
+//
+//			LogMessage("Excluding Jobs by Negative Title Keyword Token Matches");
+//			LogMessage("Checking ".count($arrJobsList) ." roles against ". count($this->title_negative_keyword_tokens) ." negative title keywords to be excluded.");
+//
+//			try {
+//				$nCounter = 1;
+//				$nCounterEnd = $nCounter + 9;
+//				foreach(array_chunk($this->title_negative_keyword_tokens, 10) as $subsetNegKwds)
+//				{
+//					LogMessage("Checking negative keywords {$nCounter}-{$nCounterEnd}...");
+//					$arrJobsWithTokenMatches = getAllMatchesForUserNotification(null, $subsetNegKwds);
+//					foreach($arrJobsWithTokenMatches as $jobMatch)
+//					{
+//						$jobMatch->setMatchedNegativeTitleKeywords($subsetNegKwds);
+//						$jobMatch->setIsExcluded(true);
+//						$jobMatch->save();
+//						$arrJobsMarkedNegMatch[$jobMatch->getJobPostingId()] = $jobMatch->getJobPostingFromUJM()->getTitleTokens();
+//					}
+//					$nCounter = $nCounterEnd;
+//					$nCounterEnd = $nCounterEnd + count($subsetNegKwds);
+//				}
+//				$nJobsMarkedAutoExcluded = countAssociativeArrayValues($arrJobsMarkedNegMatch);
+//				$nJobsNotMarked = countAssociativeArrayValues($arrJobsList) - countAssociativeArrayValues($arrJobsMarkedNegMatch);
+//			} catch (Exception $ex) {
+//				handleException($ex, 'ERROR:  Failed to verify titles against negative keywords due to error: %s', isDebug());
+//			}
+//			LogMessage("Processed " . countAssociativeArrayValues($arrJobsList) . " titles for auto-marking against negative title keywords: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) . " marked excluded; " . $nJobsNotMarked. "/" . countAssociativeArrayValues($arrJobsList) . " not marked.");
+//		}
+//		catch (Exception $ex)
+//		{
+//			handleException($ex, "Error in SearchKeywordsNotFound: %s", true);
+//		}
+//
+//	}
+//
+////
+////	/**
+////	 * @return array
+////	 */
+////	private function _getUserSearchTitleKeywords()
+////	{
+////		$keywordTokens = array();
+////		$keywordSets = getConfigurationSetting("user_keyword_sets");
+////		if(empty($keywordSets))
+////			return null;
+////
+////		foreach($keywordSets as $kwdset)
+////		{
+////			$setKwdTokens = $kwdset->getKeywordTokens();
+////			$keywordTokens = array_merge($keywordTokens, $setKwdTokens);
+////		}
+////		return $keywordTokens;
+////	}
 
 	/**
-	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
+	 * @param string $basefile
+	 * @param \JobScooper\DataAccess\UserJobMatch [] $arrJobList
+	 *
+	 * @return null|string
+	 * @throws \Exception
+	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function _markJobsList_UserExcludedKeywords_(&$arrJobsList)
+	private function _exportJobMatchesToJson($basefile="automarker", $arrJobList)
 	{
-		//
-		// Load the exclusion filter and other user data from files
-		//
-		$this->_loadTitlesTokensToFilter();
-
-		$nJobsMarkedAutoExcluded = 0;
-		$nJobsNotMarked = 0;
-
-		try
+		$arrJobItems = array();
+		if($arrJobList)
 		{
-			if(count($arrJobsList) == 0 || is_null($this->title_negative_keyword_tokens) || count($this->title_negative_keyword_tokens) == 0) return;
+			$item = array_shift($arrJobList);
+			$jobMatchKeys = array_keys($item->toArray());
+			$jobMatchKeys[] = "Title";
+			array_unshift($arrJobList, $item);
 
-			LogMessage("Excluding Jobs by Negative Title Keyword Token Matches");
-			LogMessage("Checking ".count($arrJobsList) ." roles against ". count($this->title_negative_keyword_tokens) ." negative title keywords to be excluded.");
-
-			try {
-				$nCounter = 1;
-				$nCounterEnd = $nCounter + 9;
-				foreach(array_chunk($this->title_negative_keyword_tokens, 10) as $subsetNegKwds)
-				{
-					LogMessage("Checking negative keywords {$nCounter}-{$nCounterEnd}...");
-					$arrJobsWithTokenMatches = getAllMatchesForUserNotification(null, $subsetNegKwds);
-					foreach($arrJobsWithTokenMatches as $jobMatch)
-					{
-						$jobMatch->setMatchedNegativeTitleKeywords($subsetNegKwds);
-						$jobMatch->setIsExcluded(true);
-						$jobMatch->save();
-						$arrJobsMarkedNegMatch[$jobMatch->getJobPostingId()] = $jobMatch->getJobPostingFromUJM()->getTitleTokens();
-					}
-					$nCounter = $nCounterEnd;
-					$nCounterEnd = $nCounterEnd + count($subsetNegKwds);
-				}
-				$nJobsMarkedAutoExcluded = countAssociativeArrayValues($arrJobsMarkedNegMatch);
-				$nJobsNotMarked = countAssociativeArrayValues($arrJobsList) - countAssociativeArrayValues($arrJobsMarkedNegMatch);
-			} catch (Exception $ex) {
-				handleException($ex, 'ERROR:  Failed to verify titles against negative keywords due to error: %s', isDebug());
-			}
-			LogMessage("Processed " . countAssociativeArrayValues($arrJobsList) . " titles for auto-marking against negative title keywords: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) . " marked excluded; " . $nJobsNotMarked. "/" . countAssociativeArrayValues($arrJobsList) . " not marked.");
 		}
-		catch (Exception $ex)
+		foreach($arrJobList as $job)
+			$arrJobItems[$job->getUserJobMatchId()] = $job->toFlatArrayForCSV($jobMatchKeys);
+
+		$searchKeywords = array();
+		$keywordSets = getConfigurationSetting("user_keyword_sets");
+		if(empty($keywordSets))
+			return null;
+
+		foreach($keywordSets as $kwdset)
 		{
-			handleException($ex, "Error in SearchKeywordsNotFound: %s", true);
+			$searchKeywords[$kwdset->getSearchKeyFromConfig()] = $kwdset->getKeywords();
 		}
 
+		$neg_kwds = $this->_loadUserNegativeTitleKeywords();
+
+		$jsonObj = array(
+			"user" => User::getCurrentUser()->toArray(),
+			"job_matches" => $arrJobItems,
+			"search_keywords" => $searchKeywords,
+			"negative_title_keywords" => $neg_kwds
+		);
+
+		$outfile = generateOutputFileName($basefile, "json", true, 'debug');
+		writeJson($jsonObj, $outfile );
+
+		return $outfile;
 	}
 
 
 	/**
-	 * @return array
+	 * Reads JSON encoded file with an array of UserJobMatch/JobPosting combo records named "jobs"
+	 * and updates the database with the values for each record
+	 *
+	 * @param String $inputFile The input json file to load
+	 *
+	 * @returns array Returns array of UserJobMatchIds if successful; empty array if not.
+	 * @throws \Exception
 	 */
-	private function _getUserSearchTitleKeywords()
-    {
-	    $keywordTokens = array();
-        $keywordSets = getConfigurationSetting("user_keyword_sets");
-        if(empty($keywordSets))
-        	return null;
+	private function _updateUserJobMatchesFromJson($datafile)
+	{
 
-	    foreach($keywordSets as $kwdset)
-	    {
-	    	$setKwdTokens = $kwdset->getKeywordTokens();
-		    $keywordTokens = array_merge($keywordTokens, $setKwdTokens);
-	    }
-        return $keywordTokens;
-    }
+		if (!is_file($datafile))
+			throw new Exception("Unable to locate JSON file {$datafile} to load.");
+
+		try {
+
+			LogMessage("Loading and updating UserJobMatch records from json file {$datafile}.");
+			$data = loadJSON($datafile);
+			$retUJMIds = array();
+
+			if(empty($data) || !array_key_exists('job_matches', $data))
+			{
+				throw new Exception("Unable to load data from {$datafile}.  No records found.");
+			}
+
+				$arrMatchRecs = $data['job_matches'];
+				if (!empty($arrMatchRecs) && is_array($arrMatchRecs)) {
+					$arrUserJobMatchIds = array_keys($arrMatchRecs);
+					$dbRecsById = array();
+					$chunks = array_chunk($arrUserJobMatchIds, 50);
+					foreach ($chunks as $idchunk) {
+						$dbRecsById = UserJobMatchQuery::create()
+							->filterByUserJobMatchId($idchunk, Criteria::IN)
+							->find()
+							->toKeyIndex("UserJobMatchId");
+						foreach ($idchunk as $id) {
+							$arrItem = $arrMatchRecs[$id];
+							if (array_key_exists($id, $dbRecsById)) {
+								$dbMatch = $dbRecsById[$id];
+							} else {
+								$dbMatch = UserJobMatchQuery::create()
+									->filterByUserJobMatchId($id)
+									->findOneOrCreate();
+								$dbMatch->setUserJobMatchId($id);
+							}
+
+							$arrJobMatchFacts = array_subset_keys($arrItem, array(
+								"UserJobMatchId",
+								"IsJobMatch",
+								"MatchedNegativeTitleKeywords",
+								"MatchedUserKeywords"
+							));
+							if (!empty($arrJobMatchFacts['MatchedUserKeywords']))
+								$arrJobMatchFacts['MatchedUserKeywords'] = preg_split("/\|/", $arrJobMatchFacts['MatchedUserKeywords'], -1, PREG_SPLIT_NO_EMPTY);
+							if (!empty($arrJobMatchFacts['MatchedNegativeTitleKeywords']))
+								$arrJobMatchFacts['MatchedNegativeTitleKeywords'] = preg_split("/\|/", $arrJobMatchFacts['MatchedNegativeTitleKeywords'], -1, PREG_SPLIT_NO_EMPTY);
+							$dbMatch->fromArray($arrJobMatchFacts);
+							$dbMatch->save();
+							$retUJMIds[] = $id;
+						}
+					}
+				}
+			return $retUJMIds;
+
+		} catch (Exception $ex) {
+			throw $ex;
+		}
+	}
+
+
 
 	/**
 	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
+	 * @throws \Exception
 	 */
-    private function _markJobsList_SearchKeywordsFound_(&$arrJobsList)
-    {
-        $nJobsMarkedInclude = 0;
-        $nJobsNotMarked = 0;
+	private function _markJobsList_KeywordMatches_(&$arrJobsList)
+	{
+		try {
+			startLogSection("Automarker: Starting matching of " . count($arrJobsList) . " job role titles against user search keywords ...");
 
-        try {
-            $usrSearchKeywords = $this->_getUserSearchTitleKeywords();
-            if (count($arrJobsList) == 0 || is_null($usrSearchKeywords)) return null;
+			try {
 
-            LogMessage("Checking " . count($arrJobsList) . " roles against " . count($usrSearchKeywords) . " keyword phrases in titles...");
+				$basefile = "mark_titlematches";
+				$sourcefile = $this->_exportJobMatchesToJson("{$basefile}_src", $arrJobsList);
+				$resultsfile = generateOutputFileName("{$basefile}_results", "json", true, 'debug');
 
-            try {
-	            $arrJobsWithTokenMatches = getAllMatchesForUserNotification(null, $usrSearchKeywords);
-	            $arrMatchedIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsWithTokenMatches, array("UserJobMatchId")));
-	            foreach(array_chunk($arrMatchedIds, 50) as $chunk) {
-		            $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
-		            UserJobMatchQuery::create()
-			            ->filterByUserJobMatchId($chunk)
-			            ->update(array("IsJobMatch" => true, "MatchedUserKeywords" => $usrSearchKeywords), $con, true);
-	            }
+				try {
+					startLogSection("Calling python to do work of job title matching.");
+					$PYTHONPATH = realpath(__ROOT__ . "/python/pyJobNormalizer/matchTitlesToKeywords.py");
+					$cmd = "python " . $PYTHONPATH . " -i " . escapeshellarg($sourcefile) . " -o " . escapeshellarg($resultsfile);
 
-				$arrNotMatchedJobs = array_diff_key($arrJobsList,$arrJobsWithTokenMatches);
-				$arrNotMatchedIds = array_from_orm_object_list_by_array_keys($arrNotMatchedJobs, array("UserJobMatchId"));
-				foreach(array_chunk($arrNotMatchedIds, 50) as $chunk)
+					$cmd = "source " . realpath(__ROOT__) . "/python/pyJobNormalizer/venv/bin/activate; " . $cmd;
+
+					LogMessage(PHP_EOL . "    ~~~~~~ Running command: " . $cmd . "  ~~~~~~~" . PHP_EOL);
+					doExec($cmd);
+				} catch (Exception $ex)
 				{
-					$con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
-					UserJobMatchQuery::create()
-						->filterByUserJobMatchId($chunk)
-						->update(array("IsJobMatch" => false), $con);
+					throw $ex;
+				}
+				finally
+				{
+					endLogSection("Python command call finished.");
 				}
 
-	            $nJobsMarkedInclude = countAssociativeArrayValues($arrJobsWithTokenMatches);
-	            $nJobsNotMarked = countAssociativeArrayValues($arrNotMatchedJobs);
-            } catch (Exception $ex) {
-                handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s', isDebug());
-            }
-            LogMessage("Processed " . countAssociativeArrayValues($arrJobsList) . " jobs: " . $nJobsMarkedInclude . "/" . count($arrJobsList) . " marked as user job title matches; " . $nJobsNotMarked . "/" . count($arrJobsList) . " marked as not matches to user search keywords.");
-        }
-        catch (Exception $ex)
-        {
-            handleException($ex, "Error in SearchKeywordsNotFound: %s", true);
-        }
+				LogMessage("Updating database with new match results...");
+				$this->_updateUserJobMatchesFromJson($resultsfile);
+
+			} catch (Exception $ex) {
+				handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s', isDebug());
+			}
+			LogMessage("Completed matching user keyword phrases against job titles.");
+		}
+		catch (Exception $ex)
+		{
+			handleException($ex, null, true);
+		}
+		finally
+		{
+			endLogSection("Job role title matching finished.");
+		}
 
 
-    }
+	}
+//
+//	/**
+//	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
+//	 */
+//	private function _markJobsList_SearchKeywordsFound_(&$arrJobsList)
+//	{
+//		$nJobsMarkedInclude = 0;
+//		$nJobsNotMarked = 0;
+//
+//		try {
+//			$usrSearchKeywords = $this->_getUserSearchTitleKeywords();
+//			if (count($arrJobsList) == 0 || is_null($usrSearchKeywords)) return null;
+//			LogMessage("Checking " . count($arrJobsList) . " roles against " . count($usrSearchKeywords) . " keyword phrases in titles...");
+//
+//			try {
+//
+////	            $arrJobsWithTokenMatches = getAllMatchesForUserNotification(null, $usrSearchKeywords);
+////	            $arrMatchedIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsWithTokenMatches, array("UserJobMatchId")));
+////	            foreach(array_chunk($arrMatchedIds, 50) as $chunk) {
+////		            $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
+////		            UserJobMatchQuery::create()
+////			            ->filterByUserJobMatchId($chunk)
+////			            ->update(array("IsJobMatch" => true, "MatchedUserKeywords" => $usrSearchKeywords), $con, true);
+////	            }
+////
+////				$arrNotMatchedJobs = array_diff_key($arrJobsList,$arrJobsWithTokenMatches);
+////				$arrNotMatchedIds = array_from_orm_object_list_by_array_keys($arrNotMatchedJobs, array("UserJobMatchId"));
+////				foreach(array_chunk($arrNotMatchedIds, 50) as $chunk)
+////				{
+////					$con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
+////					UserJobMatchQuery::create()
+////						->filterByUserJobMatchId($chunk)
+////						->update(array("IsJobMatch" => false), $con);
+////				}
+////
+////	            $nJobsMarkedInclude = countAssociativeArrayValues($arrJobsWithTokenMatches);
+////	            $nJobsNotMarked = countAssociativeArrayValues($arrNotMatchedJobs);
+//			} catch (Exception $ex) {
+//				handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s', isDebug());
+//			}
+//			LogMessage("Completed matching user keyword phrases against job titles.");
+//		}
+//		catch (Exception $ex)
+//		{
+//			handleException($ex, "Error in SearchKeywordsNotFound: %s", true);
+//		}
+//
+//
+//	}
 
 
 	/**
 	 * @throws \Exception
 	 */
-	private function _loadTitlesTokensToFilter()
-    {
-	    $inputfiles = getConfigurationSetting("user_data_files.negative_title_keywords");
+	private function _loadUserNegativeTitleKeywords()
+	{
+		$inputfiles = getConfigurationSetting("user_data_files.negative_title_keywords");
 
-	    $this->title_negative_keyword_tokens = array();
+		if (!is_array($inputfiles)) {
+			// No files were found, so bail
+			LogDebug("No input files were found with title token strings to exclude.");
 
-        if(isset($this->title_negative_keyword_tokens) && count($this->title_negative_keyword_tokens) > 0)
-        {
-            // We've already loaded the titles; go ahead and return right away
-            LogDebug("Using previously loaded " . countAssociativeArrayValues($this->title_negative_keyword_tokens) . " tokenized title strings to exclude." );
-            return;
-        }
+			return array();
+		}
 
-        if(!is_array($inputfiles))
-        {
-            // No files were found, so bail
-            LogDebug("No input files were found with title token strings to exclude." );
-            return;
-        }
+		$arrNegKwds = array();
 
-        $arrNegKwds = array();
+		foreach ($inputfiles as $fileItem) {
 
-        foreach($inputfiles as $fileItem)
-        {
+			$arrRecs = loadCSV($fileItem);
+			foreach ($arrRecs as $arrRec) {
+				if (array_key_exists('negative_keywords', $arrRec)) {
+					$kwd = strtolower($arrRec['negative_keywords']);
+					$arrNegKwds[$kwd] = $kwd;
+				}
+			}
+		}
+		$negKwdForTokens = array_unique($arrNegKwds, SORT_REGULAR);
 
-            $arrRecs = loadCSV($fileItem);
-            foreach($arrRecs as $arrRec)
-            {
-                if(array_key_exists('negative_keywords', $arrRec)) {
-                    $kwd = strtolower($arrRec['negative_keywords']);
-                    $arrNegKwds[$kwd] = $kwd;
-                }
-            }
-        }
-	    $negKwdForTokens = array_unique($arrNegKwds, SORT_REGULAR);
+		return $negKwdForTokens;
+	}
 
-        $arrTitlesTemp = tokenizeSingleDimensionArray($negKwdForTokens, 'userNegKwds', 'negative_keywords', 'negative_keywords');
-
-        if(count($arrTitlesTemp) <= 0)
-        {
-            LogWarning("Warning: No title negative keywords were found in the input source files " . getArrayValuesAsString($inputfiles) . " to be filtered from job listings." );
-        }
-        else
-        {
-
-	        //
-            // Add each title we found in the file to our list in this class, setting the key for
-            // each record to be equal to the job title so we can do a fast lookup later
-            //
-	        $negKeywords = array();
-	        foreach($arrTitlesTemp as $titleRecord)
-            {
-                $tokens = explode("|", $titleRecord['negative_keywordstokenized']);
-                $negKeywords[] = $tokens;
-            }
-
-	        //
-	        // override the negativity of any keywords that are actually also our specific search terms
-	        //
-	        $usrSearchKeywords = $this->_getUserSearchTitleKeywords();
-	        $this->title_negative_keyword_tokens = array_diff(array_values($negKeywords), array_values($usrSearchKeywords) );
-
-            LogMessage("Loaded " . countAssociativeArrayValues($this->title_negative_keyword_tokens) . " tokens to use for filtering titles from '" . getArrayValuesAsString($inputfiles) . "'." );
-
-        }
-
-    }
-
+	//	private function _tokenizeNegativeTitles($negKwds)
+//        $arrTitlesTemp = tokenizeSingleDimensionArray($negKwds, 'userNegKwds', 'negative_keywords', 'negative_keywords');
+//
+//        if(count($arrTitlesTemp) <= 0)
+//        {
+//            LogWarning("Warning: No title negative keywords were found in the input source files to be filtered from job listings." );
+//        }
+//        else
+//        {
+//	        //
+//            // Add each title we found in the file to our list in this class, setting the key for
+//            // each record to be equal to the job title so we can do a fast lookup later
+//            //
+//	        $negKeywords = array();
+//	        foreach($arrTitlesTemp as $titleRecord)
+//            {
+//                $tokens = explode("|", $titleRecord['negative_keywordstokenized']);
+//                $negKeywords[] = $tokens;
+//            }
+//
+//	        //
+//	        // override the negativity of any keywords that are actually also our specific search terms
+//	        //
+//	        $usrSearchKeywords = $this->_getUserSearchTitleKeywords();
+//	        $this->title_negative_keyword_tokens = array_diff(array_values($negKeywords), array_values($usrSearchKeywords) );
+//
+//            LogMessage("Loaded " . countAssociativeArrayValues($this->title_negative_keyword_tokens) . " tokens to use for filtering titles from '" . getArrayValuesAsString($inputfiles) . "'." );
+//
+//        }
+//    }
+//
 
 	/**
 	 * @param $pattern
@@ -552,6 +757,7 @@ class JobsAutoMarker
     /**
      * Initializes the global list of titles we will automatically mark
      * as "not interested" in the final results set.
+     * @throws \Exception
      */
     function _loadCompanyRegexesToFilter()
     {
