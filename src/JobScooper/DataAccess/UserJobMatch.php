@@ -38,7 +38,10 @@ class UserJobMatch extends BaseUserJobMatch
 {
     private $delim = ' | ';
 
-    private function _setMatchStatus()
+	/**
+	 *
+	 */
+	private function _setMatchStatus()
     {
         if(count($this->getMatchedUserKeywords()) > 0 )
             $this->setIsJobMatch(true);
@@ -46,6 +49,7 @@ class UserJobMatch extends BaseUserJobMatch
             $this->setIsJobMatch(false);
 
 
+	    $this->setIsExcluded(false);
         if(count($this->getMatchedNegativeTitleKeywords()) > 0 )
             $this->setIsExcluded(true);
 
@@ -71,7 +75,13 @@ class UserJobMatch extends BaseUserJobMatch
         return true;
     }
 
-    public function toFlatArrayForCSV($limitToKeys=null)
+	/**
+	 * @param null $limitToKeys
+	 *
+	 * @return array
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	public function toFlatArrayForCSV($limitToKeys=null)
     {
         $jobPost = $this->getJobPostingFromUJM();
         if(empty($jobPost) && $this->isNew())
@@ -85,16 +95,20 @@ class UserJobMatch extends BaseUserJobMatch
 
         if(!empty($limitToKeys) && is_array($limitToKeys))
         {
-	        $limitToKeys = array_combine($limitToKeys, $limitToKeys);
-        	return array_intersect_key($arrItem, $limitToKeys);
+        	return array_subset_keys($arrItem, $limitToKeys);
         }
 
         return $arrItem;
     }
 
-    public function setMatchedNegativeTitleKeywords($v)
+	/**
+	 * @param array $v
+	 *
+	 * @return $this|\JobScooper\DataAccess\UserJobMatch
+	 */
+	public function setMatchedNegativeTitleKeywords($v)
     {
-    	if(is_array($v) && !empty($v))
+    	if(!empty($v) && is_array($v))
 	    {
 	    	foreach($v as &$item)
 		    {
@@ -102,7 +116,41 @@ class UserJobMatch extends BaseUserJobMatch
 		    		$item = implode(" ", $item);
 		    }
 	    }
+	    elseif (is_string($v))
+		    $v = array($v);
+	    elseif (empty($v))
+		    $v = array();
+
 	    return parent::setMatchedNegativeTitleKeywords($v);
     }
+
+	public function setMatchedUserKeywords($v)
+	{
+		if(!empty($v) && is_array($v))
+		{
+			foreach($v as &$item)
+			{
+				if(is_array($item))
+					$item = implode(" ", $item);
+			}
+		}
+		elseif (is_string($v))
+			$v = array($v);
+		elseif (empty($v))
+			$v = array();
+
+		return parent::setMatchedUserKeywords($v);
+	}
+
+	public function clearUserMatchState()
+	{
+		$this->setIsExcluded(null);
+		$this->setIsJobMatch(null);
+		$this->setOutOfUserArea(null);
+		$this->setMatchedNegativeTitleKeywords(null);
+		$this->setMatchedNegativeCompanyKeywords(null);
+		$this->setMatchedUserKeywords(null);
+		$this->applyDefaultValues();
+	}
 
 }
