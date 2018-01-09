@@ -26,6 +26,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Font;
+use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Propel;
 
 /**
@@ -46,9 +47,7 @@ class NotifierJobAlerts extends JobsMailSender
 		"Category",
 		"Url");
 
-	const SHEET_EXCLUDED_MATCHES = "excluded job matches";
-	const SHEET_EXCLUDED_ALL = "all excluded jobs";
-	const SHEET_ALL_JOBS = "all possible matches";
+	const SHEET_ALL_JOBS = "all jobs";
 
 	const KEYS_EXCLUDED = array(
 		"JobSiteKey",
@@ -80,8 +79,6 @@ class NotifierJobAlerts extends JobsMailSender
 			'wrapText'   => false
 		)
 	);
-	protected $arrAllUnnotifiedJobs = array();
-	private $_arrJobSitesForRun = null;
 
 	/**
 	 * NotifierJobAlerts constructor.
@@ -94,6 +91,7 @@ class NotifierJobAlerts extends JobsMailSender
 	/**
 	 * @return bool
 	 * @throws \Exception
+	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
 	 */
 	function processNotifications()
 	{
@@ -113,25 +111,30 @@ class NotifierJobAlerts extends JobsMailSender
 		// Output the final files we'll send to the user
 		//
 
-		$this->arrAllUnnotifiedJobs = getAllMatchesForUserNotification();
-		if(empty($this->arrAllUnnotifiedJobs))
-			$this->arrAllUnnotifiedJobs = array();
-//		if (is_null($this->arrAllUnnotifiedJobs) || count($this->arrAllUnnotifiedJobs) <= 0) {
-//			LogMessage("No new jobs found to notify user about.");
-//			endLogSection(" User results notification.");
-//
-//			return false;
-//		}
-
-		$arrJobsToNotify = $this->arrAllUnnotifiedJobs;
 		$detailsHTMLFile = null;
 		$pathExcelResults = null;
 		$arrFilesToAttach = array();
 
-		startLogSection("Generating Excel file for user's job match results...");
+		LogMessage("Building job match lists for notifications");
+		$matches = array();
+		$matches["all"] = getAllMatchesForUserNotification(
+			[UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND, Criteria::EQUAL],
+			null
+		);
 
+		if(empty($matches["all"]))
+			$matches["all"] = array();
+		else {
+			LogMessage("Converting " . countAssociativeArrayValues($matches["all"]) . " UserJobMatch objects to array data for use in notifications...");
+			foreach ($matches["all"] as $userMatchId => $item) {
+				$item = $matches["all"][$userMatchId]->toFlatArrayForCSV();
+				$matches["all"][$userMatchId] = $item;
+			}
+		}
+		$matches["isUserJobMatchAndNotExcluded"] = array_filter($matches["all"], "isUserJobMatchAndNotExcluded");
+		startLogSection("Generating Excel file for user's job match results...");
 		try {
-			$spreadsheet = $this->_generateMatchResultsExcelFile($arrJobsToNotify);
+			$spreadsheet = $this->_generateMatchResultsExcelFile($matches);
 
 			$writer = IOFactory::createWriter($spreadsheet, "Xlsx");
 
@@ -154,11 +157,8 @@ class NotifierJobAlerts extends JobsMailSender
 		// Create a copy of the jobs list that is sorted by that value.
 		//
 		startLogSection("Generating HTML & text email content for user ");
-		$arrMatchedJobs = array_filter($arrJobsToNotify, "isUserJobMatchAndNotExcluded");
 
-		LogMessage("Generating html email content for user" . PHP_EOL);
-
-		$messageHtml = $this->_generateHTMLEmailContent("JobScooper for " . getRunDateRange(), $arrMatchedJobs, $arrJobsToNotify);
+		$messageHtml = $this->_generateHTMLEmailContent("JobScooper for " . getRunDateRange(), $matches);
 		$subject = "New Job Postings: " . getRunDateRange();
 
 		endLogSection("Email content ready to send.");
@@ -172,15 +172,8 @@ class NotifierJobAlerts extends JobsMailSender
 			$ret = $this->sendEmail(NotifierJobAlerts::PLAINTEXT_EMAIL_DIRECTIONS, $messageHtml, $arrFilesToAttach, $subject, "results");
 			if ($ret !== false || $ret !== null) {
 				if (!isDebug()) {
-					$con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
-					$ids = array_from_orm_object_list_by_array_keys($arrJobsToNotify, array("UserJobMatchId"));
-					$valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
-					$statusInt = array_search(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_SENT, $valueSet);
-					foreach (array_chunk($ids, 50) as $chunk) {
-						UserJobMatchQuery::create()
-							->filterByUserJobMatchId($chunk)
-							->update(array("UserNotificationState" => $statusInt), $con);
-					}
+					$ids = array_keys($matches['all']);
+					updateUserJobMatchesStatus($ids, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_SENT);
 				}
 			}
 			endLogSection(" Email send completed...");
@@ -216,15 +209,14 @@ class NotifierJobAlerts extends JobsMailSender
 	 * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
 	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
 	 */
-	private function _generateMatchResultsExcelFile($arrJobsToNotify)
+	private function _generateMatchResultsExcelFile(&$arrJobsToNotify)
 	{
 
 		$spreadsheet = IOFactory::load(__ROOT__ . '/src/assets/templates/results.xlsx');
 
 		$sheetFilters = array(
-			[NotifierJobAlerts::SHEET_MATCHES, "isUserJobMatch", NotifierJobAlerts::KEYS_MATCHES],
-			[NotifierJobAlerts::SHEET_EXCLUDED_MATCHES, "isUserJobMatchAndNotExcluded", NotifierJobAlerts::KEYS_EXCLUDED],
-			[NotifierJobAlerts::SHEET_ALL_JOBS, null, NotifierJobAlerts::KEYS_EXCLUDED]
+			[NotifierJobAlerts::SHEET_MATCHES, "isUserJobMatchAndNotExcluded", NotifierJobAlerts::KEYS_MATCHES],
+			[NotifierJobAlerts::SHEET_ALL_JOBS, "all", NotifierJobAlerts::KEYS_EXCLUDED]
 		);
 
 		foreach ($sheetFilters as $sheetParams) {
@@ -235,13 +227,7 @@ class NotifierJobAlerts extends JobsMailSender
 			}
 			$spreadsheet->setActiveSheetIndexByName($sheetParams[0]);
 			$spreadsheet->getActiveSheet()->getCell("F1")->setValue(getRunDateRange());
-			if(empty($sheetParams[1]))
-				$arrFilteredJobs = $arrJobsToNotify;
-			else
-				$arrFilteredJobs = array_filter($arrJobsToNotify, $sheetParams[1]);
-			if (!empty($arrFilteredJobs))
-				$this->_writeJobMatchesToSheet($spreadsheet, $sheetParams[0], $arrFilteredJobs, $sheetParams[2]);
-			$arrFilteredJobs = null;
+			$this->_writeJobMatchesToSheet($spreadsheet, $sheetParams[0], $arrJobsToNotify[$sheetParams[1]], $sheetParams[2]);
 		}
 		$spreadsheet->setActiveSheetIndexByName($sheetFilters[0][0]);
 
@@ -256,9 +242,11 @@ class NotifierJobAlerts extends JobsMailSender
 	 * @return mixed
 	 * @throws \Exception
 	 */
-	private function _generateHTMLEmailContent($subject, $arrMatchedJobs, $arrAllJobsToNotify)
+	private function _generateHTMLEmailContent($subject, &$matches)
 	{
 		$renderer = loadTemplate(join(DIRECTORY_SEPARATOR, array(__ROOT__, "src", "assets", "templates", "html_email_results_responsive.tmpl")));
+
+		assert(array_key_exists("isUserJobMatchAndNotExcluded", $matches));
 
 		$data = array(
 			"Email"      => array(
@@ -267,15 +255,15 @@ class NotifierJobAlerts extends JobsMailSender
 				"Headline"           => "Jobs for " . getRunDateRange(),
 				"IntroText"          => "",
 				"PreHeaderText"      => "",
-				"TotalJobMatchCount" => countAssociativeArrayValues($arrMatchedJobs),
-				"TotalJobsReviewedCount" => countAssociativeArrayValues($arrAllJobsToNotify),
+				"TotalJobMatchCount" => countAssociativeArrayValues($matches["isUserJobMatchAndNotExcluded"]),
+				"TotalJobsReviewedCount" => countAssociativeArrayValues($matches["all"]),
 				"PostFooterText"     => "generated by " . __APP_VERSION__. " on " . gethostname()
 			),
 			"Search"     => array(
 				"Locations" => null,
 				"Keywords"  => null
 			),
-			"JobMatches" => $this->_convertToJobsArrays($arrMatchedJobs)
+			"JobMatches" => $matches["isUserJobMatchAndNotExcluded"]
 		);
 
 		$keywordSets = getConfigurationSetting("user_keyword_sets");
@@ -322,9 +310,8 @@ class NotifierJobAlerts extends JobsMailSender
 	{
 
 		foreach ($arrResults as $k => $v) {
-			$rowData = $v->toFlatArrayForCSV($keys);
 			$rowOrder = array_fill_keys($keys, null);
-			$arrResults[$k] = array_replace($rowOrder, $rowData);;
+			$arrResults[$k] = array_replace($rowOrder, $v);
 
 		}
 
@@ -368,22 +355,4 @@ class NotifierJobAlerts extends JobsMailSender
 
 
 	}
-
-	/**
-	 * @param $arrJobObjects
-	 *
-	 * @return array
-	 */
-	private function _convertToJobsArrays($arrJobObjects)
-	{
-		$arrRet = array();
-		foreach ($arrJobObjects as $jobMatch) {
-			$item = $jobMatch->toFlatArrayForCSV();
-			$arrRet[$item['KeySiteAndPostId']] = $item;
-		}
-
-		return $arrRet;
-
-	}
-
 }

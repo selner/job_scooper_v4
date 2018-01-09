@@ -223,7 +223,7 @@ class JobSitePluginBuilder
     {
         LogMessage('Adding any missing declared jobsite plugins and jobsite records in database...');
 
-        $classListBySite = getAllPluginClassesByJobSiteKey();
+        $classListBySite = $this->_getAllPluginClassesByJobSiteKey();
 
 	    $all_jobsites_by_key = \JobScooper\DataAccess\JobSiteRecordQuery::create()
             ->filterByIsDisabled(false)
@@ -531,4 +531,27 @@ class JobSitePluginBuilder
 
         return $evalStmt;
     }
+
+	/**
+	 * @return array
+	 */
+	private function _getAllPluginClassesByJobSiteKey()
+	{
+		$classList = get_declared_classes();
+		sort($classList);
+		$pluginClasses = array_filter($classList, function ($class) {
+			return (stripos($class, "Plugin") !== false) && stripos($class, "\\Classes\\") === false && in_array("JobScooper\BasePlugin\Interfaces\IJobSitePlugin", class_implements($class));
+		});
+
+		$classListBySite = array();
+		foreach($pluginClasses as $class)
+		{
+			$jobsitekey= cleanupSlugPart(str_replace("Plugin", "", $class));
+			$classListBySite[$jobsitekey] = $class;
+		}
+
+		return $classListBySite;
+	}
+
+
 }

@@ -132,8 +132,8 @@ class UserJobMatchTableMap extends TableMap
     const DEFAULT_STRING_FORMAT = 'YAML';
 
     /** The enumerated values for the user_notification_state field */
-    const COL_USER_NOTIFICATION_STATE_NOT_READY = 'not-ready';
-    const COL_USER_NOTIFICATION_STATE_READY = 'ready';
+    const COL_USER_NOTIFICATION_STATE_NOT_YET_MARKED = 'not-yet-marked';
+    const COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND = 'marked-ready-to-send';
     const COL_USER_NOTIFICATION_STATE_SENT = 'sent';
 
     /**
@@ -167,8 +167,8 @@ class UserJobMatchTableMap extends TableMap
     /** The enumerated values for this table */
     protected static $enumValueSets = array(
                 UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE => array(
-                            self::COL_USER_NOTIFICATION_STATE_NOT_READY,
-            self::COL_USER_NOTIFICATION_STATE_READY,
+                            self::COL_USER_NOTIFICATION_STATE_NOT_YET_MARKED,
+            self::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND,
             self::COL_USER_NOTIFICATION_STATE_SENT,
         ),
     );
@@ -221,10 +221,10 @@ class UserJobMatchTableMap extends TableMap
         $this->addColumn('matched_user_keywords', 'MatchedUserKeywords', 'ARRAY', false, null, null);
         $this->addColumn('matched_negative_title_keywords', 'MatchedNegativeTitleKeywords', 'ARRAY', false, null, null);
         $this->addColumn('matched_negative_company_keywords', 'MatchedNegativeCompanyKeywords', 'ARRAY', false, null, null);
-        $this->addColumn('user_notification_state', 'UserNotificationState', 'ENUM', false, null, 'not-ready');
+        $this->addColumn('user_notification_state', 'UserNotificationState', 'ENUM', false, null, 'not-yet-marked');
         $this->getColumn('user_notification_state')->setValueSet(array (
-  0 => 'not-ready',
-  1 => 'ready',
+  0 => 'not-yet-marked',
+  1 => 'marked-ready-to-send',
   2 => 'sent',
 ));
         $this->addColumn('set_by_user_search_site_run_key', 'SetByUserSearchSiteRunKey', 'VARCHAR', false, 100, null);

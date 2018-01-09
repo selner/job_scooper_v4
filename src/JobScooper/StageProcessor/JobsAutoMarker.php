@@ -47,8 +47,23 @@ class JobsAutoMarker
     }
 
 	/**
+	 * @param null $arrLocIds
+	 *
+	 * @return \JobScooper\DataAccess\UserJobMatch[]
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function _getMatches($arrLocIds=null)
+    {
+	    return getAllMatchesForUserNotification(
+		    [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_NOT_YET_MARKED, Criteria::EQUAL],
+		    $arrLocIds
+	    );
+    }
+
+	/**
 	 *
 	 * @throws \Exception
+	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	public function markJobs()
     {
@@ -59,26 +74,43 @@ class JobsAutoMarker
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         LogMessage(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL);
-	    $arrJobs_AutoUpdatable = getAllMatchesForUserNotification(null, false);
 
-	    if(empty($arrJobs_AutoUpdatable))
-	    {
-	    	LogMessage("No jobs were found for auto-marking.");
-	    	return;
-	    }
+        try {
+	        // Get all the postings that are in the table but not marked as ready-to-send
+	        //
+	        $arrJobs_AutoUpdatable = $this->_getMatches();
 
-	    foreach($arrJobs_AutoUpdatable as $jobmatch)
-	        $jobmatch->clearUserMatchState();
+	        if (empty($arrJobs_AutoUpdatable)) {
+		        LogMessage("No jobs were found for auto-marking.");
 
-        $this->_markJobsList_KeywordMatches_($arrJobs_AutoUpdatable);
+		        return;
+	        }
 
-	    $this->_markJobsList_SetLikelyDuplicatePosts_($arrJobs_AutoUpdatable);
+	        foreach ($arrJobs_AutoUpdatable as $jobmatch)
+		        $jobmatch->clearUserMatchState();
 
-        $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
+	        $this->_markJobsList_KeywordMatches_($arrJobs_AutoUpdatable);
 
-//        $this->_markJobsList_UserExcludedKeywords_($arrJobs_AutoUpdatable);
+	        $this->_markJobsList_SetLikelyDuplicatePosts_($arrJobs_AutoUpdatable);
 
-        $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($arrJobs_AutoUpdatable);
+	        $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
+
+	        //        $this->_markJobsList_UserExcludedKeywords_($arrJobs_AutoUpdatable);
+
+	        $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($arrJobs_AutoUpdatable);
+
+	        // If we got to the end, we successfully marked all the job matches for the user
+	        // Change them all over to be ready-to-send
+	        //
+	        $arrIds = array_keys($arrJobs_AutoUpdatable);
+	        updateUserJobMatchesStatus($arrIds, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND);
+
+        }
+        catch (Exception $ex)
+        {
+			LogError($ex->getMessage(), null, $ex);
+			throw $ex;
+        }
     }
 
 	/**
@@ -277,7 +309,7 @@ class JobsAutoMarker
 	        }
 
 	        LogMessage("Marking job postings in the " . count($arrNearbyIds) . " matching areas ...");
-		    $arrJobsInArea = getAllMatchesForUserNotification(null, null, $arrNearbyIds);
+		    $arrJobsInArea = $this->getMatches($arrNearbyIds);
 		    $arrJobListIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsList, array("UserJobMatchId")));
 		    $arrInAreaIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsInArea, array("UserJobMatchId")));
 		    foreach(array_chunk($arrInAreaIds, 50) as $chunk) {

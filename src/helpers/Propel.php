@@ -29,7 +29,7 @@
  *
  ******************************************************************************/
 
-
+use \JobScooper\DataAccess\Map\UserJobMatchTableMap;
 
 /******************************************************************************
  *
@@ -101,6 +101,11 @@ function updateOrCreateJobPosting($arrJobItem)
 }
 
 
+//
+// User Job Match List Functions
+//
+
+
 /**
  * @param null $jobsiteKey
  * @param null $usrTitleKeywordSets
@@ -108,34 +113,20 @@ function updateOrCreateJobPosting($arrJobItem)
  * @return \JobScooper\DataAccess\UserJobMatch[]
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function getAllMatchesForUserNotification($jobsiteKey=null, $excludeNonJobMatches=false, $arrGeoLocIds=null)
+function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null)
 {
     $user= \JobScooper\DataAccess\User::getCurrentUser();
 
+	$userStateCriteria = [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_NOT_YET_MARKED, \Propel\Runtime\ActiveQuery\Criteria::EQUAL];
+	if(empty(!$userNotificationState) && is_array($userNotificationState))
+	{
+		$userStateCriteria = $userNotificationState;
+	}
 
     $query = \JobScooper\DataAccess\UserJobMatchQuery::create()
-        ->filterByUserNotificationState(\JobScooper\DataAccess\Map\UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_SENT, \Propel\Runtime\ActiveQuery\Criteria::NOT_EQUAL)
+        ->filterByUserNotificationState($userStateCriteria[0], $userStateCriteria[1])
         ->filterByUserFromUJM($user)
         ->joinWithJobPostingFromUJM();
-
-    if($excludeNonJobMatches === true)
-    {
-    	$query->filterByIsJobMatch(true);
-    }
-
-    if(!empty($jobsiteKey))
-    {
-        $query->useJobPostingFromUJMQuery()
-            ->filterByJobSiteKey($jobsiteKey)
-            ->endUse();
-    }
-    else
-    {
-	    $includedSites = \JobScooper\Builders\JobSitePluginBuilder::getIncludedJobSites();
-	    $query->useJobPostingFromUJMQuery()
-		    ->filterByJobSiteKey(array_keys($includedSites), \Propel\Runtime\ActiveQuery\Criteria::IN)
-		    ->endUse();
-    }
 
     if(!empty($arrGeoLocIds) && is_array($arrGeoLocIds))
     {
@@ -144,31 +135,43 @@ function getAllMatchesForUserNotification($jobsiteKey=null, $excludeNonJobMatche
 		    ->endUse();
     }
 
-    $results =  $query->find();
-    return $results->getData();
+    $results =  $query->find()->toKeyIndex("UserJobMatchId");
+
+    return $results;
 }
 
 
-
-
 /**
- * @return array
+ * @param $arrUserJobMatchIds
+ * @param $strNewStatus
+ *
+ * @throws \Exception
+ * @throws \Propel\Runtime\Exception\PropelException
  */
-function getAllPluginClassesByJobSiteKey()
+function updateUserJobMatchesStatus($arrUserJobMatchIds, $strNewStatus)
 {
-    $classList = get_declared_classes();
-    sort($classList);
-    $pluginClasses = array_filter($classList, function ($class) {
-        return (stripos($class, "Plugin") !== false) && stripos($class, "\\Classes\\") === false && in_array("JobScooper\BasePlugin\Interfaces\IJobSitePlugin", class_implements($class));
-    });
+	LogMessage("Marking " . count($arrUserJobMatchIds) . " user job matches as {$strNewStatus}...");
+	$con = \Propel\Runtime\Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
+	$valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
+	$statusInt = array_search($strNewStatus, $valueSet);
+	$nChunkCounter = 1;
+	foreach (array_chunk($arrUserJobMatchIds, 50) as $chunk) {
+		LogMessage("Marking user job matches " . $nChunkCounter . " - " . ($nChunkCounter+50) . " as {$strNewStatus}...");
+		\JobScooper\DataAccess\UserJobMatchQuery::create()
+			->filterByUserJobMatchId($chunk)
+			->update(array("UserNotificationState" => $statusInt), $con);
+		$nChunkCounter += 1;
+	}
 
-    $classListBySite = array();
-    foreach($pluginClasses as $class)
-    {
-        $jobsitekey= cleanupSlugPart(str_replace("Plugin", "", $class));
-        $classListBySite[$jobsitekey] = $class;
-    }
+}
 
-    return $classListBySite;
+
+//
+// Jobs List Filter Functions
+//
+
+function isUserJobMatchAndNotExcluded($var)
+{
+	return ((empty($var['IsExcluded']) || $var['IsExcluded'] !== true) && (!empty($var['IsJobMatch']) && $var['IsJobMatch'] === true));
 }
 

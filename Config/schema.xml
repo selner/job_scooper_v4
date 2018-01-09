@@ -413,7 +413,7 @@
         <column name="matched_negative_company_keywords" phpName="MatchedNegativeCompanyKeywords" type="array"/>
 
         <column name="user_notification_state" phpName="UserNotificationState" type="enum"
-                valueSet="not-ready,ready,sent" defaultValue="not-ready"/>
+                valueSet="not-yet-marked,marked-ready-to-send,sent" defaultValue="not-yet-marked"/>
 
         <column name="set_by_user_search_site_run_key" phpName="SetByUserSearchSiteRunKey" type="varchar" size="100"/>
 
