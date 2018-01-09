@@ -132,10 +132,15 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
     {
 	    $query->useJobPostingFromUJMQuery()
 		    ->filterByGeoLocationId($arrGeoLocIds)
+		    ->orderByKeyCompanyAndTitle()
 		    ->endUse();
     }
+    else
+	    $query->useJobPostingFromUJMQuery()
+		    ->orderByKeyCompanyAndTitle()
+		    ->endUse();
 
-    $results =  $query->find()->toKeyIndex("UserJobMatchId");
+	$results =  $query->find()->toKeyIndex("UserJobMatchId");
 
     return $results;
 }
