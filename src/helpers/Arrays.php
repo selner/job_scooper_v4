@@ -328,7 +328,19 @@ function updateColumnsForCSVFlatArray(&$arr, \Propel\Runtime\Map\TableMap $table
  */
 function array_subset(array $haystack, array $needle)
 {
-    return array_intersect_key($haystack, array_flip($needle));
+	return array_intersect_key($haystack, array_flip($needle));
+}
+
+/**
+ * @param array $haystack Source array to get data from
+ * @param array $keys List of keys to return in the source data
+ *
+ * @return array
+ */
+function array_subset_keys(array $haystack, array $keys)
+{
+	$arrKeys = array_combine($keys, $keys);
+	return array_intersect_key($haystack, $arrKeys);
 }
 
 /**
