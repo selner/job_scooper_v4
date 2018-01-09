@@ -309,7 +309,7 @@ class JobsAutoMarker
 	        }
 
 	        LogMessage("Marking job postings in the " . count($arrNearbyIds) . " matching areas ...");
-		    $arrJobsInArea = $this->getMatches($arrNearbyIds);
+		    $arrJobsInArea = $this->_getMatches($arrNearbyIds);
 		    $arrJobListIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsList, array("UserJobMatchId")));
 		    $arrInAreaIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsInArea, array("UserJobMatchId")));
 		    foreach(array_chunk($arrInAreaIds, 50) as $chunk) {
