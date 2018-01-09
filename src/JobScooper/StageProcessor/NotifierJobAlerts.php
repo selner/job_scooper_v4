@@ -94,7 +94,6 @@ class NotifierJobAlerts extends JobsMailSender
 	/**
 	 * @return bool
 	 * @throws \Exception
-	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
 	 */
 	function processNotifications()
 	{
@@ -139,6 +138,11 @@ class NotifierJobAlerts extends JobsMailSender
 			$pathExcelResults = getDefaultJobsOutputFileName("", "JobMatches", "XLSX", "_", 'notifications');
 			$writer->save($pathExcelResults);
 			$arrFilesToAttach[] = $pathExcelResults;
+
+		} catch (\PhpOffice\PhpSpreadsheet\Style\Exception $ex) {
+			handleException($ex, "Error writing results to Excel spreadsheet: %s", true);
+		} catch (\PhpOffice\PhpSpreadsheet\Exception $ex) {
+			handleException($ex, "Error writing results to Excel spreadsheet: %s", true);
 		} catch (\Exception $ex) {
 			handleException($ex);
 		} finally {
